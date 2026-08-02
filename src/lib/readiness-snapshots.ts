@@ -8,8 +8,7 @@
 
 import type { ReadinessBreakdown, ReadinessComponentKey, SubjectReadiness } from '@/lib/readiness';
 
-const SNAPSHOT_KEY = 'readiness_snapshots';
-const DEBT_KEY = 'readiness_debt';
+const STORAGE_PREFIX = 'air-journal:readiness:v2';
 
 /** Kept modest so localStorage stays cheap. 180 days is more than any GATE
  *  prep cycle needs. */
@@ -58,19 +57,23 @@ function safeSet(key: string, value: unknown): void {
 
 /* ---------------------------- snapshots ---------------------------- */
 
-export function loadSnapshots(): ReadinessSnapshot[] {
-  const all = safeGet<ReadinessSnapshot[]>(SNAPSHOT_KEY, []);
+function storageKey(userId: string, kind: 'snapshots' | 'watchlist'): string {
+  return `${STORAGE_PREFIX}:${userId}:${kind}`;
+}
+
+export function loadSnapshots(userId: string): ReadinessSnapshot[] {
+  const all = safeGet<ReadinessSnapshot[]>(storageKey(userId, 'snapshots'), []);
   return all.sort((a, b) => a.date.localeCompare(b.date));
 }
 
 /** Idempotent upsert of today's snapshot. Overwrites the row for `date` if
  *  it exists so the latest score for the day wins. */
-export function upsertSnapshot(next: ReadinessSnapshot): ReadinessSnapshot[] {
-  const all = loadSnapshots().filter((s) => s.date !== next.date);
+export function upsertSnapshot(userId: string, next: ReadinessSnapshot): ReadinessSnapshot[] {
+  const all = loadSnapshots(userId).filter((s) => s.date !== next.date);
   all.push(next);
   all.sort((a, b) => a.date.localeCompare(b.date));
   const trimmed = all.slice(-MAX_SNAPSHOTS);
-  safeSet(SNAPSHOT_KEY, trimmed);
+  safeSet(storageKey(userId, 'snapshots'), trimmed);
   return trimmed;
 }
 
@@ -94,7 +97,7 @@ export function weeklyDelta(snapshots: ReadinessSnapshot[]): number | null {
       best = s;
     }
   }
-  if (!best) return null;
+  if (!best || bestDiff > 3 * 86400000) return null;
   return today.score - best.score;
 }
 
@@ -113,8 +116,11 @@ export function projectToExam(
   daysToExam: number
 ): Projection | null {
   const recent = snapshots.slice(-30);
-  if (recent.length < 3) return null;
+  if (recent.length < 4) return null;
   const t0 = new Date(recent[0].date).getTime();
+  const spanDays =
+    (new Date(recent[recent.length - 1].date).getTime() - t0) / 86400000;
+  if (spanDays < 21) return null;
   const xs = recent.map((s) => (new Date(s.date).getTime() - t0) / 86400000);
   const ys = recent.map((s) => s.score);
   const n = xs.length;
@@ -144,8 +150,8 @@ const HEALTHY_THRESHOLDS: Record<ReadinessComponentKey, number> = {
   surface: 0.6
 };
 
-export function loadDebt(): DebtEntry[] {
-  return safeGet<DebtEntry[]>(DEBT_KEY, []);
+export function loadDebt(userId: string): DebtEntry[] {
+  return safeGet<DebtEntry[]>(storageKey(userId, 'watchlist'), []);
 }
 
 function debtKey(subject: string | null, component: ReadinessComponentKey): string {
@@ -157,11 +163,12 @@ function debtKey(subject: string | null, component: ReadinessComponentKey): stri
  *  opens a new debt entry or increments the weeksHeld on an existing one. Debts
  *  that flip above the threshold are dropped. */
 export function updateDebt(
+  userId: string,
   today: string,
   overall: ReadinessBreakdown,
   perSubject: SubjectReadiness[]
 ): DebtEntry[] {
-  const existing = new Map<string, DebtEntry>(loadDebt().map((d) => [d.key, d]));
+  const existing = new Map<string, DebtEntry>(loadDebt(userId).map((d) => [d.key, d]));
   const now = new Date(today);
 
   function observe(
@@ -197,13 +204,15 @@ export function updateDebt(
     existing.set(k, { ...prev, weeksHeld: weeks, lastSeen: today });
   }
 
-  observe(null, 'coverage', overall.coverage);
-  observe(null, 'retention', overall.retention);
-  observe(null, 'calibration', overall.calibration);
-  observe(null, 'surface', overall.surface);
+  if (overall.confidence !== 'early') {
+    observe(null, 'coverage', overall.coverage);
+    observe(null, 'retention', overall.retention);
+    observe(null, 'calibration', overall.calibration);
+    observe(null, 'surface', overall.surface);
+  }
 
   for (const s of perSubject) {
-    if (!s.hasSignal) continue;
+    if (!s.hasSignal || s.confidence === 'early') continue;
     observe(s.subject, 'coverage', s.coverage);
     observe(s.subject, 'retention', s.retention);
     observe(s.subject, 'calibration', s.calibration);
@@ -211,7 +220,7 @@ export function updateDebt(
   }
 
   const list = Array.from(existing.values()).sort((a, b) => b.weeksHeld - a.weeksHeld);
-  safeSet(DEBT_KEY, list);
+  safeSet(storageKey(userId, 'watchlist'), list);
   return list;
 }
 

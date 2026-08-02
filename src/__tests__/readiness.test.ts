@@ -15,6 +15,7 @@ import {
   surface
 } from '@/lib/readiness';
 import type { PatternRow, QuestionRow, ReattemptRow, Outcome, ReattemptStage } from '@/types';
+import { computeReadinessScore } from '../../supabase/functions/_shared/readiness-score';
 
 function question(o: Partial<QuestionRow>): QuestionRow {
   return {
@@ -101,14 +102,14 @@ describe('sub-scores', () => {
 });
 
 describe('computeReadiness', () => {
-  it('empty inputs → subscores 0 except surface (baseline unused = full mark)', () => {
+  it('empty inputs do not receive free mistake-surface points', () => {
     const r = computeReadiness({ questions: [], reattempts: [], patterns: [] });
     expect(r.coverage).toBe(0);
     expect(r.retention).toBe(0);
     expect(r.calibration).toBe(0);
-    expect(r.surface).toBe(1); // 0 open reattempts → surface score 1
-    // Only surface contributes: 1 * 0.20 * 100 = 20
-    expect(r.score).toBe(20);
+    expect(r.surface).toBe(0);
+    expect(r.score).toBe(0);
+    expect(r.confidence).toBe('early');
   });
 
   it('mixed synthetic data gives expected composite', () => {
@@ -128,11 +129,10 @@ describe('computeReadiness', () => {
     ];
     const r = computeReadiness({ questions, reattempts, patterns });
     expect(r.coverage).toBeCloseTo(0.5, 3);
-    expect(r.retention).toBeCloseTo(0.75, 3);
-    expect(r.calibration).toBeCloseTo(0.5, 3);
-    expect(r.surface).toBeCloseTo(0.94, 3);
-    // expected score: 0.5*30 + 0.75*25 + 0.5*25 + 0.94*20 = 15 + 18.75 + 12.5 + 18.8 = 65.05 → 65
-    expect(r.score).toBe(65);
+    expect(r.retention).toBeCloseTo(0.375, 3); // 4/8 evidence weight
+    expect(r.calibration).toBeCloseTo(0.2, 3); // 4/10 evidence weight
+    expect(r.surface).toBeCloseTo(0.188, 3); // 4/20 evidence weight
+    expect(r.score).toBe(33);
   });
 
   it('counts breakdown numbers match inputs', () => {
@@ -142,10 +142,47 @@ describe('computeReadiness', () => {
       patterns: [pattern('p1')]
     });
     expect(r.counts.patterns).toBe(1);
+    expect(r.counts.questions).toBe(1);
+    expect(r.counts.eligibleReattempts).toBe(1);
     expect(r.counts.stabilised).toBe(1);
     expect(r.counts.openReattempts).toBe(1); // D30 is still open (not MASTERED)
     expect(r.counts.markedDecisions).toBe(1);
     expect(r.counts.markedCorrect).toBe(1);
+  });
+
+  it('does not penalise retention for a new row that is not due yet', () => {
+    const future = { ...reattempt('D3'), scheduled_date: '2099-01-01' };
+    const r = computeReadiness({
+      questions: [question({})],
+      reattempts: [future],
+      patterns: []
+    });
+    expect(r.counts.eligibleReattempts).toBe(0);
+    expect(r.retention).toBe(0);
+  });
+
+  it('matches the weekly edge-function scorer', () => {
+    const questions = Array.from({ length: 20 }, (_, index) =>
+      question({
+        id: `q-${index}`,
+        mark_decision: index < 10 ? 'MARK' : null,
+        mark_correct: index < 7 ? true : index < 10 ? false : null
+      })
+    );
+    const reattempts = [
+      reattempt('MASTERED'),
+      reattempt('D30'),
+      reattempt('D30'),
+      reattempt('D10'),
+      reattempt('D10'),
+      reattempt('D3'),
+      reattempt('D3'),
+      reattempt('D3')
+    ];
+    const patterns = Array.from({ length: 80 }, (_, index) => pattern(`p-${index}`));
+    const client = computeReadiness({ questions, reattempts, patterns });
+    const edge = computeReadinessScore(questions, patterns.length, reattempts, '2026-08-02');
+    expect(edge).toBe(client.score);
   });
 });
 
@@ -215,7 +252,7 @@ describe('nextMoves', () => {
           id: `q${i}`,
           subject: 'Databases',
           mark_decision: 'MARK',
-          mark_correct: i < 2 // 25% accuracy
+          mark_correct: i < 1 // 12.5% accuracy
         })
       );
     }
@@ -241,7 +278,7 @@ describe('nextMoves', () => {
 });
 
 describe('examDaySimulator', () => {
-  it('yields a stable p50 across runs (deterministic seed not required — just monotone)', () => {
+  it('is deterministic for the same evidence and remains monotone', () => {
     const qs: QuestionRow[] = [];
     for (let i = 0; i < 20; i++) {
       qs.push(
@@ -266,6 +303,7 @@ describe('examDaySimulator', () => {
       ['Databases']
     );
     const perfSim = examDaySimulator(perfect, 200);
+    expect(examDaySimulator(perfect, 200)).toEqual(perfSim);
     const badSim = examDaySimulator(bad, 200);
     expect(perfSim.p50).toBeGreaterThan(badSim.p50);
   });

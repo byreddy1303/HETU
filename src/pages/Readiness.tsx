@@ -1,11 +1,10 @@
-// F5.3 — exam-day readiness. Composite gauge + per-subject matrix + rule-
-// based next-moves + trend line + AIR band + weekly delta + peer-median +
-// exam-day Monte Carlo + debt log + component tooltips. All nine surfaces.
+// F5.3 — exam-day readiness. Evidence and next actions stay primary; rough
+// projections remain available in a clearly labelled secondary disclosure.
 //
 // The score math still lives in lib/readiness.ts (pure); this page composes
 // the pieces. Peer median is the only non-local piece — it round-trips to
 // the readiness_median_for_band() RPC when the user is signed in.
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { differenceInCalendarDays, parseISO } from 'date-fns';
@@ -13,7 +12,6 @@ import {
   ArrowDown,
   ArrowRight,
   ArrowUp,
-  CircleAlert,
   Compass,
   HelpCircle,
   History,
@@ -27,7 +25,6 @@ import { Card, CardBody, CardHeader } from '@/components/ui/Card';
 import { Empty } from '@/components/ui/Empty';
 import { db } from '@/lib/db';
 import { useAuth } from '@/hooks/useAuth';
-import { useAuthStore } from '@/stores/auth';
 import { supabase, supabaseConfigured } from '@/lib/supabase';
 import {
   computeReadiness,
@@ -53,7 +50,7 @@ import {
   type ReadinessSnapshot
 } from '@/lib/readiness-snapshots';
 import { EXAM_DATE_DEFAULT, SUBJECTS } from '@/lib/constants';
-import { cn } from '@/lib/utils';
+import { cn, todayISOInTimeZone, weekStartISO } from '@/lib/utils';
 import { subjectInk } from '@/lib/subjectInk';
 
 const ACCENT_BY_KEY: Record<ReadinessComponentKey, string> = {
@@ -73,16 +70,8 @@ const BAR_BY_KEY: Record<ReadinessComponentKey, string> = {
 function scoreBand(score: number): { label: string; tone: string } {
   if (score >= 75) return { label: 'strong', tone: 'text-success' };
   if (score >= 55) return { label: 'building', tone: 'text-accent' };
-  if (score >= 35) return { label: 'thin', tone: 'text-warn' };
-  return { label: 'raw', tone: 'text-danger' };
-}
-
-function todayISO(): string {
-  const d = new Date();
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
-  return `${y}-${m}-${day}`;
+  if (score >= 35) return { label: 'forming', tone: 'text-warn' };
+  return { label: 'foundation', tone: 'text-text-muted' };
 }
 
 /* ------------------------------- gauge ------------------------------- */
@@ -128,8 +117,9 @@ function Gauge({ score }: { score: number }) {
 /* ------------------------------ page --------------------------------- */
 
 export default function Readiness() {
-  const { userId, sandbox } = useAuth();
-  const profile = useAuthStore((s) => s.profile);
+  const { userId, sandbox, profile } = useAuth();
+  const timeZone = profile?.timezone ?? 'Asia/Kolkata';
+  const today = todayISOInTimeZone(timeZone);
 
   const questions = useLiveQuery(
     () => (userId ? db.questions.where('user_id').equals(userId).toArray() : []),
@@ -179,20 +169,28 @@ export default function Readiness() {
 
   const simulator = useMemo(() => examDaySimulator(perSubject, 600), [perSubject]);
 
-  /* -------- snapshots + debt (localStorage) -------- */
+  /* -------- weekly snapshots + watchlist (per-user localStorage) -------- */
 
-  const [snapshots, setSnapshots] = useState<ReadinessSnapshot[]>(() =>
-    loadSnapshots()
-  );
-  const [debt, setDebt] = useState<DebtEntry[]>(() => loadDebt());
-  const wroteFor = useRef<string | null>(null);
+  const [snapshots, setSnapshots] = useState<ReadinessSnapshot[]>([]);
+  const [cloudSnapshots, setCloudSnapshots] = useState<ReadinessSnapshot[]>([]);
+  const [watchlist, setWatchlist] = useState<DebtEntry[]>([]);
 
   useEffect(() => {
-    const day = todayISO();
-    if (wroteFor.current === day) return;
-    wroteFor.current = day;
+    if (!userId) {
+      setSnapshots([]);
+      setCloudSnapshots([]);
+      setWatchlist([]);
+      return;
+    }
+    setSnapshots(loadSnapshots(userId));
+    setWatchlist(loadDebt(userId));
+  }, [userId]);
+
+  useEffect(() => {
+    if (!userId) return;
+    const snapshotWeek = weekStartISO(today);
     const next: ReadinessSnapshot = {
-      date: day,
+      date: snapshotWeek,
       score: breakdown.score,
       coverage: breakdown.coverage,
       retention: breakdown.retention,
@@ -200,14 +198,20 @@ export default function Readiness() {
       surface: breakdown.surface,
       daysToExam: daysLeft
     };
-    setSnapshots(upsertSnapshot(next));
-    setDebt(updateDebt(day, breakdown, perSubject));
-  }, [breakdown, perSubject, daysLeft]);
+    setSnapshots(upsertSnapshot(userId, next));
+    setWatchlist(updateDebt(userId, snapshotWeek, breakdown, perSubject));
+  }, [userId, today, breakdown, perSubject, daysLeft]);
 
-  const delta = useMemo(() => weeklyDelta(snapshots), [snapshots]);
+  const trendSnapshots = useMemo(() => {
+    const byDate = new Map(cloudSnapshots.map((snapshot) => [snapshot.date, snapshot]));
+    for (const snapshot of snapshots) byDate.set(snapshot.date, snapshot);
+    return [...byDate.values()].sort((a, b) => a.date.localeCompare(b.date));
+  }, [cloudSnapshots, snapshots]);
+
+  const delta = useMemo(() => weeklyDelta(trendSnapshots), [trendSnapshots]);
   const projection = useMemo(
-    () => projectToExam(snapshots, daysLeft),
-    [snapshots, daysLeft]
+    () => projectToExam(trendSnapshots, daysLeft),
+    [trendSnapshots, daysLeft]
   );
 
   /* -------- peer median (Supabase) -------- */
@@ -226,16 +230,36 @@ export default function Readiness() {
         .upsert(
           {
             user_id: userId,
-            on_date: todayISO(),
+            on_date: weekStartISO(today),
             score: breakdown.score,
             days_to_exam: daysLeft
           },
           { onConflict: 'user_id,on_date' }
         );
-      const { data, error } = await supabase.rpc('readiness_median_for_band', {
-        band_width_days: 7
-      });
-      if (cancelled || error) return;
+      const [historyResult, medianResult] = await Promise.all([
+        supabase
+          .from('readiness_snapshots')
+          .select('on_date, score, days_to_exam')
+          .order('on_date', { ascending: true })
+          .limit(180),
+        supabase.rpc('readiness_median_for_band', { band_width_days: 7 })
+      ]);
+      if (cancelled) return;
+      if (!historyResult.error) {
+        setCloudSnapshots(
+          (historyResult.data ?? []).map((snapshot) => ({
+            date: snapshot.on_date,
+            score: snapshot.score,
+            coverage: 0,
+            retention: 0,
+            calibration: 0,
+            surface: 0,
+            daysToExam: snapshot.days_to_exam
+          }))
+        );
+      }
+      if (medianResult.error) return;
+      const data = medianResult.data;
       const row = Array.isArray(data) ? data[0] : data;
       const median =
         row && typeof row.median === 'number'
@@ -250,9 +274,15 @@ export default function Readiness() {
     return () => {
       cancelled = true;
     };
-  }, [sandbox, userId, breakdown.score, daysLeft]);
+  }, [sandbox, userId, breakdown.score, daysLeft, today]);
 
   const anyData = questions.length + reattempts.length + patterns.length > 0;
+  const confidenceCopy =
+    breakdown.confidence === 'grounded'
+      ? 'Grounded signal — the component samples are large enough to use this as a planning measure.'
+      : breakdown.confidence === 'developing'
+        ? 'Developing signal — useful for direction, but individual sessions can still move it.'
+        : 'Early signal — small samples are deliberately tempered so one answer or an empty queue cannot dominate the score.';
 
   return (
     <div className="flex flex-col gap-4">
@@ -268,14 +298,14 @@ export default function Readiness() {
         />
       ) : (
         <>
-          {/* --- Gauge + AIR band + weekly delta + T-minus --- */}
-          <Card>
+          {/* --- Evidence-adjusted gauge --- */}
+          <Card className="order-2">
             <CardBody className="grid grid-cols-1 items-center gap-6 sm:grid-cols-[auto_1fr]">
               <Gauge score={breakdown.score} />
               <div className="flex flex-col gap-3">
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="rounded-full bg-accent-faint px-2.5 py-0.5 text-[12px] font-semibold text-accent">
-                    {airBand.label}
+                  <span className="rounded-full bg-accent-faint px-2.5 py-0.5 text-[12px] font-semibold capitalize text-accent">
+                    {breakdown.confidence} signal
                   </span>
                   {delta !== null && <DeltaChip delta={delta} />}
                   <span className="inline-flex items-center gap-1 rounded-full border border-border bg-bg-raised px-2.5 py-0.5 text-[12px] text-text-muted">
@@ -284,7 +314,7 @@ export default function Readiness() {
                   </span>
                 </div>
                 <p className="text-[13px] leading-relaxed text-text-muted">
-                  {airBand.caveat}
+                  {confidenceCopy}
                 </p>
                 <div className="flex flex-wrap items-center gap-3 border-t border-border pt-3 text-[12px] text-text-muted">
                   <span>
@@ -312,7 +342,7 @@ export default function Readiness() {
 
           {/* --- Next moves --- */}
           {moves.length > 0 && (
-            <Card>
+            <Card className="order-1">
               <CardHeader
                 title="Next 3 moves"
                 aside={
@@ -330,7 +360,11 @@ export default function Readiness() {
           )}
 
           {/* --- Trend chart + projection --- */}
-          <Card>
+          <details className="order-5 rounded-lg border border-border bg-bg-raised shadow-card">
+            <summary className="cursor-pointer px-4 py-3 font-display text-[14px] font-semibold text-text">
+              Weekly trend and long-range projection
+            </summary>
+          <Card className="border-0 shadow-none">
             <CardHeader
               title="Trend & projection"
               aside={
@@ -353,14 +387,14 @@ export default function Readiness() {
                   </span>
                 ) : (
                   <span className="text-[11px] text-text-faint">
-                    log 3+ days to project
+                    needs 4 weekly snapshots across 21+ days
                   </span>
                 )
               }
             />
             <CardBody>
               <Sparkline
-                snapshots={snapshots}
+                snapshots={trendSnapshots}
                 projectedScore={projection?.projectedScore ?? null}
                 daysToExam={daysLeft}
               />
@@ -383,12 +417,13 @@ export default function Readiness() {
               )}
             </CardBody>
           </Card>
+          </details>
 
           {/* --- Components with tooltips --- */}
-          <Card>
+          <Card className="order-3">
             <CardHeader
               title="Components"
-              aside={<span className="text-[11px] text-text-faint">sums to composite · hover for detail</span>}
+              aside={<span className="text-[11px] text-text-faint">evidence-adjusted · hover for detail</span>}
             />
             <div className="flex flex-col divide-y divide-border">
               {components.map((c) => {
@@ -448,7 +483,7 @@ export default function Readiness() {
           </Card>
 
           {/* --- Per-subject matrix --- */}
-          <Card>
+          <Card className="order-4">
             <CardHeader
               title="Per-subject matrix"
               aside={
@@ -461,7 +496,11 @@ export default function Readiness() {
           </Card>
 
           {/* --- Exam-day simulator --- */}
-          <Card>
+          <details className="order-6 rounded-lg border border-border bg-bg-raised shadow-card">
+            <summary className="cursor-pointer px-4 py-3 font-display text-[14px] font-semibold text-text">
+              Experimental exam estimates
+            </summary>
+          <Card className="border-0 shadow-none">
             <CardHeader
               title="Exam-day simulator"
               aside={
@@ -471,6 +510,15 @@ export default function Readiness() {
               }
             />
             <CardBody className="flex flex-col gap-3">
+              <div className="rounded border border-warn/30 bg-warn/5 p-3">
+                <p className="u-label text-warn">Rough rank mapping · not validated</p>
+                <p className="mt-1 font-display text-[15px] font-semibold text-text">
+                  {airBand.label}
+                </p>
+                <p className="mt-1 text-[12px] leading-relaxed text-text-muted">
+                  {airBand.caveat} Treat this as a coarse scenario, not a prediction.
+                </p>
+              </div>
               <div className="grid grid-cols-3 gap-3">
                 <SimStat label="Unlucky (p10)" value={simulator.p10} tone="text-danger" />
                 <SimStat label="Median (p50)" value={simulator.p50} tone="text-text" />
@@ -483,10 +531,15 @@ export default function Readiness() {
               </p>
             </CardBody>
           </Card>
+          </details>
 
-          {/* --- Peer median + debt log side by side --- */}
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <Card>
+          {/* --- Persistent evidence watchlist + optional peer context --- */}
+          <div className="order-1 grid grid-cols-1 gap-4 md:grid-cols-2">
+            <details className="order-2 rounded-lg border border-border bg-bg-raised shadow-card">
+              <summary className="cursor-pointer px-4 py-3 font-display text-[14px] font-semibold text-text">
+                Optional peer context
+              </summary>
+              <Card className="border-0 shadow-none">
               <CardHeader
                 title={
                   <span className="inline-flex items-center gap-1.5">
@@ -540,32 +593,32 @@ export default function Readiness() {
                   </div>
                 )}
               </CardBody>
-            </Card>
+              </Card>
+            </details>
 
-            <Card>
+            <Card className="order-1">
               <CardHeader
                 title={
                   <span className="inline-flex items-center gap-1.5">
-                    <History size={13} strokeWidth={1.75} /> Debt log
+                    <History size={13} strokeWidth={1.75} /> Persistent weak spots
                   </span>
                 }
                 aside={
-                  debt.length > 0 && (
+                  watchlist.length > 0 && (
                     <span className="text-[11px] text-text-faint">
-                      {debt.length} open
+                      {watchlist.length} observed
                     </span>
                   )
                 }
               />
               <CardBody className="p-0">
-                {debt.length === 0 ? (
+                {watchlist.length === 0 ? (
                   <p className="p-4 text-[12.5px] text-text-muted">
-                    Nothing chronically weak. Every component is above its
-                    healthy threshold.
+                    No component has remained below its healthy threshold.
                   </p>
                 ) : (
                   <ul className="divide-y divide-border">
-                    {debt.slice(0, 5).map((d) => (
+                    {watchlist.slice(0, 5).map((d) => (
                       <li
                         key={d.key}
                         className="flex items-center gap-3 px-4 py-2.5 text-[12.5px]"
@@ -585,7 +638,7 @@ export default function Readiness() {
                           </span>
                         </span>
                         <span className="u-num text-text-faint">
-                          {d.weeksHeld}w
+                          {d.weeksHeld === 0 ? 'new' : `${d.weeksHeld}w`}
                         </span>
                       </li>
                     ))}
@@ -597,15 +650,6 @@ export default function Readiness() {
         </>
       )}
 
-      {breakdown.score < 40 && anyData && (
-        <div className="flex items-start gap-2 rounded border border-warn/60 bg-warn/5 px-3 py-2 text-[12.5px] text-text">
-          <CircleAlert size={14} className="mt-0.5 shrink-0 text-warn" strokeWidth={1.75} />
-          <p>
-            Below 40 is not a verdict — it usually means the tagging surface is still thin. Log
-            more, and the number will move. Don't grade yourself yet.
-          </p>
-        </div>
-      )}
     </div>
   );
 }
@@ -844,7 +888,11 @@ function cellTone(key: ReadinessComponentKey, v: number, hasSignal: boolean): st
 }
 
 function SubjectMatrix({ rows }: { rows: SubjectReadiness[] }) {
-  const shown = rows.filter((r) => r.hasSignal || true); // show all for context
+  const shown = [...rows].sort((a, b) => {
+    if (a.hasSignal !== b.hasSignal) return a.hasSignal ? -1 : 1;
+    if (!a.hasSignal && !b.hasSignal) return a.subject.localeCompare(b.subject);
+    return a.score - b.score || a.subject.localeCompare(b.subject);
+  });
   return (
     <div className="u-table-wrap">
       <table className="u-data-table min-w-[680px] text-[12.5px]">
@@ -907,7 +955,7 @@ function SubjectMatrix({ rows }: { rows: SubjectReadiness[] }) {
                 </td>
                 <td className="px-4 py-2 text-[11px] text-text-faint">
                   {r.hasSignal
-                    ? `${r.counts.patterns}p · ${r.counts.totalReattempts}r · ${r.counts.markedDecisions}d`
+                    ? `${r.counts.questions}q · ${r.counts.patterns}p · ${r.counts.eligibleReattempts}r · ${r.counts.markedDecisions}d`
                     : 'no data yet'}
                 </td>
               </tr>

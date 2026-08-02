@@ -2,6 +2,7 @@
 // [0..1] fraction, then weighted per §5.3. Pure math so the same function
 // runs client-side (for immediate feedback) and inside compute-readiness.
 import type { PatternRow, QuestionRow, ReattemptRow } from '@/types';
+import { todayISO } from '@/lib/utils';
 
 export const TARGET_PATTERN_LIBRARY = 400;
 export const BASELINE_OPEN_SURFACE = 50;
@@ -25,9 +26,12 @@ export interface ReadinessBreakdown {
   retention: number; // 0..1
   calibration: number; // 0..1
   surface: number; // 0..1
+  confidence: 'early' | 'developing' | 'grounded';
   counts: {
+    questions: number;
     patterns: number;
     totalReattempts: number;
+    eligibleReattempts: number;
     stabilised: number; // D30 + MASTERED
     openReattempts: number;
     markedDecisions: number;
@@ -65,11 +69,18 @@ export function surface(openReattemptCount: number): number {
 }
 
 export function computeReadiness(inputs: ReadinessInputs): ReadinessBreakdown {
+  const asOf = todayISO();
+  const eligibleReattempts = inputs.reattempts.filter(
+    (r) => r.history.length > 0 || r.scheduled_date <= asOf
+  );
   const cov = coverage(inputs.patterns.length);
-  const ret = retention(inputs.reattempts);
-  const cal = calibration(inputs.questions);
+  const marked = inputs.questions.filter((q) => q.mark_decision === 'MARK');
+  // Early samples are deliberately conservative: one correct answer or one
+  // empty queue must not move a quarter of the composite score.
+  const ret = retention(eligibleReattempts) * clamp01(eligibleReattempts.length / 8);
+  const cal = calibration(inputs.questions) * clamp01(marked.length / 10);
   const openReattempts = inputs.reattempts.filter((r) => r.stage !== 'MASTERED').length;
-  const surf = surface(openReattempts);
+  const surf = surface(openReattempts) * clamp01(inputs.questions.length / 20);
   const score = Math.round(
     (cov * WEIGHTS.coverage +
       ret * WEIGHTS.retention +
@@ -77,16 +88,25 @@ export function computeReadiness(inputs: ReadinessInputs): ReadinessBreakdown {
       surf * WEIGHTS.surface) *
       100
   );
-  const marked = inputs.questions.filter((q) => q.mark_decision === 'MARK');
+  const confidence =
+    inputs.questions.length >= 50 && marked.length >= 15 && eligibleReattempts.length >= 12
+      ? 'grounded'
+      : inputs.questions.length >= 20 &&
+          (marked.length >= 5 || eligibleReattempts.length >= 5)
+        ? 'developing'
+        : 'early';
   return {
     score,
     coverage: cov,
     retention: ret,
     calibration: cal,
     surface: surf,
+    confidence,
     counts: {
+      questions: inputs.questions.length,
       patterns: inputs.patterns.length,
       totalReattempts: inputs.reattempts.length,
+      eligibleReattempts: eligibleReattempts.length,
       stabilised: inputs.reattempts.filter((r) => r.stage === 'D30' || r.stage === 'MASTERED').length,
       openReattempts,
       markedDecisions: marked.length,
@@ -119,7 +139,7 @@ export function readinessComponents(b: ReadinessBreakdown): ReadinessComponent[]
     {
       key: 'retention',
       label: 'Retention',
-      hint: `${b.counts.stabilised} of ${b.counts.totalReattempts} at D30 / mastered`,
+      hint: `${b.counts.stabilised} of ${b.counts.eligibleReattempts} due or attempted rows at D30 / mastered`,
       weight: WEIGHTS.retention,
       value: b.retention,
       contribution: Math.round(b.retention * WEIGHTS.retention * 100)
@@ -130,7 +150,7 @@ export function readinessComponents(b: ReadinessBreakdown): ReadinessComponent[]
       hint:
         b.counts.markedDecisions === 0
           ? 'no MARK decisions logged yet'
-          : `${b.counts.markedCorrect} / ${b.counts.markedDecisions} MARKs were right`,
+          : `${b.counts.markedCorrect} / ${b.counts.markedDecisions} answered decisions were right`,
       weight: WEIGHTS.calibration,
       value: b.calibration,
       contribution: Math.round(b.calibration * WEIGHTS.calibration * 100)
@@ -138,7 +158,7 @@ export function readinessComponents(b: ReadinessBreakdown): ReadinessComponent[]
     {
       key: 'surface',
       label: 'Mistake surface',
-      hint: `${b.counts.openReattempts} open re-attempts (baseline ${BASELINE_OPEN_SURFACE})`,
+      hint: `${b.counts.openReattempts} open across ${b.counts.questions} logged questions`,
       weight: WEIGHTS.surface,
       value: b.surface,
       contribution: Math.round(b.surface * WEIGHTS.surface * 100)
@@ -158,17 +178,17 @@ export const COMPONENT_TOOLTIPS: Record<
     healthy: '≥ 60% by T−90.'
   },
   retention: {
-    what: 'Fraction of your re-attempts that reached the D30 or mastered stage.',
+    what: 'Fraction of due or previously attempted re-attempts that reached D30 or mastered, tempered while the sample is small.',
     lift: 'Clear open D3/D10 re-attempts before starting fresh material.',
     healthy: '≥ 55%.'
   },
   calibration: {
-    what: 'Accuracy of your "I answered it" decisions under −⅓ negative marking.',
+    what: 'Accuracy of your "I answered it" decisions under −⅓ negative marking, tempered until ten decisions are logged.',
     lift: 'Tighten your MARK/SKIP threshold in /calibration and stop gambling on rows you can\'t justify.',
     healthy: '≥ 65%.'
   },
   surface: {
-    what: `Inverse of your open re-attempt count (baseline ${BASELINE_OPEN_SURFACE}). Smaller mistake pool = higher score.`,
+    what: `Inverse of your open re-attempt count (baseline ${BASELINE_OPEN_SURFACE}), tempered until twenty questions are logged.`,
     lift: 'Do a re-attempt sweep — pick the oldest 10 open rows and clear or master them.',
     healthy: '≥ 60%.'
   }
@@ -219,9 +239,11 @@ export function computeReadinessBySubject(
   subjects: readonly string[]
 ): SubjectReadiness[] {
   const qBySubj = new Map<string, QuestionRow[]>();
+  const questionById = new Map<string, QuestionRow>();
   const pBySubj = new Map<string, PatternRow[]>();
   const rBySubj = new Map<string, ReattemptRow[]>();
   for (const q of inputs.questions) {
+    questionById.set(q.id, q);
     const list = qBySubj.get(q.subject) ?? [];
     list.push(q);
     qBySubj.set(q.subject, list);
@@ -233,7 +255,7 @@ export function computeReadinessBySubject(
   }
   for (const r of inputs.reattempts) {
     // Re-attempts don't carry subject directly; join via the question row.
-    const q = inputs.questions.find((x) => x.id === r.question_id);
+    const q = questionById.get(r.question_id);
     if (!q) continue;
     const list = rBySubj.get(q.subject) ?? [];
     list.push(r);
@@ -245,8 +267,10 @@ export function computeReadinessBySubject(
     const rs = rBySubj.get(subject) ?? [];
     const target = subjectLibraryTarget(subject);
     const cov = clamp01(ps.length / target);
-    const ret = retention(rs);
-    const cal = calibration(qs);
+    const eligible = rs.filter((r) => r.history.length > 0 || r.scheduled_date <= todayISO());
+    const marked = qs.filter((q) => q.mark_decision === 'MARK');
+    const ret = retention(eligible) * clamp01(eligible.length / 4);
+    const cal = calibration(qs) * clamp01(marked.length / 5);
     const openReattempts = rs.filter((r) => r.stage !== 'MASTERED').length;
     // Per-subject surface baseline scales with the subject's weight.
     const perSubjBaseline = Math.max(
@@ -255,7 +279,8 @@ export function computeReadinessBySubject(
         (SUBJECT_LIBRARY_WEIGHT[subject] ?? 1 / 12) * BASELINE_OPEN_SURFACE
       )
     );
-    const surf = clamp01(1 - openReattempts / perSubjBaseline);
+    const surf =
+      clamp01(1 - openReattempts / perSubjBaseline) * clamp01(qs.length / 10);
     const score = Math.round(
       (cov * WEIGHTS.coverage +
         ret * WEIGHTS.retention +
@@ -263,7 +288,12 @@ export function computeReadinessBySubject(
         surf * WEIGHTS.surface) *
         100
     );
-    const marked = qs.filter((q) => q.mark_decision === 'MARK');
+    const confidence =
+      qs.length >= 25 && marked.length >= 8 && eligible.length >= 6
+        ? 'grounded'
+        : qs.length >= 10 && (marked.length >= 3 || eligible.length >= 3)
+          ? 'developing'
+          : 'early';
     return {
       subject,
       targetPatterns: target,
@@ -273,9 +303,12 @@ export function computeReadinessBySubject(
       retention: ret,
       calibration: cal,
       surface: surf,
+      confidence,
       counts: {
+        questions: qs.length,
         patterns: ps.length,
         totalReattempts: rs.length,
+        eligibleReattempts: eligible.length,
         stabilised: rs.filter((r) => r.stage === 'D30' || r.stage === 'MASTERED').length,
         openReattempts,
         markedDecisions: marked.length,
@@ -302,7 +335,6 @@ export interface NextMove {
   urgency: 'high' | 'medium' | 'low';
 }
 
-const HIGH_CALIBRATION_MIN = 0.4;
 const HIGH_RETENTION_MIN = 0.4;
 const OPEN_REATTEMPT_ALERT = 8;
 const LOW_COVERAGE_MAX = 0.15;
@@ -316,13 +348,21 @@ export function nextMoves(
 
   for (const s of perSubject) {
     if (!s.hasSignal) continue;
-    if (s.counts.markedDecisions >= 5 && s.calibration < HIGH_CALIBRATION_MIN) {
+    const answerAccuracy =
+      s.counts.markedDecisions === 0
+        ? null
+        : s.counts.markedCorrect / s.counts.markedDecisions;
+    if (
+      s.counts.markedDecisions >= 5 &&
+      answerAccuracy != null &&
+      answerAccuracy < 0.25
+    ) {
       moves.push({
         kind: 'calibrate',
         subject: s.subject,
         title: `Recalibrate ${s.subject}`,
-        why: `${Math.round(s.calibration * 100)}% accuracy on ${s.counts.markedDecisions} answered decisions — below the −⅓ break-even.`,
-        action: 'Open /calibration, drop the MARK threshold for this subject, and skip more.',
+        why: `${Math.round(answerAccuracy * 100)}% accuracy on ${s.counts.markedDecisions} answered decisions — below the −⅓ break-even.`,
+        action: 'Open Calibration, raise the confidence threshold for this subject, and skip more.',
         href: '/calibration',
         urgency: 'high'
       });
@@ -333,7 +373,7 @@ export function nextMoves(
         subject: s.subject,
         title: `Clear open re-attempts in ${s.subject}`,
         why: `${s.counts.openReattempts} rows stuck at D3/D10.`,
-        action: 'Do a sweep in /reattempts filtered to this subject — oldest 8 first.',
+        action: 'Open Re-attempts and clear the oldest questions first.',
         href: '/reattempts',
         urgency: s.counts.openReattempts >= 15 ? 'high' : 'medium'
       });
@@ -356,7 +396,7 @@ export function nextMoves(
       kind: 'stabilise',
       title: 'Do a D30 cleanup pass',
       why: `Only ${Math.round(overall.retention * 100)}% of your re-attempts have stabilised — the ladder is leaking.`,
-      action: 'Skip new material for a day. Sweep /reattempts to push D3s and D10s upward.',
+      action: 'Skip new material for a day. Sweep Re-attempts to push D3s and D10s upward.',
       href: '/reattempts',
       urgency: 'high'
     });
@@ -467,7 +507,8 @@ const TECH_MARK_PER_Q = 2;
 const NEG_MARK_PER_Q = TECH_MARK_PER_Q / 3;
 
 function simulateOnce(
-  perSubject: SubjectReadiness[]
+  perSubject: SubjectReadiness[],
+  random: () => number
 ): SimulatorRun {
   const perSubjMarks: SimulatorRun['perSubject'] = [];
   let total = 0;
@@ -482,7 +523,7 @@ function simulateOnce(
     const attempts = Math.round(SUBJECT_MARK_BUDGET * engagement);
     let subjMarks = 0;
     for (let i = 0; i < attempts; i++) {
-      if (Math.random() < s.calibration) subjMarks += TECH_MARK_PER_Q;
+      if (random() < s.calibration) subjMarks += TECH_MARK_PER_Q;
       else subjMarks -= NEG_MARK_PER_Q;
     }
     perSubjMarks.push({ subject: s.subject, marks: subjMarks });
@@ -493,11 +534,26 @@ function simulateOnce(
 
 export function examDaySimulator(
   perSubject: SubjectReadiness[],
-  runs: number = 500
+  runs: number = 500,
+  seed?: number
 ): SimulatorResult {
+  const derivedSeed =
+    seed ??
+    perSubject.reduce(
+      (value, subject, index) =>
+        (value * 31 + Math.round(subject.score * 10) + subject.counts.questions + index) >>> 0,
+      2166136261
+    );
+  let state = derivedSeed || 1;
+  const random = () => {
+    state = (state + 0x6d2b79f5) | 0;
+    let next = Math.imul(state ^ (state >>> 15), 1 | state);
+    next = next + Math.imul(next ^ (next >>> 7), 61 | next) ^ next;
+    return ((next ^ (next >>> 14)) >>> 0) / 4294967296;
+  };
   const totals: number[] = [];
   for (let i = 0; i < runs; i++) {
-    totals.push(simulateOnce(perSubject).totalMarks);
+    totals.push(simulateOnce(perSubject, random).totalMarks);
   }
   totals.sort((a, b) => a - b);
   const pick = (frac: number) => totals[Math.floor(totals.length * frac)] ?? 0;

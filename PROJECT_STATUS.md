@@ -10,12 +10,12 @@ must happen next.
 ## Current repository state
 
 - Branch: `main`
-- Last pushed product-code baseline: `3beb67d` (`S36: apply deployed PWA updates automatically`)
+- Last pushed product-code baseline: `539f75b` (`S42: add Telegram today command`)
 - The local branch now also contains the Dashboard and Analysis refinement commits
-  `c546bca` through `d581c51`, plus scoped Playwright coverage. These changes have
+  `c546bca` through `f1b4577`, plus this handoff correction. These changes have
   not been pushed, deployed, or rebuilt into an Android artifact by this work.
-- The pushed baseline still includes Android/mobile production work from `a0c2568`
-  and automatic installed-PWA release activation from `3beb67d`.
+- The pushed baseline includes the Android/mobile production work, automatic installed-PWA
+  release activation, and the Telegram `/today` command recorded in its history.
 - The working tree is clean at this handoff.
 
 ### Current verification

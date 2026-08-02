@@ -23,17 +23,6 @@ export function buildLearningTips(context: LearningTipContext): LearningTip[] {
   const questions = context.lastSessionQuestions;
   const has = (predicate: (question: QuestionRow) => boolean) => questions.some(predicate);
 
-  if (context.due > 0) {
-    tips.push({
-      id: 'due-first',
-      title: 'Retrieve before you reread',
-      body: `Start with the ${context.due} due re-attempt${context.due === 1 ? '' : 's'}. Solve from a blank page before opening notes; the struggle is the useful part.`,
-      actionLabel: 'Open re-attempts',
-      href: '/reattempts',
-      tone: 'rose'
-    });
-  }
-
   if (has((question) => question.outcome === 'W-R' || question.root_cause === 'reading')) {
     tips.push({
       id: 'reading-errors',
@@ -79,17 +68,6 @@ export function buildLearningTips(context: LearningTipContext): LearningTip[] {
     });
   }
 
-  if (context.weeklyFix?.trim()) {
-    tips.push({
-      id: 'weekly-fix',
-      title: 'Keep this week’s promise visible',
-      body: context.weeklyFix.trim(),
-      actionLabel: 'Open weekly review',
-      href: '/weekly-review',
-      tone: 'accent'
-    });
-  }
-
   if (context.questionsToday === 0) {
     tips.push({
       id: 'start-small',
@@ -121,5 +99,8 @@ export function buildLearningTips(context: LearningTipContext): LearningTip[] {
     });
   }
 
-  return tips.slice(0, 4);
+  // Dashboard priorities already show due work and the weekly fix. Keep this
+  // surface to one complementary coaching note so it never becomes a second
+  // queue or a carousel the learner has to manage.
+  return tips.slice(0, 1);
 }

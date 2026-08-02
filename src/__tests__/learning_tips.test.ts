@@ -28,7 +28,7 @@ function question(overrides: Partial<QuestionRow> = {}): QuestionRow {
 }
 
 describe('buildLearningTips', () => {
-  it('puts due retrieval first and links to the queue', () => {
+  it('does not duplicate the due queue already shown by the dashboard', () => {
     const tips = buildLearningTips({
       due: 3,
       weeklyFix: null,
@@ -36,10 +36,10 @@ describe('buildLearningTips', () => {
       sessionsThisWeek: 0,
       questionsToday: 0
     });
-    expect(tips[0]).toMatchObject({ id: 'due-first', href: '/reattempts' });
+    expect(tips[0]).toMatchObject({ id: 'start-small', href: '/session/new' });
   });
 
-  it('turns observed reading and execution errors into concrete advice', () => {
+  it('shows the highest-priority observed learning note', () => {
     const tips = buildLearningTips({
       due: 0,
       weeklyFix: null,
@@ -50,9 +50,7 @@ describe('buildLearningTips', () => {
       sessionsThisWeek: 1,
       questionsToday: 2
     });
-    expect(tips.map((tip) => tip.id)).toEqual(
-      expect.arrayContaining(['reading-errors', 'execution-errors'])
-    );
+    expect(tips.map((tip) => tip.id)).toEqual(['reading-errors']);
   });
 
   it('shows a useful default when there is no learner data', () => {
@@ -66,7 +64,7 @@ describe('buildLearningTips', () => {
     expect(tip.id).toBe('default-retrieval');
   });
 
-  it('caps the dashboard carousel at four notes', () => {
+  it('keeps the dashboard to one complementary learning note', () => {
     const tips = buildLearningTips({
       due: 2,
       weeklyFix: 'Redo cache mapping PYQs',
@@ -80,6 +78,6 @@ describe('buildLearningTips', () => {
       sessionsThisWeek: 2,
       questionsToday: 0
     });
-    expect(tips).toHaveLength(4);
+    expect(tips).toHaveLength(1);
   });
 });

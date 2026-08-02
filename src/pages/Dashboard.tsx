@@ -5,7 +5,7 @@ import { useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { differenceInCalendarDays, parseISO } from 'date-fns';
-import { ArrowDown, ArrowRight, ArrowUp } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import type { Outcome } from '@/types';
 import HeroCard from '@/components/dashboard/HeroCard';
 import LearningTips from '@/components/dashboard/LearningTips';
@@ -17,7 +17,14 @@ import { Button } from '@/components/ui/Button';
 import { db } from '@/lib/db';
 import { useAuth } from '@/hooks/useAuth';
 import { usePrefsStore } from '@/stores/prefs';
-import { cn, formatDate, plural, todayISO } from '@/lib/utils';
+import {
+  calendarDateInTimeZone,
+  cn,
+  formatDate,
+  plural,
+  todayISOInTimeZone,
+  weekStartISO
+} from '@/lib/utils';
 import { EXAM_DATE_DEFAULT, OUTCOMES, OUTCOME_BY_CODE } from '@/lib/constants';
 import { subjectInk } from '@/lib/subjectInk';
 import { buildLearningTips } from '@/lib/learning-tips';
@@ -25,7 +32,8 @@ import { allSessions, pruneEmptyFinishedSessions } from '@/lib/sessions';
 import {
   dueTodayCount,
   latestSession,
-  mistakeSurfaceTrend,
+  mistakeSurfaceMovement,
+  mistakeSurfaceOpen,
   outcomeDistribution
 } from '@/lib/analysis';
 
@@ -134,26 +142,11 @@ function ProgressBlock({
   );
 }
 
-function TrendChip({ delta }: { delta: number }) {
-  if (delta === 0) {
-    return (
-      <span className="inline-flex items-center gap-1 text-[12px] text-text-faint">
-        <ArrowRight size={12} strokeWidth={2} /> flat vs. last week
-      </span>
-    );
-  }
-  const up = delta > 0;
-  const abs = Math.abs(delta);
+function SurfaceMovement({ opened, mastered }: { opened: number; mastered: number }) {
   return (
-    <span
-      className={cn(
-        'inline-flex items-center gap-1 text-[12px]',
-        up ? 'text-danger' : 'text-success'
-      )}
-    >
-      {up ? <ArrowUp size={12} strokeWidth={2} /> : <ArrowDown size={12} strokeWidth={2} />}
-      {up ? '+' : '−'}
-      {abs} vs. last week
+    <span className="text-[12px] text-text-faint">
+      <span className="u-num text-text-muted">{opened}</span> opened ·{' '}
+      <span className="u-num text-success">{mastered}</span> mastered in 7 days
     </span>
   );
 }
@@ -206,7 +199,9 @@ function OutcomeBar({
 export default function Dashboard() {
   const { userId, profile } = useAuth();
   const navigate = useNavigate();
-  const today = todayISO();
+  const timeZone = profile?.timezone ?? 'Asia/Kolkata';
+  const today = todayISOInTimeZone(timeZone);
+  const currentWeek = weekStartISO(today);
   const dailyQuestionTarget = usePrefsStore((s) => s.dailyQuestionTarget);
   const weeklySessionTarget = usePrefsStore((s) => s.weeklySessionTarget);
   const showCountdown = usePrefsStore((s) => s.showCountdown);
@@ -230,11 +225,13 @@ export default function Dashboard() {
     void pruneEmptyFinishedSessions(userId);
   }, [userId]);
 
-  const weeklyFix = useLiveQuery(async () => {
+  const weeklyFixRow = useLiveQuery(async () => {
     if (!userId) return undefined;
     const rows = await db.weekly_reviews.where('user_id').equals(userId).sortBy('week_start');
-    return rows.at(-1)?.this_weeks_fix ?? undefined;
+    return rows.at(-1);
   }, [userId]);
+  const weeklyFix = weeklyFixRow?.this_weeks_fix;
+  const weeklyFixCurrent = weeklyFixRow?.week_start === currentWeek;
 
   const last = useMemo(() => latestSession(sessions), [sessions]);
 
@@ -247,8 +244,19 @@ export default function Dashboard() {
     []
   );
 
-  const trend = useMemo(() => mistakeSurfaceTrend(reattempts), [reattempts]);
+  const surface = useMemo(() => mistakeSurfaceOpen(reattempts), [reattempts]);
+  const movement = useMemo(
+    () => mistakeSurfaceMovement(reattempts, new Date(), timeZone),
+    [reattempts, timeZone]
+  );
   const due = useMemo(() => dueTodayCount(reattempts, today), [reattempts, today]);
+  const overdue = useMemo(
+    () =>
+      reattempts.filter(
+        (row) => row.stage !== 'MASTERED' && row.scheduled_date < today
+      ).length,
+    [reattempts, today]
+  );
   const dist = useMemo(() => outcomeDistribution(lastSessionQuestions), [lastSessionQuestions]);
 
   // Today's tagged questions across ALL sessions and standalone /log entries.
@@ -256,19 +264,17 @@ export default function Dashboard() {
     async () => {
       if (!userId) return 0;
       const rows = await db.questions.where('user_id').equals(userId).toArray();
-      return rows.filter((question) => question.created_at.slice(0, 10) === today).length;
+      return rows.filter(
+        (question) => calendarDateInTimeZone(question.created_at, timeZone) === today
+      ).length;
     },
-    [userId, today],
+    [userId, today, timeZone],
     0
   );
 
   const sessionsThisWeek = useMemo(() => {
-    const now = new Date();
-    const monday = new Date(now);
-    monday.setDate(now.getDate() - ((now.getDay() + 6) % 7));
-    monday.setHours(0, 0, 0, 0);
-    return sessions.filter((s) => new Date(s.created_at) >= monday).length;
-  }, [sessions]);
+    return sessions.filter((session) => session.date >= currentWeek && session.date <= today).length;
+  }, [sessions, currentWeek, today]);
 
   const examDate = profile?.exam_date ?? EXAM_DATE_DEFAULT;
   const daysLeft = differenceInCalendarDays(parseISO(examDate), new Date());
@@ -293,8 +299,11 @@ export default function Dashboard() {
         showCountdown={showCountdown}
         daysLeft={daysLeft}
         action={
-          <Button variant="primary" onClick={() => navigate('/session/new')}>
-            New session
+          <Button
+            variant="primary"
+            onClick={() => navigate(due > 0 ? '/reattempts?open=first' : '/session/new')}
+          >
+            {due > 0 ? 'Start re-attempts' : 'New session'}
           </Button>
         }
       />
@@ -302,27 +311,22 @@ export default function Dashboard() {
       <LearningTips tips={learningTips} />
 
       <Card>
-        <div className="grid grid-cols-1 divide-y divide-border sm:grid-cols-3 sm:divide-x sm:divide-y-0">
+        <div className="grid grid-cols-1 divide-y divide-border sm:grid-cols-2 sm:divide-x sm:divide-y-0">
           <Stat
-            label="Due today"
+            label="Due now"
             value={due}
             color="text-accent"
             dot="bg-accent"
             onClick={due > 0 ? () => navigate('/reattempts?open=first') : undefined}
-            actionLabel="Open first question"
+            hint={overdue > 0 ? `${overdue} carried forward` : 'ready when scheduled'}
+            actionLabel="Start review"
           />
           <Stat
             label="Mistake surface"
-            value={trend.current}
+            value={surface}
             color="text-ink-violet"
             dot="bg-ink-violet"
-            hint={<TrendChip delta={trend.delta} />}
-          />
-          <Stat
-            label="Sessions logged"
-            value={sessions.length}
-            color="text-ink-teal"
-            dot="bg-ink-teal"
+            hint={<SurfaceMovement opened={movement.opened} mastered={movement.mastered} />}
           />
         </div>
       </Card>
@@ -330,7 +334,7 @@ export default function Dashboard() {
       <Card>
         <CardHeader
           title="Today's plan"
-          aside={<span className="text-[11px] text-text-faint">from Settings</span>}
+          aside={<span className="text-[11px] text-text-faint">calm targets from Settings</span>}
         />
         <CardBody className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <ProgressBlock
@@ -350,36 +354,28 @@ export default function Dashboard() {
 
       <Card>
         <CardHeader
-          title="Re-attempts due"
+          title={weeklyFixCurrent ? "This week's fix" : 'Most recent weekly fix'}
           aside={
-            due > 0 && (
-              <Button size="sm" onClick={() => navigate('/reattempts?open=first')}>
-                Open first question
-              </Button>
-            )
+            <Button size="sm" variant="ghost" onClick={() => navigate('/weekly-review')}>
+              Open review
+            </Button>
           }
         />
         <CardBody>
-          {due > 0 ? (
-            <p className="text-[13px] text-text-muted">
-              <span className="u-num text-text">{due}</span> {plural(due, 'question')} ready now.
-              Missed questions stay here every day until you record a result.
-            </p>
-          ) : (
-            <p className="text-[13px] text-text-faint">
-              Nothing due. The queue fills as you tag mistakes.
-            </p>
-          )}
-        </CardBody>
-      </Card>
-
-      <Card>
-        <CardHeader title="This week's fix" />
-        <CardBody>
           {weeklyFix ? (
-            <p className="text-[15px] leading-relaxed">
-              <span className="u-highlight font-medium">{weeklyFix}</span>
-            </p>
+            <div>
+              <p className="text-[15px] leading-relaxed">
+                <span className={cn('font-medium', weeklyFixCurrent && 'u-highlight')}>
+                  {weeklyFix}
+                </span>
+              </p>
+              {!weeklyFixCurrent && weeklyFixRow && (
+                <p className="mt-2 text-[11.5px] text-text-faint">
+                  Set for the week of {formatDate(weeklyFixRow.week_start, 'dd MMM')}. Review this
+                  week before treating it as current.
+                </p>
+              )}
+            </div>
           ) : (
             <p className="text-[13px] text-text-faint">
               No weekly review yet. Your ONE fix for the week appears here after your first review.
@@ -447,10 +443,8 @@ export default function Dashboard() {
                 <p className="text-[12px] text-text-faint">
                   {(() => {
                     const clean = dist['R'];
-                    const wrong = dist['W-C'] + dist['W-E'] + dist['W-R'];
-                    if (wrong > 0) return `${wrong} to re-attempt · ${clean} clean.`;
-                    if (dist['RBS'] + dist['RBG'] > 0)
-                      return `${dist['RBS'] + dist['RBG']} slow/guess to revisit.`;
+                    const notClean = lastSessionQuestions.length - clean;
+                    if (notClean > 0) return `${notClean} not clean · ${clean} clean.`;
                     return `Clean session — nothing queued.`;
                   })()}
                   {OUTCOMES.find((o) => o.code === 'RBS' && dist[o.code] > 0) &&

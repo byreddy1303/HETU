@@ -7,6 +7,7 @@ import {
   dueTodayCount,
   latestSession,
   mistakeSurfaceOpen,
+  mistakeSurfaceMovement,
   mistakeSurfaceTrend,
   outcomeDistribution,
   activeDaysBack,
@@ -89,6 +90,22 @@ describe('mistakeSurfaceTrend', () => {
     const t = mistakeSurfaceTrend(rows, now);
     expect(t.current).toBe(1);
     expect(t.prior).toBe(0);
+  });
+});
+
+describe('mistakeSurfaceMovement', () => {
+  it('separates newly opened work from mastered work without grading the direction', () => {
+    const now = new Date('2026-07-17T12:00:00Z');
+    const rows = [
+      ra({ created_at: '2026-07-16T09:00:00.000Z' }),
+      ra({
+        id: 'mastered',
+        stage: 'MASTERED',
+        created_at: '2026-06-01T09:00:00.000Z',
+        history: [{ date: '2026-07-15', result: 'clean' }]
+      })
+    ];
+    expect(mistakeSurfaceMovement(rows, now)).toEqual({ opened: 1, mastered: 1, net: 0 });
   });
 });
 
@@ -205,7 +222,15 @@ describe('summarizeWeek', () => {
     const s = summarizeWeek(rows, weekStart);
     expect(s.byRootCause.concept).toBe(2);
     expect(s.byRootCause.strategy).toBe(1);
-    expect(s.topPatterns[0]).toEqual({ name: 'joins on nulls', count: 2 });
+    expect(s.topPatterns[0]).toEqual({ name: 'joins on nulls', count: 2, total: 2 });
+  });
+
+  it('assigns UTC timestamps to the learner\'s local study day', () => {
+    const afterMidnightInIndia = q({
+      created_at: '2026-07-16T20:00:00.000Z'
+    });
+    expect(summarizeWeek([afterMidnightInIndia], '2026-07-17', 'Asia/Kolkata').totalQ).toBe(1);
+    expect(summarizeWeek([afterMidnightInIndia], '2026-07-17', 'UTC').totalQ).toBe(0);
   });
 });
 
@@ -287,8 +312,9 @@ describe('calibration (F5.4 DoD)', () => {
     expect(db!.markedCorrect).toBe(2);
     expect(db!.markedWrong).toBe(1);
     expect(db!.skipped).toBe(1);
-    // EV: (2 * 1 + 1 * -1/3) / 3 = 5/9 ≈ 0.5556
-    expect(db!.expectedValue).toBeCloseTo(5 / 9, 5);
+    // Policy EV includes the skipped question at zero: (2 - 1/3) / 4 = 5/12.
+    expect(db!.expectedValue).toBeCloseTo(5 / 12, 5);
+    expect(db!.answeredExpectedValue).toBeCloseTo(5 / 9, 5);
     expect(db!.accuracy).toBeCloseTo(2 / 3, 5);
   });
 
@@ -314,21 +340,21 @@ describe('calibration (F5.4 DoD)', () => {
     expect(cal[0].recommendation).toBe('raise');
   });
 
-  it('holds when sample size is too small to advise', () => {
+  it('reports insufficient signal when sample size is too small to advise', () => {
     const rows = [
       q({ subject: 'Databases', mark_decision: 'MARK', mark_correct: false }),
       q({ subject: 'Databases', mark_decision: 'MARK', mark_correct: false })
     ];
     const cal = calibrationBySubject(rows);
-    expect(cal[0].recommendation).toBe('hold');
+    expect(cal[0].recommendation).toBe('insufficient');
   });
 
   it('recommends lower for high accuracy + high EV', () => {
-    const rows = Array.from({ length: 10 }, (_, i) =>
+    const rows = Array.from({ length: 12 }, (_, i) =>
       q({
         subject: 'Databases',
-        mark_decision: 'MARK',
-        mark_correct: i < 9 // 9/10 = 90%
+        mark_decision: i < 10 ? 'MARK' : 'SKIP',
+        mark_correct: i < 9 ? true : i < 10 ? false : null // 9/10 = 90%, plus 2 skips
       })
     );
     const cal = calibrationBySubject(rows);
@@ -346,8 +372,8 @@ describe('calibration (F5.4 DoD)', () => {
     expect(overall.correct).toBe(1);
     expect(overall.wrong).toBe(1);
     expect(overall.skipped).toBe(1);
-    // EV: (1 * 1 + 1 * -1/3) / 2 = 1/3
-    expect(overall.expectedValue).toBeCloseTo(1 / 3, 5);
+    // Policy EV includes the skip: (1 - 1/3) / 3 = 2/9.
+    expect(overall.expectedValue).toBeCloseTo(2 / 9, 5);
   });
 });
 

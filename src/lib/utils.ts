@@ -15,6 +15,38 @@ export function todayISO(): string {
   return format(new Date(), 'yyyy-MM-dd');
 }
 
+/** Calendar date for an instant in the learner's configured timezone.
+ *
+ * `created_at` values are UTC instants. Slicing their ISO string silently
+ * assigns work done after midnight in India to the previous study day. Keep
+ * all dashboard and analysis bucketing on this one conversion path instead.
+ */
+export function calendarDateInTimeZone(
+  value: string | Date,
+  timeZone = 'Asia/Kolkata'
+): string {
+  const date = typeof value === 'string' ? new Date(value) : value;
+  if (Number.isNaN(date.getTime())) return '';
+  try {
+    const parts = new Intl.DateTimeFormat('en-US', {
+      timeZone,
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit'
+    }).formatToParts(date);
+    const part = (type: Intl.DateTimeFormatPartTypes) =>
+      parts.find((item) => item.type === type)?.value ?? '';
+    return `${part('year')}-${part('month')}-${part('day')}`;
+  } catch {
+    return format(date, 'yyyy-MM-dd');
+  }
+}
+
+/** Today's calendar date in a named timezone. */
+export function todayISOInTimeZone(timeZone = 'Asia/Kolkata'): string {
+  return calendarDateInTimeZone(new Date(), timeZone);
+}
+
 export function addDaysISO(iso: string, days: number): string {
   return format(addDays(parseISO(iso), days), 'yyyy-MM-dd');
 }

@@ -102,6 +102,11 @@ const RECOMMENDATION_COPY: Record<
     label: 'Hold — calibration is fine',
     hint: 'Neither over- nor under-confident. Keep going.',
     tone: 'neutral'
+  },
+  insufficient: {
+    label: 'Need more decisions',
+    hint: 'Fewer than four answered decisions is not enough evidence to recommend a threshold.',
+    tone: 'neutral'
   }
 };
 

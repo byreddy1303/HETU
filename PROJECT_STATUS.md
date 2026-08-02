@@ -1,6 +1,6 @@
 # AIR Journal — Project Status and Handoff
 
-Last updated: 2026-07-22 (Asia/Kolkata)
+Last updated: 2026-08-02 (Asia/Kolkata)
 
 This is the first file to read when resuming work. Update it after every release,
 deployment, or material change of plan. `BUILD.md` remains the product specification;
@@ -11,22 +11,54 @@ must happen next.
 
 - Branch: `main`
 - Last pushed product-code baseline: `3beb67d` (`S36: apply deployed PWA updates automatically`)
-- `origin/main` matched local `main` when this snapshot was corrected.
-- The pushed baseline includes Android/mobile production work from `a0c2568` and
-  automatic installed-PWA release activation from `3beb67d`.
-- The working tree was clean when this snapshot was corrected.
+- The local branch now also contains the Dashboard and Analysis refinement commits
+  `c546bca` through `d581c51`, plus scoped Playwright coverage. These changes have
+  not been pushed, deployed, or rebuilt into an Android artifact by this work.
+- The pushed baseline still includes Android/mobile production work from `a0c2568`
+  and automatic installed-PWA release activation from `3beb67d`.
+- The working tree is clean at this handoff.
 
 ### Current verification
 
-Run on 2026-07-22 against the current working tree:
+Run on 2026-08-02 against the current working tree:
 
 - `npm run typecheck` — passed
 - `npm run lint` — passed with zero warnings
-- `npm run test` — 19 files passed, 104 tests passed
+- `npm run test` — 20 files passed, 114 tests passed
+- `npm run test:e2e` — 1 Chromium Dashboard/Analysis smoke flow passed
 - `npm run build` — passed; PWA precache generated successfully
 
-These checks do not mean the new database migration has been deployed or that
-the current web assets have been rebuilt into a new Android release.
+These checks do not mean the readiness edge function or current web assets have
+been deployed, or that the current web assets have been rebuilt into a new Android release.
+
+## Dashboard and Analysis refinement — implemented locally, release pending
+
+Only existing Dashboard and Analysis capabilities were enhanced:
+
+- Dashboard now leads with one context-aware action, separates due-now work from
+  seven-day mistake-surface movement, removes duplicate prompts, uses profile-timezone
+  day/week buckets, and labels stale weekly fixes.
+- Patterns sorts by unresolved burden, exposes not-clean/open evidence, previews merge
+  impact, and supports safe in-page undo with corrected counts.
+- Re-attempts defines clean completion, compares target and elapsed time, advances to
+  the next due question, and groups upcoming work without repeated scans.
+- Weekly Review separates mistake volume from miss rate and reflects saved step state.
+- Heatmap has open-ended and 7/30/90-day ranges, row denominators, concentration sorting,
+  relative color semantics, and a working unspecified-cause Journal drill-down.
+- Calibration combines MARK and 50/50 evidence, treats skipped questions as zero in
+  policy expected value, separates answered-only EV, and requires four committed answers
+  before recommending a policy.
+- Readiness is evidence-tempered, confidence-labelled, deterministic, snapshot-aware,
+  and ordered around next moves. Exam-score/rank estimates are collapsed and explicitly
+  experimental. The weekly Supabase computation is implemented with client/edge parity.
+- The first-run walkthrough now persists dismissal before navigation, eliminating the
+  asynchronous reopen race found during responsive browser QA.
+
+Release follow-up: deploy the readiness edge function/config in the intended Supabase
+environment, push the local commits, deploy the web build, and perform physical Android
+QA before rebuilding or distributing an APK/AAB. The local environment did not have the
+Deno CLI, so the edge function was verified through shared-score parity tests, TypeScript,
+ESLint, and Vitest rather than `deno check`.
 
 ## Shipped and pushed baseline
 

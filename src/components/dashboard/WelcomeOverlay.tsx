@@ -60,14 +60,16 @@ export default function WelcomeOverlay() {
   useEffect(() => {
     let cancelled = false;
     async function check() {
-      // Sandbox / offline: fall back to Dexie meta.
+      // The device marker closes the navigation race while the account marker
+      // keeps the walkthrough dismissed on other signed-in devices.
+      try {
+        const row = await db.meta.get(DEXIE_KEY);
+        if (cancelled || dismissed.current || row?.value) return;
+      } catch {
+        // If Dexie fails, fall through to the account check.
+      }
       if (sandbox || !supabaseConfigured) {
-        try {
-          const row = await db.meta.get(DEXIE_KEY);
-          if (!cancelled && !dismissed.current && !row?.value) setVisible(true);
-        } catch {
-          // If Dexie fails, don't block the app.
-        }
+        if (!cancelled && !dismissed.current) setVisible(true);
         return;
       }
       if (!profile) return;
@@ -81,16 +83,14 @@ export default function WelcomeOverlay() {
 
   const dismiss = useCallback(async () => {
     dismissed.current = true;
-    setVisible(false);
     const stamp = new Date().toISOString();
-    if (sandbox || !supabaseConfigured) {
-      try {
-        await db.meta.put({ key: DEXIE_KEY, value: stamp });
-      } catch {
-        // ignore write errors — worst case the overlay shows again once.
-      }
-      return;
+    try {
+      await db.meta.put({ key: DEXIE_KEY, value: stamp });
+    } catch {
+      // Ignore device-marker errors; the account marker may still succeed.
     }
+    setVisible(false);
+    if (sandbox || !supabaseConfigured) return;
     if (!profile) return;
     const { error } = await supabase
       .from('users')

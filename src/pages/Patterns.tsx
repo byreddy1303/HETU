@@ -8,11 +8,11 @@
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { ArrowLeft, ArrowRight, GitMerge } from 'lucide-react';
-import type { PatternRow } from '@/types';
+import { ArrowLeft, ArrowRight, GitMerge, RotateCcw } from 'lucide-react';
+import type { PatternRow, QuestionRow } from '@/types';
 import { db } from '@/lib/db';
 import { writeLocal, deleteLocal } from '@/lib/sync';
-import { cn, formatDate, levenshtein, plural } from '@/lib/utils';
+import { calendarDateInTimeZone, cn, formatDate, levenshtein, plural } from '@/lib/utils';
 import { subjectInk } from '@/lib/subjectInk';
 import { useAuth } from '@/hooks/useAuth';
 import PageHeader from '@/components/layout/PageHeader';
@@ -25,6 +25,9 @@ import { Empty } from '@/components/ui/Empty';
 interface Entry {
   row: PatternRow;
   liveCount: number;
+  notCleanCount: number;
+  openReattempts: number;
+  lastSeenAt: string | null;
 }
 
 interface MergePair {
@@ -36,7 +39,15 @@ interface SubjectGroup {
   subject: string;
   entries: Entry[];
   totalHits: number;
+  notClean: number;
+  openReattempts: number;
   reflexed: number;
+}
+
+interface MergeUndo {
+  from: PatternRow;
+  into: PatternRow;
+  affected: QuestionRow[];
 }
 
 export default function Patterns() {
@@ -45,6 +56,7 @@ export default function Patterns() {
   const [confirm, setConfirm] = useState<MergePair | null>(null);
   const [merging, setMerging] = useState(false);
   const [selectedSubject, setSelectedSubject] = useState<string | null>(null);
+  const [mergeUndo, setMergeUndo] = useState<MergeUndo | null>(null);
 
   const patterns = useLiveQuery(
     () => (userId ? db.patterns.where('user_id').equals(userId).toArray() : []),
@@ -54,16 +66,57 @@ export default function Patterns() {
     () => (userId ? db.questions.where('user_id').equals(userId).toArray() : []),
     [userId]
   );
+  const reattempts = useLiveQuery(
+    () => (userId ? db.reattempts.where('user_id').equals(userId).toArray() : []),
+    [userId]
+  );
 
   const entries = useMemo<Entry[]>(() => {
-    const counts = new Map<string, number>();
+    const stats = new Map<
+      string,
+      { total: number; notClean: number; lastSeenAt: string | null }
+    >();
+    const patternByQuestion = new Map<string, string>();
     for (const q of questions ?? []) {
-      if (q.pattern_name) counts.set(q.pattern_name, (counts.get(q.pattern_name) ?? 0) + 1);
+      if (!q.pattern_name) continue;
+      const current = stats.get(q.pattern_name) ?? {
+        total: 0,
+        notClean: 0,
+        lastSeenAt: null
+      };
+      current.total += 1;
+      if (q.outcome !== 'R') current.notClean += 1;
+      if (!current.lastSeenAt || q.created_at > current.lastSeenAt) {
+        current.lastSeenAt = q.created_at;
+      }
+      stats.set(q.pattern_name, current);
+      patternByQuestion.set(q.id, q.pattern_name);
+    }
+    const openByPattern = new Map<string, number>();
+    for (const row of reattempts ?? []) {
+      if (row.stage === 'MASTERED') continue;
+      const name = patternByQuestion.get(row.question_id);
+      if (name) openByPattern.set(name, (openByPattern.get(name) ?? 0) + 1);
     }
     return (patterns ?? [])
-      .map((row) => ({ row, liveCount: counts.get(row.name) ?? 0 }))
-      .sort((a, b) => b.liveCount - a.liveCount || a.row.name.localeCompare(b.row.name));
-  }, [patterns, questions]);
+      .map((row) => {
+        const current = stats.get(row.name);
+        return {
+          row,
+          liveCount: current?.total ?? 0,
+          notCleanCount: current?.notClean ?? 0,
+          openReattempts: openByPattern.get(row.name) ?? 0,
+          lastSeenAt: current?.lastSeenAt ?? null
+        };
+      })
+      .sort(
+        (a, b) =>
+          b.openReattempts - a.openReattempts ||
+          b.notCleanCount - a.notCleanCount ||
+          b.liveCount - a.liveCount ||
+          a.row.name.localeCompare(b.row.name)
+      );
+  }, [patterns, questions, reattempts]);
 
   const groups = useMemo<SubjectGroup[]>(() => {
     const bySubject = new Map<string, Entry[]>();
@@ -78,11 +131,17 @@ export default function Patterns() {
         subject,
         entries: arr,
         totalHits: arr.reduce((s, x) => s + x.liveCount, 0),
+        notClean: arr.reduce((s, x) => s + x.notCleanCount, 0),
+        openReattempts: arr.reduce((s, x) => s + x.openReattempts, 0),
         reflexed: arr.filter((x) => x.row.is_reflexed).length
       });
     }
     return list.sort(
-      (a, b) => b.totalHits - a.totalHits || a.subject.localeCompare(b.subject)
+      (a, b) =>
+        b.openReattempts - a.openReattempts ||
+        b.notClean - a.notClean ||
+        b.totalHits - a.totalHits ||
+        a.subject.localeCompare(b.subject)
     );
   }, [entries]);
 
@@ -128,7 +187,30 @@ export default function Patterns() {
         .count();
       await writeLocal('patterns', { ...into.row, count: total });
       await deleteLocal('patterns', from.row.id);
+      setMergeUndo({ from: from.row, into: into.row, affected: qs });
       setConfirm(null);
+    } finally {
+      setMerging(false);
+    }
+  }
+
+  async function undoMerge() {
+    if (!mergeUndo || merging) return;
+    setMerging(true);
+    try {
+      await writeLocal('patterns', mergeUndo.from);
+      for (const question of mergeUndo.affected) {
+        const current = await db.questions.get(question.id);
+        if (current?.pattern_name === mergeUndo.into.name) {
+          await writeLocal('questions', { ...current, pattern_name: mergeUndo.from.name });
+        }
+      }
+      const intoCount = await db.questions
+        .where('[user_id+pattern_name]')
+        .equals([userId as string, mergeUndo.into.name])
+        .count();
+      await writeLocal('patterns', { ...mergeUndo.into, count: intoCount });
+      setMergeUndo(null);
     } finally {
       setMerging(false);
     }
@@ -144,10 +226,24 @@ export default function Patterns() {
           loading
             ? 'Loading…'
             : selectedSubject
-              ? `${scopedEntries.length} named ${plural(scopedEntries.length, 'trick', 'tricks')} in ${selectedSubject}`
-              : `${entries.length} reusable ${plural(entries.length, 'trick', 'tricks')} across ${groups.length} ${plural(groups.length, 'subject')}`
+              ? `${scopedEntries.length} named ${plural(scopedEntries.length, 'pattern')} in ${selectedSubject}`
+              : `${entries.length} reusable ${plural(entries.length, 'pattern')} across ${groups.length} ${plural(groups.length, 'subject')}`
         }
       />
+
+      {mergeUndo && (
+        <Card className="border-success/35 bg-success-faint/35">
+          <CardBody className="flex flex-wrap items-center justify-between gap-3">
+            <p className="text-[12.5px] text-text-muted">
+              Merged <span className="font-medium text-text">{mergeUndo.from.name}</span> into{' '}
+              <span className="font-medium text-text">{mergeUndo.into.name}</span>.
+            </p>
+            <Button size="sm" variant="ghost" disabled={merging} onClick={() => void undoMerge()}>
+              <RotateCcw size={13} strokeWidth={1.8} /> Undo merge
+            </Button>
+          </CardBody>
+        </Card>
+      )}
 
       {selectedSubject && (
         <div>
@@ -231,6 +327,14 @@ export default function Patterns() {
                           {g.totalHits} tagged{' '}
                           {plural(g.totalHits, 'question')}
                         </span>
+                        <span className="text-text-faint">·</span>
+                        <span>{g.notClean} not clean</span>
+                        {g.openReattempts > 0 && (
+                          <>
+                            <span className="text-text-faint">·</span>
+                            <span className="text-accent">{g.openReattempts} open</span>
+                          </>
+                        )}
                         {g.reflexed > 0 && (
                           <>
                             <span className="text-text-faint">·</span>
@@ -263,7 +367,7 @@ export default function Patterns() {
         <Card>
           {scopedEntries.length > 0 ? (
             <div>
-              {scopedEntries.map(({ row, liveCount }) => {
+              {scopedEntries.map(({ row, liveCount, notCleanCount, openReattempts, lastSeenAt }) => {
                 const ink = subjectInk(row.subject);
                 return (
                   <button
@@ -286,17 +390,24 @@ export default function Patterns() {
                       <span className="block truncate text-[14px] font-medium">
                         {row.name}
                       </span>
-                      <span className="mt-0.5 flex items-center gap-1.5">
+                      <span className="mt-0.5 flex flex-wrap items-center gap-1.5">
                         <span className={cn('h-1.5 w-1.5 rounded-full', ink.dot)} />
                         <span className="text-[11.5px] text-text-muted">
                           {row.subject}
                         </span>
-                        <span className="text-[11.5px] text-text-faint">
-                          · first seen{' '}
-                          {formatDate(row.first_seen_at.slice(0, 10), 'dd MMM')}
+                        <span className="text-[11.5px] text-text-faint">·</span>
+                        <span className="text-[11.5px] text-text-muted">
+                          {notCleanCount}/{liveCount} not clean
                         </span>
+                        {lastSeenAt && (
+                          <span className="text-[11.5px] text-text-faint">
+                            · last seen{' '}
+                            {formatDate(calendarDateInTimeZone(lastSeenAt), 'dd MMM')}
+                          </span>
+                        )}
                       </span>
                     </span>
+                    {openReattempts > 0 && <Badge tone="warn">{openReattempts} open</Badge>}
                     {row.is_reflexed && <Badge tone="success">reflex</Badge>}
                     <ArrowRight
                       size={14}
@@ -334,8 +445,31 @@ export default function Patterns() {
               <span className="u-highlight font-medium text-text">
                 “{confirm.into.row.name}”
               </span>{' '}
-              and drop the old name. This cannot be undone.
+              and drop the old name. An undo remains available until you leave this page.
             </p>
+            {(() => {
+              const affected = (questions ?? []).filter(
+                (question) => question.pattern_name === confirm.from.row.name
+              );
+              if (affected.length === 0) return null;
+              return (
+                <div className="rounded border border-border bg-bg-overlay/35 p-3">
+                  <p className="u-label mb-2">Questions that will be retagged</p>
+                  <ul className="flex flex-col gap-1.5 text-[12px] text-text-muted">
+                    {affected.slice(0, 3).map((question) => (
+                      <li key={question.id} className="truncate">
+                        {question.source_ref ?? question.question_text ?? 'Saved question'}
+                      </li>
+                    ))}
+                  </ul>
+                  {affected.length > 3 && (
+                    <p className="mt-2 text-[11px] text-text-faint">
+                      +{affected.length - 3} more
+                    </p>
+                  )}
+                </div>
+              );
+            })()}
             <div className="flex justify-end gap-2">
               <Button
                 variant="ghost"

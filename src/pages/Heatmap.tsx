@@ -11,7 +11,13 @@ import { Input } from '@/components/ui/Input';
 import { Empty } from '@/components/ui/Empty';
 import { db } from '@/lib/db';
 import { useAuth } from '@/hooks/useAuth';
-import { addDaysISO, cn, plural, todayISO } from '@/lib/utils';
+import {
+  addDaysISO,
+  calendarDateInTimeZone,
+  cn,
+  plural,
+  todayISOInTimeZone
+} from '@/lib/utils';
 import { subjectInk } from '@/lib/subjectInk';
 import { ROOT_CAUSES } from '@/lib/constants';
 import { heatmapCells, heatmapRowTotals } from '@/lib/analysis';
@@ -35,9 +41,10 @@ function cellColor(intensity: number): { bg: string; text: string } {
 }
 
 export default function Heatmap() {
-  const { userId } = useAuth();
+  const { userId, profile } = useAuth();
   const navigate = useNavigate();
-  const today = todayISO();
+  const timeZone = profile?.timezone ?? 'Asia/Kolkata';
+  const today = todayISOInTimeZone(timeZone);
   const defaultFrom = addDaysISO(today, -30);
 
   const [from, setFrom] = useState(defaultFrom);
@@ -51,12 +58,16 @@ export default function Heatmap() {
   );
 
   const cells = useMemo(
-    () => heatmapCells(questions, { from, to, groupBySubtopic }),
-    [questions, from, to, groupBySubtopic]
+    () =>
+      from > to
+        ? []
+        : heatmapCells(questions, { from, to, groupBySubtopic, timeZone }),
+    [questions, from, to, groupBySubtopic, timeZone]
   );
+  const invalidRange = from > to;
 
   // Row keys in original order of appearance (already sorted by cell count desc).
-  const rowKeys: { subject: string; subtopic: string | null }[] = useMemo(() => {
+  const unsortedRowKeys: { subject: string; subtopic: string | null }[] = useMemo(() => {
     const seen = new Set<string>();
     const rows: { subject: string; subtopic: string | null }[] = [];
     for (const c of cells) {
@@ -77,6 +88,26 @@ export default function Heatmap() {
   }, [cells]);
 
   const rowTotals = useMemo(() => heatmapRowTotals(cells), [cells]);
+  const rowKeys = useMemo(
+    () =>
+      [...unsortedRowKeys].sort((a, b) => {
+        const aKey = `${a.subject}||${a.subtopic ?? ''}`;
+        const bKey = `${b.subject}||${b.subtopic ?? ''}`;
+        return (rowTotals.get(bKey) ?? 0) - (rowTotals.get(aKey) ?? 0);
+      }),
+    [unsortedRowKeys, rowTotals]
+  );
+  const attemptsByRow = useMemo(() => {
+    const counts = new Map<string, number>();
+    if (invalidRange) return counts;
+    for (const question of questions) {
+      const day = calendarDateInTimeZone(question.created_at, timeZone);
+      if (day < from || day > to) continue;
+      const key = `${question.subject}||${groupBySubtopic ? question.subtopic ?? '' : ''}`;
+      counts.set(key, (counts.get(key) ?? 0) + 1);
+    }
+    return counts;
+  }, [questions, from, to, groupBySubtopic, timeZone, invalidRange]);
   const rowMax = useMemo(() => {
     let max = 0;
     for (const c of cells) if (c.count > max) max = c.count;
@@ -94,7 +125,7 @@ export default function Heatmap() {
     const params = new URLSearchParams();
     params.set('subject', subject);
     if (subtopic) params.set('subtopic', subtopic);
-    if (cause !== 'unspecified') params.set('cause', cause);
+    params.set('cause', cause);
     if (from) params.set('from', from);
     if (to) params.set('to', to);
     navigate(`/journal?${params.toString()}`);
@@ -112,6 +143,24 @@ export default function Heatmap() {
           <div className="flex flex-col gap-1.5">
             <span className="u-label">From</span>
             <Input type="date" value={from} onChange={(e) => setFrom(e.target.value)} mono className="w-[160px]" />
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <span className="u-label">Window</span>
+            <div className="inline-flex divide-x divide-border overflow-hidden rounded border border-border bg-bg-raised shadow-sm">
+              {[7, 30, 90].map((days) => (
+                <button
+                  key={days}
+                  type="button"
+                  onClick={() => {
+                    setFrom(addDaysISO(today, -(days - 1)));
+                    setTo(today);
+                  }}
+                  className="h-9 px-2.5 text-[12px] text-text-muted transition-colors hover:bg-bg-overlay hover:text-text"
+                >
+                  {days}d
+                </button>
+              ))}
+            </div>
           </div>
           <div className="flex flex-col gap-1.5">
             <span className="u-label">To</span>
@@ -147,16 +196,21 @@ export default function Heatmap() {
             </div>
           </div>
           <div className="ml-auto flex flex-col gap-0.5 text-[12px] text-text-faint">
-            <span className="u-label">Window</span>
+            <span className="u-label">Evidence</span>
             <span className="u-num">
               {cells.reduce((n, c) => n + c.count, 0)} mistakes across{' '}
               {rowKeys.length} {plural(rowKeys.length, 'row')}
             </span>
           </div>
         </CardBody>
+        {invalidRange && (
+          <p className="border-t border-danger/25 bg-danger-faint/40 px-4 py-2 text-[12px] text-danger">
+            The start date must be on or before the end date.
+          </p>
+        )}
       </Card>
 
-      {rowsShown.length === 0 ? (
+      {invalidRange ? null : rowsShown.length === 0 ? (
         <Card>
           <Empty
             title="No mistakes in this window"
@@ -177,6 +231,7 @@ export default function Heatmap() {
               const ink = subjectInk(row.subject);
               const rowKey = `${row.subject}||${row.subtopic ?? ''}`;
               const rowTotal = rowTotals.get(rowKey) ?? 0;
+              const attempts = attemptsByRow.get(rowKey) ?? 0;
               return (
                 <article key={rowKey} className="native-heatmap-row-card">
                   <header className="flex items-start justify-between gap-3">
@@ -195,12 +250,16 @@ export default function Heatmap() {
                     </span>
                     <span className="native-heatmap-total shrink-0">
                       <span className="u-num text-[17px] font-semibold">{rowTotal}</span>
-                      <span className="text-[9px] uppercase tracking-[0.08em]">total</span>
+                      <span className="text-[9px] uppercase tracking-[0.08em]">
+                        of {attempts}
+                      </span>
                     </span>
                   </header>
 
                   <div className="mt-4 grid grid-cols-2 gap-2.5">
-                    {CAUSE_COLUMNS.map((cause) => {
+                    {CAUSE_COLUMNS.filter(
+                      (cause) => (cellByKey.get(`${rowKey}||${cause.key}`) ?? 0) > 0
+                    ).map((cause) => {
                       const count = cellByKey.get(`${rowKey}||${cause.key}`) ?? 0;
                       const intensity = count === 0 ? 0 : count / rowMax;
                       const { bg, text } = cellColor(intensity);
@@ -259,6 +318,7 @@ export default function Heatmap() {
                   const ink = subjectInk(r.subject);
                   const rowKey = `${r.subject}||${r.subtopic ?? ''}`;
                   const rowTotal = rowTotals.get(rowKey) ?? 0;
+                  const attempts = attemptsByRow.get(rowKey) ?? 0;
                   return (
                     <tr key={rowKey} className={cn(i % 2 === 1 && 'bg-bg-overlay/25')}>
                       <td className="heatmap-row-label sticky left-0 z-10 border-r border-border bg-bg-raised px-3 py-2">
@@ -315,6 +375,7 @@ export default function Heatmap() {
                         >
                           {rowTotal}
                         </span>
+                        <span className="ml-1 text-[10px] text-text-faint">/{attempts}</span>
                       </td>
                     </tr>
                   );
@@ -324,7 +385,7 @@ export default function Heatmap() {
           </div>
           {rowKeys.length > rowsShown.length && (
             <div className="border-t border-border px-4 py-2 text-[12px] text-text-faint">
-              Showing top 40 by count — narrow the window or granularity to see less.
+              Showing top 40 rows by mistake total — narrow the window or granularity to see less.
             </div>
           )}
         </Card>
@@ -333,19 +394,25 @@ export default function Heatmap() {
       <Card>
         <CardBody className="flex flex-wrap items-center gap-4 text-[12px] text-text-muted">
           <span className="u-label">legend</span>
-          {[0, 0.15, 0.35, 0.6, 0.85].map((step) => {
+          {[
+            { step: 0, label: 'none' },
+            { step: 0.15, label: 'light' },
+            { step: 0.35, label: 'medium' },
+            { step: 0.6, label: 'high' },
+            { step: 0.85, label: 'loudest' }
+          ].map(({ step, label }) => {
             const { bg } = cellColor(step);
             return (
               <span key={step} className="flex items-center gap-1.5">
                 <span className={cn('inline-block h-3 w-6 rounded', bg)} />
                 <span className="text-text-faint">
-                  {step === 0 ? 'none' : step === 0.85 ? 'loudest' : `${Math.round(step * 100)}%`}
+                  {label}
                 </span>
               </span>
             );
           })}
           <span className="ml-auto text-[12px] text-text-faint">
-            Only outcomes ≠ R count. Row total = mistakes per (subject{groupBySubtopic ? ' × subtopic' : ''}) in window.
+            Relative to the loudest cell in this window. Row total shows mistakes / attempts.
           </span>
         </CardBody>
       </Card>

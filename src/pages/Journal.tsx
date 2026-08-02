@@ -384,7 +384,8 @@ export default function Journal() {
     if (f.subject) rows = rows.filter((q) => q.subject === f.subject);
     if (f.subtopic) rows = rows.filter((q) => q.subtopic === f.subtopic);
     if (f.outcome) rows = rows.filter((q) => q.outcome === f.outcome);
-    if (f.cause) rows = rows.filter((q) => q.root_cause === f.cause);
+    if (f.cause === 'unspecified') rows = rows.filter((q) => q.root_cause === null);
+    else if (f.cause) rows = rows.filter((q) => q.root_cause === f.cause);
     if (f.mark) rows = rows.filter((q) => q.mark_decision === f.mark);
     if (f.source) rows = rows.filter((q) => detectSourceKind(q.source_ref) === f.source);
     if (f.format) rows = rows.filter((q) => detectFormat(q.source_ref) === f.format);
@@ -496,6 +497,7 @@ export default function Journal() {
               className="w-[140px]"
             >
               <option value="">All causes</option>
+              <option value="unspecified">Unspecified</option>
               {ROOT_CAUSES.map((rc) => (
                 <option key={rc.value} value={rc.value}>
                   {rc.label}

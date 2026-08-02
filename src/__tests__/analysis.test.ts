@@ -331,6 +331,19 @@ describe('calibration (F5.4 DoD)', () => {
     expect(algo.expectedValue).toBeCloseTo(1 / 3, 5);
   });
 
+  it('can recommend a higher threshold from 50-50 evidence alone', () => {
+    const rows = Array.from({ length: 8 }, (_, index) =>
+      q({
+        subject: 'Algorithms',
+        mark_decision: 'FIFTY_FIFTY',
+        mark_correct: index === 0
+      })
+    );
+    const [algo] = calibrationBySubject(rows);
+    expect(algo.accuracy).toBeCloseTo(0.125, 3);
+    expect(algo.recommendation).toBe('raise');
+  });
+
   it('recommends raise when accuracy is below break-even (25%)', () => {
     // 1 correct of 8 = 12.5% — well below the -1/3 break-even.
     const rows = Array.from({ length: 8 }, (_, i) =>

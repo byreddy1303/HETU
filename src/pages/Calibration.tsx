@@ -90,17 +90,17 @@ const RECOMMENDATION_COPY: Record<
 > = {
   raise: {
     label: 'Skip more',
-    hint: 'Accuracy < 40% and EV negative. You are gambling. Only commit when you can justify.',
+    hint: 'Committed-answer accuracy is below the 25% break-even point and answer EV is negative.',
     tone: 'warn'
   },
   lower: {
     label: 'Answer more',
-    hint: 'Accuracy > 80% and EV > 0.6. You are leaving points on the table. Trust the guess a little.',
+    hint: 'Committed-answer accuracy is above 80%, answer EV is strong, and some questions were skipped.',
     tone: 'success'
   },
   hold: {
-    label: 'Hold — calibration is fine',
-    hint: 'Neither over- nor under-confident. Keep going.',
+    label: 'Hold threshold',
+    hint: 'The current evidence does not support answering materially more or less.',
     tone: 'neutral'
   },
   insufficient: {
@@ -128,14 +128,14 @@ export default function Calibration() {
   const rows = useMemo(() => calibrationBySubject(questions), [questions]);
   const overall = useMemo(() => calibrationOverall(rows), [rows]);
 
-  const missing = useMemo(
+  const allMissing = useMemo(
     () =>
       questions
         .filter((q) => q.mark_decision === null)
-        .sort((a, b) => (a.created_at > b.created_at ? -1 : 1))
-        .slice(0, 25),
+        .sort((a, b) => (a.created_at > b.created_at ? -1 : 1)),
     [questions]
   );
+  const missing = allMissing.slice(0, 25);
 
   const recentDecided = useMemo(
     () =>
@@ -207,7 +207,7 @@ export default function Calibration() {
             />
           ) : (
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
-              <StatCell label="Decisions" value={overall.decided} />
+              <StatCell label="Answered" value={overall.decided} />
               <StatCell label="Correct" value={overall.correct} color="text-success" />
               <StatCell label="Wrong" value={overall.wrong} color="text-danger" />
               <StatCell label="Left blank" value={overall.skipped} muted />
@@ -226,7 +226,7 @@ export default function Calibration() {
                   {fmtEV(overall.expectedValue)}
                 </span>
                 <span className="text-[11px] text-text-faint">
-                  Answer accuracy {fmtPct(overall.accuracy)}
+                  Committed-answer accuracy {fmtPct(overall.accuracy)}
                 </span>
               </div>
             </div>
@@ -250,7 +250,7 @@ export default function Calibration() {
                   <th className="px-2 py-2 text-right font-mono">Answered</th>
                   <th className="px-2 py-2 text-right font-mono">50/50</th>
                   <th className="px-2 py-2 text-right font-mono">Blank</th>
-                  <th className="px-2 py-2 text-right font-mono">Accuracy</th>
+                  <th className="px-2 py-2 text-right font-mono">Answer accuracy</th>
                   <th className="px-2 py-2 text-right font-mono">EV / Q</th>
                   <th className="px-4 py-2 font-mono">Recommendation</th>
                   </tr>
@@ -258,6 +258,7 @@ export default function Calibration() {
                 <tbody className="divide-y divide-border">
                 {rows.map((r) => {
                   const rec = RECOMMENDATION_COPY[r.recommendation];
+                  const answered = r.marked + r.fiftyFifty;
                   const ink = subjectInk(r.subject);
                   return (
                     <tr key={r.subject}>
@@ -304,7 +305,9 @@ export default function Calibration() {
                           ) : (
                             <Info size={12} strokeWidth={2} />
                           )}
-                          {rec.label}
+                          {r.recommendation === 'insufficient'
+                            ? `${Math.max(0, 4 - answered)} more needed`
+                            : rec.label}
                         </span>
                       </td>
                     </tr>
@@ -321,9 +324,9 @@ export default function Calibration() {
         <CardHeader
           title="Waiting on a decision"
           aside={
-            missing.length > 0 && (
+            allMissing.length > 0 && (
               <Badge tone="warn">
-                {missing.length} {plural(missing.length, 'row')}
+                {allMissing.length} {plural(allMissing.length, 'row')}
               </Badge>
             )
           }
@@ -346,16 +349,21 @@ export default function Calibration() {
               ))}
             </ul>
           )}
+          {allMissing.length > missing.length && (
+            <p className="border-t border-border px-4 py-2 text-[11.5px] text-text-faint">
+              Showing the newest 25 of {allMissing.length}. Record these before older rows.
+            </p>
+          )}
         </CardBody>
       </Card>
 
       {recentDecided.length > 0 && (
         <Card>
           <CardHeader
-            title="Recently decided"
+            title="Latest recorded decisions"
             aside={
               <span className="inline-flex items-center gap-1 text-[11px] text-text-faint">
-                <History size={11} strokeWidth={1.75} /> reset if you got it wrong
+                <History size={11} strokeWidth={1.75} /> ordered by question date
               </span>
             }
           />
@@ -382,8 +390,8 @@ export default function Calibration() {
             Answered wrong = <span className="u-num">−⅓</span>
           </span>
           <span className="ml-auto">
-            EV / Q averages over decisions taken (answered + 50/50). Blank
-            answers don't move the average.
+            EV / Q averages over every recorded decision. Blank answers contribute zero,
+            so the number evaluates the full answer/skip policy.
           </span>
         </CardBody>
       </Card>

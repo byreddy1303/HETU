@@ -5,7 +5,7 @@ import { useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { differenceInCalendarDays, parseISO } from 'date-fns';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, BookOpenCheck } from 'lucide-react';
 import type { Outcome } from '@/types';
 import HeroCard from '@/components/dashboard/HeroCard';
 import LearningTips from '@/components/dashboard/LearningTips';
@@ -29,6 +29,7 @@ import { EXAM_DATE_DEFAULT, OUTCOMES, OUTCOME_BY_CODE } from '@/lib/constants';
 import { subjectInk } from '@/lib/subjectInk';
 import { buildLearningTips } from '@/lib/learning-tips';
 import { allSessions, pruneEmptyFinishedSessions } from '@/lib/sessions';
+import { PYQ_BANK_QUESTION_COUNT } from '@/lib/pyq';
 import {
   dueTodayCount,
   latestSession,
@@ -212,10 +213,16 @@ export default function Dashboard() {
     []
   );
 
-  const sessions = useLiveQuery(
-    async () => (userId ? allSessions(userId) : []),
+  const sessions = useLiveQuery(async () => (userId ? allSessions(userId) : []), [userId], []);
+
+  const pyqAttempts = useLiveQuery(
+    async () => (userId ? db.pyq_attempts.where('user_id').equals(userId).toArray() : []),
     [userId],
     []
+  );
+  const uniquePyqsSeen = useMemo(
+    () => new Set(pyqAttempts.map((attempt) => attempt.question_uid)).size,
+    [pyqAttempts]
   );
 
   // Remove legacy empty completions while the filtered query above prevents
@@ -251,10 +258,7 @@ export default function Dashboard() {
   );
   const due = useMemo(() => dueTodayCount(reattempts, today), [reattempts, today]);
   const overdue = useMemo(
-    () =>
-      reattempts.filter(
-        (row) => row.stage !== 'MASTERED' && row.scheduled_date < today
-      ).length,
+    () => reattempts.filter((row) => row.stage !== 'MASTERED' && row.scheduled_date < today).length,
     [reattempts, today]
   );
   const dist = useMemo(() => outcomeDistribution(lastSessionQuestions), [lastSessionQuestions]);
@@ -273,7 +277,8 @@ export default function Dashboard() {
   );
 
   const sessionsThisWeek = useMemo(() => {
-    return sessions.filter((session) => session.date >= currentWeek && session.date <= today).length;
+    return sessions.filter((session) => session.date >= currentWeek && session.date <= today)
+      .length;
   }, [sessions, currentWeek, today]);
 
   const examDate = profile?.exam_date ?? EXAM_DATE_DEFAULT;
@@ -309,6 +314,41 @@ export default function Dashboard() {
       />
 
       <LearningTips tips={learningTips} />
+
+      <Card className="overflow-hidden">
+        <button
+          type="button"
+          onClick={() => navigate('/pyq')}
+          className="group flex w-full flex-col gap-4 p-4 text-left transition-colors hover:bg-accent-faint/35 sm:flex-row sm:items-center sm:justify-between"
+        >
+          <span className="flex min-w-0 items-start gap-3">
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded bg-accent-faint text-accent">
+              <BookOpenCheck size={20} strokeWidth={1.8} />
+            </span>
+            <span>
+              <span className="font-display text-[16px] font-semibold text-text">
+                Practice GATE CSE PYQs
+              </span>
+              <span className="mt-0.5 block text-[12px] text-text-muted">
+                {PYQ_BANK_QUESTION_COUNT.toLocaleString()} full questions · options, diagrams, and
+                keys · 2002–2026
+              </span>
+            </span>
+          </span>
+          <span className="flex shrink-0 items-center gap-3">
+            <span className="text-right">
+              <span className="u-num block text-[14px] font-semibold text-text">
+                {uniquePyqsSeen.toLocaleString()} seen
+              </span>
+              <span className="u-label block">{pyqAttempts.length.toLocaleString()} attempts</span>
+            </span>
+            <ArrowRight
+              size={17}
+              className="text-accent transition-transform group-hover:translate-x-0.5"
+            />
+          </span>
+        </button>
+      </Card>
 
       <Card>
         <div className="grid grid-cols-1 divide-y divide-border sm:grid-cols-2 sm:divide-x sm:divide-y-0">

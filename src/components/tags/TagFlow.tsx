@@ -58,6 +58,8 @@ export default function TagFlow({
   patterns,
   questionLabel,
   timeSpentSec,
+  initialSource,
+  sourceLocked = false,
   onSave,
   onCancel
 }: {
@@ -65,11 +67,16 @@ export default function TagFlow({
   patterns: PatternRow[];
   questionLabel: string;
   timeSpentSec: number;
+  initialSource?: SourceDraft;
+  /** Bank questions already have authoritative source metadata. */
+  sourceLocked?: boolean;
   onSave: (draft: TagDraft) => Promise<void> | void;
   onCancel: () => void;
 }) {
-  const [step, setStep] = useState<Step>('source');
-  const [source, setSource] = useState<SourceDraft>(() => makeInitialSource(subject));
+  const [step, setStep] = useState<Step>(sourceLocked ? 'outcome' : 'source');
+  const [source, setSource] = useState<SourceDraft>(
+    () => initialSource ?? makeInitialSource(subject)
+  );
   const [outcome, setOutcome] = useState<Outcome>();
   const [pattern, setPattern] = useState<string | null>(null);
   const [trigger, setTrigger] = useState<string | null>(null);
@@ -79,7 +86,9 @@ export default function TagFlow({
   const advanceTimer = useRef<ReturnType<typeof setTimeout>>();
   const dir = useRef(1);
 
-  const steps = STEP_LABELS.filter((s) => s.id !== 'cause' || outcome !== 'R');
+  const steps = STEP_LABELS.filter(
+    (s) => (!sourceLocked || s.id !== 'source') && (s.id !== 'cause' || outcome !== 'R')
+  );
 
   function go(next: Step, d: 1 | -1) {
     clearTimeout(advanceTimer.current);
@@ -287,7 +296,7 @@ export default function TagFlow({
               <OutcomeStep
                 selected={outcome}
                 onSelect={pickOutcome}
-                onCancel={() => go('source', -1)}
+                onCancel={() => (sourceLocked ? onCancel() : go('source', -1))}
               />
             )}
             {step === 'pattern' && (

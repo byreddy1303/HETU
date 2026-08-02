@@ -18,7 +18,8 @@ import {
   Target,
   Users,
   X,
-  Zap
+  Zap,
+  LibraryBig
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { useLiveQuery } from 'dexie-react-hooks';
@@ -74,6 +75,7 @@ const TABS: Tab[] = [
 ];
 
 const MORE_ITEMS = [
+  { to: '/pyq', label: 'PYQ practice', icon: LibraryBig },
   { to: '/patterns', label: 'Patterns', icon: Shapes },
   { to: '/reattempts', label: 'Re-attempts', icon: RotateCcw },
   { to: '/weekly-review', label: 'Weekly review', icon: CalendarCheck },
@@ -101,9 +103,7 @@ export default function MobileTabs() {
       ? { ...t, to: `/session/${liveSessionId}/solve`, label: 'Resume' }
       : t
   );
-  const moreActive = MORE_ITEMS.some(
-    ({ to }) => pathname === to || pathname.startsWith(`${to}/`)
-  );
+  const moreActive = MORE_ITEMS.some(({ to }) => pathname === to || pathname.startsWith(`${to}/`));
   const moreHighlighted = moreOpen || moreActive;
 
   useEffect(() => {

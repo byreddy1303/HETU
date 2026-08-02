@@ -26,6 +26,7 @@ const TriggerDrill = lazy(() => import('@/pages/TriggerDrill'));
 const Settings = lazy(() => import('@/pages/Settings'));
 const Readiness = lazy(() => import('@/pages/Readiness'));
 const Buddy = lazy(() => import('@/pages/Buddy'));
+const Pyq = lazy(() => import('@/pages/Pyq'));
 const DevPrimitives = lazy(() => import('@/pages/DevPrimitives'));
 
 const devRoutes = import.meta.env.DEV
@@ -64,6 +65,7 @@ export const router = createBrowserRouter([
       { path: 'journal', element: <Journal /> },
       { path: 'log', element: <Log /> },
       { path: 'patterns', element: <Patterns /> },
+      { path: 'pyq', element: <Pyq /> },
       { path: 'planner', element: <Planner /> },
       { path: 'reattempts', element: <Reattempts /> },
       { path: 'weekly-review', element: <WeeklyReview /> },

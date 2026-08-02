@@ -48,7 +48,18 @@ export default defineConfig(({ mode }) => {
           ]
         },
         workbox: {
-          globPatterns: ['**/*.{js,css,html,ico,png,svg}']
+          globPatterns: ['**/*.{js,css,html,ico,png,svg}'],
+          runtimeCaching: [
+            {
+              urlPattern: ({ url }) =>
+                url.origin === self.location.origin && url.pathname.startsWith('/pyq/'),
+              handler: 'CacheFirst',
+              options: {
+                cacheName: 'air-pyq-bank-v1',
+                expiration: { maxEntries: 400, maxAgeSeconds: 60 * 60 * 24 * 365 }
+              }
+            }
+          ]
         }
       })
     ],

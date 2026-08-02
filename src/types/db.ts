@@ -168,6 +168,23 @@ export interface InterruptionLogRow {
   kind: InterruptionKind;
 }
 
+export type PyqSelectedAnswer = string | string[] | number | null;
+
+/** A submitted bank attempt. Analysis remains a separate, user-authored step. */
+export interface PyqAttemptRow {
+  id: string;
+  user_id: string;
+  question_uid: string;
+  subject: string;
+  year: number;
+  selected_answer: PyqSelectedAnswer;
+  mark_decision: MarkDecision;
+  mark_correct: boolean | null;
+  time_spent_sec: number;
+  bank_version: string;
+  attempted_at: string;
+}
+
 export interface BuddyRow {
   id: string;
   user_a: string;

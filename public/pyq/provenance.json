@@ -1,0 +1,24 @@
+{
+  "bankVersion": "gate-cse-2002-2026-v1",
+  "sources": [
+    {
+      "name": "GateQA",
+      "url": "https://gateqa.in",
+      "role": "Full question HTML, diagrams, metadata, and answer map"
+    },
+    {
+      "name": "GATE Overflow",
+      "url": "https://gateoverflow.in/previous-years",
+      "role": "Question provenance and the three restored older records"
+    },
+    {
+      "name": "Official GATE archive",
+      "url": "https://gate2026.iitg.ac.in/download.html",
+      "role": "Paper-count audit and original wording verification"
+    }
+  ],
+  "notes": [
+    "Question content is bundled for the private, invite-only AIR Journal practice experience.",
+    "AMBIGUOUS, MARKS_TO_ALL, and UNSUPPORTED records are never assigned an invented answer."
+  ]
+}

@@ -16,7 +16,8 @@ import {
   Sigma,
   Users,
   Settings,
-  LogOut
+  LogOut,
+  LibraryBig
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { useLiveQuery } from 'dexie-react-hooks';
@@ -66,8 +67,14 @@ const BUDDY_ITEM: Item = {
 };
 
 const ANALYSIS: Item[] = [
+  { to: '/pyq', label: 'PYQ practice', icon: LibraryBig, active: 'bg-accent-faint text-accent' },
   { to: '/patterns', label: 'Patterns', icon: Shapes, active: 'bg-ink-violet/10 text-ink-violet' },
-  { to: '/reattempts', label: 'Re-attempts', icon: RotateCcw, active: 'bg-ink-rose/10 text-ink-rose' },
+  {
+    to: '/reattempts',
+    label: 'Re-attempts',
+    icon: RotateCcw,
+    active: 'bg-ink-rose/10 text-ink-rose'
+  },
   {
     to: '/weekly-review',
     label: 'Weekly',
@@ -75,12 +82,27 @@ const ANALYSIS: Item[] = [
     active: 'bg-ink-marigold/10 text-ink-marigold'
   },
   { to: '/heatmap', label: 'Heatmap', icon: Grid3x3, active: 'bg-ink-slate/10 text-ink-slate' },
-  { to: '/calibration', label: 'Calibration', icon: Target, active: 'bg-ink-teal/10 text-ink-teal' },
-  { to: '/readiness', label: 'Readiness', icon: Compass, active: 'bg-ink-marigold/10 text-ink-marigold' }
+  {
+    to: '/calibration',
+    label: 'Calibration',
+    icon: Target,
+    active: 'bg-ink-teal/10 text-ink-teal'
+  },
+  {
+    to: '/readiness',
+    label: 'Readiness',
+    icon: Compass,
+    active: 'bg-ink-marigold/10 text-ink-marigold'
+  }
 ];
 
 const LEARN: Item[] = [
-  { to: '/trigger-drill', label: 'Trigger drill', icon: Zap, active: 'bg-ink-marigold/10 text-ink-marigold' },
+  {
+    to: '/trigger-drill',
+    label: 'Trigger drill',
+    icon: Zap,
+    active: 'bg-ink-marigold/10 text-ink-marigold'
+  },
   { to: '/formulas', label: 'Formulas', icon: Sigma, active: 'bg-ink-teal/10 text-ink-teal' }
 ];
 
@@ -155,7 +177,7 @@ export default function Nav() {
           label: 'Session',
           icon: Play,
           active: 'bg-ink-teal/10 text-ink-teal'
-    },
+        },
     JOURNAL_ITEM,
     PLANNER_ITEM,
     BUDDY_ITEM

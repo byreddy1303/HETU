@@ -14,77 +14,93 @@ Format:
 ---
 
 ## 2026-07-17 — Repo location
+
 **Chose**: subfolder `air-journal/` inside existing `Random/` repo.
 **Rejected**: standalone new repo.
 **Reason**: user already has a `Random/` catch-all; migrating to standalone is trivial later if desired.
 
 ## 2026-07-17 — Package manager
+
 **Chose**: npm.
 **Rejected**: pnpm, yarn, bun.
 **Reason**: ubiquitous, Vercel default, no lockfile drama.
 
 ## 2026-07-17 — Repo location (supersedes earlier entry)
+
 **Chose**: standalone git repo at `GATE PREP/air-journal/`.
 **Rejected**: subfolder of a `Random/` repo.
 **Reason**: no `Random/` repo exists on this machine; the build contract requires per-step commits, so the app gets its own repo.
 
 ## 2026-07-17 — Local Node version
+
 **Chose**: build with local Node 26 (spec says 20 LTS).
 **Rejected**: installing nvm + Node 20 locally.
 **Reason**: all tooling used is Node-20-compatible; Vercel deploy target stays Node 20. Zero user attention required.
 
 ## 2026-07-17 — Invite-only enforcement mechanism
+
 **Chose**: GoTrue signup enabled; a BEFORE INSERT trigger on `auth.users` rejects signups without a valid invite token (first-ever account exempt as owner bootstrap). AFTER INSERT trigger provisions profile, consumes invite, pairs buddies. Google OAuth is sign-in only.
 **Rejected**: `enable_signup=false` + a service-role `redeem-invite` edge function.
 **Reason**: keeps enforcement fully server-side (F1.1) with no extra edge function and no service-role key in more places.
 
 ## 2026-07-17 — Client-generated UUID primary keys
+
 **Chose**: `crypto.randomUUID()` client-side becomes the canonical Postgres PK.
 **Rejected**: `local_id` remap table from BUILD.md §5.5.
 **Reason**: offline-first inserts need stable ids for FK chains before sync; client UUIDs make remapping unnecessary (simpler, fewer failure modes).
 
 ## 2026-07-17 — Session question-count target is ephemeral
+
 **Chose**: keep the F2.1 question-count choice in the Zustand session store only.
 **Rejected**: adding a `question_count` column to `sessions`.
 **Reason**: the locked schema (§5.1) has no such column; the count only shapes in-session progress display.
 
 ## 2026-07-17 — Dev-only local sandbox on Auth screen
+
 **Chose**: when Supabase env is missing AND `import.meta.env.DEV`, Auth offers "Enter local sandbox" (Dexie-only synthetic user).
 **Rejected**: blocking all UI work until Supabase credentials exist.
 **Reason**: lets the whole app be built and visually verified offline; unreachable in production builds.
 
 ## 2026-07-17 — Buddy tables are online-only
+
 **Chose**: buddy/shared tables (buddies, shared_insights, question_shares, study_rooms) read via React Query from Supabase; not mirrored in Dexie.
 **Rejected**: full offline mirror of buddy data.
 **Reason**: §4 only requires offline-first for the user's own solo flow; buddy features are inherently online (realtime presence).
 
 ## 2026-07-17 — Re-attempt advancement is computed client-side
+
 F3.3 says the server calls `advance_reattempt(id, result)`. Doing that from the client would break offline-first (result taggable offline) and double-apply once the row upsert syncs. Instead the client applies an identical pure transition (`src/lib/reattempt.ts advance()`) and persists via the normal sync path; the SQL function remains for server-side jobs (nightly cron). Semantics are byte-identical, verified by reattempt.test.ts.
 
 ## 2026-07-17 — Design pivot: dark instrument-panel → sunlit rank notebook
+
 **Chose**: user-directed aesthetic override. Warm paper palette, red-pen vermilion brand, subject ink colors, highlighter motifs, springy micro-interactions (`motion` lib added). BUILD.md §2.8, §10, §17 amended in place.
 **Rejected**: keeping the locked dark tokens; also rejected switching frameworks (FastAPI/other frontend) — stack unchanged.
 **Reason**: user clarified "never look vibe-coded" meant colorful + magical + effortless, not dark minimal. Behavioral bans (no streaks, no emojis, no engagement bait, no gamified rewards) remain.
 
 ## 2026-07-18 — Extend tag flow with source metadata + question format
+
 **Chose**: new SourceStep at head of TagFlow captures subject override, source kind (PYQ / Go Classes Quiz+DPP+Weekly / GATE Overflow / Other), PYQ year (past 35) + set (2014+), question number, format (MCQ/MSQ/NAT), marks (1/2 → target_time_sec 90s/180s), image upload for non-PYQ (client-compressed JPEG data URL on `image_url`).
 **Rejected**: adding new schema columns for `source_kind`, `question_format`, `marks`.
 **Reason**: `source_ref` and `image_url` are already free-form on the frozen schema. Encoding kind+year+set+qnum+format into a canonical `source_ref` (prefix-matchable for filter) keeps the schema stable; images ride the same offline sync path as any other row without needing Supabase Storage first. Journal filters + display parse the same canonical form.
 
 ## 2026-07-18 — Defer S18–S24 (LLM stack) until API keys land
+
 **Chose**: build S25 (Weekly review) and later analytics/PWA steps ahead of S18–S24.
 **Rejected**: strict S18 → S44 order per CLAUDE.md.
 **Reason**: S18 rate-limit logic can be written and unit-tested with mocked fetch, but the provider adapters (Groq / Gemini / OpenRouter / Cerebras) can't be end-to-end verified without secrets, and S20–S24 UI is worthless without a working router. The tagging + weekly-review + re-attempt loop stands on its own — that's the mistake-surface engine. LLM assist is an augment; it will slot in later without churning the pages we ship now.
 
 ## 2026-07-18 — Scope amendment: production access flow + first-run UX + ambient insight (user-directed)
+
 **Chose**: append three feature blocks to §7 — F1.4 request-access + email approval, F3.5 dashboard hero (name greeting + rotating one-liner + Groq weekly-read card), F8.5 production hardening (rate limits, deliverability, isolation audit, ops docs) — plus a first-run onboarding pass across every empty state so a stranger can gain value without reading BUILD.md.
 **Rejected**: honouring §7 as frozen; deferring "aesthetic + production-ready + stranger-friendly" to a v2.
 **Reason**: user's product standard is "production-ready features, not half-baked, easy for someone who knows nothing." Same precedent as the 2026-07-17 sunlit pivot — user is the authority; contract amends by explicit direction, not silent creep. Non-negotiables (§2), hard bans (§17), invite-only auth stay intact — the /request-access flow does not create accounts, it only lets outsiders ASK; owner still approves.
 
 ## 2026-07-18 — Email delivery via Resend, owner via env
+
 **Chose**: Resend (esm.sh import in Deno edge functions) for owner-notify + invite-send + decline-send. Owner email lives in `OWNER_EMAIL` edge secret; owner identity in-DB is "first signed-up user" via `public.is_owner()` SQL helper.
 **Rejected**: Supabase Auth's built-in SMTP (limited, and unrelated to transactional mail), Gmail SMTP via edge fn (deliverability worst, app-password fragile), SendGrid (older SDK, 100/day cap).
 **Reason**: Resend has the best Deno DX, 3k free/mo covers the growth curve for a niche personal tool, and DKIM/SPF setup is a one-time onboarding. `is_owner()` avoids adding an `is_owner` column while keeping RLS enforceable server-side.
+
 ## 2026-07-21 — Remove provider-backed AI and strengthen Buddy
 
 **Chose**: remove all AI-facing routes, calls, settings, secrets, generated variations, and synthesis surfaces. Keep Formulas and Trigger Drill as local/manual workflows. Move Buddy directly below Planner, add unread/live previews, strict request controls, latest-message loading, connection recovery, safer question payloads, and recipient-only read receipts. Add deterministic dashboard learning notes based on due work and observed outcomes/root causes.
@@ -160,3 +176,11 @@ F3.3 says the server calls `advance_reattempt(id, result)`. Doing that from the 
 **Rejected**: adding new analytics pages, goals, notifications, leaderboards, opaque readiness certainty, or optimistic scores from missing data.
 
 **Reason**: direct user direction to enhance the existing Dashboard and Analysis only; clearer evidence and one-action hierarchy reduce the chance that sparse or duplicated signals steer GATE preparation incorrectly.
+
+## 2026-08-02 — Full PYQ practice bank inside AIR Journal
+
+**Chose**: bundle every audited GATE CSE question from 2002–2026 as a subject-indexed, local-first practice bank with original options and diagrams, explicit answer provenance/status, committed answer capture, and an optional handoff into the existing AIR Journal analysis flow.
+
+**Rejected**: a paper-download archive, question summaries, fabricated keys for defective papers, a second analytics model, and dependence on a live third-party question API during practice.
+
+**Reason**: direct user clarification that AIR Journal itself should be the PYQ practice place, while preserving its existing mistake-analysis semantics and offline-first behavior.

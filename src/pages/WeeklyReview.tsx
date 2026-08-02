@@ -21,7 +21,14 @@ import {
   type WeeklyDataSummary,
   type WeeklyDraft
 } from '@/lib/analysis';
-import { cn, formatDate, nowISO, uuid, weekStartISO } from '@/lib/utils';
+import {
+  cn,
+  formatDate,
+  nowISO,
+  todayISOInTimeZone,
+  uuid,
+  weekStartISO
+} from '@/lib/utils';
 import { subjectInk } from '@/lib/subjectInk';
 import { ROOT_CAUSES } from '@/lib/constants';
 
@@ -43,8 +50,9 @@ const EMPTY_DRAFT: Draft = {
 };
 
 export default function WeeklyReview() {
-  const { userId } = useAuth();
-  const weekStart = weekStartISO();
+  const { userId, profile } = useAuth();
+  const timeZone = profile?.timezone ?? 'Asia/Kolkata';
+  const weekStart = weekStartISO(todayISOInTimeZone(timeZone));
 
   const questions = useLiveQuery(
     async () => (userId ? db.questions.where('user_id').equals(userId).toArray() : []),
@@ -85,8 +93,8 @@ export default function WeeklyReview() {
   }, [existing]);
 
   const summary: WeeklyDataSummary = useMemo(
-    () => summarizeWeek(questions, weekStart),
-    [questions, weekStart]
+    () => summarizeWeek(questions, weekStart, timeZone),
+    [questions, weekStart, timeZone]
   );
 
   const currentDirty = weeklyDraftFingerprint(draft) !== savedFingerprint;
@@ -178,7 +186,11 @@ export default function WeeklyReview() {
         <CardBody className="flex flex-wrap items-center gap-3">
           <ol className="flex flex-wrap items-center gap-1.5">
             {STEP_LABELS.map((s, i) => {
-              const done = s.id < step;
+              const done =
+                s.id === 1 ||
+                (s.id === 2 && draft.root_cause_summary.trim().length > 0) ||
+                (s.id === 3 && draft.weakest_concept.trim().length > 0) ||
+                (s.id === 4 && draft.this_weeks_fix.trim().length > 0);
               const active = s.id === step;
               return (
                 <li key={s.id} className="flex items-center gap-1.5">
@@ -247,6 +259,20 @@ export default function WeeklyReview() {
         )}
       </motion.div>
 
+      {step === 4 && savedFingerprint && !currentDirty && (
+        <Card className="border-success/35 bg-success-faint/35">
+          <CardBody>
+            <p className="u-label text-success">Committed for this week</p>
+            <p className="mt-2 font-display text-[17px] font-semibold leading-relaxed text-text">
+              <span className="u-highlight">{draft.this_weeks_fix}</span>
+            </p>
+            <p className="mt-2 text-[11.5px] text-text-muted">
+              This is the same fix shown on the Dashboard.
+            </p>
+          </CardBody>
+        </Card>
+      )}
+
       <Card>
         <CardBody className="flex flex-col gap-2">
           {error && (
@@ -293,6 +319,15 @@ function DataStep({ summary }: { summary: WeeklyDataSummary }) {
       />
     );
   }
+  const notClean = summary.totalQ - summary.clean;
+  const cleanRate = summary.totalQ === 0 ? 0 : Math.round((summary.clean / summary.totalQ) * 100);
+  const volumeLeader = summary.bySubject[0];
+  const rateLeader = [...summary.bySubject]
+    .filter((subject) => subject.count >= 3)
+    .sort(
+      (a, b) =>
+        b.wrongish / b.count - a.wrongish / a.count || b.wrongish - a.wrongish
+    )[0];
   return (
     <div className="flex flex-col gap-4">
       <Card>
@@ -300,31 +335,53 @@ function DataStep({ summary }: { summary: WeeklyDataSummary }) {
         <CardBody>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
             <DataCell label="Total Q" value={summary.totalQ} color="text-text" />
-            <DataCell label="Clean (R)" value={summary.clean} color="text-success" />
-            <DataCell label="Slow (RBS)" value={summary.slow} color="text-warn" />
-            <DataCell label="Guess (RBG)" value={summary.guess} color="text-guess" />
-            <DataCell label="Wrong (W-*)" value={summary.wrong} color="text-danger" />
-            <DataCell
-              label="Concept (W-C)"
-              value={summary.byOutcome['W-C']}
-              color="text-danger"
-              muted
-            />
-            <DataCell
-              label="Execution (W-E)"
-              value={summary.byOutcome['W-E']}
-              color="text-danger"
-              muted
-            />
-            <DataCell
-              label="Reading (W-R)"
-              value={summary.byOutcome['W-R']}
-              color="text-danger"
-              muted
-            />
+            <DataCell label="Not clean" value={notClean} color="text-danger" />
+            <DataCell label="Clean" value={summary.clean} color="text-success" />
+            <DataCell label="Clean rate" value={cleanRate} color="text-ink-teal" suffix="%" />
           </div>
+          <p className="mt-3 text-[12px] text-text-muted">
+            Outcome mix:{' '}
+            <span className="u-num text-warn">{summary.slow} slow</span> ·{' '}
+            <span className="u-num text-guess">{summary.guess} guessed</span> ·{' '}
+            <span className="u-num text-danger">{summary.wrong} wrong</span>
+            <span className="text-text-faint">
+              {' '}({summary.byOutcome['W-C']} concept, {summary.byOutcome['W-E']} execution,{' '}
+              {summary.byOutcome['W-R']} reading)
+            </span>
+          </p>
         </CardBody>
       </Card>
+
+      {(volumeLeader || rateLeader) && (
+        <Card>
+          <CardHeader title="What the week is saying" />
+          <CardBody className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            {volumeLeader && (
+              <div className="rounded border border-border bg-bg-overlay/35 p-3">
+                <p className="u-label">Most misses by volume</p>
+                <p className="mt-1 font-display text-[15px] font-semibold text-text">
+                  {volumeLeader.subject}
+                </p>
+                <p className="mt-1 text-[12px] text-text-muted">
+                  {volumeLeader.wrongish} of {volumeLeader.count} not clean
+                </p>
+              </div>
+            )}
+            {rateLeader && (
+              <div className="rounded border border-border bg-bg-overlay/35 p-3">
+                <p className="u-label">Highest miss rate</p>
+                <p className="mt-1 font-display text-[15px] font-semibold text-text">
+                  {rateLeader.subject}
+                </p>
+                <p className="mt-1 text-[12px] text-text-muted">
+                  {Math.round((rateLeader.wrongish / rateLeader.count) * 100)}% not clean across{' '}
+                  {rateLeader.count} questions
+                </p>
+              </div>
+            )}
+          </CardBody>
+        </Card>
+      )}
 
       <Card>
         <CardHeader title="Subjects — where the misses landed" />
@@ -360,9 +417,9 @@ function DataStep({ summary }: { summary: WeeklyDataSummary }) {
           <CardHeader title="Recurring patterns" />
           <CardBody>
             <div className="flex flex-wrap gap-1.5">
-              {summary.topPatterns.map((p) => (
+              {summary.topPatterns.filter((pattern) => pattern.count > 0).map((p) => (
                 <Badge key={p.name} tone="neutral">
-                  {p.name} ×{p.count}
+                  {p.name} · {p.count}/{p.total} not clean
                 </Badge>
               ))}
             </div>
@@ -392,12 +449,14 @@ function DataCell({
   label,
   value,
   color,
-  muted = false
+  muted = false,
+  suffix = ''
 }: {
   label: string;
   value: number;
   color: string;
   muted?: boolean;
+  suffix?: string;
 }) {
   return (
     <div className="flex flex-col gap-1 rounded border border-border bg-bg-overlay/40 px-3 py-2">
@@ -409,7 +468,7 @@ function DataCell({
           muted && 'text-[16px]'
         )}
       >
-        {value}
+        {value}{suffix}
       </span>
     </div>
   );

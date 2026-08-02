@@ -110,7 +110,7 @@ describe('re-attempt solve flow', () => {
     expect(screen.queryByText(ANSWER)).not.toBeInTheDocument();
     await user.click(screen.getByRole('button', { name: 'Show answer' }));
     expect(screen.getByText(ANSWER)).toBeVisible();
-    await user.click(screen.getByRole('button', { name: 'Solved clean' }));
+    await user.click(screen.getByRole('button', { name: 'Clean — answer + method' }));
 
     expect(await screen.findByText('Nothing due')).toBeInTheDocument();
     await waitFor(async () => {
@@ -121,7 +121,7 @@ describe('re-attempt solve flow', () => {
     });
   });
 
-  it('opens the first carried-forward question from Dashboard Due today', async () => {
+  it('opens the first carried-forward question from Dashboard Due now', async () => {
     await seedDueQuestion();
     const user = userEvent.setup();
 
@@ -135,7 +135,7 @@ describe('re-attempt solve flow', () => {
     );
 
     const dueButton = await screen.findByRole('button', {
-      name: 'Due today: 1. Open first question'
+      name: 'Due now: 1. Start review'
     });
     await user.click(dueButton);
 

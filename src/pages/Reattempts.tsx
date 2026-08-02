@@ -135,6 +135,10 @@ const DueCard = forwardRef<HTMLDivElement, DueCardProps>(function DueCard(
   const hasText = !!question?.question_text?.trim();
   const hasImage = !!question?.image_url;
   const currentAttempt = attempt?.rowId === row.id ? attempt : null;
+  const targetSec = question?.target_time_sec ?? 120;
+  const priorTimes = row.history
+    .flatMap((entry) => (typeof entry.timeSpent === 'number' ? [entry.timeSpent] : []))
+    .slice(-3);
 
   useEffect(() => {
     setPromptDraft(question?.question_text ?? '');
@@ -331,7 +335,7 @@ const DueCard = forwardRef<HTMLDivElement, DueCardProps>(function DueCard(
               {currentAttempt?.startedAt ? (
                 <RunningTimer
                   startedAt={currentAttempt.startedAt}
-                  targetSec={question?.target_time_sec ?? 120}
+                  targetSec={targetSec}
                   onFinish={onFinish}
                 />
               ) : currentAttempt?.elapsed != null ? (
@@ -341,6 +345,16 @@ const DueCard = forwardRef<HTMLDivElement, DueCardProps>(function DueCard(
                       <p className="u-label">Attempt complete</p>
                       <p className="mt-1 font-display text-[22px] font-semibold text-text">
                         {secondsToClock(currentAttempt.elapsed)}
+                      </p>
+                      <p
+                        className={cn(
+                          'mt-1 text-[11.5px]',
+                          currentAttempt.elapsed <= targetSec ? 'text-success' : 'text-warn'
+                        )}
+                      >
+                        {currentAttempt.elapsed <= targetSec
+                          ? `${secondsToClock(targetSec - currentAttempt.elapsed)} inside target`
+                          : `${secondsToClock(currentAttempt.elapsed - targetSec)} over target`}
                       </p>
                     </div>
                     <Button variant="ghost" size="sm" onClick={onRestart}>
@@ -380,7 +394,8 @@ const DueCard = forwardRef<HTMLDivElement, DueCardProps>(function DueCard(
                   <div className="mt-4 border-t border-border pt-4">
                     <p className="text-[13px] font-medium text-text">How did it go?</p>
                     <p className="mt-1 text-[12px] text-text-muted">
-                      Report only after checking the final answer and method.
+                      Clean means the final answer and method were correct without help. Time is
+                      recorded separately.
                     </p>
                     <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
                       <Button
@@ -391,7 +406,7 @@ const DueCard = forwardRef<HTMLDivElement, DueCardProps>(function DueCard(
                         Failed — reset to D3
                       </Button>
                       <Button onClick={() => void report('clean')} disabled={reporting}>
-                        Solved clean
+                        Clean — answer + method
                       </Button>
                     </div>
                   </div>
@@ -420,6 +435,9 @@ const DueCard = forwardRef<HTMLDivElement, DueCardProps>(function DueCard(
                 Tagged {question ? formatDate(question.created_at.slice(0, 10), 'dd MMM') : '—'}
                 {row.history.length > 0
                   ? ` · ${row.history.length} prior ${plural(row.history.length, 'attempt')}`
+                  : ''}
+                {priorTimes.length > 0
+                  ? ` · recent times ${priorTimes.map(secondsToClock).join(', ')}`
                   : ''}
               </p>
             </div>
@@ -489,14 +507,24 @@ export default function Reattempts() {
 
   async function onResult(row: ReattemptRow, result: 'clean' | 'fail', elapsed: number) {
     const updated = await recordReattemptResult(row, result, today, elapsed);
+    const next = due.find((candidate) => candidate.id !== row.id);
     setAttempt(null);
-    setOpenId(null);
+    setOpenId(next?.id ?? null);
     if (updated.stage === 'MASTERED') {
-      pushToast('Mastered — off the mistake surface.', 'success');
+      pushToast(
+        next ? 'Mastered — next due question is ready.' : 'Mastered — queue cleared.',
+        'success'
+      );
     } else if (result === 'clean') {
-      pushToast(`Clean. Next rung ${formatDate(updated.scheduled_date, 'dd MMM')}.`, 'success');
+      pushToast(
+        `Clean. Next rung ${formatDate(updated.scheduled_date, 'dd MMM')}.${next ? ' Next due question is open.' : ''}`,
+        'success'
+      );
     } else {
-      pushToast(`Reset to D3 — back ${formatDate(updated.scheduled_date, 'dd MMM')}.`, 'neutral');
+      pushToast(
+        `Reset to D3 — back ${formatDate(updated.scheduled_date, 'dd MMM')}.${next ? ' Next due question is open.' : ''}`,
+        'neutral'
+      );
     }
   }
 
@@ -571,26 +599,28 @@ export default function Reattempts() {
         <Card>
           <CardHeader title="Upcoming" />
           <div>
-            {upcoming.map((row) => {
-              const question = qById.get(row.question_id);
-              const ink = question ? subjectInk(question.subject) : null;
+            {[...new Set(upcoming.map((row) => row.scheduled_date))].map((date) => {
+              const rows = upcoming.filter((row) => row.scheduled_date === date);
+              const subjects = new Set(
+                rows.flatMap((row) => {
+                  const subject = qById.get(row.question_id)?.subject;
+                  return subject ? [subject] : [];
+                })
+              );
               return (
                 <div
-                  key={row.id}
+                  key={date}
                   className="flex items-center gap-3 border-b border-border px-4 py-3 last:border-b-0"
                 >
                   <span className="u-num w-[64px] shrink-0 text-[11px] text-text-muted">
-                    {formatDate(row.scheduled_date, 'dd MMM')}
+                    {formatDate(date, 'dd MMM')}
                   </span>
-                  {ink ? (
-                    <span className={cn('h-1.5 w-1.5 shrink-0 rounded-full', ink.dot)} />
-                  ) : null}
-                  <span className="min-w-0 flex-1 truncate text-[13px]">
-                    {question?.pattern_name ?? (
-                      <span className="text-text-faint">untitled mistake</span>
-                    )}
+                  <span className="min-w-0 flex-1 text-[12.5px] text-text-muted">
+                    {rows.length} {plural(rows.length, 'question')} · {[...subjects].join(', ')}
                   </span>
-                  <Ladder stage={row.stage} />
+                  <span className="u-num rounded-full bg-bg-overlay px-2 py-0.5 text-[11px] text-text">
+                    {rows.length}
+                  </span>
                 </div>
               );
             })}

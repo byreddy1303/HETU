@@ -22,6 +22,12 @@ Telegram connection, delivery time, timezone, test delivery, disconnect, and the
 
 The private bot supports `/today` for the connected user's local-date plan and due re-attempts, `/tomorrow` for the next-day plan, and `/timetable` for the current Monday-to-Sunday plan.
 
+## Dashboard and analysis trust amendment — 2026-08-02
+
+At the user's direction, the existing Dashboard and Analysis surfaces prioritize the next useful action and make uncertainty explicit; this is a refinement of existing features, not a new product surface. Every day/week bucket uses the profile timezone. Dashboard shows one context-aware primary action, separates due-now work from the seven-day mistake-surface movement, avoids duplicate prompts, and labels stale weekly fixes. Patterns sort by unresolved burden, expose not-clean/open evidence, preview merge impact, and allow an in-page undo. Re-attempts define a clean result as an unaided answer plus method, compare elapsed and target time, advance directly to the next due item, and group upcoming work by date.
+
+Weekly Review distinguishes volume from miss rate and only marks steps complete when their data is actually saved. Heatmap filters support open-ended and preset ranges, sort by concentration, and disclose attempt denominators and relative color semantics. Readiness remains a confidence signal rather than a prediction: sparse evidence tempers component scores, subject rows disclose evidence confidence, historical comparisons require comparable weekly snapshots, and rank/score simulation stays collapsed and explicitly experimental. Calibration combines MARK and 50/50 committed answers, counts skips as zero in policy expected value, separates answered-only expected value, and withholds recommendations until four committed answers exist.
+
 ---
 
 ## 0. Autonomy directives (for Claude executing this doc)

@@ -4,7 +4,7 @@
 //
 // Explains the loop to a stranger in four calm paper slides. No emojis, no
 // hype, no counters, no dark patterns.
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { ArrowRight, X } from 'lucide-react';
 import { supabase, supabaseConfigured } from '@/lib/supabase';
@@ -52,6 +52,7 @@ const SLIDES: Slide[] = [
 export default function WelcomeOverlay() {
   const [visible, setVisible] = useState(false);
   const [idx, setIdx] = useState(0);
+  const dismissed = useRef(false);
   const profile = useAuthStore((s) => s.profile);
   const sandbox = useAuthStore((s) => s.sandbox);
   const refreshProfile = useAuthStore((s) => s.refreshProfile);
@@ -63,14 +64,14 @@ export default function WelcomeOverlay() {
       if (sandbox || !supabaseConfigured) {
         try {
           const row = await db.meta.get(DEXIE_KEY);
-          if (!cancelled && !row?.value) setVisible(true);
+          if (!cancelled && !dismissed.current && !row?.value) setVisible(true);
         } catch {
           // If Dexie fails, don't block the app.
         }
         return;
       }
       if (!profile) return;
-      if (!cancelled && !profile.welcome_seen_at) setVisible(true);
+      if (!cancelled && !dismissed.current && !profile.welcome_seen_at) setVisible(true);
     }
     void check();
     return () => {
@@ -79,6 +80,7 @@ export default function WelcomeOverlay() {
   }, [profile, sandbox]);
 
   const dismiss = useCallback(async () => {
+    dismissed.current = true;
     setVisible(false);
     const stamp = new Date().toISOString();
     if (sandbox || !supabaseConfigured) {

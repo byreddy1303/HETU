@@ -152,3 +152,11 @@ F3.3 says the server calls `advance_reattempt(id, result)`. Doing that from the 
 **Rejected**: making either field mandatory, warning when only one is blank, or using the browser's native confirmation popup.
 
 **Reason**: one recognition cue is enough to keep a question useful, while a deliberate override preserves the sub-30-second flow for legitimate exceptions.
+
+## 2026-08-02 — Evidence-first Dashboard and Analysis refinement
+
+**Chose**: improve only the existing Dashboard, Patterns, Re-attempts, Weekly Review, Heatmap, Calibration, and Readiness surfaces; use the learner's profile timezone for calendar buckets, order content by unresolved work, disclose denominators and evidence confidence, temper sparse readiness inputs, require four committed calibration answers, and keep exam-score/rank estimates collapsed and explicitly experimental.
+
+**Rejected**: adding new analytics pages, goals, notifications, leaderboards, opaque readiness certainty, or optimistic scores from missing data.
+
+**Reason**: direct user direction to enhance the existing Dashboard and Analysis only; clearer evidence and one-action hierarchy reduce the chance that sparse or duplicated signals steer GATE preparation incorrectly.

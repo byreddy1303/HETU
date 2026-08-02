@@ -59,12 +59,12 @@ export default function Heatmap() {
 
   const cells = useMemo(
     () =>
-      from > to
+      from && to && from > to
         ? []
         : heatmapCells(questions, { from, to, groupBySubtopic, timeZone }),
     [questions, from, to, groupBySubtopic, timeZone]
   );
-  const invalidRange = from > to;
+  const invalidRange = Boolean(from && to && from > to);
 
   // Row keys in original order of appearance (already sorted by cell count desc).
   const unsortedRowKeys: { subject: string; subtopic: string | null }[] = useMemo(() => {
@@ -102,7 +102,7 @@ export default function Heatmap() {
     if (invalidRange) return counts;
     for (const question of questions) {
       const day = calendarDateInTimeZone(question.created_at, timeZone);
-      if (day < from || day > to) continue;
+      if ((from && day < from) || (to && day > to)) continue;
       const key = `${question.subject}||${groupBySubtopic ? question.subtopic ?? '' : ''}`;
       counts.set(key, (counts.get(key) ?? 0) + 1);
     }

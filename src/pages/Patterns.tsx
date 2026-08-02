@@ -198,17 +198,23 @@ export default function Patterns() {
     if (!mergeUndo || merging) return;
     setMerging(true);
     try {
-      await writeLocal('patterns', mergeUndo.from);
       for (const question of mergeUndo.affected) {
         const current = await db.questions.get(question.id);
         if (current?.pattern_name === mergeUndo.into.name) {
           await writeLocal('questions', { ...current, pattern_name: mergeUndo.from.name });
         }
       }
-      const intoCount = await db.questions
-        .where('[user_id+pattern_name]')
-        .equals([userId as string, mergeUndo.into.name])
-        .count();
+      const [fromCount, intoCount] = await Promise.all([
+        db.questions
+          .where('[user_id+pattern_name]')
+          .equals([userId as string, mergeUndo.from.name])
+          .count(),
+        db.questions
+          .where('[user_id+pattern_name]')
+          .equals([userId as string, mergeUndo.into.name])
+          .count()
+      ]);
+      await writeLocal('patterns', { ...mergeUndo.from, count: fromCount });
       await writeLocal('patterns', { ...mergeUndo.into, count: intoCount });
       setMergeUndo(null);
     } finally {

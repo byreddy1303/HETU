@@ -412,7 +412,7 @@ function DataStep({ summary }: { summary: WeeklyDataSummary }) {
         </CardBody>
       </Card>
 
-      {summary.topPatterns.length > 0 && (
+      {summary.topPatterns.some((pattern) => pattern.count > 0) && (
         <Card>
           <CardHeader title="Recurring patterns" />
           <CardBody>

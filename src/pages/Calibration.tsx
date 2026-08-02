@@ -309,6 +309,9 @@ export default function Calibration() {
                             ? `${Math.max(0, 4 - answered)} more needed`
                             : rec.label}
                         </span>
+                        <span className="mt-0.5 block max-w-[250px] text-[10.5px] leading-relaxed text-text-faint">
+                          {rec.hint}
+                        </span>
                       </td>
                     </tr>
                   );

@@ -484,6 +484,21 @@ export default function Reattempts() {
     () => buildReattemptQueue(reattempts ?? [], today),
     [reattempts, today]
   );
+  const upcomingGroups = useMemo(() => {
+    const groups = new Map<string, { count: number; subjects: Set<string> }>();
+    for (const row of upcoming) {
+      const group = groups.get(row.scheduled_date) ?? { count: 0, subjects: new Set<string>() };
+      group.count += 1;
+      const subject = qById.get(row.question_id)?.subject;
+      if (subject) group.subjects.add(subject);
+      groups.set(row.scheduled_date, group);
+    }
+    return [...groups.entries()].map(([date, group]) => ({
+      date,
+      count: group.count,
+      subjects: [...group.subjects]
+    }));
+  }, [upcoming, qById]);
 
   useEffect(() => {
     if (autoOpened.current || due.length === 0) return;
@@ -599,14 +614,7 @@ export default function Reattempts() {
         <Card>
           <CardHeader title="Upcoming" />
           <div>
-            {[...new Set(upcoming.map((row) => row.scheduled_date))].map((date) => {
-              const rows = upcoming.filter((row) => row.scheduled_date === date);
-              const subjects = new Set(
-                rows.flatMap((row) => {
-                  const subject = qById.get(row.question_id)?.subject;
-                  return subject ? [subject] : [];
-                })
-              );
+            {upcomingGroups.map(({ date, count, subjects }) => {
               return (
                 <div
                   key={date}
@@ -616,10 +624,10 @@ export default function Reattempts() {
                     {formatDate(date, 'dd MMM')}
                   </span>
                   <span className="min-w-0 flex-1 text-[12.5px] text-text-muted">
-                    {rows.length} {plural(rows.length, 'question')} · {[...subjects].join(', ')}
+                    {count} {plural(count, 'question')} · {subjects.join(', ')}
                   </span>
                   <span className="u-num rounded-full bg-bg-overlay px-2 py-0.5 text-[11px] text-text">
-                    {rows.length}
+                    {count}
                   </span>
                 </div>
               );

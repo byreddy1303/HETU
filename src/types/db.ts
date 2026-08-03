@@ -170,7 +170,7 @@ export interface InterruptionLogRow {
 
 export type PyqSelectedAnswer = string | string[] | number | null;
 
-/** A submitted bank attempt. Analysis remains a separate, user-authored step. */
+/** A submitted bank attempt. Journal logging is automatic after each commit. */
 export interface PyqAttemptRow {
   id: string;
   user_id: string;

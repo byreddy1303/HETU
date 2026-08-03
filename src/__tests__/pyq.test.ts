@@ -1,7 +1,15 @@
 import { existsSync, readFileSync } from 'node:fs';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { evaluatePyqAnswer, formatPyqAnswer, type PyqManifest, type PyqQuestion } from '@/lib/pyq';
+import {
+  buildPyqJournalAnswerText,
+  evaluatePyqAnswer,
+  formatPyqAnswer,
+  formatPyqSelectedAnswer,
+  inferPyqDirectOutcome,
+  type PyqManifest,
+  type PyqQuestion
+} from '@/lib/pyq';
 
 function question(overrides: Partial<PyqQuestion> = {}): PyqQuestion {
   return {
@@ -56,6 +64,22 @@ describe('PYQ answer evaluation', () => {
     });
     expect(evaluatePyqAnswer(unsupported, 'B', 'MARK')).toBeNull();
     expect(formatPyqAnswer(unsupported)).toContain('no key invented');
+  });
+
+  it('formats learner answers and direct outcomes for journal logging', () => {
+    const mcq = question();
+    expect(formatPyqSelectedAnswer(mcq, 'b')).toBe('B');
+    expect(buildPyqJournalAnswerText(mcq, 'A')).toBe('My answer: A\nB');
+
+    const msq = question({ type: 'MSQ', answer: ['B', 'D'] });
+    expect(formatPyqSelectedAnswer(msq, ['D', 'B'])).toBe('B, D');
+
+    const nat = question({ type: 'NAT', answer: 0.5, tolerance: { abs: 0.01 } });
+    expect(formatPyqSelectedAnswer(nat, 0.509)).toBe('0.509');
+
+    expect(inferPyqDirectOutcome(mcq, 'MARK', 60)).toBe('R');
+    expect(inferPyqDirectOutcome(mcq, 'MARK', 200)).toBe('RBS');
+    expect(inferPyqDirectOutcome(mcq, 'FIFTY_FIFTY', 60)).toBe('RBG');
   });
 });
 

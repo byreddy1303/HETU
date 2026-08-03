@@ -1,4 +1,5 @@
-import type { MarkDecision, PyqSelectedAnswer } from '@/types';
+import type { MarkDecision, Outcome, PyqSelectedAnswer } from '@/types';
+import { DEFAULT_TARGET_TIME_SEC, MARKS_TARGET_SEC } from '@/lib/constants';
 
 export const PYQ_BANK_QUESTION_COUNT = 2388;
 
@@ -152,4 +153,41 @@ export function pyqPlainText(html: string): string {
 export function firstPyqImage(html: string): string | null {
   const document = new DOMParser().parseFromString(html, 'text/html');
   return document.querySelector('img')?.getAttribute('src') ?? null;
+}
+
+/** Human-readable label for the learner's committed answer. */
+export function formatPyqSelectedAnswer(
+  question: PyqQuestion,
+  selected: PyqSelectedAnswer
+): string | null {
+  if (selected == null) return null;
+  if (question.type === 'NAT') {
+    const numeric = typeof selected === 'number' ? selected : Number(selected);
+    return Number.isFinite(numeric) ? String(numeric) : null;
+  }
+  const choices = normalizedChoices(selected);
+  return choices.length ? choices.join(', ') : null;
+}
+
+/** Journal `answer_text`: learner attempt plus official key when available. */
+export function buildPyqJournalAnswerText(
+  question: PyqQuestion,
+  selected: PyqSelectedAnswer
+): string {
+  const mine = formatPyqSelectedAnswer(question, selected);
+  const key = formatPyqAnswer(question);
+  if (mine) return `My answer: ${mine}\n${key}`;
+  return key;
+}
+
+/** Outcome for a graded-correct PYQ when the learner skips full TagFlow analysis. */
+export function inferPyqDirectOutcome(
+  question: PyqQuestion,
+  markDecision: MarkDecision,
+  timeSpentSec: number
+): Outcome {
+  if (markDecision === 'FIFTY_FIFTY') return 'RBG';
+  const target = question.marks ? MARKS_TARGET_SEC[question.marks] : DEFAULT_TARGET_TIME_SEC;
+  if (timeSpentSec > target) return 'RBS';
+  return 'R';
 }

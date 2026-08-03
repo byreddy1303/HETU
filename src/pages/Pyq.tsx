@@ -13,7 +13,7 @@ import {
   Shuffle,
   XCircle
 } from 'lucide-react';
-import type { MarkDecision, PyqAttemptRow, PyqSelectedAnswer, QuestionRow } from '@/types';
+import type { MarkDecision, Outcome, PyqAttemptRow, PyqSelectedAnswer, QuestionRow } from '@/types';
 import type { SourceDraft } from '@/components/tags/sourceDraft';
 import type { TagDraft } from '@/components/tags/TagFlow';
 import PageHeader from '@/components/layout/PageHeader';
@@ -34,6 +34,8 @@ import {
   evaluatePyqAnswer,
   firstPyqImage,
   formatPyqAnswer,
+  buildPyqJournalAnswerText,
+  inferPyqDirectOutcome,
   loadPyqManifest,
   loadPyqQuestions,
   pyqPlainText,
@@ -559,6 +561,10 @@ export default function Pyq() {
     if (journalOpen) window.scrollTo({ top: 0, behavior: 'auto' });
   }, [journalOpen]);
 
+  useEffect(() => {
+    if (submitted?.mark_correct === false) setJournalOpen(true);
+  }, [submitted?.id, submitted?.mark_correct]);
+
   const liveSeconds = useTimer(submitted ? null : startedAt);
   const shownSeconds = submitted?.time_spent_sec ?? liveSeconds;
 
@@ -617,6 +623,46 @@ export default function Pyq() {
     }
   }
 
+  function questionRowFromAttempt(attempt: PyqAttemptRow, draft?: TagDraft): QuestionRow {
+    if (!current) throw new Error('No active question');
+    const outcome = draft?.outcome ?? inferPyqDirectOutcome(current, attempt.mark_decision, attempt.time_spent_sec);
+    return {
+      id: uuid(),
+      user_id: userId!,
+      session_id: null,
+      subject: current.subject,
+      subtopic: current.subtopics[0] ?? null,
+      source_year: current.year,
+      source_ref: pyqSourceRef(current),
+      question_text: pyqPlainText(current.html),
+      answer_text: buildPyqJournalAnswerText(current, attempt.selected_answer),
+      image_url: firstPyqImage(current.html),
+      time_spent_sec: attempt.time_spent_sec,
+      target_time_sec: current.marks ? MARKS_TARGET_SEC[current.marks] : DEFAULT_TARGET_TIME_SEC,
+      outcome,
+      pattern_name: draft?.pattern_name ?? null,
+      trigger_sentence: draft?.trigger_sentence ?? null,
+      root_cause: draft?.root_cause ?? null,
+      mark_decision: attempt.mark_decision,
+      mark_correct: attempt.mark_correct,
+      created_at: attempt.attempted_at
+    };
+  }
+
+  async function persistJournalRow(row: QuestionRow, patternName: string | null, outcome: Outcome) {
+    await writeLocal('questions', row);
+    if (patternName) await reconcileQuestionPattern(userId!, row.subject, patternName);
+    if (needsReattempt(outcome)) await scheduleReattempt(userId!, row.id);
+    setJournalSaved(true);
+    setAnalyzedCount((count) => count + 1);
+  }
+
+  async function autoLogCorrectAttempt(attempt: PyqAttemptRow) {
+    if (!userId || !current) return;
+    const row = questionRowFromAttempt(attempt);
+    await persistJournalRow(row, null, row.outcome);
+  }
+
   function selectedAnswer(question: PyqQuestion): PyqSelectedAnswer {
     if (decision === 'SKIP') return null;
     const inputType = answerInputType(question);
@@ -652,39 +698,15 @@ export default function Pyq() {
     await writeLocal('pyq_attempts', attempt);
     setSubmitted(attempt);
     setCompleted((rows) => [...rows, attempt]);
+    if (attempt.mark_correct === true) await autoLogCorrectAttempt(attempt);
     setSubmitting(false);
   }
 
   async function saveJournalAnalysis(draft: TagDraft) {
     if (!current || !submitted || !userId) return;
-    const row: QuestionRow = {
-      id: uuid(),
-      user_id: userId,
-      session_id: null,
-      subject: current.subject,
-      subtopic: current.subtopics[0] ?? null,
-      source_year: current.year,
-      source_ref: pyqSourceRef(current),
-      question_text: pyqPlainText(current.html),
-      answer_text: answerText(current),
-      image_url: firstPyqImage(current.html),
-      time_spent_sec: submitted.time_spent_sec,
-      target_time_sec: current.marks ? MARKS_TARGET_SEC[current.marks] : DEFAULT_TARGET_TIME_SEC,
-      outcome: draft.outcome,
-      pattern_name: draft.pattern_name,
-      trigger_sentence: draft.trigger_sentence,
-      root_cause: draft.root_cause,
-      mark_decision: submitted.mark_decision,
-      mark_correct: submitted.mark_correct,
-      created_at: submitted.attempted_at
-    };
-    await writeLocal('questions', row);
-    if (draft.pattern_name)
-      await reconcileQuestionPattern(userId, current.subject, draft.pattern_name);
-    if (needsReattempt(draft.outcome)) await scheduleReattempt(userId, row.id);
+    const row = questionRowFromAttempt(submitted, draft);
+    await persistJournalRow(row, draft.pattern_name, draft.outcome);
     setJournalOpen(false);
-    setJournalSaved(true);
-    setAnalyzedCount((count) => count + 1);
   }
 
   function goNext() {
@@ -896,12 +918,14 @@ export default function Pyq() {
                     {index + 1 === questions.length ? 'Finish set' : 'Next question'}
                     <ArrowRight size={15} />
                   </Button>
-                  {!journalSaved ? (
-                    <Button onClick={() => setJournalOpen(true)}>Analyze in Journal</Button>
-                  ) : (
+                  {journalSaved ? (
                     <Badge tone="success" className="self-center">
-                      Saved to analysis
+                      Saved to journal
                     </Badge>
+                  ) : submitted.mark_correct === false ? (
+                    <Button onClick={() => setJournalOpen(true)}>Continue analysis</Button>
+                  ) : (
+                    <Button onClick={() => setJournalOpen(true)}>Analyze in Journal</Button>
                   )}
                 </div>
               </div>

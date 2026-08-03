@@ -1,5 +1,6 @@
 import type { MarkDecision, Outcome, PyqSelectedAnswer } from '@/types';
 import { DEFAULT_TARGET_TIME_SEC, MARKS_TARGET_SEC } from '@/lib/constants';
+import { urlToDataUrl } from '@/lib/image';
 
 export const PYQ_BANK_QUESTION_COUNT = 2388;
 
@@ -155,29 +156,19 @@ export function firstPyqImage(html: string): string | null {
   return document.querySelector('img')?.getAttribute('src') ?? null;
 }
 
-/** Human-readable label for the learner's committed answer. */
-export function formatPyqSelectedAnswer(
-  question: PyqQuestion,
-  selected: PyqSelectedAnswer
-): string | null {
-  if (selected == null) return null;
-  if (question.type === 'NAT') {
-    const numeric = typeof selected === 'number' ? selected : Number(selected);
-    return Number.isFinite(numeric) ? String(numeric) : null;
+/** Embed bundled PYQ figure(s) as a journal-ready data URL before persisting. */
+export async function resolvePyqJournalImageUrl(
+  html: string,
+  hint: string | null = null
+): Promise<string | null> {
+  const candidate = hint?.trim() || firstPyqImage(html);
+  if (!candidate) return null;
+  if (candidate.startsWith('data:')) return candidate;
+  try {
+    return await urlToDataUrl(candidate);
+  } catch {
+    return candidate;
   }
-  const choices = normalizedChoices(selected);
-  return choices.length ? choices.join(', ') : null;
-}
-
-/** Journal `answer_text`: learner attempt plus official key when available. */
-export function buildPyqJournalAnswerText(
-  question: PyqQuestion,
-  selected: PyqSelectedAnswer
-): string {
-  const mine = formatPyqSelectedAnswer(question, selected);
-  const key = formatPyqAnswer(question);
-  if (mine) return `My answer: ${mine}\n${key}`;
-  return key;
 }
 
 /** Outcome for a graded-correct PYQ when the learner skips full TagFlow analysis. */

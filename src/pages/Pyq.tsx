@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import {
   ArrowLeft,
@@ -34,8 +34,8 @@ import {
   evaluatePyqAnswer,
   firstPyqImage,
   formatPyqAnswer,
-  buildPyqJournalAnswerText,
   inferPyqDirectOutcome,
+  resolvePyqJournalImageUrl,
   loadPyqManifest,
   loadPyqQuestions,
   pyqPlainText,
@@ -43,6 +43,7 @@ import {
   type PyqManifest,
   type PyqQuestion
 } from '@/lib/pyq';
+import { captureElementToDataUrl } from '@/lib/image';
 import { cn, nowISO, plural, secondsToClock, uuid } from '@/lib/utils';
 
 type Order = 'unseen' | 'random' | 'newest' | 'oldest';
@@ -70,7 +71,7 @@ function answerText(question: PyqQuestion): string {
   return question.answerStatus === 'available' ? `Answer key: ${formatted}` : formatted;
 }
 
-function sourceDraft(question: PyqQuestion): SourceDraft {
+function sourceDraft(question: PyqQuestion, screenshot: string | null): SourceDraft {
   const format = ['MCQ', 'MSQ', 'NAT'].includes(question.type)
     ? (question.type as 'MCQ' | 'MSQ' | 'NAT')
     : null;
@@ -85,7 +86,7 @@ function sourceDraft(question: PyqQuestion): SourceDraft {
     format,
     questionText: pyqPlainText(question.html),
     answerText: answerText(question),
-    imageDataUrl: firstPyqImage(question.html)
+    imageDataUrl: screenshot ?? firstPyqImage(question.html)
   };
 }
 
@@ -511,6 +512,8 @@ export default function Pyq() {
   const [journalOpen, setJournalOpen] = useState(false);
   const [journalSaved, setJournalSaved] = useState(false);
   const [analyzedCount, setAnalyzedCount] = useState(0);
+  const [questionScreenshot, setQuestionScreenshot] = useState<string | null>(null);
+  const questionCaptureRef = useRef<HTMLDivElement>(null);
 
   const attempts = useLiveQuery(
     async () => (userId ? db.pyq_attempts.where('user_id').equals(userId).toArray() : []),
@@ -555,6 +558,7 @@ export default function Pyq() {
     setSubmitting(false);
     setJournalOpen(false);
     setJournalSaved(false);
+    setQuestionScreenshot(null);
   }, [currentId]);
 
   useEffect(() => {
@@ -623,7 +627,11 @@ export default function Pyq() {
     }
   }
 
-  function questionRowFromAttempt(attempt: PyqAttemptRow, draft?: TagDraft): QuestionRow {
+  function questionRowFromAttempt(
+    attempt: PyqAttemptRow,
+    draft: TagDraft | undefined,
+    imageUrl: string | null
+  ): QuestionRow {
     if (!current) throw new Error('No active question');
     const outcome = draft?.outcome ?? inferPyqDirectOutcome(current, attempt.mark_decision, attempt.time_spent_sec);
     return {
@@ -635,8 +643,8 @@ export default function Pyq() {
       source_year: current.year,
       source_ref: pyqSourceRef(current),
       question_text: pyqPlainText(current.html),
-      answer_text: buildPyqJournalAnswerText(current, attempt.selected_answer),
-      image_url: firstPyqImage(current.html),
+      answer_text: answerText(current),
+      image_url: imageUrl,
       time_spent_sec: attempt.time_spent_sec,
       target_time_sec: current.marks ? MARKS_TARGET_SEC[current.marks] : DEFAULT_TARGET_TIME_SEC,
       outcome,
@@ -657,9 +665,19 @@ export default function Pyq() {
     setAnalyzedCount((count) => count + 1);
   }
 
-  async function autoLogCorrectAttempt(attempt: PyqAttemptRow) {
+  async function journalImageUrl(
+    draft?: TagDraft,
+    screenshot: string | null = questionScreenshot
+  ): Promise<string | null> {
+    if (screenshot) return screenshot;
+    if (!current) return null;
+    return resolvePyqJournalImageUrl(current.html, draft?.source.imageDataUrl ?? null);
+  }
+
+  async function autoLogCorrectAttempt(attempt: PyqAttemptRow, screenshot: string | null) {
     if (!userId || !current) return;
-    const row = questionRowFromAttempt(attempt);
+    const imageUrl = await journalImageUrl(undefined, screenshot);
+    const row = questionRowFromAttempt(attempt, undefined, imageUrl);
     await persistJournalRow(row, null, row.outcome);
   }
 
@@ -682,6 +700,10 @@ export default function Pyq() {
     )
       return;
     setSubmitting(true);
+    const screenshot = questionCaptureRef.current
+      ? await captureElementToDataUrl(questionCaptureRef.current)
+      : null;
+    setQuestionScreenshot(screenshot);
     const attempt: PyqAttemptRow = {
       id: uuid(),
       user_id: userId,
@@ -698,13 +720,14 @@ export default function Pyq() {
     await writeLocal('pyq_attempts', attempt);
     setSubmitted(attempt);
     setCompleted((rows) => [...rows, attempt]);
-    if (attempt.mark_correct === true) await autoLogCorrectAttempt(attempt);
+    if (attempt.mark_correct === true) await autoLogCorrectAttempt(attempt, screenshot);
     setSubmitting(false);
   }
 
   async function saveJournalAnalysis(draft: TagDraft) {
     if (!current || !submitted || !userId) return;
-    const row = questionRowFromAttempt(submitted, draft);
+    const imageUrl = await journalImageUrl(draft);
+    const row = questionRowFromAttempt(submitted, draft, imageUrl);
     await persistJournalRow(row, draft.pattern_name, draft.outcome);
     setJournalOpen(false);
   }
@@ -835,7 +858,7 @@ export default function Pyq() {
               patterns={patterns}
               questionLabel={`${current.paperLabel} · Q ${current.number}`}
               timeSpentSec={submitted.time_spent_sec}
-              initialSource={sourceDraft(current)}
+              initialSource={sourceDraft(current, questionScreenshot)}
               sourceLocked
               onSave={saveJournalAnalysis}
               onCancel={() => setJournalOpen(false)}
@@ -867,27 +890,29 @@ export default function Pyq() {
         </div>
       </div>
 
-      <Card className="overflow-hidden">
-        <CardHeader
-          title={
-            <span className="flex flex-wrap items-center gap-2">
-              <span>{current.paperLabel}</span>
-              <span className="text-border-hover">/</span>
-              <span>Q {current.number}</span>
-            </span>
-          }
-          aside={
-            <div className="flex flex-wrap gap-1.5">
-              <Badge tone="accent">{current.subject}</Badge>
-              <Badge>{current.type}</Badge>
-              {current.marks && <Badge>{current.marks} mark</Badge>}
-            </div>
-          }
-        />
-        <CardBody className="p-5 sm:p-7">
-          <PyqQuestionContent html={current.html} />
-        </CardBody>
-      </Card>
+      <div ref={questionCaptureRef}>
+        <Card className="overflow-hidden">
+          <CardHeader
+            title={
+              <span className="flex flex-wrap items-center gap-2">
+                <span>{current.paperLabel}</span>
+                <span className="text-border-hover">/</span>
+                <span>Q {current.number}</span>
+              </span>
+            }
+            aside={
+              <div className="flex flex-wrap gap-1.5">
+                <Badge tone="accent">{current.subject}</Badge>
+                <Badge>{current.type}</Badge>
+                {current.marks && <Badge>{current.marks} mark</Badge>}
+              </div>
+            }
+          />
+          <CardBody className="p-5 sm:p-7">
+            <PyqQuestionContent html={current.html} />
+          </CardBody>
+        </Card>
+      </div>
 
       <Card>
         <CardBody className="grid gap-5 p-4 sm:p-5 lg:grid-cols-[minmax(0,1fr)_minmax(310px,0.7fr)]">

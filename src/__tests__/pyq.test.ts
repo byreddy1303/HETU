@@ -1,12 +1,11 @@
 import { existsSync, readFileSync } from 'node:fs';
 import path from 'node:path';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import {
-  buildPyqJournalAnswerText,
   evaluatePyqAnswer,
   formatPyqAnswer,
-  formatPyqSelectedAnswer,
   inferPyqDirectOutcome,
+  resolvePyqJournalImageUrl,
   type PyqManifest,
   type PyqQuestion
 } from '@/lib/pyq';
@@ -66,17 +65,23 @@ describe('PYQ answer evaluation', () => {
     expect(formatPyqAnswer(unsupported)).toContain('no key invented');
   });
 
-  it('formats learner answers and direct outcomes for journal logging', () => {
+  it('embeds bundled PYQ figures as data URLs for journal storage', async () => {
+    const png = Buffer.from(
+      'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==',
+      'base64'
+    );
+    const blob = new Blob([png], { type: 'image/png' });
+    const fetchSpy = vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+      new Response(blob, { status: 200, headers: { 'Content-Type': 'image/png' } })
+    );
+    const html = '<p>See figure</p><img src="/pyq/images/test.png" alt="fig" />';
+    const dataUrl = await resolvePyqJournalImageUrl(html);
+    expect(dataUrl).toMatch(/^data:image\/png;base64,/);
+    fetchSpy.mockRestore();
+  });
+
+  it('infers direct journal outcomes for graded-correct PYQs', () => {
     const mcq = question();
-    expect(formatPyqSelectedAnswer(mcq, 'b')).toBe('B');
-    expect(buildPyqJournalAnswerText(mcq, 'A')).toBe('My answer: A\nB');
-
-    const msq = question({ type: 'MSQ', answer: ['B', 'D'] });
-    expect(formatPyqSelectedAnswer(msq, ['D', 'B'])).toBe('B, D');
-
-    const nat = question({ type: 'NAT', answer: 0.5, tolerance: { abs: 0.01 } });
-    expect(formatPyqSelectedAnswer(nat, 0.509)).toBe('0.509');
-
     expect(inferPyqDirectOutcome(mcq, 'MARK', 60)).toBe('R');
     expect(inferPyqDirectOutcome(mcq, 'MARK', 200)).toBe('RBS');
     expect(inferPyqDirectOutcome(mcq, 'FIFTY_FIFTY', 60)).toBe('RBG');

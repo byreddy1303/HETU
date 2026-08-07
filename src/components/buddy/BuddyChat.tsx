@@ -627,7 +627,7 @@ function QuestionCard({ ref_, isMe }: { ref_: SharedQuestionRef; isMe: boolean }
     <div
       className={cn(
         'w-full overflow-hidden rounded-2xl border shadow-sm',
-        isMe ? 'bg-white/95 border-white/50 rounded-br-md' : 'bg-bg-raised border-border rounded-bl-md'
+        isMe ? 'bg-accent/15 border-accent/40 rounded-br-md' : 'bg-bg-raised border-border rounded-bl-md'
       )}
     >
       <div className="flex items-center justify-between border-b border-border/60 px-3 py-2">

@@ -17,8 +17,6 @@ import TriggerStep from '@/components/tags/TriggerStep';
 import RootCauseStep from '@/components/tags/RootCauseStep';
 import { haptic, isNativeApp } from '@/lib/native';
 import { Button } from '@/components/ui/Button';
-import MissingTagsConfirm from '@/components/shared/MissingTagsConfirm';
-import { needsMissingTagsConfirmation } from '@/lib/questionTags';
 
 export interface TagDraft {
   source: SourceDraft;
@@ -82,7 +80,6 @@ export default function TagFlow({
   const [trigger, setTrigger] = useState<string | null>(null);
   const [cause, setCause] = useState<RootCause>();
   const [saving, setSaving] = useState(false);
-  const [pendingUntagged, setPendingUntagged] = useState<Omit<TagDraft, 'source'> | null>(null);
   const advanceTimer = useRef<ReturnType<typeof setTimeout>>();
   const dir = useRef(1);
 
@@ -106,10 +103,6 @@ export default function TagFlow({
   }
 
   function finalize(draft: Omit<TagDraft, 'source'>) {
-    if (needsMissingTagsConfirmation(draft.pattern_name, draft.trigger_sentence)) {
-      setPendingUntagged(draft);
-      return;
-    }
     void persist(draft);
   }
 
@@ -160,10 +153,6 @@ export default function TagFlow({
   const previousStep = activeIdx > 0 ? steps[activeIdx - 1] : null;
 
   function goBack() {
-    if (pendingUntagged) {
-      setPendingUntagged(null);
-      return;
-    }
     if (previousStep) {
       haptic('selection');
       go(previousStep.id, -1);
@@ -320,7 +309,7 @@ export default function TagFlow({
                 selected={cause}
                 onSelect={pickCause}
                 onBack={() => go('trigger', -1)}
-                enabled={!pendingUntagged}
+                enabled
               />
             )}
           </motion.div>
@@ -335,20 +324,6 @@ export default function TagFlow({
             : 'esc goes back · this should take under 30 seconds'}
       </p>
 
-      <MissingTagsConfirm
-        open={!!pendingUntagged}
-        saving={saving}
-        onGoBack={() => {
-          setPendingUntagged(null);
-          go('pattern', -1);
-        }}
-        onConfirm={() => {
-          const draft = pendingUntagged;
-          if (!draft) return;
-          setPendingUntagged(null);
-          void persist(draft);
-        }}
-      />
     </div>
   );
 }

@@ -70,6 +70,22 @@ export function advance(
   };
 }
 
+export function createReattemptRow(
+  userId: string,
+  questionId: string,
+  today: string = todayISO()
+): ReattemptRow {
+  return {
+    id: uuid(),
+    user_id: userId,
+    question_id: questionId,
+    scheduled_date: addDaysISO(today, REATTEMPT_FIRST_DELAY_DAYS),
+    stage: 'D3',
+    history: [],
+    created_at: nowISO()
+  };
+}
+
 /**
  * Create the first re-attempt (due today + 3) for a mistagged question.
  * Idempotent per question: an existing open ladder is left untouched.
@@ -81,15 +97,7 @@ export async function scheduleReattempt(
 ): Promise<ReattemptRow | null> {
   const existing = await db.reattempts.where('question_id').equals(questionId).first();
   if (existing && existing.stage !== 'MASTERED') return null;
-  const row: ReattemptRow = {
-    id: uuid(),
-    user_id: userId,
-    question_id: questionId,
-    scheduled_date: addDaysISO(today, REATTEMPT_FIRST_DELAY_DAYS),
-    stage: 'D3',
-    history: [],
-    created_at: nowISO()
-  };
+  const row = createReattemptRow(userId, questionId, today);
   await writeLocal('reattempts', row);
   return row;
 }

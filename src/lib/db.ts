@@ -12,6 +12,7 @@ import type {
   TriggerPhraseRow,
   WeeklyReviewRow,
   InterruptionLogRow,
+  PyqSessionRow,
   PyqAttemptRow
 } from '@/types';
 
@@ -23,6 +24,7 @@ export type LocalFormula = Local<FormulaRow>;
 export type LocalTriggerPhrase = Local<TriggerPhraseRow>;
 export type LocalWeeklyReview = Local<WeeklyReviewRow>;
 export type LocalInterruptionLog = Local<InterruptionLogRow>;
+export type LocalPyqSession = Local<PyqSessionRow>;
 export type LocalPyqAttempt = Local<PyqAttemptRow>;
 
 interface MetaRow {
@@ -39,6 +41,7 @@ class AirDB extends Dexie {
   trigger_phrases!: Table<LocalTriggerPhrase, string>;
   weekly_reviews!: Table<LocalWeeklyReview, string>;
   interruption_logs!: Table<LocalInterruptionLog, string>;
+  pyq_sessions!: Table<LocalPyqSession, string>;
   pyq_attempts!: Table<LocalPyqAttempt, string>;
   meta!: Table<MetaRow, string>;
 
@@ -94,6 +97,26 @@ class AirDB extends Dexie {
       triangulate_logs: 'id, user_id, created_at, sync_status',
       meta: 'key'
     });
+    this.version(4).stores({
+      sessions: 'id, user_id, date, created_at, sync_status, [user_id+date], [user_id+created_at]',
+      questions:
+        'id, user_id, session_id, subject, outcome, pattern_name, created_at, sync_status, [user_id+created_at], [user_id+pattern_name]',
+      patterns: 'id, user_id, name, subject, count, sync_status, [user_id+name]',
+      reattempts:
+        'id, user_id, question_id, scheduled_date, stage, sync_status, [user_id+scheduled_date]',
+      formulas: 'id, user_id, next_review, sync_status, [user_id+next_review]',
+      trigger_phrases: 'id, user_id, sync_status',
+      weekly_reviews: 'id, user_id, week_start, sync_status, [user_id+week_start]',
+      interruption_logs: 'id, user_id, session_id, sync_status',
+      pyq_sessions:
+        'id, user_id, status, updated_at, sync_status, [user_id+status], [user_id+updated_at]',
+      pyq_attempts:
+        'id, user_id, pyq_session_id, question_uid, subject, year, attempted_at, sync_status, [user_id+question_uid], [user_id+subject], [user_id+attempted_at], [pyq_session_id+question_uid]',
+      doubt_sessions: 'id, user_id, created_at, sync_status',
+      variations: 'id, user_id, parent_question_id, sync_status',
+      triangulate_logs: 'id, user_id, created_at, sync_status',
+      meta: 'key'
+    });
   }
 }
 
@@ -109,6 +132,7 @@ export const SYNCED_TABLES = [
   'trigger_phrases',
   'weekly_reviews',
   'interruption_logs',
+  'pyq_sessions',
   'pyq_attempts'
 ] as const;
 

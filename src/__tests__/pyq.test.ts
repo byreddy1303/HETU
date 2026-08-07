@@ -5,6 +5,7 @@ import {
   evaluatePyqAnswer,
   formatPyqAnswer,
   inferPyqDirectOutcome,
+  pyqAnswerValueForLog,
   resolvePyqJournalImageUrl,
   type PyqManifest,
   type PyqQuestion
@@ -63,6 +64,20 @@ describe('PYQ answer evaluation', () => {
     });
     expect(evaluatePyqAnswer(unsupported, 'B', 'MARK')).toBeNull();
     expect(formatPyqAnswer(unsupported)).toContain('no key invented');
+  });
+
+  it('returns the official answer value for PYQ attempt logs', () => {
+    expect(pyqAnswerValueForLog(question({ answer: 'b' }))).toBe('b');
+    expect(pyqAnswerValueForLog(question({ type: 'MSQ', answer: ['D', 'B'] }))).toEqual([
+      'B',
+      'D'
+    ]);
+    expect(pyqAnswerValueForLog(question({ type: 'NAT', answer: 0.5 }))).toBe(0.5);
+    expect(
+      pyqAnswerValueForLog(
+        question({ type: 'AMBIGUOUS', answer: null, answerStatus: 'ambiguous' })
+      )
+    ).toBeNull();
   });
 
   it('embeds bundled PYQ figures as data URLs for journal storage', async () => {

@@ -10,6 +10,28 @@ export function uuid(): string {
   return crypto.randomUUID();
 }
 
+export function uuidFromString(seed: string): string {
+  const bytes = new Uint8Array(16);
+  let first = 0x811c9dc5;
+  let second = 0x01000193;
+  for (let index = 0; index < seed.length; index += 1) {
+    first ^= seed.charCodeAt(index);
+    first = Math.imul(first, 0x01000193);
+    second ^= seed.charCodeAt(seed.length - index - 1);
+    second = Math.imul(second, 0x85ebca6b);
+  }
+  for (let index = 0; index < 16; index += 1) {
+    const source = index < 8 ? first : second;
+    bytes[index] = (source >>> ((index % 4) * 8)) & 0xff;
+    first = Math.imul(first ^ (first >>> 13), 0xc2b2ae35);
+    second = Math.imul(second ^ (second >>> 16), 0x27d4eb2f);
+  }
+  bytes[6] = (bytes[6] & 0x0f) | 0x40;
+  bytes[8] = (bytes[8] & 0x3f) | 0x80;
+  const hex = [...bytes].map((byte) => byte.toString(16).padStart(2, '0')).join('');
+  return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
+}
+
 /** Local calendar date as YYYY-MM-DD. */
 export function todayISO(): string {
   return format(new Date(), 'yyyy-MM-dd');

@@ -31,8 +31,6 @@ import { cn, formatDate, nowISO, plural, secondsToClock, todayISO, uuid } from '
 import { subjectInk } from '@/lib/subjectInk';
 import QuestionEditor, { DeleteBar } from '@/components/shared/QuestionEditor';
 import AnswerReveal from '@/components/shared/AnswerReveal';
-import MissingTagsConfirm from '@/components/shared/MissingTagsConfirm';
-import { needsMissingTagsConfirmation } from '@/lib/questionTags';
 import {
   applyDraftToRow,
   draftFromRow,
@@ -99,7 +97,6 @@ export default function Log() {
 
   const [saving, setSaving] = useState(false);
   const [flash, setFlash] = useState<string | null>(null);
-  const [confirmMissingTags, setConfirmMissingTags] = useState(false);
 
   // Edit dialog for the "just logged" table.
   const [editRow, setEditRow] = useState<QuestionRow | null>(null);
@@ -158,15 +155,8 @@ export default function Log() {
     setLocalDraft(emptyDraft(row.subject, today));
   }
 
-  async function save(skipMissingTagsGuard = false) {
+  async function save() {
     if (!userId || !canSave || saving) return;
-    if (
-      !skipMissingTagsGuard &&
-      needsMissingTagsConfirmation(draft.patternName, draft.triggerSentence)
-    ) {
-      setConfirmMissingTags(true);
-      return;
-    }
     setSaving(true);
     try {
       const skeleton: QuestionRow = {
@@ -558,15 +548,6 @@ export default function Log() {
         )}
       </Dialog>
 
-      <MissingTagsConfirm
-        open={confirmMissingTags}
-        saving={saving}
-        onGoBack={() => setConfirmMissingTags(false)}
-        onConfirm={() => {
-          setConfirmMissingTags(false);
-          void save(true);
-        }}
-      />
     </div>
   );
 }

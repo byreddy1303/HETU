@@ -137,6 +137,63 @@ export function formatPyqAnswer(question: PyqQuestion): string {
   return String(question.answer ?? 'Key unavailable');
 }
 
+export function pyqAnswerValueForLog(question: PyqQuestion): PyqSelectedAnswer {
+  if (question.answerStatus !== 'available') return null;
+  if (Array.isArray(question.answer)) return question.answer.map(String).sort();
+  if (typeof question.answer === 'number') return question.answer;
+  return question.answer == null ? null : String(question.answer);
+}
+
+function escapeSvgText(value: string): string {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+function wrapSnapshotText(value: string, maxChars: number): string[] {
+  const words = value.replace(/\s+/g, ' ').trim().slice(0, maxChars).split(' ');
+  const lines: string[] = [];
+  let line = '';
+  for (const word of words) {
+    const next = line ? `${line} ${word}` : word;
+    if (next.length > 84 && line) {
+      lines.push(line);
+      line = word;
+    } else {
+      line = next;
+    }
+    if (lines.length >= 14) break;
+  }
+  if (line && lines.length < 14) lines.push(line);
+  return lines;
+}
+
+export function pyqQuestionSnapshotDataUrl(question: PyqQuestion): string {
+  const heading = pyqSourceRef(question);
+  const body = wrapSnapshotText(pyqPlainText(question.html), 1200);
+  const lines = [
+    `<text x="40" y="56" class="heading">${escapeSvgText(heading)}</text>`,
+    `<text x="40" y="92" class="meta">${escapeSvgText(`${question.subject} · ${question.type}${question.marks ? ` · ${question.marks} mark` : ''}`)}</text>`,
+    ...body.map(
+      (line, index) =>
+        `<text x="40" y="${138 + index * 28}" class="body">${escapeSvgText(line)}</text>`
+    )
+  ];
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="720" viewBox="0 0 1200 720">
+  <rect width="1200" height="720" fill="#fffaf2"/>
+  <rect x="22" y="22" width="1156" height="676" rx="18" fill="#ffffff" stroke="#d8cfc2"/>
+  <style>
+    .heading{font:700 30px system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;fill:#2b2118}
+    .meta{font:600 20px system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;fill:#8a5a31}
+    .body{font:500 22px system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;fill:#3c342c}
+  </style>
+  ${lines.join('\n  ')}
+</svg>`;
+  return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+}
+
 export function pyqSourceRef(question: PyqQuestion): string {
   return [
     'GATE PYQ',

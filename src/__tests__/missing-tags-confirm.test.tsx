@@ -8,9 +8,9 @@ import { applyDraftToRow, emptyDraft } from '@/components/shared/questionDraft';
 import type { QuestionRow } from '@/types';
 
 describe('missing question-tag confirmation', () => {
-  it('warns only when both pattern and trigger are blank', () => {
-    expect(needsMissingTagsConfirmation(null, null)).toBe(true);
-    expect(needsMissingTagsConfirmation('   ', '')).toBe(true);
+  it('allows empty pattern and trigger tags without requiring confirmation', () => {
+    expect(needsMissingTagsConfirmation(null, null)).toBe(false);
+    expect(needsMissingTagsConfirmation('   ', '')).toBe(false);
     expect(needsMissingTagsConfirmation('pigeonhole on remainders', null)).toBe(false);
     expect(needsMissingTagsConfirmation(null, 'at least two share')).toBe(false);
   });
@@ -65,7 +65,7 @@ describe('missing question-tag confirmation', () => {
     expect(onConfirm).not.toHaveBeenCalled();
   });
 
-  it('requires an explicit override before an untagged Session question is saved', async () => {
+  it('saves an untagged Session question directly without confirmation popup', async () => {
     const onSave = vi.fn();
     render(
       <TagFlow
@@ -85,12 +85,6 @@ describe('missing question-tag confirmation', () => {
     const triggerInput = await screen.findByLabelText('Trigger sentence');
     fireEvent.keyDown(triggerInput, { key: 'Enter' });
 
-    expect(onSave).not.toHaveBeenCalled();
-    await waitFor(() =>
-      expect(screen.getByRole('dialog', { name: 'Save without pattern or trigger?' })).toBeVisible()
-    );
-
-    fireEvent.click(screen.getByRole('button', { name: 'Save without tags' }));
     await waitFor(() => expect(onSave).toHaveBeenCalledOnce());
     expect(onSave.mock.calls[0]?.[0]).toMatchObject({
       pattern_name: null,

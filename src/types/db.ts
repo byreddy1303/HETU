@@ -10,6 +10,8 @@ export type BuddyStatus = 'pending' | 'active' | 'paused';
 export type ShareStatus = 'sent' | 'solved' | 'discussed';
 export type InterruptionKind = 'tab_switch' | 'idle' | 'exit';
 export type SyncStatus = 'synced' | 'pending' | 'error';
+export type PyqSessionStatus = 'active' | 'completed' | 'abandoned';
+export type PyqAttemptAnswerStatus = 'available' | 'ambiguous' | 'marks-to-all' | 'unsupported';
 
 export interface UserRow {
   id: string;
@@ -170,14 +172,45 @@ export interface InterruptionLogRow {
 
 export type PyqSelectedAnswer = string | string[] | number | null;
 
-/** A submitted bank attempt. Journal logging is automatic after each commit. */
+export interface PyqSessionConfig {
+  subjectSlug: string;
+  fromYear: number;
+  toYear: number;
+  type: 'all' | 'MCQ' | 'MSQ' | 'NAT';
+  order: 'unseen' | 'random' | 'newest' | 'oldest';
+  count: '5' | '10' | '25' | '50' | 'all';
+}
+
+/** A durable PYQ practice set. `current_index` points at the next unsolved row. */
+export interface PyqSessionRow {
+  id: string;
+  user_id: string;
+  bank_version: string;
+  config: PyqSessionConfig;
+  question_uids: string[];
+  completed_question_uids: string[];
+  current_index: number;
+  completed_count: number;
+  elapsed_sec: number;
+  status: PyqSessionStatus;
+  started_at: string;
+  updated_at: string;
+  completed_at: string | null;
+}
+
+/** A submitted bank attempt. The official answer is stored, not the learner response. */
 export interface PyqAttemptRow {
   id: string;
   user_id: string;
+  pyq_session_id: string | null;
   question_uid: string;
   subject: string;
   year: number;
+  attempt_number: number;
   selected_answer: PyqSelectedAnswer;
+  correct_answer: PyqSelectedAnswer;
+  answer_status: PyqAttemptAnswerStatus;
+  screenshot_url: string | null;
   mark_decision: MarkDecision;
   mark_correct: boolean | null;
   time_spent_sec: number;

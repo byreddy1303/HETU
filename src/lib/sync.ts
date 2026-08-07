@@ -36,6 +36,19 @@ export async function writeLocal<T extends { id: string }>(
   if (syncEnabled) schedulePush(0);
 }
 
+export async function writeLocalBatch(
+  rows: { name: SyncedTableName; row: { id: string } }[]
+): Promise<void> {
+  if (rows.length === 0) return;
+  const targets = [...new Set(rows.map(({ name }) => name))].map((name) => table(name));
+  await db.transaction('rw', targets, async () => {
+    for (const { name, row } of rows) {
+      await table(name).put({ ...row, sync_status: syncEnabled ? 'pending' : 'synced' });
+    }
+  });
+  if (syncEnabled) schedulePush(0);
+}
+
 /** Delete locally now; queue the remote delete if we cannot reach the server. */
 export async function deleteLocal(name: SyncedTableName, id: string): Promise<void> {
   await table(name).delete(id);

@@ -13,7 +13,15 @@ import {
   Shuffle,
   XCircle
 } from 'lucide-react';
-import type { MarkDecision, Outcome, PyqAttemptRow, PyqSelectedAnswer, QuestionRow } from '@/types';
+import type {
+  MarkDecision,
+  Outcome,
+  PyqAttemptRow,
+  PyqSelectedAnswer,
+  PyqSessionConfig,
+  PyqSessionRow,
+  QuestionRow
+} from '@/types';
 import type { SourceDraft } from '@/components/tags/sourceDraft';
 import type { TagDraft } from '@/components/tags/TagFlow';
 import PageHeader from '@/components/layout/PageHeader';
@@ -26,8 +34,8 @@ import { Select } from '@/components/ui/Select';
 import { db } from '@/lib/db';
 import { useAuth } from '@/hooks/useAuth';
 import { useTimer } from '@/hooks/useTimer';
-import { writeLocal } from '@/lib/sync';
-import { needsReattempt, scheduleReattempt } from '@/lib/reattempt';
+import { writeLocal, writeLocalBatch } from '@/lib/sync';
+import { createReattemptRow, needsReattempt } from '@/lib/reattempt';
 import { reconcileQuestionPattern } from '@/lib/patterns';
 import { DEFAULT_TARGET_TIME_SEC, MARKS_TARGET_SEC } from '@/lib/constants';
 import {
@@ -35,6 +43,8 @@ import {
   firstPyqImage,
   formatPyqAnswer,
   inferPyqDirectOutcome,
+  pyqAnswerValueForLog,
+  pyqQuestionSnapshotDataUrl,
   resolvePyqJournalImageUrl,
   loadPyqManifest,
   loadPyqQuestions,
@@ -43,21 +53,21 @@ import {
   type PyqManifest,
   type PyqQuestion
 } from '@/lib/pyq';
+import {
+  abandonPyqSession,
+  advancePyqSessionProgress,
+  completePyqSession,
+  createPyqSessionRow,
+  pyqAttemptId,
+  pyqJournalQuestionId
+} from '@/lib/pyq-session';
 import { captureElementToDataUrl } from '@/lib/image';
 import { cn, nowISO, plural, secondsToClock, uuid } from '@/lib/utils';
 
 type Order = 'unseen' | 'random' | 'newest' | 'oldest';
 type CountChoice = '5' | '10' | '25' | '50' | 'all';
-type TypeFilter = 'all' | 'MCQ' | 'MSQ' | 'NAT';
-
-interface AttemptConfig {
-  subjectSlug: string;
-  fromYear: number;
-  toYear: number;
-  type: TypeFilter;
-  order: Order;
-  count: CountChoice;
-}
+type TypeFilter = PyqSessionConfig['type'];
+type AttemptConfig = PyqSessionConfig;
 
 const CHOICES = ['A', 'B', 'C', 'D'];
 
@@ -93,18 +103,24 @@ function sourceDraft(question: PyqQuestion, screenshot: string | null): SourceDr
 function PracticeSetup({
   manifest,
   attempts,
+  activeSession,
   config,
   setConfig,
   loading,
   error,
+  onResume,
+  onDiscard,
   onStart
 }: {
   manifest: PyqManifest;
   attempts: PyqAttemptRow[];
+  activeSession: PyqSessionRow | null;
   config: AttemptConfig;
   setConfig: (next: AttemptConfig) => void;
   loading: boolean;
   error: string | null;
+  onResume: (session: PyqSessionRow) => void;
+  onDiscard: (session: PyqSessionRow) => void;
   onStart: () => void;
 }) {
   const attemptedIds = useMemo(
@@ -127,6 +143,30 @@ function PracticeSetup({
         description="Every question from 2002–2026, separated by subject and ready to solve here."
         showMobileMark={false}
       />
+
+      {activeSession && (
+        <Card>
+          <CardBody className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="font-display text-[16px] font-semibold text-text">
+                Resume unfinished PYQ set
+              </p>
+              <p className="mt-1 text-[12px] text-text-muted">
+                {activeSession.completed_count} of {activeSession.question_uids.length} submitted ·{' '}
+                {secondsToClock(activeSession.elapsed_sec)} logged
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <Button variant="primary" onClick={() => onResume(activeSession)} disabled={loading}>
+                Resume set
+              </Button>
+              <Button onClick={() => onDiscard(activeSession)} disabled={loading}>
+                Discard
+              </Button>
+            </div>
+          </CardBody>
+        </Card>
+      )}
 
       <Card className="overflow-hidden">
         <div className="grid lg:grid-cols-[minmax(0,1.45fr)_minmax(300px,0.75fr)]">
@@ -513,12 +553,32 @@ export default function Pyq() {
   const [journalSaved, setJournalSaved] = useState(false);
   const [analyzedCount, setAnalyzedCount] = useState(0);
   const [questionScreenshot, setQuestionScreenshot] = useState<string | null>(null);
+  const [pyqSessionId, setPyqSessionId] = useState<string | null>(null);
   const questionCaptureRef = useRef<HTMLDivElement>(null);
+  const submittingRef = useRef(false);
 
   const attempts = useLiveQuery(
     async () => (userId ? db.pyq_attempts.where('user_id').equals(userId).toArray() : []),
     [userId],
     []
+  );
+  const pyqSession = useLiveQuery(
+    async () => (pyqSessionId ? ((await db.pyq_sessions.get(pyqSessionId)) ?? null) : null),
+    [pyqSessionId],
+    null
+  );
+  const activePyqSession = useLiveQuery(
+    async () => {
+      if (!userId) return null;
+      const rows = await db.pyq_sessions.where('[user_id+status]').equals([userId, 'active']).toArray();
+      return (
+        rows
+          .filter((row) => row.question_uids.length > row.current_index)
+          .sort((a, b) => b.updated_at.localeCompare(a.updated_at))[0] ?? null
+      );
+    },
+    [userId],
+    null
   );
   const patterns = useLiveQuery(
     async () => (userId ? db.patterns.where('user_id').equals(userId).toArray() : []),
@@ -572,8 +632,54 @@ export default function Pyq() {
   const liveSeconds = useTimer(submitted ? null : startedAt);
   const shownSeconds = submitted?.time_spent_sec ?? liveSeconds;
 
-  async function startPractice() {
+  async function questionsForSession(session: PyqSessionRow): Promise<PyqQuestion[]> {
+    if (!manifest) return [];
+    const rows = await loadPyqQuestions(manifest.subjects);
+    const byId = new Map(rows.map((question) => [question.id, question]));
+    return session.question_uids.flatMap((id) => {
+      const question = byId.get(id);
+      return question ? [question] : [];
+    });
+  }
+
+  async function resumeSession(session: PyqSessionRow) {
     if (!manifest || loading) return;
+    setLoading(true);
+    setStartError(null);
+    try {
+      const rows = await questionsForSession(session);
+      if (rows.length === 0)
+        throw new Error('This saved set no longer matches the local question bank.');
+      setConfig(session.config);
+      setQuestions(rows);
+      setIndex(Math.min(session.current_index, Math.max(0, rows.length - 1)));
+      setCompleted(
+        attempts
+          .filter((attempt) => attempt.pyq_session_id === session.id)
+          .sort((a, b) => a.attempted_at.localeCompare(b.attempted_at))
+      );
+      setFinished(session.current_index >= rows.length);
+      setAnalyzedCount(0);
+      setPyqSessionId(session.id);
+    } catch (error) {
+      setStartError(error instanceof Error ? error.message : 'Could not resume that PYQ set.');
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function discardSession(session: PyqSessionRow) {
+    await writeLocal('pyq_sessions', abandonPyqSession(session));
+    if (pyqSessionId === session.id) {
+      setQuestions([]);
+      setFinished(false);
+      setIndex(0);
+      setPyqSessionId(null);
+    }
+  }
+
+  async function startPractice() {
+    if (!manifest || loading || !userId) return;
     setLoading(true);
     setStartError(null);
     try {
@@ -615,6 +721,9 @@ export default function Pyq() {
       if (config.count !== 'all') rows = rows.slice(0, Number(config.count));
       if (rows.length === 0)
         throw new Error('No questions match those filters. Widen the year or type filter.');
+      const session = createPyqSessionRow(userId!, manifest.bankVersion, config, rows);
+      await writeLocal('pyq_sessions', session);
+      setPyqSessionId(session.id);
       setQuestions(rows);
       setIndex(0);
       setCompleted([]);
@@ -658,11 +767,31 @@ export default function Pyq() {
   }
 
   async function persistJournalRow(row: QuestionRow, patternName: string | null, outcome: Outcome) {
-    await writeLocal('questions', row);
+    const writes: Parameters<typeof writeLocalBatch>[0] = [{ name: 'questions', row }];
+    if (needsReattempt(outcome)) {
+      const existing = await db.reattempts.where('question_id').equals(row.id).first();
+      if (!existing || existing.stage === 'MASTERED') {
+        writes.push({ name: 'reattempts', row: createReattemptRow(userId!, row.id) });
+      }
+    }
+    await writeLocalBatch(writes);
     if (patternName) await reconcileQuestionPattern(userId!, row.subject, patternName);
-    if (needsReattempt(outcome)) await scheduleReattempt(userId!, row.id);
     setJournalSaved(true);
     setAnalyzedCount((count) => count + 1);
+  }
+
+  async function captureQuestionSnapshot(): Promise<string | null> {
+    if (!current) return null;
+    try {
+      const captured = questionCaptureRef.current
+        ? await captureElementToDataUrl(questionCaptureRef.current)
+        : null;
+      if (captured) return captured;
+    } catch {
+      // A rasterization failure must not block the attempt log.
+    }
+    const embedded = await resolvePyqJournalImageUrl(current.html).catch(() => null);
+    return embedded ?? pyqQuestionSnapshotDataUrl(current);
   }
 
   async function journalImageUrl(
@@ -671,14 +800,11 @@ export default function Pyq() {
   ): Promise<string | null> {
     if (screenshot) return screenshot;
     if (!current) return null;
-    return resolvePyqJournalImageUrl(current.html, draft?.source.imageDataUrl ?? null);
-  }
-
-  async function autoLogCorrectAttempt(attempt: PyqAttemptRow, screenshot: string | null) {
-    if (!userId || !current) return;
-    const imageUrl = await journalImageUrl(undefined, screenshot);
-    const row = questionRowFromAttempt(attempt, undefined, imageUrl);
-    await persistJournalRow(row, null, row.outcome);
+    const embedded = await resolvePyqJournalImageUrl(
+      current.html,
+      draft?.source.imageDataUrl ?? null
+    ).catch(() => null);
+    return embedded ?? pyqQuestionSnapshotDataUrl(current);
   }
 
   function selectedAnswer(question: PyqQuestion): PyqSelectedAnswer {
@@ -690,7 +816,21 @@ export default function Pyq() {
   }
 
   async function submitAnswer() {
-    if (!current || !userId || !manifest || !decision || submitted || submitting) return;
+    if (
+      !current ||
+      !userId ||
+      !manifest ||
+      !decision ||
+      submitted ||
+      submitting ||
+      submittingRef.current
+    )
+      return;
+    const session = pyqSessionId ? await db.pyq_sessions.get(pyqSessionId) : null;
+    if (!session) {
+      setStartError('Could not find the active PYQ set. Start or resume the set again.');
+      return;
+    }
     const selected = selectedAnswer(current);
     if (
       decision !== 'SKIP' &&
@@ -699,46 +839,102 @@ export default function Pyq() {
         (typeof selected === 'number' && !Number.isFinite(selected)))
     )
       return;
+    submittingRef.current = true;
     setSubmitting(true);
-    const screenshot = questionCaptureRef.current
-      ? await captureElementToDataUrl(questionCaptureRef.current)
-      : null;
-    setQuestionScreenshot(screenshot);
-    const attempt: PyqAttemptRow = {
-      id: uuid(),
-      user_id: userId,
-      question_uid: current.id,
-      subject: current.subject,
-      year: current.year,
-      selected_answer: selected,
-      mark_decision: decision,
-      mark_correct: evaluatePyqAnswer(current, selected, decision),
-      time_spent_sec: Math.max(1, liveSeconds),
-      bank_version: manifest.bankVersion,
-      attempted_at: nowISO()
-    };
-    await writeLocal('pyq_attempts', attempt);
-    setSubmitted(attempt);
-    setCompleted((rows) => [...rows, attempt]);
-    if (attempt.mark_correct === true) await autoLogCorrectAttempt(attempt, screenshot);
-    setSubmitting(false);
+    try {
+      const attemptNumber = 1;
+      const id = pyqAttemptId(session.id, current.id, attemptNumber);
+      const existing = await db.pyq_attempts.get(id);
+      if (existing) {
+        setQuestionScreenshot(existing.screenshot_url);
+        setSubmitted(existing);
+        setCompleted((rows) =>
+          rows.some((row) => row.id === existing.id) ? rows : [...rows, existing]
+        );
+        return;
+      }
+      const screenshot = await captureQuestionSnapshot();
+      setQuestionScreenshot(screenshot);
+      const correctAnswer = pyqAnswerValueForLog(current);
+      const attemptedAt = nowISO();
+      const attempt: PyqAttemptRow = {
+        id,
+        user_id: userId,
+        pyq_session_id: session.id,
+        question_uid: current.id,
+        subject: current.subject,
+        year: current.year,
+        attempt_number: attemptNumber,
+        selected_answer: correctAnswer,
+        correct_answer: correctAnswer,
+        answer_status: current.answerStatus,
+        screenshot_url: screenshot,
+        mark_decision: decision,
+        mark_correct: evaluatePyqAnswer(current, selected, decision),
+        time_spent_sec: Math.max(1, liveSeconds),
+        bank_version: manifest.bankVersion,
+        attempted_at: attemptedAt
+      };
+      const nextSession = advancePyqSessionProgress(session, current.id, index + 1, attemptedAt);
+      const writes: Parameters<typeof writeLocalBatch>[0] = [
+        { name: 'pyq_attempts', row: attempt },
+        { name: 'pyq_sessions', row: nextSession }
+      ];
+      let autoJournalSaved = false;
+      if (attempt.mark_correct === true) {
+        const row = {
+          ...questionRowFromAttempt(attempt, undefined, screenshot),
+          id: pyqJournalQuestionId(attempt.id)
+        };
+        writes.push({ name: 'questions', row });
+        if (needsReattempt(row.outcome)) {
+          const existingReattempt = await db.reattempts.where('question_id').equals(row.id).first();
+          if (!existingReattempt || existingReattempt.stage === 'MASTERED') {
+            writes.push({ name: 'reattempts', row: createReattemptRow(userId, row.id) });
+          }
+        }
+        autoJournalSaved = true;
+      }
+      await writeLocalBatch(writes);
+      setSubmitted(attempt);
+      setCompleted((rows) => [...rows, attempt]);
+      if (autoJournalSaved) {
+        setJournalSaved(true);
+        setAnalyzedCount((count) => count + 1);
+      }
+    } finally {
+      submittingRef.current = false;
+      setSubmitting(false);
+    }
   }
 
   async function saveJournalAnalysis(draft: TagDraft) {
     if (!current || !submitted || !userId) return;
-    const imageUrl = await journalImageUrl(draft);
-    const row = questionRowFromAttempt(submitted, draft, imageUrl);
+    const imageUrl = await journalImageUrl(draft, submitted.screenshot_url ?? questionScreenshot);
+    const row = {
+      ...questionRowFromAttempt(submitted, draft, imageUrl),
+      id: pyqJournalQuestionId(submitted.id)
+    };
     await persistJournalRow(row, draft.pattern_name, draft.outcome);
     setJournalOpen(false);
   }
 
-  function goNext() {
-    if (index + 1 >= questions.length) {
+  async function markSessionComplete() {
+    const session = pyqSessionId ? await db.pyq_sessions.get(pyqSessionId) : null;
+    if (session && session.status === 'active') {
+      await writeLocal('pyq_sessions', completePyqSession(session));
+    }
+  }
+
+  async function goNext() {
+    const nextIndex = Math.max(index + 1, pyqSession?.current_index ?? 0);
+    if (nextIndex >= questions.length) {
+      await markSessionComplete();
       window.scrollTo({ top: 0, behavior: 'auto' });
       setFinished(true);
       return;
     }
-    setIndex((value) => value + 1);
+    setIndex(nextIndex);
   }
 
   function exitSet() {
@@ -746,6 +942,7 @@ export default function Pyq() {
     setQuestions([]);
     setFinished(false);
     setIndex(0);
+    setPyqSessionId(null);
   }
 
   if (!manifest) {
@@ -766,10 +963,13 @@ export default function Pyq() {
       <PracticeSetup
         manifest={manifest}
         attempts={attempts}
+        activeSession={activePyqSession}
         config={config}
         setConfig={setConfig}
         loading={loading}
         error={startError}
+        onResume={(session) => void resumeSession(session)}
+        onDiscard={(session) => void discardSession(session)}
         onStart={() => void startPractice()}
       />
     );

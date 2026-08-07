@@ -15,7 +15,7 @@
   }
 
   html {
-    color-scheme: light;
+    color-scheme: dark;
     scrollbar-gutter: stable;
   }
 
@@ -36,9 +36,9 @@
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
     background-image:
-      radial-gradient(circle at 8% -4%, rgba(255, 220, 91, 0.28), transparent 31rem),
-      radial-gradient(circle at 96% 2%, rgba(255, 117, 76, 0.13), transparent 28rem),
-      linear-gradient(180deg, rgba(255, 255, 255, 0.72), rgba(255, 250, 240, 0.92));
+      radial-gradient(circle at 10% -5%, rgba(99, 102, 241, 0.16), transparent 32rem),
+      radial-gradient(circle at 95% 5%, rgba(168, 85, 247, 0.12), transparent 30rem),
+      linear-gradient(180deg, #0b0f19, #0f172a);
     background-attachment: fixed;
   }
 
@@ -146,7 +146,7 @@
   /* Lifted paper card — the app's standard surface. */
   .u-panel {
     @apply rounded-lg border border-border bg-bg-raised shadow-card;
-    background-image: linear-gradient(150deg, rgba(255, 255, 255, 0.96), rgba(255, 253, 247, 0.82));
+    background-image: linear-gradient(150deg, rgba(17, 24, 39, 0.95), rgba(15, 23, 42, 0.88));
   }
 
   html[data-native] .u-shell-content {
@@ -362,7 +362,7 @@
     min-height: 76px;
     flex-shrink: 0;
     padding: 1.125rem 1.25rem;
-    background: rgba(255, 241, 214, 0.62);
+    background: rgba(30, 41, 59, 0.8);
   }
 
   html[data-native] .planner-day-header h2 {
@@ -391,7 +391,7 @@
   html[data-native] .planner-section,
   html[data-native] .planner-view-block {
     border-radius: 18px;
-    background: rgba(255, 254, 253, 0.9);
+    background: rgba(17, 24, 39, 0.9);
   }
 
   html[data-native] .planner-section-heading {

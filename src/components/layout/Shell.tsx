@@ -4,6 +4,7 @@ import Nav from '@/components/layout/Nav';
 import MobileTabs from '@/components/layout/MobileTabs';
 import DailyQuote from '@/components/shared/DailyQuote';
 import OfflineBadge from '@/components/shared/OfflineBadge';
+import ThemeToggle from '@/components/shared/ThemeToggle';
 import { useSyncBootstrap } from '@/hooks/useSync';
 
 export default function Shell() {
@@ -13,10 +14,14 @@ export default function Shell() {
   return (
     <div className="min-h-dvh">
       <Nav />
-      <OfflineBadge className="fixed right-4 top-3 z-40" />
+      <OfflineBadge className="fixed right-4 top-3 z-40 hidden md:inline" />
+      <div className="fixed right-3 top-[calc(var(--safe-top)+0.75rem)] z-40 flex items-center gap-2 md:hidden">
+        <OfflineBadge />
+        <ThemeToggle className="h-9 w-9" />
+      </div>
       <main className="native-shell-main pb-[calc(4.5rem+var(--safe-bottom))] md:pb-0 md:pl-[220px]">
         <div
-          className={`u-shell-content mx-auto w-full px-4 py-6 md:py-8 ${
+          className={`u-shell-content mx-auto w-full px-4 pb-6 pt-16 md:py-8 ${
             pathname === '/' ? 'max-w-[1120px]' : 'max-w-[800px]'
           }`}
         >

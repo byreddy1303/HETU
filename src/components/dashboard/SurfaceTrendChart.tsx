@@ -78,7 +78,7 @@ export default function SurfaceTrendChart({ data }: { data: MistakeSurfacePoint[
               background: 'rgb(var(--color-bg-raised, 251 253 251))',
               border: '1px solid rgb(var(--color-border, 213 225 216))',
               borderRadius: 10,
-              boxShadow: '0 12px 28px -18px rgba(25, 53, 47, 0.38)',
+              boxShadow: 'var(--shadow-card)',
               color: 'rgb(var(--color-text, 25 53 47))',
               fontSize: 12
             }}

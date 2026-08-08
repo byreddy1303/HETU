@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/Button';
 import PinInput from '@/components/auth/PinInput';
 import { differenceInCalendarDays, parseISO } from 'date-fns';
 import Brand from '@/components/shared/Brand';
+import ThemeToggle from '@/components/shared/ThemeToggle';
 
 type ScreenState =
   | { kind: 'checking' }
@@ -74,9 +75,12 @@ export default function ResetPin() {
     <div className="native-auth-page relative flex min-h-dvh flex-col bg-bg">
       <header className="flex items-center justify-between px-6 py-4">
         <Brand size="sm" />
-        <Link to="/auth" className="u-label hover:text-text">
-          Back to sign in
-        </Link>
+        <div className="flex items-center gap-3">
+          <Link to="/auth" className="u-label hover:text-text">
+            Back to sign in
+          </Link>
+          <ThemeToggle />
+        </div>
       </header>
 
       <main className="flex flex-1 items-center justify-center px-4 py-8">

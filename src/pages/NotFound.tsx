@@ -1,8 +1,10 @@
 import { Link } from 'react-router-dom';
+import ThemeToggle from '@/components/shared/ThemeToggle';
 
 export default function NotFound() {
   return (
     <div className="flex min-h-dvh flex-col items-center justify-center gap-6">
+      <ThemeToggle className="fixed right-4 top-4" />
       <div className="text-center">
         <p className="font-display text-[72px] font-bold leading-none text-text-faint">
           404<span className="text-accent">.</span>

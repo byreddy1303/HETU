@@ -1,5 +1,21 @@
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { createElement } from 'react';
+import { fireEvent, render, screen } from '@testing-library/react';
+import ThemeToggle from '@/components/shared/ThemeToggle';
 import { applyTheme, resolveTheme, THEME_COLORS } from '@/lib/theme';
+import { DEFAULT_PREFERENCES, usePrefsStore } from '@/stores/prefs';
+
+beforeEach(() => {
+  usePrefsStore.setState({ ...DEFAULT_PREFERENCES, colorTheme: 'light' });
+  Object.defineProperty(window, 'matchMedia', {
+    configurable: true,
+    value: vi.fn().mockReturnValue({
+      matches: false,
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn()
+    })
+  });
+});
 
 describe('theme resolution', () => {
   it('keeps an explicit light or dark preference', () => {
@@ -30,5 +46,19 @@ describe('theme application', () => {
     expect(document.documentElement.dataset.theme).toBe('dark');
     expect(document.documentElement.style.colorScheme).toBe('dark');
     expect(meta.content).toBe(THEME_COLORS.dark);
+  });
+});
+
+describe('theme toggle', () => {
+  it('switches directly between the resolved light and dark modes', () => {
+    render(createElement(ThemeToggle));
+
+    fireEvent.click(screen.getByRole('button', { name: 'Switch to dark mode' }));
+
+    expect(usePrefsStore.getState().colorTheme).toBe('dark');
+    expect(screen.getByRole('button', { name: 'Switch to light mode' })).toHaveAttribute(
+      'aria-pressed',
+      'true'
+    );
   });
 });

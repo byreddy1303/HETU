@@ -3,7 +3,7 @@ export type ResolvedTheme = Exclude<ThemeMode, 'system'>;
 
 export const THEME_COLORS: Record<ResolvedTheme, string> = {
   light: '#F1F5F0',
-  dark: '#0E1612'
+  dark: '#0F1216'
 };
 
 export function resolveTheme(mode: ThemeMode, prefersDark: boolean): ResolvedTheme {

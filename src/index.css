@@ -47,6 +47,7 @@
     --color-ink-rose: 169 76 96;
     --color-ink-marigold: 138 91 19;
     --color-ink-slate: 80 102 95;
+    --color-table-tint: 47 111 94;
     --color-scrim: 10 23 19;
     --ledger-line-opacity: 0.035;
     --grain-opacity: 0.016;
@@ -68,45 +69,46 @@
   }
 
   html[data-theme='dark'] {
-    /* Forest Ledger after dusk: charcoal-green canvas, dark vellum cards,
-       moonlit eucalyptus, and warmer brass. */
-    --color-bg: 14 22 18;
-    --color-bg-raised: 21 31 26;
-    --color-bg-overlay: 29 43 36;
-    --color-border: 46 65 55;
-    --color-border-hover: 64 88 74;
-    --color-text: 236 243 239;
-    --color-text-muted: 166 184 174;
-    --color-text-faint: 132 155 143;
-    --color-accent: 111 177 153;
-    --color-accent-hover: 129 196 172;
-    --color-accent-faint: 32 58 49;
-    --color-accent-contrast: 11 35 27;
-    --color-success: 143 183 127;
-    --color-success-faint: 35 55 40;
-    --color-success-contrast: 13 33 17;
-    --color-danger: 225 131 120;
-    --color-danger-faint: 71 39 35;
-    --color-danger-contrast: 42 13 11;
-    --color-warn: 215 174 100;
-    --color-warn-faint: 70 55 31;
-    --color-warn-contrast: 36 23 7;
-    --color-guess: 183 163 214;
-    --color-guess-faint: 54 44 71;
-    --color-guess-contrast: 30 18 48;
-    --color-highlight: 210 169 95;
-    --color-highlight-contrast: 26 36 31;
-    --color-ink-cobalt: 112 169 200;
-    --color-ink-teal: 111 177 153;
-    --color-ink-violet: 183 163 214;
-    --color-ink-rose: 218 127 147;
-    --color-ink-marigold: 215 174 100;
-    --color-ink-slate: 166 184 174;
+    /* Forest Ledger after dusk: neutral graphite sheets let each annotation
+       ink keep its own identity instead of tinting the whole app green. */
+    --color-bg: 15 18 22;
+    --color-bg-raised: 23 27 33;
+    --color-bg-overlay: 34 40 50;
+    --color-border: 53 62 73;
+    --color-border-hover: 74 86 100;
+    --color-text: 238 242 245;
+    --color-text-muted: 178 187 197;
+    --color-text-faint: 140 152 165;
+    --color-accent: 117 185 163;
+    --color-accent-hover: 139 202 181;
+    --color-accent-faint: 36 58 52;
+    --color-accent-contrast: 11 36 28;
+    --color-success: 146 188 125;
+    --color-success-faint: 40 58 42;
+    --color-success-contrast: 16 35 14;
+    --color-danger: 228 134 127;
+    --color-danger-faint: 71 43 46;
+    --color-danger-contrast: 45 13 11;
+    --color-warn: 222 179 107;
+    --color-warn-faint: 73 58 37;
+    --color-warn-contrast: 38 24 3;
+    --color-guess: 186 167 215;
+    --color-guess-faint: 58 49 74;
+    --color-guess-contrast: 32 20 47;
+    --color-highlight: 215 173 98;
+    --color-highlight-contrast: 27 34 41;
+    --color-ink-cobalt: 120 173 210;
+    --color-ink-teal: 117 185 163;
+    --color-ink-violet: 186 167 215;
+    --color-ink-rose: 222 135 158;
+    --color-ink-marigold: 222 179 107;
+    --color-ink-slate: 170 181 192;
+    --color-table-tint: 120 173 210;
     --color-scrim: 0 0 0;
-    --ledger-line-opacity: 0.075;
-    --grain-opacity: 0.021;
-    --table-stripe-opacity: 0.035;
-    --table-hover-opacity: 0.12;
+    --ledger-line-opacity: 0;
+    --grain-opacity: 0.014;
+    --table-stripe-opacity: 0.026;
+    --table-hover-opacity: 0.09;
     --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.32);
     --shadow-card: 0 14px 34px -20px rgb(0 0 0 / 0.72), 0 1px 3px rgb(0 0 0 / 0.34);
     --shadow-lift: 0 20px 46px -18px rgb(0 0 0 / 0.78), 0 5px 14px -7px rgb(0 0 0 / 0.58);
@@ -154,6 +156,10 @@
     background-size: 100% 28px;
     background-position: 0 10px;
     background-attachment: fixed;
+  }
+
+  html[data-theme='dark'] body {
+    background-image: none;
   }
 
   html[data-native] {
@@ -263,7 +269,7 @@
   }
 
   html[data-native] .u-shell-content {
-    padding: 1.5rem 1.25rem 2rem;
+    padding: 4rem 1.25rem 2rem;
   }
 
   /* A phone stays in the mobile shell even when Android reports a wide
@@ -1097,12 +1103,12 @@
   }
 
   .u-data-table tbody tr:nth-child(even) {
-    background-color: rgb(var(--color-accent) / var(--table-stripe-opacity));
+    background-color: rgb(var(--color-table-tint) / var(--table-stripe-opacity));
   }
 
   .u-data-table tbody tr:hover,
   .u-matrix-table tbody tr:hover {
-    background-color: rgb(var(--color-accent) / var(--table-hover-opacity));
+    background-color: rgb(var(--color-table-tint) / var(--table-hover-opacity));
   }
 
   .u-data-table tbody td > .truncate,

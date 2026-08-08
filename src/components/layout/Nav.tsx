@@ -29,6 +29,7 @@ import { db } from '@/lib/db';
 import { EXAM_DATE_DEFAULT } from '@/lib/constants';
 import { cn } from '@/lib/utils';
 import Brand from '@/components/shared/Brand';
+import ThemeToggle from '@/components/shared/ThemeToggle';
 
 interface Item {
   to: string;
@@ -187,14 +188,17 @@ export default function Nav() {
     <aside className="native-side-nav fixed inset-y-0 left-0 z-30 hidden w-[224px] flex-col border-r border-border bg-bg md:flex">
       <div className="flex items-center justify-between px-4 pb-4 pt-4">
         <Brand />
-        {showCountdown && (
-          <span
-            className="u-num rounded-full bg-accent-faint px-2 py-0.5 text-[11px] font-semibold text-accent"
-            title="Days to GATE"
-          >
-            T−{daysLeft}d
-          </span>
-        )}
+        <div className="flex items-center gap-2">
+          {showCountdown && (
+            <span
+              className="u-num rounded-full bg-accent-faint px-2 py-0.5 text-[11px] font-semibold text-accent"
+              title="Days to GATE"
+            >
+              T−{daysLeft}d
+            </span>
+          )}
+          <ThemeToggle />
+        </div>
       </div>
 
       <nav className="flex flex-1 flex-col gap-0.5 overflow-y-auto px-2">

@@ -14,6 +14,7 @@ import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import PinInput from '@/components/auth/PinInput';
 import Brand, { BrandMark } from '@/components/shared/Brand';
+import ThemeToggle from '@/components/shared/ThemeToggle';
 
 type SubmitState = { kind: 'idle' } | { kind: 'sending' } | { kind: 'error'; message: string };
 
@@ -53,7 +54,10 @@ export default function Auth() {
     <div className="native-auth-page relative flex min-h-dvh flex-col bg-bg">
       <header className="flex items-center justify-between px-6 py-4">
         <Brand size="sm" />
-        <span className="u-label">invite-only</span>
+        <div className="flex items-center gap-3">
+          <span className="u-label">invite-only</span>
+          <ThemeToggle />
+        </div>
       </header>
 
       <main className="flex flex-1 items-center justify-center px-4 py-8">

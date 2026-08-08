@@ -1,5 +1,4 @@
 import { NavLink } from 'react-router-dom';
-import { differenceInCalendarDays, parseISO } from 'date-fns';
 import {
   Gauge,
   Play,
@@ -25,12 +24,9 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { useAuthStore } from '@/stores/auth';
 import { useAuth } from '@/hooks/useAuth';
 import { useSessionStore } from '@/stores/session';
-import { usePrefsStore } from '@/stores/prefs';
 import { db } from '@/lib/db';
-import { EXAM_DATE_DEFAULT } from '@/lib/constants';
 import { cn } from '@/lib/utils';
 import Brand from '@/components/shared/Brand';
-import ThemeToggle from '@/components/shared/ThemeToggle';
 
 interface Item {
   to: string;
@@ -156,11 +152,6 @@ function Group({ label, items }: { label?: string; items: Item[] }) {
 export default function Nav() {
   const { profile, sandbox } = useAuth();
   const signOut = useAuthStore((s) => s.signOut);
-  const showCountdown = usePrefsStore((s) => s.showCountdown);
-  const daysLeft = differenceInCalendarDays(
-    parseISO(profile?.exam_date ?? EXAM_DATE_DEFAULT),
-    new Date()
-  );
   const storedSessionId = useSessionStore((s) => s.sessionId);
   // Confirm the stored session is still live (row exists, unfinished) — a
   // stale localStorage entry after a "finish" that crashed shouldn't hijack
@@ -193,19 +184,8 @@ export default function Nav() {
 
   return (
     <aside className="native-side-nav fixed inset-y-0 left-0 z-30 hidden w-[224px] flex-col border-r border-border bg-bg md:flex">
-      <div className="flex items-center justify-between px-4 pb-4 pt-4">
+      <div className="flex items-center px-4 pb-4 pt-4">
         <Brand />
-        <div className="flex items-center gap-2">
-          {showCountdown && (
-            <span
-              className="u-num rounded-full bg-accent-faint px-2 py-0.5 text-[11px] font-semibold text-accent"
-              title="Days to GATE"
-            >
-              T−{daysLeft}d
-            </span>
-          )}
-          <ThemeToggle />
-        </div>
       </div>
 
       <nav className="flex flex-1 flex-col gap-0.5 overflow-y-auto px-2">

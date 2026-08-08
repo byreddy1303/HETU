@@ -2,10 +2,9 @@ import { Outlet, useLocation } from 'react-router-dom';
 import { motion, useReducedMotion } from 'motion/react';
 import Nav from '@/components/layout/Nav';
 import MobileTabs from '@/components/layout/MobileTabs';
+import TopRightControls from '@/components/layout/TopRightControls';
 import ContextualGateTip from '@/components/shared/ContextualGateTip';
 import DailyQuote from '@/components/shared/DailyQuote';
-import OfflineBadge from '@/components/shared/OfflineBadge';
-import ThemeToggle from '@/components/shared/ThemeToggle';
 import Brand from '@/components/shared/Brand';
 import { useSyncBootstrap } from '@/hooks/useSync';
 
@@ -16,17 +15,16 @@ export default function Shell() {
   return (
     <div className="min-h-dvh">
       <Nav />
-      <OfflineBadge className="fixed right-4 top-3 z-40 hidden md:inline" />
-      <div className="web-mobile-controls fixed right-3 top-[calc(var(--safe-top)+0.75rem)] z-40 flex items-center gap-2 md:hidden">
-        <OfflineBadge />
-        <ThemeToggle className="h-9 w-9" />
+      {/* Top Right Corner Controls (Countdown T-Days, Nightshift Toggle, Offline status) */}
+      <div className="fixed right-4 top-3.5 z-40 hidden md:block">
+        <TopRightControls />
+      </div>
+      <div className="web-mobile-controls fixed right-3 top-[calc(var(--safe-top)+0.75rem)] z-40 md:hidden">
+        <TopRightControls />
       </div>
       <header className="native-top-bar fixed inset-x-0 top-0 z-30 hidden h-[calc(56px+var(--safe-top))] items-end justify-between border-b border-border/80 bg-bg-raised/95 px-[calc(1rem+var(--safe-right))] pb-2.5 pl-[calc(1rem+var(--safe-left))] backdrop-blur md:hidden">
         <Brand size="sm" />
-        <div className="flex min-h-9 items-center gap-2">
-          <OfflineBadge />
-          <ThemeToggle className="h-9 w-9" />
-        </div>
+        <TopRightControls />
       </header>
       <main className="native-shell-main pb-[calc(4.5rem+var(--safe-bottom))] md:pb-0 md:pl-[220px]">
         <div

@@ -35,7 +35,8 @@ vi.mock('@/hooks/useAuth', () => ({
       digest_hour_local: 6,
       digest_minute_local: 0,
       wa_opted_in_at: null,
-      last_digest_sent_on: null
+      last_digest_sent_on: null,
+      buddy_notification_preview_enabled: true
     }
   })
 }));

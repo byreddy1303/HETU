@@ -11,6 +11,7 @@ import { wipeLocalState } from '@/lib/isolation';
 import { loginWithUsernamePin, signupViaInvite } from '@/lib/edge';
 import type { UserRow } from '@/types';
 import { EXAM_DATE_DEFAULT } from '@/lib/constants';
+import { unregisterCurrentPushDevice } from '@/lib/buddyNotifications';
 
 export type AuthStatus = 'loading' | 'signed_out' | 'signed_in';
 
@@ -39,7 +40,10 @@ interface AuthState {
 
 /** Editable subset of the users row — everything the Settings page owns. */
 export type ProfilePatch = Partial<
-  Pick<UserRow, 'name' | 'exam_date' | 'target_rank' | 'timezone'>
+  Pick<
+    UserRow,
+    'name' | 'exam_date' | 'target_rank' | 'timezone' | 'buddy_notification_preview_enabled'
+  >
 >;
 
 const SANDBOX_PROFILE: UserRow = {
@@ -59,7 +63,8 @@ const SANDBOX_PROFILE: UserRow = {
   digest_hour_local: 6,
   digest_minute_local: 0,
   wa_opted_in_at: null,
-  last_digest_sent_on: null
+  last_digest_sent_on: null,
+  buddy_notification_preview_enabled: true
 };
 
 let initialized = false;
@@ -155,6 +160,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       set({ status: 'signed_out', profile: null, sandbox: false, user: null });
       return;
     }
+    await unregisterCurrentPushDevice();
     await supabase.auth.signOut();
     await wipeLocalState();
     set({ status: 'signed_out', profile: null, user: null });

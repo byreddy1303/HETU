@@ -4,4 +4,5 @@
     <string name="title_activity_main">AIR Journal</string>
     <string name="package_name">in.airjournal.app</string>
     <string name="custom_url_scheme">airjournal</string>
+    <string name="buddy_notification_channel_id">buddy_messages</string>
 </resources>

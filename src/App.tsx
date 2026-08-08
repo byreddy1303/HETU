@@ -7,6 +7,7 @@ import { useAuthStore } from '@/stores/auth';
 import { usePrefsStore } from '@/stores/prefs';
 import { Toaster } from '@/components/ui/Toast';
 import NativeRuntime from '@/components/native/NativeRuntime';
+import BuddyNotificationRuntime from '@/components/notifications/BuddyNotificationRuntime';
 import LoadingScreen from '@/components/shared/LoadingScreen';
 import { applyTheme, resolveTheme } from '@/lib/theme';
 import { configureNativeChrome } from '@/lib/native';
@@ -45,6 +46,7 @@ export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <NativeRuntime />
+      <BuddyNotificationRuntime />
       <Suspense fallback={<LoadingScreen />}>
         <RouterProvider router={router} />
       </Suspense>

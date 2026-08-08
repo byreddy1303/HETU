@@ -350,7 +350,7 @@ function Section({
   const native = isNativeApp;
   if (native) {
     return (
-      <section className="planner-section overflow-hidden rounded border border-border bg-bg">
+      <section className="planner-section shrink-0 overflow-hidden rounded border border-border bg-bg">
         <div className="planner-section-heading">
           <h3 className="font-display text-[18px] font-semibold text-text">{title}</h3>
           {description && (

@@ -39,6 +39,7 @@ import { subjectInk } from '@/lib/subjectInk';
 import { isSharedQuestionRef, mergeBuddyMessages, safeQuestionRef } from '@/lib/buddy';
 import { Button } from '@/components/ui/Button';
 import { cn } from '@/lib/utils';
+import { notifyBuddyMessage, touchActiveBuddy } from '@/lib/buddyNotifications';
 
 interface Props {
   buddyId: string;
@@ -226,6 +227,24 @@ export default function BuddyChat({ buddyId, meId, peer, onUnfriend }: Props) {
     if (!loading) void markRead();
   }, [loading, markRead]);
 
+  // Suppress an OS alert only on the device that is actively viewing this
+  // exact chat. Other registered devices continue to receive the message.
+  useEffect(() => {
+    const heartbeat = () => {
+      if (document.visibilityState === 'visible') {
+        void touchActiveBuddy(buddyId).catch(() => undefined);
+      }
+    };
+    heartbeat();
+    const timer = window.setInterval(heartbeat, 30_000);
+    document.addEventListener('visibilitychange', heartbeat);
+    return () => {
+      window.clearInterval(timer);
+      document.removeEventListener('visibilitychange', heartbeat);
+      void touchActiveBuddy(null).catch(() => undefined);
+    };
+  }, [buddyId]);
+
   // Auto-scroll to bottom on new messages / initial load.
   useEffect(() => {
     const el = listRef.current;
@@ -276,6 +295,7 @@ export default function BuddyChat({ buddyId, meId, peer, onUnfriend }: Props) {
       setError(error.message);
     } else {
       setError(null);
+      notifyBuddyMessage(optimistic.id);
     }
   }
 
@@ -307,6 +327,7 @@ export default function BuddyChat({ buddyId, meId, peer, onUnfriend }: Props) {
       setError(error.message);
     } else {
       setError(null);
+      notifyBuddyMessage(optimistic.id);
     }
   }
 

@@ -69,12 +69,13 @@ The tool compresses your mistake surface. It does not replace your reasoning.
 - Every question you solve produces 4 tags (30 sec): outcome, pattern, trigger, root cause.
 - Wrong / slow / guessed answers auto-enter a spaced re-attempt ladder (3 → 10 → 30 days).
 - Buddy chat lets you discuss and share a stripped question snapshot without exposing outcomes, patterns, or root causes.
+- Buddy message alerts are an explicit per-device opt-in and work on installed phone PWAs, desktop browsers, and configured Android builds.
 - Weekly, you write ONE upstream weakness to fix that week; the dashboard turns your own tags into small, actionable learning notes.
-- No streaks, browser push, gamified reward loops, or third-party analytics. Telegram is an explicit opt-in and carries only scheduled work and due reviews.
+- No streaks, gamified reward loops, marketing alerts, or third-party analytics. Buddy alerts and Telegram delivery are explicit opt-ins.
 
 ## Stack
 
-React 18 + Vite + TypeScript · Tailwind · Zustand · Dexie · React Query · Supabase (Postgres 15 + Auth + Edge Functions) · Telegram Bot API · Resend (transactional mail, free tier).
+React 18 + Vite + TypeScript · Tailwind · Zustand · Dexie · React Query · Supabase (Postgres 15 + Auth + Edge Functions) · Web Push/VAPID · Firebase Cloud Messaging for native Android · Telegram Bot API · Resend.
 
 Total monthly cost at low volumes: ₹0. See `DEPLOY.md` for the scaling thresholds where paid tiers kick in.
 
@@ -108,6 +109,7 @@ npx vercel env add VITE_SUPABASE_URL production
 npx vercel env add VITE_SUPABASE_ANON_KEY production
 npx vercel env add VITE_APP_URL production
 npx vercel env add VITE_TELEGRAM_BOT_USERNAME production
+npx vercel env add VITE_WEB_PUSH_PUBLIC_KEY production
 npx vercel --prod
 ```
 

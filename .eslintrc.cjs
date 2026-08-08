@@ -33,26 +33,13 @@ module.exports = {
       // BUILD.md §2.3 + §2.7 hard bans, enforced at lint time for all app code
       files: ['src/**/*.{ts,tsx}'],
       rules: {
-        'no-restricted-globals': [
-          'error',
-          { name: 'Notification', message: 'Push/local notifications are banned (BUILD.md §2.3).' },
-          { name: 'PushManager', message: 'Push notifications are banned (BUILD.md §2.3).' }
-        ],
         'no-restricted-syntax': [
           'error',
-          {
-            selector: "CallExpression[callee.property.name='showNotification']",
-            message: 'Notifications are banned (BUILD.md §2.3).'
-          },
           {
             selector:
               "MemberExpression[object.property.name='serviceWorker'][property.name='register']",
             message:
               'Manual service-worker registration is banned; vite-plugin-pwa handles it (BUILD.md §2.3).'
-          },
-          {
-            selector: "CallExpression[callee.property.name='requestPermission'][callee.object.name='Notification']",
-            message: 'Notification permission requests are banned (BUILD.md §2.3).'
           },
           {
             selector: `JSXText[value=/${EMOJI}/]`,

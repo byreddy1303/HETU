@@ -38,6 +38,14 @@ export default defineConfig(({ mode }) => {
           display: 'standalone',
           start_url: '/',
           icons: [
+            { src: '/air-mark-192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
+            { src: '/air-mark-512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
+            {
+              src: '/air-mark-maskable-512.png',
+              sizes: '512x512',
+              type: 'image/png',
+              purpose: 'maskable'
+            },
             { src: '/air-mark.svg', sizes: 'any', type: 'image/svg+xml', purpose: 'any' },
             {
               src: '/air-mark-maskable.svg',
@@ -48,6 +56,7 @@ export default defineConfig(({ mode }) => {
           ]
         },
         workbox: {
+          importScripts: ['/push-sw.js'],
           globPatterns: ['**/*.{js,css,html,ico,png,svg}'],
           runtimeCaching: [
             {

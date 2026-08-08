@@ -1,3 +1,4 @@
+/// <reference types="@capacitor/push-notifications" />
 import type { CapacitorConfig } from '@capacitor/cli';
 import { KeyboardResize, KeyboardStyle } from '@capacitor/keyboard';
 
@@ -38,6 +39,9 @@ const config: CapacitorConfig = {
       launchFadeOutDuration: 180,
       backgroundColor: '#F1F5F0',
       showSpinner: false
+    },
+    PushNotifications: {
+      presentationOptions: ['sound', 'alert']
     }
   }
 };

@@ -32,6 +32,7 @@ export interface UserRow {
   digest_minute_local: number;
   wa_opted_in_at: string | null;
   last_digest_sent_on: string | null;
+  buddy_notification_preview_enabled: boolean;
 }
 
 export interface TelegramSubscriptionRow {

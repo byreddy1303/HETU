@@ -13,7 +13,7 @@ The user-directed `android:live:release` variant is the exception: it is a signe
 - Haptics are best-effort, restrained, and switchable under Settings → Focus & density.
 - The Android build does not register the PWA service worker, preventing stale bundled screens after an APK upgrade.
 - Cleartext traffic and Android cloud backup are disabled. No secret or signing key is committed.
-- Browser/device push remains absent by product policy.
+- Buddy-message push is opt-in per device, uses a dedicated high-priority notification channel, and deep-links to the correct chat.
 
 ## Toolchain
 
@@ -47,6 +47,17 @@ adb install -r android/app/build/outputs/apk/debug/airjournal.apk
 ```
 
 For iterative device work, use `npm run android:run`. To inspect the native project, use `npm run android:open`.
+
+## Firebase push setup
+
+The Android plugin uses Firebase Cloud Messaging. Create one Firebase Android app with package name `in.airjournal.app`, then:
+
+1. Download `google-services.json` to `android/app/google-services.json` (gitignored).
+2. Create a least-privilege Firebase service account allowed to send Cloud Messaging messages.
+3. Store its compact JSON as the Supabase secret `FCM_SERVICE_ACCOUNT_JSON`; never place it in a `VITE_*` variable or commit it.
+4. Run `npx cap sync android`, build a new APK/AAB, install it, and enable **Settings → Buddy message alerts**.
+
+The web/PWA path uses VAPID instead and does not require Firebase. Native plugin changes, including first-time push setup, require a new APK; a Vercel-only live-shell update cannot add the plugin to an older installed binary.
 
 ## Signed production release
 
@@ -120,7 +131,8 @@ Before sharing a build, verify all of the following on at least one physical pho
 9. Font scale and compact mode remain usable at 360 px width and Android's enlarged system text.
 10. Upgrade over the previous APK preserves IndexedDB data and the active session.
 11. Airplane-mode cold launch reaches previously cached local data without a blank screen.
-12. `npm run typecheck`, `npm run lint`, `npm run test`, `npm run build`, and `npm audit` remain clean.
+12. With the app killed, a Buddy message produces one alert, tapping it opens the correct chat, and the currently open chat stays quiet.
+13. `npm run typecheck`, `npm run lint`, `npm run test`, `npm run build`, and `npm audit` remain clean.
 
 ## HTTPS app links
 

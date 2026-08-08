@@ -22,7 +22,7 @@ import {
   useMemo,
   useState
 } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   ArrowLeft,
@@ -106,6 +106,7 @@ function peerHandle(p: PeerLite): string {
 
 export default function Buddy() {
   const { userId, sandbox } = useAuth();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [buddies, setBuddies] = useState<BuddyView[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [tab, setTab] = useState<BuddyTab>('chats');
@@ -414,16 +415,22 @@ export default function Buddy() {
     [buddies]
   );
   const activeBuddy = active.find((b) => b.row.id === activeId) ?? null;
+  const linkedChatId = searchParams.get('chat');
 
   useEffect(() => {
     if (active.length === 0) {
       if (activeId !== null) setActiveId(null);
       return;
     }
+    if (linkedChatId && active.some((buddy) => buddy.row.id === linkedChatId)) {
+      if (activeId !== linkedChatId) setActiveId(linkedChatId);
+      setMobileView('chat');
+      return;
+    }
     if (!active.some((buddy) => buddy.row.id === activeId)) {
       setActiveId(active[0].row.id);
     }
-  }, [active, activeId]);
+  }, [active, activeId, linkedChatId]);
 
   const showLocalMsg = sandbox || !supabaseConfigured;
 
@@ -563,6 +570,7 @@ export default function Buddy() {
               userId={userId}
               onPick={(id) => {
                 setActiveId(id);
+                setSearchParams({ chat: id }, { replace: true });
                 setBuddies((current) =>
                   current.map((buddy) =>
                     buddy.row.id === id ? { ...buddy, unreadCount: 0 } : buddy

@@ -51,6 +51,7 @@ npx supabase functions deploy request-pin-reset
 npx supabase functions deploy buddy-request
 npx supabase functions deploy daily-digest
 npx supabase functions deploy telegram-webhook
+npx supabase functions deploy buddy-notifications --no-verify-jwt
 ```
 
 ## 4. Configure secrets
@@ -85,6 +86,18 @@ curl --request POST \
 
 The webhook rejects requests without Telegram's secret header. Users connect from Settings through a 15-minute link; the browser never accepts or writes a chat ID.
 
+For Buddy message alerts, generate one VAPID keypair and keep the private half server-only:
+
+```bash
+npx web-push generate-vapid-keys
+npx supabase secrets set \
+  VAPID_PUBLIC_KEY='replace-me' \
+  VAPID_PRIVATE_KEY='replace-me' \
+  VAPID_SUBJECT='mailto:notifications@yourdomain.com'
+```
+
+Set the same public key as `VITE_WEB_PUSH_PUBLIC_KEY` in Vercel. The deployment script creates the separate outbox-cron credential in Supabase Vault. Native Android alerts additionally require `android/app/google-services.json` and the server-only `FCM_SERVICE_ACCOUNT_JSON` described in `ANDROID.md`.
+
 Free-tier key: **Resend** — [resend.com](https://resend.com) — for transactional mail. Verify your domain (DKIM + SPF) before going live.
 
 ## 5. Configure Supabase Auth
@@ -109,6 +122,7 @@ vercel env add VITE_SUPABASE_ANON_KEY production
 vercel env add VITE_APP_URL production          # same as edge fn secret
 vercel env add VITE_TELEGRAM_BOT_USERNAME production # public name, no @
 vercel env add VITE_SENTRY_DSN production       # optional
+vercel env add VITE_WEB_PUSH_PUBLIC_KEY production
 vercel --prod
 ```
 
@@ -126,6 +140,7 @@ After the first deploy:
 6. Confirm the buddy pairing landed (Buddy page for both users should show the other).
 7. Settings → Daily study digest → Connect Telegram → tap Start in Telegram.
 8. Return to Settings, confirm the connection, and use **Send now** once.
+9. Settings → Buddy message alerts → enable this device. Send a Buddy message from another account with this app closed; tap the alert and confirm the correct chat opens.
 
 ## 9. Schedule cron jobs
 

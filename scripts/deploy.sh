@@ -67,14 +67,16 @@ else
   ok "Linked."
 fi
 
-step "Provision daily-digest cron credentials in Supabase Vault"
+step "Provision digest and Buddy-push cron credentials in Supabase Vault"
 project_url="https://${SUPABASE_PROJECT_REF}.supabase.co"
 digest_cron_secret="$(openssl rand -hex 32)"
+push_cron_secret="$(openssl rand -hex 32)"
 vault_sql="
 do \$vault\$
 declare
   project_url_id uuid;
   cron_secret_id uuid;
+  push_cron_secret_id uuid;
 begin
   select id into project_url_id from vault.secrets where name = 'air_journal_project_url' limit 1;
   if project_url_id is null then
@@ -89,12 +91,20 @@ begin
   else
     perform vault.update_secret(cron_secret_id, '${digest_cron_secret}', 'air_journal_digest_cron_secret', 'AIR Journal daily digest cron credential');
   end if;
+
+  select id into push_cron_secret_id from vault.secrets where name = 'air_journal_push_cron_secret' limit 1;
+  if push_cron_secret_id is null then
+    perform vault.create_secret('${push_cron_secret}', 'air_journal_push_cron_secret', 'AIR Journal Buddy push retry credential');
+  else
+    perform vault.update_secret(push_cron_secret_id, '${push_cron_secret}', 'air_journal_push_cron_secret', 'AIR Journal Buddy push retry credential');
+  end if;
 end
 \$vault\$;"
 supabase db query --linked "$vault_sql" >/dev/null
 supabase secrets set --project-ref "$SUPABASE_PROJECT_REF" \
-  "DAILY_DIGEST_CRON_SECRET=$digest_cron_secret" >/dev/null
-unset digest_cron_secret vault_sql
+  "DAILY_DIGEST_CRON_SECRET=$digest_cron_secret" \
+  "BUDDY_PUSH_CRON_SECRET=$push_cron_secret" >/dev/null
+unset digest_cron_secret push_cron_secret vault_sql
 ok "Vault credentials are present"
 
 step "Apply migrations to remote"
@@ -114,6 +124,7 @@ functions=(
   buddy-request
   daily-digest
   telegram-webhook
+  buddy-notifications
 )
 for fn in "${functions[@]}"; do
   info "→ $fn"
@@ -136,6 +147,10 @@ add_secret OWNER_EMAIL
 add_secret VITE_APP_URL
 add_secret TELEGRAM_BOT_TOKEN
 add_secret TELEGRAM_WEBHOOK_SECRET
+add_secret VAPID_PUBLIC_KEY
+add_secret VAPID_PRIVATE_KEY
+add_secret VAPID_SUBJECT
+add_secret FCM_SERVICE_ACCOUNT_JSON
 if [[ ${#secret_args[@]} -gt 0 ]]; then
   supabase secrets set --project-ref "$SUPABASE_PROJECT_REF" "${secret_args[@]}"
   ok "Set ${#secret_args[@]} secrets"
@@ -175,6 +190,7 @@ browser login. To deploy the frontend:
        npx vercel env add VITE_SUPABASE_ANON_KEY production
        npx vercel env add VITE_APP_URL production
        npx vercel env add VITE_TELEGRAM_BOT_USERNAME production
+       npx vercel env add VITE_WEB_PUSH_PUBLIC_KEY production
   4. Ship it:              npx vercel --prod
 
 After the first Vercel deploy, come back and update .deploy.env with the

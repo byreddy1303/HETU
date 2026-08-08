@@ -33,6 +33,7 @@ import {
   sendTelegramMessage,
   type TelegramStudySession
 } from '../_shared/telegram.ts';
+import { deliverToSubscription, type SubscriptionRow } from '../_shared/push.ts';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 declare const Deno: any;
@@ -122,13 +123,20 @@ async function handleRequest(req: Request): Promise<Response> {
     .from('telegram_subscriptions')
     .select('user_id, chat_id, enabled, last_digest_sent_on')
     .limit(1000);
+  let pushQuery = admin
+    .from('push_subscriptions')
+    .select('id, user_id, platform, web_endpoint, web_p256dh, web_auth, native_token, active_buddy_id, last_seen_at, push_quiet_until')
+    .eq('enabled', true)
+    .limit(5000);
+
   if (body.user_id) {
     userQuery = userQuery.eq('id', body.user_id);
     telegramQuery = telegramQuery.eq('user_id', body.user_id);
+    pushQuery = pushQuery.eq('user_id', body.user_id);
   }
 
-  const [{ data: userData, error: userError }, { data: telegramData, error: telegramError }] =
-    await Promise.all([userQuery, telegramQuery]);
+  const [{ data: userData, error: userError }, { data: telegramData, error: telegramError }, { data: pushData }] =
+    await Promise.all([userQuery, telegramQuery, pushQuery]);
   if (userError || telegramError) {
     console.error(
       'Daily digest candidate load failed:',
@@ -140,9 +148,18 @@ async function handleRequest(req: Request): Promise<Response> {
 
   const subscriptions = (telegramData as TelegramSubscription[]) ?? [];
   const telegramByUser = new Map(subscriptions.map((row) => [row.user_id, row]));
+  const pushSubs = (pushData as (SubscriptionRow & { user_id: string })[]) ?? [];
+  const pushByUser = new Map<string, SubscriptionRow[]>();
+  for (const sub of pushSubs) {
+    const list = pushByUser.get(sub.user_id) ?? [];
+    list.push(sub);
+    pushByUser.set(sub.user_id, list);
+  }
+
   const users = ((userData as UserForDigest[]) ?? []).filter((user) => {
     const telegram = telegramByUser.get(user.id);
-    return Boolean(body.user_id || user.digest_email_enabled || telegram?.enabled);
+    const userPushSubs = pushByUser.get(user.id);
+    return Boolean(body.user_id || user.digest_email_enabled || telegram?.enabled || (userPushSubs && userPushSubs.length > 0));
   });
 
   const report: Array<Record<string, unknown>> = [];
@@ -173,7 +190,10 @@ async function handleRequest(req: Request): Promise<Response> {
       telegram.chat_id !== null &&
       (force || telegram.last_digest_sent_on !== isoDate)
     );
-    if (!emailDue && !telegramEligible) {
+    const userPushSubs = pushByUser.get(u.id) ?? [];
+    const pushEligible = userPushSubs.length > 0;
+    
+    if (!emailDue && !telegramEligible && !pushEligible) {
       report.push({ user: u.id, skipped: 'already_sent_or_disabled' });
       continue;
     }
@@ -182,11 +202,12 @@ async function handleRequest(req: Request): Promise<Response> {
     // A manual test proves the Telegram connection even on an empty planning
     // day. Scheduled delivery remains silent when there is no recorded plan.
     const telegramDue = telegramEligible && (test || digest.has_planner_sessions);
+    const pushDue = pushEligible && (test || digest.has_planner_sessions);
     if (dryRun) {
-      report.push({ user: u.id, dry: true, telegram_would_send: telegramDue, digest });
+      report.push({ user: u.id, dry: true, telegram_would_send: telegramDue, push_would_send: pushDue, digest });
       continue;
     }
-    if (!emailDue && !telegramDue) {
+    if (!emailDue && !telegramDue && !pushDue) {
       report.push({
         user: u.id,
         skipped: 'no_planner_sessions',
@@ -221,6 +242,23 @@ async function handleRequest(req: Request): Promise<Response> {
       });
       telegram_ok = res.ok;
       if (!res.ok) telegram_err = res.error;
+    }
+
+    if (pushDue) {
+      await Promise.all(
+        userPushSubs.map(async (subscription) => {
+          if (subscription.push_quiet_until) {
+            const until = Date.parse(subscription.push_quiet_until);
+            if (Number.isFinite(until) && Date.now() < until) return;
+          }
+          await deliverToSubscription(subscription, {
+            title: `HETU Daily Digest`,
+            body: test ? 'Test push notification connection.' : digest.summary,
+            kind: 'daily_digest',
+            route: test ? '/settings' : `/planner?date=${isoDate}`
+          });
+        })
+      );
     }
 
     if (email_ok && !test) {

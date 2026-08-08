@@ -5,6 +5,7 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { corsHeaders, json } from '../_shared/cors.ts';
 import { sendEmail, buddyRequestReceived } from '../_shared/email.ts';
+import { deliverToSubscription, type SubscriptionRow } from '../_shared/push.ts';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 declare const Deno: any;
@@ -86,6 +87,33 @@ Deno.serve(async (req: Request): Promise<Response> => {
         });
         await sendEmail({ to: peer.email, subject, html });
       }
+
+      // Send best-effort push notification
+      const { data: subsData } = await admin
+        .from('push_subscriptions')
+        .select('id, platform, web_endpoint, web_p256dh, web_auth, native_token, active_buddy_id, last_seen_at, push_quiet_until')
+        .eq('user_id', target)
+        .eq('enabled', true);
+      
+      const subscriptions = (subsData as SubscriptionRow[] | null) ?? [];
+      const senderName = senderProfile?.name ?? senderProfile?.username ?? 'Someone';
+      
+      await Promise.all(
+        subscriptions.map(async (subscription) => {
+          // Do not send if snoozed
+          if (subscription.push_quiet_until) {
+            const until = Date.parse(subscription.push_quiet_until);
+            if (Number.isFinite(until) && Date.now() < until) return;
+          }
+          
+          await deliverToSubscription(subscription, {
+            title: 'New Buddy Request',
+            body: `${senderName} wants to be your buddy.`,
+            kind: 'buddy_request',
+            route: '/buddy'
+          });
+        })
+      );
     } catch (e) {
       console.warn('[buddy-request] notify failed:', (e as Error).message);
     }

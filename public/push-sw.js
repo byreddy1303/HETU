@@ -22,31 +22,32 @@ self.addEventListener('push', (event) => {
     ? payload.title.trim()
     : 'HETU';
 
-  // Distinct body copy for question shares vs plain text messages.
-  const defaultBody = isQuestion
-    ? 'Shared a question — tap to attempt it fresh.'
-    : 'Your buddy sent a message.';
   const body = typeof payload.body === 'string' && payload.body.trim()
     ? payload.body.trim()
-    : defaultBody;
+    : 'You have a new notification.';
 
   const route = typeof payload.route === 'string' && payload.route.startsWith('/')
     ? payload.route
-    : '/buddy';
-  const buddyId = typeof payload.buddyId === 'string' ? payload.buddyId : 'new';
+    : '/';
+  
+  const tagId = typeof payload.tagId === 'string' ? payload.tagId : 'default';
 
-  // Action buttons: "Try it" CTA for shared questions (supported on Android +
-  // some desktop browsers; silently ignored where unsupported).
-  const actions = isQuestion
-    ? [{ action: 'try', title: 'Try it \u2192' }]
-    : [];
+  // Action buttons depend on the kind of notification
+  let actions = [];
+  if (kind === 'question') {
+    actions = [{ action: 'try', title: 'Try it \u2192' }];
+  } else if (kind === 'buddy_request') {
+    actions = [{ action: 'view_request', title: 'View Request \u2192' }];
+  } else if (kind === 'daily_digest') {
+    actions = [{ action: 'view_planner', title: 'Open Planner \u2192' }];
+  }
 
   const showAndBadge = self.registration
     .showNotification(title, {
       body,
       icon: '/hetu-mark-192.png',
       badge: '/hetu-mark-192.png',
-      tag: `buddy-${buddyId}`,
+      tag: tagId,
       renotify: true,
       timestamp: Date.now(),
       actions,
@@ -69,13 +70,16 @@ self.addEventListener('notificationclick', (event) => {
   const kind = event.notification.data?.kind;
   let route = typeof rawRoute === 'string' && rawRoute.startsWith('/') && !rawRoute.startsWith('//')
     ? rawRoute
-    : '/buddy';
+    : '/';
 
-  // "Try it" action on a question notification: append mode=attempt so the
-  // Buddy page can auto-open the shared question in attempt mode.
+  // Modify route based on the interactive action chosen by the user
   if (event.action === 'try' && kind === 'question') {
     const separator = route.includes('?') ? '&' : '?';
     route = `${route}${separator}mode=attempt`;
+  } else if (event.action === 'view_request' && kind === 'buddy_request') {
+    route = '/buddy';
+  } else if (event.action === 'view_planner' && kind === 'daily_digest') {
+    route = '/planner';
   }
 
   const targetUrl = new URL(route, self.location.origin).href;

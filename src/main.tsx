@@ -6,6 +6,15 @@ import '@/index.css';
 
 const UPDATE_CHECK_INTERVAL_MS = 15 * 60 * 1000;
 
+// Catch Vite dynamic module preload failures (e.g., after new deployments)
+window.addEventListener('vite:preloadError', () => {
+  const pageHasBeenReloaded = sessionStorage.getItem('page_reloaded_for_chunk_error');
+  if (!pageHasBeenReloaded) {
+    sessionStorage.setItem('page_reloaded_for_chunk_error', 'true');
+    window.location.reload();
+  }
+});
+
 // When an installed PWA is already controlled by a service worker, a newly
 // activated release should replace the open app without asking the learner to
 // refresh. Ignore the first controller claim on a brand-new installation so

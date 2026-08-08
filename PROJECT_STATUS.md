@@ -10,13 +10,13 @@ must happen next.
 ## Current repository state
 
 - Branch: `main`
-- Last pushed product-code baseline: `4c4cc3f` (`fix(ui): refine dark theme and add quick toggle`)
-- The local branch also contains the topic-wise PYQ work described below. It has not been
-  deployed or rebuilt into an Android artifact by this work.
+- Last pushed product-code baseline: `af68f87` (`S20: prevent stale PYQ manifest crashes`)
+- Production web deployment `dpl_92n7B3euFDpsNRqtHPHz4z1tWB63` is Ready at
+  `https://air-journal-omega.vercel.app`.
 - The pushed baseline includes the Android/mobile production work, automatic installed-PWA
   release activation, and the Telegram `/today` command recorded in its history.
 
-## Topic-wise PYQ practice — implemented locally, release pending
+## Topic-wise PYQ practice — deployed
 
 - All 2,388 bundled question IDs now have exactly one canonical subject and topic.
 - The bank is split into 14 subject archives and 95 selectable topic buckets; raw source
@@ -30,23 +30,25 @@ must happen next.
 - `public/pyq/taxonomy-audit.json` records 2,388 unique questions and zero unclassified rows.
 - Responsive local-browser QA passed at mobile and desktop sizes; a selected Sorting set
   opened with a merge-sort question and produced no browser console errors.
+- The manifest and subject JSON requests are bank-versioned and network-first so an older
+  installed service worker cannot mix stale taxonomy data with a new application bundle.
+- Supabase migrations `20260807000001`, `20260807000002`, and `20260808000001` are applied
+  remotely; durable PYQ sessions and immutable attempt receipts can sync across devices.
 
-Release follow-up: push the topic commit, deploy the web build, and rebuild Android only if
-shipping a new bundled-shell artifact; the live-shell Android release will receive the web
-content after the production deployment.
+Release follow-up: rebuild Android only if shipping a new bundled-shell artifact; the
+live-shell Android release receives the deployed web content automatically.
 
 ### Current verification
 
-Run on 2026-08-02 against the current working tree:
+Run on 2026-08-08 against commit `af68f87`:
 
 - `npm run typecheck` — passed
 - `npm run lint` — passed with zero warnings
-- `npm run test` — 20 files passed, 114 tests passed
-- `npm run test:e2e` — 1 Chromium Dashboard/Analysis smoke flow passed
+- `npm run test` — 25 files passed, 140 tests passed
 - `npm run build` — passed; PWA precache generated successfully
 
-These checks do not mean the readiness edge function or current web assets have
-been deployed, or that the current web assets have been rebuilt into a new Android release.
+These checks do not mean the readiness edge function has been deployed or that current web
+assets have been rebuilt into a new bundled Android release.
 
 ## Dashboard and Analysis refinement — implemented locally, release pending
 

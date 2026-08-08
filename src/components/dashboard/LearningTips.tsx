@@ -29,8 +29,11 @@ export default function LearningTips({ tips }: { tips: LearningTip[] }) {
         </span>
         <div className="min-w-0 flex-1 sm:flex sm:items-baseline sm:gap-4">
           <div className="shrink-0">
-            <p className="u-label text-text-muted">Evidence note</p>
-            <h2 id="learning-tip-title" className="mt-1 font-display text-[15px] font-semibold text-text">
+            <p className="u-label text-text-muted">GATE prep tip · Your evidence</p>
+            <h2
+              id="learning-tip-title"
+              className="mt-1 font-display text-[15px] font-semibold text-text"
+            >
               {tip.title}
             </h2>
           </div>

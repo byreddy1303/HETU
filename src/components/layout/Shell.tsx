@@ -2,6 +2,7 @@ import { Outlet, useLocation } from 'react-router-dom';
 import { motion, useReducedMotion } from 'motion/react';
 import Nav from '@/components/layout/Nav';
 import MobileTabs from '@/components/layout/MobileTabs';
+import ContextualGateTip from '@/components/shared/ContextualGateTip';
 import DailyQuote from '@/components/shared/DailyQuote';
 import OfflineBadge from '@/components/shared/OfflineBadge';
 import ThemeToggle from '@/components/shared/ThemeToggle';
@@ -33,6 +34,7 @@ export default function Shell() {
             transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
           >
             <Outlet />
+            {pathname === '/' ? null : <ContextualGateTip pathname={pathname} className="mt-4" />}
           </motion.div>
           {pathname === '/' ? null : <DailyQuote />}
         </div>

@@ -163,13 +163,14 @@ function PracticeSetup({
                 {activeSession.completed_count} of {activeSession.question_uids.length} submitted ·{' '}
                 {secondsToClock(activeSession.elapsed_sec)} logged
               </p>
+              {error && <p className="mt-2 text-[12px] text-danger">{error}</p>}
             </div>
             <div className="flex flex-wrap gap-2">
               <Button variant="primary" onClick={() => onResume(activeSession)} disabled={loading}>
                 Resume set
               </Button>
               <Button onClick={() => onDiscard(activeSession)} disabled={loading}>
-                Discard
+                Discard set
               </Button>
             </div>
           </CardBody>
@@ -403,7 +404,7 @@ function PracticeSetup({
               </label>
             </div>
             <div className="mt-auto pt-6">
-              {error && <p className="mb-3 text-[12px] text-danger">{error}</p>}
+              {error && !activeSession && <p className="mb-3 text-[12px] text-danger">{error}</p>}
               <Button
                 variant="primary"
                 className="w-full"
@@ -763,11 +764,6 @@ export default function Pyq() {
     setLoading(true);
     setStartError(null);
     try {
-      if (session.bank_version !== manifest.bankVersion) {
-        throw new Error(
-          'This unfinished set belongs to an older question-bank version. Discard it before starting a new set.'
-        );
-      }
       const rows = await questionsForSession(session);
       if (rows.length !== session.question_uids.length) {
         throw new Error(
@@ -775,7 +771,14 @@ export default function Pyq() {
         );
       }
       const exhausted = session.current_index >= rows.length;
-      const durableSession = exhausted ? completePyqSession(session) : session;
+      // Bank rebuilds can add coverage or correct taxonomy without removing a
+      // saved set's questions. Once every durable question ID resolves, move
+      // the set to the current version instead of stranding it permanently.
+      const compatibleSession =
+        session.bank_version === manifest.bankVersion
+          ? session
+          : { ...session, bank_version: manifest.bankVersion, updated_at: new Date().toISOString() };
+      const durableSession = exhausted ? completePyqSession(compatibleSession) : compatibleSession;
       if (durableSession !== session) await writeLocal('pyq_sessions', durableSession);
       const nextIndex = Math.min(durableSession.current_index, Math.max(0, rows.length - 1));
       let resumedSession = durableSession;
@@ -808,12 +811,21 @@ export default function Pyq() {
   }
 
   async function discardSession(session: PyqSessionRow) {
-    await writeLocal('pyq_sessions', abandonPyqSession(session));
-    if (pyqSessionId === session.id) {
-      setQuestions([]);
-      setFinished(false);
-      setIndex(0);
-      setPyqSessionId(null);
+    if (loading) return;
+    setLoading(true);
+    setStartError(null);
+    try {
+      await writeLocal('pyq_sessions', abandonPyqSession(session));
+      if (pyqSessionId === session.id) {
+        setQuestions([]);
+        setFinished(false);
+        setIndex(0);
+        setPyqSessionId(null);
+      }
+    } catch (error) {
+      setStartError(error instanceof Error ? error.message : 'Could not discard that PYQ set.');
+    } finally {
+      setLoading(false);
     }
   }
 

@@ -5,6 +5,7 @@ import { MemoryRouter } from 'react-router-dom';
 import { db } from '@/lib/db';
 import Pyq from '@/pages/Pyq';
 import type { PyqManifest, PyqQuestion } from '@/lib/pyq';
+import { createPyqSessionRow } from '@/lib/pyq-session';
 
 const USER = '00000000-0000-4000-8000-000000000001';
 
@@ -149,5 +150,68 @@ describe('PYQ committed-attempt logging', () => {
       expect(session.status).toBe('completed');
       expect(session.completed_at).not.toBeNull();
     });
+  });
+
+  it('resumes a compatible saved set after the question bank version changes', async () => {
+    const saved = createPyqSessionRow(
+      USER,
+      'older-test-bank',
+      {
+        subjectSlug: 'discrete-mathematics',
+        topicSlug: 'all',
+        fromYear: 2026,
+        toYear: 2026,
+        type: 'all',
+        order: 'unseen',
+        count: '5'
+      },
+      [question]
+    );
+    await db.pyq_sessions.put({ ...saved, sync_status: 'synced' });
+
+    const user = userEvent.setup();
+    render(
+      <MemoryRouter>
+        <Pyq />
+      </MemoryRouter>
+    );
+
+    await user.click(await screen.findByRole('button', { name: 'Resume set' }));
+    expect(await screen.findByText('Which proposition is a tautology?')).toBeInTheDocument();
+    await waitFor(async () => {
+      expect((await db.pyq_sessions.get(saved.id))?.bank_version).toBe(manifest.bankVersion);
+    });
+  });
+
+  it('discards an unfinished saved set and immediately unblocks a new one', async () => {
+    const saved = createPyqSessionRow(
+      USER,
+      'older-test-bank',
+      {
+        subjectSlug: 'discrete-mathematics',
+        topicSlug: 'all',
+        fromYear: 2026,
+        toYear: 2026,
+        type: 'all',
+        order: 'unseen',
+        count: '5'
+      },
+      [question]
+    );
+    await db.pyq_sessions.put({ ...saved, sync_status: 'synced' });
+
+    const user = userEvent.setup();
+    render(
+      <MemoryRouter>
+        <Pyq />
+      </MemoryRouter>
+    );
+
+    await user.click(await screen.findByRole('button', { name: 'Discard set' }));
+    await waitFor(async () => {
+      expect((await db.pyq_sessions.get(saved.id))?.status).toBe('abandoned');
+    });
+    expect(screen.queryByRole('button', { name: 'Resume set' })).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Start practice' })).toBeEnabled();
   });
 });

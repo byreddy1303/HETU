@@ -372,7 +372,7 @@ async function buildDigest(
     reAttemptTotal: reAttemptRows.length,
     openItems,
     weeklyFix,
-    appUrl: APP_URL || 'https://air-journal-omega.vercel.app'
+    appUrl: APP_URL || 'https://hetu-app.vercel.app'
   });
 
   const telegram_text = renderTelegramDigest({

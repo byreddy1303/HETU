@@ -7,7 +7,7 @@ import com.getcapacitor.BridgeActivity;
 
 public class MainActivity extends BridgeActivity {
 
-    private static final String APP_LINK_HOST = "air-journal-omega.vercel.app";
+    private static final String APP_LINK_HOST = "hetu-app.vercel.app";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

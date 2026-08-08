@@ -139,7 +139,7 @@ export function escapeTelegramHtml(value: string): string {
 }
 
 export function airJournalUrl(baseUrl: string, route: string): string {
-  const base = (baseUrl.trim() || 'https://air-journal-omega.vercel.app').replace(/\/+$/, '');
+  const base = (baseUrl.trim() || 'https://hetu-app.vercel.app').replace(/\/+$/, '');
   const normalizedRoute = route.startsWith('/') ? route : `/${route}`;
   return new URL(normalizedRoute, `${base}/`).toString();
 }

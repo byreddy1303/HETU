@@ -462,15 +462,15 @@ function renderEmail(args: {
 
   const reBlock =
     reAttemptTotal === 0
-      ? `<p style="margin:0 0 8px 0;font-size:13px;color:#665D7E;">No re-attempts due today. Enjoy the clean queue.</p>`
+      ? `<p style="margin:0 0 8px 0;font-size:13px;color:#50665F;">No re-attempts due today. Enjoy the clean queue.</p>`
       : `
-        <p style="margin:0 0 6px 0;font-size:13px;font-weight:600;color:#241E35;">${reAttemptTotal} question${reAttemptTotal === 1 ? '' : 's'} due for re-attempt.</p>
-        <ul style="margin:0 0 10px 18px;padding:0;font-size:13px;color:#665D7E;line-height:1.7;">
+        <p style="margin:0 0 6px 0;font-size:13px;font-weight:600;color:#19352F;">${reAttemptTotal} question${reAttemptTotal === 1 ? '' : 's'} due for re-attempt.</p>
+        <ul style="margin:0 0 10px 18px;padding:0;font-size:13px;color:#50665F;line-height:1.7;">
           ${subjectCounts
             .slice(0, 6)
             .map(
               (s) =>
-                `<li>${esc(s.subject)} — <span style="font-family:monospace;color:#241E35;">${s.count}</span></li>`
+                `<li>${esc(s.subject)} — <span style="font-family:monospace;color:#19352F;">${s.count}</span></li>`
             )
             .join('')}
         </ul>
@@ -478,8 +478,8 @@ function renderEmail(args: {
           sampleTitles.length > 0
             ? `
         <details style="margin:0 0 10px 0;">
-          <summary style="cursor:pointer;font-size:11.5px;color:#9C94AF;">Sample questions</summary>
-          <ul style="margin:8px 0 0 18px;padding:0;font-size:12px;color:#665D7E;line-height:1.65;">
+          <summary style="cursor:pointer;font-size:11.5px;color:#657871;">Sample questions</summary>
+          <ul style="margin:8px 0 0 18px;padding:0;font-size:12px;color:#50665F;line-height:1.65;">
             ${sampleTitles.map((t) => `<li>${esc(t)}</li>`).join('')}
           </ul>
         </details>`
@@ -489,14 +489,14 @@ function renderEmail(args: {
 
   const planBlock =
     openItems.length === 0
-      ? `<p style="margin:0 0 8px 0;font-size:13px;color:#665D7E;">No planner items open for today. Add one from the planner if you want an anchor.</p>`
+      ? `<p style="margin:0 0 8px 0;font-size:13px;color:#50665F;">No planner items open for today. Add one from the planner if you want an anchor.</p>`
       : `
-        <ul style="margin:0 0 10px 18px;padding:0;font-size:13px;color:#241E35;line-height:1.75;">
+        <ul style="margin:0 0 10px 18px;padding:0;font-size:13px;color:#19352F;line-height:1.75;">
           ${openItems
             .slice(0, 12)
             .map(
               (i) =>
-                `<li>${esc(i.title)}${i.subject ? ` <span style="color:#665D7E;font-size:11.5px;">· ${esc(i.subject)}</span>` : ''}${i.target_min ? ` <span style="font-family:monospace;color:#9C94AF;font-size:11.5px;">${i.target_min}m</span>` : ''}</li>`
+                `<li>${esc(i.title)}${i.subject ? ` <span style="color:#50665F;font-size:11.5px;">· ${esc(i.subject)}</span>` : ''}${i.target_min ? ` <span style="font-family:monospace;color:#657871;font-size:11.5px;">${i.target_min}m</span>` : ''}</li>`
             )
             .join('')}
         </ul>
@@ -504,39 +504,39 @@ function renderEmail(args: {
 
   const fixBlock = weeklyFix
     ? `
-      <div style="margin:8px 0 16px 0;padding:12px 14px;background:#FBF3CE;border-left:3px solid #C08A00;border-radius:6px;">
-        <p style="margin:0;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#C08A00;">this week's fix</p>
-        <p style="margin:4px 0 0 0;font-size:14px;color:#241E35;font-weight:600;">${esc(weeklyFix)}</p>
+      <div style="margin:8px 0 16px 0;padding:12px 14px;background:#F7EDCF;border-left:3px solid #8A5B13;border-radius:6px;">
+        <p style="margin:0;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#8A5B13;">this week's fix</p>
+        <p style="margin:4px 0 0 0;font-size:14px;color:#19352F;font-weight:600;">${esc(weeklyFix)}</p>
       </div>`
     : '';
 
   return `<!doctype html>
 <html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
-<body style="margin:0;padding:0;background:#FAF6EC;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;color:#241E35;">
-  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#FAF6EC;padding:32px 16px;">
+<body style="margin:0;padding:0;background:#F1F5F0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;color:#19352F;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#F1F5F0;padding:32px 16px;">
     <tr><td align="center">
-      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background:#FFFFFF;border:1px solid #E8E0CC;border-radius:16px;overflow:hidden;">
-        <tr><td style="padding:24px 30px 4px 30px;border-left:3px solid #E14B32;">
-          <p style="margin:0;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#665D7E;">AIR Journal · ${esc(isoDate)}</p>
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background:#FBFDFB;border:1px solid #D5E1D8;border-radius:16px;overflow:hidden;">
+        <tr><td style="padding:24px 30px 4px 30px;border-left:3px solid #2F6F5E;">
+          <p style="margin:0;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#50665F;">AIR Journal · ${esc(isoDate)}</p>
         </td></tr>
         <tr><td style="padding:12px 30px 4px 30px;">
           <p style="margin:0;font-size:20px;font-weight:700;line-height:1.25;">${esc(greeting)}</p>
         </td></tr>
         <tr><td style="padding:6px 30px 18px 30px;">
-          <p style="margin:0 0 12px 0;font-size:15px;font-style:italic;line-height:1.55;color:#241E35;">
-            <span style="background:linear-gradient(180deg,transparent 62%,#FBE8B0 62%,#FBE8B0 92%,transparent 92%);padding:0 2px;">${esc(quote)}</span>
+          <p style="margin:0 0 12px 0;font-size:15px;font-style:italic;line-height:1.55;color:#19352F;">
+            <span style="background:linear-gradient(180deg,transparent 62%,#F3D58A 62%,#F3D58A 92%,transparent 92%);padding:0 2px;">${esc(quote)}</span>
           </p>
-          <p style="margin:-8px 0 14px 0;font-size:11.5px;color:#9C94AF;">— ${esc(quoteAttribution)}</p>
+          <p style="margin:-8px 0 14px 0;font-size:11.5px;color:#657871;">— ${esc(quoteAttribution)}</p>
           ${fixBlock}
-          <p style="margin:16px 0 4px 0;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#665D7E;">re-attempts due today</p>
+          <p style="margin:16px 0 4px 0;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#50665F;">re-attempts due today</p>
           ${reBlock}
-          <p style="margin:12px 0 4px 0;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#665D7E;">planner · today</p>
+          <p style="margin:12px 0 4px 0;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#50665F;">planner · today</p>
           ${planBlock}
           <p style="margin:18px 0 0 0;">
-            <a href="${esc(appUrl)}" style="display:inline-block;padding:10px 20px;background:#E14B32;color:#ffffff;text-decoration:none;border-radius:10px;font-weight:600;font-size:13.5px;">Open AIR Journal</a>
+            <a href="${esc(appUrl)}" style="display:inline-block;padding:10px 20px;background:#2F6F5E;color:#ffffff;text-decoration:none;border-radius:10px;font-weight:600;font-size:13.5px;">Open AIR Journal</a>
           </p>
         </td></tr>
-        <tr><td style="padding:14px 30px;border-top:1px solid #E8E0CC;background:#F2ECDD;font-size:11px;color:#9C94AF;">
+        <tr><td style="padding:14px 30px;border-top:1px solid #D5E1D8;background:#E7EFE9;font-size:11px;color:#657871;">
           Turn off digest emails in Settings · one message per day, at your chosen local hour.
         </td></tr>
       </table>

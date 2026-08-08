@@ -138,7 +138,7 @@ export default function Signup() {
             <div className="mt-6 flex flex-col gap-3">
               <Link
                 to="/request-access"
-                className="inline-flex h-10 w-full items-center justify-center rounded bg-accent px-4 text-sm font-semibold text-white shadow-[0_2px_0_#3730a3] transition-all hover:-translate-y-px hover:bg-accent-hover hover:shadow-[0_3px_0_#3730a3] active:translate-y-[2px] active:shadow-none"
+                className="inline-flex h-10 w-full items-center justify-center rounded bg-accent px-4 text-sm font-semibold text-white shadow-[0_2px_0_#193f35] transition-all hover:-translate-y-px hover:bg-accent-hover hover:shadow-[0_3px_0_#193f35] active:translate-y-[2px] active:shadow-none"
               >
                 Request access
               </Link>

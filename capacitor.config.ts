@@ -14,7 +14,7 @@ const config: CapacitorConfig = {
   appId: 'in.airjournal.app',
   appName: 'AIR Journal',
   webDir: 'dist',
-  backgroundColor: '#FAF6EC',
+  backgroundColor: '#F1F5F0',
   loggingBehavior: 'production',
   server: {
     ...(liveServerUrl ? { url: liveServerUrl } : {}),
@@ -22,7 +22,7 @@ const config: CapacitorConfig = {
     cleartext: false
   },
   android: {
-    backgroundColor: '#FAF6EC',
+    backgroundColor: '#F1F5F0',
     allowMixedContent: false,
     webContentsDebuggingEnabled: false
   },
@@ -36,7 +36,7 @@ const config: CapacitorConfig = {
       launchAutoHide: true,
       launchShowDuration: 500,
       launchFadeOutDuration: 180,
-      backgroundColor: '#FAF6EC',
+      backgroundColor: '#F1F5F0',
       showSpinner: false
     }
   }

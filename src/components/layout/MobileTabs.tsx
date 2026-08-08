@@ -191,7 +191,7 @@ export default function MobileTabs() {
       </AnimatePresence>
 
       <nav
-        className="native-bottom-nav fixed inset-x-0 bottom-0 z-50 grid grid-cols-6 border-t border-border bg-bg-raised/95 pb-[var(--safe-bottom)] shadow-[0_-2px_12px_rgba(36,30,53,0.06)] backdrop-blur md:hidden"
+        className="native-bottom-nav fixed inset-x-0 bottom-0 z-50 grid grid-cols-6 border-t border-border bg-bg-raised/95 pb-[var(--safe-bottom)] shadow-[0_-2px_12px_rgba(25,53,47,0.08)] backdrop-blur md:hidden"
         aria-label="Primary"
       >
         {tabs.map((tab) => {

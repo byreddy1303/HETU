@@ -693,7 +693,7 @@ Each feature has a **Definition of Done (DoD)** — a testable condition. Do not
 - DoD: Playwright test `auth.spec.ts` — invalid invite → error, valid invite → account created, sign-out → redirect, sign-in again → dashboard.
 
 **F1.2 — Design system + shell + navigation**
-- Dark base, tokens per `tailwind.config.js`.
+- Forest Ledger light base, tokens per `tailwind.config.js`.
 - Left nav (desktop), bottom tabs (mobile). Nav items: Dashboard, Session, Journal, Analysis (submenu: Patterns, Re-attempts, Weekly, Heatmap), Learn (submenu: Doubt, Triangulate, Trigger drill, Formulas), Buddy, Settings.
 - DoD: All primitives render in a Storybook-less demo route `/dev/primitives` (dev only). Visual QA by user.
 
@@ -1096,21 +1096,21 @@ Set via `supabase secrets set <KEY>=<value>`:
 
 ## 10. Design system tokens
 
-Amended 2026-07-17 (user-directed pivot): **"the sunlit rank notebook"** — warm paper surfaces, ink-colored data, red-pen brand accent, highlighter details, springy feedback. Colorful and crafted; never dark-panel, never generic.
+Amended 2026-08-08 (user-selected visual direction): **"Forest Ledger"** — cool sage canvas, porcelain cards, deep pine ink, eucalyptus primary actions, and restrained brass markers. Faint ledger ruling belongs only on the canvas; data surfaces stay clean, quiet, and highly legible.
 
-- **Surfaces**: `bg` (`#FAF6EC` paper), `bg-raised` (`#FFFFFF` card), `bg-overlay` (`#F2ECDD` sunk well). Subtle grain overlay ≤ 4% opacity.
-- **Ink (text)**: `text` (`#241E35` aubergine ink), `text-muted` (`#665D7E`), `text-faint` (`#9C94AF`).
-- **Lines**: `border` (`#E8E0CC`), `border-hover` (`#D6CAAD`).
-- **Brand**: `accent` (`#E14B32` red-pen vermilion), `accent-hover` (`#C73D26`), `accent-faint` (`#FBE7E2` tint).
-- **Semantics**: `success` (`#278C52`), `warn` (`#C98A04`), `danger` (`#B3273E` crimson — distinct from brand vermilion), `guess` (`#7048B6` violet).
-- **Highlighter**: `highlight` (`#FFDE59`) — marker streaks under key text, text selection.
-- **Subject inks** (`ink.*`): cobalt `#2E5EAA`, teal `#0E8A74`, violet `#7048B6`, rose `#C2366B`, marigold `#C98A04`, slate `#52627A`. Assigned to subjects by stable index.
+- **Surfaces**: `bg` (`#F1F5F0` sage canvas), `bg-raised` (`#FBFDFB` porcelain card), `bg-overlay` (`#E7EFE9` sunk well). Subtle grain overlay ≤ 2% opacity.
+- **Ink (text)**: `text` (`#19352F` deep pine), `text-muted` (`#50665F`), `text-faint` (`#657871`).
+- **Lines**: `border` (`#D5E1D8`), `border-hover` (`#B8C9BD`).
+- **Brand**: `accent` (`#2F6F5E` eucalyptus), `accent-hover` (`#265E50`), `accent-faint` (`rgba(47, 111, 94, 0.11)`).
+- **Semantics**: `success` (`#4F7C45` moss), `warn` (`#8A5B13` accessible brass), `danger` (`#B85045` muted brick), `guess` (`#67518F` archival violet).
+- **Highlighter**: `highlight` (`#F3D58A`) — restrained brass marker streaks under key text and text selection.
+- **Subject inks** (`ink.*`): cobalt `#376C8C`, teal `#2F6F5E`, violet `#67518F`, rose `#A94C60`, marigold `#8A5B13`, slate `#50665F`. Assigned to subjects by stable index.
 - **Fonts**: Bricolage Grotesque (display/headings), Schibsted Grotesk (UI body), Azeret Mono (numbers, timers, kbd chips, micro-labels).
 - **Spacing**: 4, 8, 12, 16, 24, 32, 48, 64. No other values.
 - **Radii**: 6 (chips/kbd), 10 (inputs/buttons), 16 (cards), full (pills/avatars).
 - **Shadows**: layered soft paper lifts (`sm`, `card`, `lift`, `press`). No harsh drops.
 - **Motion**: springy micro-feedback via `motion` lib, 150–400ms. Motion always answers a user action (press, stamp, save, step change); nothing autoplays on a loop.
-- **Signature motifs**: vermilion notebook margin-line; highlighter underline on active items; rotated "LOGGED" stamp on session completion; ink-dot burst on milestones.
+- **Signature motifs**: faint ledger ruling on the canvas; eucalyptus margin-line; brass highlighter underline on active items; rotated "LOGGED" stamp on session completion; ink-dot burst on milestones.
 - **Icons**: lucide-react, `strokeWidth={1.75}`, `size={16|20|24}` only.
 - **Max content width**: 720px (single column mobile-first).
 - **No emojis — color does the celebrating.**

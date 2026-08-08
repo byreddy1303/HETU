@@ -5,36 +5,36 @@ export default {
     extend: {
       colors: {
         bg: {
-          DEFAULT: '#0b0f19',
-          raised: '#111827',
-          overlay: '#1e293b'
+          DEFAULT: '#F1F5F0',
+          raised: '#FBFDFB',
+          overlay: '#E7EFE9'
         },
         border: {
-          DEFAULT: '#1e293b',
-          hover: '#334155'
+          DEFAULT: '#D5E1D8',
+          hover: '#B8C9BD'
         },
         text: {
-          DEFAULT: '#f8fafc',
-          muted: '#94a3b8',
-          faint: '#64748b'
+          DEFAULT: '#19352F',
+          muted: '#50665F',
+          faint: '#657871'
         },
         accent: {
-          DEFAULT: '#6366f1',
-          hover: '#4f46e5',
-          faint: 'rgba(99, 102, 241, 0.15)'
+          DEFAULT: '#2F6F5E',
+          hover: '#265E50',
+          faint: 'rgba(47, 111, 94, 0.11)'
         },
-        success: { DEFAULT: '#10b981', faint: 'rgba(16, 185, 129, 0.15)' },
-        danger: { DEFAULT: '#f43f5e', faint: 'rgba(244, 63, 94, 0.15)' },
-        warn: { DEFAULT: '#f59e0b', faint: 'rgba(245, 158, 11, 0.15)' },
-        guess: { DEFAULT: '#a855f7', faint: 'rgba(168, 85, 247, 0.15)' },
-        highlight: '#38bdf8',
+        success: { DEFAULT: '#4F7C45', faint: 'rgba(79, 124, 69, 0.12)' },
+        danger: { DEFAULT: '#B85045', faint: 'rgba(184, 80, 69, 0.11)' },
+        warn: { DEFAULT: '#8A5B13', faint: 'rgba(167, 117, 36, 0.14)' },
+        guess: { DEFAULT: '#67518F', faint: 'rgba(103, 81, 143, 0.11)' },
+        highlight: '#F3D58A',
         ink: {
-          cobalt: '#38bdf8',
-          teal: '#2dd4bf',
-          violet: '#c084fc',
-          rose: '#fb7185',
-          marigold: '#fbbf24',
-          slate: '#94a3b8'
+          cobalt: '#376C8C',
+          teal: '#2F6F5E',
+          violet: '#67518F',
+          rose: '#A94C60',
+          marigold: '#8A5B13',
+          slate: '#50665F'
         }
       },
       fontFamily: {
@@ -50,10 +50,10 @@ export default {
         full: '9999px'
       },
       boxShadow: {
-        sm: '0 1px 2px rgba(0, 0, 0, 0.4)',
-        card: '0 4px 20px -2px rgba(0, 0, 0, 0.5), 0 2px 6px -1px rgba(0, 0, 0, 0.3)',
-        lift: '0 12px 36px -4px rgba(0, 0, 0, 0.6), 0 4px 12px -2px rgba(0, 0, 0, 0.4)',
-        press: 'inset 0 2px 4px rgba(0, 0, 0, 0.5)'
+        sm: '0 1px 2px rgba(25, 53, 47, 0.08)',
+        card: '0 10px 28px -18px rgba(25, 53, 47, 0.34), 0 1px 3px rgba(25, 53, 47, 0.08)',
+        lift: '0 18px 42px -20px rgba(25, 53, 47, 0.38), 0 4px 12px -6px rgba(25, 53, 47, 0.16)',
+        press: 'inset 0 2px 4px rgba(25, 53, 47, 0.14)'
       },
       spacing: {
         1: '4px',

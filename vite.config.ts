@@ -33,8 +33,8 @@ export default defineConfig(({ mode }) => {
           name: 'AIR Journal',
           short_name: 'AIR',
           description: 'GATE PYQ analysis — compress your mistake surface.',
-          theme_color: '#FAF6EC',
-          background_color: '#FAF6EC',
+          theme_color: '#F1F5F0',
+          background_color: '#F1F5F0',
           display: 'standalone',
           start_url: '/',
           icons: [

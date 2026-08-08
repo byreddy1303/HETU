@@ -15,7 +15,7 @@
   }
 
   html {
-    color-scheme: dark;
+    color-scheme: light;
     scrollbar-gutter: stable;
   }
 
@@ -35,10 +35,9 @@
     line-height: 1.55;
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
-    background-image:
-      radial-gradient(circle at 10% -5%, rgba(99, 102, 241, 0.16), transparent 32rem),
-      radial-gradient(circle at 95% 5%, rgba(168, 85, 247, 0.12), transparent 30rem),
-      linear-gradient(180deg, #0b0f19, #0f172a);
+    background-image: linear-gradient(rgba(47, 111, 94, 0.035) 1px, transparent 1px);
+    background-size: 100% 28px;
+    background-position: 0 10px;
     background-attachment: fixed;
   }
 
@@ -65,14 +64,14 @@
     }
   }
 
-  /* Paper grain — one fixed overlay, barely-there. */
+  /* Ledger grain — one fixed overlay, barely-there. */
   body::before {
     content: '';
     position: fixed;
     inset: 0;
     z-index: 50;
     pointer-events: none;
-    opacity: 0.022;
+    opacity: 0.016;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
   }
 
@@ -133,7 +132,7 @@
 }
 
 @layer components {
-  /* Micro-labels: the notebook's pencil annotations. */
+  /* Micro-labels: the ledger's compact annotations. */
   .u-label {
     @apply font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-text-faint;
   }
@@ -143,10 +142,9 @@
     @apply font-mono tabular-nums;
   }
 
-  /* Lifted paper card — the app's standard surface. */
+  /* Porcelain ledger card — the app's standard surface. */
   .u-panel {
     @apply rounded-lg border border-border bg-bg-raised shadow-card;
-    background-image: linear-gradient(150deg, rgba(17, 24, 39, 0.95), rgba(15, 23, 42, 0.88));
   }
 
   html[data-native] .u-shell-content {
@@ -281,7 +279,7 @@
   html[data-native] .native-planner-calendar {
     overflow: hidden;
     border-radius: 22px;
-    box-shadow: 0 10px 30px rgba(83, 49, 14, 0.09);
+    box-shadow: 0 10px 30px rgba(25, 53, 47, 0.1);
   }
 
   html[data-native] .native-calendar-toolbar {
@@ -346,7 +344,7 @@
     align-items: flex-end;
     overflow: hidden;
     padding: var(--safe-top) var(--safe-right) 0 var(--safe-left);
-    background: rgba(36, 23, 53, 0.42);
+    background: rgba(25, 53, 47, 0.34);
   }
 
   html[data-native] .planner-day-sheet {
@@ -362,7 +360,7 @@
     min-height: 76px;
     flex-shrink: 0;
     padding: 1.125rem 1.25rem;
-    background: rgba(30, 41, 59, 0.8);
+    background: rgba(231, 239, 233, 0.92);
   }
 
   html[data-native] .planner-day-header h2 {
@@ -391,7 +389,7 @@
   html[data-native] .planner-section,
   html[data-native] .planner-view-block {
     border-radius: 18px;
-    background: rgba(17, 24, 39, 0.9);
+    background: rgba(251, 253, 251, 0.96);
   }
 
   html[data-native] .planner-section-heading {
@@ -427,7 +425,7 @@
   html[data-native] .planner-session-card {
     border-radius: 16px;
     padding: 1.125rem;
-    box-shadow: 0 4px 16px rgba(83, 49, 14, 0.06);
+    box-shadow: 0 4px 16px rgba(25, 53, 47, 0.08);
   }
 
   html[data-native] .planner-session-fields {
@@ -467,7 +465,7 @@
   html[data-native] .native-bottom-nav {
     min-height: calc(68px + var(--safe-bottom));
     border-radius: 20px 20px 0 0;
-    box-shadow: 0 -8px 28px rgba(36, 23, 53, 0.1);
+    box-shadow: 0 -8px 28px rgba(25, 53, 47, 0.1);
   }
 
   html[data-native] .native-bottom-tab {
@@ -898,7 +896,7 @@
       border-radius: 18px;
       background: theme('colors.bg.raised');
       padding: 1rem;
-      box-shadow: 0 7px 22px rgba(88, 66, 42, 0.055);
+      box-shadow: 0 7px 22px rgba(25, 53, 47, 0.07);
     }
 
     html[data-native] .native-heatmap-total {
@@ -923,7 +921,7 @@
       width: 142px;
       min-width: 142px;
       max-width: 142px;
-      box-shadow: 1px 0 0 theme('colors.border.DEFAULT'), 8px 0 16px rgba(88, 66, 42, 0.06);
+      box-shadow: 1px 0 0 theme('colors.border.DEFAULT'), 8px 0 16px rgba(25, 53, 47, 0.07);
     }
 
     html[data-native] .heatmap-matrix thead th:not(:first-child) {
@@ -982,12 +980,12 @@
   }
 
   .u-data-table tbody tr:nth-child(even) {
-    background-color: rgba(255, 241, 214, 0.22);
+    background-color: rgba(47, 111, 94, 0.025);
   }
 
   .u-data-table tbody tr:hover,
   .u-matrix-table tbody tr:hover {
-    background-color: rgba(255, 225, 106, 0.16);
+    background-color: rgba(47, 111, 94, 0.085);
   }
 
   .u-data-table tbody td > .truncate,
@@ -1004,14 +1002,14 @@
     height: 36px;
   }
 
-  /* Highlighter streak behind text. Wrap the words that matter. */
+  /* Brass marker streak behind text. Wrap the words that matter. */
   .u-highlight {
     background-image: linear-gradient(
       100deg,
-      rgba(255, 222, 89, 0) 2%,
-      rgba(255, 222, 89, 0.85) 8%,
-      rgba(255, 222, 89, 0.65) 92%,
-      rgba(255, 222, 89, 0) 98%
+      rgba(243, 213, 138, 0) 2%,
+      rgba(243, 213, 138, 0.78) 8%,
+      rgba(243, 213, 138, 0.56) 92%,
+      rgba(243, 213, 138, 0) 98%
     );
     background-size: 100% 42%;
     background-position: 0 78%;
@@ -1020,7 +1018,7 @@
     margin: 0 -0.15em;
   }
 
-  /* Notebook margin-line: vermilion rule with breathing room, like a ruled page. */
+  /* Ledger margin-line: eucalyptus rule with breathing room. */
   .u-margin-line {
     position: relative;
     padding-left: 24px;
@@ -1042,11 +1040,11 @@
     @apply border-t border-border;
   }
 
-  /* Rotated red stamp — session logged, review done. */
+  /* Rotated ledger stamp — session logged, review done. */
   .u-stamp {
     @apply inline-block rounded-sm border-2 border-accent px-3 py-1 font-mono text-[13px] font-bold uppercase tracking-[0.22em] text-accent;
     transform: rotate(-4deg);
-    box-shadow: inset 0 0 0 1px rgba(225, 75, 50, 0.15);
+    box-shadow: inset 0 0 0 1px rgba(47, 111, 94, 0.16);
   }
 
   /* Question-bank paper: preserve original structures without letting legacy
@@ -1084,7 +1082,7 @@
     border-radius: 6px;
     background: #ffffff;
     padding: 6px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+    box-shadow: 0 2px 8px rgba(25, 53, 47, 0.14);
   }
 
   .pyq-content table {

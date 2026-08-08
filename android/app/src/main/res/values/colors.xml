@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#F04B2F</color>
-    <color name="colorPrimaryDark">#FFFAF0</color>
-    <color name="colorAccent">#F04B2F</color>
-    <color name="airPaper">#FFFAF0</color>
-    <color name="airInk">#241735</color>
+    <color name="colorPrimary">#2F6F5E</color>
+    <color name="colorPrimaryDark">#F1F5F0</color>
+    <color name="colorAccent">#2F6F5E</color>
+    <color name="airPaper">#F1F5F0</color>
+    <color name="airInk">#19352F</color>
 </resources>

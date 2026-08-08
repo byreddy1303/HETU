@@ -1141,23 +1141,13 @@
     height: 36px;
   }
 
-  /* Luminous marker streak behind text. Enhances text legibility and contrast. */
+  /* Accent underline marker — no background, full text clarity. */
   .u-highlight {
-    background-image: linear-gradient(
-      100deg,
-      rgb(var(--color-highlight) / 0.08) 0%,
-      rgb(var(--color-highlight) / 0.38) 6%,
-      rgb(var(--color-highlight) / 0.32) 94%,
-      rgb(var(--color-highlight) / 0.08) 100%
-    );
-    background-size: 100% 88%;
-    background-position: 0 55%;
-    background-repeat: no-repeat;
-    border-radius: 4px;
-    padding: 0.05em 0.3em;
-    margin: 0 -0.15em;
-    box-decoration-break: clone;
-    -webkit-box-decoration-break: clone;
+    text-decoration: underline;
+    text-decoration-color: rgb(var(--color-highlight) / 0.85);
+    text-decoration-thickness: 2.5px;
+    text-underline-offset: 3px;
+    text-decoration-skip-ink: none;
   }
 
   /* Ledger margin-line: eucalyptus rule with breathing room. */

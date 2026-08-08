@@ -15,7 +15,11 @@ export default function Shell() {
       <Nav />
       <OfflineBadge className="fixed right-4 top-3 z-40" />
       <main className="native-shell-main pb-[calc(4.5rem+var(--safe-bottom))] md:pb-0 md:pl-[220px]">
-        <div className="u-shell-content mx-auto w-full max-w-[800px] px-4 py-6 md:py-8">
+        <div
+          className={`u-shell-content mx-auto w-full px-4 py-6 md:py-8 ${
+            pathname === '/' ? 'max-w-[1120px]' : 'max-w-[800px]'
+          }`}
+        >
           <motion.div
             className="air-page"
             key={pathname}

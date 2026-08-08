@@ -37,3 +37,18 @@ if (typeof window !== 'undefined') {
   Object.defineProperty(globalThis, 'localStorage', { value: ls, configurable: true });
   Object.defineProperty(globalThis, 'sessionStorage', { value: ss, configurable: true });
 }
+
+// Recharts' ResponsiveContainer observes its parent in real browsers. jsdom
+// has no layout engine or ResizeObserver, so a no-op observer is sufficient for
+// interaction tests that render the Dashboard around the chart.
+if (typeof globalThis.ResizeObserver === 'undefined') {
+  class ResizeObserverStub {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  }
+  Object.defineProperty(globalThis, 'ResizeObserver', {
+    value: ResizeObserverStub,
+    configurable: true
+  });
+}

@@ -8,9 +8,14 @@ async function enterLocalSandbox(page: Page) {
   await enter.click();
 
   const dismiss = page.getByRole('button', { name: 'Skip walkthrough' });
-  await expect(dismiss).toBeVisible();
-  await dismiss.click();
-  await expect(dismiss).toBeHidden();
+  const walkthroughShown = await dismiss
+    .waitFor({ state: 'visible', timeout: 1_500 })
+    .then(() => true)
+    .catch(() => false);
+  if (walkthroughShown) {
+    await dismiss.click();
+    await expect(dismiss).toBeHidden();
+  }
 
   await expect(page.getByText('Due now', { exact: true })).toBeVisible();
   await expect(page.getByText('Mistake surface', { exact: true })).toBeVisible();

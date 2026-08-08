@@ -190,3 +190,9 @@ F3.3 says the server calls `advance_reattempt(id, result)`. Doing that from the 
 **Chose**: capture each committed bank attempt as a versioned, immutable row containing the exact learner response, official key, bank/question snapshot, start/commit timestamps, and millisecond duration; keep known pre-fix rows explicitly marked as legacy.
 **Rejected**: relying only on the mutable bundled bank, storing rounded time alone, or silently treating earlier session-era `selected_answer` values as trustworthy.
 **Reason**: an honest attempt log must remain auditable across bank releases and retries without fabricating learner responses that cannot be recovered.
+
+## 2026-08-08 — Decision-first dashboard instrument panel
+
+**Chose**: widen only the desktop Dashboard, lead with one context-aware action, chart the trailing seven-day mistake surface, compress practice targets into one rail, and visualize the latest session as an outcome ring.
+**Rejected**: a cosmetic card reskin, adding new analytics pages, goal/streak widgets, and a dense grid of equally weighted statistics.
+**Reason**: the Dashboard should answer “what should I do next?” before it explains movement, while keeping due work, weekly focus, and session evidence visibly distinct.

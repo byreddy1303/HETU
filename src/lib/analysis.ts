@@ -82,6 +82,52 @@ export function mistakeSurfaceMovement(
   return { opened, mastered, net: opened - mastered };
 }
 
+export interface MistakeSurfacePoint {
+  date: string;
+  open: number;
+  opened: number;
+  mastered: number;
+}
+
+/**
+ * End-of-day open mistake surface for the trailing local-calendar window.
+ *
+ * The schema does not store a dedicated `mastered_at`, so a currently mastered
+ * row's final clean history entry is the best available close date. This is the
+ * same disclosed approximation used by `mistakeSurfaceTrend` above.
+ */
+export function mistakeSurfaceSeries(
+  reattempts: ReattemptRow[],
+  now: Date = new Date(),
+  timeZone = 'Asia/Kolkata',
+  days = 7
+): MistakeSurfacePoint[] {
+  const span = Math.max(1, Math.floor(days));
+  const end = calendarDateInTimeZone(now, timeZone);
+
+  return Array.from({ length: span }, (_, index) => addDaysISO(end, index - span + 1)).map(
+    (date) => {
+      let open = 0;
+      let opened = 0;
+      let mastered = 0;
+
+      for (const row of reattempts) {
+        const openedOn = calendarDateInTimeZone(row.created_at, timeZone);
+        if (openedOn === date) opened += 1;
+
+        const final = row.history.at(-1);
+        const masteredOn =
+          row.stage === 'MASTERED' && final?.result === 'clean' ? final.date : null;
+        if (masteredOn === date) mastered += 1;
+
+        if (openedOn <= date && (!masteredOn || masteredOn > date)) open += 1;
+      }
+
+      return { date, open, opened, mastered };
+    }
+  );
+}
+
 /** Buckets a session's questions by outcome. Returns every outcome key even if 0. */
 export function outcomeDistribution(questions: QuestionRow[]): Record<Outcome, number> {
   const empty = Object.fromEntries(OUTCOMES.map((o) => [o.code, 0])) as Record<Outcome, number>;

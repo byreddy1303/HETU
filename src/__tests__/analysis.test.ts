@@ -8,6 +8,7 @@ import {
   latestSession,
   mistakeSurfaceOpen,
   mistakeSurfaceMovement,
+  mistakeSurfaceSeries,
   mistakeSurfaceTrend,
   outcomeDistribution,
   activeDaysBack,
@@ -106,6 +107,35 @@ describe('mistakeSurfaceMovement', () => {
       })
     ];
     expect(mistakeSurfaceMovement(rows, now)).toEqual({ opened: 1, mastered: 1, net: 0 });
+  });
+});
+
+describe('mistakeSurfaceSeries', () => {
+  it('returns the trailing local days with end-of-day open counts', () => {
+    const now = new Date('2026-07-17T12:00:00Z');
+    const rows = [
+      ra({ id: 'older-open', created_at: '2026-07-10T09:00:00.000Z' }),
+      ra({ id: 'new-open', created_at: '2026-07-16T09:00:00.000Z' }),
+      ra({
+        id: 'closed',
+        stage: 'MASTERED',
+        created_at: '2026-07-12T09:00:00.000Z',
+        history: [{ date: '2026-07-16', result: 'clean' }]
+      })
+    ];
+
+    expect(mistakeSurfaceSeries(rows, now, 'UTC', 3)).toEqual([
+      { date: '2026-07-15', open: 2, opened: 0, mastered: 0 },
+      { date: '2026-07-16', open: 2, opened: 1, mastered: 1 },
+      { date: '2026-07-17', open: 2, opened: 0, mastered: 0 }
+    ]);
+  });
+
+  it('returns a stable seven-point zero series when there is no evidence', () => {
+    const series = mistakeSurfaceSeries([], new Date('2026-07-17T12:00:00Z'), 'UTC');
+    expect(series).toHaveLength(7);
+    expect(series.every((point) => point.open === 0)).toBe(true);
+    expect(series.at(-1)?.date).toBe('2026-07-17');
   });
 });
 

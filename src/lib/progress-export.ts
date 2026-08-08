@@ -5,6 +5,7 @@ import { loadAllDayPlans, type DayPlan } from '@/lib/planner-storage';
 import { computeReadiness } from '@/lib/readiness';
 import { SUBTOPICS_BY_SUBJECT } from '@/lib/subtopics';
 import {
+  selectCompletionsForUser,
   topicProgressId,
   useTopicProgressStore,
   type TopicCompletions
@@ -345,7 +346,10 @@ export async function collectProgressReport(
       pyqSessions,
       pyqAttempts,
       plannerDays: loadAllDayPlans(userId),
-      topicCompletions: useTopicProgressStore.getState().byUser[userId] ?? {}
+      topicCompletions: selectCompletionsForUser(
+        useTopicProgressStore.getState().byUser,
+        userId
+      )
     },
     { learnerName }
   );

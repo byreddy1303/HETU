@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   Check,
   ChevronDown,
@@ -18,7 +18,10 @@ import { haptic } from '@/lib/native';
 import { subjectInk } from '@/lib/subjectInk';
 import { SUBTOPICS_BY_SUBJECT } from '@/lib/subtopics';
 import { cn, formatDate, plural } from '@/lib/utils';
+import { currentUserId } from '@/stores/auth';
 import {
+  selectCompletionsForUser,
+  syncTopicProgressFromDb,
   topicProgressId,
   useTopicProgressStore,
   type TopicCompletions
@@ -82,10 +85,19 @@ function nextTopicFrom(
 export default function SyllabusTracker() {
   const { userId } = useAuth();
   const reduceMotion = useReducedMotion();
-  const completions = useTopicProgressStore(
-    (state) => (userId ? state.byUser[userId] : undefined) ?? EMPTY_COMPLETIONS
-  );
+  const byUser = useTopicProgressStore((state) => state.byUser);
   const setCompleted = useTopicProgressStore((state) => state.setCompleted);
+
+  const effectiveUserId = userId ?? currentUserId() ?? 'guest';
+
+  useEffect(() => {
+    void syncTopicProgressFromDb(effectiveUserId);
+  }, [effectiveUserId]);
+
+  const completions = useMemo(
+    () => selectCompletionsForUser(byUser, effectiveUserId),
+    [byUser, effectiveUserId]
+  );
   const summaries = useMemo(() => summariesFor(completions), [completions]);
   const nextTopic = useMemo(() => nextTopicFrom(summaries, completions), [summaries, completions]);
   const [query, setQuery] = useState('');
@@ -141,8 +153,7 @@ export default function SyllabusTracker() {
   }
 
   function toggleTopic(subject: string, topic: string, completed: boolean) {
-    if (!userId) return;
-    setCompleted(userId, topicProgressId(subject, topic), completed);
+    setCompleted(effectiveUserId, topicProgressId(subject, topic), completed);
     haptic(completed ? 'success' : 'selection');
   }
 

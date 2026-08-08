@@ -1,12 +1,16 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Bell, BellOff, CheckCircle2, Laptop, LockKeyhole, Smartphone } from 'lucide-react';
+import { Bell, BellOff, BellMinus, CheckCircle2, Laptop, LockKeyhole, Smartphone, Timer } from 'lucide-react';
 import { Card, CardBody, CardHeader } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import {
+  clearSnooze,
   disableBuddyNotifications,
   enableBuddyNotifications,
   getBuddyNotificationState,
-  type BuddyNotificationState
+  getSnoozeStatus,
+  snoozeNotifications,
+  type BuddyNotificationState,
+  type SnoozeStatus
 } from '@/lib/buddyNotifications';
 import { isNativeApp } from '@/lib/native';
 import { useAuthStore } from '@/stores/auth';
@@ -36,21 +40,40 @@ function deviceLabel(state: BuddyNotificationState | null): string {
   return 'This browser';
 }
 
+/** Returns the number of minutes from now until the start of the next calendar day. */
+function minutesUntilTomorrow(): number {
+  const now = new Date();
+  const tomorrow = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 0, 0, 0, 0);
+  return Math.ceil((tomorrow.getTime() - now.getTime()) / 60_000);
+}
+
 export default function BuddyNotificationsCard({ profile, sandbox }: Props) {
   const pushToast = useUiStore((state) => state.pushToast);
   const [state, setState] = useState<BuddyNotificationState | null>(null);
+  const [snooze, setSnooze] = useState<SnoozeStatus>({ active: false, quietUntil: null });
   const [busy, setBusy] = useState(false);
+  const [snoozeBusy, setSnoozeBusy] = useState(false);
 
   const refresh = useCallback(async () => {
     if (!profile || sandbox) return;
     setState(await getBuddyNotificationState());
   }, [profile, sandbox]);
 
+  const refreshSnooze = useCallback(async () => {
+    if (!profile || sandbox) return;
+    setSnooze(await getSnoozeStatus());
+  }, [profile, sandbox]);
+
   useEffect(() => {
     void refresh();
+    void refreshSnooze();
     window.addEventListener('focus', refresh);
-    return () => window.removeEventListener('focus', refresh);
-  }, [refresh]);
+    window.addEventListener('focus', refreshSnooze);
+    return () => {
+      window.removeEventListener('focus', refresh);
+      window.removeEventListener('focus', refreshSnooze);
+    };
+  }, [refresh, refreshSnooze]);
 
   if (!profile) return null;
 
@@ -79,6 +102,37 @@ export default function BuddyNotificationsCard({ profile, sandbox }: Props) {
         : `Buddy alerts are on for ${deviceLabel(state).toLowerCase()}.`,
       'success'
     );
+  }
+
+  async function handleSnooze(minutes: number) {
+    if (sandbox) {
+      pushToast('Buddy notifications require a signed-in account.', 'neutral');
+      return;
+    }
+    setSnoozeBusy(true);
+    const result = await snoozeNotifications(minutes);
+    setSnoozeBusy(false);
+    await refreshSnooze();
+    if (!result.ok) {
+      pushToast(result.error ?? 'Could not snooze notifications.', 'neutral');
+      return;
+    }
+    const hours = Math.floor(minutes / 60);
+    const label = hours >= 24 ? 'until tomorrow' : hours === 1 ? '1 hour' : `${hours} hours`;
+    pushToast(`Buddy alerts snoozed ${label} on this device.`, 'success');
+  }
+
+  async function handleClearSnooze() {
+    if (sandbox) return;
+    setSnoozeBusy(true);
+    const result = await clearSnooze();
+    setSnoozeBusy(false);
+    await refreshSnooze();
+    if (!result.ok) {
+      pushToast(result.error ?? 'Could not clear snooze.', 'neutral');
+      return;
+    }
+    pushToast('Buddy alerts resumed on this device.', 'success');
   }
 
   async function setPreview(value: boolean) {
@@ -164,6 +218,76 @@ export default function BuddyNotificationsCard({ profile, sandbox }: Props) {
           <DeliveryStep icon={<LockKeyhole size={13} />} label="Private route" detail="Your devices only" />
           <DeliveryStep icon={<Bell size={13} />} label="Phone + desktop" detail="Fast retry included" />
         </div>
+
+        {/* ── Snooze / quiet-hours section ── */}
+        {enabled && !sandbox && (
+          <section
+            id="buddy-notifications-snooze"
+            className="grid gap-3 rounded border border-border/70 bg-bg-overlay/25 px-4 py-3"
+          >
+            <div className="flex items-center gap-2">
+              {snooze.active ? (
+                <BellMinus size={14} strokeWidth={1.75} className="shrink-0 text-warn" />
+              ) : (
+                <Timer size={14} strokeWidth={1.75} className="shrink-0 text-text-faint" />
+              )}
+              <div className="min-w-0 flex-1">
+                <p className="text-[12.5px] font-medium text-text">
+                  {snooze.active ? 'Alerts snoozed on this device' : 'Snooze alerts'}
+                </p>
+                {snooze.active && snooze.quietUntil && (
+                  <p className="mt-0.5 text-[11.5px] text-warn">
+                    Quiet until{' '}
+                    {new Date(snooze.quietUntil).toLocaleTimeString(undefined, {
+                      hour: '2-digit',
+                      minute: '2-digit'
+                    })}
+                    {' · '}
+                    {new Date(snooze.quietUntil).toLocaleDateString(undefined, {
+                      month: 'short',
+                      day: 'numeric'
+                    })}
+                  </p>
+                )}
+                {!snooze.active && (
+                  <p className="mt-0.5 text-[11px] text-text-faint">
+                    Temporarily silence this device without disabling alerts everywhere.
+                  </p>
+                )}
+              </div>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {snooze.active ? (
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  onClick={() => void handleClearSnooze()}
+                  disabled={snoozeBusy}
+                >
+                  <Bell size={11} className="mr-1" />
+                  {snoozeBusy ? 'Resuming…' : 'Resume now'}
+                </Button>
+              ) : (
+                <>
+                  {[{ label: '1 hour', minutes: 60 }, { label: '3 hours', minutes: 180 }, { label: 'Until tomorrow', minutes: minutesUntilTomorrow() }].map(
+                    ({ label, minutes }) => (
+                      <Button
+                        key={label}
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => void handleSnooze(minutes)}
+                        disabled={snoozeBusy}
+                      >
+                        <BellMinus size={11} className="mr-1" />
+                        {label}
+                      </Button>
+                    )
+                  )}
+                </>
+              )}
+            </div>
+          </section>
+        )}
 
         <label className="flex items-start justify-between gap-4 border-t border-border pt-3">
           <span>

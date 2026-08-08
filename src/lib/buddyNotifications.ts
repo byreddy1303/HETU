@@ -126,7 +126,10 @@ async function registerNativeToken(): Promise<string> {
     visibility: 0,
     vibration: true,
     lights: true,
-    lightColor: '#98182B'
+    lightColor: '#98182B',
+    // 'default' instructs Android 8+ to use the system default notification sound.
+    // Without an explicit value some ROMs on Android 8+ silently play nothing.
+    sound: 'default'
   });
 
   return await new Promise<string>((resolve, reject) => {
@@ -304,4 +307,71 @@ export function routeFromPushData(data: unknown): string | null {
   const route = (data as { route?: unknown }).route;
   if (typeof route !== 'string' || !route.startsWith('/') || route.startsWith('//')) return null;
   return route;
+}
+
+// ---------------------------------------------------------------------------
+// Snooze / quiet-hours helpers
+// These call the set_push_quiet_hours RPC introduced in migration
+// 20260808000006_push_quiet_hours.sql and read push_quiet_until back from
+// the push_subscriptions table so the settings UI can show a countdown.
+// ---------------------------------------------------------------------------
+
+export interface SnoozeStatus {
+  /** true if push_quiet_until is set and still in the future. */
+  active: boolean;
+  /** ISO timestamp when the snooze ends, or null when not snoozed. */
+  quietUntil: string | null;
+}
+
+/**
+ * Snooze push alerts on this device for `minutes` minutes.
+ * Calls the set_push_quiet_hours RPC with the current device id.
+ * Returns ok:false with an error string on failure.
+ */
+export async function snoozeNotifications(
+  minutes: number
+): Promise<BuddyNotificationResult> {
+  if (!supabaseConfigured) {
+    return { ok: false, error: 'Sign in to manage notification snooze.' };
+  }
+  if (minutes <= 0) {
+    return { ok: false, error: 'Snooze duration must be at least 1 minute.' };
+  }
+  const { error } = await supabase.rpc('set_push_quiet_hours', {
+    p_device_id: getPushDeviceId(),
+    p_quiet_minutes: Math.min(Math.round(minutes), 2880)
+  });
+  if (error) return { ok: false, error: error.message };
+  return { ok: true };
+}
+
+/**
+ * Clear an active snooze immediately on this device.
+ */
+export async function clearSnooze(): Promise<BuddyNotificationResult> {
+  if (!supabaseConfigured) {
+    return { ok: false, error: 'Sign in to manage notification snooze.' };
+  }
+  const { error } = await supabase.rpc('set_push_quiet_hours', {
+    p_device_id: getPushDeviceId(),
+    p_quiet_minutes: 0
+  });
+  if (error) return { ok: false, error: error.message };
+  return { ok: true };
+}
+
+/**
+ * Fetch the current snooze status for this device from the server.
+ * Returns { active: false, quietUntil: null } when not snoozed or on error.
+ */
+export async function getSnoozeStatus(): Promise<SnoozeStatus> {
+  if (!supabaseConfigured) return { active: false, quietUntil: null };
+  const { data } = await supabase
+    .from('push_subscriptions')
+    .select('push_quiet_until')
+    .eq('device_id', getPushDeviceId())
+    .maybeSingle();
+  const quietUntil = (data as { push_quiet_until?: string | null } | null)?.push_quiet_until ?? null;
+  const active = Boolean(quietUntil) && new Date(quietUntil!).getTime() > Date.now();
+  return { active, quietUntil: active ? quietUntil : null };
 }

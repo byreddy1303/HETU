@@ -65,6 +65,8 @@ interface SubscriptionRow {
   native_token: string | null;
   active_buddy_id: string | null;
   last_seen_at: string;
+  /** ISO timestamp set by the snooze RPC; null when no snooze is active. */
+  push_quiet_until: string | null;
 }
 
 interface DeliveryRow {
@@ -133,7 +135,7 @@ function notificationCopy(message: MessageRow, sender: ProfileRow | null, showPr
   const body =
     message.kind === 'question'
       ? showPreview
-        ? 'Shared a question with you.'
+        ? 'Shared a question — tap to attempt it fresh.'
         : 'Sent you a new message.'
       : showPreview
         ? truncate(cleanText(message.body) || 'Sent you a new message.')
@@ -141,6 +143,8 @@ function notificationCopy(message: MessageRow, sender: ProfileRow | null, showPr
   return {
     title: senderName,
     body,
+    // kind is forwarded to the SW so it can show a distinct CTA for questions.
+    kind: message.kind,
     route: `/buddy?chat=${encodeURIComponent(message.buddy_id)}`
   };
 }
@@ -149,6 +153,13 @@ function activeInThisChat(subscription: SubscriptionRow, buddyId: string): boole
   if (subscription.active_buddy_id !== buddyId) return false;
   const lastSeen = Date.parse(subscription.last_seen_at);
   return Number.isFinite(lastSeen) && Date.now() - lastSeen < ACTIVE_CHAT_WINDOW_MS;
+}
+
+/** Returns true when the user has snoozed this device until a future time. */
+function isSnoozed(subscription: SubscriptionRow): boolean {
+  if (!subscription.push_quiet_until) return false;
+  const until = Date.parse(subscription.push_quiet_until);
+  return Number.isFinite(until) && Date.now() < until;
 }
 
 function serviceAccount(): ServiceAccount | null {
@@ -236,6 +247,8 @@ async function sendWebPush(
       JSON.stringify({
         title: copy.title,
         body: copy.body,
+        // kind lets the SW show a distinct CTA button for shared questions.
+        kind: copy.kind,
         route: copy.route,
         buddyId: message.buddy_id,
         messageId: message.id
@@ -282,6 +295,8 @@ async function sendNativePush(
           notification: { title: copy.title, body: copy.body },
           data: {
             route: copy.route,
+            // kind lets the native click handler know message type for routing.
+            kind: copy.kind,
             buddyId: message.buddy_id,
             messageId: message.id
           },
@@ -294,7 +309,28 @@ async function sendNativePush(
               tag: `buddy-${message.buddy_id}`,
               visibility: 'PRIVATE',
               default_sound: true,
-              default_vibrate_timings: true
+              default_vibrate_timings: true,
+              // badge count visible on the launcher icon (Android 8+).
+              notification_count: 1
+            }
+          },
+          // apns override delivers the notification correctly on iOS via Firebase.
+          // Requires the Firebase project to have an APNs key or certificate uploaded.
+          // Silently no-ops if APNs is not configured in the Firebase project.
+          apns: {
+            payload: {
+              aps: {
+                alert: { title: copy.title, body: copy.body },
+                sound: 'default',
+                badge: 1,
+                // content-available=1 allows the app to wake in the background.
+                'content-available': 1,
+                'mutable-content': 1
+              }
+            },
+            headers: {
+              'apns-priority': '10',
+              'apns-collapse-id': `buddy-${message.buddy_id.slice(0, 64)}`
             }
           }
         }
@@ -382,7 +418,7 @@ async function processJob(job: ClaimedJob): Promise<'completed' | 'retrying' | '
         admin
           .from('push_subscriptions')
           .select(
-            'id, platform, web_endpoint, web_p256dh, web_auth, native_token, active_buddy_id, last_seen_at'
+            'id, platform, web_endpoint, web_p256dh, web_auth, native_token, active_buddy_id, last_seen_at, push_quiet_until'
           )
           .eq('user_id', job.recipient_id)
           .eq('enabled', true)
@@ -437,7 +473,9 @@ async function processJob(job: ClaimedJob): Promise<'completed' | 'retrying' | '
       deliveries.map(async (delivery) => {
         const subscription = subscriptionById.get(delivery.subscription_id);
         if (!subscription) return;
-        if (activeInThisChat(subscription, message.buddy_id)) {
+        // Suppress if the user has the chat open on this device or has snoozed
+        // alerts. Both paths write 'suppressed' to the delivery row — no retry.
+        if (activeInThisChat(subscription, message.buddy_id) || isSnoozed(subscription)) {
           await admin
             .from('buddy_notification_deliveries')
             .update({

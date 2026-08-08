@@ -134,7 +134,7 @@ export default function Signup() {
             <p className="mt-2 text-[13px] leading-relaxed text-text-muted">
               {invited
                 ? 'Your invite is valid. Pick a username and a 6-digit PIN — those are the only two things you use to sign in.'
-                : 'AIR Journal is invite-only. Ask the owner for an invite — the link you receive drops you back here with your slot pre-filled.'}
+                : 'HETU is invite-only. Ask the owner for an invite — the link you receive drops you back here with your slot pre-filled.'}
             </p>
           </div>
 

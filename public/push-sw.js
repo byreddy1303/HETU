@@ -9,7 +9,7 @@ self.addEventListener('push', (event) => {
 
   const title = typeof payload.title === 'string' && payload.title.trim()
     ? payload.title.trim()
-    : 'AIR Journal';
+    : 'HETU';
   const body = typeof payload.body === 'string' && payload.body.trim()
     ? payload.body.trim()
     : 'Your buddy sent a message.';
@@ -21,8 +21,8 @@ self.addEventListener('push', (event) => {
   event.waitUntil(
     self.registration.showNotification(title, {
       body,
-      icon: '/air-mark-192.png',
-      badge: '/air-mark-192.png',
+      icon: '/hetu-mark-192.png',
+      badge: '/hetu-mark-192.png',
       tag: `buddy-${buddyId}`,
       renotify: true,
       timestamp: Date.now(),

@@ -220,12 +220,12 @@ export function pyqQuestionSnapshotDataUrl(question: PyqQuestion): string {
     )
   ];
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="720" viewBox="0 0 1200 720">
-  <rect width="1200" height="720" fill="#f1f5f0"/>
-  <rect x="22" y="22" width="1156" height="676" rx="18" fill="#fbfdfb" stroke="#d5e1d8"/>
+  <rect width="1200" height="720" fill="#f6f1e9"/>
+  <rect x="22" y="22" width="1156" height="676" rx="18" fill="#fffdf9" stroke="#e0d5cd"/>
   <style>
-    .heading{font:700 30px system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;fill:#19352f}
-    .meta{font:600 20px system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;fill:#2f6f5e}
-    .body{font:500 22px system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;fill:#50665f}
+    .heading{font:700 30px system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;fill:#1b191c}
+    .meta{font:600 20px system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;fill:#98182b}
+    .body{font:500 22px system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;fill:#67575d}
   </style>
   ${lines.join('\n  ')}
 </svg>`;

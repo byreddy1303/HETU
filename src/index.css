@@ -13,76 +13,74 @@
     --safe-bottom: var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px));
     --safe-left: var(--safe-area-inset-left, env(safe-area-inset-left, 0px));
 
-    /* Forest Ledger — daylight sheet. RGB channels keep Tailwind opacity
-       modifiers working while the entire semantic system changes at once. */
-    --color-bg: 241 245 240;
-    --color-bg-raised: 251 253 251;
-    --color-bg-overlay: 231 239 233;
-    --color-border: 213 225 216;
-    --color-border-hover: 184 201 189;
-    --color-text: 25 53 47;
-    --color-text-muted: 80 102 95;
-    --color-text-faint: 101 120 113;
-    --color-accent: 47 111 94;
-    --color-accent-hover: 38 94 80;
-    --color-accent-faint: 224 235 230;
+    /* HETU daylight — warm paper, garnet source mark, antique-gold detail. */
+    --color-bg: 246 241 233;
+    --color-bg-raised: 255 253 249;
+    --color-bg-overlay: 239 231 224;
+    --color-border: 224 213 205;
+    --color-border-hover: 199 182 174;
+    --color-text: 27 25 28;
+    --color-text-muted: 103 87 93;
+    --color-text-faint: 125 108 114;
+    --color-accent: 152 24 43;
+    --color-accent-hover: 126 16 34;
+    --color-accent-faint: 246 226 229;
     --color-accent-contrast: 255 255 255;
-    --color-success: 79 124 69;
-    --color-success-faint: 229 237 226;
+    --color-success: 72 117 76;
+    --color-success-faint: 230 238 228;
     --color-success-contrast: 255 255 255;
-    --color-danger: 184 80 69;
-    --color-danger-faint: 244 231 229;
+    --color-danger: 185 59 63;
+    --color-danger-faint: 247 230 230;
     --color-danger-contrast: 255 255 255;
-    --color-warn: 138 91 19;
-    --color-warn-faint: 243 234 216;
+    --color-warn: 145 101 32;
+    --color-warn-faint: 246 237 217;
     --color-warn-contrast: 255 255 255;
-    --color-guess: 103 81 143;
-    --color-guess-faint: 235 231 241;
+    --color-guess: 105 78 118;
+    --color-guess-faint: 239 232 242;
     --color-guess-contrast: 255 255 255;
-    --color-highlight: 243 213 138;
-    --color-highlight-contrast: 25 53 47;
-    --color-ink-cobalt: 55 108 140;
-    --color-ink-teal: 47 111 94;
-    --color-ink-violet: 103 81 143;
-    --color-ink-rose: 169 76 96;
-    --color-ink-marigold: 138 91 19;
-    --color-ink-slate: 80 102 95;
-    --color-table-tint: 47 111 94;
-    --color-scrim: 10 23 19;
+    --color-highlight: 229 199 132;
+    --color-highlight-contrast: 27 25 28;
+    --color-ink-cobalt: 69 94 139;
+    --color-ink-teal: 54 112 105;
+    --color-ink-violet: 105 78 118;
+    --color-ink-rose: 152 24 43;
+    --color-ink-marigold: 145 101 32;
+    --color-ink-slate: 103 87 93;
+    --color-table-tint: 152 24 43;
+    --color-scrim: 25 14 18;
     --ledger-line-opacity: 0.035;
     --grain-opacity: 0.016;
     --table-stripe-opacity: 0.025;
     --table-hover-opacity: 0.085;
-    --shadow-sm: 0 1px 2px rgb(25 53 47 / 0.08);
-    --shadow-card: 0 10px 28px -18px rgb(25 53 47 / 0.34), 0 1px 3px rgb(25 53 47 / 0.08);
-    --shadow-lift: 0 18px 42px -20px rgb(25 53 47 / 0.38), 0 4px 12px -6px rgb(25 53 47 / 0.16);
-    --shadow-press: inset 0 2px 4px rgb(25 53 47 / 0.14);
-    --shadow-key: 0 2px 0 rgb(25 63 53);
-    --shadow-key-hover: 0 3px 0 rgb(25 63 53);
-    --shadow-nav: 0 -2px 12px rgb(25 53 47 / 0.08);
-    --shadow-native-card: 0 10px 30px rgb(25 53 47 / 0.1);
-    --shadow-native-soft: 0 4px 16px rgb(25 53 47 / 0.08);
-    --shadow-native-rail: 0 -8px 28px rgb(25 53 47 / 0.1);
-    --shadow-native-heatmap: 0 7px 22px rgb(25 53 47 / 0.07);
-    --shadow-image: 0 2px 8px rgb(25 53 47 / 0.14);
-    --shadow-stamp: inset 0 0 0 1px rgb(47 111 94 / 0.16);
+    --shadow-sm: 0 1px 2px rgb(54 28 37 / 0.08);
+    --shadow-card: 0 10px 28px -18px rgb(72 31 42 / 0.3), 0 1px 3px rgb(54 28 37 / 0.08);
+    --shadow-lift: 0 18px 42px -20px rgb(72 31 42 / 0.34), 0 4px 12px -6px rgb(54 28 37 / 0.15);
+    --shadow-press: inset 0 2px 4px rgb(72 31 42 / 0.13);
+    --shadow-key: 0 2px 0 rgb(102 13 29);
+    --shadow-key-hover: 0 3px 0 rgb(102 13 29);
+    --shadow-nav: 0 -2px 12px rgb(72 31 42 / 0.08);
+    --shadow-native-card: 0 10px 30px rgb(72 31 42 / 0.1);
+    --shadow-native-soft: 0 4px 16px rgb(72 31 42 / 0.08);
+    --shadow-native-rail: 0 -8px 28px rgb(72 31 42 / 0.1);
+    --shadow-native-heatmap: 0 7px 22px rgb(72 31 42 / 0.07);
+    --shadow-image: 0 2px 8px rgb(72 31 42 / 0.14);
+    --shadow-stamp: inset 0 0 0 1px rgb(152 24 43 / 0.16);
   }
 
   html[data-theme='dark'] {
-    /* Forest Ledger after dusk: neutral graphite sheets let each annotation
-       ink keep its own identity instead of tinting the whole app green. */
-    --color-bg: 15 18 22;
-    --color-bg-raised: 23 27 33;
-    --color-bg-overlay: 34 40 50;
-    --color-border: 53 62 73;
-    --color-border-hover: 74 86 100;
-    --color-text: 238 242 245;
-    --color-text-muted: 178 187 197;
-    --color-text-faint: 140 152 165;
-    --color-accent: 117 185 163;
-    --color-accent-hover: 139 202 181;
-    --color-accent-faint: 36 58 52;
-    --color-accent-contrast: 11 36 28;
+    /* HETU after dusk: ink-black sheets with a softened garnet accent. */
+    --color-bg: 20 17 19;
+    --color-bg-raised: 29 25 28;
+    --color-bg-overlay: 43 36 40;
+    --color-border: 66 54 60;
+    --color-border-hover: 91 73 81;
+    --color-text: 246 241 233;
+    --color-text-muted: 200 186 190;
+    --color-text-faint: 161 143 149;
+    --color-accent: 226 105 124;
+    --color-accent-hover: 239 130 147;
+    --color-accent-faint: 76 35 45;
+    --color-accent-contrast: 45 10 17;
     --color-success: 146 188 125;
     --color-success-faint: 40 58 42;
     --color-success-contrast: 16 35 14;
@@ -100,10 +98,10 @@
     --color-ink-cobalt: 120 173 210;
     --color-ink-teal: 117 185 163;
     --color-ink-violet: 186 167 215;
-    --color-ink-rose: 222 135 158;
+    --color-ink-rose: 226 105 124;
     --color-ink-marigold: 222 179 107;
     --color-ink-slate: 170 181 192;
-    --color-table-tint: 120 173 210;
+    --color-table-tint: 226 105 124;
     --color-scrim: 0 0 0;
     --ledger-line-opacity: 0;
     --grain-opacity: 0.014;
@@ -121,7 +119,7 @@
     --shadow-native-rail: 0 -8px 30px rgb(0 0 0 / 0.4);
     --shadow-native-heatmap: 0 8px 24px rgb(0 0 0 / 0.3);
     --shadow-image: 0 2px 10px rgb(0 0 0 / 0.48);
-    --shadow-stamp: inset 0 0 0 1px rgb(111 177 153 / 0.28);
+    --shadow-stamp: inset 0 0 0 1px rgb(226 105 124 / 0.28);
   }
 
   html {

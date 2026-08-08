@@ -1,4 +1,5 @@
 import { motion, useReducedMotion } from 'motion/react';
+import Brand from '@/components/shared/Brand';
 
 export default function LoadingScreen() {
   const reduceMotion = useReducedMotion();
@@ -10,10 +11,8 @@ export default function LoadingScreen() {
         transition={{ duration: 0.16, delay: reduceMotion ? 0 : 0.1 }}
         className="text-center"
       >
-        <p className="font-display text-[22px] font-bold tracking-tight text-text">
-          AIR<span className="text-accent">.</span>
-        </p>
-        <p className="u-label mt-1">loading</p>
+        <Brand size="lg" className="justify-center" />
+        <p className="u-label mt-3">finding the reason</p>
       </motion.div>
     </div>
   );

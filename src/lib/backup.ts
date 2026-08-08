@@ -39,7 +39,7 @@ export async function exportAll(profile: UserRow | null): Promise<BackupEnvelope
 /** Prompt the browser to save the envelope as a JSON file. */
 export function downloadEnvelope(env: BackupEnvelope, filename?: string): void {
   const stamp = env.exported_at.slice(0, 10);
-  const name = filename ?? `air-journal-${stamp}.json`;
+  const name = filename ?? `hetu-${stamp}.json`;
   const blob = new Blob([JSON.stringify(env, null, 2)], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');

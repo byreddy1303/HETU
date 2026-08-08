@@ -1,5 +1,5 @@
 {
-  "name": "air-journal",
+  "name": "hetu",
   "private": true,
   "version": "0.1.0",
   "type": "module",
@@ -25,8 +25,8 @@
     "native:sync": "npm run build:native && cap sync android",
     "android:open": "npm run native:sync && cap open android",
     "android:run": "npm run native:sync && cap run android",
-    "android:apk": "npm run native:sync && cd android && ./gradlew assembleDebug && cp app/build/outputs/apk/debug/app-debug.apk app/build/outputs/apk/debug/airjournal.apk",
-    "android:release": "npm run native:sync && cd android && ./gradlew assembleRelease && cp app/build/outputs/apk/release/app-release.apk app/build/outputs/apk/release/airjournal-release.apk",
+    "android:apk": "npm run native:sync && cd android && ./gradlew assembleDebug && cp app/build/outputs/apk/debug/app-debug.apk app/build/outputs/apk/debug/hetu.apk",
+    "android:release": "npm run native:sync && cd android && ./gradlew assembleRelease && cp app/build/outputs/apk/release/app-release.apk app/build/outputs/apk/release/hetu-release.apk",
     "android:live:release": "CAPACITOR_LIVE_SERVER_URL=https://air-journal-omega.vercel.app npm run native:sync && bash scripts/build-live-android-release.sh",
     "android:bundle": "npm run native:sync && cd android && ./gradlew bundleRelease"
   },

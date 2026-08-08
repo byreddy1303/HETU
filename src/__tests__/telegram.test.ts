@@ -78,7 +78,7 @@ describe('Telegram daily digest', () => {
     const message = renderTelegramDigest({
       dateLabel: 'TUESDAY · 21 JULY',
       quote: 'Your competition is still deciding. You already have the map.',
-      quoteAttribution: 'AIR Journal',
+      quoteAttribution: 'HETU',
       sessions: [
         {
           subject: 'Operating Systems',
@@ -101,7 +101,7 @@ describe('Telegram daily digest', () => {
     });
 
     expect(message).toContain('<b>TUESDAY · 21 JULY</b>');
-    expect(message).toContain('— AIR Journal');
+    expect(message).toContain('— HETU');
     expect(message).toContain("<b>TODAY'S PLAN · 2h 30m</b>");
     expect(message).toContain('<b>01 · Operating Systems</b>');
     expect(message).toContain('Revise paging &lt; traps');
@@ -113,7 +113,7 @@ describe('Telegram daily digest', () => {
   it('renders a useful connection test without needing a day plan', () => {
     const message = renderTelegramConnectionTest();
 
-    expect(message).toContain('<b>AIR JOURNAL · CONNECTED</b>');
+    expect(message).toContain('<b>HETU · CONNECTED</b>');
     expect(message).toContain('Telegram delivery is working.');
     expect(message).toContain('<b>No plan. No noise.</b>');
   });
@@ -122,7 +122,7 @@ describe('Telegram daily digest', () => {
     const message = renderTelegramTodayUpdate({
       isoDate: '2026-07-22',
       quote: 'The hard set should recognise you first.',
-      quoteAttribution: 'AIR Journal',
+      quoteAttribution: 'HETU',
       sessions: [
         {
           subject: 'Custom...',
@@ -140,7 +140,7 @@ describe('Telegram daily digest', () => {
       ]
     });
 
-    expect(message).toContain('<b>AIR JOURNAL · TODAY</b>');
+    expect(message).toContain('<b>HETU · TODAY</b>');
     expect(message).toContain('<b>WEDNESDAY · 22 JULY</b>');
     expect(message).toContain("<b>TODAY'S PLAN · 6h</b>");
     expect(message).toContain('Compiler &lt; Design');
@@ -182,7 +182,7 @@ describe('Telegram daily digest', () => {
       ]
     });
 
-    expect(message).toContain('<b>AIR JOURNAL · TIMETABLE</b>');
+    expect(message).toContain('<b>HETU · TIMETABLE</b>');
     expect(message).toContain('<b>WEEK OF 20 JULY 2026</b>');
     expect(message).toContain('<b>5 SESSIONS · 9h 30m</b>');
     expect(message).toContain('<b>TUE · 21 JUL · TODAY · 8h</b>');
@@ -215,7 +215,7 @@ describe('Telegram daily digest', () => {
       ]
     });
 
-    expect(message).toContain('<b>AIR JOURNAL · TOMORROW</b>');
+    expect(message).toContain('<b>HETU · TOMORROW</b>');
     expect(message).toContain('<b>WEDNESDAY · 22 JULY</b>');
     expect(message).toContain('<b>2 SESSIONS · 2h 30m</b>');
     expect(message).toContain('Deadlocks &amp; synchronization');
@@ -262,7 +262,7 @@ describe('Telegram daily digest', () => {
     const result = await sendTelegramMessage({
       token: 'test-token',
       chatId: 123456,
-      text: '<b>AIR Journal</b>',
+      text: '<b>HETU</b>',
       appUrl: 'https://air-journal-omega.vercel.app/planner?date=2026-07-22',
       fetcher
     });
@@ -274,12 +274,12 @@ describe('Telegram daily digest', () => {
     expect(body).toMatchObject({
       chat_id: '123456',
       parse_mode: 'HTML',
-      text: '<b>AIR Journal</b>',
+      text: '<b>HETU</b>',
       reply_markup: {
         inline_keyboard: [
           [
             {
-              text: 'Open AIR Journal',
+              text: 'Open HETU',
               url: 'https://air-journal-omega.vercel.app/planner?date=2026-07-22'
             }
           ]

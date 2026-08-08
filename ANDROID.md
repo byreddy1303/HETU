@@ -1,6 +1,6 @@
-# AIR Journal for Android
+# HETU for Android
 
-AIR Journal uses Capacitor to package the existing React application as a native Android app. The web/PWA and Android builds share the same components, Dexie database, sync engine, authentication, and tests. The APK contains the UI bundle locally; it is not a remote website inside a thin browser.
+HETU uses Capacitor to package the existing React application as a native Android app. The web/PWA and Android builds share the same components, Dexie database, sync engine, authentication, and tests. The APK contains the UI bundle locally; it is not a remote website inside a thin browser.
 
 The user-directed `android:live:release` variant is the exception: it is a signed shell pinned to `https://air-journal-omega.vercel.app`. It receives React, CSS, and content updates from Vercel without another APK installation. It requires an online first launch, then uses the production service worker for cached offline launches. Native code and plugin changes still require a new signed APK.
 
@@ -37,13 +37,13 @@ npm run android:apk
 The debug APK is written to:
 
 ```text
-android/app/build/outputs/apk/debug/airjournal.apk
+android/app/build/outputs/apk/debug/hetu.apk
 ```
 
 Install it on a connected device with Android Studio, or with:
 
 ```bash
-adb install -r android/app/build/outputs/apk/debug/airjournal.apk
+adb install -r android/app/build/outputs/apk/debug/hetu.apk
 ```
 
 For iterative device work, use `npm run android:run`. To inspect the native project, use `npm run android:open`.
@@ -80,7 +80,7 @@ AIR_VERSION_CODE=1 AIR_VERSION_NAME=1.0.0 npm run android:release
 The direct-install release artifact is:
 
 ```text
-android/app/build/outputs/apk/release/airjournal-release.apk
+android/app/build/outputs/apk/release/hetu-release.apk
 ```
 
 For a Play Store bundle, run `npm run android:bundle`. The artifact is:
@@ -104,14 +104,14 @@ AIR_VERSION_CODE=4 AIR_VERSION_NAME=1.1.1 npm run android:live:release
 The artifact is:
 
 ```text
-android/app/build/outputs/apk/release/airjournal-live-release.apk
+android/app/build/outputs/apk/release/hetu-live-release.apk
 ```
 
 For devices that already have the original direct-share debug-signed APK, use the
 matching optimized artifact instead so Android can upgrade it without uninstalling:
 
 ```text
-android/app/build/outputs/apk/release/airjournal-live-friend.apk
+android/app/build/outputs/apk/release/hetu-live-friend.apk
 ```
 
 After this APK is installed once, normal web releases are delivered by pushing a verified commit to `main`; Vercel updates the production origin and the app checks on launch/resume and every 15 minutes while open. Do not use this path for native permission, plugin, or signing changes.

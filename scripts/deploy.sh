@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# scripts/deploy.sh — One-shot production deploy for AIR Journal backend.
+# scripts/deploy.sh — One-shot production deploy for HETU backend.
 #
 # Prerequisites (do these once, in a browser):
 #   1. Sign up on Supabase (https://supabase.com) and create a project.
@@ -80,23 +80,23 @@ declare
 begin
   select id into project_url_id from vault.secrets where name = 'air_journal_project_url' limit 1;
   if project_url_id is null then
-    perform vault.create_secret('${project_url}', 'air_journal_project_url', 'AIR Journal Edge Function base URL');
+    perform vault.create_secret('${project_url}', 'air_journal_project_url', 'HETU Edge Function base URL');
   else
-    perform vault.update_secret(project_url_id, '${project_url}', 'air_journal_project_url', 'AIR Journal Edge Function base URL');
+    perform vault.update_secret(project_url_id, '${project_url}', 'air_journal_project_url', 'HETU Edge Function base URL');
   end if;
 
   select id into cron_secret_id from vault.secrets where name = 'air_journal_digest_cron_secret' limit 1;
   if cron_secret_id is null then
-    perform vault.create_secret('${digest_cron_secret}', 'air_journal_digest_cron_secret', 'AIR Journal daily digest cron credential');
+    perform vault.create_secret('${digest_cron_secret}', 'air_journal_digest_cron_secret', 'HETU daily digest cron credential');
   else
-    perform vault.update_secret(cron_secret_id, '${digest_cron_secret}', 'air_journal_digest_cron_secret', 'AIR Journal daily digest cron credential');
+    perform vault.update_secret(cron_secret_id, '${digest_cron_secret}', 'air_journal_digest_cron_secret', 'HETU daily digest cron credential');
   end if;
 
   select id into push_cron_secret_id from vault.secrets where name = 'air_journal_push_cron_secret' limit 1;
   if push_cron_secret_id is null then
-    perform vault.create_secret('${push_cron_secret}', 'air_journal_push_cron_secret', 'AIR Journal Buddy push retry credential');
+    perform vault.create_secret('${push_cron_secret}', 'air_journal_push_cron_secret', 'HETU Buddy push retry credential');
   else
-    perform vault.update_secret(push_cron_secret_id, '${push_cron_secret}', 'air_journal_push_cron_secret', 'AIR Journal Buddy push retry credential');
+    perform vault.update_secret(push_cron_secret_id, '${push_cron_secret}', 'air_journal_push_cron_secret', 'HETU Buddy push retry credential');
   end if;
 end
 \$vault\$;"

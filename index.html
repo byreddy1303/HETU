@@ -2,9 +2,13 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/air-mark.svg" />
+    <link rel="icon" type="image/png" href="/hetu-mark-192.png" />
+    <link rel="apple-touch-icon" href="/hetu-apple-touch-icon.png" />
+    <link rel="preload" as="image" href="/brand/hetu-mark.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="theme-color" content="#f1f5f0" />
+    <meta name="theme-color" content="#f6f1e9" />
+    <meta name="application-name" content="HETU" />
+    <meta name="apple-mobile-web-app-title" content="HETU" />
     <script>
       (() => {
         let mode = 'system';
@@ -23,10 +27,10 @@
         const theme = mode === 'system' ? (prefersDark ? 'dark' : 'light') : mode;
         document.documentElement.dataset.theme = theme;
         document.querySelector('meta[name="theme-color"]').content =
-          theme === 'dark' ? '#0F1216' : '#F1F5F0';
+          theme === 'dark' ? '#141113' : '#F6F1E9';
       })();
     </script>
-    <title>AIR Journal</title>
+    <title>HETU</title>
   </head>
   <body class="bg-bg text-text antialiased">
     <div id="root"></div>

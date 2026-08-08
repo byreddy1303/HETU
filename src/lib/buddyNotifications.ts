@@ -126,7 +126,7 @@ async function registerNativeToken(): Promise<string> {
     visibility: 0,
     vibration: true,
     lights: true,
-    lightColor: '#2F6F5E'
+    lightColor: '#98182B'
   });
 
   return await new Promise<string>((resolve, reject) => {

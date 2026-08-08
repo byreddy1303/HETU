@@ -13,9 +13,9 @@ if (liveServerUrl) {
 
 const config: CapacitorConfig = {
   appId: 'in.airjournal.app',
-  appName: 'AIR Journal',
+  appName: 'HETU',
   webDir: 'dist',
-  backgroundColor: '#F1F5F0',
+  backgroundColor: '#F6F1E9',
   loggingBehavior: 'production',
   server: {
     ...(liveServerUrl ? { url: liveServerUrl } : {}),
@@ -23,7 +23,7 @@ const config: CapacitorConfig = {
     cleartext: false
   },
   android: {
-    backgroundColor: '#F1F5F0',
+    backgroundColor: '#F6F1E9',
     allowMixedContent: false,
     webContentsDebuggingEnabled: false
   },
@@ -37,7 +37,7 @@ const config: CapacitorConfig = {
       launchAutoHide: true,
       launchShowDuration: 500,
       launchFadeOutDuration: 180,
-      backgroundColor: '#F1F5F0',
+      backgroundColor: '#F6F1E9',
       showSpinner: false
     },
     PushNotifications: {

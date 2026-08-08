@@ -1,4 +1,4 @@
-# AIR Journal
+# HETU
 
 Local-first, multi-user GATE PYQ analysis app. Captures every solved question as structured data (outcome / pattern / trigger / root cause), schedules spaced re-attempts, supports focused one-to-one buddy study, and surfaces one weekly upstream weakness. An optional Telegram bot can deliver one daily study-only digest.
 
@@ -117,7 +117,7 @@ After the first Vercel deploy, put the resulting URL into `.deploy.env` as `VITE
 
 ## Android
 
-AIR Journal ships from the same codebase as a Capacitor Android app. Create `.env.capacitor.local` from the template, then run:
+HETU ships from the same codebase as a Capacitor Android app. Create `.env.capacitor.local` from the template, then run:
 
 ```bash
 npm run android:apk

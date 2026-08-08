@@ -206,7 +206,7 @@ export default function Settings() {
               hint={
                 isNativeApp
                   ? 'Subtle taps for selections, completed work, and errors.'
-                  : 'Used when AIR Journal runs as the Android app.'
+                  : 'Used when HETU runs as the Android app.'
               }
               value={prefs.hapticsEnabled}
               onChange={(v) => prefs.set('hapticsEnabled', v)}
@@ -287,7 +287,7 @@ export default function Settings() {
         </CardBody>
       </Card>
 
-      <ProgressExportCard userId={userId} learnerName={profile?.name ?? 'AIR Journal learner'} />
+      <ProgressExportCard userId={userId} learnerName={profile?.name ?? 'HETU learner'} />
 
       {/* --- Profile (compact) -------------------------------------------- */}
       <ProfileCard

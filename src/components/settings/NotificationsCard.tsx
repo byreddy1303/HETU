@@ -221,7 +221,7 @@ export default function NotificationsCard({ profile, sandbox }: Props) {
         <div className="flex items-start gap-3">
           <Bell size={15} strokeWidth={1.75} className="mt-0.5 shrink-0 text-accent" />
           <p className="text-[12.5px] leading-relaxed text-text-muted">
-            Configure everything here. On days with a recorded study plan, AIR Journal sends one
+            Configure everything here. On days with a recorded study plan, HETU sends one
             private Telegram message at your chosen local time. The bot token stays on the server
             and is never entered in the website.
           </p>

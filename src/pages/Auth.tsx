@@ -67,15 +67,13 @@ export default function Auth() {
           transition={{ duration: 0.28, ease: 'easeOut' }}
           className="native-auth-panel u-panel relative w-full max-w-[400px] p-8"
         >
-          <span className="u-stamp absolute right-6 top-7">gate 2027</span>
-
-          <div className="u-margin-line flex items-center gap-3">
-            <BrandMark className="h-14 w-14" />
+          <div className="u-margin-line flex items-center gap-4">
+            <BrandMark className="h-16 w-auto" />
             <div>
-              <h1 className="font-display text-[38px] font-bold leading-none tracking-tight">
-                AIR<span className="text-accent">.</span>
+              <h1 className="font-sans text-[32px] font-semibold uppercase leading-none tracking-[0.18em]">
+                HETU
               </h1>
-              <p className="u-label mt-2">the rank notebook</p>
+              <p className="u-label mt-2">find the reason</p>
             </div>
           </div>
           <div className="pl-6">

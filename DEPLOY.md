@@ -1,6 +1,6 @@
 # DEPLOY.md — Production deployment walkthrough
 
-Follow this document top-to-bottom to take AIR Journal from a fresh clone to a working production URL with a functional access-request pipeline. Every step is idempotent — you can run the whole thing again to roll changes.
+Follow this document top-to-bottom to take HETU from a fresh clone to a working production URL with a functional access-request pipeline. Every step is idempotent — you can run the whole thing again to roll changes.
 
 ## 0. Prerequisites
 
@@ -61,7 +61,7 @@ Every secret below must be present before the app can function end-to-end.
 ```bash
 npx supabase secrets set \
   RESEND_API_KEY='re_...'     \
-  MAIL_FROM='AIR Journal <no-reply@yourdomain.com>' \
+  MAIL_FROM='HETU <no-reply@yourdomain.com>' \
   OWNER_EMAIL='byreddy1303@gmail.com'               \
   VITE_APP_URL='https://your-app.vercel.app'
 ```
@@ -153,7 +153,7 @@ Supabase Dashboard → Database → Cron. Add:
 
 - Access requests: 1 pending per email per calendar day (DB unique index).
 - Buddy requests: server-enforced daily limit and 24-hour cooldown after a decline.
-- Resend free tier: 3000 mails/month. At the volumes AIR Journal operates, this is comfortable.
+- Resend free tier: 3000 mails/month. At the volumes HETU operates, this is comfortable.
 - Telegram Bot API delivery is free. Two daily recipients produce about 730 messages per year.
 
 ## 11. Ongoing ops

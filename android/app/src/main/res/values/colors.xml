@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#2F6F5E</color>
-    <color name="colorPrimaryDark">#F1F5F0</color>
-    <color name="colorAccent">#2F6F5E</color>
-    <color name="airPaper">#F1F5F0</color>
-    <color name="airInk">#19352F</color>
+    <color name="colorPrimary">#98182B</color>
+    <color name="colorPrimaryDark">#F6F1E9</color>
+    <color name="colorAccent">#98182B</color>
+    <color name="hetuPaper">#F6F1E9</color>
+    <color name="hetuInk">#1B191C</color>
+    <color name="hetuGold">#C69A43</color>
 </resources>

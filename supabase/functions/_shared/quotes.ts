@@ -1,5 +1,5 @@
 // Deterministic pick of one compact, high-energy quote per calendar day.
-// Most lines are original AIR Journal copy. The four character quotes are
+// Most lines are original HETU copy. The four character quotes are
 // deliberately short, accurately attributed, and kept as a small accent.
 
 export interface QuotePreset {
@@ -9,7 +9,7 @@ export interface QuotePreset {
 
 const original = (text: string): QuotePreset => ({
   text,
-  attribution: 'AIR Journal'
+  attribution: 'HETU'
 });
 
 export const QUOTES: readonly QuotePreset[] = [

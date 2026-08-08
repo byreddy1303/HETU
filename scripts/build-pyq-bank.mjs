@@ -22,7 +22,7 @@ const SEARCH_URL = `${SOURCE_ROOT}/question-search-index.json`;
 const ANSWERS_URL = `${SOURCE_ROOT}/data/answers/answers_by_question_uid_v1.json`;
 const UNSUPPORTED_URL = `${SOURCE_ROOT}/data/answers/unsupported_question_uids_v1.json`;
 const EXAMSIDE_ROOT = 'https://questions.examside.com';
-const USER_AGENT = 'AIR Journal personal PYQ archive builder/1.0';
+const USER_AGENT = 'HETU personal PYQ archive builder/1.0';
 const IMAGE_OVERRIDES = new Map([
   [
     'http://gatecse.in/w/images/c/c5/2012_12.png',
@@ -121,7 +121,7 @@ const EXAMSIDE_CSE_SUBJECTS = {
   'computer-organization': ['coa', 'COA']
 };
 
-// ExamSIDE's chapter pages are broader than AIR Journal's GATE CSE Digital Logic
+// ExamSIDE's chapter pages are broader than HETU's GATE CSE Digital Logic
 // syllabus. Every exclusion here is audited from the question text; converter,
 // memory, logic-family, communication-code, and architecture questions are never
 // admitted merely because a source site filed them below a digital heading.
@@ -1013,7 +1013,7 @@ async function main() {
           }
         ],
         notes: [
-          'Question content is bundled for the private, invite-only AIR Journal practice experience.',
+          'Question content is bundled for the private, invite-only HETU practice experience.',
           'ECE and EE supplements are restricted to the project topics: Number System, Boolean Algebra, Combinational Circuit, and Sequential Circuit.',
           'Converter, semiconductor-memory, logic-family, microprocessor, communication-code, and architecture questions are excluded.',
           'AMBIGUOUS, MARKS_TO_ALL, and UNSUPPORTED records are never assigned an invented answer.'

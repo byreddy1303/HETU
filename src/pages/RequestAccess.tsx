@@ -1,5 +1,5 @@
 // Public landing + access-request form. Rendered outside RequireAuth.
-// Sells what AIR Journal is in one screen, then lets an outsider ask to join.
+// Sells what HETU is in one screen, then lets an outsider ask to join.
 // The owner receives a mail and decides from Settings → Access requests.
 import { useMemo, useRef, useState, type FormEvent, type ReactNode } from 'react';
 import { Link, Navigate } from 'react-router-dom';
@@ -148,7 +148,7 @@ export default function RequestAccess() {
                 </Field>
 
                 <Field
-                  label="Why AIR Journal?"
+                  label="Why HETU?"
                   htmlFor="ra-purpose"
                   hint={`One paragraph is plenty. ${purposeLen}/${PURPOSE_MAX}`}
                   hintTone={purposeValid || purposeLen === 0 ? 'faint' : 'warn'}
@@ -231,11 +231,11 @@ function Pitch({ daysLeft }: { daysLeft: number }) {
       className="u-panel relative p-8"
     >
       <div className="u-margin-line">
-        <span className="u-label text-accent">the rank notebook</span>
+        <span className="u-label text-accent">find the reason</span>
         <div className="mt-2 flex items-center gap-3">
-          <BrandMark className="h-14 w-14" />
-          <h1 className="font-display text-[38px] font-bold leading-none tracking-tight text-text">
-            AIR<span className="text-accent">.</span>
+          <BrandMark className="h-14 w-auto" />
+          <h1 className="font-sans text-[32px] font-semibold uppercase leading-none tracking-[0.18em] text-text">
+            HETU
           </h1>
         </div>
         <p className="mt-3 text-[14.5px] leading-relaxed text-text-muted">
@@ -259,9 +259,9 @@ function Pitch({ daysLeft }: { daysLeft: number }) {
       </ul>
       <div className="u-rule my-6" />
       <p className="text-[12px] leading-relaxed text-text-faint">
-        AIR Journal is invite-only on purpose: it's a quiet tool built for a narrow use case, not a
-        product. You ask; a human replies. T−<span className="u-num text-text-muted">{daysLeft}</span> days to
-        the exam.
+        HETU is invite-only on purpose: it is a quiet tool built for one demanding use case, not
+        an engagement feed. You ask; a human replies. T−
+        <span className="u-num text-text-muted">{daysLeft}</span> days to the exam.
       </p>
     </motion.div>
   );

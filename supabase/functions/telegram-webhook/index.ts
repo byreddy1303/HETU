@@ -1,7 +1,7 @@
 // Telegram webhook for the opt-in daily digest.
 //
 // Supported private-chat commands:
-//   /start <short-lived token> — bind this Telegram chat to AIR Journal
+//   /start <short-lived token> — bind this Telegram chat to HETU
 //   /stop                      — pause the daily digest
 //   /status                    — show the current connection state
 //   /today                     — show today's study plan and due re-attempts
@@ -148,12 +148,12 @@ Deno.serve(async (req: Request): Promise<Response> => {
 
         await reply(
           chatId,
-          '<b>AIR Journal connected.</b>\n\nYour optional daily study digest is on. Change its time or pause it from Settings. Use /today for today, /tomorrow for the next day, or /timetable for the week.'
+          '<b>HETU connected.</b>\n\nYour optional daily study digest is on. Change its time or pause it from Settings. Use /today for today, /tomorrow for the next day, or /timetable for the week.'
         );
         return json({ ok: true });
       }
 
-      await reply(chatId, 'This bot needs a private connection link from AIR Journal Settings.');
+      await reply(chatId, 'This bot needs a private connection link from HETU Settings.');
       return json({ ok: true });
     }
 
@@ -169,7 +169,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
     if (lookupError || !subscription || !expiry || expiry.getTime() <= Date.now()) {
       await reply(
         chatId,
-        'That connection link is invalid or expired. Generate a new one in AIR Journal Settings.'
+        'That connection link is invalid or expired. Generate a new one in HETU Settings.'
       );
       return json({ ok: true });
     }
@@ -199,7 +199,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
 
     await reply(
       chatId,
-      '<b>AIR Journal connected.</b>\n\nYour optional daily study digest is on. Change its time or pause it from Settings. Use /today for today, /tomorrow for the next day, or /timetable for the week.'
+      '<b>HETU connected.</b>\n\nYour optional daily study digest is on. Change its time or pause it from Settings. Use /today for today, /tomorrow for the next day, or /timetable for the week.'
     );
     return json({ ok: true });
   }
@@ -214,7 +214,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
     if (!subscription) {
       await reply(
         chatId,
-        `Connect this Telegram account from AIR Journal Settings before using /${command.name}.`
+        `Connect this Telegram account from HETU Settings before using /${command.name}.`
       );
       return json({ ok: true });
     }
@@ -366,7 +366,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
         .update({ enabled: false, updated_at: new Date().toISOString() })
         .eq('user_id', subscription.user_id);
     }
-    await reply(chatId, 'Daily digest paused. You can turn it back on in AIR Journal Settings.');
+    await reply(chatId, 'Daily digest paused. You can turn it back on in HETU Settings.');
     return json({ ok: true });
   }
 
@@ -376,13 +376,13 @@ Deno.serve(async (req: Request): Promise<Response> => {
         ? 'connected and enabled'
         : 'connected but paused'
       : 'not connected';
-    await reply(chatId, `<b>AIR Journal status:</b> ${status}.`);
+    await reply(chatId, `<b>HETU status:</b> ${status}.`);
     return json({ ok: true });
   }
 
   await reply(
     chatId,
-    "<b>AIR Journal bot</b>\n/today — show today's plan and due re-attempts\n/tomorrow — show tomorrow's study plan\n/timetable — show this week's study timetable\n/status — check delivery\n/stop — pause the daily digest\n/start — connect using the private Settings link"
+    "<b>HETU bot</b>\n/today — show today's plan and due re-attempts\n/tomorrow — show tomorrow's study plan\n/timetable — show this week's study timetable\n/status — check delivery\n/stop — pause the daily digest\n/start — connect using the private Settings link"
   );
   return json({ ok: true });
 });

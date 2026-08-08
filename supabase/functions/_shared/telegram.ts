@@ -209,7 +209,7 @@ function fullDateLabel(isoDate: string): string {
 
 function renderTelegramDay(
   input: TelegramDigestInput,
-  heading: 'AIR JOURNAL' | 'AIR JOURNAL · TODAY'
+  heading: 'HETU' | 'HETU · TODAY'
 ): string {
   const sessions = input.sessions.slice(0, 6);
   const totalMinutes = input.sessions.reduce(
@@ -241,7 +241,7 @@ function renderTelegramDay(
   });
 
   if (input.sessions.length > sessions.length) {
-    lines.push(`${input.sessions.length - sessions.length} more sessions in AIR Journal`, '');
+    lines.push(`${input.sessions.length - sessions.length} more sessions in HETU`, '');
   }
 
   if (input.reAttemptTotal === 0) {
@@ -260,7 +260,7 @@ function renderTelegramDay(
 }
 
 export function renderTelegramDigest(input: TelegramDigestInput): string {
-  return renderTelegramDay(input, 'AIR JOURNAL');
+  return renderTelegramDay(input, 'HETU');
 }
 
 export function renderTelegramTodayUpdate(input: TelegramTodayInput): string {
@@ -273,16 +273,16 @@ export function renderTelegramTodayUpdate(input: TelegramTodayInput): string {
       reAttemptTotal: input.reAttemptTotal,
       subjectCounts: input.subjectCounts
     },
-    'AIR JOURNAL · TODAY'
+    'HETU · TODAY'
   );
 }
 
 export function renderTelegramConnectionTest(): string {
   return [
-    '<b>AIR JOURNAL · CONNECTED</b>',
+    '<b>HETU · CONNECTED</b>',
     '',
     '<i>“The line is live. The rest is execution.”</i>',
-    '— AIR Journal',
+    '— HETU',
     '',
     'Telegram delivery is working.',
     'Planned days will arrive here at your chosen local time.',
@@ -301,7 +301,7 @@ export function renderTelegramTimetable(input: TelegramTimetableInput): string {
   );
   const weekStart = input.days[0]?.isoDate ?? input.todayIsoDate;
   const lines: string[] = [
-    '<b>AIR JOURNAL · TIMETABLE</b>',
+    '<b>HETU · TIMETABLE</b>',
     `<b>WEEK OF ${timetableWeekLabel(weekStart)}</b>`,
     '',
     `<b>${totalSessions} ${totalSessions === 1 ? 'SESSION' : 'SESSIONS'} · ${formatDuration(totalMinutes)}</b>`,
@@ -347,7 +347,7 @@ export function renderTelegramTomorrowPlan(input: TelegramTomorrowInput): string
     0
   );
   const lines: string[] = [
-    '<b>AIR JOURNAL · TOMORROW</b>',
+    '<b>HETU · TOMORROW</b>',
     `<b>${fullDateLabel(input.isoDate)}</b>`,
     ''
   ];
@@ -409,7 +409,7 @@ export async function sendTelegramMessage(args: {
 
   if (args.appUrl) {
     body.reply_markup = {
-      inline_keyboard: [[{ text: 'Open AIR Journal', url: args.appUrl }]]
+      inline_keyboard: [[{ text: 'Open HETU', url: args.appUrl }]]
     };
   }
 

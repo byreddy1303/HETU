@@ -1,5 +1,5 @@
 // Planner-only enums. Kept separate from lib/constants.ts (which is for the
-// Log/Session/Journal side of AIR Journal) so the planner can evolve alone.
+// Log/Session/Journal side of HETU) so the planner can evolve alone.
 
 import type {
   BreakPattern,

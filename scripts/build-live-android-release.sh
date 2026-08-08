@@ -27,5 +27,5 @@ export PATH="$JAVA_HOME/bin:$PATH"
   cd android
   ./gradlew assembleRelease
   cp app/build/outputs/apk/release/app-release.apk \
-    app/build/outputs/apk/release/airjournal-live-release.apk
+    app/build/outputs/apk/release/hetu-live-release.apk
 )

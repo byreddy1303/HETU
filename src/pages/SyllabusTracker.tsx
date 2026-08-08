@@ -38,7 +38,6 @@ interface SubjectSummary {
   status: Exclude<SubjectFilter, 'all'>;
 }
 
-const EMPTY_COMPLETIONS: TopicCompletions = {};
 const FILTERS: { value: SubjectFilter; label: string }[] = [
   { value: 'all', label: 'All subjects' },
   { value: 'in-progress', label: 'In progress' },

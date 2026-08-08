@@ -31,6 +31,10 @@ self.addEventListener('push', (event) => {
     : '/';
   
   const tagId = typeof payload.tagId === 'string' ? payload.tagId : 'default';
+  // Use a unique tag per notification so each one is shown independently.
+  // Fall back to tagId only if messageId is absent (legacy payloads).
+  const messageId = typeof payload.messageId === 'string' ? payload.messageId : null;
+  const notifTag = messageId ? `notif-${messageId}` : `${tagId}-${Date.now()}`;
 
   // Action buttons depend on the kind of notification
   let actions = [];
@@ -47,8 +51,8 @@ self.addEventListener('push', (event) => {
       body,
       icon: '/hetu-mark-192.png',
       badge: '/hetu-mark-192.png',
-      tag: tagId,
-      renotify: true,
+      tag: notifTag,
+      renotify: false,
       timestamp: Date.now(),
       actions,
       data: { route, messageId: payload.messageId || null, kind }

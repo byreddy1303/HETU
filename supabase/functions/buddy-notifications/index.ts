@@ -96,7 +96,7 @@ function notificationCopy(message: MessageRow, sender: ProfileRow | null, showPr
     body,
     kind: message.kind,
     route: `/buddy?chat=${encodeURIComponent(message.buddy_id)}`,
-    tagId: `buddy-${message.buddy_id}`,
+    tagId: `msg-${message.id}`,
     buddyId: message.buddy_id,
     messageId: message.id
   };

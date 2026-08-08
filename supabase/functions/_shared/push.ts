@@ -159,8 +159,7 @@ export async function sendWebPush(
       }),
       {
         TTL: 24 * 60 * 60,
-        urgency: 'high',
-        topic: copy.tagId ? `topic-${copy.tagId.replace(/-/g, '').slice(0, 26)}` : undefined
+        urgency: 'high'
       }
     );
   } catch (error) {
@@ -184,8 +183,6 @@ export async function sendNativePush(
     throw new PushDeliveryError('Native push token is missing', true);
   }
   const accessToken = await getFcmAccessToken(account);
-  
-  const tagKey = copy.tagId ? `tag-${copy.tagId}` : 'default';
 
   const response = await fetch(
     `https://fcm.googleapis.com/v1/projects/${encodeURIComponent(account.project_id)}/messages:send`,
@@ -209,10 +206,8 @@ export async function sendNativePush(
           android: {
             priority: 'high',
             ttl: '86400s',
-            collapse_key: tagKey,
             notification: {
-              channel_id: 'buddy_messages', // using existing channel for simplicity
-              tag: tagKey,
+              channel_id: 'buddy_messages',
               visibility: 'PRIVATE',
               default_sound: true,
               default_vibrate_timings: true,

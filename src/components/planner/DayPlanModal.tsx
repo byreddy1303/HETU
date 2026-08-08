@@ -69,7 +69,11 @@ export default function DayPlanModal({ date, plan, onChange, onClose, onDelete }
       transition={{ duration: 0.15 }}
       className="planner-day-overlay fixed inset-0 z-[60] flex items-start justify-center overflow-y-auto bg-text/30 p-3 backdrop-blur-[2px] sm:p-6"
       onMouseDown={(e) => {
-        if (e.target === e.currentTarget) onClose();
+        // Android WebView can retarget the synthetic mouse event to this
+        // backdrop after an inner control changes the sheet's contents. That
+        // made taps such as Edit and Add subject dismiss the whole planner.
+        // Native users already have the close button and Android Back.
+        if (!native && e.target === e.currentTarget) onClose();
       }}
     >
       <motion.div

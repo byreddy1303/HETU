@@ -2,7 +2,7 @@ import { useEffect, useId, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Check, ChevronDown, Search, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { haptic } from '@/lib/native';
+import { haptic, isNativeApp } from '@/lib/native';
 
 interface Props {
   value: string;
@@ -16,6 +16,7 @@ interface Props {
  * the document body and owns its own touch surface and scroll area.
  */
 export default function SubjectPicker({ value, options, onChange }: Props) {
+  const native = isNativeApp;
   const titleId = useId();
   const searchRef = useRef<HTMLInputElement>(null);
   const [open, setOpen] = useState(false);
@@ -72,7 +73,10 @@ export default function SubjectPicker({ value, options, onChange }: Props) {
           <div
             className="subject-picker-overlay fixed inset-0 z-[70] flex items-end justify-center bg-scrim/45 px-[var(--safe-left)] pt-[var(--safe-top)] backdrop-blur-[2px] sm:items-center sm:p-6"
             onMouseDown={(event) => {
-              if (event.target === event.currentTarget) close();
+              // See DayPlanModal: WebView may retarget an inner tap to the
+              // backdrop after the focused/search UI changes. Keep native
+              // dismissal explicit so choosing a subject cannot close early.
+              if (!native && event.target === event.currentTarget) close();
             }}
           >
             <section

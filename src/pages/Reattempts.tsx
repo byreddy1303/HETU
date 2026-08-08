@@ -268,6 +268,12 @@ const DueCard = forwardRef<HTMLDivElement, DueCardProps>(function DueCard(
                     </p>
                   ) : null}
 
+                  {question?.trigger_sentence ? (
+                    <p className="text-[13px] text-text-muted">
+                      Trigger: <span className="u-highlight font-medium text-text">{question.trigger_sentence}</span>
+                    </p>
+                  ) : null}
+
                   {hasText ? (
                     <p className="whitespace-pre-wrap text-[15px] leading-[1.75] text-text">
                       {question?.question_text}

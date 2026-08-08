@@ -38,7 +38,7 @@
     --color-guess: 105 78 118;
     --color-guess-faint: 239 232 242;
     --color-guess-contrast: 255 255 255;
-    --color-highlight: 229 199 132;
+    --color-highlight: 254 224 115;
     --color-highlight-contrast: 27 25 28;
     --color-ink-cobalt: 69 94 139;
     --color-ink-teal: 54 112 105;
@@ -93,8 +93,8 @@
     --color-guess: 186 167 215;
     --color-guess-faint: 58 49 74;
     --color-guess-contrast: 32 20 47;
-    --color-highlight: 215 173 98;
-    --color-highlight-contrast: 27 34 41;
+    --color-highlight: 245 158 11;
+    --color-highlight-contrast: 255 255 255;
     --color-ink-cobalt: 120 173 210;
     --color-ink-teal: 117 185 163;
     --color-ink-violet: 186 167 215;
@@ -202,8 +202,8 @@
   }
 
   ::selection {
-    background-color: theme('colors.highlight.DEFAULT');
-    color: theme('colors.highlight.contrast');
+    background-color: rgb(var(--color-highlight) / 0.45);
+    color: inherit;
   }
 
   :focus-visible {
@@ -1141,20 +1141,23 @@
     height: 36px;
   }
 
-  /* Brass marker streak behind text. Wrap the words that matter. */
+  /* Luminous marker streak behind text. Enhances text legibility and contrast. */
   .u-highlight {
     background-image: linear-gradient(
       100deg,
-      rgb(var(--color-highlight) / 0) 2%,
-      rgb(var(--color-highlight) / 0.78) 8%,
-      rgb(var(--color-highlight) / 0.56) 92%,
-      rgb(var(--color-highlight) / 0) 98%
+      rgb(var(--color-highlight) / 0.08) 0%,
+      rgb(var(--color-highlight) / 0.38) 6%,
+      rgb(var(--color-highlight) / 0.32) 94%,
+      rgb(var(--color-highlight) / 0.08) 100%
     );
-    background-size: 100% 42%;
-    background-position: 0 78%;
+    background-size: 100% 88%;
+    background-position: 0 55%;
     background-repeat: no-repeat;
-    padding: 0 0.15em;
+    border-radius: 4px;
+    padding: 0.05em 0.3em;
     margin: 0 -0.15em;
+    box-decoration-break: clone;
+    -webkit-box-decoration-break: clone;
   }
 
   /* Ledger margin-line: eucalyptus rule with breathing room. */

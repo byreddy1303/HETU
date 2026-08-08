@@ -75,9 +75,9 @@ describe('PYQ committed-attempt logging', () => {
   beforeEach(async () => {
     vi.stubGlobal('scrollTo', vi.fn());
     vi.spyOn(globalThis, 'fetch').mockImplementation(async (input) => {
-      const url = String(input);
-      if (url.endsWith('/pyq/manifest.json')) return Response.json(manifest);
-      if (url.endsWith('/pyq/discrete-mathematics.json')) {
+      const url = new URL(String(input), 'https://air-journal.test');
+      if (url.pathname === '/pyq/manifest.json') return Response.json(manifest);
+      if (url.pathname === '/pyq/discrete-mathematics.json') {
         return Response.json({
           bankVersion: manifest.bankVersion,
           subject: question.subject,

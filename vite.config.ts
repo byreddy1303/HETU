@@ -52,11 +52,23 @@ export default defineConfig(({ mode }) => {
           runtimeCaching: [
             {
               urlPattern: ({ url }) =>
-                url.origin === self.location.origin && url.pathname.startsWith('/pyq/'),
+                url.origin === self.location.origin && url.pathname.startsWith('/pyq/images/'),
               handler: 'CacheFirst',
               options: {
-                cacheName: 'air-pyq-bank-v1',
+                cacheName: 'air-pyq-images-v1',
                 expiration: { maxEntries: 400, maxAgeSeconds: 60 * 60 * 24 * 365 }
+              }
+            },
+            {
+              urlPattern: ({ url }) =>
+                url.origin === self.location.origin &&
+                url.pathname.startsWith('/pyq/') &&
+                url.pathname.endsWith('.json'),
+              handler: 'NetworkFirst',
+              options: {
+                cacheName: 'air-pyq-data-v3',
+                networkTimeoutSeconds: 5,
+                expiration: { maxEntries: 32, maxAgeSeconds: 60 * 60 * 24 * 30 }
               }
             }
           ]

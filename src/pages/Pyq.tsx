@@ -142,6 +142,7 @@ function PracticeSetup({
     return new Map([...ids].map(([subject, subjectIds]) => [subject, subjectIds.size]));
   }, [attempts, manifest.subjects]);
   const selectedSubject = manifest.subjects.find((subject) => subject.slug === config.subjectSlug);
+  const selectedTopics = selectedSubject?.topics ?? [];
   const selectedTopicSlug = config.topicSlug ?? 'all';
   return (
     <div className="flex flex-col gap-4">
@@ -263,7 +264,7 @@ function PracticeSetup({
                 );
               })}
             </div>
-            {selectedSubject && selectedSubject.topics.length > 1 && (
+            {selectedSubject && selectedTopics.length > 1 && (
               <div className="mt-4 border-t border-border pt-4">
                 <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
                   <div>
@@ -273,7 +274,7 @@ function PracticeSetup({
                     </p>
                   </div>
                   <span className="u-num text-[11px] text-text-faint">
-                    {selectedSubject.topics.length} topics
+                    {selectedTopics.length} topics
                   </span>
                 </div>
                 <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-3">
@@ -295,7 +296,7 @@ function PracticeSetup({
                       {selectedSubject.count}
                     </span>
                   </button>
-                  {selectedSubject.topics.map((topic) => {
+                  {selectedTopics.map((topic) => {
                     const active = selectedTopicSlug === topic.slug;
                     return (
                       <button
@@ -749,7 +750,7 @@ export default function Pyq() {
 
   async function questionsForSession(session: PyqSessionRow): Promise<PyqQuestion[]> {
     if (!manifest) return [];
-    const rows = await loadPyqQuestions(manifest.subjects);
+    const rows = await loadPyqQuestions(manifest.subjects, manifest.bankVersion);
     const byId = new Map(rows.map((question) => [question.id, question]));
     return session.question_uids.flatMap((id) => {
       const question = byId.get(id);
@@ -835,7 +836,7 @@ export default function Pyq() {
           : manifest.subjects.filter((subject) => subject.slug === config.subjectSlug);
       const low = Math.min(config.fromYear, config.toYear);
       const high = Math.max(config.fromYear, config.toYear);
-      let rows = (await loadPyqQuestions(subjects)).filter(
+      let rows = (await loadPyqQuestions(subjects, manifest.bankVersion)).filter(
         (question) =>
           matchesPyqTopicScope(question, config) &&
           question.year >= low &&

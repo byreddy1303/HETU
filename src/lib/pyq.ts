@@ -29,6 +29,10 @@ export interface PyqManifest {
   subjects: PyqSubjectManifest[];
 }
 
+type PyqManifestPayload = Omit<PyqManifest, 'subjects'> & {
+  subjects: Array<Omit<PyqSubjectManifest, 'topics'> & { topics?: PyqSubjectManifest['topics'] }>;
+};
+
 export interface PyqQuestion {
   id: string;
   year: number;
@@ -58,6 +62,7 @@ interface SubjectPayload {
 
 const subjectCache = new Map<string, Promise<SubjectPayload>>();
 let manifestPromise: Promise<PyqManifest> | null = null;
+const PYQ_MANIFEST_SCHEMA = 'topics-v1';
 
 async function fetchJson<T>(url: string): Promise<T> {
   const response = await fetch(url);
@@ -66,17 +71,36 @@ async function fetchJson<T>(url: string): Promise<T> {
 }
 
 export function loadPyqManifest(): Promise<PyqManifest> {
-  manifestPromise ??= fetchJson<PyqManifest>('/pyq/manifest.json');
+  // The query key bypasses the pre-topic service-worker cache. Normalization is
+  // still required because an already-controlled tab can briefly mix an older
+  // manifest with the latest JavaScript while a new worker activates.
+  manifestPromise ??= fetchJson<PyqManifestPayload>(
+    `/pyq/manifest.json?schema=${PYQ_MANIFEST_SCHEMA}`
+  ).then(normalizePyqManifest);
   return manifestPromise;
 }
 
-export async function loadPyqQuestions(subjects: PyqSubjectManifest[]): Promise<PyqQuestion[]> {
+export function normalizePyqManifest(payload: PyqManifestPayload): PyqManifest {
+  return {
+    ...payload,
+    subjects: payload.subjects.map((subject) => ({
+      ...subject,
+      topics: Array.isArray(subject.topics) ? subject.topics : []
+    }))
+  };
+}
+
+export async function loadPyqQuestions(
+  subjects: PyqSubjectManifest[],
+  bankVersion: string
+): Promise<PyqQuestion[]> {
   const payloads = await Promise.all(
     subjects.map((subject) => {
-      let request = subjectCache.get(subject.slug);
+      const versionedFile = `${subject.file}?bank=${encodeURIComponent(bankVersion)}`;
+      let request = subjectCache.get(versionedFile);
       if (!request) {
-        request = fetchJson<SubjectPayload>(subject.file);
-        subjectCache.set(subject.slug, request);
+        request = fetchJson<SubjectPayload>(versionedFile);
+        subjectCache.set(versionedFile, request);
       }
       return request;
     })

@@ -6,6 +6,7 @@ import {
   formatPyqAnswer,
   inferPyqDirectOutcome,
   matchesPyqTopicScope,
+  normalizePyqManifest,
   pyqAnswerValueForLog,
   resolvePyqJournalImageUrl,
   type PyqManifest,
@@ -134,6 +135,33 @@ describe('PYQ practice scope', () => {
 
   it('treats a legacy set without a topic as a complete subject', () => {
     expect(matchesPyqTopicScope(algorithm, { subjectSlug: 'algorithms' })).toBe(true);
+  });
+});
+
+describe('PYQ manifest compatibility', () => {
+  it('treats a pre-topic cached manifest as having no selectable topics', () => {
+    const legacyManifest = {
+      bankVersion: 'legacy-v1',
+      generatedAt: '2026-08-01T00:00:00.000Z',
+      source: 'test',
+      sourceUrl: 'https://example.com',
+      firstYear: 2002,
+      lastYear: 2026,
+      questionCount: 1,
+      imageCount: 0,
+      answerStatuses: { available: 1, ambiguous: 0, 'marks-to-all': 0, unsupported: 0 },
+      years: [{ year: 2026, count: 1 }],
+      subjects: [
+        {
+          slug: 'algorithms',
+          label: 'Algorithms',
+          count: 1,
+          file: '/pyq/subjects/algorithms.json'
+        }
+      ]
+    };
+
+    expect(normalizePyqManifest(legacyManifest).subjects[0].topics).toEqual([]);
   });
 });
 

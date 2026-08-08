@@ -578,7 +578,7 @@ function MessageBubble({ msg, isMe }: { msg: BuddyMessageRow; isMe: boolean }) {
             className={cn(
               'rounded-2xl px-3 py-2 text-[13.5px] leading-relaxed shadow-sm',
               isMe
-                ? 'bg-accent text-white rounded-br-md'
+                ? 'bg-accent text-accent-contrast rounded-br-md'
                 : 'bg-bg-raised text-text border border-border rounded-bl-md'
             )}
           >

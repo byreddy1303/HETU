@@ -14,8 +14,8 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 /* Key-cap physics: rest on a hard under-shadow, sink into it on press. */
 const variantClasses: Record<Variant, string> = {
   primary: cn(
-    'bg-accent font-semibold text-white shadow-[0_2px_0_#193f35]',
-    'hover:-translate-y-px hover:bg-accent-hover hover:shadow-[0_3px_0_#193f35]',
+    'bg-accent font-semibold text-accent-contrast shadow-key',
+    'hover:-translate-y-px hover:bg-accent-hover hover:shadow-key-hover',
     'active:translate-y-[2px] active:shadow-none'
   ),
   secondary: cn(

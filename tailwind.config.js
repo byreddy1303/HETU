@@ -1,3 +1,5 @@
+const color = (name) => `rgb(var(--color-${name}) / <alpha-value>)`;
+
 /** @type {import('tailwindcss').Config} */
 export default {
   content: ['./index.html', './src/**/*.{ts,tsx}'],
@@ -5,37 +7,58 @@ export default {
     extend: {
       colors: {
         bg: {
-          DEFAULT: '#F1F5F0',
-          raised: '#FBFDFB',
-          overlay: '#E7EFE9'
+          DEFAULT: color('bg'),
+          raised: color('bg-raised'),
+          overlay: color('bg-overlay')
         },
         border: {
-          DEFAULT: '#D5E1D8',
-          hover: '#B8C9BD'
+          DEFAULT: color('border'),
+          hover: color('border-hover')
         },
         text: {
-          DEFAULT: '#19352F',
-          muted: '#50665F',
-          faint: '#657871'
+          DEFAULT: color('text'),
+          muted: color('text-muted'),
+          faint: color('text-faint')
         },
         accent: {
-          DEFAULT: '#2F6F5E',
-          hover: '#265E50',
-          faint: 'rgba(47, 111, 94, 0.11)'
+          DEFAULT: color('accent'),
+          hover: color('accent-hover'),
+          faint: color('accent-faint'),
+          contrast: color('accent-contrast')
         },
-        success: { DEFAULT: '#4F7C45', faint: 'rgba(79, 124, 69, 0.12)' },
-        danger: { DEFAULT: '#B85045', faint: 'rgba(184, 80, 69, 0.11)' },
-        warn: { DEFAULT: '#8A5B13', faint: 'rgba(167, 117, 36, 0.14)' },
-        guess: { DEFAULT: '#67518F', faint: 'rgba(103, 81, 143, 0.11)' },
-        highlight: '#F3D58A',
+        success: {
+          DEFAULT: color('success'),
+          faint: color('success-faint'),
+          contrast: color('success-contrast')
+        },
+        danger: {
+          DEFAULT: color('danger'),
+          faint: color('danger-faint'),
+          contrast: color('danger-contrast')
+        },
+        warn: {
+          DEFAULT: color('warn'),
+          faint: color('warn-faint'),
+          contrast: color('warn-contrast')
+        },
+        guess: {
+          DEFAULT: color('guess'),
+          faint: color('guess-faint'),
+          contrast: color('guess-contrast')
+        },
+        highlight: {
+          DEFAULT: color('highlight'),
+          contrast: color('highlight-contrast')
+        },
         ink: {
-          cobalt: '#376C8C',
-          teal: '#2F6F5E',
-          violet: '#67518F',
-          rose: '#A94C60',
-          marigold: '#8A5B13',
-          slate: '#50665F'
-        }
+          cobalt: color('ink-cobalt'),
+          teal: color('ink-teal'),
+          violet: color('ink-violet'),
+          rose: color('ink-rose'),
+          marigold: color('ink-marigold'),
+          slate: color('ink-slate')
+        },
+        scrim: color('scrim')
       },
       fontFamily: {
         display: ['"Bricolage Grotesque"', 'system-ui', 'sans-serif'],
@@ -50,10 +73,13 @@ export default {
         full: '9999px'
       },
       boxShadow: {
-        sm: '0 1px 2px rgba(25, 53, 47, 0.08)',
-        card: '0 10px 28px -18px rgba(25, 53, 47, 0.34), 0 1px 3px rgba(25, 53, 47, 0.08)',
-        lift: '0 18px 42px -20px rgba(25, 53, 47, 0.38), 0 4px 12px -6px rgba(25, 53, 47, 0.16)',
-        press: 'inset 0 2px 4px rgba(25, 53, 47, 0.14)'
+        sm: 'var(--shadow-sm)',
+        card: 'var(--shadow-card)',
+        lift: 'var(--shadow-lift)',
+        press: 'var(--shadow-press)',
+        key: 'var(--shadow-key)',
+        'key-hover': 'var(--shadow-key-hover)',
+        nav: 'var(--shadow-nav)'
       },
       spacing: {
         1: '4px',

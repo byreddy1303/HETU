@@ -5,17 +5,21 @@
 
 .reattempt-card {
   border-radius: 20px;
-  background-image: linear-gradient(155deg, rgba(251, 253, 251, 0.99), rgba(241, 245, 240, 0.9));
+  background-image: linear-gradient(
+    155deg,
+    rgb(var(--color-bg-raised) / 0.99),
+    rgb(var(--color-bg) / 0.9)
+  );
   box-shadow:
-    0 1px 2px rgba(25, 53, 47, 0.05),
-    0 10px 28px rgba(25, 53, 47, 0.09);
+    0 1px 2px rgb(var(--color-scrim) / 0.08),
+    0 10px 28px rgb(var(--color-scrim) / 0.13);
 }
 
 .reattempt-card[data-expanded='true'] {
-  border-color: rgba(47, 111, 94, 0.42);
+  border-color: rgb(var(--color-accent) / 0.42);
   box-shadow:
-    0 1px 2px rgba(25, 53, 47, 0.05),
-    0 14px 34px rgba(25, 53, 47, 0.13);
+    0 1px 2px rgb(var(--color-scrim) / 0.08),
+    0 14px 34px rgb(var(--color-scrim) / 0.18);
 }
 
 .reattempt-card-trigger {
@@ -26,7 +30,7 @@
 }
 
 .reattempt-card-trigger:hover {
-  background-color: rgba(47, 111, 94, 0.06);
+  background-color: rgb(var(--color-accent) / 0.08);
 }
 
 .reattempt-card-trigger:active {
@@ -38,8 +42,12 @@
 }
 
 .reattempt-question-sheet {
-  background-image: linear-gradient(160deg, rgba(251, 253, 251, 0.99), rgba(231, 239, 233, 0.68));
-  box-shadow: 0 7px 24px rgba(25, 53, 47, 0.075);
+  background-image: linear-gradient(
+    160deg,
+    rgb(var(--color-bg-raised) / 0.99),
+    rgb(var(--color-bg-overlay) / 0.68)
+  );
+  box-shadow: 0 7px 24px rgb(var(--color-scrim) / 0.12);
 }
 
 .reattempt-source-ref {
@@ -48,7 +56,11 @@
 
 .reattempt-start,
 .reattempt-running {
-  background-image: linear-gradient(145deg, rgba(47, 111, 94, 0.09), rgba(251, 253, 251, 0.88));
+  background-image: linear-gradient(
+    145deg,
+    rgb(var(--color-accent) / 0.11),
+    rgb(var(--color-bg-raised) / 0.88)
+  );
 }
 
 @media (max-width: 639px) {

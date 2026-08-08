@@ -405,7 +405,7 @@ export default function Calibration() {
           <button
             type="button"
             onClick={() => void doUndo()}
-            className="inline-flex items-center gap-1 rounded-full bg-accent-faint px-3 py-1 text-[12px] font-semibold text-accent transition-colors hover:bg-accent hover:text-white"
+            className="inline-flex items-center gap-1 rounded-full bg-accent-faint px-3 py-1 text-[12px] font-semibold text-accent transition-colors hover:bg-accent hover:text-accent-contrast"
           >
             <RotateCcw size={11} strokeWidth={2} />
             Undo

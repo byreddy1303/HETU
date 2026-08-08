@@ -764,7 +764,7 @@ function ChatsTab({
                 </p>
               </div>
               {b.unreadCount > 0 && (
-                <span className="u-num flex min-w-5 shrink-0 items-center justify-center rounded-full bg-accent px-1.5 py-0.5 text-[10px] font-semibold text-white">
+                <span className="u-num flex min-w-5 shrink-0 items-center justify-center rounded-full bg-accent px-1.5 py-0.5 text-[10px] font-semibold text-accent-contrast">
                   {b.unreadCount > 99 ? '99+' : b.unreadCount}
                 </span>
               )}
@@ -971,7 +971,7 @@ function Avatar({ name, active = false }: { name: string; active?: boolean }) {
     <span
       className={cn(
         'flex h-10 w-10 shrink-0 items-center justify-center rounded-full font-display text-[14px] font-bold',
-        active ? 'bg-accent text-white' : 'bg-ink-cobalt/15 text-ink-cobalt'
+        active ? 'bg-accent text-accent-contrast' : 'bg-ink-cobalt/15 text-ink-cobalt'
       )}
     >
       {initial}

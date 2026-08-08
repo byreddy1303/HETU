@@ -8,6 +8,8 @@ import { usePrefsStore } from '@/stores/prefs';
 import { Toaster } from '@/components/ui/Toast';
 import NativeRuntime from '@/components/native/NativeRuntime';
 import LoadingScreen from '@/components/shared/LoadingScreen';
+import { applyTheme, resolveTheme } from '@/lib/theme';
+import { configureNativeChrome } from '@/lib/native';
 
 const FONT_SCALE_PX: Record<'small' | 'normal' | 'large', string> = {
   small: '14px',
@@ -19,6 +21,7 @@ export default function App() {
   const init = useAuthStore((s) => s.init);
   const fontScale = usePrefsStore((s) => s.fontScale);
   const compactRows = usePrefsStore((s) => s.compactRows);
+  const colorTheme = usePrefsStore((s) => s.colorTheme);
   useEffect(() => init(), [init]);
   useEffect(() => {
     document.documentElement.style.fontSize = FONT_SCALE_PX[fontScale];
@@ -26,6 +29,19 @@ export default function App() {
   useEffect(() => {
     document.documentElement.dataset.density = compactRows ? 'compact' : 'comfy';
   }, [compactRows]);
+  useEffect(() => {
+    const systemTheme = window.matchMedia('(prefers-color-scheme: dark)');
+    const syncTheme = () => {
+      const resolved = resolveTheme(colorTheme, systemTheme.matches);
+      applyTheme(resolved);
+      void configureNativeChrome(resolved);
+    };
+
+    syncTheme();
+    if (colorTheme !== 'system') return;
+    systemTheme.addEventListener('change', syncTheme);
+    return () => systemTheme.removeEventListener('change', syncTheme);
+  }, [colorTheme]);
   return (
     <QueryClientProvider client={queryClient}>
       <NativeRuntime />

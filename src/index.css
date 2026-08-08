@@ -12,11 +12,123 @@
     --safe-right: var(--safe-area-inset-right, env(safe-area-inset-right, 0px));
     --safe-bottom: var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px));
     --safe-left: var(--safe-area-inset-left, env(safe-area-inset-left, 0px));
+
+    /* Forest Ledger — daylight sheet. RGB channels keep Tailwind opacity
+       modifiers working while the entire semantic system changes at once. */
+    --color-bg: 241 245 240;
+    --color-bg-raised: 251 253 251;
+    --color-bg-overlay: 231 239 233;
+    --color-border: 213 225 216;
+    --color-border-hover: 184 201 189;
+    --color-text: 25 53 47;
+    --color-text-muted: 80 102 95;
+    --color-text-faint: 101 120 113;
+    --color-accent: 47 111 94;
+    --color-accent-hover: 38 94 80;
+    --color-accent-faint: 224 235 230;
+    --color-accent-contrast: 255 255 255;
+    --color-success: 79 124 69;
+    --color-success-faint: 229 237 226;
+    --color-success-contrast: 255 255 255;
+    --color-danger: 184 80 69;
+    --color-danger-faint: 244 231 229;
+    --color-danger-contrast: 255 255 255;
+    --color-warn: 138 91 19;
+    --color-warn-faint: 243 234 216;
+    --color-warn-contrast: 255 255 255;
+    --color-guess: 103 81 143;
+    --color-guess-faint: 235 231 241;
+    --color-guess-contrast: 255 255 255;
+    --color-highlight: 243 213 138;
+    --color-highlight-contrast: 25 53 47;
+    --color-ink-cobalt: 55 108 140;
+    --color-ink-teal: 47 111 94;
+    --color-ink-violet: 103 81 143;
+    --color-ink-rose: 169 76 96;
+    --color-ink-marigold: 138 91 19;
+    --color-ink-slate: 80 102 95;
+    --color-scrim: 10 23 19;
+    --ledger-line-opacity: 0.035;
+    --grain-opacity: 0.016;
+    --table-stripe-opacity: 0.025;
+    --table-hover-opacity: 0.085;
+    --shadow-sm: 0 1px 2px rgb(25 53 47 / 0.08);
+    --shadow-card: 0 10px 28px -18px rgb(25 53 47 / 0.34), 0 1px 3px rgb(25 53 47 / 0.08);
+    --shadow-lift: 0 18px 42px -20px rgb(25 53 47 / 0.38), 0 4px 12px -6px rgb(25 53 47 / 0.16);
+    --shadow-press: inset 0 2px 4px rgb(25 53 47 / 0.14);
+    --shadow-key: 0 2px 0 rgb(25 63 53);
+    --shadow-key-hover: 0 3px 0 rgb(25 63 53);
+    --shadow-nav: 0 -2px 12px rgb(25 53 47 / 0.08);
+    --shadow-native-card: 0 10px 30px rgb(25 53 47 / 0.1);
+    --shadow-native-soft: 0 4px 16px rgb(25 53 47 / 0.08);
+    --shadow-native-rail: 0 -8px 28px rgb(25 53 47 / 0.1);
+    --shadow-native-heatmap: 0 7px 22px rgb(25 53 47 / 0.07);
+    --shadow-image: 0 2px 8px rgb(25 53 47 / 0.14);
+    --shadow-stamp: inset 0 0 0 1px rgb(47 111 94 / 0.16);
+  }
+
+  html[data-theme='dark'] {
+    /* Forest Ledger after dusk: charcoal-green canvas, dark vellum cards,
+       moonlit eucalyptus, and warmer brass. */
+    --color-bg: 14 22 18;
+    --color-bg-raised: 21 31 26;
+    --color-bg-overlay: 29 43 36;
+    --color-border: 46 65 55;
+    --color-border-hover: 64 88 74;
+    --color-text: 236 243 239;
+    --color-text-muted: 166 184 174;
+    --color-text-faint: 132 155 143;
+    --color-accent: 111 177 153;
+    --color-accent-hover: 129 196 172;
+    --color-accent-faint: 32 58 49;
+    --color-accent-contrast: 11 35 27;
+    --color-success: 143 183 127;
+    --color-success-faint: 35 55 40;
+    --color-success-contrast: 13 33 17;
+    --color-danger: 225 131 120;
+    --color-danger-faint: 71 39 35;
+    --color-danger-contrast: 42 13 11;
+    --color-warn: 215 174 100;
+    --color-warn-faint: 70 55 31;
+    --color-warn-contrast: 36 23 7;
+    --color-guess: 183 163 214;
+    --color-guess-faint: 54 44 71;
+    --color-guess-contrast: 30 18 48;
+    --color-highlight: 210 169 95;
+    --color-highlight-contrast: 26 36 31;
+    --color-ink-cobalt: 112 169 200;
+    --color-ink-teal: 111 177 153;
+    --color-ink-violet: 183 163 214;
+    --color-ink-rose: 218 127 147;
+    --color-ink-marigold: 215 174 100;
+    --color-ink-slate: 166 184 174;
+    --color-scrim: 0 0 0;
+    --ledger-line-opacity: 0.075;
+    --grain-opacity: 0.021;
+    --table-stripe-opacity: 0.035;
+    --table-hover-opacity: 0.12;
+    --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.32);
+    --shadow-card: 0 14px 34px -20px rgb(0 0 0 / 0.72), 0 1px 3px rgb(0 0 0 / 0.34);
+    --shadow-lift: 0 20px 46px -18px rgb(0 0 0 / 0.78), 0 5px 14px -7px rgb(0 0 0 / 0.58);
+    --shadow-press: inset 0 2px 4px rgb(0 0 0 / 0.48);
+    --shadow-key: 0 2px 0 rgb(5 15 11);
+    --shadow-key-hover: 0 3px 0 rgb(5 15 11);
+    --shadow-nav: 0 -2px 14px rgb(0 0 0 / 0.38);
+    --shadow-native-card: 0 12px 32px rgb(0 0 0 / 0.34);
+    --shadow-native-soft: 0 5px 18px rgb(0 0 0 / 0.3);
+    --shadow-native-rail: 0 -8px 30px rgb(0 0 0 / 0.4);
+    --shadow-native-heatmap: 0 8px 24px rgb(0 0 0 / 0.3);
+    --shadow-image: 0 2px 10px rgb(0 0 0 / 0.48);
+    --shadow-stamp: inset 0 0 0 1px rgb(111 177 153 / 0.28);
   }
 
   html {
     color-scheme: light;
     scrollbar-gutter: stable;
+  }
+
+  html[data-theme='dark'] {
+    color-scheme: dark;
   }
 
   /* Compact density — reduces vertical padding across table rows and list items. */
@@ -35,7 +147,10 @@
     line-height: 1.55;
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
-    background-image: linear-gradient(rgba(47, 111, 94, 0.035) 1px, transparent 1px);
+    background-image: linear-gradient(
+      rgb(var(--color-accent) / var(--ledger-line-opacity)) 1px,
+      transparent 1px
+    );
     background-size: 100% 28px;
     background-position: 0 10px;
     background-attachment: fixed;
@@ -71,7 +186,7 @@
     inset: 0;
     z-index: 50;
     pointer-events: none;
-    opacity: 0.016;
+    opacity: var(--grain-opacity);
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
   }
 
@@ -82,8 +197,8 @@
   }
 
   ::selection {
-    background-color: theme('colors.highlight');
-    color: theme('colors.text.DEFAULT');
+    background-color: theme('colors.highlight.DEFAULT');
+    color: theme('colors.highlight.contrast');
   }
 
   :focus-visible {
@@ -279,7 +394,7 @@
   html[data-native] .native-planner-calendar {
     overflow: hidden;
     border-radius: 22px;
-    box-shadow: 0 10px 30px rgba(25, 53, 47, 0.1);
+    box-shadow: var(--shadow-native-card);
   }
 
   html[data-native] .native-calendar-toolbar {
@@ -344,7 +459,7 @@
     align-items: flex-end;
     overflow: hidden;
     padding: var(--safe-top) var(--safe-right) 0 var(--safe-left);
-    background: rgba(25, 53, 47, 0.34);
+    background: rgb(var(--color-scrim) / 0.42);
   }
 
   html[data-native] .planner-day-sheet {
@@ -360,7 +475,7 @@
     min-height: 76px;
     flex-shrink: 0;
     padding: 1.125rem 1.25rem;
-    background: rgba(231, 239, 233, 0.92);
+    background: rgb(var(--color-bg-overlay) / 0.92);
   }
 
   html[data-native] .planner-day-header h2 {
@@ -389,7 +504,7 @@
   html[data-native] .planner-section,
   html[data-native] .planner-view-block {
     border-radius: 18px;
-    background: rgba(251, 253, 251, 0.96);
+    background: rgb(var(--color-bg-raised) / 0.96);
   }
 
   html[data-native] .planner-section-heading {
@@ -425,7 +540,7 @@
   html[data-native] .planner-session-card {
     border-radius: 16px;
     padding: 1.125rem;
-    box-shadow: 0 4px 16px rgba(25, 53, 47, 0.08);
+    box-shadow: var(--shadow-native-soft);
   }
 
   html[data-native] .planner-session-fields {
@@ -465,7 +580,7 @@
   html[data-native] .native-bottom-nav {
     min-height: calc(68px + var(--safe-bottom));
     border-radius: 20px 20px 0 0;
-    box-shadow: 0 -8px 28px rgba(25, 53, 47, 0.1);
+    box-shadow: var(--shadow-native-rail);
   }
 
   html[data-native] .native-bottom-tab {
@@ -691,8 +806,8 @@
 
   html[data-native] .native-welcome-overlay {
     align-items: flex-end;
-    padding: calc(1rem + var(--safe-top)) calc(1rem + var(--safe-right))
-      var(--safe-bottom) calc(1rem + var(--safe-left));
+    padding: calc(1rem + var(--safe-top)) calc(1rem + var(--safe-right)) var(--safe-bottom)
+      calc(1rem + var(--safe-left));
   }
 
   html[data-native] .native-welcome-panel {
@@ -896,7 +1011,7 @@
       border-radius: 18px;
       background: theme('colors.bg.raised');
       padding: 1rem;
-      box-shadow: 0 7px 22px rgba(25, 53, 47, 0.07);
+      box-shadow: var(--shadow-native-heatmap);
     }
 
     html[data-native] .native-heatmap-total {
@@ -921,7 +1036,9 @@
       width: 142px;
       min-width: 142px;
       max-width: 142px;
-      box-shadow: 1px 0 0 theme('colors.border.DEFAULT'), 8px 0 16px rgba(25, 53, 47, 0.07);
+      box-shadow:
+        1px 0 0 theme('colors.border.DEFAULT'),
+        var(--shadow-native-heatmap);
     }
 
     html[data-native] .heatmap-matrix thead th:not(:first-child) {
@@ -980,12 +1097,12 @@
   }
 
   .u-data-table tbody tr:nth-child(even) {
-    background-color: rgba(47, 111, 94, 0.025);
+    background-color: rgb(var(--color-accent) / var(--table-stripe-opacity));
   }
 
   .u-data-table tbody tr:hover,
   .u-matrix-table tbody tr:hover {
-    background-color: rgba(47, 111, 94, 0.085);
+    background-color: rgb(var(--color-accent) / var(--table-hover-opacity));
   }
 
   .u-data-table tbody td > .truncate,
@@ -1006,10 +1123,10 @@
   .u-highlight {
     background-image: linear-gradient(
       100deg,
-      rgba(243, 213, 138, 0) 2%,
-      rgba(243, 213, 138, 0.78) 8%,
-      rgba(243, 213, 138, 0.56) 92%,
-      rgba(243, 213, 138, 0) 98%
+      rgb(var(--color-highlight) / 0) 2%,
+      rgb(var(--color-highlight) / 0.78) 8%,
+      rgb(var(--color-highlight) / 0.56) 92%,
+      rgb(var(--color-highlight) / 0) 98%
     );
     background-size: 100% 42%;
     background-position: 0 78%;
@@ -1044,7 +1161,7 @@
   .u-stamp {
     @apply inline-block rounded-sm border-2 border-accent px-3 py-1 font-mono text-[13px] font-bold uppercase tracking-[0.22em] text-accent;
     transform: rotate(-4deg);
-    box-shadow: inset 0 0 0 1px rgba(47, 111, 94, 0.16);
+    box-shadow: var(--shadow-stamp);
   }
 
   /* Question-bank paper: preserve original structures without letting legacy
@@ -1082,7 +1199,7 @@
     border-radius: 6px;
     background: #ffffff;
     padding: 6px;
-    box-shadow: 0 2px 8px rgba(25, 53, 47, 0.14);
+    box-shadow: var(--shadow-image);
   }
 
   .pyq-content table {

@@ -206,7 +206,7 @@ export default function WeeklyReview() {
                     className={cn(
                       'flex h-6 items-center gap-1.5 rounded-full px-2.5 font-mono text-[11px] font-semibold uppercase tracking-[0.06em] transition-colors',
                       active
-                        ? 'bg-accent text-white'
+                        ? 'bg-accent text-accent-contrast'
                         : done
                           ? 'bg-accent-faint text-accent'
                           : 'bg-bg-overlay text-text-faint'

@@ -5,6 +5,27 @@
     <link rel="icon" type="image/svg+xml" href="/air-mark.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="theme-color" content="#f1f5f0" />
+    <script>
+      (() => {
+        let mode = 'system';
+        try {
+          const stored = JSON.parse(localStorage.getItem('air.prefs') || 'null');
+          const preference = stored && stored.state && stored.state.colorTheme;
+          if (preference === 'light' || preference === 'dark' || preference === 'system') {
+            mode = preference;
+          }
+        } catch {
+          // An invalid preference should never block the app shell.
+        }
+        const prefersDark = window.matchMedia
+          ? window.matchMedia('(prefers-color-scheme: dark)').matches
+          : false;
+        const theme = mode === 'system' ? (prefersDark ? 'dark' : 'light') : mode;
+        document.documentElement.dataset.theme = theme;
+        document.querySelector('meta[name="theme-color"]').content =
+          theme === 'dark' ? '#0E1612' : '#F1F5F0';
+      })();
+    </script>
     <title>AIR Journal</title>
   </head>
   <body class="bg-bg text-text antialiased">

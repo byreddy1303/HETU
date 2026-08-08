@@ -33,11 +33,11 @@ const CAUSE_COLUMNS: { key: CauseKey; label: string }[] = [
 function cellColor(intensity: number): { bg: string; text: string } {
   // intensity ∈ [0, 1]
   if (intensity === 0) return { bg: 'bg-bg-overlay/30', text: 'text-text-faint' };
-  if (intensity < 0.15) return { bg: 'bg-warn/15', text: 'text-warn' };
-  if (intensity < 0.35) return { bg: 'bg-warn/35', text: 'text-warn' };
-  if (intensity < 0.6) return { bg: 'bg-danger/30', text: 'text-danger' };
-  if (intensity < 0.85) return { bg: 'bg-danger/55', text: 'text-white' };
-  return { bg: 'bg-danger/80', text: 'text-white' };
+  if (intensity < 0.15) return { bg: 'bg-warn/15', text: 'text-text' };
+  if (intensity < 0.35) return { bg: 'bg-warn/35', text: 'text-text' };
+  if (intensity < 0.6) return { bg: 'bg-danger/30', text: 'text-text' };
+  if (intensity < 0.85) return { bg: 'bg-danger/55', text: 'text-text' };
+  return { bg: 'bg-danger', text: 'text-danger-contrast' };
 }
 
 export default function Heatmap() {

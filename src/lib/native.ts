@@ -1,6 +1,8 @@
 import { Capacitor, SystemBars, SystemBarsStyle } from '@capacitor/core';
 import { Haptics, ImpactStyle, NotificationType } from '@capacitor/haptics';
+import { Keyboard, KeyboardStyle } from '@capacitor/keyboard';
 import { usePrefsStore } from '@/stores/prefs';
+import type { ResolvedTheme } from '@/lib/theme';
 
 export type HapticIntent = 'selection' | 'light' | 'firm' | 'success' | 'warning' | 'error';
 export type NativeBackAction =
@@ -59,13 +61,19 @@ export function haptic(intent: HapticIntent): void {
   void action.catch(() => undefined);
 }
 
-export async function configureNativeChrome(): Promise<void> {
+export async function configureNativeChrome(theme?: ResolvedTheme): Promise<void> {
   if (!isNativeApp) return;
   document.documentElement.dataset.native = nativePlatform;
+  const resolved = theme ?? (document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light');
   try {
-    await SystemBars.setStyle({ style: SystemBarsStyle.Light });
+    await Promise.all([
+      SystemBars.setStyle({
+        style: resolved === 'dark' ? SystemBarsStyle.Dark : SystemBarsStyle.Light
+      }),
+      Keyboard.setStyle({ style: resolved === 'dark' ? KeyboardStyle.Dark : KeyboardStyle.Light })
+    ]);
   } catch {
-    // System bars are cosmetic; startup must remain available on older devices.
+    // Native chrome is cosmetic; startup must remain available on older devices.
   }
 }
 
@@ -101,7 +109,5 @@ export function resolveNativeBackAction({
     if (canGoBack) return { type: 'history' };
     return { type: 'route', to: AUTH_CHILD_ROUTES.has(path) ? '/auth' : '/' };
   }
-  return now - lastRootBackAt <= BACK_EXIT_WINDOW_MS
-    ? { type: 'exit' }
-    : { type: 'arm-exit' };
+  return now - lastRootBackAt <= BACK_EXIT_WINDOW_MS ? { type: 'exit' } : { type: 'arm-exit' };
 }

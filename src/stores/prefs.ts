@@ -4,6 +4,7 @@
 // because backup.ts includes the whole store.
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
+import type { ThemeMode } from '@/lib/theme';
 
 export type FontScale = 'small' | 'normal' | 'large';
 export type DurationMin = 30 | 60 | 90 | 120;
@@ -20,6 +21,7 @@ export interface Preferences {
   defaultQuestionCount: number;
 
   // Focus & density
+  colorTheme: ThemeMode;
   compactRows: boolean;
   showCountdown: boolean;
   fontScale: FontScale;
@@ -37,6 +39,7 @@ export const DEFAULT_PREFERENCES: Preferences = {
   defaultSubject: null, // "pick each time" until user picks a default
   defaultDurationMin: 60,
   defaultQuestionCount: 10,
+  colorTheme: 'system',
   compactRows: false,
   showCountdown: true,
   fontScale: 'normal',

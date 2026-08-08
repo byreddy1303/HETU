@@ -39,6 +39,7 @@ import {
   type FontScale,
   type Preferences
 } from '@/stores/prefs';
+import type { ThemeMode } from '@/lib/theme';
 import { supabase, supabaseConfigured } from '@/lib/supabase';
 import { wipeLocalState } from '@/lib/isolation';
 import {
@@ -209,17 +210,30 @@ export default function Settings() {
               onChange={(v) => prefs.set('hapticsEnabled', v)}
             />
           </div>
-          <SegmentField
-            label="Font scale"
-            hint="Applies to the main content area."
-            value={prefs.fontScale}
-            options={[
-              { value: 'small', label: 'Small' },
-              { value: 'normal', label: 'Normal' },
-              { value: 'large', label: 'Large' }
-            ]}
-            onChange={(v) => prefs.set('fontScale', v as FontScale)}
-          />
+          <div className="flex flex-col gap-3">
+            <SegmentField
+              label="Appearance"
+              hint="System follows this device's light or dark setting."
+              value={prefs.colorTheme}
+              options={[
+                { value: 'system', label: 'System' },
+                { value: 'light', label: 'Light' },
+                { value: 'dark', label: 'Dark' }
+              ]}
+              onChange={(v) => prefs.set('colorTheme', v as ThemeMode)}
+            />
+            <SegmentField
+              label="Font scale"
+              hint="Applies to the main content area."
+              value={prefs.fontScale}
+              options={[
+                { value: 'small', label: 'Small' },
+                { value: 'normal', label: 'Normal' },
+                { value: 'large', label: 'Large' }
+              ]}
+              onChange={(v) => prefs.set('fontScale', v as FontScale)}
+            />
+          </div>
         </CardBody>
       </Card>
 
@@ -404,6 +418,7 @@ function SegmentField({
               key={o.value}
               type="button"
               onClick={() => onChange(o.value)}
+              aria-pressed={on}
               className={cn(
                 'flex-1 px-3 py-1.5 text-[12.5px] transition-colors',
                 on

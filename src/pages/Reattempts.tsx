@@ -53,7 +53,7 @@ function Ladder({ stage }: { stage: ReattemptStage }) {
           className={cn(
             'u-num rounded-full px-1.5 py-0.5 text-[10px] font-semibold',
             rung === stage
-              ? 'bg-accent text-white'
+              ? 'bg-accent text-accent-contrast'
               : index < idx || stage === 'MASTERED'
                 ? 'bg-success-faint text-success'
                 : 'bg-bg-overlay text-text-faint'

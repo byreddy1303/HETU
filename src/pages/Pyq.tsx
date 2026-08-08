@@ -415,7 +415,7 @@ function AnswerPad({
               className={cn(
                 'h-12 rounded border font-mono text-[15px] font-semibold transition-all',
                 active
-                  ? 'border-accent bg-accent text-white shadow-[0_2px_0_#193f35]'
+                  ? 'border-accent bg-accent text-accent-contrast shadow-key'
                   : 'border-border bg-bg-raised text-text-muted hover:-translate-y-px hover:border-accent/40 hover:text-text'
               )}
             >

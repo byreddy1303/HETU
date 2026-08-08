@@ -245,7 +245,7 @@ export default function TagFlow({
                   className={cn(
                     'flex h-5 items-center rounded-full px-2 font-mono text-[10px] font-semibold uppercase tracking-[0.08em] transition-colors duration-150',
                     i === activeIdx
-                      ? 'bg-accent text-white'
+                      ? 'bg-accent text-accent-contrast'
                       : i < activeIdx
                         ? 'bg-accent-faint text-accent'
                         : 'bg-bg-overlay text-text-faint'

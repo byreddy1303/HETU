@@ -1096,7 +1096,9 @@ Set via `supabase secrets set <KEY>=<value>`:
 
 ## 10. Design system tokens
 
-Amended 2026-08-08 (user-selected visual direction): **"Forest Ledger"** — cool sage canvas, porcelain cards, deep pine ink, eucalyptus primary actions, and restrained brass markers. Faint ledger ruling belongs only on the canvas; data surfaces stay clean, quiet, and highly legible.
+Amended 2026-08-08 (user-selected visual direction): **"Forest Ledger"** — cool sage canvas, porcelain cards, deep pine ink, eucalyptus primary actions, and restrained brass markers. Faint ledger ruling belongs only on the canvas; data surfaces stay clean, quiet, and highly legible. A complementary **Forest Ledger After Dusk** theme uses a charcoal-green canvas (`#0E1612`), dark vellum cards (`#151F1A`), moonlit eucalyptus (`#6FB199`), porcelain ink (`#ECF3EF`), and warm brass (`#D7AE64`). Every surface and semantic color switches through shared tokens; question diagrams may retain white paper for source legibility.
+
+- **Appearance**: Settings offers System / Light / Dark. The on-device preference is persisted, System reacts to OS changes, startup applies it before first paint, and browser/Android chrome follows the resolved theme.
 
 - **Surfaces**: `bg` (`#F1F5F0` sage canvas), `bg-raised` (`#FBFDFB` porcelain card), `bg-overlay` (`#E7EFE9` sunk well). Subtle grain overlay ≤ 2% opacity.
 - **Ink (text)**: `text` (`#19352F` deep pine), `text-muted` (`#50665F`), `text-faint` (`#657871`).

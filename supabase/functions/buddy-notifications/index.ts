@@ -10,12 +10,10 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { corsHeaders, json } from '../_shared/cors.ts';
 import { 
   type SubscriptionRow, 
-  type DeliveryResult,
   type PushCopy,
   deliverToSubscription, 
   truncate 
 } from '../_shared/push.ts';
-import { corsHeaders, json } from '../_shared/cors.ts';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 declare const Deno: any;

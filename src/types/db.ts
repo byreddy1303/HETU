@@ -11,6 +11,7 @@ export type ShareStatus = 'sent' | 'solved' | 'discussed';
 export type InterruptionKind = 'tab_switch' | 'idle' | 'exit';
 export type SyncStatus = 'synced' | 'pending' | 'error';
 export type PyqSessionStatus = 'active' | 'completed' | 'abandoned';
+export type SessionKind = 'focused' | 'log' | 'pyq';
 export type PyqAttemptAnswerStatus = 'available' | 'ambiguous' | 'marks-to-all' | 'unsupported';
 
 export interface UserRow {
@@ -72,6 +73,8 @@ export interface PlanItemCompletionRow {
 export interface SessionRow {
   id: string;
   user_id: string;
+  /** Missing only on rows created before session kinds were introduced. */
+  kind?: SessionKind;
   date: string;
   subject: string;
   target_duration_min: number;

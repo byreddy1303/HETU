@@ -67,6 +67,36 @@ else
   ok "Linked."
 fi
 
+step "Provision daily-digest cron credentials in Supabase Vault"
+project_url="https://${SUPABASE_PROJECT_REF}.supabase.co"
+digest_cron_secret="$(openssl rand -hex 32)"
+vault_sql="
+do \$vault\$
+declare
+  project_url_id uuid;
+  cron_secret_id uuid;
+begin
+  select id into project_url_id from vault.secrets where name = 'air_journal_project_url' limit 1;
+  if project_url_id is null then
+    perform vault.create_secret('${project_url}', 'air_journal_project_url', 'AIR Journal Edge Function base URL');
+  else
+    perform vault.update_secret(project_url_id, '${project_url}', 'air_journal_project_url', 'AIR Journal Edge Function base URL');
+  end if;
+
+  select id into cron_secret_id from vault.secrets where name = 'air_journal_digest_cron_secret' limit 1;
+  if cron_secret_id is null then
+    perform vault.create_secret('${digest_cron_secret}', 'air_journal_digest_cron_secret', 'AIR Journal daily digest cron credential');
+  else
+    perform vault.update_secret(cron_secret_id, '${digest_cron_secret}', 'air_journal_digest_cron_secret', 'AIR Journal daily digest cron credential');
+  end if;
+end
+\$vault\$;"
+supabase db query --linked "$vault_sql" >/dev/null
+supabase secrets set --project-ref "$SUPABASE_PROJECT_REF" \
+  "DAILY_DIGEST_CRON_SECRET=$digest_cron_secret" >/dev/null
+unset digest_cron_secret vault_sql
+ok "Vault credentials are present"
+
 step "Apply migrations to remote"
 supabase db push
 ok "Schema is up to date"

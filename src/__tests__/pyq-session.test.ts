@@ -4,6 +4,8 @@ import {
   createPyqSessionRow,
   pyqAttemptId,
   pyqJournalQuestionId,
+  pyqPracticeSessionRow,
+  pyqPracticeSubject,
   advancePyqSessionProgress,
   completePyqSession,
   abandonPyqSession,
@@ -112,6 +114,35 @@ describe('PYQ session logic and determinism', () => {
 
     const abandoned = abandonPyqSession(session);
     expect(abandoned.status).toBe('abandoned');
+  });
+
+  it('projects a PYQ set into the canonical session stream', () => {
+    const active = createPyqSessionRow(
+      'user-1',
+      '1.0.0',
+      mockConfig,
+      [question],
+      '2026-08-08T08:00:00.000Z'
+    );
+    const completed = completePyqSession(
+      advancePyqSessionProgress(active, question.id, 1, 61),
+      '2026-08-08T08:02:00.000Z'
+    );
+    const canonical = pyqPracticeSessionRow(
+      completed,
+      pyqPracticeSubject([question]),
+      'UTC'
+    );
+
+    expect(canonical).toMatchObject({
+      id: completed.id,
+      user_id: 'user-1',
+      kind: 'pyq',
+      date: '2026-08-08',
+      subject: 'Algorithms',
+      target_duration_min: 0,
+      actual_duration_min: 2
+    });
   });
 
   it('captures the learner answer separately from the official key with exact timing', () => {

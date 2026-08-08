@@ -87,7 +87,12 @@ describe('PYQ committed-attempt logging', () => {
       }
       return new Response(null, { status: 404 });
     });
-    await Promise.all([db.pyq_attempts.clear(), db.pyq_sessions.clear(), db.questions.clear()]);
+    await Promise.all([
+      db.pyq_attempts.clear(),
+      db.pyq_sessions.clear(),
+      db.questions.clear(),
+      db.sessions.clear()
+    ]);
   });
 
   it('stores the actual learner response, official key, snapshot, and timer atomically', async () => {
@@ -100,6 +105,13 @@ describe('PYQ committed-attempt logging', () => {
 
     await user.click(await screen.findByRole('button', { name: 'Start practice' }));
     expect(await screen.findByText('Which proposition is a tautology?')).toBeInTheDocument();
+    const [startedPyqSession] = await db.pyq_sessions.toArray();
+    expect(await db.sessions.get(startedPyqSession.id)).toMatchObject({
+      id: startedPyqSession.id,
+      kind: 'pyq',
+      subject: question.subject,
+      actual_duration_min: null
+    });
     await user.click(screen.getByRole('button', { name: 'A' }));
     await user.click(screen.getByRole('button', { name: /^Answered/ }));
     await user.click(screen.getByRole('button', { name: 'Commit & reveal key' }));
@@ -149,6 +161,32 @@ describe('PYQ committed-attempt logging', () => {
       const [session] = await db.pyq_sessions.toArray();
       expect(session.status).toBe('completed');
       expect(session.completed_at).not.toBeNull();
+      expect(await db.sessions.get(session.id)).toMatchObject({
+        kind: 'pyq',
+        actual_duration_min: 1
+      });
+    });
+  });
+
+  it('groups auto-journaled PYQ evidence under its canonical session', async () => {
+    const user = userEvent.setup();
+    render(
+      <MemoryRouter>
+        <Pyq />
+      </MemoryRouter>
+    );
+
+    await user.click(await screen.findByRole('button', { name: 'Start practice' }));
+    await user.click(await screen.findByRole('button', { name: 'B' }));
+    await user.click(screen.getByRole('button', { name: /^Answered/ }));
+    await user.click(screen.getByRole('button', { name: 'Commit & reveal key' }));
+
+    await waitFor(async () => {
+      const [attempt] = await db.pyq_attempts.toArray();
+      const [journalRow] = await db.questions.toArray();
+      expect(attempt.mark_correct).toBe(true);
+      expect(journalRow.session_id).toBe(attempt.pyq_session_id);
+      expect(await db.sessions.get(attempt.pyq_session_id!)).toMatchObject({ kind: 'pyq' });
     });
   });
 

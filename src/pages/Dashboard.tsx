@@ -25,7 +25,12 @@ import {
 import { EXAM_DATE_DEFAULT, OUTCOMES } from '@/lib/constants';
 import { subjectInk } from '@/lib/subjectInk';
 import { buildLearningTips } from '@/lib/learning-tips';
-import { allSessions, pruneEmptyFinishedSessions } from '@/lib/sessions';
+import {
+  allSessions,
+  practiceQuestionCount,
+  pruneEmptyFinishedSessions,
+  reconcilePyqPracticeSessions
+} from '@/lib/sessions';
 import { PYQ_BANK_QUESTION_COUNT } from '@/lib/pyq';
 import {
   dueTodayCount,
@@ -101,7 +106,11 @@ export default function Dashboard() {
     [userId],
     []
   );
-  const sessions = useLiveQuery(async () => (userId ? allSessions(userId) : []), [userId], []);
+  const sessions = useLiveQuery(
+    async () => (userId ? allSessions(userId, timeZone) : []),
+    [userId, timeZone],
+    []
+  );
   const questions = useLiveQuery(
     async () => (userId ? db.questions.where('user_id').equals(userId).toArray() : []),
     [userId],
@@ -115,8 +124,10 @@ export default function Dashboard() {
 
   useEffect(() => {
     if (!userId) return;
-    void pruneEmptyFinishedSessions(userId);
-  }, [userId]);
+    void reconcilePyqPracticeSessions(userId, timeZone).then(() =>
+      pruneEmptyFinishedSessions(userId)
+    );
+  }, [userId, timeZone]);
 
   const weeklyFixRow = useLiveQuery(async () => {
     if (!userId) return undefined;
@@ -131,6 +142,15 @@ export default function Dashboard() {
     () => (last ? questions.filter((question) => question.session_id === last.id) : []),
     [last, questions]
   );
+  const lastSessionPyqAttempts = useMemo(
+    () =>
+      last?.kind === 'pyq'
+        ? pyqAttempts.filter((attempt) => attempt.pyq_session_id === last.id)
+        : [],
+    [last, pyqAttempts]
+  );
+  const lastSessionQuestionCount =
+    last?.kind === 'pyq' ? lastSessionPyqAttempts.length : lastSessionQuestions.length;
   const distribution = useMemo(
     () => outcomeDistribution(lastSessionQuestions),
     [lastSessionQuestions]
@@ -150,12 +170,15 @@ export default function Dashboard() {
     () => mistakeSurfaceSeries(reattempts, new Date(), timeZone),
     [reattempts, timeZone]
   );
-  const questionsToday = useMemo(
-    () =>
-      questions.filter((question) => calendarDateInTimeZone(question.created_at, timeZone) === today)
-        .length,
-    [questions, timeZone, today]
-  );
+  const questionsToday = useMemo(() => {
+    const journalRows = questions.filter(
+      (question) => calendarDateInTimeZone(question.created_at, timeZone) === today
+    );
+    const attemptRows = pyqAttempts.filter(
+      (attempt) => calendarDateInTimeZone(attempt.attempted_at, timeZone) === today
+    );
+    return practiceQuestionCount(journalRows, attemptRows);
+  }, [questions, pyqAttempts, timeZone, today]);
   const sessionsThisWeek = useMemo(
     () => sessions.filter((session) => session.date >= currentWeek && session.date <= today).length,
     [sessions, currentWeek, today]
@@ -336,8 +359,8 @@ export default function Dashboard() {
                   <p className="mt-1 text-[11.5px] text-text-faint">
                     {formatDate(last.date)} ·{' '}
                     <span className="u-num">{last.actual_duration_min ?? 0}</span> min ·{' '}
-                    <span className="u-num">{lastSessionQuestions.length}</span>{' '}
-                    {plural(lastSessionQuestions.length, 'question')}
+                    <span className="u-num">{lastSessionQuestionCount}</span>{' '}
+                    {plural(lastSessionQuestionCount, last.kind === 'pyq' ? 'submission' : 'question')}
                   </p>
                   {lastSessionQuestions.length > 0 && (
                     <>
@@ -365,7 +388,7 @@ export default function Dashboard() {
               <div className="flex min-h-[228px] flex-col items-center justify-center text-center">
                 <p className="font-display text-[18px] font-semibold text-text">No session evidence yet</p>
                 <p className="mt-2 max-w-[360px] text-[12.5px] leading-relaxed text-text-faint">
-                  Finish a timed session and its outcome shape will appear here.
+                  Finish a focused, log, or PYQ practice session and its outcome shape will appear here.
                 </p>
               </div>
             )}

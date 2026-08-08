@@ -22,6 +22,7 @@ const Heatmap = lazy(() => import('@/pages/Heatmap'));
 const Calibration = lazy(() => import('@/pages/Calibration'));
 const Log = lazy(() => import('@/pages/Log'));
 const Formulas = lazy(() => import('@/pages/Formulas'));
+const SyllabusTracker = lazy(() => import('@/pages/SyllabusTracker'));
 const TriggerDrill = lazy(() => import('@/pages/TriggerDrill'));
 const Settings = lazy(() => import('@/pages/Settings'));
 const Readiness = lazy(() => import('@/pages/Readiness'));
@@ -74,6 +75,7 @@ export const router = createBrowserRouter([
       { path: 'readiness', element: <Readiness /> },
       { path: 'trigger-drill', element: <TriggerDrill /> },
       { path: 'formulas', element: <Formulas /> },
+      { path: 'syllabus', element: <SyllabusTracker /> },
       { path: 'buddy', element: <Buddy /> },
       { path: 'settings', element: <Settings /> }
     ]

@@ -36,7 +36,7 @@ export function Dialog({
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.15, ease: 'easeOut' }}
-          className="u-dialog-overlay fixed inset-0 z-40 flex items-center justify-center bg-text/30 px-[calc(1rem+var(--safe-left))] pb-[calc(1rem+var(--safe-bottom))] pt-[calc(1rem+var(--safe-top))] backdrop-blur-[2px]"
+          className="u-dialog-overlay fixed inset-0 z-[60] flex items-center justify-center bg-text/30 px-[calc(1rem+var(--safe-left))] pb-[calc(1rem+var(--safe-bottom))] pt-[calc(1rem+var(--safe-top))] backdrop-blur-[2px]"
           onMouseDown={(e) => {
             if (e.target === e.currentTarget) onClose();
           }}

@@ -8,7 +8,12 @@ import { ChevronDown, ChevronRight, Pencil } from 'lucide-react';
 import type { QuestionRow, SessionRow } from '@/types';
 import { db } from '@/lib/db';
 import { writeLocal, deleteLocal } from '@/lib/sync';
-import { pruneEmptyFinishedSessions, allSessions, recentSessions } from '@/lib/sessions';
+import {
+  pruneEmptyFinishedSessions,
+  allSessions,
+  recentSessions,
+  reconcilePyqPracticeSessions
+} from '@/lib/sessions';
 import {
   OUTCOMES,
   OUTCOME_BY_CODE,
@@ -298,7 +303,8 @@ function Row({
 }
 
 export default function Journal() {
-  const { userId } = useAuth();
+  const { userId, profile } = useAuth();
+  const timeZone = profile?.timezone ?? 'Asia/Kolkata';
   const navigate = useNavigate();
   const [params] = useSearchParams();
   const [f, setF] = useState<Filters>(() => ({
@@ -323,8 +329,10 @@ export default function Journal() {
   // (from before the auto-delete-on-finish landed).
   useEffect(() => {
     if (!userId) return;
-    void pruneEmptyFinishedSessions(userId);
-  }, [userId]);
+    void reconcilePyqPracticeSessions(userId, timeZone).then(() =>
+      pruneEmptyFinishedSessions(userId)
+    );
+  }, [userId, timeZone]);
 
   function openEdit(row: QuestionRow) {
     setEditRow(row);
@@ -362,11 +370,25 @@ export default function Journal() {
     return rows.reverse();
   }, [userId]);
 
+  const pyqAttempts = useLiveQuery(
+    async () => (userId ? db.pyq_attempts.where('user_id').equals(userId).toArray() : []),
+    [userId],
+    []
+  );
+
   // Newest-first past sessions for the strip below the filter bar.
-  const recent = useLiveQuery(async () => (userId ? recentSessions(userId, 6) : []), [userId], []);
+  const recent = useLiveQuery(
+    async () => (userId ? recentSessions(userId, 6, timeZone) : []),
+    [userId, timeZone],
+    []
+  );
   // All sessions for the filter Select — the user can jump to any old session
   // even if it isn't in the top-6 strip.
-  const sessionsAll = useLiveQuery(async () => (userId ? allSessions(userId) : []), [userId], []);
+  const sessionsAll = useLiveQuery(
+    async () => (userId ? allSessions(userId, timeZone) : []),
+    [userId, timeZone],
+    []
+  );
 
   // Per-session tagged counts (used by the sessions strip subtitle).
   const questionCountBySession = useMemo(() => {
@@ -374,8 +396,17 @@ export default function Journal() {
     for (const q of questions ?? []) {
       if (q.session_id) map.set(q.session_id, (map.get(q.session_id) ?? 0) + 1);
     }
+    const pyqCounts = new Map<string, number>();
+    for (const attempt of pyqAttempts) {
+      if (!attempt.pyq_session_id) continue;
+      pyqCounts.set(
+        attempt.pyq_session_id,
+        (pyqCounts.get(attempt.pyq_session_id) ?? 0) + 1
+      );
+    }
+    for (const [sessionId, count] of pyqCounts) map.set(sessionId, count);
     return map;
-  }, [questions]);
+  }, [questions, pyqAttempts]);
 
   const filtered = useMemo(() => {
     let rows = questions ?? [];
@@ -826,9 +857,10 @@ function RecentSessionsCard({
                   <span className="flex min-w-0 flex-1 items-center gap-1.5">
                     <span className={cn('h-1.5 w-1.5 shrink-0 rounded-full', ink.dot)} />
                     <span className="truncate text-[13px] font-medium">{s.subject}</span>
+                    {s.kind === 'pyq' && <Badge tone="accent">PYQ</Badge>}
                   </span>
                   <span className="u-num shrink-0 text-[11px] text-text-muted">
-                    {count} {plural(count, 'question')}
+                    {count} {plural(count, s.kind === 'pyq' ? 'submission' : 'question')}
                   </span>
                   {s.actual_duration_min != null && (
                     <span className="u-num hidden shrink-0 text-[11px] text-text-faint sm:inline">

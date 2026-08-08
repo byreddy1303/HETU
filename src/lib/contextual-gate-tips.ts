@@ -140,22 +140,24 @@ const TIPS: Record<string, ContextualGateTip> = {
 
 /** Resolve the coaching note for the screen the learner is currently using. */
 export function contextualGateTipForPath(pathname: string): ContextualGateTip {
-  if (pathname === '/session/new') return TIPS.newSession;
-  if (/^\/session\/[^/]+\/solve\/?$/.test(pathname)) return TIPS.activeSession;
-  if (/^\/session\/[^/]+\/review\/?$/.test(pathname)) return TIPS.sessionReview;
-  if (pathname === '/journal') return TIPS.journal;
-  if (pathname === '/log') return TIPS.log;
-  if (pathname === '/patterns') return TIPS.patterns;
-  if (pathname === '/pyq') return TIPS.pyq;
-  if (pathname === '/planner') return TIPS.planner;
-  if (pathname === '/reattempts') return TIPS.reattempts;
-  if (pathname === '/weekly-review') return TIPS.weeklyReview;
-  if (pathname === '/heatmap') return TIPS.heatmap;
-  if (pathname === '/calibration') return TIPS.calibration;
-  if (pathname === '/readiness') return TIPS.readiness;
-  if (pathname === '/trigger-drill') return TIPS.triggerDrill;
-  if (pathname === '/formulas') return TIPS.formulas;
-  if (pathname === '/buddy') return TIPS.buddy;
-  if (pathname === '/settings') return TIPS.settings;
+  const path = pathname.length > 1 ? pathname.replace(/\/+$/, '') : pathname;
+
+  if (path === '/session/new') return TIPS.newSession;
+  if (/^\/session\/[^/]+\/solve$/.test(path)) return TIPS.activeSession;
+  if (/^\/session\/[^/]+\/review$/.test(path)) return TIPS.sessionReview;
+  if (path === '/journal') return TIPS.journal;
+  if (path === '/log') return TIPS.log;
+  if (path === '/patterns') return TIPS.patterns;
+  if (path === '/pyq') return TIPS.pyq;
+  if (path === '/planner') return TIPS.planner;
+  if (path === '/reattempts') return TIPS.reattempts;
+  if (path === '/weekly-review') return TIPS.weeklyReview;
+  if (path === '/heatmap') return TIPS.heatmap;
+  if (path === '/calibration') return TIPS.calibration;
+  if (path === '/readiness') return TIPS.readiness;
+  if (path === '/trigger-drill') return TIPS.triggerDrill;
+  if (path === '/formulas') return TIPS.formulas;
+  if (path === '/buddy') return TIPS.buddy;
+  if (path === '/settings') return TIPS.settings;
   return FALLBACK_TIP;
 }

@@ -1,13 +1,16 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import 'fake-indexeddb/auto';
-import type { QuestionRow, SessionRow } from '@/types';
+import type { PyqAttemptRow, PyqSessionRow, QuestionRow, SessionRow } from '@/types';
 import { db } from '@/lib/db';
 import {
   allSessions,
   finishedSessionsWithQuestions,
+  practiceQuestionCount,
   pruneEmptyFinishedSessions,
+  reconcilePyqPracticeSessions,
   recentSessions
 } from '@/lib/sessions';
+import { pyqJournalQuestionId } from '@/lib/pyq-session';
 import { stopSync } from '@/lib/sync';
 
 const USER = '00000000-0000-4000-8000-000000000001';
@@ -97,5 +100,62 @@ describe('session history', () => {
     expect(await db.sessions.get('empty-finished')).toBeUndefined();
     expect(await db.sessions.get('running')).toBeDefined();
     expect(await db.sessions.get('valid')).toBeDefined();
+  });
+
+  it('includes legacy PYQ practice in session history and reconciles its journal grouping', async () => {
+    const pyqSession = {
+      id: 'pyq-session',
+      user_id: USER,
+      bank_version: 'test',
+      config: {
+        subjectSlug: 'algorithms',
+        topicSlug: 'all',
+        fromYear: 2020,
+        toYear: 2026,
+        type: 'all',
+        order: 'unseen',
+        count: '5'
+      },
+      question_uids: ['gate-q1'],
+      completed_question_uids: ['gate-q1'],
+      current_index: 1,
+      completed_count: 1,
+      elapsed_sec: 75,
+      status: 'completed',
+      current_question_uid: null,
+      current_question_started_at: null,
+      started_at: '2026-07-24T09:00:00.000Z',
+      updated_at: '2026-07-24T09:02:00.000Z',
+      completed_at: '2026-07-24T09:02:00.000Z',
+      sync_status: 'synced'
+    } as PyqSessionRow & { sync_status: 'synced' };
+    const attempt = {
+      id: 'pyq-attempt',
+      user_id: USER,
+      pyq_session_id: pyqSession.id,
+      subject: 'Algorithms',
+      attempted_at: '2026-07-24T09:01:00.000Z',
+      sync_status: 'synced'
+    } as PyqAttemptRow & { sync_status: 'synced' };
+    const journalRow = {
+      ...question(pyqJournalQuestionId(attempt.id), 'legacy-placeholder'),
+      session_id: null
+    };
+    await db.pyq_sessions.put(pyqSession);
+    await db.pyq_attempts.put(attempt);
+    await db.questions.put(journalRow);
+
+    expect((await allSessions(USER)).map((row) => [row.id, row.kind])).toEqual([
+      [pyqSession.id, 'pyq']
+    ]);
+    expect(practiceQuestionCount([journalRow], [attempt])).toBe(1);
+
+    expect(await reconcilePyqPracticeSessions(USER)).toBe(2);
+    expect(await db.sessions.get(pyqSession.id)).toMatchObject({
+      kind: 'pyq',
+      subject: 'Algorithms',
+      actual_duration_min: 2
+    });
+    expect((await db.questions.get(journalRow.id))?.session_id).toBe(pyqSession.id);
   });
 });

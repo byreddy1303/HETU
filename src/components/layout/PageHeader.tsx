@@ -27,7 +27,7 @@ export default function PageHeader({
       </div>
       {(showMobileMark || actions) && (
         <div className="flex items-center gap-2">
-          {showMobileMark && <BrandMark className="native-brand-mark h-9 w-9 md:hidden" />}
+          {showMobileMark && <BrandMark className="page-header-brand-mark h-9 w-9 md:hidden" />}
           {actions}
         </div>
       )}

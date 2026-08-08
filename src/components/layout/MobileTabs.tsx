@@ -19,7 +19,8 @@ import {
   Users,
   X,
   Zap,
-  LibraryBig
+  LibraryBig,
+  ListChecks
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { useLiveQuery } from 'dexie-react-hooks';
@@ -75,6 +76,7 @@ const TABS: Tab[] = [
 ];
 
 const MORE_ITEMS = [
+  { to: '/syllabus', label: 'Syllabus tracker', icon: ListChecks },
   { to: '/pyq', label: 'PYQ practice', icon: LibraryBig },
   { to: '/patterns', label: 'Patterns', icon: Shapes },
   { to: '/reattempts', label: 'Re-attempts', icon: RotateCcw },

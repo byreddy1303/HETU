@@ -30,4 +30,11 @@ describe('contextualGateTipForPath', () => {
       context: 'Study principle'
     });
   });
+
+  it('keeps the component-specific tip when a route has a trailing slash', () => {
+    expect(contextualGateTipForPath('/planner/').id).toBe('planner-output');
+    expect(contextualGateTipForPath('/session/session-42/review/').id).toBe(
+      'session-review-conversion'
+    );
+  });
 });

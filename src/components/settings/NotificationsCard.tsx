@@ -2,16 +2,7 @@
 // The bot token is server-only; users connect a private chat through a
 // short-lived link, then control delivery time, timezone, and daily on/off.
 import { useCallback, useEffect, useState } from 'react';
-import {
-  Bell,
-  Bot,
-  CheckCircle2,
-  Clock3,
-  Link2,
-  RefreshCcw,
-  Send,
-  Unlink
-} from 'lucide-react';
+import { Bell, Bot, CheckCircle2, Clock3, Link2, RefreshCcw, Send, Unlink } from 'lucide-react';
 import { Card, CardBody, CardHeader } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { TIMEZONES } from '@/lib/constants';
@@ -28,9 +19,7 @@ interface Props {
 
 // Telegram usernames are public identifiers, so the production bot is a safe
 // fallback when a preview/local build has not supplied the optional env value.
-const botUsername = String(
-  import.meta.env.VITE_TELEGRAM_BOT_USERNAME || 'Gate_prep_reminder_bot'
-)
+const botUsername = String(import.meta.env.VITE_TELEGRAM_BOT_USERNAME || 'Gate_prep_reminder_bot')
   .trim()
   .replace(/^@/, '');
 
@@ -126,7 +115,10 @@ export default function NotificationsCard({ profile, sandbox }: Props) {
       return;
     }
     await loadTelegram();
-    pushToast(value ? 'Daily Telegram notification on.' : 'Daily Telegram notification off.', 'success');
+    pushToast(
+      value ? 'Daily Telegram notification on.' : 'Daily Telegram notification off.',
+      'success'
+    );
   }
 
   async function beginConnection() {
@@ -197,10 +189,11 @@ export default function NotificationsCard({ profile, sandbox }: Props) {
       pushToast(error.message, 'neutral');
       return;
     }
-    const report =
-      ((data as {
+    const report = ((
+      data as {
         report?: Array<{ telegram_ok?: boolean; telegram_err?: string }>;
-      })?.report ?? [])[0];
+      }
+    )?.report ?? [])[0];
     if (report?.telegram_ok) {
       pushToast('Telegram test delivered.', 'success');
       await loadTelegram();
@@ -217,9 +210,7 @@ export default function NotificationsCard({ profile, sandbox }: Props) {
           <span
             className={cn(
               'rounded-full px-2.5 py-1 text-[11px] font-semibold',
-              enabled
-                ? 'bg-success/10 text-success'
-                : 'bg-bg-overlay text-text-faint'
+              enabled ? 'bg-success/10 text-success' : 'bg-bg-overlay text-text-faint'
             )}
           >
             {enabled ? 'Daily delivery on' : 'Daily delivery off'}
@@ -322,25 +313,9 @@ export default function NotificationsCard({ profile, sandbox }: Props) {
           </DetailField>
 
           <DetailField label="Daily delivery time" icon={<Clock3 size={13} strokeWidth={1.75} />}>
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-              <input
-                type="time"
-                id="telegram-time-input"
-                aria-label="Daily Telegram delivery time picker"
-                value={`${String(profile.digest_hour_local).padStart(2, '0')}:${String(profile.digest_minute_local ?? 0).padStart(2, '0')}`}
-                onChange={(event) => {
-                  const val = event.target.value;
-                  if (!val || !val.includes(':')) return;
-                  const [hStr, mStr] = val.split(':');
-                  const h = parseInt(hStr, 10);
-                  const m = parseInt(mStr, 10);
-                  if (!Number.isNaN(h) && !Number.isNaN(m)) {
-                    void saveTime(h, m);
-                  }
-                }}
-                className="block h-10 w-full sm:w-32 shrink-0 rounded border border-border bg-bg-raised px-3 text-[13px] font-mono text-text focus:border-accent focus:shadow-[0_0_0_3px_theme(colors.accent.faint)] focus:outline-none"
-              />
-              <div className="flex items-center gap-1.5 flex-1 min-w-0">
+            <div className="notification-time-grid grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-end gap-2">
+              <label className="min-w-0">
+                <span className="mb-1 block text-[11px] text-text-faint">Hour</span>
                 <select
                   id="telegram-hour"
                   aria-label="Daily Telegram delivery hour"
@@ -348,15 +323,18 @@ export default function NotificationsCard({ profile, sandbox }: Props) {
                   onChange={(event) =>
                     void saveTime(Number(event.target.value), profile.digest_minute_local ?? 0)
                   }
-                  className="block h-10 w-1/2 rounded border border-border bg-bg-raised px-2.5 text-[13px] text-text focus:border-accent focus:shadow-[0_0_0_3px_theme(colors.accent.faint)] focus:outline-none"
+                  className="block h-11 w-full rounded border border-border bg-bg-raised px-3 font-mono text-[14px] text-text focus:border-accent focus:shadow-[0_0_0_3px_theme(colors.accent.faint)] focus:outline-none"
                 >
                   {hourOptions.map((option) => (
                     <option key={option.value} value={option.value}>
-                      {option.label}h
+                      {option.label}
                     </option>
                   ))}
                 </select>
-                <span className="text-[14px] font-semibold text-text-muted">:</span>
+              </label>
+              <span className="pb-2.5 font-mono text-[16px] font-semibold text-text-muted">:</span>
+              <label className="min-w-0">
+                <span className="mb-1 block text-[11px] text-text-faint">Minute</span>
                 <select
                   id="telegram-minute"
                   aria-label="Daily Telegram delivery minute"
@@ -364,16 +342,24 @@ export default function NotificationsCard({ profile, sandbox }: Props) {
                   onChange={(event) =>
                     void saveTime(profile.digest_hour_local, Number(event.target.value))
                   }
-                  className="block h-10 w-1/2 rounded border border-border bg-bg-raised px-2.5 text-[13px] text-text focus:border-accent focus:shadow-[0_0_0_3px_theme(colors.accent.faint)] focus:outline-none"
+                  className="block h-11 w-full rounded border border-border bg-bg-raised px-3 font-mono text-[14px] text-text focus:border-accent focus:shadow-[0_0_0_3px_theme(colors.accent.faint)] focus:outline-none"
                 >
                   {minuteOptions.map((option) => (
                     <option key={option.value} value={option.value}>
-                      {option.label}m
+                      {option.label}
                     </option>
                   ))}
                 </select>
-              </div>
+              </label>
             </div>
+            <p className="mt-2 text-[11px] leading-relaxed text-text-muted">
+              Sends at{' '}
+              <span className="font-mono font-semibold text-text">
+                {String(profile.digest_hour_local).padStart(2, '0')}:
+                {String(profile.digest_minute_local ?? 0).padStart(2, '0')}
+              </span>{' '}
+              in your notification timezone.
+            </p>
           </DetailField>
 
           <DetailField label="Notification timezone" icon={<Clock3 size={13} strokeWidth={1.75} />}>
@@ -396,8 +382,8 @@ export default function NotificationsCard({ profile, sandbox }: Props) {
         <div className="rounded border border-border/70 bg-bg-overlay/35 px-3 py-2.5">
           <p className="u-label">Daily message contains</p>
           <p className="mt-1 text-[12px] leading-relaxed text-text-muted">
-            Today&apos;s study sessions, one short focus line, and due re-attempts grouped by subject.
-            Empty planning days stay silent.
+            Today&apos;s study sessions, one short focus line, and due re-attempts grouped by
+            subject. Empty planning days stay silent.
           </p>
         </div>
 
@@ -411,11 +397,7 @@ export default function NotificationsCard({ profile, sandbox }: Props) {
             />
             Also send an email backup
           </label>
-          <Button
-            size="sm"
-            onClick={() => void sendTest()}
-            disabled={!enabled || sending}
-          >
+          <Button size="sm" onClick={() => void sendTest()} disabled={!enabled || sending}>
             <Send size={12} strokeWidth={1.75} className="mr-1" />
             {sending ? 'Sending…' : 'Send Telegram test'}
           </Button>

@@ -22,10 +22,12 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { corsHeaders, json } from '../_shared/cors.ts';
 import { jwtRoleClaim } from '../_shared/cron-auth.ts';
+import { isDigestTimeDue, localDigestClock } from '../_shared/digest-schedule.ts';
 import { sendEmail } from '../_shared/email.ts';
 import { greetingForHour, pickQuoteForDay } from '../_shared/quotes.ts';
 import {
   airJournalUrl,
+  parseTelegramStudySessions,
   renderTelegramConnectionTest,
   renderTelegramDigest,
   sendTelegramMessage,
@@ -39,6 +41,7 @@ const SUPABASE_URL = Deno.env.get('SUPABASE_URL') ?? '';
 const SERVICE = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
 const APP_URL = Deno.env.get('VITE_APP_URL') ?? '';
 const TELEGRAM_BOT_TOKEN = Deno.env.get('TELEGRAM_BOT_TOKEN') ?? '';
+const DIGEST_CRON_SECRET = Deno.env.get('DAILY_DIGEST_CRON_SECRET') ?? '';
 
 const admin = createClient(SUPABASE_URL, SERVICE, {
   auth: { persistSession: false, autoRefreshToken: false }
@@ -64,49 +67,7 @@ interface TelegramSubscription {
 
 type DigestChannel = 'email' | 'telegram';
 
-function localHourAndDate(
-  now: Date,
-  tz: string
-): { hour: number; minute: number; isoDate: string; weekday: number } {
-  // Best-effort local time; if tz is invalid, fall back to UTC.
-  try {
-    const parts = new Intl.DateTimeFormat('en-CA', {
-      timeZone: tz,
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: false,
-      weekday: 'short'
-    }).formatToParts(now);
-    const map: Record<string, string> = {};
-    for (const p of parts) map[p.type] = p.value;
-    const isoDate = `${map.year}-${map.month}-${map.day}`;
-    const hour = parseInt(map.hour === '24' ? '0' : map.hour, 10);
-    const minute = parseInt(map.minute ?? '0', 10);
-    const wkMap: Record<string, number> = {
-      Sun: 0,
-      Mon: 1,
-      Tue: 2,
-      Wed: 3,
-      Thu: 4,
-      Fri: 5,
-      Sat: 6
-    };
-    const weekday = wkMap[map.weekday] ?? now.getUTCDay();
-    return { hour, minute, isoDate, weekday };
-  } catch {
-    return {
-      hour: now.getUTCHours(),
-      minute: now.getUTCMinutes(),
-      isoDate: now.toISOString().slice(0, 10),
-      weekday: now.getUTCDay()
-    };
-  }
-}
-
-Deno.serve(async (req: Request): Promise<Response> => {
+async function handleRequest(req: Request): Promise<Response> {
   if (req.method === 'OPTIONS') return new Response(null, { headers: corsHeaders });
   if (req.method !== 'POST') return json({ ok: false, error: 'method not allowed' }, 405);
 
@@ -124,12 +85,14 @@ Deno.serve(async (req: Request): Promise<Response> => {
   }
 
   const token = (req.headers.get('authorization') ?? '').replace(/^Bearer\s+/i, '');
+  const cronSecret = req.headers.get('x-air-journal-cron-secret') ?? '';
   // The gateway verifies this JWT before invoking the function. Check its
   // service-role claim instead of requiring byte equality with the injected
   // key: hosted pg_cron and Edge Functions can expose different valid key
   // generations during API-key rotation.
   const isServiceCall = Boolean(
-    token && (token === SERVICE || jwtRoleClaim(token) === 'service_role')
+    (DIGEST_CRON_SECRET && cronSecret === DIGEST_CRON_SECRET) ||
+    (token && (token === SERVICE || jwtRoleClaim(token) === 'service_role'))
   );
   if (body.user_id) {
     if (!isServiceCall) {
@@ -186,14 +149,10 @@ Deno.serve(async (req: Request): Promise<Response> => {
   for (const u of users) {
     const telegram = telegramByUser.get(u.id);
     const tz = u.timezone || 'Asia/Kolkata';
-    const { hour, minute, isoDate, weekday } = localHourAndDate(now, tz);
+    const { hour, minute, isoDate, weekday } = localDigestClock(now, tz);
     const wantHour = u.digest_hour_local;
     const wantMinute = u.digest_minute_local ?? 0;
-    const totalLocalMin = hour * 60 + minute;
-    const totalWantMin = wantHour * 60 + wantMinute;
-    const diff = Math.abs(totalLocalMin - totalWantMin);
-
-    if (!force && diff >= 15) {
+    if (!force && !isDigestTimeDue({ hour, minute }, wantHour, wantMinute)) {
       report.push({
         user: u.id,
         skipped: 'wrong_time',
@@ -283,7 +242,15 @@ Deno.serve(async (req: Request): Promise<Response> => {
   }
 
   return json({ ok: true, count: users.length, report });
-});
+}
+
+Deno.serve((req: Request) =>
+  handleRequest(req).catch((error: unknown) => {
+    const message = error instanceof Error ? error.message : 'unknown digest error';
+    console.error('Daily digest unhandled failure:', error);
+    return json({ ok: false, error: 'daily digest failed', diagnostic: message.slice(0, 240) }, 500);
+  })
+);
 
 interface Digest {
   html: string;
@@ -291,8 +258,6 @@ interface Digest {
   summary: string;
   has_planner_sessions: boolean;
 }
-
-
 
 function telegramDateLabel(isoDate: string): string {
   const date = new Date(`${isoDate}T12:00:00Z`);
@@ -423,7 +388,8 @@ async function buildDigest(
     html,
     telegram_text,
     summary: summaryLine,
-    has_planner_sessions: studySessions.length > 0 || reAttemptRows.length > 0 || openItems.length > 0
+    has_planner_sessions:
+      studySessions.length > 0 || reAttemptRows.length > 0 || openItems.length > 0
   };
 }
 

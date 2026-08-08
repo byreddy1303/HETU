@@ -11,16 +11,21 @@ function jwt(payload: Record<string, unknown>): string {
 }
 
 describe('daily digest cron authorization', () => {
-  it('keeps gateway JWT verification enabled for the digest function', () => {
+  it('lets pg_net reach the handler, which verifies its Vault cron secret itself', () => {
     const config = readFileSync('supabase/config.toml', 'utf8');
     const section = config.match(/\[functions\.daily-digest\]([\s\S]*?)(?=\n\[|$)/)?.[1];
-    expect(section).toContain('verify_jwt = true');
+    expect(section).toContain('verify_jwt = false');
+
+    const source = readFileSync('supabase/functions/daily-digest/index.ts', 'utf8');
+    expect(source).toContain(
+      "const cronSecret = req.headers.get('x-air-journal-cron-secret') ?? ''"
+    );
+    expect(source).toContain('cronSecret === DIGEST_CRON_SECRET');
+    expect(source).toMatch(/import \{[\s\S]*parseTelegramStudySessions,[\s\S]*\} from '\.\.\/_shared\/telegram\.ts'/);
   });
 
   it('recognizes the service-role claim from a gateway-verified JWT', () => {
-    expect(jwtRoleClaim(jwt({ role: 'service_role', exp: 1_900_000_000 }))).toBe(
-      'service_role'
-    );
+    expect(jwtRoleClaim(jwt({ role: 'service_role', exp: 1_900_000_000 }))).toBe('service_role');
   });
 
   it('does not promote user, malformed, or unsigned tokens', () => {

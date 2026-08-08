@@ -169,6 +169,7 @@
   html[data-native] body {
     min-height: 100dvh;
     padding: var(--safe-top) var(--safe-right) var(--safe-bottom) var(--safe-left);
+    overflow-x: hidden;
     overscroll-behavior-y: none;
     -webkit-tap-highlight-color: transparent;
   }
@@ -287,8 +288,16 @@
     display: grid !important;
   }
 
+  html[data-native] .native-top-bar {
+    display: flex !important;
+  }
+
+  html[data-native] .web-mobile-controls,
+  html[data-native] .page-header-brand-mark {
+    display: none !important;
+  }
+
   html[data-native] .native-nav-overlay,
-  html[data-native] .native-brand-mark,
   html[data-native] .native-buddy-back-row {
     display: flex !important;
   }
@@ -475,6 +484,15 @@
     flex-direction: column;
     border-bottom: 0;
     border-radius: 24px 24px 0 0;
+  }
+
+  html[data-native] .subject-picker-panel {
+    max-height: calc(100dvh - var(--safe-top) - 12px);
+    border-bottom: 0;
+  }
+
+  html[data-native] .subject-picker-list button {
+    min-height: 52px;
   }
 
   html[data-native] .planner-day-header {

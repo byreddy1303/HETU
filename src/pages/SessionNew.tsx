@@ -73,6 +73,7 @@ export default function SessionNew() {
     const row: SessionRow = {
       id: uuid(),
       user_id: userId,
+      kind: 'focused',
       date: todayISO(),
       subject,
       target_duration_min: duration,

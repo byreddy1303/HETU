@@ -4,11 +4,12 @@ import type {
   PyqQuestionSnapshot,
   PyqSelectedAnswer,
   PyqSessionConfig,
-  PyqSessionRow
+  PyqSessionRow,
+  SessionRow
 } from '@/types';
 import type { PyqQuestion } from '@/lib/pyq';
 import { evaluatePyqAnswer, pyqAnswerValueForLog } from '@/lib/pyq';
-import { nowISO, uuid, uuidFromString } from '@/lib/utils';
+import { calendarDateInTimeZone, nowISO, uuid, uuidFromString } from '@/lib/utils';
 
 export function createPyqSessionRow(
   userId: string,
@@ -42,6 +43,49 @@ export function pyqAttemptId(pyqSessionId: string, questionUid: string, attemptN
 
 export function pyqJournalQuestionId(attemptId: string): string {
   return uuidFromString(`pyq-journal-question:${attemptId}`);
+}
+
+/** Human-readable subject for the canonical session paired with a PYQ set. */
+export function pyqPracticeSubject(
+  rows: Array<Pick<PyqQuestion, 'subject'> | Pick<PyqAttemptRow, 'subject'>>
+): string {
+  const subjects = [...new Set(rows.map((row) => row.subject).filter(Boolean))];
+  if (subjects.length === 1) return subjects[0];
+  if (subjects.length > 1) return 'Mixed PYQ';
+  return 'PYQ practice';
+}
+
+/**
+ * Every durable PYQ set has a same-ID canonical session row. That lets all
+ * session consumers (targets, recent history, reviews and journal filters)
+ * treat focused, log-batch and PYQ practice uniformly without weakening the
+ * richer PYQ audit tables.
+ */
+export function pyqPracticeSessionRow(
+  session: PyqSessionRow,
+  subject: string,
+  timeZone = 'Asia/Kolkata',
+  existing?: SessionRow | null
+): SessionRow {
+  const closed = session.status !== 'active';
+  const actualDuration = closed
+    ? session.completed_count > 0
+      ? Math.max(1, Math.ceil(session.elapsed_sec / 60))
+      : 0
+    : null;
+  return {
+    id: session.id,
+    user_id: session.user_id,
+    kind: 'pyq',
+    date: existing?.date ?? calendarDateInTimeZone(session.started_at, timeZone),
+    subject: subject || existing?.subject || 'PYQ practice',
+    target_duration_min: 0,
+    actual_duration_min: actualDuration,
+    insight: existing?.insight ?? null,
+    sadhana_done: existing?.sadhana_done ?? false,
+    interruptions_count: existing?.interruptions_count ?? 0,
+    created_at: session.started_at
+  };
 }
 
 export function startPyqSessionQuestion(

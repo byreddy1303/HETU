@@ -195,6 +195,24 @@ export function loadDayPlan(date: string): DayPlan | null {
   return safeGet<DayPlan>(keyFor(date));
 }
 
+/** Return every locally cached Planner day owned by one user. */
+export function loadAllDayPlans(userId: string): DayPlan[] {
+  const prefix = `air.planner.${userId}.`;
+  const plans: DayPlan[] = [];
+  try {
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (!key?.startsWith(prefix)) continue;
+      const date = key.slice(prefix.length);
+      const plan = safeGet<DayPlan>(key);
+      if (plan?.date === date && Array.isArray(plan.sessions)) plans.push(plan);
+    }
+  } catch {
+    return [];
+  }
+  return plans.sort((a, b) => a.date.localeCompare(b.date));
+}
+
 export function saveDayPlan(plan: DayPlan): DayPlan {
   const saved = { ...plan, updatedAt: new Date().toISOString() };
   safeSet(keyFor(plan.date), saved);

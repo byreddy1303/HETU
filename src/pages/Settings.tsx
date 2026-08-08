@@ -52,6 +52,7 @@ import {
 } from '@/lib/constants';
 import { cn, formatDate, uuid } from '@/lib/utils';
 import { haptic, isNativeApp } from '@/lib/native';
+import { collectProgressReport, downloadProgressReport } from '@/lib/progress-export';
 import {
   BACKUP_VERSION,
   downloadEnvelope,
@@ -87,7 +88,7 @@ export default function Settings() {
     }
   }
 
-  const backupNudge = needsBackupReminder(prefs);
+  const backupNudge = sandbox && needsBackupReminder(prefs);
 
   return (
     <div className="flex flex-col gap-4">
@@ -237,32 +238,33 @@ export default function Settings() {
         </CardBody>
       </Card>
 
-      {/* --- Backup nudge cadence ---------------------------------------- */}
-      <Card>
-        <CardHeader title="Backup reminder" />
-        <CardBody className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-          <SegmentField
-            label="Cadence"
-            value={String(prefs.backupReminderDays)}
-            options={[
-              { value: '0', label: 'Never' },
-              { value: '7', label: 'Weekly' },
-              { value: '30', label: 'Monthly' }
-            ]}
-            onChange={(v) =>
-              prefs.set('backupReminderDays', Number(v) as Preferences['backupReminderDays'])
-            }
-          />
-          <div className="flex flex-col gap-1 sm:col-span-2">
-            <span className="u-label">Last export</span>
-            <div className="rounded border border-border bg-bg-overlay/40 px-3 py-2 text-[13px] text-text-muted">
-              {prefs.lastBackupAt
-                ? `${formatDate(prefs.lastBackupAt.slice(0, 10), 'dd MMM yyyy')} · ${daysSinceBackup(prefs.lastBackupAt)} days ago`
-                : 'No export yet'}
+      {sandbox && (
+        <Card>
+          <CardHeader title="Backup reminder" />
+          <CardBody className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+            <SegmentField
+              label="Cadence"
+              value={String(prefs.backupReminderDays)}
+              options={[
+                { value: '0', label: 'Never' },
+                { value: '7', label: 'Weekly' },
+                { value: '30', label: 'Monthly' }
+              ]}
+              onChange={(v) =>
+                prefs.set('backupReminderDays', Number(v) as Preferences['backupReminderDays'])
+              }
+            />
+            <div className="flex flex-col gap-1 sm:col-span-2">
+              <span className="u-label">Last export</span>
+              <div className="rounded border border-border bg-bg-overlay/40 px-3 py-2 text-[13px] text-text-muted">
+                {prefs.lastBackupAt
+                  ? `${formatDate(prefs.lastBackupAt.slice(0, 10), 'dd MMM yyyy')} · ${daysSinceBackup(prefs.lastBackupAt)} days ago`
+                  : 'No export yet'}
+              </div>
             </div>
-          </div>
-        </CardBody>
-      </Card>
+          </CardBody>
+        </Card>
+      )}
 
       {/* --- Reset prefs -------------------------------------------------- */}
       <Card>
@@ -284,6 +286,8 @@ export default function Settings() {
         </CardBody>
       </Card>
 
+      <ProgressExportCard userId={userId} learnerName={profile?.name ?? 'AIR Journal learner'} />
+
       {/* --- Profile (compact) -------------------------------------------- */}
       <ProfileCard
         profile={profile}
@@ -303,8 +307,8 @@ export default function Settings() {
       <InvitesCard userId={userId} sandbox={sandbox} />
 
       {/* --- Usage -------------------------------------------------------- */}
-      {/* --- Data --------------------------------------------------------- */}
-      <DataCard profile={profile} onBackup={() => prefs.markBackupNow()} />
+      {/* Local-only sandbox users need a manual backup because there is no server copy. */}
+      {sandbox && <DataCard profile={profile} onBackup={() => prefs.markBackupNow()} />}
 
       {/* --- Session ------------------------------------------------------ */}
       <Card>
@@ -834,6 +838,74 @@ function InvitesCard({ userId, sandbox }: { userId: string | null; sandbox: bool
 }
 
 /* ---------------- data card ---------------- */
+
+function ProgressExportCard({
+  userId,
+  learnerName
+}: {
+  userId: string | null;
+  learnerName: string;
+}) {
+  const pushToast = useUiStore((state) => state.pushToast);
+  const [downloading, setDownloading] = useState(false);
+
+  async function onDownload() {
+    if (!userId) return;
+    setDownloading(true);
+    try {
+      const report = await collectProgressReport(userId, learnerName);
+      downloadProgressReport(report);
+      pushToast('Progress report saved to Downloads.', 'success');
+    } catch (error) {
+      pushToast(`Progress export failed: ${(error as Error).message}`, 'neutral');
+    } finally {
+      setDownloading(false);
+    }
+  }
+
+  return (
+    <Card>
+      <CardHeader
+        title="Your progress"
+        aside={<span className="text-[11px] text-text-faint">CSV report</span>}
+      />
+      <CardBody className="flex flex-wrap items-center justify-between gap-3">
+        <div className="max-w-3xl">
+          <p className="font-display text-[14px] font-semibold text-text">
+            One report for your complete preparation trail
+          </p>
+          <p className="mt-1 text-[12px] leading-relaxed text-text-muted">
+            Includes sessions, journal outcomes, Planner, PYQs, patterns, re-attempts, weekly
+            reviews, heatmap, calibration, readiness, syllabus coverage, trigger drills, formulas,
+            focus, and subject-level totals. Opens in Excel or Google Sheets.
+          </p>
+          <div
+            className="mt-3 inline-grid grid-cols-3 divide-x divide-border overflow-hidden rounded border border-border bg-bg-overlay/40 text-[10.5px]"
+            aria-label="Report scope"
+          >
+            <span className="px-2.5 py-1.5 text-text-muted">
+              <strong className="u-num mr-1 text-text">All</strong> areas
+            </span>
+            <span className="px-2.5 py-1.5 text-text-muted">
+              <strong className="u-num mr-1 text-text">All</strong> subjects
+            </span>
+            <span className="px-2.5 py-1.5 text-text-muted">
+              <strong className="u-num mr-1 text-text">CSV</strong> format
+            </span>
+          </div>
+        </div>
+        <Button
+          variant="primary"
+          onClick={() => void onDownload()}
+          disabled={!userId || downloading}
+        >
+          <Download size={14} strokeWidth={1.75} className="mr-1" />
+          {downloading ? 'Preparing report…' : 'Download progress'}
+        </Button>
+      </CardBody>
+    </Card>
+  );
+}
 
 function DataCard({ profile, onBackup }: { profile: UserRow | null; onBackup: () => void }) {
   const pushToast = useUiStore((s) => s.pushToast);

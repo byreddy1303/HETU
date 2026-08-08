@@ -17,7 +17,8 @@ import {
   Users,
   Settings,
   LogOut,
-  LibraryBig
+  LibraryBig,
+  ListChecks
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { useLiveQuery } from 'dexie-react-hooks';
@@ -98,6 +99,12 @@ const ANALYSIS: Item[] = [
 ];
 
 const LEARN: Item[] = [
+  {
+    to: '/syllabus',
+    label: 'Syllabus tracker',
+    icon: ListChecks,
+    active: 'bg-ink-cobalt/10 text-ink-cobalt'
+  },
   {
     to: '/trigger-drill',
     label: 'Trigger drill',

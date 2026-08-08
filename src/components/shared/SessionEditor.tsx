@@ -25,6 +25,7 @@ export default function SessionEditor({
   onDeleted,
   onCancel
 }: SessionEditorProps) {
+  const isPyq = session.kind === 'pyq';
   const [subject, setSubject] = useState(session.subject);
   const [date, setDate] = useState(session.date);
   const [target, setTarget] = useState<number>(session.target_duration_min);
@@ -71,7 +72,10 @@ export default function SessionEditor({
     <div className="flex flex-col gap-4">
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <Field label="Subject">
-          <Select value={subject} onChange={(e) => setSubject(e.target.value)}>
+          <Select value={subject} onChange={(e) => setSubject(e.target.value)} disabled={isPyq}>
+            {!SUBJECTS.includes(subject as (typeof SUBJECTS)[number]) && (
+              <option value={subject}>{subject}</option>
+            )}
             {SUBJECTS.map((s) => (
               <option key={s} value={s}>
                 {s}
@@ -85,7 +89,12 @@ export default function SessionEditor({
       </div>
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <Field label="Target duration (minutes)">
-          <Select value={target} onChange={(e) => setTarget(Number(e.target.value))}>
+          <Select
+            value={target}
+            onChange={(e) => setTarget(Number(e.target.value))}
+            disabled={isPyq}
+          >
+            {isPyq && <option value={0}>Untimed PYQ set</option>}
             {TARGET_DURATIONS_MIN.map((m) => (
               <option key={m} value={m}>
                 {m}m
@@ -103,6 +112,7 @@ export default function SessionEditor({
             }
             placeholder="Blank = in progress"
             mono
+            disabled={isPyq}
           />
         </Field>
       </div>
@@ -115,7 +125,11 @@ export default function SessionEditor({
         />
       </Field>
       <div className="flex items-center justify-between border-t border-danger/25 pt-3">
-        {confirmingDelete ? (
+        {isPyq ? (
+          <span className="text-[12px] text-text-faint">
+            PYQ session lifecycle and duration come from its audited practice set.
+          </span>
+        ) : confirmingDelete ? (
           <div className="flex items-center gap-2">
             <span className="text-[12px] text-danger">
               Questions in this session will become standalone entries.

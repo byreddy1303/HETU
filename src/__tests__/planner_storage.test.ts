@@ -3,6 +3,7 @@ import type { User } from '@supabase/supabase-js';
 import {
   emptyDayPlan,
   keyFor,
+  loadAllDayPlans,
   loadDayPlan,
   plannerDateFromSearch,
   saveDayPlan
@@ -25,7 +26,8 @@ describe('Planner local isolation', () => {
   });
 
   it('keeps two users plans in separate local namespaces', () => {
-    actAs('11111111-1111-4111-8111-111111111111');
+    const firstUserId = '11111111-1111-4111-8111-111111111111';
+    actAs(firstUserId);
     const firstPlan = emptyDayPlan('2026-07-22');
     firstPlan.sessions.push({
       id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
@@ -39,6 +41,7 @@ describe('Planner local isolation', () => {
 
     actAs('22222222-2222-4222-8222-222222222222');
     expect(loadDayPlan('2026-07-22')).toBeNull();
+    expect(loadAllDayPlans(firstUserId).map((plan) => plan.date)).toEqual(['2026-07-22']);
   });
 
   it('claims a legacy Planner row for the current user', () => {

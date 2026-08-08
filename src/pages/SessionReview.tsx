@@ -48,6 +48,10 @@ export default function SessionReview() {
     () => db.questions.where('session_id').equals(id).sortBy('created_at'),
     [id]
   );
+  const pyqAttempts = useLiveQuery(
+    () => db.pyq_attempts.where('pyq_session_id').equals(id).sortBy('attempted_at'),
+    [id]
+  );
 
   const [draft, setDraft] = useState<string>();
   const [nudged, setNudged] = useState(false);
@@ -83,7 +87,7 @@ export default function SessionReview() {
       setEditRow(null);
       setEditDraft(null);
       const remaining = await db.questions.where('session_id').equals(id).count();
-      if (remaining === 0 && session) {
+      if (remaining === 0 && session && session.kind !== 'pyq') {
         await deleteLocal('sessions', session.id);
         navigate('/');
       }
@@ -115,7 +119,8 @@ export default function SessionReview() {
     };
   }, [questions]);
 
-  if (session === undefined || questions === undefined) return <LoadingScreen />;
+  if (session === undefined || questions === undefined || pyqAttempts === undefined)
+    return <LoadingScreen />;
   if (session === null)
     return (
       <Empty
@@ -153,9 +158,20 @@ export default function SessionReview() {
           <p className="mt-0.5 text-[13.5px] text-text-muted">
             <span className={cn('font-medium', ink.text)}>{session.subject}</span>
             {' · '}
-            {formatDate(session.date)} · <span className="u-num">{questions.length}</span> tagged ·{' '}
-            <span className="u-num">{session.actual_duration_min}</span>m of{' '}
-            <span className="u-num">{session.target_duration_min}</span>m target
+            {formatDate(session.date)} ·{' '}
+            {session.kind === 'pyq' ? (
+              <>
+                <span className="u-num">{pyqAttempts.length}</span> submitted ·{' '}
+                <span className="u-num">{questions.length}</span> analyzed ·{' '}
+                <span className="u-num">{session.actual_duration_min}</span>m
+              </>
+            ) : (
+              <>
+                <span className="u-num">{questions.length}</span> tagged ·{' '}
+                <span className="u-num">{session.actual_duration_min}</span>m of{' '}
+                <span className="u-num">{session.target_duration_min}</span>m target
+              </>
+            )}
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -186,6 +202,12 @@ export default function SessionReview() {
           }
         />
         <CardBody className="flex flex-col gap-4">
+          {session.kind === 'pyq' && questions.length < pyqAttempts.length && (
+            <p className="text-[12px] text-text-faint">
+              Outcome analysis covers {questions.length} of {pyqAttempts.length} submitted PYQs.
+              The remaining attempt receipts are still preserved in PYQ practice.
+            </p>
+          )}
           {questions.length > 0 && (
             <div className="flex h-2.5 overflow-hidden rounded-full bg-bg-overlay">
               {OUTCOMES.filter((o) => stats.byOutcome.get(o.code)).map((o) => (

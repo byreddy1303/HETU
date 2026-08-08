@@ -6,19 +6,12 @@
 // planner-storage; the modal itself carries no async state.
 import { useEffect, useState } from 'react';
 import { motion } from 'motion/react';
-import {
-  Check,
-  ChevronDown,
-  Clock,
-  Pencil,
-  Plus,
-  Trash2,
-  X
-} from 'lucide-react';
+import { Check, ChevronDown, Clock, Pencil, Plus, Trash2, X } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
 import { Textarea } from '@/components/ui/Textarea';
+import SubjectPicker from '@/components/planner/SubjectPicker';
 import { cn, formatDate, uuid } from '@/lib/utils';
 import {
   DURATIONS,
@@ -27,13 +20,7 @@ import {
   PRIORITIES,
   STUDY_MODES
 } from '@/lib/planner-constants';
-import type {
-  DayPlan,
-  Priority,
-  Replicate,
-  StudyMode,
-  StudySession
-} from '@/lib/planner-storage';
+import type { DayPlan, Priority, Replicate, StudyMode, StudySession } from '@/lib/planner-storage';
 import { isNativeApp } from '@/lib/native';
 
 interface Props {
@@ -54,20 +41,12 @@ function planHasContent(plan: DayPlan): boolean {
   return false;
 }
 
-export default function DayPlanModal({
-  date,
-  plan,
-  onChange,
-  onClose,
-  onDelete
-}: Props) {
+export default function DayPlanModal({ date, plan, onChange, onClose, onDelete }: Props) {
   const [confirmDelete, setConfirmDelete] = useState(false);
   // Empty plan → open straight into edit mode. Filled plan → view first,
   // then Edit → Save round-trip. Since every edit is auto-persisted, Save
   // is really "done editing" — the round-trip is UX affordance, not I/O.
-  const [mode, setMode] = useState<'view' | 'edit'>(() =>
-    planHasContent(plan) ? 'view' : 'edit'
-  );
+  const [mode, setMode] = useState<'view' | 'edit'>(() => (planHasContent(plan) ? 'view' : 'edit'));
   const native = isNativeApp;
 
   useEffect(() => {
@@ -88,7 +67,7 @@ export default function DayPlanModal({
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.15 }}
-      className="planner-day-overlay fixed inset-0 z-40 flex items-start justify-center overflow-y-auto bg-text/30 p-3 backdrop-blur-[2px] sm:p-6"
+      className="planner-day-overlay fixed inset-0 z-[60] flex items-start justify-center overflow-y-auto bg-text/30 p-3 backdrop-blur-[2px] sm:p-6"
       onMouseDown={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
@@ -137,7 +116,8 @@ export default function DayPlanModal({
                 {native ? 'Done' : 'Save'}
               </Button>
             )}
-            {mode === 'edit' && !native &&
+            {mode === 'edit' &&
+              !native &&
               (!confirmDelete ? (
                 <Button
                   variant="ghost"
@@ -150,11 +130,7 @@ export default function DayPlanModal({
                 </Button>
               ) : (
                 <>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setConfirmDelete(false)}
-                  >
+                  <Button variant="ghost" size="sm" onClick={() => setConfirmDelete(false)}>
                     Cancel
                   </Button>
                   <Button
@@ -198,7 +174,9 @@ export default function DayPlanModal({
 
               <Section
                 title={native ? 'Review the day' : '2 · Review (fill after the day)'}
-                description={native ? 'Return after studying and record what actually happened.' : undefined}
+                description={
+                  native ? 'Return after studying and record what actually happened.' : undefined
+                }
               >
                 <ReviewEditor
                   review={plan.review}
@@ -249,10 +227,9 @@ export default function DayPlanModal({
 
 function ViewMode({ plan }: { plan: DayPlan }) {
   const totalMin = plan.sessions.reduce((s, x) => s + (x.durationMin || 0), 0);
-  const endMoodLabel =
-    plan.review.endMood
-      ? END_MOODS.find((m) => m.value === plan.review.endMood)?.label
-      : null;
+  const endMoodLabel = plan.review.endMood
+    ? END_MOODS.find((m) => m.value === plan.review.endMood)?.label
+    : null;
 
   return (
     <div className="planner-view flex flex-col gap-4">
@@ -272,18 +249,14 @@ function ViewMode({ plan }: { plan: DayPlan }) {
           <ul className="divide-y divide-border">
             {plan.sessions.map((s, i) => {
               const name =
-                s.subject === 'Custom...' && s.customSubject
-                  ? s.customSubject
-                  : s.subject;
+                s.subject === 'Custom...' && s.customSubject ? s.customSubject : s.subject;
               return (
                 <li key={s.id} className="planner-view-session px-3 py-2.5">
                   <div className="flex flex-wrap items-baseline gap-2">
                     <span className="u-num text-[11px] text-text-faint">
                       {String(i + 1).padStart(2, '0')}
                     </span>
-                    <span className="text-[13.5px] font-semibold text-text">
-                      {name}
-                    </span>
+                    <span className="text-[13.5px] font-semibold text-text">{name}</span>
                     <span className="rounded-full bg-accent-faint px-2 py-0.5 text-[11px] font-semibold text-accent">
                       {formatHours(s.durationMin)}
                     </span>
@@ -318,16 +291,11 @@ function ViewMode({ plan }: { plan: DayPlan }) {
         plan.review.replicate) && (
         <div className="planner-view-block rounded border border-border bg-bg">
           <div className="border-b border-border/70 px-3 py-2">
-            <p className="font-display text-[13.5px] font-semibold text-text">
-              End-of-day review
-            </p>
+            <p className="font-display text-[13.5px] font-semibold text-text">End-of-day review</p>
           </div>
           <div className="p-3 text-[12.5px]">
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-              <SummaryStat
-                label="Completion"
-                value={`${plan.review.completionPct}%`}
-              />
+              <SummaryStat label="Completion" value={`${plan.review.completionPct}%`} />
               {endMoodLabel && <SummaryStat label="Mood" value={endMoodLabel} />}
               {plan.review.replicate && (
                 <SummaryStat label="Replicate" value={plan.review.replicate} />
@@ -336,17 +304,13 @@ function ViewMode({ plan }: { plan: DayPlan }) {
             {plan.review.wentWell && (
               <div className="mt-3">
                 <p className="u-label mb-1">Went well</p>
-                <p className="whitespace-pre-wrap text-text">
-                  {plan.review.wentWell}
-                </p>
+                <p className="whitespace-pre-wrap text-text">{plan.review.wentWell}</p>
               </div>
             )}
             {plan.review.missed && (
               <div className="mt-3">
                 <p className="u-label mb-1">Missed / why</p>
-                <p className="whitespace-pre-wrap text-text">
-                  {plan.review.missed}
-                </p>
+                <p className="whitespace-pre-wrap text-text">{plan.review.missed}</p>
               </div>
             )}
           </div>
@@ -400,9 +364,7 @@ function Section({
         onClick={() => setOpen((v) => !v)}
         className="flex w-full items-center justify-between px-3 py-2.5 text-left transition-colors hover:bg-bg-overlay/50"
       >
-        <span className="font-display text-[13.5px] font-semibold text-text">
-          {title}
-        </span>
+        <span className="font-display text-[13.5px] font-semibold text-text">{title}</span>
         <ChevronDown
           size={14}
           strokeWidth={1.75}
@@ -503,16 +465,16 @@ function SessionRow({
       </div>
       <div className="planner-session-fields grid grid-cols-1 gap-2 sm:grid-cols-2">
         <Field label="Subject">
-          <Select
+          <SubjectPicker
             value={session.subject}
-            onChange={(e) => onUpdate({ subject: e.target.value })}
-          >
-            {PLANNER_SUBJECTS.map((s) => (
-              <option key={s} value={s}>
-                {s}
-              </option>
-            ))}
-          </Select>
+            options={PLANNER_SUBJECTS}
+            onChange={(subject) =>
+              onUpdate({
+                subject,
+                ...(subject === 'Custom...' ? {} : { customSubject: undefined })
+              })
+            }
+          />
           {isCustomSubject && (
             <Input
               className="mt-1.5"
@@ -532,10 +494,7 @@ function SessionRow({
               value={session.durationMin}
               onChange={(e) =>
                 onUpdate({
-                  durationMin: Math.max(
-                    1,
-                    Math.min(720, Math.round(Number(e.target.value) || 0))
-                  )
+                  durationMin: Math.max(1, Math.min(720, Math.round(Number(e.target.value) || 0)))
                 })
               }
               placeholder="Minutes"
@@ -630,9 +589,7 @@ function ReviewEditor({
           max={100}
           step={5}
           value={review.completionPct}
-          onChange={(e) =>
-            onChange({ ...review, completionPct: Number(e.target.value) })
-          }
+          onChange={(e) => onChange({ ...review, completionPct: Number(e.target.value) })}
           className="w-full accent-accent"
         />
       </Field>

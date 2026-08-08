@@ -60,8 +60,11 @@ import {
   createPyqSessionRow,
   pyqAttemptId,
   pyqJournalQuestionId,
+  pyqPracticeSessionRow,
+  pyqPracticeSubject,
   startPyqSessionQuestion
 } from '@/lib/pyq-session';
+import { reconcilePyqPracticeSessions } from '@/lib/sessions';
 import { captureElementToDataUrl } from '@/lib/image';
 import { cn, plural, secondsToClock, uuid } from '@/lib/utils';
 
@@ -639,7 +642,8 @@ function formatAttemptAnswer(value: PyqSelectedAnswer): string {
 }
 
 export default function Pyq() {
-  const { userId } = useAuth();
+  const { userId, profile } = useAuth();
+  const timeZone = profile?.timezone ?? 'Asia/Kolkata';
   const [manifest, setManifest] = useState<PyqManifest | null>(null);
   const [manifestError, setManifestError] = useState<string | null>(null);
   const [config, setConfig] = useState<AttemptConfig>({
@@ -701,6 +705,11 @@ export default function Pyq() {
     [userId],
     []
   );
+
+  useEffect(() => {
+    if (!userId) return;
+    void reconcilePyqPracticeSessions(userId, timeZone);
+  }, [userId, timeZone]);
 
   useEffect(() => {
     let active = true;
@@ -779,7 +788,24 @@ export default function Pyq() {
           ? session
           : { ...session, bank_version: manifest.bankVersion, updated_at: new Date().toISOString() };
       const durableSession = exhausted ? completePyqSession(compatibleSession) : compatibleSession;
-      if (durableSession !== session) await writeLocal('pyq_sessions', durableSession);
+      const savedAttempts = (
+        await db.pyq_attempts.where('user_id').equals(session.user_id).toArray()
+      )
+        .filter((attempt) => attempt.pyq_session_id === session.id)
+        .sort((a, b) => a.attempted_at.localeCompare(b.attempted_at));
+      const existingCanonical = await db.sessions.get(session.id);
+      const canonical = pyqPracticeSessionRow(
+        durableSession,
+        pyqPracticeSubject(rows),
+        timeZone,
+        existingCanonical
+      );
+      await writeLocalBatch([
+        ...(durableSession !== session
+          ? ([{ name: 'pyq_sessions', row: durableSession }] as const)
+          : []),
+        { name: 'sessions', row: canonical }
+      ]);
       const nextIndex = Math.min(durableSession.current_index, Math.max(0, rows.length - 1));
       let resumedSession = durableSession;
       if (!exhausted) {
@@ -791,11 +817,6 @@ export default function Pyq() {
           startedAtMs: Number.isFinite(resumedAt) ? resumedAt : Date.now()
         };
       }
-      const savedAttempts = (
-        await db.pyq_attempts.where('user_id').equals(session.user_id).toArray()
-      )
-        .filter((attempt) => attempt.pyq_session_id === session.id)
-        .sort((a, b) => a.attempted_at.localeCompare(b.attempted_at));
       setConfig({ ...session.config, topicSlug: session.config.topicSlug ?? 'all' });
       setQuestions(rows);
       setIndex(nextIndex);
@@ -815,7 +836,25 @@ export default function Pyq() {
     setLoading(true);
     setStartError(null);
     try {
-      await writeLocal('pyq_sessions', abandonPyqSession(session));
+      const abandoned = abandonPyqSession(session);
+      const sessionAttempts = (
+        await db.pyq_attempts.where('user_id').equals(session.user_id).toArray()
+      ).filter((attempt) => attempt.pyq_session_id === session.id);
+      const existingCanonical = await db.sessions.get(session.id);
+      await writeLocalBatch([
+        { name: 'pyq_sessions', row: abandoned },
+        {
+          name: 'sessions',
+          row: pyqPracticeSessionRow(
+            abandoned,
+            sessionAttempts.length > 0
+              ? pyqPracticeSubject(sessionAttempts)
+              : existingCanonical?.subject ?? 'PYQ practice',
+            timeZone,
+            existingCanonical
+          )
+        }
+      ]);
       if (pyqSessionId === session.id) {
         setQuestions([]);
         setFinished(false);
@@ -882,7 +921,13 @@ export default function Pyq() {
       if (rows.length === 0)
         throw new Error('No questions match those filters. Widen the year or type filter.');
       const session = createPyqSessionRow(userId!, manifest.bankVersion, config, rows);
-      await writeLocal('pyq_sessions', session);
+      await writeLocalBatch([
+        { name: 'pyq_sessions', row: session },
+        {
+          name: 'sessions',
+          row: pyqPracticeSessionRow(session, pyqPracticeSubject(rows), timeZone)
+        }
+      ]);
       const firstStartedAt = Date.parse(session.current_question_started_at ?? '');
       questionStartRef.current = {
         questionUid: rows[0].id,
@@ -914,7 +959,7 @@ export default function Pyq() {
     return {
       id: uuid(),
       user_id: userId!,
-      session_id: null,
+      session_id: attempt.pyq_session_id,
       subject: current.subject,
       subtopic: current.topic,
       source_year: current.year,
@@ -1097,7 +1142,20 @@ export default function Pyq() {
   async function markSessionComplete() {
     const session = pyqSessionId ? await db.pyq_sessions.get(pyqSessionId) : null;
     if (session && session.status === 'active') {
-      await writeLocal('pyq_sessions', completePyqSession(session));
+      const completedSession = completePyqSession(session);
+      const existingCanonical = await db.sessions.get(session.id);
+      await writeLocalBatch([
+        { name: 'pyq_sessions', row: completedSession },
+        {
+          name: 'sessions',
+          row: pyqPracticeSessionRow(
+            completedSession,
+            pyqPracticeSubject(questions),
+            timeZone,
+            existingCanonical
+          )
+        }
+      ]);
     }
   }
 

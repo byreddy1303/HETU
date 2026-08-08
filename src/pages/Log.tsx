@@ -141,6 +141,7 @@ export default function Log() {
     const row: SessionRow = {
       id: uuid(),
       user_id: userId,
+      kind: 'log',
       date: today,
       subject: draft.subject || DEFAULT_SUBJECT,
       target_duration_min: 0, // marker for "log batch" (no timer)

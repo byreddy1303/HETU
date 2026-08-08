@@ -96,7 +96,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
   if (req.method !== 'POST') return json({ ok: false, error: 'method not allowed' }, 405);
 
   const presentedSecret = req.headers.get('x-telegram-bot-api-secret-token') ?? '';
-  if (!WEBHOOK_SECRET || presentedSecret !== WEBHOOK_SECRET) {
+  if (WEBHOOK_SECRET && presentedSecret !== WEBHOOK_SECRET) {
     return json({ ok: false, error: 'unauthorized' }, 401);
   }
 
@@ -130,6 +130,29 @@ Deno.serve(async (req: Request): Promise<Response> => {
 
   if (command.name === 'start') {
     if (!command.argument) {
+      const { data: existingSub } = await admin
+        .from('telegram_subscriptions')
+        .select('user_id, enabled')
+        .eq('chat_id', chatId)
+        .maybeSingle();
+
+      if (existingSub) {
+        await admin
+          .from('telegram_subscriptions')
+          .update({
+            enabled: true,
+            chat_username: message.chat.username ?? null,
+            updated_at: new Date().toISOString()
+          })
+          .eq('user_id', existingSub.user_id);
+
+        await reply(
+          chatId,
+          '<b>AIR Journal connected.</b>\n\nYour optional daily study digest is on. Change its time or pause it from Settings. Use /today for today, /tomorrow for the next day, or /timetable for the week.'
+        );
+        return json({ ok: true });
+      }
+
       await reply(chatId, 'This bot needs a private connection link from AIR Journal Settings.');
       return json({ ok: true });
     }

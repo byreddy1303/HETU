@@ -184,3 +184,9 @@ F3.3 says the server calls `advance_reattempt(id, result)`. Doing that from the 
 **Rejected**: a paper-download archive, question summaries, fabricated keys for defective papers, a second analytics model, and dependence on a live third-party question API during practice.
 
 **Reason**: direct user clarification that AIR Journal itself should be the PYQ practice place, while preserving its existing mistake-analysis semantics and offline-first behavior.
+
+## 2026-08-08 — Versioned immutable PYQ attempt receipts
+
+**Chose**: capture each committed bank attempt as a versioned, immutable row containing the exact learner response, official key, bank/question snapshot, start/commit timestamps, and millisecond duration; keep known pre-fix rows explicitly marked as legacy.
+**Rejected**: relying only on the mutable bundled bank, storing rounded time alone, or silently treating earlier session-era `selected_answer` values as trustworthy.
+**Reason**: an honest attempt log must remain auditable across bank releases and retries without fabricating learner responses that cannot be recovered.

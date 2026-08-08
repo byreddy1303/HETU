@@ -51,6 +51,7 @@ interface UserForDigest {
   timezone: string;
   digest_email_enabled: boolean;
   digest_hour_local: number;
+  digest_minute_local: number;
   last_digest_sent_on: string | null;
 }
 
@@ -66,7 +67,7 @@ type DigestChannel = 'email' | 'telegram';
 function localHourAndDate(
   now: Date,
   tz: string
-): { hour: number; isoDate: string; weekday: number } {
+): { hour: number; minute: number; isoDate: string; weekday: number } {
   // Best-effort local time; if tz is invalid, fall back to UTC.
   try {
     const parts = new Intl.DateTimeFormat('en-CA', {
@@ -75,6 +76,7 @@ function localHourAndDate(
       month: '2-digit',
       day: '2-digit',
       hour: '2-digit',
+      minute: '2-digit',
       hour12: false,
       weekday: 'short'
     }).formatToParts(now);
@@ -82,6 +84,7 @@ function localHourAndDate(
     for (const p of parts) map[p.type] = p.value;
     const isoDate = `${map.year}-${map.month}-${map.day}`;
     const hour = parseInt(map.hour === '24' ? '0' : map.hour, 10);
+    const minute = parseInt(map.minute ?? '0', 10);
     const wkMap: Record<string, number> = {
       Sun: 0,
       Mon: 1,
@@ -92,10 +95,11 @@ function localHourAndDate(
       Sat: 6
     };
     const weekday = wkMap[map.weekday] ?? now.getUTCDay();
-    return { hour, isoDate, weekday };
+    return { hour, minute, isoDate, weekday };
   } catch {
     return {
       hour: now.getUTCHours(),
+      minute: now.getUTCMinutes(),
       isoDate: now.toISOString().slice(0, 10),
       weekday: now.getUTCDay()
     };
@@ -148,7 +152,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
   let userQuery = admin
     .from('users')
     .select(
-      'id, name, email, timezone, digest_email_enabled, digest_hour_local, last_digest_sent_on'
+      'id, name, email, timezone, digest_email_enabled, digest_hour_local, digest_minute_local, last_digest_sent_on'
     )
     .limit(1000);
   let telegramQuery = admin
@@ -182,10 +186,22 @@ Deno.serve(async (req: Request): Promise<Response> => {
   for (const u of users) {
     const telegram = telegramByUser.get(u.id);
     const tz = u.timezone || 'Asia/Kolkata';
-    const { hour, isoDate, weekday } = localHourAndDate(now, tz);
+    const { hour, minute, isoDate, weekday } = localHourAndDate(now, tz);
+    const wantHour = u.digest_hour_local;
+    const wantMinute = u.digest_minute_local ?? 0;
+    const totalLocalMin = hour * 60 + minute;
+    const totalWantMin = wantHour * 60 + wantMinute;
+    const diff = Math.abs(totalLocalMin - totalWantMin);
 
-    if (!force && hour !== u.digest_hour_local) {
-      report.push({ user: u.id, skipped: 'wrong_hour', hour, want: u.digest_hour_local });
+    if (!force && diff >= 15) {
+      report.push({
+        user: u.id,
+        skipped: 'wrong_time',
+        hour,
+        minute,
+        wantHour,
+        wantMinute
+      });
       continue;
     }
 
@@ -276,29 +292,7 @@ interface Digest {
   has_planner_sessions: boolean;
 }
 
-function parseStudySessions(value: unknown): TelegramStudySession[] {
-  if (!Array.isArray(value)) return [];
-  const sessions: TelegramStudySession[] = [];
-  for (const item of value.slice(0, 24)) {
-    if (!item || typeof item !== 'object') continue;
-    const row = item as Record<string, unknown>;
-    const subject = typeof row.subject === 'string' ? row.subject.trim().slice(0, 120) : '';
-    const durationMin =
-      typeof row.durationMin === 'number' && Number.isFinite(row.durationMin)
-        ? Math.max(0, Math.min(480, Math.round(row.durationMin)))
-        : 0;
-    if (!subject || durationMin === 0) continue;
-    sessions.push({
-      subject,
-      customSubject:
-        typeof row.customSubject === 'string' ? row.customSubject.trim().slice(0, 120) : undefined,
-      durationMin,
-      mode: typeof row.mode === 'string' ? row.mode.trim().slice(0, 80) : 'Study',
-      target: typeof row.target === 'string' ? row.target.trim().slice(0, 280) : ''
-    });
-  }
-  return sessions;
-}
+
 
 function telegramDateLabel(isoDate: string): string {
   const date = new Date(`${isoDate}T12:00:00Z`);
@@ -331,7 +325,9 @@ async function buildDigest(
   if (storedPlanError) {
     console.error('Planner day load failed:', u.id, storedPlanError.message);
   }
-  const studySessions = parseStudySessions((storedPlan as { sessions?: unknown } | null)?.sessions);
+  const studySessions = parseTelegramStudySessions(
+    (storedPlan as { sessions?: unknown } | null)?.sessions
+  );
 
   // Re-attempts due today (not yet done)
   const { data: reattempts } = await admin
@@ -427,7 +423,7 @@ async function buildDigest(
     html,
     telegram_text,
     summary: summaryLine,
-    has_planner_sessions: studySessions.length > 0
+    has_planner_sessions: studySessions.length > 0 || reAttemptRows.length > 0 || openItems.length > 0
   };
 }
 

@@ -1,13 +1,16 @@
 import { describe, expect, it } from 'vitest';
 import {
+  createPyqAttemptRow,
   createPyqSessionRow,
   pyqAttemptId,
   pyqJournalQuestionId,
   advancePyqSessionProgress,
   completePyqSession,
-  abandonPyqSession
+  abandonPyqSession,
+  startPyqSessionQuestion
 } from '@/lib/pyq-session';
 import type { PyqSessionConfig } from '@/types';
+import type { PyqQuestion } from '@/lib/pyq';
 
 const mockConfig: PyqSessionConfig = {
   subjectSlug: 'algorithms',
@@ -16,6 +19,25 @@ const mockConfig: PyqSessionConfig = {
   type: 'all',
   order: 'unseen',
   count: '10'
+};
+
+const question: PyqQuestion = {
+  id: 'gate-2026-set1-q1',
+  year: 2026,
+  set: 1,
+  number: '1',
+  paperLabel: 'GATE CSE 2026 Set 1',
+  subject: 'Algorithms',
+  subjectSlug: 'algorithms',
+  subtopics: ['Shortest paths'],
+  marks: 1,
+  type: 'MCQ',
+  answer: 'B',
+  tolerance: null,
+  answerStatus: 'available',
+  html: '<p>Choose the shortest path.</p>',
+  sourceUrl: 'https://gateoverflow.in/test',
+  answerSource: null
 };
 
 describe('PYQ session logic and determinism', () => {
@@ -31,6 +53,8 @@ describe('PYQ session logic and determinism', () => {
     expect(session.completed_question_uids).toEqual([]);
     expect(session.current_index).toBe(0);
     expect(session.completed_count).toBe(0);
+    expect(session.current_question_uid).toBe('q1');
+    expect(session.current_question_started_at).not.toBeNull();
   });
 
   it('generates deterministic attempt and journal question IDs', () => {
@@ -50,10 +74,27 @@ describe('PYQ session logic and determinism', () => {
       { id: 'q2' },
       { id: 'q3' }
     ]);
-    const advanced = advancePyqSessionProgress(session, 'q1', 1);
+    const advanced = advancePyqSessionProgress(session, 'q1', 1, 17);
     expect(advanced.completed_question_uids).toEqual(['q1']);
     expect(advanced.current_index).toBe(1);
     expect(advanced.completed_count).toBe(1);
+    expect(advanced.elapsed_sec).toBe(17);
+    expect(advanced.current_question_uid).toBeNull();
+    expect(advanced.current_question_started_at).toBeNull();
+
+    const duplicate = advancePyqSessionProgress(advanced, 'q1', 1, 17);
+    expect(duplicate.elapsed_sec).toBe(17);
+  });
+
+  it('restores a persisted question start without resetting its timer', () => {
+    const session = createPyqSessionRow(
+      'user-1',
+      '1.0.0',
+      mockConfig,
+      [{ id: 'q1' }],
+      '2026-08-08T08:00:00.000Z'
+    );
+    expect(startPyqSessionQuestion(session, 'q1', '2026-08-08T08:01:00.000Z')).toBe(session);
   });
 
   it('completes and abandons sessions properly', () => {
@@ -68,5 +109,62 @@ describe('PYQ session logic and determinism', () => {
 
     const abandoned = abandonPyqSession(session);
     expect(abandoned.status).toBe('abandoned');
+  });
+
+  it('captures the learner answer separately from the official key with exact timing', () => {
+    const session = createPyqSessionRow(
+      'user-1',
+      '2.0.0',
+      mockConfig,
+      [question],
+      '2026-08-08T08:00:00.000Z'
+    );
+    const attempt = createPyqAttemptRow({
+      userId: 'user-1',
+      session,
+      question,
+      selectedAnswer: 'A',
+      decision: 'MARK',
+      bankVersion: '2.0.0',
+      questionStartedAtMs: Date.parse('2026-08-08T08:00:00.000Z'),
+      committedAtMs: Date.parse('2026-08-08T08:00:12.345Z'),
+      screenshotUrl: 'data:image/png;base64,test'
+    });
+
+    expect(attempt.selected_answer).toBe('A');
+    expect(attempt.correct_answer).toBe('B');
+    expect(attempt.mark_correct).toBe(false);
+    expect(attempt.capture_version).toBe(2);
+    expect(attempt.question_started_at).toBe('2026-08-08T08:00:00.000Z');
+    expect(attempt.attempted_at).toBe('2026-08-08T08:00:12.345Z');
+    expect(attempt.time_spent_ms).toBe(12_345);
+    expect(attempt.time_spent_sec).toBe(13);
+    expect(attempt.question_snapshot).toMatchObject({
+      question_uid: question.id,
+      number: '1',
+      type: 'MCQ',
+      html: question.html
+    });
+  });
+
+  it('records skips without a phantom learner answer', () => {
+    const session = createPyqSessionRow('user-1', '2.0.0', mockConfig, [question]);
+    const attempt = createPyqAttemptRow({
+      userId: 'user-1',
+      session,
+      question,
+      selectedAnswer: null,
+      decision: 'SKIP',
+      bankVersion: '2.0.0',
+      questionStartedAtMs: 1_000,
+      committedAtMs: 1_001,
+      screenshotUrl: null
+    });
+
+    expect(attempt.selected_answer).toBeNull();
+    expect(attempt.correct_answer).toBe('B');
+    expect(attempt.mark_correct).toBeNull();
+    expect(attempt.time_spent_ms).toBe(1);
+    expect(attempt.time_spent_sec).toBe(1);
   });
 });

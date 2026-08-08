@@ -33,6 +33,7 @@ vi.mock('@/hooks/useAuth', () => ({
       digest_email_enabled: false,
       digest_whatsapp_enabled: false,
       digest_hour_local: 6,
+      digest_minute_local: 0,
       wa_opted_in_at: null,
       last_digest_sent_on: null
     }

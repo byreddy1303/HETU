@@ -39,11 +39,9 @@ import { createReattemptRow, needsReattempt } from '@/lib/reattempt';
 import { reconcileQuestionPattern } from '@/lib/patterns';
 import { DEFAULT_TARGET_TIME_SEC, MARKS_TARGET_SEC } from '@/lib/constants';
 import {
-  evaluatePyqAnswer,
   firstPyqImage,
   formatPyqAnswer,
   inferPyqDirectOutcome,
-  pyqAnswerValueForLog,
   pyqQuestionSnapshotDataUrl,
   resolvePyqJournalImageUrl,
   loadPyqManifest,
@@ -57,12 +55,14 @@ import {
   abandonPyqSession,
   advancePyqSessionProgress,
   completePyqSession,
+  createPyqAttemptRow,
   createPyqSessionRow,
   pyqAttemptId,
-  pyqJournalQuestionId
+  pyqJournalQuestionId,
+  startPyqSessionQuestion
 } from '@/lib/pyq-session';
 import { captureElementToDataUrl } from '@/lib/image';
-import { cn, nowISO, plural, secondsToClock, uuid } from '@/lib/utils';
+import { cn, plural, secondsToClock, uuid } from '@/lib/utils';
 
 type Order = 'unseen' | 'random' | 'newest' | 'oldest';
 type CountChoice = '5' | '10' | '25' | '50' | 'all';
@@ -333,9 +333,18 @@ function PracticeSetup({
             </div>
             <div className="mt-auto pt-6">
               {error && <p className="mb-3 text-[12px] text-danger">{error}</p>}
-              <Button variant="primary" className="w-full" onClick={onStart} disabled={loading}>
+              <Button
+                variant="primary"
+                className="w-full"
+                onClick={onStart}
+                disabled={loading || activeSession !== null}
+              >
                 <BookOpenCheck size={17} />
-                {loading ? 'Opening question bank…' : 'Start practice'}
+                {loading
+                  ? 'Opening question bank…'
+                  : activeSession
+                    ? 'Resume or discard unfinished set'
+                    : 'Start practice'}
               </Button>
               <p className="mt-3 text-center text-[11px] leading-relaxed text-text-faint">
                 Questions and diagrams are bundled locally. Your answer stays hidden until you
@@ -441,6 +450,7 @@ function DecisionButtons({
           <button
             key={option.value}
             type="button"
+            aria-label={`${option.label}: ${option.hint}`}
             aria-pressed={value === option.value}
             onClick={() => onChange(option.value)}
             className={cn(
@@ -477,8 +487,19 @@ function ResultPanel({ question, attempt }: { question: PyqQuestion; attempt: Py
       : attempt.mark_correct
         ? CheckCircle2
         : XCircle;
+  const learnerAnswer =
+    attempt.capture_version === 2
+      ? attempt.mark_decision === 'SKIP'
+        ? 'Left blank'
+        : formatAttemptAnswer(attempt.selected_answer)
+      : 'Legacy attempt — learner response not verified';
+  const capturedKey =
+    attempt.answer_status === 'available'
+      ? formatAttemptAnswer(attempt.correct_answer)
+      : answerText(question).replace(/^Answer key:\s*/i, '');
   return (
-    <div
+    <section
+      aria-label="PYQ attempt receipt"
       className={cn(
         'rounded border p-4',
         tone === 'success'
@@ -503,7 +524,16 @@ function ResultPanel({ question, attempt }: { question: PyqQuestion; attempt: Py
               {secondsToClock(attempt.time_spent_sec)}
             </span>
           </div>
-          <p className="mt-1 text-[13px] font-medium text-text">{answerText(question)}</p>
+          <dl className="mt-2 grid gap-1.5 text-[12px] sm:grid-cols-2">
+            <div>
+              <dt className="u-label">Your answer</dt>
+              <dd className="mt-0.5 font-mono font-semibold text-text">{learnerAnswer}</dd>
+            </div>
+            <div>
+              <dt className="u-label">Correct answer</dt>
+              <dd className="mt-0.5 font-mono font-semibold text-text">{capturedKey}</dd>
+            </div>
+          </dl>
           {question.type === 'NAT' &&
             question.tolerance?.abs != null &&
             question.tolerance.abs > 0 && (
@@ -511,6 +541,12 @@ function ResultPanel({ question, attempt }: { question: PyqQuestion; attempt: Py
                 Accepted tolerance: ±{question.tolerance.abs}
               </p>
             )}
+          <p className="mt-2 text-[11px] text-text-faint">
+            Committed {new Date(attempt.attempted_at).toLocaleString()} ·{' '}
+            {attempt.time_spent_ms == null
+              ? secondsToClock(attempt.time_spent_sec)
+              : `${(attempt.time_spent_ms / 1000).toFixed(1)}s exact`}
+          </p>
           <a
             href={question.sourceUrl}
             target="_blank"
@@ -521,8 +557,13 @@ function ResultPanel({ question, attempt }: { question: PyqQuestion; attempt: Py
           </a>
         </div>
       </div>
-    </div>
+    </section>
   );
+}
+
+function formatAttemptAnswer(value: PyqSelectedAnswer): string {
+  if (value == null) return 'Unavailable';
+  return Array.isArray(value) ? value.join(', ') : String(value);
 }
 
 export default function Pyq() {
@@ -554,8 +595,11 @@ export default function Pyq() {
   const [analyzedCount, setAnalyzedCount] = useState(0);
   const [questionScreenshot, setQuestionScreenshot] = useState<string | null>(null);
   const [pyqSessionId, setPyqSessionId] = useState<string | null>(null);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const questionCaptureRef = useRef<HTMLDivElement>(null);
   const submittingRef = useRef(false);
+  const startingRef = useRef(false);
+  const questionStartRef = useRef<{ questionUid: string; startedAtMs: number } | null>(null);
 
   const attempts = useLiveQuery(
     async () => (userId ? db.pyq_attempts.where('user_id').equals(userId).toArray() : []),
@@ -570,12 +614,11 @@ export default function Pyq() {
   const activePyqSession = useLiveQuery(
     async () => {
       if (!userId) return null;
-      const rows = await db.pyq_sessions.where('[user_id+status]').equals([userId, 'active']).toArray();
-      return (
-        rows
-          .filter((row) => row.question_uids.length > row.current_index)
-          .sort((a, b) => b.updated_at.localeCompare(a.updated_at))[0] ?? null
-      );
+      const rows = await db.pyq_sessions
+        .where('[user_id+status]')
+        .equals([userId, 'active'])
+        .toArray();
+      return rows.sort((a, b) => b.updated_at.localeCompare(a.updated_at))[0] ?? null;
     },
     [userId],
     null
@@ -610,7 +653,11 @@ export default function Pyq() {
   useEffect(() => {
     if (!currentId) return;
     window.scrollTo({ top: 0, behavior: 'auto' });
-    setStartedAt(Date.now());
+    const persistedStart = questionStartRef.current;
+    setStartedAt(
+      persistedStart?.questionUid === currentId ? persistedStart.startedAtMs : Date.now()
+    );
+    questionStartRef.current = null;
     setChoices([]);
     setNumeric('');
     setDecision(null);
@@ -619,15 +666,12 @@ export default function Pyq() {
     setJournalOpen(false);
     setJournalSaved(false);
     setQuestionScreenshot(null);
+    setSubmitError(null);
   }, [currentId]);
 
   useEffect(() => {
     if (journalOpen) window.scrollTo({ top: 0, behavior: 'auto' });
   }, [journalOpen]);
-
-  useEffect(() => {
-    if (submitted?.mark_correct === false) setJournalOpen(true);
-  }, [submitted?.id, submitted?.mark_correct]);
 
   const liveSeconds = useTimer(submitted ? null : startedAt);
   const shownSeconds = submitted?.time_spent_sec ?? liveSeconds;
@@ -647,18 +691,41 @@ export default function Pyq() {
     setLoading(true);
     setStartError(null);
     try {
+      if (session.bank_version !== manifest.bankVersion) {
+        throw new Error(
+          'This unfinished set belongs to an older question-bank version. Discard it before starting a new set.'
+        );
+      }
       const rows = await questionsForSession(session);
-      if (rows.length === 0)
-        throw new Error('This saved set no longer matches the local question bank.');
+      if (rows.length !== session.question_uids.length) {
+        throw new Error(
+          'This saved set no longer matches the local question bank. Discard it before continuing.'
+        );
+      }
+      const exhausted = session.current_index >= rows.length;
+      const durableSession = exhausted ? completePyqSession(session) : session;
+      if (durableSession !== session) await writeLocal('pyq_sessions', durableSession);
+      const nextIndex = Math.min(durableSession.current_index, Math.max(0, rows.length - 1));
+      let resumedSession = durableSession;
+      if (!exhausted) {
+        resumedSession = startPyqSessionQuestion(durableSession, rows[nextIndex].id);
+        if (resumedSession !== durableSession) await writeLocal('pyq_sessions', resumedSession);
+        const resumedAt = Date.parse(resumedSession.current_question_started_at ?? '');
+        questionStartRef.current = {
+          questionUid: rows[nextIndex].id,
+          startedAtMs: Number.isFinite(resumedAt) ? resumedAt : Date.now()
+        };
+      }
+      const savedAttempts = (
+        await db.pyq_attempts.where('user_id').equals(session.user_id).toArray()
+      )
+        .filter((attempt) => attempt.pyq_session_id === session.id)
+        .sort((a, b) => a.attempted_at.localeCompare(b.attempted_at));
       setConfig(session.config);
       setQuestions(rows);
-      setIndex(Math.min(session.current_index, Math.max(0, rows.length - 1)));
-      setCompleted(
-        attempts
-          .filter((attempt) => attempt.pyq_session_id === session.id)
-          .sort((a, b) => a.attempted_at.localeCompare(b.attempted_at))
-      );
-      setFinished(session.current_index >= rows.length);
+      setIndex(nextIndex);
+      setCompleted(savedAttempts);
+      setFinished(exhausted);
       setAnalyzedCount(0);
       setPyqSessionId(session.id);
     } catch (error) {
@@ -679,10 +746,18 @@ export default function Pyq() {
   }
 
   async function startPractice() {
-    if (!manifest || loading || !userId) return;
+    if (!manifest || loading || !userId || startingRef.current) return;
+    startingRef.current = true;
     setLoading(true);
     setStartError(null);
     try {
+      const activeRows = await db.pyq_sessions
+        .where('[user_id+status]')
+        .equals([userId, 'active'])
+        .toArray();
+      if (activeRows.length > 0) {
+        throw new Error('Resume or discard the unfinished PYQ set before starting another.');
+      }
       const subjects =
         config.subjectSlug === 'all'
           ? manifest.subjects
@@ -723,6 +798,11 @@ export default function Pyq() {
         throw new Error('No questions match those filters. Widen the year or type filter.');
       const session = createPyqSessionRow(userId!, manifest.bankVersion, config, rows);
       await writeLocal('pyq_sessions', session);
+      const firstStartedAt = Date.parse(session.current_question_started_at ?? '');
+      questionStartRef.current = {
+        questionUid: rows[0].id,
+        startedAtMs: Number.isFinite(firstStartedAt) ? firstStartedAt : Date.now()
+      };
       setPyqSessionId(session.id);
       setQuestions(rows);
       setIndex(0);
@@ -732,6 +812,7 @@ export default function Pyq() {
     } catch (error) {
       setStartError(error instanceof Error ? error.message : 'Could not build this practice set.');
     } finally {
+      startingRef.current = false;
       setLoading(false);
     }
   }
@@ -742,7 +823,9 @@ export default function Pyq() {
     imageUrl: string | null
   ): QuestionRow {
     if (!current) throw new Error('No active question');
-    const outcome = draft?.outcome ?? inferPyqDirectOutcome(current, attempt.mark_decision, attempt.time_spent_sec);
+    const outcome =
+      draft?.outcome ??
+      inferPyqDirectOutcome(current, attempt.mark_decision, attempt.time_spent_sec);
     return {
       id: uuid(),
       user_id: userId!,
@@ -810,7 +893,7 @@ export default function Pyq() {
   function selectedAnswer(question: PyqQuestion): PyqSelectedAnswer {
     if (decision === 'SKIP') return null;
     const inputType = answerInputType(question);
-    if (inputType === 'NAT') return numeric.trim() === '' ? null : Number(numeric);
+    if (inputType === 'NAT') return numeric.trim() === '' ? null : numeric.trim();
     if (inputType === 'MSQ') return choices.slice().sort();
     return choices[0] ?? null;
   }
@@ -826,9 +909,12 @@ export default function Pyq() {
       submittingRef.current
     )
       return;
+    const committedAtMs = Date.now();
+    const questionStartedAtMs = Math.min(startedAt ?? committedAtMs, committedAtMs);
+    setSubmitError(null);
     const session = pyqSessionId ? await db.pyq_sessions.get(pyqSessionId) : null;
     if (!session) {
-      setStartError('Could not find the active PYQ set. Start or resume the set again.');
+      setSubmitError('The active set could not be found. Return to PYQ setup and resume it.');
       return;
     }
     const selected = selectedAnswer(current);
@@ -855,27 +941,25 @@ export default function Pyq() {
       }
       const screenshot = await captureQuestionSnapshot();
       setQuestionScreenshot(screenshot);
-      const correctAnswer = pyqAnswerValueForLog(current);
-      const attemptedAt = nowISO();
-      const attempt: PyqAttemptRow = {
-        id,
-        user_id: userId,
-        pyq_session_id: session.id,
-        question_uid: current.id,
-        subject: current.subject,
-        year: current.year,
-        attempt_number: attemptNumber,
-        selected_answer: correctAnswer,
-        correct_answer: correctAnswer,
-        answer_status: current.answerStatus,
-        screenshot_url: screenshot,
-        mark_decision: decision,
-        mark_correct: evaluatePyqAnswer(current, selected, decision),
-        time_spent_sec: Math.max(1, liveSeconds),
-        bank_version: manifest.bankVersion,
-        attempted_at: attemptedAt
-      };
-      const nextSession = advancePyqSessionProgress(session, current.id, index + 1, attemptedAt);
+      const attempt = createPyqAttemptRow({
+        userId,
+        session,
+        question: current,
+        selectedAnswer: selected,
+        decision,
+        bankVersion: manifest.bankVersion,
+        questionStartedAtMs,
+        committedAtMs,
+        screenshotUrl: screenshot,
+        attemptNumber
+      });
+      const nextSession = advancePyqSessionProgress(
+        session,
+        current.id,
+        index + 1,
+        attempt.time_spent_sec,
+        attempt.attempted_at
+      );
       const writes: Parameters<typeof writeLocalBatch>[0] = [
         { name: 'pyq_attempts', row: attempt },
         { name: 'pyq_sessions', row: nextSession }
@@ -902,6 +986,12 @@ export default function Pyq() {
         setJournalSaved(true);
         setAnalyzedCount((count) => count + 1);
       }
+    } catch (error) {
+      setSubmitError(
+        error instanceof Error
+          ? `Answer was not committed: ${error.message}`
+          : 'Answer was not committed. Your selection is still here; try again.'
+      );
     } finally {
       submittingRef.current = false;
       setSubmitting(false);
@@ -934,6 +1024,18 @@ export default function Pyq() {
       setFinished(true);
       return;
     }
+    const session = pyqSessionId ? await db.pyq_sessions.get(pyqSessionId) : null;
+    if (!session) {
+      setSubmitError('The active set could not be found. Return to PYQ setup and resume it.');
+      return;
+    }
+    const startedSession = startPyqSessionQuestion(session, questions[nextIndex].id);
+    if (startedSession !== session) await writeLocal('pyq_sessions', startedSession);
+    const nextStartedAt = Date.parse(startedSession.current_question_started_at ?? '');
+    questionStartRef.current = {
+      questionUid: questions[nextIndex].id,
+      startedAtMs: Number.isFinite(nextStartedAt) ? nextStartedAt : Date.now()
+    };
     setIndex(nextIndex);
   }
 
@@ -1127,14 +1229,21 @@ export default function Pyq() {
           <div className="flex flex-col gap-4 border-t border-border pt-4 lg:border-l lg:border-t-0 lg:pl-5 lg:pt-0">
             <DecisionButtons value={decision} disabled={!!submitted} onChange={setDecision} />
             {!submitted ? (
-              <Button
-                variant="primary"
-                onClick={() => void submitAnswer()}
-                disabled={!canSubmit}
-                className="w-full"
-              >
-                Commit & reveal key
-              </Button>
+              <div>
+                <Button
+                  variant="primary"
+                  onClick={() => void submitAnswer()}
+                  disabled={!canSubmit}
+                  className="w-full"
+                >
+                  Commit & reveal key
+                </Button>
+                {submitError && (
+                  <p role="alert" className="mt-2 text-[12px] leading-relaxed text-danger">
+                    {submitError}
+                  </p>
+                )}
+              </div>
             ) : (
               <div className="flex flex-col gap-3">
                 <ResultPanel question={current} attempt={submitted} />

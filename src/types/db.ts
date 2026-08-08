@@ -28,6 +28,7 @@ export interface UserRow {
   digest_email_enabled: boolean;
   digest_whatsapp_enabled: boolean;
   digest_hour_local: number;
+  digest_minute_local: number;
   wa_opted_in_at: string | null;
   last_digest_sent_on: string | null;
 }
@@ -172,6 +173,25 @@ export interface InterruptionLogRow {
 
 export type PyqSelectedAnswer = string | string[] | number | null;
 
+/** Immutable question-bank facts captured with a submitted attempt. */
+export interface PyqQuestionSnapshot {
+  question_uid: string;
+  year: number;
+  set: number | null;
+  number: string;
+  paper_label: string;
+  subject: string;
+  subject_slug: string;
+  subtopics: string[];
+  marks: 1 | 2 | null;
+  type: string;
+  tolerance: { abs?: number } | null;
+  answer_status: PyqAttemptAnswerStatus;
+  answer_source: unknown;
+  html: string;
+  source_url: string;
+}
+
 export interface PyqSessionConfig {
   subjectSlug: string;
   fromYear: number;
@@ -193,12 +213,18 @@ export interface PyqSessionRow {
   completed_count: number;
   elapsed_sec: number;
   status: PyqSessionStatus;
+  current_question_uid: string | null;
+  current_question_started_at: string | null;
   started_at: string;
   updated_at: string;
   completed_at: string | null;
 }
 
-/** A submitted bank attempt. The official answer is stored, not the learner response. */
+/**
+ * An immutable submitted bank attempt. Capture version 2 stores the exact
+ * learner response, official key, question snapshot, and millisecond timing.
+ * Versions 0/1 are retained only for honest legacy-data handling.
+ */
 export interface PyqAttemptRow {
   id: string;
   user_id: string;
@@ -209,10 +235,14 @@ export interface PyqAttemptRow {
   attempt_number: number;
   selected_answer: PyqSelectedAnswer;
   correct_answer: PyqSelectedAnswer;
+  capture_version: 0 | 1 | 2;
+  question_snapshot: PyqQuestionSnapshot | null;
   answer_status: PyqAttemptAnswerStatus;
   screenshot_url: string | null;
   mark_decision: MarkDecision;
   mark_correct: boolean | null;
+  question_started_at: string | null;
+  time_spent_ms: number | null;
   time_spent_sec: number;
   bank_version: string;
   attempted_at: string;

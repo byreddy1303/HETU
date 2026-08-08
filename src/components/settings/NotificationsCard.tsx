@@ -36,11 +36,15 @@ const botUsername = String(
 
 const hourOptions = Array.from({ length: 24 }, (_, hour) => ({
   value: hour,
-  label: `${String(hour).padStart(2, '0')}:00`
+  label: String(hour).padStart(2, '0')
+}));
+
+const minuteOptions = Array.from({ length: 60 }, (_, minute) => ({
+  value: minute,
+  label: String(minute).padStart(2, '0')
 }));
 
 export default function NotificationsCard({ profile, sandbox }: Props) {
-  const refreshProfile = useAuthStore((state) => state.refreshProfile);
   const pushToast = useUiStore((state) => state.pushToast);
   const [telegram, setTelegram] = useState<TelegramSubscriptionRow | null>(null);
   const [loadingTelegram, setLoadingTelegram] = useState(false);
@@ -87,7 +91,7 @@ export default function NotificationsCard({ profile, sandbox }: Props) {
     };
   }, [awaitingConnection, loadTelegram]);
 
-  if (sandbox || !supabaseConfigured || !profile) return null;
+  if (!profile) return null;
 
   const connected = Boolean(telegram?.chat_id && telegram.connected_at);
   const enabled = connected && Boolean(telegram?.enabled);
@@ -95,16 +99,17 @@ export default function NotificationsCard({ profile, sandbox }: Props) {
     ? `@${telegram.chat_username}`
     : connected
       ? 'Private Telegram chat'
-      : 'Not connected';
+      : sandbox || !supabaseConfigured
+        ? 'Sandbox mode (time saved locally)'
+        : 'Not connected';
 
   async function patchProfile(patch: Partial<UserRow>): Promise<boolean> {
     if (!profile) return false;
-    const { error } = await supabase.from('users').update(patch).eq('id', profile.id);
-    if (error) {
-      pushToast(error.message, 'neutral');
+    const res = await useAuthStore.getState().updateProfile(patch);
+    if (res.error) {
+      pushToast(res.error, 'neutral');
       return false;
     }
-    await refreshProfile();
     return true;
   }
 
@@ -125,6 +130,10 @@ export default function NotificationsCard({ profile, sandbox }: Props) {
   }
 
   async function beginConnection() {
+    if (sandbox || !supabaseConfigured) {
+      pushToast('Telegram connection requires connecting to Supabase backend.', 'neutral');
+      return;
+    }
     setConnecting(true);
     const { data, error } = await supabase.rpc('begin_telegram_connection');
     setConnecting(false);
@@ -153,9 +162,15 @@ export default function NotificationsCard({ profile, sandbox }: Props) {
     pushToast('Telegram disconnected.', 'success');
   }
 
-  async function saveHour(hour: number) {
-    if (await patchProfile({ digest_hour_local: hour })) {
-      pushToast(`Delivery time saved as ${String(hour).padStart(2, '0')}:00.`, 'success');
+  async function saveTime(hour: number, minute: number) {
+    if (
+      await patchProfile({
+        digest_hour_local: hour,
+        digest_minute_local: minute
+      })
+    ) {
+      const formatted = `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
+      pushToast(`Delivery time saved as ${formatted}.`, 'success');
     }
   }
 
@@ -307,19 +322,58 @@ export default function NotificationsCard({ profile, sandbox }: Props) {
           </DetailField>
 
           <DetailField label="Daily delivery time" icon={<Clock3 size={13} strokeWidth={1.75} />}>
-            <select
-              id="telegram-hour"
-              aria-label="Daily Telegram delivery time"
-              value={profile.digest_hour_local}
-              onChange={(event) => void saveHour(Number(event.target.value))}
-              className="block h-10 w-full rounded border border-border bg-bg-raised px-3 text-[13px] text-text focus:border-accent focus:shadow-[0_0_0_3px_theme(colors.accent.faint)] focus:outline-none"
-            >
-              {hourOptions.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+              <input
+                type="time"
+                id="telegram-time-input"
+                aria-label="Daily Telegram delivery time picker"
+                value={`${String(profile.digest_hour_local).padStart(2, '0')}:${String(profile.digest_minute_local ?? 0).padStart(2, '0')}`}
+                onChange={(event) => {
+                  const val = event.target.value;
+                  if (!val || !val.includes(':')) return;
+                  const [hStr, mStr] = val.split(':');
+                  const h = parseInt(hStr, 10);
+                  const m = parseInt(mStr, 10);
+                  if (!Number.isNaN(h) && !Number.isNaN(m)) {
+                    void saveTime(h, m);
+                  }
+                }}
+                className="block h-10 w-full sm:w-32 shrink-0 rounded border border-border bg-bg-raised px-3 text-[13px] font-mono text-text focus:border-accent focus:shadow-[0_0_0_3px_theme(colors.accent.faint)] focus:outline-none"
+              />
+              <div className="flex items-center gap-1.5 flex-1 min-w-0">
+                <select
+                  id="telegram-hour"
+                  aria-label="Daily Telegram delivery hour"
+                  value={profile.digest_hour_local}
+                  onChange={(event) =>
+                    void saveTime(Number(event.target.value), profile.digest_minute_local ?? 0)
+                  }
+                  className="block h-10 w-1/2 rounded border border-border bg-bg-raised px-2.5 text-[13px] text-text focus:border-accent focus:shadow-[0_0_0_3px_theme(colors.accent.faint)] focus:outline-none"
+                >
+                  {hourOptions.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}h
+                    </option>
+                  ))}
+                </select>
+                <span className="text-[14px] font-semibold text-text-muted">:</span>
+                <select
+                  id="telegram-minute"
+                  aria-label="Daily Telegram delivery minute"
+                  value={profile.digest_minute_local ?? 0}
+                  onChange={(event) =>
+                    void saveTime(profile.digest_hour_local, Number(event.target.value))
+                  }
+                  className="block h-10 w-1/2 rounded border border-border bg-bg-raised px-2.5 text-[13px] text-text focus:border-accent focus:shadow-[0_0_0_3px_theme(colors.accent.faint)] focus:outline-none"
+                >
+                  {minuteOptions.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}m
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
           </DetailField>
 
           <DetailField label="Notification timezone" icon={<Clock3 size={13} strokeWidth={1.75} />}>

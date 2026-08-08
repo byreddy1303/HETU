@@ -12,14 +12,22 @@ select cron.unschedule('daily-digest')
 
 select cron.schedule(
   'daily-digest',
-  '30 * * * *',  -- :30 past every hour, covers 6:00, 6:30 offsets globally
+  '*/15 * * * *',  -- every 15 minutes to support :00, :15, :30, :45 minute preferences
   $$
   select
     net.http_post(
-      url := (select current_setting('supabase.functions_url', true) || '/daily-digest'),
+      url := coalesce(
+        current_setting('supabase.functions_url', true),
+        current_setting('app.settings.functions_url', true),
+        'http://127.0.0.1:54321/functions/v1'
+      ) || '/daily-digest',
       headers := jsonb_build_object(
         'Content-Type', 'application/json',
-        'Authorization', 'Bearer ' || current_setting('supabase.service_role_key', true)
+        'Authorization', 'Bearer ' || coalesce(
+          current_setting('supabase.service_role_key', true),
+          current_setting('app.settings.service_role_key', true),
+          ''
+        )
       ),
       body := '{}'::jsonb
     );

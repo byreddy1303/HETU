@@ -1,4 +1,4 @@
--- AIR Journal initial schema. See BUILD.md §5.1.
+-- AIR Journal initial schema.
 -- Supabase installs extension functions in the `extensions` schema; extend
 -- the search path so unqualified calls (uuid_generate_v4, citext, ...) resolve.
 set search_path = public, extensions;

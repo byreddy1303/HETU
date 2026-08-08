@@ -73,8 +73,7 @@ export type DayType =
 export type EnergyForecast = 'high' | 'medium' | 'low' | 'recovery';
 
 /** End-of-day mood identifier. UI maps these to emoji renderings; the
- *  storage layer keeps stable non-emoji strings so the codebase stays clean
- *  under the no-emoji lint rule (BUILD.md §2.7). */
+ *  storage layer keeps stable non-emoji strings for persistence. */
 export type EndMood = 'drained' | 'flat' | 'ok' | 'strong' | 'fired_up';
 
 export type Replicate = 'yes' | 'partial' | 'no';

@@ -81,7 +81,7 @@ export const OUTCOME_BY_CODE: Record<Outcome, OutcomeSpec> = Object.fromEntries(
   OUTCOMES.map((o) => [o.code, o])
 ) as Record<Outcome, OutcomeSpec>;
 
-/** Keyboard mapping for the outcome step (BUILD.md F2.2). */
+/** Keyboard mapping for the outcome step. */
 export const OUTCOME_KEYS: Record<string, Outcome> = Object.fromEntries(
   OUTCOMES.map((o) => [o.key, o.code])
 );
@@ -256,7 +256,7 @@ export const TIMEZONES: { value: string; label: string }[] = [
   { value: 'UTC', label: 'UTC (no offset)' }
 ];
 
-/** Invite tokens live for a week per BUILD.md F6.1 — same value used server-side. */
+/** Invite tokens live for a week; the server uses the same value. */
 export const INVITE_TTL_DAYS = 7;
 
 /** Days after which the D3/D10/D30 formula review ladder rolls forward. */

@@ -59,14 +59,8 @@ Each account's data is fully separate:
 
 ## Docs
 
-- [`PROJECT_STATUS.md`](./PROJECT_STATUS.md) — Current handoff: completed work, in-progress changes, release state, blockers, and exact next steps.
-- [`BUILD.md`](./BUILD.md) — Master build specification. Everything technical lives here.
 - [`DEPLOY.md`](./DEPLOY.md) — Production deployment walkthrough (Supabase + Vercel + Resend).
 - [`ANDROID.md`](./ANDROID.md) — Android APK/AAB builds, signing, device QA, and release workflow.
-- [`CLAUDE.md`](./CLAUDE.md) — Autonomy contract for AI-assisted builds.
-- [`FROZEN.md`](./FROZEN.md) — Feature-freeze commitment (2026-10-31).
-- [`DECISIONS.md`](./DECISIONS.md) — Log of choices made mid-build.
-- [`FUTURE.md`](./FUTURE.md) — Deferred features (do not build).
 
 ## Core philosophy
 

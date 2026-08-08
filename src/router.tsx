@@ -42,7 +42,7 @@ const devRoutes = import.meta.env.DEV
     ]
   : [];
 
-// Routes are added step-by-step as pages land (BUILD.md §8).
+// Application routes.
 export const router = createBrowserRouter([
   ...devRoutes,
   { path: '/auth', element: <Auth /> },

@@ -1,6 +1,6 @@
 // Runtime state of the active session. Durable facts (session row, tagged
 // questions) live in Dexie; this holds only what is ephemeral by design:
-// planned question count (DECISIONS.md — no schema column), the current
+// planned question count (intentionally not stored in the schema), the current
 // question's start timestamp so in-app navigation never resets the timer,
 // and which mode (solve vs tag) plus the elapsed time captured when the user
 // opened the tag flow so mid-session navigation returns to the same screen.

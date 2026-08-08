@@ -1,4 +1,4 @@
-// Dexie (IndexedDB) — PRIMARY read/write source for the UI (BUILD.md §4, §5.5).
+// Dexie (IndexedDB) is the primary read/write source for the UI.
 // Mirrors Postgres 1:1 plus `sync_status`. IDs are client-generated UUIDs that
 // become the canonical Postgres PKs, so no local-id remapping is ever needed.
 import Dexie, { type Table } from 'dexie';
@@ -142,7 +142,7 @@ export function table(name: SyncedTableName): Table<Local<{ id: string }>, strin
   return db.table(name);
 }
 
-/** Full local wipe — used on sign-out (BUILD.md F1.1). */
+/** Full local wipe used on sign-out. */
 export async function clearLocalData(): Promise<void> {
   await db.delete();
   await db.open();

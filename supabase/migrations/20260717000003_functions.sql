@@ -1,4 +1,4 @@
--- Advance the D3 → D10 → D30 → MASTERED ladder. See BUILD.md §5.4.
+-- Advance the D3 → D10 → D30 → MASTERED ladder.
 create or replace function advance_reattempt(reattempt_id uuid, result text)
 returns void language plpgsql security definer as $$
 declare

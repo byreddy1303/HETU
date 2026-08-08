@@ -1,4 +1,4 @@
-// Local-first sync engine (BUILD.md §4, F1.3).
+// Local-first sync engine.
 // UI writes go to Dexie synchronously via writeLocal(); a background push
 // upserts pending rows to Supabase in FK-safe order with exponential backoff.
 // Pulls merge server rows into Dexie; local rows still pending always win.

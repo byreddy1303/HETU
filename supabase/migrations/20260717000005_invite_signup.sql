@@ -1,4 +1,4 @@
--- Invite-only signup, enforced server-side (BUILD.md F1.1, §17).
+-- Invite-only signup, enforced server-side.
 -- GoTrue-level signup stays enabled; these triggers are the actual gate:
 --   * first account ever created needs no invite (owner bootstrap)
 --   * every later signup must carry a valid, unused, unexpired invite token

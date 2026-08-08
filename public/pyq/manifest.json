@@ -1,6 +1,6 @@
 {
-  "bankVersion": "gate-cse-2002-2026-v2-topics",
-  "generatedAt": "2026-08-08T07:35:09.557Z",
+  "bankVersion": "gate-cse-2002-2026-v3-math-topics",
+  "generatedAt": "2026-08-08T07:42:20.186Z",
   "source": "GateQA public question bank, sourced from GATE Overflow; three audited records restored from original papers",
   "sourceUrl": "https://gateqa.in",
   "firstYear": 2002,
@@ -132,7 +132,7 @@
     {
       "slug": "discrete-mathematics",
       "label": "Discrete Mathematics",
-      "count": 288,
+      "count": 220,
       "file": "/pyq/subjects/discrete-mathematics.json",
       "topics": [
         {
@@ -153,12 +153,12 @@
         {
           "slug": "functions",
           "label": "Functions",
-          "count": 21
+          "count": 20
         },
         {
           "slug": "lattice",
           "label": "Lattice",
-          "count": 6
+          "count": 5
         },
         {
           "slug": "group-theory",
@@ -178,12 +178,7 @@
         {
           "slug": "combination",
           "label": "Combination",
-          "count": 28
-        },
-        {
-          "slug": "probability-theory",
-          "label": "Probability Theory",
-          "count": 65
+          "count": 27
         },
         {
           "slug": "recurrence",
@@ -195,23 +190,23 @@
     {
       "slug": "engineering-mathematics",
       "label": "Engineering Mathematics",
-      "count": 114,
+      "count": 182,
       "file": "/pyq/subjects/engineering-mathematics.json",
       "topics": [
         {
           "slug": "linear-algebra",
           "label": "Linear Algebra",
-          "count": 60
+          "count": 61
         },
         {
           "slug": "calculus",
           "label": "Calculus",
-          "count": 38
+          "count": 54
         },
         {
-          "slug": "numerical-method",
-          "label": "Numerical Method",
-          "count": 16
+          "slug": "probability-statistics",
+          "label": "Probability & Statistics",
+          "count": 67
         }
       ]
     },
@@ -555,12 +550,12 @@
         {
           "slug": "process",
           "label": "Process",
-          "count": 25
+          "count": 26
         },
         {
           "slug": "cpu-scheduling",
           "label": "CPU Scheduling",
-          "count": 33
+          "count": 32
         },
         {
           "slug": "process-synchronization",

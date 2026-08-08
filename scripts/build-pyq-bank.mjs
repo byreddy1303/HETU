@@ -5,7 +5,11 @@ import { mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import process from 'node:process';
 import { fileURLToPath } from 'node:url';
-import { classifyPyqQuestion, PYQ_TAXONOMY } from './pyq-taxonomy.mjs';
+import {
+  classifyPyqQuestion,
+  PYQ_BANK_VERSION,
+  PYQ_TAXONOMY
+} from './pyq-taxonomy.mjs';
 
 const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(SCRIPT_DIR, '..');
@@ -17,7 +21,6 @@ const SEARCH_URL = `${SOURCE_ROOT}/question-search-index.json`;
 const ANSWERS_URL = `${SOURCE_ROOT}/data/answers/answers_by_question_uid_v1.json`;
 const UNSUPPORTED_URL = `${SOURCE_ROOT}/data/answers/unsupported_question_uids_v1.json`;
 const USER_AGENT = 'AIR Journal personal PYQ archive builder/1.0';
-const BANK_VERSION = 'gate-cse-2002-2026-v2-topics';
 const IMAGE_OVERRIDES = new Map([
   [
     'http://gatecse.in/w/images/c/c5/2012_12.png',
@@ -379,7 +382,7 @@ async function main() {
     subjects.map(({ slug }) =>
       writeFile(
         path.join(OUTPUT, 'subjects', `${slug}.json`),
-        `${JSON.stringify({ bankVersion: BANK_VERSION, subject: slug, questions: grouped.get(slug) })}\n`
+        `${JSON.stringify({ bankVersion: PYQ_BANK_VERSION, subject: slug, questions: grouped.get(slug) })}\n`
       )
     )
   );
@@ -397,7 +400,7 @@ async function main() {
     ])
   );
   const manifest = {
-    bankVersion: BANK_VERSION,
+    bankVersion: PYQ_BANK_VERSION,
     generatedAt: new Date().toISOString(),
     source:
       'GateQA public question bank, sourced from GATE Overflow; three audited records restored from original papers',
@@ -415,7 +418,7 @@ async function main() {
     path.join(OUTPUT, 'provenance.json'),
     `${JSON.stringify(
       {
-        bankVersion: BANK_VERSION,
+        bankVersion: PYQ_BANK_VERSION,
         sources: [
           {
             name: 'GateQA',

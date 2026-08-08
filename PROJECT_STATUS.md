@@ -19,12 +19,14 @@ must happen next.
 ## Topic-wise PYQ practice — implemented locally, release pending
 
 - All 2,388 bundled question IDs now have exactly one canonical subject and topic.
-- The bank is split into 14 subject archives and 96 selectable topic buckets; raw source
+- The bank is split into 14 subject archives and 95 selectable topic buckets; raw source
   tags remain attached only for provenance.
 - PYQ setup supports one topic, an entire subject, or all mixed subjects without changing
   answer concealment, immutable attempt receipts, or offline behavior.
 - C Programming and Data Structure are separate archives. Seventeen obsolete Software
   Engineering questions remain visible under Other / Optional rather than being mislabeled.
+- Engineering Mathematics contains Linear Algebra, Calculus, and Probability & Statistics;
+  probability is not grouped under Discrete Mathematics.
 - `public/pyq/taxonomy-audit.json` records 2,388 unique questions and zero unclassified rows.
 - Responsive local-browser QA passed at mobile and desktop sizes; a selected Sorting set
   opened with a merge-sort question and produced no browser console errors.

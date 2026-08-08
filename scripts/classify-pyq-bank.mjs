@@ -4,7 +4,11 @@ import { readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import process from 'node:process';
 import { fileURLToPath } from 'node:url';
-import { classifyPyqQuestion, PYQ_TAXONOMY } from './pyq-taxonomy.mjs';
+import {
+  classifyPyqQuestion,
+  PYQ_BANK_VERSION,
+  PYQ_TAXONOMY
+} from './pyq-taxonomy.mjs';
 
 const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(SCRIPT_DIR, '..');
@@ -69,7 +73,7 @@ for (const subject of subjects) {
   await writeFile(
     path.join(OUTPUT, 'subjects', `${subject.slug}.json`),
     `${JSON.stringify({
-      bankVersion: 'gate-cse-2002-2026-v2-topics',
+      bankVersion: PYQ_BANK_VERSION,
       subject: subject.slug,
       questions: grouped.get(subject.slug)
     })}\n`
@@ -78,7 +82,7 @@ for (const subject of subjects) {
 
 const nextManifest = {
   ...manifest,
-  bankVersion: 'gate-cse-2002-2026-v2-topics',
+  bankVersion: PYQ_BANK_VERSION,
   generatedAt: new Date().toISOString(),
   questionCount: classified.length,
   subjects

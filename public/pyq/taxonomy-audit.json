@@ -1,16 +1,16 @@
 {
-  "bankVersion": "gate-cse-2002-2026-v2-topics",
+  "bankVersion": "gate-cse-2002-2026-v3-math-topics",
   "questionCount": 2388,
   "uniqueQuestionCount": 2388,
   "unclassifiedCount": 0,
   "subjectCount": 14,
-  "topicCount": 96,
+  "topicCount": 95,
   "classificationBasis": {
     "broad-topic-tag": 11,
-    "content-rule": 96,
-    "ordered-topic-tag": 1796,
+    "content-rule": 97,
+    "ordered-topic-tag": 1728,
     "subject-rule": 267,
-    "topic-rule": 218
+    "topic-rule": 285
   },
   "subjects": [
     {
@@ -26,7 +26,7 @@
     },
     {
       "slug": "discrete-mathematics",
-      "count": 288,
+      "count": 220,
       "topics": [
         {
           "slug": "propositional-logic",
@@ -46,12 +46,12 @@
         {
           "slug": "functions",
           "label": "Functions",
-          "count": 21
+          "count": 20
         },
         {
           "slug": "lattice",
           "label": "Lattice",
-          "count": 6
+          "count": 5
         },
         {
           "slug": "group-theory",
@@ -71,12 +71,7 @@
         {
           "slug": "combination",
           "label": "Combination",
-          "count": 28
-        },
-        {
-          "slug": "probability-theory",
-          "label": "Probability Theory",
-          "count": 65
+          "count": 27
         },
         {
           "slug": "recurrence",
@@ -87,22 +82,22 @@
     },
     {
       "slug": "engineering-mathematics",
-      "count": 114,
+      "count": 182,
       "topics": [
         {
           "slug": "linear-algebra",
           "label": "Linear Algebra",
-          "count": 60
+          "count": 61
         },
         {
           "slug": "calculus",
           "label": "Calculus",
-          "count": 38
+          "count": 54
         },
         {
-          "slug": "numerical-method",
-          "label": "Numerical Method",
-          "count": 16
+          "slug": "probability-statistics",
+          "label": "Probability & Statistics",
+          "count": 67
         }
       ]
     },
@@ -430,12 +425,12 @@
         {
           "slug": "process",
           "label": "Process",
-          "count": 25
+          "count": 26
         },
         {
           "slug": "cpu-scheduling",
           "label": "CPU Scheduling",
-          "count": 33
+          "count": 32
         },
         {
           "slug": "process-synchronization",

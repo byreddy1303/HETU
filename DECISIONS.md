@@ -204,3 +204,11 @@ F3.3 says the server calls `advance_reattempt(id, result)`. Doing that from the 
 **Rejected**: filtering directly on source tags, allowing a question to count in several practice topics, silently dropping optional-era questions, or inventing a misleading match for those questions.
 
 **Reason**: one deterministic canonical topic makes counts, progress, Journal analysis, and repeatable practice sets stable while preserving every audited question exactly once.
+
+## 2026-08-08 — Correct Engineering Mathematics topic boundary
+
+**Chose**: define Engineering Mathematics as Linear Algebra, Calculus, and Probability & Statistics; move every mathematics probability question out of Discrete Mathematics and fold legacy numerical-method questions into Calculus.
+
+**Rejected**: retaining the screenshot's Probability Theory placement under Discrete Mathematics or exposing Numerical Method as a fourth Engineering Mathematics topic.
+
+**Reason**: direct user correction establishes the canonical practice taxonomy and keeps the subject picker aligned with the intended GATE preparation structure.

@@ -48,8 +48,7 @@ export const SUBTOPICS_BY_SUBJECT: Record<string, SubtopicSpec[]> = {
     { value: 'Probability — Bayes' },
     { value: 'Probability — Expectation & Variance' },
     { value: 'Statistics — Descriptive' },
-    { value: 'Statistics — Estimation & Hypothesis' },
-    { value: 'Numerical Methods' }
+    { value: 'Statistics — Estimation & Hypothesis' }
   ],
   'Digital Logic': [
     { value: 'Number Systems' },

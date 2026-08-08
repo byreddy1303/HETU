@@ -1,3 +1,5 @@
+export const PYQ_BANK_VERSION = 'gate-cse-2002-2026-v3-math-topics';
+
 export const PYQ_TAXONOMY = [
   {
     slug: 'general-aptitude',
@@ -17,7 +19,6 @@ export const PYQ_TAXONOMY = [
       { slug: 'graph-theory', label: 'Graph Theory' },
       { slug: 'planar-graph', label: 'Planar Graph' },
       { slug: 'combination', label: 'Combination' },
-      { slug: 'probability-theory', label: 'Probability Theory' },
       { slug: 'recurrence', label: 'Recurrence' }
     ]
   },
@@ -27,7 +28,7 @@ export const PYQ_TAXONOMY = [
     topics: [
       { slug: 'linear-algebra', label: 'Linear Algebra' },
       { slug: 'calculus', label: 'Calculus' },
-      { slug: 'numerical-method', label: 'Numerical Method' }
+      { slug: 'probability-statistics', label: 'Probability & Statistics' }
     ]
   },
   {
@@ -224,9 +225,16 @@ const SUBJECT_BY_TAG = new Map(
     functions: 'discrete-mathematics',
     combinatory: 'discrete-mathematics',
     counting: 'discrete-mathematics',
-    probability: 'discrete-mathematics',
-    'conditional-probability': 'discrete-mathematics',
-    'random-variable': 'discrete-mathematics',
+    probability: 'engineering-mathematics',
+    'conditional-probability': 'engineering-mathematics',
+    'random-variable': 'engineering-mathematics',
+    expectation: 'engineering-mathematics',
+    statistics: 'engineering-mathematics',
+    'probability-distribution': 'engineering-mathematics',
+    'uniform-distribution': 'engineering-mathematics',
+    'normal-distribution': 'engineering-mathematics',
+    'binomial-distribution': 'engineering-mathematics',
+    'poisson-distribution': 'engineering-mathematics',
     'modular-arithmetic': 'discrete-mathematics',
     'linear-algebra': 'engineering-mathematics',
     calculus: 'engineering-mathematics',
@@ -315,6 +323,11 @@ function firstMappedTag(ctx, entries) {
 }
 
 function classifyDiscrete(ctx) {
+  if (
+    ctx.hasPart('probability', 'random-variable', 'distribution', 'expectation', 'statistics') ||
+    ctx.text(/\bprobability\b|bayes|random variable|expected value|standard deviation/)
+  )
+    return result('engineering-mathematics', 'probability-statistics', 'topic-rule');
   if (ctx.has('graph-planarity') || ctx.text(/\bplanar(?:ity)?\b|kuratowski/))
     return result('discrete-mathematics', 'planar-graph', 'topic-rule');
   if (ctx.has('recurrence-relation') || ctx.text(/\brecurrence relation\b/))
@@ -346,10 +359,6 @@ function classifyDiscrete(ctx) {
     ['generating-functions', 'combination'],
     ['balls-in-bins', 'combination'],
     ['pigeonhole-principle', 'combination'],
-    ['probability', 'probability-theory'],
-    ['conditional-probability', 'probability-theory'],
-    ['random-variable', 'probability-theory'],
-    ['expectation', 'probability-theory'],
     ['recurrence-relation', 'recurrence']
   ]);
   if (firstTopic) return result('discrete-mathematics', firstTopic, 'ordered-topic-tag');
@@ -365,11 +374,6 @@ function classifyDiscrete(ctx) {
     )
   )
     return result('discrete-mathematics', 'combination', 'topic-rule');
-  if (
-    ctx.hasPart('probability', 'random-variable', 'distribution', 'expectation') ||
-    ctx.text(/\bprobability\b|bayes|random variable/)
-  )
-    return result('discrete-mathematics', 'probability-theory', 'topic-rule');
   if (ctx.has('group-theory', 'binary-operation') || ctx.text(/\bgroup(?:s)?\b|subgroup/))
     return result('discrete-mathematics', 'group-theory', 'topic-rule');
   if (ctx.has('partial-order', 'lattice') || ctx.text(/\blattice\b|partial(?:ly)? order|poset/))
@@ -391,8 +395,11 @@ function classifyDiscrete(ctx) {
 }
 
 function classifyEngineering(ctx) {
-  if (ctx.hasPart('probability', 'random-variable', 'distribution', 'expectation', 'combinatory'))
-    return classifyDiscrete(ctx);
+  if (
+    ctx.hasPart('probability', 'random-variable', 'distribution', 'expectation', 'statistics') ||
+    ctx.text(/\bprobability\b|bayes|random variable|expected value|standard deviation/)
+  )
+    return result('engineering-mathematics', 'probability-statistics', 'topic-rule');
   const firstTopic = firstMappedTag(ctx, [
     ['linear-algebra', 'linear-algebra'],
     ['matrix', 'linear-algebra'],
@@ -406,12 +413,12 @@ function classifyEngineering(ctx) {
     ['limits', 'calculus'],
     ['continuity', 'calculus'],
     ['maxima-minima', 'calculus'],
-    ['numerical-methods', 'numerical-method'],
-    ['trapezoidal-rule', 'numerical-method'],
-    ['simpsons-rule', 'numerical-method'],
-    ['bisection-method', 'numerical-method'],
-    ['secant-method', 'numerical-method'],
-    ['newton-raphson', 'numerical-method']
+    ['numerical-methods', 'calculus'],
+    ['trapezoidal-rule', 'calculus'],
+    ['simpsons-rule', 'calculus'],
+    ['bisection-method', 'calculus'],
+    ['secant-method', 'calculus'],
+    ['newton-raphson', 'calculus']
   ]);
   if (firstTopic) return result('engineering-mathematics', firstTopic, 'ordered-topic-tag');
   if (
@@ -429,7 +436,7 @@ function classifyEngineering(ctx) {
     ctx.hasPart('numerical-method', 'trapezoidal', 'simpsons-rule', 'bisection', 'secant') ||
     ctx.text(/newton[- ]raphson|trapezoidal rule|simpson(?:'s)? rule|bisection method/)
   )
-    return result('engineering-mathematics', 'numerical-method', 'topic-rule');
+    return result('engineering-mathematics', 'calculus', 'topic-rule');
   if (
     ctx.hasPart(
       'calculus',

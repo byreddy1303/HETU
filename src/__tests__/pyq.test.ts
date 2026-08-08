@@ -180,7 +180,7 @@ describe('bundled PYQ bank integrity', () => {
     }
 
     expect(questionCount).toBe(manifest.questionCount);
-    expect(topicCount).toBe(96);
+    expect(topicCount).toBe(95);
     expect(statuses).toEqual(manifest.answerStatuses);
     expect(statuses).toEqual({ available: 2382, ambiguous: 2, 'marks-to-all': 1, unsupported: 3 });
     expect(
@@ -190,7 +190,7 @@ describe('bundled PYQ bank integrity', () => {
       uniqueQuestionCount: 2388,
       unclassifiedCount: 0,
       subjectCount: 14,
-      topicCount: 96
+      topicCount: 95
     });
   });
 });

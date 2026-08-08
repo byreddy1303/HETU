@@ -24,7 +24,6 @@ android/build
 *.jks
 *.keystore
 keystore.properties
-android/app/google-services.json
 
 # Build artefacts that leak from tsc / vite type-checking
 *.tsbuildinfo

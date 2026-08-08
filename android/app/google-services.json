@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "326212499948",
+    "project_id": "hetu-98b76",
+    "storage_bucket": "hetu-98b76.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:326212499948:android:ab53f37aa2a31e6a4ce8c9",
+        "android_client_info": {
+          "package_name": "in.airjournal.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBtA-FiwJIw5GXEouKo21W9pAF_cb8GHlE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

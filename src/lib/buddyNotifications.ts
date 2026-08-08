@@ -118,19 +118,23 @@ async function nativePermission(request: boolean): Promise<PermissionState> {
 }
 
 async function registerNativeToken(): Promise<string> {
-  await PushNotifications.createChannel({
-    id: 'buddy_messages',
-    name: 'Buddy messages',
-    description: 'Messages and shared questions from your study buddy.',
-    importance: 4,
-    visibility: 0,
-    vibration: true,
-    lights: true,
-    lightColor: '#98182B',
-    // 'default' instructs Android 8+ to use the system default notification sound.
-    // Without an explicit value some ROMs on Android 8+ silently play nothing.
-    sound: 'default'
-  });
+  try {
+    await PushNotifications.createChannel({
+      id: 'buddy_messages',
+      name: 'Buddy messages',
+      description: 'Messages and shared questions from your study buddy.',
+      importance: 4,
+      visibility: 0,
+      vibration: true,
+      lights: true,
+      lightColor: '#98182B',
+      // 'default' instructs Android 8+ to use the system default notification sound.
+      // Without an explicit value some ROMs on Android 8+ silently play nothing.
+      sound: 'default'
+    });
+  } catch (err) {
+    console.warn('Could not create notification channel:', err);
+  }
 
   return await new Promise<string>((resolve, reject) => {
     let settled = false;

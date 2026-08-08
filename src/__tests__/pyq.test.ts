@@ -172,6 +172,7 @@ describe('bundled PYQ bank integrity', () => {
       readFileSync(path.join(publicRoot, 'pyq', 'manifest.json'), 'utf8')
     ) as PyqManifest;
     const ids = new Set<string>();
+    const questionsById = new Map<string, PyqQuestion>();
     const statuses: Record<string, number> = {};
     let questionCount = 0;
     let topicCount = 0;
@@ -192,6 +193,7 @@ describe('bundled PYQ bank integrity', () => {
         questionCount += 1;
         expect(ids.has(row.id), `duplicate ${row.id}`).toBe(false);
         ids.add(row.id);
+        questionsById.set(row.id, row);
         expect(row.html.trim().length, `empty question ${row.id}`).toBeGreaterThan(0);
         expect(row.subjectSlug).toBe(subject.slug);
         expect(row.subject).toBe(subject.label);
@@ -211,14 +213,45 @@ describe('bundled PYQ bank integrity', () => {
     expect(topicCount).toBe(95);
     expect(statuses).toEqual(manifest.answerStatuses);
     expect(statuses).toEqual({ available: 2382, ambiguous: 2, 'marks-to-all': 1, unsupported: 3 });
-    expect(
-      JSON.parse(readFileSync(path.join(publicRoot, 'pyq', 'taxonomy-audit.json'), 'utf8'))
-    ).toMatchObject({
+    const taxonomyAudit = JSON.parse(
+      readFileSync(path.join(publicRoot, 'pyq', 'taxonomy-audit.json'), 'utf8')
+    ) as {
+      manualCorrectionCount: number;
+      classificationBasis: Record<string, number>;
+    };
+    expect(taxonomyAudit).toMatchObject({
       questionCount: 2388,
       uniqueQuestionCount: 2388,
       unclassifiedCount: 0,
       subjectCount: 14,
-      topicCount: 95
+      topicCount: 95,
+      manualCorrectionCount: 160
     });
+    expect(taxonomyAudit.classificationBasis['manual-content-audit']).toBe(160);
+
+    const representativeCorrections = [
+      ['go:422818', 'discrete-mathematics', 'graph-theory'],
+      ['go:460041', 'discrete-mathematics', 'group-theory'],
+      ['go:460803', 'discrete-mathematics', 'lattice'],
+      ['go:523097', 'digital-logic', 'combinational-circuit'],
+      ['go:399301', 'digital-logic', 'sequential-circuit'],
+      ['go:460056', 'c-programming', 'array-and-pointer'],
+      ['go:523145', 'data-structure', 'binary-tree'],
+      ['go:523132', 'algorithms', 'asymptotic-notation'],
+      ['go:460070', 'algorithms', 'recurrence-relation'],
+      ['go:39570', 'algorithms', 'dynamic-programming'],
+      ['go:993', 'theory-of-computation', 'regular-language'],
+      ['go:39675', 'compiler-design', 'intermediate-code-generation'],
+      ['go:204128', 'operating-systems', 'disk-scheduling'],
+      ['go:357444', 'computer-networks', 'network-layer-protocol'],
+      ['go:8423', 'other-optional', 'software-engineering']
+    ] as const;
+
+    for (const [id, subjectSlug, topicSlug] of representativeCorrections) {
+      expect(questionsById.get(id), `missing representative correction ${id}`).toMatchObject({
+        subjectSlug,
+        topicSlug
+      });
+    }
   });
 });

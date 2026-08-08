@@ -38,6 +38,31 @@ must happen next.
 Release follow-up: rebuild Android only if shipping a new bundled-shell artifact; the
 live-shell Android release receives the deployed web content automatically.
 
+## Topic taxonomy content audit — implemented locally, release pending
+
+- Reviewed all 2,388 bundled PYQs against the canonical 14-subject, 95-topic taxonomy.
+- Corrected and locked 160 question-level classifications where source cross-links,
+  wrapper concepts, or broad fallbacks had selected the wrong primary topic.
+- Regenerated the bank as `gate-cse-2002-2026-v4-topic-audit`; all 2,388 IDs remain
+  unique and present exactly once.
+- Added `npm run pyq:audit` to verify every stored classification against the canonical
+  classifier, all subject/topic totals, all manual corrections, and every bank version.
+- The corrected local archive contains 23 Software Engineering questions under
+  Other / Optional; six had previously escaped into unrelated subjects.
+
+### Local audit verification
+
+Run on 2026-08-08 before the audit commit:
+
+- `npm run pyq:audit` — passed; 2,388 unique questions, 160 locked corrections
+- `npm run typecheck` — passed
+- `npm run lint` — passed with zero warnings
+- `npm run test` — 25 files passed, 140 tests passed
+- `npm run build` — passed; PWA precache generated successfully
+
+Release follow-up: deploy the regenerated static PYQ bank and app assets before calling
+the content audit live. No Supabase schema change is required.
+
 ### Current verification
 
 Run on 2026-08-08 against commit `af68f87`:

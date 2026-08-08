@@ -1,4 +1,4 @@
-export const PYQ_BANK_VERSION = 'gate-cse-2002-2026-v3-math-topics';
+export const PYQ_BANK_VERSION = 'gate-cse-2002-2026-v4-topic-audit';
 
 export const PYQ_TAXONOMY = [
   {
@@ -179,6 +179,833 @@ export const PYQ_TAXONOMY = [
 ];
 
 const subjectBySlug = new Map(PYQ_TAXONOMY.map((subject) => [subject.slug, subject]));
+
+// GateQA's tags are useful provenance, but later tags frequently describe a
+// related question rather than the question itself. These rows were reviewed
+// against the complete question text during the topic-by-topic bank audit.
+// Keep the decisions explicit so regenerating the immutable bank cannot bring
+// the noisy cross-link classifications back.
+export const PYQ_MANUAL_CLASSIFICATIONS = Object.freeze({
+  // Discrete Mathematics and graph boundaries.
+  'go:422818': {
+    subjectSlug: 'discrete-mathematics',
+    topicSlug: 'graph-theory',
+    reason: 'Counts spanning trees; a trailing planarity tag is unrelated.'
+  },
+  'go:1931': {
+    subjectSlug: 'discrete-mathematics',
+    topicSlug: 'graph-theory',
+    reason: 'Counts edges in a grid graph; it does not test planarity.'
+  },
+  'go:1537': {
+    subjectSlug: 'discrete-mathematics',
+    topicSlug: 'graph-theory',
+    reason: 'Tests line-graph properties, with planarity only one substatement.'
+  },
+  'go:8281': {
+    subjectSlug: 'discrete-mathematics',
+    topicSlug: 'lattice',
+    reason: 'Tests distributivity in a given lattice; probability is only the counting wrapper.'
+  },
+  'go:118300': {
+    subjectSlug: 'discrete-mathematics',
+    topicSlug: 'graph-theory',
+    reason: 'Uses the degree-sum property of an unrooted tree.'
+  },
+  'go:204117': {
+    subjectSlug: 'discrete-mathematics',
+    topicSlug: 'graph-theory',
+    reason: 'Asks for graph degree and connected-component counts, not a traversal.'
+  },
+  'go:1075': {
+    subjectSlug: 'discrete-mathematics',
+    topicSlug: 'graph-theory',
+    reason: 'Tests structural properties of graph union and intersection.'
+  },
+  'go:1246': {
+    subjectSlug: 'discrete-mathematics',
+    topicSlug: 'propositional-logic',
+    reason: 'Tests truth assignments for CNF formulae, not digital circuitry.'
+  },
+  'go:460041': {
+    subjectSlug: 'discrete-mathematics',
+    topicSlug: 'group-theory',
+    reason: 'Asks whether pointwise addition of functions forms a group or monoid.'
+  },
+  'go:460803': {
+    subjectSlug: 'discrete-mathematics',
+    topicSlug: 'lattice',
+    reason: 'Tests the partial-order and lattice structure induced on a set of functions.'
+  },
+  'go:118185': {
+    subjectSlug: 'digital-logic',
+    topicSlug: 'number-system',
+    reason: 'Solves arithmetic in an unknown positional base.'
+  },
+  'go:8058': {
+    subjectSlug: 'discrete-mathematics',
+    topicSlug: 'combination',
+    reason: 'Counts the possible divisors from prime-factor exponent choices.'
+  },
+  'go:2015': {
+    subjectSlug: 'discrete-mathematics',
+    topicSlug: 'combination',
+    reason: 'Counts the possible positive factors from prime-factor exponent choices.'
+  },
+  'go:1957': {
+    subjectSlug: 'discrete-mathematics',
+    topicSlug: 'functions',
+    reason: 'Tests the sign behavior of a polynomial function from its roots.'
+  },
+
+  // Digital Logic, memory hardware, and sequential-circuit boundaries.
+  'go:523097': {
+    subjectSlug: 'digital-logic',
+    topicSlug: 'combinational-circuit',
+    reason: 'The circuit is a decoder feeding a multiplexer; IEEE tags are cross-links.'
+  },
+  'go:460813': {
+    subjectSlug: 'digital-logic',
+    topicSlug: 'number-system',
+    reason: 'Tests signed two-complement multiplication using Booth encoding.'
+  },
+  'go:2042': {
+    subjectSlug: 'digital-logic',
+    topicSlug: 'combinational-circuit',
+    reason: 'Asks which combinational block implements a multiplexer function.'
+  },
+  'go:1414': {
+    subjectSlug: 'digital-logic',
+    topicSlug: 'combinational-circuit',
+    reason: 'The truth table implements a priority encoder.'
+  },
+  'go:51': {
+    subjectSlug: 'digital-logic',
+    topicSlug: 'combinational-circuit',
+    reason: 'Uses a ROM as a combinational multiplier implementation.'
+  },
+  'go:1053': {
+    subjectSlug: 'digital-logic',
+    topicSlug: 'combinational-circuit',
+    reason: 'Explicitly asks for a combinational digit-comparison circuit.'
+  },
+  'go:29098': {
+    subjectSlug: 'digital-logic',
+    topicSlug: 'combinational-circuit',
+    reason: 'Tests propagation-delay glitches in an XOR combinational circuit.'
+  },
+  'go:1814': {
+    subjectSlug: 'digital-logic',
+    topicSlug: 'combinational-circuit',
+    reason: 'Tests a static hazard under a single input transition.'
+  },
+  'go:399301': {
+    subjectSlug: 'digital-logic',
+    topicSlug: 'sequential-circuit',
+    reason: 'Feedback around a multiplexer creates a latch.'
+  },
+  'go:2079': {
+    subjectSlug: 'digital-logic',
+    topicSlug: 'sequential-circuit',
+    reason: 'Asks for states of a JK flip-flop circuit.'
+  },
+  'go:2157': {
+    subjectSlug: 'digital-logic',
+    topicSlug: 'sequential-circuit',
+    reason: 'Asks for the next state of a D flip-flop counter.'
+  },
+  'go:43318': {
+    subjectSlug: 'digital-logic',
+    topicSlug: 'sequential-circuit',
+    reason: 'Counts states generated by a D flip-flop counter.'
+  },
+  'go:2206': {
+    subjectSlug: 'digital-logic',
+    topicSlug: 'sequential-circuit',
+    reason: 'Asks for the state sequence of a sequential circuit.'
+  },
+  'go:1234': {
+    subjectSlug: 'digital-logic',
+    topicSlug: 'sequential-circuit',
+    reason: 'Tests control inputs of a binary counter.'
+  },
+  'go:887': {
+    subjectSlug: 'digital-logic',
+    topicSlug: 'sequential-circuit',
+    reason: 'Uses clocked D flip-flops to delay a waveform.'
+  },
+  'go:1295': {
+    subjectSlug: 'digital-logic',
+    topicSlug: 'sequential-circuit',
+    reason: 'Tracks clocked data through D flip-flops.'
+  },
+  'go:1387': {
+    subjectSlug: 'digital-logic',
+    topicSlug: 'sequential-circuit',
+    reason: 'Asks for a D flip-flop state-transition sequence.'
+  },
+  'go:1056': {
+    subjectSlug: 'digital-logic',
+    topicSlug: 'sequential-circuit',
+    reason: 'Completes a counter built from T flip-flops.'
+  },
+  'go:264': {
+    subjectSlug: 'digital-logic',
+    topicSlug: 'sequential-circuit',
+    reason: 'Evaluates a clocked D flip-flop timing diagram.'
+  },
+  'go:2178': {
+    subjectSlug: 'coa',
+    topicSlug: 'memory-chip-design',
+    reason: 'Computes DRAM refresh time from chip organization.'
+  },
+  'go:1299': {
+    subjectSlug: 'coa',
+    topicSlug: 'memory-chip-design',
+    reason: 'Computes the RAM-chip count for a memory capacity.'
+  },
+  'go:1555': {
+    subjectSlug: 'coa',
+    topicSlug: 'memory-chip-design',
+    reason: 'Builds a larger RAM from chips and address decoders.'
+  },
+
+  // Computer Organization boundaries.
+  'go:449': {
+    subjectSlug: 'coa',
+    topicSlug: 'pipeline-processor',
+    reason: 'Asks when the data TLB can be accessed in an instruction pipeline.'
+  },
+  'go:318': {
+    subjectSlug: 'operating-systems',
+    topicSlug: 'memory-management',
+    reason: 'Computes effective access time for paging, TLB misses, and page faults.'
+  },
+
+  // C Programming and programming-language boundaries.
+  'go:460056': {
+    subjectSlug: 'c-programming',
+    topicSlug: 'array-and-pointer',
+    reason: 'Tests pointer initialization and dereference; heap tags are unrelated.'
+  },
+  'go:961': {
+    subjectSlug: 'c-programming',
+    topicSlug: 'function',
+    reason: 'Tests method dispatch and dynamic binding.'
+  },
+  'go:523063': {
+    subjectSlug: 'compiler-design',
+    topicSlug: 'parsing',
+    reason: 'Distinguishes lexical, syntactic, and semantic errors.'
+  },
+  'go:399286': {
+    subjectSlug: 'c-programming',
+    topicSlug: 'function',
+    reason: 'Tests repeated calls to a function with a static local.'
+  },
+  'go:118171': {
+    subjectSlug: 'c-programming',
+    topicSlug: 'array-and-pointer',
+    reason: 'Matches pointer-array and allocated-memory declarations.'
+  },
+  'go:39638': {
+    subjectSlug: 'c-programming',
+    topicSlug: 'function',
+    reason: 'Tests a typed function call against its declaration.'
+  },
+  'go:8563': {
+    subjectSlug: 'c-programming',
+    topicSlug: 'function',
+    reason: 'Evaluates calls with global, local, and static variables.'
+  },
+  'go:8185': {
+    subjectSlug: 'c-programming',
+    topicSlug: 'function',
+    reason: 'Contrasts value and pointer parameters in two functions.'
+  },
+  'go:8283': {
+    subjectSlug: 'c-programming',
+    topicSlug: 'array-and-pointer',
+    reason: 'Tests two-dimensional array pointer arithmetic.'
+  },
+  'go:2176': {
+    subjectSlug: 'c-programming',
+    topicSlug: 'function',
+    reason: 'Tests static and local scope across function calls.'
+  },
+  'go:43314': {
+    subjectSlug: 'c-programming',
+    topicSlug: 'function',
+    reason: 'Tests storage classes across function calls.'
+  },
+  'go:416': {
+    subjectSlug: 'c-programming',
+    topicSlug: 'conditional-statement',
+    reason: 'Evaluates nested conditional operators.'
+  },
+  'go:1368': {
+    subjectSlug: 'c-programming',
+    topicSlug: 'function',
+    reason: 'Tests the effect of removing a function prototype.'
+  },
+  'go:822': {
+    subjectSlug: 'c-programming',
+    topicSlug: 'function',
+    reason: 'Tests activation records and recursive function calls.'
+  },
+  'go:838': {
+    subjectSlug: 'c-programming',
+    topicSlug: 'array-and-pointer',
+    reason: 'Computes a two-dimensional array element address.'
+  },
+  'go:1031': {
+    subjectSlug: 'c-programming',
+    topicSlug: 'function',
+    reason: 'Places methods in an object-oriented class hierarchy.'
+  },
+  'go:422833': {
+    subjectSlug: 'c-programming',
+    topicSlug: 'function',
+    reason: 'Traces a recursive input/output function.'
+  },
+  'go:8086': {
+    subjectSlug: 'c-programming',
+    topicSlug: 'function',
+    reason: 'Traces a recursive character-processing function.'
+  },
+  'go:2008': {
+    subjectSlug: 'c-programming',
+    topicSlug: 'function',
+    reason: 'Tests recursive behavior of a function with static state.'
+  },
+  'go:484': {
+    subjectSlug: 'c-programming',
+    topicSlug: 'function',
+    reason: 'Completes a recursive string-reversal function.'
+  },
+  'go:118388': {
+    subjectSlug: 'c-programming',
+    topicSlug: 'loops',
+    reason: 'Traces nested loops implementing a bidirectional bubble pass.'
+  },
+  'go:302795': {
+    subjectSlug: 'c-programming',
+    topicSlug: 'array-and-pointer',
+    reason: 'The output depends on array-pointer arithmetic inside the loop.'
+  },
+  'go:1030': {
+    subjectSlug: 'c-programming',
+    topicSlug: 'array-and-pointer',
+    reason: 'The output depends on string-array indexing and termination.'
+  },
+  'go:848': {
+    subjectSlug: 'compiler-design',
+    topicSlug: 'parsing',
+    reason: 'Asks which formal-language class describes C syntax.'
+  },
+
+  // Data Structure and Algorithms boundaries.
+  'go:39731': {
+    subjectSlug: 'algorithms',
+    topicSlug: 'shortest-path',
+    reason: 'Asks when an edge can occur on a shortest path in a weighted graph.'
+  },
+  'go:1754': {
+    subjectSlug: 'discrete-mathematics',
+    topicSlug: 'graph-theory',
+    reason: 'Tests the structural invariance of strongly connected components under edge reversal.'
+  },
+  'go:1003': {
+    subjectSlug: 'data-structure',
+    topicSlug: 'n-ary-tree',
+    reason: 'Identifies level-order traversal of a general rooted tree.'
+  },
+  'go:357524': {
+    subjectSlug: 'data-structure',
+    topicSlug: 'binary-tree',
+    reason: 'Compares traversal prefixes of a complete binary tree.'
+  },
+  'go:523145': {
+    subjectSlug: 'data-structure',
+    topicSlug: 'binary-tree',
+    reason: 'Matches inorder, preorder, and postorder traversals of a binary tree.'
+  },
+  'go:357410': {
+    subjectSlug: 'algorithms',
+    topicSlug: 'graph-traversal',
+    reason: 'Tests articulation points using properties of a DFS tree.'
+  },
+  'go:2046': {
+    subjectSlug: 'data-structure',
+    topicSlug: 'binary-tree',
+    reason: 'Asks for the inorder traversal of a rooted binary tree.'
+  },
+  'go:460816': {
+    subjectSlug: 'algorithms',
+    topicSlug: 'graph-traversal',
+    reason: 'Compares DFS and BFS tree properties; shortest path appears in one statement.'
+  },
+  'go:460808': {
+    subjectSlug: 'algorithms',
+    topicSlug: 'minimum-spanning-tree',
+    reason: 'Tests how a uniform edge-weight shift affects MSTs and shortest paths.'
+  },
+  'go:39673': {
+    subjectSlug: 'algorithms',
+    topicSlug: 'minimum-spanning-tree',
+    reason: 'Primarily tests MST invariance when every edge weight is shifted equally.'
+  },
+  'go:460047': {
+    subjectSlug: 'algorithms',
+    topicSlug: 'graph-traversal',
+    reason: 'Relates BFS-tree height to graph diameter.'
+  },
+  'go:118707': {
+    subjectSlug: 'algorithms',
+    topicSlug: 'divide-and-conquer',
+    reason: 'Matches algorithms to design paradigms; the source tag is algorithm-design-techniques.'
+  },
+  'go:8161': {
+    subjectSlug: 'algorithms',
+    topicSlug: 'divide-and-conquer',
+    reason: 'Matches algorithms to design paradigms rather than testing shortest-path execution.'
+  },
+  'go:8088': {
+    subjectSlug: 'algorithms',
+    topicSlug: 'divide-and-conquer',
+    reason: 'Matches algorithms to design paradigms rather than testing shortest-path execution.'
+  },
+  'go:118306': {
+    subjectSlug: 'algorithms',
+    topicSlug: 'minimum-spanning-tree',
+    reason: 'The primary claim is MST uniqueness under distinct weights.'
+  },
+  'go:1404': {
+    subjectSlug: 'algorithms',
+    topicSlug: 'minimum-spanning-tree',
+    reason: 'Applies the cut property of minimum spanning trees.'
+  },
+  'go:82129': {
+    subjectSlug: 'algorithms',
+    topicSlug: 'minimum-spanning-tree',
+    reason: 'Uses the MST path property to minimize bottleneck congestion.'
+  },
+  'go:357411': {
+    subjectSlug: 'algorithms',
+    topicSlug: 'dynamic-programming',
+    reason: 'Tests optimal substructure in the rod-cutting problem.'
+  },
+  'go:302823': {
+    subjectSlug: 'algorithms',
+    topicSlug: 'divide-and-conquer',
+    reason: 'Asks for maximum subarray sum using divide and conquer.'
+  },
+  'go:357482': {
+    subjectSlug: 'algorithms',
+    topicSlug: 'dynamic-programming',
+    reason: 'Computes best path-product scores over a DAG.'
+  },
+  'go:8048': {
+    subjectSlug: 'algorithms',
+    topicSlug: 'asymptotic-notation',
+    reason: 'Tests polynomial reductions and NP-hardness, not divide and conquer.'
+  },
+  'go:1027': {
+    subjectSlug: 'algorithms',
+    topicSlug: 'asymptotic-notation',
+    reason: 'Classifies 2-SAT and 3-SAT complexity; recurrence is a cross-link.'
+  },
+  'go:523132': {
+    subjectSlug: 'algorithms',
+    topicSlug: 'asymptotic-notation',
+    reason: 'Orders functions by asymptotic growth; no recurrence is present.'
+  },
+  'go:460070': {
+    subjectSlug: 'algorithms',
+    topicSlug: 'recurrence-relation',
+    reason: 'Solves an explicitly stated recurrence relation.'
+  },
+  'go:39581': {
+    subjectSlug: 'algorithms',
+    topicSlug: 'recurrence-relation',
+    reason: 'Derives the running-time recurrence of a recursive flowchart.'
+  },
+  'go:8060': {
+    subjectSlug: 'algorithms',
+    topicSlug: 'recurrence-relation',
+    reason: 'Evaluates a recursively defined function through its recurrence.'
+  },
+  'go:925': {
+    subjectSlug: 'algorithms',
+    topicSlug: 'recurrence-relation',
+    reason: 'Evaluates a sequence given by an explicit recurrence relation.'
+  },
+  'go:39570': {
+    subjectSlug: 'algorithms',
+    topicSlug: 'dynamic-programming',
+    reason: 'Asks for the design paradigm underlying Floyd-Warshall.'
+  },
+
+  // Theory of Computation language-family boundaries.
+  'go:357528': {
+    subjectSlug: 'theory-of-computation',
+    topicSlug: 'context-free-language',
+    reason: 'Asks which set operations produce context-free languages.'
+  },
+  'go:333221': {
+    subjectSlug: 'theory-of-computation',
+    topicSlug: 'context-free-language',
+    reason: 'Classifies a language as deterministic context-free.'
+  },
+  'go:333199': {
+    subjectSlug: 'theory-of-computation',
+    topicSlug: 'context-free-language',
+    reason: 'Compares whether two languages are regular or context-free.'
+  },
+  'go:118615': {
+    subjectSlug: 'theory-of-computation',
+    topicSlug: 'context-free-language',
+    reason: 'Classifies several languages by context-freeness.'
+  },
+  'go:1543': {
+    subjectSlug: 'theory-of-computation',
+    topicSlug: 'context-free-language',
+    reason: 'Tests closure and complements of context-free languages.'
+  },
+  'go:2128': {
+    subjectSlug: 'theory-of-computation',
+    topicSlug: 'context-free-language',
+    reason: 'Compares regular, context-free, and non-context-free languages.'
+  },
+  'go:1228': {
+    subjectSlug: 'theory-of-computation',
+    topicSlug: 'context-free-language',
+    reason: 'Asks whether a language is deterministic context-free.'
+  },
+  'go:1378': {
+    subjectSlug: 'theory-of-computation',
+    topicSlug: 'context-free-language',
+    reason: 'Tests union and intersection of two context-free languages.'
+  },
+  'go:1081': {
+    subjectSlug: 'theory-of-computation',
+    topicSlug: 'context-free-language',
+    reason: 'Classifies a three-block counting language in the Chomsky hierarchy.'
+  },
+  'go:1326': {
+    subjectSlug: 'theory-of-computation',
+    topicSlug: 'context-free-language',
+    reason: 'The constructed intersection is context-free; RE appears only as an option.'
+  },
+  'go:993': {
+    subjectSlug: 'theory-of-computation',
+    topicSlug: 'regular-language',
+    reason: 'Tests regularity of a language defined by modular constraints.'
+  },
+  'go:1377': {
+    subjectSlug: 'theory-of-computation',
+    topicSlug: 'push-down-automata',
+    reason: 'Compares deterministic and nondeterministic pushdown automata.'
+  },
+  'go:811': {
+    subjectSlug: 'theory-of-computation',
+    topicSlug: 'push-down-automata',
+    reason: 'Asks about a PDA whose stack is bounded.'
+  },
+  'go:2110': {
+    subjectSlug: 'theory-of-computation',
+    topicSlug: 'push-down-automata',
+    reason: 'The differing expressive-power pair is DPDA versus NPDA.'
+  },
+  'go:1994': {
+    subjectSlug: 'theory-of-computation',
+    topicSlug: 'undecidability',
+    reason: 'Classifies a semantic property of encoded Turing machines.'
+  },
+  'go:356': {
+    subjectSlug: 'theory-of-computation',
+    topicSlug: 'undecidability',
+    reason: 'Tests preservation of decidability under a computable bijection.'
+  },
+  'go:355': {
+    subjectSlug: 'theory-of-computation',
+    topicSlug: 'undecidability',
+    reason: 'Combines the halting and non-halting languages.'
+  },
+  'go:1972': {
+    subjectSlug: 'theory-of-computation',
+    topicSlug: 'undecidability',
+    reason: 'Tests implications of many-one reductions.'
+  },
+  'go:2050': {
+    subjectSlug: 'discrete-mathematics',
+    topicSlug: 'set-theory',
+    reason: 'Compares the cardinality of a set of strings with its power set.'
+  },
+
+  // Compiler phase boundaries.
+  'go:523048': {
+    subjectSlug: 'compiler-design',
+    topicSlug: 'matching',
+    reason: 'Finds redundant common subexpressions using a control-flow graph.'
+  },
+  'go:39675': {
+    subjectSlug: 'compiler-design',
+    topicSlug: 'intermediate-code-generation',
+    reason: 'Converts a code sequence to static single-assignment form.'
+  },
+  'go:2186': {
+    subjectSlug: 'compiler-design',
+    topicSlug: 'matching',
+    reason: 'Asks for the symbol-table data structure, not lexical recognition.'
+  },
+  'go:1999': {
+    subjectSlug: 'compiler-design',
+    topicSlug: 'syntax-directed-translation',
+    reason: 'Evaluates an expression tree.'
+  },
+  'go:1837': {
+    subjectSlug: 'compiler-design',
+    topicSlug: 'syntax-directed-translation',
+    reason: 'Traces semantic print actions in a translation scheme.'
+  },
+  'go:946': {
+    subjectSlug: 'compiler-design',
+    topicSlug: 'syntax-directed-translation',
+    reason: 'Traces a syntax-directed postfix translation scheme.'
+  },
+  'go:849': {
+    subjectSlug: 'compiler-design',
+    topicSlug: 'syntax-directed-translation',
+    reason: 'Asks about stack requirements for expression evaluation.'
+  },
+  'go:1006': {
+    subjectSlug: 'compiler-design',
+    topicSlug: 'runtime-environment',
+    reason: 'Tests when an external module reference is linked.'
+  },
+  'go:357537': {
+    subjectSlug: 'compiler-design',
+    topicSlug: 'syntax-directed-translation',
+    reason: 'Tests the semantic-analysis phase and type-name validation.'
+  },
+  'go:8084': {
+    subjectSlug: 'compiler-design',
+    topicSlug: 'intermediate-code-generation',
+    reason: 'Compares program order represented by an AST and a control-flow graph.'
+  },
+  'go:914': {
+    subjectSlug: 'compiler-design',
+    topicSlug: 'syntax-directed-translation',
+    reason: 'Tests static and dynamic type-system semantics.'
+  },
+
+  // Operating Systems, secondary storage, and interrupt boundaries.
+  'go:204128': {
+    subjectSlug: 'operating-systems',
+    topicSlug: 'disk-scheduling',
+    reason: 'Services a disk request queue using SSTF.'
+  },
+  'go:2149': {
+    subjectSlug: 'operating-systems',
+    topicSlug: 'file-systems',
+    reason: 'Computes maximum file size from direct and indirect block pointers.'
+  },
+  'go:1045': {
+    subjectSlug: 'operating-systems',
+    topicSlug: 'file-systems',
+    reason: 'Computes maximum file size from Unix inode pointers.'
+  },
+  'go:915': {
+    subjectSlug: 'operating-systems',
+    topicSlug: 'file-systems',
+    reason: 'Tests block-size tradeoffs in a fixed-block file system.'
+  },
+  'go:1357': {
+    subjectSlug: 'operating-systems',
+    topicSlug: 'memory-management',
+    reason: 'Asks what process data swap space stores.'
+  },
+  'go:487': {
+    subjectSlug: 'operating-systems',
+    topicSlug: 'system-call',
+    reason: 'Compares synchronous and asynchronous I/O behavior.'
+  },
+  'go:1356': {
+    subjectSlug: 'operating-systems',
+    topicSlug: 'system-call',
+    reason: 'Tests privileged I/O and memory-mapped I/O protection.'
+  },
+  'go:850': {
+    subjectSlug: 'operating-systems',
+    topicSlug: 'system-call',
+    reason: 'Tests a dynamic-linking security concern at load time.'
+  },
+  'go:204083': {
+    subjectSlug: 'coa',
+    topicSlug: 'interrupt',
+    reason: 'Orders processor actions taken while servicing an interrupt.'
+  },
+  'go:2113': {
+    subjectSlug: 'coa',
+    topicSlug: 'interrupt',
+    reason: 'Ranks hardware interrupt sources by service priority.'
+  },
+  'go:1355': {
+    subjectSlug: 'coa',
+    topicSlug: 'interrupt',
+    reason: 'Tests vectored interrupts and multiple interrupting devices.'
+  },
+  'go:8251': {
+    subjectSlug: 'coa',
+    topicSlug: 'secondary-storage',
+    reason: 'Computes sector access time from disk hardware parameters.'
+  },
+  'go:8354': {
+    subjectSlug: 'coa',
+    topicSlug: 'secondary-storage',
+    reason: 'Computes file read time from seek and rotational latency.'
+  },
+  'go:1540': {
+    subjectSlug: 'coa',
+    topicSlug: 'secondary-storage',
+    reason: 'Computes a physical disk location from disk geometry.'
+  },
+  'go:2146': {
+    subjectSlug: 'coa',
+    topicSlug: 'secondary-storage',
+    reason: 'Computes random disk-access time from seek and rotation.'
+  },
+  'go:1337': {
+    subjectSlug: 'coa',
+    topicSlug: 'secondary-storage',
+    reason: 'Converts a disk geometry address to a sector number.'
+  },
+  'go:43477': {
+    subjectSlug: 'coa',
+    topicSlug: 'secondary-storage',
+    reason: 'Converts a sector number to a disk geometry address.'
+  },
+  'go:443': {
+    subjectSlug: 'coa',
+    topicSlug: 'secondary-storage',
+    reason: 'Tests the mechanical cause of non-linear seek latency.'
+  },
+  'go:1209': {
+    subjectSlug: 'coa',
+    topicSlug: 'secondary-storage',
+    reason: 'Computes disk-pack capacity and sector-address width.'
+  },
+
+  // Computer Network layer boundaries.
+  'go:399305': {
+    subjectSlug: 'computer-networks',
+    topicSlug: 'data-link-layer',
+    reason: 'Tests utilization of Stop-and-Wait reliable transfer.'
+  },
+  'go:118328': {
+    subjectSlug: 'computer-networks',
+    topicSlug: 'data-link-layer',
+    reason: 'Computes Stop-and-Wait ARQ efficiency.'
+  },
+  'go:39696': {
+    subjectSlug: 'computer-networks',
+    topicSlug: 'data-link-layer',
+    reason: 'Computes Stop-and-Wait ARQ throughput.'
+  },
+  'go:8363': {
+    subjectSlug: 'computer-networks',
+    topicSlug: 'data-link-layer',
+    reason: 'Chooses a frame size for Stop-and-Wait utilization.'
+  },
+  'go:357444': {
+    subjectSlug: 'computer-networks',
+    topicSlug: 'network-layer-protocol',
+    reason: 'Tests ARP request and reply destination addresses.'
+  },
+  'go:302819': {
+    subjectSlug: 'computer-networks',
+    topicSlug: 'network-layer-protocol',
+    reason: 'Uses ARP to resolve an IP address to a MAC address.'
+  },
+  'go:1360': {
+    subjectSlug: 'computer-networks',
+    topicSlug: 'network-layer-protocol',
+    reason: 'Asks which address mapping ARP performs.'
+  },
+  'go:399269': {
+    subjectSlug: 'computer-networks',
+    topicSlug: 'application-layer-protocols',
+    reason: 'Computes DNS and HTTP lookup round trips for a URL.'
+  },
+  'go:371911': {
+    subjectSlug: 'computer-networks',
+    topicSlug: 'application-layer-protocols',
+    reason: 'Counts iterative DNS query-response pairs.'
+  },
+  'go:8214': {
+    subjectSlug: 'computer-networks',
+    topicSlug: 'application-layer-protocols',
+    reason: 'Compares TCP-connection use by HTTP, FTP, SMTP, and TELNET.'
+  },
+  'go:460034': {
+    subjectSlug: 'computer-networks',
+    topicSlug: 'physical-layer',
+    reason: 'Computes independent bit errors on a noisy communication channel.'
+  },
+  'go:371887': {
+    subjectSlug: 'computer-networks',
+    topicSlug: 'physical-layer',
+    reason: 'Combines transmission and propagation delay on a satellite link.'
+  },
+  'go:118537': {
+    subjectSlug: 'computer-networks',
+    topicSlug: 'physical-layer',
+    reason: 'Computes transmission and propagation delay on a direct link.'
+  },
+
+  // Source rows whose trailing cross-links previously escaped Software Engineering.
+  'go:8423': {
+    subjectSlug: 'other-optional',
+    topicSlug: 'software-engineering',
+    reason: 'Computes a software-project function-point metric.'
+  },
+  'go:2053': {
+    subjectSlug: 'other-optional',
+    topicSlug: 'software-engineering',
+    reason: 'Tests cohesion and coupling in modular software design.'
+  },
+  'go:1311': {
+    subjectSlug: 'other-optional',
+    topicSlug: 'software-engineering',
+    reason: 'Orders forms of software-module coupling.'
+  },
+  'go:1420': {
+    subjectSlug: 'other-optional',
+    topicSlug: 'software-engineering',
+    reason: 'Matches software architecture domains to integration technologies.'
+  },
+  'go:1976': {
+    subjectSlug: 'other-optional',
+    topicSlug: 'software-engineering',
+    reason: 'Tests requirements validation and prototyping.'
+  },
+  'go:1785': {
+    subjectSlug: 'other-optional',
+    topicSlug: 'software-engineering',
+    reason: 'Matches software-development lifecycle models to properties.'
+  },
+  'go:8402': {
+    subjectSlug: 'computer-networks',
+    topicSlug: 'application-layer-protocols',
+    reason: 'Tests local edits versus web-server versions of HTTP resources.'
+  },
+  'go:1792': {
+    subjectSlug: 'computer-networks',
+    topicSlug: 'application-layer-protocols',
+    reason: 'Orders DNS, TCP, HTTP request, and HTTP response actions.'
+  }
+});
 
 function result(subjectSlug, topicSlug, basis) {
   const subject = subjectBySlug.get(subjectSlug);
@@ -1065,6 +1892,10 @@ function classifyOptional(ctx) {
 }
 
 export function classifyPyqQuestion(question) {
+  const manual = PYQ_MANUAL_CLASSIFICATIONS[question.id];
+  if (manual) {
+    return result(manual.subjectSlug, manual.topicSlug, 'manual-content-audit');
+  }
   const ctx = contextFor(question);
   const subjectSlug = inferredSubjectSlug(question, ctx);
   switch (subjectSlug) {

@@ -1,6 +1,6 @@
 {
-  "bankVersion": "gate-cse-2002-2026-v3-math-topics",
-  "generatedAt": "2026-08-08T07:42:20.186Z",
+  "bankVersion": "gate-cse-2002-2026-v4-topic-audit",
+  "generatedAt": "2026-08-08T08:23:09.568Z",
   "source": "GateQA public question bank, sourced from GATE Overflow; three audited records restored from original papers",
   "sourceUrl": "https://gateqa.in",
   "firstYear": 2002,
@@ -132,18 +132,18 @@
     {
       "slug": "discrete-mathematics",
       "label": "Discrete Mathematics",
-      "count": 220,
+      "count": 226,
       "file": "/pyq/subjects/discrete-mathematics.json",
       "topics": [
         {
           "slug": "propositional-logic",
           "label": "Propositional Logic",
-          "count": 48
+          "count": 49
         },
         {
           "slug": "set-theory",
           "label": "Set Theory",
-          "count": 18
+          "count": 15
         },
         {
           "slug": "relation",
@@ -153,32 +153,32 @@
         {
           "slug": "functions",
           "label": "Functions",
-          "count": 20
+          "count": 19
         },
         {
           "slug": "lattice",
           "label": "Lattice",
-          "count": 5
+          "count": 7
         },
         {
           "slug": "group-theory",
           "label": "Group Theory",
-          "count": 25
+          "count": 26
         },
         {
           "slug": "graph-theory",
           "label": "Graph Theory",
-          "count": 46
+          "count": 53
         },
         {
           "slug": "planar-graph",
           "label": "Planar Graph",
-          "count": 13
+          "count": 10
         },
         {
           "slug": "combination",
           "label": "Combination",
-          "count": 27
+          "count": 29
         },
         {
           "slug": "recurrence",
@@ -190,7 +190,7 @@
     {
       "slug": "engineering-mathematics",
       "label": "Engineering Mathematics",
-      "count": 182,
+      "count": 178,
       "file": "/pyq/subjects/engineering-mathematics.json",
       "topics": [
         {
@@ -201,19 +201,19 @@
         {
           "slug": "calculus",
           "label": "Calculus",
-          "count": 54
+          "count": 51
         },
         {
           "slug": "probability-statistics",
           "label": "Probability & Statistics",
-          "count": 67
+          "count": 66
         }
       ]
     },
     {
       "slug": "digital-logic",
       "label": "Digital Logic",
-      "count": 172,
+      "count": 169,
       "file": "/pyq/subjects/digital-logic.json",
       "topics": [
         {
@@ -224,30 +224,30 @@
         {
           "slug": "boolean-algebra",
           "label": "Boolean Algebra",
-          "count": 61
+          "count": 52
         },
         {
           "slug": "combinational-circuit",
           "label": "Combinational Circuit",
-          "count": 37
+          "count": 33
         },
         {
           "slug": "sequential-circuit",
           "label": "Sequential Circuit",
-          "count": 17
+          "count": 27
         }
       ]
     },
     {
       "slug": "coa",
       "label": "Computer Organization",
-      "count": 165,
+      "count": 178,
       "file": "/pyq/subjects/coa.json",
       "topics": [
         {
           "slug": "machine-instruction",
           "label": "Machine Instruction",
-          "count": 33
+          "count": 31
         },
         {
           "slug": "addressing-modes",
@@ -267,12 +267,12 @@
         {
           "slug": "interrupt",
           "label": "Interrupt",
-          "count": 7
+          "count": 10
         },
         {
           "slug": "pipeline-processor",
           "label": "Pipeline Processor",
-          "count": 40
+          "count": 41
         },
         {
           "slug": "cache-memory",
@@ -282,58 +282,58 @@
         {
           "slug": "secondary-storage",
           "label": "Secondary Storage",
-          "count": 1
+          "count": 9
         },
         {
           "slug": "memory-chip-design",
           "label": "Memory Chip Design",
-          "count": 1
+          "count": 4
         }
       ]
     },
     {
       "slug": "c-programming",
       "label": "C Programming",
-      "count": 97,
+      "count": 95,
       "file": "/pyq/subjects/c-programming.json",
       "topics": [
         {
           "slug": "arithmetic-operation",
           "label": "Arithmetic Operation",
-          "count": 25
+          "count": 8
         },
         {
           "slug": "conditional-statement",
           "label": "Conditional Statement",
-          "count": 5
+          "count": 2
         },
         {
           "slug": "loops",
           "label": "Loops",
-          "count": 15
+          "count": 14
         },
         {
           "slug": "array-and-pointer",
           "label": "Array and Pointer",
-          "count": 29
+          "count": 35
         },
         {
           "slug": "function",
           "label": "Function",
-          "count": 23
+          "count": 36
         }
       ]
     },
     {
       "slug": "data-structure",
       "label": "Data Structure",
-      "count": 161,
+      "count": 159,
       "file": "/pyq/subjects/data-structure.json",
       "topics": [
         {
           "slug": "array",
           "label": "Array",
-          "count": 9
+          "count": 8
         },
         {
           "slug": "linked-list",
@@ -353,7 +353,7 @@
         {
           "slug": "binary-tree",
           "label": "Binary Tree",
-          "count": 21
+          "count": 24
         },
         {
           "slug": "binary-search-tree",
@@ -378,12 +378,12 @@
         {
           "slug": "heap-tree",
           "label": "Heap Tree",
-          "count": 26
+          "count": 25
         },
         {
           "slug": "n-ary-tree",
           "label": "n-ary Tree",
-          "count": 8
+          "count": 5
         },
         {
           "slug": "hashing",
@@ -395,23 +395,23 @@
     {
       "slug": "algorithms",
       "label": "Algorithms",
-      "count": 234,
+      "count": 229,
       "file": "/pyq/subjects/algorithms.json",
       "topics": [
         {
           "slug": "asymptotic-notation",
           "label": "Asymptotic Notation",
-          "count": 73
+          "count": 70
         },
         {
           "slug": "recurrence-relation",
           "label": "Recurrence Relation",
-          "count": 33
+          "count": 34
         },
         {
           "slug": "divide-and-conquer",
           "label": "Divide and Conquer",
-          "count": 1
+          "count": 4
         },
         {
           "slug": "sorting",
@@ -426,29 +426,29 @@
         {
           "slug": "minimum-spanning-tree",
           "label": "Minimum Spanning Tree",
-          "count": 28
+          "count": 33
         },
         {
           "slug": "shortest-path",
           "label": "Shortest Path",
-          "count": 25
+          "count": 15
         },
         {
           "slug": "graph-traversal",
           "label": "Graph Traversal",
-          "count": 26
+          "count": 23
         },
         {
           "slug": "dynamic-programming",
           "label": "Dynamic Programming",
-          "count": 13
+          "count": 15
         }
       ]
     },
     {
       "slug": "theory-of-computation",
       "label": "Theory of Computation",
-      "count": 182,
+      "count": 181,
       "file": "/pyq/subjects/theory-of-computation.json",
       "topics": [
         {
@@ -464,7 +464,7 @@
         {
           "slug": "regular-language",
           "label": "Regular Language",
-          "count": 38
+          "count": 27
         },
         {
           "slug": "finite-automata",
@@ -479,17 +479,17 @@
         {
           "slug": "context-free-language",
           "label": "Context Free Language",
-          "count": 24
+          "count": 34
         },
         {
           "slug": "push-down-automata",
           "label": "Push-down Automata",
-          "count": 6
+          "count": 9
         },
         {
           "slug": "recursive-language",
           "label": "Recursive Language",
-          "count": 28
+          "count": 21
         },
         {
           "slug": "turing-machine",
@@ -499,40 +499,40 @@
         {
           "slug": "undecidability",
           "label": "Undecidability",
-          "count": 18
+          "count": 22
         }
       ]
     },
     {
       "slug": "compiler-design",
       "label": "Compiler Design",
-      "count": 145,
+      "count": 147,
       "file": "/pyq/subjects/compiler-design.json",
       "topics": [
         {
           "slug": "lexical-analysis",
           "label": "Lexical Analysis",
-          "count": 6
+          "count": 5
         },
         {
           "slug": "parsing",
           "label": "Parsing",
-          "count": 81
+          "count": 76
         },
         {
           "slug": "syntax-directed-translation",
           "label": "Syntax-directed Translation",
-          "count": 12
+          "count": 17
         },
         {
           "slug": "intermediate-code-generation",
           "label": "Intermediate Code Generation",
-          "count": 11
+          "count": 13
         },
         {
           "slug": "runtime-environment",
           "label": "Runtime Environment",
-          "count": 12
+          "count": 13
         },
         {
           "slug": "matching",
@@ -544,13 +544,13 @@
     {
       "slug": "operating-systems",
       "label": "Operating Systems",
-      "count": 198,
+      "count": 187,
       "file": "/pyq/subjects/operating-systems.json",
       "topics": [
         {
           "slug": "process",
           "label": "Process",
-          "count": 26
+          "count": 7
         },
         {
           "slug": "cpu-scheduling",
@@ -570,22 +570,22 @@
         {
           "slug": "memory-management",
           "label": "Memory Management",
-          "count": 56
+          "count": 57
         },
         {
           "slug": "file-systems",
           "label": "File Systems",
-          "count": 9
+          "count": 12
         },
         {
           "slug": "disk-scheduling",
           "label": "Disk Scheduling",
-          "count": 6
+          "count": 7
         },
         {
           "slug": "system-call",
           "label": "System Call",
-          "count": 10
+          "count": 13
         },
         {
           "slug": "thread",
@@ -597,7 +597,7 @@
     {
       "slug": "databases",
       "label": "Database Management System",
-      "count": 159,
+      "count": 158,
       "file": "/pyq/subjects/databases.json",
       "topics": [
         {
@@ -633,7 +633,7 @@
         {
           "slug": "sql",
           "label": "SQL",
-          "count": 35
+          "count": 34
         },
         {
           "slug": "tuple-calculus",
@@ -650,28 +650,28 @@
     {
       "slug": "computer-networks",
       "label": "Computer Network",
-      "count": 189,
+      "count": 191,
       "file": "/pyq/subjects/computer-networks.json",
       "topics": [
         {
           "slug": "osi-layer",
           "label": "OSI Layer",
-          "count": 25
+          "count": 13
         },
         {
           "slug": "physical-layer",
           "label": "Physical Layer",
-          "count": 2
+          "count": 5
         },
         {
           "slug": "data-link-layer",
           "label": "Data Link Layer",
-          "count": 39
+          "count": 43
         },
         {
           "slug": "network-layer-protocol",
           "label": "Network Layer Protocol",
-          "count": 58
+          "count": 60
         },
         {
           "slug": "transport-layer-protocol",
@@ -681,7 +681,7 @@
         {
           "slug": "application-layer-protocols",
           "label": "Application Layer Protocols",
-          "count": 19
+          "count": 24
         },
         {
           "slug": "network-security",
@@ -693,13 +693,13 @@
     {
       "slug": "other-optional",
       "label": "Other / Optional",
-      "count": 17,
+      "count": 23,
       "file": "/pyq/subjects/other-optional.json",
       "topics": [
         {
           "slug": "software-engineering",
           "label": "Software Engineering",
-          "count": 17
+          "count": 23
         }
       ]
     }

@@ -1,17 +1,1461 @@
 {
-  "bankVersion": "gate-cse-2002-2026-v3-math-topics",
+  "bankVersion": "gate-cse-2002-2026-v4-topic-audit",
   "questionCount": 2388,
   "uniqueQuestionCount": 2388,
   "unclassifiedCount": 0,
   "subjectCount": 14,
   "topicCount": 95,
   "classificationBasis": {
-    "broad-topic-tag": 11,
-    "content-rule": 97,
-    "ordered-topic-tag": 1728,
+    "broad-topic-tag": 4,
+    "content-rule": 77,
+    "manual-content-audit": 160,
+    "ordered-topic-tag": 1686,
     "subject-rule": 267,
-    "topic-rule": 285
+    "topic-rule": 194
   },
+  "manualCorrectionCount": 160,
+  "manualCorrections": [
+    {
+      "id": "go:1003",
+      "year": 2004,
+      "set": null,
+      "number": "6",
+      "subjectSlug": "data-structure",
+      "topicSlug": "n-ary-tree",
+      "reason": "Identifies level-order traversal of a general rooted tree."
+    },
+    {
+      "id": "go:1006",
+      "year": 2004,
+      "set": null,
+      "number": "9",
+      "subjectSlug": "compiler-design",
+      "topicSlug": "runtime-environment",
+      "reason": "Tests when an external module reference is linked."
+    },
+    {
+      "id": "go:1027",
+      "year": 2004,
+      "set": null,
+      "number": "30, ISRO2017-10",
+      "subjectSlug": "algorithms",
+      "topicSlug": "asymptotic-notation",
+      "reason": "Classifies 2-SAT and 3-SAT complexity; recurrence is a cross-link."
+    },
+    {
+      "id": "go:1030",
+      "year": 2004,
+      "set": null,
+      "number": "33",
+      "subjectSlug": "c-programming",
+      "topicSlug": "array-and-pointer",
+      "reason": "The output depends on string-array indexing and termination."
+    },
+    {
+      "id": "go:1031",
+      "year": 2004,
+      "set": null,
+      "number": "34",
+      "subjectSlug": "c-programming",
+      "topicSlug": "function",
+      "reason": "Places methods in an object-oriented class hierarchy."
+    },
+    {
+      "id": "go:1045",
+      "year": 2004,
+      "set": null,
+      "number": "49",
+      "subjectSlug": "operating-systems",
+      "topicSlug": "file-systems",
+      "reason": "Computes maximum file size from Unix inode pointers."
+    },
+    {
+      "id": "go:1053",
+      "year": 2004,
+      "set": null,
+      "number": "58",
+      "subjectSlug": "digital-logic",
+      "topicSlug": "combinational-circuit",
+      "reason": "Explicitly asks for a combinational digit-comparison circuit."
+    },
+    {
+      "id": "go:1056",
+      "year": 2004,
+      "set": null,
+      "number": "61",
+      "subjectSlug": "digital-logic",
+      "topicSlug": "sequential-circuit",
+      "reason": "Completes a counter built from T flip-flops."
+    },
+    {
+      "id": "go:1075",
+      "year": 2004,
+      "set": null,
+      "number": "81",
+      "subjectSlug": "discrete-mathematics",
+      "topicSlug": "graph-theory",
+      "reason": "Tests structural properties of graph union and intersection."
+    },
+    {
+      "id": "go:1081",
+      "year": 2004,
+      "set": null,
+      "number": "87",
+      "subjectSlug": "theory-of-computation",
+      "topicSlug": "context-free-language",
+      "reason": "Classifies a three-block counting language in the Chomsky hierarchy."
+    },
+    {
+      "id": "go:118171",
+      "year": 2017,
+      "set": 2,
+      "number": "2",
+      "subjectSlug": "c-programming",
+      "topicSlug": "array-and-pointer",
+      "reason": "Matches pointer-array and allocated-memory declarations."
+    },
+    {
+      "id": "go:118185",
+      "year": 2017,
+      "set": 2,
+      "number": "24",
+      "subjectSlug": "digital-logic",
+      "topicSlug": "number-system",
+      "reason": "Solves arithmetic in an unknown positional base."
+    },
+    {
+      "id": "go:118300",
+      "year": 2017,
+      "set": 1,
+      "number": "20",
+      "subjectSlug": "discrete-mathematics",
+      "topicSlug": "graph-theory",
+      "reason": "Uses the degree-sum property of an unrooted tree."
+    },
+    {
+      "id": "go:118306",
+      "year": 2017,
+      "set": 1,
+      "number": "26",
+      "subjectSlug": "algorithms",
+      "topicSlug": "minimum-spanning-tree",
+      "reason": "The primary claim is MST uniqueness under distinct weights."
+    },
+    {
+      "id": "go:118328",
+      "year": 2017,
+      "set": 1,
+      "number": "45",
+      "subjectSlug": "computer-networks",
+      "topicSlug": "data-link-layer",
+      "reason": "Computes Stop-and-Wait ARQ efficiency."
+    },
+    {
+      "id": "go:118388",
+      "year": 2017,
+      "set": 2,
+      "number": "43",
+      "subjectSlug": "c-programming",
+      "topicSlug": "loops",
+      "reason": "Traces nested loops implementing a bidirectional bubble pass."
+    },
+    {
+      "id": "go:118537",
+      "year": 2017,
+      "set": 2,
+      "number": "35",
+      "subjectSlug": "computer-networks",
+      "topicSlug": "physical-layer",
+      "reason": "Computes transmission and propagation delay on a direct link."
+    },
+    {
+      "id": "go:118615",
+      "year": 2017,
+      "set": 2,
+      "number": "40",
+      "subjectSlug": "theory-of-computation",
+      "topicSlug": "context-free-language",
+      "reason": "Classifies several languages by context-freeness."
+    },
+    {
+      "id": "go:118707",
+      "year": 2017,
+      "set": 1,
+      "number": "05",
+      "subjectSlug": "algorithms",
+      "topicSlug": "divide-and-conquer",
+      "reason": "Matches algorithms to design paradigms; the source tag is algorithm-design-techniques."
+    },
+    {
+      "id": "go:1209",
+      "year": 2007,
+      "set": null,
+      "number": "11, ISRO2009-36, ISRO2016-21",
+      "subjectSlug": "coa",
+      "topicSlug": "secondary-storage",
+      "reason": "Computes disk-pack capacity and sector-address width."
+    },
+    {
+      "id": "go:1228",
+      "year": 2007,
+      "set": null,
+      "number": "30",
+      "subjectSlug": "theory-of-computation",
+      "topicSlug": "context-free-language",
+      "reason": "Asks whether a language is deterministic context-free."
+    },
+    {
+      "id": "go:1234",
+      "year": 2007,
+      "set": null,
+      "number": "36",
+      "subjectSlug": "digital-logic",
+      "topicSlug": "sequential-circuit",
+      "reason": "Tests control inputs of a binary counter."
+    },
+    {
+      "id": "go:1246",
+      "year": 2007,
+      "set": null,
+      "number": "48",
+      "subjectSlug": "discrete-mathematics",
+      "topicSlug": "propositional-logic",
+      "reason": "Tests truth assignments for CNF formulae, not digital circuitry."
+    },
+    {
+      "id": "go:1295",
+      "year": 2006,
+      "set": null,
+      "number": "37",
+      "subjectSlug": "digital-logic",
+      "topicSlug": "sequential-circuit",
+      "reason": "Tracks clocked data through D flip-flops."
+    },
+    {
+      "id": "go:1299",
+      "year": 2009,
+      "set": null,
+      "number": "7, ISRO2015-3",
+      "subjectSlug": "coa",
+      "topicSlug": "memory-chip-design",
+      "reason": "Computes the RAM-chip count for a memory capacity."
+    },
+    {
+      "id": "go:1311",
+      "year": 2009,
+      "set": null,
+      "number": "19",
+      "subjectSlug": "other-optional",
+      "topicSlug": "software-engineering",
+      "reason": "Orders forms of software-module coupling."
+    },
+    {
+      "id": "go:1326",
+      "year": 2009,
+      "set": null,
+      "number": "40",
+      "subjectSlug": "theory-of-computation",
+      "topicSlug": "context-free-language",
+      "reason": "The constructed intersection is context-free; RE appears only as an option."
+    },
+    {
+      "id": "go:1337",
+      "year": 2009,
+      "set": null,
+      "number": "51",
+      "subjectSlug": "coa",
+      "topicSlug": "secondary-storage",
+      "reason": "Converts a disk geometry address to a sector number."
+    },
+    {
+      "id": "go:1355",
+      "year": 2005,
+      "set": null,
+      "number": "19",
+      "subjectSlug": "coa",
+      "topicSlug": "interrupt",
+      "reason": "Tests vectored interrupts and multiple interrupting devices."
+    },
+    {
+      "id": "go:1356",
+      "year": 2005,
+      "set": null,
+      "number": "20",
+      "subjectSlug": "operating-systems",
+      "topicSlug": "system-call",
+      "reason": "Tests privileged I/O and memory-mapped I/O protection."
+    },
+    {
+      "id": "go:1357",
+      "year": 2005,
+      "set": null,
+      "number": "21",
+      "subjectSlug": "operating-systems",
+      "topicSlug": "memory-management",
+      "reason": "Asks what process data swap space stores."
+    },
+    {
+      "id": "go:1360",
+      "year": 2005,
+      "set": null,
+      "number": "24",
+      "subjectSlug": "computer-networks",
+      "topicSlug": "network-layer-protocol",
+      "reason": "Asks which address mapping ARP performs."
+    },
+    {
+      "id": "go:1368",
+      "year": 2005,
+      "set": null,
+      "number": "32",
+      "subjectSlug": "c-programming",
+      "topicSlug": "function",
+      "reason": "Tests the effect of removing a function prototype."
+    },
+    {
+      "id": "go:1377",
+      "year": 2005,
+      "set": null,
+      "number": "54",
+      "subjectSlug": "theory-of-computation",
+      "topicSlug": "push-down-automata",
+      "reason": "Compares deterministic and nondeterministic pushdown automata."
+    },
+    {
+      "id": "go:1378",
+      "year": 2005,
+      "set": null,
+      "number": "55",
+      "subjectSlug": "theory-of-computation",
+      "topicSlug": "context-free-language",
+      "reason": "Tests union and intersection of two context-free languages."
+    },
+    {
+      "id": "go:1387",
+      "year": 2005,
+      "set": null,
+      "number": "64",
+      "subjectSlug": "digital-logic",
+      "topicSlug": "sequential-circuit",
+      "reason": "Asks for a D flip-flop state-transition sequence."
+    },
+    {
+      "id": "go:1404",
+      "year": 2005,
+      "set": null,
+      "number": "82a",
+      "subjectSlug": "algorithms",
+      "topicSlug": "minimum-spanning-tree",
+      "reason": "Applies the cut property of minimum spanning trees."
+    },
+    {
+      "id": "go:1414",
+      "year": 2013,
+      "set": null,
+      "number": "5",
+      "subjectSlug": "digital-logic",
+      "topicSlug": "combinational-circuit",
+      "reason": "The truth table implements a priority encoder."
+    },
+    {
+      "id": "go:1420",
+      "year": 2013,
+      "set": null,
+      "number": "11",
+      "subjectSlug": "other-optional",
+      "topicSlug": "software-engineering",
+      "reason": "Matches software architecture domains to integration technologies."
+    },
+    {
+      "id": "go:1537",
+      "year": 2013,
+      "set": null,
+      "number": "26",
+      "subjectSlug": "discrete-mathematics",
+      "topicSlug": "graph-theory",
+      "reason": "Tests line-graph properties, with planarity only one substatement."
+    },
+    {
+      "id": "go:1540",
+      "year": 2013,
+      "set": null,
+      "number": "29",
+      "subjectSlug": "coa",
+      "topicSlug": "secondary-storage",
+      "reason": "Computes a physical disk location from disk geometry."
+    },
+    {
+      "id": "go:1543",
+      "year": 2013,
+      "set": null,
+      "number": "32",
+      "subjectSlug": "theory-of-computation",
+      "topicSlug": "context-free-language",
+      "reason": "Tests closure and complements of context-free languages."
+    },
+    {
+      "id": "go:1555",
+      "year": 2013,
+      "set": null,
+      "number": "46",
+      "subjectSlug": "coa",
+      "topicSlug": "memory-chip-design",
+      "reason": "Builds a larger RAM from chips and address decoders."
+    },
+    {
+      "id": "go:1754",
+      "year": 2014,
+      "set": 1,
+      "number": "3",
+      "subjectSlug": "discrete-mathematics",
+      "topicSlug": "graph-theory",
+      "reason": "Tests the structural invariance of strongly connected components under edge reversal."
+    },
+    {
+      "id": "go:1785",
+      "year": 2014,
+      "set": 1,
+      "number": "18",
+      "subjectSlug": "other-optional",
+      "topicSlug": "software-engineering",
+      "reason": "Matches software-development lifecycle models to properties."
+    },
+    {
+      "id": "go:1792",
+      "year": 2014,
+      "set": 1,
+      "number": "25",
+      "subjectSlug": "computer-networks",
+      "topicSlug": "application-layer-protocols",
+      "reason": "Orders DNS, TCP, HTTP request, and HTTP response actions."
+    },
+    {
+      "id": "go:1814",
+      "year": 2006,
+      "set": null,
+      "number": "38",
+      "subjectSlug": "digital-logic",
+      "topicSlug": "combinational-circuit",
+      "reason": "Tests a static hazard under a single input transition."
+    },
+    {
+      "id": "go:1837",
+      "year": 2006,
+      "set": null,
+      "number": "59",
+      "subjectSlug": "compiler-design",
+      "topicSlug": "syntax-directed-translation",
+      "reason": "Traces semantic print actions in a translation scheme."
+    },
+    {
+      "id": "go:1931",
+      "year": 2014,
+      "set": 1,
+      "number": "51",
+      "subjectSlug": "discrete-mathematics",
+      "topicSlug": "graph-theory",
+      "reason": "Counts edges in a grid graph; it does not test planarity."
+    },
+    {
+      "id": "go:1957",
+      "year": 2014,
+      "set": 2,
+      "number": "5",
+      "subjectSlug": "discrete-mathematics",
+      "topicSlug": "functions",
+      "reason": "Tests the sign behavior of a polynomial function from its roots."
+    },
+    {
+      "id": "go:1972",
+      "year": 2014,
+      "set": 2,
+      "number": "16",
+      "subjectSlug": "theory-of-computation",
+      "topicSlug": "undecidability",
+      "reason": "Tests implications of many-one reductions."
+    },
+    {
+      "id": "go:1976",
+      "year": 2014,
+      "set": 2,
+      "number": "19",
+      "subjectSlug": "other-optional",
+      "topicSlug": "software-engineering",
+      "reason": "Tests requirements validation and prototyping."
+    },
+    {
+      "id": "go:1994",
+      "year": 2014,
+      "set": 2,
+      "number": "35",
+      "subjectSlug": "theory-of-computation",
+      "topicSlug": "undecidability",
+      "reason": "Classifies a semantic property of encoded Turing machines."
+    },
+    {
+      "id": "go:1999",
+      "year": 2014,
+      "set": 2,
+      "number": "39",
+      "subjectSlug": "compiler-design",
+      "topicSlug": "syntax-directed-translation",
+      "reason": "Evaluates an expression tree."
+    },
+    {
+      "id": "go:2008",
+      "year": 2014,
+      "set": 2,
+      "number": "42",
+      "subjectSlug": "c-programming",
+      "topicSlug": "function",
+      "reason": "Tests recursive behavior of a function with static state."
+    },
+    {
+      "id": "go:2015",
+      "year": 2014,
+      "set": 2,
+      "number": "49",
+      "subjectSlug": "discrete-mathematics",
+      "topicSlug": "combination",
+      "reason": "Counts the possible positive factors from prime-factor exponent choices."
+    },
+    {
+      "id": "go:204083",
+      "year": 2018,
+      "set": null,
+      "number": "9",
+      "subjectSlug": "coa",
+      "topicSlug": "interrupt",
+      "reason": "Orders processor actions taken while servicing an interrupt."
+    },
+    {
+      "id": "go:204117",
+      "year": 2018,
+      "set": null,
+      "number": "43",
+      "subjectSlug": "discrete-mathematics",
+      "topicSlug": "graph-theory",
+      "reason": "Asks for graph degree and connected-component counts, not a traversal."
+    },
+    {
+      "id": "go:204128",
+      "year": 2018,
+      "set": null,
+      "number": "53",
+      "subjectSlug": "operating-systems",
+      "topicSlug": "disk-scheduling",
+      "reason": "Services a disk request queue using SSTF."
+    },
+    {
+      "id": "go:2042",
+      "year": 2014,
+      "set": 3,
+      "number": "8",
+      "subjectSlug": "digital-logic",
+      "topicSlug": "combinational-circuit",
+      "reason": "Asks which combinational block implements a multiplexer function."
+    },
+    {
+      "id": "go:2046",
+      "year": 2014,
+      "set": 3,
+      "number": "12",
+      "subjectSlug": "data-structure",
+      "topicSlug": "binary-tree",
+      "reason": "Asks for the inorder traversal of a rooted binary tree."
+    },
+    {
+      "id": "go:2050",
+      "year": 2014,
+      "set": 3,
+      "number": "16",
+      "subjectSlug": "discrete-mathematics",
+      "topicSlug": "set-theory",
+      "reason": "Compares the cardinality of a set of strings with its power set."
+    },
+    {
+      "id": "go:2053",
+      "year": 2014,
+      "set": 3,
+      "number": "19, ISRO2017-78",
+      "subjectSlug": "other-optional",
+      "topicSlug": "software-engineering",
+      "reason": "Tests cohesion and coupling in modular software design."
+    },
+    {
+      "id": "go:2079",
+      "year": 2014,
+      "set": 3,
+      "number": "45",
+      "subjectSlug": "digital-logic",
+      "topicSlug": "sequential-circuit",
+      "reason": "Asks for states of a JK flip-flop circuit."
+    },
+    {
+      "id": "go:2110",
+      "year": 2011,
+      "set": null,
+      "number": "8",
+      "subjectSlug": "theory-of-computation",
+      "topicSlug": "push-down-automata",
+      "reason": "The differing expressive-power pair is DPDA versus NPDA."
+    },
+    {
+      "id": "go:2113",
+      "year": 2011,
+      "set": null,
+      "number": "11",
+      "subjectSlug": "coa",
+      "topicSlug": "interrupt",
+      "reason": "Ranks hardware interrupt sources by service priority."
+    },
+    {
+      "id": "go:2128",
+      "year": 2011,
+      "set": null,
+      "number": "26",
+      "subjectSlug": "theory-of-computation",
+      "topicSlug": "context-free-language",
+      "reason": "Compares regular, context-free, and non-context-free languages."
+    },
+    {
+      "id": "go:2146",
+      "year": 2011,
+      "set": null,
+      "number": "44",
+      "subjectSlug": "coa",
+      "topicSlug": "secondary-storage",
+      "reason": "Computes random disk-access time from seek and rotation."
+    },
+    {
+      "id": "go:2149",
+      "year": 2012,
+      "set": null,
+      "number": "41",
+      "subjectSlug": "operating-systems",
+      "topicSlug": "file-systems",
+      "reason": "Computes maximum file size from direct and indirect block pointers."
+    },
+    {
+      "id": "go:2157",
+      "year": 2011,
+      "set": null,
+      "number": "50",
+      "subjectSlug": "digital-logic",
+      "topicSlug": "sequential-circuit",
+      "reason": "Asks for the next state of a D flip-flop counter."
+    },
+    {
+      "id": "go:2176",
+      "year": 2012,
+      "set": null,
+      "number": "48",
+      "subjectSlug": "c-programming",
+      "topicSlug": "function",
+      "reason": "Tests static and local scope across function calls."
+    },
+    {
+      "id": "go:2178",
+      "year": 2010,
+      "set": null,
+      "number": "7",
+      "subjectSlug": "coa",
+      "topicSlug": "memory-chip-design",
+      "reason": "Computes DRAM refresh time from chip organization."
+    },
+    {
+      "id": "go:2186",
+      "year": 2010,
+      "set": null,
+      "number": "13",
+      "subjectSlug": "compiler-design",
+      "topicSlug": "matching",
+      "reason": "Asks for the symbol-table data structure, not lexical recognition."
+    },
+    {
+      "id": "go:2206",
+      "year": 2010,
+      "set": null,
+      "number": "32",
+      "subjectSlug": "digital-logic",
+      "topicSlug": "sequential-circuit",
+      "reason": "Asks for the state sequence of a sequential circuit."
+    },
+    {
+      "id": "go:264",
+      "year": 2005,
+      "set": null,
+      "number": "62",
+      "subjectSlug": "digital-logic",
+      "topicSlug": "sequential-circuit",
+      "reason": "Evaluates a clocked D flip-flop timing diagram."
+    },
+    {
+      "id": "go:29098",
+      "year": 2003,
+      "set": null,
+      "number": "47",
+      "subjectSlug": "digital-logic",
+      "topicSlug": "combinational-circuit",
+      "reason": "Tests propagation-delay glitches in an XOR combinational circuit."
+    },
+    {
+      "id": "go:302795",
+      "year": 2019,
+      "set": null,
+      "number": "53",
+      "subjectSlug": "c-programming",
+      "topicSlug": "array-and-pointer",
+      "reason": "The output depends on array-pointer arithmetic inside the loop."
+    },
+    {
+      "id": "go:302819",
+      "year": 2019,
+      "set": null,
+      "number": "29",
+      "subjectSlug": "computer-networks",
+      "topicSlug": "network-layer-protocol",
+      "reason": "Uses ARP to resolve an IP address to a MAC address."
+    },
+    {
+      "id": "go:302823",
+      "year": 2019,
+      "set": null,
+      "number": "25",
+      "subjectSlug": "algorithms",
+      "topicSlug": "divide-and-conquer",
+      "reason": "Asks for maximum subarray sum using divide and conquer."
+    },
+    {
+      "id": "go:318",
+      "year": 2004,
+      "set": null,
+      "number": "47",
+      "subjectSlug": "operating-systems",
+      "topicSlug": "memory-management",
+      "reason": "Computes effective access time for paging, TLB misses, and page faults."
+    },
+    {
+      "id": "go:333199",
+      "year": 2020,
+      "set": null,
+      "number": "32",
+      "subjectSlug": "theory-of-computation",
+      "topicSlug": "context-free-language",
+      "reason": "Compares whether two languages are regular or context-free."
+    },
+    {
+      "id": "go:333221",
+      "year": 2020,
+      "set": null,
+      "number": "10",
+      "subjectSlug": "theory-of-computation",
+      "topicSlug": "context-free-language",
+      "reason": "Classifies a language as deterministic context-free."
+    },
+    {
+      "id": "go:355",
+      "year": 2003,
+      "set": null,
+      "number": "54",
+      "subjectSlug": "theory-of-computation",
+      "topicSlug": "undecidability",
+      "reason": "Combines the halting and non-halting languages."
+    },
+    {
+      "id": "go:356",
+      "year": 2003,
+      "set": null,
+      "number": "52",
+      "subjectSlug": "theory-of-computation",
+      "topicSlug": "undecidability",
+      "reason": "Tests preservation of decidability under a computable bijection."
+    },
+    {
+      "id": "go:357410",
+      "year": 2021,
+      "set": 1,
+      "number": "41",
+      "subjectSlug": "algorithms",
+      "topicSlug": "graph-traversal",
+      "reason": "Tests articulation points using properties of a DFS tree."
+    },
+    {
+      "id": "go:357411",
+      "year": 2021,
+      "set": 1,
+      "number": "40",
+      "subjectSlug": "algorithms",
+      "topicSlug": "dynamic-programming",
+      "reason": "Tests optimal substructure in the rod-cutting problem."
+    },
+    {
+      "id": "go:357444",
+      "year": 2021,
+      "set": 1,
+      "number": "8",
+      "subjectSlug": "computer-networks",
+      "topicSlug": "network-layer-protocol",
+      "reason": "Tests ARP request and reply destination addresses."
+    },
+    {
+      "id": "go:357482",
+      "year": 2021,
+      "set": 2,
+      "number": "55",
+      "subjectSlug": "algorithms",
+      "topicSlug": "dynamic-programming",
+      "reason": "Computes best path-product scores over a DAG."
+    },
+    {
+      "id": "go:357524",
+      "year": 2021,
+      "set": 2,
+      "number": "16",
+      "subjectSlug": "data-structure",
+      "topicSlug": "binary-tree",
+      "reason": "Compares traversal prefixes of a complete binary tree."
+    },
+    {
+      "id": "go:357528",
+      "year": 2021,
+      "set": 2,
+      "number": "12",
+      "subjectSlug": "theory-of-computation",
+      "topicSlug": "context-free-language",
+      "reason": "Asks which set operations produce context-free languages."
+    },
+    {
+      "id": "go:357537",
+      "year": 2021,
+      "set": 2,
+      "number": "3",
+      "subjectSlug": "compiler-design",
+      "topicSlug": "syntax-directed-translation",
+      "reason": "Tests the semantic-analysis phase and type-name validation."
+    },
+    {
+      "id": "go:371887",
+      "year": 2022,
+      "set": null,
+      "number": "49",
+      "subjectSlug": "computer-networks",
+      "topicSlug": "physical-layer",
+      "reason": "Combines transmission and propagation delay on a satellite link."
+    },
+    {
+      "id": "go:371911",
+      "year": 2022,
+      "set": null,
+      "number": "25",
+      "subjectSlug": "computer-networks",
+      "topicSlug": "application-layer-protocols",
+      "reason": "Counts iterative DNS query-response pairs."
+    },
+    {
+      "id": "go:39570",
+      "year": 2016,
+      "set": 2,
+      "number": "14",
+      "subjectSlug": "algorithms",
+      "topicSlug": "dynamic-programming",
+      "reason": "Asks for the design paradigm underlying Floyd-Warshall."
+    },
+    {
+      "id": "go:39581",
+      "year": 2016,
+      "set": 2,
+      "number": "39",
+      "subjectSlug": "algorithms",
+      "topicSlug": "recurrence-relation",
+      "reason": "Derives the running-time recurrence of a recursive flowchart."
+    },
+    {
+      "id": "go:39638",
+      "year": 2016,
+      "set": 1,
+      "number": "12",
+      "subjectSlug": "c-programming",
+      "topicSlug": "function",
+      "reason": "Tests a typed function call against its declaration."
+    },
+    {
+      "id": "go:39673",
+      "year": 2016,
+      "set": 1,
+      "number": "14",
+      "subjectSlug": "algorithms",
+      "topicSlug": "minimum-spanning-tree",
+      "reason": "Primarily tests MST invariance when every edge weight is shifted equally."
+    },
+    {
+      "id": "go:39675",
+      "year": 2016,
+      "set": 1,
+      "number": "19",
+      "subjectSlug": "compiler-design",
+      "topicSlug": "intermediate-code-generation",
+      "reason": "Converts a code sequence to static single-assignment form."
+    },
+    {
+      "id": "go:39696",
+      "year": 2016,
+      "set": 1,
+      "number": "55",
+      "subjectSlug": "computer-networks",
+      "topicSlug": "data-link-layer",
+      "reason": "Computes Stop-and-Wait ARQ throughput."
+    },
+    {
+      "id": "go:39731",
+      "year": 2016,
+      "set": 1,
+      "number": "38",
+      "subjectSlug": "algorithms",
+      "topicSlug": "shortest-path",
+      "reason": "Asks when an edge can occur on a shortest path in a weighted graph."
+    },
+    {
+      "id": "go:399269",
+      "year": 2023,
+      "set": null,
+      "number": "42",
+      "subjectSlug": "computer-networks",
+      "topicSlug": "application-layer-protocols",
+      "reason": "Computes DNS and HTTP lookup round trips for a URL."
+    },
+    {
+      "id": "go:399286",
+      "year": 2023,
+      "set": null,
+      "number": "25",
+      "subjectSlug": "c-programming",
+      "topicSlug": "function",
+      "reason": "Tests repeated calls to a function with a static local."
+    },
+    {
+      "id": "go:399301",
+      "year": 2023,
+      "set": null,
+      "number": "11",
+      "subjectSlug": "digital-logic",
+      "topicSlug": "sequential-circuit",
+      "reason": "Feedback around a multiplexer creates a latch."
+    },
+    {
+      "id": "go:399305",
+      "year": 2023,
+      "set": null,
+      "number": "7",
+      "subjectSlug": "computer-networks",
+      "topicSlug": "data-link-layer",
+      "reason": "Tests utilization of Stop-and-Wait reliable transfer."
+    },
+    {
+      "id": "go:416",
+      "year": 2008,
+      "set": null,
+      "number": "18",
+      "subjectSlug": "c-programming",
+      "topicSlug": "conditional-statement",
+      "reason": "Evaluates nested conditional operators."
+    },
+    {
+      "id": "go:422818",
+      "year": 2024,
+      "set": 1,
+      "number": "24",
+      "subjectSlug": "discrete-mathematics",
+      "topicSlug": "graph-theory",
+      "reason": "Counts spanning trees; a trailing planarity tag is unrelated."
+    },
+    {
+      "id": "go:422833",
+      "year": 2024,
+      "set": 1,
+      "number": "9",
+      "subjectSlug": "c-programming",
+      "topicSlug": "function",
+      "reason": "Traces a recursive input/output function."
+    },
+    {
+      "id": "go:43314",
+      "year": 2012,
+      "set": null,
+      "number": "49",
+      "subjectSlug": "c-programming",
+      "topicSlug": "function",
+      "reason": "Tests storage classes across function calls."
+    },
+    {
+      "id": "go:43318",
+      "year": 2011,
+      "set": null,
+      "number": "51",
+      "subjectSlug": "digital-logic",
+      "topicSlug": "sequential-circuit",
+      "reason": "Counts states generated by a D flip-flop counter."
+    },
+    {
+      "id": "go:43477",
+      "year": 2009,
+      "set": null,
+      "number": "52",
+      "subjectSlug": "coa",
+      "topicSlug": "secondary-storage",
+      "reason": "Converts a sector number to a disk geometry address."
+    },
+    {
+      "id": "go:443",
+      "year": 2008,
+      "set": null,
+      "number": "32",
+      "subjectSlug": "coa",
+      "topicSlug": "secondary-storage",
+      "reason": "Tests the mechanical cause of non-linear seek latency."
+    },
+    {
+      "id": "go:449",
+      "year": 2008,
+      "set": null,
+      "number": "38",
+      "subjectSlug": "coa",
+      "topicSlug": "pipeline-processor",
+      "reason": "Asks when the data TLB can be accessed in an instruction pipeline."
+    },
+    {
+      "id": "go:460034",
+      "year": 2025,
+      "set": 1,
+      "number": "46",
+      "subjectSlug": "computer-networks",
+      "topicSlug": "physical-layer",
+      "reason": "Computes independent bit errors on a noisy communication channel."
+    },
+    {
+      "id": "go:460041",
+      "year": 2025,
+      "set": 1,
+      "number": "39",
+      "subjectSlug": "discrete-mathematics",
+      "topicSlug": "group-theory",
+      "reason": "Asks whether pointwise addition of functions forms a group or monoid."
+    },
+    {
+      "id": "go:460047",
+      "year": 2025,
+      "set": 1,
+      "number": "33",
+      "subjectSlug": "algorithms",
+      "topicSlug": "graph-traversal",
+      "reason": "Relates BFS-tree height to graph diameter."
+    },
+    {
+      "id": "go:460056",
+      "year": 2025,
+      "set": 1,
+      "number": "24",
+      "subjectSlug": "c-programming",
+      "topicSlug": "array-and-pointer",
+      "reason": "Tests pointer initialization and dereference; heap tags are unrelated."
+    },
+    {
+      "id": "go:460070",
+      "year": 2025,
+      "set": 1,
+      "number": "10",
+      "subjectSlug": "algorithms",
+      "topicSlug": "recurrence-relation",
+      "reason": "Solves an explicitly stated recurrence relation."
+    },
+    {
+      "id": "go:460803",
+      "year": 2025,
+      "set": 2,
+      "number": "32",
+      "subjectSlug": "discrete-mathematics",
+      "topicSlug": "lattice",
+      "reason": "Tests the partial-order and lattice structure induced on a set of functions."
+    },
+    {
+      "id": "go:460808",
+      "year": 2025,
+      "set": 2,
+      "number": "27",
+      "subjectSlug": "algorithms",
+      "topicSlug": "minimum-spanning-tree",
+      "reason": "Tests how a uniform edge-weight shift affects MSTs and shortest paths."
+    },
+    {
+      "id": "go:460813",
+      "year": 2025,
+      "set": 2,
+      "number": "22",
+      "subjectSlug": "digital-logic",
+      "topicSlug": "number-system",
+      "reason": "Tests signed two-complement multiplication using Booth encoding."
+    },
+    {
+      "id": "go:460816",
+      "year": 2025,
+      "set": 2,
+      "number": "19",
+      "subjectSlug": "algorithms",
+      "topicSlug": "graph-traversal",
+      "reason": "Compares DFS and BFS tree properties; shortest path appears in one statement."
+    },
+    {
+      "id": "go:484",
+      "year": 2008,
+      "set": null,
+      "number": "61",
+      "subjectSlug": "c-programming",
+      "topicSlug": "function",
+      "reason": "Completes a recursive string-reversal function."
+    },
+    {
+      "id": "go:487",
+      "year": 2008,
+      "set": null,
+      "number": "64, ISRO2009-13",
+      "subjectSlug": "operating-systems",
+      "topicSlug": "system-call",
+      "reason": "Compares synchronous and asynchronous I/O behavior."
+    },
+    {
+      "id": "go:51",
+      "year": 2012,
+      "set": null,
+      "number": "19",
+      "subjectSlug": "digital-logic",
+      "topicSlug": "combinational-circuit",
+      "reason": "Uses a ROM as a combinational multiplier implementation."
+    },
+    {
+      "id": "go:523048",
+      "year": 2026,
+      "set": 1,
+      "number": "32",
+      "subjectSlug": "compiler-design",
+      "topicSlug": "matching",
+      "reason": "Finds redundant common subexpressions using a control-flow graph."
+    },
+    {
+      "id": "go:523063",
+      "year": 2026,
+      "set": 1,
+      "number": "17",
+      "subjectSlug": "compiler-design",
+      "topicSlug": "parsing",
+      "reason": "Distinguishes lexical, syntactic, and semantic errors."
+    },
+    {
+      "id": "go:523097",
+      "year": 2026,
+      "set": 2,
+      "number": "49",
+      "subjectSlug": "digital-logic",
+      "topicSlug": "combinational-circuit",
+      "reason": "The circuit is a decoder feeding a multiplexer; IEEE tags are cross-links."
+    },
+    {
+      "id": "go:523132",
+      "year": 2026,
+      "set": 2,
+      "number": "14",
+      "subjectSlug": "algorithms",
+      "topicSlug": "asymptotic-notation",
+      "reason": "Orders functions by asymptotic growth; no recurrence is present."
+    },
+    {
+      "id": "go:523145",
+      "year": 2026,
+      "set": 2,
+      "number": "2",
+      "subjectSlug": "data-structure",
+      "topicSlug": "binary-tree",
+      "reason": "Matches inorder, preorder, and postorder traversals of a binary tree."
+    },
+    {
+      "id": "go:8048",
+      "year": 2015,
+      "set": 2,
+      "number": "2",
+      "subjectSlug": "algorithms",
+      "topicSlug": "asymptotic-notation",
+      "reason": "Tests polynomial reductions and NP-hardness, not divide and conquer."
+    },
+    {
+      "id": "go:8058",
+      "year": 2015,
+      "set": 2,
+      "number": "9",
+      "subjectSlug": "discrete-mathematics",
+      "topicSlug": "combination",
+      "reason": "Counts the possible divisors from prime-factor exponent choices."
+    },
+    {
+      "id": "go:8060",
+      "year": 2015,
+      "set": 2,
+      "number": "11",
+      "subjectSlug": "algorithms",
+      "topicSlug": "recurrence-relation",
+      "reason": "Evaluates a recursively defined function through its recurrence."
+    },
+    {
+      "id": "go:8084",
+      "year": 2015,
+      "set": 2,
+      "number": "14",
+      "subjectSlug": "compiler-design",
+      "topicSlug": "intermediate-code-generation",
+      "reason": "Compares program order represented by an AST and a control-flow graph."
+    },
+    {
+      "id": "go:8086",
+      "year": 2015,
+      "set": 2,
+      "number": "15",
+      "subjectSlug": "c-programming",
+      "topicSlug": "function",
+      "reason": "Traces a recursive character-processing function."
+    },
+    {
+      "id": "go:8088",
+      "year": 2015,
+      "set": 1,
+      "number": "6",
+      "subjectSlug": "algorithms",
+      "topicSlug": "divide-and-conquer",
+      "reason": "Matches algorithms to design paradigms rather than testing shortest-path execution."
+    },
+    {
+      "id": "go:811",
+      "year": 2002,
+      "set": null,
+      "number": "1.7",
+      "subjectSlug": "theory-of-computation",
+      "topicSlug": "push-down-automata",
+      "reason": "Asks about a PDA whose stack is bounded."
+    },
+    {
+      "id": "go:8161",
+      "year": 2015,
+      "set": 2,
+      "number": "36",
+      "subjectSlug": "algorithms",
+      "topicSlug": "divide-and-conquer",
+      "reason": "Matches algorithms to design paradigms rather than testing shortest-path execution."
+    },
+    {
+      "id": "go:8185",
+      "year": 2015,
+      "set": 1,
+      "number": "11",
+      "subjectSlug": "c-programming",
+      "topicSlug": "function",
+      "reason": "Contrasts value and pointer parameters in two functions."
+    },
+    {
+      "id": "go:82129",
+      "year": 2005,
+      "set": null,
+      "number": "82b",
+      "subjectSlug": "algorithms",
+      "topicSlug": "minimum-spanning-tree",
+      "reason": "Uses the MST path property to minimize bottleneck congestion."
+    },
+    {
+      "id": "go:8214",
+      "year": 2015,
+      "set": 1,
+      "number": "17",
+      "subjectSlug": "computer-networks",
+      "topicSlug": "application-layer-protocols",
+      "reason": "Compares TCP-connection use by HTTP, FTP, SMTP, and TELNET."
+    },
+    {
+      "id": "go:822",
+      "year": 2002,
+      "set": null,
+      "number": "1.17",
+      "subjectSlug": "c-programming",
+      "topicSlug": "function",
+      "reason": "Tests activation records and recursive function calls."
+    },
+    {
+      "id": "go:8251",
+      "year": 2015,
+      "set": 2,
+      "number": "49",
+      "subjectSlug": "coa",
+      "topicSlug": "secondary-storage",
+      "reason": "Computes sector access time from disk hardware parameters."
+    },
+    {
+      "id": "go:8281",
+      "year": 2015,
+      "set": 1,
+      "number": "34",
+      "subjectSlug": "discrete-mathematics",
+      "topicSlug": "lattice",
+      "reason": "Tests distributivity in a given lattice; probability is only the counting wrapper."
+    },
+    {
+      "id": "go:8283",
+      "year": 2015,
+      "set": 1,
+      "number": "35",
+      "subjectSlug": "c-programming",
+      "topicSlug": "array-and-pointer",
+      "reason": "Tests two-dimensional array pointer arithmetic."
+    },
+    {
+      "id": "go:8354",
+      "year": 2015,
+      "set": 1,
+      "number": "48",
+      "subjectSlug": "coa",
+      "topicSlug": "secondary-storage",
+      "reason": "Computes file read time from seek and rotational latency."
+    },
+    {
+      "id": "go:8363",
+      "year": 2015,
+      "set": 1,
+      "number": "53",
+      "subjectSlug": "computer-networks",
+      "topicSlug": "data-link-layer",
+      "reason": "Chooses a frame size for Stop-and-Wait utilization."
+    },
+    {
+      "id": "go:838",
+      "year": 2002,
+      "set": null,
+      "number": "2.8",
+      "subjectSlug": "c-programming",
+      "topicSlug": "array-and-pointer",
+      "reason": "Computes a two-dimensional array element address."
+    },
+    {
+      "id": "go:8402",
+      "year": 2015,
+      "set": 3,
+      "number": "8",
+      "subjectSlug": "computer-networks",
+      "topicSlug": "application-layer-protocols",
+      "reason": "Tests local edits versus web-server versions of HTTP resources."
+    },
+    {
+      "id": "go:8423",
+      "year": 2015,
+      "set": 3,
+      "number": "21",
+      "subjectSlug": "other-optional",
+      "topicSlug": "software-engineering",
+      "reason": "Computes a software-project function-point metric."
+    },
+    {
+      "id": "go:848",
+      "year": 2002,
+      "set": null,
+      "number": "2.18",
+      "subjectSlug": "compiler-design",
+      "topicSlug": "parsing",
+      "reason": "Asks which formal-language class describes C syntax."
+    },
+    {
+      "id": "go:849",
+      "year": 2002,
+      "set": null,
+      "number": "2.19",
+      "subjectSlug": "compiler-design",
+      "topicSlug": "syntax-directed-translation",
+      "reason": "Asks about stack requirements for expression evaluation."
+    },
+    {
+      "id": "go:850",
+      "year": 2002,
+      "set": null,
+      "number": "2.20",
+      "subjectSlug": "operating-systems",
+      "topicSlug": "system-call",
+      "reason": "Tests a dynamic-linking security concern at load time."
+    },
+    {
+      "id": "go:8563",
+      "year": 2015,
+      "set": 3,
+      "number": "54",
+      "subjectSlug": "c-programming",
+      "topicSlug": "function",
+      "reason": "Evaluates calls with global, local, and static variables."
+    },
+    {
+      "id": "go:887",
+      "year": 2006,
+      "set": null,
+      "number": "8",
+      "subjectSlug": "digital-logic",
+      "topicSlug": "sequential-circuit",
+      "reason": "Uses clocked D flip-flops to delay a waveform."
+    },
+    {
+      "id": "go:914",
+      "year": 2003,
+      "set": null,
+      "number": "24",
+      "subjectSlug": "compiler-design",
+      "topicSlug": "syntax-directed-translation",
+      "reason": "Tests static and dynamic type-system semantics."
+    },
+    {
+      "id": "go:915",
+      "year": 2003,
+      "set": null,
+      "number": "25, ISRO2009-12",
+      "subjectSlug": "operating-systems",
+      "topicSlug": "file-systems",
+      "reason": "Tests block-size tradeoffs in a fixed-block file system."
+    },
+    {
+      "id": "go:925",
+      "year": 2003,
+      "set": null,
+      "number": "35",
+      "subjectSlug": "algorithms",
+      "topicSlug": "recurrence-relation",
+      "reason": "Evaluates a sequence given by an explicit recurrence relation."
+    },
+    {
+      "id": "go:946",
+      "year": 2003,
+      "set": null,
+      "number": "58",
+      "subjectSlug": "compiler-design",
+      "topicSlug": "syntax-directed-translation",
+      "reason": "Traces a syntax-directed postfix translation scheme."
+    },
+    {
+      "id": "go:961",
+      "year": 2003,
+      "set": null,
+      "number": "75",
+      "subjectSlug": "c-programming",
+      "topicSlug": "function",
+      "reason": "Tests method dispatch and dynamic binding."
+    },
+    {
+      "id": "go:993",
+      "year": 2006,
+      "set": null,
+      "number": "30",
+      "subjectSlug": "theory-of-computation",
+      "topicSlug": "regular-language",
+      "reason": "Tests regularity of a language defined by modular constraints."
+    }
+  ],
   "subjects": [
     {
       "slug": "general-aptitude",
@@ -26,17 +1470,17 @@
     },
     {
       "slug": "discrete-mathematics",
-      "count": 220,
+      "count": 226,
       "topics": [
         {
           "slug": "propositional-logic",
           "label": "Propositional Logic",
-          "count": 48
+          "count": 49
         },
         {
           "slug": "set-theory",
           "label": "Set Theory",
-          "count": 18
+          "count": 15
         },
         {
           "slug": "relation",
@@ -46,32 +1490,32 @@
         {
           "slug": "functions",
           "label": "Functions",
-          "count": 20
+          "count": 19
         },
         {
           "slug": "lattice",
           "label": "Lattice",
-          "count": 5
+          "count": 7
         },
         {
           "slug": "group-theory",
           "label": "Group Theory",
-          "count": 25
+          "count": 26
         },
         {
           "slug": "graph-theory",
           "label": "Graph Theory",
-          "count": 46
+          "count": 53
         },
         {
           "slug": "planar-graph",
           "label": "Planar Graph",
-          "count": 13
+          "count": 10
         },
         {
           "slug": "combination",
           "label": "Combination",
-          "count": 27
+          "count": 29
         },
         {
           "slug": "recurrence",
@@ -82,7 +1526,7 @@
     },
     {
       "slug": "engineering-mathematics",
-      "count": 182,
+      "count": 178,
       "topics": [
         {
           "slug": "linear-algebra",
@@ -92,18 +1536,18 @@
         {
           "slug": "calculus",
           "label": "Calculus",
-          "count": 54
+          "count": 51
         },
         {
           "slug": "probability-statistics",
           "label": "Probability & Statistics",
-          "count": 67
+          "count": 66
         }
       ]
     },
     {
       "slug": "digital-logic",
-      "count": 172,
+      "count": 169,
       "topics": [
         {
           "slug": "number-system",
@@ -113,28 +1557,28 @@
         {
           "slug": "boolean-algebra",
           "label": "Boolean Algebra",
-          "count": 61
+          "count": 52
         },
         {
           "slug": "combinational-circuit",
           "label": "Combinational Circuit",
-          "count": 37
+          "count": 33
         },
         {
           "slug": "sequential-circuit",
           "label": "Sequential Circuit",
-          "count": 17
+          "count": 27
         }
       ]
     },
     {
       "slug": "coa",
-      "count": 165,
+      "count": 178,
       "topics": [
         {
           "slug": "machine-instruction",
           "label": "Machine Instruction",
-          "count": 33
+          "count": 31
         },
         {
           "slug": "addressing-modes",
@@ -154,12 +1598,12 @@
         {
           "slug": "interrupt",
           "label": "Interrupt",
-          "count": 7
+          "count": 10
         },
         {
           "slug": "pipeline-processor",
           "label": "Pipeline Processor",
-          "count": 40
+          "count": 41
         },
         {
           "slug": "cache-memory",
@@ -169,54 +1613,54 @@
         {
           "slug": "secondary-storage",
           "label": "Secondary Storage",
-          "count": 1
+          "count": 9
         },
         {
           "slug": "memory-chip-design",
           "label": "Memory Chip Design",
-          "count": 1
+          "count": 4
         }
       ]
     },
     {
       "slug": "c-programming",
-      "count": 97,
+      "count": 95,
       "topics": [
         {
           "slug": "arithmetic-operation",
           "label": "Arithmetic Operation",
-          "count": 25
+          "count": 8
         },
         {
           "slug": "conditional-statement",
           "label": "Conditional Statement",
-          "count": 5
+          "count": 2
         },
         {
           "slug": "loops",
           "label": "Loops",
-          "count": 15
+          "count": 14
         },
         {
           "slug": "array-and-pointer",
           "label": "Array and Pointer",
-          "count": 29
+          "count": 35
         },
         {
           "slug": "function",
           "label": "Function",
-          "count": 23
+          "count": 36
         }
       ]
     },
     {
       "slug": "data-structure",
-      "count": 161,
+      "count": 159,
       "topics": [
         {
           "slug": "array",
           "label": "Array",
-          "count": 9
+          "count": 8
         },
         {
           "slug": "linked-list",
@@ -236,7 +1680,7 @@
         {
           "slug": "binary-tree",
           "label": "Binary Tree",
-          "count": 21
+          "count": 24
         },
         {
           "slug": "binary-search-tree",
@@ -261,12 +1705,12 @@
         {
           "slug": "heap-tree",
           "label": "Heap Tree",
-          "count": 26
+          "count": 25
         },
         {
           "slug": "n-ary-tree",
           "label": "n-ary Tree",
-          "count": 8
+          "count": 5
         },
         {
           "slug": "hashing",
@@ -277,22 +1721,22 @@
     },
     {
       "slug": "algorithms",
-      "count": 234,
+      "count": 229,
       "topics": [
         {
           "slug": "asymptotic-notation",
           "label": "Asymptotic Notation",
-          "count": 73
+          "count": 70
         },
         {
           "slug": "recurrence-relation",
           "label": "Recurrence Relation",
-          "count": 33
+          "count": 34
         },
         {
           "slug": "divide-and-conquer",
           "label": "Divide and Conquer",
-          "count": 1
+          "count": 4
         },
         {
           "slug": "sorting",
@@ -307,28 +1751,28 @@
         {
           "slug": "minimum-spanning-tree",
           "label": "Minimum Spanning Tree",
-          "count": 28
+          "count": 33
         },
         {
           "slug": "shortest-path",
           "label": "Shortest Path",
-          "count": 25
+          "count": 15
         },
         {
           "slug": "graph-traversal",
           "label": "Graph Traversal",
-          "count": 26
+          "count": 23
         },
         {
           "slug": "dynamic-programming",
           "label": "Dynamic Programming",
-          "count": 13
+          "count": 15
         }
       ]
     },
     {
       "slug": "theory-of-computation",
-      "count": 182,
+      "count": 181,
       "topics": [
         {
           "slug": "regular-expression",
@@ -343,7 +1787,7 @@
         {
           "slug": "regular-language",
           "label": "Regular Language",
-          "count": 38
+          "count": 27
         },
         {
           "slug": "finite-automata",
@@ -358,17 +1802,17 @@
         {
           "slug": "context-free-language",
           "label": "Context Free Language",
-          "count": 24
+          "count": 34
         },
         {
           "slug": "push-down-automata",
           "label": "Push-down Automata",
-          "count": 6
+          "count": 9
         },
         {
           "slug": "recursive-language",
           "label": "Recursive Language",
-          "count": 28
+          "count": 21
         },
         {
           "slug": "turing-machine",
@@ -378,38 +1822,38 @@
         {
           "slug": "undecidability",
           "label": "Undecidability",
-          "count": 18
+          "count": 22
         }
       ]
     },
     {
       "slug": "compiler-design",
-      "count": 145,
+      "count": 147,
       "topics": [
         {
           "slug": "lexical-analysis",
           "label": "Lexical Analysis",
-          "count": 6
+          "count": 5
         },
         {
           "slug": "parsing",
           "label": "Parsing",
-          "count": 81
+          "count": 76
         },
         {
           "slug": "syntax-directed-translation",
           "label": "Syntax-directed Translation",
-          "count": 12
+          "count": 17
         },
         {
           "slug": "intermediate-code-generation",
           "label": "Intermediate Code Generation",
-          "count": 11
+          "count": 13
         },
         {
           "slug": "runtime-environment",
           "label": "Runtime Environment",
-          "count": 12
+          "count": 13
         },
         {
           "slug": "matching",
@@ -420,12 +1864,12 @@
     },
     {
       "slug": "operating-systems",
-      "count": 198,
+      "count": 187,
       "topics": [
         {
           "slug": "process",
           "label": "Process",
-          "count": 26
+          "count": 7
         },
         {
           "slug": "cpu-scheduling",
@@ -445,22 +1889,22 @@
         {
           "slug": "memory-management",
           "label": "Memory Management",
-          "count": 56
+          "count": 57
         },
         {
           "slug": "file-systems",
           "label": "File Systems",
-          "count": 9
+          "count": 12
         },
         {
           "slug": "disk-scheduling",
           "label": "Disk Scheduling",
-          "count": 6
+          "count": 7
         },
         {
           "slug": "system-call",
           "label": "System Call",
-          "count": 10
+          "count": 13
         },
         {
           "slug": "thread",
@@ -471,7 +1915,7 @@
     },
     {
       "slug": "databases",
-      "count": 159,
+      "count": 158,
       "topics": [
         {
           "slug": "er-model",
@@ -506,7 +1950,7 @@
         {
           "slug": "sql",
           "label": "SQL",
-          "count": 35
+          "count": 34
         },
         {
           "slug": "tuple-calculus",
@@ -522,27 +1966,27 @@
     },
     {
       "slug": "computer-networks",
-      "count": 189,
+      "count": 191,
       "topics": [
         {
           "slug": "osi-layer",
           "label": "OSI Layer",
-          "count": 25
+          "count": 13
         },
         {
           "slug": "physical-layer",
           "label": "Physical Layer",
-          "count": 2
+          "count": 5
         },
         {
           "slug": "data-link-layer",
           "label": "Data Link Layer",
-          "count": 39
+          "count": 43
         },
         {
           "slug": "network-layer-protocol",
           "label": "Network Layer Protocol",
-          "count": 58
+          "count": 60
         },
         {
           "slug": "transport-layer-protocol",
@@ -552,7 +1996,7 @@
         {
           "slug": "application-layer-protocols",
           "label": "Application Layer Protocols",
-          "count": 19
+          "count": 24
         },
         {
           "slug": "network-security",
@@ -563,12 +2007,12 @@
     },
     {
       "slug": "other-optional",
-      "count": 17,
+      "count": 23,
       "topics": [
         {
           "slug": "software-engineering",
           "label": "Software Engineering",
-          "count": 17
+          "count": 23
         }
       ]
     }

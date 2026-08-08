@@ -212,3 +212,11 @@ F3.3 says the server calls `advance_reattempt(id, result)`. Doing that from the 
 **Rejected**: retaining the screenshot's Probability Theory placement under Discrete Mathematics or exposing Numerical Method as a fourth Engineering Mathematics topic.
 
 **Reason**: direct user correction establishes the canonical practice taxonomy and keeps the subject picker aligned with the intended GATE preparation structure.
+
+## 2026-08-08 — Content-first PYQ taxonomy corrections
+
+**Chose**: review all 2,388 bundled PYQs against their full question text, lock 160 question-specific corrections with reasons, and make the primary tested concept win over wrapper concepts and noisy cross-link tags. The review also restores all 23 Software Engineering questions to Other / Optional; the earlier count of 17 omitted six that had leaked into unrelated subjects.
+
+**Rejected**: trusting source-tag order as semantic truth, duplicating mixed questions across several topics, or silently accepting broad fallback topics when the question text identifies a more precise canonical topic.
+
+**Reason**: topic-wise practice is only useful when every question has one stable, defensible home and future bank regeneration cannot reintroduce known errors.

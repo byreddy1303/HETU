@@ -14,6 +14,7 @@
     "preview": "vite preview",
     "pyq:build": "node scripts/build-pyq-bank.mjs",
     "pyq:classify": "node scripts/classify-pyq-bank.mjs",
+    "pyq:audit": "node scripts/audit-pyq-taxonomy.mjs",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "typecheck": "tsc --noEmit",
     "supabase:start": "supabase start",

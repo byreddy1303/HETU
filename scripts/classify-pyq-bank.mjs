@@ -7,6 +7,7 @@ import { fileURLToPath } from 'node:url';
 import {
   classifyPyqQuestion,
   PYQ_BANK_VERSION,
+  PYQ_MANUAL_CLASSIFICATIONS,
   PYQ_TAXONOMY
 } from './pyq-taxonomy.mjs';
 
@@ -22,10 +23,20 @@ const payloads = await Promise.all(
 );
 const questions = payloads.flatMap((payload) => payload.questions);
 const originalIds = new Set(questions.map((question) => question.id));
+const manualClassificationEntries = Object.entries(PYQ_MANUAL_CLASSIFICATIONS);
 
 if (questions.length !== 2388 || originalIds.size !== questions.length) {
   throw new Error(
     `Expected 2,388 unique input questions, found ${questions.length} rows and ${originalIds.size} IDs`
+  );
+}
+
+const missingManualIds = manualClassificationEntries
+  .map(([id]) => id)
+  .filter((id) => !originalIds.has(id));
+if (missingManualIds.length > 0) {
+  throw new Error(
+    `Manual PYQ classifications reference missing IDs: ${missingManualIds.join(', ')}`
   );
 }
 
@@ -102,6 +113,21 @@ await writeFile(
       classificationBasis: Object.fromEntries(
         [...basisCounts].sort(([a], [b]) => a.localeCompare(b))
       ),
+      manualCorrectionCount: manualClassificationEntries.length,
+      manualCorrections: manualClassificationEntries
+        .map(([id, correction]) => {
+          const question = classified.find((row) => row.id === id);
+          return {
+            id,
+            year: question.year,
+            set: question.set,
+            number: question.number,
+            subjectSlug: correction.subjectSlug,
+            topicSlug: correction.topicSlug,
+            reason: correction.reason
+          };
+        })
+        .sort((a, b) => a.id.localeCompare(b.id)),
       subjects: subjects.map((subject) => ({
         slug: subject.slug,
         count: subject.count,

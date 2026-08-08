@@ -196,3 +196,11 @@ F3.3 says the server calls `advance_reattempt(id, result)`. Doing that from the 
 **Chose**: widen only the desktop Dashboard, lead with one context-aware action, chart the trailing seven-day mistake surface, compress practice targets into one rail, and visualize the latest session as an outcome ring.
 **Rejected**: a cosmetic card reskin, adding new analytics pages, goal/streak widgets, and a dense grid of equally weighted statistics.
 **Reason**: the Dashboard should answer “what should I do next?” before it explains movement, while keeping due work, weekly focus, and session evidence visibly distinct.
+
+## 2026-08-08 — One canonical topic for every bundled PYQ
+
+**Chose**: classify all 2,388 audited questions into the user-provided GATE CSE subject/topic taxonomy, retain the noisy source tags only as provenance, split C Programming from Data Structure, and expose mixed-subject, complete-subject, and single-topic practice scopes. Keep the 17 obsolete Software Engineering questions in a clearly named Other / Optional archive rather than forcing them into an unrelated current topic.
+
+**Rejected**: filtering directly on source tags, allowing a question to count in several practice topics, silently dropping optional-era questions, or inventing a misleading match for those questions.
+
+**Reason**: one deterministic canonical topic makes counts, progress, Journal analysis, and repeatable practice sets stable while preserving every audited question exactly once.

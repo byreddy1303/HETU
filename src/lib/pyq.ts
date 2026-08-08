@@ -1,4 +1,4 @@
-import type { MarkDecision, Outcome, PyqSelectedAnswer } from '@/types';
+import type { MarkDecision, Outcome, PyqSelectedAnswer, PyqSessionConfig } from '@/types';
 import { DEFAULT_TARGET_TIME_SEC, MARKS_TARGET_SEC } from '@/lib/constants';
 import { urlToDataUrl } from '@/lib/image';
 
@@ -12,6 +12,7 @@ export interface PyqSubjectManifest {
   label: string;
   count: number;
   file: string;
+  topics: { slug: string; label: string; count: number }[];
 }
 
 export interface PyqManifest {
@@ -36,6 +37,8 @@ export interface PyqQuestion {
   paperLabel: string;
   subject: string;
   subjectSlug: string;
+  topic: string;
+  topicSlug: string;
   subtopics: string[];
   marks: 1 | 2 | null;
   type: PyqQuestionType;
@@ -79,6 +82,16 @@ export async function loadPyqQuestions(subjects: PyqSubjectManifest[]): Promise<
     })
   );
   return payloads.flatMap((payload) => payload.questions);
+}
+
+export function matchesPyqTopicScope(
+  question: PyqQuestion,
+  config: Pick<PyqSessionConfig, 'subjectSlug' | 'topicSlug'>
+): boolean {
+  const subjectMatches =
+    config.subjectSlug === 'all' || question.subjectSlug === config.subjectSlug;
+  const topicSlug = config.topicSlug ?? 'all';
+  return subjectMatches && (topicSlug === 'all' || question.topicSlug === topicSlug);
 }
 
 function normalizedChoices(value: PyqSelectedAnswer): string[] {

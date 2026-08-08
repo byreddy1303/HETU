@@ -14,6 +14,7 @@ import type { PyqQuestion } from '@/lib/pyq';
 
 const mockConfig: PyqSessionConfig = {
   subjectSlug: 'algorithms',
+  topicSlug: 'shortest-path',
   fromYear: 2020,
   toYear: 2026,
   type: 'all',
@@ -29,6 +30,8 @@ const question: PyqQuestion = {
   paperLabel: 'GATE CSE 2026 Set 1',
   subject: 'Algorithms',
   subjectSlug: 'algorithms',
+  topic: 'Shortest Path',
+  topicSlug: 'shortest-path',
   subtopics: ['Shortest paths'],
   marks: 1,
   type: 'MCQ',
@@ -142,6 +145,8 @@ describe('PYQ session logic and determinism', () => {
     expect(attempt.question_snapshot).toMatchObject({
       question_uid: question.id,
       number: '1',
+      topic: 'Shortest Path',
+      topic_slug: 'shortest-path',
       type: 'MCQ',
       html: question.html
     });

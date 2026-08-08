@@ -16,6 +16,8 @@ const question: PyqQuestion = {
   paperLabel: 'GATE CSE 2026 Set 1',
   subject: 'Discrete Mathematics',
   subjectSlug: 'discrete-mathematics',
+  topic: 'Propositional Logic',
+  topicSlug: 'propositional-logic',
   subtopics: ['Logic'],
   marks: 1,
   type: 'MCQ',
@@ -43,7 +45,8 @@ const manifest: PyqManifest = {
       slug: 'discrete-mathematics',
       label: 'Discrete Mathematics',
       count: 1,
-      file: '/pyq/discrete-mathematics.json'
+      file: '/pyq/discrete-mathematics.json',
+      topics: [{ slug: 'propositional-logic', label: 'Propositional Logic', count: 1 }]
     }
   ]
 };

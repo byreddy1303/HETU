@@ -182,6 +182,8 @@ export interface PyqQuestionSnapshot {
   paper_label: string;
   subject: string;
   subject_slug: string;
+  topic: string;
+  topic_slug: string;
   subtopics: string[];
   marks: 1 | 2 | null;
   type: string;
@@ -194,6 +196,8 @@ export interface PyqQuestionSnapshot {
 
 export interface PyqSessionConfig {
   subjectSlug: string;
+  /** Missing only on legacy sets created before topic-wise practice shipped. */
+  topicSlug?: string;
   fromYear: number;
   toYear: number;
   type: 'all' | 'MCQ' | 'MSQ' | 'NAT';

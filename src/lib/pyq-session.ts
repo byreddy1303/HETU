@@ -132,6 +132,8 @@ export function pyqQuestionSnapshot(question: PyqQuestion): PyqQuestionSnapshot 
     paper_label: question.paperLabel,
     subject: question.subject,
     subject_slug: question.subjectSlug,
+    topic: question.topic,
+    topic_slug: question.topicSlug,
     subtopics: [...question.subtopics],
     marks: question.marks,
     type: question.type,

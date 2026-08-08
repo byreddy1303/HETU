@@ -1,6 +1,6 @@
 # AIR Journal — Project Status and Handoff
 
-Last updated: 2026-08-02 (Asia/Kolkata)
+Last updated: 2026-08-08 (Asia/Kolkata)
 
 This is the first file to read when resuming work. Update it after every release,
 deployment, or material change of plan. `BUILD.md` remains the product specification;
@@ -10,13 +10,28 @@ must happen next.
 ## Current repository state
 
 - Branch: `main`
-- Last pushed product-code baseline: `539f75b` (`S42: add Telegram today command`)
-- The local branch now also contains the Dashboard and Analysis refinement commits
-  `c546bca` through `f1b4577`, plus this handoff correction. These changes have
-  not been pushed, deployed, or rebuilt into an Android artifact by this work.
+- Last pushed product-code baseline: `4c4cc3f` (`fix(ui): refine dark theme and add quick toggle`)
+- The local branch also contains the topic-wise PYQ work described below. It has not been
+  deployed or rebuilt into an Android artifact by this work.
 - The pushed baseline includes the Android/mobile production work, automatic installed-PWA
   release activation, and the Telegram `/today` command recorded in its history.
-- The working tree is clean at this handoff.
+
+## Topic-wise PYQ practice — implemented locally, release pending
+
+- All 2,388 bundled question IDs now have exactly one canonical subject and topic.
+- The bank is split into 14 subject archives and 96 selectable topic buckets; raw source
+  tags remain attached only for provenance.
+- PYQ setup supports one topic, an entire subject, or all mixed subjects without changing
+  answer concealment, immutable attempt receipts, or offline behavior.
+- C Programming and Data Structure are separate archives. Seventeen obsolete Software
+  Engineering questions remain visible under Other / Optional rather than being mislabeled.
+- `public/pyq/taxonomy-audit.json` records 2,388 unique questions and zero unclassified rows.
+- Responsive local-browser QA passed at mobile and desktop sizes; a selected Sorting set
+  opened with a merge-sort question and produced no browser console errors.
+
+Release follow-up: push the topic commit, deploy the web build, and rebuild Android only if
+shipping a new bundled-shell artifact; the live-shell Android release will receive the web
+content after the production deployment.
 
 ### Current verification
 

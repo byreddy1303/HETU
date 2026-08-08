@@ -46,6 +46,7 @@ import {
   resolvePyqJournalImageUrl,
   loadPyqManifest,
   loadPyqQuestions,
+  matchesPyqTopicScope,
   pyqPlainText,
   pyqSourceRef,
   type PyqManifest,
@@ -87,7 +88,7 @@ function sourceDraft(question: PyqQuestion, screenshot: string | null): SourceDr
     : null;
   return {
     subject: question.subject,
-    subtopic: question.subtopics[0] ?? null,
+    subtopic: question.topic,
     kind: 'pyq',
     year: question.year,
     set: question.set === 1 || question.set === 2 ? question.set : null,
@@ -130,12 +131,18 @@ function PracticeSetup({
   const seenBySubject = useMemo(() => {
     const ids = new Map<string, Set<string>>();
     for (const attempt of attempts) {
-      const subjectIds = ids.get(attempt.subject) ?? new Set<string>();
+      const subjectSlug =
+        attempt.question_snapshot?.subject_slug ??
+        manifest.subjects.find((subject) => subject.label === attempt.subject)?.slug ??
+        attempt.subject;
+      const subjectIds = ids.get(subjectSlug) ?? new Set<string>();
       subjectIds.add(attempt.question_uid);
-      ids.set(attempt.subject, subjectIds);
+      ids.set(subjectSlug, subjectIds);
     }
     return new Map([...ids].map(([subject, subjectIds]) => [subject, subjectIds.size]));
-  }, [attempts]);
+  }, [attempts, manifest.subjects]);
+  const selectedSubject = manifest.subjects.find((subject) => subject.slug === config.subjectSlug);
+  const selectedTopicSlug = config.topicSlug ?? 'all';
   return (
     <div className="flex flex-col gap-4">
       <PageHeader
@@ -188,7 +195,9 @@ function PracticeSetup({
               <Select
                 className="mt-1"
                 value={config.subjectSlug}
-                onChange={(event) => setConfig({ ...config, subjectSlug: event.target.value })}
+                onChange={(event) =>
+                  setConfig({ ...config, subjectSlug: event.target.value, topicSlug: 'all' })
+                }
               >
                 <option value="all">Mixed subjects — {manifest.questionCount} questions</option>
                 {manifest.subjects.map((subject) => (
@@ -201,7 +210,7 @@ function PracticeSetup({
             <div className="hidden grid-cols-1 gap-2 sm:grid sm:grid-cols-2 xl:grid-cols-3">
               <button
                 type="button"
-                onClick={() => setConfig({ ...config, subjectSlug: 'all' })}
+                onClick={() => setConfig({ ...config, subjectSlug: 'all', topicSlug: 'all' })}
                 aria-pressed={config.subjectSlug === 'all'}
                 className={cn(
                   'group flex min-h-[78px] items-start gap-3 rounded border p-3 text-left transition-all',
@@ -222,12 +231,14 @@ function PracticeSetup({
               </button>
               {manifest.subjects.map((subject) => {
                 const active = config.subjectSlug === subject.slug;
-                const seen = seenBySubject.get(subject.label) ?? 0;
+                const seen = seenBySubject.get(subject.slug) ?? 0;
                 return (
                   <button
                     key={subject.slug}
                     type="button"
-                    onClick={() => setConfig({ ...config, subjectSlug: subject.slug })}
+                    onClick={() =>
+                      setConfig({ ...config, subjectSlug: subject.slug, topicSlug: 'all' })
+                    }
                     aria-pressed={active}
                     className={cn(
                       'group flex min-h-[78px] items-start gap-3 rounded border p-3 text-left transition-all',
@@ -252,6 +263,65 @@ function PracticeSetup({
                 );
               })}
             </div>
+            {selectedSubject && selectedSubject.topics.length > 1 && (
+              <div className="mt-4 border-t border-border pt-4">
+                <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
+                  <div>
+                    <p className="u-label">Choose a topic</p>
+                    <p className="mt-1 text-[13px] text-text-muted">
+                      Pick one topic, or keep the complete subject selected.
+                    </p>
+                  </div>
+                  <span className="u-num text-[11px] text-text-faint">
+                    {selectedSubject.topics.length} topics
+                  </span>
+                </div>
+                <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-3">
+                  <button
+                    type="button"
+                    onClick={() => setConfig({ ...config, topicSlug: 'all' })}
+                    aria-pressed={selectedTopicSlug === 'all'}
+                    className={cn(
+                      'flex min-h-[56px] items-center justify-between gap-3 rounded border px-3 py-2 text-left transition-all',
+                      selectedTopicSlug === 'all'
+                        ? 'border-accent/50 bg-accent-faint shadow-sm'
+                        : 'border-border bg-bg-raised hover:border-border-hover'
+                    )}
+                  >
+                    <span className="text-[13px] font-semibold text-text">
+                      All {selectedSubject.label}
+                    </span>
+                    <span className="u-num shrink-0 text-[11px] text-text-faint">
+                      {selectedSubject.count}
+                    </span>
+                  </button>
+                  {selectedSubject.topics.map((topic) => {
+                    const active = selectedTopicSlug === topic.slug;
+                    return (
+                      <button
+                        key={topic.slug}
+                        type="button"
+                        onClick={() => setConfig({ ...config, topicSlug: topic.slug })}
+                        aria-pressed={active}
+                        className={cn(
+                          'flex min-h-[56px] items-center justify-between gap-3 rounded border px-3 py-2 text-left transition-all',
+                          active
+                            ? 'border-accent/50 bg-accent-faint shadow-sm'
+                            : 'border-border bg-bg-raised hover:border-border-hover'
+                        )}
+                      >
+                        <span className="text-[13px] font-medium leading-snug text-text">
+                          {topic.label}
+                        </span>
+                        <span className="u-num shrink-0 text-[11px] text-text-faint">
+                          {topic.count}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="flex flex-col bg-bg-overlay/25 p-4">
@@ -572,6 +642,7 @@ export default function Pyq() {
   const [manifestError, setManifestError] = useState<string | null>(null);
   const [config, setConfig] = useState<AttemptConfig>({
     subjectSlug: 'discrete-mathematics',
+    topicSlug: 'all',
     fromYear: 2002,
     toYear: 2026,
     type: 'all',
@@ -721,7 +792,7 @@ export default function Pyq() {
       )
         .filter((attempt) => attempt.pyq_session_id === session.id)
         .sort((a, b) => a.attempted_at.localeCompare(b.attempted_at));
-      setConfig(session.config);
+      setConfig({ ...session.config, topicSlug: session.config.topicSlug ?? 'all' });
       setQuestions(rows);
       setIndex(nextIndex);
       setCompleted(savedAttempts);
@@ -766,6 +837,7 @@ export default function Pyq() {
       const high = Math.max(config.fromYear, config.toYear);
       let rows = (await loadPyqQuestions(subjects)).filter(
         (question) =>
+          matchesPyqTopicScope(question, config) &&
           question.year >= low &&
           question.year <= high &&
           (config.type === 'all' || question.type === config.type)
@@ -831,7 +903,7 @@ export default function Pyq() {
       user_id: userId!,
       session_id: null,
       subject: current.subject,
-      subtopic: current.subtopics[0] ?? null,
+      subtopic: current.topic,
       source_year: current.year,
       source_ref: pyqSourceRef(current),
       question_text: pyqPlainText(current.html),

@@ -5,6 +5,7 @@ import {
   evaluatePyqAnswer,
   formatPyqAnswer,
   inferPyqDirectOutcome,
+  matchesPyqTopicScope,
   pyqAnswerValueForLog,
   resolvePyqJournalImageUrl,
   type PyqManifest,
@@ -20,6 +21,8 @@ function question(overrides: Partial<PyqQuestion> = {}): PyqQuestion {
     paperLabel: 'GATE CSE 2026 Set 1',
     subject: 'Algorithms',
     subjectSlug: 'algorithms',
+    topic: 'Shortest Path',
+    topicSlug: 'shortest-path',
     subtopics: [],
     marks: 1,
     type: 'MCQ',
@@ -68,15 +71,10 @@ describe('PYQ answer evaluation', () => {
 
   it('returns the official answer value for PYQ attempt logs', () => {
     expect(pyqAnswerValueForLog(question({ answer: 'b' }))).toBe('b');
-    expect(pyqAnswerValueForLog(question({ type: 'MSQ', answer: ['D', 'B'] }))).toEqual([
-      'B',
-      'D'
-    ]);
+    expect(pyqAnswerValueForLog(question({ type: 'MSQ', answer: ['D', 'B'] }))).toEqual(['B', 'D']);
     expect(pyqAnswerValueForLog(question({ type: 'NAT', answer: 0.5 }))).toBe(0.5);
     expect(
-      pyqAnswerValueForLog(
-        question({ type: 'AMBIGUOUS', answer: null, answerStatus: 'ambiguous' })
-      )
+      pyqAnswerValueForLog(question({ type: 'AMBIGUOUS', answer: null, answerStatus: 'ambiguous' }))
     ).toBeNull();
   });
 
@@ -86,9 +84,11 @@ describe('PYQ answer evaluation', () => {
       'base64'
     );
     const blob = new Blob([png], { type: 'image/png' });
-    const fetchSpy = vi.spyOn(globalThis, 'fetch').mockResolvedValue(
-      new Response(blob, { status: 200, headers: { 'Content-Type': 'image/png' } })
-    );
+    const fetchSpy = vi
+      .spyOn(globalThis, 'fetch')
+      .mockResolvedValue(
+        new Response(blob, { status: 200, headers: { 'Content-Type': 'image/png' } })
+      );
     const html = '<p>See figure</p><img src="/pyq/images/test.png" alt="fig" />';
     const dataUrl = await resolvePyqJournalImageUrl(html);
     expect(dataUrl).toMatch(/^data:image\/png;base64,/);
@@ -103,6 +103,40 @@ describe('PYQ answer evaluation', () => {
   });
 });
 
+describe('PYQ practice scope', () => {
+  const algorithm = question();
+  const sorting = question({ id: 'go:sorting', topic: 'Sorting', topicSlug: 'sorting' });
+  const database = question({
+    id: 'go:database',
+    subject: 'Database Management System',
+    subjectSlug: 'databases',
+    topic: 'SQL',
+    topicSlug: 'sql'
+  });
+
+  it('supports mixed subjects, a complete subject, and one topic', () => {
+    expect(
+      [algorithm, sorting, database].filter((row) =>
+        matchesPyqTopicScope(row, { subjectSlug: 'all', topicSlug: 'all' })
+      )
+    ).toHaveLength(3);
+    expect(
+      [algorithm, sorting, database].filter((row) =>
+        matchesPyqTopicScope(row, { subjectSlug: 'algorithms', topicSlug: 'all' })
+      )
+    ).toEqual([algorithm, sorting]);
+    expect(
+      [algorithm, sorting, database].filter((row) =>
+        matchesPyqTopicScope(row, { subjectSlug: 'algorithms', topicSlug: 'sorting' })
+      )
+    ).toEqual([sorting]);
+  });
+
+  it('treats a legacy set without a topic as a complete subject', () => {
+    expect(matchesPyqTopicScope(algorithm, { subjectSlug: 'algorithms' })).toBe(true);
+  });
+});
+
 describe('bundled PYQ bank integrity', () => {
   it('contains all 2,388 audited questions and no broken local image references', () => {
     const publicRoot = path.resolve(process.cwd(), 'public');
@@ -112,31 +146,51 @@ describe('bundled PYQ bank integrity', () => {
     const ids = new Set<string>();
     const statuses: Record<string, number> = {};
     let questionCount = 0;
+    let topicCount = 0;
 
     expect(manifest.questionCount).toBe(2388);
     expect(manifest.years).toHaveLength(25);
-    expect(manifest.subjects).toHaveLength(13);
+    expect(manifest.subjects).toHaveLength(14);
 
     for (const subject of manifest.subjects) {
       const payload = JSON.parse(readFileSync(path.join(publicRoot, subject.file), 'utf8')) as {
         questions: PyqQuestion[];
       };
       expect(payload.questions).toHaveLength(subject.count);
+      const expectedTopicCounts = new Map(subject.topics.map((topic) => [topic.slug, topic.count]));
+      const actualTopicCounts = new Map<string, number>();
+      topicCount += subject.topics.length;
       for (const row of payload.questions) {
         questionCount += 1;
         expect(ids.has(row.id), `duplicate ${row.id}`).toBe(false);
         ids.add(row.id);
         expect(row.html.trim().length, `empty question ${row.id}`).toBeGreaterThan(0);
+        expect(row.subjectSlug).toBe(subject.slug);
+        expect(row.subject).toBe(subject.label);
+        expect(expectedTopicCounts.has(row.topicSlug), `unknown topic ${row.topicSlug}`).toBe(true);
+        expect(row.topic.trim().length, `empty topic ${row.id}`).toBeGreaterThan(0);
+        actualTopicCounts.set(row.topicSlug, (actualTopicCounts.get(row.topicSlug) ?? 0) + 1);
         statuses[row.answerStatus] = (statuses[row.answerStatus] ?? 0) + 1;
         for (const match of row.html.matchAll(/src="([^"]+)"/g)) {
           if (!match[1].startsWith('/pyq/')) continue;
           expect(existsSync(path.join(publicRoot, match[1])), `missing ${match[1]}`).toBe(true);
         }
       }
+      expect(actualTopicCounts).toEqual(expectedTopicCounts);
     }
 
     expect(questionCount).toBe(manifest.questionCount);
+    expect(topicCount).toBe(96);
     expect(statuses).toEqual(manifest.answerStatuses);
     expect(statuses).toEqual({ available: 2382, ambiguous: 2, 'marks-to-all': 1, unsupported: 3 });
+    expect(
+      JSON.parse(readFileSync(path.join(publicRoot, 'pyq', 'taxonomy-audit.json'), 'utf8'))
+    ).toMatchObject({
+      questionCount: 2388,
+      uniqueQuestionCount: 2388,
+      unclassifiedCount: 0,
+      subjectCount: 14,
+      topicCount: 96
+    });
   });
 });

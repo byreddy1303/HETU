@@ -1,126 +1,21 @@
 {
   "bankVersion": "gate-cse-2002-2026-v2-topics",
-  "generatedAt": "2026-08-08T07:35:09.557Z",
-  "source": "GateQA public question bank, sourced from GATE Overflow; three audited records restored from original papers",
-  "sourceUrl": "https://gateqa.in",
-  "firstYear": 2002,
-  "lastYear": 2026,
   "questionCount": 2388,
-  "imageCount": 325,
-  "answerStatuses": {
-    "available": 2382,
-    "ambiguous": 2,
-    "marks-to-all": 1,
-    "unsupported": 3
+  "uniqueQuestionCount": 2388,
+  "unclassifiedCount": 0,
+  "subjectCount": 14,
+  "topicCount": 96,
+  "classificationBasis": {
+    "broad-topic-tag": 11,
+    "content-rule": 96,
+    "ordered-topic-tag": 1796,
+    "subject-rule": 267,
+    "topic-rule": 218
   },
-  "years": [
-    {
-      "year": 2026,
-      "count": 130
-    },
-    {
-      "year": 2025,
-      "count": 130
-    },
-    {
-      "year": 2024,
-      "count": 130
-    },
-    {
-      "year": 2023,
-      "count": 65
-    },
-    {
-      "year": 2022,
-      "count": 65
-    },
-    {
-      "year": 2021,
-      "count": 130
-    },
-    {
-      "year": 2020,
-      "count": 65
-    },
-    {
-      "year": 2019,
-      "count": 65
-    },
-    {
-      "year": 2018,
-      "count": 65
-    },
-    {
-      "year": 2017,
-      "count": 130
-    },
-    {
-      "year": 2016,
-      "count": 130
-    },
-    {
-      "year": 2015,
-      "count": 195
-    },
-    {
-      "year": 2014,
-      "count": 195
-    },
-    {
-      "year": 2013,
-      "count": 65
-    },
-    {
-      "year": 2012,
-      "count": 65
-    },
-    {
-      "year": 2011,
-      "count": 65
-    },
-    {
-      "year": 2010,
-      "count": 65
-    },
-    {
-      "year": 2009,
-      "count": 60
-    },
-    {
-      "year": 2008,
-      "count": 85
-    },
-    {
-      "year": 2007,
-      "count": 85
-    },
-    {
-      "year": 2006,
-      "count": 85
-    },
-    {
-      "year": 2005,
-      "count": 90
-    },
-    {
-      "year": 2004,
-      "count": 90
-    },
-    {
-      "year": 2003,
-      "count": 90
-    },
-    {
-      "year": 2002,
-      "count": 48
-    }
-  ],
   "subjects": [
     {
       "slug": "general-aptitude",
-      "label": "General Aptitude",
       "count": 267,
-      "file": "/pyq/subjects/general-aptitude.json",
       "topics": [
         {
           "slug": "general-aptitude",
@@ -131,9 +26,7 @@
     },
     {
       "slug": "discrete-mathematics",
-      "label": "Discrete Mathematics",
       "count": 288,
-      "file": "/pyq/subjects/discrete-mathematics.json",
       "topics": [
         {
           "slug": "propositional-logic",
@@ -194,9 +87,7 @@
     },
     {
       "slug": "engineering-mathematics",
-      "label": "Engineering Mathematics",
       "count": 114,
-      "file": "/pyq/subjects/engineering-mathematics.json",
       "topics": [
         {
           "slug": "linear-algebra",
@@ -217,9 +108,7 @@
     },
     {
       "slug": "digital-logic",
-      "label": "Digital Logic",
       "count": 172,
-      "file": "/pyq/subjects/digital-logic.json",
       "topics": [
         {
           "slug": "number-system",
@@ -245,9 +134,7 @@
     },
     {
       "slug": "coa",
-      "label": "Computer Organization",
       "count": 165,
-      "file": "/pyq/subjects/coa.json",
       "topics": [
         {
           "slug": "machine-instruction",
@@ -298,9 +185,7 @@
     },
     {
       "slug": "c-programming",
-      "label": "C Programming",
       "count": 97,
-      "file": "/pyq/subjects/c-programming.json",
       "topics": [
         {
           "slug": "arithmetic-operation",
@@ -331,9 +216,7 @@
     },
     {
       "slug": "data-structure",
-      "label": "Data Structure",
       "count": 161,
-      "file": "/pyq/subjects/data-structure.json",
       "topics": [
         {
           "slug": "array",
@@ -399,9 +282,7 @@
     },
     {
       "slug": "algorithms",
-      "label": "Algorithms",
       "count": 234,
-      "file": "/pyq/subjects/algorithms.json",
       "topics": [
         {
           "slug": "asymptotic-notation",
@@ -452,9 +333,7 @@
     },
     {
       "slug": "theory-of-computation",
-      "label": "Theory of Computation",
       "count": 182,
-      "file": "/pyq/subjects/theory-of-computation.json",
       "topics": [
         {
           "slug": "regular-expression",
@@ -510,9 +389,7 @@
     },
     {
       "slug": "compiler-design",
-      "label": "Compiler Design",
       "count": 145,
-      "file": "/pyq/subjects/compiler-design.json",
       "topics": [
         {
           "slug": "lexical-analysis",
@@ -548,9 +425,7 @@
     },
     {
       "slug": "operating-systems",
-      "label": "Operating Systems",
       "count": 198,
-      "file": "/pyq/subjects/operating-systems.json",
       "topics": [
         {
           "slug": "process",
@@ -601,9 +476,7 @@
     },
     {
       "slug": "databases",
-      "label": "Database Management System",
       "count": 159,
-      "file": "/pyq/subjects/databases.json",
       "topics": [
         {
           "slug": "er-model",
@@ -654,9 +527,7 @@
     },
     {
       "slug": "computer-networks",
-      "label": "Computer Network",
       "count": 189,
-      "file": "/pyq/subjects/computer-networks.json",
       "topics": [
         {
           "slug": "osi-layer",
@@ -697,9 +568,7 @@
     },
     {
       "slug": "other-optional",
-      "label": "Other / Optional",
       "count": 17,
-      "file": "/pyq/subjects/other-optional.json",
       "topics": [
         {
           "slug": "software-engineering",

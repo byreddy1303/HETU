@@ -5,6 +5,7 @@ import { mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import process from 'node:process';
 import { fileURLToPath } from 'node:url';
+import { classifyPyqQuestion, PYQ_TAXONOMY } from './pyq-taxonomy.mjs';
 
 const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(SCRIPT_DIR, '..');
@@ -16,7 +17,7 @@ const SEARCH_URL = `${SOURCE_ROOT}/question-search-index.json`;
 const ANSWERS_URL = `${SOURCE_ROOT}/data/answers/answers_by_question_uid_v1.json`;
 const UNSUPPORTED_URL = `${SOURCE_ROOT}/data/answers/unsupported_question_uids_v1.json`;
 const USER_AGENT = 'AIR Journal personal PYQ archive builder/1.0';
-const BANK_VERSION = 'gate-cse-2002-2026-v1';
+const BANK_VERSION = 'gate-cse-2002-2026-v2-topics';
 const IMAGE_OVERRIDES = new Map([
   [
     'http://gatecse.in/w/images/c/c5/2012_12.png',
@@ -43,22 +44,6 @@ const SUBJECTS = {
   'Computer Networks': ['computer-networks', 'Computer Networks'],
   'Other / Optional': ['other-optional', 'Other / Optional']
 };
-
-const SUBJECT_ORDER = [
-  'general-aptitude',
-  'discrete-mathematics',
-  'engineering-mathematics',
-  'digital-logic',
-  'coa',
-  'programming-and-ds',
-  'algorithms',
-  'theory-of-computation',
-  'compiler-design',
-  'operating-systems',
-  'databases',
-  'computer-networks',
-  'other-optional'
-];
 
 const MANUAL_QUESTIONS = [
   {
@@ -341,6 +326,13 @@ async function main() {
       answerSource: { kind: 'manual-audit' }
     }))
   );
+  for (const question of questions) {
+    const classification = classifyPyqQuestion(question);
+    question.subject = classification.subject;
+    question.subjectSlug = classification.subjectSlug;
+    question.topic = classification.topic;
+    question.topicSlug = classification.topicSlug;
+  }
   questions.sort(stableQuestionSort);
 
   if (questions.length !== 2388) {
@@ -367,13 +359,19 @@ async function main() {
     grouped.get(question.subjectSlug).push(question);
   }
 
-  const subjects = SUBJECT_ORDER.filter((slug) => grouped.has(slug)).map((slug) => {
-    const rows = grouped.get(slug);
+  const subjects = PYQ_TAXONOMY.filter((subject) => grouped.has(subject.slug)).map((subject) => {
+    const rows = grouped.get(subject.slug);
     return {
-      slug,
-      label: rows[0].subject,
+      slug: subject.slug,
+      label: subject.label,
       count: rows.length,
-      file: `/pyq/subjects/${slug}.json`
+      file: `/pyq/subjects/${subject.slug}.json`,
+      topics: subject.topics
+        .map((topic) => ({
+          ...topic,
+          count: rows.filter((question) => question.topicSlug === topic.slug).length
+        }))
+        .filter((topic) => topic.count > 0)
     };
   });
   await mkdir(path.join(OUTPUT, 'subjects'), { recursive: true });

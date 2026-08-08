@@ -28,6 +28,18 @@ At the user's direction, the existing Dashboard and Analysis surfaces prioritize
 
 Weekly Review distinguishes volume from miss rate and only marks steps complete when their data is actually saved. Heatmap filters support open-ended and preset ranges, sort by concentration, and disclose attempt denominators and relative color semantics. Readiness remains a confidence signal rather than a prediction: sparse evidence tempers component scores, subject rows disclose evidence confidence, historical comparisons require comparable weekly snapshots, and rank/score simulation stays collapsed and explicitly experimental. Calibration combines MARK and 50/50 committed answers, counts skips as zero in policy expected value, separates answered-only expected value, and withholds recommendations until four committed answers exist.
 
+## PYQ coverage amendment — 2026-08-08
+
+At the user's direction, the bundled bank begins at 1990 instead of 2002. CSE historical
+coverage uses the larger audited archive for each sparse pre-2002 paper year and keeps one
+canonical copy of every retained question. Digital Logic additionally includes GATE ECE and
+GATE EE questions only when their primary concept fits the existing Number System, Boolean
+Algebra, Combinational Circuit, or Sequential Circuit topics. Converter, memory, logic-family,
+microprocessor, communications-code, transistor-level electronics, and other wrapper questions
+outside that project syllabus are excluded explicitly. All imported source diagrams remain
+local-first, and questions without a safely gradeable key remain visible but unsupported rather
+than receiving an invented answer.
+
 ---
 
 ## 0. Autonomy directives (for Claude executing this doc)

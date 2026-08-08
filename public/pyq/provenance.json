@@ -1,5 +1,5 @@
 {
-  "bankVersion": "gate-cse-2002-2026-v1",
+  "bankVersion": "gate-1990-2026-v5-ece-ee-digital-logic",
   "sources": [
     {
       "name": "GateQA",
@@ -13,12 +13,19 @@
     },
     {
       "name": "Official GATE archive",
-      "url": "https://gate2026.iitg.ac.in/download.html",
+      "url": "https://www.iitk.ac.in/gate/download.php",
       "role": "Paper-count audit and original wording verification"
+    },
+    {
+      "name": "ExamSIDE",
+      "url": "https://questions.examside.com",
+      "role": "ECE and EE Digital Logic question text, diagrams, metadata, and answer keys"
     }
   ],
   "notes": [
     "Question content is bundled for the private, invite-only AIR Journal practice experience.",
+    "ECE and EE supplements are restricted to the project topics: Number System, Boolean Algebra, Combinational Circuit, and Sequential Circuit.",
+    "Converter, semiconductor-memory, logic-family, microprocessor, communication-code, and architecture questions are excluded.",
     "AMBIGUOUS, MARKS_TO_ALL, and UNSUPPORTED records are never assigned an invented answer."
   ]
 }

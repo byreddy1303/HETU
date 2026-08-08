@@ -147,8 +147,8 @@ function PracticeSetup({
   return (
     <div className="flex flex-col gap-4">
       <PageHeader
-        title="GATE CSE PYQs"
-        description="Every question from 2002–2026, separated by subject and ready to solve here."
+        title="GATE PYQs"
+        description="CSE papers from 1990–2026, plus in-syllabus ECE and EE Digital Logic."
         showMobileMark={false}
       />
 
@@ -624,7 +624,7 @@ function ResultPanel({ question, attempt }: { question: PyqQuestion; attempt: Py
             rel="noreferrer"
             className="mt-3 inline-flex items-center gap-1 text-[12px] font-medium text-accent hover:underline"
           >
-            Open source discussion <ExternalLink size={12} />
+            Open source question <ExternalLink size={12} />
           </a>
         </div>
       </div>
@@ -644,7 +644,7 @@ export default function Pyq() {
   const [config, setConfig] = useState<AttemptConfig>({
     subjectSlug: 'discrete-mathematics',
     topicSlug: 'all',
-    fromYear: 2002,
+    fromYear: 1990,
     toYear: 2026,
     type: 'all',
     order: 'unseen',
@@ -1123,10 +1123,10 @@ export default function Pyq() {
   if (!manifest) {
     return (
       <div className="flex flex-col gap-4">
-        <PageHeader title="GATE CSE PYQs" description="Opening the local question bank…" />
+        <PageHeader title="GATE PYQs" description="Opening the local question bank…" />
         <Card>
           <CardBody className="py-12 text-center text-[13px] text-text-faint">
-            {manifestError ?? 'Checking 25 years of papers…'}
+            {manifestError ?? 'Checking 37 years of papers…'}
           </CardBody>
         </Card>
       </div>

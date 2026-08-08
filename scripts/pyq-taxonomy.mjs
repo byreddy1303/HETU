@@ -1,4 +1,4 @@
-export const PYQ_BANK_VERSION = 'gate-cse-2002-2026-v4-topic-audit';
+export const PYQ_BANK_VERSION = 'gate-1990-2026-v5-ece-ee-digital-logic';
 
 export const PYQ_TAXONOMY = [
   {
@@ -1895,6 +1895,13 @@ export function classifyPyqQuestion(question) {
   const manual = PYQ_MANUAL_CLASSIFICATIONS[question.id];
   if (manual) {
     return result(manual.subjectSlug, manual.topicSlug, 'manual-content-audit');
+  }
+  if (question.classificationHint) {
+    return result(
+      question.classificationHint.subjectSlug,
+      question.classificationHint.topicSlug,
+      'audited-source-scope'
+    );
   }
   const ctx = contextFor(question);
   const subjectSlug = inferredSubjectSlug(question, ctx);

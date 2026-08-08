@@ -38,30 +38,34 @@ must happen next.
 Release follow-up: rebuild Android only if shipping a new bundled-shell artifact; the
 live-shell Android release receives the deployed web content automatically.
 
-## Topic taxonomy content audit — implemented locally, release pending
+## PYQ 1990+ and ECE/EE Digital Logic expansion — implemented locally, release pending
 
-- Reviewed all 2,388 bundled PYQs against the canonical 14-subject, 95-topic taxonomy.
-- Corrected and locked 160 question-level classifications where source cross-links,
-  wrapper concepts, or broad fallbacks had selected the wrong primary topic.
-- Regenerated the bank as `gate-cse-2002-2026-v4-topic-audit`; all 2,388 IDs remain
-  unique and present exactly once.
+- Expanded CSE coverage to 1990–2026, selecting the larger audited source for sparse
+  pre-2002 paper years instead of stacking duplicate archives.
+- Added 259 in-syllabus Digital Logic questions from GATE ECE and GATE EE: 189 ECE and
+  70 EE, restricted to Number System, Boolean Algebra, Combinational Circuit, and
+  Sequential Circuit.
+- Explicitly excluded converter, memory, logic-family, microprocessor, Hamming-code,
+  architecture, transistor-level, Markov-chain, and analog-wrapper questions.
+- Regenerated the bank as `gate-1990-2026-v5-ece-ee-digital-logic`; all 3,170 IDs are
+  unique and present exactly once across 14 subjects and 95 topics.
 - Added `npm run pyq:audit` to verify every stored classification against the canonical
   classifier, all subject/topic totals, all manual corrections, and every bank version.
-- The corrected local archive contains 23 Software Engineering questions under
-  Other / Optional; six had previously escaped into unrelated subjects.
+- The bank contains 3,076 gradeable answers; 94 special-status questions retain honest
+  ambiguous, marks-to-all, or unsupported states without fabricated keys.
 
 ### Local audit verification
 
-Run on 2026-08-08 before the audit commit:
+Run on 2026-08-08 before the expansion commit:
 
-- `npm run pyq:audit` — passed; 2,388 unique questions, 160 locked corrections
+- `npm run pyq:audit` — passed; 3,170 unique questions, 160 locked corrections
 - `npm run typecheck` — passed
 - `npm run lint` — passed with zero warnings
 - `npm run test` — 25 files passed, 140 tests passed
 - `npm run build` — passed; PWA precache generated successfully
 
 Release follow-up: deploy the regenerated static PYQ bank and app assets before calling
-the content audit live. No Supabase schema change is required.
+the expanded coverage live. No Supabase schema change is required.
 
 ### Current verification
 

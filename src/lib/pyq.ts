@@ -2,7 +2,7 @@ import type { MarkDecision, Outcome, PyqSelectedAnswer, PyqSessionConfig } from 
 import { DEFAULT_TARGET_TIME_SEC, MARKS_TARGET_SEC } from '@/lib/constants';
 import { urlToDataUrl } from '@/lib/image';
 
-export const PYQ_BANK_QUESTION_COUNT = 2388;
+export const PYQ_BANK_QUESTION_COUNT = 3170;
 
 export type PyqQuestionType = 'MCQ' | 'MSQ' | 'NAT' | 'AMBIGUOUS' | 'MARKS_TO_ALL' | 'UNSUPPORTED';
 export type PyqAnswerStatus = 'available' | 'ambiguous' | 'marks-to-all' | 'unsupported';
@@ -41,6 +41,7 @@ export interface PyqQuestion {
   paperLabel: string;
   subject: string;
   subjectSlug: string;
+  classificationHint?: { subjectSlug: string; topicSlug: string };
   topic: string;
   topicSlug: string;
   subtopics: string[];
@@ -233,8 +234,7 @@ export function pyqQuestionSnapshotDataUrl(question: PyqQuestion): string {
 
 export function pyqSourceRef(question: PyqQuestion): string {
   return [
-    'GATE PYQ',
-    `${question.year}${question.set ? ` Set ${question.set}` : ''}`,
+    question.paperLabel,
     `Q ${question.number}`,
     question.type
   ].join(' · ');

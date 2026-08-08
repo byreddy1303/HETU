@@ -166,7 +166,7 @@ describe('PYQ manifest compatibility', () => {
 });
 
 describe('bundled PYQ bank integrity', () => {
-  it('contains all 2,388 audited questions and no broken local image references', () => {
+  it('contains all 3,170 audited questions and no broken local image references', () => {
     const publicRoot = path.resolve(process.cwd(), 'public');
     const manifest = JSON.parse(
       readFileSync(path.join(publicRoot, 'pyq', 'manifest.json'), 'utf8')
@@ -177,8 +177,10 @@ describe('bundled PYQ bank integrity', () => {
     let questionCount = 0;
     let topicCount = 0;
 
-    expect(manifest.questionCount).toBe(2388);
-    expect(manifest.years).toHaveLength(25);
+    expect(manifest.questionCount).toBe(3170);
+    expect(manifest.firstYear).toBe(1990);
+    expect(manifest.lastYear).toBe(2026);
+    expect(manifest.years).toHaveLength(37);
     expect(manifest.subjects).toHaveLength(14);
 
     for (const subject of manifest.subjects) {
@@ -212,7 +214,12 @@ describe('bundled PYQ bank integrity', () => {
     expect(questionCount).toBe(manifest.questionCount);
     expect(topicCount).toBe(95);
     expect(statuses).toEqual(manifest.answerStatuses);
-    expect(statuses).toEqual({ available: 2382, ambiguous: 2, 'marks-to-all': 1, unsupported: 3 });
+    expect(statuses).toEqual({
+      available: 3076,
+      ambiguous: 3,
+      'marks-to-all': 1,
+      unsupported: 90
+    });
     const taxonomyAudit = JSON.parse(
       readFileSync(path.join(publicRoot, 'pyq', 'taxonomy-audit.json'), 'utf8')
     ) as {
@@ -220,14 +227,75 @@ describe('bundled PYQ bank integrity', () => {
       classificationBasis: Record<string, number>;
     };
     expect(taxonomyAudit).toMatchObject({
-      questionCount: 2388,
-      uniqueQuestionCount: 2388,
+      questionCount: 3170,
+      uniqueQuestionCount: 3170,
       unclassifiedCount: 0,
       subjectCount: 14,
       topicCount: 95,
       manualCorrectionCount: 160
     });
     expect(taxonomyAudit.classificationBasis['manual-content-audit']).toBe(160);
+
+    const allQuestions = [...questionsById.values()];
+    const cseCounts1990To2001 = Object.fromEntries(
+      Array.from({ length: 12 }, (_, index) => {
+        const year = 1990 + index;
+        return [
+          year,
+          allQuestions.filter(
+            (row) => row.year === year && row.paperLabel.startsWith('GATE CSE ')
+          ).length
+        ];
+      })
+    );
+    expect(cseCounts1990To2001).toEqual({
+      1990: 36,
+      1991: 21,
+      1992: 24,
+      1993: 36,
+      1994: 36,
+      1995: 51,
+      1996: 56,
+      1997: 57,
+      1998: 57,
+      1999: 51,
+      2000: 44,
+      2001: 54
+    });
+
+    const supplementalDigital = allQuestions.filter(
+      (row) => row.id.startsWith('es:gate-ece:') || row.id.startsWith('es:gate-ee:')
+    );
+    expect(supplementalDigital).toHaveLength(259);
+    expect(supplementalDigital.filter((row) => row.id.startsWith('es:gate-ece:'))).toHaveLength(
+      189
+    );
+    expect(supplementalDigital.filter((row) => row.id.startsWith('es:gate-ee:'))).toHaveLength(70);
+    expect(new Set(supplementalDigital.map((row) => row.topicSlug))).toEqual(
+      new Set([
+        'number-system',
+        'boolean-algebra',
+        'combinational-circuit',
+        'sequential-circuit'
+      ])
+    );
+    expect(supplementalDigital.every((row) => row.subjectSlug === 'digital-logic')).toBe(true);
+    for (const excludedId of [
+      'es:gate-ece:mh0zaha8',
+      'es:gate-ece:lxkz4pq9',
+      'es:gate-ece:mnakhyvy',
+      'es:gate-ece:QYG4jGkiGfUvKy9W7Xjf7629jjz1ohdez',
+      'es:gate-ece:589SRjK3y40rjla4',
+      'es:gate-ece:9vcls9FnVvUYretl',
+      'es:gate-ee:Ba8wZaECHPY46VeW',
+      'es:gate-ece:8pDeC2YQ1GPFFeDM',
+      'es:gate-ee:1nULlooFrc4T22Ll',
+      'es:gate-ece:ReSpUjRF5CcMjWyG',
+      'es:gate-ece:41qJJSu5hHotIUnLHGjf769xsjziqwe4s',
+      'es:gate-ece:1l056k4ej'
+    ]) {
+      expect(questionsById.has(excludedId), `out-of-scope question ${excludedId}`).toBe(false);
+    }
 
     const representativeCorrections = [
       ['go:422818', 'discrete-mathematics', 'graph-theory'],

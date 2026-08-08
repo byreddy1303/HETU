@@ -220,3 +220,11 @@ F3.3 says the server calls `advance_reattempt(id, result)`. Doing that from the 
 **Rejected**: trusting source-tag order as semantic truth, duplicating mixed questions across several topics, or silently accepting broad fallback topics when the question text identifies a more precise canonical topic.
 
 **Reason**: topic-wise practice is only useful when every question has one stable, defensible home and future bank regeneration cannot reintroduce known errors.
+
+## 2026-08-08 — Historical CSE coverage and syllabus-bounded ECE/EE Digital Logic
+
+**Chose**: extend the local-first CSE bank to 1990, use the larger audited archive for each sparse pre-2002 year, and supplement Digital Logic with ECE and EE questions only when the primary concept maps to the project's four existing Digital Logic topics. Preserve descriptive questions with unsupported grading and store every diagram locally.
+
+**Rejected**: treating one token question as complete year coverage, combining two older CSE archives without de-duplication, importing entire electronics folders, or admitting ADC/DAC, semiconductor memory, logic families, microprocessors, communications coding, transistor-level electronics, and analog wrappers because a source site placed them under a broad digital heading.
+
+**Reason**: the user asked for 1990-to-current coverage and ECE/EE Digital Logic without leaving the current syllabus; explicit source selection, content-level classification hints, and a locked exclusion audit keep practice broad in years but narrow in concepts.

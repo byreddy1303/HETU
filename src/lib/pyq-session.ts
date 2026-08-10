@@ -84,6 +84,8 @@ export function pyqPracticeSessionRow(
     insight: existing?.insight ?? null,
     sadhana_done: existing?.sadhana_done ?? false,
     interruptions_count: existing?.interruptions_count ?? 0,
+    planner_date: existing?.planner_date ?? null,
+    planner_block_id: existing?.planner_block_id ?? null,
     created_at: session.started_at
   };
 }

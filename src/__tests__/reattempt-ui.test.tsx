@@ -5,6 +5,7 @@ import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import type { QuestionRow, ReattemptRow } from '@/types';
 import { db } from '@/lib/db';
 import Dashboard from '@/pages/Dashboard';
+import DoNow from '@/pages/DoNow';
 import Reattempts from '@/pages/Reattempts';
 
 const USER = '00000000-0000-4000-8000-000000000001';
@@ -131,15 +132,19 @@ describe('re-attempt solve flow', () => {
       <MemoryRouter initialEntries={['/']}>
         <Routes>
           <Route path="/" element={<Dashboard />} />
+          <Route path="/today" element={<DoNow />} />
           <Route path="/reattempts" element={<Reattempts />} />
         </Routes>
       </MemoryRouter>
     );
 
     const dueButton = await screen.findByRole('button', {
-      name: 'Due now: 1. Start review'
+      name: '1 ordered actions. Open Do now'
     });
     await user.click(dueButton);
+
+    expect(await screen.findAllByText('Clear due re-attempts')).toHaveLength(2);
+    await user.click(screen.getByRole('button', { name: 'Start next' }));
 
     expect(await screen.findByText(QUESTION)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Start timer' })).toBeInTheDocument();

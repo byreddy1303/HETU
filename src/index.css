@@ -273,6 +273,40 @@
   }
 }
 
+@media print {
+  body:has(.revision-pack) {
+    background: white !important;
+    color: black !important;
+  }
+
+  body:has(.revision-pack) aside,
+  body:has(.revision-pack) header,
+  body:has(.revision-pack) nav,
+  body:has(.revision-pack) .revision-pack-actions,
+  body:has(.revision-pack) .u-contextual-tip,
+  body:has(.revision-pack) .u-daily-quote {
+    display: none !important;
+  }
+
+  body:has(.revision-pack) main,
+  body:has(.revision-pack) .u-shell-content {
+    padding: 0 !important;
+    margin: 0 !important;
+    max-width: none !important;
+  }
+
+  .revision-pack {
+    display: block !important;
+  }
+
+  .revision-print-block {
+    break-inside: avoid;
+    margin-bottom: 12px;
+    border-color: #aaa !important;
+    box-shadow: none !important;
+  }
+}
+
 @layer components {
   /* Micro-labels: the ledger's compact annotations. */
   .u-label {

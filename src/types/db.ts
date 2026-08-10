@@ -13,6 +13,15 @@ export type SyncStatus = 'synced' | 'pending' | 'error';
 export type PyqSessionStatus = 'active' | 'completed' | 'abandoned';
 export type SessionKind = 'focused' | 'log' | 'pyq';
 export type PyqAttemptAnswerStatus = 'available' | 'ambiguous' | 'marks-to-all' | 'unsupported';
+export type PyqHistoryFilter =
+  | 'all'
+  | 'unseen'
+  | 'incorrect'
+  | 'guessed'
+  | 'slow'
+  | 'skipped'
+  | 'unanalyzed'
+  | 'repeated';
 
 export interface UserRow {
   id: string;
@@ -84,6 +93,9 @@ export interface SessionRow {
   insight: string | null;
   sadhana_done: boolean;
   interruptions_count: number;
+  /** Planner linkage is absent on sessions created outside a planned block. */
+  planner_date?: string | null;
+  planner_block_id?: string | null;
   created_at: string;
 }
 
@@ -97,6 +109,8 @@ export interface QuestionRow {
   source_ref: string | null;
   question_text: string | null;
   answer_text: string | null;
+  /** One-sentence reflection used by the mobile quick-capture flow. */
+  capture_note?: string | null;
   image_url: string | null;
   time_spent_sec: number;
   target_time_sec: number;
@@ -208,6 +222,42 @@ export interface PyqSessionConfig {
   type: 'all' | 'MCQ' | 'MSQ' | 'NAT';
   order: 'unseen' | 'random' | 'newest' | 'oldest';
   count: '5' | '10' | '25' | '50' | 'all';
+  /** Missing on practice sets saved before history filters shipped. */
+  history?: PyqHistoryFilter;
+}
+
+export interface MockSubjectScore {
+  subject: string;
+  marks: number;
+}
+
+export interface MockTestRow {
+  id: string;
+  user_id: string;
+  name: string;
+  test_date: string;
+  total_marks: number;
+  max_marks: number;
+  total_questions: number;
+  correct: number;
+  wrong: number;
+  skipped: number;
+  duration_min: number;
+  subject_scores: MockSubjectScore[];
+  mistakes: string[];
+  planner_date: string | null;
+  planner_block_id: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface TopicProgressRow {
+  id: string;
+  user_id: string;
+  subject: string;
+  topic: string;
+  completed_at: string;
+  updated_at: string;
 }
 
 /** A durable PYQ practice set. `current_index` points at the next unsolved row. */

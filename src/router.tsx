@@ -13,6 +13,10 @@ const ResetPin = lazyWithRetry(() => import('@/pages/ResetPin'));
 const RequestAccess = lazyWithRetry(() => import('@/pages/RequestAccess'));
 const NotFound = lazyWithRetry(() => import('@/pages/NotFound'));
 const Dashboard = lazyWithRetry(() => import('@/pages/Dashboard'));
+const DoNow = lazyWithRetry(() => import('@/pages/DoNow'));
+const QuickCapture = lazyWithRetry(() => import('@/pages/QuickCapture'));
+const Mocks = lazyWithRetry(() => import('@/pages/Mocks'));
+const RevisionPack = lazyWithRetry(() => import('@/pages/RevisionPack'));
 const SessionNew = lazyWithRetry(() => import('@/pages/SessionNew'));
 const SessionActive = lazyWithRetry(() => import('@/pages/SessionActive'));
 const SessionReview = lazyWithRetry(() => import('@/pages/SessionReview'));
@@ -65,6 +69,10 @@ export const router = createBrowserRouter([
     errorElement: <RootErrorBoundary />,
     children: [
       { index: true, element: <Dashboard /> },
+      { path: 'today', element: <DoNow /> },
+      { path: 'capture', element: <QuickCapture /> },
+      { path: 'mocks', element: <Mocks /> },
+      { path: 'revision-pack', element: <RevisionPack /> },
       { path: 'session/new', element: <SessionNew /> },
       { path: 'session/:id/solve', element: <SessionActive /> },
       { path: 'session/:id/review', element: <SessionReview /> },

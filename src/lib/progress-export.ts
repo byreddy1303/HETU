@@ -5,7 +5,6 @@ import { loadAllDayPlans, type DayPlan } from '@/lib/planner-storage';
 import { computeReadiness } from '@/lib/readiness';
 import { SUBTOPICS_BY_SUBJECT } from '@/lib/subtopics';
 import {
-  selectCompletionsForUser,
   topicProgressId,
   useTopicProgressStore,
   type TopicCompletions
@@ -13,6 +12,7 @@ import {
 import type {
   FormulaRow,
   InterruptionLogRow,
+  MockTestRow,
   PatternRow,
   PyqAttemptRow,
   PyqSessionRow,
@@ -50,6 +50,7 @@ export interface ProgressData {
   interruptionLogs: InterruptionLogRow[];
   pyqSessions: PyqSessionRow[];
   pyqAttempts: PyqAttemptRow[];
+  mocks: MockTestRow[];
   plannerDays: DayPlan[];
   topicCompletions: TopicCompletions;
 }
@@ -129,6 +130,26 @@ export function buildProgressReport(
             data.plannerDays.length
         ),
     '%'
+  );
+
+  const mocksByDate = [...data.mocks].sort((a, b) => a.test_date.localeCompare(b.test_date));
+  const latestMock = mocksByDate.at(-1);
+  const bestMockPercent = data.mocks.length
+    ? Math.max(...data.mocks.map((row) => percentage(row.total_marks, row.max_marks)))
+    : 0;
+  add('Mock tests', 'Mocks recorded', data.mocks.length, 'count');
+  add('Mock tests', 'Best score', bestMockPercent, '%');
+  add(
+    'Mock tests',
+    'Latest score',
+    latestMock ? percentage(latestMock.total_marks, latestMock.max_marks) : 0,
+    '%'
+  );
+  add(
+    'Mock tests',
+    'Questions attempted',
+    data.mocks.reduce((sum, row) => sum + row.correct + row.wrong, 0),
+    'count'
   );
 
   const pyqJudged = data.pyqAttempts.filter((row) => row.mark_correct !== null);
@@ -319,7 +340,9 @@ export async function collectProgressReport(
     weeklyReviews,
     interruptionLogs,
     pyqSessions,
-    pyqAttempts
+    pyqAttempts,
+    mocks,
+    topicProgressRows
   ] = await Promise.all([
     db.sessions.where('user_id').equals(userId).toArray(),
     db.questions.where('user_id').equals(userId).toArray(),
@@ -330,8 +353,16 @@ export async function collectProgressReport(
     db.weekly_reviews.where('user_id').equals(userId).toArray(),
     db.interruption_logs.where('user_id').equals(userId).toArray(),
     db.pyq_sessions.where('user_id').equals(userId).toArray(),
-    db.pyq_attempts.where('user_id').equals(userId).toArray()
+    db.pyq_attempts.where('user_id').equals(userId).toArray(),
+    db.mock_tests.where('user_id').equals(userId).toArray(),
+    db.topic_progress.where('user_id').equals(userId).toArray()
   ]);
+
+  const localCompletions = useTopicProgressStore.getState().byUser[userId] ?? {};
+  const topicCompletions: TopicCompletions = { ...localCompletions };
+  for (const row of topicProgressRows) {
+    topicCompletions[topicProgressId(row.subject, row.topic)] = row.completed_at;
+  }
 
   return buildProgressReport(
     {
@@ -345,11 +376,9 @@ export async function collectProgressReport(
       interruptionLogs,
       pyqSessions,
       pyqAttempts,
+      mocks,
       plannerDays: loadAllDayPlans(userId),
-      topicCompletions: selectCompletionsForUser(
-        useTopicProgressStore.getState().byUser,
-        userId
-      )
+      topicCompletions
     },
     { learnerName }
   );

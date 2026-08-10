@@ -89,6 +89,14 @@ export interface StudySession {
   priority: Priority;
   target: string;
   resource?: string;
+  /** Execution facts are filled by linked Hetu sessions or an explicit completion. */
+  execution?: {
+    sessionId: string | null;
+    startedAt: string | null;
+    completedAt: string | null;
+    actualMin: number | null;
+    manual: boolean;
+  };
 }
 
 export interface DayStructure {

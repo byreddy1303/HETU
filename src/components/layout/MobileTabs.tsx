@@ -20,7 +20,10 @@ import {
   X,
   Zap,
   LibraryBig,
-  ListChecks
+  ListChecks,
+  Camera,
+  ClipboardList,
+  FileCheck2
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { useLiveQuery } from 'dexie-react-hooks';
@@ -76,8 +79,12 @@ const TABS: Tab[] = [
 ];
 
 const MORE_ITEMS = [
+  { to: '/today', label: 'Do now', icon: ClipboardList },
+  { to: '/capture', label: 'Quick capture', icon: Camera },
   { to: '/syllabus', label: 'Syllabus tracker', icon: ListChecks },
   { to: '/pyq', label: 'PYQ practice', icon: LibraryBig },
+  { to: '/mocks', label: 'Mock tests', icon: FileCheck2 },
+  { to: '/revision-pack', label: 'Revision pack', icon: ClipboardList },
   { to: '/patterns', label: 'Patterns', icon: Shapes },
   { to: '/reattempts', label: 'Re-attempts', icon: RotateCcw },
   { to: '/weekly-review', label: 'Weekly review', icon: CalendarCheck },

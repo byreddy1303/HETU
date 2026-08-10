@@ -17,14 +17,20 @@ async function enterLocalSandbox(page: Page) {
     await expect(dismiss).toBeHidden();
   }
 
-  await expect(page.getByText('Due now', { exact: true })).toBeVisible();
+  await expect(page.getByRole('button', { name: /ordered actions\. Open Do now/ })).toBeVisible();
   await expect(page.getByText('Mistake surface', { exact: true })).toBeVisible();
 }
 
-test('Dashboard and every Analysis route render in the local-first shell', async ({ page }) => {
+test('Dashboard and practical study-loop routes render in the local-first shell', async ({ page }) => {
   await enterLocalSandbox(page);
 
   const routes = [
+    ['/today', 'Do now'],
+    ['/capture', 'Quick capture'],
+    ['/pyq', 'GATE PYQs'],
+    ['/mocks', 'Mock tests'],
+    ['/revision-pack', 'Revision pack'],
+    ['/syllabus', 'Syllabus tracker'],
     ['/patterns', 'Patterns'],
     ['/reattempts', 'Re-attempts'],
     ['/weekly-review', 'Weekly review'],
@@ -42,5 +48,5 @@ test('Dashboard and every Analysis route render in the local-first shell', async
   await page.goto('/');
   await expect(page.getByRole('link', { name: 'Home', exact: true })).toBeVisible();
   await expect(page.getByRole('button', { name: 'More', exact: true })).toBeVisible();
-  await expect(page.getByText('Due now', { exact: true })).toBeVisible();
+  await expect(page.getByRole('button', { name: /ordered actions\. Open Do now/ })).toBeVisible();
 });

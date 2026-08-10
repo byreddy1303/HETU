@@ -32,6 +32,8 @@ import {
   reconcilePyqPracticeSessions
 } from '@/lib/sessions';
 import { PYQ_BANK_QUESTION_COUNT } from '@/lib/pyq';
+import { buildDoNowQueue } from '@/lib/do-now';
+import { loadDayPlan } from '@/lib/planner-storage';
 import {
   dueTodayCount,
   latestSession,
@@ -121,6 +123,11 @@ export default function Dashboard() {
     [userId],
     []
   );
+  const formulas = useLiveQuery(
+    async () => (userId ? db.formulas.where('user_id').equals(userId).toArray() : []),
+    [userId],
+    []
+  );
 
   useEffect(() => {
     if (!userId) return;
@@ -157,6 +164,18 @@ export default function Dashboard() {
   );
 
   const due = useMemo(() => dueTodayCount(reattempts, today), [reattempts, today]);
+  const doNowQueue = useMemo(
+    () =>
+      buildDoNowQueue({
+        today,
+        reattempts,
+        questions,
+        pyqAttempts,
+        formulas,
+        plan: loadDayPlan(today)
+      }),
+    [formulas, pyqAttempts, questions, reattempts, today]
+  );
   const overdue = useMemo(
     () => reattempts.filter((row) => row.stage !== 'MASTERED' && row.scheduled_date < today).length,
     [reattempts, today]
@@ -214,13 +233,14 @@ export default function Dashboard() {
         daysLeft={daysLeft}
         due={due}
         overdue={overdue}
+        queueCount={doNowQueue.length}
         action={
           <Button
             variant="primary"
-            onClick={() => navigate(due > 0 ? '/reattempts?open=first' : '/session/new')}
-            aria-label={due > 0 ? `Due now: ${due}. Start review` : 'Start a new focused session'}
+            onClick={() => navigate('/today')}
+            aria-label={`${doNowQueue.length} ordered actions. Open Do now`}
           >
-            {due > 0 ? 'Start review' : 'Start focused session'}
+            Open Do now
             <ArrowRight size={15} strokeWidth={2} aria-hidden />
           </Button>
         }

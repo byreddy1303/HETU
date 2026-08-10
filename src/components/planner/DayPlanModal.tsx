@@ -29,6 +29,8 @@ interface Props {
   onChange: (next: DayPlan) => void;
   onClose: () => void;
   onDelete: () => void;
+  onStartBlock?: (block: StudySession) => void;
+  onCompleteBlock?: (block: StudySession) => void;
 }
 
 /** A plan is considered "filled" once any user-authored field has content.
@@ -41,7 +43,15 @@ function planHasContent(plan: DayPlan): boolean {
   return false;
 }
 
-export default function DayPlanModal({ date, plan, onChange, onClose, onDelete }: Props) {
+export default function DayPlanModal({
+  date,
+  plan,
+  onChange,
+  onClose,
+  onDelete,
+  onStartBlock = () => undefined,
+  onCompleteBlock = () => undefined
+}: Props) {
   const [confirmDelete, setConfirmDelete] = useState(false);
   // Empty plan → open straight into edit mode. Filled plan → view first,
   // then Edit → Save round-trip. Since every edit is auto-persisted, Save
@@ -162,7 +172,11 @@ export default function DayPlanModal({ date, plan, onChange, onClose, onDelete }
 
         <div className="planner-day-body flex flex-col gap-3 p-4 sm:p-5">
           {mode === 'view' ? (
-            <ViewMode plan={plan} />
+            <ViewMode
+              plan={plan}
+              onStartBlock={onStartBlock}
+              onCompleteBlock={onCompleteBlock}
+            />
           ) : (
             <>
               <Section
@@ -229,7 +243,15 @@ export default function DayPlanModal({ date, plan, onChange, onClose, onDelete }
 
 /* ------------------------------- view mode ------------------------------- */
 
-function ViewMode({ plan }: { plan: DayPlan }) {
+function ViewMode({
+  plan,
+  onStartBlock,
+  onCompleteBlock
+}: {
+  plan: DayPlan;
+  onStartBlock: (block: StudySession) => void;
+  onCompleteBlock: (block: StudySession) => void;
+}) {
   const totalMin = plan.sessions.reduce((s, x) => s + (x.durationMin || 0), 0);
   const endMoodLabel = plan.review.endMood
     ? END_MOODS.find((m) => m.value === plan.review.endMood)?.label
@@ -280,6 +302,23 @@ function ViewMode({ plan }: { plan: DayPlan }) {
                       {s.resource}
                     </p>
                   )}
+                  <div className="mt-2 flex flex-wrap items-center gap-2">
+                    {s.execution?.completedAt ? (
+                      <span className="inline-flex items-center gap-1.5 text-[11.5px] font-medium text-success">
+                        <Check size={13} /> Completed
+                        {s.execution.actualMin ? ` · ${s.execution.actualMin}m actual` : ''}
+                      </span>
+                    ) : (
+                      <>
+                        <Button size="sm" variant="primary" onClick={() => onStartBlock(s)}>
+                          {s.execution?.startedAt ? 'Resume work' : 'Start work'}
+                        </Button>
+                        <Button size="sm" variant="ghost" onClick={() => onCompleteBlock(s)}>
+                          Mark complete
+                        </Button>
+                      </>
+                    )}
+                  </div>
                 </li>
               );
             })}

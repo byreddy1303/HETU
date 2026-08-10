@@ -9,6 +9,7 @@
 //   - planner insights derived from saved study sessions
 //   - modal edits persist immediately on every field change
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { AnimatePresence } from 'motion/react';
 import PageHeader from '@/components/layout/PageHeader';
 import Calendar from '@/components/planner/Calendar';
@@ -37,6 +38,13 @@ import {
 } from '@/lib/planner-storage';
 import { PLANNER_MIN_MONTH_INDEX, PLANNER_MIN_YEAR } from '@/lib/planner-constants';
 import { loadAllDayPlans } from '@/lib/planner-insights';
+import {
+  markPlannerBlockComplete,
+  markPlannerBlockStarted,
+  plannerBlockHref,
+  reconcilePlannerExecutions
+} from '@/lib/planner-execution';
+import type { StudySession } from '@/lib/planner-storage';
 
 function todayLocalISO(d: Date): string {
   const y = d.getFullYear();
@@ -51,6 +59,7 @@ async function persistCloudPlan(userId: string, plan: CloudDayPlan): Promise<str
 }
 
 export default function Planner() {
+  const navigate = useNavigate();
   const today = useMemo(() => new Date(), []);
   const todayISO = todayLocalISO(today);
   const deepLinkedDate = useMemo(() => plannerDateFromSearch(window.location.search), []);
@@ -86,6 +95,16 @@ export default function Planner() {
   const pendingCloudPlanRef = useRef<CloudDayPlan | null>(null);
   const syncErrorShownRef = useRef(false);
   const cloudLoadTokenRef = useRef(0);
+
+  useEffect(() => {
+    if (!userId) return;
+    void reconcilePlannerExecutions(userId).then((changed) => {
+      if (changed > 0) {
+        setRevision((value) => value + 1);
+        setOpenPlan((current) => (current ? loadDayPlan(current.date) ?? current : current));
+      }
+    }).catch(() => undefined);
+  }, [userId]);
 
   useEffect(() => {
     return () => {
@@ -279,6 +298,29 @@ export default function Planner() {
     pushToast('Day plan cleared.', 'neutral');
   }
 
+  function startBlock(block: StudySession) {
+    if (!selectedDate) return;
+    const saved = markPlannerBlockStarted(selectedDate, block.id);
+    if (saved) {
+      setOpenPlan(saved);
+      queuePlanSync(saved);
+      setRevision((value) => value + 1);
+    }
+    const href = plannerBlockHref(selectedDate, block);
+    closeModal();
+    navigate(href);
+  }
+
+  function completeBlock(block: StudySession) {
+    if (!selectedDate) return;
+    const saved = markPlannerBlockComplete(selectedDate, block.id, block.durationMin);
+    if (saved) {
+      setOpenPlan(saved);
+      queuePlanSync(saved);
+      setRevision((value) => value + 1);
+    }
+  }
+
   return (
     <div className="flex flex-col gap-4">
       <PageHeader
@@ -307,6 +349,8 @@ export default function Planner() {
             onChange={onChangePlan}
             onClose={closeModal}
             onDelete={onDeletePlan}
+            onStartBlock={startBlock}
+            onCompleteBlock={completeBlock}
           />
         )}
       </AnimatePresence>

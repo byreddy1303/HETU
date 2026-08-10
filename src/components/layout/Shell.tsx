@@ -29,7 +29,9 @@ export default function Shell() {
       <main className="native-shell-main pb-[calc(4.5rem+var(--safe-bottom))] md:pb-0 md:pl-[220px]">
         <div
           className={`u-shell-content mx-auto w-full px-4 pb-6 pt-16 md:py-8 ${
-            pathname === '/' || pathname === '/syllabus' ? 'max-w-[1120px]' : 'max-w-[800px]'
+            ['/', '/today', '/syllabus', '/mocks', '/revision-pack'].includes(pathname)
+              ? 'max-w-[1120px]'
+              : 'max-w-[800px]'
           }`}
         >
           <motion.div

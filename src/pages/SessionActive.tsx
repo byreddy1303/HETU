@@ -28,6 +28,7 @@ import TagFlow, { type TagDraft } from '@/components/tags/TagFlow';
 import { Button } from '@/components/ui/Button';
 import { Kbd } from '@/components/ui/Kbd';
 import { Empty } from '@/components/ui/Empty';
+import { updatePlannerBlockExecution } from '@/lib/planner-execution';
 
 async function reconcilePattern(userId: string, subject: string, name: string) {
   const count = await db.questions.where('[user_id+pattern_name]').equals([userId, name]).count();
@@ -102,6 +103,15 @@ export default function SessionActive() {
       Math.round((Date.now() - parseISO(session.created_at).getTime()) / 60_000)
     );
     await writeLocal('sessions', { ...session, actual_duration_min: mins });
+    if (session.planner_date && session.planner_block_id) {
+      updatePlannerBlockExecution(session.planner_date, session.planner_block_id, {
+        sessionId: session.id,
+        startedAt: session.created_at,
+        completedAt: nowISO(),
+        actualMin: mins,
+        manual: false
+      });
+    }
     store.end();
     navigate(`/session/${id}/review`);
   }

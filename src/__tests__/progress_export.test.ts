@@ -101,6 +101,7 @@ function progressData(): ProgressData {
     interruptionLogs: [],
     pyqSessions: [],
     pyqAttempts: [],
+    mocks: [],
     plannerDays: [plannerDay],
     topicCompletions: {
       [topicProgressId('Databases', 'ER Model')]: '2026-08-01T12:00:00.000Z'
@@ -140,6 +141,7 @@ describe('progress report export', () => {
         'Sessions',
         'Journal',
         'Planner',
+        'Mock tests',
         'PYQ practice',
         'Patterns',
         'Re-attempts',

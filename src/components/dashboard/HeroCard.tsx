@@ -18,6 +18,7 @@ export interface HeroCardProps {
   daysLeft: number;
   due: number;
   overdue: number;
+  queueCount: number;
   action: ReactNode;
 }
 
@@ -28,13 +29,15 @@ export default function HeroCard({
   daysLeft,
   due,
   overdue,
+  queueCount,
   action
 }: HeroCardProps) {
   const firstName = (name ?? '').split(/\s+/)[0] ?? '';
-  const title = due > 0 ? 'Close the loop before adding more.' : 'The queue is clear. Build fresh evidence.';
+  const title =
+    queueCount > 0 ? 'Your work is ordered. Start at the top.' : 'The queue is clear. Build fresh evidence.';
   const description =
-    due > 0
-      ? 'A re-attempt is clean only when the answer and method both hold without help.'
+    queueCount > 0
+      ? 'Due review, unfinished analysis, recall work, and today’s plan are in one list.'
       : 'Start one focused block. Today’s tags will decide what deserves another look.';
 
   return (
@@ -71,15 +74,15 @@ export default function HeroCard({
 
         <div className="relative flex min-h-[156px] flex-col justify-between border-t border-border bg-accent-faint/45 px-4 py-4 sm:min-h-[168px] sm:px-6 sm:py-6 md:border-l md:border-t-0">
           <div className="flex items-center justify-between gap-3">
-            <span className="u-label text-accent">Due now</span>
+            <span className="u-label text-accent">Do now</span>
             <CalendarDays size={17} strokeWidth={1.75} className="text-accent" aria-hidden />
           </div>
           <div>
             <span className="u-num block text-[52px] font-semibold leading-none tracking-[-0.06em] text-text sm:text-[58px]">
-              {due}
+              {queueCount}
             </span>
             <p className="mt-2 text-[12px] leading-relaxed text-text-muted">
-              {due > 0 ? 'ready for retrieval' : 'nothing waiting'}
+              {queueCount > 0 ? 'ordered actions' : 'nothing waiting'}
             </p>
           </div>
           <p className="mt-5 border-t border-border/80 pt-3 text-[11px] text-text-faint">

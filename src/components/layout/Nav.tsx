@@ -17,7 +17,10 @@ import {
   Settings,
   LogOut,
   LibraryBig,
-  ListChecks
+  ListChecks,
+  Camera,
+  ClipboardList,
+  FileCheck2
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { useLiveQuery } from 'dexie-react-hooks';
@@ -66,6 +69,7 @@ const BUDDY_ITEM: Item = {
 
 const ANALYSIS: Item[] = [
   { to: '/pyq', label: 'PYQ practice', icon: LibraryBig, active: 'bg-accent-faint text-accent' },
+  { to: '/mocks', label: 'Mock tests', icon: FileCheck2, active: 'bg-ink-teal/10 text-ink-teal' },
   { to: '/patterns', label: 'Patterns', icon: Shapes, active: 'bg-ink-violet/10 text-ink-violet' },
   {
     to: '/reattempts',
@@ -95,6 +99,12 @@ const ANALYSIS: Item[] = [
 ];
 
 const LEARN: Item[] = [
+  {
+    to: '/revision-pack',
+    label: 'Revision pack',
+    icon: ClipboardList,
+    active: 'bg-ink-marigold/10 text-ink-marigold'
+  },
   {
     to: '/syllabus',
     label: 'Syllabus tracker',
@@ -163,6 +173,8 @@ export default function Nav() {
   }, [storedSessionId]);
   const main: Item[] = [
     { to: '/', label: 'Dashboard', icon: Gauge, active: 'bg-accent-faint text-accent' },
+    { to: '/today', label: 'Do now', icon: ClipboardList, active: 'bg-accent-faint text-accent' },
+    { to: '/capture', label: 'Quick capture', icon: Camera, active: 'bg-ink-rose/10 text-ink-rose' },
     LOG_ITEM,
     liveSessionId
       ? {

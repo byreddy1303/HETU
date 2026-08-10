@@ -13,7 +13,9 @@ import type {
   WeeklyReviewRow,
   InterruptionLogRow,
   PyqSessionRow,
-  PyqAttemptRow
+  PyqAttemptRow,
+  MockTestRow,
+  TopicProgressRow
 } from '@/types';
 
 export type LocalSession = Local<SessionRow>;
@@ -26,6 +28,8 @@ export type LocalWeeklyReview = Local<WeeklyReviewRow>;
 export type LocalInterruptionLog = Local<InterruptionLogRow>;
 export type LocalPyqSession = Local<PyqSessionRow>;
 export type LocalPyqAttempt = Local<PyqAttemptRow>;
+export type LocalMockTest = Local<MockTestRow>;
+export type LocalTopicProgress = Local<TopicProgressRow>;
 
 interface MetaRow {
   key: string;
@@ -43,6 +47,8 @@ class AirDB extends Dexie {
   interruption_logs!: Table<LocalInterruptionLog, string>;
   pyq_sessions!: Table<LocalPyqSession, string>;
   pyq_attempts!: Table<LocalPyqAttempt, string>;
+  mock_tests!: Table<LocalMockTest, string>;
+  topic_progress!: Table<LocalTopicProgress, string>;
   meta!: Table<MetaRow, string>;
 
   constructor() {
@@ -117,6 +123,30 @@ class AirDB extends Dexie {
       triangulate_logs: 'id, user_id, created_at, sync_status',
       meta: 'key'
     });
+    this.version(5).stores({
+      sessions:
+        'id, user_id, date, created_at, sync_status, planner_date, planner_block_id, [user_id+date], [user_id+created_at], [user_id+planner_date]',
+      questions:
+        'id, user_id, session_id, subject, outcome, pattern_name, created_at, sync_status, [user_id+created_at], [user_id+pattern_name]',
+      patterns: 'id, user_id, name, subject, count, sync_status, [user_id+name]',
+      reattempts:
+        'id, user_id, question_id, scheduled_date, stage, sync_status, [user_id+scheduled_date]',
+      formulas: 'id, user_id, next_review, sync_status, [user_id+next_review]',
+      trigger_phrases: 'id, user_id, sync_status',
+      weekly_reviews: 'id, user_id, week_start, sync_status, [user_id+week_start]',
+      interruption_logs: 'id, user_id, session_id, sync_status',
+      pyq_sessions:
+        'id, user_id, status, updated_at, sync_status, [user_id+status], [user_id+updated_at]',
+      pyq_attempts:
+        'id, user_id, pyq_session_id, question_uid, subject, year, attempted_at, sync_status, [user_id+question_uid], [user_id+subject], [user_id+attempted_at], [pyq_session_id+question_uid]',
+      mock_tests: 'id, user_id, test_date, updated_at, sync_status, [user_id+test_date]',
+      topic_progress:
+        'id, user_id, subject, topic, updated_at, sync_status, [user_id+subject], [user_id+subject+topic]',
+      doubt_sessions: 'id, user_id, created_at, sync_status',
+      variations: 'id, user_id, parent_question_id, sync_status',
+      triangulate_logs: 'id, user_id, created_at, sync_status',
+      meta: 'key'
+    });
   }
 }
 
@@ -133,7 +163,9 @@ export const SYNCED_TABLES = [
   'weekly_reviews',
   'interruption_logs',
   'pyq_sessions',
-  'pyq_attempts'
+  'pyq_attempts',
+  'mock_tests',
+  'topic_progress'
 ] as const;
 
 export type SyncedTableName = (typeof SYNCED_TABLES)[number];

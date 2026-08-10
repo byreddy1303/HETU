@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
 import {
   ArrowLeft,
@@ -17,10 +18,12 @@ import type {
   MarkDecision,
   Outcome,
   PyqAttemptRow,
+  PyqHistoryFilter,
   PyqSelectedAnswer,
   PyqSessionConfig,
   PyqSessionRow,
-  QuestionRow
+  QuestionRow,
+  SessionRow
 } from '@/types';
 import type { SourceDraft } from '@/components/tags/sourceDraft';
 import type { TagDraft } from '@/components/tags/TagFlow';
@@ -67,6 +70,8 @@ import {
 import { reconcilePyqPracticeSessions } from '@/lib/sessions';
 import { captureElementToDataUrl } from '@/lib/image';
 import { cn, plural, secondsToClock, uuid } from '@/lib/utils';
+import { filterPyqByHistory, PYQ_HISTORY_OPTIONS } from '@/lib/pyq-history';
+import { markPlannerBlockStarted } from '@/lib/planner-execution';
 
 type Order = 'unseen' | 'random' | 'newest' | 'oldest';
 type CountChoice = '5' | '10' | '25' | '50' | 'all';
@@ -393,6 +398,22 @@ function PracticeSetup({
                 </Select>
               </label>
               <label className="col-span-2 text-[12px] font-medium text-text-muted">
+                Practice history
+                <Select
+                  className="mt-1"
+                  value={config.history ?? 'all'}
+                  onChange={(event) =>
+                    setConfig({ ...config, history: event.target.value as PyqHistoryFilter })
+                  }
+                >
+                  {PYQ_HISTORY_OPTIONS.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </Select>
+              </label>
+              <label className="col-span-2 text-[12px] font-medium text-text-muted">
                 Order
                 <Select
                   className="mt-1"
@@ -643,18 +664,26 @@ function formatAttemptAnswer(value: PyqSelectedAnswer): string {
 
 export default function Pyq() {
   const { userId, profile } = useAuth();
+  const [searchParams] = useSearchParams();
   const timeZone = profile?.timezone ?? 'Asia/Kolkata';
   const [manifest, setManifest] = useState<PyqManifest | null>(null);
   const [manifestError, setManifestError] = useState<string | null>(null);
-  const [config, setConfig] = useState<AttemptConfig>({
+  const [config, setConfig] = useState<AttemptConfig>(() => ({
     subjectSlug: 'discrete-mathematics',
     topicSlug: 'all',
     fromYear: 1990,
     toYear: 2026,
     type: 'all',
     order: 'unseen',
-    count: '10'
-  });
+    count: (['5', '10', '25', '50', 'all'].includes(searchParams.get('count') ?? '')
+      ? searchParams.get('count')
+      : '10') as CountChoice,
+    history: (PYQ_HISTORY_OPTIONS.some(
+      (option) => option.value === searchParams.get('history')
+    )
+      ? searchParams.get('history')
+      : 'all') as PyqHistoryFilter
+  }));
   const [questions, setQuestions] = useState<PyqQuestion[]>([]);
   const [loading, setLoading] = useState(false);
   const [startError, setStartError] = useState<string | null>(null);
@@ -705,6 +734,11 @@ export default function Pyq() {
     [userId],
     []
   );
+  const journalQuestions = useLiveQuery(
+    async () => (userId ? db.questions.where('user_id').equals(userId).toArray() : []),
+    [userId],
+    []
+  );
 
   useEffect(() => {
     if (!userId) return;
@@ -717,7 +751,22 @@ export default function Pyq() {
       .then((value) => {
         if (!active) return;
         setManifest(value);
-        setConfig((current) => ({ ...current, fromYear: value.firstYear, toYear: value.lastYear }));
+        setConfig((current) => {
+          const requestedSubject = searchParams.get('subject');
+          const requested = requestedSubject
+            ? value.subjects.find(
+                (subject) =>
+                  subject.label.toLocaleLowerCase() === requestedSubject.toLocaleLowerCase()
+              )
+            : null;
+          return {
+            ...current,
+            subjectSlug: requested?.slug ?? current.subjectSlug,
+            topicSlug: 'all',
+            fromYear: value.firstYear,
+            toYear: value.lastYear
+          };
+        });
       })
       .catch((error: unknown) => {
         if (active)
@@ -728,7 +777,7 @@ export default function Pyq() {
     return () => {
       active = false;
     };
-  }, []);
+  }, [searchParams]);
 
   const current = questions[index] ?? null;
   const currentId = current?.id ?? null;
@@ -817,7 +866,11 @@ export default function Pyq() {
           startedAtMs: Number.isFinite(resumedAt) ? resumedAt : Date.now()
         };
       }
-      setConfig({ ...session.config, topicSlug: session.config.topicSlug ?? 'all' });
+      setConfig({
+        ...session.config,
+        topicSlug: session.config.topicSlug ?? 'all',
+        history: session.config.history ?? 'all'
+      });
       setQuestions(rows);
       setIndex(nextIndex);
       setCompleted(savedAttempts);
@@ -894,6 +947,12 @@ export default function Pyq() {
           question.year <= high &&
           (config.type === 'all' || question.type === config.type)
       );
+      rows = filterPyqByHistory(
+        rows,
+        config.history ?? 'all',
+        attempts,
+        journalQuestions
+      );
       const attemptedIds = new Set(attempts.map((attempt) => attempt.question_uid));
       if (config.order === 'random') rows = rows.slice().sort(() => Math.random() - 0.5);
       else if (config.order === 'oldest')
@@ -919,13 +978,23 @@ export default function Pyq() {
           );
       if (config.count !== 'all') rows = rows.slice(0, Number(config.count));
       if (rows.length === 0)
-        throw new Error('No questions match those filters. Widen the year or type filter.');
+        throw new Error(
+          'No questions match those filters. Widen the subject, year, type, or history filter.'
+        );
       const session = createPyqSessionRow(userId!, manifest.bankVersion, config, rows);
+      const plannerDate = searchParams.get('plannerDate');
+      const plannerBlockId = searchParams.get('plannerBlock');
+      if (plannerDate && plannerBlockId) markPlannerBlockStarted(plannerDate, plannerBlockId);
+      const canonical: SessionRow = {
+        ...pyqPracticeSessionRow(session, pyqPracticeSubject(rows), timeZone),
+        planner_date: plannerDate,
+        planner_block_id: plannerBlockId
+      };
       await writeLocalBatch([
         { name: 'pyq_sessions', row: session },
         {
           name: 'sessions',
-          row: pyqPracticeSessionRow(session, pyqPracticeSubject(rows), timeZone)
+          row: canonical
         }
       ]);
       const firstStartedAt = Date.parse(session.current_question_started_at ?? '');
@@ -941,6 +1010,45 @@ export default function Pyq() {
       setAnalyzedCount(0);
     } catch (error) {
       setStartError(error instanceof Error ? error.message : 'Could not build this practice set.');
+    } finally {
+      startingRef.current = false;
+      setLoading(false);
+    }
+  }
+
+  async function repeatCurrentSet() {
+    if (!manifest || !userId || loading || questions.length === 0 || startingRef.current) return;
+    startingRef.current = true;
+    setLoading(true);
+    setStartError(null);
+    try {
+      const activeRows = await db.pyq_sessions
+        .where('[user_id+status]')
+        .equals([userId, 'active'])
+        .toArray();
+      if (activeRows.length > 0) {
+        throw new Error('Resume or discard the unfinished PYQ set before repeating this one.');
+      }
+      const session = createPyqSessionRow(userId, manifest.bankVersion, config, questions);
+      await writeLocalBatch([
+        { name: 'pyq_sessions', row: session },
+        {
+          name: 'sessions',
+          row: pyqPracticeSessionRow(session, pyqPracticeSubject(questions), timeZone)
+        }
+      ]);
+      const firstStartedAt = Date.parse(session.current_question_started_at ?? '');
+      questionStartRef.current = {
+        questionUid: questions[0].id,
+        startedAtMs: Number.isFinite(firstStartedAt) ? firstStartedAt : Date.now()
+      };
+      setPyqSessionId(session.id);
+      setIndex(0);
+      setCompleted([]);
+      setFinished(false);
+      setAnalyzedCount(0);
+    } catch (error) {
+      setStartError(error instanceof Error ? error.message : 'Could not repeat that exact set.');
     } finally {
       startingRef.current = false;
       setLoading(false);
@@ -1267,7 +1375,10 @@ export default function Pyq() {
               .
             </p>
             <div className="mt-6 flex flex-wrap gap-2">
-              <Button variant="primary" onClick={() => void startPractice()}>
+              <Button variant="primary" onClick={() => void repeatCurrentSet()} disabled={loading}>
+                Repeat this exact set
+              </Button>
+              <Button onClick={() => void startPractice()} disabled={loading}>
                 Repeat these filters
               </Button>
               <Button onClick={exitSet}>Change filters</Button>

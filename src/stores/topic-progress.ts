@@ -2,6 +2,8 @@ import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 import { db } from '@/lib/db';
 import { currentUserId } from '@/stores/auth';
+import { deleteLocal, writeLocal } from '@/lib/sync';
+import { nowISO, uuidFromString } from '@/lib/utils';
 
 export type TopicCompletions = Record<string, string>;
 
@@ -14,6 +16,16 @@ interface TopicProgressState {
 
 export function topicProgressId(subject: string, topic: string): string {
   return `${subject}::${topic}`;
+}
+
+function splitTopicProgressId(id: string): { subject: string; topic: string } | null {
+  const divider = id.indexOf('::');
+  if (divider <= 0 || divider >= id.length - 2) return null;
+  return { subject: id.slice(0, divider), topic: id.slice(divider + 2) };
+}
+
+export function topicProgressRowId(userId: string, subject: string, topic: string): string {
+  return uuidFromString(`topic-progress:${userId}:${subject}:${topic}`);
 }
 
 export function selectCompletionsForUser(
@@ -57,8 +69,7 @@ export async function syncTopicProgressFromDb(userId?: string | null): Promise<v
   try {
     const effectiveUserId = userId || currentUserId() || 'guest';
     const store = useTopicProgressStore.getState();
-    const current = store.byUser[effectiveUserId];
-    if (current && Object.keys(current).length > 0) return;
+    const current = store.byUser[effectiveUserId] ?? {};
 
     let restored: TopicCompletions | null = null;
     const userRow = await db.meta.get(`topic_progress_${effectiveUserId}`);
@@ -72,14 +83,37 @@ export async function syncTopicProgressFromDb(userId?: string | null): Promise<v
       }
     }
 
-    if (restored && Object.keys(restored).length > 0) {
-      useTopicProgressStore.setState((s) => ({
-        byUser: {
-          ...s.byUser,
-          [effectiveUserId]: restored!
-        }
-      }));
+    const legacy = { ...(restored ?? {}), ...current };
+    const syncedRows = await db.topic_progress
+      .where('user_id')
+      .equals(effectiveUserId)
+      .toArray();
+    const merged: TopicCompletions = { ...legacy };
+    for (const row of syncedRows) {
+      const key = topicProgressId(row.subject, row.topic);
+      if (!merged[key] || merged[key] < row.completed_at) merged[key] = row.completed_at;
     }
+
+    // One-time migration of legacy localStorage/meta progress into the normal
+    // local-first sync engine. Deterministic IDs make repeated runs idempotent.
+    for (const [key, completedAt] of Object.entries(legacy)) {
+      const parsed = splitTopicProgressId(key);
+      if (!parsed) continue;
+      const id = topicProgressRowId(effectiveUserId, parsed.subject, parsed.topic);
+      if (syncedRows.some((row) => row.id === id)) continue;
+      await writeLocal('topic_progress', {
+        id,
+        user_id: effectiveUserId,
+        subject: parsed.subject,
+        topic: parsed.topic,
+        completed_at: completedAt,
+        updated_at: completedAt
+      });
+    }
+
+    useTopicProgressStore.setState((s) => ({
+      byUser: { ...s.byUser, [effectiveUserId]: merged }
+    }));
   } catch {
     // Ignore errors when IndexedDB is disabled or unavailable
   }
@@ -113,6 +147,23 @@ export const useTopicProgressStore = create<TopicProgressState>()(
             if (effectiveUserId) {
               void db.meta.put({ key: `topic_progress_${effectiveUserId}`, value: next });
             }
+            const parsed = splitTopicProgressId(topicId);
+            if (parsed) {
+              const id = topicProgressRowId(effectiveUserId, parsed.subject, parsed.topic);
+              if (completed) {
+                const timestamp = next[topicId] ?? nowISO();
+                void writeLocal('topic_progress', {
+                  id,
+                  user_id: effectiveUserId,
+                  subject: parsed.subject,
+                  topic: parsed.topic,
+                  completed_at: timestamp,
+                  updated_at: timestamp
+                });
+              } else {
+                void deleteLocal('topic_progress', id);
+              }
+            }
           } catch {
             // Ignore IndexedDB write errors
           }
@@ -145,4 +196,3 @@ export const useTopicProgressStore = create<TopicProgressState>()(
     }
   )
 );
-

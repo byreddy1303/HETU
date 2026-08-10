@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useLiveQuery } from 'dexie-react-hooks';
 import {
   Check,
   ChevronDown,
@@ -18,6 +19,13 @@ import { haptic } from '@/lib/native';
 import { subjectInk } from '@/lib/subjectInk';
 import { SUBTOPICS_BY_SUBJECT } from '@/lib/subtopics';
 import { cn, formatDate, plural } from '@/lib/utils';
+import { todayISOInTimeZone } from '@/lib/utils';
+import { db } from '@/lib/db';
+import {
+  buildTopicEvidence,
+  type TopicEvidence,
+  type TopicEvidenceStatus
+} from '@/lib/topic-evidence';
 import { currentUserId } from '@/stores/auth';
 import {
   selectCompletionsForUser,
@@ -42,7 +50,7 @@ const FILTERS: { value: SubjectFilter; label: string }[] = [
   { value: 'all', label: 'All subjects' },
   { value: 'in-progress', label: 'In progress' },
   { value: 'not-started', label: 'Not started' },
-  { value: 'complete', label: 'Complete' }
+  { value: 'complete', label: 'All studied' }
 ];
 
 const ORBIT_COLORS = [
@@ -82,12 +90,28 @@ function nextTopicFrom(
 }
 
 export default function SyllabusTracker() {
-  const { userId } = useAuth();
+  const { userId, profile } = useAuth();
   const reduceMotion = useReducedMotion();
   const byUser = useTopicProgressStore((state) => state.byUser);
   const setCompleted = useTopicProgressStore((state) => state.setCompleted);
 
   const effectiveUserId = userId ?? currentUserId() ?? 'guest';
+  const today = todayISOInTimeZone(profile?.timezone ?? 'Asia/Kolkata');
+  const questions = useLiveQuery(
+    () => userId ? db.questions.where('user_id').equals(userId).toArray() : [],
+    [userId],
+    []
+  );
+  const attempts = useLiveQuery(
+    () => userId ? db.pyq_attempts.where('user_id').equals(userId).toArray() : [],
+    [userId],
+    []
+  );
+  const reattempts = useLiveQuery(
+    () => userId ? db.reattempts.where('user_id').equals(userId).toArray() : [],
+    [userId],
+    []
+  );
 
   useEffect(() => {
     void syncTopicProgressFromDb(effectiveUserId);
@@ -98,6 +122,24 @@ export default function SyllabusTracker() {
     [byUser, effectiveUserId]
   );
   const summaries = useMemo(() => summariesFor(completions), [completions]);
+  const evidenceByTopic = useMemo(() => {
+    const map = new Map<string, TopicEvidence>();
+    for (const subject of SUBJECTS) {
+      for (const topic of (SUBTOPICS_BY_SUBJECT[subject] ?? []).map((item) => item.value)) {
+        const id = topicProgressId(subject, topic);
+        map.set(id, buildTopicEvidence({
+          subject,
+          topic,
+          studiedAt: completions[id] ?? null,
+          questions,
+          attempts,
+          reattempts,
+          today
+        }));
+      }
+    }
+    return map;
+  }, [attempts, completions, questions, reattempts, today]);
   const nextTopic = useMemo(() => nextTopicFrom(summaries, completions), [summaries, completions]);
   const [query, setQuery] = useState('');
   const [filter, setFilter] = useState<SubjectFilter>('all');
@@ -173,7 +215,7 @@ export default function SyllabusTracker() {
     <div className="flex flex-col gap-4">
       <PageHeader
         title="Syllabus tracker"
-        description="Tick a topic when you finish it. Your progress stays on this device and is kept separate for each account."
+        description="Mark what you studied; PYQ evidence, open mistakes, and recency determine the working status."
       />
 
       <section className="relative overflow-hidden rounded-lg border border-border bg-bg-raised shadow-card">
@@ -185,7 +227,7 @@ export default function SyllabusTracker() {
             <div className="flex flex-wrap items-center gap-2">
               <Badge tone={overallPercent === 100 ? 'success' : 'accent'}>
                 {overallPercent === 100 ? <CircleCheckBig size={12} /> : <Target size={12} />}
-                {overallPercent === 100 ? 'Syllabus complete' : 'AIR roadmap'}
+                {overallPercent === 100 ? 'Study pass recorded' : 'AIR roadmap'}
               </Badge>
               <span className="u-num text-[11px] text-text-faint">
                 {completedSubjects}/{SUBJECTS.length} subjects complete
@@ -213,9 +255,9 @@ export default function SyllabusTracker() {
               </div>
             ) : (
               <div className="mt-4">
-                <p className="u-label">Roadmap complete</p>
+                <p className="u-label">First study pass complete</p>
                 <h2 className="mt-1 font-display text-xl font-bold text-success">
-                  Every topic is ticked off.
+                  Every topic is marked studied.
                 </h2>
                 <p className="mt-1 text-[13px] text-text-muted">
                   Keep the edge by pairing this with PYQs, re-attempts, and timed mocks.
@@ -225,7 +267,7 @@ export default function SyllabusTracker() {
 
             {recent.length > 0 && (
               <div className="mt-5 border-t border-border/70 pt-3">
-                <p className="u-label mb-2">Recently finished</p>
+                <p className="u-label mb-2">Recently studied</p>
                 <div className="flex flex-wrap gap-2">
                   {recent.map((item) => (
                     <span
@@ -309,6 +351,7 @@ export default function SyllabusTracker() {
               summary={summary}
               topics={matchingTopics}
               completions={completions}
+              evidence={evidenceByTopic}
               open={isOpen}
               onToggle={() => toggleSubject(summary.subject)}
               onTopicChange={(topic, completed) =>
@@ -379,7 +422,7 @@ function SyllabusOrbit({ summaries, percent }: { summaries: SubjectSummary[]; pe
         </svg>
         <div className="absolute inset-0 flex flex-col items-center justify-center">
           <span className="u-num text-4xl font-bold leading-none text-text">{percent}%</span>
-          <span className="u-label mt-2">syllabus done</span>
+          <span className="u-label mt-2">topics studied</span>
         </div>
       </div>
       <p className="-mt-1 text-center text-[11px] leading-relaxed text-text-faint">
@@ -394,6 +437,7 @@ function SubjectLedger({
   summary,
   topics,
   completions,
+  evidence,
   open,
   onToggle,
   onTopicChange
@@ -402,6 +446,7 @@ function SubjectLedger({
   summary: SubjectSummary;
   topics: string[];
   completions: TopicCompletions;
+  evidence: Map<string, TopicEvidence>;
   open: boolean;
   onToggle: () => void;
   onTopicChange: (topic: string, completed: boolean) => void;
@@ -454,7 +499,7 @@ function SubjectLedger({
             )}
           >
             {summary.status === 'complete'
-              ? 'Complete'
+              ? 'All studied'
               : summary.status === 'in-progress'
                 ? `${summary.percent}% done`
                 : 'Not started'}
@@ -473,13 +518,14 @@ function SubjectLedger({
               const id = topicProgressId(summary.subject, topic);
               const completedAt = completions[id];
               const completed = Boolean(completedAt);
+              const topicEvidence = evidence.get(id);
               return (
                 <label
                   key={topic}
                   className={cn(
                     'group/topic flex min-h-12 cursor-pointer items-start gap-3 rounded border px-3 py-2.5 transition-[border-color,background-color,transform]',
-                    completed
-                      ? 'border-success/25 bg-success-faint/70'
+                      completed
+                        ? 'border-success/25 bg-success-faint/45'
                       : 'border-transparent bg-bg-raised hover:border-border-hover hover:-translate-y-px'
                   )}
                 >
@@ -504,16 +550,12 @@ function SubjectLedger({
                     <span
                       className={cn(
                         'block text-[13px] font-medium leading-snug',
-                        completed ? 'text-text-muted line-through decoration-success/50' : 'text-text'
+                        completed ? 'text-text-muted' : 'text-text'
                       )}
                     >
                       {topic}
                     </span>
-                    {completedAt && (
-                      <span className="u-num mt-1 block text-[9.5px] text-success/80">
-                        finished {formatDate(completedAt, 'dd MMM yyyy')}
-                      </span>
-                    )}
+                    <TopicEvidenceLine evidence={topicEvidence} completedAt={completedAt} />
                   </span>
                 </label>
               );
@@ -522,5 +564,46 @@ function SubjectLedger({
         </div>
       )}
     </section>
+  );
+}
+
+const EVIDENCE_LABEL: Record<TopicEvidenceStatus, string> = {
+  'not-started': 'Not started',
+  studied: 'Studied · no PYQ evidence',
+  active: 'Active',
+  'needs-revision': 'Needs revision',
+  strong: 'Strong'
+};
+
+function TopicEvidenceLine({
+  evidence,
+  completedAt
+}: {
+  evidence: TopicEvidence | undefined;
+  completedAt: string | undefined;
+}) {
+  if (!evidence) return null;
+  const tone =
+    evidence.status === 'strong'
+      ? 'text-success'
+      : evidence.status === 'needs-revision'
+        ? 'text-danger'
+        : evidence.status === 'active'
+          ? 'text-accent'
+          : 'text-text-faint';
+  const facts = [
+    evidence.practiced > 0 ? `${evidence.practiced} practiced` : null,
+    evidence.accuracy !== null ? `${Math.round(evidence.accuracy * 100)}%` : null,
+    evidence.openMistakes > 0 ? `${evidence.openMistakes} open` : null,
+    evidence.lastPracticed ? `last ${formatDate(evidence.lastPracticed, 'dd MMM')}` : null
+  ].filter(Boolean);
+  return (
+    <span className="mt-1 block text-[9.5px] leading-relaxed">
+      <span className={cn('font-semibold', tone)}>{EVIDENCE_LABEL[evidence.status]}</span>
+      {facts.length > 0 ? <span className="u-num text-text-faint"> · {facts.join(' · ')}</span> : null}
+      {completedAt && evidence.practiced === 0 ? (
+        <span className="u-num text-text-faint"> · marked {formatDate(completedAt, 'dd MMM')}</span>
+      ) : null}
+    </span>
   );
 }

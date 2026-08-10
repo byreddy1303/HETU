@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { Play } from 'lucide-react';
 import type { SessionRow } from '@/types';
@@ -16,6 +16,7 @@ import { writeLocal } from '@/lib/sync';
 import { db } from '@/lib/db';
 import { cn, uuid, todayISO, nowISO, formatDate } from '@/lib/utils';
 import { subjectInk } from '@/lib/subjectInk';
+import { updatePlannerBlockExecution } from '@/lib/planner-execution';
 
 function Segmented({
   options,
@@ -50,6 +51,7 @@ function Segmented({
 export default function SessionNew() {
   const { userId } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const begin = useSessionStore((s) => s.begin);
   const storedSessionId = useSessionStore((s) => s.sessionId);
   const inProgress = useLiveQuery(async () => {
@@ -62,8 +64,20 @@ export default function SessionNew() {
   const defaultSubject = usePrefsStore((s) => s.defaultSubject);
   const defaultDuration = usePrefsStore((s) => s.defaultDurationMin);
   const defaultCount = usePrefsStore((s) => s.defaultQuestionCount);
-  const [subject, setSubject] = useState<string | undefined>(defaultSubject ?? undefined);
-  const [duration, setDuration] = useState<number>(defaultDuration);
+  const requestedSubject = searchParams.get('subject');
+  const requestedDuration = Number(searchParams.get('duration'));
+  const plannerDate = searchParams.get('plannerDate');
+  const plannerBlockId = searchParams.get('plannerBlock');
+  const [subject, setSubject] = useState<string | undefined>(() =>
+    requestedSubject && SUBJECTS.includes(requestedSubject as (typeof SUBJECTS)[number])
+      ? requestedSubject
+      : defaultSubject ?? undefined
+  );
+  const [duration, setDuration] = useState<number>(() =>
+    Number.isFinite(requestedDuration) && requestedDuration > 0
+      ? Math.min(720, Math.round(requestedDuration))
+      : defaultDuration
+  );
   const [count, setCount] = useState<number>(defaultCount);
   const [starting, setStarting] = useState(false);
 
@@ -81,9 +95,20 @@ export default function SessionNew() {
       insight: null,
       sadhana_done: false,
       interruptions_count: 0,
+      planner_date: plannerDate,
+      planner_block_id: plannerBlockId,
       created_at: nowISO()
     };
     await writeLocal('sessions', row);
+    if (plannerDate && plannerBlockId) {
+      updatePlannerBlockExecution(plannerDate, plannerBlockId, {
+        sessionId: row.id,
+        startedAt: row.created_at,
+        completedAt: null,
+        actualMin: null,
+        manual: false
+      });
+    }
     begin(row.id, count);
     navigate(`/session/${row.id}/solve`);
   }

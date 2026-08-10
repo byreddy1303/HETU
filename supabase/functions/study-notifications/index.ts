@@ -10,6 +10,13 @@ import {
   type PushCopy,
   type SubscriptionRow
 } from '../_shared/push.ts';
+import {
+  dailyPyqCopy,
+  detailedDayPlanCopy,
+  parseStudyPlanBlocks,
+  type StudyPlanBlock,
+  type StudyPlanItem
+} from '../_shared/study-notification-copy.ts';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 declare const Deno: any;
@@ -73,8 +80,8 @@ interface StudyEventRow {
 }
 
 interface StudyContext {
-  planBlocks: number;
-  openPlanItems: number;
+  planBlocks: StudyPlanBlock[];
+  openPlanItems: StudyPlanItem[];
   reattemptsDue: number;
   pyqLast24h: number;
   sessionsToday: number;
@@ -170,17 +177,26 @@ async function issueActionToken(args: {
 function bodyFor(categoryName: Category, context: StudyContext): string {
   switch (categoryName) {
     case 'dashboard':
-      return `${context.planBlocks} plan blocks · ${context.reattemptsDue} re-attempts · ${context.questionsLast24h} questions logged recently.`;
+      return detailedDayPlanCopy({
+        blocks: context.planBlocks,
+        openItems: context.openPlanItems,
+        reattemptsDue: context.reattemptsDue
+      }).body;
     case 'planner':
-      return context.planBlocks + context.openPlanItems > 0
-        ? `${context.planBlocks} study blocks and ${context.openPlanItems} open tasks are on today's plan.`
-        : 'Your plan is empty. Add one concrete study block for today.';
+      return detailedDayPlanCopy({
+        blocks: context.planBlocks,
+        openItems: context.openPlanItems,
+        reattemptsDue: context.reattemptsDue
+      }).body;
     case 'reattempts':
       return context.reattemptsDue > 0
         ? `${context.reattemptsDue} re-attempts are due. Clear the oldest one first.`
         : 'The due queue is clear. Review what becomes due next.';
     case 'pyq':
-      return `${context.pyqLast24h} PYQs attempted in the last 24 hours. Start a focused set now.`;
+      return dailyPyqCopy({
+        blocks: context.planBlocks,
+        attemptedLast24h: context.pyqLast24h
+      }).body;
     case 'sessions':
       return `${context.sessionsToday} sessions logged today. Protect the next focused block.`;
     case 'log':
@@ -310,16 +326,29 @@ async function loadContext(userId: string, today: string): Promise<StudyContext>
   ]);
 
   const sessions = (storedPlan.data as { sessions?: unknown } | null)?.sessions;
-  const planBlocks = Array.isArray(sessions) ? sessions.length : 0;
+  const planBlocks = parseStudyPlanBlocks(sessions);
   const completed = new Set(
     ((completionsResult.data as Array<{ item_id: string }> | null) ?? []).map((row) => row.item_id)
   );
-  const planItems = (planItemsResult.data as Array<{ id: string }> | null) ?? [];
+  const planItems =
+    (planItemsResult.data as Array<{
+      id: string;
+      title: string;
+      subject: string | null;
+      target_min: number | null;
+    }> | null) ?? [];
   const patterns = (patternResult.data as Array<{ mastery_level: number | null }> | null) ?? [];
 
   return {
     planBlocks,
-    openPlanItems: planItems.filter((item) => !completed.has(item.id)).length,
+    openPlanItems: planItems
+      .filter((item) => !completed.has(item.id))
+      .map((item) => ({
+        id: item.id,
+        title: item.title,
+        subject: item.subject,
+        targetMin: item.target_min
+      })),
     reattemptsDue: reattemptResult.count ?? 0,
     pyqLast24h: pyqResult.count ?? 0,
     sessionsToday: sessionResult.count ?? 0,
@@ -343,8 +372,22 @@ function studyCopy(
   actionToken: string
 ): PushCopy {
   const meta = CATEGORY_META[categoryName];
+  const detailedPlan = detailedDayPlanCopy({
+    blocks: context.planBlocks,
+    openItems: context.openPlanItems,
+    reattemptsDue: context.reattemptsDue
+  });
+  const pyq = dailyPyqCopy({
+    blocks: context.planBlocks,
+    attemptedLast24h: context.pyqLast24h
+  });
   return {
-    title: `HETU · ${meta.label}`,
+    title:
+      categoryName === 'dashboard' || categoryName === 'planner'
+        ? detailedPlan.title
+        : categoryName === 'pyq'
+          ? pyq.title
+          : `HETU · ${meta.label}`,
     body: bodyFor(categoryName, context),
     kind: `study_${categoryName}`,
     route: meta.route,

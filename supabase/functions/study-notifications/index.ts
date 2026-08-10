@@ -1,5 +1,5 @@
 // Opt-in daily reminders for every authenticated study surface.
-// Cron runs every 15 minutes; per-user timezone/preferences decide what is due.
+// Cron runs every minute; per-user timezone/preferences decide what is due.
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { corsHeaders, json } from '../_shared/cors.ts';

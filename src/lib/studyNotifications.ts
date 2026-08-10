@@ -1,5 +1,7 @@
 import { supabase } from '@/lib/supabase';
 
+export const STUDY_NOTIFICATION_STEP_SECONDS = 60;
+
 export const STUDY_NOTIFICATION_CATEGORIES = [
   { id: 'dashboard', label: 'Daily overview', route: '/', action: 'View today' },
   { id: 'planner', label: 'Planner', route: '/planner', action: 'Open plan' },
@@ -41,7 +43,7 @@ export function parseNotificationTime(value: string): { hour: number; minute: nu
   if (!match) return null;
   const hour = Number(match[1]);
   const minute = Number(match[2]);
-  if (hour < 0 || hour > 23 || ![0, 15, 30, 45].includes(minute)) return null;
+  if (hour < 0 || hour > 23 || minute < 0 || minute > 59) return null;
   return { hour, minute };
 }
 

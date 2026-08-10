@@ -7,6 +7,7 @@ import {
 } from '@/lib/buddyNotifications';
 import {
   STUDY_NOTIFICATION_CATEGORIES,
+  STUDY_NOTIFICATION_STEP_SECONDS,
   ensureStudyNotificationPreferences,
   notificationTime,
   parseNotificationTime,
@@ -172,7 +173,7 @@ export default function StudyNotificationsCard({ profile, sandbox }: Props) {
                     <Clock3 size={12} className="text-text-faint" />
                     <input
                       type="time"
-                      step={900}
+                      step={STUDY_NOTIFICATION_STEP_SECONDS}
                       value={notificationTime(preference)}
                       onChange={(event) => {
                         const parsed = parseNotificationTime(event.target.value);

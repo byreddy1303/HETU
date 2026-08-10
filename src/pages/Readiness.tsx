@@ -151,10 +151,7 @@ export default function Readiness() {
 
   const daysLeft = Math.max(
     0,
-    differenceInCalendarDays(
-      parseISO(profile?.exam_date ?? EXAM_DATE_DEFAULT),
-      new Date()
-    )
+    differenceInCalendarDays(parseISO(profile?.exam_date ?? EXAM_DATE_DEFAULT), new Date())
   );
 
   const airBand = useMemo(
@@ -162,10 +159,7 @@ export default function Readiness() {
     [breakdown.score, daysLeft]
   );
 
-  const moves = useMemo(
-    () => nextMoves(breakdown, perSubject),
-    [breakdown, perSubject]
-  );
+  const moves = useMemo(() => nextMoves(breakdown, perSubject), [breakdown, perSubject]);
 
   const simulator = useMemo(() => examDaySimulator(perSubject, 600), [perSubject]);
 
@@ -216,26 +210,22 @@ export default function Readiness() {
 
   /* -------- peer median (Supabase) -------- */
 
-  const [peer, setPeer] = useState<{ median: number | null; sampleSize: number } | null>(
-    null
-  );
+  const [peer, setPeer] = useState<{ median: number | null; sampleSize: number } | null>(null);
   useEffect(() => {
     if (sandbox || !supabaseConfigured || !userId) return;
     let cancelled = false;
     void (async () => {
       // Persist today's snapshot to the DB so the median RPC has data to work
       // with. Idempotent — the (user_id, on_date) PK dedupes.
-      await supabase
-        .from('readiness_snapshots')
-        .upsert(
-          {
-            user_id: userId,
-            on_date: weekStartISO(today),
-            score: breakdown.score,
-            days_to_exam: daysLeft
-          },
-          { onConflict: 'user_id,on_date' }
-        );
+      await supabase.from('readiness_snapshots').upsert(
+        {
+          user_id: userId,
+          on_date: weekStartISO(today),
+          score: breakdown.score,
+          days_to_exam: daysLeft
+        },
+        { onConflict: 'user_id,on_date' }
+      );
       const [historyResult, medianResult] = await Promise.all([
         supabase
           .from('readiness_snapshots')
@@ -267,8 +257,7 @@ export default function Readiness() {
           : row && typeof row.median === 'string'
             ? Number(row.median)
             : null;
-      const sampleSize =
-        row && typeof row.sample_size === 'number' ? row.sample_size : 0;
+      const sampleSize = row && typeof row.sample_size === 'number' ? row.sample_size : 0;
       setPeer({ median, sampleSize });
     })();
     return () => {
@@ -313,26 +302,18 @@ export default function Readiness() {
                     T−<span className="u-num text-text">{daysLeft}</span>d
                   </span>
                 </div>
-                <p className="text-[13px] leading-relaxed text-text-muted">
-                  {confidenceCopy}
-                </p>
+                <p className="text-[13px] leading-relaxed text-text-muted">{confidenceCopy}</p>
                 <div className="flex flex-wrap items-center gap-3 border-t border-border pt-3 text-[12px] text-text-muted">
                   <span>
-                    <span className="u-num text-text">
-                      {breakdown.counts.patterns}
-                    </span>{' '}
-                    patterns encountered
+                    <span className="u-num text-text">{breakdown.counts.patterns}</span> patterns
+                    encountered
                   </span>
                   <span>
-                    <span className="u-num text-text">
-                      {breakdown.counts.openReattempts}
-                    </span>{' '}
-                    open re-attempts
+                    <span className="u-num text-text">{breakdown.counts.openReattempts}</span> open
+                    re-attempts
                   </span>
                   <span>
-                    <span className="u-num text-text">
-                      {breakdown.counts.markedDecisions}
-                    </span>{' '}
+                    <span className="u-num text-text">{breakdown.counts.markedDecisions}</span>{' '}
                     answered decisions
                   </span>
                 </div>
@@ -346,9 +327,7 @@ export default function Readiness() {
               <CardHeader
                 title="Next 3 moves"
                 aside={
-                  <span className="text-[11px] text-text-faint">
-                    rule-based and inspectable
-                  </span>
+                  <span className="text-[11px] text-text-faint">rule-based and inspectable</span>
                 }
               />
               <ul className="divide-y divide-border">
@@ -364,66 +343,70 @@ export default function Readiness() {
             <summary className="cursor-pointer px-4 py-3 font-display text-[14px] font-semibold text-text">
               Weekly trend and long-range projection
             </summary>
-          <Card className="border-0 shadow-none">
-            <CardHeader
-              title="Trend & projection"
-              aside={
-                projection ? (
-                  <span className="text-[11px] text-text-faint">
-                    slope{' '}
+            <Card className="border-0 shadow-none">
+              <CardHeader
+                title="Trend & projection"
+                aside={
+                  projection ? (
+                    <span className="text-[11px] text-text-faint">
+                      slope{' '}
+                      <span
+                        className={cn(
+                          'u-num',
+                          projection.slopePerDay > 0
+                            ? 'text-success'
+                            : projection.slopePerDay < 0
+                              ? 'text-danger'
+                              : 'text-text-muted'
+                        )}
+                      >
+                        {projection.slopePerDay >= 0 ? '+' : ''}
+                        {projection.slopePerDay}/day
+                      </span>
+                    </span>
+                  ) : (
+                    <span className="text-[11px] text-text-faint">
+                      needs 4 weekly snapshots across 21+ days
+                    </span>
+                  )
+                }
+              />
+              <CardBody>
+                <Sparkline
+                  snapshots={trendSnapshots}
+                  projectedScore={projection?.projectedScore ?? null}
+                  daysToExam={daysLeft}
+                />
+                {projection && (
+                  <p className="mt-3 text-[12.5px] text-text-muted">
+                    At the current pace you land on{' '}
                     <span
                       className={cn(
-                        'u-num',
-                        projection.slopePerDay > 0
+                        'u-num font-semibold',
+                        projection.projectedScore >= breakdown.score
                           ? 'text-success'
-                          : projection.slopePerDay < 0
-                            ? 'text-danger'
-                            : 'text-text-muted'
+                          : 'text-danger'
                       )}
                     >
-                      {projection.slopePerDay >= 0 ? '+' : ''}
-                      {projection.slopePerDay}/day
-                    </span>
-                  </span>
-                ) : (
-                  <span className="text-[11px] text-text-faint">
-                    needs 4 weekly snapshots across 21+ days
-                  </span>
-                )
-              }
-            />
-            <CardBody>
-              <Sparkline
-                snapshots={trendSnapshots}
-                projectedScore={projection?.projectedScore ?? null}
-                daysToExam={daysLeft}
-              />
-              {projection && (
-                <p className="mt-3 text-[12.5px] text-text-muted">
-                  At the current pace you land on{' '}
-                  <span
-                    className={cn(
-                      'u-num font-semibold',
-                      projection.projectedScore >= breakdown.score
-                        ? 'text-success'
-                        : 'text-danger'
-                    )}
-                  >
-                    {projection.projectedScore}
-                  </span>{' '}
-                  by exam day (T−{daysLeft}). Based on the last{' '}
-                  <span className="u-num">{projection.sampleDays}</span> snapshots.
-                </p>
-              )}
-            </CardBody>
-          </Card>
+                      {projection.projectedScore}
+                    </span>{' '}
+                    by exam day (T−{daysLeft}). Based on the last{' '}
+                    <span className="u-num">{projection.sampleDays}</span> snapshots.
+                  </p>
+                )}
+              </CardBody>
+            </Card>
           </details>
 
           {/* --- Components with tooltips --- */}
           <Card className="order-3">
             <CardHeader
               title="Components"
-              aside={<span className="text-[11px] text-text-faint">evidence-adjusted · hover for detail</span>}
+              aside={
+                <span className="text-[11px] text-text-faint">
+                  evidence-adjusted · hover for detail
+                </span>
+              }
             />
             <div className="flex flex-col divide-y divide-border">
               {components.map((c) => {
@@ -486,9 +469,7 @@ export default function Readiness() {
           <Card className="order-4">
             <CardHeader
               title="Per-subject matrix"
-              aside={
-                <span className="text-[11px] text-text-faint">weak cells highlighted</span>
-              }
+              aside={<span className="text-[11px] text-text-faint">weak cells highlighted</span>}
             />
             <CardBody className="p-0">
               <SubjectMatrix rows={perSubject} />
@@ -500,37 +481,37 @@ export default function Readiness() {
             <summary className="cursor-pointer px-4 py-3 font-display text-[14px] font-semibold text-text">
               Experimental exam estimates
             </summary>
-          <Card className="border-0 shadow-none">
-            <CardHeader
-              title="Exam-day simulator"
-              aside={
-                <span className="inline-flex items-center gap-1 text-[11px] text-text-faint">
-                  <Sparkles size={11} strokeWidth={1.75} /> {simulator.runs} Monte Carlo runs
-                </span>
-              }
-            />
-            <CardBody className="flex flex-col gap-3">
-              <div className="rounded border border-warn/30 bg-warn/5 p-3">
-                <p className="u-label text-warn">Rough rank mapping · not validated</p>
-                <p className="mt-1 font-display text-[15px] font-semibold text-text">
-                  {airBand.label}
+            <Card className="border-0 shadow-none">
+              <CardHeader
+                title="Exam-day simulator"
+                aside={
+                  <span className="inline-flex items-center gap-1 text-[11px] text-text-faint">
+                    <Sparkles size={11} strokeWidth={1.75} /> {simulator.runs} Monte Carlo runs
+                  </span>
+                }
+              />
+              <CardBody className="flex flex-col gap-3">
+                <div className="rounded border border-warn/30 bg-warn/5 p-3">
+                  <p className="u-label text-warn">Rough rank mapping · not validated</p>
+                  <p className="mt-1 font-display text-[15px] font-semibold text-text">
+                    {airBand.label}
+                  </p>
+                  <p className="mt-1 text-[12px] leading-relaxed text-text-muted">
+                    {airBand.caveat} Treat this as a coarse scenario, not a prediction.
+                  </p>
+                </div>
+                <div className="grid grid-cols-3 gap-3">
+                  <SimStat label="Unlucky (p10)" value={simulator.p10} tone="text-danger" />
+                  <SimStat label="Median (p50)" value={simulator.p50} tone="text-text" />
+                  <SimStat label="Lucky (p90)" value={simulator.p90} tone="text-success" />
+                </div>
+                <p className="text-[12.5px] text-text-muted">
+                  Based on per-subject calibration + engagement. Correct = +2 marks, wrong = −⅔.
+                  Skipped is a wash. The gap between p10 and p90 is variance — narrow it by lifting
+                  calibration.
                 </p>
-                <p className="mt-1 text-[12px] leading-relaxed text-text-muted">
-                  {airBand.caveat} Treat this as a coarse scenario, not a prediction.
-                </p>
-              </div>
-              <div className="grid grid-cols-3 gap-3">
-                <SimStat label="Unlucky (p10)" value={simulator.p10} tone="text-danger" />
-                <SimStat label="Median (p50)" value={simulator.p50} tone="text-text" />
-                <SimStat label="Lucky (p90)" value={simulator.p90} tone="text-success" />
-              </div>
-              <p className="text-[12.5px] text-text-muted">
-                Based on per-subject calibration + engagement. Correct = +2 marks,
-                wrong = −⅔. Skipped is a wash. The gap between p10 and p90 is
-                variance — narrow it by lifting calibration.
-              </p>
-            </CardBody>
-          </Card>
+              </CardBody>
+            </Card>
           </details>
 
           {/* --- Persistent evidence watchlist + optional peer context --- */}
@@ -540,59 +521,55 @@ export default function Readiness() {
                 Optional peer context
               </summary>
               <Card className="border-0 shadow-none">
-              <CardHeader
-                title={
-                  <span className="inline-flex items-center gap-1.5">
-                    <Users2 size={13} strokeWidth={1.75} /> Peer band
-                  </span>
-                }
-              />
-              <CardBody>
-                {sandbox || !supabaseConfigured ? (
-                  <p className="text-[12.5px] text-text-muted">
-                    Sign in to compare against peers in the same T− window.
-                  </p>
-                ) : peer === null ? (
-                  <p className="text-[12.5px] text-text-faint">Loading peer data…</p>
-                ) : peer.median === null || peer.sampleSize < 3 ? (
-                  <p className="text-[12.5px] text-text-muted">
-                    Not enough peers in your T−{daysLeft}±7 band yet
-                    {peer.sampleSize > 0
-                      ? ` (${peer.sampleSize} logged).`
-                      : '.'}{' '}
-                    Median is hidden until at least 3 people have snapshots — no
-                    single peer's number ever leaks.
-                  </p>
-                ) : (
-                  <div>
+                <CardHeader
+                  title={
+                    <span className="inline-flex items-center gap-1.5">
+                      <Users2 size={13} strokeWidth={1.75} /> Peer band
+                    </span>
+                  }
+                />
+                <CardBody>
+                  {sandbox || !supabaseConfigured ? (
                     <p className="text-[12.5px] text-text-muted">
-                      Median across{' '}
-                      <span className="u-num text-text">{peer.sampleSize}</span> peers
-                      in T−{daysLeft}±7 days:
+                      Sign in to compare against peers in the same T− window.
                     </p>
-                    <p className="mt-1 u-num text-[32px] font-bold text-text">
-                      {Math.round(peer.median)}
+                  ) : peer === null ? (
+                    <p className="text-[12.5px] text-text-faint">Loading peer data…</p>
+                  ) : peer.median === null || peer.sampleSize < 3 ? (
+                    <p className="text-[12.5px] text-text-muted">
+                      Not enough peers in your T−{daysLeft}±7 band yet
+                      {peer.sampleSize > 0 ? ` (${peer.sampleSize} logged).` : '.'} Median is hidden
+                      until at least 3 people have snapshots — no single peer's number ever leaks.
                     </p>
-                    <p className="text-[12px] text-text-muted">
-                      You are{' '}
-                      <span
-                        className={cn(
-                          'font-semibold',
-                          breakdown.score > peer.median
-                            ? 'text-success'
-                            : breakdown.score < peer.median
-                              ? 'text-danger'
-                              : 'text-text'
-                        )}
-                      >
-                        {breakdown.score - Math.round(peer.median) >= 0 ? '+' : ''}
-                        {breakdown.score - Math.round(peer.median)}
-                      </span>{' '}
-                      vs. median.
-                    </p>
-                  </div>
-                )}
-              </CardBody>
+                  ) : (
+                    <div>
+                      <p className="text-[12.5px] text-text-muted">
+                        Median across <span className="u-num text-text">{peer.sampleSize}</span>{' '}
+                        peers in T−{daysLeft}±7 days:
+                      </p>
+                      <p className="mt-1 u-num text-[32px] font-bold text-text">
+                        {Math.round(peer.median)}
+                      </p>
+                      <p className="text-[12px] text-text-muted">
+                        You are{' '}
+                        <span
+                          className={cn(
+                            'font-semibold',
+                            breakdown.score > peer.median
+                              ? 'text-success'
+                              : breakdown.score < peer.median
+                                ? 'text-danger'
+                                : 'text-text'
+                          )}
+                        >
+                          {breakdown.score - Math.round(peer.median) >= 0 ? '+' : ''}
+                          {breakdown.score - Math.round(peer.median)}
+                        </span>{' '}
+                        vs. median.
+                      </p>
+                    </div>
+                  )}
+                </CardBody>
               </Card>
             </details>
 
@@ -605,9 +582,7 @@ export default function Readiness() {
                 }
                 aside={
                   watchlist.length > 0 && (
-                    <span className="text-[11px] text-text-faint">
-                      {watchlist.length} observed
-                    </span>
+                    <span className="text-[11px] text-text-faint">{watchlist.length} observed</span>
                   )
                 }
               />
@@ -619,10 +594,7 @@ export default function Readiness() {
                 ) : (
                   <ul className="divide-y divide-border">
                     {watchlist.slice(0, 5).map((d) => (
-                      <li
-                        key={d.key}
-                        className="flex items-center gap-3 px-4 py-2.5 text-[12.5px]"
-                      >
+                      <li key={d.key} className="flex items-center gap-3 px-4 py-2.5 text-[12.5px]">
                         <span
                           className={cn(
                             'rounded px-1.5 py-0.5 font-mono text-[10px] font-semibold uppercase',
@@ -633,9 +605,7 @@ export default function Readiness() {
                         </span>
                         <span className="min-w-0 flex-1 truncate text-text">
                           {d.subject ? d.subject : 'Overall'}{' '}
-                          <span className="text-text-muted">
-                            · {DEBT_LABEL[d.component]}
-                          </span>
+                          <span className="text-text-muted">· {DEBT_LABEL[d.component]}</span>
                         </span>
                         <span className="u-num text-text-faint">
                           {d.weeksHeld === 0 ? 'new' : `${d.weeksHeld}w`}
@@ -649,7 +619,6 @@ export default function Readiness() {
           </div>
         </>
       )}
-
     </div>
   );
 }
@@ -675,11 +644,7 @@ function DeltaChip({ delta }: { delta: number }) {
           : 'border-danger/40 bg-danger/10 text-danger'
       )}
     >
-      {up ? (
-        <ArrowUp size={11} strokeWidth={2} />
-      ) : (
-        <ArrowDown size={11} strokeWidth={2} />
-      )}
+      {up ? <ArrowUp size={11} strokeWidth={2} /> : <ArrowDown size={11} strokeWidth={2} />}
       {up ? '+' : ''}
       {delta} vs. last week
     </span>
@@ -840,29 +805,14 @@ function Sparkline({
           />
         </>
       )}
-      <text
-        x={paddingX}
-        y={paddingY - 2}
-        className="fill-text-faint"
-        fontSize="9"
-      >
+      <text x={paddingX} y={paddingY - 2} className="fill-text-faint" fontSize="9">
         100
       </text>
-      <text
-        x={paddingX}
-        y={height - 2}
-        className="fill-text-faint"
-        fontSize="9"
-      >
+      <text x={paddingX} y={height - 2} className="fill-text-faint" fontSize="9">
         0
       </text>
       {projected && (
-        <text
-          x={projected.x - 34}
-          y={projected.y - 6}
-          className="fill-text-muted"
-          fontSize="10"
-        >
+        <text x={projected.x - 34} y={projected.y - 6} className="fill-text-muted" fontSize="10">
           exam day
         </text>
       )}
@@ -980,15 +930,7 @@ function SubjectMatrix({ rows }: { rows: SubjectReadiness[] }) {
 
 /* -------------------------- simulator stat -------------------------- */
 
-function SimStat({
-  label,
-  value,
-  tone
-}: {
-  label: string;
-  value: number;
-  tone: string;
-}) {
+function SimStat({ label, value, tone }: { label: string; value: number; tone: string }) {
   return (
     <div className="rounded border border-border bg-bg-overlay/40 px-3 py-3 text-center">
       <p className="u-label">{label}</p>

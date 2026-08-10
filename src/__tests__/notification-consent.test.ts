@@ -5,6 +5,10 @@ const digestSource = readFileSync('supabase/functions/daily-digest/index.ts', 'u
 const buddyPushSource = readFileSync('supabase/functions/buddy-notifications/index.ts', 'utf8');
 const buddyRequestSource = readFileSync('supabase/functions/buddy-request/index.ts', 'utf8');
 const sharedPushSource = readFileSync('supabase/functions/_shared/push.ts', 'utf8');
+const studySettingsSource = readFileSync(
+  'src/components/settings/StudyNotificationsCard.tsx',
+  'utf8'
+);
 
 describe('notification channel consent boundaries', () => {
   it('does not treat a Buddy-message push registration as daily-digest consent', () => {
@@ -20,6 +24,12 @@ describe('notification channel consent boundaries', () => {
   it('keeps Buddy requests inside Buddy consent and gives them a relevant action', () => {
     expect(buddyRequestSource).toContain(".eq('buddy_enabled', true)");
     expect(buddyRequestSource).toContain("label: 'View request'");
+  });
+
+  it('does not show study reminders as enabled until this device opts in', () => {
+    expect(studySettingsSource).toContain(
+      'profile?.study_notifications_enabled === true && studyPushOptedIn()'
+    );
   });
 
   it('keeps a system fallback and follows it with an interactive Android upgrade', () => {

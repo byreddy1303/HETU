@@ -1,6 +1,10 @@
 import { useCallback, useEffect, useState } from 'react';
 import { BellRing, Clock3, Loader2, Send } from 'lucide-react';
-import { disableStudyNotifications, enableStudyNotifications } from '@/lib/buddyNotifications';
+import {
+  disableStudyNotifications,
+  enableStudyNotifications,
+  studyPushOptedIn
+} from '@/lib/buddyNotifications';
 import {
   STUDY_NOTIFICATION_CATEGORIES,
   ensureStudyNotificationPreferences,
@@ -105,7 +109,10 @@ export default function StudyNotificationsCard({ profile, sandbox }: Props) {
   }
 
   const byCategory = new Map(preferences.map((preference) => [preference.category, preference]));
-  const masterEnabled = profile?.study_notifications_enabled === true;
+  // Account consent gates the cron; local consent confirms this particular
+  // installation is registered for the study channel. Showing only the
+  // account flag would make a newly installed phone look enabled when it is not.
+  const masterEnabled = profile?.study_notifications_enabled === true && studyPushOptedIn();
 
   return (
     <Card id="study-notifications">
@@ -124,7 +131,7 @@ export default function StudyNotificationsCard({ profile, sandbox }: Props) {
         <label className="flex items-start justify-between gap-4">
           <span>
             <span className="block text-[12.5px] font-semibold text-text">
-              Daily study reminders
+              Daily study reminders on this device
             </span>
             <span className="mt-0.5 block text-[11.5px] leading-relaxed text-text-muted">
               Separate from Buddy messages and Telegram. Times use{' '}

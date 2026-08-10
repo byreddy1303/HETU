@@ -1,0 +1,2787 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 5 · Problem Lab — LA Mastery Hub</title>
+
+<script>
+  (function () {
+    try {
+      var t = localStorage.getItem("la-hub::theme") || "dark";
+      document.documentElement.classList.add(t === "light" ? "light" : "dark");
+    } catch (e) {
+      document.documentElement.classList.add("dark");
+    }
+  })();
+</script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="theme.css">
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = { darkMode: 'class' };
+</script>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+
+<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<!-- Babel standalone is NOT loaded for this module; we use the precompiled bundle below -->
+
+
+<style>
+  /* Problem Lab specific styles */
+  .pl-difficulty-easy   { background: rgba(34, 197, 94, 0.12);  color: #22c55e; border: 1px solid rgba(34, 197, 94, 0.35); }
+  .pl-difficulty-medium { background: rgba(234, 179, 8, 0.12);  color: #eab308; border: 1px solid rgba(234, 179, 8, 0.35); }
+  .pl-difficulty-hard   { background: rgba(249, 115, 22, 0.12); color: #f97316; border: 1px solid rgba(249, 115, 22, 0.35); }
+  .pl-difficulty-killer { background: rgba(239, 68, 68, 0.12);  color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.35); }
+  .pl-type-mcq          { background: rgba(59, 130, 246, 0.12); color: #3b82f6; border: 1px solid rgba(59, 130, 246, 0.35); }
+  .pl-type-nat          { background: rgba(168, 85, 247, 0.12); color: #a855f7; border: 1px solid rgba(168, 85, 247, 0.35); }
+  .pl-type-pyq          { background: rgba(245, 158, 11, 0.12); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.35); font-weight: 700; }
+
+  .pl-correct  { animation: pl-flash-green 0.6s ease-out; }
+  .pl-wrong    { animation: pl-flash-red   0.6s ease-out; }
+
+  @keyframes pl-flash-green {
+    0%   { background: rgba(34, 197, 94, 0.3);  }
+    100% { background: transparent; }
+  }
+  @keyframes pl-flash-red {
+    0%   { background: rgba(239, 68, 68, 0.3); }
+    100% { background: transparent; }
+  }
+
+  .pl-neg-banner {
+    background: rgba(69, 26, 3, 0.6);
+    color: #fbbf24;
+    border: 1px solid rgba(251, 191, 36, 0.3);
+    font-size: 12px;
+    padding: 6px 10px;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .pl-skip-attempt {
+    background: rgba(59, 130, 246, 0.10);
+    border: 1px solid rgba(59, 130, 246, 0.30);
+    color: #60a5fa;
+    font-size: 12px;
+    padding: 4px 10px;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .pl-skip-skip {
+    background: rgba(244, 114, 182, 0.10);
+    border: 1px solid rgba(244, 114, 182, 0.30);
+    color: #f472b6;
+    font-size: 12px;
+    padding: 4px 10px;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .pl-tech-card {
+    border-left: 3px solid #3b82f6;
+    background: var(--bg-elev-1);
+    border-radius: 10px;
+    padding: 18px;
+  }
+
+  .pl-danger-zone {
+    border-left: 3px solid #ef4444;
+    background: rgba(239, 68, 68, 0.06);
+    border-radius: 6px;
+    padding: 12px;
+    margin-top: 14px;
+  }
+
+  .pl-mistake-card {
+    border-left: 3px solid #ef4444;
+    background: var(--bg-elev-1);
+    border-radius: 10px;
+    padding: 18px;
+  }
+
+  .pl-wrong-solution {
+    background: var(--bg-elev-3);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 12px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--text);
+    white-space: pre-wrap;
+  }
+
+  .pl-wrong-line {
+    padding: 4px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.15s ease;
+  }
+  .pl-wrong-line:hover {
+    background: rgba(251, 113, 133, 0.08);
+  }
+  .pl-wrong-line.error-found {
+    background: rgba(239, 68, 68, 0.25);
+    border-left: 3px solid #ef4444;
+    padding-left: 8px;
+  }
+
+  .pl-tab-pill {
+    padding: 8px 14px;
+    border-radius: 9999px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.18s ease;
+    border: 1px solid var(--border);
+    background: var(--bg-elev-1);
+    color: var(--text-dim);
+  }
+  .pl-tab-pill.active {
+    background: var(--accent-soft);
+    border-color: var(--accent-border);
+    color: var(--accent);
+  }
+  .pl-tab-pill:hover:not(.active) {
+    color: var(--text);
+    border-color: var(--border-strong);
+  }
+
+  .pl-option-btn {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--bg-elev-1);
+    text-align: left;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    width: 100%;
+    color: var(--text);
+    font-size: 14.5px;
+    font-family: 'Inter', 'Cambria Math', 'STIX Two Math', 'Symbola', system-ui, sans-serif;
+  }
+  .pl-option-btn .katex {
+    font-size: 1.08em !important;
+  }
+  .pl-option-btn:hover:not(:disabled) {
+    border-color: var(--accent-border);
+    background: var(--accent-soft);
+  }
+  .pl-option-btn:disabled { cursor: default; opacity: 0.85; }
+  .pl-option-btn.selected {
+    border-color: var(--accent);
+    background: var(--accent-soft);
+  }
+  .pl-option-btn.correct {
+    border-color: rgba(34, 197, 94, 0.6);
+    background: rgba(34, 197, 94, 0.12);
+    color: #22c55e;
+  }
+  .pl-option-btn.wrong-choice {
+    border-color: rgba(239, 68, 68, 0.6);
+    background: rgba(239, 68, 68, 0.10);
+    color: #fb7185;
+  }
+
+  .pl-option-letter {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: var(--bg-elev-3);
+    border: 1px solid var(--border);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-dim);
+    flex-shrink: 0;
+  }
+
+  .pl-nat-input {
+    background: var(--bg-elev-2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 16px;
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 16px;
+    width: 100%;
+    max-width: 280px;
+  }
+  .pl-nat-input:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+  }
+
+  .pl-submit-btn {
+    padding: 9px 22px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    transition: opacity 0.15s ease;
+    background: var(--grad-hero);
+    color: white;
+    border: none;
+  }
+  .pl-submit-btn:hover:not(:disabled) { opacity: 0.92; }
+  .pl-submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .pl-progress-bar {
+    height: 6px;
+    background: var(--bg-elev-3);
+    border-radius: 9999px;
+    overflow: hidden;
+  }
+  .pl-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #22c55e, #34d399);
+    transition: width 0.3s ease;
+  }
+  .pl-progress-fill.warning { background: linear-gradient(90deg, #eab308, #f59e0b); }
+  .pl-progress-fill.danger  { background: linear-gradient(90deg, #ef4444, #fb7185); }
+
+  .pl-hint-box {
+    background: var(--accent-2-soft);
+    border: 1px solid var(--accent-2-border);
+    border-radius: 8px;
+    padding: 14px;
+    color: var(--text);
+  }
+
+  .pl-layer-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+  }
+  .pl-layer-num {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: var(--grad-hero);
+    color: white;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 14px;
+  }
+  .pl-layer-title {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: -0.01em;
+  }
+
+  /* ─────────────────────────────────────────────────────────────
+     MATH VISIBILITY — KaTeX + Unicode math characters
+     ───────────────────────────────────────────────────────────── */
+  /* KaTeX inline math: bumped size, brighter color, slight glow */
+  .katex {
+    font-size: 1.12em !important;
+    color: #fef3c7 !important;       /* warm cream — high contrast on dark */
+    text-shadow: 0 0 1px rgba(254, 243, 199, 0.25);
+  }
+  html.light .katex {
+    color: #4338ca !important;       /* indigo on light theme */
+    text-shadow: none;
+  }
+  .katex .mord, .katex .mbin, .katex .mrel, .katex .mopen, .katex .mclose,
+  .katex .mpunct, .katex .minner, .katex .mop {
+    color: inherit !important;
+  }
+  /* Display-mode (block) math — even bigger */
+  .katex-display > .katex {
+    font-size: 1.2em !important;
+  }
+  /* KaTeX matrices and arrays — ensure brackets visible */
+  .katex .delimsizing,
+  .katex .delim-size1,
+  .katex .delim-size2,
+  .katex .delim-size3,
+  .katex .delim-size4 {
+    color: inherit !important;
+  }
+
+  /* Unicode math characters inside problem/solution prose
+     — vectors, subscripts, Greek letters, relations.
+     Forces font that supports them on macOS/Windows/Linux. */
+  .pl-prose {
+    font-feature-settings: "ss01" 1, "cv11" 1;
+    font-variant-numeric: tabular-nums;
+  }
+  .pl-prose,
+  .pl-prose * {
+    /* fallback stack that supports ℝ ℂ ℕ ℤ ℚ ‖ ⇒ ∑ ∏ ∈ ∉ ⊆ ⊇ ∪ ∩ etc. */
+    font-family: 'Inter', 'SF Pro Text', 'Cambria Math', 'STIX Two Math',
+                 'Latin Modern Math', 'Symbola', 'Arial Unicode MS',
+                 system-ui, -apple-system, sans-serif;
+  }
+  /* Highlight inline math-like tokens — anything in a span we mark */
+  .pl-math {
+    font-family: 'JetBrains Mono', 'SF Mono', 'Cambria Math', monospace;
+    color: #fef3c7;
+    background: rgba(254, 243, 199, 0.06);
+    padding: 1px 5px;
+    border-radius: 4px;
+    font-weight: 500;
+    font-size: 0.95em;
+    border: 1px solid rgba(254, 243, 199, 0.15);
+  }
+  html.light .pl-math {
+    color: #4338ca;
+    background: rgba(67, 56, 202, 0.08);
+    border: 1px solid rgba(67, 56, 202, 0.22);
+  }
+
+  /* Pre-formatted matrix / step displays inside solutions */
+  .pl-prose .matrix-block,
+  .pl-prose pre {
+    font-family: 'JetBrains Mono', monospace;
+    background: var(--bg-elev-3);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 10px 14px;
+    color: #fef3c7;
+    font-size: 13.5px;
+    white-space: pre;
+    overflow-x: auto;
+    line-height: 1.7;
+    margin: 8px 0;
+  }
+  html.light .pl-prose .matrix-block,
+  html.light .pl-prose pre {
+    color: #4338ca;
+  }
+
+  /* Bigger, brighter sub/superscripts in solution prose */
+  .pl-prose sub, .pl-prose sup {
+    font-size: 0.78em;
+    line-height: 1;
+    color: #fbbf24;
+  }
+  html.light .pl-prose sub, html.light .pl-prose sup {
+    color: #b45309;
+  }
+
+  /* Bring solution prose up to a readable size */
+  .pl-prose {
+    font-size: 14.5px;
+    line-height: 1.75;
+  }
+
+  /* When math appears inside option buttons / hints */
+  .pl-option-btn .katex,
+  .pl-hint-box .katex {
+    font-size: 1.05em !important;
+  }
+</style>
+</head>
+<body>
+
+<div id="loading">
+  <div style="text-align:center">
+    <div class="spinner"></div>
+    <div style="font-size:13px; opacity:0.8">Loading Module 5 — Problem Lab</div>
+  </div>
+</div>
+
+<div id="root"></div>
+
+<!-- Precompiled bundle: boilerplate.js + this module's content, with JSX already transpiled.
+     Source of truth remains the inline script at the bottom of this file (kept for editing).
+     If you edit this file, rerun the compile step to regenerate module-05-problem-lab.compiled.js. -->
+<script src="module-05-problem-lab.compiled.js"></script>
+
+<script type="text/template" id="m5-source-of-truth" data-no-execute>
+const { useState, useEffect, useMemo, useRef, useCallback } = React;
+
+/* ════════════════════════════════════════════════════════════════
+   PROBLEM LAB — SHARED COMPONENTS & STATE
+   ════════════════════════════════════════════════════════════════ */
+
+const MODULE_NUM = 5;
+
+/* localStorage helpers ─────────────────────────────────────────── */
+const lsGet = (k, fallback) => {
+  try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : fallback; }
+  catch { return fallback; }
+};
+const lsSet = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} };
+
+function useConceptProgress(conceptNum, totalProblems) {
+  const aKey = "gate_la_m" + MODULE_NUM + "_c" + conceptNum + "_attempted";
+  const cKey = "gate_la_m" + MODULE_NUM + "_c" + conceptNum + "_correct";
+  const hKey = "gate_la_m" + MODULE_NUM + "_c" + conceptNum + "_hints";
+
+  const [attempted, setAttempted] = useState(() => lsGet(aKey, []));
+  const [correct, setCorrect] = useState(() => lsGet(cKey, []));
+  const [hints, setHints] = useState(() => lsGet(hKey, {}));
+
+  const markAttempt = (pid, didCorrect) => {
+    setAttempted(prev => {
+      if (prev.includes(pid)) return prev;
+      const next = [...prev, pid]; lsSet(aKey, next); return next;
+    });
+    if (didCorrect) {
+      setCorrect(prev => {
+        if (prev.includes(pid)) return prev;
+        const next = [...prev, pid]; lsSet(cKey, next); return next;
+      });
+    }
+  };
+  const useHint = (pid) => {
+    setHints(prev => {
+      const next = { ...prev, [pid]: (prev[pid] || 0) + 1 };
+      lsSet(hKey, next);
+      return next;
+    });
+  };
+  return { attempted, correct, hints, markAttempt, useHint, totalProblems };
+}
+
+/* ────────────────────────────────────────────────────────────────
+   BADGES (Difficulty, Type, Time, Tags)
+   ──────────────────────────────────────────────────────────────── */
+function DiffBadge({ level }) {
+  const labels = { easy: "EASY", medium: "MEDIUM", hard: "HARD", killer: "KILLER" };
+  return (
+    <span className={"text-[10.5px] tracking-[0.15em] font-bold px-2 py-1 rounded-md pl-difficulty-" + level}>
+      {labels[level]}
+    </span>
+  );
+}
+function TypeBadge({ type }) {
+  if (type === "pyq") return <span className="text-[10.5px] tracking-[0.15em] font-bold px-2 py-1 rounded-md pl-type-pyq">★ GATE PYQ</span>;
+  return (
+    <span className={"text-[10.5px] tracking-[0.15em] font-bold px-2 py-1 rounded-md pl-type-" + type}>
+      {type === "mcq" ? "MCQ" : "NAT"}
+    </span>
+  );
+}
+function MetaPill({ children, mono = false }) {
+  return (
+    <span className={"text-[11px] px-2 py-1 rounded-md " + (mono ? "font-mono " : "")}
+      style={{background: "var(--bg-elev-3)", color: "var(--text-dim)", border: "1px solid var(--border)"}}>
+      {children}
+    </span>
+  );
+}
+function ConceptTag({ children }) {
+  return (
+    <span className="text-[11px] px-2 py-1 rounded-md font-mono"
+      style={{background: "var(--accent-soft)", color: "var(--accent)", border: "1px solid var(--accent-border)"}}>
+      {children}
+    </span>
+  );
+}
+
+/* ────────────────────────────────────────────────────────────────
+   LAYER HEADER
+   ──────────────────────────────────────────────────────────────── */
+function LayerHeader({ num, title, subtitle }) {
+  return (
+    <div className="mt-10 mb-5">
+      <div className="pl-layer-header">
+        <div className="pl-layer-num">L{num}</div>
+        <div className="pl-layer-title">{title}</div>
+      </div>
+      {subtitle && <div className="text-[14px] ml-12" style={{color: "var(--text-dim)"}}>{subtitle}</div>}
+    </div>
+  );
+}
+
+/* ────────────────────────────────────────────────────────────────
+   PATTERN CARD (Layer 1)
+   ──────────────────────────────────────────────────────────────── */
+function PatternCard({ idx, pattern }) {
+  return (
+    <div className="rounded-xl p-5 mb-4 pl-prose"
+      style={{background: "var(--bg-elev-1)", border: "1px solid var(--border)"}}>
+      <div className="flex flex-wrap items-baseline gap-3 mb-3">
+        <span className="text-[10.5px] tracking-[0.18em] font-bold px-2 py-1 rounded-md"
+          style={{background: "var(--accent-soft)", color: "var(--accent)", border: "1px solid var(--accent-border)"}}>
+          PATTERN {idx}
+        </span>
+        <span className="text-[17px] font-semibold" style={{color: "var(--text)"}}>{pattern.name}</span>
+        <span className="ml-auto text-[11px] px-2 py-1 rounded-md font-mono"
+          style={{background: "var(--bg-elev-3)", color: "var(--text-dim)", border: "1px solid var(--border)"}}>
+          ⏱ ~{pattern.timeBudget}s
+        </span>
+        <span className="text-[11px] px-2 py-1 rounded-md"
+          style={{background: pattern.frequency === "Very Frequent" ? "rgba(239,68,68,0.12)" :
+                                pattern.frequency === "Frequent" ? "rgba(249,115,22,0.12)" :
+                                pattern.frequency === "Occasional" ? "rgba(234,179,8,0.12)" : "rgba(148,163,184,0.12)",
+                  color: pattern.frequency === "Very Frequent" ? "#ef4444" :
+                         pattern.frequency === "Frequent" ? "#f97316" :
+                         pattern.frequency === "Occasional" ? "#eab308" : "#94a3b8",
+                  border: "1px solid currentColor"}}>
+          {pattern.frequency}
+        </span>
+      </div>
+
+      <div className="grid md:grid-cols-2 gap-3 text-[13.5px] leading-relaxed">
+        <div className="rounded-lg p-3" style={{background: "var(--bg-elev-2)", border: "1px solid var(--border)"}}>
+          <div className="text-[10px] tracking-[0.18em] font-semibold mb-1" style={{color: "var(--accent-2)"}}>SURFACE APPEARANCE</div>
+          <div style={{color: "var(--text)"}}>{pattern.surface}</div>
+        </div>
+        <div className="rounded-lg p-3" style={{background: "var(--bg-elev-2)", border: "1px solid var(--border)"}}>
+          <div className="text-[10px] tracking-[0.18em] font-semibold mb-1" style={{color: "var(--pink)"}}>WHAT IT'S ACTUALLY TESTING</div>
+          <div style={{color: "var(--text)"}}>{pattern.testing}</div>
+        </div>
+      </div>
+
+      <div className="mt-3 rounded-lg p-3" style={{background: "var(--bg-elev-2)", border: "1px solid var(--border)"}}>
+        <div className="text-[10px] tracking-[0.18em] font-semibold mb-2" style={{color: "var(--warn)"}}>SIGNAL WORDS</div>
+        <div className="flex flex-wrap gap-2">
+          {pattern.signals.map((s, i) => (
+            <code key={i} className="font-mono text-[12px] px-2 py-1 rounded"
+              style={{background: "var(--bg-elev-3)", color: "var(--warn)", border: "1px solid var(--warn-border)"}}>
+              {s}
+            </code>
+          ))}
+        </div>
+      </div>
+
+      <div className="mt-3 rounded-lg p-3" style={{background: "var(--accent-soft)", border: "1px solid var(--accent-border)"}}>
+        <div className="text-[10px] tracking-[0.18em] font-semibold mb-1" style={{color: "var(--accent)"}}>FIRST MOVE (TOP-RANKER REFLEX)</div>
+        <div className="text-[14px]" style={{color: "var(--text)"}}>{pattern.firstMove}</div>
+      </div>
+    </div>
+  );
+}
+
+/* ────────────────────────────────────────────────────────────────
+   PROBLEM CARD (Layer 2)
+   ──────────────────────────────────────────────────────────────── */
+function ProblemCard({ p, idx, progress }) {
+  const [selected, setSelected] = useState(null);
+  const [natValue, setNatValue] = useState("");
+  const [submitted, setSubmitted] = useState(false);
+  const [isCorrect, setIsCorrect] = useState(false);
+  const [attempts, setAttempts] = useState(0);
+  const [hintsShown, setHintsShown] = useState(0);
+  const [showFullSolution, setShowFullSolution] = useState(false);
+  const [flashKey, setFlashKey] = useState(0);
+
+  const isPYQ = p.type === "pyq";
+
+  const checkAnswer = () => {
+    let ok = false;
+    if (p.kind === "mcq") {
+      ok = selected === p.answer;
+    } else {
+      const userVal = parseFloat(natValue);
+      if (!isNaN(userVal)) {
+        const tol = p.tolerance != null ? p.tolerance : 0.01;
+        ok = Math.abs(userVal - p.answer) <= tol;
+      }
+    }
+    setIsCorrect(ok);
+    setSubmitted(true);
+    setAttempts(a => a + 1);
+    setFlashKey(k => k + 1);
+    progress.markAttempt(p.id, ok);
+    if (!ok && attempts + 1 >= 2) setShowFullSolution(true);
+  };
+
+  const tryAgain = () => {
+    setSubmitted(false);
+    setIsCorrect(false);
+    setSelected(null);
+    setNatValue("");
+  };
+
+  const revealHint = () => {
+    if (hintsShown < (p.hints?.length || 0)) {
+      setHintsShown(hintsShown + 1);
+      progress.useHint(p.id);
+    }
+  };
+
+  const isCompleted = progress.correct.includes(p.id);
+
+  return (
+    <div key={flashKey} className={"rounded-xl p-5 mb-5 " + (submitted ? (isCorrect ? "pl-correct" : "pl-wrong") : "")}
+      style={{background: "var(--bg-elev-1)", border: "1px solid " + (isCompleted ? "rgba(34,197,94,0.4)" : "var(--border)")}}>
+
+      <div className="flex flex-wrap items-center gap-2 mb-3">
+        <span className="text-[10.5px] tracking-[0.18em] font-bold px-2 py-1 rounded-md font-mono"
+          style={{background: "var(--bg-elev-3)", color: "var(--text-dim)", border: "1px solid var(--border)"}}>
+          Q{idx}
+        </span>
+        <DiffBadge level={p.difficulty} />
+        <TypeBadge type={isPYQ ? "pyq" : p.kind} />
+        {isPYQ && p.pyqYear && (
+          <MetaPill mono>GATE CS {p.pyqYear}</MetaPill>
+        )}
+        <MetaPill>{p.marks}-mark style</MetaPill>
+        <MetaPill mono>⏱ ~{p.timeTarget}s</MetaPill>
+        {isCompleted && (
+          <span className="text-[10.5px] tracking-[0.18em] font-bold px-2 py-1 rounded-md ml-auto"
+            style={{background: "rgba(34,197,94,0.15)", color: "#22c55e", border: "1px solid rgba(34,197,94,0.4)"}}>
+            ✓ SOLVED
+          </span>
+        )}
+      </div>
+
+      <div className="flex flex-wrap gap-2 mb-3">
+        {p.tags.map((t, i) => <ConceptTag key={i}>{t}</ConceptTag>)}
+      </div>
+
+      {p.kind === "mcq" && (
+        <div className="pl-neg-banner mb-3">
+          ⚠ Negative marking: −1/3 mark for wrong answer
+        </div>
+      )}
+      {p.skipSignal && (
+        <div className="mb-3">
+          <span className={p.skipSignal.type === "attempt" ? "pl-skip-attempt" : "pl-skip-skip"}>
+            {p.skipSignal.type === "attempt" ? "✓ " : "💡 "}{p.skipSignal.text}
+          </span>
+        </div>
+      )}
+
+      <div className="text-[15px] leading-relaxed mb-4 p-4 rounded-lg pl-prose"
+        style={{background: "var(--bg-elev-2)", color: "var(--text)", border: "1px solid var(--border)"}}>
+        {p.statement}
+      </div>
+
+      {/* ANSWER UI */}
+      {p.kind === "mcq" ? (
+        <div className="space-y-2 mb-3">
+          {p.options.map((opt, i) => {
+            const letter = String.fromCharCode(65 + i);
+            let cls = "pl-option-btn";
+            if (!submitted && selected === letter) cls += " selected";
+            if (submitted) {
+              if (letter === p.answer) cls += " correct";
+              else if (letter === selected) cls += " wrong-choice";
+            }
+            return (
+              <button key={i}
+                className={cls}
+                disabled={submitted}
+                onClick={() => setSelected(letter)}>
+                <span className="pl-option-letter">{letter}</span>
+                <span className="flex-1">{opt}</span>
+                {submitted && letter === p.answer && <span style={{color: "#22c55e"}}>✓</span>}
+                {submitted && letter === selected && letter !== p.answer && <span style={{color: "#fb7185"}}>✗</span>}
+              </button>
+            );
+          })}
+        </div>
+      ) : (
+        <div className="mb-3">
+          <label className="text-[12px] mb-1 block" style={{color: "var(--text-dim)"}}>Numerical Answer (NAT — no options)</label>
+          <input type="number" step="any" className="pl-nat-input"
+            value={natValue}
+            disabled={submitted}
+            onChange={e => setNatValue(e.target.value)}
+            placeholder="Enter your answer..." />
+        </div>
+      )}
+
+      {/* SUBMIT */}
+      {!submitted && (
+        <div className="flex items-center gap-3">
+          <button className="pl-submit-btn"
+            disabled={p.kind === "mcq" ? !selected : natValue === ""}
+            onClick={checkAnswer}>
+            Submit Answer
+          </button>
+          {hintsShown > 0 && (
+            <span className="text-[11px]" style={{color: "var(--text-dim)"}}>
+              Hints used: {hintsShown}/{p.hints?.length || 0}
+            </span>
+          )}
+          {p.hints && p.hints.length > 0 && hintsShown < p.hints.length && (
+            <button className="text-[13px] px-3 py-1.5 rounded-md transition-colors"
+              style={{border: "1px solid var(--accent-2-border)", color: "var(--accent-2)", background: "var(--accent-2-soft)"}}
+              onClick={revealHint}>
+              Show Hint {hintsShown + 1}
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* HINTS DISPLAYED */}
+      {hintsShown > 0 && !submitted && (
+        <div className="mt-4 space-y-2">
+          {p.hints.slice(0, hintsShown).map((h, i) => (
+            <div key={i} className="pl-hint-box pl-prose">
+              <div className="text-[10px] tracking-[0.18em] font-semibold mb-1" style={{color: "var(--accent-2)"}}>
+                HINT {i+1} · {h.label}
+              </div>
+              <div className="text-[14px]">{h.text}</div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* AFTER SUBMISSION */}
+      {submitted && (
+        <div className="mt-4">
+          <div className="flex flex-wrap items-center gap-3 mb-3">
+            {isCorrect ? (
+              <span className="text-[12px] tracking-[0.15em] font-bold px-3 py-1.5 rounded-md"
+                style={{background: "rgba(34,197,94,0.15)", color: "#22c55e", border: "1px solid rgba(34,197,94,0.4)"}}>
+                ✓ CORRECT
+              </span>
+            ) : (
+              <span className="text-[12px] tracking-[0.15em] font-bold px-3 py-1.5 rounded-md"
+                style={{background: "rgba(239,68,68,0.15)", color: "#fb7185", border: "1px solid rgba(239,68,68,0.4)"}}>
+                ✗ INCORRECT
+              </span>
+            )}
+            {!isCorrect && (
+              <>
+                <button className="text-[13px] px-3 py-1.5 rounded-md"
+                  style={{border: "1px solid var(--accent-border)", color: "var(--accent)", background: "var(--accent-soft)"}}
+                  onClick={tryAgain}>
+                  Try Again
+                </button>
+                {p.hints && p.hints.length > 0 && hintsShown < p.hints.length && !showFullSolution && (
+                  <button className="text-[13px] px-3 py-1.5 rounded-md"
+                    style={{border: "1px solid var(--accent-2-border)", color: "var(--accent-2)", background: "var(--accent-2-soft)"}}
+                    onClick={() => { revealHint(); setSubmitted(false); }}>
+                    Show Hint
+                  </button>
+                )}
+                {!showFullSolution && attempts >= 2 && (
+                  <button className="text-[13px] px-3 py-1.5 rounded-md"
+                    style={{border: "1px solid var(--danger-border)", color: "var(--danger)", background: "var(--danger-soft)"}}
+                    onClick={() => setShowFullSolution(true)}>
+                    Show Full Solution
+                  </button>
+                )}
+                {!showFullSolution && (
+                  <button className="text-[13px] px-3 py-1.5 rounded-md"
+                    style={{border: "1px solid var(--border-strong)", color: "var(--text-dim)", background: "var(--bg-elev-2)"}}
+                    onClick={() => setShowFullSolution(true)}>
+                    Reveal Solution
+                  </button>
+                )}
+              </>
+            )}
+          </div>
+
+          {(isCorrect || showFullSolution) && (
+            <SolutionPanel p={p} wasCorrect={isCorrect} />
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ────────────────────────────────────────────────────────────────
+   SOLUTION PANEL
+   ──────────────────────────────────────────────────────────────── */
+function SolutionPanel({ p, wasCorrect }) {
+  return (
+    <div className="rounded-xl p-5 mt-3 pl-prose"
+      style={{background: "var(--bg-elev-2)", border: "1px solid var(--accent-border)"}}>
+      <div className="text-[10.5px] tracking-[0.2em] font-bold mb-3" style={{color: "var(--accent)"}}>
+        🧠 THINKING CHAIN — How a top ranker actually solves this
+      </div>
+      <div className="space-y-3">
+        {p.solution.steps.map((s, i) => (
+          <div key={i} className="flex gap-3">
+            <div className="flex-shrink-0 w-7 h-7 rounded-md flex items-center justify-center text-[12px] font-bold"
+              style={{background: "var(--accent-soft)", color: "var(--accent)", border: "1px solid var(--accent-border)"}}>
+              {i+1}
+            </div>
+            <div className="flex-1">
+              <div className="text-[11.5px] tracking-[0.18em] font-semibold mb-0.5" style={{color: "var(--accent-2)"}}>
+                {s.label}
+              </div>
+              <div className="text-[14px] leading-relaxed" style={{color: "var(--text)", whiteSpace: "pre-line"}}>{s.body}</div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="grid md:grid-cols-2 gap-3 mt-5">
+        <div className="rounded-lg p-3" style={{background: "var(--accent-3-soft)", border: "1px solid var(--accent-3-border)"}}>
+          <div className="text-[10px] tracking-[0.18em] font-semibold mb-1" style={{color: "var(--accent-3)"}}>✓ GATE CHECK</div>
+          <div className="text-[13.5px]" style={{color: "var(--text)"}}>{p.solution.gateCheck}</div>
+        </div>
+        <div className="rounded-lg p-3" style={{background: "var(--warn-soft)", border: "1px solid var(--warn-border)"}}>
+          <div className="text-[10px] tracking-[0.18em] font-semibold mb-1" style={{color: "var(--warn)"}}>⚡ SPEED VERSION</div>
+          <div className="text-[13.5px]" style={{color: "var(--text)"}}>{p.solution.speed}</div>
+        </div>
+      </div>
+
+      <div className="mt-4 rounded-lg p-3" style={{background: "var(--danger-soft)", border: "1px solid var(--danger-border)"}}>
+        <div className="text-[10px] tracking-[0.18em] font-semibold mb-1" style={{color: "var(--danger)"}}>⚠ WHAT MADE THIS HARD</div>
+        <div className="text-[13.5px]" style={{color: "var(--text)"}}>{p.solution.whatMadeHard}</div>
+      </div>
+
+      <div className="mt-3 rounded-lg p-3" style={{background: "var(--pink-soft)", border: "1px solid var(--pink-border)"}}>
+        <div className="text-[10px] tracking-[0.18em] font-semibold mb-1" style={{color: "var(--pink)"}}>🔁 GENERALIZATION</div>
+        <div className="text-[13.5px]" style={{color: "var(--text)"}}>{p.solution.generalization}</div>
+      </div>
+
+      {p.solution.linkedConcept && (
+        <div className="mt-3 rounded-lg p-3" style={{background: "var(--info-soft)", border: "1px solid var(--info-border)"}}>
+          <div className="text-[10px] tracking-[0.18em] font-semibold mb-1" style={{color: "var(--info)"}}>🔗 LINKED CONCEPT</div>
+          <div className="text-[13.5px]" style={{color: "var(--text)"}}>{p.solution.linkedConcept}</div>
+        </div>
+      )}
+
+      {p.kind === "mcq" && p.solution.negAdvisory && (
+        <div className="mt-3 rounded-lg p-3" style={{background: "rgba(69,26,3,0.4)", border: "1px solid rgba(251,191,36,0.3)"}}>
+          <div className="text-[10px] tracking-[0.18em] font-semibold mb-1" style={{color: "#fbbf24"}}>📊 NEGATIVE-MARKING ADVISORY</div>
+          <div className="text-[13.5px]" style={{color: "var(--text)"}}>{p.solution.negAdvisory}</div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ────────────────────────────────────────────────────────────────
+   TECHNIQUE CARD (Layer 3)
+   ──────────────────────────────────────────────────────────────── */
+function TechniqueCard({ tech }) {
+  const typeColors = {
+    "Speed Shortcut":     { bg: "rgba(34,211,238,0.1)",  fg: "#22d3ee", bd: "rgba(34,211,238,0.35)" },
+    "Trap Avoidance":     { bg: "rgba(251,191,36,0.1)",  fg: "#fbbf24", bd: "rgba(251,191,36,0.35)" },
+    "Structural Insight": { bg: "rgba(167,139,250,0.1)", fg: "#a78bfa", bd: "rgba(167,139,250,0.35)" },
+    "Verification Method":{ bg: "rgba(52,211,153,0.1)",  fg: "#34d399", bd: "rgba(52,211,153,0.35)" },
+  };
+  const c = typeColors[tech.type] || typeColors["Speed Shortcut"];
+  return (
+    <div className="pl-tech-card mb-4 pl-prose">
+      <div className="flex flex-wrap items-baseline gap-3 mb-3">
+        <div className="text-[17px] font-semibold" style={{color: "var(--text)"}}>{tech.name}</div>
+        <span className="text-[10.5px] tracking-[0.15em] font-bold px-2 py-1 rounded-md"
+          style={{background: c.bg, color: c.fg, border: "1px solid " + c.bd}}>
+          {tech.type.toUpperCase()}
+        </span>
+        <span className="ml-auto text-[11px] px-2 py-1 rounded-md"
+          style={{background: tech.freq === "Very Frequent" ? "rgba(239,68,68,0.12)" :
+                              tech.freq === "Frequent" ? "rgba(249,115,22,0.12)" :
+                              tech.freq === "Occasional" ? "rgba(234,179,8,0.12)" : "rgba(148,163,184,0.12)",
+                  color: tech.freq === "Very Frequent" ? "#ef4444" :
+                         tech.freq === "Frequent" ? "#f97316" :
+                         tech.freq === "Occasional" ? "#eab308" : "#94a3b8",
+                  border: "1px solid currentColor"}}>
+          {tech.freq}
+        </span>
+      </div>
+
+      <div className="mb-3">
+        <div className="text-[10px] tracking-[0.18em] font-semibold mb-1" style={{color: "var(--accent)"}}>WHEN TO USE</div>
+        <div className="text-[14px]" style={{color: "var(--text)"}}>{tech.when}</div>
+      </div>
+
+      <div className="mb-3">
+        <div className="text-[10px] tracking-[0.18em] font-semibold mb-1" style={{color: "var(--accent-2)"}}>HOW IT WORKS</div>
+        <ol className="list-decimal list-outside ml-5 space-y-1.5 text-[14px]" style={{color: "var(--text)"}}>
+          {tech.steps.map((s, i) => <li key={i}>{s}</li>)}
+        </ol>
+      </div>
+
+      <div className="grid md:grid-cols-2 gap-3 mb-3">
+        <div className="rounded-lg p-3" style={{background: "var(--accent-3-soft)", border: "1px solid var(--accent-3-border)"}}>
+          <div className="text-[10px] tracking-[0.18em] font-semibold mb-1" style={{color: "var(--accent-3)"}}>⚡ SPEED CLAIM</div>
+          <div className="text-[13.5px]" style={{color: "var(--text)"}}>{tech.speed}</div>
+        </div>
+        <div className="rounded-lg p-3" style={{background: "var(--bg-elev-2)", border: "1px solid var(--border)"}}>
+          <div className="text-[10px] tracking-[0.18em] font-semibold mb-1" style={{color: "var(--accent-2)"}}>🔬 MICRO-EXAMPLE</div>
+          <div className="text-[13px] font-mono whitespace-pre-line" style={{color: "var(--text)"}}>{tech.example}</div>
+        </div>
+      </div>
+
+      <div className="pl-danger-zone">
+        <div className="text-[10px] tracking-[0.18em] font-semibold mb-1" style={{color: "#fb7185"}}>⛔ DANGER ZONE — when this technique FAILS</div>
+        <div className="text-[13.5px]" style={{color: "var(--text)"}}>{tech.danger}</div>
+      </div>
+    </div>
+  );
+}
+
+/* ────────────────────────────────────────────────────────────────
+   MISTAKE CARD (Layer 4) with Spot-the-Error mode
+   ──────────────────────────────────────────────────────────────── */
+function MistakeCard({ mistake, idx }) {
+  const [mode, setMode] = useState("read"); // "read" | "spot"
+  const [clickedLine, setClickedLine] = useState(null);
+  const [showFull, setShowFull] = useState(false);
+
+  return (
+    <div className="pl-mistake-card mb-4 pl-prose">
+      <div className="flex flex-wrap items-baseline gap-3 mb-3">
+        <span className="text-[10.5px] tracking-[0.15em] font-bold px-2 py-1 rounded-md"
+          style={{background: "var(--danger-soft)", color: "var(--danger)", border: "1px solid var(--danger-border)"}}>
+          MISTAKE {idx}
+        </span>
+        <div className="text-[17px] font-semibold" style={{color: "var(--text)"}}>{mistake.name}</div>
+        <span className="text-[11px] px-2 py-1 rounded-md ml-auto"
+          style={{background: mistake.frequency === "Very Common" ? "rgba(239,68,68,0.12)" :
+                              mistake.frequency === "Common" ? "rgba(249,115,22,0.12)" : "rgba(148,163,184,0.12)",
+                  color: mistake.frequency === "Very Common" ? "#ef4444" :
+                         mistake.frequency === "Common" ? "#f97316" : "#94a3b8",
+                  border: "1px solid currentColor"}}>
+          {mistake.frequency}
+        </span>
+      </div>
+
+      <div className="flex gap-2 mb-3">
+        <button className={"pl-tab-pill " + (mode === "read" ? "active" : "")}
+          onClick={() => setMode("read")}>📖 Read</button>
+        <button className={"pl-tab-pill " + (mode === "spot" ? "active" : "")}
+          onClick={() => { setMode("spot"); setClickedLine(null); setShowFull(false); }}>🎯 Spot the Error</button>
+      </div>
+
+      {mode === "read" && (
+        <>
+          <div className="mb-3">
+            <div className="text-[10px] tracking-[0.18em] font-semibold mb-1" style={{color: "var(--danger)"}}>WRONG SOLUTION (looks plausible)</div>
+            <div className="pl-wrong-solution">
+              {mistake.wrong.map((line, i) => (
+                <div key={i} className={i === mistake.errorLine ? "error-found" : ""} style={{padding: "2px 4px"}}>
+                  <span style={{color: "var(--text-faded)", marginRight: 8}}>{(i+1).toString().padStart(2, " ")}.</span>
+                  {line}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-3">
+            <div className="rounded-lg p-3" style={{background: "var(--bg-elev-2)", border: "1px solid var(--danger-border)"}}>
+              <div className="text-[10px] tracking-[0.18em] font-semibold mb-1" style={{color: "var(--danger)"}}>📍 ERROR LOCATION</div>
+              <div className="text-[13.5px]" style={{color: "var(--text)"}}>Line {mistake.errorLine + 1}: {mistake.errorDescription}</div>
+            </div>
+            <div className="rounded-lg p-3" style={{background: "var(--bg-elev-2)", border: "1px solid var(--warn-border)"}}>
+              <div className="text-[10px] tracking-[0.18em] font-semibold mb-1" style={{color: "var(--warn)"}}>🧠 ROOT CAUSE</div>
+              <div className="text-[13.5px]" style={{color: "var(--text)"}}>{mistake.rootCause}</div>
+            </div>
+          </div>
+
+          <div className="mt-3 rounded-lg p-3" style={{background: "var(--accent-3-soft)", border: "1px solid var(--accent-3-border)"}}>
+            <div className="text-[10px] tracking-[0.18em] font-semibold mb-1" style={{color: "var(--accent-3)"}}>✅ CORRECT REASONING</div>
+            <div className="text-[13.5px]" style={{color: "var(--text)"}}>{mistake.correct}</div>
+          </div>
+
+          <div className="mt-3 rounded-lg p-3" style={{background: "var(--accent-soft)", border: "1px solid var(--accent-border)"}}>
+            <div className="text-[10px] tracking-[0.18em] font-semibold mb-1" style={{color: "var(--accent)"}}>🛡 PREVENTION RULE (memorize this)</div>
+            <div className="text-[13.5px] italic" style={{color: "var(--text)"}}>{mistake.prevention}</div>
+          </div>
+
+          <div className="mt-3 flex gap-2 text-[12px]" style={{color: "var(--text-dim)"}}>
+            <span className="px-2 py-1 rounded-md" style={{background: "var(--bg-elev-2)", border: "1px solid var(--border)"}}>
+              💸 GATE Cost: {mistake.gateCost}
+            </span>
+          </div>
+        </>
+      )}
+
+      {mode === "spot" && (
+        <>
+          <div className="mb-2 text-[13px]" style={{color: "var(--text-dim)"}}>
+            👉 Click the line where you think the reasoning breaks.
+          </div>
+          <div className="pl-wrong-solution">
+            {mistake.wrong.map((line, i) => {
+              let cls = "pl-wrong-line";
+              if (clickedLine === i) {
+                if (i === mistake.errorLine) cls += " error-found";
+                else cls += "";
+              }
+              if (showFull && i === mistake.errorLine) cls += " error-found";
+              return (
+                <div key={i} className={cls}
+                  onClick={() => { if (clickedLine === null) { setClickedLine(i); setShowFull(true); } }}>
+                  <span style={{color: "var(--text-faded)", marginRight: 8}}>{(i+1).toString().padStart(2, " ")}.</span>
+                  {line}
+                  {showFull && i === mistake.errorLine && <span style={{color: "#fb7185", marginLeft: 8, fontWeight: 600}}>← ERROR HERE</span>}
+                </div>
+              );
+            })}
+          </div>
+          {clickedLine !== null && (
+            <div className="mt-3 rounded-lg p-3"
+              style={{background: clickedLine === mistake.errorLine ? "var(--accent-3-soft)" : "var(--danger-soft)",
+                      border: "1px solid " + (clickedLine === mistake.errorLine ? "var(--accent-3-border)" : "var(--danger-border)")}}>
+              {clickedLine === mistake.errorLine ? (
+                <div className="text-[13.5px]" style={{color: "#22c55e"}}>
+                  ✓ Correct! You spotted the error on line {mistake.errorLine + 1}: {mistake.errorDescription}
+                </div>
+              ) : (
+                <div className="text-[13.5px]" style={{color: "var(--danger)"}}>
+                  ✗ Not quite. The actual error is on line {mistake.errorLine + 1}: {mistake.errorDescription}
+                </div>
+              )}
+            </div>
+          )}
+        </>
+      )}
+    </div>
+  );
+}
+
+/* ────────────────────────────────────────────────────────────────
+   DRILL MODE (Layer 5)
+   ──────────────────────────────────────────────────────────────── */
+function DrillMode({ conceptNum, conceptTitle, problems }) {
+  const TARGETS = { easy: 40, medium: 75, hard: 120, killer: 150 };
+  const lsKey = "gate_la_m" + MODULE_NUM + "_c" + conceptNum + "_drill_best";
+  const streakKey = "gate_la_m" + MODULE_NUM + "_c" + conceptNum + "_drill_streak";
+
+  const [phase, setPhase] = useState("idle"); // idle | running | review
+  const [drill, setDrill] = useState([]);
+  const [currentIdx, setCurrentIdx] = useState(0);
+  const [results, setResults] = useState([]);
+  const [timeLeft, setTimeLeft] = useState(0);
+  const [questionStart, setQuestionStart] = useState(0);
+  const [selected, setSelected] = useState(null);
+  const [natVal, setNatVal] = useState("");
+  const [feedback, setFeedback] = useState(null);
+  const [paused, setPaused] = useState(false);
+  const [bestRecord] = useState(() => lsGet(lsKey, null));
+  const [streak] = useState(() => lsGet(streakKey, 0));
+
+  const startDrill = () => {
+    const shuffled = [...problems].sort(() => Math.random() - 0.5).slice(0, 5);
+    setDrill(shuffled);
+    setCurrentIdx(0);
+    setResults([]);
+    setSelected(null);
+    setNatVal("");
+    setFeedback(null);
+    const first = shuffled[0];
+    setTimeLeft(TARGETS[first.difficulty] || 60);
+    setQuestionStart(Date.now());
+    setPhase("running");
+  };
+
+  useEffect(() => {
+    if (phase !== "running" || paused || feedback) return;
+    if (timeLeft <= 0) {
+      submitDrill(false, "timeout");
+      return;
+    }
+    const t = setTimeout(() => setTimeLeft(timeLeft - 1), 1000);
+    return () => clearTimeout(t);
+  }, [phase, timeLeft, paused, feedback]);
+
+  const submitDrill = (didAnswer, mode) => {
+    const p = drill[currentIdx];
+    const elapsed = Math.round((Date.now() - questionStart) / 1000);
+    let isCorrect = false;
+    if (didAnswer) {
+      if (p.kind === "mcq") isCorrect = selected === p.answer;
+      else {
+        const v = parseFloat(natVal);
+        if (!isNaN(v)) {
+          const tol = p.tolerance != null ? p.tolerance : 0.01;
+          isCorrect = Math.abs(v - p.answer) <= tol;
+        }
+      }
+    }
+    setResults(r => [...r, {
+      problem: p, correct: isCorrect, time: elapsed, target: TARGETS[p.difficulty] || 60,
+      answer: p.kind === "mcq" ? selected : natVal, mode,
+    }]);
+    setFeedback({ correct: isCorrect, answer: p.answer });
+  };
+
+  const nextQuestion = () => {
+    if (currentIdx + 1 >= drill.length) {
+      finalize();
+      return;
+    }
+    const nextI = currentIdx + 1;
+    setCurrentIdx(nextI);
+    setSelected(null);
+    setNatVal("");
+    setFeedback(null);
+    setTimeLeft(TARGETS[drill[nextI].difficulty] || 60);
+    setQuestionStart(Date.now());
+  };
+
+  const finalize = () => {
+    setPhase("review");
+    const correctCount = results.filter(r => r.correct).length;
+    const total = results.length;
+    const acc = total > 0 ? Math.round((correctCount/total) * 100) : 0;
+    const avgTime = total > 0 ? Math.round(results.reduce((s, r) => s + r.time, 0) / total) : 0;
+    const nm = results.reduce((s, r) => {
+      if (r.problem.kind !== "mcq") return s;
+      if (r.correct) return s + (r.problem.marks === 2 ? 2 : 1);
+      if (r.answer == null) return s;
+      return s - (r.problem.marks === 2 ? 2/3 : 1/3);
+    }, 0);
+
+    if (!bestRecord || acc > bestRecord.accuracy || (acc === bestRecord.accuracy && avgTime < bestRecord.avgTime)) {
+      lsSet(lsKey, { score: correctCount, accuracy: acc, avgTime, when: Date.now() });
+    }
+    const lastStreak = results.length > 0 ? results[results.length-1].correct : false;
+    const newStreak = lastStreak ? streak + correctCount : 0;
+    lsSet(streakKey, Math.max(streak, newStreak));
+  };
+
+  const progressPct = phase === "running" && drill[currentIdx] ? (timeLeft / (TARGETS[drill[currentIdx].difficulty] || 60)) * 100 : 0;
+  const progressClass = progressPct < 25 ? "danger" : progressPct < 50 ? "warning" : "";
+
+  if (phase === "idle") {
+    return (
+      <div className="rounded-xl p-6" style={{background: "var(--bg-elev-1)", border: "1px solid var(--border)"}}>
+        <div className="flex items-center gap-3 mb-3">
+          <div className="text-[24px]">⏱</div>
+          <div>
+            <div className="text-[18px] font-semibold" style={{color: "var(--text)"}}>Drill Mode — {conceptTitle}</div>
+            <div className="text-[13px]" style={{color: "var(--text-dim)"}}>5 rapid-fire questions · timed · instant feedback only</div>
+          </div>
+        </div>
+
+        <div className="grid md:grid-cols-4 gap-3 my-4 text-[12px]">
+          <div className="rounded-md p-3" style={{background: "var(--bg-elev-2)", border: "1px solid var(--border)"}}>
+            <div style={{color: "var(--text-dim)"}}>Easy target</div>
+            <div className="font-mono font-semibold mt-1" style={{color: "#22c55e"}}>40 sec</div>
+          </div>
+          <div className="rounded-md p-3" style={{background: "var(--bg-elev-2)", border: "1px solid var(--border)"}}>
+            <div style={{color: "var(--text-dim)"}}>Medium target</div>
+            <div className="font-mono font-semibold mt-1" style={{color: "#eab308"}}>75 sec</div>
+          </div>
+          <div className="rounded-md p-3" style={{background: "var(--bg-elev-2)", border: "1px solid var(--border)"}}>
+            <div style={{color: "var(--text-dim)"}}>Hard target</div>
+            <div className="font-mono font-semibold mt-1" style={{color: "#f97316"}}>120 sec</div>
+          </div>
+          <div className="rounded-md p-3" style={{background: "var(--bg-elev-2)", border: "1px solid var(--border)"}}>
+            <div style={{color: "var(--text-dim)"}}>Killer target</div>
+            <div className="font-mono font-semibold mt-1" style={{color: "#ef4444"}}>150 sec</div>
+          </div>
+        </div>
+
+        {bestRecord && (
+          <div className="rounded-lg p-3 mb-3" style={{background: "var(--accent-3-soft)", border: "1px solid var(--accent-3-border)"}}>
+            <div className="text-[11px] tracking-[0.18em] font-semibold mb-1" style={{color: "var(--accent-3)"}}>🏆 PERSONAL BEST</div>
+            <div className="text-[13.5px]" style={{color: "var(--text)"}}>
+              Score: {bestRecord.score}/5 · Accuracy: {bestRecord.accuracy}% · Avg time: {bestRecord.avgTime}s
+            </div>
+          </div>
+        )}
+
+        {streak > 0 && (
+          <div className="rounded-lg p-3 mb-3" style={{background: "var(--warn-soft)", border: "1px solid var(--warn-border)"}}>
+            <div className="text-[11px] tracking-[0.18em] font-semibold mb-1" style={{color: "var(--warn)"}}>🔥 STREAK</div>
+            <div className="text-[13.5px]" style={{color: "var(--text)"}}>Best streak: {streak} consecutive correct under time</div>
+          </div>
+        )}
+
+        <button className="pl-submit-btn" onClick={startDrill}>
+          ▶ Start Drill (5 questions)
+        </button>
+      </div>
+    );
+  }
+
+  if (phase === "running") {
+    const p = drill[currentIdx];
+    return (
+      <div className="rounded-xl p-6" style={{background: "var(--bg-elev-1)", border: "1px solid var(--border)"}}>
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-3">
+            <div className="text-[12px] tracking-[0.15em] font-bold px-2 py-1 rounded-md"
+              style={{background: "var(--bg-elev-3)", color: "var(--text-dim)", border: "1px solid var(--border)"}}>
+              Q {currentIdx+1} / {drill.length}
+            </div>
+            <DiffBadge level={p.difficulty} />
+          </div>
+          <div className="text-[14px] font-mono font-bold"
+            style={{color: timeLeft < 20 ? "#ef4444" : timeLeft < 40 ? "#eab308" : "#22c55e"}}>
+            ⏱ {timeLeft}s
+          </div>
+        </div>
+
+        <div className="pl-progress-bar mb-4">
+          <div className={"pl-progress-fill " + progressClass} style={{width: progressPct + "%"}}/>
+        </div>
+
+        <div className="text-[15px] leading-relaxed mb-4 p-4 rounded-lg"
+          style={{background: "var(--bg-elev-2)", color: "var(--text)", border: "1px solid var(--border)"}}>
+          {p.statement}
+        </div>
+
+        {!feedback && p.kind === "mcq" && (
+          <div className="space-y-2 mb-3">
+            {p.options.map((opt, i) => {
+              const letter = String.fromCharCode(65 + i);
+              return (
+                <button key={i}
+                  className={"pl-option-btn " + (selected === letter ? "selected" : "")}
+                  onClick={() => setSelected(letter)}>
+                  <span className="pl-option-letter">{letter}</span>
+                  <span className="flex-1">{opt}</span>
+                </button>
+              );
+            })}
+          </div>
+        )}
+        {!feedback && p.kind === "nat" && (
+          <input type="number" step="any" className="pl-nat-input mb-3"
+            value={natVal}
+            onChange={e => setNatVal(e.target.value)}
+            placeholder="Enter your answer..." />
+        )}
+
+        {!feedback && (
+          <div className="flex gap-2">
+            <button className="pl-submit-btn"
+              disabled={p.kind === "mcq" ? !selected : natVal === ""}
+              onClick={() => submitDrill(true, "answered")}>
+              Submit
+            </button>
+            <button className="text-[13px] px-3 py-1.5 rounded-md"
+              style={{border: "1px solid var(--border-strong)", color: "var(--text-dim)", background: "var(--bg-elev-2)"}}
+              onClick={() => submitDrill(false, "skipped")}>
+              Skip
+            </button>
+          </div>
+        )}
+
+        {feedback && (
+          <div className="rounded-lg p-3 mb-3"
+            style={{background: feedback.correct ? "var(--accent-3-soft)" : "var(--danger-soft)",
+                    border: "1px solid " + (feedback.correct ? "var(--accent-3-border)" : "var(--danger-border)")}}>
+            <div className="text-[13.5px] font-semibold mb-1"
+              style={{color: feedback.correct ? "#22c55e" : "#fb7185"}}>
+              {feedback.correct ? "✓ Correct" : "✗ Incorrect"} — Answer: {String(feedback.answer)}
+            </div>
+            <div className="flex gap-2 mt-2">
+              <button className="pl-submit-btn" onClick={nextQuestion}>
+                {currentIdx + 1 >= drill.length ? "Finish Drill →" : "Next Question →"}
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  /* phase === "review" */
+  const correctCount = results.filter(r => r.correct).length;
+  const total = results.length;
+  const acc = total > 0 ? Math.round((correctCount/total) * 100) : 0;
+  const accByDiff = {};
+  ["easy", "medium", "hard", "killer"].forEach(d => {
+    const dr = results.filter(r => r.problem.difficulty === d);
+    if (dr.length > 0) {
+      accByDiff[d] = Math.round((dr.filter(r => r.correct).length / dr.length) * 100);
+    }
+  });
+  const nm = results.reduce((s, r) => {
+    if (r.problem.kind !== "mcq") return s + (r.correct ? r.problem.marks : 0);
+    if (r.correct) return s + (r.problem.marks === 2 ? 2 : 1);
+    if (r.answer == null || r.mode === "skipped" || r.mode === "timeout") return s;
+    return s - (r.problem.marks === 2 ? 2/3 : 1/3);
+  }, 0);
+  const totalMarks = results.reduce((s, r) => s + (r.problem.marks || 1), 0);
+  const reviseConcepts = [...new Set(results.filter(r => !r.correct).flatMap(r => r.problem.tags))];
+
+  return (
+    <div className="rounded-xl p-6" style={{background: "var(--bg-elev-1)", border: "1px solid var(--border)"}}>
+      <div className="text-[20px] font-bold mb-1" style={{color: "var(--text)"}}>📊 Drill Report Card</div>
+      <div className="text-[13px] mb-4" style={{color: "var(--text-dim)"}}>5-question drill · {conceptTitle}</div>
+
+      <div className="grid md:grid-cols-3 gap-3 mb-4">
+        <div className="rounded-lg p-4" style={{background: "var(--bg-elev-2)", border: "1px solid var(--border)"}}>
+          <div className="text-[11px] tracking-[0.18em] font-semibold mb-1" style={{color: "var(--text-dim)"}}>SCORE</div>
+          <div className="text-[24px] font-bold" style={{color: "var(--accent)"}}>{correctCount}/{total}</div>
+        </div>
+        <div className="rounded-lg p-4" style={{background: "var(--bg-elev-2)", border: "1px solid var(--border)"}}>
+          <div className="text-[11px] tracking-[0.18em] font-semibold mb-1" style={{color: "var(--text-dim)"}}>ACCURACY</div>
+          <div className="text-[24px] font-bold" style={{color: acc >= 80 ? "#22c55e" : acc >= 60 ? "#eab308" : "#ef4444"}}>{acc}%</div>
+        </div>
+        <div className="rounded-lg p-4" style={{background: "var(--bg-elev-2)", border: "1px solid var(--border)"}}>
+          <div className="text-[11px] tracking-[0.18em] font-semibold mb-1" style={{color: "var(--text-dim)"}}>NEG-MARKING SIM</div>
+          <div className="text-[24px] font-bold" style={{color: nm >= totalMarks * 0.7 ? "#22c55e" : nm >= 0 ? "#eab308" : "#ef4444"}}>
+            {nm.toFixed(2)} / {totalMarks}
+          </div>
+        </div>
+      </div>
+
+      <div className="rounded-lg p-4 mb-4" style={{background: "var(--bg-elev-2)", border: "1px solid var(--border)"}}>
+        <div className="text-[11px] tracking-[0.18em] font-semibold mb-3" style={{color: "var(--accent-2)"}}>⏱ TIME vs TARGET (per question)</div>
+        <div className="space-y-2">
+          {results.map((r, i) => {
+            const pct = Math.min(100, (r.time / r.target) * 100);
+            const cls = pct > 100 ? "danger" : pct > 75 ? "warning" : "";
+            return (
+              <div key={i} className="flex items-center gap-3 text-[12px]">
+                <div className="w-16 font-mono" style={{color: "var(--text-dim)"}}>Q{i+1}</div>
+                <DiffBadge level={r.problem.difficulty} />
+                <div className="flex-1 pl-progress-bar">
+                  <div className={"pl-progress-fill " + cls} style={{width: pct + "%"}}/>
+                </div>
+                <div className="font-mono w-20 text-right" style={{color: "var(--text)"}}>{r.time}s / {r.target}s</div>
+                <div style={{color: r.correct ? "#22c55e" : "#fb7185"}}>{r.correct ? "✓" : "✗"}</div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {Object.keys(accByDiff).length > 0 && (
+        <div className="rounded-lg p-4 mb-4" style={{background: "var(--bg-elev-2)", border: "1px solid var(--border)"}}>
+          <div className="text-[11px] tracking-[0.18em] font-semibold mb-2" style={{color: "var(--accent)"}}>ACCURACY BY DIFFICULTY</div>
+          <div className="flex flex-wrap gap-2">
+            {Object.entries(accByDiff).map(([d, a]) => (
+              <div key={d} className="flex items-center gap-2 text-[12px] px-2 py-1 rounded-md"
+                style={{background: "var(--bg-elev-3)", border: "1px solid var(--border)"}}>
+                <DiffBadge level={d} />
+                <span className="font-mono" style={{color: a >= 80 ? "#22c55e" : a >= 60 ? "#eab308" : "#ef4444"}}>{a}%</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {reviseConcepts.length > 0 && (
+        <div className="rounded-lg p-4 mb-4" style={{background: "var(--warn-soft)", border: "1px solid var(--warn-border)"}}>
+          <div className="text-[11px] tracking-[0.18em] font-semibold mb-2" style={{color: "var(--warn)"}}>🔁 CONCEPTS TO REVISIT</div>
+          <div className="flex flex-wrap gap-2">
+            {reviseConcepts.map((c, i) => <ConceptTag key={i}>{c}</ConceptTag>)}
+          </div>
+        </div>
+      )}
+
+      <div className="flex gap-2">
+        <button className="pl-submit-btn" onClick={startDrill}>↻ Restart Drill</button>
+        <button className="text-[13px] px-3 py-1.5 rounded-md"
+          style={{border: "1px solid var(--border-strong)", color: "var(--text-dim)", background: "var(--bg-elev-2)"}}
+          onClick={() => setPhase("idle")}>
+          ← Back
+        </button>
+      </div>
+    </div>
+  );
+}
+
+/* ────────────────────────────────────────────────────────────────
+   PYQ WALKTHROUGH (labeled GATE CS PYQ — explanation only)
+   ──────────────────────────────────────────────────────────────── */
+function PYQWalkthrough({ year, marks, statement, solution }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="rounded-xl p-5 mb-5 pl-prose"
+      style={{background: "rgba(245,158,11,0.05)", border: "1px solid rgba(245,158,11,0.35)"}}>
+      <div className="flex flex-wrap items-center gap-2 mb-3">
+        <span className="pl-type-pyq text-[10.5px] tracking-[0.15em] font-bold px-2 py-1 rounded-md">
+          ★ GATE CS {year} — PYQ WALKTHROUGH
+        </span>
+        <MetaPill>{marks}-mark</MetaPill>
+      </div>
+      <div className="text-[15px] leading-relaxed mb-3 p-4 rounded-lg"
+        style={{background: "var(--bg-elev-2)", color: "var(--text)", border: "1px solid var(--border)"}}>
+        {statement}
+      </div>
+      <button onClick={() => setOpen(o => !o)}
+        className="text-[13px] px-3 py-1.5 rounded-md"
+        style={{border: "1px solid rgba(245,158,11,0.35)", color: "#f59e0b", background: "rgba(245,158,11,0.10)"}}>
+        {open ? "▲ Hide walkthrough" : "▼ Show full walkthrough"}
+      </button>
+      {open && (
+        <div className="mt-4 space-y-3">
+          {solution.map((s, i) => (
+            <div key={i} className="rounded-lg p-3" style={{background: "var(--bg-elev-2)", border: "1px solid var(--border)"}}>
+              <div className="text-[11px] tracking-[0.18em] font-semibold mb-1" style={{color: "var(--accent)"}}>{s.label}</div>
+              <div className="text-[14px]" style={{color: "var(--text)", whiteSpace: "pre-line"}}>{s.body}</div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ────────────────────────────────────────────────────────────────
+   CONCEPT NAVIGATOR (Tabs to pick which concept lab)
+   ──────────────────────────────────────────────────────────────── */
+function ConceptNavigator({ concepts, active, setActive, progressMap }) {
+  return (
+    <div className="sticky top-[60px] z-40 py-3 px-4 mb-4 rounded-xl flex flex-wrap gap-2"
+      style={{background: "var(--bg-overlay)", backdropFilter: "blur(14px)", border: "1px solid var(--border)"}}>
+      {concepts.map(c => {
+        const p = progressMap[c.num];
+        const done = p ? p.correct.length : 0;
+        const total = p ? p.totalProblems : 0;
+        return (
+          <button key={c.num}
+            className={"pl-tab-pill " + (active === c.num ? "active" : "")}
+            onClick={() => {
+              setActive(c.num);
+              document.getElementById("concept-lab-" + c.num)?.scrollIntoView({ behavior: "smooth", block: "start" });
+            }}>
+            <span style={{fontWeight: 600}}>C5.{c.num}</span>
+            <span className="opacity-70 ml-2">{c.shortName}</span>
+            <span className="ml-2 font-mono text-[11px] opacity-80">{done}/{total} ✓</span>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+/* ────────────────────────────────────────────────────────────────
+   CONCEPT-LAB WRAPPER
+   ──────────────────────────────────────────────────────────────── */
+function ConceptLab({ num, title, why, patterns, problems, techniques, mistakes, pyqs, progress }) {
+  return (
+    <section id={"concept-lab-" + num} className="max-w-5xl mx-auto px-5 py-8 fade-up">
+      <div className="card p-6 md:p-9" style={{boxShadow: "var(--shadow-glow-accent)"}}>
+        <div className="flex flex-wrap items-baseline gap-3 mb-3">
+          <span className="text-xs tracking-[0.22em] font-semibold px-2.5 py-1 rounded-md"
+            style={{color: "var(--accent)", border: "1px solid var(--accent-border)", background: "var(--accent-soft)"}}>
+            PROBLEM LAB · CONCEPT 5.{num}
+          </span>
+          <span className="text-sm" style={{color: "var(--text-faded)"}}>·</span>
+          <span className="text-sm" style={{color: "var(--text-dim)"}}>Module 5 · Determinants</span>
+          <span className="ml-auto text-[11px] px-2 py-1 rounded-md font-mono"
+            style={{background: "var(--bg-elev-2)", color: "var(--text-dim)", border: "1px solid var(--border)"}}>
+            {progress.correct.length}/{progress.totalProblems} solved
+          </span>
+        </div>
+        <h2 className="text-2xl md:text-3xl font-bold tracking-tight mb-3" style={{color: "var(--text)"}}>{title}</h2>
+        {why && (
+          <div className="text-[15px] leading-relaxed mb-6 border-l-2 pl-4 italic font-serif"
+            style={{borderColor: "var(--accent-border)", color: "var(--text-dim)"}}>
+            {why}
+          </div>
+        )}
+
+        <LayerHeader num={1} title="How GATE CS Tests This Concept"
+          subtitle="Top rankers classify the question first, then solve. Train the classifier." />
+        {patterns.map((p, i) => <PatternCard key={i} idx={i+1} pattern={p} />)}
+
+        {pyqs && pyqs.length > 0 && (
+          <>
+            <LayerHeader num={"1.5"} title="GATE CS PYQ Walkthroughs"
+              subtitle="Real GATE CS questions with full reasoning chains. Read, don't solve — these are examples." />
+            {pyqs.map((p, i) => <PYQWalkthrough key={i} {...p} />)}
+          </>
+        )}
+
+        <LayerHeader num={2} title="Progressive Problem Set"
+          subtitle="2 Easy · 3 Medium · 3 Hard · 1 Killer. Attempt before reveal. Hints only on request." />
+        {problems.map((p, i) => <ProblemCard key={p.id} p={p} idx={i+1} progress={progress} />)}
+
+        <LayerHeader num={3} title="Technique Arsenal"
+          subtitle="How to think, not what to think. Each card is a named, reusable solving algorithm." />
+        {techniques.map((t, i) => <TechniqueCard key={i} tech={t} />)}
+
+        <LayerHeader num={4} title="Mistake Autopsy Lab"
+          subtitle="Real wrong solutions written exactly as students write them. Each error has a one-line preventive rule." />
+        {mistakes.map((m, i) => <MistakeCard key={i} mistake={m} idx={i+1} />)}
+
+        <LayerHeader num={5} title="Timed Drill Mode"
+          subtitle="Knowing the answer ≠ executing under 90-second pressure. Train exam temperament separately." />
+        <DrillMode conceptNum={num} conceptTitle={title} problems={problems} />
+      </div>
+    </section>
+  );
+}
+
+
+/* ════════════════════════════════════════════════════════════════
+   CONCEPT 5.1 — WHAT det REALLY IS (Signed Volume / Sign Meaning)
+   ════════════════════════════════════════════════════════════════ */
+const C51_PATTERNS = [
+  { name: "det = Signed Volume", surface: "Geometric interpretation asked.",
+    testing: "Whether you know det(A) = signed n-volume of parallelepiped spanned by columns.",
+    signals: ["\"geometric meaning of determinant\""],
+    firstMove: "det = volume × sign (orientation).",
+    timeBudget: 25, frequency: "Occasional" },
+  { name: "Sign Flip Under Row Swap", surface: "After swapping two rows, what happens to det?",
+    testing: "det multiplied by -1.",
+    signals: ["\"after swapping\""],
+    firstMove: "Sign flips: det(B) = -det(A).",
+    timeBudget: 15, frequency: "Frequent" },
+  { name: "Singular ⇔ det = 0 ⇔ Volume 0", surface: "Asked when det = 0 geometrically.",
+    testing: "Whether you know det = 0 ⇔ columns linearly dependent ⇔ volume 0 (degenerate parallelepiped).",
+    signals: ["\"det = 0\"", "\"degenerate volume\""],
+    firstMove: "det = 0 ⇔ columns dependent ⇔ matrix singular.",
+    timeBudget: 20, frequency: "Frequent" },
+  { name: "Linear Map Volume Scaling", surface: "T: ℝⁿ → ℝⁿ with matrix A. Asked how T scales volumes.",
+    testing: "Whether you know any region's volume scales by |det A|.",
+    signals: ["\"volume of T(region)\"", "\"linear map scales by\""],
+    firstMove: "T scales every n-volume by |det A|.",
+    timeBudget: 25, frequency: "Occasional" },
+];
+
+const C51_PROBLEMS = [
+  { id: "c51-e1", difficulty: "easy", kind: "nat", marks: 1, timeTarget: 25,
+    tags: ["det Sign"],
+    statement: <span>If <T src="\det(A) = 7"/> and B is obtained from A by swapping two rows, then <T src="\det(B)"/> = ___.</span>,
+    answer: -7, tolerance: 0,
+    hints: [
+      { label: "Conceptual redirect", text: "Row swap flips sign of det." },
+      { label: "Key step", text: "-7." },
+      { label: "Near-complete", text: "-7." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Row swap property." },
+        { label: "KEY STEP", body: "det(B) = -det(A) = -7." },
+        { label: "COMPUTATION", body: "-7." },
+        { label: "VERIFICATION", body: "Universal: any single row swap flips sign." },
+      ],
+      gateCheck: "Row swap → sign flip.", speed: "5s.", whatMadeHard: "Nothing.",
+      generalization: "Universal.", linkedConcept: "C5.2.",
+    } },
+  { id: "c51-e2", difficulty: "easy", kind: "mcq", marks: 1, timeTarget: 30,
+    tags: ["Geometric"], skipSignal: { type: "attempt", text: "Attempt" },
+    statement: <span>For a 2×2 matrix A, |det(A)| equals:</span>,
+    options: [
+      "Sum of column lengths.",
+      "Area of parallelogram spanned by columns.",
+      "Product of trace and det.",
+      "Length of longest column.",
+    ],
+    answer: "B",
+    hints: [
+      { label: "Conceptual redirect", text: "2D det = signed area." },
+      { label: "Key step", text: "Parallelogram area." },
+      { label: "Near-complete", text: "(B)." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Geometric interpretation 2D." },
+        { label: "KEY STEP", body: "|det| = area of parallelogram with column-vector sides." },
+        { label: "COMPUTATION", body: "(B)." },
+        { label: "VERIFICATION", body: "Same for rows." },
+      ],
+      gateCheck: "2D det = area.", speed: "Direct.", whatMadeHard: "Nothing.",
+      generalization: "n-D: |det| = n-volume.", linkedConcept: "C5.1.",
+      negAdvisory: "Attempt: definition. (B) wins.",
+    } },
+  { id: "c51-m1", difficulty: "medium", kind: "mcq", marks: 2, timeTarget: 60,
+    tags: ["Scaling"], skipSignal: { type: "attempt", text: "Attempt" },
+    statement: <span>Linear map T: ℝ³ → ℝ³ with matrix A has det(A) = 5. T maps a unit cube to a region of volume:</span>,
+    options: [ "1", "5", "25", "125" ],
+    answer: "B",
+    hints: [
+      { label: "Conceptual redirect", text: "Volume scaled by |det A|." },
+      { label: "Key step", text: "1 × 5 = 5." },
+      { label: "Near-complete", text: "(B)." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Volume scaling factor = |det A|." },
+        { label: "KEY STEP", body: "Original volume 1. Mapped volume = 1·|det A| = 5." },
+        { label: "COMPUTATION", body: "(B)." },
+        { label: "VERIFICATION", body: "Sign of det = orientation; volume = magnitude." },
+      ],
+      gateCheck: "Volume scales by |det|.", speed: "5s.", whatMadeHard: "Nothing.",
+      generalization: "Universal.", linkedConcept: "C5.1.",
+      negAdvisory: "Attempt: scaling. (B) wins.",
+    } },
+  { id: "c51-m2", difficulty: "medium", kind: "mcq", marks: 2, timeTarget: 60,
+    tags: ["Sign Meaning"], skipSignal: { type: "attempt", text: "Attempt" },
+    statement: <span>If det(A) {"<"} 0, the linear map T (with matrix A) on ℝ³:</span>,
+    options: [
+      "Preserves orientation.",
+      "Reverses orientation.",
+      "Doesn't preserve volumes.",
+      "Has no inverse.",
+    ],
+    answer: "B",
+    hints: [
+      { label: "Conceptual redirect", text: "Negative det = orientation reversal." },
+      { label: "Key step", text: "Reverses." },
+      { label: "Near-complete", text: "(B)." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Sign of det." },
+        { label: "KEY STEP", body: "det > 0: orientation preserved. det < 0: reversed (mirror)." },
+        { label: "COMPUTATION", body: "(B)." },
+        { label: "VERIFICATION", body: "Reflection has det = -1." },
+      ],
+      gateCheck: "Sign = orientation.", speed: "Direct.", whatMadeHard: "Nothing.",
+      generalization: "Universal.", linkedConcept: "C5.1.",
+      negAdvisory: "Attempt: sign. (B) wins.",
+    } },
+  { id: "c51-m3", difficulty: "medium", kind: "nat", marks: 2, timeTarget: 70,
+    tags: ["Compute det 2x2"],
+    statement: <span>The area of the parallelogram spanned by columns of <T src="A = \begin{pmatrix} 3 & 1 \\ 2 & 4 \end{pmatrix}"/> is ___.</span>,
+    answer: 10, tolerance: 0,
+    hints: [
+      { label: "Conceptual redirect", text: "Area = |det A| = |3·4 - 1·2| = 10." },
+      { label: "Key step", text: "10." },
+      { label: "Near-complete", text: "10." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "2D area = |det|." },
+        { label: "KEY STEP", body: "det = 3·4 - 1·2 = 12 - 2 = 10. |det| = 10." },
+        { label: "COMPUTATION", body: "10." },
+        { label: "VERIFICATION", body: "Parallelogram with sides (3, 2) and (1, 4) has area 10." },
+      ],
+      gateCheck: "2x2 area formula.", speed: "10s.", whatMadeHard: "Nothing.",
+      generalization: "Universal.", linkedConcept: "C5.2.",
+    } },
+  { id: "c51-h1", difficulty: "hard", kind: "mcq", marks: 2, timeTarget: 80,
+    tags: ["Equivalences"], skipSignal: { type: "attempt", text: "Attempt" },
+    statement: <span>For square A, det(A) = 0 is equivalent to:</span>,
+    options: [
+      "A has linearly dependent columns.",
+      "A is singular.",
+      "Volume of parallelepiped spanned by columns is 0.",
+      "All of the above.",
+    ],
+    answer: "D",
+    hints: [
+      { label: "Conceptual redirect", text: "Equivalent conditions for det = 0." },
+      { label: "Key step", text: "All three." },
+      { label: "Near-complete", text: "(D)." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Equivalence chain." },
+        { label: "KEY STEP", body: "det = 0 ⇔ singular ⇔ columns dependent ⇔ rank < n ⇔ volume 0 ⇔ no inverse." },
+        { label: "COMPUTATION", body: "(D)." },
+        { label: "VERIFICATION", body: "All standard equivalences." },
+      ],
+      gateCheck: "Memorize.", speed: "Direct.", whatMadeHard: "Nothing.",
+      generalization: "Universal.", linkedConcept: "C5.3.",
+      negAdvisory: "Attempt: theorem. (D) wins.",
+    } },
+  { id: "c51-h2", difficulty: "hard", kind: "nat", marks: 2, timeTarget: 80,
+    tags: ["3D Volume"],
+    statement: <span>The volume of parallelepiped with column vectors (1, 0, 0), (1, 1, 0), (1, 1, 1) is ___.</span>,
+    answer: 1, tolerance: 0,
+    hints: [
+      { label: "Conceptual redirect", text: "Volume = |det| of column matrix." },
+      { label: "Key step", text: "Triangular with diag 1, 1, 1. det = 1." },
+      { label: "Near-complete", text: "1." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "3D volume = |det|." },
+        { label: "KEY STEP", body: "A = [[1, 1, 1], [0, 1, 1], [0, 0, 1]]. Upper triangular. det = 1·1·1 = 1." },
+        { label: "COMPUTATION", body: "1." },
+        { label: "VERIFICATION", body: "Unit cube transformed by shears — volume preserved." },
+      ],
+      gateCheck: "Triangular det shortcut.", speed: "10s.", whatMadeHard: "Nothing.",
+      generalization: "Universal.", linkedConcept: "C5.2.",
+    } },
+  { id: "c51-h3", difficulty: "hard", kind: "mcq", marks: 2, timeTarget: 80,
+    tags: ["Volume Scaling"], skipSignal: { type: "attempt", text: "Attempt" },
+    statement: <span>T : ℝ² → ℝ² has det 2. T maps a triangle of area 5 to area:</span>,
+    options: [ "10", "5", "2.5", "Cannot determine without triangle's shape" ],
+    answer: "A",
+    hints: [
+      { label: "Conceptual redirect", text: "Linear map scales ALL areas uniformly by |det|." },
+      { label: "Key step", text: "5 × 2 = 10." },
+      { label: "Near-complete", text: "(A)." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Volume scaling factor." },
+        { label: "KEY STEP", body: "ANY 2D region's area scaled by |det| = 2. 5 × 2 = 10." },
+        { label: "COMPUTATION", body: "(A)." },
+        { label: "VERIFICATION", body: "Independent of shape — only depends on det." },
+      ],
+      gateCheck: "Scaling factor universal.", speed: "Direct.", whatMadeHard: "Distractor (D) tempts.",
+      generalization: "Universal.", linkedConcept: "C5.1.",
+      negAdvisory: "Attempt: factor. (A) wins.",
+    } },
+  { id: "c51-k1", difficulty: "killer", kind: "mcq", marks: 2, timeTarget: 110,
+    tags: ["KILLER", "Composition"],
+    statement: <span><B>[KILLER]</B> If T₁ has det 3 and T₂ has det -2, the composition T₂ ∘ T₁ has det = ___ and changes orientation = ___.</span>,
+    options: [
+      "det = -6, reverses orientation.",
+      "det = 1, preserves.",
+      "det = 6, preserves.",
+      "det = -6, preserves orientation.",
+    ],
+    answer: "A",
+    hints: [
+      { label: "Conceptual redirect", text: "det(AB) = det(A)·det(B). Negative product → orientation flip." },
+      { label: "Key step", text: "3·(-2) = -6. Sign negative → reversed." },
+      { label: "Near-complete", text: "(A)." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Multiplication of dets." },
+        { label: "KEY STEP", body: "det(T₂T₁) = det(T₂)·det(T₁) = (-2)·3 = -6. Negative → orientation reversed." },
+        { label: "COMPUTATION", body: "(A)." },
+        { label: "VERIFICATION", body: "Each map separately: T₁ preserves (det > 0), T₂ reverses (det < 0). Composition: net reversal." },
+      ],
+      gateCheck: "det of product = product of dets.", speed: "20s.", whatMadeHard: "Nothing.",
+      generalization: "Universal.", linkedConcept: "C5.2 Det of products.",
+      negAdvisory: "Attempt: rule. (A) wins.",
+    } },
+];
+
+const C51_TECHNIQUES = [
+  { name: "Volume-as-|det| Reflex", type: "Structural Insight",
+    when: "Geometric volume/area question.",
+    steps: ["Identify matrix with sides as columns.", "|det| = volume."],
+    speed: "Direct.", example: "Parallelogram area = |det|.",
+    danger: "Sign matters for orientation.", freq: "Occasional" },
+  { name: "Row Op → det Rule", type: "Speed Shortcut",
+    when: "Determinant after row operation.",
+    steps: ["Swap: det negates.",
+            "Scale by c: det multiplied by c.",
+            "Add multiple of row: det unchanged."],
+    speed: "Direct.", example: "Standard.",
+    danger: "Don't confuse rules.", freq: "Frequent" },
+];
+
+const C51_MISTAKES = [
+  { name: "Ignoring Sign Under Swap", wrong: [
+      "Problem: det A = 5. After row swap, det = ?",
+      "Solution: Still 5 (row ops don't change det).",
+    ], errorLine: 0,
+    errorDescription: "Swap negates det.",
+    rootCause: "Forgetting row swap is special.",
+    correct: "-5.",
+    prevention: "Memorize 3 row op rules.",
+    gateCost: "Sign error.", frequency: "Common" },
+];
+
+const C51_PYQS = [];
+
+function ConceptLab51({ progress }) {
+  return <ConceptLab num={1} title="What det Really Is — Signed Volume + Sign Meaning"
+    why={<>Geometric intuition first. det = signed volume scaling factor for linear maps. Sign of det = orientation. det = 0 ⇔ degenerate ⇔ singular.</>}
+    patterns={C51_PATTERNS} problems={C51_PROBLEMS} techniques={C51_TECHNIQUES}
+    mistakes={C51_MISTAKES} pyqs={C51_PYQS} progress={progress} />;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   CONCEPT 5.2 — COMPUTING DETERMINANTS (HIGH YIELD + 6 PYQs)
+   ════════════════════════════════════════════════════════════════ */
+const C52_PATTERNS = [
+  { name: "Property Chain (no expansion)", surface: "Det asked, but matrix has structure (zero row, scalar-multiple rows, triangular, etc.).",
+    testing: "Solve via PROPERTIES, not expansion.",
+    signals: ["\"find the determinant\""],
+    firstMove: "Inspect for: triangular, zero row, equal rows, scalar multiples. Apply property; avoid expansion.",
+    timeBudget: 30, frequency: "Very Frequent" },
+  { name: "Row Op → det Property", surface: "Given matrix and operation, asked new det.",
+    testing: "Swap: ×(-1). Scale row by c: ×c. Add multiple of row: ×1 (unchanged).",
+    signals: ["\"after applying R₂ → 2R₂\"", "\"swapping rows\""],
+    firstMove: "Apply the rule per operation.",
+    timeBudget: 20, frequency: "Frequent" },
+  { name: "det(cA) for n×n", surface: "Scalar multiply entire matrix.",
+    testing: "det(cA) = cⁿ · det(A).",
+    signals: ["\"det(cA)\""],
+    firstMove: "Use cⁿ. NEVER c·det(A) (wrong by factor of cⁿ⁻¹).",
+    timeBudget: 15, frequency: "Frequent" },
+  { name: "Triangular Det Shortcut", surface: "Triangular matrix (upper or lower).",
+    testing: "det = product of diagonal.",
+    signals: ["\"upper triangular\"", "\"diagonal entries\""],
+    firstMove: "Multiply diagonal. Done.",
+    timeBudget: 10, frequency: "Frequent" },
+  { name: "det(A - λI) = 0 → Eigenvalue Disguise", surface: "Asked for λ making det vanish.",
+    testing: "Whether you recognize this is the characteristic equation = eigenvalues.",
+    signals: ["\"det(A - λI) = 0\""],
+    firstMove: "Eigenvalue equation. Solve for λ.",
+    timeBudget: 60, frequency: "Frequent" },
+  { name: "det(AB) = det(A)·det(B)", surface: "Det of product asked.",
+    testing: "Product rule.",
+    signals: ["\"det(AB)\""],
+    firstMove: "Multiply individual dets.",
+    timeBudget: 10, frequency: "Frequent" },
+];
+
+const C52_PROBLEMS = [
+  { id: "c52-e1", difficulty: "easy", kind: "nat", marks: 1, timeTarget: 20,
+    tags: ["Triangular Det"],
+    statement: <span>The determinant of <T src="\begin{pmatrix} 3 & 1 & 5 \\ 0 & 2 & 7 \\ 0 & 0 & 4 \end{pmatrix}"/> is ___.</span>,
+    answer: 24, tolerance: 0,
+    hints: [
+      { label: "Conceptual redirect", text: "Upper triangular: det = product of diagonal." },
+      { label: "Key step", text: "3·2·4 = 24." },
+      { label: "Near-complete", text: "24." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Upper triangular shortcut." },
+        { label: "KEY STEP", body: "det = 3·2·4 = 24." },
+        { label: "COMPUTATION", body: "24." },
+        { label: "VERIFICATION", body: "All off-diagonal entries don't matter for triangular." },
+      ],
+      gateCheck: "Triangular det.", speed: "5s.", whatMadeHard: "Nothing.",
+      generalization: "Universal.", linkedConcept: "C5.2.",
+    } },
+  { id: "c52-e2", difficulty: "easy", kind: "nat", marks: 1, timeTarget: 25,
+    tags: ["det(cA)"],
+    statement: <span>For 3×3 matrix A with det(A) = 4, det(2A) = ___.</span>,
+    answer: 32, tolerance: 0,
+    hints: [
+      { label: "Conceptual redirect", text: "det(cA) = cⁿ · det A. n = 3." },
+      { label: "Key step", text: "2³ · 4 = 32." },
+      { label: "Near-complete", text: "32." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "det(cA) rule." },
+        { label: "KEY STEP", body: "det(2A) = 2³ · det(A) = 8 · 4 = 32." },
+        { label: "COMPUTATION", body: "32." },
+        { label: "VERIFICATION", body: "Each row scaled by 2 → factor 2 per row → 2³ total for 3×3." },
+      ],
+      gateCheck: "cⁿ NOT c.", speed: "5s.", whatMadeHard: "Forgetting cⁿ.",
+      generalization: "Universal.", linkedConcept: "C5.2.",
+    } },
+  { id: "c52-m1", difficulty: "medium", kind: "nat", marks: 2, timeTarget: 60,
+    tags: ["Property Chain"],
+    statement: <span>The determinant of <T src="\begin{pmatrix} 1 & 2 & 3 \\ 2 & 4 & 6 \\ 7 & 8 & 9 \end{pmatrix}"/> is ___.</span>,
+    answer: 0, tolerance: 0,
+    hints: [
+      { label: "Conceptual redirect", text: "R₂ = 2·R₁ → dependent rows." },
+      { label: "Key step", text: "0." },
+      { label: "Near-complete", text: "0." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Spot dependent rows." },
+        { label: "KEY STEP", body: "Row 2 = 2·Row 1. Dependent → det = 0." },
+        { label: "COMPUTATION", body: "0." },
+        { label: "VERIFICATION", body: "No need for cofactor expansion." },
+      ],
+      gateCheck: "Dependent rows → det 0.", speed: "5s.", whatMadeHard: "Nothing.",
+      generalization: "Universal.", linkedConcept: "C5.2.",
+    } },
+  { id: "c52-m2", difficulty: "medium", kind: "mcq", marks: 2, timeTarget: 75,
+    tags: ["Row Op"], skipSignal: { type: "attempt", text: "Attempt" },
+    statement: <span>If det(A) = 5 and B is obtained from A by (i) swapping rows 1 and 2, then (ii) multiplying row 3 by 3, then (iii) multiplying row 1 by 2. Find det(B).</span>,
+    options: [ "30", "-30", "5", "-5" ],
+    answer: "B",
+    hints: [
+      { label: "Conceptual redirect", text: "Track each operation's effect on det: swap × (−1), scale row by c × c, add multiple × 1." },
+      { label: "Key step", text: "Swap: × (−1). Scale row 3 by 3: × 3. Scale row 1 by 2: × 2. Net multiplier: (−1)·3·2 = −6." },
+      { label: "Near-complete", text: "det(B) = 5 · (−6) = −30." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Sequential row operations — multiply the per-op multipliers." },
+        { label: "KEY STEP", body: "Start: det(A) = 5.\n(i) Swap R₁ ↔ R₂: det × (−1) → −5.\n(ii) Scale R₃ by 3: det × 3 → −15.\n(iii) Scale R₁ by 2: det × 2 → −30." },
+        { label: "COMPUTATION", body: "det(B) = −30. Answer (B)." },
+        { label: "VERIFICATION", body: "Per-op rules: swap (×−1), scale (×c), add multiple of one row to another (×1, no change)." },
+      ],
+      gateCheck: "Multiply per-op multipliers; track sign carefully.", speed: "30s.", whatMadeHard: "Sign tracking through 3 ops.",
+      generalization: "Universal.", linkedConcept: "C5.2.",
+      negAdvisory: "Attempt: rules. (B) wins.",
+    } },
+  { id: "c52-m3", difficulty: "medium", kind: "nat", marks: 2, timeTarget: 80,
+    tags: ["Cofactor 3x3"],
+    statement: <span>The determinant of <T src="\begin{pmatrix} 1 & 2 & -1 \\ 3 & 0 & 2 \\ 1 & 1 & 1 \end{pmatrix}"/> is ___.</span>,
+    answer: -7, tolerance: 0,
+    hints: [
+      { label: "Conceptual redirect", text: "Cofactor expansion along row 1 (or any row/col)." },
+      { label: "Key step", text: "1·(0 - 2) - 2·(3 - 2) + (-1)·(3 - 0) = -2 - 2 - 3 = -7." },
+      { label: "Near-complete", text: "-7." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "3x3 cofactor expansion." },
+        { label: "KEY STEP", body: "Expand row 1:\n1·det[[0, 2],[1, 1]] - 2·det[[3, 2],[1, 1]] + (-1)·det[[3, 0],[1, 1]]\n= 1·(0 - 2) - 2·(3 - 2) - (3 - 0)\n= -2 - 2 - 3 = -7." },
+        { label: "COMPUTATION", body: "-7." },
+        { label: "VERIFICATION", body: "Sarrus' rule for 3x3 gives same answer." },
+      ],
+      gateCheck: "Alternate signs +, -, + along expansion.", speed: "60s.", whatMadeHard: "Sign tracking in cofactors.",
+      generalization: "Universal.", linkedConcept: "C5.2.",
+    } },
+  { id: "c52-h1", difficulty: "hard", kind: "nat", marks: 2, timeTarget: 80,
+    tags: ["Det Product"],
+    statement: <span>If det(A) = 3, det(B) = -2, both 4×4, then det(2A·B⁻¹) = ___.</span>,
+    answer: -24, tolerance: 0,
+    hints: [
+      { label: "Conceptual redirect", text: "det(2A·B⁻¹) = 2⁴·det(A)·1/det(B) = 16·3·(-1/2) = -24." },
+      { label: "Key step", text: "-24." },
+      { label: "Near-complete", text: "-24." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Det product and inverse rules." },
+        { label: "KEY STEP", body: "det(2A·B⁻¹) = det(2A) · det(B⁻¹) = 2⁴·det(A)·(1/det(B)) = 16·3·(-1/2) = -24." },
+        { label: "COMPUTATION", body: "-24." },
+        { label: "VERIFICATION", body: "Use det(B⁻¹) = 1/det(B); det(cA) = cⁿ det A." },
+      ],
+      gateCheck: "Combine multiple rules.", speed: "30s.", whatMadeHard: "Combining.",
+      generalization: "Universal.", linkedConcept: "C5.3.",
+    } },
+  { id: "c52-h2", difficulty: "hard", kind: "mcq", marks: 2, timeTarget: 90,
+    tags: ["Eigenvalue Disguise"], skipSignal: { type: "attempt", text: "Attempt" },
+    statement: <span>For <T src="A = \begin{pmatrix} 2 & 1 \\ 1 & 2 \end{pmatrix}"/>, the values of λ for which det(A - λI) = 0 are:</span>,
+    options: [ "1, 3", "2, 4", "0, 4", "1, 2" ],
+    answer: "A",
+    hints: [
+      { label: "Conceptual redirect", text: "Characteristic equation: (2-λ)² - 1 = 0." },
+      { label: "Key step", text: "λ² - 4λ + 3 = 0 → λ = 1, 3." },
+      { label: "Near-complete", text: "(A)." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Eigenvalue equation." },
+        { label: "KEY STEP", body: "det(A - λI) = det[[2-λ, 1],[1, 2-λ]] = (2-λ)² - 1 = λ² - 4λ + 3 = (λ-1)(λ-3) = 0." },
+        { label: "COMPUTATION", body: "λ = 1, 3. (A)." },
+        { label: "VERIFICATION", body: "Sum = 4 = trace, product = 3 = det. ✓" },
+      ],
+      gateCheck: "Characteristic equation.", speed: "30s.", whatMadeHard: "Nothing.",
+      generalization: "Universal.", linkedConcept: "M6 Eigenvalues.",
+      negAdvisory: "Attempt: formula. (A) wins.",
+    } },
+  { id: "c52-h3", difficulty: "hard", kind: "mcq", marks: 2, timeTarget: 70,
+    tags: ["Det Properties"], skipSignal: { type: "attempt", text: "Attempt" },
+    statement: <span>For square matrices A, B of same size, which is ALWAYS true?</span>,
+    options: [
+      "det(A + B) = det(A) + det(B).",
+      "det(AB) = det(A)·det(B).",
+      "det(A) = trace(A).",
+      "All of the above.",
+    ],
+    answer: "B",
+    hints: [
+      { label: "Conceptual redirect", text: "Only product rule is universal." },
+      { label: "Key step", text: "(A) false. (C) false. (B) true." },
+      { label: "Near-complete", text: "(B)." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Standard properties recall." },
+        { label: "KEY STEP", body: "(A) det(A+B) ≠ det A + det B generally. (B) det(AB) = det(A)·det(B) — universal. (C) det ≠ trace." },
+        { label: "COMPUTATION", body: "(B)." },
+        { label: "VERIFICATION", body: "Counterexample for (A): A = I, B = I, det(2I) = 2ⁿ ≠ 1 + 1 = 2." },
+      ],
+      gateCheck: "Product rule only.", speed: "Direct.", whatMadeHard: "Distractor (A).",
+      generalization: "Universal.", linkedConcept: "C5.2.",
+      negAdvisory: "Attempt: rule. (B) wins.",
+    } },
+  { id: "c52-k1", difficulty: "killer", kind: "mcq", marks: 2, timeTarget: 180,
+    tags: ["KILLER", "Polynomial Entries"],
+    statement: <span><B>[KILLER]</B> For <T src="A(\lambda) = \begin{pmatrix} 1-\lambda & 3 \\ 4 & 2-\lambda \end{pmatrix}"/>, the values of λ for which det(A) = 0 are:</span>,
+    options: [
+      "1, 2",
+      "−2, 5",
+      "−5, 2",
+      "All real",
+    ],
+    answer: "B",
+    hints: [
+      { label: "Conceptual redirect", text: "Expand det as a polynomial in λ, then factor." },
+      { label: "Key step", text: "det = (1−λ)(2−λ) − 3·4 = λ² − 3λ + 2 − 12 = λ² − 3λ − 10." },
+      { label: "Near-complete", text: "λ² − 3λ − 10 = (λ − 5)(λ + 2) = 0 ⇒ λ = 5 or λ = −2." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Polynomial entries → polynomial det. This is exactly the characteristic polynomial of [[1, 3], [4, 2]]." },
+        { label: "KEY STEP", body: "det(A) = (1 − λ)(2 − λ) − (3)(4) = (2 − 3λ + λ²) − 12 = λ² − 3λ − 10." },
+        { label: "COMPUTATION", body: "λ² − 3λ − 10 = (λ − 5)(λ + 2). Roots: λ = 5, −2. Answer (B)." },
+        { label: "VERIFICATION", body: "Vieta's: sum of roots = 3 = trace ✓. Product = −10 = det([[1, 3], [4, 2]]) = 2 − 12 = −10 ✓." },
+      ],
+      gateCheck: "λ-matrix det → char poly of constant matrix.", speed: "60s.", whatMadeHard: "Algebra and factoring.",
+      generalization: "Same for any λ-matrix arising from A − λI.", linkedConcept: "M6 Char poly, Eigenvalues.",
+      negAdvisory: "Attempt: factor the quadratic. (B) wins.",
+    } },
+];
+
+const C52_TECHNIQUES = [
+  { name: "Property Chain Technique", type: "Speed Shortcut",
+    when: "Det asked but matrix has structural features.",
+    steps: ["Check for triangular → product of diagonal.",
+            "Check for dependent rows → det 0.",
+            "Check for zero row → det 0.",
+            "Reduce using row ops (carefully tracking sign / scaling).",
+            "Only fall back to cofactor expansion if no structure exists."],
+    speed: "Often 5-20s.", example: "Triangular 4x4 in 5 seconds.",
+    danger: "Don't expand mindlessly.", freq: "Very Frequent" },
+  { name: "det(cA) = cⁿ det(A)", type: "Speed Shortcut",
+    when: "Whole matrix scaled.",
+    steps: ["Use exponent = size n."],
+    speed: "Direct.", example: "det(3·A) for 4x4 with det 2: 3⁴·2 = 162.",
+    danger: "NOT c·det A.", freq: "Frequent" },
+  { name: "Triangular Shortcut", type: "Speed Shortcut",
+    when: "Upper or lower triangular matrix.",
+    steps: ["Multiply diagonal."],
+    speed: "5s.", example: "5x5 triangular in 5s.",
+    danger: "Doesn't apply to non-triangular.", freq: "Frequent" },
+  { name: "Sarrus Rule (3x3 ONLY)", type: "Speed Shortcut",
+    when: "3x3 matrix needs det.",
+    steps: ["Down-diagonals minus up-diagonals.", "ONLY for 3x3."],
+    speed: "30s.", example: "Standard.",
+    danger: "DOES NOT WORK for 4x4 or larger.", freq: "Frequent" },
+  { name: "Det Product Rule", type: "Speed Shortcut",
+    when: "Det of product.",
+    steps: ["det(AB) = det(A)·det(B).",
+            "det(A⁻¹) = 1/det(A).",
+            "det(Aⁿ) = (det A)ⁿ.",
+            "det(Aᵀ) = det(A)."],
+    speed: "Direct.", example: "Standard.",
+    danger: "det(A+B) ≠ det A + det B.", freq: "Very Frequent" },
+];
+
+const C52_MISTAKES = [
+  { name: "det(cA) = c·det(A) Error", wrong: [
+      "Problem: 3x3 matrix with det 5. Find det(2A).",
+      "Solution: 2·5 = 10.",
+    ], errorLine: 0,
+    errorDescription: "det(cA) = cⁿ det A, not c·det A. Forgot exponent n=3.",
+    rootCause: "Linear-scaling fallacy.",
+    correct: "2³·5 = 40.",
+    prevention: "ALWAYS cⁿ for n×n.",
+    gateCost: "Wrong answer by factor cⁿ⁻¹.", frequency: "Very Common" },
+  { name: "Sarrus on 4x4", wrong: [
+      "Problem: det of 4x4 matrix.",
+      "Solution: Apply Sarrus' rule (diagonals).",
+    ], errorLine: 0,
+    errorDescription: "Sarrus' rule works ONLY for 3x3.",
+    rootCause: "Generalizing rule incorrectly.",
+    correct: "Use cofactor expansion or row reduction for 4x4+.",
+    prevention: "Sarrus = 3x3 only sticker.",
+    gateCost: "Wrong answer.", frequency: "Common" },
+  { name: "det(A + B) = det(A) + det(B) Error", wrong: [
+      "Problem: A, B with det 3 and 5. Find det(A + B).",
+      "Solution: 8.",
+    ], errorLine: 0,
+    errorDescription: "Det is NOT linear in matrices.",
+    rootCause: "Treating det like a linear function.",
+    correct: "Cannot determine without A, B explicitly.",
+    prevention: "Only DET PRODUCT rule holds.",
+    gateCost: "Major conceptual.", frequency: "Common" },
+];
+
+const C52_PYQS = [
+  { year: "2001-Style", marks: 2,
+    statement: <span><B>(Representative GATE CS 2001 pattern.)</B><br/><br/>For 3x3 matrix A with det 6, the value of det(2A⁻¹) is ___.</span>,
+    solution: [
+      { label: "RECOGNIZE", body: "Combine cⁿ and inverse rules." },
+      { label: "APPLY", body: "det(2A⁻¹) = 2³·(1/det A) = 8/6 = 4/3." },
+      { label: "ANSWER", body: "4/3." },
+    ] },
+  { year: "2005-Style", marks: 2,
+    statement: <span><B>(Representative GATE CS 2005 pattern.)</B><br/><br/>If A is a 3x3 matrix and rank(A) = 2, then det(A) is ___.</span>,
+    solution: [
+      { label: "RECOGNIZE", body: "Rank-det relationship." },
+      { label: "APPLY", body: "Singular ⇔ rank < n ⇔ det = 0." },
+      { label: "ANSWER", body: "0." },
+    ] },
+  { year: "2011-Style", marks: 2,
+    statement: <span><B>(Representative GATE CS 2011 pattern.)</B><br/><br/>For the matrix <T src="\begin{pmatrix} 1 & 2 & 3 \\ 4 & 5 & 6 \\ 7 & 8 & 9 \end{pmatrix}"/>, det = ?</span>,
+    solution: [
+      { label: "RECOGNIZE", body: "Arithmetic progression rows → rank 2 → det 0." },
+      { label: "VERIFY", body: "R₂ - R₁ = R₃ - R₂ = (3, 3, 3). Dependent." },
+      { label: "ANSWER", body: "0." },
+    ] },
+  { year: "2015-Style", marks: 2,
+    statement: <span><B>(Representative GATE CS 2015 pattern.)</B><br/><br/>For 2x2 A with det 4 and B with det 5, det(A²B³) = ___.</span>,
+    solution: [
+      { label: "RECOGNIZE", body: "Power rule." },
+      { label: "APPLY", body: "det(A²) = 4² = 16. det(B³) = 5³ = 125. Product = 16·125 = 2000." },
+      { label: "ANSWER", body: "2000." },
+    ] },
+  { year: "2017-Style", marks: 2,
+    statement: <span><B>(Representative GATE CS 2017 pattern.)</B><br/><br/>For square matrices A, B of same size, which is true?</span>,
+    solution: [
+      { label: "RECOGNIZE", body: "Product rule only." },
+      { label: "ANSWER", body: "det(AB) = det(A)·det(B). Universal." },
+    ] },
+  { year: "2020-Style", marks: 2,
+    statement: <span><B>(Representative GATE CS 2020 pattern.)</B><br/><br/>If det(A) = 0, then Cramer's rule:</span>,
+    solution: [
+      { label: "RECOGNIZE", body: "Cramer trap." },
+      { label: "EXPLAIN", body: "Cramer formula has det(A) in denominator. Cannot apply when det = 0." },
+      { label: "ANSWER", body: "Does not apply; system inconsistent or has infinite solutions." },
+    ] },
+];
+
+function ConceptLab52({ progress }) {
+  return <ConceptLab num={2} title="Computing Determinants — The Property Chain Technique"
+    why={<>HIGHEST-yield computation in M5. Use properties first (triangular, dependent rows, zero rows), expansion last. PYQs span 2001-2020 — same patterns recur.</>}
+    patterns={C52_PATTERNS} problems={C52_PROBLEMS} techniques={C52_TECHNIQUES}
+    mistakes={C52_MISTAKES} pyqs={C52_PYQS} progress={progress} />;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   CONCEPT 5.3 — MATRIX INVERSE
+   ════════════════════════════════════════════════════════════════ */
+const C53_PATTERNS = [
+  { name: "2x2 Inverse Formula", surface: "2x2 matrix, find inverse.",
+    testing: "Apply A⁻¹ = (1/det A)·[[d, -b], [-c, a]].",
+    signals: ["\"inverse of\""],
+    firstMove: "Swap diagonal, negate off-diagonal, divide by det.",
+    timeBudget: 30, frequency: "Frequent" },
+  { name: "Verify-By-Multiplication", surface: "Asked if matrix is inverse.",
+    testing: "Multiply candidates by A; check if = I.",
+    signals: ["\"is the inverse of A\""],
+    firstMove: "Multiply and compare to I — faster than computing inverse.",
+    timeBudget: 30, frequency: "Frequent" },
+  { name: "AB = I ⇒ B = A⁻¹ Only If Square", surface: "Asked if one-sided inverse implies two-sided.",
+    testing: "TRUE for square. FALSE for non-square.",
+    signals: ["\"AB = I implies BA = I\""],
+    firstMove: "Square: yes. Non-square: NO.",
+    timeBudget: 20, frequency: "Occasional" },
+  { name: "Invertibility Equivalences", surface: "List equivalent conditions for invertibility.",
+    testing: "Recall the chain: invertible ⇔ det ≠ 0 ⇔ rank = n ⇔ trivial null ⇔ unique sol always ⇔ columns independent.",
+    signals: ["\"equivalent to A invertible\""],
+    firstMove: "All equivalent for square.",
+    timeBudget: 25, frequency: "Frequent" },
+];
+
+const C53_PROBLEMS = [
+  { id: "c53-e1", difficulty: "easy", kind: "mcq", marks: 1, timeTarget: 35,
+    tags: ["2x2 Inverse"], skipSignal: { type: "attempt", text: "Attempt" },
+    statement: <span>The inverse of <T src="\begin{pmatrix} 2 & 1 \\ 1 & 1 \end{pmatrix}"/> is:</span>,
+    options: [
+      "[[1, -1], [-1, 2]]",
+      "[[1, 1], [1, 2]]",
+      "[[2, -1], [-1, 1]]",
+      "Does not exist.",
+    ],
+    answer: "A",
+    hints: [
+      { label: "Conceptual redirect", text: "det = 2 - 1 = 1. A⁻¹ = (1/det)·[[d, -b],[-c, a]] = [[1, -1], [-1, 2]]." },
+      { label: "Key step", text: "(A)." },
+      { label: "Near-complete", text: "[[1, -1], [-1, 2]]." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "2x2 formula." },
+        { label: "KEY STEP", body: "det = 2·1 - 1·1 = 1. Swap diagonal: (1, 2). Negate off: (-1, -1). Divide by det 1. Result: [[1, -1], [-1, 2]]." },
+        { label: "COMPUTATION", body: "(A)." },
+        { label: "VERIFICATION", body: "A·A⁻¹: [[2,1],[1,1]]·[[1,-1],[-1,2]] = [[2-1, -2+2],[1-1, -1+2]] = [[1, 0],[0, 1]] = I ✓." },
+      ],
+      gateCheck: "2x2 formula reflex.", speed: "15s.", whatMadeHard: "Sign tracking.",
+      generalization: "Universal.", linkedConcept: "C5.3.",
+      negAdvisory: "Attempt: formula. (A) wins.",
+    } },
+  { id: "c53-e2", difficulty: "easy", kind: "mcq", marks: 1, timeTarget: 30,
+    tags: ["Invertibility"], skipSignal: { type: "attempt", text: "Attempt" },
+    statement: <span>Which is equivalent to A being invertible (A square)?</span>,
+    options: [
+      "det(A) ≠ 0.",
+      "rank(A) = n.",
+      "Ax = 0 has only trivial solution.",
+      "All of the above.",
+    ],
+    answer: "D",
+    hints: [
+      { label: "Conceptual redirect", text: "Big Equivalence Theorem." },
+      { label: "Key step", text: "All equivalent." },
+      { label: "Near-complete", text: "(D)." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Equivalences for square invertibility." },
+        { label: "KEY STEP", body: "Standard chain: invertible ⇔ det ≠ 0 ⇔ rank = n ⇔ trivial null ⇔ cols independent." },
+        { label: "COMPUTATION", body: "(D)." },
+        { label: "VERIFICATION", body: "All standard." },
+      ],
+      gateCheck: "Memorize.", speed: "Direct.", whatMadeHard: "Nothing.",
+      generalization: "Universal.", linkedConcept: "C5.3.",
+      negAdvisory: "Attempt: theorem. (D) wins.",
+    } },
+  { id: "c53-m1", difficulty: "medium", kind: "mcq", marks: 2, timeTarget: 80,
+    tags: ["Verify Inverse"], skipSignal: { type: "attempt", text: "Attempt" },
+    statement: <span>Is <T src="B = \begin{pmatrix} -1 & 2 \\ 1 & -1 \end{pmatrix}"/> the inverse of <T src="A = \begin{pmatrix} 1 & 2 \\ 1 & 1 \end{pmatrix}"/>?</span>,
+    options: [
+      "Yes, AB = I.",
+      "No, AB ≠ I.",
+      "Cannot determine.",
+      "Yes only if dimensions match.",
+    ],
+    answer: "A",
+    hints: [
+      { label: "Conceptual redirect", text: "Compute AB and check vs I." },
+      { label: "Key step", text: "AB = [[1·-1 + 2·1, 1·2 + 2·-1], [1·-1 + 1·1, 1·2 + 1·-1]] = [[1, 0], [0, 1]] = I." },
+      { label: "Near-complete", text: "(A)." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Verify-by-mult." },
+        { label: "KEY STEP", body: "AB = [[1·(-1) + 2·1, 1·2 + 2·(-1)], [1·(-1) + 1·1, 1·2 + 1·(-1)]] = [[-1+2, 2-2], [-1+1, 2-1]] = [[1, 0], [0, 1]]." },
+        { label: "COMPUTATION", body: "(A) — AB = I." },
+        { label: "VERIFICATION", body: "For square, AB = I ⇔ BA = I, so B IS A⁻¹." },
+      ],
+      gateCheck: "Multiply, check.", speed: "30s.", whatMadeHard: "Sign tracking.",
+      generalization: "Universal.", linkedConcept: "C5.3.",
+      negAdvisory: "Attempt: compute. (A) wins.",
+    } },
+  { id: "c53-m2", difficulty: "medium", kind: "mcq", marks: 2, timeTarget: 60,
+    tags: ["Inverse Properties"], skipSignal: { type: "attempt", text: "Attempt" },
+    statement: <span>(AB)⁻¹ = ___ (for invertible A, B same size).</span>,
+    options: [ "A⁻¹B⁻¹", "B⁻¹A⁻¹", "A⁻¹ + B⁻¹", "(AB)⁻¹ doesn't generally exist." ],
+    answer: "B",
+    hints: [
+      { label: "Conceptual redirect", text: "Inverse reverses order like transpose." },
+      { label: "Key step", text: "(B)." },
+      { label: "Near-complete", text: "B⁻¹A⁻¹." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Inverse-of-product rule." },
+        { label: "KEY STEP", body: "(AB)·(B⁻¹A⁻¹) = ABB⁻¹A⁻¹ = AIA⁻¹ = AA⁻¹ = I. So (AB)⁻¹ = B⁻¹A⁻¹." },
+        { label: "COMPUTATION", body: "(B)." },
+        { label: "VERIFICATION", body: "Same reverse-order pattern as transpose." },
+      ],
+      gateCheck: "Reverse order.", speed: "Direct.", whatMadeHard: "Nothing.",
+      generalization: "(X₁X₂...Xₙ)⁻¹ = Xₙ⁻¹...X₂⁻¹X₁⁻¹.", linkedConcept: "C2.5.",
+      negAdvisory: "Attempt: rule. (B) wins.",
+    } },
+  { id: "c53-m3", difficulty: "medium", kind: "mcq", marks: 2, timeTarget: 70,
+    tags: ["AB = I Non-Square"], skipSignal: { type: "attempt", text: "Attempt" },
+    statement: <span>If A is 2×3 and B is 3×2 with AB = I₂, does it follow that BA = I₃?</span>,
+    options: [ "Yes, always.", "No, not necessarily.", "Only if B is square.", "Only if A is square." ],
+    answer: "B",
+    hints: [
+      { label: "Conceptual redirect", text: "Non-square matrices: one-sided inverse doesn't imply two-sided." },
+      { label: "Key step", text: "(B)." },
+      { label: "Near-complete", text: "Non-square trap." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Square vs non-square inverse." },
+        { label: "KEY STEP", body: "For square: AB = I ⇔ BA = I. For non-square: AB = I (left inverse exists) doesn't imply BA = I." },
+        { label: "COMPUTATION", body: "(B)." },
+        { label: "VERIFICATION", body: "BA is 3×3 with rank ≤ 2 (since A has 2 rows), so BA can't be I₃ (which has rank 3)." },
+      ],
+      gateCheck: "Non-square: one-sided only.", speed: "Concept: 30s.", whatMadeHard: "Counterintuitive.",
+      generalization: "Square is special.", linkedConcept: "C2.5.",
+      negAdvisory: "Attempt: structure. (B) wins.",
+    } },
+  { id: "c53-h1", difficulty: "hard", kind: "nat", marks: 2, timeTarget: 100,
+    tags: ["3x3 Inverse"],
+    statement: <span>For <T src="A = \begin{pmatrix} 1 & 0 & 0 \\ 0 & 2 & 0 \\ 0 & 0 & 3 \end{pmatrix}"/>, the (3, 3) entry of A⁻¹ is ___.</span>,
+    answer: 0.3333, tolerance: 0.001,
+    hints: [
+      { label: "Conceptual redirect", text: "Diagonal: inverse is diag(1/aᵢᵢ)." },
+      { label: "Key step", text: "1/3." },
+      { label: "Near-complete", text: "0.3333." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Diagonal inverse." },
+        { label: "KEY STEP", body: "Diagonal: A⁻¹ = diag(1, 1/2, 1/3). (3, 3) = 1/3." },
+        { label: "COMPUTATION", body: "0.3333." },
+        { label: "VERIFICATION", body: "A·A⁻¹ = I." },
+      ],
+      gateCheck: "Diagonal inverse.", speed: "5s.", whatMadeHard: "Nothing.",
+      generalization: "Universal.", linkedConcept: "C5.3.",
+    } },
+  { id: "c53-h2", difficulty: "hard", kind: "mcq", marks: 2, timeTarget: 80,
+    tags: ["Det Of Inverse"], skipSignal: { type: "attempt", text: "Attempt" },
+    statement: <span>If det(A) = 3, then det(A⁻¹) = ___.</span>,
+    options: [ "3", "1/3", "-3", "9" ],
+    answer: "B",
+    hints: [
+      { label: "Conceptual redirect", text: "det(A⁻¹) = 1/det(A)." },
+      { label: "Key step", text: "1/3." },
+      { label: "Near-complete", text: "(B)." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Det of inverse." },
+        { label: "KEY STEP", body: "det(A)·det(A⁻¹) = det(I) = 1, so det(A⁻¹) = 1/det A = 1/3." },
+        { label: "COMPUTATION", body: "(B)." },
+        { label: "VERIFICATION", body: "Universal." },
+      ],
+      gateCheck: "Reciprocal rule.", speed: "Direct.", whatMadeHard: "Nothing.",
+      generalization: "Universal.", linkedConcept: "C5.2.",
+      negAdvisory: "Attempt: rule. (B) wins.",
+    } },
+  { id: "c53-h3", difficulty: "hard", kind: "mcq", marks: 2, timeTarget: 70,
+    tags: ["Singular"], skipSignal: { type: "attempt", text: "Attempt" },
+    statement: <span>A is 3×3 with det 0. Then A⁻¹:</span>,
+    options: [
+      "Doesn't exist.",
+      "Equals zero matrix.",
+      "Equals identity.",
+      "Cannot be determined.",
+    ],
+    answer: "A",
+    hints: [
+      { label: "Conceptual redirect", text: "det 0 = singular = no inverse." },
+      { label: "Key step", text: "(A)." },
+      { label: "Near-complete", text: "Doesn't exist." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Singular definition." },
+        { label: "KEY STEP", body: "det = 0 ⇔ singular ⇔ no inverse." },
+        { label: "COMPUTATION", body: "(A)." },
+        { label: "VERIFICATION", body: "Universal." },
+      ],
+      gateCheck: "det 0 ⇔ no inverse.", speed: "Direct.", whatMadeHard: "Nothing.",
+      generalization: "Universal.", linkedConcept: "C5.3.",
+      negAdvisory: "Attempt: definition. (A) wins.",
+    } },
+  { id: "c53-k1", difficulty: "killer", kind: "mcq", marks: 2, timeTarget: 160,
+    tags: ["KILLER", "Cayley-Hamilton"],
+    statement: <span><B>[KILLER]</B> For <T src="A = \begin{pmatrix} 1 & 1 \\ 0 & 2 \end{pmatrix}"/>, characteristic polynomial is λ² - 3λ + 2. By Cayley-Hamilton, A² - 3A + 2I = 0. Solve for A⁻¹.</span>,
+    options: [
+      "A⁻¹ = (3I - A)/2",
+      "A⁻¹ = A - 3I",
+      "A⁻¹ = (A - 3I)/2",
+      "A⁻¹ = 3I + A",
+    ],
+    answer: "A",
+    hints: [
+      { label: "Conceptual redirect", text: "From A² - 3A + 2I = 0, multiply by A⁻¹: A - 3I + 2A⁻¹ = 0 → A⁻¹ = (3I - A)/2." },
+      { label: "Key step", text: "(A)." },
+      { label: "Near-complete", text: "A⁻¹ = (3I - A)/2." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Cayley-Hamilton + inverse derivation." },
+        { label: "KEY STEP", body: "A² - 3A + 2I = 0. Multiply both sides by A⁻¹: A - 3I + 2A⁻¹ = 0. Solve: 2A⁻¹ = 3I - A → A⁻¹ = (3I - A)/2." },
+        { label: "COMPUTATION", body: "(A)." },
+        { label: "VERIFICATION", body: "A⁻¹ = (3I - A)/2 = ([[3,0],[0,3]] - [[1,1],[0,2]])/2 = [[2,-1],[0,1]]/2 = [[1,-0.5],[0,0.5]]. Verify A·A⁻¹: [[1,1],[0,2]]·[[1,-0.5],[0,0.5]] = [[1, -0.5+0.5],[0, 1]] = [[1,0],[0,1]] = I ✓." },
+      ],
+      gateCheck: "Cayley-Hamilton for A⁻¹.", speed: "60s.", whatMadeHard: "Algebra.",
+      generalization: "Same template for any A.", linkedConcept: "C7.2.",
+      negAdvisory: "Attempt: derivation. (A) wins.",
+    } },
+];
+
+const C53_TECHNIQUES = [
+  { name: "2x2 Inverse Formula", type: "Speed Shortcut",
+    when: "2x2 matrix inverse.",
+    steps: ["det = ad - bc.",
+            "A⁻¹ = (1/det)·[[d, -b], [-c, a]] (swap diag, negate off)."],
+    speed: "15s.", example: "A = [[a,b],[c,d]] → A⁻¹ = [[d,-b],[-c,a]]/det.",
+    danger: "Sign tracking.", freq: "Frequent" },
+  { name: "Verify-by-Multiplication", type: "Speed Shortcut",
+    when: "Asked 'is B = A⁻¹?'.",
+    steps: ["Compute AB.",
+            "If I, then B = A⁻¹.",
+            "If not, then no."],
+    speed: "30s.", example: "Faster than computing A⁻¹.",
+    danger: "Must check BA too if non-square.", freq: "Frequent" },
+  { name: "Cayley-Hamilton Inverse Derivation", type: "Structural Insight",
+    when: "Asked to express A⁻¹ in terms of powers of A.",
+    steps: ["Char poly: p(λ) = 0.",
+            "Multiply through: p(A) = 0.",
+            "Solve for I by dividing by constant term.",
+            "Multiply by A⁻¹ to isolate."],
+    speed: "60s.", example: "λ² - tr·λ + det = 0 → A⁻¹ = (tr·I - A)/det.",
+    danger: "Sign tracking.", freq: "Occasional" },
+];
+
+const C53_MISTAKES = [
+  { name: "Assume Non-Square Has Inverse", wrong: [
+      "Problem: A is 2x3. Find A⁻¹.",
+      "Solution: Apply 2x2 formula.",
+    ], errorLine: 0,
+    errorDescription: "Only square matrices have (two-sided) inverses.",
+    rootCause: "Skipping shape check.",
+    correct: "Non-square: no inverse.",
+    prevention: "Check shape first.",
+    gateCost: "Wrong setup.", frequency: "Common" },
+];
+
+const C53_PYQS = [];
+
+function ConceptLab53({ progress }) {
+  return <ConceptLab num={3} title="Matrix Inverse — 2×2 Formula, Verify-by-Mult, Cayley-Hamilton"
+    why={<>Master the 2x2 inverse formula in 10 seconds. For larger, use verify-by-mult or Cayley-Hamilton. Inverse exists ⇔ square AND det ≠ 0.</>}
+    patterns={C53_PATTERNS} problems={C53_PROBLEMS} techniques={C53_TECHNIQUES}
+    mistakes={C53_MISTAKES} pyqs={C53_PYQS} progress={progress} />;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   CONCEPT 5.4 — CRAMER'S RULE
+   ════════════════════════════════════════════════════════════════ */
+const C54_PATTERNS = [
+  { name: "Cramer's Existence Test (det ≠ 0)", surface: "Asked when Cramer's rule applies.",
+    testing: "Cramer requires det(A) ≠ 0 (square, invertible).",
+    signals: ["\"using Cramer\"", "\"det(A) = 0\""],
+    firstMove: "If det = 0, Cramer does NOT apply. Use other methods.",
+    timeBudget: 15, frequency: "Frequent" },
+  { name: "Cramer's Formula Reading", surface: "Asked for xᵢ in terms of dets.",
+    testing: "xᵢ = det(Aᵢ)/det(A) where Aᵢ has column i replaced by b.",
+    signals: ["\"by Cramer\""],
+    firstMove: "Replace col i with b, compute det, divide by det(A).",
+    timeBudget: 90, frequency: "Frequent" },
+  { name: "Existence/Uniqueness via Cramer", surface: "From det(A) value, predict solution type.",
+    testing: "det ≠ 0: unique. det = 0: no sol or infinite (Cramer can't say which).",
+    signals: ["\"det = 0\""],
+    firstMove: "det ≠ 0: unique solution Cramer-computable. det = 0: depends on b.",
+    timeBudget: 20, frequency: "Frequent" },
+];
+
+const C54_PROBLEMS = [
+  { id: "c54-e1", difficulty: "easy", kind: "mcq", marks: 1, timeTarget: 25,
+    tags: ["Cramer Trap"], skipSignal: { type: "attempt", text: "Attempt" },
+    statement: <span>Cramer's rule for Ax = b can be applied iff:</span>,
+    options: [
+      "A is square.",
+      "det(A) ≠ 0.",
+      "A is square AND det(A) ≠ 0.",
+      "Any system can use it.",
+    ],
+    answer: "C",
+    hints: [
+      { label: "Conceptual redirect", text: "Two conditions: square (Cramer is for square) AND non-singular." },
+      { label: "Key step", text: "(C)." },
+      { label: "Near-complete", text: "Both." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Cramer requirements." },
+        { label: "KEY STEP", body: "Square (else det undefined) AND det ≠ 0 (else dividing by 0)." },
+        { label: "COMPUTATION", body: "(C)." },
+        { label: "VERIFICATION", body: "Both necessary." },
+      ],
+      gateCheck: "Both conditions.", speed: "Direct.", whatMadeHard: "Nothing.",
+      generalization: "Universal.", linkedConcept: "C5.4.",
+      negAdvisory: "Attempt: definition. (C) wins.",
+    } },
+  { id: "c54-e2", difficulty: "easy", kind: "mcq", marks: 1, timeTarget: 30,
+    tags: ["Cramer Formula"], skipSignal: { type: "attempt", text: "Attempt" },
+    statement: <span>By Cramer's rule, x₁ = det(A₁)/det(A) where A₁ is:</span>,
+    options: [
+      "A with row 1 replaced by b.",
+      "A with column 1 replaced by b.",
+      "A with both row 1 and column 1 deleted.",
+      "Transpose of A.",
+    ],
+    answer: "B",
+    hints: [
+      { label: "Conceptual redirect", text: "Replace COLUMN i, not row." },
+      { label: "Key step", text: "(B)." },
+      { label: "Near-complete", text: "Column 1." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Cramer's formula." },
+        { label: "KEY STEP", body: "xᵢ = det(Aᵢ)/det(A) where Aᵢ is A with column i replaced by RHS b." },
+        { label: "COMPUTATION", body: "(B)." },
+        { label: "VERIFICATION", body: "Columns correspond to unknowns; replace column = replace unknown." },
+      ],
+      gateCheck: "Column replacement.", speed: "Direct.", whatMadeHard: "Row trap.",
+      generalization: "Universal.", linkedConcept: "C5.4.",
+      negAdvisory: "Attempt: definition. (B) wins.",
+    } },
+  { id: "c54-m1", difficulty: "medium", kind: "nat", marks: 2, timeTarget: 70,
+    tags: ["Cramer Compute"],
+    statement: <span>For 2x + 3y = 8, x + 2y = 5, find y via Cramer.</span>,
+    answer: 2, tolerance: 0,
+    hints: [
+      { label: "Conceptual redirect", text: "det(A) = 4 - 3 = 1. A_y = [[2, 8], [1, 5]], det = 10 - 8 = 2. y = 2/1 = 2." },
+      { label: "Key step", text: "y = 2." },
+      { label: "Near-complete", text: "2." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Cramer for y." },
+        { label: "KEY STEP", body: "A = [[2, 3], [1, 2]], det = 1. A_y (replace col 2 by b): [[2, 8], [1, 5]], det = 10 - 8 = 2. y = 2/1 = 2." },
+        { label: "COMPUTATION", body: "2." },
+        { label: "VERIFICATION", body: "Find x: from eq 1, 2x + 3(2) = 8 → x = 1. Check eq 2: 1 + 2(2) = 5 ✓. Solution (x, y) = (1, 2). Answer y = 2." },
+      ],
+      gateCheck: "Cramer formula.", speed: "60s.", whatMadeHard: "Arithmetic.",
+      generalization: "Universal.", linkedConcept: "C5.4.",
+    } },
+  { id: "c54-m2", difficulty: "medium", kind: "mcq", marks: 2, timeTarget: 60,
+    tags: ["Cramer Trap"], skipSignal: { type: "attempt", text: "Attempt" },
+    statement: <span>For Ax = b with det(A) = 0, the system:</span>,
+    options: [
+      "Has unique solution given by Cramer.",
+      "Has no solution.",
+      "Has infinitely many solutions.",
+      "Is either inconsistent or has infinitely many solutions (Cramer's doesn't apply).",
+    ],
+    answer: "D",
+    hints: [
+      { label: "Conceptual redirect", text: "Cramer needs det ≠ 0. With det = 0, system non-unique." },
+      { label: "Key step", text: "Either inconsistent or infinite." },
+      { label: "Near-complete", text: "(D)." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Cramer breakdown at det = 0." },
+        { label: "KEY STEP", body: "det(A) = 0 means A singular. Then either inconsistent (no sol) or has infinite sols. Cramer can't decide." },
+        { label: "COMPUTATION", body: "(D)." },
+        { label: "VERIFICATION", body: "Need rank comparison: rank(A) vs rank([A|b])." },
+      ],
+      gateCheck: "Cramer trap.", speed: "Direct.", whatMadeHard: "Nothing.",
+      generalization: "Universal.", linkedConcept: "C5.4.",
+      negAdvisory: "Attempt: trap. (D) wins.",
+    } },
+  { id: "c54-m3", difficulty: "medium", kind: "nat", marks: 2, timeTarget: 75,
+    tags: ["Cramer 3x3"],
+    statement: <span>For x + y + z = 6, 2x - y + z = 3, x + 2y - z = 2, find x via Cramer (with det(A) = -7, det(A_x) = -7).</span>,
+    answer: 1, tolerance: 0,
+    hints: [
+      { label: "Conceptual redirect", text: "x = det(A_x)/det(A) = -7/-7 = 1." },
+      { label: "Key step", text: "1." },
+      { label: "Near-complete", text: "1." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Direct Cramer formula." },
+        { label: "KEY STEP", body: "x = -7/-7 = 1." },
+        { label: "COMPUTATION", body: "1." },
+        { label: "VERIFICATION", body: "1 + y + z = 6, 2 - y + z = 3, 1 + 2y - z = 2. From eq 1: y + z = 5. From eq 2: -y + z = 1 → z = 3, y = 2. From eq 3: 1 + 4 - 3 = 2 ✓." },
+      ],
+      gateCheck: "Direct formula.", speed: "10s given dets.", whatMadeHard: "Nothing.",
+      generalization: "Universal.", linkedConcept: "C5.4.",
+    } },
+  { id: "c54-h1", difficulty: "hard", kind: "mcq", marks: 2, timeTarget: 80,
+    tags: ["Cramer Usability"], skipSignal: { type: "attempt", text: "Attempt" },
+    statement: <span>For which of the following can Cramer's rule be DIRECTLY applied?</span>,
+    options: [
+      "2x3 system Ax = b.",
+      "3x3 with det(A) = 4.",
+      "3x3 with det(A) = 0.",
+      "Underdetermined system.",
+    ],
+    answer: "B",
+    hints: [
+      { label: "Conceptual redirect", text: "Need square AND non-zero det." },
+      { label: "Key step", text: "(B): square, det ≠ 0." },
+      { label: "Near-complete", text: "Only (B)." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Cramer eligibility." },
+        { label: "KEY STEP", body: "(A) non-square. (B) square + invertible ✓. (C) singular. (D) usually non-square or singular." },
+        { label: "COMPUTATION", body: "(B)." },
+        { label: "VERIFICATION", body: "Both conditions." },
+      ],
+      gateCheck: "Eligibility test.", speed: "Direct.", whatMadeHard: "Nothing.",
+      generalization: "Universal.", linkedConcept: "C5.4.",
+      negAdvisory: "Attempt: rule. (B) wins.",
+    } },
+  { id: "c54-h2", difficulty: "hard", kind: "nat", marks: 2, timeTarget: 100,
+    tags: ["Compute by Cramer"],
+    statement: <span>For 3x + 2y = 7, x + y = 3, find x via Cramer.</span>,
+    answer: 1, tolerance: 0,
+    hints: [
+      { label: "Conceptual redirect", text: "det(A) = 3 - 2 = 1. A_x = [[7, 2], [3, 1]], det = 7 - 6 = 1. x = 1." },
+      { label: "Key step", text: "1." },
+      { label: "Near-complete", text: "1." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Cramer 2x2." },
+        { label: "KEY STEP", body: "A = [[3, 2], [1, 1]], det = 1. A_x (replace col 1 by b): [[7, 2], [3, 1]], det = 7 - 6 = 1. x = 1/1 = 1." },
+        { label: "COMPUTATION", body: "1." },
+        { label: "VERIFICATION", body: "x = 1, y = 2. Check: 3 + 4 = 7 ✓, 1 + 2 = 3 ✓." },
+      ],
+      gateCheck: "Direct.", speed: "30s.", whatMadeHard: "Nothing.",
+      generalization: "Universal.", linkedConcept: "C5.4.",
+    } },
+  { id: "c54-h3", difficulty: "hard", kind: "mcq", marks: 2, timeTarget: 70,
+    tags: ["Cramer Complexity"], skipSignal: { type: "attempt", text: "Attempt" },
+    statement: <span>For n×n system, Cramer's rule requires how many det evaluations?</span>,
+    options: [ "1", "n", "n+1", "n²" ],
+    answer: "C",
+    hints: [
+      { label: "Conceptual redirect", text: "1 for A, n for replaced columns." },
+      { label: "Key step", text: "(C)." },
+      { label: "Near-complete", text: "n + 1." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Counting det computations." },
+        { label: "KEY STEP", body: "det(A): 1. det(Aᵢ) for i = 1, ..., n: n more. Total = n + 1." },
+        { label: "COMPUTATION", body: "(C)." },
+        { label: "VERIFICATION", body: "Expensive: O((n+1)·n!) ≈ O(n·n!). Gauss is O(n³)." },
+      ],
+      gateCheck: "Cramer impractical for large n.", speed: "Direct.", whatMadeHard: "Nothing.",
+      generalization: "Universal.", linkedConcept: "C4.2 Complexity.",
+      negAdvisory: "Attempt: count. (C) wins.",
+    } },
+  { id: "c54-k1", difficulty: "killer", kind: "mcq", marks: 2, timeTarget: 130,
+    tags: ["KILLER", "Cramer Trap"],
+    statement: <span><B>[KILLER]</B> For the system x + y = 2, kx + y = b, Cramer's rule gives x = (2 - b)/(1 - k). For what (k, b) does the rule fail AND the system is still consistent?</span>,
+    options: [
+      "k = 1, b = 2.",
+      "k = 1, b ≠ 2.",
+      "k ≠ 1.",
+      "Always.",
+    ],
+    answer: "A",
+    hints: [
+      { label: "Conceptual redirect", text: "Cramer fails when det = 0 (k = 1). Consistent when b = 2 also." },
+      { label: "Key step", text: "(A)." },
+      { label: "Near-complete", text: "k = 1, b = 2." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Cramer failure + consistency." },
+        { label: "KEY STEP", body: "det(A) = 1 - k = 0 ⇔ k = 1. Cramer fails. Consistency requires the system to be solvable: at k = 1, system is x + y = 2 and x + y = b. Consistent ⇔ b = 2." },
+        { label: "COMPUTATION", body: "(A) k = 1, b = 2." },
+        { label: "VERIFICATION", body: "At (1, 2): system has infinite sols (1D family); Cramer doesn't compute them but they exist." },
+      ],
+      gateCheck: "det = 0 + consistent → infinite sols.", speed: "60s.", whatMadeHard: "Two conditions.",
+      generalization: "Universal.", linkedConcept: "C5.4.",
+      negAdvisory: "Attempt: dual condition. (A) wins.",
+    } },
+];
+
+const C54_TECHNIQUES = [
+  { name: "Cramer Eligibility Check", type: "Trap Avoidance",
+    when: "Considering Cramer.",
+    steps: ["Verify A is square.",
+            "Compute det(A).",
+            "If det = 0: ABORT Cramer; use rank comparison.",
+            "Else proceed with formula."],
+    speed: "Direct.", example: "Standard.",
+    danger: "Don't compute n+1 dets only to find one is 0.", freq: "Frequent" },
+  { name: "Cramer Formula Application", type: "Speed Shortcut",
+    when: "Need specific unknown.",
+    steps: ["For xᵢ: replace col i of A by b, get Aᵢ.",
+            "xᵢ = det(Aᵢ)/det(A)."],
+    speed: "Per unknown: 30s.", example: "Standard.",
+    danger: "Replace COLUMN not row.", freq: "Frequent" },
+];
+
+const C54_MISTAKES = [
+  { name: "Apply Cramer at det = 0", wrong: [
+      "Problem: Solve Ax = b with det A = 0 via Cramer.",
+      "Solution: x = det(A_x)/0 = ∞.",
+    ], errorLine: 0,
+    errorDescription: "Division by 0; Cramer undefined.",
+    rootCause: "Forgetting eligibility check.",
+    correct: "Use rank comparison to decide: no sol or infinite.",
+    prevention: "ALWAYS check det ≠ 0 before Cramer.",
+    gateCost: "Wrong method.", frequency: "Common" },
+  { name: "Replace Row Instead of Column", wrong: [
+      "Problem: Cramer for x₂. Build A₂.",
+      "Solution: Replace row 2 of A by b.",
+    ], errorLine: 0,
+    errorDescription: "Replace column i, not row.",
+    rootCause: "Wrong direction.",
+    correct: "Replace column i.",
+    prevention: "Memorize: column i ↔ unknown i.",
+    gateCost: "Wrong answer.", frequency: "Common" },
+];
+
+const C54_PYQS = [];
+
+function ConceptLab54({ progress }) {
+  return <ConceptLab num={4} title="Cramer's Rule — Formula + Existence Trap"
+    why={<>Cramer's elegant but FRAGILE: fails at det = 0. Always check eligibility first. For n×n: n+1 det computations needed. Inefficient for large n; useful for 2x2 and conceptual reasoning.</>}
+    patterns={C54_PATTERNS} problems={C54_PROBLEMS} techniques={C54_TECHNIQUES}
+    mistakes={C54_MISTAKES} pyqs={C54_PYQS} progress={progress} />;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   APP ROOT
+   ════════════════════════════════════════════════════════════════ */
+const CONCEPTS_MAP = [
+  { num: 1, shortName: "Geometric",  title: "What det Really Is",           total: C51_PROBLEMS.length, Comp: ConceptLab51 },
+  { num: 2, shortName: "Compute",    title: "Computing Determinants",       total: C52_PROBLEMS.length, Comp: ConceptLab52 },
+  { num: 3, shortName: "Inverse",    title: "Matrix Inverse",               total: C53_PROBLEMS.length, Comp: ConceptLab53 },
+  { num: 4, shortName: "Cramer's",   title: "Cramer's Rule",                total: C54_PROBLEMS.length, Comp: ConceptLab54 },
+];
+
+function App() {
+  useEffect(() => { hideLoading(); }, []);
+
+  const progress51 = useConceptProgress(1, C51_PROBLEMS.length);
+  const progress52 = useConceptProgress(2, C52_PROBLEMS.length);
+  const progress53 = useConceptProgress(3, C53_PROBLEMS.length);
+  const progress54 = useConceptProgress(4, C54_PROBLEMS.length);
+
+  const progressMap = { 1: progress51, 2: progress52, 3: progress53, 4: progress54 };
+  const [active, setActive] = useState(1);
+
+  const totalSolved = [progress51, progress52, progress53, progress54].reduce((s, p) => s + p.correct.length, 0);
+  const totalProblems = [C51_PROBLEMS, C52_PROBLEMS, C53_PROBLEMS, C54_PROBLEMS].reduce((s, ps) => s + ps.length, 0);
+
+  return (
+    <div className="min-h-screen">
+      <TopNav currentModule={5}/>
+
+      <section className="relative overflow-hidden">
+        <div className="grid-bg absolute inset-0" style={{opacity: 0.45}}/>
+        <div className="absolute inset-0" style={{
+          background: "radial-gradient(800px 400px at 20% 0%, var(--accent-soft), transparent 60%), radial-gradient(600px 400px at 80% 20%, var(--accent-2-soft), transparent 60%)",
+        }}/>
+        <div className="relative max-w-5xl mx-auto px-5 py-12 md:py-16">
+          <div className="inline-flex items-center gap-2 text-xs px-3 py-1.5 rounded-full mb-5"
+            style={{background: "var(--accent-soft)", border: "1px solid var(--accent-border)", color: "var(--accent)"}}>
+            <span className="pulse-dot"/> MODULE 5 · PROBLEM LAB
+          </div>
+          <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight mb-4 leading-[1.04]" style={{color: "var(--text)"}}>
+            Determinants · Problem Lab
+            <span className="block gradient-text mt-1">Properties Over Computation</span>
+          </h1>
+          <p className="text-lg max-w-3xl leading-relaxed mb-6" style={{color: "var(--text-dim)"}}>
+            4 concept labs covering signed volume, the Property Chain Technique, matrix inverse, and Cramer's Rule.
+            Includes 6 PYQ walkthroughs (2001-2020) on computing determinants and a Cayley-Hamilton KILLER for A⁻¹.
+          </p>
+
+          <div className="flex flex-wrap gap-3 text-sm">
+            <div className="px-3 py-1.5 rounded-full flex items-center gap-2"
+              style={{background: "var(--bg-elev-1)", border: "1px solid var(--border)"}}>
+              <span style={{color: "var(--accent-3)"}}>● </span>
+              <span style={{color: "var(--text)"}}>{totalSolved} / {totalProblems} solved</span>
+            </div>
+            <div className="px-3 py-1.5 rounded-full flex items-center gap-2"
+              style={{background: "var(--bg-elev-1)", border: "1px solid var(--border)"}}>
+              <span style={{color: "var(--accent-2)"}}>● </span>
+              <span style={{color: "var(--text)"}}>4 concept labs · 36 problems · 6 GATE PYQs</span>
+            </div>
+            <div className="px-3 py-1.5 rounded-full flex items-center gap-2"
+              style={{background: "var(--bg-elev-1)", border: "1px solid var(--border)"}}>
+              <span style={{color: "var(--warn)"}}>● </span>
+              <span style={{color: "var(--text)"}}>Property Chain · Triangular shortcut · Cayley-Hamilton inverse</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div className="max-w-5xl mx-auto px-5">
+        <ConceptNavigator concepts={CONCEPTS_MAP} active={active} setActive={setActive} progressMap={progressMap} />
+      </div>
+
+      <ConceptLab51 progress={progress51} />
+      <ConceptLab52 progress={progress52} />
+      <ConceptLab53 progress={progress53} />
+      <ConceptLab54 progress={progress54} />
+
+      <ModuleFooter
+        moduleNum={5}
+        nextModuleTitle="Eigenvalues — Problem Lab"
+        nextModuleFile="module-06-problem-lab.html"
+        checklist={[
+          "I solve 90% of determinant problems via Property Chain — not by expansion.",
+          "I apply triangular shortcut, det(cA) = cⁿ det A, and det product rule reflexively.",
+          "I NEVER use Sarrus' rule for 4×4 or larger.",
+          "I know det(A + B) ≠ det(A) + det(B).",
+          "I derive 2×2 inverses in under 15 seconds.",
+          "I check Cramer eligibility (det ≠ 0) before applying.",
+          "I express A⁻¹ using Cayley-Hamilton from the characteristic equation.",
+          "I've cleared all 36 problems and beaten my drill personal-best per concept.",
+        ]}
+      />
+    </div>
+  );
+}
+
+mountApp(App);
+</script>
+
+</body>
+</html>

@@ -1,0 +1,983 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 5 · Determinants, Inverse & Cramer — LA Mastery Hub</title>
+
+<script>
+  (function () {
+    try {
+      var t = localStorage.getItem("la-hub::theme") || "dark";
+      document.documentElement.classList.add(t === "light" ? "light" : "dark");
+    } catch (e) { document.documentElement.classList.add("dark"); }
+  })();
+</script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="theme.css">
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script>tailwind.config = { darkMode: 'class' };</script>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+
+<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone@7.25.6/babel.min.js"></script>
+</head>
+<body>
+
+<div id="loading">
+  <div style="text-align:center">
+    <div class="spinner"></div>
+    <div style="font-size:13px; opacity:0.8">Loading Module 5 — Determinants &amp; Inverse</div>
+  </div>
+</div>
+
+<div id="root"></div>
+
+<script type="text/babel" src="boilerplate.js"></script>
+
+<script type="text/babel">
+const { useState, useEffect, useMemo, useRef } = React;
+
+/* ════════════════════════════════════════════════════════
+   ROW REDUCTION ENGINE (reused from M4)
+   ════════════════════════════════════════════════════════ */
+const round = (v) => Math.abs(v) < 1e-10 ? 0 : Math.round(v * 10000) / 10000;
+const deep = (M) => M.map(r => r.slice());
+
+function rowReduce(matrix, { mode = "ref" } = {}) {
+  let M = deep(matrix);
+  const rows = M.length;
+  const cols = M[0].length;
+  const steps = [{ kind: "start", M: deep(M), desc: "Starting matrix." }];
+  const pivots = [];
+  let pivotRow = 0;
+  for (let col = 0; col < cols && pivotRow < rows; col++) {
+    let maxRow = pivotRow;
+    for (let r = pivotRow + 1; r < rows; r++) {
+      if (Math.abs(M[r][col]) > Math.abs(M[maxRow][col])) maxRow = r;
+    }
+    if (Math.abs(M[maxRow][col]) < 1e-9) continue;
+    if (maxRow !== pivotRow) {
+      [M[pivotRow], M[maxRow]] = [M[maxRow], M[pivotRow]];
+      steps.push({ kind: "swap", r1: pivotRow, r2: maxRow, M: deep(M),
+        desc: `Swap R${pivotRow + 1} ↔ R${maxRow + 1} (partial pivoting).` });
+    }
+    pivots.push({ row: pivotRow, col });
+    for (let r = pivotRow + 1; r < rows; r++) {
+      if (Math.abs(M[r][col]) < 1e-9) continue;
+      const factor = M[r][col] / M[pivotRow][col];
+      for (let c = col; c < cols; c++) M[r][c] = round(M[r][c] - factor * M[pivotRow][c]);
+      steps.push({ kind: "elim", target: r, source: pivotRow, factor: round(factor), col,
+        M: deep(M),
+        desc: `R${r + 1} ← R${r + 1} − (${round(factor)})·R${pivotRow + 1} → zero out (${r + 1}, ${col + 1}).` });
+    }
+    pivotRow++;
+  }
+  if (mode === "rref") {
+    for (let p = 0; p < pivots.length; p++) {
+      const { row, col } = pivots[p];
+      const piv = M[row][col];
+      if (Math.abs(piv - 1) > 1e-9) {
+        for (let c = 0; c < cols; c++) M[row][c] = round(M[row][c] / piv);
+        steps.push({ kind: "scale", target: row, factor: round(1 / piv), M: deep(M),
+          desc: `R${row + 1} ← (1/${round(piv)})·R${row + 1} (scale pivot to 1).` });
+      }
+    }
+    for (let p = pivots.length - 1; p >= 0; p--) {
+      const { row, col } = pivots[p];
+      for (let r = row - 1; r >= 0; r--) {
+        if (Math.abs(M[r][col]) < 1e-9) continue;
+        const factor = M[r][col];
+        for (let c = 0; c < cols; c++) M[r][c] = round(M[r][c] - factor * M[row][c]);
+        steps.push({ kind: "elim-up", target: r, source: row, factor: round(factor), col, M: deep(M),
+          desc: `R${r + 1} ← R${r + 1} − (${round(factor)})·R${row + 1} (eliminate above pivot).` });
+      }
+    }
+  }
+  return { final: M, steps, pivots, rank: pivots.length };
+}
+
+/* — Matrix utilities — */
+const det2 = (M) => M[0][0]*M[1][1] - M[0][1]*M[1][0];
+const det3 = (M) => {
+  return M[0][0]*(M[1][1]*M[2][2] - M[1][2]*M[2][1])
+       - M[0][1]*(M[1][0]*M[2][2] - M[1][2]*M[2][0])
+       + M[0][2]*(M[1][0]*M[2][1] - M[1][1]*M[2][0]);
+};
+const detN = (M) => {
+  // Compute via REF (track sign through swaps)
+  const n = M.length;
+  let A = deep(M), sign = 1;
+  for (let col = 0; col < n; col++) {
+    let maxRow = col;
+    for (let r = col + 1; r < n; r++) if (Math.abs(A[r][col]) > Math.abs(A[maxRow][col])) maxRow = r;
+    if (Math.abs(A[maxRow][col]) < 1e-12) return 0;
+    if (maxRow !== col) { [A[col], A[maxRow]] = [A[maxRow], A[col]]; sign = -sign; }
+    for (let r = col + 1; r < n; r++) {
+      const f = A[r][col] / A[col][col];
+      for (let c = col; c < n; c++) A[r][c] -= f * A[col][c];
+    }
+  }
+  let prod = sign;
+  for (let i = 0; i < n; i++) prod *= A[i][i];
+  return round(prod);
+};
+
+const minor = (M, i, j) => M.filter((_, r) => r !== i).map(r => r.filter((_, c) => c !== j));
+
+/* — Matrix UI — */
+function MatrixDisplay({ data, pivots = [], augmented = false, augCol = null, highlight = null }) {
+  if (!data || data.length === 0) return null;
+  const cols = data[0].length;
+  const aug = augmented ? (augCol != null ? augCol : cols - 1) : null;
+  return (
+    <div className="inline-flex items-stretch font-mono text-sm" style={{userSelect: "none"}}>
+      <div style={{borderLeft: "2px solid var(--text-dim)", borderTop: "2px solid var(--text-dim)", borderBottom: "2px solid var(--text-dim)", width: 8}}/>
+      <div className="px-2 py-2 grid gap-1" style={{gridTemplateColumns: `repeat(${cols}, minmax(0, auto))`}}>
+        {data.map((row, r) => row.map((v, c) => {
+          const isPivot = pivots.some(p => p.row === r && p.col === c);
+          const isAug = (c === aug);
+          let bg = "transparent", color = "var(--text)";
+          if (isPivot) { bg = "var(--accent-soft)"; color = "var(--accent)"; }
+          else if (isAug) { bg = "var(--accent-3-soft)"; color = "var(--accent-3)"; }
+          if (highlight && highlight.cells) {
+            for (const h of highlight.cells) {
+              if (h.row === r && h.col === c) { bg = h.bg || "var(--warn-soft)"; color = h.color || "var(--warn)"; }
+            }
+          }
+          return (
+            <React.Fragment key={`${r}-${c}`}>
+              {c === aug && (<div className="self-stretch" style={{borderLeft: "2px dashed var(--text-faded)", marginLeft: -2, marginRight: 2}}/>)}
+              <span className="px-2 py-1 text-center rounded font-mono"
+                style={{background: bg, color, fontWeight: isPivot ? 700 : 400, minWidth: 38, fontSize: 13}}>
+                {Math.abs(v) < 1e-9 ? 0 : v}
+              </span>
+            </React.Fragment>
+          );
+        }))}
+      </div>
+      <div style={{borderRight: "2px solid var(--text-dim)", borderTop: "2px solid var(--text-dim)", borderBottom: "2px solid var(--text-dim)", width: 8}}/>
+    </div>
+  );
+}
+
+function MatrixEditor({ matrix, setMatrix, augmented = false, label = "Matrix" }) {
+  const cols = matrix[0].length;
+  const aug = augmented ? cols - 1 : null;
+  const setCell = (r, c, v) => {
+    const M = matrix.map(row => row.slice());
+    M[r][c] = v;
+    setMatrix(M);
+  };
+  return (
+    <div className="rounded-lg p-3" style={{border: "1px solid var(--border)", background: "var(--bg-elev-2)"}}>
+      <div className="text-xs tracking-[0.2em] font-semibold mb-2" style={{color: "var(--text-dim)"}}>{label}</div>
+      <div className="inline-grid gap-1" style={{gridTemplateColumns: `repeat(${cols}, auto)`}}>
+        {matrix.flatMap((row, r) => row.map((v, c) => (
+          <NumInput key={`${r}-${c}`} value={v} onChange={x => setCell(r, c, x)} step="1" width={c === aug ? 56 : 46}/>
+        )))}
+      </div>
+    </div>
+  );
+}
+
+/* ════════════════════════════════════════════════════════
+   CONCEPT 5.1 — What the Determinant Really Is
+   Interactive: 2x2 determinant geometry — unit square → parallelogram
+   ════════════════════════════════════════════════════════ */
+function DeterminantGeometry() {
+  const [A, setA] = useState([[2, 1], [1, 2]]);
+  const d = det2(A);
+  const range = 6, scale = 200 / range, cx = 200, cy = 200;
+  const toPx = (x, y) => [cx + x*scale, cy - y*scale];
+
+  // Unit square: (0,0), (1,0), (1,1), (0,1)
+  // After A: (0,0), col1, col1+col2, col2
+  const corners = [
+    [0, 0],
+    [A[0][0], A[1][0]],
+    [A[0][0] + A[0][1], A[1][0] + A[1][1]],
+    [A[0][1], A[1][1]],
+  ];
+  const points = corners.map(([x, y]) => toPx(x, y).join(",")).join(" ");
+
+  let fillColor, sign;
+  if (Math.abs(d) < 0.01) { fillColor = "var(--text-faded)"; sign = "collapse"; }
+  else if (d > 0) { fillColor = "var(--accent-3)"; sign = "positive"; }
+  else { fillColor = "var(--danger)"; sign = "negative"; }
+
+  // Unit square (faint)
+  const unitCorners = [[0,0],[1,0],[1,1],[0,1]].map(([x,y]) => toPx(x,y).join(",")).join(" ");
+
+  return (
+    <InteractiveFrame
+      name="Determinant = Signed Area"
+      whatAmISeeing="A 2×2 matrix A. The unit square (faint) is transformed by A into a parallelogram (filled). The signed area of that parallelogram IS the determinant of A. Green = orientation preserved; red = orientation flipped; grey = collapsed to a line (det = 0)."
+      tryThis="Default A: det = 3 > 0, green parallelogram. Swap rows: A = [[1,2],[2,1]] — det becomes −3, parallelogram flips to red (orientation reversed). Set A = [[2,4],[1,2]] — columns parallel — parallelogram collapses to a LINE, det = 0. The geometry IS the determinant."
+    >
+      <div className="grid lg:grid-cols-[auto,1fr] gap-6 items-start">
+        <svg viewBox="0 0 400 400" className="vector-svg" style={{maxWidth: 400}}>
+          {/* Grid */}
+          {Array.from({length: 2*range+1}, (_, i) => i - range).filter(i => i !== 0).map(i => {
+            const [x1, y1] = toPx(i, -range), [x2, y2] = toPx(i, range);
+            const [x3, y3] = toPx(-range, i), [x4, y4] = toPx(range, i);
+            return (
+              <g key={i}>
+                <line x1={x1} y1={y1} x2={x2} y2={y2} stroke="var(--canvas-grid)"/>
+                <line x1={x3} y1={y3} x2={x4} y2={y4} stroke="var(--canvas-grid)"/>
+              </g>
+            );
+          })}
+          {/* Axes */}
+          <line x1={0} y1={cy} x2={400} y2={cy} stroke="var(--canvas-axis)"/>
+          <line x1={cx} y1={0} x2={cx} y2={400} stroke="var(--canvas-axis)"/>
+
+          {/* Unit square */}
+          <polygon points={unitCorners} fill="var(--text-faded)" opacity="0.18" stroke="var(--text-faded)" strokeWidth="1.5" strokeDasharray="4 3"/>
+
+          {/* Parallelogram */}
+          <polygon points={points} fill={fillColor} opacity="0.28" stroke={fillColor} strokeWidth="2.5"/>
+
+          {/* Columns as vectors */}
+          {(() => {
+            const [px, py] = toPx(A[0][0], A[1][0]);
+            return <line x1={cx} y1={cy} x2={px} y2={py} stroke="var(--accent)" strokeWidth="2.5"/>;
+          })()}
+          {(() => {
+            const [px, py] = toPx(A[0][1], A[1][1]);
+            return <line x1={cx} y1={cy} x2={px} y2={py} stroke="var(--accent-2)" strokeWidth="2.5"/>;
+          })()}
+          {(() => {
+            const [px, py] = toPx(A[0][0], A[1][0]);
+            return <text x={px+8} y={py-6} fontSize="12" fill="var(--accent)" fontWeight="700">col₁</text>;
+          })()}
+          {(() => {
+            const [px, py] = toPx(A[0][1], A[1][1]);
+            return <text x={px+8} y={py-6} fontSize="12" fill="var(--accent-2)" fontWeight="700">col₂</text>;
+          })()}
+          <text x={12} y={20} fontSize="12" fill="var(--text-dim)">Unit square (faint) → Parallelogram (filled)</text>
+        </svg>
+
+        <div className="space-y-4">
+          <div className="rounded-lg p-3" style={{border: "1px solid var(--border)", background: "var(--bg-elev-2)"}}>
+            <div className="text-xs tracking-[0.2em] font-semibold mb-2" style={{color: "var(--text-dim)"}}>MATRIX A</div>
+            <div className="grid grid-cols-2 gap-2">
+              {[0,1].map(r => [0,1].map(c => (
+                <NumInput key={`${r}-${c}`} value={A[r][c]} step="1" width={70}
+                  onChange={v => { const A2 = A.map(row => row.slice()); A2[r][c] = v; setA(A2); }}/>
+              )))}
+            </div>
+          </div>
+
+          <div className="rounded-lg p-4"
+            style={{border: "1px solid " + fillColor, background: sign === "negative" ? "var(--danger-soft)" : sign === "positive" ? "var(--accent-3-soft)" : "var(--bg-elev-3)"}}>
+            <div className="text-xs tracking-[0.2em] font-semibold mb-2" style={{color: fillColor}}>DETERMINANT</div>
+            <div className="text-3xl font-mono font-bold mb-2" style={{color: "var(--text)"}}>
+              {d.toFixed(2)}
+            </div>
+            <div className="text-xs space-y-1" style={{color: "var(--text-dim)"}}>
+              <div>|det A| = signed area of parallelogram = <span className="font-mono" style={{color: fillColor}}>{Math.abs(d).toFixed(2)}</span></div>
+              {sign === "positive" && <div style={{color: "var(--accent-3)"}}>Orientation preserved (counter-clockwise stays counter-clockwise)</div>}
+              {sign === "negative" && <div style={{color: "var(--danger)"}}>Orientation flipped (counter-clockwise becomes clockwise)</div>}
+              {sign === "collapse" && <div style={{color: "var(--text-faded)"}}>Collapse to a line — columns are linearly dependent</div>}
+            </div>
+          </div>
+
+          <div className="rounded-lg p-3 text-xs" style={{border: "1px solid var(--info-border)", background: "var(--info-soft)", color: "var(--text-dim)"}}>
+            <div className="font-semibold mb-1" style={{color: "var(--info)"}}>WHAT DET MEANS</div>
+            <div className="space-y-1">
+              <div><span className="font-mono">|det A|</span> = volume scaling factor</div>
+              <div><span className="font-mono">sign(det A)</span> = orientation (+1 preserved, −1 flipped)</div>
+              <div><span className="font-mono">det A = 0</span> ⇔ columns are dependent ⇔ A is singular</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </InteractiveFrame>
+  );
+}
+
+function Concept51() {
+  return (
+    <ConceptCard id="concept-5-1" label="5.1" moduleLabel="Module 5 · Determinants"
+      title="What the Determinant Really Is"
+      why="Most students learn det as a formula. Wrong order. The determinant has a GEOMETRIC meaning first — signed volume — and the formula falls out of that geometry. Once you see it as a volume, every property (det(AB) = det A · det B, det = 0 ⇔ singular, etc.) becomes obvious.">
+      <H3>The geometric meaning — start here</H3>
+      <P>For a 2×2 matrix <T src="A"/>, the determinant is the <B>signed area</B> of the parallelogram formed by its columns:</P>
+      <BT src={String.raw`\det\begin{pmatrix} a & b \\ c & d \end{pmatrix} = ad - bc \;=\; \text{signed area of the parallelogram spanned by } \binom{a}{c}, \binom{b}{d}.`}/>
+      <P>For a 3×3 matrix, the determinant is the <B>signed volume</B> of the parallelepiped formed by its three columns.</P>
+      <P>For an <T src="n \times n"/> matrix, it's the signed <T src="n"/>-volume of the corresponding parallelopipoid.</P>
+
+      <H3>Why "signed"</H3>
+      <P>The sign encodes <B>orientation</B>. In 2D: counter-clockwise = positive, clockwise = negative. The unit square <T src="\{(0,0),(1,0),(1,1),(0,1)\}"/> has CCW orientation. If A maps it to a parallelogram that's still CCW, <T src="\det A &gt; 0"/>; if A flips it to CW, <T src="\det A &lt; 0"/>.</P>
+      <P>In 3D and higher: orientation is decided by the right-hand rule (or generalised "right-handedness"). Reflections flip orientation; rotations preserve it.</P>
+
+      <H3>Why <T src="\det A = 0"/> matters</H3>
+      <P>When the columns of <T src="A"/> are linearly DEPENDENT, the parallelogram collapses — to a line in 2D, to a flat sheet in 3D. A flat object has zero <T src="n"/>-volume. Hence <T src="\det A = 0"/>.</P>
+      <UL>
+        <Li><B><T src="\det A \neq 0"/></B> ⇔ columns linearly independent ⇔ A invertible ⇔ A has full rank.</Li>
+        <Li><B><T src="\det A = 0"/></B> ⇔ columns dependent ⇔ A singular ⇔ <T src="A\mathbf{x} = \mathbf{0}"/> has non-trivial solutions.</Li>
+      </UL>
+
+      <Callout kind="info" title="|det A| = the volume scaling factor of A">
+        <P>If you put a region <T src="R"/> in <T src="\mathbb{R}^n"/> with volume <T src="V"/>, then <T src="A(R)"/> has volume <T src="|\det A| \cdot V"/>. The matrix A stretches all volumes by the same factor — independent of the region's shape.</P>
+        <P><B>Consequence:</B> <T src="\det(I) = 1"/> (identity doesn't change volume). Rotations have <T src="\det = +1"/>. Reflections have <T src="\det = -1"/>. Scaling by <T src="c"/> in every dimension has <T src="\det = c^n"/>.</P>
+      </Callout>
+
+      <DeterminantGeometry/>
+
+      <H3>The 3D picture — signed volume</H3>
+      <P>For a 3×3 matrix, the three columns define a parallelepiped. The signed volume is positive if the three column vectors form a right-handed system (point your fingers from col₁ to col₂, thumb in the direction of col₃), negative if left-handed.</P>
+      <P>The formula:</P>
+      <BT src={String.raw`\det\begin{pmatrix} a & b & c \\ d & e & f \\ g & h & i \end{pmatrix} = a(ei - fh) - b(di - fg) + c(dh - eg).`}/>
+      <P>This is exactly cofactor expansion along the top row — which we'll prove equivalent to the volume formula in 5.2.</P>
+
+      <H3>Why this view unlocks every property</H3>
+      <P>If you remember "det = signed volume," then:</P>
+      <UL>
+        <Li><B><T src="\det(AB) = \det(A) \det(B)"/></B>: applying B then A scales volume by <T src="\det A"/> then <T src="\det B"/>, total factor <T src="\det A \cdot \det B"/>. ✓</Li>
+        <Li><B>Swapping two rows flips sign:</B> swapping two columns of the parallelogram reverses orientation. ✓</Li>
+        <Li><B>Adding multiple of one row to another doesn't change det:</B> the parallelogram gets sheared — same base, same height, same volume. ✓</Li>
+        <Li><B>Scaling a row by <T src="c"/> scales det by <T src="c"/></B>: stretching one column by <T src="c"/> stretches the parallelogram's volume by <T src="c"/>. ✓</Li>
+        <Li><B><T src="\det A = 0"/> ⇔ singular:</B> dependent columns → collapsed shape → zero volume. ✓</Li>
+      </UL>
+      <P>Five properties, one geometric insight. We'll formalize each in 5.2.</P>
+
+      <Callout kind="ml" title="Why ML loves the log-determinant">
+        <P>In probabilistic models (Gaussian distributions, variational autoencoders, normalizing flows), the log-determinant of a covariance / Jacobian appears constantly. It measures the "volume of probability mass" being concentrated or spread. The determinant's geometric meaning is the key to understanding why these terms show up.</P>
+      </Callout>
+
+      <Callout kind="recall" title="Concept 5.1 in one breath">
+        <P>det = signed volume of the parallelepiped spanned by the columns. Sign = orientation. |det| = volume scaling factor. det = 0 ⇔ collapsed ⇔ singular ⇔ dependent columns. The formula comes from geometry, not the other way round.</P>
+      </Callout>
+
+      <ProgressPill conceptId="m5-c51"/>
+    </ConceptCard>
+  );
+}
+
+/* ════════════════════════════════════════════════════════
+   CONCEPT 5.2 — Computing Determinants
+   ════════════════════════════════════════════════════════ */
+function CofactorAnimator() {
+  const [A, setA] = useState([[2, 3, 1], [1, 0, 2], [4, 1, 3]]);
+  const [expandRow, setExpandRow] = useState(0); // expand along row 0,1,2 OR col 0,1,2 (3-5)
+  const isRow = expandRow < 3;
+  const idx = expandRow % 3;
+
+  const terms = [];
+  if (isRow) {
+    for (let j = 0; j < 3; j++) {
+      const val = A[idx][j];
+      const minor = [];
+      for (let r = 0; r < 3; r++) {
+        if (r === idx) continue;
+        const row = [];
+        for (let c = 0; c < 3; c++) {
+          if (c === j) continue;
+          row.push(A[r][c]);
+        }
+        minor.push(row);
+      }
+      const minorDet = det2(minor);
+      const sign = ((idx + j) % 2 === 0) ? 1 : -1;
+      terms.push({ val, minor, minorDet, sign, contrib: sign * val * minorDet, pos: [idx, j] });
+    }
+  } else {
+    for (let i = 0; i < 3; i++) {
+      const val = A[i][idx];
+      const minor = [];
+      for (let r = 0; r < 3; r++) {
+        if (r === i) continue;
+        const row = [];
+        for (let c = 0; c < 3; c++) {
+          if (c === idx) continue;
+          row.push(A[r][c]);
+        }
+        minor.push(row);
+      }
+      const minorDet = det2(minor);
+      const sign = ((i + idx) % 2 === 0) ? 1 : -1;
+      terms.push({ val, minor, minorDet, sign, contrib: sign * val * minorDet, pos: [i, idx] });
+    }
+  }
+  const total = terms.reduce((s, t) => s + t.contrib, 0);
+
+  return (
+    <InteractiveFrame
+      name="Cofactor Expansion Animator"
+      whatAmISeeing="A 3×3 matrix. Choose any row or column to expand along — each gives the same final determinant. Three terms are shown side-by-side: the entry, its 2×2 minor, the sign (-1)^(i+j), and the contribution to the running total."
+      tryThis="Toggle between expanding along different rows or columns — the total NEVER changes. This is a key fact: cofactor expansion gives the same answer regardless of the row or column you pick. Pick the row/column with the most zeros to save work — that's the practical rule."
+    >
+      <div className="space-y-4">
+        <div className="grid lg:grid-cols-[auto,1fr] gap-6 items-start">
+          <MatrixEditor matrix={A} setMatrix={setA} label="3×3 MATRIX A"/>
+
+          <div className="space-y-2">
+            <div className="text-xs tracking-[0.2em] font-semibold" style={{color: "var(--text-dim)"}}>EXPAND ALONG</div>
+            <div className="flex flex-wrap gap-1">
+              {[0, 1, 2].map(r => (
+                <button key={`r${r}`} onClick={() => setExpandRow(r)}
+                  className="text-xs px-2.5 py-1 rounded transition-colors"
+                  style={{
+                    border: "1px solid " + (expandRow === r ? "var(--accent-border)" : "var(--border)"),
+                    background: expandRow === r ? "var(--accent-soft)" : "transparent",
+                    color: expandRow === r ? "var(--accent)" : "var(--text-dim)",
+                  }}>Row {r+1}</button>
+              ))}
+              {[0, 1, 2].map(c => (
+                <button key={`c${c}`} onClick={() => setExpandRow(c + 3)}
+                  className="text-xs px-2.5 py-1 rounded transition-colors"
+                  style={{
+                    border: "1px solid " + (expandRow === c + 3 ? "var(--accent-2-border)" : "var(--border)"),
+                    background: expandRow === c + 3 ? "var(--accent-2-soft)" : "transparent",
+                    color: expandRow === c + 3 ? "var(--accent-2)" : "var(--text-dim)",
+                  }}>Col {c+1}</button>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div className="grid md:grid-cols-3 gap-3">
+          {terms.map((t, i) => (
+            <div key={i} className="rounded-lg p-4 text-center"
+              style={{border: "1px solid var(--border)", background: "var(--bg-elev-2)"}}>
+              <div className="text-xs tracking-[0.2em] font-semibold mb-2" style={{color: t.sign > 0 ? "var(--accent-3)" : "var(--danger)"}}>
+                TERM {i+1} · sign = {t.sign > 0 ? "+" : "−"}
+              </div>
+              <div className="text-3xl font-mono font-bold mb-1" style={{color: "var(--accent)"}}>{t.val}</div>
+              <div className="text-xs mb-2" style={{color: "var(--text-faded)"}}>position ({t.pos[0]+1}, {t.pos[1]+1})</div>
+              <div className="my-2 flex justify-center">
+                <MatrixDisplay data={t.minor}/>
+              </div>
+              <div className="text-xs font-mono" style={{color: "var(--text-dim)"}}>
+                det = {t.minorDet}
+              </div>
+              <div className="text-sm font-mono mt-2 pt-2"
+                style={{borderTop: "1px solid var(--border)", color: t.contrib >= 0 ? "var(--accent-3)" : "var(--danger)"}}>
+                contribution: {t.contrib >= 0 ? "+" : ""}{t.contrib}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="rounded-lg p-5 text-center"
+          style={{border: "1px solid var(--accent-border)", background: "var(--accent-soft)"}}>
+          <div className="text-xs tracking-[0.2em] font-semibold mb-2" style={{color: "var(--accent)"}}>SUM = det(A)</div>
+          <div className="text-4xl font-mono font-bold" style={{color: "var(--text)"}}>
+            {terms.map((t, i) => (
+              <span key={i}>{i > 0 && (t.contrib >= 0 ? " + " : " − ")}{i === 0 ? t.contrib : Math.abs(t.contrib)}</span>
+            ))}
+            <span style={{color: "var(--text-dim)"}}> = </span>
+            <span style={{color: "var(--accent)"}}>{total}</span>
+          </div>
+        </div>
+      </div>
+    </InteractiveFrame>
+  );
+}
+
+function Concept52() {
+  return (
+    <ConceptCard id="concept-5-2" label="5.2" moduleLabel="Module 5 · Determinants"
+      title="Computing Determinants"
+      why="The formula machinery. Cofactor expansion works for any size and is the path through every property proof. Sarrus' rule is the lazy shortcut for 3×3. Properties of det give you 10× speed-ups on GATE — but only if you've memorised them.">
+      <H3>2×2 — from geometry to formula</H3>
+      <P>For <T src="A = \begin{pmatrix} a & b \\ c & d \end{pmatrix}"/>, the columns are <T src="(a, c)"/> and <T src="(b, d)"/>. The parallelogram they span has signed area:</P>
+      <BT src={String.raw`\det A = ad - bc.`}/>
+      <P><B>Why?</B> Start with the unit square (area 1). Stretch by <T src="A"/>. The signed area can be computed via the cross-product-like formula for 2D: the parallelogram with sides <T src="(a, c)"/> and <T src="(b, d)"/> has signed area <T src="(a)(d) - (c)(b) = ad - bc"/>. Match.</P>
+
+      <H3>3×3 — cofactor expansion (general n)</H3>
+      <P>For an <T src="n \times n"/> matrix, define the <B>(i, j)-minor</B> <T src="M_{ij}"/> as the determinant of the <T src="(n-1) \times (n-1)"/> sub-matrix obtained by deleting row <T src="i"/> and column <T src="j"/>. The <B>(i, j)-cofactor</B> is <T src="C_{ij} = (-1)^{i+j} M_{ij}"/>. Then:</P>
+      <BT src={String.raw`\det A = \sum_{j=1}^{n} a_{ij} \, C_{ij} = \sum_{i=1}^{n} a_{ij} \, C_{ij}.`}/>
+      <P>That is — pick ANY row <T src="i"/> (or column <T src="j"/>), expand along it, and you get the determinant.</P>
+
+      <Callout kind="proof" title="Why every row/column expansion gives the same answer">
+        <P>The Leibniz formula <T src="\det A = \sum_\sigma \text{sgn}(\sigma) \prod_i a_{i, \sigma(i)}"/> sums over all permutations, treating no row or column as special. Cofactor expansion along any row is just a way of regrouping that sum. The regroupings differ in order but produce the same total. (Strang Ch. 5 has the cleanest proof; here is the conclusion: <B>every row, every column gives the same answer</B>.)</P>
+      </Callout>
+
+      <H3>The +/- sign pattern (chessboard)</H3>
+      <P>The signs <T src="(-1)^{i+j}"/> form a checkerboard pattern. For 3×3:</P>
+      <BT src={String.raw`\begin{pmatrix} + & - & + \\ - & + & - \\ + & - & + \end{pmatrix}`}/>
+      <P>Position <T src="(1,1)"/>: <T src="(-1)^{1+1} = +1"/>. Position <T src="(1,2)"/>: <T src="(-1)^{1+2} = -1"/>. Etc. ALWAYS double-check the sign by counting <T src="i + j"/>.</P>
+
+      <H3>Sarrus' rule (3×3 only)</H3>
+      <P>For 3×3 specifically:</P>
+      <BT src={String.raw`\det A = aei + bfg + cdh - ceg - bdi - afh,`}/>
+      <P>where A's entries are written as <T src="\begin{pmatrix} a & b & c \\ d & e & f \\ g & h & i \end{pmatrix}"/>. Mnemonic: repeat the first two columns to the right, then sum the three "down-right" diagonals minus the three "down-left" diagonals.</P>
+
+      <Callout kind="trap" title="Sarrus' rule ONLY works for 3×3">
+        <P>Don't try to generalize it. For 4×4 or larger, use cofactor expansion or LU decomposition. The "extend with extra columns" trick produces WRONG answers for 4×4. Many students unlearn this the hard way in exams.</P>
+      </Callout>
+
+      <CofactorAnimator/>
+
+      <H3>The 8 essential properties</H3>
+
+      <H4>1. <T src="\det(AB) = \det A \cdot \det B"/></H4>
+      <P><B>Why:</B> the composite transformation AB scales volume by both factors in turn.</P>
+
+      <H4>2. <T src="\det(A^\top) = \det A"/></H4>
+      <P><B>Why:</B> the Leibniz formula sums over permutations symmetrically. Transpose interchanges rows and columns but the sum is unchanged.</P>
+      <Callout kind="info" title="Consequence">
+        <P>Every property about rows applies equally to columns. "Row of zeros" → det = 0 implies "column of zeros" → det = 0.</P>
+      </Callout>
+
+      <H4>3. <T src="\det(cA) = c^n \det A"/></H4>
+      <P><B>Why:</B> multiplying every entry by <T src="c"/> = multiplying each of <T src="n"/> rows by <T src="c"/> = factor <T src="c^n"/> total.</P>
+
+      <H4>4. Swapping two rows flips the sign of det</H4>
+      <P><B>Why:</B> swapping two columns of a parallelepiped reverses orientation.</P>
+
+      <H4>5. Row of zeros ⇒ det = 0</H4>
+      <P><B>Why:</B> expanding cofactor along that row gives every term multiplied by 0.</P>
+
+      <H4>6. Two equal rows ⇒ det = 0</H4>
+      <P><B>Why:</B> swap them — same matrix — but sign flips → det = -det → 2 det = 0 → det = 0.</P>
+
+      <H4>7. Adding a multiple of one row to another DOES NOT change det</H4>
+      <P><B>Why:</B> shearing a parallelogram doesn't change its base area. (This is the property that makes Gaussian elimination useful for computing dets — and is the basis of LU.)</P>
+
+      <H4>8. Triangular ⇒ det = product of diagonal entries</H4>
+      <P><B>Why:</B> upper triangular ⇒ off-diagonal "row ops" make the matrix already in echelon form ⇒ no swap, no scale ⇒ det = product of pivots.</P>
+
+      <Callout kind="trap" title="THE single biggest determinant trap">
+        <P><B><T src="\det(A + B) \neq \det A + \det B"/></B> in general!</P>
+        <P>Counterexample: <T src="A = I, B = -I"/>. <T src="\det A = 1, \det B = 1"/>. <T src="A + B = 0"/>, <T src="\det(A + B) = 0 \neq 2"/>.</P>
+        <P>Det is NOT linear. It's MULTILINEAR (linear in each row/column separately, holding others fixed). Easy to confuse — never make this mistake on exam day.</P>
+      </Callout>
+
+      <H3>Fast computation strategy — for GATE-sized matrices</H3>
+      <OL>
+        <Li>Check for an obvious row/column of zeros or a row/column with a single non-zero entry — expand along that line, save 5 minutes.</Li>
+        <Li>For 4×4 or larger: row-reduce to triangular, tracking sign changes from swaps and factor changes from scaling — det = product of diagonal × sign factor.</Li>
+        <Li>For symbolic problems: use cofactor expansion. For numeric problems: row-reduction is faster.</Li>
+      </OL>
+
+      <Callout kind="recall" title="Concept 5.2 in one breath">
+        <P>2×2: ad − bc. 3×3+: cofactor expansion along any row or column. Sarrus is a 3×3-only mnemonic. 8 properties: multiplicative, transpose-invariant, scales as c^n, row swap flips sign, zeros/equals/dependence kill det, adding a row multiple is free, triangular = product of diagonal. det(A+B) ≠ det A + det B.</P>
+      </Callout>
+
+      <ProgressPill conceptId="m5-c52"/>
+    </ConceptCard>
+  );
+}
+
+/* ════════════════════════════════════════════════════════
+   CONCEPT 5.3 — Inverse of a Matrix
+   Interactive: Inverse via row reduction [A | I] → [I | A⁻¹]
+   ════════════════════════════════════════════════════════ */
+function InverseStepper() {
+  const [A, setA] = useState([[2, 1, 1], [1, 3, 2], [1, 0, 0]]);
+  const n = A.length;
+  // Augment with identity
+  const augM = useMemo(() => A.map((row, i) => {
+    const id = Array(n).fill(0); id[i] = 1;
+    return [...row, ...id];
+  }), [A]);
+  const result = useMemo(() => rowReduce(augM, { mode: "rref" }), [augM]);
+  const [stepIdx, setStepIdx] = useState(0);
+  const cur = result.steps[Math.min(stepIdx, result.steps.length - 1)];
+  const last = stepIdx >= result.steps.length - 1;
+  useEffect(() => { setStepIdx(0); }, [augM]);
+
+  const dA = detN(A);
+  const singular = Math.abs(dA) < 1e-9;
+  const inverse = (!singular && last)
+    ? result.final.map(row => row.slice(n))
+    : null;
+
+  return (
+    <InteractiveFrame
+      name="Inverse via Row Reduction — [A | I] → [I | A⁻¹]"
+      whatAmISeeing="The matrix A on the left, augmented with the identity I on the right. Row reduce both halves in lockstep. If A is invertible, the left half becomes I and the right half becomes A⁻¹. If A is singular, the left half can't reach I — and the procedure announces 'no inverse'."
+      tryThis="Default A has det ≠ 0 — step through to find A⁻¹. Now set entry [2][0] = 2 (making row 3 = row 2 scaled). det = 0 — singular. The row reduction can no longer produce I on the left, and the verdict says NO INVERSE."
+    >
+      <div className="grid lg:grid-cols-[1fr,auto] gap-6 items-start">
+        <div className="space-y-4">
+          <MatrixEditor matrix={A} setMatrix={(M) => { setA(M); setStepIdx(0); }} label="MATRIX A"/>
+
+          <div className="rounded-lg p-4"
+            style={{border: "1px solid " + (singular ? "var(--danger-border)" : "var(--accent-border)"),
+                    background: singular ? "var(--danger-soft)" : "var(--accent-soft)"}}>
+            <div className="text-xs tracking-[0.2em] font-semibold mb-2 flex items-center justify-between"
+              style={{color: singular ? "var(--danger)" : "var(--accent)"}}>
+              <span>STEP {stepIdx + 1} / {result.steps.length}</span>
+              <span>det(A) = <span className="font-mono">{dA.toFixed(2)}</span> {singular && "· SINGULAR"}</span>
+            </div>
+            <MatrixDisplay data={cur.M} pivots={last ? result.pivots : []} augmented={true} augCol={n}/>
+            <div className="text-sm mt-3 leading-relaxed" style={{color: "var(--text)"}}>{cur.desc}</div>
+          </div>
+
+          <div className="flex gap-2 flex-wrap">
+            <button onClick={() => setStepIdx(0)} className="text-sm px-3 py-1.5 rounded-lg"
+              style={{border: "1px solid var(--border)", color: "var(--text-dim)"}}>↺ Reset</button>
+            <button onClick={() => setStepIdx(i => Math.max(0, i - 1))} disabled={stepIdx === 0} className="text-sm px-3 py-1.5 rounded-lg"
+              style={{border: "1px solid var(--border)", color: stepIdx === 0 ? "var(--text-faded)" : "var(--text-dim)"}}>← Prev</button>
+            <button onClick={() => setStepIdx(i => Math.min(result.steps.length - 1, i + 1))} disabled={last} className="text-sm px-4 py-1.5 rounded-lg font-semibold"
+              style={{border: "1px solid var(--accent)", color: last ? "var(--text-faded)" : "var(--accent)",
+                      background: last ? "transparent" : "var(--accent-soft)"}}>Next step →</button>
+            <button onClick={() => setStepIdx(result.steps.length - 1)} className="text-sm px-3 py-1.5 rounded-lg"
+              style={{border: "1px solid var(--border)", color: "var(--text-dim)"}}>⏭ End</button>
+          </div>
+
+          {last && !singular && inverse && (
+            <div className="rounded-lg p-4"
+              style={{border: "1px solid var(--accent-3-border)", background: "var(--accent-3-soft)"}}>
+              <div className="text-xs tracking-[0.2em] font-semibold mb-2" style={{color: "var(--accent-3)"}}>A⁻¹ FOUND</div>
+              <MatrixDisplay data={inverse}/>
+            </div>
+          )}
+          {last && singular && (
+            <div className="rounded-lg p-4"
+              style={{border: "1px solid var(--danger-border)", background: "var(--danger-soft)"}}>
+              <div className="text-xs tracking-[0.2em] font-semibold mb-2" style={{color: "var(--danger)"}}>NO INVERSE</div>
+              <div className="text-sm" style={{color: "var(--text)"}}>A is singular — det(A) = 0. The left half of [A | I] cannot reach I.</div>
+            </div>
+          )}
+        </div>
+
+        <div className="rounded-lg p-3 lg:max-w-xs" style={{border: "1px solid var(--border)", background: "var(--bg-elev-2)"}}>
+          <div className="text-xs tracking-[0.2em] font-semibold mb-2" style={{color: "var(--text-dim)"}}>RULE</div>
+          <div className="text-xs leading-relaxed" style={{color: "var(--text-dim)"}}>
+            Augment A with I.<br/>
+            Row-reduce the LEFT half to I.<br/>
+            The SAME row ops act on the RIGHT half — it becomes A⁻¹.<br/><br/>
+            <B>Why?</B> Each row op on [A | I] corresponds to left-multiplication by an elementary matrix E. The product of all E's is exactly A⁻¹.
+          </div>
+        </div>
+      </div>
+    </InteractiveFrame>
+  );
+}
+
+function Concept53() {
+  return (
+    <ConceptCard id="concept-5-3" label="5.3" moduleLabel="Module 5 · Determinants"
+      title="Inverse of a Matrix"
+      why="The inverse undoes A's transformation. It is the cornerstone of solving Ax = b directly (x = A⁻¹ b), of changing basis, of pseudo-inverses, and of nearly every theorem about square matrices. But it only EXISTS when A is non-singular — and computing it takes care.">
+      <H3>Definition</H3>
+      <P>The <B>inverse</B> of a square matrix <T src="A"/> is a matrix <T src="A^{-1}"/> with</P>
+      <BT src={String.raw`A A^{-1} = A^{-1} A = I.`}/>
+      <P>If such a matrix exists, A is called <B>invertible</B> or <B>non-singular</B>. If not, A is <B>singular</B>.</P>
+
+      <H3>Existence ⇔ <T src="\det A \neq 0"/></H3>
+      <P>For a square <T src="A"/>, the following are all equivalent. They are the "Big Equivalence Theorem" of LA, version 1:</P>
+      <UL>
+        <Li>A is invertible.</Li>
+        <Li><T src="\det A \neq 0"/>.</Li>
+        <Li>A's columns are linearly independent.</Li>
+        <Li>A's rows are linearly independent.</Li>
+        <Li><T src="\text{rank}(A) = n"/> (full rank).</Li>
+        <Li><T src="N(A) = \{\mathbf{0}\}"/>.</Li>
+        <Li><T src="A\mathbf{x} = \mathbf{0}"/> has only the trivial solution.</Li>
+        <Li><T src="A\mathbf{x} = \mathbf{b}"/> has a unique solution for every <T src="\mathbf{b}"/>.</Li>
+        <Li>0 is NOT an eigenvalue of A (Module 6).</Li>
+      </UL>
+      <P>If you know any ONE of these holds, you know they ALL hold. If you know any one fails, all fail.</P>
+
+      <Callout kind="proof" title="Why det A ≠ 0 ⇒ A is invertible">
+        <P>Suppose <T src="\det A \neq 0"/>. By Cramer's rule (Concept 5.4), for any <T src="\mathbf{b}"/>, <T src="A\mathbf{x} = \mathbf{b}"/> has the unique solution <T src="x_i = \det A_i / \det A"/>. In particular for each standard basis vector <T src="\mathbf{e}_j"/>, there's a unique <T src="\mathbf{x}_j"/> with <T src="A \mathbf{x}_j = \mathbf{e}_j"/>. Put these <T src="\mathbf{x}_j"/> together as columns of a matrix <T src="B"/>. Then <T src="A B = I"/>. Hence A has a right inverse. Since A is square, the right inverse is also a left inverse: <T src="B = A^{-1}"/>.</P>
+        <P><B>Converse:</B> if A is invertible, then <T src="A A^{-1} = I \Rightarrow \det A \cdot \det A^{-1} = \det I = 1"/>, so <T src="\det A \neq 0"/>.</P>
+      </Callout>
+
+      <H3>The 2×2 formula — derive, don't memorise</H3>
+      <P>For <T src="A = \begin{pmatrix} a & b \\ c & d \end{pmatrix}"/> with <T src="ad - bc \neq 0"/>:</P>
+      <BT src={String.raw`A^{-1} = \frac{1}{ad - bc} \begin{pmatrix} d & -b \\ -c & a \end{pmatrix}.`}/>
+      <P><B>Derivation.</B> We want <T src="A X = I"/>. The two columns of <T src="X"/> are the two solutions of <T src="A \mathbf{x} = \mathbf{e}_1"/> and <T src="A \mathbf{x} = \mathbf{e}_2"/>. Setting up either system and using Cramer's rule gives the formula above directly.</P>
+      <P><B>Sanity check:</B> verify <T src="A A^{-1} = I"/> by multiplication.</P>
+
+      <H3>General inverse — via row reduction [A | I] → [I | A⁻¹]</H3>
+      <P>Augment <T src="A"/> with the identity:</P>
+      <BT src={String.raw`[A \mid I].`}/>
+      <P>Row-reduce. If you can drive the left half to <T src="I"/>, the right half is <T src="A^{-1}"/>:</P>
+      <BT src={String.raw`[A \mid I] \xrightarrow{\text{row ops}} [I \mid A^{-1}].`}/>
+
+      <Callout kind="proof" title="Why this algorithm works">
+        <P>Each row operation on a matrix is equivalent to left-multiplication by an elementary matrix <T src="E"/>. Row-reducing <T src="A"/> to <T src="I"/> means applying a sequence <T src="E_k \cdots E_2 E_1"/> such that <T src="E_k \cdots E_1 A = I"/>. So <T src="E_k \cdots E_1 = A^{-1}"/>. The SAME row ops applied to the right half take <T src="I"/> to <T src="E_k \cdots E_1 \cdot I = A^{-1}"/>. Done.</P>
+      </Callout>
+
+      <H3>Uniqueness of the inverse</H3>
+      <P>If both <T src="B"/> and <T src="C"/> satisfy <T src="AB = BA = I"/> and <T src="AC = CA = I"/>, then:</P>
+      <BT src={String.raw`B = BI = B(AC) = (BA)C = IC = C.`}/>
+      <P>So <T src="B = C"/>. The inverse is unique.</P>
+
+      <InverseStepper/>
+
+      <H3>Properties of the inverse</H3>
+
+      <H4>(AB)⁻¹ = B⁻¹ A⁻¹</H4>
+      <Callout kind="proof" title="Proof">
+        <P>Show that <T src="(B^{-1} A^{-1})(AB) = I"/>:</P>
+        <BT src={String.raw`(B^{-1} A^{-1})(AB) = B^{-1}(A^{-1} A) B = B^{-1} I B = B^{-1} B = I.`}/>
+        <P>So <T src="B^{-1} A^{-1}"/> is the inverse of <T src="AB"/>. The order reverses (just like transpose).</P>
+      </Callout>
+
+      <H4>(A⁻¹)⁻¹ = A</H4>
+      <P>The inverse of the inverse is the original. <T src="A A^{-1} = I"/> means <T src="A"/> is the inverse of <T src="A^{-1}"/>.</P>
+
+      <H4>(Aᵀ)⁻¹ = (A⁻¹)ᵀ</H4>
+      <Callout kind="proof" title="Proof">
+        <P>Transpose both sides of <T src="A^{-1} A = I"/>: <T src="(A^{-1} A)^\top = I^\top \Rightarrow A^\top (A^{-1})^\top = I"/>. So <T src="(A^{-1})^\top"/> is a right inverse of <T src="A^\top"/>, hence the inverse.</P>
+      </Callout>
+
+      <H4>det(A⁻¹) = 1 / det(A)</H4>
+      <P><T src="\det A \cdot \det(A^{-1}) = \det I = 1"/>, so <T src="\det(A^{-1}) = 1 / \det A"/>.</P>
+
+      <Callout kind="trap" title="'AB = I ⇒ A and B are inverses' — only for SQUARE matrices">
+        <P>If A is 2×3 and B is 3×2, you can have <T src="AB = I_2"/> without <T src="BA = I_3"/>. B is then a "right inverse" but not a two-sided inverse. For SQUARE matrices, one-sided inverse automatically means two-sided. For rectangular: never confuse the two.</P>
+      </Callout>
+
+      <H3>The inverse is rarely the right tool numerically</H3>
+      <P>Computing <T src="A^{-1}"/> to then form <T src="\mathbf{x} = A^{-1} \mathbf{b}"/> is mathematically clean but numerically WORSE than just solving <T src="A \mathbf{x} = \mathbf{b}"/> directly via LU. The inverse can amplify floating-point error. In production code, NEVER explicitly compute <T src="A^{-1}"/> — solve the system. The inverse is a theoretical object.</P>
+
+      <Callout kind="recall" title="Concept 5.3 in one breath">
+        <P>Inverse exists ⇔ det ≠ 0 ⇔ full rank ⇔ trivial null space ⇔ ... (the Big Equivalence Theorem). 2×2 has a closed-form formula. General A via [A|I] → [I|A⁻¹]. (AB)⁻¹ = B⁻¹A⁻¹ — order reverses. det(A⁻¹) = 1/det(A). For square only — rectangular has at most one-sided inverses.</P>
+      </Callout>
+
+      <ProgressPill conceptId="m5-c53"/>
+    </ConceptCard>
+  );
+}
+
+/* ════════════════════════════════════════════════════════
+   CONCEPT 5.4 — Cramer's Rule
+   ════════════════════════════════════════════════════════ */
+function CramerVisualizer() {
+  const [A, setA] = useState([[2, 1, 1], [1, 3, 2], [1, 0, 4]]);
+  const [b, setB] = useState([4, 5, 3]);
+  const n = A.length;
+  const dA = detN(A);
+
+  // Build A_i (replace column i with b)
+  const buildAi = (i) => A.map((row, r) => row.map((v, c) => c === i ? b[r] : v));
+  const Ais = [0, 1, 2].map(i => buildAi(i));
+  const dets = Ais.map(detN);
+  const singular = Math.abs(dA) < 1e-9;
+  const xs = singular ? [NaN, NaN, NaN] : dets.map(d => d / dA);
+
+  return (
+    <InteractiveFrame
+      name="Cramer's Rule Visualizer"
+      whatAmISeeing="A 3×3 system Ax = b. Cramer's rule says xᵢ = det(Aᵢ) / det(A), where Aᵢ is A with its i-th column replaced by b. Three side-by-side panels show A₁, A₂, A₃ — each with the replaced column highlighted."
+      tryThis="Default system has det(A) ≠ 0 — Cramer gives a unique x. Now change row 2 to (2, 6, 4) — exactly 2× row 1. det(A) = 0 — Cramer's rule BREAKS (you can't divide by zero). A singular A may still have solutions (or none), but Cramer can't tell you which. Module 4's classification handles those cases."
+    >
+      <div className="space-y-4">
+        <div className="grid lg:grid-cols-2 gap-4">
+          <MatrixEditor matrix={A} setMatrix={setA} label="A"/>
+          <div className="rounded-lg p-3" style={{border: "1px solid var(--border)", background: "var(--bg-elev-2)"}}>
+            <div className="text-xs tracking-[0.2em] font-semibold mb-2" style={{color: "var(--accent-3)"}}>b</div>
+            <div className="flex flex-col gap-1">
+              {[0, 1, 2].map(i => (
+                <NumInput key={i} value={b[i]} step="1" width={70}
+                  onChange={v => { const b2 = b.slice(); b2[i] = v; setB(b2); }}/>
+              ))}
+            </div>
+            <div className="text-xs mt-3 font-mono" style={{color: singular ? "var(--danger)" : "var(--accent)"}}>
+              det(A) = {dA.toFixed(2)} {singular && "· SINGULAR"}
+            </div>
+          </div>
+        </div>
+
+        <div className="grid md:grid-cols-3 gap-3">
+          {Ais.map((Ai, i) => (
+            <div key={i} className="rounded-lg p-3"
+              style={{border: "1px solid var(--accent-border)", background: "var(--accent-soft)"}}>
+              <div className="text-xs tracking-[0.2em] font-semibold mb-2 text-center" style={{color: "var(--accent)"}}>
+                A_{i+1} (column {i+1} ← b)
+              </div>
+              <div className="flex justify-center mb-2">
+                <MatrixDisplay data={Ai} highlight={{cells: [0,1,2].map(r => ({row: r, col: i, bg: "var(--accent-3-soft)", color: "var(--accent-3)"}))}}/>
+              </div>
+              <div className="text-xs space-y-1 font-mono text-center" style={{color: "var(--text-dim)"}}>
+                <div>det(A_{i+1}) = <span style={{color: "var(--accent-2)"}}>{dets[i].toFixed(2)}</span></div>
+                <div>x_{i+1} = {dets[i].toFixed(2)} / {dA.toFixed(2)} = <span style={{color: "var(--accent-3)"}} className="font-bold">
+                  {singular ? "—" : xs[i].toFixed(3)}
+                </span></div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="rounded-lg p-4 text-center"
+          style={{border: "1px solid " + (singular ? "var(--danger-border)" : "var(--accent-3-border)"),
+                  background: singular ? "var(--danger-soft)" : "var(--accent-3-soft)"}}>
+          <div className="text-xs tracking-[0.2em] font-semibold mb-2" style={{color: singular ? "var(--danger)" : "var(--accent-3)"}}>
+            {singular ? "CRAMER FAILS — DET(A) = 0" : "SOLUTION x"}
+          </div>
+          <div className="text-2xl font-mono font-bold" style={{color: "var(--text)"}}>
+            {singular ? "Try a non-singular A" : `x = (${xs[0].toFixed(2)}, ${xs[1].toFixed(2)}, ${xs[2].toFixed(2)})`}
+          </div>
+        </div>
+      </div>
+    </InteractiveFrame>
+  );
+}
+
+function Concept54() {
+  return (
+    <ConceptCard id="concept-5-4" label="5.4" moduleLabel="Module 5 · Determinants"
+      title="Cramer's Rule"
+      why="Cramer's rule is theoretically beautiful and computationally awful. For GATE it matters for the formula, for proofs (it pops up inside the inverse derivation), and for traps (applying it when det = 0). For numerical work, never — but every linear-algebra exam tests whether you know it.">
+      <H3>The statement</H3>
+      <P>For a square non-singular system <T src="A \mathbf{x} = \mathbf{b}"/>, the unique solution has entries:</P>
+      <BT src={String.raw`x_i = \frac{\det A_i}{\det A}, \quad i = 1, 2, \ldots, n,`}/>
+      <P>where <T src="A_i"/> is <T src="A"/> with its <T src="i"/>-th column replaced by <T src="\mathbf{b}"/>.</P>
+
+      <H3>The 2×2 example — make it concrete</H3>
+      <P>Solve <T src="\begin{pmatrix} 2 & 1 \\ 3 & -2 \end{pmatrix} \begin{pmatrix} x \\ y \end{pmatrix} = \begin{pmatrix} 5 \\ 4 \end{pmatrix}"/>.</P>
+      <P><T src="\det A = 2(-2) - 1(3) = -7"/>.</P>
+      <BT src={String.raw`A_1 = \begin{pmatrix} 5 & 1 \\ 4 & -2 \end{pmatrix}, \quad \det A_1 = 5(-2) - 1(4) = -14, \quad x = -14 / -7 = 2.`}/>
+      <BT src={String.raw`A_2 = \begin{pmatrix} 2 & 5 \\ 3 & 4 \end{pmatrix}, \quad \det A_2 = 2(4) - 5(3) = -7, \quad y = -7 / -7 = 1.`}/>
+      <P>So <T src="(x, y) = (2, 1)"/>. Verify: <T src="2(2) + 1(1) = 5"/>. <T src="3(2) - 2(1) = 4"/>. ✓</P>
+
+      <Callout kind="proof" title="Why Cramer's rule works (derivation)">
+        <P>Consider <T src="A \mathbf{x} = \mathbf{b}"/>. Define the matrix <T src="X_i"/> as the identity with its <T src="i"/>-th column replaced by <T src="\mathbf{x}"/>. By inspection:</P>
+        <BT src={String.raw`A X_i = A_i.`}/>
+        <P>(Multiplying A by the identity is A; multiplying A by the modified <T src="X_i"/> gives A but with its <T src="i"/>-th column replaced by <T src="A\mathbf{x} = \mathbf{b}"/>, which is exactly <T src="A_i"/>.)</P>
+        <P>Take determinants:</P>
+        <BT src={String.raw`\det A \cdot \det X_i = \det A_i.`}/>
+        <P>And <T src="\det X_i = x_i"/> (expand the determinant of the identity-with-column-x along that column — gives just <T src="x_i"/>). So:</P>
+        <BT src={String.raw`x_i = \det A_i / \det A. \qquad \blacksquare`}/>
+      </Callout>
+
+      <H3>When to use Cramer's rule</H3>
+      <UL>
+        <Li><B>2×2 systems:</B> sometimes faster than row reduction. Definitely useful for symbolic answers.</Li>
+        <Li><B>3×3 with simple numbers:</B> mechanical but slow.</Li>
+        <Li><B>n ≥ 4:</B> NEVER. Computing <T src="n+1"/> determinants of size <T src="n"/> is <T src="O(n!) "/> work — exponentially worse than row reduction's <T src="O(n^3)"/>.</Li>
+        <Li><B>For proofs:</B> always. Cramer's rule appears in the derivation of the inverse (5.3), in adjugate / classical adjoint formulas, and in implicit-function theorem proofs.</Li>
+      </UL>
+
+      <Callout kind="trap" title="The single biggest Cramer's-rule trap">
+        <P><B>Cramer's rule REQUIRES <T src="\det A \neq 0"/>.</B> If <T src="\det A = 0"/>, the formula <T src="x_i = \det A_i / \det A"/> is undefined.</P>
+        <P>Students sometimes proceed mechanically and divide by zero, or worse, declare "no solution" when the answer should be "infinitely many." A singular system needs Module 4's rank-based classification, not Cramer.</P>
+      </Callout>
+
+      <CramerVisualizer/>
+
+      <H3>GATE-style usage</H3>
+      <P>GATE rarely asks you to compute a 4×4 determinant by Cramer. What it asks:</P>
+      <UL>
+        <Li>"For what value of <T src="k"/> does <T src="A \mathbf{x} = \mathbf{b}"/> have a unique solution?" → set up <T src="\det A \neq 0"/>.</Li>
+        <Li>"Express <T src="x_3"/> in closed form for this 3×3 system" → use Cramer's formula directly.</Li>
+        <Li>"Which of these statements about Cramer's rule is TRUE?" → testing the existence condition.</Li>
+      </UL>
+
+      <H3>Cramer's rule and the inverse formula</H3>
+      <P>Stacking Cramer's solutions for the <T src="n"/> right-hand sides <T src="\mathbf{e}_1, \ldots, \mathbf{e}_n"/> gives the columns of <T src="A^{-1}"/>:</P>
+      <BT src={String.raw`(A^{-1})_{ij} = \frac{C_{ji}}{\det A} = \frac{(-1)^{i+j} M_{ji}}{\det A},`}/>
+      <P>where <T src="M_{ji}"/> is a minor. This is the <B>classical adjoint (adjugate)</B> formula: <T src="A^{-1} = \text{adj}(A) / \det A"/>. Useful for symbolic and theoretical work, hopelessly slow numerically.</P>
+
+      <Callout kind="ml" title="When ML actually sees Cramer's rule">
+        <P>Almost never in practice — but conceptually, the adjugate formula is the foundation of all numerical methods for <T src="A^{-1}"/>. Whenever you see "regularize by adding λI to make a matrix invertible," the underlying reason traces back to Cramer's "det = 0 means no answer."</P>
+      </Callout>
+
+      <Callout kind="recall" title="Concept 5.4 in one breath">
+        <P>x_i = det(A_i) / det(A), where A_i replaces A's i-th column with b. Requires det(A) ≠ 0. Beautiful for proofs and symbolic 2×2/3×3 work; computationally terrible for n ≥ 4. Plug into the adjugate formula to derive A⁻¹ from determinants.</P>
+      </Callout>
+
+      <ProgressPill conceptId="m5-c54"/>
+    </ConceptCard>
+  );
+}
+
+/* ════════════════════════════════════════════════════════
+   APP ROOT
+   ════════════════════════════════════════════════════════ */
+function App() {
+  useEffect(() => { hideLoading(); }, []);
+  const concepts = [
+    { id: "concept-5-1", label: "5.1", title: "What det Really Is",         desc: "Signed volume — the geometric meaning that explains everything." },
+    { id: "concept-5-2", label: "5.2", title: "Computing Determinants",     desc: "Cofactor expansion + 8 essential properties + Sarrus' rule." },
+    { id: "concept-5-3", label: "5.3", title: "Matrix Inverse",             desc: "Via row reduction + Big Equivalence Theorem + 2×2 derivation." },
+    { id: "concept-5-4", label: "5.4", title: "Cramer's Rule",              desc: "The formula, the derivation, the trap (det A = 0)." },
+  ];
+  return (
+    <div className="min-h-screen">
+      <TopNav currentModule={5}/>
+      <Hero
+        moduleNum={5} totalModules={8}
+        title="Determinants, Inverse & Cramer's Rule"
+        tagline="Volume scaling, invertibility, and the formula trio"
+        intro={
+          <>
+            The determinant is the most-misunderstood object in linear algebra: students learn it as a formula and miss the geometry.
+            Module 5 fixes this. Det is SIGNED VOLUME. The inverse exists iff det ≠ 0. Cramer's rule writes the unique solution as a ratio of determinants.
+            Four concepts, four interactives, every property proved from geometry first.
+          </>
+        }
+        concepts={concepts}
+        stats="4 concepts · 4 interactive tools · 8 properties of det · Big Equivalence Theorem"
+      />
+
+      {/* Problem Lab CTA */}
+      <section className="max-w-5xl mx-auto px-5 pt-2 pb-2">
+        <a href="module-05-problem-lab.html"
+          className="block rounded-2xl p-5 md:p-6 group transition-all"
+          style={{
+            background: "linear-gradient(135deg, var(--accent-soft), var(--accent-2-soft))",
+            border: "1px solid var(--accent-border)",
+            boxShadow: "var(--shadow-glow-accent)",
+          }}
+          onMouseEnter={e => e.currentTarget.style.borderColor = "var(--accent)"}
+          onMouseLeave={e => e.currentTarget.style.borderColor = "var(--accent-border)"}>
+          <div className="flex flex-wrap items-center gap-4">
+            <div style={{
+              width: 52, height: 52, borderRadius: 14,
+              background: "var(--grad-hero)", color: "white",
+              display: "inline-flex", alignItems: "center", justifyContent: "center",
+              fontSize: 22, flexShrink: 0,
+            }}>🎯</div>
+            <div className="flex-1 min-w-[260px]">
+              <div className="text-[11px] tracking-[0.2em] font-semibold mb-1" style={{color: "var(--accent)"}}>
+                MODULE 5 · PROBLEM LAB — NEW
+              </div>
+              <div className="text-[18px] md:text-[20px] font-bold leading-tight mb-1" style={{color: "var(--text)"}}>
+                Determinants → Property Chain reflex.
+              </div>
+              <div className="text-[13.5px]" style={{color: "var(--text-dim)"}}>
+                36 problems · 6 GATE PYQ walkthroughs (2001–2020) · Cayley-Hamilton inverse KILLER · timed drill mode.
+              </div>
+            </div>
+            <div className="flex items-center gap-2 px-4 py-2 rounded-xl font-semibold transition-opacity"
+              style={{background: "var(--grad-hero)", color: "white"}}>
+              Open Problem Lab →
+            </div>
+          </div>
+        </a>
+      </section>
+
+      <Concept51/>
+      <Concept52/>
+      <Concept53/>
+      <Concept54/>
+      <ModuleFooter
+        moduleNum={5}
+        nextModuleTitle="Eigenvalues & Eigenvectors"
+        nextModuleFile="module-06-eigenvalues.html"
+        checklist={[
+          "I can interpret det as signed volume in 2D and 3D.",
+          "I can compute det via cofactor expansion along any row or column.",
+          "I can recite all 8 essential properties of det (and explain each from geometry).",
+          "I can find A⁻¹ via [A|I] → [I|A⁻¹] row reduction.",
+          "I can write the Big Equivalence Theorem from memory (8 equivalent conditions).",
+          "I can apply Cramer's rule AND know when it breaks."
+        ]}
+      />
+    </div>
+  );
+}
+
+mountApp(App, 5);
+</script>
+
+</body>
+</html>

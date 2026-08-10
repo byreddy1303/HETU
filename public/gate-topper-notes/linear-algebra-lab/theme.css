@@ -1,0 +1,481 @@
+/* ═══════════════════════════════════════════════════════════════
+   LA MASTERY HUB — Shared Theme System
+   Two themes: dark (default) and light.
+   Theme is toggled via `.dark` or `.light` on <html>.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Reset ──────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+
+/* ── Tokens (shared between themes) ─────────────────────────── */
+:root {
+  --r-sm: 0.5rem;
+  --r-md: 0.75rem;
+  --r-lg: 1rem;
+  --r-xl: 1.25rem;
+  --r-2xl: 1.5rem;
+
+  --ease-out: cubic-bezier(.2,.7,.2,1);
+  --t-fast: 160ms;
+  --t-base: 240ms;
+  --t-slow: 380ms;
+
+  --font-sans: 'Inter', 'SF Pro Text',
+               'Cambria Math', 'STIX Two Math', 'Latin Modern Math',
+               'Symbola', 'Arial Unicode MS',
+               system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
+  --font-serif: 'Lora', Georgia, 'Times New Roman', serif;
+
+  /* Accent base hues — adjust per theme for contrast */
+  --hue-violet: 258;
+  --hue-cyan: 188;
+  --hue-emerald: 158;
+  --hue-amber: 38;
+  --hue-rose: 350;
+  --hue-blue: 217;
+  --hue-pink: 330;
+}
+
+/* ── Dark theme (default) ───────────────────────────────────── */
+:root,
+html.dark {
+  color-scheme: dark;
+
+  --bg:          #0a0e17;
+  --bg-elev-1:   #11151f;
+  --bg-elev-2:   #19202d;
+  --bg-elev-3:   #212a3a;
+  --bg-overlay:  rgba(10, 14, 23, 0.78);
+
+  --border:        #2d3548;
+  --border-strong: #3f4a64;
+
+  --text:        #f1f5f9;
+  --text-dim:    #94a3b8;
+  --text-faded:  #64748b;
+  --text-mute:   #475569;
+
+  --accent:     #a78bfa;
+  --accent-2:   #22d3ee;
+  --accent-3:   #34d399;
+  --warn:       #fbbf24;
+  --danger:     #fb7185;
+  --info:       #60a5fa;
+  --pink:       #f472b6;
+
+  --accent-soft:   rgba(167, 139, 250, 0.12);
+  --accent-2-soft: rgba(34, 211, 238, 0.12);
+  --accent-3-soft: rgba(52, 211, 153, 0.12);
+  --warn-soft:     rgba(251, 191, 36, 0.12);
+  --danger-soft:   rgba(251, 113, 133, 0.12);
+  --info-soft:     rgba(96, 165, 250, 0.12);
+  --pink-soft:     rgba(244, 114, 182, 0.12);
+
+  --accent-border:   rgba(167, 139, 250, 0.32);
+  --accent-2-border: rgba(34, 211, 238, 0.32);
+  --accent-3-border: rgba(52, 211, 153, 0.32);
+  --warn-border:     rgba(251, 191, 36, 0.32);
+  --danger-border:   rgba(251, 113, 133, 0.32);
+  --info-border:     rgba(96, 165, 250, 0.32);
+  --pink-border:     rgba(244, 114, 182, 0.32);
+
+  --canvas-bg:    #0e1320;
+  --canvas-grid:  rgba(167, 139, 250, 0.08);
+  --canvas-axis:  rgba(241, 245, 249, 0.32);
+  --canvas-text:  #94a3b8;
+
+  --shadow-sm: 0 4px 12px -2px rgba(0,0,0,0.4);
+  --shadow-md: 0 12px 32px -10px rgba(0,0,0,0.5);
+  --shadow-lg: 0 24px 56px -20px rgba(0,0,0,0.6);
+  --shadow-glow-accent: 0 0 40px rgba(167,139,250,0.20);
+  --shadow-glow-2:      0 0 40px rgba(34,211,238,0.18);
+
+  --selection: rgba(167, 139, 250, 0.40);
+
+  --grad-hero: linear-gradient(135deg, #a78bfa 0%, #22d3ee 50%, #34d399 100%);
+}
+
+/* ── Light theme ────────────────────────────────────────────── */
+html.light {
+  color-scheme: light;
+
+  --bg:          #f7f8fb;
+  --bg-elev-1:   #ffffff;
+  --bg-elev-2:   #f0f3f9;
+  --bg-elev-3:   #e7ecf4;
+  --bg-overlay:  rgba(247, 248, 251, 0.82);
+
+  --border:        #e2e8f0;
+  --border-strong: #cbd5e1;
+
+  --text:        #0f172a;
+  --text-dim:    #475569;
+  --text-faded:  #64748b;
+  --text-mute:   #94a3b8;
+
+  --accent:     #7c3aed;
+  --accent-2:   #0891b2;
+  --accent-3:   #059669;
+  --warn:       #c2570c;
+  --danger:     #e11d48;
+  --info:       #2563eb;
+  --pink:       #db2777;
+
+  --accent-soft:   rgba(124, 58, 237, 0.07);
+  --accent-2-soft: rgba(8, 145, 178, 0.07);
+  --accent-3-soft: rgba(5, 150, 105, 0.07);
+  --warn-soft:     rgba(194, 87, 12, 0.07);
+  --danger-soft:   rgba(225, 29, 72, 0.07);
+  --info-soft:     rgba(37, 99, 235, 0.07);
+  --pink-soft:     rgba(219, 39, 119, 0.07);
+
+  --accent-border:   rgba(124, 58, 237, 0.28);
+  --accent-2-border: rgba(8, 145, 178, 0.28);
+  --accent-3-border: rgba(5, 150, 105, 0.28);
+  --warn-border:     rgba(194, 87, 12, 0.32);
+  --danger-border:   rgba(225, 29, 72, 0.28);
+  --info-border:     rgba(37, 99, 235, 0.28);
+  --pink-border:     rgba(219, 39, 119, 0.28);
+
+  --canvas-bg:    #ffffff;
+  --canvas-grid:  rgba(124, 58, 237, 0.10);
+  --canvas-axis:  rgba(15, 23, 42, 0.38);
+  --canvas-text:  #64748b;
+
+  --shadow-sm: 0 4px 12px -2px rgba(15, 23, 42, 0.08);
+  --shadow-md: 0 12px 32px -12px rgba(15, 23, 42, 0.14);
+  --shadow-lg: 0 24px 56px -20px rgba(15, 23, 42, 0.18);
+  --shadow-glow-accent: 0 0 40px rgba(124,58,237,0.14);
+  --shadow-glow-2:      0 0 40px rgba(8,145,178,0.14);
+
+  --selection: rgba(124, 58, 237, 0.22);
+
+  --grad-hero: linear-gradient(135deg, #7c3aed 0%, #0891b2 50%, #059669 100%);
+}
+
+/* ── Base ───────────────────────────────────────────────────── */
+html {
+  font-size: 17px;
+}
+html, body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 80px;
+  transition: background-color var(--t-base) var(--ease-out), color var(--t-base) var(--ease-out);
+}
+body { min-height: 100vh; }
+
+::selection { background: var(--selection); color: var(--text); }
+
+/* Theme transition pulse — only during toggle */
+html.theme-switching, html.theme-switching * {
+  transition: background-color 320ms ease, color 320ms ease, border-color 320ms ease, box-shadow 320ms ease !important;
+}
+
+/* ── Typography helpers ─────────────────────────────────────── */
+.font-serif { font-family: var(--font-serif); }
+.font-mono  { font-family: var(--font-mono); }
+
+.gradient-text {
+  background: var(--grad-hero);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* ── Scrollbars ─────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 5px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-mute); }
+
+/* ── KaTeX color override ───────────────────────────────────── */
+.katex { color: var(--text) !important; font-size: 1.02em; }
+.katex-display { margin: 0.6rem 0 !important; overflow-x: auto; overflow-y: hidden; padding: 0.25rem 0; }
+.katex-display > .katex { padding: 0 0.25rem; }
+
+/* ── Backgrounds & decoratives ──────────────────────────────── */
+.grid-bg {
+  background-image:
+    linear-gradient(var(--canvas-grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--canvas-grid) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+.noise {
+  position: relative;
+}
+.noise::after {
+  content: "";
+  position: absolute; inset: 0;
+  background-image: radial-gradient(circle at 1px 1px, var(--canvas-grid) 1px, transparent 0);
+  background-size: 24px 24px;
+  opacity: 0.25;
+  pointer-events: none;
+}
+
+/* ── Card primitive ─────────────────────────────────────────── */
+.card {
+  background: var(--bg-elev-1);
+  border: 1px solid var(--border);
+  border-radius: var(--r-xl);
+  transition: border-color var(--t-base) var(--ease-out), box-shadow var(--t-base) var(--ease-out);
+}
+.card:hover { border-color: var(--border-strong); }
+.card-hover { transition: transform var(--t-base) var(--ease-out), border-color var(--t-base) var(--ease-out), box-shadow var(--t-base) var(--ease-out); }
+.card-hover:hover { transform: translateY(-3px); border-color: var(--accent-border); box-shadow: var(--shadow-md), var(--shadow-glow-accent); }
+
+.glow-accent { box-shadow: var(--shadow-glow-accent); }
+.glow-2 { box-shadow: var(--shadow-glow-2); }
+
+/* ── Inputs ─────────────────────────────────────────────────── */
+input[type="number"], input[type="text"] {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: var(--text);
+  border-radius: var(--r-sm);
+  padding: 0.4rem 0.6rem;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  outline: none;
+  transition: border-color var(--t-fast), box-shadow var(--t-fast);
+}
+input[type="number"]:focus, input[type="text"]:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  cursor: pointer;
+  width: 100%;
+  height: 22px;
+}
+input[type="range"]::-webkit-slider-runnable-track {
+  background: var(--bg-elev-3);
+  height: 5px;
+  border-radius: 3px;
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none; appearance: none;
+  background: var(--accent);
+  height: 18px; width: 18px;
+  border-radius: 50%;
+  margin-top: -6.5px;
+  box-shadow: 0 0 0 3px var(--accent-soft), 0 2px 6px rgba(0,0,0,0.2);
+  transition: transform var(--t-fast);
+}
+input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.12); }
+input[type="range"]::-moz-range-track {
+  background: var(--bg-elev-3); height: 5px; border-radius: 3px;
+}
+input[type="range"]::-moz-range-thumb {
+  background: var(--accent); height: 18px; width: 18px; border: none; border-radius: 50%;
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+input[type="checkbox"] { accent-color: var(--accent); }
+
+button { font-family: inherit; }
+button:focus-visible, a:focus-visible, input:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* ── Pulse dot ──────────────────────────────────────────────── */
+.pulse-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--accent-3);
+  display: inline-block;
+  position: relative;
+}
+.pulse-dot::before {
+  content: ""; position: absolute; inset: 0; border-radius: 50%;
+  background: inherit;
+  animation: pulse-ring 2.4s var(--ease-out) infinite;
+}
+@keyframes pulse-ring {
+  0%   { transform: scale(1);   opacity: 0.6; }
+  70%  { transform: scale(2.8); opacity: 0;   }
+  100% { transform: scale(2.8); opacity: 0;   }
+}
+
+/* ── Vector canvas (SVG wrapper) ────────────────────────────── */
+.vector-svg {
+  background:
+    radial-gradient(circle at center, var(--accent-soft), transparent 70%),
+    var(--canvas-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+}
+.vector-svg text { font-family: var(--font-mono); }
+
+/* ── Concept tile / domain tile hover ───────────────────────── */
+.tile {
+  transition: transform var(--t-base) var(--ease-out),
+              border-color var(--t-base) var(--ease-out),
+              box-shadow var(--t-base) var(--ease-out),
+              background-color var(--t-base) var(--ease-out);
+}
+.tile:hover {
+  transform: translateY(-4px);
+  border-color: var(--accent);
+  box-shadow: var(--shadow-md), var(--shadow-glow-accent);
+}
+.tile.locked { opacity: 0.55; }
+.tile.locked:hover { transform: none; border-color: var(--border); box-shadow: none; }
+
+/* ── Animations ─────────────────────────────────────────────── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.fade-up { animation: fadeUp var(--t-slow) var(--ease-out) both; }
+
+@keyframes fadeIn {
+  from { opacity: 0; } to { opacity: 1; }
+}
+.fade-in { animation: fadeIn var(--t-base) var(--ease-out) both; }
+
+/* details/summary chrome-strip */
+details > summary { list-style: none; cursor: pointer; }
+details > summary::-webkit-details-marker { display: none; }
+
+/* ── Loading overlay ────────────────────────────────────────── */
+#loading {
+  position: fixed; inset: 0; z-index: 200;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--bg);
+  color: var(--text-dim);
+  font-family: var(--font-sans);
+  transition: opacity 400ms;
+}
+#loading.hide { opacity: 0; pointer-events: none; }
+.spinner {
+  width: 32px; height: 32px; margin: 0 auto 12px;
+  border: 2.5px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.9s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── Theme toggle button ────────────────────────────────────── */
+.theme-toggle {
+  position: relative;
+  width: 36px; height: 36px;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--border);
+  background: var(--bg-elev-1);
+  display: inline-flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  transition: border-color var(--t-fast), background-color var(--t-fast);
+  color: var(--text-dim);
+}
+.theme-toggle:hover { border-color: var(--accent-border); color: var(--text); background: var(--accent-soft); }
+.theme-toggle svg { width: 18px; height: 18px; }
+
+/* Sun visible in dark, moon visible in light */
+html.dark  .theme-toggle .icon-sun  { display: block; }
+html.dark  .theme-toggle .icon-moon { display: none; }
+html.light .theme-toggle .icon-sun  { display: none; }
+html.light .theme-toggle .icon-moon { display: block; }
+
+/* ── Misc utilities ─────────────────────────────────────────── */
+.text-accent  { color: var(--accent); }
+.text-accent2 { color: var(--accent-2); }
+.text-accent3 { color: var(--accent-3); }
+.text-warn    { color: var(--warn); }
+.text-danger  { color: var(--danger); }
+.text-pink    { color: var(--pink); }
+
+.bg-elev-1 { background: var(--bg-elev-1); }
+.bg-elev-2 { background: var(--bg-elev-2); }
+.bg-elev-3 { background: var(--bg-elev-3); }
+
+.border-default { border: 1px solid var(--border); }
+.border-strong  { border: 1px solid var(--border-strong); }
+.border-accent  { border: 1px solid var(--accent-border); }
+
+/* ═══════════════════════════════════════════════════════════════
+   MATH SYMBOL VISIBILITY — applies to ALL modules
+   - KaTeX bumped in size + brighter color (per theme)
+   - Body font stack falls back to math-capable fonts so Unicode
+     glyphs like ℝ ‖ ⇒ ∑ ⊆ ⇔ render reliably across systems
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Body font: handled at the top by --font-sans, which now includes math fonts
+   so Unicode glyphs (ℝ ‖ ⇒ ∑ ⊆ ⇔) render reliably across systems. */
+
+/* KaTeX rendered math — make it visibly larger and brighter */
+.katex {
+  font-size: 1.12em !important;
+}
+html.dark .katex {
+  color: #fef3c7 !important;          /* warm cream — high contrast on dark */
+  text-shadow: 0 0 1px rgba(254, 243, 199, 0.25);
+}
+html.light .katex {
+  color: #4338ca !important;          /* indigo — high contrast on light */
+  text-shadow: none;
+}
+.katex .mord, .katex .mbin, .katex .mrel,
+.katex .mopen, .katex .mclose, .katex .mpunct,
+.katex .minner, .katex .mop,
+.katex .delimsizing,
+.katex .delim-size1, .katex .delim-size2,
+.katex .delim-size3, .katex .delim-size4 {
+  color: inherit !important;
+}
+.katex-display > .katex {
+  font-size: 1.22em !important;
+}
+.katex-display { margin: 0.6em 0 !important; }
+
+/* When math appears inside small UI areas (buttons, badges) keep ratio modest */
+button .katex, .badge .katex, .pill .katex { font-size: 1.05em !important; }
+
+/* Inline math-marker class — paint highlights for inline expressions
+   that aren't KaTeX-rendered (rare, used inside Problem Labs).
+   Safe on all modules: opt-in by adding class="pl-math" */
+.pl-math {
+  font-family: 'JetBrains Mono', 'SF Mono', 'Cambria Math', monospace;
+  padding: 1px 5px;
+  border-radius: 4px;
+  font-weight: 500;
+  font-size: 0.95em;
+}
+html.dark .pl-math {
+  color: #fef3c7;
+  background: rgba(254, 243, 199, 0.06);
+  border: 1px solid rgba(254, 243, 199, 0.15);
+}
+html.light .pl-math {
+  color: #4338ca;
+  background: rgba(67, 56, 202, 0.08);
+  border: 1px solid rgba(67, 56, 202, 0.22);
+}
+
+/* Sub/superscripts in any prose: bigger + brighter so they don't disappear */
+p sub, p sup, li sub, li sup, span sub, span sup, div sub, div sup {
+  font-size: 0.80em;
+  line-height: 1;
+}
+html.dark p sub, html.dark p sup, html.dark li sub, html.dark li sup,
+html.dark span sub, html.dark span sup, html.dark div sub, html.dark div sup {
+  color: #fbbf24;
+}
+html.light p sub, html.light p sup, html.light li sub, html.light li sup,
+html.light span sub, html.light span sup, html.light div sub, html.light div sup {
+  color: #b45309;
+}

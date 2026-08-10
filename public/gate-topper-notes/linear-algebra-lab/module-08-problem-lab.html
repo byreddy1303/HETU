@@ -1,0 +1,2181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 8 · Problem Lab — LA Mastery Hub</title>
+
+<script>
+  (function () {
+    try {
+      var t = localStorage.getItem("la-hub::theme") || "dark";
+      document.documentElement.classList.add(t === "light" ? "light" : "dark");
+    } catch (e) {
+      document.documentElement.classList.add("dark");
+    }
+  })();
+</script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="theme.css">
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = { darkMode: 'class' };
+</script>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+
+<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<!-- Babel standalone is NOT loaded for this module; we use the precompiled bundle below -->
+
+
+<style>
+  /* Problem Lab specific styles */
+  .pl-difficulty-easy   { background: rgba(34, 197, 94, 0.12);  color: #22c55e; border: 1px solid rgba(34, 197, 94, 0.35); }
+  .pl-difficulty-medium { background: rgba(234, 179, 8, 0.12);  color: #eab308; border: 1px solid rgba(234, 179, 8, 0.35); }
+  .pl-difficulty-hard   { background: rgba(249, 115, 22, 0.12); color: #f97316; border: 1px solid rgba(249, 115, 22, 0.35); }
+  .pl-difficulty-killer { background: rgba(239, 68, 68, 0.12);  color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.35); }
+  .pl-type-mcq          { background: rgba(59, 130, 246, 0.12); color: #3b82f6; border: 1px solid rgba(59, 130, 246, 0.35); }
+  .pl-type-nat          { background: rgba(168, 85, 247, 0.12); color: #a855f7; border: 1px solid rgba(168, 85, 247, 0.35); }
+  .pl-type-pyq          { background: rgba(245, 158, 11, 0.12); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.35); font-weight: 700; }
+
+  .pl-correct  { animation: pl-flash-green 0.6s ease-out; }
+  .pl-wrong    { animation: pl-flash-red   0.6s ease-out; }
+
+  @keyframes pl-flash-green {
+    0%   { background: rgba(34, 197, 94, 0.3);  }
+    100% { background: transparent; }
+  }
+  @keyframes pl-flash-red {
+    0%   { background: rgba(239, 68, 68, 0.3); }
+    100% { background: transparent; }
+  }
+
+  .pl-neg-banner {
+    background: rgba(69, 26, 3, 0.6);
+    color: #fbbf24;
+    border: 1px solid rgba(251, 191, 36, 0.3);
+    font-size: 12px;
+    padding: 6px 10px;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .pl-skip-attempt {
+    background: rgba(59, 130, 246, 0.10);
+    border: 1px solid rgba(59, 130, 246, 0.30);
+    color: #60a5fa;
+    font-size: 12px;
+    padding: 4px 10px;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .pl-skip-skip {
+    background: rgba(244, 114, 182, 0.10);
+    border: 1px solid rgba(244, 114, 182, 0.30);
+    color: #f472b6;
+    font-size: 12px;
+    padding: 4px 10px;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .pl-tech-card {
+    border-left: 3px solid #3b82f6;
+    background: var(--bg-elev-1);
+    border-radius: 10px;
+    padding: 18px;
+  }
+
+  .pl-danger-zone {
+    border-left: 3px solid #ef4444;
+    background: rgba(239, 68, 68, 0.06);
+    border-radius: 6px;
+    padding: 12px;
+    margin-top: 14px;
+  }
+
+  .pl-mistake-card {
+    border-left: 3px solid #ef4444;
+    background: var(--bg-elev-1);
+    border-radius: 10px;
+    padding: 18px;
+  }
+
+  .pl-wrong-solution {
+    background: var(--bg-elev-3);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 12px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--text);
+    white-space: pre-wrap;
+  }
+
+  .pl-wrong-line {
+    padding: 4px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.15s ease;
+  }
+  .pl-wrong-line:hover {
+    background: rgba(251, 113, 133, 0.08);
+  }
+  .pl-wrong-line.error-found {
+    background: rgba(239, 68, 68, 0.25);
+    border-left: 3px solid #ef4444;
+    padding-left: 8px;
+  }
+
+  .pl-tab-pill {
+    padding: 8px 14px;
+    border-radius: 9999px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.18s ease;
+    border: 1px solid var(--border);
+    background: var(--bg-elev-1);
+    color: var(--text-dim);
+  }
+  .pl-tab-pill.active {
+    background: var(--accent-soft);
+    border-color: var(--accent-border);
+    color: var(--accent);
+  }
+  .pl-tab-pill:hover:not(.active) {
+    color: var(--text);
+    border-color: var(--border-strong);
+  }
+
+  .pl-option-btn {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--bg-elev-1);
+    text-align: left;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    width: 100%;
+    color: var(--text);
+    font-size: 14.5px;
+    font-family: 'Inter', 'Cambria Math', 'STIX Two Math', 'Symbola', system-ui, sans-serif;
+  }
+  .pl-option-btn .katex {
+    font-size: 1.08em !important;
+  }
+  .pl-option-btn:hover:not(:disabled) {
+    border-color: var(--accent-border);
+    background: var(--accent-soft);
+  }
+  .pl-option-btn:disabled { cursor: default; opacity: 0.85; }
+  .pl-option-btn.selected {
+    border-color: var(--accent);
+    background: var(--accent-soft);
+  }
+  .pl-option-btn.correct {
+    border-color: rgba(34, 197, 94, 0.6);
+    background: rgba(34, 197, 94, 0.12);
+    color: #22c55e;
+  }
+  .pl-option-btn.wrong-choice {
+    border-color: rgba(239, 68, 68, 0.6);
+    background: rgba(239, 68, 68, 0.10);
+    color: #fb7185;
+  }
+
+  .pl-option-letter {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: var(--bg-elev-3);
+    border: 1px solid var(--border);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-dim);
+    flex-shrink: 0;
+  }
+
+  .pl-nat-input {
+    background: var(--bg-elev-2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 16px;
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 16px;
+    width: 100%;
+    max-width: 280px;
+  }
+  .pl-nat-input:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+  }
+
+  .pl-submit-btn {
+    padding: 9px 22px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    transition: opacity 0.15s ease;
+    background: var(--grad-hero);
+    color: white;
+    border: none;
+  }
+  .pl-submit-btn:hover:not(:disabled) { opacity: 0.92; }
+  .pl-submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .pl-progress-bar {
+    height: 6px;
+    background: var(--bg-elev-3);
+    border-radius: 9999px;
+    overflow: hidden;
+  }
+  .pl-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #22c55e, #34d399);
+    transition: width 0.3s ease;
+  }
+  .pl-progress-fill.warning { background: linear-gradient(90deg, #eab308, #f59e0b); }
+  .pl-progress-fill.danger  { background: linear-gradient(90deg, #ef4444, #fb7185); }
+
+  .pl-hint-box {
+    background: var(--accent-2-soft);
+    border: 1px solid var(--accent-2-border);
+    border-radius: 8px;
+    padding: 14px;
+    color: var(--text);
+  }
+
+  .pl-layer-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+  }
+  .pl-layer-num {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: var(--grad-hero);
+    color: white;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 14px;
+  }
+  .pl-layer-title {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: -0.01em;
+  }
+
+  /* ─────────────────────────────────────────────────────────────
+     MATH VISIBILITY — KaTeX + Unicode math characters
+     ───────────────────────────────────────────────────────────── */
+  /* KaTeX inline math: bumped size, brighter color, slight glow */
+  .katex {
+    font-size: 1.12em !important;
+    color: #fef3c7 !important;       /* warm cream — high contrast on dark */
+    text-shadow: 0 0 1px rgba(254, 243, 199, 0.25);
+  }
+  html.light .katex {
+    color: #4338ca !important;       /* indigo on light theme */
+    text-shadow: none;
+  }
+  .katex .mord, .katex .mbin, .katex .mrel, .katex .mopen, .katex .mclose,
+  .katex .mpunct, .katex .minner, .katex .mop {
+    color: inherit !important;
+  }
+  /* Display-mode (block) math — even bigger */
+  .katex-display > .katex {
+    font-size: 1.2em !important;
+  }
+  /* KaTeX matrices and arrays — ensure brackets visible */
+  .katex .delimsizing,
+  .katex .delim-size1,
+  .katex .delim-size2,
+  .katex .delim-size3,
+  .katex .delim-size4 {
+    color: inherit !important;
+  }
+
+  /* Unicode math characters inside problem/solution prose
+     — vectors, subscripts, Greek letters, relations.
+     Forces font that supports them on macOS/Windows/Linux. */
+  .pl-prose {
+    font-feature-settings: "ss01" 1, "cv11" 1;
+    font-variant-numeric: tabular-nums;
+  }
+  .pl-prose,
+  .pl-prose * {
+    /* fallback stack that supports ℝ ℂ ℕ ℤ ℚ ‖ ⇒ ∑ ∏ ∈ ∉ ⊆ ⊇ ∪ ∩ etc. */
+    font-family: 'Inter', 'SF Pro Text', 'Cambria Math', 'STIX Two Math',
+                 'Latin Modern Math', 'Symbola', 'Arial Unicode MS',
+                 system-ui, -apple-system, sans-serif;
+  }
+  /* Highlight inline math-like tokens — anything in a span we mark */
+  .pl-math {
+    font-family: 'JetBrains Mono', 'SF Mono', 'Cambria Math', monospace;
+    color: #fef3c7;
+    background: rgba(254, 243, 199, 0.06);
+    padding: 1px 5px;
+    border-radius: 4px;
+    font-weight: 500;
+    font-size: 0.95em;
+    border: 1px solid rgba(254, 243, 199, 0.15);
+  }
+  html.light .pl-math {
+    color: #4338ca;
+    background: rgba(67, 56, 202, 0.08);
+    border: 1px solid rgba(67, 56, 202, 0.22);
+  }
+
+  /* Pre-formatted matrix / step displays inside solutions */
+  .pl-prose .matrix-block,
+  .pl-prose pre {
+    font-family: 'JetBrains Mono', monospace;
+    background: var(--bg-elev-3);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 10px 14px;
+    color: #fef3c7;
+    font-size: 13.5px;
+    white-space: pre;
+    overflow-x: auto;
+    line-height: 1.7;
+    margin: 8px 0;
+  }
+  html.light .pl-prose .matrix-block,
+  html.light .pl-prose pre {
+    color: #4338ca;
+  }
+
+  /* Bigger, brighter sub/superscripts in solution prose */
+  .pl-prose sub, .pl-prose sup {
+    font-size: 0.78em;
+    line-height: 1;
+    color: #fbbf24;
+  }
+  html.light .pl-prose sub, html.light .pl-prose sup {
+    color: #b45309;
+  }
+
+  /* Bring solution prose up to a readable size */
+  .pl-prose {
+    font-size: 14.5px;
+    line-height: 1.75;
+  }
+
+  /* When math appears inside option buttons / hints */
+  .pl-option-btn .katex,
+  .pl-hint-box .katex {
+    font-size: 1.05em !important;
+  }
+</style>
+</head>
+<body>
+
+<div id="loading">
+  <div style="text-align:center">
+    <div class="spinner"></div>
+    <div style="font-size:13px; opacity:0.8">Loading Module 8 — Problem Lab</div>
+  </div>
+</div>
+
+<div id="root"></div>
+
+<!-- Precompiled bundle: boilerplate.js + this module's content, with JSX already transpiled.
+     Source of truth remains the inline script at the bottom of this file (kept for editing).
+     If you edit this file, rerun the compile step to regenerate module-08-problem-lab.compiled.js. -->
+<script src="module-08-problem-lab.compiled.js"></script>
+
+<script type="text/template" id="m8-source-of-truth" data-no-execute>
+const { useState, useEffect, useMemo, useRef, useCallback } = React;
+
+/* ════════════════════════════════════════════════════════════════
+   PROBLEM LAB — SHARED COMPONENTS & STATE
+   ════════════════════════════════════════════════════════════════ */
+
+const MODULE_NUM = 8;
+
+/* localStorage helpers ─────────────────────────────────────────── */
+const lsGet = (k, fallback) => {
+  try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : fallback; }
+  catch { return fallback; }
+};
+const lsSet = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} };
+
+function useConceptProgress(conceptNum, totalProblems) {
+  const aKey = "gate_la_m" + MODULE_NUM + "_c" + conceptNum + "_attempted";
+  const cKey = "gate_la_m" + MODULE_NUM + "_c" + conceptNum + "_correct";
+  const hKey = "gate_la_m" + MODULE_NUM + "_c" + conceptNum + "_hints";
+
+  const [attempted, setAttempted] = useState(() => lsGet(aKey, []));
+  const [correct, setCorrect] = useState(() => lsGet(cKey, []));
+  const [hints, setHints] = useState(() => lsGet(hKey, {}));
+
+  const markAttempt = (pid, didCorrect) => {
+    setAttempted(prev => {
+      if (prev.includes(pid)) return prev;
+      const next = [...prev, pid]; lsSet(aKey, next); return next;
+    });
+    if (didCorrect) {
+      setCorrect(prev => {
+        if (prev.includes(pid)) return prev;
+        const next = [...prev, pid]; lsSet(cKey, next); return next;
+      });
+    }
+  };
+  const useHint = (pid) => {
+    setHints(prev => {
+      const next = { ...prev, [pid]: (prev[pid] || 0) + 1 };
+      lsSet(hKey, next);
+      return next;
+    });
+  };
+  return { attempted, correct, hints, markAttempt, useHint, totalProblems };
+}
+
+/* ────────────────────────────────────────────────────────────────
+   BADGES (Difficulty, Type, Time, Tags)
+   ──────────────────────────────────────────────────────────────── */
+function DiffBadge({ level }) {
+  const labels = { easy: "EASY", medium: "MEDIUM", hard: "HARD", killer: "KILLER" };
+  return (
+    <span className={"text-[10.5px] tracking-[0.15em] font-bold px-2 py-1 rounded-md pl-difficulty-" + level}>
+      {labels[level]}
+    </span>
+  );
+}
+function TypeBadge({ type }) {
+  if (type === "pyq") return <span className="text-[10.5px] tracking-[0.15em] font-bold px-2 py-1 rounded-md pl-type-pyq">★ GATE PYQ</span>;
+  return (
+    <span className={"text-[10.5px] tracking-[0.15em] font-bold px-2 py-1 rounded-md pl-type-" + type}>
+      {type === "mcq" ? "MCQ" : "NAT"}
+    </span>
+  );
+}
+function MetaPill({ children, mono = false }) {
+  return (
+    <span className={"text-[11px] px-2 py-1 rounded-md " + (mono ? "font-mono " : "")}
+      style={{background: "var(--bg-elev-3)", color: "var(--text-dim)", border: "1px solid var(--border)"}}>
+      {children}
+    </span>
+  );
+}
+function ConceptTag({ children }) {
+  return (
+    <span className="text-[11px] px-2 py-1 rounded-md font-mono"
+      style={{background: "var(--accent-soft)", color: "var(--accent)", border: "1px solid var(--accent-border)"}}>
+      {children}
+    </span>
+  );
+}
+
+/* ────────────────────────────────────────────────────────────────
+   LAYER HEADER
+   ──────────────────────────────────────────────────────────────── */
+function LayerHeader({ num, title, subtitle }) {
+  return (
+    <div className="mt-10 mb-5">
+      <div className="pl-layer-header">
+        <div className="pl-layer-num">L{num}</div>
+        <div className="pl-layer-title">{title}</div>
+      </div>
+      {subtitle && <div className="text-[14px] ml-12" style={{color: "var(--text-dim)"}}>{subtitle}</div>}
+    </div>
+  );
+}
+
+/* ────────────────────────────────────────────────────────────────
+   PATTERN CARD (Layer 1)
+   ──────────────────────────────────────────────────────────────── */
+function PatternCard({ idx, pattern }) {
+  return (
+    <div className="rounded-xl p-5 mb-4 pl-prose"
+      style={{background: "var(--bg-elev-1)", border: "1px solid var(--border)"}}>
+      <div className="flex flex-wrap items-baseline gap-3 mb-3">
+        <span className="text-[10.5px] tracking-[0.18em] font-bold px-2 py-1 rounded-md"
+          style={{background: "var(--accent-soft)", color: "var(--accent)", border: "1px solid var(--accent-border)"}}>
+          PATTERN {idx}
+        </span>
+        <span className="text-[17px] font-semibold" style={{color: "var(--text)"}}>{pattern.name}</span>
+        <span className="ml-auto text-[11px] px-2 py-1 rounded-md font-mono"
+          style={{background: "var(--bg-elev-3)", color: "var(--text-dim)", border: "1px solid var(--border)"}}>
+          ⏱ ~{pattern.timeBudget}s
+        </span>
+        <span className="text-[11px] px-2 py-1 rounded-md"
+          style={{background: pattern.frequency === "Very Frequent" ? "rgba(239,68,68,0.12)" :
+                                pattern.frequency === "Frequent" ? "rgba(249,115,22,0.12)" :
+                                pattern.frequency === "Occasional" ? "rgba(234,179,8,0.12)" : "rgba(148,163,184,0.12)",
+                  color: pattern.frequency === "Very Frequent" ? "#ef4444" :
+                         pattern.frequency === "Frequent" ? "#f97316" :
+                         pattern.frequency === "Occasional" ? "#eab308" : "#94a3b8",
+                  border: "1px solid currentColor"}}>
+          {pattern.frequency}
+        </span>
+      </div>
+
+      <div className="grid md:grid-cols-2 gap-3 text-[13.5px] leading-relaxed">
+        <div className="rounded-lg p-3" style={{background: "var(--bg-elev-2)", border: "1px solid var(--border)"}}>
+          <div className="text-[10px] tracking-[0.18em] font-semibold mb-1" style={{color: "var(--accent-2)"}}>SURFACE APPEARANCE</div>
+          <div style={{color: "var(--text)"}}>{pattern.surface}</div>
+        </div>
+        <div className="rounded-lg p-3" style={{background: "var(--bg-elev-2)", border: "1px solid var(--border)"}}>
+          <div className="text-[10px] tracking-[0.18em] font-semibold mb-1" style={{color: "var(--pink)"}}>WHAT IT'S ACTUALLY TESTING</div>
+          <div style={{color: "var(--text)"}}>{pattern.testing}</div>
+        </div>
+      </div>
+
+      <div className="mt-3 rounded-lg p-3" style={{background: "var(--bg-elev-2)", border: "1px solid var(--border)"}}>
+        <div className="text-[10px] tracking-[0.18em] font-semibold mb-2" style={{color: "var(--warn)"}}>SIGNAL WORDS</div>
+        <div className="flex flex-wrap gap-2">
+          {pattern.signals.map((s, i) => (
+            <code key={i} className="font-mono text-[12px] px-2 py-1 rounded"
+              style={{background: "var(--bg-elev-3)", color: "var(--warn)", border: "1px solid var(--warn-border)"}}>
+              {s}
+            </code>
+          ))}
+        </div>
+      </div>
+
+      <div className="mt-3 rounded-lg p-3" style={{background: "var(--accent-soft)", border: "1px solid var(--accent-border)"}}>
+        <div className="text-[10px] tracking-[0.18em] font-semibold mb-1" style={{color: "var(--accent)"}}>FIRST MOVE (TOP-RANKER REFLEX)</div>
+        <div className="text-[14px]" style={{color: "var(--text)"}}>{pattern.firstMove}</div>
+      </div>
+    </div>
+  );
+}
+
+/* ────────────────────────────────────────────────────────────────
+   PROBLEM CARD (Layer 2)
+   ──────────────────────────────────────────────────────────────── */
+function ProblemCard({ p, idx, progress }) {
+  const [selected, setSelected] = useState(null);
+  const [natValue, setNatValue] = useState("");
+  const [submitted, setSubmitted] = useState(false);
+  const [isCorrect, setIsCorrect] = useState(false);
+  const [attempts, setAttempts] = useState(0);
+  const [hintsShown, setHintsShown] = useState(0);
+  const [showFullSolution, setShowFullSolution] = useState(false);
+  const [flashKey, setFlashKey] = useState(0);
+
+  const isPYQ = p.type === "pyq";
+
+  const checkAnswer = () => {
+    let ok = false;
+    if (p.kind === "mcq") {
+      ok = selected === p.answer;
+    } else {
+      const userVal = parseFloat(natValue);
+      if (!isNaN(userVal)) {
+        const tol = p.tolerance != null ? p.tolerance : 0.01;
+        ok = Math.abs(userVal - p.answer) <= tol;
+      }
+    }
+    setIsCorrect(ok);
+    setSubmitted(true);
+    setAttempts(a => a + 1);
+    setFlashKey(k => k + 1);
+    progress.markAttempt(p.id, ok);
+    if (!ok && attempts + 1 >= 2) setShowFullSolution(true);
+  };
+
+  const tryAgain = () => {
+    setSubmitted(false);
+    setIsCorrect(false);
+    setSelected(null);
+    setNatValue("");
+  };
+
+  const revealHint = () => {
+    if (hintsShown < (p.hints?.length || 0)) {
+      setHintsShown(hintsShown + 1);
+      progress.useHint(p.id);
+    }
+  };
+
+  const isCompleted = progress.correct.includes(p.id);
+
+  return (
+    <div key={flashKey} className={"rounded-xl p-5 mb-5 " + (submitted ? (isCorrect ? "pl-correct" : "pl-wrong") : "")}
+      style={{background: "var(--bg-elev-1)", border: "1px solid " + (isCompleted ? "rgba(34,197,94,0.4)" : "var(--border)")}}>
+
+      <div className="flex flex-wrap items-center gap-2 mb-3">
+        <span className="text-[10.5px] tracking-[0.18em] font-bold px-2 py-1 rounded-md font-mono"
+          style={{background: "var(--bg-elev-3)", color: "var(--text-dim)", border: "1px solid var(--border)"}}>
+          Q{idx}
+        </span>
+        <DiffBadge level={p.difficulty} />
+        <TypeBadge type={isPYQ ? "pyq" : p.kind} />
+        {isPYQ && p.pyqYear && (
+          <MetaPill mono>GATE CS {p.pyqYear}</MetaPill>
+        )}
+        <MetaPill>{p.marks}-mark style</MetaPill>
+        <MetaPill mono>⏱ ~{p.timeTarget}s</MetaPill>
+        {isCompleted && (
+          <span className="text-[10.5px] tracking-[0.18em] font-bold px-2 py-1 rounded-md ml-auto"
+            style={{background: "rgba(34,197,94,0.15)", color: "#22c55e", border: "1px solid rgba(34,197,94,0.4)"}}>
+            ✓ SOLVED
+          </span>
+        )}
+      </div>
+
+      <div className="flex flex-wrap gap-2 mb-3">
+        {p.tags.map((t, i) => <ConceptTag key={i}>{t}</ConceptTag>)}
+      </div>
+
+      {p.kind === "mcq" && (
+        <div className="pl-neg-banner mb-3">
+          ⚠ Negative marking: −1/3 mark for wrong answer
+        </div>
+      )}
+      {p.skipSignal && (
+        <div className="mb-3">
+          <span className={p.skipSignal.type === "attempt" ? "pl-skip-attempt" : "pl-skip-skip"}>
+            {p.skipSignal.type === "attempt" ? "✓ " : "💡 "}{p.skipSignal.text}
+          </span>
+        </div>
+      )}
+
+      <div className="text-[15px] leading-relaxed mb-4 p-4 rounded-lg pl-prose"
+        style={{background: "var(--bg-elev-2)", color: "var(--text)", border: "1px solid var(--border)"}}>
+        {p.statement}
+      </div>
+
+      {/* ANSWER UI */}
+      {p.kind === "mcq" ? (
+        <div className="space-y-2 mb-3">
+          {p.options.map((opt, i) => {
+            const letter = String.fromCharCode(65 + i);
+            let cls = "pl-option-btn";
+            if (!submitted && selected === letter) cls += " selected";
+            if (submitted) {
+              if (letter === p.answer) cls += " correct";
+              else if (letter === selected) cls += " wrong-choice";
+            }
+            return (
+              <button key={i}
+                className={cls}
+                disabled={submitted}
+                onClick={() => setSelected(letter)}>
+                <span className="pl-option-letter">{letter}</span>
+                <span className="flex-1">{opt}</span>
+                {submitted && letter === p.answer && <span style={{color: "#22c55e"}}>✓</span>}
+                {submitted && letter === selected && letter !== p.answer && <span style={{color: "#fb7185"}}>✗</span>}
+              </button>
+            );
+          })}
+        </div>
+      ) : (
+        <div className="mb-3">
+          <label className="text-[12px] mb-1 block" style={{color: "var(--text-dim)"}}>Numerical Answer (NAT — no options)</label>
+          <input type="number" step="any" className="pl-nat-input"
+            value={natValue}
+            disabled={submitted}
+            onChange={e => setNatValue(e.target.value)}
+            placeholder="Enter your answer..." />
+        </div>
+      )}
+
+      {/* SUBMIT */}
+      {!submitted && (
+        <div className="flex items-center gap-3">
+          <button className="pl-submit-btn"
+            disabled={p.kind === "mcq" ? !selected : natValue === ""}
+            onClick={checkAnswer}>
+            Submit Answer
+          </button>
+          {hintsShown > 0 && (
+            <span className="text-[11px]" style={{color: "var(--text-dim)"}}>
+              Hints used: {hintsShown}/{p.hints?.length || 0}
+            </span>
+          )}
+          {p.hints && p.hints.length > 0 && hintsShown < p.hints.length && (
+            <button className="text-[13px] px-3 py-1.5 rounded-md transition-colors"
+              style={{border: "1px solid var(--accent-2-border)", color: "var(--accent-2)", background: "var(--accent-2-soft)"}}
+              onClick={revealHint}>
+              Show Hint {hintsShown + 1}
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* HINTS DISPLAYED */}
+      {hintsShown > 0 && !submitted && (
+        <div className="mt-4 space-y-2">
+          {p.hints.slice(0, hintsShown).map((h, i) => (
+            <div key={i} className="pl-hint-box pl-prose">
+              <div className="text-[10px] tracking-[0.18em] font-semibold mb-1" style={{color: "var(--accent-2)"}}>
+                HINT {i+1} · {h.label}
+              </div>
+              <div className="text-[14px]">{h.text}</div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* AFTER SUBMISSION */}
+      {submitted && (
+        <div className="mt-4">
+          <div className="flex flex-wrap items-center gap-3 mb-3">
+            {isCorrect ? (
+              <span className="text-[12px] tracking-[0.15em] font-bold px-3 py-1.5 rounded-md"
+                style={{background: "rgba(34,197,94,0.15)", color: "#22c55e", border: "1px solid rgba(34,197,94,0.4)"}}>
+                ✓ CORRECT
+              </span>
+            ) : (
+              <span className="text-[12px] tracking-[0.15em] font-bold px-3 py-1.5 rounded-md"
+                style={{background: "rgba(239,68,68,0.15)", color: "#fb7185", border: "1px solid rgba(239,68,68,0.4)"}}>
+                ✗ INCORRECT
+              </span>
+            )}
+            {!isCorrect && (
+              <>
+                <button className="text-[13px] px-3 py-1.5 rounded-md"
+                  style={{border: "1px solid var(--accent-border)", color: "var(--accent)", background: "var(--accent-soft)"}}
+                  onClick={tryAgain}>
+                  Try Again
+                </button>
+                {p.hints && p.hints.length > 0 && hintsShown < p.hints.length && !showFullSolution && (
+                  <button className="text-[13px] px-3 py-1.5 rounded-md"
+                    style={{border: "1px solid var(--accent-2-border)", color: "var(--accent-2)", background: "var(--accent-2-soft)"}}
+                    onClick={() => { revealHint(); setSubmitted(false); }}>
+                    Show Hint
+                  </button>
+                )}
+                {!showFullSolution && attempts >= 2 && (
+                  <button className="text-[13px] px-3 py-1.5 rounded-md"
+                    style={{border: "1px solid var(--danger-border)", color: "var(--danger)", background: "var(--danger-soft)"}}
+                    onClick={() => setShowFullSolution(true)}>
+                    Show Full Solution
+                  </button>
+                )}
+                {!showFullSolution && (
+                  <button className="text-[13px] px-3 py-1.5 rounded-md"
+                    style={{border: "1px solid var(--border-strong)", color: "var(--text-dim)", background: "var(--bg-elev-2)"}}
+                    onClick={() => setShowFullSolution(true)}>
+                    Reveal Solution
+                  </button>
+                )}
+              </>
+            )}
+          </div>
+
+          {(isCorrect || showFullSolution) && (
+            <SolutionPanel p={p} wasCorrect={isCorrect} />
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ────────────────────────────────────────────────────────────────
+   SOLUTION PANEL
+   ──────────────────────────────────────────────────────────────── */
+function SolutionPanel({ p, wasCorrect }) {
+  return (
+    <div className="rounded-xl p-5 mt-3 pl-prose"
+      style={{background: "var(--bg-elev-2)", border: "1px solid var(--accent-border)"}}>
+      <div className="text-[10.5px] tracking-[0.2em] font-bold mb-3" style={{color: "var(--accent)"}}>
+        🧠 THINKING CHAIN — How a top ranker actually solves this
+      </div>
+      <div className="space-y-3">
+        {p.solution.steps.map((s, i) => (
+          <div key={i} className="flex gap-3">
+            <div className="flex-shrink-0 w-7 h-7 rounded-md flex items-center justify-center text-[12px] font-bold"
+              style={{background: "var(--accent-soft)", color: "var(--accent)", border: "1px solid var(--accent-border)"}}>
+              {i+1}
+            </div>
+            <div className="flex-1">
+              <div className="text-[11.5px] tracking-[0.18em] font-semibold mb-0.5" style={{color: "var(--accent-2)"}}>
+                {s.label}
+              </div>
+              <div className="text-[14px] leading-relaxed" style={{color: "var(--text)", whiteSpace: "pre-line"}}>{s.body}</div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="grid md:grid-cols-2 gap-3 mt-5">
+        <div className="rounded-lg p-3" style={{background: "var(--accent-3-soft)", border: "1px solid var(--accent-3-border)"}}>
+          <div className="text-[10px] tracking-[0.18em] font-semibold mb-1" style={{color: "var(--accent-3)"}}>✓ GATE CHECK</div>
+          <div className="text-[13.5px]" style={{color: "var(--text)"}}>{p.solution.gateCheck}</div>
+        </div>
+        <div className="rounded-lg p-3" style={{background: "var(--warn-soft)", border: "1px solid var(--warn-border)"}}>
+          <div className="text-[10px] tracking-[0.18em] font-semibold mb-1" style={{color: "var(--warn)"}}>⚡ SPEED VERSION</div>
+          <div className="text-[13.5px]" style={{color: "var(--text)"}}>{p.solution.speed}</div>
+        </div>
+      </div>
+
+      <div className="mt-4 rounded-lg p-3" style={{background: "var(--danger-soft)", border: "1px solid var(--danger-border)"}}>
+        <div className="text-[10px] tracking-[0.18em] font-semibold mb-1" style={{color: "var(--danger)"}}>⚠ WHAT MADE THIS HARD</div>
+        <div className="text-[13.5px]" style={{color: "var(--text)"}}>{p.solution.whatMadeHard}</div>
+      </div>
+
+      <div className="mt-3 rounded-lg p-3" style={{background: "var(--pink-soft)", border: "1px solid var(--pink-border)"}}>
+        <div className="text-[10px] tracking-[0.18em] font-semibold mb-1" style={{color: "var(--pink)"}}>🔁 GENERALIZATION</div>
+        <div className="text-[13.5px]" style={{color: "var(--text)"}}>{p.solution.generalization}</div>
+      </div>
+
+      {p.solution.linkedConcept && (
+        <div className="mt-3 rounded-lg p-3" style={{background: "var(--info-soft)", border: "1px solid var(--info-border)"}}>
+          <div className="text-[10px] tracking-[0.18em] font-semibold mb-1" style={{color: "var(--info)"}}>🔗 LINKED CONCEPT</div>
+          <div className="text-[13.5px]" style={{color: "var(--text)"}}>{p.solution.linkedConcept}</div>
+        </div>
+      )}
+
+      {p.kind === "mcq" && p.solution.negAdvisory && (
+        <div className="mt-3 rounded-lg p-3" style={{background: "rgba(69,26,3,0.4)", border: "1px solid rgba(251,191,36,0.3)"}}>
+          <div className="text-[10px] tracking-[0.18em] font-semibold mb-1" style={{color: "#fbbf24"}}>📊 NEGATIVE-MARKING ADVISORY</div>
+          <div className="text-[13.5px]" style={{color: "var(--text)"}}>{p.solution.negAdvisory}</div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ────────────────────────────────────────────────────────────────
+   TECHNIQUE CARD (Layer 3)
+   ──────────────────────────────────────────────────────────────── */
+function TechniqueCard({ tech }) {
+  const typeColors = {
+    "Speed Shortcut":     { bg: "rgba(34,211,238,0.1)",  fg: "#22d3ee", bd: "rgba(34,211,238,0.35)" },
+    "Trap Avoidance":     { bg: "rgba(251,191,36,0.1)",  fg: "#fbbf24", bd: "rgba(251,191,36,0.35)" },
+    "Structural Insight": { bg: "rgba(167,139,250,0.1)", fg: "#a78bfa", bd: "rgba(167,139,250,0.35)" },
+    "Verification Method":{ bg: "rgba(52,211,153,0.1)",  fg: "#34d399", bd: "rgba(52,211,153,0.35)" },
+  };
+  const c = typeColors[tech.type] || typeColors["Speed Shortcut"];
+  return (
+    <div className="pl-tech-card mb-4 pl-prose">
+      <div className="flex flex-wrap items-baseline gap-3 mb-3">
+        <div className="text-[17px] font-semibold" style={{color: "var(--text)"}}>{tech.name}</div>
+        <span className="text-[10.5px] tracking-[0.15em] font-bold px-2 py-1 rounded-md"
+          style={{background: c.bg, color: c.fg, border: "1px solid " + c.bd}}>
+          {tech.type.toUpperCase()}
+        </span>
+        <span className="ml-auto text-[11px] px-2 py-1 rounded-md"
+          style={{background: tech.freq === "Very Frequent" ? "rgba(239,68,68,0.12)" :
+                              tech.freq === "Frequent" ? "rgba(249,115,22,0.12)" :
+                              tech.freq === "Occasional" ? "rgba(234,179,8,0.12)" : "rgba(148,163,184,0.12)",
+                  color: tech.freq === "Very Frequent" ? "#ef4444" :
+                         tech.freq === "Frequent" ? "#f97316" :
+                         tech.freq === "Occasional" ? "#eab308" : "#94a3b8",
+                  border: "1px solid currentColor"}}>
+          {tech.freq}
+        </span>
+      </div>
+
+      <div className="mb-3">
+        <div className="text-[10px] tracking-[0.18em] font-semibold mb-1" style={{color: "var(--accent)"}}>WHEN TO USE</div>
+        <div className="text-[14px]" style={{color: "var(--text)"}}>{tech.when}</div>
+      </div>
+
+      <div className="mb-3">
+        <div className="text-[10px] tracking-[0.18em] font-semibold mb-1" style={{color: "var(--accent-2)"}}>HOW IT WORKS</div>
+        <ol className="list-decimal list-outside ml-5 space-y-1.5 text-[14px]" style={{color: "var(--text)"}}>
+          {tech.steps.map((s, i) => <li key={i}>{s}</li>)}
+        </ol>
+      </div>
+
+      <div className="grid md:grid-cols-2 gap-3 mb-3">
+        <div className="rounded-lg p-3" style={{background: "var(--accent-3-soft)", border: "1px solid var(--accent-3-border)"}}>
+          <div className="text-[10px] tracking-[0.18em] font-semibold mb-1" style={{color: "var(--accent-3)"}}>⚡ SPEED CLAIM</div>
+          <div className="text-[13.5px]" style={{color: "var(--text)"}}>{tech.speed}</div>
+        </div>
+        <div className="rounded-lg p-3" style={{background: "var(--bg-elev-2)", border: "1px solid var(--border)"}}>
+          <div className="text-[10px] tracking-[0.18em] font-semibold mb-1" style={{color: "var(--accent-2)"}}>🔬 MICRO-EXAMPLE</div>
+          <div className="text-[13px] font-mono whitespace-pre-line" style={{color: "var(--text)"}}>{tech.example}</div>
+        </div>
+      </div>
+
+      <div className="pl-danger-zone">
+        <div className="text-[10px] tracking-[0.18em] font-semibold mb-1" style={{color: "#fb7185"}}>⛔ DANGER ZONE — when this technique FAILS</div>
+        <div className="text-[13.5px]" style={{color: "var(--text)"}}>{tech.danger}</div>
+      </div>
+    </div>
+  );
+}
+
+/* ────────────────────────────────────────────────────────────────
+   MISTAKE CARD (Layer 4) with Spot-the-Error mode
+   ──────────────────────────────────────────────────────────────── */
+function MistakeCard({ mistake, idx }) {
+  const [mode, setMode] = useState("read"); // "read" | "spot"
+  const [clickedLine, setClickedLine] = useState(null);
+  const [showFull, setShowFull] = useState(false);
+
+  return (
+    <div className="pl-mistake-card mb-4 pl-prose">
+      <div className="flex flex-wrap items-baseline gap-3 mb-3">
+        <span className="text-[10.5px] tracking-[0.15em] font-bold px-2 py-1 rounded-md"
+          style={{background: "var(--danger-soft)", color: "var(--danger)", border: "1px solid var(--danger-border)"}}>
+          MISTAKE {idx}
+        </span>
+        <div className="text-[17px] font-semibold" style={{color: "var(--text)"}}>{mistake.name}</div>
+        <span className="text-[11px] px-2 py-1 rounded-md ml-auto"
+          style={{background: mistake.frequency === "Very Common" ? "rgba(239,68,68,0.12)" :
+                              mistake.frequency === "Common" ? "rgba(249,115,22,0.12)" : "rgba(148,163,184,0.12)",
+                  color: mistake.frequency === "Very Common" ? "#ef4444" :
+                         mistake.frequency === "Common" ? "#f97316" : "#94a3b8",
+                  border: "1px solid currentColor"}}>
+          {mistake.frequency}
+        </span>
+      </div>
+
+      <div className="flex gap-2 mb-3">
+        <button className={"pl-tab-pill " + (mode === "read" ? "active" : "")}
+          onClick={() => setMode("read")}>📖 Read</button>
+        <button className={"pl-tab-pill " + (mode === "spot" ? "active" : "")}
+          onClick={() => { setMode("spot"); setClickedLine(null); setShowFull(false); }}>🎯 Spot the Error</button>
+      </div>
+
+      {mode === "read" && (
+        <>
+          <div className="mb-3">
+            <div className="text-[10px] tracking-[0.18em] font-semibold mb-1" style={{color: "var(--danger)"}}>WRONG SOLUTION (looks plausible)</div>
+            <div className="pl-wrong-solution">
+              {mistake.wrong.map((line, i) => (
+                <div key={i} className={i === mistake.errorLine ? "error-found" : ""} style={{padding: "2px 4px"}}>
+                  <span style={{color: "var(--text-faded)", marginRight: 8}}>{(i+1).toString().padStart(2, " ")}.</span>
+                  {line}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-3">
+            <div className="rounded-lg p-3" style={{background: "var(--bg-elev-2)", border: "1px solid var(--danger-border)"}}>
+              <div className="text-[10px] tracking-[0.18em] font-semibold mb-1" style={{color: "var(--danger)"}}>📍 ERROR LOCATION</div>
+              <div className="text-[13.5px]" style={{color: "var(--text)"}}>Line {mistake.errorLine + 1}: {mistake.errorDescription}</div>
+            </div>
+            <div className="rounded-lg p-3" style={{background: "var(--bg-elev-2)", border: "1px solid var(--warn-border)"}}>
+              <div className="text-[10px] tracking-[0.18em] font-semibold mb-1" style={{color: "var(--warn)"}}>🧠 ROOT CAUSE</div>
+              <div className="text-[13.5px]" style={{color: "var(--text)"}}>{mistake.rootCause}</div>
+            </div>
+          </div>
+
+          <div className="mt-3 rounded-lg p-3" style={{background: "var(--accent-3-soft)", border: "1px solid var(--accent-3-border)"}}>
+            <div className="text-[10px] tracking-[0.18em] font-semibold mb-1" style={{color: "var(--accent-3)"}}>✅ CORRECT REASONING</div>
+            <div className="text-[13.5px]" style={{color: "var(--text)"}}>{mistake.correct}</div>
+          </div>
+
+          <div className="mt-3 rounded-lg p-3" style={{background: "var(--accent-soft)", border: "1px solid var(--accent-border)"}}>
+            <div className="text-[10px] tracking-[0.18em] font-semibold mb-1" style={{color: "var(--accent)"}}>🛡 PREVENTION RULE (memorize this)</div>
+            <div className="text-[13.5px] italic" style={{color: "var(--text)"}}>{mistake.prevention}</div>
+          </div>
+
+          <div className="mt-3 flex gap-2 text-[12px]" style={{color: "var(--text-dim)"}}>
+            <span className="px-2 py-1 rounded-md" style={{background: "var(--bg-elev-2)", border: "1px solid var(--border)"}}>
+              💸 GATE Cost: {mistake.gateCost}
+            </span>
+          </div>
+        </>
+      )}
+
+      {mode === "spot" && (
+        <>
+          <div className="mb-2 text-[13px]" style={{color: "var(--text-dim)"}}>
+            👉 Click the line where you think the reasoning breaks.
+          </div>
+          <div className="pl-wrong-solution">
+            {mistake.wrong.map((line, i) => {
+              let cls = "pl-wrong-line";
+              if (clickedLine === i) {
+                if (i === mistake.errorLine) cls += " error-found";
+                else cls += "";
+              }
+              if (showFull && i === mistake.errorLine) cls += " error-found";
+              return (
+                <div key={i} className={cls}
+                  onClick={() => { if (clickedLine === null) { setClickedLine(i); setShowFull(true); } }}>
+                  <span style={{color: "var(--text-faded)", marginRight: 8}}>{(i+1).toString().padStart(2, " ")}.</span>
+                  {line}
+                  {showFull && i === mistake.errorLine && <span style={{color: "#fb7185", marginLeft: 8, fontWeight: 600}}>← ERROR HERE</span>}
+                </div>
+              );
+            })}
+          </div>
+          {clickedLine !== null && (
+            <div className="mt-3 rounded-lg p-3"
+              style={{background: clickedLine === mistake.errorLine ? "var(--accent-3-soft)" : "var(--danger-soft)",
+                      border: "1px solid " + (clickedLine === mistake.errorLine ? "var(--accent-3-border)" : "var(--danger-border)")}}>
+              {clickedLine === mistake.errorLine ? (
+                <div className="text-[13.5px]" style={{color: "#22c55e"}}>
+                  ✓ Correct! You spotted the error on line {mistake.errorLine + 1}: {mistake.errorDescription}
+                </div>
+              ) : (
+                <div className="text-[13.5px]" style={{color: "var(--danger)"}}>
+                  ✗ Not quite. The actual error is on line {mistake.errorLine + 1}: {mistake.errorDescription}
+                </div>
+              )}
+            </div>
+          )}
+        </>
+      )}
+    </div>
+  );
+}
+
+/* ────────────────────────────────────────────────────────────────
+   DRILL MODE (Layer 5)
+   ──────────────────────────────────────────────────────────────── */
+function DrillMode({ conceptNum, conceptTitle, problems }) {
+  const TARGETS = { easy: 40, medium: 75, hard: 120, killer: 150 };
+  const lsKey = "gate_la_m" + MODULE_NUM + "_c" + conceptNum + "_drill_best";
+  const streakKey = "gate_la_m" + MODULE_NUM + "_c" + conceptNum + "_drill_streak";
+
+  const [phase, setPhase] = useState("idle"); // idle | running | review
+  const [drill, setDrill] = useState([]);
+  const [currentIdx, setCurrentIdx] = useState(0);
+  const [results, setResults] = useState([]);
+  const [timeLeft, setTimeLeft] = useState(0);
+  const [questionStart, setQuestionStart] = useState(0);
+  const [selected, setSelected] = useState(null);
+  const [natVal, setNatVal] = useState("");
+  const [feedback, setFeedback] = useState(null);
+  const [paused, setPaused] = useState(false);
+  const [bestRecord] = useState(() => lsGet(lsKey, null));
+  const [streak] = useState(() => lsGet(streakKey, 0));
+
+  const startDrill = () => {
+    const shuffled = [...problems].sort(() => Math.random() - 0.5).slice(0, 5);
+    setDrill(shuffled);
+    setCurrentIdx(0);
+    setResults([]);
+    setSelected(null);
+    setNatVal("");
+    setFeedback(null);
+    const first = shuffled[0];
+    setTimeLeft(TARGETS[first.difficulty] || 60);
+    setQuestionStart(Date.now());
+    setPhase("running");
+  };
+
+  useEffect(() => {
+    if (phase !== "running" || paused || feedback) return;
+    if (timeLeft <= 0) {
+      submitDrill(false, "timeout");
+      return;
+    }
+    const t = setTimeout(() => setTimeLeft(timeLeft - 1), 1000);
+    return () => clearTimeout(t);
+  }, [phase, timeLeft, paused, feedback]);
+
+  const submitDrill = (didAnswer, mode) => {
+    const p = drill[currentIdx];
+    const elapsed = Math.round((Date.now() - questionStart) / 1000);
+    let isCorrect = false;
+    if (didAnswer) {
+      if (p.kind === "mcq") isCorrect = selected === p.answer;
+      else {
+        const v = parseFloat(natVal);
+        if (!isNaN(v)) {
+          const tol = p.tolerance != null ? p.tolerance : 0.01;
+          isCorrect = Math.abs(v - p.answer) <= tol;
+        }
+      }
+    }
+    setResults(r => [...r, {
+      problem: p, correct: isCorrect, time: elapsed, target: TARGETS[p.difficulty] || 60,
+      answer: p.kind === "mcq" ? selected : natVal, mode,
+    }]);
+    setFeedback({ correct: isCorrect, answer: p.answer });
+  };
+
+  const nextQuestion = () => {
+    if (currentIdx + 1 >= drill.length) {
+      finalize();
+      return;
+    }
+    const nextI = currentIdx + 1;
+    setCurrentIdx(nextI);
+    setSelected(null);
+    setNatVal("");
+    setFeedback(null);
+    setTimeLeft(TARGETS[drill[nextI].difficulty] || 60);
+    setQuestionStart(Date.now());
+  };
+
+  const finalize = () => {
+    setPhase("review");
+    const correctCount = results.filter(r => r.correct).length;
+    const total = results.length;
+    const acc = total > 0 ? Math.round((correctCount/total) * 100) : 0;
+    const avgTime = total > 0 ? Math.round(results.reduce((s, r) => s + r.time, 0) / total) : 0;
+    const nm = results.reduce((s, r) => {
+      if (r.problem.kind !== "mcq") return s;
+      if (r.correct) return s + (r.problem.marks === 2 ? 2 : 1);
+      if (r.answer == null) return s;
+      return s - (r.problem.marks === 2 ? 2/3 : 1/3);
+    }, 0);
+
+    if (!bestRecord || acc > bestRecord.accuracy || (acc === bestRecord.accuracy && avgTime < bestRecord.avgTime)) {
+      lsSet(lsKey, { score: correctCount, accuracy: acc, avgTime, when: Date.now() });
+    }
+    const lastStreak = results.length > 0 ? results[results.length-1].correct : false;
+    const newStreak = lastStreak ? streak + correctCount : 0;
+    lsSet(streakKey, Math.max(streak, newStreak));
+  };
+
+  const progressPct = phase === "running" && drill[currentIdx] ? (timeLeft / (TARGETS[drill[currentIdx].difficulty] || 60)) * 100 : 0;
+  const progressClass = progressPct < 25 ? "danger" : progressPct < 50 ? "warning" : "";
+
+  if (phase === "idle") {
+    return (
+      <div className="rounded-xl p-6" style={{background: "var(--bg-elev-1)", border: "1px solid var(--border)"}}>
+        <div className="flex items-center gap-3 mb-3">
+          <div className="text-[24px]">⏱</div>
+          <div>
+            <div className="text-[18px] font-semibold" style={{color: "var(--text)"}}>Drill Mode — {conceptTitle}</div>
+            <div className="text-[13px]" style={{color: "var(--text-dim)"}}>5 rapid-fire questions · timed · instant feedback only</div>
+          </div>
+        </div>
+
+        <div className="grid md:grid-cols-4 gap-3 my-4 text-[12px]">
+          <div className="rounded-md p-3" style={{background: "var(--bg-elev-2)", border: "1px solid var(--border)"}}>
+            <div style={{color: "var(--text-dim)"}}>Easy target</div>
+            <div className="font-mono font-semibold mt-1" style={{color: "#22c55e"}}>40 sec</div>
+          </div>
+          <div className="rounded-md p-3" style={{background: "var(--bg-elev-2)", border: "1px solid var(--border)"}}>
+            <div style={{color: "var(--text-dim)"}}>Medium target</div>
+            <div className="font-mono font-semibold mt-1" style={{color: "#eab308"}}>75 sec</div>
+          </div>
+          <div className="rounded-md p-3" style={{background: "var(--bg-elev-2)", border: "1px solid var(--border)"}}>
+            <div style={{color: "var(--text-dim)"}}>Hard target</div>
+            <div className="font-mono font-semibold mt-1" style={{color: "#f97316"}}>120 sec</div>
+          </div>
+          <div className="rounded-md p-3" style={{background: "var(--bg-elev-2)", border: "1px solid var(--border)"}}>
+            <div style={{color: "var(--text-dim)"}}>Killer target</div>
+            <div className="font-mono font-semibold mt-1" style={{color: "#ef4444"}}>150 sec</div>
+          </div>
+        </div>
+
+        {bestRecord && (
+          <div className="rounded-lg p-3 mb-3" style={{background: "var(--accent-3-soft)", border: "1px solid var(--accent-3-border)"}}>
+            <div className="text-[11px] tracking-[0.18em] font-semibold mb-1" style={{color: "var(--accent-3)"}}>🏆 PERSONAL BEST</div>
+            <div className="text-[13.5px]" style={{color: "var(--text)"}}>
+              Score: {bestRecord.score}/5 · Accuracy: {bestRecord.accuracy}% · Avg time: {bestRecord.avgTime}s
+            </div>
+          </div>
+        )}
+
+        {streak > 0 && (
+          <div className="rounded-lg p-3 mb-3" style={{background: "var(--warn-soft)", border: "1px solid var(--warn-border)"}}>
+            <div className="text-[11px] tracking-[0.18em] font-semibold mb-1" style={{color: "var(--warn)"}}>🔥 STREAK</div>
+            <div className="text-[13.5px]" style={{color: "var(--text)"}}>Best streak: {streak} consecutive correct under time</div>
+          </div>
+        )}
+
+        <button className="pl-submit-btn" onClick={startDrill}>
+          ▶ Start Drill (5 questions)
+        </button>
+      </div>
+    );
+  }
+
+  if (phase === "running") {
+    const p = drill[currentIdx];
+    return (
+      <div className="rounded-xl p-6" style={{background: "var(--bg-elev-1)", border: "1px solid var(--border)"}}>
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-3">
+            <div className="text-[12px] tracking-[0.15em] font-bold px-2 py-1 rounded-md"
+              style={{background: "var(--bg-elev-3)", color: "var(--text-dim)", border: "1px solid var(--border)"}}>
+              Q {currentIdx+1} / {drill.length}
+            </div>
+            <DiffBadge level={p.difficulty} />
+          </div>
+          <div className="text-[14px] font-mono font-bold"
+            style={{color: timeLeft < 20 ? "#ef4444" : timeLeft < 40 ? "#eab308" : "#22c55e"}}>
+            ⏱ {timeLeft}s
+          </div>
+        </div>
+
+        <div className="pl-progress-bar mb-4">
+          <div className={"pl-progress-fill " + progressClass} style={{width: progressPct + "%"}}/>
+        </div>
+
+        <div className="text-[15px] leading-relaxed mb-4 p-4 rounded-lg"
+          style={{background: "var(--bg-elev-2)", color: "var(--text)", border: "1px solid var(--border)"}}>
+          {p.statement}
+        </div>
+
+        {!feedback && p.kind === "mcq" && (
+          <div className="space-y-2 mb-3">
+            {p.options.map((opt, i) => {
+              const letter = String.fromCharCode(65 + i);
+              return (
+                <button key={i}
+                  className={"pl-option-btn " + (selected === letter ? "selected" : "")}
+                  onClick={() => setSelected(letter)}>
+                  <span className="pl-option-letter">{letter}</span>
+                  <span className="flex-1">{opt}</span>
+                </button>
+              );
+            })}
+          </div>
+        )}
+        {!feedback && p.kind === "nat" && (
+          <input type="number" step="any" className="pl-nat-input mb-3"
+            value={natVal}
+            onChange={e => setNatVal(e.target.value)}
+            placeholder="Enter your answer..." />
+        )}
+
+        {!feedback && (
+          <div className="flex gap-2">
+            <button className="pl-submit-btn"
+              disabled={p.kind === "mcq" ? !selected : natVal === ""}
+              onClick={() => submitDrill(true, "answered")}>
+              Submit
+            </button>
+            <button className="text-[13px] px-3 py-1.5 rounded-md"
+              style={{border: "1px solid var(--border-strong)", color: "var(--text-dim)", background: "var(--bg-elev-2)"}}
+              onClick={() => submitDrill(false, "skipped")}>
+              Skip
+            </button>
+          </div>
+        )}
+
+        {feedback && (
+          <div className="rounded-lg p-3 mb-3"
+            style={{background: feedback.correct ? "var(--accent-3-soft)" : "var(--danger-soft)",
+                    border: "1px solid " + (feedback.correct ? "var(--accent-3-border)" : "var(--danger-border)")}}>
+            <div className="text-[13.5px] font-semibold mb-1"
+              style={{color: feedback.correct ? "#22c55e" : "#fb7185"}}>
+              {feedback.correct ? "✓ Correct" : "✗ Incorrect"} — Answer: {String(feedback.answer)}
+            </div>
+            <div className="flex gap-2 mt-2">
+              <button className="pl-submit-btn" onClick={nextQuestion}>
+                {currentIdx + 1 >= drill.length ? "Finish Drill →" : "Next Question →"}
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  /* phase === "review" */
+  const correctCount = results.filter(r => r.correct).length;
+  const total = results.length;
+  const acc = total > 0 ? Math.round((correctCount/total) * 100) : 0;
+  const accByDiff = {};
+  ["easy", "medium", "hard", "killer"].forEach(d => {
+    const dr = results.filter(r => r.problem.difficulty === d);
+    if (dr.length > 0) {
+      accByDiff[d] = Math.round((dr.filter(r => r.correct).length / dr.length) * 100);
+    }
+  });
+  const nm = results.reduce((s, r) => {
+    if (r.problem.kind !== "mcq") return s + (r.correct ? r.problem.marks : 0);
+    if (r.correct) return s + (r.problem.marks === 2 ? 2 : 1);
+    if (r.answer == null || r.mode === "skipped" || r.mode === "timeout") return s;
+    return s - (r.problem.marks === 2 ? 2/3 : 1/3);
+  }, 0);
+  const totalMarks = results.reduce((s, r) => s + (r.problem.marks || 1), 0);
+  const reviseConcepts = [...new Set(results.filter(r => !r.correct).flatMap(r => r.problem.tags))];
+
+  return (
+    <div className="rounded-xl p-6" style={{background: "var(--bg-elev-1)", border: "1px solid var(--border)"}}>
+      <div className="text-[20px] font-bold mb-1" style={{color: "var(--text)"}}>📊 Drill Report Card</div>
+      <div className="text-[13px] mb-4" style={{color: "var(--text-dim)"}}>5-question drill · {conceptTitle}</div>
+
+      <div className="grid md:grid-cols-3 gap-3 mb-4">
+        <div className="rounded-lg p-4" style={{background: "var(--bg-elev-2)", border: "1px solid var(--border)"}}>
+          <div className="text-[11px] tracking-[0.18em] font-semibold mb-1" style={{color: "var(--text-dim)"}}>SCORE</div>
+          <div className="text-[24px] font-bold" style={{color: "var(--accent)"}}>{correctCount}/{total}</div>
+        </div>
+        <div className="rounded-lg p-4" style={{background: "var(--bg-elev-2)", border: "1px solid var(--border)"}}>
+          <div className="text-[11px] tracking-[0.18em] font-semibold mb-1" style={{color: "var(--text-dim)"}}>ACCURACY</div>
+          <div className="text-[24px] font-bold" style={{color: acc >= 80 ? "#22c55e" : acc >= 60 ? "#eab308" : "#ef4444"}}>{acc}%</div>
+        </div>
+        <div className="rounded-lg p-4" style={{background: "var(--bg-elev-2)", border: "1px solid var(--border)"}}>
+          <div className="text-[11px] tracking-[0.18em] font-semibold mb-1" style={{color: "var(--text-dim)"}}>NEG-MARKING SIM</div>
+          <div className="text-[24px] font-bold" style={{color: nm >= totalMarks * 0.7 ? "#22c55e" : nm >= 0 ? "#eab308" : "#ef4444"}}>
+            {nm.toFixed(2)} / {totalMarks}
+          </div>
+        </div>
+      </div>
+
+      <div className="rounded-lg p-4 mb-4" style={{background: "var(--bg-elev-2)", border: "1px solid var(--border)"}}>
+        <div className="text-[11px] tracking-[0.18em] font-semibold mb-3" style={{color: "var(--accent-2)"}}>⏱ TIME vs TARGET (per question)</div>
+        <div className="space-y-2">
+          {results.map((r, i) => {
+            const pct = Math.min(100, (r.time / r.target) * 100);
+            const cls = pct > 100 ? "danger" : pct > 75 ? "warning" : "";
+            return (
+              <div key={i} className="flex items-center gap-3 text-[12px]">
+                <div className="w-16 font-mono" style={{color: "var(--text-dim)"}}>Q{i+1}</div>
+                <DiffBadge level={r.problem.difficulty} />
+                <div className="flex-1 pl-progress-bar">
+                  <div className={"pl-progress-fill " + cls} style={{width: pct + "%"}}/>
+                </div>
+                <div className="font-mono w-20 text-right" style={{color: "var(--text)"}}>{r.time}s / {r.target}s</div>
+                <div style={{color: r.correct ? "#22c55e" : "#fb7185"}}>{r.correct ? "✓" : "✗"}</div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {Object.keys(accByDiff).length > 0 && (
+        <div className="rounded-lg p-4 mb-4" style={{background: "var(--bg-elev-2)", border: "1px solid var(--border)"}}>
+          <div className="text-[11px] tracking-[0.18em] font-semibold mb-2" style={{color: "var(--accent)"}}>ACCURACY BY DIFFICULTY</div>
+          <div className="flex flex-wrap gap-2">
+            {Object.entries(accByDiff).map(([d, a]) => (
+              <div key={d} className="flex items-center gap-2 text-[12px] px-2 py-1 rounded-md"
+                style={{background: "var(--bg-elev-3)", border: "1px solid var(--border)"}}>
+                <DiffBadge level={d} />
+                <span className="font-mono" style={{color: a >= 80 ? "#22c55e" : a >= 60 ? "#eab308" : "#ef4444"}}>{a}%</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {reviseConcepts.length > 0 && (
+        <div className="rounded-lg p-4 mb-4" style={{background: "var(--warn-soft)", border: "1px solid var(--warn-border)"}}>
+          <div className="text-[11px] tracking-[0.18em] font-semibold mb-2" style={{color: "var(--warn)"}}>🔁 CONCEPTS TO REVISIT</div>
+          <div className="flex flex-wrap gap-2">
+            {reviseConcepts.map((c, i) => <ConceptTag key={i}>{c}</ConceptTag>)}
+          </div>
+        </div>
+      )}
+
+      <div className="flex gap-2">
+        <button className="pl-submit-btn" onClick={startDrill}>↻ Restart Drill</button>
+        <button className="text-[13px] px-3 py-1.5 rounded-md"
+          style={{border: "1px solid var(--border-strong)", color: "var(--text-dim)", background: "var(--bg-elev-2)"}}
+          onClick={() => setPhase("idle")}>
+          ← Back
+        </button>
+      </div>
+    </div>
+  );
+}
+
+/* ────────────────────────────────────────────────────────────────
+   PYQ WALKTHROUGH (labeled GATE CS PYQ — explanation only)
+   ──────────────────────────────────────────────────────────────── */
+function PYQWalkthrough({ year, marks, statement, solution }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="rounded-xl p-5 mb-5 pl-prose"
+      style={{background: "rgba(245,158,11,0.05)", border: "1px solid rgba(245,158,11,0.35)"}}>
+      <div className="flex flex-wrap items-center gap-2 mb-3">
+        <span className="pl-type-pyq text-[10.5px] tracking-[0.15em] font-bold px-2 py-1 rounded-md">
+          ★ GATE CS {year} — PYQ WALKTHROUGH
+        </span>
+        <MetaPill>{marks}-mark</MetaPill>
+      </div>
+      <div className="text-[15px] leading-relaxed mb-3 p-4 rounded-lg"
+        style={{background: "var(--bg-elev-2)", color: "var(--text)", border: "1px solid var(--border)"}}>
+        {statement}
+      </div>
+      <button onClick={() => setOpen(o => !o)}
+        className="text-[13px] px-3 py-1.5 rounded-md"
+        style={{border: "1px solid rgba(245,158,11,0.35)", color: "#f59e0b", background: "rgba(245,158,11,0.10)"}}>
+        {open ? "▲ Hide walkthrough" : "▼ Show full walkthrough"}
+      </button>
+      {open && (
+        <div className="mt-4 space-y-3">
+          {solution.map((s, i) => (
+            <div key={i} className="rounded-lg p-3" style={{background: "var(--bg-elev-2)", border: "1px solid var(--border)"}}>
+              <div className="text-[11px] tracking-[0.18em] font-semibold mb-1" style={{color: "var(--accent)"}}>{s.label}</div>
+              <div className="text-[14px]" style={{color: "var(--text)", whiteSpace: "pre-line"}}>{s.body}</div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ────────────────────────────────────────────────────────────────
+   CONCEPT NAVIGATOR (Tabs to pick which concept lab)
+   ──────────────────────────────────────────────────────────────── */
+function ConceptNavigator({ concepts, active, setActive, progressMap }) {
+  return (
+    <div className="sticky top-[60px] z-40 py-3 px-4 mb-4 rounded-xl flex flex-wrap gap-2"
+      style={{background: "var(--bg-overlay)", backdropFilter: "blur(14px)", border: "1px solid var(--border)"}}>
+      {concepts.map(c => {
+        const p = progressMap[c.num];
+        const done = p ? p.correct.length : 0;
+        const total = p ? p.totalProblems : 0;
+        return (
+          <button key={c.num}
+            className={"pl-tab-pill " + (active === c.num ? "active" : "")}
+            onClick={() => {
+              setActive(c.num);
+              document.getElementById("concept-lab-" + c.num)?.scrollIntoView({ behavior: "smooth", block: "start" });
+            }}>
+            <span style={{fontWeight: 600}}>C8.{c.num}</span>
+            <span className="opacity-70 ml-2">{c.shortName}</span>
+            <span className="ml-2 font-mono text-[11px] opacity-80">{done}/{total} ✓</span>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+/* ────────────────────────────────────────────────────────────────
+   CONCEPT-LAB WRAPPER
+   ──────────────────────────────────────────────────────────────── */
+function ConceptLab({ num, title, why, patterns, problems, techniques, mistakes, pyqs, progress }) {
+  return (
+    <section id={"concept-lab-" + num} className="max-w-5xl mx-auto px-5 py-8 fade-up">
+      <div className="card p-6 md:p-9" style={{boxShadow: "var(--shadow-glow-accent)"}}>
+        <div className="flex flex-wrap items-baseline gap-3 mb-3">
+          <span className="text-xs tracking-[0.22em] font-semibold px-2.5 py-1 rounded-md"
+            style={{color: "var(--accent)", border: "1px solid var(--accent-border)", background: "var(--accent-soft)"}}>
+            PROBLEM LAB · CONCEPT 8.{num}
+          </span>
+          <span className="text-sm" style={{color: "var(--text-faded)"}}>·</span>
+          <span className="text-sm" style={{color: "var(--text-dim)"}}>Module 8 · Decompositions & Types</span>
+          <span className="ml-auto text-[11px] px-2 py-1 rounded-md font-mono"
+            style={{background: "var(--bg-elev-2)", color: "var(--text-dim)", border: "1px solid var(--border)"}}>
+            {progress.correct.length}/{progress.totalProblems} solved
+          </span>
+        </div>
+        <h2 className="text-2xl md:text-3xl font-bold tracking-tight mb-3" style={{color: "var(--text)"}}>{title}</h2>
+        {why && (
+          <div className="text-[15px] leading-relaxed mb-6 border-l-2 pl-4 italic font-serif"
+            style={{borderColor: "var(--accent-border)", color: "var(--text-dim)"}}>{why}</div>
+        )}
+        <LayerHeader num={1} title="How GATE CS Tests This Concept" subtitle="Top rankers classify the question first, then solve." />
+        {patterns.map((p, i) => <PatternCard key={i} idx={i+1} pattern={p} />)}
+        {pyqs && pyqs.length > 0 && (
+          <>
+            <LayerHeader num={"1.5"} title="GATE CS PYQ Walkthroughs" subtitle="Real GATE CS questions with full reasoning chains. Read, don't solve." />
+            {pyqs.map((p, i) => <PYQWalkthrough key={i} {...p} />)}
+          </>
+        )}
+        <LayerHeader num={2} title="Progressive Problem Set" subtitle="2 Easy · 3 Medium · 3 Hard · 1 Killer." />
+        {problems.map((p, i) => <ProblemCard key={p.id} p={p} idx={i+1} progress={progress} />)}
+        <LayerHeader num={3} title="Technique Arsenal" subtitle="How to think, not what to think." />
+        {techniques.map((t, i) => <TechniqueCard key={i} tech={t} />)}
+        <LayerHeader num={4} title="Mistake Autopsy Lab" subtitle="Real wrong solutions written exactly as students write them." />
+        {mistakes.map((m, i) => <MistakeCard key={i} mistake={m} idx={i+1} />)}
+        <LayerHeader num={5} title="Timed Drill Mode" subtitle="Knowing the answer ≠ executing under 90-second pressure." />
+        <DrillMode conceptNum={num} conceptTitle={title} problems={problems} />
+      </div>
+    </section>
+  );
+}
+
+
+/* ════════════════════════════════════════════════════════════════
+   CONCEPT 8.1 — LU DECOMPOSITION
+   ════════════════════════════════════════════════════════════════ */
+const C81_PATTERNS = [
+  { name: "LU Operation Count", surface: "Asked the operation count for LU and subsequent solves.",
+    testing: "Whether you know LU is O(n³) once; each subsequent solve is O(n²).",
+    signals: ["\"number of operations\""],
+    firstMove: "LU once: O(n³). Per solve: O(n²) forward + back substitution.",
+    timeBudget: 30, frequency: "Frequent" },
+  { name: "LU Existence Condition", surface: "Asked when LU exists (without pivoting).",
+    testing: "Whether you know all leading principal minors must be non-zero.",
+    signals: ["\"does LU exist\""],
+    firstMove: "All leading principal minors ≠ 0. Else need PLU.",
+    timeBudget: 30, frequency: "Occasional" },
+  { name: "PLU for General Matrices", surface: "Why permutation matrix P is needed.",
+    testing: "Whether you know PLU always exists for non-singular A.",
+    signals: ["\"PLU\"", "\"partial pivoting\""],
+    firstMove: "If A non-singular but LU fails, swap rows: PA = LU.",
+    timeBudget: 25, frequency: "Occasional" },
+  { name: "L and U Properties", surface: "Identify which is lower/upper, diagonal of L.",
+    testing: "L is lower triangular with 1s on diag (in Doolittle). U is upper triangular.",
+    signals: ["\"L is\""],
+    firstMove: "L unit lower triangular; U upper triangular.",
+    timeBudget: 20, frequency: "Frequent" },
+];
+
+const C81_PROBLEMS = [
+  { id: "c81-e1", difficulty: "easy", kind: "mcq", marks: 1, timeTarget: 30,
+    tags: ["LU Existence"], skipSignal: { type: "attempt", text: "Attempt" },
+    statement: <span>LU decomposition exists without row swaps iff:</span>,
+    options: [
+      "All leading principal minors are non-zero.",
+      "A is symmetric.",
+      "A is invertible.",
+      "A is square.",
+    ],
+    answer: "A",
+    hints: [
+      { label: "Conceptual redirect", text: "Need pivots through the elimination process." },
+      { label: "Key step", text: "(A)." },
+      { label: "Near-complete", text: "Leading principal minors ≠ 0." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "LU existence." },
+        { label: "KEY STEP", body: "Without row swaps, requires non-zero pivots at each step ⇔ all leading principal minors ≠ 0." },
+        { label: "COMPUTATION", body: "(A)." },
+        { label: "VERIFICATION", body: "Invertible alone is not sufficient (could need row swap)." },
+      ],
+      gateCheck: "Leading minors all non-zero.", speed: "Direct.", whatMadeHard: "Distractor (C).",
+      generalization: "Universal.", linkedConcept: "C8.1.",
+      negAdvisory: "Attempt: theorem. (A) wins.",
+    } },
+  { id: "c81-e2", difficulty: "easy", kind: "mcq", marks: 1, timeTarget: 30,
+    tags: ["L Form"], skipSignal: { type: "attempt", text: "Attempt" },
+    statement: <span>In Doolittle's LU decomposition, the diagonal of L is:</span>,
+    options: [ "All zeros.", "All ones.", "Arbitrary.", "Equal to diagonal of A." ],
+    answer: "B",
+    hints: [
+      { label: "Conceptual redirect", text: "Doolittle = unit lower triangular L." },
+      { label: "Key step", text: "(B)." },
+      { label: "Near-complete", text: "All 1s." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "L convention." },
+        { label: "KEY STEP", body: "Doolittle: L diagonal = 1. Crout: U diagonal = 1." },
+        { label: "COMPUTATION", body: "(B)." },
+        { label: "VERIFICATION", body: "Standard." },
+      ],
+      gateCheck: "Doolittle vs Crout.", speed: "Direct.", whatMadeHard: "Convention.",
+      generalization: "Universal.", linkedConcept: "C8.1.",
+      negAdvisory: "Attempt: convention. (B) wins.",
+    } },
+  { id: "c81-m1", difficulty: "medium", kind: "mcq", marks: 2, timeTarget: 60,
+    tags: ["Op Count"], skipSignal: { type: "attempt", text: "Attempt" },
+    statement: <span>To solve Ax = b for k different b vectors using LU, total operations are:</span>,
+    options: [
+      "O(n³) per solve.",
+      "O(n²) per solve.",
+      "O(n³) once + O(n²) per solve.",
+      "O(k·n³).",
+    ],
+    answer: "C",
+    hints: [
+      { label: "Conceptual redirect", text: "Factor LU once, then forward + back per b." },
+      { label: "Key step", text: "(C)." },
+      { label: "Near-complete", text: "Once O(n³), each O(n²)." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "LU complexity." },
+        { label: "KEY STEP", body: "LU factor: O(n³) ONCE. Then for each b: solve Ly = b (forward sub, O(n²)) and Ux = y (back sub, O(n²)). Total: O(n³ + k·n²)." },
+        { label: "COMPUTATION", body: "(C)." },
+        { label: "VERIFICATION", body: "Universal." },
+      ],
+      gateCheck: "LU once, solve k times.", speed: "Direct.", whatMadeHard: "Nothing.",
+      generalization: "Universal.", linkedConcept: "C8.1.",
+      negAdvisory: "Attempt: complexity. (C) wins.",
+    } },
+  { id: "c81-m2", difficulty: "medium", kind: "mcq", marks: 2, timeTarget: 65,
+    tags: ["When PLU"], skipSignal: { type: "attempt", text: "Attempt" },
+    statement: <span>For A = [[0, 1], [1, 0]], standard LU decomposition:</span>,
+    options: [
+      "Exists.",
+      "Doesn't exist (need row swap).",
+      "Equals A itself.",
+      "Equals I."
+    ],
+    answer: "B",
+    hints: [
+      { label: "Conceptual redirect", text: "(1,1) entry = 0 → no pivot." },
+      { label: "Key step", text: "Need PLU instead." },
+      { label: "Near-complete", text: "(B)." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Leading principal minor check." },
+        { label: "KEY STEP", body: "Top-left = 0 → can't pivot without row swap. Standard LU fails. PLU with P = [[0,1],[1,0]] works: PA = [[1,0],[0,1]] = I." },
+        { label: "COMPUTATION", body: "(B)." },
+        { label: "VERIFICATION", body: "Universal." },
+      ],
+      gateCheck: "0 pivot → PLU.", speed: "Direct.", whatMadeHard: "Nothing.",
+      generalization: "Universal.", linkedConcept: "C8.1.",
+      negAdvisory: "Attempt: pivot test. (B) wins.",
+    } },
+  { id: "c81-m3", difficulty: "medium", kind: "nat", marks: 2, timeTarget: 70,
+    tags: ["L Entries"],
+    statement: <span>For Doolittle LU of <T src="A = \begin{pmatrix} 4 & 3 \\ 6 & 3 \end{pmatrix}"/>, L₂₁ = ___.</span>,
+    answer: 1.5, tolerance: 0.001,
+    hints: [
+      { label: "Conceptual redirect", text: "Multiplier = a₂₁/a₁₁ = 6/4." },
+      { label: "Key step", text: "1.5." },
+      { label: "Near-complete", text: "1.5." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Gaussian elimination as L entries." },
+        { label: "KEY STEP", body: "To eliminate a₂₁: subtract (a₂₁/a₁₁)·R₁ from R₂. Multiplier = 6/4 = 1.5. This becomes L₂₁." },
+        { label: "COMPUTATION", body: "1.5." },
+        { label: "VERIFICATION", body: "L = [[1, 0], [1.5, 1]]. U = [[4, 3], [0, -1.5]]. LU = [[4, 3], [6, 3]]. ✓" },
+      ],
+      gateCheck: "Multipliers fill L.", speed: "30s.", whatMadeHard: "Nothing.",
+      generalization: "Universal.", linkedConcept: "C8.1.",
+    } },
+  { id: "c81-h1", difficulty: "hard", kind: "nat", marks: 2, timeTarget: 90,
+    tags: ["U Entry"],
+    statement: <span>For LU of <T src="A = \begin{pmatrix} 2 & 1 & 1 \\ 4 & 3 & 3 \\ 8 & 7 & 9 \end{pmatrix}"/>, the (3, 3) entry of U is ___.</span>,
+    answer: 2, tolerance: 0,
+    hints: [
+      { label: "Conceptual redirect", text: "Forward elimination on full matrix." },
+      { label: "Key step", text: "R₂ - 2R₁: (0, 1, 1). R₃ - 4R₁: (0, 3, 5). R₃ - 3R₂: (0, 0, 2)." },
+      { label: "Near-complete", text: "2." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Forward elimination." },
+        { label: "KEY STEP", body: "R₂ → R₂ - 2R₁ = (0, 1, 1). R₃ → R₃ - 4R₁ = (0, 3, 5). R₃ → R₃ - 3R₂ = (0, 0, 2). U[3,3] = 2." },
+        { label: "COMPUTATION", body: "2." },
+        { label: "VERIFICATION", body: "L = [[1,0,0],[2,1,0],[4,3,1]]. U = [[2,1,1],[0,1,1],[0,0,2]]. LU = original A. ✓" },
+      ],
+      gateCheck: "Final upper triangular entry.", speed: "60s.", whatMadeHard: "3x3 reduction.",
+      generalization: "Universal.", linkedConcept: "C8.1.",
+    } },
+  { id: "c81-h2", difficulty: "hard", kind: "mcq", marks: 2, timeTarget: 70,
+    tags: ["det via LU"], skipSignal: { type: "attempt", text: "Attempt" },
+    statement: <span>If A = LU (Doolittle), then det(A) = ___.</span>,
+    options: [
+      "Product of L's diagonal.",
+      "Product of U's diagonal.",
+      "Product of all diagonal entries of L AND U.",
+      "Always 1."
+    ],
+    answer: "B",
+    hints: [
+      { label: "Conceptual redirect", text: "det(A) = det(L)·det(U). L unit triangular → det(L) = 1." },
+      { label: "Key step", text: "(B)." },
+      { label: "Near-complete", text: "Product of U's diag." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Det via factorization." },
+        { label: "KEY STEP", body: "det(A) = det(L)·det(U). L triangular with 1s on diag → det L = 1. U triangular → det U = product of diag(U)." },
+        { label: "COMPUTATION", body: "(B)." },
+        { label: "VERIFICATION", body: "Universal." },
+      ],
+      gateCheck: "Det shortcut via LU.", speed: "Direct.", whatMadeHard: "Nothing.",
+      generalization: "Universal.", linkedConcept: "C5.2.",
+      negAdvisory: "Attempt: rule. (B) wins.",
+    } },
+  { id: "c81-h3", difficulty: "hard", kind: "mcq", marks: 2, timeTarget: 60,
+    tags: ["LU Uniqueness"], skipSignal: { type: "attempt", text: "Attempt" },
+    statement: <span>LU decomposition (with L unit lower triangular) is:</span>,
+    options: [
+      "Unique when it exists.",
+      "Never unique.",
+      "Sometimes unique.",
+      "Unique only for invertible A.",
+    ],
+    answer: "A",
+    hints: [
+      { label: "Conceptual redirect", text: "Theorem." },
+      { label: "Key step", text: "(A)." },
+      { label: "Near-complete", text: "Unique." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Uniqueness theorem." },
+        { label: "KEY STEP", body: "If LU exists (no pivoting), the decomposition is unique (fixing L's diagonal to 1)." },
+        { label: "COMPUTATION", body: "(A)." },
+        { label: "VERIFICATION", body: "Universal." },
+      ],
+      gateCheck: "Unique when exists.", speed: "Direct.", whatMadeHard: "Nothing.",
+      generalization: "Universal.", linkedConcept: "C8.1.",
+      negAdvisory: "Attempt: theorem. (A) wins.",
+    } },
+  { id: "c81-k1", difficulty: "killer", kind: "mcq", marks: 2, timeTarget: 130,
+    tags: ["KILLER", "Op Count Realistic"],
+    statement: <span><B>[KILLER]</B> For 1000×1000 matrix A, solving Ax = b for 5 different b vectors via LU takes approximately:</span>,
+    options: [
+      "5 · 10⁹ operations.",
+      "10⁹ + 5 · 10⁶ operations.",
+      "5 · 10⁶ operations.",
+      "10⁹ · 5 operations."
+    ],
+    answer: "B",
+    hints: [
+      { label: "Conceptual redirect", text: "LU once O(n³) ≈ 10⁹. Per solve O(n²) ≈ 10⁶." },
+      { label: "Key step", text: "(B)." },
+      { label: "Near-complete", text: "10⁹ + 5·10⁶." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Apply complexity to real numbers." },
+        { label: "KEY STEP", body: "LU: O(n³) = 10⁹. Per b: O(n²) = 10⁶. Total: 10⁹ + 5·10⁶ ≈ 10⁹." },
+        { label: "COMPUTATION", body: "(B)." },
+        { label: "VERIFICATION", body: "Comparison: Gaussian elimination each time would cost 5·10⁹ = 5 billion ops. LU saves a factor of 5." },
+      ],
+      gateCheck: "Realistic application.", speed: "30s.", whatMadeHard: "Nothing.",
+      generalization: "Universal.", linkedConcept: "C8.1.",
+      negAdvisory: "Attempt: complexity. (B) wins.",
+    } },
+];
+
+const C81_TECHNIQUES = [
+  { name: "LU Existence Test", type: "Trap Avoidance",
+    when: "Asked if LU works.",
+    steps: ["Check all leading principal minors non-zero.",
+            "If any is 0, must use PLU."],
+    speed: "Direct.", example: "Universal.",
+    danger: "Invertibility alone doesn't guarantee LU.", freq: "Occasional" },
+  { name: "LU Complexity Reflex", type: "Speed Shortcut",
+    when: "Op count questions.",
+    steps: ["LU factor: O(n³).",
+            "Each forward/back sub: O(n²).",
+            "Total for k solves: O(n³ + k·n²)."],
+    speed: "Direct.", example: "Universal.",
+    danger: "Don't multiply n³ by k.", freq: "Frequent" },
+];
+
+const C81_MISTAKES = [
+  { name: "Assume Invertible ⇒ LU Always Works", wrong: [
+      "Problem: A invertible. Does LU exist?",
+      "Solution: Yes.",
+    ], errorLine: 0,
+    errorDescription: "Need leading principal minors ≠ 0, not just det ≠ 0.",
+    rootCause: "Over-generalization.",
+    correct: "PLU may be needed.",
+    prevention: "Check minors.",
+    gateCost: "Major conceptual.", frequency: "Common" },
+];
+
+const C81_PYQS = [];
+
+function ConceptLab81({ progress }) {
+  return <ConceptLab num={1} title="LU Decomposition — Solver Foundation"
+    why={<>LU = Gaussian elimination as a factorization. Factor once O(n³); reuse for k solves at O(n²) each. Save n-fold vs naive.</>}
+    patterns={C81_PATTERNS} problems={C81_PROBLEMS} techniques={C81_TECHNIQUES}
+    mistakes={C81_MISTAKES} pyqs={C81_PYQS} progress={progress} />;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   CONCEPT 8.2 — THE MATRIX TYPES (Eigenvalue Signatures)
+   Idempotent, Nilpotent, Involutory, Orthogonal, Symmetric, PD,
+   Skew-Symmetric — each tested by GATE
+   ════════════════════════════════════════════════════════════════ */
+const C82_PATTERNS = [
+  { name: "Idempotent (A² = A)", surface: "Asked properties of idempotent matrix.",
+    testing: "Eigvals 0 or 1; rank = trace.",
+    signals: ["\"A² = A\"", "\"idempotent\""],
+    firstMove: "Eigvals in {0, 1}; rank = sum of eigvals = trace.",
+    timeBudget: 25, frequency: "Frequent" },
+  { name: "Nilpotent (Aᵏ = 0)", surface: "Asked properties of nilpotent.",
+    testing: "All eigvals 0.",
+    signals: ["\"Aᵏ = 0\"", "\"nilpotent\""],
+    firstMove: "All λ = 0. Rank can be > 0 (e.g., shift matrix).",
+    timeBudget: 25, frequency: "Frequent" },
+  { name: "Involutory (A² = I)", surface: "Asked properties of involutory.",
+    testing: "Eigvals ±1.",
+    signals: ["\"A² = I\"", "\"involutory\""],
+    firstMove: "λ = ±1.",
+    timeBudget: 20, frequency: "Occasional" },
+  { name: "Orthogonal (AᵀA = I)", surface: "Asked properties of orthogonal.",
+    testing: "det ±1, |λ| = 1, columns orthonormal.",
+    signals: ["\"orthogonal\"", "\"AᵀA = I\""],
+    firstMove: "det = ±1. |λ| = 1.",
+    timeBudget: 25, frequency: "Frequent" },
+  { name: "Symmetric (A = Aᵀ)", surface: "Asked properties.",
+    testing: "Real eigvals, orthogonal eigvecs (distinct), diagonalizable.",
+    signals: ["\"symmetric\""],
+    firstMove: "Spectral theorem.",
+    timeBudget: 20, frequency: "Very Frequent" },
+  { name: "Positive Definite (xᵀAx > 0)", surface: "Asked properties of PD.",
+    testing: "All λ > 0 (symmetric A).",
+    signals: ["\"positive definite\""],
+    firstMove: "Symmetric + all λ > 0.",
+    timeBudget: 25, frequency: "Frequent" },
+  { name: "Skew-Symmetric (A = -Aᵀ)", surface: "Asked properties.",
+    testing: "Diagonal = 0. Eigvals: 0 or pure imaginary. For real n odd: det = 0.",
+    signals: ["\"skew-symmetric\""],
+    firstMove: "Diag 0; eigvals 0 or imaginary.",
+    timeBudget: 25, frequency: "Occasional" },
+];
+
+const C82_PROBLEMS = [
+  { id: "c82-e1", difficulty: "easy", kind: "mcq", marks: 1, timeTarget: 25,
+    tags: ["Idempotent"], skipSignal: { type: "attempt", text: "Attempt" },
+    statement: <span>Idempotent matrix (A² = A) has eigenvalues in:</span>,
+    options: [ "{0, 1}", "{-1, 1}", "{0}", "All reals" ],
+    answer: "A",
+    hints: [
+      { label: "Conceptual redirect", text: "λ² = λ → λ(λ-1) = 0." },
+      { label: "Key step", text: "(A)." },
+      { label: "Near-complete", text: "0 or 1." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Idempotent eigvals." },
+        { label: "KEY STEP", body: "A² = A → λ²v = λv → λ² = λ → λ = 0 or 1." },
+        { label: "COMPUTATION", body: "(A)." },
+        { label: "VERIFICATION", body: "Universal." },
+      ],
+      gateCheck: "λ²=λ.", speed: "Direct.", whatMadeHard: "Nothing.",
+      generalization: "Universal.", linkedConcept: "C7.1.",
+      negAdvisory: "Attempt: theorem. (A) wins.",
+    } },
+  { id: "c82-e2", difficulty: "easy", kind: "mcq", marks: 1, timeTarget: 25,
+    tags: ["Nilpotent"], skipSignal: { type: "attempt", text: "Attempt" },
+    statement: <span>Nilpotent matrix (Aᵏ = 0 for some k) has eigenvalues:</span>,
+    options: [ "All 0.", "All 1.", "±1.", "Arbitrary." ],
+    answer: "A",
+    hints: [
+      { label: "Conceptual redirect", text: "λᵏ = 0 → λ = 0." },
+      { label: "Key step", text: "(A)." },
+      { label: "Near-complete", text: "All 0." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Nilpotent eigvals." },
+        { label: "KEY STEP", body: "Aᵏ = 0 → λᵏ = 0 → λ = 0." },
+        { label: "COMPUTATION", body: "(A)." },
+        { label: "VERIFICATION", body: "Trace = 0 too." },
+      ],
+      gateCheck: "Universal.", speed: "Direct.", whatMadeHard: "Nothing.",
+      generalization: "Universal.", linkedConcept: "C7.1.",
+      negAdvisory: "Attempt: theorem. (A) wins.",
+    } },
+  { id: "c82-m1", difficulty: "medium", kind: "nat", marks: 2, timeTarget: 35,
+    tags: ["Idempotent Rank"],
+    statement: <span>A 4×4 idempotent matrix with trace 3 has rank ___.</span>,
+    answer: 3, tolerance: 0,
+    hints: [
+      { label: "Conceptual redirect", text: "Idempotent: rank = trace." },
+      { label: "Key step", text: "3." },
+      { label: "Near-complete", text: "3." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Idempotent rank-trace identity." },
+        { label: "KEY STEP", body: "Eigvals 0 or 1. trace = sum = # 1's = rank." },
+        { label: "COMPUTATION", body: "3." },
+        { label: "VERIFICATION", body: "Universal." },
+      ],
+      gateCheck: "rank = trace for idempotent.", speed: "5s.", whatMadeHard: "Nothing.",
+      generalization: "Universal.", linkedConcept: "C7.1.",
+    } },
+  { id: "c82-m2", difficulty: "medium", kind: "mcq", marks: 2, timeTarget: 60,
+    tags: ["Nilpotent Non-Zero"], skipSignal: { type: "attempt", text: "Attempt" },
+    statement: <span>Is there a non-zero nilpotent 2×2 matrix?</span>,
+    options: [
+      "Yes; e.g., [[0, 1], [0, 0]] has A² = 0.",
+      "No, nilpotent must be zero.",
+      "Only diagonal matrices.",
+      "Only symmetric matrices.",
+    ],
+    answer: "A",
+    hints: [
+      { label: "Conceptual redirect", text: "Shift matrix is nilpotent." },
+      { label: "Key step", text: "(A)." },
+      { label: "Near-complete", text: "Yes; shift example." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Concrete non-zero nilpotent." },
+        { label: "KEY STEP", body: "[[0,1],[0,0]]² = [[0,0],[0,0]] = 0. Non-zero, nilpotent." },
+        { label: "COMPUTATION", body: "(A)." },
+        { label: "VERIFICATION", body: "All eigvals 0 (triangular diag = 0)." },
+      ],
+      gateCheck: "Shift matrix.", speed: "Direct.", whatMadeHard: "Nothing.",
+      generalization: "Universal.", linkedConcept: "C8.2.",
+      negAdvisory: "Attempt: example. (A) wins.",
+    } },
+  { id: "c82-m3", difficulty: "medium", kind: "mcq", marks: 2, timeTarget: 50,
+    tags: ["Orthogonal Det"], skipSignal: { type: "attempt", text: "Attempt" },
+    statement: <span>The det of an orthogonal matrix is:</span>,
+    options: [ "±1.", "Always 1.", "Always 0.", "Arbitrary." ],
+    answer: "A",
+    hints: [
+      { label: "Conceptual redirect", text: "det²(A) = det(AᵀA) = det(I) = 1." },
+      { label: "Key step", text: "(A)." },
+      { label: "Near-complete", text: "±1." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Orthogonal det." },
+        { label: "KEY STEP", body: "AᵀA = I → det(A)² = 1 → det = ±1." },
+        { label: "COMPUTATION", body: "(A)." },
+        { label: "VERIFICATION", body: "Universal." },
+      ],
+      gateCheck: "±1.", speed: "Direct.", whatMadeHard: "Nothing.",
+      generalization: "Universal.", linkedConcept: "C8.2.",
+      negAdvisory: "Attempt: derivation. (A) wins.",
+    } },
+  { id: "c82-h1", difficulty: "hard", kind: "mcq", marks: 2, timeTarget: 70,
+    tags: ["Skew-Symmetric Diag"], skipSignal: { type: "attempt", text: "Attempt" },
+    statement: <span>Skew-symmetric matrix A satisfies A = -Aᵀ. The diagonal entries are:</span>,
+    options: [ "All 0.", "All 1.", "Arbitrary.", "Real." ],
+    answer: "A",
+    hints: [
+      { label: "Conceptual redirect", text: "Aᵢᵢ = -Aᵢᵢ → 2Aᵢᵢ = 0 → Aᵢᵢ = 0." },
+      { label: "Key step", text: "(A)." },
+      { label: "Near-complete", text: "All 0." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Skew-symmetric structure." },
+        { label: "KEY STEP", body: "Aᵢᵢ = -Aᵢᵢ → Aᵢᵢ = 0 for all i." },
+        { label: "COMPUTATION", body: "(A)." },
+        { label: "VERIFICATION", body: "Universal." },
+      ],
+      gateCheck: "Diag = 0 for skew.", speed: "Direct.", whatMadeHard: "Nothing.",
+      generalization: "Universal.", linkedConcept: "C8.2.",
+      negAdvisory: "Attempt: theorem. (A) wins.",
+    } },
+  { id: "c82-h2", difficulty: "hard", kind: "mcq", marks: 2, timeTarget: 80,
+    tags: ["PD Equivalent"], skipSignal: { type: "attempt", text: "Attempt" },
+    statement: <span>For symmetric A, A is PD iff:</span>,
+    options: [
+      "All leading principal minors > 0 (Sylvester).",
+      "All eigvals > 0.",
+      "Both (A) and (B).",
+      "Only (A)."
+    ],
+    answer: "C",
+    hints: [
+      { label: "Conceptual redirect", text: "Two equivalent characterizations." },
+      { label: "Key step", text: "(C)." },
+      { label: "Near-complete", text: "Both." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "PD characterizations." },
+        { label: "KEY STEP", body: "Equivalent: all leading principal minors > 0 (Sylvester) AND all eigvals > 0." },
+        { label: "COMPUTATION", body: "(C)." },
+        { label: "VERIFICATION", body: "Universal." },
+      ],
+      gateCheck: "Two equivalent.", speed: "Direct.", whatMadeHard: "Nothing.",
+      generalization: "Universal.", linkedConcept: "C6.6.",
+      negAdvisory: "Attempt: theorem. (C) wins.",
+    } },
+  { id: "c82-h3", difficulty: "hard", kind: "mcq", marks: 2, timeTarget: 80,
+    tags: ["AᵀA"], skipSignal: { type: "attempt", text: "Attempt" },
+    statement: <span>For any real matrix A, AᵀA is:</span>,
+    options: [
+      "Symmetric and PSD.",
+      "Always invertible.",
+      "Diagonal.",
+      "Skew-symmetric.",
+    ],
+    answer: "A",
+    hints: [
+      { label: "Conceptual redirect", text: "Symmetric: (AᵀA)ᵀ = AᵀA. PSD: xᵀAᵀAx = ‖Ax‖² ≥ 0." },
+      { label: "Key step", text: "(A)." },
+      { label: "Near-complete", text: "Symmetric PSD." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "AᵀA template." },
+        { label: "KEY STEP", body: "Universal: symmetric + PSD." },
+        { label: "COMPUTATION", body: "(A)." },
+        { label: "VERIFICATION", body: "Invertible iff A has indep cols." },
+      ],
+      gateCheck: "Universal.", speed: "Direct.", whatMadeHard: "Distractor (B).",
+      generalization: "Universal.", linkedConcept: "C6.6.",
+      negAdvisory: "Attempt: theorem. (A) wins.",
+    } },
+  { id: "c82-k1", difficulty: "killer", kind: "mcq", marks: 2, timeTarget: 130,
+    tags: ["KILLER", "Type Combo"],
+    statement: <span><B>[KILLER]</B> A 3×3 idempotent matrix has rank 2. The trace and eigenvalues are:</span>,
+    options: [
+      "trace = 2, eigvals 0, 1, 1.",
+      "trace = 0, eigvals 0, 0, 0.",
+      "trace = 1, eigvals 0, 0, 1.",
+      "Cannot determine."
+    ],
+    answer: "A",
+    hints: [
+      { label: "Conceptual redirect", text: "Idempotent eigvals 0 or 1. rank = trace = # 1's = 2." },
+      { label: "Key step", text: "(A)." },
+      { label: "Near-complete", text: "Two 1's, one 0." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Combined idempotent." },
+        { label: "KEY STEP", body: "Idempotent: eigvals ∈ {0, 1}. rank 2 = # non-zero = # of 1's = 2. Trace = sum = 2. Eigvals: 1, 1, 0." },
+        { label: "COMPUTATION", body: "(A)." },
+        { label: "VERIFICATION", body: "Universal." },
+      ],
+      gateCheck: "rank = trace = #1's.", speed: "30s.", whatMadeHard: "Nothing.",
+      generalization: "Universal.", linkedConcept: "C8.2.",
+      negAdvisory: "Attempt: theorem. (A) wins.",
+    } },
+];
+
+const C82_TECHNIQUES = [
+  { name: "Idempotent Quick Facts", type: "Speed Shortcut",
+    when: "A² = A given.",
+    steps: ["Eigvals ∈ {0, 1}.",
+            "rank = trace = # of 1's.",
+            "I - A is also idempotent."],
+    speed: "Direct.", example: "Universal.",
+    danger: "Don't apply to general matrices.", freq: "Frequent" },
+  { name: "Nilpotent Quick Facts", type: "Speed Shortcut",
+    when: "Aᵏ = 0 given.",
+    steps: ["All eigvals 0.",
+            "trace = det = 0.",
+            "Not necessarily zero matrix."],
+    speed: "Direct.", example: "Shift matrix [[0,1],[0,0]].",
+    danger: "Can have non-zero rank.", freq: "Frequent" },
+  { name: "Orthogonal Quick Facts", type: "Speed Shortcut",
+    when: "AᵀA = I given.",
+    steps: ["det = ±1.",
+            "|λ| = 1.",
+            "Columns orthonormal.",
+            "Preserves lengths and angles."],
+    speed: "Direct.", example: "Rotation matrices.",
+    danger: "λ may be complex.", freq: "Frequent" },
+  { name: "Symmetric Spectral Theorem", type: "Structural Insight",
+    when: "A = Aᵀ given.",
+    steps: ["Real eigvals.",
+            "Orthogonal eigvecs (distinct).",
+            "Always diagonalizable.",
+            "A = QΛQᵀ with Q orthogonal."],
+    speed: "Direct.", example: "Universal.",
+    danger: "Don't apply to non-symmetric.", freq: "Very Frequent" },
+  { name: "PD Test (Sylvester or Eigvals)", type: "Verification Method",
+    when: "Check if symmetric A is PD.",
+    steps: ["Sylvester: all leading principal minors > 0.",
+            "Or: all eigvals > 0."],
+    speed: "60s.", example: "Universal.",
+    danger: "Need symmetric first.", freq: "Frequent" },
+];
+
+const C82_MISTAKES = [
+  { name: "Nilpotent = Zero", wrong: [
+      "Problem: nilpotent 2x2 example.",
+      "Solution: Zero matrix.",
+    ], errorLine: 0,
+    errorDescription: "Non-zero examples exist: [[0,1],[0,0]].",
+    rootCause: "Confusion.",
+    correct: "Shift matrix.",
+    prevention: "Memorize example.",
+    gateCost: "Conceptual.", frequency: "Common" },
+  { name: "Idempotent ⇒ Identity", wrong: [
+      "Problem: A² = A non-trivial?",
+      "Solution: Only A = I.",
+    ], errorLine: 0,
+    errorDescription: "Projection matrices are non-trivial idempotents.",
+    rootCause: "Over-restriction.",
+    correct: "Many examples: projections, P = P².",
+    prevention: "Think projections.",
+    gateCost: "Conceptual.", frequency: "Common" },
+];
+
+const C82_PYQS = [];
+
+function ConceptLab82({ progress }) {
+  return <ConceptLab num={2} title="Matrix Types — Eigenvalue Signatures (Idempotent / Nilpotent / Orthogonal / Symmetric / PD / Skew)"
+    why={<>Each type has a signature in eigvals + det + trace. Memorize the table. GATE tests these every year.</>}
+    patterns={C82_PATTERNS} problems={C82_PROBLEMS} techniques={C82_TECHNIQUES}
+    mistakes={C82_MISTAKES} pyqs={C82_PYQS} progress={progress} />;
+}
+
+
+/* ════════════════════════════════════════════════════════════════
+   APP ROOT
+   ════════════════════════════════════════════════════════════════ */
+const CONCEPTS_MAP = [
+  { num: 1, shortName: "LU",    title: "LU Decomposition",            total: C81_PROBLEMS.length, Comp: ConceptLab81 },
+  { num: 2, shortName: "Types", title: "Matrix Types — Eigval Signatures", total: C82_PROBLEMS.length, Comp: ConceptLab82 },
+];
+
+function App() {
+  useEffect(() => { hideLoading(); }, []);
+  const p1 = useConceptProgress(1, C81_PROBLEMS.length);
+  const p2 = useConceptProgress(2, C82_PROBLEMS.length);
+  const progressMap = { 1: p1, 2: p2 };
+  const [active, setActive] = useState(1);
+  const totalSolved = [p1, p2].reduce((s, p) => s + p.correct.length, 0);
+  const totalProblems = [C81_PROBLEMS, C82_PROBLEMS].reduce((s, ps) => s + ps.length, 0);
+
+  return (
+    <div className="min-h-screen">
+      <TopNav currentModule={8}/>
+      <section className="relative overflow-hidden">
+        <div className="grid-bg absolute inset-0" style={{opacity: 0.45}}/>
+        <div className="absolute inset-0" style={{
+          background: "radial-gradient(800px 400px at 20% 0%, var(--accent-soft), transparent 60%), radial-gradient(600px 400px at 80% 20%, var(--accent-2-soft), transparent 60%)",
+        }}/>
+        <div className="relative max-w-5xl mx-auto px-5 py-12 md:py-16">
+          <div className="inline-flex items-center gap-2 text-xs px-3 py-1.5 rounded-full mb-5"
+            style={{background: "var(--accent-soft)", border: "1px solid var(--accent-border)", color: "var(--accent)"}}>
+            <span className="pulse-dot"/> MODULE 8 · PROBLEM LAB
+          </div>
+          <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight mb-4 leading-[1.04]" style={{color: "var(--text)"}}>
+            Decompositions & Matrix Types · Problem Lab
+            <span className="block gradient-text mt-1">LU + 7 Matrix Type Signatures</span>
+          </h1>
+          <p className="text-lg max-w-3xl leading-relaxed mb-6" style={{color: "var(--text-dim)"}}>
+            2 consolidated concept labs covering LU decomposition (operation count, existence, PLU) and 7 matrix types (idempotent, nilpotent, involutory, orthogonal, symmetric, positive definite, skew-symmetric) with their eigenvalue signatures.
+          </p>
+          <div className="flex flex-wrap gap-3 text-sm">
+            <div className="px-3 py-1.5 rounded-full flex items-center gap-2" style={{background: "var(--bg-elev-1)", border: "1px solid var(--border)"}}>
+              <span style={{color: "var(--accent-3)"}}>● </span><span style={{color: "var(--text)"}}>{totalSolved} / {totalProblems} solved</span>
+            </div>
+            <div className="px-3 py-1.5 rounded-full flex items-center gap-2" style={{background: "var(--bg-elev-1)", border: "1px solid var(--border)"}}>
+              <span style={{color: "var(--accent-2)"}}>● </span><span style={{color: "var(--text)"}}>2 concept labs · 18 problems · timed drill</span>
+            </div>
+            <div className="px-3 py-1.5 rounded-full flex items-center gap-2" style={{background: "var(--bg-elev-1)", border: "1px solid var(--border)"}}>
+              <span style={{color: "var(--warn)"}}>● </span><span style={{color: "var(--text)"}}>LU complexity · Idempotent rank=trace · Sylvester PD test</span>
+            </div>
+          </div>
+        </div>
+      </section>
+      <div className="max-w-5xl mx-auto px-5">
+        <ConceptNavigator concepts={CONCEPTS_MAP} active={active} setActive={setActive} progressMap={progressMap} />
+      </div>
+      <ConceptLab81 progress={p1} />
+      <ConceptLab82 progress={p2} />
+      <ModuleFooter
+        moduleNum={8}
+        nextModuleTitle="Cheat Sheet"
+        nextModuleFile="module-09-cheatsheet.html"
+        checklist={[
+          "I know LU factor is O(n³) ONCE, then O(n²) per solve.",
+          "LU exists iff all leading principal minors are non-zero; else use PLU.",
+          "Idempotent A: eigvals ∈ {0, 1}, rank = trace.",
+          "Nilpotent A: all eigvals 0; non-zero examples exist.",
+          "Involutory A² = I: eigvals ±1.",
+          "Orthogonal AᵀA = I: det ±1, |λ| = 1.",
+          "Symmetric: real eigvals, orthogonal eigvecs, always diagonalizable.",
+          "Positive definite: symmetric + all λ > 0 (or Sylvester).",
+          "Skew-symmetric: diagonal 0, eigvals 0 or pure imaginary.",
+          "I've cleared all 18 problems.",
+        ]}
+      />
+    </div>
+  );
+}
+
+mountApp(App);
+</script>
+
+</body>
+</html>

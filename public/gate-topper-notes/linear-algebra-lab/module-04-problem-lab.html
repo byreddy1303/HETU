@@ -1,0 +1,3930 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 4 · Problem Lab — LA Mastery Hub</title>
+
+<script>
+  (function () {
+    try {
+      var t = localStorage.getItem("la-hub::theme") || "dark";
+      document.documentElement.classList.add(t === "light" ? "light" : "dark");
+    } catch (e) {
+      document.documentElement.classList.add("dark");
+    }
+  })();
+</script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="theme.css">
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = { darkMode: 'class' };
+</script>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+
+<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<!-- Babel standalone is NOT loaded for this module; we use the precompiled bundle below -->
+
+
+<style>
+  /* Problem Lab specific styles */
+  .pl-difficulty-easy   { background: rgba(34, 197, 94, 0.12);  color: #22c55e; border: 1px solid rgba(34, 197, 94, 0.35); }
+  .pl-difficulty-medium { background: rgba(234, 179, 8, 0.12);  color: #eab308; border: 1px solid rgba(234, 179, 8, 0.35); }
+  .pl-difficulty-hard   { background: rgba(249, 115, 22, 0.12); color: #f97316; border: 1px solid rgba(249, 115, 22, 0.35); }
+  .pl-difficulty-killer { background: rgba(239, 68, 68, 0.12);  color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.35); }
+  .pl-type-mcq          { background: rgba(59, 130, 246, 0.12); color: #3b82f6; border: 1px solid rgba(59, 130, 246, 0.35); }
+  .pl-type-nat          { background: rgba(168, 85, 247, 0.12); color: #a855f7; border: 1px solid rgba(168, 85, 247, 0.35); }
+  .pl-type-pyq          { background: rgba(245, 158, 11, 0.12); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.35); font-weight: 700; }
+
+  .pl-correct  { animation: pl-flash-green 0.6s ease-out; }
+  .pl-wrong    { animation: pl-flash-red   0.6s ease-out; }
+
+  @keyframes pl-flash-green {
+    0%   { background: rgba(34, 197, 94, 0.3);  }
+    100% { background: transparent; }
+  }
+  @keyframes pl-flash-red {
+    0%   { background: rgba(239, 68, 68, 0.3); }
+    100% { background: transparent; }
+  }
+
+  .pl-neg-banner {
+    background: rgba(69, 26, 3, 0.6);
+    color: #fbbf24;
+    border: 1px solid rgba(251, 191, 36, 0.3);
+    font-size: 12px;
+    padding: 6px 10px;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .pl-skip-attempt {
+    background: rgba(59, 130, 246, 0.10);
+    border: 1px solid rgba(59, 130, 246, 0.30);
+    color: #60a5fa;
+    font-size: 12px;
+    padding: 4px 10px;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .pl-skip-skip {
+    background: rgba(244, 114, 182, 0.10);
+    border: 1px solid rgba(244, 114, 182, 0.30);
+    color: #f472b6;
+    font-size: 12px;
+    padding: 4px 10px;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .pl-tech-card {
+    border-left: 3px solid #3b82f6;
+    background: var(--bg-elev-1);
+    border-radius: 10px;
+    padding: 18px;
+  }
+
+  .pl-danger-zone {
+    border-left: 3px solid #ef4444;
+    background: rgba(239, 68, 68, 0.06);
+    border-radius: 6px;
+    padding: 12px;
+    margin-top: 14px;
+  }
+
+  .pl-mistake-card {
+    border-left: 3px solid #ef4444;
+    background: var(--bg-elev-1);
+    border-radius: 10px;
+    padding: 18px;
+  }
+
+  .pl-wrong-solution {
+    background: var(--bg-elev-3);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 12px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--text);
+    white-space: pre-wrap;
+  }
+
+  .pl-wrong-line {
+    padding: 4px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.15s ease;
+  }
+  .pl-wrong-line:hover {
+    background: rgba(251, 113, 133, 0.08);
+  }
+  .pl-wrong-line.error-found {
+    background: rgba(239, 68, 68, 0.25);
+    border-left: 3px solid #ef4444;
+    padding-left: 8px;
+  }
+
+  .pl-tab-pill {
+    padding: 8px 14px;
+    border-radius: 9999px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.18s ease;
+    border: 1px solid var(--border);
+    background: var(--bg-elev-1);
+    color: var(--text-dim);
+  }
+  .pl-tab-pill.active {
+    background: var(--accent-soft);
+    border-color: var(--accent-border);
+    color: var(--accent);
+  }
+  .pl-tab-pill:hover:not(.active) {
+    color: var(--text);
+    border-color: var(--border-strong);
+  }
+
+  .pl-option-btn {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--bg-elev-1);
+    text-align: left;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    width: 100%;
+    color: var(--text);
+    font-size: 14.5px;
+    font-family: 'Inter', 'Cambria Math', 'STIX Two Math', 'Symbola', system-ui, sans-serif;
+  }
+  .pl-option-btn .katex {
+    font-size: 1.08em !important;
+  }
+  .pl-option-btn:hover:not(:disabled) {
+    border-color: var(--accent-border);
+    background: var(--accent-soft);
+  }
+  .pl-option-btn:disabled { cursor: default; opacity: 0.85; }
+  .pl-option-btn.selected {
+    border-color: var(--accent);
+    background: var(--accent-soft);
+  }
+  .pl-option-btn.correct {
+    border-color: rgba(34, 197, 94, 0.6);
+    background: rgba(34, 197, 94, 0.12);
+    color: #22c55e;
+  }
+  .pl-option-btn.wrong-choice {
+    border-color: rgba(239, 68, 68, 0.6);
+    background: rgba(239, 68, 68, 0.10);
+    color: #fb7185;
+  }
+
+  .pl-option-letter {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: var(--bg-elev-3);
+    border: 1px solid var(--border);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-dim);
+    flex-shrink: 0;
+  }
+
+  .pl-nat-input {
+    background: var(--bg-elev-2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 16px;
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 16px;
+    width: 100%;
+    max-width: 280px;
+  }
+  .pl-nat-input:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+  }
+
+  .pl-submit-btn {
+    padding: 9px 22px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    transition: opacity 0.15s ease;
+    background: var(--grad-hero);
+    color: white;
+    border: none;
+  }
+  .pl-submit-btn:hover:not(:disabled) { opacity: 0.92; }
+  .pl-submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .pl-progress-bar {
+    height: 6px;
+    background: var(--bg-elev-3);
+    border-radius: 9999px;
+    overflow: hidden;
+  }
+  .pl-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #22c55e, #34d399);
+    transition: width 0.3s ease;
+  }
+  .pl-progress-fill.warning { background: linear-gradient(90deg, #eab308, #f59e0b); }
+  .pl-progress-fill.danger  { background: linear-gradient(90deg, #ef4444, #fb7185); }
+
+  .pl-hint-box {
+    background: var(--accent-2-soft);
+    border: 1px solid var(--accent-2-border);
+    border-radius: 8px;
+    padding: 14px;
+    color: var(--text);
+  }
+
+  .pl-layer-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+  }
+  .pl-layer-num {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: var(--grad-hero);
+    color: white;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 14px;
+  }
+  .pl-layer-title {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: -0.01em;
+  }
+
+  /* ─────────────────────────────────────────────────────────────
+     MATH VISIBILITY — KaTeX + Unicode math characters
+     ───────────────────────────────────────────────────────────── */
+  /* KaTeX inline math: bumped size, brighter color, slight glow */
+  .katex {
+    font-size: 1.12em !important;
+    color: #fef3c7 !important;       /* warm cream — high contrast on dark */
+    text-shadow: 0 0 1px rgba(254, 243, 199, 0.25);
+  }
+  html.light .katex {
+    color: #4338ca !important;       /* indigo on light theme */
+    text-shadow: none;
+  }
+  .katex .mord, .katex .mbin, .katex .mrel, .katex .mopen, .katex .mclose,
+  .katex .mpunct, .katex .minner, .katex .mop {
+    color: inherit !important;
+  }
+  /* Display-mode (block) math — even bigger */
+  .katex-display > .katex {
+    font-size: 1.2em !important;
+  }
+  /* KaTeX matrices and arrays — ensure brackets visible */
+  .katex .delimsizing,
+  .katex .delim-size1,
+  .katex .delim-size2,
+  .katex .delim-size3,
+  .katex .delim-size4 {
+    color: inherit !important;
+  }
+
+  /* Unicode math characters inside problem/solution prose
+     — vectors, subscripts, Greek letters, relations.
+     Forces font that supports them on macOS/Windows/Linux. */
+  .pl-prose {
+    font-feature-settings: "ss01" 1, "cv11" 1;
+    font-variant-numeric: tabular-nums;
+  }
+  .pl-prose,
+  .pl-prose * {
+    /* fallback stack that supports ℝ ℂ ℕ ℤ ℚ ‖ ⇒ ∑ ∏ ∈ ∉ ⊆ ⊇ ∪ ∩ etc. */
+    font-family: 'Inter', 'SF Pro Text', 'Cambria Math', 'STIX Two Math',
+                 'Latin Modern Math', 'Symbola', 'Arial Unicode MS',
+                 system-ui, -apple-system, sans-serif;
+  }
+  /* Highlight inline math-like tokens — anything in a span we mark */
+  .pl-math {
+    font-family: 'JetBrains Mono', 'SF Mono', 'Cambria Math', monospace;
+    color: #fef3c7;
+    background: rgba(254, 243, 199, 0.06);
+    padding: 1px 5px;
+    border-radius: 4px;
+    font-weight: 500;
+    font-size: 0.95em;
+    border: 1px solid rgba(254, 243, 199, 0.15);
+  }
+  html.light .pl-math {
+    color: #4338ca;
+    background: rgba(67, 56, 202, 0.08);
+    border: 1px solid rgba(67, 56, 202, 0.22);
+  }
+
+  /* Pre-formatted matrix / step displays inside solutions */
+  .pl-prose .matrix-block,
+  .pl-prose pre {
+    font-family: 'JetBrains Mono', monospace;
+    background: var(--bg-elev-3);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 10px 14px;
+    color: #fef3c7;
+    font-size: 13.5px;
+    white-space: pre;
+    overflow-x: auto;
+    line-height: 1.7;
+    margin: 8px 0;
+  }
+  html.light .pl-prose .matrix-block,
+  html.light .pl-prose pre {
+    color: #4338ca;
+  }
+
+  /* Bigger, brighter sub/superscripts in solution prose */
+  .pl-prose sub, .pl-prose sup {
+    font-size: 0.78em;
+    line-height: 1;
+    color: #fbbf24;
+  }
+  html.light .pl-prose sub, html.light .pl-prose sup {
+    color: #b45309;
+  }
+
+  /* Bring solution prose up to a readable size */
+  .pl-prose {
+    font-size: 14.5px;
+    line-height: 1.75;
+  }
+
+  /* When math appears inside option buttons / hints */
+  .pl-option-btn .katex,
+  .pl-hint-box .katex {
+    font-size: 1.05em !important;
+  }
+</style>
+</head>
+<body>
+
+<div id="loading">
+  <div style="text-align:center">
+    <div class="spinner"></div>
+    <div style="font-size:13px; opacity:0.8">Loading Module 4 — Problem Lab</div>
+  </div>
+</div>
+
+<div id="root"></div>
+
+<!-- Precompiled bundle: boilerplate.js + this module's content, with JSX already transpiled.
+     Source of truth remains the inline script at the bottom of this file (kept for editing).
+     If you edit this file, rerun the compile step to regenerate module-04-problem-lab.compiled.js. -->
+<script src="module-04-problem-lab.compiled.js"></script>
+
+<script type="text/template" id="m4-source-of-truth" data-no-execute>
+const { useState, useEffect, useMemo, useRef, useCallback } = React;
+
+/* ════════════════════════════════════════════════════════════════
+   PROBLEM LAB — SHARED COMPONENTS & STATE
+   ════════════════════════════════════════════════════════════════ */
+
+const MODULE_NUM = 4;
+
+/* localStorage helpers ─────────────────────────────────────────── */
+const lsGet = (k, fallback) => {
+  try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : fallback; }
+  catch { return fallback; }
+};
+const lsSet = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} };
+
+function useConceptProgress(conceptNum, totalProblems) {
+  const aKey = "gate_la_m" + MODULE_NUM + "_c" + conceptNum + "_attempted";
+  const cKey = "gate_la_m" + MODULE_NUM + "_c" + conceptNum + "_correct";
+  const hKey = "gate_la_m" + MODULE_NUM + "_c" + conceptNum + "_hints";
+
+  const [attempted, setAttempted] = useState(() => lsGet(aKey, []));
+  const [correct, setCorrect] = useState(() => lsGet(cKey, []));
+  const [hints, setHints] = useState(() => lsGet(hKey, {}));
+
+  const markAttempt = (pid, didCorrect) => {
+    setAttempted(prev => {
+      if (prev.includes(pid)) return prev;
+      const next = [...prev, pid]; lsSet(aKey, next); return next;
+    });
+    if (didCorrect) {
+      setCorrect(prev => {
+        if (prev.includes(pid)) return prev;
+        const next = [...prev, pid]; lsSet(cKey, next); return next;
+      });
+    }
+  };
+  const useHint = (pid) => {
+    setHints(prev => {
+      const next = { ...prev, [pid]: (prev[pid] || 0) + 1 };
+      lsSet(hKey, next);
+      return next;
+    });
+  };
+  return { attempted, correct, hints, markAttempt, useHint, totalProblems };
+}
+
+/* ────────────────────────────────────────────────────────────────
+   BADGES (Difficulty, Type, Time, Tags)
+   ──────────────────────────────────────────────────────────────── */
+function DiffBadge({ level }) {
+  const labels = { easy: "EASY", medium: "MEDIUM", hard: "HARD", killer: "KILLER" };
+  return (
+    <span className={"text-[10.5px] tracking-[0.15em] font-bold px-2 py-1 rounded-md pl-difficulty-" + level}>
+      {labels[level]}
+    </span>
+  );
+}
+function TypeBadge({ type }) {
+  if (type === "pyq") return <span className="text-[10.5px] tracking-[0.15em] font-bold px-2 py-1 rounded-md pl-type-pyq">★ GATE PYQ</span>;
+  return (
+    <span className={"text-[10.5px] tracking-[0.15em] font-bold px-2 py-1 rounded-md pl-type-" + type}>
+      {type === "mcq" ? "MCQ" : "NAT"}
+    </span>
+  );
+}
+function MetaPill({ children, mono = false }) {
+  return (
+    <span className={"text-[11px] px-2 py-1 rounded-md " + (mono ? "font-mono " : "")}
+      style={{background: "var(--bg-elev-3)", color: "var(--text-dim)", border: "1px solid var(--border)"}}>
+      {children}
+    </span>
+  );
+}
+function ConceptTag({ children }) {
+  return (
+    <span className="text-[11px] px-2 py-1 rounded-md font-mono"
+      style={{background: "var(--accent-soft)", color: "var(--accent)", border: "1px solid var(--accent-border)"}}>
+      {children}
+    </span>
+  );
+}
+
+/* ────────────────────────────────────────────────────────────────
+   LAYER HEADER
+   ──────────────────────────────────────────────────────────────── */
+function LayerHeader({ num, title, subtitle }) {
+  return (
+    <div className="mt-10 mb-5">
+      <div className="pl-layer-header">
+        <div className="pl-layer-num">L{num}</div>
+        <div className="pl-layer-title">{title}</div>
+      </div>
+      {subtitle && <div className="text-[14px] ml-12" style={{color: "var(--text-dim)"}}>{subtitle}</div>}
+    </div>
+  );
+}
+
+/* ────────────────────────────────────────────────────────────────
+   PATTERN CARD (Layer 1)
+   ──────────────────────────────────────────────────────────────── */
+function PatternCard({ idx, pattern }) {
+  return (
+    <div className="rounded-xl p-5 mb-4 pl-prose"
+      style={{background: "var(--bg-elev-1)", border: "1px solid var(--border)"}}>
+      <div className="flex flex-wrap items-baseline gap-3 mb-3">
+        <span className="text-[10.5px] tracking-[0.18em] font-bold px-2 py-1 rounded-md"
+          style={{background: "var(--accent-soft)", color: "var(--accent)", border: "1px solid var(--accent-border)"}}>
+          PATTERN {idx}
+        </span>
+        <span className="text-[17px] font-semibold" style={{color: "var(--text)"}}>{pattern.name}</span>
+        <span className="ml-auto text-[11px] px-2 py-1 rounded-md font-mono"
+          style={{background: "var(--bg-elev-3)", color: "var(--text-dim)", border: "1px solid var(--border)"}}>
+          ⏱ ~{pattern.timeBudget}s
+        </span>
+        <span className="text-[11px] px-2 py-1 rounded-md"
+          style={{background: pattern.frequency === "Very Frequent" ? "rgba(239,68,68,0.12)" :
+                                pattern.frequency === "Frequent" ? "rgba(249,115,22,0.12)" :
+                                pattern.frequency === "Occasional" ? "rgba(234,179,8,0.12)" : "rgba(148,163,184,0.12)",
+                  color: pattern.frequency === "Very Frequent" ? "#ef4444" :
+                         pattern.frequency === "Frequent" ? "#f97316" :
+                         pattern.frequency === "Occasional" ? "#eab308" : "#94a3b8",
+                  border: "1px solid currentColor"}}>
+          {pattern.frequency}
+        </span>
+      </div>
+
+      <div className="grid md:grid-cols-2 gap-3 text-[13.5px] leading-relaxed">
+        <div className="rounded-lg p-3" style={{background: "var(--bg-elev-2)", border: "1px solid var(--border)"}}>
+          <div className="text-[10px] tracking-[0.18em] font-semibold mb-1" style={{color: "var(--accent-2)"}}>SURFACE APPEARANCE</div>
+          <div style={{color: "var(--text)"}}>{pattern.surface}</div>
+        </div>
+        <div className="rounded-lg p-3" style={{background: "var(--bg-elev-2)", border: "1px solid var(--border)"}}>
+          <div className="text-[10px] tracking-[0.18em] font-semibold mb-1" style={{color: "var(--pink)"}}>WHAT IT'S ACTUALLY TESTING</div>
+          <div style={{color: "var(--text)"}}>{pattern.testing}</div>
+        </div>
+      </div>
+
+      <div className="mt-3 rounded-lg p-3" style={{background: "var(--bg-elev-2)", border: "1px solid var(--border)"}}>
+        <div className="text-[10px] tracking-[0.18em] font-semibold mb-2" style={{color: "var(--warn)"}}>SIGNAL WORDS</div>
+        <div className="flex flex-wrap gap-2">
+          {pattern.signals.map((s, i) => (
+            <code key={i} className="font-mono text-[12px] px-2 py-1 rounded"
+              style={{background: "var(--bg-elev-3)", color: "var(--warn)", border: "1px solid var(--warn-border)"}}>
+              {s}
+            </code>
+          ))}
+        </div>
+      </div>
+
+      <div className="mt-3 rounded-lg p-3" style={{background: "var(--accent-soft)", border: "1px solid var(--accent-border)"}}>
+        <div className="text-[10px] tracking-[0.18em] font-semibold mb-1" style={{color: "var(--accent)"}}>FIRST MOVE (TOP-RANKER REFLEX)</div>
+        <div className="text-[14px]" style={{color: "var(--text)"}}>{pattern.firstMove}</div>
+      </div>
+    </div>
+  );
+}
+
+/* ────────────────────────────────────────────────────────────────
+   PROBLEM CARD (Layer 2)
+   ──────────────────────────────────────────────────────────────── */
+function ProblemCard({ p, idx, progress }) {
+  const [selected, setSelected] = useState(null);
+  const [natValue, setNatValue] = useState("");
+  const [submitted, setSubmitted] = useState(false);
+  const [isCorrect, setIsCorrect] = useState(false);
+  const [attempts, setAttempts] = useState(0);
+  const [hintsShown, setHintsShown] = useState(0);
+  const [showFullSolution, setShowFullSolution] = useState(false);
+  const [flashKey, setFlashKey] = useState(0);
+
+  const isPYQ = p.type === "pyq";
+
+  const checkAnswer = () => {
+    let ok = false;
+    if (p.kind === "mcq") {
+      ok = selected === p.answer;
+    } else {
+      const userVal = parseFloat(natValue);
+      if (!isNaN(userVal)) {
+        const tol = p.tolerance != null ? p.tolerance : 0.01;
+        ok = Math.abs(userVal - p.answer) <= tol;
+      }
+    }
+    setIsCorrect(ok);
+    setSubmitted(true);
+    setAttempts(a => a + 1);
+    setFlashKey(k => k + 1);
+    progress.markAttempt(p.id, ok);
+    if (!ok && attempts + 1 >= 2) setShowFullSolution(true);
+  };
+
+  const tryAgain = () => {
+    setSubmitted(false);
+    setIsCorrect(false);
+    setSelected(null);
+    setNatValue("");
+  };
+
+  const revealHint = () => {
+    if (hintsShown < (p.hints?.length || 0)) {
+      setHintsShown(hintsShown + 1);
+      progress.useHint(p.id);
+    }
+  };
+
+  const isCompleted = progress.correct.includes(p.id);
+
+  return (
+    <div key={flashKey} className={"rounded-xl p-5 mb-5 " + (submitted ? (isCorrect ? "pl-correct" : "pl-wrong") : "")}
+      style={{background: "var(--bg-elev-1)", border: "1px solid " + (isCompleted ? "rgba(34,197,94,0.4)" : "var(--border)")}}>
+
+      <div className="flex flex-wrap items-center gap-2 mb-3">
+        <span className="text-[10.5px] tracking-[0.18em] font-bold px-2 py-1 rounded-md font-mono"
+          style={{background: "var(--bg-elev-3)", color: "var(--text-dim)", border: "1px solid var(--border)"}}>
+          Q{idx}
+        </span>
+        <DiffBadge level={p.difficulty} />
+        <TypeBadge type={isPYQ ? "pyq" : p.kind} />
+        {isPYQ && p.pyqYear && (
+          <MetaPill mono>GATE CS {p.pyqYear}</MetaPill>
+        )}
+        <MetaPill>{p.marks}-mark style</MetaPill>
+        <MetaPill mono>⏱ ~{p.timeTarget}s</MetaPill>
+        {isCompleted && (
+          <span className="text-[10.5px] tracking-[0.18em] font-bold px-2 py-1 rounded-md ml-auto"
+            style={{background: "rgba(34,197,94,0.15)", color: "#22c55e", border: "1px solid rgba(34,197,94,0.4)"}}>
+            ✓ SOLVED
+          </span>
+        )}
+      </div>
+
+      <div className="flex flex-wrap gap-2 mb-3">
+        {p.tags.map((t, i) => <ConceptTag key={i}>{t}</ConceptTag>)}
+      </div>
+
+      {p.kind === "mcq" && (
+        <div className="pl-neg-banner mb-3">
+          ⚠ Negative marking: −1/3 mark for wrong answer
+        </div>
+      )}
+      {p.skipSignal && (
+        <div className="mb-3">
+          <span className={p.skipSignal.type === "attempt" ? "pl-skip-attempt" : "pl-skip-skip"}>
+            {p.skipSignal.type === "attempt" ? "✓ " : "💡 "}{p.skipSignal.text}
+          </span>
+        </div>
+      )}
+
+      <div className="text-[15px] leading-relaxed mb-4 p-4 rounded-lg pl-prose"
+        style={{background: "var(--bg-elev-2)", color: "var(--text)", border: "1px solid var(--border)"}}>
+        {p.statement}
+      </div>
+
+      {/* ANSWER UI */}
+      {p.kind === "mcq" ? (
+        <div className="space-y-2 mb-3">
+          {p.options.map((opt, i) => {
+            const letter = String.fromCharCode(65 + i);
+            let cls = "pl-option-btn";
+            if (!submitted && selected === letter) cls += " selected";
+            if (submitted) {
+              if (letter === p.answer) cls += " correct";
+              else if (letter === selected) cls += " wrong-choice";
+            }
+            return (
+              <button key={i}
+                className={cls}
+                disabled={submitted}
+                onClick={() => setSelected(letter)}>
+                <span className="pl-option-letter">{letter}</span>
+                <span className="flex-1">{opt}</span>
+                {submitted && letter === p.answer && <span style={{color: "#22c55e"}}>✓</span>}
+                {submitted && letter === selected && letter !== p.answer && <span style={{color: "#fb7185"}}>✗</span>}
+              </button>
+            );
+          })}
+        </div>
+      ) : (
+        <div className="mb-3">
+          <label className="text-[12px] mb-1 block" style={{color: "var(--text-dim)"}}>Numerical Answer (NAT — no options)</label>
+          <input type="number" step="any" className="pl-nat-input"
+            value={natValue}
+            disabled={submitted}
+            onChange={e => setNatValue(e.target.value)}
+            placeholder="Enter your answer..." />
+        </div>
+      )}
+
+      {/* SUBMIT */}
+      {!submitted && (
+        <div className="flex items-center gap-3">
+          <button className="pl-submit-btn"
+            disabled={p.kind === "mcq" ? !selected : natValue === ""}
+            onClick={checkAnswer}>
+            Submit Answer
+          </button>
+          {hintsShown > 0 && (
+            <span className="text-[11px]" style={{color: "var(--text-dim)"}}>
+              Hints used: {hintsShown}/{p.hints?.length || 0}
+            </span>
+          )}
+          {p.hints && p.hints.length > 0 && hintsShown < p.hints.length && (
+            <button className="text-[13px] px-3 py-1.5 rounded-md transition-colors"
+              style={{border: "1px solid var(--accent-2-border)", color: "var(--accent-2)", background: "var(--accent-2-soft)"}}
+              onClick={revealHint}>
+              Show Hint {hintsShown + 1}
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* HINTS DISPLAYED */}
+      {hintsShown > 0 && !submitted && (
+        <div className="mt-4 space-y-2">
+          {p.hints.slice(0, hintsShown).map((h, i) => (
+            <div key={i} className="pl-hint-box pl-prose">
+              <div className="text-[10px] tracking-[0.18em] font-semibold mb-1" style={{color: "var(--accent-2)"}}>
+                HINT {i+1} · {h.label}
+              </div>
+              <div className="text-[14px]">{h.text}</div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* AFTER SUBMISSION */}
+      {submitted && (
+        <div className="mt-4">
+          <div className="flex flex-wrap items-center gap-3 mb-3">
+            {isCorrect ? (
+              <span className="text-[12px] tracking-[0.15em] font-bold px-3 py-1.5 rounded-md"
+                style={{background: "rgba(34,197,94,0.15)", color: "#22c55e", border: "1px solid rgba(34,197,94,0.4)"}}>
+                ✓ CORRECT
+              </span>
+            ) : (
+              <span className="text-[12px] tracking-[0.15em] font-bold px-3 py-1.5 rounded-md"
+                style={{background: "rgba(239,68,68,0.15)", color: "#fb7185", border: "1px solid rgba(239,68,68,0.4)"}}>
+                ✗ INCORRECT
+              </span>
+            )}
+            {!isCorrect && (
+              <>
+                <button className="text-[13px] px-3 py-1.5 rounded-md"
+                  style={{border: "1px solid var(--accent-border)", color: "var(--accent)", background: "var(--accent-soft)"}}
+                  onClick={tryAgain}>
+                  Try Again
+                </button>
+                {p.hints && p.hints.length > 0 && hintsShown < p.hints.length && !showFullSolution && (
+                  <button className="text-[13px] px-3 py-1.5 rounded-md"
+                    style={{border: "1px solid var(--accent-2-border)", color: "var(--accent-2)", background: "var(--accent-2-soft)"}}
+                    onClick={() => { revealHint(); setSubmitted(false); }}>
+                    Show Hint
+                  </button>
+                )}
+                {!showFullSolution && attempts >= 2 && (
+                  <button className="text-[13px] px-3 py-1.5 rounded-md"
+                    style={{border: "1px solid var(--danger-border)", color: "var(--danger)", background: "var(--danger-soft)"}}
+                    onClick={() => setShowFullSolution(true)}>
+                    Show Full Solution
+                  </button>
+                )}
+                {!showFullSolution && (
+                  <button className="text-[13px] px-3 py-1.5 rounded-md"
+                    style={{border: "1px solid var(--border-strong)", color: "var(--text-dim)", background: "var(--bg-elev-2)"}}
+                    onClick={() => setShowFullSolution(true)}>
+                    Reveal Solution
+                  </button>
+                )}
+              </>
+            )}
+          </div>
+
+          {(isCorrect || showFullSolution) && (
+            <SolutionPanel p={p} wasCorrect={isCorrect} />
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ────────────────────────────────────────────────────────────────
+   SOLUTION PANEL
+   ──────────────────────────────────────────────────────────────── */
+function SolutionPanel({ p, wasCorrect }) {
+  return (
+    <div className="rounded-xl p-5 mt-3 pl-prose"
+      style={{background: "var(--bg-elev-2)", border: "1px solid var(--accent-border)"}}>
+      <div className="text-[10.5px] tracking-[0.2em] font-bold mb-3" style={{color: "var(--accent)"}}>
+        🧠 THINKING CHAIN — How a top ranker actually solves this
+      </div>
+      <div className="space-y-3">
+        {p.solution.steps.map((s, i) => (
+          <div key={i} className="flex gap-3">
+            <div className="flex-shrink-0 w-7 h-7 rounded-md flex items-center justify-center text-[12px] font-bold"
+              style={{background: "var(--accent-soft)", color: "var(--accent)", border: "1px solid var(--accent-border)"}}>
+              {i+1}
+            </div>
+            <div className="flex-1">
+              <div className="text-[11.5px] tracking-[0.18em] font-semibold mb-0.5" style={{color: "var(--accent-2)"}}>
+                {s.label}
+              </div>
+              <div className="text-[14px] leading-relaxed" style={{color: "var(--text)", whiteSpace: "pre-line"}}>{s.body}</div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="grid md:grid-cols-2 gap-3 mt-5">
+        <div className="rounded-lg p-3" style={{background: "var(--accent-3-soft)", border: "1px solid var(--accent-3-border)"}}>
+          <div className="text-[10px] tracking-[0.18em] font-semibold mb-1" style={{color: "var(--accent-3)"}}>✓ GATE CHECK</div>
+          <div className="text-[13.5px]" style={{color: "var(--text)"}}>{p.solution.gateCheck}</div>
+        </div>
+        <div className="rounded-lg p-3" style={{background: "var(--warn-soft)", border: "1px solid var(--warn-border)"}}>
+          <div className="text-[10px] tracking-[0.18em] font-semibold mb-1" style={{color: "var(--warn)"}}>⚡ SPEED VERSION</div>
+          <div className="text-[13.5px]" style={{color: "var(--text)"}}>{p.solution.speed}</div>
+        </div>
+      </div>
+
+      <div className="mt-4 rounded-lg p-3" style={{background: "var(--danger-soft)", border: "1px solid var(--danger-border)"}}>
+        <div className="text-[10px] tracking-[0.18em] font-semibold mb-1" style={{color: "var(--danger)"}}>⚠ WHAT MADE THIS HARD</div>
+        <div className="text-[13.5px]" style={{color: "var(--text)"}}>{p.solution.whatMadeHard}</div>
+      </div>
+
+      <div className="mt-3 rounded-lg p-3" style={{background: "var(--pink-soft)", border: "1px solid var(--pink-border)"}}>
+        <div className="text-[10px] tracking-[0.18em] font-semibold mb-1" style={{color: "var(--pink)"}}>🔁 GENERALIZATION</div>
+        <div className="text-[13.5px]" style={{color: "var(--text)"}}>{p.solution.generalization}</div>
+      </div>
+
+      {p.solution.linkedConcept && (
+        <div className="mt-3 rounded-lg p-3" style={{background: "var(--info-soft)", border: "1px solid var(--info-border)"}}>
+          <div className="text-[10px] tracking-[0.18em] font-semibold mb-1" style={{color: "var(--info)"}}>🔗 LINKED CONCEPT</div>
+          <div className="text-[13.5px]" style={{color: "var(--text)"}}>{p.solution.linkedConcept}</div>
+        </div>
+      )}
+
+      {p.kind === "mcq" && p.solution.negAdvisory && (
+        <div className="mt-3 rounded-lg p-3" style={{background: "rgba(69,26,3,0.4)", border: "1px solid rgba(251,191,36,0.3)"}}>
+          <div className="text-[10px] tracking-[0.18em] font-semibold mb-1" style={{color: "#fbbf24"}}>📊 NEGATIVE-MARKING ADVISORY</div>
+          <div className="text-[13.5px]" style={{color: "var(--text)"}}>{p.solution.negAdvisory}</div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ────────────────────────────────────────────────────────────────
+   TECHNIQUE CARD (Layer 3)
+   ──────────────────────────────────────────────────────────────── */
+function TechniqueCard({ tech }) {
+  const typeColors = {
+    "Speed Shortcut":     { bg: "rgba(34,211,238,0.1)",  fg: "#22d3ee", bd: "rgba(34,211,238,0.35)" },
+    "Trap Avoidance":     { bg: "rgba(251,191,36,0.1)",  fg: "#fbbf24", bd: "rgba(251,191,36,0.35)" },
+    "Structural Insight": { bg: "rgba(167,139,250,0.1)", fg: "#a78bfa", bd: "rgba(167,139,250,0.35)" },
+    "Verification Method":{ bg: "rgba(52,211,153,0.1)",  fg: "#34d399", bd: "rgba(52,211,153,0.35)" },
+  };
+  const c = typeColors[tech.type] || typeColors["Speed Shortcut"];
+  return (
+    <div className="pl-tech-card mb-4 pl-prose">
+      <div className="flex flex-wrap items-baseline gap-3 mb-3">
+        <div className="text-[17px] font-semibold" style={{color: "var(--text)"}}>{tech.name}</div>
+        <span className="text-[10.5px] tracking-[0.15em] font-bold px-2 py-1 rounded-md"
+          style={{background: c.bg, color: c.fg, border: "1px solid " + c.bd}}>
+          {tech.type.toUpperCase()}
+        </span>
+        <span className="ml-auto text-[11px] px-2 py-1 rounded-md"
+          style={{background: tech.freq === "Very Frequent" ? "rgba(239,68,68,0.12)" :
+                              tech.freq === "Frequent" ? "rgba(249,115,22,0.12)" :
+                              tech.freq === "Occasional" ? "rgba(234,179,8,0.12)" : "rgba(148,163,184,0.12)",
+                  color: tech.freq === "Very Frequent" ? "#ef4444" :
+                         tech.freq === "Frequent" ? "#f97316" :
+                         tech.freq === "Occasional" ? "#eab308" : "#94a3b8",
+                  border: "1px solid currentColor"}}>
+          {tech.freq}
+        </span>
+      </div>
+
+      <div className="mb-3">
+        <div className="text-[10px] tracking-[0.18em] font-semibold mb-1" style={{color: "var(--accent)"}}>WHEN TO USE</div>
+        <div className="text-[14px]" style={{color: "var(--text)"}}>{tech.when}</div>
+      </div>
+
+      <div className="mb-3">
+        <div className="text-[10px] tracking-[0.18em] font-semibold mb-1" style={{color: "var(--accent-2)"}}>HOW IT WORKS</div>
+        <ol className="list-decimal list-outside ml-5 space-y-1.5 text-[14px]" style={{color: "var(--text)"}}>
+          {tech.steps.map((s, i) => <li key={i}>{s}</li>)}
+        </ol>
+      </div>
+
+      <div className="grid md:grid-cols-2 gap-3 mb-3">
+        <div className="rounded-lg p-3" style={{background: "var(--accent-3-soft)", border: "1px solid var(--accent-3-border)"}}>
+          <div className="text-[10px] tracking-[0.18em] font-semibold mb-1" style={{color: "var(--accent-3)"}}>⚡ SPEED CLAIM</div>
+          <div className="text-[13.5px]" style={{color: "var(--text)"}}>{tech.speed}</div>
+        </div>
+        <div className="rounded-lg p-3" style={{background: "var(--bg-elev-2)", border: "1px solid var(--border)"}}>
+          <div className="text-[10px] tracking-[0.18em] font-semibold mb-1" style={{color: "var(--accent-2)"}}>🔬 MICRO-EXAMPLE</div>
+          <div className="text-[13px] font-mono whitespace-pre-line" style={{color: "var(--text)"}}>{tech.example}</div>
+        </div>
+      </div>
+
+      <div className="pl-danger-zone">
+        <div className="text-[10px] tracking-[0.18em] font-semibold mb-1" style={{color: "#fb7185"}}>⛔ DANGER ZONE — when this technique FAILS</div>
+        <div className="text-[13.5px]" style={{color: "var(--text)"}}>{tech.danger}</div>
+      </div>
+    </div>
+  );
+}
+
+/* ────────────────────────────────────────────────────────────────
+   MISTAKE CARD (Layer 4) with Spot-the-Error mode
+   ──────────────────────────────────────────────────────────────── */
+function MistakeCard({ mistake, idx }) {
+  const [mode, setMode] = useState("read"); // "read" | "spot"
+  const [clickedLine, setClickedLine] = useState(null);
+  const [showFull, setShowFull] = useState(false);
+
+  return (
+    <div className="pl-mistake-card mb-4 pl-prose">
+      <div className="flex flex-wrap items-baseline gap-3 mb-3">
+        <span className="text-[10.5px] tracking-[0.15em] font-bold px-2 py-1 rounded-md"
+          style={{background: "var(--danger-soft)", color: "var(--danger)", border: "1px solid var(--danger-border)"}}>
+          MISTAKE {idx}
+        </span>
+        <div className="text-[17px] font-semibold" style={{color: "var(--text)"}}>{mistake.name}</div>
+        <span className="text-[11px] px-2 py-1 rounded-md ml-auto"
+          style={{background: mistake.frequency === "Very Common" ? "rgba(239,68,68,0.12)" :
+                              mistake.frequency === "Common" ? "rgba(249,115,22,0.12)" : "rgba(148,163,184,0.12)",
+                  color: mistake.frequency === "Very Common" ? "#ef4444" :
+                         mistake.frequency === "Common" ? "#f97316" : "#94a3b8",
+                  border: "1px solid currentColor"}}>
+          {mistake.frequency}
+        </span>
+      </div>
+
+      <div className="flex gap-2 mb-3">
+        <button className={"pl-tab-pill " + (mode === "read" ? "active" : "")}
+          onClick={() => setMode("read")}>📖 Read</button>
+        <button className={"pl-tab-pill " + (mode === "spot" ? "active" : "")}
+          onClick={() => { setMode("spot"); setClickedLine(null); setShowFull(false); }}>🎯 Spot the Error</button>
+      </div>
+
+      {mode === "read" && (
+        <>
+          <div className="mb-3">
+            <div className="text-[10px] tracking-[0.18em] font-semibold mb-1" style={{color: "var(--danger)"}}>WRONG SOLUTION (looks plausible)</div>
+            <div className="pl-wrong-solution">
+              {mistake.wrong.map((line, i) => (
+                <div key={i} className={i === mistake.errorLine ? "error-found" : ""} style={{padding: "2px 4px"}}>
+                  <span style={{color: "var(--text-faded)", marginRight: 8}}>{(i+1).toString().padStart(2, " ")}.</span>
+                  {line}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-3">
+            <div className="rounded-lg p-3" style={{background: "var(--bg-elev-2)", border: "1px solid var(--danger-border)"}}>
+              <div className="text-[10px] tracking-[0.18em] font-semibold mb-1" style={{color: "var(--danger)"}}>📍 ERROR LOCATION</div>
+              <div className="text-[13.5px]" style={{color: "var(--text)"}}>Line {mistake.errorLine + 1}: {mistake.errorDescription}</div>
+            </div>
+            <div className="rounded-lg p-3" style={{background: "var(--bg-elev-2)", border: "1px solid var(--warn-border)"}}>
+              <div className="text-[10px] tracking-[0.18em] font-semibold mb-1" style={{color: "var(--warn)"}}>🧠 ROOT CAUSE</div>
+              <div className="text-[13.5px]" style={{color: "var(--text)"}}>{mistake.rootCause}</div>
+            </div>
+          </div>
+
+          <div className="mt-3 rounded-lg p-3" style={{background: "var(--accent-3-soft)", border: "1px solid var(--accent-3-border)"}}>
+            <div className="text-[10px] tracking-[0.18em] font-semibold mb-1" style={{color: "var(--accent-3)"}}>✅ CORRECT REASONING</div>
+            <div className="text-[13.5px]" style={{color: "var(--text)"}}>{mistake.correct}</div>
+          </div>
+
+          <div className="mt-3 rounded-lg p-3" style={{background: "var(--accent-soft)", border: "1px solid var(--accent-border)"}}>
+            <div className="text-[10px] tracking-[0.18em] font-semibold mb-1" style={{color: "var(--accent)"}}>🛡 PREVENTION RULE (memorize this)</div>
+            <div className="text-[13.5px] italic" style={{color: "var(--text)"}}>{mistake.prevention}</div>
+          </div>
+
+          <div className="mt-3 flex gap-2 text-[12px]" style={{color: "var(--text-dim)"}}>
+            <span className="px-2 py-1 rounded-md" style={{background: "var(--bg-elev-2)", border: "1px solid var(--border)"}}>
+              💸 GATE Cost: {mistake.gateCost}
+            </span>
+          </div>
+        </>
+      )}
+
+      {mode === "spot" && (
+        <>
+          <div className="mb-2 text-[13px]" style={{color: "var(--text-dim)"}}>
+            👉 Click the line where you think the reasoning breaks.
+          </div>
+          <div className="pl-wrong-solution">
+            {mistake.wrong.map((line, i) => {
+              let cls = "pl-wrong-line";
+              if (clickedLine === i) {
+                if (i === mistake.errorLine) cls += " error-found";
+                else cls += "";
+              }
+              if (showFull && i === mistake.errorLine) cls += " error-found";
+              return (
+                <div key={i} className={cls}
+                  onClick={() => { if (clickedLine === null) { setClickedLine(i); setShowFull(true); } }}>
+                  <span style={{color: "var(--text-faded)", marginRight: 8}}>{(i+1).toString().padStart(2, " ")}.</span>
+                  {line}
+                  {showFull && i === mistake.errorLine && <span style={{color: "#fb7185", marginLeft: 8, fontWeight: 600}}>← ERROR HERE</span>}
+                </div>
+              );
+            })}
+          </div>
+          {clickedLine !== null && (
+            <div className="mt-3 rounded-lg p-3"
+              style={{background: clickedLine === mistake.errorLine ? "var(--accent-3-soft)" : "var(--danger-soft)",
+                      border: "1px solid " + (clickedLine === mistake.errorLine ? "var(--accent-3-border)" : "var(--danger-border)")}}>
+              {clickedLine === mistake.errorLine ? (
+                <div className="text-[13.5px]" style={{color: "#22c55e"}}>
+                  ✓ Correct! You spotted the error on line {mistake.errorLine + 1}: {mistake.errorDescription}
+                </div>
+              ) : (
+                <div className="text-[13.5px]" style={{color: "var(--danger)"}}>
+                  ✗ Not quite. The actual error is on line {mistake.errorLine + 1}: {mistake.errorDescription}
+                </div>
+              )}
+            </div>
+          )}
+        </>
+      )}
+    </div>
+  );
+}
+
+/* ────────────────────────────────────────────────────────────────
+   DRILL MODE (Layer 5)
+   ──────────────────────────────────────────────────────────────── */
+function DrillMode({ conceptNum, conceptTitle, problems }) {
+  const TARGETS = { easy: 40, medium: 75, hard: 120, killer: 150 };
+  const lsKey = "gate_la_m" + MODULE_NUM + "_c" + conceptNum + "_drill_best";
+  const streakKey = "gate_la_m" + MODULE_NUM + "_c" + conceptNum + "_drill_streak";
+
+  const [phase, setPhase] = useState("idle"); // idle | running | review
+  const [drill, setDrill] = useState([]);
+  const [currentIdx, setCurrentIdx] = useState(0);
+  const [results, setResults] = useState([]);
+  const [timeLeft, setTimeLeft] = useState(0);
+  const [questionStart, setQuestionStart] = useState(0);
+  const [selected, setSelected] = useState(null);
+  const [natVal, setNatVal] = useState("");
+  const [feedback, setFeedback] = useState(null);
+  const [paused, setPaused] = useState(false);
+  const [bestRecord] = useState(() => lsGet(lsKey, null));
+  const [streak] = useState(() => lsGet(streakKey, 0));
+
+  const startDrill = () => {
+    const shuffled = [...problems].sort(() => Math.random() - 0.5).slice(0, 5);
+    setDrill(shuffled);
+    setCurrentIdx(0);
+    setResults([]);
+    setSelected(null);
+    setNatVal("");
+    setFeedback(null);
+    const first = shuffled[0];
+    setTimeLeft(TARGETS[first.difficulty] || 60);
+    setQuestionStart(Date.now());
+    setPhase("running");
+  };
+
+  useEffect(() => {
+    if (phase !== "running" || paused || feedback) return;
+    if (timeLeft <= 0) {
+      submitDrill(false, "timeout");
+      return;
+    }
+    const t = setTimeout(() => setTimeLeft(timeLeft - 1), 1000);
+    return () => clearTimeout(t);
+  }, [phase, timeLeft, paused, feedback]);
+
+  const submitDrill = (didAnswer, mode) => {
+    const p = drill[currentIdx];
+    const elapsed = Math.round((Date.now() - questionStart) / 1000);
+    let isCorrect = false;
+    if (didAnswer) {
+      if (p.kind === "mcq") isCorrect = selected === p.answer;
+      else {
+        const v = parseFloat(natVal);
+        if (!isNaN(v)) {
+          const tol = p.tolerance != null ? p.tolerance : 0.01;
+          isCorrect = Math.abs(v - p.answer) <= tol;
+        }
+      }
+    }
+    setResults(r => [...r, {
+      problem: p, correct: isCorrect, time: elapsed, target: TARGETS[p.difficulty] || 60,
+      answer: p.kind === "mcq" ? selected : natVal, mode,
+    }]);
+    setFeedback({ correct: isCorrect, answer: p.answer });
+  };
+
+  const nextQuestion = () => {
+    if (currentIdx + 1 >= drill.length) {
+      finalize();
+      return;
+    }
+    const nextI = currentIdx + 1;
+    setCurrentIdx(nextI);
+    setSelected(null);
+    setNatVal("");
+    setFeedback(null);
+    setTimeLeft(TARGETS[drill[nextI].difficulty] || 60);
+    setQuestionStart(Date.now());
+  };
+
+  const finalize = () => {
+    setPhase("review");
+    const correctCount = results.filter(r => r.correct).length;
+    const total = results.length;
+    const acc = total > 0 ? Math.round((correctCount/total) * 100) : 0;
+    const avgTime = total > 0 ? Math.round(results.reduce((s, r) => s + r.time, 0) / total) : 0;
+    const nm = results.reduce((s, r) => {
+      if (r.problem.kind !== "mcq") return s;
+      if (r.correct) return s + (r.problem.marks === 2 ? 2 : 1);
+      if (r.answer == null) return s;
+      return s - (r.problem.marks === 2 ? 2/3 : 1/3);
+    }, 0);
+
+    if (!bestRecord || acc > bestRecord.accuracy || (acc === bestRecord.accuracy && avgTime < bestRecord.avgTime)) {
+      lsSet(lsKey, { score: correctCount, accuracy: acc, avgTime, when: Date.now() });
+    }
+    const lastStreak = results.length > 0 ? results[results.length-1].correct : false;
+    const newStreak = lastStreak ? streak + correctCount : 0;
+    lsSet(streakKey, Math.max(streak, newStreak));
+  };
+
+  const progressPct = phase === "running" && drill[currentIdx] ? (timeLeft / (TARGETS[drill[currentIdx].difficulty] || 60)) * 100 : 0;
+  const progressClass = progressPct < 25 ? "danger" : progressPct < 50 ? "warning" : "";
+
+  if (phase === "idle") {
+    return (
+      <div className="rounded-xl p-6" style={{background: "var(--bg-elev-1)", border: "1px solid var(--border)"}}>
+        <div className="flex items-center gap-3 mb-3">
+          <div className="text-[24px]">⏱</div>
+          <div>
+            <div className="text-[18px] font-semibold" style={{color: "var(--text)"}}>Drill Mode — {conceptTitle}</div>
+            <div className="text-[13px]" style={{color: "var(--text-dim)"}}>5 rapid-fire questions · timed · instant feedback only</div>
+          </div>
+        </div>
+
+        <div className="grid md:grid-cols-4 gap-3 my-4 text-[12px]">
+          <div className="rounded-md p-3" style={{background: "var(--bg-elev-2)", border: "1px solid var(--border)"}}>
+            <div style={{color: "var(--text-dim)"}}>Easy target</div>
+            <div className="font-mono font-semibold mt-1" style={{color: "#22c55e"}}>40 sec</div>
+          </div>
+          <div className="rounded-md p-3" style={{background: "var(--bg-elev-2)", border: "1px solid var(--border)"}}>
+            <div style={{color: "var(--text-dim)"}}>Medium target</div>
+            <div className="font-mono font-semibold mt-1" style={{color: "#eab308"}}>75 sec</div>
+          </div>
+          <div className="rounded-md p-3" style={{background: "var(--bg-elev-2)", border: "1px solid var(--border)"}}>
+            <div style={{color: "var(--text-dim)"}}>Hard target</div>
+            <div className="font-mono font-semibold mt-1" style={{color: "#f97316"}}>120 sec</div>
+          </div>
+          <div className="rounded-md p-3" style={{background: "var(--bg-elev-2)", border: "1px solid var(--border)"}}>
+            <div style={{color: "var(--text-dim)"}}>Killer target</div>
+            <div className="font-mono font-semibold mt-1" style={{color: "#ef4444"}}>150 sec</div>
+          </div>
+        </div>
+
+        {bestRecord && (
+          <div className="rounded-lg p-3 mb-3" style={{background: "var(--accent-3-soft)", border: "1px solid var(--accent-3-border)"}}>
+            <div className="text-[11px] tracking-[0.18em] font-semibold mb-1" style={{color: "var(--accent-3)"}}>🏆 PERSONAL BEST</div>
+            <div className="text-[13.5px]" style={{color: "var(--text)"}}>
+              Score: {bestRecord.score}/5 · Accuracy: {bestRecord.accuracy}% · Avg time: {bestRecord.avgTime}s
+            </div>
+          </div>
+        )}
+
+        {streak > 0 && (
+          <div className="rounded-lg p-3 mb-3" style={{background: "var(--warn-soft)", border: "1px solid var(--warn-border)"}}>
+            <div className="text-[11px] tracking-[0.18em] font-semibold mb-1" style={{color: "var(--warn)"}}>🔥 STREAK</div>
+            <div className="text-[13.5px]" style={{color: "var(--text)"}}>Best streak: {streak} consecutive correct under time</div>
+          </div>
+        )}
+
+        <button className="pl-submit-btn" onClick={startDrill}>
+          ▶ Start Drill (5 questions)
+        </button>
+      </div>
+    );
+  }
+
+  if (phase === "running") {
+    const p = drill[currentIdx];
+    return (
+      <div className="rounded-xl p-6" style={{background: "var(--bg-elev-1)", border: "1px solid var(--border)"}}>
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-3">
+            <div className="text-[12px] tracking-[0.15em] font-bold px-2 py-1 rounded-md"
+              style={{background: "var(--bg-elev-3)", color: "var(--text-dim)", border: "1px solid var(--border)"}}>
+              Q {currentIdx+1} / {drill.length}
+            </div>
+            <DiffBadge level={p.difficulty} />
+          </div>
+          <div className="text-[14px] font-mono font-bold"
+            style={{color: timeLeft < 20 ? "#ef4444" : timeLeft < 40 ? "#eab308" : "#22c55e"}}>
+            ⏱ {timeLeft}s
+          </div>
+        </div>
+
+        <div className="pl-progress-bar mb-4">
+          <div className={"pl-progress-fill " + progressClass} style={{width: progressPct + "%"}}/>
+        </div>
+
+        <div className="text-[15px] leading-relaxed mb-4 p-4 rounded-lg"
+          style={{background: "var(--bg-elev-2)", color: "var(--text)", border: "1px solid var(--border)"}}>
+          {p.statement}
+        </div>
+
+        {!feedback && p.kind === "mcq" && (
+          <div className="space-y-2 mb-3">
+            {p.options.map((opt, i) => {
+              const letter = String.fromCharCode(65 + i);
+              return (
+                <button key={i}
+                  className={"pl-option-btn " + (selected === letter ? "selected" : "")}
+                  onClick={() => setSelected(letter)}>
+                  <span className="pl-option-letter">{letter}</span>
+                  <span className="flex-1">{opt}</span>
+                </button>
+              );
+            })}
+          </div>
+        )}
+        {!feedback && p.kind === "nat" && (
+          <input type="number" step="any" className="pl-nat-input mb-3"
+            value={natVal}
+            onChange={e => setNatVal(e.target.value)}
+            placeholder="Enter your answer..." />
+        )}
+
+        {!feedback && (
+          <div className="flex gap-2">
+            <button className="pl-submit-btn"
+              disabled={p.kind === "mcq" ? !selected : natVal === ""}
+              onClick={() => submitDrill(true, "answered")}>
+              Submit
+            </button>
+            <button className="text-[13px] px-3 py-1.5 rounded-md"
+              style={{border: "1px solid var(--border-strong)", color: "var(--text-dim)", background: "var(--bg-elev-2)"}}
+              onClick={() => submitDrill(false, "skipped")}>
+              Skip
+            </button>
+          </div>
+        )}
+
+        {feedback && (
+          <div className="rounded-lg p-3 mb-3"
+            style={{background: feedback.correct ? "var(--accent-3-soft)" : "var(--danger-soft)",
+                    border: "1px solid " + (feedback.correct ? "var(--accent-3-border)" : "var(--danger-border)")}}>
+            <div className="text-[13.5px] font-semibold mb-1"
+              style={{color: feedback.correct ? "#22c55e" : "#fb7185"}}>
+              {feedback.correct ? "✓ Correct" : "✗ Incorrect"} — Answer: {String(feedback.answer)}
+            </div>
+            <div className="flex gap-2 mt-2">
+              <button className="pl-submit-btn" onClick={nextQuestion}>
+                {currentIdx + 1 >= drill.length ? "Finish Drill →" : "Next Question →"}
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  /* phase === "review" */
+  const correctCount = results.filter(r => r.correct).length;
+  const total = results.length;
+  const acc = total > 0 ? Math.round((correctCount/total) * 100) : 0;
+  const accByDiff = {};
+  ["easy", "medium", "hard", "killer"].forEach(d => {
+    const dr = results.filter(r => r.problem.difficulty === d);
+    if (dr.length > 0) {
+      accByDiff[d] = Math.round((dr.filter(r => r.correct).length / dr.length) * 100);
+    }
+  });
+  const nm = results.reduce((s, r) => {
+    if (r.problem.kind !== "mcq") return s + (r.correct ? r.problem.marks : 0);
+    if (r.correct) return s + (r.problem.marks === 2 ? 2 : 1);
+    if (r.answer == null || r.mode === "skipped" || r.mode === "timeout") return s;
+    return s - (r.problem.marks === 2 ? 2/3 : 1/3);
+  }, 0);
+  const totalMarks = results.reduce((s, r) => s + (r.problem.marks || 1), 0);
+  const reviseConcepts = [...new Set(results.filter(r => !r.correct).flatMap(r => r.problem.tags))];
+
+  return (
+    <div className="rounded-xl p-6" style={{background: "var(--bg-elev-1)", border: "1px solid var(--border)"}}>
+      <div className="text-[20px] font-bold mb-1" style={{color: "var(--text)"}}>📊 Drill Report Card</div>
+      <div className="text-[13px] mb-4" style={{color: "var(--text-dim)"}}>5-question drill · {conceptTitle}</div>
+
+      <div className="grid md:grid-cols-3 gap-3 mb-4">
+        <div className="rounded-lg p-4" style={{background: "var(--bg-elev-2)", border: "1px solid var(--border)"}}>
+          <div className="text-[11px] tracking-[0.18em] font-semibold mb-1" style={{color: "var(--text-dim)"}}>SCORE</div>
+          <div className="text-[24px] font-bold" style={{color: "var(--accent)"}}>{correctCount}/{total}</div>
+        </div>
+        <div className="rounded-lg p-4" style={{background: "var(--bg-elev-2)", border: "1px solid var(--border)"}}>
+          <div className="text-[11px] tracking-[0.18em] font-semibold mb-1" style={{color: "var(--text-dim)"}}>ACCURACY</div>
+          <div className="text-[24px] font-bold" style={{color: acc >= 80 ? "#22c55e" : acc >= 60 ? "#eab308" : "#ef4444"}}>{acc}%</div>
+        </div>
+        <div className="rounded-lg p-4" style={{background: "var(--bg-elev-2)", border: "1px solid var(--border)"}}>
+          <div className="text-[11px] tracking-[0.18em] font-semibold mb-1" style={{color: "var(--text-dim)"}}>NEG-MARKING SIM</div>
+          <div className="text-[24px] font-bold" style={{color: nm >= totalMarks * 0.7 ? "#22c55e" : nm >= 0 ? "#eab308" : "#ef4444"}}>
+            {nm.toFixed(2)} / {totalMarks}
+          </div>
+        </div>
+      </div>
+
+      <div className="rounded-lg p-4 mb-4" style={{background: "var(--bg-elev-2)", border: "1px solid var(--border)"}}>
+        <div className="text-[11px] tracking-[0.18em] font-semibold mb-3" style={{color: "var(--accent-2)"}}>⏱ TIME vs TARGET (per question)</div>
+        <div className="space-y-2">
+          {results.map((r, i) => {
+            const pct = Math.min(100, (r.time / r.target) * 100);
+            const cls = pct > 100 ? "danger" : pct > 75 ? "warning" : "";
+            return (
+              <div key={i} className="flex items-center gap-3 text-[12px]">
+                <div className="w-16 font-mono" style={{color: "var(--text-dim)"}}>Q{i+1}</div>
+                <DiffBadge level={r.problem.difficulty} />
+                <div className="flex-1 pl-progress-bar">
+                  <div className={"pl-progress-fill " + cls} style={{width: pct + "%"}}/>
+                </div>
+                <div className="font-mono w-20 text-right" style={{color: "var(--text)"}}>{r.time}s / {r.target}s</div>
+                <div style={{color: r.correct ? "#22c55e" : "#fb7185"}}>{r.correct ? "✓" : "✗"}</div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {Object.keys(accByDiff).length > 0 && (
+        <div className="rounded-lg p-4 mb-4" style={{background: "var(--bg-elev-2)", border: "1px solid var(--border)"}}>
+          <div className="text-[11px] tracking-[0.18em] font-semibold mb-2" style={{color: "var(--accent)"}}>ACCURACY BY DIFFICULTY</div>
+          <div className="flex flex-wrap gap-2">
+            {Object.entries(accByDiff).map(([d, a]) => (
+              <div key={d} className="flex items-center gap-2 text-[12px] px-2 py-1 rounded-md"
+                style={{background: "var(--bg-elev-3)", border: "1px solid var(--border)"}}>
+                <DiffBadge level={d} />
+                <span className="font-mono" style={{color: a >= 80 ? "#22c55e" : a >= 60 ? "#eab308" : "#ef4444"}}>{a}%</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {reviseConcepts.length > 0 && (
+        <div className="rounded-lg p-4 mb-4" style={{background: "var(--warn-soft)", border: "1px solid var(--warn-border)"}}>
+          <div className="text-[11px] tracking-[0.18em] font-semibold mb-2" style={{color: "var(--warn)"}}>🔁 CONCEPTS TO REVISIT</div>
+          <div className="flex flex-wrap gap-2">
+            {reviseConcepts.map((c, i) => <ConceptTag key={i}>{c}</ConceptTag>)}
+          </div>
+        </div>
+      )}
+
+      <div className="flex gap-2">
+        <button className="pl-submit-btn" onClick={startDrill}>↻ Restart Drill</button>
+        <button className="text-[13px] px-3 py-1.5 rounded-md"
+          style={{border: "1px solid var(--border-strong)", color: "var(--text-dim)", background: "var(--bg-elev-2)"}}
+          onClick={() => setPhase("idle")}>
+          ← Back
+        </button>
+      </div>
+    </div>
+  );
+}
+
+/* ────────────────────────────────────────────────────────────────
+   PYQ WALKTHROUGH (labeled GATE CS PYQ — explanation only)
+   ──────────────────────────────────────────────────────────────── */
+function PYQWalkthrough({ year, marks, statement, solution }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="rounded-xl p-5 mb-5 pl-prose"
+      style={{background: "rgba(245,158,11,0.05)", border: "1px solid rgba(245,158,11,0.35)"}}>
+      <div className="flex flex-wrap items-center gap-2 mb-3">
+        <span className="pl-type-pyq text-[10.5px] tracking-[0.15em] font-bold px-2 py-1 rounded-md">
+          ★ GATE CS {year} — PYQ WALKTHROUGH
+        </span>
+        <MetaPill>{marks}-mark</MetaPill>
+      </div>
+      <div className="text-[15px] leading-relaxed mb-3 p-4 rounded-lg"
+        style={{background: "var(--bg-elev-2)", color: "var(--text)", border: "1px solid var(--border)"}}>
+        {statement}
+      </div>
+      <button onClick={() => setOpen(o => !o)}
+        className="text-[13px] px-3 py-1.5 rounded-md"
+        style={{border: "1px solid rgba(245,158,11,0.35)", color: "#f59e0b", background: "rgba(245,158,11,0.10)"}}>
+        {open ? "▲ Hide walkthrough" : "▼ Show full walkthrough"}
+      </button>
+      {open && (
+        <div className="mt-4 space-y-3">
+          {solution.map((s, i) => (
+            <div key={i} className="rounded-lg p-3" style={{background: "var(--bg-elev-2)", border: "1px solid var(--border)"}}>
+              <div className="text-[11px] tracking-[0.18em] font-semibold mb-1" style={{color: "var(--accent)"}}>{s.label}</div>
+              <div className="text-[14px]" style={{color: "var(--text)", whiteSpace: "pre-line"}}>{s.body}</div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ────────────────────────────────────────────────────────────────
+   CONCEPT NAVIGATOR (Tabs to pick which concept lab)
+   ──────────────────────────────────────────────────────────────── */
+function ConceptNavigator({ concepts, active, setActive, progressMap }) {
+  return (
+    <div className="sticky top-[60px] z-40 py-3 px-4 mb-4 rounded-xl flex flex-wrap gap-2"
+      style={{background: "var(--bg-overlay)", backdropFilter: "blur(14px)", border: "1px solid var(--border)"}}>
+      {concepts.map(c => {
+        const p = progressMap[c.num];
+        const done = p ? p.correct.length : 0;
+        const total = p ? p.totalProblems : 0;
+        return (
+          <button key={c.num}
+            className={"pl-tab-pill " + (active === c.num ? "active" : "")}
+            onClick={() => {
+              setActive(c.num);
+              document.getElementById("concept-lab-" + c.num)?.scrollIntoView({ behavior: "smooth", block: "start" });
+            }}>
+            <span style={{fontWeight: 600}}>C4.{c.num}</span>
+            <span className="opacity-70 ml-2">{c.shortName}</span>
+            <span className="ml-2 font-mono text-[11px] opacity-80">{done}/{total} ✓</span>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+/* ────────────────────────────────────────────────────────────────
+   CONCEPT-LAB WRAPPER
+   ──────────────────────────────────────────────────────────────── */
+function ConceptLab({ num, title, why, patterns, problems, techniques, mistakes, pyqs, progress }) {
+  return (
+    <section id={"concept-lab-" + num} className="max-w-5xl mx-auto px-5 py-8 fade-up">
+      <div className="card p-6 md:p-9" style={{boxShadow: "var(--shadow-glow-accent)"}}>
+        <div className="flex flex-wrap items-baseline gap-3 mb-3">
+          <span className="text-xs tracking-[0.22em] font-semibold px-2.5 py-1 rounded-md"
+            style={{color: "var(--accent)", border: "1px solid var(--accent-border)", background: "var(--accent-soft)"}}>
+            PROBLEM LAB · CONCEPT 4.{num}
+          </span>
+          <span className="text-sm" style={{color: "var(--text-faded)"}}>·</span>
+          <span className="text-sm" style={{color: "var(--text-dim)"}}>Module 4 · Echelon & Rank</span>
+          <span className="ml-auto text-[11px] px-2 py-1 rounded-md font-mono"
+            style={{background: "var(--bg-elev-2)", color: "var(--text-dim)", border: "1px solid var(--border)"}}>
+            {progress.correct.length}/{progress.totalProblems} solved
+          </span>
+        </div>
+        <h2 className="text-2xl md:text-3xl font-bold tracking-tight mb-3" style={{color: "var(--text)"}}>{title}</h2>
+        {why && (
+          <div className="text-[15px] leading-relaxed mb-6 border-l-2 pl-4 italic font-serif"
+            style={{borderColor: "var(--accent-border)", color: "var(--text-dim)"}}>
+            {why}
+          </div>
+        )}
+
+        <LayerHeader num={1} title="How GATE CS Tests This Concept"
+          subtitle="Top rankers classify the question first, then solve. Train the classifier." />
+        {patterns.map((p, i) => <PatternCard key={i} idx={i+1} pattern={p} />)}
+
+        {pyqs && pyqs.length > 0 && (
+          <>
+            <LayerHeader num={"1.5"} title="GATE CS PYQ Walkthroughs"
+              subtitle="Real GATE CS questions with full reasoning chains. Read, don't solve — these are examples." />
+            {pyqs.map((p, i) => <PYQWalkthrough key={i} {...p} />)}
+          </>
+        )}
+
+        <LayerHeader num={2} title="Progressive Problem Set"
+          subtitle="2 Easy · 3 Medium · 3 Hard · 1 Killer. Attempt before reveal. Hints only on request." />
+        {problems.map((p, i) => <ProblemCard key={p.id} p={p} idx={i+1} progress={progress} />)}
+
+        <LayerHeader num={3} title="Technique Arsenal"
+          subtitle="How to think, not what to think. Each card is a named, reusable solving algorithm." />
+        {techniques.map((t, i) => <TechniqueCard key={i} tech={t} />)}
+
+        <LayerHeader num={4} title="Mistake Autopsy Lab"
+          subtitle="Real wrong solutions written exactly as students write them. Each error has a one-line preventive rule." />
+        {mistakes.map((m, i) => <MistakeCard key={i} mistake={m} idx={i+1} />)}
+
+        <LayerHeader num={5} title="Timed Drill Mode"
+          subtitle="Knowing the answer ≠ executing under 90-second pressure. Train exam temperament separately." />
+        <DrillMode conceptNum={num} conceptTitle={title} problems={problems} />
+      </div>
+    </section>
+  );
+}
+
+
+/* ════════════════════════════════════════════════════════════════
+   CONCEPT 4.1 — ECHELON FORM & PIVOTS
+   ════════════════════════════════════════════════════════════════ */
+const C41_PATTERNS = [
+  {
+    name: "Pivot Identification from Row Echelon",
+    surface: "Matrix given in echelon (or row-reduced) form. Asked to identify pivot columns / free columns.",
+    testing: "Whether you can read off pivots (first non-zero entry in each non-zero row).",
+    signals: ["\"pivot columns\"", "\"free columns\"", "\"echelon form\""],
+    firstMove: "Scan rows top-to-bottom. First non-zero entry in each row is the pivot. Its column is a pivot column.",
+    timeBudget: 30,
+    frequency: "Frequent",
+  },
+  {
+    name: "Reducing to Echelon Form",
+    surface: "Numeric matrix. Asked to row-reduce to echelon form.",
+    testing: "Whether you can apply the 3 legal row operations sequentially.",
+    signals: ["\"reduce to row echelon\"", "\"forward elimination\""],
+    firstMove: "Top-left pivot. Zero out below. Move to next row, next column. Repeat.",
+    timeBudget: 90,
+    frequency: "Very Frequent",
+  },
+  {
+    name: "Legal Operation Verification",
+    surface: "Given a row operation, asked if it preserves the row space / solution set.",
+    testing: "Knowledge of 3 legal operations: row swap, scalar multiply (non-zero), row addition.",
+    signals: ["\"is the following operation legal\"", "\"preserves solution\""],
+    firstMove: "3 legal: swap, scale by non-zero, add multiple of row to another. ANY OTHER is illegal.",
+    timeBudget: 25,
+    frequency: "Occasional",
+  },
+  {
+    name: "Counting Pivots vs Free Columns",
+    surface: "Asked for number of free variables, columns, or pivot positions.",
+    testing: "Pivots = rank. Free = n - rank.",
+    signals: ["\"number of free variables\"", "\"how many pivots\""],
+    firstMove: "Pivot count = rank = dim(col(A)). Free count = nullity = n - rank.",
+    timeBudget: 25,
+    frequency: "Frequent",
+  },
+];
+
+const C41_PROBLEMS = [
+  {
+    id: "c41-e1", difficulty: "easy", kind: "nat", marks: 1, timeTarget: 25,
+    tags: ["Pivots"],
+    statement: <span>How many pivots does the row echelon matrix <T src="\begin{pmatrix} 1 & 2 & 3 \\ 0 & 1 & 4 \\ 0 & 0 & 5 \end{pmatrix}"/> have?</span>,
+    answer: 3, tolerance: 0,
+    hints: [
+      { label: "Conceptual redirect", text: "Pivots = first non-zero entries per non-zero row." },
+      { label: "Key step", text: "All 3 rows have non-zero entries. 3 pivots." },
+      { label: "Near-complete", text: "3." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Count pivots — first non-zero per row." },
+        { label: "KEY STEP", body: "Row 1 pivot at (1,1) = 1. Row 2 pivot at (2,2) = 1. Row 3 pivot at (3,3) = 5. Three pivots." },
+        { label: "COMPUTATION", body: "3." },
+        { label: "VERIFICATION", body: "Rank = 3 = number of rows = number of columns. Full rank." },
+      ],
+      gateCheck: "Pivot per non-zero row.",
+      speed: "5 seconds.",
+      whatMadeHard: "Nothing.",
+      generalization: "Same for any echelon matrix.",
+      linkedConcept: "C4.3 Rank.",
+    },
+  },
+  {
+    id: "c41-e2", difficulty: "easy", kind: "mcq", marks: 1, timeTarget: 30,
+    tags: ["Legal Operations"], skipSignal: { type: "attempt", text: "Attempt — definition" },
+    statement: <span>Which of the following is NOT a legal elementary row operation?</span>,
+    options: [
+      "Swap two rows.",
+      "Multiply a row by a non-zero scalar.",
+      "Add a multiple of one row to another row.",
+      "Square a row entry-wise.",
+    ],
+    answer: "D",
+    hints: [
+      { label: "Conceptual redirect", text: "Only 3 legal operations: swap, scale (non-zero), add multiple of row." },
+      { label: "Key step", text: "Squaring is NOT one of them." },
+      { label: "Near-complete", text: "Answer (D)." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Recall the 3 legal operations." },
+        { label: "KEY STEP", body: "Legal: (1) Rᵢ ↔ Rⱼ. (2) Rᵢ → c·Rᵢ for c ≠ 0. (3) Rᵢ → Rᵢ + c·Rⱼ. Illegal: scaling by 0, non-linear ops (squaring, etc)." },
+        { label: "COMPUTATION", body: "Squaring is not linear. Answer (D)." },
+        { label: "VERIFICATION", body: "Squaring changes solution set: x² = 4 has 2 solutions vs x = 2 has 1." },
+      ],
+      gateCheck: "3 legal: swap, scale, add. NO non-linear operations.",
+      speed: "5 seconds.",
+      whatMadeHard: "Nothing.",
+      generalization: "Same for column operations.",
+      linkedConcept: "C4.2 Gaussian Elimination.",
+      negAdvisory: "Attempt: definition. (D) wins.",
+    },
+  },
+  {
+    id: "c41-m1", difficulty: "medium", kind: "nat", marks: 2, timeTarget: 60,
+    tags: ["Echelon Form"],
+    statement: <span>For <T src="A = \begin{pmatrix} 1 & 2 & 1 \\ 2 & 4 & 1 \\ 3 & 6 & 0 \end{pmatrix}"/>, after reducing to echelon form, how many pivots are there?</span>,
+    answer: 2, tolerance: 0,
+    hints: [
+      { label: "Conceptual redirect", text: "Row reduce and count pivots." },
+      { label: "Key step", text: "R₂ → R₂ - 2R₁: (0, 0, -1). R₃ → R₃ - 3R₁: (0, 0, -3). R₃ → R₃ - 3R₂: (0, 0, 0). Result: [[1, 2, 1], [0, 0, -1], [0, 0, 0]]. 2 pivots." },
+      { label: "Near-complete", text: "2." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Reduce, then count pivots." },
+        { label: "KEY STEP", body: "R₂ → R₂ - 2R₁: [1, 2, 1; 0, 0, -1; 3, 6, 0]. R₃ → R₃ - 3R₁: [1, 2, 1; 0, 0, -1; 0, 0, -3]. R₃ → R₃ - 3R₂: [1, 2, 1; 0, 0, -1; 0, 0, 0]. Two non-zero rows." },
+        { label: "COMPUTATION", body: "2 pivots." },
+        { label: "VERIFICATION", body: "Columns 2 and 3 — pivot in row 1 col 1, pivot in row 2 col 3. Column 2 is free." },
+      ],
+      gateCheck: "Count non-zero rows after row reduction.",
+      speed: "60 seconds.",
+      whatMadeHard: "Sign tracking.",
+      generalization: "Same for any matrix.",
+      linkedConcept: "C4.3 Rank.",
+    },
+  },
+  {
+    id: "c41-m2", difficulty: "medium", kind: "mcq", marks: 2, timeTarget: 55,
+    tags: ["Free Columns"], skipSignal: { type: "attempt", text: "Attempt — RREF reading" },
+    statement: <span>For the RREF matrix <T src="\begin{pmatrix} 1 & 0 & 2 & 0 & 3 \\ 0 & 1 & 1 & 0 & -1 \\ 0 & 0 & 0 & 1 & 2 \end{pmatrix}"/>, the FREE columns are:</span>,
+    options: [
+      "Columns 1, 2, 4.",
+      "Columns 3, 5.",
+      "Columns 1, 3, 5.",
+      "Columns 2, 4.",
+    ],
+    answer: "B",
+    hints: [
+      { label: "Conceptual redirect", text: "Pivot columns: 1, 2, 4. Free columns: 3, 5." },
+      { label: "Key step", text: "Columns 3, 5 have no pivot." },
+      { label: "Near-complete", text: "Answer (B)." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Pivots in cols 1, 2, 4. Free = remaining." },
+        { label: "KEY STEP", body: "Pivot cols: 1 (row 1), 2 (row 2), 4 (row 3). Non-pivot cols: 3, 5 → free." },
+        { label: "COMPUTATION", body: "Answer (B)." },
+        { label: "VERIFICATION", body: "Number of free = nullity = n - rank = 5 - 3 = 2. Matches." },
+      ],
+      gateCheck: "Free cols ↔ no pivot in that column.",
+      speed: "Direct.",
+      whatMadeHard: "Nothing.",
+      generalization: "Same for any RREF.",
+      linkedConcept: "C4.4 Nullity.",
+      negAdvisory: "Attempt: pattern. (B) wins.",
+    },
+  },
+  {
+    id: "c41-m3", difficulty: "medium", kind: "mcq", marks: 2, timeTarget: 70,
+    tags: ["Reduce to Echelon"], skipSignal: { type: "attempt", text: "Attempt — row ops" },
+    statement: <span>After reducing <T src="A = \begin{pmatrix} 1 & 1 & 1 \\ 1 & 2 & 3 \\ 1 & 3 & 5 \end{pmatrix}"/> to row echelon form, what does the (2, 3) entry become?</span>,
+    options: [ "2", "3", "0", "1" ],
+    answer: "A",
+    hints: [
+      { label: "Conceptual redirect", text: "Apply R₂ → R₂ - R₁, R₃ → R₃ - R₁ first." },
+      { label: "Key step", text: "Result: [[1, 1, 1], [0, 1, 2], [0, 2, 4]]. (2, 3) = 2." },
+      { label: "Near-complete", text: "Answer (A)." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Step-by-step row reduction." },
+        { label: "KEY STEP", body: "R₂ → R₂ - R₁: (0, 1, 2). R₃ → R₃ - R₁: (0, 2, 4). Matrix: [[1, 1, 1], [0, 1, 2], [0, 2, 4]]. (2, 3) = 2." },
+        { label: "COMPUTATION", body: "2. Answer (A)." },
+        { label: "VERIFICATION", body: "Further reduction: R₃ → R₃ - 2R₂: (0, 0, 0). Final: [[1, 1, 1], [0, 1, 2], [0, 0, 0]]. (2, 3) still 2 in echelon form." },
+      ],
+      gateCheck: "After first round of elimination, intermediate values often appear.",
+      speed: "30 seconds.",
+      whatMadeHard: "Tracking which form (intermediate vs final).",
+      generalization: "Same template.",
+      linkedConcept: "C4.2 Gaussian Elimination.",
+      negAdvisory: "Attempt: direct compute. (A) wins.",
+    },
+  },
+  {
+    id: "c41-h1", difficulty: "hard", kind: "nat", marks: 2, timeTarget: 90,
+    tags: ["Pivot Count"],
+    statement: <span>For <T src="A = \begin{pmatrix} 2 & 4 & 1 & 3 \\ 1 & 2 & 1 & 0 \\ 3 & 6 & 2 & 5 \\ 1 & 2 & 0 & 1 \end{pmatrix}"/>, after row reduction the number of pivots is ___.</span>,
+    answer: 3, tolerance: 0,
+    hints: [
+      { label: "Conceptual redirect", text: "Row reduce and count." },
+      { label: "Key step", text: "R₁ ↔ R₂. R₂ → R₂ - 2R₁: (0, 0, -1, 3). R₃ → R₃ - 3R₁: (0, 0, -1, 5). R₄ → R₄ - R₁: (0, 0, -1, 1). R₃ → R₃ - R₂: (0, 0, 0, 2). R₄ → R₄ - R₂: (0, 0, 0, -2). R₄ → R₄ + R₃: (0, 0, 0, 0)." },
+      { label: "Near-complete", text: "Result has pivots at columns 1, 3, 4. Three pivots." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Row reduce 4×4 matrix, count pivots." },
+        { label: "KEY STEP", body: "Swap R₁ ↔ R₂. Then eliminate column 1 from rows 2, 3, 4. Then eliminate column 3. Final: 3 non-zero rows, pivots in cols 1, 3, 4. rank = 3." },
+        { label: "COMPUTATION", body: "3." },
+        { label: "VERIFICATION", body: "Col 2 = 2·col 1. So col 2 is dependent → 1 dependency → rank = 4 - 1 = 3." },
+      ],
+      gateCheck: "Look for obvious column dependencies first.",
+      speed: "Inspection: 30 seconds. Row reduce: 90 seconds.",
+      whatMadeHard: "Tracking signs through 4×4 reduction.",
+      generalization: "Same template.",
+      linkedConcept: "C4.3 Rank.",
+    },
+  },
+  {
+    id: "c41-h2", difficulty: "hard", kind: "mcq", marks: 2, timeTarget: 80,
+    tags: ["Echelon Properties"], skipSignal: { type: "attempt", text: "Attempt — property check" },
+    statement: <span>Which of the following is TRUE for the row echelon form (REF) of a matrix?</span>,
+    options: [
+      "REF is unique for a given matrix.",
+      "All pivots equal 1.",
+      "Pivot positions are unique (any REF has them in the same places).",
+      "Entries below pivots are 1.",
+    ],
+    answer: "C",
+    hints: [
+      { label: "Conceptual redirect", text: "REF allows choice in pivot scaling. RREF is unique." },
+      { label: "Key step", text: "Pivot POSITIONS are unique even if REF itself isn't." },
+      { label: "Near-complete", text: "Answer (C)." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Differentiate REF (not unique) from RREF (unique)." },
+        { label: "KEY STEP", body: "REF allows different scaling for pivots, so not unique. Pivots can be any value (not just 1). But pivot POSITIONS are invariant — that's a theorem." },
+        { label: "COMPUTATION", body: "Answer (C)." },
+        { label: "VERIFICATION", body: "Distractor (A): RREF is unique, REF is not. (B): pivots in REF can be any value. (D): below pivots are 0, not 1." },
+      ],
+      gateCheck: "RREF unique. REF: positions unique, values can vary.",
+      speed: "Concept recall: 30 seconds.",
+      whatMadeHard: "Distinguishing REF and RREF.",
+      generalization: "Pivot positions = rank-related invariant.",
+      linkedConcept: "C4.8 RREF.",
+      negAdvisory: "Attempt: definition decides. (C) wins.",
+    },
+  },
+  {
+    id: "c41-h3", difficulty: "hard", kind: "nat", marks: 2, timeTarget: 80,
+    tags: ["Pivots", "Free Vars"],
+    statement: <span>If A is a 4×6 matrix with rank 3, the number of FREE columns in the RREF of A is ___.</span>,
+    answer: 3, tolerance: 0,
+    hints: [
+      { label: "Conceptual redirect", text: "Free columns = n - rank." },
+      { label: "Key step", text: "6 - 3 = 3." },
+      { label: "Near-complete", text: "3." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Free columns = nullity = n - rank." },
+        { label: "KEY STEP", body: "6 columns, 3 pivots (= rank). Free = 6 - 3 = 3." },
+        { label: "COMPUTATION", body: "3." },
+        { label: "VERIFICATION", body: "Each free column gives a parametric direction in null space." },
+      ],
+      gateCheck: "Free count = nullity.",
+      speed: "5 seconds.",
+      whatMadeHard: "Nothing.",
+      generalization: "Same for any rank/dim.",
+      linkedConcept: "C4.4 Rank-Nullity.",
+    },
+  },
+  {
+    id: "c41-k1", difficulty: "killer", kind: "mcq", marks: 2, timeTarget: 130,
+    tags: ["KILLER", "Pivot Position"],
+    statement: <span><B>[KILLER]</B> Two different sequences of row operations on a matrix yield two different REFs. Which of the following is GUARANTEED to be the same in both REFs?</span>,
+    options: [
+      "The exact values in each row.",
+      "Pivot positions (the column indices where pivots occur).",
+      "The sign of each non-zero entry.",
+      "Nothing — both are completely different.",
+    ],
+    answer: "B",
+    hints: [
+      { label: "Conceptual redirect", text: "REF is not unique, but pivot positions are invariant (theorem)." },
+      { label: "Key step", text: "Pivot column indices are determined by the matrix's rank structure." },
+      { label: "Near-complete", text: "Answer (B)." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "REF non-uniqueness — what's invariant?" },
+        { label: "KEY STEP", body: "Theorem: pivot positions in any REF of A are uniquely determined by A. Reason: they correspond to a particular basis of col(A) (specifically, the pivot columns = independent original columns)." },
+        { label: "COMPUTATION", body: "Answer (B)." },
+        { label: "VERIFICATION", body: "Number of pivots = rank — well-defined regardless of row ops." },
+      ],
+      gateCheck: "Pivot positions invariant. Other things vary.",
+      speed: "Concept recall: 30 seconds.",
+      whatMadeHard: "Knowing the theorem about pivot position invariance.",
+      generalization: "Same for any matrix.",
+      linkedConcept: "C4.3 Rank.",
+      negAdvisory: "Attempt: pivot invariance is the key fact. (B) wins.",
+    },
+  },
+];
+
+const C41_TECHNIQUES = [
+  { name: "Pivot Read Algorithm", type: "Speed Shortcut",
+    when: "Identifying pivots in a given matrix.",
+    steps: ["Scan top-to-bottom.", "For each row, first non-zero entry is a pivot.", "Its column is a pivot column."],
+    speed: "Direct read: 5 seconds per matrix.", example: "[[1, 2], [0, 3]] → pivots at (1,1), (2,2).",
+    danger: "Confusing zero rows with non-zero (zero rows have no pivot).", freq: "Frequent" },
+  { name: "Forward Elimination Recipe", type: "Speed Shortcut",
+    when: "Reducing to row echelon form.",
+    steps: ["Find first non-zero column. Use top entry as pivot.", "Zero out entries below the pivot via row addition.", "Move to next row, next pivot column. Repeat until done."],
+    speed: "60-120 seconds for 3×3 or 4×4.", example: "Standard Gaussian elimination.",
+    danger: "Tracking signs.", freq: "Very Frequent" },
+  { name: "Free vs Pivot Column Distinction", type: "Structural Insight",
+    when: "Identifying free / pivot columns.",
+    steps: ["Pivots: columns with leading non-zero in some row of REF.", "Free: columns without pivots.", "Each free column corresponds to a free variable in Ax = 0."],
+    speed: "10 seconds.", example: "RREF [[1, 0, 2], [0, 1, 3]] → cols 1, 2 pivot; col 3 free.",
+    danger: "Mistaking column indexing.", freq: "Frequent" },
+];
+
+const C41_MISTAKES = [
+  { name: "Counting Pivots Without Reducing First", wrong: [
+      "Problem: rank of A = [[1, 2, 3], [2, 4, 6]]?",
+      "Solution: count non-zero rows directly = 2. Rank = 2.",
+    ], errorLine: 1,
+    errorDescription: "Need to reduce first. R₂ = 2·R₁ — dependent.",
+    rootCause: "Skipping the reduction step.",
+    correct: "Reduce: R₂ → R₂ - 2R₁ = (0, 0, 0). Rank = 1, not 2.",
+    prevention: "ALWAYS row reduce before counting.",
+    gateCost: "2-mark wrong rank.", frequency: "Very Common" },
+  { name: "Using Squaring as Row Op", wrong: [
+      "Problem: simplify row (2, 4, 6).",
+      "Solution: divide by 2 OR square: (4, 16, 36).",
+    ], errorLine: 1,
+    errorDescription: "Squaring is non-linear — illegal.",
+    rootCause: "Confusing row ops with arbitrary transformations.",
+    correct: "Only 3 legal: swap, scale (non-zero), add multiple.",
+    prevention: "Memorize the 3 legal ops.",
+    gateCost: "Catastrophic — invalid reduction.", frequency: "Rare but Critical" },
+];
+
+const C41_PYQS = [];
+
+function ConceptLab41({ progress }) {
+  return <ConceptLab num={1} title="Echelon Form & Pivots — The 3 Legal Operations"
+    why={<>Row reduction is the workhorse algorithm of all of M4. Pivots identify col space basis, free columns the null space. This lab calibrates the mechanical skill.</>}
+    patterns={C41_PATTERNS} problems={C41_PROBLEMS} techniques={C41_TECHNIQUES}
+    mistakes={C41_MISTAKES} pyqs={C41_PYQS} progress={progress} />;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   CONCEPT 4.2 — GAUSSIAN ELIMINATION
+   ════════════════════════════════════════════════════════════════ */
+const C42_PATTERNS = [
+  { name: "Solve via Gauss + Back-Substitute", surface: "Numeric system Ax = b. Asked for solution.",
+    testing: "Whether you can reduce [A|b] to echelon and back-substitute.",
+    signals: ["\"solve the system\"", "\"using Gaussian elimination\""],
+    firstMove: "Form augmented [A|b]. Reduce to echelon. Back-substitute starting from last row.",
+    timeBudget: 120, frequency: "Very Frequent" },
+  { name: "Partial Pivoting Decision", surface: "Asked whether pivot needs to be swapped.",
+    testing: "Whether you know swap is needed when current pivot is 0.",
+    signals: ["\"pivoting\"", "\"zero on the diagonal\""],
+    firstMove: "If current pivot = 0, swap with row below having non-zero entry.",
+    timeBudget: 30, frequency: "Occasional" },
+  { name: "Inconsistency Detection", surface: "Asked when Gauss elimination reveals inconsistency.",
+    testing: "Whether you can spot 0 = c rows.",
+    signals: ["\"no solution\"", "\"inconsistent\""],
+    firstMove: "After reduction, look for row of form (0, 0, ..., 0 | c ≠ 0).",
+    timeBudget: 30, frequency: "Frequent" },
+];
+
+const C42_PROBLEMS = [
+  { id: "c42-e1", difficulty: "easy", kind: "nat", marks: 1, timeTarget: 35,
+    tags: ["Gauss Solve"],
+    statement: <span>Solve <T src="x + y = 5, x - y = 1"/> via elimination. Find x.</span>,
+    answer: 3, tolerance: 0,
+    hints: [
+      { label: "Conceptual redirect", text: "Add equations: 2x = 6 → x = 3." },
+      { label: "Key step", text: "x = 3." },
+      { label: "Near-complete", text: "3." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "2 equations 2 unknowns — eliminate." },
+        { label: "KEY STEP", body: "R₁ + R₂: 2x = 6 → x = 3. Then y = 5 - 3 = 2." },
+        { label: "COMPUTATION", body: "3." },
+        { label: "VERIFICATION", body: "(3, 2): 3+2 = 5, 3-2 = 1. ✓" },
+      ],
+      gateCheck: "Add/subtract rows to eliminate variables.",
+      speed: "10 seconds.", whatMadeHard: "Nothing.", generalization: "Same template.",
+      linkedConcept: "C4.2 Gauss method.",
+    } },
+  { id: "c42-e2", difficulty: "easy", kind: "mcq", marks: 1, timeTarget: 30,
+    tags: ["Inconsistency"], skipSignal: { type: "attempt", text: "Attempt" },
+    statement: <span>After row reduction, the augmented matrix has the row <T src="(0, 0, 0 \mid 5)"/>. The system is:</span>,
+    options: ["Consistent with unique solution.", "Consistent with infinite solutions.", "Inconsistent (no solution).", "Cannot be determined."],
+    answer: "C",
+    hints: [
+      { label: "Conceptual redirect", text: "0 = 5 is impossible." },
+      { label: "Key step", text: "Inconsistent." },
+      { label: "Near-complete", text: "(C)." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Row of zeros with non-zero augmented entry = contradiction." },
+        { label: "KEY STEP", body: "0·x = 5 has no solution. Inconsistent." },
+        { label: "COMPUTATION", body: "(C)." },
+        { label: "VERIFICATION", body: "rank(A) < rank([A|b])." },
+      ],
+      gateCheck: "Spot (0 ... 0 | c ≠ 0) → inconsistent.",
+      speed: "5 seconds.", whatMadeHard: "Nothing.", generalization: "Universal.",
+      linkedConcept: "C3.4 Consistency.",
+      negAdvisory: "Attempt: pattern. (C) wins.",
+    } },
+  { id: "c42-m1", difficulty: "medium", kind: "nat", marks: 2, timeTarget: 80,
+    tags: ["Gauss Solve 3x3"],
+    statement: <span>Solve via Gauss: <T src="x + y + z = 6, 2x + y + z = 7, x + 2y + z = 8"/>. Find x.</span>,
+    answer: 1, tolerance: 0,
+    hints: [
+      { label: "Conceptual redirect", text: "Eliminate x from eq 2 and 3 using eq 1." },
+      { label: "Key step", text: "R₂ → R₂ - 2R₁: -y - z = -5. R₃ → R₃ - R₁: y = 2. So y = 2. From -y - z = -5: z = 5 - 2 = 3. From R₁: x = 6 - y - z = 6 - 2 - 3 = 1." },
+      { label: "Near-complete", text: "1." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Forward eliminate, then back-substitute." },
+        { label: "KEY STEP", body: "After R₂ ← R₂ - 2R₁: (0, -1, -1 | -5). After R₃ ← R₃ - R₁: (0, 1, 0 | 2). From row 3: y = 2. From row 2: -2 - z = -5 → z = 3. From row 1: x = 6 - 2 - 3 = 1." },
+        { label: "COMPUTATION", body: "x = 1." },
+        { label: "VERIFICATION", body: "(1, 2, 3): 1+2+3=6, 2+2+3=7, 1+4+3=8. ✓" },
+      ],
+      gateCheck: "Always back-substitute and verify.",
+      speed: "60 seconds.", whatMadeHard: "Sign tracking.", generalization: "Same template for any 3×3.",
+      linkedConcept: "C4.2 Gauss.",
+    } },
+  { id: "c42-m2", difficulty: "medium", kind: "mcq", marks: 2, timeTarget: 65,
+    tags: ["Pivoting"], skipSignal: { type: "attempt", text: "Attempt" },
+    statement: <span>While reducing, you encounter a 0 in the pivot position with a non-zero entry below. What should you do?</span>,
+    options: [ "Discard the row.", "Swap with the row below (partial pivoting).", "Multiply the current row by 0.", "Stop — system has no solution." ],
+    answer: "B",
+    hints: [
+      { label: "Conceptual redirect", text: "Standard partial pivoting." },
+      { label: "Key step", text: "Swap." },
+      { label: "Near-complete", text: "(B)." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Need non-zero pivot — swap." },
+        { label: "KEY STEP", body: "Swap rows. This is row exchange — a legal operation." },
+        { label: "COMPUTATION", body: "(B)." },
+        { label: "VERIFICATION", body: "After swap, proceed with elimination normally." },
+      ],
+      gateCheck: "Swap when pivot = 0.",
+      speed: "Direct.", whatMadeHard: "Nothing.", generalization: "Universal.",
+      linkedConcept: "C4.1 Row ops.",
+      negAdvisory: "Attempt: technique. (B) wins.",
+    } },
+  { id: "c42-m3", difficulty: "medium", kind: "mcq", marks: 2, timeTarget: 80,
+    tags: ["Operation Count"],
+    skipSignal: { type: "attempt", text: "Attempt — count flops" },
+    statement: <span>For Gaussian elimination on an n × n system, the number of arithmetic operations (additions + multiplications) is approximately:</span>,
+    options: [ "O(n)", "O(n²)", "O(n³)", "O(n⁴)" ],
+    answer: "C",
+    hints: [
+      { label: "Conceptual redirect", text: "n stages × n² work per stage = n³." },
+      { label: "Key step", text: "O(n³)." },
+      { label: "Near-complete", text: "(C)." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Operation count for Gaussian elimination." },
+        { label: "KEY STEP", body: "Forward elimination: n stages. Each eliminates one column, requiring O(n²) operations (zeroing n entries with n multiplications each). Total: O(n³)." },
+        { label: "COMPUTATION", body: "(C). Exact: 2n³/3 leading-order." },
+        { label: "VERIFICATION", body: "Back-substitution is only O(n²)." },
+      ],
+      gateCheck: "Memorize: Gauss is O(n³).",
+      speed: "Direct.", whatMadeHard: "Nothing.", generalization: "Same for LU.",
+      linkedConcept: "M8 LU decomposition.",
+      negAdvisory: "Attempt: definition. (C) wins.",
+    } },
+  { id: "c42-h1", difficulty: "hard", kind: "mcq", marks: 2, timeTarget: 100,
+    tags: ["Parametric System"],
+    skipSignal: { type: "attempt", text: "Attempt — case analysis" },
+    statement: <span>For the system <T src="x + y = 1, kx + y = 2"/>, the solution exists uniquely iff:</span>,
+    options: [ "k = 1", "k ≠ 1", "k = 2", "All k" ],
+    answer: "B",
+    hints: [
+      { label: "Conceptual redirect", text: "Unique sol ⇔ det(A) ≠ 0." },
+      { label: "Key step", text: "det = 1 - k ≠ 0 ⇒ k ≠ 1." },
+      { label: "Near-complete", text: "(B)." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Square system unique sol ⇔ det non-zero." },
+        { label: "KEY STEP", body: "A = [[1, 1], [k, 1]]. det = 1 - k. ≠ 0 ⇔ k ≠ 1." },
+        { label: "COMPUTATION", body: "(B). At k = 1: inconsistent (1 = 2 contradiction)." },
+        { label: "VERIFICATION", body: "k = 0: x = 1, y = 0 unique. ✓" },
+      ],
+      gateCheck: "Square unique ⇔ invertible ⇔ det ≠ 0.",
+      speed: "20 seconds.", whatMadeHard: "Nothing.", generalization: "Same for any parametric square.",
+      linkedConcept: "C5.1 Determinant.",
+      negAdvisory: "Attempt: det test. (B) wins.",
+    } },
+  { id: "c42-h2", difficulty: "hard", kind: "nat", marks: 2, timeTarget: 100,
+    tags: ["Gauss with Param"],
+    statement: <span>For what value of <T src="k"/> does the system <T src="x + y + z = 1, x + 2y + z = 2, x + y + kz = 3"/> have no solution?</span>,
+    answer: 1, tolerance: 0,
+    hints: [
+      { label: "Conceptual redirect", text: "Reduce and check for inconsistency at k = 1." },
+      { label: "Key step", text: "R₂ - R₁: (0, 1, 0 | 1). R₃ - R₁: (0, 0, k-1 | 2). At k = 1: (0, 0, 0 | 2) — inconsistent." },
+      { label: "Near-complete", text: "k = 1." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Parametric system — reduce and detect inconsistency." },
+        { label: "KEY STEP", body: "After R₂ → R₂ - R₁: (0, 1, 0 | 1). After R₃ → R₃ - R₁: (0, 0, k - 1 | 2). At k = 1, row 3 becomes (0, 0, 0 | 2) — inconsistent." },
+        { label: "COMPUTATION", body: "k = 1." },
+        { label: "VERIFICATION", body: "At k = 1: third equation x + y + z = 3 contradicts first (= 1)." },
+      ],
+      gateCheck: "Param value that makes 0 = (non-zero) gives no solution.",
+      speed: "60 seconds.", whatMadeHard: "Tracking the parameter.", generalization: "Same technique.",
+      linkedConcept: "C4.7 Solution Theory.",
+    } },
+  { id: "c42-h3", difficulty: "hard", kind: "mcq", marks: 2, timeTarget: 80,
+    tags: ["Gauss Insight"], skipSignal: { type: "skip", text: "Skip if <70%" },
+    statement: <span>Gaussian elimination preserves which of the following?</span>,
+    options: [ "All eigenvalues of A.", "The solution set of Ax = b.", "The determinant up to sign.", "Both (B) and (C)." ],
+    answer: "D",
+    hints: [
+      { label: "Conceptual redirect", text: "Solution set: yes. Det: changes only by sign (swap) or factor (scale)." },
+      { label: "Key step", text: "Eigenvalues: generally NO. Solution and det (up to sign): YES." },
+      { label: "Near-complete", text: "(D)." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "What's invariant under row ops?" },
+        { label: "KEY STEP", body: "Solution set of Ax = b: preserved (definition of legal ops).\nDet: swap changes sign, scale changes by factor (non-zero), add doesn't change. So det up to sign/scale preserved.\nEigenvalues: NO — row ops generally change them." },
+        { label: "COMPUTATION", body: "(D) covers (B) and (C)." },
+        { label: "VERIFICATION", body: "(A) wrong (eigenvalues change)." },
+      ],
+      gateCheck: "Solution set + det (up to sign/scale) preserved.",
+      speed: "40 seconds.", whatMadeHard: "Eigenvalue confusion.", generalization: "Same.",
+      linkedConcept: "C5.2 Det properties.",
+      negAdvisory: "Attempt: structure. (D) wins.",
+    } },
+  { id: "c42-k1", difficulty: "killer", kind: "mcq", marks: 2, timeTarget: 150,
+    tags: ["KILLER", "Parametric"],
+    statement: <span><B>[KILLER]</B> For the system <T src="x + y + z = 1, x + ky + z = 2, x + y + k^2 z = 3"/>, the system has UNIQUE solution iff:</span>,
+    options: [ "k ≠ 0, ±1", "k ≠ ±1", "k = 1", "k ≠ 1" ],
+    answer: "B",
+    hints: [
+      { label: "Conceptual redirect", text: "Unique ⇔ det ≠ 0." },
+      { label: "Key step", text: "Compute det of A = [[1,1,1],[1,k,1],[1,1,k²]] and find roots." },
+      { label: "Near-complete", text: "det = (k - 1)(k² - 1) = (k - 1)²(k + 1). Zero at k = 1 or k = -1." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Parametric det = 0 for non-unique sol." },
+        { label: "KEY STEP", body: "A = [[1,1,1],[1,k,1],[1,1,k²]]. Compute det:\nExpand along row 1:\n1·(k·k² - 1·1) - 1·(1·k² - 1·1) + 1·(1·1 - k·1)\n= (k³ - 1) - (k² - 1) + (1 - k)\n= k³ - 1 - k² + 1 + 1 - k\n= k³ - k² - k + 1\n= k²(k - 1) - (k - 1)\n= (k - 1)(k² - 1)\n= (k - 1)²(k + 1)." },
+        { label: "COMPUTATION", body: "det = 0 at k = 1 (double) or k = -1. Unique sol ⇔ k ≠ ±1. Answer (B)." },
+        { label: "VERIFICATION", body: "k = 2: det = 1·3 = 3 ≠ 0 → unique." },
+      ],
+      gateCheck: "Factor determinant polynomial to find all bad k.",
+      speed: "Det computation: 90-120 seconds.", whatMadeHard: "Polynomial factoring.",
+      generalization: "Same for any parametric square.", linkedConcept: "C5.2 Det.",
+      negAdvisory: "Attempt: factor det. (B) wins.",
+    } },
+];
+
+const C42_TECHNIQUES = [
+  { name: "Gauss + Back-Sub Recipe", type: "Speed Shortcut",
+    when: "Solving Ax = b numerically.",
+    steps: ["Augment [A | b].", "Reduce to echelon.", "Back-substitute from last row up."],
+    speed: "60-120s for 3×3.", example: "Standard.", danger: "Sign errors.", freq: "Very Frequent" },
+  { name: "Inconsistency Spotter", type: "Verification Method",
+    when: "During reduction.",
+    steps: ["Look for row (0...0 | c ≠ 0).", "If found, halt — no solution."],
+    speed: "5 seconds.", example: "(0, 0 | 5) — inconsistent.",
+    danger: "Confuse with (0, 0 | 0) — that's redundant, not inconsistent.", freq: "Frequent" },
+  { name: "Partial Pivoting", type: "Trap Avoidance",
+    when: "Pivot is 0.",
+    steps: ["Swap with row below having largest absolute value in that column."],
+    speed: "10 seconds.", example: "Standard numerical practice.",
+    danger: "Don't skip — gives wrong rank otherwise.", freq: "Occasional" },
+];
+
+const C42_MISTAKES = [
+  { name: "Skipping Back-Sub", wrong: [
+      "Problem: Solve Ax = b.",
+      "Solution: Reduce, then claim sol from echelon.",
+    ], errorLine: 0,
+    errorDescription: "Need back-substitution to compute actual values.",
+    rootCause: "Stopping mid-process.",
+    correct: "Echelon gives structure; back-sub gives values.",
+    prevention: "Always back-substitute.",
+    gateCost: "Wrong numerical answer.", frequency: "Common" },
+];
+
+const C42_PYQS = [];
+
+function ConceptLab42({ progress }) {
+  return <ConceptLab num={2} title="Gaussian Elimination — Solving Ax = b in Practice"
+    why={<>The canonical numerical method. Master forward elimination + back-substitution, recognize when to swap rows, spot inconsistency.</>}
+    patterns={C42_PATTERNS} problems={C42_PROBLEMS} techniques={C42_TECHNIQUES}
+    mistakes={C42_MISTAKES} pyqs={C42_PYQS} progress={progress} />;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   CONCEPT 4.3 — RANK OF A MATRIX (HIGH GATE WEIGHT)
+   ════════════════════════════════════════════════════════════════ */
+const C43_PATTERNS = [
+  { name: "Parameterized Rank Drop", surface: "Matrix has parameter k. Asked rank as function of k OR for what k the rank drops below max.",
+    testing: "Symbolic row reduction or det = 0 condition.",
+    signals: ["\"find k such that rank(A) = r\"", "\"the rank of A is\""],
+    firstMove: "Form A. Compute det (if square) and set = 0 OR row-reduce symbolically.",
+    timeBudget: 80, frequency: "Very Frequent" },
+  { name: "Rank Invariance Under Row/Col Ops", surface: "Asked how rank changes after row/col operations.",
+    testing: "Whether you know rank is INVARIANT under elementary ops.",
+    signals: ["\"after applying R₂ → R₂ + 3R₁\"", "\"rank remains\""],
+    firstMove: "Rank invariant under row ops AND column ops. Don't re-compute.",
+    timeBudget: 20, frequency: "Frequent" },
+  { name: "Rank of Outer Product (uvᵀ)", surface: "Matrix written as column × row product. Asked for rank.",
+    testing: "Whether you know uvᵀ (non-zero u, v) has rank exactly 1.",
+    signals: ["\"uvᵀ\"", "\"outer product\"", "\"column times row\""],
+    firstMove: "uvᵀ has rank 1 if u, v non-zero. Otherwise rank 0.",
+    timeBudget: 30, frequency: "Frequent" },
+  { name: "Rank Inequalities for Products", surface: "Asked rank(AB) given rank(A), rank(B).",
+    testing: "Whether you know rank(AB) ≤ min(rank A, rank B), and equality cases.",
+    signals: ["\"rank(AB) ≤\"", "\"product rank\""],
+    firstMove: "rank(AB) ≤ min(rank A, rank B). Equality when A or B full rank.",
+    timeBudget: 40, frequency: "Frequent" },
+  { name: "Counting Non-Zero Rows Properly", surface: "Asked for rank of a matrix that's already in echelon form.",
+    testing: "Whether you know rank = number of non-zero rows in echelon.",
+    signals: ["\"rank of the following matrix\""],
+    firstMove: "If echelon, count non-zero rows = rank.",
+    timeBudget: 15, frequency: "Frequent" },
+];
+
+const C43_PROBLEMS = [
+  { id: "c43-e1", difficulty: "easy", kind: "nat", marks: 1, timeTarget: 25,
+    tags: ["Rank from Echelon"],
+    statement: <span>The rank of <T src="A = \begin{pmatrix} 1 & 2 & 3 \\ 0 & 4 & 5 \\ 0 & 0 & 6 \end{pmatrix}"/> is ___.</span>,
+    answer: 3, tolerance: 0,
+    hints: [
+      { label: "Conceptual redirect", text: "Echelon form. Count non-zero rows." },
+      { label: "Key step", text: "3." },
+      { label: "Near-complete", text: "3." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Triangular non-zero diagonal → full rank." },
+        { label: "KEY STEP", body: "All 3 rows non-zero. Rank = 3." },
+        { label: "COMPUTATION", body: "3." },
+        { label: "VERIFICATION", body: "det = 1·4·6 = 24 ≠ 0 → full rank 3." },
+      ],
+      gateCheck: "Triangular non-zero diagonal → full rank.",
+      speed: "3 seconds.", whatMadeHard: "Nothing.", generalization: "Same for upper/lower triangular.",
+      linkedConcept: "C4.1 Pivots.",
+    } },
+  { id: "c43-e2", difficulty: "easy", kind: "nat", marks: 1, timeTarget: 30,
+    tags: ["Rank Outer Product"],
+    statement: <span>What is the rank of <T src="A = uv^T"/> where <T src="u = (1, 2, 3)^T"/> and <T src="v = (4, 5, 6)^T"/>?</span>,
+    answer: 1, tolerance: 0,
+    hints: [
+      { label: "Conceptual redirect", text: "Outer product of non-zero vectors has rank exactly 1." },
+      { label: "Key step", text: "1." },
+      { label: "Near-complete", text: "1." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "uvᵀ outer product structure." },
+        { label: "KEY STEP", body: "uvᵀ = u·(scalar in each column from v). Every column is a scalar multiple of u. Col space = span{u}, dim 1." },
+        { label: "COMPUTATION", body: "1." },
+        { label: "VERIFICATION", body: "Compute: A = [[4,5,6],[8,10,12],[12,15,18]]. Each row is a multiple of (4,5,6). Rank 1." },
+      ],
+      gateCheck: "uvᵀ has rank 1 when u, v non-zero. Memorize.",
+      speed: "5 seconds.", whatMadeHard: "Nothing.", generalization: "Same for any outer product.",
+      linkedConcept: "C7.3 Rank of products.",
+    } },
+  { id: "c43-m1", difficulty: "medium", kind: "nat", marks: 2, timeTarget: 70,
+    tags: ["Parametric Rank"],
+    statement: <span>For <T src="A = \begin{pmatrix} 1 & 2 \\ 3 & k \end{pmatrix}"/>, the rank is less than 2 iff <T src="k"/> = ___.</span>,
+    answer: 6, tolerance: 0,
+    hints: [
+      { label: "Conceptual redirect", text: "Rank < 2 ⇔ det = 0." },
+      { label: "Key step", text: "det = k - 6 = 0 → k = 6." },
+      { label: "Near-complete", text: "6." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Rank < 2 in 2×2 ⇔ det = 0." },
+        { label: "KEY STEP", body: "det(A) = 1·k - 2·3 = k - 6. Set = 0: k = 6." },
+        { label: "COMPUTATION", body: "6." },
+        { label: "VERIFICATION", body: "At k = 6: rows (1, 2), (3, 6). R₂ = 3·R₁. Rank 1. ✓" },
+      ],
+      gateCheck: "Parametric det test.",
+      speed: "15 seconds.", whatMadeHard: "Nothing.", generalization: "Same for 3×3 etc.",
+      linkedConcept: "C5.2 Det.",
+    } },
+  { id: "c43-m2", difficulty: "medium", kind: "mcq", marks: 2, timeTarget: 75,
+    tags: ["Rank Invariance"], skipSignal: { type: "attempt", text: "Attempt" },
+    statement: <span>After applying R₃ → R₃ + 5R₁ to matrix A, the rank of the resulting matrix is:</span>,
+    options: [ "Decreased by 1.", "Increased by 1.", "Unchanged.", "Cannot be determined." ],
+    answer: "C",
+    hints: [
+      { label: "Conceptual redirect", text: "Elementary row ops preserve rank." },
+      { label: "Key step", text: "Unchanged." },
+      { label: "Near-complete", text: "(C)." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Row op = legal → rank invariant." },
+        { label: "KEY STEP", body: "All 3 elementary row operations (swap, scale, add) preserve rank. Same for column operations." },
+        { label: "COMPUTATION", body: "(C)." },
+        { label: "VERIFICATION", body: "Rank = dim(row span) = dim(col span). Both unchanged under row ops." },
+      ],
+      gateCheck: "Rank invariant under row AND column ops.",
+      speed: "Direct.", whatMadeHard: "Nothing.", generalization: "Universal.",
+      linkedConcept: "C4.1 Row ops.",
+      negAdvisory: "Attempt: theorem. (C) wins.",
+    } },
+  { id: "c43-m3", difficulty: "medium", kind: "mcq", marks: 2, timeTarget: 70,
+    tags: ["Rank Product"], skipSignal: { type: "attempt", text: "Attempt" },
+    statement: <span>If A is 3 × 5 with rank 3, and B is 5 × 4 with rank 2, then rank(AB) is at most:</span>,
+    options: [ "5", "3", "2", "4" ],
+    answer: "C",
+    hints: [
+      { label: "Conceptual redirect", text: "rank(AB) ≤ min(rank A, rank B)." },
+      { label: "Key step", text: "min(3, 2) = 2." },
+      { label: "Near-complete", text: "(C)." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Rank inequality for products." },
+        { label: "KEY STEP", body: "rank(AB) ≤ min(rank A, rank B) = min(3, 2) = 2." },
+        { label: "COMPUTATION", body: "(C)." },
+        { label: "VERIFICATION", body: "AB is 3×4 → rank ≤ min(3, 4) = 3 from dimension. Combined: ≤ 2." },
+      ],
+      gateCheck: "rank(AB) bounded by both factors.",
+      speed: "Direct.", whatMadeHard: "Nothing.", generalization: "Same for n-fold products.",
+      linkedConcept: "M7 Rank inequalities.",
+      negAdvisory: "Attempt: bound. (C) wins.",
+    } },
+  { id: "c43-h1", difficulty: "hard", kind: "nat", marks: 2, timeTarget: 100,
+    tags: ["Parametric Rank 3x3"],
+    statement: <span>For <T src="A = \begin{pmatrix} 1 & 2 & 3 \\ 2 & 4 & 6 \\ 3 & 6 & k \end{pmatrix}"/>, the rank of A equals 1 iff k = ___.</span>,
+    answer: 9, tolerance: 0,
+    hints: [
+      { label: "Conceptual redirect", text: "Row 2 = 2·R₁, so rank ≤ 2. For rank = 1, R₃ must also be a multiple of R₁." },
+      { label: "Key step", text: "(3, 6, k) = 3·(1, 2, 3) requires k = 9." },
+      { label: "Near-complete", text: "9." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Inspect for scalar-multiple rows." },
+        { label: "KEY STEP", body: "R₂ = 2·R₁ already. For rank 1: need R₃ ∝ R₁ too. R₃ = (3, 6, k) and 3·R₁ = (3, 6, 9). So k = 9." },
+        { label: "COMPUTATION", body: "9." },
+        { label: "VERIFICATION", body: "At k = 9: all rows multiples of (1, 2, 3). Rank 1." },
+      ],
+      gateCheck: "All rows scalar multiples of first → rank 1.",
+      speed: "20 seconds.", whatMadeHard: "Nothing.", generalization: "Same template.",
+      linkedConcept: "C4.3 Parametric rank.",
+    } },
+  { id: "c43-h2", difficulty: "hard", kind: "mcq", marks: 2, timeTarget: 90,
+    tags: ["Rank of Sum"], skipSignal: { type: "skip", text: "Skip if <60%" },
+    statement: <span>For n × n matrices A, B with rank(A) = r and rank(B) = s, the rank of A + B is at most:</span>,
+    options: [ "r + s", "r · s", "max(r, s)", "min(r, s)" ],
+    answer: "A",
+    hints: [
+      { label: "Conceptual redirect", text: "rank(A + B) ≤ rank(A) + rank(B). Subadditivity." },
+      { label: "Key step", text: "(A)." },
+      { label: "Near-complete", text: "r + s." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Rank subadditivity for sums." },
+        { label: "KEY STEP", body: "col(A + B) ⊆ col(A) + col(B) (any column of A+B is sum of column of A and column of B). dim(sum) ≤ dim(A) + dim(B) = r + s." },
+        { label: "COMPUTATION", body: "(A)." },
+        { label: "VERIFICATION", body: "Equality when col(A) ∩ col(B) = {0}. Else strict." },
+      ],
+      gateCheck: "rank(A+B) ≤ rank(A) + rank(B).",
+      speed: "Definition: 30 seconds.", whatMadeHard: "Nothing.", generalization: "Same.",
+      linkedConcept: "M7 Rank inequalities.",
+      negAdvisory: "Attempt: theorem. (A) wins.",
+    } },
+  { id: "c43-h3", difficulty: "hard", kind: "nat", marks: 2, timeTarget: 90,
+    tags: ["Rank Computation"],
+    statement: <span>The rank of <T src="A = \begin{pmatrix} 1 & 2 & 3 & 4 \\ 2 & 4 & 7 & 10 \\ 3 & 6 & 10 & 14 \end{pmatrix}"/> is ___.</span>,
+    answer: 2, tolerance: 0,
+    hints: [
+      { label: "Conceptual redirect", text: "Row reduce and count pivots." },
+      { label: "Key step", text: "R₂ - 2R₁: (0, 0, 1, 2). R₃ - 3R₁: (0, 0, 1, 2). R₃ - R₂: (0, 0, 0, 0). Two non-zero rows." },
+      { label: "Near-complete", text: "2." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Row reduce." },
+        { label: "KEY STEP", body: "R₂ → R₂ - 2R₁: (0, 0, 1, 2). R₃ → R₃ - 3R₁: (0, 0, 1, 2). R₃ → R₃ - R₂: (0, 0, 0, 0). 2 non-zero rows." },
+        { label: "COMPUTATION", body: "2." },
+        { label: "VERIFICATION", body: "Note: col 2 = 2·col 1, so col 2 dependent." },
+      ],
+      gateCheck: "Reduce; count non-zero rows.",
+      speed: "60 seconds.", whatMadeHard: "Sign tracking.", generalization: "Same.",
+      linkedConcept: "C4.1 Pivots.",
+    } },
+  { id: "c43-k1", difficulty: "killer", kind: "nat", marks: 2, timeTarget: 150,
+    tags: ["KILLER", "Parametric 4x4"],
+    statement: <span><B>[KILLER]</B> For <T src="A = \begin{pmatrix} 1 & 1 & 1 & 1 \\ 1 & 2 & 3 & 4 \\ 1 & 3 & 5 & k \\ 1 & 4 & 7 & 9 \end{pmatrix}"/>, the rank is at most 3 iff k = ___.</span>,
+    answer: 7, tolerance: 0,
+    hints: [
+      { label: "Conceptual redirect", text: "Rank < 4 ⇔ det = 0." },
+      { label: "Key step", text: "Reduce: R₂ - R₁, R₃ - R₁, R₄ - R₁. Then R₃ - 2R₂, R₄ - 3R₂. Then R₄ - 2R₃ (if pattern holds)." },
+      { label: "Near-complete", text: "Compute det as polynomial in k, set = 0." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Parametric rank in 4×4." },
+        { label: "KEY STEP", body: "R₂ → R₂ - R₁: (0, 1, 2, 3). R₃ → R₃ - R₁: (0, 2, 4, k-1). R₄ → R₄ - R₁: (0, 3, 6, 8).\nR₃ → R₃ - 2R₂: (0, 0, 0, k-1-6) = (0, 0, 0, k-7).\nR₄ → R₄ - 3R₂: (0, 0, 0, 8 - 9) = (0, 0, 0, -1).\nFor rank < 4: row 3 and row 4 are both in column 4 only.\nThe matrix after reduction has rows (1, 1, 1, 1), (0, 1, 2, 3), (0, 0, 0, k-7), (0, 0, 0, -1).\nFor rank ≤ 3: rank stays at the first two non-zero rows plus possibly one of the bottom two.\nIf k - 7 = 0, row 3 becomes zero → rank 3 (rows 1, 2, 4 independent). Then full rank = 3. So k = 7." },
+        { label: "COMPUTATION", body: "7." },
+        { label: "VERIFICATION", body: "k = 7: row 3 of reduced form is zero. Rank = 3 (top two rows + row 4)." },
+      ],
+      gateCheck: "Parametric value making a row zero in reduction reduces rank.",
+      speed: "Reduction: 90-120 seconds.", whatMadeHard: "4×4 reduction; sign tracking.",
+      generalization: "Same template for n×n parametric.", linkedConcept: "C4.7 Solution theory.",
+    } },
+];
+
+const C43_TECHNIQUES = [
+  { name: "Rank-as-Pivot-Count", type: "Speed Shortcut",
+    when: "Standard rank query.",
+    steps: ["Row reduce A.", "Count pivots = rank."],
+    speed: "60-90s.", example: "Standard.", danger: "Sign errors in reduction.", freq: "Very Frequent" },
+  { name: "Outer Product Rank-1 Reflex", type: "Speed Shortcut",
+    when: "Matrix expressed as uvᵀ.",
+    steps: ["If u, v non-zero: rank = 1.", "If u = 0 or v = 0: rank = 0."],
+    speed: "Direct.", example: "uvᵀ rank 1 always (u, v ≠ 0).",
+    danger: "Don't forget the non-zero condition.", freq: "Frequent" },
+  { name: "Rank Product Inequality", type: "Structural Insight",
+    when: "Computing or bounding rank(AB).",
+    steps: ["rank(AB) ≤ min(rank A, rank B).", "Equality if A or B has full rank along the shared dim."],
+    speed: "Bound: 10 seconds.", example: "rank(A)=3, rank(B)=2: rank(AB) ≤ 2.",
+    danger: "Strict inequality when neither has full rank.", freq: "Frequent" },
+  { name: "Rank Sum Inequality", type: "Structural Insight",
+    when: "Computing rank(A + B).",
+    steps: ["rank(A + B) ≤ rank(A) + rank(B)."],
+    speed: "Bound: 5 seconds.", example: "I + I = 2I → rank n. Sum of two rank-1 can give rank 1 or 2.",
+    danger: "Lower bound: rank(A+B) ≥ |rank A - rank B|.", freq: "Occasional" },
+  { name: "Parametric Rank via det = 0", type: "Structural Insight",
+    when: "Matrix has a parameter, asked for rank.",
+    steps: ["For square A: compute det as polynomial in k.", "Set det = 0; solve for k.", "Rank < n at these k. Else rank = n."],
+    speed: "60-120s.", example: "See KILLER above.",
+    danger: "Polynomial factoring care.", freq: "Frequent" },
+];
+
+const C43_MISTAKES = [
+  { name: "Counting Non-Zero Rows Without Reducing", wrong: [
+      "Problem: rank of [[1, 2, 3], [2, 4, 6], [3, 6, 9]] = ?",
+      "Solution: 3 non-zero rows → rank 3.",
+    ], errorLine: 0,
+    errorDescription: "All rows are scalar multiples of (1, 2, 3). Rank 1, not 3.",
+    rootCause: "Treating raw matrix like echelon.",
+    correct: "Row reduce: rank = 1.",
+    prevention: "ALWAYS reduce before counting.",
+    gateCost: "2-mark error.", frequency: "Very Common" },
+  { name: "Forgetting Rank Invariance Under Row Ops", wrong: [
+      "Problem: After R₂ → R₂ + 3R₁, does rank change?",
+      "Solution: We added rows, so rank goes up.",
+    ], errorLine: 0,
+    errorDescription: "Elementary row ops preserve rank.",
+    rootCause: "Not knowing the invariance theorem.",
+    correct: "Rank unchanged by row ops.",
+    prevention: "Memorize: row ops preserve rank.",
+    gateCost: "Major conceptual error.", frequency: "Common" },
+  { name: "Outer Product Rank Confusion", wrong: [
+      "Problem: rank of uvᵀ where u, v ∈ ℝ³.",
+      "Solution: 3 by 3 matrix → rank 3.",
+    ], errorLine: 0,
+    errorDescription: "uvᵀ has rank exactly 1 (or 0 if u or v is zero), regardless of size.",
+    rootCause: "Confusing matrix size with rank.",
+    correct: "uvᵀ rank = 1 always (when both non-zero).",
+    prevention: "Outer product = rank 1.",
+    gateCost: "2-mark error.", frequency: "Common" },
+];
+
+const C43_PYQS = [
+  { year: "1994-Style", marks: 2,
+    statement: <span><B>(Representative of GATE CS 1994 patterns.)</B><br/><br/>The rank of the matrix <T src="\begin{pmatrix} 1 & 2 & 3 \\ 4 & 5 & 6 \\ 7 & 8 & 9 \end{pmatrix}"/> is ___.</span>,
+    solution: [
+      { label: "RECOGNIZE", body: "Arithmetic progression rows. Suggests dependency." },
+      { label: "REDUCE", body: "R₂ → R₂ - 4R₁: (0, -3, -6). R₃ → R₃ - 7R₁: (0, -6, -12). R₃ → R₃ - 2R₂: (0, 0, 0). Rank 2." },
+      { label: "ANSWER", body: "2." },
+      { label: "WHY GATE LOVES THIS", body: "Tests AP dependency recognition + reduction." },
+    ] },
+  { year: "2002-Style", marks: 2,
+    statement: <span><B>(GATE CS 2002 pattern.)</B><br/><br/>For real <T src="\lambda"/>, the rank of <T src="\begin{pmatrix} 1 & \lambda \\ \lambda & 1 \end{pmatrix}"/> is less than 2 iff <T src="\lambda"/> = ___.</span>,
+    solution: [
+      { label: "RECOGNIZE", body: "Symmetric parametric 2×2." },
+      { label: "DET", body: "det = 1 - λ². Set = 0: λ = ±1." },
+      { label: "ANSWER", body: "λ = ±1." },
+      { label: "TRAP", body: "Two values, not just one!" },
+    ] },
+  { year: "2014-Style", marks: 2,
+    statement: <span><B>(GATE CS 2014 pattern.)</B><br/><br/>The rank of <T src="A = uv^T"/> where <T src="u, v \in \mathbb{R}^n"/> are non-zero is ___.</span>,
+    solution: [
+      { label: "RECOGNIZE", body: "Outer product." },
+      { label: "REASONING", body: "Each col is a multiple of u → col(A) = span{u} → dim 1." },
+      { label: "ANSWER", body: "1 (always)." },
+      { label: "MEMORIZE", body: "uvᵀ → rank 1." },
+    ] },
+  { year: "2019-Style", marks: 2,
+    statement: <span><B>(GATE CS 2019 pattern.)</B><br/><br/>For matrices A (3×5) and B (5×3), rank(AB) is at most ___.</span>,
+    solution: [
+      { label: "RECOGNIZE", body: "Rank product inequality." },
+      { label: "BOUND", body: "rank(AB) ≤ min(rank A, rank B) ≤ min(3, 3) = 3 (dimension bound on rank A and B)." },
+      { label: "ANSWER", body: "3." },
+      { label: "NUANCE", body: "Could be less; 3 is the upper bound." },
+    ] },
+];
+
+function ConceptLab43({ progress }) {
+  return <ConceptLab num={3} title="Rank of a Matrix — The Single Most-Tested Concept in M4"
+    why={<>GATE tests parameterized rank, outer product rank, product/sum inequalities, and invariance under row ops every year. This lab forges all reflexes — including the spec-mandated PYQs from 1994, 2002, 2014, 2019.</>}
+    patterns={C43_PATTERNS} problems={C43_PROBLEMS} techniques={C43_TECHNIQUES}
+    mistakes={C43_MISTAKES} pyqs={C43_PYQS} progress={progress} />;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   CONCEPT 4.4 — RANK-NULLITY THEOREM (with KILLER on ker(T))
+   ════════════════════════════════════════════════════════════════ */
+const C44_PATTERNS = [
+  { name: "Direct Rank-Nullity Application", surface: "Matrix or linear map. Given rank, find nullity (or vice versa).",
+    testing: "Whether you apply rank + nullity = n (columns / domain dim) automatically.",
+    signals: ["\"find the dimension of the null space\"", "\"nullity of A\""],
+    firstMove: "nullity = n − rank, where n = number of columns (or domain dim for linear map).",
+    timeBudget: 15, frequency: "Very Frequent" },
+  { name: "Linear Map T: V → W", surface: "Linear map between spaces. Given rank(T), find dim(ker(T)).",
+    testing: "Use dim(V) (domain), not dim(W).",
+    signals: ["\"T: ℝᵐ → ℝⁿ\"", "\"kernel of T\""],
+    firstMove: "dim(ker(T)) = dim(V) - rank(T). DOMAIN, not codomain.",
+    timeBudget: 20, frequency: "Frequent" },
+  { name: "Free Variable Count = Nullity", surface: "Asked for free variables in Ax = 0.",
+    testing: "Whether you know free vars = nullity.",
+    signals: ["\"number of free variables\""],
+    firstMove: "Free vars = nullity = n - rank.",
+    timeBudget: 15, frequency: "Frequent" },
+  { name: "Reverse: Find Rank from Nullity", surface: "Nullity given, asked rank.",
+    testing: "Same theorem, reverse direction.",
+    signals: ["\"dim(N(A)) = 2\""],
+    firstMove: "rank = n - nullity.",
+    timeBudget: 15, frequency: "Frequent" },
+];
+
+const C44_PROBLEMS = [
+  { id: "c44-e1", difficulty: "easy", kind: "nat", marks: 1, timeTarget: 20,
+    tags: ["Rank-Nullity"],
+    statement: <span>A 4 × 7 matrix has rank 3. Nullity = ___.</span>,
+    answer: 4, tolerance: 0,
+    hints: [
+      { label: "Conceptual redirect", text: "nullity = n - rank = 7 - 3." },
+      { label: "Key step", text: "4." },
+      { label: "Near-complete", text: "4." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Direct rank-nullity." },
+        { label: "KEY STEP", body: "nullity = 7 - 3 = 4." },
+        { label: "COMPUTATION", body: "4." },
+        { label: "VERIFICATION", body: "Use n = columns = 7, NOT rows = 4." },
+      ],
+      gateCheck: "n = columns.", speed: "5s.", whatMadeHard: "Nothing.",
+      generalization: "Universal.", linkedConcept: "C2.2 Rank-Nullity.",
+    } },
+  { id: "c44-e2", difficulty: "easy", kind: "nat", marks: 1, timeTarget: 25,
+    tags: ["Linear Map"],
+    statement: <span>For <T src="T: \mathbb{R}^4 \to \mathbb{R}^3"/> with rank 2, dim(ker T) = ___.</span>,
+    answer: 2, tolerance: 0,
+    hints: [
+      { label: "Conceptual redirect", text: "Use domain dim = 4." },
+      { label: "Key step", text: "ker dim = 4 - 2 = 2." },
+      { label: "Near-complete", text: "2." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Rank-nullity for linear map." },
+        { label: "KEY STEP", body: "dim(ker T) = dim(domain) - rank(T) = 4 - 2 = 2." },
+        { label: "COMPUTATION", body: "2." },
+        { label: "VERIFICATION", body: "Codomain dim (3) doesn't enter." },
+      ],
+      gateCheck: "Use DOMAIN dimension.", speed: "5s.", whatMadeHard: "Trap with codomain.",
+      generalization: "Universal.", linkedConcept: "C4.4.",
+    } },
+  { id: "c44-m1", difficulty: "medium", kind: "nat", marks: 2, timeTarget: 40,
+    tags: ["Rank from Nullity"],
+    statement: <span>A 5 × 6 matrix has 3-dimensional null space. Rank = ___.</span>,
+    answer: 3, tolerance: 0,
+    hints: [
+      { label: "Conceptual redirect", text: "rank = n - nullity." },
+      { label: "Key step", text: "6 - 3 = 3." },
+      { label: "Near-complete", text: "3." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Reverse rank-nullity." },
+        { label: "KEY STEP", body: "rank = n - nullity = 6 - 3 = 3." },
+        { label: "COMPUTATION", body: "3." },
+        { label: "VERIFICATION", body: "rank ≤ min(m, n) = 5. 3 ≤ 5 ✓." },
+      ],
+      gateCheck: "Reverse formula.", speed: "10s.", whatMadeHard: "Nothing.",
+      generalization: "Universal.", linkedConcept: "C4.4.",
+    } },
+  { id: "c44-m2", difficulty: "medium", kind: "mcq", marks: 2, timeTarget: 65,
+    tags: ["Free Variables"], skipSignal: { type: "attempt", text: "Attempt" },
+    statement: <span>For Ax = 0 with A of size 6 × 9 and rank 4, the number of free variables in the parametric solution is:</span>,
+    options: [ "4", "5", "6", "9" ],
+    answer: "B",
+    hints: [
+      { label: "Conceptual redirect", text: "Free vars = nullity = n - rank." },
+      { label: "Key step", text: "9 - 4 = 5." },
+      { label: "Near-complete", text: "(B)." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Free vars = nullity." },
+        { label: "KEY STEP", body: "nullity = 9 - 4 = 5." },
+        { label: "COMPUTATION", body: "(B)." },
+        { label: "VERIFICATION", body: "5 parameters in general null space solution." },
+      ],
+      gateCheck: "Free vars count.", speed: "5s.", whatMadeHard: "Nothing.",
+      generalization: "Universal.", linkedConcept: "C4.4.",
+      negAdvisory: "Attempt: arithmetic. (B) wins.",
+    } },
+  { id: "c44-m3", difficulty: "medium", kind: "mcq", marks: 2, timeTarget: 70,
+    tags: ["One-to-One"], skipSignal: { type: "attempt", text: "Attempt" },
+    statement: <span>A linear map T: ℝ⁴ → ℝ⁵ is ONE-TO-ONE iff:</span>,
+    options: [ "rank(T) = 4.", "rank(T) = 5.", "rank(T) = 0.", "T is the zero map." ],
+    answer: "A",
+    hints: [
+      { label: "Conceptual redirect", text: "One-to-one ⇔ ker(T) = {0} ⇔ nullity 0 ⇔ rank = domain dim." },
+      { label: "Key step", text: "rank = 4." },
+      { label: "Near-complete", text: "(A)." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "One-to-one ⇔ trivial kernel." },
+        { label: "KEY STEP", body: "nullity 0 ⇒ rank = n = 4. So rank(T) = 4." },
+        { label: "COMPUTATION", body: "(A)." },
+        { label: "VERIFICATION", body: "Distractor (B): rank ≤ 4 here, can't be 5." },
+      ],
+      gateCheck: "One-to-one ⇔ rank = domain dim.", speed: "20s.", whatMadeHard: "Codomain trap.",
+      generalization: "Universal.", linkedConcept: "C4.4.",
+      negAdvisory: "Attempt: definition. (A) wins.",
+    } },
+  { id: "c44-h1", difficulty: "hard", kind: "mcq", marks: 2, timeTarget: 80,
+    tags: ["Onto + One-to-One"], skipSignal: { type: "attempt", text: "Attempt" },
+    statement: <span>For T: ℝ⁵ → ℝ⁵, which of the following is equivalent to T being a bijection?</span>,
+    options: [ "rank(T) = 5.", "nullity(T) = 0.", "det(T) ≠ 0.", "All of the above." ],
+    answer: "D",
+    hints: [
+      { label: "Conceptual redirect", text: "All three are equivalent characterizations of invertibility for square map." },
+      { label: "Key step", text: "(D)." },
+      { label: "Near-complete", text: "All." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Square map bijection equivalences." },
+        { label: "KEY STEP", body: "rank = n ⇔ ker = {0} (nullity 0) ⇔ det ≠ 0 ⇔ invertible ⇔ bijection." },
+        { label: "COMPUTATION", body: "(D)." },
+        { label: "VERIFICATION", body: "Each is necessary and sufficient." },
+      ],
+      gateCheck: "All equivalent for square.", speed: "20s.", whatMadeHard: "Nothing.",
+      generalization: "Universal for square.", linkedConcept: "C5.3 Invertibility.",
+      negAdvisory: "Attempt: theorem. (D) wins.",
+    } },
+  { id: "c44-h2", difficulty: "hard", kind: "nat", marks: 2, timeTarget: 90,
+    tags: ["Combined"],
+    statement: <span>If T: V → W has dim(V) = 8, dim(W) = 5, and T is ONTO, then dim(ker T) = ___.</span>,
+    answer: 3, tolerance: 0,
+    hints: [
+      { label: "Conceptual redirect", text: "Onto ⇒ rank = 5. nullity = 8 - 5 = 3." },
+      { label: "Key step", text: "3." },
+      { label: "Near-complete", text: "3." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Onto ⇒ rank = codomain dim." },
+        { label: "KEY STEP", body: "rank(T) = dim(W) = 5 (onto). nullity = dim(V) - rank = 8 - 5 = 3." },
+        { label: "COMPUTATION", body: "3." },
+        { label: "VERIFICATION", body: "Sanity: T can't be 1-1 (would need dim V ≤ dim W, here 8 > 5)." },
+      ],
+      gateCheck: "Onto ⇒ rank = codomain dim.", speed: "15s.", whatMadeHard: "Nothing.",
+      generalization: "Universal.", linkedConcept: "C4.4.",
+    } },
+  { id: "c44-h3", difficulty: "hard", kind: "mcq", marks: 2, timeTarget: 80,
+    tags: ["Composition Rank"], skipSignal: { type: "skip", text: "Skip if <65%" },
+    statement: <span>For T: ℝ⁴ → ℝ³ with rank 2 and S: ℝ³ → ℝ⁶ with rank 3, the rank of S ∘ T : ℝ⁴ → ℝ⁶ is at most:</span>,
+    options: [ "4", "3", "2", "6" ],
+    answer: "C",
+    hints: [
+      { label: "Conceptual redirect", text: "rank(ST) ≤ min(rank S, rank T) = min(3, 2) = 2." },
+      { label: "Key step", text: "2." },
+      { label: "Near-complete", text: "(C)." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Composition rank inequality." },
+        { label: "KEY STEP", body: "rank(S ∘ T) ≤ min(rank S, rank T) = min(3, 2) = 2." },
+        { label: "COMPUTATION", body: "(C)." },
+        { label: "VERIFICATION", body: "Image of T is 2D; S restricted to it has rank ≤ 2." },
+      ],
+      gateCheck: "Composition rank.", speed: "Direct.", whatMadeHard: "Nothing.",
+      generalization: "Same.", linkedConcept: "C4.3 Rank inequality.",
+      negAdvisory: "Attempt: bound. (C) wins.",
+    } },
+  { id: "c44-k1", difficulty: "killer", kind: "nat", marks: 2, timeTarget: 90,
+    tags: ["KILLER", "ker(T)"],
+    statement: <span><B>[KILLER]</B> For a linear map T: ℝ⁵ → ℝ³ with rank 2, the dimension of ker(T) is ___.</span>,
+    answer: 3, tolerance: 0,
+    hints: [
+      { label: "Conceptual redirect", text: "Rank-nullity using DOMAIN dim." },
+      { label: "Key step", text: "ker dim = 5 - 2 = 3." },
+      { label: "Near-complete", text: "3." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "GATE-mandated KILLER. Standard rank-nullity on a linear map." },
+        { label: "KEY STEP", body: "dim(domain) = 5, rank = 2. dim(ker) = 5 - 2 = 3." },
+        { label: "COMPUTATION", body: "3." },
+        { label: "VERIFICATION", body: "TRAP: codomain dim (3) is NOT used. Many students use 3 - 2 = 1 — WRONG." },
+      ],
+      gateCheck: "Use domain dim, NOT codomain.",
+      speed: "10 seconds with the rule memorized — but TRIVIAL if you know it, KILLER if you don't.",
+      whatMadeHard: "The trap is using codomain dim (3) instead of domain (5). Test-taker thinks 'rank 2, codomain 3, so 1 dim missing' — wrong.",
+      generalization: "ALWAYS domain dim for rank-nullity.",
+      linkedConcept: "C4.4 Universal application.",
+    } },
+];
+
+const C44_TECHNIQUES = [
+  { name: "rank + nullity = n (Domain Dim)", type: "Speed Shortcut",
+    when: "Any rank-nullity question.",
+    steps: ["For matrix A (m × n): nullity(A) = n − rank(A). n = COLUMNS.",
+            "For map T: V → W: dim(ker T) = dim(V) − rank(T). V = DOMAIN."],
+    speed: "5s.", example: "5 × 7 rank 2 → nullity 5.",
+    danger: "Use n (cols / domain) — NEVER m (rows / codomain).", freq: "Very Frequent" },
+  { name: "One-to-One ⇔ Trivial Kernel", type: "Structural Insight",
+    when: "Asked if T is 1-1.",
+    steps: ["T 1-1 ⇔ ker(T) = {0} ⇔ nullity = 0 ⇔ rank = domain dim."],
+    speed: "Direct.", example: "T: ℝⁿ → ℝᵐ 1-1 needs rank n.",
+    danger: "Don't confuse with onto.", freq: "Frequent" },
+  { name: "Onto ⇔ Rank = Codomain Dim", type: "Structural Insight",
+    when: "Asked if T is onto.",
+    steps: ["T onto ⇔ image = W ⇔ rank(T) = dim(W)."],
+    speed: "Direct.", example: "T: ℝ⁵ → ℝ³ onto needs rank 3.",
+    danger: "Don't confuse with 1-1.", freq: "Frequent" },
+  { name: "Square Map Bijection Pack", type: "Structural Insight",
+    when: "Square A or T: V → V.",
+    steps: ["rank = n ⇔ nullity 0 ⇔ det ≠ 0 ⇔ invertible ⇔ bijection."],
+    speed: "All equivalent.", example: "Standard.",
+    danger: "Equivalences only for SQUARE.", freq: "Very Frequent" },
+];
+
+const C44_MISTAKES = [
+  { name: "Using Rows Instead of Columns", wrong: [
+      "Problem: A is 4 × 6, rank 3. Nullity?",
+      "Solution: nullity = 4 - 3 = 1.",
+    ], errorLine: 0,
+    errorDescription: "Wrong: should be n - rank = 6 - 3 = 3.",
+    rootCause: "Conflating m and n.",
+    correct: "Always n (columns).",
+    prevention: "Underline COLUMN count.",
+    gateCost: "Wrong answer.", frequency: "Very Common" },
+  { name: "Using Codomain for Linear Map", wrong: [
+      "Problem: T: ℝ⁵ → ℝ³, rank 2. ker dim?",
+      "Solution: ker dim = 3 - 2 = 1.",
+    ], errorLine: 0,
+    errorDescription: "Should use domain (5), not codomain (3).",
+    rootCause: "Wrong dimension in formula.",
+    correct: "ker dim = 5 - 2 = 3.",
+    prevention: "DOMAIN always.",
+    gateCost: "2-mark error.", frequency: "Very Common" },
+];
+
+const C44_PYQS = [];
+
+function ConceptLab44({ progress }) {
+  return <ConceptLab num={4} title="Rank-Nullity Theorem — rank + nullity = (domain dim)"
+    why={<>One theorem, two traps: rows-vs-columns (matrix form), domain-vs-codomain (linear map form). The KILLER tests exactly this confusion: T: ℝ⁵ → ℝ³, rank 2, ker dim = ?</>}
+    patterns={C44_PATTERNS} problems={C44_PROBLEMS} techniques={C44_TECHNIQUES}
+    mistakes={C44_MISTAKES} pyqs={C44_PYQS} progress={progress} />;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   CONCEPT 4.5 — SOLVING Ax = b · COMPLETE SOLUTION
+   ════════════════════════════════════════════════════════════════ */
+const C45_PATTERNS = [
+  { name: "General Solution x = xₚ + xₙ", surface: "Asked for general solution of Ax = b with non-trivial null space.",
+    testing: "Finding xₚ + null space basis representation.",
+    signals: ["\"general solution\"", "\"complete solution\""],
+    firstMove: "Find one xₚ. Find null basis. Combine: x = xₚ + Σ tᵢvᵢ.",
+    timeBudget: 100, frequency: "Frequent" },
+  { name: "Particular Solution via RREF", surface: "Asked for any specific solution.",
+    testing: "Set free variables to 0 (or convenient values).",
+    signals: ["\"a particular solution\"", "\"one solution\""],
+    firstMove: "Row reduce [A|b]. Set free = 0. Back-substitute for pivot vars.",
+    timeBudget: 60, frequency: "Frequent" },
+  { name: "Solution Type Identification", surface: "Asked unique / infinite / no solution.",
+    testing: "Rank comparison protocol.",
+    signals: ["\"how many solutions\""],
+    firstMove: "Compare rank(A) and rank([A|b]). rank match + rank = n: unique. rank match + rank < n: infinite. rank mismatch: no sol.",
+    timeBudget: 40, frequency: "Very Frequent" },
+];
+
+const C45_PROBLEMS = [
+  { id: "c45-e1", difficulty: "easy", kind: "mcq", marks: 1, timeTarget: 30,
+    tags: ["Sol Type"], skipSignal: { type: "attempt", text: "Attempt" },
+    statement: <span>If rank(A) = 3, rank([A|b]) = 3, and A is 4 × 5, the system Ax = b has:</span>,
+    options: [ "Unique solution.", "Infinitely many.", "No solution.", "Cannot determine." ],
+    answer: "B",
+    hints: [
+      { label: "Conceptual redirect", text: "rank match → consistent. rank 3 < n = 5 → free vars exist." },
+      { label: "Key step", text: "Infinite." },
+      { label: "Near-complete", text: "(B)." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Rank comparison." },
+        { label: "KEY STEP", body: "rank(A) = rank([A|b]) = 3 < n = 5. Consistent + 2 free vars → infinite." },
+        { label: "COMPUTATION", body: "(B)." },
+        { label: "VERIFICATION", body: "Sol set is a 2D affine subspace." },
+      ],
+      gateCheck: "Match + rank < n → infinite.", speed: "Direct.", whatMadeHard: "Nothing.",
+      generalization: "Universal.", linkedConcept: "C4.7 Solution theory.",
+      negAdvisory: "Attempt: pattern. (B) wins.",
+    } },
+  { id: "c45-e2", difficulty: "easy", kind: "nat", marks: 1, timeTarget: 35,
+    tags: ["Sol Set Dim"],
+    statement: <span>Ax = b is consistent with A of size 3 × 5, rank 2. The dimension of the solution set is ___.</span>,
+    answer: 3, tolerance: 0,
+    hints: [
+      { label: "Conceptual redirect", text: "Dim = nullity = n - rank." },
+      { label: "Key step", text: "5 - 2 = 3." },
+      { label: "Near-complete", text: "3." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Sol set dim." },
+        { label: "KEY STEP", body: "Sol set is translate of N(A). Dim = nullity = 5 - 2 = 3." },
+        { label: "COMPUTATION", body: "3." },
+        { label: "VERIFICATION", body: "Independent of b." },
+      ],
+      gateCheck: "Dim sol = nullity.", speed: "5s.", whatMadeHard: "Nothing.",
+      generalization: "Universal.", linkedConcept: "C4.4 Rank-Nullity.",
+    } },
+  { id: "c45-m1", difficulty: "medium", kind: "mcq", marks: 2, timeTarget: 70,
+    tags: ["Particular Sol"], skipSignal: { type: "attempt", text: "Attempt" },
+    statement: <span>For x + y + z = 6 with x, y, z ∈ ℝ, a particular solution is:</span>,
+    options: [ "(6, 0, 0)", "(0, 0, 0)", "(1, 1, 1)", "(2, 2, 2) only" ],
+    answer: "A",
+    hints: [
+      { label: "Conceptual redirect", text: "Setting free vars to 0 gives quick particular." },
+      { label: "Key step", text: "Set y = z = 0: x = 6. → (6, 0, 0)." },
+      { label: "Near-complete", text: "(6, 0, 0): 6 + 0 + 0 = 6 ✓. Only (A) satisfies; (C) gives 1 + 1 + 1 = 3 ≠ 6." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Particular solution — set free variables to convenient values." },
+        { label: "KEY STEP", body: "Set y = z = 0 (free vars). Then x = 6. So xₚ = (6, 0, 0)." },
+        { label: "COMPUTATION", body: "Answer (A). Verify: 6 + 0 + 0 = 6 ✓." },
+        { label: "VERIFICATION", body: "(C) (1, 1, 1) gives 1 + 1 + 1 = 3 ≠ 6, so it's NOT a solution and was a trap." },
+      ],
+      gateCheck: "Always verify particular sol.", speed: "10s.", whatMadeHard: "(C) trap.",
+      generalization: "Same template.", linkedConcept: "C3.4.",
+      negAdvisory: "Attempt: verify each. (A) wins.",
+    } },
+  { id: "c45-m2", difficulty: "medium", kind: "mcq", marks: 2, timeTarget: 80,
+    tags: ["Complete Sol"], skipSignal: { type: "attempt", text: "Attempt" },
+    statement: <span>If xₚ = (1, 2, 0) solves Ax = b and N(A) = span{(1, -1, 1)}, the general solution is:</span>,
+    options: [ "(1, 2, 0)", "(1, 2, 0) + t(1, -1, 1), t ∈ ℝ", "t(1, -1, 1), t ∈ ℝ", "(1+t, 2-t, t) for t = 1 only" ],
+    answer: "B",
+    hints: [
+      { label: "Conceptual redirect", text: "General = particular + null param." },
+      { label: "Key step", text: "(1, 2, 0) + t(1, -1, 1)." },
+      { label: "Near-complete", text: "(B)." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "x = xₚ + xₙ structure." },
+        { label: "KEY STEP", body: "xₙ = t·(1, -1, 1). General = (1, 2, 0) + t·(1, -1, 1)." },
+        { label: "COMPUTATION", body: "(B)." },
+        { label: "VERIFICATION", body: "Each t gives a valid sol." },
+      ],
+      gateCheck: "xₚ + parametric null.", speed: "Direct.", whatMadeHard: "Distractor (D) restricts t.",
+      generalization: "Same.", linkedConcept: "C3.4.",
+      negAdvisory: "Attempt: structure. (B) wins.",
+    } },
+  { id: "c45-m3", difficulty: "medium", kind: "nat", marks: 2, timeTarget: 70,
+    tags: ["Sol Count"],
+    statement: <span>Ax = b with A 4 × 4, rank 4 has how many solutions?</span>,
+    answer: 1, tolerance: 0,
+    hints: [
+      { label: "Conceptual redirect", text: "Square full rank → unique." },
+      { label: "Key step", text: "1." },
+      { label: "Near-complete", text: "1." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Square invertible." },
+        { label: "KEY STEP", body: "rank = n = 4 → invertible. Unique sol x = A⁻¹b." },
+        { label: "COMPUTATION", body: "1." },
+        { label: "VERIFICATION", body: "Consistent for any b in this case." },
+      ],
+      gateCheck: "Square + full rank → unique.", speed: "5s.", whatMadeHard: "Nothing.",
+      generalization: "Universal.", linkedConcept: "C5.3 Inverse.",
+    } },
+  { id: "c45-h1", difficulty: "hard", kind: "mcq", marks: 2, timeTarget: 110,
+    tags: ["Parametric Sys"], skipSignal: { type: "skip", text: "Skip if <70%" },
+    statement: <span>For x + y = 2, 2x + 2y = k, the system has solution iff:</span>,
+    options: [ "k = 2 only", "k = 4 only", "k ≠ 4", "All k" ],
+    answer: "B",
+    hints: [
+      { label: "Conceptual redirect", text: "Rows scalar multiples; b must match." },
+      { label: "Key step", text: "(2, 2 | k) = 2·(1, 1 | 2) requires k = 4." },
+      { label: "Near-complete", text: "(B)." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Dependent rows: consistency depends on b." },
+        { label: "KEY STEP", body: "R₂ = 2·R₁ for A, requires b₂ = 2·b₁ = 4." },
+        { label: "COMPUTATION", body: "(B). For k = 4: infinite. For k ≠ 4: none." },
+        { label: "VERIFICATION", body: "k = 4: x + y = 2 (one equation, two unknowns)." },
+      ],
+      gateCheck: "Rank match for b too.", speed: "15s.", whatMadeHard: "Nothing.",
+      generalization: "Universal.", linkedConcept: "C3.4.",
+      negAdvisory: "Attempt: consistency. (B) wins.",
+    } },
+  { id: "c45-h2", difficulty: "hard", kind: "mcq", marks: 2, timeTarget: 100,
+    tags: ["Particular Sol"], skipSignal: { type: "attempt", text: "Attempt" },
+    statement: <span>If Ax = b has solutions x = (1, 0, 0) AND x = (0, 1, 0), it must also have:</span>,
+    options: [
+      "x = (1, 1, 0)",
+      "x = (0.5, 0.5, 0) (the midpoint)",
+      "x = (1, -1, 0)",
+      "All x of form t(1,0,0) + (1-t)(0,1,0)",
+    ],
+    answer: "D",
+    hints: [
+      { label: "Conceptual redirect", text: "Solution set is affine — any convex (or affine) combination of solutions is also a solution." },
+      { label: "Key step", text: "Affine combos t·x₁ + (1-t)·x₂." },
+      { label: "Near-complete", text: "(D)." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Affine combinations of solutions." },
+        { label: "KEY STEP", body: "x₁ - x₂ ∈ N(A). x₁ + t(x₁ - x₂) ∈ solution set ⇔ t(x₁ - x₂) ∈ N(A) ✓. Same as: t·x₁ + (1-t)·x₂ = affine combo, in sol set." },
+        { label: "COMPUTATION", body: "(D)." },
+        { label: "VERIFICATION", body: "(B) is just t = 0.5. (D) covers all t." },
+      ],
+      gateCheck: "Sol set is affine subspace.", speed: "30s.", whatMadeHard: "Affine vs linear combo.",
+      generalization: "Same.", linkedConcept: "C2.6 Solution structure.",
+      negAdvisory: "Attempt: structure. (D) wins.",
+    } },
+  { id: "c45-h3", difficulty: "hard", kind: "nat", marks: 2, timeTarget: 90,
+    tags: ["Sol Set"],
+    statement: <span>For consistent Ax = b with A 4 × 7 and rank 3, the dim of solution set is ___.</span>,
+    answer: 4, tolerance: 0,
+    hints: [
+      { label: "Conceptual redirect", text: "Sol set dim = nullity." },
+      { label: "Key step", text: "nullity = 7 - 3 = 4." },
+      { label: "Near-complete", text: "4." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Sol set dim formula." },
+        { label: "KEY STEP", body: "nullity = n - rank = 7 - 3 = 4." },
+        { label: "COMPUTATION", body: "4." },
+        { label: "VERIFICATION", body: "4 free vars → 4D sol set." },
+      ],
+      gateCheck: "Dim sol = nullity.", speed: "5s.", whatMadeHard: "Nothing.",
+      generalization: "Universal.", linkedConcept: "C4.4.",
+    } },
+  { id: "c45-k1", difficulty: "killer", kind: "mcq", marks: 2, timeTarget: 150,
+    tags: ["KILLER", "Sol Synthesis"],
+    statement: <span><B>[KILLER]</B> Three vectors x₁, x₂, x₃ are solutions to Ax = b. Which is NOT necessarily a solution?</span>,
+    options: [
+      "(x₁ + x₂)/2",
+      "x₁ + x₂ - x₃",
+      "x₁ + x₂",
+      "(x₁ + x₂ + x₃)/3",
+    ],
+    answer: "C",
+    hints: [
+      { label: "Conceptual redirect", text: "Affine combinations (coefficients summing to 1) preserve. Plain sums (sum to 2) don't." },
+      { label: "Key step", text: "x₁ + x₂: coefficients (1, 1) sum to 2, not 1." },
+      { label: "Near-complete", text: "(C)." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Affine combination test." },
+        { label: "KEY STEP", body: "If Σcᵢxᵢ = x, then A·Σcᵢxᵢ = ΣcᵢAxᵢ = Σcᵢb = (Σcᵢ)·b. For x to solve Ax = b, need Σcᵢ = 1.\n(A) (1/2, 1/2): sum 1 ✓.\n(B) (1, 1, -1): sum 1 ✓.\n(C) (1, 1, 0): sum 2 ≠ 1 ✗.\n(D) (1/3, 1/3, 1/3): sum 1 ✓." },
+        { label: "COMPUTATION", body: "(C). Sum coefs = 2 → gives 2b, not b." },
+        { label: "VERIFICATION", body: "A(x₁ + x₂) = 2b ≠ b (unless b = 0)." },
+      ],
+      gateCheck: "Affine combinations: Σcᵢ = 1 required for sol set membership.",
+      speed: "60s.", whatMadeHard: "Distinguishing linear from affine combinations.",
+      generalization: "Sol set is affine, NOT linear (except when b = 0).",
+      linkedConcept: "C2.6 Solution structure.",
+      negAdvisory: "Attempt: sum-of-coefs test. (C) wins.",
+    } },
+];
+
+const C45_TECHNIQUES = [
+  { name: "Complete Solution Recipe", type: "Structural Insight",
+    when: "General sol to Ax = b.",
+    steps: ["Find one xₚ.", "Find null space basis.", "x = xₚ + Σtᵢvᵢ."],
+    speed: "2-3 min.", example: "Standard.",
+    danger: "Don't include xₚ as a free parameter.", freq: "Very Frequent" },
+  { name: "Rank Comparison Protocol", type: "Structural Insight",
+    when: "Determining solution count.",
+    steps: ["Compute rank(A) and rank([A|b]).",
+            "Match + rank = n: unique.",
+            "Match + rank < n: infinite.",
+            "Mismatch: no solution."],
+    speed: "Direct.", example: "Universal protocol.",
+    danger: "Don't skip the rank = n check.", freq: "Very Frequent" },
+  { name: "Affine Combo Preservation", type: "Trap Avoidance",
+    when: "Combining known solutions.",
+    steps: ["For Σcᵢxᵢ to be a solution: need Σcᵢ = 1 (when b ≠ 0)."],
+    speed: "Direct.", example: "Midpoint, weighted avgs.",
+    danger: "x₁ + x₂ alone is NOT a sol.", freq: "Occasional" },
+];
+
+const C45_MISTAKES = [
+  { name: "Treating x₁ + x₂ as Solution", wrong: [
+      "Problem: x₁, x₂ solve Ax = b. Is x₁ + x₂?",
+      "Solution: Yes, by linearity.",
+    ], errorLine: 0,
+    errorDescription: "Linearity gives A(x₁+x₂) = 2b ≠ b.",
+    rootCause: "Confusing affine with linear.",
+    correct: "Affine combos (sum coefs = 1) preserve, not plain sums.",
+    prevention: "Always check sum of coefficients.",
+    gateCost: "Conceptual.", frequency: "Common" },
+];
+
+const C45_PYQS = [];
+
+function ConceptLab45({ progress }) {
+  return <ConceptLab num={5} title="Solving Ax = b · The Complete Solution"
+    why={<>x = xₚ + xₙ is THE general form. Master particular sol via setting free vars to 0, null basis via parametric reading, and the rank comparison protocol.</>}
+    patterns={C45_PATTERNS} problems={C45_PROBLEMS} techniques={C45_TECHNIQUES}
+    mistakes={C45_MISTAKES} pyqs={C45_PYQS} progress={progress} />;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   CONCEPT 4.6 — MULTIPLE FREE VARIABLES (Null Basis from RREF)
+   ════════════════════════════════════════════════════════════════ */
+const C46_PATTERNS = [
+  { name: "Read Null Basis from RREF", surface: "RREF given. Asked basis of N(A).",
+    testing: "Whether you can convert RREF to parametric null space vectors.",
+    signals: ["\"basis of null space\""],
+    firstMove: "For each free col: set that free var = 1, others = 0, solve pivots.",
+    timeBudget: 90, frequency: "Very Frequent" },
+  { name: "Count Free Variables", surface: "Number of free variables in Ax = 0.",
+    testing: "Free count = n - rank.",
+    signals: ["\"how many free variables\""],
+    firstMove: "n - rank.",
+    timeBudget: 15, frequency: "Frequent" },
+  { name: "Multi-Dim Null Solution Structure", surface: "General null space solution as linear combo.",
+    testing: "Sum over free vars.",
+    signals: ["\"general solution\""],
+    firstMove: "Σ (free var)·(basis vector).",
+    timeBudget: 30, frequency: "Frequent" },
+];
+
+const C46_PROBLEMS = [
+  { id: "c46-e1", difficulty: "easy", kind: "nat", marks: 1, timeTarget: 25,
+    tags: ["Free Vars Count"],
+    statement: <span>An m × n matrix with rank r has how many free variables in Ax = 0? (n = 8, r = 3).</span>,
+    answer: 5, tolerance: 0,
+    hints: [
+      { label: "Conceptual redirect", text: "Free = n - r." },
+      { label: "Key step", text: "5." },
+      { label: "Near-complete", text: "5." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Free vars formula." },
+        { label: "KEY STEP", body: "8 - 3 = 5." },
+        { label: "COMPUTATION", body: "5." },
+        { label: "VERIFICATION", body: "5 parameters in null space." },
+      ],
+      gateCheck: "Free = n - rank.", speed: "5s.", whatMadeHard: "Nothing.",
+      generalization: "Universal.", linkedConcept: "C4.4.",
+    } },
+  { id: "c46-e2", difficulty: "easy", kind: "mcq", marks: 1, timeTarget: 35,
+    tags: ["Null Basis"], skipSignal: { type: "attempt", text: "Attempt" },
+    statement: <span>For RREF <T src="\begin{pmatrix} 1 & 0 & 2 \\ 0 & 1 & 3 \\ 0 & 0 & 0 \end{pmatrix}"/>, a basis vector for N(A) is:</span>,
+    options: [ "(0, 0, 1)", "(-2, -3, 1)", "(2, 3, 1)", "(1, 0, 0)" ],
+    answer: "B",
+    hints: [
+      { label: "Conceptual redirect", text: "Free var x₃. Set x₃ = 1, then x₁ = -2, x₂ = -3 from rows." },
+      { label: "Key step", text: "(-2, -3, 1)." },
+      { label: "Near-complete", text: "(B)." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Null basis from RREF." },
+        { label: "KEY STEP", body: "x₃ free. Set x₃ = 1. Row 1: x₁ + 2x₃ = 0 ⇒ x₁ = -2. Row 2: x₂ + 3x₃ = 0 ⇒ x₂ = -3." },
+        { label: "COMPUTATION", body: "(B) (-2, -3, 1)." },
+        { label: "VERIFICATION", body: "A·(-2, -3, 1)ᵀ: row 1: -2 + 0 + 2 = 0. Row 2: 0 - 3 + 3 = 0. ✓" },
+      ],
+      gateCheck: "Set free = 1, solve for pivot vars.", speed: "30s.", whatMadeHard: "Sign tracking.",
+      generalization: "Same algorithm.", linkedConcept: "C4.8 RREF.",
+      negAdvisory: "Attempt: substitute. (B) wins.",
+    } },
+  { id: "c46-m1", difficulty: "medium", kind: "mcq", marks: 2, timeTarget: 80,
+    tags: ["Two Free Vars"], skipSignal: { type: "attempt", text: "Attempt" },
+    statement: <span>For RREF <T src="\begin{pmatrix} 1 & 2 & 0 & 1 \\ 0 & 0 & 1 & 3 \\ 0 & 0 & 0 & 0 \end{pmatrix}"/>, a basis of N(A) is:</span>,
+    options: [
+      "{(-2, 1, 0, 0), (-1, 0, -3, 1)}",
+      "{(2, 1, 0, 0), (1, 0, 3, 1)}",
+      "{(-2, 1, 0, 0)} only",
+      "Empty",
+    ],
+    answer: "A",
+    hints: [
+      { label: "Conceptual redirect", text: "Free vars x₂, x₄. Two basis vectors." },
+      { label: "Key step", text: "Set x₂ = 1, x₄ = 0: x₁ = -2, x₃ = 0. → (-2, 1, 0, 0). Set x₂ = 0, x₄ = 1: x₁ = -1, x₃ = -3. → (-1, 0, -3, 1)." },
+      { label: "Near-complete", text: "(A)." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Multi-free RREF → null basis." },
+        { label: "KEY STEP", body: "Free: x₂, x₄. Two basis vectors.\nBasis 1: x₂ = 1, x₄ = 0. Row 1: x₁ + 2 = 0 ⇒ x₁ = -2. Row 2: x₃ = 0. → (-2, 1, 0, 0).\nBasis 2: x₂ = 0, x₄ = 1. Row 1: x₁ + 1 = 0 ⇒ x₁ = -1. Row 2: x₃ + 3 = 0 ⇒ x₃ = -3. → (-1, 0, -3, 1)." },
+        { label: "COMPUTATION", body: "(A)." },
+        { label: "VERIFICATION", body: "Each vector kills the matrix." },
+      ],
+      gateCheck: "One basis vector per free variable.", speed: "60s.", whatMadeHard: "Sign tracking.",
+      generalization: "Same.", linkedConcept: "C4.8.",
+      negAdvisory: "Attempt: compute each. (A) wins.",
+    } },
+  { id: "c46-m2", difficulty: "medium", kind: "nat", marks: 2, timeTarget: 50,
+    tags: ["Free Vars in RREF"],
+    statement: <span>For RREF with pivots in cols 1, 3 and total 5 columns, the number of free variables is ___.</span>,
+    answer: 3, tolerance: 0,
+    hints: [
+      { label: "Conceptual redirect", text: "Free cols: those without pivots." },
+      { label: "Key step", text: "Free: 2, 4, 5 → 3 free." },
+      { label: "Near-complete", text: "3." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Free count." },
+        { label: "KEY STEP", body: "Pivots at 1, 3 → 2 pivots → free at 2, 4, 5 → 3 free." },
+        { label: "COMPUTATION", body: "3." },
+        { label: "VERIFICATION", body: "5 - 2 = 3 ✓." },
+      ],
+      gateCheck: "n - pivots.", speed: "5s.", whatMadeHard: "Nothing.",
+      generalization: "Universal.", linkedConcept: "C4.1.",
+    } },
+  { id: "c46-m3", difficulty: "medium", kind: "mcq", marks: 2, timeTarget: 75,
+    tags: ["Sign Reading"], skipSignal: { type: "attempt", text: "Attempt" },
+    statement: <span>From RREF row (1, -2, 3, 0, -1), with cols 2, 4, 5 free, the basis vector for x₂ = 1 (others free = 0) has x₁ = ___.</span>,
+    options: [ "2", "-2", "1", "-1" ],
+    answer: "A",
+    hints: [
+      { label: "Conceptual redirect", text: "x₁ - 2·1 = 0 ⇒ x₁ = 2." },
+      { label: "Key step", text: "2." },
+      { label: "Near-complete", text: "(A)." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Set x₂ = 1, free others = 0, solve x₁ from row." },
+        { label: "KEY STEP", body: "Row: 1·x₁ + (-2)·x₂ + 3·x₃ + 0·x₄ + (-1)·x₅ = 0. Free: x₄ = x₅ = 0. Pivot: x₃ from another row, but for x₂ = 1, focus on x₁: x₁ - 2(1) = 0 ⇒ x₁ = 2." },
+        { label: "COMPUTATION", body: "(A) 2." },
+        { label: "VERIFICATION", body: "Sign flip: -2·(1) = -2, move to right: x₁ = 2." },
+      ],
+      gateCheck: "Set free var = 1, sign flip the coefficient.", speed: "20s.", whatMadeHard: "Sign.",
+      generalization: "Same.", linkedConcept: "C4.6.",
+      negAdvisory: "Attempt: arithmetic. (A) wins.",
+    } },
+  { id: "c46-h1", difficulty: "hard", kind: "nat", marks: 2, timeTarget: 90,
+    tags: ["Null Basis Dim"],
+    statement: <span>For 3 × 5 RREF with 2 pivots, the null space has dimension ___ and a basis of ___ vectors.</span>,
+    answer: 3, tolerance: 0,
+    hints: [
+      { label: "Conceptual redirect", text: "Dim = nullity = 5 - 2 = 3." },
+      { label: "Key step", text: "3." },
+      { label: "Near-complete", text: "3 (dim and basis count are both 3)." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Free count = basis size." },
+        { label: "KEY STEP", body: "Free = 3. Basis has 3 vectors." },
+        { label: "COMPUTATION", body: "3." },
+        { label: "VERIFICATION", body: "Each free var → one basis vector." },
+      ],
+      gateCheck: "Free = basis count.", speed: "5s.", whatMadeHard: "Nothing.",
+      generalization: "Same.", linkedConcept: "C4.4.",
+    } },
+  { id: "c46-h2", difficulty: "hard", kind: "mcq", marks: 2, timeTarget: 95,
+    tags: ["Reconstruction"], skipSignal: { type: "skip", text: "Skip if <60%" },
+    statement: <span>If the null space of A has basis {(1, 1, 0), (0, 0, 1)}, the RREF of A must be:</span>,
+    options: [
+      "[[1, -1, 0]]",
+      "[[1, 0, 0], [0, 0, 1]]",
+      "Cannot be determined without rank.",
+      "Always 3×3 identity.",
+    ],
+    answer: "A",
+    hints: [
+      { label: "Conceptual redirect", text: "Null basis (1, 1, 0): x₁ + x₂ = 0 → x₁ = -x₂. RREF row: (1, -1, 0)." },
+      { label: "Key step", text: "(A)." },
+      { label: "Near-complete", text: "Single relation x₁ = -x₂; free vars x₂, x₃." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Reverse direction: given null basis, find RREF row(s)." },
+        { label: "KEY STEP", body: "The RREF rows must be orthogonal to every null basis vector.\nLet the unique RREF row be (a, b, c). Then:\n(a, b, c) · (1, 1, 0) = a + b = 0 ⇒ a = −b.\n(a, b, c) · (0, 0, 1) = c = 0.\nSet a = 1: row = (1, −1, 0)." },
+        { label: "COMPUTATION", body: "Answer (A) — RREF row is (1, −1, 0)." },
+        { label: "VERIFICATION", body: "(1, −1, 0) · (1, 1, 0) = 1 − 1 + 0 = 0 ✓. (1, −1, 0) · (0, 0, 1) = 0 ✓." },
+      ],
+      gateCheck: "Null basis → row dependencies.", speed: "60s.", whatMadeHard: "Reverse direction.",
+      generalization: "Same.", linkedConcept: "C4.8.",
+      negAdvisory: "Attempt: structure. (A) wins.",
+    } },
+  { id: "c46-h3", difficulty: "hard", kind: "nat", marks: 2, timeTarget: 100,
+    tags: ["Full Reading"],
+    statement: <span>For RREF <T src="\begin{pmatrix} 1 & 0 & 2 & 1 \\ 0 & 1 & -1 & 3 \\ 0 & 0 & 0 & 0 \end{pmatrix}"/>, the (2, 4) entry of the basis vector for x₄ = 1 (others = 0) is ___.</span>,
+    answer: 1, tolerance: 0,
+    hints: [
+      { label: "Conceptual redirect", text: "Basis vector for x₄ = 1: (-1, -3, 0, 1)." },
+      { label: "Key step", text: "Position 4 in vector = 1." },
+      { label: "Near-complete", text: "1." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Free variable contribution = 1 in its own slot." },
+        { label: "KEY STEP", body: "Free variables are x₃ and x₄. Set x₄ = 1 and x₃ = 0; solve for pivot variables.\nRow 1: x₁ + 2x₃ + x₄ = 0 ⇒ x₁ = −2(0) − 1(1) = −1.\nRow 2: x₂ − x₃ + 3x₄ = 0 ⇒ x₂ = 0 − 3(1) = −3.\nBasis vector: (−1, −3, 0, 1)." },
+        { label: "COMPUTATION", body: "Position 4 of (−1, −3, 0, 1) = 1." },
+        { label: "VERIFICATION", body: "By construction, the free variable that is set to 1 always appears as 1 in its slot of the corresponding basis vector." },
+      ],
+      gateCheck: "Free var slot has value 1.", speed: "20s.", whatMadeHard: "Setup.",
+      generalization: "Same.", linkedConcept: "C4.6.",
+    } },
+  { id: "c46-k1", difficulty: "killer", kind: "mcq", marks: 2, timeTarget: 140,
+    tags: ["KILLER", "Synthesis"],
+    statement: <span><B>[KILLER]</B> A matrix A has N(A) with basis {(1, -1, 0, 0), (0, 1, -1, 0), (0, 0, 1, -1)}. Then A must be:</span>,
+    options: [
+      "1 × 4 matrix [1, 1, 1, 1].",
+      "Any matrix with row space = span{(1, 1, 1, 1)}.",
+      "Cannot be determined.",
+      "Identity matrix.",
+    ],
+    answer: "B",
+    hints: [
+      { label: "Conceptual redirect", text: "Each null basis vector is orthogonal to every row." },
+      { label: "Key step", text: "Common orthogonal direction is (1, 1, 1, 1) (check dot products = 0)." },
+      { label: "Near-complete", text: "(B) — any matrix with row space exactly span{(1,1,1,1)}." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Null space ↔ row space orthogonality." },
+        { label: "KEY STEP", body: "row(A) = N(A)⊥. dim N(A) = 3 → dim row(A) = 1 → A has rank 1.\nFind common orthogonal to {(1,-1,0,0), (0,1,-1,0), (0,0,1,-1)}: Let v = (a, b, c, d). v·(1,-1,0,0) = a - b = 0 → a = b. v·(0,1,-1,0) = b - c = 0 → b = c. v·(0,0,1,-1) = c - d = 0 → c = d. So v = (a, a, a, a) = a·(1, 1, 1, 1). Row space = span{(1,1,1,1)}." },
+        { label: "COMPUTATION", body: "(B)." },
+        { label: "VERIFICATION", body: "A could be (1, 1, 1, 1) or (2, 2, 2, 2) etc. — any non-zero scalar multiple." },
+      ],
+      gateCheck: "Null space basis ⊥ row space.",
+      speed: "Orthogonal computation: 90s.", whatMadeHard: "Identifying common ⊥ direction.",
+      generalization: "Same.", linkedConcept: "M8 Four Subspaces.",
+      negAdvisory: "Attempt: orthogonality. (B) wins.",
+    } },
+];
+
+const C46_TECHNIQUES = [
+  { name: "Null Basis from RREF", type: "Speed Shortcut",
+    when: "Need basis of N(A).",
+    steps: ["Identify free cols from RREF.",
+            "For each free col: set that var = 1, all other free = 0.",
+            "Back-substitute for pivot vars (sign-flip RREF coefficients).",
+            "Resulting vector is one basis vector."],
+    speed: "30-60s.", example: "Standard.",
+    danger: "Sign flips.", freq: "Very Frequent" },
+  { name: "Free Var Count = Basis Size", type: "Speed Shortcut",
+    when: "Counting null basis size.",
+    steps: ["Count free cols = nullity = basis size."],
+    speed: "5s.", example: "Standard.",
+    danger: "Don't include pivot cols.", freq: "Frequent" },
+];
+
+const C46_MISTAKES = [
+  { name: "Sign Errors in Null Basis", wrong: [
+      "Problem: Find null basis from RREF row (1, 2, 3) with col 3 free.",
+      "Solution: Set x₃ = 1. x₁ = 2(0) + 3 = 3, x₂ = 0. → (3, 0, 1).",
+    ], errorLine: 0,
+    errorDescription: "Sign flip needed: x₁ + 3 = 0 → x₁ = -3.",
+    rootCause: "Forgetting to move RREF coefficient to RHS.",
+    correct: "(-3, 0, 1).",
+    prevention: "Always sign-flip when moving.",
+    gateCost: "2-mark error.", frequency: "Very Common" },
+];
+
+const C46_PYQS = [];
+
+function ConceptLab46({ progress }) {
+  return <ConceptLab num={6} title="Multiple Free Variables — Null Basis from RREF"
+    why={<>RREF tells you everything about N(A). Each free variable gives one basis vector. Master the sign-flip back-sub algorithm.</>}
+    patterns={C46_PATTERNS} problems={C46_PROBLEMS} techniques={C46_TECHNIQUES}
+    mistakes={C46_MISTAKES} pyqs={C46_PYQS} progress={progress} />;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   CONCEPT 4.7 — SOLUTION THEORY (HIGHEST YIELD + 5 PYQs + KILLER)
+   ════════════════════════════════════════════════════════════════ */
+const C47_PATTERNS = [
+  { name: "For what k: no / unique / infinite?",
+    surface: "Parametric system. Asked for k values giving each of: no sol, unique sol, infinitely many.",
+    testing: "Whether you can do case analysis on (rank A, rank [A|b]) as functions of k.",
+    signals: ["\"for what value of k\"", "\"the system has no solution / unique / infinite\""],
+    firstMove: "Form symbolic [A|b]. Row reduce. Each parametric row gives a condition.",
+    timeBudget: 120, frequency: "Very Frequent" },
+  { name: "Rank Comparison Protocol",
+    surface: "System given. Asked solution count without further qualification.",
+    testing: "rank match → consistent. rank = n → unique. rank < n → infinite.",
+    signals: ["\"how many solutions\""],
+    firstMove: "Compute both ranks. Apply protocol.",
+    timeBudget: 50, frequency: "Very Frequent" },
+  { name: "Trap: rank Match ≠ Unique",
+    surface: "Asked under what conditions Ax = b has unique solution.",
+    testing: "Trap: 'rank(A) = rank([A|b]) is sufficient for unique solution' — FALSE.",
+    signals: ["\"is sufficient for unique\""],
+    firstMove: "Need ALSO rank = n. Rank match alone only gives consistency.",
+    timeBudget: 40, frequency: "Frequent" },
+  { name: "Number-of-Solutions Counting Trap",
+    surface: "Linear system with parameter — count exact integer solutions.",
+    testing: "Linear systems have 0, 1, or ∞ solutions. NEVER a finite > 1 count.",
+    signals: ["\"how many solutions exist\""],
+    firstMove: "Eliminate 'finite > 1' option immediately.",
+    timeBudget: 20, frequency: "Frequent" },
+];
+
+const C47_PROBLEMS = [
+  { id: "c47-e1", difficulty: "easy", kind: "mcq", marks: 1, timeTarget: 30,
+    tags: ["Sol Count"], skipSignal: { type: "attempt", text: "Attempt" },
+    statement: <span>A linear system in ℝⁿ can have:</span>,
+    options: [
+      "0, 1, or 2 solutions only.",
+      "0, 1, or infinitely many solutions.",
+      "Always at least 1 solution.",
+      "Any finite number of solutions.",
+    ],
+    answer: "B",
+    hints: [
+      { label: "Conceptual redirect", text: "Linear sol set: empty, single point, or affine subspace." },
+      { label: "Key step", text: "0, 1, or ∞." },
+      { label: "Near-complete", text: "(B)." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Sol set structure." },
+        { label: "KEY STEP", body: "Linear sol set = empty (no sol), single point (unique), or k-dim affine subspace (infinitely many for k ≥ 1)." },
+        { label: "COMPUTATION", body: "(B)." },
+        { label: "VERIFICATION", body: "Never 2, 7, or any finite >1." },
+      ],
+      gateCheck: "Linear: 0, 1, ∞ only.", speed: "Direct.", whatMadeHard: "Nothing.",
+      generalization: "Universal.", linkedConcept: "C4.5.",
+      negAdvisory: "Attempt: theorem. (B) wins.",
+    } },
+  { id: "c47-e2", difficulty: "easy", kind: "mcq", marks: 1, timeTarget: 35,
+    tags: ["Protocol"], skipSignal: { type: "attempt", text: "Attempt" },
+    statement: <span>rank(A) = rank([A|b]) is:</span>,
+    options: [
+      "Sufficient for unique solution.",
+      "Sufficient for consistency (at least one solution).",
+      "Sufficient for infinite solutions.",
+      "Not related to existence of solution.",
+    ],
+    answer: "B",
+    hints: [
+      { label: "Conceptual redirect", text: "Rank match = consistency. Unique requires also rank = n." },
+      { label: "Key step", text: "Consistency only." },
+      { label: "Near-complete", text: "(B)." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Rank comparison — only existence." },
+        { label: "KEY STEP", body: "rank(A) = rank([A|b]) ⇔ b ∈ col(A) ⇔ system consistent. Uniqueness needs additional rank = n condition." },
+        { label: "COMPUTATION", body: "(B)." },
+        { label: "VERIFICATION", body: "Distractor (A) is the canonical TRAP." },
+      ],
+      gateCheck: "Match → consistency only.", speed: "Direct.", whatMadeHard: "Trap (A).",
+      generalization: "Universal.", linkedConcept: "C4.7 Trap.",
+      negAdvisory: "Attempt: definition. (B) wins.",
+    } },
+  { id: "c47-m1", difficulty: "medium", kind: "mcq", marks: 2, timeTarget: 80,
+    tags: ["Parametric Sol"], skipSignal: { type: "attempt", text: "Attempt" },
+    statement: <span>For 2x + y = 3, 4x + 2y = k, the system has infinitely many solutions iff:</span>,
+    options: [ "k = 6", "k = 3", "k ≠ 6", "All k" ],
+    answer: "A",
+    hints: [
+      { label: "Conceptual redirect", text: "R₂ = 2·R₁ for A. Need R₂(augmented) = 2·R₁(augmented) too." },
+      { label: "Key step", text: "k = 2·3 = 6." },
+      { label: "Near-complete", text: "(A)." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Dependent rows: consistency condition on b." },
+        { label: "KEY STEP", body: "(4, 2 | k) = 2·(2, 1 | 3) requires k = 6. At k = 6: rank 1 < n = 2 → infinite. At k ≠ 6: inconsistent." },
+        { label: "COMPUTATION", body: "(A)." },
+        { label: "VERIFICATION", body: "At k = 6: x + y/2 = 1.5, single eq with 2 unknowns → 1D family." },
+      ],
+      gateCheck: "Dependent rows + b matches → infinite.", speed: "30s.", whatMadeHard: "Nothing.",
+      generalization: "Universal.", linkedConcept: "C4.5.",
+      negAdvisory: "Attempt: structure. (A) wins.",
+    } },
+  { id: "c47-m2", difficulty: "medium", kind: "mcq", marks: 2, timeTarget: 80,
+    tags: ["Parametric No Sol"], skipSignal: { type: "attempt", text: "Attempt" },
+    statement: <span>For x + 2y = 1, 2x + 4y = k, the system has NO solution iff:</span>,
+    options: [ "k = 2", "k ≠ 2", "k = 1", "All k" ],
+    answer: "B",
+    hints: [
+      { label: "Conceptual redirect", text: "R₂ = 2·R₁ for A. Consistency needs k = 2." },
+      { label: "Key step", text: "k ≠ 2 → no solution." },
+      { label: "Near-complete", text: "(B)." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Parametric inconsistency." },
+        { label: "KEY STEP", body: "Coefficient rows parallel. Consistent only if RHS also matches: k = 2. Else: no sol." },
+        { label: "COMPUTATION", body: "(B)." },
+        { label: "VERIFICATION", body: "At k = 3: x + 2y = 1 and x + 2y = 1.5 — contradiction." },
+      ],
+      gateCheck: "Parallel rows, non-matching RHS → inconsistent.", speed: "20s.", whatMadeHard: "Nothing.",
+      generalization: "Universal.", linkedConcept: "C4.5.",
+      negAdvisory: "Attempt: structure. (B) wins.",
+    } },
+  { id: "c47-m3", difficulty: "medium", kind: "mcq", marks: 2, timeTarget: 70,
+    tags: ["Unique Sol"], skipSignal: { type: "attempt", text: "Attempt" },
+    statement: <span>For the system 2x + 3y = 5, 4x + 6y = k, the system has unique solution iff:</span>,
+    options: [ "k = 10", "k ≠ 10", "Never (rows are parallel)", "Always" ],
+    answer: "C",
+    hints: [
+      { label: "Conceptual redirect", text: "Parallel rows → rank A = 1 < n = 2. Never unique." },
+      { label: "Key step", text: "Never." },
+      { label: "Near-complete", text: "(C)." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Detect rank < n always — never unique." },
+        { label: "KEY STEP", body: "(4, 6) = 2·(2, 3). rank A = 1 always. n = 2. Unique would need rank = n = 2. Never." },
+        { label: "COMPUTATION", body: "(C)." },
+        { label: "VERIFICATION", body: "Distractors (A), (B) incorrectly suggest some k gives unique. They give either infinite or none." },
+      ],
+      gateCheck: "Detect structural impossibility.", speed: "30s.", whatMadeHard: "Trap of (A), (B).",
+      generalization: "Same.", linkedConcept: "C4.7.",
+      negAdvisory: "Attempt: structural. (C) wins.",
+    } },
+  { id: "c47-h1", difficulty: "hard", kind: "mcq", marks: 2, timeTarget: 110,
+    tags: ["Parametric Full"], skipSignal: { type: "skip", text: "Skip if <65%" },
+    statement: <span>For x + y + z = 1, x + 2y + 3z = 2, x + 4y + 9z = k², the system is inconsistent iff:</span>,
+    options: [ "k² = 4", "k² ≠ 4", "k² = 1", "Never (always consistent)" ],
+    answer: "D",
+    hints: [
+      { label: "Conceptual redirect", text: "A is 3×3. Check det(A)." },
+      { label: "Key step", text: "det = (2-1)(4-1) - (3-1) ... compute carefully. A = [[1,1,1],[1,2,3],[1,4,9]] — Vandermonde, det = (2-1)(4-1)(4-2) = 1·3·2 = 6 ≠ 0." },
+      { label: "Near-complete", text: "(D). Always unique (and consistent) regardless of k." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Vandermonde det non-zero → invertible → always unique sol for any RHS." },
+        { label: "KEY STEP", body: "A = Vandermonde(1, 2, 3). det = (2-1)(3-1)(3-2) = 1·2·1 = 2 ≠ 0. A invertible → unique sol for ANY k²." },
+        { label: "COMPUTATION", body: "(D)." },
+        { label: "VERIFICATION", body: "Square invertible → unique always." },
+      ],
+      gateCheck: "Vandermonde with distinct gen points → invertible.", speed: "30s.", whatMadeHard: "Vandermonde recognition.",
+      generalization: "Same.", linkedConcept: "C2.2 Vandermonde.",
+      negAdvisory: "Attempt: structural. (D) wins.",
+    } },
+  { id: "c47-h2", difficulty: "hard", kind: "mcq", marks: 2, timeTarget: 100,
+    tags: ["Three Cases"], skipSignal: { type: "skip", text: "Skip if <70%" },
+    statement: <span>For x + y = 2, ax + y = b, the values of (a, b) for which the system has NO solution are:</span>,
+    options: [
+      "a = 1, b ≠ 2.",
+      "a = 1, b = 2.",
+      "a ≠ 1.",
+      "Cannot determine.",
+    ],
+    answer: "A",
+    hints: [
+      { label: "Conceptual redirect", text: "Rows parallel when a = 1. Consistency needs b = 2 then." },
+      { label: "Key step", text: "a = 1 and b ≠ 2 → no sol." },
+      { label: "Near-complete", text: "(A)." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Case analysis." },
+        { label: "KEY STEP", body: "If a ≠ 1: det ≠ 0, unique sol for any b. If a = 1: rows (1, 1) and (1, 1) parallel. Consistency needs RHS match: b = 2. b ≠ 2 → no sol." },
+        { label: "COMPUTATION", body: "(A)." },
+        { label: "VERIFICATION", body: "a = 1, b = 5: x + y = 2 and x + y = 5 — contradiction." },
+      ],
+      gateCheck: "Full case analysis.", speed: "60s.", whatMadeHard: "Two conditions combined.",
+      generalization: "Same.", linkedConcept: "C4.7.",
+      negAdvisory: "Attempt: case. (A) wins.",
+    } },
+  { id: "c47-h3", difficulty: "hard", kind: "nat", marks: 2, timeTarget: 110,
+    tags: ["Parametric Reduce"],
+    statement: <span>For the system 2x + y - z = 1, x + 2y + kz = 0, the smallest non-negative integer k for which the system has a non-trivial null space (extending to 3 unknowns: x, y, z) is ___.</span>,
+    answer: 0, tolerance: 0,
+    hints: [
+      { label: "Conceptual redirect", text: "2 × 3 system always has nullity ≥ 1." },
+      { label: "Key step", text: "rank ≤ 2 always for 2×3, so nullity ≥ 1 for ALL k." },
+      { label: "Near-complete", text: "k = 0 (smallest non-neg)." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Non-trivial null space = nullity > 0." },
+        { label: "KEY STEP", body: "A is 2 × 3 → rank ≤ 2 < 3 = n → nullity ≥ 1 ALWAYS. So any k works, including k = 0." },
+        { label: "COMPUTATION", body: "0." },
+        { label: "VERIFICATION", body: "For any 2×3 matrix, nullity ≥ 1 since rank ≤ min(2, 3) = 2 < 3." },
+      ],
+      gateCheck: "Underdetermined → nullity > 0.", speed: "10s.", whatMadeHard: "Recognizing it's always true.",
+      generalization: "Universal.", linkedConcept: "C4.4.",
+    } },
+  { id: "c47-k1", difficulty: "killer", kind: "mcq", marks: 2, timeTarget: 180,
+    tags: ["KILLER", "5x3 Parametric"],
+    statement: <span><B>[KILLER]</B> The 5 × 3 system <T src="\begin{pmatrix} 1 & 1 & 1 \\ 1 & 2 & 4 \\ 1 & 3 & 9 \\ 1 & 4 & 16 \\ 1 & 5 & k \end{pmatrix} \mathbf{x} = \begin{pmatrix} 0 \\ 0 \\ 0 \\ 0 \\ 0 \end{pmatrix}"/> has non-trivial solutions iff k = ___.</span>,
+    options: [ "k = 25 only", "Trivial solution only for every k (no non-trivial exists)", "k ≠ 25", "Always non-trivial regardless of k" ],
+    answer: "B",
+    hints: [
+      { label: "Conceptual redirect", text: "Non-trivial null ⇔ rank(A) < n = 3 (n = number of unknowns)." },
+      { label: "Key step", text: "Examine rank just from the first FOUR rows: V(1, 2, 3, 4) is a 4 × 3 Vandermonde with distinct generators, so it has full column rank = 3." },
+      { label: "Near-complete", text: "Adding row 5 cannot DECREASE rank. So rank(A) = 3 for every k ⇒ nullity = 0 ⇒ only the trivial solution exists for any k." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Homogeneous 5×3 system — non-trivial null ⇔ rank < 3 (rank-nullity)." },
+        { label: "KEY STEP", body: "First 4 rows form V(1, 2, 3, 4), a 4 × 3 Vandermonde matrix. Distinct generators ⇒ full column rank 3. Adding a 5th row can only INCREASE or keep rank — never decrease. So rank(A) = 3 for all k." },
+        { label: "COMPUTATION", body: "rank(A) = 3 = n always ⇒ nullity = 0 ⇒ only trivial solution. Answer: (B)." },
+        { label: "VERIFICATION", body: "Trap: the value k = 25 makes row 5 equal to the Vandermonde extension (1, 5, 25), which keeps the matrix Vandermonde-shaped but rank stays 3 — that affects which rows are dependent on others, not the column rank." },
+      ],
+      gateCheck: "Adding rows never decreases rank. Look at the existing rank floor first.",
+      speed: "60s.", whatMadeHard: "Trap: students compute when row 5 is dependent on rows 1–4 and pick k = 25. But row-dependence doesn't change COLUMN rank.",
+      generalization: "Overdetermined homogeneous system with full column rank ⇒ only trivial solution.",
+      linkedConcept: "C4.3 Rank invariance, C4.4 Rank-Nullity.",
+      negAdvisory: "Attempt: (A) is the classic trap. (B) is correct.",
+    } },
+];
+
+const C47_TECHNIQUES = [
+  { name: "Rank Comparison Protocol", type: "Structural Insight",
+    when: "Determining sol count.",
+    steps: ["Compute rank(A), rank([A|b]).",
+            "Mismatch → no solution.",
+            "Match + rank = n → unique.",
+            "Match + rank < n → infinitely many."],
+    speed: "30s.", example: "Universal.",
+    danger: "Skip rank = n check leads to wrong 'unique'.", freq: "Very Frequent" },
+  { name: "Three-Case Parametric Analysis", type: "Structural Insight",
+    when: "Parametric system asked for all 3 cases.",
+    steps: ["Symbolic row reduction.",
+            "Find k values for rank drops.",
+            "At each, check consistency separately.",
+            "Tabulate: no sol / unique / infinite."],
+    speed: "120s.", example: "See problems above.",
+    danger: "Forgetting case at boundary.", freq: "Very Frequent" },
+];
+
+const C47_MISTAKES = [
+  { name: "Rank Match Sufficient for Unique TRAP", wrong: [
+      "Problem: rank(A) = rank([A|b]) implies unique sol.",
+      "Solution: True — by rank comparison.",
+    ], errorLine: 0,
+    errorDescription: "Rank match only gives CONSISTENCY. Unique requires also rank = n.",
+    rootCause: "Half-remembering the protocol.",
+    correct: "Need BOTH rank match AND rank = n.",
+    prevention: "Memorize: 'match AND full' for unique.",
+    gateCost: "Catastrophic — 2-mark + neg.", frequency: "Very Common" },
+  { name: "Reporting 'Two Solutions'", wrong: [
+      "Problem: How many solutions does the system have?",
+      "Solution: Two.",
+    ], errorLine: 0,
+    errorDescription: "Linear systems have 0, 1, or infinite. Never finite > 1.",
+    rootCause: "Confusing with quadratic systems.",
+    correct: "0, 1, or ∞ only.",
+    prevention: "Memorize.",
+    gateCost: "Direct error.", frequency: "Common" },
+];
+
+const C47_PYQS = [
+  { year: "GATE-Style A", marks: 2,
+    statement: <span><B>(Representative GATE Solution Theory PYQ.)</B><br/><br/>For x + y + z = 6, 2x + 3y + z = 11, 3x + ky + z = k², determine k such that the system has NO solution.</span>,
+    solution: [
+      { label: "REDUCE", body: "R₂ → R₂ − 2R₁: (0, 1, −1 | −1).\nR₃ → R₃ − 3R₁: (0, k−3, −2 | k²−18).\nR₃ → R₃ − (k−3)R₂: (0, 0, (k−3)−2 | k²−18 + (k−3)) = (0, 0, k−5 | k² + k − 21)." },
+      { label: "CASE ANALYSIS", body: "No solution ⇔ rank A < rank [A|b] ⇔ the last row reads 0 = (non-zero).\nThis requires k − 5 = 0 AND k² + k − 21 ≠ 0.\nAt k = 5: coefficient is 0, augmented entry = 25 + 5 − 21 = 9 ≠ 0. ✓ So at k = 5 the row reads 0 = 9 — INCONSISTENT." },
+      { label: "ANSWER", body: "k = 5 gives no solution. For k ≠ 5, the system has a unique solution." },
+      { label: "TRAP", body: "Don't ask for infinite solutions: at the candidate k = 5 the augmented entry is non-zero, so we get inconsistency, not infinite. Always check BOTH coefficient and augmented column after the reduction." },
+    ] },
+  { year: "GATE-Style B", marks: 2,
+    statement: <span><B>For what k does the system kx + y = 0, x + ky = 0 have only the trivial solution?</B></span>,
+    solution: [
+      { label: "RECOGNIZE", body: "Homogeneous. Trivial only ⇔ det ≠ 0." },
+      { label: "DET", body: "det = k² - 1." },
+      { label: "ANSWER", body: "k ≠ ±1." },
+      { label: "TRAP", body: "At k = ±1: rank 1, non-trivial null space." },
+    ] },
+  { year: "GATE-Style C", marks: 2,
+    statement: <span><B>For x + 2y + 3z = 1, x + 2y + 3z = k (note: same LHS!), the system has:</B></span>,
+    solution: [
+      { label: "RECOGNIZE", body: "Same row, different RHS." },
+      { label: "ANALYZE", body: "At k = 1: same equation; rank 1, nullity 2. Infinite sols. At k ≠ 1: contradiction; no sol." },
+      { label: "ANSWER", body: "Infinite if k = 1, none otherwise." },
+      { label: "TRAP", body: "Detect identical LHS quickly." },
+    ] },
+  { year: "GATE-Style D", marks: 2,
+    statement: <span><B>For x + y + z = 1, ax + by + cz = d, when does the system have unique solution?</B></span>,
+    solution: [
+      { label: "ANALYZE", body: "2 equations, 3 unknowns. rank ≤ 2 < 3 always. Never unique." },
+      { label: "ANSWER", body: "Never." },
+      { label: "TRAP", body: "Underdetermined never has unique sol." },
+    ] },
+  { year: "GATE-Style E", marks: 2,
+    statement: <span><B>For 5 × 3 system Ax = b, the system has at most how many solutions?</B></span>,
+    solution: [
+      { label: "ANALYZE", body: "0 (overdetermined often inconsistent), 1 (rank 3 + match), or ∞ (rank < 3 + match)." },
+      { label: "ANSWER", body: "0, 1, or ∞." },
+      { label: "TRAP", body: "Don't say 'finite > 1'." },
+    ] },
+];
+
+function ConceptLab47({ progress }) {
+  return <ConceptLab num={7} title="Solution Theory — The Single Highest-Yield Topic in M4"
+    why={<>The Rank Comparison Protocol + Three-Case Parametric Analysis = 80% of M4 exam marks. 5 PYQ walkthroughs train both directions: given system → count, given conditions → solve for k. Trap of 'rank match = unique' must be memorized as FALSE.</>}
+    patterns={C47_PATTERNS} problems={C47_PROBLEMS} techniques={C47_TECHNIQUES}
+    mistakes={C47_MISTAKES} pyqs={C47_PYQS} progress={progress} />;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   CONCEPT 4.8 — RREF (BONUS)
+   ════════════════════════════════════════════════════════════════ */
+const C48_PATTERNS = [
+  { name: "RREF Uniqueness Recognition", surface: "Asked if RREF is unique.",
+    testing: "Yes — RREF is unique for a given matrix.",
+    signals: ["\"unique\""],
+    firstMove: "RREF unique by theorem.",
+    timeBudget: 15, frequency: "Frequent" },
+  { name: "Null Space Algorithm from RREF",
+    surface: "Compute null basis from RREF.",
+    testing: "Apply sign-flip back-sub for each free var.",
+    signals: ["\"null space basis\""],
+    firstMove: "Free var = 1, others 0, solve pivots.",
+    timeBudget: 60, frequency: "Very Frequent" },
+  { name: "RREF Structure Properties",
+    surface: "Asked properties of RREF: leading 1s, zeros above pivots, etc.",
+    testing: "RREF requirements: pivots = 1, only non-zero in their col is the pivot, pivots move right going down, zero rows at bottom.",
+    signals: ["\"properties of RREF\""],
+    firstMove: "Memorize the 4 properties.",
+    timeBudget: 20, frequency: "Frequent" },
+];
+
+const C48_PROBLEMS = [
+  { id: "c48-e1", difficulty: "easy", kind: "mcq", marks: 1, timeTarget: 30,
+    tags: ["RREF Definition"], skipSignal: { type: "attempt", text: "Attempt" },
+    statement: <span>Which of the following is TRUE about RREF?</span>,
+    options: [
+      "RREF is unique for each matrix.",
+      "RREF is not unique.",
+      "RREF exists only for square matrices.",
+      "RREF requires matrix to be invertible.",
+    ],
+    answer: "A",
+    hints: [
+      { label: "Conceptual redirect", text: "RREF uniqueness theorem." },
+      { label: "Key step", text: "(A)." },
+      { label: "Near-complete", text: "Unique." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "RREF theorem." },
+        { label: "KEY STEP", body: "RREF is unique (Hermite normal form for matrices over ℝ)." },
+        { label: "COMPUTATION", body: "(A)." },
+        { label: "VERIFICATION", body: "REF is not unique; RREF is." },
+      ],
+      gateCheck: "RREF unique.", speed: "Direct.", whatMadeHard: "Distinguish from REF.",
+      generalization: "Universal.", linkedConcept: "C4.1.",
+      negAdvisory: "Attempt: theorem. (A) wins.",
+    } },
+  { id: "c48-e2", difficulty: "easy", kind: "mcq", marks: 1, timeTarget: 35,
+    tags: ["RREF Properties"], skipSignal: { type: "attempt", text: "Attempt" },
+    statement: <span>Which property is NOT required for a matrix to be in RREF?</span>,
+    options: [
+      "Pivots are 1.",
+      "Above each pivot are zeros.",
+      "Determinant is non-zero.",
+      "Zero rows at the bottom.",
+    ],
+    answer: "C",
+    hints: [
+      { label: "Conceptual redirect", text: "RREF properties: 1s pivots, zeros above and below, staircase, zero rows bottom. Det doesn't enter." },
+      { label: "Key step", text: "(C)." },
+      { label: "Near-complete", text: "Det isn't a RREF requirement." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "RREF requirements." },
+        { label: "KEY STEP", body: "RREF: leading 1s, zeros above pivots in same col, staircase, zero rows at bottom. Det is unrelated." },
+        { label: "COMPUTATION", body: "(C)." },
+        { label: "VERIFICATION", body: "Zero matrix in RREF has det = 0 — still RREF." },
+      ],
+      gateCheck: "Det not a RREF requirement.", speed: "Direct.", whatMadeHard: "Nothing.",
+      generalization: "Universal.", linkedConcept: "C4.1.",
+      negAdvisory: "Attempt: definition. (C) wins.",
+    } },
+  { id: "c48-m1", difficulty: "medium", kind: "mcq", marks: 2, timeTarget: 70,
+    tags: ["Null Basis"], skipSignal: { type: "attempt", text: "Attempt" },
+    statement: <span>From RREF <T src="\begin{pmatrix} 1 & 0 & 2 & 1 \\ 0 & 1 & 0 & 3 \end{pmatrix}"/>, the null basis is:</span>,
+    options: [
+      "{(-2, 0, 1, 0), (-1, -3, 0, 1)}",
+      "{(2, 0, -1, 0), (1, 3, 0, -1)}",
+      "{(1, 0, 0, 0), (0, 0, 1, 0)}",
+      "Empty (only trivial)",
+    ],
+    answer: "A",
+    hints: [
+      { label: "Conceptual redirect", text: "Free: x₃, x₄. Two basis vectors." },
+      { label: "Key step", text: "x₃ = 1, x₄ = 0: x₁ = -2, x₂ = 0 → (-2, 0, 1, 0). x₃ = 0, x₄ = 1: x₁ = -1, x₂ = -3 → (-1, -3, 0, 1)." },
+      { label: "Near-complete", text: "(A)." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Sign-flip algorithm." },
+        { label: "KEY STEP", body: "Free: x₃, x₄.\nBasis 1: x₃ = 1, x₄ = 0. Row 1: x₁ + 2 = 0 ⇒ x₁ = -2. Row 2: x₂ = 0. → (-2, 0, 1, 0).\nBasis 2: x₃ = 0, x₄ = 1. Row 1: x₁ + 1 = 0 ⇒ x₁ = -1. Row 2: x₂ + 3 = 0 ⇒ x₂ = -3. → (-1, -3, 0, 1)." },
+        { label: "COMPUTATION", body: "(A)." },
+        { label: "VERIFICATION", body: "Each vector kills both rows." },
+      ],
+      gateCheck: "Sign-flip from RREF.", speed: "60s.", whatMadeHard: "Sign tracking.",
+      generalization: "Universal.", linkedConcept: "C4.6.",
+      negAdvisory: "Attempt: algorithm. (A) wins.",
+    } },
+  { id: "c48-m2", difficulty: "medium", kind: "nat", marks: 2, timeTarget: 60,
+    tags: ["Pivot Count"],
+    statement: <span>The RREF of <T src="A = \begin{pmatrix} 1 & 2 \\ 2 & 4 \\ 3 & 6 \end{pmatrix}"/> has ___ pivots.</span>,
+    answer: 1, tolerance: 0,
+    hints: [
+      { label: "Conceptual redirect", text: "All rows are scalar multiples of (1, 2). Rank 1." },
+      { label: "Key step", text: "1." },
+      { label: "Near-complete", text: "1." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Compute rank from inspection." },
+        { label: "KEY STEP", body: "Rows: (1, 2), 2·(1, 2), 3·(1, 2). All parallel. RREF: [[1, 2], [0, 0], [0, 0]]. 1 pivot." },
+        { label: "COMPUTATION", body: "1." },
+        { label: "VERIFICATION", body: "rank 1." },
+      ],
+      gateCheck: "Inspect for dependent rows first.", speed: "10s.", whatMadeHard: "Nothing.",
+      generalization: "Same.", linkedConcept: "C4.3.",
+    } },
+  { id: "c48-m3", difficulty: "medium", kind: "mcq", marks: 2, timeTarget: 70,
+    tags: ["RREF Identification"], skipSignal: { type: "attempt", text: "Attempt" },
+    statement: <span>Which of the following is in RREF?</span>,
+    options: [
+      "[[2, 0, 1], [0, 1, 3]]",
+      "[[1, 2, 0], [0, 1, 3]]",
+      "[[1, 0, 2], [0, 1, 3]]",
+      "[[0, 0, 1], [1, 0, 0]]",
+    ],
+    answer: "C",
+    hints: [
+      { label: "Conceptual redirect", text: "Check 4 RREF rules: pivots = 1, zeros above, staircase, zero rows at bottom." },
+      { label: "Key step", text: "(C) satisfies all." },
+      { label: "Near-complete", text: "(A): pivot is 2, not 1. (B): col 2 has both pivot (1) and another non-zero (2). (D): not staircase. (C): OK." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Verify each property." },
+        { label: "KEY STEP", body: "(C): pivots at (1,1) and (2,2), both = 1. Zeros above pivots. Staircase. No zero rows. ✓\n(A): pivot (1,1) = 2 ≠ 1.\n(B): col 2 has (1,2) = 2 above pivot — violates 'zeros above pivot'.\n(D): pivot in row 1 is at col 3; row 2 pivot at col 1 — not staircase." },
+        { label: "COMPUTATION", body: "(C)." },
+        { label: "VERIFICATION", body: "Apply each property." },
+      ],
+      gateCheck: "All 4 properties required.", speed: "30s.", whatMadeHard: "Property checking.",
+      generalization: "Same.", linkedConcept: "C4.1.",
+      negAdvisory: "Attempt: rule check. (C) wins.",
+    } },
+  { id: "c48-h1", difficulty: "hard", kind: "mcq", marks: 2, timeTarget: 90,
+    tags: ["Same RREF"], skipSignal: { type: "skip", text: "Skip if <65%" },
+    statement: <span>Two matrices A and B have the same RREF iff:</span>,
+    options: [
+      "Same row space.",
+      "Same column space.",
+      "Both A and B are square.",
+      "Same rank only.",
+    ],
+    answer: "A",
+    hints: [
+      { label: "Conceptual redirect", text: "Row ops preserve row space. RREF is canonical row-space representative." },
+      { label: "Key step", text: "Same row space ⇔ same RREF." },
+      { label: "Near-complete", text: "(A)." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "RREF = canonical for row space." },
+        { label: "KEY STEP", body: "Row ops preserve row(A). RREF is unique canonical form for row spaces. So A, B have same RREF ⇔ same row(A)." },
+        { label: "COMPUTATION", body: "(A)." },
+        { label: "VERIFICATION", body: "Same rank alone insufficient: many matrices with rank 2 have different RREFs." },
+      ],
+      gateCheck: "RREF ↔ row space.", speed: "Concept: 30s.", whatMadeHard: "Distinguishing rank from row space.",
+      generalization: "Universal.", linkedConcept: "C4.8.",
+      negAdvisory: "Attempt: theorem. (A) wins.",
+    } },
+  { id: "c48-h2", difficulty: "hard", kind: "nat", marks: 2, timeTarget: 95,
+    tags: ["RREF Computation"],
+    statement: <span>The (1, 3) entry of the RREF of <T src="A = \begin{pmatrix} 1 & 2 & 3 \\ 2 & 4 & 7 \\ 3 & 6 & 10 \end{pmatrix}"/> is ___.</span>,
+    answer: 0, tolerance: 0,
+    hints: [
+      { label: "Conceptual redirect", text: "Reduce to RREF and read (1, 3)." },
+      { label: "Key step", text: "R₂ - 2R₁: (0, 0, 1). R₃ - 3R₁: (0, 0, 1). R₃ - R₂: (0, 0, 0). R₁ - 3R₂: (1, 2, 0). RREF: [[1, 2, 0], [0, 0, 1], [0, 0, 0]]." },
+      { label: "Near-complete", text: "0." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Full RREF reduction." },
+        { label: "KEY STEP", body: "Reduce: R₂ → R₂ - 2R₁: (0, 0, 1). R₃ → R₃ - 3R₁: (0, 0, 1). R₃ → R₃ - R₂: (0, 0, 0).\nMatrix: [[1, 2, 3], [0, 0, 1], [0, 0, 0]].\nClear above pivot in col 3: R₁ → R₁ - 3·R₂: (1, 2, 0).\nFinal RREF: [[1, 2, 0], [0, 0, 1], [0, 0, 0]]. (1, 3) = 0." },
+        { label: "COMPUTATION", body: "0." },
+        { label: "VERIFICATION", body: "Pivot col 3 should have only (2, 3) = 1, rest 0." },
+      ],
+      gateCheck: "RREF cleans above pivots too.", speed: "60s.", whatMadeHard: "Above-pivot cleanup.",
+      generalization: "Same.", linkedConcept: "C4.8.",
+    } },
+  { id: "c48-h3", difficulty: "hard", kind: "mcq", marks: 2, timeTarget: 80,
+    tags: ["RREF Uniqueness"], skipSignal: { type: "attempt", text: "Attempt" },
+    statement: <span>Two distinct row operations on A both lead to the same RREF. This implies:</span>,
+    options: [
+      "RREF depends on order.",
+      "RREF is unique regardless of operation order.",
+      "Mistakes were made.",
+      "Cannot happen.",
+    ],
+    answer: "B",
+    hints: [
+      { label: "Conceptual redirect", text: "RREF uniqueness theorem." },
+      { label: "Key step", text: "Same RREF regardless of path." },
+      { label: "Near-complete", text: "(B)." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "RREF unique theorem." },
+        { label: "KEY STEP", body: "Theorem: RREF is unique. Different sequences of legal row ops lead to the same RREF." },
+        { label: "COMPUTATION", body: "(B)." },
+        { label: "VERIFICATION", body: "Intermediate REF can differ; final RREF is canonical." },
+      ],
+      gateCheck: "RREF unique.", speed: "Direct.", whatMadeHard: "Nothing.",
+      generalization: "Universal.", linkedConcept: "C4.8.",
+      negAdvisory: "Attempt: theorem. (B) wins.",
+    } },
+  { id: "c48-k1", difficulty: "killer", kind: "mcq", marks: 2, timeTarget: 140,
+    tags: ["KILLER", "RREF + Null"],
+    statement: <span><B>[KILLER]</B> If A has RREF = <T src="\begin{pmatrix} 1 & 2 & 0 & 3 \\ 0 & 0 & 1 & 4 \\ 0 & 0 & 0 & 0 \end{pmatrix}"/>, the dimension of col(A) + dim(N(A)) = ___.</span>,
+    options: [ "4", "5", "3", "6" ],
+    answer: "A",
+    hints: [
+      { label: "Conceptual redirect", text: "Rank-nullity: rank + nullity = n." },
+      { label: "Key step", text: "rank = 2, nullity = 4 - 2 = 2. Sum = 4." },
+      { label: "Near-complete", text: "(A). This IS the rank-nullity theorem stated differently!" },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "rank-nullity disguised." },
+        { label: "KEY STEP", body: "rank(A) = 2 (two pivots). dim(col(A)) = rank = 2. dim(N(A)) = nullity = n - rank = 4 - 2 = 2. Sum = 4 = n." },
+        { label: "COMPUTATION", body: "(A)." },
+        { label: "VERIFICATION", body: "Rank-nullity in disguise: dim(col) + dim(null) = n always." },
+      ],
+      gateCheck: "Rank + nullity = n = #columns.", speed: "20s.", whatMadeHard: "Recognizing the disguise.",
+      generalization: "Universal.", linkedConcept: "C4.4.",
+      negAdvisory: "Attempt: theorem. (A) wins.",
+    } },
+];
+
+const C48_TECHNIQUES = [
+  { name: "Null Space from RREF Algorithm", type: "Speed Shortcut",
+    when: "Need basis of N(A) from RREF.",
+    steps: ["Identify free columns.",
+            "For each free col j: set xⱼ = 1, others free = 0.",
+            "Back-substitute: each pivot row gives one pivot var = (-RREF coefficient on xⱼ).",
+            "Collect into vector. Repeat for each free col."],
+    speed: "60s.", example: "Universal.",
+    danger: "Sign flips.", freq: "Very Frequent" },
+  { name: "RREF Property Check (4 rules)", type: "Verification Method",
+    when: "Verifying a matrix is in RREF.",
+    steps: ["(1) Pivots = 1.",
+            "(2) Only non-zero in pivot col is the pivot itself.",
+            "(3) Pivots staircase right going down.",
+            "(4) Zero rows at bottom."],
+    speed: "Per matrix: 20s.", example: "Standard.",
+    danger: "All 4 must hold.", freq: "Frequent" },
+];
+
+const C48_MISTAKES = [
+  { name: "Missing 'Zeros Above Pivots' in RREF", wrong: [
+      "Problem: Is [[1, 2, 0], [0, 1, 3]] in RREF?",
+      "Solution: Pivots are 1 at (1,1) and (2,2). Looks like RREF.",
+    ], errorLine: 0,
+    errorDescription: "Col 2 has (1, 2) at top — should be 0 above pivot.",
+    rootCause: "Forgetting rule (2).",
+    correct: "Not in RREF. RREF would clean (1, 2) → 0: row 1 becomes (1, 0, -6).",
+    prevention: "Memorize all 4 rules.",
+    gateCost: "Conceptual.", frequency: "Common" },
+];
+
+const C48_PYQS = [];
+
+function ConceptLab48({ progress }) {
+  return <ConceptLab num={8} title="RREF (Bonus) — Unique Canonical Form + 4-Subspace Recipe"
+    why={<>RREF is the unique canonical form. It IS the algorithm for: extract null basis, identify col(A) basis, identify row(A) basis, characterize rank.</>}
+    patterns={C48_PATTERNS} problems={C48_PROBLEMS} techniques={C48_TECHNIQUES}
+    mistakes={C48_MISTAKES} pyqs={C48_PYQS} progress={progress} />;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   APP ROOT
+   ════════════════════════════════════════════════════════════════ */
+const CONCEPTS_MAP = [
+  { num: 1, shortName: "Echelon",      title: "Echelon Form & Pivots",        total: C41_PROBLEMS.length, Comp: ConceptLab41 },
+  { num: 2, shortName: "Gauss",        title: "Gaussian Elimination",         total: C42_PROBLEMS.length, Comp: ConceptLab42 },
+  { num: 3, shortName: "Rank",         title: "Rank of a Matrix",             total: C43_PROBLEMS.length, Comp: ConceptLab43 },
+  { num: 4, shortName: "Rank-Nullity", title: "Rank-Nullity Theorem",         total: C44_PROBLEMS.length, Comp: ConceptLab44 },
+  { num: 5, shortName: "Solve Ax=b",   title: "Solving Ax = b",               total: C45_PROBLEMS.length, Comp: ConceptLab45 },
+  { num: 6, shortName: "Free Vars",    title: "Multiple Free Variables",      total: C46_PROBLEMS.length, Comp: ConceptLab46 },
+  { num: 7, shortName: "Sol Theory",   title: "Solution Theory",              total: C47_PROBLEMS.length, Comp: ConceptLab47 },
+  { num: 8, shortName: "RREF",         title: "RREF (Bonus)",                 total: C48_PROBLEMS.length, Comp: ConceptLab48 },
+];
+
+function App() {
+  useEffect(() => { hideLoading(); }, []);
+
+  const progress41 = useConceptProgress(1, C41_PROBLEMS.length);
+  const progress42 = useConceptProgress(2, C42_PROBLEMS.length);
+  const progress43 = useConceptProgress(3, C43_PROBLEMS.length);
+  const progress44 = useConceptProgress(4, C44_PROBLEMS.length);
+  const progress45 = useConceptProgress(5, C45_PROBLEMS.length);
+  const progress46 = useConceptProgress(6, C46_PROBLEMS.length);
+  const progress47 = useConceptProgress(7, C47_PROBLEMS.length);
+  const progress48 = useConceptProgress(8, C48_PROBLEMS.length);
+
+  const progressMap = {
+    1: progress41, 2: progress42, 3: progress43, 4: progress44,
+    5: progress45, 6: progress46, 7: progress47, 8: progress48,
+  };
+  const [active, setActive] = useState(1);
+
+  const totalSolved = [progress41, progress42, progress43, progress44, progress45, progress46, progress47, progress48]
+    .reduce((s, p) => s + p.correct.length, 0);
+  const totalProblems = [C41_PROBLEMS, C42_PROBLEMS, C43_PROBLEMS, C44_PROBLEMS, C45_PROBLEMS, C46_PROBLEMS, C47_PROBLEMS, C48_PROBLEMS]
+    .reduce((s, ps) => s + ps.length, 0);
+
+  return (
+    <div className="min-h-screen">
+      <TopNav currentModule={4}/>
+
+      <section className="relative overflow-hidden">
+        <div className="grid-bg absolute inset-0" style={{opacity: 0.45}}/>
+        <div className="absolute inset-0" style={{
+          background: "radial-gradient(800px 400px at 20% 0%, var(--accent-soft), transparent 60%), radial-gradient(600px 400px at 80% 20%, var(--accent-2-soft), transparent 60%)",
+        }}/>
+        <div className="relative max-w-5xl mx-auto px-5 py-12 md:py-16">
+          <div className="inline-flex items-center gap-2 text-xs px-3 py-1.5 rounded-full mb-5"
+            style={{background: "var(--accent-soft)", border: "1px solid var(--accent-border)", color: "var(--accent)"}}>
+            <span className="pulse-dot"/> MODULE 4 · PROBLEM LAB
+          </div>
+          <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight mb-4 leading-[1.04]" style={{color: "var(--text)"}}>
+            Echelon, Rank & Solution Theory
+            <span className="block gradient-text mt-1">The Highest-Yield GATE Topic</span>
+          </h1>
+          <p className="text-lg max-w-3xl leading-relaxed mb-6" style={{color: "var(--text-dim)"}}>
+            8 concept labs covering parametric rank, rank-nullity, the Rank Comparison Protocol, RREF, and the full solution-theory case analysis. Includes 4 PYQ walkthroughs on Rank (1994/2002/2014/2019), 5 PYQ walkthroughs on Solution Theory, and a KILLER on ker(T) for T: ℝ⁵ → ℝ³.
+          </p>
+
+          <div className="flex flex-wrap gap-3 text-sm">
+            <div className="px-3 py-1.5 rounded-full flex items-center gap-2"
+              style={{background: "var(--bg-elev-1)", border: "1px solid var(--border)"}}>
+              <span style={{color: "var(--accent-3)"}}>● </span>
+              <span style={{color: "var(--text)"}}>{totalSolved} / {totalProblems} solved</span>
+            </div>
+            <div className="px-3 py-1.5 rounded-full flex items-center gap-2"
+              style={{background: "var(--bg-elev-1)", border: "1px solid var(--border)"}}>
+              <span style={{color: "var(--accent-2)"}}>● </span>
+              <span style={{color: "var(--text)"}}>8 concept labs · 72 problems · 9 GATE PYQs · timed drill mode</span>
+            </div>
+            <div className="px-3 py-1.5 rounded-full flex items-center gap-2"
+              style={{background: "var(--bg-elev-1)", border: "1px solid var(--border)"}}>
+              <span style={{color: "var(--warn)"}}>● </span>
+              <span style={{color: "var(--text)"}}>Outer product rank, rank inequalities, Rank Comparison Protocol</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div className="max-w-5xl mx-auto px-5">
+        <ConceptNavigator concepts={CONCEPTS_MAP} active={active} setActive={setActive} progressMap={progressMap} />
+      </div>
+
+      <ConceptLab41 progress={progress41} />
+      <ConceptLab42 progress={progress42} />
+      <ConceptLab43 progress={progress43} />
+      <ConceptLab44 progress={progress44} />
+      <ConceptLab45 progress={progress45} />
+      <ConceptLab46 progress={progress46} />
+      <ConceptLab47 progress={progress47} />
+      <ConceptLab48 progress={progress48} />
+
+      <ModuleFooter
+        moduleNum={4}
+        nextModuleTitle="Determinants — Problem Lab"
+        nextModuleFile="module-05-problem-lab.html"
+        checklist={[
+          "I apply rank-nullity using n (columns / domain dim) — never m or codomain.",
+          "I recognize uvᵀ has rank 1 (when u, v non-zero) instantly.",
+          "I use the Rank Comparison Protocol: match → consistent, rank = n → unique.",
+          "I never claim rank match alone implies unique solution.",
+          "I solve parametric 'for what k' problems via symbolic row reduction.",
+          "I read null basis from RREF using the sign-flip back-sub algorithm.",
+          "I distinguish REF (not unique) from RREF (unique).",
+          "I've cleared all 72 problems and beaten my drill personal-best per concept.",
+        ]}
+      />
+    </div>
+  );
+}
+
+mountApp(App);
+</script>
+
+</body>
+</html>

@@ -1,0 +1,1964 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 11 · Theorems Vault — LA Mastery Hub</title>
+
+<script>
+  (function () {
+    try {
+      var t = localStorage.getItem("la-hub::theme") || "dark";
+      document.documentElement.classList.add(t === "light" ? "light" : "dark");
+    } catch (e) { document.documentElement.classList.add("dark"); }
+  })();
+</script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="theme.css">
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script>tailwind.config = { darkMode: 'class' };</script>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+
+<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone@7.25.6/babel.min.js"></script>
+
+<style>
+  /* Category card (top level — Eigenvalues, Rank, etc.) */
+  .cat-card {
+    border: 1px solid var(--border);
+    background: var(--bg-elev-1);
+    border-radius: var(--r-lg);
+    overflow: hidden;
+    transition: border-color var(--t-fast), box-shadow var(--t-fast);
+  }
+  .cat-card:hover { border-color: var(--accent-border); box-shadow: var(--shadow-glow-accent); }
+  .cat-card[open] { border-color: var(--accent); box-shadow: var(--shadow-glow-accent); }
+
+  .cat-summary {
+    cursor: pointer;
+    list-style: none;
+    padding: 1.1rem 1.3rem;
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+    user-select: none;
+  }
+  .cat-summary::-webkit-details-marker { display: none; }
+  .cat-summary:hover { background: var(--accent-soft); }
+  .cat-card[open] .cat-summary {
+    background: linear-gradient(90deg, var(--accent-soft), var(--accent-2-soft));
+    border-bottom: 1px solid var(--accent-border);
+  }
+
+  .cat-icon {
+    width: 38px; height: 38px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--accent-soft);
+    border: 1px solid var(--accent-border);
+    color: var(--accent);
+    font-weight: 700;
+    font-size: 13px;
+    flex-shrink: 0;
+    font-family: var(--font-mono);
+  }
+  .cat-card[open] .cat-icon { background: var(--accent); color: white; }
+
+  .cat-title {
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.2;
+  }
+  .cat-desc {
+    font-size: 12.5px;
+    color: var(--text-dim);
+    margin-top: 2px;
+  }
+  .cat-count {
+    margin-left: auto;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-faded);
+    padding: 3px 10px;
+    border-radius: 999px;
+    background: var(--bg-elev-3);
+    border: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  .cat-chev {
+    width: 18px; height: 18px;
+    color: var(--text-dim);
+    transition: transform var(--t-fast);
+    flex-shrink: 0;
+  }
+  .cat-card[open] .cat-chev { transform: rotate(90deg); color: var(--accent); }
+
+  .cat-body {
+    padding: 1rem 1.3rem 1.3rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.55rem;
+  }
+
+  /* Theorem row (inside a category) */
+  .thm {
+    border: 1px solid var(--border);
+    background: var(--bg-elev-2);
+    border-radius: var(--r-md);
+    transition: border-color var(--t-fast);
+  }
+  .thm:hover { border-color: var(--accent-2-border); }
+  .thm[open] { border-color: var(--accent-2); }
+
+  .thm-summary {
+    cursor: pointer;
+    list-style: none;
+    padding: 0.7rem 0.95rem;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    user-select: none;
+  }
+  .thm-summary::-webkit-details-marker { display: none; }
+  .thm-summary:hover { background: var(--accent-2-soft); border-radius: var(--r-md); }
+
+  .thm-num {
+    width: 22px; height: 22px;
+    border-radius: 6px;
+    background: var(--bg-elev-3);
+    border: 1px solid var(--border);
+    color: var(--accent-2);
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    font-weight: 600;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .thm[open] .thm-num { background: var(--accent-2); color: var(--bg); border-color: var(--accent-2); }
+
+  .thm-title {
+    font-size: 14.5px;
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1.35;
+    flex: 1;
+    min-width: 0;
+  }
+  .thm-tag {
+    font-size: 10px;
+    font-family: var(--font-mono);
+    padding: 2px 7px;
+    border-radius: 999px;
+    background: var(--accent-3-soft);
+    color: var(--accent-3);
+    border: 1px solid var(--accent-3-border);
+    flex-shrink: 0;
+  }
+  .thm-tag.gate {
+    background: var(--danger-soft);
+    color: var(--danger);
+    border-color: var(--danger-border);
+  }
+  .thm-tag.core {
+    background: var(--accent-soft);
+    color: var(--accent);
+    border-color: var(--accent-border);
+  }
+  .thm-chev {
+    width: 14px; height: 14px;
+    color: var(--text-dim);
+    transition: transform var(--t-fast);
+    flex-shrink: 0;
+  }
+  .thm[open] .thm-chev { transform: rotate(90deg); color: var(--accent-2); }
+
+  .thm-body {
+    padding: 0.4rem 1rem 1.1rem;
+    border-top: 1px dashed var(--border);
+    margin-top: 0.3rem;
+  }
+
+  /* Block (Statement / Proof / Intuition / Edge Cases) */
+  .blk {
+    margin-top: 0.85rem;
+    border-radius: var(--r-md);
+    padding: 0.75rem 0.95rem;
+    border: 1px solid var(--border);
+  }
+  .blk-statement {
+    background: var(--accent-soft);
+    border-color: var(--accent-border);
+  }
+  .blk-proof {
+    background: var(--bg-elev-1);
+    border-color: var(--border-strong);
+  }
+  .blk-intuition {
+    background: var(--accent-2-soft);
+    border-color: var(--accent-2-border);
+  }
+  .blk-edge {
+    background: var(--warn-soft);
+    border-color: var(--warn-border);
+  }
+  .blk-label {
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    font-weight: 700;
+    text-transform: uppercase;
+    margin-bottom: 0.4rem;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+  .blk-statement .blk-label { color: var(--accent); }
+  .blk-proof .blk-label { color: var(--text-dim); }
+  .blk-intuition .blk-label { color: var(--accent-2); }
+  .blk-edge .blk-label { color: var(--warn); }
+
+  .blk-body {
+    font-size: 14px;
+    line-height: 1.7;
+    color: var(--text);
+  }
+  .blk-body p { margin: 0.4rem 0; }
+  .blk-body ol, .blk-body ul { margin: 0.3rem 0 0.3rem 1.4rem; }
+  .blk-body ol { list-style: decimal; }
+  .blk-body ul { list-style: disc; }
+  .blk-body li { margin: 0.2rem 0; }
+  .blk-body code {
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    padding: 1px 6px;
+    border-radius: 4px;
+    background: var(--bg-elev-3);
+    color: var(--accent-2);
+    border: 1px solid var(--border);
+  }
+
+  .pill-tag {
+    display: inline-block;
+    padding: 1px 8px;
+    border-radius: 999px;
+    font-size: 10px;
+    font-family: var(--font-mono);
+    background: var(--bg-elev-3);
+    color: var(--text-dim);
+    border: 1px solid var(--border);
+    margin-right: 4px;
+  }
+</style>
+</head>
+<body>
+
+<div id="loading">
+  <div style="text-align:center">
+    <div class="spinner"></div>
+    <div style="font-size:13px; opacity:0.8">Loading Theorems Vault…</div>
+  </div>
+</div>
+
+<div id="root"></div>
+
+<script type="text/babel" src="boilerplate.js"></script>
+
+<script type="text/babel">
+const { useState, useEffect, useMemo, useRef } = React;
+
+/* ════════════════════════════════════════════════════════
+   SEARCH BAR — filters categories AND theorems
+   ════════════════════════════════════════════════════════ */
+function SearchBar({ query, setQuery, visible, total }) {
+  const inputRef = useRef(null);
+  useEffect(() => {
+    const onKey = (e) => {
+      if (e.key === "/" && document.activeElement !== inputRef.current) {
+        e.preventDefault();
+        inputRef.current?.focus();
+      }
+      if (e.key === "Escape") {
+        inputRef.current?.blur();
+        setQuery("");
+      }
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [setQuery]);
+
+  return (
+    <div className="sticky top-[60px] z-40 backdrop-blur-xl py-3 -mx-2 px-2"
+      style={{background: "var(--bg-overlay)", borderBottom: "1px solid var(--border)"}}>
+      <div className="flex items-center gap-3 max-w-6xl mx-auto">
+        <div className="relative flex-1">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+            style={{width: 18, height: 18, position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: "var(--text-faded)"}}>
+            <circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>
+          </svg>
+          <input ref={inputRef} type="text" value={query} onChange={e => setQuery(e.target.value)}
+            placeholder="Search theorems · proofs · keywords  ( press / to focus,  Esc to clear )"
+            className="w-full pl-10 pr-4 py-2.5 rounded-lg text-sm outline-none"
+            style={{background: "var(--bg-elev-2)", border: "1px solid var(--border)", color: "var(--text)"}}/>
+        </div>
+        <div className="text-xs whitespace-nowrap hidden md:block" style={{color: "var(--text-dim)"}}>
+          <span className="font-mono font-bold" style={{color: query ? "var(--accent)" : "var(--text)"}}>{visible}</span> / {total} theorems
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ════════════════════════════════════════════════════════
+   THEOREM BUILDING BLOCKS
+   ════════════════════════════════════════════════════════ */
+function Statement({ children }) {
+  return (
+    <div className="blk blk-statement">
+      <div className="blk-label">📜 Statement</div>
+      <div className="blk-body">{children}</div>
+    </div>
+  );
+}
+function Proof({ children }) {
+  return (
+    <div className="blk blk-proof">
+      <div className="blk-label">🔧 Proof</div>
+      <div className="blk-body">{children}</div>
+    </div>
+  );
+}
+function Intuition({ children }) {
+  return (
+    <div className="blk blk-intuition">
+      <div className="blk-label">🧭 Intuition</div>
+      <div className="blk-body">{children}</div>
+    </div>
+  );
+}
+function Edge({ children }) {
+  return (
+    <div className="blk blk-edge">
+      <div className="blk-label">⚠ Edge Cases / GATE Traps</div>
+      <div className="blk-body">{children}</div>
+    </div>
+  );
+}
+
+function Thm({ num, title, tag, children }) {
+  return (
+    <details className="thm" data-search={(title + " " + (tag || "")).toLowerCase()}>
+      <summary className="thm-summary">
+        <span className="thm-num">{num}</span>
+        <span className="thm-title">{title}</span>
+        {tag && <span className={"thm-tag " + (tag === "GATE" ? "gate" : tag === "CORE" ? "core" : "")}>{tag}</span>}
+        <svg className="thm-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <polyline points="9 18 15 12 9 6"/>
+        </svg>
+      </summary>
+      <div className="thm-body">{children}</div>
+    </details>
+  );
+}
+
+function Cat({ id, icon, title, desc, count, defaultOpen, children }) {
+  return (
+    <details id={id} className="cat-card" {...(defaultOpen ? {open: true} : {})}>
+      <summary className="cat-summary">
+        <div className="cat-icon">{icon}</div>
+        <div>
+          <div className="cat-title">{title}</div>
+          <div className="cat-desc">{desc}</div>
+        </div>
+        <span className="cat-count">{count} thms</span>
+        <svg className="cat-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <polyline points="9 18 15 12 9 6"/>
+        </svg>
+      </summary>
+      <div className="cat-body">{children}</div>
+    </details>
+  );
+}
+
+/* ════════════════════════════════════════════════════════
+   CONTENT — every theorem you need for GATE CSE
+   ════════════════════════════════════════════════════════ */
+function TheoremsContent({ query }) {
+  useEffect(() => {
+    const q = query.trim().toLowerCase();
+    const thms = document.querySelectorAll(".thm");
+    let visible = 0;
+    thms.forEach(t => {
+      const data = (t.getAttribute("data-search") || "") + " " + t.textContent.toLowerCase();
+      const match = !q || data.includes(q);
+      t.style.display = match ? "" : "none";
+      if (match) visible++;
+      if (q && match) t.setAttribute("open", "");
+    });
+    const cats = document.querySelectorAll(".cat-card");
+    cats.forEach(c => {
+      const visibleThms = Array.from(c.querySelectorAll(".thm")).filter(t => t.style.display !== "none");
+      c.style.display = visibleThms.length === 0 ? "none" : "";
+      if (q && visibleThms.length > 0) c.setAttribute("open", "");
+    });
+    const el = document.getElementById("thm-visible");
+    if (el) el.textContent = visible;
+  });
+
+  return (
+    <div className="space-y-3">
+
+{/* ═════════════════════════════════════════════════════════════
+    CATEGORY 1 — MATRIX BASICS · TRANSPOSE · TRACE
+    ═════════════════════════════════════════════════════════════ */}
+<Cat id="cat-basics" icon="01" title="Matrix Basics · Transpose · Trace"
+  desc="Foundational rules for transpose and trace — applied in nearly every problem"
+  count={11} defaultOpen={true}>
+
+  <Thm num="1.1" title="Transpose involution: (Aᵀ)ᵀ = A" tag="CORE">
+    <Statement>For any matrix <code>A</code> (any size), <T src="(A^\top)^\top = A"/>.</Statement>
+    <Proof>
+      <P>Let <T src="B = A^\top"/>, so <T src="b_{ij} = a_{ji}"/>. Then <T src="(B^\top)_{ij} = b_{ji} = a_{ij}"/>, hence <T src="(A^\top)^\top = A"/>.</P>
+    </Proof>
+    <Intuition>Transposing reflects entries across the main diagonal. Reflecting twice returns the original.</Intuition>
+    <Edge>Holds for non-square matrices too (an m×n becomes n×m, then m×n again).</Edge>
+  </Thm>
+
+  <Thm num="1.2" title="Linearity of transpose: (A+B)ᵀ = Aᵀ + Bᵀ and (cA)ᵀ = cAᵀ" tag="CORE">
+    <Statement><BT src={String.raw`(A+B)^\top = A^\top + B^\top, \qquad (cA)^\top = c\,A^\top.`}/></Statement>
+    <Proof>Entrywise: <T src="((A+B)^\top)_{ij} = (A+B)_{ji} = a_{ji} + b_{ji} = (A^\top)_{ij} + (B^\top)_{ij}"/>. Similarly for scalar.</Proof>
+    <Intuition>Transpose is just an index swap — it doesn't change addition or scaling, only rearranges.</Intuition>
+    <Edge>A and B must have the same size for addition to be defined.</Edge>
+  </Thm>
+
+  <Thm num="1.3" title="Reverse-order law: (AB)ᵀ = BᵀAᵀ" tag="CORE">
+    <Statement><BT src={String.raw`(AB)^\top = B^\top A^\top.`}/></Statement>
+    <Proof>
+      <BT src={String.raw`((AB)^\top)_{ij} = (AB)_{ji} = \sum_k a_{jk} b_{ki} = \sum_k (B^\top)_{ik}(A^\top)_{kj} = (B^\top A^\top)_{ij}.`}/>
+    </Proof>
+    <Intuition>Transpose reflects, and reflection reverses order — like reversing a stack of pages when flipping the pile.</Intuition>
+    <Edge>
+      <P>Generalises to <T src="(A_1 A_2 \cdots A_k)^\top = A_k^\top \cdots A_2^\top A_1^\top"/>.</P>
+      <P>Don't confuse with <T src="(AB)^\top \neq A^\top B^\top"/> in general.</P>
+    </Edge>
+  </Thm>
+
+  <Thm num="1.4" title="Transpose of inverse: (A⁻¹)ᵀ = (Aᵀ)⁻¹" tag="GATE">
+    <Statement>If A is invertible, then <T src="(A^{-1})^\top = (A^\top)^{-1}"/>.</Statement>
+    <Proof>
+      <P>From <T src="A A^{-1} = I"/> take transpose on both sides: <T src="(A^{-1})^\top A^\top = I^\top = I"/>. By uniqueness of inverse, <T src="(A^{-1})^\top = (A^\top)^{-1}"/>.</P>
+    </Proof>
+    <Intuition>Inverse and transpose commute — order of applying them doesn't matter.</Intuition>
+    <Edge>Requires A invertible. If A is singular, neither side is defined.</Edge>
+  </Thm>
+
+  <Thm num="1.5" title="Linearity of trace: tr(A+B) = tr A + tr B, tr(cA) = c·tr A" tag="CORE">
+    <Statement><T src="\operatorname{tr}(A+B) = \operatorname{tr}(A) + \operatorname{tr}(B)"/> and <T src="\operatorname{tr}(cA) = c\,\operatorname{tr}(A)"/> for square A, B.</Statement>
+    <Proof>Both follow directly from the definition <T src="\operatorname{tr}(M) = \sum_i m_{ii}"/> and linearity of summation.</Proof>
+    <Intuition>Trace is just "sum the diagonal" — addition and scaling pass through trivially.</Intuition>
+    <Edge>A and B must be SAME size square matrices.</Edge>
+  </Thm>
+
+  <Thm num="1.6" title="Cyclic property of trace: tr(AB) = tr(BA)" tag="GATE">
+    <Statement><BT src={String.raw`\operatorname{tr}(AB) = \operatorname{tr}(BA), \quad \text{whenever both products are defined.}`}/></Statement>
+    <Proof>
+      <BT src={String.raw`\operatorname{tr}(AB) = \sum_i (AB)_{ii} = \sum_i \sum_k a_{ik} b_{ki} = \sum_k \sum_i b_{ki} a_{ik} = \sum_k (BA)_{kk} = \operatorname{tr}(BA).`}/>
+    </Proof>
+    <Intuition>Trace ignores ordering inside cyclic rotations — it counts the same diagonal contributions in a different walk-order.</Intuition>
+    <Edge>
+      <P>Generalises cyclically: <T src="\operatorname{tr}(ABC) = \operatorname{tr}(BCA) = \operatorname{tr}(CAB)"/>.</P>
+      <P><B>Trap:</B> <T src="\operatorname{tr}(ABC) \neq \operatorname{tr}(ACB)"/> in general — only cyclic rotations are equal, not arbitrary swaps.</P>
+      <P>A need NOT be square individually — but AB and BA must be square. e.g. A is m×n, B is n×m → AB is m×m, BA is n×n, both have same trace.</P>
+    </Edge>
+  </Thm>
+
+  <Thm num="1.7" title="Trace = sum of eigenvalues" tag="GATE">
+    <Statement>For an n×n matrix A with eigenvalues <T src="\lambda_1, \ldots, \lambda_n"/> (counted with algebraic multiplicity, over ℂ),
+      <BT src={String.raw`\operatorname{tr}(A) = \sum_{i=1}^{n} \lambda_i.`}/>
+    </Statement>
+    <Proof>
+      <P>The characteristic polynomial is <T src="p(\lambda) = \det(\lambda I - A) = \lambda^n - (\operatorname{tr} A)\lambda^{n-1} + \cdots + (-1)^n \det A"/>.</P>
+      <P>If <T src="p(\lambda) = \prod_i (\lambda - \lambda_i)"/>, expand: the coefficient of <T src="\lambda^{n-1}"/> is <T src="-\sum \lambda_i"/>. Matching with <T src="-\operatorname{tr} A"/> gives the result.</P>
+    </Proof>
+    <Intuition>The diagonal sum is preserved under similarity — and for diagonalised A = PDP⁻¹, the trace literally is the sum of diagonal eigenvalues.</Intuition>
+    <Edge>
+      <P>Holds over ℂ even when eigenvalues are complex.</P>
+      <P>Algebraic multiplicity matters — repeat each eigenvalue accordingly.</P>
+    </Edge>
+  </Thm>
+
+  <Thm num="1.8" title="Determinant = product of eigenvalues" tag="GATE">
+    <Statement><BT src={String.raw`\det(A) = \prod_{i=1}^{n} \lambda_i.`}/></Statement>
+    <Proof>Set <T src="\lambda = 0"/> in <T src="p(\lambda) = \prod (\lambda - \lambda_i)"/>: <T src="p(0) = \prod(-\lambda_i) = (-1)^n \prod \lambda_i"/>. Also <T src="p(0) = \det(-A) = (-1)^n \det A"/>. Cancel <T src="(-1)^n"/>.</Proof>
+    <Intuition>Determinant = volume-scaling factor. Each eigenvalue stretches one independent eigen-direction; the total volume scaling is the product.</Intuition>
+    <Edge>
+      <P>If ANY eigenvalue is 0, then det = 0 → A is singular.</P>
+      <P>Use complex eigenvalues over ℂ — pairs of conjugate complex eigenvalues multiply to a positive real.</P>
+    </Edge>
+  </Thm>
+
+  <Thm num="1.9" title="tr(Aᵀ) = tr(A)" tag="CORE">
+    <Statement><T src="\operatorname{tr}(A^\top) = \operatorname{tr}(A)"/>.</Statement>
+    <Proof>Transpose only swaps off-diagonal entries; diagonal entries are fixed, so the sum is unchanged.</Proof>
+    <Intuition>The main diagonal is the mirror axis of transposition — invariant.</Intuition>
+    <Edge>None.</Edge>
+  </Thm>
+
+  <Thm num="1.10" title="Trace under similarity: tr(P⁻¹AP) = tr(A)" tag="GATE">
+    <Statement>For invertible P, <T src="\operatorname{tr}(P^{-1} A P) = \operatorname{tr}(A)"/>.</Statement>
+    <Proof><T src="\operatorname{tr}(P^{-1}AP) = \operatorname{tr}(APP^{-1}) = \operatorname{tr}(A)"/> by cyclic property.</Proof>
+    <Intuition>Trace is a similarity invariant — depends only on the underlying linear operator, not on the basis.</Intuition>
+    <Edge>This is WHY trace equals sum of eigenvalues: diagonalisable A = PDP⁻¹ implies tr A = tr D = sum of diagonal eigenvalues.</Edge>
+  </Thm>
+
+  <Thm num="1.11" title="Determinant under similarity: det(P⁻¹AP) = det(A)" tag="GATE">
+    <Statement><T src="\det(P^{-1} A P) = \det(A)"/> for any invertible P.</Statement>
+    <Proof><T src="\det(P^{-1}AP) = \det(P^{-1})\det(A)\det(P) = \frac{1}{\det P}\det(A)\det(P) = \det(A)"/>.</Proof>
+    <Intuition>Determinant is also a similarity invariant — same underlying linear map, same volume scaling.</Intuition>
+    <Edge>Combined with trace invariance, similar matrices share characteristic polynomial → same eigenvalues with multiplicity.</Edge>
+  </Thm>
+
+</Cat>
+
+{/* ═════════════════════════════════════════════════════════════
+    CATEGORY 2 — DETERMINANTS
+    ═════════════════════════════════════════════════════════════ */}
+<Cat id="cat-det" icon="02" title="Determinants"
+  desc="Multiplicativity, transpose invariance, row operations, cofactor expansion, special-shape formulas"
+  count={14}>
+
+  <Thm num="2.1" title="Multiplicativity: det(AB) = det(A)·det(B)" tag="GATE">
+    <Statement>For square matrices A, B of the same size, <T src="\det(AB) = \det(A)\,\det(B)"/>.</Statement>
+    <Proof>
+      <P>Case 1: A singular. Then AB is singular (since rank(AB) ≤ rank A), so <T src="\det(AB) = 0 = 0 \cdot \det B"/>.</P>
+      <P>Case 2: A invertible. Write A as product of elementary matrices <T src="A = E_1 E_2 \cdots E_k"/>. For each elementary E, <T src="\det(EM) = \det(E)\det(M)"/> (row-op effect on det). Apply inductively.</P>
+    </Proof>
+    <Intuition>Composing two linear maps multiplies their volume-scaling factors. If A doubles volume and B triples it, AB scales by 6.</Intuition>
+    <Edge>
+      <P><B>Trap:</B> <T src="\det(A+B) \neq \det A + \det B"/> in general — addition is NOT multiplicative.</P>
+      <P><T src="\det(AB) = \det(BA)"/> even though <T src="AB \neq BA"/> usually.</P>
+    </Edge>
+  </Thm>
+
+  <Thm num="2.2" title="Transpose invariance: det(Aᵀ) = det(A)" tag="CORE">
+    <Statement><T src="\det(A^\top) = \det(A)"/>.</Statement>
+    <Proof>
+      <P>Use Leibniz formula: <T src="\det A = \sum_{\sigma} \mathrm{sgn}(\sigma) \prod_i a_{i,\sigma(i)}"/>. Substituting <T src="\tau = \sigma^{-1}"/> reindexes the sum to give <T src="\sum_\tau \mathrm{sgn}(\tau) \prod_i a_{\tau(i),i}"/>, which is <T src="\det A^\top"/>.</P>
+    </Proof>
+    <Intuition>Det depends only on the multiset of rows/columns up to signed combinations. Row-view and column-view are symmetric — same volume.</Intuition>
+    <Edge>Implies every row property of det also holds for columns.</Edge>
+  </Thm>
+
+  <Thm num="2.3" title="Scalar multiplication: det(cA) = cⁿ·det(A)" tag="GATE">
+    <Statement>For n×n A and scalar c, <T src="\det(cA) = c^n \det(A)"/>.</Statement>
+    <Proof>Multiplying each of the n rows by c contributes a factor of c each: <T src="\det(cA) = c \cdot c \cdots c \cdot \det A = c^n \det A"/>.</Proof>
+    <Intuition>Scaling every direction by c scales each independent direction's stretch by c, multiplying volumes by cⁿ.</Intuition>
+    <Edge>
+      <P><B>Trap:</B> <T src="\det(cA) \neq c \det A"/> (common mistake). Always raise c to the matrix size.</P>
+      <P>If c = −1: <T src="\det(-A) = (-1)^n \det A"/>. For odd n, sign flips; for even n, unchanged.</P>
+    </Edge>
+  </Thm>
+
+  <Thm num="2.4" title="det(A⁻¹) = 1/det(A)" tag="GATE">
+    <Statement>If A is invertible, <T src="\det(A^{-1}) = \frac{1}{\det(A)}"/>.</Statement>
+    <Proof><T src="\det(A) \cdot \det(A^{-1}) = \det(A A^{-1}) = \det(I) = 1"/>. Solve.</Proof>
+    <Intuition>Inverse undoes A's volume scaling — if A scales by k, A⁻¹ scales by 1/k.</Intuition>
+    <Edge>If det A = 0, A⁻¹ doesn't exist (division by zero in the formula reflects the geometric collapse).</Edge>
+  </Thm>
+
+  <Thm num="2.5" title="det(Aᵏ) = (det A)ᵏ" tag="CORE">
+    <Statement><T src="\det(A^k) = (\det A)^k"/> for any positive integer k. For invertible A, also for negative k.</Statement>
+    <Proof>Apply multiplicativity (2.1) inductively: <T src="\det(A^2) = \det A \cdot \det A"/>, etc.</Proof>
+    <Intuition>Apply A k times → volume scales by det A each time → total scaling <T src="(\det A)^k"/>.</Intuition>
+    <Edge>For k = 0: <T src="A^0 = I"/>, <T src="\det I = 1 = (\det A)^0"/>. For negative k, need A invertible.</Edge>
+  </Thm>
+
+  <Thm num="2.6" title="Triangular matrix: det = product of diagonal" tag="GATE">
+    <Statement>If A is upper- or lower-triangular, <T src="\det A = \prod_i a_{ii}"/>.</Statement>
+    <Proof>By induction on n via cofactor expansion along the column (or row) with all-zero off-diagonals — only the diagonal-entry term survives at each step.</Proof>
+    <Intuition>Triangular means each "axis" is independently scaled by its diagonal entry; volume = product of diagonal stretches.</Intuition>
+    <Edge>
+      <P>Diagonal matrices are a special case → det = product of diagonal entries.</P>
+      <P><B>Triangular eigenvalue shortcut:</B> eigenvalues of triangular A = diagonal entries (apply det shortcut to <T src="A - \lambda I"/>).</P>
+    </Edge>
+  </Thm>
+
+  <Thm num="2.7" title="Row operations and determinant" tag="CORE">
+    <Statement>Three elementary row operations affect det as follows:
+      <ol>
+        <li>Swap two rows: <T src="\det \to -\det"/> (sign flips).</li>
+        <li>Multiply a row by <T src="c \neq 0"/>: <T src="\det \to c \det"/>.</li>
+        <li>Add a multiple of one row to another: <T src="\det"/> unchanged.</li>
+      </ol>
+    </Statement>
+    <Proof>
+      <P>(1) Sign flip is the defining alternating property of the determinant.</P>
+      <P>(2) Multilinearity: det is linear in each row separately.</P>
+      <P>(3) <T src="\det(\ldots, r_i + c r_j, \ldots, r_j, \ldots) = \det(\ldots, r_i, \ldots, r_j, \ldots) + c \det(\ldots, r_j, \ldots, r_j, \ldots) = \det A + 0"/>, since two equal rows ⇒ det = 0.</P>
+    </Proof>
+    <Intuition>Row 3 is the "free move" — Gaussian elimination uses it precisely because it doesn't change the determinant.</Intuition>
+    <Edge>By transpose invariance, same rules hold for COLUMN operations. Never scale by 0 — destroys information AND makes det = 0 trivially.</Edge>
+  </Thm>
+
+  <Thm num="2.8" title="Two equal rows / zero row ⇒ det = 0" tag="CORE">
+    <Statement>If A has two equal rows, or a row of zeros, then <T src="\det A = 0"/>.</Statement>
+    <Proof>
+      <P>Equal rows: swap them, sign flips, but matrix unchanged → <T src="\det A = -\det A"/>, so <T src="\det A = 0"/>.</P>
+      <P>Zero row: multilinearity → scaling by 0 forces det = 0.</P>
+    </Proof>
+    <Intuition>Two equal rows means the rows live in a lower-dimensional subspace → the parallelepiped collapses → volume 0.</Intuition>
+    <Edge>Same holds for columns. Also: ANY linear dependence among rows ⇒ det = 0.</Edge>
+  </Thm>
+
+  <Thm num="2.9" title="Laplace / Cofactor expansion" tag="GATE">
+    <Statement>For any row i: <BT src={String.raw`\det A = \sum_{j=1}^{n} (-1)^{i+j} a_{ij} M_{ij}`}/>
+      where <T src="M_{ij}"/> is the (i,j)-minor (det of A with row i, column j deleted).</Statement>
+    <Proof>Proven by induction on n; the alternating multilinear definition forces this formula.</Proof>
+    <Intuition>"Pick any row, fan out via the alternating sign pattern, recurse." Useful when one row has many zeros.</Intuition>
+    <Edge>
+      <P>Works for any row OR column. Pick the row/column with the MOST zeros for fastest computation.</P>
+      <P>Adjugate matrix (used in inverse formula) is the transpose of the cofactor matrix.</P>
+    </Edge>
+  </Thm>
+
+  <Thm num="2.10" title="Singular ⇔ det = 0" tag="GATE">
+    <Statement>A square matrix A is singular (non-invertible) iff <T src="\det A = 0"/>.</Statement>
+    <Proof>
+      <P>(⇒) If singular, columns are linearly dependent → det = 0 (linear dependence among columns ⇒ det = 0).</P>
+      <P>(⇐) If det = 0, row reduction yields a zero row in REF → rank &lt; n → columns dependent → A not invertible.</P>
+    </Proof>
+    <Intuition>Det = volume. Volume = 0 means the columns collapse into a lower-dimensional flat — the map is not 1–1, no inverse.</Intuition>
+    <Edge>Equivalent to: rank(A) &lt; n; N(A) ≠ {'{0}'}; 0 is an eigenvalue; Ax = b has 0 or ∞ solutions, never unique.</Edge>
+  </Thm>
+
+  <Thm num="2.11" title="Block triangular: det = product of diagonal blocks" tag="GATE">
+    <Statement>If <T src="M = \begin{pmatrix} A & B \\ 0 & D \end{pmatrix}"/> with square A, D, then <T src="\det M = \det A \cdot \det D"/>.</Statement>
+    <Proof>Row-reduce within the upper block to a triangular form; the lower-left zero block ensures no cross terms appear in the expansion.</Proof>
+    <Intuition>The zero block makes the action of A and D independent on their respective subspaces, so volume factors multiply.</Intuition>
+    <Edge>
+      <P>Same for lower block triangular <T src="\begin{pmatrix} A & 0 \\ C & D \end{pmatrix}"/>.</P>
+      <P><B>Trap:</B> NOT true in general for full block matrices — only if one off-diagonal block is zero.</P>
+      <P>Schur complement: <T src="\det\begin{pmatrix} A & B \\ C & D \end{pmatrix} = \det A \cdot \det(D - CA^{-1}B)"/> when A invertible.</P>
+    </Edge>
+  </Thm>
+
+  <Thm num="2.12" title="Vandermonde determinant" tag="GATE">
+    <Statement><BT src={String.raw`\det\begin{pmatrix} 1 & x_1 & x_1^2 & \cdots & x_1^{n-1} \\ 1 & x_2 & x_2^2 & \cdots & x_2^{n-1} \\ \vdots & \vdots & \vdots & \ddots & \vdots \\ 1 & x_n & x_n^2 & \cdots & x_n^{n-1} \end{pmatrix} = \prod_{1 \leq i < j \leq n} (x_j - x_i).`}/></Statement>
+    <Proof>
+      <P>Treat as polynomial in <T src="x_n"/>. It vanishes when <T src="x_n = x_i"/> for any i &lt; n, so it's divisible by <T src="\prod_{i&lt;n}(x_n - x_i)"/>. Degree count and leading coefficient force equality. Recurse.</P>
+    </Proof>
+    <Intuition>The determinant detects "all x's distinct" — it's zero exactly when two nodes coincide (rows become equal).</Intuition>
+    <Edge>Non-zero iff all <T src="x_i"/> are distinct — used in polynomial interpolation uniqueness.</Edge>
+  </Thm>
+
+  <Thm num="2.13" title="det(I + uvᵀ) = 1 + vᵀu (matrix determinant lemma, rank-1 update)" tag="GATE">
+    <Statement>For column vectors u, v in ℝⁿ, <T src="\det(I + uv^\top) = 1 + v^\top u"/>.</Statement>
+    <Proof>
+      <P>If u = 0 trivial. Else build basis with u as first vector. In this basis, <T src="uv^\top"/> has only one non-zero row, so <T src="I + uv^\top"/> is upper triangular with first diagonal entry <T src="1 + v^\top u"/> and rest equal to 1.</P>
+    </Proof>
+    <Intuition><T src="uv^\top"/> is rank-1; it only stretches one direction (along u). The new determinant differs from the identity only in that one stretched direction.</Intuition>
+    <Edge>General: <T src="\det(A + uv^\top) = \det(A)(1 + v^\top A^{-1} u)"/> when A invertible. Common in numerical linear algebra (Sherman–Morrison).</Edge>
+  </Thm>
+
+  <Thm num="2.14" title="det(A) for 2×2 and 3×3" tag="CORE">
+    <Statement>
+      <BT src={String.raw`\det\begin{pmatrix} a & b \\ c & d \end{pmatrix} = ad - bc.`}/>
+      <BT src={String.raw`\det\begin{pmatrix} a & b & c \\ d & e & f \\ g & h & i \end{pmatrix} = aei + bfg + cdh - ceg - bdi - afh.`}/>
+    </Statement>
+    <Proof>Direct from Leibniz / Sarrus rule. 2×2 has 2! = 2 terms, 3×3 has 3! = 6 terms.</Proof>
+    <Intuition>For 2×2: signed area of the parallelogram with sides (a,c) and (b,d). For 3×3: signed volume.</Intuition>
+    <Edge>
+      <P><B>Sarrus rule ONLY works for 3×3 and 2×2.</B> Fails for 4×4 and higher — must use cofactor expansion or row reduction.</P>
+    </Edge>
+  </Thm>
+
+</Cat>
+
+{/* ═════════════════════════════════════════════════════════════
+    CATEGORY 3 — INVERSE MATRIX
+    ═════════════════════════════════════════════════════════════ */}
+<Cat id="cat-inverse" icon="03" title="Inverse Matrix"
+  desc="Existence, uniqueness, formulas, and the Invertible Matrix Theorem (Big Equivalence)"
+  count={9}>
+
+  <Thm num="3.1" title="Uniqueness of inverse" tag="CORE">
+    <Statement>If A has an inverse, it is unique.</Statement>
+    <Proof>
+      <P>Suppose B and C both satisfy <T src="AB = BA = I"/> and <T src="AC = CA = I"/>. Then <T src="B = BI = B(AC) = (BA)C = IC = C"/>.</P>
+    </Proof>
+    <Intuition>Once a "perfect undo" exists, it's pinned down — there's no second inverse hiding.</Intuition>
+    <Edge>Justifies writing <T src="A^{-1}"/> as a single well-defined object.</Edge>
+  </Thm>
+
+  <Thm num="3.2" title="Existence: A invertible ⇔ det A ≠ 0" tag="GATE">
+    <Statement>An n×n matrix A is invertible iff <T src="\det A \neq 0"/>.</Statement>
+    <Proof>
+      <P>(⇒) <T src="\det A \cdot \det A^{-1} = 1"/> ≠ 0 forces det A ≠ 0.</P>
+      <P>(⇐) If det A ≠ 0, the adjugate formula <T src="A^{-1} = \frac{1}{\det A} \mathrm{adj}(A)"/> constructs the inverse explicitly.</P>
+    </Proof>
+    <Intuition>Invertible = doesn't collapse space = preserves volume nontrivially.</Intuition>
+    <Edge>Equivalent to many statements (see Invertible Matrix Theorem 3.9).</Edge>
+  </Thm>
+
+  <Thm num="3.3" title="Inverse via adjugate: A⁻¹ = adj(A)/det A" tag="GATE">
+    <Statement>If det A ≠ 0,
+      <BT src={String.raw`A^{-1} = \frac{1}{\det A}\,\mathrm{adj}(A),`}/>
+      where <T src="\mathrm{adj}(A) = (\mathrm{cof}(A))^\top"/> is the adjugate (transpose of the cofactor matrix).</Statement>
+    <Proof>
+      <P>Show <T src="A \cdot \mathrm{adj}(A) = (\det A) I"/>: the (i,j) entry of the product is <T src="\sum_k a_{ik}\, C_{jk}"/>. For i = j, this is the cofactor expansion = det A. For i ≠ j, it equals the determinant of a matrix with two equal rows = 0.</P>
+    </Proof>
+    <Intuition>Adjugate "pre-bakes" the cofactor magic; dividing by det normalises so the product becomes I.</Intuition>
+    <Edge>
+      <P>2×2 quick form: <T src="\begin{pmatrix} a & b \\ c & d \end{pmatrix}^{-1} = \frac{1}{ad-bc}\begin{pmatrix} d & -b \\ -c & a \end{pmatrix}"/>.</P>
+      <P>Computationally expensive for large n — row reduction is faster in practice.</P>
+    </Edge>
+  </Thm>
+
+  <Thm num="3.4" title="(AB)⁻¹ = B⁻¹A⁻¹  (reverse-order law for inverse)" tag="CORE">
+    <Statement>If A, B invertible, then AB is invertible and <T src="(AB)^{-1} = B^{-1} A^{-1}"/>.</Statement>
+    <Proof><T src="(AB)(B^{-1}A^{-1}) = A(BB^{-1})A^{-1} = AIA^{-1} = AA^{-1} = I"/>. Similarly the other side.</Proof>
+    <Intuition>Putting on a sock then a shoe → to undo: take off the shoe first, then the sock. Order reverses.</Intuition>
+    <Edge>Generalises: <T src="(A_1 \cdots A_k)^{-1} = A_k^{-1} \cdots A_1^{-1}"/>.</Edge>
+  </Thm>
+
+  <Thm num="3.5" title="(A⁻¹)⁻¹ = A and (cA)⁻¹ = c⁻¹A⁻¹" tag="CORE">
+    <Statement><T src="(A^{-1})^{-1} = A"/> and for nonzero scalar c, <T src="(cA)^{-1} = c^{-1} A^{-1}"/>.</Statement>
+    <Proof>Both immediate from <T src="A \cdot A^{-1} = I"/> and basic algebra.</Proof>
+    <Intuition>"Undoing the undo" returns the original. Scaling commutes with inversion via reciprocal.</Intuition>
+    <Edge>c = 0 not allowed: 0·A is the zero matrix, not invertible.</Edge>
+  </Thm>
+
+  <Thm num="3.6" title="One-sided inverse forces invertibility (square case)" tag="GATE">
+    <Statement>For square A: if there exists B with <T src="AB = I"/>, then BA = I also, and B = A⁻¹.</Statement>
+    <Proof>
+      <P>AB = I ⇒ det A · det B = 1 ⇒ det A ≠ 0 ⇒ A invertible. Multiply AB = I on left by A⁻¹: B = A⁻¹.</P>
+    </Proof>
+    <Intuition>For square matrices, "left inverse" = "right inverse" = full inverse — no asymmetry.</Intuition>
+    <Edge>
+      <P><B>FAILS for non-square.</B> E.g., a 2×3 matrix may have a 3×2 right inverse but no left inverse.</P>
+    </Edge>
+  </Thm>
+
+  <Thm num="3.7" title="A⁻¹ has eigenvalues 1/λ" tag="GATE">
+    <Statement>If A is invertible with eigenvalue λ and eigenvector v, then A⁻¹ has eigenvalue 1/λ with the SAME eigenvector v.</Statement>
+    <Proof>From <T src="Av = \lambda v"/>, left-multiply by A⁻¹: <T src="v = \lambda A^{-1} v"/>, so <T src="A^{-1} v = \frac{1}{\lambda} v"/>.</Proof>
+    <Intuition>Inverse undoes A; if A stretches v by λ, A⁻¹ shrinks v by λ — that's multiplication by 1/λ.</Intuition>
+    <Edge>
+      <P>Requires λ ≠ 0 — and indeed A invertible ⇔ 0 is NOT an eigenvalue, so all λᵢ ≠ 0 automatically.</P>
+      <P>Eigenvectors are SAME for A and A⁻¹.</P>
+    </Edge>
+  </Thm>
+
+  <Thm num="3.8" title="Row reduction algorithm: [A | I] → [I | A⁻¹]" tag="CORE">
+    <Statement>To compute A⁻¹: augment A with the identity, then row-reduce the left half to I. The right half becomes A⁻¹.</Statement>
+    <Proof>Each elementary row op is left multiplication by an elementary matrix E. The composition E_k…E_1 takes A → I, so E_k…E_1 = A⁻¹. Applied to the right block (initially I), it produces E_k…E_1 = A⁻¹.</Proof>
+    <Intuition>You're simultaneously "untangling" A while applying the SAME moves to I — so I records what you did, which is exactly A⁻¹.</Intuition>
+    <Edge>If the left half cannot be reduced to I (some pivot is missing), A is singular and no inverse exists.</Edge>
+  </Thm>
+
+  <Thm num="3.9" title="Invertible Matrix Theorem (Big Equivalence)" tag="GATE">
+    <Statement>For an n×n matrix A, the following are EQUIVALENT:
+      <ol>
+        <li>A is invertible.</li>
+        <li><T src="\det A \neq 0"/>.</li>
+        <li>Columns of A are linearly independent.</li>
+        <li>Rows of A are linearly independent.</li>
+        <li><T src="\mathrm{rank}(A) = n"/>.</li>
+        <li><T src="N(A) = \{\mathbf{0}\}"/> (null space is trivial).</li>
+        <li><T src="A\mathbf{x} = \mathbf{0}"/> has only the trivial solution.</li>
+        <li><T src="A\mathbf{x} = \mathbf{b}"/> has a UNIQUE solution for every b.</li>
+        <li>0 is NOT an eigenvalue of A.</li>
+        <li>A is a product of elementary matrices.</li>
+        <li><T src="A^\top"/> is invertible.</li>
+        <li>The linear map <T src="\mathbf{x} \mapsto A\mathbf{x}"/> is a bijection on ℝⁿ.</li>
+      </ol>
+    </Statement>
+    <Proof>Proved as a chain of implications. Most are direct: rank = n ⇔ columns LI ⇔ N(A) = 0; det ≠ 0 ⇔ rank = n; etc.</Proof>
+    <Intuition>"Invertible" is the same concept seen from twelve angles — algebraic, geometric, computational. Master all of them.</Intuition>
+    <Edge>
+      <P>ONLY for SQUARE matrices. For non-square: invertibility doesn't apply (use pseudo-inverse instead).</P>
+      <P>Most GATE questions hide as "find k such that A is singular / has unique solution / has zero eigenvalue" — recognise these as the SAME question.</P>
+    </Edge>
+  </Thm>
+
+</Cat>
+
+{/* ═════════════════════════════════════════════════════════════
+    CATEGORY 4 — RANK AND NULLITY
+    ═════════════════════════════════════════════════════════════ */}
+<Cat id="cat-rank" icon="04" title="Rank & Nullity"
+  desc="Rank-nullity, row=column rank, Sylvester/Frobenius inequalities, rank under operations"
+  count={11}>
+
+  <Thm num="4.1" title="Rank-Nullity Theorem" tag="GATE">
+    <Statement>For an m×n matrix A: <BT src={String.raw`\boxed{\;\mathrm{rank}(A) + \mathrm{nullity}(A) = n\;}`}/>
+      where n = number of COLUMNS and <T src="\mathrm{nullity}(A) = \dim N(A)"/>.</Statement>
+    <Proof>
+      <P>Reduce A to RREF. Pivot columns → rank. Free columns ↔ basis vectors of N(A). Pivot + free = total columns = n.</P>
+      <P>More formally: a basis of N(A) (one vector per free column) plus a basis of the row space (one per pivot row) covers ℝⁿ.</P>
+    </Proof>
+    <Intuition>n input dimensions split into: dimensions PRESERVED by A (rank, mapped to column space) plus dimensions CRUSHED to zero (nullity).</Intuition>
+    <Edge>
+      <P><B>Trap:</B> n is COLUMNS, not rows. <T src="\mathrm{nullity}(A^\top) = m - \mathrm{rank}(A)"/>.</P>
+      <P>For square A: rank + nullity = n; A invertible ⇔ rank = n ⇔ nullity = 0.</P>
+    </Edge>
+  </Thm>
+
+  <Thm num="4.2" title="Row rank = Column rank" tag="GATE">
+    <Statement>For any matrix A, the maximum number of linearly independent rows equals the maximum number of linearly independent columns: <T src="\dim \mathrm{Row}(A) = \dim \mathrm{Col}(A) = \mathrm{rank}(A)"/>.</Statement>
+    <Proof>
+      <P>Row reduce A to RREF. Pivot columns of RREF are independent and span the column space → column rank = number of pivots = number of nonzero rows in RREF = row rank.</P>
+      <P>Alternative: if A = CR is a rank factorisation (C = pivot columns, R = RREF nonzero rows), then column rank = number of columns of C = number of rows of R = row rank.</P>
+    </Proof>
+    <Intuition>Rank is intrinsic — the SAME number whether you look at row-space or column-space. Both measure "how much information" A carries.</Intuition>
+    <Edge>True even for non-square matrices.</Edge>
+  </Thm>
+
+  <Thm num="4.3" title="Rank bounds: 0 ≤ rank(A) ≤ min(m, n)" tag="CORE">
+    <Statement>For an m×n matrix A: <T src="0 \leq \mathrm{rank}(A) \leq \min(m, n)"/>.</Statement>
+    <Proof>Rank ≤ row count m (cannot have more LI rows than rows). Rank ≤ column count n. Combined: rank ≤ min(m, n). Zero matrix has rank 0.</Proof>
+    <Intuition>Rank is bounded by how many rows/columns even exist to be independent.</Intuition>
+    <Edge>"Full rank" means rank = min(m, n). Equal to: full column rank if rank = n, full row rank if rank = m.</Edge>
+  </Thm>
+
+  <Thm num="4.4" title="rank(AB) ≤ min(rank A, rank B)" tag="GATE">
+    <Statement><T src="\mathrm{rank}(AB) \leq \min(\mathrm{rank}(A), \mathrm{rank}(B))"/>.</Statement>
+    <Proof>
+      <P>Columns of AB are linear combinations of columns of A → C(AB) ⊆ C(A) → rank AB ≤ rank A.</P>
+      <P>Rows of AB are linear combinations of rows of B → Row(AB) ⊆ Row(B) → rank AB ≤ rank B.</P>
+    </Proof>
+    <Intuition>Multiplying can only LOSE information (project further) — never create independence that wasn't already present in the factors.</Intuition>
+    <Edge>
+      <P>Equality holds when one factor is invertible. E.g., if A invertible: <T src="\mathrm{rank}(AB) = \mathrm{rank}(B)"/>.</P>
+      <P>Used to prove: rank(A²) ≤ rank A; equality if A is diagonalizable or full rank.</P>
+    </Edge>
+  </Thm>
+
+  <Thm num="4.5" title="Sylvester's Rank Inequality" tag="GATE">
+    <Statement>For A (m×n) and B (n×k): <BT src={String.raw`\mathrm{rank}(A) + \mathrm{rank}(B) - n \leq \mathrm{rank}(AB) \leq \min(\mathrm{rank}(A), \mathrm{rank}(B)).`}/></Statement>
+    <Proof>
+      <P>Upper bound: Theorem 4.4. Lower bound: by rank-nullity applied to A restricted to C(B), <T src="\dim(\mathrm{Im}(A|_{C(B)})) \geq \dim C(B) - \dim N(A)"/>, i.e. <T src="\mathrm{rank}(AB) \geq \mathrm{rank}(B) - (n - \mathrm{rank}(A))"/>.</P>
+    </Proof>
+    <Intuition>The product can lose at most "nullity of A many" dimensions from B; so rank doesn't drop below rank B − nullity A.</Intuition>
+    <Edge>Crucial when both A and B have small null spaces — product must still have decent rank.</Edge>
+  </Thm>
+
+  <Thm num="4.6" title="Frobenius rank inequality" tag="GATE">
+    <Statement>For compatible A, B, C: <BT src={String.raw`\mathrm{rank}(AB) + \mathrm{rank}(BC) \leq \mathrm{rank}(B) + \mathrm{rank}(ABC).`}/></Statement>
+    <Proof>Apply Sylvester to <T src="A \cdot (BC)"/> and to <T src="(AB) \cdot C"/>, then combine via clever counting of B's column space.</Proof>
+    <Intuition>Refinement of Sylvester for triple products — controls how much information sandwiched B contributes.</Intuition>
+    <Edge>Frequently appears in advanced GATE-DA / research problems; less common in core GATE-CS.</Edge>
+  </Thm>
+
+  <Thm num="4.7" title="rank(A + B) ≤ rank A + rank B" tag="GATE">
+    <Statement><T src="\mathrm{rank}(A + B) \leq \mathrm{rank}(A) + \mathrm{rank}(B)"/>.</Statement>
+    <Proof><T src="C(A+B) \subseteq C(A) + C(B)"/>, and <T src="\dim(C(A) + C(B)) \leq \dim C(A) + \dim C(B)"/>.</Proof>
+    <Intuition>Adding can only combine columns from A and B — at most their dimensions sum.</Intuition>
+    <Edge>
+      <P>Lower bound: <T src="|\mathrm{rank}(A) - \mathrm{rank}(B)| \leq \mathrm{rank}(A+B)"/> (from <T src="\mathrm{rank}(A) = \mathrm{rank}((A+B) + (-B)) \leq \mathrm{rank}(A+B) + \mathrm{rank}(B)"/>).</P>
+    </Edge>
+  </Thm>
+
+  <Thm num="4.8" title="rank(A) = rank(Aᵀ) = rank(AᵀA) = rank(AAᵀ)" tag="GATE">
+    <Statement>All four ranks are equal.</Statement>
+    <Proof>
+      <P>rank(A) = rank(Aᵀ) by row rank = column rank.</P>
+      <P>rank(AᵀA) = rank(A): show N(AᵀA) = N(A). If <T src="A^\top A x = 0"/>, then <T src="x^\top A^\top A x = \|Ax\|^2 = 0"/>, so Ax = 0. Same nullity ⇒ same rank by rank-nullity (both have n columns).</P>
+    </Proof>
+    <Intuition>AᵀA collects column dot-products; it's zero on N(A) and full-rank on rowspace of A.</Intuition>
+    <Edge>Heavily used in least-squares and SVD.</Edge>
+  </Thm>
+
+  <Thm num="4.9" title="Rank is invariant under elementary row/column operations" tag="CORE">
+    <Statement>Multiplying A by an elementary matrix (left or right) does NOT change rank.</Statement>
+    <Proof>Elementary matrices are invertible. rank(EA) = rank A and rank(AE) = rank A since invertible factors preserve rank (Theorem 4.4 equality case).</Proof>
+    <Intuition>Row reduction is a rank-preserving "view change" — same underlying linear map.</Intuition>
+    <Edge>This is why "rank from REF/RREF = number of nonzero rows" is well-defined.</Edge>
+  </Thm>
+
+  <Thm num="4.10" title="Solution-existence theorem (Rouché–Capelli)" tag="GATE">
+    <Statement><T src="A\mathbf{x} = \mathbf{b}"/> has a solution iff <T src="\mathrm{rank}(A) = \mathrm{rank}([A | \mathbf{b}])"/>.</Statement>
+    <Proof>
+      <P>Solution exists ⇔ b ∈ C(A) ⇔ adding b as a column doesn't enlarge the column space ⇔ rank unchanged.</P>
+    </Proof>
+    <Intuition>If b lies in the span of A's columns, you can build it from them — that's exactly what a solution does.</Intuition>
+    <Edge>
+      <P>If rank(A) = rank([A|b]) = n → UNIQUE solution.</P>
+      <P>If rank(A) = rank([A|b]) &lt; n → INFINITELY MANY solutions (n − rank free parameters).</P>
+      <P>If rank(A) ≠ rank([A|b]) → NO solution.</P>
+    </Edge>
+  </Thm>
+
+  <Thm num="4.11" title="Rank of outer product uvᵀ is at most 1" tag="GATE">
+    <Statement>For nonzero u, v: <T src="\mathrm{rank}(uv^\top) = 1"/>. If u = 0 or v = 0, rank = 0.</Statement>
+    <Proof>Every column of <T src="uv^\top"/> is a scalar multiple of u, so column space = span{'{u}'} has dimension 1.</Proof>
+    <Intuition>An outer product creates a "rank-1 update" — only one new direction is introduced.</Intuition>
+    <Edge>Sum of k rank-1 matrices has rank ≤ k. This is the basis of SVD's "best rank-k approximation".</Edge>
+  </Thm>
+
+</Cat>
+
+{/* ═════════════════════════════════════════════════════════════
+    CATEGORY 5 — LINEAR SYSTEMS · Ax = b · Ax = 0
+    ═════════════════════════════════════════════════════════════ */}
+<Cat id="cat-systems" icon="05" title="Linear Systems · Ax = b · Ax = 0"
+  desc="Existence, uniqueness, solution counting, structure of solution sets"
+  count={9}>
+
+  <Thm num="5.1" title="0 / 1 / ∞ solutions theorem" tag="GATE">
+    <Statement>Any linear system Ax = b has EXACTLY 0, 1, or infinitely many solutions — never 2 or 7 or any other finite number &gt; 1.</Statement>
+    <Proof>
+      <P>If x₁ and x₂ are two distinct solutions, then for any scalar t, <T src="x_1 + t(x_2 - x_1)"/> is also a solution: <T src="A(x_1 + t(x_2-x_1)) = b + t(b - b) = b"/>. Letting t vary gives infinitely many.</P>
+    </Proof>
+    <Intuition>The solution set is an AFFINE SUBSPACE — either empty, a single point, or an entire line/plane/.../hyperplane (infinitely many points).</Intuition>
+    <Edge>Holds over any infinite field (ℝ, ℂ, ℚ). Over a finite field (ℤₚ), the "infinitely many" becomes "pⁿ many" but the trichotomy of solvability persists.</Edge>
+  </Thm>
+
+  <Thm num="5.2" title="Homogeneous system Ax = 0 is ALWAYS consistent" tag="CORE">
+    <Statement>Ax = 0 always has at least one solution: the trivial solution x = 0.</Statement>
+    <Proof><T src="A \cdot \mathbf{0} = \mathbf{0}"/> directly.</Proof>
+    <Intuition>Going nowhere always lands at zero — there is no "no solution" case for homogeneous systems.</Intuition>
+    <Edge>So the question for Ax = 0 is never "exists?" but "non-trivial?": Ax = 0 has non-trivial solution ⇔ rank(A) &lt; n ⇔ columns of A are linearly dependent.</Edge>
+  </Thm>
+
+  <Thm num="5.3" title="Complete solution structure: x = xₚ + xₙ" tag="GATE">
+    <Statement>If <T src="\mathbf{x}_p"/> is any particular solution of Ax = b and <T src="\mathbf{x}_n"/> ranges over all solutions of the homogeneous system Ax = 0, then the complete solution of Ax = b is:
+      <BT src={String.raw`\mathbf{x} = \mathbf{x}_p + \mathbf{x}_n, \quad \mathbf{x}_n \in N(A).`}/></Statement>
+    <Proof>
+      <P>If x is a solution: <T src="A(x - x_p) = b - b = 0"/>, so <T src="x - x_p \in N(A)"/>.</P>
+      <P>Conversely, for any <T src="x_n \in N(A)"/>: <T src="A(x_p + x_n) = b + 0 = b"/>.</P>
+    </Proof>
+    <Intuition>One anchor (xₚ) + the freedom of the null space = the entire affine solution set. Like "particular + complementary" in ODEs.</Intuition>
+    <Edge>
+      <P>If N(A) = {'{0}'}: unique solution xₚ.</P>
+      <P>If N(A) ≠ {'{0}'}: infinite solution set translated from N(A) by xₚ.</P>
+    </Edge>
+  </Thm>
+
+  <Thm num="5.4" title="Solution count classification (rank tableau)" tag="GATE">
+    <Statement>
+      <table className="cheat-table" style={{width: "100%", borderCollapse: "collapse", fontSize: 13, marginTop: 6}}>
+        <thead><tr style={{borderBottom: "1px solid var(--border)"}}>
+          <th style={{textAlign: "left", padding: "4px 6px", color: "var(--accent)"}}>Condition (n cols)</th>
+          <th style={{textAlign: "left", padding: "4px 6px", color: "var(--accent)"}}>Solutions</th>
+        </tr></thead>
+        <tbody>
+          <tr><td style={{padding:"4px 6px"}}><T src="\mathrm{rank}(A) &lt; \mathrm{rank}([A|b])"/></td><td style={{padding:"4px 6px"}}>None</td></tr>
+          <tr><td style={{padding:"4px 6px"}}><T src="\mathrm{rank}(A) = \mathrm{rank}([A|b]) = n"/></td><td style={{padding:"4px 6px"}}>Unique</td></tr>
+          <tr><td style={{padding:"4px 6px"}}><T src="\mathrm{rank}(A) = \mathrm{rank}([A|b]) &lt; n"/></td><td style={{padding:"4px 6px"}}>∞ many (n − rank free vars)</td></tr>
+        </tbody>
+      </table>
+    </Statement>
+    <Proof>Combine Rouché–Capelli (5.10 alt) with rank-nullity. Number of free variables = n − rank(A), each parametrising one dimension of solution.</Proof>
+    <Intuition>Two questions, two answers: (1) Is b reachable? (2) If so, is the route unique?</Intuition>
+    <Edge>
+      <P>For SQUARE A: unique iff det A ≠ 0; else no/∞ depending on b.</P>
+      <P>For HOMOGENEOUS (b = 0): always consistent, so only "unique trivial" vs "∞ non-trivial" cases.</P>
+    </Edge>
+  </Thm>
+
+  <Thm num="5.5" title="Wide system (m < n) has 0 or ∞ solutions, never unique" tag="GATE">
+    <Statement>If A is m×n with m &lt; n, then Ax = b has either 0 or infinitely many solutions — UNIQUENESS IS IMPOSSIBLE.</Statement>
+    <Proof>rank(A) ≤ min(m, n) = m &lt; n, so by rank-nullity nullity(A) = n − rank(A) ≥ 1. Hence N(A) ≠ {'{0}'}; the system can never be unique.</Proof>
+    <Intuition>More unknowns than equations → too much freedom → either the freedom is consistent (∞) or it isn't (0).</Intuition>
+    <Edge>For homogeneous Ax = 0 with m &lt; n: ALWAYS has non-trivial solutions (guaranteed ∞).</Edge>
+  </Thm>
+
+  <Thm num="5.6" title="Tall system (m > n) typically has 0 or 1 solutions" tag="GATE">
+    <Statement>If A is m×n with m &gt; n and full column rank (rank = n), then Ax = b has either 0 or 1 solution. (For a generic b: zero solutions; least-squares used instead.)</Statement>
+    <Proof>rank A = n → nullity = 0 → at most one solution. Solution exists iff b ∈ C(A) which is only an n-dimensional subspace of ℝᵐ — small chance.</Proof>
+    <Intuition>More equations than unknowns → over-determined → usually no exact solution; best you can do is minimize ||Ax − b|| (least squares).</Intuition>
+    <Edge>If rank &lt; n, infinitely many solutions are again possible.</Edge>
+  </Thm>
+
+  <Thm num="5.7" title="Square A: unique iff invertible" tag="GATE">
+    <Statement>For square n×n A: Ax = b has a unique solution for every b iff A is invertible. In that case <T src="\mathbf{x} = A^{-1} \mathbf{b}"/>.</Statement>
+    <Proof>Direct from Invertible Matrix Theorem (3.9), specifically conditions 1 ⇔ 8.</Proof>
+    <Intuition>An invertible square matrix is a bijection of ℝⁿ — every target b has exactly one pre-image.</Intuition>
+    <Edge>If A singular: either no solution (b ∉ C(A)) or infinitely many (b ∈ C(A) and N(A) ≠ {'{0}'}).</Edge>
+  </Thm>
+
+  <Thm num="5.8" title="Null space N(A) is a subspace of ℝⁿ" tag="CORE">
+    <Statement><T src="N(A) = \{\mathbf{x} : A\mathbf{x} = \mathbf{0}\}"/> is a subspace of ℝⁿ.</Statement>
+    <Proof>
+      <P>Contains 0: A·0 = 0. ✓</P>
+      <P>Closed under addition: <T src="x, y \in N(A) \Rightarrow A(x+y) = Ax + Ay = 0"/>. ✓</P>
+      <P>Closed under scalar mult: <T src="A(cx) = c \cdot Ax = 0"/>. ✓</P>
+    </Proof>
+    <Intuition>The set of "things A crushes to zero" is closed under linear operations — natural subspace structure.</Intuition>
+    <Edge>Column space C(A) is similarly a subspace of ℝᵐ. These are 2 of the 4 fundamental subspaces.</Edge>
+  </Thm>
+
+  <Thm num="5.9" title="Solution set of Ax = b is an affine subspace (or empty)" tag="GATE">
+    <Statement>If Ax = b is consistent with particular solution xₚ, the solution set is the COSET <T src="x_p + N(A)"/> — an affine subspace of dimension nullity(A).</Statement>
+    <Proof>From 5.3: complete solution = xₚ + N(A). This is the translate of N(A) by xₚ — an affine flat (doesn't contain 0 unless xₚ ∈ N(A), i.e. b = 0).</Proof>
+    <Intuition>Picture: N(A) is a line (or plane) through the origin; the solution set is that same line/plane shifted to pass through xₚ.</Intuition>
+    <Edge>Dimension = nullity(A) = n − rank(A) = "number of free variables".</Edge>
+  </Thm>
+
+</Cat>
+
+{/* ═════════════════════════════════════════════════════════════
+    CATEGORY 6 — CRAMER'S RULE
+    ═════════════════════════════════════════════════════════════ */}
+<Cat id="cat-cramer" icon="06" title="Cramer's Rule"
+  desc="Closed-form determinant ratio for square invertible systems"
+  count={3}>
+
+  <Thm num="6.1" title="Cramer's Rule" tag="GATE">
+    <Statement>If A is n×n invertible, the unique solution of Ax = b has components
+      <BT src={String.raw`x_i = \frac{\det A_i}{\det A}, \quad i = 1, \ldots, n,`}/>
+      where <T src="A_i"/> is A with its i-th COLUMN replaced by b.</Statement>
+    <Proof>
+      <P>Multiply x = A⁻¹b by det A: <T src="(\det A) x_i = (\mathrm{adj}(A) \cdot b)_i"/>. Expanding the i-th component of <T src="\mathrm{adj}(A) \cdot b"/> gives cofactor expansion of <T src="\det A_i"/> along the i-th column.</P>
+    </Proof>
+    <Intuition>Replacing column i with b says: "what fraction of column-i's contribution is needed to build b?" That fraction is xᵢ.</Intuition>
+    <Edge>
+      <P><B>Strict requirement:</B> A must be square AND invertible (det A ≠ 0).</P>
+      <P>Computationally O(n!) per determinant → unusable for n ≥ 4 in practice; row reduction is O(n³).</P>
+      <P>Mainly useful for symbolic 2×2 and 3×3 problems on GATE.</P>
+    </Edge>
+  </Thm>
+
+  <Thm num="6.2" title="Cramer's Rule for inverse columns" tag="GATE">
+    <Statement>The j-th column of A⁻¹ is <T src="A^{-1} e_j"/> — by Cramer, its i-th entry is <T src="\det(A_{ij}^*) / \det A"/>, where <T src="A_{ij}^*"/> is A with column i replaced by <T src="e_j"/>. This recovers the adjugate formula.</Statement>
+    <Proof>Apply Cramer column-by-column to <T src="A X = I"/>. Each column of X is recovered via Cramer.</Proof>
+    <Intuition>The adjugate formula <T src="A^{-1} = \mathrm{adj}(A)/\det A"/> is literally Cramer's rule applied n times in parallel.</Intuition>
+    <Edge>Same impractical complexity; theoretical link only.</Edge>
+  </Thm>
+
+  <Thm num="6.3" title="Cramer doesn't apply when det A = 0" tag="GATE">
+    <Statement>If det A = 0, Cramer's rule is undefined. The system has either 0 or ∞ solutions; rank analysis is required.</Statement>
+    <Proof>Division by zero. The "solution exists ⇔ rank(A) = rank([A|b])" criterion replaces Cramer here.</Proof>
+    <Intuition>Cramer is the "unique solution via determinant ratio" recipe — it can't say anything when uniqueness itself fails.</Intuition>
+    <Edge><B>GATE trap:</B> If a problem asks "find x₁ via Cramer" but A is singular, the question is ill-posed or expects "no unique solution / use rank method".</Edge>
+  </Thm>
+
+</Cat>
+
+{/* ═════════════════════════════════════════════════════════════
+    CATEGORY 7 — VECTOR SPACES · BASIS · DIMENSION
+    ═════════════════════════════════════════════════════════════ */}
+<Cat id="cat-vs" icon="07" title="Vector Spaces · Basis · Dimension"
+  desc="Subspace axioms, independence, basis uniqueness, dimension theorems"
+  count={9}>
+
+  <Thm num="7.1" title="Subspace test (3 axioms)" tag="CORE">
+    <Statement>A non-empty subset W of vector space V is a subspace iff:
+      <ol>
+        <li>0 ∈ W (contains the zero vector).</li>
+        <li>W is closed under addition: <T src="u, v \in W \Rightarrow u + v \in W"/>.</li>
+        <li>W is closed under scalar multiplication: <T src="v \in W, c \in \mathbb{R} \Rightarrow cv \in W"/>.</li>
+      </ol>
+    </Statement>
+    <Proof>The axioms are precisely what's needed for W to inherit the vector-space structure of V (associativity, distributivity etc. are automatic).</Proof>
+    <Intuition>A subspace is a "self-contained linear universe" — never leaves itself under the allowed operations.</Intuition>
+    <Edge>
+      <P><B>Quick first test:</B> does W contain 0? If not, NOT a subspace (e.g. lines not through origin, half-planes).</P>
+      <P>Span of any set is automatically a subspace.</P>
+    </Edge>
+  </Thm>
+
+  <Thm num="7.2" title="Span is the smallest subspace containing the set" tag="CORE">
+    <Statement>For any subset S of V, span(S) is a subspace, and it is contained in every subspace that contains S.</Statement>
+    <Proof>Closure under linear combinations is built into the definition. Any subspace containing S must contain all linear combinations of S.</Proof>
+    <Intuition>Span(S) is the "smallest linear universe" you can build that includes S.</Intuition>
+    <Edge>span(∅) = {'{0}'}.</Edge>
+  </Thm>
+
+  <Thm num="7.3" title="Linear independence — uniqueness of representation" tag="GATE">
+    <Statement>If <T src="v_1, \ldots, v_k"/> are linearly independent and <T src="\sum a_i v_i = \sum b_i v_i"/>, then aᵢ = bᵢ for all i.</Statement>
+    <Proof>Subtract: <T src="\sum (a_i - b_i) v_i = 0"/>. Linear independence forces each <T src="a_i - b_i = 0"/>.</Proof>
+    <Intuition>Independence = each vector contributes something unique → unique recipe in terms of them.</Intuition>
+    <Edge>This is the SOLE reason coordinates in a basis are well-defined.</Edge>
+  </Thm>
+
+  <Thm num="7.4" title="Steinitz Exchange / Replacement Lemma" tag="GATE">
+    <Statement>If <T src="\{v_1, \ldots, v_n\}"/> spans V and <T src="\{u_1, \ldots, u_m\}"/> is linearly independent in V, then m ≤ n, and we can replace m of the vᵢ's with the uⱼ's to obtain another spanning set of V.</Statement>
+    <Proof>Induct on m. At each step, express the next uⱼ as a combination of remaining vᵢ's and previously swapped-in u's; some vᵢ must have nonzero coefficient (else uⱼ would be a combo of u's already used, contradicting independence). Swap that vᵢ with uⱼ.</Proof>
+    <Intuition>"You can always trade an old basis vector for an independent new one" — the dimension is rigid.</Intuition>
+    <Edge>This is the master theorem behind: invariance of dimension, basis size = dim, and any spanning set is at least as large as any independent set.</Edge>
+  </Thm>
+
+  <Thm num="7.5" title="All bases have the same size (dimension is well-defined)" tag="GATE">
+    <Statement>Any two bases of a finite-dimensional vector space have the same number of elements. That number is called the DIMENSION.</Statement>
+    <Proof>By Steinitz, if B₁ and B₂ are both bases, |B₁| ≤ |B₂| (since B₂ is independent and B₁ spans) and |B₂| ≤ |B₁| (symmetric). So |B₁| = |B₂|.</Proof>
+    <Intuition>Dimension is intrinsic — doesn't depend on which axes you choose.</Intuition>
+    <Edge>Defines dim V uniquely. dim ℝⁿ = n.</Edge>
+  </Thm>
+
+  <Thm num="7.6" title="n vectors in n-dim space: independent ⇔ spans ⇔ basis" tag="GATE">
+    <Statement>If dim V = n and S ⊆ V has exactly n vectors, then: S is linearly independent ⇔ S spans V ⇔ S is a basis.</Statement>
+    <Proof>If S is LI but doesn't span, extend to a larger LI set → contradicts dim = n. If S spans but isn't LI, remove a redundant vector → smaller spanning set → contradicts dim = n. Either property alone forces both, hence basis.</Proof>
+    <Intuition>When you have the "right number" of vectors, independence and spanning collapse into one condition.</Intuition>
+    <Edge>Practical: in ℝⁿ, n vectors are a basis ⇔ the matrix with them as columns is invertible ⇔ det ≠ 0.</Edge>
+  </Thm>
+
+  <Thm num="7.7" title="Subspace dimension ≤ ambient dimension" tag="CORE">
+    <Statement>If W is a subspace of V and V is finite-dimensional, then W is finite-dimensional and <T src="\dim W \leq \dim V"/>, with equality iff W = V.</Statement>
+    <Proof>Any LI set in W is also LI in V → has ≤ dim V vectors → W has a basis of size ≤ dim V. Equality forces a basis of W to also be a basis of V → W = V.</Proof>
+    <Intuition>You can't fit a higher-dimensional flat inside a lower-dimensional one.</Intuition>
+    <Edge>Strict inequality ⇔ W is a proper subspace.</Edge>
+  </Thm>
+
+  <Thm num="7.8" title="Dimension formula for sum of subspaces" tag="GATE">
+    <Statement>For subspaces U, W of finite-dim V:
+      <BT src={String.raw`\dim(U + W) = \dim U + \dim W - \dim(U \cap W).`}/></Statement>
+    <Proof>Take basis of U ∩ W; extend to basis of U; extend to basis of W. The combined set is a basis of U + W. Count vectors.</Proof>
+    <Intuition>Inclusion–exclusion for subspace dimensions — overlap is counted twice if you just add.</Intuition>
+    <Edge>
+      <P>If U ∩ W = {'{0}'} (direct sum): dim(U ⊕ W) = dim U + dim W.</P>
+      <P>NO 3-set analogue: <T src="\dim(U+V+W)"/> formula has extra triple-intersection terms but is more subtle than inclusion-exclusion.</P>
+    </Edge>
+  </Thm>
+
+  <Thm num="7.9" title="Eigenvectors for distinct eigenvalues are linearly independent" tag="GATE">
+    <Statement>If <T src="\lambda_1, \ldots, \lambda_k"/> are DISTINCT eigenvalues of A with corresponding eigenvectors <T src="v_1, \ldots, v_k"/>, then <T src="\{v_1, \ldots, v_k\}"/> is linearly independent.</Statement>
+    <Proof>
+      <P>Induction. Base case trivial. Suppose <T src="c_1 v_1 + \cdots + c_k v_k = 0"/>. Apply A: <T src="c_1 \lambda_1 v_1 + \cdots + c_k \lambda_k v_k = 0"/>. Subtract <T src="\lambda_k"/> times the first: <T src="c_1(\lambda_1 - \lambda_k) v_1 + \cdots + c_{k-1}(\lambda_{k-1} - \lambda_k) v_{k-1} = 0"/>. By induction, all <T src="c_i (\lambda_i - \lambda_k) = 0"/>, and distinctness forces <T src="c_i = 0"/>. Then back-substitute <T src="c_k v_k = 0 \Rightarrow c_k = 0"/>.</P>
+    </Proof>
+    <Intuition>Different stretch-factors can't be cancelled by combining — eigenvectors of different λ's live in independent directions.</Intuition>
+    <Edge>If A has n DISTINCT eigenvalues, A automatically has n LI eigenvectors → A is DIAGONALIZABLE.</Edge>
+  </Thm>
+
+</Cat>
+
+{/* ═════════════════════════════════════════════════════════════
+    CATEGORY 8 — EIGENVALUES & EIGENVECTORS (definitions, multiplicities)
+    ═════════════════════════════════════════════════════════════ */}
+<Cat id="cat-eig" icon="08" title="Eigenvalues & Eigenvectors"
+  desc="Characteristic equation, multiplicities, fundamental properties"
+  count={11}>
+
+  <Thm num="8.1" title="Existence via characteristic equation" tag="GATE">
+    <Statement>λ is an eigenvalue of A iff <T src="\det(A - \lambda I) = 0"/>.</Statement>
+    <Proof>
+      <P>λ eigenvalue ⇔ ∃ v ≠ 0 with Av = λv ⇔ (A − λI)v = 0 has nontrivial solution ⇔ A − λI singular ⇔ det(A − λI) = 0.</P>
+    </Proof>
+    <Intuition>Eigenvalues are exactly the scalars λ for which "A behaves like λI" on some direction — i.e., the direction is crushed by A − λI.</Intuition>
+    <Edge>
+      <P>For n×n A, characteristic poly p(λ) = det(λI − A) has degree n → at most n distinct eigenvalues, exactly n over ℂ (with multiplicity).</P>
+      <P>Over ℝ, complex roots come in conjugate pairs.</P>
+    </Edge>
+  </Thm>
+
+  <Thm num="8.2" title="2×2 characteristic polynomial: λ² − (tr A)λ + det A" tag="GATE">
+    <Statement>For 2×2 A: <BT src={String.raw`p(\lambda) = \lambda^2 - \mathrm{tr}(A)\,\lambda + \det(A),`}/>
+      so eigenvalues are <T src="\lambda = \frac{\mathrm{tr}(A) \pm \sqrt{\mathrm{tr}(A)^2 - 4 \det(A)}}{2}"/>.</Statement>
+    <Proof>Expand <T src="\det(\lambda I - A) = (\lambda - a)(\lambda - d) - bc = \lambda^2 - (a+d)\lambda + (ad - bc)"/>.</Proof>
+    <Intuition>For 2×2, trace and det fully determine eigenvalues — no need for cofactor expansion.</Intuition>
+    <Edge>
+      <P>Discriminant <T src="\mathrm{tr}^2 - 4\det &gt; 0"/>: two distinct real eigenvalues.</P>
+      <P><T src="= 0"/>: repeated real eigenvalue (defective unless A is already scalar λI).</P>
+      <P><T src="&lt; 0"/>: complex conjugate pair.</P>
+    </Edge>
+  </Thm>
+
+  <Thm num="8.3" title="Triangular matrix: eigenvalues = diagonal entries" tag="GATE">
+    <Statement>If A is upper or lower triangular (including diagonal), eigenvalues are exactly the diagonal entries.</Statement>
+    <Proof><T src="A - \lambda I"/> is also triangular; <T src="\det(A - \lambda I) = \prod_i (a_{ii} - \lambda) = 0 \Leftrightarrow \lambda = a_{ii}"/> for some i.</Proof>
+    <Intuition>Triangular structure means each diagonal axis is independently scaled by aᵢᵢ.</Intuition>
+    <Edge>
+      <P>Block-triangular: eigenvalues = union of eigenvalues of diagonal blocks (with multiplicity).</P>
+      <P>EIGENVECTORS of triangular matrices are NOT trivially the standard basis — must still solve (A − λI)v = 0.</P>
+    </Edge>
+  </Thm>
+
+  <Thm num="8.4" title="Eigenvalues of Aᵀ equal eigenvalues of A" tag="GATE">
+    <Statement>A and Aᵀ have the SAME eigenvalues (with same algebraic multiplicities).</Statement>
+    <Proof><T src="\det(A^\top - \lambda I) = \det((A - \lambda I)^\top) = \det(A - \lambda I)"/> → same characteristic polynomial.</Proof>
+    <Intuition>Determinant is transpose-invariant; eigenvalues come from a det equation, so are too.</Intuition>
+    <Edge>
+      <P>EIGENVECTORS may differ. Eigenvectors of Aᵀ for λ are "left eigenvectors" of A: <T src="w^\top A = \lambda w^\top"/>.</P>
+      <P>Geometric multiplicities of A and Aᵀ are also equal (nullity invariance).</P>
+    </Edge>
+  </Thm>
+
+  <Thm num="8.5" title="Eigenvalues of Aᵏ are λᵏ" tag="GATE">
+    <Statement>If Av = λv, then <T src="A^k v = \lambda^k v"/> for any positive integer k. Same v.</Statement>
+    <Proof>Induction: <T src="A^{k+1} v = A(A^k v) = A(\lambda^k v) = \lambda^k (Av) = \lambda^{k+1} v"/>.</Proof>
+    <Intuition>Applying A k times to v: stretches by λ each time → total stretch λᵏ. Direction never changes.</Intuition>
+    <Edge>For k = 0: A⁰ = I, eigenvalue λ⁰ = 1 (true for ALL v). For A invertible, extends to negative k.</Edge>
+  </Thm>
+
+  <Thm num="8.6" title="Eigenvalues of p(A) are p(λ)" tag="GATE">
+    <Statement>If p is a polynomial and Av = λv, then <T src="p(A) v = p(\lambda) v"/>.</Statement>
+    <Proof>Linearity + theorem 8.5: <T src="p(A) v = \sum c_k A^k v = \sum c_k \lambda^k v = p(\lambda) v"/>.</Proof>
+    <Intuition>Polynomial functions of A act on the eigen-directions by the same polynomial applied to the eigenvalue.</Intuition>
+    <Edge>
+      <P>Extends to <T src="A + cI"/> → eigenvalues λ + c (with c being p = x + c).</P>
+      <P>Same eigenvectors as A — diagonalisation P, D structure is preserved: <T src="p(A) = P p(D) P^{-1}"/>.</P>
+    </Edge>
+  </Thm>
+
+  <Thm num="8.7" title="A and A + cI: eigenvalues shift by c, eigenvectors unchanged" tag="GATE">
+    <Statement>If A has eigenvalue λ with eigenvector v, then A + cI has eigenvalue λ + c with the SAME eigenvector v.</Statement>
+    <Proof><T src="(A + cI) v = Av + cv = \lambda v + cv = (\lambda + c) v"/>.</Proof>
+    <Intuition>Adding cI shifts every "stretch factor" by c, without affecting the directions.</Intuition>
+    <Edge>Used as a "shift trick" to make matrices invertible / positive definite for computation (shift away from zero eigenvalues).</Edge>
+  </Thm>
+
+  <Thm num="8.8" title="Algebraic ≥ Geometric multiplicity: 1 ≤ gm(λ) ≤ am(λ)" tag="GATE">
+    <Statement>For each eigenvalue λ: <BT src={String.raw`1 \leq \mathrm{gm}(\lambda) \leq \mathrm{am}(\lambda) \leq n.`}/>
+      Here am(λ) is the multiplicity of λ as a root of the char poly; gm(λ) = dim(eigenspace) = nullity(A − λI).</Statement>
+    <Proof>
+      <P>gm(λ) ≥ 1 because λ is an eigenvalue → eigenspace non-trivial.</P>
+      <P>gm(λ) ≤ am(λ): pick basis {'{v₁,…,v_gm}'} of eigenspace; extend to basis of ℂⁿ; in this basis, A has block form <T src="\begin{pmatrix} \lambda I_{gm} & * \\ 0 & B \end{pmatrix}"/>. Hence <T src="(t - \lambda)^{\mathrm{gm}}"/> divides the char poly, so am ≥ gm.</P>
+    </Proof>
+    <Intuition>"How many copies of λ does char poly see" ≥ "how many independent eigenvectors λ has". They CAN differ (defective case).</Intuition>
+    <Edge>
+      <P><B>Diagonalizable ⇔ gm = am for every eigenvalue.</B></P>
+      <P>When am(λ) = 1 (simple eigenvalue): automatically gm(λ) = 1 — no defect possible.</P>
+      <P>"Defective" matrix: some gm &lt; am → not diagonalizable.</P>
+    </Edge>
+  </Thm>
+
+  <Thm num="8.9" title="Sum of geometric multiplicities ≤ n" tag="GATE">
+    <Statement><T src="\sum_\lambda \mathrm{gm}(\lambda) \leq n"/>, with equality iff A is diagonalisable.</Statement>
+    <Proof>
+      <P>Eigenvectors for distinct λ's are independent (7.9). Within each eigenspace pick a basis of size gm(λ). The union is an independent set of size <T src="\sum gm(\lambda)"/> in ℝⁿ → ≤ n. Equality means we have n LI eigenvectors → diagonalisable.</P>
+    </Proof>
+    <Intuition>Each eigenspace contributes gm independent directions; total can't exceed the ambient dimension.</Intuition>
+    <Edge>Sum of am's = n (since char poly has degree n). So "diagonalizable" = "no defect" = "the inequality is tight".</Edge>
+  </Thm>
+
+  <Thm num="8.10" title="Singular matrix ⇔ 0 is an eigenvalue" tag="GATE">
+    <Statement><T src="\det A = 0"/> iff 0 is an eigenvalue of A.</Statement>
+    <Proof>0 is an eigenvalue ⇔ <T src="A v = 0"/> for some v ≠ 0 ⇔ N(A) ≠ {0} ⇔ A singular ⇔ det A = 0.</Proof>
+    <Intuition>Eigenvalue 0 means A "crushes" some direction to zero — that's exactly being non-invertible.</Intuition>
+    <Edge>Eigenspace for λ = 0 IS the null space N(A); gm(0) = nullity(A).</Edge>
+  </Thm>
+
+  <Thm num="8.11" title="Rank–eigenvalue connection (for diagonalizable A)" tag="GATE">
+    <Statement>If A is diagonalizable, rank(A) = number of NON-ZERO eigenvalues (counted with multiplicity).</Statement>
+    <Proof>A = PDP⁻¹ → rank(A) = rank(D) = number of nonzero diagonal entries of D = number of nonzero eigenvalues.</Proof>
+    <Intuition>Zero eigenvalues correspond to crushed directions; nonzero ones to preserved directions = the column space.</Intuition>
+    <Edge>
+      <P>For non-diagonalisable A: rank may differ from "count of nonzero λ's" — must compute directly.</P>
+      <P>nullity(A) = am(0) for diagonalisable; could equal gm(0) which is ≤ am(0) in general.</P>
+    </Edge>
+  </Thm>
+
+</Cat>
+
+{/* ═════════════════════════════════════════════════════════════
+    CATEGORY 9 — CAYLEY–HAMILTON & MINIMAL POLYNOMIAL
+    ═════════════════════════════════════════════════════════════ */}
+<Cat id="cat-ch" icon="09" title="Cayley–Hamilton & Minimal Polynomial"
+  desc="Every matrix satisfies its own characteristic polynomial — and the consequences"
+  count={5}>
+
+  <Thm num="9.1" title="Cayley–Hamilton Theorem" tag="GATE">
+    <Statement>Let <T src="p(\lambda) = \det(\lambda I - A)"/> be the characteristic polynomial of n×n A. Then <T src="p(A) = 0"/> (the zero matrix).</Statement>
+    <Proof>
+      <P>Slick proof (diagonalizable case): A = PDP⁻¹ → p(A) = P p(D) P⁻¹. Since <T src="p(\lambda_i) = 0"/> for each eigenvalue, p(D) = 0, hence p(A) = 0.</P>
+      <P>General proof: use that diagonalisable matrices are dense (over ℂ), and p(A) is continuous in A; or use the adjugate identity <T src="(\lambda I - A) \cdot \mathrm{adj}(\lambda I - A) = p(\lambda) I"/>, expand both sides as polynomials in λ and equate coefficients.</P>
+    </Proof>
+    <Intuition>Every matrix is a "root" of its own characteristic polynomial — a deep algebraic constraint.</Intuition>
+    <Edge>
+      <P><B>2×2 form:</B> <T src="A^2 - \mathrm{tr}(A)\,A + \det(A)\,I = 0"/>. Used CONSTANTLY in GATE.</P>
+      <P>Allows computing <T src="A^k"/> for k ≥ n in terms of <T src="I, A, \ldots, A^{n-1}"/>.</P>
+      <P>Allows computing <T src="A^{-1}"/> when A invertible: rearrange CH polynomial, isolate <T src="A \cdot (\ldots) = -\frac{p(0)}{a_0} I"/>.</P>
+    </Edge>
+  </Thm>
+
+  <Thm num="9.2" title="A⁻¹ via Cayley–Hamilton (2×2 case)" tag="GATE">
+    <Statement>For invertible 2×2 A: <BT src={String.raw`A^{-1} = \frac{1}{\det A}\left(\mathrm{tr}(A) \cdot I - A\right).`}/></Statement>
+    <Proof>From CH: <T src="A^2 - \mathrm{tr}(A) A + \det(A) I = 0"/>. Multiply by A⁻¹: <T src="A - \mathrm{tr}(A) I + \det(A) A^{-1} = 0"/>. Solve for A⁻¹.</Proof>
+    <Intuition>CH gives you a polynomial identity in A; rearranging isolates A⁻¹ without computing cofactors.</Intuition>
+    <Edge>For 3×3: <T src="A^{-1} = \frac{1}{\det A}(A^2 - c_2 A + c_1 I)"/> where <T src="c_1 = \mathrm{tr}(A)"/>, <T src="c_2 = \frac{1}{2}(\mathrm{tr}(A)^2 - \mathrm{tr}(A^2))"/>.</Edge>
+  </Thm>
+
+  <Thm num="9.3" title="Powers Aᵏ reducible to ≤ n−1 degree polynomial in A" tag="GATE">
+    <Statement>For any k ≥ n, <T src="A^k"/> can be written as a polynomial in A of degree at most n − 1, with coefficients depending on the characteristic polynomial of A.</Statement>
+    <Proof>Repeatedly substitute <T src="A^n = c_{n-1} A^{n-1} + \cdots + c_0 I"/> (from CH) to reduce any higher power down to degree ≤ n − 1.</Proof>
+    <Intuition>The first n powers <T src="I, A, \ldots, A^{n-1}"/> generate (as a vector space) all higher powers — CH is the "wrap-around" relation.</Intuition>
+    <Edge>Common trick: compute A¹⁰⁰ for a 2×2 matrix by reducing to <T src="\alpha A + \beta I"/> using CH and matching eigenvalue equations.</Edge>
+  </Thm>
+
+  <Thm num="9.4" title="Minimal polynomial divides characteristic polynomial" tag="GATE">
+    <Statement>The minimal polynomial mₐ(λ) (monic poly of least degree with mₐ(A) = 0) DIVIDES the characteristic polynomial p_A(λ).</Statement>
+    <Proof>By polynomial division p_A = q · mₐ + r with deg r &lt; deg mₐ. Apply at A: <T src="0 = 0 + r(A) \Rightarrow r(A) = 0"/>. Minimality forces r = 0.</Proof>
+    <Intuition>Min poly is the "shortest" polynomial that kills A; char poly is one such, hence a multiple.</Intuition>
+    <Edge>
+      <P>Both mₐ and p_A share the SAME SET of roots = eigenvalues of A. Multiplicities can differ.</P>
+      <P>A is DIAGONALIZABLE ⇔ mₐ has all DISTINCT roots (no repeated factors).</P>
+    </Edge>
+  </Thm>
+
+  <Thm num="9.5" title="Diagonalisability test via minimal polynomial" tag="GATE">
+    <Statement>A is diagonalisable iff its minimal polynomial factors into DISTINCT linear factors over the field (e.g. <T src="m_A(\lambda) = (\lambda - \lambda_1)(\lambda - \lambda_2)\cdots(\lambda - \lambda_k)"/> with all <T src="\lambda_i"/> distinct).</Statement>
+    <Proof>(⇒) Diagonalizable A = PDP⁻¹ → <T src="m_A(\lambda) = \prod_{\text{distinct }\lambda_i}(\lambda - \lambda_i)"/> kills A.
+      (⇐) If min poly splits with distinct roots, kernel of <T src="m_A(A) = 0"/> decomposes ℂⁿ into direct sum of eigenspaces.</Proof>
+    <Intuition>Repeated factors in min poly = "stuck" generalised eigenvectors = defective matrix (Jordan blocks bigger than 1×1).</Intuition>
+    <Edge>Easier than checking gm = am for every eigenvalue if you can factor m_A.</Edge>
+  </Thm>
+
+</Cat>
+
+{/* ═════════════════════════════════════════════════════════════
+    CATEGORY 10 — DIAGONALIZATION & SPECTRAL THEOREM
+    ═════════════════════════════════════════════════════════════ */}
+<Cat id="cat-diag" icon="10" title="Diagonalization & Spectral Theorem"
+  desc="When A = PDP⁻¹, and the symmetric case A = QΛQᵀ"
+  count={6}>
+
+  <Thm num="10.1" title="Diagonalizability criterion" tag="GATE">
+    <Statement>An n×n matrix A is diagonalisable iff A has n linearly independent eigenvectors. Equivalently, iff the sum of geometric multiplicities equals n.</Statement>
+    <Proof>If P is the n×n matrix whose columns are n LI eigenvectors and D is diagonal of corresponding eigenvalues, then <T src="AP = PD"/> ⇒ A = PDP⁻¹. Conversely, columns of P in A = PDP⁻¹ are n LI eigenvectors.</Proof>
+    <Intuition>Diagonalisable = "exists a basis where A is the simplest possible — diagonal".</Intuition>
+    <Edge>
+      <P>SUFFICIENT (not necessary): n distinct eigenvalues → diagonalisable (by 7.9).</P>
+      <P>NECESSARY and SUFFICIENT: gm = am for every λ (no defective eigenvalues).</P>
+      <P>Diagonal/triangular A is not automatically diagonalizable if repeated diagonal entries hide deficient eigenspaces.</P>
+    </Edge>
+  </Thm>
+
+  <Thm num="10.2" title="Powers of diagonalizable A: Aᵏ = PDᵏP⁻¹" tag="GATE">
+    <Statement>If A = PDP⁻¹, then <T src="A^k = P D^k P^{-1}"/> for any integer k (negative if A invertible).</Statement>
+    <Proof>Telescoping: <T src="A^k = (PDP^{-1})^k = PD^k P^{-1}"/> since the inner P⁻¹P pairs collapse.</Proof>
+    <Intuition>In eigenbasis, taking powers is trivial — just raise each diagonal entry to the k-th power.</Intuition>
+    <Edge>
+      <P>Apply to compute A¹⁰⁰ or matrix exponentials <T src="e^A = P e^D P^{-1}"/> for diagonalisable A.</P>
+      <P><B>Fails if A not diagonalisable</B> — use Jordan form instead.</P>
+    </Edge>
+  </Thm>
+
+  <Thm num="10.3" title="Spectral Theorem (real symmetric A)" tag="GATE">
+    <Statement>If A is real symmetric (A = Aᵀ), then:
+      <ol>
+        <li>All eigenvalues of A are REAL.</li>
+        <li>Eigenvectors corresponding to distinct eigenvalues are ORTHOGONAL.</li>
+        <li>A is ALWAYS DIAGONALIZABLE via an ORTHOGONAL matrix: <T src="A = Q \Lambda Q^\top"/>, with <T src="Q^\top Q = I"/> and Λ diagonal of real eigenvalues.</li>
+      </ol>
+    </Statement>
+    <Proof>
+      <P>(1) Suppose Av = λv with possibly complex λ, v. Take conjugate transpose: <T src="\overline{v}^\top A^\top = \bar{\lambda} \overline{v}^\top"/>; since A = Aᵀ real, <T src="\overline{v}^\top A = \bar{\lambda} \overline{v}^\top"/>. Multiply Av = λv on left by <T src="\overline{v}^\top"/>: <T src="\overline{v}^\top A v = \lambda \overline{v}^\top v"/>. Also from prior: <T src="\overline{v}^\top A v = \bar{\lambda} \overline{v}^\top v"/>. Equate: <T src="(\lambda - \bar{\lambda}) \|v\|^2 = 0"/>; v ≠ 0 → <T src="\lambda = \bar{\lambda}"/> → λ real.</P>
+      <P>(2) <T src="\lambda_1 v_1^\top v_2 = (A v_1)^\top v_2 = v_1^\top A^\top v_2 = v_1^\top A v_2 = \lambda_2 v_1^\top v_2"/>. If <T src="\lambda_1 \neq \lambda_2"/>, then <T src="v_1^\top v_2 = 0"/>.</P>
+      <P>(3) Induction with Gram–Schmidt within repeated eigenspaces; always yields an orthonormal eigenbasis.</P>
+    </Proof>
+    <Intuition>Symmetric = "self-adjoint" = the linear map "looks the same from both sides" → it MUST have a real, orthogonal eigen-structure.</Intuition>
+    <Edge>
+      <P>Always diagonalisable, even for repeated eigenvalues — symmetric matrices are NEVER defective.</P>
+      <P>Generalises to Hermitian over ℂ: <T src="A = A^*"/> implies real eigenvalues and unitary diagonalisation.</P>
+    </Edge>
+  </Thm>
+
+  <Thm num="10.4" title="Simultaneous diagonalisation of commuting matrices" tag="GATE">
+    <Statement>Two diagonalisable matrices A, B commute (AB = BA) iff they are SIMULTANEOUSLY diagonalisable — i.e., there exists invertible P with both P⁻¹AP and P⁻¹BP diagonal.</Statement>
+    <Proof>
+      <P>(⇐) If both equal P · diag · P⁻¹, then AB = P D_A D_B P⁻¹ = P D_B D_A P⁻¹ = BA.</P>
+      <P>(⇒) AB = BA implies B preserves each eigenspace of A → diagonalise B within each eigenspace using its own diagonalisability.</P>
+    </Proof>
+    <Intuition>Commuting linear maps share eigen-directions — same axes serve both.</Intuition>
+    <Edge>Both must be individually diagonalisable; commutativity alone isn't enough if one is defective.</Edge>
+  </Thm>
+
+  <Thm num="10.5" title="Schur Decomposition (always exists over ℂ)" tag="GATE">
+    <Statement>Every square A (over ℂ) admits a UNITARY decomposition <T src="A = U T U^*"/>, where U is unitary and T is upper triangular.</Statement>
+    <Proof>Induction on n. Pick any eigenvector v₁ (normalised); extend to orthonormal basis; in this basis A is block <T src="\begin{pmatrix} \lambda_1 & * \\ 0 & A' \end{pmatrix}"/>. Apply induction to A'.</Proof>
+    <Intuition>Even when full diagonalisation fails, we can ALWAYS reach "triangular in an orthonormal frame".</Intuition>
+    <Edge>Diagonal entries of T are eigenvalues of A. Real Schur form over ℝ uses orthogonal Q but allows 2×2 blocks for complex pairs.</Edge>
+  </Thm>
+
+  <Thm num="10.6" title="Jordan Canonical Form" tag="GATE">
+    <Statement>Every n×n matrix over ℂ is similar to a block-diagonal matrix of "Jordan blocks":
+      <BT src={String.raw`A = P J P^{-1}, \quad J = \mathrm{diag}(J_{k_1}(\lambda_1), J_{k_2}(\lambda_2), \ldots).`}/>
+      A Jordan block <T src="J_k(\lambda)"/> has λ on the diagonal, 1's on the superdiagonal, zeros elsewhere.</Statement>
+    <Proof>Generalised eigenvectors: <T src="(A - \lambda I)^k v = 0"/> for some k. Build chains; combine across eigenvalues.</Proof>
+    <Intuition>Jordan form is the "best we can do" when A isn't diagonalisable — replaces clean eigenvectors with chains of generalised ones.</Intuition>
+    <Edge>
+      <P>Diagonalisable A ⇔ all Jordan blocks have size 1.</P>
+      <P>Number of Jordan blocks for λ = gm(λ); total size of blocks for λ = am(λ).</P>
+    </Edge>
+  </Thm>
+
+</Cat>
+
+{/* ═════════════════════════════════════════════════════════════
+    CATEGORY 11 — SPECIAL MATRIX TYPES & THEIR EIGENVALUES
+    ═════════════════════════════════════════════════════════════ */}
+<Cat id="cat-types" icon="11" title="Special Matrix Types"
+  desc="Symmetric, Skew, Orthogonal, Idempotent, Nilpotent, Involutory, Identity, PD/PSD, Hermitian, Unitary, Normal"
+  count={14}>
+
+  <Thm num="11.1" title="Symmetric: real eigenvalues + orthogonal eigenvectors" tag="GATE">
+    <Statement>Real symmetric A (A = Aᵀ): eigenvalues are REAL; eigenvectors for distinct eigenvalues are ORTHOGONAL; always orthogonally diagonalisable A = QΛQᵀ.</Statement>
+    <Proof>See Spectral Theorem (10.3).</Proof>
+    <Intuition>Symmetric matrices are "self-dual" — they preserve inner-product structure → real spectrum, orthogonal eigen-axes.</Intuition>
+    <Edge>Never defective. The eigenvalue equation Ax = λx is solvable in a clean orthonormal basis.</Edge>
+  </Thm>
+
+  <Thm num="11.2" title="Skew-symmetric: eigenvalues are 0 or pure imaginary" tag="GATE">
+    <Statement>Real skew-symmetric A (A = −Aᵀ): all eigenvalues are 0 or purely imaginary (iβ, β ∈ ℝ).</Statement>
+    <Proof>
+      <P>From Av = λv: <T src="v^* A v = \lambda \|v\|^2"/>. Taking conjugate transpose of Av = λv: <T src="v^* A^\top = \bar{\lambda} v^*"/>, so <T src="v^* A^\top v = \bar{\lambda} \|v\|^2"/>. Since A = −Aᵀ, <T src="v^* A v = -v^* A^\top v"/>, so <T src="\lambda = -\bar{\lambda}"/> → Re(λ) = 0.</P>
+    </Proof>
+    <Intuition>Skew-symmetric = "infinitesimal rotation" → no real stretching, only imaginary "rotational" eigen-effects.</Intuition>
+    <Edge>
+      <P>For ODD n: det = 0, so 0 IS an eigenvalue (skew-symmetric odd matrices are always singular).</P>
+      <P>Trace = 0 always (sum of diagonals = sum of −themselves).</P>
+      <P>Complex eigenvalues come in conjugate pairs ±iβ.</P>
+    </Edge>
+  </Thm>
+
+  <Thm num="11.3" title="Orthogonal: |λ| = 1, det = ±1" tag="GATE">
+    <Statement>If A is orthogonal (AᵀA = I), then every eigenvalue λ satisfies |λ| = 1, and det A = ±1.</Statement>
+    <Proof>
+      <P>Orthogonal preserves norms: <T src="\|Av\| = \|v\|"/>. Apply to eigenvector: <T src="\|\lambda v\| = |\lambda| \|v\| = \|v\|"/> → |λ| = 1.</P>
+      <P>det(AᵀA) = 1 → <T src="(\det A)^2 = 1"/> → det A = ±1.</P>
+    </Proof>
+    <Intuition>Orthogonal matrices = "rigid motions" (rotations & reflections); they preserve all lengths, so no eigenvalue can stretch — must have unit modulus.</Intuition>
+    <Edge>
+      <P>Real eigenvalues only ±1. Complex eigenvalues come in conjugate pairs <T src="e^{i\theta}, e^{-i\theta}"/>.</P>
+      <P>A⁻¹ = Aᵀ (defining property — inverse is just the transpose).</P>
+      <P>Rows AND columns of A are orthonormal sets.</P>
+      <P>det = +1: pure rotation (special orthogonal SO(n)); det = −1: reflection-containing.</P>
+    </Edge>
+  </Thm>
+
+  <Thm num="11.4" title="Idempotent (projection): A² = A ⇒ λ ∈ {0, 1}" tag="GATE">
+    <Statement>If A² = A, then every eigenvalue of A is 0 or 1, and rank(A) = trace(A).</Statement>
+    <Proof>
+      <P>From Av = λv: <T src="A^2 v = \lambda A v = \lambda^2 v"/>. But A² = A → <T src="\lambda^2 v = \lambda v"/> → λ(λ−1) = 0 → λ ∈ {'{0, 1}'}.</P>
+      <P>Idempotents are diagonalizable (min poly λ(λ−1) has distinct roots). With this, rank A = number of 1-eigenvalues = trace A.</P>
+    </Proof>
+    <Intuition>A projection either kills (λ = 0) or fixes (λ = 1) each eigen-direction.</Intuition>
+    <Edge>
+      <P><B>rank(A) = trace(A)</B> — extremely common GATE shortcut for idempotent.</P>
+      <P>Common idempotents: P = AA⁺ (orthogonal projection onto C(A)) in regression.</P>
+      <P>I − A is also idempotent if A is (and they project onto complementary subspaces).</P>
+    </Edge>
+  </Thm>
+
+  <Thm num="11.5" title="Nilpotent: Aᵏ = 0 ⇒ all eigenvalues are 0" tag="GATE">
+    <Statement>If <T src="A^k = 0"/> for some k ≥ 1, then every eigenvalue of A equals 0. Consequently det A = 0, trace A = 0.</Statement>
+    <Proof>From Av = λv: <T src="A^k v = \lambda^k v = 0"/>. Since v ≠ 0, λᵏ = 0 → λ = 0.</Proof>
+    <Intuition>Nilpotent = "kills everything eventually". Only an eigenvalue of 0 is compatible with iterated annihilation.</Intuition>
+    <Edge>
+      <P>A ≠ 0 in general — A can have 0 eigenvalue with non-trivial action (it's NOT diagonalisable except when A = 0).</P>
+      <P>For n×n nilpotent: Aⁿ = 0 always (smallest k ≤ n).</P>
+      <P>All Jordan blocks are <T src="J_k(0)"/>.</P>
+    </Edge>
+  </Thm>
+
+  <Thm num="11.6" title="Involutory: A² = I ⇒ λ = ±1" tag="GATE">
+    <Statement>If A² = I, then eigenvalues are ±1; A is diagonalisable; A = A⁻¹.</Statement>
+    <Proof>From <T src="A^2 v = v"/> and Av = λv: λ²v = v → λ² = 1 → λ = ±1. Min poly is at most λ² − 1 = (λ−1)(λ+1), distinct roots → diagonalisable.</Proof>
+    <Intuition>Doing the operation twice = identity → either fixes a direction (λ = 1) or flips it (λ = −1).</Intuition>
+    <Edge>Reflection matrices are involutory. Inverse equals itself.</Edge>
+  </Thm>
+
+  <Thm num="11.7" title="Identity matrix: every nonzero v is an eigenvector with λ = 1" tag="CORE">
+    <Statement>For <T src="I_n"/>: every vector is an eigenvector with eigenvalue 1. am(1) = gm(1) = n.</Statement>
+    <Proof>Iv = v = 1·v.</Proof>
+    <Intuition>Identity does nothing → every direction is preserved trivially.</Intuition>
+    <Edge>The only matrix with a SINGLE eigenvalue of geometric multiplicity = n (any other matrix with this property is cI for some scalar c).</Edge>
+  </Thm>
+
+  <Thm num="11.8" title="Positive Definite: all λ > 0 (symmetric A)" tag="GATE">
+    <Statement>A real symmetric A is positive definite iff all eigenvalues are STRICTLY POSITIVE. Equivalent: <T src="x^\top A x &gt; 0"/> for all x ≠ 0.</Statement>
+    <Proof>
+      <P>(⇒) Take eigenvector v: <T src="v^\top A v = \lambda \|v\|^2 &gt; 0"/> → λ &gt; 0.</P>
+      <P>(⇐) Diagonalise A = QΛQᵀ; <T src="x^\top A x = (Q^\top x)^\top \Lambda (Q^\top x) = \sum \lambda_i y_i^2 &gt; 0"/> for x ≠ 0 since all λᵢ &gt; 0.</P>
+    </Proof>
+    <Intuition>PD = "always-positive bilinear form". Geometrically: the level sets <T src="x^\top A x = c"/> are ELLIPSOIDS centred at origin.</Intuition>
+    <Edge>
+      <P>Equivalent criteria: all LEADING principal minors &gt; 0 (Sylvester's criterion).</P>
+      <P>PD ⇒ invertible (no zero eigenvalue).</P>
+      <P>Has unique "square root" matrix B with B² = A.</P>
+      <P>Cholesky decomposable: A = LLᵀ.</P>
+    </Edge>
+  </Thm>
+
+  <Thm num="11.9" title="Positive Semi-Definite: all λ ≥ 0" tag="GATE">
+    <Statement>Real symmetric A is positive semi-definite iff all eigenvalues are ≥ 0; equivalently <T src="x^\top A x \geq 0"/> for all x.</Statement>
+    <Proof>As in 11.8 with ≥ instead of &gt;.</Proof>
+    <Intuition>PSD can have some "flat" directions (λ = 0) where the form vanishes.</Intuition>
+    <Edge>
+      <P>PSD with rank r &lt; n: form is positive on an r-dim subspace, zero on the kernel.</P>
+      <P>AᵀA is always PSD (and PD iff A has full column rank).</P>
+    </Edge>
+  </Thm>
+
+  <Thm num="11.10" title="Hermitian: real eigenvalues + orthonormal complex eigenvectors" tag="GATE">
+    <Statement>Complex A with <T src="A = A^*"/> (conjugate transpose) is Hermitian. All eigenvalues are REAL; A is unitarily diagonalisable: <T src="A = U \Lambda U^*"/>.</Statement>
+    <Proof>Direct analogue of Spectral Theorem 10.3 with conjugate-transpose replacing transpose.</Proof>
+    <Intuition>Hermitian is the complex generalisation of symmetric — same real-spectrum guarantees.</Intuition>
+    <Edge>Real symmetric matrices are a special case of Hermitian.</Edge>
+  </Thm>
+
+  <Thm num="11.11" title="Unitary: |λ| = 1, AA* = I" tag="GATE">
+    <Statement>Complex A with <T src="A^* A = I"/> is unitary. All eigenvalues satisfy |λ| = 1; A preserves complex inner product.</Statement>
+    <Proof>Direct analogue of orthogonal matrix theorem 11.3.</Proof>
+    <Intuition>Unitary = complex rotation — preserves all complex norms.</Intuition>
+    <Edge>
+      <P>A⁻¹ = A* (conjugate transpose).</P>
+      <P>Real orthogonal matrices are unitary.</P>
+      <P>Columns AND rows form orthonormal sets in ℂⁿ.</P>
+    </Edge>
+  </Thm>
+
+  <Thm num="11.12" title="Normal: AA* = A*A ⇒ unitarily diagonalisable" tag="GATE">
+    <Statement>A is normal iff <T src="A A^* = A^* A"/> iff A is UNITARILY DIAGONALISABLE: <T src="A = U \Lambda U^*"/> with U unitary.</Statement>
+    <Proof>(⇐) Substitute and use diagonal commuting. (⇒) Schur decomposition gives A = UTU*; if A is normal, T must be diagonal (computation on T*T = TT* forces zero off-diagonals).</Proof>
+    <Intuition>Normal = "well-behaved enough to have an orthonormal eigenbasis", encompassing Hermitian, unitary, skew-Hermitian.</Intuition>
+    <Edge>
+      <P>Subsumes all the "nice" complex matrix types.</P>
+      <P>Eigenvalues can be ANY complex numbers (no |λ| or real restriction unless extra structure).</P>
+    </Edge>
+  </Thm>
+
+  <Thm num="11.13" title="Trace of idempotent = rank of idempotent" tag="GATE">
+    <Statement>For idempotent A: rank(A) = trace(A) (and both equal the number of eigenvalues equal to 1).</Statement>
+    <Proof>From 11.4: idempotent diagonalisable with eigenvalues 0/1. Trace = sum of λ = number of 1's = rank.</Proof>
+    <Intuition>An idempotent projects onto its column space; the "trace counts dimensions preserved".</Intuition>
+    <Edge>Quick GATE shortcut: if you see "idempotent" with a trace number, instantly know the rank.</Edge>
+  </Thm>
+
+  <Thm num="11.14" title="Determinant of orthogonal/unitary matrix is ±1 / unit complex" tag="GATE">
+    <Statement>Orthogonal A: <T src="(\det A)^2 = 1"/> → det A = ±1. Unitary A: <T src="|\det A| = 1"/> (so det A is on unit circle, possibly complex).</Statement>
+    <Proof>From <T src="A^\top A = I"/> resp. <T src="A^* A = I"/>: det squared / det times conjugate = 1.</Proof>
+    <Intuition>Rigid motions can flip orientation (det = −1 reflection) or preserve it (det = +1 rotation), but never expand or contract.</Intuition>
+    <Edge>Special Orthogonal group SO(n): orthogonal with det = +1 (proper rotations).</Edge>
+  </Thm>
+
+</Cat>
+
+{/* ═════════════════════════════════════════════════════════════
+    CATEGORY 12 — AB vs BA (commutator-related results)
+    ═════════════════════════════════════════════════════════════ */}
+<Cat id="cat-abba" icon="12" title="AB vs BA"
+  desc="When matrix multiplication commutes for traces, eigenvalues, and structure"
+  count={5}>
+
+  <Thm num="12.1" title="tr(AB) = tr(BA)" tag="GATE">
+    <Statement><T src="\operatorname{tr}(AB) = \operatorname{tr}(BA)"/> whenever both products are defined.</Statement>
+    <Proof>See Theorem 1.6.</Proof>
+    <Intuition>Trace ignores cyclic order.</Intuition>
+    <Edge>A may be m×n, B may be n×m — they need not be individually square. Both AB (m×m) and BA (n×n) need not even have the same size, yet share the trace value.</Edge>
+  </Thm>
+
+  <Thm num="12.2" title="AB and BA have the SAME nonzero eigenvalues" tag="GATE">
+    <Statement>For A (m×n), B (n×m): the nonzero eigenvalues of AB and BA are IDENTICAL (with same algebraic multiplicities).</Statement>
+    <Proof>
+      <P>Suppose ABv = λv with λ ≠ 0. Let w = Bv. Then BAw = B(ABv) = λ(Bv) = λw; also w = Bv ≠ 0 (else ABv = 0 = λv → λ = 0 contradiction). So λ is an eigenvalue of BA.</P>
+      <P>By symmetry, BA's nonzero eigenvalues are also AB's. Multiplicity arguments via characteristic polynomial: <T src="\lambda^m \det(\lambda I_n - BA) = \lambda^n \det(\lambda I_m - AB)"/>.</P>
+    </Proof>
+    <Intuition>AB and BA are similar UP TO the kernel; the action on the "interesting" subspace (nonzero λ) is identical.</Intuition>
+    <Edge>
+      <P>Zero eigenvalues may DIFFER in multiplicity when AB and BA have different sizes.</P>
+      <P>If A, B are both n×n: AB and BA have EXACTLY the same characteristic polynomial → same eigenvalues with same multiplicities.</P>
+    </Edge>
+  </Thm>
+
+  <Thm num="12.3" title="det(AB) = det(BA) for square A, B" tag="GATE">
+    <Statement>For square A, B of the same size: <T src="\det(AB) = \det(A)\det(B) = \det(BA)"/>.</Statement>
+    <Proof>Multiplicativity (2.1) gives both equal to <T src="\det A \cdot \det B"/>.</Proof>
+    <Intuition>Both products have the same eigenvalues → same product of eigenvalues = same determinant.</Intuition>
+    <Edge>
+      <P>For A (m×n), B (n×m) with m ≠ n: <T src="\det(AB) \neq \det(BA)"/> typically; in fact the two have different sizes (m×m vs n×n).</P>
+      <P>Sylvester's determinant theorem: <T src="\det(I_m + AB) = \det(I_n + BA)"/> for ANY rectangular A, B compatible sizes.</P>
+    </Edge>
+  </Thm>
+
+  <Thm num="12.4" title="AB − BA can never equal I" tag="GATE">
+    <Statement>For square A, B of any size: <T src="AB - BA \neq I"/>.</Statement>
+    <Proof>If AB − BA = I, take trace: <T src="\operatorname{tr}(AB) - \operatorname{tr}(BA) = \operatorname{tr}(I) = n"/>. But trace(AB) = trace(BA), so left side = 0 → 0 = n, contradiction.</Proof>
+    <Intuition>The commutator [A, B] = AB − BA has trace 0 always; identity I has trace n ≠ 0.</Intuition>
+    <Edge>True over ℝ and ℂ (any field of characteristic 0). In characteristic p with p | n, this can fail (rare in GATE).</Edge>
+  </Thm>
+
+  <Thm num="12.5" title="Commuting matrices share eigenvectors (when diagonalizable)" tag="GATE">
+    <Statement>If A and B are both diagonalizable AND commute (AB = BA), they share a common basis of eigenvectors.</Statement>
+    <Proof>See 10.4.</Proof>
+    <Intuition>Commuting linear maps "agree" on natural decomposition axes — they share preferred directions.</Intuition>
+    <Edge>Commutativity alone (without diagonalisability) doesn't imply shared eigenbasis — Jordan-block defects can break it.</Edge>
+  </Thm>
+
+</Cat>
+
+{/* ═════════════════════════════════════════════════════════════
+    CATEGORY 13 — ORTHOGONALITY, GRAM–SCHMIDT, PROJECTIONS
+    ═════════════════════════════════════════════════════════════ */}
+<Cat id="cat-ortho" icon="13" title="Orthogonality, Projections, Gram–Schmidt"
+  desc="Orthogonal complements, projection formulas, QR existence"
+  count={6}>
+
+  <Thm num="13.1" title="Orthogonal vectors are linearly independent" tag="CORE">
+    <Statement>A set of nonzero MUTUALLY ORTHOGONAL vectors <T src="\{v_1, \ldots, v_k\}"/> is linearly independent.</Statement>
+    <Proof>Suppose <T src="\sum c_i v_i = 0"/>. Take inner product with vⱼ: <T src="\sum c_i \langle v_i, v_j\rangle = c_j \|v_j\|^2 = 0"/>. Since vⱼ ≠ 0, cⱼ = 0.</Proof>
+    <Intuition>Orthogonal vectors point in "completely separate" directions → no cancellation possible.</Intuition>
+    <Edge>Orthonormal sets in ℝⁿ have at most n elements; n orthonormal vectors form a basis.</Edge>
+  </Thm>
+
+  <Thm num="13.2" title="Pythagorean theorem for orthogonal vectors" tag="CORE">
+    <Statement>If u ⊥ v then <T src="\|u + v\|^2 = \|u\|^2 + \|v\|^2"/>.</Statement>
+    <Proof><T src="\|u+v\|^2 = \langle u+v, u+v\rangle = \|u\|^2 + 2\langle u,v\rangle + \|v\|^2 = \|u\|^2 + \|v\|^2"/> since <T src="\langle u, v\rangle = 0"/>.</Proof>
+    <Intuition>Right-angle triangle in any dimension — Pythagoras generalises directly to ℝⁿ.</Intuition>
+    <Edge>Generalises to mutually orthogonal sets: <T src="\|v_1 + \cdots + v_k\|^2 = \sum \|v_i\|^2"/>.</Edge>
+  </Thm>
+
+  <Thm num="13.3" title="Orthogonal projection onto a subspace" tag="GATE">
+    <Statement>Let W = span of orthonormal {'{q₁, …, qₖ}'}. The orthogonal projection of v ∈ ℝⁿ onto W is
+      <BT src={String.raw`\mathrm{proj}_W v = \sum_{i=1}^k \langle v, q_i\rangle q_i = QQ^\top v`}/>
+      where Q is the matrix with qᵢ as columns. The "error" <T src="v - \mathrm{proj}_W v"/> is orthogonal to W.</Statement>
+    <Proof>
+      <P>Decompose v = w + u with w ∈ W, u ⊥ W. The unique such w is the projection. Coefficients: w = <T src="\sum c_i q_i"/> with <T src="c_i = \langle v, q_i\rangle"/> from orthonormality.</P>
+    </Proof>
+    <Intuition>Projection = "best approximation in W". The error is what couldn't be captured — automatically perpendicular.</Intuition>
+    <Edge>
+      <P>Projection matrix P = QQᵀ is symmetric AND idempotent (P² = P).</P>
+      <P>For general (non-orthonormal) basis: P = A(AᵀA)⁻¹Aᵀ (least squares hat matrix).</P>
+    </Edge>
+  </Thm>
+
+  <Thm num="13.4" title="Gram–Schmidt: any LI set can be orthonormalised" tag="GATE">
+    <Statement>Given LI vectors <T src="v_1, \ldots, v_k"/>, the Gram–Schmidt process produces an orthonormal set <T src="q_1, \ldots, q_k"/> with the same span.</Statement>
+    <Proof>
+      <P>Set <T src="u_1 = v_1, q_1 = u_1/\|u_1\|"/>. For j ≥ 2:
+        <T src="u_j = v_j - \sum_{i&lt;j} \langle v_j, q_i\rangle q_i, \quad q_j = u_j/\|u_j\|"/>.
+      Each uⱼ is the part of vⱼ orthogonal to span of previous q's; non-zero because v's are LI.</P>
+    </Proof>
+    <Intuition>Project away the "already covered" directions, then normalise.</Intuition>
+    <Edge>
+      <P>Numerically unstable in floating point — modified Gram–Schmidt or Householder preferred for practice.</P>
+      <P>Produces the QR factorisation A = QR with Q orthonormal columns, R upper triangular.</P>
+    </Edge>
+  </Thm>
+
+  <Thm num="13.5" title="Orthogonal complement: dim W + dim W⊥ = n" tag="GATE">
+    <Statement>For subspace W of ℝⁿ: <T src="\dim W + \dim W^\perp = n"/> and <T src="(W^\perp)^\perp = W"/>.</Statement>
+    <Proof>Take orthonormal basis of W, extend to ℝⁿ via Gram–Schmidt; the additional vectors span W⊥.</Proof>
+    <Intuition>Every vector decomposes uniquely as a part in W plus a part perpendicular to W.</Intuition>
+    <Edge>
+      <P>Four fundamental subspaces: <T src="N(A) = C(A^\top)^\perp"/> and <T src="N(A^\top) = C(A)^\perp"/>.</P>
+      <P>So <T src="\mathbb{R}^n = N(A) \oplus C(A^\top)"/> and <T src="\mathbb{R}^m = N(A^\top) \oplus C(A)"/>.</P>
+    </Edge>
+  </Thm>
+
+  <Thm num="13.6" title="QR decomposition existence" tag="GATE">
+    <Statement>Every m×n matrix A with linearly independent columns can be factored as <T src="A = QR"/>, where Q has orthonormal columns (m×n) and R is upper triangular (n×n) with positive diagonal.</Statement>
+    <Proof>Gram–Schmidt on the columns of A produces Q; the coefficients form R.</Proof>
+    <Intuition>"Orthogonalise the columns, and record the transformation" — yields a structurally nice factorisation.</Intuition>
+    <Edge>
+      <P>Used to solve least squares <T src="A^\top A x = A^\top b"/> stably: <T src="R x = Q^\top b"/>.</P>
+      <P>For full square A: Q is square orthogonal.</P>
+    </Edge>
+  </Thm>
+
+</Cat>
+
+{/* ═════════════════════════════════════════════════════════════
+    CATEGORY 14 — DECOMPOSITIONS
+    ═════════════════════════════════════════════════════════════ */}
+<Cat id="cat-decomp" icon="14" title="Matrix Decompositions"
+  desc="LU, Cholesky, SVD, Spectral — when they exist and what they buy you"
+  count={5}>
+
+  <Thm num="14.1" title="LU decomposition (with possible row swaps → PLU)" tag="GATE">
+    <Statement>Every square A admits a decomposition <T src="PA = LU"/>, where P is a permutation, L is unit lower triangular, U is upper triangular. When no row swaps are needed: A = LU.</Statement>
+    <Proof>Gaussian elimination is a sequence of row operations. Multipliers form L; the result is U. Row swaps recorded in P.</Proof>
+    <Intuition>Encodes the entire process of Gaussian elimination as a single matrix factorisation.</Intuition>
+    <Edge>
+      <P>Existence without permutation: requires all leading principal minors nonzero.</P>
+      <P>Used to solve Ax = b efficiently via Ly = Pb (forward) then Ux = y (back substitution) — O(n²) once L, U known.</P>
+    </Edge>
+  </Thm>
+
+  <Thm num="14.2" title="Cholesky decomposition (positive definite A)" tag="GATE">
+    <Statement>Every real symmetric positive definite A has a UNIQUE factorisation <T src="A = L L^\top"/> with L lower triangular, positive diagonal.</Statement>
+    <Proof>Modified LU for symmetric PD A: standard LU yields L D Lᵀ with D diagonal positive; then absorb <T src="\sqrt{D}"/> into L.</Proof>
+    <Intuition>The "square root" of a PD matrix in factored triangular form — twice as fast as LU.</Intuition>
+    <Edge>Requires PD; for PSD only an approximate / modified Cholesky exists.</Edge>
+  </Thm>
+
+  <Thm num="14.3" title="Spectral decomposition (symmetric A)" tag="GATE">
+    <Statement>Real symmetric A: <T src="A = Q \Lambda Q^\top = \sum_{i=1}^n \lambda_i q_i q_i^\top"/>.</Statement>
+    <Proof>From spectral theorem (10.3): pick orthonormal eigenbasis qᵢ; A = Q Λ Qᵀ. Expand the matrix product as a sum of outer products.</Proof>
+    <Intuition>A is a sum of n rank-1 "scaled projections" — one per eigen-direction.</Intuition>
+    <Edge>Foundation of PCA: ranks principal axes by descending λᵢ.</Edge>
+  </Thm>
+
+  <Thm num="14.4" title="Singular Value Decomposition (SVD)" tag="GATE">
+    <Statement>EVERY m×n real matrix A can be written as <T src="A = U \Sigma V^\top"/>, where U (m×m) and V (n×n) are orthogonal, and Σ is m×n diagonal with non-negative entries <T src="\sigma_1 \geq \sigma_2 \geq \cdots \geq 0"/> (singular values).</Statement>
+    <Proof>Apply spectral theorem to symmetric <T src="A^\top A"/>: eigenvalues are <T src="\sigma_i^2 \geq 0"/>. Define V from eigenvectors of AᵀA, U from <T src="u_i = A v_i / \sigma_i"/> for nonzero σ's.</Proof>
+    <Intuition>Any linear map = rotate (Vᵀ), then stretch along axes (Σ), then rotate (U). Universal factorisation.</Intuition>
+    <Edge>
+      <P><B>Works for ANY matrix</B> — square, rectangular, singular, full rank.</P>
+      <P>Singular values <T src="\sigma_i = \sqrt{\lambda_i(A^\top A)}"/>.</P>
+      <P>rank(A) = number of nonzero singular values.</P>
+      <P>Best rank-k approximation: truncate Σ to top k σ's (Eckart–Young theorem).</P>
+    </Edge>
+  </Thm>
+
+  <Thm num="14.5" title="Schur decomposition (any square A)" tag="GATE">
+    <Statement>Every n×n complex A can be written as <T src="A = U T U^*"/> with U unitary and T upper triangular.</Statement>
+    <Proof>See 10.5.</Proof>
+    <Intuition>Even non-diagonalisable matrices can be put into triangular form via a unitary change of basis.</Intuition>
+    <Edge>Diagonal entries of T are exactly the eigenvalues. Often used as a base for QR-algorithm eigenvalue computation.</Edge>
+  </Thm>
+
+</Cat>
+
+{/* ═════════════════════════════════════════════════════════════
+    CATEGORY 15 — QUADRATIC FORMS & INEQUALITIES
+    ═════════════════════════════════════════════════════════════ */}
+<Cat id="cat-qf" icon="15" title="Quadratic Forms & Norms"
+  desc="Rayleigh quotient, Cauchy–Schwarz, definiteness classification"
+  count={5}>
+
+  <Thm num="15.1" title="Rayleigh quotient bounds" tag="GATE">
+    <Statement>For real symmetric A: <BT src={String.raw`\lambda_{\min}(A) \leq \frac{x^\top A x}{x^\top x} \leq \lambda_{\max}(A) \quad \forall x \neq 0.`}/>
+      Equalities attained when x is the corresponding eigenvector.</Statement>
+    <Proof>Diagonalise A = QΛQᵀ. Let y = Qᵀx. Then <T src="\frac{x^\top A x}{x^\top x} = \frac{\sum \lambda_i y_i^2}{\sum y_i^2}"/>, which is a convex combination of eigenvalues → bounded by min and max λ.</Proof>
+    <Intuition>The "stretching ratio" of A on direction x is at most λ_max and at least λ_min.</Intuition>
+    <Edge>
+      <P>Gives variational characterisation of eigenvalues — fundamental in optimisation, PCA, physics.</P>
+      <P>Min-max theorem (Courant-Fischer): all eigenvalues are min-max of Rayleigh quotients over subspaces.</P>
+    </Edge>
+  </Thm>
+
+  <Thm num="15.2" title="Cauchy–Schwarz inequality" tag="CORE">
+    <Statement>For u, v ∈ ℝⁿ: <BT src={String.raw`|\langle u, v\rangle| \leq \|u\| \cdot \|v\|,`}/> with equality iff u, v are linearly dependent.</Statement>
+    <Proof>Consider <T src="\|u - tv\|^2 \geq 0"/> as a quadratic in t. Discriminant ≤ 0 gives the inequality.</Proof>
+    <Intuition>The dot product is bounded by the product of magnitudes — angle between vectors has |cos θ| ≤ 1.</Intuition>
+    <Edge>Equivalent to triangle inequality <T src="\|u + v\| \leq \|u\| + \|v\|"/>.</Edge>
+  </Thm>
+
+  <Thm num="15.3" title="Sylvester's criterion for positive definiteness" tag="GATE">
+    <Statement>Real symmetric A is positive definite iff ALL LEADING PRINCIPAL MINORS are POSITIVE.</Statement>
+    <Proof>Use induction: leading 1×1 minor positive ⇒ a₁₁ &gt; 0; inductive Cholesky construction shows all minors positive ⇔ all "pivots" positive ⇔ all eigenvalues positive.</Proof>
+    <Intuition>Each successive minor being positive guarantees one more positive eigenvalue is being added.</Intuition>
+    <Edge>
+      <P>FAILS for PSD (need all principal minors, not just leading ones).</P>
+      <P>For PSD: ALL principal minors ≥ 0 (not just leading).</P>
+    </Edge>
+  </Thm>
+
+  <Thm num="15.4" title="Signature / inertia of a quadratic form" tag="GATE">
+    <Statement>The numbers <T src="(n_+, n_-, n_0)"/> = (positive eigenvalues, negative eigenvalues, zero eigenvalues) of a real symmetric A are INVARIANT under congruence transformations <T src="A \to P^\top A P"/> with P invertible.</Statement>
+    <Proof>Sylvester's law of inertia: change of basis via congruence preserves the signs of eigenvalues even though magnitudes change.</Proof>
+    <Intuition>The "geometry" of the quadratic form (how many directions go up, down, are flat) is invariant.</Intuition>
+    <Edge>
+      <P>PD: <T src="(n, 0, 0)"/>. PSD: <T src="(r, 0, n - r)"/>. ND: <T src="(0, n, 0)"/>. Indefinite: <T src="n_+ &gt; 0"/> AND <T src="n_- &gt; 0"/>.</P>
+    </Edge>
+  </Thm>
+
+  <Thm num="15.5" title="Norm equivalence on finite-dimensional spaces" tag="GATE">
+    <Statement>Any two norms on a finite-dim vector space are equivalent: there exist constants c, C &gt; 0 with <T src="c\|x\|_1 \leq \|x\|_2 \leq C \|x\|_1"/> for all x.</Statement>
+    <Proof>WLOG one of the norms is Euclidean. The unit sphere of the other norm is compact in Euclidean topology → continuous functions (the norms) attain min/max → ratio is bounded.</Proof>
+    <Intuition>In finite dimensions, all "reasonable" notions of size are comparable up to scaling.</Intuition>
+    <Edge>FAILS in infinite-dim spaces — different norms can give genuinely different topologies.</Edge>
+  </Thm>
+
+</Cat>
+
+{/* ═════════════════════════════════════════════════════════════
+    CATEGORY 16 — LEAST SQUARES & PSEUDOINVERSE
+    ═════════════════════════════════════════════════════════════ */}
+<Cat id="cat-ls" icon="16" title="Least Squares & Pseudoinverse"
+  desc="Best approximate solution when Ax = b has no exact answer"
+  count={4}>
+
+  <Thm num="16.1" title="Normal equations" tag="GATE">
+    <Statement>The least-squares minimiser of <T src="\|Ax - b\|^2"/> is any solution of the NORMAL EQUATIONS
+      <BT src={String.raw`A^\top A \,\hat{x} = A^\top b.`}/></Statement>
+    <Proof>
+      <P>Geometric: <T src="\hat{x}"/> minimises distance iff <T src="A\hat{x}"/> is the orthogonal projection of b onto C(A), iff <T src="A^\top(A\hat{x} - b) = 0"/>.</P>
+      <P>Calculus: gradient of <T src="\|Ax - b\|^2"/> equals <T src="2 A^\top (Ax - b)"/>; setting to zero gives the result.</P>
+    </Proof>
+    <Intuition>Project b onto C(A); the corresponding x is least squares solution. Residual is perpendicular to C(A).</Intuition>
+    <Edge>
+      <P>If A has full COLUMN rank, <T src="A^\top A"/> is invertible and <T src="\hat{x} = (A^\top A)^{-1} A^\top b"/> is UNIQUE.</P>
+      <P>If A rank deficient: infinitely many minimisers; minimum-norm solution chosen via pseudoinverse (16.2).</P>
+    </Edge>
+  </Thm>
+
+  <Thm num="16.2" title="Moore–Penrose pseudoinverse A⁺" tag="GATE">
+    <Statement>For any m×n matrix A, there is a UNIQUE n×m matrix A⁺ satisfying the four Penrose conditions:
+      <ol>
+        <li><T src="A A^+ A = A"/></li>
+        <li><T src="A^+ A A^+ = A^+"/></li>
+        <li><T src="(AA^+)^\top = AA^+"/></li>
+        <li><T src="(A^+ A)^\top = A^+ A"/></li>
+      </ol>
+      Explicitly via SVD: if <T src="A = U \Sigma V^\top"/>, then <T src="A^+ = V \Sigma^+ U^\top"/>, where Σ⁺ is Σᵀ with non-zero σᵢ reciprocated.</Statement>
+    <Proof>Existence via SVD construction. Uniqueness from the four axioms via algebraic manipulation.</Proof>
+    <Intuition>A⁺ generalises A⁻¹ to non-square / singular matrices. Behaves like the "best possible inverse".</Intuition>
+    <Edge>
+      <P>If A invertible: A⁺ = A⁻¹.</P>
+      <P>If A has full column rank: <T src="A^+ = (A^\top A)^{-1} A^\top"/>.</P>
+      <P>If A has full row rank: <T src="A^+ = A^\top (A A^\top)^{-1}"/>.</P>
+    </Edge>
+  </Thm>
+
+  <Thm num="16.3" title="Minimum-norm least squares solution" tag="GATE">
+    <Statement>Among all least squares minimisers, the one with the SMALLEST norm is <T src="\hat{x} = A^+ b"/>.</Statement>
+    <Proof>The general least squares solution is <T src="\hat{x} = A^+ b + (\text{anything in } N(A))"/>. The component in N(A) is orthogonal to A⁺b (since A⁺b ∈ row space of A). Pythagoras → minimum norm achieved when null-space component is zero.</Proof>
+    <Intuition>The pseudoinverse picks the "cleanest" answer: shortest x that fits as well as possible.</Intuition>
+    <Edge>Always exists, even when normal equations have no unique solution.</Edge>
+  </Thm>
+
+  <Thm num="16.4" title="Projection matrix P = A(AᵀA)⁻¹Aᵀ" tag="GATE">
+    <Statement>For A with full column rank, the orthogonal projection onto C(A) is given by the matrix <T src="P = A(A^\top A)^{-1} A^\top"/>. This P is symmetric and idempotent.</Statement>
+    <Proof>
+      <P>Symmetry: <T src="P^\top = (A^\top)^\top ((A^\top A)^{-1})^\top A^\top = A(A^\top A)^{-1} A^\top = P"/>.</P>
+      <P>Idempotent: <T src="P^2 = A(A^\top A)^{-1} A^\top \cdot A(A^\top A)^{-1} A^\top = A(A^\top A)^{-1}(A^\top A)(A^\top A)^{-1} A^\top = A(A^\top A)^{-1} A^\top = P"/>.</P>
+    </Proof>
+    <Intuition>"Hat matrix" in regression — turns observations into fitted values.</Intuition>
+    <Edge>
+      <P>P projects onto C(A); I − P projects onto N(Aᵀ) (the orthogonal complement).</P>
+      <P>rank(P) = trace(P) = rank(A).</P>
+    </Edge>
+  </Thm>
+
+</Cat>
+
+    </div>
+  );
+}
+
+/* ════════════════════════════════════════════════════════
+   APP ROOT
+   ════════════════════════════════════════════════════════ */
+function App() {
+  const [query, setQuery] = useState("");
+  const [total, setTotal] = useState(0);
+  const [visible, setVisible] = useState(0);
+
+  useEffect(() => { hideLoading(); }, []);
+
+  useEffect(() => {
+    setTotal(document.querySelectorAll(".thm").length);
+  }, []);
+
+  useEffect(() => {
+    const obs = new MutationObserver(() => {
+      const el = document.getElementById("thm-visible");
+      if (el) setVisible(Number(el.textContent) || 0);
+    });
+    const el = document.getElementById("thm-visible");
+    if (el) {
+      obs.observe(el, { childList: true, characterData: true, subtree: true });
+      return () => obs.disconnect();
+    }
+  }, []);
+
+  const toc = [
+    { id: "cat-basics",  label: "01 · Basics · Transpose · Trace" },
+    { id: "cat-det",     label: "02 · Determinants" },
+    { id: "cat-inverse", label: "03 · Inverse Matrix" },
+    { id: "cat-rank",    label: "04 · Rank & Nullity" },
+    { id: "cat-systems", label: "05 · Linear Systems" },
+    { id: "cat-cramer",  label: "06 · Cramer's Rule" },
+    { id: "cat-vs",      label: "07 · Vector Spaces" },
+    { id: "cat-eig",     label: "08 · Eigenvalues" },
+    { id: "cat-ch",      label: "09 · Cayley–Hamilton" },
+    { id: "cat-diag",    label: "10 · Diagonalisation" },
+    { id: "cat-types",   label: "11 · Special Matrices" },
+    { id: "cat-abba",    label: "12 · AB vs BA" },
+    { id: "cat-ortho",   label: "13 · Orthogonality" },
+    { id: "cat-decomp",  label: "14 · Decompositions" },
+    { id: "cat-qf",      label: "15 · Quadratic Forms" },
+    { id: "cat-ls",      label: "16 · Least Squares" },
+  ];
+
+  return (
+    <ErrorBoundary>
+      <div className="min-h-screen">
+        <TopNav currentModule={11}/>
+
+        <section className="relative overflow-hidden">
+          <div className="grid-bg absolute inset-0" style={{opacity: 0.4}}/>
+          <div className="absolute inset-0" style={{
+            background: "radial-gradient(800px 400px at 20% 0%, var(--accent-soft), transparent 60%), radial-gradient(700px 400px at 80% 20%, var(--accent-2-soft), transparent 60%)",
+          }}/>
+          <div className="relative max-w-5xl mx-auto px-5 pt-10 pb-6">
+            <div className="inline-flex items-center gap-2 text-xs px-3 py-1.5 rounded-full mb-5"
+              style={{background: "var(--accent-soft)", border: "1px solid var(--accent-border)", color: "var(--accent)"}}>
+              <span className="pulse-dot"/> THEOREMS VAULT · MODULE 11
+            </div>
+            <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight mb-3" style={{color: "var(--text)"}}>
+              Every theorem. <span className="gradient-text">Statement · Proof · Intuition · Edge cases.</span>
+            </h1>
+            <p className="text-base max-w-3xl" style={{color: "var(--text-dim)"}}>
+              16 categorised blocks covering every theorem you'll need for GATE CSE — eigenvalues, rank, determinants,
+              special matrices, Cayley–Hamilton, decompositions, and more. Click any category to expand its theorems;
+              click any theorem to see the full statement, proof, intuition, and traps.
+              Press <kbd style={{padding: "1px 6px", borderRadius: 4, background: "var(--bg-elev-3)", border: "1px solid var(--border)", fontFamily: "var(--font-mono)", fontSize: 11}}>/</kbd> to search.
+            </p>
+            <div className="mt-5 flex flex-wrap gap-2 text-xs">
+              <span className="pill-tag" style={{background: "var(--accent-soft)", color: "var(--accent)", borderColor: "var(--accent-border)"}}>16 categories</span>
+              <span className="pill-tag" style={{background: "var(--accent-2-soft)", color: "var(--accent-2)", borderColor: "var(--accent-2-border)"}}><span id="thm-visible">{visible}</span> theorems visible</span>
+              <span className="pill-tag" style={{background: "var(--danger-soft)", color: "var(--danger)", borderColor: "var(--danger-border)"}}>GATE-tagged: priority</span>
+              <span className="pill-tag" style={{background: "var(--accent-3-soft)", color: "var(--accent-3)", borderColor: "var(--accent-3-border)"}}>CORE-tagged: foundational</span>
+            </div>
+          </div>
+        </section>
+
+        <SearchBar query={query} setQuery={setQuery} visible={visible} total={total}/>
+
+        <div className="max-w-6xl mx-auto px-5 grid lg:grid-cols-[200px,1fr] gap-6">
+          <aside className="hidden lg:block">
+            <div className="sticky top-[140px] space-y-1">
+              <div style={{fontSize: 9, letterSpacing: "0.18em", color: "var(--text-mute)", padding: "4px 8px", fontWeight: 700}}>CATEGORIES</div>
+              {toc.map(t => (
+                <a key={t.id} href={"#" + t.id}
+                  className="block px-3 py-1.5 rounded text-[12px] transition-colors"
+                  style={{color: "var(--text-dim)", border: "1px solid transparent"}}
+                  onMouseEnter={e => { e.currentTarget.style.color = "var(--accent)"; e.currentTarget.style.background = "var(--accent-soft)"; }}
+                  onMouseLeave={e => { e.currentTarget.style.color = "var(--text-dim)"; e.currentTarget.style.background = "transparent"; }}>
+                  {t.label}
+                </a>
+              ))}
+              <div style={{borderTop: "1px solid var(--border)", marginTop: 10, paddingTop: 10}}>
+                <a href="module-09-cheatsheet.html"
+                  className="block px-3 py-1.5 rounded text-[12px] mb-1"
+                  style={{color: "var(--accent-2)", border: "1px solid var(--accent-2-border)", background: "var(--accent-2-soft)"}}>
+                  📋 Cheat Sheet
+                </a>
+                <a href="module-10-mocktest.html"
+                  className="block px-3 py-1.5 rounded text-[12px]"
+                  style={{color: "var(--accent-3)", border: "1px solid var(--accent-3-border)", background: "var(--accent-3-soft)"}}>
+                  📝 Mock Test
+                </a>
+              </div>
+            </div>
+          </aside>
+
+          <main className="pb-16">
+            <TheoremsContent query={query}/>
+          </main>
+        </div>
+
+        <ModuleFooter
+          moduleNum={11}
+          nextModuleTitle="Cheat Sheet — one-page formula reference"
+          nextModuleFile="module-09-cheatsheet.html"
+          checklist={[
+            "I can recite the Invertible Matrix Theorem in at least 8 equivalent forms.",
+            "I can state and prove the Rank–Nullity theorem.",
+            "I can derive A⁻¹ for a 2×2 matrix using Cayley–Hamilton.",
+            "I can list eigenvalue signatures for symmetric, skew, orthogonal, idempotent, nilpotent, involutory matrices.",
+            "I can explain WHY tr(AB) = tr(BA) and why AB ≠ BA in general.",
+            "I can state the Spectral Theorem and explain WHY symmetric matrices are diagonalisable.",
+            "I can use rank = trace shortcut for idempotent matrices on GATE problems.",
+            "I can recognise PYQ traps where det(cA) = cⁿ det A is needed, not c·det A.",
+          ]}
+        />
+      </div>
+    </ErrorBoundary>
+  );
+}
+
+mountApp(App, 11);
+</script>
+
+</body>
+</html>

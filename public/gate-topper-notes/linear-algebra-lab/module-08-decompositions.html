@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 8 · Decompositions & Matrix Types — LA Mastery Hub</title>
+
+<script>
+  (function () {
+    try {
+      var t = localStorage.getItem("la-hub::theme") || "dark";
+      document.documentElement.classList.add(t === "light" ? "light" : "dark");
+    } catch (e) { document.documentElement.classList.add("dark"); }
+  })();
+</script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="theme.css">
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script>tailwind.config = { darkMode: 'class' };</script>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+
+<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone@7.25.6/babel.min.js"></script>
+</head>
+<body>
+
+<div id="loading">
+  <div style="text-align:center">
+    <div class="spinner"></div>
+    <div style="font-size:13px; opacity:0.8">Loading Module 8 — Decompositions &amp; Matrix Types</div>
+  </div>
+</div>
+
+<div id="root"></div>
+
+<script type="text/babel" src="boilerplate.js"></script>
+
+<script type="text/babel">
+const { useState, useEffect, useMemo, useRef } = React;
+
+/* ════════════════════════════════════════════════════════
+   MATRIX UTILITIES
+   ════════════════════════════════════════════════════════ */
+const round = (v, d = 4) => Math.abs(v) < 1e-10 ? 0 : Math.round(v * Math.pow(10, d)) / Math.pow(10, d);
+
+const matMul = (A, B) => {
+  const m = A.length, n = A[0].length, p = B[0].length;
+  const C = Array.from({length: m}, () => Array(p).fill(0));
+  for (let i = 0; i < m; i++)
+    for (let j = 0; j < p; j++)
+      for (let k = 0; k < n; k++)
+        C[i][j] += A[i][k] * B[k][j];
+  return C.map(row => row.map(round));
+};
+const matT = (A) => A[0].map((_, c) => A.map(r => r[c]));
+const matId = (n) => Array.from({length: n}, (_, i) => Array.from({length: n}, (_, j) => i === j ? 1 : 0));
+const matEqual = (A, B, tol = 1e-7) => {
+  if (A.length !== B.length || A[0].length !== B[0].length) return false;
+  for (let i = 0; i < A.length; i++)
+    for (let j = 0; j < A[0].length; j++)
+      if (Math.abs(A[i][j] - B[i][j]) > tol) return false;
+  return true;
+};
+const matNeg = (A) => A.map(r => r.map(v => -v));
+const matPow = (A, k) => {
+  if (k === 0) return matId(A.length);
+  let result = A.map(r => r.slice());
+  for (let i = 1; i < k; i++) result = matMul(result, A);
+  return result;
+};
+const isZero = (A, tol = 1e-7) => A.every(r => r.every(v => Math.abs(v) < tol));
+const det3 = (M) => M[0][0]*(M[1][1]*M[2][2] - M[1][2]*M[2][1])
+                  - M[0][1]*(M[1][0]*M[2][2] - M[1][2]*M[2][0])
+                  + M[0][2]*(M[1][0]*M[2][1] - M[1][1]*M[2][0]);
+
+function eigen2x2(A) {
+  const [[a, b], [c, d]] = A;
+  const trace = a + d, det = a * d - b * c;
+  const disc = trace * trace - 4 * det;
+  if (disc < -1e-9) return { complex: true, lambda1: { re: trace/2, im: Math.sqrt(-disc)/2 }, lambda2: { re: trace/2, im: -Math.sqrt(-disc)/2 } };
+  const sqDisc = Math.sqrt(Math.max(0, disc));
+  return { complex: false, lambda1: (trace + sqDisc) / 2, lambda2: (trace - sqDisc) / 2, trace, det };
+}
+
+/* — Matrix display — */
+function MatrixDisplay({ data, highlightCells = null }) {
+  if (!data || data.length === 0) return null;
+  const cols = data[0].length;
+  return (
+    <div className="inline-flex items-stretch font-mono text-sm" style={{userSelect: "none"}}>
+      <div style={{borderLeft: "2px solid var(--text-dim)", borderTop: "2px solid var(--text-dim)", borderBottom: "2px solid var(--text-dim)", width: 8}}/>
+      <div className="px-2 py-2 grid gap-1" style={{gridTemplateColumns: `repeat(${cols}, minmax(0, auto))`}}>
+        {data.map((row, r) => row.map((v, c) => {
+          const hi = highlightCells && highlightCells.some(h => h[0] === r && h[1] === c);
+          return (
+            <span key={`${r}-${c}`} className="px-2 py-1 text-center rounded font-mono"
+              style={{background: hi ? "var(--accent-soft)" : "transparent", color: hi ? "var(--accent)" : "var(--text)", minWidth: 38, fontSize: 13}}>
+              {Math.abs(v) < 1e-9 ? 0 : (typeof v === "number" ? round(v, 3) : v)}
+            </span>
+          );
+        }))}
+      </div>
+      <div style={{borderRight: "2px solid var(--text-dim)", borderTop: "2px solid var(--text-dim)", borderBottom: "2px solid var(--text-dim)", width: 8}}/>
+    </div>
+  );
+}
+
+function MatrixEditor({ matrix, setMatrix, label = "Matrix", color = "var(--text-dim)" }) {
+  const cols = matrix[0].length;
+  const setCell = (r, c, v) => {
+    const M = matrix.map(row => row.slice());
+    M[r][c] = v;
+    setMatrix(M);
+  };
+  return (
+    <div className="rounded-lg p-3" style={{border: "1px solid var(--border)", background: "var(--bg-elev-2)"}}>
+      <div className="text-xs tracking-[0.2em] font-semibold mb-2" style={{color}}>{label}</div>
+      <div className="inline-grid gap-1" style={{gridTemplateColumns: `repeat(${cols}, auto)`}}>
+        {matrix.flatMap((row, r) => row.map((v, c) => (
+          <NumInput key={`${r}-${c}`} value={v} onChange={x => setCell(r, c, x)} step="1" width={52}/>
+        )))}
+      </div>
+    </div>
+  );
+}
+
+/* ════════════════════════════════════════════════════════
+   CONCEPT 8.1 — LU Decomposition
+   ════════════════════════════════════════════════════════ */
+function LUStepper() {
+  const [A, setA] = useState([[2, 1, 1], [4, 3, 3], [8, 7, 9]]);
+  const n = A.length;
+
+  // Compute LU (no pivoting for simplicity)
+  const lu = useMemo(() => {
+    const U = A.map(r => r.slice());
+    const L = matId(n);
+    const steps = [];
+    for (let k = 0; k < n - 1; k++) {
+      if (Math.abs(U[k][k]) < 1e-12) return { failed: true, steps };
+      for (let i = k + 1; i < n; i++) {
+        const factor = U[i][k] / U[k][k];
+        L[i][k] = round(factor);
+        for (let j = k; j < n; j++) U[i][j] = round(U[i][j] - factor * U[k][j]);
+        steps.push({
+          k, i, factor: round(factor),
+          desc: `R${i+1} ← R${i+1} − (${round(factor)})·R${k+1}; store ${round(factor)} in L[${i+1}][${k+1}].`,
+          L: L.map(r => r.slice()),
+          U: U.map(r => r.slice()),
+        });
+      }
+    }
+    return { failed: false, L, U, steps };
+  }, [A]);
+
+  const [stepIdx, setStepIdx] = useState(0);
+  useEffect(() => { setStepIdx(0); }, [A]);
+  const last = stepIdx >= lu.steps.length;
+  const cur = lu.steps[Math.min(stepIdx, lu.steps.length - 1)] || { L: matId(n), U: A };
+
+  const product = lu.failed ? null : matMul(cur.L || lu.L, cur.U || lu.U);
+  const matches = product && matEqual(product, A);
+
+  return (
+    <InteractiveFrame
+      name="LU Decomposition Stepper — A = LU built one step at a time"
+      whatAmISeeing="A 3×3 matrix A. Step through forward elimination: each step zeroes out one entry below the pivot. The multipliers used go into L (with 1's on the diagonal); the resulting upper triangular form is U. The product L·U reconstructs A at every step."
+      tryThis="Default A has no zero pivots — straightforward LU. Now set A[0][0] = 0 — the algorithm fails (would need row swaps → PLU). The classic engineering workaround: PLU = A with P a permutation matrix that brings non-zero pivots up."
+    >
+      <div className="grid lg:grid-cols-2 gap-4 mb-4">
+        <MatrixEditor matrix={A} setMatrix={(M) => { setA(M); setStepIdx(0); }} label="MATRIX A"/>
+        {lu.failed && (
+          <div className="rounded-lg p-4" style={{border: "1px solid var(--danger-border)", background: "var(--danger-soft)"}}>
+            <div className="text-sm" style={{color: "var(--danger)"}}>
+              ⛔ Zero pivot encountered — pure LU fails. Use PLU (with row swaps) for a general matrix.
+            </div>
+          </div>
+        )}
+      </div>
+
+      {!lu.failed && (
+        <>
+          <div className="grid md:grid-cols-3 gap-3 mb-4">
+            <div className="rounded-lg p-3" style={{border: "1px solid var(--accent-border)", background: "var(--accent-soft)"}}>
+              <div className="text-xs tracking-[0.2em] font-semibold mb-2" style={{color: "var(--accent)"}}>L (lower)</div>
+              <div className="flex justify-center"><MatrixDisplay data={cur.L || lu.L}/></div>
+            </div>
+            <div className="rounded-lg p-3" style={{border: "1px solid var(--accent-2-border)", background: "var(--accent-2-soft)"}}>
+              <div className="text-xs tracking-[0.2em] font-semibold mb-2" style={{color: "var(--accent-2)"}}>U (upper)</div>
+              <div className="flex justify-center"><MatrixDisplay data={cur.U || lu.U}/></div>
+            </div>
+            <div className="rounded-lg p-3" style={{border: "1px solid var(--accent-3-border)", background: "var(--accent-3-soft)"}}>
+              <div className="text-xs tracking-[0.2em] font-semibold mb-2" style={{color: "var(--accent-3)"}}>L·U (should equal A)</div>
+              <div className="flex justify-center"><MatrixDisplay data={product}/></div>
+              <div className="text-xs mt-2 text-center" style={{color: matches ? "var(--accent-3)" : "var(--warn)"}}>
+                {matches ? "✓ L·U = A" : "Building..."}
+              </div>
+            </div>
+          </div>
+
+          {lu.steps.length > 0 && (
+            <div className="rounded-lg p-3 mb-3" style={{border: "1px solid var(--info-border)", background: "var(--info-soft)"}}>
+              <div className="text-xs tracking-[0.2em] font-semibold mb-1" style={{color: "var(--info)"}}>STEP {Math.min(stepIdx + 1, lu.steps.length)} / {lu.steps.length}</div>
+              <div className="text-sm" style={{color: "var(--text)"}}>{cur.desc || "Starting matrix."}</div>
+            </div>
+          )}
+
+          <div className="flex gap-2 flex-wrap">
+            <button onClick={() => setStepIdx(0)} className="text-sm px-3 py-1.5 rounded-lg"
+              style={{border: "1px solid var(--border)", color: "var(--text-dim)"}}>↺ Reset</button>
+            <button onClick={() => setStepIdx(i => Math.max(0, i - 1))} disabled={stepIdx === 0} className="text-sm px-3 py-1.5 rounded-lg"
+              style={{border: "1px solid var(--border)", color: stepIdx === 0 ? "var(--text-faded)" : "var(--text-dim)"}}>← Prev</button>
+            <button onClick={() => setStepIdx(i => Math.min(lu.steps.length - 1, i + 1))} disabled={last} className="text-sm px-4 py-1.5 rounded-lg font-semibold"
+              style={{border: "1px solid var(--accent)", color: last ? "var(--text-faded)" : "var(--accent)", background: last ? "transparent" : "var(--accent-soft)"}}>Next step →</button>
+            <button onClick={() => setStepIdx(lu.steps.length - 1)} className="text-sm px-3 py-1.5 rounded-lg"
+              style={{border: "1px solid var(--border)", color: "var(--text-dim)"}}>⏭ End</button>
+          </div>
+        </>
+      )}
+    </InteractiveFrame>
+  );
+}
+
+function Concept81() {
+  return (
+    <ConceptCard id="concept-8-1" label="8.1" moduleLabel="Module 8 · Decompositions"
+      title="LU Decomposition"
+      why="Gaussian elimination's bookkeeping turns into a factorization: A = LU, where L is lower triangular and U is upper triangular. Once decomposed, solving Ax = b for ANY right-hand side becomes two cheap triangular solves. This is how every production linear-system solver works.">
+      <H3>The decomposition</H3>
+      <P>For most square matrices A, we can write</P>
+      <BT src={String.raw`A = L U,`}/>
+      <P>where:</P>
+      <UL>
+        <Li><B>L</B> is LOWER triangular with 1's on the diagonal (called <Em>unit lower triangular</Em>).</Li>
+        <Li><B>U</B> is UPPER triangular (the result of Gaussian elimination on A).</Li>
+      </UL>
+
+      <H3>How L appears — it stores the multipliers</H3>
+      <P>Recall Gaussian elimination: at step k, you zero out everything below the pivot <T src="U_{kk}"/> by subtracting multiples <T src="\ell_{ik} = U_{ik}/U_{kk}"/> of row k from each lower row i.</P>
+      <P>The matrix L has these multipliers in its lower triangle, position (i, k) holding <T src="\ell_{ik}"/>:</P>
+      <BT src={String.raw`L = \begin{pmatrix} 1 & 0 & 0 \\ \ell_{21} & 1 & 0 \\ \ell_{31} & \ell_{32} & 1 \end{pmatrix}.`}/>
+
+      <Callout kind="proof" title="Why L·U = A reconstructs the original matrix">
+        <P>Each elimination step is left-multiplication by an elementary matrix <T src="E_k"/> that "undoes" by adding back the multiplier. The PRODUCT <T src="E_k^{-1} \cdots E_1^{-1}"/> of these inverses is lower triangular with the multipliers in their natural positions — exactly the matrix L. And <T src="E_k \cdots E_1 \cdot A = U"/>. So <T src="A = (E_k \cdots E_1)^{-1} U = L U"/>.</P>
+      </Callout>
+
+      <H3>Solving Ax = b after LU</H3>
+      <P>Given <T src="A = LU"/>, solving <T src="A\mathbf{x} = \mathbf{b}"/> splits into two triangular solves:</P>
+      <OL>
+        <Li>Forward substitution: solve <T src="L \mathbf{y} = \mathbf{b}"/> for <T src="\mathbf{y}"/>.</Li>
+        <Li>Back substitution: solve <T src="U \mathbf{x} = \mathbf{y}"/> for <T src="\mathbf{x}"/>.</Li>
+      </OL>
+      <P>Each triangular solve is <T src="O(n^2)"/> work. The LU decomposition itself is <T src="O(n^3)"/> — but you do it ONCE. For multiple right-hand sides (or to compute <T src="A^{-1}"/> column by column), the savings are enormous.</P>
+
+      <H3>When LU exists without row swaps</H3>
+      <P>Pure LU (no row swaps needed) exists iff every "leading principal submatrix" (top-left <T src="k \times k"/> for <T src="k = 1, \ldots, n"/>) is invertible. If any of those is singular, we hit a zero pivot during elimination and need a swap.</P>
+      <P>With row swaps, we use the more general PLU decomposition:</P>
+      <BT src={String.raw`P A = L U,`}/>
+      <P>where <T src="P"/> is a PERMUTATION matrix (identity with rows reordered). PLU always exists for any non-singular A.</P>
+
+      <LUStepper/>
+
+      <H3>Other decompositions you'll meet</H3>
+      <UL>
+        <Li><B>QR decomposition:</B> A = QR with Q orthogonal and R upper triangular. Used in least-squares.</Li>
+        <Li><B>Cholesky decomposition:</B> for symmetric positive-definite A, A = LLᵀ. Twice as fast as LU.</Li>
+        <Li><B>SVD:</B> A = UΣVᵀ — three factors, works for ANY rectangular matrix. The "Swiss Army knife" of LA.</Li>
+        <Li><B>Eigendecomposition:</B> A = PDP⁻¹ (Module 7.5).</Li>
+        <Li><B>Schur decomposition:</B> A = QTQᵀ with Q orthogonal and T upper triangular. Always exists; useful in numerical computing.</Li>
+      </UL>
+
+      <Callout kind="ml" title="LU underlies almost every numerical solver">
+        <P>NumPy's <T src="\texttt{np.linalg.solve}"/> calls LAPACK's <T src="\texttt{dgesv}"/>, which performs PLU decomposition with partial pivoting. PyTorch's <T src="\texttt{torch.linalg.solve}"/> does the same. Every neural-net library, scientific computation, or ML method that solves a linear system is doing LU (or a variant) under the hood.</P>
+      </Callout>
+
+      <Callout kind="recall" title="Concept 8.1 in one breath">
+        <P>A = LU = (unit lower triangular)(upper triangular), bookkeeping of Gaussian elimination. PLU for general case (with row swaps). Solve Ax = b via forward sub on Ly = b then back sub on Ux = y. Foundation of all production linear solvers.</P>
+      </Callout>
+
+      <ProgressPill conceptId="m8-c81"/>
+    </ConceptCard>
+  );
+}
+
+/* ════════════════════════════════════════════════════════
+   CONCEPT 8.2 — All 12 Matrix Types
+   ════════════════════════════════════════════════════════ */
+function MatrixTypeIdentifier() {
+  const [A, setA] = useState([[1, 0, 0], [0, 0, 1], [0, 1, 0]]);
+  const n = A.length;
+  const AT = matT(A);
+  const A2 = matMul(A, A);
+  const A3 = matMul(A2, A);
+
+  // Check each property
+  const checks = {
+    symmetric:    matEqual(A, AT),
+    skewSymmetric:matEqual(A, matNeg(AT)) && A.every((row, i) => Math.abs(row[i]) < 1e-9),
+    orthogonal:   matEqual(matMul(A, AT), matId(n)),
+    idempotent:   matEqual(A2, A),
+    nilpotent:    isZero(A3),  // for 3×3, A^k = 0 for k ≤ n
+    involutory:   matEqual(A2, matId(n)),
+    diagonal:     A.every((row, i) => row.every((v, j) => i === j || Math.abs(v) < 1e-9)),
+    upperTri:     A.every((row, i) => row.every((v, j) => j >= i || Math.abs(v) < 1e-9)),
+    lowerTri:     A.every((row, i) => row.every((v, j) => j <= i || Math.abs(v) < 1e-9)),
+    singular:     Math.abs(det3(A)) < 1e-9,
+  };
+  // For positive-definite/semi-definite: A must be symmetric AND eigenvalues > 0 / >= 0
+  // For 3x3, eigenvalues are complex to compute; use Sylvester's criterion for symmetric
+  let positiveDefinite = false, positiveSemiDefinite = false;
+  if (checks.symmetric) {
+    // Sylvester: all leading principal minors > 0
+    const d1 = A[0][0];
+    const d2 = A[0][0]*A[1][1] - A[0][1]*A[1][0];
+    const d3 = det3(A);
+    if (d1 > 1e-9 && d2 > 1e-9 && d3 > 1e-9) positiveDefinite = true;
+    if (d1 >= -1e-9 && d2 >= -1e-9 && d3 >= -1e-9) positiveSemiDefinite = true;
+  }
+  checks.positiveDefinite = positiveDefinite;
+  checks.positiveSemiDefinite = positiveSemiDefinite;
+
+  const TYPES = [
+    { key: "symmetric",         label: "Symmetric",         test: "A = Aᵀ",                  rule: "Real eigenvalues · orthogonal eigenvectors" },
+    { key: "skewSymmetric",     label: "Skew-Symmetric",    test: "A = −Aᵀ (diagonal = 0)",   rule: "Eigenvalues are 0 or pure imaginary" },
+    { key: "orthogonal",        label: "Orthogonal",        test: "AᵀA = I",                  rule: "Columns orthonormal · det = ±1 · |λ| = 1" },
+    { key: "idempotent",        label: "Idempotent",        test: "A² = A",                  rule: "Eigenvalues only 0 or 1 · rank = trace" },
+    { key: "nilpotent",         label: "Nilpotent",         test: "Aᵏ = 0 for some k",        rule: "All eigenvalues 0 · det = 0" },
+    { key: "involutory",        label: "Involutory",        test: "A² = I",                  rule: "Eigenvalues ±1 · A = A⁻¹" },
+    { key: "positiveDefinite",  label: "Positive Definite", test: "xᵀAx > 0 for all x ≠ 0",   rule: "All eigenvalues > 0 · symmetric" },
+    { key: "positiveSemiDefinite", label: "PSD",            test: "xᵀAx ≥ 0",                 rule: "All eigenvalues ≥ 0" },
+    { key: "diagonal",          label: "Diagonal",          test: "Off-diagonal = 0",         rule: "Eigenvalues = diagonal entries" },
+    { key: "upperTri",          label: "Upper Triangular",  test: "Below diagonal = 0",       rule: "Eigenvalues = diagonal entries" },
+    { key: "lowerTri",          label: "Lower Triangular",  test: "Above diagonal = 0",       rule: "Eigenvalues = diagonal entries" },
+    { key: "singular",          label: "Singular",          test: "det(A) = 0",               rule: "Not invertible · 0 is an eigenvalue" },
+  ];
+
+  const presets = [
+    { label: "Identity",       A: [[1,0,0],[0,1,0],[0,0,1]] },
+    { label: "Symmetric",      A: [[2,1,3],[1,4,2],[3,2,5]] },
+    { label: "Skew-symmetric", A: [[0,2,-3],[-2,0,1],[3,-1,0]] },
+    { label: "Orthogonal",     A: [[0,1,0],[0,0,1],[1,0,0]] },
+    { label: "Projection (idempotent)", A: [[1,0,0],[0,1,0],[0,0,0]] },
+    { label: "Nilpotent",      A: [[0,1,0],[0,0,1],[0,0,0]] },
+    { label: "Involutory",     A: [[1,0,0],[0,0,1],[0,1,0]] },
+    { label: "Positive definite", A: [[2,-1,0],[-1,2,-1],[0,-1,2]] },
+  ];
+
+  return (
+    <InteractiveFrame
+      name="Matrix Type Identifier — which types does this matrix satisfy?"
+      whatAmISeeing="A 3×3 matrix and a checklist of all 12 matrix types. Each is verified with its definition; satisfied types light up in green. A matrix can satisfy multiple types simultaneously (e.g., identity is symmetric AND orthogonal AND positive definite AND idempotent)."
+      tryThis="Click presets to see each type satisfied. The identity matrix triggers EIGHT types simultaneously. The projection matrix [[1,0,0],[0,1,0],[0,0,0]] is symmetric, idempotent, PSD, singular, diagonal — five at once. Edit values to mix and match."
+    >
+      <div className="space-y-4">
+        <div className="flex gap-2 flex-wrap">
+          {presets.map((p, i) => (
+            <button key={i} onClick={() => setA(p.A.map(r => r.slice()))}
+              className="text-xs px-2.5 py-1 rounded transition-colors"
+              style={{border: "1px solid var(--border)", background: "var(--bg-elev-2)", color: "var(--text-dim)"}}
+              onMouseEnter={e => { e.target.style.borderColor = "var(--accent)"; e.target.style.color = "var(--accent)"; }}
+              onMouseLeave={e => { e.target.style.borderColor = "var(--border)"; e.target.style.color = "var(--text-dim)"; }}>
+              {p.label}
+            </button>
+          ))}
+        </div>
+
+        <div className="grid lg:grid-cols-[auto,1fr] gap-4">
+          <MatrixEditor matrix={A} setMatrix={setA} label="MATRIX A"/>
+
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+            {TYPES.map(t => (
+              <div key={t.key} className="rounded-lg p-3"
+                style={{
+                  border: "1px solid " + (checks[t.key] ? "var(--accent-3-border)" : "var(--border)"),
+                  background: checks[t.key] ? "var(--accent-3-soft)" : "var(--bg-elev-2)",
+                  opacity: checks[t.key] ? 1 : 0.55,
+                }}>
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-base">{checks[t.key] ? "✓" : "○"}</span>
+                  <span className="text-sm font-semibold" style={{color: checks[t.key] ? "var(--accent-3)" : "var(--text-dim)"}}>{t.label}</span>
+                </div>
+                <div className="text-xs font-mono" style={{color: "var(--text-dim)"}}>{t.test}</div>
+                <div className="text-xs mt-1" style={{color: checks[t.key] ? "var(--text)" : "var(--text-faded)"}}>{t.rule}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </InteractiveFrame>
+  );
+}
+
+function TypeCard({ title, def, eigenvalues, properties, ml, example }) {
+  return (
+    <div className="rounded-xl p-5 my-4"
+      style={{border: "1px solid var(--accent-border)", background: "linear-gradient(135deg, var(--accent-soft), var(--bg-elev-1))"}}>
+      <div className="text-base font-bold mb-2" style={{color: "var(--accent)"}}>{title}</div>
+      <div className="grid md:grid-cols-2 gap-3 text-sm">
+        <div>
+          <div className="text-[10px] tracking-[0.2em] font-semibold mb-1" style={{color: "var(--accent-2)"}}>DEFINITION</div>
+          <div style={{color: "var(--text)"}}>{def}</div>
+        </div>
+        <div>
+          <div className="text-[10px] tracking-[0.2em] font-semibold mb-1" style={{color: "var(--accent-3)"}}>EIGENVALUE BEHAVIOR</div>
+          <div style={{color: "var(--text)"}}>{eigenvalues}</div>
+        </div>
+        <div>
+          <div className="text-[10px] tracking-[0.2em] font-semibold mb-1" style={{color: "var(--warn)"}}>KEY PROPERTIES</div>
+          <ul className="list-disc list-outside ml-4 space-y-0.5" style={{color: "var(--text)"}}>
+            {properties.map((p, i) => <li key={i}>{p}</li>)}
+          </ul>
+        </div>
+        <div>
+          <div className="text-[10px] tracking-[0.2em] font-semibold mb-1" style={{color: "var(--pink)"}}>EXAMPLE / ML USE</div>
+          <div style={{color: "var(--text)"}}>{example} {ml && <span className="block text-xs mt-1" style={{color: "var(--accent-3)"}}>{ml}</span>}</div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Concept82() {
+  return (
+    <ConceptCard id="concept-8-2" label="8.2" moduleLabel="Module 8 · Decompositions"
+      title="The 12 Matrix Types — Every One You'll See"
+      why="One question type that GATE asks year after year: 'A satisfies X — what can you deduce?' If you've memorized the X → eigenvalue behavior table, the answer takes 5 seconds. If not, you'll burn 5 minutes computing what's already a definition.">
+      <H3>The unified picture</H3>
+      <P>Each matrix type is defined by an ALGEBRAIC condition and produces a characteristic EIGENVALUE signature. Knowing the type tells you the eigenvalues; knowing the eigenvalues often tells you the type. The table below covers everything tested at GATE level.</P>
+
+      <TypeCard
+        title="1 · Symmetric (A = Aᵀ)"
+        def={<>Equal to its own transpose. Off-diagonal entries mirror across the diagonal.</>}
+        eigenvalues="All eigenvalues are REAL. Eigenvectors for distinct λ are orthogonal."
+        properties={[
+          "Always diagonalizable (spectral theorem)",
+          "A = QΛQᵀ with Q orthogonal",
+          "trace = Σλ, det = Πλ (always real)",
+        ]}
+        example={<>Covariance matrices, Hessians, Gram matrices, adjacency of undirected graphs.</>}
+        ml="PCA decomposes a symmetric covariance into eigenvectors."
+      />
+
+      <TypeCard
+        title="2 · Skew-Symmetric (A = −Aᵀ)"
+        def={<>Equal to the NEGATIVE of its transpose. Diagonal entries must be zero.</>}
+        eigenvalues="Eigenvalues are 0 or pure imaginary (±iα). Complex-conjugate pairs."
+        properties={[
+          "If n is odd, A is always singular (det = 0)",
+          "All diagonal entries = 0 (forced)",
+          "Used to represent infinitesimal rotations",
+        ]}
+        example={<>Cross-product matrix in 3D: <T src="[\mathbf{u}]_\times \mathbf{v} = \mathbf{u} \times \mathbf{v}"/>.</>}
+      />
+
+      <TypeCard
+        title="3 · Orthogonal (AᵀA = I, equivalently A⁻¹ = Aᵀ)"
+        def={<>Columns (and rows) form an orthonormal set. A⁻¹ = Aᵀ — inverse is FREE.</>}
+        eigenvalues={<>All eigenvalues have |λ| = 1 (modulus 1). Real eigenvalues are ±1. Complex eigenvalues come in conjugate pairs on the unit circle.</>}
+        properties={[
+          "det(A) = ±1 (preserves volume)",
+          "Preserves lengths and angles (rigid transformation)",
+          "Product of orthogonal matrices is orthogonal",
+        ]}
+        example={<>Rotation matrices, reflection matrices, permutation matrices.</>}
+        ml="QR decomposition, Householder reflections, learned attention with orthogonal weights."
+      />
+
+      <TypeCard
+        title="4 · Idempotent (A² = A)"
+        def={<>Applying twice equals applying once. The matrix is a PROJECTION.</>}
+        eigenvalues="Eigenvalues are ONLY 0 or 1. Each direction is either preserved (λ = 1) or killed (λ = 0)."
+        properties={[
+          "rank(A) = trace(A) (because each eigenvalue is 0 or 1)",
+          "I − A is also idempotent (the complementary projection)",
+          "Diagonalizable (gm = am for both 0 and 1)",
+        ]}
+        example={<>Projection onto a subspace: <T src="P = \mathbf{u} \mathbf{u}^\top"/> for unit <T src="\mathbf{u}"/>.</>}
+        ml="The 'hat matrix' H = X(XᵀX)⁻¹Xᵀ in linear regression is idempotent."
+      />
+
+      <TypeCard
+        title="5 · Nilpotent (Aᵏ = 0 for some k ≥ 1)"
+        def={<>Some power equals the zero matrix. The smallest such k is the 'index of nilpotency'.</>}
+        eigenvalues="ALL eigenvalues are 0. (But A ≠ 0 in general!)"
+        properties={[
+          "det(A) = 0 (singular)",
+          "trace(A) = 0",
+          "Not diagonalizable (unless A = 0)",
+          "Strictly upper or lower triangular matrices are nilpotent",
+        ]}
+        example={<>Shift matrix: <T src="A = \begin{pmatrix} 0 & 1 \\ 0 & 0 \end{pmatrix}"/>, A² = 0.</>}
+      />
+
+      <TypeCard
+        title="6 · Involutory (A² = I, equivalently A = A⁻¹)"
+        def={<>The matrix is its own inverse. Applying it twice undoes the first application.</>}
+        eigenvalues="Eigenvalues are ONLY ±1."
+        properties={[
+          "Always invertible (A⁻¹ = A)",
+          "det(A) = ±1",
+          "Reflections are involutory: reflect twice, get the original",
+        ]}
+        example={<>Reflection across an axis. Swap matrix <T src="\begin{pmatrix} 0 & 1 \\ 1 & 0 \end{pmatrix}"/>.</>}
+      />
+
+      <TypeCard
+        title="7 · Positive Definite (xᵀAx > 0 for all x ≠ 0)"
+        def={<>Quadratic form is strictly positive. Always symmetric (we redefine A to be (A + Aᵀ)/2 if not).</>}
+        eigenvalues="ALL eigenvalues are strictly POSITIVE."
+        properties={[
+          "Always invertible",
+          "Has a Cholesky decomposition A = LLᵀ",
+          "All leading principal minors > 0 (Sylvester's criterion)",
+        ]}
+        example={<>Covariance of a non-degenerate distribution. Hessian at a strict local minimum.</>}
+        ml="Required for Newton's method to converge; ensured by Gauss-Newton-style approximations."
+      />
+
+      <TypeCard
+        title="8 · Positive Semi-Definite (xᵀAx ≥ 0)"
+        def={<>Quadratic form is non-negative. Allowed to be zero on a non-trivial subspace.</>}
+        eigenvalues="All eigenvalues ≥ 0 (can equal 0)."
+        properties={[
+          "Symmetric",
+          "All leading principal minors ≥ 0",
+          "Sum of two PSD matrices is PSD",
+        ]}
+        example={<>Gram matrix <T src="K_{ij} = \langle \mathbf{x}_i, \mathbf{x}_j \rangle"/> is always PSD.</>}
+        ml="Kernel methods use PSD matrices to define implicit feature spaces."
+      />
+
+      <TypeCard
+        title="9 · Diagonal"
+        def={<>Off-diagonal entries are all zero.</>}
+        eigenvalues="Eigenvalues equal the diagonal entries directly."
+        properties={[
+          "Trivially diagonalizable (already diagonal)",
+          "Powers: D^k has diagonal d_i^k",
+          "Sum of diagonals = sum of squared norm contributions in metrics",
+        ]}
+        example={<>Scaling matrices. The D in any eigendecomposition A = PDP⁻¹.</>}
+      />
+
+      <TypeCard
+        title="10 · Triangular (Upper / Lower)"
+        def={<>All entries below (or above) the diagonal are zero.</>}
+        eigenvalues="Eigenvalues equal the diagonal entries."
+        properties={[
+          "det(A) = product of diagonal entries",
+          "Inverse is also triangular (same type)",
+          "Sum/product of upper triangulars is upper triangular",
+        ]}
+        example={<>The U factor of any LU decomposition. The R factor of QR.</>}
+      />
+
+      <TypeCard
+        title="11 · Singular (det = 0)"
+        def={<>Not invertible. Columns are linearly dependent.</>}
+        eigenvalues="0 IS an eigenvalue (with multiplicity ≥ 1)."
+        properties={[
+          "rank < n",
+          "Non-trivial null space",
+          "Ax = b is either inconsistent or has ∞ solutions",
+        ]}
+        example={<>Any matrix with a row of zeros, repeated rows, etc.</>}
+      />
+
+      <TypeCard
+        title="12 · Non-singular / Invertible (det ≠ 0)"
+        def={<>Has a two-sided inverse A⁻¹.</>}
+        eigenvalues="0 is NOT an eigenvalue."
+        properties={[
+          "rank = n (full rank)",
+          "Trivial null space",
+          "Ax = b has unique solution for every b",
+          "The 'Big Equivalence Theorem' (Concept 5.3) holds",
+        ]}
+        example={<>Identity, rotations, any non-degenerate transformation.</>}
+      />
+
+      <MatrixTypeIdentifier/>
+
+      <H3>Three GATE traps for matrix types</H3>
+
+      <H4>Trap 1 — "Idempotent ⇒ rank = trace"</H4>
+      <P><B>Proof:</B> idempotent ⇒ eigenvalues are only 0 or 1. So trace = sum of eigenvalues = number of 1's = number of non-zero eigenvalues = rank.</P>
+
+      <H4>Trap 2 — "Nilpotent but not zero matrix"</H4>
+      <P>A nilpotent matrix has ALL eigenvalues zero, but the matrix itself is NOT necessarily zero. Example: <T src="A = \begin{pmatrix} 0 & 1 \\ 0 & 0 \end{pmatrix}"/>. det(A) = 0, trace(A) = 0, eigenvalues = 0, 0 — but A ≠ 0.</P>
+
+      <H4>Trap 3 — "Symmetric ⇒ orthogonal" — FALSE</H4>
+      <P>Symmetric matrices satisfy A = Aᵀ. Orthogonal matrices satisfy AᵀA = I. These are DIFFERENT conditions. A matrix can be symmetric without being orthogonal (e.g., the matrix [[2,1],[1,2]] is symmetric but [[2,1],[1,2]]·[[2,1],[1,2]] ≠ I).</P>
+      <P>The intersection (symmetric AND orthogonal) is exactly the matrices satisfying A² = I AND A = Aᵀ — these are the symmetric involutory matrices.</P>
+
+      <PYQ year="2018" exam="CS-style" marks="2"
+        question={<P>The matrix <T src="A = \begin{pmatrix} 0 & 1 & 0 \\ 0 & 0 & 1 \\ 0 & 0 & 0 \end{pmatrix}"/> is:<br/>(a) Idempotent (b) Nilpotent (c) Orthogonal (d) Invertible</P>}
+        solution={
+          <>
+            <P>Compute powers: <T src="A^2 = \begin{pmatrix} 0 & 0 & 1 \\ 0 & 0 & 0 \\ 0 & 0 & 0 \end{pmatrix}"/>, <T src="A^3 = 0"/>.</P>
+            <P>So A is NILPOTENT (with index 3). Not idempotent (A² ≠ A). Not orthogonal (AᵀA = diag(0, 1, 1) ≠ I). Not invertible (det = 0).</P>
+            <P><B>Answer:</B> (b) Nilpotent.</P>
+          </>
+        }/>
+
+      <PYQ year="2020" exam="CS-style" marks="2"
+        question={<P>If A is a 4×4 idempotent matrix with rank 2, what is trace(A)?</P>}
+        solution={
+          <>
+            <P>Idempotent ⇒ eigenvalues only 0 or 1. rank(A) = 2 = number of non-zero eigenvalues = number of 1's. So 2 eigenvalues are 1, the other 2 are 0.</P>
+            <P>trace(A) = sum of eigenvalues = 1 + 1 + 0 + 0 = 2.</P>
+            <P><B>Answer:</B> trace(A) = 2. (And in general: idempotent ⇒ trace = rank.)</P>
+          </>
+        }/>
+
+      <Callout kind="recall" title="Concept 8.2 in one breath">
+        <P>12 matrix types, each with a defining condition and an eigenvalue signature. Symmetric → real λ. Skew → λ = 0 or imaginary. Orthogonal → |λ| = 1. Idempotent → λ ∈ {`{0, 1}`}, rank = trace. Nilpotent → all λ = 0. Involutory → λ = ±1. Positive (semi)definite → λ ≥ 0 (&gt;0). Memorize this table; GATE questions are pattern-matching against it.</P>
+      </Callout>
+
+      <ProgressPill conceptId="m8-c82"/>
+    </ConceptCard>
+  );
+}
+
+/* ════════════════════════════════════════════════════════
+   APP ROOT
+   ════════════════════════════════════════════════════════ */
+function App() {
+  useEffect(() => { hideLoading(); }, []);
+  const concepts = [
+    { id: "concept-8-1", label: "8.1", title: "LU Decomposition",         desc: "Gaussian elimination as a factorization · the foundation of all solvers." },
+    { id: "concept-8-2", label: "8.2", title: "The 12 Matrix Types",      desc: "Symmetric, orthogonal, idempotent, nilpotent... eigenvalue signatures for every type." },
+  ];
+  return (
+    <div className="min-h-screen">
+      <TopNav currentModule={8}/>
+      <Hero
+        moduleNum={8} totalModules={8}
+        title="Decompositions & Matrix Types"
+        tagline="Where everything comes together"
+        intro={
+          <>
+            The final content module. We close with two big ideas: <Em>LU decomposition</Em> (Gaussian elimination as a matrix factorization)
+            and the <Em>12 matrix types</Em> that every GATE question pattern-matches against. Once you know each type's eigenvalue signature,
+            classification becomes instant.
+          </>
+        }
+        concepts={concepts}
+        stats="2 concepts · 2 interactive tools · 12 matrix types catalogued · 2 GATE PYQs"
+      />
+
+      {/* Problem Lab CTA */}
+      <section className="max-w-5xl mx-auto px-5 pt-2 pb-2">
+        <a href="module-08-problem-lab.html"
+          className="block rounded-2xl p-5 md:p-6 group transition-all"
+          style={{
+            background: "linear-gradient(135deg, var(--accent-soft), var(--accent-2-soft))",
+            border: "1px solid var(--accent-border)",
+            boxShadow: "var(--shadow-glow-accent)",
+          }}
+          onMouseEnter={e => e.currentTarget.style.borderColor = "var(--accent)"}
+          onMouseLeave={e => e.currentTarget.style.borderColor = "var(--accent-border)"}>
+          <div className="flex flex-wrap items-center gap-4">
+            <div style={{
+              width: 52, height: 52, borderRadius: 14,
+              background: "var(--grad-hero)", color: "white",
+              display: "inline-flex", alignItems: "center", justifyContent: "center",
+              fontSize: 22, flexShrink: 0,
+            }}>🎯</div>
+            <div className="flex-1 min-w-[260px]">
+              <div className="text-[11px] tracking-[0.2em] font-semibold mb-1" style={{color: "var(--accent)"}}>
+                MODULE 8 · PROBLEM LAB — NEW
+              </div>
+              <div className="text-[18px] md:text-[20px] font-bold leading-tight mb-1" style={{color: "var(--text)"}}>
+                LU + Matrix Type Signatures → instant GATE reflex.
+              </div>
+              <div className="text-[13.5px]" style={{color: "var(--text-dim)"}}>
+                18 problems · 7 matrix types (idempotent, nilpotent, orthogonal, symmetric, PD, skew, involutory) · LU complexity · timed drill.
+              </div>
+            </div>
+            <div className="flex items-center gap-2 px-4 py-2 rounded-xl font-semibold transition-opacity"
+              style={{background: "var(--grad-hero)", color: "white"}}>
+              Open Problem Lab →
+            </div>
+          </div>
+        </a>
+      </section>
+
+      <Concept81/>
+      <Concept82/>
+      <ModuleFooter
+        moduleNum={8}
+        nextModuleTitle="Cheat Sheet — every formula on one page"
+        nextModuleFile="module-09-cheatsheet.html"
+        checklist={[
+          "I can perform LU decomposition by hand for a 3×3 matrix.",
+          "I can solve Ax = b given the LU decomposition (forward + back substitution).",
+          "I can name the eigenvalue signature of all 12 matrix types from memory.",
+          "I can prove idempotent ⇒ rank = trace.",
+          "I can prove orthogonal ⇒ |λ| = 1.",
+          "I can identify which types a given matrix satisfies in under 60 seconds."
+        ]}
+      />
+    </div>
+  );
+}
+
+mountApp(App, 8);
+</script>
+
+</body>
+</html>

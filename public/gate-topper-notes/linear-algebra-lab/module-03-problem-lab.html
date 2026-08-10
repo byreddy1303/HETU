@@ -1,0 +1,3364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 3 · Problem Lab — LA Mastery Hub</title>
+
+<script>
+  (function () {
+    try {
+      var t = localStorage.getItem("la-hub::theme") || "dark";
+      document.documentElement.classList.add(t === "light" ? "light" : "dark");
+    } catch (e) {
+      document.documentElement.classList.add("dark");
+    }
+  })();
+</script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="theme.css">
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = { darkMode: 'class' };
+</script>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+
+<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<!-- Babel standalone NOT loaded; this module uses the precompiled bundle below -->
+
+
+<style>
+  /* Problem Lab specific styles */
+  .pl-difficulty-easy   { background: rgba(34, 197, 94, 0.12);  color: #22c55e; border: 1px solid rgba(34, 197, 94, 0.35); }
+  .pl-difficulty-medium { background: rgba(234, 179, 8, 0.12);  color: #eab308; border: 1px solid rgba(234, 179, 8, 0.35); }
+  .pl-difficulty-hard   { background: rgba(249, 115, 22, 0.12); color: #f97316; border: 1px solid rgba(249, 115, 22, 0.35); }
+  .pl-difficulty-killer { background: rgba(239, 68, 68, 0.12);  color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.35); }
+  .pl-type-mcq          { background: rgba(59, 130, 246, 0.12); color: #3b82f6; border: 1px solid rgba(59, 130, 246, 0.35); }
+  .pl-type-nat          { background: rgba(168, 85, 247, 0.12); color: #a855f7; border: 1px solid rgba(168, 85, 247, 0.35); }
+  .pl-type-pyq          { background: rgba(245, 158, 11, 0.12); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.35); font-weight: 700; }
+
+  .pl-correct  { animation: pl-flash-green 0.6s ease-out; }
+  .pl-wrong    { animation: pl-flash-red   0.6s ease-out; }
+
+  @keyframes pl-flash-green {
+    0%   { background: rgba(34, 197, 94, 0.3);  }
+    100% { background: transparent; }
+  }
+  @keyframes pl-flash-red {
+    0%   { background: rgba(239, 68, 68, 0.3); }
+    100% { background: transparent; }
+  }
+
+  .pl-neg-banner {
+    background: rgba(69, 26, 3, 0.6);
+    color: #fbbf24;
+    border: 1px solid rgba(251, 191, 36, 0.3);
+    font-size: 12px;
+    padding: 6px 10px;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .pl-skip-attempt {
+    background: rgba(59, 130, 246, 0.10);
+    border: 1px solid rgba(59, 130, 246, 0.30);
+    color: #60a5fa;
+    font-size: 12px;
+    padding: 4px 10px;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .pl-skip-skip {
+    background: rgba(244, 114, 182, 0.10);
+    border: 1px solid rgba(244, 114, 182, 0.30);
+    color: #f472b6;
+    font-size: 12px;
+    padding: 4px 10px;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .pl-tech-card {
+    border-left: 3px solid #3b82f6;
+    background: var(--bg-elev-1);
+    border-radius: 10px;
+    padding: 18px;
+  }
+
+  .pl-danger-zone {
+    border-left: 3px solid #ef4444;
+    background: rgba(239, 68, 68, 0.06);
+    border-radius: 6px;
+    padding: 12px;
+    margin-top: 14px;
+  }
+
+  .pl-mistake-card {
+    border-left: 3px solid #ef4444;
+    background: var(--bg-elev-1);
+    border-radius: 10px;
+    padding: 18px;
+  }
+
+  .pl-wrong-solution {
+    background: var(--bg-elev-3);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 12px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--text);
+    white-space: pre-wrap;
+  }
+
+  .pl-wrong-line {
+    padding: 4px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.15s ease;
+  }
+  .pl-wrong-line:hover {
+    background: rgba(251, 113, 133, 0.08);
+  }
+  .pl-wrong-line.error-found {
+    background: rgba(239, 68, 68, 0.25);
+    border-left: 3px solid #ef4444;
+    padding-left: 8px;
+  }
+
+  .pl-tab-pill {
+    padding: 8px 14px;
+    border-radius: 9999px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.18s ease;
+    border: 1px solid var(--border);
+    background: var(--bg-elev-1);
+    color: var(--text-dim);
+  }
+  .pl-tab-pill.active {
+    background: var(--accent-soft);
+    border-color: var(--accent-border);
+    color: var(--accent);
+  }
+  .pl-tab-pill:hover:not(.active) {
+    color: var(--text);
+    border-color: var(--border-strong);
+  }
+
+  .pl-option-btn {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--bg-elev-1);
+    text-align: left;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    width: 100%;
+    color: var(--text);
+    font-size: 14.5px;
+    font-family: 'Inter', 'Cambria Math', 'STIX Two Math', 'Symbola', system-ui, sans-serif;
+  }
+  .pl-option-btn .katex {
+    font-size: 1.08em !important;
+  }
+  .pl-option-btn:hover:not(:disabled) {
+    border-color: var(--accent-border);
+    background: var(--accent-soft);
+  }
+  .pl-option-btn:disabled { cursor: default; opacity: 0.85; }
+  .pl-option-btn.selected {
+    border-color: var(--accent);
+    background: var(--accent-soft);
+  }
+  .pl-option-btn.correct {
+    border-color: rgba(34, 197, 94, 0.6);
+    background: rgba(34, 197, 94, 0.12);
+    color: #22c55e;
+  }
+  .pl-option-btn.wrong-choice {
+    border-color: rgba(239, 68, 68, 0.6);
+    background: rgba(239, 68, 68, 0.10);
+    color: #fb7185;
+  }
+
+  .pl-option-letter {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: var(--bg-elev-3);
+    border: 1px solid var(--border);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-dim);
+    flex-shrink: 0;
+  }
+
+  .pl-nat-input {
+    background: var(--bg-elev-2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 16px;
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 16px;
+    width: 100%;
+    max-width: 280px;
+  }
+  .pl-nat-input:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+  }
+
+  .pl-submit-btn {
+    padding: 9px 22px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    transition: opacity 0.15s ease;
+    background: var(--grad-hero);
+    color: white;
+    border: none;
+  }
+  .pl-submit-btn:hover:not(:disabled) { opacity: 0.92; }
+  .pl-submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .pl-progress-bar {
+    height: 6px;
+    background: var(--bg-elev-3);
+    border-radius: 9999px;
+    overflow: hidden;
+  }
+  .pl-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #22c55e, #34d399);
+    transition: width 0.3s ease;
+  }
+  .pl-progress-fill.warning { background: linear-gradient(90deg, #eab308, #f59e0b); }
+  .pl-progress-fill.danger  { background: linear-gradient(90deg, #ef4444, #fb7185); }
+
+  .pl-hint-box {
+    background: var(--accent-2-soft);
+    border: 1px solid var(--accent-2-border);
+    border-radius: 8px;
+    padding: 14px;
+    color: var(--text);
+  }
+
+  .pl-layer-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+  }
+  .pl-layer-num {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: var(--grad-hero);
+    color: white;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 14px;
+  }
+  .pl-layer-title {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: -0.01em;
+  }
+
+  /* ─────────────────────────────────────────────────────────────
+     MATH VISIBILITY — KaTeX + Unicode math characters
+     ───────────────────────────────────────────────────────────── */
+  /* KaTeX inline math: bumped size, brighter color, slight glow */
+  .katex {
+    font-size: 1.12em !important;
+    color: #fef3c7 !important;       /* warm cream — high contrast on dark */
+    text-shadow: 0 0 1px rgba(254, 243, 199, 0.25);
+  }
+  html.light .katex {
+    color: #4338ca !important;       /* indigo on light theme */
+    text-shadow: none;
+  }
+  .katex .mord, .katex .mbin, .katex .mrel, .katex .mopen, .katex .mclose,
+  .katex .mpunct, .katex .minner, .katex .mop {
+    color: inherit !important;
+  }
+  /* Display-mode (block) math — even bigger */
+  .katex-display > .katex {
+    font-size: 1.2em !important;
+  }
+  /* KaTeX matrices and arrays — ensure brackets visible */
+  .katex .delimsizing,
+  .katex .delim-size1,
+  .katex .delim-size2,
+  .katex .delim-size3,
+  .katex .delim-size4 {
+    color: inherit !important;
+  }
+
+  /* Unicode math characters inside problem/solution prose
+     — vectors, subscripts, Greek letters, relations.
+     Forces font that supports them on macOS/Windows/Linux. */
+  .pl-prose {
+    font-feature-settings: "ss01" 1, "cv11" 1;
+    font-variant-numeric: tabular-nums;
+  }
+  .pl-prose,
+  .pl-prose * {
+    /* fallback stack that supports ℝ ℂ ℕ ℤ ℚ ‖ ⇒ ∑ ∏ ∈ ∉ ⊆ ⊇ ∪ ∩ etc. */
+    font-family: 'Inter', 'SF Pro Text', 'Cambria Math', 'STIX Two Math',
+                 'Latin Modern Math', 'Symbola', 'Arial Unicode MS',
+                 system-ui, -apple-system, sans-serif;
+  }
+  /* Highlight inline math-like tokens — anything in a span we mark */
+  .pl-math {
+    font-family: 'JetBrains Mono', 'SF Mono', 'Cambria Math', monospace;
+    color: #fef3c7;
+    background: rgba(254, 243, 199, 0.06);
+    padding: 1px 5px;
+    border-radius: 4px;
+    font-weight: 500;
+    font-size: 0.95em;
+    border: 1px solid rgba(254, 243, 199, 0.15);
+  }
+  html.light .pl-math {
+    color: #4338ca;
+    background: rgba(67, 56, 202, 0.08);
+    border: 1px solid rgba(67, 56, 202, 0.22);
+  }
+
+  /* Pre-formatted matrix / step displays inside solutions */
+  .pl-prose .matrix-block,
+  .pl-prose pre {
+    font-family: 'JetBrains Mono', monospace;
+    background: var(--bg-elev-3);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 10px 14px;
+    color: #fef3c7;
+    font-size: 13.5px;
+    white-space: pre;
+    overflow-x: auto;
+    line-height: 1.7;
+    margin: 8px 0;
+  }
+  html.light .pl-prose .matrix-block,
+  html.light .pl-prose pre {
+    color: #4338ca;
+  }
+
+  /* Bigger, brighter sub/superscripts in solution prose */
+  .pl-prose sub, .pl-prose sup {
+    font-size: 0.78em;
+    line-height: 1;
+    color: #fbbf24;
+  }
+  html.light .pl-prose sub, html.light .pl-prose sup {
+    color: #b45309;
+  }
+
+  /* Bring solution prose up to a readable size */
+  .pl-prose {
+    font-size: 14.5px;
+    line-height: 1.75;
+  }
+
+  /* When math appears inside option buttons / hints */
+  .pl-option-btn .katex,
+  .pl-hint-box .katex {
+    font-size: 1.05em !important;
+  }
+</style>
+</head>
+<body>
+
+<div id="loading">
+  <div style="text-align:center">
+    <div class="spinner"></div>
+    <div style="font-size:13px; opacity:0.8">Loading Module 3 — Problem Lab</div>
+  </div>
+</div>
+
+<div id="root"></div>
+
+<!-- Precompiled bundle: boilerplate.js + this module's content with JSX already transpiled.
+     Source of truth remains the template script at the bottom of this file.
+     Re-run `node build-problem-lab.js 3` after editing it. -->
+<script src="module-03-problem-lab.compiled.js"></script>
+
+<script type="text/template" id="m3-source-of-truth" data-no-execute>
+const { useState, useEffect, useMemo, useRef, useCallback } = React;
+
+/* ════════════════════════════════════════════════════════════════
+   PROBLEM LAB — SHARED COMPONENTS & STATE
+   ════════════════════════════════════════════════════════════════ */
+
+const MODULE_NUM = 3;
+
+/* localStorage helpers ─────────────────────────────────────────── */
+const lsGet = (k, fallback) => {
+  try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : fallback; }
+  catch { return fallback; }
+};
+const lsSet = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} };
+
+function useConceptProgress(conceptNum, totalProblems) {
+  const aKey = "gate_la_m" + MODULE_NUM + "_c" + conceptNum + "_attempted";
+  const cKey = "gate_la_m" + MODULE_NUM + "_c" + conceptNum + "_correct";
+  const hKey = "gate_la_m" + MODULE_NUM + "_c" + conceptNum + "_hints";
+
+  const [attempted, setAttempted] = useState(() => lsGet(aKey, []));
+  const [correct, setCorrect] = useState(() => lsGet(cKey, []));
+  const [hints, setHints] = useState(() => lsGet(hKey, {}));
+
+  const markAttempt = (pid, didCorrect) => {
+    setAttempted(prev => {
+      if (prev.includes(pid)) return prev;
+      const next = [...prev, pid]; lsSet(aKey, next); return next;
+    });
+    if (didCorrect) {
+      setCorrect(prev => {
+        if (prev.includes(pid)) return prev;
+        const next = [...prev, pid]; lsSet(cKey, next); return next;
+      });
+    }
+  };
+  const useHint = (pid) => {
+    setHints(prev => {
+      const next = { ...prev, [pid]: (prev[pid] || 0) + 1 };
+      lsSet(hKey, next);
+      return next;
+    });
+  };
+  return { attempted, correct, hints, markAttempt, useHint, totalProblems };
+}
+
+/* ────────────────────────────────────────────────────────────────
+   BADGES (Difficulty, Type, Time, Tags)
+   ──────────────────────────────────────────────────────────────── */
+function DiffBadge({ level }) {
+  const labels = { easy: "EASY", medium: "MEDIUM", hard: "HARD", killer: "KILLER" };
+  return (
+    <span className={"text-[10.5px] tracking-[0.15em] font-bold px-2 py-1 rounded-md pl-difficulty-" + level}>
+      {labels[level]}
+    </span>
+  );
+}
+function TypeBadge({ type }) {
+  if (type === "pyq") return <span className="text-[10.5px] tracking-[0.15em] font-bold px-2 py-1 rounded-md pl-type-pyq">★ GATE PYQ</span>;
+  return (
+    <span className={"text-[10.5px] tracking-[0.15em] font-bold px-2 py-1 rounded-md pl-type-" + type}>
+      {type === "mcq" ? "MCQ" : "NAT"}
+    </span>
+  );
+}
+function MetaPill({ children, mono = false }) {
+  return (
+    <span className={"text-[11px] px-2 py-1 rounded-md " + (mono ? "font-mono " : "")}
+      style={{background: "var(--bg-elev-3)", color: "var(--text-dim)", border: "1px solid var(--border)"}}>
+      {children}
+    </span>
+  );
+}
+function ConceptTag({ children }) {
+  return (
+    <span className="text-[11px] px-2 py-1 rounded-md font-mono"
+      style={{background: "var(--accent-soft)", color: "var(--accent)", border: "1px solid var(--accent-border)"}}>
+      {children}
+    </span>
+  );
+}
+
+/* ────────────────────────────────────────────────────────────────
+   LAYER HEADER
+   ──────────────────────────────────────────────────────────────── */
+function LayerHeader({ num, title, subtitle }) {
+  return (
+    <div className="mt-10 mb-5">
+      <div className="pl-layer-header">
+        <div className="pl-layer-num">L{num}</div>
+        <div className="pl-layer-title">{title}</div>
+      </div>
+      {subtitle && <div className="text-[14px] ml-12" style={{color: "var(--text-dim)"}}>{subtitle}</div>}
+    </div>
+  );
+}
+
+/* ────────────────────────────────────────────────────────────────
+   PATTERN CARD (Layer 1)
+   ──────────────────────────────────────────────────────────────── */
+function PatternCard({ idx, pattern }) {
+  return (
+    <div className="rounded-xl p-5 mb-4 pl-prose"
+      style={{background: "var(--bg-elev-1)", border: "1px solid var(--border)"}}>
+      <div className="flex flex-wrap items-baseline gap-3 mb-3">
+        <span className="text-[10.5px] tracking-[0.18em] font-bold px-2 py-1 rounded-md"
+          style={{background: "var(--accent-soft)", color: "var(--accent)", border: "1px solid var(--accent-border)"}}>
+          PATTERN {idx}
+        </span>
+        <span className="text-[17px] font-semibold" style={{color: "var(--text)"}}>{pattern.name}</span>
+        <span className="ml-auto text-[11px] px-2 py-1 rounded-md font-mono"
+          style={{background: "var(--bg-elev-3)", color: "var(--text-dim)", border: "1px solid var(--border)"}}>
+          ⏱ ~{pattern.timeBudget}s
+        </span>
+        <span className="text-[11px] px-2 py-1 rounded-md"
+          style={{background: pattern.frequency === "Very Frequent" ? "rgba(239,68,68,0.12)" :
+                                pattern.frequency === "Frequent" ? "rgba(249,115,22,0.12)" :
+                                pattern.frequency === "Occasional" ? "rgba(234,179,8,0.12)" : "rgba(148,163,184,0.12)",
+                  color: pattern.frequency === "Very Frequent" ? "#ef4444" :
+                         pattern.frequency === "Frequent" ? "#f97316" :
+                         pattern.frequency === "Occasional" ? "#eab308" : "#94a3b8",
+                  border: "1px solid currentColor"}}>
+          {pattern.frequency}
+        </span>
+      </div>
+
+      <div className="grid md:grid-cols-2 gap-3 text-[13.5px] leading-relaxed">
+        <div className="rounded-lg p-3" style={{background: "var(--bg-elev-2)", border: "1px solid var(--border)"}}>
+          <div className="text-[10px] tracking-[0.18em] font-semibold mb-1" style={{color: "var(--accent-2)"}}>SURFACE APPEARANCE</div>
+          <div style={{color: "var(--text)"}}>{pattern.surface}</div>
+        </div>
+        <div className="rounded-lg p-3" style={{background: "var(--bg-elev-2)", border: "1px solid var(--border)"}}>
+          <div className="text-[10px] tracking-[0.18em] font-semibold mb-1" style={{color: "var(--pink)"}}>WHAT IT'S ACTUALLY TESTING</div>
+          <div style={{color: "var(--text)"}}>{pattern.testing}</div>
+        </div>
+      </div>
+
+      <div className="mt-3 rounded-lg p-3" style={{background: "var(--bg-elev-2)", border: "1px solid var(--border)"}}>
+        <div className="text-[10px] tracking-[0.18em] font-semibold mb-2" style={{color: "var(--warn)"}}>SIGNAL WORDS</div>
+        <div className="flex flex-wrap gap-2">
+          {pattern.signals.map((s, i) => (
+            <code key={i} className="font-mono text-[12px] px-2 py-1 rounded"
+              style={{background: "var(--bg-elev-3)", color: "var(--warn)", border: "1px solid var(--warn-border)"}}>
+              {s}
+            </code>
+          ))}
+        </div>
+      </div>
+
+      <div className="mt-3 rounded-lg p-3" style={{background: "var(--accent-soft)", border: "1px solid var(--accent-border)"}}>
+        <div className="text-[10px] tracking-[0.18em] font-semibold mb-1" style={{color: "var(--accent)"}}>FIRST MOVE (TOP-RANKER REFLEX)</div>
+        <div className="text-[14px]" style={{color: "var(--text)"}}>{pattern.firstMove}</div>
+      </div>
+    </div>
+  );
+}
+
+/* ────────────────────────────────────────────────────────────────
+   PROBLEM CARD (Layer 2)
+   ──────────────────────────────────────────────────────────────── */
+function ProblemCard({ p, idx, progress }) {
+  const [selected, setSelected] = useState(null);
+  const [natValue, setNatValue] = useState("");
+  const [submitted, setSubmitted] = useState(false);
+  const [isCorrect, setIsCorrect] = useState(false);
+  const [attempts, setAttempts] = useState(0);
+  const [hintsShown, setHintsShown] = useState(0);
+  const [showFullSolution, setShowFullSolution] = useState(false);
+  const [flashKey, setFlashKey] = useState(0);
+
+  const isPYQ = p.type === "pyq";
+
+  const checkAnswer = () => {
+    let ok = false;
+    if (p.kind === "mcq") {
+      ok = selected === p.answer;
+    } else {
+      const userVal = parseFloat(natValue);
+      if (!isNaN(userVal)) {
+        const tol = p.tolerance != null ? p.tolerance : 0.01;
+        ok = Math.abs(userVal - p.answer) <= tol;
+      }
+    }
+    setIsCorrect(ok);
+    setSubmitted(true);
+    setAttempts(a => a + 1);
+    setFlashKey(k => k + 1);
+    progress.markAttempt(p.id, ok);
+    if (!ok && attempts + 1 >= 2) setShowFullSolution(true);
+  };
+
+  const tryAgain = () => {
+    setSubmitted(false);
+    setIsCorrect(false);
+    setSelected(null);
+    setNatValue("");
+  };
+
+  const revealHint = () => {
+    if (hintsShown < (p.hints?.length || 0)) {
+      setHintsShown(hintsShown + 1);
+      progress.useHint(p.id);
+    }
+  };
+
+  const isCompleted = progress.correct.includes(p.id);
+
+  return (
+    <div key={flashKey} className={"rounded-xl p-5 mb-5 " + (submitted ? (isCorrect ? "pl-correct" : "pl-wrong") : "")}
+      style={{background: "var(--bg-elev-1)", border: "1px solid " + (isCompleted ? "rgba(34,197,94,0.4)" : "var(--border)")}}>
+
+      <div className="flex flex-wrap items-center gap-2 mb-3">
+        <span className="text-[10.5px] tracking-[0.18em] font-bold px-2 py-1 rounded-md font-mono"
+          style={{background: "var(--bg-elev-3)", color: "var(--text-dim)", border: "1px solid var(--border)"}}>
+          Q{idx}
+        </span>
+        <DiffBadge level={p.difficulty} />
+        <TypeBadge type={isPYQ ? "pyq" : p.kind} />
+        {isPYQ && p.pyqYear && (
+          <MetaPill mono>GATE CS {p.pyqYear}</MetaPill>
+        )}
+        <MetaPill>{p.marks}-mark style</MetaPill>
+        <MetaPill mono>⏱ ~{p.timeTarget}s</MetaPill>
+        {isCompleted && (
+          <span className="text-[10.5px] tracking-[0.18em] font-bold px-2 py-1 rounded-md ml-auto"
+            style={{background: "rgba(34,197,94,0.15)", color: "#22c55e", border: "1px solid rgba(34,197,94,0.4)"}}>
+            ✓ SOLVED
+          </span>
+        )}
+      </div>
+
+      <div className="flex flex-wrap gap-2 mb-3">
+        {p.tags.map((t, i) => <ConceptTag key={i}>{t}</ConceptTag>)}
+      </div>
+
+      {p.kind === "mcq" && (
+        <div className="pl-neg-banner mb-3">
+          ⚠ Negative marking: −1/3 mark for wrong answer
+        </div>
+      )}
+      {p.skipSignal && (
+        <div className="mb-3">
+          <span className={p.skipSignal.type === "attempt" ? "pl-skip-attempt" : "pl-skip-skip"}>
+            {p.skipSignal.type === "attempt" ? "✓ " : "💡 "}{p.skipSignal.text}
+          </span>
+        </div>
+      )}
+
+      <div className="text-[15px] leading-relaxed mb-4 p-4 rounded-lg pl-prose"
+        style={{background: "var(--bg-elev-2)", color: "var(--text)", border: "1px solid var(--border)"}}>
+        {p.statement}
+      </div>
+
+      {/* ANSWER UI */}
+      {p.kind === "mcq" ? (
+        <div className="space-y-2 mb-3">
+          {p.options.map((opt, i) => {
+            const letter = String.fromCharCode(65 + i);
+            let cls = "pl-option-btn";
+            if (!submitted && selected === letter) cls += " selected";
+            if (submitted) {
+              if (letter === p.answer) cls += " correct";
+              else if (letter === selected) cls += " wrong-choice";
+            }
+            return (
+              <button key={i}
+                className={cls}
+                disabled={submitted}
+                onClick={() => setSelected(letter)}>
+                <span className="pl-option-letter">{letter}</span>
+                <span className="flex-1">{opt}</span>
+                {submitted && letter === p.answer && <span style={{color: "#22c55e"}}>✓</span>}
+                {submitted && letter === selected && letter !== p.answer && <span style={{color: "#fb7185"}}>✗</span>}
+              </button>
+            );
+          })}
+        </div>
+      ) : (
+        <div className="mb-3">
+          <label className="text-[12px] mb-1 block" style={{color: "var(--text-dim)"}}>Numerical Answer (NAT — no options)</label>
+          <input type="number" step="any" className="pl-nat-input"
+            value={natValue}
+            disabled={submitted}
+            onChange={e => setNatValue(e.target.value)}
+            placeholder="Enter your answer..." />
+        </div>
+      )}
+
+      {/* SUBMIT */}
+      {!submitted && (
+        <div className="flex items-center gap-3">
+          <button className="pl-submit-btn"
+            disabled={p.kind === "mcq" ? !selected : natValue === ""}
+            onClick={checkAnswer}>
+            Submit Answer
+          </button>
+          {hintsShown > 0 && (
+            <span className="text-[11px]" style={{color: "var(--text-dim)"}}>
+              Hints used: {hintsShown}/{p.hints?.length || 0}
+            </span>
+          )}
+          {p.hints && p.hints.length > 0 && hintsShown < p.hints.length && (
+            <button className="text-[13px] px-3 py-1.5 rounded-md transition-colors"
+              style={{border: "1px solid var(--accent-2-border)", color: "var(--accent-2)", background: "var(--accent-2-soft)"}}
+              onClick={revealHint}>
+              Show Hint {hintsShown + 1}
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* HINTS DISPLAYED */}
+      {hintsShown > 0 && !submitted && (
+        <div className="mt-4 space-y-2">
+          {p.hints.slice(0, hintsShown).map((h, i) => (
+            <div key={i} className="pl-hint-box pl-prose">
+              <div className="text-[10px] tracking-[0.18em] font-semibold mb-1" style={{color: "var(--accent-2)"}}>
+                HINT {i+1} · {h.label}
+              </div>
+              <div className="text-[14px]">{h.text}</div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* AFTER SUBMISSION */}
+      {submitted && (
+        <div className="mt-4">
+          <div className="flex flex-wrap items-center gap-3 mb-3">
+            {isCorrect ? (
+              <span className="text-[12px] tracking-[0.15em] font-bold px-3 py-1.5 rounded-md"
+                style={{background: "rgba(34,197,94,0.15)", color: "#22c55e", border: "1px solid rgba(34,197,94,0.4)"}}>
+                ✓ CORRECT
+              </span>
+            ) : (
+              <span className="text-[12px] tracking-[0.15em] font-bold px-3 py-1.5 rounded-md"
+                style={{background: "rgba(239,68,68,0.15)", color: "#fb7185", border: "1px solid rgba(239,68,68,0.4)"}}>
+                ✗ INCORRECT
+              </span>
+            )}
+            {!isCorrect && (
+              <>
+                <button className="text-[13px] px-3 py-1.5 rounded-md"
+                  style={{border: "1px solid var(--accent-border)", color: "var(--accent)", background: "var(--accent-soft)"}}
+                  onClick={tryAgain}>
+                  Try Again
+                </button>
+                {p.hints && p.hints.length > 0 && hintsShown < p.hints.length && !showFullSolution && (
+                  <button className="text-[13px] px-3 py-1.5 rounded-md"
+                    style={{border: "1px solid var(--accent-2-border)", color: "var(--accent-2)", background: "var(--accent-2-soft)"}}
+                    onClick={() => { revealHint(); setSubmitted(false); }}>
+                    Show Hint
+                  </button>
+                )}
+                {!showFullSolution && attempts >= 2 && (
+                  <button className="text-[13px] px-3 py-1.5 rounded-md"
+                    style={{border: "1px solid var(--danger-border)", color: "var(--danger)", background: "var(--danger-soft)"}}
+                    onClick={() => setShowFullSolution(true)}>
+                    Show Full Solution
+                  </button>
+                )}
+                {!showFullSolution && (
+                  <button className="text-[13px] px-3 py-1.5 rounded-md"
+                    style={{border: "1px solid var(--border-strong)", color: "var(--text-dim)", background: "var(--bg-elev-2)"}}
+                    onClick={() => setShowFullSolution(true)}>
+                    Reveal Solution
+                  </button>
+                )}
+              </>
+            )}
+          </div>
+
+          {(isCorrect || showFullSolution) && (
+            <SolutionPanel p={p} wasCorrect={isCorrect} />
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ────────────────────────────────────────────────────────────────
+   SOLUTION PANEL
+   ──────────────────────────────────────────────────────────────── */
+function SolutionPanel({ p, wasCorrect }) {
+  return (
+    <div className="rounded-xl p-5 mt-3 pl-prose"
+      style={{background: "var(--bg-elev-2)", border: "1px solid var(--accent-border)"}}>
+      <div className="text-[10.5px] tracking-[0.2em] font-bold mb-3" style={{color: "var(--accent)"}}>
+        🧠 THINKING CHAIN — How a top ranker actually solves this
+      </div>
+      <div className="space-y-3">
+        {p.solution.steps.map((s, i) => (
+          <div key={i} className="flex gap-3">
+            <div className="flex-shrink-0 w-7 h-7 rounded-md flex items-center justify-center text-[12px] font-bold"
+              style={{background: "var(--accent-soft)", color: "var(--accent)", border: "1px solid var(--accent-border)"}}>
+              {i+1}
+            </div>
+            <div className="flex-1">
+              <div className="text-[11.5px] tracking-[0.18em] font-semibold mb-0.5" style={{color: "var(--accent-2)"}}>
+                {s.label}
+              </div>
+              <div className="text-[14px] leading-relaxed" style={{color: "var(--text)", whiteSpace: "pre-line"}}>{s.body}</div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="grid md:grid-cols-2 gap-3 mt-5">
+        <div className="rounded-lg p-3" style={{background: "var(--accent-3-soft)", border: "1px solid var(--accent-3-border)"}}>
+          <div className="text-[10px] tracking-[0.18em] font-semibold mb-1" style={{color: "var(--accent-3)"}}>✓ GATE CHECK</div>
+          <div className="text-[13.5px]" style={{color: "var(--text)"}}>{p.solution.gateCheck}</div>
+        </div>
+        <div className="rounded-lg p-3" style={{background: "var(--warn-soft)", border: "1px solid var(--warn-border)"}}>
+          <div className="text-[10px] tracking-[0.18em] font-semibold mb-1" style={{color: "var(--warn)"}}>⚡ SPEED VERSION</div>
+          <div className="text-[13.5px]" style={{color: "var(--text)"}}>{p.solution.speed}</div>
+        </div>
+      </div>
+
+      <div className="mt-4 rounded-lg p-3" style={{background: "var(--danger-soft)", border: "1px solid var(--danger-border)"}}>
+        <div className="text-[10px] tracking-[0.18em] font-semibold mb-1" style={{color: "var(--danger)"}}>⚠ WHAT MADE THIS HARD</div>
+        <div className="text-[13.5px]" style={{color: "var(--text)"}}>{p.solution.whatMadeHard}</div>
+      </div>
+
+      <div className="mt-3 rounded-lg p-3" style={{background: "var(--pink-soft)", border: "1px solid var(--pink-border)"}}>
+        <div className="text-[10px] tracking-[0.18em] font-semibold mb-1" style={{color: "var(--pink)"}}>🔁 GENERALIZATION</div>
+        <div className="text-[13.5px]" style={{color: "var(--text)"}}>{p.solution.generalization}</div>
+      </div>
+
+      {p.solution.linkedConcept && (
+        <div className="mt-3 rounded-lg p-3" style={{background: "var(--info-soft)", border: "1px solid var(--info-border)"}}>
+          <div className="text-[10px] tracking-[0.18em] font-semibold mb-1" style={{color: "var(--info)"}}>🔗 LINKED CONCEPT</div>
+          <div className="text-[13.5px]" style={{color: "var(--text)"}}>{p.solution.linkedConcept}</div>
+        </div>
+      )}
+
+      {p.kind === "mcq" && p.solution.negAdvisory && (
+        <div className="mt-3 rounded-lg p-3" style={{background: "rgba(69,26,3,0.4)", border: "1px solid rgba(251,191,36,0.3)"}}>
+          <div className="text-[10px] tracking-[0.18em] font-semibold mb-1" style={{color: "#fbbf24"}}>📊 NEGATIVE-MARKING ADVISORY</div>
+          <div className="text-[13.5px]" style={{color: "var(--text)"}}>{p.solution.negAdvisory}</div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ────────────────────────────────────────────────────────────────
+   TECHNIQUE CARD (Layer 3)
+   ──────────────────────────────────────────────────────────────── */
+function TechniqueCard({ tech }) {
+  const typeColors = {
+    "Speed Shortcut":     { bg: "rgba(34,211,238,0.1)",  fg: "#22d3ee", bd: "rgba(34,211,238,0.35)" },
+    "Trap Avoidance":     { bg: "rgba(251,191,36,0.1)",  fg: "#fbbf24", bd: "rgba(251,191,36,0.35)" },
+    "Structural Insight": { bg: "rgba(167,139,250,0.1)", fg: "#a78bfa", bd: "rgba(167,139,250,0.35)" },
+    "Verification Method":{ bg: "rgba(52,211,153,0.1)",  fg: "#34d399", bd: "rgba(52,211,153,0.35)" },
+  };
+  const c = typeColors[tech.type] || typeColors["Speed Shortcut"];
+  return (
+    <div className="pl-tech-card mb-4 pl-prose">
+      <div className="flex flex-wrap items-baseline gap-3 mb-3">
+        <div className="text-[17px] font-semibold" style={{color: "var(--text)"}}>{tech.name}</div>
+        <span className="text-[10.5px] tracking-[0.15em] font-bold px-2 py-1 rounded-md"
+          style={{background: c.bg, color: c.fg, border: "1px solid " + c.bd}}>
+          {tech.type.toUpperCase()}
+        </span>
+        <span className="ml-auto text-[11px] px-2 py-1 rounded-md"
+          style={{background: tech.freq === "Very Frequent" ? "rgba(239,68,68,0.12)" :
+                              tech.freq === "Frequent" ? "rgba(249,115,22,0.12)" :
+                              tech.freq === "Occasional" ? "rgba(234,179,8,0.12)" : "rgba(148,163,184,0.12)",
+                  color: tech.freq === "Very Frequent" ? "#ef4444" :
+                         tech.freq === "Frequent" ? "#f97316" :
+                         tech.freq === "Occasional" ? "#eab308" : "#94a3b8",
+                  border: "1px solid currentColor"}}>
+          {tech.freq}
+        </span>
+      </div>
+
+      <div className="mb-3">
+        <div className="text-[10px] tracking-[0.18em] font-semibold mb-1" style={{color: "var(--accent)"}}>WHEN TO USE</div>
+        <div className="text-[14px]" style={{color: "var(--text)"}}>{tech.when}</div>
+      </div>
+
+      <div className="mb-3">
+        <div className="text-[10px] tracking-[0.18em] font-semibold mb-1" style={{color: "var(--accent-2)"}}>HOW IT WORKS</div>
+        <ol className="list-decimal list-outside ml-5 space-y-1.5 text-[14px]" style={{color: "var(--text)"}}>
+          {tech.steps.map((s, i) => <li key={i}>{s}</li>)}
+        </ol>
+      </div>
+
+      <div className="grid md:grid-cols-2 gap-3 mb-3">
+        <div className="rounded-lg p-3" style={{background: "var(--accent-3-soft)", border: "1px solid var(--accent-3-border)"}}>
+          <div className="text-[10px] tracking-[0.18em] font-semibold mb-1" style={{color: "var(--accent-3)"}}>⚡ SPEED CLAIM</div>
+          <div className="text-[13.5px]" style={{color: "var(--text)"}}>{tech.speed}</div>
+        </div>
+        <div className="rounded-lg p-3" style={{background: "var(--bg-elev-2)", border: "1px solid var(--border)"}}>
+          <div className="text-[10px] tracking-[0.18em] font-semibold mb-1" style={{color: "var(--accent-2)"}}>🔬 MICRO-EXAMPLE</div>
+          <div className="text-[13px] font-mono whitespace-pre-line" style={{color: "var(--text)"}}>{tech.example}</div>
+        </div>
+      </div>
+
+      <div className="pl-danger-zone">
+        <div className="text-[10px] tracking-[0.18em] font-semibold mb-1" style={{color: "#fb7185"}}>⛔ DANGER ZONE — when this technique FAILS</div>
+        <div className="text-[13.5px]" style={{color: "var(--text)"}}>{tech.danger}</div>
+      </div>
+    </div>
+  );
+}
+
+/* ────────────────────────────────────────────────────────────────
+   MISTAKE CARD (Layer 4) with Spot-the-Error mode
+   ──────────────────────────────────────────────────────────────── */
+function MistakeCard({ mistake, idx }) {
+  const [mode, setMode] = useState("read"); // "read" | "spot"
+  const [clickedLine, setClickedLine] = useState(null);
+  const [showFull, setShowFull] = useState(false);
+
+  return (
+    <div className="pl-mistake-card mb-4 pl-prose">
+      <div className="flex flex-wrap items-baseline gap-3 mb-3">
+        <span className="text-[10.5px] tracking-[0.15em] font-bold px-2 py-1 rounded-md"
+          style={{background: "var(--danger-soft)", color: "var(--danger)", border: "1px solid var(--danger-border)"}}>
+          MISTAKE {idx}
+        </span>
+        <div className="text-[17px] font-semibold" style={{color: "var(--text)"}}>{mistake.name}</div>
+        <span className="text-[11px] px-2 py-1 rounded-md ml-auto"
+          style={{background: mistake.frequency === "Very Common" ? "rgba(239,68,68,0.12)" :
+                              mistake.frequency === "Common" ? "rgba(249,115,22,0.12)" : "rgba(148,163,184,0.12)",
+                  color: mistake.frequency === "Very Common" ? "#ef4444" :
+                         mistake.frequency === "Common" ? "#f97316" : "#94a3b8",
+                  border: "1px solid currentColor"}}>
+          {mistake.frequency}
+        </span>
+      </div>
+
+      <div className="flex gap-2 mb-3">
+        <button className={"pl-tab-pill " + (mode === "read" ? "active" : "")}
+          onClick={() => setMode("read")}>📖 Read</button>
+        <button className={"pl-tab-pill " + (mode === "spot" ? "active" : "")}
+          onClick={() => { setMode("spot"); setClickedLine(null); setShowFull(false); }}>🎯 Spot the Error</button>
+      </div>
+
+      {mode === "read" && (
+        <>
+          <div className="mb-3">
+            <div className="text-[10px] tracking-[0.18em] font-semibold mb-1" style={{color: "var(--danger)"}}>WRONG SOLUTION (looks plausible)</div>
+            <div className="pl-wrong-solution">
+              {mistake.wrong.map((line, i) => (
+                <div key={i} className={i === mistake.errorLine ? "error-found" : ""} style={{padding: "2px 4px"}}>
+                  <span style={{color: "var(--text-faded)", marginRight: 8}}>{(i+1).toString().padStart(2, " ")}.</span>
+                  {line}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-3">
+            <div className="rounded-lg p-3" style={{background: "var(--bg-elev-2)", border: "1px solid var(--danger-border)"}}>
+              <div className="text-[10px] tracking-[0.18em] font-semibold mb-1" style={{color: "var(--danger)"}}>📍 ERROR LOCATION</div>
+              <div className="text-[13.5px]" style={{color: "var(--text)"}}>Line {mistake.errorLine + 1}: {mistake.errorDescription}</div>
+            </div>
+            <div className="rounded-lg p-3" style={{background: "var(--bg-elev-2)", border: "1px solid var(--warn-border)"}}>
+              <div className="text-[10px] tracking-[0.18em] font-semibold mb-1" style={{color: "var(--warn)"}}>🧠 ROOT CAUSE</div>
+              <div className="text-[13.5px]" style={{color: "var(--text)"}}>{mistake.rootCause}</div>
+            </div>
+          </div>
+
+          <div className="mt-3 rounded-lg p-3" style={{background: "var(--accent-3-soft)", border: "1px solid var(--accent-3-border)"}}>
+            <div className="text-[10px] tracking-[0.18em] font-semibold mb-1" style={{color: "var(--accent-3)"}}>✅ CORRECT REASONING</div>
+            <div className="text-[13.5px]" style={{color: "var(--text)"}}>{mistake.correct}</div>
+          </div>
+
+          <div className="mt-3 rounded-lg p-3" style={{background: "var(--accent-soft)", border: "1px solid var(--accent-border)"}}>
+            <div className="text-[10px] tracking-[0.18em] font-semibold mb-1" style={{color: "var(--accent)"}}>🛡 PREVENTION RULE (memorize this)</div>
+            <div className="text-[13.5px] italic" style={{color: "var(--text)"}}>{mistake.prevention}</div>
+          </div>
+
+          <div className="mt-3 flex gap-2 text-[12px]" style={{color: "var(--text-dim)"}}>
+            <span className="px-2 py-1 rounded-md" style={{background: "var(--bg-elev-2)", border: "1px solid var(--border)"}}>
+              💸 GATE Cost: {mistake.gateCost}
+            </span>
+          </div>
+        </>
+      )}
+
+      {mode === "spot" && (
+        <>
+          <div className="mb-2 text-[13px]" style={{color: "var(--text-dim)"}}>
+            👉 Click the line where you think the reasoning breaks.
+          </div>
+          <div className="pl-wrong-solution">
+            {mistake.wrong.map((line, i) => {
+              let cls = "pl-wrong-line";
+              if (clickedLine === i) {
+                if (i === mistake.errorLine) cls += " error-found";
+                else cls += "";
+              }
+              if (showFull && i === mistake.errorLine) cls += " error-found";
+              return (
+                <div key={i} className={cls}
+                  onClick={() => { if (clickedLine === null) { setClickedLine(i); setShowFull(true); } }}>
+                  <span style={{color: "var(--text-faded)", marginRight: 8}}>{(i+1).toString().padStart(2, " ")}.</span>
+                  {line}
+                  {showFull && i === mistake.errorLine && <span style={{color: "#fb7185", marginLeft: 8, fontWeight: 600}}>← ERROR HERE</span>}
+                </div>
+              );
+            })}
+          </div>
+          {clickedLine !== null && (
+            <div className="mt-3 rounded-lg p-3"
+              style={{background: clickedLine === mistake.errorLine ? "var(--accent-3-soft)" : "var(--danger-soft)",
+                      border: "1px solid " + (clickedLine === mistake.errorLine ? "var(--accent-3-border)" : "var(--danger-border)")}}>
+              {clickedLine === mistake.errorLine ? (
+                <div className="text-[13.5px]" style={{color: "#22c55e"}}>
+                  ✓ Correct! You spotted the error on line {mistake.errorLine + 1}: {mistake.errorDescription}
+                </div>
+              ) : (
+                <div className="text-[13.5px]" style={{color: "var(--danger)"}}>
+                  ✗ Not quite. The actual error is on line {mistake.errorLine + 1}: {mistake.errorDescription}
+                </div>
+              )}
+            </div>
+          )}
+        </>
+      )}
+    </div>
+  );
+}
+
+/* ────────────────────────────────────────────────────────────────
+   DRILL MODE (Layer 5)
+   ──────────────────────────────────────────────────────────────── */
+function DrillMode({ conceptNum, conceptTitle, problems }) {
+  const TARGETS = { easy: 40, medium: 75, hard: 120, killer: 150 };
+  const lsKey = "gate_la_m" + MODULE_NUM + "_c" + conceptNum + "_drill_best";
+  const streakKey = "gate_la_m" + MODULE_NUM + "_c" + conceptNum + "_drill_streak";
+
+  const [phase, setPhase] = useState("idle"); // idle | running | review
+  const [drill, setDrill] = useState([]);
+  const [currentIdx, setCurrentIdx] = useState(0);
+  const [results, setResults] = useState([]);
+  const [timeLeft, setTimeLeft] = useState(0);
+  const [questionStart, setQuestionStart] = useState(0);
+  const [selected, setSelected] = useState(null);
+  const [natVal, setNatVal] = useState("");
+  const [feedback, setFeedback] = useState(null);
+  const [paused, setPaused] = useState(false);
+  const [bestRecord] = useState(() => lsGet(lsKey, null));
+  const [streak] = useState(() => lsGet(streakKey, 0));
+
+  const startDrill = () => {
+    const shuffled = [...problems].sort(() => Math.random() - 0.5).slice(0, 5);
+    setDrill(shuffled);
+    setCurrentIdx(0);
+    setResults([]);
+    setSelected(null);
+    setNatVal("");
+    setFeedback(null);
+    const first = shuffled[0];
+    setTimeLeft(TARGETS[first.difficulty] || 60);
+    setQuestionStart(Date.now());
+    setPhase("running");
+  };
+
+  useEffect(() => {
+    if (phase !== "running" || paused || feedback) return;
+    if (timeLeft <= 0) {
+      submitDrill(false, "timeout");
+      return;
+    }
+    const t = setTimeout(() => setTimeLeft(timeLeft - 1), 1000);
+    return () => clearTimeout(t);
+  }, [phase, timeLeft, paused, feedback]);
+
+  const submitDrill = (didAnswer, mode) => {
+    const p = drill[currentIdx];
+    const elapsed = Math.round((Date.now() - questionStart) / 1000);
+    let isCorrect = false;
+    if (didAnswer) {
+      if (p.kind === "mcq") isCorrect = selected === p.answer;
+      else {
+        const v = parseFloat(natVal);
+        if (!isNaN(v)) {
+          const tol = p.tolerance != null ? p.tolerance : 0.01;
+          isCorrect = Math.abs(v - p.answer) <= tol;
+        }
+      }
+    }
+    setResults(r => [...r, {
+      problem: p, correct: isCorrect, time: elapsed, target: TARGETS[p.difficulty] || 60,
+      answer: p.kind === "mcq" ? selected : natVal, mode,
+    }]);
+    setFeedback({ correct: isCorrect, answer: p.answer });
+  };
+
+  const nextQuestion = () => {
+    if (currentIdx + 1 >= drill.length) {
+      finalize();
+      return;
+    }
+    const nextI = currentIdx + 1;
+    setCurrentIdx(nextI);
+    setSelected(null);
+    setNatVal("");
+    setFeedback(null);
+    setTimeLeft(TARGETS[drill[nextI].difficulty] || 60);
+    setQuestionStart(Date.now());
+  };
+
+  const finalize = () => {
+    setPhase("review");
+    const correctCount = results.filter(r => r.correct).length;
+    const total = results.length;
+    const acc = total > 0 ? Math.round((correctCount/total) * 100) : 0;
+    const avgTime = total > 0 ? Math.round(results.reduce((s, r) => s + r.time, 0) / total) : 0;
+    const nm = results.reduce((s, r) => {
+      if (r.problem.kind !== "mcq") return s;
+      if (r.correct) return s + (r.problem.marks === 2 ? 2 : 1);
+      if (r.answer == null) return s;
+      return s - (r.problem.marks === 2 ? 2/3 : 1/3);
+    }, 0);
+
+    if (!bestRecord || acc > bestRecord.accuracy || (acc === bestRecord.accuracy && avgTime < bestRecord.avgTime)) {
+      lsSet(lsKey, { score: correctCount, accuracy: acc, avgTime, when: Date.now() });
+    }
+    const lastStreak = results.length > 0 ? results[results.length-1].correct : false;
+    const newStreak = lastStreak ? streak + correctCount : 0;
+    lsSet(streakKey, Math.max(streak, newStreak));
+  };
+
+  const progressPct = phase === "running" && drill[currentIdx] ? (timeLeft / (TARGETS[drill[currentIdx].difficulty] || 60)) * 100 : 0;
+  const progressClass = progressPct < 25 ? "danger" : progressPct < 50 ? "warning" : "";
+
+  if (phase === "idle") {
+    return (
+      <div className="rounded-xl p-6" style={{background: "var(--bg-elev-1)", border: "1px solid var(--border)"}}>
+        <div className="flex items-center gap-3 mb-3">
+          <div className="text-[24px]">⏱</div>
+          <div>
+            <div className="text-[18px] font-semibold" style={{color: "var(--text)"}}>Drill Mode — {conceptTitle}</div>
+            <div className="text-[13px]" style={{color: "var(--text-dim)"}}>5 rapid-fire questions · timed · instant feedback only</div>
+          </div>
+        </div>
+
+        <div className="grid md:grid-cols-4 gap-3 my-4 text-[12px]">
+          <div className="rounded-md p-3" style={{background: "var(--bg-elev-2)", border: "1px solid var(--border)"}}>
+            <div style={{color: "var(--text-dim)"}}>Easy target</div>
+            <div className="font-mono font-semibold mt-1" style={{color: "#22c55e"}}>40 sec</div>
+          </div>
+          <div className="rounded-md p-3" style={{background: "var(--bg-elev-2)", border: "1px solid var(--border)"}}>
+            <div style={{color: "var(--text-dim)"}}>Medium target</div>
+            <div className="font-mono font-semibold mt-1" style={{color: "#eab308"}}>75 sec</div>
+          </div>
+          <div className="rounded-md p-3" style={{background: "var(--bg-elev-2)", border: "1px solid var(--border)"}}>
+            <div style={{color: "var(--text-dim)"}}>Hard target</div>
+            <div className="font-mono font-semibold mt-1" style={{color: "#f97316"}}>120 sec</div>
+          </div>
+          <div className="rounded-md p-3" style={{background: "var(--bg-elev-2)", border: "1px solid var(--border)"}}>
+            <div style={{color: "var(--text-dim)"}}>Killer target</div>
+            <div className="font-mono font-semibold mt-1" style={{color: "#ef4444"}}>150 sec</div>
+          </div>
+        </div>
+
+        {bestRecord && (
+          <div className="rounded-lg p-3 mb-3" style={{background: "var(--accent-3-soft)", border: "1px solid var(--accent-3-border)"}}>
+            <div className="text-[11px] tracking-[0.18em] font-semibold mb-1" style={{color: "var(--accent-3)"}}>🏆 PERSONAL BEST</div>
+            <div className="text-[13.5px]" style={{color: "var(--text)"}}>
+              Score: {bestRecord.score}/5 · Accuracy: {bestRecord.accuracy}% · Avg time: {bestRecord.avgTime}s
+            </div>
+          </div>
+        )}
+
+        {streak > 0 && (
+          <div className="rounded-lg p-3 mb-3" style={{background: "var(--warn-soft)", border: "1px solid var(--warn-border)"}}>
+            <div className="text-[11px] tracking-[0.18em] font-semibold mb-1" style={{color: "var(--warn)"}}>🔥 STREAK</div>
+            <div className="text-[13.5px]" style={{color: "var(--text)"}}>Best streak: {streak} consecutive correct under time</div>
+          </div>
+        )}
+
+        <button className="pl-submit-btn" onClick={startDrill}>
+          ▶ Start Drill (5 questions)
+        </button>
+      </div>
+    );
+  }
+
+  if (phase === "running") {
+    const p = drill[currentIdx];
+    return (
+      <div className="rounded-xl p-6" style={{background: "var(--bg-elev-1)", border: "1px solid var(--border)"}}>
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-3">
+            <div className="text-[12px] tracking-[0.15em] font-bold px-2 py-1 rounded-md"
+              style={{background: "var(--bg-elev-3)", color: "var(--text-dim)", border: "1px solid var(--border)"}}>
+              Q {currentIdx+1} / {drill.length}
+            </div>
+            <DiffBadge level={p.difficulty} />
+          </div>
+          <div className="text-[14px] font-mono font-bold"
+            style={{color: timeLeft < 20 ? "#ef4444" : timeLeft < 40 ? "#eab308" : "#22c55e"}}>
+            ⏱ {timeLeft}s
+          </div>
+        </div>
+
+        <div className="pl-progress-bar mb-4">
+          <div className={"pl-progress-fill " + progressClass} style={{width: progressPct + "%"}}/>
+        </div>
+
+        <div className="text-[15px] leading-relaxed mb-4 p-4 rounded-lg"
+          style={{background: "var(--bg-elev-2)", color: "var(--text)", border: "1px solid var(--border)"}}>
+          {p.statement}
+        </div>
+
+        {!feedback && p.kind === "mcq" && (
+          <div className="space-y-2 mb-3">
+            {p.options.map((opt, i) => {
+              const letter = String.fromCharCode(65 + i);
+              return (
+                <button key={i}
+                  className={"pl-option-btn " + (selected === letter ? "selected" : "")}
+                  onClick={() => setSelected(letter)}>
+                  <span className="pl-option-letter">{letter}</span>
+                  <span className="flex-1">{opt}</span>
+                </button>
+              );
+            })}
+          </div>
+        )}
+        {!feedback && p.kind === "nat" && (
+          <input type="number" step="any" className="pl-nat-input mb-3"
+            value={natVal}
+            onChange={e => setNatVal(e.target.value)}
+            placeholder="Enter your answer..." />
+        )}
+
+        {!feedback && (
+          <div className="flex gap-2">
+            <button className="pl-submit-btn"
+              disabled={p.kind === "mcq" ? !selected : natVal === ""}
+              onClick={() => submitDrill(true, "answered")}>
+              Submit
+            </button>
+            <button className="text-[13px] px-3 py-1.5 rounded-md"
+              style={{border: "1px solid var(--border-strong)", color: "var(--text-dim)", background: "var(--bg-elev-2)"}}
+              onClick={() => submitDrill(false, "skipped")}>
+              Skip
+            </button>
+          </div>
+        )}
+
+        {feedback && (
+          <div className="rounded-lg p-3 mb-3"
+            style={{background: feedback.correct ? "var(--accent-3-soft)" : "var(--danger-soft)",
+                    border: "1px solid " + (feedback.correct ? "var(--accent-3-border)" : "var(--danger-border)")}}>
+            <div className="text-[13.5px] font-semibold mb-1"
+              style={{color: feedback.correct ? "#22c55e" : "#fb7185"}}>
+              {feedback.correct ? "✓ Correct" : "✗ Incorrect"} — Answer: {String(feedback.answer)}
+            </div>
+            <div className="flex gap-2 mt-2">
+              <button className="pl-submit-btn" onClick={nextQuestion}>
+                {currentIdx + 1 >= drill.length ? "Finish Drill →" : "Next Question →"}
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  /* phase === "review" */
+  const correctCount = results.filter(r => r.correct).length;
+  const total = results.length;
+  const acc = total > 0 ? Math.round((correctCount/total) * 100) : 0;
+  const accByDiff = {};
+  ["easy", "medium", "hard", "killer"].forEach(d => {
+    const dr = results.filter(r => r.problem.difficulty === d);
+    if (dr.length > 0) {
+      accByDiff[d] = Math.round((dr.filter(r => r.correct).length / dr.length) * 100);
+    }
+  });
+  const nm = results.reduce((s, r) => {
+    if (r.problem.kind !== "mcq") return s + (r.correct ? r.problem.marks : 0);
+    if (r.correct) return s + (r.problem.marks === 2 ? 2 : 1);
+    if (r.answer == null || r.mode === "skipped" || r.mode === "timeout") return s;
+    return s - (r.problem.marks === 2 ? 2/3 : 1/3);
+  }, 0);
+  const totalMarks = results.reduce((s, r) => s + (r.problem.marks || 1), 0);
+  const reviseConcepts = [...new Set(results.filter(r => !r.correct).flatMap(r => r.problem.tags))];
+
+  return (
+    <div className="rounded-xl p-6" style={{background: "var(--bg-elev-1)", border: "1px solid var(--border)"}}>
+      <div className="text-[20px] font-bold mb-1" style={{color: "var(--text)"}}>📊 Drill Report Card</div>
+      <div className="text-[13px] mb-4" style={{color: "var(--text-dim)"}}>5-question drill · {conceptTitle}</div>
+
+      <div className="grid md:grid-cols-3 gap-3 mb-4">
+        <div className="rounded-lg p-4" style={{background: "var(--bg-elev-2)", border: "1px solid var(--border)"}}>
+          <div className="text-[11px] tracking-[0.18em] font-semibold mb-1" style={{color: "var(--text-dim)"}}>SCORE</div>
+          <div className="text-[24px] font-bold" style={{color: "var(--accent)"}}>{correctCount}/{total}</div>
+        </div>
+        <div className="rounded-lg p-4" style={{background: "var(--bg-elev-2)", border: "1px solid var(--border)"}}>
+          <div className="text-[11px] tracking-[0.18em] font-semibold mb-1" style={{color: "var(--text-dim)"}}>ACCURACY</div>
+          <div className="text-[24px] font-bold" style={{color: acc >= 80 ? "#22c55e" : acc >= 60 ? "#eab308" : "#ef4444"}}>{acc}%</div>
+        </div>
+        <div className="rounded-lg p-4" style={{background: "var(--bg-elev-2)", border: "1px solid var(--border)"}}>
+          <div className="text-[11px] tracking-[0.18em] font-semibold mb-1" style={{color: "var(--text-dim)"}}>NEG-MARKING SIM</div>
+          <div className="text-[24px] font-bold" style={{color: nm >= totalMarks * 0.7 ? "#22c55e" : nm >= 0 ? "#eab308" : "#ef4444"}}>
+            {nm.toFixed(2)} / {totalMarks}
+          </div>
+        </div>
+      </div>
+
+      <div className="rounded-lg p-4 mb-4" style={{background: "var(--bg-elev-2)", border: "1px solid var(--border)"}}>
+        <div className="text-[11px] tracking-[0.18em] font-semibold mb-3" style={{color: "var(--accent-2)"}}>⏱ TIME vs TARGET (per question)</div>
+        <div className="space-y-2">
+          {results.map((r, i) => {
+            const pct = Math.min(100, (r.time / r.target) * 100);
+            const cls = pct > 100 ? "danger" : pct > 75 ? "warning" : "";
+            return (
+              <div key={i} className="flex items-center gap-3 text-[12px]">
+                <div className="w-16 font-mono" style={{color: "var(--text-dim)"}}>Q{i+1}</div>
+                <DiffBadge level={r.problem.difficulty} />
+                <div className="flex-1 pl-progress-bar">
+                  <div className={"pl-progress-fill " + cls} style={{width: pct + "%"}}/>
+                </div>
+                <div className="font-mono w-20 text-right" style={{color: "var(--text)"}}>{r.time}s / {r.target}s</div>
+                <div style={{color: r.correct ? "#22c55e" : "#fb7185"}}>{r.correct ? "✓" : "✗"}</div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {Object.keys(accByDiff).length > 0 && (
+        <div className="rounded-lg p-4 mb-4" style={{background: "var(--bg-elev-2)", border: "1px solid var(--border)"}}>
+          <div className="text-[11px] tracking-[0.18em] font-semibold mb-2" style={{color: "var(--accent)"}}>ACCURACY BY DIFFICULTY</div>
+          <div className="flex flex-wrap gap-2">
+            {Object.entries(accByDiff).map(([d, a]) => (
+              <div key={d} className="flex items-center gap-2 text-[12px] px-2 py-1 rounded-md"
+                style={{background: "var(--bg-elev-3)", border: "1px solid var(--border)"}}>
+                <DiffBadge level={d} />
+                <span className="font-mono" style={{color: a >= 80 ? "#22c55e" : a >= 60 ? "#eab308" : "#ef4444"}}>{a}%</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {reviseConcepts.length > 0 && (
+        <div className="rounded-lg p-4 mb-4" style={{background: "var(--warn-soft)", border: "1px solid var(--warn-border)"}}>
+          <div className="text-[11px] tracking-[0.18em] font-semibold mb-2" style={{color: "var(--warn)"}}>🔁 CONCEPTS TO REVISIT</div>
+          <div className="flex flex-wrap gap-2">
+            {reviseConcepts.map((c, i) => <ConceptTag key={i}>{c}</ConceptTag>)}
+          </div>
+        </div>
+      )}
+
+      <div className="flex gap-2">
+        <button className="pl-submit-btn" onClick={startDrill}>↻ Restart Drill</button>
+        <button className="text-[13px] px-3 py-1.5 rounded-md"
+          style={{border: "1px solid var(--border-strong)", color: "var(--text-dim)", background: "var(--bg-elev-2)"}}
+          onClick={() => setPhase("idle")}>
+          ← Back
+        </button>
+      </div>
+    </div>
+  );
+}
+
+/* ────────────────────────────────────────────────────────────────
+   PYQ WALKTHROUGH (labeled GATE CS PYQ — explanation only)
+   ──────────────────────────────────────────────────────────────── */
+function PYQWalkthrough({ year, marks, statement, solution }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="rounded-xl p-5 mb-5 pl-prose"
+      style={{background: "rgba(245,158,11,0.05)", border: "1px solid rgba(245,158,11,0.35)"}}>
+      <div className="flex flex-wrap items-center gap-2 mb-3">
+        <span className="pl-type-pyq text-[10.5px] tracking-[0.15em] font-bold px-2 py-1 rounded-md">
+          ★ GATE CS {year} — PYQ WALKTHROUGH
+        </span>
+        <MetaPill>{marks}-mark</MetaPill>
+      </div>
+      <div className="text-[15px] leading-relaxed mb-3 p-4 rounded-lg"
+        style={{background: "var(--bg-elev-2)", color: "var(--text)", border: "1px solid var(--border)"}}>
+        {statement}
+      </div>
+      <button onClick={() => setOpen(o => !o)}
+        className="text-[13px] px-3 py-1.5 rounded-md"
+        style={{border: "1px solid rgba(245,158,11,0.35)", color: "#f59e0b", background: "rgba(245,158,11,0.10)"}}>
+        {open ? "▲ Hide walkthrough" : "▼ Show full walkthrough"}
+      </button>
+      {open && (
+        <div className="mt-4 space-y-3">
+          {solution.map((s, i) => (
+            <div key={i} className="rounded-lg p-3" style={{background: "var(--bg-elev-2)", border: "1px solid var(--border)"}}>
+              <div className="text-[11px] tracking-[0.18em] font-semibold mb-1" style={{color: "var(--accent)"}}>{s.label}</div>
+              <div className="text-[14px]" style={{color: "var(--text)", whiteSpace: "pre-line"}}>{s.body}</div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ────────────────────────────────────────────────────────────────
+   CONCEPT NAVIGATOR (Tabs to pick which concept lab)
+   ──────────────────────────────────────────────────────────────── */
+function ConceptNavigator({ concepts, active, setActive, progressMap }) {
+  return (
+    <div className="sticky top-[60px] z-40 py-3 px-4 mb-4 rounded-xl flex flex-wrap gap-2"
+      style={{background: "var(--bg-overlay)", backdropFilter: "blur(14px)", border: "1px solid var(--border)"}}>
+      {concepts.map(c => {
+        const p = progressMap[c.num];
+        const done = p ? p.correct.length : 0;
+        const total = p ? p.totalProblems : 0;
+        return (
+          <button key={c.num}
+            className={"pl-tab-pill " + (active === c.num ? "active" : "")}
+            onClick={() => {
+              setActive(c.num);
+              document.getElementById("concept-lab-" + c.num)?.scrollIntoView({ behavior: "smooth", block: "start" });
+            }}>
+            <span style={{fontWeight: 600}}>C3.{c.num}</span>
+            <span className="opacity-70 ml-2">{c.shortName}</span>
+            <span className="ml-2 font-mono text-[11px] opacity-80">{done}/{total} ✓</span>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+/* ────────────────────────────────────────────────────────────────
+   CONCEPT-LAB WRAPPER
+   ──────────────────────────────────────────────────────────────── */
+function ConceptLab({ num, title, why, patterns, problems, techniques, mistakes, pyqs, progress }) {
+  return (
+    <section id={"concept-lab-" + num} className="max-w-5xl mx-auto px-5 py-8 fade-up">
+      <div className="card p-6 md:p-9" style={{boxShadow: "var(--shadow-glow-accent)"}}>
+        <div className="flex flex-wrap items-baseline gap-3 mb-3">
+          <span className="text-xs tracking-[0.22em] font-semibold px-2.5 py-1 rounded-md"
+            style={{color: "var(--accent)", border: "1px solid var(--accent-border)", background: "var(--accent-soft)"}}>
+            PROBLEM LAB · CONCEPT 3.{num}
+          </span>
+          <span className="text-sm" style={{color: "var(--text-faded)"}}>·</span>
+          <span className="text-sm" style={{color: "var(--text-dim)"}}>Module 3 · Linear Systems</span>
+          <span className="ml-auto text-[11px] px-2 py-1 rounded-md font-mono"
+            style={{background: "var(--bg-elev-2)", color: "var(--text-dim)", border: "1px solid var(--border)"}}>
+            {progress.correct.length}/{progress.totalProblems} solved
+          </span>
+        </div>
+        <h2 className="text-2xl md:text-3xl font-bold tracking-tight mb-3" style={{color: "var(--text)"}}>{title}</h2>
+        {why && (
+          <div className="text-[15px] leading-relaxed mb-6 border-l-2 pl-4 italic font-serif"
+            style={{borderColor: "var(--accent-border)", color: "var(--text-dim)"}}>
+            {why}
+          </div>
+        )}
+
+        <LayerHeader num={1} title="How GATE CS Tests This Concept"
+          subtitle="Top rankers classify the question first, then solve. Train the classifier." />
+        {patterns.map((p, i) => <PatternCard key={i} idx={i+1} pattern={p} />)}
+
+        {pyqs && pyqs.length > 0 && (
+          <>
+            <LayerHeader num={"1.5"} title="GATE CS PYQ Walkthroughs"
+              subtitle="Real GATE CS questions with full reasoning chains. Read, don't solve — these are examples." />
+            {pyqs.map((p, i) => <PYQWalkthrough key={i} {...p} />)}
+          </>
+        )}
+
+        <LayerHeader num={2} title="Progressive Problem Set"
+          subtitle="2 Easy · 3 Medium · 3 Hard · 1 Killer. Attempt before reveal. Hints only on request." />
+        {problems.map((p, i) => <ProblemCard key={p.id} p={p} idx={i+1} progress={progress} />)}
+
+        <LayerHeader num={3} title="Technique Arsenal"
+          subtitle="How to think, not what to think. Each card is a named, reusable solving algorithm." />
+        {techniques.map((t, i) => <TechniqueCard key={i} tech={t} />)}
+
+        <LayerHeader num={4} title="Mistake Autopsy Lab"
+          subtitle="Real wrong solutions written exactly as students write them. Each error has a one-line preventive rule." />
+        {mistakes.map((m, i) => <MistakeCard key={i} mistake={m} idx={i+1} />)}
+
+        <LayerHeader num={5} title="Timed Drill Mode"
+          subtitle="Knowing the answer ≠ executing under 90-second pressure. Train exam temperament separately." />
+        <DrillMode conceptNum={num} conceptTitle={title} problems={problems} />
+      </div>
+    </section>
+  );
+}
+
+
+/* ════════════════════════════════════════════════════════════════
+   CONCEPT 3.1 — WHY SOLVE SYSTEMS?
+   ════════════════════════════════════════════════════════════════ */
+
+const C31_PATTERNS = [
+  {
+    name: "Real-World Scenario → System Setup",
+    surface: "A word problem describes a real situation (circuit, traffic, balancing equations, equilibrium) and asks to set up the system.",
+    testing: "Whether you can translate constraints into a matrix equation Ax = b, identifying x, A, and b.",
+    signals: ["\"set up the system\"", "\"how many equations / unknowns\"", "\"matrix form\""],
+    firstMove: "List unknowns → list constraints → build A (row = constraint, column = unknown) and b (RHS).",
+    timeBudget: 60,
+    frequency: "Frequent",
+  },
+  {
+    name: "Counting Unknowns vs Equations",
+    surface: "Asked about system dimensions: how many variables (n), how many equations (m), determined / underdetermined / overdetermined.",
+    testing: "Whether you classify by m vs n: m < n underdetermined, m > n overdetermined, m = n square.",
+    signals: ["\"underdetermined\"", "\"overdetermined\"", "\"square system\""],
+    firstMove: "n = # unknowns (columns of A); m = # equations (rows of A). Classify by m vs n.",
+    timeBudget: 30,
+    frequency: "Frequent",
+  },
+  {
+    name: "Solution Existence Forecast",
+    surface: "Given the structure of a real-world problem, predict whether a unique solution exists.",
+    testing: "Whether you connect physical constraints (uniqueness of equilibrium, conservation laws) to rank conditions.",
+    signals: ["\"unique solution\"", "\"is there a solution\"", "\"is the problem well-posed\""],
+    firstMove: "Apply rank-consistency: well-posed = unique solution when rank = n = m.",
+    timeBudget: 45,
+    frequency: "Occasional",
+  },
+  {
+    name: "Application Recognition",
+    surface: "Classify which problem-type (network flow, chemical balance, circuit) the system represents.",
+    testing: "Whether you can map applications to mathematical structures.",
+    signals: ["\"this represents\"", "\"a typical application of\""],
+    firstMove: "Match keywords: 'flow' / 'balance' → network; 'reactions' → chemistry; 'voltage / current' → circuits; 'least squares' → data fitting.",
+    timeBudget: 30,
+    frequency: "Occasional",
+  },
+];
+
+const C31_PROBLEMS = [
+  {
+    id: "c31-e1", difficulty: "easy", kind: "mcq", marks: 1, timeTarget: 30,
+    tags: ["System Classification"],
+    skipSignal: { type: "attempt", text: "Attempt — pure classification" },
+    statement: <span>A system Ax = b with A of size 3×5 is:</span>,
+    options: [
+      "Square — equal numbers of equations and unknowns.",
+      "Overdetermined — more equations than unknowns.",
+      "Underdetermined — more unknowns than equations.",
+      "Cannot be classified without more info.",
+    ],
+    answer: "C",
+    hints: [
+      { label: "Conceptual redirect", text: "m × n: m = 3 rows = equations, n = 5 columns = unknowns." },
+      { label: "Key step", text: "m < n → underdetermined." },
+      { label: "Near-complete", text: "Underdetermined." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "System dimensions — compare m (equations) and n (unknowns)." },
+        { label: "KEY STEP", body: "A is 3×5 → 3 equations, 5 unknowns. 3 < 5: underdetermined." },
+        { label: "COMPUTATION", body: "Answer (C)." },
+        { label: "VERIFICATION", body: "Underdetermined: typically infinitely many solutions (or none if inconsistent)." },
+      ],
+      gateCheck: "m < n: underdetermined. m > n: overdetermined. m = n: square.",
+      speed: "Direct.",
+      whatMadeHard: "Nothing.",
+      generalization: "Same for any m × n matrix.",
+      linkedConcept: "M3 Solution Theory.",
+      negAdvisory: "Attempt: count decides. (C) wins.",
+    },
+  },
+  {
+    id: "c31-e2", difficulty: "easy", kind: "mcq", marks: 1, timeTarget: 35,
+    tags: ["Application Recognition"],
+    skipSignal: { type: "attempt", text: "Attempt — keyword match" },
+    statement: <span>An electrical circuit with 5 nodes and 7 resistors, where Kirchhoff's current/voltage laws give equations for unknown currents, reduces to:</span>,
+    options: [
+      "An eigenvalue problem.",
+      "A linear system Ax = b.",
+      "A nonlinear optimization.",
+      "A graph traversal problem.",
+    ],
+    answer: "B",
+    hints: [
+      { label: "Conceptual redirect", text: "Kirchhoff's laws produce linear equations in unknowns (currents). Standard system Ax = b." },
+      { label: "Key step", text: "Linear equations → Ax = b." },
+      { label: "Near-complete", text: "Answer (B)." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Kirchhoff's laws → linear equations → Ax = b." },
+        { label: "KEY STEP", body: "Currents are unknowns (x), KCL/KVL give linear constraints (rows of A), RHS = voltage sources / zero." },
+        { label: "COMPUTATION", body: "Answer (B)." },
+        { label: "VERIFICATION", body: "Standard linear circuit analysis = solving Ax = b." },
+      ],
+      gateCheck: "Kirchhoff = linear system.",
+      speed: "Pattern: 5 seconds.",
+      whatMadeHard: "Distractor (A) eigenvalues — wrong for steady-state DC circuits.",
+      generalization: "All mesh / node analysis → Ax = b.",
+      linkedConcept: "C1.1 Family classifier.",
+      negAdvisory: "Attempt: pattern decides. (B) wins.",
+    },
+  },
+  {
+    id: "c31-m1", difficulty: "medium", kind: "mcq", marks: 2, timeTarget: 65,
+    tags: ["System Setup"],
+    skipSignal: { type: "attempt", text: "Attempt — setup translation" },
+    statement: <span>A traffic network has 4 intersections with the constraint that incoming flow equals outgoing flow at each. The unknowns are 6 road flows. The system has:</span>,
+    options: [
+      "6 equations, 4 unknowns.",
+      "4 equations, 6 unknowns.",
+      "4 equations, 4 unknowns.",
+      "6 equations, 6 unknowns.",
+    ],
+    answer: "B",
+    hints: [
+      { label: "Conceptual redirect", text: "Equations from constraints; unknowns from quantities to find." },
+      { label: "Key step", text: "4 intersections → 4 conservation equations. 6 roads → 6 flow unknowns." },
+      { label: "Near-complete", text: "4 eq, 6 unkn. (B)." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Translate scenario: intersections give equations, roads give unknowns." },
+        { label: "KEY STEP", body: "Each intersection: in = out (one linear eqn). 4 intersections → 4 equations.\nEach road has 1 flow → 6 unknowns. A is 4×6." },
+        { label: "COMPUTATION", body: "4 equations, 6 unknowns. Answer (B). Underdetermined." },
+        { label: "VERIFICATION", body: "Typically 6 - 4 = 2 free directions (often interpreted as 'choose flows on 2 roads, rest determined')." },
+      ],
+      gateCheck: "Equations = constraints; unknowns = quantities asked.",
+      speed: "Count: 30 seconds.",
+      whatMadeHard: "Confusion if 'intersections' are unknowns rather than equations.",
+      generalization: "Same template: conservation/balance → equations; quantities → unknowns.",
+      linkedConcept: "C3.2 Setting up Ax = b.",
+      negAdvisory: "Attempt: count decides. (B) wins.",
+    },
+  },
+  {
+    id: "c31-m2", difficulty: "medium", kind: "mcq", marks: 2, timeTarget: 70,
+    tags: ["Application", "Linearity"],
+    skipSignal: { type: "attempt", text: "Attempt — linearity check" },
+    statement: <span>Chemical equation balancing (e.g., aH₂ + bO₂ → cH₂O) reduces to:</span>,
+    options: [
+      "A nonlinear system (since chemistry is nonlinear).",
+      "A homogeneous linear system Ax = 0 (balancing per element).",
+      "An eigenvalue problem.",
+      "Cannot be expressed in matrix form.",
+    ],
+    answer: "B",
+    hints: [
+      { label: "Conceptual redirect", text: "Atom counting: each element gives a balance equation (atoms LHS = atoms RHS). All linear in coefficients." },
+      { label: "Key step", text: "For 2 elements (H, O): 2 equations in coefficients (a, b, c). Linear, RHS = 0 (atom conservation)." },
+      { label: "Near-complete", text: "Homogeneous Ax = 0." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Atom balance: linear equations in molecule counts." },
+        { label: "KEY STEP", body: "For aH₂ + bO₂ → cH₂O: H balance: 2a = 2c. O balance: 2b = c. Rewrite: 2a - 2c = 0, 2b - c = 0. Linear, homogeneous (RHS = 0)." },
+        { label: "COMPUTATION", body: "Linear Ax = 0. Answer (B). Null space of A gives the balanced ratios (smallest positive integer solution)." },
+        { label: "VERIFICATION", body: "Solving: a = c, b = c/2. Smallest integers: c = 2, b = 1, a = 2. So 2H₂ + O₂ → 2H₂O." },
+      ],
+      gateCheck: "Balancing = null space of A.",
+      speed: "Pattern: 20 seconds.",
+      whatMadeHard: "Distractor (A) confuses 'chemistry' with 'nonlinear math'.",
+      generalization: "All conservation laws → homogeneous linear systems.",
+      linkedConcept: "C2.2 Null space.",
+      negAdvisory: "Attempt: pattern. (B) wins.",
+    },
+  },
+  {
+    id: "c31-m3", difficulty: "medium", kind: "nat", marks: 2, timeTarget: 70,
+    tags: ["Counting"],
+    statement: <span>For a system of 5 linear equations in 8 unknowns, the maximum possible number of linearly independent equations is ___.</span>,
+    answer: 5,
+    tolerance: 0,
+    hints: [
+      { label: "Conceptual redirect", text: "rank(A) ≤ min(m, n)." },
+      { label: "Key step", text: "rank ≤ min(5, 8) = 5." },
+      { label: "Near-complete", text: "5." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Max number of independent equations = rank of A, bounded by min(m, n)." },
+        { label: "KEY STEP", body: "5 × 8 matrix. rank ≤ min(5, 8) = 5." },
+        { label: "COMPUTATION", body: "Max = 5." },
+        { label: "VERIFICATION", body: "All 5 rows could be independent if no row is a combination of others." },
+      ],
+      gateCheck: "rank ≤ min(m, n).",
+      speed: "5 seconds.",
+      whatMadeHard: "Confusing 'max independent' with 'always 5'.",
+      generalization: "Holds for any m × n.",
+      linkedConcept: "M4 Rank bound.",
+    },
+  },
+  {
+    id: "c31-h1", difficulty: "hard", kind: "mcq", marks: 2, timeTarget: 90,
+    tags: ["Solution Existence"],
+    skipSignal: { type: "attempt", text: "Attempt — rank logic" },
+    statement: <span>An economist models supply-demand equilibrium as Ax = b, where A is 4×4 and represents market interactions. Under what condition does a UNIQUE equilibrium exist?</span>,
+    options: [
+      "rank(A) = 3.",
+      "det(A) ≠ 0.",
+      "b = 0.",
+      "Always.",
+    ],
+    answer: "B",
+    hints: [
+      { label: "Conceptual redirect", text: "Square A: unique solution ⇔ A invertible ⇔ det(A) ≠ 0." },
+      { label: "Key step", text: "det(A) ≠ 0." },
+      { label: "Near-complete", text: "Answer (B)." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Unique solution to Ax = b for square A ⇔ A invertible." },
+        { label: "KEY STEP", body: "A is 4 × 4. Unique solution ⇔ rank(A) = 4 ⇔ det(A) ≠ 0 ⇔ A invertible." },
+        { label: "COMPUTATION", body: "Answer (B)." },
+        { label: "VERIFICATION", body: "Distractor (A) rank 3 gives non-unique (1D null space). (C) b = 0 doesn't ensure uniqueness if A singular. (D) wrong (not always)." },
+      ],
+      gateCheck: "Square A: invertible ⇔ unique solution to Ax = b for ANY b.",
+      speed: "Direct.",
+      whatMadeHard: "Distractor (A) wrong rank.",
+      generalization: "Same for any square system.",
+      linkedConcept: "M5 Determinants.",
+      negAdvisory: "Attempt: (B) by definition of invertibility.",
+    },
+  },
+  {
+    id: "c31-h2", difficulty: "hard", kind: "mcq", marks: 2, timeTarget: 90,
+    tags: ["System Setup", "Counting"],
+    skipSignal: { type: "attempt", text: "Attempt — setup translation" },
+    statement: <span>You are fitting a polynomial of degree 3 (i.e., y = a₀ + a₁x + a₂x² + a₃x³) through 7 data points. The least-squares system is:</span>,
+    options: [
+      "7 × 7.",
+      "4 × 4.",
+      "7 × 4 (overdetermined, solve normal equations 4 × 4).",
+      "4 × 7 (underdetermined).",
+    ],
+    answer: "C",
+    hints: [
+      { label: "Conceptual redirect", text: "7 data points → 7 equations. 4 polynomial coefficients (a₀-a₃) → 4 unknowns." },
+      { label: "Key step", text: "Va = y where V is 7 × 4 Vandermonde. Overdetermined → normal equations." },
+      { label: "Near-complete", text: "Answer (C)." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Polynomial fit by least squares — count data points vs coefficients." },
+        { label: "KEY STEP", body: "7 data points (xᵢ, yᵢ) give 7 equations a₀ + a₁xᵢ + a₂xᵢ² + a₃xᵢ³ = yᵢ. 4 unknowns (a₀, a₁, a₂, a₃). System is 7 × 4 (overdetermined)." },
+        { label: "COMPUTATION", body: "Normal equations: VᵀV·a = Vᵀy, a 4 × 4 system. Answer (C)." },
+        { label: "VERIFICATION", body: "Distractor (A) wrong (4 unknowns). (B) wrong (7 data points). (D) wrong (overdetermined, not under)." },
+      ],
+      gateCheck: "Polynomial fit: data points = equations, coefficients = unknowns.",
+      speed: "Direct.",
+      whatMadeHard: "Distractor (D) confuses rows and columns.",
+      generalization: "Polynomial fit of degree d with k data: k × (d+1) Vandermonde.",
+      linkedConcept: "M2 Vandermonde, M4 Least Squares.",
+      negAdvisory: "Attempt: count decides. (C) wins.",
+    },
+  },
+  {
+    id: "c31-h3", difficulty: "hard", kind: "nat", marks: 2, timeTarget: 80,
+    tags: ["Application Counting"],
+    statement: <span>An 8-node electrical network has the requirement that one node is grounded (reference). The number of INDEPENDENT KCL equations is ___.</span>,
+    answer: 7,
+    tolerance: 0,
+    hints: [
+      { label: "Conceptual redirect", text: "KCL at each node gives one equation; but with all nodes, the sum is automatically zero (conservation)." },
+      { label: "Key step", text: "n nodes → n KCL equations, but only n - 1 are independent." },
+      { label: "Near-complete", text: "For n = 8: 8 - 1 = 7." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "KCL equations: one per node, but they sum to zero (currents balance globally), so one is redundant." },
+        { label: "KEY STEP", body: "n nodes, n KCL equations. Sum of all KCL = 0 (total current in = total out). So rank = n - 1." },
+        { label: "COMPUTATION", body: "For n = 8: independent equations = n - 1 = 7." },
+        { label: "VERIFICATION", body: "Grounding one node fixes the redundancy: take n - 1 = 7 independent KCL + 1 ground condition." },
+      ],
+      gateCheck: "Conservation laws often have one redundant equation per closed system.",
+      speed: "Conceptual: 30 seconds.",
+      whatMadeHard: "Recognizing redundancy.",
+      generalization: "Same in network flows, chemical balance: one redundancy per closed conservation.",
+      linkedConcept: "M3 Rank in Applied Systems.",
+    },
+  },
+  {
+    id: "c31-k1", difficulty: "killer", kind: "mcq", marks: 2, timeTarget: 150,
+    tags: ["Synthesis", "System Modeling"],
+    statement: <span><B>[KILLER]</B> A weighted-graph traffic model has 10 intersections and 15 roads. Conservation (in = out) at each intersection produces 10 equations. Additionally, 3 roads have fixed flows (boundary conditions). The number of FREE flows after imposing all constraints is at most:</span>,
+    options: [
+      "15 - 13 = 2.",
+      "15 - 10 = 5.",
+      "15 - 3 = 12.",
+      "15 - 9 - 3 = 3 (subtracting 1 redundant KCL).",
+    ],
+    answer: "D",
+    hints: [
+      { label: "Conceptual redirect", text: "Free flows = unknowns - independent constraints." },
+      { label: "Key step", text: "10 KCL but 1 redundant → 9 independent. Plus 3 boundary fixes. Total constraints = 12. Free = 15 - 12 = 3." },
+      { label: "Near-complete", text: "Answer (D)." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Free flows = (# unknowns) - (# independent constraints)." },
+        { label: "KEY STEP", body: "15 unknowns (road flows). 10 KCL constraints, but sum of all KCL = 0 ⇒ 1 redundant ⇒ 9 independent KCL. 3 boundary conditions = 3 more constraints (assuming independent of KCL). Total independent constraints: 9 + 3 = 12.\nFree = 15 - 12 = 3." },
+        { label: "COMPUTATION", body: "Answer (D)." },
+        { label: "VERIFICATION", body: "Distractors: (A) doesn't account for KCL redundancy. (B) ignores boundary. (C) ignores KCL. (D) correct accounting." },
+      ],
+      gateCheck: "Independence: subtract redundancies.",
+      speed: "Accounting: 60 seconds.",
+      whatMadeHard: "Recognizing the KCL redundancy.",
+      generalization: "Always check for redundant conservation laws.",
+      linkedConcept: "M4 Rank-Nullity.",
+      negAdvisory: "Attempt: (D) is the careful answer.",
+    },
+  },
+];
+
+const C31_TECHNIQUES = [
+  {
+    name: "Word Problem → A, x, b Identification",
+    type: "Structural Insight",
+    when: "Setting up a system from a real-world scenario.",
+    steps: [
+      "Identify unknowns (quantities to find) = entries of x.",
+      "Identify constraints (each equation) = rows of A.",
+      "RHS (numbers in constraints) = b.",
+      "Build matrix: row i = coefficients of unknowns in equation i; b_i = RHS.",
+    ],
+    speed: "Setup in 60 seconds.",
+    example: "Currents I₁, I₂ in circuit; KCL: I₁ - I₂ = 0; KVL: 2I₁ + 3I₂ = 10. A = [[1, -1], [2, 3]], b = (0, 10).",
+    danger: "Constants on wrong side; sign errors.",
+    freq: "Frequent",
+  },
+  {
+    name: "Conservation Law → Homogeneous Ax = 0",
+    type: "Structural Insight",
+    when: "Recognizing applications where RHS = 0 due to conservation.",
+    steps: [
+      "Identify conservation: mass, charge, atoms.",
+      "Each balance equation: LHS - RHS = 0.",
+      "System: Ax = 0. Solution = null space.",
+    ],
+    speed: "Recognition: 5 seconds.",
+    example: "Chemical balance, network flow.",
+    danger: "Distinguish from inhomogeneous problems with boundary conditions.",
+    freq: "Frequent",
+  },
+  {
+    name: "Conservation Redundancy",
+    type: "Structural Insight",
+    when: "n conservation equations may have 1 redundant.",
+    steps: [
+      "Sum all conservation equations: often = 0 identity.",
+      "True rank = n - 1.",
+      "Adjust counting accordingly.",
+    ],
+    speed: "Spot redundancy: 10 seconds.",
+    example: "KCL at n nodes: only n - 1 independent.",
+    danger: "Missing redundancy gives wrong free-variable count.",
+    freq: "Occasional",
+  },
+  {
+    name: "Application Pattern Recognition",
+    type: "Speed Shortcut",
+    when: "Classify the problem type.",
+    steps: [
+      "Conservation + flow → network.",
+      "Atom balance → chemistry.",
+      "Voltage / current → circuits.",
+      "Data + best fit → least squares.",
+      "Equilibrium of competing forces / supplies → economics / mechanics.",
+    ],
+    speed: "Classify: 5 seconds.",
+    example: "See above.",
+    danger: "Don't fall for surface keywords; check for genuine linearity.",
+    freq: "Occasional",
+  },
+];
+
+const C31_MISTAKES = [
+  {
+    name: "Confusing m and n",
+    wrong: [
+      "Problem: A is 3 × 5. Is the system underdetermined or overdetermined?",
+      "Solution: m = 5 > n = 3 → overdetermined.",
+    ],
+    errorLine: 0,
+    errorDescription: "Swapped m and n. A is 3 × 5 means m = 3 (rows) and n = 5 (columns).",
+    rootCause: "Inconsistent notation.",
+    correct: "m = 3 equations, n = 5 unknowns. m < n → underdetermined.",
+    prevention: "First number = rows = equations. Always.",
+    gateCost: "1-mark mistake.",
+    frequency: "Common",
+  },
+  {
+    name: "Ignoring Conservation Redundancy",
+    wrong: [
+      "Problem: 4 nodes, 4 KCL equations. Independent?",
+      "Solution: 4 nodes give 4 equations; all 4 are independent.",
+    ],
+    errorLine: 0,
+    errorDescription: "KCL at all nodes is redundant: sum = 0 always.",
+    rootCause: "Treating each equation as independent without checking.",
+    correct: "Only 3 KCL independent. Ground one node.",
+    prevention: "Always check: sum of conservation equations = 0?",
+    gateCost: "2-mark error in flow problems.",
+    frequency: "Common",
+  },
+  {
+    name: "Polynomial Fit Confusion",
+    wrong: [
+      "Problem: Fit y = a₀ + a₁x through 5 data points. System size?",
+      "Solution: 2 unknowns + 5 points = 7 × 7.",
+    ],
+    errorLine: 0,
+    errorDescription: "Linear system: 5 equations (one per point), 2 unknowns. Size is 5 × 2.",
+    rootCause: "Adding unknowns and equations together.",
+    correct: "5 × 2 system, overdetermined.",
+    prevention: "Each data point = 1 equation. Each coefficient = 1 unknown.",
+    gateCost: "Major setup error.",
+    frequency: "Common",
+  },
+];
+
+const C31_PYQS = [];
+
+function ConceptLab31({ progress }) {
+  return <ConceptLab num={1} title="Why Solve Systems? — From Scenarios to Ax = b"
+    why={<>Real-world problems reduce to Ax = b. The fastest path: identify unknowns (x), constraints (A's rows), and RHS (b). This concept calibrates the translation reflex you'll use in every later module.</>}
+    patterns={C31_PATTERNS}
+    problems={C31_PROBLEMS}
+    techniques={C31_TECHNIQUES}
+    mistakes={C31_MISTAKES}
+    pyqs={C31_PYQS}
+    progress={progress} />;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   CONCEPT 3.2 — WRITING A SYSTEM AS Ax = b
+   ════════════════════════════════════════════════════════════════ */
+
+const C32_PATTERNS = [
+  {
+    name: "Equation List → Matrix Form",
+    surface: "List of n linear equations is given. Asked to write in matrix form Ax = b.",
+    testing: "Mechanical extraction: coefficients → A, unknowns → x, RHS → b.",
+    signals: ["\"write in matrix form\"", "\"Ax = b\""],
+    firstMove: "Order unknowns once consistently. For each equation: collect coefficients into a row, RHS into b.",
+    timeBudget: 45,
+    frequency: "Very Frequent",
+  },
+  {
+    name: "Augmented Matrix Construction",
+    surface: "Given Ax = b, build the augmented [A | b].",
+    testing: "Whether you correctly append b as the rightmost column.",
+    signals: ["\"augmented matrix\"", "\"[A | b]\""],
+    firstMove: "Write A. Add a vertical bar. Append b as the last column. New matrix is m × (n + 1).",
+    timeBudget: 25,
+    frequency: "Very Frequent",
+  },
+  {
+    name: "Coefficient Identification",
+    surface: "Asked specific entry of A (or b) from a verbal description.",
+    testing: "Whether you can identify Aᵢⱼ (= coeff of xⱼ in equation i).",
+    signals: ["\"the (i, j) entry of A\"", "\"the coefficient of x₃ in equation 2\""],
+    firstMove: "Aᵢⱼ = coefficient of xⱼ in i-th equation.",
+    timeBudget: 25,
+    frequency: "Frequent",
+  },
+  {
+    name: "Missing Coefficient Trap",
+    surface: "Equation has implicit zero coefficients (e.g., variable not present).",
+    testing: "Whether you correctly identify the 0 entry.",
+    signals: ["\"x₁ + x₃ = 5\" (no x₂)"],
+    firstMove: "Missing variable → coefficient is 0. Write A with explicit 0s.",
+    timeBudget: 30,
+    frequency: "Frequent",
+  },
+];
+
+const C32_PROBLEMS = [
+  {
+    id: "c32-e1", difficulty: "easy", kind: "nat", marks: 1, timeTarget: 30,
+    tags: ["Matrix Form"],
+    statement: <span>For the system <T src="2x + 3y = 5, x - y = 1"/>, the (1, 1) entry of A is ___.</span>,
+    answer: 2,
+    tolerance: 0,
+    hints: [
+      { label: "Conceptual redirect", text: "(1, 1) entry of A = coefficient of x in first equation." },
+      { label: "Key step", text: "2." },
+      { label: "Near-complete", text: "2." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Read A directly from coefficients." },
+        { label: "KEY STEP", body: "Equation 1: 2x + 3y = 5. A row 1 = [2, 3]." },
+        { label: "COMPUTATION", body: "(1, 1) entry = 2." },
+        { label: "VERIFICATION", body: "Full A = [[2, 3], [1, -1]]. b = (5, 1)." },
+      ],
+      gateCheck: "Aᵢⱼ = coefficient of xⱼ in equation i.",
+      speed: "5 seconds.",
+      whatMadeHard: "Nothing.",
+      generalization: "Same for any system.",
+      linkedConcept: "C2.3 Matrix elements.",
+    },
+  },
+  {
+    id: "c32-e2", difficulty: "easy", kind: "mcq", marks: 1, timeTarget: 35,
+    tags: ["Augmented Matrix"],
+    skipSignal: { type: "attempt", text: "Attempt — direct" },
+    statement: <span>For <T src="A = \begin{pmatrix} 1 & 2 \ 3 & 4 \end{pmatrix}"/> and <T src="\mathbf{b} = (5, 6)^T"/>, the augmented matrix [A | b] is:</span>,
+    options: [
+      "[[1, 2, 5], [3, 4, 6]] — appended as third column.",
+      "[[1, 2], [3, 4], [5, 6]] — appended as third row.",
+      "[[5, 6], [1, 2], [3, 4]] — prepended as first row.",
+      "[[1, 5], [2, 6], [3, 4]] — interleaved.",
+    ],
+    answer: "A",
+    hints: [
+      { label: "Conceptual redirect", text: "Augmented = append b as a COLUMN to A." },
+      { label: "Key step", text: "[[1, 2, 5], [3, 4, 6]]." },
+      { label: "Near-complete", text: "Answer (A)." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Augmented = A with b appended as rightmost column." },
+        { label: "KEY STEP", body: "[A | b] = [[1, 2, 5], [3, 4, 6]] (2 × 3 matrix)." },
+        { label: "COMPUTATION", body: "Answer (A)." },
+        { label: "VERIFICATION", body: "Distractors: (B) row not column. (C) wrong position. (D) wrong interleaving." },
+      ],
+      gateCheck: "Always: b becomes the last COLUMN of [A | b].",
+      speed: "Direct.",
+      whatMadeHard: "Nothing — definition.",
+      generalization: "[A | b] is m × (n + 1).",
+      linkedConcept: "M3 Row Reduction.",
+      negAdvisory: "Attempt: definition. (A) wins.",
+    },
+  },
+  {
+    id: "c32-m1", difficulty: "medium", kind: "mcq", marks: 2, timeTarget: 60,
+    tags: ["Coefficient Identification", "Missing Term"],
+    skipSignal: { type: "attempt", text: "Attempt — careful read" },
+    statement: <span>For the system <T src="x_1 + x_3 = 4, x_2 - x_3 = 2, x_1 + x_2 + x_3 = 6"/>, the matrix A is:</span>,
+    options: [
+      "[[1, 0, 1], [0, 1, -1], [1, 1, 1]]",
+      "[[1, 1, 0], [0, 1, -1], [1, 1, 1]]",
+      "[[1, 1, 1], [1, 1, -1], [1, 1, 1]]",
+      "[[1, 0, 1], [0, 1, 1], [1, 1, 1]]",
+    ],
+    answer: "A",
+    hints: [
+      { label: "Conceptual redirect", text: "Missing variable → coefficient 0. Sign matters." },
+      { label: "Key step", text: "Eq 1: 1·x₁ + 0·x₂ + 1·x₃. Eq 2: 0·x₁ + 1·x₂ - 1·x₃. Eq 3: 1·x₁ + 1·x₂ + 1·x₃." },
+      { label: "Near-complete", text: "A = [[1, 0, 1], [0, 1, -1], [1, 1, 1]]. Answer (A)." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Read coefficients carefully; missing variable = 0." },
+        { label: "KEY STEP", body: "Eq 1: x₁ + x₃ = 4 → row (1, 0, 1). Eq 2: x₂ - x₃ = 2 → row (0, 1, -1). Eq 3: x₁ + x₂ + x₃ = 6 → row (1, 1, 1)." },
+        { label: "COMPUTATION", body: "A = [[1, 0, 1], [0, 1, -1], [1, 1, 1]]. Answer (A)." },
+        { label: "VERIFICATION", body: "Distractors trap: (B) has wrong 0/1 in (1, 2). (C) wrong signs. (D) wrong sign in (2, 3)." },
+      ],
+      gateCheck: "Missing variable → 0. Sign tracking essential.",
+      speed: "Careful read: 30 seconds.",
+      whatMadeHard: "Easy to miss 0s.",
+      generalization: "Same for any system with sparse equations.",
+      linkedConcept: "C3.2 Augmented Matrix.",
+      negAdvisory: "Attempt: careful read decides. (A) wins.",
+    },
+  },
+  {
+    id: "c32-m2", difficulty: "medium", kind: "nat", marks: 2, timeTarget: 55,
+    tags: ["Augmented Construction"],
+    statement: <span>The augmented matrix for <T src="2x_1 + 3x_2 = 5, x_1 + 4x_2 = 6"/> has the (2, 3) entry = ___.</span>,
+    answer: 6,
+    tolerance: 0,
+    hints: [
+      { label: "Conceptual redirect", text: "[A | b] = [[2, 3, 5], [1, 4, 6]]. (2, 3) entry = b₂." },
+      { label: "Key step", text: "b₂ = 6." },
+      { label: "Near-complete", text: "6." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Augmented matrix entry: 2nd equation's RHS." },
+        { label: "KEY STEP", body: "[A | b] = [[2, 3 | 5], [1, 4 | 6]]. (2, 3) = b₂ = 6." },
+        { label: "COMPUTATION", body: "6." },
+        { label: "VERIFICATION", body: "(1, 3) = b₁ = 5. Both in the rightmost column." },
+      ],
+      gateCheck: "Last column = b.",
+      speed: "Direct.",
+      whatMadeHard: "Nothing.",
+      generalization: "Same for any system.",
+      linkedConcept: "M3 Augmented Matrix.",
+    },
+  },
+  {
+    id: "c32-m3", difficulty: "medium", kind: "mcq", marks: 2, timeTarget: 65,
+    tags: ["Rewriting Systems"],
+    skipSignal: { type: "attempt", text: "Attempt — algebra" },
+    statement: <span>The system <T src="x - 2y = 1, 3x + y = 8 - x"/> in matrix form Ax = b has:</span>,
+    options: [
+      "A = [[1, -2], [3, 1]], b = (1, 8).",
+      "A = [[1, -2], [4, 1]], b = (1, 8).",
+      "A = [[1, -2], [3, 2]], b = (1, 8).",
+      "A = [[1, -2], [-1, 1]], b = (1, 8).",
+    ],
+    answer: "B",
+    hints: [
+      { label: "Conceptual redirect", text: "Bring all x, y terms to LHS." },
+      { label: "Key step", text: "3x + y + x = 8 → 4x + y = 8." },
+      { label: "Near-complete", text: "Coefficients (4, 1). Answer (B)." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Rewrite each equation in standard form a₁x + a₂y = b." },
+        { label: "KEY STEP", body: "Eq 2: 3x + y = 8 - x. Bring -x to LHS: 4x + y = 8. New coefficient of x = 4." },
+        { label: "COMPUTATION", body: "A row 2 = (4, 1). Answer (B)." },
+        { label: "VERIFICATION", body: "Verify: 4x + y = 8. Substitute x = 1, y = 4: 4 + 4 = 8 ✓." },
+      ],
+      gateCheck: "Always standardize: all unknowns on LHS, constants on RHS.",
+      speed: "Algebra: 30 seconds.",
+      whatMadeHard: "Trap: not bringing -x to LHS.",
+      generalization: "Same for any equation needing rearrangement.",
+      linkedConcept: "C3.2 Equation Rewriting.",
+      negAdvisory: "Attempt: algebra step decides. (B) wins.",
+    },
+  },
+  {
+    id: "c32-h1", difficulty: "hard", kind: "mcq", marks: 2, timeTarget: 80,
+    tags: ["System with Parameters"],
+    skipSignal: { type: "attempt", text: "Attempt — careful identification" },
+    statement: <span>The system <T src="kx + y = 2, x + ky = 1"/> in matrix form has A = ___ and b = ___.</span>,
+    options: [
+      "A = [[k, 1], [1, k]], b = (2, 1).",
+      "A = [[k, k], [1, 1]], b = (2, 1).",
+      "A = [[k, 1], [k, 1]], b = (2, 1).",
+      "A = [[1, k], [k, 1]], b = (2, 1).",
+    ],
+    answer: "A",
+    hints: [
+      { label: "Conceptual redirect", text: "Each row: coefficient of x, coefficient of y." },
+      { label: "Key step", text: "Eq 1: (k, 1). Eq 2: (1, k)." },
+      { label: "Near-complete", text: "A = [[k, 1], [1, k]]. Answer (A)." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Read coefficients per equation, in order of unknowns." },
+        { label: "KEY STEP", body: "Eq 1: kx + y = 2 → row (k, 1). Eq 2: x + ky = 1 → row (1, k)." },
+        { label: "COMPUTATION", body: "A = [[k, 1], [1, k]]. b = (2, 1). Answer (A)." },
+        { label: "VERIFICATION", body: "Symmetric matrix in k." },
+      ],
+      gateCheck: "Order: x first, then y, in EVERY row.",
+      speed: "Direct.",
+      whatMadeHard: "Distractors test if students swap order.",
+      generalization: "Same for any parametric system.",
+      linkedConcept: "M5 Determinant of A in terms of k.",
+      negAdvisory: "Attempt: direct read. (A) wins.",
+    },
+  },
+  {
+    id: "c32-h2", difficulty: "hard", kind: "mcq", marks: 2, timeTarget: 90,
+    tags: ["Block Construction"],
+    skipSignal: { type: "skip", text: "Skip if <60% — multi-step" },
+    statement: <span>A circuit gives the 3-equation system: 2I₁ - I₂ = 12 (KVL loop 1), -I₁ + 3I₂ - I₃ = 0 (loop 2), -I₂ + 2I₃ = 0 (loop 3). The augmented matrix is:</span>,
+    options: [
+      "[[2, -1, 0 | 12], [-1, 3, -1 | 0], [0, -1, 2 | 0]]",
+      "[[2, 1, 0 | 12], [-1, 3, -1 | 0], [0, -1, 2 | 0]]",
+      "[[2, -1, 0 | 12], [-1, 3, -1 | 0], [0, 1, 2 | 0]]",
+      "[[2, -1, -1 | 12], [-1, 3, 0 | 0], [0, -1, 2 | 0]]",
+    ],
+    answer: "A",
+    hints: [
+      { label: "Conceptual redirect", text: "Track signs carefully — minus signs matter." },
+      { label: "Key step", text: "Row 1: (2, -1, 0 | 12). Row 2: (-1, 3, -1 | 0). Row 3: (0, -1, 2 | 0)." },
+      { label: "Near-complete", text: "Answer (A)." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Carefully transcribe each equation row-by-row, watching signs." },
+        { label: "KEY STEP", body: "Eq 1: 2I₁ - I₂ + 0·I₃ = 12 → row (2, -1, 0 | 12). Eq 2: -I₁ + 3I₂ - I₃ = 0 → row (-1, 3, -1 | 0). Eq 3: 0·I₁ - I₂ + 2I₃ = 0 → row (0, -1, 2 | 0)." },
+        { label: "COMPUTATION", body: "[A | b] = [[2, -1, 0 | 12], [-1, 3, -1 | 0], [0, -1, 2 | 0]]. Answer (A)." },
+        { label: "VERIFICATION", body: "Distractors trap on sign flips and missing zeros." },
+      ],
+      gateCheck: "Track every sign and every zero coefficient.",
+      speed: "Careful transcription: 60 seconds.",
+      whatMadeHard: "Sign tracking under time pressure.",
+      generalization: "Same template for any circuit / network system.",
+      linkedConcept: "M3 Augmented matrices.",
+      negAdvisory: "Attempt: careful read. (A) wins.",
+    },
+  },
+  {
+    id: "c32-h3", difficulty: "hard", kind: "nat", marks: 2, timeTarget: 75,
+    tags: ["Matrix Form"],
+    statement: <span>For the system <T src="x_1 + 2x_2 + 3x_3 = 6, 4x_1 + 5x_2 + 6x_3 = 15, 7x_1 + 8x_2 + 9x_3 = 24"/>, the (3, 2) entry of A is ___.</span>,
+    answer: 8,
+    tolerance: 0,
+    hints: [
+      { label: "Conceptual redirect", text: "(3, 2) = coefficient of x₂ in eq 3." },
+      { label: "Key step", text: "Eq 3: 7x₁ + 8x₂ + 9x₃ = 24. (3, 2) = 8." },
+      { label: "Near-complete", text: "8." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Direct read: (3, 2) entry is coefficient of x₂ in equation 3." },
+        { label: "KEY STEP", body: "Equation 3: 7x₁ + 8x₂ + 9x₃. Coefficient of x₂ = 8." },
+        { label: "COMPUTATION", body: "8." },
+        { label: "VERIFICATION", body: "A = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]. Confirmed (3, 2) = 8." },
+      ],
+      gateCheck: "Aᵢⱼ = coefficient of xⱼ in equation i.",
+      speed: "5 seconds.",
+      whatMadeHard: "Nothing — direct.",
+      generalization: "Same for any system.",
+      linkedConcept: "M3 Matrix entries.",
+    },
+  },
+  {
+    id: "c32-k1", difficulty: "killer", kind: "mcq", marks: 2, timeTarget: 130,
+    tags: ["Synthesis", "Implicit Form"],
+    statement: <span><B>[KILLER]</B> Express the constraint <T src="x_1 = 2x_2 - 3x_3 + 4"/> in standard matrix form. The resulting row of A and entry of b are:</span>,
+    options: [
+      "Row: (1, 2, -3); b: 4.",
+      "Row: (1, -2, 3); b: 4.",
+      "Row: (-1, 2, -3); b: -4.",
+      "Row: (1, 2, 3); b: 4.",
+    ],
+    answer: "B",
+    hints: [
+      { label: "Conceptual redirect", text: "Rewrite: bring x's to LHS, constants to RHS." },
+      { label: "Key step", text: "x₁ - 2x₂ + 3x₃ = 4. Row (1, -2, 3), b = 4." },
+      { label: "Near-complete", text: "Answer (B)." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Standard form: a·x = b." },
+        { label: "KEY STEP", body: "x₁ = 2x₂ - 3x₃ + 4 ⇒ x₁ - 2x₂ + 3x₃ = 4. Coefficients (1, -2, 3) for (x₁, x₂, x₃), b = 4." },
+        { label: "COMPUTATION", body: "Answer (B)." },
+        { label: "VERIFICATION", body: "Plug x₁ = 1, x₂ = 0, x₃ = 1: 1·1 - 2·0 + 3·1 = 4 ✓ (matches original x₁ = 0 + 3 + 1? Let me check: original: x₁ = 2·0 - 3·(-1) + 4 = 7 if x₃ = -1. So a specific example may give 7 not 4 — but the STRUCTURE of the matrix form is correct: row (1, -2, 3), b = 4)." },
+      ],
+      gateCheck: "Move all unknowns to LHS, constants to RHS. Sign flip when crossing equals sign.",
+      speed: "Algebra: 30 seconds.",
+      whatMadeHard: "Sign-flip discipline.",
+      generalization: "Same for any implicit equation.",
+      linkedConcept: "C3.2 Standardization.",
+      negAdvisory: "Attempt: algebra step. (B) wins.",
+    },
+  },
+];
+
+const C32_TECHNIQUES = [
+  {
+    name: "Coefficient-Extraction Method",
+    type: "Speed Shortcut",
+    when: "Converting equation list to matrix form.",
+    steps: [
+      "Fix order of unknowns (e.g., x₁, x₂, ..., xₙ).",
+      "For each equation, write coefficients in fixed order. Missing variable = 0.",
+      "RHS goes to b.",
+    ],
+    speed: "Per-equation: 5 seconds.",
+    example: "2x₁ - 3x₃ = 5 → row (2, 0, -3), b entry = 5.",
+    danger: "Sign and zero tracking.",
+    freq: "Very Frequent",
+  },
+  {
+    name: "Standardization Before Matrix",
+    type: "Trap Avoidance",
+    when: "Equation has unknowns on both sides or implicit form.",
+    steps: [
+      "Move all unknowns to LHS.",
+      "Move constants to RHS.",
+      "Then extract coefficients.",
+    ],
+    speed: "Algebra: 15 seconds.",
+    example: "x = 2y + 3 ⇒ x - 2y = 3. Row (1, -2), b = 3.",
+    danger: "Sign flips during rearrangement.",
+    freq: "Frequent",
+  },
+  {
+    name: "Augmented Matrix Builder",
+    type: "Speed Shortcut",
+    when: "Need [A | b] for row reduction.",
+    steps: [
+      "Write A.",
+      "Append b as rightmost column.",
+      "Result is m × (n + 1).",
+    ],
+    speed: "Mechanical: 10 seconds.",
+    example: "A = [[1, 2], [3, 4]], b = (5, 6). [A|b] = [[1, 2, 5], [3, 4, 6]].",
+    danger: "Don't confuse with row appendage.",
+    freq: "Very Frequent",
+  },
+];
+
+const C32_MISTAKES = [
+  {
+    name: "Sign Errors in Equation Rewriting",
+    wrong: [
+      "Problem: Rewrite x = 2y + 1 in standard form.",
+      "Solution: Just move y: x + 2y = 1.",
+    ],
+    errorLine: 0,
+    errorDescription: "Moving 2y across equals sign should flip its sign: x - 2y = 1.",
+    rootCause: "Forgetting sign flip.",
+    correct: "x - 2y = 1.",
+    prevention: "When moving a term across = sign, flip its sign.",
+    gateCost: "Whole matrix becomes wrong.",
+    frequency: "Very Common",
+  },
+  {
+    name: "Skipping Zero Coefficients",
+    wrong: [
+      "Problem: System x₁ + x₃ = 5, x₂ - x₃ = 1.",
+      "Solution: A = [[1, 1], [1, -1]] (only 2 columns since 2 visible variables per equation).",
+    ],
+    errorLine: 0,
+    errorDescription: "Three variables overall (x₁, x₂, x₃). Each equation needs a 3-column row with explicit 0s for absent variables.",
+    rootCause: "Treating each equation independently without considering global unknown list.",
+    correct: "A = [[1, 0, 1], [0, 1, -1]] (2 × 3).",
+    prevention: "First enumerate ALL unknowns. Then write each row with all coefficients.",
+    gateCost: "Wrong matrix dimensions → cascading errors.",
+    frequency: "Very Common",
+  },
+  {
+    name: "Swapping Rows and Columns",
+    wrong: [
+      "Problem: 2 equations, 3 unknowns. Size of A?",
+      "Solution: 3 × 2 (3 unknowns × 2 equations).",
+    ],
+    errorLine: 0,
+    errorDescription: "Convention: A is m × n where m = equations, n = unknowns. So 2 × 3.",
+    rootCause: "Conventional ordering.",
+    correct: "A is 2 × 3 (m × n).",
+    prevention: "Rows = equations, columns = unknowns.",
+    gateCost: "Dimensional confusion.",
+    frequency: "Common",
+  },
+];
+
+const C32_PYQS = [];
+
+function ConceptLab32({ progress }) {
+  return <ConceptLab num={2} title="Writing a System as Ax = b — Equations to Matrix Form"
+    why={<>Every system gets mechanically translated to Ax = b. Track signs, identify missing zeros, and append b correctly for the augmented matrix. This is the loading bay for every row-reduction problem.</>}
+    patterns={C32_PATTERNS}
+    problems={C32_PROBLEMS}
+    techniques={C32_TECHNIQUES}
+    mistakes={C32_MISTAKES}
+    pyqs={C32_PYQS}
+    progress={progress} />;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   CONCEPT 3.3 — GEOMETRIC INTERPRETATION (3 PLANES — 7 CONFIGURATIONS)
+   ════════════════════════════════════════════════════════════════ */
+
+const C33_PATTERNS = [
+  {
+    name: "Geometric Configuration → Algebraic Type",
+    surface: "Geometric description given ('three planes meet at a single point' / 'two coincide and third parallel'), asked solution type / rank conditions.",
+    testing: "Whether you can map all 7 configurations of 3 planes in ℝ³ to (rank A, rank [A|b]) pairs.",
+    signals: ["\"three planes\"", "\"meet at\"", "\"parallel\"", "\"coincident\""],
+    firstMove: "Match configuration → rank-pair. Unique pt: r(A)=r([A|b])=3. Line: r=2 consistent. Plane: r=1 consistent. No sol: r(A) < r([A|b]).",
+    timeBudget: 60,
+    frequency: "Very Frequent",
+  },
+  {
+    name: "Algebraic Type → Geometric Configuration",
+    surface: "Rank conditions given, asked geometric configuration of 3 planes.",
+    testing: "Reverse direction of the same mapping.",
+    signals: ["\"rank(A) = 2 and rank([A|b]) = 2\"", "\"infinitely many solutions\""],
+    firstMove: "Map rank-pair → geometric configuration via the 7-config table.",
+    timeBudget: 50,
+    frequency: "Frequent",
+  },
+  {
+    name: "Parallel / Coincident Detection",
+    surface: "Asked if two specific planes are parallel, coincident, or intersecting.",
+    testing: "Detect parallel via scalar-multiple rows; coincident requires b-matching too.",
+    signals: ["\"are these two planes parallel\"", "\"do they coincide\""],
+    firstMove: "Compare coefficient rows: scalar multiples ⇒ parallel. Then compare b: same ratio ⇒ coincident, else parallel distinct.",
+    timeBudget: 40,
+    frequency: "Frequent",
+  },
+  {
+    name: "ℝ² Lines Configuration",
+    surface: "2 or 3 lines in ℝ², asked geometric configuration.",
+    testing: "Whether you can apply the same rank logic in 2D.",
+    signals: ["\"lines in the plane\"", "\"point of intersection\""],
+    firstMove: "Lines: rank logic still applies. Distinct intersecting: 1 pt. Parallel: no sol. Coincident: 1D line.",
+    timeBudget: 30,
+    frequency: "Occasional",
+  },
+  {
+    name: "Hyperplane Generalization",
+    surface: "n planes in ℝⁿ asked geometrically.",
+    testing: "Whether you understand intersection dim = n - rank (for consistent).",
+    signals: ["\"n hyperplanes\""],
+    firstMove: "dim(intersection) = n - rank(A) when consistent.",
+    timeBudget: 40,
+    frequency: "Occasional",
+  },
+];
+
+const C33_PROBLEMS = [
+  {
+    id: "c33-e1", difficulty: "easy", kind: "mcq", marks: 1, timeTarget: 30,
+    tags: ["3-Plane Configuration"],
+    skipSignal: { type: "attempt", text: "Attempt — geometric" },
+    statement: <span>Three planes intersect at a single point. The corresponding system has:</span>,
+    options: [
+      "No solution.",
+      "Exactly one solution.",
+      "Infinitely many solutions.",
+      "Cannot be determined.",
+    ],
+    answer: "B",
+    hints: [
+      { label: "Conceptual redirect", text: "Single point = unique solution." },
+      { label: "Key step", text: "Unique." },
+      { label: "Near-complete", text: "Answer (B)." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Geometric single point = one solution." },
+        { label: "KEY STEP", body: "Three planes meeting at one point ⇔ unique solution ⇔ rank(A) = rank([A|b]) = 3 (square system, n = 3)." },
+        { label: "COMPUTATION", body: "Answer (B)." },
+        { label: "VERIFICATION", body: "Single common point = (x, y, z) — one solution." },
+      ],
+      gateCheck: "Configuration ↔ solution count mapping. Memorize.",
+      speed: "Direct.",
+      whatMadeHard: "Nothing.",
+      generalization: "k-dim intersection = (k+1)-parameter family of solutions; point = 0-dim = unique.",
+      linkedConcept: "C2.4 Row picture.",
+      negAdvisory: "Attempt: definition. (B) wins.",
+    },
+  },
+  {
+    id: "c33-e2", difficulty: "easy", kind: "mcq", marks: 1, timeTarget: 35,
+    tags: ["3-Plane Configuration"],
+    skipSignal: { type: "attempt", text: "Attempt — visualization" },
+    statement: <span>Three planes are mutually parallel and distinct. The system has:</span>,
+    options: [
+      "No solution.",
+      "Exactly one solution.",
+      "Infinitely many solutions.",
+      "A finite, non-unique number of solutions.",
+    ],
+    answer: "A",
+    hints: [
+      { label: "Conceptual redirect", text: "Parallel and distinct ⇒ no common intersection ⇒ no solution." },
+      { label: "Key step", text: "Answer (A)." },
+      { label: "Near-complete", text: "No solution." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Parallel + distinct = no intersection." },
+        { label: "KEY STEP", body: "Three parallel distinct planes never share a point. rank(A) = 1 (all rows scalar multiples), rank([A|b]) = 3 (each b's value is different)." },
+        { label: "COMPUTATION", body: "rank gap → inconsistent → no solution. Answer (A)." },
+        { label: "VERIFICATION", body: "Example: x + y + z = 1, x + y + z = 2, x + y + z = 3. Incompatible RHS." },
+      ],
+      gateCheck: "Parallel distinct = no solution.",
+      speed: "5 seconds.",
+      whatMadeHard: "Distractor (D) — finite > 1 solutions never occur in linear systems.",
+      generalization: "k-parameter family or empty: no finite-non-unique case for linear systems.",
+      linkedConcept: "C2.4 Row picture.",
+      negAdvisory: "Attempt: pattern. (A) wins.",
+    },
+  },
+  {
+    id: "c33-m1", difficulty: "medium", kind: "mcq", marks: 2, timeTarget: 75,
+    tags: ["3-Plane Configuration", "Line of Intersection"],
+    skipSignal: { type: "attempt", text: "Attempt — rank reasoning" },
+    statement: <span>Three planes meet in a line. The rank-pair (rank(A), rank([A|b])) is:</span>,
+    options: [
+      "(3, 3)",
+      "(2, 2)",
+      "(2, 3)",
+      "(1, 1)",
+    ],
+    answer: "B",
+    hints: [
+      { label: "Conceptual redirect", text: "Line = 1D solution set. nullity = 1 ⇒ rank = 3 - 1 = 2. Consistent ⇒ same rank for [A|b]." },
+      { label: "Key step", text: "(2, 2)." },
+      { label: "Near-complete", text: "Answer (B)." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Solution = line (1D) ⇔ nullity = 1 ⇔ rank = 2. Consistent ⇒ rank(A) = rank([A|b])." },
+        { label: "KEY STEP", body: "rank(A) = 2, consistent. rank([A|b]) = 2." },
+        { label: "COMPUTATION", body: "Answer (B)." },
+        { label: "VERIFICATION", body: "(A) point. (C) inconsistent. (D) plane (rank 1)." },
+      ],
+      gateCheck: "Solution set dim = n - rank.",
+      speed: "Direct.",
+      whatMadeHard: "Distractor (C) rank gap.",
+      generalization: "Same for any line of intersection of hyperplanes.",
+      linkedConcept: "C2.4, C3.4.",
+      negAdvisory: "Attempt: rank arithmetic decides. (B) wins.",
+    },
+  },
+  {
+    id: "c33-m2", difficulty: "medium", kind: "mcq", marks: 2, timeTarget: 80,
+    tags: ["7-Configuration Mapping"],
+    skipSignal: { type: "skip", text: "Skip if <65% — case analysis" },
+    statement: <span>Three planes coincide (all three are the same plane). The rank-pair is:</span>,
+    options: [
+      "(3, 3)",
+      "(1, 1)",
+      "(2, 2)",
+      "(1, 3)",
+    ],
+    answer: "B",
+    hints: [
+      { label: "Conceptual redirect", text: "All identical → A has 1 independent row." },
+      { label: "Key step", text: "rank(A) = 1. Consistent (same RHS) → rank([A|b]) = 1." },
+      { label: "Near-complete", text: "(1, 1). Answer (B)." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "All planes coincident = 1 independent equation." },
+        { label: "KEY STEP", body: "Three identical equations. rank(A) = 1. Same b on all → rank([A|b]) = 1." },
+        { label: "COMPUTATION", body: "Answer (B). 2D family of solutions (the plane itself)." },
+        { label: "VERIFICATION", body: "Solution = the common plane = 2D family." },
+      ],
+      gateCheck: "Coincident planes give rank 1, consistent system.",
+      speed: "20 seconds.",
+      whatMadeHard: "Confusion with parallel-distinct.",
+      generalization: "k coincident hyperplanes → rank 1.",
+      linkedConcept: "C2.1 Span.",
+      negAdvisory: "Attempt: visualization decides. (B) wins.",
+    },
+  },
+  {
+    id: "c33-m3", difficulty: "medium", kind: "mcq", marks: 2, timeTarget: 90,
+    tags: ["7-Configuration", "Prism"],
+    skipSignal: { type: "skip", text: "Skip if <60% — subtle config" },
+    statement: <span>Three planes pairwise intersect in 3 distinct parallel lines (forming a 'prism' configuration, no common point). The rank-pair is:</span>,
+    options: [
+      "(2, 3) — system is inconsistent.",
+      "(3, 3) — unique solution.",
+      "(2, 2) — line solution.",
+      "(1, 1) — plane solution.",
+    ],
+    answer: "A",
+    hints: [
+      { label: "Conceptual redirect", text: "Pairwise intersect = each pair meets in a line. No common point = inconsistent." },
+      { label: "Key step", text: "rank(A) = 2 (3 planes but only 2 independent normal directions). rank([A|b]) = 3 (inconsistent RHS)." },
+      { label: "Near-complete", text: "Answer (A)." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Prism = no common point but pairwise intersections exist." },
+        { label: "KEY STEP", body: "Three planes with linearly dependent normals (rank 2) but their RHS don't align for a common solution. So rank(A) = 2, rank([A|b]) = 3, inconsistent." },
+        { label: "COMPUTATION", body: "Answer (A)." },
+        { label: "VERIFICATION", body: "Geometrically: the 3 pairwise lines are parallel, forming a triangular prism shape." },
+      ],
+      gateCheck: "Prism = inconsistent system with rank(A) = 2, rank([A|b]) = 3.",
+      speed: "Visualization + rank: 50 seconds.",
+      whatMadeHard: "Distinguishing prism from line-intersection.",
+      generalization: "Whenever pairwise intersections exist but no common one: inconsistency.",
+      linkedConcept: "C2.4 Row picture, C3.4 Consistency.",
+      negAdvisory: "Attempt: (A) correct.",
+    },
+  },
+  {
+    id: "c33-h1", difficulty: "hard", kind: "mcq", marks: 2, timeTarget: 90,
+    tags: ["All 7 Configurations"],
+    skipSignal: { type: "skip", text: "Skip if <60% — all 7 to recall" },
+    statement: <span>Which of the following 3-plane configurations corresponds to rank(A) = 2, rank([A|b]) = 2?</span>,
+    options: [
+      "Three planes meeting at one line.",
+      "Three planes meeting at one point.",
+      "Three planes mutually parallel and distinct.",
+      "Three planes all coincident.",
+    ],
+    answer: "A",
+    hints: [
+      { label: "Conceptual redirect", text: "(2, 2) means rank 2 consistent. Solution dim = 3 - 2 = 1 (line)." },
+      { label: "Key step", text: "Line solution = planes meeting at a line." },
+      { label: "Near-complete", text: "Answer (A)." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Rank pair (2, 2): consistent, 1D solution = line." },
+        { label: "KEY STEP", body: "Three planes meet in a line. Could be: (i) two distinct planes meeting in a line + third plane contains that line; or (ii) three planes pairwise meeting (with common line)." },
+        { label: "COMPUTATION", body: "Answer (A)." },
+        { label: "VERIFICATION", body: "(B) is rank 3. (C) is rank 1, inconsistent. (D) is rank 1, consistent (plane sol)." },
+      ],
+      gateCheck: "Rank-pair → solution dim → geometric config.",
+      speed: "30 seconds with table memorized.",
+      whatMadeHard: "Memorizing all 7 configurations.",
+      generalization: "Same in any n hyperplanes in ℝⁿ.",
+      linkedConcept: "C2.4, C3.4.",
+      negAdvisory: "Attempt: rank-config table. (A) wins.",
+    },
+  },
+  {
+    id: "c33-h2", difficulty: "hard", kind: "mcq", marks: 2, timeTarget: 100,
+    tags: ["Geometric to Rank"],
+    skipSignal: { type: "skip", text: "Skip if <65% — case analysis" },
+    statement: <span>Two planes are parallel and distinct; the third plane intersects each in a distinct parallel line. The system is:</span>,
+    options: [
+      "Consistent, unique solution.",
+      "Inconsistent (no solution).",
+      "Consistent, line solution.",
+      "Consistent, plane solution.",
+    ],
+    answer: "B",
+    hints: [
+      { label: "Conceptual redirect", text: "If two planes are parallel and distinct, NO common point exists for them — so no common point of all three." },
+      { label: "Key step", text: "Inconsistent." },
+      { label: "Near-complete", text: "Answer (B)." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "If two of three planes don't share any point, neither do all three." },
+        { label: "KEY STEP", body: "Two parallel distinct planes have empty intersection. Adding a third plane doesn't help — common intersection is still empty." },
+        { label: "COMPUTATION", body: "Answer (B). rank(A) = 2 (third plane has independent normal), rank([A|b]) = 3." },
+        { label: "VERIFICATION", body: "Pairwise: parallel pair gives empty intersection; the others give lines but no common point." },
+      ],
+      gateCheck: "Empty pairwise = empty common.",
+      speed: "Visualization: 40 seconds.",
+      whatMadeHard: "Recognizing parallel-distinct kills entire system.",
+      generalization: "Any subset of inconsistent equations makes the whole system inconsistent.",
+      linkedConcept: "C2.4, C3.4.",
+      negAdvisory: "Attempt: structural reasoning. (B) wins.",
+    },
+  },
+  {
+    id: "c33-h3", difficulty: "hard", kind: "nat", marks: 2, timeTarget: 95,
+    tags: ["Geometric Counting"],
+    statement: <span>The number of distinct configurations (up to renaming planes) for 3 planes in ℝ³ is ___.</span>,
+    answer: 7,
+    tolerance: 0,
+    hints: [
+      { label: "Conceptual redirect", text: "Enumerate based on solution type and degeneracy." },
+      { label: "Key step", text: "(1) Unique point, (2) Line intersection (all 3 share), (3) All coincident, (4) Two coincident + 3rd intersecting, (5) Two coincident + 3rd parallel, (6) All three parallel distinct, (7) Pairwise intersections forming prism." },
+      { label: "Near-complete", text: "Total: 7. Some texts list 8 (separating subcases). Standard GATE answer: 7 main cases." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Standard enumeration of 3-plane configurations." },
+        { label: "KEY STEP", body: "The 7 main cases:\n1. Three planes meet at a single point (rank 3, unique sol).\n2. Three planes meet at a line (rank 2, consistent — line sol).\n3. All three planes coincide (rank 1, consistent — plane sol).\n4. Two coincide, third intersects them in a line (rank 2, consistent).\n5. Two coincide, third parallel distinct (rank 1, inconsistent).\n6. All three parallel and distinct (rank 1, inconsistent).\n7. Pairwise intersecting in parallel lines forming a triangular prism (rank 2, inconsistent).\nTotal = 7." },
+        { label: "COMPUTATION", body: "7." },
+        { label: "VERIFICATION", body: "Some references separate (4) into subcases — leading to 8 — but the standard GATE-style count is 7." },
+      ],
+      gateCheck: "Memorize the 7-case table.",
+      speed: "Recall: 30 seconds.",
+      whatMadeHard: "Subtle subcases.",
+      generalization: "n hyperplanes in ℝⁿ: many more cases by rank-RHS combinations.",
+      linkedConcept: "C3.3 Configurations.",
+    },
+  },
+  {
+    id: "c33-k1", difficulty: "killer", kind: "mcq", marks: 2, timeTarget: 150,
+    tags: ["Synthesis", "Rank Mapping"],
+    statement: <span><B>[KILLER]</B> A 3-plane system has rank(A) = 1 and rank([A|b]) = 2. What geometric configuration does this correspond to?</span>,
+    options: [
+      "All three planes coincide.",
+      "All three planes are mutually parallel and distinct.",
+      "Two planes coincide; the third is parallel and distinct.",
+      "Three planes meet at a line.",
+    ],
+    answer: "C",
+    hints: [
+      { label: "Conceptual redirect", text: "rank(A) = 1: all rows scalar multiples. rank([A|b]) = 2: two distinct b values." },
+      { label: "Key step", text: "Two coincident (same equation) + one with different b but same direction → two coincide, third parallel distinct." },
+      { label: "Near-complete", text: "Answer (C)." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Rank(A) = 1 means all planes have parallel normals. Rank([A|b]) = 2 means RHS has 2 distinct values among the 3 rows." },
+        { label: "KEY STEP", body: "Among 3 planes with parallel normals: 2 distinct b-values means 2 of the 3 planes coincide (same b), and the third is parallel but distinct (different b)." },
+        { label: "COMPUTATION", body: "Answer (C). Inconsistent system." },
+        { label: "VERIFICATION", body: "(A) is rank 1, rank 1 (all same b). (B) is rank 1, rank 3 (3 distinct b). (D) is rank 2." },
+      ],
+      gateCheck: "Memorize rank pairs ↔ configurations.",
+      speed: "60 seconds with table.",
+      whatMadeHard: "Distinguishing (B) from (C): rank([A|b]) = 2 vs 3.",
+      generalization: "Same logic for n planes.",
+      linkedConcept: "C3.3 7-config table.",
+      negAdvisory: "Attempt: rank dissection. (C) wins.",
+    },
+  },
+];
+
+const C33_TECHNIQUES = [
+  {
+    name: "7-Configuration Lookup Table",
+    type: "Speed Shortcut",
+    when: "Mapping geometric configuration to solution count (or vice versa).",
+    steps: [
+      "Memorize:\n• rank 3, [A|b] 3: unique point (1 sol).\n• rank 2, [A|b] 2: line of intersection (∞ sols).\n• rank 1, [A|b] 1: coincident planes (∞ sols, 2D).\n• rank 2, [A|b] 3: pairwise intersect, no common pt (prism, inconsistent).\n• rank 1, [A|b] 2: two coincident + parallel third (inconsistent).\n• rank 1, [A|b] 3: three parallel distinct (inconsistent).",
+      "Look up the matching geometry / rank pair.",
+    ],
+    speed: "Direct map: 5 seconds.",
+    example: "rank(A) = 2, rank([A|b]) = 2 → line of intersection.",
+    danger: "Confusing rank pairs.",
+    freq: "Very Frequent",
+  },
+  {
+    name: "Pairwise Parallel Test",
+    type: "Verification Method",
+    when: "Determining if two planes are parallel.",
+    steps: [
+      "Compare normal vectors (= coefficient rows).",
+      "Scalar multiples ⇒ parallel.",
+      "Then check b: same scaling ⇒ coincident; else parallel distinct.",
+    ],
+    speed: "Per-pair: 20 seconds.",
+    example: "x + y + z = 1 and 2x + 2y + 2z = 5: parallel distinct (rows scaled by 2 but RHS not).",
+    danger: "Don't conflate parallel distinct with intersecting.",
+    freq: "Frequent",
+  },
+  {
+    name: "Rank-to-Geometry Translator",
+    type: "Structural Insight",
+    when: "Given numeric system, identify geometric configuration.",
+    steps: [
+      "Form A and [A|b]. Row reduce.",
+      "Read off ranks.",
+      "Match to 7-config table.",
+    ],
+    speed: "60-90 seconds.",
+    example: "See techniques above.",
+    danger: "Sign / arithmetic errors in row reduction.",
+    freq: "Frequent",
+  },
+];
+
+const C33_MISTAKES = [
+  {
+    name: "Confusing Coincident with Parallel Distinct",
+    wrong: [
+      "Problem: Are x + y = 1 and 2x + 2y = 2 parallel distinct planes (in ℝ³ extending to z)?",
+      "Solution: Coefficients are scaled by 2 → parallel. So they are parallel distinct.",
+    ],
+    errorLine: 0,
+    errorDescription: "Both equations describe the SAME plane (2nd is 2× the 1st). They are COINCIDENT, not parallel distinct.",
+    rootCause: "Forgetting to check b scaling.",
+    correct: "Rows scaled by 2 AND RHS scaled by 2 → coincident.",
+    prevention: "Both coefficients AND b must scale by the same factor for coincidence.",
+    gateCost: "Wrong configuration identified.",
+    frequency: "Very Common",
+  },
+  {
+    name: "Skipping the Prism Configuration",
+    wrong: [
+      "Problem: 3 planes with rank(A) = 2 and rank([A|b]) = 3. What configuration?",
+      "Solution: Two intersect in a line, third contains that line.",
+    ],
+    errorLine: 0,
+    errorDescription: "rank gap means inconsistent. Description matches consistent line config. The actual config is a prism.",
+    rootCause: "Forgetting the prism case.",
+    correct: "Prism: pairwise intersect in parallel lines, no common point.",
+    prevention: "Memorize all 7 cases including the prism.",
+    gateCost: "2-mark error.",
+    frequency: "Common",
+  },
+  {
+    name: "Counting Geometric Configurations as 3",
+    wrong: [
+      "Problem: How many distinct configurations of 3 planes in ℝ³ are there?",
+      "Solution: Three: unique solution, no solution, infinite solutions.",
+    ],
+    errorLine: 0,
+    errorDescription: "Solution-count gives 3 categories, but geometric configurations are richer (parallel vs coincident, prism vs no-common-pt, etc.).",
+    rootCause: "Conflating solution-type with geometric-type.",
+    correct: "7 distinct geometric configurations.",
+    prevention: "Solution count ≠ configuration count.",
+    gateCost: "Conceptual misunderstanding.",
+    frequency: "Common",
+  },
+];
+
+const C33_PYQS = [];
+
+function ConceptLab33({ progress }) {
+  return <ConceptLab num={3} title="Geometric Interpretation — All 7 Configurations of 3 Planes"
+    why={<>GATE tests both directions: 'given the geometry, find the rank' and 'given the rank, find the geometry'. The 7-configuration table is mandatory memorization. This lab drills both directions until automatic.</>}
+    patterns={C33_PATTERNS}
+    problems={C33_PROBLEMS}
+    techniques={C33_TECHNIQUES}
+    mistakes={C33_MISTAKES}
+    pyqs={C33_PYQS}
+    progress={progress} />;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   CONCEPT 3.4 — INTUITION DEEP DIVE: x = xₚ + xₙ
+   (Includes the mandated KILLER: characterize col(A) for 4×3 system)
+   ════════════════════════════════════════════════════════════════ */
+
+const C34_PATTERNS = [
+  {
+    name: "Particular + Null Decomposition",
+    surface: "Find general solution to Ax = b. Write as x = xₚ + (null space basis combination).",
+    testing: "Whether you know: any solution = particular + null space element.",
+    signals: ["\"general solution\"", "\"x = xₚ + xₙ\""],
+    firstMove: "Find any particular solution xₚ via row reduction. Find null space basis. General sol = xₚ + Σ tᵢ·(null basis vᵢ).",
+    timeBudget: 90,
+    frequency: "Very Frequent",
+  },
+  {
+    name: "Existence vs Uniqueness Decoupling",
+    surface: "Asked about existence (does a solution exist?) separately from uniqueness (is it unique?).",
+    testing: "Existence: rank(A) = rank([A|b]). Uniqueness: rank(A) = n.",
+    signals: ["\"existence\"", "\"uniqueness\"", "\"determines\""],
+    firstMove: "Two separate checks: existence + uniqueness. Both must hold for unique solution.",
+    timeBudget: 40,
+    frequency: "Frequent",
+  },
+  {
+    name: "Characterize All b for Consistency",
+    surface: "Given A (often tall), find conditions on b such that Ax = b is solvable.",
+    testing: "Whether you can determine col(A) as a subspace and write its defining equations.",
+    signals: ["\"for which b\"", "\"all b such that\"", "\"conditions on b\""],
+    firstMove: "Form [A | b] with symbolic b. Row reduce. Constraints arise from rows where 0 = (linear combination of b's components).",
+    timeBudget: 100,
+    frequency: "Frequent",
+  },
+  {
+    name: "Solution Set Dimension",
+    surface: "Asked the dimension of the solution set when infinitely many solutions exist.",
+    testing: "Dim = nullity = n - rank.",
+    signals: ["\"dimension of the solution set\"", "\"how many free variables\""],
+    firstMove: "Dim = n - rank(A) (for consistent system).",
+    timeBudget: 35,
+    frequency: "Frequent",
+  },
+  {
+    name: "Homogeneous Always Has Trivial Solution",
+    surface: "Ax = 0 always has x = 0. Asked about non-trivial solutions.",
+    testing: "Whether you know Ax = 0 has non-trivial solutions ⇔ rank(A) < n.",
+    signals: ["\"Ax = 0\"", "\"non-trivial\"", "\"homogeneous\""],
+    firstMove: "Homogeneous: always consistent. Non-trivial sol ⇔ nullity > 0 ⇔ rank < n.",
+    timeBudget: 30,
+    frequency: "Frequent",
+  },
+];
+
+const C34_PROBLEMS = [
+  {
+    id: "c34-e1", difficulty: "easy", kind: "mcq", marks: 1, timeTarget: 30,
+    tags: ["Homogeneous"],
+    skipSignal: { type: "attempt", text: "Attempt — definition" },
+    statement: <span>The homogeneous system Ax = 0 always has:</span>,
+    options: [
+      "No solution.",
+      "Exactly one solution (the zero vector).",
+      "At least the trivial solution x = 0.",
+      "Always infinitely many solutions.",
+    ],
+    answer: "C",
+    hints: [
+      { label: "Conceptual redirect", text: "x = 0 always satisfies Ax = 0. May or may not be unique." },
+      { label: "Key step", text: "At least trivial sol always exists." },
+      { label: "Near-complete", text: "Answer (C)." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Homogeneous: A·0 = 0 trivially." },
+        { label: "KEY STEP", body: "x = 0 is always a solution. Non-trivial solutions exist iff rank(A) < n." },
+        { label: "COMPUTATION", body: "Answer (C)." },
+        { label: "VERIFICATION", body: "Distractor (B): only one sol if rank = n. (D): not always — only if rank < n." },
+      ],
+      gateCheck: "Homogeneous: always at least one sol (the zero vector).",
+      speed: "Direct.",
+      whatMadeHard: "Nothing.",
+      generalization: "Same for any homogeneous system.",
+      linkedConcept: "C2.3 Null space.",
+      negAdvisory: "Attempt: definition. (C) wins.",
+    },
+  },
+  {
+    id: "c34-e2", difficulty: "easy", kind: "nat", marks: 1, timeTarget: 30,
+    tags: ["Solution Set Dimension"],
+    statement: <span>Ax = b is consistent with A being 3 × 5, rank 2. The dimension of the solution set is ___.</span>,
+    answer: 3,
+    tolerance: 0,
+    hints: [
+      { label: "Conceptual redirect", text: "Dim = nullity = n - rank." },
+      { label: "Key step", text: "5 - 2 = 3." },
+      { label: "Near-complete", text: "3." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Solution set dim = nullity." },
+        { label: "KEY STEP", body: "nullity = n - rank = 5 - 2 = 3." },
+        { label: "COMPUTATION", body: "3." },
+        { label: "VERIFICATION", body: "3 free variables → 3D solution family." },
+      ],
+      gateCheck: "Dim = n - rank.",
+      speed: "5 seconds.",
+      whatMadeHard: "Nothing.",
+      generalization: "Same template.",
+      linkedConcept: "M4 Rank-Nullity.",
+    },
+  },
+  {
+    id: "c34-m1", difficulty: "medium", kind: "mcq", marks: 2, timeTarget: 70,
+    tags: ["x = xp + xn"],
+    skipSignal: { type: "attempt", text: "Attempt — definition" },
+    statement: <span>If <T src="\mathbf{x}_p"/> is a particular solution to <T src="A\mathbf{x} = \mathbf{b}"/> and <T src="\mathbf{x}_n"/> is in N(A), then <T src="\mathbf{x}_p + \mathbf{x}_n"/>:</span>,
+    options: [
+      "Is also a solution to Ax = b.",
+      "Is a solution to Ax = 0.",
+      "Is generally not a solution.",
+      "Equals xₚ only.",
+    ],
+    answer: "A",
+    hints: [
+      { label: "Conceptual redirect", text: "A(xₚ + xₙ) = Axₚ + Axₙ = b + 0 = b." },
+      { label: "Key step", text: "Both xₚ + xₙ and xₚ solve Ax = b." },
+      { label: "Near-complete", text: "Answer (A)." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Linearity: A(xₚ + xₙ) = Axₚ + Axₙ." },
+        { label: "KEY STEP", body: "Axₚ = b (particular). Axₙ = 0 (null space). Sum: A(xₚ + xₙ) = b + 0 = b. So xₚ + xₙ is a solution." },
+        { label: "COMPUTATION", body: "Answer (A)." },
+        { label: "VERIFICATION", body: "Distractor (B) wrong (sum solves the inhomogeneous, not homogeneous)." },
+      ],
+      gateCheck: "Solution = xₚ + (null space). All sols of the same form.",
+      speed: "Definition: 15 seconds.",
+      whatMadeHard: "Distractor (B) easy to misread.",
+      generalization: "Same template.",
+      linkedConcept: "C3.4 Decomposition.",
+      negAdvisory: "Attempt: arithmetic. (A) wins.",
+    },
+  },
+  {
+    id: "c34-m2", difficulty: "medium", kind: "mcq", marks: 2, timeTarget: 75,
+    tags: ["Existence vs Uniqueness"],
+    skipSignal: { type: "attempt", text: "Attempt — both conditions" },
+    statement: <span>For Ax = b with A of size m × n to have a UNIQUE solution, the necessary and sufficient conditions are:</span>,
+    options: [
+      "rank(A) = m only.",
+      "rank(A) = n only.",
+      "rank(A) = rank([A|b]) = n.",
+      "rank(A) = rank([A|b]) = m.",
+    ],
+    answer: "C",
+    hints: [
+      { label: "Conceptual redirect", text: "Unique = existence + uniqueness. Existence: rank match. Uniqueness: nullity = 0 ⇔ rank = n." },
+      { label: "Key step", text: "Both: rank(A) = rank([A|b]) = n." },
+      { label: "Near-complete", text: "Answer (C)." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Unique solution = existence + uniqueness." },
+        { label: "KEY STEP", body: "Existence: rank(A) = rank([A|b]). Uniqueness: rank(A) = n (no free variables)." },
+        { label: "COMPUTATION", body: "Combined: rank(A) = rank([A|b]) = n. Answer (C)." },
+        { label: "VERIFICATION", body: "Distractors: (A) only existence. (B) missing existence check. (D) rank = m doesn't ensure uniqueness." },
+      ],
+      gateCheck: "Unique sol: BOTH rank conditions.",
+      speed: "Recall: 30 seconds.",
+      whatMadeHard: "Distractor (D) confuses 'onto' with 'unique'.",
+      generalization: "Same for any system.",
+      linkedConcept: "M4 Rank Conditions.",
+      negAdvisory: "Attempt: definition. (C) wins.",
+    },
+  },
+  {
+    id: "c34-m3", difficulty: "medium", kind: "mcq", marks: 2, timeTarget: 80,
+    tags: ["Solution Counting"],
+    skipSignal: { type: "attempt", text: "Attempt — count" },
+    statement: <span>Ax = 0 with A of size 4 × 6, rank 4. The general solution has how many free parameters?</span>,
+    options: [
+      "0",
+      "2",
+      "4",
+      "6",
+    ],
+    answer: "B",
+    hints: [
+      { label: "Conceptual redirect", text: "Free parameters = nullity = n - rank = 6 - 4 = 2." },
+      { label: "Key step", text: "2." },
+      { label: "Near-complete", text: "Answer (B)." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Free parameters = nullity in Ax = 0." },
+        { label: "KEY STEP", body: "nullity = n - rank = 6 - 4 = 2." },
+        { label: "COMPUTATION", body: "Answer (B). General sol = t₁·v₁ + t₂·v₂ where v₁, v₂ form null basis." },
+        { label: "VERIFICATION", body: "2D null space." },
+      ],
+      gateCheck: "Free parameters = nullity.",
+      speed: "Direct.",
+      whatMadeHard: "Nothing.",
+      generalization: "Same template.",
+      linkedConcept: "M4 Rank-Nullity.",
+      negAdvisory: "Attempt: arithmetic. (B) wins.",
+    },
+  },
+  {
+    id: "c34-h1", difficulty: "hard", kind: "mcq", marks: 2, timeTarget: 100,
+    tags: ["Particular Solution"],
+    skipSignal: { type: "skip", text: "Skip if <60% — verification" },
+    statement: <span>Suppose xₚ = (1, 2, 0) is a particular solution to Ax = b, and the null space of A is span{(1, -1, 1)}. The general solution is:</span>,
+    options: [
+      "x = (1, 2, 0).",
+      "x = (1, 2, 0) + t·(1, -1, 1) for t ∈ ℝ.",
+      "x = t·(1, -1, 1) for t ∈ ℝ.",
+      "x = (1, 2, 0) + (1, -1, 1).",
+    ],
+    answer: "B",
+    hints: [
+      { label: "Conceptual redirect", text: "General sol = xₚ + (any null space element)." },
+      { label: "Key step", text: "xₚ + t·(null basis)." },
+      { label: "Near-complete", text: "Answer (B)." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "General sol = particular + null space combination." },
+        { label: "KEY STEP", body: "Null space basis: {(1, -1, 1)}. General null element: t·(1, -1, 1) for t ∈ ℝ." },
+        { label: "COMPUTATION", body: "General sol: x = (1, 2, 0) + t·(1, -1, 1). Answer (B)." },
+        { label: "VERIFICATION", body: "Test t = 0: x = (1, 2, 0) = xₚ. Test t = 1: x = (2, 1, 1). Plug into Ax: A·xₚ + A·t·null = b + 0 = b. ✓" },
+      ],
+      gateCheck: "Always: xₚ + (parametric null space).",
+      speed: "Direct.",
+      whatMadeHard: "Distractor (D) drops the parameter.",
+      generalization: "Same form for any sol set.",
+      linkedConcept: "C3.4 Decomposition.",
+      negAdvisory: "Attempt: structure decides. (B) wins.",
+    },
+  },
+  {
+    id: "c34-h2", difficulty: "hard", kind: "mcq", marks: 2, timeTarget: 90,
+    tags: ["Existence Conditions"],
+    skipSignal: { type: "attempt", text: "Attempt — verify pattern" },
+    statement: <span>For an m × n matrix A with m > n (tall) and rank n, Ax = b is consistent:</span>,
+    options: [
+      "For all b ∈ ℝᵐ.",
+      "Only when b ∈ col(A), which is a proper subspace of ℝᵐ.",
+      "Only when b = 0.",
+      "Never (since over-determined).",
+    ],
+    answer: "B",
+    hints: [
+      { label: "Conceptual redirect", text: "Tall matrix full column rank: col(A) has dim n < m. Not all of ℝᵐ." },
+      { label: "Key step", text: "Consistent ⇔ b ∈ col(A), a proper n-dim subspace." },
+      { label: "Near-complete", text: "Answer (B)." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Tall matrix full column rank: col(A) ⊊ ℝᵐ." },
+        { label: "KEY STEP", body: "col(A) has dim = rank = n. Since n < m, col(A) is a proper n-dim subspace of ℝᵐ. Ax = b consistent ⇔ b ∈ col(A)." },
+        { label: "COMPUTATION", body: "Answer (B)." },
+        { label: "VERIFICATION", body: "(A) wrong (not onto). (C) wrong (more cases work). (D) wrong (some b work)." },
+      ],
+      gateCheck: "Tall + full col rank: consistent for b in proper subspace.",
+      speed: "Pattern: 40 seconds.",
+      whatMadeHard: "Easily confuse with onto case (rank = m).",
+      generalization: "Tall: col(A) ⊊ ℝᵐ. Square full rank: col(A) = ℝᵐ.",
+      linkedConcept: "C2.3 Column Picture, Onto.",
+      negAdvisory: "Attempt: structure. (B) wins.",
+    },
+  },
+  {
+    id: "c34-h3", difficulty: "hard", kind: "nat", marks: 2, timeTarget: 95,
+    tags: ["Particular + Null", "Dimension Calc"],
+    statement: <span>Ax = b has 4 different solutions x₁, x₂, x₃, x₄. The dimension of the solution set is at least ___.</span>,
+    answer: 1,
+    tolerance: 0,
+    hints: [
+      { label: "Conceptual redirect", text: "Different solutions → solution set has > 1 point → dim ≥ 1." },
+      { label: "Key step", text: "Multiple solutions → infinite solutions → dim ≥ 1." },
+      { label: "Near-complete", text: "1." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Linear systems: solution set is either empty, 1 point, or infinite (k-dim affine space)." },
+        { label: "KEY STEP", body: "4 different solutions → infinite solution set → dim ≥ 1." },
+        { label: "COMPUTATION", body: "At least 1." },
+        { label: "VERIFICATION", body: "Could be 1, 2, ..., n depending on nullity. Minimum is 1." },
+      ],
+      gateCheck: "Linear sol set has 0, 1, or ∞ points.",
+      speed: "Direct.",
+      whatMadeHard: "Nothing.",
+      generalization: "Same for any linear system.",
+      linkedConcept: "C3.4 Sol Set Dim.",
+    },
+  },
+  {
+    id: "c34-k1", difficulty: "killer", kind: "mcq", marks: 2, timeTarget: 180,
+    tags: ["KILLER", "Characterize col(A)", "Synthesis"],
+    statement: <span><B>[KILLER]</B> For <T src="A = \begin{pmatrix} 1 & 0 & 1 \ 0 & 1 & 1 \ 1 & 1 & 2 \ 1 & -1 & 0 \end{pmatrix}"/>, find ALL b = (b₁, b₂, b₃, b₄) such that Ax = b is consistent. The condition is:</span>,
+    options: [
+      "b₃ = b₁ + b₂ AND b₄ = b₁ − b₂.",
+      "b₃ = b₁ + b₂.",
+      "b₄ = b₁ − b₂.",
+      "Any b ∈ ℝ⁴.",
+    ],
+    answer: "A",
+    hints: [
+      { label: "Conceptual redirect", text: "Form [A | b]. Row reduce. Read off constraints on b from rows that become 0 = f(b)." },
+      { label: "Key step", text: "Augmented: rows are (1, 0, 1 | b₁), (0, 1, 1 | b₂), (1, 1, 2 | b₃), (1, -1, 0 | b₄). R₃ → R₃ - R₁ - R₂: (0, 0, 0 | b₃ - b₁ - b₂). R₄ → R₄ - R₁ + R₂: (0, 0, 0 | b₄ - b₁ + b₂)." },
+      { label: "Near-complete", text: "Constraints: b₃ - b₁ - b₂ = 0 AND b₄ - b₁ + b₂ = 0, i.e., b₃ = b₁ + b₂ AND b₄ = b₁ - b₂. Answer (A)." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "GATE-mandated KILLER: characterize col(A). Form augmented matrix with symbolic b, row reduce, identify constraints from zero rows." },
+        { label: "KEY STEP", body: "[A | b] = \n[1  0  1 | b₁]\n[0  1  1 | b₂]\n[1  1  2 | b₃]\n[1 -1  0 | b₄]\n\nR₃ → R₃ - R₁: (0, 1, 1 | b₃ - b₁). R₃ → R₃ - R₂: (0, 0, 0 | b₃ - b₁ - b₂).\nR₄ → R₄ - R₁: (0, -1, -1 | b₄ - b₁). R₄ → R₄ + R₂: (0, 0, 0 | b₄ - b₁ + b₂)." },
+        { label: "COMPUTATION", body: "After reduction:\n[1 0 1 | b₁]\n[0 1 1 | b₂]\n[0 0 0 | b₃ - b₁ - b₂]\n[0 0 0 | b₄ - b₁ + b₂]\n\nFor consistency, both zero rows must have zero augmented entry:\nb₃ - b₁ - b₂ = 0 ⇒ b₃ = b₁ + b₂.\nb₄ - b₁ + b₂ = 0 ⇒ b₄ = b₁ - b₂.\nBoth conditions required. Answer (A)." },
+        { label: "VERIFICATION", body: "Test b = (1, 2, 3, -1): b₃ = 3 = 1 + 2 ✓, b₄ = -1 = 1 - 2 ✓. Plug into Ax: x = (1, 2, 0) gives Ax = (1, 2, 3, -1). ✓\nCol(A) = {b ∈ ℝ⁴ : b₃ = b₁ + b₂, b₄ = b₁ - b₂} = 2D subspace (rank 2)." },
+      ],
+      gateCheck: "Always: form augmented with symbolic b, row reduce, identify zero rows to get b-constraints.",
+      speed: "Row reduction with symbolic b: 2-3 minutes.",
+      whatMadeHard: "Sign tracking with symbolic b; recognizing that both constraints are needed (not just one).",
+      generalization: "Same template for any tall matrix: characterize col(A) as a subspace via row reduction with symbolic b.",
+      linkedConcept: "C2.3 Column Picture, M4 Rank-Consistency.",
+      negAdvisory: "Attempt: methodical row reduction wins.",
+    },
+  },
+];
+
+const C34_TECHNIQUES = [
+  {
+    name: "Particular + Null Decomposition",
+    type: "Structural Insight",
+    when: "Finding general solution to Ax = b.",
+    steps: [
+      "Find any particular solution xₚ (set free variables to convenient values like 0).",
+      "Find basis of N(A) = {v₁, ..., vₖ}.",
+      "General sol: x = xₚ + t₁v₁ + ... + tₖvₖ for t₁, ..., tₖ ∈ ℝ.",
+    ],
+    speed: "Full general sol: 2-3 minutes.",
+    example: "xₚ = (1, 0, 0), N(A) = span{(0, 1, -1)}. Gen sol: x = (1, 0, 0) + t·(0, 1, -1) = (1, t, -t).",
+    danger: "Don't include xₚ in null space basis.",
+    freq: "Very Frequent",
+  },
+  {
+    name: "Existence + Uniqueness Two-Check",
+    type: "Trap Avoidance",
+    when: "Asked when system has unique solution.",
+    steps: [
+      "Existence: rank(A) = rank([A|b]).",
+      "Uniqueness: rank(A) = n (no free variables).",
+      "Both required for unique solution.",
+    ],
+    speed: "30 seconds.",
+    example: "n = 3, rank 3, consistent: unique. n = 3, rank 2: infinite (if consistent).",
+    danger: "Forgetting one of the two conditions.",
+    freq: "Frequent",
+  },
+  {
+    name: "Symbolic-b Row Reduction for col(A) Characterization",
+    type: "Structural Insight",
+    when: "Asked to find all b for which Ax = b is consistent.",
+    steps: [
+      "Form augmented matrix [A | b] with b = (b₁, ..., bₘ) as symbolic.",
+      "Row reduce A. Apply SAME row operations to b column.",
+      "Identify rows where pivots vanish (0 = linear comb of bᵢ).",
+      "Each such row gives a constraint on b. Together they define col(A).",
+    ],
+    speed: "Characterization: 2-3 minutes for 4×3 matrix.",
+    example: "See KILLER above.",
+    danger: "Sign tracking with multiple bᵢ.",
+    freq: "Frequent",
+  },
+  {
+    name: "Null Space Basis Algorithm",
+    type: "Speed Shortcut",
+    when: "Finding basis of N(A).",
+    steps: [
+      "Row reduce A to RREF.",
+      "Identify free variables (no pivot).",
+      "For each free variable: set it to 1, others to 0, solve for pivot variables.",
+      "Each resulting vector is a null basis element.",
+    ],
+    speed: "60-90 seconds.",
+    example: "A 2 × 3 with RREF [[1, 0, 2], [0, 1, -1]]. Free: x₃. Null basis: set x₃ = 1, get x₁ = -2, x₂ = 1. Basis = {(-2, 1, 1)}.",
+    danger: "Sign errors when back-substituting.",
+    freq: "Very Frequent",
+  },
+];
+
+const C34_MISTAKES = [
+  {
+    name: "Confusing Particular Sol with Unique Sol",
+    wrong: [
+      "Problem: Found xₚ = (1, 2, 3) for Ax = b. Is the system uniquely solved?",
+      "Solution: We found a solution → unique.",
+    ],
+    errorLine: 0,
+    errorDescription: "Particular sol shows existence, not uniqueness. Need rank(A) = n for uniqueness.",
+    rootCause: "Conflating existence with uniqueness.",
+    correct: "Check nullity = 0. If N(A) ≠ {0}, infinite solutions exist.",
+    prevention: "Always check BOTH existence and uniqueness.",
+    gateCost: "Major conceptual error.",
+    frequency: "Common",
+  },
+  {
+    name: "Adding xₚ to Null Basis",
+    wrong: [
+      "Problem: General sol when xₚ = (1, 1, 1) and N(A) = span{(1, 0, 0), (0, 1, 0)}.",
+      "Solution: General sol = t₁·(1, 1, 1) + t₂·(1, 0, 0) + t₃·(0, 1, 0).",
+    ],
+    errorLine: 0,
+    errorDescription: "xₚ is a FIXED translation, not a basis vector. Coefficient is always 1.",
+    rootCause: "Treating xₚ as part of the parametric family.",
+    correct: "General sol = xₚ + t₂·(1, 0, 0) + t₃·(0, 1, 0). xₚ has implicit coefficient 1, not a free parameter.",
+    prevention: "xₚ is fixed; only null basis vectors get parameters.",
+    gateCost: "Wrong sol structure.",
+    frequency: "Common",
+  },
+  {
+    name: "Missing a Consistency Constraint on b",
+    wrong: [
+      "Problem: 4 × 3 matrix A. Row-reduce gave 2 zero rows. Constraint on b: only one of them.",
+      "Solution: b must satisfy ONE equation (from one zero row).",
+    ],
+    errorLine: 0,
+    errorDescription: "EACH zero row gives one constraint. If 2 zero rows, b must satisfy BOTH.",
+    rootCause: "Reading only the first constraint.",
+    correct: "All zero-row constraints required simultaneously.",
+    prevention: "List every constraint, then take intersection (all must hold).",
+    gateCost: "Wrong col(A) characterization.",
+    frequency: "Common",
+  },
+  {
+    name: "Treating Free Variable Count as Solution Count",
+    wrong: [
+      "Problem: 3 free variables in solution. How many solutions?",
+      "Solution: 3 solutions.",
+    ],
+    errorLine: 0,
+    errorDescription: "Free variables = parametric directions. Solutions = infinite (a 3D family).",
+    rootCause: "Confusing dim with count.",
+    correct: "3 free variables → 3D family = infinite solutions.",
+    prevention: "Free vars = dim of sol set, not number.",
+    gateCost: "Conceptual error.",
+    frequency: "Common",
+  },
+];
+
+const C34_PYQS = [];
+
+function ConceptLab34({ progress }) {
+  return <ConceptLab num={4} title="Intuition Deep Dive — x = xₚ + xₙ and Characterizing col(A)"
+    why={<>The MOST tested M3 concept. Three skills: (1) decompose general solution as particular + null. (2) Separate existence from uniqueness checks. (3) Characterize col(A) for a tall A — the mandated KILLER pattern.</>}
+    patterns={C34_PATTERNS}
+    problems={C34_PROBLEMS}
+    techniques={C34_TECHNIQUES}
+    mistakes={C34_MISTAKES}
+    pyqs={C34_PYQS}
+    progress={progress} />;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   APP ROOT
+   ════════════════════════════════════════════════════════════════ */
+const CONCEPTS_MAP = [
+  { num: 1, shortName: "Why Solve",       title: "Why Solve Systems?",            total: C31_PROBLEMS.length, Comp: ConceptLab31 },
+  { num: 2, shortName: "Ax = b form",     title: "Writing a System as Ax = b",    total: C32_PROBLEMS.length, Comp: ConceptLab32 },
+  { num: 3, shortName: "Geometric",       title: "Geometric Interpretation",      total: C33_PROBLEMS.length, Comp: ConceptLab33 },
+  { num: 4, shortName: "Deep Dive",       title: "Intuition Deep Dive",           total: C34_PROBLEMS.length, Comp: ConceptLab34 },
+];
+
+function App() {
+  useEffect(() => { hideLoading(); }, []);
+
+  const progress31 = useConceptProgress(1, C31_PROBLEMS.length);
+  const progress32 = useConceptProgress(2, C32_PROBLEMS.length);
+  const progress33 = useConceptProgress(3, C33_PROBLEMS.length);
+  const progress34 = useConceptProgress(4, C34_PROBLEMS.length);
+
+  const progressMap = {
+    1: progress31, 2: progress32, 3: progress33, 4: progress34,
+  };
+  const [active, setActive] = useState(1);
+
+  const totalSolved = progress31.correct.length + progress32.correct.length + progress33.correct.length + progress34.correct.length;
+  const totalProblems = C31_PROBLEMS.length + C32_PROBLEMS.length + C33_PROBLEMS.length + C34_PROBLEMS.length;
+
+  return (
+    <div className="min-h-screen">
+      <TopNav currentModule={3}/>
+
+      <section className="relative overflow-hidden">
+        <div className="grid-bg absolute inset-0" style={{opacity: 0.45}}/>
+        <div className="absolute inset-0" style={{
+          background: "radial-gradient(800px 400px at 20% 0%, var(--accent-soft), transparent 60%), radial-gradient(600px 400px at 80% 20%, var(--accent-2-soft), transparent 60%)",
+        }}/>
+        <div className="relative max-w-5xl mx-auto px-5 py-12 md:py-16">
+          <div className="inline-flex items-center gap-2 text-xs px-3 py-1.5 rounded-full mb-5"
+            style={{background: "var(--accent-soft)", border: "1px solid var(--accent-border)", color: "var(--accent)"}}>
+            <span className="pulse-dot"/> MODULE 3 · PROBLEM LAB
+          </div>
+          <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight mb-4 leading-[1.04]" style={{color: "var(--text)"}}>
+            Linear Systems · Problem Lab
+            <span className="block gradient-text mt-1">Ax = b in Depth</span>
+          </h1>
+          <p className="text-lg max-w-3xl leading-relaxed mb-6" style={{color: "var(--text-dim)"}}>
+            Four concept labs covering scenario translation, augmented matrix construction, all 7 geometric configurations of 3 planes,
+            and the mandated KILLER pattern: characterizing all b for which a 4×3 system Ax = b is consistent.
+          </p>
+
+          <div className="flex flex-wrap gap-3 text-sm">
+            <div className="px-3 py-1.5 rounded-full flex items-center gap-2"
+              style={{background: "var(--bg-elev-1)", border: "1px solid var(--border)"}}>
+              <span style={{color: "var(--accent-3)"}}>● </span>
+              <span style={{color: "var(--text)"}}>{totalSolved} / {totalProblems} solved</span>
+            </div>
+            <div className="px-3 py-1.5 rounded-full flex items-center gap-2"
+              style={{background: "var(--bg-elev-1)", border: "1px solid var(--border)"}}>
+              <span style={{color: "var(--accent-2)"}}>● </span>
+              <span style={{color: "var(--text)"}}>4 concept labs · 36 problems · 16 techniques · 13 mistake autopsies</span>
+            </div>
+            <div className="px-3 py-1.5 rounded-full flex items-center gap-2"
+              style={{background: "var(--bg-elev-1)", border: "1px solid var(--border)"}}>
+              <span style={{color: "var(--warn)"}}>● </span>
+              <span style={{color: "var(--text)"}}>All 7 plane configurations · KILLER on col(A) characterization</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div className="max-w-5xl mx-auto px-5">
+        <ConceptNavigator concepts={CONCEPTS_MAP} active={active} setActive={setActive} progressMap={progressMap} />
+      </div>
+
+      <ConceptLab31 progress={progress31} />
+      <ConceptLab32 progress={progress32} />
+      <ConceptLab33 progress={progress33} />
+      <ConceptLab34 progress={progress34} />
+
+      <ModuleFooter
+        moduleNum={3}
+        nextModuleTitle="Echelon & Rank — Problem Lab"
+        nextModuleFile="module-04-problem-lab.html"
+        checklist={[
+          "I can translate any word problem into Ax = b in under 60 seconds.",
+          "I can identify all 7 geometric configurations of 3 planes from rank pairs (and vice versa).",
+          "I can characterize col(A) by row-reducing [A | b] with symbolic b.",
+          "I decompose general solutions as xₚ + (parametric null space).",
+          "I separate existence (rank match) from uniqueness (rank = n).",
+          "I never confuse free-variable COUNT with solution COUNT.",
+          "I've cleared all 36 problems and beaten my drill personal-best per concept.",
+        ]}
+      />
+    </div>
+  );
+}
+
+mountApp(App);
+</script>
+
+</body>
+</html>

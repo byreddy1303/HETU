@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 9 · Cheat Sheet — LA Mastery Hub</title>
+
+<script>
+  (function () {
+    try {
+      var t = localStorage.getItem("la-hub::theme") || "dark";
+      document.documentElement.classList.add(t === "light" ? "light" : "dark");
+    } catch (e) { document.documentElement.classList.add("dark"); }
+  })();
+</script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="theme.css">
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script>tailwind.config = { darkMode: 'class' };</script>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+
+<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone@7.25.6/babel.min.js"></script>
+
+<style>
+  .cheat-card {
+    border: 1px solid var(--border);
+    background: var(--bg-elev-1);
+    border-radius: var(--r-md);
+    padding: 1rem 1.2rem;
+    transition: border-color var(--t-fast), background-color var(--t-fast);
+  }
+  .cheat-card:hover { border-color: var(--accent-border); }
+  .cheat-card.hidden { display: none; }
+  .cheat-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  .cheat-table th, .cheat-table td {
+    padding: 6px 10px;
+    border-bottom: 1px solid var(--border);
+    text-align: left;
+    vertical-align: top;
+  }
+  .cheat-table th { color: var(--accent); font-weight: 600; }
+  .cheat-table td { color: var(--text); }
+  .cheat-table tr:hover td { background: var(--accent-soft); }
+  .cheat-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 0.5rem;
+  }
+  .pill {
+    display: inline-block;
+    padding: 1px 8px;
+    border-radius: 999px;
+    font-size: 10px;
+    font-family: var(--font-mono);
+    background: var(--bg-elev-3);
+    color: var(--text-dim);
+    border: 1px solid var(--border);
+    margin-right: 4px;
+  }
+  .pill.acc { background: var(--accent-soft); color: var(--accent); border-color: var(--accent-border); }
+  .pill.acc2 { background: var(--accent-2-soft); color: var(--accent-2); border-color: var(--accent-2-border); }
+  .pill.acc3 { background: var(--accent-3-soft); color: var(--accent-3); border-color: var(--accent-3-border); }
+  .pill.warn { background: var(--warn-soft); color: var(--warn); border-color: var(--warn-border); }
+  .pill.danger { background: var(--danger-soft); color: var(--danger); border-color: var(--danger-border); }
+  details.cheat-section summary {
+    cursor: pointer;
+    padding: 0.6rem 0.8rem;
+    border-radius: var(--r-sm);
+    background: var(--bg-elev-2);
+    border: 1px solid var(--border);
+    font-weight: 600;
+    color: var(--text);
+    transition: border-color var(--t-fast);
+  }
+  details.cheat-section summary:hover { border-color: var(--accent-border); }
+  details.cheat-section[open] summary { border-color: var(--accent); background: var(--accent-soft); color: var(--accent); }
+</style>
+</head>
+<body>
+
+<div id="loading">
+  <div style="text-align:center">
+    <div class="spinner"></div>
+    <div style="font-size:13px; opacity:0.8">Loading Module 9 — Cheat Sheet</div>
+  </div>
+</div>
+
+<div id="root"></div>
+
+<script type="text/babel" src="boilerplate.js"></script>
+
+<script type="text/babel">
+const { useState, useEffect, useMemo, useRef } = React;
+
+/* ════════════════════════════════════════════════════════
+   SEARCH & FILTER
+   ════════════════════════════════════════════════════════ */
+function SearchBar({ query, setQuery, matches, total }) {
+  const inputRef = useRef(null);
+  useEffect(() => {
+    const onKey = (e) => {
+      if (e.key === "/" && document.activeElement !== inputRef.current) {
+        e.preventDefault();
+        inputRef.current?.focus();
+      }
+      if (e.key === "Escape") {
+        inputRef.current?.blur();
+        setQuery("");
+      }
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [setQuery]);
+
+  return (
+    <div className="sticky top-[60px] z-40 backdrop-blur-xl py-3 -mx-2 px-2"
+      style={{background: "var(--bg-overlay)", borderBottom: "1px solid var(--border)"}}>
+      <div className="flex items-center gap-3 max-w-5xl mx-auto">
+        <div className="relative flex-1">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+            style={{width: 18, height: 18, position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: "var(--text-faded)"}}>
+            <circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>
+          </svg>
+          <input ref={inputRef} type="text" value={query} onChange={e => setQuery(e.target.value)}
+            placeholder="Search formulas, theorems, properties...  ( / to focus,  Esc to clear )"
+            className="w-full pl-10 pr-4 py-2.5 rounded-lg text-sm outline-none"
+            style={{background: "var(--bg-elev-2)", border: "1px solid var(--border)", color: "var(--text)"}}/>
+        </div>
+        <div className="text-xs whitespace-nowrap hidden md:block" style={{color: "var(--text-dim)"}}>
+          <span className="font-mono font-bold" style={{color: query ? "var(--accent)" : "var(--text)"}}>{matches}</span> / {total} cards
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ════════════════════════════════════════════════════════
+   CHEAT CARDS — every formula on the project
+   ════════════════════════════════════════════════════════ */
+
+function CheatCard({ title, mod, tags, children }) {
+  return (
+    <div className="cheat-card" data-search={(title + " " + (tags||[]).join(" ") + " " + (React.Children.toArray(children).map(c => typeof c === "string" ? c : "")).join(" ")).toLowerCase()}>
+      <div className="flex items-baseline gap-2 mb-2 flex-wrap">
+        <div className="cheat-title">{title}</div>
+        {mod && <span className="pill acc">M{mod}</span>}
+        {(tags || []).map((t, i) => <span key={i} className="pill">{t}</span>)}
+      </div>
+      <div className="space-y-2 text-[14px] leading-relaxed" style={{color: "var(--text)"}}>{children}</div>
+    </div>
+  );
+}
+
+/* Helpers */
+const SectionTitle = ({ id, num, title }) => (
+  <div id={id} className="pt-8 pb-3 -mt-4">
+    <div className="flex items-baseline gap-3 mb-1">
+      <span className="text-xs tracking-[0.22em] font-bold" style={{color: "var(--accent-2)"}}>MODULE {num}</span>
+      <span style={{color: "var(--text-faded)"}}>·</span>
+      <span className="text-lg font-bold" style={{color: "var(--text)"}}>{title}</span>
+    </div>
+    <div className="h-px" style={{background: "linear-gradient(90deg, var(--accent), var(--accent-2), transparent)"}}/>
+  </div>
+);
+
+/* ════════════════════════════════════════════════════════
+   APP CONTENT
+   ════════════════════════════════════════════════════════ */
+function CheatSheetContent({ query }) {
+  // Apply filtering after render via DOM (simple approach)
+  useEffect(() => {
+    const cards = document.querySelectorAll(".cheat-card");
+    let visible = 0;
+    cards.forEach(c => {
+      const data = c.getAttribute("data-search") || "";
+      const text = c.textContent.toLowerCase();
+      const match = !query || data.includes(query.toLowerCase()) || text.includes(query.toLowerCase());
+      c.classList.toggle("hidden", !match);
+      if (match) visible++;
+    });
+    const matchesEl = document.getElementById("match-count");
+    if (matchesEl) matchesEl.textContent = visible;
+    const sections = document.querySelectorAll("details.cheat-section");
+    sections.forEach(s => {
+      const visibleChildren = s.querySelectorAll(".cheat-card:not(.hidden)");
+      s.style.display = visibleChildren.length === 0 ? "none" : "block";
+    });
+  });
+
+  return (
+    <div className="space-y-3">
+
+      {/* ─── MODULE 1 ─── */}
+      <SectionTitle id="m1" num="1" title="Foundations · Vectors, Linear Combinations, Independence"/>
+
+      <CheatCard title="Vector — two views" mod={1} tags={["vector","definition"]}>
+        <BT src={String.raw`\mathbf{v} = \begin{bmatrix} v_1 \\ \vdots \\ v_n \end{bmatrix} \in \mathbb{R}^n.`}/>
+        Geometric: arrow from origin with magnitude + direction. Algebraic: column of n real numbers.
+      </CheatCard>
+
+      <CheatCard title="Vector operations" mod={1} tags={["addition","scalar"]}>
+        <P><B>Addition:</B> component-wise. Geometrically, head-to-tail (parallelogram law).</P>
+        <P><B>Scalar mult:</B> <T src="c\mathbf{v} = (cv_1, \ldots, cv_n)"/>. Stretches by |c|, flips if c &lt; 0.</P>
+        <P><B>Norm:</B> <T src="\|\mathbf{v}\| = \sqrt{v_1^2 + \cdots + v_n^2}"/>. Unit vector: <T src="\hat{\mathbf{v}} = \mathbf{v}/\|\mathbf{v}\|"/>.</P>
+      </CheatCard>
+
+      <CheatCard title="Linear combination" mod={1} tags={["combination","weighted sum"]}>
+        <BT src={String.raw`c_1 \mathbf{v}_1 + c_2 \mathbf{v}_2 + \cdots + c_k \mathbf{v}_k.`}/>
+        <P>The CORE operation of LA. Matrix-vector product <T src="A\mathbf{x}"/> = LC of A's columns weighted by x.</P>
+      </CheatCard>
+
+      <CheatCard title="Linear independence — definition" mod={1} tags={["independence","dependence","trivial solution"]}>
+        <P>A set <T src="\{\mathbf{v}_1, \ldots, \mathbf{v}_k\}"/> is linearly INDEPENDENT iff</P>
+        <BT src={String.raw`c_1 \mathbf{v}_1 + \cdots + c_k \mathbf{v}_k = \mathbf{0} \implies c_1 = \cdots = c_k = 0.`}/>
+        <P>Otherwise DEPENDENT — there exists a non-trivial null combination.</P>
+      </CheatCard>
+
+      <CheatCard title="Independence — 4 instant checks" mod={1} tags={["instant","check","gate trap"]}>
+        <ol className="list-decimal ml-5 space-y-1">
+          <li>Zero vector in set ⇒ <B style={{color: "var(--danger)"}}>automatic dependence</B>.</li>
+          <li>One vector is a scalar multiple of another ⇒ dependent.</li>
+          <li>More than <T src="n"/> vectors in <T src="\mathbb{R}^n"/> ⇒ automatic dependence.</li>
+          <li>For exactly <T src="n"/> vectors in <T src="\mathbb{R}^n"/>: independent ⇔ <T src="\det \neq 0"/>.</li>
+        </ol>
+      </CheatCard>
+
+      <CheatCard title="Independence is about the SET" mod={1} tags={["gate trap"]}>
+        <P>"Vector v₂ is linearly independent" is MEANINGLESS. Independence is a property of a SET of vectors taken together. Always mentally rewrite as "this set is independent".</P>
+      </CheatCard>
+
+      {/* ─── MODULE 2 ─── */}
+      <SectionTitle id="m2" num="2" title="Span, Subspaces & the Column Picture"/>
+
+      <CheatCard title="Span" mod={2} tags={["span","subspace"]}>
+        <BT src={String.raw`\text{span}(\mathbf{v}_1, \ldots, \mathbf{v}_k) = \{c_1 \mathbf{v}_1 + \cdots + c_k \mathbf{v}_k : c_i \in \mathbb{R}\}.`}/>
+        <P>The reachable region. Always a subspace.</P>
+      </CheatCard>
+
+      <CheatCard title="Subspace — three axioms" mod={2} tags={["subspace","closure"]}>
+        <ol className="list-decimal ml-5 space-y-1">
+          <li>Contains <T src="\mathbf{0}"/>.</li>
+          <li>Closed under addition.</li>
+          <li>Closed under scalar multiplication.</li>
+        </ol>
+        <P><B>First check:</B> does the set contain <T src="\mathbf{0}"/>? If not, NOT a subspace.</P>
+      </CheatCard>
+
+      <CheatCard title="Basis & dimension" mod={2} tags={["basis","dimension"]}>
+        <P><B>Basis:</B> linearly independent AND spans the space.</P>
+        <P><B>Dimension:</B> number of vectors in any basis (well-defined — invariant).</P>
+        <P>Standard basis of <T src="\mathbb{R}^n"/>: <T src="\mathbf{e}_1, \ldots, \mathbf{e}_n"/>. <T src="\dim(\mathbb{R}^n) = n"/>.</P>
+      </CheatCard>
+
+      <CheatCard title="The column picture (THE key)" mod={2} tags={["Ax=b","column space","fundamental"]}>
+        <BT src={String.raw`A\mathbf{x} = x_1 \mathbf{a}_1 + x_2 \mathbf{a}_2 + \cdots + x_n \mathbf{a}_n.`}/>
+        <P><Em>Ax is a linear combination of A's columns weighted by x.</Em> This single sentence unlocks rank, null space, eigenspace.</P>
+      </CheatCard>
+
+      <CheatCard title="Column space C(A)" mod={2} tags={["column space","reachable"]}>
+        <BT src={String.raw`C(A) = \text{span}\{\text{columns of }A\} = \{A\mathbf{x} : \mathbf{x} \in \mathbb{R}^n\}.`}/>
+        <P><T src="A\mathbf{x} = \mathbf{b}"/> has a solution iff <T src="\mathbf{b} \in C(A)"/>.</P>
+      </CheatCard>
+
+      <CheatCard title="Matrix multiplication — 4 perspectives" mod={2} tags={["matmul","perspectives"]}>
+        <table className="cheat-table">
+          <tbody>
+            <tr><td><B>1. Row · column</B></td><td><T src="(AB)_{ij} = \text{row}_i(A) \cdot \text{col}_j(B)"/></td></tr>
+            <tr><td><B>2. Column combo</B></td><td><T src="\text{col}_j(AB) = A \cdot \text{col}_j(B)"/></td></tr>
+            <tr><td><B>3. Row combo</B></td><td><T src="\text{row}_i(AB) = \text{row}_i(A) \cdot B"/></td></tr>
+            <tr><td><B>4. Outer product sum</B></td><td><T src="AB = \sum_k \text{col}_k(A) \cdot \text{row}_k(B)"/></td></tr>
+          </tbody>
+        </table>
+        <P><B>AB ≠ BA</B> in general. Order matters.</P>
+      </CheatCard>
+
+      <CheatCard title="Uniqueness in independent sets" mod={2} tags={["uniqueness","coordinates"]}>
+        <P>If <T src="\mathbf{v}_1, \ldots, \mathbf{v}_k"/> independent and <T src="\sum c_i \mathbf{v}_i = \sum d_i \mathbf{v}_i"/>, then <T src="c_i = d_i"/> for all i.</P>
+        <P>This is why coordinates in a basis are well-defined.</P>
+      </CheatCard>
+
+      {/* ─── MODULE 3 ─── */}
+      <SectionTitle id="m3" num="3" title="Linear Systems · 0 / 1 / ∞"/>
+
+      <CheatCard title="Setup Ax = b" mod={3} tags={["augmented","setup"]}>
+        <P>m equations in n unknowns → matrix form <T src="A\mathbf{x} = \mathbf{b}"/>. Working object: augmented matrix</P>
+        <BT src={String.raw`[A \mid \mathbf{b}] = \left[\begin{array}{ccc|c} a_{11} & a_{12} & a_{13} & b_1 \\ a_{21} & a_{22} & a_{23} & b_2 \\ a_{31} & a_{32} & a_{33} & b_3 \end{array}\right].`}/>
+      </CheatCard>
+
+      <CheatCard title="The 0, 1, ∞ theorem" mod={3} tags={["solutions","count"]}>
+        <P>A linear system has EXACTLY 0, 1, or ∞ solutions. Never 2, never any other finite number.</P>
+        <P><B>Why:</B> if <T src="\mathbf{x}_1, \mathbf{x}_2"/> are two solutions, so is <T src="\mathbf{x}_1 + t(\mathbf{x}_1 - \mathbf{x}_2)"/> for any t.</P>
+      </CheatCard>
+
+      <CheatCard title="Two yes/no questions for Ax = b" mod={3} tags={["solvability","yes/no"]}>
+        <ol className="list-decimal ml-5 space-y-1">
+          <li>Is <T src="\mathbf{b} \in C(A)"/>? → solution exists?</li>
+          <li>Is <T src="N(A) = \{\mathbf{0}\}"/>? → unique?</li>
+        </ol>
+      </CheatCard>
+
+      <CheatCard title="Complete solution x = xₚ + xₙ" mod={3} tags={["complete","particular","null"]}>
+        <BT src={String.raw`\mathbf{x} = \mathbf{x}_p + \mathbf{x}_n, \quad \mathbf{x}_n \in N(A).`}/>
+        <P>One particular solution PLUS the entire null space. Solution set is an affine subspace.</P>
+      </CheatCard>
+
+      <CheatCard title="Null space N(A)" mod={3} tags={["null space","kernel"]}>
+        <BT src={String.raw`N(A) = \{\mathbf{x} : A\mathbf{x} = \mathbf{0}\}.`}/>
+        <P>Subspace of <T src="\mathbb{R}^n"/>. <T src="\dim N(A) = \text{nullity}(A) = n - \text{rank}(A)"/>.</P>
+      </CheatCard>
+
+      {/* ─── MODULE 4 ─── */}
+      <SectionTitle id="m4" num="4" title="Echelon, Rank & Rank-Nullity"/>
+
+      <CheatCard title="Row operations (preserve solutions)" mod={4} tags={["row operations","preserve"]}>
+        <ol className="list-decimal ml-5 space-y-1">
+          <li>Swap two rows.</li>
+          <li>Scale a row by <T src="c \neq 0"/>.</li>
+          <li>Add a multiple of one row to another.</li>
+        </ol>
+        <P><B>NEVER scale by 0</B> — erases information.</P>
+      </CheatCard>
+
+      <CheatCard title="REF & RREF" mod={4} tags={["echelon","REF","RREF"]}>
+        <P><B>REF:</B> zero rows at bottom; pivots descend right; "staircase form".</P>
+        <P><B>RREF:</B> REF + pivots = 1 + zeros above pivots. <Em>Unique</Em> (REF is not).</P>
+      </CheatCard>
+
+      <CheatCard title="Rank — three equivalent definitions" mod={4} tags={["rank","pivots"]}>
+        <P>rank(A) = number of pivots in REF = dim of column space = dim of row space.</P>
+        <P><B>Bounds:</B> <T src="0 \leq \text{rank}(A) \leq \min(m, n)"/>.</P>
+        <P><B>Row rank = column rank</B> — proved via REF.</P>
+      </CheatCard>
+
+      <CheatCard title="Rank-Nullity Theorem" mod={4} tags={["rank-nullity","conservation"]}>
+        <BT src={String.raw`\boxed{\text{rank}(A) + \text{nullity}(A) = n}`}/>
+        <P>where n = number of COLUMNS. Conservation of input dimension. "Preserved" + "lost" = total.</P>
+      </CheatCard>
+
+      <CheatCard title="Solution classification table" mod={4} tags={["solution","classification","types"]}>
+        <table className="cheat-table">
+          <thead><tr><th>Condition</th><th>Type</th></tr></thead>
+          <tbody>
+            <tr><td><T src="\text{rank}(A) \neq \text{rank}([A|\mathbf{b}])"/></td><td>None</td></tr>
+            <tr><td><T src="\text{rank}(A) = \text{rank}([A|\mathbf{b}]) = n"/></td><td>Unique</td></tr>
+            <tr><td><T src="\text{rank}(A) = \text{rank}([A|\mathbf{b}]) < n"/></td><td>∞ many (<T src="n - \text{rank}"/> free vars)</td></tr>
+          </tbody>
+        </table>
+      </CheatCard>
+
+      <CheatCard title="Reading null-space basis from RREF" mod={4} tags={["null basis","RREF"]}>
+        <P>For each FREE column: set that free variable to 1, others to 0, read basic variables from RREF rows. Each such vector is a null-space basis element. Automatically independent.</P>
+      </CheatCard>
+
+      <CheatCard title="Quick rules of thumb" mod={4} tags={["m<n","m>n","square"]}>
+        <table className="cheat-table">
+          <thead><tr><th>Shape</th><th>Implication</th></tr></thead>
+          <tbody>
+            <tr><td>m &lt; n (wide)</td><td>Never unique. None or ∞.</td></tr>
+            <tr><td>m = n, full rank</td><td>Always unique.</td></tr>
+            <tr><td>m &gt; n, full col rank</td><td>At most one solution. Usually none (use least squares).</td></tr>
+            <tr><td>Square singular</td><td>Never unique. None or ∞.</td></tr>
+          </tbody>
+        </table>
+      </CheatCard>
+
+      {/* ─── MODULE 5 ─── */}
+      <SectionTitle id="m5" num="5" title="Determinants, Inverse & Cramer's Rule"/>
+
+      <CheatCard title="Det — geometric meaning" mod={5} tags={["determinant","volume","signed area"]}>
+        <P><T src="\det A"/> = signed n-volume of the parallelepiped spanned by A's columns.</P>
+        <P><B>Sign:</B> +1 preserves orientation, −1 flips. <B>|det|:</B> volume scaling factor. <B>det = 0:</B> collapsed → singular.</P>
+      </CheatCard>
+
+      <CheatCard title="Det formulas (2×2, 3×3)" mod={5} tags={["formula","cofactor","sarrus"]}>
+        <BT src={String.raw`\det\begin{pmatrix} a & b \\ c & d \end{pmatrix} = ad - bc.`}/>
+        <BT src={String.raw`\det\begin{pmatrix} a & b & c \\ d & e & f \\ g & h & i \end{pmatrix} = aei + bfg + cdh - ceg - bdi - afh.`}/>
+        <P><B>General:</B> cofactor expansion along any row/column gives the same answer.</P>
+      </CheatCard>
+
+      <CheatCard title="Det — 8 essential properties" mod={5} tags={["properties","multiplicative","transpose"]}>
+        <ol className="list-decimal ml-5 space-y-1">
+          <li><T src="\det(AB) = \det A \cdot \det B"/>.</li>
+          <li><T src="\det(A^\top) = \det A"/>.</li>
+          <li><T src="\det(cA) = c^n \det A"/>.</li>
+          <li>Row swap flips sign.</li>
+          <li>Row of zeros ⇒ det = 0.</li>
+          <li>Two equal rows ⇒ det = 0.</li>
+          <li>Adding row multiple to another: det unchanged.</li>
+          <li>Triangular ⇒ det = product of diagonal.</li>
+        </ol>
+        <P><span className="pill danger">trap</span> <T src="\det(A + B) \neq \det A + \det B"/> in general.</P>
+      </CheatCard>
+
+      <CheatCard title="Inverse — when it exists" mod={5} tags={["inverse","invertible"]}>
+        <P>A⁻¹ exists iff <T src="\det A \neq 0"/>. Unique when it exists.</P>
+        <BT src={String.raw`A = \begin{pmatrix} a & b \\ c & d \end{pmatrix} \Rightarrow A^{-1} = \frac{1}{ad - bc}\begin{pmatrix} d & -b \\ -c & a \end{pmatrix}.`}/>
+        <P><B>General:</B> row-reduce <T src="[A \mid I] \to [I \mid A^{-1}]"/>.</P>
+      </CheatCard>
+
+      <CheatCard title="Inverse properties" mod={5} tags={["inverse","properties"]}>
+        <BT src={String.raw`(AB)^{-1} = B^{-1} A^{-1}, \quad (A^\top)^{-1} = (A^{-1})^\top, \quad (A^{-1})^{-1} = A.`}/>
+        <BT src={String.raw`\det(A^{-1}) = \frac{1}{\det A}.`}/>
+        <P>Both transpose and inverse REVERSE the order of products.</P>
+      </CheatCard>
+
+      <CheatCard title="Big Equivalence Theorem (square A)" mod={5} tags={["equivalence","invertible","fundamental"]}>
+        <P>The following are ALL equivalent:</P>
+        <ol className="list-decimal ml-5 text-[13px] space-y-0.5">
+          <li>A is invertible.</li>
+          <li><T src="\det A \neq 0"/>.</li>
+          <li>Columns linearly independent.</li>
+          <li>Rows linearly independent.</li>
+          <li>rank(A) = n.</li>
+          <li><T src="N(A) = \{\mathbf{0}\}"/>.</li>
+          <li><T src="A\mathbf{x} = \mathbf{0}"/> only trivial solution.</li>
+          <li><T src="A\mathbf{x} = \mathbf{b}"/> unique solution for every b.</li>
+          <li>0 is NOT an eigenvalue.</li>
+        </ol>
+      </CheatCard>
+
+      <CheatCard title="Cramer's Rule" mod={5} tags={["cramer","rule","determinant ratio"]}>
+        <BT src={String.raw`x_i = \frac{\det A_i}{\det A},`}/>
+        <P>where <T src="A_i"/> is A with column i replaced by <T src="\mathbf{b}"/>. Requires <T src="\det A \neq 0"/>.</P>
+        <P>Useful for symbolic 2×2/3×3 work; computationally infeasible for n ≥ 4.</P>
+      </CheatCard>
+
+      {/* ─── MODULE 6 ─── */}
+      <SectionTitle id="m6" num="6" title="Eigenvalues & Eigenvectors"/>
+
+      <CheatCard title="Eigenvalue definition" mod={6} tags={["eigenvalue","eigenvector"]}>
+        <BT src={String.raw`A\mathbf{v} = \lambda \mathbf{v}, \quad \mathbf{v} \neq \mathbf{0}.`}/>
+        <P>v is an eigenVECTOR (a "special direction"); λ is the eigenvalue (stretch factor).</P>
+      </CheatCard>
+
+      <CheatCard title="Characteristic equation" mod={6} tags={["characteristic","polynomial"]}>
+        <BT src={String.raw`\det(A - \lambda I) = 0.`}/>
+        <P>n×n matrix → degree-n polynomial in λ → exactly n eigenvalues (over ℂ, counted with multiplicity).</P>
+      </CheatCard>
+
+      <CheatCard title="2×2 magic" mod={6} tags={["2x2","trace","det"]}>
+        <BT src={String.raw`p(\lambda) = \lambda^2 - \text{tr}(A) \lambda + \det(A).`}/>
+        <BT src={String.raw`\lambda = \frac{\text{tr}(A) \pm \sqrt{\text{tr}(A)^2 - 4\det(A)}}{2}.`}/>
+      </CheatCard>
+
+      <CheatCard title="Eigenvectors of triangular matrix" mod={6} tags={["triangular","shortcut"]}>
+        <P>Eigenvalues = diagonal entries (because <T src="A - \lambda I"/> is also triangular, det = product of diagonal).</P>
+      </CheatCard>
+
+      <CheatCard title="Algebraic vs Geometric Multiplicity" mod={6} tags={["multiplicity","am","gm","diagonalizable"]}>
+        <P><B>am(λ):</B> multiplicity as root of char poly.</P>
+        <P><B>gm(λ):</B> dim of eigenspace = nullity of <T src="A - \lambda I"/>.</P>
+        <BT src={String.raw`1 \leq \text{gm}(\lambda) \leq \text{am}(\lambda) \leq n.`}/>
+        <P><B>Diagonalizable</B> ⇔ gm = am for every eigenvalue.</P>
+      </CheatCard>
+
+      <CheatCard title="Eigenvectors for distinct λ are independent" mod={6} tags={["distinct","independent"]}>
+        <P>Eigenvectors for distinct eigenvalues are linearly independent. Distinct eigenvalues ⇒ diagonalizable.</P>
+      </CheatCard>
+
+      <CheatCard title="Spectral Theorem (symmetric A)" mod={6} tags={["spectral","symmetric","real"]}>
+        <P>If <T src="A = A^\top"/> (real symmetric):</P>
+        <ul className="list-disc ml-5 space-y-0.5">
+          <li>All eigenvalues real.</li>
+          <li>Eigenvectors for distinct λ orthogonal.</li>
+          <li>Always diagonalizable: <T src="A = Q \Lambda Q^\top"/> with Q orthogonal.</li>
+        </ul>
+      </CheatCard>
+
+      <CheatCard title="trace = Σλ, det = Πλ" mod={6} tags={["trace","det","sum","product"]}>
+        <BT src={String.raw`\text{tr}(A) = \sum_i \lambda_i, \quad \det(A) = \prod_i \lambda_i.`}/>
+        <P>Solves most GATE eigenvalue questions in &lt;30 seconds.</P>
+      </CheatCard>
+
+      {/* ─── MODULE 7 ─── */}
+      <SectionTitle id="m7" num="7" title="Eigenvalue Power Tools"/>
+
+      <CheatCard title="Rank ↔ Eigenvalues" mod={7} tags={["rank","eigenvalues","connection"]}>
+        <P>For diagonalizable A: rank(A) = number of NON-ZERO eigenvalues (with multiplicity).</P>
+        <P>Null space = eigenspace for λ = 0. nullity(A) = gm(0).</P>
+      </CheatCard>
+
+      <CheatCard title="Cayley-Hamilton Theorem" mod={7} tags={["cayley","hamilton","CH"]}>
+        <P>Every matrix satisfies its own characteristic polynomial:</P>
+        <BT src={String.raw`p(A) = 0.`}/>
+        <P><B>2×2:</B> <T src="A^2 - \text{tr}(A) A + \det(A) I = 0"/>. Use to compute <T src="A^k"/> or <T src="A^{-1}"/>.</P>
+      </CheatCard>
+
+      <CheatCard title="A⁻¹ via Cayley-Hamilton (2×2)" mod={7} tags={["inverse","CH"]}>
+        <BT src={String.raw`A^{-1} = \frac{1}{\det A}(\text{tr}(A) \cdot I - A).`}/>
+      </CheatCard>
+
+      <CheatCard title="AB vs BA eigenvalues" mod={7} tags={["AB","BA","commutative"]}>
+        <P>AB and BA have the same NON-ZERO eigenvalues (with multiplicity). Zero eigenvalues may differ when sizes differ.</P>
+        <BT src={String.raw`\text{tr}(AB) = \text{tr}(BA).`}/>
+      </CheatCard>
+
+      <CheatCard title="Eigenvalues of functions of A" mod={7} tags={["powers","polynomial","function"]}>
+        <P>If <T src="A\mathbf{v} = \lambda \mathbf{v}"/>, then:</P>
+        <ul className="list-disc ml-5 space-y-0.5">
+          <li><T src="A^k"/> has eigenvalues <T src="\lambda^k"/>.</li>
+          <li><T src="A^{-1}"/> has eigenvalues <T src="1/\lambda"/> (if A invertible).</li>
+          <li><T src="A - cI"/> has eigenvalues <T src="\lambda - c"/>.</li>
+          <li><T src="p(A)"/> has eigenvalues <T src="p(\lambda)"/>.</li>
+        </ul>
+        <P>Eigenvectors DON'T change (for diagonalizable A).</P>
+      </CheatCard>
+
+      <CheatCard title="Diagonalization A = PDP⁻¹" mod={7} tags={["diagonalize","PDP","spectral"]}>
+        <P>P = matrix of eigenvectors (as columns). D = diagonal of eigenvalues. Possible iff A has n LI eigenvectors.</P>
+        <BT src={String.raw`A^k = P D^k P^{-1}.`}/>
+        <P><B>Symmetric A:</B> P can be chosen orthogonal Q, so <T src="A = Q \Lambda Q^\top"/>.</P>
+      </CheatCard>
+
+      {/* ─── MODULE 8 ─── */}
+      <SectionTitle id="m8" num="8" title="Decompositions & Matrix Types"/>
+
+      <CheatCard title="LU decomposition" mod={8} tags={["LU","decomposition","factorization"]}>
+        <P>A = LU. L: unit lower triangular (multipliers from elimination). U: upper triangular (result of elimination).</P>
+        <P><B>Solve Ax = b:</B> forward sub on <T src="L\mathbf{y} = \mathbf{b}"/>, then back sub on <T src="U\mathbf{x} = \mathbf{y}"/>.</P>
+        <P><B>With row swaps:</B> PA = LU (PLU decomposition).</P>
+      </CheatCard>
+
+      <CheatCard title="12 matrix types — eigenvalue signature table" mod={8} tags={["matrix types","catalog","eigenvalues"]}>
+        <table className="cheat-table">
+          <thead><tr><th>Type</th><th>Definition</th><th>Eigenvalues</th></tr></thead>
+          <tbody>
+            <tr><td>Symmetric</td><td>A = Aᵀ</td><td>Real</td></tr>
+            <tr><td>Skew-symmetric</td><td>A = −Aᵀ</td><td>0 or pure imaginary</td></tr>
+            <tr><td>Orthogonal</td><td>AᵀA = I</td><td>|λ| = 1, det = ±1</td></tr>
+            <tr><td>Idempotent</td><td>A² = A</td><td>0 or 1; rank = trace</td></tr>
+            <tr><td>Nilpotent</td><td>Aᵏ = 0</td><td>All 0; det = 0</td></tr>
+            <tr><td>Involutory</td><td>A² = I</td><td>±1</td></tr>
+            <tr><td>Pos. Definite</td><td>xᵀAx &gt; 0</td><td>All &gt; 0 (symmetric)</td></tr>
+            <tr><td>Pos. SemiDef.</td><td>xᵀAx ≥ 0</td><td>All ≥ 0</td></tr>
+            <tr><td>Diagonal</td><td>Off-diag = 0</td><td>= diagonal entries</td></tr>
+            <tr><td>Triangular</td><td>Below/above = 0</td><td>= diagonal entries</td></tr>
+            <tr><td>Singular</td><td>det = 0</td><td>0 is eigenvalue</td></tr>
+            <tr><td>Invertible</td><td>det ≠ 0</td><td>0 NOT eigenvalue</td></tr>
+          </tbody>
+        </table>
+      </CheatCard>
+
+      <CheatCard title="Other decompositions to know" mod={8} tags={["QR","Cholesky","SVD","Schur"]}>
+        <table className="cheat-table">
+          <thead><tr><th>Name</th><th>Form</th><th>Use</th></tr></thead>
+          <tbody>
+            <tr><td>LU</td><td>A = LU</td><td>Solving Ax = b</td></tr>
+            <tr><td>QR</td><td>A = QR (Q orthog., R upper triangular)</td><td>Least squares</td></tr>
+            <tr><td>Cholesky</td><td>A = LLᵀ (for sym. PD)</td><td>2× faster than LU for PD</td></tr>
+            <tr><td>Eigen</td><td>A = PDP⁻¹</td><td>Powers, dynamics</td></tr>
+            <tr><td>Spectral</td><td>A = QΛQᵀ (sym.)</td><td>PCA</td></tr>
+            <tr><td>SVD</td><td>A = UΣVᵀ (any size)</td><td>Universal</td></tr>
+            <tr><td>Schur</td><td>A = QTQᵀ</td><td>Numerical</td></tr>
+          </tbody>
+        </table>
+      </CheatCard>
+
+      {/* ─── BONUS: ML BRIDGES ─── */}
+      <SectionTitle id="ml" num="*" title="ML / AI Bridges Throughout"/>
+
+      <CheatCard title="Where each module shows up in ML" tags={["ML","AI","applications"]}>
+        <table className="cheat-table">
+          <thead><tr><th>Concept</th><th>ML application</th></tr></thead>
+          <tbody>
+            <tr><td>Linear combinations (M1)</td><td>Attention output = LC of value vectors</td></tr>
+            <tr><td>Column picture (M2)</td><td>Linear regression features</td></tr>
+            <tr><td>Rank-nullity (M4)</td><td>Bottleneck architectures, underdetermined networks</td></tr>
+            <tr><td>Symmetric matrices (M6)</td><td>Covariance, Hessian, Gram, PCA</td></tr>
+            <tr><td>Diagonalization (M7)</td><td>Fast Hessian inverse, natural gradient</td></tr>
+            <tr><td>Idempotent (M8)</td><td>Linear regression hat matrix H</td></tr>
+            <tr><td>Orthogonal (M8)</td><td>Householder, QR, attention with O weights</td></tr>
+            <tr><td>SVD (M8)</td><td>Image compression, LSI, recommender systems</td></tr>
+          </tbody>
+        </table>
+      </CheatCard>
+
+      <CheatCard title="GATE-style time savers" tags={["shortcut","gate","exam"]}>
+        <ol className="list-decimal ml-5 space-y-1">
+          <li>Triangular → eigenvalues = diagonal entries.</li>
+          <li>Diagonal → eigenvalues = diagonal entries.</li>
+          <li>trace = Σλ, det = Πλ — verify your eigenvalue computation.</li>
+          <li>p(A) eigenvalues are p(λᵢ) — no matrix arithmetic.</li>
+          <li>AB and BA: same trace, same det (square), same non-zero eigenvalues.</li>
+          <li>Symmetric → real eigenvalues + orthogonal eigenvectors.</li>
+          <li>Idempotent → rank = trace.</li>
+          <li>Nilpotent → all λ = 0 (but A ≠ 0).</li>
+          <li>If <T src="\mathbf{b} \in C(A)"/> AND rank = n → unique. Else 0 or ∞.</li>
+          <li>"Linearly dependent" for square A ⇔ det = 0 ⇔ A singular.</li>
+        </ol>
+      </CheatCard>
+
+    </div>
+  );
+}
+
+/* ════════════════════════════════════════════════════════
+   APP ROOT
+   ════════════════════════════════════════════════════════ */
+function App() {
+  const [query, setQuery] = useState("");
+  const [totalCards, setTotalCards] = useState(0);
+  const [matchCount, setMatchCount] = useState(0);
+
+  useEffect(() => { hideLoading(); }, []);
+
+  useEffect(() => {
+    setTotalCards(document.querySelectorAll(".cheat-card").length);
+  }, []);
+
+  useEffect(() => {
+    const obs = new MutationObserver(() => {
+      const el = document.getElementById("match-count");
+      if (el) setMatchCount(Number(el.textContent) || 0);
+    });
+    const el = document.getElementById("match-count");
+    if (el) {
+      obs.observe(el, { childList: true, characterData: true, subtree: true });
+      return () => obs.disconnect();
+    }
+  }, []);
+
+  // Toc with section anchors
+  const toc = [
+    { id: "m1", label: "M1 · Foundations" },
+    { id: "m2", label: "M2 · Span & Subspaces" },
+    { id: "m3", label: "M3 · Linear Systems" },
+    { id: "m4", label: "M4 · Echelon & Rank" },
+    { id: "m5", label: "M5 · Determinants" },
+    { id: "m6", label: "M6 · Eigenvalues" },
+    { id: "m7", label: "M7 · Eigen Power Tools" },
+    { id: "m8", label: "M8 · Decompositions" },
+    { id: "ml", label: "★ ML Bridges + Shortcuts" },
+  ];
+
+  return (
+    <ErrorBoundary>
+      <div className="min-h-screen">
+        <TopNav currentModule={9}/>
+
+        <section className="relative overflow-hidden">
+          <div className="grid-bg absolute inset-0" style={{opacity: 0.4}}/>
+          <div className="relative max-w-5xl mx-auto px-5 pt-10 pb-6">
+            <div className="inline-flex items-center gap-2 text-xs px-3 py-1.5 rounded-full mb-5"
+              style={{background: "var(--accent-soft)", border: "1px solid var(--accent-border)", color: "var(--accent)"}}>
+              <span className="pulse-dot"/> CHEAT SHEET · MODULE 9
+            </div>
+            <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight mb-3" style={{color: "var(--text)"}}>
+              Every formula. <span className="gradient-text">One scrollable page.</span>
+            </h1>
+            <p className="text-base max-w-2xl" style={{color: "var(--text-dim)"}}>
+              Quick-reference for every formula, theorem, classification table, and property covered across Modules 1–8.
+              Use the search bar (or press <kbd style={{padding: "1px 6px", borderRadius: 4, background: "var(--bg-elev-3)", border: "1px solid var(--border)", fontFamily: "var(--font-mono)", fontSize: 11}}>/</kbd>) to filter — every visible card matches your query.
+            </p>
+          </div>
+        </section>
+
+        <SearchBar query={query} setQuery={setQuery} matches={<span id="match-count">{matchCount}</span>} total={totalCards}/>
+
+        <div className="max-w-5xl mx-auto px-5 grid lg:grid-cols-[180px,1fr] gap-6">
+          {/* TOC sidebar (sticky on lg+) */}
+          <aside className="hidden lg:block">
+            <div className="sticky top-[140px] space-y-3">
+              <div>
+                <div style={{fontSize: 9, letterSpacing: "0.18em", color: "var(--text-mute)", padding: "4px 8px", fontWeight: 700}}>SECTIONS</div>
+                {toc.map(t => (
+                  <a key={t.id} href={"#" + t.id}
+                    className="block px-3 py-1.5 rounded text-sm transition-colors"
+                    style={{color: "var(--text-dim)", border: "1px solid transparent"}}
+                    onMouseEnter={e => { e.target.style.color = "var(--accent)"; e.target.style.background = "var(--accent-soft)"; }}
+                    onMouseLeave={e => { e.target.style.color = "var(--text-dim)"; e.target.style.background = "transparent"; }}>
+                    {t.label}
+                  </a>
+                ))}
+              </div>
+              <div style={{borderTop: "1px solid var(--border)", paddingTop: 10}}>
+                <div style={{fontSize: 9, letterSpacing: "0.18em", color: "var(--text-mute)", padding: "4px 8px", fontWeight: 700}}>🎯 PROBLEM LABS</div>
+                {window.MODULES.filter(m => m.lab).map(m => (
+                  <a key={m.num} href={m.lab}
+                    className="block px-3 py-1.5 rounded text-[12px] transition-colors"
+                    style={{color: "var(--text-dim)", border: "1px solid transparent"}}
+                    onMouseEnter={e => { e.target.style.color = "var(--accent-2)"; e.target.style.background = "var(--accent-2-soft)"; }}
+                    onMouseLeave={e => { e.target.style.color = "var(--text-dim)"; e.target.style.background = "transparent"; }}>
+                    M{m.num} Lab
+                  </a>
+                ))}
+                <a href="module-10-mocktest.html"
+                  className="block px-3 py-1.5 rounded text-[12px] mt-1 transition-colors font-semibold"
+                  style={{color: "var(--accent-3)", border: "1px solid var(--accent-3-border)", background: "var(--accent-3-soft)"}}>
+                  📝 Mock Test
+                </a>
+              </div>
+            </div>
+          </aside>
+
+          <main className="pb-16">
+            <CheatSheetContent query={query}/>
+          </main>
+        </div>
+
+        <ModuleFooter
+          moduleNum={9}
+          nextModuleTitle="Mock Test — 20 timed GATE-style questions"
+          nextModuleFile="module-10-mocktest.html"
+          checklist={[
+            "I can locate any formula by typing a 1-word query.",
+            "I can recall the rank-nullity theorem, solution classification table, and Big Equivalence Theorem.",
+            "I can recite the 12 matrix-type eigenvalue signatures.",
+            "I can use this page as my final-day exam reference.",
+            "I've taken the Mock Test at least once to identify weak modules."
+          ]}
+        />
+      </div>
+    </ErrorBoundary>
+  );
+}
+
+mountApp(App, 9);
+</script>
+
+</body>
+</html>

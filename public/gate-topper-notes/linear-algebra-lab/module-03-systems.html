@@ -1,0 +1,1001 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 3 · Linear Systems — LA Mastery Hub</title>
+
+<script>
+  (function () {
+    try {
+      var t = localStorage.getItem("la-hub::theme") || "dark";
+      document.documentElement.classList.add(t === "light" ? "light" : "dark");
+    } catch (e) { document.documentElement.classList.add("dark"); }
+  })();
+</script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="theme.css">
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script>tailwind.config = { darkMode: 'class' };</script>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+
+<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone@7.25.6/babel.min.js"></script>
+</head>
+<body>
+
+<div id="loading">
+  <div style="text-align:center">
+    <div class="spinner"></div>
+    <div style="font-size:13px; opacity:0.8">Loading Module 3 — Linear Systems</div>
+  </div>
+</div>
+
+<div id="root"></div>
+
+<script type="text/babel" src="boilerplate.js"></script>
+
+<script type="text/babel">
+const { useState, useEffect, useMemo, useRef } = React;
+
+/* ════════════════════════════════════════════════════════
+   CONCEPT 3.1 — Why Solve Systems of Linear Equations?
+   Interactive: Real-world scenario translator
+   ════════════════════════════════════════════════════════ */
+const SCENARIOS = [
+  {
+    icon: "🧪", title: "Chemical Equation Balancing",
+    blurb: "Balance C₂H₆ + O₂ → CO₂ + H₂O. Each element must be conserved.",
+    detail: "Let x₁, x₂, x₃, x₄ be the coefficients (unknown). Conservation gives one equation per element: Carbon: 2x₁ = x₃. Hydrogen: 6x₁ = 2x₄. Oxygen: 2x₂ = 2x₃ + x₄. Three equations, four unknowns — solvable up to a scaling factor.",
+    rows: [
+      ["2", "0", "-1",  "0"],
+      ["6", "0",  "0", "-2"],
+      ["0", "2", "-2", "-1"],
+    ],
+    vars: ["x₁ (C₂H₆)", "x₂ (O₂)", "x₃ (CO₂)", "x₄ (H₂O)"],
+    rhs: ["0", "0", "0"],
+    insight: "The system is homogeneous (Ax = 0). Non-trivial solutions exist iff A's columns are dependent — which they are, because chemistry conservation always has a one-parameter family of solutions (scaling the whole reaction up or down).",
+  },
+  {
+    icon: "🚦", title: "Traffic Flow at Intersections",
+    blurb: "4 streets meet at 4 intersections. 'Flow in = flow out' at each intersection.",
+    detail: "Variables x₁, x₂, x₃, x₄ are flows on each road segment. At each intersection, incoming = outgoing. Given the inflows from outside (numbers on each side), we get 4 equations in 4 unknowns.",
+    rows: [
+      ["1", "-1", "0", "0"],
+      ["0", "1", "-1", "0"],
+      ["0", "0", "1", "-1"],
+      ["-1", "0", "0", "1"],
+    ],
+    vars: ["x₁", "x₂", "x₃", "x₄"],
+    rhs: ["100", "150", "50", "-300"],
+    insight: "The matrix has rank 3 (rows sum to zero — total in must equal total out). So infinitely many solutions parametrized by the choice of one flow (typically the smallest physically possible).",
+  },
+  {
+    icon: "⚡", title: "Circuit Analysis (Kirchhoff)",
+    blurb: "Currents i₁, i₂, i₃ in a 3-loop circuit. KVL gives one equation per loop.",
+    detail: "Each loop's voltage drop must equal the source. With known resistances and voltages, you get 3 linear equations in 3 unknown currents.",
+    rows: [
+      ["5", "-2", "0"],
+      ["-2", "8", "-3"],
+      ["0", "-3", "6"],
+    ],
+    vars: ["i₁", "i₂", "i₃"],
+    rhs: ["10", "0", "5"],
+    insight: "The matrix is symmetric and positive-definite (it's a 'Laplacian' for the resistor network). Unique solution always exists. Used millions of times per second in any circuit simulator.",
+  },
+  {
+    icon: "📈", title: "Least-Squares Fitting",
+    blurb: "Fit a line y = mx + c through 4 data points. Usually no perfect line exists.",
+    detail: "Each data point gives an equation m·xᵢ + c = yᵢ. With 4 points and 2 unknowns (m, c), the system is over-determined — usually no solution. Least squares finds (m, c) minimizing the sum of squared errors. Module 8 will derive AᵀAx = Aᵀb (the 'normal equations').",
+    rows: [
+      ["1", "1"],
+      ["2", "1"],
+      ["3", "1"],
+      ["4", "1"],
+    ],
+    vars: ["m", "c"],
+    rhs: ["2.1", "3.9", "6.2", "7.8"],
+    insight: "Over-determined system: more equations than unknowns. No exact solution generally exists. The 'best' solution minimizes ‖Ax - b‖² — this is regression, used in every statistics and ML class.",
+  },
+];
+
+function ScenarioExplorer() {
+  const [active, setActive] = useState(0);
+  const s = SCENARIOS[active];
+  return (
+    <InteractiveFrame
+      name="Real-World to Ax = b — 4 scenarios that ALL become linear systems"
+      whatAmISeeing="Four real problems from chemistry, traffic, electricity, and statistics. Each translates word-for-word into a matrix equation Ax = b. Pick a tab to see the translation, the matrix, and what makes that scenario interesting."
+      tryThis="Compare 'Chemical Balancing' (homogeneous, Ax = 0) with 'Circuit Analysis' (Ax = b with non-zero b). Same algebra, but the first has infinitely many solutions (multiples of one valid balanced equation), the second has exactly one (a unique set of currents). The difference is the structure of A — independence vs dependence of columns."
+    >
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-5">
+        {SCENARIOS.map((sc, i) => (
+          <button key={i} onClick={() => setActive(i)}
+            className="tile text-left rounded-xl p-3"
+            style={{
+              border: "1px solid " + (active === i ? "var(--accent)" : "var(--border)"),
+              background: active === i ? "var(--accent-soft)" : "var(--bg-elev-2)",
+            }}>
+            <div className="text-2xl mb-1">{sc.icon}</div>
+            <div className="text-sm font-semibold leading-tight" style={{color: "var(--text)"}}>{sc.title}</div>
+          </button>
+        ))}
+      </div>
+
+      <div className="rounded-xl p-5 space-y-4"
+        style={{border: "1px solid var(--accent-border)", background: "linear-gradient(135deg, var(--accent-soft), var(--accent-2-soft))"}}>
+        <div>
+          <div className="text-xs tracking-[0.2em] font-semibold mb-1" style={{color: "var(--accent)"}}>SCENARIO</div>
+          <div className="text-base font-semibold" style={{color: "var(--text)"}}>{s.blurb}</div>
+        </div>
+
+        <div>
+          <div className="text-xs tracking-[0.2em] font-semibold mb-1" style={{color: "var(--accent-2)"}}>TRANSLATION</div>
+          <div className="text-sm leading-relaxed" style={{color: "var(--text)"}}>{s.detail}</div>
+        </div>
+
+        <div>
+          <div className="text-xs tracking-[0.2em] font-semibold mb-2" style={{color: "var(--accent-3)"}}>MATRIX FORM Ax = b</div>
+          <div className="flex flex-wrap items-center gap-2 justify-center font-mono text-sm overflow-x-auto">
+            {/* A */}
+            <div className="flex items-center gap-1">
+              <span style={{color: "var(--text-faded)"}}>[</span>
+              <div className="grid gap-1" style={{gridTemplateColumns: "repeat(" + s.rows[0].length + ", minmax(0, 1fr))"}}>
+                {s.rows.flat().map((v, i) => (
+                  <span key={i} className="px-2 py-0.5 text-center rounded"
+                    style={{background: "var(--bg-elev-3)", color: "var(--text)", minWidth: 36}}>{v}</span>
+                ))}
+              </div>
+              <span style={{color: "var(--text-faded)"}}>]</span>
+            </div>
+            {/* x */}
+            <div className="flex items-center gap-1">
+              <span style={{color: "var(--text-faded)"}}>[</span>
+              <div className="grid gap-1">
+                {s.vars.map((v, i) => (
+                  <span key={i} className="px-2 py-0.5 text-center rounded text-xs"
+                    style={{background: "var(--accent-soft)", color: "var(--accent)", minWidth: 80}}>{v}</span>
+                ))}
+              </div>
+              <span style={{color: "var(--text-faded)"}}>]</span>
+            </div>
+            <span style={{color: "var(--text-dim)"}}>=</span>
+            {/* b */}
+            <div className="flex items-center gap-1">
+              <span style={{color: "var(--text-faded)"}}>[</span>
+              <div className="grid gap-1">
+                {s.rhs.map((v, i) => (
+                  <span key={i} className="px-2 py-0.5 text-center rounded"
+                    style={{background: "var(--accent-3-soft)", color: "var(--accent-3)", minWidth: 36}}>{v}</span>
+                ))}
+              </div>
+              <span style={{color: "var(--text-faded)"}}>]</span>
+            </div>
+          </div>
+          <div className="text-xs mt-2 text-center" style={{color: "var(--text-dim)"}}>
+            A is {s.rows.length}×{s.rows[0].length} · x is {s.rows[0].length}×1 · b is {s.rows.length}×1
+          </div>
+        </div>
+
+        <div className="rounded-lg p-3"
+          style={{border: "1px solid var(--info-border)", background: "var(--info-soft)"}}>
+          <div className="text-xs tracking-[0.2em] font-semibold mb-1" style={{color: "var(--info)"}}>WHAT MAKES THIS INTERESTING</div>
+          <div className="text-sm leading-relaxed" style={{color: "var(--text)"}}>{s.insight}</div>
+        </div>
+      </div>
+    </InteractiveFrame>
+  );
+}
+
+function Concept31() {
+  return (
+    <ConceptCard id="concept-3-1" label="3.1" moduleLabel="Module 3 · Linear Systems"
+      title="Why Solve Systems of Linear Equations?"
+      why="Linear systems are not a school exercise — they are the workhorse of every quantitative profession on Earth. Before any algorithm or theorem, we look at WHY the world keeps producing the equation Ax = b, and what kinds of answers it can have.">
+      <H3>The question you keep meeting</H3>
+      <P>
+        Almost every time someone asks "given these inputs, what outputs do I get?" — and the relationship is linear (or linearisable) — you end up writing <T src="A\mathbf{x} = \mathbf{b}"/>.
+      </P>
+      <UL>
+        <Li><B>Chemistry:</B> conservation of atoms → linear equation per element.</Li>
+        <Li><B>Traffic engineering:</B> Kirchhoff-style flow conservation → linear equation per intersection.</Li>
+        <Li><B>Electrical circuits:</B> Kirchhoff's voltage / current laws → linear equation per loop.</Li>
+        <Li><B>Statistics & ML:</B> fitting a linear model to data → least squares.</Li>
+        <Li><B>Computer graphics:</B> rendering = solving where 3D points project to 2D.</Li>
+        <Li><B>Economics:</B> input-output models, Leontief's prize-winning matrix.</Li>
+        <Li><B>Numerical PDE solvers:</B> discretising any PDE → a (huge) sparse linear system.</Li>
+      </UL>
+
+      <Callout kind="info" title="The single question, three versions">
+        <P><B>(1)</B> "Given <T src="A"/> and <T src="\mathbf{b}"/>, find <T src="\mathbf{x}"/> such that <T src="A\mathbf{x} = \mathbf{b}"/>."</P>
+        <P><B>(2)</B> "Which inputs to a linear process produce a given output?"</P>
+        <P><B>(3)</B> "Which weighted combinations of A's columns equal <T src="\mathbf{b}"/>?" (column picture)</P>
+        <P>All three are the same question, dressed in different clothes.</P>
+      </Callout>
+
+      <H3>The three possible answers — and ONLY three</H3>
+      <P>For any linear system, there are exactly three possibilities:</P>
+      <OL>
+        <Li><B>No solution.</B> Inconsistent system. <T src="\mathbf{b}"/> is not reachable from A's columns.</Li>
+        <Li><B>Exactly one solution.</B> The system is consistent and the columns of A are independent.</Li>
+        <Li><B>Infinitely many solutions.</B> The system is consistent but the columns are dependent — a whole family of <T src="\mathbf{x}"/>'s work.</Li>
+      </OL>
+      <P><B>Never 2.</B> Never 17. Never a finite number greater than 1. We will prove this in Concept 3.3 (the geometric reason) and again in Concept 3.4 (the algebraic reason).</P>
+
+      <Callout kind="proof" title="Why the count is always 0, 1, or ∞ — first taste">
+        <P>Suppose <T src="\mathbf{x}_1"/> and <T src="\mathbf{x}_2"/> are two different solutions to <T src="A\mathbf{x} = \mathbf{b}"/>. Then</P>
+        <BT src={String.raw`A(\mathbf{x}_1 - \mathbf{x}_2) = A\mathbf{x}_1 - A\mathbf{x}_2 = \mathbf{b} - \mathbf{b} = \mathbf{0}.`}/>
+        <P>So <T src="\mathbf{x}_1 - \mathbf{x}_2"/> is a non-zero solution of <T src="A\mathbf{x} = \mathbf{0}"/>. But then so is <T src="t(\mathbf{x}_1 - \mathbf{x}_2)"/> for ANY real <T src="t"/>. And every <T src="\mathbf{x}_1 + t(\mathbf{x}_1 - \mathbf{x}_2)"/> also solves the original equation. So once you have two solutions, you have infinitely many. Hence the count is 0, 1, or ∞.</P>
+      </Callout>
+
+      <H3>Why GATE loves linear-system questions</H3>
+      <P>The structure of a system instantly tests three skills at once:</P>
+      <UL>
+        <Li>Can you classify the system (consistent / inconsistent, unique / many)?</Li>
+        <Li>Can you read the rank or determinant in your head?</Li>
+        <Li>Do you see both the row picture (lines/planes) and the column picture (reachability)?</Li>
+      </UL>
+      <P>A 2-mark question that takes 30 seconds in your head can take 5 minutes by computation — the gap is intuition.</P>
+
+      <ScenarioExplorer/>
+
+      <Callout kind="ml" title="ML practitioners can't escape Ax = b">
+        <P>Linear regression: <T src="X^\top X \boldsymbol{\beta} = X^\top \mathbf{y}"/>. Neural-network training: huge linear systems inside the gradient computation. Recommender systems: matrix factorisation, again a linear system. The vocabulary changes (loss, optimiser, factor) but the underlying object is Ax = b every time.</P>
+      </Callout>
+
+      <Callout kind="recall" title="Concept 3.1 in one breath">
+        <P>Linear systems appear whenever many quantities interact linearly. Every Ax = b has exactly 0, 1, or ∞ solutions — never 2, never any other finite number. Module 3 is about which of those three cases you have, and how to see it instantly.</P>
+      </Callout>
+
+      <ProgressPill conceptId="m3-c31"/>
+    </ConceptCard>
+  );
+}
+
+/* ════════════════════════════════════════════════════════
+   CONCEPT 3.2 — Writing a System as Ax = b
+   Interactive: Equation-to-matrix converter
+   ════════════════════════════════════════════════════════ */
+function EquationToMatrix() {
+  // 3 equations, 3 unknowns x,y,z
+  const [eqs, setEqs] = useState([
+    [2, 1, -1,  3],   // 2x + y - z = 3
+    [1, -1, 2,  4],   // x - y + 2z = 4
+    [3, 0, 1, 10],    // 3x + 0y + z = 10
+  ]);
+  const setCell = (r, c, v) => {
+    const e2 = eqs.map(row => row.slice());
+    e2[r][c] = v;
+    setEqs(e2);
+  };
+  const A = eqs.map(row => row.slice(0, 3));
+  const b = eqs.map(row => row[3]);
+  // Augmented [A|b]
+  const aug = eqs;
+
+  function EqRow({ row, r }) {
+    const coeffs = row.slice(0, 3);
+    const rhs = row[3];
+    const labels = ["x", "y", "z"];
+    return (
+      <div className="flex items-center flex-wrap gap-1 font-mono text-sm">
+        {coeffs.map((v, c) => (
+          <span key={c} className="flex items-center">
+            {c > 0 && <span style={{color: "var(--text-dim)"}} className="mx-1">{v >= 0 ? "+" : ""}</span>}
+            <NumInput value={v} onChange={x => setCell(r, c, x)} step="1" width={50}/>
+            <span className="ml-1" style={{color: "var(--accent)"}}>{labels[c]}</span>
+          </span>
+        ))}
+        <span className="mx-2" style={{color: "var(--text-dim)"}}>=</span>
+        <NumInput value={rhs} onChange={x => setCell(r, 3, x)} step="1" width={56}/>
+      </div>
+    );
+  }
+
+  function MatrixView({ data, color, label }) {
+    return (
+      <div className="text-center">
+        <div className="text-xs tracking-[0.2em] font-semibold mb-1" style={{color: color}}>{label}</div>
+        <div className="inline-flex items-stretch">
+          <div style={{borderLeft: "2px solid var(--text-dim)", borderTop: "2px solid var(--text-dim)", borderBottom: "2px solid var(--text-dim)", width: 6}}></div>
+          <div className="px-2 py-1 grid gap-1"
+            style={{gridTemplateColumns: "repeat(" + data[0].length + ", minmax(0, 1fr))"}}>
+            {data.flat().map((v, i) => (
+              <span key={i} className="px-2 py-0.5 text-center rounded font-mono text-sm"
+                style={{background: "var(--bg-elev-3)", color: "var(--text)", minWidth: 32}}>
+                {v}
+              </span>
+            ))}
+          </div>
+          <div style={{borderRight: "2px solid var(--text-dim)", borderTop: "2px solid var(--text-dim)", borderBottom: "2px solid var(--text-dim)", width: 6}}></div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <InteractiveFrame
+      name="Equation-to-Matrix Converter"
+      whatAmISeeing="Three equations in three unknowns on the left. Their coefficient matrix A, unknown vector x, and right-hand side b on the right — assembled live. The fourth panel shows the augmented matrix [A | b] that we'll use heavily in Module 4."
+      tryThis="Edit any coefficient and watch the matrix update in real time. Try making the third row equal to (sum of first two): the matrix becomes singular (rank 2 < 3). The system is then dependent — either no solution or infinitely many."
+    >
+      <div className="space-y-4">
+        <div className="rounded-lg p-4" style={{border: "1px solid var(--border)", background: "var(--bg-elev-2)"}}>
+          <div className="text-xs tracking-[0.2em] font-semibold mb-3" style={{color: "var(--accent)"}}>EQUATIONS</div>
+          <div className="space-y-2">
+            {[0, 1, 2].map(r => <EqRow key={r} row={eqs[r]} r={r}/>)}
+          </div>
+        </div>
+
+        <div className="grid md:grid-cols-3 gap-4 items-center">
+          <MatrixView data={A} color="var(--accent)" label="A (coefficient)"/>
+          <MatrixView data={b.map(v => [v])} color="var(--accent-3)" label="b (RHS)"/>
+          <MatrixView data={aug} color="var(--accent-2)" label="[A | b] augmented"/>
+        </div>
+
+        <div className="rounded-lg p-3"
+          style={{border: "1px solid var(--info-border)", background: "var(--info-soft)"}}>
+          <div className="text-xs tracking-[0.2em] font-semibold mb-1" style={{color: "var(--info)"}}>WHY THE AUGMENTED MATRIX IS THE 'WORKING OBJECT'</div>
+          <div className="text-sm leading-relaxed" style={{color: "var(--text)"}}>
+            Every row operation we do during Gaussian elimination acts on BOTH the coefficients AND the right-hand side simultaneously.
+            Carrying them around as [A | b] keeps the bookkeeping mechanical. In Module 4 we'll row-reduce this object to discover the solution structure.
+          </div>
+        </div>
+      </div>
+    </InteractiveFrame>
+  );
+}
+
+function Concept32() {
+  return (
+    <ConceptCard id="concept-3-2" label="3.2" moduleLabel="Module 3 · Linear Systems"
+      title="Writing a System as Ax = b"
+      why="The mechanical step. Once a problem is in matrix form, every theorem and algorithm in linear algebra applies. Conversely, students who can't fluently switch between 'three equations in three unknowns' and the 3×3 matrix form lose 30 seconds per question — minutes over a 3-hour exam.">
+      <H3>The translation</H3>
+      <P>Start with <T src="m"/> equations in <T src="n"/> unknowns:</P>
+      <BT src={String.raw`\begin{aligned} a_{11} x_1 + a_{12} x_2 + \cdots + a_{1n} x_n &= b_1 \\ a_{21} x_1 + a_{22} x_2 + \cdots + a_{2n} x_n &= b_2 \\ &\vdots \\ a_{m1} x_1 + a_{m2} x_2 + \cdots + a_{mn} x_n &= b_m \end{aligned}`}/>
+      <P>Pack the coefficients into a matrix A (size <T src="m \times n"/>), the unknowns into a column x (size <T src="n \times 1"/>), and the RHS into a column b (size <T src="m \times 1"/>):</P>
+      <BT src={String.raw`A = \begin{bmatrix} a_{11} & a_{12} & \cdots & a_{1n} \\ a_{21} & a_{22} & \cdots & a_{2n} \\ \vdots & \vdots & \ddots & \vdots \\ a_{m1} & a_{m2} & \cdots & a_{mn} \end{bmatrix}, \quad \mathbf{x} = \begin{bmatrix} x_1 \\ x_2 \\ \vdots \\ x_n \end{bmatrix}, \quad \mathbf{b} = \begin{bmatrix} b_1 \\ b_2 \\ \vdots \\ b_m \end{bmatrix}.`}/>
+      <P>And the whole system collapses to the single matrix equation:</P>
+      <BT src={String.raw`A\mathbf{x} = \mathbf{b}.`}/>
+
+      <H3>The augmented matrix [A | b]</H3>
+      <P>For computation, we attach <T src="\mathbf{b}"/> as one extra column on A and treat it as a single object:</P>
+      <BT src={String.raw`[A \mid \mathbf{b}] = \left[\begin{array}{ccc|c} a_{11} & a_{12} & a_{13} & b_1 \\ a_{21} & a_{22} & a_{23} & b_2 \\ a_{31} & a_{32} & a_{33} & b_3 \end{array}\right].`}/>
+      <P>The vertical bar is a reminder of the meaning, not algebra — algebraically it's just an <T src="m \times (n+1)"/> matrix.</P>
+
+      <Callout kind="info" title="Why we work with [A | b] and NOT the equation list">
+        <UL>
+          <Li><B>Row operations apply uniformly.</B> When we subtract one row from another to eliminate variables, the same operation must apply to both the coefficients AND the right-hand side. Keeping them together is fool-proof.</Li>
+          <Li><B>Comparing rank(A) and rank([A | b])</B> answers "is there a solution?" instantly. (Module 4 will make this rigorous.)</Li>
+          <Li><B>Mechanical algorithms (Gaussian elimination, LU, etc.)</B> all act on this single object — easier to reason about, easier to code.</Li>
+        </UL>
+      </Callout>
+
+      <H3>Worked example</H3>
+      <P>System: <T src="\quad 2x + y - z = 3, \quad x - y + 2z = 4, \quad 3x + z = 10"/>.</P>
+      <P>Coefficient matrix:</P>
+      <BT src={String.raw`A = \begin{bmatrix} 2 & 1 & -1 \\ 1 & -1 & 2 \\ 3 & 0 & 1 \end{bmatrix}, \quad \mathbf{b} = \begin{bmatrix} 3 \\ 4 \\ 10 \end{bmatrix}.`}/>
+      <P>Notice the zero coefficient on <T src="y"/> in the third equation must be entered explicitly as 0 — DO NOT skip it. Augmented form:</P>
+      <BT src={String.raw`[A \mid \mathbf{b}] = \left[\begin{array}{ccc|c} 2 & 1 & -1 & 3 \\ 1 & -1 & 2 & 4 \\ 3 & 0 & 1 & 10 \end{array}\right].`}/>
+
+      <Callout kind="trap" title="Three small but expensive translation traps">
+        <UL>
+          <Li><B>Missing variables.</B> If an equation reads <T src="2x + 4z = 7"/>, the <T src="y"/> coefficient is 0 — must appear in A.</Li>
+          <Li><B>Sign errors.</B> Rearrange <T src="3x = 2y - 1"/> as <T src="3x - 2y = -1"/> BEFORE building A.</Li>
+          <Li><B>Order of variables.</B> Decide once whether your unknowns are <T src="(x, y, z)"/> or <T src="(y, x, z)"/> and stick with it across A AND b.</Li>
+        </UL>
+      </Callout>
+
+      <H3>Special structures of A you'll meet</H3>
+      <UL>
+        <Li><B>Square (m = n):</B> typical "solve for n unknowns from n equations". May or may not be invertible.</Li>
+        <Li><B>Tall (m &gt; n):</B> overdetermined. Usually no exact solution. Least squares lives here.</Li>
+        <Li><B>Wide (m &lt; n):</B> underdetermined. Usually infinitely many solutions. Underconstrained ML problems live here.</Li>
+        <Li><B>Sparse:</B> mostly zeros. The case in real engineering systems (Kirchhoff matrices, finite-element matrices) — never solved by general algorithms.</Li>
+      </UL>
+
+      <EquationToMatrix/>
+
+      <Callout kind="recall" title="Concept 3.2 in one breath">
+        <P>Pack coefficients into A, unknowns into x, RHS into b. The augmented matrix [A | b] is the working object. Don't skip zero coefficients. Rearrange to standard form (variables LHS, constants RHS) before assembling.</P>
+      </Callout>
+
+      <ProgressPill conceptId="m3-c32"/>
+    </ConceptCard>
+  );
+}
+
+/* ════════════════════════════════════════════════════════
+   CONCEPT 3.3 — Geometric Interpretation of Solutions
+   Interactive: 2x2 line system + 3x3 plane gallery
+   ════════════════════════════════════════════════════════ */
+function GeometricSolutions2D() {
+  // a1 x + b1 y = c1
+  // a2 x + b2 y = c2
+  const [eq1, setEq1] = useState({ a: 1, b: 1, c: 3 });
+  const [eq2, setEq2] = useState({ a: 1, b: -1, c: 1 });
+
+  const det = eq1.a * eq2.b - eq1.b * eq2.a;
+  const range = 6, scale = 200 / range, cx = 200, cy = 200;
+  const toPx = (x, y) => [cx + x*scale, cy - y*scale];
+
+  let kind = "unique", reason = "", solution = null;
+  if (Math.abs(det) > 1e-6) {
+    kind = "unique";
+    reason = "The two lines have different slopes, so they intersect at exactly one point.";
+    solution = [
+      (eq1.c * eq2.b - eq2.c * eq1.b) / det,
+      (eq1.a * eq2.c - eq2.a * eq1.c) / det,
+    ];
+  } else {
+    // Parallel — check if same line
+    // Multiply eq1 by some k to match eq2's a coefficient?
+    const norm1 = Math.hypot(eq1.a, eq1.b);
+    const norm2 = Math.hypot(eq2.a, eq2.b);
+    if (norm1 < 1e-6 || norm2 < 1e-6) {
+      kind = "degenerate";
+      reason = "One of the equations is trivial (0 = something) — not a real line.";
+    } else {
+      // ratio of (a,b) to (a,b)
+      const ratio_a = eq2.a / (eq1.a || 1e-9);
+      const ratio_b = eq2.b / (eq1.b || 1e-9);
+      const ratio = Math.abs(eq1.a) > 1e-6 ? eq2.a / eq1.a : eq2.b / eq1.b;
+      if (Math.abs(eq2.c - ratio * eq1.c) < 1e-6) {
+        kind = "infinite";
+        reason = "The two equations describe the SAME line — every point on it satisfies both. Infinitely many solutions.";
+      } else {
+        kind = "none";
+        reason = "The two lines are parallel but distinct — they never meet. No solution.";
+      }
+    }
+  }
+
+  function drawLine(eq, color) {
+    // a x + b y = c → if b ≠ 0: y = (c - a*x)/b
+    const a = eq.a, b = eq.b, c = eq.c;
+    if (Math.abs(b) > 1e-6) {
+      const y1 = (c - a*(-range)) / b;
+      const y2 = (c - a*( range)) / b;
+      const [p1, p2] = toPx(-range, y1);
+      const [p3, p4] = toPx( range, y2);
+      return <line x1={p1} y1={p2} x2={p3} y2={p4} stroke={color} strokeWidth="2.5"/>;
+    } else if (Math.abs(a) > 1e-6) {
+      const xVal = c / a;
+      const [p1, p2] = toPx(xVal, -range);
+      const [p3, p4] = toPx(xVal,  range);
+      return <line x1={p1} y1={p2} x2={p3} y2={p4} stroke={color} strokeWidth="2.5"/>;
+    }
+    return null;
+  }
+
+  const verdictColor = kind === "unique" ? "var(--accent-3)" : kind === "infinite" ? "var(--info)" : "var(--warn)";
+
+  function EqEditor({ eq, setEq, color, label }) {
+    return (
+      <div className="rounded-lg p-3" style={{border: "1px solid var(--border)", background: "var(--bg-elev-2)"}}>
+        <div className="text-xs tracking-[0.2em] font-semibold mb-2" style={{color}}>{label}</div>
+        <div className="flex items-center gap-1 font-mono text-sm">
+          <NumInput value={eq.a} onChange={v => setEq({...eq, a: v})} step="1" width={46}/>
+          <span style={{color: "var(--accent)"}}>x</span>
+          <span className="mx-1" style={{color: "var(--text-dim)"}}>+</span>
+          <NumInput value={eq.b} onChange={v => setEq({...eq, b: v})} step="1" width={46}/>
+          <span style={{color: "var(--accent-2)"}}>y</span>
+          <span className="mx-1" style={{color: "var(--text-dim)"}}>=</span>
+          <NumInput value={eq.c} onChange={v => setEq({...eq, c: v})} step="1" width={56}/>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <InteractiveFrame
+      name="2D Solution Visualizer — three cases for two lines"
+      whatAmISeeing="Two equations as two lines on the same plane. The geometric intersection is the solution set. Edit the coefficients and watch the verdict update: one point (unique), no intersection (parallel), or the same line (infinitely many)."
+      tryThis="Start with the default — two clearly different lines, unique intersection. Set the second equation to (2, 2, 6) — exactly 2× the first. Same line, infinite solutions. Now change just the RHS to 7. Parallel but offset — no solution. Three cases. No other possibility."
+    >
+      <div className="grid lg:grid-cols-[auto,1fr] gap-6 items-start">
+        <svg viewBox="0 0 400 400" className="vector-svg" style={{maxWidth: 400}}>
+          {Array.from({length: 2*range+1}, (_, i) => i - range).filter(i => i !== 0).map(i => {
+            const [x1, y1] = toPx(i, -range), [x2, y2] = toPx(i, range);
+            const [x3, y3] = toPx(-range, i), [x4, y4] = toPx(range, i);
+            return <g key={i}>
+              <line x1={x1} y1={y1} x2={x2} y2={y2} stroke="var(--canvas-grid)"/>
+              <line x1={x3} y1={y3} x2={x4} y2={y4} stroke="var(--canvas-grid)"/>
+            </g>;
+          })}
+          <line x1={0} y1={cy} x2={400} y2={cy} stroke="var(--canvas-axis)"/>
+          <line x1={cx} y1={0} x2={cx} y2={400} stroke="var(--canvas-axis)"/>
+
+          {drawLine(eq1, "var(--accent)")}
+          {drawLine(eq2, "var(--accent-2)")}
+
+          {kind === "unique" && solution && (() => {
+            const [px, py] = toPx(solution[0], solution[1]);
+            return (
+              <g>
+                <circle cx={px} cy={py} r="9" fill="var(--accent-3)" opacity="0.3"/>
+                <circle cx={px} cy={py} r="5" fill="var(--accent-3)" stroke="var(--canvas-bg)" strokeWidth="2"/>
+                <text x={px + 10} y={py - 8} fontSize="11" fill="var(--accent-3)" fontWeight="700">
+                  ({solution[0].toFixed(1)}, {solution[1].toFixed(1)})
+                </text>
+              </g>
+            );
+          })()}
+        </svg>
+
+        <div className="space-y-3">
+          <EqEditor eq={eq1} setEq={setEq1} color="var(--accent)" label="EQ 1 (violet)"/>
+          <EqEditor eq={eq2} setEq={setEq2} color="var(--accent-2)" label="EQ 2 (cyan)"/>
+
+          <div className="rounded-lg p-4" style={{border: "1px solid " + verdictColor, background: verdictColor.replace(")", "-soft)").replace("var(--", "var(--")}}>
+            <div className="text-xs tracking-[0.2em] font-semibold mb-2" style={{color: verdictColor}}>
+              VERDICT
+            </div>
+            <div className="text-base font-semibold mb-2" style={{color: "var(--text)"}}>
+              {kind === "unique" && "Unique solution"}
+              {kind === "none" && "No solution (inconsistent)"}
+              {kind === "infinite" && "Infinitely many solutions"}
+              {kind === "degenerate" && "Degenerate (one equation is trivial)"}
+            </div>
+            <div className="text-sm leading-relaxed" style={{color: "var(--text-dim)"}}>{reason}</div>
+            <div className="text-xs font-mono mt-2" style={{color: "var(--text-dim)"}}>
+              det(A) = {det.toFixed(2)}
+            </div>
+          </div>
+        </div>
+      </div>
+    </InteractiveFrame>
+  );
+}
+
+/* — 3x3 plane configuration gallery — */
+const PLANE_CASES = [
+  { kind: "U",  emoji: "•", title: "Unique intersection at one point",
+    desc: "Three planes meeting in exactly one point. det(A) ≠ 0. The classic 'good' case.",
+    nA: 3, nAb: 3, n: 3, count: "1 solution" },
+  { kind: "L",  emoji: "—", title: "Intersection along a line",
+    desc: "Three planes share a common line. Two planes intersect in a line; the third contains that line. rank = 2, infinitely many solutions.",
+    nA: 2, nAb: 2, n: 3, count: "∞ solutions (1-parameter family)" },
+  { kind: "P",  emoji: "▭", title: "All three are the same plane",
+    desc: "All three equations describe the SAME plane. rank = 1, infinitely many solutions in a 2-parameter family.",
+    nA: 1, nAb: 1, n: 3, count: "∞ solutions (2-parameter family)" },
+  { kind: "N1", emoji: "∥", title: "Two parallel planes",
+    desc: "Two of the three planes are parallel but distinct — they never meet. The system is inconsistent regardless of the third.",
+    nA: 2, nAb: 3, n: 3, count: "0 solutions" },
+  { kind: "N2", emoji: "△", title: "Triangular 'prism' — no common point",
+    desc: "Each pair of planes meets in a line, but the three lines are parallel (no common point). Inconsistent.",
+    nA: 2, nAb: 3, n: 3, count: "0 solutions" },
+  { kind: "N3", emoji: "≡", title: "Two coincident, third parallel",
+    desc: "Two of the equations describe the same plane; the third is parallel but distinct. Inconsistent.",
+    nA: 1, nAb: 2, n: 3, count: "0 solutions" },
+  { kind: "U2", emoji: "▱", title: "Two coincident, third intersects",
+    desc: "Two planes are identical, third crosses them along a line. rank = 2, infinitely many solutions on that line.",
+    nA: 2, nAb: 2, n: 3, count: "∞ solutions (1-parameter family)" },
+];
+
+function PlanesGallery() {
+  const [active, setActive] = useState(0);
+  const c = PLANE_CASES[active];
+  return (
+    <InteractiveFrame
+      name="3D Plane Gallery — the 7 configurations for three planes"
+      whatAmISeeing="In 3D, each linear equation is a plane. Three equations = three planes. There are exactly 7 distinct geometric configurations, partitioning into the same 3 answer classes (0, 1, or ∞ solutions). Click each tab to read its description."
+      tryThis="Pay attention to the rank columns. The pattern that ALWAYS predicts the count: rank(A) = rank([A|b]) = n → unique; rank(A) = rank([A|b]) < n → infinitely many; rank(A) ≠ rank([A|b]) → none. This is the entire 'solution theory' of Module 4 in one line."
+    >
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-4">
+        {PLANE_CASES.map((cs, i) => (
+          <button key={i} onClick={() => setActive(i)}
+            className="tile text-left rounded-xl p-3"
+            style={{
+              border: "1px solid " + (active === i ? "var(--accent)" : "var(--border)"),
+              background: active === i ? "var(--accent-soft)" : "var(--bg-elev-2)",
+            }}>
+            <div className="text-2xl mb-1">{cs.emoji}</div>
+            <div className="text-xs font-semibold leading-tight" style={{color: "var(--text)"}}>{cs.title.split(" ").slice(0, 4).join(" ")}…</div>
+          </button>
+        ))}
+      </div>
+
+      <div className="rounded-xl p-5"
+        style={{border: "1px solid var(--accent-border)", background: "var(--accent-soft)"}}>
+        <div className="text-xs tracking-[0.2em] font-semibold mb-2" style={{color: "var(--accent)"}}>CONFIGURATION</div>
+        <div className="text-lg font-semibold mb-2" style={{color: "var(--text)"}}>{c.title}</div>
+        <div className="text-sm leading-relaxed mb-4" style={{color: "var(--text-dim)"}}>{c.desc}</div>
+
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <div className="rounded-lg p-3" style={{background: "var(--bg-elev-1)", border: "1px solid var(--border)"}}>
+            <div className="text-[10px] tracking-[0.2em] font-semibold" style={{color: "var(--accent)"}}>rank(A)</div>
+            <div className="text-2xl font-mono font-bold" style={{color: "var(--text)"}}>{c.nA}</div>
+          </div>
+          <div className="rounded-lg p-3" style={{background: "var(--bg-elev-1)", border: "1px solid var(--border)"}}>
+            <div className="text-[10px] tracking-[0.2em] font-semibold" style={{color: "var(--accent-2)"}}>rank([A | b])</div>
+            <div className="text-2xl font-mono font-bold" style={{color: "var(--text)"}}>{c.nAb}</div>
+          </div>
+          <div className="rounded-lg p-3" style={{background: "var(--bg-elev-1)", border: "1px solid var(--border)"}}>
+            <div className="text-[10px] tracking-[0.2em] font-semibold" style={{color: "var(--text-dim)"}}>n (unknowns)</div>
+            <div className="text-2xl font-mono font-bold" style={{color: "var(--text)"}}>{c.n}</div>
+          </div>
+          <div className="rounded-lg p-3" style={{background: "var(--bg-elev-1)", border: "1px solid var(--border)"}}>
+            <div className="text-[10px] tracking-[0.2em] font-semibold" style={{color: "var(--accent-3)"}}>solutions</div>
+            <div className="text-sm font-mono font-bold" style={{color: "var(--text)"}}>{c.count}</div>
+          </div>
+        </div>
+      </div>
+    </InteractiveFrame>
+  );
+}
+
+function Concept33() {
+  return (
+    <ConceptCard id="concept-3-3" label="3.3" moduleLabel="Module 3 · Linear Systems"
+      title="Geometric Interpretation of Solutions"
+      why="The 0 / 1 / ∞ classification is not an axiom — it falls out of geometry. Once you SEE why a system can have only those three answer types, you'll never again ask 'could there be 2 solutions?'.">
+      <H3>The 2×2 case — two lines</H3>
+      <P>Each equation <T src="a_i x + b_i y = c_i"/> in <T src="\mathbb{R}^2"/> describes a LINE. Two equations = two lines. The solution set of the system is the INTERSECTION of those lines.</P>
+      <UL>
+        <Li><B>Different slopes →</B> the lines cross at exactly one point → <B>unique solution</B>.</Li>
+        <Li><B>Same slope, same intercept →</B> the lines are identical → <B>infinitely many solutions</B>.</Li>
+        <Li><B>Same slope, different intercept →</B> the lines are parallel but distinct → <B>no solution</B>.</Li>
+      </UL>
+      <P>That's it. Three cases. Cannot be more. Cannot be less.</P>
+
+      <Callout kind="info" title="Why 'different slopes' is the same as 'det(A) ≠ 0'">
+        <P>Lines <T src="a_1 x + b_1 y = c_1"/> and <T src="a_2 x + b_2 y = c_2"/> are parallel iff their normal vectors <T src="(a_1, b_1)"/> and <T src="(a_2, b_2)"/> are proportional, iff <T src="a_1 b_2 = b_1 a_2"/>, iff</P>
+        <BT src={String.raw`\det\begin{bmatrix} a_1 & b_1 \\ a_2 & b_2 \end{bmatrix} = a_1 b_2 - b_1 a_2 = 0.`}/>
+        <P>So <T src="\det(A) \neq 0"/> ⇔ different slopes ⇔ exactly one intersection. We will rederive this connection from a dozen different angles in Module 5.</P>
+      </Callout>
+
+      <GeometricSolutions2D/>
+
+      <H3>The 3×3 case — three planes</H3>
+      <P>Each equation <T src="a_i x + b_i y + c_i z = d_i"/> in <T src="\mathbb{R}^3"/> describes a PLANE. Three equations = three planes. The solution set is the common intersection.</P>
+
+      <P>There are exactly <B>seven distinct geometric configurations</B>, grouped into the same three answer classes:</P>
+      <UL>
+        <Li><B>1 solution (unique):</B> three planes meeting at a single point.</Li>
+        <Li><B>∞ solutions (line):</B> three planes sharing a line (rank 2 systems).</Li>
+        <Li><B>∞ solutions (plane):</B> all three planes are the SAME plane (rank 1 system).</Li>
+        <Li><B>0 solutions:</B> 3 sub-cases — two parallel planes; triangular prism (three pairs of intersecting lines, no common point); two coincident planes plus a parallel third.</Li>
+      </UL>
+
+      <PlanesGallery/>
+
+      <H3>Why exactly 0, 1, or ∞ (the geometric reason)</H3>
+      <P>An intersection of flat objects (lines, planes, higher-dimensional analogues) is always a flat object — a point, line, plane, or higher-dimensional flat. The dimension of the intersection determines the count:</P>
+      <UL>
+        <Li><B>Dimension 0:</B> a point → 1 solution.</Li>
+        <Li><B>Dimension ≥ 1:</B> a line / plane / ... → ∞ solutions.</Li>
+        <Li><B>Empty:</B> no common point → 0 solutions.</Li>
+      </UL>
+      <P>You'll never get "2 solutions" because a finite set of more than one point is not a flat object. Geometry forbids it. (Algebraically, this is the Module 3.1 proof: any 2 solutions generate ∞.)</P>
+
+      <Callout kind="trap" title="The 'rank gives the count' shortcut">
+        <P>The geometric cases all map cleanly to comparisons of <T src="\text{rank}(A)"/>, <T src="\text{rank}([A | \mathbf{b}])"/>, and <T src="n"/> (number of unknowns):</P>
+        <UL>
+          <Li><T src="\text{rank}(A) \neq \text{rank}([A | \mathbf{b}])"/> → no solution (inconsistent).</Li>
+          <Li><T src="\text{rank}(A) = \text{rank}([A | \mathbf{b}]) = n"/> → unique solution.</Li>
+          <Li><T src="\text{rank}(A) = \text{rank}([A | \mathbf{b}]) &lt; n"/> → infinitely many; specifically, <T src="n - \text{rank}(A)"/> free parameters.</Li>
+        </UL>
+        <P>Module 4 will prove this. Bookmark it now.</P>
+      </Callout>
+
+      <Callout kind="recall" title="Concept 3.3 in one breath">
+        <P>2×2: two lines, 3 cases. 3×3: three planes, 7 cases collapsing to 3 answer classes. Always 0, 1, or ∞ — never 2, never any other finite count. The 'why' is geometric: intersections of flats are flats.</P>
+      </Callout>
+
+      <ProgressPill conceptId="m3-c33"/>
+    </ConceptCard>
+  );
+}
+
+/* ════════════════════════════════════════════════════════
+   CONCEPT 3.4 — Deep Intuition: Column Space, Null Space, x = xp + xn
+   Interactive: Column space membership + solution structure
+   ════════════════════════════════════════════════════════ */
+function ColumnSpaceMembership() {
+  // 2x2 matrix with adjustable columns
+  const [col1, setCol1] = useState([2, 1]);
+  const [col2, setCol2] = useState([4, 2]); // start dependent for drama
+  const [b, setB] = useState([3, 2]);
+
+  const det = col1[0]*col2[1] - col1[1]*col2[0];
+  const independent = Math.abs(det) > 1e-6;
+
+  // Is b in column space?
+  let inSpace, x1 = 0, x2 = 0;
+  if (independent) {
+    inSpace = true;
+    x1 = (b[0]*col2[1] - b[1]*col2[0]) / det;
+    x2 = (col1[0]*b[1] - col1[1]*b[0]) / det;
+  } else {
+    // Column space = line in direction of col1 (or col2 if col1 is 0)
+    // Check if b is on that line
+    const dir = (col1[0] !== 0 || col1[1] !== 0) ? col1 : col2;
+    if (dir[0] === 0 && dir[1] === 0) {
+      inSpace = (b[0] === 0 && b[1] === 0);
+    } else {
+      // cross product b × dir = 0 ⇒ b is parallel to dir
+      const cross = b[0]*dir[1] - b[1]*dir[0];
+      inSpace = Math.abs(cross) < 0.1;
+    }
+  }
+
+  const range = 6, scale = 230 / range, cx = 230, cy = 230;
+  const toPx = (x, y) => [cx + x*scale, cy - y*scale];
+
+  // Shading for column space
+  let extras = null;
+  if (independent) {
+    // Whole plane (don't shade, gives noise)
+    extras = null;
+  } else if (col1[0] !== 0 || col1[1] !== 0) {
+    const dir = (col1[0] !== 0 || col1[1] !== 0) ? col1 : col2;
+    const t = range * 1.4;
+    const norm = Math.hypot(dir[0], dir[1]);
+    const [x1_, y1_] = toPx(-t * dir[0]/norm * range*0.8, -t * dir[1]/norm * range*0.8);
+    const [x2_, y2_] = toPx( t * dir[0]/norm * range*0.8,  t * dir[1]/norm * range*0.8);
+    extras = (
+      <g>
+        <line x1={x1_} y1={y1_} x2={x2_} y2={y2_} stroke="var(--accent-3)" strokeWidth="6" opacity="0.25" strokeLinecap="round"/>
+        <line x1={x1_} y1={y1_} x2={x2_} y2={y2_} stroke="var(--accent-3)" strokeWidth="1.5" strokeDasharray="6 4" opacity="0.85"/>
+      </g>
+    );
+  }
+
+  const vectors = [
+    { vec: col1, colorIdx: 0, label: "col₁" },
+    { vec: col2, colorIdx: 1, label: "col₂" },
+    { vec: b,    colorIdx: inSpace ? 2 : 5, label: "b", thick: 3 },
+  ];
+
+  return (
+    <InteractiveFrame
+      name="Column Space Membership — is b reachable?"
+      whatAmISeeing="Two columns of a 2×2 matrix A (violet, cyan) and a target b (emerald if reachable, rose if not). When A's columns are independent, every b in R² is reachable. When they're parallel, only b's on that single line are reachable."
+      tryThis="Start with col₁ = (2, 1), col₂ = (4, 2) — parallel (dependent). The column space is a LINE. Target b = (3, 2) is NOT on that line → unreachable, no solution. Move b to be on the line — say b = (4, 2) — and suddenly it's reachable. This is the column-space-membership test at work."
+    >
+      <div className="grid lg:grid-cols-[auto,1fr] gap-6 items-start">
+        <VectorCanvas width={460} height={460} range={6} vectors={vectors} extras={extras}/>
+
+        <div className="space-y-4">
+          <div className="rounded-lg p-3" style={{border: "1px solid var(--border)", background: "var(--bg-elev-2)"}}>
+            <div className="text-xs tracking-[0.2em] font-semibold mb-2" style={{color: "var(--accent)"}}>col₁ (A)</div>
+            <div className="flex items-center gap-2">
+              <NumInput value={col1[0]} onChange={x => setCol1([x, col1[1]])} width={72}/>
+              <NumInput value={col1[1]} onChange={y => setCol1([col1[0], y])} width={72}/>
+            </div>
+          </div>
+          <div className="rounded-lg p-3" style={{border: "1px solid var(--border)", background: "var(--bg-elev-2)"}}>
+            <div className="text-xs tracking-[0.2em] font-semibold mb-2" style={{color: "var(--accent-2)"}}>col₂ (A)</div>
+            <div className="flex items-center gap-2">
+              <NumInput value={col2[0]} onChange={x => setCol2([x, col2[1]])} width={72}/>
+              <NumInput value={col2[1]} onChange={y => setCol2([col2[0], y])} width={72}/>
+            </div>
+          </div>
+          <div className="rounded-lg p-3" style={{border: "1px solid var(--border)", background: "var(--bg-elev-2)"}}>
+            <div className="text-xs tracking-[0.2em] font-semibold mb-2" style={{color: "var(--accent-3)"}}>TARGET b</div>
+            <div className="flex items-center gap-2">
+              <NumInput value={b[0]} onChange={x => setB([x, b[1]])} width={72}/>
+              <NumInput value={b[1]} onChange={y => setB([b[0], y])} width={72}/>
+            </div>
+          </div>
+
+          <div className="rounded-lg p-4"
+            style={{
+              border: "1px solid " + (inSpace ? "var(--accent-3-border)" : "var(--danger-border)"),
+              background: inSpace ? "var(--accent-3-soft)" : "var(--danger-soft)",
+            }}>
+            <div className="text-xs tracking-[0.2em] font-semibold mb-1" style={{color: inSpace ? "var(--accent-3)" : "var(--danger)"}}>
+              COLUMN SPACE MEMBERSHIP
+            </div>
+            <div className="text-base font-semibold mb-2" style={{color: "var(--text)"}}>
+              {inSpace ? "b ∈ C(A) — solution(s) exist!" : "b ∉ C(A) — NO solution."}
+            </div>
+            <div className="text-xs font-mono" style={{color: "var(--text-dim)"}}>
+              det(A) = {det.toFixed(2)} · column space is {independent ? "all of R²" : "a line"}.
+            </div>
+            {inSpace && independent && (
+              <div className="text-xs font-mono mt-2" style={{color: "var(--accent-3)"}}>
+                x = ({x1.toFixed(2)}, {x2.toFixed(2)}) — unique.
+              </div>
+            )}
+            {inSpace && !independent && (
+              <div className="text-xs font-mono mt-2" style={{color: "var(--info)"}}>
+                Infinitely many x's work (parametrize by one free variable).
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </InteractiveFrame>
+  );
+}
+
+function Concept34() {
+  return (
+    <ConceptCard id="concept-3-4" label="3.4" moduleLabel="Module 3 · Linear Systems"
+      title="Understanding Ax = b Intuitively — Column Space + Null Space + Full Solution"
+      why="By now we have all the parts — column picture, span, independence. Time to wire them together. By the end of this concept, you'll have a single mental model that handles every Ax = b question: from 'does a solution exist' to 'describe ALL solutions parametrically'.">
+      <H3>The two-question test for Ax = b</H3>
+      <P>Every linear-system question reduces to two questions, in this order:</P>
+      <OL>
+        <Li><B>Is <T src="\mathbf{b}"/> in the column space of <T src="A"/>?</B> → If no, no solution. If yes, solutions exist.</Li>
+        <Li><B>Are the columns of <T src="A"/> linearly independent?</B> → If yes, exactly one solution. If no, infinitely many.</Li>
+      </OL>
+      <P>That's all of solvability in two yes/no questions. Memorise it.</P>
+
+      <H3>Question 1 — the column space C(A)</H3>
+      <P>The <B>column space</B> of A, written <T src="C(A)"/>, is the span of A's columns. It is a subspace of <T src="\mathbb{R}^m"/> (the codomain of A).</P>
+      <BT src={String.raw`C(A) = \{A\mathbf{x} : \mathbf{x} \in \mathbb{R}^n\} = \text{span}\{\text{columns of } A\}.`}/>
+      <P>By the column picture (Concept 2.3), <T src="A\mathbf{x}"/> is a linear combination of A's columns. So the OUTPUTS of A are exactly the things in <T src="C(A)"/>. If <T src="\mathbf{b}"/> is not among them, there's no way to manufacture <T src="\mathbf{b}"/> from A's columns — no solution.</P>
+
+      <Callout kind="info" title="A is 'onto' iff C(A) fills R^m">
+        <P>If the column space of A equals all of <T src="\mathbb{R}^m"/>, then EVERY <T src="\mathbf{b}"/> has a solution. This is what 'A is surjective / onto' means. For a square invertible matrix, this is automatic.</P>
+      </Callout>
+
+      <ColumnSpaceMembership/>
+
+      <H3>Question 2 — the null space N(A)</H3>
+      <P>The <B>null space</B> of A, written <T src="N(A)"/> or <T src="\ker(A)"/>, is the set of inputs that A sends to zero:</P>
+      <BT src={String.raw`N(A) = \{\mathbf{x} \in \mathbb{R}^n : A\mathbf{x} = \mathbf{0}\}.`}/>
+      <P>It is a subspace of <T src="\mathbb{R}^n"/> (the domain of A). Some observations:</P>
+      <UL>
+        <Li><B>The zero vector is always in <T src="N(A)"/></B> — <T src="A\mathbf{0} = \mathbf{0}"/> trivially.</Li>
+        <Li><B>Closed under addition and scalar multiplication</B> — same argument as span.</Li>
+        <Li><B><T src="N(A) = \{\mathbf{0}\}"/> iff A's columns are independent.</B> Because <T src="A\mathbf{x} = \mathbf{0}"/> is exactly <T src="x_1 \mathbf{a}_1 + \cdots + x_n \mathbf{a}_n = \mathbf{0}"/>, which has only the trivial solution iff the columns are independent.</Li>
+      </UL>
+
+      <Callout kind="info" title="A is 'one-to-one' iff N(A) = {0}">
+        <P>If the null space is trivial (only the zero vector), then NO non-zero input gets killed. Different inputs produce different outputs. This is what 'A is injective / one-to-one' means.</P>
+      </Callout>
+
+      <H3>The full solution structure: x = xₚ + xₙ</H3>
+      <P>Here is the most important formula in linear-system theory. If <T src="\mathbf{x}_p"/> is ANY particular solution to <T src="A\mathbf{x} = \mathbf{b}"/>, then every solution has the form:</P>
+      <BT src={String.raw`\mathbf{x} = \mathbf{x}_p + \mathbf{x}_n, \quad \text{where } \mathbf{x}_n \in N(A).`}/>
+      <P>That is: <Em>"one solution plus the entire null space".</Em></P>
+
+      <Callout kind="proof" title="Why x = xₚ + xₙ is the complete solution">
+        <P><B>Direction 1:</B> if <T src="\mathbf{x}_n \in N(A)"/>, then <T src="A(\mathbf{x}_p + \mathbf{x}_n) = A\mathbf{x}_p + A\mathbf{x}_n = \mathbf{b} + \mathbf{0} = \mathbf{b}"/>. So every such combination is a solution.</P>
+        <P><B>Direction 2:</B> suppose <T src="\mathbf{x}_*"/> is any solution. Set <T src="\mathbf{x}_n = \mathbf{x}_* - \mathbf{x}_p"/>. Then <T src="A\mathbf{x}_n = A\mathbf{x}_* - A\mathbf{x}_p = \mathbf{b} - \mathbf{b} = \mathbf{0}"/>, so <T src="\mathbf{x}_n \in N(A)"/>, and <T src="\mathbf{x}_* = \mathbf{x}_p + \mathbf{x}_n"/>. So every solution has the claimed form.</P>
+      </Callout>
+
+      <H3>Three cases in one formula</H3>
+      <P>The formula <T src="\mathbf{x} = \mathbf{x}_p + \mathbf{x}_n"/> reproduces all three solvability cases:</P>
+      <UL>
+        <Li><B>No particular solution exists</B> → no solution. (The set is empty: <T src="\mathbf{b} \notin C(A)"/>.)</Li>
+        <Li><B>Particular solution exists, <T src="N(A) = \{\mathbf{0}\}"/></B> → one solution. <T src="\mathbf{x} = \mathbf{x}_p"/> only.</Li>
+        <Li><B>Particular solution exists, <T src="N(A)"/> non-trivial</B> → infinitely many solutions. The null space has dimension <T src="n - \text{rank}(A)"/>, so the solution set is an affine subspace of that dimension.</Li>
+      </UL>
+
+      <H3>Worked example — full solution</H3>
+      <P>Solve <T src="A\mathbf{x} = \mathbf{b}"/> with <T src="A = \begin{pmatrix} 1 & 2 & 3 \\ 2 & 4 & 6 \end{pmatrix}, \mathbf{b} = \begin{pmatrix} 4 \\ 8 \end{pmatrix}"/>.</P>
+      <P><B>Step 1 — A particular solution.</B> Try <T src="x_2 = x_3 = 0"/>: <T src="x_1 = 4"/>. So <T src="\mathbf{x}_p = (4, 0, 0)"/> works (check: <T src="A\mathbf{x}_p = (4, 8)"/> ✓).</P>
+      <P><B>Step 2 — Null space.</B> Solve <T src="A\mathbf{x}_n = \mathbf{0}"/>. The two rows of A are proportional (row 2 = 2 × row 1), so the system is just <T src="x_1 + 2 x_2 + 3 x_3 = 0"/>. Letting <T src="x_2 = s, x_3 = t"/> free:</P>
+      <BT src={String.raw`\mathbf{x}_n = s \begin{pmatrix} -2 \\ 1 \\ 0 \end{pmatrix} + t \begin{pmatrix} -3 \\ 0 \\ 1 \end{pmatrix}.`}/>
+      <P><B>Step 3 — Complete solution.</B></P>
+      <BT src={String.raw`\mathbf{x} = \begin{pmatrix} 4 \\ 0 \\ 0 \end{pmatrix} + s\begin{pmatrix} -2 \\ 1 \\ 0 \end{pmatrix} + t\begin{pmatrix} -3 \\ 0 \\ 1 \end{pmatrix}, \quad s, t \in \mathbb{R}.`}/>
+      <P>A 2-parameter family of solutions. The set is an affine plane in <T src="\mathbb{R}^3"/> — translated copy of the null space, shifted by the particular solution.</P>
+
+      <Callout kind="info" title="Why the homogeneous problem Ax = 0 matters even when you want Ax = b">
+        <P>To find all solutions of <T src="A\mathbf{x} = \mathbf{b}"/>, you need ONE particular solution AND the entire null space. The null space is the homogeneous solution — exactly the kernel of A. You cannot describe the full solution to a non-homogeneous problem without first understanding the homogeneous one. This is a recurring theme in differential equations too.</P>
+      </Callout>
+
+      <Callout kind="trap" title="The two most common 'I forgot the null space' mistakes">
+        <UL>
+          <Li><B>Finding only the particular solution</B> when many solutions exist. You'll lose marks for not describing the full family.</Li>
+          <Li><B>Forgetting to verify <T src="\mathbf{b} \in C(A)"/></B> before computing. You might 'find' a solution to an inconsistent system by accident if you race through the algebra.</Li>
+        </UL>
+      </Callout>
+
+      <Callout kind="ml" title="Underdetermined ML problems live in the null space">
+        <P>When you have more parameters than data — most modern neural networks — the parameter vector <T src="\boldsymbol{\theta}"/> satisfying the training equations is non-unique. Regularization (L2, L1, dropout) is a way of picking ONE point in the affine space of solutions, by adding a term that prefers small / sparse <T src="\boldsymbol{\theta}"/>. The 'null space' of the data matrix is exactly the space of 'redundant directions' a regularizer fights against.</P>
+      </Callout>
+
+      <Callout kind="recall" title="Concept 3.4 in one breath">
+        <P>Ax = b has a solution iff b ∈ C(A). Solution is unique iff N(A) = {0}. The complete solution is x_p + N(A): one particular, plus the entire null space. The homogeneous problem Ax = 0 is the core, and the non-homogeneous problem is just 'shift by xₚ'.</P>
+      </Callout>
+
+      <ProgressPill conceptId="m3-c34"/>
+    </ConceptCard>
+  );
+}
+
+/* ════════════════════════════════════════════════════════
+   APP ROOT
+   ════════════════════════════════════════════════════════ */
+function App() {
+  useEffect(() => { hideLoading(); }, []);
+  const concepts = [
+    { id: "concept-3-1", label: "3.1", title: "Why Solve Systems?",          desc: "Real-world Ax = b — 4 scenarios that prove the question is universal." },
+    { id: "concept-3-2", label: "3.2", title: "Writing a System as Ax = b",  desc: "Equation list → matrix form → augmented matrix [A | b]." },
+    { id: "concept-3-3", label: "3.3", title: "Geometric Interpretation",    desc: "2×2 lines, 3×3 planes — 7 configurations, 3 outcomes." },
+    { id: "concept-3-4", label: "3.4", title: "Intuition Deep Dive",         desc: "Column space + null space + x = xₚ + xₙ — the full solution." },
+  ];
+  return (
+    <div className="min-h-screen">
+      <TopNav currentModule={3}/>
+      <Hero
+        moduleNum={3} totalModules={8}
+        title="Linear Systems"
+        tagline="0, 1, or ∞ — never anything else"
+        intro={
+          <>
+            Ax = b is the most-asked question in linear algebra. This module gives you the complete intuition:
+            why every system has exactly 0, 1, or ∞ solutions; how to read the answer off geometry instantly;
+            and what the full solution <T src="\mathbf{x} = \mathbf{x}_p + \mathbf{x}_n"/> really looks like.
+          </>
+        }
+        concepts={concepts}
+        stats="4 concepts · 4 interactive tools · column space + null space introduced"
+      />
+
+      {/* Problem Lab CTA */}
+      <section className="max-w-5xl mx-auto px-5 pt-2 pb-2">
+        <a href="module-03-problem-lab.html"
+          className="block rounded-2xl p-5 md:p-6 group transition-all"
+          style={{
+            background: "linear-gradient(135deg, var(--accent-soft), var(--accent-2-soft))",
+            border: "1px solid var(--accent-border)",
+            boxShadow: "var(--shadow-glow-accent)",
+          }}
+          onMouseEnter={e => e.currentTarget.style.borderColor = "var(--accent)"}
+          onMouseLeave={e => e.currentTarget.style.borderColor = "var(--accent-border)"}>
+          <div className="flex flex-wrap items-center gap-4">
+            <div style={{
+              width: 52, height: 52, borderRadius: 14,
+              background: "var(--grad-hero)", color: "white",
+              display: "inline-flex", alignItems: "center", justifyContent: "center",
+              fontSize: 22, flexShrink: 0,
+            }}>🎯</div>
+            <div className="flex-1 min-w-[260px]">
+              <div className="text-[11px] tracking-[0.2em] font-semibold mb-1" style={{color: "var(--accent)"}}>
+                MODULE 3 · PROBLEM LAB — NEW
+              </div>
+              <div className="text-[18px] md:text-[20px] font-bold leading-tight mb-1" style={{color: "var(--text)"}}>
+                Ax = b → 90-second GATE reflex.
+              </div>
+              <div className="text-[13.5px]" style={{color: "var(--text-dim)"}}>
+                36 problems · all 7 plane configurations · KILLER on col(A) characterization · timed drill mode.
+              </div>
+            </div>
+            <div className="flex items-center gap-2 px-4 py-2 rounded-xl font-semibold transition-opacity"
+              style={{background: "var(--grad-hero)", color: "white"}}>
+              Open Problem Lab →
+            </div>
+          </div>
+        </a>
+      </section>
+
+      <Concept31/>
+      <Concept32/>
+      <Concept33/>
+      <Concept34/>
+      <ModuleFooter
+        moduleNum={3}
+        nextModuleTitle="Echelon Form, Rank & the Rank-Nullity Theorem"
+        nextModuleFile="module-04-echelon-rank.html"
+        checklist={[
+          "I can spot 'Ax = b' inside real-world prose problems (chemistry, traffic, circuits, regression).",
+          "I can convert a list of equations to A, x, b, and the augmented [A | b] without error.",
+          "I can sketch the geometric case (lines / planes) and immediately predict 0, 1, or ∞ solutions.",
+          "I can describe a solution set as x = xₚ + xₙ, naming both the particular and null parts.",
+          "I can explain why 'b ∈ C(A)' and 'N(A) = {0}' are the only two yes/no questions that matter."
+        ]}
+      />
+    </div>
+  );
+}
+
+mountApp(App, 3);
+</script>
+
+</body>
+</html>

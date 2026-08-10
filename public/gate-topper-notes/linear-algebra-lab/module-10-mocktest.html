@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 10 · Mock Test — LA Mastery Hub</title>
+
+<script>
+  (function () {
+    try {
+      var t = localStorage.getItem("la-hub::theme") || "dark";
+      document.documentElement.classList.add(t === "light" ? "light" : "dark");
+    } catch (e) { document.documentElement.classList.add("dark"); }
+  })();
+</script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="theme.css">
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script>tailwind.config = { darkMode: 'class' };</script>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+
+<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone@7.25.6/babel.min.js"></script>
+
+<style>
+  .mock-question-card {
+    background: var(--bg-elev-1);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 24px;
+  }
+  .mock-option {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 14px; border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--bg-elev-1);
+    text-align: left; cursor: pointer; width: 100%;
+    color: var(--text); font-size: 14.5px;
+    transition: border-color 140ms, background 140ms;
+  }
+  .mock-option:hover:not(:disabled) { border-color: var(--accent-border); background: var(--accent-soft); }
+  .mock-option.selected { border-color: var(--accent); background: var(--accent-soft); }
+  .mock-option.correct { border-color: rgba(34,197,94,0.6); background: rgba(34,197,94,0.12); color: #22c55e; }
+  .mock-option.wrong { border-color: rgba(239,68,68,0.6); background: rgba(239,68,68,0.10); color: #fb7185; }
+  .mock-option-letter {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 26px; height: 26px; border-radius: 50%;
+    background: var(--bg-elev-3); border: 1px solid var(--border);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px; font-weight: 600; color: var(--text-dim); flex-shrink: 0;
+  }
+  .mock-nat-input {
+    background: var(--bg-elev-2); border: 1px solid var(--border);
+    border-radius: 8px; padding: 12px 16px; color: var(--text);
+    font-family: 'JetBrains Mono', monospace; font-size: 16px;
+    width: 100%; max-width: 280px;
+  }
+  .mock-nat-input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+  .mock-q-dot {
+    width: 32px; height: 32px; border-radius: 8px;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 600;
+    cursor: pointer; transition: all 140ms;
+    border: 1px solid var(--border); background: var(--bg-elev-2); color: var(--text-dim);
+  }
+  .mock-q-dot.current { border-color: var(--accent); background: var(--accent-soft); color: var(--accent); }
+  .mock-q-dot.answered { border-color: var(--accent-2-border); background: var(--accent-2-soft); color: var(--accent-2); }
+  .mock-q-dot.marked { border-color: var(--warn-border); background: var(--warn-soft); color: var(--warn); }
+  .mock-q-dot.skipped { opacity: 0.5; }
+  .mock-stat-card {
+    background: var(--bg-elev-1); border: 1px solid var(--border);
+    border-radius: 12px; padding: 18px;
+  }
+  .mock-timer {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 18px; font-weight: 700;
+    padding: 6px 14px; border-radius: 8px;
+    background: var(--bg-elev-2); border: 1px solid var(--border);
+  }
+  .mock-timer.warning { color: var(--warn); border-color: var(--warn-border); background: var(--warn-soft); }
+  .mock-timer.danger { color: var(--danger); border-color: var(--danger-border); background: var(--danger-soft); }
+  .mock-btn {
+    padding: 9px 18px; border-radius: 8px; font-weight: 600;
+    font-size: 14px; cursor: pointer; transition: opacity 0.15s ease;
+    border: none;
+  }
+  .mock-btn.primary { background: var(--grad-hero); color: white; }
+  .mock-btn.primary:hover:not(:disabled) { opacity: 0.92; }
+  .mock-btn.secondary { background: var(--bg-elev-2); border: 1px solid var(--border); color: var(--text); }
+  .mock-btn.secondary:hover { border-color: var(--accent-border); }
+  .mock-btn.warn { background: var(--warn-soft); border: 1px solid var(--warn-border); color: var(--warn); }
+  .mock-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .mod-bar {
+    height: 22px; border-radius: 4px; background: var(--bg-elev-3);
+    overflow: hidden; position: relative;
+  }
+  .mod-bar-fill {
+    height: 100%; background: linear-gradient(90deg, #22c55e, #34d399);
+    transition: width 600ms cubic-bezier(.2,.7,.2,1);
+  }
+  .mod-bar-fill.warn { background: linear-gradient(90deg, #eab308, #f59e0b); }
+  .mod-bar-fill.danger { background: linear-gradient(90deg, #ef4444, #fb7185); }
+</style>
+</head>
+<body>
+
+<div id="loading">
+  <div style="text-align:center">
+    <div class="spinner"></div>
+    <div style="font-size:13px; opacity:0.8">Loading Module 10 — Mock Test</div>
+  </div>
+</div>
+
+<div id="root"></div>
+
+<script type="text/babel" src="boilerplate.js"></script>
+
+<script type="text/babel">
+const { useState, useEffect, useMemo, useRef } = React;
+
+/* ════════════════════════════════════════════════════════
+   MOCK TEST QUESTIONS — 20 questions across M1-M8
+   ════════════════════════════════════════════════════════ */
+const QUESTIONS = [
+  /* ===== M1 — FOUNDATIONS (2 questions) ===== */
+  {
+    id: "q1", mod: 1, marks: 1, kind: "mcq",
+    question: <span>Which of the following sets of vectors in ℝ³ is linearly DEPENDENT?</span>,
+    options: [
+      "{(1, 0, 0), (0, 1, 0), (0, 0, 1)}",
+      "{(1, 1, 1), (1, 2, 3), (1, 4, 9)}",
+      "{(1, 2, 3), (4, 5, 6), (7, 8, 9)}",
+      "{(1, 0, 0), (1, 1, 0), (1, 1, 1)}",
+    ],
+    answer: "C",
+    explanation: "Set (C) is in arithmetic progression: row 2 - row 1 = row 3 - row 2 = (3,3,3). So R₁ - 2R₂ + R₃ = 0. Dependent. (A) standard basis. (B) Vandermonde det ≠ 0. (D) lower triangular det = 1.",
+    tags: ["Independence", "AP structure"],
+  },
+  {
+    id: "q2", mod: 1, marks: 2, kind: "mcq",
+    question: <span>Find scalars (a, b) such that a·(1, 2) + b·(3, −1) = (4, 1).</span>,
+    options: [ "(2, 0)", "(1, 1)", "(0, 1)", "(−1, 2)" ],
+    answer: "B",
+    explanation: "Solve a + 3b = 4 and 2a − b = 1. From eq 2: b = 2a − 1. Sub: a + 3(2a − 1) = 4 → 7a = 7 → a = 1. Then b = 1.",
+    tags: ["Linear Combinations", "LC-as-System"],
+  },
+
+  /* ===== M2 — SPAN & SUBSPACES (3 questions) ===== */
+  {
+    id: "q3", mod: 2, marks: 1, kind: "nat",
+    question: <span>Find the dimension of span{'{(1, 0, 1), (0, 1, 1), (1, 1, 2)}'} in ℝ³.</span>,
+    answer: 2, tolerance: 0,
+    explanation: "Note v₃ = v₁ + v₂. So rank = 2 (only v₁, v₂ independent). Dimension = 2 (a plane).",
+    tags: ["Span", "Dimension"],
+  },
+  {
+    id: "q4", mod: 2, marks: 2, kind: "mcq",
+    question: <span>For 3×4 matrix A with rank 2, the dimension of the null space N(A) is:</span>,
+    options: [ "1", "2", "3", "4" ],
+    answer: "B",
+    explanation: "Rank-nullity: nullity = n − rank = 4 − 2 = 2. n is COLUMNS, not rows.",
+    tags: ["Rank-Nullity", "Column Picture"],
+  },
+  {
+    id: "q5", mod: 2, marks: 1, kind: "mcq",
+    question: <span>For 2×2 matrices A, B with AB = AC, does B = C necessarily?</span>,
+    options: [
+      "Yes, always.",
+      "Yes, only if A is invertible.",
+      "Yes, only if B = 0.",
+      "No, never.",
+    ],
+    answer: "B",
+    explanation: "Cancellation requires invertibility. If A = 0, AB = AC for ANY B, C. Need det(A) ≠ 0 to cancel.",
+    tags: ["Matrix Algebra", "Invertibility"],
+  },
+
+  /* ===== M3 — LINEAR SYSTEMS (2 questions) ===== */
+  {
+    id: "q6", mod: 3, marks: 2, kind: "mcq",
+    question: <span>Three planes in ℝ³ intersect in a single LINE. The (rank A, rank [A|b]) pair is:</span>,
+    options: [
+      "(3, 3)",
+      "(2, 2)",
+      "(2, 3)",
+      "(1, 1)",
+    ],
+    answer: "B",
+    explanation: "Solution = line ⇔ nullity = 1 ⇔ rank = n - 1 = 2. Consistent: ranks match. Pair (2, 2).",
+    tags: ["Geometric Interpretation", "Rank"],
+  },
+  {
+    id: "q7", mod: 3, marks: 2, kind: "mcq",
+    question: <span>For 2×2 system x + y = 3, kx + y = 5, the system has NO solution iff:</span>,
+    options: [
+      "k = 1 and k ≠ 1 simultaneously (impossible)",
+      "k = 1",
+      "k ≠ 1",
+      "Any k",
+    ],
+    answer: "B",
+    explanation: "Parallel lines (k = 1) with different RHS (3 vs 5) → inconsistent. For k ≠ 1, unique solution exists.",
+    tags: ["Parallel Lines", "Consistency"],
+  },
+
+  /* ===== M4 — RANK & SOLUTION THEORY (4 questions) ===== */
+  {
+    id: "q8", mod: 4, marks: 1, kind: "nat",
+    question: <span>For an m×n matrix A with m = 5, n = 8 and rank 3, the nullity is ___.</span>,
+    answer: 5, tolerance: 0,
+    explanation: "Rank-nullity uses columns: nullity = n - rank = 8 - 3 = 5. NOT m - rank.",
+    tags: ["Rank-Nullity", "Trap"],
+  },
+  {
+    id: "q9", mod: 4, marks: 2, kind: "mcq",
+    question: <span>For Ax = b to have a UNIQUE solution, the necessary and sufficient conditions are:</span>,
+    options: [
+      "rank(A) = m",
+      "rank(A) = n",
+      "rank(A) = rank([A|b]) = n",
+      "rank(A) = rank([A|b])",
+    ],
+    answer: "C",
+    explanation: "Unique = existence (rank match) + uniqueness (rank = n). Rank match alone gives consistency only.",
+    tags: ["Solution Theory", "Trap"],
+  },
+  {
+    id: "q10", mod: 4, marks: 2, kind: "nat",
+    question: <span>For uvᵀ where u = (2, 3, 1)ᵀ and v = (1, 4, 2)ᵀ, the rank is ___.</span>,
+    answer: 1, tolerance: 0,
+    explanation: "Outer product of non-zero vectors always has rank 1. Each column = scalar multiple of u.",
+    tags: ["Outer Product", "Rank"],
+  },
+  {
+    id: "q11", mod: 4, marks: 2, kind: "mcq",
+    question: <span>For T: ℝ⁵ → ℝ³ with rank 2, dim(ker T) is:</span>,
+    options: [ "1", "2", "3", "5" ],
+    answer: "C",
+    explanation: "Use DOMAIN dim: dim(ker T) = dim(V) - rank = 5 - 2 = 3. NOT codomain dim (3 - 2 = 1).",
+    tags: ["Rank-Nullity", "Linear Map"],
+  },
+
+  /* ===== M5 — DETERMINANTS (3 questions) ===== */
+  {
+    id: "q12", mod: 5, marks: 1, kind: "nat",
+    question: <span>For a 4×4 matrix A with det(A) = 3, find det(2A).</span>,
+    answer: 48, tolerance: 0,
+    explanation: "det(cA) = cⁿ·det(A) = 2⁴·3 = 16·3 = 48. NOT 2·3 = 6.",
+    tags: ["det(cA)", "Trap"],
+  },
+  {
+    id: "q13", mod: 5, marks: 2, kind: "mcq",
+    question: <span>For 2×2 A with eigenvalues 2 and 5, det(A² − 4A + 3I) equals:</span>,
+    options: [ "0", "9", "−8", "Cannot determine" ],
+    answer: "C",
+    explanation: "p(λ) = λ² − 4λ + 3 = (λ−1)(λ−3). For each eigenvalue of A: p(2) = 4 − 8 + 3 = −1; p(5) = 25 − 20 + 3 = 8. det(p(A)) = product of eigenvalues = (−1) · 8 = −8.",
+    tags: ["det of p(A)", "Eigenvalues"],
+  },
+  {
+    id: "q14", mod: 5, marks: 2, kind: "mcq",
+    question: <span>The matrix <T src="A = \begin{pmatrix} 1 & 2 & 3 \\ 0 & 4 & 5 \\ 0 & 0 & 6 \end{pmatrix}"/> has det:</span>,
+    options: [ "0", "24", "1", "Cannot determine without expansion" ],
+    answer: "B",
+    explanation: "Upper triangular → det = product of diagonal = 1·4·6 = 24. Triangular shortcut.",
+    tags: ["Triangular det", "Speed"],
+  },
+
+  /* ===== M6 — EIGENVALUES (3 questions) ===== */
+  {
+    id: "q15", mod: 6, marks: 1, kind: "mcq",
+    question: <span>For 2×2 A with trace 5 and det 6, the eigenvalues are:</span>,
+    options: [ "1 and 6", "2 and 3", "−1 and 6", "−2 and −3" ],
+    answer: "B",
+    explanation: "Trace-det quadratic: λ² − 5λ + 6 = (λ − 2)(λ − 3) = 0 ⇒ λ = 2, 3. Verify: 2 + 3 = 5 = trace ✓; 2·3 = 6 = det ✓.",
+    tags: ["Trace-Det Quadratic", "20-sec method"],
+  },
+  {
+    id: "q16", mod: 6, marks: 2, kind: "mcq",
+    question: <span>If A has eigenvalues 1, 2, 3, then det(A² + A + I) equals:</span>,
+    options: [ "0", "91", "273", "Cannot determine" ],
+    answer: "C",
+    explanation: "p(λ) = λ² + λ + 1. p(1) = 3, p(2) = 7, p(3) = 13. det(p(A)) = product of eigenvalues = 3 · 7 · 13 = 273.",
+    tags: ["f(A) eigenvalues", "Polynomial"],
+  },
+  {
+    id: "q17", mod: 6, marks: 2, kind: "mcq",
+    question: <span>Real symmetric matrices have:</span>,
+    options: [
+      "Always complex eigenvalues.",
+      "Real eigenvalues and orthogonal eigenvectors (for distinct eigenvalues).",
+      "Eigenvalues only ±1.",
+      "Never diagonalizable.",
+    ],
+    answer: "B",
+    explanation: "Spectral theorem: real symmetric ⇒ real eigenvalues + orthogonal eigvecs for distinct eigvals + always diagonalizable.",
+    tags: ["Spectral Theorem", "Symmetric"],
+  },
+
+  /* ===== M7 — POWER TOOLS (2 questions) ===== */
+  {
+    id: "q18", mod: 7, marks: 2, kind: "nat",
+    question: <span>For 3×3 A with char poly λ³ − 6λ² + 11λ − 6 = 0, find det(A³ − 6A² + 11A − 6I).</span>,
+    answer: 0, tolerance: 0,
+    explanation: "Cayley-Hamilton: A satisfies its own char poly ⇒ A³ - 6A² + 11A - 6I = 0 (zero matrix) ⇒ det = 0.",
+    tags: ["Cayley-Hamilton", "Killer"],
+  },
+  {
+    id: "q19", mod: 7, marks: 2, kind: "mcq",
+    question: <span>For invertible A with eigenvalue λ, A⁻¹ has eigenvalue:</span>,
+    options: [ "λ", "1/λ", "−λ", "λ²" ],
+    answer: "B",
+    explanation: "From Av = λv: A⁻¹Av = A⁻¹λv ⇒ v = λ·A⁻¹v ⇒ A⁻¹v = (1/λ)v. Same eigenvector, eigenvalue 1/λ.",
+    tags: ["Inverse eigenvalues", "f(A) table"],
+  },
+
+  /* ===== M8 — DECOMPOSITIONS & TYPES (1 question) ===== */
+  {
+    id: "q20", mod: 8, marks: 2, kind: "mcq",
+    question: <span>A 4×4 idempotent matrix (A² = A) with trace 3 has rank:</span>,
+    options: [ "0", "1", "3", "4" ],
+    answer: "C",
+    explanation: "Idempotent: eigenvalues ∈ {0, 1}. trace = # of 1's. rank = # of non-zero eigenvalues = # of 1's = trace = 3.",
+    tags: ["Idempotent", "rank = trace"],
+  },
+];
+
+const TOTAL_MARKS = QUESTIONS.reduce((s, q) => s + q.marks, 0);
+const TOTAL_MINUTES = 40; // Suggested time for 20 questions
+
+/* ════════════════════════════════════════════════════════
+   LOCALSTORAGE
+   ════════════════════════════════════════════════════════ */
+const LS_KEY = "la-hub::mock-test-state";
+const LS_RESULTS = "la-hub::mock-test-results";
+
+function loadState() {
+  try { const v = localStorage.getItem(LS_KEY); return v ? JSON.parse(v) : null; }
+  catch { return null; }
+}
+function saveState(s) {
+  try { localStorage.setItem(LS_KEY, JSON.stringify(s)); } catch {}
+}
+function clearState() {
+  try { localStorage.removeItem(LS_KEY); } catch {}
+}
+function loadResults() {
+  try { const v = localStorage.getItem(LS_RESULTS); return v ? JSON.parse(v) : []; }
+  catch { return []; }
+}
+function saveResults(r) {
+  try { localStorage.setItem(LS_RESULTS, JSON.stringify(r)); } catch {}
+}
+
+/* ════════════════════════════════════════════════════════
+   LANDING PAGE
+   ════════════════════════════════════════════════════════ */
+function MockLanding({ onStart, previousResults }) {
+  const lastResult = previousResults.length > 0 ? previousResults[previousResults.length - 1] : null;
+
+  return (
+    <section className="max-w-4xl mx-auto px-5 py-10">
+      <div className="card p-6 md:p-9" style={{boxShadow: "var(--shadow-glow-accent)"}}>
+        <div className="inline-flex items-center gap-2 text-xs px-3 py-1.5 rounded-full mb-5"
+          style={{background: "var(--accent-soft)", border: "1px solid var(--accent-border)", color: "var(--accent)"}}>
+          <span className="pulse-dot"/> GATE-STYLE TIMED MOCK TEST
+        </div>
+        <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight mb-3" style={{color: "var(--text)"}}>
+          20 questions. <span className="gradient-text">40 minutes.</span>
+        </h1>
+        <p className="text-base max-w-2xl leading-relaxed mb-6" style={{color: "var(--text-dim)"}}>
+          A full Linear Algebra mock test mimicking GATE CS structure: 20 questions distributed across Modules 1–8,
+          mixed MCQ and NAT, 1-mark and 2-mark, with negative marking on MCQ. Per-module breakdown + weak-spot analysis at the end.
+        </p>
+
+        <div className="grid md:grid-cols-3 gap-4 mb-6">
+          <div className="mock-stat-card">
+            <div className="text-[11px] tracking-[0.18em] font-semibold mb-1" style={{color: "var(--accent)"}}>QUESTIONS</div>
+            <div className="text-[26px] font-bold" style={{color: "var(--text)"}}>20</div>
+            <div className="text-[12px]" style={{color: "var(--text-dim)"}}>distributed across M1–M8</div>
+          </div>
+          <div className="mock-stat-card">
+            <div className="text-[11px] tracking-[0.18em] font-semibold mb-1" style={{color: "var(--accent-2)"}}>TIME</div>
+            <div className="text-[26px] font-bold" style={{color: "var(--text)"}}>{TOTAL_MINUTES} min</div>
+            <div className="text-[12px]" style={{color: "var(--text-dim)"}}>~2 min/question</div>
+          </div>
+          <div className="mock-stat-card">
+            <div className="text-[11px] tracking-[0.18em] font-semibold mb-1" style={{color: "var(--accent-3)"}}>MARKS</div>
+            <div className="text-[26px] font-bold" style={{color: "var(--text)"}}>{TOTAL_MARKS}</div>
+            <div className="text-[12px]" style={{color: "var(--text-dim)"}}>negative marking applies</div>
+          </div>
+        </div>
+
+        <div className="rounded-xl p-5 mb-6" style={{background: "var(--warn-soft)", border: "1px solid var(--warn-border)"}}>
+          <div className="text-[11px] tracking-[0.18em] font-semibold mb-2" style={{color: "var(--warn)"}}>⚠ RULES</div>
+          <ul className="space-y-1.5 text-[14px]" style={{color: "var(--text)"}}>
+            <li>• <b>MCQ wrong:</b> −1/3 of question marks (1-mark: −0.33, 2-mark: −0.67).</li>
+            <li>• <b>NAT wrong:</b> No negative marking.</li>
+            <li>• <b>Skipped:</b> 0 marks.</li>
+            <li>• Timer counts down from {TOTAL_MINUTES}:00. You can navigate freely between questions.</li>
+            <li>• Auto-submits when timer hits 0.</li>
+            <li>• You can pause and resume — progress is auto-saved.</li>
+          </ul>
+        </div>
+
+        {lastResult && (
+          <div className="rounded-xl p-5 mb-6" style={{background: "var(--accent-3-soft)", border: "1px solid var(--accent-3-border)"}}>
+            <div className="text-[11px] tracking-[0.18em] font-semibold mb-2" style={{color: "var(--accent-3)"}}>🏆 LAST ATTEMPT</div>
+            <div className="flex flex-wrap gap-4 text-[14px]" style={{color: "var(--text)"}}>
+              <div>Score: <b>{lastResult.score.toFixed(2)} / {TOTAL_MARKS}</b></div>
+              <div>Accuracy: <b>{lastResult.accuracy}%</b></div>
+              <div>Time used: <b>{lastResult.timeUsed} min</b></div>
+            </div>
+          </div>
+        )}
+
+        <div className="flex flex-wrap gap-3">
+          <button className="mock-btn primary" onClick={() => onStart(false)}>
+            ▶ Start New Test
+          </button>
+          {loadState() && (
+            <button className="mock-btn secondary" onClick={() => onStart(true)}>
+              ↻ Resume Saved Attempt
+            </button>
+          )}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ════════════════════════════════════════════════════════
+   TEST RUNNER
+   ════════════════════════════════════════════════════════ */
+function MockTest({ resume, onFinish }) {
+  const initial = resume ? loadState() : null;
+  const [idx, setIdx] = useState(initial?.idx ?? 0);
+  const [answers, setAnswers] = useState(initial?.answers ?? {});
+  const [marked, setMarked] = useState(initial?.marked ?? {});
+  const [timeLeft, setTimeLeft] = useState(initial?.timeLeft ?? TOTAL_MINUTES * 60);
+  const [paused, setPaused] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+
+  // Persist state every change
+  useEffect(() => {
+    saveState({ idx, answers, marked, timeLeft });
+  }, [idx, answers, marked, timeLeft]);
+
+  // Countdown
+  useEffect(() => {
+    if (paused) return;
+    if (timeLeft <= 0) { handleFinish(); return; }
+    const t = setTimeout(() => setTimeLeft(timeLeft - 1), 1000);
+    return () => clearTimeout(t);
+  }, [timeLeft, paused]);
+
+  const q = QUESTIONS[idx];
+  const totalAnswered = Object.keys(answers).length;
+  const totalMarked = Object.keys(marked).filter(k => marked[k]).length;
+
+  const setAnswer = (val) => {
+    setAnswers({ ...answers, [q.id]: val });
+  };
+
+  const toggleMarked = () => {
+    setMarked({ ...marked, [q.id]: !marked[q.id] });
+  };
+
+  const handleFinish = () => {
+    const results = computeResults(answers, timeLeft);
+    const all = loadResults();
+    all.push(results);
+    saveResults(all);
+    clearState();
+    onFinish(results);
+  };
+
+  const minutes = Math.floor(timeLeft / 60);
+  const seconds = timeLeft % 60;
+  const timerClass = timeLeft < 60 ? "danger" : timeLeft < 300 ? "warning" : "";
+
+  return (
+    <section className="max-w-6xl mx-auto px-5 py-6">
+      {/* Header: timer + actions */}
+      <div className="flex flex-wrap items-center gap-3 mb-5 sticky top-[60px] z-30 py-3 rounded-xl"
+        style={{background: "var(--bg-overlay)", backdropFilter: "blur(12px)", border: "1px solid var(--border)"}}>
+        <div className="px-4 flex-shrink-0">
+          <div className={"mock-timer " + timerClass}>
+            ⏱ {String(minutes).padStart(2, "0")}:{String(seconds).padStart(2, "0")}
+          </div>
+        </div>
+        <div className="text-[13px] px-2" style={{color: "var(--text-dim)"}}>
+          <b>Q{idx + 1}</b> / {QUESTIONS.length}
+          <span className="ml-2 hidden md:inline">· Answered <b style={{color: "var(--accent-2)"}}>{totalAnswered}</b> · Marked <b style={{color: "var(--warn)"}}>{totalMarked}</b></span>
+        </div>
+        <div className="ml-auto flex flex-wrap gap-2 px-3">
+          <button className="mock-btn secondary" onClick={() => setPaused(p => !p)}>{paused ? "▶ Resume" : "⏸ Pause"}</button>
+          <button className="mock-btn warn" onClick={() => setShowConfirm(true)}>End Test</button>
+        </div>
+      </div>
+
+      {showConfirm && (
+        <div className="rounded-xl p-5 mb-5" style={{background: "var(--danger-soft)", border: "1px solid var(--danger-border)"}}>
+          <div className="text-[14px] mb-3" style={{color: "var(--text)"}}>
+            <b>End test now?</b> You've answered <b>{totalAnswered}</b> of <b>{QUESTIONS.length}</b> questions. Unanswered = 0 marks (no negative).
+          </div>
+          <div className="flex gap-2">
+            <button className="mock-btn warn" onClick={handleFinish}>Yes, end test</button>
+            <button className="mock-btn secondary" onClick={() => setShowConfirm(false)}>Cancel</button>
+          </div>
+        </div>
+      )}
+
+      {/* Main grid: question + side panel */}
+      <div className="grid lg:grid-cols-[1fr,260px] gap-5">
+        {/* Question */}
+        <div className="mock-question-card">
+          <div className="flex flex-wrap items-center gap-2 mb-4">
+            <span className="text-[10.5px] tracking-[0.18em] font-bold px-2 py-1 rounded-md font-mono"
+              style={{background: "var(--bg-elev-3)", color: "var(--text-dim)", border: "1px solid var(--border)"}}>
+              Q{idx + 1}
+            </span>
+            <span className="text-[10.5px] tracking-[0.15em] font-bold px-2 py-1 rounded-md"
+              style={{background: "var(--accent-soft)", color: "var(--accent)", border: "1px solid var(--accent-border)"}}>
+              M{q.mod}
+            </span>
+            <span className="text-[10.5px] tracking-[0.15em] font-bold px-2 py-1 rounded-md"
+              style={{background: q.kind === "mcq" ? "rgba(59,130,246,0.12)" : "rgba(168,85,247,0.12)",
+                       color: q.kind === "mcq" ? "#3b82f6" : "#a855f7",
+                       border: "1px solid currentColor"}}>
+              {q.kind === "mcq" ? "MCQ" : "NAT"}
+            </span>
+            <span className="text-[11px] px-2 py-1 rounded-md"
+              style={{background: "var(--bg-elev-3)", color: "var(--text-dim)", border: "1px solid var(--border)"}}>
+              {q.marks}-mark
+            </span>
+            {q.kind === "mcq" && (
+              <span className="text-[11px] px-2 py-1 rounded-md"
+                style={{background: "rgba(69,26,3,0.6)", color: "#fbbf24", border: "1px solid rgba(251,191,36,0.3)"}}>
+                ⚠ neg: −{(q.marks/3).toFixed(2)}
+              </span>
+            )}
+            <button className="ml-auto text-[12px] px-3 py-1.5 rounded-md"
+              style={{background: marked[q.id] ? "var(--warn-soft)" : "var(--bg-elev-2)",
+                       color: marked[q.id] ? "var(--warn)" : "var(--text-dim)",
+                       border: "1px solid " + (marked[q.id] ? "var(--warn-border)" : "var(--border)")}}
+              onClick={toggleMarked}>
+              {marked[q.id] ? "★ Marked" : "☆ Mark for review"}
+            </button>
+          </div>
+
+          <div className="text-[16px] leading-relaxed mb-5" style={{color: "var(--text)"}}>
+            {q.question}
+          </div>
+
+          {/* Answer area */}
+          {q.kind === "mcq" ? (
+            <div className="space-y-2 mb-5">
+              {q.options.map((opt, i) => {
+                const letter = String.fromCharCode(65 + i);
+                const selected = answers[q.id] === letter;
+                return (
+                  <button key={i} className={"mock-option " + (selected ? "selected" : "")}
+                    onClick={() => setAnswer(letter)}>
+                    <span className="mock-option-letter">{letter}</span>
+                    <span className="flex-1">{opt}</span>
+                  </button>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="mb-5">
+              <label className="text-[12px] mb-2 block" style={{color: "var(--text-dim)"}}>
+                Numerical Answer (NAT — no options)
+              </label>
+              <input type="number" step="any" className="mock-nat-input"
+                value={answers[q.id] ?? ""}
+                onChange={e => setAnswer(e.target.value === "" ? undefined : parseFloat(e.target.value))}
+                placeholder="Enter your answer..." />
+            </div>
+          )}
+
+          {/* Navigation */}
+          <div className="flex flex-wrap justify-between gap-3 pt-4" style={{borderTop: "1px solid var(--border)"}}>
+            <button className="mock-btn secondary" disabled={idx === 0}
+              onClick={() => setIdx(idx - 1)}>← Previous</button>
+            <div className="flex gap-2">
+              <button className="mock-btn secondary"
+                onClick={() => {
+                  setAnswers(a => { const copy = { ...a }; delete copy[q.id]; return copy; });
+                }}>Clear</button>
+              {idx < QUESTIONS.length - 1 ? (
+                <button className="mock-btn primary"
+                  onClick={() => setIdx(idx + 1)}>Save & Next →</button>
+              ) : (
+                <button className="mock-btn primary" onClick={() => setShowConfirm(true)}>
+                  Submit Test →
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Side panel: question navigator */}
+        <div className="mock-question-card lg:sticky lg:top-[170px]" style={{height: "fit-content"}}>
+          <div className="text-[11px] tracking-[0.18em] font-semibold mb-3" style={{color: "var(--accent)"}}>QUESTION NAVIGATOR</div>
+          <div className="grid grid-cols-5 gap-1.5 mb-4">
+            {QUESTIONS.map((qq, i) => {
+              const answered = answers[qq.id] !== undefined;
+              const isMarked = marked[qq.id];
+              let cls = "mock-q-dot";
+              if (i === idx) cls += " current";
+              else if (answered && isMarked) cls += " marked";
+              else if (answered) cls += " answered";
+              return (
+                <button key={qq.id} className={cls} onClick={() => setIdx(i)} title={`Q${i+1} (M${qq.mod}, ${qq.marks}-mark)`}>
+                  {i + 1}
+                </button>
+              );
+            })}
+          </div>
+          <div className="space-y-1.5 text-[11px]" style={{color: "var(--text-dim)"}}>
+            <div className="flex items-center gap-2"><span className="mock-q-dot current" style={{width: 14, height: 14, padding: 0}}/> Current</div>
+            <div className="flex items-center gap-2"><span className="mock-q-dot answered" style={{width: 14, height: 14, padding: 0}}/> Answered</div>
+            <div className="flex items-center gap-2"><span className="mock-q-dot marked" style={{width: 14, height: 14, padding: 0}}/> Answered + marked</div>
+            <div className="flex items-center gap-2"><span className="mock-q-dot" style={{width: 14, height: 14, padding: 0}}/> Unanswered</div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ════════════════════════════════════════════════════════
+   RESULTS COMPUTATION
+   ════════════════════════════════════════════════════════ */
+function computeResults(answers, timeLeft) {
+  let score = 0, correct = 0, incorrect = 0, skipped = 0;
+  const perMod = {};
+  const perQ = [];
+
+  for (const q of QUESTIONS) {
+    const userAns = answers[q.id];
+    const mod = q.mod;
+    if (!perMod[mod]) perMod[mod] = { score: 0, marks: 0, correct: 0, incorrect: 0, skipped: 0, total: 0 };
+    perMod[mod].marks += q.marks;
+    perMod[mod].total += 1;
+
+    let result = "skipped", marks = 0;
+    if (userAns === undefined || userAns === null || userAns === "") {
+      skipped += 1; perMod[mod].skipped += 1;
+    } else if (q.kind === "mcq") {
+      if (userAns === q.answer) {
+        result = "correct"; marks = q.marks; correct += 1;
+        perMod[mod].correct += 1; perMod[mod].score += q.marks;
+      } else {
+        result = "incorrect"; marks = -q.marks / 3; incorrect += 1;
+        perMod[mod].incorrect += 1; perMod[mod].score -= q.marks / 3;
+      }
+    } else {
+      const userVal = parseFloat(userAns);
+      const tol = q.tolerance != null ? q.tolerance : 0.01;
+      if (!isNaN(userVal) && Math.abs(userVal - q.answer) <= tol) {
+        result = "correct"; marks = q.marks; correct += 1;
+        perMod[mod].correct += 1; perMod[mod].score += q.marks;
+      } else {
+        result = "incorrect"; marks = 0; incorrect += 1;
+        perMod[mod].incorrect += 1;
+      }
+    }
+    score += marks;
+    perQ.push({ id: q.id, mod, marks: q.marks, result, gained: marks, userAns, correctAns: q.answer ?? q.answer });
+  }
+
+  const attempted = correct + incorrect;
+  const accuracy = attempted > 0 ? Math.round((correct / attempted) * 100) : 0;
+  const timeUsedSec = TOTAL_MINUTES * 60 - timeLeft;
+  const timeUsed = Math.round(timeUsedSec / 60);
+
+  return {
+    when: Date.now(),
+    score, accuracy, correct, incorrect, skipped, timeUsed,
+    perMod, perQ,
+  };
+}
+
+/* ════════════════════════════════════════════════════════
+   RESULTS PAGE
+   ════════════════════════════════════════════════════════ */
+function MockResults({ results, onRetry, onReview }) {
+  const scorePct = Math.round((results.score / TOTAL_MARKS) * 100);
+  const weakMods = Object.entries(results.perMod)
+    .filter(([k, v]) => v.total > 0 && v.score / v.marks < 0.5)
+    .map(([k, v]) => parseInt(k))
+    .sort();
+
+  return (
+    <section className="max-w-5xl mx-auto px-5 py-8">
+      <div className="card p-6 md:p-9" style={{boxShadow: "var(--shadow-glow-accent)"}}>
+        <div className="inline-flex items-center gap-2 text-xs px-3 py-1.5 rounded-full mb-5"
+          style={{background: "var(--accent-soft)", border: "1px solid var(--accent-border)", color: "var(--accent)"}}>
+          <span className="pulse-dot"/> MOCK TEST — RESULTS
+        </div>
+        <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight mb-3" style={{color: "var(--text)"}}>
+          {results.score >= TOTAL_MARKS * 0.75 ? "Strong attempt." :
+           results.score >= TOTAL_MARKS * 0.5 ? "Solid baseline." :
+           "Plenty to revise."}
+          <span className="block gradient-text mt-1">
+            {results.score.toFixed(2)} / {TOTAL_MARKS} marks
+          </span>
+        </h1>
+
+        {/* Summary cards */}
+        <div className="grid md:grid-cols-4 gap-4 mb-6 mt-6">
+          <div className="mock-stat-card">
+            <div className="text-[11px] tracking-[0.18em] font-semibold mb-1" style={{color: "var(--accent)"}}>SCORE</div>
+            <div className="text-[28px] font-bold" style={{color: scorePct >= 70 ? "#22c55e" : scorePct >= 40 ? "#eab308" : "#fb7185"}}>{scorePct}%</div>
+          </div>
+          <div className="mock-stat-card">
+            <div className="text-[11px] tracking-[0.18em] font-semibold mb-1" style={{color: "var(--accent-3)"}}>CORRECT</div>
+            <div className="text-[28px] font-bold" style={{color: "var(--accent-3)"}}>{results.correct}</div>
+            <div className="text-[11px]" style={{color: "var(--text-dim)"}}>of {QUESTIONS.length}</div>
+          </div>
+          <div className="mock-stat-card">
+            <div className="text-[11px] tracking-[0.18em] font-semibold mb-1" style={{color: "var(--danger)"}}>INCORRECT</div>
+            <div className="text-[28px] font-bold" style={{color: "var(--danger)"}}>{results.incorrect}</div>
+            <div className="text-[11px]" style={{color: "var(--text-dim)"}}>negative marking applied</div>
+          </div>
+          <div className="mock-stat-card">
+            <div className="text-[11px] tracking-[0.18em] font-semibold mb-1" style={{color: "var(--warn)"}}>SKIPPED</div>
+            <div className="text-[28px] font-bold" style={{color: "var(--warn)"}}>{results.skipped}</div>
+            <div className="text-[11px]" style={{color: "var(--text-dim)"}}>0 penalty</div>
+          </div>
+        </div>
+
+        {/* Time used */}
+        <div className="rounded-xl p-4 mb-6" style={{background: "var(--bg-elev-2)", border: "1px solid var(--border)"}}>
+          <div className="flex flex-wrap items-center gap-4 text-[14px]" style={{color: "var(--text)"}}>
+            <div>⏱ Time used: <b>{results.timeUsed} min</b> of {TOTAL_MINUTES} min</div>
+            <div>Accuracy: <b>{results.accuracy}%</b> (correct / attempted)</div>
+          </div>
+        </div>
+
+        {/* Per-module breakdown */}
+        <h2 className="text-2xl font-bold mt-8 mb-3" style={{color: "var(--text)"}}>Per-module breakdown</h2>
+        <div className="space-y-2 mb-6">
+          {Object.entries(results.perMod).sort((a, b) => parseInt(a[0]) - parseInt(b[0])).map(([mod, stats]) => {
+            const pct = stats.marks > 0 ? Math.round((stats.score / stats.marks) * 100) : 0;
+            const fillCls = pct >= 70 ? "" : pct >= 40 ? "warn" : "danger";
+            const modTitle = (window.MODULES.find(m => m.num === parseInt(mod)) || {}).title || `M${mod}`;
+            return (
+              <div key={mod} className="grid grid-cols-[80px,1fr,200px] gap-3 items-center">
+                <div className="text-[13px] font-mono" style={{color: "var(--accent)"}}>M{mod}</div>
+                <div className="mod-bar">
+                  <div className={"mod-bar-fill " + fillCls} style={{width: pct + "%"}}/>
+                </div>
+                <div className="text-[12px]" style={{color: "var(--text-dim)"}}>
+                  <b style={{color: "var(--text)"}}>{stats.score.toFixed(2)}/{stats.marks}</b> · {stats.correct}/{stats.total} correct
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Weak spots */}
+        {weakMods.length > 0 && (
+          <div className="rounded-xl p-5 mb-6" style={{background: "var(--danger-soft)", border: "1px solid var(--danger-border)"}}>
+            <div className="text-[11px] tracking-[0.18em] font-semibold mb-2" style={{color: "var(--danger)"}}>⚠ WEAK SPOTS (scored {"<"} 50%)</div>
+            <div className="text-[14px] mb-3" style={{color: "var(--text)"}}>
+              Focus your next study session here. The Problem Lab links below jump straight into targeted practice.
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {weakMods.map(m => {
+                const mod = window.MODULES.find(x => x.num === m);
+                if (!mod || !mod.lab) return null;
+                return (
+                  <a key={m} href={mod.lab} className="text-[12px] px-3 py-1.5 rounded-md inline-flex items-center gap-1.5"
+                    style={{background: "var(--bg-elev-2)", border: "1px solid var(--danger-border)", color: "var(--text)"}}>
+                    🎯 M{m} · {mod.title} → Problem Lab
+                  </a>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* Question-by-question review */}
+        <details className="mb-6">
+          <summary className="cursor-pointer text-[14px] font-semibold py-2" style={{color: "var(--accent-2)"}}>
+            ▼ Question-by-question review
+          </summary>
+          <div className="space-y-2 mt-3">
+            {results.perQ.map((r, i) => {
+              const q = QUESTIONS.find(x => x.id === r.id);
+              const bgCls = r.result === "correct" ? "var(--accent-3-soft)" :
+                            r.result === "incorrect" ? "var(--danger-soft)" : "var(--bg-elev-2)";
+              const border = r.result === "correct" ? "var(--accent-3-border)" :
+                              r.result === "incorrect" ? "var(--danger-border)" : "var(--border)";
+              return (
+                <div key={r.id} className="rounded-lg p-3" style={{background: bgCls, border: "1px solid " + border}}>
+                  <div className="flex flex-wrap items-center gap-2 mb-2 text-[12px]">
+                    <span className="font-mono font-bold" style={{color: "var(--text)"}}>Q{i+1}</span>
+                    <span style={{color: "var(--text-dim)"}}>M{r.mod}</span>
+                    <span style={{color: "var(--text-dim)"}}>·</span>
+                    <span style={{color: "var(--text-dim)"}}>{q.marks}-mark</span>
+                    <span className="ml-auto font-bold" style={{
+                      color: r.result === "correct" ? "#22c55e" : r.result === "incorrect" ? "#fb7185" : "var(--text-faded)"
+                    }}>
+                      {r.result === "correct" ? "✓ +" + r.gained : r.result === "incorrect" ? (r.gained < 0 ? r.gained.toFixed(2) : "0") : "skipped"}
+                    </span>
+                  </div>
+                  <div className="text-[13.5px] mb-2" style={{color: "var(--text)"}}>{q.question}</div>
+                  <div className="text-[12.5px] mb-1" style={{color: "var(--text-dim)"}}>
+                    Your answer: <b style={{color: "var(--text)"}}>{r.userAns ?? "—"}</b>
+                    {q.answer !== undefined && (
+                      <span className="ml-3">Correct: <b style={{color: "var(--accent-3)"}}>{q.answer}</b></span>
+                    )}
+                  </div>
+                  <div className="text-[12.5px]" style={{color: "var(--text)"}}>
+                    <b style={{color: "var(--accent-2)"}}>Explanation:</b> {q.explanation}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </details>
+
+        <div className="flex flex-wrap gap-3">
+          <button className="mock-btn primary" onClick={onRetry}>↻ Try Again</button>
+          <a href="module-09-cheatsheet.html" className="mock-btn secondary" style={{textDecoration: "none"}}>📋 Open Cheat Sheet</a>
+          <a href="index.html" className="mock-btn secondary" style={{textDecoration: "none"}}>← Back to Hub</a>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ════════════════════════════════════════════════════════
+   APP ROOT
+   ════════════════════════════════════════════════════════ */
+function App() {
+  useEffect(() => { hideLoading(); }, []);
+  const [phase, setPhase] = useState("landing"); // "landing" | "test" | "results"
+  const [results, setResults] = useState(null);
+  const [resumeFlag, setResumeFlag] = useState(false);
+  const previousResults = loadResults();
+
+  return (
+    <div className="min-h-screen">
+      <TopNav currentModule={10}/>
+      {phase === "landing" && (
+        <MockLanding
+          onStart={(resume) => { setResumeFlag(resume); setPhase("test"); }}
+          previousResults={previousResults}
+        />
+      )}
+      {phase === "test" && (
+        <MockTest
+          resume={resumeFlag}
+          onFinish={(r) => { setResults(r); setPhase("results"); }}
+        />
+      )}
+      {phase === "results" && (
+        <MockResults
+          results={results}
+          onRetry={() => { clearState(); setResults(null); setPhase("landing"); }}
+        />
+      )}
+    </div>
+  );
+}
+
+mountApp(App, 10);
+</script>
+
+</body>
+</html>

@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LA Mastery Hub — GATE CS · DA · PGEE</title>
+
+<script>
+  (function () {
+    try {
+      var t = localStorage.getItem("la-hub::theme") || "dark";
+      document.documentElement.classList.add(t === "light" ? "light" : "dark");
+    } catch (e) { document.documentElement.classList.add("dark"); }
+  })();
+</script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="theme.css">
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script>tailwind.config = { darkMode: 'class' };</script>
+
+<style>
+  .module-tile { transition: transform 240ms cubic-bezier(.2,.7,.2,1), border-color 240ms, box-shadow 240ms, background-color 240ms; }
+  .module-tile:hover { transform: translateY(-4px); border-color: var(--accent); background: var(--accent-soft); box-shadow: var(--shadow-md), var(--shadow-glow-accent); }
+  .module-tile.locked { opacity: 0.55; cursor: not-allowed; }
+  .module-tile.locked:hover { transform: none; border-color: var(--border); background: var(--bg-elev-1); box-shadow: none; }
+</style>
+</head>
+
+<body>
+
+<div class="relative overflow-hidden">
+
+  <!-- ===== Header ===== -->
+  <header class="relative z-10 max-w-7xl mx-auto px-5 py-5 flex items-center gap-3">
+    <div class="w-10 h-10 rounded-xl flex items-center justify-center font-bold" style="background: var(--grad-hero); color: white;">LA</div>
+    <div class="leading-tight">
+      <div class="font-bold text-lg">Mastery Hub</div>
+      <div class="text-xs" style="color: var(--text-faded);">Linear Algebra · GATE CS · GATE DA · IIITH PGEE</div>
+    </div>
+    <div class="ml-auto flex items-center gap-3">
+      <div class="hidden md:flex items-center gap-2 text-sm" style="color: var(--text-dim);">
+        <span class="pulse-dot"></span> Live build
+      </div>
+      <button id="themeBtn" class="theme-toggle" title="Toggle theme" aria-label="Toggle theme">
+        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="4"/>
+          <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>
+        </svg>
+        <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- ===== Hero ===== -->
+  <section class="relative">
+    <div class="grid-bg absolute inset-0" style="opacity: 0.45;"></div>
+    <div class="absolute inset-0" style="background: radial-gradient(800px 400px at 20% 0%, var(--accent-soft), transparent 60%), radial-gradient(700px 400px at 80% 20%, var(--accent-2-soft), transparent 60%);"></div>
+    <div class="relative max-w-5xl mx-auto px-5 pt-6 pb-12 md:pt-12 md:pb-16">
+      <div class="inline-flex items-center gap-2 text-xs px-3 py-1.5 rounded-full mb-6"
+        style="background: var(--accent-soft); border: 1px solid var(--accent-border); color: var(--accent);">
+        <span class="pulse-dot"></span> Complete · 8 modules + cheat sheet + mock test + theorems vault · 351 problem-lab questions
+      </div>
+      <h1 class="text-4xl md:text-6xl font-extrabold tracking-tight leading-[1.04] mb-5" style="color: var(--text);">
+        Every concept.
+        <span class="block gradient-text">Every intuition. Every trap.</span>
+      </h1>
+      <p class="text-lg max-w-3xl leading-relaxed" style="color: var(--text-dim);">
+        A complete, interactive learning system for Linear Algebra — built concept by concept, from first principles,
+        with an interactive tool for every idea. Pick a module to start, or jump in at Module 1.
+      </p>
+
+      <div class="mt-7 flex flex-wrap gap-3">
+        <a href="module-01-foundations.html"
+          class="inline-flex items-center gap-2 px-5 py-3 rounded-xl font-semibold transition-opacity"
+          style="background: var(--grad-hero); color: white;">
+          Start with Module 1 →
+        </a>
+        <a href="module-10-mocktest.html"
+          class="inline-flex items-center gap-2 px-5 py-3 rounded-xl font-semibold transition-colors"
+          style="background: var(--accent-soft); border: 1px solid var(--accent-border); color: var(--accent);">
+          🎯 Take Mock Test
+        </a>
+        <a href="#modules"
+          class="inline-flex items-center gap-2 px-5 py-3 rounded-xl font-semibold transition-colors"
+          style="background: var(--bg-elev-1); border: 1px solid var(--border); color: var(--text);">
+          Browse all modules
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Modules grid ===== -->
+  <section id="modules" class="relative max-w-7xl mx-auto px-5 pb-20">
+    <div class="text-sm uppercase tracking-[0.2em] mb-4" style="color: var(--text-dim);">Modules</div>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="moduleGrid"></div>
+  </section>
+
+  <!-- ===== Footer ===== -->
+  <footer class="max-w-7xl mx-auto px-5 py-10 text-center text-xs" style="border-top: 1px solid var(--border); color: var(--text-faded);">
+    Built concept by concept · Module-by-module delivery · No shallow explanations.
+  </footer>
+
+</div>
+
+<script>
+  // ── Theme toggle ──
+  document.getElementById("themeBtn").addEventListener("click", function () {
+    var root = document.documentElement;
+    var next = root.classList.contains("light") ? "dark" : "light";
+    root.classList.add("theme-switching");
+    root.classList.remove("light", "dark");
+    root.classList.add(next);
+    try { localStorage.setItem("la-hub::theme", next); } catch {}
+    setTimeout(function () { root.classList.remove("theme-switching"); }, 360);
+  });
+
+  // ── Modules ──
+  var MODULES = [
+    { num: 1,  title: "Foundations",                  desc: "Why LA · vectors · linear combinations · independence",       file: "module-01-foundations.html",    ready: true,  badge: "READY", lab: "module-01-problem-lab.html" },
+    { num: 2,  title: "Span, Subspaces & Column Picture", desc: "Span · basis · dim · the column picture · 4 perspectives", file: "module-02-span-subspaces.html", ready: true,  badge: "READY", lab: "module-02-problem-lab.html" },
+    { num: 3,  title: "Linear Systems",               desc: "Ax = b · geometric interpretation · column & null space",     file: "module-03-systems.html",        ready: true,  badge: "READY", lab: "module-03-problem-lab.html" },
+    { num: 4,  title: "Echelon, Rank & Null Space",   desc: "REF · RREF · Gaussian elimination · rank-nullity · solution theory", file: "module-04-echelon-rank.html", ready: true,  badge: "READY", lab: "module-04-problem-lab.html" },
+    { num: 5,  title: "Determinants, Inverse & Cramer", desc: "Geometric meaning · 8 properties · inverse · Cramer",       file: "module-05-determinants.html",   ready: true,  badge: "READY", lab: "module-05-problem-lab.html" },
+    { num: 6,  title: "Eigenvalues & Eigenvectors",   desc: "Special directions · char. eq. · multiplicity · symmetric magic", file: "module-06-eigenvalues.html",   ready: true,  badge: "READY", lab: "module-06-problem-lab.html" },
+    { num: 7,  title: "Eigenvalue Power Tools",       desc: "Cayley-Hamilton · AB vs BA · diagonalization · 3 GATE PYQs",  file: "module-07-eigen-power.html",    ready: true,  badge: "READY", lab: "module-07-problem-lab.html" },
+    { num: 8,  title: "Decompositions & Matrix Types", desc: "LU · 12 matrix types · eigenvalue behaviour each",            file: "module-08-decompositions.html", ready: true,  badge: "READY", lab: "module-08-problem-lab.html" },
+    { num: 9,  title: "Cheat Sheet",                  desc: "Every formula, theorem, classification — one scrollable page", file: "module-09-cheatsheet.html",     ready: true,  badge: "READY" },
+    { num: 10, title: "Full GATE Mock Test",          desc: "20 timed questions · per-module breakdown · weak-spot analysis", file: "module-10-mocktest.html",     ready: true, badge: "NEW" },
+    { num: 11, title: "Theorems Vault",               desc: "Every theorem · statement · proof · intuition · edge cases · 16 categories", file: "module-11-theorems.html",   ready: true, badge: "NEW" },
+  ];
+
+  var grid = document.getElementById("moduleGrid");
+  MODULES.forEach(function (m) {
+    var labHtml = m.lab
+      ? '<a href="' + m.lab + '" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold mt-3" '
+        + 'style="background: var(--accent-2-soft); border: 1px solid var(--accent-2-border); color: var(--accent-2); text-decoration: none;" '
+        + 'onclick="event.stopPropagation();">'
+        + '🎯 Problem Lab'
+        + '</a>'
+      : '';
+    var html = '<div class="module-tile rounded-2xl p-6 block' + (m.ready ? "" : " locked") + '" '
+      + 'style="border: 1px solid var(--border); background: var(--bg-elev-1); color: var(--text); position: relative;">'
+      + '<a href="' + (m.ready ? m.file : "#") + '" style="text-decoration: none; color: inherit; display: block;" '
+      + (m.ready ? '' : 'onclick="event.preventDefault();"') + '>'
+      + '<div class="flex items-center justify-between mb-3">'
+      + '<span class="text-xs px-2 py-1 rounded-md font-mono" style="background: ' + (m.ready ? "var(--accent-3-soft)" : "var(--bg-elev-3)") + '; color: ' + (m.ready ? "var(--accent-3)" : "var(--text-faded)") + '; border: 1px solid ' + (m.ready ? "var(--accent-3-border)" : "var(--border)") + ';">' + m.badge + '</span>'
+      + '<span class="font-mono text-sm" style="color: var(--accent);">M' + m.num + '</span>'
+      + '</div>'
+      + '<h3 class="text-lg font-bold mb-1" style="color: var(--text);">' + m.title + '</h3>'
+      + '<p class="text-sm leading-relaxed" style="color: var(--text-dim);">' + m.desc + '</p>'
+      + '</a>'
+      + labHtml
+      + '</div>';
+    grid.insertAdjacentHTML("beforeend", html);
+  });
+</script>
+</body>
+</html>

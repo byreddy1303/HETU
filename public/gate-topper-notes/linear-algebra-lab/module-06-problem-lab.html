@@ -1,0 +1,3006 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 6 · Problem Lab — LA Mastery Hub</title>
+
+<script>
+  (function () {
+    try {
+      var t = localStorage.getItem("la-hub::theme") || "dark";
+      document.documentElement.classList.add(t === "light" ? "light" : "dark");
+    } catch (e) {
+      document.documentElement.classList.add("dark");
+    }
+  })();
+</script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="theme.css">
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = { darkMode: 'class' };
+</script>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+
+<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<!-- Babel standalone is NOT loaded for this module; we use the precompiled bundle below -->
+
+
+<style>
+  /* Problem Lab specific styles */
+  .pl-difficulty-easy   { background: rgba(34, 197, 94, 0.12);  color: #22c55e; border: 1px solid rgba(34, 197, 94, 0.35); }
+  .pl-difficulty-medium { background: rgba(234, 179, 8, 0.12);  color: #eab308; border: 1px solid rgba(234, 179, 8, 0.35); }
+  .pl-difficulty-hard   { background: rgba(249, 115, 22, 0.12); color: #f97316; border: 1px solid rgba(249, 115, 22, 0.35); }
+  .pl-difficulty-killer { background: rgba(239, 68, 68, 0.12);  color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.35); }
+  .pl-type-mcq          { background: rgba(59, 130, 246, 0.12); color: #3b82f6; border: 1px solid rgba(59, 130, 246, 0.35); }
+  .pl-type-nat          { background: rgba(168, 85, 247, 0.12); color: #a855f7; border: 1px solid rgba(168, 85, 247, 0.35); }
+  .pl-type-pyq          { background: rgba(245, 158, 11, 0.12); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.35); font-weight: 700; }
+
+  .pl-correct  { animation: pl-flash-green 0.6s ease-out; }
+  .pl-wrong    { animation: pl-flash-red   0.6s ease-out; }
+
+  @keyframes pl-flash-green {
+    0%   { background: rgba(34, 197, 94, 0.3);  }
+    100% { background: transparent; }
+  }
+  @keyframes pl-flash-red {
+    0%   { background: rgba(239, 68, 68, 0.3); }
+    100% { background: transparent; }
+  }
+
+  .pl-neg-banner {
+    background: rgba(69, 26, 3, 0.6);
+    color: #fbbf24;
+    border: 1px solid rgba(251, 191, 36, 0.3);
+    font-size: 12px;
+    padding: 6px 10px;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .pl-skip-attempt {
+    background: rgba(59, 130, 246, 0.10);
+    border: 1px solid rgba(59, 130, 246, 0.30);
+    color: #60a5fa;
+    font-size: 12px;
+    padding: 4px 10px;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .pl-skip-skip {
+    background: rgba(244, 114, 182, 0.10);
+    border: 1px solid rgba(244, 114, 182, 0.30);
+    color: #f472b6;
+    font-size: 12px;
+    padding: 4px 10px;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .pl-tech-card {
+    border-left: 3px solid #3b82f6;
+    background: var(--bg-elev-1);
+    border-radius: 10px;
+    padding: 18px;
+  }
+
+  .pl-danger-zone {
+    border-left: 3px solid #ef4444;
+    background: rgba(239, 68, 68, 0.06);
+    border-radius: 6px;
+    padding: 12px;
+    margin-top: 14px;
+  }
+
+  .pl-mistake-card {
+    border-left: 3px solid #ef4444;
+    background: var(--bg-elev-1);
+    border-radius: 10px;
+    padding: 18px;
+  }
+
+  .pl-wrong-solution {
+    background: var(--bg-elev-3);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 12px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--text);
+    white-space: pre-wrap;
+  }
+
+  .pl-wrong-line {
+    padding: 4px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.15s ease;
+  }
+  .pl-wrong-line:hover {
+    background: rgba(251, 113, 133, 0.08);
+  }
+  .pl-wrong-line.error-found {
+    background: rgba(239, 68, 68, 0.25);
+    border-left: 3px solid #ef4444;
+    padding-left: 8px;
+  }
+
+  .pl-tab-pill {
+    padding: 8px 14px;
+    border-radius: 9999px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.18s ease;
+    border: 1px solid var(--border);
+    background: var(--bg-elev-1);
+    color: var(--text-dim);
+  }
+  .pl-tab-pill.active {
+    background: var(--accent-soft);
+    border-color: var(--accent-border);
+    color: var(--accent);
+  }
+  .pl-tab-pill:hover:not(.active) {
+    color: var(--text);
+    border-color: var(--border-strong);
+  }
+
+  .pl-option-btn {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--bg-elev-1);
+    text-align: left;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    width: 100%;
+    color: var(--text);
+    font-size: 14.5px;
+    font-family: 'Inter', 'Cambria Math', 'STIX Two Math', 'Symbola', system-ui, sans-serif;
+  }
+  .pl-option-btn .katex {
+    font-size: 1.08em !important;
+  }
+  .pl-option-btn:hover:not(:disabled) {
+    border-color: var(--accent-border);
+    background: var(--accent-soft);
+  }
+  .pl-option-btn:disabled { cursor: default; opacity: 0.85; }
+  .pl-option-btn.selected {
+    border-color: var(--accent);
+    background: var(--accent-soft);
+  }
+  .pl-option-btn.correct {
+    border-color: rgba(34, 197, 94, 0.6);
+    background: rgba(34, 197, 94, 0.12);
+    color: #22c55e;
+  }
+  .pl-option-btn.wrong-choice {
+    border-color: rgba(239, 68, 68, 0.6);
+    background: rgba(239, 68, 68, 0.10);
+    color: #fb7185;
+  }
+
+  .pl-option-letter {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: var(--bg-elev-3);
+    border: 1px solid var(--border);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-dim);
+    flex-shrink: 0;
+  }
+
+  .pl-nat-input {
+    background: var(--bg-elev-2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 16px;
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 16px;
+    width: 100%;
+    max-width: 280px;
+  }
+  .pl-nat-input:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+  }
+
+  .pl-submit-btn {
+    padding: 9px 22px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    transition: opacity 0.15s ease;
+    background: var(--grad-hero);
+    color: white;
+    border: none;
+  }
+  .pl-submit-btn:hover:not(:disabled) { opacity: 0.92; }
+  .pl-submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .pl-progress-bar {
+    height: 6px;
+    background: var(--bg-elev-3);
+    border-radius: 9999px;
+    overflow: hidden;
+  }
+  .pl-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #22c55e, #34d399);
+    transition: width 0.3s ease;
+  }
+  .pl-progress-fill.warning { background: linear-gradient(90deg, #eab308, #f59e0b); }
+  .pl-progress-fill.danger  { background: linear-gradient(90deg, #ef4444, #fb7185); }
+
+  .pl-hint-box {
+    background: var(--accent-2-soft);
+    border: 1px solid var(--accent-2-border);
+    border-radius: 8px;
+    padding: 14px;
+    color: var(--text);
+  }
+
+  .pl-layer-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+  }
+  .pl-layer-num {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: var(--grad-hero);
+    color: white;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 14px;
+  }
+  .pl-layer-title {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: -0.01em;
+  }
+
+  /* ─────────────────────────────────────────────────────────────
+     MATH VISIBILITY — KaTeX + Unicode math characters
+     ───────────────────────────────────────────────────────────── */
+  /* KaTeX inline math: bumped size, brighter color, slight glow */
+  .katex {
+    font-size: 1.12em !important;
+    color: #fef3c7 !important;       /* warm cream — high contrast on dark */
+    text-shadow: 0 0 1px rgba(254, 243, 199, 0.25);
+  }
+  html.light .katex {
+    color: #4338ca !important;       /* indigo on light theme */
+    text-shadow: none;
+  }
+  .katex .mord, .katex .mbin, .katex .mrel, .katex .mopen, .katex .mclose,
+  .katex .mpunct, .katex .minner, .katex .mop {
+    color: inherit !important;
+  }
+  /* Display-mode (block) math — even bigger */
+  .katex-display > .katex {
+    font-size: 1.2em !important;
+  }
+  /* KaTeX matrices and arrays — ensure brackets visible */
+  .katex .delimsizing,
+  .katex .delim-size1,
+  .katex .delim-size2,
+  .katex .delim-size3,
+  .katex .delim-size4 {
+    color: inherit !important;
+  }
+
+  /* Unicode math characters inside problem/solution prose
+     — vectors, subscripts, Greek letters, relations.
+     Forces font that supports them on macOS/Windows/Linux. */
+  .pl-prose {
+    font-feature-settings: "ss01" 1, "cv11" 1;
+    font-variant-numeric: tabular-nums;
+  }
+  .pl-prose,
+  .pl-prose * {
+    /* fallback stack that supports ℝ ℂ ℕ ℤ ℚ ‖ ⇒ ∑ ∏ ∈ ∉ ⊆ ⊇ ∪ ∩ etc. */
+    font-family: 'Inter', 'SF Pro Text', 'Cambria Math', 'STIX Two Math',
+                 'Latin Modern Math', 'Symbola', 'Arial Unicode MS',
+                 system-ui, -apple-system, sans-serif;
+  }
+  /* Highlight inline math-like tokens — anything in a span we mark */
+  .pl-math {
+    font-family: 'JetBrains Mono', 'SF Mono', 'Cambria Math', monospace;
+    color: #fef3c7;
+    background: rgba(254, 243, 199, 0.06);
+    padding: 1px 5px;
+    border-radius: 4px;
+    font-weight: 500;
+    font-size: 0.95em;
+    border: 1px solid rgba(254, 243, 199, 0.15);
+  }
+  html.light .pl-math {
+    color: #4338ca;
+    background: rgba(67, 56, 202, 0.08);
+    border: 1px solid rgba(67, 56, 202, 0.22);
+  }
+
+  /* Pre-formatted matrix / step displays inside solutions */
+  .pl-prose .matrix-block,
+  .pl-prose pre {
+    font-family: 'JetBrains Mono', monospace;
+    background: var(--bg-elev-3);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 10px 14px;
+    color: #fef3c7;
+    font-size: 13.5px;
+    white-space: pre;
+    overflow-x: auto;
+    line-height: 1.7;
+    margin: 8px 0;
+  }
+  html.light .pl-prose .matrix-block,
+  html.light .pl-prose pre {
+    color: #4338ca;
+  }
+
+  /* Bigger, brighter sub/superscripts in solution prose */
+  .pl-prose sub, .pl-prose sup {
+    font-size: 0.78em;
+    line-height: 1;
+    color: #fbbf24;
+  }
+  html.light .pl-prose sub, html.light .pl-prose sup {
+    color: #b45309;
+  }
+
+  /* Bring solution prose up to a readable size */
+  .pl-prose {
+    font-size: 14.5px;
+    line-height: 1.75;
+  }
+
+  /* When math appears inside option buttons / hints */
+  .pl-option-btn .katex,
+  .pl-hint-box .katex {
+    font-size: 1.05em !important;
+  }
+</style>
+</head>
+<body>
+
+<div id="loading">
+  <div style="text-align:center">
+    <div class="spinner"></div>
+    <div style="font-size:13px; opacity:0.8">Loading Module 6 — Problem Lab</div>
+  </div>
+</div>
+
+<div id="root"></div>
+
+<!-- Precompiled bundle: boilerplate.js + this module's content, with JSX already transpiled.
+     Source of truth remains the inline script at the bottom of this file (kept for editing).
+     If you edit this file, rerun the compile step to regenerate module-06-problem-lab.compiled.js. -->
+<script src="module-06-problem-lab.compiled.js"></script>
+
+<script type="text/template" id="m6-source-of-truth" data-no-execute>
+const { useState, useEffect, useMemo, useRef, useCallback } = React;
+
+/* ════════════════════════════════════════════════════════════════
+   PROBLEM LAB — SHARED COMPONENTS & STATE
+   ════════════════════════════════════════════════════════════════ */
+
+const MODULE_NUM = 6;
+
+/* localStorage helpers ─────────────────────────────────────────── */
+const lsGet = (k, fallback) => {
+  try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : fallback; }
+  catch { return fallback; }
+};
+const lsSet = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} };
+
+function useConceptProgress(conceptNum, totalProblems) {
+  const aKey = "gate_la_m" + MODULE_NUM + "_c" + conceptNum + "_attempted";
+  const cKey = "gate_la_m" + MODULE_NUM + "_c" + conceptNum + "_correct";
+  const hKey = "gate_la_m" + MODULE_NUM + "_c" + conceptNum + "_hints";
+
+  const [attempted, setAttempted] = useState(() => lsGet(aKey, []));
+  const [correct, setCorrect] = useState(() => lsGet(cKey, []));
+  const [hints, setHints] = useState(() => lsGet(hKey, {}));
+
+  const markAttempt = (pid, didCorrect) => {
+    setAttempted(prev => {
+      if (prev.includes(pid)) return prev;
+      const next = [...prev, pid]; lsSet(aKey, next); return next;
+    });
+    if (didCorrect) {
+      setCorrect(prev => {
+        if (prev.includes(pid)) return prev;
+        const next = [...prev, pid]; lsSet(cKey, next); return next;
+      });
+    }
+  };
+  const useHint = (pid) => {
+    setHints(prev => {
+      const next = { ...prev, [pid]: (prev[pid] || 0) + 1 };
+      lsSet(hKey, next);
+      return next;
+    });
+  };
+  return { attempted, correct, hints, markAttempt, useHint, totalProblems };
+}
+
+/* ────────────────────────────────────────────────────────────────
+   BADGES (Difficulty, Type, Time, Tags)
+   ──────────────────────────────────────────────────────────────── */
+function DiffBadge({ level }) {
+  const labels = { easy: "EASY", medium: "MEDIUM", hard: "HARD", killer: "KILLER" };
+  return (
+    <span className={"text-[10.5px] tracking-[0.15em] font-bold px-2 py-1 rounded-md pl-difficulty-" + level}>
+      {labels[level]}
+    </span>
+  );
+}
+function TypeBadge({ type }) {
+  if (type === "pyq") return <span className="text-[10.5px] tracking-[0.15em] font-bold px-2 py-1 rounded-md pl-type-pyq">★ GATE PYQ</span>;
+  return (
+    <span className={"text-[10.5px] tracking-[0.15em] font-bold px-2 py-1 rounded-md pl-type-" + type}>
+      {type === "mcq" ? "MCQ" : "NAT"}
+    </span>
+  );
+}
+function MetaPill({ children, mono = false }) {
+  return (
+    <span className={"text-[11px] px-2 py-1 rounded-md " + (mono ? "font-mono " : "")}
+      style={{background: "var(--bg-elev-3)", color: "var(--text-dim)", border: "1px solid var(--border)"}}>
+      {children}
+    </span>
+  );
+}
+function ConceptTag({ children }) {
+  return (
+    <span className="text-[11px] px-2 py-1 rounded-md font-mono"
+      style={{background: "var(--accent-soft)", color: "var(--accent)", border: "1px solid var(--accent-border)"}}>
+      {children}
+    </span>
+  );
+}
+
+/* ────────────────────────────────────────────────────────────────
+   LAYER HEADER
+   ──────────────────────────────────────────────────────────────── */
+function LayerHeader({ num, title, subtitle }) {
+  return (
+    <div className="mt-10 mb-5">
+      <div className="pl-layer-header">
+        <div className="pl-layer-num">L{num}</div>
+        <div className="pl-layer-title">{title}</div>
+      </div>
+      {subtitle && <div className="text-[14px] ml-12" style={{color: "var(--text-dim)"}}>{subtitle}</div>}
+    </div>
+  );
+}
+
+/* ────────────────────────────────────────────────────────────────
+   PATTERN CARD (Layer 1)
+   ──────────────────────────────────────────────────────────────── */
+function PatternCard({ idx, pattern }) {
+  return (
+    <div className="rounded-xl p-5 mb-4 pl-prose"
+      style={{background: "var(--bg-elev-1)", border: "1px solid var(--border)"}}>
+      <div className="flex flex-wrap items-baseline gap-3 mb-3">
+        <span className="text-[10.5px] tracking-[0.18em] font-bold px-2 py-1 rounded-md"
+          style={{background: "var(--accent-soft)", color: "var(--accent)", border: "1px solid var(--accent-border)"}}>
+          PATTERN {idx}
+        </span>
+        <span className="text-[17px] font-semibold" style={{color: "var(--text)"}}>{pattern.name}</span>
+        <span className="ml-auto text-[11px] px-2 py-1 rounded-md font-mono"
+          style={{background: "var(--bg-elev-3)", color: "var(--text-dim)", border: "1px solid var(--border)"}}>
+          ⏱ ~{pattern.timeBudget}s
+        </span>
+        <span className="text-[11px] px-2 py-1 rounded-md"
+          style={{background: pattern.frequency === "Very Frequent" ? "rgba(239,68,68,0.12)" :
+                                pattern.frequency === "Frequent" ? "rgba(249,115,22,0.12)" :
+                                pattern.frequency === "Occasional" ? "rgba(234,179,8,0.12)" : "rgba(148,163,184,0.12)",
+                  color: pattern.frequency === "Very Frequent" ? "#ef4444" :
+                         pattern.frequency === "Frequent" ? "#f97316" :
+                         pattern.frequency === "Occasional" ? "#eab308" : "#94a3b8",
+                  border: "1px solid currentColor"}}>
+          {pattern.frequency}
+        </span>
+      </div>
+
+      <div className="grid md:grid-cols-2 gap-3 text-[13.5px] leading-relaxed">
+        <div className="rounded-lg p-3" style={{background: "var(--bg-elev-2)", border: "1px solid var(--border)"}}>
+          <div className="text-[10px] tracking-[0.18em] font-semibold mb-1" style={{color: "var(--accent-2)"}}>SURFACE APPEARANCE</div>
+          <div style={{color: "var(--text)"}}>{pattern.surface}</div>
+        </div>
+        <div className="rounded-lg p-3" style={{background: "var(--bg-elev-2)", border: "1px solid var(--border)"}}>
+          <div className="text-[10px] tracking-[0.18em] font-semibold mb-1" style={{color: "var(--pink)"}}>WHAT IT'S ACTUALLY TESTING</div>
+          <div style={{color: "var(--text)"}}>{pattern.testing}</div>
+        </div>
+      </div>
+
+      <div className="mt-3 rounded-lg p-3" style={{background: "var(--bg-elev-2)", border: "1px solid var(--border)"}}>
+        <div className="text-[10px] tracking-[0.18em] font-semibold mb-2" style={{color: "var(--warn)"}}>SIGNAL WORDS</div>
+        <div className="flex flex-wrap gap-2">
+          {pattern.signals.map((s, i) => (
+            <code key={i} className="font-mono text-[12px] px-2 py-1 rounded"
+              style={{background: "var(--bg-elev-3)", color: "var(--warn)", border: "1px solid var(--warn-border)"}}>
+              {s}
+            </code>
+          ))}
+        </div>
+      </div>
+
+      <div className="mt-3 rounded-lg p-3" style={{background: "var(--accent-soft)", border: "1px solid var(--accent-border)"}}>
+        <div className="text-[10px] tracking-[0.18em] font-semibold mb-1" style={{color: "var(--accent)"}}>FIRST MOVE (TOP-RANKER REFLEX)</div>
+        <div className="text-[14px]" style={{color: "var(--text)"}}>{pattern.firstMove}</div>
+      </div>
+    </div>
+  );
+}
+
+/* ────────────────────────────────────────────────────────────────
+   PROBLEM CARD (Layer 2)
+   ──────────────────────────────────────────────────────────────── */
+function ProblemCard({ p, idx, progress }) {
+  const [selected, setSelected] = useState(null);
+  const [natValue, setNatValue] = useState("");
+  const [submitted, setSubmitted] = useState(false);
+  const [isCorrect, setIsCorrect] = useState(false);
+  const [attempts, setAttempts] = useState(0);
+  const [hintsShown, setHintsShown] = useState(0);
+  const [showFullSolution, setShowFullSolution] = useState(false);
+  const [flashKey, setFlashKey] = useState(0);
+
+  const isPYQ = p.type === "pyq";
+
+  const checkAnswer = () => {
+    let ok = false;
+    if (p.kind === "mcq") {
+      ok = selected === p.answer;
+    } else {
+      const userVal = parseFloat(natValue);
+      if (!isNaN(userVal)) {
+        const tol = p.tolerance != null ? p.tolerance : 0.01;
+        ok = Math.abs(userVal - p.answer) <= tol;
+      }
+    }
+    setIsCorrect(ok);
+    setSubmitted(true);
+    setAttempts(a => a + 1);
+    setFlashKey(k => k + 1);
+    progress.markAttempt(p.id, ok);
+    if (!ok && attempts + 1 >= 2) setShowFullSolution(true);
+  };
+
+  const tryAgain = () => {
+    setSubmitted(false);
+    setIsCorrect(false);
+    setSelected(null);
+    setNatValue("");
+  };
+
+  const revealHint = () => {
+    if (hintsShown < (p.hints?.length || 0)) {
+      setHintsShown(hintsShown + 1);
+      progress.useHint(p.id);
+    }
+  };
+
+  const isCompleted = progress.correct.includes(p.id);
+
+  return (
+    <div key={flashKey} className={"rounded-xl p-5 mb-5 " + (submitted ? (isCorrect ? "pl-correct" : "pl-wrong") : "")}
+      style={{background: "var(--bg-elev-1)", border: "1px solid " + (isCompleted ? "rgba(34,197,94,0.4)" : "var(--border)")}}>
+
+      <div className="flex flex-wrap items-center gap-2 mb-3">
+        <span className="text-[10.5px] tracking-[0.18em] font-bold px-2 py-1 rounded-md font-mono"
+          style={{background: "var(--bg-elev-3)", color: "var(--text-dim)", border: "1px solid var(--border)"}}>
+          Q{idx}
+        </span>
+        <DiffBadge level={p.difficulty} />
+        <TypeBadge type={isPYQ ? "pyq" : p.kind} />
+        {isPYQ && p.pyqYear && (
+          <MetaPill mono>GATE CS {p.pyqYear}</MetaPill>
+        )}
+        <MetaPill>{p.marks}-mark style</MetaPill>
+        <MetaPill mono>⏱ ~{p.timeTarget}s</MetaPill>
+        {isCompleted && (
+          <span className="text-[10.5px] tracking-[0.18em] font-bold px-2 py-1 rounded-md ml-auto"
+            style={{background: "rgba(34,197,94,0.15)", color: "#22c55e", border: "1px solid rgba(34,197,94,0.4)"}}>
+            ✓ SOLVED
+          </span>
+        )}
+      </div>
+
+      <div className="flex flex-wrap gap-2 mb-3">
+        {p.tags.map((t, i) => <ConceptTag key={i}>{t}</ConceptTag>)}
+      </div>
+
+      {p.kind === "mcq" && (
+        <div className="pl-neg-banner mb-3">
+          ⚠ Negative marking: −1/3 mark for wrong answer
+        </div>
+      )}
+      {p.skipSignal && (
+        <div className="mb-3">
+          <span className={p.skipSignal.type === "attempt" ? "pl-skip-attempt" : "pl-skip-skip"}>
+            {p.skipSignal.type === "attempt" ? "✓ " : "💡 "}{p.skipSignal.text}
+          </span>
+        </div>
+      )}
+
+      <div className="text-[15px] leading-relaxed mb-4 p-4 rounded-lg pl-prose"
+        style={{background: "var(--bg-elev-2)", color: "var(--text)", border: "1px solid var(--border)"}}>
+        {p.statement}
+      </div>
+
+      {/* ANSWER UI */}
+      {p.kind === "mcq" ? (
+        <div className="space-y-2 mb-3">
+          {p.options.map((opt, i) => {
+            const letter = String.fromCharCode(65 + i);
+            let cls = "pl-option-btn";
+            if (!submitted && selected === letter) cls += " selected";
+            if (submitted) {
+              if (letter === p.answer) cls += " correct";
+              else if (letter === selected) cls += " wrong-choice";
+            }
+            return (
+              <button key={i}
+                className={cls}
+                disabled={submitted}
+                onClick={() => setSelected(letter)}>
+                <span className="pl-option-letter">{letter}</span>
+                <span className="flex-1">{opt}</span>
+                {submitted && letter === p.answer && <span style={{color: "#22c55e"}}>✓</span>}
+                {submitted && letter === selected && letter !== p.answer && <span style={{color: "#fb7185"}}>✗</span>}
+              </button>
+            );
+          })}
+        </div>
+      ) : (
+        <div className="mb-3">
+          <label className="text-[12px] mb-1 block" style={{color: "var(--text-dim)"}}>Numerical Answer (NAT — no options)</label>
+          <input type="number" step="any" className="pl-nat-input"
+            value={natValue}
+            disabled={submitted}
+            onChange={e => setNatValue(e.target.value)}
+            placeholder="Enter your answer..." />
+        </div>
+      )}
+
+      {/* SUBMIT */}
+      {!submitted && (
+        <div className="flex items-center gap-3">
+          <button className="pl-submit-btn"
+            disabled={p.kind === "mcq" ? !selected : natValue === ""}
+            onClick={checkAnswer}>
+            Submit Answer
+          </button>
+          {hintsShown > 0 && (
+            <span className="text-[11px]" style={{color: "var(--text-dim)"}}>
+              Hints used: {hintsShown}/{p.hints?.length || 0}
+            </span>
+          )}
+          {p.hints && p.hints.length > 0 && hintsShown < p.hints.length && (
+            <button className="text-[13px] px-3 py-1.5 rounded-md transition-colors"
+              style={{border: "1px solid var(--accent-2-border)", color: "var(--accent-2)", background: "var(--accent-2-soft)"}}
+              onClick={revealHint}>
+              Show Hint {hintsShown + 1}
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* HINTS DISPLAYED */}
+      {hintsShown > 0 && !submitted && (
+        <div className="mt-4 space-y-2">
+          {p.hints.slice(0, hintsShown).map((h, i) => (
+            <div key={i} className="pl-hint-box pl-prose">
+              <div className="text-[10px] tracking-[0.18em] font-semibold mb-1" style={{color: "var(--accent-2)"}}>
+                HINT {i+1} · {h.label}
+              </div>
+              <div className="text-[14px]">{h.text}</div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* AFTER SUBMISSION */}
+      {submitted && (
+        <div className="mt-4">
+          <div className="flex flex-wrap items-center gap-3 mb-3">
+            {isCorrect ? (
+              <span className="text-[12px] tracking-[0.15em] font-bold px-3 py-1.5 rounded-md"
+                style={{background: "rgba(34,197,94,0.15)", color: "#22c55e", border: "1px solid rgba(34,197,94,0.4)"}}>
+                ✓ CORRECT
+              </span>
+            ) : (
+              <span className="text-[12px] tracking-[0.15em] font-bold px-3 py-1.5 rounded-md"
+                style={{background: "rgba(239,68,68,0.15)", color: "#fb7185", border: "1px solid rgba(239,68,68,0.4)"}}>
+                ✗ INCORRECT
+              </span>
+            )}
+            {!isCorrect && (
+              <>
+                <button className="text-[13px] px-3 py-1.5 rounded-md"
+                  style={{border: "1px solid var(--accent-border)", color: "var(--accent)", background: "var(--accent-soft)"}}
+                  onClick={tryAgain}>
+                  Try Again
+                </button>
+                {p.hints && p.hints.length > 0 && hintsShown < p.hints.length && !showFullSolution && (
+                  <button className="text-[13px] px-3 py-1.5 rounded-md"
+                    style={{border: "1px solid var(--accent-2-border)", color: "var(--accent-2)", background: "var(--accent-2-soft)"}}
+                    onClick={() => { revealHint(); setSubmitted(false); }}>
+                    Show Hint
+                  </button>
+                )}
+                {!showFullSolution && attempts >= 2 && (
+                  <button className="text-[13px] px-3 py-1.5 rounded-md"
+                    style={{border: "1px solid var(--danger-border)", color: "var(--danger)", background: "var(--danger-soft)"}}
+                    onClick={() => setShowFullSolution(true)}>
+                    Show Full Solution
+                  </button>
+                )}
+                {!showFullSolution && (
+                  <button className="text-[13px] px-3 py-1.5 rounded-md"
+                    style={{border: "1px solid var(--border-strong)", color: "var(--text-dim)", background: "var(--bg-elev-2)"}}
+                    onClick={() => setShowFullSolution(true)}>
+                    Reveal Solution
+                  </button>
+                )}
+              </>
+            )}
+          </div>
+
+          {(isCorrect || showFullSolution) && (
+            <SolutionPanel p={p} wasCorrect={isCorrect} />
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ────────────────────────────────────────────────────────────────
+   SOLUTION PANEL
+   ──────────────────────────────────────────────────────────────── */
+function SolutionPanel({ p, wasCorrect }) {
+  return (
+    <div className="rounded-xl p-5 mt-3 pl-prose"
+      style={{background: "var(--bg-elev-2)", border: "1px solid var(--accent-border)"}}>
+      <div className="text-[10.5px] tracking-[0.2em] font-bold mb-3" style={{color: "var(--accent)"}}>
+        🧠 THINKING CHAIN — How a top ranker actually solves this
+      </div>
+      <div className="space-y-3">
+        {p.solution.steps.map((s, i) => (
+          <div key={i} className="flex gap-3">
+            <div className="flex-shrink-0 w-7 h-7 rounded-md flex items-center justify-center text-[12px] font-bold"
+              style={{background: "var(--accent-soft)", color: "var(--accent)", border: "1px solid var(--accent-border)"}}>
+              {i+1}
+            </div>
+            <div className="flex-1">
+              <div className="text-[11.5px] tracking-[0.18em] font-semibold mb-0.5" style={{color: "var(--accent-2)"}}>
+                {s.label}
+              </div>
+              <div className="text-[14px] leading-relaxed" style={{color: "var(--text)", whiteSpace: "pre-line"}}>{s.body}</div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="grid md:grid-cols-2 gap-3 mt-5">
+        <div className="rounded-lg p-3" style={{background: "var(--accent-3-soft)", border: "1px solid var(--accent-3-border)"}}>
+          <div className="text-[10px] tracking-[0.18em] font-semibold mb-1" style={{color: "var(--accent-3)"}}>✓ GATE CHECK</div>
+          <div className="text-[13.5px]" style={{color: "var(--text)"}}>{p.solution.gateCheck}</div>
+        </div>
+        <div className="rounded-lg p-3" style={{background: "var(--warn-soft)", border: "1px solid var(--warn-border)"}}>
+          <div className="text-[10px] tracking-[0.18em] font-semibold mb-1" style={{color: "var(--warn)"}}>⚡ SPEED VERSION</div>
+          <div className="text-[13.5px]" style={{color: "var(--text)"}}>{p.solution.speed}</div>
+        </div>
+      </div>
+
+      <div className="mt-4 rounded-lg p-3" style={{background: "var(--danger-soft)", border: "1px solid var(--danger-border)"}}>
+        <div className="text-[10px] tracking-[0.18em] font-semibold mb-1" style={{color: "var(--danger)"}}>⚠ WHAT MADE THIS HARD</div>
+        <div className="text-[13.5px]" style={{color: "var(--text)"}}>{p.solution.whatMadeHard}</div>
+      </div>
+
+      <div className="mt-3 rounded-lg p-3" style={{background: "var(--pink-soft)", border: "1px solid var(--pink-border)"}}>
+        <div className="text-[10px] tracking-[0.18em] font-semibold mb-1" style={{color: "var(--pink)"}}>🔁 GENERALIZATION</div>
+        <div className="text-[13.5px]" style={{color: "var(--text)"}}>{p.solution.generalization}</div>
+      </div>
+
+      {p.solution.linkedConcept && (
+        <div className="mt-3 rounded-lg p-3" style={{background: "var(--info-soft)", border: "1px solid var(--info-border)"}}>
+          <div className="text-[10px] tracking-[0.18em] font-semibold mb-1" style={{color: "var(--info)"}}>🔗 LINKED CONCEPT</div>
+          <div className="text-[13.5px]" style={{color: "var(--text)"}}>{p.solution.linkedConcept}</div>
+        </div>
+      )}
+
+      {p.kind === "mcq" && p.solution.negAdvisory && (
+        <div className="mt-3 rounded-lg p-3" style={{background: "rgba(69,26,3,0.4)", border: "1px solid rgba(251,191,36,0.3)"}}>
+          <div className="text-[10px] tracking-[0.18em] font-semibold mb-1" style={{color: "#fbbf24"}}>📊 NEGATIVE-MARKING ADVISORY</div>
+          <div className="text-[13.5px]" style={{color: "var(--text)"}}>{p.solution.negAdvisory}</div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ────────────────────────────────────────────────────────────────
+   TECHNIQUE CARD (Layer 3)
+   ──────────────────────────────────────────────────────────────── */
+function TechniqueCard({ tech }) {
+  const typeColors = {
+    "Speed Shortcut":     { bg: "rgba(34,211,238,0.1)",  fg: "#22d3ee", bd: "rgba(34,211,238,0.35)" },
+    "Trap Avoidance":     { bg: "rgba(251,191,36,0.1)",  fg: "#fbbf24", bd: "rgba(251,191,36,0.35)" },
+    "Structural Insight": { bg: "rgba(167,139,250,0.1)", fg: "#a78bfa", bd: "rgba(167,139,250,0.35)" },
+    "Verification Method":{ bg: "rgba(52,211,153,0.1)",  fg: "#34d399", bd: "rgba(52,211,153,0.35)" },
+  };
+  const c = typeColors[tech.type] || typeColors["Speed Shortcut"];
+  return (
+    <div className="pl-tech-card mb-4 pl-prose">
+      <div className="flex flex-wrap items-baseline gap-3 mb-3">
+        <div className="text-[17px] font-semibold" style={{color: "var(--text)"}}>{tech.name}</div>
+        <span className="text-[10.5px] tracking-[0.15em] font-bold px-2 py-1 rounded-md"
+          style={{background: c.bg, color: c.fg, border: "1px solid " + c.bd}}>
+          {tech.type.toUpperCase()}
+        </span>
+        <span className="ml-auto text-[11px] px-2 py-1 rounded-md"
+          style={{background: tech.freq === "Very Frequent" ? "rgba(239,68,68,0.12)" :
+                              tech.freq === "Frequent" ? "rgba(249,115,22,0.12)" :
+                              tech.freq === "Occasional" ? "rgba(234,179,8,0.12)" : "rgba(148,163,184,0.12)",
+                  color: tech.freq === "Very Frequent" ? "#ef4444" :
+                         tech.freq === "Frequent" ? "#f97316" :
+                         tech.freq === "Occasional" ? "#eab308" : "#94a3b8",
+                  border: "1px solid currentColor"}}>
+          {tech.freq}
+        </span>
+      </div>
+
+      <div className="mb-3">
+        <div className="text-[10px] tracking-[0.18em] font-semibold mb-1" style={{color: "var(--accent)"}}>WHEN TO USE</div>
+        <div className="text-[14px]" style={{color: "var(--text)"}}>{tech.when}</div>
+      </div>
+
+      <div className="mb-3">
+        <div className="text-[10px] tracking-[0.18em] font-semibold mb-1" style={{color: "var(--accent-2)"}}>HOW IT WORKS</div>
+        <ol className="list-decimal list-outside ml-5 space-y-1.5 text-[14px]" style={{color: "var(--text)"}}>
+          {tech.steps.map((s, i) => <li key={i}>{s}</li>)}
+        </ol>
+      </div>
+
+      <div className="grid md:grid-cols-2 gap-3 mb-3">
+        <div className="rounded-lg p-3" style={{background: "var(--accent-3-soft)", border: "1px solid var(--accent-3-border)"}}>
+          <div className="text-[10px] tracking-[0.18em] font-semibold mb-1" style={{color: "var(--accent-3)"}}>⚡ SPEED CLAIM</div>
+          <div className="text-[13.5px]" style={{color: "var(--text)"}}>{tech.speed}</div>
+        </div>
+        <div className="rounded-lg p-3" style={{background: "var(--bg-elev-2)", border: "1px solid var(--border)"}}>
+          <div className="text-[10px] tracking-[0.18em] font-semibold mb-1" style={{color: "var(--accent-2)"}}>🔬 MICRO-EXAMPLE</div>
+          <div className="text-[13px] font-mono whitespace-pre-line" style={{color: "var(--text)"}}>{tech.example}</div>
+        </div>
+      </div>
+
+      <div className="pl-danger-zone">
+        <div className="text-[10px] tracking-[0.18em] font-semibold mb-1" style={{color: "#fb7185"}}>⛔ DANGER ZONE — when this technique FAILS</div>
+        <div className="text-[13.5px]" style={{color: "var(--text)"}}>{tech.danger}</div>
+      </div>
+    </div>
+  );
+}
+
+/* ────────────────────────────────────────────────────────────────
+   MISTAKE CARD (Layer 4) with Spot-the-Error mode
+   ──────────────────────────────────────────────────────────────── */
+function MistakeCard({ mistake, idx }) {
+  const [mode, setMode] = useState("read"); // "read" | "spot"
+  const [clickedLine, setClickedLine] = useState(null);
+  const [showFull, setShowFull] = useState(false);
+
+  return (
+    <div className="pl-mistake-card mb-4 pl-prose">
+      <div className="flex flex-wrap items-baseline gap-3 mb-3">
+        <span className="text-[10.5px] tracking-[0.15em] font-bold px-2 py-1 rounded-md"
+          style={{background: "var(--danger-soft)", color: "var(--danger)", border: "1px solid var(--danger-border)"}}>
+          MISTAKE {idx}
+        </span>
+        <div className="text-[17px] font-semibold" style={{color: "var(--text)"}}>{mistake.name}</div>
+        <span className="text-[11px] px-2 py-1 rounded-md ml-auto"
+          style={{background: mistake.frequency === "Very Common" ? "rgba(239,68,68,0.12)" :
+                              mistake.frequency === "Common" ? "rgba(249,115,22,0.12)" : "rgba(148,163,184,0.12)",
+                  color: mistake.frequency === "Very Common" ? "#ef4444" :
+                         mistake.frequency === "Common" ? "#f97316" : "#94a3b8",
+                  border: "1px solid currentColor"}}>
+          {mistake.frequency}
+        </span>
+      </div>
+
+      <div className="flex gap-2 mb-3">
+        <button className={"pl-tab-pill " + (mode === "read" ? "active" : "")}
+          onClick={() => setMode("read")}>📖 Read</button>
+        <button className={"pl-tab-pill " + (mode === "spot" ? "active" : "")}
+          onClick={() => { setMode("spot"); setClickedLine(null); setShowFull(false); }}>🎯 Spot the Error</button>
+      </div>
+
+      {mode === "read" && (
+        <>
+          <div className="mb-3">
+            <div className="text-[10px] tracking-[0.18em] font-semibold mb-1" style={{color: "var(--danger)"}}>WRONG SOLUTION (looks plausible)</div>
+            <div className="pl-wrong-solution">
+              {mistake.wrong.map((line, i) => (
+                <div key={i} className={i === mistake.errorLine ? "error-found" : ""} style={{padding: "2px 4px"}}>
+                  <span style={{color: "var(--text-faded)", marginRight: 8}}>{(i+1).toString().padStart(2, " ")}.</span>
+                  {line}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-3">
+            <div className="rounded-lg p-3" style={{background: "var(--bg-elev-2)", border: "1px solid var(--danger-border)"}}>
+              <div className="text-[10px] tracking-[0.18em] font-semibold mb-1" style={{color: "var(--danger)"}}>📍 ERROR LOCATION</div>
+              <div className="text-[13.5px]" style={{color: "var(--text)"}}>Line {mistake.errorLine + 1}: {mistake.errorDescription}</div>
+            </div>
+            <div className="rounded-lg p-3" style={{background: "var(--bg-elev-2)", border: "1px solid var(--warn-border)"}}>
+              <div className="text-[10px] tracking-[0.18em] font-semibold mb-1" style={{color: "var(--warn)"}}>🧠 ROOT CAUSE</div>
+              <div className="text-[13.5px]" style={{color: "var(--text)"}}>{mistake.rootCause}</div>
+            </div>
+          </div>
+
+          <div className="mt-3 rounded-lg p-3" style={{background: "var(--accent-3-soft)", border: "1px solid var(--accent-3-border)"}}>
+            <div className="text-[10px] tracking-[0.18em] font-semibold mb-1" style={{color: "var(--accent-3)"}}>✅ CORRECT REASONING</div>
+            <div className="text-[13.5px]" style={{color: "var(--text)"}}>{mistake.correct}</div>
+          </div>
+
+          <div className="mt-3 rounded-lg p-3" style={{background: "var(--accent-soft)", border: "1px solid var(--accent-border)"}}>
+            <div className="text-[10px] tracking-[0.18em] font-semibold mb-1" style={{color: "var(--accent)"}}>🛡 PREVENTION RULE (memorize this)</div>
+            <div className="text-[13.5px] italic" style={{color: "var(--text)"}}>{mistake.prevention}</div>
+          </div>
+
+          <div className="mt-3 flex gap-2 text-[12px]" style={{color: "var(--text-dim)"}}>
+            <span className="px-2 py-1 rounded-md" style={{background: "var(--bg-elev-2)", border: "1px solid var(--border)"}}>
+              💸 GATE Cost: {mistake.gateCost}
+            </span>
+          </div>
+        </>
+      )}
+
+      {mode === "spot" && (
+        <>
+          <div className="mb-2 text-[13px]" style={{color: "var(--text-dim)"}}>
+            👉 Click the line where you think the reasoning breaks.
+          </div>
+          <div className="pl-wrong-solution">
+            {mistake.wrong.map((line, i) => {
+              let cls = "pl-wrong-line";
+              if (clickedLine === i) {
+                if (i === mistake.errorLine) cls += " error-found";
+                else cls += "";
+              }
+              if (showFull && i === mistake.errorLine) cls += " error-found";
+              return (
+                <div key={i} className={cls}
+                  onClick={() => { if (clickedLine === null) { setClickedLine(i); setShowFull(true); } }}>
+                  <span style={{color: "var(--text-faded)", marginRight: 8}}>{(i+1).toString().padStart(2, " ")}.</span>
+                  {line}
+                  {showFull && i === mistake.errorLine && <span style={{color: "#fb7185", marginLeft: 8, fontWeight: 600}}>← ERROR HERE</span>}
+                </div>
+              );
+            })}
+          </div>
+          {clickedLine !== null && (
+            <div className="mt-3 rounded-lg p-3"
+              style={{background: clickedLine === mistake.errorLine ? "var(--accent-3-soft)" : "var(--danger-soft)",
+                      border: "1px solid " + (clickedLine === mistake.errorLine ? "var(--accent-3-border)" : "var(--danger-border)")}}>
+              {clickedLine === mistake.errorLine ? (
+                <div className="text-[13.5px]" style={{color: "#22c55e"}}>
+                  ✓ Correct! You spotted the error on line {mistake.errorLine + 1}: {mistake.errorDescription}
+                </div>
+              ) : (
+                <div className="text-[13.5px]" style={{color: "var(--danger)"}}>
+                  ✗ Not quite. The actual error is on line {mistake.errorLine + 1}: {mistake.errorDescription}
+                </div>
+              )}
+            </div>
+          )}
+        </>
+      )}
+    </div>
+  );
+}
+
+/* ────────────────────────────────────────────────────────────────
+   DRILL MODE (Layer 5)
+   ──────────────────────────────────────────────────────────────── */
+function DrillMode({ conceptNum, conceptTitle, problems }) {
+  const TARGETS = { easy: 40, medium: 75, hard: 120, killer: 150 };
+  const lsKey = "gate_la_m" + MODULE_NUM + "_c" + conceptNum + "_drill_best";
+  const streakKey = "gate_la_m" + MODULE_NUM + "_c" + conceptNum + "_drill_streak";
+
+  const [phase, setPhase] = useState("idle"); // idle | running | review
+  const [drill, setDrill] = useState([]);
+  const [currentIdx, setCurrentIdx] = useState(0);
+  const [results, setResults] = useState([]);
+  const [timeLeft, setTimeLeft] = useState(0);
+  const [questionStart, setQuestionStart] = useState(0);
+  const [selected, setSelected] = useState(null);
+  const [natVal, setNatVal] = useState("");
+  const [feedback, setFeedback] = useState(null);
+  const [paused, setPaused] = useState(false);
+  const [bestRecord] = useState(() => lsGet(lsKey, null));
+  const [streak] = useState(() => lsGet(streakKey, 0));
+
+  const startDrill = () => {
+    const shuffled = [...problems].sort(() => Math.random() - 0.5).slice(0, 5);
+    setDrill(shuffled);
+    setCurrentIdx(0);
+    setResults([]);
+    setSelected(null);
+    setNatVal("");
+    setFeedback(null);
+    const first = shuffled[0];
+    setTimeLeft(TARGETS[first.difficulty] || 60);
+    setQuestionStart(Date.now());
+    setPhase("running");
+  };
+
+  useEffect(() => {
+    if (phase !== "running" || paused || feedback) return;
+    if (timeLeft <= 0) {
+      submitDrill(false, "timeout");
+      return;
+    }
+    const t = setTimeout(() => setTimeLeft(timeLeft - 1), 1000);
+    return () => clearTimeout(t);
+  }, [phase, timeLeft, paused, feedback]);
+
+  const submitDrill = (didAnswer, mode) => {
+    const p = drill[currentIdx];
+    const elapsed = Math.round((Date.now() - questionStart) / 1000);
+    let isCorrect = false;
+    if (didAnswer) {
+      if (p.kind === "mcq") isCorrect = selected === p.answer;
+      else {
+        const v = parseFloat(natVal);
+        if (!isNaN(v)) {
+          const tol = p.tolerance != null ? p.tolerance : 0.01;
+          isCorrect = Math.abs(v - p.answer) <= tol;
+        }
+      }
+    }
+    setResults(r => [...r, {
+      problem: p, correct: isCorrect, time: elapsed, target: TARGETS[p.difficulty] || 60,
+      answer: p.kind === "mcq" ? selected : natVal, mode,
+    }]);
+    setFeedback({ correct: isCorrect, answer: p.answer });
+  };
+
+  const nextQuestion = () => {
+    if (currentIdx + 1 >= drill.length) {
+      finalize();
+      return;
+    }
+    const nextI = currentIdx + 1;
+    setCurrentIdx(nextI);
+    setSelected(null);
+    setNatVal("");
+    setFeedback(null);
+    setTimeLeft(TARGETS[drill[nextI].difficulty] || 60);
+    setQuestionStart(Date.now());
+  };
+
+  const finalize = () => {
+    setPhase("review");
+    const correctCount = results.filter(r => r.correct).length;
+    const total = results.length;
+    const acc = total > 0 ? Math.round((correctCount/total) * 100) : 0;
+    const avgTime = total > 0 ? Math.round(results.reduce((s, r) => s + r.time, 0) / total) : 0;
+    const nm = results.reduce((s, r) => {
+      if (r.problem.kind !== "mcq") return s;
+      if (r.correct) return s + (r.problem.marks === 2 ? 2 : 1);
+      if (r.answer == null) return s;
+      return s - (r.problem.marks === 2 ? 2/3 : 1/3);
+    }, 0);
+
+    if (!bestRecord || acc > bestRecord.accuracy || (acc === bestRecord.accuracy && avgTime < bestRecord.avgTime)) {
+      lsSet(lsKey, { score: correctCount, accuracy: acc, avgTime, when: Date.now() });
+    }
+    const lastStreak = results.length > 0 ? results[results.length-1].correct : false;
+    const newStreak = lastStreak ? streak + correctCount : 0;
+    lsSet(streakKey, Math.max(streak, newStreak));
+  };
+
+  const progressPct = phase === "running" && drill[currentIdx] ? (timeLeft / (TARGETS[drill[currentIdx].difficulty] || 60)) * 100 : 0;
+  const progressClass = progressPct < 25 ? "danger" : progressPct < 50 ? "warning" : "";
+
+  if (phase === "idle") {
+    return (
+      <div className="rounded-xl p-6" style={{background: "var(--bg-elev-1)", border: "1px solid var(--border)"}}>
+        <div className="flex items-center gap-3 mb-3">
+          <div className="text-[24px]">⏱</div>
+          <div>
+            <div className="text-[18px] font-semibold" style={{color: "var(--text)"}}>Drill Mode — {conceptTitle}</div>
+            <div className="text-[13px]" style={{color: "var(--text-dim)"}}>5 rapid-fire questions · timed · instant feedback only</div>
+          </div>
+        </div>
+
+        <div className="grid md:grid-cols-4 gap-3 my-4 text-[12px]">
+          <div className="rounded-md p-3" style={{background: "var(--bg-elev-2)", border: "1px solid var(--border)"}}>
+            <div style={{color: "var(--text-dim)"}}>Easy target</div>
+            <div className="font-mono font-semibold mt-1" style={{color: "#22c55e"}}>40 sec</div>
+          </div>
+          <div className="rounded-md p-3" style={{background: "var(--bg-elev-2)", border: "1px solid var(--border)"}}>
+            <div style={{color: "var(--text-dim)"}}>Medium target</div>
+            <div className="font-mono font-semibold mt-1" style={{color: "#eab308"}}>75 sec</div>
+          </div>
+          <div className="rounded-md p-3" style={{background: "var(--bg-elev-2)", border: "1px solid var(--border)"}}>
+            <div style={{color: "var(--text-dim)"}}>Hard target</div>
+            <div className="font-mono font-semibold mt-1" style={{color: "#f97316"}}>120 sec</div>
+          </div>
+          <div className="rounded-md p-3" style={{background: "var(--bg-elev-2)", border: "1px solid var(--border)"}}>
+            <div style={{color: "var(--text-dim)"}}>Killer target</div>
+            <div className="font-mono font-semibold mt-1" style={{color: "#ef4444"}}>150 sec</div>
+          </div>
+        </div>
+
+        {bestRecord && (
+          <div className="rounded-lg p-3 mb-3" style={{background: "var(--accent-3-soft)", border: "1px solid var(--accent-3-border)"}}>
+            <div className="text-[11px] tracking-[0.18em] font-semibold mb-1" style={{color: "var(--accent-3)"}}>🏆 PERSONAL BEST</div>
+            <div className="text-[13.5px]" style={{color: "var(--text)"}}>
+              Score: {bestRecord.score}/5 · Accuracy: {bestRecord.accuracy}% · Avg time: {bestRecord.avgTime}s
+            </div>
+          </div>
+        )}
+
+        {streak > 0 && (
+          <div className="rounded-lg p-3 mb-3" style={{background: "var(--warn-soft)", border: "1px solid var(--warn-border)"}}>
+            <div className="text-[11px] tracking-[0.18em] font-semibold mb-1" style={{color: "var(--warn)"}}>🔥 STREAK</div>
+            <div className="text-[13.5px]" style={{color: "var(--text)"}}>Best streak: {streak} consecutive correct under time</div>
+          </div>
+        )}
+
+        <button className="pl-submit-btn" onClick={startDrill}>
+          ▶ Start Drill (5 questions)
+        </button>
+      </div>
+    );
+  }
+
+  if (phase === "running") {
+    const p = drill[currentIdx];
+    return (
+      <div className="rounded-xl p-6" style={{background: "var(--bg-elev-1)", border: "1px solid var(--border)"}}>
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-3">
+            <div className="text-[12px] tracking-[0.15em] font-bold px-2 py-1 rounded-md"
+              style={{background: "var(--bg-elev-3)", color: "var(--text-dim)", border: "1px solid var(--border)"}}>
+              Q {currentIdx+1} / {drill.length}
+            </div>
+            <DiffBadge level={p.difficulty} />
+          </div>
+          <div className="text-[14px] font-mono font-bold"
+            style={{color: timeLeft < 20 ? "#ef4444" : timeLeft < 40 ? "#eab308" : "#22c55e"}}>
+            ⏱ {timeLeft}s
+          </div>
+        </div>
+
+        <div className="pl-progress-bar mb-4">
+          <div className={"pl-progress-fill " + progressClass} style={{width: progressPct + "%"}}/>
+        </div>
+
+        <div className="text-[15px] leading-relaxed mb-4 p-4 rounded-lg"
+          style={{background: "var(--bg-elev-2)", color: "var(--text)", border: "1px solid var(--border)"}}>
+          {p.statement}
+        </div>
+
+        {!feedback && p.kind === "mcq" && (
+          <div className="space-y-2 mb-3">
+            {p.options.map((opt, i) => {
+              const letter = String.fromCharCode(65 + i);
+              return (
+                <button key={i}
+                  className={"pl-option-btn " + (selected === letter ? "selected" : "")}
+                  onClick={() => setSelected(letter)}>
+                  <span className="pl-option-letter">{letter}</span>
+                  <span className="flex-1">{opt}</span>
+                </button>
+              );
+            })}
+          </div>
+        )}
+        {!feedback && p.kind === "nat" && (
+          <input type="number" step="any" className="pl-nat-input mb-3"
+            value={natVal}
+            onChange={e => setNatVal(e.target.value)}
+            placeholder="Enter your answer..." />
+        )}
+
+        {!feedback && (
+          <div className="flex gap-2">
+            <button className="pl-submit-btn"
+              disabled={p.kind === "mcq" ? !selected : natVal === ""}
+              onClick={() => submitDrill(true, "answered")}>
+              Submit
+            </button>
+            <button className="text-[13px] px-3 py-1.5 rounded-md"
+              style={{border: "1px solid var(--border-strong)", color: "var(--text-dim)", background: "var(--bg-elev-2)"}}
+              onClick={() => submitDrill(false, "skipped")}>
+              Skip
+            </button>
+          </div>
+        )}
+
+        {feedback && (
+          <div className="rounded-lg p-3 mb-3"
+            style={{background: feedback.correct ? "var(--accent-3-soft)" : "var(--danger-soft)",
+                    border: "1px solid " + (feedback.correct ? "var(--accent-3-border)" : "var(--danger-border)")}}>
+            <div className="text-[13.5px] font-semibold mb-1"
+              style={{color: feedback.correct ? "#22c55e" : "#fb7185"}}>
+              {feedback.correct ? "✓ Correct" : "✗ Incorrect"} — Answer: {String(feedback.answer)}
+            </div>
+            <div className="flex gap-2 mt-2">
+              <button className="pl-submit-btn" onClick={nextQuestion}>
+                {currentIdx + 1 >= drill.length ? "Finish Drill →" : "Next Question →"}
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  /* phase === "review" */
+  const correctCount = results.filter(r => r.correct).length;
+  const total = results.length;
+  const acc = total > 0 ? Math.round((correctCount/total) * 100) : 0;
+  const accByDiff = {};
+  ["easy", "medium", "hard", "killer"].forEach(d => {
+    const dr = results.filter(r => r.problem.difficulty === d);
+    if (dr.length > 0) {
+      accByDiff[d] = Math.round((dr.filter(r => r.correct).length / dr.length) * 100);
+    }
+  });
+  const nm = results.reduce((s, r) => {
+    if (r.problem.kind !== "mcq") return s + (r.correct ? r.problem.marks : 0);
+    if (r.correct) return s + (r.problem.marks === 2 ? 2 : 1);
+    if (r.answer == null || r.mode === "skipped" || r.mode === "timeout") return s;
+    return s - (r.problem.marks === 2 ? 2/3 : 1/3);
+  }, 0);
+  const totalMarks = results.reduce((s, r) => s + (r.problem.marks || 1), 0);
+  const reviseConcepts = [...new Set(results.filter(r => !r.correct).flatMap(r => r.problem.tags))];
+
+  return (
+    <div className="rounded-xl p-6" style={{background: "var(--bg-elev-1)", border: "1px solid var(--border)"}}>
+      <div className="text-[20px] font-bold mb-1" style={{color: "var(--text)"}}>📊 Drill Report Card</div>
+      <div className="text-[13px] mb-4" style={{color: "var(--text-dim)"}}>5-question drill · {conceptTitle}</div>
+
+      <div className="grid md:grid-cols-3 gap-3 mb-4">
+        <div className="rounded-lg p-4" style={{background: "var(--bg-elev-2)", border: "1px solid var(--border)"}}>
+          <div className="text-[11px] tracking-[0.18em] font-semibold mb-1" style={{color: "var(--text-dim)"}}>SCORE</div>
+          <div className="text-[24px] font-bold" style={{color: "var(--accent)"}}>{correctCount}/{total}</div>
+        </div>
+        <div className="rounded-lg p-4" style={{background: "var(--bg-elev-2)", border: "1px solid var(--border)"}}>
+          <div className="text-[11px] tracking-[0.18em] font-semibold mb-1" style={{color: "var(--text-dim)"}}>ACCURACY</div>
+          <div className="text-[24px] font-bold" style={{color: acc >= 80 ? "#22c55e" : acc >= 60 ? "#eab308" : "#ef4444"}}>{acc}%</div>
+        </div>
+        <div className="rounded-lg p-4" style={{background: "var(--bg-elev-2)", border: "1px solid var(--border)"}}>
+          <div className="text-[11px] tracking-[0.18em] font-semibold mb-1" style={{color: "var(--text-dim)"}}>NEG-MARKING SIM</div>
+          <div className="text-[24px] font-bold" style={{color: nm >= totalMarks * 0.7 ? "#22c55e" : nm >= 0 ? "#eab308" : "#ef4444"}}>
+            {nm.toFixed(2)} / {totalMarks}
+          </div>
+        </div>
+      </div>
+
+      <div className="rounded-lg p-4 mb-4" style={{background: "var(--bg-elev-2)", border: "1px solid var(--border)"}}>
+        <div className="text-[11px] tracking-[0.18em] font-semibold mb-3" style={{color: "var(--accent-2)"}}>⏱ TIME vs TARGET (per question)</div>
+        <div className="space-y-2">
+          {results.map((r, i) => {
+            const pct = Math.min(100, (r.time / r.target) * 100);
+            const cls = pct > 100 ? "danger" : pct > 75 ? "warning" : "";
+            return (
+              <div key={i} className="flex items-center gap-3 text-[12px]">
+                <div className="w-16 font-mono" style={{color: "var(--text-dim)"}}>Q{i+1}</div>
+                <DiffBadge level={r.problem.difficulty} />
+                <div className="flex-1 pl-progress-bar">
+                  <div className={"pl-progress-fill " + cls} style={{width: pct + "%"}}/>
+                </div>
+                <div className="font-mono w-20 text-right" style={{color: "var(--text)"}}>{r.time}s / {r.target}s</div>
+                <div style={{color: r.correct ? "#22c55e" : "#fb7185"}}>{r.correct ? "✓" : "✗"}</div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {Object.keys(accByDiff).length > 0 && (
+        <div className="rounded-lg p-4 mb-4" style={{background: "var(--bg-elev-2)", border: "1px solid var(--border)"}}>
+          <div className="text-[11px] tracking-[0.18em] font-semibold mb-2" style={{color: "var(--accent)"}}>ACCURACY BY DIFFICULTY</div>
+          <div className="flex flex-wrap gap-2">
+            {Object.entries(accByDiff).map(([d, a]) => (
+              <div key={d} className="flex items-center gap-2 text-[12px] px-2 py-1 rounded-md"
+                style={{background: "var(--bg-elev-3)", border: "1px solid var(--border)"}}>
+                <DiffBadge level={d} />
+                <span className="font-mono" style={{color: a >= 80 ? "#22c55e" : a >= 60 ? "#eab308" : "#ef4444"}}>{a}%</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {reviseConcepts.length > 0 && (
+        <div className="rounded-lg p-4 mb-4" style={{background: "var(--warn-soft)", border: "1px solid var(--warn-border)"}}>
+          <div className="text-[11px] tracking-[0.18em] font-semibold mb-2" style={{color: "var(--warn)"}}>🔁 CONCEPTS TO REVISIT</div>
+          <div className="flex flex-wrap gap-2">
+            {reviseConcepts.map((c, i) => <ConceptTag key={i}>{c}</ConceptTag>)}
+          </div>
+        </div>
+      )}
+
+      <div className="flex gap-2">
+        <button className="pl-submit-btn" onClick={startDrill}>↻ Restart Drill</button>
+        <button className="text-[13px] px-3 py-1.5 rounded-md"
+          style={{border: "1px solid var(--border-strong)", color: "var(--text-dim)", background: "var(--bg-elev-2)"}}
+          onClick={() => setPhase("idle")}>
+          ← Back
+        </button>
+      </div>
+    </div>
+  );
+}
+
+/* ────────────────────────────────────────────────────────────────
+   PYQ WALKTHROUGH (labeled GATE CS PYQ — explanation only)
+   ──────────────────────────────────────────────────────────────── */
+function PYQWalkthrough({ year, marks, statement, solution }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="rounded-xl p-5 mb-5 pl-prose"
+      style={{background: "rgba(245,158,11,0.05)", border: "1px solid rgba(245,158,11,0.35)"}}>
+      <div className="flex flex-wrap items-center gap-2 mb-3">
+        <span className="pl-type-pyq text-[10.5px] tracking-[0.15em] font-bold px-2 py-1 rounded-md">
+          ★ GATE CS {year} — PYQ WALKTHROUGH
+        </span>
+        <MetaPill>{marks}-mark</MetaPill>
+      </div>
+      <div className="text-[15px] leading-relaxed mb-3 p-4 rounded-lg"
+        style={{background: "var(--bg-elev-2)", color: "var(--text)", border: "1px solid var(--border)"}}>
+        {statement}
+      </div>
+      <button onClick={() => setOpen(o => !o)}
+        className="text-[13px] px-3 py-1.5 rounded-md"
+        style={{border: "1px solid rgba(245,158,11,0.35)", color: "#f59e0b", background: "rgba(245,158,11,0.10)"}}>
+        {open ? "▲ Hide walkthrough" : "▼ Show full walkthrough"}
+      </button>
+      {open && (
+        <div className="mt-4 space-y-3">
+          {solution.map((s, i) => (
+            <div key={i} className="rounded-lg p-3" style={{background: "var(--bg-elev-2)", border: "1px solid var(--border)"}}>
+              <div className="text-[11px] tracking-[0.18em] font-semibold mb-1" style={{color: "var(--accent)"}}>{s.label}</div>
+              <div className="text-[14px]" style={{color: "var(--text)", whiteSpace: "pre-line"}}>{s.body}</div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ────────────────────────────────────────────────────────────────
+   CONCEPT NAVIGATOR (Tabs to pick which concept lab)
+   ──────────────────────────────────────────────────────────────── */
+function ConceptNavigator({ concepts, active, setActive, progressMap }) {
+  return (
+    <div className="sticky top-[60px] z-40 py-3 px-4 mb-4 rounded-xl flex flex-wrap gap-2"
+      style={{background: "var(--bg-overlay)", backdropFilter: "blur(14px)", border: "1px solid var(--border)"}}>
+      {concepts.map(c => {
+        const p = progressMap[c.num];
+        const done = p ? p.correct.length : 0;
+        const total = p ? p.totalProblems : 0;
+        return (
+          <button key={c.num}
+            className={"pl-tab-pill " + (active === c.num ? "active" : "")}
+            onClick={() => {
+              setActive(c.num);
+              document.getElementById("concept-lab-" + c.num)?.scrollIntoView({ behavior: "smooth", block: "start" });
+            }}>
+            <span style={{fontWeight: 600}}>C6.{c.num}</span>
+            <span className="opacity-70 ml-2">{c.shortName}</span>
+            <span className="ml-2 font-mono text-[11px] opacity-80">{done}/{total} ✓</span>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+/* ────────────────────────────────────────────────────────────────
+   CONCEPT-LAB WRAPPER
+   ──────────────────────────────────────────────────────────────── */
+function ConceptLab({ num, title, why, patterns, problems, techniques, mistakes, pyqs, progress }) {
+  return (
+    <section id={"concept-lab-" + num} className="max-w-5xl mx-auto px-5 py-8 fade-up">
+      <div className="card p-6 md:p-9" style={{boxShadow: "var(--shadow-glow-accent)"}}>
+        <div className="flex flex-wrap items-baseline gap-3 mb-3">
+          <span className="text-xs tracking-[0.22em] font-semibold px-2.5 py-1 rounded-md"
+            style={{color: "var(--accent)", border: "1px solid var(--accent-border)", background: "var(--accent-soft)"}}>
+            PROBLEM LAB · CONCEPT 6.{num}
+          </span>
+          <span className="text-sm" style={{color: "var(--text-faded)"}}>·</span>
+          <span className="text-sm" style={{color: "var(--text-dim)"}}>Module 6 · Eigenvalues</span>
+          <span className="ml-auto text-[11px] px-2 py-1 rounded-md font-mono"
+            style={{background: "var(--bg-elev-2)", color: "var(--text-dim)", border: "1px solid var(--border)"}}>
+            {progress.correct.length}/{progress.totalProblems} solved
+          </span>
+        </div>
+        <h2 className="text-2xl md:text-3xl font-bold tracking-tight mb-3" style={{color: "var(--text)"}}>{title}</h2>
+        {why && (
+          <div className="text-[15px] leading-relaxed mb-6 border-l-2 pl-4 italic font-serif"
+            style={{borderColor: "var(--accent-border)", color: "var(--text-dim)"}}>
+            {why}
+          </div>
+        )}
+        <LayerHeader num={1} title="How GATE CS Tests This Concept"
+          subtitle="Top rankers classify the question first, then solve. Train the classifier." />
+        {patterns.map((p, i) => <PatternCard key={i} idx={i+1} pattern={p} />)}
+        {pyqs && pyqs.length > 0 && (
+          <>
+            <LayerHeader num={"1.5"} title="GATE CS PYQ Walkthroughs"
+              subtitle="Real GATE CS questions with full reasoning chains. Read, don't solve — these are examples." />
+            {pyqs.map((p, i) => <PYQWalkthrough key={i} {...p} />)}
+          </>
+        )}
+        <LayerHeader num={2} title="Progressive Problem Set"
+          subtitle="2 Easy · 3 Medium · 3 Hard · 1 Killer. Attempt before reveal. Hints only on request." />
+        {problems.map((p, i) => <ProblemCard key={p.id} p={p} idx={i+1} progress={progress} />)}
+        <LayerHeader num={3} title="Technique Arsenal"
+          subtitle="How to think, not what to think. Each card is a named, reusable solving algorithm." />
+        {techniques.map((t, i) => <TechniqueCard key={i} tech={t} />)}
+        <LayerHeader num={4} title="Mistake Autopsy Lab"
+          subtitle="Real wrong solutions written exactly as students write them. Each error has a one-line preventive rule." />
+        {mistakes.map((m, i) => <MistakeCard key={i} mistake={m} idx={i+1} />)}
+        <LayerHeader num={5} title="Timed Drill Mode"
+          subtitle="Knowing the answer ≠ executing under 90-second pressure. Train exam temperament separately." />
+        <DrillMode conceptNum={num} conceptTitle={title} problems={problems} />
+      </div>
+    </section>
+  );
+}
+
+
+/* ════════════════════════════════════════════════════════════════
+   CONCEPT 6.1 — WHAT EIGENVALUES REALLY ARE
+   ════════════════════════════════════════════════════════════════ */
+const C61_PATTERNS = [
+  { name: "Eigenvector Verification", surface: "Vector v and matrix A given. Asked if v is an eigenvector.",
+    testing: "Compute Av; check if it equals a scalar multiple of v.",
+    signals: ["\"is v an eigenvector of A\""],
+    firstMove: "Compute Av. If Av = λv for some λ → yes. Else no.",
+    timeBudget: 30, frequency: "Frequent" },
+  { name: "Geometric Interpretation", surface: "Asked what eigenvalues mean geometrically.",
+    testing: "Whether you know they're scaling factors along special directions.",
+    signals: ["\"geometric meaning\"", "\"direction\""],
+    firstMove: "Eigenvector = direction A only stretches/flips. Eigenvalue = stretch factor (negative = flip).",
+    timeBudget: 20, frequency: "Occasional" },
+  { name: "Eigenvalue from Definition", surface: "Av = λv given for known v. Find λ.",
+    testing: "Computing Av and identifying the scalar factor.",
+    signals: ["\"corresponding eigenvalue\""],
+    firstMove: "Av = λv; read off λ from any non-zero component.",
+    timeBudget: 25, frequency: "Frequent" },
+];
+
+const C61_PROBLEMS = [
+  { id: "c61-e1", difficulty: "easy", kind: "nat", marks: 1, timeTarget: 25,
+    tags: ["Verify"],
+    statement: <span>For <T src="A = \begin{pmatrix} 2 & 0 \\ 0 & 3 \end{pmatrix}"/>, the eigenvalue corresponding to eigenvector (1, 0) is ___.</span>,
+    answer: 2, tolerance: 0,
+    hints: [
+      { label: "Conceptual redirect", text: "Compute A·(1, 0) = ?" },
+      { label: "Key step", text: "A(1, 0) = (2, 0) = 2·(1, 0). λ = 2." },
+      { label: "Near-complete", text: "2." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Av direct compute." },
+        { label: "KEY STEP", body: "A·(1, 0) = (2·1 + 0·0, 0·1 + 3·0) = (2, 0) = 2·(1, 0). So λ = 2." },
+        { label: "COMPUTATION", body: "2." },
+        { label: "VERIFICATION", body: "(1, 0) is the eigenvector for λ = 2; (0, 1) is for λ = 3." },
+      ],
+      gateCheck: "Diagonal entries are eigenvalues.", speed: "5s.", whatMadeHard: "Nothing.",
+      generalization: "Diagonal matrix: eigvals = diag entries.", linkedConcept: "C6.1.",
+    } },
+  { id: "c61-e2", difficulty: "easy", kind: "mcq", marks: 1, timeTarget: 30,
+    tags: ["Definition"], skipSignal: { type: "attempt", text: "Attempt" },
+    statement: <span>For a square A, λ is an eigenvalue iff there exists non-zero v such that:</span>,
+    options: [ "Av = 0", "Av = λv", "A = λv", "v = λA" ],
+    answer: "B",
+    hints: [
+      { label: "Conceptual redirect", text: "Definition." },
+      { label: "Key step", text: "(B)." },
+      { label: "Near-complete", text: "Av = λv." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Eigenvalue definition." },
+        { label: "KEY STEP", body: "Av = λv where v ≠ 0." },
+        { label: "COMPUTATION", body: "(B)." },
+        { label: "VERIFICATION", body: "v = 0 makes the equation trivially true; we exclude it." },
+      ],
+      gateCheck: "Av = λv with v ≠ 0.", speed: "Direct.", whatMadeHard: "Nothing.",
+      generalization: "Universal.", linkedConcept: "C6.1.",
+      negAdvisory: "Attempt: definition. (B) wins.",
+    } },
+  { id: "c61-m1", difficulty: "medium", kind: "mcq", marks: 2, timeTarget: 50,
+    tags: ["Verify Multi"], skipSignal: { type: "attempt", text: "Attempt" },
+    statement: <span>For <T src="A = \begin{pmatrix} 1 & 1 \\ 0 & 2 \end{pmatrix}"/>, which is an eigenvector?</span>,
+    options: [ "(1, 0)", "(0, 1)", "(1, 1)", "Both (1, 0) and (1, 1)" ],
+    answer: "D",
+    hints: [
+      { label: "Conceptual redirect", text: "Test each by computing Av." },
+      { label: "Key step", text: "A(1, 0) = (1, 0) = 1·(1, 0) ✓. A(0, 1) = (1, 2), not parallel to (0,1) ✗. A(1, 1) = (2, 2) = 2·(1, 1) ✓." },
+      { label: "Near-complete", text: "(1, 0) for λ=1, (1, 1) for λ=2." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Verify each candidate." },
+        { label: "KEY STEP", body: "A(1,0)=(1,0)=1·(1,0) ✓ λ=1. A(0,1)=(1,2) — not multiple of (0,1) ✗. A(1,1)=(2,2)=2·(1,1) ✓ λ=2." },
+        { label: "COMPUTATION", body: "(D)." },
+        { label: "VERIFICATION", body: "Triangular: eigvals 1, 2 from diagonal. Eigenvectors found." },
+      ],
+      gateCheck: "Verify by direct Av compute.", speed: "30s.", whatMadeHard: "Distractor (B).",
+      generalization: "Test each.", linkedConcept: "C6.1.",
+      negAdvisory: "Attempt: verify. (D) wins.",
+    } },
+  { id: "c61-m2", difficulty: "medium", kind: "nat", marks: 2, timeTarget: 50,
+    tags: ["Stretch Factor"],
+    statement: <span>If A has eigenvalue 3 with eigenvector v = (1, 2), find the y-component of Av.</span>,
+    answer: 6, tolerance: 0,
+    hints: [
+      { label: "Conceptual redirect", text: "Av = 3v = (3, 6). y = 6." },
+      { label: "Key step", text: "6." },
+      { label: "Near-complete", text: "6." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Av = λv." },
+        { label: "KEY STEP", body: "Av = 3·(1, 2) = (3, 6). y = 6." },
+        { label: "COMPUTATION", body: "6." },
+        { label: "VERIFICATION", body: "Don't need A; just λ and v." },
+      ],
+      gateCheck: "Av = λv directly.", speed: "5s.", whatMadeHard: "Nothing.",
+      generalization: "Universal.", linkedConcept: "C6.1.",
+    } },
+  { id: "c61-m3", difficulty: "medium", kind: "mcq", marks: 2, timeTarget: 60,
+    tags: ["Eigen Geometric"], skipSignal: { type: "attempt", text: "Attempt" },
+    statement: <span>If A has eigenvalue λ = -1 with eigenvector v, then A maps v to:</span>,
+    options: [ "v (unchanged)", "-v (flipped direction)", "0 (origin)", "2v (doubled)" ],
+    answer: "B",
+    hints: [
+      { label: "Conceptual redirect", text: "λ = -1 means flip." },
+      { label: "Key step", text: "Av = -v." },
+      { label: "Near-complete", text: "(B)." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Negative eigenvalue interpretation." },
+        { label: "KEY STEP", body: "Av = -1·v = -v. Direction reversed, magnitude same." },
+        { label: "COMPUTATION", body: "(B)." },
+        { label: "VERIFICATION", body: "Reflection map has eigenvalue -1." },
+      ],
+      gateCheck: "Sign = direction flip.", speed: "Direct.", whatMadeHard: "Nothing.",
+      generalization: "Universal.", linkedConcept: "C6.1.",
+      negAdvisory: "Attempt: definition. (B) wins.",
+    } },
+  { id: "c61-h1", difficulty: "hard", kind: "mcq", marks: 2, timeTarget: 80,
+    tags: ["Eigen Multiplicities"], skipSignal: { type: "attempt", text: "Attempt" },
+    statement: <span>For 3×3 identity matrix I, the eigenvalues and their multiplicities are:</span>,
+    options: [
+      "Three distinct: 1, 2, 3.",
+      "Only λ = 1, with multiplicity 3.",
+      "λ = 0 with multiplicity 3.",
+      "No eigenvalues.",
+    ],
+    answer: "B",
+    hints: [
+      { label: "Conceptual redirect", text: "Iv = v for every v. So every non-zero vector is eigenvector with λ = 1." },
+      { label: "Key step", text: "(B)." },
+      { label: "Near-complete", text: "λ = 1, triple." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Identity matrix." },
+        { label: "KEY STEP", body: "Iv = 1·v for all v ⇒ λ = 1 only, with multiplicity = dimension = 3." },
+        { label: "COMPUTATION", body: "(B)." },
+        { label: "VERIFICATION", body: "Char poly: (1-λ)³ = 0." },
+      ],
+      gateCheck: "Identity → λ = 1, mult n.", speed: "Direct.", whatMadeHard: "Nothing.",
+      generalization: "Universal.", linkedConcept: "C6.4 multiplicities.",
+      negAdvisory: "Attempt: pattern. (B) wins.",
+    } },
+  { id: "c61-h2", difficulty: "hard", kind: "mcq", marks: 2, timeTarget: 70,
+    tags: ["Singular Eigen"], skipSignal: { type: "attempt", text: "Attempt" },
+    statement: <span>If A is singular (det = 0), then:</span>,
+    options: [
+      "A has no eigenvalues.",
+      "0 is an eigenvalue of A.",
+      "All eigenvalues are positive.",
+      "Eigenvectors are all zero.",
+    ],
+    answer: "B",
+    hints: [
+      { label: "Conceptual redirect", text: "Singular ⇔ null space non-trivial ⇔ Av = 0 = 0·v for some v ≠ 0." },
+      { label: "Key step", text: "(B)." },
+      { label: "Near-complete", text: "0 is eigenvalue." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Singular = det 0 = null non-trivial." },
+        { label: "KEY STEP", body: "∃ v ≠ 0 with Av = 0 = 0·v. So λ = 0 is eigenvalue." },
+        { label: "COMPUTATION", body: "(B)." },
+        { label: "VERIFICATION", body: "Universal: det(A - 0·I) = det A = 0." },
+      ],
+      gateCheck: "Singular ⇔ λ = 0 ∈ spec.", speed: "Direct.", whatMadeHard: "Nothing.",
+      generalization: "Universal.", linkedConcept: "C6.7.",
+      negAdvisory: "Attempt: theorem. (B) wins.",
+    } },
+  { id: "c61-h3", difficulty: "hard", kind: "mcq", marks: 2, timeTarget: 80,
+    tags: ["Eigen Scaling"], skipSignal: { type: "attempt", text: "Attempt" },
+    statement: <span>If λ is an eigenvalue of A, then 3λ is an eigenvalue of:</span>,
+    options: [ "3A", "A + 3I", "A - 3I", "3A⁻¹" ],
+    answer: "A",
+    hints: [
+      { label: "Conceptual redirect", text: "(3A)v = 3·(Av) = 3·λv = (3λ)v." },
+      { label: "Key step", text: "(A)." },
+      { label: "Near-complete", text: "3A." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Scalar multiplication of A." },
+        { label: "KEY STEP", body: "(cA)v = c(Av) = c(λv) = (cλ)v. Eigenvalue cλ." },
+        { label: "COMPUTATION", body: "(A)." },
+        { label: "VERIFICATION", body: "Distractors: (B) gives λ+3, (C) gives λ-3, (D) gives 3/λ." },
+      ],
+      gateCheck: "Scaling A scales eigenvalues.", speed: "Direct.", whatMadeHard: "Nothing.",
+      generalization: "Universal.", linkedConcept: "C6.7.",
+      negAdvisory: "Attempt: rule. (A) wins.",
+    } },
+  { id: "c61-k1", difficulty: "killer", kind: "mcq", marks: 2, timeTarget: 130,
+    tags: ["KILLER", "Inverse Eigen"],
+    statement: <span><B>[KILLER]</B> If A is invertible with eigenvalue λ and eigenvector v, then A⁻¹ has eigenvector ___ with eigenvalue ___.</span>,
+    options: [
+      "v, 1/λ",
+      "v, -λ",
+      "Av, 1/λ",
+      "A⁻¹v, λ",
+    ],
+    answer: "A",
+    hints: [
+      { label: "Conceptual redirect", text: "From Av = λv, multiply both sides by A⁻¹: v = λ·A⁻¹v → A⁻¹v = (1/λ)·v." },
+      { label: "Key step", text: "(A)." },
+      { label: "Near-complete", text: "Same v, eigenvalue 1/λ." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Inverse eigenvalue derivation." },
+        { label: "KEY STEP", body: "Av = λv ⇒ A⁻¹Av = A⁻¹·λv ⇒ v = λ·A⁻¹v ⇒ A⁻¹v = (1/λ)·v. Eigenvector v, eigenvalue 1/λ." },
+        { label: "COMPUTATION", body: "(A)." },
+        { label: "VERIFICATION", body: "λ ≠ 0 required (A invertible)." },
+      ],
+      gateCheck: "Same v, reciprocal eigenvalue.", speed: "30s.", whatMadeHard: "Manipulation.",
+      generalization: "Universal.", linkedConcept: "C7.4.",
+      negAdvisory: "Attempt: derivation. (A) wins.",
+    } },
+];
+
+const C61_TECHNIQUES = [
+  { name: "Av Direct Verification", type: "Speed Shortcut",
+    when: "Asked if v is an eigenvector.",
+    steps: ["Compute Av.", "Check if Av = λv for some scalar λ.", "Read λ from any non-zero component."],
+    speed: "30s.", example: "Standard.",
+    danger: "Distractor where Av looks similar but isn't a multiple.", freq: "Frequent" },
+  { name: "Triangular/Diagonal → Diag Entries", type: "Speed Shortcut",
+    when: "Triangular or diagonal matrix.",
+    steps: ["Eigenvalues = diagonal entries (counted with multiplicity)."],
+    speed: "5s.", example: "Standard.",
+    danger: "Only works for triangular/diagonal.", freq: "Frequent" },
+];
+
+const C61_MISTAKES = [
+  { name: "Forgetting v ≠ 0 Requirement", wrong: [
+      "Problem: Define eigenvalue.",
+      "Solution: λ such that Av = λv for ANY v.",
+    ], errorLine: 0,
+    errorDescription: "v = 0 always satisfies; must exclude.",
+    rootCause: "Half-remembering definition.",
+    correct: "v ≠ 0.",
+    prevention: "Memorize: non-zero eigenvector.",
+    gateCost: "Definitional error.", frequency: "Common" },
+];
+
+const C61_PYQS = [];
+
+function ConceptLab61({ progress }) {
+  return <ConceptLab num={1} title="What Eigenvalues Really Are — Special Directions"
+    why={<>Eigenvectors = directions A only stretches/flips. Eigenvalues = stretch factors. Before formulas, grasp the picture.</>}
+    patterns={C61_PATTERNS} problems={C61_PROBLEMS} techniques={C61_TECHNIQUES}
+    mistakes={C61_MISTAKES} pyqs={C61_PYQS} progress={progress} />;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   CONCEPT 6.2 + 6.3 — CHARACTERISTIC EQUATION + SOLVING
+   (HIGHEST YIELD IN M6 — 7 PYQs + Cayley-Hamilton KILLER)
+   ════════════════════════════════════════════════════════════════ */
+const C62_PATTERNS = [
+  { name: "Trace-Det Quadratic (2x2)", surface: "2x2 matrix; find eigenvalues.",
+    testing: "Whether you use λ² − tr(A)·λ + det(A) = 0 instead of expanding det(A - λI).",
+    signals: ["\"eigenvalues of 2x2\""],
+    firstMove: "Compute trace and det. Solve λ² − tr·λ + det = 0 using factoring or quadratic formula.",
+    timeBudget: 25, frequency: "Very Frequent" },
+  { name: "Function-of-A Eigenvalues", surface: "Asked eigenvalues of p(A) given eigenvalues of A.",
+    testing: "Whether you know p(A) has eigenvalues p(λᵢ).",
+    signals: ["\"eigenvalue of A³ + 2A - I\""],
+    firstMove: "For each eigenvalue λ of A, p(A) has eigenvalue p(λ).",
+    timeBudget: 30, frequency: "Very Frequent" },
+  { name: "Shift Property (A − cI)", surface: "Asked eigenvalues of A − cI given those of A.",
+    testing: "Whether you know they shift by -c.",
+    signals: ["\"eigenvalues of A − 3I\""],
+    firstMove: "Each λᵢ becomes λᵢ − c.",
+    timeBudget: 15, frequency: "Frequent" },
+  { name: "Power Property (Aⁿ)", surface: "Eigenvalues of A^n.",
+    testing: "Each λᵢ becomes λᵢⁿ.",
+    signals: ["\"eigenvalues of A⁵\""],
+    firstMove: "Each λᵢ → λᵢⁿ.",
+    timeBudget: 15, frequency: "Frequent" },
+  { name: "Number of Independent Eigenvectors", surface: "Asked for number of LI eigenvectors.",
+    testing: "Whether you sum geometric multiplicities.",
+    signals: ["\"how many linearly independent eigenvectors\""],
+    firstMove: "Σ gm(λᵢ). Maximum n; equals n iff diagonalizable.",
+    timeBudget: 60, frequency: "Frequent" },
+];
+
+const C62_PROBLEMS = [
+  { id: "c62-e1", difficulty: "easy", kind: "nat", marks: 1, timeTarget: 20,
+    tags: ["Trace-Det 2x2"],
+    statement: <span>For <T src="A = \begin{pmatrix} 3 & 1 \\ 0 & 2 \end{pmatrix}"/>, the larger eigenvalue is ___.</span>,
+    answer: 3, tolerance: 0,
+    hints: [
+      { label: "Conceptual redirect", text: "Triangular → eigenvalues = diagonal entries." },
+      { label: "Key step", text: "Diagonal: 3, 2. Larger = 3." },
+      { label: "Near-complete", text: "3." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Triangular shortcut." },
+        { label: "KEY STEP", body: "Upper triangular: eigvals = diagonal = 3, 2." },
+        { label: "COMPUTATION", body: "3." },
+        { label: "VERIFICATION", body: "Trace = 5 = 3 + 2 ✓. Det = 6 = 3·2 ✓." },
+      ],
+      gateCheck: "Triangular: read diagonal.", speed: "5s.", whatMadeHard: "Nothing.",
+      generalization: "Universal.", linkedConcept: "C6.7.",
+    } },
+  { id: "c62-e2", difficulty: "easy", kind: "nat", marks: 1, timeTarget: 30,
+    tags: ["Trace-Det Quadratic"],
+    statement: <span>For <T src="A = \begin{pmatrix} 4 & 1 \\ 2 & 3 \end{pmatrix}"/>, the smaller eigenvalue is ___.</span>,
+    answer: 2, tolerance: 0,
+    hints: [
+      { label: "Conceptual redirect", text: "λ² - 7λ + 10 = 0 → (λ-2)(λ-5) = 0 → λ = 2, 5." },
+      { label: "Key step", text: "Smaller = 2." },
+      { label: "Near-complete", text: "2." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Trace-det quadratic." },
+        { label: "KEY STEP", body: "trace = 7, det = 12 - 2 = 10. λ² - 7λ + 10 = (λ-2)(λ-5) = 0. λ = 2, 5." },
+        { label: "COMPUTATION", body: "2." },
+        { label: "VERIFICATION", body: "2 + 5 = 7 ✓, 2·5 = 10 ✓." },
+      ],
+      gateCheck: "λ² - tr·λ + det = 0.", speed: "20s.", whatMadeHard: "Nothing.",
+      generalization: "Universal for 2x2.", linkedConcept: "C6.7.",
+    } },
+  { id: "c62-m1", difficulty: "medium", kind: "nat", marks: 2, timeTarget: 60,
+    tags: ["Function-of-A"],
+    statement: <span>If A has eigenvalues 1, 2, 3, the LARGEST eigenvalue of A² is ___.</span>,
+    answer: 9, tolerance: 0,
+    hints: [
+      { label: "Conceptual redirect", text: "λ → λ² under the power rule." },
+      { label: "Key step", text: "1² = 1, 2² = 4, 3² = 9. Largest is 9." },
+      { label: "Near-complete", text: "9." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Power property." },
+        { label: "KEY STEP", body: "Eigvals of A² = (1, 4, 9). Largest = 9." },
+        { label: "COMPUTATION", body: "9." },
+        { label: "VERIFICATION", body: "Same eigenvectors as A; only eigenvalues get squared." },
+      ],
+      gateCheck: "λⁿ rule.", speed: "5s.", whatMadeHard: "Nothing.",
+      generalization: "Universal.", linkedConcept: "C7.4.",
+    } },
+  { id: "c62-m2", difficulty: "medium", kind: "mcq", marks: 2, timeTarget: 70,
+    tags: ["Shift"], skipSignal: { type: "attempt", text: "Attempt" },
+    statement: <span>If A has eigenvalues 2, 5, then A - 2I has eigenvalues:</span>,
+    options: [ "0, 3", "0, 7", "2, 5", "-2, 3" ],
+    answer: "A",
+    hints: [
+      { label: "Conceptual redirect", text: "λ → λ - 2." },
+      { label: "Key step", text: "2 - 2 = 0, 5 - 2 = 3." },
+      { label: "Near-complete", text: "(A)." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Shift property." },
+        { label: "KEY STEP", body: "(A - cI)v = Av - cv = λv - cv = (λ - c)v. So shift each by -c = -2." },
+        { label: "COMPUTATION", body: "(A) 0, 3." },
+        { label: "VERIFICATION", body: "Eigenvalue 0 means A - 2I singular — true since 2 is eigval of A." },
+      ],
+      gateCheck: "Shift by -c.", speed: "5s.", whatMadeHard: "Nothing.",
+      generalization: "Universal.", linkedConcept: "C6.7.",
+      negAdvisory: "Attempt: rule. (A) wins.",
+    } },
+  { id: "c62-m3", difficulty: "medium", kind: "nat", marks: 2, timeTarget: 70,
+    tags: ["f(A) Eigenvalues"],
+    statement: <span>If A has eigenvalue λ = 2, then A³ - 2A + I has eigenvalue ___.</span>,
+    answer: 5, tolerance: 0,
+    hints: [
+      { label: "Conceptual redirect", text: "p(A) → p(λ). p(2) = 8 - 4 + 1 = 5." },
+      { label: "Key step", text: "5." },
+      { label: "Near-complete", text: "5." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Polynomial of A." },
+        { label: "KEY STEP", body: "p(λ) = λ³ - 2λ + 1. p(2) = 8 - 4 + 1 = 5." },
+        { label: "COMPUTATION", body: "5." },
+        { label: "VERIFICATION", body: "Same eigenvector v." },
+      ],
+      gateCheck: "p(A) → p(λ).", speed: "10s.", whatMadeHard: "Nothing.",
+      generalization: "Universal.", linkedConcept: "C7.4.",
+    } },
+  { id: "c62-h1", difficulty: "hard", kind: "nat", marks: 2, timeTarget: 80,
+    tags: ["Char Eq 3x3"],
+    statement: <span>For <T src="A = \begin{pmatrix} 2 & 0 & 0 \\ 0 & 3 & 1 \\ 0 & 0 & 3 \end{pmatrix}"/>, the sum of all eigenvalues (with algebraic multiplicity) is ___.</span>,
+    answer: 8, tolerance: 0,
+    hints: [
+      { label: "Conceptual redirect", text: "Triangular: eigvals = diag entries = 2, 3, 3." },
+      { label: "Key step", text: "2 + 3 + 3 = 8." },
+      { label: "Near-complete", text: "8." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Triangular + sum = trace." },
+        { label: "KEY STEP", body: "Eigvals: 2, 3, 3 (3 has am = 2). Sum = trace = 8." },
+        { label: "COMPUTATION", body: "8." },
+        { label: "VERIFICATION", body: "Trace = 2 + 3 + 3 = 8 ✓." },
+      ],
+      gateCheck: "Trace = Σλ with am.", speed: "10s.", whatMadeHard: "Nothing.",
+      generalization: "Universal.", linkedConcept: "C6.7.",
+    } },
+  { id: "c62-h2", difficulty: "hard", kind: "mcq", marks: 2, timeTarget: 90,
+    tags: ["Inverse Eigen"], skipSignal: { type: "attempt", text: "Attempt" },
+    statement: <span>If A is 3×3 invertible with eigenvalues 1, 2, 4, then det(A⁻¹) and trace(A⁻¹) are:</span>,
+    options: [
+      "det = 1/8, trace = 7/4",
+      "det = 8, trace = 7",
+      "det = 1/8, trace = 1 + 1/2 + 1/4 = 7/4",
+      "Both (A) and (C) — same answer.",
+    ],
+    answer: "D",
+    hints: [
+      { label: "Conceptual redirect", text: "A⁻¹ has eigvals 1/1, 1/2, 1/4. det = product, trace = sum." },
+      { label: "Key step", text: "det = 1·(1/2)·(1/4) = 1/8. trace = 1 + 1/2 + 1/4 = 7/4." },
+      { label: "Near-complete", text: "(D) — (A) and (C) match." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Inverse eigenvalues." },
+        { label: "KEY STEP", body: "A⁻¹ eigvals: 1/λᵢ = 1, 1/2, 1/4. det = product = 1/8. trace = sum = 7/4." },
+        { label: "COMPUTATION", body: "(D)." },
+        { label: "VERIFICATION", body: "det(A) = 8 ✓, det(A⁻¹) = 1/8 ✓." },
+      ],
+      gateCheck: "Reciprocal eigvals.", speed: "30s.", whatMadeHard: "Distractor format.",
+      generalization: "Universal.", linkedConcept: "C7.4.",
+      negAdvisory: "Attempt: rule. (D) wins.",
+    } },
+  { id: "c62-h3", difficulty: "hard", kind: "mcq", marks: 2, timeTarget: 100,
+    tags: ["LI Eigenvectors"], skipSignal: { type: "skip", text: "Skip if <60%" },
+    statement: <span>For <T src="A = \begin{pmatrix} 2 & 1 & 0 \\ 0 & 2 & 0 \\ 0 & 0 & 3 \end{pmatrix}"/>, the number of linearly independent eigenvectors is:</span>,
+    options: [ "1", "2", "3", "None" ],
+    answer: "B",
+    hints: [
+      { label: "Conceptual redirect", text: "Eigvals 2 (am=2), 3 (am=1). Find gm for each." },
+      { label: "Key step", text: "A - 2I = [[0,1,0],[0,0,0],[0,0,1]]. Null space dim = 1 (kernel of rank 2). gm(2) = 1. gm(3) = 1." },
+      { label: "Near-complete", text: "Total LI eigenvectors = 1 + 1 = 2." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Sum of gm = LI eigenvectors." },
+        { label: "KEY STEP", body: "λ = 2 (am = 2): A - 2I has rank 2 → null dim 1 → gm = 1.\nλ = 3 (am = 1): gm = 1.\nTotal LI eigenvectors = 1 + 1 = 2." },
+        { label: "COMPUTATION", body: "(B)." },
+        { label: "VERIFICATION", body: "Defective! gm(2) = 1 < am(2) = 2. So not diagonalizable." },
+      ],
+      gateCheck: "Σ gm = number of LI eigenvectors.", speed: "60s.", whatMadeHard: "Computing gm.",
+      generalization: "Universal.", linkedConcept: "C6.4-5.",
+      negAdvisory: "Attempt: nullity. (B) wins.",
+    } },
+  { id: "c62-k1", difficulty: "killer", kind: "nat", marks: 2, timeTarget: 100,
+    tags: ["KILLER", "Cayley-Hamilton"],
+    statement: <span><B>[KILLER]</B> Let A be 3×3 with eigenvalues 1, 2, 3. Find <T src="\det(A^3 - 6A^2 + 11A - 6I)"/>.</span>,
+    answer: 0, tolerance: 0,
+    hints: [
+      { label: "Conceptual redirect", text: "Char poly: p(λ) = (λ-1)(λ-2)(λ-3) = λ³ - 6λ² + 11λ - 6." },
+      { label: "Key step", text: "A satisfies its own char poly: p(A) = 0 (Cayley-Hamilton). So A³ - 6A² + 11A - 6I = 0." },
+      { label: "Near-complete", text: "det(0) = 0." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Cayley-Hamilton." },
+        { label: "KEY STEP", body: "Char poly: p(λ) = (λ-1)(λ-2)(λ-3) = λ³ - 6λ² + 11λ - 6.\nCayley-Hamilton: A satisfies p(A) = 0. So A³ - 6A² + 11A - 6I = 0 (zero matrix).\ndet(0) = 0." },
+        { label: "COMPUTATION", body: "0." },
+        { label: "VERIFICATION", body: "Eigenvalues of (A³ - 6A² + 11A - 6I) = p(λ) for each λ = 1, 2, 3. p(1) = p(2) = p(3) = 0. All eigenvalues 0 → det = product = 0." },
+      ],
+      gateCheck: "Cayley-Hamilton: p(A) = 0 always.",
+      speed: "30s.", whatMadeHard: "Recognizing the polynomial is the char poly.",
+      generalization: "p(A) = 0 ⇒ det(p(A)) = 0.",
+      linkedConcept: "C7.2.",
+    } },
+];
+
+const C62_TECHNIQUES = [
+  { name: "Trace-Det Quadratic for 2x2", type: "Speed Shortcut",
+    when: "Eigenvalues of 2×2.",
+    steps: ["Compute trace and det.", "Solve λ² − tr·λ + det = 0.", "Factor or quadratic formula."],
+    speed: "20s.", example: "tr = 5, det = 6 → λ² - 5λ + 6 = (λ-2)(λ-3).",
+    danger: "Sign of det.", freq: "Very Frequent" },
+  { name: "Triangular Eigenvalue Shortcut", type: "Speed Shortcut",
+    when: "Triangular matrix (upper or lower).",
+    steps: ["Eigenvalues = diagonal entries (with multiplicity)."],
+    speed: "5s.", example: "Standard.",
+    danger: "Only triangular.", freq: "Frequent" },
+  { name: "f(A) Eigenvalue Reflex", type: "Speed Shortcut",
+    when: "Asked eigenvalues of polynomial/function of A.",
+    steps: ["p(A) has eigenvalues p(λᵢ).",
+            "Same eigenvectors as A."],
+    speed: "Direct.", example: "λ = 2 → A² has 4, A - 3I has -1, etc.",
+    danger: "Doesn't work for A + B unless A and B commute.", freq: "Very Frequent" },
+  { name: "Cayley-Hamilton", type: "Structural Insight",
+    when: "Polynomial of A with same degree as size.",
+    steps: ["Char poly p(λ) = det(A - λI).",
+            "p(A) = 0 ALWAYS.",
+            "Use to reduce powers Aⁿ for n ≥ size."],
+    speed: "Depends.", example: "See KILLER.",
+    danger: "Apply only to p(A), not arbitrary polys.", freq: "Frequent" },
+  { name: "Inverse Eigenvalues", type: "Speed Shortcut",
+    when: "Eigenvalues of A⁻¹.",
+    steps: ["A⁻¹ has eigvals 1/λᵢ.", "Same eigenvectors.", "Requires A invertible (all λᵢ ≠ 0)."],
+    speed: "Direct.", example: "λ = 2 → 1/2.",
+    danger: "0 eigenvalue → no inverse.", freq: "Frequent" },
+];
+
+const C62_MISTAKES = [
+  { name: "eig(A+B) = eig(A) + eig(B) Error", wrong: [
+      "Problem: A has eigvals 1, 2. B has eigvals 3, 4. Eigenvalues of A + B?",
+      "Solution: 1+3=4, 2+4=6.",
+    ], errorLine: 0,
+    errorDescription: "Eigenvalues of sums are NOT sums of eigenvalues unless A, B simultaneously diagonalizable.",
+    rootCause: "Treating eigenvalues as linear.",
+    correct: "Need actual matrices; cannot deduce from eigvals alone.",
+    prevention: "Memorize: only f(A) = polynomial in A gives p(λ).",
+    gateCost: "Major error.", frequency: "Very Common" },
+  { name: "am vs gm Confusion", wrong: [
+      "Problem: A has λ = 2 with am 3. So gm = 3.",
+      "Solution: Yes.",
+    ], errorLine: 0,
+    errorDescription: "gm ≤ am; equality optional. Could be 1, 2, or 3.",
+    rootCause: "Half-knowledge.",
+    correct: "Compute gm = nullity(A - λI).",
+    prevention: "am, gm separate.",
+    gateCost: "Diagonalizability error.", frequency: "Common" },
+];
+
+const C62_PYQS = [
+  { year: "2014-Style", marks: 2,
+    statement: <span><B>(GATE CS 2014 pattern.)</B><br/>For 2x2 A with trace 5 and det 6, eigenvalues are ___.</span>,
+    solution: [
+      { label: "APPLY", body: "λ² - 5λ + 6 = (λ-2)(λ-3) = 0." },
+      { label: "ANSWER", body: "λ = 2, 3." },
+    ] },
+  { year: "2015-Style", marks: 2,
+    statement: <span><B>(GATE CS 2015 pattern.)</B><br/>If A has eigenvalues 1, 2, 3, then A⁻¹ has eigenvalues ___.</span>,
+    solution: [
+      { label: "RULE", body: "λ → 1/λ." },
+      { label: "ANSWER", body: "1, 1/2, 1/3." },
+    ] },
+  { year: "2016-Style", marks: 2,
+    statement: <span><B>(GATE CS 2016 pattern.)</B><br/>For A 3×3 with eigenvalues 1, 2, 3, trace(A) = ___ and det(A) = ___.</span>,
+    solution: [
+      { label: "TRACE", body: "1 + 2 + 3 = 6." },
+      { label: "DET", body: "1·2·3 = 6." },
+    ] },
+  { year: "2018-Style", marks: 2,
+    statement: <span><B>(GATE CS 2018 pattern.)</B><br/>If A has eigenvalue λ then 2A + 3I has eigenvalue ___.</span>,
+    solution: [
+      { label: "RULE", body: "2λ + 3." },
+    ] },
+  { year: "2019-Style", marks: 2,
+    statement: <span><B>(GATE CS 2019 pattern.)</B><br/>Eigenvalues of <T src="\begin{pmatrix} 1 & 2 \\ 4 & 3 \end{pmatrix}"/> are ___.</span>,
+    solution: [
+      { label: "TR-DET", body: "tr = 4, det = -5. λ² - 4λ - 5 = (λ-5)(λ+1)." },
+      { label: "ANSWER", body: "5, -1." },
+    ] },
+  { year: "2021-Style", marks: 2,
+    statement: <span><B>(GATE CS 2021 pattern.)</B><br/>For 3×3 A with eigvals 1, 2, 3, det(A² - 3A + 2I) = ___.</span>,
+    solution: [
+      { label: "RULE", body: "p(A) eigvals: p(λᵢ). p(λ) = λ² - 3λ + 2 = (λ-1)(λ-2). p(1)=0, p(2)=0, p(3)=2." },
+      { label: "ANSWER", body: "det = 0·0·2 = 0." },
+    ] },
+  { year: "2022-Style", marks: 2,
+    statement: <span><B>(GATE CS 2022 pattern.)</B><br/>If λ is an eigenvalue of A, what is an eigenvalue of A²?</span>,
+    solution: [
+      { label: "RULE", body: "λ²." },
+    ] },
+];
+
+function ConceptLab62({ progress }) {
+  return <ConceptLab num={2} title="Characteristic Equation + Solving — 7 PYQs + Cayley-Hamilton KILLER"
+    why={<>Two concepts merged: char poly + eigenvalue extraction. Trace-Det quadratic for 2×2, f(A) → f(λ) reflex, Cayley-Hamilton p(A) = 0. 7 PYQs span 2014–2022.</>}
+    patterns={C62_PATTERNS} problems={C62_PROBLEMS} techniques={C62_TECHNIQUES}
+    mistakes={C62_MISTAKES} pyqs={C62_PYQS} progress={progress} />;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   CONCEPT 6.4 + 6.5 — ALGEBRAIC vs GEOMETRIC MULTIPLICITY
+   (Diagonalizability + Defective Matrices)
+   ════════════════════════════════════════════════════════════════ */
+const C64_PATTERNS = [
+  { name: "Diagonalizability Test", surface: "Asked if A is diagonalizable.",
+    testing: "Whether you check gm = am for every eigenvalue.",
+    signals: ["\"diagonalizable\""],
+    firstMove: "For each eigenvalue λ: am = power in char poly. gm = nullity(A - λI). Diagonalizable iff gm = am for ALL eigvals.",
+    timeBudget: 80, frequency: "Very Frequent" },
+  { name: "Distinct Eigenvalues → Diagonalizable", surface: "If A has n distinct eigenvalues, is it diagonalizable?",
+    testing: "Yes always.",
+    signals: ["\"n distinct eigenvalues\""],
+    firstMove: "Distinct eigvals ⇒ each has am = 1 = gm ⇒ diagonalizable.",
+    timeBudget: 20, frequency: "Frequent" },
+  { name: "Repeated Eigenvalue Trap", surface: "Eigenvalue has am > 1. Diagonalizable?",
+    testing: "Depends on gm. Could be either.",
+    signals: ["\"repeated eigenvalue\""],
+    firstMove: "Compute gm = nullity(A - λI) and compare to am.",
+    timeBudget: 60, frequency: "Frequent" },
+  { name: "Defective Matrix Recognition", surface: "Asked if matrix is defective.",
+    testing: "Defective = some gm < am = NOT diagonalizable.",
+    signals: ["\"defective\""],
+    firstMove: "Some gm < am ⇒ defective.",
+    timeBudget: 30, frequency: "Occasional" },
+];
+
+const C64_PROBLEMS = [
+  { id: "c64-e1", difficulty: "easy", kind: "mcq", marks: 1, timeTarget: 25,
+    tags: ["Diag Test"], skipSignal: { type: "attempt", text: "Attempt" },
+    statement: <span>A 3×3 matrix has 3 distinct eigenvalues. Then A is:</span>,
+    options: [
+      "Always diagonalizable.",
+      "Never diagonalizable.",
+      "Diagonalizable only if symmetric.",
+      "Cannot determine.",
+    ],
+    answer: "A",
+    hints: [
+      { label: "Conceptual redirect", text: "Distinct eigvals ⇒ each am = 1 = gm." },
+      { label: "Key step", text: "(A)." },
+      { label: "Near-complete", text: "Always." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Distinct eigvals rule." },
+        { label: "KEY STEP", body: "Distinct eigvals → independent eigenvectors → diagonalizable." },
+        { label: "COMPUTATION", body: "(A)." },
+        { label: "VERIFICATION", body: "Theorem: distinct λ → LI eigenvectors." },
+      ],
+      gateCheck: "Distinct → diagonalizable always.", speed: "Direct.", whatMadeHard: "Nothing.",
+      generalization: "Universal.", linkedConcept: "C6.4.",
+      negAdvisory: "Attempt: theorem. (A) wins.",
+    } },
+  { id: "c64-e2", difficulty: "easy", kind: "mcq", marks: 1, timeTarget: 30,
+    tags: ["am vs gm"], skipSignal: { type: "attempt", text: "Attempt" },
+    statement: <span>For an eigenvalue λ:</span>,
+    options: [
+      "gm ≤ am always.",
+      "gm > am always.",
+      "gm = am always.",
+      "No relation.",
+    ],
+    answer: "A",
+    hints: [
+      { label: "Conceptual redirect", text: "Standard inequality." },
+      { label: "Key step", text: "(A)." },
+      { label: "Near-complete", text: "gm ≤ am." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Multiplicity inequality." },
+        { label: "KEY STEP", body: "Always 1 ≤ gm ≤ am. Equality (gm = am) → diagonalizable contribution." },
+        { label: "COMPUTATION", body: "(A)." },
+        { label: "VERIFICATION", body: "Theorem." },
+      ],
+      gateCheck: "gm ≤ am.", speed: "Direct.", whatMadeHard: "Nothing.",
+      generalization: "Universal.", linkedConcept: "C6.4.",
+      negAdvisory: "Attempt: theorem. (A) wins.",
+    } },
+  { id: "c64-m1", difficulty: "medium", kind: "mcq", marks: 2, timeTarget: 70,
+    tags: ["Diag Decision"], skipSignal: { type: "attempt", text: "Attempt" },
+    statement: <span>The matrix <T src="A = \begin{pmatrix} 2 & 1 \\ 0 & 2 \end{pmatrix}"/> is:</span>,
+    options: [
+      "Diagonalizable.",
+      "Not diagonalizable (defective).",
+      "Symmetric.",
+      "Singular.",
+    ],
+    answer: "B",
+    hints: [
+      { label: "Conceptual redirect", text: "Single eigenvalue 2 with am = 2. Check gm." },
+      { label: "Key step", text: "A - 2I = [[0, 1], [0, 0]]. rank 1 → nullity 1. gm = 1 < am = 2." },
+      { label: "Near-complete", text: "(B)." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Repeated eigenvalue — check gm." },
+        { label: "KEY STEP", body: "λ = 2 (am 2). A - 2I = [[0, 1], [0, 0]]. Rank 1 → null dim 1. gm = 1 < am = 2 ⇒ defective." },
+        { label: "COMPUTATION", body: "(B)." },
+        { label: "VERIFICATION", body: "Only one eigenvector direction; can't diagonalize." },
+      ],
+      gateCheck: "Defective = some gm < am.", speed: "30s.", whatMadeHard: "Computing gm.",
+      generalization: "Same template.", linkedConcept: "C6.4-5.",
+      negAdvisory: "Attempt: nullity. (B) wins.",
+    } },
+  { id: "c64-m2", difficulty: "medium", kind: "mcq", marks: 2, timeTarget: 70,
+    tags: ["Identity Case"], skipSignal: { type: "attempt", text: "Attempt" },
+    statement: <span>The matrix <T src="A = \begin{pmatrix} 2 & 0 \\ 0 & 2 \end{pmatrix}"/> is:</span>,
+    options: [
+      "Diagonalizable (in fact, already diagonal).",
+      "Defective.",
+      "Has only one eigenvector.",
+      "Singular.",
+    ],
+    answer: "A",
+    hints: [
+      { label: "Conceptual redirect", text: "Already diagonal. Single eigenvalue 2 with full multiplicity." },
+      { label: "Key step", text: "gm = am = 2. Diagonalizable." },
+      { label: "Near-complete", text: "(A)." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Already diagonal." },
+        { label: "KEY STEP", body: "A = 2I. Every non-zero v is eigenvector. gm = 2 = am. Diagonalizable trivially." },
+        { label: "COMPUTATION", body: "(A)." },
+        { label: "VERIFICATION", body: "Repeated eigenvalue can still give diagonalizable if gm matches am." },
+      ],
+      gateCheck: "Diagonal ⇒ diagonalizable.", speed: "Direct.", whatMadeHard: "Distractor (C) trap.",
+      generalization: "Universal.", linkedConcept: "C6.4-5.",
+      negAdvisory: "Attempt: structure. (A) wins.",
+    } },
+  { id: "c64-m3", difficulty: "medium", kind: "nat", marks: 2, timeTarget: 80,
+    tags: ["Count LI eigenvectors"],
+    statement: <span>For <T src="A = \begin{pmatrix} 3 & 1 & 0 \\ 0 & 3 & 0 \\ 0 & 0 & 5 \end{pmatrix}"/>, total number of LI eigenvectors is ___.</span>,
+    answer: 2, tolerance: 0,
+    hints: [
+      { label: "Conceptual redirect", text: "Sum gm." },
+      { label: "Key step", text: "λ = 3 (am 2): A-3I = [[0,1,0],[0,0,0],[0,0,2]]. Rank 2, null 1. gm = 1. λ = 5 (am 1): gm = 1." },
+      { label: "Near-complete", text: "1 + 1 = 2." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Sum of gm." },
+        { label: "KEY STEP", body: "λ = 3: A - 3I has rank 2, gm = 1. λ = 5: gm = 1. Total = 2." },
+        { label: "COMPUTATION", body: "2." },
+        { label: "VERIFICATION", body: "Defective: gm(3) = 1 < am(3) = 2." },
+      ],
+      gateCheck: "Σ gm.", speed: "60s.", whatMadeHard: "Nullity calc.",
+      generalization: "Universal.", linkedConcept: "C6.4-5.",
+    } },
+  { id: "c64-h1", difficulty: "hard", kind: "mcq", marks: 2, timeTarget: 80,
+    tags: ["Diag Property"], skipSignal: { type: "attempt", text: "Attempt" },
+    statement: <span>Which is NECESSARY for A to be diagonalizable?</span>,
+    options: [
+      "A has n distinct eigenvalues.",
+      "A is symmetric.",
+      "Σ gm = n.",
+      "A is invertible.",
+    ],
+    answer: "C",
+    hints: [
+      { label: "Conceptual redirect", text: "Diagonalizable ⇔ n LI eigenvectors ⇔ Σ gm = n." },
+      { label: "Key step", text: "(C)." },
+      { label: "Near-complete", text: "Σ gm = n is necessary and sufficient." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Definition of diagonalizable." },
+        { label: "KEY STEP", body: "Diagonalizable ⇔ exists basis of eigenvectors ⇔ Σ gm(λᵢ) = n." },
+        { label: "COMPUTATION", body: "(C)." },
+        { label: "VERIFICATION", body: "(A) sufficient but not necessary. (B) sufficient not necessary. (D) irrelevant." },
+      ],
+      gateCheck: "Σ gm = n iff diagonalizable.", speed: "Direct.", whatMadeHard: "Distractors.",
+      generalization: "Universal.", linkedConcept: "C6.4.",
+      negAdvisory: "Attempt: definition. (C) wins.",
+    } },
+  { id: "c64-h2", difficulty: "hard", kind: "mcq", marks: 2, timeTarget: 80,
+    tags: ["Trap"], skipSignal: { type: "attempt", text: "Attempt" },
+    statement: <span>'A repeated eigenvalue means A is NOT diagonalizable' is:</span>,
+    options: [
+      "Always true.",
+      "Always false.",
+      "Sometimes true.",
+      "Only true if A is real.",
+    ],
+    answer: "C",
+    hints: [
+      { label: "Conceptual redirect", text: "Counterexample: I has λ = 1 repeated but is diagonal." },
+      { label: "Key step", text: "(C)." },
+      { label: "Near-complete", text: "Depends on gm vs am." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Common trap." },
+        { label: "KEY STEP", body: "Repeated eigenvalue doesn't preclude diagonalizability — only matters if gm < am. Identity I has all eigvals = 1 (repeated n times) but is fully diagonalizable." },
+        { label: "COMPUTATION", body: "(C)." },
+        { label: "VERIFICATION", body: "Repeated + gm = am: still diagonalizable." },
+      ],
+      gateCheck: "Repeated ≠ defective.", speed: "Concept: 30s.", whatMadeHard: "Trap.",
+      generalization: "Universal.", linkedConcept: "C6.4.",
+      negAdvisory: "Attempt: pattern. (C) wins.",
+    } },
+  { id: "c64-h3", difficulty: "hard", kind: "nat", marks: 2, timeTarget: 80,
+    tags: ["am vs gm Compute"],
+    statement: <span>For <T src="A = \begin{pmatrix} 2 & 0 \\ 1 & 2 \end{pmatrix}"/>, am(2) - gm(2) = ___.</span>,
+    answer: 1, tolerance: 0,
+    hints: [
+      { label: "Conceptual redirect", text: "λ = 2 with am 2. A - 2I = [[0, 0], [1, 0]]. Nullity 1 → gm = 1." },
+      { label: "Key step", text: "am - gm = 2 - 1 = 1." },
+      { label: "Near-complete", text: "1." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Compute am - gm." },
+        { label: "KEY STEP", body: "am = 2 (double root). A - 2I = [[0, 0], [1, 0]] rank 1, null 1. gm = 1. Difference = 1." },
+        { label: "COMPUTATION", body: "1." },
+        { label: "VERIFICATION", body: "am - gm > 0 → defective." },
+      ],
+      gateCheck: "Defect = am - gm.", speed: "30s.", whatMadeHard: "Nullity.",
+      generalization: "Universal.", linkedConcept: "C6.4-5.",
+    } },
+  { id: "c64-k1", difficulty: "killer", kind: "mcq", marks: 2, timeTarget: 130,
+    tags: ["KILLER", "Triple Eigen"],
+    statement: <span><B>[KILLER]</B> Construct 3×3 A with eigenvalue 2 of am = 3 but only 1 LI eigenvector. The structure of A - 2I must satisfy:</span>,
+    options: [
+      "rank(A - 2I) = 0.",
+      "rank(A - 2I) = 1.",
+      "rank(A - 2I) = 2.",
+      "rank(A - 2I) = 3.",
+    ],
+    answer: "C",
+    hints: [
+      { label: "Conceptual redirect", text: "gm = 1 means null(A - 2I) is 1D. rank-nullity: rank = 3 - 1 = 2." },
+      { label: "Key step", text: "(C)." },
+      { label: "Near-complete", text: "rank 2." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Defect via rank." },
+        { label: "KEY STEP", body: "gm(2) = nullity(A - 2I) = 1. rank-nullity: rank(A - 2I) = 3 - 1 = 2.\n\nExample: Jordan block [[2, 1, 0], [0, 2, 1], [0, 0, 2]]. A - 2I = [[0, 1, 0], [0, 0, 1], [0, 0, 0]] which has rank 2." },
+        { label: "COMPUTATION", body: "(C)." },
+        { label: "VERIFICATION", body: "am = 3, gm = 1, defect = 2 (max possible)." },
+      ],
+      gateCheck: "rank(A - λI) = n - gm.", speed: "60s.", whatMadeHard: "Jordan structure.",
+      generalization: "Universal.", linkedConcept: "C6.4-5.",
+      negAdvisory: "Attempt: rank-nullity. (C) wins.",
+    } },
+];
+
+const C64_TECHNIQUES = [
+  { name: "Diagonalizability via Σ gm = n", type: "Structural Insight",
+    when: "Check if A diagonalizable.",
+    steps: ["Find eigenvalues with am.",
+            "For each, compute gm = nullity(A - λI).",
+            "Diagonalizable iff Σ gm = n (or equivalently, gm = am for every λ)."],
+    speed: "60-120s for 3×3.", example: "Standard.",
+    danger: "Repeated eigenvalues need gm check.", freq: "Very Frequent" },
+  { name: "Distinct Eigenvalues Shortcut", type: "Speed Shortcut",
+    when: "All eigenvalues distinct.",
+    steps: ["Diagonalizable automatically."],
+    speed: "Direct.", example: "Standard.",
+    danger: "Doesn't extend to repeated case.", freq: "Frequent" },
+];
+
+const C64_MISTAKES = [
+  { name: "Distinct Eigvals NOT Guaranteed Diagonalizable", wrong: [
+      "Problem: A has 3 distinct eigvals. Is it diagonalizable?",
+      "Solution: No, requires further conditions.",
+    ], errorLine: 0,
+    errorDescription: "Distinct eigvals → always diagonalizable.",
+    rootCause: "Wrong recall.",
+    correct: "Yes, always.",
+    prevention: "Memorize.",
+    gateCost: "Conceptual.", frequency: "Common" },
+  { name: "Repeated → Not Diagonalizable", wrong: [
+      "Problem: A has λ = 2 with am 3. Diagonalizable?",
+      "Solution: No, since repeated.",
+    ], errorLine: 0,
+    errorDescription: "Need to check gm.",
+    rootCause: "Half-knowledge.",
+    correct: "Depends on gm.",
+    prevention: "Always compute gm.",
+    gateCost: "Wrong conclusion.", frequency: "Very Common" },
+];
+
+const C64_PYQS = [];
+
+function ConceptLab64({ progress }) {
+  return <ConceptLab num={4} title="Algebraic vs Geometric Multiplicity — Defective vs Diagonalizable"
+    why={<>am from char poly, gm from nullity. gm ≤ am always. Diagonalizable ⇔ Σ gm = n ⇔ gm = am for all λ. Distinct eigvals → automatic.</>}
+    patterns={C64_PATTERNS} problems={C64_PROBLEMS} techniques={C64_TECHNIQUES}
+    mistakes={C64_MISTAKES} pyqs={C64_PYQS} progress={progress} />;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   CONCEPT 6.6 — SYMMETRIC MATRICES (Spectral Theorem)
+   ════════════════════════════════════════════════════════════════ */
+const C66_PATTERNS = [
+  { name: "Real Symmetric Properties", surface: "Asked about eigenvalues of real symmetric A.",
+    testing: "Whether you know: real eigenvalues, orthogonal eigenvectors (for distinct eigvals), always diagonalizable.",
+    signals: ["\"A is real symmetric\""],
+    firstMove: "Recall: real eigvals, orthogonal eigenvectors, always diagonalizable.",
+    timeBudget: 25, frequency: "Frequent" },
+  { name: "PSD/PD Recognition", surface: "Asked if A is positive (semi-)definite.",
+    testing: "Whether you know: A symmetric + all eigvals ≥ 0 (or > 0).",
+    signals: ["\"positive definite\"", "\"PSD\""],
+    firstMove: "PD: all eigvals > 0. PSD: all ≥ 0. Both require symmetric A.",
+    timeBudget: 30, frequency: "Occasional" },
+  { name: "AᵀA / AAᵀ Symmetry", surface: "Are these matrices symmetric?",
+    testing: "AᵀA always symmetric and PSD.",
+    signals: ["\"AᵀA\""],
+    firstMove: "(AᵀA)ᵀ = AᵀA always. Always symmetric.",
+    timeBudget: 20, frequency: "Frequent" },
+];
+
+const C66_PROBLEMS = [
+  { id: "c66-e1", difficulty: "easy", kind: "mcq", marks: 1, timeTarget: 25,
+    tags: ["Symmetric"], skipSignal: { type: "attempt", text: "Attempt" },
+    statement: <span>Real symmetric A has eigenvalues that are:</span>,
+    options: [ "Always real.", "Always complex.", "Always positive.", "Always zero." ],
+    answer: "A",
+    hints: [
+      { label: "Conceptual redirect", text: "Spectral theorem." },
+      { label: "Key step", text: "(A)." },
+      { label: "Near-complete", text: "Real." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Spectral theorem." },
+        { label: "KEY STEP", body: "Real symmetric → real eigenvalues." },
+        { label: "COMPUTATION", body: "(A)." },
+        { label: "VERIFICATION", body: "Universal." },
+      ],
+      gateCheck: "Real symmetric → real eigvals.", speed: "Direct.", whatMadeHard: "Nothing.",
+      generalization: "Universal.", linkedConcept: "C6.6.",
+      negAdvisory: "Attempt: theorem. (A) wins.",
+    } },
+  { id: "c66-e2", difficulty: "easy", kind: "mcq", marks: 1, timeTarget: 30,
+    tags: ["AᵀA"], skipSignal: { type: "attempt", text: "Attempt" },
+    statement: <span>For any matrix A, AᵀA is:</span>,
+    options: [ "Always symmetric.", "Always invertible.", "Always positive definite.", "Never symmetric." ],
+    answer: "A",
+    hints: [
+      { label: "Conceptual redirect", text: "(AᵀA)ᵀ = AᵀA." },
+      { label: "Key step", text: "(A)." },
+      { label: "Near-complete", text: "Symmetric." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Transpose property." },
+        { label: "KEY STEP", body: "(AᵀA)ᵀ = Aᵀ(Aᵀ)ᵀ = AᵀA. Symmetric.\nAlso PSD: vᵀAᵀAv = ‖Av‖² ≥ 0." },
+        { label: "COMPUTATION", body: "(A)." },
+        { label: "VERIFICATION", body: "Not always PD; only when A has independent columns." },
+      ],
+      gateCheck: "AᵀA = symmetric PSD.", speed: "Direct.", whatMadeHard: "Distractor (C).",
+      generalization: "Universal.", linkedConcept: "M8 SVD.",
+      negAdvisory: "Attempt: rule. (A) wins.",
+    } },
+  { id: "c66-m1", difficulty: "medium", kind: "mcq", marks: 2, timeTarget: 60,
+    tags: ["Orthogonality"], skipSignal: { type: "attempt", text: "Attempt" },
+    statement: <span>For symmetric A with DISTINCT eigenvalues, eigenvectors corresponding to different eigenvalues are:</span>,
+    options: [ "Parallel.", "Orthogonal.", "Identical.", "Arbitrary." ],
+    answer: "B",
+    hints: [
+      { label: "Conceptual redirect", text: "Spectral theorem." },
+      { label: "Key step", text: "Orthogonal." },
+      { label: "Near-complete", text: "(B)." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Spectral theorem property." },
+        { label: "KEY STEP", body: "Distinct eigvals of symmetric A → eigenvectors are mutually orthogonal." },
+        { label: "COMPUTATION", body: "(B)." },
+        { label: "VERIFICATION", body: "Proof: λ₁v₁ᵀv₂ = (Av₁)ᵀv₂ = v₁ᵀAv₂ = λ₂v₁ᵀv₂. If λ₁ ≠ λ₂, then v₁ᵀv₂ = 0." },
+      ],
+      gateCheck: "Symmetric distinct → orthogonal.", speed: "Direct.", whatMadeHard: "Nothing.",
+      generalization: "Universal.", linkedConcept: "M8 Orthogonal basis.",
+      negAdvisory: "Attempt: theorem. (B) wins.",
+    } },
+  { id: "c66-m2", difficulty: "medium", kind: "mcq", marks: 2, timeTarget: 60,
+    tags: ["PSD Test"], skipSignal: { type: "attempt", text: "Attempt" },
+    statement: <span>Symmetric A is positive definite iff all eigenvalues are:</span>,
+    options: [ "Real.", "Positive.", "Non-negative.", "Distinct." ],
+    answer: "B",
+    hints: [
+      { label: "Conceptual redirect", text: "PD definition via eigvals." },
+      { label: "Key step", text: "(B)." },
+      { label: "Near-complete", text: "Positive." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "PD test." },
+        { label: "KEY STEP", body: "Symmetric A is PD iff all λᵢ > 0. PSD iff all λᵢ ≥ 0." },
+        { label: "COMPUTATION", body: "(B)." },
+        { label: "VERIFICATION", body: "Reason: xᵀAx > 0 for x ≠ 0 ⇔ all eigvals positive." },
+      ],
+      gateCheck: "PD ⇔ all λ > 0.", speed: "Direct.", whatMadeHard: "Distinguishing PSD/PD.",
+      generalization: "Universal.", linkedConcept: "C6.6.",
+      negAdvisory: "Attempt: definition. (B) wins.",
+    } },
+  { id: "c66-m3", difficulty: "medium", kind: "mcq", marks: 2, timeTarget: 70,
+    tags: ["Symmetric Diag"], skipSignal: { type: "attempt", text: "Attempt" },
+    statement: <span>Every real symmetric matrix is:</span>,
+    options: [
+      "Always diagonalizable.",
+      "Diagonalizable only if eigvals distinct.",
+      "Never diagonalizable.",
+      "Diagonalizable only if positive definite.",
+    ],
+    answer: "A",
+    hints: [
+      { label: "Conceptual redirect", text: "Spectral theorem." },
+      { label: "Key step", text: "(A)." },
+      { label: "Near-complete", text: "Always." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Spectral theorem." },
+        { label: "KEY STEP", body: "Real symmetric → orthogonally diagonalizable: A = QΛQᵀ with Q orthogonal." },
+        { label: "COMPUTATION", body: "(A)." },
+        { label: "VERIFICATION", body: "Even with repeated eigvals, gm = am for symmetric." },
+      ],
+      gateCheck: "Real symmetric always diagonalizable.", speed: "Direct.", whatMadeHard: "Distractor.",
+      generalization: "Universal.", linkedConcept: "M8 PCA.",
+      negAdvisory: "Attempt: theorem. (A) wins.",
+    } },
+  { id: "c66-h1", difficulty: "hard", kind: "mcq", marks: 2, timeTarget: 80,
+    tags: ["Covariance"], skipSignal: { type: "attempt", text: "Attempt" },
+    statement: <span>The covariance matrix C = (1/n)·XᵀX of centered data X is:</span>,
+    options: [
+      "Symmetric positive semi-definite.",
+      "Always positive definite.",
+      "Always invertible.",
+      "Never symmetric.",
+    ],
+    answer: "A",
+    hints: [
+      { label: "Conceptual redirect", text: "AᵀA template." },
+      { label: "Key step", text: "(A)." },
+      { label: "Near-complete", text: "Symmetric PSD." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Covariance structure." },
+        { label: "KEY STEP", body: "C = (1/n)XᵀX is symmetric (transpose property), PSD (vᵀCv = (1/n)‖Xv‖² ≥ 0)." },
+        { label: "COMPUTATION", body: "(A)." },
+        { label: "VERIFICATION", body: "PD only if X has independent columns (rank-full); else PSD with eigval 0." },
+      ],
+      gateCheck: "Covariance always sym PSD.", speed: "Direct.", whatMadeHard: "PD vs PSD.",
+      generalization: "Universal.", linkedConcept: "M8 PCA.",
+      negAdvisory: "Attempt: theorem. (A) wins.",
+    } },
+  { id: "c66-h2", difficulty: "hard", kind: "mcq", marks: 2, timeTarget: 70,
+    tags: ["Symmetric Eig"], skipSignal: { type: "attempt", text: "Attempt" },
+    statement: <span>If symmetric A has eigenvalues 1, 2, 3, then A is:</span>,
+    options: [
+      "Positive definite and diagonalizable.",
+      "Diagonalizable but not PD.",
+      "PD but not diagonalizable.",
+      "Singular.",
+    ],
+    answer: "A",
+    hints: [
+      { label: "Conceptual redirect", text: "Symmetric → diagonalizable. All eigvals > 0 → PD." },
+      { label: "Key step", text: "(A)." },
+      { label: "Near-complete", text: "Both." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Symmetric properties." },
+        { label: "KEY STEP", body: "Symmetric → diagonalizable. All λ > 0 → PD." },
+        { label: "COMPUTATION", body: "(A)." },
+        { label: "VERIFICATION", body: "det = 1·2·3 = 6 > 0 → invertible." },
+      ],
+      gateCheck: "Both properties from spectral theorem + PD test.", speed: "Direct.", whatMadeHard: "Nothing.",
+      generalization: "Universal.", linkedConcept: "C6.6.",
+      negAdvisory: "Attempt: theorems. (A) wins.",
+    } },
+  { id: "c66-h3", difficulty: "hard", kind: "nat", marks: 2, timeTarget: 70,
+    tags: ["Spectral"],
+    statement: <span>If symmetric A is 3×3 with trace 6 and det 6 and one eigenvalue is 1, then the largest eigenvalue is ___.</span>,
+    answer: 3, tolerance: 0,
+    hints: [
+      { label: "Conceptual redirect", text: "λ₁ + λ₂ + λ₃ = 6, λ₁·λ₂·λ₃ = 6, λ₁ = 1." },
+      { label: "Key step", text: "λ₂ + λ₃ = 5, λ₂·λ₃ = 6. λ²-5λ+6=0 → λ = 2, 3." },
+      { label: "Near-complete", text: "Largest = 3." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Trace and det shortcuts." },
+        { label: "KEY STEP", body: "Given λ₁ = 1. λ₂ + λ₃ = 6 - 1 = 5. λ₂·λ₃ = 6/1 = 6. Quadratic: λ² - 5λ + 6 = (λ-2)(λ-3) = 0. λ = 2, 3." },
+        { label: "COMPUTATION", body: "3." },
+        { label: "VERIFICATION", body: "Sum 1+2+3 = 6 ✓. Product 1·2·3 = 6 ✓." },
+      ],
+      gateCheck: "Vieta's for given partial info.", speed: "30s.", whatMadeHard: "Nothing.",
+      generalization: "Universal.", linkedConcept: "C6.7.",
+    } },
+  { id: "c66-k1", difficulty: "killer", kind: "mcq", marks: 2, timeTarget: 100,
+    tags: ["KILLER", "PCA"],
+    statement: <span><B>[KILLER]</B> ML BRIDGE: PCA finds the principal direction by computing eigenvectors of the (symmetric) covariance matrix C. The TOP principal component direction corresponds to:</span>,
+    options: [
+      "The eigenvector for the smallest eigenvalue.",
+      "The eigenvector for the largest eigenvalue.",
+      "The eigenvector for λ = 0.",
+      "Any eigenvector.",
+    ],
+    answer: "B",
+    hints: [
+      { label: "Conceptual redirect", text: "PCA: max variance direction = max eigval direction." },
+      { label: "Key step", text: "(B)." },
+      { label: "Near-complete", text: "Largest eigval." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "ML bridge: PCA = top eigenvector of covariance." },
+        { label: "KEY STEP", body: "Variance along direction v is vᵀCv. Maximized over unit v by top eigenvector (Rayleigh quotient)." },
+        { label: "COMPUTATION", body: "(B)." },
+        { label: "VERIFICATION", body: "C symmetric PSD → always orthogonal eigenvectors → PCA always works." },
+      ],
+      gateCheck: "Top eigenvalue → top principal component.", speed: "Direct.", whatMadeHard: "Nothing.",
+      generalization: "Universal in ML.", linkedConcept: "M8 PCA.",
+      negAdvisory: "Attempt: ML knowledge. (B) wins.",
+    } },
+];
+
+const C66_TECHNIQUES = [
+  { name: "Spectral Theorem Reflex", type: "Structural Insight",
+    when: "Real symmetric matrix question.",
+    steps: ["Real eigvals.",
+            "Orthogonal eigenvectors (distinct eigvals).",
+            "Always diagonalizable: A = QΛQᵀ."],
+    speed: "Direct.", example: "Universal.",
+    danger: "Don't apply to non-symmetric.", freq: "Frequent" },
+  { name: "AᵀA / AAᵀ Symmetry Check", type: "Speed Shortcut",
+    when: "Asked properties of products with transpose.",
+    steps: ["(AᵀA)ᵀ = AᵀA — always symmetric.",
+            "AᵀA is PSD.",
+            "AᵀA is PD iff A has independent columns."],
+    speed: "Direct.", example: "Used in SVD, PCA.",
+    danger: "AᵀA and AAᵀ are different sizes.", freq: "Frequent" },
+];
+
+const C66_MISTAKES = [
+  { name: "Non-Symmetric Assumed to Have Real Eig", wrong: [
+      "Problem: 2x2 matrix [[0, -1], [1, 0]] has real eigenvalues.",
+      "Solution: Yes.",
+    ], errorLine: 0,
+    errorDescription: "Not symmetric. Eigenvalues are ±i (purely imaginary).",
+    rootCause: "Over-applying spectral theorem.",
+    correct: "Only SYMMETRIC has guaranteed real eigvals.",
+    prevention: "Check symmetric first.",
+    gateCost: "Conceptual.", frequency: "Common" },
+];
+
+const C66_PYQS = [];
+
+function ConceptLab66({ progress }) {
+  return <ConceptLab num={6} title="Symmetric Matrices — Spectral Theorem"
+    why={<>Real symmetric: real eigvals, orthogonal eigenvectors, ALWAYS diagonalizable. AᵀA = symmetric PSD. Covariance matrix = symmetric PSD → PCA always works. The math backbone of ML.</>}
+    patterns={C66_PATTERNS} problems={C66_PROBLEMS} techniques={C66_TECHNIQUES}
+    mistakes={C66_MISTAKES} pyqs={C66_PYQS} progress={progress} />;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   CONCEPT 6.7 — TRACE = Σλ, DET = Πλ (EXTREMELY HIGH ROI)
+   ════════════════════════════════════════════════════════════════ */
+const C67_PATTERNS = [
+  { name: "Trace = Sum of Eigenvalues", surface: "Asked sum of eigenvalues OR trace.",
+    testing: "Whether you use trace formula directly.",
+    signals: ["\"sum of eigenvalues\"", "\"trace\""],
+    firstMove: "trace(A) = Σ λᵢ (with multiplicity).",
+    timeBudget: 10, frequency: "Very Frequent" },
+  { name: "Det = Product of Eigenvalues", surface: "Asked product OR det.",
+    testing: "det(A) = Π λᵢ.",
+    signals: ["\"product of eigenvalues\"", "\"det of A\""],
+    firstMove: "det(A) = Π λᵢ.",
+    timeBudget: 10, frequency: "Very Frequent" },
+  { name: "20-Second 2x2 Eigenvalue Finder", surface: "2x2 matrix; find eigvals fast.",
+    testing: "Apply tr and det to λ² − tr·λ + det = 0.",
+    signals: ["\"eigenvalues of 2x2\""],
+    firstMove: "Find tr, det. Factor quadratic.",
+    timeBudget: 20, frequency: "Very Frequent" },
+  { name: "Find Missing Eigenvalue (Vieta's)", surface: "Some eigvals + trace/det given. Find rest.",
+    testing: "Use Vieta's to back out unknowns.",
+    signals: ["\"one eigenvalue is\"", "\"sum is\""],
+    firstMove: "Sum + product → quadratic for unknowns.",
+    timeBudget: 60, frequency: "Frequent" },
+];
+
+const C67_PROBLEMS = [
+  { id: "c67-e1", difficulty: "easy", kind: "nat", marks: 1, timeTarget: 15,
+    tags: ["Trace=Sum"],
+    statement: <span>A 3x3 matrix has eigenvalues 2, 3, -1. Trace = ___.</span>,
+    answer: 4, tolerance: 0,
+    hints: [
+      { label: "Conceptual redirect", text: "trace = sum." },
+      { label: "Key step", text: "2 + 3 - 1 = 4." },
+      { label: "Near-complete", text: "4." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Trace formula." },
+        { label: "KEY STEP", body: "Σλ = 4." },
+        { label: "COMPUTATION", body: "4." },
+        { label: "VERIFICATION", body: "Universal." },
+      ],
+      gateCheck: "Trace = Σλ.", speed: "3s.", whatMadeHard: "Nothing.",
+      generalization: "Universal.", linkedConcept: "C6.7.",
+    } },
+  { id: "c67-e2", difficulty: "easy", kind: "nat", marks: 1, timeTarget: 15,
+    tags: ["Det=Product"],
+    statement: <span>A 3x3 matrix has eigenvalues 2, 3, -1. det = ___.</span>,
+    answer: -6, tolerance: 0,
+    hints: [
+      { label: "Conceptual redirect", text: "det = product." },
+      { label: "Key step", text: "2·3·(-1) = -6." },
+      { label: "Near-complete", text: "-6." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Det formula." },
+        { label: "KEY STEP", body: "Πλ = -6." },
+        { label: "COMPUTATION", body: "-6." },
+        { label: "VERIFICATION", body: "Universal." },
+      ],
+      gateCheck: "Det = Πλ.", speed: "3s.", whatMadeHard: "Nothing.",
+      generalization: "Universal.", linkedConcept: "C6.7.",
+    } },
+  { id: "c67-m1", difficulty: "medium", kind: "nat", marks: 2, timeTarget: 25,
+    tags: ["2x2 Eigvals"],
+    statement: <span>For <T src="A = \begin{pmatrix} 4 & 2 \\ 1 & 3 \end{pmatrix}"/>, smaller eigenvalue = ___.</span>,
+    answer: 2, tolerance: 0,
+    hints: [
+      { label: "Conceptual redirect", text: "tr = 7, det = 10. λ² - 7λ + 10 = 0." },
+      { label: "Key step", text: "(λ-2)(λ-5)." },
+      { label: "Near-complete", text: "2." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "20-sec method." },
+        { label: "KEY STEP", body: "tr = 7, det = 12 - 2 = 10. λ² - 7λ + 10 = (λ-2)(λ-5)." },
+        { label: "COMPUTATION", body: "Smaller = 2." },
+        { label: "VERIFICATION", body: "2 + 5 = 7 ✓, 2·5 = 10 ✓." },
+      ],
+      gateCheck: "Trace + det quadratic.", speed: "15s.", whatMadeHard: "Nothing.",
+      generalization: "Universal for 2x2.", linkedConcept: "C6.7.",
+    } },
+  { id: "c67-m2", difficulty: "medium", kind: "nat", marks: 2, timeTarget: 30,
+    tags: ["Trace Quick"],
+    statement: <span>If A has eigenvalues 1, 1, 4, and B is 3×3 with eigenvalues 2, 3, -1, then trace(A + B)... cannot be determined from eigvals alone. Find trace(A) + trace(B).</span>,
+    answer: 10, tolerance: 0,
+    hints: [
+      { label: "Conceptual redirect", text: "trace is linear: tr(A+B) = trace A + trace B." },
+      { label: "Key step", text: "trace A = 6, trace B = 4. Sum = 10." },
+      { label: "Near-complete", text: "10." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Trace addition." },
+        { label: "KEY STEP", body: "trace A = 1+1+4=6. trace B = 2+3-1=4. Sum = 10." },
+        { label: "COMPUTATION", body: "10." },
+        { label: "VERIFICATION", body: "Trace IS linear (unlike eigvals)." },
+      ],
+      gateCheck: "Trace is linear; eigvals are not.", speed: "5s.", whatMadeHard: "Distinction.",
+      generalization: "Universal.", linkedConcept: "C6.7.",
+    } },
+  { id: "c67-m3", difficulty: "medium", kind: "nat", marks: 2, timeTarget: 30,
+    tags: ["Quick 2x2"],
+    statement: <span>For 2x2 A with trace 3 and det -10, smaller eigenvalue is ___.</span>,
+    answer: -2, tolerance: 0,
+    hints: [
+      { label: "Conceptual redirect", text: "λ² - 3λ - 10 = 0. (λ-5)(λ+2)." },
+      { label: "Key step", text: "λ = 5, -2." },
+      { label: "Near-complete", text: "-2." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Direct quadratic." },
+        { label: "KEY STEP", body: "λ² - 3λ - 10 = 0. Factor: (λ-5)(λ+2). λ = 5 or -2." },
+        { label: "COMPUTATION", body: "-2." },
+        { label: "VERIFICATION", body: "5 + (-2) = 3 ✓, 5·(-2) = -10 ✓." },
+      ],
+      gateCheck: "20-sec method.", speed: "15s.", whatMadeHard: "Sign.",
+      generalization: "Universal.", linkedConcept: "C6.7.",
+    } },
+  { id: "c67-h1", difficulty: "hard", kind: "nat", marks: 2, timeTarget: 80,
+    tags: ["Power of Trace"],
+    statement: <span>If A is 3x3 with eigenvalues 1, 2, 3, find trace(A²).</span>,
+    answer: 14, tolerance: 0,
+    hints: [
+      { label: "Conceptual redirect", text: "A² has eigvals 1, 4, 9. trace = sum." },
+      { label: "Key step", text: "1 + 4 + 9 = 14." },
+      { label: "Near-complete", text: "14." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Power property + trace formula." },
+        { label: "KEY STEP", body: "A² eigvals = 1², 2², 3² = 1, 4, 9. trace = 14." },
+        { label: "COMPUTATION", body: "14." },
+        { label: "VERIFICATION", body: "trace(A²) = Σλᵢ²." },
+      ],
+      gateCheck: "trace(Aⁿ) = Σλⁿ.", speed: "15s.", whatMadeHard: "Nothing.",
+      generalization: "Universal.", linkedConcept: "C6.7.",
+    } },
+  { id: "c67-h2", difficulty: "hard", kind: "nat", marks: 2, timeTarget: 80,
+    tags: ["Symmetric Quick"],
+    statement: <span>A 4×4 symmetric matrix has trace 10 and det 24. Three of its eigenvalues are 1, 2, 3. Find the missing fourth eigenvalue.</span>,
+    answer: 4, tolerance: 0,
+    hints: [
+      { label: "Conceptual redirect", text: "Sum of eigvals = trace. 1 + 2 + 3 + λ₄ = 10 → λ₄ = 4." },
+      { label: "Key step", text: "4." },
+      { label: "Near-complete", text: "Cross-check product: 1·2·3·4 = 24 ✓ matches det." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Use trace to find missing eigenvalue." },
+        { label: "KEY STEP", body: "Σλᵢ = trace: 1 + 2 + 3 + λ₄ = 10 ⇒ λ₄ = 4." },
+        { label: "COMPUTATION", body: "4." },
+        { label: "VERIFICATION", body: "Product check: 1·2·3·4 = 24 = det ✓. Both invariants confirm λ₄ = 4." },
+      ],
+      gateCheck: "Trace-method for missing eigval, det as cross-check.", speed: "10s.", whatMadeHard: "Nothing.",
+      generalization: "Universal.", linkedConcept: "C6.7.",
+    } },
+  { id: "c67-h3", difficulty: "hard", kind: "nat", marks: 2, timeTarget: 60,
+    tags: ["Inverse Trace"],
+    statement: <span>If A is 3x3 invertible with eigenvalues 1, 2, 4, then trace(A⁻¹) = ___.</span>,
+    answer: 1.75, tolerance: 0.01,
+    hints: [
+      { label: "Conceptual redirect", text: "A⁻¹ has eigvals 1, 1/2, 1/4." },
+      { label: "Key step", text: "1 + 1/2 + 1/4 = 1.75." },
+      { label: "Near-complete", text: "1.75." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Inverse eigvals + trace." },
+        { label: "KEY STEP", body: "A⁻¹ eigvals = 1, 0.5, 0.25. Sum = 1.75." },
+        { label: "COMPUTATION", body: "1.75." },
+        { label: "VERIFICATION", body: "Universal." },
+      ],
+      gateCheck: "Combine rules.", speed: "10s.", whatMadeHard: "Nothing.",
+      generalization: "Universal.", linkedConcept: "C7.4.",
+    } },
+  { id: "c67-k1", difficulty: "killer", kind: "mcq", marks: 2, timeTarget: 120,
+    tags: ["KILLER", "Vieta's 3x3"],
+    statement: <span><B>[KILLER]</B> A 3×3 matrix has eigenvalues with sum 9 and product 24. One eigenvalue is 4. The OTHER two are:</span>,
+    options: [
+      "(3, 1) — sum 4, product 3.",
+      "(2, 3) — sum 5, product 6.",
+      "(5, 0) — sum 5, product 0.",
+      "Cannot be determined without more info.",
+    ],
+    answer: "B",
+    hints: [
+      { label: "Conceptual redirect", text: "Let the other two eigvals be a, b. Use Vieta's: a + b = 9 − 4 = 5 and a·b = 24/4 = 6." },
+      { label: "Key step", text: "a, b are roots of λ² − 5λ + 6 = 0." },
+      { label: "Near-complete", text: "Factor: λ² − 5λ + 6 = (λ − 2)(λ − 3). Roots 2 and 3. Answer (B)." },
+    ],
+    solution: {
+      steps: [
+        { label: "TRIGGER", body: "Vieta's for missing roots from trace/det." },
+        { label: "KEY STEP", body: "Let unknown eigvals be a, b.\nTrace: 4 + a + b = 9 → a + b = 5.\nDet: 4·a·b = 24 → a·b = 6.\nThen a, b satisfy λ² − (a+b)λ + ab = λ² − 5λ + 6 = 0." },
+        { label: "COMPUTATION", body: "λ² − 5λ + 6 = (λ − 2)(λ − 3) ⇒ {a, b} = {2, 3}. Answer (B)." },
+        { label: "VERIFICATION", body: "Sum: 4 + 2 + 3 = 9 ✓. Product: 4·2·3 = 24 ✓." },
+      ],
+      gateCheck: "Vieta's reduces unknowns to a quadratic.", speed: "45s.", whatMadeHard: "Setting up sum and product correctly.",
+      generalization: "Universal — works for any n × n given trace and det.", linkedConcept: "C5.2 Vieta's.",
+      negAdvisory: "Attempt: Vieta's gives clean factoring. (B) wins.",
+    } },
+];
+
+const C67_TECHNIQUES = [
+  { name: "trace(A) = Σλ", type: "Speed Shortcut",
+    when: "Need sum of eigenvalues or trace.",
+    steps: ["Identity holds for ANY square matrix (with multiplicities)."],
+    speed: "Instant.", example: "Universal.",
+    danger: "Includes multiplicity.", freq: "Very Frequent" },
+  { name: "det(A) = Πλ", type: "Speed Shortcut",
+    when: "Need product of eigenvalues or det.",
+    steps: ["Universal identity."],
+    speed: "Instant.", example: "Universal.",
+    danger: "Includes multiplicity.", freq: "Very Frequent" },
+  { name: "20-Second 2x2 Eigenvalue Finder", type: "Speed Shortcut",
+    when: "Need eigvals of 2x2.",
+    steps: ["tr = sum diagonal.",
+            "det = ad - bc.",
+            "λ² − tr·λ + det = 0.",
+            "Factor or quadratic formula."],
+    speed: "20s.", example: "Standard.",
+    danger: "Sign care.", freq: "Very Frequent" },
+  { name: "Vieta's for Missing Eigenvalues", type: "Structural Insight",
+    when: "Some eigvals + trace/det known.",
+    steps: ["Sum of unknowns = trace - known sum.",
+            "Product of unknowns = det / known product.",
+            "Build polynomial; solve."],
+    speed: "60s.", example: "See KILLER.",
+    danger: "Discriminant could be negative (complex roots).", freq: "Occasional" },
+];
+
+const C67_MISTAKES = [
+  { name: "trace(AB) ≠ trace(A)·trace(B)", wrong: [
+      "Problem: trace(AB) given trace A = 5, trace B = 7.",
+      "Solution: 35.",
+    ], errorLine: 0,
+    errorDescription: "Trace NOT multiplicative. trace(AB) = trace(BA) but not products of traces.",
+    rootCause: "Generalization error.",
+    correct: "Cannot compute from individual traces alone.",
+    prevention: "Memorize: trace cyclic, not multiplicative.",
+    gateCost: "Big error.", frequency: "Common" },
+];
+
+const C67_PYQS = [];
+
+function ConceptLab67({ progress }) {
+  return <ConceptLab num={7} title="Trace = Σλ, det = Πλ — The 30-Second Shortcuts"
+    why={<>EXTREMELY HIGH ROI. Two identities collapse most 2x2 eigval problems to 20 seconds. Vieta's lets you back-solve missing eigvals from trace/det. Mandatory drill.</>}
+    patterns={C67_PATTERNS} problems={C67_PROBLEMS} techniques={C67_TECHNIQUES}
+    mistakes={C67_MISTAKES} pyqs={C67_PYQS} progress={progress} />;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   APP ROOT
+   ════════════════════════════════════════════════════════════════ */
+const CONCEPTS_MAP = [
+  { num: 1, shortName: "What",      title: "What Eigenvalues Are",           total: C61_PROBLEMS.length, Comp: ConceptLab61 },
+  { num: 2, shortName: "Solving",   title: "Char Eq + Solving",              total: C62_PROBLEMS.length, Comp: ConceptLab62 },
+  { num: 4, shortName: "am vs gm",  title: "Algebraic vs Geometric Mult",    total: C64_PROBLEMS.length, Comp: ConceptLab64 },
+  { num: 6, shortName: "Symmetric", title: "Symmetric Matrices",             total: C66_PROBLEMS.length, Comp: ConceptLab66 },
+  { num: 7, shortName: "tr/det",    title: "Trace = Σλ, det = Πλ",           total: C67_PROBLEMS.length, Comp: ConceptLab67 },
+];
+
+function App() {
+  useEffect(() => { hideLoading(); }, []);
+
+  const progress61 = useConceptProgress(1, C61_PROBLEMS.length);
+  const progress62 = useConceptProgress(2, C62_PROBLEMS.length);
+  const progress64 = useConceptProgress(4, C64_PROBLEMS.length);
+  const progress66 = useConceptProgress(6, C66_PROBLEMS.length);
+  const progress67 = useConceptProgress(7, C67_PROBLEMS.length);
+
+  const progressMap = { 1: progress61, 2: progress62, 4: progress64, 6: progress66, 7: progress67 };
+  const [active, setActive] = useState(1);
+
+  const totalSolved = [progress61, progress62, progress64, progress66, progress67].reduce((s, p) => s + p.correct.length, 0);
+  const totalProblems = [C61_PROBLEMS, C62_PROBLEMS, C64_PROBLEMS, C66_PROBLEMS, C67_PROBLEMS].reduce((s, ps) => s + ps.length, 0);
+
+  return (
+    <div className="min-h-screen">
+      <TopNav currentModule={6}/>
+
+      <section className="relative overflow-hidden">
+        <div className="grid-bg absolute inset-0" style={{opacity: 0.45}}/>
+        <div className="absolute inset-0" style={{
+          background: "radial-gradient(800px 400px at 20% 0%, var(--accent-soft), transparent 60%), radial-gradient(600px 400px at 80% 20%, var(--accent-2-soft), transparent 60%)",
+        }}/>
+        <div className="relative max-w-5xl mx-auto px-5 py-12 md:py-16">
+          <div className="inline-flex items-center gap-2 text-xs px-3 py-1.5 rounded-full mb-5"
+            style={{background: "var(--accent-soft)", border: "1px solid var(--accent-border)", color: "var(--accent)"}}>
+            <span className="pulse-dot"/> MODULE 6 · PROBLEM LAB
+          </div>
+          <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight mb-4 leading-[1.04]" style={{color: "var(--text)"}}>
+            Eigenvalues · Problem Lab
+            <span className="block gradient-text mt-1">The Highest-Frequency M6 Skill: Trace + Det</span>
+          </h1>
+          <p className="text-lg max-w-3xl leading-relaxed mb-6" style={{color: "var(--text-dim)"}}>
+            5 consolidated concept labs covering eigenvalue verification, trace-det quadratic, am vs gm with defective KILLER, spectral theorem for symmetric matrices, and the universal trace = Σλ / det = Πλ shortcuts. 7 GATE PYQ walkthroughs (2014–2022) plus a Cayley-Hamilton KILLER.
+          </p>
+
+          <div className="flex flex-wrap gap-3 text-sm">
+            <div className="px-3 py-1.5 rounded-full flex items-center gap-2"
+              style={{background: "var(--bg-elev-1)", border: "1px solid var(--border)"}}>
+              <span style={{color: "var(--accent-3)"}}>● </span>
+              <span style={{color: "var(--text)"}}>{totalSolved} / {totalProblems} solved</span>
+            </div>
+            <div className="px-3 py-1.5 rounded-full flex items-center gap-2"
+              style={{background: "var(--bg-elev-1)", border: "1px solid var(--border)"}}>
+              <span style={{color: "var(--accent-2)"}}>● </span>
+              <span style={{color: "var(--text)"}}>5 concept labs · 45 problems · 7 GATE PYQs · timed drill</span>
+            </div>
+            <div className="px-3 py-1.5 rounded-full flex items-center gap-2"
+              style={{background: "var(--bg-elev-1)", border: "1px solid var(--border)"}}>
+              <span style={{color: "var(--warn)"}}>● </span>
+              <span style={{color: "var(--text)"}}>Cayley-Hamilton · Spectral Theorem · PCA bridge</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div className="max-w-5xl mx-auto px-5">
+        <ConceptNavigator concepts={CONCEPTS_MAP} active={active} setActive={setActive} progressMap={progressMap} />
+      </div>
+
+      <ConceptLab61 progress={progress61} />
+      <ConceptLab62 progress={progress62} />
+      <ConceptLab64 progress={progress64} />
+      <ConceptLab66 progress={progress66} />
+      <ConceptLab67 progress={progress67} />
+
+      <ModuleFooter
+        moduleNum={6}
+        nextModuleTitle="Eigenvalue Power Tools — Problem Lab"
+        nextModuleFile="module-07-problem-lab.html"
+        checklist={[
+          "I find 2×2 eigenvalues in 20 seconds using λ² - tr·λ + det = 0.",
+          "I apply Cayley-Hamilton: p(A) = 0 for char poly p.",
+          "I use f(A) → f(λ) for ANY polynomial of A.",
+          "I never claim eig(A+B) = eig(A) + eig(B).",
+          "I check am vs gm separately for diagonalizability.",
+          "Distinct eigenvalues → always diagonalizable (no need to compute gm).",
+          "Real symmetric → real eigvals + orthogonal eigvecs + always diagonalizable.",
+          "Trace(A) = Σλᵢ and det(A) = Πλᵢ — always.",
+          "I've cleared all problems and beaten my drill personal-best per concept.",
+        ]}
+      />
+    </div>
+  );
+}
+
+mountApp(App);
+</script>
+
+</body>
+</html>

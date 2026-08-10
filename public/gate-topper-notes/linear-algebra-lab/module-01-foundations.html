@@ -1,0 +1,938 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 1 · Foundations — LA Mastery Hub</title>
+
+<!-- Theme detection BEFORE styles to avoid flash -->
+<script>
+  (function () {
+    try {
+      var t = localStorage.getItem("la-hub::theme") || "dark";
+      document.documentElement.classList.add(t === "light" ? "light" : "dark");
+    } catch (e) {
+      document.documentElement.classList.add("dark");
+    }
+  })();
+</script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="theme.css">
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = { darkMode: 'class' };
+</script>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+
+<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone@7.25.6/babel.min.js"></script>
+</head>
+<body>
+
+<div id="loading">
+  <div style="text-align:center">
+    <div class="spinner"></div>
+    <div style="font-size:13px; opacity:0.8">Loading Module 1 — Foundations</div>
+  </div>
+</div>
+
+<div id="root"></div>
+
+<script type="text/babel" src="boilerplate.js"></script>
+
+<script type="text/babel">
+const { useState, useEffect, useMemo, useRef } = React;
+
+/* ════════════════════════════════════════════════════════
+   CONCEPT 1.1 — Why Study Linear Algebra?
+   Interactive: "LA in the Wild" — 8 domains
+   ════════════════════════════════════════════════════════ */
+const DOMAINS = [
+  {
+    icon: "🤖", title: "Machine Learning",
+    one: "Every neural network is a stack of matrix multiplications.",
+    long: "A neuron is a dot product (Wx + b). A layer is a matrix-vector multiplication. Backpropagation is a chain of matrix derivatives. Training reduces to optimizing the entries of those matrices. Without LA you can't even write the forward pass — let alone the optimizer.",
+    bullets: ["Forward pass: W·x + b", "Gradients flow as transposes", "Embeddings live in R^d"],
+  },
+  {
+    icon: "📸", title: "Image Compression & SVD",
+    one: "JPEG-like compression keeps the top singular values, throws the rest.",
+    long: "A grayscale image is a matrix of intensities. The Singular Value Decomposition writes it as a sum of rank-1 layers, sorted by importance. Keep the first k layers and you reconstruct most of the image with a fraction of the data. Same idea drives Latent Semantic Indexing in text.",
+    bullets: ["Image = A (m×n)", "A = Σ σᵢ uᵢ vᵢᵀ", "Top-k → compression"],
+  },
+  {
+    icon: "🔍", title: "Google PageRank",
+    one: "Every page's rank is the dominant eigenvector of the link matrix.",
+    long: "Imagine a random surfer hopping between pages. The long-run probability of being on page p is the value of an eigenvector of the link-transition matrix. Larry Page and Sergey Brin's original PageRank is exactly this — power-iteration on a stochastic matrix.",
+    bullets: ["Stochastic link matrix M", "PageRank = eigenvector of M", "λ = 1 leading eigenvalue"],
+  },
+  {
+    icon: "🎮", title: "Computer Graphics",
+    one: "Every camera, rotation, and shadow is a matrix.",
+    long: "Rotating, scaling, translating, projecting — all are matrix transformations applied to vectors of vertex positions. A 4×4 'model-view-projection' matrix turns world coordinates into pixels. Modern GPUs are massively parallel matrix multipliers.",
+    bullets: ["4×4 homogeneous matrices", "Rotation matrices orthogonal", "Projection: 3D → 2D"],
+  },
+  {
+    icon: "🧬", title: "Quantum Computing",
+    one: "Qubit states are unit vectors; gates are unitary matrices.",
+    long: "A single qubit is a vector in C². A quantum gate is a 2×2 unitary matrix that rotates the state on the Bloch sphere. Entangling two qubits is a tensor product. Quantum algorithms (Grover, Shor) are sequences of matrix multiplications on these state vectors.",
+    bullets: ["|ψ⟩ ∈ C², ‖|ψ⟩‖ = 1", "Gate U: U U* = I", "Tensor → multi-qubit"],
+  },
+  {
+    icon: "📡", title: "Signal Processing",
+    one: "The Fourier transform is just a change of basis.",
+    long: "A signal is a vector. The Discrete Fourier Transform expresses it in a new basis — the basis of complex exponentials. Filtering, compression, denoising are all done in that basis. Wavelets are just a different basis.",
+    bullets: ["Time → Frequency", "DFT is unitary", "Filtering = zero coeffs"],
+  },
+  {
+    icon: "🛰", title: "Engineering Systems",
+    one: "Circuits and structures all reduce to Ax = b.",
+    long: "Kirchhoff's laws, mesh analysis, finite-element models — all reduce to a (sometimes huge) linear system. The structure of the matrix (sparse, symmetric, positive-definite) decides which algorithm is fastest. Daily bread of computational engineering.",
+    bullets: ["Mesh → Ax = b", "Sparse + symmetric", "Conjugate-gradient"],
+  },
+  {
+    icon: "📊", title: "Statistics & PCA",
+    one: "Finding the most important direction in data = top eigenvector.",
+    long: "Principal Component Analysis takes a data cloud, builds the covariance matrix (always symmetric, always PSD), and finds its eigenvectors. The eigenvector with the largest eigenvalue points in the direction of greatest variance — your first principal component.",
+    bullets: ["C = (1/n) XᵀX", "C symmetric → real λ", "Top eigenvector = PC1"],
+  },
+];
+
+function LAInTheWild() {
+  const [active, setActive] = useState(0);
+  const d = DOMAINS[active];
+  return (
+    <InteractiveFrame
+      name="LA in the Wild — 8 domains where Linear Algebra is the only tool"
+      whatAmISeeing="Eight real-world domains as tiles. Click one to see how Linear Algebra appears — the object, the operation, and what would be impossible without it."
+      tryThis="Compare 'Google PageRank' and 'PCA'. Both rely on the SAME idea — the eigenvector with the largest eigenvalue — applied to very different matrices. This pattern shows up everywhere."
+    >
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        {DOMAINS.map((dom, i) => (
+          <button key={i} onClick={() => setActive(i)} className="tile text-left rounded-xl p-3"
+            style={{
+              border: "1px solid " + (active === i ? "var(--accent)" : "var(--border)"),
+              background: active === i ? "var(--accent-soft)" : "var(--bg-elev-2)",
+            }}>
+            <div className="text-2xl mb-1">{dom.icon}</div>
+            <div className="text-sm font-semibold leading-tight" style={{color: "var(--text)"}}>{dom.title}</div>
+            <div className="text-xs mt-1 leading-snug" style={{color: "var(--text-dim)"}}>{dom.one}</div>
+          </button>
+        ))}
+      </div>
+      <div className="mt-5 rounded-xl p-5"
+        style={{border: "1px solid var(--accent-border)",
+          background: "linear-gradient(135deg, var(--accent-soft), var(--accent-2-soft))"}}>
+        <div className="text-xs tracking-[0.2em] font-semibold mb-1" style={{color: "var(--accent)"}}>
+          DOMAIN · {d.title.toUpperCase()}
+        </div>
+        <div className="text-[15px] leading-relaxed mb-3" style={{color: "var(--text)"}}>{d.long}</div>
+        <div className="flex flex-wrap gap-2">
+          {d.bullets.map((b, i) => (
+            <span key={i} className="text-xs px-2.5 py-1 rounded-full font-mono"
+              style={{background: "var(--bg-elev-3)", color: "var(--accent-2)", border: "1px solid var(--border)"}}>
+              {b}
+            </span>
+          ))}
+        </div>
+      </div>
+    </InteractiveFrame>
+  );
+}
+
+function Concept11() {
+  return (
+    <ConceptCard id="concept-1-1" label="1.1" moduleLabel="Module 1 · Foundations"
+      title="Why Study Linear Algebra?"
+      why="A subject you can't motivate is a subject you'll forget. Before any formula, we need a gut-level reason why linear algebra matters — not as an abstract exam topic, but as the operating system of modern computation.">
+      <H3>The one-line answer</H3>
+      <P>
+        Linear algebra is the mathematics of <B>doing many things at once</B>, in a way that a computer can execute fast.
+        Whenever you have many quantities that depend on many other quantities — pixels on light, sales on prices, layer outputs on layer inputs —
+        you have a linear (or near-linear) map. Linear algebra is the toolbox for analysing and computing with those maps.
+      </P>
+
+      <H3>The four big classes of problems it solves</H3>
+      <P>Every problem linear algebra solves falls into one of four families. Memorise them — they will help you classify any unfamiliar exam question.</P>
+
+      <H4>1. Systems of linear equations</H4>
+      <UL>
+        <Li>Given <T src="A\mathbf{x} = \mathbf{b}"/>, find <T src="\mathbf{x}"/>. Or: prove no such vector exists. Or: describe ALL vectors that work.</Li>
+        <Li>Underlies: circuit analysis, balancing chemical equations, traffic flow, least-squares fitting.</Li>
+      </UL>
+      <H4>2. Linear transformations of space</H4>
+      <UL>
+        <Li>Rotating a model, projecting a 3D scene to 2D, mapping inputs through a neural-network layer.</Li>
+        <Li>The transformation IS the matrix. The matrix IS the transformation.</Li>
+      </UL>
+      <H4>3. Finding hidden structure in data</H4>
+      <UL>
+        <Li>What direction has the most variance? → top eigenvector of the covariance matrix.</Li>
+        <Li>What is the best low-rank approximation? → singular value decomposition.</Li>
+        <Li>What does this link graph concentrate on? → top eigenvector of the link matrix.</Li>
+      </UL>
+      <H4>4. Optimisation in many variables</H4>
+      <UL>
+        <Li>Gradient descent is steered by the gradient (vector) and corrected by the Hessian (matrix).</Li>
+        <Li>Whether the Hessian is positive-definite decides minimum vs maximum vs saddle.</Li>
+      </UL>
+
+      <Callout kind="ml" title="ML / AI is mostly linear algebra in disguise">
+        <P>Every forward pass is matrix multiplications interleaved with non-linearities. Every PCA, every embedding, every attention head — linear algebra. Make peace with LA now and the rest of the AI stack becomes mechanical.</P>
+      </Callout>
+
+      <H3>Why GATE tests it so heavily</H3>
+      <P>GATE loads linear algebra because it tests <B>three skills at once</B>: algebraic manipulation, geometric reasoning, and the ability to translate between the two. Memorising formulas without intuition loses marks on the "tricky" questions — which is most of them.</P>
+      <UL>
+        <Li>GATE CS: 2–4 marks of linear algebra plus indirect use in graphs and algorithms.</Li>
+        <Li>GATE DA: heavier — eigenvalues, SVD, PCA in the core syllabus, plus subspace and rank questions.</Li>
+        <Li>IIITH PGEE: short, conceptual problems testing whether you can spot the trap quickly.</Li>
+      </UL>
+
+      <Callout kind="info" title="The mental model we build">
+        <P>By the end of Module 1, "vector" should feel as concrete as "number". "Linear combination" should evoke a picture, not a formula. And "linearly independent" should sound like a property of a SET — not of any single vector. Everything later rests on these three reflexes.</P>
+      </Callout>
+
+      <LAInTheWild />
+
+      <H3>What you will be able to do after this module</H3>
+      <UL>
+        <Li>Switch fluidly between the geometric and algebraic view of a vector.</Li>
+        <Li>Picture exactly what a linear combination reaches — point, line, plane, or all of <T src="\mathbb{R}^n"/>.</Li>
+        <Li>Decide independence of a small set of vectors in under 30 seconds.</Li>
+        <Li>Spot the classic GATE traps that catch memorisers.</Li>
+      </UL>
+
+      <ProgressPill conceptId="m1-c11"/>
+    </ConceptCard>
+  );
+}
+
+/* ════════════════════════════════════════════════════════
+   CONCEPT 1.2 — Vectors
+   ════════════════════════════════════════════════════════ */
+function VectorPlayground() {
+  const [v1, setV1] = useState([3, 2]);
+  const [v2, setV2] = useState([-2, 3]);
+  const [scalar, setScalar] = useState(1.4);
+  const [mode, setMode] = useState("explore");
+
+  const sv1 = [v1[0]*scalar, v1[1]*scalar];
+  const sum = [v1[0]+v2[0], v1[1]+v2[1]];
+
+  let vectors = [];
+  if (mode === "explore") vectors = [{ vec: v1, colorIdx: 0, label: "v" }];
+  else if (mode === "scale") vectors = [
+    { vec: v1, colorIdx: 0, label: "v", opacity: 0.45, dashed: true, dot: false },
+    { vec: sv1, colorIdx: 1, label: scalar.toFixed(2) + "·v" },
+  ];
+  else vectors = [
+    { vec: v1, colorIdx: 0, label: "u" },
+    { vec: v2, colorIdx: 1, label: "v" },
+    { vec: sum, colorIdx: 2, label: "u+v", thick: 3 },
+  ];
+
+  // Extras for parallelogram dashed lines
+  const range = 6, scale = 230 / range, cx = 230, cy = 230;
+  const toPx = (x, y) => [cx + x*scale, cy - y*scale];
+  let extras = null;
+  if (mode === "add") {
+    const [a1,b1] = toPx(v1[0], v1[1]);
+    const [a2,b2] = toPx(v2[0], v2[1]);
+    const [a3,b3] = toPx(sum[0], sum[1]);
+    extras = (
+      <g>
+        <line x1={a1} y1={b1} x2={a3} y2={b3} stroke="var(--accent-2)" strokeWidth="1.5" strokeDasharray="4 3" opacity="0.55"/>
+        <line x1={a2} y1={b2} x2={a3} y2={b3} stroke="var(--accent)"   strokeWidth="1.5" strokeDasharray="4 3" opacity="0.55"/>
+      </g>
+    );
+  }
+
+  const onDrag = (id, val) => {
+    if (id === "v1") setV1(val);
+    if (id === "v2") setV2(val);
+  };
+  const draggable = mode === "add"
+    ? [{ id: "v1", vec: v1 }, { id: "v2", vec: v2 }]
+    : [{ id: "v1", vec: v1 }];
+
+  return (
+    <InteractiveFrame
+      name="2D Vector Playground — drag, scale, add"
+      whatAmISeeing="A 2D plane. The vector tip (filled dot) is draggable. Switch modes to scalar-multiply or add two vectors with the parallelogram law."
+      tryThis="In Add mode, set u = (3, 1) and v = (1, 3). The sum is the parallelogram's diagonal. Drag v onto u's line — the parallelogram collapses to a line. That's linear dependence in action."
+    >
+      <div className="grid lg:grid-cols-[auto,1fr] gap-6 items-start">
+        <VectorCanvas width={460} height={460} range={6}
+          vectors={vectors} extras={extras}
+          onDrag={onDrag} draggable={draggable}/>
+
+        <div className="space-y-4">
+          <div className="flex gap-2 flex-wrap">
+            {[
+              {k:"explore", label:"Explore v"},
+              {k:"scale",   label:"Scalar × v"},
+              {k:"add",     label:"u + v (parallelogram)"},
+            ].map(t => (
+              <button key={t.k} onClick={() => setMode(t.k)}
+                className="text-sm px-3 py-1.5 rounded-lg transition-colors"
+                style={{
+                  border: "1px solid " + (mode === t.k ? "var(--accent-border)" : "var(--border)"),
+                  background: mode === t.k ? "var(--accent-soft)" : "transparent",
+                  color: mode === t.k ? "var(--accent)" : "var(--text-dim)",
+                }}>
+                {t.label}
+              </button>
+            ))}
+          </div>
+
+          <div className="rounded-lg p-4" style={{border: "1px solid var(--border)", background: "var(--bg-elev-2)"}}>
+            <div className="text-xs tracking-[0.2em] font-semibold mb-2" style={{color: "var(--accent)"}}>
+              VECTOR v {mode === "add" ? "(= u)" : ""}
+            </div>
+            <div className="flex items-center gap-3">
+              <label className="text-xs" style={{color: "var(--text-dim)"}}>x</label>
+              <NumInput value={v1[0]} onChange={x => setV1([x, v1[1]])} width={72}/>
+              <label className="text-xs" style={{color: "var(--text-dim)"}}>y</label>
+              <NumInput value={v1[1]} onChange={y => setV1([v1[0], y])} width={72}/>
+            </div>
+            <div className="text-xs mt-2" style={{color: "var(--text-dim)"}}>
+              Magnitude: <span className="font-mono" style={{color: "var(--accent-2)"}}>{Math.hypot(v1[0], v1[1]).toFixed(3)}</span>{" · "}
+              Angle: <span className="font-mono" style={{color: "var(--accent-2)"}}>{(Math.atan2(v1[1], v1[0]) * 180 / Math.PI).toFixed(1)}°</span>
+            </div>
+          </div>
+
+          {mode === "scale" && (
+            <div className="rounded-lg p-4" style={{border: "1px solid var(--border)", background: "var(--bg-elev-2)"}}>
+              <div className="text-xs tracking-[0.2em] font-semibold mb-2" style={{color: "var(--accent-2)"}}>
+                SCALAR c = <span className="font-mono">{scalar.toFixed(2)}</span>
+              </div>
+              <input type="range" min="-3" max="3" step="0.05" value={scalar} onChange={e => setScalar(+e.target.value)}/>
+              <div className="text-xs mt-2" style={{color: "var(--text-dim)"}}>
+                {scalar > 1 && "Stretching v (longer, same direction)"}
+                {scalar > 0 && scalar < 1 && "Shrinking v (shorter, same direction)"}
+                {Math.abs(scalar) < 0.01 && "Zero — collapses to origin"}
+                {scalar < 0 && scalar > -1 && "Shrinking and flipping (shorter, opposite)"}
+                {scalar < -1 && "Stretching and flipping (longer, opposite)"}
+              </div>
+              <div className="text-sm font-mono mt-2" style={{color: "var(--accent-2)"}}>
+                c·v = ({sv1[0].toFixed(2)}, {sv1[1].toFixed(2)})
+              </div>
+            </div>
+          )}
+
+          {mode === "add" && (
+            <div className="rounded-lg p-4" style={{border: "1px solid var(--border)", background: "var(--bg-elev-2)"}}>
+              <div className="text-xs tracking-[0.2em] font-semibold mb-2" style={{color: "var(--accent-2)"}}>VECTOR v</div>
+              <div className="flex items-center gap-3">
+                <label className="text-xs" style={{color: "var(--text-dim)"}}>x</label>
+                <NumInput value={v2[0]} onChange={x => setV2([x, v2[1]])} width={72}/>
+                <label className="text-xs" style={{color: "var(--text-dim)"}}>y</label>
+                <NumInput value={v2[1]} onChange={y => setV2([v2[0], y])} width={72}/>
+              </div>
+              <div className="mt-3 text-sm font-mono" style={{color: "var(--accent-3)"}}>
+                u + v = ({sum[0].toFixed(2)}, {sum[1].toFixed(2)})
+              </div>
+              <div className="text-xs mt-1" style={{color: "var(--text-dim)"}}>
+                The green vector is the diagonal of the parallelogram formed by u and v.
+              </div>
+            </div>
+          )}
+
+          <div className="rounded-lg p-4 text-xs leading-relaxed" style={{border: "1px solid var(--border)", background: "var(--bg-elev-2)", color: "var(--text-dim)"}}>
+            <strong style={{color: "var(--accent)"}}>Tip:</strong> drag the tips on the canvas, or type exact values for GATE-style problems.
+          </div>
+        </div>
+      </div>
+    </InteractiveFrame>
+  );
+}
+
+function Concept12() {
+  return (
+    <ConceptCard id="concept-1-2" label="1.2" moduleLabel="Module 1 · Foundations"
+      title="Vectors: What They Really Are"
+      why="A vector is the single most important object in linear algebra. The trouble is that everyone learns 'two different things' called a vector — and most people never realise they are the same thing. We fix that now.">
+      <H3>Two views, one object</H3>
+      <P>A vector has two completely equivalent identities. Whenever you read a problem, switch between them on demand.</P>
+
+      <H4>The geometric view: an arrow in space</H4>
+      <P>A vector is an arrow with two attributes: <B>magnitude</B> (how long) and <B>direction</B> (where it points). The arrow's tail is anchored at the origin; only the tip matters. Two arrows are the same vector iff they have the same length and the same direction — starting position never matters.</P>
+
+      <H4>The algebraic view: an ordered tuple of numbers</H4>
+      <P>A vector in <T src="\mathbb{R}^n"/> is just a list of <T src="n"/> real numbers, written as a column:</P>
+      <BT src={String.raw`\mathbf{v} = \begin{bmatrix} v_1 \\ v_2 \\ \vdots \\ v_n \end{bmatrix} \in \mathbb{R}^n.`}/>
+      <P>In <T src="\mathbb{R}^2"/>, the tuple <T src="(3, 2)"/> means "move 3 along x, then 2 along y." The arrow from origin to <T src="(3, 2)"/> is the geometric form of the same vector.</P>
+
+      <Callout kind="info" title="Why both views must coexist in your head">
+        <P>GATE switches between views inside a single question. "The vectors <T src="\mathbf{u}"/> and <T src="\mathbf{v}"/> are parallel" (geometric) → "one is a scalar multiple of the other" → "the determinant is zero" (algebraic). You must translate without skipping a beat.</P>
+      </Callout>
+
+      <H3>Vector addition</H3>
+      <P>Geometric (head-to-tail): place <T src="\mathbf{v}"/>'s tail at <T src="\mathbf{u}"/>'s tip. The arrow from origin to the new tip is <T src="\mathbf{u} + \mathbf{v}"/>. Equivalently (parallelogram): both from origin, complete the parallelogram, diagonal is the sum. Algebraic: add component-wise.</P>
+      <BT src={String.raw`\mathbf{u} + \mathbf{v} = \begin{bmatrix} u_1 \\ u_2 \end{bmatrix} + \begin{bmatrix} v_1 \\ v_2 \end{bmatrix} = \begin{bmatrix} u_1 + v_1 \\ u_2 + v_2 \end{bmatrix}.`}/>
+
+      <H3>Scalar multiplication</H3>
+      <P>Multiplying by <T src="c \in \mathbb{R}"/> stretches length by <T src="|c|"/> and, if <T src="c &lt; 0"/>, flips direction. The result stays on the same line through the origin.</P>
+      <BT src={String.raw`c\mathbf{v} = \begin{bmatrix} c v_1 \\ c v_2 \end{bmatrix}.`}/>
+      <UL>
+        <Li><T src="c = 2"/>: doubles length, same direction.</Li>
+        <Li><T src="c = 0.5"/>: halves length, same direction.</Li>
+        <Li><T src="c = 0"/>: collapses to zero vector.</Li>
+        <Li><T src="c = -1"/>: same length, opposite direction.</Li>
+        <Li><T src="c = -2"/>: doubles length, opposite direction.</Li>
+      </UL>
+
+      <Callout kind="info" title="The 'same line through the origin' insight">
+        <P>For non-zero <T src="\mathbf{v}"/>, the set <T src="\{c\mathbf{v} : c \in \mathbb{R}\}"/> is exactly a line through the origin in <T src="\mathbf{v}"/>'s direction. We'll call this the <B>span</B> of <T src="\{\mathbf{v}\}"/> in Concept 2.1.</P>
+      </Callout>
+
+      <H3>The zero vector</H3>
+      <P><T src="\mathbf{0}"/> has all components zero. Geometrically: a degenerate "arrow of length zero". It's special:</P>
+      <OL>
+        <Li><B>Additive identity:</B> <T src="\mathbf{v} + \mathbf{0} = \mathbf{v}"/> for every vector.</Li>
+        <Li><B>Killed by every scalar:</B> <T src="c \cdot \mathbf{0} = \mathbf{0}"/>.</Li>
+        <Li><B>Belongs to every subspace.</B> No such thing as a subspace that misses the origin.</Li>
+      </OL>
+
+      <Callout kind="trap" title="Zero vector ⇒ instant dependence">
+        <P>As soon as <T src="\mathbf{0}"/> is in a set, that set is linearly dependent — full stop. The reason will be obvious in 1.4.</P>
+      </Callout>
+
+      <VectorPlayground />
+
+      <H3>Magnitude and direction (quick formulas)</H3>
+      <BT src={String.raw`\|\mathbf{v}\| = \sqrt{v_1^2 + v_2^2 + \cdots + v_n^2}, \qquad \hat{\mathbf{v}} = \frac{\mathbf{v}}{\|\mathbf{v}\|}.`}/>
+      <P>The norm is the geometric length. Dividing by the length gives a unit vector — useful when only direction matters.</P>
+
+      <H3>What "vector space" will mean shortly</H3>
+      <P>We've been working in <T src="\mathbb{R}^n"/>, but LA is more general. A <B>vector space</B> is any set in which addition and scalar multiplication produce members of the set, with the usual algebraic rules. That definition lets us call the set of all polynomials of degree at most <T src="n"/> a vector space, the set of continuous functions a vector space, even all <T src="m \times n"/> matrices. For GATE you mostly live in <T src="\mathbb{R}^n"/>, but the abstraction is what makes the same theorems apply everywhere.</P>
+
+      <Callout kind="recall" title="Concept 1.2 in one breath">
+        <P>Vector = arrow with tail at origin (geometric) OR column of numbers (algebraic). Addition: head-to-tail, equivalently component-wise. Scalar multiplication: stretch and maybe flip. Zero vector: in every subspace, poisons independence.</P>
+      </Callout>
+
+      <ProgressPill conceptId="m1-c12"/>
+    </ConceptCard>
+  );
+}
+
+/* ════════════════════════════════════════════════════════
+   CONCEPT 1.3 — Linear Combinations
+   ════════════════════════════════════════════════════════ */
+function LinearCombinationBuilder() {
+  const [v1, setV1] = useState([3, 1]);
+  const [v2, setV2] = useState([1, 2]);
+  const [c1, setC1] = useState(1);
+  const [c2, setC2] = useState(1);
+  const [reach, setReach] = useState(false);
+
+  const result = [c1*v1[0] + c2*v2[0], c1*v1[1] + c2*v2[1]];
+  const leg1 = [c1*v1[0], c1*v1[1]];
+  const det = v1[0]*v2[1] - v1[1]*v2[0];
+  const independent = Math.abs(det) > 1e-6;
+
+  const dots = useMemo(() => {
+    if (!reach) return null;
+    const arr = [];
+    const N = 14, spanRange = 2.2, range = 6;
+    for (let i = -N; i <= N; i++) {
+      for (let j = -N; j <= N; j++) {
+        const a = (i / N) * spanRange;
+        const b = (j / N) * spanRange;
+        const x = a*v1[0] + b*v2[0];
+        const y = a*v1[1] + b*v2[1];
+        if (Math.abs(x) < range && Math.abs(y) < range) arr.push([x, y]);
+      }
+    }
+    return arr;
+  }, [reach, v1[0], v1[1], v2[0], v2[1]]);
+
+  const range = 6, scale = 230 / range, cx = 230, cy = 230;
+  const toPx = (x, y) => [cx + x*scale, cy - y*scale];
+
+  // Build extras: reachability dots + leg lines
+  const extras = (
+    <g>
+      {dots && dots.map(([x, y], i) => {
+        const [px, py] = toPx(x, y);
+        return <circle key={i} cx={px} cy={py} r="1.6"
+          fill={independent ? "var(--accent-3)" : "var(--warn)"} opacity="0.7"/>;
+      })}
+      {(() => {
+        const [px, py] = toPx(leg1[0], leg1[1]);
+        return <line x1={cx} y1={cy} x2={px} y2={py} stroke="var(--accent)" strokeWidth="3" opacity="0.85"/>;
+      })()}
+      {(() => {
+        const [a, b] = toPx(leg1[0], leg1[1]);
+        const [px, py] = toPx(result[0], result[1]);
+        return <line x1={a} y1={b} x2={px} y2={py} stroke="var(--accent-2)" strokeWidth="3" opacity="0.85"/>;
+      })()}
+    </g>
+  );
+
+  const vectors = [
+    { vec: v1, colorIdx: 0, label: "v₁", opacity: 0.55, dashed: true, dot: false },
+    { vec: v2, colorIdx: 1, label: "v₂", opacity: 0.55, dashed: true, dot: false },
+    { vec: result, colorIdx: 2, label: "c₁v₁+c₂v₂", thick: 3 },
+  ];
+
+  return (
+    <InteractiveFrame
+      name="Linear Combination Builder — c₁v₁ + c₂v₂"
+      whatAmISeeing="Two input vectors v₁ (violet) and v₂ (cyan). Sliders set the weights c₁, c₂. The emerald vector is the resulting linear combination. Toggle 'Reachability' to sweep all weights and shade everywhere reachable."
+      tryThis="Set v₁ = (2, 1) and v₂ = (4, 2) — same direction. Turn on Reachability — only a LINE (dependent). Now change v₂ to (1, 2) — the region fills all of R². You just felt independence."
+    >
+      <div className="grid lg:grid-cols-[auto,1fr] gap-6 items-start">
+        <VectorCanvas width={460} height={460} range={6} vectors={vectors} extras={extras}/>
+
+        <div className="space-y-4">
+          <div className="rounded-lg p-4" style={{border: "1px solid var(--border)", background: "var(--bg-elev-2)"}}>
+            <div className="text-xs tracking-[0.2em] font-semibold mb-2" style={{color: "var(--accent)"}}>v₁</div>
+            <div className="flex items-center gap-2">
+              <NumInput value={v1[0]} onChange={x => setV1([x, v1[1]])} width={72}/>
+              <NumInput value={v1[1]} onChange={y => setV1([v1[0], y])} width={72}/>
+            </div>
+          </div>
+          <div className="rounded-lg p-4" style={{border: "1px solid var(--border)", background: "var(--bg-elev-2)"}}>
+            <div className="text-xs tracking-[0.2em] font-semibold mb-2" style={{color: "var(--accent-2)"}}>v₂</div>
+            <div className="flex items-center gap-2">
+              <NumInput value={v2[0]} onChange={x => setV2([x, v2[1]])} width={72}/>
+              <NumInput value={v2[1]} onChange={y => setV2([v2[0], y])} width={72}/>
+            </div>
+          </div>
+
+          <div className="rounded-lg p-4 space-y-3" style={{border: "1px solid var(--border)", background: "var(--bg-elev-2)"}}>
+            <div>
+              <div className="text-xs tracking-[0.2em] font-semibold mb-1" style={{color: "var(--accent)"}}>
+                c₁ = <span className="font-mono">{c1.toFixed(2)}</span>
+              </div>
+              <input type="range" min="-3" max="3" step="0.05" value={c1} onChange={e => setC1(+e.target.value)}/>
+            </div>
+            <div>
+              <div className="text-xs tracking-[0.2em] font-semibold mb-1" style={{color: "var(--accent-2)"}}>
+                c₂ = <span className="font-mono">{c2.toFixed(2)}</span>
+              </div>
+              <input type="range" min="-3" max="3" step="0.05" value={c2} onChange={e => setC2(+e.target.value)}/>
+            </div>
+            <div className="text-sm font-mono pt-2" style={{color: "var(--accent-3)", borderTop: "1px solid var(--border)"}}>
+              c₁v₁ + c₂v₂ = ({result[0].toFixed(2)}, {result[1].toFixed(2)})
+            </div>
+          </div>
+
+          <label className="flex items-center gap-2 text-sm cursor-pointer" style={{color: "var(--text)"}}>
+            <input type="checkbox" checked={reach} onChange={e => setReach(e.target.checked)}/>
+            Show reachable region (all linear combinations)
+          </label>
+
+          <div className="text-xs px-3 py-2 rounded-md"
+            style={{
+              border: "1px solid " + (independent ? "var(--accent-3-border)" : "var(--warn-border)"),
+              background: independent ? "var(--accent-3-soft)" : "var(--warn-soft)",
+              color: independent ? "var(--accent-3)" : "var(--warn)",
+            }}>
+            <strong className="font-mono">det = {det.toFixed(2)}</strong>{" — "}
+            {independent
+              ? "v₁ and v₂ are linearly INDEPENDENT. They reach all of R²."
+              : "v₁ and v₂ are linearly DEPENDENT. They reach only a single line through the origin."}
+          </div>
+        </div>
+      </div>
+    </InteractiveFrame>
+  );
+}
+
+function Concept13() {
+  return (
+    <ConceptCard id="concept-1-3" label="1.3" moduleLabel="Module 1 · Foundations"
+      title="Linear Combinations"
+      why="If you only learn ONE operation in linear algebra, it is this one. Matrix multiplication is a linear combination. Solving Ax = b is finding the right linear combination. The column space, the row space, every basis — all defined through linear combinations.">
+      <H3>Definition</H3>
+      <P>A <B>linear combination</B> of <T src="\mathbf{v}_1, \mathbf{v}_2, \ldots, \mathbf{v}_k"/> with scalar weights <T src="c_1, c_2, \ldots, c_k"/> is the vector</P>
+      <BT src={String.raw`c_1 \mathbf{v}_1 + c_2 \mathbf{v}_2 + \cdots + c_k \mathbf{v}_k.`}/>
+      <P>That's it. Each <T src="c_i"/> is a number, each <T src="\mathbf{v}_i"/> is a vector, the result is again a vector.</P>
+
+      <H3>Why this is the CORE operation</H3>
+      <UL>
+        <Li>Matrix-vector product <T src="A\mathbf{x}"/> is a linear combination of A's COLUMNS weighted by <T src="\mathbf{x}"/>. This single sentence unlocks the column picture (Concept 2.3).</Li>
+        <Li>Solving <T src="A\mathbf{x} = \mathbf{b}"/> = finding the weights that combine A's columns to make <T src="\mathbf{b}"/>.</Li>
+        <Li>Span = the set of all linear combinations.</Li>
+        <Li>Basis = a smallest set whose linear combinations reach everything.</Li>
+        <Li>The eigen-equation <T src="A\mathbf{v} = \lambda \mathbf{v}"/> says <T src="A\mathbf{v}"/> is a specific linear combination (<T src="\lambda"/> times <T src="\mathbf{v}"/>) of ONE vector.</Li>
+      </UL>
+
+      <Callout kind="info" title="The recipe analogy">
+        <P>Each vector <T src="\mathbf{v}_i"/> is an ingredient. The weights <T src="c_i"/> are amounts. The linear combination is the dish. The "reachable region" is your full menu. Two ingredients pointing the same way (flour + more flour) make only 1D variations; two truly different ingredients let you reach a whole plane of dishes.</P>
+      </Callout>
+
+      <H3>Geometric meaning — what does a linear combination LOOK like?</H3>
+      <H4>One vector</H4>
+      <P>The set <T src="\{c\mathbf{v} : c \in \mathbb{R}\}"/> is a line through the origin in <T src="\mathbf{v}"/>'s direction (or just the origin, if <T src="\mathbf{v} = \mathbf{0}"/>).</P>
+
+      <H4>Two vectors in R²</H4>
+      <UL>
+        <Li>Different directions: every linear combination lands somewhere in <T src="\mathbb{R}^2"/>, AND every point in <T src="\mathbb{R}^2"/> can be reached.</Li>
+        <Li>Same direction (one is a scalar multiple): only a single line is reachable.</Li>
+      </UL>
+
+      <H4>Three vectors in R³</H4>
+      <UL>
+        <Li>No two parallel and no third in the plane of the other two: combinations fill all of <T src="\mathbb{R}^3"/>.</Li>
+        <Li>Two parallel: fill only a plane.</Li>
+        <Li>All three coplanar: fill only that plane.</Li>
+        <Li>All three collinear: fill only that line.</Li>
+      </UL>
+
+      <Callout kind="info" title="Foreshadowing the 'span'">
+        <P>Concept 2.1 will name the "reachable region" the <B>span</B>. You'll already have the intuition by the time the definition arrives.</P>
+      </Callout>
+
+      <H3>Worked algebraic example</H3>
+      <P>Let <T src="\mathbf{v}_1 = (1, 2)"/> and <T src="\mathbf{v}_2 = (3, -1)"/>. The combination with <T src="c_1 = 2,\ c_2 = 1"/> is:</P>
+      <BT src={String.raw`2\begin{bmatrix} 1 \\ 2 \end{bmatrix} + 1\begin{bmatrix} 3 \\ -1 \end{bmatrix} = \begin{bmatrix} 5 \\ 3 \end{bmatrix}.`}/>
+      <P>Sweeping all <T src="(c_1, c_2) \in \mathbb{R}^2"/> traces every point in <T src="\mathbb{R}^2"/> — because these two vectors are linearly independent (preview).</P>
+
+      <H3>Two questions the rest of LA is about</H3>
+      <OL>
+        <Li><B>Reachability:</B> given <T src="\mathbf{v}_1, \ldots, \mathbf{v}_k"/> and a target <T src="\mathbf{b}"/>, is there a linear combination equal to <T src="\mathbf{b}"/>? ("Does <T src="A\mathbf{x} = \mathbf{b}"/> have a solution?")</Li>
+        <Li><B>Uniqueness:</B> if reachable, is the combination unique? ("Is the solution unique?")</Li>
+      </OL>
+      <P>Both answers depend on whether the input vectors are linearly independent. Which is the next concept.</P>
+
+      <LinearCombinationBuilder />
+
+      <Callout kind="ml" title="Where you'll meet linear combinations next">
+        <P>Every <B>embedding</B> in NLP — the vector for "king" or "queen" — gets combined with attention weights inside a transformer. Each attention head's output is a weighted (linear) combination of value vectors. "Attention is all you need" = "linear combinations weighted by similarity."</P>
+      </Callout>
+
+      <ProgressPill conceptId="m1-c13"/>
+    </ConceptCard>
+  );
+}
+
+/* ════════════════════════════════════════════════════════
+   CONCEPT 1.4 — Dependence & Independence
+   ════════════════════════════════════════════════════════ */
+function DependenceChecker() {
+  const [count, setCount] = useState(2);
+  const [v1, setV1] = useState([2, 1]);
+  const [v2, setV2] = useState([1, 2]);
+  const [v3, setV3] = useState([3, 3]);
+
+  let verdict, reason, det = null;
+  if (count === 2) {
+    det = v1[0]*v2[1] - v1[1]*v2[0];
+    const independent = Math.abs(det) > 1e-6;
+    verdict = independent ? "Linearly INDEPENDENT" : "Linearly DEPENDENT";
+    if (independent) reason = "No vector is a scalar multiple of the other. The 2×2 determinant ad − bc is non-zero, so the two vectors span all of R².";
+    else if (v1[0] === 0 && v1[1] === 0) reason = "v₁ is the zero vector. Any set containing 0 is automatically dependent.";
+    else if (v2[0] === 0 && v2[1] === 0) reason = "v₂ is the zero vector. Any set containing 0 is automatically dependent.";
+    else reason = "v₂ is a scalar multiple of v₁ — same line through the origin. The 2×2 determinant ad − bc = 0.";
+  } else {
+    verdict = "Linearly DEPENDENT (automatic)";
+    reason = "Any 3 vectors in R² are linearly dependent — you can't have more than 2 independent vectors in 2-dimensional space.";
+  }
+
+  const vectors = [
+    { vec: v1, colorIdx: 0, label: "v₁" },
+    { vec: v2, colorIdx: 1, label: "v₂" },
+  ];
+  if (count === 3) vectors.push({ vec: v3, colorIdx: 3, label: "v₃" });
+
+  const range = 6, scale = 230 / range, cx = 230, cy = 230;
+  const toPx = (x, y) => [cx + x*scale, cy - y*scale];
+  const extras = (count === 2 && Math.abs(det) < 1e-6 && (v1[0] !== 0 || v1[1] !== 0)) ? (() => {
+    const t = range * 1.3;
+    const [x1, y1] = toPx(-t*v1[0], -t*v1[1]);
+    const [x2, y2] = toPx( t*v1[0],  t*v1[1]);
+    return <line x1={x1} y1={y1} x2={x2} y2={y2} stroke="var(--warn)" strokeWidth="2" strokeDasharray="6 4" opacity="0.65"/>;
+  })() : null;
+
+  return (
+    <InteractiveFrame
+      name="Dependence Checker — feel the difference geometrically"
+      whatAmISeeing="A 2D plane with 2 or 3 input vectors. The verdict (dependent or independent) is computed live, with the geometric reason explained underneath."
+      tryThis="Set v₁ = (2, 1), v₂ = (4, 2). Same line — dependent. Change v₂ slightly to (4, 2.1). Suddenly independent! The boundary between dependence and independence is a single number: the determinant going from 0 to non-zero."
+    >
+      <div className="grid lg:grid-cols-[auto,1fr] gap-6 items-start">
+        <VectorCanvas width={460} height={460} range={6} vectors={vectors} extras={extras}/>
+
+        <div className="space-y-4">
+          <div className="flex gap-2">
+            {[2, 3].map(n => (
+              <button key={n} onClick={() => setCount(n)}
+                className="text-sm px-3 py-1.5 rounded-lg transition-colors"
+                style={{
+                  border: "1px solid " + (count === n ? "var(--accent-border)" : "var(--border)"),
+                  background: count === n ? "var(--accent-soft)" : "transparent",
+                  color: count === n ? "var(--accent)" : "var(--text-dim)",
+                }}>
+                {n} vectors
+              </button>
+            ))}
+          </div>
+
+          {[{label: "v₁", v: v1, setV: setV1, c: "var(--accent)"},
+            {label: "v₂", v: v2, setV: setV2, c: "var(--accent-2)"},
+            ...(count === 3 ? [{label: "v₃", v: v3, setV: setV3, c: "var(--warn)"}] : [])
+          ].map((d, i) => (
+            <div key={i} className="rounded-lg p-3" style={{border: "1px solid var(--border)", background: "var(--bg-elev-2)"}}>
+              <div className="text-xs tracking-[0.2em] font-semibold mb-2" style={{color: d.c}}>{d.label}</div>
+              <div className="flex items-center gap-2">
+                <NumInput value={d.v[0]} onChange={x => d.setV([x, d.v[1]])} width={72}/>
+                <NumInput value={d.v[1]} onChange={y => d.setV([d.v[0], y])} width={72}/>
+              </div>
+            </div>
+          ))}
+
+          <div className="rounded-lg p-4"
+            style={{
+              border: "1px solid " + (count === 2 && Math.abs(det) > 1e-6 ? "var(--accent-3-border)" : "var(--warn-border)"),
+              background: count === 2 && Math.abs(det) > 1e-6 ? "var(--accent-3-soft)" : "var(--warn-soft)",
+            }}>
+            <div className="text-xs tracking-[0.2em] font-semibold mb-2"
+              style={{color: count === 2 && Math.abs(det) > 1e-6 ? "var(--accent-3)" : "var(--warn)"}}>
+              VERDICT
+            </div>
+            <div className="text-base font-semibold mb-2" style={{color: "var(--text)"}}>{verdict}</div>
+            <div className="text-sm leading-relaxed" style={{color: "var(--text-dim)"}}>{reason}</div>
+            {count === 2 && (
+              <div className="mt-2 text-xs font-mono" style={{color: "var(--text-dim)"}}>
+                2×2 det = ({v1[0]})·({v2[1]}) − ({v1[1]})·({v2[0]}) ={" "}
+                <span style={{color: Math.abs(det) > 1e-6 ? "var(--accent-3)" : "var(--warn)"}}>{det.toFixed(2)}</span>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </InteractiveFrame>
+  );
+}
+
+function Concept14() {
+  return (
+    <ConceptCard id="concept-1-4" label="1.4" moduleLabel="Module 1 · Foundations"
+      title="Linear Dependence and Independence"
+      why="This is the first big idea GATE actively tests. Independence governs whether Ax = b has a unique solution, whether a matrix is invertible, whether a basis is valid, whether a matrix has n eigenvectors. Get intuition, formal definition, and the traps right now.">
+      <H3>The geometric intuition (start here, always)</H3>
+      <P>A set of vectors is <B>linearly independent</B> when no vector is "redundant" — no vector can be reached by combining the others. Each contributes a new direction the others could not produce.</P>
+      <P>A set is <B>linearly dependent</B> when at least one vector lies in the reachable region of the others. That vector adds nothing new — throw it out and you still reach the same set of points.</P>
+
+      <Callout kind="info" title="The single picture to remember">
+        <P>Two vectors in <T src="\mathbb{R}^2"/> are independent iff they point in different directions through the origin. Three vectors in <T src="\mathbb{R}^3"/> are independent iff none lies in the plane of the other two. In one phrase: <Em>no vector is already reachable.</Em></P>
+      </Callout>
+
+      <H3>The formal definition</H3>
+      <P>The vectors <T src="\mathbf{v}_1, \ldots, \mathbf{v}_k"/> are <B>linearly independent</B> if</P>
+      <BT src={String.raw`c_1 \mathbf{v}_1 + \cdots + c_k \mathbf{v}_k = \mathbf{0}`}/>
+      <P>has ONLY the trivial solution <T src="c_1 = \cdots = c_k = 0"/>. They are <B>dependent</B> if there exists ANY non-trivial choice of weights making the sum zero.</P>
+
+      <Callout kind="proof" title="Why this definition captures the geometric idea">
+        <P>If the set is dependent, there exist <T src="c_i"/> not all zero with <T src="\sum c_i \mathbf{v}_i = \mathbf{0}"/>. Pick a non-zero <T src="c_j"/>. Then <T src="\mathbf{v}_j = -\frac{1}{c_j}\sum_{i \neq j} c_i \mathbf{v}_i"/> — a linear combination of the OTHERS. So <T src="\mathbf{v}_j"/> is "already reachable" — exactly the geometric notion. Conversely, if <T src="\mathbf{v}_j"/> lies in the span of the others, you can rearrange to get a non-trivial null combination.</P>
+      </Callout>
+
+      <H3>The fundamental small cases</H3>
+      <H4>Case A: a single vector</H4>
+      <UL>
+        <Li><T src="\mathbf{v} \neq \mathbf{0}"/>: independent.</Li>
+        <Li><T src="\mathbf{v} = \mathbf{0}"/>: dependent (any non-zero <T src="c"/> works).</Li>
+      </UL>
+
+      <H4>Case B: a set containing the zero vector</H4>
+      <P>Pick <T src="c_0 = 1"/> on <T src="\mathbf{0}"/> and 0 on the rest. The combination is still <T src="\mathbf{0}"/>, but not all weights are zero. Dependent. <B>Always.</B></P>
+
+      <Callout kind="trap" title="The zero-vector trap">
+        <P>"A set containing the zero vector is always linearly dependent." Memorise this with the reason: the coefficient on <T src="\mathbf{0}"/> can be any non-zero number while every other is zero, and the sum is still <T src="\mathbf{0}"/>. GATE has tested this exact fact.</P>
+      </Callout>
+
+      <H4>Case C: two non-zero vectors</H4>
+      <P>Dependent iff one is a scalar multiple of the other.</P>
+
+      <Callout kind="proof" title="The 2-vector special case, proved">
+        <P>Suppose <T src="\mathbf{u}, \mathbf{v}"/> non-zero and dependent: <T src="a\mathbf{u} + b\mathbf{v} = \mathbf{0}"/> with <T src="(a,b) \neq (0,0)"/>. If <T src="b = 0"/>: <T src="a\mathbf{u} = \mathbf{0}"/> with <T src="a \neq 0"/> forces <T src="\mathbf{u} = \mathbf{0}"/> — contradiction. So <T src="b \neq 0"/>, giving <T src="\mathbf{v} = -\frac{a}{b}\mathbf{u}"/>. Done.</P>
+      </Callout>
+
+      <H4>Case D: more vectors than dimensions</H4>
+      <P>Any <T src="k > n"/> vectors in <T src="\mathbb{R}^n"/> are automatically dependent.</P>
+      <UL>
+        <Li>3 vectors in <T src="\mathbb{R}^2"/>: dependent.</Li>
+        <Li>4 vectors in <T src="\mathbb{R}^3"/>: dependent.</Li>
+        <Li><T src="n+1"/> vectors in <T src="\mathbb{R}^n"/>: dependent.</Li>
+      </UL>
+
+      <H3>The determinant connection (preview)</H3>
+      <P>For exactly <T src="n"/> vectors in <T src="\mathbb{R}^n"/>, stack them as columns of <T src="A"/>. Independent iff <T src="\det(A) \neq 0"/>. Module 5 will prove this.</P>
+
+      <Callout kind="trap" title="Independence is about the SET, not individual vectors">
+        <P>"Vector v₂ is linearly independent" is meaningless. Independence is a property of a SET. Mentally rewrite such phrasing as "this set is independent."</P>
+      </Callout>
+
+      <Callout kind="trap" title="Subset of independent ⇒ independent; superset of dependent ⇒ dependent">
+        <P>Removing from independent keeps independent. Adding to dependent keeps dependent. But the reverse directions can change either way. Don't confuse them.</P>
+      </Callout>
+
+      <DependenceChecker />
+
+      <H3>Solved practice — 6 worked checks</H3>
+
+      <H4>Q1.</H4>
+      <P>Are <T src="\mathbf{v}_1 = (1, 2)"/> and <T src="\mathbf{v}_2 = (3, 6)"/> independent?</P>
+      <P><B>Answer:</B> <T src="\mathbf{v}_2 = 3\mathbf{v}_1"/>. Dependent. 2×2 det = <T src="1\cdot 6 - 2\cdot 3 = 0"/>. ✓</P>
+
+      <H4>Q2.</H4>
+      <P>Are <T src="(1, 0, 0), (0, 1, 0), (0, 0, 1)"/> independent in <T src="\mathbb{R}^3"/>?</P>
+      <P><B>Answer:</B> Yes — standard basis. <T src="\det(I_3) = 1"/>.</P>
+
+      <H4>Q3.</H4>
+      <P>Are <T src="(1, 1), (2, 2), (3, 3)"/> independent?</P>
+      <P><B>Answer:</B> All on <T src="y = x"/>. Dependent.</P>
+
+      <H4>Q4.</H4>
+      <P>Are <T src="(1, 0), (0, 1), (3, 4)"/> independent in <T src="\mathbb{R}^2"/>?</P>
+      <P><B>Answer:</B> 3 vectors in <T src="\mathbb{R}^2"/> — automatic dependence. <T src="(3, 4) = 3(1,0) + 4(0,1)"/>.</P>
+
+      <H4>Q5.</H4>
+      <P>Are <T src="(1, 2, 3), (4, 5, 6), (7, 8, 9)"/> independent in <T src="\mathbb{R}^3"/>?</P>
+      <BT src={String.raw`\det\begin{bmatrix}1&4&7\\2&5&8\\3&6&9\end{bmatrix} = 1(45 - 48) - 4(18 - 24) + 7(12 - 15) = -3 + 24 - 21 = 0.`}/>
+      <P>Dependent.</P>
+
+      <H4>Q6.</H4>
+      <P>Are <T src="\mathbf{0}"/> and <T src="(1, 2)"/> independent? <B>Answer:</B> Zero vector poisons. Dependent.</P>
+
+      <H3>GATE 2017 — full PYQ walkthrough</H3>
+      <PYQ year="2017" exam="CS-style" marks="2"
+        question={<P>For what value of <T src="a"/> are the vectors <T src="(1, 2, 3), (4, 5, 6), (7, 8, a)"/> linearly dependent?</P>}
+        solution={
+          <>
+            <P><B>Step 1.</B> Three vectors in <T src="\mathbb{R}^3"/> are dependent iff the determinant of the matrix formed by stacking them is zero.</P>
+            <P><B>Step 2.</B> Build the matrix.</P>
+            <BT src={String.raw`M = \begin{bmatrix} 1 & 2 & 3 \\ 4 & 5 & 6 \\ 7 & 8 & a \end{bmatrix}.`}/>
+            <P><B>Step 3.</B> Expand along row 1.</P>
+            <BT src={String.raw`\det(M) = 1(5a - 48) - 2(4a - 42) + 3(32 - 35) = -3a + 27.`}/>
+            <P><B>Step 4.</B> <T src="-3a + 27 = 0 \implies a = 9"/>.</P>
+            <P><B>Sanity check:</B> with <T src="a = 9"/>, rows are <T src="(1,2,3), (4,5,6), (7,8,9)"/> — det 0 (Q5).</P>
+            <P><B>Answer:</B> <T src="a = 9"/>.</P>
+            <Callout kind="info" title="What this question was really testing">
+              <P>The trap was translation: "linearly dependent" → "det of the stacked matrix is zero" for <T src="n"/> vectors in <T src="\mathbb{R}^n"/>. After that, mechanical.</P>
+            </Callout>
+          </>
+        }/>
+
+      <H3>Patterns to spot in any independence question</H3>
+      <OL>
+        <Li>Zero vector in set? → Automatic dependence.</Li>
+        <Li>One vector is a scalar multiple of another? → Automatic dependence.</Li>
+        <Li>More vectors than dimensions? → Automatic dependence.</Li>
+        <Li>Otherwise: determinant (square) or row-reduce (rectangular — Module 4).</Li>
+      </OL>
+
+      <Callout kind="ml" title="Why independence matters in ML">
+        <P>Linearly dependent feature columns cause "perfect multicollinearity" — regression's normal equations <T src="X^\top X \boldsymbol{\beta} = X^\top \mathbf{y}"/> become singular and coefficient estimates blow up. Detecting and removing dependent columns is daily ML work.</P>
+      </Callout>
+
+      <Callout kind="recall" title="Concept 1.4 in one breath">
+        <P>Independence is about a SET. Defining test: only trivial null combination. Zero vector poisons. Two non-zero vectors are dependent iff parallel. More vectors than dimension ⇒ automatic dependence. Square case: <T src="\det = 0"/> is the silver bullet.</P>
+      </Callout>
+
+      <ProgressPill conceptId="m1-c14"/>
+    </ConceptCard>
+  );
+}
+
+/* ════════════════════════════════════════════════════════
+   APP ROOT
+   ════════════════════════════════════════════════════════ */
+function App() {
+  useEffect(() => { hideLoading(); }, []);
+  const concepts = [
+    { id: "concept-1-1", label: "1.1", title: "Why Study Linear Algebra?",         desc: "The 8 domains where LA is the only tool." },
+    { id: "concept-1-2", label: "1.2", title: "Vectors: What They Really Are",     desc: "Two views, one object. Drag and feel it." },
+    { id: "concept-1-3", label: "1.3", title: "Linear Combinations",               desc: "The single operation behind all of LA." },
+    { id: "concept-1-4", label: "1.4", title: "Linear Dependence & Independence",  desc: "The first big idea GATE will test on." },
+  ];
+  return (
+    <div className="min-h-screen">
+      <TopNav currentModule={1}/>
+      <Hero
+        moduleNum={1} totalModules={8}
+        title="Foundations"
+        tagline="Why Linear Algebra & What Vectors Really Are"
+        intro={
+          <>
+            Before any matrix, any determinant, any eigenvalue — there is the <Em>vector</Em>.
+            This module rebuilds your intuition for what vectors are, what linear combinations actually mean,
+            and why the difference between dependent and independent vectors decides the shape of every problem in linear algebra.
+          </>
+        }
+        concepts={concepts}
+        stats="4 concepts · 4 interactive tools · 1 PYQ · zero shortcuts"
+      />
+
+      {/* Problem Lab CTA */}
+      <section className="max-w-5xl mx-auto px-5 pt-2 pb-2">
+        <a href="module-01-problem-lab.html"
+          className="block rounded-2xl p-5 md:p-6 group transition-all"
+          style={{
+            background: "linear-gradient(135deg, var(--accent-soft), var(--accent-2-soft))",
+            border: "1px solid var(--accent-border)",
+            boxShadow: "var(--shadow-glow-accent)",
+          }}
+          onMouseEnter={e => e.currentTarget.style.borderColor = "var(--accent)"}
+          onMouseLeave={e => e.currentTarget.style.borderColor = "var(--accent-border)"}>
+          <div className="flex flex-wrap items-center gap-4">
+            <div style={{
+              width: 52, height: 52, borderRadius: 14,
+              background: "var(--grad-hero)", color: "white",
+              display: "inline-flex", alignItems: "center", justifyContent: "center",
+              fontSize: 22, flexShrink: 0,
+            }}>🎯</div>
+            <div className="flex-1 min-w-[260px]">
+              <div className="text-[11px] tracking-[0.2em] font-semibold mb-1" style={{color: "var(--accent)"}}>
+                MODULE 1 · PROBLEM LAB — NEW
+              </div>
+              <div className="text-[18px] md:text-[20px] font-bold leading-tight mb-1" style={{color: "var(--text)"}}>
+                From concept to 90-second GATE reflex.
+              </div>
+              <div className="text-[13.5px]" style={{color: "var(--text-dim)"}}>
+                36 problems · 5-layer structure per concept · GATE PYQ walkthroughs · timed drill mode.
+              </div>
+            </div>
+            <div className="flex items-center gap-2 px-4 py-2 rounded-xl font-semibold transition-opacity"
+              style={{background: "var(--grad-hero)", color: "white"}}>
+              Open Problem Lab →
+            </div>
+          </div>
+        </a>
+      </section>
+
+      <Concept11/>
+      <Concept12/>
+      <Concept13/>
+      <Concept14/>
+      <ModuleFooter
+        moduleNum={1}
+        nextModuleTitle="Span, Subspaces & the Column Picture"
+        nextModuleFile="module-02-span-subspaces.html"
+        checklist={[
+          "I can switch between the geometric and algebraic view of any vector in under 5 seconds.",
+          "I can describe the reachable region of any small set of vectors.",
+          "I can apply the four 'instant checks' for independence without computation.",
+          "I can solve a GATE-style determinant-based independence question."
+        ]}
+      />
+    </div>
+  );
+}
+
+mountApp(App, 1);
+</script>
+
+</body>
+</html>

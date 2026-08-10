@@ -1,0 +1,1340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 4 · Echelon, Rank & Rank-Nullity — LA Mastery Hub</title>
+
+<script>
+  (function () {
+    try {
+      var t = localStorage.getItem("la-hub::theme") || "dark";
+      document.documentElement.classList.add(t === "light" ? "light" : "dark");
+    } catch (e) { document.documentElement.classList.add("dark"); }
+  })();
+</script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="theme.css">
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script>tailwind.config = { darkMode: 'class' };</script>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+
+<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone@7.25.6/babel.min.js"></script>
+</head>
+<body>
+
+<div id="loading">
+  <div style="text-align:center">
+    <div class="spinner"></div>
+    <div style="font-size:13px; opacity:0.8">Loading Module 4 — Echelon &amp; Rank</div>
+  </div>
+</div>
+
+<div id="root"></div>
+
+<script type="text/babel" src="boilerplate.js"></script>
+
+<script type="text/babel">
+const { useState, useEffect, useMemo, useRef } = React;
+
+/* ════════════════════════════════════════════════════════
+   ROW REDUCTION ENGINE
+   Reused by 4.1, 4.2, 4.3, 4.5, 4.6, 4.7, 4.8
+   ════════════════════════════════════════════════════════ */
+const round = (v) => Math.abs(v) < 1e-10 ? 0 : Math.round(v * 1000) / 1000;
+const deep = (M) => M.map(r => r.slice());
+
+function rowReduce(matrix, { mode = "ref" } = {}) {
+  let M = deep(matrix);
+  const rows = M.length;
+  const cols = M[0].length;
+  const steps = [{ kind: "start", M: deep(M), desc: "Starting matrix." }];
+  const pivots = [];
+  let pivotRow = 0;
+
+  for (let col = 0; col < cols && pivotRow < rows; col++) {
+    // Find largest-magnitude entry in column from pivotRow down (partial pivoting)
+    let maxRow = pivotRow;
+    for (let r = pivotRow + 1; r < rows; r++) {
+      if (Math.abs(M[r][col]) > Math.abs(M[maxRow][col])) maxRow = r;
+    }
+    if (Math.abs(M[maxRow][col]) < 1e-9) continue; // free column — no pivot here
+
+    if (maxRow !== pivotRow) {
+      [M[pivotRow], M[maxRow]] = [M[maxRow], M[pivotRow]];
+      steps.push({
+        kind: "swap", r1: pivotRow, r2: maxRow,
+        M: deep(M),
+        desc: `Swap R${pivotRow + 1} ↔ R${maxRow + 1} (bring non-zero pivot up).`,
+      });
+    }
+
+    pivots.push({ row: pivotRow, col });
+
+    // Eliminate entries below pivot
+    for (let r = pivotRow + 1; r < rows; r++) {
+      if (Math.abs(M[r][col]) < 1e-9) continue;
+      const factor = M[r][col] / M[pivotRow][col];
+      for (let c = col; c < cols; c++) {
+        M[r][c] = round(M[r][c] - factor * M[pivotRow][c]);
+      }
+      steps.push({
+        kind: "elim", target: r, source: pivotRow, factor: round(factor), col,
+        M: deep(M),
+        desc: `R${r + 1} ← R${r + 1} − (${round(factor)}) · R${pivotRow + 1} (zero out (${r + 1}, ${col + 1})).`,
+      });
+    }
+    pivotRow++;
+  }
+
+  // RREF: scale pivots to 1, then eliminate above
+  if (mode === "rref") {
+    // Scale each pivot row to 1
+    for (let p = 0; p < pivots.length; p++) {
+      const { row, col } = pivots[p];
+      const piv = M[row][col];
+      if (Math.abs(piv - 1) > 1e-9) {
+        for (let c = 0; c < cols; c++) M[row][c] = round(M[row][c] / piv);
+        steps.push({
+          kind: "scale", target: row, factor: round(1 / piv),
+          M: deep(M),
+          desc: `R${row + 1} ← (1/${round(piv)}) · R${row + 1} (scale pivot to 1).`,
+        });
+      }
+    }
+    // Eliminate above each pivot
+    for (let p = pivots.length - 1; p >= 0; p--) {
+      const { row, col } = pivots[p];
+      for (let r = row - 1; r >= 0; r--) {
+        if (Math.abs(M[r][col]) < 1e-9) continue;
+        const factor = M[r][col];
+        for (let c = 0; c < cols; c++) M[r][c] = round(M[r][c] - factor * M[row][c]);
+        steps.push({
+          kind: "elim-up", target: r, source: row, factor: round(factor), col,
+          M: deep(M),
+          desc: `R${r + 1} ← R${r + 1} − (${round(factor)}) · R${row + 1} (eliminate above pivot).`,
+        });
+      }
+    }
+  }
+
+  return { final: M, steps, pivots, rank: pivots.length };
+}
+
+/* — Visual matrix display with highlights — */
+function MatrixDisplay({ data, pivots = [], augmented = false, augCol = null, highlight = null, compact = false }) {
+  if (!data || data.length === 0) return null;
+  const cols = data[0].length;
+  const aug = augmented ? (augCol != null ? augCol : cols - 1) : null;
+  return (
+    <div className="inline-flex items-stretch font-mono text-sm" style={{userSelect: "none"}}>
+      <div style={{borderLeft: "2px solid var(--text-dim)", borderTop: "2px solid var(--text-dim)", borderBottom: "2px solid var(--text-dim)", width: 8}}/>
+      <div className="px-2 py-2 grid gap-1"
+        style={{gridTemplateColumns: `repeat(${cols}, minmax(0, auto))`}}>
+        {data.map((row, r) => row.map((v, c) => {
+          const isPivot = pivots.some(p => p.row === r && p.col === c);
+          const isInPivotCol = pivots.some(p => p.col === c);
+          const isFreeCol = !isInPivotCol && (aug == null || c !== aug);
+          const isAug = (c === aug);
+          const isHighlight = highlight && highlight.row === r;
+          let bg = "transparent", color = "var(--text)";
+          if (isPivot) { bg = "var(--accent-soft)"; color = "var(--accent)"; }
+          else if (isAug) { bg = "var(--accent-3-soft)"; color = "var(--accent-3)"; }
+          else if (isInPivotCol && pivots.length > 0) { bg = "rgba(167,139,250,0.04)"; }
+          else if (isFreeCol && pivots.length > 0) { bg = "var(--accent-2-soft)"; color = "var(--accent-2)"; }
+          if (isHighlight) bg = "var(--warn-soft)";
+          return (
+            <React.Fragment key={`${r}-${c}`}>
+              {c === aug && (
+                <div className="self-stretch" style={{borderLeft: "2px dashed var(--text-faded)", marginLeft: -2, marginRight: 2}}/>
+              )}
+              <span className="px-2 py-1 text-center rounded font-mono transition-colors"
+                style={{
+                  background: bg,
+                  color,
+                  fontWeight: isPivot ? 700 : 400,
+                  minWidth: compact ? 36 : 42,
+                  fontSize: compact ? 12 : 13,
+                }}>
+                {Math.abs(v) < 1e-9 ? 0 : v}
+              </span>
+            </React.Fragment>
+          );
+        }))}
+      </div>
+      <div style={{borderRight: "2px solid var(--text-dim)", borderTop: "2px solid var(--text-dim)", borderBottom: "2px solid var(--text-dim)", width: 8}}/>
+    </div>
+  );
+}
+
+/* — Editable matrix grid — */
+function MatrixEditor({ matrix, setMatrix, augmented = false, label = "Matrix" }) {
+  const rows = matrix.length;
+  const cols = matrix[0].length;
+  const aug = augmented ? cols - 1 : null;
+  const setCell = (r, c, v) => {
+    const M = matrix.map(row => row.slice());
+    M[r][c] = v;
+    setMatrix(M);
+  };
+  return (
+    <div className="rounded-lg p-3" style={{border: "1px solid var(--border)", background: "var(--bg-elev-2)"}}>
+      <div className="text-xs tracking-[0.2em] font-semibold mb-2" style={{color: "var(--text-dim)"}}>{label}</div>
+      <div className="inline-grid gap-1" style={{gridTemplateColumns: `repeat(${cols}, auto)`}}>
+        {matrix.flatMap((row, r) => row.map((v, c) => (
+          <React.Fragment key={`${r}-${c}`}>
+            <NumInput value={v} onChange={x => setCell(r, c, x)} step="1" width={c === aug ? 56 : 46}/>
+          </React.Fragment>
+        )))}
+      </div>
+    </div>
+  );
+}
+
+/* ════════════════════════════════════════════════════════
+   CONCEPT 4.1 — Echelon Form and Pivot Columns
+   ════════════════════════════════════════════════════════ */
+function EchelonIdentifier() {
+  const [matrix, setMatrix] = useState([
+    [1, 2, 0, 3],
+    [2, 4, 1, 7],
+    [0, 0, 3, 6],
+  ]);
+  const result = useMemo(() => rowReduce(matrix, { mode: "ref" }), [matrix]);
+  const pivotCols = result.pivots.map(p => p.col);
+  const freeCols = [];
+  for (let c = 0; c < matrix[0].length; c++) if (!pivotCols.includes(c)) freeCols.push(c);
+
+  return (
+    <InteractiveFrame
+      name="Echelon Identifier — see the staircase form"
+      whatAmISeeing="Your matrix on the left, its row echelon form (REF) on the right. Pivot positions are highlighted in violet. Free (non-pivot) columns are highlighted in cyan — they'll become free variables when this matrix represents Ax = 0."
+      tryThis="Start with the default — three independent rows. Now change row 2 to (2, 4, 0, 6) — exactly 2 × row 1. The REF has a zero row appear. Rank drops from 3 to 2. The middle column becomes a free column."
+    >
+      <div className="grid lg:grid-cols-2 gap-6">
+        <div className="space-y-3">
+          <MatrixEditor matrix={matrix} setMatrix={setMatrix} label="ORIGINAL MATRIX"/>
+          <div className="text-xs" style={{color: "var(--text-dim)"}}>Edit any entry to recompute REF.</div>
+        </div>
+        <div className="space-y-3">
+          <div className="text-xs tracking-[0.2em] font-semibold mb-2" style={{color: "var(--accent)"}}>REF (row echelon form)</div>
+          <MatrixDisplay data={result.final} pivots={result.pivots}/>
+          <div className="grid grid-cols-3 gap-2 text-xs">
+            <div className="rounded p-2" style={{background: "var(--accent-soft)", border: "1px solid var(--accent-border)"}}>
+              <div className="font-semibold" style={{color: "var(--accent)"}}>rank</div>
+              <div className="font-mono text-lg" style={{color: "var(--text)"}}>{result.rank}</div>
+            </div>
+            <div className="rounded p-2" style={{background: "var(--accent-2-soft)", border: "1px solid var(--accent-2-border)"}}>
+              <div className="font-semibold" style={{color: "var(--accent-2)"}}>free cols</div>
+              <div className="font-mono text-lg" style={{color: "var(--text)"}}>{freeCols.length}</div>
+            </div>
+            <div className="rounded p-2" style={{background: "var(--bg-elev-3)", border: "1px solid var(--border)"}}>
+              <div className="font-semibold" style={{color: "var(--text-dim)"}}>n (cols)</div>
+              <div className="font-mono text-lg" style={{color: "var(--text)"}}>{matrix[0].length}</div>
+            </div>
+          </div>
+          <div className="text-xs mt-2" style={{color: "var(--text-dim)"}}>
+            Pivot columns: <span className="font-mono" style={{color: "var(--accent)"}}>{pivotCols.map(c => c + 1).join(", ") || "none"}</span>
+            <br/>Free columns: <span className="font-mono" style={{color: "var(--accent-2)"}}>{freeCols.map(c => c + 1).join(", ") || "none"}</span>
+          </div>
+        </div>
+      </div>
+    </InteractiveFrame>
+  );
+}
+
+function Concept41() {
+  return (
+    <ConceptCard id="concept-4-1" label="4.1" moduleLabel="Module 4 · Echelon & Rank"
+      title="Echelon Form and Pivot Columns"
+      why="Module 3 told us rank determines solvability. Now we need a procedure to FIND the rank. The procedure is row reduction. Its output is echelon form. Echelon form makes everything readable — rank, null space, free variables — at a glance.">
+      <H3>The three legal row operations</H3>
+      <P>Row operations transform a matrix but preserve the solution set of <T src="A\mathbf{x} = \mathbf{b}"/> (we'll prove this below). There are exactly three:</P>
+      <OL>
+        <Li><B>Swap two rows:</B> exchange the order of two equations.</Li>
+        <Li><B>Scale a row by a non-zero constant:</B> multiply both sides of one equation by <T src="c \neq 0"/>.</Li>
+        <Li><B>Add a multiple of one row to another:</B> add <T src="c"/> times equation <T src="j"/> to equation <T src="i"/>.</Li>
+      </OL>
+
+      <Callout kind="proof" title="Why row operations preserve solutions">
+        <P><B>(1) Swap:</B> reordering equations doesn't change what satisfies them all.</P>
+        <P><B>(2) Scale:</B> if <T src="a^\top \mathbf{x} = b"/> holds, then <T src="(c a)^\top \mathbf{x} = c b"/> holds for any <T src="c"/>; if <T src="c \neq 0"/>, the reverse is also true.</P>
+        <P><B>(3) Add:</B> if both <T src="\mathbf{a}_i^\top \mathbf{x} = b_i"/> and <T src="\mathbf{a}_j^\top \mathbf{x} = b_j"/> hold, then <T src="(\mathbf{a}_i + c \mathbf{a}_j)^\top \mathbf{x} = b_i + c b_j"/> holds. The converse also holds because we can subtract back.</P>
+        <P>So every row operation maps solutions to solutions and is reversible. Hence the SOLUTION SET is preserved.</P>
+      </Callout>
+
+      <Callout kind="trap" title="Why we forbid scaling by zero">
+        <P>Multiplying a row by 0 ERASES information — you can't undo it. The original equation might have ruled out some <T src="\mathbf{x}"/>'s, but the new "0 = 0" equation rules out nothing. So scaling by 0 is forbidden. It would change (enlarge) the solution set.</P>
+      </Callout>
+
+      <H3>Row Echelon Form (REF) — the definition</H3>
+      <P>A matrix is in <B>row echelon form</B> if:</P>
+      <OL>
+        <Li>All zero rows (if any) are at the bottom.</Li>
+        <Li>The leading entry (first non-zero) of each non-zero row is strictly to the right of the leading entry of the row above.</Li>
+      </OL>
+      <P>The leading entries are called <B>pivots</B>. The columns they occupy are <B>pivot columns</B>. All other columns are <B>free columns</B>.</P>
+
+      <P>Visually, REF makes a staircase descending to the right:</P>
+      <BT src={String.raw`\left[\begin{array}{ccccc} \boxed{\,*\,} & * & * & * & * \\ 0 & \boxed{\,*\,} & * & * & * \\ 0 & 0 & 0 & \boxed{\,*\,} & * \\ 0 & 0 & 0 & 0 & 0 \end{array}\right]`}/>
+      <P>The boxed entries are pivots. Pivot positions strictly increase from row to row. Columns 1, 2, 4 are pivot columns; columns 3 and 5 are free.</P>
+
+      <H3>Why the staircase shape is forced</H3>
+      <P>If a pivot in row <T src="i"/> were in the same column as (or to the LEFT of) the pivot in row <T src="i - 1"/>, we could subtract a multiple of row <T src="i - 1"/> from row <T src="i"/> and create a zero at that position. The staircase shape is exactly what you get when this reduction is finished.</P>
+
+      <H3>Pivot columns vs free columns — the meaning</H3>
+      <UL>
+        <Li><B>Pivot columns</B> correspond to <B>basic variables</B> — variables determined by the equations.</Li>
+        <Li><B>Free columns</B> (other than the augmented column in [A | b]) correspond to <B>free variables</B> — variables you can set to anything; the basic variables adjust to match.</Li>
+        <Li><B>Number of pivot columns = rank(A).</B> This is THE first major use of REF.</Li>
+        <Li><B>Number of free variables = nullity(A) = n − rank(A).</B> Hello, Rank-Nullity.</Li>
+      </UL>
+
+      <EchelonIdentifier/>
+
+      <Callout kind="info" title="REF is not unique, RREF is">
+        <P>Different sequences of row operations can produce different REFs from the same starting matrix — but they all have the same pivot positions. To get a unique form, we go further and produce the <B>Reduced Row Echelon Form (RREF)</B>: pivots equal to 1, and zeros both above AND below each pivot. RREF is unique. Module 4.8 will use it to read off the null space directly.</P>
+      </Callout>
+
+      <Callout kind="recall" title="Concept 4.1 in one breath">
+        <P>Three legal row ops preserve the solution set. REF = staircase form with pivots descending right. Pivot columns = basic variables; free columns = free variables. Number of pivots = rank. RREF (Module 4.8) is the unique canonical form.</P>
+      </Callout>
+
+      <ProgressPill conceptId="m4-c41"/>
+    </ConceptCard>
+  );
+}
+
+/* ════════════════════════════════════════════════════════
+   CONCEPT 4.2 — Gaussian Elimination (animated stepper)
+   ════════════════════════════════════════════════════════ */
+function GaussianStepper() {
+  const [matrix, setMatrix] = useState([
+    [2, 1, -1,  3],
+    [1, -1,  2, 4],
+    [3,  0,  1, 10],
+  ]);
+  const [stepIdx, setStepIdx] = useState(0);
+  const result = useMemo(() => rowReduce(matrix, { mode: "ref" }), [matrix]);
+  const cur = result.steps[Math.min(stepIdx, result.steps.length - 1)];
+  const last = stepIdx >= result.steps.length - 1;
+
+  const reset = () => setStepIdx(0);
+  const next = () => setStepIdx(i => Math.min(i + 1, result.steps.length - 1));
+  const prev = () => setStepIdx(i => Math.max(i - 1, 0));
+  const skip = () => setStepIdx(result.steps.length - 1);
+
+  // Determine if inconsistent (zero row with non-zero augmented entry)
+  const cols = matrix[0].length;
+  const isInconsistent = result.final.some(row => {
+    const allCoeffZero = row.slice(0, cols - 1).every(v => Math.abs(v) < 1e-9);
+    return allCoeffZero && Math.abs(row[cols - 1]) > 1e-9;
+  });
+
+  return (
+    <InteractiveFrame
+      name="Gaussian Elimination — animated stepper"
+      whatAmISeeing="A 3×4 augmented matrix [A | b]. Step through forward elimination one row operation at a time. The current step's description appears below. The matrix is in REF when you reach the last step."
+      tryThis="Use the default matrix and step through all the way. Now change the third equation to [3, 1.5, -1.5, 9] (= 1.5 × row 1). After elimination, row 3 becomes all zeros — including the augmented column — meaning '0 = 0', which is consistent. Now change the RHS of row 3 to 10 instead. Now row 3 becomes [0, 0, 0, nonzero] — '0 = nonzero', which is INCONSISTENT."
+    >
+      <div className="grid lg:grid-cols-[1fr,auto] gap-6 items-start">
+        <div className="space-y-4">
+          <MatrixEditor matrix={matrix} setMatrix={(M) => { setMatrix(M); setStepIdx(0); }}
+            augmented={true} label="AUGMENTED MATRIX [A | b]"/>
+
+          <div className="rounded-lg p-4"
+            style={{border: "1px solid var(--accent-border)", background: "var(--accent-soft)"}}>
+            <div className="text-xs tracking-[0.2em] font-semibold mb-2 flex items-center justify-between" style={{color: "var(--accent)"}}>
+              <span>STEP {stepIdx + 1} / {result.steps.length}</span>
+              <span style={{color: "var(--text-dim)"}}>{cur.kind === "start" ? "BEFORE" : cur.kind.toUpperCase()}</span>
+            </div>
+            <MatrixDisplay data={cur.M} pivots={last ? result.pivots : []} augmented={true}/>
+            <div className="text-sm mt-3 leading-relaxed" style={{color: "var(--text)"}}>{cur.desc}</div>
+          </div>
+
+          <div className="flex gap-2 flex-wrap">
+            <button onClick={reset} className="text-sm px-3 py-1.5 rounded-lg"
+              style={{border: "1px solid var(--border)", color: "var(--text-dim)", background: "transparent"}}>↺ Reset</button>
+            <button onClick={prev} disabled={stepIdx === 0} className="text-sm px-3 py-1.5 rounded-lg"
+              style={{border: "1px solid var(--border)", color: stepIdx === 0 ? "var(--text-faded)" : "var(--text-dim)", background: "transparent", cursor: stepIdx === 0 ? "not-allowed" : "pointer"}}>← Prev</button>
+            <button onClick={next} disabled={last} className="text-sm px-4 py-1.5 rounded-lg font-semibold"
+              style={{border: "1px solid var(--accent)", color: last ? "var(--text-faded)" : "var(--accent)", background: last ? "transparent" : "var(--accent-soft)", cursor: last ? "not-allowed" : "pointer"}}>Next step →</button>
+            <button onClick={skip} className="text-sm px-3 py-1.5 rounded-lg"
+              style={{border: "1px solid var(--border)", color: "var(--text-dim)", background: "transparent"}}>Skip to end ⏭</button>
+          </div>
+        </div>
+
+        <div className="space-y-3 lg:max-w-xs">
+          <div className="rounded-lg p-3" style={{border: "1px solid var(--border)", background: "var(--bg-elev-2)"}}>
+            <div className="text-xs tracking-[0.2em] font-semibold mb-2" style={{color: "var(--text-dim)"}}>FINAL VERDICT (REF)</div>
+            <div className="space-y-1 text-sm">
+              <div className="flex justify-between"><span style={{color: "var(--text-dim)"}}>rank(A) =</span> <span className="font-mono font-bold" style={{color: "var(--accent)"}}>{rowReduce(matrix.map(r => r.slice(0, -1)), {mode: "ref"}).rank}</span></div>
+              <div className="flex justify-between"><span style={{color: "var(--text-dim)"}}>rank([A | b]) =</span> <span className="font-mono font-bold" style={{color: "var(--accent-2)"}}>{result.rank}</span></div>
+              <div className="flex justify-between"><span style={{color: "var(--text-dim)"}}>n (unknowns) =</span> <span className="font-mono" style={{color: "var(--text)"}}>{cols - 1}</span></div>
+            </div>
+            <div className="mt-3 pt-3 text-sm" style={{borderTop: "1px solid var(--border)", color: "var(--text)"}}>
+              {isInconsistent ? (
+                <span style={{color: "var(--danger)"}} className="font-semibold">⛔ Inconsistent — NO solution.</span>
+              ) : result.rank === cols - 1 ? (
+                <span style={{color: "var(--accent-3)"}} className="font-semibold">✓ Unique solution.</span>
+              ) : (
+                <span style={{color: "var(--info)"}} className="font-semibold">∞ many solutions ({(cols - 1) - result.rank} free variables).</span>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    </InteractiveFrame>
+  );
+}
+
+function Concept42() {
+  return (
+    <ConceptCard id="concept-4-2" label="4.2" moduleLabel="Module 4 · Echelon & Rank"
+      title="Gaussian Elimination"
+      why="Knowing what REF looks like is one thing. Producing it from any matrix is another. Gaussian elimination is the disciplined algorithm that gets you there in a predictable number of steps — and is the basis for every linear solver in scientific computing.">
+      <H3>The algorithm — forward elimination</H3>
+      <P>Start with augmented matrix <T src="[A \mid \mathbf{b}]"/>. Loop:</P>
+      <OL>
+        <Li>Find the leftmost column that hasn't been processed yet.</Li>
+        <Li>If all entries in that column (from the current row downward) are zero, skip — it's a free column.</Li>
+        <Li>Otherwise, bring the largest-magnitude entry to the top by swapping rows if needed. This entry becomes a <B>pivot</B>.</Li>
+        <Li>For each row below the pivot, subtract a multiple of the pivot row to make the entry below the pivot zero.</Li>
+        <Li>Move to the next row and column. Repeat.</Li>
+      </OL>
+      <P>When the loop ends, the matrix is in REF. No randomness, no creativity — just bookkeeping.</P>
+
+      <Callout kind="info" title="Why we 'pivot' (partial pivoting)">
+        <P>If the topmost entry of the current column is zero or very small, dividing by it is unstable: either impossible (zero) or numerically dangerous (tiny denominator amplifies floating-point error). Swapping in the largest-magnitude entry from below — <B>partial pivoting</B> — avoids both problems and is the default in every production solver.</P>
+      </Callout>
+
+      <H3>Worked example — full forward elimination</H3>
+      <P>Solve <T src="2x + y - z = 3,\ x - y + 2z = 4,\ 3x + z = 10"/>.</P>
+      <BT src={String.raw`[A \mid \mathbf{b}] = \begin{bmatrix} 2 & 1 & -1 & 3 \\ 1 & -1 & 2 & 4 \\ 3 & 0 & 1 & 10 \end{bmatrix}`}/>
+
+      <P><B>Step 1:</B> R2 ← R2 − (1/2) R1, R3 ← R3 − (3/2) R1.</P>
+      <BT src={String.raw`\to \begin{bmatrix} 2 & 1 & -1 & 3 \\ 0 & -3/2 & 5/2 & 5/2 \\ 0 & -3/2 & 5/2 & 11/2 \end{bmatrix}`}/>
+
+      <P><B>Step 2:</B> R3 ← R3 − R2 (the pivot multiplier is (−3/2)/(−3/2) = 1).</P>
+      <BT src={String.raw`\to \begin{bmatrix} 2 & 1 & -1 & 3 \\ 0 & -3/2 & 5/2 & 5/2 \\ 0 & 0 & 0 & 3 \end{bmatrix}`}/>
+
+      <P>The last row reads <T src="0 = 3"/>. <B>Inconsistent.</B> No solution. (Geometrically: the three planes have no common point.)</P>
+
+      <Callout kind="trap" title="Spotting inconsistency from REF in 1 second">
+        <P>In the augmented matrix <T src="[A \mid \mathbf{b}]"/>, look at every row of the final REF. If any row has ALL zeros in the A-portion AND a non-zero entry in the b-portion, the system is INCONSISTENT. Geometrically that row reads "0 = non-zero" — impossible.</P>
+      </Callout>
+
+      <H3>Connection: elementary matrices</H3>
+      <P>Every row operation can be represented as left-multiplication by a special matrix called an <B>elementary matrix</B> <T src="E"/>:</P>
+      <UL>
+        <Li><B>Swap R_i and R_j:</B> <T src="E"/> is the identity with rows <T src="i"/> and <T src="j"/> swapped.</Li>
+        <Li><B>Scale R_i by c:</B> <T src="E"/> is the identity with a <T src="c"/> in position <T src="(i, i)"/> instead of 1.</Li>
+        <Li><B>R_i ← R_i + c R_j:</B> <T src="E"/> is the identity with a <T src="c"/> added at position <T src="(i, j)"/>.</Li>
+      </UL>
+      <P>So forward elimination is equivalent to multiplying <T src="A"/> by a sequence of elementary matrices: <T src="E_k \cdots E_2 E_1 A = U"/> (upper triangular). Their inverses are themselves elementary, so this is reversible. <B>Module 8 (LU decomposition)</B> packs the inverses into a single <T src="L"/> matrix and writes <T src="A = L U"/>.</P>
+
+      <GaussianStepper/>
+
+      <Callout kind="ml" title="Why ML rarely solves Ax = b by Gaussian elimination">
+        <P>Naïve Gaussian elimination on an <T src="n \times n"/> matrix costs <T src="O(n^3)"/> flops and <T src="O(n^2)"/> memory. For modern ML matrices (millions of rows), this is infeasible. Instead, iterative solvers (conjugate gradient, GMRES) and matrix-free methods are used. But every one of these methods is built on top of the LINEAR-ALGEBRA INTUITION you're building now — what rank means, what a pivot is, what 'unique solution' even is.</P>
+      </Callout>
+
+      <Callout kind="recall" title="Concept 4.2 in one breath">
+        <P>Forward elimination = locate pivot in current column, swap up if needed, zero out everything below, move on. Output is REF. Inconsistency shows up as a [0…0 | nonzero] row. Every step is a left-multiplication by an elementary matrix — the seed of the LU decomposition.</P>
+      </Callout>
+
+      <ProgressPill conceptId="m4-c42"/>
+    </ConceptCard>
+  );
+}
+
+/* ════════════════════════════════════════════════════════
+   CONCEPT 4.3 — Rank
+   ════════════════════════════════════════════════════════ */
+function RankVisualizer() {
+  const [matrix, setMatrix] = useState([
+    [1, 2, 3],
+    [4, 5, 6],
+    [7, 8, 9],
+  ]);
+  const result = useMemo(() => rowReduce(matrix, { mode: "ref" }), [matrix]);
+  const m = matrix.length, n = matrix[0].length;
+  const maxRank = Math.min(m, n);
+
+  return (
+    <InteractiveFrame
+      name="Rank Visualizer"
+      whatAmISeeing="A 3×3 matrix on the left, REF on the right with pivots highlighted. The rank counter shows the number of pivots, the upper bound min(m, n), and whether the matrix is 'full rank'."
+      tryThis="The default is the famous (1,2,3), (4,5,6), (7,8,9) — rank 2, NOT 3. (Each row equals the previous plus (3,3,3).) Change row 3 entry [2][2] to 10. Now rank jumps to 3 — full rank. Move it back to 9 — rank drops to 2. One number can change the rank."
+    >
+      <div className="grid lg:grid-cols-2 gap-6">
+        <div className="space-y-3">
+          <MatrixEditor matrix={matrix} setMatrix={setMatrix} label="MATRIX A"/>
+        </div>
+        <div className="space-y-3">
+          <div className="text-xs tracking-[0.2em] font-semibold" style={{color: "var(--accent)"}}>REF</div>
+          <MatrixDisplay data={result.final} pivots={result.pivots}/>
+
+          <div className="rounded-lg p-4 mt-3"
+            style={{border: "1px solid var(--accent-border)", background: "var(--accent-soft)"}}>
+            <div className="text-xs tracking-[0.2em] font-semibold mb-2" style={{color: "var(--accent)"}}>RANK</div>
+            <div className="text-3xl font-mono font-bold" style={{color: "var(--text)"}}>{result.rank}</div>
+            <div className="text-xs mt-2 space-y-1" style={{color: "var(--text-dim)"}}>
+              <div>upper bound: <span className="font-mono">min({m}, {n}) = {maxRank}</span></div>
+              <div>{result.rank === maxRank
+                ? <span style={{color: "var(--accent-3)"}}>✓ Full rank</span>
+                : <span style={{color: "var(--warn)"}}>⚠ Rank-deficient (rank &lt; min(m, n))</span>}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </InteractiveFrame>
+  );
+}
+
+function Concept43() {
+  return (
+    <ConceptCard id="concept-4-3" label="4.3" moduleLabel="Module 4 · Echelon & Rank"
+      title="Rank of a Matrix"
+      why="Rank is the single most predictive number you can extract from a matrix. It tells you whether columns are independent, whether rows are independent, whether Ax = b is solvable, how many dimensions of inputs get crushed to zero — and we can READ it off REF instantly.">
+      <H3>Three equivalent definitions</H3>
+      <P>The <B>rank</B> of <T src="A"/> can be defined three ways. They all agree:</P>
+      <OL>
+        <Li><B>Number of pivots</B> in any REF of <T src="A"/>.</Li>
+        <Li><B>Dimension of the column space</B> <T src="C(A)"/>.</Li>
+        <Li><B>Dimension of the row space</B> <T src="R(A)"/>.</Li>
+      </OL>
+      <P>The equivalence of (1) and (2) is direct: pivot columns of <T src="A"/> form a basis for <T src="C(A)"/>, so the pivot count equals <T src="\dim C(A)"/>. The equivalence with (3) is the famous <B>row rank = column rank</B> theorem.</P>
+
+      <Callout kind="proof" title="Why rank(A) = rank(Aᵀ) (i.e., row rank = column rank)">
+        <P>Forward direction: row operations don't change the row space (each new row is a linear combination of old rows), so the row space of <T src="A"/> equals the row space of any REF. In REF, the non-zero rows are clearly linearly independent (the staircase pivots give independence), so they form a basis of the row space. Thus <T src="\dim R(A) = "/> number of pivots <T src="= \text{rank}(A)"/>.</P>
+          <P>But also <T src="\dim C(A) = "/> number of pivots <T src="= \text{rank}(A)"/>. So both spaces have the same dimension — even though they live in different ambient spaces (<T src="\mathbb{R}^m"/> vs <T src="\mathbb{R}^n"/>).</P>
+        <P>Since <T src="R(A) = C(A^\top)"/>, this gives <T src="\text{rank}(A) = \text{rank}(A^\top)"/>. <B>The rank is the same whether you count independent rows or independent columns.</B></P>
+      </Callout>
+
+      <H3>Bounds on rank</H3>
+      <P>For any <T src="m \times n"/> matrix:</P>
+      <BT src={String.raw`0 \leq \text{rank}(A) \leq \min(m, n).`}/>
+      <P>You can't have more independent rows than there are rows, and you can't have more independent columns than there are columns.</P>
+
+      <H3>Full rank — three flavors</H3>
+      <UL>
+        <Li><B>Square <T src="n \times n"/>, full rank:</B> <T src="\text{rank}(A) = n"/>. The matrix is invertible. <T src="A\mathbf{x} = \mathbf{b}"/> has a unique solution for every <T src="\mathbf{b}"/>. <T src="\det(A) \neq 0"/>.</Li>
+        <Li><B>Tall <T src="m \times n"/> with <T src="m &gt; n"/>, full COLUMN rank:</B> <T src="\text{rank}(A) = n"/>. Columns are independent. <T src="A\mathbf{x} = \mathbf{b}"/> has at most one solution (typically none — overdetermined). This is the regression setting.</Li>
+        <Li><B>Wide <T src="m \times n"/> with <T src="m &lt; n"/>, full ROW rank:</B> <T src="\text{rank}(A) = m"/>. Rows are independent. <T src="A\mathbf{x} = \mathbf{b}"/> has at least one solution for every <T src="\mathbf{b}"/> (typically infinitely many — underdetermined). This is the modern-ML setting.</Li>
+      </UL>
+
+      <Callout kind="trap" title="The 'full rank means invertible' trap">
+        <P>"Full rank" alone doesn't mean invertible — invertibility requires SQUARE matrix AND full rank. A 3×5 matrix can have rank 3 (its maximum) but is not square, so 'inverse' doesn't apply. The right concepts for non-square matrices are LEFT and RIGHT inverses (or the pseudoinverse, Module 8 territory).</P>
+      </Callout>
+
+      <H3>Rank's connection to almost everything</H3>
+      <UL>
+        <Li><T src="\text{rank}(A) = n"/> ⇔ columns independent ⇔ <T src="N(A) = \{\mathbf{0}\}"/> ⇔ <T src="A"/> is one-to-one.</Li>
+        <Li><T src="\text{rank}(A) = m"/> ⇔ rows independent ⇔ <T src="C(A) = \mathbb{R}^m"/> ⇔ <T src="A"/> is onto.</Li>
+        <Li><T src="\text{rank}(A) = n = m"/> ⇔ <T src="A"/> is invertible (square + full rank).</Li>
+        <Li><T src="\text{rank}(A) &lt; n"/> ⇔ columns dependent ⇔ <T src="\dim N(A) &gt; 0"/> ⇔ infinitely many <T src="\mathbf{x}"/>'s satisfy <T src="A\mathbf{x} = \mathbf{0}"/>.</Li>
+      </UL>
+
+      <RankVisualizer/>
+
+      <H3>GATE 1994 — full PYQ walkthrough</H3>
+      <PYQ year="1994" exam="CS-style" marks="2"
+        question={<P>What is the rank of the matrix <T src="A = \begin{pmatrix} 1 & 2 & 3 \\ 2 & 4 & 6 \\ 3 & 6 & 9 \end{pmatrix}"/>?</P>}
+        solution={
+          <>
+            <P><B>Observation.</B> Row 2 = 2 × Row 1 and Row 3 = 3 × Row 1. All three rows are scalar multiples of the first row.</P>
+            <P><B>Step 1 — Reduce to REF.</B> R2 ← R2 − 2 R1 gives [0, 0, 0]. R3 ← R3 − 3 R1 gives [0, 0, 0]. So</P>
+            <BT src={String.raw`A \xrightarrow{\text{REF}} \begin{pmatrix} 1 & 2 & 3 \\ 0 & 0 & 0 \\ 0 & 0 & 0 \end{pmatrix}.`}/>
+            <P><B>Step 2 — Count pivots.</B> Exactly one pivot (in position [1, 1]). So <T src="\text{rank}(A) = 1"/>.</P>
+            <P><B>Sanity check via columns.</B> Column 2 = 2 × Column 1, Column 3 = 3 × Column 1 — only ONE independent column. Confirmed.</P>
+            <P><B>Answer:</B> <T src="\text{rank}(A) = 1"/>.</P>
+            <Callout kind="info" title="Quickest spot-check for rank 1">
+              <P>If every column is a multiple of one fixed vector — equivalently, every row is a multiple of one fixed vector — then rank = 1. The matrix is an OUTER PRODUCT <T src="\mathbf{u}\mathbf{v}^\top"/>. Useful in SVD and embeddings.</P>
+            </Callout>
+          </>
+        }/>
+
+      <Callout kind="ml" title="Rank in data — the noise dimension">
+        <P>In a clean dataset, the data matrix often has rank close to <T src="\min(m, n)"/>. In a corrupted or low-information dataset, the effective rank is much lower. Detecting this drop is the core idea of PCA (Module 6.6) and matrix completion algorithms (Netflix-prize style). Many ML diagnostics ask "what is the rank of the design matrix?" — get the question wrong and your regularization is misset.</P>
+      </Callout>
+
+      <Callout kind="recall" title="Concept 4.3 in one breath">
+        <P>Rank = number of pivots = dim of column space = dim of row space. Bounded by min(m, n). Full rank means different things for square / tall / wide matrices. Rank packages independence, invertibility, and solvability into one number.</P>
+      </Callout>
+
+      <ProgressPill conceptId="m4-c43"/>
+    </ConceptCard>
+  );
+}
+
+/* ════════════════════════════════════════════════════════
+   CONCEPT 4.4 — Rank-Nullity Theorem
+   ════════════════════════════════════════════════════════ */
+function RankNullityBalance() {
+  const [matrix, setMatrix] = useState([
+    [1, 2, 3, 4, 5],
+    [2, 4, 7, 9, 12],
+    [1, 2, 4, 5, 7],
+  ]);
+  const result = useMemo(() => rowReduce(matrix, { mode: "ref" }), [matrix]);
+  const n = matrix[0].length;
+  const rank = result.rank;
+  const nullity = n - rank;
+  const rankPct = (rank / n) * 100;
+  const nullPct = (nullity / n) * 100;
+
+  return (
+    <InteractiveFrame
+      name="Rank-Nullity Balance"
+      whatAmISeeing="A bar visualizing rank + nullity = n. As you edit the matrix, the bar splits differently — but the TOTAL length is always n. This is the rank-nullity theorem made literal."
+      tryThis="Default is a 3×5 matrix with rank 2 → nullity 3. Change row 3 to (1, 2, 5, 6, 8) — now row 3 is independent → rank 3, nullity 2. The split moves but the total stays at 5. There is no way to make rank + nullity ≠ n."
+    >
+      <div className="grid lg:grid-cols-2 gap-6">
+        <div className="space-y-3">
+          <MatrixEditor matrix={matrix} setMatrix={setMatrix} label="MATRIX A (m × n)"/>
+        </div>
+
+        <div className="space-y-4">
+          <div className="rounded-lg p-4" style={{border: "1px solid var(--border)", background: "var(--bg-elev-2)"}}>
+            <div className="text-xs tracking-[0.2em] font-semibold mb-2" style={{color: "var(--text-dim)"}}>RANK + NULLITY = n ({n})</div>
+            <div className="h-12 w-full rounded-lg overflow-hidden flex" style={{border: "1px solid var(--border)"}}>
+              <div className="flex items-center justify-center text-xs font-mono font-bold transition-all"
+                style={{width: rankPct + "%", background: "var(--accent)", color: "white", minWidth: rank > 0 ? 60 : 0}}>
+                {rank > 0 && <>rank = {rank}</>}
+              </div>
+              <div className="flex items-center justify-center text-xs font-mono font-bold transition-all"
+                style={{width: nullPct + "%", background: "var(--accent-2)", color: "white", minWidth: nullity > 0 ? 60 : 0}}>
+                {nullity > 0 && <>nullity = {nullity}</>}
+              </div>
+            </div>
+            <div className="text-xs mt-3 font-mono" style={{color: "var(--text-dim)"}}>
+              <span style={{color: "var(--accent)"}}>rank = {rank}</span>
+              <span> + </span>
+              <span style={{color: "var(--accent-2)"}}>nullity = {nullity}</span>
+              <span> = </span>
+              <span style={{color: "var(--text)"}}>n = {n}</span> ✓
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3 text-xs">
+            <div className="rounded-lg p-3" style={{border: "1px solid var(--accent-border)", background: "var(--accent-soft)"}}>
+              <div className="font-semibold mb-1" style={{color: "var(--accent)"}}>RANK = {rank}</div>
+              <div style={{color: "var(--text-dim)"}}>Dimension of column space. Number of independent columns. Number of pivots.</div>
+            </div>
+            <div className="rounded-lg p-3" style={{border: "1px solid var(--accent-2-border)", background: "var(--accent-2-soft)"}}>
+              <div className="font-semibold mb-1" style={{color: "var(--accent-2)"}}>NULLITY = {nullity}</div>
+              <div style={{color: "var(--text-dim)"}}>Dimension of null space. Number of free variables. Number of "redundant" directions.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </InteractiveFrame>
+  );
+}
+
+function Concept44() {
+  return (
+    <ConceptCard id="concept-4-4" label="4.4" moduleLabel="Module 4 · Echelon & Rank"
+      title="The Rank-Nullity Theorem"
+      why="One equation that organizes half of linear algebra. If you know any two of (rank, nullity, n), you know the third. Conservation of dimension — like conservation of energy, but for vector spaces.">
+      <H3>The statement</H3>
+      <P>For any <T src="m \times n"/> matrix <T src="A"/>:</P>
+      <BT src={String.raw`\boxed{\quad \text{rank}(A) + \text{nullity}(A) = n \quad}`}/>
+      <P>where <T src="n"/> is the number of COLUMNS of <T src="A"/> (i.e., the dimension of the domain).</P>
+
+      <H3>The intuition — conservation of dimension</H3>
+      <P>Think of <T src="A"/> as a linear map from <T src="\mathbb{R}^n"/> to <T src="\mathbb{R}^m"/>. The input space has dimension <T src="n"/>. Some directions get mapped to non-zero output (these form the column space, of dimension <T src="\text{rank}"/>). Other directions get mapped to zero (these form the null space, of dimension <T src="\text{nullity}"/>). Together they account for every dimension of the input:</P>
+      <BT src={String.raw`\underbrace{\text{rank}}_{\text{information preserved}} + \underbrace{\text{nullity}}_{\text{information lost}} = \underbrace{n}_{\text{total input}}.`}/>
+
+      <Callout kind="proof" title="Full proof via free variables (the readable version)">
+        <P>Row-reduce <T src="A"/> to REF. Let <T src="r"/> = number of pivot columns. By definition, <T src="\text{rank}(A) = r"/>.</P>
+        <P>The remaining <T src="n - r"/> columns are FREE — each corresponds to a free variable in <T src="A\mathbf{x} = \mathbf{0}"/>. Setting one free variable to 1 and the others to 0 produces a specific solution vector. Doing this for each free variable produces <T src="n - r"/> solution vectors.</P>
+        <P><B>Claim:</B> these <T src="n - r"/> solution vectors are linearly independent AND span the null space. Therefore <T src="\text{nullity}(A) = n - r = n - \text{rank}(A)"/>, hence <T src="\text{rank} + \text{nullity} = n"/>.</P>
+        <P><B>Why independent:</B> in each solution vector, exactly one free variable is 1 and the others are 0. If a linear combination sums to zero, the coefficient on each free variable (read off the entry where that variable is 1) must be zero.</P>
+        <P><B>Why spanning:</B> any null-space solution can be reconstructed by reading off its free-variable values and summing the corresponding free-variable vectors. Done.</P>
+      </Callout>
+
+      <H3>Worked example</H3>
+      <P>Let <T src="A = \begin{pmatrix} 1 & 2 & 3 & 4 \\ 2 & 4 & 7 & 9 \\ 1 & 2 & 4 & 5 \end{pmatrix}"/>. Row reduction yields rank 2. So nullity = 4 − 2 = 2. The null space is a 2-dimensional subspace of <T src="\mathbb{R}^4"/>.</P>
+
+      <Callout kind="info" title="What rank-nullity tells you instantly">
+        <UL>
+          <Li><B>Square invertible:</B> rank = <T src="n"/>, so nullity = 0. No null space beyond zero. Unique solutions.</Li>
+          <Li><B>Wide (<T src="m &lt; n"/>):</B> rank ≤ <T src="m &lt; n"/>, so nullity ≥ <T src="n - m &gt; 0"/>. There MUST be a non-trivial null space. <T src="A\mathbf{x} = \mathbf{0}"/> always has non-trivial solutions.</Li>
+          <Li><B>Tall (<T src="m &gt; n"/>) full column rank:</B> rank = <T src="n"/>, nullity = 0. Columns independent, so <T src="A^\top A"/> is invertible — that's why normal equations work in regression.</Li>
+        </UL>
+      </Callout>
+
+      <RankNullityBalance/>
+
+      <Callout kind="trap" title="The 'rank-nullity uses ROWS' trap">
+        <P>The theorem uses <T src="n"/> = number of COLUMNS. NOT rows. <T src="\text{rank} + \text{nullity}"/> equals the dimension of the DOMAIN (input space), not the codomain. Many students lose marks by writing "rank + nullity = m" — wrong unless A is square.</P>
+      </Callout>
+
+      <H3>The 'four fundamental subspaces' preview</H3>
+      <P>Rank-nullity is one of FOUR conservation equations between the subspaces of A:</P>
+      <UL>
+        <Li><B>Column space <T src="C(A) \subseteq \mathbb{R}^m"/>:</B> <T src="\dim = \text{rank}"/>.</Li>
+        <Li><B>Null space <T src="N(A) \subseteq \mathbb{R}^n"/>:</B> <T src="\dim = n - \text{rank}"/>.</Li>
+        <Li><B>Row space <T src="R(A) \subseteq \mathbb{R}^n"/>:</B> <T src="\dim = \text{rank}"/>.</Li>
+        <Li><B>Left null space <T src="N(A^\top) \subseteq \mathbb{R}^m"/>:</B> <T src="\dim = m - \text{rank}"/>.</Li>
+      </UL>
+      <P>The two equations on the right (the input side) and left (the output side) each sum to <T src="n"/> and <T src="m"/> respectively. This is Strang's famous "big picture" of linear algebra — you'll see it in every textbook from page 1.</P>
+
+      <Callout kind="ml" title="Dimension accounting in ML pipelines">
+        <P>Whenever you stack a sequence of linear layers (matrices) in a neural network, dimensions decompose along the way. The rank of each layer's weight matrix tells you how much information is preserved vs squashed. A layer with rank <T src="r"/> mapping into <T src="\mathbb{R}^d"/> can have its output described by only <T src="r"/> of the <T src="d"/> output coordinates — this is exactly why bottleneck architectures work (autoencoders, attention's QKV).</P>
+      </Callout>
+
+      <Callout kind="recall" title="Concept 4.4 in one breath">
+        <P>rank + nullity = number of COLUMNS. Conservation of input dimension. Rank counts directions preserved; nullity counts directions crushed. Knowing two of (rank, nullity, n) gives the third.</P>
+      </Callout>
+
+      <ProgressPill conceptId="m4-c44"/>
+    </ConceptCard>
+  );
+}
+
+/* ════════════════════════════════════════════════════════
+   CONCEPT 4.5 — Solving Ax = b: The Complete Solution
+   ════════════════════════════════════════════════════════ */
+function CompleteSolutionBuilder() {
+  // Default: 2x3 with rank 1 — for a clean "1 particular + 2 free vars" story
+  const [augM, setAugM] = useState([
+    [1, 2, 3, 4],
+    [2, 4, 6, 8],
+  ]);
+  const A = augM.map(r => r.slice(0, -1));
+  const b = augM.map(r => r[r.length - 1]);
+  const m = A.length, n = A[0].length;
+  const ref = useMemo(() => rowReduce(augM, { mode: "rref" }), [augM]);
+
+  // Diagnose
+  const cols = augM[0].length;
+  const rankA = rowReduce(A, { mode: "ref" }).rank;
+  const rankAb = ref.rank;
+  const consistent = rankA === rankAb;
+  const numFree = consistent ? n - rankA : 0;
+  const unique = consistent && numFree === 0;
+
+  // Extract particular & null basis from RREF
+  let particular = [];
+  let nullBasis = [];
+  if (consistent) {
+    // Find pivot columns
+    const pivotCols = ref.pivots.map(p => p.col).filter(c => c < n);
+    const freeCols = [];
+    for (let c = 0; c < n; c++) if (!pivotCols.includes(c)) freeCols.push(c);
+
+    // Particular solution: free vars = 0, basic vars from RREF
+    particular = Array(n).fill(0);
+    for (const p of ref.pivots) {
+      if (p.col < n) {
+        // basic variable in column p.col is set from rhs of row p.row
+        particular[p.col] = ref.final[p.row][n];
+      }
+    }
+
+    // Null basis: for each free column, set that free var = 1, others = 0, solve for basic vars
+    for (const fc of freeCols) {
+      const v = Array(n).fill(0);
+      v[fc] = 1;
+      for (const p of ref.pivots) {
+        if (p.col < n) {
+          v[p.col] = -ref.final[p.row][fc];
+        }
+      }
+      nullBasis.push(v);
+    }
+  }
+
+  const [coeffs, setCoeffs] = useState([0, 0]);
+  useEffect(() => { setCoeffs(Array(nullBasis.length).fill(0)); }, [nullBasis.length]);
+
+  // Build "current x"
+  const currentX = consistent ? particular.map((p, i) =>
+    p + nullBasis.reduce((acc, v, k) => acc + (coeffs[k] || 0) * v[i], 0)
+  ) : [];
+
+  // Verify Ax = b
+  const verify = currentX.length > 0 ? A.map(row =>
+    row.reduce((acc, a, i) => acc + a * currentX[i], 0)
+  ) : [];
+
+  return (
+    <InteractiveFrame
+      name="Complete Solution Builder — x = xₚ + Σ cᵢ · xₙᵢ"
+      whatAmISeeing="Augmented matrix on the left. Right side decomposes the solution into: (a) a particular solution xₚ; (b) null-space basis vectors; (c) sliders for the free parameters cᵢ. The verification Ax = b is shown live."
+      tryThis="Default 2×4 augmented matrix gives a rank-1 system: 1 particular solution + 2 free parameters. Drag the sliders — Ax always equals b regardless of which combination you pick. Now edit the b-column to 5 instead of 4 in row 1 — system becomes INCONSISTENT (no solution)."
+    >
+      <div className="grid lg:grid-cols-2 gap-6">
+        <div className="space-y-3">
+          <MatrixEditor matrix={augM} setMatrix={setAugM} augmented={true} label="[A | b]"/>
+          <div className="text-xs space-y-1" style={{color: "var(--text-dim)"}}>
+            <div>rank(A) = <span className="font-mono" style={{color: "var(--accent)"}}>{rankA}</span></div>
+            <div>rank([A | b]) = <span className="font-mono" style={{color: "var(--accent-2)"}}>{rankAb}</span></div>
+            <div>n = <span className="font-mono">{n}</span></div>
+          </div>
+
+          {!consistent && (
+            <div className="rounded-lg p-3" style={{border: "1px solid var(--danger-border)", background: "var(--danger-soft)"}}>
+              <div className="font-semibold" style={{color: "var(--danger)"}}>⛔ No solution (inconsistent)</div>
+              <div className="text-xs mt-1" style={{color: "var(--text-dim)"}}>rank(A) ≠ rank([A | b]).</div>
+            </div>
+          )}
+          {unique && (
+            <div className="rounded-lg p-3" style={{border: "1px solid var(--accent-3-border)", background: "var(--accent-3-soft)"}}>
+              <div className="font-semibold" style={{color: "var(--accent-3)"}}>✓ Unique solution</div>
+              <div className="text-xs mt-1 font-mono" style={{color: "var(--text)"}}>x = ({particular.map(p => p.toFixed(2)).join(", ")})</div>
+            </div>
+          )}
+          {consistent && !unique && (
+            <div className="rounded-lg p-3" style={{border: "1px solid var(--info-border)", background: "var(--info-soft)"}}>
+              <div className="font-semibold" style={{color: "var(--info)"}}>∞ many solutions ({numFree} free)</div>
+              <div className="text-xs mt-1" style={{color: "var(--text-dim)"}}>solution set is an affine subspace of dimension {numFree}.</div>
+            </div>
+          )}
+        </div>
+
+        <div className="space-y-3">
+          {consistent && (
+            <>
+              <div className="rounded-lg p-3" style={{border: "1px solid var(--accent-3-border)", background: "var(--accent-3-soft)"}}>
+                <div className="text-xs tracking-[0.2em] font-semibold mb-1" style={{color: "var(--accent-3)"}}>PARTICULAR SOLUTION xₚ</div>
+                <div className="font-mono text-sm" style={{color: "var(--text)"}}>
+                  xₚ = ({particular.map(p => p.toFixed(2)).join(", ")})
+                </div>
+              </div>
+
+              {nullBasis.map((v, i) => (
+                <div key={i} className="rounded-lg p-3" style={{border: "1px solid var(--accent-2-border)", background: "var(--accent-2-soft)"}}>
+                  <div className="text-xs tracking-[0.2em] font-semibold mb-1" style={{color: "var(--accent-2)"}}>NULL BASIS xₙ{i + 1}</div>
+                  <div className="font-mono text-sm mb-2" style={{color: "var(--text)"}}>
+                    xₙ{i + 1} = ({v.map(x => x.toFixed(2)).join(", ")})
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <label className="text-xs font-mono" style={{color: "var(--accent-2)"}}>c{i + 1}</label>
+                    <input type="range" min="-3" max="3" step="0.1" value={coeffs[i] || 0}
+                      onChange={e => setCoeffs(c => { const c2 = c.slice(); c2[i] = +e.target.value; return c2; })}
+                      className="flex-1"/>
+                    <span className="text-xs font-mono w-12 text-right" style={{color: "var(--accent-2)"}}>{(coeffs[i] || 0).toFixed(1)}</span>
+                  </div>
+                </div>
+              ))}
+
+              <div className="rounded-lg p-3" style={{border: "1px solid var(--accent-border)", background: "var(--accent-soft)"}}>
+                <div className="text-xs tracking-[0.2em] font-semibold mb-1" style={{color: "var(--accent)"}}>CURRENT SOLUTION x</div>
+                <div className="font-mono text-sm" style={{color: "var(--text)"}}>
+                  x = ({currentX.map(p => p.toFixed(2)).join(", ")})
+                </div>
+                <div className="text-xs mt-2 font-mono" style={{color: "var(--text-dim)"}}>
+                  Verify Ax = ({verify.map(v => v.toFixed(2)).join(", ")})  vs  b = ({b.join(", ")})
+                </div>
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+    </InteractiveFrame>
+  );
+}
+
+function Concept45() {
+  return (
+    <ConceptCard id="concept-4-5" label="4.5" moduleLabel="Module 4 · Echelon & Rank"
+      title="Solving Ax = b — The Complete Solution"
+      why="Module 3 introduced x = xₚ + xₙ as the form of the complete solution. Now we COMPUTE it. The mechanical recipe: row-reduce [A | b] to RREF, read off the particular solution, read off the null-space basis. Five typical question shapes worked end to end.">
+      <H3>The three-step recipe</H3>
+      <OL>
+        <Li><B>Row reduce</B> the augmented matrix <T src="[A \mid \mathbf{b}]"/> to RREF.</Li>
+        <Li><B>Check consistency:</B> if any row of the RREF reads "0 = non-zero", stop — no solution.</Li>
+        <Li><B>Read off:</B>
+          <UL>
+            <Li><B>Particular solution <T src="\mathbf{x}_p"/></B>: set all free variables to 0, read the basic variables from the right-hand column.</Li>
+            <Li><B>Null-space basis</B>: for each free variable, set it to 1 (others to 0) and read off the basic variables. Each such vector is a null-space basis element.</Li>
+            <Li><B>Complete solution</B>: <T src="\mathbf{x} = \mathbf{x}_p + c_1 \mathbf{x}_{n,1} + c_2 \mathbf{x}_{n,2} + \cdots"/>.</Li>
+          </UL>
+        </Li>
+      </OL>
+
+      <H3>The five canonical question shapes</H3>
+
+      <H4>Type 1 — Unique solution (square, full rank)</H4>
+      <P><T src="A"/> is <T src="n \times n"/> with rank <T src="n"/>. RREF of <T src="[A \mid \mathbf{b}]"/> is <T src="[I \mid \mathbf{x}]"/>. Done.</P>
+      <P><B>Example.</B> <T src="A = \begin{pmatrix} 1 & 0 \\ 0 & 1 \end{pmatrix}, \mathbf{b} = (3, 5)"/>. RREF: <T src="\begin{pmatrix} 1 & 0 & 3 \\ 0 & 1 & 5 \end{pmatrix}"/>. So <T src="\mathbf{x} = (3, 5)"/>.</P>
+
+      <H4>Type 2 — No solution (inconsistent)</H4>
+      <P>A row in RREF reads <T src="(0, 0, \ldots, 0 \mid \text{non-zero})"/>. <B>Stop.</B> No <T src="\mathbf{x}"/> exists.</P>
+      <P><B>Example.</B> <T src="[A \mid \mathbf{b}] = \begin{pmatrix} 1 & 1 & 2 \\ 1 & 1 & 5 \end{pmatrix}"/>. R2 ← R2 − R1 gives <T src="\begin{pmatrix} 1 & 1 & 2 \\ 0 & 0 & 3 \end{pmatrix}"/>. Last row: <T src="0 = 3"/>. No solution.</P>
+
+      <H4>Type 3 — Infinitely many, 1 free variable</H4>
+      <P>Rank <T src="r = n - 1"/>. One free variable parametrizes a line in <T src="\mathbb{R}^n"/>.</P>
+      <P><B>Example.</B> <T src="A = \begin{pmatrix} 1 & 2 & 3 \\ 2 & 4 & 6 \end{pmatrix}, \mathbf{b} = (4, 8)"/>. Rank 1, free vars on <T src="x_2, x_3"/> (wait, here rank = 1 in this case so 2 free; let's just use the next case below). For a precise 1-free case: <T src="A = \begin{pmatrix} 1 & 0 & 1 \\ 0 & 1 & 1 \end{pmatrix}, \mathbf{b} = (3, 5)"/>. RREF: <T src="\begin{pmatrix} 1 & 0 & 1 & 3 \\ 0 & 1 & 1 & 5 \end{pmatrix}"/>. With <T src="x_3 = t"/> free, particular: <T src="(3, 5, 0)"/>; null basis: <T src="(-1, -1, 1)"/>. So <T src="\mathbf{x} = (3 - t, 5 - t, t)"/>.</P>
+
+      <H4>Type 4 — Infinitely many, 2 free variables</H4>
+      <P>Rank <T src="r = n - 2"/>. Solution set is a plane.</P>
+      <P><B>Example.</B> <T src="A = \begin{pmatrix} 1 & 2 & 3 & 4 \\ 2 & 4 & 6 & 8 \end{pmatrix}, \mathbf{b} = (5, 10)"/>. Row reduction gives RREF <T src="\begin{pmatrix} 1 & 2 & 3 & 4 & 5 \\ 0 & 0 & 0 & 0 & 0 \end{pmatrix}"/>. Pivot col: 1. Free: 2, 3, 4. Particular: <T src="(5, 0, 0, 0)"/>. Null basis: <T src="(-2, 1, 0, 0), (-3, 0, 1, 0), (-4, 0, 0, 1)"/>. So <T src="\mathbf{x} = (5, 0, 0, 0) + s(-2, 1, 0, 0) + t(-3, 0, 1, 0) + u(-4, 0, 0, 1)"/>.</P>
+
+      <H4>Type 5 — Underdetermined (m &lt; n)</H4>
+      <P>More unknowns than equations. Even at full row rank, there must be ≥ <T src="n - m"/> free variables. Common in ML.</P>
+      <P><B>Example.</B> <T src="A = \begin{pmatrix} 1 & 2 & 3 \end{pmatrix}, \mathbf{b} = (6)"/> — one equation, three unknowns. Rank 1. Nullity 2. Particular: <T src="(6, 0, 0)"/>. Null basis: <T src="(-2, 1, 0), (-3, 0, 1)"/>. <T src="\mathbf{x} = (6, 0, 0) + s(-2, 1, 0) + t(-3, 0, 1)"/>.</P>
+
+      <CompleteSolutionBuilder/>
+
+      <H3>GATE 2021 — full PYQ walkthrough (free variables question)</H3>
+      <PYQ year="2021" exam="CS-style" marks="2"
+        question={<P>Consider the system <T src="A\mathbf{x} = \mathbf{b}"/> where <T src="A"/> is a 3×5 matrix with <T src="\text{rank}(A) = 2"/> and <T src="\mathbf{b}"/> is in the column space of <T src="A"/>. How many free variables does the general solution have?</P>}
+        solution={
+          <>
+            <P><B>Step 1 — Consistency.</B> <T src="\mathbf{b} \in C(A)"/> so the system is consistent (at least one solution exists).</P>
+            <P><B>Step 2 — Apply rank-nullity.</B></P>
+            <BT src={String.raw`\text{nullity}(A) = n - \text{rank}(A) = 5 - 2 = 3.`}/>
+            <P><B>Step 3 — Free variables count.</B> The number of free variables in the general solution equals <T src="\text{nullity}(A)"/>. So there are 3 free variables — the solution set is a 3-dimensional affine subspace of <T src="\mathbb{R}^5"/>.</P>
+            <P><B>Answer:</B> 3 free variables.</P>
+            <Callout kind="trap" title="What changes if b is NOT in C(A)?">
+              <P>If <T src="\mathbf{b} \notin C(A)"/>, there are ZERO solutions and asking about "free variables" doesn't make sense — the question would be malformed. Always check consistency first.</P>
+            </Callout>
+          </>
+        }/>
+
+      <Callout kind="recall" title="Concept 4.5 in one breath">
+        <P>Row reduce [A | b] to RREF. Check the bottom for inconsistency. Read off particular solution (free vars = 0). Read off null basis (one free var = 1 at a time). General solution = particular + arbitrary combo of null basis.</P>
+      </Callout>
+
+      <ProgressPill conceptId="m4-c45"/>
+    </ConceptCard>
+  );
+}
+
+/* ════════════════════════════════════════════════════════
+   CONCEPT 4.6 — More Than One Free Variable
+   ════════════════════════════════════════════════════════ */
+function Concept46() {
+  return (
+    <ConceptCard id="concept-4-6" label="4.6" moduleLabel="Module 4 · Echelon & Rank"
+      title="More Than One Free Variable in Ax = 0"
+      why="When rank drops, multiple free variables appear. Each free variable is a 'degree of freedom' in the null space. Reading them off RREF cleanly — and constructing the null-space basis — is the most-tested mechanical skill in GATE rank questions.">
+      <H3>When does rank drop by more than 1?</H3>
+      <P>If <T src="A"/> is <T src="m \times n"/> and <T src="\text{rank}(A) = r"/>, then <T src="\text{nullity}(A) = n - r"/>. So:</P>
+      <UL>
+        <Li><B>0 free variables</B> ⇔ <T src="r = n"/> ⇔ columns of <T src="A"/> independent ⇔ <T src="A\mathbf{x} = \mathbf{0}"/> has only the trivial solution.</Li>
+        <Li><B>1 free variable</B> ⇔ <T src="r = n - 1"/> ⇔ exactly one redundancy among the columns.</Li>
+        <Li><B>2 free variables</B> ⇔ <T src="r = n - 2"/> ⇔ two redundancies; null space is a plane.</Li>
+        <Li><B>k free variables</B> ⇔ <T src="r = n - k"/> ⇔ null space is a <T src="k"/>-dimensional subspace.</Li>
+      </UL>
+
+      <H3>Reading multiple null-space basis vectors from RREF</H3>
+      <P>Suppose <T src="A"/> has RREF</P>
+      <BT src={String.raw`\text{RREF}(A) = \begin{pmatrix} 1 & 0 & 2 & 0 & 3 \\ 0 & 1 & -1 & 0 & 4 \\ 0 & 0 & 0 & 1 & -2 \\ 0 & 0 & 0 & 0 & 0 \end{pmatrix}.`}/>
+      <P>Pivot columns: 1, 2, 4. Free columns: 3, 5. So <T src="\text{rank} = 3, \text{nullity} = 2"/>. The basic variables are <T src="x_1, x_2, x_4"/>; the free variables are <T src="x_3, x_5"/>.</P>
+
+      <P>Set free variable <T src="x_3 = 1, x_5 = 0"/> and solve for basic variables. From the rows of RREF: <T src="x_1 = -2,\ x_2 = 1,\ x_4 = 0"/>. So <T src="\mathbf{n}_1 = (-2, 1, 1, 0, 0)^\top"/>.</P>
+      <P>Set free variable <T src="x_3 = 0, x_5 = 1"/>. Then <T src="x_1 = -3,\ x_2 = -4,\ x_4 = 2"/>. So <T src="\mathbf{n}_2 = (-3, -4, 0, 2, 1)^\top"/>.</P>
+      <P>These two vectors form a basis of the null space:</P>
+      <BT src={String.raw`N(A) = \text{span}\{(-2, 1, 1, 0, 0)^\top, (-3, -4, 0, 2, 1)^\top\}.`}/>
+
+      <Callout kind="info" title="Why the basis vectors are automatically independent">
+        <P>Look at the free-variable positions. In <T src="\mathbf{n}_1"/>, free variable <T src="x_3 = 1"/> and <T src="x_5 = 0"/>. In <T src="\mathbf{n}_2"/>, the opposite. So if <T src="c_1 \mathbf{n}_1 + c_2 \mathbf{n}_2 = \mathbf{0}"/>, looking at the <T src="x_3"/> coordinate gives <T src="c_1 = 0"/>, and the <T src="x_5"/> coordinate gives <T src="c_2 = 0"/>. Automatic independence by construction.</P>
+      </Callout>
+
+      <H3>The null space as a subspace</H3>
+      <P>The null space is a SUBSPACE of <T src="\mathbb{R}^n"/> — it contains the zero vector, and is closed under addition and scalar multiplication (Concept 3.4). When you've found its basis, you've characterized it completely.</P>
+
+      <H3>Reusing the Complete Solution Builder</H3>
+      <P>The Complete Solution Builder in 4.5 is built for exactly this case. Drag any free-variable slider and the corresponding null-space vector contributes. With multiple free variables, you can sweep a multi-dimensional affine slice through <T src="\mathbb{R}^n"/> — and <T src="A\mathbf{x}"/> never moves.</P>
+
+      <Callout kind="trap" title="The off-by-one trap when listing free columns">
+        <P>If RREF has 5 columns and pivots in columns 1, 2, 4 — free columns are 3 and 5. NOT 3, 4, 5. Always recount by going column by column and asking "is there a pivot in this column?" The mistake costs 30 seconds at the start of a complicated computation.</P>
+      </Callout>
+
+      <Callout kind="recall" title="Concept 4.6 in one breath">
+        <P>Free variables in Ax = 0 number n − rank. Each gives one null-space basis vector. Construction: set one free variable to 1, others to 0, solve for basic variables, read off. The vectors are automatically independent and span the null space.</P>
+      </Callout>
+
+      <ProgressPill conceptId="m4-c46"/>
+    </ConceptCard>
+  );
+}
+
+/* ════════════════════════════════════════════════════════
+   CONCEPT 4.7 — Solution Theory: Rank-based Classification
+   ════════════════════════════════════════════════════════ */
+function SolutionTypePredictor() {
+  const [augM, setAugM] = useState([
+    [1, 2, 1, 4],
+    [2, 4, 3, 9],
+    [1, 2, 2, 5],
+  ]);
+  const A = augM.map(r => r.slice(0, -1));
+  const n = A[0].length;
+  const refA = useMemo(() => rowReduce(A, { mode: "ref" }), [augM]);
+  const refAb = useMemo(() => rowReduce(augM, { mode: "ref" }), [augM]);
+  const rA = refA.rank, rAb = refAb.rank;
+  const cls = rA !== rAb ? "none" : rA === n ? "unique" : "infinite";
+  const freeCount = cls === "infinite" ? n - rA : 0;
+
+  const classes = {
+    none:    { color: "var(--danger)",   border: "var(--danger-border)",   bg: "var(--danger-soft)",   label: "NO SOLUTION", icon: "⛔",
+               reason: "rank(A) < rank([A | b]) — last column of REF isn't in column space.", detail: "" },
+    unique:  { color: "var(--accent-3)", border: "var(--accent-3-border)", bg: "var(--accent-3-soft)", label: "UNIQUE SOLUTION", icon: "✓",
+               reason: "rank(A) = rank([A | b]) = n — columns independent and b reachable.", detail: "" },
+    infinite:{ color: "var(--info)",     border: "var(--info-border)",     bg: "var(--info-soft)",     label: "INFINITELY MANY SOLUTIONS", icon: "∞",
+               reason: `rank(A) = rank([A | b]) = ${rA} < n = ${n}.`, detail: `Solution set is a ${freeCount}-dim affine subspace (${freeCount} free variables).` },
+  };
+  const c = classes[cls];
+
+  return (
+    <InteractiveFrame
+      name="Solution Type Predictor"
+      whatAmISeeing="Augmented matrix on the left. The classifier compares rank(A) and rank([A | b]) and against n, then reports the system's solution type with the geometric reason."
+      tryThis="Default: rank(A) = rank([A|b]) = 2 < 3 → infinite solutions. Change row 3 last entry from 5 to 6 — now ranks split, system becomes inconsistent. Change row 1 entry [0][2] from 1 to 3 — rank rises to 3, unique solution. Three classes, predictable from two rank numbers."
+    >
+      <div className="grid lg:grid-cols-2 gap-6">
+        <div className="space-y-3">
+          <MatrixEditor matrix={augM} setMatrix={setAugM} augmented={true} label="AUGMENTED MATRIX [A | b]"/>
+          <div className="text-xs space-y-1 font-mono" style={{color: "var(--text-dim)"}}>
+            <div>rank(A) = <span style={{color: "var(--accent)"}}>{rA}</span></div>
+            <div>rank([A | b]) = <span style={{color: "var(--accent-2)"}}>{rAb}</span></div>
+            <div>n = <span style={{color: "var(--text)"}}>{n}</span></div>
+          </div>
+        </div>
+
+        <div className="space-y-3">
+          <div className="rounded-lg p-5"
+            style={{border: "1px solid " + c.border, background: c.bg}}>
+            <div className="text-xs tracking-[0.2em] font-semibold mb-2 flex items-center gap-2" style={{color: c.color}}>
+              <span className="text-base">{c.icon}</span> CLASSIFICATION
+            </div>
+            <div className="text-xl font-bold mb-2" style={{color: "var(--text)"}}>{c.label}</div>
+            <div className="text-sm leading-relaxed" style={{color: "var(--text-dim)"}}>{c.reason}</div>
+            {c.detail && <div className="text-xs mt-2 font-mono" style={{color: "var(--text-dim)"}}>{c.detail}</div>}
+          </div>
+
+          <div className="rounded-lg p-3 text-xs space-y-2" style={{border: "1px solid var(--border)", background: "var(--bg-elev-2)", color: "var(--text-dim)"}}>
+            <div className="font-semibold mb-1" style={{color: "var(--accent)"}}>THE THREE CASES</div>
+            <div><span className="font-mono">rank(A) ≠ rank([A|b])</span> → no solution</div>
+            <div><span className="font-mono">rank(A) = rank([A|b]) = n</span> → unique solution</div>
+            <div><span className="font-mono">rank(A) = rank([A|b]) &lt; n</span> → infinitely many (n − rank free vars)</div>
+          </div>
+        </div>
+      </div>
+    </InteractiveFrame>
+  );
+}
+
+function Concept47() {
+  return (
+    <ConceptCard id="concept-4-7" label="4.7" moduleLabel="Module 4 · Echelon & Rank"
+      title="Solution Theory — The Rank-Based Classification"
+      why="The single most useful classification table in linear algebra. Two rank numbers and n determine the solution type. Once memorised, every Ax = b consistency question becomes a 5-second answer.">
+      <H3>The classification</H3>
+      <P>For an <T src="m \times n"/> system <T src="A\mathbf{x} = \mathbf{b}"/>, compute two numbers: <T src="\text{rank}(A)"/> and <T src="\text{rank}([A \mid \mathbf{b}])"/>. Then:</P>
+
+      <div className="overflow-x-auto my-4">
+        <table className="w-full text-sm" style={{borderCollapse: "collapse"}}>
+          <thead>
+            <tr style={{borderBottom: "2px solid var(--border-strong)"}}>
+              <th className="text-left py-2 px-3" style={{color: "var(--accent)"}}>Condition</th>
+              <th className="text-left py-2 px-3" style={{color: "var(--accent-2)"}}>Solution type</th>
+              <th className="text-left py-2 px-3" style={{color: "var(--accent-3)"}}>Geometric meaning</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style={{borderBottom: "1px solid var(--border)"}}>
+              <td className="py-3 px-3 font-mono"><T src="\text{rank}(A) \neq \text{rank}([A \mid \mathbf{b}])"/></td>
+              <td className="py-3 px-3"><B>None</B></td>
+              <td className="py-3 px-3" style={{color: "var(--text-dim)"}}><T src="\mathbf{b} \notin C(A)"/> — not reachable</td>
+            </tr>
+            <tr style={{borderBottom: "1px solid var(--border)"}}>
+              <td className="py-3 px-3 font-mono"><T src="\text{rank}(A) = \text{rank}([A \mid \mathbf{b}]) = n"/></td>
+              <td className="py-3 px-3"><B>Unique</B></td>
+              <td className="py-3 px-3" style={{color: "var(--text-dim)"}}>Columns independent + <T src="\mathbf{b}"/> reachable</td>
+            </tr>
+            <tr>
+              <td className="py-3 px-3 font-mono"><T src="\text{rank}(A) = \text{rank}([A \mid \mathbf{b}]) &lt; n"/></td>
+              <td className="py-3 px-3"><B>Infinitely many</B></td>
+              <td className="py-3 px-3" style={{color: "var(--text-dim)"}}><T src="n - \text{rank}"/> free variables; affine subspace</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <Callout kind="proof" title="Proof of each case from first principles">
+        <P><B>Case 1 — Inconsistent.</B> Row-reduce <T src="[A \mid \mathbf{b}]"/>. The augmented column contributes a pivot iff there's a row <T src="(0, \ldots, 0 \mid c \neq 0)"/> — i.e., iff <T src="\mathbf{b}"/> creates a new pivot column. That's exactly when <T src="\text{rank}([A \mid \mathbf{b}]) &gt; \text{rank}(A)"/>. Such a row says "0 = c ≠ 0" — no solution.</P>
+        <P><B>Case 2 — Unique.</B> If consistent and rank = n, then every column of A is a pivot column. There are no free variables, so the null space is <T src="\{\mathbf{0}\}"/>. The complete solution <T src="\mathbf{x} = \mathbf{x}_p + N(A)"/> reduces to <T src="\mathbf{x} = \mathbf{x}_p"/> — one point.</P>
+        <P><B>Case 3 — Infinitely many.</B> If consistent and rank &lt; n, then <T src="n - \text{rank}"/> columns are free, contributing that many free variables. The null space is <T src="(n - \text{rank})"/>-dimensional. Solution set <T src="\mathbf{x}_p + N(A)"/> is an affine subspace of that dimension — infinitely many points.</P>
+      </Callout>
+
+      <Callout kind="trap" title="The 'rank(A) = rank([A|b]) implies unique' fallacy">
+        <P>Equal ranks alone DO NOT mean unique. You also need rank = <T src="n"/>. The first condition guarantees CONSISTENCY (a solution exists). The second guarantees UNIQUENESS (no free variables). Both required.</P>
+      </Callout>
+
+      <SolutionTypePredictor/>
+
+      <H3>Quick-reference rules of thumb</H3>
+      <UL>
+        <Li><B>m × n with m &lt; n:</B> rank ≤ m &lt; n. <B>Never unique.</B> Either none or infinitely many. (Underdetermined.)</Li>
+        <Li><B>m × n with m = n, full rank:</B> always unique for any b. (Invertible.)</Li>
+        <Li><B>m × n with m &gt; n, full column rank:</B> at most one solution (typically none — overdetermined). Least-squares used to "solve" it (Module 8).</Li>
+        <Li><B>Square singular (rank &lt; n):</B> depends on b. Either none or infinitely many. Never unique.</Li>
+      </UL>
+
+      <H3>Worked PYQ — applying the classification</H3>
+      <PYQ year="various" exam="Conceptual" marks="2"
+        question={<P>Suppose <T src="A"/> is a 4×5 matrix with <T src="\text{rank}(A) = 4"/> and <T src="\mathbf{b} \in \mathbb{R}^4"/>. How many solutions does <T src="A\mathbf{x} = \mathbf{b}"/> have?</P>}
+        solution={
+          <>
+            <P><B>Step 1.</B> <T src="\text{rank}(A) = 4 = m"/>, so A has full ROW rank. <T src="C(A) = \mathbb{R}^4"/>, so every <T src="\mathbf{b} \in \mathbb{R}^4"/> is reachable. Hence the system is CONSISTENT (Case 2 or 3, not Case 1).</P>
+            <P><B>Step 2.</B> Apply rank-nullity: <T src="\text{nullity}(A) = n - \text{rank}(A) = 5 - 4 = 1"/>. There's exactly one free variable.</P>
+            <P><B>Step 3.</B> Since rank &lt; n = 5, the solution is NOT unique. Infinitely many solutions, parametrized by one free variable.</P>
+            <P><B>Answer:</B> Infinitely many solutions (a 1-parameter family).</P>
+            <Callout kind="info" title="Pattern to spot fast">
+              <P>m &lt; n and rank = m → ALWAYS infinitely many for ANY b. m &gt; n and rank = n → usually none, occasionally unique (b in C(A) only). m = n and rank = n → always unique. These three shortcuts cover 80% of GATE classification questions.</P>
+            </Callout>
+          </>
+        }/>
+
+      <Callout kind="recall" title="Concept 4.7 in one breath">
+        <P>Three cases: rank(A) ≠ rank([A|b]) → none. rank(A) = rank([A|b]) = n → unique. rank(A) = rank([A|b]) &lt; n → infinite (n − rank free vars). Memorise the table; it's the most-asked structure in GATE LA questions.</P>
+      </Callout>
+
+      <ProgressPill conceptId="m4-c47"/>
+    </ConceptCard>
+  );
+}
+
+/* ════════════════════════════════════════════════════════
+   CONCEPT 4.8 — RREF & Reading the Null Space
+   ════════════════════════════════════════════════════════ */
+function RrefStepper() {
+  const [matrix, setMatrix] = useState([
+    [1, 2, 3, 4],
+    [2, 4, 7, 10],
+    [3, 6, 11, 16],
+  ]);
+  const [mode, setMode] = useState("rref");
+  const [stepIdx, setStepIdx] = useState(0);
+  const result = useMemo(() => rowReduce(matrix, { mode }), [matrix, mode]);
+  const cur = result.steps[Math.min(stepIdx, result.steps.length - 1)];
+  const last = stepIdx >= result.steps.length - 1;
+
+  useEffect(() => { setStepIdx(0); }, [matrix, mode]);
+
+  return (
+    <InteractiveFrame
+      name="REF → RREF Stepper"
+      whatAmISeeing="Switch between REF and RREF modes. REF stops after forward elimination — pivots may not be 1. RREF continues: scale each pivot row so the pivot is 1, then eliminate ABOVE each pivot too. RREF is unique; REF is not."
+      tryThis="Start in REF mode and step to the end — pivots are visible but not normalized. Switch to RREF and step further: each pivot is scaled to 1, then zeros appear ABOVE each pivot. The RREF is the canonical form — same starting matrix, same RREF, regardless of which legal sequence of row ops you choose."
+    >
+      <div className="grid lg:grid-cols-[1fr,auto] gap-6 items-start">
+        <div className="space-y-4">
+          <MatrixEditor matrix={matrix} setMatrix={(M) => { setMatrix(M); setStepIdx(0); }} label="MATRIX"/>
+
+          <div className="flex gap-2">
+            {[{k: "ref", n: "REF (forward only)"}, {k: "rref", n: "RREF (forward + backward)"}].map(t => (
+              <button key={t.k} onClick={() => setMode(t.k)}
+                className="text-sm px-3 py-1.5 rounded-lg transition-colors"
+                style={{
+                  border: "1px solid " + (mode === t.k ? "var(--accent-border)" : "var(--border)"),
+                  background: mode === t.k ? "var(--accent-soft)" : "transparent",
+                  color: mode === t.k ? "var(--accent)" : "var(--text-dim)",
+                }}>
+                {t.n}
+              </button>
+            ))}
+          </div>
+
+          <div className="rounded-lg p-4"
+            style={{border: "1px solid var(--accent-border)", background: "var(--accent-soft)"}}>
+            <div className="text-xs tracking-[0.2em] font-semibold mb-2 flex items-center justify-between" style={{color: "var(--accent)"}}>
+              <span>STEP {stepIdx + 1} / {result.steps.length}</span>
+              <span style={{color: "var(--text-dim)"}}>{cur.kind.toUpperCase()}</span>
+            </div>
+            <MatrixDisplay data={cur.M} pivots={last ? result.pivots : []}/>
+            <div className="text-sm mt-3 leading-relaxed" style={{color: "var(--text)"}}>{cur.desc}</div>
+          </div>
+
+          <div className="flex gap-2 flex-wrap">
+            <button onClick={() => setStepIdx(0)} className="text-sm px-3 py-1.5 rounded-lg"
+              style={{border: "1px solid var(--border)", color: "var(--text-dim)"}}>↺ Reset</button>
+            <button onClick={() => setStepIdx(i => Math.max(0, i - 1))} disabled={stepIdx === 0} className="text-sm px-3 py-1.5 rounded-lg"
+              style={{border: "1px solid var(--border)", color: stepIdx === 0 ? "var(--text-faded)" : "var(--text-dim)", cursor: stepIdx === 0 ? "not-allowed" : "pointer"}}>← Prev</button>
+            <button onClick={() => setStepIdx(i => Math.min(result.steps.length - 1, i + 1))} disabled={last} className="text-sm px-4 py-1.5 rounded-lg font-semibold"
+              style={{border: "1px solid var(--accent)", color: last ? "var(--text-faded)" : "var(--accent)", background: last ? "transparent" : "var(--accent-soft)", cursor: last ? "not-allowed" : "pointer"}}>Next step →</button>
+            <button onClick={() => setStepIdx(result.steps.length - 1)} className="text-sm px-3 py-1.5 rounded-lg"
+              style={{border: "1px solid var(--border)", color: "var(--text-dim)"}}>⏭ End</button>
+          </div>
+        </div>
+
+        <div className="rounded-lg p-3 lg:max-w-xs" style={{border: "1px solid var(--border)", background: "var(--bg-elev-2)"}}>
+          <div className="text-xs tracking-[0.2em] font-semibold mb-2" style={{color: "var(--text-dim)"}}>SUMMARY</div>
+          <div className="text-sm space-y-1">
+            <div className="flex justify-between"><span style={{color: "var(--text-dim)"}}>rank =</span> <span className="font-mono font-bold" style={{color: "var(--accent)"}}>{result.rank}</span></div>
+            <div className="flex justify-between"><span style={{color: "var(--text-dim)"}}>nullity =</span> <span className="font-mono font-bold" style={{color: "var(--accent-2)"}}>{matrix[0].length - result.rank}</span></div>
+            <div className="flex justify-between"><span style={{color: "var(--text-dim)"}}>cols =</span> <span className="font-mono" style={{color: "var(--text)"}}>{matrix[0].length}</span></div>
+          </div>
+        </div>
+      </div>
+    </InteractiveFrame>
+  );
+}
+
+function Concept48() {
+  return (
+    <ConceptCard id="concept-4-8" label="4.8" moduleLabel="Module 4 · Echelon & Rank"
+      title="RREF and Reading Dependence Directly"
+      why="REF is good. RREF is better. Three properties make RREF the canonical form: (1) pivots are 1, (2) all entries below pivots are zero, (3) all entries ABOVE pivots are zero too. The result: read the null-space basis directly with NO further algebra.">
+      <H3>Reduced Row Echelon Form (RREF) — definition</H3>
+      <P>A matrix is in RREF if it's in REF AND additionally:</P>
+      <OL>
+        <Li>Each pivot equals 1.</Li>
+        <Li>Each pivot is the ONLY non-zero entry in its column (i.e., zeros above as well as below).</Li>
+      </OL>
+      <P>Visually, in 5×5 with rank 3:</P>
+      <BT src={String.raw`\left[\begin{array}{ccccc} \boxed{1} & 0 & * & 0 & * \\ 0 & \boxed{1} & * & 0 & * \\ 0 & 0 & 0 & \boxed{1} & * \\ 0 & 0 & 0 & 0 & 0 \\ 0 & 0 & 0 & 0 & 0 \end{array}\right]`}/>
+      <P>The free columns (here columns 3, 5) contain the negative coefficients you'll need for the null-space basis. Pivots are 1; everything else in pivot columns is 0.</P>
+
+      <H3>Why RREF is unique</H3>
+      <P>REF is not unique — different valid sequences of row operations can produce different REFs (different pivot magnitudes, different multipliers above). But the further normalization in RREF kills all ambiguity. There is exactly ONE RREF for any matrix.</P>
+
+      <Callout kind="proof" title="Why RREF is unique (sketch)">
+        <P>Suppose <T src="A"/> reduces to two RREFs <T src="B_1"/> and <T src="B_2"/>. Both have the same pivot columns (this is a property of column independence preserved by row operations). For each pivot column, the pivot is 1 and the rest of the column is 0 — forced. For each free column, the entries are <T src="-c_{ij}"/> where <T src="c_{ij}"/> are the unique coefficients expressing the free column as a combination of preceding pivot columns. Uniqueness of these coefficients (from Concept 2.6 — independence implies uniqueness) forces <T src="B_1 = B_2"/>.</P>
+      </Callout>
+
+      <H3>Reading the null-space basis straight from RREF</H3>
+      <P>From the 5×5 RREF above with free columns 3 and 5, the null space is:</P>
+      <BT src={String.raw`N(A) = \text{span}\left\{ \begin{pmatrix} -* \\ -* \\ 1 \\ 0 \\ 0 \end{pmatrix},\ \begin{pmatrix} -* \\ -* \\ 0 \\ -* \\ 1 \end{pmatrix} \right\}.`}/>
+      <P>where the asterisks are the entries from the RREF's free columns. For each free variable, take the negatives of the column entries (in the pivot rows) and put 1 in the free variable's position.</P>
+
+      <RrefStepper/>
+
+      <Callout kind="info" title="Why this is the cleanest way to find the null space">
+        <P>Without RREF, finding the null space requires solving <T src="A\mathbf{x} = \mathbf{0}"/> by back-substitution — error-prone for any matrix bigger than 3×3. With RREF, you LOOK at the free columns and IMMEDIATELY write down the null-space basis. No solving, no arithmetic.</P>
+      </Callout>
+
+      <H3>The four fundamental subspaces — basis recipe</H3>
+      <P>Given <T src="A"/>, here are the bases of all four fundamental subspaces, read off cleanly from operations on <T src="A"/>:</P>
+      <UL>
+        <Li><B>Column space <T src="C(A)"/>:</B> the columns of <T src="A"/> in pivot positions (the ORIGINAL columns, not the reduced ones).</Li>
+        <Li><B>Null space <T src="N(A)"/>:</B> RREF + free-variable trick (above).</Li>
+        <Li><B>Row space <T src="R(A)"/>:</B> the non-zero rows of RREF (these span the row space and are independent by the staircase property).</Li>
+        <Li><B>Left null space <T src="N(A^\top)"/>:</B> apply the null-space trick to <T src="A^\top"/>.</Li>
+      </UL>
+
+      <Callout kind="recall" title="Concept 4.8 in one breath">
+        <P>RREF = REF + pivots scaled to 1 + zeros above pivots. Unique form. Null-space basis pops out: for each free variable, set it to 1 and read the negatives of the RREF entries in the free column. Column space basis = original A columns in pivot positions. Row space basis = non-zero rows of RREF.</P>
+      </Callout>
+
+      <ProgressPill conceptId="m4-c48"/>
+    </ConceptCard>
+  );
+}
+
+/* ════════════════════════════════════════════════════════
+   APP ROOT
+   ════════════════════════════════════════════════════════ */
+function App() {
+  useEffect(() => { hideLoading(); }, []);
+  const concepts = [
+    { id: "concept-4-1", label: "4.1", title: "Echelon Form & Pivots",            desc: "Three legal row ops · staircase form · pivot vs free columns." },
+    { id: "concept-4-2", label: "4.2", title: "Gaussian Elimination",             desc: "Animated step-by-step forward elimination." },
+    { id: "concept-4-3", label: "4.3", title: "Rank of a Matrix",                 desc: "Pivots = column-space dim = row-space dim. GATE 1994 PYQ." },
+    { id: "concept-4-4", label: "4.4", title: "Rank-Nullity Theorem",             desc: "rank + nullity = n — full proof and conservation law." },
+    { id: "concept-4-5", label: "4.5", title: "Solving Ax = b · Complete Soln",   desc: "The xₚ + xₙ recipe. 5 question types. GATE 2021 PYQ." },
+    { id: "concept-4-6", label: "4.6", title: "Multiple Free Variables",          desc: "Reading multi-dim null-space basis directly from RREF." },
+    { id: "concept-4-7", label: "4.7", title: "Solution Theory",                  desc: "The rank-based classification table — 3 cases proved." },
+    { id: "concept-4-8", label: "4.8", title: "RREF (Bonus)",                     desc: "The unique canonical form + 4-subspace recipe." },
+  ];
+  return (
+    <div className="min-h-screen">
+      <TopNav currentModule={4}/>
+      <Hero
+        moduleNum={4} totalModules={8}
+        title="Echelon, Rank & Rank-Nullity"
+        tagline="Where every Ax = b question is decided"
+        intro={
+          <>
+            Modules 1–3 told you WHAT the answer to <T src="A\mathbf{x} = \mathbf{b}"/> can be. This module gives you the MECHANISM:
+            row-reduce to echelon form, count the pivots, read the rank, apply the rank-nullity theorem.
+            Eight concepts, eight interactive tools, three GATE PYQs — and by the end, every classification question becomes a 5-second answer.
+          </>
+        }
+        concepts={concepts}
+        stats="8 concepts · 8 interactive tools · 3 GATE PYQs · rank-nullity proved"
+      />
+
+      {/* Problem Lab CTA */}
+      <section className="max-w-5xl mx-auto px-5 pt-2 pb-2">
+        <a href="module-04-problem-lab.html"
+          className="block rounded-2xl p-5 md:p-6 group transition-all"
+          style={{
+            background: "linear-gradient(135deg, var(--accent-soft), var(--accent-2-soft))",
+            border: "1px solid var(--accent-border)",
+            boxShadow: "var(--shadow-glow-accent)",
+          }}
+          onMouseEnter={e => e.currentTarget.style.borderColor = "var(--accent)"}
+          onMouseLeave={e => e.currentTarget.style.borderColor = "var(--accent-border)"}>
+          <div className="flex flex-wrap items-center gap-4">
+            <div style={{
+              width: 52, height: 52, borderRadius: 14,
+              background: "var(--grad-hero)", color: "white",
+              display: "inline-flex", alignItems: "center", justifyContent: "center",
+              fontSize: 22, flexShrink: 0,
+            }}>🎯</div>
+            <div className="flex-1 min-w-[260px]">
+              <div className="text-[11px] tracking-[0.2em] font-semibold mb-1" style={{color: "var(--accent)"}}>
+                MODULE 4 · PROBLEM LAB — NEW
+              </div>
+              <div className="text-[18px] md:text-[20px] font-bold leading-tight mb-1" style={{color: "var(--text)"}}>
+                Rank, Rank-Nullity, Solution Theory → 90-second GATE reflex.
+              </div>
+              <div className="text-[13.5px]" style={{color: "var(--text-dim)"}}>
+                72 problems · 9 GATE CS PYQ walkthroughs · KILLER on ker(T) for T: ℝ⁵ → ℝ³ · timed drill mode.
+              </div>
+            </div>
+            <div className="flex items-center gap-2 px-4 py-2 rounded-xl font-semibold transition-opacity"
+              style={{background: "var(--grad-hero)", color: "white"}}>
+              Open Problem Lab →
+            </div>
+          </div>
+        </a>
+      </section>
+
+      <Concept41/>
+      <Concept42/>
+      <Concept43/>
+      <Concept44/>
+      <Concept45/>
+      <Concept46/>
+      <Concept47/>
+      <Concept48/>
+      <ModuleFooter
+        moduleNum={4}
+        nextModuleTitle="Determinants, Inverse & Cramer's Rule"
+        nextModuleFile="module-05-determinants.html"
+        checklist={[
+          "I can produce REF and RREF of any small matrix by hand without error.",
+          "I can count rank and nullity off REF or RREF in seconds.",
+          "I can state and prove the rank-nullity theorem.",
+          "I can write the complete solution x = xₚ + xₙ for any consistent system.",
+          "I can use the rank-based classification (3 cases) to predict solution types instantly.",
+          "I can read a null-space basis directly off RREF for any matrix with multiple free variables."
+        ]}
+      />
+    </div>
+  );
+}
+
+mountApp(App, 4);
+</script>
+
+</body>
+</html>

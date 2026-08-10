@@ -1,0 +1,1277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 6 · Eigenvalues & Eigenvectors — LA Mastery Hub</title>
+
+<script>
+  (function () {
+    try {
+      var t = localStorage.getItem("la-hub::theme") || "dark";
+      document.documentElement.classList.add(t === "light" ? "light" : "dark");
+    } catch (e) { document.documentElement.classList.add("dark"); }
+  })();
+</script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="theme.css">
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script>tailwind.config = { darkMode: 'class' };</script>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+
+<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone@7.25.6/babel.min.js"></script>
+</head>
+<body>
+
+<div id="loading">
+  <div style="text-align:center">
+    <div class="spinner"></div>
+    <div style="font-size:13px; opacity:0.8">Loading Module 6 — Eigenvalues</div>
+  </div>
+</div>
+
+<div id="root"></div>
+
+<script type="text/babel" src="boilerplate.js"></script>
+
+<script type="text/babel">
+const { useState, useEffect, useMemo, useRef } = React;
+
+/* ════════════════════════════════════════════════════════
+   EIGEN UTILITIES (2×2)
+   ════════════════════════════════════════════════════════ */
+const round = (v, d = 3) => Math.abs(v) < 1e-10 ? 0 : Math.round(v * Math.pow(10, d)) / Math.pow(10, d);
+
+function eigen2x2(A) {
+  const [[a, b], [c, d]] = A;
+  const trace = a + d;
+  const det = a * d - b * c;
+  const disc = trace * trace - 4 * det;
+
+  if (disc < -1e-9) {
+    // Complex eigenvalues
+    const re = trace / 2;
+    const im = Math.sqrt(-disc) / 2;
+    return {
+      complex: true, trace, det, disc,
+      lambda1: { re, im }, lambda2: { re, im: -im },
+      v1: null, v2: null,
+      repeated: false,
+    };
+  }
+
+  const sqDisc = Math.sqrt(Math.max(0, disc));
+  const lambda1 = (trace + sqDisc) / 2;
+  const lambda2 = (trace - sqDisc) / 2;
+  const repeated = Math.abs(lambda1 - lambda2) < 1e-7;
+
+  const eigenvector = (lambda) => {
+    const M = [[a - lambda, b], [c, d - lambda]];
+    if (Math.abs(M[0][1]) > 1e-9) return [M[0][1], -M[0][0]];
+    if (Math.abs(M[1][0]) > 1e-9) return [-M[1][1], M[1][0]];
+    if (Math.abs(M[0][0]) < 1e-9 && Math.abs(M[1][1]) < 1e-9) return null;
+    return Math.abs(M[0][0]) < 1e-9 ? [1, 0] : [0, 1];
+  };
+
+  const v1 = eigenvector(lambda1);
+  let v2 = eigenvector(lambda2);
+
+  let geomMult = 1;
+  if (repeated) {
+    if (Math.abs(a - lambda1) < 1e-9 && Math.abs(d - lambda1) < 1e-9 && Math.abs(b) < 1e-9 && Math.abs(c) < 1e-9) {
+      geomMult = 2;
+      v2 = [0, 1];
+    } else {
+      geomMult = 1;
+      v2 = null;
+    }
+  }
+
+  return {
+    complex: false, trace, det, disc,
+    lambda1, lambda2, v1, v2, repeated,
+    geomMult,
+    isSymmetric: Math.abs(b - c) < 1e-9,
+  };
+}
+
+function normalize(v) {
+  const n = Math.hypot(v[0], v[1]);
+  return n < 1e-9 ? v : [v[0]/n, v[1]/n];
+}
+
+/* — Matrix UI utilities — */
+function MatrixDisplay({ data, highlightRow = null, highlightCol = null }) {
+  if (!data || data.length === 0) return null;
+  const cols = data[0].length;
+  return (
+    <div className="inline-flex items-stretch font-mono text-sm" style={{userSelect: "none"}}>
+      <div style={{borderLeft: "2px solid var(--text-dim)", borderTop: "2px solid var(--text-dim)", borderBottom: "2px solid var(--text-dim)", width: 8}}/>
+      <div className="px-2 py-2 grid gap-1" style={{gridTemplateColumns: `repeat(${cols}, minmax(0, auto))`}}>
+        {data.map((row, r) => row.map((v, c) => {
+          const isHigh = (highlightRow === r) || (highlightCol === c);
+          return (
+            <span key={`${r}-${c}`} className="px-2 py-1 text-center rounded font-mono"
+              style={{background: isHigh ? "var(--accent-soft)" : "transparent", color: isHigh ? "var(--accent)" : "var(--text)", minWidth: 38, fontSize: 13}}>
+              {Math.abs(v) < 1e-9 ? 0 : (typeof v === "number" ? round(v, 3) : v)}
+            </span>
+          );
+        }))}
+      </div>
+      <div style={{borderRight: "2px solid var(--text-dim)", borderTop: "2px solid var(--text-dim)", borderBottom: "2px solid var(--text-dim)", width: 8}}/>
+    </div>
+  );
+}
+
+function MatrixEditor({ matrix, setMatrix, label = "Matrix" }) {
+  const cols = matrix[0].length;
+  const setCell = (r, c, v) => {
+    const M = matrix.map(row => row.slice());
+    M[r][c] = v;
+    setMatrix(M);
+  };
+  return (
+    <div className="rounded-lg p-3" style={{border: "1px solid var(--border)", background: "var(--bg-elev-2)"}}>
+      <div className="text-xs tracking-[0.2em] font-semibold mb-2" style={{color: "var(--text-dim)"}}>{label}</div>
+      <div className="inline-grid gap-1" style={{gridTemplateColumns: `repeat(${cols}, auto)`}}>
+        {matrix.flatMap((row, r) => row.map((v, c) => (
+          <NumInput key={`${r}-${c}`} value={v} onChange={x => setCell(r, c, x)} step="1" width={56}/>
+        )))}
+      </div>
+    </div>
+  );
+}
+
+/* ════════════════════════════════════════════════════════
+   CONCEPT 6.1 — What Eigenvalues Really Are
+   THE BIG INTERACTIVE: Special Direction Demo
+   ════════════════════════════════════════════════════════ */
+function SpecialDirectionDemo() {
+  const [A, setA] = useState([[2, 1], [1, 3]]);
+  const e = useMemo(() => eigen2x2(A), [A]);
+
+  const range = 5, scale = 200 / range, cx = 200, cy = 200;
+  const toPx = (x, y) => [cx + x*scale, cy - y*scale];
+
+  // Test vectors at 12 directions on the unit circle
+  const testVectors = useMemo(() => {
+    const arr = [];
+    for (let i = 0; i < 12; i++) {
+      const angle = (i / 12) * 2 * Math.PI;
+      const v = [Math.cos(angle) * 1.8, Math.sin(angle) * 1.8];
+      const Av = [A[0][0]*v[0] + A[0][1]*v[1], A[1][0]*v[0] + A[1][1]*v[1]];
+      // Check alignment with eigenvectors
+      let onEigen = false;
+      const isClose = (u, w) => {
+        if (!u || !w) return false;
+        const nu = normalize(u), nw = normalize(w);
+        return Math.abs(nu[0]*nw[0] + nu[1]*nw[1]) > 0.995;
+      };
+      if (e.v1 && isClose(v, e.v1)) onEigen = 1;
+      if (e.v2 && isClose(v, e.v2)) onEigen = 2;
+      arr.push({ v, Av, onEigen });
+    }
+    return arr;
+  }, [A, e]);
+
+  return (
+    <InteractiveFrame
+      name="Eigenvectors as Special Directions — 12 vectors before vs after A"
+      whatAmISeeing="12 vectors arranged around a circle (gray arrows = original, colored arrows = after applying A). Most vectors GET ROTATED by A — their direction changes. Eigenvector directions are highlighted as bright lines through the origin — and any vector along those lines ONLY GETS SCALED, never rotated."
+      tryThis="Default A = [[2,1],[1,3]] — symmetric. Watch the bright eigenvector lines. Try A = [[2,0],[0,3]] (diagonal) — eigenvectors are the standard x and y axes. Try A = [[0,-1],[1,0]] (rotation by 90°) — NO REAL eigenvectors exist (the panel shows complex eigenvalues), so the bright lines disappear; every vector gets rotated."
+    >
+      <div className="grid lg:grid-cols-[auto,1fr] gap-6 items-start">
+        <svg viewBox="0 0 400 400" className="vector-svg" style={{maxWidth: 400}}>
+          <defs>
+            <marker id="ev-arr-gray" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M0,0 L10,5 L0,10 z" fill="var(--text-faded)"/>
+            </marker>
+            <marker id="ev-arr-color" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M0,0 L10,5 L0,10 z" fill="var(--accent-2)"/>
+            </marker>
+            <marker id="ev-arr-eigen1" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M0,0 L10,5 L0,10 z" fill="var(--accent-3)"/>
+            </marker>
+            <marker id="ev-arr-eigen2" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M0,0 L10,5 L0,10 z" fill="var(--warn)"/>
+            </marker>
+          </defs>
+          {Array.from({length: 2*range+1}, (_, i) => i - range).filter(i => i !== 0).map(i => {
+            const [x1, y1] = toPx(i, -range), [x2, y2] = toPx(i, range);
+            const [x3, y3] = toPx(-range, i), [x4, y4] = toPx(range, i);
+            return (
+              <g key={i}>
+                <line x1={x1} y1={y1} x2={x2} y2={y2} stroke="var(--canvas-grid)"/>
+                <line x1={x3} y1={y3} x2={x4} y2={y4} stroke="var(--canvas-grid)"/>
+              </g>
+            );
+          })}
+          <line x1={0} y1={cy} x2={400} y2={cy} stroke="var(--canvas-axis)"/>
+          <line x1={cx} y1={0} x2={cx} y2={400} stroke="var(--canvas-axis)"/>
+
+          {/* Unit circle for reference */}
+          <circle cx={cx} cy={cy} r={1.8 * scale} fill="none" stroke="var(--text-faded)" strokeDasharray="3 4" opacity="0.5"/>
+
+          {/* Eigenvector lines */}
+          {!e.complex && e.v1 && (() => {
+            const norm = Math.hypot(e.v1[0], e.v1[1]);
+            const t = range * 1.5;
+            const [x1, y1] = toPx(-t*e.v1[0]/norm, -t*e.v1[1]/norm);
+            const [x2, y2] = toPx( t*e.v1[0]/norm,  t*e.v1[1]/norm);
+            return (
+              <g>
+                <line x1={x1} y1={y1} x2={x2} y2={y2} stroke="var(--accent-3)" strokeWidth="6" opacity="0.18" strokeLinecap="round"/>
+                <line x1={x1} y1={y1} x2={x2} y2={y2} stroke="var(--accent-3)" strokeWidth="1.5" strokeDasharray="5 3"/>
+              </g>
+            );
+          })()}
+          {!e.complex && e.v2 && !e.repeated && (() => {
+            const norm = Math.hypot(e.v2[0], e.v2[1]);
+            const t = range * 1.5;
+            const [x1, y1] = toPx(-t*e.v2[0]/norm, -t*e.v2[1]/norm);
+            const [x2, y2] = toPx( t*e.v2[0]/norm,  t*e.v2[1]/norm);
+            return (
+              <g>
+                <line x1={x1} y1={y1} x2={x2} y2={y2} stroke="var(--warn)" strokeWidth="6" opacity="0.18" strokeLinecap="round"/>
+                <line x1={x1} y1={y1} x2={x2} y2={y2} stroke="var(--warn)" strokeWidth="1.5" strokeDasharray="5 3"/>
+              </g>
+            );
+          })()}
+
+          {/* Test vectors: before (gray, faint) */}
+          {testVectors.map((t, i) => {
+            const [px, py] = toPx(t.v[0], t.v[1]);
+            return (
+              <line key={`in-${i}`} x1={cx} y1={cy} x2={px} y2={py}
+                stroke="var(--text-faded)" strokeWidth="1.2" opacity="0.5" markerEnd="url(#ev-arr-gray)"/>
+            );
+          })}
+
+          {/* Test vectors: after (colored) */}
+          {testVectors.map((t, i) => {
+            const [px, py] = toPx(t.Av[0], t.Av[1]);
+            let color = "var(--accent-2)";
+            let stroke = 1.8;
+            let marker = "ev-arr-color";
+            if (t.onEigen === 1) { color = "var(--accent-3)"; stroke = 3; marker = "ev-arr-eigen1"; }
+            if (t.onEigen === 2) { color = "var(--warn)"; stroke = 3; marker = "ev-arr-eigen2"; }
+            return (
+              <line key={`out-${i}`} x1={cx} y1={cy} x2={px} y2={py}
+                stroke={color} strokeWidth={stroke} opacity={t.onEigen ? 1 : 0.85} markerEnd={`url(#${marker})`}/>
+            );
+          })}
+
+          <text x={12} y={20} fontSize="11" fill="var(--text-dim)">Gray = before · Cyan = after · Green/Amber = eigenvector directions</text>
+        </svg>
+
+        <div className="space-y-3">
+          <MatrixEditor matrix={A} setMatrix={setA} label="MATRIX A"/>
+
+          <div className="rounded-lg p-4"
+            style={{border: "1px solid var(--accent-border)", background: "var(--accent-soft)"}}>
+            <div className="text-xs tracking-[0.2em] font-semibold mb-2" style={{color: "var(--accent)"}}>EIGEN-DATA</div>
+            <div className="space-y-2 text-sm">
+              <div className="font-mono" style={{color: "var(--text-dim)"}}>
+                trace = <span style={{color: "var(--text)"}}>{e.trace.toFixed(2)}</span>{" · "}
+                det = <span style={{color: "var(--text)"}}>{e.det.toFixed(2)}</span>
+              </div>
+              {!e.complex && (
+                <>
+                  <div className="font-mono" style={{color: "var(--accent-3)"}}>
+                    λ₁ = {e.lambda1.toFixed(3)}, v₁ = ({(e.v1 || []).map(x => x.toFixed(2)).join(", ")})
+                  </div>
+                  {!e.repeated && e.v2 && (
+                    <div className="font-mono" style={{color: "var(--warn)"}}>
+                      λ₂ = {e.lambda2.toFixed(3)}, v₂ = ({e.v2.map(x => x.toFixed(2)).join(", ")})
+                    </div>
+                  )}
+                  {e.repeated && (
+                    <div className="font-mono" style={{color: "var(--warn)"}}>
+                      λ₁ = λ₂ = {e.lambda1.toFixed(3)} (repeated, gm = {e.geomMult})
+                    </div>
+                  )}
+                  {e.isSymmetric && (
+                    <div className="text-xs mt-2 pt-2" style={{color: "var(--accent-3)", borderTop: "1px solid var(--border)"}}>
+                      ✓ Symmetric: eigenvalues real, eigenvectors orthogonal.
+                    </div>
+                  )}
+                </>
+              )}
+              {e.complex && (
+                <div className="font-mono" style={{color: "var(--danger)"}}>
+                  λ₁ = {e.lambda1.re.toFixed(2)} + {e.lambda1.im.toFixed(2)}i<br/>
+                  λ₂ = {e.lambda2.re.toFixed(2)} − {e.lambda2.im.toFixed(2)}i
+                  <div className="text-xs mt-2 pt-2 not-italic" style={{color: "var(--danger)", borderTop: "1px solid var(--border)"}}>
+                    No real eigenvectors. Every real vector gets rotated.
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="rounded-lg p-3 text-xs" style={{border: "1px solid var(--info-border)", background: "var(--info-soft)", color: "var(--text-dim)"}}>
+            <div className="font-semibold mb-1" style={{color: "var(--info)"}}>WHAT MAKES EIGENVECTORS SPECIAL</div>
+            <div className="leading-relaxed">
+              Pick ANY direction in the plane. Apply A. Most directions are altered (rotated AND scaled).
+              But two special directions — the eigenvector lines — DON'T rotate. Vectors along those lines only get longer or shorter (or flipped if λ &lt; 0).
+            </div>
+          </div>
+        </div>
+      </div>
+    </InteractiveFrame>
+  );
+}
+
+function Concept61() {
+  return (
+    <ConceptCard id="concept-6-1" label="6.1" moduleLabel="Module 6 · Eigenvalues"
+      title="What Eigenvalues and Eigenvectors Actually Are"
+      why="The single most important concept in all of linear algebra. Once you SEE eigenvectors as 'special directions that survive A unchanged in direction', everything that follows — diagonalization, SVD, PCA, quantum mechanics — falls into place. Skip the formulas first; build the picture.">
+      <H3>The special direction intuition</H3>
+      <P>Take any matrix <T src="A"/>. Multiply it by a random vector <T src="\mathbf{v}"/>. In general, <T src="A\mathbf{v}"/> is a DIFFERENT direction than <T src="\mathbf{v}"/> — A rotated AND scaled it.</P>
+      <P>But for MOST matrices, there are a few <Em>special directions</Em> where this rotation does NOT happen. Along these directions, A only stretches the vector — possibly flipping it — but the direction (the line through the origin) stays the same.</P>
+      <P>These special directions are called <B>eigenvectors</B>. The amount of stretching is called the <B>eigenvalue</B>.</P>
+
+      <H3>The formal definition</H3>
+      <P>An <B>eigenvector</B> of an <T src="n \times n"/> matrix <T src="A"/> is a non-zero vector <T src="\mathbf{v}"/> satisfying:</P>
+      <BT src={String.raw`A \mathbf{v} = \lambda \mathbf{v},`}/>
+      <P>for some scalar <T src="\lambda"/>. The number <T src="\lambda"/> is the <B>eigenvalue</B> associated with <T src="\mathbf{v}"/>.</P>
+      <P>In words: <T src="A"/> acts on <T src="\mathbf{v}"/> just like multiplication by the number <T src="\lambda"/> would. A matrix becomes a NUMBER when acting on its eigenvectors.</P>
+
+      <Callout kind="trap" title="Why we exclude v = 0">
+        <P>If we allowed <T src="\mathbf{v} = \mathbf{0}"/>, then <T src="A \mathbf{0} = \mathbf{0} = \lambda \mathbf{0}"/> for EVERY scalar <T src="\lambda"/>. So zero would be an "eigenvector" for every eigenvalue. To make the concept meaningful, we require <T src="\mathbf{v} \neq \mathbf{0}"/>. Note that the eigenvalue <T src="\lambda"/> CAN be zero (that's a separate, important case).</P>
+      </Callout>
+
+      <H3>Eigenvectors are directions, not specific vectors</H3>
+      <P>If <T src="\mathbf{v}"/> is an eigenvector with eigenvalue <T src="\lambda"/>, so is <T src="c\mathbf{v}"/> for any non-zero <T src="c"/>:</P>
+      <BT src={String.raw`A(c\mathbf{v}) = c A \mathbf{v} = c \lambda \mathbf{v} = \lambda (c\mathbf{v}).`}/>
+      <P>So eigenvectors come in infinite families — any non-zero multiple is still an eigenvector. What's really unique is the <B>direction</B> (the line through the origin), or more generally the <B>eigenspace</B> (the subspace spanned by all eigenvectors for one λ).</P>
+
+      <H3>Three concrete examples — build the picture</H3>
+
+      <H4>Example 1: Identity matrix</H4>
+      <BT src={String.raw`I = \begin{pmatrix} 1 & 0 \\ 0 & 1 \end{pmatrix}, \quad I \mathbf{v} = \mathbf{v} \text{ for every } \mathbf{v}.`}/>
+      <P>EVERY non-zero vector is an eigenvector of the identity, with eigenvalue λ = 1. The "eigenspace" for λ = 1 is all of <T src="\mathbb{R}^2"/>.</P>
+
+      <H4>Example 2: Diagonal matrix</H4>
+      <BT src={String.raw`D = \begin{pmatrix} 3 & 0 \\ 0 & 5 \end{pmatrix}.`}/>
+      <P>Check: <T src="D \mathbf{e}_1 = (3, 0) = 3 \mathbf{e}_1"/>. So <T src="\mathbf{e}_1"/> is an eigenvector with eigenvalue 3. Similarly <T src="\mathbf{e}_2"/> with eigenvalue 5. The standard basis vectors are the eigenvectors of any diagonal matrix; the diagonal entries are the eigenvalues.</P>
+
+      <H4>Example 3: Projection matrix</H4>
+      <BT src={String.raw`P = \begin{pmatrix} 1 & 0 \\ 0 & 0 \end{pmatrix} \quad \text{(projection onto x-axis)}.`}/>
+      <P>Anything on the x-axis (form <T src="(c, 0)"/>) is unchanged by P — eigenvalue λ = 1. Anything on the y-axis (form <T src="(0, c)"/>) gets sent to zero — eigenvalue λ = 0. Other vectors are decomposed into these two pieces, and P keeps the x-component but kills the y-component. The eigenvectors are <T src="(1, 0)"/> and <T src="(0, 1)"/> with eigenvalues 1 and 0.</P>
+
+      <H4>Example 4: Rotation by 90°</H4>
+      <BT src={String.raw`R = \begin{pmatrix} 0 & -1 \\ 1 & 0 \end{pmatrix}.`}/>
+      <P>Every real vector gets rotated 90°. NO real direction is preserved. Hence R has no real eigenvectors — only complex ones (λ = ±i). The "every vector gets rotated" intuition leads directly to "no real eigenvalues."</P>
+
+      <SpecialDirectionDemo/>
+
+      <Callout kind="info" title="When real eigenvalues exist, when they don't">
+        <P>A real <T src="n \times n"/> matrix has <T src="n"/> eigenvalues (counting multiplicity) IN THE COMPLEX NUMBERS. Some matrices have all-real eigenvalues (symmetric matrices always do — Concept 6.6). Others have complex-conjugate pairs (rotation matrices). Real eigenvalues = "directions that survive"; complex eigenvalues = "no direction survives, the matrix rotates everything in some basis".</P>
+      </Callout>
+
+      <H3>Why eigenvalues are EVERYWHERE</H3>
+      <UL>
+        <Li><B>Stability of dynamics:</B> a system <T src="\mathbf{x}_{k+1} = A \mathbf{x}_k"/> grows along eigenvectors at rate <T src="\lambda_i"/>. <T src="|\lambda| &gt; 1"/> = unstable; <T src="|\lambda| &lt; 1"/> = decays.</Li>
+        <Li><B>PCA:</B> top eigenvector of the covariance matrix points in the direction of maximum variance.</Li>
+        <Li><B>PageRank:</B> the stationary distribution of the random surfer is the eigenvector for λ = 1.</Li>
+        <Li><B>Quantum mechanics:</B> energy levels are eigenvalues of the Hamiltonian; states are eigenvectors.</Li>
+        <Li><B>Vibrating drums:</B> resonant frequencies are eigenvalues of the Laplacian.</Li>
+        <Li><B>Neural networks:</B> training dynamics governed by eigenvalues of the Hessian / weight matrices.</Li>
+      </UL>
+
+      <Callout kind="ml" title="The eigenvalue mindset is the key to ML theory">
+        <P>Every theorem about gradient descent — when it converges, when it explodes, when it gets stuck — is a statement about eigenvalues of some matrix (Hessian, Jacobian, NTK). If you understand eigenvalues geometrically, you can read modern ML theory; if not, you'll memorize formulas forever.</P>
+      </Callout>
+
+      <Callout kind="recall" title="Concept 6.1 in one breath">
+        <P>Eigenvector = a direction that A only stretches (doesn't rotate). Eigenvalue = the stretching factor. Av = λv with v ≠ 0. Identity → every vector is an eigenvector. Diagonal → standard basis are eigenvectors. Rotation → no real eigenvectors.</P>
+      </Callout>
+
+      <ProgressPill conceptId="m6-c61"/>
+    </ConceptCard>
+  );
+}
+
+/* ════════════════════════════════════════════════════════
+   CONCEPT 6.2 — Characteristic Equation
+   Interactive: Polynomial Builder
+   ════════════════════════════════════════════════════════ */
+function CharPolyBuilder() {
+  const [A, setA] = useState([[3, 1], [0, 2]]);
+  const e = useMemo(() => eigen2x2(A), [A]);
+  const [[a, b], [c, d]] = A;
+
+  // p(λ) = λ² - trace·λ + det
+  const tr = e.trace, det = e.det;
+
+  // Plot p(λ) for visualization
+  const range = 6;
+  const step = 0.05;
+  const pts = [];
+  for (let l = -range; l <= range; l += step) {
+    const p = l*l - tr*l + det;
+    pts.push([l, p]);
+  }
+  const yMax = 12, yMin = -12;
+  const xToPx = (l) => 20 + ((l + range) / (2*range)) * 320;
+  const yToPx = (p) => 200 - ((p - yMin) / (yMax - yMin)) * 180;
+  const path = pts.filter(([_, p]) => p >= yMin && p <= yMax).map(([l, p], i) => (i === 0 ? "M" : "L") + xToPx(l) + "," + yToPx(p)).join(" ");
+
+  return (
+    <InteractiveFrame
+      name="Characteristic Polynomial Builder"
+      whatAmISeeing="A 2×2 matrix A on the left, the characteristic polynomial p(λ) = det(A − λI) symbolically expanded in the middle, and graphed on the right. Roots of p(λ) are the eigenvalues — marked on the curve."
+      tryThis="Default A is upper-triangular — eigenvalues are the diagonal entries (3 and 2). Change A to [[2,1],[1,2]] — eigenvalues become roots of λ² − 4λ + 3 = (λ−1)(λ−3), so λ = 1, 3. Try A = [[0,−1],[1,0]] — discriminant negative — graph never touches axis — complex eigenvalues."
+    >
+      <div className="grid lg:grid-cols-[auto,1fr] gap-6 items-start">
+        <MatrixEditor matrix={A} setMatrix={setA} label="MATRIX A"/>
+
+        <div className="space-y-3">
+          <div className="rounded-lg p-3 text-sm font-mono" style={{border: "1px solid var(--border)", background: "var(--bg-elev-2)"}}>
+            <div className="text-xs tracking-[0.2em] font-semibold mb-2" style={{color: "var(--accent)"}}>SYMBOLIC EXPANSION</div>
+            <div style={{color: "var(--text)"}}>A − λI = [[{a}−λ, {b}], [{c}, {d}−λ]]</div>
+            <div className="mt-2" style={{color: "var(--text-dim)"}}>det(A − λI) = ({a}−λ)({d}−λ) − ({b})({c})</div>
+            <div className="mt-1" style={{color: "var(--accent-2)"}}>= λ² − {tr.toFixed(2)}·λ + {det.toFixed(2)}</div>
+            <div className="text-xs mt-2 pt-2" style={{color: "var(--text-dim)", borderTop: "1px solid var(--border)"}}>
+              trace = {tr.toFixed(2)} (= sum of eigenvalues) · det = {det.toFixed(2)} (= product of eigenvalues)
+            </div>
+          </div>
+
+          <svg viewBox="0 0 360 240" className="vector-svg w-full">
+            {/* Grid */}
+            {[-range, -range/2, 0, range/2, range].map(l => (
+              <g key={l}>
+                <line x1={xToPx(l)} y1={20} x2={xToPx(l)} y2={220} stroke="var(--canvas-grid)" strokeWidth="1"/>
+                <text x={xToPx(l)} y={236} fontSize="9" fill="var(--text-dim)" textAnchor="middle">{l}</text>
+              </g>
+            ))}
+            <line x1={20} y1={yToPx(0)} x2={340} y2={yToPx(0)} stroke="var(--canvas-axis)"/>
+            <line x1={xToPx(0)} y1={20} x2={xToPx(0)} y2={220} stroke="var(--canvas-axis)"/>
+
+            {/* p(λ) curve */}
+            <path d={path} fill="none" stroke="var(--accent-2)" strokeWidth="2"/>
+
+            {/* Roots */}
+            {!e.complex && (
+              <>
+                <circle cx={xToPx(e.lambda1)} cy={yToPx(0)} r="6" fill="var(--accent-3)" stroke="var(--canvas-bg)" strokeWidth="2"/>
+                <text x={xToPx(e.lambda1)} y={yToPx(0) - 10} fontSize="11" fill="var(--accent-3)" textAnchor="middle" fontWeight="700">
+                  λ₁={e.lambda1.toFixed(2)}
+                </text>
+                {!e.repeated && (
+                  <>
+                    <circle cx={xToPx(e.lambda2)} cy={yToPx(0)} r="6" fill="var(--warn)" stroke="var(--canvas-bg)" strokeWidth="2"/>
+                    <text x={xToPx(e.lambda2)} y={yToPx(0) + 18} fontSize="11" fill="var(--warn)" textAnchor="middle" fontWeight="700">
+                      λ₂={e.lambda2.toFixed(2)}
+                    </text>
+                  </>
+                )}
+              </>
+            )}
+            <text x={12} y={16} fontSize="10" fill="var(--text-dim)">p(λ) = λ² − {tr.toFixed(1)}λ + {det.toFixed(1)}</text>
+          </svg>
+
+          {e.complex && (
+            <div className="rounded-lg p-3" style={{border: "1px solid var(--danger-border)", background: "var(--danger-soft)"}}>
+              <div className="text-xs tracking-[0.2em] font-semibold mb-1" style={{color: "var(--danger)"}}>COMPLEX EIGENVALUES</div>
+              <div className="text-sm font-mono" style={{color: "var(--text)"}}>
+                λ = {e.lambda1.re.toFixed(2)} ± {e.lambda1.im.toFixed(2)}i
+              </div>
+              <div className="text-xs mt-1" style={{color: "var(--text-dim)"}}>
+                Discriminant {e.disc.toFixed(2)} &lt; 0. The curve doesn't touch the λ-axis — no real roots.
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </InteractiveFrame>
+  );
+}
+
+function Concept62() {
+  return (
+    <ConceptCard id="concept-6-2" label="6.2" moduleLabel="Module 6 · Eigenvalues"
+      title="The Characteristic Equation"
+      why="The eigenvector definition Av = λv is geometric. We need an ALGEBRAIC method to find which λ's actually work. The trick — rearrange to (A − λI)v = 0, demand a non-trivial solution, set determinant to zero — produces a polynomial whose roots are EXACTLY the eigenvalues.">
+      <H3>The rearrangement</H3>
+      <P>Start with the eigenvector equation:</P>
+      <BT src={String.raw`A \mathbf{v} = \lambda \mathbf{v}.`}/>
+      <P>Subtract <T src="\lambda \mathbf{v}"/> from both sides:</P>
+      <BT src={String.raw`A \mathbf{v} - \lambda \mathbf{v} = \mathbf{0}.`}/>
+      <P>Factor out <T src="\mathbf{v}"/>, using the identity matrix to make the dimensions work:</P>
+      <BT src={String.raw`(A - \lambda I) \mathbf{v} = \mathbf{0}.`}/>
+      <P>(We MUST insert <T src="I"/> because <T src="A - \lambda"/> doesn't make sense — a matrix minus a scalar. <T src="A - \lambda I"/> is a matrix minus a matrix.)</P>
+
+      <H3>The crucial demand: non-trivial v</H3>
+      <P>By definition, eigenvectors are NON-ZERO. So we don't want the trivial solution <T src="\mathbf{v} = \mathbf{0}"/>. We want a non-trivial solution of:</P>
+      <BT src={String.raw`(A - \lambda I) \mathbf{v} = \mathbf{0}.`}/>
+      <P>From Concept 4.3 / 5.3: a homogeneous system <T src="M \mathbf{v} = \mathbf{0}"/> has a non-trivial solution iff <T src="M"/> is singular, iff <T src="\det M = 0"/>. So:</P>
+      <BT src={String.raw`\boxed{\det(A - \lambda I) = 0.}`}/>
+      <P>This is the <B>characteristic equation</B> of A.</P>
+
+      <H3>The characteristic polynomial</H3>
+      <P>For an <T src="n \times n"/> matrix <T src="A"/>, <T src="\det(A - \lambda I)"/> is a polynomial in <T src="\lambda"/> of degree <T src="n"/>, called the <B>characteristic polynomial</B>:</P>
+      <BT src={String.raw`p(\lambda) = \det(A - \lambda I).`}/>
+      <P>For 2×2 <T src="A = \begin{pmatrix} a & b \\ c & d \end{pmatrix}"/>:</P>
+      <BT src={String.raw`p(\lambda) = \det\begin{pmatrix} a - \lambda & b \\ c & d - \lambda \end{pmatrix} = (a - \lambda)(d - \lambda) - bc = \lambda^2 - (a + d) \lambda + (ad - bc).`}/>
+      <P>i.e.</P>
+      <BT src={String.raw`p(\lambda) = \lambda^2 - \text{tr}(A) \lambda + \det(A).`}/>
+      <P>You'll use this constantly — the 2×2 characteristic polynomial is built from the trace and determinant.</P>
+
+      <H3>For n×n: degree n, n eigenvalues</H3>
+      <P>Expanding <T src="\det(A - \lambda I)"/> for a general <T src="n \times n"/> matrix gives a polynomial of degree <T src="n"/>:</P>
+      <BT src={String.raw`p(\lambda) = (-1)^n \lambda^n + c_{n-1} \lambda^{n-1} + \cdots + c_0.`}/>
+      <P>By the <B>Fundamental Theorem of Algebra</B>, this polynomial has exactly <T src="n"/> roots (counting multiplicity) in the complex numbers. So an <T src="n \times n"/> matrix has exactly <T src="n"/> eigenvalues over <T src="\mathbb{C}"/>.</P>
+
+      <Callout kind="info" title="The two coefficient shortcuts">
+        <UL>
+          <Li>The coefficient of <T src="\lambda^{n-1}"/> is <T src="-\text{tr}(A)"/>. So the SUM of all eigenvalues equals <T src="\text{tr}(A)"/> (Concept 6.7).</Li>
+          <Li>The constant term (value at <T src="\lambda = 0"/>) is <T src="\det(A)"/>. By Vieta's formulas, the PRODUCT of all eigenvalues equals <T src="(-1)^n \cdot \text{constant term} = \det(A)"/>.</Li>
+        </UL>
+      </Callout>
+
+      <CharPolyBuilder/>
+
+      <H3>Worked example — 3×3</H3>
+      <P>Find the characteristic polynomial of <T src="A = \begin{pmatrix} 2 & 1 & 0 \\ 0 & 2 & 0 \\ 1 & 0 & 3 \end{pmatrix}"/>.</P>
+      <P>Expand <T src="\det(A - \lambda I)"/> along the third column (it has two zeros):</P>
+      <BT src={String.raw`A - \lambda I = \begin{pmatrix} 2 - \lambda & 1 & 0 \\ 0 & 2 - \lambda & 0 \\ 1 & 0 & 3 - \lambda \end{pmatrix}.`}/>
+      <P>Expanding along column 3:</P>
+      <BT src={String.raw`p(\lambda) = (3 - \lambda) \cdot \det\begin{pmatrix} 2 - \lambda & 1 \\ 0 & 2 - \lambda \end{pmatrix} = (3 - \lambda)(2 - \lambda)^2.`}/>
+      <P>Roots: <T src="\lambda = 2"/> (multiplicity 2) and <T src="\lambda = 3"/>. So eigenvalues are 2, 2, 3.</P>
+
+      <Callout kind="trap" title="Eigenvalues of triangular matrices = diagonal entries">
+        <P>For ANY triangular matrix (upper OR lower), <T src="A - \lambda I"/> is also triangular. Its determinant is the product of diagonal entries: <T src="(a_{11} - \lambda)(a_{22} - \lambda) \cdots (a_{nn} - \lambda)"/>. So the eigenvalues are exactly the diagonal entries. This is the fastest shortcut on GATE — always check for triangular structure first.</P>
+      </Callout>
+
+      <Callout kind="recall" title="Concept 6.2 in one breath">
+        <P>Av = λv ⇒ (A − λI)v = 0 needs det(A − λI) = 0 for non-trivial v. This is the characteristic equation. The polynomial p(λ) = det(A − λI) has degree n with n complex roots — the eigenvalues. For 2×2: p(λ) = λ² − trace·λ + det. For triangular: eigenvalues = diagonal entries.</P>
+      </Callout>
+
+      <ProgressPill conceptId="m6-c62"/>
+    </ConceptCard>
+  );
+}
+
+/* ════════════════════════════════════════════════════════
+   CONCEPT 6.3 — Solving for Eigenvalues and Eigenvectors
+   Interactive: Step-by-Step Solver
+   ════════════════════════════════════════════════════════ */
+function EigenSolver() {
+  const [A, setA] = useState([[3, 1], [0, 2]]);
+  const e = useMemo(() => eigen2x2(A), [A]);
+  const [[a, b], [c, d]] = A;
+
+  return (
+    <InteractiveFrame
+      name="Eigenvalue + Eigenvector Solver — full step-by-step"
+      whatAmISeeing="A 2×2 matrix A. Three steps shown: (1) form the characteristic equation; (2) solve for eigenvalues via the quadratic formula; (3) for each eigenvalue λ, solve (A − λI)v = 0 and read off the eigenvector. Each step is shown with the actual numbers."
+      tryThis="Try the symmetric matrix [[4, 1], [1, 2]] — two distinct real eigenvalues, orthogonal eigenvectors. Try [[3, 1], [0, 3]] (defective) — repeated eigenvalue, only ONE eigenvector. Try [[0, -1], [1, 0]] (rotation) — complex eigenvalues, no real eigenvectors."
+    >
+      <div className="space-y-4">
+        <div className="grid lg:grid-cols-[auto,1fr] gap-4">
+          <MatrixEditor matrix={A} setMatrix={setA} label="MATRIX A"/>
+
+          <div className="rounded-lg p-4" style={{border: "1px solid var(--accent-border)", background: "var(--accent-soft)"}}>
+            <div className="text-xs tracking-[0.2em] font-semibold mb-2" style={{color: "var(--accent)"}}>STEP 1 · CHARACTERISTIC EQUATION</div>
+            <div className="text-sm font-mono" style={{color: "var(--text)"}}>
+              p(λ) = λ² − ({e.trace.toFixed(2)})λ + {e.det.toFixed(2)} = 0
+            </div>
+            <div className="text-xs mt-1" style={{color: "var(--text-dim)"}}>
+              trace = {e.trace.toFixed(2)} · det = {e.det.toFixed(2)}
+            </div>
+          </div>
+        </div>
+
+        <div className="rounded-lg p-4" style={{border: "1px solid var(--accent-2-border)", background: "var(--accent-2-soft)"}}>
+          <div className="text-xs tracking-[0.2em] font-semibold mb-2" style={{color: "var(--accent-2)"}}>STEP 2 · SOLVE QUADRATIC</div>
+          <div className="text-sm font-mono space-y-1" style={{color: "var(--text)"}}>
+            <div>discriminant = trace² − 4·det = {(e.trace*e.trace - 4*e.det).toFixed(2)}</div>
+            {!e.complex ? (
+              <>
+                <div>λ = (trace ± √discriminant) / 2 = ({e.trace.toFixed(2)} ± {Math.sqrt(Math.max(0, e.disc)).toFixed(2)}) / 2</div>
+                <div style={{color: "var(--accent-3)"}}>λ₁ = {e.lambda1.toFixed(3)}{e.repeated ? "  (repeated)" : ""}</div>
+                {!e.repeated && <div style={{color: "var(--warn)"}}>λ₂ = {e.lambda2.toFixed(3)}</div>}
+              </>
+            ) : (
+              <div style={{color: "var(--danger)"}}>λ = {e.lambda1.re.toFixed(2)} ± {e.lambda1.im.toFixed(2)}i (complex)</div>
+            )}
+          </div>
+        </div>
+
+        {!e.complex && (
+          <>
+            <div className="rounded-lg p-4" style={{border: "1px solid var(--accent-3-border)", background: "var(--accent-3-soft)"}}>
+              <div className="text-xs tracking-[0.2em] font-semibold mb-2" style={{color: "var(--accent-3)"}}>STEP 3 · EIGENVECTOR FOR λ₁ = {e.lambda1.toFixed(3)}</div>
+              <div className="text-sm font-mono space-y-1" style={{color: "var(--text)"}}>
+                <div>A − λ₁I = [[{(a - e.lambda1).toFixed(2)}, {b}], [{c}, {(d - e.lambda1).toFixed(2)}]]</div>
+                <div>Solve (A − λ₁I)v = 0 → null space basis:</div>
+                {e.v1 ? (
+                  <div style={{color: "var(--accent-3)"}}>v₁ = ({e.v1.map(x => x.toFixed(2)).join(", ")}) (any scalar multiple is also an eigenvector)</div>
+                ) : (
+                  <div style={{color: "var(--text-dim)"}}>(no eigenvector found — defective case)</div>
+                )}
+              </div>
+            </div>
+
+            {!e.repeated && (
+              <div className="rounded-lg p-4" style={{border: "1px solid var(--warn-border)", background: "var(--warn-soft)"}}>
+                <div className="text-xs tracking-[0.2em] font-semibold mb-2" style={{color: "var(--warn)"}}>STEP 3 · EIGENVECTOR FOR λ₂ = {e.lambda2.toFixed(3)}</div>
+                <div className="text-sm font-mono space-y-1" style={{color: "var(--text)"}}>
+                  <div>A − λ₂I = [[{(a - e.lambda2).toFixed(2)}, {b}], [{c}, {(d - e.lambda2).toFixed(2)}]]</div>
+                  <div>Solve (A − λ₂I)v = 0:</div>
+                  {e.v2 ? (
+                    <div style={{color: "var(--warn)"}}>v₂ = ({e.v2.map(x => x.toFixed(2)).join(", ")})</div>
+                  ) : (
+                    <div style={{color: "var(--text-dim)"}}>(no second eigenvector — defective case, gm &lt; am)</div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {e.repeated && (
+              <div className="rounded-lg p-4" style={{border: "1px solid var(--danger-border)", background: "var(--danger-soft)"}}>
+                <div className="text-xs tracking-[0.2em] font-semibold mb-2" style={{color: "var(--danger)"}}>REPEATED EIGENVALUE</div>
+                <div className="text-sm" style={{color: "var(--text)"}}>
+                  {e.geomMult === 2
+                    ? "Geometric multiplicity = 2: every vector is an eigenvector (A = λI)."
+                    : "Geometric multiplicity = 1: only one eigenvector direction. A is DEFECTIVE (not diagonalizable)."}
+                </div>
+              </div>
+            )}
+          </>
+        )}
+      </div>
+    </InteractiveFrame>
+  );
+}
+
+function Concept63() {
+  return (
+    <ConceptCard id="concept-6-3" label="6.3" moduleLabel="Module 6 · Eigenvalues"
+      title="Solving for Eigenvalues, then Eigenvectors"
+      why="The standard two-step recipe. Find the eigenvalues by solving the characteristic equation. Then, for each eigenvalue, find the eigenvectors by computing the null space of A − λI. Every GATE question on this topic follows this template.">
+      <H3>The two-step recipe</H3>
+      <OL>
+        <Li><B>Find eigenvalues:</B> solve <T src="\det(A - \lambda I) = 0"/> for <T src="\lambda"/>.</Li>
+        <Li><B>Find eigenvectors:</B> for each eigenvalue <T src="\lambda_i"/>, find the null space of <T src="A - \lambda_i I"/>. This null space IS the <B>eigenspace</B> for <T src="\lambda_i"/>.</Li>
+      </OL>
+
+      <H3>Worked example 1 — distinct real eigenvalues</H3>
+      <P>Find the eigenvalues and eigenvectors of <T src="A = \begin{pmatrix} 4 & 1 \\ 2 & 3 \end{pmatrix}"/>.</P>
+      <P><B>Step 1.</B> trace = 7, det = 10. Characteristic polynomial: <T src="\lambda^2 - 7\lambda + 10 = 0"/>. Factor: <T src="(\lambda - 5)(\lambda - 2) = 0"/>. So <T src="\lambda_1 = 5, \lambda_2 = 2"/>.</P>
+      <P><B>Step 2 (λ = 5).</B> <T src="A - 5I = \begin{pmatrix} -1 & 1 \\ 2 & -2 \end{pmatrix}"/>. Row-reduce: <T src="\begin{pmatrix} -1 & 1 \\ 0 & 0 \end{pmatrix}"/>. Setting <T src="v_2 = 1"/>: <T src="v_1 = 1"/>. So <T src="\mathbf{v}_1 = (1, 1)^\top"/>.</P>
+      <P><B>Step 2 (λ = 2).</B> <T src="A - 2I = \begin{pmatrix} 2 & 1 \\ 2 & 1 \end{pmatrix}"/>. Row-reduce: <T src="\begin{pmatrix} 2 & 1 \\ 0 & 0 \end{pmatrix}"/>. Setting <T src="v_2 = -2"/>: <T src="v_1 = 1"/>. So <T src="\mathbf{v}_2 = (1, -2)^\top"/>.</P>
+      <P><B>Verify.</B> <T src="A \mathbf{v}_1 = (5, 5) = 5 \mathbf{v}_1"/> ✓. <T src="A \mathbf{v}_2 = (2, -4) = 2 \mathbf{v}_2"/> ✓.</P>
+
+      <H3>Worked example 2 — repeated eigenvalue, diagonalizable</H3>
+      <P><T src="A = \begin{pmatrix} 3 & 0 \\ 0 & 3 \end{pmatrix} = 3I"/>. Characteristic polynomial: <T src="(\lambda - 3)^2 = 0"/>. So <T src="\lambda = 3"/> (repeated, algebraic multiplicity 2).</P>
+      <P>For <T src="\lambda = 3"/>: <T src="A - 3I = 0"/>. The null space is ALL of <T src="\mathbb{R}^2"/> — every non-zero vector is an eigenvector. Geometric multiplicity 2.</P>
+      <P>Here the matrix is "trivially" diagonal — both algebraic and geometric multiplicity equal 2.</P>
+
+      <H3>Worked example 3 — repeated eigenvalue, DEFECTIVE</H3>
+      <P><T src="A = \begin{pmatrix} 3 & 1 \\ 0 & 3 \end{pmatrix}"/>. Eigenvalue λ = 3 with algebraic multiplicity 2.</P>
+      <P><T src="A - 3I = \begin{pmatrix} 0 & 1 \\ 0 & 0 \end{pmatrix}"/>. Null space: <T src="(c, 0)"/>. Only ONE independent eigenvector direction! Geometric multiplicity = 1 &lt; 2 = algebraic. DEFECTIVE.</P>
+      <P>Defective matrices are not diagonalizable — they need the Jordan canonical form (advanced; out of GATE scope but important for understanding).</P>
+
+      <H3>Worked example 4 — 3×3 matrix</H3>
+      <P><T src="A = \begin{pmatrix} 2 & 0 & 0 \\ 0 & 3 & 4 \\ 0 & 0 & 1 \end{pmatrix}"/> — block-upper-triangular.</P>
+      <P>Eigenvalues are the diagonal entries: 2, 3, 1.</P>
+      <P>For each, find null space of <T src="A - \lambda I"/>. (The work is mechanical; reduce, free variable trick.)</P>
+      <UL>
+        <Li>λ = 2: eigenvector (1, 0, 0).</Li>
+        <Li>λ = 3: eigenvector (0, 1, 0).</Li>
+        <Li>λ = 1: eigenvector (0, -2, 1) (after solving the 2×2 block).</Li>
+      </UL>
+
+      <Callout kind="trap" title="Eigenvectors are not unique — eigenSPACES are">
+        <P>Any non-zero scalar multiple of an eigenvector is also an eigenvector. So when reporting "the eigenvector," it's a representative from a whole eigenSPACE. GATE answers might give your <T src="(1, 1)"/> as <T src="(2, 2)"/> or <T src="(-1, -1)"/> — all are correct.</P>
+        <P>What IS unique is the EIGENSPACE itself: the subspace spanned by all eigenvectors for a given eigenvalue.</P>
+      </Callout>
+
+      <EigenSolver/>
+
+      <H3>The eigenspace</H3>
+      <P>For each eigenvalue <T src="\lambda_i"/>, the set</P>
+      <BT src={String.raw`E_{\lambda_i} = N(A - \lambda_i I) = \{\mathbf{v} : A \mathbf{v} = \lambda_i \mathbf{v}\}`}/>
+      <P>is called the <B>eigenspace</B> for <T src="\lambda_i"/>. It is a subspace of <T src="\mathbb{R}^n"/> — it contains the zero vector AND every eigenvector for <T src="\lambda_i"/>. (We include zero in the eigenspace as a matter of convention, even though zero itself isn't an eigenvector.)</P>
+
+      <Callout kind="proof" title="Why eigenvectors for DIFFERENT eigenvalues are linearly independent">
+        <P>Suppose <T src="\mathbf{v}_1, \mathbf{v}_2"/> are eigenvectors of A for distinct eigenvalues <T src="\lambda_1 \neq \lambda_2"/>. Suppose <T src="c_1 \mathbf{v}_1 + c_2 \mathbf{v}_2 = \mathbf{0}"/>. Apply A: <T src="c_1 \lambda_1 \mathbf{v}_1 + c_2 \lambda_2 \mathbf{v}_2 = \mathbf{0}"/>. Multiply the first equation by <T src="\lambda_1"/>: <T src="c_1 \lambda_1 \mathbf{v}_1 + c_2 \lambda_1 \mathbf{v}_2 = \mathbf{0}"/>. Subtract: <T src="c_2 (\lambda_2 - \lambda_1) \mathbf{v}_2 = \mathbf{0}"/>. Since <T src="\lambda_2 \neq \lambda_1"/> and <T src="\mathbf{v}_2 \neq \mathbf{0}"/>, this forces <T src="c_2 = 0"/>. Back-substitute: <T src="c_1 = 0"/>. So <T src="\mathbf{v}_1, \mathbf{v}_2"/> are linearly independent.</P>
+        <P>By induction, eigenvectors for <T src="n"/> distinct eigenvalues are linearly independent — and hence form a basis if there are <T src="n"/> of them.</P>
+      </Callout>
+
+      <Callout kind="recall" title="Concept 6.3 in one breath">
+        <P>Find eigenvalues via det(A − λI) = 0. For each λ, find eigenvectors via null space of A − λI. Eigenspace = null space of A − λI. Eigenvectors are unique only up to scalar; eigenspaces are unique. Eigenvectors for distinct λ are always linearly independent.</P>
+      </Callout>
+
+      <ProgressPill conceptId="m6-c63"/>
+    </ConceptCard>
+  );
+}
+
+/* ════════════════════════════════════════════════════════
+   CONCEPT 6.4 — Algebraic vs Geometric Multiplicity
+   ════════════════════════════════════════════════════════ */
+function Concept64() {
+  return (
+    <ConceptCard id="concept-6-4" label="6.4" moduleLabel="Module 6 · Eigenvalues"
+      title="Algebraic vs Geometric Multiplicity"
+      why="The single deepest distinction in eigenvalue theory. Algebraic multiplicity (am) counts how many times λ appears as a root of the characteristic polynomial. Geometric multiplicity (gm) counts how many linearly independent eigenvectors λ has. They are NOT always equal — and that gap is what makes some matrices not diagonalizable.">
+      <H3>The two definitions</H3>
+      <UL>
+        <Li><B>Algebraic multiplicity (am(λ)):</B> the power of <T src="(\lambda_0 - \lambda)"/> in the factorization of <T src="p(\lambda)"/>. E.g., if <T src="p(\lambda) = (\lambda - 3)^2 (\lambda - 5)"/>, then am(3) = 2 and am(5) = 1.</Li>
+        <Li><B>Geometric multiplicity (gm(λ)):</B> the dimension of the eigenspace <T src="E_\lambda = N(A - \lambda I)"/>. I.e., the number of linearly independent eigenvectors for <T src="\lambda"/>.</Li>
+      </UL>
+
+      <H3>The key inequality</H3>
+      <BT src={String.raw`\boxed{1 \leq \text{gm}(\lambda) \leq \text{am}(\lambda) \leq n.}`}/>
+      <P>Every eigenvalue has at least one eigenvector (gm ≥ 1, because <T src="A - \lambda I"/> is singular). And gm cannot exceed am. The sum of all am's equals <T src="n"/> (degree of the polynomial).</P>
+
+      <Callout kind="proof" title="Why gm ≤ am">
+        <P>Suppose <T src="\lambda_0"/> has geometric multiplicity <T src="k"/>: there are <T src="k"/> linearly independent eigenvectors <T src="\mathbf{v}_1, \ldots, \mathbf{v}_k"/>. Extend to a basis of <T src="\mathbb{R}^n"/>. In this basis, A becomes a block-triangular matrix with a <T src="k \times k"/> block of <T src="\lambda_0 I"/> in the top-left. The characteristic polynomial has at least <T src="(\lambda_0 - \lambda)^k"/> as a factor. Hence am ≥ k = gm.</P>
+      </Callout>
+
+      <H3>When gm = am (diagonalizable) vs gm &lt; am (defective)</H3>
+
+      <H4>Case 1: am(λ) = 1 (simple eigenvalue)</H4>
+      <P>Then gm(λ) = 1 too (forced by the inequality). One eigenvector. Always "clean."</P>
+
+      <H4>Case 2: am(λ) ≥ 2 (repeated eigenvalue)</H4>
+      <P>Then gm could be anything from 1 to am.</P>
+      <UL>
+        <Li><B>gm = am:</B> "full" eigenspace, A behaves like a multiple of identity on that subspace.</Li>
+        <Li><B>gm &lt; am:</B> A is DEFECTIVE on this eigenvalue. Missing eigenvectors. Not diagonalizable.</Li>
+      </UL>
+
+      <H3>A matrix is diagonalizable iff gm = am for every eigenvalue</H3>
+      <P>To diagonalize <T src="A"/>, we need a basis of eigenvectors. Total eigenvectors needed: <T src="n"/>. Total available: <T src="\sum_i \text{gm}(\lambda_i)"/>. We need <T src="\sum_i \text{gm}(\lambda_i) = n"/>. Since <T src="\sum_i \text{am}(\lambda_i) = n"/> always, the condition is:</P>
+      <BT src={String.raw`\text{Diagonalizable} \iff \text{gm}(\lambda_i) = \text{am}(\lambda_i) \text{ for every eigenvalue.}`}/>
+
+      <H3>Three concrete examples</H3>
+
+      <H4>Example A — All distinct eigenvalues (always diagonalizable)</H4>
+      <BT src={String.raw`A = \begin{pmatrix} 1 & 0 \\ 0 & 2 \end{pmatrix}, \quad \text{am}(1) = 1, \text{gm}(1) = 1, \text{am}(2) = 1, \text{gm}(2) = 1.`}/>
+      <P>Both equalities. A is diagonal already (so trivially diagonalizable).</P>
+
+      <H4>Example B — Repeated, full eigenspace (diagonalizable)</H4>
+      <BT src={String.raw`A = \begin{pmatrix} 3 & 0 \\ 0 & 3 \end{pmatrix} = 3I.`}/>
+      <P>am(3) = 2, gm(3) = 2 (every vector is an eigenvector). Diagonalizable — it IS already diagonal.</P>
+
+      <H4>Example C — Repeated, defective (NOT diagonalizable)</H4>
+      <BT src={String.raw`A = \begin{pmatrix} 3 & 1 \\ 0 & 3 \end{pmatrix}.`}/>
+      <P>am(3) = 2. Compute gm: <T src="A - 3I = \begin{pmatrix} 0 & 1 \\ 0 & 0 \end{pmatrix}"/>, null space spanned by <T src="(1, 0)"/>. So gm(3) = 1 &lt; 2. DEFECTIVE. Not diagonalizable.</P>
+
+      <Callout kind="trap" title="The repeated-eigenvalue trap">
+        <P>"A 3×3 matrix with a repeated eigenvalue is NOT diagonalizable." FALSE. It MIGHT be — if gm = am for the repeated eigenvalue. Always check the dimension of the eigenspace before declaring "not diagonalizable."</P>
+        <P>Conversely: "A matrix with distinct eigenvalues IS diagonalizable." TRUE. Distinct eigenvalues guarantee gm = am = 1 for each, and the total number of independent eigenvectors equals <T src="n"/>.</P>
+      </Callout>
+
+      <Callout kind="recall" title="Concept 6.4 in one breath">
+        <P>am = multiplicity as root of characteristic polynomial. gm = dim of eigenspace = nullity of (A − λI). Always 1 ≤ gm ≤ am ≤ n. A is diagonalizable iff gm = am for every eigenvalue. Defective = gm &lt; am somewhere. Distinct eigenvalues ⇒ automatic diagonalizability.</P>
+      </Callout>
+
+      <ProgressPill conceptId="m6-c64"/>
+    </ConceptCard>
+  );
+}
+
+/* ════════════════════════════════════════════════════════
+   CONCEPT 6.5 — Three Examples with Repeating Lambda
+   ════════════════════════════════════════════════════════ */
+function MultiplicityExplorer() {
+  const cases = [
+    {
+      name: "Case A · Distinct eigenvalues",
+      A: [[2, 0], [0, 5]],
+      desc: "λ₁ = 2, λ₂ = 5 — distinct → automatically diagonalizable.",
+      verdict: "diagonalizable",
+    },
+    {
+      name: "Case B · Repeated, gm = am (diagonalizable)",
+      A: [[3, 0], [0, 3]],
+      desc: "λ = 3 repeated. A = 3I — every vector is an eigenvector → gm = am = 2 → diagonalizable.",
+      verdict: "diagonalizable",
+    },
+    {
+      name: "Case C · Repeated, gm < am (DEFECTIVE)",
+      A: [[3, 1], [0, 3]],
+      desc: "λ = 3 with am = 2. But A − 3I = [[0,1],[0,0]] has 1-dim null space → gm = 1 < 2. DEFECTIVE.",
+      verdict: "defective",
+    },
+  ];
+
+  return (
+    <InteractiveFrame
+      name="Repeating Lambda — three concrete cases"
+      whatAmISeeing="Three 2×2 matrices side-by-side. Each has TWO eigenvalues (with multiplicity), but the relationship between algebraic and geometric multiplicity differs. Cases A and B are diagonalizable; Case C is defective."
+      tryThis="Notice: Case B has A = 3I, which IS already diagonal (geometric multiplicity = 2). Case C has the same eigenvalue but only 1 independent eigenvector — defective. The single off-diagonal 1 in Case C is what kills diagonalizability."
+    >
+      <div className="grid md:grid-cols-3 gap-4">
+        {cases.map((c, i) => {
+          const e = eigen2x2(c.A);
+          const isDefective = c.verdict === "defective";
+          return (
+            <div key={i} className="rounded-xl p-4"
+              style={{border: "1px solid " + (isDefective ? "var(--danger-border)" : "var(--accent-3-border)"),
+                      background: isDefective ? "var(--danger-soft)" : "var(--accent-3-soft)"}}>
+              <div className="text-xs tracking-[0.2em] font-semibold mb-2" style={{color: isDefective ? "var(--danger)" : "var(--accent-3)"}}>{c.name}</div>
+              <div className="flex justify-center mb-3">
+                <MatrixDisplay data={c.A}/>
+              </div>
+              <div className="text-xs leading-relaxed mb-3" style={{color: "var(--text)"}}>{c.desc}</div>
+              <div className="text-xs space-y-1" style={{color: "var(--text-dim)"}}>
+                <div>am = <span style={{color: "var(--accent)"}}>{e.repeated ? 2 : 1}</span></div>
+                <div>gm = <span style={{color: "var(--accent-2)"}}>{e.repeated ? e.geomMult : 1}</span></div>
+                <div className="pt-1 font-semibold" style={{color: isDefective ? "var(--danger)" : "var(--accent-3)", borderTop: "1px solid var(--border)"}}>
+                  {isDefective ? "⛔ Not diagonalizable" : "✓ Diagonalizable"}
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </InteractiveFrame>
+  );
+}
+
+function Concept65() {
+  return (
+    <ConceptCard id="concept-6-5" label="6.5" moduleLabel="Module 6 · Eigenvalues"
+      title="Three Examples with Repeating Lambda — In Detail"
+      why="Repeated eigenvalues are where most students stumble. The fork in the road — diagonalizable or defective — is decided entirely by geometric multiplicity. We work through every case end-to-end so the distinction becomes mechanical.">
+      <H3>Why repeating eigenvalues need special attention</H3>
+      <P>When all eigenvalues are distinct, diagonalizability is automatic (Concept 6.3 proof). When eigenvalues repeat, you have to CHECK the geometric multiplicity. The check might say "yes still diagonalizable" or "no, defective" — and either outcome happens regularly.</P>
+
+      <H3>Case A — Repeated λ, full eigenspace (gm = am)</H3>
+      <BT src={String.raw`A_1 = \begin{pmatrix} 3 & 0 \\ 0 & 3 \end{pmatrix}.`}/>
+      <P>Eigenvalues: solve <T src="(3 - \lambda)^2 = 0"/>. λ = 3 with am = 2.</P>
+      <P>Eigenspace: <T src="A_1 - 3I = 0"/>, the zero matrix. Null space = all of <T src="\mathbb{R}^2"/>. gm = 2. Diagonalizable.</P>
+      <P>Eigenvectors: every non-zero vector is an eigenvector. Choose any basis, say <T src="\mathbf{e}_1, \mathbf{e}_2"/>.</P>
+
+      <H3>Case B — Repeated λ, only ONE eigenvector (defective)</H3>
+      <BT src={String.raw`A_2 = \begin{pmatrix} 3 & 1 \\ 0 & 3 \end{pmatrix}.`}/>
+      <P>Eigenvalues: triangular, so λ = 3, 3. am = 2.</P>
+      <P>Eigenspace: <T src="A_2 - 3I = \begin{pmatrix} 0 & 1 \\ 0 & 0 \end{pmatrix}"/>. Setting <T src="v_2 = 0, v_1 = 1"/> gives only one direction. gm = 1 &lt; am = 2. DEFECTIVE.</P>
+      <P>Only one eigenvector: <T src="\mathbf{v} = (1, 0)^\top"/>. Try other vectors: <T src="A_2 \mathbf{v}_2 = (1, 0)"/>, not a scalar multiple of <T src="\mathbf{v}_2"/>.</P>
+      <P>This matrix is not diagonalizable. In advanced theory, it has a "Jordan block" — but GATE just wants you to recognize it as defective.</P>
+
+      <H3>Case C — 3×3 with triple repeated λ</H3>
+      <P>Consider three sub-cases, all with characteristic polynomial <T src="(\lambda - 2)^3 = 0"/>:</P>
+
+      <H4>C₁: <T src="A = 2I"/> (am = 3, gm = 3) — diagonalizable trivially</H4>
+      <BT src={String.raw`A = \begin{pmatrix} 2 & 0 & 0 \\ 0 & 2 & 0 \\ 0 & 0 & 2 \end{pmatrix}.`}/>
+      <P>Every vector is an eigenvector. Already diagonal. gm = am = 3.</P>
+
+      <H4>C₂: One Jordan block (am = 3, gm = 1) — defective</H4>
+      <BT src={String.raw`A = \begin{pmatrix} 2 & 1 & 0 \\ 0 & 2 & 1 \\ 0 & 0 & 2 \end{pmatrix}.`}/>
+      <P><T src="A - 2I = \begin{pmatrix} 0 & 1 & 0 \\ 0 & 0 & 1 \\ 0 & 0 & 0 \end{pmatrix}"/>. Rank 2. Nullity 1. So gm = 1 &lt; am = 3. Strongly defective.</P>
+
+      <H4>C₃: Mixed (am = 3, gm = 2) — partially defective</H4>
+      <BT src={String.raw`A = \begin{pmatrix} 2 & 0 & 0 \\ 0 & 2 & 1 \\ 0 & 0 & 2 \end{pmatrix}.`}/>
+      <P><T src="A - 2I = \begin{pmatrix} 0 & 0 & 0 \\ 0 & 0 & 1 \\ 0 & 0 & 0 \end{pmatrix}"/>. Rank 1. Nullity 2. So gm = 2 &lt; am = 3. Still defective.</P>
+
+      <P>The three sub-cases C₁, C₂, C₃ all have the SAME characteristic polynomial, but differ in geometric multiplicity. Diagonalizability cannot be read off the characteristic polynomial alone.</P>
+
+      <MultiplicityExplorer/>
+
+      <Callout kind="info" title="The 'visual signature' of a defective matrix">
+        <P>For 2×2 defective with eigenvalue λ: there's exactly one eigenvector direction. Every other vector gets rotated AND scaled. The "1" in the off-diagonal position of a Jordan block causes vectors near the eigenvector direction to drift toward it (or away, depending on |λ|). In dynamical systems, this is the "rotational pull" toward an asymptote.</P>
+      </Callout>
+
+      <Callout kind="trap" title="GATE-style diagonalizability question — the right algorithm">
+        <P><B>Step 1:</B> Find eigenvalues from the characteristic polynomial.</P>
+        <P><B>Step 2:</B> If all eigenvalues distinct → automatically diagonalizable. Done.</P>
+        <P><B>Step 3:</B> If some eigenvalue repeats, compute gm for that eigenvalue (nullity of A − λI).</P>
+        <P><B>Step 4:</B> If gm = am for EVERY repeated eigenvalue → diagonalizable. Otherwise → defective (not diagonalizable).</P>
+      </Callout>
+
+      <Callout kind="recall" title="Concept 6.5 in one breath">
+        <P>Repeated eigenvalue with gm = am → still diagonalizable. Repeated eigenvalue with gm &lt; am → defective, not diagonalizable. Same characteristic polynomial, different gm values, different verdicts. Always check gm before concluding.</P>
+      </Callout>
+
+      <ProgressPill conceptId="m6-c65"/>
+    </ConceptCard>
+  );
+}
+
+/* ════════════════════════════════════════════════════════
+   CONCEPT 6.6 — Symmetric Matrices Magic
+   ════════════════════════════════════════════════════════ */
+function SymmetricComparison() {
+  const [A, setA] = useState([[2, 1], [3, 4]]);
+  const symPart = [[A[0][0], (A[0][1] + A[1][0])/2], [(A[0][1] + A[1][0])/2, A[1][1]]];
+  const eOriginal = eigen2x2(A);
+  const eSym = eigen2x2(symPart);
+
+  // Compute orthogonality of eigenvectors
+  const isOrth = (v1, v2) => {
+    if (!v1 || !v2) return false;
+    const dot = v1[0]*v2[0] + v1[1]*v2[1];
+    return Math.abs(dot) < 0.01;
+  };
+
+  return (
+    <InteractiveFrame
+      name="Symmetric vs Non-Symmetric — eigenvalue structure compared"
+      whatAmISeeing="Two 2×2 matrices: your input A on the left, and (A + Aᵀ)/2 (the symmetric part) on the right. For each, the eigenvalues and orthogonality of eigenvectors are computed. The symmetric matrix always has real eigenvalues and orthogonal eigenvectors."
+      tryThis="Default A = [[2,1],[3,4]] is non-symmetric — eigenvalues might be real or complex; eigenvectors not orthogonal. Symmetric part [[2,2],[2,4]] always has real eigenvalues and orthogonal eigenvectors. Try A = [[0,-1],[1,0]] — rotation, complex eigenvalues; symmetric part is the zero matrix."
+    >
+      <div className="grid lg:grid-cols-[auto,1fr] gap-4 mb-4">
+        <MatrixEditor matrix={A} setMatrix={setA} label="MATRIX A (your input)"/>
+      </div>
+
+      <div className="grid md:grid-cols-2 gap-4">
+        <div className="rounded-xl p-4"
+          style={{border: "1px solid var(--accent-border)", background: "var(--accent-soft)"}}>
+          <div className="text-xs tracking-[0.2em] font-semibold mb-2" style={{color: "var(--accent)"}}>
+            ORIGINAL A {eOriginal.isSymmetric ? "(symmetric)" : "(non-symmetric)"}
+          </div>
+          <div className="flex justify-center mb-3">
+            <MatrixDisplay data={A}/>
+          </div>
+          <div className="text-xs space-y-1 font-mono" style={{color: "var(--text-dim)"}}>
+            <div>trace = {eOriginal.trace.toFixed(2)}, det = {eOriginal.det.toFixed(2)}</div>
+            {eOriginal.complex ? (
+              <div style={{color: "var(--danger)"}}>Eigenvalues: {eOriginal.lambda1.re.toFixed(2)} ± {eOriginal.lambda1.im.toFixed(2)}i (COMPLEX)</div>
+            ) : (
+              <>
+                <div>λ₁ = {eOriginal.lambda1.toFixed(3)}, λ₂ = {eOriginal.lambda2.toFixed(3)}</div>
+                {eOriginal.v1 && eOriginal.v2 && (
+                  <div>Eigenvectors orthogonal? <span style={{color: isOrth(eOriginal.v1, eOriginal.v2) ? "var(--accent-3)" : "var(--warn)"}}>
+                    {isOrth(eOriginal.v1, eOriginal.v2) ? "YES" : "NO"}
+                  </span></div>
+                )}
+              </>
+            )}
+          </div>
+        </div>
+
+        <div className="rounded-xl p-4"
+          style={{border: "1px solid var(--accent-3-border)", background: "var(--accent-3-soft)"}}>
+          <div className="text-xs tracking-[0.2em] font-semibold mb-2" style={{color: "var(--accent-3)"}}>
+            SYMMETRIC PART (A + Aᵀ)/2
+          </div>
+          <div className="flex justify-center mb-3">
+            <MatrixDisplay data={symPart}/>
+          </div>
+          <div className="text-xs space-y-1 font-mono" style={{color: "var(--text-dim)"}}>
+            <div>trace = {eSym.trace.toFixed(2)}, det = {eSym.det.toFixed(2)}</div>
+            <div style={{color: "var(--accent-3)"}}>λ₁ = {eSym.lambda1.toFixed(3)}, λ₂ = {eSym.lambda2.toFixed(3)} (always REAL)</div>
+            {eSym.v1 && eSym.v2 && (
+              <div>Eigenvectors orthogonal? <span style={{color: isOrth(eSym.v1, eSym.v2) ? "var(--accent-3)" : "var(--warn)"}}>
+                {isOrth(eSym.v1, eSym.v2) ? "YES ✓" : "NO"}
+              </span></div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-4 rounded-lg p-3 text-sm"
+        style={{border: "1px solid var(--info-border)", background: "var(--info-soft)", color: "var(--text)"}}>
+        <strong style={{color: "var(--info)"}}>Spectral Theorem:</strong> every real symmetric matrix has n REAL eigenvalues (with multiplicity) and n ORTHOGONAL eigenvectors. Hence always diagonalizable — in fact, by an ORTHOGONAL similarity: <T src="A = Q \Lambda Q^\top"/> with <T src="Q^\top Q = I"/>.
+      </div>
+    </InteractiveFrame>
+  );
+}
+
+function Concept66() {
+  return (
+    <ConceptCard id="concept-6-6" label="6.6" moduleLabel="Module 6 · Eigenvalues"
+      title="Symmetric Matrices Have n Linearly Independent Eigenvectors"
+      why="One theorem rules them all. Real symmetric matrices behave PERFECTLY: all eigenvalues real, all eigenvectors orthogonal, always diagonalizable. Every covariance matrix, every Hessian, every adjacency matrix of an undirected graph is symmetric — which is why PCA, optimization theory, and spectral graph theory exist.">
+      <H3>The Spectral Theorem (real symmetric case)</H3>
+      <P>If <T src="A"/> is an <T src="n \times n"/> REAL SYMMETRIC matrix (<T src="A = A^\top"/>), then:</P>
+      <OL>
+        <Li>All eigenvalues of <T src="A"/> are <B>real</B>.</Li>
+        <Li>Eigenvectors corresponding to <B>distinct</B> eigenvalues are <B>orthogonal</B>.</Li>
+        <Li>Even for repeated eigenvalues, you can choose <T src="n"/> mutually orthogonal eigenvectors.</Li>
+        <Li>Consequently, <T src="A"/> is <B>always diagonalizable</B>, and the diagonalization can be done with an ORTHOGONAL change of basis: <T src="A = Q \Lambda Q^\top"/> where <T src="Q^\top Q = I"/>.</Li>
+      </OL>
+
+      <Callout kind="proof" title="Why eigenvectors for distinct eigenvalues are orthogonal (the key lemma)">
+        <P>Let <T src="\mathbf{v}_1, \mathbf{v}_2"/> be eigenvectors of A with distinct eigenvalues <T src="\lambda_1, \lambda_2"/>. Compute <T src="\mathbf{v}_1^\top A \mathbf{v}_2"/> two ways:</P>
+        <P><B>Way 1:</B> <T src="\mathbf{v}_1^\top (A \mathbf{v}_2) = \mathbf{v}_1^\top (\lambda_2 \mathbf{v}_2) = \lambda_2 \mathbf{v}_1^\top \mathbf{v}_2"/>.</P>
+        <P><B>Way 2:</B> Since <T src="A = A^\top"/>, <T src="\mathbf{v}_1^\top A \mathbf{v}_2 = (A \mathbf{v}_1)^\top \mathbf{v}_2 = (\lambda_1 \mathbf{v}_1)^\top \mathbf{v}_2 = \lambda_1 \mathbf{v}_1^\top \mathbf{v}_2"/>.</P>
+        <P>Equating: <T src="\lambda_1 \mathbf{v}_1^\top \mathbf{v}_2 = \lambda_2 \mathbf{v}_1^\top \mathbf{v}_2"/>, so <T src="(\lambda_1 - \lambda_2) \mathbf{v}_1^\top \mathbf{v}_2 = 0"/>. Since <T src="\lambda_1 \neq \lambda_2"/>, <T src="\mathbf{v}_1^\top \mathbf{v}_2 = 0"/>. Eigenvectors are orthogonal.</P>
+      </Callout>
+
+      <Callout kind="proof" title="Why eigenvalues are real (for real symmetric A)">
+        <P>Let <T src="A \mathbf{v} = \lambda \mathbf{v}"/> with <T src="\mathbf{v} \neq \mathbf{0}"/> (possibly complex). Take conjugate transpose: <T src="\mathbf{v}^* A^\top = \overline{\lambda} \mathbf{v}^*"/>. Since A is real and symmetric, <T src="A^\top = A"/>: <T src="\mathbf{v}^* A = \overline{\lambda} \mathbf{v}^*"/>.</P>
+        <P>Multiply both sides of the original by <T src="\mathbf{v}^*"/> from left: <T src="\mathbf{v}^* A \mathbf{v} = \lambda \mathbf{v}^* \mathbf{v}"/>.</P>
+        <P>Use the transposed equation: <T src="\mathbf{v}^* A \mathbf{v} = \overline{\lambda} \mathbf{v}^* \mathbf{v}"/>.</P>
+        <P>So <T src="(\lambda - \overline{\lambda}) \mathbf{v}^* \mathbf{v} = 0"/>. Since <T src="\mathbf{v}^* \mathbf{v} = \|\mathbf{v}\|^2 &gt; 0"/>, we get <T src="\lambda = \overline{\lambda}"/>, i.e., λ is real.</P>
+      </Callout>
+
+      <H3>Why symmetric matrices are EVERYWHERE in ML/CS</H3>
+      <UL>
+        <Li><B>Covariance matrices</B> <T src="\Sigma = \mathbb{E}[(\mathbf{x} - \mathbb{E}\mathbf{x})(\mathbf{x} - \mathbb{E}\mathbf{x})^\top]"/> are symmetric. PCA decomposes the covariance via the spectral theorem.</Li>
+        <Li><B>Hessian matrices</B> <T src="H_{ij} = \partial^2 f / \partial x_i \partial x_j"/> are symmetric (mixed partials equal). Optimization classifies minima/maxima via eigenvalues of H.</Li>
+        <Li><B>Adjacency matrices of undirected graphs</B> are symmetric. Spectral graph theory (Laplacian, expander graphs, Cheeger's inequality) is all eigenvalue magic.</Li>
+        <Li><B>Gram matrices</B> <T src="K_{ij} = \langle \mathbf{x}_i, \mathbf{x}_j \rangle"/> from kernel methods. Always symmetric and positive semi-definite.</Li>
+        <Li><B>Quadratic forms</B> <T src="\mathbf{x}^\top A \mathbf{x}"/> can always be assumed symmetric (replace <T src="A"/> with <T src="(A + A^\top)/2"/>).</Li>
+      </UL>
+
+      <SymmetricComparison/>
+
+      <H3>The orthogonal diagonalization</H3>
+      <P>For symmetric <T src="A"/>, the diagonalization takes a particularly clean form:</P>
+      <BT src={String.raw`A = Q \Lambda Q^\top,`}/>
+      <P>where <T src="Q"/> is ORTHOGONAL (<T src="Q^\top Q = I"/>) whose columns are orthonormal eigenvectors of A, and <T src="\Lambda"/> is the diagonal matrix of eigenvalues. Since <T src="Q^{-1} = Q^\top"/>, computing the inverse is FREE — you just take the transpose.</P>
+
+      <Callout kind="ml" title="PCA in one sentence using the spectral theorem">
+        <P>Given data centered around the origin, the sample covariance matrix <T src="C"/> is symmetric and positive semi-definite. By the spectral theorem, <T src="C = Q \Lambda Q^\top"/> with non-negative eigenvalues on the diagonal of <T src="\Lambda"/>. The columns of <T src="Q"/> are the PRINCIPAL DIRECTIONS; the eigenvalues are the VARIANCE ALONG those directions. PCA = sort eigenvalues by size, keep the top k columns of Q. That's it.</P>
+      </Callout>
+
+      <Callout kind="recall" title="Concept 6.6 in one breath">
+        <P>Real symmetric A: (1) eigenvalues real, (2) eigenvectors for distinct λ orthogonal, (3) always diagonalizable by orthogonal Q. A = QΛQᵀ. Covariance, Hessian, Gram, adjacency — all symmetric. The spectral theorem powers PCA and most of ML.</P>
+      </Callout>
+
+      <ProgressPill conceptId="m6-c66"/>
+    </ConceptCard>
+  );
+}
+
+/* ════════════════════════════════════════════════════════
+   CONCEPT 6.7 — Trace = Σλ, Det = Πλ — The Magical Properties
+   ════════════════════════════════════════════════════════ */
+function TraceDetTrainer() {
+  const presets = [
+    { A: [[3, 1], [0, 2]], label: "Upper triangular — eigenvalues = diagonal" },
+    { A: [[4, 1], [1, 4]], label: "Symmetric" },
+    { A: [[2, -1], [4, -3]], label: "General" },
+    { A: [[5, 3], [3, 5]], label: "Symmetric" },
+  ];
+  const [presetIdx, setPresetIdx] = useState(0);
+  const A = presets[presetIdx].A;
+  const e = eigen2x2(A);
+
+  return (
+    <InteractiveFrame
+      name="Trace-Det Shortcut Trainer"
+      whatAmISeeing="A 2×2 matrix and a side-by-side comparison: (1) the full characteristic polynomial computation, (2) the trace-det shortcut. Both give the same eigenvalues, but the shortcut takes 5 seconds — perfect for GATE."
+      tryThis="Note: for 2×2 you only need trace and det to find eigenvalues. Pick presets and watch the formula. The eigenvalues always satisfy λ₁ + λ₂ = trace and λ₁ · λ₂ = det. If you know one eigenvalue, the other comes from these two equations instantly."
+    >
+      <div className="flex gap-2 flex-wrap mb-4">
+        {presets.map((p, i) => (
+          <button key={i} onClick={() => setPresetIdx(i)}
+            className="text-xs px-3 py-1.5 rounded-lg transition-colors"
+            style={{
+              border: "1px solid " + (presetIdx === i ? "var(--accent-border)" : "var(--border)"),
+              background: presetIdx === i ? "var(--accent-soft)" : "transparent",
+              color: presetIdx === i ? "var(--accent)" : "var(--text-dim)",
+            }}>{p.label}</button>
+        ))}
+      </div>
+
+      <div className="grid md:grid-cols-2 gap-4">
+        <div className="rounded-xl p-4" style={{border: "1px solid var(--accent-border)", background: "var(--accent-soft)"}}>
+          <div className="text-xs tracking-[0.2em] font-semibold mb-3" style={{color: "var(--accent)"}}>FULL COMPUTATION</div>
+          <div className="flex justify-center mb-3">
+            <MatrixDisplay data={A}/>
+          </div>
+          <div className="text-sm font-mono space-y-1" style={{color: "var(--text)"}}>
+            <div>det(A − λI) = ({A[0][0]}−λ)({A[1][1]}−λ) − ({A[0][1]})({A[1][0]})</div>
+            <div>= λ² − {e.trace.toFixed(2)}·λ + {e.det.toFixed(2)} = 0</div>
+            <div className="pt-2" style={{color: "var(--accent-3)", borderTop: "1px solid var(--border)"}}>
+              λ = ({e.trace.toFixed(2)} ± √{(e.trace*e.trace - 4*e.det).toFixed(2)}) / 2
+            </div>
+          </div>
+        </div>
+
+        <div className="rounded-xl p-4" style={{border: "1px solid var(--accent-3-border)", background: "var(--accent-3-soft)"}}>
+          <div className="text-xs tracking-[0.2em] font-semibold mb-3" style={{color: "var(--accent-3)"}}>SHORTCUT (use trace & det)</div>
+          <div className="text-sm space-y-2" style={{color: "var(--text)"}}>
+            <div className="font-mono">trace(A) = <span style={{color: "var(--accent)"}}>{e.trace.toFixed(2)}</span> ⇒ λ₁ + λ₂ = {e.trace.toFixed(2)}</div>
+            <div className="font-mono">det(A) = <span style={{color: "var(--accent-2)"}}>{e.det.toFixed(2)}</span> ⇒ λ₁ · λ₂ = {e.det.toFixed(2)}</div>
+            <div className="pt-2 text-xs" style={{color: "var(--text-dim)", borderTop: "1px solid var(--border)"}}>
+              If problem gives one eigenvalue, the other is determined by these two equations. If problem asks "is A invertible", check det. If asks "is A traceless", check trace.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-4 rounded-lg p-3 text-center"
+        style={{border: "1px solid var(--info-border)", background: "var(--info-soft)"}}>
+        <div className="text-xs tracking-[0.2em] font-semibold mb-1" style={{color: "var(--info)"}}>EIGENVALUES</div>
+        {e.complex ? (
+          <div className="text-lg font-mono" style={{color: "var(--text)"}}>λ = {e.lambda1.re.toFixed(2)} ± {e.lambda1.im.toFixed(2)}i</div>
+        ) : (
+          <div className="text-lg font-mono" style={{color: "var(--text)"}}>
+            λ₁ = {e.lambda1.toFixed(3)} {!e.repeated && <>, λ₂ = {e.lambda2.toFixed(3)}</>}
+          </div>
+        )}
+      </div>
+    </InteractiveFrame>
+  );
+}
+
+function Concept67() {
+  return (
+    <ConceptCard id="concept-6-7" label="6.7" moduleLabel="Module 6 · Eigenvalues"
+      title="Two Magical Properties: trace = Σλ, det = Πλ"
+      why="The shortcuts that win GATE marks. Trace equals the SUM of eigenvalues. Determinant equals the PRODUCT. These two facts let you compute eigenvalues mentally for 2×2, verify your work, and spot impossible answers. Master them.">
+      <H3>Property 1: trace(A) = sum of eigenvalues</H3>
+      <BT src={String.raw`\text{tr}(A) = \sum_{i=1}^{n} \lambda_i.`}/>
+
+      <Callout kind="proof" title="Why trace = Σλ (from the characteristic polynomial)">
+        <P>The characteristic polynomial expands as <T src="p(\lambda) = (-1)^n \prod_i (\lambda - \lambda_i) = (-1)^n [\lambda^n - (\sum \lambda_i) \lambda^{n-1} + \cdots]"/>.</P>
+        <P>On the other hand, expanding <T src="\det(A - \lambda I)"/> directly: the coefficient of <T src="\lambda^{n-1}"/> is <T src="(-1)^{n-1} (a_{11} + a_{22} + \cdots + a_{nn}) = (-1)^{n-1} \text{tr}(A)"/>.</P>
+        <P>Matching coefficients: <T src="\text{tr}(A) = \sum_i \lambda_i"/>.</P>
+      </Callout>
+
+      <H3>Property 2: det(A) = product of eigenvalues</H3>
+      <BT src={String.raw`\det(A) = \prod_{i=1}^{n} \lambda_i.`}/>
+
+      <Callout kind="proof" title="Why det = Πλ">
+        <P>Set <T src="\lambda = 0"/> in the characteristic polynomial: <T src="p(0) = \det(A - 0 \cdot I) = \det(A)"/>. On the other hand, <T src="p(0) = (-1)^n \prod_i (-\lambda_i) = \prod_i \lambda_i"/>. Match: <T src="\det(A) = \prod_i \lambda_i"/>.</P>
+      </Callout>
+
+      <H3>The 2×2 magic recipe</H3>
+      <P>For any 2×2 matrix A:</P>
+      <BT src={String.raw`\lambda_1 + \lambda_2 = \text{tr}(A) = a + d, \quad \lambda_1 \lambda_2 = \det(A) = ad - bc.`}/>
+      <P>These are the coefficients in the characteristic equation <T src="\lambda^2 - \text{tr}(A) \lambda + \det(A) = 0"/>. Vieta's formulas in action.</P>
+
+      <H3>Three killer GATE applications</H3>
+
+      <H4>Application 1: "One eigenvalue is given; find the other."</H4>
+      <P>Given <T src="A = \begin{pmatrix} 5 & 2 \\ 1 & 4 \end{pmatrix}"/>, one eigenvalue is 3. Find the other.</P>
+      <P><B>Trick:</B> trace = 9, so other eigenvalue = 9 − 3 = 6. (Verify via det = 18 = 3 · 6 ✓.)</P>
+
+      <H4>Application 2: "Is A invertible?" without computing det fully</H4>
+      <P>A is invertible iff det ≠ 0 iff zero is not an eigenvalue. So if you know all eigenvalues, check whether 0 is among them.</P>
+
+      <H4>Application 3: "Find det(A²) given det(A) = 4"</H4>
+      <P>Eigenvalues of <T src="A^2"/> are <T src="\lambda_i^2"/>. So <T src="\det(A^2) = \prod \lambda_i^2 = (\prod \lambda_i)^2 = (\det A)^2 = 16"/>.</P>
+
+      <TraceDetTrainer/>
+
+      <H3>Why this generalizes — eigenvalues of A^k, A⁻¹, p(A)</H3>
+      <P>The eigen-data of A propagates cleanly through polynomial operations:</P>
+      <BT src={String.raw`A^k \text{ has eigenvalues } \lambda_i^k. \quad A^{-1} \text{ has eigenvalues } 1/\lambda_i. \quad p(A) \text{ has eigenvalues } p(\lambda_i).`}/>
+      <P>The eigenVECTORS stay the same (assuming A is diagonalizable). Only the eigenvalues transform. Module 7 (Eigenvalue Power Tools) makes heavy use of this.</P>
+
+      <Callout kind="trap" title="Two common 'magical-property' mistakes">
+        <UL>
+          <Li><B>Forgetting multiplicity.</B> If trace = 8 and you know two eigenvalues are 3 and 3, that's a REPEATED eigenvalue — count it twice in trace. Don't say "I know two eigenvalues already, so the third must make trace work" if multiplicities are not respected.</Li>
+          <Li><B>Confusing trace properties.</B> <T src="\text{tr}(AB) = \text{tr}(BA)"/> (cyclic), <T src="\text{tr}(A + B) = \text{tr}(A) + \text{tr}(B)"/> (linear), but <T src="\text{tr}(AB) \neq \text{tr}(A) \text{tr}(B)"/>. Don't confuse.</Li>
+        </UL>
+      </Callout>
+
+      <Callout kind="recall" title="Concept 6.7 in one breath">
+        <P>trace = sum of eigenvalues. det = product. For 2×2 these two facts plus the quadratic formula give the eigenvalues instantly. λ propagates through powers and polynomials cleanly: A^k has λ^k, A⁻¹ has 1/λ, p(A) has p(λ).</P>
+      </Callout>
+
+      <ProgressPill conceptId="m6-c67"/>
+    </ConceptCard>
+  );
+}
+
+/* ════════════════════════════════════════════════════════
+   APP ROOT
+   ════════════════════════════════════════════════════════ */
+function App() {
+  useEffect(() => { hideLoading(); }, []);
+  const concepts = [
+    { id: "concept-6-1", label: "6.1", title: "What eigenvalues really are",     desc: "Special directions A only stretches — the picture before the formula." },
+    { id: "concept-6-2", label: "6.2", title: "Characteristic equation",         desc: "det(A − λI) = 0 — the algebraic test for eigenvalues." },
+    { id: "concept-6-3", label: "6.3", title: "Solving eigenvalues + eigenvectors", desc: "Two-step recipe with full worked examples." },
+    { id: "concept-6-4", label: "6.4", title: "Algebraic vs Geometric Multiplicity", desc: "The fork: gm < am = defective; gm = am = diagonalizable." },
+    { id: "concept-6-5", label: "6.5", title: "Three cases with repeating λ",    desc: "All worked end-to-end. The visual signature of defective." },
+    { id: "concept-6-6", label: "6.6", title: "Symmetric matrices",              desc: "Always real λ, orthogonal eigenvectors. Spectral theorem proved." },
+    { id: "concept-6-7", label: "6.7", title: "trace = Σλ, det = Πλ",            desc: "Two magic shortcuts that solve GATE in 30 seconds." },
+  ];
+  return (
+    <div className="min-h-screen">
+      <TopNav currentModule={6}/>
+      <Hero
+        moduleNum={6} totalModules={8}
+        title="Eigenvalues & Eigenvectors"
+        tagline="The directions that survive A unchanged"
+        intro={
+          <>
+            Possibly the most important concept in all of linear algebra. <Em>Eigenvectors</Em> are the special directions
+            a matrix leaves alone — A only stretches them, never rotates. <Em>Eigenvalues</Em> tell you how much.
+            From here flow PCA, SVD, quantum mechanics, PageRank, neural-network dynamics, and every spectral method on Earth.
+          </>
+        }
+        concepts={concepts}
+        stats="7 concepts · 7 interactive tools · spectral theorem proved · ML/AI bridges throughout"
+      />
+
+      {/* Problem Lab CTA */}
+      <section className="max-w-5xl mx-auto px-5 pt-2 pb-2">
+        <a href="module-06-problem-lab.html"
+          className="block rounded-2xl p-5 md:p-6 group transition-all"
+          style={{
+            background: "linear-gradient(135deg, var(--accent-soft), var(--accent-2-soft))",
+            border: "1px solid var(--accent-border)",
+            boxShadow: "var(--shadow-glow-accent)",
+          }}
+          onMouseEnter={e => e.currentTarget.style.borderColor = "var(--accent)"}
+          onMouseLeave={e => e.currentTarget.style.borderColor = "var(--accent-border)"}>
+          <div className="flex flex-wrap items-center gap-4">
+            <div style={{
+              width: 52, height: 52, borderRadius: 14,
+              background: "var(--grad-hero)", color: "white",
+              display: "inline-flex", alignItems: "center", justifyContent: "center",
+              fontSize: 22, flexShrink: 0,
+            }}>🎯</div>
+            <div className="flex-1 min-w-[260px]">
+              <div className="text-[11px] tracking-[0.2em] font-semibold mb-1" style={{color: "var(--accent)"}}>
+                MODULE 6 · PROBLEM LAB — NEW
+              </div>
+              <div className="text-[18px] md:text-[20px] font-bold leading-tight mb-1" style={{color: "var(--text)"}}>
+                Eigenvalues → 20-second GATE reflex.
+              </div>
+              <div className="text-[13.5px]" style={{color: "var(--text-dim)"}}>
+                45 problems · 7 GATE PYQs (2014–2022) · Cayley-Hamilton KILLER · timed drill mode.
+              </div>
+            </div>
+            <div className="flex items-center gap-2 px-4 py-2 rounded-xl font-semibold transition-opacity"
+              style={{background: "var(--grad-hero)", color: "white"}}>
+              Open Problem Lab →
+            </div>
+          </div>
+        </a>
+      </section>
+
+      <Concept61/>
+      <Concept62/>
+      <Concept63/>
+      <Concept64/>
+      <Concept65/>
+      <Concept66/>
+      <Concept67/>
+      <ModuleFooter
+        moduleNum={6}
+        nextModuleTitle="Eigenvalue Power Tools — Cayley-Hamilton, AB vs BA, Diagonalization"
+        nextModuleFile="module-07-eigen-power.html"
+        checklist={[
+          "I can describe an eigenvector geometrically (a direction that A only stretches).",
+          "I can derive the characteristic equation from Av = λv.",
+          "I can compute eigenvalues + eigenvectors of any 2×2 matrix in under 90 seconds.",
+          "I can decide diagonalizability by comparing algebraic and geometric multiplicities.",
+          "I can state and use the spectral theorem for real symmetric matrices.",
+          "I can use trace = Σλ and det = Πλ to shortcut GATE-style questions."
+        ]}
+      />
+    </div>
+  );
+}
+
+mountApp(App, 6);
+</script>
+
+</body>
+</html>

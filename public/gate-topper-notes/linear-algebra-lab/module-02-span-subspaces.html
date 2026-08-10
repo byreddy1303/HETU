@@ -1,0 +1,1425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 2 · Span, Subspaces & the Column Picture — LA Mastery Hub</title>
+
+<script>
+  (function () {
+    try {
+      var t = localStorage.getItem("la-hub::theme") || "dark";
+      document.documentElement.classList.add(t === "light" ? "light" : "dark");
+    } catch (e) { document.documentElement.classList.add("dark"); }
+  })();
+</script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="theme.css">
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script>tailwind.config = { darkMode: 'class' };</script>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+
+<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone@7.25.6/babel.min.js"></script>
+</head>
+<body>
+
+<div id="loading">
+  <div style="text-align:center">
+    <div class="spinner"></div>
+    <div style="font-size:13px; opacity:0.8">Loading Module 2 — Span & Subspaces</div>
+  </div>
+</div>
+
+<div id="root"></div>
+
+<script type="text/babel" src="boilerplate.js"></script>
+
+<script type="text/babel">
+const { useState, useEffect, useMemo, useRef } = React;
+
+/* ════════════════════════════════════════════════════════
+   CONCEPT 2.1 — Span of a Set of Vectors
+   ════════════════════════════════════════════════════════ */
+function SpanVisualizer() {
+  const [count, setCount] = useState(2);
+  const [v1, setV1] = useState([2, 1]);
+  const [v2, setV2] = useState([1, 2]);
+  const [v3, setV3] = useState([0, 0]); // for "third" — usually causes plane regardless
+
+  // Determine span shape in R²
+  let shape = "point";
+  let shapeReason = "";
+  const zero1 = v1[0] === 0 && v1[1] === 0;
+  const zero2 = v2[0] === 0 && v2[1] === 0;
+  const det12 = v1[0]*v2[1] - v1[1]*v2[0];
+  if (count === 1) {
+    if (zero1) { shape = "point"; shapeReason = "span{0} = {0} — just the origin."; }
+    else { shape = "line"; shapeReason = "span{v} = a line through the origin in v's direction."; }
+  } else {
+    if (zero1 && zero2) { shape = "point"; shapeReason = "Both vectors are zero. span = {0}."; }
+    else if (Math.abs(det12) < 1e-6) { shape = "line"; shapeReason = "v₁ and v₂ are parallel (linearly dependent). span = a line."; }
+    else { shape = "plane"; shapeReason = "v₁ and v₂ are linearly independent. span = all of R²."; }
+  }
+
+  const range = 6, scale = 230 / range, cx = 230, cy = 230;
+  const toPx = (x, y) => [cx + x*scale, cy - y*scale];
+
+  // Build extras: shaded region
+  let extras = null;
+  if (shape === "line") {
+    const dir = (!zero1) ? v1 : v2;
+    const norm = Math.hypot(dir[0], dir[1]);
+    if (norm > 1e-6) {
+      const t = range * 1.4;
+      const [x1, y1] = toPx(-t*dir[0]/norm * (range*0.8), -t*dir[1]/norm * (range*0.8));
+      const [x2, y2] = toPx( t*dir[0]/norm * (range*0.8),  t*dir[1]/norm * (range*0.8));
+      extras = (
+        <g>
+          <line x1={x1} y1={y1} x2={x2} y2={y2}
+            stroke="var(--accent-3)" strokeWidth="6" opacity="0.25" strokeLinecap="round"/>
+          <line x1={x1} y1={y1} x2={x2} y2={y2}
+            stroke="var(--accent-3)" strokeWidth="1.5" strokeDasharray="6 4" opacity="0.85"/>
+        </g>
+      );
+    }
+  } else if (shape === "plane") {
+    extras = (
+      <rect x={0} y={0} width={460} height={460} fill="var(--accent-3)" opacity="0.07"/>
+    );
+  } else if (shape === "point") {
+    extras = <circle cx={cx} cy={cy} r="8" fill="var(--accent-3)" opacity="0.6"/>;
+  }
+
+  const vectors = [{vec: v1, colorIdx: 0, label: "v₁"}];
+  if (count >= 2) vectors.push({vec: v2, colorIdx: 1, label: "v₂"});
+
+  return (
+    <InteractiveFrame
+      name="Span Visualizer — point, line, or plane?"
+      whatAmISeeing="A 2D plane with 1 or 2 input vectors. The shaded region is the SPAN — every point reachable by linear combinations. Watch the shape collapse from plane → line → point as you vary the vectors."
+      tryThis="With 2 vectors, set v₁ = (2, 1), v₂ = (1, 2) — independent — span is all of R² (entire plane shaded). Now change v₂ to (4, 2) — parallel to v₁ — span collapses to a LINE. Set v₁ = v₂ = (0, 0): span shrinks to a single point (origin)."
+    >
+      <div className="grid lg:grid-cols-[auto,1fr] gap-6 items-start">
+        <VectorCanvas width={460} height={460} range={6} vectors={vectors} extras={extras}/>
+
+        <div className="space-y-4">
+          <div className="flex gap-2">
+            {[1, 2].map(n => (
+              <button key={n} onClick={() => setCount(n)}
+                className="text-sm px-3 py-1.5 rounded-lg transition-colors"
+                style={{
+                  border: "1px solid " + (count === n ? "var(--accent-border)" : "var(--border)"),
+                  background: count === n ? "var(--accent-soft)" : "transparent",
+                  color: count === n ? "var(--accent)" : "var(--text-dim)",
+                }}>
+                {n} vector{n > 1 ? "s" : ""}
+              </button>
+            ))}
+          </div>
+
+          {[{label: "v₁", v: v1, setV: setV1, c: "var(--accent)"},
+            ...(count >= 2 ? [{label: "v₂", v: v2, setV: setV2, c: "var(--accent-2)"}] : []),
+          ].map((d, i) => (
+            <div key={i} className="rounded-lg p-3" style={{border: "1px solid var(--border)", background: "var(--bg-elev-2)"}}>
+              <div className="text-xs tracking-[0.2em] font-semibold mb-2" style={{color: d.c}}>{d.label}</div>
+              <div className="flex items-center gap-2">
+                <NumInput value={d.v[0]} onChange={x => d.setV([x, d.v[1]])} width={72}/>
+                <NumInput value={d.v[1]} onChange={y => d.setV([d.v[0], y])} width={72}/>
+              </div>
+            </div>
+          ))}
+
+          <div className="rounded-lg p-4"
+            style={{
+              border: "1px solid var(--accent-3-border)",
+              background: "var(--accent-3-soft)",
+            }}>
+            <div className="text-xs tracking-[0.2em] font-semibold mb-2" style={{color: "var(--accent-3)"}}>SPAN SHAPE</div>
+            <div className="text-base font-semibold mb-1" style={{color: "var(--text)"}}>
+              {shape === "point" && "Point (just the origin)"}
+              {shape === "line" && "Line through the origin"}
+              {shape === "plane" && "All of R² (entire plane)"}
+            </div>
+            <div className="text-sm leading-relaxed" style={{color: "var(--text-dim)"}}>{shapeReason}</div>
+            <div className="mt-2 text-xs font-mono" style={{color: "var(--text-dim)"}}>
+              dim(span) = {shape === "point" ? 0 : shape === "line" ? 1 : 2}
+            </div>
+          </div>
+        </div>
+      </div>
+    </InteractiveFrame>
+  );
+}
+
+function Concept21() {
+  return (
+    <ConceptCard id="concept-2-1" label="2.1" moduleLabel="Module 2 · Span & Subspaces"
+      title="Span of a Set of Vectors"
+      why="Concept 1.3 hinted at the 'reachable region'. Now we name it. Span is the single most important geometric object in linear algebra — every column space, every row space, every eigenspace is a span. Make peace with it first.">
+      <H3>Definition</H3>
+      <P>The <B>span</B> of a set of vectors <T src="\{\mathbf{v}_1, \mathbf{v}_2, \ldots, \mathbf{v}_k\}"/> is the set of ALL linear combinations:</P>
+      <BT src={String.raw`\text{span}(\mathbf{v}_1, \ldots, \mathbf{v}_k) \;=\; \{\,c_1 \mathbf{v}_1 + c_2 \mathbf{v}_2 + \cdots + c_k \mathbf{v}_k \;:\; c_i \in \mathbb{R}\,\}.`}/>
+      <P>That's it. The "reachable region" gets a name. Two synonyms used interchangeably: "the span of these vectors," and "the subspace generated by these vectors."</P>
+
+      <H3>The four geometric cases (memorise)</H3>
+      <UL>
+        <Li><B><T src="\text{span}\{\mathbf{0}\} = \{\mathbf{0}\}"/></B> — just the origin. A single point.</Li>
+        <Li><B><T src="\text{span}\{\mathbf{v}\}"/></B>, <T src="\mathbf{v} \neq \mathbf{0}"/> — a line through the origin in <T src="\mathbf{v}"/>'s direction.</Li>
+        <Li><B><T src="\text{span}\{\mathbf{v}_1, \mathbf{v}_2\}"/></B>, INDEPENDENT in <T src="\mathbb{R}^2"/> — all of <T src="\mathbb{R}^2"/>.</Li>
+        <Li><B><T src="\text{span}\{\mathbf{v}_1, \mathbf{v}_2\}"/></B>, DEPENDENT — a line (or a point if both are zero).</Li>
+        <Li><B><T src="\text{span}\{\mathbf{v}_1, \mathbf{v}_2\}"/></B>, INDEPENDENT in <T src="\mathbb{R}^3"/> — a plane through the origin.</Li>
+        <Li><B><T src="\text{span}\{\mathbf{v}_1, \mathbf{v}_2, \mathbf{v}_3\}"/></B>, INDEPENDENT in <T src="\mathbb{R}^3"/> — all of <T src="\mathbb{R}^3"/>.</Li>
+      </UL>
+
+      <Callout kind="info" title="The 'dimension' of a span">
+        <P>The span of <T src="k"/> independent vectors has dimension <T src="k"/>. The span of <T src="k"/> dependent vectors has dimension strictly LESS than <T src="k"/>. So in <T src="\mathbb{R}^3"/>:</P>
+        <UL>
+          <Li>0 vectors: <T src="\dim = 0"/> (just the origin).</Li>
+          <Li>1 non-zero vector: <T src="\dim = 1"/> (line).</Li>
+          <Li>2 independent vectors: <T src="\dim = 2"/> (plane).</Li>
+          <Li>3 independent vectors: <T src="\dim = 3"/> (all of <T src="\mathbb{R}^3"/>).</Li>
+        </UL>
+      </Callout>
+
+      <H3>Span is always a subspace</H3>
+      <P>A <B>subspace</B> of <T src="\mathbb{R}^n"/> is a non-empty subset closed under addition and scalar multiplication. Equivalently, it must satisfy three axioms:</P>
+      <OL>
+        <Li><B>Contains the zero vector</B> (take all coefficients zero).</Li>
+        <Li><B>Closed under addition:</B> if <T src="\mathbf{u}, \mathbf{v}"/> are in the set, so is <T src="\mathbf{u} + \mathbf{v}"/>.</Li>
+        <Li><B>Closed under scalar multiplication:</B> if <T src="\mathbf{v}"/> is in the set, so is <T src="c\mathbf{v}"/> for any <T src="c \in \mathbb{R}"/>.</Li>
+      </OL>
+
+      <Callout kind="proof" title="Span satisfies all three axioms">
+        <P>Let <T src="S = \text{span}\{\mathbf{v}_1, \ldots, \mathbf{v}_k\}"/>.</P>
+        <UL>
+          <Li><B>Zero:</B> set all <T src="c_i = 0"/>. Then <T src="\sum c_i \mathbf{v}_i = \mathbf{0} \in S"/>.</Li>
+          <Li><B>Addition:</B> if <T src="\mathbf{u} = \sum a_i \mathbf{v}_i"/> and <T src="\mathbf{w} = \sum b_i \mathbf{v}_i"/>, then <T src="\mathbf{u} + \mathbf{w} = \sum (a_i + b_i)\mathbf{v}_i \in S"/>.</Li>
+          <Li><B>Scalar:</B> if <T src="\mathbf{u} = \sum a_i \mathbf{v}_i"/>, then <T src="c\mathbf{u} = \sum (c a_i) \mathbf{v}_i \in S"/>.</Li>
+        </UL>
+        <P>So span is always closed — hence always a subspace.</P>
+      </Callout>
+
+      <Callout kind="trap" title="Common 'is this a subspace?' traps">
+        <P>Many sets LOOK like subspaces but aren't because they miss the origin or aren't closed:</P>
+        <UL>
+          <Li>The line <T src="y = x + 1"/> is NOT a subspace — it doesn't pass through the origin.</Li>
+          <Li>The set of vectors with first component <T src="\geq 0"/> is NOT a subspace — not closed under scalar multiplication by <T src="-1"/>.</Li>
+          <Li>The set of unit vectors (<T src="\|\mathbf{v}\| = 1"/>) is NOT a subspace — not closed under addition (sum of two unit vectors usually isn't a unit vector).</Li>
+        </UL>
+        <P><B>The first check, always:</B> does the set contain <T src="\mathbf{0}"/>? If not, it's not a subspace.</P>
+      </Callout>
+
+      <H3>Worked example — what's the span?</H3>
+      <P><B>(a)</B> <T src="\text{span}\{(1, 0), (2, 0)\}"/>. Both vectors lie on the x-axis. <T src="(2, 0) = 2(1, 0)"/> — dependent. Span = the x-axis (a line).</P>
+      <P><B>(b)</B> <T src="\text{span}\{(1, 0), (0, 1)\}"/>. Standard basis of <T src="\mathbb{R}^2"/>. Span = all of <T src="\mathbb{R}^2"/>.</P>
+      <P><B>(c)</B> <T src="\text{span}\{(1, 1, 0), (0, 1, 1)\}"/>. Two independent vectors in <T src="\mathbb{R}^3"/>. Span = a plane through the origin.</P>
+      <P><B>(d)</B> <T src="\text{span}\{(1, 2), (3, 6), (5, 10)\}"/>. All three on the line <T src="y = 2x"/>. Span = that line.</P>
+
+      <SpanVisualizer/>
+
+      <H3>Properties of span you'll lean on</H3>
+      <UL>
+        <Li>Adding the zero vector to a spanning set doesn't change the span.</Li>
+        <Li>Adding a vector that's already in the span doesn't change the span.</Li>
+        <Li>The span equals the span of any maximal independent subset (Module 4 will sharpen this).</Li>
+        <Li>If <T src="W \subseteq \mathbb{R}^n"/> is a subspace and contains every <T src="\mathbf{v}_i"/>, then <T src="\text{span}\{\mathbf{v}_i\} \subseteq W"/>. In other words, span is the SMALLEST subspace containing all <T src="\mathbf{v}_i"/>.</Li>
+      </UL>
+
+      <Callout kind="ml" title="The column space — your first 'named' span">
+        <P>The COLUMN SPACE of a matrix <T src="A"/>, written <T src="C(A)"/> or <T src="\text{col}(A)"/>, is simply the span of its columns. In Concept 2.3 we'll prove that <T src="A\mathbf{x} = \mathbf{b}"/> has a solution iff <T src="\mathbf{b} \in C(A)"/>. The column space sits at the heart of every linear-system question.</P>
+      </Callout>
+
+      <Callout kind="recall" title="Concept 2.1 in one breath">
+        <P>Span = set of all linear combinations. Always a subspace. Shape depends on dependence: independent k vectors → k-dim flat. Dependent → lower-dimensional flat. The first sanity check on "is this a subspace?" is "does it contain 0?"</P>
+      </Callout>
+
+      <ProgressPill conceptId="m2-c21"/>
+    </ConceptCard>
+  );
+}
+
+/* ════════════════════════════════════════════════════════
+   CONCEPT 2.2 — Basis and Dimension (foundational)
+   ════════════════════════════════════════════════════════ */
+function BasisExplorer() {
+  // Standard basis e1=(1,0), e2=(0,1) vs alternate b1=(2,1), b2=(-1,1)
+  const STANDARD = { b1: [1, 0], b2: [0, 1], name: "Standard basis {e₁, e₂}" };
+  const ALT      = { b1: [2, 1], b2: [-1, 1], name: "Alternate basis {b₁, b₂}" };
+  const [which, setWhich] = useState("standard");
+  const [target, setTarget] = useState([3, 2]);
+  const basis = which === "standard" ? STANDARD : ALT;
+
+  // Solve target = c1*b1 + c2*b2 → 2x2 system
+  const det = basis.b1[0]*basis.b2[1] - basis.b1[1]*basis.b2[0];
+  let c1 = 0, c2 = 0;
+  if (Math.abs(det) > 1e-6) {
+    c1 = (target[0]*basis.b2[1] - target[1]*basis.b2[0]) / det;
+    c2 = (basis.b1[0]*target[1] - basis.b1[1]*target[0]) / det;
+  }
+
+  // Render: basis vectors + target + decomposition (c1*b1 then c2*b2)
+  const leg1 = [c1*basis.b1[0], c1*basis.b1[1]];
+  const range = 6, scale = 230 / range, cx = 230, cy = 230;
+  const toPx = (x, y) => [cx + x*scale, cy - y*scale];
+
+  const extras = (
+    <g>
+      {(() => {
+        const [px, py] = toPx(leg1[0], leg1[1]);
+        return <line x1={cx} y1={cy} x2={px} y2={py} stroke="var(--accent)" strokeWidth="3" opacity="0.8"/>;
+      })()}
+      {(() => {
+        const [a, b] = toPx(leg1[0], leg1[1]);
+        const [px, py] = toPx(target[0], target[1]);
+        return <line x1={a} y1={b} x2={px} y2={py} stroke="var(--accent-2)" strokeWidth="3" opacity="0.8"/>;
+      })()}
+    </g>
+  );
+
+  const vectors = [
+    { vec: basis.b1, colorIdx: 0, label: which === "standard" ? "e₁" : "b₁", opacity: 0.6, dashed: true, dot: false },
+    { vec: basis.b2, colorIdx: 1, label: which === "standard" ? "e₂" : "b₂", opacity: 0.6, dashed: true, dot: false },
+    { vec: target,   colorIdx: 2, label: "v", thick: 3 },
+  ];
+
+  return (
+    <InteractiveFrame
+      name="Basis Explorer — same vector, different coordinates"
+      whatAmISeeing="The target vector v stays put. You toggle between the standard basis {e₁, e₂} and an alternate basis {b₁, b₂}. The coefficients (c₁, c₂) on the basis vectors change — but they always combine to the SAME v."
+      tryThis="Set v = (3, 2). In the standard basis, the coordinates are (3, 2). Switch to {b₁=(2,1), b₂=(-1,1)} — same vector, but the coordinates become roughly (5/3, 1/3). Same vector. Different basis. Different coordinates. This is what 'basis' really means."
+    >
+      <div className="grid lg:grid-cols-[auto,1fr] gap-6 items-start">
+        <VectorCanvas width={460} height={460} range={6} vectors={vectors} extras={extras}/>
+
+        <div className="space-y-4">
+          <div className="flex gap-2">
+            {[{k: "standard", n: "Standard {e₁,e₂}"}, {k: "alt", n: "Alternate {b₁,b₂}"}].map(t => (
+              <button key={t.k} onClick={() => setWhich(t.k)}
+                className="text-sm px-3 py-1.5 rounded-lg transition-colors"
+                style={{
+                  border: "1px solid " + (which === t.k ? "var(--accent-border)" : "var(--border)"),
+                  background: which === t.k ? "var(--accent-soft)" : "transparent",
+                  color: which === t.k ? "var(--accent)" : "var(--text-dim)",
+                }}>
+                {t.n}
+              </button>
+            ))}
+          </div>
+
+          <div className="rounded-lg p-3" style={{border: "1px solid var(--border)", background: "var(--bg-elev-2)"}}>
+            <div className="text-xs tracking-[0.2em] font-semibold mb-2" style={{color: "var(--accent-3)"}}>TARGET VECTOR v</div>
+            <div className="flex items-center gap-2">
+              <NumInput value={target[0]} onChange={x => setTarget([x, target[1]])} width={72}/>
+              <NumInput value={target[1]} onChange={y => setTarget([target[0], y])} width={72}/>
+            </div>
+          </div>
+
+          <div className="rounded-lg p-4 space-y-2"
+            style={{border: "1px solid var(--accent-border)", background: "var(--accent-soft)"}}>
+            <div className="text-xs tracking-[0.2em] font-semibold" style={{color: "var(--accent)"}}>COORDINATES IN {basis.name.toUpperCase()}</div>
+            <div className="font-mono text-sm" style={{color: "var(--text)"}}>
+              v = <span style={{color: "var(--accent)"}}>{c1.toFixed(2)}</span>·{which === "standard" ? "e₁" : "b₁"}{" + "}
+              <span style={{color: "var(--accent-2)"}}>{c2.toFixed(2)}</span>·{which === "standard" ? "e₂" : "b₂"}
+            </div>
+            <div className="text-xs font-mono" style={{color: "var(--text-dim)"}}>
+              [v]<sub>basis</sub> = ({c1.toFixed(2)}, {c2.toFixed(2)})
+            </div>
+          </div>
+
+          <div className="text-xs rounded-md p-3"
+            style={{border: "1px solid var(--info-border)", background: "var(--info-soft)", color: "var(--info)"}}>
+            <strong>Same v.</strong> Two bases. Two coordinate pairs. Both equally valid representations.
+          </div>
+        </div>
+      </div>
+    </InteractiveFrame>
+  );
+}
+
+function Concept22() {
+  return (
+    <ConceptCard id="concept-2-2" label="2.2" moduleLabel="Module 2 · Span & Subspaces"
+      title="Basis and Dimension (Foundational)"
+      why="A basis is the most efficient possible spanning set — every vector reachable, no redundancy. The size of any basis is a fixed number: the DIMENSION. From this single idea flows almost every theorem in Modules 3–8.">
+      <H3>The motivation — why we need a minimal spanning set</H3>
+      <P>Suppose someone tells you "this subspace is the span of these 10 vectors." That's information overload. You might be able to reach every point using just 2 of those 10 vectors. The other 8 are linear combinations of the first 2 — they add nothing. We want the SMALLEST list that still spans the entire subspace.</P>
+      <P>That smallest list is a <B>basis</B>.</P>
+
+      <H3>Definition</H3>
+      <P>A <B>basis</B> of a vector space <T src="V"/> is a set of vectors <T src="\{\mathbf{v}_1, \ldots, \mathbf{v}_n\}"/> that is BOTH:</P>
+      <OL>
+        <Li><B>Linearly independent</B> (no redundancy), AND</Li>
+        <Li><B>Spans <T src="V"/></B> (reaches every vector in <T src="V"/>).</Li>
+      </OL>
+      <P>If you drop a vector from a basis, you lose coverage (the span shrinks). If you add a vector, you lose independence (the new vector is reachable). A basis is exactly that sweet spot.</P>
+
+      <H3>Dimension</H3>
+      <P>The <B>dimension</B> of <T src="V"/> is the number of vectors in any basis of <T src="V"/>.</P>
+
+      <Callout kind="proof" title="Why dimension is well-defined (sketch)">
+        <P><B>Claim:</B> any two bases of <T src="V"/> have the same number of vectors.</P>
+        <P>Suppose <T src="V"/> has a basis <T src="\{\mathbf{u}_1, \ldots, \mathbf{u}_m\}"/> and another basis <T src="\{\mathbf{w}_1, \ldots, \mathbf{w}_n\}"/> with <T src="m \neq n"/>, say <T src="m < n"/>.</P>
+        <P>The <Em>Steinitz exchange lemma</Em> says: in any independent set inside the span of <T src="\{\mathbf{u}_1, \ldots, \mathbf{u}_m\}"/>, you can have at most <T src="m"/> elements. But <T src="\{\mathbf{w}_1, \ldots, \mathbf{w}_n\}"/> is independent with <T src="n > m"/> elements inside <T src="V = \text{span}(\mathbf{u}_i)"/> — contradiction. So <T src="m \geq n"/>. By symmetry <T src="n \geq m"/>. Hence <T src="m = n"/>.</P>
+        <P>So every basis has the same size. That number — the dimension — is an invariant of the space, not of the chosen basis.</P>
+      </Callout>
+
+      <H3>Standard basis of <T src="\mathbb{R}^n"/></H3>
+      <P>The standard basis is the most natural:</P>
+      <BT src={String.raw`\mathbf{e}_1 = \begin{bmatrix} 1 \\ 0 \\ 0 \\ \vdots \\ 0 \end{bmatrix},\quad \mathbf{e}_2 = \begin{bmatrix} 0 \\ 1 \\ 0 \\ \vdots \\ 0 \end{bmatrix},\quad \ldots,\quad \mathbf{e}_n = \begin{bmatrix} 0 \\ 0 \\ \vdots \\ 0 \\ 1 \end{bmatrix}.`}/>
+      <P>Each <T src="\mathbf{e}_i"/> is a unit vector along axis <T src="i"/>. Any vector <T src="\mathbf{v} = (v_1, v_2, \ldots, v_n)"/> is the linear combination <T src="\mathbf{v} = v_1 \mathbf{e}_1 + v_2 \mathbf{e}_2 + \cdots + v_n \mathbf{e}_n"/>.</P>
+      <P><T src="\dim(\mathbb{R}^n) = n"/>. This is why <T src="\mathbb{R}^2"/> is "the plane" and <T src="\mathbb{R}^3"/> is "3D space".</P>
+
+      <H3>Multiple valid bases for the same space</H3>
+      <P>The standard basis is not the only basis of <T src="\mathbb{R}^2"/>. Any two linearly independent vectors form a basis. For instance:</P>
+      <UL>
+        <Li><T src="\{(1, 0), (0, 1)\}"/> — standard.</Li>
+        <Li><T src="\{(1, 1), (1, -1)\}"/> — rotated/diagonal basis.</Li>
+        <Li><T src="\{(2, 1), (-1, 1)\}"/> — alternate basis.</Li>
+      </UL>
+      <P>All have the same dimension (= 2). All span <T src="\mathbb{R}^2"/>. The SAME vector has DIFFERENT coordinate pairs depending on which basis you measure with.</P>
+
+      <H3>Coordinates relative to a basis</H3>
+      <P>If <T src="\{\mathbf{b}_1, \mathbf{b}_2\}"/> is a basis of <T src="\mathbb{R}^2"/>, then every <T src="\mathbf{v}"/> can be written uniquely as <T src="\mathbf{v} = c_1 \mathbf{b}_1 + c_2 \mathbf{b}_2"/>. The pair <T src="(c_1, c_2)"/> is called the <B>coordinate vector of <T src="\mathbf{v}"/> in basis <T src="\{\mathbf{b}_i\}"/></B>, written <T src="[\mathbf{v}]_B"/>.</P>
+      <P>Why "uniquely"? Because the basis is INDEPENDENT — and we proved in Concept 1.3 (and will re-prove formally in Concept 2.6) that independent vectors give unique coefficients.</P>
+
+      <BasisExplorer/>
+
+      <H3>Bases of subspaces</H3>
+      <P>Any subspace <T src="W \subseteq \mathbb{R}^n"/> has its own basis and its own dimension <T src="\dim(W) \leq n"/>.</P>
+      <UL>
+        <Li>The zero subspace <T src="\{\mathbf{0}\}"/> has dimension 0 (empty basis).</Li>
+        <Li>A line through the origin has dimension 1.</Li>
+        <Li>A plane through the origin has dimension 2.</Li>
+        <Li><T src="\mathbb{R}^3"/> itself has dimension 3.</Li>
+      </UL>
+
+      <Callout kind="info" title="The dimension hierarchy in R³">
+        <P>The only subspaces of <T src="\mathbb{R}^3"/> are: <B>{`{0}`}</B> (dim 0), <B>lines through origin</B> (dim 1), <B>planes through origin</B> (dim 2), <B><T src="\mathbb{R}^3"/></B> itself (dim 3). Nothing else. This four-level hierarchy is worth visualizing — Module 3 will lean on it heavily.</P>
+      </Callout>
+
+      <H3>Three theorems about bases (used constantly)</H3>
+      <OL>
+        <Li><B>Spanning set theorem:</B> any spanning set of <T src="V"/> contains a basis. (Discard dependent vectors one at a time.)</Li>
+        <Li><B>Independent set extension:</B> any independent set in <T src="V"/> can be extended to a basis. (Keep adding vectors not yet in the span.)</Li>
+        <Li><B>Dimension match:</B> if you have a set of <T src="n = \dim(V)"/> vectors, then "independent" and "spanning" become EQUIVALENT — either one implies it's a basis. This is hugely useful: in <T src="\mathbb{R}^3"/>, ANY 3 independent vectors automatically span — no need to check separately.</Li>
+      </OL>
+
+      <Callout kind="trap" title="The 'right count' trap">
+        <P>"This set has 3 vectors in <T src="\mathbb{R}^3"/> — therefore it's a basis." FALSE. Three vectors in <T src="\mathbb{R}^3"/> are a basis only if they are also independent. Three coplanar vectors are NOT a basis. Always verify independence (typically: compute the determinant).</P>
+      </Callout>
+
+      <Callout kind="ml" title="Bases everywhere in ML">
+        <P>Word embeddings live in a high-dimensional space — choosing a different basis (e.g., via PCA) reveals the most informative directions. Fourier and wavelet bases let signal processors work in the basis where the data is sparse. A change of basis can turn an unsolvable problem into a trivial one — this is the entire point of SVD.</P>
+      </Callout>
+
+      <Callout kind="recall" title="Concept 2.2 in one breath">
+        <P>Basis = independent + spans. Dimension = the (unique) size of any basis. Standard basis of <T src="\mathbb{R}^n"/> is <T src="\mathbf{e}_1, \ldots, \mathbf{e}_n"/>. Same vector has different coordinates in different bases. When you have <T src="n = \dim"/> vectors, independent ⇔ spanning.</P>
+      </Callout>
+
+      <ProgressPill conceptId="m2-c22"/>
+    </ConceptCard>
+  );
+}
+
+/* ════════════════════════════════════════════════════════
+   CONCEPT 2.3 — Ax = b: The Column Picture
+   ════════════════════════════════════════════════════════ */
+function ColumnPictureAnimator() {
+  // A is 2x2: cols c1, c2. x = [x1, x2]. Result Ax = x1*c1 + x2*c2.
+  const [c1, setC1] = useState([2, 1]);
+  const [c2, setC2] = useState([-1, 3]);
+  const [x, setX] = useState([1.5, 1.0]);
+  const [stage, setStage] = useState(2); // 0=just cols, 1=scaled cols, 2=summed
+
+  const sc1 = [x[0]*c1[0], x[0]*c1[1]];
+  const sc2 = [x[1]*c2[0], x[1]*c2[1]];
+  const result = [sc1[0] + sc2[0], sc1[1] + sc2[1]];
+
+  const range = 6, scale = 230 / range, cx = 230, cy = 230;
+  const toPx = (x, y) => [cx + x*scale, cy - y*scale];
+
+  // Build vectors based on stage
+  let vectors = [];
+  let extras = null;
+
+  if (stage === 0) {
+    // Just the columns of A
+    vectors = [
+      { vec: c1, colorIdx: 0, label: "col₁(A)" },
+      { vec: c2, colorIdx: 1, label: "col₂(A)" },
+    ];
+  } else if (stage === 1) {
+    // Scaled columns
+    vectors = [
+      { vec: c1, colorIdx: 0, label: "col₁", opacity: 0.35, dashed: true, dot: false },
+      { vec: c2, colorIdx: 1, label: "col₂", opacity: 0.35, dashed: true, dot: false },
+      { vec: sc1, colorIdx: 0, label: `${x[0].toFixed(1)}·col₁`, thick: 3 },
+      { vec: sc2, colorIdx: 1, label: `${x[1].toFixed(1)}·col₂`, thick: 3 },
+    ];
+  } else {
+    // Summed
+    vectors = [
+      { vec: c1, colorIdx: 0, label: "col₁", opacity: 0.25, dashed: true, dot: false },
+      { vec: c2, colorIdx: 1, label: "col₂", opacity: 0.25, dashed: true, dot: false },
+      { vec: result, colorIdx: 2, label: "Ax = b", thick: 3 },
+    ];
+    // Show head-to-tail: c1 leg from origin, c2 leg from end of c1
+    extras = (() => {
+      const [p1, p2] = toPx(sc1[0], sc1[1]);
+      const [p3, p4] = toPx(result[0], result[1]);
+      return (
+        <g>
+          <line x1={cx} y1={cy} x2={p1} y2={p2} stroke="var(--accent)"   strokeWidth="3" opacity="0.85"/>
+          <line x1={p1} y1={p2} x2={p3} y2={p4} stroke="var(--accent-2)" strokeWidth="3" opacity="0.85"/>
+        </g>
+      );
+    })();
+  }
+
+  return (
+    <InteractiveFrame
+      name="Ax — The Column Picture animated"
+      whatAmISeeing="A 2×2 matrix A whose columns are col₁ and col₂. The input x = (x₁, x₂) becomes the weights on each column. Step through the three stages to watch Ax assemble: just columns → scaled columns → summed result."
+      tryThis="Set x = (1, 0). Then Ax = 1·col₁ + 0·col₂ = col₁. Now x = (0, 1) gives col₂. Set x = (1, 1): Ax is the diagonal of the parallelogram. This is the column picture: every Ax is a linear combination of A's columns."
+    >
+      <div className="grid lg:grid-cols-[auto,1fr] gap-6 items-start">
+        <VectorCanvas width={460} height={460} range={6} vectors={vectors} extras={extras}/>
+
+        <div className="space-y-4">
+          <div className="flex gap-2 flex-wrap">
+            {[
+              {k: 0, label: "1. Columns"},
+              {k: 1, label: "2. Scale by x"},
+              {k: 2, label: "3. Sum → Ax"},
+            ].map(t => (
+              <button key={t.k} onClick={() => setStage(t.k)}
+                className="text-sm px-3 py-1.5 rounded-lg transition-colors"
+                style={{
+                  border: "1px solid " + (stage === t.k ? "var(--accent-border)" : "var(--border)"),
+                  background: stage === t.k ? "var(--accent-soft)" : "transparent",
+                  color: stage === t.k ? "var(--accent)" : "var(--text-dim)",
+                }}>
+                {t.label}
+              </button>
+            ))}
+          </div>
+
+          <div className="rounded-lg p-3" style={{border: "1px solid var(--border)", background: "var(--bg-elev-2)"}}>
+            <div className="text-xs tracking-[0.2em] font-semibold mb-2" style={{color: "var(--text-dim)"}}>MATRIX A (columns)</div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <div className="text-xs mb-1" style={{color: "var(--accent)"}}>col₁</div>
+                <div className="flex gap-1">
+                  <NumInput value={c1[0]} onChange={x => setC1([x, c1[1]])} width={56}/>
+                  <NumInput value={c1[1]} onChange={y => setC1([c1[0], y])} width={56}/>
+                </div>
+              </div>
+              <div>
+                <div className="text-xs mb-1" style={{color: "var(--accent-2)"}}>col₂</div>
+                <div className="flex gap-1">
+                  <NumInput value={c2[0]} onChange={x => setC2([x, c2[1]])} width={56}/>
+                  <NumInput value={c2[1]} onChange={y => setC2([c2[0], y])} width={56}/>
+                </div>
+              </div>
+            </div>
+            <div className="text-xs font-mono mt-2" style={{color: "var(--text-dim)"}}>
+              A = [[{c1[0]}, {c2[0]}], [{c1[1]}, {c2[1]}]]
+            </div>
+          </div>
+
+          <div className="rounded-lg p-3" style={{border: "1px solid var(--border)", background: "var(--bg-elev-2)"}}>
+            <div className="text-xs tracking-[0.2em] font-semibold mb-2" style={{color: "var(--accent-3)"}}>INPUT x</div>
+            <div className="space-y-2">
+              <div className="flex items-center gap-3">
+                <label className="text-xs w-6" style={{color: "var(--accent)"}}>x₁</label>
+                <input type="range" min="-3" max="3" step="0.1" value={x[0]} onChange={e => setX([+e.target.value, x[1]])} className="flex-1"/>
+                <span className="text-sm font-mono w-12 text-right" style={{color: "var(--accent)"}}>{x[0].toFixed(1)}</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <label className="text-xs w-6" style={{color: "var(--accent-2)"}}>x₂</label>
+                <input type="range" min="-3" max="3" step="0.1" value={x[1]} onChange={e => setX([x[0], +e.target.value])} className="flex-1"/>
+                <span className="text-sm font-mono w-12 text-right" style={{color: "var(--accent-2)"}}>{x[1].toFixed(1)}</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="rounded-lg p-4"
+            style={{border: "1px solid var(--accent-border)", background: "var(--accent-soft)"}}>
+            <div className="text-xs tracking-[0.2em] font-semibold mb-2" style={{color: "var(--accent)"}}>COLUMN PICTURE</div>
+            <div className="text-sm font-mono leading-relaxed" style={{color: "var(--text)"}}>
+              Ax = <span style={{color: "var(--accent)"}}>{x[0].toFixed(1)}</span>·col₁ + <span style={{color: "var(--accent-2)"}}>{x[1].toFixed(1)}</span>·col₂
+            </div>
+            <div className="text-sm font-mono mt-1" style={{color: "var(--accent-3)"}}>
+              = ({result[0].toFixed(2)}, {result[1].toFixed(2)})
+            </div>
+          </div>
+        </div>
+      </div>
+    </InteractiveFrame>
+  );
+}
+
+function Concept23() {
+  return (
+    <ConceptCard id="concept-2-3" label="2.3" moduleLabel="Module 2 · Span & Subspaces"
+      title="Ax = b — The Column Picture"
+      why="If you learn nothing else in this module, learn this one sentence: Ax is a linear combination of A's columns weighted by x. Once that sentence is in your bones, EVERY question about linear systems, rank, null space, eigenspace becomes intuitive. The row picture is useful too — but the column picture is the one that unlocks all of LA.">
+      <H3>The standard view (row dot products)</H3>
+      <P>You probably learned matrix-vector multiplication this way:</P>
+      <BT src={String.raw`A\mathbf{x} = \begin{bmatrix} a_{11} & a_{12} \\ a_{21} & a_{22} \end{bmatrix} \begin{bmatrix} x_1 \\ x_2 \end{bmatrix} = \begin{bmatrix} a_{11}x_1 + a_{12}x_2 \\ a_{21}x_1 + a_{22}x_2 \end{bmatrix}.`}/>
+      <P>Row by row, take a dot product. Easy to compute. Easy to grade. <Em>And the worst possible intuition for understanding linear algebra.</Em></P>
+
+      <H3>The REAL view — columns combined</H3>
+      <P>Look at the result again, but factor it differently:</P>
+      <BT src={String.raw`A\mathbf{x} = \begin{bmatrix} a_{11}x_1 + a_{12}x_2 \\ a_{21}x_1 + a_{22}x_2 \end{bmatrix} = x_1 \begin{bmatrix} a_{11} \\ a_{21} \end{bmatrix} + x_2 \begin{bmatrix} a_{12} \\ a_{22} \end{bmatrix} = x_1 \mathbf{a}_1 + x_2 \mathbf{a}_2.`}/>
+      <P>where <T src="\mathbf{a}_1, \mathbf{a}_2"/> are the COLUMNS of <T src="A"/>.</P>
+
+      <Callout kind="info" title="The one sentence that unlocks LA">
+        <P><Em><T src="A\mathbf{x}"/> is a linear combination of the columns of <T src="A"/>, with the entries of <T src="\mathbf{x}"/> as the weights.</Em></P>
+        <P>Say it. Underline it. Sleep on it. This single reframing turns most of linear algebra from rote computation into geometric reasoning.</P>
+      </Callout>
+
+      <H3>Concrete 2×3 example — both pictures, same answer</H3>
+      <P>Let <T src="A = \begin{bmatrix} 1 & 3 & 2 \\ 2 & 1 & 4 \end{bmatrix}"/>, <T src="\mathbf{x} = (1, 2, -1)^\top"/>.</P>
+      <P><B>Standard view (row dot products):</B></P>
+      <BT src={String.raw`A\mathbf{x} = \begin{bmatrix} 1(1) + 3(2) + 2(-1) \\ 2(1) + 1(2) + 4(-1) \end{bmatrix} = \begin{bmatrix} 5 \\ 0 \end{bmatrix}.`}/>
+      <P><B>Column view (linear combination):</B></P>
+      <BT src={String.raw`A\mathbf{x} = 1 \begin{bmatrix} 1 \\ 2 \end{bmatrix} + 2 \begin{bmatrix} 3 \\ 1 \end{bmatrix} + (-1) \begin{bmatrix} 2 \\ 4 \end{bmatrix} = \begin{bmatrix} 1 \\ 2 \end{bmatrix} + \begin{bmatrix} 6 \\ 2 \end{bmatrix} + \begin{bmatrix} -2 \\ -4 \end{bmatrix} = \begin{bmatrix} 5 \\ 0 \end{bmatrix}.`}/>
+      <P>Same answer. Different mental picture.</P>
+
+      <H3>What this gives you immediately</H3>
+
+      <H4>1. The Column Space <T src="C(A)"/></H4>
+      <P>By definition, <T src="C(A) = \text{span}\{\text{columns of } A\}"/>. From the column picture, <T src="A\mathbf{x}"/> can only equal vectors <T src="\mathbf{b}"/> that are linear combinations of A's columns. So:</P>
+      <BT src={String.raw`A\mathbf{x} = \mathbf{b}\ \text{has a solution} \iff \mathbf{b} \in C(A).`}/>
+      <P>That is the FIRST big theorem of solvability — and it's a one-line consequence of the column picture.</P>
+
+      <H4>2. The Null Space <T src="N(A)"/></H4>
+      <P>If <T src="A\mathbf{x} = \mathbf{0}"/>, then <T src="\mathbf{x}"/> describes a linear combination of A's columns that sums to zero. That is exactly the definition of a dependence relation among the columns!</P>
+      <UL>
+        <Li>Null space trivial (= <T src="\{\mathbf{0}\}"/>) ⇔ columns of A are independent.</Li>
+        <Li>Null space non-trivial ⇔ columns are dependent (and the null space vectors tell you HOW they are dependent).</Li>
+      </UL>
+
+      <H4>3. Rank in one sentence</H4>
+      <P>The <B>rank</B> of <T src="A"/> is the dimension of its column space — i.e., the number of independent columns. Module 4 will make this precise, but you can already see it: rank measures how much "real" space A's columns reach.</P>
+
+      <Callout kind="trap" title="The most expensive trap in linear algebra">
+        <P>Students who only know the ROW picture get confused by rank, null space, eigenspace, and column space because every one of those concepts is a statement about COLUMNS. If you find yourself stuck on a rank or null-space question, ask yourself: "what does this look like in the column picture?" Nine times out of ten the answer becomes obvious.</P>
+      </Callout>
+
+      <ColumnPictureAnimator/>
+
+      <H3>Connection: solving <T src="A\mathbf{x} = \mathbf{b}"/> as 'find the weights'</H3>
+      <P>The column picture rephrases the linear system question entirely:</P>
+      <P><B>OLD:</B> "Solve the system of <T src="m"/> equations in <T src="n"/> unknowns."</P>
+      <P><B>NEW:</B> "Find the weights <T src="x_1, \ldots, x_n"/> that combine A's columns to make <T src="\mathbf{b}"/>."</P>
+      <P>Same problem. The second framing tells you immediately:</P>
+      <UL>
+        <Li>If <T src="\mathbf{b}"/> is reachable — there's at least one solution.</Li>
+        <Li>If A's columns are independent — the solution (when it exists) is unique.</Li>
+        <Li>If A's columns are dependent — there are infinitely many solutions (or none).</Li>
+      </UL>
+
+      <Callout kind="ml" title="Why ML practitioners love the column picture">
+        <P>In a linear regression <T src="X\boldsymbol{\beta} = \mathbf{y}"/>, the columns of <T src="X"/> are the features. The fitted prediction is a linear combination of those feature columns. "Multicollinearity" (features that are almost dependent) makes the column space "thin" in some direction — exactly the geometric reason the regression becomes unstable.</P>
+      </Callout>
+
+      <Callout kind="recall" title="Concept 2.3 in one breath">
+        <P>Ax is a linear combination of A's columns, weights from x. Column space = span of columns. Ax = b has a solution iff b is in the column space. Null space = dependence relations among the columns.</P>
+      </Callout>
+
+      <ProgressPill conceptId="m2-c23"/>
+    </ConceptCard>
+  );
+}
+
+/* ════════════════════════════════════════════════════════
+   CONCEPT 2.4 — Ax = b: The Row Picture
+   ════════════════════════════════════════════════════════ */
+function RowColumnToggle() {
+  // 2x2 system
+  const [A, setA] = useState([[1, 2], [3, -1]]);
+  const [b, setB] = useState([4, 1]);
+  const [view, setView] = useState("both"); // "row" | "col" | "both"
+
+  // Solve for x using Cramer's
+  const det = A[0][0]*A[1][1] - A[0][1]*A[1][0];
+  let x = [0, 0];
+  let solvable = Math.abs(det) > 1e-6;
+  if (solvable) {
+    x = [
+      (b[0]*A[1][1] - b[1]*A[0][1]) / det,
+      (A[0][0]*b[1] - A[1][0]*b[0]) / det,
+    ];
+  }
+
+  const range = 7, scale = 200 / range, cx = 200, cy = 200;
+  const toPx = (x, y) => [cx + x*scale, cy - y*scale];
+
+  // Row picture: two lines from the equations
+  // Eq 1: A[0][0]*X + A[0][1]*Y = b[0]
+  // Eq 2: A[1][0]*X + A[1][1]*Y = b[1]
+  function lineFromEq(a, b_, c) {
+    // a*X + b*Y = c → parametrize
+    if (Math.abs(b_) > 1e-6) {
+      const y1 = (c - a*(-range)) / b_;
+      const y2 = (c - a*( range)) / b_;
+      return [[-range, y1], [range, y2]];
+    } else {
+      const xVal = c / a;
+      return [[xVal, -range], [xVal, range]];
+    }
+  }
+  const line1 = lineFromEq(A[0][0], A[0][1], b[0]);
+  const line2 = lineFromEq(A[1][0], A[1][1], b[1]);
+
+  // Column picture: cols of A, target b
+  const col1 = [A[0][0], A[1][0]];
+  const col2 = [A[0][1], A[1][1]];
+  // After applying x: x1*col1 + x2*col2 = b
+  const xCol1 = [x[0]*col1[0], x[0]*col1[1]];
+
+  function ViewLabel({ label, color }) {
+    return (
+      <div className="text-xs tracking-[0.2em] font-semibold mb-2 text-center" style={{color}}>{label}</div>
+    );
+  }
+
+  return (
+    <InteractiveFrame
+      name="Row Picture vs Column Picture — same Ax = b, two ways"
+      whatAmISeeing="The same 2×2 system shown both ways. Left: the row picture — two lines, one per equation; the solution is their intersection. Right: the column picture — Ax = b means the columns combine to b."
+      tryThis="Try a system with NO solution: A = [[1,2],[2,4]], b = (4,1). In the row picture, you'll see two parallel lines (never meet). In the column picture, the columns are parallel, so they only span a single line — and b is OFF that line. The two failure modes are the same fact in two languages."
+    >
+      <div className="grid lg:grid-cols-2 gap-4 mb-4">
+        {(view === "row" || view === "both") && (
+          <div className="flex flex-col items-center">
+            <ViewLabel label="ROW PICTURE — Two equations as lines" color="var(--accent)" />
+            <svg viewBox="0 0 400 400" className="vector-svg" style={{maxWidth: "100%"}}>
+              {Array.from({length: 2*range+1}, (_, i) => i - range).filter(i => i !== 0).map(i => {
+                const [x1, y1] = toPx(i, -range), [x2, y2] = toPx(i, range);
+                const [x3, y3] = toPx(-range, i), [x4, y4] = toPx(range, i);
+                return <g key={i}>
+                  <line x1={x1} y1={y1} x2={x2} y2={y2} stroke="var(--canvas-grid)"/>
+                  <line x1={x3} y1={y3} x2={x4} y2={y4} stroke="var(--canvas-grid)"/>
+                </g>;
+              })}
+              <line x1={0} y1={cy} x2={400} y2={cy} stroke="var(--canvas-axis)"/>
+              <line x1={cx} y1={0} x2={cx} y2={400} stroke="var(--canvas-axis)"/>
+              {(() => {
+                const [p1, p2] = toPx(line1[0][0], line1[0][1]);
+                const [p3, p4] = toPx(line1[1][0], line1[1][1]);
+                return <line x1={p1} y1={p2} x2={p3} y2={p4} stroke="var(--accent)" strokeWidth="2.5"/>;
+              })()}
+              {(() => {
+                const [p1, p2] = toPx(line2[0][0], line2[0][1]);
+                const [p3, p4] = toPx(line2[1][0], line2[1][1]);
+                return <line x1={p1} y1={p2} x2={p3} y2={p4} stroke="var(--accent-2)" strokeWidth="2.5"/>;
+              })()}
+              {solvable && (() => {
+                const [px, py] = toPx(x[0], x[1]);
+                return <g>
+                  <circle cx={px} cy={py} r="7" fill="var(--accent-3)" stroke="var(--canvas-bg)" strokeWidth="2.5"/>
+                  <text x={px + 10} y={py - 8} fontSize="11" fill="var(--accent-3)" fontWeight="700">solution</text>
+                </g>;
+              })()}
+              <text x={20} y={20} fontSize="11" fill="var(--accent)">Eq 1: {A[0][0]}x + {A[0][1]}y = {b[0]}</text>
+              <text x={20} y={36} fontSize="11" fill="var(--accent-2)">Eq 2: {A[1][0]}x + {A[1][1]}y = {b[1]}</text>
+            </svg>
+          </div>
+        )}
+
+        {(view === "col" || view === "both") && (
+          <div className="flex flex-col items-center">
+            <ViewLabel label="COLUMN PICTURE — Combine A's columns to make b" color="var(--accent-2)" />
+            <svg viewBox="0 0 400 400" className="vector-svg" style={{maxWidth: "100%"}}>
+              <defs>
+                {["var(--accent)", "var(--accent-2)", "var(--accent-3)"].map((c, i) => (
+                  <marker key={i} id={"rc-arr-"+i} viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                    <path d="M0,0 L10,5 L0,10 z" fill={c}/>
+                  </marker>
+                ))}
+              </defs>
+              {Array.from({length: 2*range+1}, (_, i) => i - range).filter(i => i !== 0).map(i => {
+                const [x1, y1] = toPx(i, -range), [x2, y2] = toPx(i, range);
+                const [x3, y3] = toPx(-range, i), [x4, y4] = toPx(range, i);
+                return <g key={i}>
+                  <line x1={x1} y1={y1} x2={x2} y2={y2} stroke="var(--canvas-grid)"/>
+                  <line x1={x3} y1={y3} x2={x4} y2={y4} stroke="var(--canvas-grid)"/>
+                </g>;
+              })}
+              <line x1={0} y1={cy} x2={400} y2={cy} stroke="var(--canvas-axis)"/>
+              <line x1={cx} y1={0} x2={cx} y2={400} stroke="var(--canvas-axis)"/>
+
+              {/* Original cols (faint) */}
+              {(() => {
+                const [px, py] = toPx(col1[0], col1[1]);
+                return <line x1={cx} y1={cy} x2={px} y2={py} stroke="var(--accent)" strokeWidth="1.5" opacity="0.4" strokeDasharray="4 3" markerEnd="url(#rc-arr-0)"/>;
+              })()}
+              {(() => {
+                const [px, py] = toPx(col2[0], col2[1]);
+                return <line x1={cx} y1={cy} x2={px} y2={py} stroke="var(--accent-2)" strokeWidth="1.5" opacity="0.4" strokeDasharray="4 3" markerEnd="url(#rc-arr-1)"/>;
+              })()}
+
+              {/* x1*col1 from origin */}
+              {solvable && (() => {
+                const [px, py] = toPx(xCol1[0], xCol1[1]);
+                return <line x1={cx} y1={cy} x2={px} y2={py} stroke="var(--accent)" strokeWidth="3"/>;
+              })()}
+              {/* x2*col2 from end of x1*col1 */}
+              {solvable && (() => {
+                const [a, b_] = toPx(xCol1[0], xCol1[1]);
+                const [px, py] = toPx(b[0], b[1]);
+                return <line x1={a} y1={b_} x2={px} y2={py} stroke="var(--accent-2)" strokeWidth="3"/>;
+              })()}
+              {/* b target */}
+              {(() => {
+                const [px, py] = toPx(b[0], b[1]);
+                return <g>
+                  <line x1={cx} y1={cy} x2={px} y2={py} stroke="var(--accent-3)" strokeWidth="2.5" markerEnd="url(#rc-arr-2)"/>
+                  <circle cx={px} cy={py} r="5" fill="var(--accent-3)" stroke="var(--canvas-bg)" strokeWidth="2"/>
+                  <text x={px + 10} y={py - 8} fontSize="13" fill="var(--accent-3)" fontWeight="700">b</text>
+                </g>;
+              })()}
+              <text x={20} y={20} fontSize="11" fill="var(--accent)">col₁ = ({col1[0]}, {col1[1]})</text>
+              <text x={20} y={36} fontSize="11" fill="var(--accent-2)">col₂ = ({col2[0]}, {col2[1]})</text>
+              {solvable && <text x={20} y={52} fontSize="11" fill="var(--text-dim)">Ax = {x[0].toFixed(2)}·col₁ + {x[1].toFixed(2)}·col₂ = b</text>}
+            </svg>
+          </div>
+        )}
+      </div>
+
+      <div className="grid md:grid-cols-2 gap-3">
+        <div className="rounded-lg p-3" style={{border: "1px solid var(--border)", background: "var(--bg-elev-2)"}}>
+          <div className="text-xs tracking-[0.2em] font-semibold mb-2" style={{color: "var(--text-dim)"}}>MATRIX A</div>
+          <div className="grid grid-cols-2 gap-2">
+            {[0, 1].map(r => (
+              [0, 1].map(c => (
+                <NumInput key={`${r}-${c}`} value={A[r][c]}
+                  onChange={v => { const A2 = A.map(row => row.slice()); A2[r][c] = v; setA(A2); }} width={60}/>
+              ))
+            ))}
+          </div>
+        </div>
+        <div className="rounded-lg p-3" style={{border: "1px solid var(--border)", background: "var(--bg-elev-2)"}}>
+          <div className="text-xs tracking-[0.2em] font-semibold mb-2" style={{color: "var(--accent-3)"}}>VECTOR b</div>
+          <div className="flex gap-2">
+            <NumInput value={b[0]} onChange={v => setB([v, b[1]])} width={72}/>
+            <NumInput value={b[1]} onChange={v => setB([b[0], v])} width={72}/>
+          </div>
+          <div className="text-xs mt-2 font-mono" style={{color: "var(--text-dim)"}}>
+            det(A) = {det.toFixed(2)} {!solvable && <span style={{color: "var(--warn)"}}>· singular!</span>}
+          </div>
+          {solvable && (
+            <div className="text-xs mt-1 font-mono" style={{color: "var(--accent-3)"}}>
+              x = ({x[0].toFixed(2)}, {x[1].toFixed(2)})
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div className="flex gap-2 mt-3">
+        {[{k: "row", n: "Row only"}, {k: "col", n: "Column only"}, {k: "both", n: "Both"}].map(t => (
+          <button key={t.k} onClick={() => setView(t.k)}
+            className="text-sm px-3 py-1.5 rounded-lg transition-colors"
+            style={{
+              border: "1px solid " + (view === t.k ? "var(--accent-border)" : "var(--border)"),
+              background: view === t.k ? "var(--accent-soft)" : "transparent",
+              color: view === t.k ? "var(--accent)" : "var(--text-dim)",
+            }}>
+            {t.n}
+          </button>
+        ))}
+      </div>
+    </InteractiveFrame>
+  );
+}
+
+function Concept24() {
+  return (
+    <ConceptCard id="concept-2-4" label="2.4" moduleLabel="Module 2 · Span & Subspaces"
+      title="Ax = b — The Row Picture"
+      why="The column picture is more powerful, but the row picture is more visual for 2-equation systems. It's also the picture you grew up with. We give it equal time so you can pick the right tool for each question.">
+      <H3>Row picture: each row is one equation</H3>
+      <P>The matrix equation <T src="A\mathbf{x} = \mathbf{b}"/> is a compact way of writing <T src="m"/> separate equations:</P>
+      <BT src={String.raw`\begin{aligned} a_{11} x_1 + a_{12} x_2 + \cdots + a_{1n} x_n &= b_1 \\ a_{21} x_1 + a_{22} x_2 + \cdots + a_{2n} x_n &= b_2 \\ &\vdots \\ a_{m1} x_1 + a_{m2} x_2 + \cdots + a_{mn} x_n &= b_m \end{aligned}`}/>
+      <P>The <T src="i"/>-th row of <T src="A"/>, dotted with <T src="\mathbf{x}"/>, gives the <T src="i"/>-th entry of <T src="\mathbf{b}"/>.</P>
+
+      <H3>Geometric interpretation</H3>
+      <UL>
+        <Li>Each equation <T src="a_{i1} x_1 + a_{i2} x_2 = b_i"/> in <T src="\mathbb{R}^2"/> describes a LINE.</Li>
+        <Li>Each equation <T src="a_{i1} x_1 + a_{i2} x_2 + a_{i3} x_3 = b_i"/> in <T src="\mathbb{R}^3"/> describes a PLANE.</Li>
+        <Li>The solution to the SYSTEM is the INTERSECTION of all these lines / planes.</Li>
+      </UL>
+
+      <H3>The three cases for a 2×2 system</H3>
+      <UL>
+        <Li><B>Two non-parallel lines:</B> intersect at a single point — unique solution.</Li>
+        <Li><B>Two parallel lines (no overlap):</B> never intersect — no solution.</Li>
+        <Li><B>Two identical lines:</B> infinitely many intersections — infinitely many solutions.</Li>
+      </UL>
+      <P>This already tells you: a linear system has 0, 1, or infinitely many solutions — never exactly 2 or 17. (Module 3 will give the algebraic reason.)</P>
+
+      <Callout kind="info" title="When to use which picture">
+        <UL>
+          <Li><B>Row picture wins</B> for 2×2 or 3×3 systems with concrete numbers — you can sketch lines/planes and see the answer.</Li>
+          <Li><B>Column picture wins</B> for everything else: rank, null space, column space, eigenspace, solvability theorems, ML applications.</Li>
+          <Li><B>Use both</B> when reasoning about underdetermined or overdetermined systems — switching views reveals different aspects.</Li>
+        </UL>
+      </Callout>
+
+      <RowColumnToggle/>
+
+      <Callout kind="trap" title="The row-only student's blind spot">
+        <P>Students who only think in the row picture will solve "find x for this 3×3 system" easily, but freeze on questions like "find the column space" or "describe the null space geometrically." Those questions LIVE in the column picture. Switch deliberately when you see those keywords.</P>
+      </Callout>
+
+      <Callout kind="recall" title="Concept 2.4 in one breath">
+        <P>Row picture = system of equations, geometrically lines/planes whose intersection is the solution. Great for small concrete problems. For abstract rank/null/column-space questions, always switch to the column picture.</P>
+      </Callout>
+
+      <ProgressPill conceptId="m2-c24"/>
+    </ConceptCard>
+  );
+}
+
+/* ════════════════════════════════════════════════════════
+   CONCEPT 2.5 — Matrix Multiplication: 4 Perspectives
+   ════════════════════════════════════════════════════════ */
+function MatrixMultPerspectives() {
+  const [A, setA] = useState([[1, 2], [3, 4]]);
+  const [B, setB] = useState([[5, 6], [7, 8]]);
+  const [view, setView] = useState("dot");
+
+  // Compute AB
+  const AB = [
+    [A[0][0]*B[0][0] + A[0][1]*B[1][0], A[0][0]*B[0][1] + A[0][1]*B[1][1]],
+    [A[1][0]*B[0][0] + A[1][1]*B[1][0], A[1][0]*B[0][1] + A[1][1]*B[1][1]],
+  ];
+
+  const cell = (val, color, highlight) => (
+    <div className="font-mono text-sm w-12 h-12 flex items-center justify-center rounded transition-all"
+      style={{
+        background: highlight ? "var(--accent-soft)" : "var(--bg-elev-3)",
+        border: "1px solid " + (highlight ? "var(--accent)" : "var(--border)"),
+        color: color || "var(--text)",
+        transform: highlight ? "scale(1.05)" : "scale(1)",
+      }}>
+      {val}
+    </div>
+  );
+
+  function Matrix({ data, title, color, highlightRow, highlightCol, highlightCell }) {
+    return (
+      <div className="flex flex-col items-center">
+        <div className="text-xs tracking-[0.2em] font-semibold mb-1" style={{color: color || "var(--text-dim)"}}>{title}</div>
+        <div className="grid grid-cols-2 gap-1 p-2 rounded-lg" style={{background: "var(--bg-elev-2)", border: "1px solid var(--border)"}}>
+          {data.map((row, r) => row.map((val, c) => (
+            <div key={`${r}-${c}`} className="w-10 h-10 flex items-center justify-center text-sm font-mono rounded"
+              style={{
+                background: (highlightRow === r || highlightCol === c || (highlightCell && highlightCell[0] === r && highlightCell[1] === c))
+                  ? (color ? color.replace("var(--", "var(--").replace(")", "-soft)") : "var(--accent-soft)") : "transparent",
+                color: (highlightRow === r || highlightCol === c || (highlightCell && highlightCell[0] === r && highlightCell[1] === c))
+                  ? color : "var(--text)",
+                fontWeight: (highlightCell && highlightCell[0] === r && highlightCell[1] === c) ? 700 : 400,
+              }}>
+              {val}
+            </div>
+          )))}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <InteractiveFrame
+      name="Matrix Multiplication — 4 Perspectives"
+      whatAmISeeing="Two 2×2 matrices A and B. The product AB on the right. Switch perspectives to see WHY each entry of AB is computed — every perspective gives the same numbers, but a different mental story."
+      tryThis="Compute AB and BA with A = [[1,2],[3,4]] and B = [[0,1],[1,0]]. Notice AB ≠ BA. Now try B = identity matrix [[1,0],[0,1]] — then AB = A. The 4 perspectives are different lenses on the SAME numbers."
+    >
+      <div className="space-y-4">
+        <div className="flex gap-2 flex-wrap">
+          {[
+            {k: "dot",  n: "1. Row · Column (standard)"},
+            {k: "col",  n: "2. Cols of AB = A·(col of B)"},
+            {k: "row",  n: "3. Rows of AB = (row of A)·B"},
+            {k: "outer", n: "4. Outer product sum"},
+          ].map(t => (
+            <button key={t.k} onClick={() => setView(t.k)}
+              className="text-sm px-3 py-1.5 rounded-lg transition-colors"
+              style={{
+                border: "1px solid " + (view === t.k ? "var(--accent-border)" : "var(--border)"),
+                background: view === t.k ? "var(--accent-soft)" : "transparent",
+                color: view === t.k ? "var(--accent)" : "var(--text-dim)",
+              }}>
+              {t.n}
+            </button>
+          ))}
+        </div>
+
+        <div className="grid md:grid-cols-2 gap-3">
+          <div className="rounded-lg p-3" style={{border: "1px solid var(--border)", background: "var(--bg-elev-2)"}}>
+            <div className="text-xs tracking-[0.2em] font-semibold mb-2" style={{color: "var(--accent)"}}>MATRIX A</div>
+            <div className="grid grid-cols-2 gap-2">
+              {[0, 1].map(r => [0, 1].map(c => (
+                <NumInput key={`A-${r}-${c}`} value={A[r][c]}
+                  onChange={v => { const A2 = A.map(row => row.slice()); A2[r][c] = v; setA(A2); }} width={60}/>
+              )))}
+            </div>
+          </div>
+          <div className="rounded-lg p-3" style={{border: "1px solid var(--border)", background: "var(--bg-elev-2)"}}>
+            <div className="text-xs tracking-[0.2em] font-semibold mb-2" style={{color: "var(--accent-2)"}}>MATRIX B</div>
+            <div className="grid grid-cols-2 gap-2">
+              {[0, 1].map(r => [0, 1].map(c => (
+                <NumInput key={`B-${r}-${c}`} value={B[r][c]}
+                  onChange={v => { const B2 = B.map(row => row.slice()); B2[r][c] = v; setB(B2); }} width={60}/>
+              )))}
+            </div>
+          </div>
+        </div>
+
+        <div className="grid md:grid-cols-3 gap-4 items-center">
+          <Matrix data={A} title="A" color="var(--accent)"/>
+          <div className="text-3xl text-center" style={{color: "var(--text-dim)"}}>×</div>
+          <Matrix data={B} title="B" color="var(--accent-2)"/>
+        </div>
+
+        <div className="text-center text-2xl" style={{color: "var(--text-dim)"}}>=</div>
+
+        <div className="flex justify-center">
+          <Matrix data={AB} title="AB (result)" color="var(--accent-3)"/>
+        </div>
+
+        <div className="rounded-lg p-4"
+          style={{border: "1px solid var(--accent-border)", background: "var(--accent-soft)"}}>
+          {view === "dot" && (
+            <>
+              <div className="text-xs tracking-[0.2em] font-semibold mb-2" style={{color: "var(--accent)"}}>PERSPECTIVE 1 · ROW DOT COLUMN</div>
+              <div className="text-sm leading-relaxed mb-2" style={{color: "var(--text)"}}>
+                Each entry of AB is a dot product: <T src="(AB)_{ij} = (\text{row}_i \text{ of } A) \cdot (\text{col}_j \text{ of } B)"/>.
+              </div>
+              <BT src={String.raw`(AB)_{11} = (1)(5) + (2)(7) = 19, \quad (AB)_{12} = (1)(6) + (2)(8) = 22, \ldots`}/>
+            </>
+          )}
+          {view === "col" && (
+            <>
+              <div className="text-xs tracking-[0.2em] font-semibold mb-2" style={{color: "var(--accent)"}}>PERSPECTIVE 2 · COLUMN COMBINATION</div>
+              <div className="text-sm leading-relaxed mb-2" style={{color: "var(--text)"}}>
+                The <T src="j"/>-th column of AB is <T src="A \cdot (\text{col}_j \text{ of } B)"/> — a linear combination of A's columns using col_j of B as weights.
+              </div>
+              <BT src={String.raw`\text{col}_1(AB) = A \cdot \text{col}_1(B) = 5 \cdot \text{col}_1(A) + 7 \cdot \text{col}_2(A).`}/>
+            </>
+          )}
+          {view === "row" && (
+            <>
+              <div className="text-xs tracking-[0.2em] font-semibold mb-2" style={{color: "var(--accent)"}}>PERSPECTIVE 3 · ROW COMBINATION</div>
+              <div className="text-sm leading-relaxed mb-2" style={{color: "var(--text)"}}>
+                The <T src="i"/>-th row of AB is <T src="(\text{row}_i \text{ of } A) \cdot B"/> — a linear combination of B's rows.
+              </div>
+              <BT src={String.raw`\text{row}_1(AB) = \text{row}_1(A) \cdot B = 1 \cdot \text{row}_1(B) + 2 \cdot \text{row}_2(B).`}/>
+            </>
+          )}
+          {view === "outer" && (
+            <>
+              <div className="text-xs tracking-[0.2em] font-semibold mb-2" style={{color: "var(--accent)"}}>PERSPECTIVE 4 · OUTER PRODUCT SUM</div>
+              <div className="text-sm leading-relaxed mb-2" style={{color: "var(--text)"}}>
+                AB equals the SUM of outer products of A's columns and B's rows. Each outer product is a rank-1 matrix.
+              </div>
+              <BT src={String.raw`AB = \text{col}_1(A) \cdot \text{row}_1(B) + \text{col}_2(A) \cdot \text{row}_2(B).`}/>
+              <div className="text-xs mt-1" style={{color: "var(--text-dim)"}}>This view powers the SVD and low-rank approximations.</div>
+            </>
+          )}
+        </div>
+      </div>
+    </InteractiveFrame>
+  );
+}
+
+function Concept25() {
+  return (
+    <ConceptCard id="concept-2-5" label="2.5" moduleLabel="Module 2 · Span & Subspaces"
+      title="Multiplying Two Matrices — Four Perspectives"
+      why="Most students learn ONE way to multiply matrices: row × column. That's enough to pass an exam, and useless for understanding anything bigger. There are FOUR ways. Each illuminates a different theorem. By the end of this concept you'll see why every matrix decomposition (LU, SVD, QR) is built on these views.">
+      <H3>The standard definition</H3>
+      <P>For <T src="A"/> (size <T src="m \times n"/>) and <T src="B"/> (size <T src="n \times p"/>), the product <T src="AB"/> is <T src="m \times p"/> with entries:</P>
+      <BT src={String.raw`(AB)_{ij} = \sum_{k=1}^{n} A_{ik} B_{kj}.`}/>
+      <P>This is "row i of A dotted with column j of B" — Perspective 1.</P>
+
+      <H3>Perspective 1 — Row dot column</H3>
+      <P>The textbook view. Compute each entry <T src="(AB)_{ij}"/> as the dot product of <T src="A"/>'s <T src="i"/>-th row and <T src="B"/>'s <T src="j"/>-th column. Easy to code; bad mental picture for theorems.</P>
+
+      <H3>Perspective 2 — Columns of AB are linear combinations of columns of A</H3>
+      <P>From the column picture of <T src="A\mathbf{x}"/>: each column of <T src="B"/> acts as an <T src="\mathbf{x}"/> input to <T src="A"/>.</P>
+      <BT src={String.raw`\text{col}_j(AB) \;=\; A \cdot \text{col}_j(B) \;=\; \sum_k B_{kj} \cdot \text{col}_k(A).`}/>
+      <P><B>Mental model:</B> "to get the j-th column of AB, mix A's columns using the j-th column of B as weights."</P>
+
+      <H3>Perspective 3 — Rows of AB are linear combinations of rows of B</H3>
+      <P>Symmetrically:</P>
+      <BT src={String.raw`\text{row}_i(AB) \;=\; \text{row}_i(A) \cdot B \;=\; \sum_k A_{ik} \cdot \text{row}_k(B).`}/>
+      <P><B>Mental model:</B> "to get the i-th row of AB, mix B's rows using the i-th row of A as weights."</P>
+
+      <H3>Perspective 4 — Outer product sum (the SVD lens)</H3>
+      <P>The most powerful view. Write the product as a sum of <T src="n"/> rank-1 matrices, each being a column of A times a row of B:</P>
+      <BT src={String.raw`AB \;=\; \sum_{k=1}^{n} \text{col}_k(A) \cdot \text{row}_k(B) \;=\; \mathbf{a}_1 \mathbf{b}_1^\top + \mathbf{a}_2 \mathbf{b}_2^\top + \cdots + \mathbf{a}_n \mathbf{b}_n^\top.`}/>
+      <P>Each term <T src="\mathbf{a}_k \mathbf{b}_k^\top"/> is an outer product — a rank-1 matrix. The whole product is a SUM of rank-1 contributions. This is the view that powers SVD, PCA, and every low-rank matrix factorization.</P>
+
+      <Callout kind="proof" title="Why all four views agree — 2×2 example">
+        <P>Let <T src="A = \begin{pmatrix} 1 & 2 \\ 3 & 4 \end{pmatrix}, B = \begin{pmatrix} 5 & 6 \\ 7 & 8 \end{pmatrix}"/>.</P>
+        <P><B>Perspective 1 (dot product):</B> <T src="(AB)_{11} = 1\cdot 5 + 2 \cdot 7 = 19."/> Continue for all four entries: <T src="AB = \begin{pmatrix} 19 & 22 \\ 43 & 50 \end{pmatrix}"/>.</P>
+        <P><B>Perspective 2 (column combo):</B> <T src="\text{col}_1(AB) = 5\begin{pmatrix} 1 \\ 3 \end{pmatrix} + 7\begin{pmatrix} 2 \\ 4 \end{pmatrix} = \begin{pmatrix} 19 \\ 43 \end{pmatrix}"/>. ✓</P>
+        <P><B>Perspective 3 (row combo):</B> <T src="\text{row}_1(AB) = 1\cdot (5, 6) + 2\cdot (7, 8) = (19, 22)"/>. ✓</P>
+        <P><B>Perspective 4 (outer products):</B> <T src="\begin{pmatrix} 1 \\ 3 \end{pmatrix}(5,6) + \begin{pmatrix} 2 \\ 4 \end{pmatrix}(7,8) = \begin{pmatrix} 5 & 6 \\ 15 & 18 \end{pmatrix} + \begin{pmatrix} 14 & 16 \\ 28 & 32 \end{pmatrix} = \begin{pmatrix} 19 & 22 \\ 43 & 50 \end{pmatrix}"/>. ✓</P>
+        <P>All four arrive at the same matrix. The algebra is the same; the storytelling differs.</P>
+      </Callout>
+
+      <H3>AB ≠ BA in general</H3>
+      <P>Matrix multiplication is <B>not commutative</B>. Concrete counterexample:</P>
+      <BT src={String.raw`A = \begin{pmatrix} 1 & 0 \\ 0 & 0 \end{pmatrix}, \quad B = \begin{pmatrix} 0 & 1 \\ 0 & 0 \end{pmatrix} \quad \Rightarrow \quad AB = \begin{pmatrix} 0 & 1 \\ 0 & 0 \end{pmatrix}, \quad BA = \begin{pmatrix} 0 & 0 \\ 0 & 0 \end{pmatrix}.`}/>
+      <P>So even when both products are defined, they need not be equal. They need not even be the same SIZE if A and B aren't square. The order matters absolutely. Concept 7.3 will study WHEN AB and BA share structure (eigenvalues).</P>
+
+      <Callout kind="trap" title="The 'I'll just transpose' fallacy">
+        <P>If <T src="A"/> is <T src="m \times n"/> and <T src="B"/> is <T src="n \times p"/>, then <T src="AB"/> is defined but <T src="BA"/> is only defined if <T src="p = m"/>. Even then, the products will generally differ. Don't assume things like <T src="(AB)^\top = A^\top B^\top"/>. The correct rule is <T src="(AB)^\top = B^\top A^\top"/> — order reverses.</P>
+      </Callout>
+
+      <MatrixMultPerspectives/>
+
+      <H3>GATE 2016 — full PYQ walkthrough</H3>
+      <PYQ year="2016" exam="CS-style" marks="2"
+        question={<P>Let A and B be two arbitrary 3×3 non-singular matrices. Which of the following is ALWAYS true? <br/>(a) <T src="(AB)^{-1} = A^{-1} B^{-1}"/>, (b) <T src="(AB)^\top = A^\top B^\top"/>, (c) <T src="(AB)^{-1} = B^{-1} A^{-1}"/>, (d) <T src="AB = BA"/>.</P>}
+        solution={
+          <>
+            <P><B>Check (a):</B> <T src="(AB)^{-1} = A^{-1} B^{-1}"/>? If we multiply <T src="AB \cdot A^{-1} B^{-1}"/>, we get <T src="A(BA^{-1})B^{-1}"/>, which is NOT generally I. So this fails unless A and B commute. <B>Wrong.</B></P>
+            <P><B>Check (b):</B> <T src="(AB)^\top = A^\top B^\top"/>? The actual rule is <T src="(AB)^\top = B^\top A^\top"/>. Order reverses. <B>Wrong.</B></P>
+            <P><B>Check (c):</B> <T src="(AB)^{-1} = B^{-1} A^{-1}"/>? Verify: <T src="(AB)(B^{-1} A^{-1}) = A(BB^{-1})A^{-1} = A I A^{-1} = I"/>. ✓ Always true (for non-singular A and B).</P>
+            <P><B>Check (d):</B> Matrices don't commute in general. <B>Wrong.</B></P>
+            <P><B>Answer:</B> (c).</P>
+            <Callout kind="info" title="The rule to memorise">
+              <P><B>Transpose and inverse both reverse the order:</B> <T src="(AB)^\top = B^\top A^\top"/>, <T src="(AB)^{-1} = B^{-1} A^{-1}"/>. Many GATE questions test exactly this reversal.</P>
+            </Callout>
+          </>
+        }/>
+
+      <H3>GATE 2014 — full PYQ walkthrough</H3>
+      <PYQ year="2014" exam="CS-style" marks="2"
+        question={<P>If A is a 3×3 matrix with <T src="\det(A) = 4"/>, what is <T src="\det(2A)"/>?</P>}
+        solution={
+          <>
+            <P><B>Step 1.</B> Use the scalar-matrix determinant rule: for an <T src="n \times n"/> matrix, <T src="\det(cA) = c^n \det(A)"/>.</P>
+            <P><B>Step 2.</B> Here <T src="n = 3"/> and <T src="c = 2"/>:</P>
+            <BT src={String.raw`\det(2A) = 2^3 \cdot \det(A) = 8 \cdot 4 = 32.`}/>
+            <P><B>Answer:</B> <T src="\det(2A) = 32"/>.</P>
+            <Callout kind="trap" title="Why c^n, not c">
+              <P>Multiplying every entry of <T src="A"/> by <T src="c"/> is the same as multiplying each of <T src="n"/> rows by <T src="c"/>. Each row-multiplication multiplies the determinant by <T src="c"/>. <T src="n"/> rows → factor <T src="c^n"/>. A common mistake is <T src="\det(2A) = 2 \det(A) = 8"/>, which would only be true if you scaled just one row.</P>
+            </Callout>
+          </>
+        }/>
+
+      <Callout kind="ml" title="The 4 perspectives in machine learning">
+        <P><B>Forward pass</B> uses Perspective 1 or 2 — matrix multiplication as 'apply A to each column of B'. <B>Backprop</B> reverses everything via Perspective 3 — gradients propagate as row combinations. <B>SVD and low-rank approximation</B> live in Perspective 4 — keep only the top few outer-product terms. Every deep-learning textbook implicitly switches between these views constantly.</P>
+      </Callout>
+
+      <Callout kind="recall" title="Concept 2.5 in one breath">
+        <P>4 perspectives: row·col (entries), col-combo (cols of AB = A·cols of B), row-combo (rows of AB = rows of A·B), outer-product sum (rank-1 decomposition). Same numbers, different stories. AB ≠ BA. Transpose and inverse both reverse order.</P>
+      </Callout>
+
+      <ProgressPill conceptId="m2-c25"/>
+    </ConceptCard>
+  );
+}
+
+/* ════════════════════════════════════════════════════════
+   CONCEPT 2.6 — Unique Linear Combination of Independent Vectors
+   ════════════════════════════════════════════════════════ */
+function UniquenessDemo() {
+  // 2 independent vectors v1, v2; target. Always unique decomposition.
+  // Toggle: independent vs dependent
+  const [independent, setIndependent] = useState(true);
+  const v1 = independent ? [2, 1] : [2, 1];
+  const v2 = independent ? [-1, 2] : [4, 2]; // dependent: 2*v1
+  const [target, setTarget] = useState([1, 3]);
+
+  // Solve target = c1*v1 + c2*v2
+  const det = v1[0]*v2[1] - v1[1]*v2[0];
+  let c1 = 0, c2 = 0, solvable = false;
+  if (Math.abs(det) > 1e-6) {
+    c1 = (target[0]*v2[1] - target[1]*v2[0]) / det;
+    c2 = (v1[0]*target[1] - v1[1]*target[0]) / det;
+    solvable = true;
+  }
+
+  // Alternative decomposition (only meaningful when dependent and solvable)
+  // For dependent case, infinitely many decompositions exist if target ∈ span
+  let alt1 = null, alt2 = null;
+  if (!independent) {
+    // dependent case: check if target is on the line of v1
+    // target = c1 * v1 → c1 = target[0]/v1[0] (if v1[0] ≠ 0)
+    if (Math.abs(v1[0]) > 1e-6) {
+      const c = target[0] / v1[0];
+      if (Math.abs(c * v1[1] - target[1]) < 0.1) {
+        solvable = true;
+        c1 = c; c2 = 0;
+        alt1 = c - 2; alt2 = 1; // alternative: c1' = c - 2, c2' = 1 (since v2 = 2*v1)
+      }
+    }
+  }
+
+  const range = 6, scale = 230 / range, cx = 230, cy = 230;
+  const toPx = (x, y) => [cx + x*scale, cy - y*scale];
+
+  const leg1 = [c1*v1[0], c1*v1[1]];
+  const extras = solvable ? (
+    <g>
+      {(() => {
+        const [px, py] = toPx(leg1[0], leg1[1]);
+        return <line x1={cx} y1={cy} x2={px} y2={py} stroke="var(--accent)" strokeWidth="3" opacity="0.8"/>;
+      })()}
+      {(() => {
+        const [a, b] = toPx(leg1[0], leg1[1]);
+        const [px, py] = toPx(target[0], target[1]);
+        return <line x1={a} y1={b} x2={px} y2={py} stroke="var(--accent-2)" strokeWidth="3" opacity="0.8"/>;
+      })()}
+    </g>
+  ) : null;
+
+  const vectors = [
+    { vec: v1, colorIdx: 0, label: "v₁", opacity: 0.55, dashed: true, dot: false },
+    { vec: v2, colorIdx: 1, label: "v₂", opacity: 0.55, dashed: true, dot: false },
+    { vec: target, colorIdx: 2, label: "target", thick: 3 },
+  ];
+
+  return (
+    <InteractiveFrame
+      name="Uniqueness Demonstrator"
+      whatAmISeeing="Target vector decomposed as c₁v₁ + c₂v₂. When v₁ and v₂ are independent, the decomposition is UNIQUE — there's exactly one (c₁, c₂). When dependent, either no solution exists, or infinitely many do."
+      tryThis="Start in INDEPENDENT mode. Move the target. Watch (c₁, c₂) update — always unique. Switch to DEPENDENT mode (v₂ = 2v₁). Now if target lies on v₁'s line, infinitely many (c₁, c₂) work (one shown — try the displayed alternative). If target is OFF the line, no decomposition exists."
+    >
+      <div className="grid lg:grid-cols-[auto,1fr] gap-6 items-start">
+        <VectorCanvas width={460} height={460} range={6} vectors={vectors} extras={extras}/>
+
+        <div className="space-y-4">
+          <div className="flex gap-2">
+            {[{k: true, n: "Independent (v₂ ⊥ v₁)"}, {k: false, n: "Dependent (v₂ = 2v₁)"}].map(t => (
+              <button key={String(t.k)} onClick={() => setIndependent(t.k)}
+                className="text-sm px-3 py-1.5 rounded-lg transition-colors"
+                style={{
+                  border: "1px solid " + (independent === t.k ? "var(--accent-border)" : "var(--border)"),
+                  background: independent === t.k ? "var(--accent-soft)" : "transparent",
+                  color: independent === t.k ? "var(--accent)" : "var(--text-dim)",
+                }}>
+                {t.n}
+              </button>
+            ))}
+          </div>
+
+          <div className="rounded-lg p-3" style={{border: "1px solid var(--border)", background: "var(--bg-elev-2)"}}>
+            <div className="text-xs tracking-[0.2em] font-semibold mb-2" style={{color: "var(--accent-3)"}}>TARGET</div>
+            <div className="flex items-center gap-2">
+              <NumInput value={target[0]} onChange={x => setTarget([x, target[1]])} width={72}/>
+              <NumInput value={target[1]} onChange={y => setTarget([target[0], y])} width={72}/>
+            </div>
+          </div>
+
+          <div className="rounded-lg p-4"
+            style={{
+              border: "1px solid " + (solvable ? "var(--accent-border)" : "var(--warn-border)"),
+              background: solvable ? "var(--accent-soft)" : "var(--warn-soft)",
+            }}>
+            {solvable ? (
+              <>
+                <div className="text-xs tracking-[0.2em] font-semibold mb-2" style={{color: "var(--accent)"}}>
+                  DECOMPOSITION{independent ? " (UNIQUE)" : " (one of infinitely many)"}
+                </div>
+                <div className="text-sm font-mono" style={{color: "var(--text)"}}>
+                  target = <span style={{color: "var(--accent)"}}>{c1.toFixed(2)}</span>·v₁ + <span style={{color: "var(--accent-2)"}}>{c2.toFixed(2)}</span>·v₂
+                </div>
+                {!independent && alt1 !== null && (
+                  <div className="text-sm font-mono mt-1" style={{color: "var(--text-dim)"}}>
+                    or target = <span style={{color: "var(--accent)"}}>{alt1.toFixed(2)}</span>·v₁ + <span style={{color: "var(--accent-2)"}}>{alt2.toFixed(2)}</span>·v₂ (also works!)
+                  </div>
+                )}
+              </>
+            ) : (
+              <>
+                <div className="text-xs tracking-[0.2em] font-semibold mb-2" style={{color: "var(--warn)"}}>NO DECOMPOSITION</div>
+                <div className="text-sm" style={{color: "var(--text)"}}>
+                  target is NOT in span{`{v₁, v₂}`}. v₂ = 2v₁ so span is only a line — target is off it.
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      </div>
+    </InteractiveFrame>
+  );
+}
+
+function Concept26() {
+  return (
+    <ConceptCard id="concept-2-6" label="2.6" moduleLabel="Module 2 · Span & Subspaces"
+      title="Linear Combination of Independent Vectors is Unique"
+      why="The uniqueness of representation in an independent set is what lets us talk about 'the coordinates of a vector in a basis' as a well-defined object. Without uniqueness, coordinates would be ambiguous. Every coordinate-changing trick in Modules 5–8 depends on this fact.">
+      <H3>The statement</H3>
+      <P>Suppose <T src="\mathbf{v}_1, \mathbf{v}_2, \ldots, \mathbf{v}_k"/> are linearly INDEPENDENT, and</P>
+      <BT src={String.raw`c_1 \mathbf{v}_1 + c_2 \mathbf{v}_2 + \cdots + c_k \mathbf{v}_k = d_1 \mathbf{v}_1 + d_2 \mathbf{v}_2 + \cdots + d_k \mathbf{v}_k.`}/>
+      <P>Then <T src="c_i = d_i"/> for ALL <T src="i = 1, \ldots, k"/>.</P>
+      <P>In words: <Em>two linear combinations of independent vectors that give the same result MUST have identical coefficients.</Em></P>
+
+      <Callout kind="proof" title="Full proof from first principles">
+        <P>Subtract the right side from the left:</P>
+        <BT src={String.raw`c_1 \mathbf{v}_1 + \cdots + c_k \mathbf{v}_k - (d_1 \mathbf{v}_1 + \cdots + d_k \mathbf{v}_k) = \mathbf{0}.`}/>
+        <P>Combine like terms:</P>
+        <BT src={String.raw`(c_1 - d_1) \mathbf{v}_1 + (c_2 - d_2) \mathbf{v}_2 + \cdots + (c_k - d_k) \mathbf{v}_k = \mathbf{0}.`}/>
+        <P>But the <T src="\mathbf{v}_i"/> are linearly INDEPENDENT — by definition, the ONLY way a linear combination of them equals <T src="\mathbf{0}"/> is if every coefficient is zero. So:</P>
+        <BT src={String.raw`c_i - d_i = 0 \quad \text{for every } i, \quad \text{i.e., } c_i = d_i. \qquad \blacksquare`}/>
+      </Callout>
+
+      <H3>Why this matters — coordinates are well-defined</H3>
+      <P>If <T src="\{\mathbf{b}_1, \ldots, \mathbf{b}_n\}"/> is a basis of <T src="V"/>, every <T src="\mathbf{v} \in V"/> can be written as a linear combination of basis vectors (because the basis spans). The uniqueness theorem says: there is exactly ONE such combination. Hence the COORDINATES <T src="(c_1, \ldots, c_n)"/> of <T src="\mathbf{v}"/> in this basis are well-defined.</P>
+      <P>Without uniqueness, "the coordinates of <T src="\mathbf{v}"/>" would mean nothing — there'd be multiple choices.</P>
+
+      <H3>The dependent case — uniqueness fails</H3>
+      <P>If <T src="\mathbf{v}_1, \ldots, \mathbf{v}_k"/> are DEPENDENT, then by definition there's a non-trivial relation <T src="\sum a_i \mathbf{v}_i = \mathbf{0}"/> with not all <T src="a_i"/> zero. Given any decomposition <T src="\mathbf{v} = \sum c_i \mathbf{v}_i"/>, you can manufacture a different one by adding the trivial combination: <T src="\mathbf{v} = \sum (c_i + t a_i) \mathbf{v}_i"/> for any <T src="t \in \mathbb{R}"/>. So infinitely many decompositions exist whenever ONE exists. (And if <T src="\mathbf{v}"/> isn't in the span, no decomposition exists at all.)</P>
+
+      <Callout kind="info" title="Why this is the foundation of EVERYTHING coordinate-based">
+        <P>Change of basis. Matrix representations of linear maps. Eigenvalue decomposition. SVD. PCA. Every one of these operations expresses a vector in some convenient basis and reads off its coordinates. ALL of it depends on uniqueness — without it, the coordinates wouldn't be well-defined and these decompositions would be ambiguous nonsense.</P>
+      </Callout>
+
+      <UniquenessDemo/>
+
+      <H3>GATE 2017 — full PYQ walkthrough</H3>
+      <PYQ year="2017" exam="CS-style" marks="2"
+        question={<P>Let V be a vector space with a basis <T src="\{\mathbf{v}_1, \mathbf{v}_2, \mathbf{v}_3\}"/>. If <T src="\mathbf{u} = 2\mathbf{v}_1 + 3\mathbf{v}_2 - \mathbf{v}_3"/> and also <T src="\mathbf{u} = a\mathbf{v}_1 + b\mathbf{v}_2 + c\mathbf{v}_3"/>, what are the values of <T src="a, b, c"/>?</P>}
+        solution={
+          <>
+            <P><B>Step 1 — Translate.</B> The set <T src="\{\mathbf{v}_1, \mathbf{v}_2, \mathbf{v}_3\}"/> is a basis, so the three vectors are linearly INDEPENDENT.</P>
+            <P><B>Step 2 — Apply uniqueness.</B> Two linear combinations of independent vectors yielding the same result must have identical coefficients. So:</P>
+            <BT src={String.raw`2 \mathbf{v}_1 + 3 \mathbf{v}_2 - 1 \mathbf{v}_3 = a \mathbf{v}_1 + b \mathbf{v}_2 + c \mathbf{v}_3.`}/>
+            <P><B>Step 3 — Read off.</B> <T src="a = 2,\ b = 3,\ c = -1"/>.</P>
+            <P><B>Answer:</B> <T src="(a, b, c) = (2, 3, -1)"/>.</P>
+            <Callout kind="info" title="Why this is a 'reasoning' question, not computation">
+              <P>There's no system to solve. The whole question tests whether you KNOW that independent vectors give unique coefficients. If you do, the answer is immediate. Without that knowledge, you'd set up linear equations and waste minutes computing what's already obvious.</P>
+            </Callout>
+          </>
+        }/>
+
+      <H3>Connection back to Module 1.3</H3>
+      <P>We previewed this fact in Concept 1.3 when discussing "the two questions" — reachability AND uniqueness. Now you have the full statement, the full proof, and the GATE-style application.</P>
+
+      <Callout kind="ml" title="In ML: why latent variable models care about identifiability">
+        <P>In factor models, ICA, and neural-network embeddings, you often want a UNIQUE representation of an input in some learned basis. If the basis is dependent (overcomplete), the representation is ambiguous — a problem called "non-identifiability". Researchers add sparsity, orthogonality, or other constraints precisely to force uniqueness (or near-uniqueness). The math here is the same: independent → unique.</P>
+      </Callout>
+
+      <Callout kind="recall" title="Concept 2.6 in one breath">
+        <P>Independent vectors → unique coefficients. Dependent vectors → either no decomposition or infinitely many. This single fact makes 'coordinates in a basis' a well-defined object — the foundation of every coordinate-change theorem.</P>
+      </Callout>
+
+      <ProgressPill conceptId="m2-c26"/>
+    </ConceptCard>
+  );
+}
+
+/* ════════════════════════════════════════════════════════
+   APP ROOT
+   ════════════════════════════════════════════════════════ */
+function App() {
+  useEffect(() => { hideLoading(); }, []);
+  const concepts = [
+    { id: "concept-2-1", label: "2.1", title: "Span of a Set of Vectors",            desc: "Where can you reach? Point, line, plane, all." },
+    { id: "concept-2-2", label: "2.2", title: "Basis and Dimension",                  desc: "The minimum spanning set + its fixed size." },
+    { id: "concept-2-3", label: "2.3", title: "Ax = b · The Column Picture",          desc: "THE key view. Unlocks rank, null space, eigenspace." },
+    { id: "concept-2-4", label: "2.4", title: "Ax = b · The Row Picture",             desc: "Each row = a line/plane. Solution = intersection." },
+    { id: "concept-2-5", label: "2.5", title: "Matrix Multiplication · 4 Perspectives", desc: "Row·col, col-combo, row-combo, outer-product. Two PYQs." },
+    { id: "concept-2-6", label: "2.6", title: "Uniqueness in Independent Sets",       desc: "Why coordinates in a basis are well-defined." },
+  ];
+  return (
+    <div className="min-h-screen">
+      <TopNav currentModule={2}/>
+      <Hero
+        moduleNum={2} totalModules={8}
+        title="Span, Subspaces & the Column Picture"
+        tagline="The view that unlocks the rest of linear algebra"
+        intro={
+          <>
+            Module 1 gave you vectors and linear combinations. Now we name the regions they reach.
+            We meet the <Em>span</Em>, the <Em>subspace</Em>, the <Em>basis</Em>, the <Em>dimension</Em>.
+            And then we look at <T src="A\mathbf{x} = \mathbf{b}"/> in the one way that makes rank, null space, and eigenspace feel obvious — the column picture.
+          </>
+        }
+        concepts={concepts}
+        stats="6 concepts · 6 interactive tools · 3 GATE PYQs"
+      />
+
+      {/* Problem Lab CTA */}
+      <section className="max-w-5xl mx-auto px-5 pt-2 pb-2">
+        <a href="module-02-problem-lab.html"
+          className="block rounded-2xl p-5 md:p-6 group transition-all"
+          style={{
+            background: "linear-gradient(135deg, var(--accent-soft), var(--accent-2-soft))",
+            border: "1px solid var(--accent-border)",
+            boxShadow: "var(--shadow-glow-accent)",
+          }}
+          onMouseEnter={e => e.currentTarget.style.borderColor = "var(--accent)"}
+          onMouseLeave={e => e.currentTarget.style.borderColor = "var(--accent-border)"}>
+          <div className="flex flex-wrap items-center gap-4">
+            <div style={{
+              width: 52, height: 52, borderRadius: 14,
+              background: "var(--grad-hero)", color: "white",
+              display: "inline-flex", alignItems: "center", justifyContent: "center",
+              fontSize: 22, flexShrink: 0,
+            }}>🎯</div>
+            <div className="flex-1 min-w-[260px]">
+              <div className="text-[11px] tracking-[0.2em] font-semibold mb-1" style={{color: "var(--accent)"}}>
+                MODULE 2 · PROBLEM LAB — NEW
+              </div>
+              <div className="text-[18px] md:text-[20px] font-bold leading-tight mb-1" style={{color: "var(--text)"}}>
+                Span → 90-second GATE reflex.
+              </div>
+              <div className="text-[13.5px]" style={{color: "var(--text-dim)"}}>
+                54 problems · 5-layer structure per concept · GATE CS 2016 PYQ walkthrough · timed drill mode.
+              </div>
+            </div>
+            <div className="flex items-center gap-2 px-4 py-2 rounded-xl font-semibold transition-opacity"
+              style={{background: "var(--grad-hero)", color: "white"}}>
+              Open Problem Lab →
+            </div>
+          </div>
+        </a>
+      </section>
+
+      <Concept21/>
+      <Concept22/>
+      <Concept23/>
+      <Concept24/>
+      <Concept25/>
+      <Concept26/>
+      <ModuleFooter
+        moduleNum={2}
+        nextModuleTitle="Linear Systems · Ax = b in depth"
+        nextModuleFile="module-03-systems.html"
+        checklist={[
+          "I can describe what a span looks like (point / line / plane / all) by inspection.",
+          "I can build any basis of R² or R³ and compute coordinates in it.",
+          "I can state Ax as a linear combination of A's columns without thinking.",
+          "I can switch between row and column pictures of Ax = b on demand.",
+          "I can name and use all 4 perspectives of matrix multiplication.",
+          "I can prove (and apply) the uniqueness of linear combinations of independent vectors."
+        ]}
+      />
+    </div>
+  );
+}
+
+mountApp(App, 2);
+</script>
+
+</body>
+</html>

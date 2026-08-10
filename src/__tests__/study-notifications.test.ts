@@ -1,6 +1,10 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
-import { STUDY_NOTIFICATION_CATEGORIES, parseNotificationTime } from '@/lib/studyNotifications';
+import {
+  STUDY_NOTIFICATION_CATEGORIES,
+  parseNotificationTime,
+  updateStudyNotificationPreference
+} from '@/lib/studyNotifications';
 
 const migration = readFileSync(
   'supabase/migrations/20260810000002_interactive_study_notifications.sql',
@@ -43,5 +47,15 @@ describe('interactive study notification system', () => {
     expect(androidService).toContain('new RemoteInput.Builder(REPLY_RESULT_KEY)');
     expect(androidService).toContain('NotificationActionReceiver.class');
     expect(androidService).toContain('replacesSystem ? 0 : notificationId(tag)');
+  });
+
+  it('clears last_sent_on and muted_until when the scheduled time is changed so the new time fires today', async () => {
+    // Verify the source code contains the reset logic — no DB needed.
+    const source = readFileSync('src/lib/studyNotifications.ts', 'utf8');
+    expect(source).toContain('last_sent_on: null');
+    expect(source).toContain('muted_until: null');
+    expect(source).toContain('isTimeChange');
+    // updateStudyNotificationPreference is importable and typed correctly.
+    expect(typeof updateStudyNotificationPreference).toBe('function');
   });
 });

@@ -56,9 +56,16 @@ export async function updateStudyNotificationPreference(
   category: StudyNotificationCategory,
   patch: Partial<Pick<StudyNotificationPreference, 'enabled' | 'hour_local' | 'minute_local'>>
 ): Promise<void> {
+  // When the user changes the scheduled time, clear last_sent_on so the cron
+  // can fire at the new time today rather than waiting until tomorrow.
+  const isTimeChange = patch.hour_local !== undefined || patch.minute_local !== undefined;
   const { error } = await supabase
     .from('study_notification_preferences')
-    .update({ ...patch, updated_at: new Date().toISOString() })
+    .update({
+      ...patch,
+      ...(isTimeChange ? { last_sent_on: null, muted_until: null } : {}),
+      updated_at: new Date().toISOString()
+    })
     .eq('user_id', userId)
     .eq('category', category);
   if (error) throw new Error(error.message);

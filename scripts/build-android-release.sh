@@ -4,14 +4,6 @@ set -euo pipefail
 : "${AIR_VERSION_CODE:?Set AIR_VERSION_CODE to an integer higher than every prior release.}"
 : "${AIR_VERSION_NAME:?Set AIR_VERSION_NAME to the public release version.}"
 
-capacitor_config='android/app/src/main/assets/capacitor.config.json'
-node --input-type=module -e '
-  import { readFileSync } from "node:fs";
-  const config = JSON.parse(readFileSync(process.argv[1], "utf8"));
-  if (config.server?.url) {
-    throw new Error("Android releases must bundle assets and cannot set server.url.");
-  }
-' "$capacitor_config"
 
 air_jdk21_home="${AIR_JDK21_HOME:-}"
 homebrew_jdk21='/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home'

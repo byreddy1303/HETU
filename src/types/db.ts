@@ -33,6 +33,7 @@ export interface UserRow {
   wa_opted_in_at: string | null;
   last_digest_sent_on: string | null;
   buddy_notification_preview_enabled: boolean;
+  study_notifications_enabled: boolean;
 }
 
 export interface TelegramSubscriptionRow {

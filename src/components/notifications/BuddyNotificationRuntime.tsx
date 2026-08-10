@@ -4,7 +4,7 @@ import { router } from '@/router';
 import { useAuthStore } from '@/stores/auth';
 import { isNativeApp } from '@/lib/native';
 import {
-  buddyPushOptedIn,
+  pushNotificationsOptedIn,
   routeFromPushData,
   saveNativePushToken,
   syncBuddyPushRegistration
@@ -16,7 +16,7 @@ export default function BuddyNotificationRuntime() {
   const [pendingRoute, setPendingRoute] = useState<string | null>(null);
 
   useEffect(() => {
-    if (authStatus !== 'signed_in' || !buddyPushOptedIn()) return;
+    if (authStatus !== 'signed_in' || !pushNotificationsOptedIn()) return;
     void syncBuddyPushRegistration().catch(() => undefined);
 
     const syncWhenVisible = () => {

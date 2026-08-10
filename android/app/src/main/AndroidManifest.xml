@@ -80,6 +80,10 @@
         <receiver
             android:name=".BuddyReplyReceiver"
             android:exported="false" />
+
+        <receiver
+            android:name=".NotificationActionReceiver"
+            android:exported="false" />
     </application>
 
     <!-- Permissions -->

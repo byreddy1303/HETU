@@ -27,6 +27,7 @@ import { Empty } from '@/components/ui/Empty';
 import AccessRequestsCard from '@/components/settings/AccessRequestsCard';
 import NotificationsCard from '@/components/settings/NotificationsCard';
 import BuddyNotificationsCard from '@/components/settings/BuddyNotificationsCard';
+import StudyNotificationsCard from '@/components/settings/StudyNotificationsCard';
 import { useAuthStore, type ProfilePatch } from '@/stores/auth';
 import { useAuth } from '@/hooks/useAuth';
 import { useUiStore } from '@/stores/ui';
@@ -300,6 +301,7 @@ export default function Settings() {
 
       {/* --- Notifications ------------------------------------------------ */}
       <BuddyNotificationsCard profile={profile} sandbox={sandbox} />
+      <StudyNotificationsCard profile={profile} sandbox={sandbox} />
       <NotificationsCard profile={profile} sandbox={sandbox} />
 
       {/* --- Access requests (owner-only) --------------------------------- */}

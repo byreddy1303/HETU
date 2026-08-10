@@ -42,7 +42,12 @@ interface AuthState {
 export type ProfilePatch = Partial<
   Pick<
     UserRow,
-    'name' | 'exam_date' | 'target_rank' | 'timezone' | 'buddy_notification_preview_enabled'
+    | 'name'
+    | 'exam_date'
+    | 'target_rank'
+    | 'timezone'
+    | 'buddy_notification_preview_enabled'
+    | 'study_notifications_enabled'
   >
 >;
 
@@ -64,7 +69,8 @@ const SANDBOX_PROFILE: UserRow = {
   digest_minute_local: 0,
   wa_opted_in_at: null,
   last_digest_sent_on: null,
-  buddy_notification_preview_enabled: true
+  buddy_notification_preview_enabled: true,
+  study_notifications_enabled: false
 };
 
 let initialized = false;

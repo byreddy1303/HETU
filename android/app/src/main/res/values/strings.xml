@@ -12,4 +12,13 @@
     <string name="buddy_notification_sending">Sending reply…</string>
     <string name="buddy_notification_sent">You: %1$s</string>
     <string name="buddy_notification_failed">Reply not sent. Tap to open the chat.</string>
+    <string name="study_notification_channel_name">Study reminders</string>
+    <string name="study_notification_channel_description">Daily, interactive reminders for HETU study modules.</string>
+    <string name="notification_action_working">Updating…</string>
+    <string name="notification_action_done">Done.</string>
+    <string name="notification_action_failed">Action failed. Tap to open HETU.</string>
+    <string name="notification_marked_read">Marked as read.</string>
+    <string name="notification_buddy_muted">Buddy alerts muted for 1 hour.</string>
+    <string name="notification_reminder_set">Reminder set for 1 hour.</string>
+    <string name="notification_category_muted">This reminder category is muted.</string>
 </resources>

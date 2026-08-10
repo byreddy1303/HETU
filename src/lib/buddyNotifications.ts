@@ -4,6 +4,7 @@ import { supabase, supabaseConfigured } from '@/lib/supabase';
 
 const DEVICE_ID_KEY = 'air:buddy-push-device-id';
 const OPT_IN_KEY = 'air:buddy-push-opt-in';
+const STUDY_OPT_IN_KEY = 'air:study-push-opt-in';
 const NATIVE_REGISTRATION_TIMEOUT_MS = 15_000;
 
 type PermissionState = PermissionStatus['receive'];
@@ -63,8 +64,25 @@ export function buddyPushOptedIn(): boolean {
   return localStorage.getItem(OPT_IN_KEY) === 'true';
 }
 
-function setOptedIn(value: boolean): void {
-  localStorage.setItem(OPT_IN_KEY, String(value));
+export function studyPushOptedIn(): boolean {
+  return localStorage.getItem(STUDY_OPT_IN_KEY) === 'true';
+}
+
+export function pushNotificationsOptedIn(): boolean {
+  return buddyPushOptedIn() || studyPushOptedIn();
+}
+
+function setChannelOptedIn(channel: 'buddy' | 'study', value: boolean): void {
+  localStorage.setItem(channel === 'buddy' ? OPT_IN_KEY : STUDY_OPT_IN_KEY, String(value));
+}
+
+async function syncChannelFlags(): Promise<void> {
+  const { error } = await supabase.rpc('set_push_subscription_channels', {
+    p_device_id: getPushDeviceId(),
+    p_buddy_enabled: buddyPushOptedIn(),
+    p_study_enabled: studyPushOptedIn()
+  });
+  if (error) throw new Error(error.message);
 }
 
 export function urlBase64ToUint8Array(value: string): Uint8Array<ArrayBuffer> {
@@ -92,10 +110,11 @@ async function upsertWebSubscription(subscription: PushSubscription): Promise<vo
     p_native_token: null
   });
   if (error) throw new Error(error.message);
+  await syncChannelFlags();
 }
 
 export async function saveNativePushToken(token: string): Promise<void> {
-  if (!buddyPushOptedIn() || !supabaseConfigured || !token.trim()) return;
+  if (!pushNotificationsOptedIn() || !supabaseConfigured || !token.trim()) return;
   const currentPlatform = platform();
   if (currentPlatform === 'web') return;
   const { error } = await supabase.rpc('upsert_push_subscription', {
@@ -107,6 +126,7 @@ export async function saveNativePushToken(token: string): Promise<void> {
     p_native_token: token.trim()
   });
   if (error) throw new Error(error.message);
+  await syncChannelFlags();
 }
 
 async function nativePermission(request: boolean): Promise<PermissionState> {
@@ -119,21 +139,34 @@ async function nativePermission(request: boolean): Promise<PermissionState> {
 
 async function registerNativeToken(): Promise<string> {
   try {
-    await PushNotifications.createChannel({
-      id: 'buddy_messages',
-      name: 'Buddy messages',
-      description: 'Messages and shared questions from your study buddy.',
-      importance: 4,
-      visibility: 0,
-      vibration: true,
-      lights: true,
-      lightColor: '#98182B',
-      // 'default' instructs Android 8+ to use the system default notification sound.
-      // Without an explicit value some ROMs on Android 8+ silently play nothing.
-      sound: 'default'
-    });
+    await Promise.all([
+      PushNotifications.createChannel({
+        id: 'buddy_messages',
+        name: 'Buddy messages',
+        description: 'Messages and shared questions from your study buddy.',
+        importance: 4,
+        visibility: 0,
+        vibration: true,
+        lights: true,
+        lightColor: '#98182B',
+        // 'default' instructs Android 8+ to use the system default notification sound.
+        // Without an explicit value some ROMs on Android 8+ silently play nothing.
+        sound: 'default'
+      }),
+      PushNotifications.createChannel({
+        id: 'study_reminders',
+        name: 'Study reminders',
+        description: 'Daily, interactive reminders for HETU study modules.',
+        importance: 3,
+        visibility: 0,
+        vibration: true,
+        lights: true,
+        lightColor: '#98182B',
+        sound: 'default'
+      })
+    ]);
   } catch (err) {
-    console.warn('Could not create notification channel:', err);
+    console.warn('Could not create notification channels:', err);
   }
 
   return await new Promise<string>((resolve, reject) => {
@@ -161,7 +194,8 @@ async function registerNativeToken(): Promise<string> {
         )
       ]);
       timer = window.setTimeout(
-        () => finish(new Error('Native push registration timed out. Check Firebase configuration.')),
+        () =>
+          finish(new Error('Native push registration timed out. Check Firebase configuration.')),
         NATIVE_REGISTRATION_TIMEOUT_MS
       );
       await PushNotifications.register();
@@ -172,20 +206,27 @@ async function registerNativeToken(): Promise<string> {
 export async function getBuddyNotificationState(): Promise<BuddyNotificationState> {
   const currentPlatform = platform();
   if (!supabaseConfigured) {
-    return { supported: false, permission: 'unsupported', registered: false, platform: currentPlatform };
+    return {
+      supported: false,
+      permission: 'unsupported',
+      registered: false,
+      platform: currentPlatform
+    };
   }
 
   const supported = isNativeApp
     ? currentPlatform === 'android' || currentPlatform === 'ios'
     : webPushSupported();
-  const permissionPromise: Promise<BuddyNotificationPermission> = isNativeApp && supported
-    ? nativePermission(false).catch(() => 'unsupported')
-    : Promise.resolve(supported ? webPermission(Notification.permission) : 'unsupported');
+  const permissionPromise: Promise<BuddyNotificationPermission> =
+    isNativeApp && supported
+      ? nativePermission(false).catch(() => 'unsupported')
+      : Promise.resolve(supported ? webPermission(Notification.permission) : 'unsupported');
   const registrationPromise = supabase
     .from('push_subscriptions')
     .select('id')
     .eq('device_id', getPushDeviceId())
     .eq('enabled', true)
+    .eq('buddy_enabled', true)
     .maybeSingle();
   const [permission, { data }] = await Promise.all([permissionPromise, registrationPromise]);
   return {
@@ -196,21 +237,29 @@ export async function getBuddyNotificationState(): Promise<BuddyNotificationStat
   };
 }
 
-export async function enableBuddyNotifications(): Promise<BuddyNotificationResult> {
-  if (!supabaseConfigured) return { ok: false, error: 'Sign in to enable Buddy notifications.' };
+async function enableNotificationChannel(
+  channel: 'buddy' | 'study'
+): Promise<BuddyNotificationResult> {
+  if (!supabaseConfigured) return { ok: false, error: 'Sign in to enable notifications.' };
   try {
+    setChannelOptedIn(channel, true);
     if (isNativeApp) {
       const permission = await nativePermission(true);
       if (permission !== 'granted') {
-        return { ok: false, permission, error: 'Notification permission is blocked in device settings.' };
+        setChannelOptedIn(channel, false);
+        return {
+          ok: false,
+          permission,
+          error: 'Notification permission is blocked in device settings.'
+        };
       }
-      setOptedIn(true);
       const token = await registerNativeToken();
       await saveNativePushToken(token);
       return { ok: true, permission };
     }
 
     if (!webPushSupported()) {
+      setChannelOptedIn(channel, false);
       return {
         ok: false,
         permission: 'unsupported',
@@ -219,11 +268,13 @@ export async function enableBuddyNotifications(): Promise<BuddyNotificationResul
     }
     const publicKey = String(import.meta.env.VITE_WEB_PUSH_PUBLIC_KEY ?? '').trim();
     if (!publicKey) {
+      setChannelOptedIn(channel, false);
       return { ok: false, error: 'Web Push is not configured on this deployment.' };
     }
     const browserPermission = await Notification.requestPermission();
     const permission = webPermission(browserPermission);
     if (permission !== 'granted') {
+      setChannelOptedIn(channel, false);
       return {
         ok: false,
         permission,
@@ -239,31 +290,28 @@ export async function enableBuddyNotifications(): Promise<BuddyNotificationResul
         applicationServerKey: urlBase64ToUint8Array(publicKey)
       }));
     await upsertWebSubscription(subscription);
-    setOptedIn(true);
     return { ok: true, permission };
   } catch (error) {
-    setOptedIn(false);
+    setChannelOptedIn(channel, false);
     return { ok: false, error: (error as Error).message || 'Could not enable notifications.' };
   }
 }
 
-export async function disableBuddyNotifications(): Promise<BuddyNotificationResult> {
-  // Local intent wins even if a platform API is temporarily unavailable; the
-  // server row is removed first and invalid provider endpoints self-retire.
-  setOptedIn(false);
+export function enableBuddyNotifications(): Promise<BuddyNotificationResult> {
+  return enableNotificationChannel('buddy');
+}
+
+export function enableStudyNotifications(): Promise<BuddyNotificationResult> {
+  return enableNotificationChannel('study');
+}
+
+async function disableNotificationChannel(
+  channel: 'buddy' | 'study'
+): Promise<BuddyNotificationResult> {
+  setChannelOptedIn(channel, false);
   try {
     if (supabaseConfigured) {
-      const { error } = await supabase.rpc('unregister_push_subscription', {
-        p_device_id: getPushDeviceId()
-      });
-      if (error) throw new Error(error.message);
-    }
-    if (isNativeApp) {
-      await PushNotifications.unregister();
-    } else if (webPushSupported()) {
-      const registration = await navigator.serviceWorker.getRegistration();
-      const subscription = await registration?.pushManager.getSubscription();
-      if (subscription) await subscription.unsubscribe();
+      await syncChannelFlags();
     }
     return { ok: true };
   } catch (error) {
@@ -271,13 +319,32 @@ export async function disableBuddyNotifications(): Promise<BuddyNotificationResu
   }
 }
 
+export function disableBuddyNotifications(): Promise<BuddyNotificationResult> {
+  return disableNotificationChannel('buddy');
+}
+
+export function disableStudyNotifications(): Promise<BuddyNotificationResult> {
+  return disableNotificationChannel('study');
+}
+
 export async function unregisterCurrentPushDevice(): Promise<void> {
-  await disableBuddyNotifications();
+  setChannelOptedIn('buddy', false);
+  setChannelOptedIn('study', false);
+  if (supabaseConfigured) {
+    await supabase.rpc('unregister_push_subscription', { p_device_id: getPushDeviceId() });
+  }
+  if (isNativeApp) {
+    await PushNotifications.unregister();
+  } else if (webPushSupported()) {
+    const registration = await navigator.serviceWorker.getRegistration();
+    const subscription = await registration?.pushManager.getSubscription();
+    if (subscription) await subscription.unsubscribe();
+  }
 }
 
 /** Refresh rotated tokens/subscriptions without prompting for permission. */
 export async function syncBuddyPushRegistration(): Promise<void> {
-  if (!buddyPushOptedIn() || !supabaseConfigured) return;
+  if (!pushNotificationsOptedIn() || !supabaseConfigured) return;
   if (isNativeApp) {
     if ((await nativePermission(false)) !== 'granted') return;
     const token = await registerNativeToken();
@@ -332,9 +399,7 @@ export interface SnoozeStatus {
  * Calls the set_push_quiet_hours RPC with the current device id.
  * Returns ok:false with an error string on failure.
  */
-export async function snoozeNotifications(
-  minutes: number
-): Promise<BuddyNotificationResult> {
+export async function snoozeNotifications(minutes: number): Promise<BuddyNotificationResult> {
   if (!supabaseConfigured) {
     return { ok: false, error: 'Sign in to manage notification snooze.' };
   }
@@ -375,7 +440,8 @@ export async function getSnoozeStatus(): Promise<SnoozeStatus> {
     .select('push_quiet_until')
     .eq('device_id', getPushDeviceId())
     .maybeSingle();
-  const quietUntil = (data as { push_quiet_until?: string | null } | null)?.push_quiet_until ?? null;
+  const quietUntil =
+    (data as { push_quiet_until?: string | null } | null)?.push_quiet_until ?? null;
   const active = Boolean(quietUntil) && new Date(quietUntil!).getTime() > Date.now();
   return { active, quietUntil: active ? quietUntil : null };
 }

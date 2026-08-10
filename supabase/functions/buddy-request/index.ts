@@ -91,13 +91,16 @@ Deno.serve(async (req: Request): Promise<Response> => {
       // Send best-effort push notification
       const { data: subsData } = await admin
         .from('push_subscriptions')
-        .select('id, platform, web_endpoint, web_p256dh, web_auth, native_token, active_buddy_id, last_seen_at, push_quiet_until')
+        .select(
+          'id, platform, web_endpoint, web_p256dh, web_auth, native_token, active_buddy_id, last_seen_at, push_quiet_until'
+        )
         .eq('user_id', target)
-        .eq('enabled', true);
-      
+        .eq('enabled', true)
+        .eq('buddy_enabled', true);
+
       const subscriptions = (subsData as SubscriptionRow[] | null) ?? [];
       const senderName = senderProfile?.name ?? senderProfile?.username ?? 'Someone';
-      
+
       await Promise.all(
         subscriptions.map(async (subscription) => {
           // Do not send if snoozed
@@ -105,12 +108,18 @@ Deno.serve(async (req: Request): Promise<Response> => {
             const until = Date.parse(subscription.push_quiet_until);
             if (Number.isFinite(until) && Date.now() < until) return;
           }
-          
+
           await deliverToSubscription(subscription, {
             title: 'New Buddy Request',
             body: `${senderName} wants to be your buddy.`,
             kind: 'buddy_request',
-            route: '/buddy'
+            route: '/buddy',
+            tagId: `buddy-request-${me}`,
+            channelId: 'buddy_messages',
+            priority: 'high',
+            actions: [
+              { id: 'open_buddy_request', label: 'View request', type: 'open', route: '/buddy' }
+            ]
           });
         })
       );

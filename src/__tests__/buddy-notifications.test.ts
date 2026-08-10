@@ -2,7 +2,9 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import {
   buddyPushOptedIn,
   getPushDeviceId,
+  pushNotificationsOptedIn,
   routeFromPushData,
+  studyPushOptedIn,
   urlBase64ToUint8Array
 } from '@/lib/buddyNotifications';
 
@@ -18,8 +20,15 @@ describe('Buddy notification client helpers', () => {
 
   it('defaults to opted out until the learner explicitly enables alerts', () => {
     expect(buddyPushOptedIn()).toBe(false);
+    expect(studyPushOptedIn()).toBe(false);
+    expect(pushNotificationsOptedIn()).toBe(false);
     localStorage.setItem('air:buddy-push-opt-in', 'true');
     expect(buddyPushOptedIn()).toBe(true);
+    expect(pushNotificationsOptedIn()).toBe(true);
+    localStorage.setItem('air:buddy-push-opt-in', 'false');
+    localStorage.setItem('air:study-push-opt-in', 'true');
+    expect(studyPushOptedIn()).toBe(true);
+    expect(pushNotificationsOptedIn()).toBe(true);
   });
 
   it('converts URL-safe VAPID keys to bytes', () => {

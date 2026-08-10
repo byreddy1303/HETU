@@ -48,3 +48,9 @@ verify_jwt = false
 
 [functions.buddy-notifications]
 verify_jwt = false
+
+[functions.study-notifications]
+verify_jwt = false
+
+[functions.notification-actions]
+verify_jwt = false

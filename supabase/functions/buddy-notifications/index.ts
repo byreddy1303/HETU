@@ -22,6 +22,7 @@ const SUPABASE_URL = Deno.env.get('SUPABASE_URL') ?? '';
 const ANON = Deno.env.get('SUPABASE_ANON_KEY') ?? '';
 const SERVICE = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
 const CRON_SECRET = Deno.env.get('BUDDY_PUSH_CRON_SECRET') ?? '';
+const ACTION_URL = `${SUPABASE_URL.replace(/\/$/, '')}/functions/v1/notification-actions`;
 
 const admin = createClient(SUPABASE_URL, SERVICE, {
   auth: { persistSession: false, autoRefreshToken: false }
@@ -111,37 +112,90 @@ async function inlineReplyToken(
   return { token, hash: hex(new Uint8Array(digest)) };
 }
 
+async function notificationActionToken(
+  message: MessageRow,
+  subscription: SubscriptionRow,
+  recipientId: string,
+  route: string
+): Promise<string> {
+  const bytes = crypto.getRandomValues(new Uint8Array(32));
+  const token = base64Url(bytes);
+  const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(token));
+  const { error } = await admin.from('notification_action_tokens').upsert(
+    {
+      token_hash: hex(new Uint8Array(digest)),
+      source_key: `buddy:${message.id}:${subscription.id}`,
+      source_kind: 'buddy',
+      source_id: message.id,
+      user_id: recipientId,
+      subscription_id: subscription.id,
+      category: null,
+      route,
+      allowed_actions: ['buddy_mark_read', 'buddy_mute_1h'],
+      used_actions: [],
+      expires_at: new Date(Date.now() + REPLY_TOKEN_LIFETIME_MS).toISOString(),
+      updated_at: new Date().toISOString()
+    },
+    { onConflict: 'source_key' }
+  );
+  if (error) throw new Error(error.message);
+  return token;
+}
+
 async function notificationCopyForSubscription(
   copy: PushCopy,
   subscription: SubscriptionRow,
   message: MessageRow,
   recipientId: string
 ): Promise<PushCopy> {
-  if (subscription.platform !== 'android') return copy;
-  const reply = await inlineReplyToken(message.id, subscription.id, recipientId);
-  const { error } = await admin.from('buddy_notification_reply_tokens').upsert(
-    {
-      token_hash: reply.hash,
-      source_message_id: message.id,
-      subscription_id: subscription.id,
-      reply_sender_id: recipientId,
-      buddy_id: message.buddy_id,
-      expires_at: new Date(Date.now() + REPLY_TOKEN_LIFETIME_MS).toISOString()
-    },
-    { onConflict: 'source_message_id,subscription_id' }
-  );
-  if (error) {
+  let enriched = copy;
+  try {
+    const actionToken = await notificationActionToken(
+      message,
+      subscription,
+      recipientId,
+      copy.route
+    );
+    enriched = {
+      ...enriched,
+      actionToken,
+      actionUrl: ACTION_URL,
+      actions: [
+        { id: 'buddy_mark_read', label: 'Mark read', type: 'api' },
+        { id: 'buddy_mute_1h', label: 'Mute 1h', type: 'api' }
+      ]
+    };
+  } catch (error) {
+    console.warn('[buddy-push] Android actions unavailable:', (error as Error).message);
+  }
+
+  if (subscription.platform !== 'android') return enriched;
+  try {
+    const reply = await inlineReplyToken(message.id, subscription.id, recipientId);
+    const { error } = await admin.from('buddy_notification_reply_tokens').upsert(
+      {
+        token_hash: reply.hash,
+        source_message_id: message.id,
+        subscription_id: subscription.id,
+        reply_sender_id: recipientId,
+        buddy_id: message.buddy_id,
+        expires_at: new Date(Date.now() + REPLY_TOKEN_LIFETIME_MS).toISOString()
+      },
+      { onConflict: 'source_message_id,subscription_id' }
+    );
+    if (error) throw new Error(error.message);
+    return {
+      ...enriched,
+      replyToken: reply.token,
+      replyUrl: `${SUPABASE_URL.replace(/\/$/, '')}/functions/v1/buddy-notifications`
+    };
+  } catch (error) {
     // Inline reply is an enhancement, not a prerequisite for the alert. A
     // delayed migration or temporary token-table failure must never block the
     // recipient from seeing the Buddy message itself.
-    console.warn('[buddy-push] Android reply unavailable:', error.message);
-    return copy;
+    console.warn('[buddy-push] Android reply unavailable:', (error as Error).message);
+    return enriched;
   }
-  return {
-    ...copy,
-    replyToken: reply.token,
-    replyUrl: `${SUPABASE_URL.replace(/\/$/, '')}/functions/v1/buddy-notifications`
-  };
 }
 
 function senderLabel(sender: ProfileRow | null): string {
@@ -228,6 +282,7 @@ async function processJob(job: ClaimedJob): Promise<'completed' | 'retrying' | '
           )
           .eq('user_id', job.recipient_id)
           .eq('enabled', true)
+          .eq('buddy_enabled', true)
       ]);
 
     if (messageError) throw new Error(messageError.message);

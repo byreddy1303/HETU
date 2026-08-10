@@ -131,6 +131,18 @@ export interface PushCopy {
   messageId?: string; // specific to buddy chats
   replyToken?: string; // Android-only, short-lived single-notification token
   replyUrl?: string; // Android-only HTTPS Edge Function endpoint
+  channelId?: 'buddy_messages' | 'study_reminders';
+  priority?: 'high' | 'normal';
+  actions?: PushAction[];
+  actionToken?: string;
+  actionUrl?: string;
+}
+
+export interface PushAction {
+  id: string;
+  label: string;
+  type: 'open' | 'api';
+  route?: string;
 }
 
 export async function sendWebPush(subscription: SubscriptionRow, copy: PushCopy): Promise<void> {
@@ -154,11 +166,14 @@ export async function sendWebPush(subscription: SubscriptionRow, copy: PushCopy)
         route: copy.route,
         tagId: copy.tagId,
         buddyId: copy.buddyId,
-        messageId: copy.messageId
+        messageId: copy.messageId,
+        actions: copy.actions ?? [],
+        actionToken: copy.actionToken,
+        actionUrl: copy.actionUrl
       }),
       {
         TTL: 24 * 60 * 60,
-        urgency: 'high'
+        urgency: copy.priority === 'normal' ? 'normal' : 'high'
       }
     );
   } catch (error) {
@@ -180,6 +195,9 @@ export async function sendNativePush(subscription: SubscriptionRow, copy: PushCo
   }
   const accessToken = await getFcmAccessToken(account);
   const tagKey = copy.tagId || copy.messageId || `${copy.kind}-${crypto.randomUUID()}`;
+  const channelId = copy.channelId ?? 'buddy_messages';
+  const priority = copy.priority ?? 'high';
+  const actions = (copy.actions ?? []).slice(0, 3);
 
   const data = {
     title: copy.title,
@@ -190,83 +208,111 @@ export async function sendNativePush(subscription: SubscriptionRow, copy: PushCo
     buddyId: copy.buddyId || '',
     messageId: copy.messageId || '',
     replyToken: copy.replyToken || '',
-    replyUrl: copy.replyUrl || ''
+    replyUrl: copy.replyUrl || '',
+    channelId,
+    actionToken: copy.actionToken || '',
+    actionUrl: copy.actionUrl || '',
+    action1Id: actions[0]?.id || '',
+    action1Label: actions[0]?.label || '',
+    action1Type: actions[0]?.type || '',
+    action1Route: actions[0]?.route || '',
+    action2Id: actions[1]?.id || '',
+    action2Label: actions[1]?.label || '',
+    action2Type: actions[1]?.type || '',
+    action2Route: actions[1]?.route || '',
+    action3Id: actions[2]?.id || '',
+    action3Label: actions[2]?.label || '',
+    action3Type: actions[2]?.type || '',
+    action3Route: actions[2]?.route || ''
   };
 
-  // Include both notification and data for Android. FCM renders the notification
-  // itself while the app is backgrounded or closed, and the data remains
-  // available for routing when the user opens it. In the foreground, FCM calls
-  // BuddyMessagingService so the app can retain its inline-reply experience.
-  const platformPayload =
-    subscription.platform === 'android'
-      ? {
-          notification: { title: copy.title, body: copy.body },
-          data,
-          android: {
-            priority: 'high',
-            ttl: '86400s',
-            notification: {
-              channel_id: 'buddy_messages',
-              tag: tagKey,
-              notification_priority: 'PRIORITY_HIGH',
-              visibility: 'PRIVATE',
-              default_sound: true,
-              default_vibrate_timings: true
-            }
+  const sendFcm = async (platformPayload: Record<string, unknown>): Promise<void> => {
+    const response = await fetch(
+      `https://fcm.googleapis.com/v1/projects/${encodeURIComponent(account.project_id)}/messages:send`,
+      {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          message: {
+            token: subscription.native_token,
+            ...platformPayload
           }
-        }
-      : {
-          notification: { title: copy.title, body: copy.body },
-          data,
-          apns: {
-            payload: {
-              aps: {
-                alert: { title: copy.title, body: copy.body },
-                sound: 'default',
-                badge: 1,
-                'content-available': 1,
-                'mutable-content': 1
-              }
-            },
-            headers: {
-              'apns-priority': '10',
-              'apns-collapse-id': tagKey.slice(0, 64)
-            }
-          }
-        };
+        })
+      }
+    );
+    if (response.ok) return;
 
-  const response = await fetch(
-    `https://fcm.googleapis.com/v1/projects/${encodeURIComponent(account.project_id)}/messages:send`,
-    {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        message: {
-          token: subscription.native_token,
-          ...platformPayload
+    const payload = (await response.json().catch(() => null)) as {
+      error?: {
+        message?: string;
+        details?: Array<{ errorCode?: string }>;
+      };
+    } | null;
+    const errorCode = payload?.error?.details?.find((detail) => detail.errorCode)?.errorCode;
+    const permanent = errorCode === 'UNREGISTERED';
+    if (response.status === 401) fcmAccessToken = null;
+    throw new PushDeliveryError(
+      truncate(payload?.error?.message ?? `FCM delivery failed (${response.status})`, 240),
+      permanent,
+      response.status
+    );
+  };
+
+  if (subscription.platform === 'android') {
+    // The notification payload is the reliable closed-app fallback. A second
+    // high-priority data message upgrades that same (tag, id=0) notification
+    // with app-defined Reply/Read/Mute actions when the native service runs.
+    await sendFcm({
+      notification: { title: copy.title, body: copy.body },
+      data: { ...data, renderMode: 'fallback' },
+      android: {
+        priority,
+        ttl: '86400s',
+        notification: {
+          channel_id: channelId,
+          tag: tagKey,
+          notification_priority: priority === 'high' ? 'PRIORITY_HIGH' : 'PRIORITY_DEFAULT',
+          visibility: 'PRIVATE',
+          default_sound: true,
+          default_vibrate_timings: true
         }
-      })
+      }
+    });
+    try {
+      await sendFcm({
+        data: { ...data, renderMode: 'interactive', replaceSystemNotification: '1' },
+        android: { priority: 'high', ttl: '86400s' }
+      });
+    } catch (error) {
+      // The user already has the fallback alert. An interaction-upgrade failure
+      // must not turn a successfully delivered notification into a retry storm.
+      console.warn('[push] Android interaction upgrade unavailable:', (error as Error).message);
     }
-  );
-  if (response.ok) return;
+    return;
+  }
 
-  const payload = (await response.json().catch(() => null)) as {
-    error?: {
-      message?: string;
-      details?: Array<{ errorCode?: string }>;
-    };
-  } | null;
-  const errorCode = payload?.error?.details?.find((detail) => detail.errorCode)?.errorCode;
-  const permanent = errorCode === 'UNREGISTERED';
-  if (response.status === 401) fcmAccessToken = null;
-  throw new PushDeliveryError(
-    truncate(payload?.error?.message ?? `FCM delivery failed (${response.status})`, 240),
-    permanent,
-    response.status
-  );
+  await sendFcm({
+    notification: { title: copy.title, body: copy.body },
+    data,
+    apns: {
+      payload: {
+        aps: {
+          alert: { title: copy.title, body: copy.body },
+          sound: 'default',
+          badge: 1,
+          'content-available': 1,
+          'mutable-content': 1
+        }
+      },
+      headers: {
+        'apns-priority': '10',
+        'apns-collapse-id': tagKey.slice(0, 64)
+      }
+    }
+  });
 }
 
 export async function deliverToSubscription(

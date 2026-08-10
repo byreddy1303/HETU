@@ -23,9 +23,24 @@ fi
 export JAVA_HOME="$air_jdk21_home"
 export PATH="$JAVA_HOME/bin:$PATH"
 
+air_apk_tmp_dir=$(mktemp -d "${TMPDIR:-/tmp}/hetu-live-apks.XXXXXX")
+trap 'rm -rf -- "$air_apk_tmp_dir"' EXIT
+
 (
   cd android
   ./gradlew assembleRelease
   cp app/build/outputs/apk/release/app-release.apk \
+    "$air_apk_tmp_dir/hetu-live-release.apk"
+
+  # The first direct-share builds used Android's debug certificate. Keep a
+  # minified, debug-signed variant so those installs can update in place and
+  # retain their local app data.
+  ./gradlew assembleRelease -PAIR_FRIEND_BUILD=true --rerun-tasks
+  cp app/build/outputs/apk/release/app-release.apk \
+    "$air_apk_tmp_dir/hetu-live-friend.apk"
+
+  cp "$air_apk_tmp_dir/hetu-live-release.apk" \
     app/build/outputs/apk/release/hetu-live-release.apk
+  cp "$air_apk_tmp_dir/hetu-live-friend.apk" \
+    app/build/outputs/apk/release/hetu-live-friend.apk
 )

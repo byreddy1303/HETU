@@ -2,7 +2,7 @@
 
 HETU uses Capacitor to package the existing React application as a native Android app. The web/PWA and Android builds share the same components, Dexie database, sync engine, authentication, and tests. The APK contains the UI bundle locally; it is not a remote website inside a thin browser.
 
-The user-directed `android:live:release` variant is the exception: it is a signed shell pinned to `https://air-journal-omega.vercel.app`. It receives React, CSS, and content updates from Vercel without another APK installation. It requires an online first launch, then uses the production service worker for cached offline launches. Native code and plugin changes still require a new signed APK.
+The user-directed `android:live:release` variant is the exception: it is a signed shell pinned to `https://hetu-app.vercel.app`. It receives React, CSS, and content updates from Vercel without another APK installation. It requires an online first launch, then uses the production service worker for cached offline launches. Native code and plugin changes still require a new signed APK.
 
 ## Product guarantees
 

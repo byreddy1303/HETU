@@ -5,6 +5,7 @@ def keystoreProperties = new Properties()
 if (keystorePropertiesFile.exists()) {
     keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
 }
+def friendBuild = (project.findProperty('AIR_FRIEND_BUILD') ?: 'false').toBoolean()
 
 android {
     namespace = "in.airjournal.app"
@@ -36,7 +37,9 @@ android {
         release {
             minifyEnabled = true
             shrinkResources = true
-            if (keystorePropertiesFile.exists()) {
+            if (friendBuild) {
+                signingConfig = signingConfigs.debug
+            } else if (keystorePropertiesFile.exists()) {
                 signingConfig = signingConfigs.release
             }
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Check, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { cn } from '@/lib/utils';
+import { isNativeApp } from '@/lib/native';
 
 const hourOptions = Array.from({ length: 24 }, (_, hour) => ({
   value: hour,
@@ -66,6 +67,67 @@ export default function NotificationTimeEditor({
     compact ? 'h-9 px-2 text-[12px]' : 'h-11 px-3 text-[14px]'
   );
 
+  function updateNativeValue(value: number, max: number, update: (next: number) => void) {
+    if (!Number.isFinite(value)) return;
+    update(Math.min(max, Math.max(0, Math.trunc(value))));
+  }
+
+  function timeControl({
+    id,
+    ariaLabel,
+    value,
+    max,
+    options,
+    onChange,
+    enterKeyHint
+  }: {
+    id: string;
+    ariaLabel: string;
+    value: number;
+    max: number;
+    options: typeof hourOptions;
+    onChange: (next: number) => void;
+    enterKeyHint: 'next' | 'done';
+  }) {
+    if (isNativeApp) {
+      return (
+        <input
+          id={id}
+          type="number"
+          inputMode="numeric"
+          min={0}
+          max={max}
+          step={1}
+          value={value}
+          onFocus={(event) => event.currentTarget.select()}
+          onChange={(event) => updateNativeValue(event.currentTarget.valueAsNumber, max, onChange)}
+          enterKeyHint={enterKeyHint}
+          autoComplete="off"
+          aria-label={ariaLabel}
+          disabled={disabled || saving}
+          className={cn(selectClassName, 'text-center text-[16px] tabular-nums')}
+        />
+      );
+    }
+
+    return (
+      <select
+        id={id}
+        aria-label={ariaLabel}
+        value={value}
+        onChange={(event) => onChange(Number(event.target.value))}
+        disabled={disabled || saving}
+        className={selectClassName}
+      >
+        {options.map((option) => (
+          <option key={option.value} value={option.value}>
+            {option.label}
+          </option>
+        ))}
+      </select>
+    );
+  }
+
   return (
     <div
       className={cn(
@@ -77,20 +139,15 @@ export default function NotificationTimeEditor({
         <span className={cn('mb-1 block text-text-faint', compact ? 'sr-only' : 'text-[11px]')}>
           Hour
         </span>
-        <select
-          id={`${idPrefix}-hour`}
-          aria-label={`${label} hour`}
-          value={draftHour}
-          onChange={(event) => setDraftHour(Number(event.target.value))}
-          disabled={disabled || saving}
-          className={selectClassName}
-        >
-          {hourOptions.map((option) => (
-            <option key={option.value} value={option.value}>
-              {option.label}
-            </option>
-          ))}
-        </select>
+        {timeControl({
+          id: `${idPrefix}-hour`,
+          ariaLabel: `${label} hour`,
+          value: draftHour,
+          max: 23,
+          options: hourOptions,
+          onChange: setDraftHour,
+          enterKeyHint: 'next'
+        })}
       </label>
 
       <span
@@ -107,20 +164,15 @@ export default function NotificationTimeEditor({
         <span className={cn('mb-1 block text-text-faint', compact ? 'sr-only' : 'text-[11px]')}>
           Minute
         </span>
-        <select
-          id={`${idPrefix}-minute`}
-          aria-label={`${label} minute`}
-          value={draftMinute}
-          onChange={(event) => setDraftMinute(Number(event.target.value))}
-          disabled={disabled || saving}
-          className={selectClassName}
-        >
-          {minuteOptions.map((option) => (
-            <option key={option.value} value={option.value}>
-              {option.label}
-            </option>
-          ))}
-        </select>
+        {timeControl({
+          id: `${idPrefix}-minute`,
+          ariaLabel: `${label} minute`,
+          value: draftMinute,
+          max: 59,
+          options: minuteOptions,
+          onChange: setDraftMinute,
+          enterKeyHint: 'done'
+        })}
       </label>
 
       <Button

@@ -185,7 +185,10 @@
   html[data-native] body {
     min-height: 100dvh;
     padding: var(--safe-top) var(--safe-right) var(--safe-bottom) var(--safe-left);
-    overflow-x: hidden;
+    /* `hidden` makes the other axis compute to `auto`, turning body into a
+       non-scrolling touch target in Android WebView. `clip` keeps vertical
+       overflow visible so the document remains the page scroll surface. */
+    overflow-x: clip;
     overscroll-behavior-y: none;
     -webkit-tap-highlight-color: transparent;
   }

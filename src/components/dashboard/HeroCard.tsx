@@ -38,9 +38,13 @@ export default function HeroCard({
       : 'Start one focused block. Today’s tags will decide what deserves another look.';
 
   return (
-    <section className="u-panel overflow-hidden" aria-labelledby="dashboard-next-move">
-      <div className="u-margin-line grid md:grid-cols-[minmax(0,1fr)_220px]">
-        <div className="px-5 py-6 sm:px-6 sm:py-8">
+    <section
+      className="u-panel relative overflow-hidden"
+      aria-labelledby="dashboard-next-move"
+    >
+      <span className="absolute inset-y-0 left-0 z-10 w-0.5 bg-accent/50" aria-hidden />
+      <div className="grid md:grid-cols-[minmax(0,1fr)_220px]">
+        <div className="px-4 py-5 sm:px-6 sm:py-8">
           <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
             <p className="u-label text-accent">Today’s next move</p>
             <span className="hidden h-1 w-1 rounded-full bg-border-hover sm:block" aria-hidden />
@@ -48,7 +52,7 @@ export default function HeroCard({
           </div>
           <h1
             id="dashboard-next-move"
-            className="mt-3 max-w-[620px] font-display text-[30px] font-semibold leading-[1.08] tracking-[-0.025em] text-text sm:text-[38px]"
+            className="mt-3 max-w-[620px] font-display text-[28px] font-semibold leading-[1.1] tracking-[-0.025em] text-text sm:text-[38px] sm:leading-[1.08]"
           >
             {title}
           </h1>
@@ -65,13 +69,13 @@ export default function HeroCard({
           </div>
         </div>
 
-        <div className="relative flex min-h-[168px] flex-col justify-between border-t border-border bg-accent-faint/45 px-5 py-5 md:border-l md:border-t-0 md:px-6 md:py-6">
+        <div className="relative flex min-h-[156px] flex-col justify-between border-t border-border bg-accent-faint/45 px-4 py-4 sm:min-h-[168px] sm:px-6 sm:py-6 md:border-l md:border-t-0">
           <div className="flex items-center justify-between gap-3">
             <span className="u-label text-accent">Due now</span>
             <CalendarDays size={17} strokeWidth={1.75} className="text-accent" aria-hidden />
           </div>
           <div>
-            <span className="u-num block text-[58px] font-semibold leading-none tracking-[-0.06em] text-text">
+            <span className="u-num block text-[52px] font-semibold leading-none tracking-[-0.06em] text-text sm:text-[58px]">
               {due}
             </span>
             <p className="mt-2 text-[12px] leading-relaxed text-text-muted">

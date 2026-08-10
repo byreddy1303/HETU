@@ -231,6 +231,7 @@ export default function Dashboard() {
           <CardHeader
             title="Mistake surface"
             aside={<span className="u-label text-text-faint">7 local days</span>}
+            className="flex-nowrap items-center [&>div]:w-auto [&>div]:shrink-0"
           />
           <CardBody>
             <div className="flex flex-wrap items-end justify-between gap-3">
@@ -246,13 +247,13 @@ export default function Dashboard() {
               <SurfaceTrendChart data={surfaceSeries} />
             </div>
             <div className="grid grid-cols-2 divide-x divide-border border-t border-border pt-3">
-              <div className="pr-4">
+              <div className="pr-3 sm:pr-4">
                 <p className="u-label">Opened</p>
                 <p className="mt-1 text-[12px] text-text-muted">
                   <span className="u-num font-semibold text-text">{movement.opened}</span> added in 7 days
                 </p>
               </div>
-              <div className="pl-4">
+              <div className="pl-3 sm:pl-4">
                 <p className="u-label">Mastered</p>
                 <p className="mt-1 text-[12px] text-text-muted">
                   <span className="u-num font-semibold text-success">{movement.mastered}</span> closed in 7 days
@@ -263,7 +264,11 @@ export default function Dashboard() {
         </Card>
 
         <Card className="overflow-hidden">
-          <CardHeader title="Practice pulse" aside={<Target size={14} className="text-accent" aria-hidden />} />
+          <CardHeader
+            title="Practice pulse"
+            aside={<Target size={14} className="text-accent" aria-hidden />}
+            className="flex-nowrap items-center [&>div]:w-auto [&>div]:shrink-0"
+          />
           <CardBody className="flex h-[calc(100%-41px)] flex-col gap-5">
             <TargetMeter label="Questions today" done={questionsToday} target={dailyQuestionTarget} />
             <TargetMeter label="Sessions this week" done={sessionsThisWeek} target={weeklySessionTarget} />
@@ -298,8 +303,9 @@ export default function Dashboard() {
           <CardHeader
             title="Weekly focus"
             aside={<CalendarRange size={14} className="text-ink-marigold" aria-hidden />}
+            className="flex-nowrap items-center [&>div]:w-auto [&>div]:shrink-0"
           />
-          <CardBody className="flex min-h-[220px] flex-col lg:min-h-[260px]">
+          <CardBody className="flex min-h-[200px] flex-col sm:min-h-[220px] lg:min-h-[260px]">
             {weeklyFix ? (
               <>
                 <p className="u-label text-text-muted">
@@ -340,8 +346,9 @@ export default function Dashboard() {
           <CardHeader
             title="Last session"
             aside={lastSessionQuestions.length > 0 ? <OutcomeLegend /> : undefined}
+            className="flex-nowrap items-center [&>div]:w-auto [&>div]:shrink-0"
           />
-          <CardBody className="min-h-[260px]">
+          <CardBody className="min-h-[192px] sm:min-h-[260px]">
             {last ? (
               <div className="flex h-full flex-col gap-4 sm:flex-row sm:items-center">
                 {lastSessionQuestions.length > 0 ? (
@@ -385,7 +392,7 @@ export default function Dashboard() {
                 </div>
               </div>
             ) : (
-              <div className="flex min-h-[228px] flex-col items-center justify-center text-center">
+              <div className="flex min-h-[160px] flex-col items-center justify-center text-center sm:min-h-[228px]">
                 <p className="font-display text-[18px] font-semibold text-text">No session evidence yet</p>
                 <p className="mt-2 max-w-[360px] text-[12.5px] leading-relaxed text-text-faint">
                   Finish a focused, log, or PYQ practice session and its outcome shape will appear here.

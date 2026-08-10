@@ -1,16 +1,24 @@
 package in.airjournal.app;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import com.getcapacitor.BridgeActivity;
+import java.io.File;
 
 public class MainActivity extends BridgeActivity {
 
     private static final String APP_LINK_HOST = "hetu-app.vercel.app";
+    private static final String TAG = "HetuMainActivity";
+    private static final String NATIVE_PREFS = "hetu_native_migrations";
+    private static final String SERVICE_WORKER_CLEANUP_V1 = "service_worker_cleanup_v1";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        clearLegacyServiceWorkerDataOnce();
         super.onCreate(savedInstanceState);
         openIntentRoute(getIntent());
     }
@@ -20,6 +28,45 @@ public class MainActivity extends BridgeActivity {
         super.onNewIntent(intent);
         setIntent(intent);
         openIntentRoute(intent);
+    }
+
+    private void clearLegacyServiceWorkerDataOnce() {
+        SharedPreferences preferences = getSharedPreferences(NATIVE_PREFS, Context.MODE_PRIVATE);
+        if (preferences.getBoolean(SERVICE_WORKER_CLEANUP_V1, false)) return;
+
+        File webViewRoot = new File(getApplicationInfo().dataDir, "app_webview");
+        File[] serviceWorkerDirectories = {
+            new File(webViewRoot, "Default/Service Worker"),
+            new File(webViewRoot, "Service Worker")
+        };
+
+        boolean cleanupSucceeded = true;
+        boolean removedLegacyData = false;
+        for (File directory : serviceWorkerDirectories) {
+            if (!directory.exists()) continue;
+            removedLegacyData = true;
+            cleanupSucceeded &= deleteRecursively(directory);
+        }
+
+        if (cleanupSucceeded) {
+            preferences.edit().putBoolean(SERVICE_WORKER_CLEANUP_V1, true).apply();
+            if (removedLegacyData) {
+                Log.i(TAG, "Removed legacy WebView service worker data.");
+            }
+        } else {
+            Log.w(TAG, "Could not completely remove legacy WebView service worker data; will retry.");
+        }
+    }
+
+    private boolean deleteRecursively(File file) {
+        if (file.isDirectory()) {
+            File[] children = file.listFiles();
+            if (children == null) return false;
+            for (File child : children) {
+                if (!deleteRecursively(child)) return false;
+            }
+        }
+        return !file.exists() || file.delete();
     }
 
     private void openIntentRoute(Intent intent) {

@@ -24,10 +24,9 @@ async function disableNativeServiceWorkers(): Promise<void> {
   await Promise.all(registrations.map((registration) => registration.unregister()));
 
   // A controller remains active for the current document after unregistering.
-  // Reload once so all subsequent requests come from the APK's local server.
-  const reloadKey = 'native_service_worker_removed';
-  if (wasControlled && sessionStorage.getItem(reloadKey) !== 'true') {
-    sessionStorage.setItem(reloadKey, 'true');
+  // After unregistering, the next document cannot be controlled, so this
+  // reload is self-limiting without a session flag that could become stale.
+  if (wasControlled) {
     window.location.reload();
   }
 }

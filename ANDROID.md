@@ -1,8 +1,8 @@
 # HETU for Android
 
-HETU uses Capacitor to package the existing React application as a native Android app. The web/PWA and Android builds share the same components, Dexie database, sync engine, authentication, and tests. The APK contains the UI bundle locally; it is not a remote website inside a thin browser.
+HETU uses Capacitor to package the existing React application as a native Android app. The web/PWA and Android builds share the same components, Dexie database, sync engine, authentication, and tests. Every APK contains its UI bundle locally; website deployments do not change installed Android apps. All UI, content, and native updates require a newly versioned APK installation.
 
-The user-directed `android:live:release` variant is the exception: it is a signed shell pinned to `https://hetu-app.vercel.app`. It receives React, CSS, and content updates from Vercel without another APK installation. It requires an online first launch, then uses the production service worker for cached offline launches. Native code and plugin changes still require a new signed APK.
+The bundled app keeps `https://hetu-app.vercel.app` as its local WebView origin so users upgrading from the former live shell retain their session and origin-scoped storage. It does not load the website as its application shell.
 
 ## Product guarantees
 
@@ -11,7 +11,7 @@ The user-directed `android:live:release` variant is the exception: it is a signe
 - Android back dismisses the keyboard first, then navigates, then backgrounds the app from a root screen.
 - System bars and every fixed surface respect notches and gesture-navigation insets.
 - Haptics are best-effort, restrained, and switchable under Settings → Focus & density.
-- The Android build does not register the PWA service worker, preventing stale bundled screens after an APK upgrade.
+- The Android build removes prior PWA service workers and never registers one, preventing website deployments or stale caches from replacing bundled screens.
 - Cleartext traffic and Android cloud backup are disabled. No secret or signing key is committed.
 - Buddy-message push is opt-in per device, uses a dedicated high-priority notification channel, and deep-links to the correct chat.
 
@@ -57,7 +57,7 @@ The Android plugin uses Firebase Cloud Messaging. Create one Firebase Android ap
 3. Store its compact JSON as the Supabase secret `FCM_SERVICE_ACCOUNT_JSON`; never place it in a `VITE_*` variable or commit it.
 4. Run `npx cap sync android`, build a new APK/AAB, install it, and enable **Settings → Buddy message alerts**.
 
-The web/PWA path uses VAPID instead and does not require Firebase. Native plugin changes, including first-time push setup, require a new APK; a Vercel-only live-shell update cannot add the plugin to an older installed binary.
+The web/PWA path uses VAPID instead and does not require Firebase. Native plugin changes, including first-time push setup, require a new APK.
 
 ## Signed production release
 
@@ -74,14 +74,30 @@ keytool -genkeypair -v \
 Copy `android/keystore.properties.example` to `android/keystore.properties`, fill the four values, and build a signed APK:
 
 ```bash
-AIR_VERSION_CODE=1 AIR_VERSION_NAME=1.0.0 npm run android:release
+AIR_VERSION_CODE=11 AIR_VERSION_NAME=1.2.2 npm run android:release
 ```
 
-The direct-install release artifact is:
+The production-signed direct-install artifact is:
 
 ```text
 android/app/build/outputs/apk/release/hetu-release.apk
 ```
+
+The same command also produces a debug-signed APK for friends whose existing
+direct-share installation uses the Android debug certificate:
+
+```text
+android/app/build/outputs/apk/release/hetu-friend.apk
+```
+
+Install a friend update without clearing its data:
+
+```bash
+adb install -r android/app/build/outputs/apk/release/hetu-friend.apk
+```
+
+Increment `AIR_VERSION_CODE` for every release. Android rejects same- or
+lower-version updates, and website deployments never update these APKs.
 
 For a Play Store bundle, run `npm run android:bundle`. The artifact is:
 
@@ -90,31 +106,6 @@ android/app/build/outputs/bundle/release/app-release.aab
 ```
 
 Keep the upload keystore and passwords in a password manager and an encrypted offline backup. Losing the signing key can prevent future direct-install updates from replacing the existing app.
-
-## One-time live-shell release
-
-Before replacing an older bundled-shell APK, open it online and wait until its pending-sync count reaches zero. The live shell uses the production HTTPS origin instead of the old local WebView origin, so unsynced local-only rows are not visible after the upgrade.
-
-Build the signed live shell with a version code higher than every prior APK/AAB:
-
-```bash
-AIR_VERSION_CODE=4 AIR_VERSION_NAME=1.1.1 npm run android:live:release
-```
-
-The artifact is:
-
-```text
-android/app/build/outputs/apk/release/hetu-live-release.apk
-```
-
-For devices that already have the original direct-share debug-signed APK, use the
-matching optimized artifact instead so Android can upgrade it without uninstalling:
-
-```text
-android/app/build/outputs/apk/release/hetu-live-friend.apk
-```
-
-After this APK is installed once, normal web releases are delivered by pushing a verified commit to `main`; Vercel updates the production origin and the app checks on launch/resume and every 15 minutes while open. Do not use this path for native permission, plugin, or signing changes.
 
 ## Release verification matrix
 

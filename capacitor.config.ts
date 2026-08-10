@@ -2,15 +2,6 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 import { KeyboardResize, KeyboardStyle } from '@capacitor/keyboard';
 
-const liveServerUrl = process.env.CAPACITOR_LIVE_SERVER_URL?.trim();
-
-if (liveServerUrl) {
-  const parsed = new URL(liveServerUrl);
-  if (parsed.protocol !== 'https:' || parsed.username || parsed.password) {
-    throw new Error('CAPACITOR_LIVE_SERVER_URL must be a credential-free HTTPS URL.');
-  }
-}
-
 const config: CapacitorConfig = {
   appId: 'in.airjournal.app',
   appName: 'HETU',
@@ -18,7 +9,9 @@ const config: CapacitorConfig = {
   backgroundColor: '#F6F1E9',
   loggingBehavior: 'production',
   server: {
-    ...(liveServerUrl ? { url: liveServerUrl } : {}),
+    // Keep the former production origin so upgrades from the live shell retain
+    // their WebView storage, while serving only the APK's bundled assets.
+    hostname: 'hetu-app.vercel.app',
     androidScheme: 'https',
     cleartext: false
   },

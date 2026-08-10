@@ -417,8 +417,8 @@ export default function Log() {
             className="border-0 py-8"
           />
         ) : (
-          <div className="u-table-wrap">
-            <table className="u-data-table min-w-[940px] text-[13px]">
+          <div className="u-mobile-cards-wrap u-table-wrap">
+            <table className="u-data-table u-mobile-cards min-w-[940px] text-[13px]">
               <thead>
                 <tr className="border-b border-border text-left text-[11px] uppercase tracking-[0.08em] text-text-muted">
                   <th className="px-3 py-2 font-mono">Date</th>
@@ -443,21 +443,31 @@ export default function Log() {
                       key={q.id}
                       className={cn('hover:bg-bg-overlay/40', inBatch && 'bg-accent-faint/25')}
                     >
-                      <td className="u-num whitespace-nowrap px-3 py-2 text-[11px] text-text-faint">
+                      <td
+                        data-label="Date"
+                        className="u-num whitespace-nowrap px-3 py-2 text-[11px] text-text-faint"
+                      >
                         {formatDate(q.created_at.slice(0, 10), 'dd MMM yy')}
                       </td>
-                      <td className="max-w-[180px] px-3 py-2">
+                      <td
+                        data-label="Subject"
+                        data-mobile-primary
+                        className="max-w-[180px] px-3 py-2"
+                      >
                         <span className="flex items-center gap-1.5">
                           <span className={cn('h-1.5 w-1.5 shrink-0 rounded-full', ink.dot)} />
                           <span className="truncate text-[12px] text-text-muted">{q.subject}</span>
                         </span>
                       </td>
-                      <td className="hidden max-w-[180px] px-3 py-2 text-[12px] text-text-muted sm:table-cell">
+                      <td
+                        data-label="Subtopic"
+                        className="hidden max-w-[180px] px-3 py-2 text-[12px] text-text-muted sm:table-cell"
+                      >
                         <span className="truncate">
                           {q.subtopic ?? <span className="text-text-faint">—</span>}
                         </span>
                       </td>
-                      <td className="px-3 py-2">
+                      <td data-label="Outcome" className="px-3 py-2">
                         <Badge
                           tone={
                             spec.tone === 'ok'
@@ -472,20 +482,24 @@ export default function Log() {
                           {q.outcome}
                         </Badge>
                       </td>
-                      <td className="hidden max-w-[220px] px-3 py-2 text-[12px] text-text-muted md:table-cell">
+                      <td
+                        data-label="Source"
+                        className="hidden max-w-[220px] px-3 py-2 text-[12px] text-text-muted md:table-cell"
+                      >
                         <span className="truncate">
                           {q.source_ref ?? <span className="text-text-faint">—</span>}
                         </span>
                       </td>
-                      <td className="max-w-[240px] px-3 py-2">
+                      <td data-label="Pattern" data-mobile-wide className="max-w-[240px] px-3 py-2">
                         <span className="truncate">
                           {q.pattern_name ?? <span className="text-text-faint">no pattern</span>}
                         </span>
                       </td>
-                      <td className="min-w-[220px] px-3 py-2">
+                      <td data-label="Answer" data-mobile-wide className="min-w-[220px] px-3 py-2">
                         <AnswerReveal answer={q.answer_text} onAdd={() => openEdit(q)} compact />
                       </td>
                       <td
+                        data-label="Time"
                         className={cn(
                           'u-num hidden px-3 py-2 text-right text-[12px] sm:table-cell',
                           over ? 'text-warn' : 'text-text-muted'
@@ -493,7 +507,7 @@ export default function Log() {
                       >
                         {secondsToClock(q.time_spent_sec)}
                       </td>
-                      <td className="px-3 py-2 text-right">
+                      <td data-label="Actions" className="px-3 py-2 text-right">
                         <button
                           type="button"
                           onClick={() => openEdit(q)}
@@ -548,7 +562,6 @@ export default function Log() {
           </div>
         )}
       </Dialog>
-
     </div>
   );
 }

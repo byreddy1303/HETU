@@ -144,35 +144,48 @@ function Row({
         className="cursor-pointer transition-colors hover:bg-bg-overlay/40"
         onClick={() => setOpen((o) => !o)}
       >
-        <td className="u-num w-[86px] whitespace-nowrap px-3 py-2 text-[11px] text-text-faint">
+        <td
+          data-label="Date"
+          className="u-num w-[86px] whitespace-nowrap px-3 py-2 text-[11px] text-text-faint"
+        >
           {formatDate(q.created_at.slice(0, 10), 'dd MMM yy')}
         </td>
-        <td className="min-w-[140px] max-w-[180px] px-3 py-2">
+        <td
+          data-label="Subject"
+          data-mobile-primary
+          className="min-w-[140px] max-w-[180px] px-3 py-2"
+        >
           <span className="flex items-center gap-1.5">
             <span className={cn('h-1.5 w-1.5 shrink-0 rounded-full', ink.dot)} />
             <span className="truncate text-[12px] text-text-muted">{q.subject}</span>
           </span>
         </td>
-        <td className="hidden max-w-[180px] px-3 py-2 text-[12px] text-text-muted sm:table-cell">
+        <td
+          data-label="Subtopic"
+          className="hidden max-w-[180px] px-3 py-2 text-[12px] text-text-muted sm:table-cell"
+        >
           <span className="truncate">
             {q.subtopic ?? <span className="text-text-faint">—</span>}
           </span>
         </td>
-        <td className="hidden px-3 py-2 sm:table-cell">
+        <td data-label="Outcome" className="hidden px-3 py-2 sm:table-cell">
           <Badge tone={TONE_BADGE[spec.tone]}>{q.outcome}</Badge>
         </td>
-        <td className="hidden max-w-[220px] px-3 py-2 text-[12px] text-text-muted md:table-cell">
+        <td
+          data-label="Source"
+          className="hidden max-w-[220px] px-3 py-2 text-[12px] text-text-muted md:table-cell"
+        >
           <span className="truncate">
             {sourceLabel ?? '—'}
             {format && <span className="ml-1 font-mono text-text-faint">· {format}</span>}
           </span>
         </td>
-        <td className="min-w-0 max-w-[280px] px-3 py-2">
+        <td data-label="Pattern" data-mobile-wide className="min-w-0 max-w-[280px] px-3 py-2">
           <span className="truncate text-[13px]">
             {q.pattern_name ?? <span className="text-text-faint">no pattern</span>}
           </span>
         </td>
-        <td className="w-[52px] px-3 py-2">
+        <td data-label="Photo" className="w-[52px] px-3 py-2">
           {q.image_url ? (
             <button
               type="button"
@@ -194,6 +207,7 @@ function Row({
           )}
         </td>
         <td
+          data-label="Time"
           className={cn(
             'u-num hidden px-3 py-2 text-right text-[12px] sm:table-cell',
             over ? 'text-warn' : 'text-text-faint'
@@ -201,7 +215,7 @@ function Row({
         >
           {secondsToClock(q.time_spent_sec)}
         </td>
-        <td className="w-[88px] px-3 py-2 text-right">
+        <td data-label="Actions" className="w-[88px] px-3 py-2 text-right">
           <span className="inline-flex items-center gap-1">
             <button
               type="button"
@@ -225,6 +239,7 @@ function Row({
       <AnimatePresence initial={false}>
         {open && (
           <motion.tr
+            className="u-mobile-detail-row"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -246,6 +261,11 @@ function Row({
                     <span className="text-text-faint">—</span>
                   )}
                 </Detail>
+                {q.capture_note && (
+                  <Detail label="quick note">
+                    <span className="whitespace-pre-wrap">{q.capture_note}</span>
+                  </Detail>
+                )}
                 <Detail label="time vs target">
                   <span className="u-num">{secondsToClock(q.time_spent_sec)}</span>
                   <span className="text-text-faint"> of </span>
@@ -399,10 +419,7 @@ export default function Journal() {
     const pyqCounts = new Map<string, number>();
     for (const attempt of pyqAttempts) {
       if (!attempt.pyq_session_id) continue;
-      pyqCounts.set(
-        attempt.pyq_session_id,
-        (pyqCounts.get(attempt.pyq_session_id) ?? 0) + 1
-      );
+      pyqCounts.set(attempt.pyq_session_id, (pyqCounts.get(attempt.pyq_session_id) ?? 0) + 1);
     }
     for (const [sessionId, count] of pyqCounts) map.set(sessionId, count);
     return map;
@@ -674,8 +691,8 @@ export default function Journal() {
         <Card>
           {pageRows.length > 0 ? (
             <>
-              <div className="u-table-wrap">
-                <table className="u-data-table min-w-[780px] text-[13px]">
+              <div className="u-mobile-cards-wrap u-table-wrap">
+                <table className="u-data-table u-mobile-cards min-w-[780px] text-[13px]">
                   <thead>
                     <tr className="border-b border-border text-left text-[11px] uppercase tracking-[0.08em] text-text-muted">
                       <th className="px-3 py-2 font-mono">Date</th>

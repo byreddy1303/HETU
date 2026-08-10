@@ -204,8 +204,8 @@ export default function SessionReview() {
         <CardBody className="flex flex-col gap-4">
           {session.kind === 'pyq' && questions.length < pyqAttempts.length && (
             <p className="text-[12px] text-text-faint">
-              Outcome analysis covers {questions.length} of {pyqAttempts.length} submitted PYQs.
-              The remaining attempt receipts are still preserved in PYQ practice.
+              Outcome analysis covers {questions.length} of {pyqAttempts.length} submitted PYQs. The
+              remaining attempt receipts are still preserved in PYQ practice.
             </p>
           )}
           {questions.length > 0 && (
@@ -324,8 +324,8 @@ export default function SessionReview() {
               </span>
             }
           />
-          <div className="u-table-wrap">
-            <table className="u-data-table min-w-[860px] text-[13px]">
+          <div className="u-mobile-cards-wrap u-table-wrap">
+            <table className="u-data-table u-mobile-cards min-w-[860px] text-[13px]">
               <thead>
                 <tr className="border-b border-border text-left text-[11px] uppercase tracking-[0.08em] text-text-muted">
                   <th className="px-3 py-2 font-mono">#</th>
@@ -343,10 +343,13 @@ export default function SessionReview() {
                   const over = q.time_spent_sec > q.target_time_sec;
                   return (
                     <tr key={q.id} className="hover:bg-bg-overlay/40">
-                      <td className="u-num px-3 py-2 text-[11px] text-text-faint">
+                      <td
+                        data-label="Question"
+                        className="u-num px-3 py-2 text-[11px] text-text-faint"
+                      >
                         Q{String(i + 1).padStart(2, '0')}
                       </td>
-                      <td className="px-3 py-2">
+                      <td data-label="Outcome" className="px-3 py-2">
                         <Badge
                           tone={
                             spec.tone === 'ok'
@@ -361,17 +364,21 @@ export default function SessionReview() {
                           {q.outcome}
                         </Badge>
                       </td>
-                      <td className="px-3 py-2">
+                      <td data-label="Pattern" data-mobile-primary className="px-3 py-2">
                         <span className="truncate text-text">
                           {q.pattern_name ?? <span className="text-text-faint">no pattern</span>}
                         </span>
                       </td>
-                      <td className="hidden max-w-[240px] px-3 py-2 text-[12px] text-text-muted sm:table-cell">
+                      <td
+                        data-label="Source"
+                        className="hidden max-w-[240px] px-3 py-2 text-[12px] text-text-muted sm:table-cell"
+                      >
                         <span className="truncate">
                           {q.source_ref ?? <span className="text-text-faint">—</span>}
                         </span>
                       </td>
                       <td
+                        data-label="Time"
                         className={cn(
                           'u-num px-3 py-2 text-right text-[12px]',
                           over ? 'text-warn' : 'text-text-muted'
@@ -379,10 +386,10 @@ export default function SessionReview() {
                       >
                         {secondsToClock(q.time_spent_sec)}
                       </td>
-                      <td className="min-w-[220px] px-3 py-2">
+                      <td data-label="Answer" data-mobile-wide className="min-w-[220px] px-3 py-2">
                         <AnswerReveal answer={q.answer_text} onAdd={() => openEdit(q)} compact />
                       </td>
-                      <td className="px-3 py-2 text-right">
+                      <td data-label="Actions" className="px-3 py-2 text-right">
                         <button
                           type="button"
                           onClick={() => openEdit(q)}

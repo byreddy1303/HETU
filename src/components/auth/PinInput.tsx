@@ -66,12 +66,7 @@ export default function PinInput({
   }
 
   return (
-    <div
-      id={id}
-      role="group"
-      aria-label="6-digit PIN"
-      className="flex items-center justify-between gap-2"
-    >
+    <div id={id} role="group" aria-label="6-digit PIN" className="grid w-full grid-cols-6 gap-2">
       {cells.map((digit, i) => (
         <input
           key={i}
@@ -91,7 +86,7 @@ export default function PinInput({
           onFocus={(e) => e.currentTarget.select()}
           aria-label={`PIN digit ${i + 1}`}
           className={cn(
-            'h-12 w-11 rounded-lg border border-border bg-bg-raised text-center font-mono text-[20px] font-semibold text-text shadow-sm',
+            'h-12 min-w-0 w-full rounded-lg border border-border bg-bg-raised text-center font-mono text-[20px] font-semibold text-text shadow-sm',
             'transition-[border-color,box-shadow]',
             'hover:border-border-hover',
             'focus:border-accent focus:shadow-[0_0_0_3px_theme(colors.accent.faint)] focus:outline-none',

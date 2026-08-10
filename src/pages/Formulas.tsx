@@ -105,7 +105,10 @@ export default function Formulas() {
       />
 
       <Card>
-        <CardHeader title="Add formula" aside={<span className="text-[11px] text-text-faint">due today after saving</span>} />
+        <CardHeader
+          title="Add formula"
+          aside={<span className="text-[11px] text-text-faint">due today after saving</span>}
+        />
         <CardBody>
           <form
             className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)_minmax(160px,.7fr)_auto]"
@@ -129,12 +132,22 @@ export default function Formulas() {
               className="font-mono"
               aria-label="Formula expression"
             />
-            <Select value={subject} onChange={(event) => setSubject(event.target.value)} aria-label="Subject">
+            <Select
+              value={subject}
+              onChange={(event) => setSubject(event.target.value)}
+              aria-label="Subject"
+            >
               {SUBJECTS.map((item) => (
-                <option key={item} value={item}>{item}</option>
+                <option key={item} value={item}>
+                  {item}
+                </option>
               ))}
             </Select>
-            <Button type="submit" variant="primary" disabled={!name.trim() || !expression.trim() || saving}>
+            <Button
+              type="submit"
+              variant="primary"
+              disabled={!name.trim() || !expression.trim() || saving}
+            >
               <Plus size={15} strokeWidth={1.8} />
               Add
             </Button>
@@ -144,7 +157,10 @@ export default function Formulas() {
 
       {dueToday.length > 0 && (
         <Card>
-          <CardHeader title="Due today" aside={<span className="u-num text-[11px] text-text-faint">{dueToday.length}</span>} />
+          <CardHeader
+            title="Due today"
+            aside={<span className="u-num text-[11px] text-text-faint">{dueToday.length}</span>}
+          />
           <ul className="divide-y divide-border">
             {dueToday.map((formula) => (
               <FormulaReviewRow
@@ -160,7 +176,10 @@ export default function Formulas() {
       )}
 
       <Card>
-        <CardHeader title="Library" aside={<span className="u-num text-[11px] text-text-faint">{formulas.length}</span>} />
+        <CardHeader
+          title="Library"
+          aside={<span className="u-num text-[11px] text-text-faint">{formulas.length}</span>}
+        />
         {formulas.length === 0 ? (
           <Empty
             title="No formulas yet"
@@ -213,19 +232,29 @@ function FormulaReviewRow({
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-baseline gap-2">
           <span className="font-display font-semibold text-text">{row.name}</span>
-          <code className="rounded bg-bg-overlay px-1.5 py-0.5 font-mono text-[12px] text-accent">{row.expression}</code>
+          <code className="max-w-full break-words rounded bg-bg-overlay px-1.5 py-0.5 font-mono text-[12px] text-accent">
+            {row.expression}
+          </code>
         </div>
         <p className="text-[11.5px] text-text-faint">
-          due {formatDate(row.next_review, 'dd MMM')} · {row.forgot_count > 0 && `forgot ${row.forgot_count}× · `}
+          due {formatDate(row.next_review, 'dd MMM')} ·{' '}
+          {row.forgot_count > 0 && `forgot ${row.forgot_count}× · `}
           {row.last_reviewed ? `last ${formatDate(row.last_reviewed, 'dd MMM')}` : 'never reviewed'}
         </p>
       </div>
-      <div className="flex items-center gap-1.5">
+      <div className="flex w-full flex-wrap items-center justify-end gap-1.5 sm:w-auto">
         <Button variant="ghost" size="sm" onClick={onForgot}>
           <RotateCcw size={12} strokeWidth={1.75} /> Forgot
         </Button>
-        <Button variant="primary" size="sm" onClick={onRecalled}>Recalled</Button>
-        <button type="button" onClick={onDelete} aria-label="Delete formula" className="rounded p-1 text-text-faint hover:text-danger">
+        <Button variant="primary" size="sm" onClick={onRecalled}>
+          Recalled
+        </Button>
+        <button
+          type="button"
+          onClick={onDelete}
+          aria-label="Delete formula"
+          className="rounded p-1 text-text-faint hover:text-danger"
+        >
           <Trash2 size={12} strokeWidth={1.75} />
         </button>
       </div>
@@ -255,28 +284,56 @@ function FormulaLibraryRow({ row, onDelete }: { row: FormulaRow; onDelete: () =>
       <div className="min-w-0 flex-1">
         {editing ? (
           <div className="flex flex-col gap-1">
-            <Input value={name} onChange={(event) => setName(event.target.value)} placeholder="Name" />
-            <Input value={expression} onChange={(event) => setExpression(event.target.value)} placeholder="Expression" className="font-mono" />
+            <Input
+              value={name}
+              onChange={(event) => setName(event.target.value)}
+              placeholder="Name"
+            />
+            <Input
+              value={expression}
+              onChange={(event) => setExpression(event.target.value)}
+              placeholder="Expression"
+              className="font-mono"
+            />
           </div>
         ) : (
           <div className="flex flex-wrap items-baseline gap-2">
             <span className="font-display font-semibold text-text">{row.name}</span>
-            <code className="rounded bg-bg-overlay px-1.5 py-0.5 font-mono text-[12px] text-accent">{row.expression}</code>
+            <code className="max-w-full break-words rounded bg-bg-overlay px-1.5 py-0.5 font-mono text-[12px] text-accent">
+              {row.expression}
+            </code>
             {row.forgot_count > 0 && <Badge tone="warn">{row.forgot_count} forgot</Badge>}
           </div>
         )}
-        <p className="text-[11px] text-text-faint">next review {formatDate(row.next_review, 'dd MMM')}</p>
+        <p className="text-[11px] text-text-faint">
+          next review {formatDate(row.next_review, 'dd MMM')}
+        </p>
       </div>
-      <div className="flex items-center gap-1">
+      <div className="flex w-full flex-wrap items-center justify-end gap-1 sm:w-auto">
         {editing ? (
           <>
-            <Button variant="ghost" size="sm" onClick={() => setEditing(false)} disabled={saving}>Cancel</Button>
-            <Button variant="primary" size="sm" onClick={() => void save()} disabled={saving}>Save</Button>
+            <Button variant="ghost" size="sm" onClick={() => setEditing(false)} disabled={saving}>
+              Cancel
+            </Button>
+            <Button variant="primary" size="sm" onClick={() => void save()} disabled={saving}>
+              Save
+            </Button>
           </>
         ) : (
           <>
-            <button type="button" onClick={() => setEditing(true)} className="text-[11px] text-text-faint underline decoration-dotted underline-offset-2 hover:text-text">edit</button>
-            <button type="button" onClick={onDelete} aria-label="Delete formula" className="rounded p-1 text-text-faint hover:text-danger">
+            <button
+              type="button"
+              onClick={() => setEditing(true)}
+              className="text-[11px] text-text-faint underline decoration-dotted underline-offset-2 hover:text-text"
+            >
+              edit
+            </button>
+            <button
+              type="button"
+              onClick={onDelete}
+              aria-label="Delete formula"
+              className="rounded p-1 text-text-faint hover:text-danger"
+            >
               <Trash2 size={12} strokeWidth={1.75} />
             </button>
           </>

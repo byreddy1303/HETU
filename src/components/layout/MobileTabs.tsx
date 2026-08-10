@@ -181,8 +181,8 @@ export default function MobileTabs() {
                         )
                       }
                     >
-                      <Icon size={17} strokeWidth={1.75} />
-                      {item.label}
+                      <Icon size={17} strokeWidth={1.75} className="shrink-0" />
+                      <span className="min-w-0 leading-tight">{item.label}</span>
                     </NavLink>
                   );
                 })}

@@ -30,11 +30,7 @@ import { Button } from '@/components/ui/Button';
 import { db } from '@/lib/db';
 import { writeLocal } from '@/lib/sync';
 import { useAuth } from '@/hooks/useAuth';
-import {
-  calibrationBySubject,
-  calibrationOverall,
-  type CalibrationRow
-} from '@/lib/analysis';
+import { calibrationBySubject, calibrationOverall, type CalibrationRow } from '@/lib/analysis';
 import { cn, formatDate, plural } from '@/lib/utils';
 import { subjectInk } from '@/lib/subjectInk';
 import { OUTCOME_BY_CODE } from '@/lib/constants';
@@ -182,11 +178,7 @@ export default function Calibration() {
   }
 
   async function resetRow(q: QuestionRow) {
-    await stashUndoAndPersist(
-      q,
-      { mark_decision: null, mark_correct: null },
-      'Cleared decision'
-    );
+    await stashUndoAndPersist(q, { mark_decision: null, mark_correct: null }, 'Cleared decision');
   }
 
   return (
@@ -206,7 +198,7 @@ export default function Calibration() {
               className="border-0 py-8"
             />
           ) : (
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
+            <div className="calibration-summary grid grid-cols-2 gap-3 sm:grid-cols-5">
               <StatCell label="Answered" value={overall.decided} />
               <StatCell label="Correct" value={overall.correct} color="text-success" />
               <StatCell label="Wrong" value={overall.wrong} color="text-danger" />
@@ -242,80 +234,94 @@ export default function Calibration() {
               Nothing tagged yet. Set a decision on any question via the inbox below.
             </p>
           ) : (
-            <div className="u-table-wrap">
-              <table className="u-data-table min-w-[760px] text-[13px]">
+            <div className="u-mobile-cards-wrap u-table-wrap">
+              <table className="u-data-table u-mobile-cards min-w-[760px] text-[13px]">
                 <thead>
                   <tr className="text-left text-[11px] uppercase tracking-[0.08em] text-text-muted">
-                  <th className="px-4 py-2 font-mono">Subject</th>
-                  <th className="px-2 py-2 text-right font-mono">Answered</th>
-                  <th className="px-2 py-2 text-right font-mono">50/50</th>
-                  <th className="px-2 py-2 text-right font-mono">Blank</th>
-                  <th className="px-2 py-2 text-right font-mono">Answer accuracy</th>
-                  <th className="px-2 py-2 text-right font-mono">EV / Q</th>
-                  <th className="px-4 py-2 font-mono">Recommendation</th>
+                    <th className="px-4 py-2 font-mono">Subject</th>
+                    <th className="px-2 py-2 text-right font-mono">Answered</th>
+                    <th className="px-2 py-2 text-right font-mono">50/50</th>
+                    <th className="px-2 py-2 text-right font-mono">Blank</th>
+                    <th className="px-2 py-2 text-right font-mono">Answer accuracy</th>
+                    <th className="px-2 py-2 text-right font-mono">EV / Q</th>
+                    <th className="px-4 py-2 font-mono">Recommendation</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border">
-                {rows.map((r) => {
-                  const rec = RECOMMENDATION_COPY[r.recommendation];
-                  const answered = r.marked + r.fiftyFifty;
-                  const ink = subjectInk(r.subject);
-                  return (
-                    <tr key={r.subject}>
-                      <td className="px-4 py-2">
-                        <span className="flex items-center gap-2">
-                          <span className={cn('h-1.5 w-1.5 rounded-full', ink.dot)} />
-                          <span className="font-medium text-text">{r.subject}</span>
-                        </span>
-                      </td>
-                      <td className="u-num px-2 py-2 text-right text-text-muted">
-                        {r.markedCorrect}/{r.marked}
-                      </td>
-                      <td className="u-num px-2 py-2 text-right text-text-muted">
-                        {r.fiftyFiftyCorrect}/{r.fiftyFifty}
-                      </td>
-                      <td className="u-num px-2 py-2 text-right text-text-muted">{r.skipped}</td>
-                      <td className="u-num px-2 py-2 text-right">{fmtPct(r.accuracy)}</td>
-                      <td
-                        className={cn(
-                          'u-num px-2 py-2 text-right font-semibold',
-                          r.expectedValue > 0
-                            ? 'text-success'
-                            : r.expectedValue < 0
-                              ? 'text-danger'
-                              : 'text-text-faint'
-                        )}
-                      >
-                        {fmtEV(r.expectedValue)}
-                      </td>
-                      <td className="px-4 py-2">
-                        <span
-                          className={cn(
-                            'inline-flex items-center gap-1.5 text-[12px]',
-                            rec.tone === 'warn' && 'text-warn',
-                            rec.tone === 'success' && 'text-success',
-                            rec.tone === 'neutral' && 'text-text-muted'
-                          )}
-                          title={rec.hint}
+                  {rows.map((r) => {
+                    const rec = RECOMMENDATION_COPY[r.recommendation];
+                    const answered = r.marked + r.fiftyFifty;
+                    const ink = subjectInk(r.subject);
+                    return (
+                      <tr key={r.subject}>
+                        <td data-label="Subject" data-mobile-primary className="px-4 py-2">
+                          <span className="flex items-center gap-2">
+                            <span className={cn('h-1.5 w-1.5 rounded-full', ink.dot)} />
+                            <span className="font-medium text-text">{r.subject}</span>
+                          </span>
+                        </td>
+                        <td
+                          data-label="Answered"
+                          className="u-num px-2 py-2 text-right text-text-muted"
                         >
-                          {rec.tone === 'warn' ? (
-                            <AlertTriangle size={12} strokeWidth={2} />
-                          ) : rec.tone === 'success' ? (
-                            <Check size={12} strokeWidth={2} />
-                          ) : (
-                            <Info size={12} strokeWidth={2} />
+                          {r.markedCorrect}/{r.marked}
+                        </td>
+                        <td
+                          data-label="50/50"
+                          className="u-num px-2 py-2 text-right text-text-muted"
+                        >
+                          {r.fiftyFiftyCorrect}/{r.fiftyFifty}
+                        </td>
+                        <td
+                          data-label="Blank"
+                          className="u-num px-2 py-2 text-right text-text-muted"
+                        >
+                          {r.skipped}
+                        </td>
+                        <td data-label="Answer accuracy" className="u-num px-2 py-2 text-right">
+                          {fmtPct(r.accuracy)}
+                        </td>
+                        <td
+                          data-label="Expected value / Q"
+                          className={cn(
+                            'u-num px-2 py-2 text-right font-semibold',
+                            r.expectedValue > 0
+                              ? 'text-success'
+                              : r.expectedValue < 0
+                                ? 'text-danger'
+                                : 'text-text-faint'
                           )}
-                          {r.recommendation === 'insufficient'
-                            ? `${Math.max(0, 4 - answered)} more needed`
-                            : rec.label}
-                        </span>
-                        <span className="mt-0.5 block max-w-[250px] text-[10.5px] leading-relaxed text-text-faint">
-                          {rec.hint}
-                        </span>
-                      </td>
-                    </tr>
-                  );
-                })}
+                        >
+                          {fmtEV(r.expectedValue)}
+                        </td>
+                        <td data-label="Recommendation" data-mobile-wide className="px-4 py-2">
+                          <span
+                            className={cn(
+                              'inline-flex items-center gap-1.5 text-[12px]',
+                              rec.tone === 'warn' && 'text-warn',
+                              rec.tone === 'success' && 'text-success',
+                              rec.tone === 'neutral' && 'text-text-muted'
+                            )}
+                            title={rec.hint}
+                          >
+                            {rec.tone === 'warn' ? (
+                              <AlertTriangle size={12} strokeWidth={2} />
+                            ) : rec.tone === 'success' ? (
+                              <Check size={12} strokeWidth={2} />
+                            ) : (
+                              <Info size={12} strokeWidth={2} />
+                            )}
+                            {r.recommendation === 'insufficient'
+                              ? `${Math.max(0, 4 - answered)} more needed`
+                              : rec.label}
+                          </span>
+                          <span className="mt-0.5 block max-w-[250px] text-[10.5px] leading-relaxed text-text-faint">
+                            {rec.hint}
+                          </span>
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
@@ -345,9 +351,7 @@ export default function Calibration() {
                 <MissingRow
                   key={q.id}
                   q={q}
-                  onDecide={(update, label) =>
-                    void stashUndoAndPersist(q, update, label)
-                  }
+                  onDecide={(update, label) => void stashUndoAndPersist(q, update, label)}
                 />
               ))}
             </ul>
@@ -393,8 +397,8 @@ export default function Calibration() {
             Answered wrong = <span className="u-num">−⅓</span>
           </span>
           <span className="ml-auto">
-            EV / Q averages over every recorded decision. Blank answers contribute zero,
-            so the number evaluates the full answer/skip policy.
+            EV / Q averages over every recorded decision. Blank answers contribute zero, so the
+            number evaluates the full answer/skip policy.
           </span>
         </CardBody>
       </Card>
@@ -441,7 +445,7 @@ function StatCell({
       <span
         className={cn(
           'u-num text-[20px] font-semibold leading-none',
-          value > 0 ? color ?? 'text-text' : muted ? 'text-text-faint' : 'text-text-faint'
+          value > 0 ? (color ?? 'text-text') : muted ? 'text-text-faint' : 'text-text-faint'
         )}
       >
         {value}
@@ -478,9 +482,7 @@ function MissingRow({
     if (!decision) return;
     onDecide(
       { mark_decision: decision, mark_correct: correct },
-      correct
-        ? 'Recorded correct answer'
-        : 'Recorded wrong answer'
+      correct ? 'Recorded correct answer' : 'Recorded wrong answer'
     );
     setDecision(null);
     setOpen(false);
@@ -559,9 +561,11 @@ function MissingRow({
           ) : (
             <div className="flex flex-col gap-2">
               <p className="u-label">
-                You picked <span className="text-text">
+                You picked{' '}
+                <span className="text-text">
                   {DECISION_OPTIONS.find((o) => o.value === decision)?.label}
-                </span>. Was your answer correct?
+                </span>
+                . Was your answer correct?
               </p>
               <div className="flex flex-wrap items-center gap-2">
                 <Button variant="primary" size="sm" onClick={() => pickOutcome(true)}>
@@ -585,8 +589,7 @@ function MissingRow({
 }
 
 function DecidedRow({ q, onReset }: { q: QuestionRow; onReset: () => void }) {
-  const decLabel =
-    DECISION_OPTIONS.find((o) => o.value === q.mark_decision)?.label ?? '—';
+  const decLabel = DECISION_OPTIONS.find((o) => o.value === q.mark_decision)?.label ?? '—';
   const outcomeLabel =
     q.mark_decision === 'SKIP'
       ? 'left blank'

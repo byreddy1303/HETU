@@ -894,8 +894,8 @@ function SubjectMatrix({ rows }: { rows: SubjectReadiness[] }) {
     return a.score - b.score || a.subject.localeCompare(b.subject);
   });
   return (
-    <div className="u-table-wrap">
-      <table className="u-data-table min-w-[680px] text-[12.5px]">
+    <div className="u-mobile-cards-wrap u-table-wrap">
+      <table className="u-data-table u-mobile-cards min-w-[680px] text-[12.5px]">
         <thead>
           <tr className="text-left text-[11px] uppercase tracking-[0.08em] text-text-muted">
             <th className="px-4 py-2 font-mono">Subject</th>
@@ -912,16 +912,20 @@ function SubjectMatrix({ rows }: { rows: SubjectReadiness[] }) {
             const ink = subjectInk(r.subject);
             return (
               <tr key={r.subject}>
-                <td className="px-4 py-2">
+                <td data-label="Subject" data-mobile-primary className="px-4 py-2">
                   <span className="flex items-center gap-2">
                     <span className={cn('h-1.5 w-1.5 rounded-full', ink.dot)} />
                     <span className="font-medium text-text">{r.subject}</span>
                   </span>
                 </td>
-                <td className="u-num px-2 py-2 text-right font-semibold text-text">
+                <td
+                  data-label="Score"
+                  className="u-num px-2 py-2 text-right font-semibold text-text"
+                >
                   {r.hasSignal ? r.score : '—'}
                 </td>
                 <td
+                  data-label="Coverage"
                   className={cn(
                     'u-num px-2 py-2 text-right',
                     cellTone('coverage', r.coverage, r.hasSignal)
@@ -930,6 +934,7 @@ function SubjectMatrix({ rows }: { rows: SubjectReadiness[] }) {
                   {r.hasSignal ? `${Math.round(r.coverage * 100)}%` : '—'}
                 </td>
                 <td
+                  data-label="Retention"
                   className={cn(
                     'u-num px-2 py-2 text-right',
                     cellTone('retention', r.retention, r.hasSignal)
@@ -938,6 +943,7 @@ function SubjectMatrix({ rows }: { rows: SubjectReadiness[] }) {
                   {r.hasSignal ? `${Math.round(r.retention * 100)}%` : '—'}
                 </td>
                 <td
+                  data-label="Calibration"
                   className={cn(
                     'u-num px-2 py-2 text-right',
                     cellTone('calibration', r.calibration, r.hasSignal)
@@ -946,6 +952,7 @@ function SubjectMatrix({ rows }: { rows: SubjectReadiness[] }) {
                   {r.hasSignal ? `${Math.round(r.calibration * 100)}%` : '—'}
                 </td>
                 <td
+                  data-label="Surface"
                   className={cn(
                     'u-num px-2 py-2 text-right',
                     cellTone('surface', r.surface, r.hasSignal)
@@ -953,7 +960,11 @@ function SubjectMatrix({ rows }: { rows: SubjectReadiness[] }) {
                 >
                   {r.hasSignal ? `${Math.round(r.surface * 100)}%` : '—'}
                 </td>
-                <td className="px-4 py-2 text-[11px] text-text-faint">
+                <td
+                  data-label="Signal"
+                  data-mobile-wide
+                  className="px-4 py-2 text-[11px] text-text-faint"
+                >
                   {r.hasSignal
                     ? `${r.counts.questions}q · ${r.counts.patterns}p · ${r.counts.eligibleReattempts}r · ${r.counts.markedDecisions}d`
                     : 'no data yet'}

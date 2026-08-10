@@ -5,7 +5,10 @@ import { KeyboardResize, KeyboardStyle } from '@capacitor/keyboard';
 const config: CapacitorConfig = {
   appId: 'in.airjournal.app',
   appName: 'HETU',
-  webDir: 'dist',
+  // server.url is set so the WebView loads from Vercel — no web assets need
+  // to be bundled in the APK. Point webDir at an empty stub so cap sync
+  // doesn't copy dist/ (or the 200 MB public/ folder) into the APK.
+  webDir: 'android-stub',
   backgroundColor: '#F6F1E9',
   loggingBehavior: 'production',
   server: {

@@ -295,21 +295,38 @@ export default function Dashboard() {
             <button
               type="button"
               onClick={() => navigate('/pyq')}
-              className="group mt-auto rounded border border-border bg-bg-overlay/35 p-3 text-left transition-colors hover:border-border-hover hover:bg-accent-faint/35"
+              className="u-tactile-tile group mt-auto w-full rounded-md p-3.5 text-left"
             >
               <span className="flex items-start gap-3">
-                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded bg-bg-raised text-accent shadow-sm">
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded border border-accent/15 bg-accent-faint/55 text-accent shadow-sm">
                   <BookOpenCheck size={18} strokeWidth={1.75} aria-hidden />
                 </span>
                 <span className="min-w-0 flex-1">
-                  <span className="flex items-center justify-between gap-3">
-                    <span className="font-display text-[14px] font-semibold text-text">PYQ practice bank</span>
-                    <ArrowRight size={14} className="text-accent transition-transform group-hover:translate-x-0.5" aria-hidden />
+                  <span className="flex min-w-0 items-start justify-between gap-2">
+                    <span className="font-display text-[14px] font-semibold leading-snug text-text">
+                      PYQ practice bank
+                    </span>
+                    <ArrowRight
+                      size={14}
+                      className="mt-0.5 shrink-0 text-accent transition-transform group-hover:translate-x-0.5"
+                      aria-hidden
+                    />
                   </span>
-                  <span className="mt-1 block text-[11px] leading-relaxed text-text-faint">
-                    <span className="u-num text-text-muted">{uniquePyqsSeen.toLocaleString()}</span> of{' '}
-                    <span className="u-num text-text-muted">{PYQ_BANK_QUESTION_COUNT.toLocaleString()}</span> seen ·{' '}
-                    <span className="u-num text-text-muted">{pyqAttempts.length.toLocaleString()}</span> attempts
+                  <span className="mt-1.5 flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-[11px] leading-relaxed text-text-faint">
+                    <span>
+                      <span className="u-num text-text-muted">{uniquePyqsSeen.toLocaleString()}</span> of{' '}
+                      <span className="u-num text-text-muted">
+                        {PYQ_BANK_QUESTION_COUNT.toLocaleString()}
+                      </span>{' '}
+                      seen
+                    </span>
+                    <span className="h-1 w-1 rounded-full bg-border-hover" aria-hidden />
+                    <span>
+                      <span className="u-num text-text-muted">
+                        {pyqAttempts.length.toLocaleString()}
+                      </span>{' '}
+                      attempts
+                    </span>
                   </span>
                 </span>
               </span>

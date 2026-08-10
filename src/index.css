@@ -326,6 +326,32 @@
     @apply min-w-0 max-w-full rounded-lg border border-border bg-bg-raised shadow-card;
   }
 
+  /* A neutral key-cap surface for primary navigation tiles inside cards. */
+  .u-tactile-tile {
+    @apply min-w-0 max-w-full border border-border bg-bg-raised;
+    box-shadow:
+      0 3px 0 rgb(var(--color-border-hover) / 0.68),
+      0 10px 22px -17px rgb(var(--color-text) / 0.42);
+    transition-property: transform, border-color, background-color, box-shadow;
+    transition-duration: 120ms;
+  }
+
+  .u-tactile-tile:hover {
+    border-color: theme('colors.border.hover');
+    background: rgb(var(--color-accent-faint) / 0.32);
+    transform: translateY(-1px);
+    box-shadow:
+      0 4px 0 rgb(var(--color-border-hover) / 0.72),
+      0 13px 24px -17px rgb(var(--color-text) / 0.46);
+  }
+
+  .u-tactile-tile:active {
+    transform: translateY(2px);
+    box-shadow:
+      0 1px 0 rgb(var(--color-border-hover) / 0.65),
+      var(--shadow-press);
+  }
+
   .air-page,
   .air-page > *,
   .u-shell-content,
@@ -1629,12 +1655,12 @@
     background: rgb(var(--color-accent) / 0.2);
   }
 
-  .topper-subject-tab:nth-child(2) {
-    margin-left: 8px;
+  .topper-notes-hero > * {
+    min-width: 0;
   }
 
-  .topper-subject-tab:nth-child(3) {
-    margin-left: 16px;
+  .topper-subject-tab {
+    max-width: 100%;
   }
 
   /* Question-bank paper: preserve original structures without letting legacy

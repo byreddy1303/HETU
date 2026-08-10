@@ -851,32 +851,32 @@ function RecentSessionsCard({
               <li
                 key={s.id}
                 className={cn(
-                  'flex flex-wrap items-center gap-3 px-4 py-2.5 transition-colors hover:bg-bg-overlay/40',
+                  'flex flex-col gap-2.5 px-4 py-3 transition-colors hover:bg-bg-overlay/40 sm:flex-row sm:items-center sm:gap-3 sm:py-2.5',
                   active && 'bg-accent-faint/40'
                 )}
               >
                 <button
                   type="button"
                   onClick={() => onSelect(s.id)}
-                  className="flex min-w-0 flex-1 items-center gap-3 text-left"
+                  className="grid w-full min-w-0 flex-1 grid-cols-[14px_minmax(0,1fr)_auto] items-center gap-x-2 gap-y-0.5 text-left sm:flex sm:gap-3"
                 >
                   <ChevronRight
                     size={14}
                     strokeWidth={1.75}
                     className={cn(
-                      'shrink-0 transition-colors',
+                      'row-span-2 shrink-0 transition-colors sm:row-auto',
                       active ? 'text-accent' : 'text-text-faint'
                     )}
                   />
-                  <span className="u-num w-[74px] shrink-0 text-[11px] text-text-faint">
+                  <span className="u-num col-start-2 row-start-1 shrink-0 text-[10.5px] text-text-faint sm:w-[74px] sm:text-[11px]">
                     {formatDate(s.date, 'dd MMM yy')}
                   </span>
-                  <span className="flex min-w-0 flex-1 items-center gap-1.5">
+                  <span className="col-start-2 row-start-2 flex min-w-0 flex-1 items-center gap-1.5 sm:col-auto sm:row-auto">
                     <span className={cn('h-1.5 w-1.5 shrink-0 rounded-full', ink.dot)} />
                     <span className="truncate text-[13px] font-medium">{s.subject}</span>
                     {s.kind === 'pyq' && <Badge tone="accent">PYQ</Badge>}
                   </span>
-                  <span className="u-num shrink-0 text-[11px] text-text-muted">
+                  <span className="u-num col-start-3 row-span-2 row-start-1 shrink-0 self-center text-right text-[10.5px] leading-snug text-text-muted sm:col-auto sm:row-auto sm:text-[11px]">
                     {count} {plural(count, s.kind === 'pyq' ? 'submission' : 'question')}
                   </span>
                   {s.actual_duration_min != null && (
@@ -885,22 +885,29 @@ function RecentSessionsCard({
                     </span>
                   )}
                 </button>
-                <span className="flex shrink-0 items-center gap-1">
-                  <button
-                    type="button"
-                    aria-label="Edit session"
-                    onClick={() => onEdit(s)}
-                    className="rounded p-1 text-text-faint transition-colors hover:bg-bg-overlay hover:text-accent"
-                  >
-                    <Pencil size={12} strokeWidth={1.75} />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => onOpenReview(s)}
-                    className="rounded px-2 py-0.5 text-[11px] text-text-muted transition-colors hover:bg-bg-overlay hover:text-text"
-                  >
-                    Review
-                  </button>
+                <span className="flex w-full shrink-0 items-center justify-between border-t border-border/70 pl-[22px] pt-2 sm:w-auto sm:justify-start sm:border-0 sm:p-0">
+                  <span className="u-num text-[10px] text-text-faint sm:hidden">
+                    {s.actual_duration_min != null
+                      ? `${s.actual_duration_min}m of ${s.target_duration_min}m`
+                      : `${s.target_duration_min}m target`}
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <button
+                      type="button"
+                      aria-label="Edit session"
+                      onClick={() => onEdit(s)}
+                      className="flex min-h-8 min-w-8 items-center justify-center rounded text-text-faint transition-colors hover:bg-bg-overlay hover:text-accent"
+                    >
+                      <Pencil size={13} strokeWidth={1.75} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => onOpenReview(s)}
+                      className="min-h-8 rounded px-2.5 py-1 text-[11px] font-medium text-text-muted transition-colors hover:bg-bg-overlay hover:text-text"
+                    >
+                      Review
+                    </button>
+                  </span>
                 </span>
               </li>
             );

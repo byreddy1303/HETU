@@ -28,14 +28,14 @@ function Segmented({
   onChange: (v: number) => void;
 }) {
   return (
-    <div className="inline-flex divide-x divide-border overflow-hidden rounded border border-border bg-bg-raised shadow-sm">
+    <div className="grid w-full max-w-full grid-flow-col auto-cols-fr divide-x divide-border overflow-hidden rounded border border-border bg-bg-raised shadow-sm sm:inline-grid sm:w-auto">
       {options.map((o) => (
         <button
           key={o.value}
           type="button"
           onClick={() => onChange(o.value)}
           className={cn(
-            'h-9 px-4 font-mono text-[13px] transition-colors active:scale-95',
+            'min-h-11 min-w-0 px-2.5 py-1.5 font-mono text-[12.5px] leading-tight transition-colors active:scale-95 sm:min-h-9 sm:px-4 sm:text-[13px]',
             value === o.value
               ? 'bg-accent-faint font-semibold text-accent'
               : 'text-text-muted hover:bg-bg-overlay hover:text-text'
@@ -191,8 +191,8 @@ export default function SessionNew() {
             </div>
           </div>
 
-          <div className="flex flex-wrap gap-x-10 gap-y-4">
-            <div>
+          <div className="flex flex-col gap-5 sm:flex-row sm:flex-wrap sm:gap-x-10 sm:gap-y-4">
+            <div className="min-w-0">
               <p className="u-label mb-2">Target duration</p>
               <Segmented
                 options={TARGET_DURATIONS_MIN.map((m) => ({ value: m, label: `${m}m` }))}
@@ -200,13 +200,13 @@ export default function SessionNew() {
                 onChange={setDuration}
               />
             </div>
-            <div>
+            <div className="min-w-0">
               <p className="u-label mb-2">Questions</p>
               <Segmented options={QUESTION_COUNT_CHOICES} value={count} onChange={setCount} />
             </div>
           </div>
 
-          <div className="flex items-center justify-between border-t border-border pt-4">
+          <div className="flex flex-col gap-3 border-t border-border pt-4 sm:flex-row sm:items-center sm:justify-between">
             <p className="text-[12px] text-text-faint">
               {subject ? (
                 <>
@@ -216,7 +216,12 @@ export default function SessionNew() {
                 'Pick a subject to arm the session.'
               )}
             </p>
-            <Button variant="primary" disabled={!subject || starting} onClick={() => void start()}>
+            <Button
+              variant="primary"
+              disabled={!subject || starting}
+              onClick={() => void start()}
+              className="w-full sm:w-auto"
+            >
               Start session
             </Button>
           </div>

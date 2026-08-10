@@ -292,6 +292,6 @@ describe('Telegram daily digest', () => {
     expect(airJournalUrl('https://air-journal-omega.vercel.app/', '/planner?date=2026-07-22')).toBe(
       'https://air-journal-omega.vercel.app/planner?date=2026-07-22'
     );
-    expect(airJournalUrl('', '/settings')).toBe('https://air-journal-omega.vercel.app/settings');
+    expect(airJournalUrl('', '/settings')).toBe('https://hetu-app.vercel.app/settings');
   });
 });

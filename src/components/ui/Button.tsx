@@ -16,18 +16,18 @@ const variantClasses: Record<Variant, string> = {
   primary: cn(
     'bg-accent font-semibold text-accent-contrast shadow-key',
     'hover:-translate-y-px hover:bg-accent-hover hover:shadow-key-hover',
-    'active:translate-y-[2px] active:shadow-none'
+    'active:scale-[0.96] active:translate-y-0 active:shadow-none'
   ),
   secondary: cn(
     'border border-border bg-bg-raised font-medium text-text shadow-[0_2px_0_theme(colors.border.DEFAULT)]',
     'hover:-translate-y-px hover:border-border-hover hover:shadow-[0_3px_0_theme(colors.border.hover)]',
-    'active:translate-y-[2px] active:shadow-none'
+    'active:scale-[0.97] active:translate-y-0 active:shadow-none'
   ),
-  ghost: 'font-medium text-text-muted hover:bg-bg-overlay hover:text-text active:scale-[0.97]',
+  ghost: 'font-medium text-text-muted hover:bg-bg-overlay hover:text-text active:scale-[0.95]',
   danger: cn(
     'border border-danger/40 font-medium text-danger shadow-[0_2px_0_theme(colors.danger.faint)]',
     'hover:border-danger hover:bg-danger-faint',
-    'active:translate-y-[2px] active:shadow-none'
+    'active:scale-[0.96] active:translate-y-0 active:shadow-none'
   )
 };
 

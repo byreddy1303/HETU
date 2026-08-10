@@ -2,6 +2,7 @@ import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 import path from 'path';
+import { rmSync } from 'node:fs';
 
 export default defineConfig(({ mode }) => {
   const nativeBuild = mode === 'capacitor';
@@ -75,7 +76,23 @@ export default defineConfig(({ mode }) => {
             }
           ]
         }
-      })
+      }),
+      ...(nativeBuild
+        ? [
+            {
+              name: 'exclude-hosted-topper-notes-from-native-bundle',
+              closeBundle() {
+                // PDFs remain hosted by the web app and open externally on native.
+                // Keeping 215 MB of source material out of every APK preserves a
+                // practical install size without removing access to the library.
+                rmSync(path.resolve(__dirname, 'dist/gate-topper-notes'), {
+                  recursive: true,
+                  force: true
+                });
+              }
+            }
+          ]
+        : [])
     ],
     resolve: {
       alias: { '@': path.resolve(__dirname, './src') }

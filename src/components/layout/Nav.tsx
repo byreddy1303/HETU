@@ -18,6 +18,7 @@ import {
   LogOut,
   LibraryBig,
   ListChecks,
+  BookOpen,
   Camera,
   ClipboardList,
   FileCheck2
@@ -99,6 +100,12 @@ const ANALYSIS: Item[] = [
 ];
 
 const LEARN: Item[] = [
+  {
+    to: '/topper-notes',
+    label: 'Topper notes',
+    icon: BookOpen,
+    active: 'bg-ink-violet/10 text-ink-violet'
+  },
   {
     to: '/revision-pack',
     label: 'Revision pack',

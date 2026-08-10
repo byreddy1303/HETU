@@ -12,6 +12,7 @@
     "build": "tsc -b && vite build",
     "build:native": "tsc -b && vite build --mode capacitor",
     "preview": "vite preview",
+    "notes:build": "node scripts/build-topper-notes.mjs",
     "pyq:build": "node scripts/build-pyq-bank.mjs",
     "pyq:classify": "node scripts/classify-pyq-bank.mjs",
     "pyq:audit": "node scripts/audit-pyq-taxonomy.mjs",
@@ -32,6 +33,7 @@
   "dependencies": {
     "@capacitor/android": "^8.4.2",
     "@capacitor/app": "^8.1.1",
+    "@capacitor/browser": "^8.0.4",
     "@capacitor/core": "^8.4.2",
     "@capacitor/haptics": "^8.0.2",
     "@capacitor/keyboard": "^8.0.5",

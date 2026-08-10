@@ -35,6 +35,7 @@ const Settings = lazyWithRetry(() => import('@/pages/Settings'));
 const Readiness = lazyWithRetry(() => import('@/pages/Readiness'));
 const Buddy = lazyWithRetry(() => import('@/pages/Buddy'));
 const Pyq = lazyWithRetry(() => import('@/pages/Pyq'));
+const TopperNotes = lazyWithRetry(() => import('@/pages/TopperNotes'));
 const DevPrimitives = lazyWithRetry(() => import('@/pages/DevPrimitives'));
 
 const devRoutes = import.meta.env.DEV
@@ -88,6 +89,7 @@ export const router = createBrowserRouter([
       { path: 'readiness', element: <Readiness /> },
       { path: 'trigger-drill', element: <TriggerDrill /> },
       { path: 'formulas', element: <Formulas /> },
+      { path: 'topper-notes', element: <TopperNotes /> },
       { path: 'syllabus', element: <SyllabusTracker /> },
       { path: 'buddy', element: <Buddy /> },
       { path: 'settings', element: <Settings /> }

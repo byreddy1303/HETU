@@ -21,6 +21,7 @@ import {
   Zap,
   LibraryBig,
   ListChecks,
+  BookOpen,
   Camera,
   ClipboardList,
   FileCheck2
@@ -81,6 +82,7 @@ const TABS: Tab[] = [
 const MORE_ITEMS = [
   { to: '/today', label: 'Do now', icon: ClipboardList },
   { to: '/capture', label: 'Quick capture', icon: Camera },
+  { to: '/topper-notes', label: 'Topper notes', icon: BookOpen },
   { to: '/syllabus', label: 'Syllabus tracker', icon: ListChecks },
   { to: '/pyq', label: 'PYQ practice', icon: LibraryBig },
   { to: '/mocks', label: 'Mock tests', icon: FileCheck2 },

@@ -1601,6 +1601,39 @@
     box-shadow: var(--shadow-stamp);
   }
 
+  /* Topper archive: indexed-notebook rules that reflect the source material. */
+  .topper-notes-hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.45;
+    background-image: repeating-linear-gradient(
+      to bottom,
+      transparent 0,
+      transparent 27px,
+      rgb(var(--color-ink-cobalt) / 0.08) 28px
+    );
+  }
+
+  .topper-notes-hero::after {
+    content: '';
+    position: absolute;
+    left: 18px;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: rgb(var(--color-accent) / 0.2);
+  }
+
+  .topper-subject-tab:nth-child(2) {
+    margin-left: 8px;
+  }
+
+  .topper-subject-tab:nth-child(3) {
+    margin-left: 16px;
+  }
+
   /* Question-bank paper: preserve original structures without letting legacy
      tables, code, or diagrams escape the reading column. */
   .pyq-content {

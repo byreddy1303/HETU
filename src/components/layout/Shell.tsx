@@ -2,10 +2,12 @@ import { Outlet, useLocation } from 'react-router-dom';
 import { motion, useReducedMotion } from 'motion/react';
 import Nav from '@/components/layout/Nav';
 import MobileTabs from '@/components/layout/MobileTabs';
-import TopRightControls from '@/components/layout/TopRightControls';
+import TopRightControls, { ExamCountdown } from '@/components/layout/TopRightControls';
 import ContextualGateTip from '@/components/shared/ContextualGateTip';
 import DailyQuote from '@/components/shared/DailyQuote';
-import Brand from '@/components/shared/Brand';
+import Brand, { BrandMark } from '@/components/shared/Brand';
+import ThemeToggle from '@/components/shared/ThemeToggle';
+import OfflineBadge from '@/components/shared/OfflineBadge';
 import { useSyncBootstrap } from '@/hooks/useSync';
 
 export default function Shell() {
@@ -19,12 +21,16 @@ export default function Shell() {
       <div className="fixed right-4 top-3.5 z-40 hidden md:block">
         <TopRightControls />
       </div>
-      <div className="web-mobile-controls fixed right-3 top-[calc(var(--safe-top)+0.75rem)] z-40 md:hidden">
-        <TopRightControls />
-      </div>
-      <header className="native-top-bar fixed inset-x-0 top-0 z-30 hidden h-[calc(56px+var(--safe-top))] items-end justify-between border-b border-border/80 bg-bg-raised/95 px-[calc(1rem+var(--safe-right))] pb-2.5 pl-[calc(1rem+var(--safe-left))] backdrop-blur md:hidden">
-        <Brand size="sm" />
-        <TopRightControls />
+      <header className="fixed inset-x-0 top-0 z-40 grid h-[calc(56px+var(--safe-top))] grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-2 border-b border-border/80 bg-bg-raised/95 pl-[calc(1rem+var(--safe-left))] pr-[calc(1rem+var(--safe-right))] pt-[var(--safe-top)] backdrop-blur md:hidden">
+        <div className="min-w-0 justify-self-start">
+          <BrandMark decorative className="h-7 w-auto min-[360px]:hidden" />
+          <Brand size="sm" className="hidden min-[360px]:inline-flex" />
+        </div>
+        <ExamCountdown className="justify-self-center" />
+        <div className="flex min-w-0 items-center justify-self-end gap-2">
+          <OfflineBadge className="hidden max-w-16 truncate min-[360px]:inline" />
+          <ThemeToggle className="h-9 w-9" />
+        </div>
       </header>
       <main className="native-shell-main pb-[calc(4.5rem+var(--safe-bottom))] md:pb-0 md:pl-[220px]">
         <div

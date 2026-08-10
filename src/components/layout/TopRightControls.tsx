@@ -5,8 +5,9 @@ import { usePrefsStore } from '@/stores/prefs';
 import { EXAM_DATE_DEFAULT } from '@/lib/constants';
 import ThemeToggle from '@/components/shared/ThemeToggle';
 import OfflineBadge from '@/components/shared/OfflineBadge';
+import { cn } from '@/lib/utils';
 
-export default function TopRightControls({ className }: { className?: string }) {
+export function ExamCountdown({ className }: { className?: string }) {
   const { profile } = useAuth();
   const showCountdown = usePrefsStore((s) => s.showCountdown);
   const daysLeft = differenceInCalendarDays(
@@ -14,18 +15,27 @@ export default function TopRightControls({ className }: { className?: string }) 
     new Date()
   );
 
+  if (!showCountdown) return null;
+
+  return (
+    <Link
+      to="/planner"
+      className={cn(
+        'u-num inline-flex min-h-8 items-center justify-center rounded-full border border-accent/20 bg-accent-faint px-3 py-1.5 text-[11px] font-semibold leading-none text-accent transition-colors hover:bg-accent/15',
+        className
+      )}
+      title={`GATE Exam in ${daysLeft} days (click to view planner)`}
+    >
+      T−{daysLeft}d
+    </Link>
+  );
+}
+
+export default function TopRightControls({ className }: { className?: string }) {
   return (
     <div className={`flex items-center gap-2 ${className ?? ''}`}>
       <OfflineBadge />
-      {showCountdown && (
-        <Link
-          to="/planner"
-          className="u-num inline-flex items-center rounded-full bg-accent-faint border border-accent/20 px-2.5 py-1 text-[11px] font-semibold text-accent hover:bg-accent/15 transition-colors"
-          title={`GATE Exam in ${daysLeft} days (click to view planner)`}
-        >
-          T−{daysLeft}d
-        </Link>
-      )}
+      <ExamCountdown />
       <ThemeToggle className="h-9 w-9 shrink-0" />
     </div>
   );

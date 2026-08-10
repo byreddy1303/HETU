@@ -32,8 +32,8 @@ const variantClasses: Record<Variant, string> = {
 };
 
 const sizeClasses: Record<Size, string> = {
-  sm: 'h-8 px-3 text-[13px]',
-  md: 'h-10 px-4 text-sm'
+  sm: 'min-h-8 px-3 py-1.5 text-[13px] leading-snug',
+  md: 'min-h-10 px-4 py-2 text-sm leading-snug'
 };
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
@@ -64,7 +64,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
       disabled={disabled}
       onPointerUp={handlePointerUp}
       className={cn(
-        'u-button inline-flex select-none items-center justify-center gap-2 rounded',
+        'u-button inline-flex min-w-0 max-w-full select-none items-center justify-center gap-2 whitespace-normal rounded text-center [&>svg]:shrink-0',
         'transition-[transform,background-color,border-color,box-shadow,color] duration-100',
         'disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none disabled:hover:translate-y-0',
         variantClasses[variant],

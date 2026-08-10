@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 
 const digestSource = readFileSync('supabase/functions/daily-digest/index.ts', 'utf8');
 const buddyPushSource = readFileSync('supabase/functions/buddy-notifications/index.ts', 'utf8');
+const sharedPushSource = readFileSync('supabase/functions/_shared/push.ts', 'utf8');
 
 describe('notification channel consent boundaries', () => {
   it('does not treat a Buddy-message push registration as daily-digest consent', () => {
@@ -15,5 +16,14 @@ describe('notification channel consent boundaries', () => {
       "console.warn('[buddy-push] Android reply unavailable:', error.message)"
     );
     expect(buddyPushSource).toMatch(/Android reply unavailable:[\s\S]*return copy;/);
+  });
+
+  it('lets FCM render Android alerts while the app process is closed', () => {
+    expect(sharedPushSource).toContain(
+      "notification: { title: copy.title, body: copy.body }"
+    );
+    expect(sharedPushSource).toContain("channel_id: 'buddy_messages'");
+    expect(sharedPushSource).toContain('tag: tagKey');
+    expect(sharedPushSource).toContain("notification_priority: 'PRIORITY_HIGH'");
   });
 });

@@ -193,17 +193,26 @@ export async function sendNativePush(subscription: SubscriptionRow, copy: PushCo
     replyUrl: copy.replyUrl || ''
   };
 
-  // Android must receive a data-only message so our FirebaseMessagingService
-  // can create a distinct NotificationCompat notification with RemoteInput.
-  // Supplying `notification` here would make FCM render it before app code and
-  // would remove our ability to add a secure inline-reply action.
+  // Include both notification and data for Android. FCM renders the notification
+  // itself while the app is backgrounded or closed, and the data remains
+  // available for routing when the user opens it. In the foreground, FCM calls
+  // BuddyMessagingService so the app can retain its inline-reply experience.
   const platformPayload =
     subscription.platform === 'android'
       ? {
+          notification: { title: copy.title, body: copy.body },
           data,
           android: {
             priority: 'high',
-            ttl: '86400s'
+            ttl: '86400s',
+            notification: {
+              channel_id: 'buddy_messages',
+              tag: tagKey,
+              notification_priority: 'PRIORITY_HIGH',
+              visibility: 'PRIVATE',
+              default_sound: true,
+              default_vibrate_timings: true
+            }
           }
         }
       : {

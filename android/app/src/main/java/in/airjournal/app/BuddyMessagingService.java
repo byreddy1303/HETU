@@ -17,7 +17,7 @@ import com.google.firebase.messaging.RemoteMessage;
 import java.util.HashMap;
 import java.util.Map;
 
-/** Renders every Android push with its own tag and adds direct reply to Buddy messages. */
+/** Renders foreground Android pushes and adds direct reply to Buddy messages. */
 public class BuddyMessagingService extends MessagingService {
 
     static final String CHANNEL_ID = "buddy_messages";
@@ -34,8 +34,8 @@ public class BuddyMessagingService extends MessagingService {
     @Override
     public void onMessageReceived(@NonNull RemoteMessage remoteMessage) {
         // Keep Capacitor's pushNotificationReceived event working while the app
-        // is open. Android messages are data-only, so the parent does not draw
-        // a second system notification.
+        // is open. FCM system-renders notification payloads only when the app is
+        // backgrounded, so this foreground path does not create a duplicate.
         super.onMessageReceived(remoteMessage);
 
         Map<String, String> data = new HashMap<>(remoteMessage.getData());

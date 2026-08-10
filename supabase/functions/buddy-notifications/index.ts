@@ -8,11 +8,11 @@
 // retries transient provider failures and retires permanently invalid tokens.
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { corsHeaders, json } from '../_shared/cors.ts';
-import { 
-  type SubscriptionRow, 
+import {
+  type SubscriptionRow,
   type PushCopy,
-  deliverToSubscription, 
-  truncate 
+  deliverToSubscription,
+  truncate
 } from '../_shared/push.ts';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -29,7 +29,10 @@ const admin = createClient(SUPABASE_URL, SERVICE, {
 
 const MAX_ATTEMPTS = 8;
 const ACTIVE_CHAT_WINDOW_MS = 75_000;
+const REPLY_TOKEN_LIFETIME_MS = 7 * 24 * 60 * 60 * 1000;
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+let replyHmacKey: Promise<CryptoKey> | null = null;
 
 interface ClaimedJob {
   message_id: string;
@@ -74,6 +77,67 @@ function cleanText(value: string | null | undefined): string {
     .trim();
 }
 
+function base64Url(bytes: Uint8Array): string {
+  let binary = '';
+  for (const byte of bytes) binary += String.fromCharCode(byte);
+  return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '');
+}
+
+function hex(bytes: Uint8Array): string {
+  return Array.from(bytes, (byte) => byte.toString(16).padStart(2, '0')).join('');
+}
+
+async function inlineReplyToken(
+  messageId: string,
+  subscriptionId: string,
+  recipientId: string
+): Promise<{ token: string; hash: string }> {
+  if (!SERVICE) throw new Error('service role secret is not configured');
+  replyHmacKey ??= crypto.subtle.importKey(
+    'raw',
+    new TextEncoder().encode(SERVICE),
+    { name: 'HMAC', hash: 'SHA-256' },
+    false,
+    ['sign']
+  );
+  const key = await replyHmacKey;
+  const signed = await crypto.subtle.sign(
+    'HMAC',
+    key,
+    new TextEncoder().encode(`buddy-reply:v1:${messageId}:${subscriptionId}:${recipientId}`)
+  );
+  const token = base64Url(new Uint8Array(signed));
+  const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(token));
+  return { token, hash: hex(new Uint8Array(digest)) };
+}
+
+async function notificationCopyForSubscription(
+  copy: PushCopy,
+  subscription: SubscriptionRow,
+  message: MessageRow,
+  recipientId: string
+): Promise<PushCopy> {
+  if (subscription.platform !== 'android') return copy;
+  const reply = await inlineReplyToken(message.id, subscription.id, recipientId);
+  const { error } = await admin.from('buddy_notification_reply_tokens').upsert(
+    {
+      token_hash: reply.hash,
+      source_message_id: message.id,
+      subscription_id: subscription.id,
+      reply_sender_id: recipientId,
+      buddy_id: message.buddy_id,
+      expires_at: new Date(Date.now() + REPLY_TOKEN_LIFETIME_MS).toISOString()
+    },
+    { onConflict: 'source_message_id,subscription_id' }
+  );
+  if (error) throw new Error(`could not provision Android reply: ${error.message}`);
+  return {
+    ...copy,
+    replyToken: reply.token,
+    replyUrl: `${SUPABASE_URL.replace(/\/$/, '')}/functions/v1/buddy-notifications`
+  };
+}
+
 function senderLabel(sender: ProfileRow | null): string {
   const name = cleanText(sender?.name);
   if (name) return name;
@@ -81,7 +145,11 @@ function senderLabel(sender: ProfileRow | null): string {
   return username ? `@${username}` : 'Your buddy';
 }
 
-function notificationCopy(message: MessageRow, sender: ProfileRow | null, showPreview: boolean): PushCopy {
+function notificationCopy(
+  message: MessageRow,
+  sender: ProfileRow | null,
+  showPreview: boolean
+): PushCopy {
   const senderName = senderLabel(sender);
   const body =
     message.kind === 'question'
@@ -114,8 +182,6 @@ function isSnoozed(subscription: SubscriptionRow): boolean {
   const until = Date.parse(subscription.push_quiet_until);
   return Number.isFinite(until) && Date.now() < until;
 }
-
-
 
 function retryAt(attempt: number): string {
   const seconds = Math.min(3600, 30 * 2 ** Math.max(0, attempt - 1));
@@ -199,7 +265,9 @@ async function processJob(job: ClaimedJob): Promise<'completed' | 'retrying' | '
       .eq('status', 'pending');
     if (deliveriesError) throw new Error(deliveriesError.message);
     const deliveries = (deliveriesData as DeliveryRow[] | null) ?? [];
-    const subscriptionById = new Map(subscriptions.map((subscription) => [subscription.id, subscription]));
+    const subscriptionById = new Map(
+      subscriptions.map((subscription) => [subscription.id, subscription])
+    );
 
     let transientFailures = 0;
     const errors: string[] = [];
@@ -221,7 +289,13 @@ async function processJob(job: ClaimedJob): Promise<'completed' | 'retrying' | '
           return;
         }
 
-        const result = await deliverToSubscription(subscription, copy);
+        const subscriptionCopy = await notificationCopyForSubscription(
+          copy,
+          subscription,
+          message,
+          job.recipient_id
+        );
+        const result = await deliverToSubscription(subscription, subscriptionCopy);
         if (!result.error) {
           await admin
             .from('buddy_notification_deliveries')
@@ -303,16 +377,51 @@ Deno.serve(async (req: Request): Promise<Response> => {
   if (req.method === 'OPTIONS') return new Response(null, { headers: corsHeaders });
   if (req.method !== 'POST') return json({ error: 'method not allowed' }, 405);
 
-  const cronAuthorized = safeEqual(
-    req.headers.get('x-air-journal-cron-secret') ?? '',
-    CRON_SECRET
-  );
-  let body: { message_id?: string } = {};
+  const cronAuthorized = safeEqual(req.headers.get('x-air-journal-cron-secret') ?? '', CRON_SECRET);
+  let body: { message_id?: string; reply_token?: string; body?: string } = {};
   try {
-    body = (await req.json()) as { message_id?: string };
+    body = (await req.json()) as { message_id?: string; reply_token?: string; body?: string };
   } catch {
     body = {};
   }
+
+  const replyToken = cleanText(body.reply_token);
+  if (replyToken) {
+    const replyBody = String(body.body ?? '').trim();
+    if (
+      replyToken.length < 32 ||
+      replyToken.length > 512 ||
+      !replyBody ||
+      replyBody.length > 4000
+    ) {
+      return json({ error: 'invalid reply' }, 400);
+    }
+    const { data: replyRows, error: replyError } = await admin.rpc(
+      'send_buddy_notification_reply',
+      { p_reply_token: replyToken, p_body: replyBody }
+    );
+    if (replyError) {
+      console.error('[buddy-push] inline reply failed:', replyError.message);
+      return json({ error: 'could not send reply' }, 500);
+    }
+    const reply = (replyRows as Array<{ message_id: string; was_created: boolean }> | null)?.[0];
+    if (!reply?.message_id) return json({ error: 'reply link expired or already used' }, 410);
+
+    // A direct reply is a normal Buddy message. Claim its transactional outbox
+    // row immediately so the other phone receives it without waiting for cron.
+    const { data: claimedReply } = await admin.rpc('claim_buddy_notification_jobs', {
+      p_limit: 1,
+      p_message_id: reply.message_id
+    });
+    const replyJobs = (claimedReply as ClaimedJob[] | null) ?? [];
+    const replyOutcomes = await Promise.all(replyJobs.map(processJob));
+    return json({
+      ok: true,
+      message_id: reply.message_id,
+      notification_completed: replyOutcomes.includes('completed')
+    });
+  }
+
   const messageId = cleanText(body.message_id);
 
   if (!cronAuthorized) {
@@ -327,13 +436,10 @@ Deno.serve(async (req: Request): Promise<Response> => {
     if (!message || message.sender_id !== userId) return json({ error: 'not allowed' }, 403);
   }
 
-  const { data: claimed, error: claimError } = await admin.rpc(
-    'claim_buddy_notification_jobs',
-    {
-      p_limit: messageId ? 1 : 20,
-      p_message_id: messageId || null
-    }
-  );
+  const { data: claimed, error: claimError } = await admin.rpc('claim_buddy_notification_jobs', {
+    p_limit: messageId ? 1 : 20,
+    p_message_id: messageId || null
+  });
   if (claimError) return json({ error: 'could not claim notification work' }, 500);
   const jobs = (claimed as ClaimedJob[] | null) ?? [];
   const outcomes = await Promise.all(jobs.map(processJob));

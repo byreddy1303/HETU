@@ -19,3 +19,6 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+
+# WorkManager recreates this class by name after process death.
+-keep class in.airjournal.app.BuddyReplyWorker { public <init>(...); }

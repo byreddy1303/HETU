@@ -131,8 +131,10 @@ Before sharing a build, verify all of the following on at least one physical pho
 9. Font scale and compact mode remain usable at 360 px width and Android's enlarged system text.
 10. Upgrade over the previous APK preserves IndexedDB data and the active session.
 11. Airplane-mode cold launch reaches previously cached local data without a blank screen.
-12. With the app killed, a Buddy message produces one alert, tapping it opens the correct chat, and the currently open chat stays quiet.
-13. `npm run typecheck`, `npm run lint`, `npm run test`, `npm run build`, and `npm audit` remain clean.
+12. With the app killed, two successive Buddy messages produce two separate alerts; neither replaces the other.
+13. Reply from each alert without opening the app; the reply appears in the correct chat and reaches the other device once.
+14. Tapping a Buddy alert opens the correct chat, and the currently open chat stays quiet.
+15. `npm run typecheck`, `npm run lint`, `npm run test`, `npm run build`, and `npm audit` remain clean.
 
 ## HTTPS app links
 

@@ -127,14 +127,13 @@ export interface PushCopy {
   kind: string;
   route: string;
   tagId?: string;
-  buddyId?: string;     // specific to buddy chats
-  messageId?: string;   // specific to buddy chats
+  buddyId?: string; // specific to buddy chats
+  messageId?: string; // specific to buddy chats
+  replyToken?: string; // Android-only, short-lived single-notification token
+  replyUrl?: string; // Android-only HTTPS Edge Function endpoint
 }
 
-export async function sendWebPush(
-  subscription: SubscriptionRow,
-  copy: PushCopy
-): Promise<void> {
+export async function sendWebPush(subscription: SubscriptionRow, copy: PushCopy): Promise<void> {
   if (!VAPID_PUBLIC_KEY || !VAPID_PRIVATE_KEY) {
     throw new PushDeliveryError('Web Push VAPID keys are not configured');
   }
@@ -173,47 +172,43 @@ export async function sendWebPush(
   }
 }
 
-export async function sendNativePush(
-  subscription: SubscriptionRow,
-  copy: PushCopy
-): Promise<void> {
+export async function sendNativePush(subscription: SubscriptionRow, copy: PushCopy): Promise<void> {
   const account = serviceAccount();
   if (!account) throw new PushDeliveryError('FCM service account is not configured');
   if (!subscription.native_token) {
     throw new PushDeliveryError('Native push token is missing', true);
   }
   const accessToken = await getFcmAccessToken(account);
+  const tagKey = copy.tagId || copy.messageId || `${copy.kind}-${crypto.randomUUID()}`;
 
-  const response = await fetch(
-    `https://fcm.googleapis.com/v1/projects/${encodeURIComponent(account.project_id)}/messages:send`,
-    {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        message: {
-          token: subscription.native_token,
-          notification: { title: copy.title, body: copy.body },
-          data: {
-            route: copy.route,
-            kind: copy.kind,
-            tagId: copy.tagId || '',
-            buddyId: copy.buddyId || '',
-            messageId: copy.messageId || ''
-          },
+  const data = {
+    title: copy.title,
+    body: copy.body,
+    route: copy.route,
+    kind: copy.kind,
+    tagId: tagKey,
+    buddyId: copy.buddyId || '',
+    messageId: copy.messageId || '',
+    replyToken: copy.replyToken || '',
+    replyUrl: copy.replyUrl || ''
+  };
+
+  // Android must receive a data-only message so our FirebaseMessagingService
+  // can create a distinct NotificationCompat notification with RemoteInput.
+  // Supplying `notification` here would make FCM render it before app code and
+  // would remove our ability to add a secure inline-reply action.
+  const platformPayload =
+    subscription.platform === 'android'
+      ? {
+          data,
           android: {
             priority: 'high',
-            ttl: '86400s',
-            notification: {
-              channel_id: 'buddy_messages',
-              visibility: 'PRIVATE',
-              default_sound: true,
-              default_vibrate_timings: true,
-              notification_count: 1
-            }
-          },
+            ttl: '86400s'
+          }
+        }
+      : {
+          notification: { title: copy.title, body: copy.body },
+          data,
           apns: {
             payload: {
               aps: {
@@ -229,6 +224,20 @@ export async function sendNativePush(
               'apns-collapse-id': tagKey.slice(0, 64)
             }
           }
+        };
+
+  const response = await fetch(
+    `https://fcm.googleapis.com/v1/projects/${encodeURIComponent(account.project_id)}/messages:send`,
+    {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        message: {
+          token: subscription.native_token,
+          ...platformPayload
         }
       })
     }

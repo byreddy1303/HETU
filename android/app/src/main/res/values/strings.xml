@@ -5,4 +5,11 @@
     <string name="package_name">in.airjournal.app</string>
     <string name="custom_url_scheme">airjournal</string>
     <string name="buddy_notification_channel_id">buddy_messages</string>
+    <string name="buddy_notification_channel_name">Buddy messages</string>
+    <string name="buddy_notification_channel_description">Messages and shared questions from your study buddy.</string>
+    <string name="buddy_notification_reply">Reply</string>
+    <string name="buddy_notification_reply_hint">Reply to %1$s</string>
+    <string name="buddy_notification_sending">Sending reply…</string>
+    <string name="buddy_notification_sent">You: %1$s</string>
+    <string name="buddy_notification_failed">Reply not sent. Tap to open the chat.</string>
 </resources>

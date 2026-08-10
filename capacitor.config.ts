@@ -9,8 +9,9 @@ const config: CapacitorConfig = {
   backgroundColor: '#F6F1E9',
   loggingBehavior: 'production',
   server: {
-    // Keep the former production origin so upgrades from the live shell retain
-    // their WebView storage, while serving only the APK's bundled assets.
+    // Load assets from Vercel so any deployed update reaches all installed
+    // apps immediately without requiring a new APK.
+    url: 'https://hetu-app.vercel.app',
     hostname: 'hetu-app.vercel.app',
     androidScheme: 'https',
     cleartext: false

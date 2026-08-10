@@ -1,7 +1,5 @@
 import { supabase } from '@/lib/supabase';
 
-export const STUDY_NOTIFICATION_STEP_SECONDS = 60;
-
 export const STUDY_NOTIFICATION_CATEGORIES = [
   { id: 'dashboard', label: 'Daily overview', route: '/', action: 'View today' },
   { id: 'planner', label: 'Planner', route: '/planner', action: 'Open plan' },

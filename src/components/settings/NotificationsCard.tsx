@@ -5,10 +5,11 @@ import { useCallback, useEffect, useState } from 'react';
 import { Bell, Bot, CheckCircle2, Clock3, Link2, RefreshCcw, Send, Unlink } from 'lucide-react';
 import { Card, CardBody, CardHeader } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
+import NotificationTimeEditor from '@/components/settings/NotificationTimeEditor';
 import { TIMEZONES } from '@/lib/constants';
 import { supabase, supabaseConfigured } from '@/lib/supabase';
 import { cn } from '@/lib/utils';
-import { useAuthStore } from '@/stores/auth';
+import { useAuthStore, type ProfilePatch } from '@/stores/auth';
 import { useUiStore } from '@/stores/ui';
 import type { TelegramSubscriptionRow, UserRow } from '@/types';
 
@@ -22,16 +23,6 @@ interface Props {
 const botUsername = String(import.meta.env.VITE_TELEGRAM_BOT_USERNAME || 'Gate_prep_reminder_bot')
   .trim()
   .replace(/^@/, '');
-
-const hourOptions = Array.from({ length: 24 }, (_, hour) => ({
-  value: hour,
-  label: String(hour).padStart(2, '0')
-}));
-
-const minuteOptions = Array.from({ length: 60 }, (_, minute) => ({
-  value: minute,
-  label: String(minute).padStart(2, '0')
-}));
 
 export default function NotificationsCard({ profile, sandbox }: Props) {
   const pushToast = useUiStore((state) => state.pushToast);
@@ -92,7 +83,7 @@ export default function NotificationsCard({ profile, sandbox }: Props) {
         ? 'Sandbox mode (time saved locally)'
         : 'Not connected';
 
-  async function patchProfile(patch: Partial<UserRow>): Promise<boolean> {
+  async function patchProfile(patch: ProfilePatch): Promise<boolean> {
     if (!profile) return false;
     const res = await useAuthStore.getState().updateProfile(patch);
     if (res.error) {
@@ -154,7 +145,7 @@ export default function NotificationsCard({ profile, sandbox }: Props) {
     pushToast('Telegram disconnected.', 'success');
   }
 
-  async function saveTime(hour: number, minute: number) {
+  async function saveTime(hour: number, minute: number): Promise<boolean> {
     if (
       await patchProfile({
         digest_hour_local: hour,
@@ -163,7 +154,9 @@ export default function NotificationsCard({ profile, sandbox }: Props) {
     ) {
       const formatted = `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
       pushToast(`Delivery time saved as ${formatted}.`, 'success');
+      return true;
     }
+    return false;
   }
 
   async function saveTimezone(timezone: string) {
@@ -221,9 +214,9 @@ export default function NotificationsCard({ profile, sandbox }: Props) {
         <div className="flex items-start gap-3">
           <Bell size={15} strokeWidth={1.75} className="mt-0.5 shrink-0 text-accent" />
           <p className="text-[12.5px] leading-relaxed text-text-muted">
-            Configure everything here. On days with a recorded study plan, HETU sends one
-            private Telegram message at your chosen local time. The bot token stays on the server
-            and is never entered in the website.
+            Configure everything here. On days with a recorded study plan, HETU sends one private
+            Telegram message at your chosen local time. The bot token stays on the server and is
+            never entered in the website.
           </p>
         </div>
 
@@ -313,45 +306,13 @@ export default function NotificationsCard({ profile, sandbox }: Props) {
           </DetailField>
 
           <DetailField label="Daily delivery time" icon={<Clock3 size={13} strokeWidth={1.75} />}>
-            <div className="notification-time-grid grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-end gap-2">
-              <label className="min-w-0">
-                <span className="mb-1 block text-[11px] text-text-faint">Hour</span>
-                <select
-                  id="telegram-hour"
-                  aria-label="Daily Telegram delivery hour"
-                  value={profile.digest_hour_local}
-                  onChange={(event) =>
-                    void saveTime(Number(event.target.value), profile.digest_minute_local ?? 0)
-                  }
-                  className="block h-11 w-full rounded border border-border bg-bg-raised px-3 font-mono text-[14px] text-text focus:border-accent focus:shadow-[0_0_0_3px_theme(colors.accent.faint)] focus:outline-none"
-                >
-                  {hourOptions.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <span className="pb-2.5 font-mono text-[16px] font-semibold text-text-muted">:</span>
-              <label className="min-w-0">
-                <span className="mb-1 block text-[11px] text-text-faint">Minute</span>
-                <select
-                  id="telegram-minute"
-                  aria-label="Daily Telegram delivery minute"
-                  value={profile.digest_minute_local ?? 0}
-                  onChange={(event) =>
-                    void saveTime(profile.digest_hour_local, Number(event.target.value))
-                  }
-                  className="block h-11 w-full rounded border border-border bg-bg-raised px-3 font-mono text-[14px] text-text focus:border-accent focus:shadow-[0_0_0_3px_theme(colors.accent.faint)] focus:outline-none"
-                >
-                  {minuteOptions.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-              </label>
-            </div>
+            <NotificationTimeEditor
+              idPrefix="telegram-delivery"
+              label="Daily Telegram delivery"
+              hour={profile.digest_hour_local}
+              minute={profile.digest_minute_local ?? 0}
+              onSave={saveTime}
+            />
             <p className="mt-2 text-[11px] leading-relaxed text-text-muted">
               Sends at{' '}
               <span className="font-mono font-semibold text-text">

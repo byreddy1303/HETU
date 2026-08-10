@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { BellRing, Clock3, Loader2, Send } from 'lucide-react';
+import { BellRing, Loader2, Send } from 'lucide-react';
 import {
   disableStudyNotifications,
   enableStudyNotifications,
@@ -7,10 +7,7 @@ import {
 } from '@/lib/buddyNotifications';
 import {
   STUDY_NOTIFICATION_CATEGORIES,
-  STUDY_NOTIFICATION_STEP_SECONDS,
   ensureStudyNotificationPreferences,
-  notificationTime,
-  parseNotificationTime,
   sendStudyNotificationTest,
   updateStudyNotificationPreference,
   type StudyNotificationCategory,
@@ -21,6 +18,7 @@ import { useUiStore } from '@/stores/ui';
 import type { UserRow } from '@/types';
 import { Button } from '@/components/ui/Button';
 import { Card, CardBody, CardHeader } from '@/components/ui/Card';
+import NotificationTimeEditor from '@/components/settings/NotificationTimeEditor';
 
 interface Props {
   profile: UserRow | null;
@@ -79,8 +77,8 @@ export default function StudyNotificationsCard({ profile, sandbox }: Props) {
   async function updateCategory(
     category: StudyNotificationCategory,
     patch: Partial<Pick<StudyNotificationPreference, 'enabled' | 'hour_local' | 'minute_local'>>
-  ) {
-    if (!profile || sandbox) return;
+  ): Promise<boolean> {
+    if (!profile || sandbox) return false;
     const before = preferences;
     setPreferences((rows) =>
       rows.map((row) => (row.category === category ? { ...row, ...patch } : row))
@@ -88,9 +86,11 @@ export default function StudyNotificationsCard({ profile, sandbox }: Props) {
     setSaving(category);
     try {
       await updateStudyNotificationPreference(profile.id, category, patch);
+      return true;
     } catch (error) {
       setPreferences(before);
       pushToast((error as Error).message || 'Could not update this reminder.', 'neutral');
+      return false;
     } finally {
       setSaving(null);
     }
@@ -159,58 +159,58 @@ export default function StudyNotificationsCard({ profile, sandbox }: Props) {
               if (!preference) return null;
               const busy = saving === item.id;
               return (
-                <div
-                  key={item.id}
-                  className="grid grid-cols-[minmax(0,1fr)_96px_auto_auto] items-center gap-2 border-b border-border/70 px-3 py-3 last:border-b-0"
-                >
-                  <div className="min-w-0">
-                    <p className="truncate text-[12px] font-semibold text-text">{item.label}</p>
-                    <p className="truncate text-[10.5px] text-text-faint">
-                      {item.action} · Remind in 1h · Mute
-                    </p>
-                  </div>
-                  <label className="flex items-center gap-1.5">
-                    <Clock3 size={12} className="text-text-faint" />
+                <div key={item.id} className="border-b border-border/70 px-3 py-3 last:border-b-0">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="truncate text-[12px] font-semibold text-text">{item.label}</p>
+                      <p className="truncate text-[10.5px] text-text-faint">
+                        {item.action} · Remind in 1h · Mute
+                      </p>
+                    </div>
                     <input
-                      type="time"
-                      step={STUDY_NOTIFICATION_STEP_SECONDS}
-                      value={notificationTime(preference)}
-                      onChange={(event) => {
-                        const parsed = parseNotificationTime(event.target.value);
-                        if (parsed)
-                          void updateCategory(item.id, {
-                            hour_local: parsed.hour,
-                            minute_local: parsed.minute
-                          });
-                      }}
-                      disabled={!masterEnabled || !preference.enabled || busy || sandbox}
-                      className="u-control h-8 w-[88px] rounded border border-border bg-bg-raised px-1.5 text-[11px] text-text disabled:opacity-50"
-                      aria-label={`${item.label} reminder time`}
+                      type="checkbox"
+                      checked={preference.enabled}
+                      onChange={(event) =>
+                        void updateCategory(item.id, { enabled: event.target.checked })
+                      }
+                      disabled={!masterEnabled || busy || sandbox}
+                      className="mt-0.5 h-4 w-4 shrink-0 accent-accent"
+                      aria-label={`Enable ${item.label} reminder`}
                     />
-                  </label>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => void sendTest(item.id)}
-                    disabled={!masterEnabled || !preference.enabled || testing !== null || sandbox}
-                    aria-label={`Send ${item.label} test notification`}
-                  >
-                    {testing === item.id ? (
-                      <Loader2 size={12} className="animate-spin" />
-                    ) : (
-                      <Send size={12} />
-                    )}
-                  </Button>
-                  <input
-                    type="checkbox"
-                    checked={preference.enabled}
-                    onChange={(event) =>
-                      void updateCategory(item.id, { enabled: event.target.checked })
-                    }
-                    disabled={!masterEnabled || busy || sandbox}
-                    className="h-4 w-4 accent-accent"
-                    aria-label={`Enable ${item.label} reminder`}
-                  />
+                  </div>
+                  <div className="mt-2 flex items-end gap-2">
+                    <NotificationTimeEditor
+                      idPrefix={`study-${item.id}`}
+                      label={`${item.label} reminder`}
+                      hour={preference.hour_local}
+                      minute={preference.minute_local}
+                      compact
+                      disabled={!masterEnabled || !preference.enabled || busy || sandbox}
+                      className="min-w-0 flex-1"
+                      onSave={(hour, minute) =>
+                        updateCategory(item.id, {
+                          hour_local: hour,
+                          minute_local: minute
+                        })
+                      }
+                    />
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="w-10 px-0"
+                      onClick={() => void sendTest(item.id)}
+                      disabled={
+                        !masterEnabled || !preference.enabled || testing !== null || sandbox
+                      }
+                      aria-label={`Send ${item.label} test notification`}
+                    >
+                      {testing === item.id ? (
+                        <Loader2 size={12} className="animate-spin" />
+                      ) : (
+                        <Send size={12} />
+                      )}
+                    </Button>
+                  </div>
                 </div>
               );
             })

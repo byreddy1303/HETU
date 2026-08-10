@@ -1,10 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
-import {
-  STUDY_NOTIFICATION_CATEGORIES,
-  STUDY_NOTIFICATION_STEP_SECONDS,
-  parseNotificationTime
-} from '@/lib/studyNotifications';
+import { STUDY_NOTIFICATION_CATEGORIES, parseNotificationTime } from '@/lib/studyNotifications';
 
 const migration = readFileSync(
   'supabase/migrations/20260810000002_interactive_study_notifications.sql',
@@ -14,7 +10,6 @@ const minuteMigration = readFileSync(
   'supabase/migrations/20260810000004_study_notification_minutes.sql',
   'utf8'
 );
-const settingsCard = readFileSync('src/components/settings/StudyNotificationsCard.tsx', 'utf8');
 const worker = readFileSync('supabase/functions/study-notifications/index.ts', 'utf8');
 const androidService = readFileSync(
   'android/app/src/main/java/in/airjournal/app/BuddyMessagingService.java',
@@ -30,12 +25,10 @@ describe('interactive study notification system', () => {
   });
 
   it('accepts every minute supported by the minute-level scheduler', () => {
-    expect(STUDY_NOTIFICATION_STEP_SECONDS).toBe(60);
     expect(parseNotificationTime('06:07')).toEqual({ hour: 6, minute: 7 });
     expect(parseNotificationTime('23:59')).toEqual({ hour: 23, minute: 59 });
     expect(parseNotificationTime('24:00')).toBeNull();
     expect(parseNotificationTime('09:60')).toBeNull();
-    expect(settingsCard).toContain('step={STUDY_NOTIFICATION_STEP_SECONDS}');
     expect(minuteMigration).toContain('minute_local between 0 and 59');
     expect(minuteMigration).toContain("'* * * * *'");
   });

@@ -46,6 +46,9 @@ export type ProfilePatch = Partial<
     | 'exam_date'
     | 'target_rank'
     | 'timezone'
+    | 'digest_email_enabled'
+    | 'digest_hour_local'
+    | 'digest_minute_local'
     | 'buddy_notification_preview_enabled'
     | 'study_notifications_enabled'
   >

@@ -1,6 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import type { BuddyMessageRow, QuestionRow } from '@/types';
-import { isSharedQuestionRef, mergeBuddyMessages, safeQuestionRef } from '@/lib/buddy';
+import {
+  buddyPresenceTopic,
+  buddyPresenceUserIds,
+  buddyRealtimeTopic,
+  isSharedQuestionRef,
+  mergeBuddyMessages,
+  safeQuestionRef
+} from '@/lib/buddy';
 
 const question: QuestionRow = {
   id: 'question-1',
@@ -67,5 +74,15 @@ describe('Buddy helpers', () => {
     expect(isSharedQuestionRef({ subject: 'OS', target_time_sec: 90 })).toBe(true);
     expect(isSharedQuestionRef({ subject: 'OS' })).toBe(false);
     expect(isSharedQuestionRef(null)).toBe(false);
+  });
+
+  it('uses a pair-scoped Presence topic and the expected peer id', () => {
+    expect(buddyPresenceTopic('pair-1')).toBe('buddy-presence:pair-1');
+    expect(buddyRealtimeTopic('pair-1')).toBe('buddy:pair-1');
+    const state = {
+      me: [{ user_id: 'me' }],
+      peer: [{ user_id: 'peer' }]
+    };
+    expect(buddyPresenceUserIds(state)).toEqual(['me', 'peer']);
   });
 });

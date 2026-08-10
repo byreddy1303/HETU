@@ -130,7 +130,13 @@ async function notificationCopyForSubscription(
     },
     { onConflict: 'source_message_id,subscription_id' }
   );
-  if (error) throw new Error(`could not provision Android reply: ${error.message}`);
+  if (error) {
+    // Inline reply is an enhancement, not a prerequisite for the alert. A
+    // delayed migration or temporary token-table failure must never block the
+    // recipient from seeing the Buddy message itself.
+    console.warn('[buddy-push] Android reply unavailable:', error.message);
+    return copy;
+  }
   return {
     ...copy,
     replyToken: reply.token,

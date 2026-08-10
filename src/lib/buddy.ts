@@ -1,5 +1,22 @@
 import type { BuddyMessageRow, QuestionRow, SharedQuestionRef } from '@/types';
 
+/** All clients in one accepted Buddy pair share this Presence topic. */
+export function buddyPresenceTopic(buddyId: string): string {
+  return `buddy-presence:${buddyId}`;
+}
+
+/** The open-chat channel carries typing events and database-change bindings. */
+export function buddyRealtimeTopic(buddyId: string): string {
+  return `buddy:${buddyId}`;
+}
+
+/** Return only keys that currently have at least one connected Presence client. */
+export function buddyPresenceUserIds(state: Record<string, unknown[]>): string[] {
+  return Object.entries(state)
+    .filter(([, presences]) => presences.length > 0)
+    .map(([userId]) => userId);
+}
+
 /** Strip a journal row to the only fields that may cross into Buddy. */
 export function safeQuestionRef(question: QuestionRow): SharedQuestionRef {
   return {

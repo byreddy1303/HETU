@@ -1,0 +1,19 @@
+import { readFileSync } from 'node:fs';
+import { describe, expect, it } from 'vitest';
+
+const digestSource = readFileSync('supabase/functions/daily-digest/index.ts', 'utf8');
+const buddyPushSource = readFileSync('supabase/functions/buddy-notifications/index.ts', 'utf8');
+
+describe('notification channel consent boundaries', () => {
+  it('does not treat a Buddy-message push registration as daily-digest consent', () => {
+    expect(digestSource).not.toContain("from('push_subscriptions')");
+    expect(digestSource).not.toContain("kind: 'daily_digest'");
+  });
+
+  it('still delivers Android alerts when optional inline-reply setup fails', () => {
+    expect(buddyPushSource).toContain(
+      "console.warn('[buddy-push] Android reply unavailable:', error.message)"
+    );
+    expect(buddyPushSource).toMatch(/Android reply unavailable:[\s\S]*return copy;/);
+  });
+});

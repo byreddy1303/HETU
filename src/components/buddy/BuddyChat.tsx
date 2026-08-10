@@ -2,8 +2,9 @@
 // websocket channel:
 //   - postgres_changes INSERT   → new messages appear live
 //   - postgres_changes UPDATE   → read receipts propagate
-//   - presence (track)          → online dot for the peer
 //   - broadcast('typing')       → typing indicator, debounced
+// App-wide Presence is maintained separately by BuddyPresenceRuntime so the
+// online dot stays accurate even while the peer studies on another page.
 //
 // Message kinds:
 //   text     — plain text bubble
@@ -36,7 +37,13 @@ import type {
 } from '@/types';
 import { formatDate } from '@/lib/utils';
 import { subjectInk } from '@/lib/subjectInk';
-import { isSharedQuestionRef, mergeBuddyMessages, safeQuestionRef } from '@/lib/buddy';
+import {
+  buddyRealtimeTopic,
+  isSharedQuestionRef,
+  mergeBuddyMessages,
+  safeQuestionRef
+} from '@/lib/buddy';
+import { useBuddyPresenceStore } from '@/stores/buddyPresence';
 import { Button } from '@/components/ui/Button';
 import { cn } from '@/lib/utils';
 import { notifyBuddyMessage, touchActiveBuddy } from '@/lib/buddyNotifications';
@@ -75,7 +82,9 @@ export default function BuddyChat({ buddyId, meId, peer, onUnfriend }: Props) {
   const [sending, setSending] = useState(false);
   const [picker, setPicker] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [peerOnline, setPeerOnline] = useState(false);
+  const peerOnline = useBuddyPresenceStore(
+    (state) => state.onlineUsersByBuddy[buddyId]?.includes(peer.id) ?? false
+  );
   const [peerTyping, setPeerTyping] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [confirmUnfriend, setConfirmUnfriend] = useState(false);
@@ -104,7 +113,6 @@ export default function BuddyChat({ buddyId, meId, peer, onUnfriend }: Props) {
     setMessages([]);
     setLoading(true);
     setError(null);
-    setPeerOnline(false);
     setPeerTyping(false);
     setConnection('connecting');
     setMenuOpen(false);
@@ -125,14 +133,15 @@ export default function BuddyChat({ buddyId, meId, peer, onUnfriend }: Props) {
         return;
       }
       setError(null);
-      setMessages([...((data as BuddyMessageRow[]) ?? [])].reverse());
+      // Merge instead of replacing. An INSERT can arrive while this request is
+      // in flight; replacing here would erase that just-rendered message.
+      const fetched = [...((data as BuddyMessageRow[]) ?? [])].reverse();
+      setMessages((current) => mergeBuddyMessages(current, fetched));
       setLoading(false);
     }
     void load();
 
-    const channel: RealtimeChannel = supabase.channel(`buddy:${buddyId}`, {
-      config: { presence: { key: meId } }
-    });
+    const channel: RealtimeChannel = supabase.channel(buddyRealtimeTopic(buddyId));
 
     channel
       .on(
@@ -163,10 +172,6 @@ export default function BuddyChat({ buddyId, meId, peer, onUnfriend }: Props) {
           );
         }
       )
-      .on('presence', { event: 'sync' }, () => {
-        const state = channel.presenceState();
-        setPeerOnline(Object.keys(state).some((k) => k !== meId));
-      })
       .on('broadcast', { event: 'typing' }, (payload) => {
         const p = payload.payload as { from?: string } | undefined;
         if (!p?.from || p.from === meId) return;
@@ -180,7 +185,9 @@ export default function BuddyChat({ buddyId, meId, peer, onUnfriend }: Props) {
       .subscribe((status) => {
         if (status === 'SUBSCRIBED') {
           setConnection('live');
-          void channel.track({ user_id: meId, online_at: new Date().toISOString() });
+          // Close the fetch-before-subscribe gap: reconcile once the database
+          // change feed is definitely live.
+          void load();
         } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
           setConnection('retrying');
         } else if (status === 'CLOSED') {
@@ -190,8 +197,14 @@ export default function BuddyChat({ buddyId, meId, peer, onUnfriend }: Props) {
 
     channelRef.current = channel;
 
+    const resyncWhenVisible = () => {
+      if (document.visibilityState === 'visible') void load();
+    };
+    document.addEventListener('visibilitychange', resyncWhenVisible);
+
     return () => {
       cancelled = true;
+      document.removeEventListener('visibilitychange', resyncWhenVisible);
       if (peerTypingTimer.current) clearTimeout(peerTypingTimer.current);
       channelRef.current = null;
       void supabase.removeChannel(channel);

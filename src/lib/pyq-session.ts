@@ -169,6 +169,20 @@ export function abandonPyqSession(session: PyqSessionRow, now = nowISO()): PyqSe
   };
 }
 
+export function pausePyqSession(session: PyqSessionRow, now = nowISO()): PyqSessionRow {
+  if (session.status !== 'active') {
+    throw new Error('Only an active PYQ set can be paused.');
+  }
+  return {
+    ...session,
+    status: 'paused',
+    current_question_uid: null,
+    current_question_started_at: null,
+    updated_at: now
+  };
+}
+
+
 export function pyqQuestionSnapshot(question: PyqQuestion): PyqQuestionSnapshot {
   return {
     question_uid: question.id,

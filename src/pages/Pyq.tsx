@@ -4,6 +4,7 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import {
   ArrowLeft,
   ArrowRight,
+  Bookmark,
   BookOpenCheck,
   Check,
   CheckCircle2,
@@ -61,6 +62,7 @@ import {
   completePyqSession,
   createPyqAttemptRow,
   createPyqSessionRow,
+  pausePyqSession,
   pyqAttemptId,
   pyqJournalQuestionId,
   pyqPracticeSessionRow,
@@ -113,22 +115,26 @@ function PracticeSetup({
   manifest,
   attempts,
   activeSession,
+  savedSessions,
   config,
   setConfig,
   loading,
   error,
   onResume,
+  onSave,
   onDiscard,
   onStart
 }: {
   manifest: PyqManifest;
   attempts: PyqAttemptRow[];
   activeSession: PyqSessionRow | null;
+  savedSessions: PyqSessionRow[];
   config: AttemptConfig;
   setConfig: (next: AttemptConfig) => void;
   loading: boolean;
   error: string | null;
   onResume: (session: PyqSessionRow) => void;
+  onSave: (session: PyqSessionRow) => void;
   onDiscard: (session: PyqSessionRow) => void;
   onStart: () => void;
 }) {
@@ -161,11 +167,11 @@ function PracticeSetup({
       />
 
       {activeSession && (
-        <Card>
+        <Card className="border-accent/30">
           <CardBody className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
-            <div>
+            <div className="min-w-0">
               <p className="font-display text-[16px] font-semibold text-text">
-                Resume unfinished PYQ set
+                Unfinished PYQ set
               </p>
               <p className="mt-1 text-[12px] text-text-muted">
                 {activeSession.completed_count} of {activeSession.question_uids.length} submitted ·{' '}
@@ -177,12 +183,59 @@ function PracticeSetup({
               <Button variant="primary" onClick={() => onResume(activeSession)} disabled={loading}>
                 Resume set
               </Button>
+              <Button
+                onClick={() => onSave(activeSession)}
+                disabled={loading}
+                title="Save this set so you can start a fresh one and come back later"
+              >
+                <Bookmark size={14} />
+                Save set
+              </Button>
               <Button onClick={() => onDiscard(activeSession)} disabled={loading}>
-                Discard set
+                Discard
               </Button>
             </div>
           </CardBody>
         </Card>
+      )}
+
+      {savedSessions.length > 0 && (
+        <div className="flex flex-col gap-2">
+          <p className="px-1 text-[11px] font-semibold uppercase tracking-widest text-text-faint">
+            Saved sets
+          </p>
+          {savedSessions.map((session) => (
+            <Card key={session.id}>
+              <CardBody className="flex flex-col gap-3 p-3 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex min-w-0 items-center gap-3">
+                  <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded bg-bg-overlay text-text-faint">
+                    <Bookmark size={15} />
+                  </span>
+                  <div className="min-w-0">
+                    <p className="truncate text-[13.5px] font-semibold text-text">
+                      {session.config.subjectSlug === 'all'
+                        ? 'Mixed subjects'
+                        : manifest.subjects.find((s) => s.slug === session.config.subjectSlug)
+                            ?.label ?? session.config.subjectSlug}
+                    </p>
+                    <p className="mt-0.5 text-[11.5px] text-text-faint">
+                      {session.completed_count} / {session.question_uids.length} done ·{' '}
+                      {secondsToClock(session.elapsed_sec)}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <Button variant="primary" onClick={() => onResume(session)} disabled={loading}>
+                    Resume
+                  </Button>
+                  <Button onClick={() => onDiscard(session)} disabled={loading}>
+                    Discard
+                  </Button>
+                </div>
+              </CardBody>
+            </Card>
+          ))}
+        </div>
       )}
 
       <Card className="overflow-hidden">
@@ -433,14 +486,10 @@ function PracticeSetup({
                 variant="primary"
                 className="w-full"
                 onClick={onStart}
-                disabled={loading || activeSession !== null}
+                disabled={loading}
               >
                 <BookOpenCheck size={17} />
-                {loading
-                  ? 'Opening question bank…'
-                  : activeSession
-                    ? 'Resume or discard unfinished set'
-                    : 'Start practice'}
+                {loading ? 'Opening question bank…' : 'Start fresh set'}
               </Button>
               <p className="mt-3 text-center text-[11px] leading-relaxed text-text-faint">
                 Questions and diagrams are bundled locally. Your answer stays hidden until you
@@ -729,6 +778,18 @@ export default function Pyq() {
     [userId],
     null
   );
+  const pausedPyqSessions = useLiveQuery(
+    async () => {
+      if (!userId) return [];
+      const rows = await db.pyq_sessions
+        .where('[user_id+status]')
+        .equals([userId, 'paused'])
+        .toArray();
+      return rows.sort((a, b) => b.updated_at.localeCompare(a.updated_at));
+    },
+    [userId],
+    []
+  );
   const patterns = useLiveQuery(
     async () => (userId ? db.patterns.where('user_id').equals(userId).toArray() : []),
     [userId],
@@ -822,6 +883,23 @@ export default function Pyq() {
     setLoading(true);
     setStartError(null);
     try {
+      // If resuming a paused set, auto-pause the currently active set first
+      if (session.status === 'paused' && userId) {
+        const activeRows = await db.pyq_sessions
+          .where('[user_id+status]')
+          .equals([userId, 'active'])
+          .toArray();
+        for (const activeRow of activeRows) {
+          await writeLocal('pyq_sessions', pausePyqSession(activeRow));
+        }
+        if (pyqSessionId && activeRows.some((r) => r.id === pyqSessionId)) {
+          setQuestions([]);
+          setFinished(false);
+          setIndex(0);
+          setPyqSessionId(null);
+        }
+      }
+
       const rows = await questionsForSession(session);
       if (rows.length !== session.question_uids.length) {
         throw new Error(
@@ -836,7 +914,12 @@ export default function Pyq() {
         session.bank_version === manifest.bankVersion
           ? session
           : { ...session, bank_version: manifest.bankVersion, updated_at: new Date().toISOString() };
-      const durableSession = exhausted ? completePyqSession(compatibleSession) : compatibleSession;
+      // Reactivate paused sessions
+      const activatedSession: PyqSessionRow =
+        compatibleSession.status !== 'active'
+          ? { ...compatibleSession, status: 'active', updated_at: new Date().toISOString() }
+          : compatibleSession;
+      const durableSession = exhausted ? completePyqSession(activatedSession) : activatedSession;
       const savedAttempts = (
         await db.pyq_attempts.where('user_id').equals(session.user_id).toArray()
       )
@@ -884,6 +967,7 @@ export default function Pyq() {
     }
   }
 
+
   async function discardSession(session: PyqSessionRow) {
     if (loading) return;
     setLoading(true);
@@ -921,18 +1005,45 @@ export default function Pyq() {
     }
   }
 
+  async function saveSession(session: PyqSessionRow) {
+    if (loading) return;
+    setLoading(true);
+    setStartError(null);
+    try {
+      const paused = pausePyqSession(session);
+      await writeLocal('pyq_sessions', paused);
+      if (pyqSessionId === session.id) {
+        setQuestions([]);
+        setFinished(false);
+        setIndex(0);
+        setPyqSessionId(null);
+      }
+    } catch (error) {
+      setStartError(error instanceof Error ? error.message : 'Could not save that PYQ set.');
+    } finally {
+      setLoading(false);
+    }
+  }
+
   async function startPractice() {
     if (!manifest || loading || !userId || startingRef.current) return;
     startingRef.current = true;
     setLoading(true);
     setStartError(null);
     try {
+      // Auto-pause any active set so the user can start a fresh one
       const activeRows = await db.pyq_sessions
         .where('[user_id+status]')
         .equals([userId, 'active'])
         .toArray();
-      if (activeRows.length > 0) {
-        throw new Error('Resume or discard the unfinished PYQ set before starting another.');
+      for (const activeRow of activeRows) {
+        await writeLocal('pyq_sessions', pausePyqSession(activeRow));
+      }
+      if (pyqSessionId && activeRows.some((r) => r.id === pyqSessionId)) {
+        setQuestions([]);
+        setFinished(false);
+        setIndex(0);
+        setPyqSessionId(null);
       }
       const subjects =
         config.subjectSlug === 'all'
@@ -1026,8 +1137,8 @@ export default function Pyq() {
         .where('[user_id+status]')
         .equals([userId, 'active'])
         .toArray();
-      if (activeRows.length > 0) {
-        throw new Error('Resume or discard the unfinished PYQ set before repeating this one.');
+      for (const activeRow of activeRows) {
+        await writeLocal('pyq_sessions', pausePyqSession(activeRow));
       }
       const session = createPyqSessionRow(userId, manifest.bankVersion, config, questions);
       await writeLocalBatch([
@@ -1316,12 +1427,14 @@ export default function Pyq() {
       <PracticeSetup
         manifest={manifest}
         attempts={attempts}
-        activeSession={activePyqSession}
+        activeSession={activePyqSession ?? null}
+        savedSessions={pausedPyqSessions ?? []}
         config={config}
         setConfig={setConfig}
         loading={loading}
         error={startError}
         onResume={(session) => void resumeSession(session)}
+        onSave={(session) => void saveSession(session)}
         onDiscard={(session) => void discardSession(session)}
         onStart={() => void startPractice()}
       />

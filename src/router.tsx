@@ -83,6 +83,7 @@ export const router = createBrowserRouter([
       { path: 'pyq', element: <Pyq /> },
       { path: 'planner', element: <Planner /> },
       { path: 'reattempts', element: <Reattempts /> },
+      { path: 'reattempts/:reattemptId', element: <Reattempts /> },
       { path: 'weekly-review', element: <WeeklyReview /> },
       { path: 'heatmap', element: <Heatmap /> },
       { path: 'calibration', element: <Calibration /> },

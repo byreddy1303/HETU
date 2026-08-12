@@ -12,6 +12,8 @@ const USER = '00000000-0000-4000-8000-000000000001';
 const QUESTION = 'Which schedules are conflict serializable, and why?';
 const ANSWER = 'The schedule is not conflict serializable.';
 const PATTERN = 'precedence graph cycle';
+const IMAGE =
+  'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22100%22%3E%3Crect width=%22200%22 height=%22100%22 fill=%22white%22/%3E%3C/svg%3E';
 
 vi.mock('@/hooks/useAuth', () => ({
   useAuth: () => ({
@@ -95,18 +97,21 @@ describe('re-attempt solve flow', () => {
     const user = userEvent.setup();
 
     render(
-      <MemoryRouter initialEntries={['/reattempts']}>
-        <Reattempts />
+      <MemoryRouter initialEntries={['/reattempts/reattempt-due']}>
+        <Routes>
+          <Route path="/reattempts" element={<Reattempts />} />
+          <Route path="/reattempts/:reattemptId" element={<Reattempts />} />
+        </Routes>
       </MemoryRouter>
     );
 
     expect(await screen.findByText(QUESTION)).toBeInTheDocument();
     expect(screen.getByText(PATTERN)).toBeInTheDocument();
     expect(screen.getByText('carried forward')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Exit session' })).toBeInTheDocument();
     expect(screen.queryByText(ANSWER)).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Show answer' })).not.toBeInTheDocument();
 
-    await user.click(screen.getByRole('button', { name: 'Start timer' }));
     expect(await screen.findByText('Attempt running')).toBeInTheDocument();
     await user.click(screen.getByRole('button', { name: 'Finish attempt' }));
     expect(await screen.findByText('How did it go?')).toBeInTheDocument();
@@ -134,6 +139,7 @@ describe('re-attempt solve flow', () => {
           <Route path="/" element={<Dashboard />} />
           <Route path="/today" element={<DoNow />} />
           <Route path="/reattempts" element={<Reattempts />} />
+          <Route path="/reattempts/:reattemptId" element={<Reattempts />} />
         </Routes>
       </MemoryRouter>
     );
@@ -147,6 +153,32 @@ describe('re-attempt solve flow', () => {
     await user.click(screen.getByRole('button', { name: 'Start next' }));
 
     expect(await screen.findByText(QUESTION)).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Start timer' })).toBeInTheDocument();
+    expect(screen.getByText('Attempt running')).toBeInTheDocument();
+  });
+
+  it('opens a question photo in the zoomable full-screen viewer', async () => {
+    await seedDueQuestion();
+    const stored = await db.questions.get('question-due');
+    await db.questions.put({ ...stored!, image_url: IMAGE, sync_status: 'synced' });
+    const user = userEvent.setup();
+
+    render(
+      <MemoryRouter initialEntries={['/reattempts/reattempt-due']}>
+        <Routes>
+          <Route path="/reattempts" element={<Reattempts />} />
+          <Route path="/reattempts/:reattemptId" element={<Reattempts />} />
+        </Routes>
+      </MemoryRouter>
+    );
+
+    await user.click(await screen.findByRole('button', { name: 'Open question image full screen' }));
+    expect(screen.getByRole('dialog', { name: 'Image preview' })).toBeInTheDocument();
+    expect(screen.getByText('100%')).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Zoom in' }));
+    expect(screen.getByText('150%')).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Close preview' }));
+    await waitFor(() => {
+      expect(screen.queryByRole('dialog', { name: 'Image preview' })).not.toBeInTheDocument();
+    });
   });
 });

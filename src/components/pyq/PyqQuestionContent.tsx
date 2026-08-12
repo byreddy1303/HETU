@@ -1,13 +1,14 @@
 import { useEffect, useMemo, useRef } from 'react';
 import DOMPurify from 'dompurify';
 import renderMathInElement from 'katex/contrib/auto-render';
+import { normalizePyqQuestionHtml } from '@/lib/pyq';
 import 'katex/dist/katex.min.css';
 
 export default function PyqQuestionContent({ html }: { html: string }) {
   const root = useRef<HTMLDivElement>(null);
   const safeHtml = useMemo(
     () =>
-      DOMPurify.sanitize(html, {
+      DOMPurify.sanitize(normalizePyqQuestionHtml(html), {
         FORBID_TAGS: ['a'],
         FORBID_ATTR: ['onclick', 'onerror', 'onload']
       }),

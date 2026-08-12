@@ -76,11 +76,25 @@ function downscaleDataUrl(img: HTMLImageElement): string {
   return canvas.toDataURL('image/jpeg', JPEG_QUALITY);
 }
 
+async function waitForElementMedia(element: HTMLElement): Promise<void> {
+  const fonts = document.fonts?.ready.catch(() => undefined);
+  const images = [...element.querySelectorAll('img')].map(async (image) => {
+    if (image.complete) return;
+    try {
+      await image.decode();
+    } catch {
+      // A missing source image should not prevent capturing the rendered text.
+    }
+  });
+  await Promise.all([fonts, ...images]);
+}
+
 /** Rasterize a DOM node (e.g. the rendered PYQ card) to a compressed JPEG data URL. */
 export async function captureElementToDataUrl(element: HTMLElement): Promise<string | null> {
   const rect = element.getBoundingClientRect();
   if (rect.width < 1 || rect.height < 1) return null;
   try {
+    await waitForElementMedia(element);
     const { default: html2canvas } = await import('html2canvas');
     const canvas = await html2canvas(element, {
       useCORS: true,

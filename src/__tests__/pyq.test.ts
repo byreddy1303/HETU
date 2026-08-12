@@ -6,6 +6,7 @@ import {
   formatPyqAnswer,
   inferPyqDirectOutcome,
   matchesPyqTopicScope,
+  normalizePyqQuestionHtml,
   normalizePyqManifest,
   pyqAnswerValueForLog,
   resolvePyqJournalImageUrl,
@@ -165,6 +166,29 @@ describe('PYQ manifest compatibility', () => {
   });
 });
 
+describe('PYQ source HTML normalization', () => {
+  it('joins archive line-break tags inside display math', () => {
+    const html = String.raw`<p>Match the lists:<br>\[<br>\begin{array}{|l|l|}<br>\hline<br>P & 1 \\<br>\hline<br>\end{array}<br>\]</p>`;
+    const normalized = normalizePyqQuestionHtml(html);
+
+    expect(normalized).toContain(String.raw`\begin{array}{|l|l|}`);
+    expect(normalized).not.toMatch(/\\\[[\s\S]*?<br\s*\/?>(?=[\s\S]*?\\\])/i);
+  });
+
+  it('wraps a bare multiline math environment for KaTeX', () => {
+    const html = String.raw`<p>Format:<br>\begin{array}{|l|l|}<br>A & B \\<br>\end{array}</p>`;
+    const normalized = normalizePyqQuestionHtml(html);
+
+    expect(normalized).toContain(String.raw`\[\begin{array}{|l|l|}`);
+    expect(normalized).toContain(String.raw`\end{array}\]`);
+  });
+
+  it('leaves ordinary inline math and HTML structure intact', () => {
+    const html = String.raw`<p>If $x &lt; 2$, choose:</p><ol><li>$1$</li></ol>`;
+    expect(normalizePyqQuestionHtml(html)).toBe(html);
+  });
+});
+
 describe('bundled PYQ bank integrity', () => {
   it('contains all 3,170 audited questions and no broken local image references', () => {
     const publicRoot = path.resolve(process.cwd(), 'public');
@@ -176,6 +200,7 @@ describe('bundled PYQ bank integrity', () => {
     const statuses: Record<string, number> = {};
     let questionCount = 0;
     let topicCount = 0;
+    const repairedQuestions: PyqQuestion[] = [];
 
     expect(manifest.questionCount).toBe(3170);
     expect(manifest.firstYear).toBe(1990);
@@ -201,6 +226,13 @@ describe('bundled PYQ bank integrity', () => {
         expect(row.subject).toBe(subject.label);
         expect(expectedTopicCounts.has(row.topicSlug), `unknown topic ${row.topicSlug}`).toBe(true);
         expect(row.topic.trim().length, `empty topic ${row.id}`).toBeGreaterThan(0);
+        const normalizedHtml = normalizePyqQuestionHtml(row.html);
+        if (normalizedHtml !== row.html) repairedQuestions.push(row);
+        for (const displayMath of normalizedHtml.matchAll(/\\\[[\s\S]*?\\\]|\$\$[\s\S]*?\$\$/g)) {
+          expect(displayMath[0], `broken display math line in ${row.id}`).not.toMatch(
+            /<br\s*\/?>/i
+          );
+        }
         actualTopicCounts.set(row.topicSlug, (actualTopicCounts.get(row.topicSlug) ?? 0) + 1);
         statuses[row.answerStatus] = (statuses[row.answerStatus] ?? 0) + 1;
         for (const match of row.html.matchAll(/src="([^"]+)"/g)) {
@@ -213,6 +245,9 @@ describe('bundled PYQ bank integrity', () => {
 
     expect(questionCount).toBe(manifest.questionCount);
     expect(topicCount).toBe(95);
+    expect(repairedQuestions).toHaveLength(518);
+    expect(new Set(repairedQuestions.map((row) => row.subjectSlug)).size).toBe(13);
+    expect(new Set(repairedQuestions.map((row) => row.topicSlug)).size).toBe(83);
     expect(statuses).toEqual(manifest.answerStatuses);
     expect(statuses).toEqual({
       available: 3076,
@@ -242,9 +277,8 @@ describe('bundled PYQ bank integrity', () => {
         const year = 1990 + index;
         return [
           year,
-          allQuestions.filter(
-            (row) => row.year === year && row.paperLabel.startsWith('GATE CSE ')
-          ).length
+          allQuestions.filter((row) => row.year === year && row.paperLabel.startsWith('GATE CSE '))
+            .length
         ];
       })
     );
@@ -272,12 +306,7 @@ describe('bundled PYQ bank integrity', () => {
     );
     expect(supplementalDigital.filter((row) => row.id.startsWith('es:gate-ee:'))).toHaveLength(70);
     expect(new Set(supplementalDigital.map((row) => row.topicSlug))).toEqual(
-      new Set([
-        'number-system',
-        'boolean-algebra',
-        'combinational-circuit',
-        'sequential-circuit'
-      ])
+      new Set(['number-system', 'boolean-algebra', 'combinational-circuit', 'sequential-circuit'])
     );
     expect(supplementalDigital.every((row) => row.subjectSlug === 'digital-logic')).toBe(true);
     for (const excludedId of [

@@ -65,6 +65,168 @@ const subjectCache = new Map<string, Promise<SubjectPayload>>();
 let manifestPromise: Promise<PyqManifest> | null = null;
 const PYQ_MANIFEST_SCHEMA = 'topics-v1';
 
+const PYQ_MATH_DELIMITERS = [
+  { left: '$$$', right: '$$$' },
+  { left: '$$', right: '$$' },
+  { left: '\\[', right: '\\]' },
+  { left: '\\(', right: '\\)' },
+  { left: '$', right: '$' }
+] as const;
+const PYQ_MATH_ENVIRONMENT_PATTERN =
+  /\\begin\{(array|gathered|matrix|pmatrix|aligned|bmatrix|vmatrix|cases|align\*?)\}[\s\S]*?\\end\{\1\}/g;
+const PYQ_MATH_BREAK_PATTERN = /<br\s*\/?\s*>/gi;
+const PYQ_MATH_TOKEN_PATTERN = /HETUPYQMATHSEGMENT(\d+)TOKEN/g;
+const PYQ_TEXT_COMMAND_PATTERN = /\\(text|textbf|textit|textrm|textsf|texttt)\s*\{([^{}]*)\}/g;
+
+function replaceBalancedPyqMathCommand(
+  value: string,
+  command: string,
+  transform: (body: string) => string
+): string {
+  let cursor = 0;
+  let output = '';
+  while (cursor < value.length) {
+    const commandStart = value.indexOf(command, cursor);
+    if (commandStart < 0) return output + value.slice(cursor);
+    const openingBrace = commandStart + command.length - 1;
+    let depth = 1;
+    let index = openingBrace + 1;
+    for (; index < value.length && depth > 0; index += 1) {
+      if (value[index] === '\\') {
+        index += 1;
+      } else if (value[index] === '{') {
+        depth += 1;
+      } else if (value[index] === '}') {
+        depth -= 1;
+      }
+    }
+    if (depth !== 0) return output + value.slice(cursor);
+    output +=
+      value.slice(cursor, commandStart) + transform(value.slice(openingBrace + 1, index - 1));
+    cursor = index;
+  }
+  return output;
+}
+
+function normalizePyqTextCommands(value: string): string {
+  return value.replace(PYQ_TEXT_COMMAND_PATTERN, (_match, command: string, body: string) => {
+    const chunks = body.split(/(\$[^$]*\$)/g);
+    for (let index = 0; index < chunks.length; index += 2) {
+      chunks[index] = chunks[index].replace(/(?<!\\)([#_%])/g, '\\$1');
+    }
+    return `\\${command}{${chunks.join('')}}`;
+  });
+}
+
+function joinPyqMathLines(value: string): string {
+  let normalized = value
+    .replace(PYQ_MATH_BREAK_PATTERN, '\n')
+    .replace(/&nbsp;/gi, ' ')
+    .replace(/\u00a0/g, ' ')
+    .replace(/\\renewcommand\s*\{\\arraystretch\}\s*\{([^{}]+)\}/g, '\\def\\arraystretch{$1}')
+    .replace(/p\{\s*\d+(?:\.\d+)?(?:cm|mm|in|pt|em|ex)\s*\}/g, 'l')
+    .replace(/\^?\\hat\{\}/g, '\\mathbin{\\char`\\^}')
+    .replace(
+      /(\\end\{(?:array|gathered|matrix|pmatrix|aligned|bmatrix|vmatrix|cases|align\*?)\})\s*\\\\\s*$/,
+      '$1'
+    );
+  normalized = replaceBalancedPyqMathCommand(
+    normalized,
+    '\\eqalign{',
+    (body) => `\\begin{aligned}${body.replace(/\\cr(?![A-Za-z])/g, '\\\\')}\\end{aligned}`
+  );
+  normalized = replaceBalancedPyqMathCommand(
+    normalized,
+    '\\matrix{',
+    (body) => `\\begin{matrix}${body.replace(/\\cr(?![A-Za-z])/g, '\\\\')}\\end{matrix}`
+  );
+  return normalizePyqTextCommands(normalized);
+}
+
+function pyqMathEndIndex(value: string, delimiter: string, startIndex: number): number {
+  let index = startIndex;
+  let braceDepth = 0;
+  while (index < value.length) {
+    const character = value[index];
+    if (braceDepth <= 0 && value.slice(index, index + delimiter.length) === delimiter) {
+      return index;
+    }
+    if (character === '\\') index += 1;
+    else if (character === '{') braceDepth += 1;
+    else if (character === '}') braceDepth -= 1;
+    index += 1;
+  }
+  return -1;
+}
+
+function normalizePyqMathSegment(segment: string, left: string, right: string): string {
+  const body = joinPyqMathLines(segment.slice(left.length, segment.length - right.length));
+  if (left === '$$$') return `$$${body}$$`;
+  if (left === '$' && /\\begin\{align\*?\}/.test(body)) return `\\[${body}\\]`;
+  return `${left}${body}${right}`;
+}
+
+/**
+ * Repair source-archive HTML before KaTeX sees it.
+ *
+ * A number of papers encode one display expression as text separated by
+ * `<br>` tags. KaTeX auto-render intentionally works one DOM text node at a
+ * time, so those tags otherwise expose raw `\\begin{array}` source. A smaller
+ * set contains a complete environment without any math delimiters. Protect
+ * valid math first, join only the line breaks inside it, then wrap genuinely
+ * bare environments in display delimiters.
+ */
+export function normalizePyqQuestionHtml(html: string): string {
+  const mathSegments: string[] = [];
+  let tokenized = '';
+  let cursor = 0;
+  while (cursor < html.length) {
+    let next:
+      | { index: number; left: (typeof PYQ_MATH_DELIMITERS)[number]['left']; right: string }
+      | undefined;
+    for (const delimiter of PYQ_MATH_DELIMITERS) {
+      const index = html.indexOf(delimiter.left, cursor);
+      if (
+        index >= 0 &&
+        (!next ||
+          index < next.index ||
+          (index === next.index && delimiter.left.length > next.left.length))
+      ) {
+        next = { index, left: delimiter.left, right: delimiter.right };
+      }
+    }
+    if (!next) {
+      tokenized += html.slice(cursor);
+      break;
+    }
+    const end = pyqMathEndIndex(html, next.right, next.index + next.left.length);
+    if (end < 0) {
+      const unmatchedEnd = next.index + next.left.length;
+      tokenized += html.slice(cursor, unmatchedEnd);
+      cursor = unmatchedEnd;
+      continue;
+    }
+    tokenized += html.slice(cursor, next.index);
+    tokenized += `HETUPYQMATHSEGMENT${mathSegments.length}TOKEN`;
+    mathSegments.push(
+      normalizePyqMathSegment(
+        html.slice(next.index, end + next.right.length),
+        next.left,
+        next.right
+      )
+    );
+    cursor = end + next.right.length;
+  }
+  const wrapped = tokenized.replace(
+    PYQ_MATH_ENVIRONMENT_PATTERN,
+    (environment) => `\\[${joinPyqMathLines(environment)}\\]`
+  );
+  return wrapped.replace(
+    PYQ_MATH_TOKEN_PATTERN,
+    (_token, index: string) => mathSegments[Number(index)] ?? ''
+  );
+}
+
 async function fetchJson<T>(url: string): Promise<T> {
   const response = await fetch(url);
   if (!response.ok) throw new Error(`Question bank request failed (${response.status})`);
@@ -233,11 +395,7 @@ export function pyqQuestionSnapshotDataUrl(question: PyqQuestion): string {
 }
 
 export function pyqSourceRef(question: PyqQuestion): string {
-  return [
-    question.paperLabel,
-    `Q ${question.number}`,
-    question.type
-  ].join(' · ');
+  return [question.paperLabel, `Q ${question.number}`, question.type].join(' · ');
 }
 
 export function pyqPlainText(html: string): string {

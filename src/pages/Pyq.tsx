@@ -1212,8 +1212,8 @@ export default function Pyq() {
     setAnalyzedCount((count) => count + 1);
   }
 
-  async function captureQuestionSnapshot(): Promise<string | null> {
-    if (!current) return null;
+  async function captureQuestionSnapshot(): Promise<string> {
+    if (!current) throw new Error('No active question to capture.');
     try {
       const captured = questionCaptureRef.current
         ? await captureElementToDataUrl(questionCaptureRef.current)
@@ -1223,6 +1223,8 @@ export default function Pyq() {
       // A rasterization failure must not block the attempt log.
     }
     const embedded = await resolvePyqJournalImageUrl(current.html).catch(() => null);
+    // Every committed PYQ must carry an image into its attempt/journal log,
+    // even on browsers where DOM rasterization or a bundled figure fails.
     return embedded ?? pyqQuestionSnapshotDataUrl(current);
   }
 

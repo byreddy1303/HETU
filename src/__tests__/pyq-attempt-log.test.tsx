@@ -131,6 +131,7 @@ describe('PYQ committed-attempt logging', () => {
       expect(attempt.correct_answer).toBe('B');
       expect(attempt.mark_correct).toBe(false);
       expect(attempt.capture_version).toBe(2);
+      expect(attempt.screenshot_url).toBe('data:image/png;base64,cXVlc3Rpb24tc25hcHNob3Q=');
       expect(attempt.time_spent_ms).toBeGreaterThan(0);
       expect(attempt.time_spent_sec).toBe(Math.max(1, Math.ceil(attempt.time_spent_ms! / 1000)));
       expect(attempt.question_started_at).not.toBeNull();
@@ -186,6 +187,7 @@ describe('PYQ committed-attempt logging', () => {
       const [journalRow] = await db.questions.toArray();
       expect(attempt.mark_correct).toBe(true);
       expect(journalRow.session_id).toBe(attempt.pyq_session_id);
+      expect(journalRow.image_url).toBe(attempt.screenshot_url);
       expect(await db.sessions.get(attempt.pyq_session_id!)).toMatchObject({ kind: 'pyq' });
     });
   });

@@ -1,30 +1,49 @@
 // Question-first spaced re-attempt queue. Each due item launches a dedicated
 // test session instead of expanding inside the queue.
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
 import {
   ArrowLeft,
   ArrowRight,
   BookOpen,
+  CheckCircle2,
   Clock3,
+  FileQuestion,
   PencilLine,
   Play,
   RotateCcw,
   ScanSearch,
+  XCircle,
   ZoomIn
 } from 'lucide-react';
-import type { QuestionRow, ReattemptRow, ReattemptStage } from '@/types';
+import type {
+  MarkDecision,
+  PyqAttemptRow,
+  PyqSelectedAnswer,
+  QuestionRow,
+  ReattemptRow,
+  ReattemptStage
+} from '@/types';
 import { db } from '@/lib/db';
 import { buildReattemptQueue, recordReattemptResult } from '@/lib/reattempt';
 import { writeLocal } from '@/lib/sync';
 import { OUTCOME_BY_CODE } from '@/lib/constants';
 import { cn, formatDate, plural, secondsToClock, todayISO } from '@/lib/utils';
+import type { PyqQuestion } from '@/lib/pyq';
+import {
+  createPyqReattemptAttemptRow,
+  pyqQuestionFromAttempt,
+  pyqReattemptAttemptId,
+  pyqSourceAttemptForJournalQuestion
+} from '@/lib/pyq-session';
+import { captureElementToDataUrl } from '@/lib/image';
 import { subjectInk } from '@/lib/subjectInk';
 import { useAuth } from '@/hooks/useAuth';
 import { useTimer } from '@/hooks/useTimer';
 import { useUiStore } from '@/stores/ui';
 import PageHeader from '@/components/layout/PageHeader';
+import PyqQuestionContent from '@/components/pyq/PyqQuestionContent';
 import AnswerReveal from '@/components/shared/AnswerReveal';
 import { ImagePreview } from '@/components/shared/ImagePreview';
 import Timer from '@/components/shared/Timer';
@@ -46,6 +65,7 @@ const TONE_BADGE: Record<
 };
 
 const RUNGS: ReattemptStage[] = ['D3', 'D10', 'D30'];
+const PYQ_CHOICES = ['A', 'B', 'C', 'D'];
 
 interface AttemptState {
   rowId: string;
@@ -169,6 +189,462 @@ function QueueCard({
         </span>
       </button>
     </article>
+  );
+}
+
+function pyqAnswerInputType(question: PyqQuestion): 'MCQ' | 'MSQ' | 'NAT' {
+  if (question.type === 'MSQ' || question.type === 'NAT') return question.type;
+  return 'MCQ';
+}
+
+function formatAttemptAnswer(value: PyqSelectedAnswer): string {
+  if (value == null) return 'Unavailable';
+  return Array.isArray(value) ? value.join(', ') : String(value);
+}
+
+function savedAttemptAnswer(attempt: PyqAttemptRow): string {
+  if (attempt.capture_version !== 2) return 'Legacy attempt — learner answer not verified';
+  if (attempt.mark_decision === 'SKIP') return 'Left blank';
+  return formatAttemptAnswer(attempt.selected_answer);
+}
+
+function PyqAnswerPad({
+  question,
+  choices,
+  numeric,
+  disabled,
+  onChoices,
+  onNumeric
+}: {
+  question: PyqQuestion;
+  choices: string[];
+  numeric: string;
+  disabled: boolean;
+  onChoices: (choices: string[]) => void;
+  onNumeric: (value: string) => void;
+}) {
+  const inputType = pyqAnswerInputType(question);
+  if (inputType === 'NAT') {
+    return (
+      <label className="block text-[12px] font-medium text-text-muted">
+        Your numeric answer
+        <input
+          type="number"
+          inputMode="decimal"
+          step="any"
+          value={numeric}
+          disabled={disabled}
+          onChange={(event) => onNumeric(event.target.value)}
+          placeholder="Enter a number"
+          className="u-control mt-1 h-12 w-full rounded border border-border bg-bg-raised px-3 font-mono text-[16px] text-text shadow-sm focus:border-accent focus:outline-none focus:ring-4 focus:ring-accent-faint"
+        />
+      </label>
+    );
+  }
+
+  return (
+    <fieldset disabled={disabled}>
+      <legend className="u-label mb-2">
+        Your answer {inputType === 'MSQ' ? '— select all that apply' : ''}
+      </legend>
+      <div className="grid grid-cols-4 gap-2">
+        {PYQ_CHOICES.map((choice) => {
+          const active = choices.includes(choice);
+          return (
+            <button
+              key={choice}
+              type="button"
+              aria-pressed={active}
+              onClick={() => {
+                if (inputType === 'MCQ') onChoices([choice]);
+                else
+                  onChoices(
+                    active ? choices.filter((item) => item !== choice) : [...choices, choice]
+                  );
+              }}
+              className={cn(
+                'h-12 rounded border font-mono text-[15px] font-semibold transition-all',
+                active
+                  ? 'border-accent bg-accent text-accent-contrast shadow-key'
+                  : 'border-border bg-bg-raised text-text-muted hover:-translate-y-px hover:border-accent/40 hover:text-text'
+              )}
+            >
+              {choice}
+            </button>
+          );
+        })}
+      </div>
+    </fieldset>
+  );
+}
+
+function PyqDecisionButtons({
+  value,
+  disabled,
+  onChange
+}: {
+  value: MarkDecision | null;
+  disabled: boolean;
+  onChange: (value: MarkDecision) => void;
+}) {
+  const options: { value: MarkDecision; label: string; hint: string }[] = [
+    { value: 'MARK', label: 'Answered', hint: 'committed' },
+    { value: 'FIFTY_FIFTY', label: 'Guessed 50/50', hint: 'uncertain' },
+    { value: 'SKIP', label: 'Left blank', hint: 'skipped' }
+  ];
+  return (
+    <fieldset disabled={disabled}>
+      <legend className="u-label mb-2">Exam decision</legend>
+      <div className="grid gap-2 sm:grid-cols-3">
+        {options.map((option) => (
+          <button
+            key={option.value}
+            type="button"
+            aria-label={`${option.label}: ${option.hint}`}
+            aria-pressed={value === option.value}
+            onClick={() => onChange(option.value)}
+            className={cn(
+              'rounded border px-3 py-2.5 text-left transition-colors',
+              value === option.value
+                ? 'border-ink-violet/40 bg-ink-violet/10 text-ink-violet'
+                : 'border-border bg-bg-raised text-text-muted hover:border-border-hover'
+            )}
+          >
+            <span className="block text-[12.5px] font-semibold">{option.label}</span>
+            <span className="u-label mt-0.5 block">{option.hint}</span>
+          </button>
+        ))}
+      </div>
+    </fieldset>
+  );
+}
+
+function PyqAnswerHistory({
+  question,
+  attempts,
+  currentAttempt
+}: {
+  question: PyqQuestion;
+  attempts: PyqAttemptRow[];
+  currentAttempt: PyqAttemptRow;
+}) {
+  const ordered = [
+    ...attempts.filter((attempt) => attempt.id !== currentAttempt.id),
+    currentAttempt
+  ].sort((a, b) => a.attempted_at.localeCompare(b.attempted_at));
+  const skipped = currentAttempt.mark_decision === 'SKIP';
+  const available = question.answerStatus === 'available';
+  const tone =
+    skipped || currentAttempt.mark_correct == null
+      ? 'warn'
+      : currentAttempt.mark_correct
+        ? 'success'
+        : 'danger';
+  const title = skipped
+    ? 'Left blank'
+    : !available
+      ? 'No definitive key'
+      : currentAttempt.mark_correct
+        ? 'Correct'
+        : 'Not correct';
+  const Icon =
+    skipped || currentAttempt.mark_correct == null
+      ? FileQuestion
+      : currentAttempt.mark_correct
+        ? CheckCircle2
+        : XCircle;
+
+  return (
+    <section
+      aria-label="PYQ answer history"
+      className={cn(
+        'rounded border p-4',
+        tone === 'success'
+          ? 'border-success/30 bg-success-faint'
+          : tone === 'danger'
+            ? 'border-danger/30 bg-danger-faint'
+            : 'border-warn/30 bg-warn-faint'
+      )}
+    >
+      <div className="flex items-start gap-3">
+        <Icon
+          size={20}
+          className={cn(
+            'mt-0.5 shrink-0',
+            tone === 'success' ? 'text-success' : tone === 'danger' ? 'text-danger' : 'text-warn'
+          )}
+        />
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <p className="font-display text-[17px] font-semibold text-text">{title}</p>
+            <span className="u-num text-[11px] text-text-faint">
+              {secondsToClock(currentAttempt.time_spent_sec)}
+            </span>
+          </div>
+          <dl className="mt-3 grid gap-3 text-[12px] sm:grid-cols-3">
+            {ordered
+              .map((attempt, index) => ({ attempt, number: index + 1 }))
+              .reverse()
+              .map(({ attempt, number }) => (
+                <div key={attempt.id}>
+                  <dt className="u-label">Attempt {number} answer</dt>
+                  <dd className="mt-0.5 font-mono font-semibold text-text">
+                    {savedAttemptAnswer(attempt)}
+                  </dd>
+                </div>
+              ))}
+            <div>
+              <dt className="u-label">Actual answer</dt>
+              <dd className="mt-0.5 font-mono font-semibold text-text">
+                {formatAttemptAnswer(currentAttempt.correct_answer)}
+              </dd>
+            </div>
+          </dl>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function PyqReattemptSession({
+  userId,
+  row,
+  question,
+  sourceAttempt,
+  attempts,
+  existingAttempt,
+  position,
+  total,
+  onExit,
+  onResult
+}: {
+  userId: string;
+  row: ReattemptRow;
+  question: PyqQuestion;
+  sourceAttempt: PyqAttemptRow;
+  attempts: PyqAttemptRow[];
+  existingAttempt: PyqAttemptRow | null;
+  position: number;
+  total: number;
+  onExit: () => void;
+  onResult: (result: 'clean' | 'fail', elapsed: number) => Promise<void>;
+}) {
+  const initialAnswer = existingAttempt?.selected_answer;
+  const [choices, setChoices] = useState<string[]>(() =>
+    Array.isArray(initialAnswer)
+      ? initialAnswer.map(String)
+      : typeof initialAnswer === 'string' && pyqAnswerInputType(question) !== 'NAT'
+        ? [initialAnswer]
+        : []
+  );
+  const [numeric, setNumeric] = useState(() =>
+    existingAttempt && pyqAnswerInputType(question) === 'NAT'
+      ? String(existingAttempt.selected_answer ?? '')
+      : ''
+  );
+  const [decision, setDecision] = useState<MarkDecision | null>(
+    existingAttempt?.mark_decision ?? null
+  );
+  const [startedAt, setStartedAt] = useState<number | null>(() =>
+    existingAttempt ? null : Date.now()
+  );
+  const [localAttempt, setLocalAttempt] = useState<PyqAttemptRow | null>(existingAttempt);
+  const [submitting, setSubmitting] = useState(false);
+  const [reporting, setReporting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const captureRef = useRef<HTMLDivElement>(null);
+  const submitted = localAttempt ?? existingAttempt;
+  const liveSeconds = useTimer(submitted ? null : startedAt);
+  const shownSeconds = submitted?.time_spent_sec ?? liveSeconds;
+  const inputType = pyqAnswerInputType(question);
+  const hasAnswer =
+    inputType === 'NAT'
+      ? numeric.trim() !== '' && Number.isFinite(Number(numeric))
+      : choices.length > 0;
+  const canSubmit = !!decision && (decision === 'SKIP' || hasAnswer) && !submitting;
+
+  useEffect(() => {
+    if (!existingAttempt) return;
+    const selected = existingAttempt.selected_answer;
+    setChoices(
+      Array.isArray(selected)
+        ? selected.map(String)
+        : typeof selected === 'string' && inputType !== 'NAT'
+          ? [selected]
+          : []
+    );
+    setNumeric(inputType === 'NAT' ? String(selected ?? '') : '');
+    setDecision(existingAttempt.mark_decision);
+    setLocalAttempt(existingAttempt);
+    setStartedAt(null);
+  }, [existingAttempt, inputType]);
+
+  function selectedAnswer(): PyqSelectedAnswer {
+    if (decision === 'SKIP') return null;
+    if (inputType === 'NAT') return numeric.trim() === '' ? null : numeric.trim();
+    if (inputType === 'MSQ') return choices.slice().sort();
+    return choices[0] ?? null;
+  }
+
+  async function submitAnswer() {
+    if (!decision || !canSubmit || submitted || submitting) return;
+    setSubmitting(true);
+    setSubmitError(null);
+    try {
+      const roundAttemptId = pyqReattemptAttemptId(row.id, row.history.length);
+      const alreadySaved = await db.pyq_attempts.get(roundAttemptId);
+      if (alreadySaved) {
+        setLocalAttempt(alreadySaved);
+        return;
+      }
+      const committedAtMs = Date.now();
+      const questionStartedAtMs = Math.min(startedAt ?? committedAtMs, committedAtMs);
+      let screenshotUrl = sourceAttempt.screenshot_url;
+      try {
+        screenshotUrl = captureRef.current
+          ? await captureElementToDataUrl(captureRef.current, { theme: 'light' })
+          : screenshotUrl;
+      } catch {
+        // The immutable HTML snapshot still keeps the exact question auditable.
+      }
+      const attempt = createPyqReattemptAttemptRow({
+        userId,
+        reattemptId: row.id,
+        completedRoundCount: row.history.length,
+        sourceAttempt,
+        question,
+        selectedAnswer: selectedAnswer(),
+        decision,
+        questionStartedAtMs,
+        committedAtMs,
+        screenshotUrl,
+        attemptNumber: attempts.length + 1
+      });
+      await writeLocal('pyq_attempts', attempt);
+      setLocalAttempt(attempt);
+      setStartedAt(null);
+    } catch (error) {
+      setSubmitError(
+        error instanceof Error
+          ? `Answer was not committed: ${error.message}`
+          : 'Answer was not committed. Your selection is still here; try again.'
+      );
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  async function report(result: 'clean' | 'fail') {
+    if (!submitted || reporting) return;
+    setReporting(true);
+    try {
+      await onResult(result, submitted.time_spent_sec);
+    } finally {
+      setReporting(false);
+    }
+  }
+
+  return (
+    <div className="mx-auto flex w-full max-w-5xl flex-col gap-4">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border pb-3">
+        <button
+          type="button"
+          onClick={onExit}
+          className="inline-flex items-center gap-1 text-[12px] font-medium text-text-muted hover:text-text"
+        >
+          <ArrowLeft size={14} /> Exit test
+        </button>
+        <div className="flex items-center gap-3">
+          <span className="u-num text-[12px] text-text-muted">
+            Q {position}/{total}
+          </span>
+          <span className="inline-flex items-center gap-1 font-mono text-[12px] text-text-faint">
+            <Clock3 size={13} />
+            {secondsToClock(shownSeconds)}
+          </span>
+        </div>
+      </div>
+
+      <div ref={captureRef}>
+        <Card className="overflow-hidden">
+          <CardHeader
+            title={
+              <span className="flex flex-wrap items-center gap-2">
+                <span>{question.paperLabel}</span>
+                <span className="text-border-hover">/</span>
+                <span>Q {question.number}</span>
+              </span>
+            }
+            aside={
+              <div className="flex flex-wrap gap-1.5">
+                <Badge tone="accent">{question.subject}</Badge>
+                <Badge>{question.type}</Badge>
+                {question.marks ? <Badge>{question.marks} mark</Badge> : null}
+              </div>
+            }
+          />
+          <CardBody className="p-5 sm:p-7">
+            <PyqQuestionContent html={question.html} />
+          </CardBody>
+        </Card>
+      </div>
+
+      <Card>
+        <CardBody className="grid gap-5 p-4 sm:p-5 lg:grid-cols-[minmax(0,1fr)_minmax(310px,0.7fr)]">
+          <PyqAnswerPad
+            question={question}
+            choices={choices}
+            numeric={numeric}
+            disabled={!!submitted}
+            onChoices={setChoices}
+            onNumeric={setNumeric}
+          />
+          <div className="flex flex-col gap-4 border-t border-border pt-4 lg:border-l lg:border-t-0 lg:pl-5 lg:pt-0">
+            <PyqDecisionButtons value={decision} disabled={!!submitted} onChange={setDecision} />
+            {!submitted ? (
+              <div>
+                <Button
+                  variant="primary"
+                  onClick={() => void submitAnswer()}
+                  disabled={!canSubmit}
+                  className="w-full"
+                >
+                  Commit & reveal key
+                </Button>
+                {submitError ? (
+                  <p role="alert" className="mt-2 text-[12px] leading-relaxed text-danger">
+                    {submitError}
+                  </p>
+                ) : null}
+              </div>
+            ) : (
+              <div className="flex flex-col gap-3">
+                <PyqAnswerHistory
+                  question={question}
+                  attempts={attempts}
+                  currentAttempt={submitted}
+                />
+                <p className="text-[12px] leading-relaxed text-text-muted">
+                  Clean means the final answer and method were correct without help. The submitted
+                  answer and exact key are already stored.
+                </p>
+                <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                  <Button variant="danger" onClick={() => void report('fail')} disabled={reporting}>
+                    Failed — reset to D3
+                  </Button>
+                  <Button
+                    onClick={() => void report('clean')}
+                    disabled={reporting || submitted.mark_correct !== true}
+                  >
+                    Clean — answer + method
+                  </Button>
+                </div>
+              </div>
+            )}
+          </div>
+        </CardBody>
+      </Card>
+    </div>
   );
 }
 
@@ -463,11 +939,7 @@ function ReattemptSession({
               separately.
             </p>
             <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
-              <Button
-                variant="danger"
-                onClick={() => void report('fail')}
-                disabled={reporting}
-              >
+              <Button variant="danger" onClick={() => void report('fail')} disabled={reporting}>
                 Failed — reset to D3
               </Button>
               <Button onClick={() => void report('clean')} disabled={reporting}>
@@ -527,6 +999,10 @@ export default function Reattempts() {
     () => (userId ? db.reattempts.where('user_id').equals(userId).toArray() : []),
     [userId]
   );
+  const pyqAttempts = useLiveQuery(
+    () => (userId ? db.pyq_attempts.where('user_id').equals(userId).toArray() : []),
+    [userId]
+  );
 
   const questionIds = useMemo(
     () => [...new Set((reattempts ?? []).map((row) => row.question_id))],
@@ -545,6 +1021,14 @@ export default function Reattempts() {
     }
     return byId;
   }, [questions]);
+  const pyqSourceByQuestionId = useMemo(() => {
+    const byQuestionId = new Map<string, PyqAttemptRow>();
+    for (const questionId of questionIds) {
+      const source = pyqSourceAttemptForJournalQuestion(questionId, pyqAttempts ?? []);
+      if (source) byQuestionId.set(questionId, source);
+    }
+    return byQuestionId;
+  }, [pyqAttempts, questionIds]);
 
   const { due, upcoming, mastered } = useMemo(
     () => buildReattemptQueue(reattempts ?? [], today),
@@ -566,6 +1050,21 @@ export default function Reattempts() {
     }));
   }, [upcoming, qById]);
   const activeRow = reattemptId ? due.find((row) => row.id === reattemptId) : undefined;
+  const activePyqSource = activeRow
+    ? (pyqSourceByQuestionId.get(activeRow.question_id) ?? null)
+    : null;
+  const activePyqQuestion = activePyqSource ? pyqQuestionFromAttempt(activePyqSource) : null;
+  const activePyqAttempts = activePyqSource
+    ? (pyqAttempts ?? [])
+        .filter((candidate) => candidate.question_uid === activePyqSource.question_uid)
+        .sort((a, b) => a.attempted_at.localeCompare(b.attempted_at))
+    : [];
+  const existingRoundAttempt = activeRow
+    ? ((pyqAttempts ?? []).find(
+        (candidate) =>
+          candidate.id === pyqReattemptAttemptId(activeRow.id, activeRow.history.length)
+      ) ?? null)
+    : null;
 
   useEffect(() => {
     if (reattemptId || searchParams.get('open') !== 'first' || due.length === 0) return;
@@ -574,12 +1073,16 @@ export default function Reattempts() {
 
   useEffect(() => {
     if (!activeRow) return;
+    if (activePyqSource) {
+      setAttempt(null);
+      return;
+    }
     setAttempt((current) => {
       if (current?.rowId === activeRow.id) return current;
       if (current && current.rowId !== activeRow.id) return current;
       return { rowId: activeRow.id, startedAt: Date.now(), elapsed: null };
     });
-  }, [activeRow]);
+  }, [activePyqSource, activeRow]);
 
   function openSession(rowId: string) {
     if (attempt && attempt.rowId !== rowId) {
@@ -596,9 +1099,13 @@ export default function Reattempts() {
 
   async function onResult(row: ReattemptRow, result: 'clean' | 'fail', elapsed: number) {
     const updated = await recordReattemptResult(row, result, today, elapsed);
-    const remaining = due.filter((candidate) => candidate.id !== row.id).length;
+    const remainingRows = due.filter((candidate) => candidate.id !== row.id);
+    const next = remainingRows[0];
+    const remaining = remainingRows.length;
     setAttempt(null);
-    navigate('/reattempts', { replace: true });
+    navigate(next ? `/reattempts/${encodeURIComponent(next.id)}` : '/reattempts', {
+      replace: true
+    });
     if (updated.stage === 'MASTERED') {
       pushToast(
         remaining > 0 ? `Mastered — ${remaining} due remaining.` : 'Mastered — queue cleared.',
@@ -637,7 +1144,34 @@ export default function Reattempts() {
     );
   }
 
+  if (activeRow && pyqAttempts === undefined) {
+    return (
+      <Card>
+        <CardBody className="py-12 text-center text-[13px] text-text-faint">
+          Opening due test…
+        </CardBody>
+      </Card>
+    );
+  }
+
   if (activeRow) {
+    if (userId && activePyqSource && activePyqQuestion) {
+      return (
+        <PyqReattemptSession
+          key={activeRow.id}
+          userId={userId}
+          row={activeRow}
+          question={activePyqQuestion}
+          sourceAttempt={activePyqSource}
+          attempts={activePyqAttempts}
+          existingAttempt={existingRoundAttempt}
+          position={Math.max(1, due.findIndex((row) => row.id === activeRow.id) + 1)}
+          total={due.length}
+          onExit={() => navigate('/reattempts')}
+          onResult={(result, elapsed) => onResult(activeRow, result, elapsed)}
+        />
+      );
+    }
     return (
       <ReattemptSession
         row={activeRow}
@@ -647,15 +1181,11 @@ export default function Reattempts() {
         total={due.length}
         attempt={attempt}
         onExit={() => navigate('/reattempts')}
-        onStart={() =>
-          setAttempt({ rowId: activeRow.id, startedAt: Date.now(), elapsed: null })
-        }
+        onStart={() => setAttempt({ rowId: activeRow.id, startedAt: Date.now(), elapsed: null })}
         onFinish={(seconds) =>
           setAttempt({ rowId: activeRow.id, startedAt: null, elapsed: seconds })
         }
-        onRestart={() =>
-          setAttempt({ rowId: activeRow.id, startedAt: Date.now(), elapsed: null })
-        }
+        onRestart={() => setAttempt({ rowId: activeRow.id, startedAt: Date.now(), elapsed: null })}
         onResult={(result, elapsed) => onResult(activeRow, result, elapsed)}
         onSavePrompt={savePrompt}
         onSaveAnswer={saveAnswer}
@@ -676,15 +1206,20 @@ export default function Reattempts() {
 
       {due.length > 0 ? (
         <section className="flex flex-col gap-3" aria-label="Questions due now">
-          <div className="flex items-end justify-between gap-4 px-1">
+          <div className="flex flex-wrap items-end justify-between gap-4 px-1">
             <div>
               <p className="u-label text-accent">Due now</p>
               <p className="mt-1 text-[12.5px] leading-relaxed text-text-muted">
-                Choose a question to launch its own timed test session. Photos open full-screen and
-                support pinch or button zoom.
+                Start the due test with the original PYQ options, timer, and answer logging.
+                Manually captured questions keep their saved prompt or photo.
               </p>
             </div>
-            <span className="u-num text-[12px] text-text-faint">{due.length}</span>
+            <div className="flex items-center gap-3">
+              <span className="u-num text-[12px] text-text-faint">{due.length}</span>
+              <Button variant="primary" onClick={() => openSession(due[0].id)}>
+                <Play size={15} /> Start test
+              </Button>
+            </div>
           </div>
           {due.map((row) => (
             <QueueCard

@@ -45,6 +45,121 @@ export function pyqJournalQuestionId(attemptId: string): string {
   return uuidFromString(`pyq-journal-question:${attemptId}`);
 }
 
+/**
+ * Resolve the immutable PYQ receipt that produced an auto-journal row. The
+ * journal ID is deterministic, so this does not rely on lossy source labels or
+ * question text matching.
+ */
+export function pyqSourceAttemptForJournalQuestion(
+  journalQuestionId: string,
+  attempts: PyqAttemptRow[]
+): PyqAttemptRow | null {
+  return (
+    attempts.find(
+      (attempt) =>
+        attempt.capture_version === 2 &&
+        attempt.question_snapshot !== null &&
+        pyqJournalQuestionId(attempt.id) === journalQuestionId
+    ) ?? null
+  );
+}
+
+/** Restore the exact bundled PYQ, including its original option HTML and key. */
+export function pyqQuestionFromAttempt(attempt: PyqAttemptRow): PyqQuestion | null {
+  const snapshot = attempt.question_snapshot;
+  if (attempt.capture_version !== 2 || !snapshot) return null;
+  return {
+    id: snapshot.question_uid,
+    year: snapshot.year,
+    set: snapshot.set,
+    number: snapshot.number,
+    paperLabel: snapshot.paper_label,
+    subject: snapshot.subject,
+    subjectSlug: snapshot.subject_slug,
+    topic: snapshot.topic,
+    topicSlug: snapshot.topic_slug,
+    subtopics: [...snapshot.subtopics],
+    marks: snapshot.marks,
+    type: snapshot.type as PyqQuestion['type'],
+    answer: attempt.correct_answer as PyqQuestion['answer'],
+    tolerance: snapshot.tolerance ? { ...snapshot.tolerance } : null,
+    answerStatus: snapshot.answer_status,
+    html: snapshot.html,
+    sourceUrl: snapshot.source_url,
+    answerSource: snapshot.answer_source
+  };
+}
+
+/** One durable receipt per due-round, even across reloads before ladder grading. */
+export function pyqReattemptAttemptId(reattemptId: string, completedRoundCount: number): string {
+  return uuidFromString(`pyq-reattempt:${reattemptId}:${completedRoundCount}`);
+}
+
+/**
+ * Create the capture-version-2 receipt for a spaced PYQ re-attempt. Re-attempt
+ * receipts intentionally have no practice-session FK: they belong to the PYQ's
+ * chronological answer history, not to the already-closed original set.
+ */
+export function createPyqReattemptAttemptRow(args: {
+  userId: string;
+  reattemptId: string;
+  completedRoundCount: number;
+  sourceAttempt: PyqAttemptRow;
+  question: PyqQuestion;
+  selectedAnswer: PyqSelectedAnswer;
+  decision: MarkDecision;
+  questionStartedAtMs: number;
+  committedAtMs: number;
+  screenshotUrl: string | null;
+  attemptNumber: number;
+}): PyqAttemptRow {
+  const syntheticSession: PyqSessionRow = {
+    id: args.sourceAttempt.pyq_session_id ?? args.sourceAttempt.id,
+    user_id: args.userId,
+    bank_version: args.sourceAttempt.bank_version,
+    config: {
+      subjectSlug: args.question.subjectSlug,
+      topicSlug: args.question.topicSlug,
+      fromYear: args.question.year,
+      toYear: args.question.year,
+      type:
+        args.question.type === 'MCQ' || args.question.type === 'MSQ' || args.question.type === 'NAT'
+          ? args.question.type
+          : 'all',
+      order: 'unseen',
+      count: '5'
+    },
+    question_uids: [args.question.id],
+    completed_question_uids: [],
+    current_index: 0,
+    completed_count: 0,
+    elapsed_sec: 0,
+    status: 'active',
+    current_question_uid: args.question.id,
+    current_question_started_at: new Date(args.questionStartedAtMs).toISOString(),
+    started_at: new Date(args.questionStartedAtMs).toISOString(),
+    updated_at: new Date(args.questionStartedAtMs).toISOString(),
+    completed_at: null
+  };
+  const attempt = createPyqAttemptRow({
+    userId: args.userId,
+    session: syntheticSession,
+    question: args.question,
+    selectedAnswer: args.selectedAnswer,
+    decision: args.decision,
+    bankVersion: args.sourceAttempt.bank_version,
+    questionStartedAtMs: args.questionStartedAtMs,
+    committedAtMs: args.committedAtMs,
+    screenshotUrl: args.screenshotUrl,
+    attemptNumber: args.attemptNumber
+  });
+  return {
+    ...attempt,
+    id: pyqReattemptAttemptId(args.reattemptId, args.completedRoundCount),
+    pyq_session_id: null
+  };
+}
+
 /** Human-readable subject for the canonical session paired with a PYQ set. */
 export function pyqPracticeSubject(
   rows: Array<Pick<PyqQuestion, 'subject'> | Pick<PyqAttemptRow, 'subject'>>
@@ -181,7 +296,6 @@ export function pausePyqSession(session: PyqSessionRow, now = nowISO()): PyqSess
     updated_at: now
   };
 }
-
 
 export function pyqQuestionSnapshot(question: PyqQuestion): PyqQuestionSnapshot {
   return {

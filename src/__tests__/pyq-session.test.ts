@@ -1,9 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import {
   createPyqAttemptRow,
+  createPyqReattemptAttemptRow,
   createPyqSessionRow,
   pyqAttemptId,
   pyqJournalQuestionId,
+  pyqQuestionFromAttempt,
+  pyqReattemptAttemptId,
+  pyqSourceAttemptForJournalQuestion,
   pyqPracticeSessionRow,
   pyqPracticeSubject,
   advancePyqSessionProgress,
@@ -128,11 +132,7 @@ describe('PYQ session logic and determinism', () => {
       advancePyqSessionProgress(active, question.id, 1, 61),
       '2026-08-08T08:02:00.000Z'
     );
-    const canonical = pyqPracticeSessionRow(
-      completed,
-      pyqPracticeSubject([question]),
-      'UTC'
-    );
+    const canonical = pyqPracticeSessionRow(completed, pyqPracticeSubject([question]), 'UTC');
 
     expect(canonical).toMatchObject({
       id: completed.id,
@@ -202,5 +202,59 @@ describe('PYQ session logic and determinism', () => {
     expect(attempt.mark_correct).toBeNull();
     expect(attempt.time_spent_ms).toBe(1);
     expect(attempt.time_spent_sec).toBe(1);
+  });
+
+  it('reconstructs an exact PYQ and creates a durable second-attempt receipt', () => {
+    const session = createPyqSessionRow('user-1', '2.0.0', mockConfig, [question]);
+    const firstAttempt = createPyqAttemptRow({
+      userId: 'user-1',
+      session,
+      question,
+      selectedAnswer: 'A',
+      decision: 'MARK',
+      bankVersion: '2.0.0',
+      questionStartedAtMs: 1_000,
+      committedAtMs: 2_000,
+      screenshotUrl: 'data:image/png;base64,first'
+    });
+    const journalQuestionId = pyqJournalQuestionId(firstAttempt.id);
+
+    expect(pyqSourceAttemptForJournalQuestion(journalQuestionId, [firstAttempt])).toBe(
+      firstAttempt
+    );
+    expect(pyqSourceAttemptForJournalQuestion('unrelated-journal-row', [firstAttempt])).toBeNull();
+
+    const restored = pyqQuestionFromAttempt(firstAttempt);
+    expect(restored).toMatchObject({
+      id: question.id,
+      html: question.html,
+      answer: 'B',
+      type: 'MCQ'
+    });
+
+    const secondAttempt = createPyqReattemptAttemptRow({
+      userId: 'user-1',
+      reattemptId: 'reattempt-1',
+      completedRoundCount: 0,
+      sourceAttempt: firstAttempt,
+      question: restored!,
+      selectedAnswer: 'B',
+      decision: 'MARK',
+      questionStartedAtMs: 3_000,
+      committedAtMs: 4_250,
+      screenshotUrl: 'data:image/png;base64,second',
+      attemptNumber: 2
+    });
+
+    expect(secondAttempt).toMatchObject({
+      id: pyqReattemptAttemptId('reattempt-1', 0),
+      pyq_session_id: null,
+      question_uid: question.id,
+      attempt_number: 2,
+      selected_answer: 'B',
+      correct_answer: 'B',
+      mark_correct: true,
+      capture_version: 2
+    });
   });
 });

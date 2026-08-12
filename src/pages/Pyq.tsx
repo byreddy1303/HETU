@@ -1216,7 +1216,7 @@ export default function Pyq() {
     if (!current) throw new Error('No active question to capture.');
     try {
       const captured = questionCaptureRef.current
-        ? await captureElementToDataUrl(questionCaptureRef.current)
+        ? await captureElementToDataUrl(questionCaptureRef.current, { theme: 'light' })
         : null;
       if (captured) return captured;
     } catch {

@@ -2,6 +2,7 @@
 // data URLs on the QuestionRow.image_url column so they ride the same offline
 // sync path as everything else. Long-term this should move to Supabase Storage,
 // but for now — with local-first + small photo counts — DataURLs are enough.
+import { THEME_COLORS, type ResolvedTheme } from '@/lib/theme';
 
 const MAX_EDGE = 1400;
 const JPEG_QUALITY = 0.82;
@@ -12,6 +13,10 @@ export interface CompressedImage {
   width: number;
   height: number;
   bytes: number;
+}
+
+export interface ElementCaptureOptions {
+  theme?: ResolvedTheme;
 }
 
 export class ImageTooLargeError extends Error {
@@ -90,7 +95,10 @@ async function waitForElementMedia(element: HTMLElement): Promise<void> {
 }
 
 /** Rasterize a DOM node (e.g. the rendered PYQ card) to a compressed JPEG data URL. */
-export async function captureElementToDataUrl(element: HTMLElement): Promise<string | null> {
+export async function captureElementToDataUrl(
+  element: HTMLElement,
+  options: ElementCaptureOptions = {}
+): Promise<string | null> {
   const rect = element.getBoundingClientRect();
   if (rect.width < 1 || rect.height < 1) return null;
   try {
@@ -99,10 +107,14 @@ export async function captureElementToDataUrl(element: HTMLElement): Promise<str
     const canvas = await html2canvas(element, {
       useCORS: true,
       allowTaint: false,
-      backgroundColor: null,
+      backgroundColor: options.theme ? THEME_COLORS[options.theme] : null,
       scale: Math.min(window.devicePixelRatio || 1, 2),
       logging: false,
-      onclone: (_doc, clone) => {
+      onclone: (clonedDocument, clone) => {
+        if (options.theme) {
+          clonedDocument.documentElement.dataset.theme = options.theme;
+          clonedDocument.documentElement.style.colorScheme = options.theme;
+        }
         clone.style.overflow = 'visible';
       }
     });

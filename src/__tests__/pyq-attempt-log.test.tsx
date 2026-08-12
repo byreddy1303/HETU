@@ -6,6 +6,7 @@ import { db } from '@/lib/db';
 import Pyq from '@/pages/Pyq';
 import type { PyqManifest, PyqQuestion } from '@/lib/pyq';
 import { createPyqSessionRow } from '@/lib/pyq-session';
+import { captureElementToDataUrl } from '@/lib/image';
 
 const USER = '00000000-0000-4000-8000-000000000001';
 
@@ -74,6 +75,7 @@ vi.mock('@/lib/image', async (importOriginal) => {
 
 describe('PYQ committed-attempt logging', () => {
   beforeEach(async () => {
+    vi.mocked(captureElementToDataUrl).mockClear();
     vi.stubGlobal('scrollTo', vi.fn());
     vi.spyOn(globalThis, 'fetch').mockImplementation(async (input) => {
       const url = new URL(String(input), 'https://air-journal.test');
@@ -115,6 +117,10 @@ describe('PYQ committed-attempt logging', () => {
     await user.click(screen.getByRole('button', { name: 'A' }));
     await user.click(screen.getByRole('button', { name: /^Answered/ }));
     await user.click(screen.getByRole('button', { name: 'Commit & reveal key' }));
+
+    expect(captureElementToDataUrl).toHaveBeenCalledWith(expect.any(HTMLElement), {
+      theme: 'light'
+    });
 
     const receipt = await screen.findByRole('region', { name: 'PYQ attempt receipt' });
     expect(within(receipt).getByText('Not correct')).toBeInTheDocument();

@@ -15,24 +15,10 @@
 //     dedicated Requests tab with a count badge — they never go to Settings.
 //   - A Realtime subscription on public.buddies keeps the tabs live: new
 //     incoming requests, accepts, and declines show up without a refresh.
-import {
-  type FormEvent,
-  useCallback,
-  useEffect,
-  useMemo,
-  useState
-} from 'react';
+import { type FormEvent, useCallback, useEffect, useMemo, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { motion, AnimatePresence } from 'motion/react';
-import {
-  ArrowLeft,
-  Check,
-  MessageSquarePlus,
-  RefreshCcw,
-  Search,
-  UserPlus,
-  X
-} from 'lucide-react';
+import { motion, AnimatePresence, useReducedMotion } from 'motion/react';
+import { BookOpen, Check, MessageSquarePlus, RefreshCcw, Search, UserPlus, X } from 'lucide-react';
 import type { RealtimeChannel } from '@supabase/supabase-js';
 import PageHeader from '@/components/layout/PageHeader';
 import { Card, CardBody } from '@/components/ui/Card';
@@ -40,13 +26,16 @@ import { Button } from '@/components/ui/Button';
 import { Dialog } from '@/components/ui/Dialog';
 import { Textarea } from '@/components/ui/Textarea';
 import BuddyChat from '@/components/buddy/BuddyChat';
+import { BuddyAvatar } from '@/components/buddy/BuddyAvatar';
 import { supabase, supabaseConfigured } from '@/lib/supabase';
 import { sendBuddyRequest } from '@/lib/edge';
 import { useAuth } from '@/hooks/useAuth';
 import { useUiStore } from '@/stores/ui';
 import type { BuddyMessageRow, BuddyRow, UserRow } from '@/types';
-import { formatDate } from '@/lib/utils';
+import { shortBuddyTime } from '@/lib/buddy';
 import { cn } from '@/lib/utils';
+import { isNativeApp } from '@/lib/native';
+import { useMediaQuery } from '@/hooks/useMediaQuery';
 
 interface BuddyRowExt extends BuddyRow {
   requested_by: string | null;
@@ -120,6 +109,26 @@ export default function Buddy() {
   const [declineTarget, setDeclineTarget] = useState<BuddyView | null>(null);
   const [declineReason, setDeclineReason] = useState('');
   const pushToast = useUiStore((s) => s.pushToast);
+  const reduceMotion = useReducedMotion();
+  const desktopLayout = useMediaQuery('(min-width: 768px)') && !isNativeApp;
+  const conversationVisible = desktopLayout || mobileView === 'chat';
+
+  const closeMobileChat = useCallback(() => {
+    setMobileView('list');
+    const next = new URLSearchParams(searchParams);
+    next.delete('chat');
+    setSearchParams(next, { replace: true });
+  }, [searchParams, setSearchParams]);
+
+  useEffect(() => {
+    if (mobileView !== 'chat') return;
+    const onNativeBack = (event: Event) => {
+      event.preventDefault();
+      closeMobileChat();
+    };
+    window.addEventListener('air:native-back', onNativeBack);
+    return () => window.removeEventListener('air:native-back', onNativeBack);
+  }, [closeMobileChat, mobileView]);
 
   const reload = useCallback(async () => {
     if (!userId) return;
@@ -188,29 +197,32 @@ export default function Buddy() {
     setLoading(false);
   }, [userId]);
 
-  const refreshPreview = useCallback(async (buddyId: string) => {
-    if (!userId) return;
-    const [{ data: message }, { count }] = await Promise.all([
-      supabase
-        .from('buddy_messages')
-        .select('id, buddy_id, sender_id, kind, body, question_ref, created_at, read_at')
-        .eq('buddy_id', buddyId)
-        .order('created_at', { ascending: false })
-        .limit(1),
-      supabase
-        .from('buddy_messages')
-        .select('id', { count: 'exact', head: true })
-        .eq('buddy_id', buddyId)
-        .neq('sender_id', userId)
-        .is('read_at', null)
-    ]);
-    const last = ((message as BuddyMessageRow[]) ?? [])[0] ?? null;
-    setBuddies((current) =>
-      current.map((view) =>
-        view.row.id === buddyId ? { ...view, last, unreadCount: count ?? 0 } : view
-      )
-    );
-  }, [userId]);
+  const refreshPreview = useCallback(
+    async (buddyId: string) => {
+      if (!userId) return;
+      const [{ data: message }, { count }] = await Promise.all([
+        supabase
+          .from('buddy_messages')
+          .select('id, buddy_id, sender_id, kind, body, question_ref, created_at, read_at')
+          .eq('buddy_id', buddyId)
+          .order('created_at', { ascending: false })
+          .limit(1),
+        supabase
+          .from('buddy_messages')
+          .select('id', { count: 'exact', head: true })
+          .eq('buddy_id', buddyId)
+          .neq('sender_id', userId)
+          .is('read_at', null)
+      ]);
+      const last = ((message as BuddyMessageRow[]) ?? [])[0] ?? null;
+      setBuddies((current) =>
+        current.map((view) =>
+          view.row.id === buddyId ? { ...view, last, unreadCount: count ?? 0 } : view
+        )
+      );
+    },
+    [userId]
+  );
 
   useEffect(() => {
     if (!userId || sandbox || !supabaseConfigured) {
@@ -229,7 +241,9 @@ export default function Buddy() {
         'postgres_changes',
         { event: '*', schema: 'public', table: 'buddy_messages' },
         (payload) => {
-          const row = (payload.new && Object.keys(payload.new).length > 0 ? payload.new : payload.old) as Partial<BuddyMessageRow>;
+          const row = (
+            payload.new && Object.keys(payload.new).length > 0 ? payload.new : payload.old
+          ) as Partial<BuddyMessageRow>;
           if (row.buddy_id) void refreshPreview(row.buddy_id);
         }
       )
@@ -333,6 +347,7 @@ export default function Buddy() {
         setActiveId(bId);
         setTab('chats');
         setMobileView('chat');
+        setSearchParams({ chat: bId }, { replace: desktopLayout });
       } else {
         pushToast('Request declined.', 'success');
         setDeclineTarget(null);
@@ -390,6 +405,9 @@ export default function Buddy() {
     if (activeId === bId) {
       setActiveId(null);
       setMobileView('list');
+      const next = new URLSearchParams(searchParams);
+      next.delete('chat');
+      setSearchParams(next, { replace: true });
     }
     void reload();
   }
@@ -427,10 +445,13 @@ export default function Buddy() {
       setMobileView('chat');
       return;
     }
+    if (!linkedChatId && !desktopLayout && mobileView === 'chat') {
+      setMobileView('list');
+    }
     if (!active.some((buddy) => buddy.row.id === activeId)) {
       setActiveId(active[0].row.id);
     }
-  }, [active, activeId, linkedChatId]);
+  }, [active, activeId, desktopLayout, linkedChatId, mobileView]);
 
   const showLocalMsg = sandbox || !supabaseConfigured;
 
@@ -456,33 +477,36 @@ export default function Buddy() {
 
   return (
     <div className="native-buddy-page flex h-[calc(100dvh-8rem)] flex-col gap-3">
-      <div className="native-buddy-header flex flex-wrap items-center justify-between gap-2">
-        <div>
-          <h1 className="font-display text-[22px] font-bold leading-tight text-text">
-            Buddy
-          </h1>
-          <p className="text-[12.5px] text-text-muted">
-            Chats stay between you and one peer. Sharing a question hides your tags.
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button variant="ghost" size="sm" onClick={() => void reload()} disabled={loading}>
-            <RefreshCcw size={11} strokeWidth={1.75} className="mr-1" />
-            Refresh
-          </Button>
-          <Button
-            variant="primary"
-            size="sm"
-            onClick={() => setShowAddPanel((v) => !v)}
+      <AnimatePresence initial={false}>
+        {desktopLayout || mobileView === 'list' ? (
+          <motion.div
+            initial={reduceMotion ? false : { opacity: 0, y: -6 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={reduceMotion ? undefined : { opacity: 0, y: -6 }}
+            className="native-buddy-header flex flex-wrap items-center justify-between gap-2"
           >
-            <UserPlus size={11} strokeWidth={2} className="mr-1" />
-            New buddy
-          </Button>
-        </div>
-      </div>
+            <div>
+              <h1 className="font-display text-[22px] font-bold leading-tight text-text">Buddy</h1>
+              <p className="text-[12.5px] text-text-muted">
+                Chats stay between you and one peer. Sharing a question hides your tags.
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button variant="ghost" size="sm" onClick={() => void reload()} disabled={loading}>
+                <RefreshCcw size={11} strokeWidth={1.75} className="mr-1" />
+                Refresh
+              </Button>
+              <Button variant="primary" size="sm" onClick={() => setShowAddPanel((v) => !v)}>
+                <UserPlus size={11} strokeWidth={2} className="mr-1" />
+                New buddy
+              </Button>
+            </div>
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
 
       <AnimatePresence>
-        {showAddPanel && (
+        {showAddPanel && (desktopLayout || mobileView === 'list') ? (
           <motion.div
             initial={{ opacity: 0, y: -6, height: 0 }}
             animate={{ opacity: 1, y: 0, height: 'auto' }}
@@ -529,128 +553,133 @@ export default function Buddy() {
               </CardBody>
             </Card>
           </motion.div>
-        )}
+        ) : null}
       </AnimatePresence>
 
       <div className="native-buddy-layout grid min-h-0 flex-1 grid-cols-1 gap-3 overflow-hidden md:grid-cols-[300px_minmax(0,1fr)]">
-        {/* Buddies list */}
-        <div
-          className={cn(
-            'native-buddy-list flex min-h-0 flex-col overflow-hidden rounded-lg border border-border bg-bg-raised',
-            mobileView === 'chat' ? 'hidden md:flex' : 'flex'
-          )}
-        >
-          <div className="flex items-center gap-1 border-b border-border px-2 py-2">
-            <TabPill
-              on={tab === 'chats'}
-              onClick={() => setTab('chats')}
-              label="Chats"
-              count={active.length}
-            />
-            <TabPill
-              on={tab === 'requests'}
-              onClick={() => setTab('requests')}
-              label="Requests"
-              count={incoming.length + outgoing.length}
-              highlight={incoming.length > 0}
-            />
-            <TabPill
-              on={tab === 'paused'}
-              onClick={() => setTab('paused')}
-              label="Paused"
-              count={paused.length}
-            />
-          </div>
-
-          {tab === 'chats' && (
-            <ChatsTab
-              loading={loading}
-              active={active}
-              activeId={activeId}
-              userId={userId}
-              onPick={(id) => {
-                setActiveId(id);
-                setSearchParams({ chat: id }, { replace: true });
-                setBuddies((current) =>
-                  current.map((buddy) =>
-                    buddy.row.id === id ? { ...buddy, unreadCount: 0 } : buddy
-                  )
-                );
-                setMobileView('chat');
-              }}
-              onNew={() => setShowAddPanel(true)}
-            />
-          )}
-
-          {tab === 'requests' && (
-            <RequestsTab
-              incoming={incoming}
-              outgoing={outgoing}
-              busyId={busyId}
-              onRespond={(id, action) => {
-                if (action === 'accept') {
-                  void onRespond(id, action);
-                } else {
-                  const target = incoming.find((request) => request.row.id === id) ?? null;
-                  setDeclineTarget(target);
-                  setDeclineReason('');
-                }
-              }}
-              onCancel={(id) => void onCancelRequest(id)}
-              onNew={() => setShowAddPanel(true)}
-            />
-          )}
-
-          {tab === 'paused' && (
-            <PausedTab rows={paused} busyId={busyId} onRetry={(buddy) => void onRetry(buddy)} />
-          )}
-        </div>
-
-        {/* Chat pane */}
-        <div
-          className={cn(
-            'native-buddy-pane min-h-0 overflow-hidden',
-            mobileView === 'list' ? 'hidden md:block' : 'block'
-          )}
-        >
-          {activeBuddy && userId ? (
-            <div className="flex h-full min-h-0 flex-col">
-              <div className="native-buddy-back-row mb-2 flex items-center gap-2 md:hidden">
-                <button
-                  type="button"
-                  onClick={() => setMobileView('list')}
-                  className="inline-flex items-center gap-1 rounded border border-border bg-bg-raised px-2 py-1 text-[12px] text-text-muted"
-                >
-                  <ArrowLeft size={12} strokeWidth={1.75} /> Back
-                </button>
-              </div>
-              <div className="min-h-0 flex-1">
-                <BuddyChat
-                  buddyId={activeBuddy.row.id}
-                  meId={userId}
-                  peer={activeBuddy.peer}
-                  onUnfriend={() => void onUnfriend(activeBuddy.row.id)}
+        <AnimatePresence initial={false} mode="popLayout">
+          {desktopLayout || mobileView === 'list' ? (
+            <motion.div
+              key="buddy-list"
+              initial={reduceMotion || desktopLayout ? false : { opacity: 0, x: -28 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={reduceMotion || desktopLayout ? undefined : { opacity: 0, x: -32 }}
+              transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
+              className="native-buddy-list flex min-h-0 flex-col overflow-hidden rounded-lg border border-border bg-bg-raised"
+            >
+              <div className="flex items-center gap-1 border-b border-border px-2 py-2">
+                <TabPill
+                  on={tab === 'chats'}
+                  onClick={() => setTab('chats')}
+                  label="Chats"
+                  count={active.length}
+                />
+                <TabPill
+                  on={tab === 'requests'}
+                  onClick={() => setTab('requests')}
+                  label="Requests"
+                  count={incoming.length + outgoing.length}
+                  highlight={incoming.length > 0}
+                />
+                <TabPill
+                  on={tab === 'paused'}
+                  onClick={() => setTab('paused')}
+                  label="Paused"
+                  count={paused.length}
                 />
               </div>
-            </div>
-          ) : (
-            <div className="flex h-full flex-col items-center justify-center gap-3 rounded-lg border border-dashed border-border bg-bg-overlay/40 p-6 text-center">
-              <MessageSquarePlus size={28} strokeWidth={1.5} className="text-text-faint" />
-              <p className="font-display text-[15px] font-semibold text-text">Start a chat</p>
-              <p className="max-w-[320px] text-[12.5px] leading-relaxed text-text-muted">
-                Pick a buddy from the list, or add one with the{' '}
-                <span className="u-num text-text">New buddy</span> button. Your first message
-                opens the room.
-              </p>
-              {active.length === 0 && (
-                <Button size="sm" variant="primary" onClick={() => setShowAddPanel(true)}>
-                  <UserPlus size={11} strokeWidth={2} className="mr-1" />
-                  New buddy
-                </Button>
+
+              {tab === 'chats' && (
+                <ChatsTab
+                  loading={loading}
+                  active={active}
+                  activeId={activeId}
+                  userId={userId}
+                  onPick={(id) => {
+                    setActiveId(id);
+                    setSearchParams({ chat: id }, { replace: desktopLayout });
+                    setBuddies((current) =>
+                      current.map((buddy) =>
+                        buddy.row.id === id ? { ...buddy, unreadCount: 0 } : buddy
+                      )
+                    );
+                    setMobileView('chat');
+                  }}
+                  onNew={() => setShowAddPanel(true)}
+                />
               )}
-            </div>
-          )}
-        </div>
+
+              {tab === 'requests' && (
+                <RequestsTab
+                  incoming={incoming}
+                  outgoing={outgoing}
+                  busyId={busyId}
+                  onRespond={(id, action) => {
+                    if (action === 'accept') {
+                      void onRespond(id, action);
+                    } else {
+                      const target = incoming.find((request) => request.row.id === id) ?? null;
+                      setDeclineTarget(target);
+                      setDeclineReason('');
+                    }
+                  }}
+                  onCancel={(id) => void onCancelRequest(id)}
+                  onNew={() => setShowAddPanel(true)}
+                />
+              )}
+
+              {tab === 'paused' && (
+                <PausedTab rows={paused} busyId={busyId} onRetry={(buddy) => void onRetry(buddy)} />
+              )}
+            </motion.div>
+          ) : null}
+
+          {desktopLayout || mobileView === 'chat' ? (
+            <motion.div
+              key="buddy-chat"
+              initial={reduceMotion || desktopLayout ? false : { opacity: 0, x: 28 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={reduceMotion || desktopLayout ? undefined : { opacity: 0, x: 32 }}
+              transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
+              className="native-buddy-pane min-h-0 overflow-hidden"
+            >
+              {activeBuddy && userId ? (
+                <div className="flex h-full min-h-0 flex-col">
+                  <div className="min-h-0 flex-1">
+                    <BuddyChat
+                      buddyId={activeBuddy.row.id}
+                      meId={userId}
+                      peer={activeBuddy.peer}
+                      isVisible={conversationVisible}
+                      onBack={closeMobileChat}
+                      onUnfriend={() => void onUnfriend(activeBuddy.row.id)}
+                    />
+                  </div>
+                </div>
+              ) : (
+                <div className="flex h-full flex-col items-center justify-center gap-3 rounded-lg border border-border bg-bg/70 p-6 text-center">
+                  <span className="flex h-12 w-12 items-center justify-center rounded-lg border border-border bg-bg-raised text-ink-marigold shadow-sm">
+                    <BookOpen size={22} strokeWidth={1.5} />
+                  </span>
+                  <p className="font-display text-[16px] font-semibold text-text">
+                    Open a study desk
+                  </p>
+                  <p className="max-w-[320px] text-[12.5px] leading-relaxed text-text-muted">
+                    Pick a buddy from the list, or add one with the{' '}
+                    <span className="u-num text-text">New buddy</span> button. Your first message
+                    opens the room.
+                  </p>
+                  {active.length === 0 && (
+                    <Button size="sm" variant="primary" onClick={() => setShowAddPanel(true)}>
+                      <UserPlus size={11} strokeWidth={2} className="mr-1" />
+                      New buddy
+                    </Button>
+                  )}
+                </div>
+              )}
+            </motion.div>
+          ) : null}
+        </AnimatePresence>
       </div>
 
       {error && (
@@ -728,10 +757,16 @@ function ChatsTab({
   }
   if (active.length === 0) {
     return (
-      <div className="flex flex-col items-start gap-3 p-4">
-        <p className="text-[12.5px] text-text-muted">
-          No active buddies yet. Send a request or accept an incoming one to start chatting.
-        </p>
+      <div className="flex flex-1 flex-col items-center justify-center gap-3 p-6 text-center">
+        <span className="flex h-11 w-11 items-center justify-center rounded-lg border border-border bg-bg text-ink-marigold shadow-sm">
+          <BookOpen size={20} strokeWidth={1.5} />
+        </span>
+        <div>
+          <p className="font-display text-[15px] font-semibold text-text">Find a study buddy</p>
+          <p className="mt-1 max-w-[240px] text-[12.5px] leading-relaxed text-text-muted">
+            Pair by username, then trade doubts and questions without sharing performance tags.
+          </p>
+        </div>
         <Button size="sm" variant="primary" onClick={onNew}>
           <MessageSquarePlus size={11} strokeWidth={2} className="mr-1" />
           New buddy
@@ -749,23 +784,23 @@ function ChatsTab({
               type="button"
               onClick={() => onPick(b.row.id)}
               className={cn(
-                'flex w-full items-center gap-3 px-3 py-3 text-left transition-colors',
-                activeId === b.row.id ? 'bg-accent-faint/40' : 'hover:bg-bg-overlay/60'
+                'relative flex min-h-[72px] w-full items-center gap-3 px-4 py-3 text-left transition-colors',
+                activeId === b.row.id
+                  ? 'bg-accent-faint/35 shadow-[inset_3px_0_0_theme(colors.accent.DEFAULT)]'
+                  : 'hover:bg-bg-overlay/60'
               )}
             >
-              <Avatar name={displayName} active={activeId === b.row.id} />
+              <BuddyAvatar name={displayName} size="lg" />
               <div className="min-w-0 flex-1">
                 <div className="flex items-baseline justify-between gap-2">
-                  <p className="truncate text-[13.5px] font-semibold text-text">
-                    {displayName}
-                  </p>
+                  <p className="truncate text-[13.5px] font-semibold text-text">{displayName}</p>
                   {b.last && (
                     <span className="u-num shrink-0 text-[10.5px] text-text-faint">
-                      {shortTime(b.last.created_at)}
+                      {shortBuddyTime(b.last.created_at)}
                     </span>
                   )}
                 </div>
-                <p className="mt-0.5 truncate text-[11.5px] text-text-faint">
+                <p className="mt-0.5 truncate text-[12px] leading-snug text-text-faint">
                   {b.last
                     ? previewOf(b.last, b.last.sender_id === userId)
                     : `@${peerHandle(b.peer)} · say hi`}
@@ -822,14 +857,10 @@ function RequestsTab({
               const displayName = peerDisplay(b.peer);
               return (
                 <li key={b.row.id} className="flex flex-wrap items-center gap-2 px-3 py-3">
-                  <Avatar name={displayName} />
+                  <BuddyAvatar name={displayName} size="md" />
                   <div className="min-w-0 flex-1">
-                    <p className="truncate text-[13px] font-semibold text-text">
-                      {displayName}
-                    </p>
-                    <p className="u-num truncate text-[11px] text-text-faint">
-                      @{b.peer.username}
-                    </p>
+                    <p className="truncate text-[13px] font-semibold text-text">{displayName}</p>
+                    <p className="u-num truncate text-[11px] text-text-faint">@{b.peer.username}</p>
                   </div>
                   <div className="flex items-center gap-1.5">
                     <Button
@@ -861,14 +892,12 @@ function RequestsTab({
           <ul className="divide-y divide-border">
             {outgoing.map((b) => (
               <li key={b.row.id} className="flex items-center gap-3 px-3 py-2.5">
-                <Avatar name={b.peer.name || `@${b.peer.username}`} />
+                <BuddyAvatar name={b.peer.name || `@${b.peer.username}`} size="md" />
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-[13px] font-semibold text-text">
                     {b.peer.name || `@${b.peer.username}`}
                   </p>
-                  <p className="u-num truncate text-[11px] text-text-faint">
-                    @{b.peer.username}
-                  </p>
+                  <p className="u-num truncate text-[11px] text-text-faint">@{b.peer.username}</p>
                 </div>
                 <Button
                   size="sm"
@@ -897,22 +926,18 @@ function PausedTab({
   onRetry: (buddy: BuddyView) => void;
 }) {
   if (rows.length === 0) {
-    return (
-      <p className="p-4 text-[12.5px] text-text-muted">Nothing paused.</p>
-    );
+    return <p className="p-4 text-[12.5px] text-text-muted">Nothing paused.</p>;
   }
   return (
     <ul className="flex-1 divide-y divide-border overflow-y-auto">
       {rows.map((b) => (
         <li key={b.row.id} className="flex items-center gap-3 px-3 py-2.5">
-          <Avatar name={b.peer.name || `@${b.peer.username}`} />
+          <BuddyAvatar name={b.peer.name || `@${b.peer.username}`} size="md" />
           <div className="min-w-0 flex-1">
             <p className="truncate text-[13px] font-semibold text-text">
               {b.peer.name || `@${b.peer.username}`}
             </p>
-            <p className="u-num truncate text-[11px] text-text-faint">
-              @{b.peer.username}
-            </p>
+            <p className="u-num truncate text-[11px] text-text-faint">@{b.peer.username}</p>
           </div>
           <Button
             size="sm"
@@ -971,34 +996,6 @@ function TabPill({
       )}
     </button>
   );
-}
-
-function Avatar({ name, active = false }: { name: string; active?: boolean }) {
-  const initial = (name || '?').trim().replace(/^@/, '')[0]?.toUpperCase() ?? '?';
-  return (
-    <span
-      className={cn(
-        'flex h-10 w-10 shrink-0 items-center justify-center rounded-full font-display text-[14px] font-bold',
-        active ? 'bg-accent text-accent-contrast' : 'bg-ink-cobalt/15 text-ink-cobalt'
-      )}
-    >
-      {initial}
-    </span>
-  );
-}
-
-function shortTime(iso: string): string {
-  const then = new Date(iso);
-  const now = new Date();
-  const sameDay = then.toDateString() === now.toDateString();
-  if (sameDay) {
-    return then.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
-  }
-  const diffDays = Math.floor((+now - +then) / 86400000);
-  if (diffDays < 7) {
-    return then.toLocaleDateString(undefined, { weekday: 'short' });
-  }
-  return formatDate(iso.slice(0, 10), 'dd MMM');
 }
 
 function previewOf(m: BuddyMessageRow, isMine: boolean): string {

@@ -3,7 +3,7 @@ import { cn } from '@/lib/utils';
 import { haptic, type HapticIntent } from '@/lib/native';
 
 type Variant = 'primary' | 'secondary' | 'ghost' | 'danger';
-type Size = 'sm' | 'md';
+type Size = 'sm' | 'md' | 'icon';
 
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: Variant;
@@ -33,7 +33,8 @@ const variantClasses: Record<Variant, string> = {
 
 const sizeClasses: Record<Size, string> = {
   sm: 'min-h-8 px-3 py-1.5 text-[13px] leading-snug',
-  md: 'min-h-10 px-4 py-2 text-sm leading-snug'
+  md: 'min-h-10 px-4 py-2 text-sm leading-snug',
+  icon: 'h-10 w-10 shrink-0 p-0'
 };
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(

@@ -4,9 +4,11 @@ import {
   buddyPresenceTopic,
   buddyPresenceUserIds,
   buddyRealtimeTopic,
+  groupBuddyMessages,
   isSharedQuestionRef,
   mergeBuddyMessages,
-  safeQuestionRef
+  safeQuestionRef,
+  shortBuddyTime
 } from '@/lib/buddy';
 
 const question: QuestionRow = {
@@ -84,5 +86,32 @@ describe('Buddy helpers', () => {
       peer: [{ user_id: 'peer' }]
     };
     expect(buddyPresenceUserIds(state)).toEqual(['me', 'peer']);
+  });
+
+  it('groups nearby text messages into turns and keeps questions distinct', () => {
+    const first = message('one', '2026-07-21T08:00:00.000Z');
+    const second = message('two', '2026-07-21T08:03:00.000Z');
+    const questionMessage: BuddyMessageRow = {
+      ...message('question', '2026-07-21T08:04:00.000Z'),
+      kind: 'question',
+      body: null,
+      question_ref: safeQuestionRef(question)
+    };
+    const later = message('later', '2026-07-21T08:12:00.000Z');
+
+    const grouped = groupBuddyMessages([first, second, questionMessage, later]);
+
+    expect(grouped).toHaveLength(1);
+    expect(grouped[0].clusters.map((cluster) => cluster.rows.map((row) => row.id))).toEqual([
+      ['one', 'two'],
+      ['question'],
+      ['later']
+    ]);
+  });
+
+  it('formats compact chat-list times without a refresh timer', () => {
+    const now = new Date('2026-07-21T10:00:30.000Z');
+    expect(shortBuddyTime('2026-07-21T10:00:00.000Z', now)).toBe('now');
+    expect(shortBuddyTime('2026-07-20T10:00:00.000Z', now)).toBe('Yesterday');
   });
 });

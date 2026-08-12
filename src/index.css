@@ -418,7 +418,7 @@
   }
 
   html[data-native] .native-nav-overlay,
-  html[data-native] .native-buddy-back-row {
+  html[data-native] .native-chat-back {
     display: flex !important;
   }
 
@@ -875,11 +875,15 @@
     overscroll-behavior-y: contain;
   }
 
+  html[data-native] .native-chat-typing {
+    min-height: 32px;
+    padding-inline: 1rem;
+  }
+
   html[data-native] .native-chat-composer {
     padding: 0.875rem 1rem calc(0.875rem + var(--safe-bottom));
   }
 
-  html[data-native] .native-chat-share-note,
   html[data-native] .native-keyboard-hint {
     display: none;
   }

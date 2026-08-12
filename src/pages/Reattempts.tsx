@@ -26,9 +26,13 @@ import type {
   ReattemptStage
 } from '@/types';
 import { db } from '@/lib/db';
-import { buildReattemptQueue, recordReattemptResult } from '@/lib/reattempt';
+import {
+  buildReattemptQueue,
+  recordReattemptResult,
+  type ReattemptAnswerEvidence
+} from '@/lib/reattempt';
 import { writeLocal } from '@/lib/sync';
-import { OUTCOME_BY_CODE } from '@/lib/constants';
+import { OUTCOME_BY_CODE, type QuestionFormat } from '@/lib/constants';
 import { cn, formatDate, plural, secondsToClock, todayISO } from '@/lib/utils';
 import type { PyqQuestion } from '@/lib/pyq';
 import {
@@ -44,6 +48,7 @@ import { useTimer } from '@/hooks/useTimer';
 import { useUiStore } from '@/stores/ui';
 import PageHeader from '@/components/layout/PageHeader';
 import PyqQuestionContent from '@/components/pyq/PyqQuestionContent';
+import { draftFromRow } from '@/components/shared/questionDraft';
 import AnswerReveal from '@/components/shared/AnswerReveal';
 import { ImagePreview } from '@/components/shared/ImagePreview';
 import Timer from '@/components/shared/Timer';
@@ -71,6 +76,8 @@ interface AttemptState {
   rowId: string;
   startedAt: number | null;
   elapsed: number | null;
+  selectedAnswer?: PyqSelectedAnswer;
+  decision?: MarkDecision;
 }
 
 function Ladder({ stage }: { stage: ReattemptStage }) {
@@ -208,22 +215,25 @@ function savedAttemptAnswer(attempt: PyqAttemptRow): string {
   return formatAttemptAnswer(attempt.selected_answer);
 }
 
-function PyqAnswerPad({
-  question,
+function formatDecisionAnswer(value: PyqSelectedAnswer, decision?: MarkDecision): string {
+  return decision === 'SKIP' ? 'Left blank' : formatAttemptAnswer(value);
+}
+
+function ExamAnswerPad({
+  inputType,
   choices,
   numeric,
   disabled,
   onChoices,
   onNumeric
 }: {
-  question: PyqQuestion;
+  inputType: QuestionFormat;
   choices: string[];
   numeric: string;
   disabled: boolean;
   onChoices: (choices: string[]) => void;
   onNumeric: (value: string) => void;
 }) {
-  const inputType = pyqAnswerInputType(question);
   if (inputType === 'NAT') {
     return (
       <label className="block text-[12px] font-medium text-text-muted">
@@ -278,7 +288,7 @@ function PyqAnswerPad({
   );
 }
 
-function PyqDecisionButtons({
+function ExamDecisionButtons({
   value,
   disabled,
   onChange
@@ -406,6 +416,65 @@ function PyqAnswerHistory({
   );
 }
 
+function LoggedQuestionAnswerHistory({
+  row,
+  question,
+  selectedAnswer,
+  decision,
+  elapsed
+}: {
+  row: ReattemptRow;
+  question: QuestionRow;
+  selectedAnswer: PyqSelectedAnswer;
+  decision: MarkDecision;
+  elapsed: number;
+}) {
+  const recordedAttempts = row.history
+    .map((entry, index) => ({ entry, number: index + 2 }))
+    .filter(({ entry }) => entry.selectedAnswer !== undefined)
+    .reverse();
+  const firstAttemptAnswer =
+    question.mark_decision === 'SKIP' ? 'Left blank' : 'Not captured in the original log';
+
+  return (
+    <section
+      aria-label="Re-attempt answer history"
+      className="rounded border border-accent/25 bg-accent-faint p-4"
+    >
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <p className="font-display text-[17px] font-semibold text-text">Answer committed</p>
+        <span className="u-num text-[11px] text-text-faint">{secondsToClock(elapsed)}</span>
+      </div>
+      <dl className="mt-3 grid gap-3 text-[12px] sm:grid-cols-3">
+        <div>
+          <dt className="u-label">Attempt {row.history.length + 2} answer</dt>
+          <dd className="mt-0.5 font-mono font-semibold text-text">
+            {formatDecisionAnswer(selectedAnswer, decision)}
+          </dd>
+        </div>
+        {recordedAttempts.map(({ entry, number }) => (
+          <div key={`${number}-${entry.date}`}>
+            <dt className="u-label">Attempt {number} answer</dt>
+            <dd className="mt-0.5 font-mono font-semibold text-text">
+              {formatDecisionAnswer(entry.selectedAnswer ?? null, entry.markDecision)}
+            </dd>
+          </div>
+        ))}
+        <div>
+          <dt className="u-label">Attempt 1 answer</dt>
+          <dd className="mt-0.5 font-mono font-semibold text-text">{firstAttemptAnswer}</dd>
+        </div>
+        <div>
+          <dt className="u-label">Actual answer</dt>
+          <dd className="mt-0.5 whitespace-pre-wrap font-semibold text-text">
+            {question.answer_text?.trim() || 'Not saved in the original log'}
+          </dd>
+        </div>
+      </dl>
+    </section>
+  );
+}
+
 function PyqReattemptSession({
   userId,
   row,
@@ -427,7 +496,11 @@ function PyqReattemptSession({
   position: number;
   total: number;
   onExit: () => void;
-  onResult: (result: 'clean' | 'fail', elapsed: number) => Promise<void>;
+  onResult: (
+    result: 'clean' | 'fail',
+    elapsed: number,
+    answer: ReattemptAnswerEvidence
+  ) => Promise<void>;
 }) {
   const initialAnswer = existingAttempt?.selected_answer;
   const [choices, setChoices] = useState<string[]>(() =>
@@ -538,7 +611,11 @@ function PyqReattemptSession({
     if (!submitted || reporting) return;
     setReporting(true);
     try {
-      await onResult(result, submitted.time_spent_sec);
+      await onResult(result, submitted.time_spent_sec, {
+        selectedAnswer: submitted.selected_answer,
+        correctAnswer: submitted.correct_answer,
+        markDecision: submitted.mark_decision
+      });
     } finally {
       setReporting(false);
     }
@@ -591,8 +668,8 @@ function PyqReattemptSession({
 
       <Card>
         <CardBody className="grid gap-5 p-4 sm:p-5 lg:grid-cols-[minmax(0,1fr)_minmax(310px,0.7fr)]">
-          <PyqAnswerPad
-            question={question}
+          <ExamAnswerPad
+            inputType={inputType}
             choices={choices}
             numeric={numeric}
             disabled={!!submitted}
@@ -600,7 +677,7 @@ function PyqReattemptSession({
             onNumeric={setNumeric}
           />
           <div className="flex flex-col gap-4 border-t border-border pt-4 lg:border-l lg:border-t-0 lg:pl-5 lg:pt-0">
-            <PyqDecisionButtons value={decision} disabled={!!submitted} onChange={setDecision} />
+            <ExamDecisionButtons value={decision} disabled={!!submitted} onChange={setDecision} />
             {!submitted ? (
               <div>
                 <Button
@@ -671,9 +748,13 @@ function ReattemptSession({
   attempt: AttemptState | null;
   onExit: () => void;
   onStart: () => void;
-  onFinish: (seconds: number) => void;
+  onFinish: (seconds: number, selectedAnswer?: PyqSelectedAnswer, decision?: MarkDecision) => void;
   onRestart: () => void;
-  onResult: (result: 'clean' | 'fail', elapsed: number) => Promise<void>;
+  onResult: (
+    result: 'clean' | 'fail',
+    elapsed: number,
+    answer?: ReattemptAnswerEvidence
+  ) => Promise<void>;
   onSavePrompt: (question: QuestionRow, prompt: string) => Promise<void>;
   onSaveAnswer: (question: QuestionRow, answer: string) => Promise<void>;
 }) {
@@ -686,6 +767,11 @@ function ReattemptSession({
   const [reporting, setReporting] = useState(false);
   const [imageOpen, setImageOpen] = useState(false);
   const currentAttempt = attempt?.rowId === row.id ? attempt : null;
+  const inputType = question ? draftFromRow(question).format : null;
+  const [choices, setChoices] = useState<string[]>([]);
+  const [numeric, setNumeric] = useState('');
+  const [decision, setDecision] = useState<MarkDecision | null>(null);
+  const liveSeconds = useTimer(currentAttempt?.startedAt ?? null);
   const targetSec = question?.target_time_sec ?? 120;
   const hasText = !!question?.question_text?.trim();
   const hasImage = !!question?.image_url;
@@ -701,6 +787,50 @@ function ReattemptSession({
   useEffect(() => {
     setAnswerDraft(question?.answer_text ?? '');
   }, [question?.answer_text]);
+
+  useEffect(() => {
+    const savedAnswer = currentAttempt?.selectedAnswer;
+    setChoices(
+      Array.isArray(savedAnswer)
+        ? savedAnswer.map(String)
+        : typeof savedAnswer === 'string' && inputType !== 'NAT'
+          ? [savedAnswer]
+          : []
+    );
+    setNumeric(inputType === 'NAT' && savedAnswer != null ? String(savedAnswer) : '');
+    setDecision(currentAttempt?.decision ?? null);
+  }, [
+    currentAttempt?.decision,
+    currentAttempt?.elapsed,
+    currentAttempt?.selectedAnswer,
+    inputType,
+    row.id
+  ]);
+
+  const hasAnswer =
+    inputType === 'NAT'
+      ? numeric.trim() !== '' && Number.isFinite(Number(numeric))
+      : choices.length > 0;
+  const canCommit = !!inputType && !!decision && (decision === 'SKIP' || hasAnswer);
+
+  function selectedAnswer(): PyqSelectedAnswer {
+    if (decision === 'SKIP') return null;
+    if (inputType === 'NAT') return numeric.trim() === '' ? null : numeric.trim();
+    if (inputType === 'MSQ') return choices.slice().sort();
+    return choices[0] ?? null;
+  }
+
+  function commitAnswer() {
+    if (!decision || !canCommit) return;
+    onFinish(liveSeconds, selectedAnswer(), decision);
+  }
+
+  function restart() {
+    setChoices([]);
+    setNumeric('');
+    setDecision(null);
+    onRestart();
+  }
 
   async function savePrompt() {
     if (!question || !promptDraft.trim() || savingPrompt) return;
@@ -728,7 +858,15 @@ function ReattemptSession({
     if (currentAttempt?.elapsed == null || reporting) return;
     setReporting(true);
     try {
-      await onResult(result, currentAttempt.elapsed);
+      const answer =
+        currentAttempt.selectedAnswer !== undefined && currentAttempt.decision
+          ? {
+              selectedAnswer: currentAttempt.selectedAnswer,
+              correctAnswer: question?.answer_text?.trim() || null,
+              markDecision: currentAttempt.decision
+            }
+          : undefined;
+      await onResult(result, currentAttempt.elapsed, answer);
     } finally {
       setReporting(false);
     }
@@ -874,11 +1012,42 @@ function ReattemptSession({
       </Card>
 
       {currentAttempt?.startedAt ? (
-        <RunningTimer
-          startedAt={currentAttempt.startedAt}
-          targetSec={targetSec}
-          onFinish={onFinish}
-        />
+        inputType ? (
+          <Card>
+            <CardBody className="grid gap-5 p-4 sm:p-5 lg:grid-cols-[minmax(0,1fr)_minmax(310px,0.7fr)]">
+              <ExamAnswerPad
+                inputType={inputType}
+                choices={choices}
+                numeric={numeric}
+                disabled={false}
+                onChoices={setChoices}
+                onNumeric={setNumeric}
+              />
+              <div className="flex flex-col gap-4 border-t border-border pt-4 lg:border-l lg:border-t-0 lg:pl-5 lg:pt-0">
+                <ExamDecisionButtons value={decision} disabled={false} onChange={setDecision} />
+                <div>
+                  <Button
+                    variant="primary"
+                    onClick={commitAnswer}
+                    disabled={!canCommit}
+                    className="w-full"
+                  >
+                    Commit & reveal answer
+                  </Button>
+                  <p className="mt-2 text-[11.5px] leading-relaxed text-text-faint">
+                    Elapsed {secondsToClock(liveSeconds)} · target {secondsToClock(targetSec)}
+                  </p>
+                </div>
+              </div>
+            </CardBody>
+          </Card>
+        ) : (
+          <RunningTimer
+            startedAt={currentAttempt.startedAt}
+            targetSec={targetSec}
+            onFinish={(seconds) => onFinish(seconds)}
+          />
+        )
       ) : currentAttempt?.elapsed != null ? (
         <section className="reattempt-result rounded-[18px] border border-border bg-bg-raised p-4 shadow-card sm:p-5">
           <div className="flex flex-wrap items-center justify-between gap-3">
@@ -898,16 +1067,42 @@ function ReattemptSession({
                   : `${secondsToClock(currentAttempt.elapsed - targetSec)} over target`}
               </p>
             </div>
-            <Button variant="ghost" size="sm" onClick={onRestart}>
+            <Button variant="ghost" size="sm" onClick={restart}>
               <RotateCcw size={14} strokeWidth={1.8} className="mr-1.5" />
               Try again
             </Button>
           </div>
           <div className="mt-4 border-t border-border pt-4">
-            <AnswerReveal
-              answer={question?.answer_text}
-              onAdd={question ? () => setEditingAnswer(true) : undefined}
-            />
+            {question &&
+            inputType &&
+            currentAttempt.selectedAnswer !== undefined &&
+            currentAttempt.decision ? (
+              <>
+                <LoggedQuestionAnswerHistory
+                  row={row}
+                  question={question}
+                  selectedAnswer={currentAttempt.selectedAnswer}
+                  decision={currentAttempt.decision}
+                  elapsed={currentAttempt.elapsed}
+                />
+                {!question.answer_text?.trim() && !editingAnswer ? (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="mt-3"
+                    onClick={() => setEditingAnswer(true)}
+                  >
+                    <PencilLine size={14} strokeWidth={1.8} className="mr-1.5" />
+                    Add actual answer
+                  </Button>
+                ) : null}
+              </>
+            ) : (
+              <AnswerReveal
+                answer={question?.answer_text}
+                onAdd={question ? () => setEditingAnswer(true) : undefined}
+              />
+            )}
             {editingAnswer && question ? (
               <div className="mt-3 flex flex-col gap-3 rounded-xl border border-border bg-bg-overlay/30 p-3">
                 <Textarea
@@ -935,8 +1130,8 @@ function ReattemptSession({
           <div className="mt-4 border-t border-border pt-4">
             <p className="text-[13px] font-medium text-text">How did it go?</p>
             <p className="mt-1 text-[12px] text-text-muted">
-              Clean means the final answer and method were correct without help. Time is recorded
-              separately.
+              Clean means the final answer and method were correct without help. Your committed
+              answer, the saved actual answer, and time are recorded together.
             </p>
             <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
               <Button variant="danger" onClick={() => void report('fail')} disabled={reporting}>
@@ -961,7 +1156,7 @@ function ReattemptSession({
           </div>
           <Button variant="primary" onClick={onStart}>
             <Play size={15} strokeWidth={2} className="mr-1.5" />
-            Start timer
+            {inputType ? 'Start test' : 'Start timer'}
           </Button>
         </div>
       )}
@@ -1097,8 +1292,13 @@ export default function Reattempts() {
     navigate(`/reattempts/${encodeURIComponent(rowId)}`);
   }
 
-  async function onResult(row: ReattemptRow, result: 'clean' | 'fail', elapsed: number) {
-    const updated = await recordReattemptResult(row, result, today, elapsed);
+  async function onResult(
+    row: ReattemptRow,
+    result: 'clean' | 'fail',
+    elapsed: number,
+    answer?: ReattemptAnswerEvidence
+  ) {
+    const updated = await recordReattemptResult(row, result, today, elapsed, answer);
     const remainingRows = due.filter((candidate) => candidate.id !== row.id);
     const next = remainingRows[0];
     const remaining = remainingRows.length;
@@ -1168,7 +1368,7 @@ export default function Reattempts() {
           position={Math.max(1, due.findIndex((row) => row.id === activeRow.id) + 1)}
           total={due.length}
           onExit={() => navigate('/reattempts')}
-          onResult={(result, elapsed) => onResult(activeRow, result, elapsed)}
+          onResult={(result, elapsed, answer) => onResult(activeRow, result, elapsed, answer)}
         />
       );
     }
@@ -1182,11 +1382,17 @@ export default function Reattempts() {
         attempt={attempt}
         onExit={() => navigate('/reattempts')}
         onStart={() => setAttempt({ rowId: activeRow.id, startedAt: Date.now(), elapsed: null })}
-        onFinish={(seconds) =>
-          setAttempt({ rowId: activeRow.id, startedAt: null, elapsed: seconds })
+        onFinish={(seconds, selectedAnswer, decision) =>
+          setAttempt({
+            rowId: activeRow.id,
+            startedAt: null,
+            elapsed: seconds,
+            selectedAnswer,
+            decision
+          })
         }
         onRestart={() => setAttempt({ rowId: activeRow.id, startedAt: Date.now(), elapsed: null })}
-        onResult={(result, elapsed) => onResult(activeRow, result, elapsed)}
+        onResult={(result, elapsed, answer) => onResult(activeRow, result, elapsed, answer)}
         onSavePrompt={savePrompt}
         onSaveAnswer={saveAnswer}
       />

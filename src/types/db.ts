@@ -138,6 +138,11 @@ export interface ReattemptHistoryEntry {
   date: string;
   result: ReattemptResult;
   timeSpent?: number;
+  /** Present for answer-capable re-attempts; absent on historical timer-only rows. */
+  selectedAnswer?: PyqSelectedAnswer;
+  /** Saved answer/key at the time of this attempt, so later edits do not rewrite history. */
+  correctAnswer?: PyqSelectedAnswer;
+  markDecision?: MarkDecision;
 }
 
 export interface ReattemptRow {

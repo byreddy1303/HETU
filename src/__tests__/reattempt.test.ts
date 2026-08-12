@@ -62,6 +62,23 @@ describe('advance (pure ladder)', () => {
     const next = advance(ladderRow('D3'), 'clean', TODAY, 94.6);
     expect(next.history).toEqual([{ date: TODAY, result: 'clean', timeSpent: 95 }]);
   });
+
+  it('stores the learner answer, saved key, and exam decision with the attempt', () => {
+    const next = advance(ladderRow('D3'), 'fail', TODAY, 75, {
+      selectedAnswer: ['A', 'C'],
+      correctAnswer: ['A', 'D'],
+      markDecision: 'FIFTY_FIFTY'
+    });
+
+    expect(next.history[0]).toEqual({
+      date: TODAY,
+      result: 'fail',
+      timeSpent: 75,
+      selectedAnswer: ['A', 'C'],
+      correctAnswer: ['A', 'D'],
+      markDecision: 'FIFTY_FIFTY'
+    });
+  });
 });
 
 describe('needsReattempt', () => {

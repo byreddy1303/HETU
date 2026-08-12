@@ -2,7 +2,14 @@
 // to D3. `advance` mirrors the Postgres advance_reattempt() function exactly —
 // the UI applies it locally and syncs the row, so it works offline; the SQL
 // function stays authoritative for server-side jobs.
-import type { Outcome, ReattemptResult, ReattemptRow, ReattemptStage } from '@/types';
+import type {
+  MarkDecision,
+  Outcome,
+  PyqSelectedAnswer,
+  ReattemptResult,
+  ReattemptRow,
+  ReattemptStage
+} from '@/types';
 import { OUTCOME_BY_CODE, REATTEMPT_FIRST_DELAY_DAYS } from '@/lib/constants';
 import { addDaysISO, nowISO, todayISO, uuid } from '@/lib/utils';
 import { db } from '@/lib/db';
@@ -23,6 +30,12 @@ export interface ReattemptQueue {
   due: ReattemptRow[];
   upcoming: ReattemptRow[];
   mastered: number;
+}
+
+export interface ReattemptAnswerEvidence {
+  selectedAnswer: PyqSelectedAnswer;
+  correctAnswer: PyqSelectedAnswer;
+  markDecision: MarkDecision;
 }
 
 /**
@@ -51,7 +64,8 @@ export function advance(
   row: Pick<ReattemptRow, 'stage' | 'scheduled_date' | 'history'>,
   result: ReattemptResult,
   today: string = todayISO(),
-  timeSpent?: number
+  timeSpent?: number,
+  answer?: ReattemptAnswerEvidence
 ): Pick<ReattemptRow, 'stage' | 'scheduled_date' | 'history'> {
   const next =
     result === 'clean' ? NEXT_ON_CLEAN[row.stage] : { stage: 'D3' as const, delayDays: 3 };
@@ -64,7 +78,8 @@ export function advance(
       {
         date: today,
         result,
-        ...(timeSpent !== undefined ? { timeSpent: Math.max(0, Math.round(timeSpent)) } : {})
+        ...(timeSpent !== undefined ? { timeSpent: Math.max(0, Math.round(timeSpent)) } : {}),
+        ...(answer ?? {})
       }
     ]
   };
@@ -107,9 +122,10 @@ export async function recordReattemptResult(
   row: ReattemptRow,
   result: ReattemptResult,
   today: string = todayISO(),
-  timeSpent?: number
+  timeSpent?: number,
+  answer?: ReattemptAnswerEvidence
 ): Promise<ReattemptRow> {
-  const updated: ReattemptRow = { ...row, ...advance(row, result, today, timeSpent) };
+  const updated: ReattemptRow = { ...row, ...advance(row, result, today, timeSpent, answer) };
   await writeLocal('reattempts', updated);
   return updated;
 }

@@ -450,9 +450,10 @@ export default function Journal() {
   const current = Math.min(page, pages - 1);
   const pageRows = filtered.slice(current * PAGE_SIZE, current * PAGE_SIZE + PAGE_SIZE);
   const filtersActive = Object.values(f).some((v) => v !== '');
-  // Only surface the questions table when the user asked for one — i.e. any
-  // filter is set. Otherwise the recent-sessions strip stands alone.
-  const showQuestionsTable = filtersActive;
+  // The journal is a question log first. Standalone and imported questions do
+  // not have a recent-session card, so hiding this table until a filter is set
+  // makes valid entries appear to be missing.
+  const showQuestionsTable = true;
   const selectedSession =
     f.session && f.session !== 'standalone'
       ? (sessionsAll.find((s) => s.id === f.session) ?? null)

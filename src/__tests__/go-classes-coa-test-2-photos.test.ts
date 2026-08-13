@@ -1,4 +1,4 @@
-import { existsSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 
@@ -17,17 +17,39 @@ describe('GO Classes COA Topic Test 2 screenshot archive', () => {
       );
 
       expect(question.html).toContain(
-        `/pyq/images/go-classes-coa-topic-test-2/question-q${number}.png`
+        `/pyq/images/go-classes-coa-topic-test-2/practice-q${number}-v2.png`
       );
       expect(question.html).not.toContain(
         `/pyq/images/go-classes-coa-topic-test-2/attempt-q${number}.png`
       );
-      expect(existsSync(path.join(imageDirectory, `question-q${number}.png`))).toBe(
+      expect(existsSync(path.join(imageDirectory, `practice-q${number}-v2.png`))).toBe(
         true
       );
       expect(existsSync(path.join(imageDirectory, `attempt-q${number}.png`))).toBe(
         true
       );
     }
+  });
+
+  it('keeps result receipts out of re-attempt and journal image fields', () => {
+    const migration = readFileSync(
+      path.resolve(
+        'supabase/migrations/20260813000006_go_classes_coa_topic_test_2_answer_free_reattempts.sql'
+      ),
+      'utf8'
+    );
+
+    expect(migration).toContain(
+      "screenshot_url = '/pyq/images/go-classes-coa-topic-test-2/practice-q'"
+    );
+    expect(migration).toContain(
+      "set image_url = '/pyq/images/go-classes-coa-topic-test-2/practice-q'"
+    );
+    expect(migration).not.toContain(
+      "screenshot_url = '/pyq/images/go-classes-coa-topic-test-2/attempt-q'"
+    );
+    expect(migration).not.toContain(
+      "set image_url = '/pyq/images/go-classes-coa-topic-test-2/attempt-q'"
+    );
   });
 });

@@ -2,7 +2,7 @@ import type { MarkDecision, Outcome, PyqSelectedAnswer, PyqSessionConfig } from 
 import { DEFAULT_TARGET_TIME_SEC, MARKS_TARGET_SEC } from '@/lib/constants';
 import { urlToDataUrl } from '@/lib/image';
 
-export const PYQ_BANK_QUESTION_COUNT = 3185;
+export const PYQ_BANK_QUESTION_COUNT = 3200;
 
 export type PyqQuestionType = 'MCQ' | 'MSQ' | 'NAT' | 'AMBIGUOUS' | 'MARKS_TO_ALL' | 'UNSUPPORTED';
 export type PyqAnswerStatus = 'available' | 'ambiguous' | 'marks-to-all' | 'unsupported';

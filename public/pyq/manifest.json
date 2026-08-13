@@ -1,14 +1,14 @@
 {
-  "bankVersion": "gate-1990-2026-v6-go-classes-coa-topic-test",
-  "generatedAt": "2026-08-13T06:27:55.985Z",
-  "source": "GateQA/GATE Overflow CSE archive, syllabus-filtered ExamSIDE ECE/EE Digital Logic records, and the learner-provided GO Classes COA Topic Test",
+  "bankVersion": "gate-1990-2026-v7-go-classes-coa-topic-tests",
+  "generatedAt": "2026-08-13T07:07:40.717Z",
+  "source": "GateQA/GATE Overflow CSE archive, syllabus-filtered ExamSIDE ECE/EE Digital Logic records, and the learner-provided GO Classes COA Topic Tests",
   "sourceUrl": "https://gateqa.in",
   "firstYear": 1990,
   "lastYear": 2026,
-  "questionCount": 3185,
+  "questionCount": 3200,
   "imageCount": 596,
   "answerStatuses": {
-    "available": 3091,
+    "available": 3106,
     "ambiguous": 3,
     "marks-to-all": 1,
     "unsupported": 90
@@ -16,7 +16,7 @@
   "years": [
     {
       "year": 2026,
-      "count": 152
+      "count": 167
     },
     {
       "year": 2025,
@@ -289,23 +289,23 @@
     {
       "slug": "coa",
       "label": "Computer Organization",
-      "count": 233,
+      "count": 248,
       "file": "/pyq/subjects/coa.json",
       "topics": [
         {
           "slug": "machine-instruction",
           "label": "Machine Instruction",
-          "count": 54
+          "count": 59
         },
         {
           "slug": "addressing-modes",
           "label": "Addressing Modes",
-          "count": 12
+          "count": 14
         },
         {
           "slug": "alu-data-path-and-control-unit",
           "label": "ALU Data Path and Control Unit",
-          "count": 12
+          "count": 17
         },
         {
           "slug": "io-interface",
@@ -320,7 +320,7 @@
         {
           "slug": "pipeline-processor",
           "label": "Pipeline Processor",
-          "count": 43
+          "count": 46
         },
         {
           "slug": "cache-memory",

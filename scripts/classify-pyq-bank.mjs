@@ -25,9 +25,9 @@ const questions = payloads.flatMap((payload) => payload.questions);
 const originalIds = new Set(questions.map((question) => question.id));
 const manualClassificationEntries = Object.entries(PYQ_MANUAL_CLASSIFICATIONS);
 
-if (questions.length !== 3185 || originalIds.size !== questions.length) {
+if (questions.length !== 3200 || originalIds.size !== questions.length) {
   throw new Error(
-    `Expected 3,185 unique input questions, found ${questions.length} rows and ${originalIds.size} IDs`
+    `Expected 3,200 unique input questions, found ${questions.length} rows and ${originalIds.size} IDs`
   );
 }
 

@@ -1,12 +1,12 @@
 {
-  "bankVersion": "gate-1990-2026-v6-go-classes-coa-topic-test",
-  "questionCount": 3185,
-  "uniqueQuestionCount": 3185,
+  "bankVersion": "gate-1990-2026-v7-go-classes-coa-topic-tests",
+  "questionCount": 3200,
+  "uniqueQuestionCount": 3200,
   "unclassifiedCount": 0,
   "subjectCount": 14,
   "topicCount": 95,
   "classificationBasis": {
-    "audited-source-scope": 466,
+    "audited-source-scope": 481,
     "broad-topic-tag": 6,
     "content-rule": 83,
     "manual-content-audit": 160,
@@ -1574,22 +1574,22 @@
     },
     {
       "slug": "coa",
-      "count": 233,
+      "count": 248,
       "topics": [
         {
           "slug": "machine-instruction",
           "label": "Machine Instruction",
-          "count": 54
+          "count": 59
         },
         {
           "slug": "addressing-modes",
           "label": "Addressing Modes",
-          "count": 12
+          "count": 14
         },
         {
           "slug": "alu-data-path-and-control-unit",
           "label": "ALU Data Path and Control Unit",
-          "count": 12
+          "count": 17
         },
         {
           "slug": "io-interface",
@@ -1604,7 +1604,7 @@
         {
           "slug": "pipeline-processor",
           "label": "Pipeline Processor",
-          "count": 43
+          "count": 46
         },
         {
           "slug": "cache-memory",

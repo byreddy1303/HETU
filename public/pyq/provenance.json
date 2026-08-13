@@ -1,5 +1,5 @@
 {
-  "bankVersion": "gate-1990-2026-v6-go-classes-coa-topic-test",
+  "bankVersion": "gate-1990-2026-v7-go-classes-coa-topic-tests",
   "sources": [
     {
       "name": "GateQA",
@@ -24,11 +24,11 @@
     {
       "name": "GO Classes",
       "url": "https://www.goclasses.in/",
-      "role": "Learner-provided COA Topic Test question text, answer keys, and source tag"
+      "role": "Learner-provided COA Topic Test question text, answer keys, and source tags"
     }
   ],
   "notes": [
-    "Question content is bundled for the private, invite-only AIR Journal practice experience.",
+    "Question content is bundled for the private, invite-only HETU practice experience.",
     "ECE and EE supplements are restricted to the project topics: Number System, Boolean Algebra, Combinational Circuit, and Sequential Circuit.",
     "Converter, semiconductor-memory, logic-family, microprocessor, communication-code, and architecture questions are excluded.",
     "AMBIGUOUS, MARKS_TO_ALL, and UNSUPPORTED records are never assigned an invented answer."

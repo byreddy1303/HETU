@@ -1,4 +1,4 @@
-export const PYQ_BANK_VERSION = 'gate-1990-2026-v6-go-classes-coa-topic-test';
+export const PYQ_BANK_VERSION = 'gate-1990-2026-v7-go-classes-coa-topic-tests';
 
 export const PYQ_TAXONOMY = [
   {

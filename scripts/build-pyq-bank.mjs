@@ -12,7 +12,10 @@ const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(SCRIPT_DIR, '..');
 const OUTPUT = path.join(ROOT, 'public', 'pyq');
 const IMAGE_OUTPUT = path.join(OUTPUT, 'images');
-const CUSTOM_QUESTIONS_PATH = path.join(SCRIPT_DIR, 'pyq-custom', 'go-classes-coa-topic-test.json');
+const CUSTOM_QUESTION_PATHS = [
+  'go-classes-coa-topic-test.json',
+  'go-classes-coa-topic-test-2.json'
+].map((filename) => path.join(SCRIPT_DIR, 'pyq-custom', filename));
 const CACHE = '/tmp/air-journal-pyq-cache';
 const SOURCE_ROOT = 'https://gateqa.in';
 const SEARCH_URL = `${SOURCE_ROOT}/question-search-index.json`;
@@ -812,14 +815,16 @@ async function main() {
     unsupportedPayload,
     supplementalDigitalLogic,
     supplementalCse,
-    customQuestionPayload
+    customQuestionPayloads
   ] = await Promise.all([
     cachedJson(SEARCH_URL, 'question-search-index.json'),
     cachedJson(ANSWERS_URL, 'answers-by-question-uid.json'),
     cachedJson(UNSUPPORTED_URL, 'unsupported-question-uids.json'),
     examSideDigitalLogicQuestions(),
     examSideCseQuestions(),
-    readFile(CUSTOM_QUESTIONS_PATH, 'utf8').then(JSON.parse)
+    Promise.all(
+      CUSTOM_QUESTION_PATHS.map((filename) => readFile(filename, 'utf8').then(JSON.parse))
+    )
   ]);
   const answers = answerPayload.records_by_question_uid ?? answerPayload;
   const unsupported = new Set(unsupportedPayload.question_uids ?? []);
@@ -890,7 +895,7 @@ async function main() {
   );
   questions.push(...supplementalCse);
   questions.push(...supplementalDigitalLogic);
-  questions.push(...customQuestionPayload.questions);
+  questions.push(...customQuestionPayloads.flatMap((payload) => payload.questions));
   for (const question of questions) {
     const classification = classifyPyqQuestion(question);
     question.subject = classification.subject;
@@ -900,8 +905,8 @@ async function main() {
   }
   questions.sort(stableQuestionSort);
 
-  if (questions.length !== 3185)
-    throw new Error(`Expected 3,185 audited questions, found ${questions.length}`);
+  if (questions.length !== 3200)
+    throw new Error(`Expected 3,200 audited questions, found ${questions.length}`);
   const ids = new Set(questions.map((question) => question.id));
   if (ids.size !== questions.length) throw new Error('Duplicate question IDs found in the bank');
 
@@ -962,7 +967,7 @@ async function main() {
     bankVersion: PYQ_BANK_VERSION,
     generatedAt: new Date().toISOString(),
     source:
-      'GateQA/GATE Overflow CSE archive, syllabus-filtered ExamSIDE ECE/EE Digital Logic records, and the learner-provided GO Classes COA Topic Test',
+      'GateQA/GATE Overflow CSE archive, syllabus-filtered ExamSIDE ECE/EE Digital Logic records, and the learner-provided GO Classes COA Topic Tests',
     sourceUrl: SOURCE_ROOT,
     firstYear: 1990,
     lastYear: 2026,
@@ -1001,8 +1006,8 @@ async function main() {
           },
           {
             name: 'GO Classes',
-            url: customQuestionPayload.sourceUrl,
-            role: 'Learner-provided COA Topic Test question text, answer keys, and source tag'
+            url: customQuestionPayloads[0].sourceUrl,
+            role: 'Learner-provided COA Topic Test question text, answer keys, and source tags'
           }
         ],
         notes: [

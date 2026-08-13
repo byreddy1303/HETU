@@ -1,0 +1,135 @@
+# .understandignore — patterns for files/dirs to exclude from analysis
+# Syntax: same as .gitignore (globs, # comments, ! negation, trailing / for dirs)
+# Lines below are suggestions — uncomment to activate.
+# Use ! prefix to force-include something excluded by defaults.
+#
+# Built-in defaults (always excluded unless negated):
+#   node_modules/, .git/, dist/, build/, obj/, *.lock, *.min.js, etc.
+#
+
+# --- From .gitignore (uncomment to exclude) ---
+
+# dist-ssr
+# .env
+# .env.local
+# .env.production
+# *.local
+# .DS_Store
+# supabase/.branches
+# supabase/.temp
+# supabase/functions/**/.env
+# playwright-report
+# test-results
+# android/.gradle
+# android/.idea
+# android/local.properties
+# android/app/build
+# android/build
+# *.jks
+# *.keystore
+# keystore.properties
+# *.tsbuildinfo
+# vite.config.js
+# vite.config.d.ts
+# .deploy.env
+# .vercel
+# .env*
+# !.env.example
+# !.deploy.env.example
+# !.env.capacitor.example
+
+# --- Detected directories (uncomment to exclude) ---
+
+# scripts/
+
+# --- Test file patterns (uncomment to exclude) ---
+
+# JS / TS
+# *.test.*
+# *.spec.*
+# *.snap
+# C# / .NET
+# **/*Tests.cs
+# **/*Test.cs
+# **/*Fixture.cs
+# **/*.Tests.csproj
+# Java / Kotlin
+# **/src/test/**
+# **/*Test.java
+# **/*IT.java
+# **/*Spec.kt
+# Go
+# **/*_test.go
+# C++
+# **/*_test.cc
+# **/*_test.cpp
+# **/*_test.cxx
+# **/*Test.cc
+# **/*Test.cpp
+# **/*_unittest.cc
+# **/*_unittest.cpp
+# **/*_browsertest.cc
+# **/*_benchmark.cc
+# **/*Benchmark.cpp
+# Python
+# **/test_*.py
+# **/*_test.py
+# **/tests.py
+# **/conftest.py
+# Rust
+# **/tests.rs
+# **/test_*.rs
+# **/*_test.rs
+# **/bench_*.rs
+# **/*_bench.rs
+# Ruby
+# **/*_spec.rb
+# **/*_test.rb
+# **/test_*.rb
+# **/spec_helper.rb
+# **/test_helper.rb
+# **/rails_helper.rb
+# Swift
+# **/Tests/**/*.swift
+# **/Specs/**/*.swift
+
+# --- HETU architecture scan exclusions ---
+
+# Local secrets and machine-specific deployment state
+.env
+.env.*
+*.local
+.deploy.env
+.vercel/
+supabase/.branches/
+supabase/.temp/
+supabase/functions/**/.env
+android/local.properties
+android/keystore.properties
+*.jks
+*.keystore
+
+# Generated build, test, and IDE artifacts
+.ua/intermediate/
+.ua/tmp/
+.ua/.trash-*/
+.ua/fingerprints.json
+.ua/knowledge-graph.json
+.ua/meta.json
+.DS_Store
+playwright-report/
+test-results/
+android/.gradle/
+android/.idea/
+android/app/build/
+android/build/
+*.tsbuildinfo
+vite.config.js
+vite.config.d.ts
+
+# Large generated/reference datasets and binary learning assets
+public/pyq/
+public/gate-topper-notes/
+src/data/*.json
+scripts/pyq-assets/
+scripts/pyq-custom/

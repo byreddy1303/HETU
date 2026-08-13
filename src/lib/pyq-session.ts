@@ -367,6 +367,7 @@ export function createPyqAttemptRow(args: {
   committedAtMs: number;
   screenshotUrl: string | null;
   attemptNumber?: number;
+  retryingSkippedAttempt?: boolean;
 }): PyqAttemptRow {
   if (args.session.status !== 'active') {
     throw new Error('Cannot submit an answer to a closed PYQ set.');
@@ -374,7 +375,13 @@ export function createPyqAttemptRow(args: {
   if (args.session.bank_version !== args.bankVersion) {
     throw new Error('PYQ bank version changed during the set.');
   }
-  if (args.session.question_uids[args.session.current_index] !== args.question.id) {
+  const retryingCompletedSkip =
+    args.retryingSkippedAttempt === true &&
+    args.session.completed_question_uids.includes(args.question.id);
+  if (
+    args.session.question_uids[args.session.current_index] !== args.question.id &&
+    !retryingCompletedSkip
+  ) {
     throw new Error('Only the current PYQ can be committed.');
   }
   const selectedAnswer = args.decision === 'SKIP' ? null : args.selectedAnswer;

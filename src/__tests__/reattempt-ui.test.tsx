@@ -367,6 +367,72 @@ describe('re-attempt solve flow', () => {
     });
   });
 
+  it('reviews answered questions as locked and reopens skipped questions for an answer', async () => {
+    await seedDueQuestion();
+    const firstQuestion = await db.questions.get('question-due');
+    const firstReattempt = await db.reattempts.get('reattempt-due');
+    await db.questions.put({
+      ...firstQuestion!,
+      id: 'question-due-second',
+      question_text: 'Which option completes the second re-attempt?',
+      sync_status: 'synced'
+    });
+    await db.reattempts.put({
+      ...firstReattempt!,
+      id: 'reattempt-due-second',
+      question_id: 'question-due-second',
+      sync_status: 'synced'
+    });
+    const user = userEvent.setup();
+
+    render(
+      <MemoryRouter initialEntries={['/reattempts/reattempt-due']}>
+        <Routes>
+          <Route path="/reattempts" element={<Reattempts />} />
+          <Route path="/reattempts/:reattemptId" element={<Reattempts />} />
+        </Routes>
+      </MemoryRouter>
+    );
+
+    await user.click(await screen.findByRole('button', { name: 'C' }));
+    await user.click(screen.getByRole('button', { name: 'Answered: committed' }));
+    await user.click(screen.getByRole('button', { name: 'Commit & reveal answer' }));
+
+    expect(
+      await screen.findByText('Which option completes the second re-attempt?')
+    ).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Previous question' }));
+    expect(await screen.findByText(QUESTION)).toBeInTheDocument();
+    expect(screen.getByText(/Answer locked/)).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'A' })).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: 'Next question' }));
+    expect(
+      await screen.findByText('Which option completes the second re-attempt?')
+    ).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Left blank: skipped' }));
+    await user.click(screen.getByRole('button', { name: 'Commit & reveal answer' }));
+
+    expect(await screen.findByText('Review this re-attempt test')).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Previous question' }));
+    expect(await screen.findByRole('button', { name: 'C' })).toBeEnabled();
+    await user.click(screen.getByRole('button', { name: 'C' }));
+    await user.click(screen.getByRole('button', { name: 'Answered: committed' }));
+    await user.click(screen.getByRole('button', { name: 'Commit & reveal answer' }));
+
+    expect(await screen.findByText('Nothing due')).toBeInTheDocument();
+    await waitFor(async () => {
+      expect((await db.reattempts.get('reattempt-due'))?.history).toHaveLength(1);
+      expect((await db.reattempts.get('reattempt-due-second'))?.history).toEqual([
+        expect.objectContaining({
+          selectedAnswer: 'C',
+          markDecision: 'MARK',
+          result: 'clean'
+        })
+      ]);
+    });
+  });
+
   it('opens the first carried-forward question from Dashboard Due now', async () => {
     await seedDueQuestion();
     const user = userEvent.setup();
@@ -444,6 +510,48 @@ describe('re-attempt solve flow', () => {
       selectedAnswer: 'B',
       correctAnswer: 'B',
       markDecision: 'MARK'
+    });
+  });
+
+  it('lets a skipped PYQ re-attempt be answered when revisited', async () => {
+    await seedDuePyq();
+    const user = userEvent.setup();
+
+    render(
+      <MemoryRouter initialEntries={['/reattempts/reattempt-pyq']}>
+        <Routes>
+          <Route path="/reattempts" element={<Reattempts />} />
+          <Route path="/reattempts/:reattemptId" element={<Reattempts />} />
+        </Routes>
+      </MemoryRouter>
+    );
+
+    await user.click(await screen.findByRole('button', { name: 'Left blank: skipped' }));
+    await user.click(screen.getByRole('button', { name: 'Commit & reveal key' }));
+    expect(await screen.findByText('Review this re-attempt test')).toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: 'Previous question' }));
+    await user.click(await screen.findByRole('button', { name: 'B' }));
+    await user.click(screen.getByRole('button', { name: 'Answered: committed' }));
+    await user.click(screen.getByRole('button', { name: 'Commit & reveal key' }));
+
+    expect(await screen.findByText('Nothing due')).toBeInTheDocument();
+    await waitFor(async () => {
+      const attempts = await db.pyq_attempts
+        .where('question_uid')
+        .equals('gate-2026-set1-q1')
+        .toArray();
+      expect(attempts).toHaveLength(2);
+      expect(attempts.find((attempt) => attempt.pyq_session_id === null)).toMatchObject({
+        selected_answer: 'B',
+        mark_decision: 'MARK',
+        mark_correct: true
+      });
+      expect((await db.reattempts.get('reattempt-pyq'))?.history[0]).toMatchObject({
+        selectedAnswer: 'B',
+        markDecision: 'MARK',
+        result: 'clean'
+      });
     });
   });
 

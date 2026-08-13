@@ -82,6 +82,16 @@ type AttemptConfig = PyqSessionConfig;
 
 const CHOICES = ['A', 'B', 'C', 'D'];
 
+function latestQuestionAttempt(
+  attempts: PyqAttemptRow[],
+  questionUid: string
+): PyqAttemptRow | null {
+  for (let index = attempts.length - 1; index >= 0; index -= 1) {
+    if (attempts[index].question_uid === questionUid) return attempts[index];
+  }
+  return null;
+}
+
 function answerInputType(question: PyqQuestion): 'MCQ' | 'MSQ' | 'NAT' {
   if (question.type === 'MSQ' || question.type === 'NAT') return question.type;
   return 'MCQ';
@@ -755,16 +765,13 @@ export default function Pyq() {
   const submittingRef = useRef(false);
   const startingRef = useRef(false);
   const questionStartRef = useRef<{ questionUid: string; startedAtMs: number } | null>(null);
+  const completedRef = useRef(completed);
+  completedRef.current = completed;
 
   const attempts = useLiveQuery(
     async () => (userId ? db.pyq_attempts.where('user_id').equals(userId).toArray() : []),
     [userId],
     []
-  );
-  const pyqSession = useLiveQuery(
-    async () => (pyqSessionId ? ((await db.pyq_sessions.get(pyqSessionId)) ?? null) : null),
-    [pyqSessionId],
-    null
   );
   const activePyqSession = useLiveQuery(
     async () => {
@@ -842,24 +849,40 @@ export default function Pyq() {
 
   const current = questions[index] ?? null;
   const currentId = current?.id ?? null;
+  const latestCurrentAttempt = currentId ? latestQuestionAttempt(completed, currentId) : null;
   useEffect(() => {
     if (!currentId) return;
     window.scrollTo({ top: 0, behavior: 'auto' });
+    const priorAttempt = latestQuestionAttempt(completedRef.current, currentId);
+    const lockedAttempt = priorAttempt?.mark_decision === 'SKIP' ? null : priorAttempt;
     const persistedStart = questionStartRef.current;
     setStartedAt(
-      persistedStart?.questionUid === currentId ? persistedStart.startedAtMs : Date.now()
+      lockedAttempt
+        ? null
+        : persistedStart?.questionUid === currentId
+          ? persistedStart.startedAtMs
+          : Date.now()
     );
     questionStartRef.current = null;
-    setChoices([]);
-    setNumeric('');
-    setDecision(null);
-    setSubmitted(null);
+    const savedAnswer = lockedAttempt?.selected_answer;
+    setChoices(
+      Array.isArray(savedAnswer)
+        ? savedAnswer.map(String)
+        : typeof savedAnswer === 'string' && answerInputType(questions[index]) !== 'NAT'
+          ? [savedAnswer]
+          : []
+    );
+    setNumeric(
+      lockedAttempt && answerInputType(questions[index]) === 'NAT' ? String(savedAnswer ?? '') : ''
+    );
+    setDecision(lockedAttempt?.mark_decision ?? null);
+    setSubmitted(lockedAttempt ?? null);
     setSubmitting(false);
     setJournalOpen(false);
     setJournalSaved(false);
-    setQuestionScreenshot(null);
+    setQuestionScreenshot(lockedAttempt?.screenshot_url ?? null);
     setSubmitError(null);
-  }, [currentId]);
+  }, [currentId, index, questions]);
 
   useEffect(() => {
     if (journalOpen) window.scrollTo({ top: 0, behavior: 'auto' });
@@ -1282,12 +1305,17 @@ export default function Pyq() {
       const attemptNumber = 1;
       const id = pyqAttemptId(session.id, current.id, attemptNumber);
       const existing = await db.pyq_attempts.get(id);
-      if (existing) {
+      if (existing && existing.mark_decision !== 'SKIP') {
         setQuestionScreenshot(existing.screenshot_url);
         setSubmitted(existing);
         setCompleted((rows) =>
           rows.some((row) => row.id === existing.id) ? rows : [...rows, existing]
         );
+        return;
+      }
+      if (existing && decision === 'SKIP') {
+        setQuestionScreenshot(existing.screenshot_url);
+        setSubmitted(existing);
         return;
       }
       const screenshot = await captureQuestionSnapshot();
@@ -1302,15 +1330,26 @@ export default function Pyq() {
         questionStartedAtMs,
         committedAtMs,
         screenshotUrl: screenshot,
-        attemptNumber
+        attemptNumber,
+        retryingSkippedAttempt: existing?.mark_decision === 'SKIP'
       });
-      const nextSession = advancePyqSessionProgress(
+      const advancedSession = advancePyqSessionProgress(
         session,
         current.id,
         index + 1,
         attempt.time_spent_sec,
         attempt.attempted_at
       );
+      const nextSession =
+        existing?.mark_decision === 'SKIP'
+          ? {
+              ...advancedSession,
+              elapsed_sec: Math.max(
+                0,
+                advancedSession.elapsed_sec - existing.time_spent_sec + attempt.time_spent_sec
+              )
+            }
+          : advancedSession;
       const writes: Parameters<typeof writeLocalBatch>[0] = [
         { name: 'pyq_attempts', row: attempt },
         { name: 'pyq_sessions', row: nextSession }
@@ -1332,7 +1371,11 @@ export default function Pyq() {
       }
       await writeLocalBatch(writes);
       setSubmitted(attempt);
-      setCompleted((rows) => [...rows, attempt]);
+      setCompleted((rows) =>
+        rows.some((row) => row.id === attempt.id)
+          ? rows.map((row) => (row.id === attempt.id ? attempt : row))
+          : [...rows, attempt]
+      );
       if (autoJournalSaved) {
         setJournalSaved(true);
         setAnalyzedCount((count) => count + 1);
@@ -1381,7 +1424,7 @@ export default function Pyq() {
   }
 
   async function goNext() {
-    const nextIndex = Math.max(index + 1, pyqSession?.current_index ?? 0);
+    const nextIndex = index + 1;
     if (nextIndex >= questions.length) {
       await markSessionComplete();
       window.scrollTo({ top: 0, behavior: 'auto' });
@@ -1401,6 +1444,11 @@ export default function Pyq() {
       startedAtMs: Number.isFinite(nextStartedAt) ? nextStartedAt : Date.now()
     };
     setIndex(nextIndex);
+  }
+
+  function goPrevious() {
+    if (index <= 0) return;
+    setIndex(index - 1);
   }
 
   function exitSet() {
@@ -1511,6 +1559,7 @@ export default function Pyq() {
       ? numeric.trim() !== '' && Number.isFinite(Number(numeric))
       : choices.length > 0;
   const canSubmit = !!decision && (decision === 'SKIP' || hasAnswer) && !submitting;
+  const previouslySkipped = latestCurrentAttempt?.mark_decision === 'SKIP' && !submitted;
 
   if (journalOpen && submitted) {
     return (
@@ -1599,6 +1648,12 @@ export default function Pyq() {
             <DecisionButtons value={decision} disabled={!!submitted} onChange={setDecision} />
             {!submitted ? (
               <div>
+                {previouslySkipped ? (
+                  <p className="mb-3 rounded border border-warn/25 bg-warn-faint px-3 py-2 text-[12px] leading-relaxed text-text-muted">
+                    Previously skipped — you can answer it now. Once committed, the answer is
+                    locked.
+                  </p>
+                ) : null}
                 <Button
                   variant="primary"
                   onClick={() => void submitAnswer()}
@@ -1607,6 +1662,18 @@ export default function Pyq() {
                 >
                   Commit & reveal key
                 </Button>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {index > 0 ? (
+                    <Button onClick={goPrevious} disabled={submitting}>
+                      <ArrowLeft size={15} /> Previous question
+                    </Button>
+                  ) : null}
+                  {previouslySkipped ? (
+                    <Button onClick={() => void goNext()} disabled={submitting}>
+                      Keep skipped & next <ArrowRight size={15} />
+                    </Button>
+                  ) : null}
+                </div>
                 {submitError && (
                   <p role="alert" className="mt-2 text-[12px] leading-relaxed text-danger">
                     {submitError}
@@ -1617,6 +1684,11 @@ export default function Pyq() {
               <div className="flex flex-col gap-3">
                 <ResultPanel question={current} attempt={submitted} />
                 <div className="flex flex-wrap gap-2">
+                  {index > 0 ? (
+                    <Button onClick={goPrevious}>
+                      <ArrowLeft size={15} /> Previous question
+                    </Button>
+                  ) : null}
                   <Button variant="primary" onClick={goNext}>
                     {index + 1 === questions.length ? 'Finish set' : 'Next question'}
                     <ArrowRight size={15} />

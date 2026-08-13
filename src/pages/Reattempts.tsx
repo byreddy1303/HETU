@@ -1,7 +1,7 @@
 // Question-first spaced re-attempt queue. Each due item launches a dedicated
 // test session instead of expanding inside the queue.
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
 import {
   ArrowLeft,
@@ -87,6 +87,32 @@ interface AttemptState {
   elapsed: number | null;
   selectedAnswer?: PyqSelectedAnswer;
   decision?: MarkDecision;
+}
+
+interface ReattemptNavigationState {
+  queueIds: string[];
+  roundById: Record<string, number>;
+  completedIds: string[];
+  attemptsById: Record<string, AttemptState>;
+  lastIndex: number;
+}
+
+function navigationState(value: unknown): ReattemptNavigationState | null {
+  if (!value || typeof value !== 'object') return null;
+  const candidate = value as Partial<ReattemptNavigationState>;
+  if (
+    !Array.isArray(candidate.queueIds) ||
+    !candidate.queueIds.every((id) => typeof id === 'string')
+  ) {
+    return null;
+  }
+  return {
+    queueIds: candidate.queueIds,
+    roundById: candidate.roundById ?? {},
+    completedIds: candidate.completedIds ?? [],
+    attemptsById: candidate.attemptsById ?? {},
+    lastIndex: typeof candidate.lastIndex === 'number' ? candidate.lastIndex : -1
+  };
 }
 
 function Ladder({ stage }: { stage: ReattemptStage }) {
@@ -493,7 +519,11 @@ function PyqReattemptSession({
   existingAttempt,
   position,
   total,
+  readOnly,
   onExit,
+  onPrevious,
+  onNext,
+  onSkip,
   onResult
 }: {
   userId: string;
@@ -504,14 +534,19 @@ function PyqReattemptSession({
   existingAttempt: PyqAttemptRow | null;
   position: number;
   total: number;
+  readOnly: boolean;
   onExit: () => void;
+  onPrevious?: () => void;
+  onNext?: () => void;
+  onSkip: () => void;
   onResult: (
     result: 'clean' | 'fail',
     elapsed: number,
     answer: ReattemptAnswerEvidence
   ) => Promise<void>;
 }) {
-  const initialAnswer = existingAttempt?.selected_answer;
+  const existingAnswer = existingAttempt?.mark_decision === 'SKIP' ? null : existingAttempt;
+  const initialAnswer = existingAnswer?.selected_answer;
   const [choices, setChoices] = useState<string[]>(() =>
     Array.isArray(initialAnswer)
       ? initialAnswer.map(String)
@@ -520,23 +555,23 @@ function PyqReattemptSession({
         : []
   );
   const [numeric, setNumeric] = useState(() =>
-    existingAttempt && pyqAnswerInputType(question) === 'NAT'
-      ? String(existingAttempt.selected_answer ?? '')
+    existingAnswer && pyqAnswerInputType(question) === 'NAT'
+      ? String(existingAnswer.selected_answer ?? '')
       : ''
   );
   const [decision, setDecision] = useState<MarkDecision | null>(
-    existingAttempt?.mark_decision ?? null
+    existingAnswer?.mark_decision ?? null
   );
   const [startedAt, setStartedAt] = useState<number | null>(() =>
-    existingAttempt ? null : Date.now()
+    existingAnswer ? null : Date.now()
   );
-  const [localAttempt, setLocalAttempt] = useState<PyqAttemptRow | null>(existingAttempt);
+  const [localAttempt, setLocalAttempt] = useState<PyqAttemptRow | null>(existingAnswer);
   const [submitting, setSubmitting] = useState(false);
   const [reporting, setReporting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const autoReportedAttempt = useRef<string | null>(null);
   const captureRef = useRef<HTMLDivElement>(null);
-  const submitted = localAttempt ?? existingAttempt;
+  const submitted = localAttempt ?? existingAnswer;
   const liveSeconds = useTimer(submitted ? null : startedAt);
   const shownSeconds = submitted?.time_spent_sec ?? liveSeconds;
   const inputType = pyqAnswerInputType(question);
@@ -548,6 +583,7 @@ function PyqReattemptSession({
 
   useEffect(() => {
     if (!existingAttempt) return;
+    if (existingAttempt.mark_decision === 'SKIP') return;
     const selected = existingAttempt.selected_answer;
     setChoices(
       Array.isArray(selected)
@@ -576,7 +612,11 @@ function PyqReattemptSession({
     try {
       const roundAttemptId = pyqReattemptAttemptId(row.id, row.history.length);
       const alreadySaved = await db.pyq_attempts.get(roundAttemptId);
-      if (alreadySaved) {
+      if (alreadySaved && alreadySaved.mark_decision !== 'SKIP') {
+        setLocalAttempt(alreadySaved);
+        return;
+      }
+      if (alreadySaved && decision === 'SKIP') {
         setLocalAttempt(alreadySaved);
         return;
       }
@@ -601,7 +641,7 @@ function PyqReattemptSession({
         questionStartedAtMs,
         committedAtMs,
         screenshotUrl,
-        attemptNumber: attempts.length + 1
+        attemptNumber: alreadySaved?.attempt_number ?? attempts.length + 1
       });
       await writeLocal('pyq_attempts', attempt);
       setLocalAttempt(attempt);
@@ -620,6 +660,11 @@ function PyqReattemptSession({
   useEffect(() => {
     if (!submitted || autoReportedAttempt.current === submitted.id) return;
     autoReportedAttempt.current = submitted.id;
+    if (submitted.mark_decision === 'SKIP') {
+      onSkip();
+      return;
+    }
+    if (readOnly) return;
     setReporting(true);
     setSubmitError(null);
     void onResult(submitted.mark_correct === true ? 'clean' : 'fail', submitted.time_spent_sec, {
@@ -635,7 +680,7 @@ function PyqReattemptSession({
         );
       })
       .finally(() => setReporting(false));
-  }, [onResult, submitted]);
+  }, [onResult, onSkip, readOnly, submitted]);
 
   function retryAutomaticUpdate() {
     if (!submitted) return;
@@ -663,6 +708,23 @@ function PyqReattemptSession({
           </span>
         </div>
       </div>
+
+      {onPrevious || (readOnly && onNext) ? (
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div>
+            {onPrevious ? (
+              <Button onClick={onPrevious}>
+                <ArrowLeft size={15} /> Previous question
+              </Button>
+            ) : null}
+          </div>
+          {readOnly && onNext ? (
+            <Button onClick={onNext}>
+              Next question <ArrowRight size={15} />
+            </Button>
+          ) : null}
+        </div>
+      ) : null}
 
       <div ref={captureRef}>
         <Card className="overflow-hidden">
@@ -724,9 +786,11 @@ function PyqReattemptSession({
                   currentAttempt={submitted}
                 />
                 <p className="text-[12px] leading-relaxed text-text-muted">
-                  {submitted.mark_correct === true
-                    ? 'Correct — moving this question to the next phase.'
-                    : 'Not correct — moving this question back one phase.'}
+                  {readOnly
+                    ? 'Answer locked — submitted answers can be reviewed but not changed.'
+                    : submitted.mark_correct === true
+                      ? 'Correct — moving this question to the next phase.'
+                      : 'Not correct — moving this question back one phase.'}
                 </p>
                 {reporting ? (
                   <p role="status" className="u-label text-accent">
@@ -759,7 +823,11 @@ function ReattemptSession({
   position,
   total,
   attempt,
+  readOnly,
   onExit,
+  onPrevious,
+  onNext,
+  onSkip,
   onStart,
   onFinish,
   onRestart,
@@ -773,7 +841,11 @@ function ReattemptSession({
   position: number;
   total: number;
   attempt: AttemptState | null;
+  readOnly: boolean;
   onExit: () => void;
+  onPrevious?: () => void;
+  onNext?: () => void;
+  onSkip: () => void;
   onStart: () => void;
   onFinish: (seconds: number, selectedAnswer?: PyqSelectedAnswer, decision?: MarkDecision) => void;
   onRestart: () => void;
@@ -918,7 +990,6 @@ function ReattemptSession({
   useEffect(() => {
     if (
       !hasCommittedAnswer ||
-      automaticVerdict == null ||
       autoReportedAttempt.current ||
       currentAttempt?.elapsed == null ||
       currentAttempt.selectedAnswer === undefined ||
@@ -926,6 +997,13 @@ function ReattemptSession({
     ) {
       return;
     }
+    if (readOnly) return;
+    if (currentAttempt.decision === 'SKIP') {
+      autoReportedAttempt.current = true;
+      onSkip();
+      return;
+    }
+    if (automaticVerdict == null) return;
     autoReportedAttempt.current = true;
     setReporting(true);
     setResultError(null);
@@ -949,8 +1027,10 @@ function ReattemptSession({
     currentAttempt?.elapsed,
     currentAttempt?.selectedAnswer,
     hasCommittedAnswer,
+    onSkip,
     onResult,
-    question?.answer_text
+    question?.answer_text,
+    readOnly
   ]);
 
   function retryAutomaticUpdate() {
@@ -978,6 +1058,23 @@ function ReattemptSession({
           </span>
         </div>
       </div>
+
+      {onPrevious || (readOnly && onNext) ? (
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div>
+            {onPrevious ? (
+              <Button onClick={onPrevious}>
+                <ArrowLeft size={15} /> Previous question
+              </Button>
+            ) : null}
+          </div>
+          {readOnly && onNext ? (
+            <Button onClick={onNext}>
+              Next question <ArrowRight size={15} />
+            </Button>
+          ) : null}
+        </div>
+      ) : null}
 
       <Card className="reattempt-question-sheet overflow-hidden">
         <CardHeader
@@ -1152,10 +1249,12 @@ function ReattemptSession({
                   : `${secondsToClock(currentAttempt.elapsed - targetSec)} over target`}
               </p>
             </div>
-            <Button variant="ghost" size="sm" onClick={restart}>
-              <RotateCcw size={14} strokeWidth={1.8} className="mr-1.5" />
-              Try again
-            </Button>
+            {currentAttempt.decision === 'SKIP' || currentAttempt.decision === undefined ? (
+              <Button variant="ghost" size="sm" onClick={restart}>
+                <RotateCcw size={14} strokeWidth={1.8} className="mr-1.5" />
+                {currentAttempt.decision === 'SKIP' ? 'Answer now' : 'Try again'}
+              </Button>
+            ) : null}
           </div>
           <div className="mt-4 border-t border-border pt-4">
             {question &&
@@ -1213,7 +1312,11 @@ function ReattemptSession({
             ) : null}
           </div>
           <div className="mt-4 border-t border-border pt-4">
-            {hasCommittedAnswer ? (
+            {readOnly ? (
+              <p className="text-[13px] font-medium text-text-muted">
+                Answer locked — submitted answers can be reviewed but not changed.
+              </p>
+            ) : hasCommittedAnswer ? (
               automaticVerdict == null ? (
                 <div>
                   <p className="text-[13px] font-medium text-warn">Add a checkable actual answer</p>
@@ -1311,9 +1414,13 @@ export default function Reattempts() {
   const { userId } = useAuth();
   const pushToast = useUiStore((state) => state.pushToast);
   const navigate = useNavigate();
+  const location = useLocation();
   const { reattemptId } = useParams<{ reattemptId: string }>();
   const [searchParams] = useSearchParams();
-  const [attempt, setAttempt] = useState<AttemptState | null>(null);
+  const routeNavigation = navigationState(location.state);
+  const [attemptsByRowId, setAttemptsByRowId] = useState<Record<string, AttemptState>>(
+    () => routeNavigation?.attemptsById ?? {}
+  );
   const today = todayISO();
 
   const reattempts = useLiveQuery(
@@ -1373,7 +1480,19 @@ export default function Reattempts() {
       subjects: [...group.subjects]
     }));
   }, [upcoming, qById]);
-  const activeRow = reattemptId ? due.find((row) => row.id === reattemptId) : undefined;
+  const defaultQueueIds = due.map((row) => row.id);
+  const queueIds = routeNavigation?.queueIds.length ? routeNavigation.queueIds : defaultQueueIds;
+  const roundById =
+    routeNavigation?.roundById ??
+    Object.fromEntries(due.map((row) => [row.id, row.history.length]));
+  const completedIds = routeNavigation?.completedIds ?? [];
+  const activeRow = reattemptId
+    ? (due.find((row) => row.id === reattemptId) ??
+      (queueIds.includes(reattemptId)
+        ? reattempts?.find((row) => row.id === reattemptId)
+        : undefined))
+    : undefined;
+  const activePosition = activeRow ? queueIds.indexOf(activeRow.id) : -1;
   const activePyqSource = activeRow
     ? (pyqSourceByQuestionId.get(activeRow.question_id) ?? null)
     : null;
@@ -1403,7 +1522,8 @@ export default function Reattempts() {
   const existingRoundAttempt = activeRow
     ? ((pyqAttempts ?? []).find(
         (candidate) =>
-          candidate.id === pyqReattemptAttemptId(activeRow.id, activeRow.history.length)
+          candidate.id ===
+          pyqReattemptAttemptId(activeRow.id, roundById[activeRow.id] ?? activeRow.history.length)
       ) ?? null)
     : null;
 
@@ -1447,27 +1567,80 @@ export default function Reattempts() {
   useEffect(() => {
     if (!activeRow) return;
     if (activePyqSource) {
-      setAttempt(null);
       return;
     }
-    setAttempt((current) => {
-      if (current?.rowId === activeRow.id) return current;
-      if (current && current.rowId !== activeRow.id) return current;
-      return { rowId: activeRow.id, startedAt: Date.now(), elapsed: null };
+    setAttemptsByRowId((current) => {
+      if (current[activeRow.id]) return current;
+      return {
+        ...current,
+        [activeRow.id]: { rowId: activeRow.id, startedAt: Date.now(), elapsed: null }
+      };
     });
   }, [activePyqSource, activeRow]);
 
   function openSession(rowId: string) {
-    if (attempt && attempt.rowId !== rowId) {
-      pushToast(
-        attempt.startedAt
-          ? 'Finish the running attempt before opening another question.'
-          : 'Record the finished attempt before opening another question.',
-        'neutral'
-      );
+    const runningAttempt = Object.values(attemptsByRowId).find((attempt) => attempt.startedAt);
+    if (runningAttempt && runningAttempt.rowId !== rowId) {
+      pushToast('Finish the running attempt before opening another question.', 'neutral');
       return;
     }
-    navigate(`/reattempts/${encodeURIComponent(rowId)}`);
+    const nextQueueIds = due.map((row) => row.id);
+    const nextNavigation: ReattemptNavigationState = {
+      queueIds: nextQueueIds,
+      roundById: Object.fromEntries(due.map((row) => [row.id, row.history.length])),
+      completedIds: [],
+      attemptsById: {},
+      lastIndex: nextQueueIds.indexOf(rowId)
+    };
+    setAttemptsByRowId({});
+    navigate(`/reattempts/${encodeURIComponent(rowId)}`, { state: nextNavigation });
+  }
+
+  function currentNavigation(
+    overrides: Partial<ReattemptNavigationState> = {}
+  ): ReattemptNavigationState {
+    return {
+      queueIds,
+      roundById,
+      completedIds,
+      attemptsById: attemptsByRowId,
+      lastIndex: activePosition,
+      ...overrides
+    };
+  }
+
+  function moveWithinSession(targetIndex: number) {
+    const targetId = queueIds[targetIndex];
+    if (!targetId) return;
+    const nextAttempts = { ...attemptsByRowId };
+    const targetAttempt = nextAttempts[targetId];
+    if (targetAttempt?.decision === 'SKIP') {
+      nextAttempts[targetId] = {
+        rowId: targetId,
+        startedAt: Date.now(),
+        elapsed: null
+      };
+      setAttemptsByRowId(nextAttempts);
+    }
+    navigate(`/reattempts/${encodeURIComponent(targetId)}`, {
+      state: currentNavigation({ attemptsById: nextAttempts, lastIndex: targetIndex })
+    });
+  }
+
+  function advanceAfterSkip(row: ReattemptRow) {
+    const currentIndex = queueIds.indexOf(row.id);
+    const nextIndex = queueIds.findIndex(
+      (id, index) => index > currentIndex && !completedIds.includes(id)
+    );
+    const nextNavigation = currentNavigation({ lastIndex: currentIndex });
+    navigate(
+      nextIndex >= 0 ? `/reattempts/${encodeURIComponent(queueIds[nextIndex])}` : '/reattempts',
+      { replace: true, state: nextNavigation }
+    );
+    pushToast(
+      'Skipped for now — use Previous question to answer it before leaving the test.',
+      'neutral'
+    );
   }
 
   async function onResult(
@@ -1477,13 +1650,19 @@ export default function Reattempts() {
     answer?: ReattemptAnswerEvidence
   ) {
     const updated = await recordReattemptResult(row, result, today, elapsed, answer);
-    const remainingRows = due.filter((candidate) => candidate.id !== row.id);
-    const next = remainingRows[0];
-    const remaining = remainingRows.length;
-    setAttempt(null);
-    navigate(next ? `/reattempts/${encodeURIComponent(next.id)}` : '/reattempts', {
-      replace: true
-    });
+    const nextCompletedIds = Array.from(new Set([...completedIds, row.id]));
+    const currentIndex = queueIds.indexOf(row.id);
+    const nextIndex = queueIds.findIndex(
+      (id, index) => index > currentIndex && !nextCompletedIds.includes(id)
+    );
+    const remaining = queueIds.filter((id) => !nextCompletedIds.includes(id)).length;
+    navigate(
+      nextIndex >= 0 ? `/reattempts/${encodeURIComponent(queueIds[nextIndex])}` : '/reattempts',
+      {
+        replace: true,
+        state: currentNavigation({ completedIds: nextCompletedIds, lastIndex: currentIndex })
+      }
+    );
     if (updated.stage === 'MASTERED') {
       pushToast(
         remaining > 0 ? `Mastered — ${remaining} due remaining.` : 'Mastered — queue cleared.',
@@ -1555,33 +1734,63 @@ export default function Reattempts() {
           sourceAttempt={activePyqSource}
           attempts={activePyqAttempts}
           existingAttempt={existingRoundAttempt}
-          position={Math.max(1, due.findIndex((row) => row.id === activeRow.id) + 1)}
-          total={due.length}
+          position={Math.max(1, activePosition + 1)}
+          total={queueIds.length}
+          readOnly={completedIds.includes(activeRow.id)}
           onExit={() => navigate('/reattempts')}
+          onPrevious={activePosition > 0 ? () => moveWithinSession(activePosition - 1) : undefined}
+          onNext={
+            activePosition + 1 < queueIds.length
+              ? () => moveWithinSession(activePosition + 1)
+              : undefined
+          }
+          onSkip={() => advanceAfterSkip(activeRow)}
           onResult={(result, elapsed, answer) => onResult(activeRow, result, elapsed, answer)}
         />
       );
     }
     return (
       <ReattemptSession
+        key={activeRow.id}
         row={activeRow}
         question={qById.get(activeRow.question_id)}
         today={today}
-        position={Math.max(1, due.findIndex((row) => row.id === activeRow.id) + 1)}
-        total={due.length}
-        attempt={attempt}
+        position={Math.max(1, activePosition + 1)}
+        total={queueIds.length}
+        attempt={attemptsByRowId[activeRow.id] ?? null}
+        readOnly={completedIds.includes(activeRow.id)}
         onExit={() => navigate('/reattempts')}
-        onStart={() => setAttempt({ rowId: activeRow.id, startedAt: Date.now(), elapsed: null })}
-        onFinish={(seconds, selectedAnswer, decision) =>
-          setAttempt({
-            rowId: activeRow.id,
-            startedAt: null,
-            elapsed: seconds,
-            selectedAnswer,
-            decision
-          })
+        onPrevious={activePosition > 0 ? () => moveWithinSession(activePosition - 1) : undefined}
+        onNext={
+          activePosition + 1 < queueIds.length
+            ? () => moveWithinSession(activePosition + 1)
+            : undefined
         }
-        onRestart={() => setAttempt({ rowId: activeRow.id, startedAt: Date.now(), elapsed: null })}
+        onSkip={() => advanceAfterSkip(activeRow)}
+        onStart={() =>
+          setAttemptsByRowId((current) => ({
+            ...current,
+            [activeRow.id]: { rowId: activeRow.id, startedAt: Date.now(), elapsed: null }
+          }))
+        }
+        onFinish={(seconds, selectedAnswer, decision) =>
+          setAttemptsByRowId((current) => ({
+            ...current,
+            [activeRow.id]: {
+              rowId: activeRow.id,
+              startedAt: null,
+              elapsed: seconds,
+              selectedAnswer,
+              decision
+            }
+          }))
+        }
+        onRestart={() =>
+          setAttemptsByRowId((current) => ({
+            ...current,
+            [activeRow.id]: { rowId: activeRow.id, startedAt: Date.now(), elapsed: null }
+          }))
+        }
         onResult={(result, elapsed, answer) => onResult(activeRow, result, elapsed, answer)}
         onSavePrompt={savePrompt}
         onSaveAnswer={saveAnswer}
@@ -1599,6 +1808,22 @@ export default function Reattempts() {
             : `${due.length} due · ${upcoming.length} upcoming · ${mastered} mastered`
         }
       />
+
+      {routeNavigation && routeNavigation.lastIndex >= 0 ? (
+        <Card>
+          <CardBody className="flex flex-wrap items-center justify-between gap-3 p-4">
+            <div>
+              <p className="text-[13px] font-semibold text-text">Review this re-attempt test</p>
+              <p className="mt-1 text-[12px] text-text-muted">
+                Answered questions stay locked. Skipped questions can still be answered.
+              </p>
+            </div>
+            <Button onClick={() => moveWithinSession(routeNavigation.lastIndex)}>
+              <ArrowLeft size={15} /> Previous question
+            </Button>
+          </CardBody>
+        </Card>
+      ) : null}
 
       {due.length > 0 ? (
         <section className="flex flex-col gap-3" aria-label="Questions due now">
@@ -1623,7 +1848,7 @@ export default function Reattempts() {
               row={row}
               question={qById.get(row.question_id)}
               today={today}
-              attempt={attempt}
+              attempt={attemptsByRowId[row.id] ?? null}
               onOpen={() => openSession(row.id)}
             />
           ))}

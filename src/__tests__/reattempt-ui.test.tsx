@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { render, screen, waitFor, within } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import type { QuestionRow, ReattemptRow } from '@/types';
@@ -18,7 +18,7 @@ import Reattempts from '@/pages/Reattempts';
 
 const USER = '00000000-0000-4000-8000-000000000001';
 const QUESTION = 'Which schedules are conflict serializable, and why?';
-const ANSWER = 'The schedule is not conflict serializable.';
+const ANSWER = 'C';
 const PATTERN = 'precedence graph cycle';
 const IMAGE =
   'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22100%22%3E%3Crect width=%22200%22 height=%22100%22 fill=%22white%22/%3E%3C/svg%3E';
@@ -101,7 +101,7 @@ async function seedDueQuestion(
   await db.reattempts.put({ ...reattempt, sync_status: 'synced' });
 }
 
-async function seedDuePyq() {
+async function seedDuePyq(stage: ReattemptRow['stage'] = 'D3') {
   const pyq: PyqQuestion = {
     id: 'gate-2026-set1-q1',
     year: 2026,
@@ -183,7 +183,7 @@ async function seedDuePyq() {
     user_id: USER,
     question_id: journalQuestionId,
     scheduled_date: '2026-07-20',
-    stage: 'D3',
+    stage,
     history: [],
     created_at: '2026-07-17T10:01:01.000Z'
   };
@@ -207,7 +207,7 @@ describe('re-attempt solve flow', () => {
     vi.mocked(captureElementToDataUrl).mockClear();
   });
 
-  it('opens a logged MCQ with exam controls and persists the answer comparison', async () => {
+  it('automatically checks a logged MCQ and advances it after the answer is committed', async () => {
     await seedDueQuestion();
     const user = userEvent.setup();
 
@@ -224,7 +224,6 @@ describe('re-attempt solve flow', () => {
     expect(screen.getByText(PATTERN)).toBeInTheDocument();
     expect(screen.getByText('carried forward')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Exit session' })).toBeInTheDocument();
-    expect(screen.queryByText(ANSWER)).not.toBeInTheDocument();
     expect(await screen.findByRole('button', { name: 'A' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'D' })).toBeInTheDocument();
     expect(screen.queryByText('Actual answer')).not.toBeInTheDocument();
@@ -232,15 +231,6 @@ describe('re-attempt solve flow', () => {
     await user.click(screen.getByRole('button', { name: 'C' }));
     await user.click(screen.getByRole('button', { name: 'Answered: committed' }));
     await user.click(screen.getByRole('button', { name: 'Commit & reveal answer' }));
-
-    const history = await screen.findByRole('region', { name: 'Re-attempt answer history' });
-    const attemptTwo = within(history).getByText('Attempt 2 answer');
-    const attemptOne = within(history).getByText('Attempt 1 answer');
-    const actual = within(history).getByText('Actual answer');
-    expect(attemptTwo.nextElementSibling).toHaveTextContent('C');
-    expect(attemptOne.nextElementSibling).toHaveTextContent('Not captured in the original log');
-    expect(actual.nextElementSibling).toHaveTextContent(ANSWER);
-    await user.click(screen.getByRole('button', { name: 'Clean — answer + method' }));
 
     expect(await screen.findByText('Nothing due')).toBeInTheDocument();
     await waitFor(async () => {
@@ -283,7 +273,7 @@ describe('re-attempt solve flow', () => {
     expect(screen.getByRole('button', { name: 'A' })).toBeInTheDocument();
   });
 
-  it('runs a due PYQ in the full exam UI and shows second, first, and actual answers', async () => {
+  it('automatically checks and advances a correct PYQ re-attempt', async () => {
     await seedDuePyq();
     const user = userEvent.setup();
 
@@ -308,14 +298,6 @@ describe('re-attempt solve flow', () => {
     await user.click(screen.getByRole('button', { name: 'Answered: committed' }));
     await user.click(screen.getByRole('button', { name: 'Commit & reveal key' }));
 
-    const history = await screen.findByRole('region', { name: 'PYQ answer history' });
-    const attemptTwo = within(history).getByText('Attempt 2 answer');
-    const attemptOne = within(history).getByText('Attempt 1 answer');
-    const actual = within(history).getByText('Actual answer');
-    expect(attemptTwo.nextElementSibling).toHaveTextContent('B');
-    expect(attemptOne.nextElementSibling).toHaveTextContent('A');
-    expect(actual.nextElementSibling).toHaveTextContent('B');
-
     await waitFor(async () => {
       const attempts = await db.pyq_attempts
         .where('question_uid')
@@ -333,9 +315,10 @@ describe('re-attempt solve flow', () => {
       });
     });
 
-    await user.click(screen.getByRole('button', { name: 'Clean — answer + method' }));
     expect(await screen.findByText('Nothing due')).toBeInTheDocument();
     const stored = await db.reattempts.get('reattempt-pyq');
+    expect(stored?.stage).toBe('D10');
+    expect(stored?.history[0].result).toBe('clean');
     expect(stored?.history[0]).toMatchObject({
       selectedAnswer: 'B',
       correctAnswer: 'B',
@@ -363,18 +346,42 @@ describe('re-attempt solve flow', () => {
     await user.click(screen.getByRole('button', { name: 'Answered: committed' }));
     await user.click(screen.getByRole('button', { name: 'Commit & reveal answer' }));
 
-    const history = await screen.findByRole('region', { name: 'Re-attempt answer history' });
-    const attemptTwo = within(history).getByText('Attempt 2 answer');
-    const actual = within(history).getByText('Actual answer');
-    expect(attemptTwo.nextElementSibling).toHaveTextContent('42.5');
-    expect(actual.nextElementSibling).toHaveTextContent('42.5');
-
-    await user.click(screen.getByRole('button', { name: 'Clean — answer + method' }));
+    expect(await screen.findByText('Nothing due')).toBeInTheDocument();
     await waitFor(async () => {
       const stored = await db.reattempts.get('reattempt-due');
       expect(stored?.history[0]).toMatchObject({
         selectedAnswer: '42.5',
         correctAnswer: '42.5',
+        markDecision: 'MARK'
+      });
+    });
+  });
+
+  it('automatically moves an incorrect D30 PYQ back to D10', async () => {
+    await seedDuePyq('D30');
+    const user = userEvent.setup();
+
+    render(
+      <MemoryRouter initialEntries={['/reattempts/reattempt-pyq']}>
+        <Routes>
+          <Route path="/reattempts" element={<Reattempts />} />
+          <Route path="/reattempts/:reattemptId" element={<Reattempts />} />
+        </Routes>
+      </MemoryRouter>
+    );
+
+    await user.click(await screen.findByRole('button', { name: 'A' }));
+    await user.click(screen.getByRole('button', { name: 'Answered: committed' }));
+    await user.click(screen.getByRole('button', { name: 'Commit & reveal key' }));
+
+    expect(await screen.findByText('Nothing due')).toBeInTheDocument();
+    await waitFor(async () => {
+      const stored = await db.reattempts.get('reattempt-pyq');
+      expect(stored?.stage).toBe('D10');
+      expect(stored?.history[0]).toMatchObject({
+        result: 'fail',
+        selectedAnswer: 'A',
+        correctAnswer: 'B',
         markDecision: 'MARK'
       });
     });

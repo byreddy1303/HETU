@@ -28,6 +28,7 @@ import type {
 import { db } from '@/lib/db';
 import {
   buildReattemptQueue,
+  evaluateLoggedReattemptAnswer,
   recordReattemptResult,
   type ReattemptAnswerEvidence
 } from '@/lib/reattempt';
@@ -525,6 +526,7 @@ function PyqReattemptSession({
   const [submitting, setSubmitting] = useState(false);
   const [reporting, setReporting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const autoReportedAttempt = useRef<string | null>(null);
   const captureRef = useRef<HTMLDivElement>(null);
   const submitted = localAttempt ?? existingAttempt;
   const liveSeconds = useTimer(submitted ? null : startedAt);
@@ -607,18 +609,30 @@ function PyqReattemptSession({
     }
   }
 
-  async function report(result: 'clean' | 'fail') {
-    if (!submitted || reporting) return;
+  useEffect(() => {
+    if (!submitted || autoReportedAttempt.current === submitted.id) return;
+    autoReportedAttempt.current = submitted.id;
     setReporting(true);
-    try {
-      await onResult(result, submitted.time_spent_sec, {
-        selectedAnswer: submitted.selected_answer,
-        correctAnswer: submitted.correct_answer,
-        markDecision: submitted.mark_decision
-      });
-    } finally {
-      setReporting(false);
-    }
+    setSubmitError(null);
+    void onResult(submitted.mark_correct === true ? 'clean' : 'fail', submitted.time_spent_sec, {
+      selectedAnswer: submitted.selected_answer,
+      correctAnswer: submitted.correct_answer,
+      markDecision: submitted.mark_decision
+    })
+      .catch((error) => {
+        setSubmitError(
+          error instanceof Error
+            ? `The answer was checked, but the phase could not be updated: ${error.message}`
+            : 'The answer was checked, but the phase could not be updated.'
+        );
+      })
+      .finally(() => setReporting(false));
+  }, [onResult, submitted]);
+
+  function retryAutomaticUpdate() {
+    if (!submitted) return;
+    autoReportedAttempt.current = null;
+    setLocalAttempt({ ...submitted });
   }
 
   return (
@@ -702,20 +716,25 @@ function PyqReattemptSession({
                   currentAttempt={submitted}
                 />
                 <p className="text-[12px] leading-relaxed text-text-muted">
-                  Clean means the final answer and method were correct without help. The submitted
-                  answer and exact key are already stored.
+                  {submitted.mark_correct === true
+                    ? 'Correct — moving this question to the next phase.'
+                    : 'Not correct — moving this question back one phase.'}
                 </p>
-                <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-                  <Button variant="danger" onClick={() => void report('fail')} disabled={reporting}>
-                    Failed — reset to D3
-                  </Button>
-                  <Button
-                    onClick={() => void report('clean')}
-                    disabled={reporting || submitted.mark_correct !== true}
-                  >
-                    Clean — answer + method
-                  </Button>
-                </div>
+                {reporting ? (
+                  <p role="status" className="u-label text-accent">
+                    Updating review phase…
+                  </p>
+                ) : null}
+                {submitError ? (
+                  <div>
+                    <p role="alert" className="text-[12px] leading-relaxed text-danger">
+                      {submitError}
+                    </p>
+                    <Button className="mt-2" onClick={retryAutomaticUpdate}>
+                      Retry phase update
+                    </Button>
+                  </div>
+                ) : null}
               </div>
             )}
           </div>
@@ -765,7 +784,10 @@ function ReattemptSession({
   const [answerDraft, setAnswerDraft] = useState(question?.answer_text ?? '');
   const [savingAnswer, setSavingAnswer] = useState(false);
   const [reporting, setReporting] = useState(false);
+  const [resultError, setResultError] = useState<string | null>(null);
+  const [autoRetryVersion, setAutoRetryVersion] = useState(0);
   const [imageOpen, setImageOpen] = useState(false);
+  const autoReportedAttempt = useRef(false);
   const currentAttempt = attempt?.rowId === row.id ? attempt : null;
   const inputType = question ? draftFromRow(question).format : null;
   const [choices, setChoices] = useState<string[]>([]);
@@ -812,6 +834,19 @@ function ReattemptSession({
       ? numeric.trim() !== '' && Number.isFinite(Number(numeric))
       : choices.length > 0;
   const canCommit = !!inputType && !!decision && (decision === 'SKIP' || hasAnswer);
+  const hasCommittedAnswer =
+    !!inputType &&
+    currentAttempt?.elapsed != null &&
+    currentAttempt.selectedAnswer !== undefined &&
+    !!currentAttempt.decision;
+  const automaticVerdict = hasCommittedAnswer
+    ? evaluateLoggedReattemptAnswer(
+        inputType!,
+        currentAttempt.selectedAnswer!,
+        question?.answer_text ?? null,
+        currentAttempt.decision!
+      )
+    : null;
 
   function selectedAnswer(): PyqSelectedAnswer {
     if (decision === 'SKIP') return null;
@@ -870,6 +905,50 @@ function ReattemptSession({
     } finally {
       setReporting(false);
     }
+  }
+
+  useEffect(() => {
+    if (
+      !hasCommittedAnswer ||
+      automaticVerdict == null ||
+      autoReportedAttempt.current ||
+      currentAttempt?.elapsed == null ||
+      currentAttempt.selectedAnswer === undefined ||
+      !currentAttempt.decision
+    ) {
+      return;
+    }
+    autoReportedAttempt.current = true;
+    setReporting(true);
+    setResultError(null);
+    void onResult(automaticVerdict ? 'clean' : 'fail', currentAttempt.elapsed, {
+      selectedAnswer: currentAttempt.selectedAnswer,
+      correctAnswer: question?.answer_text?.trim() || null,
+      markDecision: currentAttempt.decision
+    })
+      .catch((error) => {
+        setResultError(
+          error instanceof Error
+            ? `The answer was checked, but the phase could not be updated: ${error.message}`
+            : 'The answer was checked, but the phase could not be updated.'
+        );
+      })
+      .finally(() => setReporting(false));
+  }, [
+    automaticVerdict,
+    autoRetryVersion,
+    currentAttempt?.decision,
+    currentAttempt?.elapsed,
+    currentAttempt?.selectedAnswer,
+    hasCommittedAnswer,
+    onResult,
+    question?.answer_text
+  ]);
+
+  function retryAutomaticUpdate() {
+    autoReportedAttempt.current = false;
+    setResultError(null);
+    setAutoRetryVersion((value) => value + 1);
   }
 
   return (
@@ -1085,7 +1164,7 @@ function ReattemptSession({
                   decision={currentAttempt.decision}
                   elapsed={currentAttempt.elapsed}
                 />
-                {!question.answer_text?.trim() && !editingAnswer ? (
+                {automaticVerdict == null && !editingAnswer ? (
                   <Button
                     variant="ghost"
                     size="sm"
@@ -1093,7 +1172,7 @@ function ReattemptSession({
                     onClick={() => setEditingAnswer(true)}
                   >
                     <PencilLine size={14} strokeWidth={1.8} className="mr-1.5" />
-                    Add actual answer
+                    {question.answer_text?.trim() ? 'Update actual answer' : 'Add actual answer'}
                   </Button>
                 ) : null}
               </>
@@ -1128,19 +1207,60 @@ function ReattemptSession({
             ) : null}
           </div>
           <div className="mt-4 border-t border-border pt-4">
-            <p className="text-[13px] font-medium text-text">How did it go?</p>
-            <p className="mt-1 text-[12px] text-text-muted">
-              Clean means the final answer and method were correct without help. Your committed
-              answer, the saved actual answer, and time are recorded together.
-            </p>
-            <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
-              <Button variant="danger" onClick={() => void report('fail')} disabled={reporting}>
-                Failed — reset to D3
-              </Button>
-              <Button onClick={() => void report('clean')} disabled={reporting}>
-                Clean — answer + method
-              </Button>
-            </div>
+            {hasCommittedAnswer ? (
+              automaticVerdict == null ? (
+                <div>
+                  <p className="text-[13px] font-medium text-warn">Add a checkable actual answer</p>
+                  <p className="mt-1 text-[12px] leading-relaxed text-text-muted">
+                    Save the correct option for MCQ/MSQ (for example B or A, C) or the exact number
+                    for NAT. The app will then grade this answer and update its phase automatically.
+                  </p>
+                </div>
+              ) : (
+                <div>
+                  <p
+                    className={cn(
+                      'text-[13px] font-medium',
+                      automaticVerdict ? 'text-success' : 'text-danger'
+                    )}
+                  >
+                    {automaticVerdict
+                      ? 'Correct — moving to the next phase.'
+                      : 'Not correct — moving back one phase.'}
+                  </p>
+                  {reporting ? (
+                    <p role="status" className="u-label mt-2 text-accent">
+                      Updating review phase…
+                    </p>
+                  ) : null}
+                  {resultError ? (
+                    <div className="mt-2">
+                      <p role="alert" className="text-[12px] leading-relaxed text-danger">
+                        {resultError}
+                      </p>
+                      <Button className="mt-2" onClick={retryAutomaticUpdate}>
+                        Retry phase update
+                      </Button>
+                    </div>
+                  ) : null}
+                </div>
+              )
+            ) : (
+              <>
+                <p className="text-[13px] font-medium text-text">How did it go?</p>
+                <p className="mt-1 text-[12px] text-text-muted">
+                  This timer-only question has no answer format to check automatically.
+                </p>
+                <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
+                  <Button variant="danger" onClick={() => void report('fail')} disabled={reporting}>
+                    Failed — move back
+                  </Button>
+                  <Button onClick={() => void report('clean')} disabled={reporting}>
+                    Clean — move forward
+                  </Button>
+                </div>
+              </>
+            )}
           </div>
         </section>
       ) : (
@@ -1313,12 +1433,14 @@ export default function Reattempts() {
       );
     } else if (result === 'clean') {
       pushToast(
-        `Clean. Next rung ${formatDate(updated.scheduled_date, 'dd MMM')}.${remaining > 0 ? ` ${remaining} due remaining.` : ''}`,
+        `Correct. Next phase ${updated.stage} on ${formatDate(updated.scheduled_date, 'dd MMM')}.${remaining > 0 ? ` ${remaining} due remaining.` : ''}`,
         'success'
       );
     } else {
+      const phaseMessage =
+        updated.stage === row.stage ? `Stays at ${updated.stage}` : `Back to ${updated.stage}`;
       pushToast(
-        `Reset to D3 — back ${formatDate(updated.scheduled_date, 'dd MMM')}.${remaining > 0 ? ` ${remaining} due remaining.` : ''}`,
+        `Not correct. ${phaseMessage} on ${formatDate(updated.scheduled_date, 'dd MMM')}.${remaining > 0 ? ` ${remaining} due remaining.` : ''}`,
         'neutral'
       );
     }

@@ -1,5 +1,6 @@
-// Spaced re-attempt ladder (F3.3): D3 → D10 → D30 → MASTERED; any fail resets
-// to D3. `advance` mirrors the Postgres advance_reattempt() function exactly —
+// Spaced re-attempt ladder (F3.3): D3 → D10 → D30 → MASTERED. A correct answer
+// advances one rung; an incorrect answer moves back one rung. `advance` mirrors
+// the Postgres advance_reattempt() function exactly —
 // the UI applies it locally and syncs the row, so it works offline; the SQL
 // function stays authoritative for server-side jobs.
 import type {
@@ -11,6 +12,7 @@ import type {
   ReattemptStage
 } from '@/types';
 import { OUTCOME_BY_CODE, REATTEMPT_FIRST_DELAY_DAYS } from '@/lib/constants';
+import type { QuestionFormat } from '@/lib/constants';
 import { addDaysISO, nowISO, todayISO, uuid } from '@/lib/utils';
 import { db } from '@/lib/db';
 import { writeLocal } from '@/lib/sync';
@@ -20,6 +22,13 @@ const NEXT_ON_CLEAN: Record<ReattemptStage, { stage: ReattemptStage; delayDays: 
   D10: { stage: 'D30', delayDays: 30 },
   D30: { stage: 'MASTERED', delayDays: null },
   MASTERED: { stage: 'MASTERED', delayDays: null }
+};
+
+const NEXT_ON_FAIL: Record<ReattemptStage, { stage: ReattemptStage; delayDays: number }> = {
+  D3: { stage: 'D3', delayDays: 3 },
+  D10: { stage: 'D3', delayDays: 3 },
+  D30: { stage: 'D10', delayDays: 10 },
+  MASTERED: { stage: 'D30', delayDays: 30 }
 };
 
 export function needsReattempt(outcome: Outcome): boolean {
@@ -36,6 +45,61 @@ export interface ReattemptAnswerEvidence {
   selectedAnswer: PyqSelectedAnswer;
   correctAnswer: PyqSelectedAnswer;
   markDecision: MarkDecision;
+}
+
+function stripAnswerLabel(value: string): string {
+  return value
+    .trim()
+    .replace(/^(?:actual\s+answer|answer(?:\s+key)?|correct\s+(?:answer|option))\s*[:=-]\s*/i, '')
+    .trim();
+}
+
+function normalizedChoices(value: PyqSelectedAnswer): string[] {
+  const raw = Array.isArray(value) ? value : value == null ? [] : [String(value)];
+  return raw
+    .map(String)
+    .map((choice) => choice.trim().toUpperCase())
+    .filter(Boolean)
+    .sort();
+}
+
+function savedChoiceKey(value: PyqSelectedAnswer): string[] {
+  if (Array.isArray(value)) return normalizedChoices(value);
+  if (value == null) return [];
+  const answer = stripAnswerLabel(String(value)).toUpperCase();
+  const exact = answer.match(/^\(?([A-D])\)?[.)]?$/);
+  if (exact) return [exact[1]];
+  if (/^[A-D](?:\s*[,/&+]\s*[A-D])+$/i.test(answer)) {
+    return answer.split(/\s*[,/&+]\s*/).sort();
+  }
+  return [];
+}
+
+/**
+ * Grade an answer captured from a logged (non-bank) question against its saved
+ * key. A missing/unusable key returns null so the UI can ask for a checkable
+ * actual answer instead of silently promoting the question.
+ */
+export function evaluateLoggedReattemptAnswer(
+  format: QuestionFormat,
+  selectedAnswer: PyqSelectedAnswer,
+  correctAnswer: PyqSelectedAnswer,
+  decision: MarkDecision
+): boolean | null {
+  if (decision === 'SKIP' || selectedAnswer == null) return false;
+  if (correctAnswer == null || String(correctAnswer).trim() === '') return null;
+
+  if (format === 'MCQ' || format === 'MSQ') {
+    const expected = savedChoiceKey(correctAnswer);
+    if (expected.length === 0) return null;
+    const selected = normalizedChoices(selectedAnswer);
+    return selected.join('|') === expected.join('|');
+  }
+
+  const selected = Number(selectedAnswer);
+  const expected = Number(stripAnswerLabel(String(correctAnswer)));
+  if (!Number.isFinite(selected) || !Number.isFinite(expected)) return null;
+  return Math.abs(selected - expected) <= Number.EPSILON;
 }
 
 /**
@@ -67,8 +131,7 @@ export function advance(
   timeSpent?: number,
   answer?: ReattemptAnswerEvidence
 ): Pick<ReattemptRow, 'stage' | 'scheduled_date' | 'history'> {
-  const next =
-    result === 'clean' ? NEXT_ON_CLEAN[row.stage] : { stage: 'D3' as const, delayDays: 3 };
+  const next = result === 'clean' ? NEXT_ON_CLEAN[row.stage] : NEXT_ON_FAIL[row.stage];
   return {
     stage: next.stage,
     scheduled_date:

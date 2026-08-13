@@ -1,9 +1,10 @@
-// F3.3 DoD: ladder progression D3→D10→D30→MASTERED; failure resets to D3.
+// F3.3 DoD: ladder progression D3→D10→D30→MASTERED; failure moves back one rung.
 import { describe, it, expect, beforeEach } from 'vitest';
 import type { ReattemptRow } from '@/types';
 import {
   advance,
   buildReattemptQueue,
+  evaluateLoggedReattemptAnswer,
   needsReattempt,
   scheduleReattempt,
   recordReattemptResult
@@ -45,10 +46,14 @@ describe('advance (pure ladder)', () => {
     expect(next.history.map((h) => h.result)).toEqual(['clean', 'clean', 'clean']);
   });
 
-  it.each(['D3', 'D10', 'D30'] as const)('fail at %s resets to D3 at +3d', (stage) => {
+  it.each([
+    ['D3', 'D3', '2026-07-20'],
+    ['D10', 'D3', '2026-07-20'],
+    ['D30', 'D10', '2026-07-27']
+  ] as const)('fail at %s moves to %s', (stage, expectedStage, expectedDate) => {
     const next = advance(ladderRow(stage), 'fail', TODAY);
-    expect(next.stage).toBe('D3');
-    expect(next.scheduled_date).toBe('2026-07-20');
+    expect(next.stage).toBe(expectedStage);
+    expect(next.scheduled_date).toBe(expectedDate);
     expect(next.history).toEqual([{ date: TODAY, result: 'fail' }]);
   });
 
@@ -78,6 +83,31 @@ describe('advance (pure ladder)', () => {
       correctAnswer: ['A', 'D'],
       markDecision: 'FIFTY_FIFTY'
     });
+  });
+});
+
+describe('evaluateLoggedReattemptAnswer', () => {
+  it('checks MCQ and MSQ keys without depending on choice order', () => {
+    expect(evaluateLoggedReattemptAnswer('MCQ', 'B', 'Answer key: b', 'MARK')).toBe(true);
+    expect(evaluateLoggedReattemptAnswer('MCQ', 'A', 'B', 'MARK')).toBe(false);
+    expect(evaluateLoggedReattemptAnswer('MSQ', ['C', 'A'], 'A, C', 'MARK')).toBe(true);
+  });
+
+  it('checks exact NAT values and treats a skipped answer as incorrect', () => {
+    expect(evaluateLoggedReattemptAnswer('NAT', '42.5', 'Answer: 42.5', 'MARK')).toBe(true);
+    expect(evaluateLoggedReattemptAnswer('NAT', '42.6', '42.5', 'MARK')).toBe(false);
+    expect(evaluateLoggedReattemptAnswer('MCQ', null, 'B', 'SKIP')).toBe(false);
+  });
+
+  it('does not guess when a saved answer is not a checkable key', () => {
+    expect(
+      evaluateLoggedReattemptAnswer(
+        'MCQ',
+        'C',
+        'The schedule is not conflict serializable.',
+        'MARK'
+      )
+    ).toBeNull();
   });
 });
 

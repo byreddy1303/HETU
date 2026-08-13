@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { createHash } from 'node:crypto';
-import { mkdir, readFile, rm, writeFile } from 'node:fs/promises';
+import { cp, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import process from 'node:process';
 import { fileURLToPath } from 'node:url';
@@ -12,6 +12,7 @@ const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(SCRIPT_DIR, '..');
 const OUTPUT = path.join(ROOT, 'public', 'pyq');
 const IMAGE_OUTPUT = path.join(OUTPUT, 'images');
+const BUNDLED_CUSTOM_ASSET_DIRS = ['go-classes-coa-topic-test'];
 const CUSTOM_QUESTION_PATHS = [
   'go-classes-coa-topic-test.json',
   'go-classes-coa-topic-test-2.json'
@@ -244,6 +245,21 @@ function imageSources(html) {
   return [...String(html).matchAll(/<img\b[^>]*\bsrc=["']([^"']+)["']/gi)].map((match) =>
     match[1].replaceAll('&amp;', '&')
   );
+}
+
+function isBundledPyqImage(src) {
+  return BUNDLED_CUSTOM_ASSET_DIRS.some((directory) =>
+    src.startsWith(`/pyq/images/${directory}/`)
+  );
+}
+
+function customQuestionWithImage(source) {
+  const { questionImageUrl, ...question } = source;
+  if (!questionImageUrl) return question;
+  return {
+    ...question,
+    html: `${question.html}<figure><img src="${questionImageUrl}" alt="${question.paperLabel} question ${question.number} source screenshot"></figure>`
+  };
 }
 
 function absoluteImageUrl(src) {
@@ -800,6 +816,7 @@ async function downloadImages(urls) {
 function localizedHtml(html, imageMap) {
   let localized = html;
   for (const src of imageSources(html)) {
+    if (isBundledPyqImage(src)) continue;
     const absolute = absoluteImageUrl(src);
     const local = imageMap.get(absolute);
     if (!local) throw new Error(`No local image mapping for ${absolute}`);
@@ -895,7 +912,11 @@ async function main() {
   );
   questions.push(...supplementalCse);
   questions.push(...supplementalDigitalLogic);
-  questions.push(...customQuestionPayloads.flatMap((payload) => payload.questions));
+  questions.push(
+    ...customQuestionPayloads.flatMap((payload) =>
+      payload.questions.map(customQuestionWithImage)
+    )
+  );
   for (const question of questions) {
     const classification = classifyPyqQuestion(question);
     question.subject = classification.subject;
@@ -911,13 +932,26 @@ async function main() {
   if (ids.size !== questions.length) throw new Error('Duplicate question IDs found in the bank');
 
   const remoteImages = new Set();
+  const bundledImages = new Set();
   for (const question of questions) {
-    for (const src of imageSources(question.html)) remoteImages.add(absoluteImageUrl(src));
+    for (const src of imageSources(question.html)) {
+      if (isBundledPyqImage(src)) bundledImages.add(src);
+      else remoteImages.add(absoluteImageUrl(src));
+    }
   }
 
   await rm(OUTPUT, { recursive: true, force: true });
   await mkdir(OUTPUT, { recursive: true });
   const imageMap = await downloadImages(remoteImages);
+  await Promise.all(
+    BUNDLED_CUSTOM_ASSET_DIRS.map((directory) =>
+      cp(
+        path.join(SCRIPT_DIR, 'pyq-assets', directory),
+        path.join(IMAGE_OUTPUT, directory),
+        { recursive: true }
+      )
+    )
+  );
   for (const question of questions) question.html = localizedHtml(question.html, imageMap);
 
   const grouped = new Map();
@@ -972,7 +1006,7 @@ async function main() {
     firstYear: 1990,
     lastYear: 2026,
     questionCount: questions.length,
-    imageCount: imageMap.size,
+    imageCount: imageMap.size + bundledImages.size,
     answerStatuses,
     years,
     subjects

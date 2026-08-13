@@ -8,11 +8,22 @@ import {
   matchesPyqTopicScope,
   normalizePyqQuestionHtml,
   normalizePyqManifest,
+  pyqPlainText,
   pyqAnswerValueForLog,
   resolvePyqJournalImageUrl,
   type PyqManifest,
   type PyqQuestion
 } from '@/lib/pyq';
+
+describe('PYQ journal text', () => {
+  it('preserves answer labels and line breaks when flattening archived HTML', () => {
+    const html = String.raw`<p>Choose the expression:</p><ol style="list-style-type:upper-alpha"><li>$A+B$</li><li>$A-B$</li><li>$AB$</li><li>$A/B$</li></ol>`;
+
+    expect(pyqPlainText(html)).toBe(
+      ['Choose the expression:', 'A. $A+B$', 'B. $A-B$', 'C. $AB$', 'D. $A/B$'].join('\n')
+    );
+  });
+});
 
 function question(overrides: Partial<PyqQuestion> = {}): PyqQuestion {
   return {

@@ -44,4 +44,20 @@ describe('PYQ question rendering', () => {
     expect(container).toHaveTextContent('Profit %');
     expect(container).toHaveTextContent('Bank_Manager #1');
   });
+
+  it('renders the 2005 switching-expression stem and all four choices as math', async () => {
+    const html = String.raw`<p>The switching expression corresponding to $f(A,B,C,D)=\Sigma(1, 4, 5, 9, 11, 12)$ is:</p>
+<ol style="list-style-type:upper-alpha">
+<li><p>$BC’D’ + A’C’D + AB’D$</p></li>
+<li><p>$ABC’ + ACD + B’C’D$</p></li>
+<li><p>$ACD’ + A’BC’ + AC’D’$</p></li>
+<li><p>$A’BD + ACD’ + BCD’$</p></li>
+</ol>`;
+    const { container } = render(<PyqQuestionContent html={html} />);
+
+    await waitFor(() => expect(container.querySelectorAll('.katex')).toHaveLength(5));
+    expect(container.querySelectorAll('ol > li')).toHaveLength(4);
+    expect(container.querySelector('.katex-error')).toBeNull();
+    expect(container).not.toHaveTextContent('$BC’D’');
+  });
 });

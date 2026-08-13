@@ -4,7 +4,7 @@ import userEvent from '@testing-library/user-event';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import type { QuestionRow, ReattemptRow } from '@/types';
 import { db } from '@/lib/db';
-import type { PyqQuestion } from '@/lib/pyq';
+import { loadPyqQuestionByUid, type PyqQuestion } from '@/lib/pyq';
 import {
   createPyqAttemptRow,
   createPyqSessionRow,
@@ -53,6 +53,14 @@ vi.mock('@/hooks/useAuth', () => ({
 }));
 
 vi.mock('@/components/dashboard/WelcomeOverlay', () => ({ default: () => null }));
+
+vi.mock('@/lib/pyq', async (importOriginal) => {
+  const original = await importOriginal<typeof import('@/lib/pyq')>();
+  return {
+    ...original,
+    loadPyqQuestionByUid: vi.fn().mockResolvedValue(null)
+  };
+});
 
 vi.mock('@/lib/image', async (importOriginal) => {
   const original = await importOriginal<typeof import('@/lib/image')>();
@@ -194,6 +202,98 @@ async function seedDuePyq(stage: ReattemptRow['stage'] = 'D3') {
   await db.reattempts.put({ ...reattempt, sync_status: 'synced' });
 }
 
+async function seedLegacyDuePyq() {
+  const pyq: PyqQuestion = {
+    id: 'go:1354',
+    year: 2005,
+    set: null,
+    number: '18',
+    paperLabel: 'GATE CSE 2005',
+    subject: 'Digital Logic',
+    subjectSlug: 'digital-logic',
+    topic: 'Boolean Algebra',
+    topicSlug: 'boolean-algebra',
+    subtopics: ['K-map'],
+    marks: null,
+    type: 'MCQ',
+    answer: 'A',
+    tolerance: null,
+    answerStatus: 'available',
+    html: String.raw`<p>The switching expression corresponding to $f(A,B,C,D)=\Sigma(1, 4, 5, 9, 11, 12)$ is:</p><ol style="list-style-type:upper-alpha"><li>$BC’D’ + A’C’D + AB’D$</li><li>$ABC’ + ACD + B’C’D$</li><li>$ACD’ + A’BC’ + AC’D’$</li><li>$A’BD + ACD’ + BCD’$</li></ol>`,
+    sourceUrl: 'https://gateoverflow.in/1354/gate-cse-2005-question-18',
+    answerSource: null
+  };
+  const session = createPyqSessionRow(
+    USER,
+    'legacy-bank',
+    {
+      subjectSlug: pyq.subjectSlug,
+      topicSlug: pyq.topicSlug,
+      fromYear: pyq.year,
+      toYear: pyq.year,
+      type: 'MCQ',
+      order: 'unseen',
+      count: '5'
+    },
+    [pyq],
+    '2026-08-02T10:00:00.000Z'
+  );
+  const currentAttempt = createPyqAttemptRow({
+    userId: USER,
+    session,
+    question: pyq,
+    selectedAnswer: 'C',
+    decision: 'MARK',
+    bankVersion: 'legacy-bank',
+    questionStartedAtMs: Date.parse('2026-08-02T10:00:00.000Z'),
+    committedAtMs: Date.parse('2026-08-02T10:01:00.000Z'),
+    screenshotUrl: null
+  });
+  const legacyAttempt = {
+    ...currentAttempt,
+    id: 'legacy-pyq-attempt',
+    pyq_session_id: null,
+    capture_version: 1 as const,
+    question_snapshot: null
+  };
+  const journalQuestion: QuestionRow = {
+    id: 'random-legacy-journal-question',
+    user_id: USER,
+    session_id: null,
+    subject: pyq.subject,
+    subtopic: pyq.topic,
+    source_year: pyq.year,
+    source_ref: 'GATE PYQ · 2005 · Q 18 · MCQ',
+    question_text:
+      'The switching expression corresponding to $f(A,B,C,D)=\\Sigma(1, 4, 5, 9, 11, 12)$ is: $BC’D’ + A’C’D + AB’D$ $ABC’ + ACD + B’C’D$ $ACD’ + A’BC’ + AC’D’$ $A’BD + ACD’ + BCD’$',
+    answer_text: 'Answer key: A',
+    image_url: null,
+    time_spent_sec: legacyAttempt.time_spent_sec,
+    target_time_sec: 120,
+    outcome: 'W-E',
+    pattern_name: 'K-Map and determine the MIN SOP/POS',
+    trigger_sentence: 'Draw K-Map and determine the MIN SOP/POS',
+    root_cause: 'concept',
+    mark_decision: legacyAttempt.mark_decision,
+    mark_correct: legacyAttempt.mark_correct,
+    created_at: legacyAttempt.attempted_at
+  };
+  const reattempt: ReattemptRow = {
+    id: 'legacy-pyq-reattempt',
+    user_id: USER,
+    question_id: journalQuestion.id,
+    scheduled_date: '2026-08-05',
+    stage: 'D3',
+    history: [],
+    created_at: '2026-08-02T10:01:01.000Z'
+  };
+
+  await db.pyq_attempts.put({ ...legacyAttempt, sync_status: 'synced' });
+  await db.questions.put({ ...journalQuestion, sync_status: 'synced' });
+  await db.reattempts.put({ ...reattempt, sync_status: 'synced' });
+  return pyq;
+}
+
 describe('re-attempt solve flow', () => {
   beforeEach(async () => {
     await Promise.all([
@@ -205,6 +305,27 @@ describe('re-attempt solve flow', () => {
       db.weekly_reviews.clear()
     ]);
     vi.mocked(captureElementToDataUrl).mockClear();
+    vi.mocked(loadPyqQuestionByUid).mockReset().mockResolvedValue(null);
+  });
+
+  it('restores the original options and math for a legacy PYQ journal row', async () => {
+    const pyq = await seedLegacyDuePyq();
+    vi.mocked(loadPyqQuestionByUid).mockResolvedValue(pyq);
+
+    const { container } = render(
+      <MemoryRouter initialEntries={['/reattempts/legacy-pyq-reattempt']}>
+        <Routes>
+          <Route path="/reattempts/:reattemptId" element={<Reattempts />} />
+        </Routes>
+      </MemoryRouter>
+    );
+
+    expect(await screen.findByText('GATE CSE 2005')).toBeInTheDocument();
+    await waitFor(() => expect(container.querySelectorAll('.pyq-content ol > li')).toHaveLength(4));
+    expect(container.querySelectorAll('.katex')).toHaveLength(5);
+    expect(container).not.toHaveTextContent('$BC’D’');
+    expect(loadPyqQuestionByUid).toHaveBeenCalledWith('go:1354', 'Digital Logic');
+    expect(screen.getByRole('button', { name: 'A' })).toBeInTheDocument();
   });
 
   it('automatically checks a logged MCQ and advances it after the answer is committed', async () => {

@@ -5,6 +5,7 @@ import type {
   PyqSelectedAnswer,
   PyqSessionConfig,
   PyqSessionRow,
+  QuestionRow,
   SessionRow
 } from '@/types';
 import type { PyqQuestion } from '@/lib/pyq';
@@ -51,17 +52,37 @@ export function pyqJournalQuestionId(attemptId: string): string {
  * question text matching.
  */
 export function pyqSourceAttemptForJournalQuestion(
-  journalQuestionId: string,
+  journalQuestion:
+    | string
+    | Pick<
+        QuestionRow,
+        'id' | 'session_id' | 'subject' | 'source_year' | 'source_ref' | 'created_at'
+      >,
   attempts: PyqAttemptRow[]
 ): PyqAttemptRow | null {
-  return (
-    attempts.find(
-      (attempt) =>
-        attempt.capture_version === 2 &&
-        attempt.question_snapshot !== null &&
-        pyqJournalQuestionId(attempt.id) === journalQuestionId
-    ) ?? null
+  const journalQuestionId =
+    typeof journalQuestion === 'string' ? journalQuestion : journalQuestion.id;
+  const exact = attempts.find(
+    (attempt) =>
+      attempt.capture_version === 2 &&
+      attempt.question_snapshot !== null &&
+      pyqJournalQuestionId(attempt.id) === journalQuestionId
   );
+  if (exact || typeof journalQuestion === 'string') return exact ?? null;
+
+  // Journal rows created before immutable v2 receipts used random IDs. Their
+  // creation timestamp was copied directly from the source attempt, which lets
+  // us reconnect the legacy row without guessing from flattened prompt text.
+  if (!journalQuestion.source_ref?.toLowerCase().includes('gate')) return null;
+  const legacyMatches = attempts.filter(
+    (attempt) =>
+      attempt.capture_version !== 2 &&
+      attempt.attempted_at === journalQuestion.created_at &&
+      attempt.subject === journalQuestion.subject &&
+      (journalQuestion.source_year == null || attempt.year === journalQuestion.source_year) &&
+      (journalQuestion.session_id == null || attempt.pyq_session_id === journalQuestion.session_id)
+  );
+  return legacyMatches.length === 1 ? legacyMatches[0] : null;
 }
 
 /** Restore the exact bundled PYQ, including its original option HTML and key. */

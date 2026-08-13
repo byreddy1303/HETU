@@ -224,6 +224,27 @@ describe('PYQ session logic and determinism', () => {
     );
     expect(pyqSourceAttemptForJournalQuestion('unrelated-journal-row', [firstAttempt])).toBeNull();
 
+    const legacyAttempt = {
+      ...firstAttempt,
+      id: 'legacy-attempt',
+      capture_version: 1 as const,
+      question_snapshot: null,
+      pyq_session_id: null
+    };
+    expect(
+      pyqSourceAttemptForJournalQuestion(
+        {
+          id: 'random-legacy-journal-id',
+          session_id: null,
+          subject: legacyAttempt.subject,
+          source_year: legacyAttempt.year,
+          source_ref: 'GATE PYQ · 2026 · Q 1 · MCQ',
+          created_at: legacyAttempt.attempted_at
+        },
+        [legacyAttempt]
+      )
+    ).toBe(legacyAttempt);
+
     const restored = pyqQuestionFromAttempt(firstAttempt);
     expect(restored).toMatchObject({
       id: question.id,

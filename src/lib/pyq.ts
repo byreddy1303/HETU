@@ -271,6 +271,25 @@ export async function loadPyqQuestions(
   return payloads.flatMap((payload) => payload.questions);
 }
 
+/** Restore a legacy attempt from the current bundled bank without downloading
+ * unrelated subject files. Immutable v2 attempts use their own snapshot and do
+ * not need this compatibility path. */
+export async function loadPyqQuestionByUid(
+  questionUid: string,
+  subjectHint: string
+): Promise<PyqQuestion | null> {
+  const manifest = await loadPyqManifest();
+  const normalizedHint = subjectHint.trim().toLowerCase();
+  const subject = manifest.subjects.find(
+    (candidate) =>
+      candidate.slug.toLowerCase() === normalizedHint ||
+      candidate.label.toLowerCase() === normalizedHint
+  );
+  if (!subject) return null;
+  const questions = await loadPyqQuestions([subject], manifest.bankVersion);
+  return questions.find((question) => question.id === questionUid) ?? null;
+}
+
 export function matchesPyqTopicScope(
   question: PyqQuestion,
   config: Pick<PyqSessionConfig, 'subjectSlug' | 'topicSlug'>
@@ -400,7 +419,38 @@ export function pyqSourceRef(question: PyqQuestion): string {
 
 export function pyqPlainText(html: string): string {
   const document = new DOMParser().parseFromString(html, 'text/html');
-  return document.body.textContent?.replace(/\s+/g, ' ').trim() ?? '';
+  const orderedListMarker = (list: HTMLOListElement, index: number): string => {
+    const type = list.getAttribute('type');
+    const style = list.getAttribute('style') ?? '';
+    if (type === 'A' || /upper-alpha/i.test(style)) return String.fromCharCode(65 + index);
+    if (type === 'a' || /lower-alpha/i.test(style)) return String.fromCharCode(97 + index);
+    return String((list.start || 1) + index);
+  };
+
+  for (const list of document.querySelectorAll('ol')) {
+    const items = Array.from(list.children).filter(
+      (child): child is HTMLLIElement => child.tagName === 'LI'
+    );
+    items.forEach((item, index) => {
+      item.prepend(document.createTextNode(`${orderedListMarker(list, index)}. `));
+      item.append(document.createTextNode('\n'));
+    });
+  }
+  for (const lineBreak of document.querySelectorAll('br')) {
+    lineBreak.replaceWith(document.createTextNode('\n'));
+  }
+  for (const element of document.querySelectorAll('p, div, tr, ul')) {
+    element.append(document.createTextNode('\n'));
+  }
+
+  return (
+    document.body.textContent
+      ?.replace(/\u00a0/g, ' ')
+      .split(/\n+/)
+      .map((line) => line.replace(/[\t ]+/g, ' ').trim())
+      .filter(Boolean)
+      .join('\n') ?? ''
+  );
 }
 
 export function firstPyqImage(html: string): string | null {

@@ -35,7 +35,7 @@ import {
 import { writeLocal } from '@/lib/sync';
 import { OUTCOME_BY_CODE, type QuestionFormat } from '@/lib/constants';
 import { cn, formatDate, plural, secondsToClock, todayISO } from '@/lib/utils';
-import type { PyqQuestion } from '@/lib/pyq';
+import { loadPyqQuestionByUid, type PyqQuestion } from '@/lib/pyq';
 import {
   createPyqReattemptAttemptRow,
   pyqQuestionFromAttempt,
@@ -72,6 +72,14 @@ const TONE_BADGE: Record<
 
 const RUNGS: ReattemptStage[] = ['D3', 'D10', 'D30'];
 const PYQ_CHOICES = ['A', 'B', 'C', 'D'];
+
+function plainTextQuestionHtml(value: string): string {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/\r?\n/g, '<br>');
+}
 
 interface AttemptState {
   rowId: string;
@@ -1012,9 +1020,7 @@ function ReattemptSession({
           ) : null}
 
           {hasText ? (
-            <p className="whitespace-pre-wrap text-[15.5px] leading-[1.75] text-text">
-              {question?.question_text}
-            </p>
+            <PyqQuestionContent html={plainTextQuestionHtml(question?.question_text ?? '')} />
           ) : null}
 
           {hasImage ? (
@@ -1339,11 +1345,14 @@ export default function Reattempts() {
   const pyqSourceByQuestionId = useMemo(() => {
     const byQuestionId = new Map<string, PyqAttemptRow>();
     for (const questionId of questionIds) {
-      const source = pyqSourceAttemptForJournalQuestion(questionId, pyqAttempts ?? []);
+      const source = pyqSourceAttemptForJournalQuestion(
+        qById.get(questionId) ?? questionId,
+        pyqAttempts ?? []
+      );
       if (source) byQuestionId.set(questionId, source);
     }
     return byQuestionId;
-  }, [pyqAttempts, questionIds]);
+  }, [pyqAttempts, qById, questionIds]);
 
   const { due, upcoming, mastered } = useMemo(
     () => buildReattemptQueue(reattempts ?? [], today),
@@ -1368,7 +1377,24 @@ export default function Reattempts() {
   const activePyqSource = activeRow
     ? (pyqSourceByQuestionId.get(activeRow.question_id) ?? null)
     : null;
-  const activePyqQuestion = activePyqSource ? pyqQuestionFromAttempt(activePyqSource) : null;
+  const snapshotPyqQuestion = useMemo(
+    () => (activePyqSource ? pyqQuestionFromAttempt(activePyqSource) : null),
+    [activePyqSource]
+  );
+  const [legacyPyqRestore, setLegacyPyqRestore] = useState<{
+    sourceAttemptId: string;
+    loading: boolean;
+    question: PyqQuestion | null;
+  } | null>(null);
+  const matchingLegacyRestore =
+    activePyqSource && legacyPyqRestore?.sourceAttemptId === activePyqSource.id
+      ? legacyPyqRestore
+      : null;
+  const legacyPyqLoading =
+    !!activePyqSource &&
+    !snapshotPyqQuestion &&
+    (!matchingLegacyRestore || matchingLegacyRestore.loading);
+  const activePyqQuestion = snapshotPyqQuestion ?? matchingLegacyRestore?.question ?? null;
   const activePyqAttempts = activePyqSource
     ? (pyqAttempts ?? [])
         .filter((candidate) => candidate.question_uid === activePyqSource.question_uid)
@@ -1380,6 +1406,38 @@ export default function Reattempts() {
           candidate.id === pyqReattemptAttemptId(activeRow.id, activeRow.history.length)
       ) ?? null)
     : null;
+
+  useEffect(() => {
+    if (!activePyqSource || snapshotPyqQuestion) return;
+    let cancelled = false;
+    setLegacyPyqRestore({
+      sourceAttemptId: activePyqSource.id,
+      loading: true,
+      question: null
+    });
+    void loadPyqQuestionByUid(activePyqSource.question_uid, activePyqSource.subject)
+      .then((question) => {
+        if (!cancelled) {
+          setLegacyPyqRestore({
+            sourceAttemptId: activePyqSource.id,
+            loading: false,
+            question
+          });
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setLegacyPyqRestore({
+            sourceAttemptId: activePyqSource.id,
+            loading: false,
+            question: null
+          });
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [activePyqSource, snapshotPyqQuestion]);
 
   useEffect(() => {
     if (reattemptId || searchParams.get('open') !== 'first' || due.length === 0) return;
@@ -1471,6 +1529,16 @@ export default function Reattempts() {
       <Card>
         <CardBody className="py-12 text-center text-[13px] text-text-faint">
           Opening due test…
+        </CardBody>
+      </Card>
+    );
+  }
+
+  if (activeRow && activePyqSource && legacyPyqLoading) {
+    return (
+      <Card>
+        <CardBody className="py-12 text-center text-[13px] text-text-faint">
+          Restoring the original PYQ and answer choices…
         </CardBody>
       </Card>
     );

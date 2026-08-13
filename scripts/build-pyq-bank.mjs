@@ -12,7 +12,10 @@ const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(SCRIPT_DIR, '..');
 const OUTPUT = path.join(ROOT, 'public', 'pyq');
 const IMAGE_OUTPUT = path.join(OUTPUT, 'images');
-const BUNDLED_CUSTOM_ASSET_DIRS = ['go-classes-coa-topic-test'];
+const BUNDLED_CUSTOM_ASSET_DIRS = [
+  'go-classes-coa-topic-test',
+  'go-classes-coa-topic-test-2'
+];
 const CUSTOM_QUESTION_PATHS = [
   'go-classes-coa-topic-test.json',
   'go-classes-coa-topic-test-2.json'

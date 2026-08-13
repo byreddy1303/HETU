@@ -1,12 +1,12 @@
 {
-  "bankVersion": "gate-1990-2026-v5-ece-ee-digital-logic",
-  "questionCount": 3170,
-  "uniqueQuestionCount": 3170,
+  "bankVersion": "gate-1990-2026-v6-go-classes-coa-topic-test",
+  "questionCount": 3185,
+  "uniqueQuestionCount": 3185,
   "unclassifiedCount": 0,
   "subjectCount": 14,
   "topicCount": 95,
   "classificationBasis": {
-    "audited-source-scope": 451,
+    "audited-source-scope": 466,
     "broad-topic-tag": 6,
     "content-rule": 83,
     "manual-content-audit": 160,
@@ -1574,12 +1574,12 @@
     },
     {
       "slug": "coa",
-      "count": 218,
+      "count": 233,
       "topics": [
         {
           "slug": "machine-instruction",
           "label": "Machine Instruction",
-          "count": 45
+          "count": 54
         },
         {
           "slug": "addressing-modes",
@@ -1619,7 +1619,7 @@
         {
           "slug": "memory-chip-design",
           "label": "Memory Chip Design",
-          "count": 4
+          "count": 10
         }
       ]
     },

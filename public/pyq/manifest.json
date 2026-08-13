@@ -1,14 +1,14 @@
 {
-  "bankVersion": "gate-1990-2026-v5-ece-ee-digital-logic",
-  "generatedAt": "2026-08-08T10:02:03.584Z",
-  "source": "GateQA/GATE Overflow CSE archive plus syllabus-filtered ExamSIDE ECE and EE Digital Logic records",
+  "bankVersion": "gate-1990-2026-v6-go-classes-coa-topic-test",
+  "generatedAt": "2026-08-13T06:27:55.985Z",
+  "source": "GateQA/GATE Overflow CSE archive, syllabus-filtered ExamSIDE ECE/EE Digital Logic records, and the learner-provided GO Classes COA Topic Test",
   "sourceUrl": "https://gateqa.in",
   "firstYear": 1990,
   "lastYear": 2026,
-  "questionCount": 3170,
+  "questionCount": 3185,
   "imageCount": 596,
   "answerStatuses": {
-    "available": 3076,
+    "available": 3091,
     "ambiguous": 3,
     "marks-to-all": 1,
     "unsupported": 90
@@ -16,7 +16,7 @@
   "years": [
     {
       "year": 2026,
-      "count": 137
+      "count": 152
     },
     {
       "year": 2025,
@@ -289,13 +289,13 @@
     {
       "slug": "coa",
       "label": "Computer Organization",
-      "count": 218,
+      "count": 233,
       "file": "/pyq/subjects/coa.json",
       "topics": [
         {
           "slug": "machine-instruction",
           "label": "Machine Instruction",
-          "count": 45
+          "count": 54
         },
         {
           "slug": "addressing-modes",
@@ -335,7 +335,7 @@
         {
           "slug": "memory-chip-design",
           "label": "Memory Chip Design",
-          "count": 4
+          "count": 10
         }
       ]
     },

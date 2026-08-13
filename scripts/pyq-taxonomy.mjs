@@ -1,4 +1,4 @@
-export const PYQ_BANK_VERSION = 'gate-1990-2026-v5-ece-ee-digital-logic';
+export const PYQ_BANK_VERSION = 'gate-1990-2026-v6-go-classes-coa-topic-test';
 
 export const PYQ_TAXONOMY = [
   {

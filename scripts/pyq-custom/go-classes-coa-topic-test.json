@@ -1,0 +1,481 @@
+{
+  "source": "GO Classes COA Topic Test",
+  "sourceUrl": "https://www.goclasses.in/",
+  "questions": [
+    {
+      "id": "goclasses:coa-topic-test:1",
+      "year": 2026,
+      "set": null,
+      "number": "1",
+      "paperLabel": "GO Classes COA Topic Test",
+      "subject": "Computer Organization",
+      "subjectSlug": "coa",
+      "classificationHint": { "subjectSlug": "coa", "topicSlug": "machine-instruction" },
+      "topic": "Machine Instruction",
+      "topicSlug": "machine-instruction",
+      "subtopics": [
+        "co-and-architecture",
+        "machine-instructions",
+        "instruction-format",
+        "expanding-opcode",
+        "goclasses-coa-topic-test"
+      ],
+      "marks": 1,
+      "type": "MCQ",
+      "answer": "B",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<p>Consider a machine with 16-bit instructions and 16 registers. We wish to encode the following instructions:</p><ul><li>15 instructions with 3 addresses</li><li>14 instructions with 2 addresses</li><li>31 instructions with 1 address</li><li>16 instructions with 0 addresses</li></ul><p>Can we encode this instruction set in 16 bits?</p><ol style=\"list-style-type:upper-alpha\"><li>Yes, if we use fixed-length opcodes.</li><li>Yes, if we use expanding opcodes.</li><li>No, because 15 instructions with 3 addresses leave no combinations available for other formats.</li><li>No, because we can only encode a maximum of 15 instructions with 0 addresses.</li></ol>",
+      "sourceUrl": "https://www.goclasses.in/",
+      "answerSource": {
+        "kind": "learner-provided-screenshot",
+        "label": "GO Classes COA Topic Test",
+        "capturedAt": "2026-08-13"
+      }
+    },
+    {
+      "id": "goclasses:coa-topic-test:2",
+      "year": 2026,
+      "set": null,
+      "number": "2",
+      "paperLabel": "GO Classes COA Topic Test",
+      "subject": "Computer Organization",
+      "subjectSlug": "coa",
+      "classificationHint": { "subjectSlug": "coa", "topicSlug": "memory-chip-design" },
+      "topic": "Memory Chip Design",
+      "topicSlug": "memory-chip-design",
+      "subtopics": [
+        "co-and-architecture",
+        "memory-chip-design",
+        "memory-interfacing",
+        "dram",
+        "numerical-answers",
+        "goclasses-coa-topic-test"
+      ],
+      "marks": 1,
+      "type": "NAT",
+      "answer": 8,
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<p>Consider a 68K microprocessor system with a 24-bit address bus ($A_{23}$ to $A_0$) and a 16-bit data bus. The system implements:</p><ul><li>A 1 Mbyte ROM block starting at address $000000_{16}$.</li><li>An 8 Mbyte DRAM block starting at address $800000_{16}$.</li></ul><pre>Memory organization\nROM:  2 sub-blocks × (256K × 16-bit) = 1 Mbyte\nDRAM: 2 banks × 4 parallel (2M × 4-bit) chips = 8 Mbytes</pre><p>The 8 Mbyte DRAM memory block is constructed using multiple $2M \\times 4$-bit memory chips. Because the microprocessor has a 16-bit data bus, multiple 4-bit chips must be arranged in parallel to form a 16-bit word. Calculate the total number of $2M \\times 4$-bit chips required to fully implement this 8 Mbyte DRAM block.</p>",
+      "sourceUrl": "https://www.goclasses.in/",
+      "answerSource": {
+        "kind": "learner-provided-screenshot",
+        "label": "GO Classes COA Topic Test",
+        "capturedAt": "2026-08-13"
+      }
+    },
+    {
+      "id": "goclasses:coa-topic-test:3",
+      "year": 2026,
+      "set": null,
+      "number": "3",
+      "paperLabel": "GO Classes COA Topic Test",
+      "subject": "Computer Organization",
+      "subjectSlug": "coa",
+      "classificationHint": { "subjectSlug": "coa", "topicSlug": "memory-chip-design" },
+      "topic": "Memory Chip Design",
+      "topicSlug": "memory-chip-design",
+      "subtopics": [
+        "co-and-architecture",
+        "memory-chip-design",
+        "memory-interfacing",
+        "address-decoding",
+        "numerical-answers",
+        "goclasses-coa-topic-test"
+      ],
+      "marks": 1,
+      "type": "NAT",
+      "answer": 19,
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<p>Consider a 68K microprocessor system with a 24-bit address bus ($A_{23}$ to $A_0$) and a 16-bit data bus. The system implements:</p><ul><li>A 1 Mbyte ROM block starting at address $000000_{16}$.</li><li>An 8 Mbyte DRAM block starting at address $800000_{16}$.</li></ul><pre>Memory organization\nROM:  2 sub-blocks × (256K × 16-bit) = 1 Mbyte\nDRAM: 2 banks × 4 parallel (2M × 4-bit) chips = 8 Mbytes</pre><p>The 1 Mbyte ROM block starts at base address $000000_{16}$. It is composed of two discrete 512 Kbyte sub-blocks using $256K \\times 16$-bit chips. The microprocessor must use a specific address line to select between the first and second 512 Kbyte sub-blocks. What is the index $k$ of this address line $A_k$?</p>",
+      "sourceUrl": "https://www.goclasses.in/",
+      "answerSource": {
+        "kind": "learner-provided-screenshot",
+        "label": "GO Classes COA Topic Test",
+        "capturedAt": "2026-08-13"
+      }
+    },
+    {
+      "id": "goclasses:coa-topic-test:4",
+      "year": 2026,
+      "set": null,
+      "number": "4",
+      "paperLabel": "GO Classes COA Topic Test",
+      "subject": "Computer Organization",
+      "subjectSlug": "coa",
+      "classificationHint": { "subjectSlug": "coa", "topicSlug": "machine-instruction" },
+      "topic": "Machine Instruction",
+      "topicSlug": "machine-instruction",
+      "subtopics": [
+        "co-and-architecture",
+        "machine-instructions",
+        "shift-and-rotate-operations",
+        "twos-complement",
+        "numerical-answers",
+        "goclasses-coa-topic-test"
+      ],
+      "marks": 1,
+      "type": "NAT",
+      "answer": -12,
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<p>An 8-bit register contains the 2's complement representation of the decimal number $-48$. The processor executes an Arithmetic Shift Right (ASR) instruction twice sequentially on this register. What is the final decimal value stored in the register? Provide the answer as a base-10 integer, including the sign if negative.</p>",
+      "sourceUrl": "https://www.goclasses.in/",
+      "answerSource": {
+        "kind": "learner-provided-screenshot",
+        "label": "GO Classes COA Topic Test",
+        "capturedAt": "2026-08-13"
+      }
+    },
+    {
+      "id": "goclasses:coa-topic-test:5",
+      "year": 2026,
+      "set": null,
+      "number": "5",
+      "paperLabel": "GO Classes COA Topic Test",
+      "subject": "Computer Organization",
+      "subjectSlug": "coa",
+      "classificationHint": { "subjectSlug": "coa", "topicSlug": "machine-instruction" },
+      "topic": "Machine Instruction",
+      "topicSlug": "machine-instruction",
+      "subtopics": [
+        "co-and-architecture",
+        "machine-instructions",
+        "shift-and-rotate-operations",
+        "numerical-answers",
+        "goclasses-coa-topic-test"
+      ],
+      "marks": 1,
+      "type": "NAT",
+      "answer": 192,
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<p>Consider an 8-bit register containing the binary value $X = 10010110_2$. Let $Y$ be the value resulting from a Logical Shift Right (LSR) by 2 bits on $X$. Let $Z$ be the value resulting from an Arithmetic Shift Right (ASR) by 2 bits on the original value $X$. Calculate the absolute difference between the unsigned decimal values of $Z$ and $Y$, i.e. $|Z-Y|$.</p>",
+      "sourceUrl": "https://www.goclasses.in/",
+      "answerSource": {
+        "kind": "learner-provided-screenshot",
+        "label": "GO Classes COA Topic Test",
+        "capturedAt": "2026-08-13"
+      }
+    },
+    {
+      "id": "goclasses:coa-topic-test:6",
+      "year": 2026,
+      "set": null,
+      "number": "6",
+      "paperLabel": "GO Classes COA Topic Test",
+      "subject": "Computer Organization",
+      "subjectSlug": "coa",
+      "classificationHint": { "subjectSlug": "coa", "topicSlug": "machine-instruction" },
+      "topic": "Machine Instruction",
+      "topicSlug": "machine-instruction",
+      "subtopics": [
+        "co-and-architecture",
+        "machine-instructions",
+        "instruction-format",
+        "expanding-opcode",
+        "numerical-answers",
+        "goclasses-coa-topic-test"
+      ],
+      "marks": 2,
+      "type": "NAT",
+      "answer": 252,
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<p>Assume an instruction set that uses a fixed 16-bit instruction length. Operand specifiers are 6 bits in length. If the instruction set supports exactly 12 two-operand instructions and 200 zero-operand instructions, what is the maximum number of one-operand instructions that can be supported?</p>",
+      "sourceUrl": "https://www.goclasses.in/",
+      "answerSource": {
+        "kind": "learner-provided-screenshot",
+        "label": "GO Classes COA Topic Test",
+        "capturedAt": "2026-08-13"
+      }
+    },
+    {
+      "id": "goclasses:coa-topic-test:7",
+      "year": 2026,
+      "set": null,
+      "number": "7",
+      "paperLabel": "GO Classes COA Topic Test",
+      "subject": "Computer Organization",
+      "subjectSlug": "coa",
+      "classificationHint": { "subjectSlug": "coa", "topicSlug": "machine-instruction" },
+      "topic": "Machine Instruction",
+      "topicSlug": "machine-instruction",
+      "subtopics": [
+        "co-and-architecture",
+        "machine-instructions",
+        "instruction-format",
+        "expanding-opcode",
+        "multiple-selects",
+        "goclasses-coa-topic-test"
+      ],
+      "marks": 2,
+      "type": "MSQ",
+      "answer": ["A", "C", "D"],
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<p>Consider a machine architecture where we want to determine if it is possible to design an expanding opcode. Assume:</p><ul><li>Instruction length: 12 bits</li><li>Register operand size: 3 bits</li></ul><p>We wish to encode:</p><ul><li>4 instructions with 3 registers</li><li>255 instructions with 1 register</li><li>16 instructions with 0 registers</li></ul><p>Based on the bit-pattern capacity method for evaluating expanding opcodes, which statements are correct?</p><ol style=\"list-style-type:upper-alpha\"><li>The first 4 instructions (with 3 registers) account for exactly $4 \\times 2^9 = 2048$ bit patterns in the overall instruction space.</li><li>The 255 instructions with 1 register account for exactly 255 bit patterns since they only utilize a single operand.</li><li>The total maximum capacity of a 12-bit instruction format is $2^{12} = 4096$ unique bit patterns.</li><li>The proposed instruction set cannot be encoded because the total required bit patterns (4104) exceed the available capacity.</li></ol>",
+      "sourceUrl": "https://www.goclasses.in/",
+      "answerSource": {
+        "kind": "learner-provided-screenshot",
+        "label": "GO Classes COA Topic Test",
+        "capturedAt": "2026-08-13"
+      }
+    },
+    {
+      "id": "goclasses:coa-topic-test:8",
+      "year": 2026,
+      "set": null,
+      "number": "8",
+      "paperLabel": "GO Classes COA Topic Test",
+      "subject": "Computer Organization",
+      "subjectSlug": "coa",
+      "classificationHint": { "subjectSlug": "coa", "topicSlug": "machine-instruction" },
+      "topic": "Machine Instruction",
+      "topicSlug": "machine-instruction",
+      "subtopics": [
+        "co-and-architecture",
+        "machine-instructions",
+        "instruction-format",
+        "expanding-opcode",
+        "multiple-selects",
+        "goclasses-coa-topic-test"
+      ],
+      "marks": 2,
+      "type": "MSQ",
+      "answer": ["A", "B", "C", "D"],
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<p>Consider a processor utilizing a 24-bit instruction format and a register file with 64 general-purpose registers. The processor supports 3-, 2-, 1-, and 0-operand instructions exclusively using an expanding opcode technique. Let $N_k$ represent the number of $k$-operand instructions encoded in the system.</p><p>Which statements regarding the theoretical limits of this instruction set are always true?</p><ol style=\"list-style-type:upper-alpha\"><li>If the processor implements exactly $N_3 = 63$, the absolute maximum possible value for $N_2$ is 64.</li><li>The expansion factor (the multiplier for available opcodes) at every transition from $k$ to $k-1$ operands is exactly 64.</li><li>If the processor implements $N_3 = 64$, it becomes impossible to implement any instructions with fewer operands.</li><li>If the processor implements $N_3 = 62$ and $N_2 = 64$, the available capacity for 1-operand instructions is exactly 4096.</li></ol>",
+      "sourceUrl": "https://www.goclasses.in/",
+      "answerSource": {
+        "kind": "learner-provided-screenshot",
+        "label": "GO Classes COA Topic Test",
+        "capturedAt": "2026-08-13"
+      }
+    },
+    {
+      "id": "goclasses:coa-topic-test:9",
+      "year": 2026,
+      "set": null,
+      "number": "9",
+      "paperLabel": "GO Classes COA Topic Test",
+      "subject": "Computer Organization",
+      "subjectSlug": "coa",
+      "classificationHint": { "subjectSlug": "coa", "topicSlug": "memory-chip-design" },
+      "topic": "Memory Chip Design",
+      "topicSlug": "memory-chip-design",
+      "subtopics": [
+        "co-and-architecture",
+        "memory-chip-design",
+        "memory-interfacing",
+        "address-decoding",
+        "multiple-selects",
+        "goclasses-coa-topic-test"
+      ],
+      "marks": 2,
+      "type": "MSQ",
+      "answer": ["A", "B", "C"],
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<p>Consider an 8-bit microprocessor with a 16-bit address bus. An address decoder selects a specific memory block when the top three address bits $(A_{15}, A_{14}, A_{13})$ are set to $101_2$. The remaining 13 bits ($x$) address individual locations within this memory block, forming the address pattern $101xxxxxxxxxxxxx_2$.</p><p>Which statements are true regarding this memory configuration?</p><ol style=\"list-style-type:upper-alpha\"><li>The lowest accessible address in this memory block is $A000_{16}$.</li><li>The highest accessible address in this memory block is $BFFF_{16}$.</li><li>The total size of this specific memory block is 8 KB.</li><li>Decoding the top three address lines divides the entire 16-bit address space into exactly 4 independent blocks.</li></ol>",
+      "sourceUrl": "https://www.goclasses.in/",
+      "answerSource": {
+        "kind": "learner-provided-screenshot",
+        "label": "GO Classes COA Topic Test",
+        "capturedAt": "2026-08-13"
+      }
+    },
+    {
+      "id": "goclasses:coa-topic-test:10",
+      "year": 2026,
+      "set": null,
+      "number": "10",
+      "paperLabel": "GO Classes COA Topic Test",
+      "subject": "Computer Organization",
+      "subjectSlug": "coa",
+      "classificationHint": { "subjectSlug": "coa", "topicSlug": "memory-chip-design" },
+      "topic": "Memory Chip Design",
+      "topicSlug": "memory-chip-design",
+      "subtopics": [
+        "co-and-architecture",
+        "memory-chip-design",
+        "memory-interfacing",
+        "address-decoding",
+        "multiple-selects",
+        "goclasses-coa-topic-test"
+      ],
+      "marks": 2,
+      "type": "MSQ",
+      "answer": ["A", "B", "C"],
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<p>A 16-bit microprocessor addresses a 32 KB block of ROM mapped contiguously starting from the base memory address $0000_{16}$. The 32 KB ROM block is constructed using four separate 8 KB memory chips (Chip 0 through Chip 3). Which statements regarding the memory interfacing and addressing of this system are true?</p><ol style=\"list-style-type:upper-alpha\"><li>Each 8 KB memory chip requires exactly 13 address lines ($A_0$ to $A_{12}$) from the processor to select a specific byte within the chip.</li><li>The valid memory address range serviced by the third chip (Chip 2) is exactly $4000_{16}$ to $5FFF_{16}$.</li><li>To properly decode and select exactly one of the four 8 KB chips during a memory access within the 32 KB block, address lines $A_{13}$ and $A_{14}$ can be connected to the select inputs of a 2-to-4 decoder.</li><li>During any valid memory access to this 32 KB ROM block, the highest-order address bit ($A_{15}$) must be at a logic '1' state.</li></ol>",
+      "sourceUrl": "https://www.goclasses.in/",
+      "answerSource": {
+        "kind": "learner-provided-screenshot",
+        "label": "GO Classes COA Topic Test",
+        "capturedAt": "2026-08-13"
+      }
+    },
+    {
+      "id": "goclasses:coa-topic-test:11",
+      "year": 2026,
+      "set": null,
+      "number": "11",
+      "paperLabel": "GO Classes COA Topic Test",
+      "subject": "Computer Organization",
+      "subjectSlug": "coa",
+      "classificationHint": { "subjectSlug": "coa", "topicSlug": "memory-chip-design" },
+      "topic": "Memory Chip Design",
+      "topicSlug": "memory-chip-design",
+      "subtopics": [
+        "co-and-architecture",
+        "memory-chip-design",
+        "memory-interfacing",
+        "address-decoding",
+        "numerical-answers",
+        "goclasses-coa-topic-test"
+      ],
+      "marks": 2,
+      "type": "NAT",
+      "answer": 3,
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<p>An 8-bit microprocessor with a 16-bit address bus interfaces with a 32 KB block of ROM mapped contiguously starting from memory address $0000_{16}$. The ROM block is composed of four 8 KB chips (Chip 0 through Chip 3 in contiguous order). A 2-to-4 line decoder generates the active-low Chip Select ($\\overline{CS}$) signals for the four chips. Address line $A_{14}$ is connected to the MSB select input and $A_{13}$ to the LSB select input of the decoder. If the microprocessor executes a read operation to fetch data from hexadecimal address $6F3A_{16}$, what is the decimal value of the decoder output line (0 to 3) that becomes active?</p>",
+      "sourceUrl": "https://www.goclasses.in/",
+      "answerSource": {
+        "kind": "learner-provided-screenshot",
+        "label": "GO Classes COA Topic Test",
+        "capturedAt": "2026-08-13"
+      }
+    },
+    {
+      "id": "goclasses:coa-topic-test:12",
+      "year": 2026,
+      "set": null,
+      "number": "12",
+      "paperLabel": "GO Classes COA Topic Test",
+      "subject": "Computer Organization",
+      "subjectSlug": "coa",
+      "classificationHint": { "subjectSlug": "coa", "topicSlug": "memory-chip-design" },
+      "topic": "Memory Chip Design",
+      "topicSlug": "memory-chip-design",
+      "subtopics": [
+        "co-and-architecture",
+        "memory-chip-design",
+        "memory-interfacing",
+        "address-decoding",
+        "goclasses-coa-topic-test"
+      ],
+      "marks": 2,
+      "type": "MCQ",
+      "answer": "B",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<p>Consider a 68K microprocessor system with a 24-bit address bus ($A_{23}$ to $A_0$) and a 16-bit data bus. The system implements:</p><ul><li>A 1 Mbyte ROM block starting at address $000000_{16}$.</li><li>An 8 Mbyte DRAM block starting at address $800000_{16}$.</li></ul><pre>Memory organization\nROM:  2 sub-blocks × (256K × 16-bit) = 1 Mbyte\nDRAM: 2 banks × 4 parallel (2M × 4-bit) chips = 8 Mbytes</pre><p>The 8 Mbyte DRAM space mapped from address $800000_{16}$ is divided into two equal 4 Mbyte sub-blocks, DRAM 1 and DRAM 2. DRAM 1 is selected when $A_{23}=1$ and $A_{22}=0$; DRAM 2 is selected when $A_{23}=1$ and $A_{22}=1$. What are the correct hexadecimal address ranges for DRAM 1 and DRAM 2, respectively?</p><ol style=\"list-style-type:upper-alpha\"><li>DRAM 1: $800000$ to $9FFFFF$; DRAM 2: $A00000$ to $BFFFFF$</li><li>DRAM 1: $800000$ to $BFFFFF$; DRAM 2: $C00000$ to $FFFFFF$</li><li>DRAM 1: $800000$ to $8FFFFF$; DRAM 2: $900000$ to $9FFFFF$</li><li>DRAM 1: $800000$ to $FFFFFF$; DRAM 2: $000000$ to $7FFFFF$</li></ol>",
+      "sourceUrl": "https://www.goclasses.in/",
+      "answerSource": {
+        "kind": "learner-provided-screenshot",
+        "label": "GO Classes COA Topic Test",
+        "capturedAt": "2026-08-13"
+      }
+    },
+    {
+      "id": "goclasses:coa-topic-test:13",
+      "year": 2026,
+      "set": null,
+      "number": "13",
+      "paperLabel": "GO Classes COA Topic Test",
+      "subject": "Computer Organization",
+      "subjectSlug": "coa",
+      "classificationHint": { "subjectSlug": "coa", "topicSlug": "machine-instruction" },
+      "topic": "Machine Instruction",
+      "topicSlug": "machine-instruction",
+      "subtopics": [
+        "co-and-architecture",
+        "machine-instructions",
+        "shift-and-rotate-operations",
+        "bitwise-operations",
+        "numerical-answers",
+        "goclasses-coa-topic-test"
+      ],
+      "marks": 2,
+      "type": "NAT",
+      "answer": 114,
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<p>Two 8-bit registers $R_1$ and $R_2$ hold the initial binary values $01011011_2$ and $10101010_2$, respectively. The following operations are performed:</p><ol><li>Logical Shift Left (LSL) on $R_1$ by 3 bits.</li><li>Bitwise XOR ($\\oplus$) the new value of $R_1$ with $R_2$, storing the result back in $R_1$.</li></ol><p>What is the unsigned decimal value of the final result in $R_1$?</p>",
+      "sourceUrl": "https://www.goclasses.in/",
+      "answerSource": {
+        "kind": "learner-provided-screenshot",
+        "label": "GO Classes COA Topic Test",
+        "capturedAt": "2026-08-13"
+      }
+    },
+    {
+      "id": "goclasses:coa-topic-test:14",
+      "year": 2026,
+      "set": null,
+      "number": "14",
+      "paperLabel": "GO Classes COA Topic Test",
+      "subject": "Computer Organization",
+      "subjectSlug": "coa",
+      "classificationHint": { "subjectSlug": "coa", "topicSlug": "machine-instruction" },
+      "topic": "Machine Instruction",
+      "topicSlug": "machine-instruction",
+      "subtopics": [
+        "co-and-architecture",
+        "machine-instructions",
+        "shift-and-rotate-operations",
+        "numerical-answers",
+        "goclasses-coa-topic-test"
+      ],
+      "marks": 2,
+      "type": "NAT",
+      "answer": 108,
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<p>An 8-bit register $A$ contains the hexadecimal value $C6_{16}$. A Rotate Right (ROR) operation by 4 bits is performed on register $A$. What is the unsigned decimal value of the resulting number?</p>",
+      "sourceUrl": "https://www.goclasses.in/",
+      "answerSource": {
+        "kind": "learner-provided-screenshot",
+        "label": "GO Classes COA Topic Test",
+        "capturedAt": "2026-08-13"
+      }
+    },
+    {
+      "id": "goclasses:coa-topic-test:15",
+      "year": 2026,
+      "set": null,
+      "number": "15",
+      "paperLabel": "GO Classes COA Topic Test",
+      "subject": "Computer Organization",
+      "subjectSlug": "coa",
+      "classificationHint": { "subjectSlug": "coa", "topicSlug": "machine-instruction" },
+      "topic": "Machine Instruction",
+      "topicSlug": "machine-instruction",
+      "subtopics": [
+        "co-and-architecture",
+        "machine-instructions",
+        "shift-and-rotate-operations",
+        "numerical-answers",
+        "goclasses-coa-topic-test"
+      ],
+      "marks": 2,
+      "type": "NAT",
+      "answer": 109,
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<p>An 8-bit microprocessor register contains the unsigned decimal value 173. An instruction performs a Rotate Left (ROL) by 3 bits. What is the resulting unsigned decimal value in the register?</p>",
+      "sourceUrl": "https://www.goclasses.in/",
+      "answerSource": {
+        "kind": "learner-provided-screenshot",
+        "label": "GO Classes COA Topic Test",
+        "capturedAt": "2026-08-13"
+      }
+    }
+  ]
+}

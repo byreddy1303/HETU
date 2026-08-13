@@ -25,9 +25,9 @@ const questions = payloads.flatMap((payload) => payload.questions);
 const originalIds = new Set(questions.map((question) => question.id));
 const manualClassificationEntries = Object.entries(PYQ_MANUAL_CLASSIFICATIONS);
 
-if (questions.length !== 3170 || originalIds.size !== questions.length) {
+if (questions.length !== 3185 || originalIds.size !== questions.length) {
   throw new Error(
-    `Expected 3,170 unique input questions, found ${questions.length} rows and ${originalIds.size} IDs`
+    `Expected 3,185 unique input questions, found ${questions.length} rows and ${originalIds.size} IDs`
   );
 }
 
@@ -96,6 +96,18 @@ const nextManifest = {
   bankVersion: PYQ_BANK_VERSION,
   generatedAt: new Date().toISOString(),
   questionCount: classified.length,
+  years: [...new Set(classified.map((question) => question.year))]
+    .sort((a, b) => b - a)
+    .map((year) => ({
+      year,
+      count: classified.filter((question) => question.year === year).length
+    })),
+  answerStatuses: Object.fromEntries(
+    ['available', 'ambiguous', 'marks-to-all', 'unsupported'].map((status) => [
+      status,
+      classified.filter((question) => question.answerStatus === status).length
+    ])
+  ),
   subjects
 };
 await writeFile(manifestPath, `${JSON.stringify(nextManifest, null, 2)}\n`);

@@ -1,0 +1,128 @@
+{
+  "username": "kalyan",
+  "attemptDate": "2026-08-13",
+  "firstQuestionStartedAt": "2026-08-13T05:27:00.000Z",
+  "gapBetweenQuestionsSec": 5,
+  "questions": [
+    {
+      "number": "1",
+      "selectedAnswer": "B",
+      "decision": "MARK",
+      "markCorrect": true,
+      "timeSpentSec": 96,
+      "outcome": "RBS"
+    },
+    {
+      "number": "2",
+      "selectedAnswer": 7,
+      "decision": "MARK",
+      "markCorrect": false,
+      "timeSpentSec": 112,
+      "outcome": "W-C"
+    },
+    {
+      "number": "3",
+      "selectedAnswer": null,
+      "decision": "SKIP",
+      "markCorrect": null,
+      "timeSpentSec": 56,
+      "outcome": "W-C"
+    },
+    {
+      "number": "4",
+      "selectedAnswer": null,
+      "decision": "SKIP",
+      "markCorrect": null,
+      "timeSpentSec": 134,
+      "outcome": "W-C"
+    },
+    {
+      "number": "5",
+      "selectedAnswer": 192,
+      "decision": "MARK",
+      "markCorrect": true,
+      "timeSpentSec": 198,
+      "outcome": "RBS"
+    },
+    {
+      "number": "6",
+      "selectedAnswer": 4992,
+      "decision": "MARK",
+      "markCorrect": false,
+      "timeSpentSec": 271,
+      "outcome": "W-C"
+    },
+    {
+      "number": "7",
+      "selectedAnswer": ["A", "C"],
+      "decision": "MARK",
+      "markCorrect": false,
+      "timeSpentSec": 364,
+      "outcome": "W-C"
+    },
+    {
+      "number": "8",
+      "selectedAnswer": ["A", "C", "D"],
+      "decision": "MARK",
+      "markCorrect": false,
+      "timeSpentSec": 350,
+      "outcome": "W-C"
+    },
+    {
+      "number": "9",
+      "selectedAnswer": ["A", "B"],
+      "decision": "MARK",
+      "markCorrect": false,
+      "timeSpentSec": 135,
+      "outcome": "W-C"
+    },
+    {
+      "number": "10",
+      "selectedAnswer": ["A"],
+      "decision": "MARK",
+      "markCorrect": false,
+      "timeSpentSec": 204,
+      "outcome": "W-C"
+    },
+    {
+      "number": "11",
+      "selectedAnswer": null,
+      "decision": "SKIP",
+      "markCorrect": null,
+      "timeSpentSec": 3,
+      "outcome": "W-C"
+    },
+    {
+      "number": "12",
+      "selectedAnswer": "B",
+      "decision": "MARK",
+      "markCorrect": true,
+      "timeSpentSec": 287,
+      "outcome": "RBS"
+    },
+    {
+      "number": "13",
+      "selectedAnswer": 114,
+      "decision": "MARK",
+      "markCorrect": true,
+      "timeSpentSec": 106,
+      "outcome": "R"
+    },
+    {
+      "number": "14",
+      "selectedAnswer": 108,
+      "decision": "MARK",
+      "markCorrect": true,
+      "timeSpentSec": 223,
+      "outcome": "RBS"
+    },
+    {
+      "number": "15",
+      "selectedAnswer": 109,
+      "decision": "MARK",
+      "markCorrect": true,
+      "timeSpentSec": 164,
+      "outcome": "R"
+    }
+  ]
+}

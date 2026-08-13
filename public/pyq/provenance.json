@@ -1,5 +1,5 @@
 {
-  "bankVersion": "gate-1990-2026-v5-ece-ee-digital-logic",
+  "bankVersion": "gate-1990-2026-v6-go-classes-coa-topic-test",
   "sources": [
     {
       "name": "GateQA",
@@ -20,6 +20,11 @@
       "name": "ExamSIDE",
       "url": "https://questions.examside.com",
       "role": "ECE and EE Digital Logic question text, diagrams, metadata, and answer keys"
+    },
+    {
+      "name": "GO Classes",
+      "url": "https://www.goclasses.in/",
+      "role": "Learner-provided COA Topic Test question text, answer keys, and source tag"
     }
   ],
   "notes": [

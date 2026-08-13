@@ -201,7 +201,7 @@ describe('PYQ source HTML normalization', () => {
 });
 
 describe('bundled PYQ bank integrity', () => {
-  it('contains all 3,170 audited questions and no broken local image references', () => {
+  it('contains all 3,185 audited questions and no broken local image references', () => {
     const publicRoot = path.resolve(process.cwd(), 'public');
     const manifest = JSON.parse(
       readFileSync(path.join(publicRoot, 'pyq', 'manifest.json'), 'utf8')
@@ -213,7 +213,7 @@ describe('bundled PYQ bank integrity', () => {
     let topicCount = 0;
     const repairedQuestions: PyqQuestion[] = [];
 
-    expect(manifest.questionCount).toBe(3170);
+    expect(manifest.questionCount).toBe(3185);
     expect(manifest.firstYear).toBe(1990);
     expect(manifest.lastYear).toBe(2026);
     expect(manifest.years).toHaveLength(37);
@@ -261,7 +261,7 @@ describe('bundled PYQ bank integrity', () => {
     expect(new Set(repairedQuestions.map((row) => row.topicSlug)).size).toBe(83);
     expect(statuses).toEqual(manifest.answerStatuses);
     expect(statuses).toEqual({
-      available: 3076,
+      available: 3091,
       ambiguous: 3,
       'marks-to-all': 1,
       unsupported: 90
@@ -273,8 +273,8 @@ describe('bundled PYQ bank integrity', () => {
       classificationBasis: Record<string, number>;
     };
     expect(taxonomyAudit).toMatchObject({
-      questionCount: 3170,
-      uniqueQuestionCount: 3170,
+      questionCount: 3185,
+      uniqueQuestionCount: 3185,
       unclassifiedCount: 0,
       subjectCount: 14,
       topicCount: 95,
@@ -283,6 +283,35 @@ describe('bundled PYQ bank integrity', () => {
     expect(taxonomyAudit.classificationBasis['manual-content-audit']).toBe(160);
 
     const allQuestions = [...questionsById.values()];
+    const goClassesCoaTest = allQuestions.filter((row) =>
+      row.id.startsWith('goclasses:coa-topic-test:')
+    );
+    expect(goClassesCoaTest).toHaveLength(15);
+    expect(goClassesCoaTest.every((row) => row.subjectSlug === 'coa')).toBe(true);
+    expect(new Set(goClassesCoaTest.map((row) => row.topicSlug))).toEqual(
+      new Set(['machine-instruction', 'memory-chip-design'])
+    );
+    expect(
+      goClassesCoaTest.every((row) => row.subtopics.includes('goclasses-coa-topic-test'))
+    ).toBe(true);
+    expect(goClassesCoaTest.map((row) => row.answer)).toEqual([
+      'B',
+      8,
+      19,
+      -12,
+      192,
+      252,
+      ['A', 'C', 'D'],
+      ['A', 'B', 'C', 'D'],
+      ['A', 'B', 'C'],
+      ['A', 'B', 'C'],
+      3,
+      'B',
+      114,
+      108,
+      109
+    ]);
+
     const cseCounts1990To2001 = Object.fromEntries(
       Array.from({ length: 12 }, (_, index) => {
         const year = 1990 + index;

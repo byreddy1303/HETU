@@ -458,12 +458,21 @@ export function firstPyqImage(html: string): string | null {
   return document.querySelector('img')?.getAttribute('src') ?? null;
 }
 
+/** Rewrite the retired GO Classes result-card assets to their answer-free crops. */
+export function answerFreePyqImageUrl(url: string | null | undefined): string | null {
+  if (!url) return null;
+  return url.replace(
+    /\/pyq\/images\/go-classes-coa-topic-test\/attempt-q(\d{2})\.png$/,
+    '/pyq/images/go-classes-coa-topic-test/question-q$1.png'
+  );
+}
+
 /** Embed bundled PYQ figure(s) as a journal-ready data URL before persisting. */
 export async function resolvePyqJournalImageUrl(
   html: string,
   hint: string | null = null
 ): Promise<string | null> {
-  const candidate = hint?.trim() || firstPyqImage(html);
+  const candidate = answerFreePyqImageUrl(hint?.trim() || firstPyqImage(html));
   if (!candidate) return null;
   if (candidate.startsWith('data:')) return candidate;
   try {

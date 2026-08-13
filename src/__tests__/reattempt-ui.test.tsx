@@ -22,6 +22,7 @@ const ANSWER = 'C';
 const PATTERN = 'precedence graph cycle';
 const IMAGE =
   'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22100%22%3E%3Crect width=%22200%22 height=%22100%22 fill=%22white%22/%3E%3C/svg%3E';
+const SAFE_PYQ_IMAGE = '/pyq/images/test/question-q01.png';
 
 vi.mock('@/hooks/useAuth', () => ({
   useAuth: () => ({
@@ -134,6 +135,7 @@ async function seedDuePyq(stage: ReattemptRow['stage'] = 'D3') {
         <li>p only</li>
         <li>not p only</li>
       </ol>
+      <figure><img src="${SAFE_PYQ_IMAGE}" alt="Answer-free source question"></figure>
     `,
     sourceUrl: 'https://gateoverflow.in/test',
     answerSource: null
@@ -500,6 +502,8 @@ describe('re-attempt solve flow', () => {
         mark_correct: true,
         capture_version: 2
       });
+      expect(attempts[1].screenshot_url).toMatch(/^data:image\/png;base64,/);
+      expect(attempts[1].screenshot_url).not.toContain('/attempt-q');
     });
 
     expect(await screen.findByText('Nothing due')).toBeInTheDocument();

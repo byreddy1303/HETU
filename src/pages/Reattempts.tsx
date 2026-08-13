@@ -35,7 +35,12 @@ import {
 import { writeLocal } from '@/lib/sync';
 import { OUTCOME_BY_CODE, type QuestionFormat } from '@/lib/constants';
 import { cn, formatDate, plural, secondsToClock, todayISO } from '@/lib/utils';
-import { loadPyqQuestionByUid, type PyqQuestion } from '@/lib/pyq';
+import {
+  answerFreePyqImageUrl,
+  firstPyqImage,
+  loadPyqQuestionByUid,
+  type PyqQuestion
+} from '@/lib/pyq';
 import {
   createPyqReattemptAttemptRow,
   pyqQuestionFromAttempt,
@@ -622,7 +627,9 @@ function PyqReattemptSession({
       }
       const committedAtMs = Date.now();
       const questionStartedAtMs = Math.min(startedAt ?? committedAtMs, committedAtMs);
-      let screenshotUrl = sourceAttempt.screenshot_url;
+      let screenshotUrl = answerFreePyqImageUrl(
+        firstPyqImage(question.html) ?? sourceAttempt.screenshot_url
+      );
       try {
         screenshotUrl = captureRef.current
           ? await captureElementToDataUrl(captureRef.current, { theme: 'light' })
@@ -876,7 +883,8 @@ function ReattemptSession({
   const liveSeconds = useTimer(currentAttempt?.startedAt ?? null);
   const targetSec = question?.target_time_sec ?? 120;
   const hasText = !!question?.question_text?.trim();
-  const hasImage = !!question?.image_url;
+  const questionImageUrl = answerFreePyqImageUrl(question?.image_url);
+  const hasImage = !!questionImageUrl;
   const carriedForward = row.scheduled_date < today;
   const priorTimes = row.history
     .flatMap((entry) => (typeof entry.timeSpent === 'number' ? [entry.timeSpent] : []))
@@ -1128,7 +1136,7 @@ function ReattemptSession({
               aria-label="Open question image full screen"
             >
               <img
-                src={question?.image_url ?? ''}
+                src={questionImageUrl ?? ''}
                 alt="Question to re-attempt"
                 className="mx-auto max-h-[62dvh] w-full object-contain transition-transform duration-200 group-hover:scale-[1.01]"
               />
@@ -1401,7 +1409,7 @@ function ReattemptSession({
       </p>
 
       <ImagePreview
-        src={question?.image_url ?? null}
+        src={questionImageUrl}
         caption={question?.source_ref ?? question?.pattern_name ?? 'Question to re-attempt'}
         open={imageOpen}
         onClose={() => setImageOpen(false)}

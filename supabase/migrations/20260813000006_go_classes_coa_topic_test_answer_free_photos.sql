@@ -1,6 +1,6 @@
--- Attach answer-free learner-provided question crops to the original GO Classes
--- COA Topic Test bank entries, immutable attempt receipts, and journal records.
--- Answers, correctness, and timing stay in their dedicated structured fields.
+-- Reusable question images must never reveal a prior result. Replace every
+-- original GO Classes COA Topic Test image reference with the answer-free crop.
+-- Selected answers, keys, correctness, and timings remain structured fields.
 do $migration$
 declare
   target_user_id uuid;
@@ -20,28 +20,9 @@ begin
     alter table public.pyq_attempts disable trigger pyq_attempts_immutable;
 
     update public.pyq_attempts as attempt
-    set
-      screenshot_url = '/pyq/images/go-classes-coa-topic-test/question-q'
-        || lpad(split_part(attempt.question_uid, ':', 3), 2, '0')
-        || '.png',
-      question_snapshot = jsonb_set(
-        attempt.question_snapshot,
-        '{html}',
-        to_jsonb(
-          case
-            when coalesce(attempt.question_snapshot->>'html', '') like
-              '%/pyq/images/go-classes-coa-topic-test/question-q%.png%'
-              then coalesce(attempt.question_snapshot->>'html', '')
-            else coalesce(attempt.question_snapshot->>'html', '')
-              || '<figure><img src="/pyq/images/go-classes-coa-topic-test/question-q'
-              || lpad(split_part(attempt.question_uid, ':', 3), 2, '0')
-              || '.png" alt="GO Classes COA Topic Test question '
-              || split_part(attempt.question_uid, ':', 3)
-              || ' source screenshot"></figure>'
-          end
-        ),
-        true
-      )
+    set screenshot_url = '/pyq/images/go-classes-coa-topic-test/question-q'
+      || lpad(split_part(attempt.question_uid, ':', 3), 2, '0')
+      || '.png'
     where attempt.user_id = target_user_id
       and attempt.question_uid like 'goclasses:coa-topic-test:%'
       and split_part(attempt.question_uid, ':', 3) ~ '^[0-9]+$'
@@ -74,7 +55,7 @@ begin
 
   if attempt_rows <> 15 or journal_rows <> 15 then
     raise exception
-      'Expected 15 GO Classes COA answer-free photo links in attempts and journal, updated % and %',
+      'Expected 15 answer-free COA photos in attempts and journal; updated % and %',
       attempt_rows,
       journal_rows;
   end if;

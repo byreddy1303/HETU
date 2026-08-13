@@ -9,6 +9,7 @@ import { createPyqSessionRow } from '@/lib/pyq-session';
 import { captureElementToDataUrl } from '@/lib/image';
 
 const USER = '00000000-0000-4000-8000-000000000001';
+const SAFE_PYQ_IMAGE = '/pyq/images/test/question-q01.png';
 
 const question: PyqQuestion = {
   id: 'gate-2026-set1-q1',
@@ -26,7 +27,7 @@ const question: PyqQuestion = {
   answer: 'B',
   tolerance: null,
   answerStatus: 'available',
-  html: '<p>Which proposition is a tautology?</p>',
+  html: `<p>Which proposition is a tautology?</p><figure><img src="${SAFE_PYQ_IMAGE}" alt="Answer-free source question"></figure>`,
   sourceUrl: 'https://gateoverflow.in/test',
   answerSource: null
 };
@@ -105,7 +106,7 @@ describe('PYQ committed-attempt logging', () => {
       </MemoryRouter>
     );
 
-    await user.click(await screen.findByRole('button', { name: 'Start practice' }));
+    await user.click(await screen.findByRole('button', { name: 'Start fresh set' }));
     expect(await screen.findByText('Which proposition is a tautology?')).toBeInTheDocument();
     const [startedPyqSession] = await db.pyq_sessions.toArray();
     expect(await db.sessions.get(startedPyqSession.id)).toMatchObject({
@@ -183,7 +184,7 @@ describe('PYQ committed-attempt logging', () => {
       </MemoryRouter>
     );
 
-    await user.click(await screen.findByRole('button', { name: 'Start practice' }));
+    await user.click(await screen.findByRole('button', { name: 'Start fresh set' }));
     await user.click(await screen.findByRole('button', { name: 'B' }));
     await user.click(screen.getByRole('button', { name: /^Answered/ }));
     await user.click(screen.getByRole('button', { name: 'Commit & reveal key' }));
@@ -193,7 +194,8 @@ describe('PYQ committed-attempt logging', () => {
       const [journalRow] = await db.questions.toArray();
       expect(attempt.mark_correct).toBe(true);
       expect(journalRow.session_id).toBe(attempt.pyq_session_id);
-      expect(journalRow.image_url).toBe(attempt.screenshot_url);
+      expect(journalRow.image_url).toBe(SAFE_PYQ_IMAGE);
+      expect(journalRow.image_url).not.toBe(attempt.screenshot_url);
       expect(await db.sessions.get(attempt.pyq_session_id!)).toMatchObject({ kind: 'pyq' });
     });
   });
@@ -253,11 +255,11 @@ describe('PYQ committed-attempt logging', () => {
       </MemoryRouter>
     );
 
-    await user.click(await screen.findByRole('button', { name: 'Discard set' }));
+    await user.click(await screen.findByRole('button', { name: 'Discard' }));
     await waitFor(async () => {
       expect((await db.pyq_sessions.get(saved.id))?.status).toBe('abandoned');
     });
     expect(screen.queryByRole('button', { name: 'Resume set' })).not.toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Start practice' })).toBeEnabled();
+    expect(screen.getByRole('button', { name: 'Start fresh set' })).toBeEnabled();
   });
 });

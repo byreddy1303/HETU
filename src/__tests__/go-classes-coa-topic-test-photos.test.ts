@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { answerFreePyqImageUrl } from '@/lib/pyq';
 
 beforeEach(() => {
   vi.restoreAllMocks();
@@ -22,5 +23,18 @@ describe('GO Classes COA Topic Test screenshot archive', () => {
         `/pyq/images/go-classes-coa-topic-test/attempt-q${number}.png`
       );
     }
+  });
+
+  it('does not ship answer-bearing result-card assets', () => {
+    const modules = import.meta.glob(
+      '../../public/pyq/images/go-classes-coa-topic-test/attempt-q*.png'
+    );
+    expect(Object.keys(modules)).toHaveLength(0);
+  });
+
+  it('rewrites any stale local result-card link before display', () => {
+    expect(answerFreePyqImageUrl('/pyq/images/go-classes-coa-topic-test/attempt-q09.png')).toBe(
+      '/pyq/images/go-classes-coa-topic-test/question-q09.png'
+    );
   });
 });

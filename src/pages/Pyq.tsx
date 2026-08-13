@@ -43,6 +43,7 @@ import { createReattemptRow, needsReattempt } from '@/lib/reattempt';
 import { reconcileQuestionPattern } from '@/lib/patterns';
 import { DEFAULT_TARGET_TIME_SEC, MARKS_TARGET_SEC } from '@/lib/constants';
 import {
+  answerFreePyqImageUrl,
   firstPyqImage,
   formatPyqAnswer,
   inferPyqDirectOutcome,
@@ -180,9 +181,7 @@ function PracticeSetup({
         <Card className="border-accent/30">
           <CardBody className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="min-w-0">
-              <p className="font-display text-[16px] font-semibold text-text">
-                Unfinished PYQ set
-              </p>
+              <p className="font-display text-[16px] font-semibold text-text">Unfinished PYQ set</p>
               <p className="mt-1 text-[12px] text-text-muted">
                 {activeSession.completed_count} of {activeSession.question_uids.length} submitted ·{' '}
                 {secondsToClock(activeSession.elapsed_sec)} logged
@@ -225,8 +224,8 @@ function PracticeSetup({
                     <p className="truncate text-[13.5px] font-semibold text-text">
                       {session.config.subjectSlug === 'all'
                         ? 'Mixed subjects'
-                        : manifest.subjects.find((s) => s.slug === session.config.subjectSlug)
-                            ?.label ?? session.config.subjectSlug}
+                        : (manifest.subjects.find((s) => s.slug === session.config.subjectSlug)
+                            ?.label ?? session.config.subjectSlug)}
                     </p>
                     <p className="mt-0.5 text-[11.5px] text-text-faint">
                       {session.completed_count} / {session.question_uids.length} done ·{' '}
@@ -492,12 +491,7 @@ function PracticeSetup({
             </div>
             <div className="mt-auto pt-6">
               {error && !activeSession && <p className="mb-3 text-[12px] text-danger">{error}</p>}
-              <Button
-                variant="primary"
-                className="w-full"
-                onClick={onStart}
-                disabled={loading}
-              >
+              <Button variant="primary" className="w-full" onClick={onStart} disabled={loading}>
                 <BookOpenCheck size={17} />
                 {loading ? 'Opening question bank…' : 'Start fresh set'}
               </Button>
@@ -737,9 +731,7 @@ export default function Pyq() {
     count: (['5', '10', '25', '50', 'all'].includes(searchParams.get('count') ?? '')
       ? searchParams.get('count')
       : '10') as CountChoice,
-    history: (PYQ_HISTORY_OPTIONS.some(
-      (option) => option.value === searchParams.get('history')
-    )
+    history: (PYQ_HISTORY_OPTIONS.some((option) => option.value === searchParams.get('history'))
       ? searchParams.get('history')
       : 'all') as PyqHistoryFilter
   }));
@@ -880,7 +872,11 @@ export default function Pyq() {
     setSubmitting(false);
     setJournalOpen(false);
     setJournalSaved(false);
-    setQuestionScreenshot(lockedAttempt?.screenshot_url ?? null);
+    setQuestionScreenshot(
+      firstPyqImage(questions[index].html) ??
+        answerFreePyqImageUrl(lockedAttempt?.screenshot_url) ??
+        null
+    );
     setSubmitError(null);
   }, [currentId, index, questions]);
 
@@ -936,7 +932,11 @@ export default function Pyq() {
       const compatibleSession =
         session.bank_version === manifest.bankVersion
           ? session
-          : { ...session, bank_version: manifest.bankVersion, updated_at: new Date().toISOString() };
+          : {
+              ...session,
+              bank_version: manifest.bankVersion,
+              updated_at: new Date().toISOString()
+            };
       // Reactivate paused sessions
       const activatedSession: PyqSessionRow =
         compatibleSession.status !== 'active'
@@ -990,7 +990,6 @@ export default function Pyq() {
     }
   }
 
-
   async function discardSession(session: PyqSessionRow) {
     if (loading) return;
     setLoading(true);
@@ -1009,7 +1008,7 @@ export default function Pyq() {
             abandoned,
             sessionAttempts.length > 0
               ? pyqPracticeSubject(sessionAttempts)
-              : existingCanonical?.subject ?? 'PYQ practice',
+              : (existingCanonical?.subject ?? 'PYQ practice'),
             timeZone,
             existingCanonical
           )
@@ -1081,12 +1080,7 @@ export default function Pyq() {
           question.year <= high &&
           (config.type === 'all' || question.type === config.type)
       );
-      rows = filterPyqByHistory(
-        rows,
-        config.history ?? 'all',
-        attempts,
-        journalQuestions
-      );
+      rows = filterPyqByHistory(rows, config.history ?? 'all', attempts, journalQuestions);
       const attemptedIds = new Set(attempts.map((attempt) => attempt.question_uid));
       if (config.order === 'random') rows = rows.slice().sort(() => Math.random() - 0.5);
       else if (config.order === 'oldest')
@@ -1219,6 +1213,11 @@ export default function Pyq() {
       mark_correct: attempt.mark_correct,
       created_at: attempt.attempted_at
     };
+  }
+
+  async function safeQuestionImageUrl(): Promise<string | null> {
+    if (!current) return null;
+    return resolvePyqJournalImageUrl(current.html).catch(() => firstPyqImage(current.html));
   }
 
   async function persistJournalRow(row: QuestionRow, patternName: string | null, outcome: Outcome) {
@@ -1357,7 +1356,7 @@ export default function Pyq() {
       let autoJournalSaved = false;
       if (attempt.mark_correct === true) {
         const row = {
-          ...questionRowFromAttempt(attempt, undefined, screenshot),
+          ...questionRowFromAttempt(attempt, undefined, await safeQuestionImageUrl()),
           id: pyqJournalQuestionId(attempt.id)
         };
         writes.push({ name: 'questions', row });
@@ -1394,7 +1393,7 @@ export default function Pyq() {
 
   async function saveJournalAnalysis(draft: TagDraft) {
     if (!current || !submitted || !userId) return;
-    const imageUrl = await journalImageUrl(draft, submitted.screenshot_url ?? questionScreenshot);
+    const imageUrl = (await safeQuestionImageUrl()) ?? (await journalImageUrl(draft));
     const row = {
       ...questionRowFromAttempt(submitted, draft, imageUrl),
       id: pyqJournalQuestionId(submitted.id)

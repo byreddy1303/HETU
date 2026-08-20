@@ -9,6 +9,7 @@ import 'fake-indexeddb/auto';
 import { DEFAULT_PREFERENCES, usePrefsStore } from '@/stores/prefs';
 import { useSessionStore } from '@/stores/session';
 import { useLogStore } from '@/stores/log';
+import { topicProgressId, useTopicProgressStore } from '@/stores/topic-progress';
 import { db } from '@/lib/db';
 import { wipeLocalState } from '@/lib/isolation';
 
@@ -22,6 +23,13 @@ async function seedAll() {
   // Log: pretend we're mid-batch.
   useLogStore.getState().beginMulti('sess-456');
   useLogStore.getState().bumpLogged();
+  useTopicProgressStore.setState({
+    byUser: {
+      'u-1': {
+        [topicProgressId('Discrete Mathematics', 'Propositional Logic')]: '2026-08-08T10:00:00.000Z'
+      }
+    }
+  });
   // Dexie: real row + meta entry.
   await db.meta.put({ key: 'welcome_seen_at', value: new Date().toISOString() });
   await db.questions.add({
@@ -60,6 +68,7 @@ describe('wipeLocalState()', () => {
     usePrefsStore.setState({ ...DEFAULT_PREFERENCES });
     useSessionStore.getState().end();
     useLogStore.getState().end();
+    useTopicProgressStore.setState({ byUser: {} });
   });
 
   it('resets zustand stores back to their initial state', async () => {
@@ -78,6 +87,7 @@ describe('wipeLocalState()', () => {
     expect(useSessionStore.getState().mode).toBe('solve');
     expect(useLogStore.getState().mode).toBe('idle');
     expect(useLogStore.getState().loggedCount).toBe(0);
+    expect(useTopicProgressStore.getState().byUser).toEqual({});
   });
 
   it('wipes Dexie tables including meta', async () => {

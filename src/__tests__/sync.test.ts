@@ -3,7 +3,14 @@
 // and log to console.
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { db, table, SYNCED_TABLES, type SyncedTableName } from '@/lib/db';
-import { writeLocal, deleteLocal, flushPushQueue, pullAll, stopSync, _enableForTests } from '@/lib/sync';
+import {
+  writeLocal,
+  deleteLocal,
+  flushPushQueue,
+  pullAll,
+  stopSync,
+  _enableForTests
+} from '@/lib/sync';
 
 const mocks = vi.hoisted(() => ({
   upsert: vi.fn(),
@@ -35,7 +42,11 @@ function sessionRow(id: string, subject = 'Discrete Mathematics') {
   };
 }
 
-async function seed(name: SyncedTableName, row: { id: string } & Record<string, unknown>, status: 'pending' | 'synced') {
+async function seed(
+  name: SyncedTableName,
+  row: { id: string } & Record<string, unknown>,
+  status: 'pending' | 'synced'
+) {
   await table(name).put({ ...row, sync_status: status });
 }
 
@@ -72,6 +83,41 @@ describe('sync engine (F1.3)', () => {
     expect(pushed[0].id).toBe('s-1');
     expect('sync_status' in pushed[0]).toBe(false);
     expect((await table('sessions').get('s-1'))?.sync_status).toBe('synced');
+  });
+
+  it('waits for a local write before flushing during sign-out', async () => {
+    const target = db.topic_progress;
+    const put = target.put.bind(target);
+    let releaseWrite: () => void = () => {};
+    const writeGate = new Promise<void>((resolve) => {
+      releaseWrite = resolve;
+    });
+    const delayedPut = async (row: Parameters<typeof target.put>[0]) => {
+      await writeGate;
+      return put(row);
+    };
+    vi.spyOn(target, 'put').mockImplementation(delayedPut as typeof target.put);
+
+    const write = writeLocal('topic_progress', {
+      id: 'tp-1',
+      user_id: USER,
+      subject: 'Discrete Mathematics',
+      topic: 'Propositional Logic',
+      completed_at: '2026-08-08T10:00:00.000Z',
+      updated_at: '2026-08-08T10:00:00.000Z'
+    });
+    const flush = flushPushQueue();
+
+    await Promise.resolve();
+    expect(mocks.upsert).not.toHaveBeenCalled();
+
+    releaseWrite();
+    await Promise.all([write, flush]);
+
+    expect(mocks.upsert).toHaveBeenCalledWith(
+      'topic_progress',
+      expect.arrayContaining([expect.objectContaining({ id: 'tp-1', user_id: USER })])
+    );
   });
 
   it('stops at the first failing table so FK parents push before children', async () => {
@@ -115,10 +161,16 @@ describe('sync engine (F1.3)', () => {
     await pullAll(USER);
 
     expect(info).toHaveBeenCalledWith('[sync] conflict on sessions/s-4: local pending wins');
-    const kept = (await table('sessions').get('s-4')) as unknown as { subject: string; sync_status: string };
+    const kept = (await table('sessions').get('s-4')) as unknown as {
+      subject: string;
+      sync_status: string;
+    };
     expect(kept.subject).toBe('LOCAL EDIT');
     expect(kept.sync_status).toBe('pending');
-    const overwritten = (await table('sessions').get('s-5')) as unknown as { subject: string; sync_status: string };
+    const overwritten = (await table('sessions').get('s-5')) as unknown as {
+      subject: string;
+      sync_status: string;
+    };
     expect(overwritten.subject).toBe('REMOTE');
     expect(overwritten.sync_status).toBe('synced');
   });

@@ -35,8 +35,8 @@ export function selectCompletionsForUser(
   if (!byUser) return {};
 
   const effectiveId = userId || currentUserId() || 'guest';
-  if (byUser[effectiveId] && Object.keys(byUser[effectiveId]).length > 0) {
-    return byUser[effectiveId];
+  if (Object.prototype.hasOwnProperty.call(byUser, effectiveId)) {
+    return byUser[effectiveId] ?? {};
   }
 
   // Priority search for legacy / fallback user keys (sandbox, guest, default, undefined, null)
@@ -55,14 +55,22 @@ export function selectCompletionsForUser(
     }
   }
 
-  // Fallback: search any non-empty completions in byUser
-  for (const [key, comp] of Object.entries(byUser)) {
-    if (key !== effectiveId && comp && Object.keys(comp).length > 0) {
-      return comp;
-    }
-  }
-
   return {};
+}
+
+/** Merge cloud/Dexie rows into the user's optimistic in-memory completions. */
+export function mergeTopicProgressRows(
+  completions: TopicCompletions,
+  rows: readonly { subject: string; topic: string; completed_at: string }[]
+): TopicCompletions {
+  if (rows.length === 0) return completions;
+
+  const merged = { ...completions };
+  for (const row of rows) {
+    const key = topicProgressId(row.subject, row.topic);
+    if (!merged[key] || merged[key] < row.completed_at) merged[key] = row.completed_at;
+  }
+  return merged;
 }
 
 export async function syncTopicProgressFromDb(userId?: string | null): Promise<void> {
@@ -84,15 +92,8 @@ export async function syncTopicProgressFromDb(userId?: string | null): Promise<v
     }
 
     const legacy = { ...(restored ?? {}), ...current };
-    const syncedRows = await db.topic_progress
-      .where('user_id')
-      .equals(effectiveUserId)
-      .toArray();
-    const merged: TopicCompletions = { ...legacy };
-    for (const row of syncedRows) {
-      const key = topicProgressId(row.subject, row.topic);
-      if (!merged[key] || merged[key] < row.completed_at) merged[key] = row.completed_at;
-    }
+    const syncedRows = await db.topic_progress.where('user_id').equals(effectiveUserId).toArray();
+    const merged = mergeTopicProgressRows(legacy, syncedRows);
 
     // One-time migration of legacy localStorage/meta progress into the normal
     // local-first sync engine. Deterministic IDs make repeated runs idempotent.
@@ -127,10 +128,7 @@ export const useTopicProgressStore = create<TopicProgressState>()(
         set((state) => {
           const effectiveUserId = userId || currentUserId() || 'guest';
           const existing = state.byUser[effectiveUserId];
-          const base =
-            existing && Object.keys(existing).length > 0
-              ? existing
-              : selectCompletionsForUser(state.byUser, effectiveUserId);
+          const base = existing ?? selectCompletionsForUser(state.byUser, effectiveUserId);
 
           const next = { ...base };
 

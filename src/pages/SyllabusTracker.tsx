@@ -1,13 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
-import {
-  Check,
-  ChevronDown,
-  CircleCheckBig,
-  Search,
-  Sparkles,
-  Target
-} from 'lucide-react';
+import { Check, ChevronDown, CircleCheckBig, Search, Sparkles, Target } from 'lucide-react';
 import { useReducedMotion } from 'motion/react';
 import PageHeader from '@/components/layout/PageHeader';
 import { Badge } from '@/components/ui/Badge';
@@ -28,7 +21,7 @@ import {
 } from '@/lib/topic-evidence';
 import { currentUserId } from '@/stores/auth';
 import {
-  selectCompletionsForUser,
+  mergeTopicProgressRows,
   syncTopicProgressFromDb,
   topicProgressId,
   useTopicProgressStore,
@@ -67,7 +60,8 @@ function summariesFor(completions: TopicCompletions): SubjectSummary[] {
     const topics = (SUBTOPICS_BY_SUBJECT[subject] ?? []).map((topic) => topic.value);
     const completed = topics.filter((topic) => completions[topicProgressId(subject, topic)]).length;
     const percent = topics.length ? Math.round((completed / topics.length) * 100) : 0;
-    const status = completed === topics.length ? 'complete' : completed > 0 ? 'in-progress' : 'not-started';
+    const status =
+      completed === topics.length ? 'complete' : completed > 0 ? 'in-progress' : 'not-started';
     return { subject, topics, completed, percent, status };
   });
 }
@@ -92,24 +86,28 @@ function nextTopicFrom(
 export default function SyllabusTracker() {
   const { userId, profile } = useAuth();
   const reduceMotion = useReducedMotion();
-  const byUser = useTopicProgressStore((state) => state.byUser);
-  const setCompleted = useTopicProgressStore((state) => state.setCompleted);
-
   const effectiveUserId = userId ?? currentUserId() ?? 'guest';
+  const localCompletions = useTopicProgressStore((state) => state.byUser[effectiveUserId]);
+  const setCompleted = useTopicProgressStore((state) => state.setCompleted);
   const today = todayISOInTimeZone(profile?.timezone ?? 'Asia/Kolkata');
   const questions = useLiveQuery(
-    () => userId ? db.questions.where('user_id').equals(userId).toArray() : [],
+    () => (userId ? db.questions.where('user_id').equals(userId).toArray() : []),
     [userId],
     []
   );
   const attempts = useLiveQuery(
-    () => userId ? db.pyq_attempts.where('user_id').equals(userId).toArray() : [],
+    () => (userId ? db.pyq_attempts.where('user_id').equals(userId).toArray() : []),
     [userId],
     []
   );
   const reattempts = useLiveQuery(
-    () => userId ? db.reattempts.where('user_id').equals(userId).toArray() : [],
+    () => (userId ? db.reattempts.where('user_id').equals(userId).toArray() : []),
     [userId],
+    []
+  );
+  const topicProgressRows = useLiveQuery(
+    () => db.topic_progress.where('user_id').equals(effectiveUserId).toArray(),
+    [effectiveUserId],
     []
   );
 
@@ -117,9 +115,12 @@ export default function SyllabusTracker() {
     void syncTopicProgressFromDb(effectiveUserId);
   }, [effectiveUserId]);
 
+  // The initial local read can finish before the post-login cloud pull. Dexie's
+  // live query rerenders with those later rows, so restored progress appears
+  // without requiring a refresh or another login.
   const completions = useMemo(
-    () => selectCompletionsForUser(byUser, effectiveUserId),
-    [byUser, effectiveUserId]
+    () => mergeTopicProgressRows(localCompletions ?? {}, topicProgressRows),
+    [localCompletions, topicProgressRows]
   );
   const summaries = useMemo(() => summariesFor(completions), [completions]);
   const evidenceByTopic = useMemo(() => {
@@ -127,15 +128,18 @@ export default function SyllabusTracker() {
     for (const subject of SUBJECTS) {
       for (const topic of (SUBTOPICS_BY_SUBJECT[subject] ?? []).map((item) => item.value)) {
         const id = topicProgressId(subject, topic);
-        map.set(id, buildTopicEvidence({
-          subject,
-          topic,
-          studiedAt: completions[id] ?? null,
-          questions,
-          attempts,
-          reattempts,
-          today
-        }));
+        map.set(
+          id,
+          buildTopicEvidence({
+            subject,
+            topic,
+            studiedAt: completions[id] ?? null,
+            questions,
+            attempts,
+            reattempts,
+            today
+          })
+        );
       }
     }
     return map;
@@ -330,7 +334,9 @@ export default function SyllabusTracker() {
               ? `${visibleSummaries.length} ${plural(visibleSummaries.length, 'subject')}`
               : `${matchingTopicCount} matching ${plural(matchingTopicCount, 'topic')}`}
           </span>
-          <span className="u-num">{totalCompleted}/{totalTopics} topics</span>
+          <span className="u-num">
+            {totalCompleted}/{totalTopics} topics
+          </span>
         </div>
       </section>
 
@@ -354,9 +360,7 @@ export default function SyllabusTracker() {
               evidence={evidenceByTopic}
               open={isOpen}
               onToggle={() => toggleSubject(summary.subject)}
-              onTopicChange={(topic, completed) =>
-                toggleTopic(summary.subject, topic, completed)
-              }
+              onTopicChange={(topic, completed) => toggleTopic(summary.subject, topic, completed)}
             />
           );
         })}
@@ -381,7 +385,10 @@ function SyllabusOrbit({ summaries, percent }: { summaries: SubjectSummary[]; pe
   const step = 100 / summaries.length;
 
   return (
-    <div className="mx-auto flex w-[190px] flex-col items-center lg:mx-0" aria-label={`${percent}% of syllabus complete`}>
+    <div
+      className="mx-auto flex w-[190px] flex-col items-center lg:mx-0"
+      aria-label={`${percent}% of syllabus complete`}
+    >
       <div className="relative h-[180px] w-[180px]">
         <svg viewBox="0 0 128 128" className="h-full w-full -rotate-90" aria-hidden="true">
           {summaries.map((summary, index) => (
@@ -466,10 +473,16 @@ function SubjectLedger({
         <span
           className={cn(
             'u-num flex h-8 w-8 items-center justify-center rounded-full text-[11px] font-semibold',
-            summary.status === 'complete' ? 'bg-success-faint text-success' : 'bg-bg-overlay text-text-faint'
+            summary.status === 'complete'
+              ? 'bg-success-faint text-success'
+              : 'bg-bg-overlay text-text-faint'
           )}
         >
-          {summary.status === 'complete' ? <Check size={14} strokeWidth={2.5} /> : String(index + 1).padStart(2, '0')}
+          {summary.status === 'complete' ? (
+            <Check size={14} strokeWidth={2.5} />
+          ) : (
+            String(index + 1).padStart(2, '0')
+          )}
         </span>
         <span className="min-w-0">
           <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
@@ -506,7 +519,10 @@ function SubjectLedger({
           </span>
           <ChevronDown
             size={17}
-            className={cn('text-text-faint transition-transform duration-200', open && 'rotate-180')}
+            className={cn(
+              'text-text-faint transition-transform duration-200',
+              open && 'rotate-180'
+            )}
           />
         </span>
       </button>
@@ -524,8 +540,8 @@ function SubjectLedger({
                   key={topic}
                   className={cn(
                     'group/topic flex min-h-12 cursor-pointer items-start gap-3 rounded border px-3 py-2.5 transition-[border-color,background-color,transform]',
-                      completed
-                        ? 'border-success/25 bg-success-faint/45'
+                    completed
+                      ? 'border-success/25 bg-success-faint/45'
                       : 'border-transparent bg-bg-raised hover:border-border-hover hover:-translate-y-px'
                   )}
                 >
@@ -600,7 +616,9 @@ function TopicEvidenceLine({
   return (
     <span className="mt-1 block text-[9.5px] leading-relaxed">
       <span className={cn('font-semibold', tone)}>{EVIDENCE_LABEL[evidence.status]}</span>
-      {facts.length > 0 ? <span className="u-num text-text-faint"> · {facts.join(' · ')}</span> : null}
+      {facts.length > 0 ? (
+        <span className="u-num text-text-faint"> · {facts.join(' · ')}</span>
+      ) : null}
       {completedAt && evidence.practiced === 0 ? (
         <span className="u-num text-text-faint"> · marked {formatDate(completedAt, 'dd MMM')}</span>
       ) : null}

@@ -19,6 +19,7 @@ let lastPullAt = 0;
 let currentUserId: string | null = null;
 let pullInFlight: Promise<void> | null = null;
 let pullingForUserId: string | null = null;
+const localWritesInFlight = new Set<Promise<void>>();
 
 const BACKOFF_MAX_MS = 60_000;
 const PULL_MIN_GAP_MS = 30_000;
@@ -27,35 +28,60 @@ export function isSyncEnabled(): boolean {
   return syncEnabled;
 }
 
-/** Write a row locally (source of truth) and schedule a background push. */
-export async function writeLocal<T extends { id: string }>(
-  name: SyncedTableName,
-  row: T
-): Promise<void> {
-  await table(name).put({ ...row, sync_status: syncEnabled ? 'pending' : 'synced' });
-  if (syncEnabled) schedulePush(0);
+function trackLocalWrite(operation: Promise<void>): Promise<void> {
+  localWritesInFlight.add(operation);
+  void operation.then(
+    () => localWritesInFlight.delete(operation),
+    () => localWritesInFlight.delete(operation)
+  );
+  return operation;
 }
 
-export async function writeLocalBatch(
+async function waitForLocalWrites(): Promise<void> {
+  while (localWritesInFlight.size > 0) {
+    await Promise.allSettled([...localWritesInFlight]);
+  }
+}
+
+/** Write a row locally (source of truth) and schedule a background push. */
+export function writeLocal<T extends { id: string }>(name: SyncedTableName, row: T): Promise<void> {
+  return trackLocalWrite(
+    (async () => {
+      await table(name).put({ ...row, sync_status: syncEnabled ? 'pending' : 'synced' });
+      if (syncEnabled) schedulePush(0);
+    })()
+  );
+}
+
+export function writeLocalBatch(
   rows: { name: SyncedTableName; row: { id: string } }[]
 ): Promise<void> {
-  if (rows.length === 0) return;
-  const targets = [...new Set(rows.map(({ name }) => name))].map((name) => table(name));
-  await db.transaction('rw', targets, async () => {
-    for (const { name, row } of rows) {
-      await table(name).put({ ...row, sync_status: syncEnabled ? 'pending' : 'synced' });
-    }
-  });
-  if (syncEnabled) schedulePush(0);
+  if (rows.length === 0) return Promise.resolve();
+  return trackLocalWrite(
+    (async () => {
+      const targets = [...new Set(rows.map(({ name }) => name))].map((name) => table(name));
+      await db.transaction('rw', targets, async () => {
+        for (const { name, row } of rows) {
+          await table(name).put({ ...row, sync_status: syncEnabled ? 'pending' : 'synced' });
+        }
+      });
+      if (syncEnabled) schedulePush(0);
+    })()
+  );
 }
 
 /** Delete locally now; queue the remote delete if we cannot reach the server. */
-export async function deleteLocal(name: SyncedTableName, id: string): Promise<void> {
-  await table(name).delete(id);
-  if (!syncEnabled) return;
-  const queue = ((await db.meta.get('delete_queue'))?.value as QueuedDelete[] | undefined) ?? [];
-  await db.meta.put({ key: 'delete_queue', value: [...queue, { table: name, id }] });
-  schedulePush(0);
+export function deleteLocal(name: SyncedTableName, id: string): Promise<void> {
+  return trackLocalWrite(
+    (async () => {
+      await table(name).delete(id);
+      if (!syncEnabled) return;
+      const queue =
+        ((await db.meta.get('delete_queue'))?.value as QueuedDelete[] | undefined) ?? [];
+      await db.meta.put({ key: 'delete_queue', value: [...queue, { table: name, id }] });
+      schedulePush(0);
+    })()
+  );
 }
 
 function schedulePush(delayMs: number) {
@@ -69,10 +95,13 @@ export function flushPushQueue(): Promise<void> {
   if (!syncEnabled) return Promise.resolve();
   if (typeof navigator !== 'undefined' && !navigator.onLine) return Promise.resolve();
   // Callers that overlap an auto-scheduled push must await the same work instead
-  // of returning early while deletes or pending rows are still in flight.
-  if (pushInFlight) return pushInFlight;
+  // of returning early while deletes or pending rows are still in flight. Run
+  // one more drain afterward because a local write may have landed after an
+  // earlier table was already scanned.
+  if (pushInFlight) return pushInFlight.then(() => flushPushQueue());
 
   pushInFlight = (async () => {
+    await waitForLocalWrites();
     let hadError = false;
     for (const name of SYNCED_TABLES) {
       const rows = await table(name).where('sync_status').anyOf('pending', 'error').toArray();

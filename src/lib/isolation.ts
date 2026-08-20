@@ -7,6 +7,7 @@ import { clearLocalData } from '@/lib/db';
 import { DEFAULT_PREFERENCES, usePrefsStore } from '@/stores/prefs';
 import { useSessionStore } from '@/stores/session';
 import { useLogStore } from '@/stores/log';
+import { useTopicProgressStore } from '@/stores/topic-progress';
 
 const KNOWN_LOCALSTORAGE_KEYS = ['air.prefs', 'air.session', 'air.log'];
 
@@ -34,6 +35,11 @@ export async function wipeLocalState(): Promise<void> {
   }
   try {
     useLogStore.getState().end();
+  } catch {
+    // ignore
+  }
+  try {
+    useTopicProgressStore.setState({ byUser: {} });
   } catch {
     // ignore
   }

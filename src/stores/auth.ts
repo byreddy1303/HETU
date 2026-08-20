@@ -8,6 +8,7 @@ import type { User } from '@supabase/supabase-js';
 import { supabase, supabaseConfigured } from '@/lib/supabase';
 import { db } from '@/lib/db';
 import { wipeLocalState } from '@/lib/isolation';
+import { flushPushQueue } from '@/lib/sync';
 import type { UserRow } from '@/types';
 import { EXAM_DATE_DEFAULT } from '@/lib/constants';
 
@@ -190,6 +191,10 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       // Signing out must remain available if an optional notification chunk
       // cannot be fetched while the device is offline.
     }
+    // Topic toggles and other local-first writes are intentionally optimistic.
+    // Drain them while the current JWT is still valid, before sign-out clears
+    // the account-scoped IndexedDB database.
+    await flushPushQueue();
     await supabase.auth.signOut();
     await wipeLocalState();
     set({ status: 'signed_out', profile: null, user: null });

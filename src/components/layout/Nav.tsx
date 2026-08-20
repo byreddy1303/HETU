@@ -142,15 +142,16 @@ function NavItem({ item }: { item: Item }) {
       end={item.to === '/'}
       className={({ isActive }) =>
         cn(
-          'relative flex h-9 items-center gap-3 rounded px-3 text-[13.5px] transition-all duration-150',
+          'immersive-nav-item relative flex h-9 items-center gap-3 rounded px-3 text-[13.5px] transition-all duration-150',
           isActive
             ? cn('font-semibold', item.active)
             : 'font-medium text-text-muted hover:translate-x-0.5 hover:bg-bg-overlay/70 hover:text-text'
         )
       }
     >
-      <Icon size={16} strokeWidth={1.75} className="shrink-0" />
-      {item.label}
+      <span className="immersive-nav-item__node" aria-hidden />
+      <Icon size={16} strokeWidth={1.75} className="immersive-nav-item__icon shrink-0" />
+      <span className="immersive-nav-item__label">{item.label}</span>
     </NavLink>
   );
 }
@@ -181,7 +182,12 @@ export default function Nav() {
   const main: Item[] = [
     { to: '/', label: 'Dashboard', icon: Gauge, active: 'bg-accent-faint text-accent' },
     { to: '/today', label: 'Do now', icon: ClipboardList, active: 'bg-accent-faint text-accent' },
-    { to: '/capture', label: 'Quick capture', icon: Camera, active: 'bg-ink-rose/10 text-ink-rose' },
+    {
+      to: '/capture',
+      label: 'Quick capture',
+      icon: Camera,
+      active: 'bg-ink-rose/10 text-ink-rose'
+    },
     LOG_ITEM,
     liveSessionId
       ? {
@@ -202,19 +208,23 @@ export default function Nav() {
   ];
 
   return (
-    <aside className="native-side-nav fixed inset-y-0 left-0 z-30 hidden w-[224px] flex-col border-r border-border bg-bg md:flex">
-      <div className="flex items-center px-4 pb-4 pt-4">
+    <aside className="native-side-nav immersive-side-nav fixed inset-y-0 left-0 z-30 hidden w-[224px] flex-col border-r border-border bg-bg md:flex">
+      <div className="immersive-side-nav__thread" aria-hidden />
+      <div className="immersive-side-nav__brand flex items-center px-4 pb-4 pt-4">
         <Brand />
+        <span className="immersive-side-nav__live">
+          <i /> live
+        </span>
       </div>
 
-      <nav className="flex flex-1 flex-col gap-0.5 overflow-y-auto px-2">
+      <nav className="immersive-side-nav__links flex flex-1 flex-col gap-0.5 overflow-y-auto px-2">
         <Group items={main} />
         <Group label="Analysis" items={ANALYSIS} />
         <Group label="Learn" items={LEARN} />
         <Group items={[SETTINGS_ITEM]} />
       </nav>
 
-      <div className="border-t border-border px-4 py-3">
+      <div className="immersive-side-nav__profile border-t border-border px-4 py-3">
         <div className="flex items-center justify-between gap-2">
           <div className="flex min-w-0 items-center gap-2.5">
             <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-ink-cobalt/15 font-display text-[13px] font-bold text-ink-cobalt">

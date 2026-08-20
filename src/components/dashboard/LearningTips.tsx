@@ -17,7 +17,7 @@ export default function LearningTips({ tips }: { tips: LearningTip[] }) {
   return (
     <section
       className={cn(
-        'native-learning-tips relative overflow-hidden rounded-lg border border-border bg-bg-raised shadow-card',
+        'native-learning-tips immersive-learning-signal relative overflow-hidden rounded-lg border border-border bg-bg-raised shadow-card',
         tone.wash
       )}
       aria-labelledby="learning-tip-title"

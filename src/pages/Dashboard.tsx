@@ -63,10 +63,15 @@ function TargetMeter({ label, done, target }: { label: string; done: number; tar
         aria-valuemax={target}
         aria-valuenow={Math.min(done, target)}
       >
-        <div className="h-full rounded-full bg-accent transition-[width]" style={{ width: `${progress}%` }} />
+        <div
+          className="h-full rounded-full bg-accent transition-[width]"
+          style={{ width: `${progress}%` }}
+        />
       </div>
       <p className="mt-1.5 text-[10.5px] text-text-faint">
-        {remaining === 0 ? 'Target met. More is optional.' : `${remaining} remaining at your current setting.`}
+        {remaining === 0
+          ? 'Target met. More is optional.'
+          : `${remaining} remaining at your current setting.`}
       </p>
     </div>
   );
@@ -224,8 +229,15 @@ export default function Dashboard() {
   const notClean = lastSessionQuestions.length - distribution.R;
 
   return (
-    <div className="flex flex-col gap-4 sm:gap-6">
+    <div className="immersive-dashboard flex flex-col gap-4 sm:gap-6">
       <WelcomeOverlay />
+      <div className="immersive-dashboard__coordinates" aria-hidden>
+        <span>HETU / CAUSAL FIELD</span>
+        <i />
+        <span>{formatDate(today, 'dd.MM.yyyy')}</span>
+        <i />
+        <span>SYNCED EVIDENCE</span>
+      </div>
       <HeroCard
         name={profile?.name}
         today={today}
@@ -246,8 +258,8 @@ export default function Dashboard() {
         }
       />
 
-      <div className="grid min-w-0 gap-4 lg:grid-cols-[minmax(0,1.65fr)_minmax(280px,0.85fr)]">
-        <Card className="min-w-0 overflow-hidden">
+      <div className="immersive-card-constellation immersive-card-constellation--surface grid min-w-0 gap-4 lg:grid-cols-[minmax(0,1.65fr)_minmax(280px,0.85fr)]">
+        <Card className="immersive-metric-card immersive-metric-card--surface min-w-0 overflow-hidden">
           <CardHeader
             title="Mistake surface"
             aside={<span className="u-label text-text-faint">7 local days</span>}
@@ -270,28 +282,38 @@ export default function Dashboard() {
               <div className="pr-3 sm:pr-4">
                 <p className="u-label">Opened</p>
                 <p className="mt-1 text-[12px] text-text-muted">
-                  <span className="u-num font-semibold text-text">{movement.opened}</span> added in 7 days
+                  <span className="u-num font-semibold text-text">{movement.opened}</span> added in
+                  7 days
                 </p>
               </div>
               <div className="pl-3 sm:pl-4">
                 <p className="u-label">Mastered</p>
                 <p className="mt-1 text-[12px] text-text-muted">
-                  <span className="u-num font-semibold text-success">{movement.mastered}</span> closed in 7 days
+                  <span className="u-num font-semibold text-success">{movement.mastered}</span>{' '}
+                  closed in 7 days
                 </p>
               </div>
             </div>
           </CardBody>
         </Card>
 
-        <Card className="overflow-hidden">
+        <Card className="immersive-metric-card immersive-metric-card--pulse overflow-hidden">
           <CardHeader
             title="Practice pulse"
             aside={<Target size={14} className="text-accent" aria-hidden />}
             className="flex-nowrap items-center [&>div]:w-auto [&>div]:shrink-0"
           />
           <CardBody className="flex h-[calc(100%-41px)] flex-col gap-5">
-            <TargetMeter label="Questions today" done={questionsToday} target={dailyQuestionTarget} />
-            <TargetMeter label="Sessions this week" done={sessionsThisWeek} target={weeklySessionTarget} />
+            <TargetMeter
+              label="Questions today"
+              done={questionsToday}
+              target={dailyQuestionTarget}
+            />
+            <TargetMeter
+              label="Sessions this week"
+              done={sessionsThisWeek}
+              target={weeklySessionTarget}
+            />
             <button
               type="button"
               onClick={() => navigate('/pyq')}
@@ -314,7 +336,10 @@ export default function Dashboard() {
                   </span>
                   <span className="mt-1.5 flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-[11px] leading-relaxed text-text-faint">
                     <span>
-                      <span className="u-num text-text-muted">{uniquePyqsSeen.toLocaleString()}</span> of{' '}
+                      <span className="u-num text-text-muted">
+                        {uniquePyqsSeen.toLocaleString()}
+                      </span>{' '}
+                      of{' '}
                       <span className="u-num text-text-muted">
                         {PYQ_BANK_QUESTION_COUNT.toLocaleString()}
                       </span>{' '}
@@ -335,8 +360,8 @@ export default function Dashboard() {
         </Card>
       </div>
 
-      <div className="grid min-w-0 gap-4 lg:grid-cols-[minmax(280px,0.85fr)_minmax(0,1.65fr)]">
-        <Card className="overflow-hidden">
+      <div className="immersive-card-constellation immersive-card-constellation--review grid min-w-0 gap-4 lg:grid-cols-[minmax(280px,0.85fr)_minmax(0,1.65fr)]">
+        <Card className="immersive-metric-card immersive-metric-card--focus overflow-hidden">
           <CardHeader
             title="Weekly focus"
             aside={<CalendarRange size={14} className="text-ink-marigold" aria-hidden />}
@@ -371,7 +396,12 @@ export default function Dashboard() {
               </>
             )}
             <div className="mt-auto pt-5">
-              <Button size="sm" variant="ghost" onClick={() => navigate('/weekly-review')} className="-ml-3">
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={() => navigate('/weekly-review')}
+                className="-ml-3"
+              >
                 {weeklyFix ? 'Open weekly review' : 'Set weekly focus'}
                 <ArrowRight size={13} aria-hidden />
               </Button>
@@ -379,7 +409,7 @@ export default function Dashboard() {
           </CardBody>
         </Card>
 
-        <Card className="min-w-0 overflow-hidden">
+        <Card className="immersive-metric-card immersive-metric-card--session min-w-0 overflow-hidden">
           <CardHeader
             title="Last session"
             aside={lastSessionQuestions.length > 0 ? <OutcomeLegend /> : undefined}
@@ -397,14 +427,22 @@ export default function Dashboard() {
                 )}
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
-                    <span className={cn('h-2 w-2 rounded-full', subjectInk(last.subject).dot)} aria-hidden />
-                    <h2 className="font-display text-[19px] font-semibold text-text">{last.subject}</h2>
+                    <span
+                      className={cn('h-2 w-2 rounded-full', subjectInk(last.subject).dot)}
+                      aria-hidden
+                    />
+                    <h2 className="font-display text-[19px] font-semibold text-text">
+                      {last.subject}
+                    </h2>
                   </div>
                   <p className="mt-1 text-[11.5px] text-text-faint">
                     {formatDate(last.date)} ·{' '}
                     <span className="u-num">{last.actual_duration_min ?? 0}</span> min ·{' '}
                     <span className="u-num">{lastSessionQuestionCount}</span>{' '}
-                    {plural(lastSessionQuestionCount, last.kind === 'pyq' ? 'submission' : 'question')}
+                    {plural(
+                      lastSessionQuestionCount,
+                      last.kind === 'pyq' ? 'submission' : 'question'
+                    )}
                   </p>
                   {lastSessionQuestions.length > 0 && (
                     <>
@@ -412,8 +450,9 @@ export default function Dashboard() {
                         <OutcomeKey distribution={distribution} />
                       </div>
                       <p className="mt-3 text-[11.5px] text-text-muted">
-                        <span className="u-num font-semibold text-text">{distribution.R}</span> clean ·{' '}
-                        <span className="u-num font-semibold text-danger">{notClean}</span> not clean
+                        <span className="u-num font-semibold text-text">{distribution.R}</span>{' '}
+                        clean · <span className="u-num font-semibold text-danger">{notClean}</span>{' '}
+                        not clean
                       </p>
                     </>
                   )}
@@ -430,9 +469,12 @@ export default function Dashboard() {
               </div>
             ) : (
               <div className="flex min-h-[160px] flex-col items-center justify-center text-center sm:min-h-[228px]">
-                <p className="font-display text-[18px] font-semibold text-text">No session evidence yet</p>
+                <p className="font-display text-[18px] font-semibold text-text">
+                  No session evidence yet
+                </p>
                 <p className="mt-2 max-w-[360px] text-[12.5px] leading-relaxed text-text-faint">
-                  Finish a focused, log, or PYQ practice session and its outcome shape will appear here.
+                  Finish a focused, log, or PYQ practice session and its outcome shape will appear
+                  here.
                 </p>
               </div>
             )}

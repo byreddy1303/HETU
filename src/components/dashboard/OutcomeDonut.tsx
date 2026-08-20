@@ -25,7 +25,7 @@ export default function OutcomeDonut({
 
   return (
     <div
-      className="relative h-[150px] w-[150px] shrink-0"
+      className="immersive-outcome-donut relative h-[150px] w-[150px] shrink-0"
       role="img"
       aria-label={`Last session outcome distribution across ${total} questions`}
     >
@@ -54,6 +54,9 @@ export default function OutcomeDonut({
         <span className="u-num text-[24px] font-semibold leading-none text-text">{total}</span>
         <span className="u-label mt-1">questions</span>
       </div>
+      <span className="immersive-outcome-donut__satellite" aria-hidden>
+        R
+      </span>
     </div>
   );
 }

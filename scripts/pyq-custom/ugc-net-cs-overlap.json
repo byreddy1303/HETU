@@ -1,0 +1,764 @@
+{
+  "bookSlug": "ugc-net-cs-overlap",
+  "source": "UGC NET Computer Science",
+  "sourceUrl": "https://www.ugcnetonline.in/question_papers_june2012.php",
+  "importedAt": "2026-08-20",
+  "questions": [
+    {
+      "id": "ugc-net-cs:2012-06:1",
+      "year": 2012,
+      "set": null,
+      "number": "1",
+      "paperLabel": "UGC NET CS June 2012 · Paper II (filtered)",
+      "subject": "data-structure",
+      "subjectSlug": "data-structure",
+      "classificationHint": {
+        "subjectSlug": "data-structure",
+        "topicSlug": "stack"
+      },
+      "topic": "stack",
+      "topicSlug": "stack",
+      "subtopics": [
+        "stack",
+        "ugc-net-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "A",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">The postfix expression AB + CD – *<br>     can be evaluated using a<br>     (A) stack<br>     (B)   tree<br>     (C)   queue<br>     (D) linked list</div>",
+      "sourceUrl": "https://www.ugcnetonline.in/showPdf.php?p1=question_papers%2FJune2012_paper-II%2FJ-87-12%20%28Comp%20Sci%29.pdf",
+      "answerSource": {
+        "kind": "official-answer-key",
+        "url": "https://www.ugcnetonline.in/J2012_answerkeys/SC087_II.pdf"
+      }
+    },
+    {
+      "id": "ugc-net-cs:2012-06:5",
+      "year": 2012,
+      "set": null,
+      "number": "5",
+      "paperLabel": "UGC NET CS June 2012 · Paper II (filtered)",
+      "subject": "computer-networks",
+      "subjectSlug": "computer-networks",
+      "classificationHint": {
+        "subjectSlug": "computer-networks",
+        "topicSlug": "network-layer-protocol"
+      },
+      "topic": "network-layer-protocol",
+      "topicSlug": "network-layer-protocol",
+      "subtopics": [
+        "network-layer-protocol",
+        "ugc-net-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "D",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">Networks     that  use   different<br>         technologies can be connected by<br>         using<br>         (A)   Packets<br>         (B)   Switches<br>         (C)   Bridges<br>         (D)   Routers</div>",
+      "sourceUrl": "https://www.ugcnetonline.in/showPdf.php?p1=question_papers%2FJune2012_paper-II%2FJ-87-12%20%28Comp%20Sci%29.pdf",
+      "answerSource": {
+        "kind": "official-answer-key",
+        "url": "https://www.ugcnetonline.in/J2012_answerkeys/SC087_II.pdf"
+      }
+    },
+    {
+      "id": "ugc-net-cs:2012-06:6",
+      "year": 2012,
+      "set": null,
+      "number": "6",
+      "paperLabel": "UGC NET CS June 2012 · Paper II (filtered)",
+      "subject": "computer-networks",
+      "subjectSlug": "computer-networks",
+      "classificationHint": {
+        "subjectSlug": "computer-networks",
+        "topicSlug": "application-layer-protocols"
+      },
+      "topic": "application-layer-protocols",
+      "topicSlug": "application-layer-protocols",
+      "subtopics": [
+        "application-layer-protocols",
+        "ugc-net-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "A",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">Both hosts and routers are TCP/IP<br>         protocol software. However, routers do<br>         not use protocol from all layers. The<br>         layer for which protocol software is not<br>         needed by a router is<br>         (A) Layer – 5 (Application)<br>         (B) Layer – 1 (Physical)<br>         (C) Layer – 3 (Internet)<br>         (D) Layer – 2 (Network Interface)</div>",
+      "sourceUrl": "https://www.ugcnetonline.in/showPdf.php?p1=question_papers%2FJune2012_paper-II%2FJ-87-12%20%28Comp%20Sci%29.pdf",
+      "answerSource": {
+        "kind": "official-answer-key",
+        "url": "https://www.ugcnetonline.in/J2012_answerkeys/SC087_II.pdf"
+      }
+    },
+    {
+      "id": "ugc-net-cs:2012-06:7",
+      "year": 2012,
+      "set": null,
+      "number": "7",
+      "paperLabel": "UGC NET CS June 2012 · Paper II (filtered)",
+      "subject": "databases",
+      "subjectSlug": "databases",
+      "classificationHint": {
+        "subjectSlug": "databases",
+        "topicSlug": "transactions"
+      },
+      "topic": "transactions",
+      "topicSlug": "transactions",
+      "subtopics": [
+        "transactions",
+        "ugc-net-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "D",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">In multiuser database if two users wish<br>         to update the same record at the same<br>         time, they are prevented from doing so<br>         by<br>         (A) Jamming<br>         (B) Password<br>         (C) Documentation<br>         (D) Record lock</div>",
+      "sourceUrl": "https://www.ugcnetonline.in/showPdf.php?p1=question_papers%2FJune2012_paper-II%2FJ-87-12%20%28Comp%20Sci%29.pdf",
+      "answerSource": {
+        "kind": "official-answer-key",
+        "url": "https://www.ugcnetonline.in/J2012_answerkeys/SC087_II.pdf"
+      }
+    },
+    {
+      "id": "ugc-net-cs:2012-06:8",
+      "year": 2012,
+      "set": null,
+      "number": "8",
+      "paperLabel": "UGC NET CS June 2012 · Paper II (filtered)",
+      "subject": "data-structure",
+      "subjectSlug": "data-structure",
+      "classificationHint": {
+        "subjectSlug": "data-structure",
+        "topicSlug": "binary-search-tree"
+      },
+      "topic": "binary-search-tree",
+      "topicSlug": "binary-search-tree",
+      "subtopics": [
+        "binary-search-tree",
+        "ugc-net-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "D",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">A binary search tree is a binary tree :<br>         (A) All items in the left subtree are<br>              less than root<br>         (B) All items in the right subtree are<br>              greater than or equal to the root<br>         (C) Each subtree is itself a binary<br>              search tree<br>         (D) All of the above<br></div>",
+      "sourceUrl": "https://www.ugcnetonline.in/showPdf.php?p1=question_papers%2FJune2012_paper-II%2FJ-87-12%20%28Comp%20Sci%29.pdf",
+      "answerSource": {
+        "kind": "official-answer-key",
+        "url": "https://www.ugcnetonline.in/J2012_answerkeys/SC087_II.pdf"
+      }
+    },
+    {
+      "id": "ugc-net-cs:2012-06:11",
+      "year": 2012,
+      "set": null,
+      "number": "11",
+      "paperLabel": "UGC NET CS June 2012 · Paper II (filtered)",
+      "subject": "databases",
+      "subjectSlug": "databases",
+      "classificationHint": {
+        "subjectSlug": "databases",
+        "topicSlug": "file-system"
+      },
+      "topic": "file-system",
+      "topicSlug": "file-system",
+      "subtopics": [
+        "file-system",
+        "ugc-net-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "B",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">B+ tree are preferred to binary tree in<br>      Database because<br>      (A) Disk capacity are greater than<br>          memory capacities<br>      (B)   Disk access is much slower than<br>            memory access<br>      (C)   Disk data transfer rates are much<br>            less than memory data transfer<br>            rate<br>      (D) Disks are more reliable than<br>          memory</div>",
+      "sourceUrl": "https://www.ugcnetonline.in/showPdf.php?p1=question_papers%2FJune2012_paper-II%2FJ-87-12%20%28Comp%20Sci%29.pdf",
+      "answerSource": {
+        "kind": "official-answer-key",
+        "url": "https://www.ugcnetonline.in/J2012_answerkeys/SC087_II.pdf"
+      }
+    },
+    {
+      "id": "ugc-net-cs:2012-06:12",
+      "year": 2012,
+      "set": null,
+      "number": "12",
+      "paperLabel": "UGC NET CS June 2012 · Paper II (filtered)",
+      "subject": "databases",
+      "subjectSlug": "databases",
+      "classificationHint": {
+        "subjectSlug": "databases",
+        "topicSlug": "transactions"
+      },
+      "topic": "transactions",
+      "topicSlug": "transactions",
+      "subtopics": [
+        "transactions",
+        "ugc-net-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "D",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">A Transaction Manager is which of the<br>      following ?<br>      (A) Maintains a log of transactions<br>      (B)   Maintains before     and    after<br>            database images<br>      (C)   Maintains appropriate concurrency<br>            control<br>     (D) All of the above<br></div>",
+      "sourceUrl": "https://www.ugcnetonline.in/showPdf.php?p1=question_papers%2FJune2012_paper-II%2FJ-87-12%20%28Comp%20Sci%29.pdf",
+      "answerSource": {
+        "kind": "official-answer-key",
+        "url": "https://www.ugcnetonline.in/J2012_answerkeys/SC087_II.pdf"
+      }
+    },
+    {
+      "id": "ugc-net-cs:2012-06:13",
+      "year": 2012,
+      "set": null,
+      "number": "13",
+      "paperLabel": "UGC NET CS June 2012 · Paper II (filtered)",
+      "subject": "data-structure",
+      "subjectSlug": "data-structure",
+      "classificationHint": {
+        "subjectSlug": "data-structure",
+        "topicSlug": "n-ary-tree"
+      },
+      "topic": "n-ary-tree",
+      "topicSlug": "n-ary-tree",
+      "subtopics": [
+        "n-ary-tree",
+        "ugc-net-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "B",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">Leaves of which of the following trees<br>          are at the same level ?<br>          (A) Binary tree<br>          (B)   B-tree<br>          (C)   AVL-tree<br>          (D) Expression tree</div>",
+      "sourceUrl": "https://www.ugcnetonline.in/showPdf.php?p1=question_papers%2FJune2012_paper-II%2FJ-87-12%20%28Comp%20Sci%29.pdf",
+      "answerSource": {
+        "kind": "official-answer-key",
+        "url": "https://www.ugcnetonline.in/J2012_answerkeys/SC087_II.pdf"
+      }
+    },
+    {
+      "id": "ugc-net-cs:2012-06:15",
+      "year": 2012,
+      "set": null,
+      "number": "15",
+      "paperLabel": "UGC NET CS June 2012 · Paper II (filtered)",
+      "subject": "computer-networks",
+      "subjectSlug": "computer-networks",
+      "classificationHint": {
+        "subjectSlug": "computer-networks",
+        "topicSlug": "application-layer-protocols"
+      },
+      "topic": "application-layer-protocols",
+      "topicSlug": "application-layer-protocols",
+      "subtopics": [
+        "application-layer-protocols",
+        "ugc-net-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "C",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">Decryption and encryption of data are<br>          the responsibility of which of the<br>          following layer ?<br>          (A) Physical layer<br>          (B)   Data Link layer<br>          (C)   Presentation layer<br>          (D) Session layer</div>",
+      "sourceUrl": "https://www.ugcnetonline.in/showPdf.php?p1=question_papers%2FJune2012_paper-II%2FJ-87-12%20%28Comp%20Sci%29.pdf",
+      "answerSource": {
+        "kind": "official-answer-key",
+        "url": "https://www.ugcnetonline.in/J2012_answerkeys/SC087_II.pdf"
+      }
+    },
+    {
+      "id": "ugc-net-cs:2012-06:17",
+      "year": 2012,
+      "set": null,
+      "number": "17",
+      "paperLabel": "UGC NET CS June 2012 · Paper II (filtered)",
+      "subject": "computer-networks",
+      "subjectSlug": "computer-networks",
+      "classificationHint": {
+        "subjectSlug": "computer-networks",
+        "topicSlug": "network-layer-protocol"
+      },
+      "topic": "network-layer-protocol",
+      "topicSlug": "network-layer-protocol",
+      "subtopics": [
+        "network-layer-protocol",
+        "ugc-net-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "B",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">In which Routing Method do all the<br>      routers have a common database ?<br>      (A) Distance vector<br>      (B)   Link state<br>      (C)   Link vector<br>      (D) Dijkestra method</div>",
+      "sourceUrl": "https://www.ugcnetonline.in/showPdf.php?p1=question_papers%2FJune2012_paper-II%2FJ-87-12%20%28Comp%20Sci%29.pdf",
+      "answerSource": {
+        "kind": "official-answer-key",
+        "url": "https://www.ugcnetonline.in/J2012_answerkeys/SC087_II.pdf"
+      }
+    },
+    {
+      "id": "ugc-net-cs:2012-06:18",
+      "year": 2012,
+      "set": null,
+      "number": "18",
+      "paperLabel": "UGC NET CS June 2012 · Paper II (filtered)",
+      "subject": "computer-networks",
+      "subjectSlug": "computer-networks",
+      "classificationHint": {
+        "subjectSlug": "computer-networks",
+        "topicSlug": "physical-layer"
+      },
+      "topic": "physical-layer",
+      "topicSlug": "physical-layer",
+      "subtopics": [
+        "physical-layer",
+        "ugc-net-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "A",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">Page Shift Keying (PSK) Method is<br>      used to modulate digital signal at<br>      9600 bps using 16 level. Find the line<br>      signals and speed (i.e. modulation<br>      rate).<br>      (A)   2400 bauds      (B)   1200 bauds<br>      (C)   4800 bauds      (D) 9600 bauds</div>",
+      "sourceUrl": "https://www.ugcnetonline.in/showPdf.php?p1=question_papers%2FJune2012_paper-II%2FJ-87-12%20%28Comp%20Sci%29.pdf",
+      "answerSource": {
+        "kind": "official-answer-key",
+        "url": "https://www.ugcnetonline.in/J2012_answerkeys/SC087_II.pdf"
+      }
+    },
+    {
+      "id": "ugc-net-cs:2012-06:27",
+      "year": 2012,
+      "set": null,
+      "number": "27",
+      "paperLabel": "UGC NET CS June 2012 · Paper II (filtered)",
+      "subject": "data-structure",
+      "subjectSlug": "data-structure",
+      "classificationHint": {
+        "subjectSlug": "data-structure",
+        "topicSlug": "binary-search-tree"
+      },
+      "topic": "binary-search-tree",
+      "topicSlug": "binary-search-tree",
+      "subtopics": [
+        "binary-search-tree",
+        "ugc-net-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "B",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">The Inorder traversal of the tree will<br>      yield a sorted listing of elements of<br>      tree in<br>      (A) Binary tree<br>      (B) Binary search tree<br>      (C) Heaps<br>      (D) None of the above</div>",
+      "sourceUrl": "https://www.ugcnetonline.in/showPdf.php?p1=question_papers%2FJune2012_paper-II%2FJ-87-12%20%28Comp%20Sci%29.pdf",
+      "answerSource": {
+        "kind": "official-answer-key",
+        "url": "https://www.ugcnetonline.in/J2012_answerkeys/SC087_II.pdf"
+      }
+    },
+    {
+      "id": "ugc-net-cs:2012-06:29",
+      "year": 2012,
+      "set": null,
+      "number": "29",
+      "paperLabel": "UGC NET CS June 2012 · Paper II (filtered)",
+      "subject": "operating-systems",
+      "subjectSlug": "operating-systems",
+      "classificationHint": {
+        "subjectSlug": "operating-systems",
+        "topicSlug": "cpu-scheduling"
+      },
+      "topic": "cpu-scheduling",
+      "topicSlug": "cpu-scheduling",
+      "subtopics": [
+        "cpu-scheduling",
+        "ugc-net-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "A",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">Pre-emptive scheduling is the strategy<br>      of temporarily suspending a gunning<br>      process<br>      (A) before the CPU time slice expires<br>      (B) to allow starving processes to run<br>      (C) when it requests I/O<br>      (D) to avoid collision</div>",
+      "sourceUrl": "https://www.ugcnetonline.in/showPdf.php?p1=question_papers%2FJune2012_paper-II%2FJ-87-12%20%28Comp%20Sci%29.pdf",
+      "answerSource": {
+        "kind": "official-answer-key",
+        "url": "https://www.ugcnetonline.in/J2012_answerkeys/SC087_II.pdf"
+      }
+    },
+    {
+      "id": "ugc-net-cs:2012-06:31",
+      "year": 2012,
+      "set": null,
+      "number": "31",
+      "paperLabel": "UGC NET CS June 2012 · Paper II (filtered)",
+      "subject": "operating-systems",
+      "subjectSlug": "operating-systems",
+      "classificationHint": {
+        "subjectSlug": "operating-systems",
+        "topicSlug": "deadlock"
+      },
+      "topic": "deadlock",
+      "topicSlug": "deadlock",
+      "subtopics": [
+        "deadlock",
+        "ugc-net-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "A",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">Resources are allocated to the process<br>      on non-sharable basis is<br>      (A) mutual exclusion<br>      (B) hold and wait<br>      (C) no pre-emption<br>      (D) circular wait<br><br></div>",
+      "sourceUrl": "https://www.ugcnetonline.in/showPdf.php?p1=question_papers%2FJune2012_paper-II%2FJ-87-12%20%28Comp%20Sci%29.pdf",
+      "answerSource": {
+        "kind": "official-answer-key",
+        "url": "https://www.ugcnetonline.in/J2012_answerkeys/SC087_II.pdf"
+      }
+    },
+    {
+      "id": "ugc-net-cs:2012-06:32",
+      "year": 2012,
+      "set": null,
+      "number": "32",
+      "paperLabel": "UGC NET CS June 2012 · Paper II (filtered)",
+      "subject": "coa",
+      "subjectSlug": "coa",
+      "classificationHint": {
+        "subjectSlug": "coa",
+        "topicSlug": "cache-memory"
+      },
+      "topic": "cache-memory",
+      "topicSlug": "cache-memory",
+      "subtopics": [
+        "cache-memory",
+        "ugc-net-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "B",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">Cached and interleaved memories are<br>          ways of speeding up memory access<br>          between CPU’s and slower RAM.<br>          Which memory models are best suited<br>          (i.e. improves the performance most)<br>          for which programs ?<br>          (i)      Cached memory is best suited for<br>                   small loops.<br>          (ii)     Interleaved memory               is   best<br>                   suited for small loops<br>          (iii) Interleaved memory is best<br>                suited for large sequential code.<br>          (iv) Cached memory is best suited for<br>               large sequential code.<br>          (A) (i) and (ii) are true.<br>          (B)      (i) and (iii) are true.<br>          (C)      (iv) and (ii) are true.<br>          (D) (iv) and (iii) are true.</div>",
+      "sourceUrl": "https://www.ugcnetonline.in/showPdf.php?p1=question_papers%2FJune2012_paper-II%2FJ-87-12%20%28Comp%20Sci%29.pdf",
+      "answerSource": {
+        "kind": "official-answer-key",
+        "url": "https://www.ugcnetonline.in/J2012_answerkeys/SC087_II.pdf"
+      }
+    },
+    {
+      "id": "ugc-net-cs:2012-06:34",
+      "year": 2012,
+      "set": null,
+      "number": "34",
+      "paperLabel": "UGC NET CS June 2012 · Paper II (filtered)",
+      "subject": "computer-networks",
+      "subjectSlug": "computer-networks",
+      "classificationHint": {
+        "subjectSlug": "computer-networks",
+        "topicSlug": "data-link-layer"
+      },
+      "topic": "data-link-layer",
+      "topicSlug": "data-link-layer",
+      "subtopics": [
+        "data-link-layer",
+        "ugc-net-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "B",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">Check sum used along with each<br>          packet computes the sum of the data,<br>          where data is treated as a sequence of<br>          (A) Integer<br>          (B)      Character<br>          (C)      Real numbers<br>          (D) Bits<br></div>",
+      "sourceUrl": "https://www.ugcnetonline.in/showPdf.php?p1=question_papers%2FJune2012_paper-II%2FJ-87-12%20%28Comp%20Sci%29.pdf",
+      "answerSource": {
+        "kind": "official-answer-key",
+        "url": "https://www.ugcnetonline.in/J2012_answerkeys/SC087_II.pdf"
+      }
+    },
+    {
+      "id": "ugc-net-cs:2012-06:35",
+      "year": 2012,
+      "set": null,
+      "number": "35",
+      "paperLabel": "UGC NET CS June 2012 · Paper II (filtered)",
+      "subject": "digital-logic",
+      "subjectSlug": "digital-logic",
+      "classificationHint": {
+        "subjectSlug": "digital-logic",
+        "topicSlug": "number-system"
+      },
+      "topic": "number-system",
+      "topicSlug": "number-system",
+      "subtopics": [
+        "number-system",
+        "ugc-net-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "B",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">If an integer needs two bytes of<br>      storage, then the maximum value of a<br>      signed integer is<br>      (A) 216 – 1<br>      (B)   215 – 1<br>      (C)   216<br>      (D) 215</div>",
+      "sourceUrl": "https://www.ugcnetonline.in/showPdf.php?p1=question_papers%2FJune2012_paper-II%2FJ-87-12%20%28Comp%20Sci%29.pdf",
+      "answerSource": {
+        "kind": "official-answer-key",
+        "url": "https://www.ugcnetonline.in/J2012_answerkeys/SC087_II.pdf"
+      }
+    },
+    {
+      "id": "ugc-net-cs:2012-06:38",
+      "year": 2012,
+      "set": null,
+      "number": "38",
+      "paperLabel": "UGC NET CS June 2012 · Paper II (filtered)",
+      "subject": "c-programming",
+      "subjectSlug": "c-programming",
+      "classificationHint": {
+        "subjectSlug": "c-programming",
+        "topicSlug": "function"
+      },
+      "topic": "function",
+      "topicSlug": "function",
+      "subtopics": [
+        "function",
+        "ugc-net-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "B",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">printf(“%c”, 100);<br>      (A) prints 100<br>      (B)   prints ASCII equivalent of 100<br>      (C)   prints garbage<br>      (D) none of the above</div>",
+      "sourceUrl": "https://www.ugcnetonline.in/showPdf.php?p1=question_papers%2FJune2012_paper-II%2FJ-87-12%20%28Comp%20Sci%29.pdf",
+      "answerSource": {
+        "kind": "official-answer-key",
+        "url": "https://www.ugcnetonline.in/J2012_answerkeys/SC087_II.pdf"
+      }
+    },
+    {
+      "id": "ugc-net-cs:2012-06:40",
+      "year": 2012,
+      "set": null,
+      "number": "40",
+      "paperLabel": "UGC NET CS June 2012 · Paper II (filtered)",
+      "subject": "theory-of-computation",
+      "subjectSlug": "theory-of-computation",
+      "classificationHint": {
+        "subjectSlug": "theory-of-computation",
+        "topicSlug": "recursive-language"
+      },
+      "topic": "recursive-language",
+      "topicSlug": "recursive-language",
+      "subtopics": [
+        "recursive-language",
+        "ugc-net-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "B",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">Consider the following statements :<br>          I.     Recursive languages are closed<br>                 under complementation.<br>          II.    Recursively enumerable languages<br>                 are closed under union.<br>          III.   Recursively enumerable languages<br>                 are closed under complementation.<br>          Which of the above statements are true ?<br>          (A) I only<br>          (B)    I and II<br>          (C)    I and III<br>          (D) II and III</div>",
+      "sourceUrl": "https://www.ugcnetonline.in/showPdf.php?p1=question_papers%2FJune2012_paper-II%2FJ-87-12%20%28Comp%20Sci%29.pdf",
+      "answerSource": {
+        "kind": "official-answer-key",
+        "url": "https://www.ugcnetonline.in/J2012_answerkeys/SC087_II.pdf"
+      }
+    },
+    {
+      "id": "ugc-net-cs:2012-06:49",
+      "year": 2012,
+      "set": null,
+      "number": "49",
+      "paperLabel": "UGC NET CS June 2012 · Paper II (filtered)",
+      "subject": "data-structure",
+      "subjectSlug": "data-structure",
+      "classificationHint": {
+        "subjectSlug": "data-structure",
+        "topicSlug": "array"
+      },
+      "topic": "array",
+      "topicSlug": "array",
+      "subtopics": [
+        "array",
+        "ugc-net-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "D",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">Which of the following data structure<br>          is linear type ?<br><br>          (A) Strings<br><br>          (B)   Lists<br><br>          (C)   Queues<br><br>          (D) All of the above</div>",
+      "sourceUrl": "https://www.ugcnetonline.in/showPdf.php?p1=question_papers%2FJune2012_paper-II%2FJ-87-12%20%28Comp%20Sci%29.pdf",
+      "answerSource": {
+        "kind": "official-answer-key",
+        "url": "https://www.ugcnetonline.in/J2012_answerkeys/SC087_II.pdf"
+      }
+    },
+    {
+      "id": "ugc-net-cs:2012-06:50",
+      "year": 2012,
+      "set": null,
+      "number": "50",
+      "paperLabel": "UGC NET CS June 2012 · Paper II (filtered)",
+      "subject": "data-structure",
+      "subjectSlug": "data-structure",
+      "classificationHint": {
+        "subjectSlug": "data-structure",
+        "topicSlug": "n-ary-tree"
+      },
+      "topic": "n-ary-tree",
+      "topicSlug": "n-ary-tree",
+      "subtopics": [
+        "n-ary-tree",
+        "ugc-net-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "C",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">To represent hierarchical relationship<br>          between elements, which data structure<br>          is suitable ?<br><br>          (A) Dequeue<br><br>          (B)   Priority<br><br>          (C)   Tree<br><br>          (D) All of the above<br><br></div>",
+      "sourceUrl": "https://www.ugcnetonline.in/showPdf.php?p1=question_papers%2FJune2012_paper-II%2FJ-87-12%20%28Comp%20Sci%29.pdf",
+      "answerSource": {
+        "kind": "official-answer-key",
+        "url": "https://www.ugcnetonline.in/J2012_answerkeys/SC087_II.pdf"
+      }
+    }
+  ]
+}

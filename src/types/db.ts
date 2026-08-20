@@ -213,6 +213,8 @@ export interface PyqQuestionSnapshot {
   subtopics: string[];
   marks: 1 | 2 | null;
   type: string;
+  /** Missing on attempt receipts created before variable option sets shipped. */
+  choices?: string[];
   tolerance: { abs?: number } | null;
   answer_status: PyqAttemptAnswerStatus;
   answer_source: unknown;

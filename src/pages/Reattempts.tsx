@@ -71,7 +71,7 @@ const TONE_BADGE: Record<
 };
 
 const RUNGS: ReattemptStage[] = ['D3', 'D10', 'D30'];
-const PYQ_CHOICES = ['A', 'B', 'C', 'D'];
+const DEFAULT_PYQ_CHOICES = ['A', 'B', 'C', 'D'] as const;
 
 function plainTextQuestionHtml(value: string): string {
   return value
@@ -256,6 +256,7 @@ function formatDecisionAnswer(value: PyqSelectedAnswer, decision?: MarkDecision)
 
 function ExamAnswerPad({
   inputType,
+  availableChoices = DEFAULT_PYQ_CHOICES,
   choices,
   numeric,
   disabled,
@@ -263,6 +264,7 @@ function ExamAnswerPad({
   onNumeric
 }: {
   inputType: QuestionFormat;
+  availableChoices?: readonly string[];
   choices: string[];
   numeric: string;
   disabled: boolean;
@@ -292,8 +294,13 @@ function ExamAnswerPad({
       <legend className="u-label mb-2">
         Your answer {inputType === 'MSQ' ? '— select all that apply' : ''}
       </legend>
-      <div className="grid grid-cols-4 gap-2">
-        {PYQ_CHOICES.map((choice) => {
+      <div
+        className={cn(
+          'grid gap-2',
+          availableChoices.length > 4 ? 'grid-cols-2 sm:grid-cols-5' : 'grid-cols-4'
+        )}
+      >
+        {availableChoices.map((choice) => {
           const active = choices.includes(choice);
           return (
             <button
@@ -754,6 +761,7 @@ function PyqReattemptSession({
         <CardBody className="grid gap-5 p-4 sm:p-5 lg:grid-cols-[minmax(0,1fr)_minmax(310px,0.7fr)]">
           <ExamAnswerPad
             inputType={inputType}
+            availableChoices={question.choices}
             choices={choices}
             numeric={numeric}
             disabled={!!submitted}

@@ -1,5 +1,5 @@
 {
-  "bankVersion": "gate-1990-2026-v8-gate-level-books",
+  "bankVersion": "gate-and-cs-exams-1990-2026-v9",
   "sources": [
     {
       "name": "GateQA",
@@ -19,7 +19,32 @@
     {
       "name": "ExamSIDE",
       "url": "https://questions.examside.com",
-      "role": "GATE DA/AI overlap and ECE/EE Digital Logic question text, diagrams, metadata, and answer keys"
+      "role": "GATE DA/AI overlap, cross-branch Engineering Mathematics, and ECE/EE Digital Logic question text, diagrams, metadata, and answer keys"
+    },
+    {
+      "name": "ISRO",
+      "url": "https://www.isro.gov.in/ICRB_Recruitment9.html",
+      "role": "Official Scientist/Engineer CS paper and answer key"
+    },
+    {
+      "name": "IIIT Hyderabad",
+      "url": "https://pgadmissions.iiit.ac.in/monsoon_syllabus/",
+      "role": "Current PGEE syllabus and provenance for the independently keyed official sample"
+    },
+    {
+      "name": "TIFR",
+      "url": "https://main.tifr.res.in/academics/past_question_papers.php",
+      "role": "Official Graduate School Computer Science papers with marked solutions"
+    },
+    {
+      "name": "Chennai Mathematical Institute",
+      "url": "https://www.cmi.ac.in/admissions/syllabus.php",
+      "role": "Official MSc/PhD Computer Science papers and solutions"
+    },
+    {
+      "name": "UGC NET",
+      "url": "https://www.ugcnetonline.in/previous_question_papers.php",
+      "role": "Official Computer Science paper and answer key, restricted to audited syllabus overlap"
     },
     {
       "name": "GO Classes",
@@ -29,10 +54,14 @@
   ],
   "notes": [
     "Question content is bundled for the private, invite-only HETU practice experience.",
-    "Every visible book is constrained to a GATE difficulty floor; no below-GATE source is admitted.",
+    "Every supplemental book carries an explicit GATE-level, mixed-level, or above-GATE difficulty band.",
     "GATE IT excludes Other / Optional material outside the current CSE syllabus.",
     "GATE DA/AI includes only Algorithms, Data Structures, DBMS, Discrete Mathematics, Linear Algebra, Calculus, and Probability chapters that overlap GATE CSE.",
     "ECE and EE supplements are restricted to the project topics: Number System, Boolean Algebra, Combinational Circuit, and Sequential Circuit.",
+    "Cross-branch Engineering Mathematics is restricted to Linear Algebra and Probability & Statistics from ECE, EE, ME, CE, and IN papers.",
+    "IIIT-H PGEE sample questions are explicitly identified as independently audited because no official answer key is published with the sample.",
+    "TIFR and CMI are stretch collections; UGC NET and ISRO are mixed-level supplements. GATE CSE remains the default book.",
+    "Diagram-dependent, incomplete, obsolete, off-syllabus, and demonstrably flawed supplemental questions are excluded.",
     "Converter, semiconductor-memory, logic-family, microprocessor, communication-code, and architecture questions are excluded.",
     "AMBIGUOUS, MARKS_TO_ALL, and UNSUPPORTED records are never assigned an invented answer."
   ]

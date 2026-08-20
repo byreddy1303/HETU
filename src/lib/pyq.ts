@@ -2,7 +2,7 @@ import type { MarkDecision, Outcome, PyqSelectedAnswer, PyqSessionConfig } from 
 import { DEFAULT_TARGET_TIME_SEC, MARKS_TARGET_SEC } from '@/lib/constants';
 import { urlToDataUrl } from '@/lib/image';
 
-export const PYQ_BANK_QUESTION_COUNT = 3649;
+export const PYQ_BANK_QUESTION_COUNT = 4210;
 
 export type PyqQuestionType = 'MCQ' | 'MSQ' | 'NAT' | 'AMBIGUOUS' | 'MARKS_TO_ALL' | 'UNSUPPORTED';
 export type PyqAnswerStatus = 'available' | 'ambiguous' | 'marks-to-all' | 'unsupported';
@@ -15,7 +15,12 @@ export interface PyqSubjectManifest {
   topics: { slug: string; label: string; count: number }[];
 }
 
-export type PyqDifficultyFloor = 'gate' | 'above-gate';
+export type PyqDifficultyFloor = 'gate' | 'mixed' | 'above-gate';
+export type PyqSourceClass =
+  | 'official-exam'
+  | 'official-sample'
+  | 'reconstructed-exam'
+  | 'audited-gate-prep';
 
 export interface PyqBookManifest {
   slug: string;
@@ -23,7 +28,7 @@ export interface PyqBookManifest {
   shortLabel: string;
   description: string;
   difficultyFloor: PyqDifficultyFloor;
-  sourceClass: 'official-exam' | 'audited-gate-prep';
+  sourceClass: PyqSourceClass;
   source: string;
   sourceUrl: string;
   count: number;
@@ -77,6 +82,8 @@ export interface PyqQuestion {
   subtopics: string[];
   marks: 1 | 2 | null;
   type: PyqQuestionType;
+  /** Option labels supplied by the source; legacy four-option questions omit this. */
+  choices?: string[];
   answer: string | number | (string | number)[] | null;
   tolerance: { abs?: number } | null;
   answerStatus: PyqAnswerStatus;
@@ -93,7 +100,7 @@ interface SubjectPayload {
 
 const subjectCache = new Map<string, Promise<SubjectPayload>>();
 let manifestPromise: Promise<PyqManifest> | null = null;
-const PYQ_MANIFEST_SCHEMA = 'books-v1';
+const PYQ_MANIFEST_SCHEMA = 'books-v2';
 
 const PYQ_MATH_DELIMITERS = [
   { left: '$$$', right: '$$$' },
@@ -361,6 +368,12 @@ export function matchesPyqTopicScope(
 
 export function inferPyqBookSlug(paperLabel: string): string {
   const normalized = paperLabel.trim().toUpperCase();
+  if (normalized.startsWith('ISRO ')) return 'isro-cs-overlap';
+  if (normalized.startsWith('IIIT-H ') || normalized.startsWith('IIIT HYDERABAD '))
+    return 'iiith-pgee';
+  if (normalized.startsWith('TIFR ')) return 'tifr-gs-cs';
+  if (normalized.startsWith('CMI ')) return 'cmi-cs-objective';
+  if (normalized.startsWith('UGC NET ')) return 'ugc-net-cs-overlap';
   if (normalized.startsWith('GATE IT ')) return 'gate-it';
   if (normalized.startsWith('GATE DA ') || normalized.startsWith('GATE AI '))
     return 'gate-da-overlap';

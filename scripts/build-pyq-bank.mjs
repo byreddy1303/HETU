@@ -23,7 +23,12 @@ const BUNDLED_CUSTOM_ASSET_DIRS = [
 ];
 const CUSTOM_QUESTION_PATHS = [
   'go-classes-coa-topic-test.json',
-  'go-classes-coa-topic-test-2.json'
+  'go-classes-coa-topic-test-2.json',
+  'isro-cs-overlap.json',
+  'iiith-pgee.json',
+  'tifr-gs-cs.json',
+  'cmi-cs-objective.json',
+  'ugc-net-cs-overlap.json'
 ].map((filename) => path.join(SCRIPT_DIR, 'pyq-custom', filename));
 const CACHE = '/tmp/air-journal-pyq-cache';
 const SOURCE_ROOT = 'https://gateqa.in';
@@ -88,6 +93,72 @@ const PYQ_BOOKS = [
     source: 'GATE ECE and EE',
     sourceUrl: 'https://questions.examside.com/past-years/gate',
     expectedCount: 259
+  },
+  {
+    slug: 'gate-cross-math',
+    label: 'Cross-Branch Engineering Mathematics',
+    shortLabel: 'GATE Math',
+    description: 'Official ECE, EE, ME, CE and IN questions limited to Linear Algebra and Probability.',
+    difficultyFloor: 'gate',
+    sourceClass: 'official-exam',
+    source: 'GATE ECE, EE, ME, CE and IN',
+    sourceUrl: 'https://questions.examside.com/past-years/gate',
+    expectedCount: 424
+  },
+  {
+    slug: 'isro-cs-overlap',
+    label: 'ISRO Scientist/Engineer CS',
+    shortLabel: 'ISRO CS',
+    description: 'Official ISRO CS questions filtered to the current GATE CSE syllabus.',
+    difficultyFloor: 'mixed',
+    sourceClass: 'official-exam',
+    source: 'ISRO Scientist/Engineer CS',
+    sourceUrl: 'https://www.isro.gov.in/ICRB_Recruitment9.html',
+    expectedCount: 45
+  },
+  {
+    slug: 'iiith-pgee',
+    label: 'IIIT-H PGEE · Audited Sample',
+    shortLabel: 'IIIT-H PGEE',
+    description: 'High-confidence CSE questions from the published PGEE sample, independently keyed.',
+    difficultyFloor: 'mixed',
+    sourceClass: 'official-sample',
+    source: 'IIIT Hyderabad PGEE',
+    sourceUrl: 'https://pgadmissions.iiit.ac.in/monsoon_syllabus/',
+    expectedCount: 8
+  },
+  {
+    slug: 'tifr-gs-cs',
+    label: 'TIFR GS Computer Science',
+    shortLabel: 'TIFR GS CS',
+    description: 'Recent official CS sections with marked solutions; diagram-dependent items are excluded.',
+    difficultyFloor: 'above-gate',
+    sourceClass: 'official-exam',
+    source: 'TIFR Graduate School Computer Science',
+    sourceUrl: 'https://main.tifr.res.in/academics/past_question_papers.php',
+    expectedCount: 36
+  },
+  {
+    slug: 'cmi-cs-objective',
+    label: 'CMI MSc/PhD CS · Objective',
+    shortLabel: 'CMI CS',
+    description: 'Official Part A objective questions and solutions, excluding diagram-dependent items.',
+    difficultyFloor: 'above-gate',
+    sourceClass: 'official-exam',
+    source: 'Chennai Mathematical Institute Computer Science',
+    sourceUrl: 'https://www.cmi.ac.in/admissions/syllabus.php',
+    expectedCount: 27
+  },
+  {
+    slug: 'ugc-net-cs-overlap',
+    label: 'UGC NET CS · Filtered Overlap',
+    shortLabel: 'UGC NET CS',
+    description: 'Official keyed questions restricted to useful GATE CSE overlap; dated and flawed items are excluded.',
+    difficultyFloor: 'mixed',
+    sourceClass: 'official-exam',
+    source: 'UGC NET Computer Science',
+    sourceUrl: 'https://www.ugcnetonline.in/previous_question_papers.php',
+    expectedCount: 21
   },
   {
     slug: 'go-classes-coa',
@@ -171,6 +242,21 @@ const EXAMSIDE_DIGITAL_LOGIC_CATEGORIES = [
     path: '/past-years/gate/gate-ee/digital-electronics/sequential-circuits',
     topicSlug: 'sequential-circuit'
   }
+];
+
+const EXAMSIDE_CROSS_BRANCH_MATH_CATEGORIES = [
+  ...['gate-ece', 'gate-ee', 'gate-me', 'gate-ce', 'gate-in'].flatMap((exam) => [
+    {
+      exam,
+      path: `/past-years/gate/${exam}/engineering-mathematics/linear-algebra`,
+      topicSlug: 'linear-algebra'
+    },
+    {
+      exam,
+      path: `/past-years/gate/${exam}/engineering-mathematics/probability-and-statistics`,
+      topicSlug: 'probability-statistics'
+    }
+  ])
 ];
 
 // GATE DA/AI is admitted only where its published syllabus overlaps the
@@ -632,6 +718,13 @@ function loadExamSideSourceRows() {
   );
 }
 
+function loadExamSideCrossBranchMathRows() {
+  return loadExamSideCategorySourceRows(
+    EXAMSIDE_CROSS_BRANCH_MATH_CATEGORIES,
+    'examside-cross-branch-math-1990-2026-v1.json'
+  );
+}
+
 function loadExamSideDaSourceRows() {
   return loadExamSideCategorySourceRows(
     EXAMSIDE_GATE_DA_CATEGORIES,
@@ -1000,6 +1093,48 @@ async function examSideDigitalLogicQuestions() {
   return accepted;
 }
 
+async function examSideCrossBranchMathQuestions() {
+  const sourceRows = await loadExamSideCrossBranchMathRows();
+  const accepted = [];
+  for (const row of sourceRows) {
+    const source = row.question;
+    if (source.year < 1990 || source.year > 2026 || source.isOutOfSyllabus) continue;
+    const type = examSideQuestionType(source);
+    const answer = examSideAnswer(source, type);
+    const numericKey = type === 'NAT' ? numericExamSideKey(source.question?.en?.answer) : null;
+    const hasAnswer = answer != null && (!Array.isArray(answer) || answer.length > 0);
+    const answerState =
+      type === 'MARKS_TO_ALL' ? 'marks-to-all' : answerStatus(type, hasAnswer, !hasAnswer);
+    if (!['available', 'marks-to-all'].includes(answerState)) continue;
+    const setMatch = String(source.paperTitle ?? '').match(/\bSet\s*(\d+)/i);
+    const numberMatch = String(row.detailTitle ?? '').match(/\bQuestion\s+([\d.]+)/i);
+    accepted.push({
+      id: `es:${source.exam}:${source.question_id}`,
+      bookSlug: 'gate-cross-math',
+      year: source.year,
+      set: setMatch ? Number(setMatch[1]) : null,
+      number: numberMatch?.[1] ?? source.question_id,
+      paperLabel: source.paperTitle,
+      subject: 'Engineering Mathematics',
+      subjectSlug: 'engineering-mathematics',
+      classificationHint: {
+        subjectSlug: 'engineering-mathematics',
+        topicSlug: row.topicSlug
+      },
+      subtopics: [row.topicSlug, source.chapter].filter(Boolean),
+      marks: source.marks === 1 || source.marks === 2 ? source.marks : null,
+      type,
+      answer,
+      tolerance: numericKey?.tolerance ?? null,
+      answerStatus: answerState,
+      html: examSideQuestionHtml(source),
+      sourceUrl: row.sourceUrl,
+      answerSource: { kind: 'examside-key', url: row.sourceUrl }
+    });
+  }
+  return accepted;
+}
+
 async function examSideCseQuestions() {
   const sourceRows = await loadExamSideCseSourceRows();
   const questions = sourceRows.map((row) => {
@@ -1081,6 +1216,11 @@ async function downloadImages(urls) {
         bytes = Buffer.from(await response.arrayBuffer());
         extension = imageExtension(contentType, url);
       }
+      if (extension === '.svg') {
+        bytes = Buffer.from(
+          bytes.toString('utf8').replaceAll('\r\n', '\n').replace(/[ \t]+\n/g, '\n')
+        );
+      }
       const digest = createHash('sha1').update(url).digest('hex').slice(0, 12);
       const filename = `${digest}${extension}`;
       await writeFile(path.join(IMAGE_OUTPUT, filename), bytes);
@@ -1110,6 +1250,7 @@ async function main() {
     answerPayload,
     unsupportedPayload,
     supplementalDigitalLogic,
+    supplementalCrossBranchMath,
     supplementalCse,
     supplementalDa,
     customQuestionPayloads
@@ -1118,6 +1259,7 @@ async function main() {
     cachedJson(ANSWERS_URL, 'answers-by-question-uid.json'),
     cachedJson(UNSUPPORTED_URL, 'unsupported-question-uids.json'),
     examSideDigitalLogicQuestions(),
+    examSideCrossBranchMathQuestions(),
     examSideCseQuestions(),
     examSideDaQuestions(),
     Promise.all(
@@ -1203,11 +1345,12 @@ async function main() {
   questions.push(...supplementalCse);
   questions.push(...supplementalDa);
   questions.push(...supplementalDigitalLogic);
+  questions.push(...supplementalCrossBranchMath);
   questions.push(
     ...customQuestionPayloads.flatMap((payload) =>
       payload.questions.map((question) => ({
         ...customQuestionWithImage(question),
-        bookSlug: 'go-classes-coa'
+        bookSlug: payload.bookSlug ?? 'go-classes-coa'
       }))
     )
   );
@@ -1232,8 +1375,8 @@ async function main() {
     }
   }
   for (const book of PYQ_BOOKS) {
-    if (book.difficultyFloor !== 'gate') {
-      throw new Error(`Book ${book.slug} violates the GATE difficulty floor`);
+    if (!['gate', 'above-gate', 'mixed'].includes(book.difficultyFloor)) {
+      throw new Error(`Book ${book.slug} has an invalid difficulty band`);
     }
     const bookQuestions = questions.filter((question) => question.bookSlug === book.slug);
     if (bookQuestions.length !== book.expectedCount) {
@@ -1347,7 +1490,7 @@ async function main() {
     bankVersion: PYQ_BANK_VERSION,
     generatedAt: new Date().toISOString(),
     source:
-      'Official GATE-level CSE, IT, DA/AI, ECE and EE archives plus audited GO Classes COA topic tests',
+      'Audited GATE, ISRO, IIIT-H PGEE sample, TIFR GS, CMI and UGC NET Computer Science archives plus GO Classes COA topic tests',
     sourceUrl: SOURCE_ROOT,
     defaultBookSlug: 'gate-cse',
     firstYear: 1990,
@@ -1384,7 +1527,32 @@ async function main() {
           {
             name: 'ExamSIDE',
             url: EXAMSIDE_ROOT,
-            role: 'GATE DA/AI overlap and ECE/EE Digital Logic question text, diagrams, metadata, and answer keys'
+            role: 'GATE DA/AI overlap, cross-branch Engineering Mathematics, and ECE/EE Digital Logic question text, diagrams, metadata, and answer keys'
+          },
+          {
+            name: 'ISRO',
+            url: PYQ_BOOK_BY_SLUG.get('isro-cs-overlap').sourceUrl,
+            role: 'Official Scientist/Engineer CS paper and answer key'
+          },
+          {
+            name: 'IIIT Hyderabad',
+            url: PYQ_BOOK_BY_SLUG.get('iiith-pgee').sourceUrl,
+            role: 'Current PGEE syllabus and provenance for the independently keyed official sample'
+          },
+          {
+            name: 'TIFR',
+            url: PYQ_BOOK_BY_SLUG.get('tifr-gs-cs').sourceUrl,
+            role: 'Official Graduate School Computer Science papers with marked solutions'
+          },
+          {
+            name: 'Chennai Mathematical Institute',
+            url: PYQ_BOOK_BY_SLUG.get('cmi-cs-objective').sourceUrl,
+            role: 'Official MSc/PhD Computer Science papers and solutions'
+          },
+          {
+            name: 'UGC NET',
+            url: PYQ_BOOK_BY_SLUG.get('ugc-net-cs-overlap').sourceUrl,
+            role: 'Official Computer Science paper and answer key, restricted to audited syllabus overlap'
           },
           {
             name: 'GO Classes',
@@ -1394,10 +1562,14 @@ async function main() {
         ],
         notes: [
           'Question content is bundled for the private, invite-only HETU practice experience.',
-          'Every visible book is constrained to a GATE difficulty floor; no below-GATE source is admitted.',
+          'Every supplemental book carries an explicit GATE-level, mixed-level, or above-GATE difficulty band.',
           'GATE IT excludes Other / Optional material outside the current CSE syllabus.',
           'GATE DA/AI includes only Algorithms, Data Structures, DBMS, Discrete Mathematics, Linear Algebra, Calculus, and Probability chapters that overlap GATE CSE.',
           'ECE and EE supplements are restricted to the project topics: Number System, Boolean Algebra, Combinational Circuit, and Sequential Circuit.',
+          'Cross-branch Engineering Mathematics is restricted to Linear Algebra and Probability & Statistics from ECE, EE, ME, CE, and IN papers.',
+          'IIIT-H PGEE sample questions are explicitly identified as independently audited because no official answer key is published with the sample.',
+          'TIFR and CMI are stretch collections; UGC NET and ISRO are mixed-level supplements. GATE CSE remains the default book.',
+          'Diagram-dependent, incomplete, obsolete, off-syllabus, and demonstrably flawed supplemental questions are excluded.',
           'Converter, semiconductor-memory, logic-family, microprocessor, communication-code, and architecture questions are excluded.',
           'AMBIGUOUS, MARKS_TO_ALL, and UNSUPPORTED records are never assigned an invented answer.'
         ]

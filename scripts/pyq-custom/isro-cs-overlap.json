@@ -1,0 +1,1628 @@
+{
+  "bookSlug": "isro-cs-overlap",
+  "source": "ISRO Scientist/Engineer CS 2023",
+  "sourceUrl": "https://www.isro.gov.in/media_isro/pdf/recruitmentNotice/2025_May/CS_2023_merge.pdf",
+  "importedAt": "2026-08-20",
+  "questions": [
+    {
+      "id": "isro-cs:2023:2",
+      "year": 2023,
+      "set": null,
+      "number": "2",
+      "paperLabel": "ISRO Scientist/Engineer CS 2023 · Part A",
+      "subject": "algorithms",
+      "subjectSlug": "algorithms",
+      "classificationHint": {
+        "subjectSlug": "algorithms",
+        "topicSlug": "shortest-path"
+      },
+      "topic": "shortest-path",
+      "topicSlug": "shortest-path",
+      "subtopics": [
+        "shortest-path",
+        "isro-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "B",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">Match the following :<br>             (A) Floyd Warshall (i)         shortest        path<br>                                            between          two<br>                                            vertices<br>             (B) Dijkstra             (ii) single    source<br>                                            shortest path<br>             (C) Kruskal’s            (iii) Minimum<br>                                            spanning tree<br>             (D) Bellman ford         (iv) solving all pair<br>                                            shortest path<br><br>             (a)   (A)-(iii), (B)-(ii), (C)-(iv), (D)-(i)<br>             (b)   (A)-(iv), (B)-(i), (C)-(iii), (D)-(ii)<br>             (c)   (A)-(i), (B)-(ii), (C)-(iii), (D)-(iv)<br>             (d)   (A)-(ii), (B)-(iii), (C)-(i), (D)-(iv)</div>",
+      "sourceUrl": "https://www.isro.gov.in/media_isro/pdf/recruitmentNotice/2025_May/CS_2023_merge.pdf",
+      "answerSource": {
+        "kind": "official-answer-key",
+        "url": "https://www.isro.gov.in/media_isro/pdf/recruitmentNotice/2024_January/SCIENTISTENGINEER_SC_COMPUTER_SCIENCE.pdf"
+      }
+    },
+    {
+      "id": "isro-cs:2023:4",
+      "year": 2023,
+      "set": null,
+      "number": "4",
+      "paperLabel": "ISRO Scientist/Engineer CS 2023 · Part A",
+      "subject": "data-structure",
+      "subjectSlug": "data-structure",
+      "classificationHint": {
+        "subjectSlug": "data-structure",
+        "topicSlug": "binary-search-tree"
+      },
+      "topic": "binary-search-tree",
+      "topicSlug": "binary-search-tree",
+      "subtopics": [
+        "binary-search-tree",
+        "isro-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "B",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">The preorder traversal of a binary search<br>          tree is (10, 5, 1, 7, 40, 50). The postorder<br>          traversal is<br><br>          (a)   (1, 5, 7, 10, 40, 50)<br><br>          (b)   (50, 40, 10, 7, 5, 1)<br><br>          (c)   (1, 7, 5, 10, 40, 50)<br><br>          (d)   (1, 5, 7, 50, 40, 10)</div>",
+      "sourceUrl": "https://www.isro.gov.in/media_isro/pdf/recruitmentNotice/2025_May/CS_2023_merge.pdf",
+      "answerSource": {
+        "kind": "official-answer-key",
+        "url": "https://www.isro.gov.in/media_isro/pdf/recruitmentNotice/2024_January/SCIENTISTENGINEER_SC_COMPUTER_SCIENCE.pdf"
+      }
+    },
+    {
+      "id": "isro-cs:2023:8",
+      "year": 2023,
+      "set": null,
+      "number": "8",
+      "paperLabel": "ISRO Scientist/Engineer CS 2023 · Part A",
+      "subject": "compiler-design",
+      "subjectSlug": "compiler-design",
+      "classificationHint": {
+        "subjectSlug": "compiler-design",
+        "topicSlug": "parsing"
+      },
+      "topic": "parsing",
+      "topicSlug": "parsing",
+      "subtopics": [
+        "parsing",
+        "isro-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "C",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">Consider the context-free grammar<br>              G below for arithmetic expressions :<br>              E → E + E |E × E |id<br>              Which of the following statements is<br>              TRUE:<br><br>             (a)   The string “id + id × id” has no parse<br>                    tree according to G<br><br>              (b)   The string “id + id × id” has only one<br>                    parse tree according to G<br><br>             (c)   The string “id + id × id” has exactly<br>                    two parse trees according to G<br><br>            (d)   The string “id + id × id” has more<br>                    than two parse trees according to G</div>",
+      "sourceUrl": "https://www.isro.gov.in/media_isro/pdf/recruitmentNotice/2025_May/CS_2023_merge.pdf",
+      "answerSource": {
+        "kind": "official-answer-key",
+        "url": "https://www.isro.gov.in/media_isro/pdf/recruitmentNotice/2024_January/SCIENTISTENGINEER_SC_COMPUTER_SCIENCE.pdf"
+      }
+    },
+    {
+      "id": "isro-cs:2023:9",
+      "year": 2023,
+      "set": null,
+      "number": "9",
+      "paperLabel": "ISRO Scientist/Engineer CS 2023 · Part A",
+      "subject": "operating-systems",
+      "subjectSlug": "operating-systems",
+      "classificationHint": {
+        "subjectSlug": "operating-systems",
+        "topicSlug": "memory-management"
+      },
+      "topic": "memory-management",
+      "topicSlug": "memory-management",
+      "subtopics": [
+        "memory-management",
+        "isro-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "C",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">Which of the following heap memory<br>              allocation strategies is likely to exploit<br>              spatial locality of memory accesses in a<br>              program, the most?<br><br>              (a)   Best Fit<br><br>              (b)   First Fit<br><br>              (c)   Next Fit<br><br>              (d)   Last Fit</div>",
+      "sourceUrl": "https://www.isro.gov.in/media_isro/pdf/recruitmentNotice/2025_May/CS_2023_merge.pdf",
+      "answerSource": {
+        "kind": "official-answer-key",
+        "url": "https://www.isro.gov.in/media_isro/pdf/recruitmentNotice/2024_January/SCIENTISTENGINEER_SC_COMPUTER_SCIENCE.pdf"
+      }
+    },
+    {
+      "id": "isro-cs:2023:10",
+      "year": 2023,
+      "set": null,
+      "number": "10",
+      "paperLabel": "ISRO Scientist/Engineer CS 2023 · Part A",
+      "subject": "compiler-design",
+      "subjectSlug": "compiler-design",
+      "classificationHint": {
+        "subjectSlug": "compiler-design",
+        "topicSlug": "intermediate-code-generation"
+      },
+      "topic": "intermediate-code-generation",
+      "topicSlug": "intermediate-code-generation",
+      "subtopics": [
+        "intermediate-code-generation",
+        "isro-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "D",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">Which sequence below best describes the<br>             order in which the phases of a compiler<br>            typically work?<br><br>            (a)   Syntax analysis, lexical analysis,<br>                   semantic       analysis,      code<br>                  optimization, intermediate code<br>                   generation<br>            (b)   Lexical analysis, syntax analysis,<br>                   semantic       analysis,      code<br>                  optimization, intermediate code<br>                   generation<br>            (c)   Syntax analysis, lexical analysis,<br>                   syntax analysis, semantic analysis,<br>                  intermediate code generation, code<br> ,                 optimization<br><br>            (d)   Lexical analysis, syntax analysis,<br>                   semantic analysis, intermediate code<br> ,                 generation, code optimization</div>",
+      "sourceUrl": "https://www.isro.gov.in/media_isro/pdf/recruitmentNotice/2025_May/CS_2023_merge.pdf",
+      "answerSource": {
+        "kind": "official-answer-key",
+        "url": "https://www.isro.gov.in/media_isro/pdf/recruitmentNotice/2024_January/SCIENTISTENGINEER_SC_COMPUTER_SCIENCE.pdf"
+      }
+    },
+    {
+      "id": "isro-cs:2023:11",
+      "year": 2023,
+      "set": null,
+      "number": "11",
+      "paperLabel": "ISRO Scientist/Engineer CS 2023 · Part A",
+      "subject": "compiler-design",
+      "subjectSlug": "compiler-design",
+      "classificationHint": {
+        "subjectSlug": "compiler-design",
+        "topicSlug": "parsing"
+      },
+      "topic": "parsing",
+      "topicSlug": "parsing",
+      "subtopics": [
+        "parsing",
+        "isro-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "B",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">In the context of parsing techniques,<br> )            LL(1) refers to:<br><br>            (a)   Grammars that parse the input from<br>                   left to right, produce a rightmost<br>                  derivation, with a lookahead of<br>                  1 symbol.<br><br>            (b)   Grammars that parse the input from<br>                   left to right, produce a leftmost<br>                  derivation, with a lookahead of<br>                  1 symbol.<br><br>            (c)   Grammars that parse the input from<br>                   left to right, and backtrack at most<br>                 once.<br><br>            (d)   Grammars that parse the input from<br>                   right to left, produce a leftmost<br>                 derivation, and backtrack at most<br>                  once.</div>",
+      "sourceUrl": "https://www.isro.gov.in/media_isro/pdf/recruitmentNotice/2025_May/CS_2023_merge.pdf",
+      "answerSource": {
+        "kind": "official-answer-key",
+        "url": "https://www.isro.gov.in/media_isro/pdf/recruitmentNotice/2024_January/SCIENTISTENGINEER_SC_COMPUTER_SCIENCE.pdf"
+      }
+    },
+    {
+      "id": "isro-cs:2023:12",
+      "year": 2023,
+      "set": null,
+      "number": "12",
+      "paperLabel": "ISRO Scientist/Engineer CS 2023 · Part A",
+      "subject": "computer-networks",
+      "subjectSlug": "computer-networks",
+      "classificationHint": {
+        "subjectSlug": "computer-networks",
+        "topicSlug": "data-link-layer"
+      },
+      "topic": "data-link-layer",
+      "topicSlug": "data-link-layer",
+      "subtopics": [
+        "data-link-layer",
+        "isro-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "C",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">A host in one organisation is connected to<br>         another host in other organisation using<br>         1 Gbps link with 25m sec RTT. Network<br>         administrator of this network tuned the<br>         packet size to 1000 bytes to transfer large<br>         files optimally over this network. In order<br>         to have channel utilisation &gt; 96%, how big<br>         window size (in terms of packets) should<br>         be (assuming ACK packets have no<br>         impact)?<br><br>          (a)   2000 packets<br><br>          (b)   2400 packets<br><br>          (c)   3000 packets<br><br>          (d)   4000 packets</div>",
+      "sourceUrl": "https://www.isro.gov.in/media_isro/pdf/recruitmentNotice/2025_May/CS_2023_merge.pdf",
+      "answerSource": {
+        "kind": "official-answer-key",
+        "url": "https://www.isro.gov.in/media_isro/pdf/recruitmentNotice/2024_January/SCIENTISTENGINEER_SC_COMPUTER_SCIENCE.pdf"
+      }
+    },
+    {
+      "id": "isro-cs:2023:13",
+      "year": 2023,
+      "set": null,
+      "number": "13",
+      "paperLabel": "ISRO Scientist/Engineer CS 2023 · Part A",
+      "subject": "computer-networks",
+      "subjectSlug": "computer-networks",
+      "classificationHint": {
+        "subjectSlug": "computer-networks",
+        "topicSlug": "data-link-layer"
+      },
+      "topic": "data-link-layer",
+      "topicSlug": "data-link-layer",
+      "subtopics": [
+        "data-link-layer",
+        "isro-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "D",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">In a computer network using CSMA/CD,<br>          the minimum frame size for data transfer<br>          is 1500 bytes. What will be the data<br>          transfer speed in this network over 1 Km<br>          cable, if the signal speed in the cable is<br>          250000 Km/sec and no repeaters are used<br>          in this network?<br><br>          (a)   1 Gbps<br>          (b)   100 Mbps<br>          (c)   500 Mbps<br>          (d)   1.5 Gbps</div>",
+      "sourceUrl": "https://www.isro.gov.in/media_isro/pdf/recruitmentNotice/2025_May/CS_2023_merge.pdf",
+      "answerSource": {
+        "kind": "official-answer-key",
+        "url": "https://www.isro.gov.in/media_isro/pdf/recruitmentNotice/2024_January/SCIENTISTENGINEER_SC_COMPUTER_SCIENCE.pdf"
+      }
+    },
+    {
+      "id": "isro-cs:2023:14",
+      "year": 2023,
+      "set": null,
+      "number": "14",
+      "paperLabel": "ISRO Scientist/Engineer CS 2023 · Part A",
+      "subject": "computer-networks",
+      "subjectSlug": "computer-networks",
+      "classificationHint": {
+        "subjectSlug": "computer-networks",
+        "topicSlug": "application-layer-protocols"
+      },
+      "topic": "application-layer-protocols",
+      "topicSlug": "application-layer-protocols",
+      "subtopics": [
+        "application-layer-protocols",
+        "isro-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "C",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">For internal data communication through<br>         computer network, a 5 layer protocol<br>         hierarchy is proposed. Applications to be<br>         used in this network generate 270 bytes<br>         long messages. At each of the layers, a<br>         6-byte header is added. What fraction of<br>         network bandwidth(in %) is wasted due to<br>         headers?<br><br>         (a)    5%<br>         (b)    20%<br>         (c)    10%<br>         (d)    15%</div>",
+      "sourceUrl": "https://www.isro.gov.in/media_isro/pdf/recruitmentNotice/2025_May/CS_2023_merge.pdf",
+      "answerSource": {
+        "kind": "official-answer-key",
+        "url": "https://www.isro.gov.in/media_isro/pdf/recruitmentNotice/2024_January/SCIENTISTENGINEER_SC_COMPUTER_SCIENCE.pdf"
+      }
+    },
+    {
+      "id": "isro-cs:2023:17",
+      "year": 2023,
+      "set": null,
+      "number": "17",
+      "paperLabel": "ISRO Scientist/Engineer CS 2023 · Part A",
+      "subject": "data-structure",
+      "subjectSlug": "data-structure",
+      "classificationHint": {
+        "subjectSlug": "data-structure",
+        "topicSlug": "stack"
+      },
+      "topic": "stack",
+      "topicSlug": "stack",
+      "subtopics": [
+        "stack",
+        "isro-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "A",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">In Reverse Polish notation, expression<br>               A*B+C*D is written as<br><br>               (a)   AB*CD*+<br>               (b)   A*BCD*+<br>               (c)   AB*CD+*<br>               (d)   A*B*CD+</div>",
+      "sourceUrl": "https://www.isro.gov.in/media_isro/pdf/recruitmentNotice/2025_May/CS_2023_merge.pdf",
+      "answerSource": {
+        "kind": "official-answer-key",
+        "url": "https://www.isro.gov.in/media_isro/pdf/recruitmentNotice/2024_January/SCIENTISTENGINEER_SC_COMPUTER_SCIENCE.pdf"
+      }
+    },
+    {
+      "id": "isro-cs:2023:18",
+      "year": 2023,
+      "set": null,
+      "number": "18",
+      "paperLabel": "ISRO Scientist/Engineer CS 2023 · Part A",
+      "subject": "coa",
+      "subjectSlug": "coa",
+      "classificationHint": {
+        "subjectSlug": "coa",
+        "topicSlug": "interrupt"
+      },
+      "topic": "interrupt",
+      "topicSlug": "interrupt",
+      "subtopics": [
+        "interrupt",
+        "isro-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "B",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">In a vectored interrupt<br><br>              (a)   The branch address is assigned to a<br>                     fixed location in memory<br><br>              (b)   The interrupting source supplies the<br>                     branch information to the processor<br><br>              (c)   The branch address is obtained from<br>                     a register in the processor<br><br>               (d)   None of the above</div>",
+      "sourceUrl": "https://www.isro.gov.in/media_isro/pdf/recruitmentNotice/2025_May/CS_2023_merge.pdf",
+      "answerSource": {
+        "kind": "official-answer-key",
+        "url": "https://www.isro.gov.in/media_isro/pdf/recruitmentNotice/2024_January/SCIENTISTENGINEER_SC_COMPUTER_SCIENCE.pdf"
+      }
+    },
+    {
+      "id": "isro-cs:2023:20",
+      "year": 2023,
+      "set": null,
+      "number": "20",
+      "paperLabel": "ISRO Scientist/Engineer CS 2023 · Part A",
+      "subject": "coa",
+      "subjectSlug": "coa",
+      "classificationHint": {
+        "subjectSlug": "coa",
+        "topicSlug": "pipeline-processor"
+      },
+      "topic": "pipeline-processor",
+      "topicSlug": "pipeline-processor",
+      "subtopics": [
+        "pipeline-processor",
+        "isro-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "B",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">An    instruction pipeline       can       be<br>              implemented by means of<br><br>              (a)   LIFO buffer<br>              (b)   FIFO buffer<br>              (c)   Stack<br>              (d)   None of the above</div>",
+      "sourceUrl": "https://www.isro.gov.in/media_isro/pdf/recruitmentNotice/2025_May/CS_2023_merge.pdf",
+      "answerSource": {
+        "kind": "official-answer-key",
+        "url": "https://www.isro.gov.in/media_isro/pdf/recruitmentNotice/2024_January/SCIENTISTENGINEER_SC_COMPUTER_SCIENCE.pdf"
+      }
+    },
+    {
+      "id": "isro-cs:2023:21",
+      "year": 2023,
+      "set": null,
+      "number": "21",
+      "paperLabel": "ISRO Scientist/Engineer CS 2023 · Part A",
+      "subject": "coa",
+      "subjectSlug": "coa",
+      "classificationHint": {
+        "subjectSlug": "coa",
+        "topicSlug": "alu-data-path-and-control-unit"
+      },
+      "topic": "alu-data-path-and-control-unit",
+      "topicSlug": "alu-data-path-and-control-unit",
+      "subtopics": [
+        "alu-data-path-and-control-unit",
+        "isro-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "B",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">The operation executed on data stored in<br>              registers is called<br><br>              (a)   Macro-operation<br>              (b)   Micro-operation<br>              (c)   Bit-operation<br>              (d)   Byte-operation</div>",
+      "sourceUrl": "https://www.isro.gov.in/media_isro/pdf/recruitmentNotice/2025_May/CS_2023_merge.pdf",
+      "answerSource": {
+        "kind": "official-answer-key",
+        "url": "https://www.isro.gov.in/media_isro/pdf/recruitmentNotice/2024_January/SCIENTISTENGINEER_SC_COMPUTER_SCIENCE.pdf"
+      }
+    },
+    {
+      "id": "isro-cs:2023:22",
+      "year": 2023,
+      "set": null,
+      "number": "22",
+      "paperLabel": "ISRO Scientist/Engineer CS 2023 · Part A",
+      "subject": "computer-networks",
+      "subjectSlug": "computer-networks",
+      "classificationHint": {
+        "subjectSlug": "computer-networks",
+        "topicSlug": "data-link-layer"
+      },
+      "topic": "data-link-layer",
+      "topicSlug": "data-link-layer",
+      "subtopics": [
+        "data-link-layer",
+        "isro-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "C",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">Which of the following methods is used to<br><br>              detect double errors?<br><br>              (a)   Odd Parity<br>              (b)   Even Parity<br>              (c)   Checksum (CRC)<br>              (d)   Checksum (XOR)</div>",
+      "sourceUrl": "https://www.isro.gov.in/media_isro/pdf/recruitmentNotice/2025_May/CS_2023_merge.pdf",
+      "answerSource": {
+        "kind": "official-answer-key",
+        "url": "https://www.isro.gov.in/media_isro/pdf/recruitmentNotice/2024_January/SCIENTISTENGINEER_SC_COMPUTER_SCIENCE.pdf"
+      }
+    },
+    {
+      "id": "isro-cs:2023:23",
+      "year": 2023,
+      "set": null,
+      "number": "23",
+      "paperLabel": "ISRO Scientist/Engineer CS 2023 · Part A",
+      "subject": "data-structure",
+      "subjectSlug": "data-structure",
+      "classificationHint": {
+        "subjectSlug": "data-structure",
+        "topicSlug": "stack"
+      },
+      "topic": "stack",
+      "topicSlug": "stack",
+      "subtopics": [
+        "stack",
+        "isro-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "A",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">The prefix expression is –+abc+d*ef.<br>             Evaluate the expression for a = 10,b = 2,<br><br>             c = 5, d = 3, e = 4, f = 1<br><br>             (a)    3<br>             (b)    4<br>             (c)    10<br>             (d)    6</div>",
+      "sourceUrl": "https://www.isro.gov.in/media_isro/pdf/recruitmentNotice/2025_May/CS_2023_merge.pdf",
+      "answerSource": {
+        "kind": "official-answer-key",
+        "url": "https://www.isro.gov.in/media_isro/pdf/recruitmentNotice/2024_January/SCIENTISTENGINEER_SC_COMPUTER_SCIENCE.pdf"
+      }
+    },
+    {
+      "id": "isro-cs:2023:27",
+      "year": 2023,
+      "set": null,
+      "number": "27",
+      "paperLabel": "ISRO Scientist/Engineer CS 2023 · Part A",
+      "subject": "c-programming",
+      "subjectSlug": "c-programming",
+      "classificationHint": {
+        "subjectSlug": "c-programming",
+        "topicSlug": "array-and-pointer"
+      },
+      "topic": "array-and-pointer",
+      "topicSlug": "array-and-pointer",
+      "subtopics": [
+        "array-and-pointer",
+        "isro-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "A",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">Pointer p to an array of integers (of size 2<br>          Bytes) is initialised to 200. What is the<br>          value of p+3?<br><br>           (a)       206<br>           (b)       203<br>           (c)       212<br>           (d)       204</div>",
+      "sourceUrl": "https://www.isro.gov.in/media_isro/pdf/recruitmentNotice/2025_May/CS_2023_merge.pdf",
+      "answerSource": {
+        "kind": "official-answer-key",
+        "url": "https://www.isro.gov.in/media_isro/pdf/recruitmentNotice/2024_January/SCIENTISTENGINEER_SC_COMPUTER_SCIENCE.pdf"
+      }
+    },
+    {
+      "id": "isro-cs:2023:28",
+      "year": 2023,
+      "set": null,
+      "number": "28",
+      "paperLabel": "ISRO Scientist/Engineer CS 2023 · Part A",
+      "subject": "data-structure",
+      "subjectSlug": "data-structure",
+      "classificationHint": {
+        "subjectSlug": "data-structure",
+        "topicSlug": "queue"
+      },
+      "topic": "queue",
+      "topicSlug": "queue",
+      "subtopics": [
+        "queue",
+        "isro-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "D",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">In a priority queue, insertion and deletion<br>           can be done at<br><br>           (a)       Front<br>           (b)       Back<br>           (c)       Middle<br>           (d)       Any position</div>",
+      "sourceUrl": "https://www.isro.gov.in/media_isro/pdf/recruitmentNotice/2025_May/CS_2023_merge.pdf",
+      "answerSource": {
+        "kind": "official-answer-key",
+        "url": "https://www.isro.gov.in/media_isro/pdf/recruitmentNotice/2024_January/SCIENTISTENGINEER_SC_COMPUTER_SCIENCE.pdf"
+      }
+    },
+    {
+      "id": "isro-cs:2023:29",
+      "year": 2023,
+      "set": null,
+      "number": "29",
+      "paperLabel": "ISRO Scientist/Engineer CS 2023 · Part A",
+      "subject": "algorithms",
+      "subjectSlug": "algorithms",
+      "classificationHint": {
+        "subjectSlug": "algorithms",
+        "topicSlug": "sorting"
+      },
+      "topic": "sorting",
+      "topicSlug": "sorting",
+      "subtopics": [
+        "sorting",
+        "isro-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "A",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">Worst case time complexity of heap sort<br>          for n elements<br><br>           (a)   O(nlogn)<br><br>           (b)   O(logn)<br><br>           (c)   O(n2)<br><br>           (d)   O(n)</div>",
+      "sourceUrl": "https://www.isro.gov.in/media_isro/pdf/recruitmentNotice/2025_May/CS_2023_merge.pdf",
+      "answerSource": {
+        "kind": "official-answer-key",
+        "url": "https://www.isro.gov.in/media_isro/pdf/recruitmentNotice/2024_January/SCIENTISTENGINEER_SC_COMPUTER_SCIENCE.pdf"
+      }
+    },
+    {
+      "id": "isro-cs:2023:30",
+      "year": 2023,
+      "set": null,
+      "number": "30",
+      "paperLabel": "ISRO Scientist/Engineer CS 2023 · Part A",
+      "subject": "databases",
+      "subjectSlug": "databases",
+      "classificationHint": {
+        "subjectSlug": "databases",
+        "topicSlug": "sql"
+      },
+      "topic": "sql",
+      "topicSlug": "sql",
+      "subtopics": [
+        "sql",
+        "isro-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "A",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">Consider a database table T containing<br>          two columns X and Y each of type Integer.<br>          After the creation of the table, one record<br>          (X=1, Y=1) is inserted in the table. Let MX<br>          and MY denote the respective maximum<br>          values of X and Y among all records in the<br>          table at any point in time. Using MX and<br>          MY, new records are inserted in the table<br>          128 times with X and Y values being<br>          MX+1, 2 × MY+1 respectively. It may be<br>          noted that each time after the insertion,<br>          values of MX and MY change. What will<br>          be the output of the following SQL query<br>          after the steps mentioned above are<br>          carried out?<br>           SELECT Y FROM T WHERE X=7;<br><br>           (a)   127<br><br>           (b)   15<br><br>           (c)   129<br><br>           (d)   257</div>",
+      "sourceUrl": "https://www.isro.gov.in/media_isro/pdf/recruitmentNotice/2025_May/CS_2023_merge.pdf",
+      "answerSource": {
+        "kind": "official-answer-key",
+        "url": "https://www.isro.gov.in/media_isro/pdf/recruitmentNotice/2024_January/SCIENTISTENGINEER_SC_COMPUTER_SCIENCE.pdf"
+      }
+    },
+    {
+      "id": "isro-cs:2023:31",
+      "year": 2023,
+      "set": null,
+      "number": "31",
+      "paperLabel": "ISRO Scientist/Engineer CS 2023 · Part A",
+      "subject": "databases",
+      "subjectSlug": "databases",
+      "classificationHint": {
+        "subjectSlug": "databases",
+        "topicSlug": "sql"
+      },
+      "topic": "sql",
+      "topicSlug": "sql",
+      "subtopics": [
+        "sql",
+        "isro-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "B",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">In SQL the statement select * from R, S is<br>              equivalent to<br><br>              (a)   Select * from R natural join S<br><br>              (b)   Select * from R cross join S<br><br>              (c)   Select * from R outer join S<br><br>              (d)   Select * from R inner join S</div>",
+      "sourceUrl": "https://www.isro.gov.in/media_isro/pdf/recruitmentNotice/2025_May/CS_2023_merge.pdf",
+      "answerSource": {
+        "kind": "official-answer-key",
+        "url": "https://www.isro.gov.in/media_isro/pdf/recruitmentNotice/2024_January/SCIENTISTENGINEER_SC_COMPUTER_SCIENCE.pdf"
+      }
+    },
+    {
+      "id": "isro-cs:2023:32",
+      "year": 2023,
+      "set": null,
+      "number": "32",
+      "paperLabel": "ISRO Scientist/Engineer CS 2023 · Part A",
+      "subject": "databases",
+      "subjectSlug": "databases",
+      "classificationHint": {
+        "subjectSlug": "databases",
+        "topicSlug": "sql"
+      },
+      "topic": "sql",
+      "topicSlug": "sql",
+      "subtopics": [
+        "sql",
+        "isro-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "C",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">Which of the following SQL query deletes<br>              all tuples in the teacher relation for those<br>              teachers associated with a department<br>              located in the building with name CSE<br>              and which is in department relation:<br><br>E             (a)   DELETE FROM teacher WHERE<br>                    dept_name IN 'CSE';<br><br>t             (b)   DELETE        FROM        department<br>                    WHERE building='CSE';<br><br>E             (c)   DELETE FROM teacher WHERE<br>e                   dept_name IN (SELECT dept_name<br>g                   FROM        department         WHERE<br>                    building = ’CSE’);<br><br>              (d)   None of the above</div>",
+      "sourceUrl": "https://www.isro.gov.in/media_isro/pdf/recruitmentNotice/2025_May/CS_2023_merge.pdf",
+      "answerSource": {
+        "kind": "official-answer-key",
+        "url": "https://www.isro.gov.in/media_isro/pdf/recruitmentNotice/2024_January/SCIENTISTENGINEER_SC_COMPUTER_SCIENCE.pdf"
+      }
+    },
+    {
+      "id": "isro-cs:2023:33",
+      "year": 2023,
+      "set": null,
+      "number": "33",
+      "paperLabel": "ISRO Scientist/Engineer CS 2023 · Part A",
+      "subject": "databases",
+      "subjectSlug": "databases",
+      "classificationHint": {
+        "subjectSlug": "databases",
+        "topicSlug": "transactions"
+      },
+      "topic": "transactions",
+      "topicSlug": "transactions",
+      "subtopics": [
+        "transactions",
+        "isro-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "D",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">Amongst    the     ACID    properties    of   a<br>              transaction,     the   'Durability'   property<br><br>              requires that the changes made to the<br>            database by a successful transaction<br>              persist<br><br>             (a)   Except in case of an operating<br>                    system crash<br><br>              (b)   Except in case of a disk crash<br><br>             (c)   Except in case of a power failure<br><br>             (d)   Always, even if there is a failure of<br>                    any kind</div>",
+      "sourceUrl": "https://www.isro.gov.in/media_isro/pdf/recruitmentNotice/2025_May/CS_2023_merge.pdf",
+      "answerSource": {
+        "kind": "official-answer-key",
+        "url": "https://www.isro.gov.in/media_isro/pdf/recruitmentNotice/2024_January/SCIENTISTENGINEER_SC_COMPUTER_SCIENCE.pdf"
+      }
+    },
+    {
+      "id": "isro-cs:2023:34",
+      "year": 2023,
+      "set": null,
+      "number": "34",
+      "paperLabel": "ISRO Scientist/Engineer CS 2023 · Part A",
+      "subject": "databases",
+      "subjectSlug": "databases",
+      "classificationHint": {
+        "subjectSlug": "databases",
+        "topicSlug": "normal-form"
+      },
+      "topic": "normal-form",
+      "topicSlug": "normal-form",
+      "subtopics": [
+        "normal-form",
+        "isro-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "A",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">Fifth Normal form is concerned with<br><br>              (a)   Join dependency<br><br>              (b)   Domain-key<br><br>              (c)   Multivalued dependency<br><br>              (d)   Functional dependency</div>",
+      "sourceUrl": "https://www.isro.gov.in/media_isro/pdf/recruitmentNotice/2025_May/CS_2023_merge.pdf",
+      "answerSource": {
+        "kind": "official-answer-key",
+        "url": "https://www.isro.gov.in/media_isro/pdf/recruitmentNotice/2024_January/SCIENTISTENGINEER_SC_COMPUTER_SCIENCE.pdf"
+      }
+    },
+    {
+      "id": "isro-cs:2023:35",
+      "year": 2023,
+      "set": null,
+      "number": "35",
+      "paperLabel": "ISRO Scientist/Engineer CS 2023 · Part A",
+      "subject": "digital-logic",
+      "subjectSlug": "digital-logic",
+      "classificationHint": {
+        "subjectSlug": "digital-logic",
+        "topicSlug": "combinational-circuit"
+      },
+      "topic": "combinational-circuit",
+      "topicSlug": "combinational-circuit",
+      "subtopics": [
+        "combinational-circuit",
+        "isro-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "A",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">Which of the following definitions is true<br>             (i)   A digital multiplexer takes one input<br><br>                   from many inputs and outputs the<br>                  selected one<br>            (ii) Four select lines are required for<br>                   1-16 demultiplexer<br>             (iii) Eight OR gates are required to<br>                  implement an octal to binary<br>                   encoder<br><br>              (a)   (i) and (ii)<br><br>              (b)   (ii) and (iii)<br><br>              (c)   (i) alone<br><br>              (d)   none of the above</div>",
+      "sourceUrl": "https://www.isro.gov.in/media_isro/pdf/recruitmentNotice/2025_May/CS_2023_merge.pdf",
+      "answerSource": {
+        "kind": "official-answer-key",
+        "url": "https://www.isro.gov.in/media_isro/pdf/recruitmentNotice/2024_January/SCIENTISTENGINEER_SC_COMPUTER_SCIENCE.pdf"
+      }
+    },
+    {
+      "id": "isro-cs:2023:36",
+      "year": 2023,
+      "set": null,
+      "number": "36",
+      "paperLabel": "ISRO Scientist/Engineer CS 2023 · Part A",
+      "subject": "digital-logic",
+      "subjectSlug": "digital-logic",
+      "classificationHint": {
+        "subjectSlug": "digital-logic",
+        "topicSlug": "sequential-circuit"
+      },
+      "topic": "sequential-circuit",
+      "topicSlug": "sequential-circuit",
+      "subtopics": [
+        "sequential-circuit",
+        "isro-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "A",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">The time delay obtained through an 8 bit<br>             serial register with 400 MHz clock is :<br><br>              (a)   20 ns<br>              (b)   2.5 µs<br>              (c)   20 µs<br>              (d)   2.5 ns</div>",
+      "sourceUrl": "https://www.isro.gov.in/media_isro/pdf/recruitmentNotice/2025_May/CS_2023_merge.pdf",
+      "answerSource": {
+        "kind": "official-answer-key",
+        "url": "https://www.isro.gov.in/media_isro/pdf/recruitmentNotice/2024_January/SCIENTISTENGINEER_SC_COMPUTER_SCIENCE.pdf"
+      }
+    },
+    {
+      "id": "isro-cs:2023:37",
+      "year": 2023,
+      "set": null,
+      "number": "37",
+      "paperLabel": "ISRO Scientist/Engineer CS 2023 · Part A",
+      "subject": "digital-logic",
+      "subjectSlug": "digital-logic",
+      "classificationHint": {
+        "subjectSlug": "digital-logic",
+        "topicSlug": "combinational-circuit"
+      },
+      "topic": "combinational-circuit",
+      "topicSlug": "combinational-circuit",
+      "subtopics": [
+        "combinational-circuit",
+        "isro-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "C",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">A full adder circuit requires<br><br>              (a)       two inputs and two outputs<br><br>              (b)   two inputs and three outputs<br><br>              (c)       three inputs and two outputs<br><br>              (d)       three inputs and one output</div>",
+      "sourceUrl": "https://www.isro.gov.in/media_isro/pdf/recruitmentNotice/2025_May/CS_2023_merge.pdf",
+      "answerSource": {
+        "kind": "official-answer-key",
+        "url": "https://www.isro.gov.in/media_isro/pdf/recruitmentNotice/2024_January/SCIENTISTENGINEER_SC_COMPUTER_SCIENCE.pdf"
+      }
+    },
+    {
+      "id": "isro-cs:2023:39",
+      "year": 2023,
+      "set": null,
+      "number": "39",
+      "paperLabel": "ISRO Scientist/Engineer CS 2023 · Part A",
+      "subject": "digital-logic",
+      "subjectSlug": "digital-logic",
+      "classificationHint": {
+        "subjectSlug": "digital-logic",
+        "topicSlug": "boolean-algebra"
+      },
+      "topic": "boolean-algebra",
+      "topicSlug": "boolean-algebra",
+      "subtopics": [
+        "boolean-algebra",
+        "isro-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "C",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">A logic circuit that provides a LOW output<br>             when both inputs are HIGH or both<br><br>             inputs are LOW is<br><br>              (a)   AND<br>              (b)       NAND<br>              (c)       XNOR<br>              (d)       XOR</div>",
+      "sourceUrl": "https://www.isro.gov.in/media_isro/pdf/recruitmentNotice/2025_May/CS_2023_merge.pdf",
+      "answerSource": {
+        "kind": "official-answer-key",
+        "url": "https://www.isro.gov.in/media_isro/pdf/recruitmentNotice/2024_January/SCIENTISTENGINEER_SC_COMPUTER_SCIENCE.pdf"
+      }
+    },
+    {
+      "id": "isro-cs:2023:40",
+      "year": 2023,
+      "set": null,
+      "number": "40",
+      "paperLabel": "ISRO Scientist/Engineer CS 2023 · Part A",
+      "subject": "digital-logic",
+      "subjectSlug": "digital-logic",
+      "classificationHint": {
+        "subjectSlug": "digital-logic",
+        "topicSlug": "boolean-algebra"
+      },
+      "topic": "boolean-algebra",
+      "topicSlug": "boolean-algebra",
+      "subtopics": [
+        "boolean-algebra",
+        "isro-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "D",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">The resulting logic circuit obtained when<br>               both inputs of NOR and NAND gates are<br>               connected together is:<br><br>               (a)     AND<br><br>               (b)     XOR<br><br>               (c)     OR<br><br>               (d)     NOT<br><br>                                     3     2 1 4<br>                                                  <br>                                        4   0 3 1<br>              Given P is a matrix = </div>",
+      "sourceUrl": "https://www.isro.gov.in/media_isro/pdf/recruitmentNotice/2025_May/CS_2023_merge.pdf",
+      "answerSource": {
+        "kind": "official-answer-key",
+        "url": "https://www.isro.gov.in/media_isro/pdf/recruitmentNotice/2024_January/SCIENTISTENGINEER_SC_COMPUTER_SCIENCE.pdf"
+      }
+    },
+    {
+      "id": "isro-cs:2023:42",
+      "year": 2023,
+      "set": null,
+      "number": "42",
+      "paperLabel": "ISRO Scientist/Engineer CS 2023 · Part A",
+      "subject": "discrete-mathematics",
+      "subjectSlug": "discrete-mathematics",
+      "classificationHint": {
+        "subjectSlug": "discrete-mathematics",
+        "topicSlug": "graph-theory"
+      },
+      "topic": "graph-theory",
+      "topicSlug": "graph-theory",
+      "subtopics": [
+        "graph-theory",
+        "isro-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "D",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">Which of the following are true?<br>             (i)   In a graph G with ‘n’ vertices and ‘e’<br>G<br>                   edges, sum of degrees of vertices =<br>                   2*e<br>            (ii) Eccentricity of a connected graph<br>                   can never be equal to radius of the<br>                   graph<br>             (iii) Girth of a graph is the total number<br>                   of edges in the shortest cycle of the<br>                   graph<br>             (iv) Graph with equal degree for all<br>                   vertices is multigraph<br>              (a)   (i), (ii), (iii)<br>              (b)   (ii), (iii), (iv)<br>              (c)   (i), (iii), (iv)<br>              (d)   None of the above</div>",
+      "sourceUrl": "https://www.isro.gov.in/media_isro/pdf/recruitmentNotice/2025_May/CS_2023_merge.pdf",
+      "answerSource": {
+        "kind": "official-answer-key",
+        "url": "https://www.isro.gov.in/media_isro/pdf/recruitmentNotice/2024_January/SCIENTISTENGINEER_SC_COMPUTER_SCIENCE.pdf"
+      }
+    },
+    {
+      "id": "isro-cs:2023:43",
+      "year": 2023,
+      "set": null,
+      "number": "43",
+      "paperLabel": "ISRO Scientist/Engineer CS 2023 · Part A",
+      "subject": "discrete-mathematics",
+      "subjectSlug": "discrete-mathematics",
+      "classificationHint": {
+        "subjectSlug": "discrete-mathematics",
+        "topicSlug": "planar-graph"
+      },
+      "topic": "planar-graph",
+      "topicSlug": "planar-graph",
+      "subtopics": [
+        "planar-graph",
+        "isro-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "C",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">f there are five faces and nine vertices in<br>              an undirected planar graph, then number<br>              of edges is<br>              (a) 14<br>              (b) 16<br>              (c)   12<br>              (d) None of the above</div>",
+      "sourceUrl": "https://www.isro.gov.in/media_isro/pdf/recruitmentNotice/2025_May/CS_2023_merge.pdf",
+      "answerSource": {
+        "kind": "official-answer-key",
+        "url": "https://www.isro.gov.in/media_isro/pdf/recruitmentNotice/2024_January/SCIENTISTENGINEER_SC_COMPUTER_SCIENCE.pdf"
+      }
+    },
+    {
+      "id": "isro-cs:2023:45",
+      "year": 2023,
+      "set": null,
+      "number": "45",
+      "paperLabel": "ISRO Scientist/Engineer CS 2023 · Part A",
+      "subject": "algorithms",
+      "subjectSlug": "algorithms",
+      "classificationHint": {
+        "subjectSlug": "algorithms",
+        "topicSlug": "asymptotic-notation"
+      },
+      "topic": "asymptotic-notation",
+      "topicSlug": "asymptotic-notation",
+      "subtopics": [
+        "asymptotic-notation",
+        "isro-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "D",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">The complexity of matrix multiplication of<br>               two matrices A and B whose orders are<br>               m × n and n × p respectively is<br><br>               (a)   O(m × p)<br>               (b)   O(m × n2 × p)<br>               (c)   O(m × n × p2)<br>               (d)   O(m × n × p)</div>",
+      "sourceUrl": "https://www.isro.gov.in/media_isro/pdf/recruitmentNotice/2025_May/CS_2023_merge.pdf",
+      "answerSource": {
+        "kind": "official-answer-key",
+        "url": "https://www.isro.gov.in/media_isro/pdf/recruitmentNotice/2024_January/SCIENTISTENGINEER_SC_COMPUTER_SCIENCE.pdf"
+      }
+    },
+    {
+      "id": "isro-cs:2023:46",
+      "year": 2023,
+      "set": null,
+      "number": "46",
+      "paperLabel": "ISRO Scientist/Engineer CS 2023 · Part A",
+      "subject": "discrete-mathematics",
+      "subjectSlug": "discrete-mathematics",
+      "classificationHint": {
+        "subjectSlug": "discrete-mathematics",
+        "topicSlug": "combination"
+      },
+      "topic": "combination",
+      "topicSlug": "combination",
+      "subtopics": [
+        "combination",
+        "isro-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "C",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">From a character string of length m, the<br>              number of sub-strings of all lengths that<br>               can be formed are:<br><br>               (a)   m2<br>               (b)   m<br>               (c)   m(m+1)/2<br>               (d)   m(log m)</div>",
+      "sourceUrl": "https://www.isro.gov.in/media_isro/pdf/recruitmentNotice/2025_May/CS_2023_merge.pdf",
+      "answerSource": {
+        "kind": "official-answer-key",
+        "url": "https://www.isro.gov.in/media_isro/pdf/recruitmentNotice/2024_January/SCIENTISTENGINEER_SC_COMPUTER_SCIENCE.pdf"
+      }
+    },
+    {
+      "id": "isro-cs:2023:47",
+      "year": 2023,
+      "set": null,
+      "number": "47",
+      "paperLabel": "ISRO Scientist/Engineer CS 2023 · Part A",
+      "subject": "digital-logic",
+      "subjectSlug": "digital-logic",
+      "classificationHint": {
+        "subjectSlug": "digital-logic",
+        "topicSlug": "boolean-algebra"
+      },
+      "topic": "boolean-algebra",
+      "topicSlug": "boolean-algebra",
+      "subtopics": [
+        "boolean-algebra",
+        "isro-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "C",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">A truth table will need how many rows if<br>              there are n variables.<br><br>               (a)   2 *n<br>               (b)   n<br>               (c)   2^n<br>               (d)   None of the above</div>",
+      "sourceUrl": "https://www.isro.gov.in/media_isro/pdf/recruitmentNotice/2025_May/CS_2023_merge.pdf",
+      "answerSource": {
+        "kind": "official-answer-key",
+        "url": "https://www.isro.gov.in/media_isro/pdf/recruitmentNotice/2024_January/SCIENTISTENGINEER_SC_COMPUTER_SCIENCE.pdf"
+      }
+    },
+    {
+      "id": "isro-cs:2023:48",
+      "year": 2023,
+      "set": null,
+      "number": "48",
+      "paperLabel": "ISRO Scientist/Engineer CS 2023 · Part A",
+      "subject": "operating-systems",
+      "subjectSlug": "operating-systems",
+      "classificationHint": {
+        "subjectSlug": "operating-systems",
+        "topicSlug": "process"
+      },
+      "topic": "process",
+      "topicSlug": "process",
+      "subtopics": [
+        "process",
+        "isro-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "A",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">Which of the following multithreading<br>              model is followed in Linux OS?<br><br>             (a)   One User Thread mapping to One<br>                     Kernel Thread<br><br>              (b)   Many User Threads mapping to One<br>                     Kernel Thread<br><br>              (c)   One User Thread mapping to Many<br>                     Kernel Threads<br><br>              (d)   Many User Threads mapping to<br>                     Many Kernel Threads</div>",
+      "sourceUrl": "https://www.isro.gov.in/media_isro/pdf/recruitmentNotice/2025_May/CS_2023_merge.pdf",
+      "answerSource": {
+        "kind": "official-answer-key",
+        "url": "https://www.isro.gov.in/media_isro/pdf/recruitmentNotice/2024_January/SCIENTISTENGINEER_SC_COMPUTER_SCIENCE.pdf"
+      }
+    },
+    {
+      "id": "isro-cs:2023:49",
+      "year": 2023,
+      "set": null,
+      "number": "49",
+      "paperLabel": "ISRO Scientist/Engineer CS 2023 · Part A",
+      "subject": "operating-systems",
+      "subjectSlug": "operating-systems",
+      "classificationHint": {
+        "subjectSlug": "operating-systems",
+        "topicSlug": "process-synchronization"
+      },
+      "topic": "process-synchronization",
+      "topicSlug": "process-synchronization",
+      "subtopics": [
+        "process-synchronization",
+        "isro-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "C",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">Purpose of priority inheritance protocol in<br>              synchronization mechanisms is<br><br>              (a)   To prevent priority inversion in<br>                     systems having two or lesser<br><br>                     priorities for a resource<br><br>              (b)   To    provide  mutual   exclusion<br>                     between threads and prevent data<br><br>                     corruption<br><br>              (c)   To prevent priority inversion and<br>                     ensure     fairness in    resource<br><br>                     allocation<br><br>              (d)   To allow multiple threads to access<br>                     any resource simultaneously</div>",
+      "sourceUrl": "https://www.isro.gov.in/media_isro/pdf/recruitmentNotice/2025_May/CS_2023_merge.pdf",
+      "answerSource": {
+        "kind": "official-answer-key",
+        "url": "https://www.isro.gov.in/media_isro/pdf/recruitmentNotice/2024_January/SCIENTISTENGINEER_SC_COMPUTER_SCIENCE.pdf"
+      }
+    },
+    {
+      "id": "isro-cs:2023:50",
+      "year": 2023,
+      "set": null,
+      "number": "50",
+      "paperLabel": "ISRO Scientist/Engineer CS 2023 · Part A",
+      "subject": "operating-systems",
+      "subjectSlug": "operating-systems",
+      "classificationHint": {
+        "subjectSlug": "operating-systems",
+        "topicSlug": "memory-management"
+      },
+      "topic": "memory-management",
+      "topicSlug": "memory-management",
+      "subtopics": [
+        "memory-management",
+        "isro-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "C",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">As    part     of   segmentation      memory<br>              allocation strategy, which of the following<br><br>              assigns segment numbers for various<br>             segments of a program like code segment<br>              and data segment?<br><br>              (a)   Compiler<br><br>              (b)   Assembler<br><br>              (c)   Loader<br><br>              (d)   Linker</div>",
+      "sourceUrl": "https://www.isro.gov.in/media_isro/pdf/recruitmentNotice/2025_May/CS_2023_merge.pdf",
+      "answerSource": {
+        "kind": "official-answer-key",
+        "url": "https://www.isro.gov.in/media_isro/pdf/recruitmentNotice/2024_January/SCIENTISTENGINEER_SC_COMPUTER_SCIENCE.pdf"
+      }
+    },
+    {
+      "id": "isro-cs:2023:51",
+      "year": 2023,
+      "set": null,
+      "number": "51",
+      "paperLabel": "ISRO Scientist/Engineer CS 2023 · Part A",
+      "subject": "coa",
+      "subjectSlug": "coa",
+      "classificationHint": {
+        "subjectSlug": "coa",
+        "topicSlug": "interrupt"
+      },
+      "topic": "interrupt",
+      "topicSlug": "interrupt",
+      "subtopics": [
+        "interrupt",
+        "isro-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "D",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">Which of the following is false about<br>              interrupts ?<br><br>             (a)   Interrupts can be triggered by a<br>                    hardware or by a software<br><br>             (b)   Hardware          interrupts   may   be<br>                    triggered by sending a signal to CPU<br><br>                    through a system bus<br><br>              (c)   Software          interrupts   may   be<br>                    triggered by executing system calls<br><br>             (d)   Trap     is   a     hardware   generated<br>                    interrupt</div>",
+      "sourceUrl": "https://www.isro.gov.in/media_isro/pdf/recruitmentNotice/2025_May/CS_2023_merge.pdf",
+      "answerSource": {
+        "kind": "official-answer-key",
+        "url": "https://www.isro.gov.in/media_isro/pdf/recruitmentNotice/2024_January/SCIENTISTENGINEER_SC_COMPUTER_SCIENCE.pdf"
+      }
+    },
+    {
+      "id": "isro-cs:2023:52",
+      "year": 2023,
+      "set": null,
+      "number": "52",
+      "paperLabel": "ISRO Scientist/Engineer CS 2023 · Part A",
+      "subject": "operating-systems",
+      "subjectSlug": "operating-systems",
+      "classificationHint": {
+        "subjectSlug": "operating-systems",
+        "topicSlug": "cpu-scheduling"
+      },
+      "topic": "cpu-scheduling",
+      "topicSlug": "cpu-scheduling",
+      "subtopics": [
+        "cpu-scheduling",
+        "isro-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "B",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">Process                        Activity<br><br>                     Scheduler type<br><br>                 (i) Long term                 (P) executes<br>                    scheduler                       much faster<br><br>                                                    to       reduce<br><br>                                                    wastage          of<br><br>                                                    CPU time<br><br>              (ii) Medium term                 (Q) controls<br>                    scheduler                       degree of<br><br>                                                    multipro<br><br>                                                    gramming<br><br>             (iii) Short Term                  (R) is<br>                    Scheduler                       associated<br><br>                                                    with<br><br>                                                    swapping<br><br>             With respect to Process Schedulers of an<br><br>             operating system mentioned above in the<br><br>             table, which of the following statements is<br><br>             correct?<br><br>             (a)     (i) - (R), (ii) - (P), (iii) - (Q)<br>             (b)     (i) - (Q), (ii) - (R), (iii) - (P)<br>             (c)     (i) - (P), (ii) - (R), (iii) - (Q)<br>             (d)     (i) - (R), (ii) - (Q), (iii) - (P)</div>",
+      "sourceUrl": "https://www.isro.gov.in/media_isro/pdf/recruitmentNotice/2025_May/CS_2023_merge.pdf",
+      "answerSource": {
+        "kind": "official-answer-key",
+        "url": "https://www.isro.gov.in/media_isro/pdf/recruitmentNotice/2024_January/SCIENTISTENGINEER_SC_COMPUTER_SCIENCE.pdf"
+      }
+    },
+    {
+      "id": "isro-cs:2023:53",
+      "year": 2023,
+      "set": null,
+      "number": "53",
+      "paperLabel": "ISRO Scientist/Engineer CS 2023 · Part A",
+      "subject": "operating-systems",
+      "subjectSlug": "operating-systems",
+      "classificationHint": {
+        "subjectSlug": "operating-systems",
+        "topicSlug": "process-synchronization"
+      },
+      "topic": "process-synchronization",
+      "topicSlug": "process-synchronization",
+      "subtopics": [
+        "process-synchronization",
+        "isro-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "C",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">In a producer-consumer scenario also<br>              known as Bounded-Buffer Problem, what<br><br>              would    be    the   most    appropriate<br>             synchronization primitive to ensure that<br>             the consumer waits when the buffer is<br>              empty?<br><br>             (a)   Spinlock<br><br>             (b)   Mutex lock<br><br>             (c)   Semaphore<br><br>             (d)   Monitors</div>",
+      "sourceUrl": "https://www.isro.gov.in/media_isro/pdf/recruitmentNotice/2025_May/CS_2023_merge.pdf",
+      "answerSource": {
+        "kind": "official-answer-key",
+        "url": "https://www.isro.gov.in/media_isro/pdf/recruitmentNotice/2024_January/SCIENTISTENGINEER_SC_COMPUTER_SCIENCE.pdf"
+      }
+    },
+    {
+      "id": "isro-cs:2023:54",
+      "year": 2023,
+      "set": null,
+      "number": "54",
+      "paperLabel": "ISRO Scientist/Engineer CS 2023 · Part A",
+      "subject": "operating-systems",
+      "subjectSlug": "operating-systems",
+      "classificationHint": {
+        "subjectSlug": "operating-systems",
+        "topicSlug": "memory-management"
+      },
+      "topic": "memory-management",
+      "topicSlug": "memory-management",
+      "subtopics": [
+        "memory-management",
+        "isro-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "A",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">Any attempt by a process to access<br>             memory allocated to OS or process of<br><br>             other user results into<br><br>             (a)   Trap to OS<br><br>             (b)   Context Switching<br><br>             (c)   Page fault<br><br>            (d)   Invocation to Scheduler Despatch</div>",
+      "sourceUrl": "https://www.isro.gov.in/media_isro/pdf/recruitmentNotice/2025_May/CS_2023_merge.pdf",
+      "answerSource": {
+        "kind": "official-answer-key",
+        "url": "https://www.isro.gov.in/media_isro/pdf/recruitmentNotice/2024_January/SCIENTISTENGINEER_SC_COMPUTER_SCIENCE.pdf"
+      }
+    },
+    {
+      "id": "isro-cs:2023:57",
+      "year": 2023,
+      "set": null,
+      "number": "57",
+      "paperLabel": "ISRO Scientist/Engineer CS 2023 · Part A",
+      "subject": "theory-of-computation",
+      "subjectSlug": "theory-of-computation",
+      "classificationHint": {
+        "subjectSlug": "theory-of-computation",
+        "topicSlug": "context-free-grammar"
+      },
+      "topic": "context-free-grammar",
+      "topicSlug": "context-free-grammar",
+      "subtopics": [
+        "context-free-grammar",
+        "isro-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "A",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">Consider the context-free grammar G<br>              below. Here S is the starting non-terminal<br><br>              symbol, while a and b are terminal<br>              symbols.<br>                             S → aSb|T<br>                             T → bT |b<br>              The language generated by G is:<br><br>               (a)   {ambn : 0 ≤ m &lt; n}<br>               (b)   {ambn : 0 &lt; m &lt; n}<br>               (c)   {ambn : 0 &lt; n ≤ m}<br>               (d)   {a nbn : 0 ≤ n}</div>",
+      "sourceUrl": "https://www.isro.gov.in/media_isro/pdf/recruitmentNotice/2025_May/CS_2023_merge.pdf",
+      "answerSource": {
+        "kind": "official-answer-key",
+        "url": "https://www.isro.gov.in/media_isro/pdf/recruitmentNotice/2024_January/SCIENTISTENGINEER_SC_COMPUTER_SCIENCE.pdf"
+      }
+    },
+    {
+      "id": "isro-cs:2023:58",
+      "year": 2023,
+      "set": null,
+      "number": "58",
+      "paperLabel": "ISRO Scientist/Engineer CS 2023 · Part A",
+      "subject": "theory-of-computation",
+      "subjectSlug": "theory-of-computation",
+      "classificationHint": {
+        "subjectSlug": "theory-of-computation",
+        "topicSlug": "recursive-language"
+      },
+      "topic": "recursive-language",
+      "topicSlug": "recursive-language",
+      "subtopics": [
+        "recursive-language",
+        "isro-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "D",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">Which of the following statements is NOT<br>             true?<br><br>            (a)   If a language is recursive        its<br>                   complement is recursive<br><br>            (b)   If a language is      recursive its<br>                   complement    is         recursively<br>                   enumerable<br>             (c)   If a language and its complement<br>                   are recursively enumerable it is<br><br>                   recursive<br><br>            (d)   If a language is recursively<br>                   enumerable its complement is also<br><br>                   recursively enumerable</div>",
+      "sourceUrl": "https://www.isro.gov.in/media_isro/pdf/recruitmentNotice/2025_May/CS_2023_merge.pdf",
+      "answerSource": {
+        "kind": "official-answer-key",
+        "url": "https://www.isro.gov.in/media_isro/pdf/recruitmentNotice/2024_January/SCIENTISTENGINEER_SC_COMPUTER_SCIENCE.pdf"
+      }
+    },
+    {
+      "id": "isro-cs:2023:59",
+      "year": 2023,
+      "set": null,
+      "number": "59",
+      "paperLabel": "ISRO Scientist/Engineer CS 2023 · Part A",
+      "subject": "theory-of-computation",
+      "subjectSlug": "theory-of-computation",
+      "classificationHint": {
+        "subjectSlug": "theory-of-computation",
+        "topicSlug": "context-free-language"
+      },
+      "topic": "context-free-language",
+      "topicSlug": "context-free-language",
+      "subtopics": [
+        "context-free-language",
+        "isro-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "B",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">Which of the following statements is<br>             FALSE:<br><br>            (a)   The intersection of a regular<br>                   language     and    a    context-free<br>                   language is context-free<br><br>            (b)   The intersection of a regular<br>                   language and context-free language<br>                   is regular<br><br>            (c)   The union of two context-free<br>                   languages is context-free<br><br>            (d)   The union of two regular languages<br>                   is regular</div>",
+      "sourceUrl": "https://www.isro.gov.in/media_isro/pdf/recruitmentNotice/2025_May/CS_2023_merge.pdf",
+      "answerSource": {
+        "kind": "official-answer-key",
+        "url": "https://www.isro.gov.in/media_isro/pdf/recruitmentNotice/2024_January/SCIENTISTENGINEER_SC_COMPUTER_SCIENCE.pdf"
+      }
+    },
+    {
+      "id": "isro-cs:2023:60",
+      "year": 2023,
+      "set": null,
+      "number": "60",
+      "paperLabel": "ISRO Scientist/Engineer CS 2023 · Part A",
+      "subject": "theory-of-computation",
+      "subjectSlug": "theory-of-computation",
+      "classificationHint": {
+        "subjectSlug": "theory-of-computation",
+        "topicSlug": "context-free-grammar"
+      },
+      "topic": "context-free-grammar",
+      "topicSlug": "context-free-grammar",
+      "subtopics": [
+        "context-free-grammar",
+        "isro-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "B",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">Consider the context-free grammar<br>              G below. Here S is the starting non-<br><br>              terminal symbol, while a and b are<br>              terminal symbols.<br>                            S → aaSb|T<br>                            T → Tb|a<br>)             Which of the following statements is true<br>              about the language L(G) generated by G?<br><br>             (a)   aabbaabb belongs to L(G) but aabb<br>                     does not<br><br>             (b)   aaaaabbb belongs      to    L(G)   but<br>                     aaaabb does not<br><br>             (c)   aaaabb belongs      to     L(G)    but<br>                     aabbaabb does not<br><br>             (d)   aaabb belongs to L(G) but aaaaabbb<br>                     does not</div>",
+      "sourceUrl": "https://www.isro.gov.in/media_isro/pdf/recruitmentNotice/2025_May/CS_2023_merge.pdf",
+      "answerSource": {
+        "kind": "official-answer-key",
+        "url": "https://www.isro.gov.in/media_isro/pdf/recruitmentNotice/2024_January/SCIENTISTENGINEER_SC_COMPUTER_SCIENCE.pdf"
+      }
+    },
+    {
+      "id": "isro-cs:2023:80",
+      "year": 2023,
+      "set": null,
+      "number": "80",
+      "paperLabel": "ISRO Scientist/Engineer CS 2023 · Part A",
+      "subject": "databases",
+      "subjectSlug": "databases",
+      "classificationHint": {
+        "subjectSlug": "databases",
+        "topicSlug": "er-model"
+      },
+      "topic": "er-model",
+      "topicSlug": "er-model",
+      "subtopics": [
+        "er-model",
+        "isro-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "A",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">Entity Relationship model shows the<br><br>              (a)   Static view<br><br>              (b)   Functional view<br><br>              (c)   Dynamic view<br><br>              (d)   All of the above</div>",
+      "sourceUrl": "https://www.isro.gov.in/media_isro/pdf/recruitmentNotice/2025_May/CS_2023_merge.pdf",
+      "answerSource": {
+        "kind": "official-answer-key",
+        "url": "https://www.isro.gov.in/media_isro/pdf/recruitmentNotice/2024_January/SCIENTISTENGINEER_SC_COMPUTER_SCIENCE.pdf"
+      }
+    }
+  ]
+}

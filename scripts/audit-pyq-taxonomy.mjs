@@ -58,13 +58,36 @@ for (const question of questions) {
     question.subjectSlug === expected.subjectSlug && question.topicSlug === expected.topicSlug,
     `${question.id} is ${question.subjectSlug}/${question.topicSlug}; expected ${expected.subjectSlug}/${expected.topicSlug}`
   );
+  if (question.choices !== undefined) {
+    const validChoices = Array.isArray(question.choices) && question.choices.length >= 2;
+    check(
+      validChoices,
+      `${question.id} has an invalid source choice set`
+    );
+    const answers = Array.isArray(question.answer) ? question.answer : [question.answer];
+    if (validChoices && question.answerStatus === 'available' && question.type !== 'NAT') {
+      check(
+        answers.every((answer) => question.choices.includes(String(answer))),
+        `${question.id} has an answer outside its source choice set`
+      );
+    }
+  }
 }
 
 check(manifest.defaultBookSlug === 'gate-cse', 'Default PYQ book is stale');
-check(manifest.books.length === 5, 'Manifest must expose exactly five GATE-level books');
+check(manifest.books.length === 11, 'Manifest must expose exactly eleven audited books');
 for (const book of manifest.books) {
   const rows = questions.filter((question) => question.bookSlug === book.slug);
-  check(book.difficultyFloor === 'gate', `${book.slug} violates the GATE difficulty floor`);
+  check(
+    ['gate', 'mixed', 'above-gate'].includes(book.difficultyFloor),
+    `${book.slug} has an invalid difficulty band`
+  );
+  check(
+    ['official-exam', 'official-sample', 'reconstructed-exam', 'audited-gate-prep'].includes(
+      book.sourceClass
+    ),
+    `${book.slug} has an invalid source class`
+  );
   check(rows.length === book.count, `${book.slug} question count is stale`);
   check(
     book.subjects.reduce((total, subject) => total + subject.count, 0) === book.count,

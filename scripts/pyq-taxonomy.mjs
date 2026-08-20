@@ -1,5 +1,5 @@
-export const PYQ_BANK_VERSION = 'gate-1990-2026-v8-gate-level-books';
-export const PYQ_BANK_QUESTION_COUNT = 3649;
+export const PYQ_BANK_VERSION = 'gate-and-cs-exams-1990-2026-v9';
+export const PYQ_BANK_QUESTION_COUNT = 4210;
 
 export const PYQ_TAXONOMY = [
   {

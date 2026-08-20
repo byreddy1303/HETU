@@ -23,6 +23,7 @@ const questions: PyqQuestion[] = [
     subtopics: ['Logic'],
     marks: 1,
     type: 'MCQ',
+    choices: ['A', 'B', 'C', 'D', 'E'],
     answer: 'B',
     tolerance: null,
     answerStatus: 'available',
@@ -175,6 +176,7 @@ describe('PYQ practice navigation', () => {
     await user.click(
       await screen.findByRole('button', { name: /Start (?:fresh set|practice)/ })
     );
+    expect(await screen.findByRole('button', { name: 'E' })).toBeEnabled();
     await user.click(await screen.findByRole('button', { name: 'A' }));
     await user.click(screen.getByRole('button', { name: /^Answered/ }));
     await user.click(screen.getByRole('button', { name: 'Commit & reveal key' }));
@@ -209,6 +211,7 @@ describe('PYQ practice navigation', () => {
     expect(await screen.findByText('Which proposition is a tautology?')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'A' })).toBeDisabled();
     expect(screen.getByRole('button', { name: 'B' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'E' })).toBeDisabled();
     expect(screen.getByRole('button', { name: /^Answered/ })).toBeDisabled();
 
     await waitFor(async () => {
@@ -219,6 +222,10 @@ describe('PYQ practice navigation', () => {
         mark_decision: 'MARK',
         mark_correct: true
       });
+      expect(
+        attempts.find((attempt) => attempt.question_uid === questions[0].id)?.question_snapshot
+          ?.choices
+      ).toEqual(['A', 'B', 'C', 'D', 'E']);
     });
   });
 });

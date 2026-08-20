@@ -55,7 +55,8 @@ import {
   pyqPlainText,
   pyqSourceRef,
   type PyqManifest,
-  type PyqQuestion
+  type PyqQuestion,
+  type PyqSourceClass
 } from '@/lib/pyq';
 import {
   abandonPyqSession,
@@ -81,7 +82,20 @@ type CountChoice = '5' | '10' | '25' | '50' | 'all';
 type TypeFilter = PyqSessionConfig['type'];
 type AttemptConfig = PyqSessionConfig;
 
-const CHOICES = ['A', 'B', 'C', 'D'];
+const DEFAULT_CHOICES = ['A', 'B', 'C', 'D'] as const;
+
+function difficultyLabel(value: PyqManifest['books'][number]['difficultyFloor']): string {
+  if (value === 'above-gate') return 'Above GATE';
+  if (value === 'mixed') return 'Mixed level';
+  return 'GATE level';
+}
+
+function sourceClassLabel(value: PyqSourceClass): string {
+  if (value === 'official-sample') return 'Official sample';
+  if (value === 'reconstructed-exam') return 'Reconstructed';
+  if (value === 'audited-gate-prep') return 'Audited prep';
+  return 'Official exam';
+}
 
 function latestQuestionAttempt(
   attempts: PyqAttemptRow[],
@@ -255,7 +269,7 @@ function PracticeSetup({
             <div>
               <p className="u-label">Choose a question book</p>
               <p className="mt-1 text-[13px] text-text-muted">
-                Every book is GATE level; DA/AI and cross-branch books include only CSE-syllabus overlap.
+                Each book shows its source class and difficulty band; GATE CSE remains the default.
               </p>
             </div>
             <span className="u-num text-[11px] text-text-faint">
@@ -321,9 +335,10 @@ function PracticeSetup({
                     <span className="text-[13.5px] font-semibold leading-snug text-text">
                       {book.label}
                     </span>
-                    <Badge tone="accent">
-                      {book.difficultyFloor === 'above-gate' ? 'Above GATE' : 'GATE level'}
-                    </Badge>
+                    <span className="flex shrink-0 flex-wrap justify-end gap-1">
+                      <Badge tone="accent">{difficultyLabel(book.difficultyFloor)}</Badge>
+                      <Badge>{sourceClassLabel(book.sourceClass)}</Badge>
+                    </span>
                   </span>
                   <span className="mt-2 block text-[11.5px] leading-relaxed text-text-muted">
                     {book.description}
@@ -623,6 +638,7 @@ function AnswerPad({
   onNumeric: (value: string) => void;
 }) {
   const inputType = answerInputType(question);
+  const answerChoices = question.choices?.length ? question.choices : DEFAULT_CHOICES;
   if (inputType === 'NAT') {
     return (
       <label className="block text-[12px] font-medium text-text-muted">
@@ -646,8 +662,10 @@ function AnswerPad({
       <legend className="u-label mb-2">
         Your answer {inputType === 'MSQ' ? '— select all that apply' : ''}
       </legend>
-      <div className="grid grid-cols-4 gap-2">
-        {CHOICES.map((choice) => {
+      <div
+        className={cn('grid gap-2', answerChoices.length > 4 ? 'grid-cols-2 sm:grid-cols-5' : 'grid-cols-4')}
+      >
+        {answerChoices.map((choice) => {
           const active = choices.includes(choice);
           return (
             <button

@@ -13,6 +13,7 @@
     "build:native": "tsc -b && vite build --mode capacitor",
     "preview": "vite preview",
     "notes:build": "node scripts/build-topper-notes.mjs",
+    "pyq:import:supplemental": "node scripts/import-supplemental-pyqs.mjs",
     "pyq:build": "node scripts/build-pyq-bank.mjs",
     "pyq:classify": "node scripts/classify-pyq-bank.mjs",
     "pyq:audit": "node scripts/audit-pyq-taxonomy.mjs",

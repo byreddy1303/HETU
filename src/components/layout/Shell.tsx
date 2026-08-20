@@ -50,12 +50,8 @@ export default function Shell() {
             <motion.div
               className="air-page immersive-route-stage"
               key={pathname}
-              initial={
-                reduceMotion
-                  ? false
-                  : { opacity: 0, y: 24, scale: 0.985, rotateX: 1.4, filter: 'blur(7px)' }
-              }
-              animate={{ opacity: 1, y: 0, scale: 1, rotateX: 0, filter: 'blur(0px)' }}
+              initial={reduceMotion ? false : { opacity: 0, y: 24, scale: 0.985, rotateX: 1.4 }}
+              animate={{ opacity: 1, y: 0, scale: 1, rotateX: 0 }}
               transition={{ duration: 0.56, ease: [0.22, 1, 0.36, 1] }}
             >
               <Outlet />

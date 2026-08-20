@@ -12,6 +12,7 @@ export default function MagneticAction({
   strength?: number;
 }) {
   const ref = useRef<HTMLDivElement>(null);
+  const boundsRef = useRef<DOMRect | null>(null);
   const reduceMotion = useReducedMotion();
   const rawX = useMotionValue(0);
   const rawY = useMotionValue(0);
@@ -23,13 +24,18 @@ export default function MagneticAction({
       ref={ref}
       className={cn('immersive-magnetic', className)}
       style={reduceMotion ? undefined : { x, y }}
+      onPointerEnter={(event) => {
+        if (reduceMotion || event.pointerType === 'touch') return;
+        boundsRef.current = event.currentTarget.getBoundingClientRect();
+      }}
       onPointerMove={(event) => {
         if (reduceMotion || event.pointerType === 'touch') return;
-        const bounds = event.currentTarget.getBoundingClientRect();
+        const bounds = boundsRef.current ?? event.currentTarget.getBoundingClientRect();
         rawX.set((event.clientX - bounds.left - bounds.width / 2) * strength);
         rawY.set((event.clientY - bounds.top - bounds.height / 2) * strength);
       }}
       onPointerLeave={() => {
+        boundsRef.current = null;
         rawX.set(0);
         rawY.set(0);
       }}

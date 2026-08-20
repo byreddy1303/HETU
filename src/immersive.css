@@ -11,6 +11,32 @@
   --scene-cursor-y: 50vh;
   --scene-pulse-x: 50vw;
   --scene-pulse-y: 50vh;
+  --scene-far-x: 0px;
+  --scene-far-y: 0px;
+  --scene-mid-x: 0px;
+  --scene-mid-y: 0px;
+  --scene-near-x: 0px;
+  --scene-near-y: 0px;
+  --scene-far-x-inverse: 0px;
+  --scene-mid-x-inverse: 0px;
+  --scene-near-x-inverse: 0px;
+  --scene-wash-x: 0px;
+  --scene-wash-y: 0px;
+  --scene-wash-focus-x: 68%;
+  --scene-wash-focus-y: 32%;
+  --scene-wash-echo-x: 30%;
+  --scene-wash-echo-y: 72%;
+  --scene-panel-x: 0px;
+  --scene-panel-y: -3px;
+  --scene-hero-x: 0px;
+  --scene-tilt-x: 0deg;
+  --scene-tilt-y: 0deg;
+  --scene-scroll-far: 0px;
+  --scene-scroll-grid: 0px;
+  --scene-scroll-thread: 0px;
+  --scene-scroll-orbit: 0px;
+  --scene-scroll-core: 0px;
+  --scene-scroll-node: 0px;
   position: relative;
   isolation: isolate;
   background:
@@ -86,8 +112,8 @@
 .immersive-orbit,
 .immersive-focus-core,
 .immersive-evidence,
-.immersive-scene__identity,
-.immersive-scene__axis {
+.immersive-scene__cursor,
+.immersive-scene__pulse {
   will-change: transform;
 }
 
@@ -140,8 +166,8 @@
 
 .immersive-scene__cursor {
   position: absolute;
-  left: var(--scene-cursor-x);
-  top: var(--scene-cursor-y);
+  left: 0;
+  top: 0;
   width: 22rem;
   height: 22rem;
   border-radius: 50%;
@@ -152,7 +178,7 @@
     rgb(var(--scene-tone) / 0.025) 38%,
     transparent 70%
   );
-  transform: translate(-50%, -50%);
+  transform: translate3d(50vw, 50vh, 0) translate(-50%, -50%);
   transition: opacity 180ms ease;
   mix-blend-mode: multiply;
 }
@@ -163,13 +189,14 @@ html[data-theme='dark'] .immersive-scene__cursor {
 
 .immersive-scene__pulse {
   position: absolute;
-  left: var(--scene-pulse-x);
-  top: var(--scene-pulse-y);
+  left: 0;
+  top: 0;
   width: 26px;
   height: 26px;
   border: 1px solid rgb(var(--scene-tone) / 0.6);
   border-radius: 50%;
   opacity: 0;
+  translate: 50vw 50vh;
   transform: translate(-50%, -50%) scale(0.1);
 }
 
@@ -217,11 +244,13 @@ html[data-theme='dark'] .immersive-scene__cursor {
 
 .immersive-orbit {
   position: absolute;
-  left: calc(64% + var(--scene-mid-x));
-  top: calc(41% + var(--scene-mid-y) + var(--scene-scroll-orbit));
+  left: 64%;
+  top: 41%;
   border: 1px solid rgb(var(--scene-tone) / 0.16);
   border-radius: 50%;
-  transform: translate(-50%, -50%) rotateX(67deg) rotateZ(0deg);
+  translate: calc(-50% + var(--scene-mid-x))
+    calc(-50% + var(--scene-mid-y) + var(--scene-scroll-orbit));
+  transform: rotateX(67deg) rotateZ(0deg);
   transform-style: preserve-3d;
 }
 
@@ -266,8 +295,8 @@ html[data-theme='dark'] .immersive-scene__cursor {
 
 .immersive-focus-core {
   position: absolute;
-  left: calc(64% + var(--scene-far-x));
-  top: calc(41% + var(--scene-far-y) + var(--scene-scroll-core));
+  left: 64%;
+  top: 41%;
   display: grid;
   width: 84px;
   height: 84px;
@@ -279,8 +308,9 @@ html[data-theme='dark'] .immersive-scene__cursor {
   box-shadow:
     0 0 0 16px rgb(var(--scene-tone) / 0.025),
     0 0 70px rgb(var(--scene-tone) / 0.08);
-  transform: translate(-50%, -50%);
-  backdrop-filter: blur(4px);
+  translate: calc(-50% + var(--scene-far-x))
+    calc(-50% + var(--scene-far-y) + var(--scene-scroll-core));
+  background: rgb(var(--color-bg-raised) / 0.36);
 }
 
 .immersive-focus-core__mark {
@@ -358,7 +388,7 @@ html[data-theme='dark'] .immersive-scene__cursor {
   border: 1px solid rgb(var(--scene-tone) / 0.13);
   border-radius: 2px 12px 12px 12px;
   color: rgb(var(--color-text-faint) / 0.54);
-  background: rgb(var(--color-bg-raised) / 0.28);
+  background: rgb(var(--color-bg-raised) / 0.42);
   box-shadow: 0 12px 30px -22px rgb(var(--scene-tone) / 0.45);
   transform: translate3d(
       var(--node-drift-x),
@@ -366,7 +396,6 @@ html[data-theme='dark'] .immersive-scene__cursor {
       0
     )
     rotate(var(--node-rotate, 0deg));
-  backdrop-filter: blur(3px);
   animation: immersive-evidence-float var(--node-duration) ease-in-out infinite;
   animation-delay: var(--node-delay);
 }
@@ -375,7 +404,6 @@ html[data-theme='dark'] .immersive-scene__cursor {
   --node-drift-x: var(--scene-far-x);
   --node-drift-y: var(--scene-far-y);
   opacity: 0.38;
-  filter: blur(0.3px);
 }
 
 .immersive-evidence[data-depth='2'] {
@@ -483,12 +511,11 @@ html[data-theme='dark'] .immersive-scene__cursor {
 .immersive-shell .air-page .u-panel,
 .immersive-shell .air-page .native-learning-tips {
   border-color: rgb(var(--color-border) / 0.86);
-  background: rgb(var(--color-bg-raised) / 0.86);
+  background: rgb(var(--color-bg-raised) / 0.93);
   box-shadow:
     0 26px 62px -42px rgb(var(--scene-tone) / 0.38),
     0 9px 25px -21px rgb(var(--color-text) / 0.23),
     inset 0 1px rgb(255 255 255 / 0.38);
-  backdrop-filter: blur(16px) saturate(1.04);
   transition:
     transform 320ms cubic-bezier(0.22, 1, 0.36, 1),
     border-color 220ms ease,
@@ -498,7 +525,7 @@ html[data-theme='dark'] .immersive-scene__cursor {
 
 html[data-theme='dark'] .immersive-shell .air-page .u-panel,
 html[data-theme='dark'] .immersive-shell .air-page .native-learning-tips {
-  background: rgb(var(--color-bg-raised) / 0.82);
+  background: rgb(var(--color-bg-raised) / 0.91);
   box-shadow:
     0 26px 64px -38px rgb(0 0 0 / 0.84),
     0 0 0 1px rgb(var(--scene-tone) / 0.035),
@@ -534,8 +561,7 @@ html[data-theme='dark'] .immersive-shell .air-page .native-learning-tips {
 .immersive-shell input:not([type='checkbox']):not([type='radio']),
 .immersive-shell textarea,
 .immersive-shell select {
-  background-color: rgb(var(--color-bg-raised) / 0.82);
-  backdrop-filter: blur(10px);
+  background-color: rgb(var(--color-bg-raised) / 0.94);
   transition:
     border-color 180ms ease,
     background-color 180ms ease,
@@ -595,17 +621,19 @@ html[data-theme='dark'] .immersive-shell .air-page .native-learning-tips {
 
 .immersive-shell [role='progressbar'] {
   position: relative;
+  overflow: hidden;
   isolation: isolate;
   box-shadow: inset 0 1px 2px rgb(var(--color-text) / 0.06);
 }
 
 .immersive-shell [role='progressbar'] > *::after {
   position: absolute;
-  inset: 0;
+  inset: 0 auto 0 0;
+  width: 45%;
   border-radius: inherit;
   background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.38), transparent);
-  background-size: 45% 100%;
-  background-repeat: no-repeat;
+  transform: translate3d(-225%, 0, 0);
+  will-change: transform;
   animation: immersive-progress-scan 3.8s ease-in-out infinite;
   content: '';
 }
@@ -720,10 +748,9 @@ html[data-theme='dark'] .immersive-shell .air-page .native-learning-tips {
   overflow: hidden;
   border-right-color: rgb(var(--scene-tone) / 0.14);
   background:
-    linear-gradient(180deg, rgb(var(--color-bg-raised) / 0.9), rgb(var(--color-bg) / 0.81)),
+    linear-gradient(180deg, rgb(var(--color-bg-raised) / 0.96), rgb(var(--color-bg) / 0.92)),
     radial-gradient(circle at 50% 16%, rgb(var(--scene-tone) / 0.1), transparent 15rem);
   box-shadow: 18px 0 70px -50px rgb(var(--scene-tone) / 0.4);
-  backdrop-filter: blur(22px) saturate(1.05);
 }
 
 .immersive-side-nav__brand,
@@ -846,17 +873,15 @@ html[data-theme='dark'] .immersive-shell .air-page .native-learning-tips {
 }
 
 .immersive-side-nav__profile {
-  background: rgb(var(--color-bg-raised) / 0.42);
-  backdrop-filter: blur(14px);
+  background: rgb(var(--color-bg-raised) / 0.76);
 }
 
 .immersive-top-controls > div {
   padding: 4px;
   border: 1px solid rgb(var(--color-border) / 0.58);
   border-radius: 999px;
-  background: rgb(var(--color-bg-raised) / 0.64);
+  background: rgb(var(--color-bg-raised) / 0.9);
   box-shadow: 0 13px 30px -24px rgb(var(--scene-tone) / 0.54);
-  backdrop-filter: blur(16px);
 }
 
 /* Dashboard constellation -------------------------------------------------- */
@@ -896,6 +921,13 @@ html[data-theme='dark'] .immersive-shell .air-page .native-learning-tips {
     ),
     rgb(var(--color-bg-raised)) !important;
   transform: translate3d(var(--scene-far-x-inverse), 0, 0);
+}
+
+.immersive-dashboard-hero,
+.immersive-metric-card,
+.immersive-learning-signal {
+  backface-visibility: hidden;
+  will-change: transform;
 }
 
 .immersive-dashboard-hero:hover {
@@ -1185,8 +1217,7 @@ html[data-theme='dark'] .immersive-shell .air-page .native-learning-tips {
 .immersive-mobile-header,
 .immersive-shell .native-bottom-nav,
 .immersive-shell .native-more-sheet {
-  background: rgb(var(--color-bg-raised) / 0.84) !important;
-  backdrop-filter: blur(22px) saturate(1.08);
+  background: rgb(var(--color-bg-raised) / 0.94) !important;
 }
 
 .immersive-shell .native-bottom-nav {
@@ -1243,17 +1274,17 @@ html[data-theme='dark'] .immersive-shell .air-page .native-learning-tips {
 
 @keyframes immersive-orbit-spin {
   to {
-    transform: translate(-50%, -50%) rotateX(67deg) rotateZ(360deg);
+    transform: rotateX(67deg) rotateZ(360deg);
   }
 }
 
 @keyframes immersive-evidence-float {
   0%,
   100% {
-    margin-top: -3px;
+    translate: 0 -3px;
   }
   50% {
-    margin-top: 5px;
+    translate: 0 5px;
   }
 }
 
@@ -1338,11 +1369,11 @@ html[data-theme='dark'] .immersive-shell .air-page .native-learning-tips {
 @keyframes immersive-progress-scan {
   0%,
   30% {
-    background-position: -80% 0;
+    transform: translate3d(-225%, 0, 0);
   }
   70%,
   100% {
-    background-position: 180% 0;
+    transform: translate3d(400%, 0, 0);
   }
 }
 
@@ -1433,8 +1464,7 @@ html[data-theme='dark'] .immersive-shell .air-page .native-learning-tips {
 
   .immersive-shell .air-page .u-panel,
   .immersive-shell .air-page .native-learning-tips {
-    background: rgb(var(--color-bg-raised) / 0.9);
-    backdrop-filter: blur(12px);
+    background: rgb(var(--color-bg-raised) / 0.94);
   }
 
   .immersive-shell .air-page .u-panel:hover,

@@ -73,10 +73,22 @@ function configurePwaUpdates(): void {
   });
 }
 
+function schedulePwaUpdates(): void {
+  const start = () => configurePwaUpdates();
+  const idleWindow = window as Window & {
+    requestIdleCallback?: (callback: IdleRequestCallback, options?: IdleRequestOptions) => number;
+  };
+  if (idleWindow.requestIdleCallback) {
+    idleWindow.requestIdleCallback(start, { timeout: 2500 });
+    return;
+  }
+  window.setTimeout(start, 1200);
+}
+
 if (Capacitor.isNativePlatform()) {
   void disableNativeServiceWorkers().catch(() => undefined);
 } else {
-  configurePwaUpdates();
+  schedulePwaUpdates();
 }
 
 ReactDOM.createRoot(document.getElementById('root')!).render(

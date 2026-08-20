@@ -2,7 +2,6 @@
 // mean. Lives next to the OutcomeBar on the Dashboard's Last session card
 // so a first-time reader can decode the colours without hunting through docs.
 import { useEffect, useRef, useState } from 'react';
-import { AnimatePresence, motion } from 'motion/react';
 import { HelpCircle } from 'lucide-react';
 import { OUTCOMES } from '@/lib/constants';
 import { cn } from '@/lib/utils';
@@ -51,39 +50,33 @@ export default function OutcomeLegend() {
         <HelpCircle size={11} strokeWidth={1.75} />
         legend
       </button>
-      <AnimatePresence>
-        {open && (
-          <motion.div
-            initial={{ opacity: 0, y: -4 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -4 }}
-            transition={{ duration: 0.15 }}
-            role="dialog"
-            aria-modal="true"
-            aria-label="Outcome code legend"
-            className="native-outcome-legend absolute right-0 top-full z-30 mt-1 w-[260px] rounded border border-border bg-bg-raised p-3 shadow-lift"
-          >
-            <p className="u-label mb-2 text-text-muted">outcome codes</p>
-            <ul className="flex flex-col gap-1.5">
-              {OUTCOMES.map((o) => (
-                <li key={o.code} className="flex items-start gap-2 text-[12px]">
-                  <span className={cn('mt-1 h-1.5 w-1.5 shrink-0 rounded-full', TONE_DOT[o.tone])} />
-                  <div className="min-w-0">
-                    <p>
-                      <span className="u-num text-text">{o.code}</span>
-                      <span className="text-text-muted"> · {o.label}</span>
-                    </p>
-                    <p className="text-[11px] text-text-faint">{o.hint}</p>
-                  </div>
-                </li>
-              ))}
-            </ul>
-            <p className="mt-2 border-t border-border/60 pt-2 text-[11px] text-text-faint">
-              Anything not R schedules a re-attempt at D3.
-            </p>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {open && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label="Outcome code legend"
+          className="native-outcome-legend latency-popover-enter absolute right-0 top-full z-30 mt-1 w-[260px] rounded border border-border bg-bg-raised p-3 shadow-lift"
+        >
+          <p className="u-label mb-2 text-text-muted">outcome codes</p>
+          <ul className="flex flex-col gap-1.5">
+            {OUTCOMES.map((o) => (
+              <li key={o.code} className="flex items-start gap-2 text-[12px]">
+                <span className={cn('mt-1 h-1.5 w-1.5 shrink-0 rounded-full', TONE_DOT[o.tone])} />
+                <div className="min-w-0">
+                  <p>
+                    <span className="u-num text-text">{o.code}</span>
+                    <span className="text-text-muted"> · {o.label}</span>
+                  </p>
+                  <p className="text-[11px] text-text-faint">{o.hint}</p>
+                </div>
+              </li>
+            ))}
+          </ul>
+          <p className="mt-2 border-t border-border/60 pt-2 text-[11px] text-text-faint">
+            Anything not R schedules a re-attempt at D3.
+          </p>
+        </div>
+      )}
     </div>
   );
 }

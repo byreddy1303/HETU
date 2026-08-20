@@ -8,10 +8,8 @@ import type { User } from '@supabase/supabase-js';
 import { supabase, supabaseConfigured } from '@/lib/supabase';
 import { db } from '@/lib/db';
 import { wipeLocalState } from '@/lib/isolation';
-import { loginWithUsernamePin, signupViaInvite } from '@/lib/edge';
 import type { UserRow } from '@/types';
 import { EXAM_DATE_DEFAULT } from '@/lib/constants';
-import { unregisterCurrentPushDevice } from '@/lib/buddyNotifications';
 
 export type AuthStatus = 'loading' | 'signed_out' | 'signed_in';
 
@@ -77,6 +75,16 @@ const SANDBOX_PROFILE: UserRow = {
 };
 
 let initialized = false;
+let authActionsPromise: Promise<typeof import('@/lib/edge')> | null = null;
+
+/** Lets auth screens warm the action chunk after their first paint. */
+export function preloadAuthActions(): Promise<typeof import('@/lib/edge')> {
+  authActionsPromise ??= import('@/lib/edge').catch((error) => {
+    authActionsPromise = null;
+    throw error;
+  });
+  return authActionsPromise;
+}
 
 export const useAuthStore = create<AuthState>((set, get) => ({
   status: 'loading',
@@ -126,6 +134,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   signIn: async (username, pin) => {
+    const actions = await preloadAuthActions().catch(() => null);
+    if (!actions) return { error: 'Could not load sign-in. Check your connection.' };
+    const { loginWithUsernamePin } = actions;
     const res = await loginWithUsernamePin({ username, pin });
     if (!('ok' in res) || !res.ok) return { error: res.error };
     // Hand the tokens to the Supabase client so future calls carry the JWT.
@@ -139,6 +150,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   signUp: async (payload) => {
+    const actions = await preloadAuthActions().catch(() => null);
+    if (!actions) return { error: 'Could not load signup. Check your connection.' };
+    const { loginWithUsernamePin, signupViaInvite } = actions;
     const res = await signupViaInvite(payload);
     if (!('ok' in res) || !res.ok) return { error: res.error };
     // Sign in immediately with the same credentials so the user lands
@@ -169,7 +183,13 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       set({ status: 'signed_out', profile: null, sandbox: false, user: null });
       return;
     }
-    await unregisterCurrentPushDevice();
+    try {
+      const { unregisterCurrentPushDevice } = await import('@/lib/buddyNotifications');
+      await unregisterCurrentPushDevice();
+    } catch {
+      // Signing out must remain available if an optional notification chunk
+      // cannot be fetched while the device is offline.
+    }
     await supabase.auth.signOut();
     await wipeLocalState();
     set({ status: 'signed_out', profile: null, user: null });

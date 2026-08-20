@@ -1,6 +1,6 @@
 import { useRef, type ReactNode } from 'react';
-import { motion, useMotionValue, useReducedMotion, useSpring } from 'motion/react';
 import { cn } from '@/lib/utils';
+import { useMediaQuery } from '@/hooks/useMediaQuery';
 
 export default function MagneticAction({
   children,
@@ -13,17 +13,12 @@ export default function MagneticAction({
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const boundsRef = useRef<DOMRect | null>(null);
-  const reduceMotion = useReducedMotion();
-  const rawX = useMotionValue(0);
-  const rawY = useMotionValue(0);
-  const x = useSpring(rawX, { stiffness: 320, damping: 24, mass: 0.32 });
-  const y = useSpring(rawY, { stiffness: 320, damping: 24, mass: 0.32 });
+  const reduceMotion = useMediaQuery('(prefers-reduced-motion: reduce)');
 
   return (
-    <motion.div
+    <div
       ref={ref}
       className={cn('immersive-magnetic', className)}
-      style={reduceMotion ? undefined : { x, y }}
       onPointerEnter={(event) => {
         if (reduceMotion || event.pointerType === 'touch') return;
         boundsRef.current = event.currentTarget.getBoundingClientRect();
@@ -31,16 +26,16 @@ export default function MagneticAction({
       onPointerMove={(event) => {
         if (reduceMotion || event.pointerType === 'touch') return;
         const bounds = boundsRef.current ?? event.currentTarget.getBoundingClientRect();
-        rawX.set((event.clientX - bounds.left - bounds.width / 2) * strength);
-        rawY.set((event.clientY - bounds.top - bounds.height / 2) * strength);
+        const x = (event.clientX - bounds.left - bounds.width / 2) * strength;
+        const y = (event.clientY - bounds.top - bounds.height / 2) * strength;
+        event.currentTarget.style.transform = `translate3d(${x.toFixed(1)}px, ${y.toFixed(1)}px, 0)`;
       }}
-      onPointerLeave={() => {
+      onPointerLeave={(event) => {
         boundsRef.current = null;
-        rawX.set(0);
-        rawY.set(0);
+        event.currentTarget.style.removeProperty('transform');
       }}
     >
       {children}
-    </motion.div>
+    </div>
   );
 }

@@ -1,4 +1,3 @@
-import { Cell, Pie, PieChart, ResponsiveContainer } from 'recharts';
 import type { Outcome } from '@/types';
 import { OUTCOMES } from '@/lib/constants';
 
@@ -18,10 +17,17 @@ export default function OutcomeDonut({
   distribution: Record<Outcome, number>;
   total: number;
 }) {
-  const data = OUTCOMES.map((outcome) => ({
-    code: outcome.code,
-    value: distribution[outcome.code]
-  })).filter((entry) => entry.value > 0);
+  let cursor = 0;
+  const stops = OUTCOMES.flatMap((outcome) => {
+    const value = distribution[outcome.code];
+    if (value <= 0 || total <= 0) return [];
+    const start = cursor;
+    cursor += (value / total) * 100;
+    return `${COLOR[outcome.code]} ${start.toFixed(2)}% ${cursor.toFixed(2)}%`;
+  });
+  const backgroundImage = stops.length
+    ? `conic-gradient(from -90deg, ${stops.join(', ')})`
+    : 'none';
 
   return (
     <div
@@ -29,27 +35,15 @@ export default function OutcomeDonut({
       role="img"
       aria-label={`Last session outcome distribution across ${total} questions`}
     >
-      <ResponsiveContainer width="100%" height="100%">
-        <PieChart>
-          <Pie
-            data={data}
-            dataKey="value"
-            nameKey="code"
-            cx="50%"
-            cy="50%"
-            innerRadius={48}
-            outerRadius={66}
-            paddingAngle={data.length > 1 ? 2 : 0}
-            stroke="rgb(var(--color-bg-raised, 251 253 251))"
-            strokeWidth={2}
-            isAnimationActive={false}
-          >
-            {data.map((entry) => (
-              <Cell key={entry.code} fill={COLOR[entry.code]} />
-            ))}
-          </Pie>
-        </PieChart>
-      </ResponsiveContainer>
+      <div
+        className="absolute inset-[9px] rounded-full shadow-sm"
+        style={{ backgroundImage }}
+        aria-hidden="true"
+      />
+      <div
+        className="absolute inset-[29px] rounded-full border-2 border-bg-raised bg-bg-raised"
+        aria-hidden="true"
+      />
       <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
         <span className="u-num text-[24px] font-semibold leading-none text-text">{total}</span>
         <span className="u-label mt-1">questions</span>

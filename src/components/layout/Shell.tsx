@@ -1,5 +1,4 @@
 import { Outlet, useLocation } from 'react-router-dom';
-import { motion, useReducedMotion } from 'motion/react';
 import Nav from '@/components/layout/Nav';
 import MobileTabs from '@/components/layout/MobileTabs';
 import TopRightControls, { ExamCountdown } from '@/components/layout/TopRightControls';
@@ -17,7 +16,6 @@ import '@/immersive.css';
 export default function Shell() {
   useSyncBootstrap();
   const { pathname } = useLocation();
-  const reduceMotion = useReducedMotion();
   return (
     <SceneProvider pathname={pathname}>
       <ImmersiveScene />
@@ -49,16 +47,10 @@ export default function Shell() {
                 : 'max-w-[880px]'
             }`}
           >
-            <motion.div
-              className="air-page immersive-route-stage"
-              key={pathname}
-              initial={reduceMotion ? false : { opacity: 0, y: 24, scale: 0.985, rotateX: 1.4 }}
-              animate={{ opacity: 1, y: 0, scale: 1, rotateX: 0 }}
-              transition={{ duration: 0.56, ease: [0.22, 1, 0.36, 1] }}
-            >
+            <div className="air-page immersive-route-stage" key={pathname}>
               <Outlet />
               {pathname === '/' ? null : <ContextualGateTip pathname={pathname} className="mt-6" />}
-            </motion.div>
+            </div>
             {pathname === '/' ? null : <DailyQuote />}
           </div>
         </main>

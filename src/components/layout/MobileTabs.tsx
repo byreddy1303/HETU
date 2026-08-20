@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
-import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import {
   BookOpen,
   CalendarCheck,
@@ -25,7 +24,7 @@ import {
   Target,
   Users,
   X,
-  Zap,
+  Zap
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { useLiveQuery } from 'dexie-react-hooks';
@@ -43,9 +42,9 @@ interface Tab {
 }
 
 const TABS: Tab[] = [
-  { to: '/',        label: 'Home',    icon: Gauge,       match: ['/'] },
-  { to: '/log',     label: 'Log',     icon: PenLine,     match: ['/log'] },
-  { to: '/planner', label: 'Planner', icon: CalendarDays, match: ['/planner'] },
+  { to: '/', label: 'Home', icon: Gauge, match: ['/'] },
+  { to: '/log', label: 'Log', icon: PenLine, match: ['/log'] },
+  { to: '/planner', label: 'Planner', icon: CalendarDays, match: ['/planner'] }
 ];
 
 /* ─── More sheet groups ──────────────────────────────────────── */
@@ -59,45 +58,43 @@ const MORE_GROUPS: { label: string; items: MoreItem[] }[] = [
   {
     label: 'Study',
     items: [
-      { to: '/journal',       label: 'Journal',       icon: NotebookText },
-      { to: '/today',         label: 'Do now',        icon: ClipboardList },
-      { to: '/capture',       label: 'Quick capture', icon: Camera },
-      { to: '/revision-pack', label: 'Revision pack', icon: ClipboardList },
-    ],
+      { to: '/journal', label: 'Journal', icon: NotebookText },
+      { to: '/today', label: 'Do now', icon: ClipboardList },
+      { to: '/capture', label: 'Quick capture', icon: Camera },
+      { to: '/revision-pack', label: 'Revision pack', icon: ClipboardList }
+    ]
   },
   {
     label: 'Practice',
     items: [
-      { to: '/pyq',        label: 'PYQ practice', icon: LibraryBig },
-      { to: '/mocks',      label: 'Mock tests',   icon: FileCheck2 },
-      { to: '/reattempts', label: 'Re-attempts',  icon: RotateCcw },
-    ],
+      { to: '/pyq', label: 'PYQ practice', icon: LibraryBig },
+      { to: '/mocks', label: 'Mock tests', icon: FileCheck2 },
+      { to: '/reattempts', label: 'Re-attempts', icon: RotateCcw }
+    ]
   },
   {
     label: 'Analysis',
     items: [
-      { to: '/weekly-review', label: 'Weekly review',    icon: CalendarCheck },
-      { to: '/heatmap',       label: 'Heatmap',          icon: Grid3x3 },
-      { to: '/calibration',   label: 'Calibration',      icon: Target },
-      { to: '/readiness',     label: 'Readiness',        icon: Compass },
-      { to: '/patterns',      label: 'Patterns',         icon: Shapes },
-    ],
+      { to: '/weekly-review', label: 'Weekly review', icon: CalendarCheck },
+      { to: '/heatmap', label: 'Heatmap', icon: Grid3x3 },
+      { to: '/calibration', label: 'Calibration', icon: Target },
+      { to: '/readiness', label: 'Readiness', icon: Compass },
+      { to: '/patterns', label: 'Patterns', icon: Shapes }
+    ]
   },
   {
     label: 'Learn',
     items: [
-      { to: '/topper-notes',  label: 'Topper notes',    icon: BookOpen },
-      { to: '/syllabus',      label: 'Syllabus tracker', icon: ListChecks },
-      { to: '/trigger-drill', label: 'Trigger drill',    icon: Zap },
-      { to: '/formulas',      label: 'Formulas',         icon: Sigma },
-    ],
+      { to: '/topper-notes', label: 'Topper notes', icon: BookOpen },
+      { to: '/syllabus', label: 'Syllabus tracker', icon: ListChecks },
+      { to: '/trigger-drill', label: 'Trigger drill', icon: Zap },
+      { to: '/formulas', label: 'Formulas', icon: Sigma }
+    ]
   },
   {
     label: 'Community',
-    items: [
-      { to: '/buddy', label: 'Buddy', icon: Users },
-    ],
-  },
+    items: [{ to: '/buddy', label: 'Buddy', icon: Users }]
+  }
 ];
 
 const SETTINGS_ITEM: MoreItem = { to: '/settings', label: 'Settings', icon: Settings };
@@ -106,7 +103,6 @@ const SETTINGS_ITEM: MoreItem = { to: '/settings', label: 'Settings', icon: Sett
 export default function MobileTabs() {
   const { pathname } = useLocation();
   const [moreOpen, setMoreOpen] = useState(false);
-  const reduceMotion = useReducedMotion();
   const sheetRef = useRef<HTMLElement>(null);
 
   const storedSessionId = useSessionStore((s) => s.sessionId);
@@ -126,12 +122,16 @@ export default function MobileTabs() {
   const moreHighlighted = moreOpen || moreActive;
 
   // Close sheet on navigation
-  useEffect(() => { setMoreOpen(false); }, [pathname]);
+  useEffect(() => {
+    setMoreOpen(false);
+  }, [pathname]);
 
   // Keyboard close
   useEffect(() => {
     if (!moreOpen) return;
-    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') setMoreOpen(false); };
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setMoreOpen(false);
+    };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
   }, [moreOpen]);
@@ -139,104 +139,92 @@ export default function MobileTabs() {
   return (
     <>
       {/* ── More sheet overlay ── */}
-      <AnimatePresence>
-        {moreOpen && (
-          <motion.div
-            initial={reduceMotion ? false : { opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.16 }}
-            className="native-nav-overlay fixed inset-0 z-40 md:hidden"
+      {moreOpen && (
+        <div className="native-nav-overlay latency-overlay-enter fixed inset-0 z-40 md:hidden">
+          {/* Scrim */}
+          <button
+            type="button"
+            className="absolute inset-0 bg-scrim/40 backdrop-blur-[2px]"
+            aria-label="Close navigation menu"
+            onClick={() => setMoreOpen(false)}
+          />
+
+          {/* Sheet */}
+          <section
+            ref={sheetRef}
+            className="native-more-sheet latency-sheet-enter absolute inset-x-3 bottom-[calc(4.5rem+var(--safe-bottom))] overflow-hidden rounded-xl border border-border bg-bg-raised shadow-lift"
+            aria-label="All sections"
+            role="dialog"
+            aria-modal="true"
           >
-            {/* Scrim */}
-            <motion.button
-              type="button"
-              className="absolute inset-0 bg-scrim/40 backdrop-blur-[2px]"
-              aria-label="Close navigation menu"
-              onClick={() => setMoreOpen(false)}
-            />
-
-            {/* Sheet */}
-            <motion.section
-              ref={sheetRef}
-              initial={reduceMotion ? false : { opacity: 0, y: 20, scale: 0.98 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 12, scale: 0.99 }}
-              transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
-              className="native-more-sheet absolute inset-x-3 bottom-[calc(4.5rem+var(--safe-bottom))] rounded-xl border border-border bg-bg-raised shadow-lift overflow-hidden"
-              aria-label="All sections"
-              role="dialog"
-              aria-modal="true"
-            >
-              {/* Sheet header */}
-              <div className="flex items-center justify-between border-b border-border px-4 py-3">
-                <p className="text-[13px] font-semibold text-text">All sections</p>
-                <button
-                  type="button"
-                  onClick={() => setMoreOpen(false)}
-                  className="flex h-8 w-8 items-center justify-center rounded-full bg-bg-overlay text-text-faint transition-colors hover:text-text"
-                  aria-label="Close"
-                >
-                  <X size={15} />
-                </button>
-              </div>
-
-              {/* Scrollable groups */}
-              <div
-                className="overflow-y-auto overscroll-contain"
-                style={{ maxHeight: 'calc(75dvh - var(--safe-top) - var(--safe-bottom))' }}
+            {/* Sheet header */}
+            <div className="flex items-center justify-between border-b border-border px-4 py-3">
+              <p className="text-[13px] font-semibold text-text">All sections</p>
+              <button
+                type="button"
+                onClick={() => setMoreOpen(false)}
+                className="flex h-8 w-8 items-center justify-center rounded-full bg-bg-overlay text-text-faint transition-colors hover:text-text"
+                aria-label="Close"
               >
-                {MORE_GROUPS.map((group) => (
-                  <div key={group.label}>
-                    <p className="px-4 pt-3 pb-1 text-[10px] font-semibold uppercase tracking-widest text-text-faint font-mono">
-                      {group.label}
-                    </p>
-                    {group.items.map((item) => {
-                      const Icon = item.icon;
-                      const active = pathname === item.to || pathname.startsWith(`${item.to}/`);
-                      return (
-                        <NavLink
-                          key={item.to}
-                          to={item.to}
-                          onClick={() => haptic('selection')}
-                          className={cn(
-                            'flex items-center gap-3 px-4 py-3 transition-colors active:bg-bg-overlay',
-                            active
-                              ? 'text-accent bg-accent-faint/60'
-                              : 'text-text-muted hover:bg-bg-overlay'
-                          )}
-                        >
-                          <Icon size={17} strokeWidth={1.75} className="shrink-0" />
-                          <span className="flex-1 text-[13.5px] font-medium">{item.label}</span>
-                          <ChevronRight size={14} className="shrink-0 text-text-faint/60" />
-                        </NavLink>
-                      );
-                    })}
-                  </div>
-                ))}
+                <X size={15} />
+              </button>
+            </div>
 
-                {/* Settings — separated */}
-                <div className="border-t border-border mt-1 pb-2">
-                  <NavLink
-                    to={SETTINGS_ITEM.to}
-                    onClick={() => haptic('selection')}
-                    className={cn(
-                      'flex items-center gap-3 px-4 py-3 transition-colors active:bg-bg-overlay',
-                      pathname === SETTINGS_ITEM.to
-                        ? 'text-accent bg-accent-faint/60'
-                        : 'text-text-muted hover:bg-bg-overlay'
-                    )}
-                  >
-                    <Settings size={17} strokeWidth={1.75} className="shrink-0" />
-                    <span className="flex-1 text-[13.5px] font-medium">Settings</span>
-                    <ChevronRight size={14} className="shrink-0 text-text-faint/60" />
-                  </NavLink>
+            {/* Scrollable groups */}
+            <div
+              className="overflow-y-auto overscroll-contain"
+              style={{ maxHeight: 'calc(75dvh - var(--safe-top) - var(--safe-bottom))' }}
+            >
+              {MORE_GROUPS.map((group) => (
+                <div key={group.label}>
+                  <p className="px-4 pt-3 pb-1 text-[10px] font-semibold uppercase tracking-widest text-text-faint font-mono">
+                    {group.label}
+                  </p>
+                  {group.items.map((item) => {
+                    const Icon = item.icon;
+                    const active = pathname === item.to || pathname.startsWith(`${item.to}/`);
+                    return (
+                      <NavLink
+                        key={item.to}
+                        to={item.to}
+                        onClick={() => haptic('selection')}
+                        className={cn(
+                          'flex items-center gap-3 px-4 py-3 transition-colors active:bg-bg-overlay',
+                          active
+                            ? 'text-accent bg-accent-faint/60'
+                            : 'text-text-muted hover:bg-bg-overlay'
+                        )}
+                      >
+                        <Icon size={17} strokeWidth={1.75} className="shrink-0" />
+                        <span className="flex-1 text-[13.5px] font-medium">{item.label}</span>
+                        <ChevronRight size={14} className="shrink-0 text-text-faint/60" />
+                      </NavLink>
+                    );
+                  })}
                 </div>
+              ))}
+
+              {/* Settings — separated */}
+              <div className="border-t border-border mt-1 pb-2">
+                <NavLink
+                  to={SETTINGS_ITEM.to}
+                  onClick={() => haptic('selection')}
+                  className={cn(
+                    'flex items-center gap-3 px-4 py-3 transition-colors active:bg-bg-overlay',
+                    pathname === SETTINGS_ITEM.to
+                      ? 'text-accent bg-accent-faint/60'
+                      : 'text-text-muted hover:bg-bg-overlay'
+                  )}
+                >
+                  <Settings size={17} strokeWidth={1.75} className="shrink-0" />
+                  <span className="flex-1 text-[13.5px] font-medium">Settings</span>
+                  <ChevronRight size={14} className="shrink-0 text-text-faint/60" />
+                </NavLink>
               </div>
-            </motion.section>
-          </motion.div>
-        )}
-      </AnimatePresence>
+            </div>
+          </section>
+        </div>
+      )}
 
       {/* ── Bottom nav bar ── */}
       <nav
@@ -244,7 +232,9 @@ export default function MobileTabs() {
         aria-label="Primary navigation"
       >
         {/* First 2 tabs: Home, Log */}
-        {TABS.slice(0, 2).map((tab) => <TabButton key={tab.to} tab={tab} pathname={pathname} />)}
+        {TABS.slice(0, 2).map((tab) => (
+          <TabButton key={tab.to} tab={tab} pathname={pathname} />
+        ))}
 
         {/* FAB — centre */}
         <div className="flex flex-1 items-center justify-center">
@@ -271,7 +261,9 @@ export default function MobileTabs() {
         </div>
 
         {/* Last tab: Planner */}
-        {TABS.slice(2).map((tab) => <TabButton key={tab.to} tab={tab} pathname={pathname} />)}
+        {TABS.slice(2).map((tab) => (
+          <TabButton key={tab.to} tab={tab} pathname={pathname} />
+        ))}
 
         {/* More button */}
         <button
@@ -288,19 +280,19 @@ export default function MobileTabs() {
           )}
         >
           {moreHighlighted && (
-            <motion.span
-              layoutId="mobile-tab-indicator"
-              transition={{ type: 'spring', stiffness: 520, damping: 38 }}
-              className="absolute inset-x-3 top-0 h-[2.5px] rounded-b-full bg-accent"
-            />
+            <span className="latency-tab-indicator absolute inset-x-3 top-0 h-[2.5px] rounded-b-full bg-accent" />
           )}
           <svg
-            width="19" height="19" viewBox="0 0 19 19" fill="none"
-            xmlns="http://www.w3.org/2000/svg" aria-hidden="true"
+            width="19"
+            height="19"
+            viewBox="0 0 19 19"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            aria-hidden="true"
             className="transition-transform duration-150"
             style={{ transform: moreOpen ? 'rotate(90deg)' : 'none' }}
           >
-            <circle cx="4"  cy="9.5" r="1.5" fill="currentColor" />
+            <circle cx="4" cy="9.5" r="1.5" fill="currentColor" />
             <circle cx="9.5" cy="9.5" r="1.5" fill="currentColor" />
             <circle cx="15" cy="9.5" r="1.5" fill="currentColor" />
           </svg>
@@ -330,11 +322,7 @@ function TabButton({ tab, pathname }: { tab: Tab; pathname: string }) {
       )}
     >
       {active && (
-        <motion.span
-          layoutId="mobile-tab-indicator"
-          transition={{ type: 'spring', stiffness: 520, damping: 38 }}
-          className="absolute inset-x-3 top-0 h-[2.5px] rounded-b-full bg-accent"
-        />
+        <span className="latency-tab-indicator absolute inset-x-3 top-0 h-[2.5px] rounded-b-full bg-accent" />
       )}
       <Icon size={19} strokeWidth={1.75} />
       <span className="text-[9.5px] font-semibold tracking-tight">{tab.label}</span>

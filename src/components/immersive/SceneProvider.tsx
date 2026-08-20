@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useRef, type ReactNode } from 'react';
-import { useReducedMotion } from 'motion/react';
 import { sceneForPath } from '@/components/immersive/scene';
 import { resolveSceneQuality } from '@/components/immersive/performance';
 import { SceneContext } from '@/components/immersive/scene-context';
 import { usePrefsStore } from '@/stores/prefs';
+import { useMediaQuery } from '@/hooks/useMediaQuery';
 import {
   collectSceneElements,
   HOVER_SURFACE_SELECTOR,
@@ -16,15 +16,19 @@ export function SceneProvider({ pathname, children }: { pathname: string; childr
   const rootRef = useRef<HTMLDivElement>(null);
   const parallaxTargetsRef = useRef<HTMLElement[]>([]);
   const previousOrderRef = useRef(0);
-  const prefersReducedMotion = useReducedMotion();
-  const reducedMotion = prefersReducedMotion === true;
+  const reducedMotion = useMediaQuery('(prefers-reduced-motion: reduce)');
   const soundEnabled = usePrefsStore((state) => state.immersiveSoundEnabled);
+  const soundEnabledRef = useRef(soundEnabled);
   const config = useMemo(() => sceneForPath(pathname), [pathname]);
   const quality = useMemo(
     () =>
       resolveSceneQuality(reducedMotion, typeof navigator === 'undefined' ? undefined : navigator),
     [reducedMotion]
   );
+
+  useEffect(() => {
+    soundEnabledRef.current = soundEnabled;
+  }, [soundEnabled]);
 
   useEffect(() => {
     const frame = window.requestAnimationFrame(() => {
@@ -121,19 +125,21 @@ export function SceneProvider({ pathname, children }: { pathname: string; childr
     };
 
     const onPointerDown = (event: PointerEvent) => {
-      root.style.setProperty('--scene-pulse-x', `${event.clientX}px`);
-      root.style.setProperty('--scene-pulse-y', `${event.clientY}px`);
-      elements.pulse.style.translate = `${event.clientX}px ${event.clientY}px`;
-      root.classList.remove('is-scene-pulsing');
-      window.requestAnimationFrame(() => root.classList.add('is-scene-pulsing'));
-      window.clearTimeout(pulseTimer);
-      pulseTimer = window.setTimeout(() => root.classList.remove('is-scene-pulsing'), 760);
+      if (quality !== 'essential') {
+        root.style.setProperty('--scene-pulse-x', `${event.clientX}px`);
+        root.style.setProperty('--scene-pulse-y', `${event.clientY}px`);
+        elements.pulse.style.translate = `${event.clientX}px ${event.clientY}px`;
+        root.classList.remove('is-scene-pulsing');
+        window.requestAnimationFrame(() => root.classList.add('is-scene-pulsing'));
+        window.clearTimeout(pulseTimer);
+        pulseTimer = window.setTimeout(() => root.classList.remove('is-scene-pulsing'), 760);
+      }
 
       const target = event.target instanceof Element ? event.target : null;
       const isInteractive = Boolean(
         target?.closest('a, button, input, select, textarea, [role="button"], .u-tactile-tile')
       );
-      if (soundEnabled && event.isPrimary && isInteractive) {
+      if (soundEnabledRef.current && event.isPrimary && isInteractive) {
         void import('@/components/immersive/sound-engine').then((engine) => {
           engine.playInteractionCue(event.clientY / Math.max(window.innerHeight, 1));
         });
@@ -151,7 +157,7 @@ export function SceneProvider({ pathname, children }: { pathname: string; childr
     };
 
     const tracksPointer =
-      !reducedMotion && window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+      quality === 'full' && window.matchMedia('(hover: hover) and (pointer: fine)').matches;
     if (!reducedMotion) {
       renderSceneTransforms(elements, normalizedX, normalizedY, cappedScroll, scrollProgress);
       if (tracksPointer) window.addEventListener('pointermove', onPointerMove, { passive: true });
@@ -162,7 +168,7 @@ export function SceneProvider({ pathname, children }: { pathname: string; childr
     window.addEventListener('pointerdown', onPointerDown, { passive: true });
     document.addEventListener('visibilitychange', onVisibilityChange);
     const resizeObserver =
-      reducedMotion || typeof ResizeObserver === 'undefined'
+      quality === 'essential' || typeof ResizeObserver === 'undefined'
         ? null
         : new ResizeObserver(() => {
             maxScroll = Math.max(document.documentElement.scrollHeight - window.innerHeight, 0);
@@ -183,7 +189,7 @@ export function SceneProvider({ pathname, children }: { pathname: string; childr
       if (scrollFrame) window.cancelAnimationFrame(scrollFrame);
       window.clearTimeout(pulseTimer);
     };
-  }, [pathname, reducedMotion, soundEnabled]);
+  }, [pathname, quality, reducedMotion]);
 
   const value = useMemo(
     () => ({ config, quality, reducedMotion }),

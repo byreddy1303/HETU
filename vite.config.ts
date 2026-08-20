@@ -53,6 +53,10 @@ export default defineConfig(({ mode }) => {
           navigateFallbackDenylist: [/^\/gate-topper-notes\//],
           importScripts: ['/push-sw.js'],
           globPatterns: ['**/*.{js,css,html,ico,png,svg}'],
+          // Practice media is already covered by the on-demand runtime cache.
+          // Keeping it out of precache avoids a multi-megabyte install/update
+          // transaction before a learner has opened any of those questions.
+          globIgnores: ['pyq/images/**', 'gate-topper-notes/**'],
           runtimeCaching: [
             {
               urlPattern: ({ url }) =>

@@ -1,14 +1,11 @@
 import { Suspense, useEffect } from 'react';
 import { RouterProvider } from 'react-router-dom';
-import { QueryClientProvider } from '@tanstack/react-query';
 import { router } from '@/router';
-import { queryClient } from '@/lib/queryClient';
 import { useAuthStore } from '@/stores/auth';
 import { usePrefsStore } from '@/stores/prefs';
 import { Toaster } from '@/components/ui/Toast';
 import NativeRuntime from '@/components/native/NativeRuntime';
-import BuddyNotificationRuntime from '@/components/notifications/BuddyNotificationRuntime';
-import BuddyPresenceRuntime from '@/components/buddy/BuddyPresenceRuntime';
+import DeferredAppRuntimes from '@/components/shared/DeferredAppRuntimes';
 import LoadingScreen from '@/components/shared/LoadingScreen';
 import { applyTheme, resolveTheme } from '@/lib/theme';
 import { configureNativeChrome } from '@/lib/native';
@@ -45,14 +42,13 @@ export default function App() {
     return () => systemTheme.removeEventListener('change', syncTheme);
   }, [colorTheme]);
   return (
-    <QueryClientProvider client={queryClient}>
+    <>
       <NativeRuntime />
-      <BuddyNotificationRuntime />
-      <BuddyPresenceRuntime />
+      <DeferredAppRuntimes />
       <Suspense fallback={<LoadingScreen />}>
         <RouterProvider router={router} />
       </Suspense>
       <Toaster />
-    </QueryClientProvider>
+    </>
   );
 }

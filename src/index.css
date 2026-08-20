@@ -6,6 +6,89 @@
 @tailwind components;
 @tailwind utilities;
 
+@keyframes latency-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+}
+
+@keyframes latency-toast-enter {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.97);
+  }
+}
+
+@keyframes latency-overlay-enter {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes latency-sheet-enter {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.985);
+  }
+}
+
+@keyframes latency-dialog-enter {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.985);
+  }
+}
+
+@keyframes latency-popover-enter {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+
+@keyframes latency-tab-indicator-enter {
+  from {
+    opacity: 0;
+    transform: scaleX(0.55);
+  }
+}
+
+.latency-fade-in {
+  animation: latency-fade-in 160ms ease-out 100ms both;
+}
+
+.latency-toast-enter {
+  animation: latency-toast-enter 180ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.latency-overlay-enter {
+  animation: latency-overlay-enter 160ms ease-out both;
+}
+
+.latency-sheet-enter,
+.latency-dialog-enter {
+  animation: latency-sheet-enter 220ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.latency-dialog-enter {
+  animation-name: latency-dialog-enter;
+  animation-duration: 280ms;
+}
+
+.latency-welcome-slide {
+  animation: latency-fade-in 180ms ease-out both;
+}
+
+.latency-popover-enter {
+  animation: latency-popover-enter 150ms ease-out both;
+}
+
+.latency-tab-indicator {
+  animation: latency-tab-indicator-enter 160ms ease-out both;
+  transform-origin: center;
+}
+
 @layer base {
   :root {
     --safe-top: var(--safe-area-inset-top, env(safe-area-inset-top, 0px));

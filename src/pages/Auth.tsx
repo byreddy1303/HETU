@@ -2,11 +2,11 @@
 // The signup + Google + magic-link paths are gone; the only entry into an
 // account is username + PIN. Outsiders get pushed to /request-access, and
 // the very first user (bootstrap) can jump to /signup with no invite token.
-import { useState, type FormEvent } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
 import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { differenceInCalendarDays, parseISO } from 'date-fns';
 import { motion } from 'motion/react';
-import { useAuthStore } from '@/stores/auth';
+import { preloadAuthActions, useAuthStore } from '@/stores/auth';
 import { useAuth } from '@/hooks/useAuth';
 import { supabaseConfigured } from '@/lib/supabase';
 import { EXAM_DATE_DEFAULT } from '@/lib/constants';
@@ -28,14 +28,18 @@ export default function Auth() {
   const [pin, setPin] = useState('');
   const [state, setState] = useState<SubmitState>({ kind: 'idle' });
 
+  useEffect(() => {
+    if (!supabaseConfigured) return;
+    const handle = window.setTimeout(() => void preloadAuthActions().catch(() => undefined), 0);
+    return () => window.clearTimeout(handle);
+  }, []);
+
   if (status === 'signed_in') return <Navigate to="/" replace />;
 
   const daysLeft = differenceInCalendarDays(parseISO(EXAM_DATE_DEFAULT), new Date());
   const cleanedUsername = username.trim().toLowerCase();
   const canSubmit =
-    state.kind !== 'sending' &&
-    /^[a-z0-9_]{3,32}$/.test(cleanedUsername) &&
-    /^\d{6}$/.test(pin);
+    state.kind !== 'sending' && /^[a-z0-9_]{3,32}$/.test(cleanedUsername) && /^\d{6}$/.test(pin);
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault();

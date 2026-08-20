@@ -1,7 +1,9 @@
 import { useEffect, useRef } from 'react';
 import type { SceneWorld } from '@/components/immersive/scene';
 
-const FRAME_INTERVAL_MS = 1000 / 18;
+const ACTIVE_FRAME_INTERVAL_MS = 1000 / 18;
+const IDLE_FRAME_INTERVAL_MS = 250;
+const ACTIVE_RENDER_WINDOW_MS = 6000;
 const MAX_DEVICE_PIXEL_RATIO = 1.25;
 
 const WORLD_TONES: Record<SceneWorld, readonly [number, number, number]> = {
@@ -145,8 +147,19 @@ export default function WebGLAtmosphere({ world }: { world: SceneWorld }) {
     gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 
     let frame = 0;
-    let previousFrame = 0;
+    let timer = 0;
     let running = !document.hidden;
+    let activeUntil = performance.now() + ACTIVE_RENDER_WINDOW_MS;
+
+    const scheduleDraw = () => {
+      if (!running || frame || timer) return;
+      const interval =
+        performance.now() < activeUntil ? ACTIVE_FRAME_INTERVAL_MS : IDLE_FRAME_INTERVAL_MS;
+      timer = window.setTimeout(() => {
+        timer = 0;
+        frame = window.requestAnimationFrame(draw);
+      }, interval);
+    };
 
     const resize = () => {
       const dpr = Math.min(window.devicePixelRatio || 1, MAX_DEVICE_PIXEL_RATIO);
@@ -156,26 +169,30 @@ export default function WebGLAtmosphere({ world }: { world: SceneWorld }) {
       canvas.width = width;
       canvas.height = height;
       gl.viewport(0, 0, width, height);
+      activeUntil = performance.now() + ACTIVE_RENDER_WINDOW_MS;
     };
 
     const draw = (timestamp: number) => {
+      frame = 0;
       if (!running) return;
-      frame = window.requestAnimationFrame(draw);
-      if (timestamp - previousFrame < FRAME_INTERVAL_MS) return;
-      previousFrame = timestamp;
       const [red, green, blue] = toneRef.current;
       gl.uniform1f(time, timestamp / 1000);
       gl.uniform2f(resolution, canvas.width, canvas.height);
       gl.uniform3f(tone, red, green, blue);
       gl.drawArrays(gl.TRIANGLES, 0, 6);
+      scheduleDraw();
     };
 
     const onVisibilityChange = () => {
       running = !document.hidden;
-      if (running && !frame) frame = window.requestAnimationFrame(draw);
-      if (!running && frame) {
-        window.cancelAnimationFrame(frame);
+      if (running) {
+        activeUntil = performance.now() + ACTIVE_RENDER_WINDOW_MS;
+        if (!frame && !timer) frame = window.requestAnimationFrame(draw);
+      } else {
+        if (frame) window.cancelAnimationFrame(frame);
+        if (timer) window.clearTimeout(timer);
         frame = 0;
+        timer = 0;
       }
     };
 
@@ -183,7 +200,9 @@ export default function WebGLAtmosphere({ world }: { world: SceneWorld }) {
       event.preventDefault();
       running = false;
       if (frame) window.cancelAnimationFrame(frame);
+      if (timer) window.clearTimeout(timer);
       frame = 0;
+      timer = 0;
     };
 
     canvas.addEventListener('webglcontextlost', onContextLost);
@@ -198,6 +217,7 @@ export default function WebGLAtmosphere({ world }: { world: SceneWorld }) {
       document.removeEventListener('visibilitychange', onVisibilityChange);
       window.removeEventListener('resize', resize);
       if (frame) window.cancelAnimationFrame(frame);
+      if (timer) window.clearTimeout(timer);
       gl.deleteBuffer(buffer);
       gl.deleteProgram(program);
       gl.getExtension('WEBGL_lose_context')?.loseContext();

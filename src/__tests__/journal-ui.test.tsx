@@ -14,6 +14,8 @@ import {
 } from '@/lib/pyq-session';
 
 const USER = '11111111-1111-4111-8111-111111111111';
+const FIRST_PYQ_PHOTO = 'data:image/png;base64,cHlxLWZpcnN0LXBob3Rv';
+const SECOND_PYQ_PHOTO = 'data:image/png;base64,cHlxLXNlY29uZC1waG90bw==';
 
 vi.mock('@/hooks/useAuth', () => ({
   useAuth: () => ({
@@ -137,7 +139,7 @@ describe('Journal question list', () => {
       bankVersion: session.bank_version,
       questionStartedAtMs: Date.parse('2026-08-19T10:00:00.000Z'),
       committedAtMs: Date.parse('2026-08-19T10:01:05.000Z'),
-      screenshotUrl: null
+      screenshotUrl: FIRST_PYQ_PHOTO
     });
     session = advancePyqSessionProgress(
       session,
@@ -155,7 +157,7 @@ describe('Journal question list', () => {
       bankVersion: session.bank_version,
       questionStartedAtMs: Date.parse('2026-08-19T10:01:05.000Z'),
       committedAtMs: Date.parse('2026-08-19T10:01:35.000Z'),
-      screenshotUrl: null
+      screenshotUrl: SECOND_PYQ_PHOTO
     });
     session = completePyqSession(
       advancePyqSessionProgress(
@@ -213,6 +215,16 @@ describe('Journal question list', () => {
     expect(within(first).getByText('Incorrect')).toBeInTheDocument();
     expect(within(first).getByText('A')).toBeInTheDocument();
     expect(within(first).getByText('B')).toBeInTheDocument();
+    expect(
+      within(first).getByRole('img', {
+        name: 'Question photo for GATE CSE 2025 Set 1 Q12'
+      })
+    ).toHaveAttribute('src', FIRST_PYQ_PHOTO);
+    expect(
+      within(first).getByRole('button', {
+        name: 'Open question photo for GATE CSE 2025 Set 1 Q12'
+      })
+    ).toBeInTheDocument();
     const analysisRegion = within(first).getByRole('region', {
       name: 'Journal analysis for question 1'
     });
@@ -229,6 +241,11 @@ describe('Journal question list', () => {
     expect(within(second).getByText('Skipped')).toBeInTheDocument();
     expect(within(second).getByText('Left blank')).toBeInTheDocument();
     expect(within(second).getByText('C')).toBeInTheDocument();
+    expect(
+      within(second).getByRole('img', {
+        name: 'Question photo for GATE CSE 2024 Set 2 Q31'
+      })
+    ).toHaveAttribute('src', SECOND_PYQ_PHOTO);
     expect(screen.queryByText('No entries match')).not.toBeInTheDocument();
     expect(
       screen.getByRole('option', { name: '19 Aug 26 · PYQ · Operating Systems' })

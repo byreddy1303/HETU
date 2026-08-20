@@ -372,6 +372,7 @@ function PyqAttemptDetail({
   const decision = MARK_DECISIONS.find((item) => item.value === attempt.mark_decision)?.label;
   const questionNumber = snapshot?.number ?? String(position);
   const source = snapshot?.paper_label ?? journal?.source_ref ?? `GATE ${attempt.year}`;
+  const questionPhoto = attempt.screenshot_url ?? journal?.image_url ?? null;
   const learnerAnswer =
     attempt.capture_version === 2
       ? attempt.mark_decision === 'SKIP'
@@ -415,17 +416,47 @@ function PyqAttemptDetail({
             </div>
           </div>
 
-          <div className="py-4">
-            {snapshot?.html ? (
-              <PyqQuestionContent html={snapshot.html} />
-            ) : journal?.question_text ? (
-              <p className="whitespace-pre-wrap text-[15px] leading-relaxed text-text">
-                {journal.question_text}
-              </p>
-            ) : (
-              <p className="text-[13px] text-text-faint">
-                The full prompt was not captured for this legacy attempt.
-              </p>
+          <div
+            className={cn(
+              'grid gap-4 py-4',
+              questionPhoto && 'lg:grid-cols-[minmax(0,1.25fr)_minmax(240px,0.75fr)]'
+            )}
+          >
+            <div className="min-w-0">
+              {snapshot?.html ? (
+                <PyqQuestionContent html={snapshot.html} />
+              ) : journal?.question_text ? (
+                <p className="whitespace-pre-wrap text-[15px] leading-relaxed text-text">
+                  {journal.question_text}
+                </p>
+              ) : (
+                <p className="text-[13px] text-text-faint">
+                  The full prompt was not captured for this legacy attempt.
+                </p>
+              )}
+            </div>
+
+            {questionPhoto && (
+              <figure className="min-w-0 overflow-hidden rounded border border-border bg-bg-overlay/45 p-2 shadow-sm">
+                <button
+                  type="button"
+                  aria-label={`Open question photo for ${source} Q${questionNumber}`}
+                  onClick={() => onImage(questionPhoto, `${source} · Q${questionNumber}`)}
+                  className="group block w-full overflow-hidden rounded bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
+                >
+                  <img
+                    src={questionPhoto}
+                    alt={`Question photo for ${source} Q${questionNumber}`}
+                    className="mx-auto max-h-[360px] w-full object-contain transition-transform duration-200 group-hover:scale-[1.015]"
+                  />
+                </button>
+                <figcaption className="u-label flex items-center justify-between gap-2 px-1 pb-0.5 pt-2">
+                  <span>Question photo</span>
+                  <span className="normal-case tracking-normal text-text-faint">
+                    Open full size
+                  </span>
+                </figcaption>
+              </figure>
             )}
           </div>
 
@@ -457,17 +488,6 @@ function PyqAttemptDetail({
               Submitted {formatDate(attempt.attempted_at, 'dd MMM yy · HH:mm')}
             </span>
             <span className="flex flex-wrap items-center gap-2">
-              {attempt.screenshot_url && (
-                <button
-                  type="button"
-                  onClick={() =>
-                    onImage(attempt.screenshot_url as string, `${source} · Q${questionNumber}`)
-                  }
-                  className="font-medium text-accent hover:underline"
-                >
-                  View captured question
-                </button>
-              )}
               {snapshot?.source_url && (
                 <a
                   href={snapshot.source_url}

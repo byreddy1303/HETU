@@ -4,8 +4,8 @@ import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { AnimatePresence, motion } from 'motion/react';
-import { ChevronDown, ChevronRight, Pencil } from 'lucide-react';
-import type { QuestionRow, SessionRow } from '@/types';
+import { ChevronDown, ChevronRight, ExternalLink, Pencil } from 'lucide-react';
+import type { PyqAttemptRow, PyqSelectedAnswer, QuestionRow, SessionRow } from '@/types';
 import { db } from '@/lib/db';
 import { writeLocal, deleteLocal } from '@/lib/sync';
 import {
@@ -30,7 +30,7 @@ import { cn, formatDate, levenshtein, secondsToClock, plural } from '@/lib/utils
 import { subjectInk } from '@/lib/subjectInk';
 import { useAuth } from '@/hooks/useAuth';
 import PageHeader from '@/components/layout/PageHeader';
-import { Card, CardBody } from '@/components/ui/Card';
+import { Card, CardBody, CardHeader } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
@@ -41,8 +41,10 @@ import AnswerReveal from '@/components/shared/AnswerReveal';
 import { Dialog } from '@/components/ui/Dialog';
 import QuestionEditor, { DeleteBar } from '@/components/shared/QuestionEditor';
 import SessionEditor from '@/components/shared/SessionEditor';
+import PyqQuestionContent from '@/components/pyq/PyqQuestionContent';
 import { applyDraftToRow, draftFromRow, type EditorDraft } from '@/components/shared/questionDraft';
 import { subtopicsFor } from '@/lib/subtopics';
+import { pyqSourceAttemptForJournalQuestion } from '@/lib/pyq-session';
 
 const PAGE_SIZE = 50;
 
@@ -322,6 +324,283 @@ function Row({
   );
 }
 
+function formatAttemptAnswer(value: PyqSelectedAnswer): string {
+  if (value == null) return 'Unavailable';
+  if (Array.isArray(value)) return value.length > 0 ? value.join(', ') : 'Unavailable';
+  return String(value);
+}
+
+function officialAnswer(attempt: PyqAttemptRow): string {
+  if (attempt.answer_status === 'available') return formatAttemptAnswer(attempt.correct_answer);
+  if (attempt.answer_status === 'marks-to-all') return 'Marks awarded to all';
+  if (attempt.answer_status === 'ambiguous') return 'Official key is ambiguous';
+  return 'Official key is unavailable';
+}
+
+function attemptResult(attempt: PyqAttemptRow): {
+  label: string;
+  tone: 'success' | 'danger' | 'warn';
+  border: string;
+} {
+  if (attempt.mark_decision === 'SKIP') {
+    return { label: 'Skipped', tone: 'warn', border: 'border-l-warn' };
+  }
+  if (attempt.mark_correct === true) {
+    return { label: 'Correct', tone: 'success', border: 'border-l-success' };
+  }
+  if (attempt.mark_correct === false) {
+    return { label: 'Incorrect', tone: 'danger', border: 'border-l-danger' };
+  }
+  return { label: 'Key unavailable', tone: 'warn', border: 'border-l-warn' };
+}
+
+function PyqAttemptDetail({
+  attempt,
+  position,
+  journal,
+  onImage,
+  onEdit
+}: {
+  attempt: PyqAttemptRow;
+  position: number;
+  journal: QuestionRow | null;
+  onImage: (src: string, caption: string) => void;
+  onEdit: (row: QuestionRow) => void;
+}) {
+  const snapshot = attempt.question_snapshot;
+  const result = attemptResult(attempt);
+  const decision = MARK_DECISIONS.find((item) => item.value === attempt.mark_decision)?.label;
+  const questionNumber = snapshot?.number ?? String(position);
+  const source = snapshot?.paper_label ?? journal?.source_ref ?? `GATE ${attempt.year}`;
+  const learnerAnswer =
+    attempt.capture_version === 2
+      ? attempt.mark_decision === 'SKIP'
+        ? 'Left blank'
+        : formatAttemptAnswer(attempt.selected_answer)
+      : 'Legacy attempt — response not verified';
+
+  return (
+    <li className="border-t border-border first:border-t-0">
+      <article
+        aria-label={`PYQ question ${position} details`}
+        className={cn('grid border-l-[3px] sm:grid-cols-[74px_minmax(0,1fr)]', result.border)}
+      >
+        <div className="flex items-center gap-2 border-b border-border bg-bg-overlay/55 px-4 py-3 sm:flex-col sm:items-start sm:gap-1 sm:border-b-0 sm:border-r sm:px-3 sm:py-4">
+          <span className="u-label">Question</span>
+          <span className="u-num text-[20px] font-semibold leading-none text-text">
+            {String(position).padStart(2, '0')}
+          </span>
+          {attempt.attempt_number > 1 && (
+            <span className="u-num ml-auto text-[10px] text-text-faint sm:ml-0">
+              try {attempt.attempt_number}
+            </span>
+          )}
+        </div>
+
+        <div className="min-w-0 p-4 sm:p-5">
+          <div className="flex flex-wrap items-start justify-between gap-3 border-b border-border pb-3">
+            <div className="min-w-0">
+              <p className="font-display text-[16px] font-semibold leading-snug text-text">
+                {source} · Q{questionNumber}
+              </p>
+              <p className="mt-1 text-[12px] text-text-muted">
+                {snapshot?.topic ?? journal?.subtopic ?? attempt.subject}
+                {snapshot?.subtopics.length ? ` · ${snapshot.subtopics.join(' · ')}` : ''}
+              </p>
+            </div>
+            <div className="flex flex-wrap items-center gap-1.5">
+              <Badge tone={result.tone}>{result.label}</Badge>
+              {snapshot?.type && <Badge>{snapshot.type}</Badge>}
+              {snapshot?.marks && <Badge>{snapshot.marks} mark</Badge>}
+            </div>
+          </div>
+
+          <div className="py-4">
+            {snapshot?.html ? (
+              <PyqQuestionContent html={snapshot.html} />
+            ) : journal?.question_text ? (
+              <p className="whitespace-pre-wrap text-[15px] leading-relaxed text-text">
+                {journal.question_text}
+              </p>
+            ) : (
+              <p className="text-[13px] text-text-faint">
+                The full prompt was not captured for this legacy attempt.
+              </p>
+            )}
+          </div>
+
+          <dl className="grid gap-px overflow-hidden rounded border border-border bg-border sm:grid-cols-2 lg:grid-cols-4">
+            <div className="bg-bg-raised p-3">
+              <dt className="u-label">Your answer</dt>
+              <dd className="u-num mt-1.5 text-[13px] font-semibold text-text">{learnerAnswer}</dd>
+            </div>
+            <div className="bg-bg-raised p-3">
+              <dt className="u-label">Official answer</dt>
+              <dd className="u-num mt-1.5 text-[13px] font-semibold text-text">
+                {officialAnswer(attempt)}
+              </dd>
+            </div>
+            <div className="bg-bg-raised p-3">
+              <dt className="u-label">Exam decision</dt>
+              <dd className="mt-1.5 text-[13px] font-medium text-text">{decision ?? '—'}</dd>
+            </div>
+            <div className="bg-bg-raised p-3">
+              <dt className="u-label">Time</dt>
+              <dd className="u-num mt-1.5 text-[13px] font-semibold text-text">
+                {secondsToClock(attempt.time_spent_sec)}
+              </dd>
+            </div>
+          </dl>
+
+          <div className="mt-3 flex flex-wrap items-center justify-between gap-2 text-[11px] text-text-faint">
+            <span className="u-num">
+              Submitted {formatDate(attempt.attempted_at, 'dd MMM yy · HH:mm')}
+            </span>
+            <span className="flex flex-wrap items-center gap-2">
+              {attempt.screenshot_url && (
+                <button
+                  type="button"
+                  onClick={() =>
+                    onImage(attempt.screenshot_url as string, `${source} · Q${questionNumber}`)
+                  }
+                  className="font-medium text-accent hover:underline"
+                >
+                  View captured question
+                </button>
+              )}
+              {snapshot?.source_url && (
+                <a
+                  href={snapshot.source_url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-1 font-medium text-accent hover:underline"
+                >
+                  Open source <ExternalLink size={11} />
+                </a>
+              )}
+            </span>
+          </div>
+
+          {journal ? (
+            <section
+              aria-label={`Journal analysis for question ${position}`}
+              className="mt-4 rounded border border-accent/20 bg-accent-faint/30 p-3"
+            >
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="u-label text-accent">Journal analysis</span>
+                  <Badge tone={TONE_BADGE[OUTCOME_BY_CODE[journal.outcome].tone]}>
+                    {journal.outcome}
+                  </Badge>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => onEdit(journal)}
+                  className="inline-flex items-center gap-1 rounded px-2 py-1 text-[11px] font-medium text-text-muted transition-colors hover:bg-bg-overlay hover:text-accent"
+                >
+                  <Pencil size={11} strokeWidth={1.75} />
+                  Edit analysis
+                </button>
+              </div>
+              <div className="mt-3 grid gap-3 text-[12px] sm:grid-cols-2 lg:grid-cols-4">
+                <Detail label="pattern">
+                  {journal.pattern_name ?? <span className="text-text-faint">—</span>}
+                </Detail>
+                <Detail label="root cause">
+                  {journal.root_cause ? (
+                    ROOT_CAUSES.find((cause) => cause.value === journal.root_cause)?.label
+                  ) : (
+                    <span className="text-text-faint">—</span>
+                  )}
+                </Detail>
+                <Detail label="trigger">
+                  {journal.trigger_sentence ?? <span className="text-text-faint">—</span>}
+                </Detail>
+                <Detail label="quick note">
+                  {journal.capture_note ?? <span className="text-text-faint">—</span>}
+                </Detail>
+              </div>
+            </section>
+          ) : (
+            <p className="mt-4 border-l-2 border-border pl-3 text-[12px] text-text-faint">
+              No separate journal analysis was added for this question. Its complete attempt receipt
+              is still preserved above.
+            </p>
+          )}
+        </div>
+      </article>
+    </li>
+  );
+}
+
+function PyqSessionDetails({
+  attempts,
+  journalsByAttempt,
+  onImage,
+  onEdit
+}: {
+  attempts: PyqAttemptRow[];
+  journalsByAttempt: Map<string, QuestionRow>;
+  onImage: (src: string, caption: string) => void;
+  onEdit: (row: QuestionRow) => void;
+}) {
+  const skipped = attempts.filter((attempt) => attempt.mark_decision === 'SKIP').length;
+  const correct = attempts.filter(
+    (attempt) => attempt.mark_decision !== 'SKIP' && attempt.mark_correct === true
+  ).length;
+  const incorrect = attempts.filter(
+    (attempt) => attempt.mark_decision !== 'SKIP' && attempt.mark_correct === false
+  ).length;
+
+  return (
+    <Card>
+      <CardHeader
+        title="PYQ question details"
+        aside={
+          <span className="u-num text-[11px] text-text-faint">
+            {attempts.length} {plural(attempts.length, 'submission')}
+          </span>
+        }
+      />
+      {attempts.length > 0 ? (
+        <>
+          <div className="grid grid-cols-2 gap-px border-b border-border bg-border sm:grid-cols-4">
+            {[
+              ['Correct', correct, 'text-success'],
+              ['Incorrect', incorrect, 'text-danger'],
+              ['Skipped', skipped, 'text-warn'],
+              ['Analyzed', journalsByAttempt.size, 'text-accent']
+            ].map(([label, value, tone]) => (
+              <div key={String(label)} className="bg-bg-raised px-4 py-3">
+                <p className={cn('u-num text-[18px] font-semibold leading-none', tone)}>{value}</p>
+                <p className="u-label mt-1.5">{label}</p>
+              </div>
+            ))}
+          </div>
+          <ol>
+            {attempts.map((attempt, index) => (
+              <PyqAttemptDetail
+                key={attempt.id}
+                attempt={attempt}
+                position={index + 1}
+                journal={journalsByAttempt.get(attempt.id) ?? null}
+                onImage={onImage}
+                onEdit={onEdit}
+              />
+            ))}
+          </ol>
+        </>
+      ) : (
+        <Empty
+          title="No submitted PYQs"
+          hint="This session does not contain a saved attempt receipt yet."
+          className="border-0 py-10"
+        />
+      )}
+    </Card>
+  );
+}
+
 export default function Journal() {
   const { userId, profile } = useAuth();
   const timeZone = profile?.timezone ?? 'Asia/Kolkata';
@@ -458,6 +737,24 @@ export default function Journal() {
     f.session && f.session !== 'standalone'
       ? (sessionsAll.find((s) => s.id === f.session) ?? null)
       : null;
+  const selectedPyqAttempts = useMemo(() => {
+    if (selectedSession?.kind !== 'pyq') return [];
+    return pyqAttempts
+      .filter((attempt) => attempt.pyq_session_id === selectedSession.id)
+      .sort(
+        (a, b) =>
+          a.attempted_at.localeCompare(b.attempted_at) || a.attempt_number - b.attempt_number
+      );
+  }, [pyqAttempts, selectedSession]);
+  const pyqJournalsByAttempt = useMemo(() => {
+    const map = new Map<string, QuestionRow>();
+    if (selectedPyqAttempts.length === 0) return map;
+    for (const question of questions ?? []) {
+      const attempt = pyqSourceAttemptForJournalQuestion(question, selectedPyqAttempts);
+      if (attempt) map.set(attempt.id, question);
+    }
+    return map;
+  }, [questions, selectedPyqAttempts]);
 
   function set<K extends keyof Filters>(key: K, value: string) {
     setF((prev) => ({ ...prev, [key]: value }));
@@ -469,9 +766,11 @@ export default function Journal() {
       <PageHeader
         title="Journal"
         description={
-          questions === undefined
-            ? 'Loading…'
-            : `${filtered.length} of ${questions.length} ${plural(questions.length, 'entry', 'entries')}`
+          selectedSession?.kind === 'pyq'
+            ? `${selectedPyqAttempts.length} ${plural(selectedPyqAttempts.length, 'submission')} in this PYQ session`
+            : questions === undefined
+              ? 'Loading…'
+              : `${filtered.length} of ${questions.length} ${plural(questions.length, 'entry', 'entries')}`
         }
       />
 
@@ -589,7 +888,8 @@ export default function Journal() {
               <option value="standalone">Standalone (Log) entries</option>
               {sessionsAll.map((s) => (
                 <option key={s.id} value={s.id}>
-                  {formatDate(s.date, 'dd MMM yy')} · {s.subject}
+                  {formatDate(s.date, 'dd MMM yy')} · {s.kind === 'pyq' ? 'PYQ · ' : ''}
+                  {s.subject}
                 </option>
               ))}
             </Select>
@@ -659,7 +959,10 @@ export default function Journal() {
               <span className="text-text-faint">
                 · {formatDate(selectedSession.date, 'EEE dd MMM yy')} ·{' '}
                 <span className="u-num">{questionCountBySession.get(selectedSession.id) ?? 0}</span>{' '}
-                {plural(questionCountBySession.get(selectedSession.id) ?? 0, 'question')}
+                {plural(
+                  questionCountBySession.get(selectedSession.id) ?? 0,
+                  selectedSession.kind === 'pyq' ? 'submission' : 'question'
+                )}
                 {selectedSession.actual_duration_min != null && (
                   <>
                     {' · '}
@@ -688,7 +991,14 @@ export default function Journal() {
         </Card>
       )}
 
-      {showQuestionsTable ? (
+      {selectedSession?.kind === 'pyq' ? (
+        <PyqSessionDetails
+          attempts={selectedPyqAttempts}
+          journalsByAttempt={pyqJournalsByAttempt}
+          onImage={(src, caption) => setPreview({ src, caption })}
+          onEdit={openEdit}
+        />
+      ) : showQuestionsTable ? (
         <Card>
           {pageRows.length > 0 ? (
             <>
@@ -882,14 +1192,17 @@ function RecentSessionsCard({
                   </span>
                   {s.actual_duration_min != null && (
                     <span className="u-num hidden shrink-0 text-[11px] text-text-faint sm:inline">
-                      · {s.actual_duration_min}m of {s.target_duration_min}m
+                      · {s.actual_duration_min}m
+                      {s.kind === 'pyq' ? '' : ` of ${s.target_duration_min}m`}
                     </span>
                   )}
                 </button>
                 <span className="flex w-full shrink-0 items-center justify-between border-t border-border/70 pl-[22px] pt-2 sm:w-auto sm:justify-start sm:border-0 sm:p-0">
                   <span className="u-num text-[10px] text-text-faint sm:hidden">
                     {s.actual_duration_min != null
-                      ? `${s.actual_duration_min}m of ${s.target_duration_min}m`
+                      ? s.kind === 'pyq'
+                        ? `${s.actual_duration_min}m logged`
+                        : `${s.actual_duration_min}m of ${s.target_duration_min}m`
                       : `${s.target_duration_min}m target`}
                   </span>
                   <span className="flex items-center gap-1">

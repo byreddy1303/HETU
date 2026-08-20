@@ -4,12 +4,7 @@
 import { subDays } from 'date-fns';
 import type { Outcome, QuestionRow, ReattemptRow, RootCause, SessionRow } from '@/types';
 import { OUTCOMES } from '@/lib/constants';
-import {
-  addDaysISO,
-  calendarDateInTimeZone,
-  todayISO,
-  weekStartISO
-} from '@/lib/utils';
+import { addDaysISO, calendarDateInTimeZone, todayISO, weekStartISO } from '@/lib/utils';
 
 export interface WeeklyDraft {
   root_cause_summary: string;
@@ -104,6 +99,13 @@ export function mistakeSurfaceSeries(
 ): MistakeSurfacePoint[] {
   const span = Math.max(1, Math.floor(days));
   const end = calendarDateInTimeZone(now, timeZone);
+  const lifecycle = reattempts.map((row) => {
+    const final = row.history.at(-1);
+    return {
+      openedOn: calendarDateInTimeZone(row.created_at, timeZone),
+      masteredOn: row.stage === 'MASTERED' && final?.result === 'clean' ? final.date : null
+    };
+  });
 
   return Array.from({ length: span }, (_, index) => addDaysISO(end, index - span + 1)).map(
     (date) => {
@@ -111,13 +113,8 @@ export function mistakeSurfaceSeries(
       let opened = 0;
       let mastered = 0;
 
-      for (const row of reattempts) {
-        const openedOn = calendarDateInTimeZone(row.created_at, timeZone);
+      for (const { openedOn, masteredOn } of lifecycle) {
         if (openedOn === date) opened += 1;
-
-        const final = row.history.at(-1);
-        const masteredOn =
-          row.stage === 'MASTERED' && final?.result === 'clean' ? final.date : null;
         if (masteredOn === date) mastered += 1;
 
         if (openedOn <= date && (!masteredOn || masteredOn > date)) open += 1;
@@ -137,9 +134,12 @@ export function outcomeDistribution(questions: QuestionRow[]): Record<Outcome, n
 
 /** Newest finished session by created_at, or null. */
 export function latestSession(sessions: SessionRow[]): SessionRow | null {
-  const finished = sessions.filter((session) => session.actual_duration_min !== null);
-  if (finished.length === 0) return null;
-  return [...finished].sort((a, b) => (a.created_at < b.created_at ? 1 : -1))[0];
+  let latest: SessionRow | null = null;
+  for (const session of sessions) {
+    if (session.actual_duration_min === null) continue;
+    if (!latest || session.created_at > latest.created_at) latest = session;
+  }
+  return latest;
 }
 
 /** Reattempts due today or overdue and not yet mastered. */
@@ -269,11 +269,7 @@ export function calibrationBySubject(questions: QuestionRow[]): CalibrationRow[]
     // on the table. Sample size < 4 stays explicitly inconclusive.
     if (decided < 4) {
       row.recommendation = 'insufficient';
-    } else if (
-      row.accuracy != null &&
-      row.accuracy < 0.25 &&
-      row.answeredExpectedValue < 0
-    ) {
+    } else if (row.accuracy != null && row.accuracy < 0.25 && row.answeredExpectedValue < 0) {
       row.recommendation = 'raise';
     } else if (
       row.accuracy != null &&
@@ -286,9 +282,7 @@ export function calibrationBySubject(questions: QuestionRow[]): CalibrationRow[]
       row.recommendation = 'hold';
     }
   }
-  return [...per.values()].sort(
-    (a, b) => a.expectedValue - b.expectedValue || b.marked - a.marked
-  );
+  return [...per.values()].sort((a, b) => a.expectedValue - b.expectedValue || b.marked - a.marked);
 }
 
 /** Aggregate all-subject EV given the per-subject rows. */
@@ -316,9 +310,7 @@ export function calibrationOverall(rows: CalibrationRow[]): {
     wrong,
     skipped,
     expectedValue:
-      decided + skipped === 0
-        ? 0
-        : (correct * 1 + wrong * (-1 / 3)) / (decided + skipped),
+      decided + skipped === 0 ? 0 : (correct * 1 + wrong * (-1 / 3)) / (decided + skipped),
     accuracy: decided === 0 ? null : correct / decided
   };
 }
@@ -384,9 +376,7 @@ export function activeDaysBack(
   now: Date = new Date(),
   timeZone = 'Asia/Kolkata'
 ): number {
-  const dates = new Set(
-    questions.map((q) => calendarDateInTimeZone(q.created_at, timeZone))
-  );
+  const dates = new Set(questions.map((q) => calendarDateInTimeZone(q.created_at, timeZone)));
   let n = 0;
   let cursor = now;
   while (dates.has(calendarDateInTimeZone(cursor, timeZone))) {

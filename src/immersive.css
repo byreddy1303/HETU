@@ -674,8 +674,6 @@ html[data-theme='dark'] .immersive-scene__cursor {
 .immersive-route-stage {
   position: relative;
   z-index: 3;
-  transform-style: preserve-3d;
-  transform-origin: 50% 8%;
 }
 
 .immersive-main .u-shell-content {
@@ -685,36 +683,23 @@ html[data-theme='dark'] .immersive-scene__cursor {
 .immersive-shell .air-page .u-panel,
 .immersive-shell .air-page .native-learning-tips {
   border-color: rgb(var(--color-border) / 0.86);
-  background: rgb(var(--color-bg-raised) / 0.93);
-  box-shadow:
-    0 26px 62px -42px rgb(var(--scene-tone) / 0.38),
-    0 9px 25px -21px rgb(var(--color-text) / 0.23),
-    inset 0 1px rgb(255 255 255 / 0.38);
+  background: rgb(var(--color-bg-raised));
+  box-shadow: 0 9px 25px -21px rgb(var(--color-text) / 0.23);
   transition:
-    transform 320ms cubic-bezier(0.22, 1, 0.36, 1),
-    border-color 220ms ease,
-    box-shadow 320ms ease,
-    background-color 220ms ease;
+    border-color 120ms ease,
+    background-color 120ms ease;
 }
 
 html[data-theme='dark'] .immersive-shell .air-page .u-panel,
 html[data-theme='dark'] .immersive-shell .air-page .native-learning-tips {
-  background: rgb(var(--color-bg-raised) / 0.91);
-  box-shadow:
-    0 26px 64px -38px rgb(0 0 0 / 0.84),
-    0 0 0 1px rgb(var(--scene-tone) / 0.035),
-    inset 0 1px rgb(255 255 255 / 0.035);
+  background: rgb(var(--color-bg-raised));
+  box-shadow: 0 9px 25px -21px rgb(0 0 0 / 0.66);
 }
 
 .immersive-shell .air-page .u-panel:hover,
 .immersive-shell .air-page .native-learning-tips:hover {
   border-color: rgb(var(--scene-tone) / 0.26);
-  box-shadow:
-    0 34px 74px -42px rgb(var(--scene-tone) / 0.45),
-    0 14px 28px -24px rgb(var(--color-text) / 0.25),
-    inset 0 1px rgb(255 255 255 / 0.48);
-  transform: translate3d(var(--scene-panel-x), var(--scene-panel-y), 18px)
-    rotateX(var(--scene-tilt-x)) rotateY(var(--scene-tilt-y));
+  background: rgb(var(--color-bg-overlay));
 }
 
 .immersive-shell .u-button,
@@ -722,11 +707,6 @@ html[data-theme='dark'] .immersive-shell .air-page .native-learning-tips {
 .immersive-shell a,
 .immersive-shell button {
   -webkit-tap-highlight-color: transparent;
-}
-
-.immersive-shell .u-button:not(:disabled):active,
-.immersive-shell .u-tactile-tile:active {
-  filter: saturate(1.08);
 }
 
 /* Functional surfaces keep their familiar affordances, but behave like
@@ -801,15 +781,7 @@ html[data-theme='dark'] .immersive-shell .air-page .native-learning-tips {
 }
 
 .immersive-shell [role='progressbar'] > *::after {
-  position: absolute;
-  inset: 0 auto 0 0;
-  width: 45%;
-  border-radius: inherit;
-  background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.38), transparent);
-  transform: translate3d(-225%, 0, 0);
-  will-change: transform;
-  animation: immersive-progress-scan 3.8s ease-in-out infinite;
-  content: '';
+  display: none;
 }
 
 .immersive-shell table {
@@ -818,16 +790,13 @@ html[data-theme='dark'] .immersive-shell .air-page .native-learning-tips {
 }
 
 .immersive-shell tbody tr {
-  transition:
-    background-color 160ms ease,
-    transform 220ms cubic-bezier(0.22, 1, 0.36, 1);
+  transition: background-color 120ms ease;
 }
 
 .immersive-shell tbody tr:hover {
   position: relative;
   z-index: 1;
   background: rgb(var(--scene-tone) / 0.035);
-  transform: translateX(2px);
 }
 
 .immersive-shell .u-dialog-overlay {
@@ -838,7 +807,6 @@ html[data-theme='dark'] .immersive-shell .air-page .native-learning-tips {
       transparent 18rem
     ),
     rgb(var(--color-scrim) / 0.46);
-  backdrop-filter: blur(8px) saturate(0.9);
 }
 
 .immersive-shell .u-dialog-panel {
@@ -897,7 +865,6 @@ html[data-theme='dark'] .immersive-shell .air-page .native-learning-tips {
   position: relative;
   z-index: 3;
   transition: transform 180ms cubic-bezier(0.22, 1, 0.36, 1);
-  will-change: transform;
 }
 
 .immersive-magnetic::before {
@@ -959,7 +926,6 @@ html[data-theme='dark'] .immersive-shell .air-page .native-learning-tips {
   border-radius: 50%;
   background: currentColor;
   box-shadow: 0 0 0 4px rgb(var(--scene-tone) / 0.08);
-  animation: immersive-signal 2.2s ease-in-out infinite;
 }
 
 .immersive-side-nav__thread {
@@ -1063,7 +1029,6 @@ html[data-theme='dark'] .immersive-shell .air-page .native-learning-tips {
 /* Dashboard constellation -------------------------------------------------- */
 .immersive-dashboard {
   position: relative;
-  perspective: 1400px;
 }
 
 .immersive-dashboard__coordinates {
@@ -1102,13 +1067,11 @@ html[data-theme='dark'] .immersive-shell .air-page .native-learning-tips {
 .immersive-dashboard-hero,
 .immersive-metric-card,
 .immersive-learning-signal {
-  backface-visibility: hidden;
-  will-change: transform;
+  transform: none !important;
 }
 
 .immersive-dashboard-hero:hover {
-  transform: translate3d(var(--scene-hero-x), -3px, 18px) rotateX(var(--scene-tilt-x))
-    rotateY(var(--scene-tilt-y)) !important;
+  transform: none !important;
 }
 
 .immersive-dashboard-hero__thread {
@@ -1137,7 +1100,6 @@ html[data-theme='dark'] .immersive-shell .air-page .native-learning-tips {
   background: rgb(var(--scene-tone));
   box-shadow: 0 0 0 4px rgb(var(--scene-tone) / 0.09);
   content: '';
-  animation: immersive-thread-node 5s ease-in-out infinite;
 }
 
 .immersive-dashboard-hero__halo {
@@ -1188,7 +1150,6 @@ html[data-theme='dark'] .immersive-shell .air-page .native-learning-tips {
   height: 4px;
   border-radius: 50%;
   background: currentColor;
-  animation: immersive-signal 2s ease-in-out infinite;
 }
 
 .immersive-inline-note::before {
@@ -1219,7 +1180,6 @@ html[data-theme='dark'] .immersive-shell .air-page .native-learning-tips {
   border: 1px solid rgb(var(--scene-tone) / 0.19);
   border-radius: 50%;
   transform: translateY(-50%);
-  animation: immersive-ring-breathe 7s ease-in-out infinite;
 }
 
 .immersive-queue-orbit__rings span {
@@ -1244,12 +1204,11 @@ html[data-theme='dark'] .immersive-shell .air-page .native-learning-tips {
 }
 
 .immersive-orbit-icon {
-  animation: immersive-icon-orbit 12s linear infinite;
+  transform: none;
 }
 
 .immersive-card-constellation {
   position: relative;
-  transform-style: preserve-3d;
 }
 
 .immersive-card-constellation::before {
@@ -1289,7 +1248,6 @@ html[data-theme='dark'] .immersive-shell .air-page .native-learning-tips {
 
 .immersive-metric-card {
   position: relative;
-  transform-style: preserve-3d;
 }
 
 .immersive-metric-card::after {
@@ -1342,15 +1300,12 @@ html[data-theme='dark'] .immersive-shell .air-page .native-learning-tips {
   border: 1px dashed rgb(var(--scene-tone) / 0.12);
   border-radius: 50%;
   content: '';
-  animation: immersive-donut-spin 28s linear infinite;
 }
 
 .immersive-outcome-donut::after {
   inset: 11px;
   border-style: solid;
   border-color: rgb(var(--scene-secondary) / 0.1);
-  animation-direction: reverse;
-  animation-duration: 19s;
 }
 
 .immersive-outcome-donut__satellite {
@@ -1368,7 +1323,6 @@ html[data-theme='dark'] .immersive-shell .air-page .native-learning-tips {
   color: rgb(var(--color-success));
   background: rgb(var(--color-bg-raised));
   box-shadow: 0 0 0 5px rgb(var(--color-success) / 0.05);
-  animation: immersive-satellite 5s ease-in-out infinite;
 }
 
 .immersive-learning-signal {
@@ -1393,7 +1347,7 @@ html[data-theme='dark'] .immersive-shell .air-page .native-learning-tips {
 .immersive-mobile-header,
 .immersive-shell .native-bottom-nav,
 .immersive-shell .native-more-sheet {
-  background: rgb(var(--color-bg-raised) / 0.94) !important;
+  background: rgb(var(--color-bg-raised)) !important;
 }
 
 .immersive-shell .native-bottom-nav {

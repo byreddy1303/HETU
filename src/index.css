@@ -6,22 +6,6 @@
 @tailwind components;
 @tailwind utilities;
 
-/* The theme button supplies the circular clip path. These rules only remove
-   the browser's default cross-fade so the new paper surface can be revealed. */
-::view-transition-old(root),
-::view-transition-new(root) {
-  animation: none;
-  mix-blend-mode: normal;
-}
-
-::view-transition-old(root) {
-  z-index: 1;
-}
-
-::view-transition-new(root) {
-  z-index: 2;
-}
-
 @keyframes latency-fade-in {
   from {
     opacity: 0;

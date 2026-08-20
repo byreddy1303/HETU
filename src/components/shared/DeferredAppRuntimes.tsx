@@ -14,10 +14,11 @@ interface IdleWindow {
 /** Starts non-visual collaboration listeners after the signed-in UI is responsive. */
 export default function DeferredAppRuntimes() {
   const authStatus = useAuthStore((state) => state.status);
+  const sandbox = useAuthStore((state) => state.sandbox);
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    if (authStatus !== 'signed_in') {
+    if (authStatus !== 'signed_in' || sandbox) {
       setReady(false);
       return;
     }
@@ -34,7 +35,7 @@ export default function DeferredAppRuntimes() {
         window.clearTimeout(handle);
       }
     };
-  }, [authStatus]);
+  }, [authStatus, sandbox]);
 
   return ready ? (
     <Suspense fallback={null}>

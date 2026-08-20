@@ -4,9 +4,9 @@ import { cn } from '@/lib/utils';
 
 /** Quiet sync status: invisible when everything is synced and online. */
 export default function OfflineBadge({ className }: { className?: string }) {
-  const online = useOnline();
-  const pending = usePendingCount();
   const { sandbox } = useAuth();
+  const online = useOnline();
+  const pending = usePendingCount(!sandbox);
 
   if (sandbox) {
     return (

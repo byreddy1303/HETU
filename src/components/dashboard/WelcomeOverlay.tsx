@@ -114,7 +114,7 @@ export default function WelcomeOverlay() {
 
   return (
     <div
-      className="native-welcome-overlay latency-overlay-enter fixed inset-0 z-50 flex items-center justify-center bg-black/25 px-4 py-8 backdrop-blur-sm"
+      className="native-welcome-overlay latency-overlay-enter fixed inset-0 z-50 flex items-center justify-center bg-black/35 px-4 py-8"
       role="dialog"
       aria-modal="true"
       aria-labelledby="welcome-title"

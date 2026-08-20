@@ -33,15 +33,16 @@ export function useOnline(): boolean {
 }
 
 /** Count of rows still waiting to reach the server. */
-export function usePendingCount(): number {
+export function usePendingCount(enabled = true): number {
   return (
     useLiveQuery(async () => {
+      if (!enabled) return 0;
       const counts = await Promise.all(
         SYNCED_TABLES.map((name) =>
           table(name).where('sync_status').anyOf('pending', 'error').count()
         )
       );
       return counts.reduce((total, count) => total + count, 0);
-    }, []) ?? 0
+    }, [enabled]) ?? 0
   );
 }

@@ -47,13 +47,6 @@ export default function AnswerReveal({
 
   return (
     <motion.section
-      layout={!reduceMotion}
-      transition={{
-        layout: {
-          duration: reduceMotion ? MOTION_DURATION.immediate : MOTION_DURATION.content,
-          ease: MOTION_EASE
-        }
-      }}
       className={cn(
         'overflow-hidden rounded-xl border transition-colors',
         revealed ? 'border-ink-teal/30 bg-ink-teal/5' : 'border-dashed border-border bg-bg-raised',
@@ -127,12 +120,12 @@ export default function AnswerReveal({
             role="region"
             aria-label="Saved answer"
             className="overflow-hidden border-t border-ink-teal/20"
-            initial={reduceMotion ? false : { height: 0, opacity: 0, filter: 'blur(3px)' }}
-            animate={{ height: 'auto', opacity: 1, filter: 'blur(0px)' }}
+            initial={reduceMotion ? false : { height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
             exit={
               reduceMotion
                 ? { opacity: 0 }
-                : { height: 0, opacity: 0, filter: 'blur(2px)', transition: { duration: 0.16 } }
+                : { height: 0, opacity: 0, transition: { duration: 0.16 } }
             }
             transition={{
               duration: reduceMotion ? MOTION_DURATION.immediate : MOTION_DURATION.content,

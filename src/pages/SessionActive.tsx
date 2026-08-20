@@ -268,7 +268,7 @@ export default function SessionActive() {
         </span>
       </div>
 
-      <AnimatePresence initial={false} mode="wait">
+      <AnimatePresence initial={false}>
         {savedReceipt ? (
           <motion.div
             key={`receipt-${savedReceipt.id}`}

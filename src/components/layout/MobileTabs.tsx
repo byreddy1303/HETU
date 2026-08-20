@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
-import { LayoutGroup, motion, useReducedMotion } from 'motion/react';
 import {
   BookOpen,
   CalendarCheck,
@@ -33,7 +32,6 @@ import { cn } from '@/lib/utils';
 import { db } from '@/lib/db';
 import { useSessionStore } from '@/stores/session';
 import { haptic } from '@/lib/native';
-import { MOTION_DURATION, MOTION_SPRING } from '@/lib/motion';
 
 /* ─── Primary tabs (4 only) ─────────────────────────────────── */
 interface Tab {
@@ -62,14 +60,14 @@ const MORE_GROUPS: { label: string; items: MoreItem[] }[] = [
     items: [
       { to: '/journal', label: 'Journal', icon: NotebookText },
       { to: '/today', label: 'Do now', icon: ClipboardList },
-      { to: '/capture', label: 'Quick capture', icon: Camera },
+      { to: '/pyq', label: 'PYQ practice', icon: LibraryBig },
       { to: '/revision-pack', label: 'Revision pack', icon: ClipboardList }
     ]
   },
   {
     label: 'Practice',
     items: [
-      { to: '/pyq', label: 'PYQ practice', icon: LibraryBig },
+      { to: '/capture', label: 'Quick capture', icon: Camera },
       { to: '/mocks', label: 'Mock tests', icon: FileCheck2 },
       { to: '/reattempts', label: 'Re-attempts', icon: RotateCcw }
     ]
@@ -106,7 +104,6 @@ export default function MobileTabs() {
   const { pathname } = useLocation();
   const [moreOpen, setMoreOpen] = useState(false);
   const sheetRef = useRef<HTMLElement>(null);
-  const reduceMotion = useReducedMotion();
 
   const storedSessionId = useSessionStore((s) => s.sessionId);
   const liveSessionId = useLiveQuery(async () => {
@@ -147,7 +144,7 @@ export default function MobileTabs() {
           {/* Scrim */}
           <button
             type="button"
-            className="absolute inset-0 bg-scrim/40 backdrop-blur-[2px]"
+            className="absolute inset-0 bg-scrim/50"
             aria-label="Close navigation menu"
             onClick={() => setMoreOpen(false)}
           />
@@ -230,106 +227,81 @@ export default function MobileTabs() {
       )}
 
       {/* ── Bottom nav bar ── */}
-      <LayoutGroup id="mobile-primary-navigation">
-        <nav
-          className="native-bottom-nav fixed inset-x-0 bottom-0 z-50 flex items-stretch border-t border-border bg-bg-raised/96 pb-[var(--safe-bottom)] shadow-nav backdrop-blur-sm md:hidden"
-          aria-label="Primary navigation"
-        >
-          {/* First 2 tabs: Home, Log */}
-          {TABS.slice(0, 2).map((tab) => (
-            <TabButton
-              key={tab.to}
-              tab={tab}
-              pathname={pathname}
-              reduceMotion={reduceMotion}
-              showIndicator={!moreOpen}
-            />
-          ))}
+      <nav
+        className="native-bottom-nav fixed inset-x-0 bottom-0 z-50 flex items-stretch border-t border-border bg-bg-raised pb-[var(--safe-bottom)] shadow-nav md:hidden"
+        aria-label="Primary navigation"
+      >
+        {/* First 2 tabs: Home, Log */}
+        {TABS.slice(0, 2).map((tab) => (
+          <TabButton key={tab.to} tab={tab} pathname={pathname} showIndicator={!moreOpen} />
+        ))}
 
-          {/* FAB — centre */}
-          <div className="flex flex-1 items-center justify-center">
-            <NavLink
-              to={fabTo}
-              onClick={() => haptic('firm')}
-              aria-label={fabLabel}
-              className={({ isActive }) =>
-                cn(
-                  'relative flex h-12 w-12 items-center justify-center rounded-full shadow-lift transition-all duration-150',
-                  'active:scale-90',
-                  isActive
-                    ? 'bg-accent-hover text-accent-contrast'
-                    : 'bg-accent text-accent-contrast hover:bg-accent-hover'
-                )
-              }
-            >
-              {liveSessionId ? (
-                <Play size={20} strokeWidth={2} className="translate-x-px" />
-              ) : (
-                <Plus size={22} strokeWidth={2.25} />
-              )}
-            </NavLink>
-          </div>
-
-          {/* Last tab: Planner */}
-          {TABS.slice(2).map((tab) => (
-            <TabButton
-              key={tab.to}
-              tab={tab}
-              pathname={pathname}
-              reduceMotion={reduceMotion}
-              showIndicator={!moreOpen}
-            />
-          ))}
-
-          {/* More button */}
-          <button
-            type="button"
-            onClick={() => {
-              haptic('selection');
-              setMoreOpen((o) => !o);
-            }}
-            aria-expanded={moreOpen}
-            aria-label="More sections"
-            className={cn(
-              'native-bottom-tab relative flex flex-1 flex-col items-center justify-center gap-1 transition-colors active:scale-95',
-              moreHighlighted ? 'text-accent' : 'text-text-faint'
-            )}
+        {/* FAB — centre */}
+        <div className="flex flex-1 items-center justify-center">
+          <NavLink
+            to={fabTo}
+            onClick={() => haptic('firm')}
+            aria-label={fabLabel}
+            className={({ isActive }) =>
+              cn(
+                'relative flex h-12 w-12 items-center justify-center rounded-full shadow-lift transition-all duration-150',
+                'active:scale-90',
+                isActive
+                  ? 'bg-accent-hover text-accent-contrast'
+                  : 'bg-accent text-accent-contrast hover:bg-accent-hover'
+              )
+            }
           >
-            {moreHighlighted ? (
-              <motion.span
-                layoutId="mobile-tab-indicator"
-                className="absolute inset-x-3 top-0 h-[2.5px] rounded-b-full bg-accent"
-                transition={
-                  reduceMotion ? { duration: MOTION_DURATION.immediate } : MOTION_SPRING.layout
-                }
-              />
-            ) : null}
-            <motion.span
-              className="inline-flex"
-              animate={
-                reduceMotion ? undefined : { rotate: moreOpen ? 90 : 0, y: moreOpen ? -1 : 0 }
-              }
-              transition={{
-                duration: reduceMotion ? MOTION_DURATION.immediate : MOTION_DURATION.control
-              }}
+            {liveSessionId ? (
+              <Play size={20} strokeWidth={2} className="translate-x-px" />
+            ) : (
+              <Plus size={22} strokeWidth={2.25} />
+            )}
+          </NavLink>
+        </div>
+
+        {/* Last tab: Planner */}
+        {TABS.slice(2).map((tab) => (
+          <TabButton key={tab.to} tab={tab} pathname={pathname} showIndicator={!moreOpen} />
+        ))}
+
+        {/* More button */}
+        <button
+          type="button"
+          onClick={() => {
+            haptic('selection');
+            setMoreOpen((o) => !o);
+          }}
+          aria-expanded={moreOpen}
+          aria-label="More sections"
+          className={cn(
+            'native-bottom-tab relative flex flex-1 flex-col items-center justify-center gap-1 transition-colors active:scale-95',
+            moreHighlighted ? 'text-accent' : 'text-text-faint'
+          )}
+        >
+          {moreHighlighted ? (
+            <span className="absolute inset-x-3 top-0 h-[2.5px] rounded-b-full bg-accent" />
+          ) : null}
+          <span
+            className="inline-flex transition-transform duration-100"
+            style={{ transform: moreOpen ? 'rotate(90deg)' : undefined }}
+          >
+            <svg
+              width="19"
+              height="19"
+              viewBox="0 0 19 19"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              aria-hidden="true"
             >
-              <svg
-                width="19"
-                height="19"
-                viewBox="0 0 19 19"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-                aria-hidden="true"
-              >
-                <circle cx="4" cy="9.5" r="1.5" fill="currentColor" />
-                <circle cx="9.5" cy="9.5" r="1.5" fill="currentColor" />
-                <circle cx="15" cy="9.5" r="1.5" fill="currentColor" />
-              </svg>
-            </motion.span>
-            <span className="text-[9.5px] font-semibold tracking-tight">More</span>
-          </button>
-        </nav>
-      </LayoutGroup>
+              <circle cx="4" cy="9.5" r="1.5" fill="currentColor" />
+              <circle cx="9.5" cy="9.5" r="1.5" fill="currentColor" />
+              <circle cx="15" cy="9.5" r="1.5" fill="currentColor" />
+            </svg>
+          </span>
+          <span className="text-[9.5px] font-semibold tracking-tight">More</span>
+        </button>
+      </nav>
     </>
   );
 }
@@ -338,12 +310,10 @@ export default function MobileTabs() {
 function TabButton({
   tab,
   pathname,
-  reduceMotion,
   showIndicator
 }: {
   tab: Tab;
   pathname: string;
-  reduceMotion: boolean | null;
   showIndicator: boolean;
 }) {
   const Icon = tab.icon;
@@ -363,19 +333,9 @@ function TabButton({
       )}
     >
       {active && showIndicator ? (
-        <motion.span
-          layoutId="mobile-tab-indicator"
-          className="absolute inset-x-3 top-0 h-[2.5px] rounded-b-full bg-accent"
-          transition={reduceMotion ? { duration: MOTION_DURATION.immediate } : MOTION_SPRING.layout}
-        />
+        <span className="absolute inset-x-3 top-0 h-[2.5px] rounded-b-full bg-accent" />
       ) : null}
-      <motion.span
-        className="inline-flex"
-        animate={reduceMotion ? undefined : { y: active ? -1 : 0, scale: active ? 1.04 : 1 }}
-        transition={reduceMotion ? { duration: MOTION_DURATION.immediate } : MOTION_SPRING.control}
-      >
-        <Icon size={19} strokeWidth={1.75} />
-      </motion.span>
+      <Icon size={19} strokeWidth={1.75} />
       <span className="text-[9.5px] font-semibold tracking-tight">{tab.label}</span>
     </NavLink>
   );

@@ -1,7 +1,7 @@
-import { useEffect, useRef, type CSSProperties } from 'react';
+import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { differenceInCalendarDays, parseISO } from 'date-fns';
-import { motion, useReducedMotion, useScroll, useSpring, useTransform } from 'motion/react';
+import { motion, useReducedMotion } from 'motion/react';
 import {
   ArrowDown,
   ArrowRight,
@@ -23,36 +23,31 @@ const EVIDENCE = [
     code: 'W-C',
     detail: 'concept',
     subject: 'Theory of Computation',
-    className: 'landing-evidence--one',
-    duration: 7.6
+    className: 'landing-evidence--one'
   },
   {
     code: 'RBS',
     detail: 'over target',
     subject: 'Algorithms',
-    className: 'landing-evidence--two',
-    duration: 8.8
+    className: 'landing-evidence--two'
   },
   {
     code: 'RBG',
     detail: 'could not justify',
     subject: 'Computer Networks',
-    className: 'landing-evidence--three',
-    duration: 7.1
+    className: 'landing-evidence--three'
   },
   {
     code: 'W-R',
     detail: 'reading',
     subject: 'Operating Systems',
-    className: 'landing-evidence--four',
-    duration: 9.2
+    className: 'landing-evidence--four'
   },
   {
     code: 'W-E',
     detail: 'execution',
     subject: 'Engineering Mathematics',
-    className: 'landing-evidence--five',
-    duration: 8.1
+    className: 'landing-evidence--five'
   }
 ] as const;
 
@@ -120,34 +115,17 @@ function SectionHeading({
   );
 }
 
-function FloatingEvidence({ reduceMotion }: { reduceMotion: boolean }) {
+function FloatingEvidence() {
   return (
     <div className="landing-evidence-field" aria-hidden="true">
-      {EVIDENCE.map((item, index) => (
-        <motion.div
-          key={item.code}
-          className={`landing-evidence ${item.className}`}
-          animate={
-            reduceMotion
-              ? undefined
-              : {
-                  y: [0, index % 2 === 0 ? -12 : 10, 0],
-                  rotate: [0, index % 2 === 0 ? 1.4 : -1.2, 0]
-                }
-          }
-          transition={{
-            duration: item.duration,
-            ease: 'easeInOut',
-            repeat: Infinity,
-            delay: index * -0.9
-          }}
-        >
+      {EVIDENCE.map((item) => (
+        <div key={item.code} className={`landing-evidence ${item.className}`}>
           <span>{item.code}</span>
           <div>
             <strong>{item.detail}</strong>
             <small>{item.subject}</small>
           </div>
-        </motion.div>
+        </div>
       ))}
     </div>
   );
@@ -233,27 +211,15 @@ function RecallOrbit() {
     <Reveal className="landing-orbit-wrap">
       <div className="landing-orbit" aria-hidden="true">
         <div className="landing-orbit__halo" />
-        <motion.div
-          className="landing-orbit__ring landing-orbit__ring--thirty"
-          animate={reduceMotion ? undefined : { rotate: 360 }}
-          transition={{ duration: 46, repeat: Infinity, ease: 'linear' }}
-        >
+        <div className="landing-orbit__ring landing-orbit__ring--thirty">
           <span className="landing-orbit__node landing-orbit__node--thirty">D30</span>
-        </motion.div>
-        <motion.div
-          className="landing-orbit__ring landing-orbit__ring--ten"
-          animate={reduceMotion ? undefined : { rotate: -360 }}
-          transition={{ duration: 32, repeat: Infinity, ease: 'linear' }}
-        >
+        </div>
+        <div className="landing-orbit__ring landing-orbit__ring--ten">
           <span className="landing-orbit__node landing-orbit__node--ten">D10</span>
-        </motion.div>
-        <motion.div
-          className="landing-orbit__ring landing-orbit__ring--three"
-          animate={reduceMotion ? undefined : { rotate: 360 }}
-          transition={{ duration: 20, repeat: Infinity, ease: 'linear' }}
-        >
+        </div>
+        <div className="landing-orbit__ring landing-orbit__ring--three">
           <span className="landing-orbit__node landing-orbit__node--three">D3</span>
-        </motion.div>
+        </div>
         <div className="landing-orbit__core">
           <BrandMark decorative className="landing-orbit__mark" />
           <span>one mistake</span>
@@ -391,13 +357,7 @@ function SurfaceCard() {
   );
 }
 
-function CausalThread({
-  progress,
-  reduced
-}: {
-  progress: ReturnType<typeof useSpring>;
-  reduced: boolean;
-}) {
+function CausalThread() {
   const path =
     'M680 160 C810 310 440 410 520 690 C590 930 720 920 628 1190 C540 1450 350 1470 420 1770 C476 2015 666 2030 595 2310 C520 2600 382 2670 470 2940 C550 3190 720 3280 610 3540 C530 3730 395 3820 500 4060 C552 4180 580 4300 505 4480';
 
@@ -408,38 +368,14 @@ function CausalThread({
       preserveAspectRatio="none"
       aria-hidden="true"
     >
-      <path
-        className="landing-causal-thread__ghost"
-        d={path}
-      />
-      {reduced ? (
-        <path className="landing-causal-thread__live" d={path} />
-      ) : (
-        <motion.path
-          className="landing-causal-thread__live"
-          d={path}
-          style={{ pathLength: progress }}
-        />
-      )}
+      <path className="landing-causal-thread__ghost" d={path} />
+      <path className="landing-causal-thread__live" d={path} />
     </svg>
   );
 }
 
 export default function Landing() {
-  const pageRef = useRef<HTMLDivElement>(null);
-  const heroRef = useRef<HTMLElement>(null);
   const reduceMotion = useReducedMotion();
-  const { scrollYProgress } = useScroll({
-    target: pageRef,
-    offset: ['start start', 'end end']
-  });
-  const { scrollYProgress: heroProgress } = useScroll({
-    target: heroRef,
-    offset: ['start start', 'end start']
-  });
-  const threadProgress = useSpring(scrollYProgress, { stiffness: 90, damping: 28, mass: 0.45 });
-  const heroY = useTransform(heroProgress, [0, 1], [0, 150]);
-  const heroOpacity = useTransform(heroProgress, [0, 0.82], [1, 0]);
   const daysLeft = Math.max(0, differenceInCalendarDays(parseISO(EXAM_DATE_DEFAULT), new Date()));
 
   useEffect(() => {
@@ -450,31 +386,12 @@ export default function Landing() {
     };
   }, []);
 
-  function trackPointer(event: React.PointerEvent<HTMLDivElement>) {
-    if (reduceMotion) return;
-    const bounds = event.currentTarget.getBoundingClientRect();
-    const x = (event.clientX - bounds.left) / bounds.width - 0.5;
-    const y = (event.clientY - bounds.top) / bounds.height - 0.5;
-    event.currentTarget.style.setProperty('--landing-pointer-x', `${x * 18}px`);
-    event.currentTarget.style.setProperty('--landing-pointer-y', `${y * 18}px`);
-  }
-
   return (
-    <div
-      ref={pageRef}
-      className="landing-page"
-      onPointerMove={trackPointer}
-      style={
-        {
-          '--landing-pointer-x': '0px',
-          '--landing-pointer-y': '0px'
-        } as CSSProperties
-      }
-    >
+    <div className="landing-page">
       <a className="landing-skip" href="#landing-main">
         Skip to the method
       </a>
-      <CausalThread progress={threadProgress} reduced={Boolean(reduceMotion)} />
+      <CausalThread />
 
       <header className="landing-nav">
         <Link to="/" aria-label="HETU home" className="landing-nav__brand">
@@ -498,15 +415,12 @@ export default function Landing() {
       </header>
 
       <main id="landing-main">
-        <section ref={heroRef} className="landing-hero" aria-labelledby="landing-title">
+        <section className="landing-hero" aria-labelledby="landing-title">
           <div className="landing-hero__grid" aria-hidden="true" />
           <div className="landing-hero__glow" aria-hidden="true" />
-          <FloatingEvidence reduceMotion={Boolean(reduceMotion)} />
+          <FloatingEvidence />
 
-          <motion.div
-            className="landing-hero__content"
-            style={reduceMotion ? undefined : { y: heroY, opacity: heroOpacity }}
-          >
+          <motion.div className="landing-hero__content">
             <motion.div
               className="landing-hero__mark-wrap"
               initial={reduceMotion ? false : { opacity: 0, scale: 0.88, rotate: -5 }}

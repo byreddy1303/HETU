@@ -13,7 +13,7 @@ import { buildDoNowQueue, type DoNowItem } from '@/lib/do-now';
 import { loadDayPlan } from '@/lib/planner-storage';
 import { markPlannerBlockStarted, reconcilePlannerExecutions } from '@/lib/planner-execution';
 import { todayISOInTimeZone } from '@/lib/utils';
-import { MOTION_DURATION, MOTION_EASE, MOTION_SPRING } from '@/lib/motion';
+import { MOTION_DURATION, MOTION_EASE } from '@/lib/motion';
 
 const KIND_LABEL: Record<DoNowItem['kind'], string> = {
   reattempt: 'Retrieval',
@@ -123,7 +123,6 @@ export default function DoNow() {
             }}
           >
             <motion.div
-              layout={!reduceMotion}
               initial={reduceMotion ? false : { opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{
@@ -167,14 +166,10 @@ export default function DoNow() {
               </Card>
             </motion.div>
 
-            <motion.ol
-              layout={!reduceMotion}
-              className="overflow-hidden rounded-lg border border-border bg-bg-raised shadow-card"
-            >
+            <motion.ol className="overflow-hidden rounded-lg border border-border bg-bg-raised shadow-card">
               <AnimatePresence initial mode="popLayout">
                 {queue.map((item, index) => (
                   <motion.li
-                    layout={!reduceMotion}
                     key={item.id}
                     initial={
                       reduceMotion || index >= 6 ? false : { opacity: 0, y: 8, scale: 0.992 }
@@ -186,9 +181,6 @@ export default function DoNow() {
                         : { opacity: 0, height: 0, x: -10, transition: { duration: 0.18 } }
                     }
                     transition={{
-                      layout: reduceMotion
-                        ? { duration: MOTION_DURATION.immediate }
-                        : MOTION_SPRING.layout,
                       opacity: {
                         duration: reduceMotion
                           ? MOTION_DURATION.immediate

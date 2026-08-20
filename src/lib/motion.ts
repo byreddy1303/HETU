@@ -9,7 +9,7 @@ export const MOTION_DURATION = {
   page: 0.26,
   arrival: 0.52,
   evidence: 0.4,
-  evidenceHold: 0.68
+  evidenceHold: 0.32
 } as const;
 
 export const MOTION_SPRING = {

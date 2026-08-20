@@ -4,11 +4,14 @@ import { AlertTriangle, RefreshCw } from 'lucide-react';
 import Brand from './Brand';
 
 export default function RootErrorBoundary() {
-  const error: any = useRouteError();
+  const error: unknown = useRouteError();
 
   const errorMessage =
-    error?.message ||
-    (isRouteErrorResponse(error) ? `${error.status} ${error.statusText}` : String(error));
+    error instanceof Error
+      ? error.message
+      : isRouteErrorResponse(error)
+        ? `${error.status} ${error.statusText}`
+        : String(error);
 
   const isChunkError =
     errorMessage.includes('Failed to fetch dynamically imported module') ||

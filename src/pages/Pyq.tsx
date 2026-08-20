@@ -61,6 +61,7 @@ import {
   completePyqSession,
   createPyqAttemptRow,
   createPyqSessionRow,
+  pausePyqSession,
   pyqAttemptId,
   pyqJournalQuestionId,
   pyqPracticeSessionRow,
@@ -697,9 +698,7 @@ export default function Pyq() {
     count: (['5', '10', '25', '50', 'all'].includes(searchParams.get('count') ?? '')
       ? searchParams.get('count')
       : '10') as CountChoice,
-    history: (PYQ_HISTORY_OPTIONS.some(
-      (option) => option.value === searchParams.get('history')
-    )
+    history: (PYQ_HISTORY_OPTIONS.some((option) => option.value === searchParams.get('history'))
       ? searchParams.get('history')
       : 'all') as PyqHistoryFilter
   }));
@@ -884,7 +883,11 @@ export default function Pyq() {
       const compatibleSession =
         session.bank_version === manifest.bankVersion
           ? session
-          : { ...session, bank_version: manifest.bankVersion, updated_at: new Date().toISOString() };
+          : {
+              ...session,
+              bank_version: manifest.bankVersion,
+              updated_at: new Date().toISOString()
+            };
       // Reactivate paused sessions
       const activatedSession: PyqSessionRow =
         compatibleSession.status !== 'active'
@@ -938,7 +941,6 @@ export default function Pyq() {
     }
   }
 
-
   async function discardSession(session: PyqSessionRow) {
     if (loading) return;
     setLoading(true);
@@ -957,7 +959,7 @@ export default function Pyq() {
             abandoned,
             sessionAttempts.length > 0
               ? pyqPracticeSubject(sessionAttempts)
-              : existingCanonical?.subject ?? 'PYQ practice',
+              : (existingCanonical?.subject ?? 'PYQ practice'),
             timeZone,
             existingCanonical
           )
@@ -996,7 +998,7 @@ export default function Pyq() {
             saved,
             sessionAttempts.length > 0
               ? pyqPracticeSubject(sessionAttempts)
-              : existingCanonical?.subject ?? 'PYQ practice',
+              : (existingCanonical?.subject ?? 'PYQ practice'),
             timeZone,
             existingCanonical
           )
@@ -1026,7 +1028,9 @@ export default function Pyq() {
         .equals([userId, 'active'])
         .toArray();
       if (activeRows.length > 0) {
-        throw new Error('Save to journal or discard the unfinished PYQ set before starting another.');
+        throw new Error(
+          'Save to journal or discard the unfinished PYQ set before starting another.'
+        );
       }
       const subjects =
         config.subjectSlug === 'all'
@@ -1041,12 +1045,7 @@ export default function Pyq() {
           question.year <= high &&
           (config.type === 'all' || question.type === config.type)
       );
-      rows = filterPyqByHistory(
-        rows,
-        config.history ?? 'all',
-        attempts,
-        journalQuestions
-      );
+      rows = filterPyqByHistory(rows, config.history ?? 'all', attempts, journalQuestions);
       const attemptedIds = new Set(attempts.map((attempt) => attempt.question_uid));
       if (config.order === 'random') rows = rows.slice().sort(() => Math.random() - 0.5);
       else if (config.order === 'oldest')

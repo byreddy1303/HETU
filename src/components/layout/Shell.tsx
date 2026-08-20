@@ -1,5 +1,4 @@
 import { useLocation, useOutlet } from 'react-router-dom';
-import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import Nav from '@/components/layout/Nav';
 import MobileTabs from '@/components/layout/MobileTabs';
 import TopRightControls, { ExamCountdown } from '@/components/layout/TopRightControls';
@@ -10,9 +9,8 @@ import ThemeToggle from '@/components/shared/ThemeToggle';
 import OfflineBadge from '@/components/shared/OfflineBadge';
 import ImmersiveSoundToggle from '@/components/immersive/ImmersiveSoundToggle';
 import { useSyncBootstrap } from '@/hooks/useSync';
+import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { SceneProvider } from '@/components/immersive/SceneProvider';
-import ImmersiveScene from '@/components/immersive/ImmersiveScene';
-import { MOTION_DURATION, MOTION_EASE } from '@/lib/motion';
 import '@/immersive.css';
 
 export default function Shell() {
@@ -27,19 +25,20 @@ export default function Shell() {
 
 function ShellChrome({ pathname }: { pathname: string }) {
   const outlet = useOutlet();
-  const reduceMotion = useReducedMotion();
-  const dashboardArrival = pathname === '/';
+  const desktop = useMediaQuery('(min-width: 768px)');
 
   return (
-    <>
-      <ImmersiveScene />
-      <div className="immersive-app relative min-h-dvh">
-        <Nav />
-        {/* Top Right Corner Controls (Countdown T-Days, Nightshift Toggle, Offline status) */}
-        <div className="immersive-top-controls fixed right-4 top-3.5 z-40 hidden md:block">
-          <TopRightControls />
-        </div>
-        <header className="immersive-mobile-header fixed inset-x-0 top-0 z-40 grid h-[calc(56px+var(--safe-top))] grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-2 border-b border-border/80 bg-bg-raised/95 pl-[calc(1rem+var(--safe-left))] pr-[calc(1rem+var(--safe-right))] pt-[var(--safe-top)] backdrop-blur md:hidden">
+    <div className="immersive-app relative min-h-dvh">
+      {desktop ? (
+        <>
+          <Nav />
+          {/* Top Right Corner Controls (Countdown T-Days, Nightshift Toggle, Offline status) */}
+          <div className="immersive-top-controls fixed right-4 top-3.5 z-40">
+            <TopRightControls />
+          </div>
+        </>
+      ) : (
+        <header className="immersive-mobile-header fixed inset-x-0 top-0 z-40 grid h-[calc(56px+var(--safe-top))] grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-2 border-b border-border/80 bg-bg-raised pl-[calc(1rem+var(--safe-left))] pr-[calc(1rem+var(--safe-right))] pt-[var(--safe-top)]">
           <div className="min-w-0 justify-self-start">
             <BrandMark decorative className="h-7 w-auto min-[360px]:hidden" />
             <Brand size="sm" className="hidden min-[360px]:inline-flex" />
@@ -51,49 +50,25 @@ function ShellChrome({ pathname }: { pathname: string }) {
             <ThemeToggle className="h-9 w-9" />
           </div>
         </header>
-        <main className="native-shell-main immersive-main relative z-10 pb-[calc(4.5rem+var(--safe-bottom))] md:pb-0 md:pl-[224px]">
-          <div
-            className={`u-shell-content mx-auto w-full px-4 pb-8 pt-16 md:px-8 md:pb-16 md:pt-24 ${
-              ['/', '/today', '/syllabus', '/mocks', '/revision-pack', '/topper-notes'].includes(
-                pathname
-              )
-                ? 'max-w-[1180px]'
-                : 'max-w-[880px]'
-            }`}
-          >
-            <AnimatePresence initial mode="popLayout">
-              <motion.div
-                className="air-page immersive-route-stage"
-                key={pathname}
-                initial={
-                  reduceMotion
-                    ? false
-                    : dashboardArrival
-                      ? { opacity: 0, y: 24, scale: 0.985, rotateX: 1.4 }
-                      : { opacity: 0, y: 10, scale: 0.996 }
-                }
-                animate={{ opacity: 1, y: 0, scale: 1, rotateX: 0 }}
-                exit={reduceMotion ? { opacity: 0 } : { opacity: 0, y: -6, scale: 0.998 }}
-                transition={{
-                  duration: reduceMotion
-                    ? MOTION_DURATION.immediate
-                    : dashboardArrival
-                      ? MOTION_DURATION.arrival
-                      : MOTION_DURATION.page,
-                  ease: MOTION_EASE
-                }}
-              >
-                {outlet}
-                {pathname === '/' ? null : (
-                  <ContextualGateTip pathname={pathname} className="mt-6" />
-                )}
-              </motion.div>
-            </AnimatePresence>
-            {pathname === '/' ? null : <DailyQuote />}
+      )}
+      <main className="native-shell-main immersive-main relative z-10 pb-[calc(4.5rem+var(--safe-bottom))] md:pb-0 md:pl-[224px]">
+        <div
+          className={`u-shell-content mx-auto w-full px-4 pb-8 pt-16 md:px-8 md:pb-16 md:pt-24 ${
+            ['/', '/today', '/syllabus', '/mocks', '/revision-pack', '/topper-notes'].includes(
+              pathname
+            )
+              ? 'max-w-[1180px]'
+              : 'max-w-[880px]'
+          }`}
+        >
+          <div className="air-page immersive-route-stage">
+            {outlet}
+            {pathname === '/' ? null : <ContextualGateTip pathname={pathname} className="mt-6" />}
           </div>
-        </main>
-        <MobileTabs />
-      </div>
-    </>
+          {pathname === '/' ? null : <DailyQuote />}
+        </div>
+      </main>
+      {desktop ? null : <MobileTabs />}
+    </div>
   );
 }

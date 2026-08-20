@@ -3,11 +3,7 @@
 import type { PyqAttemptRow, QuestionRow, SessionRow } from '@/types';
 import { db } from '@/lib/db';
 import { deleteLocal, writeLocalBatch } from '@/lib/sync';
-import {
-  pyqJournalQuestionId,
-  pyqPracticeSessionRow,
-  pyqPracticeSubject
-} from '@/lib/pyq-session';
+import { pyqJournalQuestionId, pyqPracticeSessionRow, pyqPracticeSubject } from '@/lib/pyq-session';
 
 /** Count practice questions once when a PYQ attempt also has a journal row. */
 export function practiceQuestionCount(
@@ -53,7 +49,7 @@ export async function reconcilePyqPracticeSessions(
       pyqSession,
       sessionAttempts.length > 0
         ? pyqPracticeSubject(sessionAttempts)
-        : existing?.subject ?? 'PYQ practice',
+        : (existing?.subject ?? 'PYQ practice'),
       timeZone,
       existing
     );
@@ -105,6 +101,13 @@ export async function finishedSessionsWithQuestions(
   const attemptedPyqSessionIds = new Set(
     pyqAttempts.flatMap((attempt) => (attempt.pyq_session_id ? [attempt.pyq_session_id] : []))
   );
+  const attemptsBySession = new Map<string, PyqAttemptRow[]>();
+  for (const attempt of pyqAttempts) {
+    if (!attempt.pyq_session_id) continue;
+    const rows = attemptsBySession.get(attempt.pyq_session_id) ?? [];
+    rows.push(attempt);
+    attemptsBySession.set(attempt.pyq_session_id, rows);
+  }
   const pyqById = new Map(pyqSessions.map((session) => [session.id, session]));
   const canonicalById = new Map<string, SessionRow>(
     sessions.map((session) => [session.id, session])
@@ -113,9 +116,7 @@ export async function finishedSessionsWithQuestions(
   // Project legacy PYQ sets immediately; the mount-time reconciler persists
   // the same row so review routes and sync gain the canonical parent too.
   for (const pyqSession of pyqSessions) {
-    const sessionAttempts = pyqAttempts.filter(
-      (attempt) => attempt.pyq_session_id === pyqSession.id
-    );
+    const sessionAttempts = attemptsBySession.get(pyqSession.id) ?? [];
     const existing = canonicalById.get(pyqSession.id);
     canonicalById.set(
       pyqSession.id,
@@ -123,7 +124,7 @@ export async function finishedSessionsWithQuestions(
         pyqSession,
         sessionAttempts.length > 0
           ? pyqPracticeSubject(sessionAttempts)
-          : existing?.subject ?? 'PYQ practice',
+          : (existing?.subject ?? 'PYQ practice'),
         timeZone,
         existing
       )

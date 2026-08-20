@@ -5,7 +5,7 @@ import { registerSW } from 'virtual:pwa-register';
 import App from '@/App';
 import '@/index.css';
 
-const UPDATE_CHECK_INTERVAL_MS = 60 * 1000; // Check for PWA updates every 1 minute while app is open
+const UPDATE_CHECK_INTERVAL_MS = 30 * 60 * 1000;
 
 // Catch Vite dynamic module preload failures (e.g., after new deployments)
 window.addEventListener('vite:preloadError', () => {
@@ -67,7 +67,9 @@ function configurePwaUpdates(): void {
     }
   });
 
-  window.setInterval(checkForServiceWorkerUpdate, UPDATE_CHECK_INTERVAL_MS);
+  window.setInterval(() => {
+    if (document.visibilityState === 'visible') checkForServiceWorkerUpdate();
+  }, UPDATE_CHECK_INTERVAL_MS);
   document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'visible') checkForServiceWorkerUpdate();
   });

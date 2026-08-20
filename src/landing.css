@@ -70,8 +70,7 @@ html[data-theme='dark'] .landing-page {
   height: 72px;
   padding: 0 clamp(18px, 3.5vw, 56px);
   border-bottom: 1px solid color-mix(in srgb, var(--landing-ink) 10%, transparent);
-  background: color-mix(in srgb, var(--landing-paper) 84%, transparent);
-  backdrop-filter: blur(16px) saturate(1.1);
+  background: var(--landing-paper);
 }
 
 .landing-nav__brand {
@@ -298,7 +297,6 @@ html[data-theme='dark'] .landing-page {
   inset: 0;
   border: 1px solid color-mix(in srgb, var(--landing-garnet) 22%, transparent);
   border-radius: 50%;
-  animation: landing-ring-pulse 3.6s ease-in-out infinite;
 }
 
 .landing-hero__mark-ring::after {
@@ -407,8 +405,6 @@ html[data-theme='dark'] .landing-page {
   inset: 94px clamp(20px, 5vw, 80px) 70px;
   z-index: 1;
   pointer-events: none;
-  transform: translate(var(--landing-pointer-x), var(--landing-pointer-y));
-  transition: transform 1100ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .landing-evidence {
@@ -421,9 +417,8 @@ html[data-theme='dark'] .landing-page {
   border-radius: 9px;
   padding: 9px 12px;
   color: color-mix(in srgb, var(--landing-ink) 58%, transparent);
-  background: color-mix(in srgb, var(--landing-paper-raised) 73%, transparent);
+  background: var(--landing-paper-raised);
   box-shadow: 0 16px 34px -28px color-mix(in srgb, var(--landing-ink) 60%, transparent);
-  backdrop-filter: blur(8px);
 }
 
 .landing-evidence > span {
@@ -512,7 +507,6 @@ html[data-theme='dark'] .landing-page {
   position: absolute;
   inset: 0;
   background: var(--landing-garnet);
-  animation: landing-scroll-line 2.2s ease-in-out infinite;
 }
 
 .landing-section {
@@ -904,8 +898,7 @@ html[data-theme='dark'] .landing-page {
   inset: 16%;
   border-radius: 50%;
   background: radial-gradient(circle, rgba(152, 24, 43, 0.22), transparent 68%);
-  filter: blur(18px);
-  animation: landing-orbit-breathe 4.8s ease-in-out infinite;
+  opacity: 0.62;
 }
 
 .landing-orbit__ring {
@@ -984,7 +977,6 @@ html[data-theme='dark'] .landing-page {
   box-shadow:
     inset 0 0 40px rgba(152, 24, 43, 0.13),
     0 25px 55px rgba(0, 0, 0, 0.3);
-  backdrop-filter: blur(8px);
 }
 
 .landing-orbit__mark {
@@ -1296,11 +1288,11 @@ html[data-theme='dark'] .landing-page {
 }
 
 .landing-manifesto__field span:nth-child(odd) {
-  animation: landing-drift-up 9s ease-in-out infinite alternate;
+  transform: translateY(-6px);
 }
 
 .landing-manifesto__field span:nth-child(even) {
-  animation: landing-drift-down 11s ease-in-out infinite alternate;
+  transform: translateY(6px);
 }
 
 .landing-manifesto__content {
@@ -1818,11 +1810,7 @@ html[data-native='android'] .landing-page::after {
   width: 1px;
   pointer-events: none;
   opacity: 0.2;
-  background-image: linear-gradient(
-    to bottom,
-    var(--landing-garnet) 0 34%,
-    transparent 34% 100%
-  );
+  background-image: linear-gradient(to bottom, var(--landing-garnet) 0 34%, transparent 34% 100%);
   background-size: 1px 11px;
 }
 
@@ -1835,9 +1823,8 @@ html[data-native='android'] .landing-nav {
   gap: 12px;
   padding: 0 16px;
   border-radius: 0 0 16px 16px;
-  background: color-mix(in srgb, var(--landing-paper) 94%, transparent);
+  background: var(--landing-paper);
   box-shadow: 0 10px 28px -24px color-mix(in srgb, var(--landing-ink) 65%, transparent);
-  backdrop-filter: blur(18px) saturate(1.15);
 }
 
 html[data-native='android'] .landing-nav__brand {

@@ -10,10 +10,17 @@ export function useTimer(startedAtMs: number | null): number {
       setSeconds(0);
       return;
     }
-    const tick = () => setSeconds(Math.max(0, Math.floor((Date.now() - startedAtMs) / 1000)));
+
+    let timeout = 0;
+    const tick = () => {
+      const elapsedMs = Math.max(0, Date.now() - startedAtMs);
+      setSeconds(Math.floor(elapsedMs / 1000));
+      // Align the next update to the next displayed second. The old 500 ms
+      // interval woke React twice for every visible timer change.
+      timeout = window.setTimeout(tick, 1000 - (elapsedMs % 1000) + 16);
+    };
     tick();
-    const id = setInterval(tick, 500);
-    return () => clearInterval(id);
+    return () => window.clearTimeout(timeout);
   }, [startedAtMs]);
   return seconds;
 }

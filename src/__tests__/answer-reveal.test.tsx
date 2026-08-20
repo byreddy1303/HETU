@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 import AnswerReveal from '@/components/shared/AnswerReveal';
@@ -10,10 +10,12 @@ describe('AnswerReveal', () => {
 
     expect(screen.queryByText('Use inclusion-exclusion: 42.')).not.toBeInTheDocument();
     await user.click(screen.getByRole('button', { name: 'Show answer' }));
-    expect(screen.getByText('Use inclusion-exclusion: 42.')).toBeVisible();
+    await waitFor(() => expect(screen.getByText('Use inclusion-exclusion: 42.')).toBeVisible());
 
     await user.click(screen.getByRole('button', { name: 'Hide answer' }));
-    expect(screen.queryByText('Use inclusion-exclusion: 42.')).not.toBeInTheDocument();
+    await waitFor(() =>
+      expect(screen.queryByText('Use inclusion-exclusion: 42.')).not.toBeInTheDocument()
+    );
   });
 
   it('offers an add action when no answer was recorded', async () => {

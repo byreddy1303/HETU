@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createElement } from 'react';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import ThemeToggle from '@/components/shared/ThemeToggle';
 import { applyTheme, resolveTheme, THEME_COLORS } from '@/lib/theme';
 import { DEFAULT_PREFERENCES, usePrefsStore } from '@/stores/prefs';
@@ -15,6 +15,11 @@ beforeEach(() => {
       removeEventListener: vi.fn()
     })
   });
+});
+
+afterEach(() => {
+  Reflect.deleteProperty(document, 'startViewTransition');
+  Reflect.deleteProperty(document.documentElement, 'animate');
 });
 
 describe('theme resolution', () => {
@@ -60,5 +65,39 @@ describe('theme toggle', () => {
       'aria-pressed',
       'true'
     );
+  });
+
+  it('reveals the next theme from the toggle when view transitions are available', async () => {
+    const animate = vi.fn().mockReturnValue({
+      finished: Promise.resolve()
+    } as unknown as Animation);
+    Object.defineProperty(document.documentElement, 'animate', {
+      configurable: true,
+      value: animate
+    });
+    const startViewTransition = vi.fn((update: () => void) => {
+      update();
+      return {
+        ready: Promise.resolve(),
+        finished: Promise.resolve(),
+        updateCallbackDone: Promise.resolve(),
+        skipTransition: vi.fn()
+      } as unknown as ViewTransition;
+    });
+    Object.defineProperty(document, 'startViewTransition', {
+      configurable: true,
+      value: startViewTransition
+    });
+
+    render(createElement(ThemeToggle));
+    fireEvent.click(screen.getByRole('button', { name: 'Switch to dark mode' }));
+
+    expect(startViewTransition).toHaveBeenCalledOnce();
+    expect(usePrefsStore.getState().colorTheme).toBe('dark');
+    await waitFor(() => expect(animate).toHaveBeenCalledOnce());
+    expect(animate.mock.calls[0]?.[1]).toMatchObject({
+      pseudoElement: '::view-transition-new(root)',
+      fill: 'both'
+    });
   });
 });

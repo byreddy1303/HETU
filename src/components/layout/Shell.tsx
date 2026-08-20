@@ -1,4 +1,5 @@
-import { Outlet, useLocation } from 'react-router-dom';
+import { useLocation, useOutlet } from 'react-router-dom';
+import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import Nav from '@/components/layout/Nav';
 import MobileTabs from '@/components/layout/MobileTabs';
 import TopRightControls, { ExamCountdown } from '@/components/layout/TopRightControls';
@@ -11,6 +12,7 @@ import ImmersiveSoundToggle from '@/components/immersive/ImmersiveSoundToggle';
 import { useSyncBootstrap } from '@/hooks/useSync';
 import { SceneProvider } from '@/components/immersive/SceneProvider';
 import ImmersiveScene from '@/components/immersive/ImmersiveScene';
+import { MOTION_DURATION, MOTION_EASE } from '@/lib/motion';
 import '@/immersive.css';
 
 export default function Shell() {
@@ -18,6 +20,18 @@ export default function Shell() {
   const { pathname } = useLocation();
   return (
     <SceneProvider pathname={pathname}>
+      <ShellChrome pathname={pathname} />
+    </SceneProvider>
+  );
+}
+
+function ShellChrome({ pathname }: { pathname: string }) {
+  const outlet = useOutlet();
+  const reduceMotion = useReducedMotion();
+  const dashboardArrival = pathname === '/';
+
+  return (
+    <>
       <ImmersiveScene />
       <div className="immersive-app relative min-h-dvh">
         <Nav />
@@ -47,15 +61,39 @@ export default function Shell() {
                 : 'max-w-[880px]'
             }`}
           >
-            <div className="air-page immersive-route-stage" key={pathname}>
-              <Outlet />
-              {pathname === '/' ? null : <ContextualGateTip pathname={pathname} className="mt-6" />}
-            </div>
+            <AnimatePresence initial mode="popLayout">
+              <motion.div
+                className="air-page immersive-route-stage"
+                key={pathname}
+                initial={
+                  reduceMotion
+                    ? false
+                    : dashboardArrival
+                      ? { opacity: 0, y: 24, scale: 0.985, rotateX: 1.4 }
+                      : { opacity: 0, y: 10, scale: 0.996 }
+                }
+                animate={{ opacity: 1, y: 0, scale: 1, rotateX: 0 }}
+                exit={reduceMotion ? { opacity: 0 } : { opacity: 0, y: -6, scale: 0.998 }}
+                transition={{
+                  duration: reduceMotion
+                    ? MOTION_DURATION.immediate
+                    : dashboardArrival
+                      ? MOTION_DURATION.arrival
+                      : MOTION_DURATION.page,
+                  ease: MOTION_EASE
+                }}
+              >
+                {outlet}
+                {pathname === '/' ? null : (
+                  <ContextualGateTip pathname={pathname} className="mt-6" />
+                )}
+              </motion.div>
+            </AnimatePresence>
             {pathname === '/' ? null : <DailyQuote />}
           </div>
         </main>
         <MobileTabs />
       </div>
-    </SceneProvider>
+    </>
   );
 }

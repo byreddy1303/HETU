@@ -1,4 +1,5 @@
 import { NavLink } from 'react-router-dom';
+import { LayoutGroup, motion, useReducedMotion } from 'motion/react';
 import {
   Gauge,
   Play,
@@ -30,6 +31,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useSessionStore } from '@/stores/session';
 import { db } from '@/lib/db';
 import { cn } from '@/lib/utils';
+import { MOTION_DURATION, MOTION_SPRING } from '@/lib/motion';
 import Brand from '@/components/shared/Brand';
 
 interface Item {
@@ -134,7 +136,7 @@ const SETTINGS_ITEM: Item = {
   active: 'bg-ink-slate/10 text-ink-slate'
 };
 
-function NavItem({ item }: { item: Item }) {
+function NavItem({ item, reduceMotion }: { item: Item; reduceMotion: boolean | null }) {
   const Icon = item.icon;
   return (
     <NavLink
@@ -149,19 +151,42 @@ function NavItem({ item }: { item: Item }) {
         )
       }
     >
-      <span className="immersive-nav-item__node" aria-hidden />
-      <Icon size={16} strokeWidth={1.75} className="immersive-nav-item__icon shrink-0" />
-      <span className="immersive-nav-item__label">{item.label}</span>
+      {({ isActive }) => (
+        <>
+          {isActive ? (
+            <motion.span
+              layoutId="desktop-nav-node"
+              className="immersive-nav-item__node"
+              aria-hidden
+              transition={
+                reduceMotion ? { duration: MOTION_DURATION.immediate } : MOTION_SPRING.layout
+              }
+            />
+          ) : (
+            <span className="immersive-nav-item__node" aria-hidden />
+          )}
+          <Icon size={16} strokeWidth={1.75} className="immersive-nav-item__icon shrink-0" />
+          <span className="immersive-nav-item__label">{item.label}</span>
+        </>
+      )}
     </NavLink>
   );
 }
 
-function Group({ label, items }: { label?: string; items: Item[] }) {
+function Group({
+  label,
+  items,
+  reduceMotion
+}: {
+  label?: string;
+  items: Item[];
+  reduceMotion: boolean | null;
+}) {
   return (
     <div className="flex flex-col gap-0.5">
       {label && <p className="u-label px-3 pb-1 pt-4">{label}</p>}
       {items.map((i) => (
-        <NavItem key={i.to} item={i} />
+        <NavItem key={i.to} item={i} reduceMotion={reduceMotion} />
       ))}
     </div>
   );
@@ -170,6 +195,7 @@ function Group({ label, items }: { label?: string; items: Item[] }) {
 export default function Nav() {
   const { profile, sandbox } = useAuth();
   const signOut = useAuthStore((s) => s.signOut);
+  const reduceMotion = useReducedMotion();
   const storedSessionId = useSessionStore((s) => s.sessionId);
   // Confirm the stored session is still live (row exists, unfinished) — a
   // stale localStorage entry after a "finish" that crashed shouldn't hijack
@@ -217,12 +243,14 @@ export default function Nav() {
         </span>
       </div>
 
-      <nav className="immersive-side-nav__links flex flex-1 flex-col gap-0.5 overflow-y-auto px-2">
-        <Group items={main} />
-        <Group label="Analysis" items={ANALYSIS} />
-        <Group label="Learn" items={LEARN} />
-        <Group items={[SETTINGS_ITEM]} />
-      </nav>
+      <LayoutGroup id="desktop-primary-navigation">
+        <nav className="immersive-side-nav__links flex flex-1 flex-col gap-0.5 overflow-y-auto px-2">
+          <Group items={main} reduceMotion={reduceMotion} />
+          <Group label="Analysis" items={ANALYSIS} reduceMotion={reduceMotion} />
+          <Group label="Learn" items={LEARN} reduceMotion={reduceMotion} />
+          <Group items={[SETTINGS_ITEM]} reduceMotion={reduceMotion} />
+        </nav>
+      </LayoutGroup>
 
       <div className="immersive-side-nav__profile border-t border-border px-4 py-3">
         <div className="flex items-center justify-between gap-2">

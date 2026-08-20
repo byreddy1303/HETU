@@ -1,6 +1,6 @@
 // Journal (F3.1): every tagged question, filterable six ways, fuzzy trigger
 // search, expandable rows, 50/page.
-import { useEffect, useMemo, useState } from 'react';
+import { useDeferredValue, useEffect, useMemo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { AnimatePresence, motion } from 'motion/react';
@@ -11,7 +11,6 @@ import { writeLocal, deleteLocal } from '@/lib/sync';
 import {
   pruneEmptyFinishedSessions,
   allSessions,
-  recentSessions,
   reconcilePyqPracticeSessions
 } from '@/lib/sessions';
 import {
@@ -695,19 +694,15 @@ export default function Journal() {
     []
   );
 
-  // Newest-first past sessions for the strip below the filter bar.
-  const recent = useLiveQuery(
-    async () => (userId ? recentSessions(userId, 6, timeZone) : []),
-    [userId, timeZone],
-    []
-  );
   // All sessions for the filter Select — the user can jump to any old session
-  // even if it isn't in the top-6 strip.
+  // even if it isn't in the top-6 strip. The strip is derived from this same
+  // query so Journal does not load and aggregate four tables twice.
   const sessionsAll = useLiveQuery(
     async () => (userId ? allSessions(userId, timeZone) : []),
     [userId, timeZone],
     []
   );
+  const recent = sessionsAll.slice(0, 6);
 
   // Per-session tagged counts (used by the sessions strip subtitle).
   const questionCountBySession = useMemo(() => {
@@ -724,26 +719,50 @@ export default function Journal() {
     return map;
   }, [questions, pyqAttempts]);
 
+  const deferredFilters = useDeferredValue(f);
   const filtered = useMemo(() => {
-    let rows = questions ?? [];
-    if (f.session === 'standalone') rows = rows.filter((q) => q.session_id === null);
-    else if (f.session) rows = rows.filter((q) => q.session_id === f.session);
-    if (f.subject) rows = rows.filter((q) => q.subject === f.subject);
-    if (f.subtopic) rows = rows.filter((q) => q.subtopic === f.subtopic);
-    if (f.outcome) rows = rows.filter((q) => q.outcome === f.outcome);
-    if (f.cause === 'unspecified') rows = rows.filter((q) => q.root_cause === null);
-    else if (f.cause) rows = rows.filter((q) => q.root_cause === f.cause);
-    if (f.mark) rows = rows.filter((q) => q.mark_decision === f.mark);
-    if (f.source) rows = rows.filter((q) => detectSourceKind(q.source_ref) === f.source);
-    if (f.format) rows = rows.filter((q) => detectFormat(q.source_ref) === f.format);
-    if (f.from) rows = rows.filter((q) => q.created_at.slice(0, 10) >= f.from);
-    if (f.to) rows = rows.filter((q) => q.created_at.slice(0, 10) <= f.to);
-    if (f.pattern.trim())
-      rows = rows.filter((q) => q.pattern_name && fuzzy(f.pattern, q.pattern_name));
-    if (f.trigger.trim())
-      rows = rows.filter((q) => q.trigger_sentence && fuzzy(f.trigger, q.trigger_sentence));
-    return rows;
-  }, [questions, f]);
+    const pattern = deferredFilters.pattern.trim();
+    const trigger = deferredFilters.trigger.trim();
+
+    return (questions ?? []).filter((question) => {
+      if (
+        deferredFilters.session === 'standalone'
+          ? question.session_id !== null
+          : deferredFilters.session && question.session_id !== deferredFilters.session
+      ) {
+        return false;
+      }
+      if (deferredFilters.subject && question.subject !== deferredFilters.subject) return false;
+      if (deferredFilters.subtopic && question.subtopic !== deferredFilters.subtopic) return false;
+      if (deferredFilters.outcome && question.outcome !== deferredFilters.outcome) return false;
+      if (
+        deferredFilters.cause === 'unspecified'
+          ? question.root_cause !== null
+          : deferredFilters.cause && question.root_cause !== deferredFilters.cause
+      ) {
+        return false;
+      }
+      if (deferredFilters.mark && question.mark_decision !== deferredFilters.mark) return false;
+      if (
+        deferredFilters.source &&
+        detectSourceKind(question.source_ref) !== deferredFilters.source
+      ) {
+        return false;
+      }
+      if (deferredFilters.format && detectFormat(question.source_ref) !== deferredFilters.format) {
+        return false;
+      }
+      const createdDate = question.created_at.slice(0, 10);
+      if (deferredFilters.from && createdDate < deferredFilters.from) return false;
+      if (deferredFilters.to && createdDate > deferredFilters.to) return false;
+      if (pattern && (!question.pattern_name || !fuzzy(pattern, question.pattern_name)))
+        return false;
+      if (trigger && (!question.trigger_sentence || !fuzzy(trigger, question.trigger_sentence))) {
+        return false;
+      }
+      return true;
+    });
+  }, [questions, deferredFilters]);
 
   const pages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const current = Math.min(page, pages - 1);

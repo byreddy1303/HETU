@@ -1,0 +1,47 @@
+{
+  "nodes": [
+    {
+      "id": "config:android/app/build.gradle",
+      "type": "config",
+      "name": "build.gradle",
+      "filePath": "android/app/build.gradle",
+      "summary": "Configures the Android application module, including its Android build settings, application plugin, dependencies, release processing, Capacitor integration, and Google Services plugin.",
+      "tags": ["configuration", "android", "gradle", "build-system"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "config:android/app/capacitor.build.gradle",
+      "type": "config",
+      "name": "capacitor.build.gradle",
+      "filePath": "android/app/capacitor.build.gradle",
+      "summary": "Provides the Capacitor-specific Android module configuration and dependency wiring applied by the main application Gradle build.",
+      "tags": ["configuration", "android", "capacitor", "build-system"],
+      "complexity": "simple"
+    },
+    {
+      "id": "config:android/app/google-services.json",
+      "type": "config",
+      "name": "google-services.json",
+      "filePath": "android/app/google-services.json",
+      "summary": "Supplies Android Google Services and Firebase client metadata consumed by the Gradle plugin during application builds.",
+      "tags": ["configuration", "android", "firebase", "google-services"],
+      "complexity": "simple"
+    }
+  ],
+  "edges": [
+    {
+      "source": "config:android/app/build.gradle",
+      "target": "config:android/app/capacitor.build.gradle",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "config:android/app/google-services.json",
+      "target": "config:android/app/build.gradle",
+      "type": "configures",
+      "direction": "forward",
+      "weight": 0.6
+    }
+  ]
+}

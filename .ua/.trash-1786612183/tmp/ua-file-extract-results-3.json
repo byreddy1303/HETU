@@ -1,0 +1,6199 @@
+{
+  "scriptCompleted": true,
+  "filesAnalyzed": 28,
+  "filesSkipped": [],
+  "analysisOutcomes": {
+    "structure": {
+      "succeeded": 28,
+      "failed": 0
+    },
+    "callGraph": {
+      "succeeded": 28,
+      "failed": 0,
+      "skipped": 0
+    }
+  },
+  "results": [
+    {
+      "path": "src/components/shared/RootErrorBoundary.tsx",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 69,
+      "nonEmptyLines": 59,
+      "functions": [
+        {
+          "name": "RootErrorBoundary",
+          "startLine": 6,
+          "endLine": 69,
+          "params": []
+        }
+      ],
+      "exports": [
+        {
+          "name": "RootErrorBoundary",
+          "line": 6,
+          "isDefault": true
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "RootErrorBoundary",
+          "callee": "useRouteError",
+          "lineNumber": 7
+        },
+        {
+          "caller": "RootErrorBoundary",
+          "callee": "isRouteErrorResponse",
+          "lineNumber": 11
+        },
+        {
+          "caller": "RootErrorBoundary",
+          "callee": "String",
+          "lineNumber": 11
+        },
+        {
+          "caller": "RootErrorBoundary",
+          "callee": "errorMessage.includes",
+          "lineNumber": 14
+        },
+        {
+          "caller": "RootErrorBoundary",
+          "callee": "errorMessage.includes",
+          "lineNumber": 15
+        },
+        {
+          "caller": "RootErrorBoundary",
+          "callee": "errorMessage.includes",
+          "lineNumber": 16
+        },
+        {
+          "caller": "RootErrorBoundary",
+          "callee": "errorMessage.includes",
+          "lineNumber": 17
+        },
+        {
+          "caller": "RootErrorBoundary",
+          "callee": "useEffect",
+          "lineNumber": 19
+        },
+        {
+          "caller": "RootErrorBoundary",
+          "callee": "sessionStorage.getItem",
+          "lineNumber": 21
+        },
+        {
+          "caller": "RootErrorBoundary",
+          "callee": "sessionStorage.setItem",
+          "lineNumber": 23
+        },
+        {
+          "caller": "RootErrorBoundary",
+          "callee": "window.location.reload",
+          "lineNumber": 24
+        },
+        {
+          "caller": "RootErrorBoundary",
+          "callee": "sessionStorage.removeItem",
+          "lineNumber": 58
+        },
+        {
+          "caller": "RootErrorBoundary",
+          "callee": "window.location.reload",
+          "lineNumber": 59
+        }
+      ],
+      "metrics": {
+        "importCount": 1,
+        "exportCount": 1,
+        "functionCount": 1,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/components/shared/ThemeToggle.tsx",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 50,
+      "nonEmptyLines": 46,
+      "functions": [
+        {
+          "name": "ThemeToggle",
+          "startLine": 8,
+          "endLine": 50,
+          "params": [
+            "{ className }"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "ThemeToggle",
+          "line": 8,
+          "isDefault": true
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "ThemeToggle",
+          "callee": "usePrefsStore",
+          "lineNumber": 9
+        },
+        {
+          "caller": "ThemeToggle",
+          "callee": "usePrefsStore",
+          "lineNumber": 10
+        },
+        {
+          "caller": "ThemeToggle",
+          "callee": "useState",
+          "lineNumber": 11
+        },
+        {
+          "caller": "ThemeToggle",
+          "callee": "window.matchMedia",
+          "lineNumber": 12
+        },
+        {
+          "caller": "ThemeToggle",
+          "callee": "useEffect",
+          "lineNumber": 15
+        },
+        {
+          "caller": "ThemeToggle",
+          "callee": "window.matchMedia",
+          "lineNumber": 16
+        },
+        {
+          "caller": "sync",
+          "callee": "setSystemDark",
+          "lineNumber": 17
+        },
+        {
+          "caller": "ThemeToggle",
+          "callee": "sync",
+          "lineNumber": 18
+        },
+        {
+          "caller": "ThemeToggle",
+          "callee": "media.addEventListener",
+          "lineNumber": 19
+        },
+        {
+          "caller": "ThemeToggle",
+          "callee": "media.removeEventListener",
+          "lineNumber": 20
+        },
+        {
+          "caller": "ThemeToggle",
+          "callee": "resolveTheme",
+          "lineNumber": 23
+        },
+        {
+          "caller": "ThemeToggle",
+          "callee": "haptic",
+          "lineNumber": 34
+        },
+        {
+          "caller": "ThemeToggle",
+          "callee": "setPreference",
+          "lineNumber": 35
+        },
+        {
+          "caller": "ThemeToggle",
+          "callee": "cn",
+          "lineNumber": 37
+        }
+      ],
+      "metrics": {
+        "importCount": 4,
+        "exportCount": 1,
+        "functionCount": 1,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/components/ui/Button.tsx",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 78,
+      "nonEmptyLines": 71,
+      "exports": [
+        {
+          "name": "Button",
+          "line": 40,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "handlePointerUp",
+          "callee": "haptic",
+          "lineNumber": 57
+        },
+        {
+          "caller": "handlePointerUp",
+          "callee": "onPointerUp",
+          "lineNumber": 58
+        }
+      ],
+      "metrics": {
+        "importCount": 2,
+        "exportCount": 1,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/components/ui/Toast.tsx",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 56,
+      "nonEmptyLines": 52,
+      "functions": [
+        {
+          "name": "Toaster",
+          "startLine": 14,
+          "endLine": 56,
+          "params": []
+        }
+      ],
+      "exports": [
+        {
+          "name": "Toaster",
+          "line": 14,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "Toaster",
+          "callee": "useUiStore",
+          "lineNumber": 15
+        },
+        {
+          "caller": "Toaster",
+          "callee": "useUiStore",
+          "lineNumber": 16
+        },
+        {
+          "caller": "Toaster",
+          "callee": "useRef",
+          "lineNumber": 17
+        },
+        {
+          "caller": "Toaster",
+          "callee": "useEffect",
+          "lineNumber": 19
+        },
+        {
+          "caller": "Toaster",
+          "callee": "notified.current.has",
+          "lineNumber": 21
+        },
+        {
+          "caller": "Toaster",
+          "callee": "notified.current.add",
+          "lineNumber": 22
+        },
+        {
+          "caller": "Toaster",
+          "callee": "haptic",
+          "lineNumber": 23
+        },
+        {
+          "caller": "Toaster",
+          "callee": "haptic",
+          "lineNumber": 24
+        },
+        {
+          "caller": "Toaster",
+          "callee": "toasts.map",
+          "lineNumber": 34
+        },
+        {
+          "caller": "Toaster",
+          "callee": "dismiss",
+          "lineNumber": 43
+        },
+        {
+          "caller": "Toaster",
+          "callee": "cn",
+          "lineNumber": 44
+        }
+      ],
+      "metrics": {
+        "importCount": 3,
+        "exportCount": 1,
+        "functionCount": 1,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/hooks/useMediaQuery.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 20,
+      "nonEmptyLines": 17,
+      "functions": [
+        {
+          "name": "useMediaQuery",
+          "startLine": 3,
+          "endLine": 20,
+          "params": [
+            "query"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "useMediaQuery",
+          "line": 3,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "useMediaQuery",
+          "callee": "useState",
+          "lineNumber": 4
+        },
+        {
+          "caller": "useMediaQuery",
+          "callee": "window.matchMedia",
+          "lineNumber": 7
+        },
+        {
+          "caller": "useMediaQuery",
+          "callee": "useEffect",
+          "lineNumber": 10
+        },
+        {
+          "caller": "useMediaQuery",
+          "callee": "window.matchMedia",
+          "lineNumber": 12
+        },
+        {
+          "caller": "update",
+          "callee": "setMatches",
+          "lineNumber": 13
+        },
+        {
+          "caller": "useMediaQuery",
+          "callee": "update",
+          "lineNumber": 14
+        },
+        {
+          "caller": "useMediaQuery",
+          "callee": "media.addEventListener",
+          "lineNumber": 15
+        },
+        {
+          "caller": "useMediaQuery",
+          "callee": "media.removeEventListener",
+          "lineNumber": 16
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 1,
+        "functionCount": 1,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/lib/buddy.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 112,
+      "nonEmptyLines": 98,
+      "functions": [
+        {
+          "name": "buddyPresenceTopic",
+          "startLine": 17,
+          "endLine": 19,
+          "params": [
+            "buddyId"
+          ]
+        },
+        {
+          "name": "buddyRealtimeTopic",
+          "startLine": 22,
+          "endLine": 24,
+          "params": [
+            "buddyId"
+          ]
+        },
+        {
+          "name": "buddyPresenceUserIds",
+          "startLine": 27,
+          "endLine": 31,
+          "params": [
+            "state"
+          ]
+        },
+        {
+          "name": "safeQuestionRef",
+          "startLine": 34,
+          "endLine": 45,
+          "params": [
+            "question"
+          ]
+        },
+        {
+          "name": "mergeBuddyMessages",
+          "startLine": 48,
+          "endLine": 57,
+          "params": [
+            "previous",
+            "incoming"
+          ]
+        },
+        {
+          "name": "groupBuddyMessages",
+          "startLine": 60,
+          "endLine": 88,
+          "params": [
+            "rows"
+          ]
+        },
+        {
+          "name": "shortBuddyTime",
+          "startLine": 91,
+          "endLine": 106,
+          "params": [
+            "iso",
+            "now"
+          ]
+        },
+        {
+          "name": "isSharedQuestionRef",
+          "startLine": 108,
+          "endLine": 112,
+          "params": [
+            "value"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "buddyPresenceTopic",
+          "line": 17,
+          "isDefault": false
+        },
+        {
+          "name": "buddyRealtimeTopic",
+          "line": 22,
+          "isDefault": false
+        },
+        {
+          "name": "buddyPresenceUserIds",
+          "line": 27,
+          "isDefault": false
+        },
+        {
+          "name": "safeQuestionRef",
+          "line": 34,
+          "isDefault": false
+        },
+        {
+          "name": "mergeBuddyMessages",
+          "line": 48,
+          "isDefault": false
+        },
+        {
+          "name": "groupBuddyMessages",
+          "line": 60,
+          "isDefault": false
+        },
+        {
+          "name": "shortBuddyTime",
+          "line": 91,
+          "isDefault": false
+        },
+        {
+          "name": "isSharedQuestionRef",
+          "line": 108,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "buddyPresenceUserIds",
+          "callee": "Object.entries(state)\n    .filter(([, presences]) => presences.length > 0)\n    .map",
+          "lineNumber": 28
+        },
+        {
+          "caller": "buddyPresenceUserIds",
+          "callee": "Object.entries(state)\n    .filter",
+          "lineNumber": 28
+        },
+        {
+          "caller": "buddyPresenceUserIds",
+          "callee": "Object.entries",
+          "lineNumber": 28
+        },
+        {
+          "caller": "mergeBuddyMessages",
+          "callee": "byId.set",
+          "lineNumber": 54
+        },
+        {
+          "caller": "mergeBuddyMessages",
+          "callee": "byId.set",
+          "lineNumber": 55
+        },
+        {
+          "caller": "mergeBuddyMessages",
+          "callee": "[...byId.values()].sort",
+          "lineNumber": 56
+        },
+        {
+          "caller": "mergeBuddyMessages",
+          "callee": "byId.values",
+          "lineNumber": 56
+        },
+        {
+          "caller": "mergeBuddyMessages",
+          "callee": "a.created_at.localeCompare",
+          "lineNumber": 56
+        },
+        {
+          "caller": "groupBuddyMessages",
+          "callee": "row.created_at.slice",
+          "lineNumber": 63
+        },
+        {
+          "caller": "groupBuddyMessages",
+          "callee": "days.at",
+          "lineNumber": 64
+        },
+        {
+          "caller": "groupBuddyMessages",
+          "callee": "days.push",
+          "lineNumber": 67
+        },
+        {
+          "caller": "groupBuddyMessages",
+          "callee": "dayGroup.clusters.at",
+          "lineNumber": 70
+        },
+        {
+          "caller": "groupBuddyMessages",
+          "callee": "previousCluster?.rows.at",
+          "lineNumber": 71
+        },
+        {
+          "caller": "groupBuddyMessages",
+          "callee": "new Date(row.created_at).getTime",
+          "lineNumber": 73
+        },
+        {
+          "caller": "groupBuddyMessages",
+          "callee": "new Date(previousRow.created_at).getTime",
+          "lineNumber": 73
+        },
+        {
+          "caller": "groupBuddyMessages",
+          "callee": "previousCluster.rows.push",
+          "lineNumber": 82
+        },
+        {
+          "caller": "groupBuddyMessages",
+          "callee": "dayGroup.clusters.push",
+          "lineNumber": 84
+        },
+        {
+          "caller": "shortBuddyTime",
+          "callee": "now.getTime",
+          "lineNumber": 93
+        },
+        {
+          "caller": "shortBuddyTime",
+          "callee": "then.getTime",
+          "lineNumber": 93
+        },
+        {
+          "caller": "shortBuddyTime",
+          "callee": "then.toDateString",
+          "lineNumber": 95
+        },
+        {
+          "caller": "shortBuddyTime",
+          "callee": "now.toDateString",
+          "lineNumber": 95
+        },
+        {
+          "caller": "shortBuddyTime",
+          "callee": "then.toLocaleTimeString",
+          "lineNumber": 96
+        },
+        {
+          "caller": "shortBuddyTime",
+          "callee": "yesterday.setDate",
+          "lineNumber": 100
+        },
+        {
+          "caller": "shortBuddyTime",
+          "callee": "now.getDate",
+          "lineNumber": 100
+        },
+        {
+          "caller": "shortBuddyTime",
+          "callee": "then.toDateString",
+          "lineNumber": 101
+        },
+        {
+          "caller": "shortBuddyTime",
+          "callee": "yesterday.toDateString",
+          "lineNumber": 101
+        },
+        {
+          "caller": "shortBuddyTime",
+          "callee": "then.toLocaleDateString",
+          "lineNumber": 103
+        },
+        {
+          "caller": "shortBuddyTime",
+          "callee": "then.toLocaleDateString",
+          "lineNumber": 105
+        }
+      ],
+      "metrics": {
+        "importCount": 1,
+        "exportCount": 8,
+        "functionCount": 8,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/lib/buddyNotifications.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 447,
+      "nonEmptyLines": 406,
+      "functions": [
+        {
+          "name": "platform",
+          "startLine": 26,
+          "endLine": 30,
+          "params": []
+        },
+        {
+          "name": "webPushSupported",
+          "startLine": 32,
+          "endLine": 40,
+          "params": []
+        },
+        {
+          "name": "webPermission",
+          "startLine": 42,
+          "endLine": 44,
+          "params": [
+            "value"
+          ]
+        },
+        {
+          "name": "uuid",
+          "startLine": 46,
+          "endLine": 53,
+          "params": []
+        },
+        {
+          "name": "getPushDeviceId",
+          "startLine": 55,
+          "endLine": 61,
+          "params": []
+        },
+        {
+          "name": "buddyPushOptedIn",
+          "startLine": 63,
+          "endLine": 65,
+          "params": []
+        },
+        {
+          "name": "studyPushOptedIn",
+          "startLine": 67,
+          "endLine": 69,
+          "params": []
+        },
+        {
+          "name": "pushNotificationsOptedIn",
+          "startLine": 71,
+          "endLine": 73,
+          "params": []
+        },
+        {
+          "name": "setChannelOptedIn",
+          "startLine": 75,
+          "endLine": 77,
+          "params": [
+            "channel",
+            "value"
+          ]
+        },
+        {
+          "name": "syncChannelFlags",
+          "startLine": 79,
+          "endLine": 86,
+          "params": []
+        },
+        {
+          "name": "urlBase64ToUint8Array",
+          "startLine": 88,
+          "endLine": 97,
+          "params": [
+            "value"
+          ]
+        },
+        {
+          "name": "upsertWebSubscription",
+          "startLine": 99,
+          "endLine": 114,
+          "params": [
+            "subscription"
+          ]
+        },
+        {
+          "name": "saveNativePushToken",
+          "startLine": 116,
+          "endLine": 130,
+          "params": [
+            "token"
+          ]
+        },
+        {
+          "name": "nativePermission",
+          "startLine": 132,
+          "endLine": 138,
+          "params": [
+            "request"
+          ]
+        },
+        {
+          "name": "registerNativeToken",
+          "startLine": 140,
+          "endLine": 204,
+          "params": []
+        },
+        {
+          "name": "getBuddyNotificationState",
+          "startLine": 206,
+          "endLine": 238,
+          "params": []
+        },
+        {
+          "name": "enableNotificationChannel",
+          "startLine": 240,
+          "endLine": 298,
+          "params": [
+            "channel"
+          ]
+        },
+        {
+          "name": "enableBuddyNotifications",
+          "startLine": 300,
+          "endLine": 302,
+          "params": []
+        },
+        {
+          "name": "enableStudyNotifications",
+          "startLine": 304,
+          "endLine": 306,
+          "params": []
+        },
+        {
+          "name": "disableNotificationChannel",
+          "startLine": 308,
+          "endLine": 320,
+          "params": [
+            "channel"
+          ]
+        },
+        {
+          "name": "disableBuddyNotifications",
+          "startLine": 322,
+          "endLine": 324,
+          "params": []
+        },
+        {
+          "name": "disableStudyNotifications",
+          "startLine": 326,
+          "endLine": 328,
+          "params": []
+        },
+        {
+          "name": "unregisterCurrentPushDevice",
+          "startLine": 330,
+          "endLine": 343,
+          "params": []
+        },
+        {
+          "name": "syncBuddyPushRegistration",
+          "startLine": 346,
+          "endLine": 358,
+          "params": []
+        },
+        {
+          "name": "touchActiveBuddy",
+          "startLine": 360,
+          "endLine": 366,
+          "params": [
+            "buddyId"
+          ]
+        },
+        {
+          "name": "notifyBuddyMessage",
+          "startLine": 369,
+          "endLine": 374,
+          "params": [
+            "messageId"
+          ]
+        },
+        {
+          "name": "routeFromPushData",
+          "startLine": 376,
+          "endLine": 381,
+          "params": [
+            "data"
+          ]
+        },
+        {
+          "name": "snoozeNotifications",
+          "startLine": 402,
+          "endLine": 415,
+          "params": [
+            "minutes"
+          ]
+        },
+        {
+          "name": "clearSnooze",
+          "startLine": 420,
+          "endLine": 430,
+          "params": []
+        },
+        {
+          "name": "getSnoozeStatus",
+          "startLine": 436,
+          "endLine": 447,
+          "params": []
+        }
+      ],
+      "exports": [
+        {
+          "name": "getPushDeviceId",
+          "line": 55,
+          "isDefault": false
+        },
+        {
+          "name": "buddyPushOptedIn",
+          "line": 63,
+          "isDefault": false
+        },
+        {
+          "name": "studyPushOptedIn",
+          "line": 67,
+          "isDefault": false
+        },
+        {
+          "name": "pushNotificationsOptedIn",
+          "line": 71,
+          "isDefault": false
+        },
+        {
+          "name": "urlBase64ToUint8Array",
+          "line": 88,
+          "isDefault": false
+        },
+        {
+          "name": "saveNativePushToken",
+          "line": 116,
+          "isDefault": false
+        },
+        {
+          "name": "getBuddyNotificationState",
+          "line": 206,
+          "isDefault": false
+        },
+        {
+          "name": "enableBuddyNotifications",
+          "line": 300,
+          "isDefault": false
+        },
+        {
+          "name": "enableStudyNotifications",
+          "line": 304,
+          "isDefault": false
+        },
+        {
+          "name": "disableBuddyNotifications",
+          "line": 322,
+          "isDefault": false
+        },
+        {
+          "name": "disableStudyNotifications",
+          "line": 326,
+          "isDefault": false
+        },
+        {
+          "name": "unregisterCurrentPushDevice",
+          "line": 330,
+          "isDefault": false
+        },
+        {
+          "name": "syncBuddyPushRegistration",
+          "line": 346,
+          "isDefault": false
+        },
+        {
+          "name": "touchActiveBuddy",
+          "line": 360,
+          "isDefault": false
+        },
+        {
+          "name": "notifyBuddyMessage",
+          "line": 369,
+          "isDefault": false
+        },
+        {
+          "name": "routeFromPushData",
+          "line": 376,
+          "isDefault": false
+        },
+        {
+          "name": "snoozeNotifications",
+          "line": 402,
+          "isDefault": false
+        },
+        {
+          "name": "clearSnooze",
+          "line": 420,
+          "isDefault": false
+        },
+        {
+          "name": "getSnoozeStatus",
+          "line": 436,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "uuid",
+          "callee": "crypto.randomUUID",
+          "lineNumber": 47
+        },
+        {
+          "caller": "uuid",
+          "callee": "'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace",
+          "lineNumber": 48
+        },
+        {
+          "caller": "uuid",
+          "callee": "Math.floor",
+          "lineNumber": 49
+        },
+        {
+          "caller": "uuid",
+          "callee": "Math.random",
+          "lineNumber": 49
+        },
+        {
+          "caller": "uuid",
+          "callee": "value.toString",
+          "lineNumber": 51
+        },
+        {
+          "caller": "getPushDeviceId",
+          "callee": "localStorage.getItem",
+          "lineNumber": 56
+        },
+        {
+          "caller": "getPushDeviceId",
+          "callee": "uuid",
+          "lineNumber": 58
+        },
+        {
+          "caller": "getPushDeviceId",
+          "callee": "localStorage.setItem",
+          "lineNumber": 59
+        },
+        {
+          "caller": "buddyPushOptedIn",
+          "callee": "localStorage.getItem",
+          "lineNumber": 64
+        },
+        {
+          "caller": "studyPushOptedIn",
+          "callee": "localStorage.getItem",
+          "lineNumber": 68
+        },
+        {
+          "caller": "pushNotificationsOptedIn",
+          "callee": "buddyPushOptedIn",
+          "lineNumber": 72
+        },
+        {
+          "caller": "pushNotificationsOptedIn",
+          "callee": "studyPushOptedIn",
+          "lineNumber": 72
+        },
+        {
+          "caller": "setChannelOptedIn",
+          "callee": "localStorage.setItem",
+          "lineNumber": 76
+        },
+        {
+          "caller": "setChannelOptedIn",
+          "callee": "String",
+          "lineNumber": 76
+        },
+        {
+          "caller": "syncChannelFlags",
+          "callee": "supabase.rpc",
+          "lineNumber": 80
+        },
+        {
+          "caller": "syncChannelFlags",
+          "callee": "getPushDeviceId",
+          "lineNumber": 81
+        },
+        {
+          "caller": "syncChannelFlags",
+          "callee": "buddyPushOptedIn",
+          "lineNumber": 82
+        },
+        {
+          "caller": "syncChannelFlags",
+          "callee": "studyPushOptedIn",
+          "lineNumber": 83
+        },
+        {
+          "caller": "urlBase64ToUint8Array",
+          "callee": "'='.repeat",
+          "lineNumber": 89
+        },
+        {
+          "caller": "urlBase64ToUint8Array",
+          "callee": "(value + padding).replace(/-/g, '+').replace",
+          "lineNumber": 90
+        },
+        {
+          "caller": "urlBase64ToUint8Array",
+          "callee": "(value + padding).replace",
+          "lineNumber": 90
+        },
+        {
+          "caller": "urlBase64ToUint8Array",
+          "callee": "window.atob",
+          "lineNumber": 91
+        },
+        {
+          "caller": "urlBase64ToUint8Array",
+          "callee": "decoded.charCodeAt",
+          "lineNumber": 94
+        },
+        {
+          "caller": "upsertWebSubscription",
+          "callee": "subscription.toJSON",
+          "lineNumber": 100
+        },
+        {
+          "caller": "upsertWebSubscription",
+          "callee": "supabase.rpc",
+          "lineNumber": 104
+        },
+        {
+          "caller": "upsertWebSubscription",
+          "callee": "getPushDeviceId",
+          "lineNumber": 105
+        },
+        {
+          "caller": "upsertWebSubscription",
+          "callee": "syncChannelFlags",
+          "lineNumber": 113
+        },
+        {
+          "caller": "saveNativePushToken",
+          "callee": "pushNotificationsOptedIn",
+          "lineNumber": 117
+        },
+        {
+          "caller": "saveNativePushToken",
+          "callee": "token.trim",
+          "lineNumber": 117
+        },
+        {
+          "caller": "saveNativePushToken",
+          "callee": "platform",
+          "lineNumber": 118
+        },
+        {
+          "caller": "saveNativePushToken",
+          "callee": "supabase.rpc",
+          "lineNumber": 120
+        },
+        {
+          "caller": "saveNativePushToken",
+          "callee": "getPushDeviceId",
+          "lineNumber": 121
+        },
+        {
+          "caller": "saveNativePushToken",
+          "callee": "token.trim",
+          "lineNumber": 126
+        },
+        {
+          "caller": "saveNativePushToken",
+          "callee": "syncChannelFlags",
+          "lineNumber": 129
+        },
+        {
+          "caller": "nativePermission",
+          "callee": "PushNotifications.checkPermissions",
+          "lineNumber": 133
+        },
+        {
+          "caller": "nativePermission",
+          "callee": "PushNotifications.requestPermissions",
+          "lineNumber": 135
+        },
+        {
+          "caller": "registerNativeToken",
+          "callee": "Promise.all",
+          "lineNumber": 142
+        },
+        {
+          "caller": "registerNativeToken",
+          "callee": "PushNotifications.createChannel",
+          "lineNumber": 143
+        },
+        {
+          "caller": "registerNativeToken",
+          "callee": "PushNotifications.createChannel",
+          "lineNumber": 156
+        },
+        {
+          "caller": "registerNativeToken",
+          "callee": "console.warn",
+          "lineNumber": 169
+        },
+        {
+          "caller": "finish",
+          "callee": "window.clearTimeout",
+          "lineNumber": 180
+        },
+        {
+          "caller": "finish",
+          "callee": "Promise.resolve().then",
+          "lineNumber": 181
+        },
+        {
+          "caller": "finish",
+          "callee": "Promise.resolve",
+          "lineNumber": 181
+        },
+        {
+          "caller": "finish",
+          "callee": "Promise.all",
+          "lineNumber": 182
+        },
+        {
+          "caller": "finish",
+          "callee": "handles.map",
+          "lineNumber": 182
+        },
+        {
+          "caller": "finish",
+          "callee": "handle.remove",
+          "lineNumber": 182
+        },
+        {
+          "caller": "finish",
+          "callee": "reject",
+          "lineNumber": 184
+        },
+        {
+          "caller": "finish",
+          "callee": "resolve",
+          "lineNumber": 185
+        },
+        {
+          "caller": "finish",
+          "callee": "reject",
+          "lineNumber": 186
+        },
+        {
+          "caller": "registerNativeToken",
+          "callee": "(async () => {\n      handles = await Promise.all([\n        PushNotifications.addListener('registration', (token) => finish(null, token.value)),\n        PushNotifications.addListener('registrationError', (error) =>\n          finish(new Error(error.error || 'Native push registration failed.'))\n        )\n      ]);\n      timer = window.setTimeout(\n        () =>\n          finish(new Error('Native push registration timed out. Check Firebase configuration.')),\n        NATIVE_REGISTRATION_TIMEOUT_MS\n      );\n      await PushNotifications.register();\n    })().catch",
+          "lineNumber": 189
+        },
+        {
+          "caller": "registerNativeToken",
+          "callee": "(async () => {\n      handles = await Promise.all([\n        PushNotifications.addListener('registration', (token) => finish(null, token.value)),\n        PushNotifications.addListener('registrationError', (error) =>\n          finish(new Error(error.error || 'Native push registration failed.'))\n        )\n      ]);\n      timer = window.setTimeout(\n        () =>\n          finish(new Error('Native push registration timed out. Check Firebase configuration.')),\n        NATIVE_REGISTRATION_TIMEOUT_MS\n      );\n      await PushNotifications.register();\n    })",
+          "lineNumber": 189
+        },
+        {
+          "caller": "registerNativeToken",
+          "callee": "Promise.all",
+          "lineNumber": 190
+        },
+        {
+          "caller": "registerNativeToken",
+          "callee": "PushNotifications.addListener",
+          "lineNumber": 191
+        },
+        {
+          "caller": "registerNativeToken",
+          "callee": "finish",
+          "lineNumber": 191
+        },
+        {
+          "caller": "registerNativeToken",
+          "callee": "PushNotifications.addListener",
+          "lineNumber": 192
+        },
+        {
+          "caller": "registerNativeToken",
+          "callee": "finish",
+          "lineNumber": 193
+        },
+        {
+          "caller": "registerNativeToken",
+          "callee": "window.setTimeout",
+          "lineNumber": 196
+        },
+        {
+          "caller": "registerNativeToken",
+          "callee": "finish",
+          "lineNumber": 198
+        },
+        {
+          "caller": "registerNativeToken",
+          "callee": "PushNotifications.register",
+          "lineNumber": 201
+        },
+        {
+          "caller": "registerNativeToken",
+          "callee": "finish",
+          "lineNumber": 202
+        },
+        {
+          "caller": "getBuddyNotificationState",
+          "callee": "platform",
+          "lineNumber": 207
+        },
+        {
+          "caller": "getBuddyNotificationState",
+          "callee": "webPushSupported",
+          "lineNumber": 219
+        },
+        {
+          "caller": "getBuddyNotificationState",
+          "callee": "nativePermission(false).catch",
+          "lineNumber": 222
+        },
+        {
+          "caller": "getBuddyNotificationState",
+          "callee": "nativePermission",
+          "lineNumber": 222
+        },
+        {
+          "caller": "getBuddyNotificationState",
+          "callee": "Promise.resolve",
+          "lineNumber": 223
+        },
+        {
+          "caller": "getBuddyNotificationState",
+          "callee": "webPermission",
+          "lineNumber": 223
+        },
+        {
+          "caller": "getBuddyNotificationState",
+          "callee": "supabase\n    .from('push_subscriptions')\n    .select('id')\n    .eq('device_id', getPushDeviceId())\n    .eq('enabled', true)\n    .eq('buddy_enabled', true)\n    .maybeSingle",
+          "lineNumber": 224
+        },
+        {
+          "caller": "getBuddyNotificationState",
+          "callee": "supabase\n    .from('push_subscriptions')\n    .select('id')\n    .eq('device_id', getPushDeviceId())\n    .eq('enabled', true)\n    .eq",
+          "lineNumber": 224
+        },
+        {
+          "caller": "getBuddyNotificationState",
+          "callee": "supabase\n    .from('push_subscriptions')\n    .select('id')\n    .eq('device_id', getPushDeviceId())\n    .eq",
+          "lineNumber": 224
+        },
+        {
+          "caller": "getBuddyNotificationState",
+          "callee": "supabase\n    .from('push_subscriptions')\n    .select('id')\n    .eq",
+          "lineNumber": 224
+        },
+        {
+          "caller": "getBuddyNotificationState",
+          "callee": "supabase\n    .from('push_subscriptions')\n    .select",
+          "lineNumber": 224
+        },
+        {
+          "caller": "getBuddyNotificationState",
+          "callee": "supabase\n    .from",
+          "lineNumber": 224
+        },
+        {
+          "caller": "getBuddyNotificationState",
+          "callee": "getPushDeviceId",
+          "lineNumber": 227
+        },
+        {
+          "caller": "getBuddyNotificationState",
+          "callee": "Promise.all",
+          "lineNumber": 231
+        },
+        {
+          "caller": "getBuddyNotificationState",
+          "callee": "Boolean",
+          "lineNumber": 235
+        },
+        {
+          "caller": "getBuddyNotificationState",
+          "callee": "buddyPushOptedIn",
+          "lineNumber": 235
+        },
+        {
+          "caller": "enableNotificationChannel",
+          "callee": "setChannelOptedIn",
+          "lineNumber": 245
+        },
+        {
+          "caller": "enableNotificationChannel",
+          "callee": "nativePermission",
+          "lineNumber": 247
+        },
+        {
+          "caller": "enableNotificationChannel",
+          "callee": "setChannelOptedIn",
+          "lineNumber": 249
+        },
+        {
+          "caller": "enableNotificationChannel",
+          "callee": "registerNativeToken",
+          "lineNumber": 256
+        },
+        {
+          "caller": "enableNotificationChannel",
+          "callee": "saveNativePushToken",
+          "lineNumber": 257
+        },
+        {
+          "caller": "enableNotificationChannel",
+          "callee": "webPushSupported",
+          "lineNumber": 261
+        },
+        {
+          "caller": "enableNotificationChannel",
+          "callee": "setChannelOptedIn",
+          "lineNumber": 262
+        },
+        {
+          "caller": "enableNotificationChannel",
+          "callee": "String(import.meta.env.VITE_WEB_PUSH_PUBLIC_KEY ?? '').trim",
+          "lineNumber": 269
+        },
+        {
+          "caller": "enableNotificationChannel",
+          "callee": "String",
+          "lineNumber": 269
+        },
+        {
+          "caller": "enableNotificationChannel",
+          "callee": "setChannelOptedIn",
+          "lineNumber": 271
+        },
+        {
+          "caller": "enableNotificationChannel",
+          "callee": "Notification.requestPermission",
+          "lineNumber": 274
+        },
+        {
+          "caller": "enableNotificationChannel",
+          "callee": "webPermission",
+          "lineNumber": 275
+        },
+        {
+          "caller": "enableNotificationChannel",
+          "callee": "setChannelOptedIn",
+          "lineNumber": 277
+        },
+        {
+          "caller": "enableNotificationChannel",
+          "callee": "registration.pushManager.getSubscription",
+          "lineNumber": 285
+        },
+        {
+          "caller": "enableNotificationChannel",
+          "callee": "registration.pushManager.subscribe",
+          "lineNumber": 288
+        },
+        {
+          "caller": "enableNotificationChannel",
+          "callee": "urlBase64ToUint8Array",
+          "lineNumber": 290
+        },
+        {
+          "caller": "enableNotificationChannel",
+          "callee": "upsertWebSubscription",
+          "lineNumber": 292
+        },
+        {
+          "caller": "enableNotificationChannel",
+          "callee": "setChannelOptedIn",
+          "lineNumber": 295
+        },
+        {
+          "caller": "enableBuddyNotifications",
+          "callee": "enableNotificationChannel",
+          "lineNumber": 301
+        },
+        {
+          "caller": "enableStudyNotifications",
+          "callee": "enableNotificationChannel",
+          "lineNumber": 305
+        },
+        {
+          "caller": "disableNotificationChannel",
+          "callee": "setChannelOptedIn",
+          "lineNumber": 311
+        },
+        {
+          "caller": "disableNotificationChannel",
+          "callee": "syncChannelFlags",
+          "lineNumber": 314
+        },
+        {
+          "caller": "disableBuddyNotifications",
+          "callee": "disableNotificationChannel",
+          "lineNumber": 323
+        },
+        {
+          "caller": "disableStudyNotifications",
+          "callee": "disableNotificationChannel",
+          "lineNumber": 327
+        },
+        {
+          "caller": "unregisterCurrentPushDevice",
+          "callee": "setChannelOptedIn",
+          "lineNumber": 331
+        },
+        {
+          "caller": "unregisterCurrentPushDevice",
+          "callee": "setChannelOptedIn",
+          "lineNumber": 332
+        },
+        {
+          "caller": "unregisterCurrentPushDevice",
+          "callee": "supabase.rpc",
+          "lineNumber": 334
+        },
+        {
+          "caller": "unregisterCurrentPushDevice",
+          "callee": "getPushDeviceId",
+          "lineNumber": 334
+        },
+        {
+          "caller": "unregisterCurrentPushDevice",
+          "callee": "PushNotifications.unregister",
+          "lineNumber": 337
+        },
+        {
+          "caller": "unregisterCurrentPushDevice",
+          "callee": "webPushSupported",
+          "lineNumber": 338
+        },
+        {
+          "caller": "unregisterCurrentPushDevice",
+          "callee": "navigator.serviceWorker.getRegistration",
+          "lineNumber": 339
+        },
+        {
+          "caller": "unregisterCurrentPushDevice",
+          "callee": "registration?.pushManager.getSubscription",
+          "lineNumber": 340
+        },
+        {
+          "caller": "unregisterCurrentPushDevice",
+          "callee": "subscription.unsubscribe",
+          "lineNumber": 341
+        },
+        {
+          "caller": "syncBuddyPushRegistration",
+          "callee": "pushNotificationsOptedIn",
+          "lineNumber": 347
+        },
+        {
+          "caller": "syncBuddyPushRegistration",
+          "callee": "nativePermission",
+          "lineNumber": 349
+        },
+        {
+          "caller": "syncBuddyPushRegistration",
+          "callee": "registerNativeToken",
+          "lineNumber": 350
+        },
+        {
+          "caller": "syncBuddyPushRegistration",
+          "callee": "saveNativePushToken",
+          "lineNumber": 351
+        },
+        {
+          "caller": "syncBuddyPushRegistration",
+          "callee": "webPushSupported",
+          "lineNumber": 354
+        },
+        {
+          "caller": "syncBuddyPushRegistration",
+          "callee": "registration.pushManager.getSubscription",
+          "lineNumber": 356
+        },
+        {
+          "caller": "syncBuddyPushRegistration",
+          "callee": "upsertWebSubscription",
+          "lineNumber": 357
+        },
+        {
+          "caller": "touchActiveBuddy",
+          "callee": "buddyPushOptedIn",
+          "lineNumber": 361
+        },
+        {
+          "caller": "touchActiveBuddy",
+          "callee": "supabase.rpc",
+          "lineNumber": 362
+        },
+        {
+          "caller": "touchActiveBuddy",
+          "callee": "getPushDeviceId",
+          "lineNumber": 363
+        },
+        {
+          "caller": "notifyBuddyMessage",
+          "callee": "supabase.functions\n    .invoke('buddy-notifications', { body: { message_id: messageId } })\n    .catch",
+          "lineNumber": 371
+        },
+        {
+          "caller": "notifyBuddyMessage",
+          "callee": "supabase.functions\n    .invoke",
+          "lineNumber": 371
+        },
+        {
+          "caller": "routeFromPushData",
+          "callee": "route.startsWith",
+          "lineNumber": 379
+        },
+        {
+          "caller": "routeFromPushData",
+          "callee": "route.startsWith",
+          "lineNumber": 379
+        },
+        {
+          "caller": "snoozeNotifications",
+          "callee": "supabase.rpc",
+          "lineNumber": 409
+        },
+        {
+          "caller": "snoozeNotifications",
+          "callee": "getPushDeviceId",
+          "lineNumber": 410
+        },
+        {
+          "caller": "snoozeNotifications",
+          "callee": "Math.min",
+          "lineNumber": 411
+        },
+        {
+          "caller": "snoozeNotifications",
+          "callee": "Math.round",
+          "lineNumber": 411
+        },
+        {
+          "caller": "clearSnooze",
+          "callee": "supabase.rpc",
+          "lineNumber": 424
+        },
+        {
+          "caller": "clearSnooze",
+          "callee": "getPushDeviceId",
+          "lineNumber": 425
+        },
+        {
+          "caller": "getSnoozeStatus",
+          "callee": "supabase\n    .from('push_subscriptions')\n    .select('push_quiet_until')\n    .eq('device_id', getPushDeviceId())\n    .maybeSingle",
+          "lineNumber": 438
+        },
+        {
+          "caller": "getSnoozeStatus",
+          "callee": "supabase\n    .from('push_subscriptions')\n    .select('push_quiet_until')\n    .eq",
+          "lineNumber": 438
+        },
+        {
+          "caller": "getSnoozeStatus",
+          "callee": "supabase\n    .from('push_subscriptions')\n    .select",
+          "lineNumber": 438
+        },
+        {
+          "caller": "getSnoozeStatus",
+          "callee": "supabase\n    .from",
+          "lineNumber": 438
+        },
+        {
+          "caller": "getSnoozeStatus",
+          "callee": "getPushDeviceId",
+          "lineNumber": 441
+        },
+        {
+          "caller": "getSnoozeStatus",
+          "callee": "Boolean",
+          "lineNumber": 445
+        },
+        {
+          "caller": "getSnoozeStatus",
+          "callee": "new Date(quietUntil!).getTime",
+          "lineNumber": 445
+        },
+        {
+          "caller": "getSnoozeStatus",
+          "callee": "Date.now",
+          "lineNumber": 445
+        }
+      ],
+      "metrics": {
+        "importCount": 2,
+        "exportCount": 19,
+        "functionCount": 30,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/lib/edge.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 303,
+      "nonEmptyLines": 277,
+      "functions": [
+        {
+          "name": "functionsBase",
+          "startLine": 9,
+          "endLine": 13,
+          "params": []
+        },
+        {
+          "name": "anonKey",
+          "startLine": 15,
+          "endLine": 17,
+          "params": []
+        },
+        {
+          "name": "currentJwt",
+          "startLine": 19,
+          "endLine": 22,
+          "params": []
+        },
+        {
+          "name": "readJson",
+          "startLine": 24,
+          "endLine": 30,
+          "params": [
+            "res"
+          ]
+        },
+        {
+          "name": "requestAccess",
+          "startLine": 52,
+          "endLine": 80,
+          "params": [
+            "input"
+          ]
+        },
+        {
+          "name": "approveRequest",
+          "startLine": 90,
+          "endLine": 111,
+          "params": [
+            "requestId"
+          ]
+        },
+        {
+          "name": "declineRequest",
+          "startLine": 119,
+          "endLine": 143,
+          "params": [
+            "requestId",
+            "opts"
+          ]
+        },
+        {
+          "name": "isEdgeError",
+          "startLine": 145,
+          "endLine": 147,
+          "params": [
+            "x"
+          ]
+        },
+        {
+          "name": "signupViaInvite",
+          "startLine": 165,
+          "endLine": 182,
+          "params": [
+            "input"
+          ]
+        },
+        {
+          "name": "loginWithUsernamePin",
+          "startLine": 198,
+          "endLine": 213,
+          "params": [
+            "input"
+          ]
+        },
+        {
+          "name": "requestPinReset",
+          "startLine": 219,
+          "endLine": 234,
+          "params": [
+            "input"
+          ]
+        },
+        {
+          "name": "sendBuddyRequest",
+          "startLine": 255,
+          "endLine": 284,
+          "params": [
+            "username"
+          ]
+        },
+        {
+          "name": "isUsernameAvailable",
+          "startLine": 287,
+          "endLine": 303,
+          "params": [
+            "username"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "requestAccess",
+          "line": 52,
+          "isDefault": false
+        },
+        {
+          "name": "approveRequest",
+          "line": 90,
+          "isDefault": false
+        },
+        {
+          "name": "declineRequest",
+          "line": 119,
+          "isDefault": false
+        },
+        {
+          "name": "isEdgeError",
+          "line": 145,
+          "isDefault": false
+        },
+        {
+          "name": "signupViaInvite",
+          "line": 165,
+          "isDefault": false
+        },
+        {
+          "name": "loginWithUsernamePin",
+          "line": 198,
+          "isDefault": false
+        },
+        {
+          "name": "requestPinReset",
+          "line": 219,
+          "isDefault": false
+        },
+        {
+          "name": "sendBuddyRequest",
+          "line": 255,
+          "isDefault": false
+        },
+        {
+          "name": "isUsernameAvailable",
+          "line": 287,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "functionsBase",
+          "callee": "url.replace",
+          "lineNumber": 12
+        },
+        {
+          "caller": "currentJwt",
+          "callee": "supabase.auth.getSession",
+          "lineNumber": 20
+        },
+        {
+          "caller": "readJson",
+          "callee": "res.json",
+          "lineNumber": 26
+        },
+        {
+          "caller": "requestAccess",
+          "callee": "anonKey",
+          "lineNumber": 55
+        },
+        {
+          "caller": "requestAccess",
+          "callee": "fetch(`${functionsBase()}/request-access`, {\n    method: 'POST',\n    headers: {\n      'Content-Type': 'application/json',\n      // Supabase Functions Gateway requires an auth header on every request.\n      // For public endpoints we use the anon key — the edge fn's own logic\n      // then decides what to do with the payload.\n      Authorization: `Bearer ${key}`,\n      apikey: key\n    },\n    body: JSON.stringify(input)\n  }).catch",
+          "lineNumber": 59
+        },
+        {
+          "caller": "requestAccess",
+          "callee": "fetch",
+          "lineNumber": 59
+        },
+        {
+          "caller": "requestAccess",
+          "callee": "functionsBase",
+          "lineNumber": 59
+        },
+        {
+          "caller": "requestAccess",
+          "callee": "JSON.stringify",
+          "lineNumber": 69
+        },
+        {
+          "caller": "requestAccess",
+          "callee": "JSON.stringify",
+          "lineNumber": 71
+        },
+        {
+          "caller": "requestAccess",
+          "callee": "readJson",
+          "lineNumber": 73
+        },
+        {
+          "caller": "approveRequest",
+          "callee": "currentJwt",
+          "lineNumber": 91
+        },
+        {
+          "caller": "approveRequest",
+          "callee": "fetch",
+          "lineNumber": 93
+        },
+        {
+          "caller": "approveRequest",
+          "callee": "functionsBase",
+          "lineNumber": 93
+        },
+        {
+          "caller": "approveRequest",
+          "callee": "JSON.stringify",
+          "lineNumber": 99
+        },
+        {
+          "caller": "approveRequest",
+          "callee": "readJson",
+          "lineNumber": 101
+        },
+        {
+          "caller": "declineRequest",
+          "callee": "currentJwt",
+          "lineNumber": 123
+        },
+        {
+          "caller": "declineRequest",
+          "callee": "fetch",
+          "lineNumber": 125
+        },
+        {
+          "caller": "declineRequest",
+          "callee": "functionsBase",
+          "lineNumber": 125
+        },
+        {
+          "caller": "declineRequest",
+          "callee": "JSON.stringify",
+          "lineNumber": 131
+        },
+        {
+          "caller": "declineRequest",
+          "callee": "readJson",
+          "lineNumber": 133
+        },
+        {
+          "caller": "signupViaInvite",
+          "callee": "anonKey",
+          "lineNumber": 166
+        },
+        {
+          "caller": "signupViaInvite",
+          "callee": "fetch(`${functionsBase()}/signup-via-invite`, {\n    method: 'POST',\n    headers: {\n      'Content-Type': 'application/json',\n      Authorization: `Bearer ${key}`,\n      apikey: key\n    },\n    body: JSON.stringify(input)\n  }).catch",
+          "lineNumber": 168
+        },
+        {
+          "caller": "signupViaInvite",
+          "callee": "fetch",
+          "lineNumber": 168
+        },
+        {
+          "caller": "signupViaInvite",
+          "callee": "functionsBase",
+          "lineNumber": 168
+        },
+        {
+          "caller": "signupViaInvite",
+          "callee": "JSON.stringify",
+          "lineNumber": 175
+        },
+        {
+          "caller": "signupViaInvite",
+          "callee": "JSON.stringify",
+          "lineNumber": 176
+        },
+        {
+          "caller": "signupViaInvite",
+          "callee": "readJson",
+          "lineNumber": 177
+        },
+        {
+          "caller": "loginWithUsernamePin",
+          "callee": "anonKey",
+          "lineNumber": 199
+        },
+        {
+          "caller": "loginWithUsernamePin",
+          "callee": "fetch(`${functionsBase()}/login`, {\n    method: 'POST',\n    headers: {\n      'Content-Type': 'application/json',\n      Authorization: `Bearer ${key}`,\n      apikey: key\n    },\n    body: JSON.stringify(input)\n  }).catch",
+          "lineNumber": 201
+        },
+        {
+          "caller": "loginWithUsernamePin",
+          "callee": "fetch",
+          "lineNumber": 201
+        },
+        {
+          "caller": "loginWithUsernamePin",
+          "callee": "functionsBase",
+          "lineNumber": 201
+        },
+        {
+          "caller": "loginWithUsernamePin",
+          "callee": "JSON.stringify",
+          "lineNumber": 208
+        },
+        {
+          "caller": "loginWithUsernamePin",
+          "callee": "JSON.stringify",
+          "lineNumber": 209
+        },
+        {
+          "caller": "loginWithUsernamePin",
+          "callee": "readJson",
+          "lineNumber": 210
+        },
+        {
+          "caller": "requestPinReset",
+          "callee": "anonKey",
+          "lineNumber": 220
+        },
+        {
+          "caller": "requestPinReset",
+          "callee": "fetch(`${functionsBase()}/request-pin-reset`, {\n    method: 'POST',\n    headers: {\n      'Content-Type': 'application/json',\n      Authorization: `Bearer ${key}`,\n      apikey: key\n    },\n    body: JSON.stringify(input)\n  }).catch",
+          "lineNumber": 222
+        },
+        {
+          "caller": "requestPinReset",
+          "callee": "fetch",
+          "lineNumber": 222
+        },
+        {
+          "caller": "requestPinReset",
+          "callee": "functionsBase",
+          "lineNumber": 222
+        },
+        {
+          "caller": "requestPinReset",
+          "callee": "JSON.stringify",
+          "lineNumber": 229
+        },
+        {
+          "caller": "requestPinReset",
+          "callee": "JSON.stringify",
+          "lineNumber": 230
+        },
+        {
+          "caller": "requestPinReset",
+          "callee": "readJson",
+          "lineNumber": 231
+        },
+        {
+          "caller": "sendBuddyRequest",
+          "callee": "currentJwt",
+          "lineNumber": 258
+        },
+        {
+          "caller": "sendBuddyRequest",
+          "callee": "fetch(`${functionsBase()}/buddy-request`, {\n    method: 'POST',\n    headers: {\n      Authorization: `Bearer ${jwt}`,\n      'Content-Type': 'application/json'\n    },\n    body: JSON.stringify({ username })\n  }).catch",
+          "lineNumber": 260
+        },
+        {
+          "caller": "sendBuddyRequest",
+          "callee": "fetch",
+          "lineNumber": 260
+        },
+        {
+          "caller": "sendBuddyRequest",
+          "callee": "functionsBase",
+          "lineNumber": 260
+        },
+        {
+          "caller": "sendBuddyRequest",
+          "callee": "JSON.stringify",
+          "lineNumber": 266
+        },
+        {
+          "caller": "sendBuddyRequest",
+          "callee": "JSON.stringify",
+          "lineNumber": 267
+        },
+        {
+          "caller": "sendBuddyRequest",
+          "callee": "readJson",
+          "lineNumber": 268
+        },
+        {
+          "caller": "isUsernameAvailable",
+          "callee": "anonKey",
+          "lineNumber": 288
+        },
+        {
+          "caller": "isUsernameAvailable",
+          "callee": "functionsBase().replace",
+          "lineNumber": 290
+        },
+        {
+          "caller": "isUsernameAvailable",
+          "callee": "functionsBase",
+          "lineNumber": 290
+        },
+        {
+          "caller": "isUsernameAvailable",
+          "callee": "fetch(url, {\n    method: 'POST',\n    headers: {\n      'Content-Type': 'application/json',\n      Authorization: `Bearer ${key}`,\n      apikey: key\n    },\n    body: JSON.stringify({ uname: username })\n  }).catch",
+          "lineNumber": 291
+        },
+        {
+          "caller": "isUsernameAvailable",
+          "callee": "fetch",
+          "lineNumber": 291
+        },
+        {
+          "caller": "isUsernameAvailable",
+          "callee": "JSON.stringify",
+          "lineNumber": 298
+        },
+        {
+          "caller": "isUsernameAvailable",
+          "callee": "res.json().catch",
+          "lineNumber": 301
+        },
+        {
+          "caller": "isUsernameAvailable",
+          "callee": "res.json",
+          "lineNumber": 301
+        }
+      ],
+      "metrics": {
+        "importCount": 1,
+        "exportCount": 9,
+        "functionCount": 13,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/lib/lazyWithRetry.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 37,
+      "nonEmptyLines": 33,
+      "functions": [
+        {
+          "name": "lazyWithRetry",
+          "startLine": 8,
+          "endLine": 37,
+          "params": [
+            "componentImport"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "lazyWithRetry",
+          "line": 8,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "lazyWithRetry",
+          "callee": "lazy",
+          "lineNumber": 11
+        },
+        {
+          "caller": "lazyWithRetry",
+          "callee": "sessionStorage.getItem",
+          "lineNumber": 12
+        },
+        {
+          "caller": "lazyWithRetry",
+          "callee": "componentImport",
+          "lineNumber": 15
+        },
+        {
+          "caller": "lazyWithRetry",
+          "callee": "sessionStorage.removeItem",
+          "lineNumber": 16
+        },
+        {
+          "caller": "lazyWithRetry",
+          "callee": "String",
+          "lineNumber": 19
+        },
+        {
+          "caller": "lazyWithRetry",
+          "callee": "errorMessage.includes",
+          "lineNumber": 22
+        },
+        {
+          "caller": "lazyWithRetry",
+          "callee": "errorMessage.includes",
+          "lineNumber": 23
+        },
+        {
+          "caller": "lazyWithRetry",
+          "callee": "errorMessage.includes",
+          "lineNumber": 24
+        },
+        {
+          "caller": "lazyWithRetry",
+          "callee": "errorMessage.includes",
+          "lineNumber": 25
+        },
+        {
+          "caller": "lazyWithRetry",
+          "callee": "sessionStorage.setItem",
+          "lineNumber": 28
+        },
+        {
+          "caller": "lazyWithRetry",
+          "callee": "window.location.reload",
+          "lineNumber": 29
+        },
+        {
+          "caller": "lazyWithRetry",
+          "callee": "sessionStorage.removeItem",
+          "lineNumber": 33
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 1,
+        "functionCount": 1,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/lib/native.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 113,
+      "nonEmptyLines": 102,
+      "functions": [
+        {
+          "name": "hapticsAllowed",
+          "startLine": 27,
+          "endLine": 29,
+          "params": []
+        },
+        {
+          "name": "haptic",
+          "startLine": 36,
+          "endLine": 62,
+          "params": [
+            "intent"
+          ]
+        },
+        {
+          "name": "configureNativeChrome",
+          "startLine": 64,
+          "endLine": 78,
+          "params": [
+            "theme"
+          ]
+        },
+        {
+          "name": "routeFromAppUrl",
+          "startLine": 80,
+          "endLine": 94,
+          "params": [
+            "url"
+          ]
+        },
+        {
+          "name": "resolveNativeBackAction",
+          "startLine": 97,
+          "endLine": 113,
+          "params": [
+            "{\n  path,\n  canGoBack,\n  now,\n  lastRootBackAt\n}"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "BACK_EXIT_WINDOW_MS",
+          "line": 16,
+          "isDefault": false
+        },
+        {
+          "name": "isNativeApp",
+          "line": 18,
+          "isDefault": false
+        },
+        {
+          "name": "nativePlatform",
+          "line": 19,
+          "isDefault": false
+        },
+        {
+          "name": "haptic",
+          "line": 36,
+          "isDefault": false
+        },
+        {
+          "name": "configureNativeChrome",
+          "line": 64,
+          "isDefault": false
+        },
+        {
+          "name": "routeFromAppUrl",
+          "line": 80,
+          "isDefault": false
+        },
+        {
+          "name": "resolveNativeBackAction",
+          "line": 97,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "hapticsAllowed",
+          "callee": "usePrefsStore.getState",
+          "lineNumber": 28
+        },
+        {
+          "caller": "haptic",
+          "callee": "hapticsAllowed",
+          "lineNumber": 37
+        },
+        {
+          "caller": "haptic",
+          "callee": "Haptics.selectionChanged",
+          "lineNumber": 42
+        },
+        {
+          "caller": "haptic",
+          "callee": "Haptics.impact",
+          "lineNumber": 45
+        },
+        {
+          "caller": "haptic",
+          "callee": "Haptics.impact",
+          "lineNumber": 48
+        },
+        {
+          "caller": "haptic",
+          "callee": "Haptics.notification",
+          "lineNumber": 51
+        },
+        {
+          "caller": "haptic",
+          "callee": "Haptics.notification",
+          "lineNumber": 54
+        },
+        {
+          "caller": "haptic",
+          "callee": "Haptics.notification",
+          "lineNumber": 57
+        },
+        {
+          "caller": "haptic",
+          "callee": "action.catch",
+          "lineNumber": 61
+        },
+        {
+          "caller": "configureNativeChrome",
+          "callee": "Promise.all",
+          "lineNumber": 69
+        },
+        {
+          "caller": "configureNativeChrome",
+          "callee": "SystemBars.setStyle",
+          "lineNumber": 70
+        },
+        {
+          "caller": "configureNativeChrome",
+          "callee": "Keyboard.setStyle",
+          "lineNumber": 73
+        },
+        {
+          "caller": "resolveNativeBackAction",
+          "callee": "ROOT_ROUTES.has",
+          "lineNumber": 108
+        },
+        {
+          "caller": "resolveNativeBackAction",
+          "callee": "AUTH_CHILD_ROUTES.has",
+          "lineNumber": 110
+        }
+      ],
+      "metrics": {
+        "importCount": 2,
+        "exportCount": 7,
+        "functionCount": 5,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/lib/queryClient.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 11,
+      "nonEmptyLines": 10,
+      "exports": [
+        {
+          "name": "queryClient",
+          "line": 3,
+          "isDefault": false
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 1,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/lib/studyNotifications.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 85,
+      "nonEmptyLines": 77,
+      "functions": [
+        {
+          "name": "notificationTime",
+          "startLine": 35,
+          "endLine": 37,
+          "params": [
+            "preference"
+          ]
+        },
+        {
+          "name": "parseNotificationTime",
+          "startLine": 39,
+          "endLine": 46,
+          "params": [
+            "value"
+          ]
+        },
+        {
+          "name": "ensureStudyNotificationPreferences",
+          "startLine": 48,
+          "endLine": 52,
+          "params": []
+        },
+        {
+          "name": "updateStudyNotificationPreference",
+          "startLine": 54,
+          "endLine": 72,
+          "params": [
+            "userId",
+            "category",
+            "patch"
+          ]
+        },
+        {
+          "name": "sendStudyNotificationTest",
+          "startLine": 74,
+          "endLine": 85,
+          "params": [
+            "userId",
+            "category"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "STUDY_NOTIFICATION_CATEGORIES",
+          "line": 3,
+          "isDefault": false
+        },
+        {
+          "name": "notificationTime",
+          "line": 35,
+          "isDefault": false
+        },
+        {
+          "name": "parseNotificationTime",
+          "line": 39,
+          "isDefault": false
+        },
+        {
+          "name": "ensureStudyNotificationPreferences",
+          "line": 48,
+          "isDefault": false
+        },
+        {
+          "name": "updateStudyNotificationPreference",
+          "line": 54,
+          "isDefault": false
+        },
+        {
+          "name": "sendStudyNotificationTest",
+          "line": 74,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "notificationTime",
+          "callee": "String(preference.hour_local).padStart",
+          "lineNumber": 36
+        },
+        {
+          "caller": "notificationTime",
+          "callee": "String",
+          "lineNumber": 36
+        },
+        {
+          "caller": "notificationTime",
+          "callee": "String(preference.minute_local).padStart",
+          "lineNumber": 36
+        },
+        {
+          "caller": "notificationTime",
+          "callee": "String",
+          "lineNumber": 36
+        },
+        {
+          "caller": "parseNotificationTime",
+          "callee": "/^(\\d{2}):(\\d{2})$/.exec",
+          "lineNumber": 40
+        },
+        {
+          "caller": "parseNotificationTime",
+          "callee": "Number",
+          "lineNumber": 42
+        },
+        {
+          "caller": "parseNotificationTime",
+          "callee": "Number",
+          "lineNumber": 43
+        },
+        {
+          "caller": "ensureStudyNotificationPreferences",
+          "callee": "supabase.rpc",
+          "lineNumber": 49
+        },
+        {
+          "caller": "updateStudyNotificationPreference",
+          "callee": "supabase\n    .from('study_notification_preferences')\n    .update({\n      ...patch,\n      ...(isTimeChange ? { last_sent_on: null, muted_until: null } : {}),\n      updated_at: new Date().toISOString()\n    })\n    .eq('user_id', userId)\n    .eq",
+          "lineNumber": 62
+        },
+        {
+          "caller": "updateStudyNotificationPreference",
+          "callee": "supabase\n    .from('study_notification_preferences')\n    .update({\n      ...patch,\n      ...(isTimeChange ? { last_sent_on: null, muted_until: null } : {}),\n      updated_at: new Date().toISOString()\n    })\n    .eq",
+          "lineNumber": 62
+        },
+        {
+          "caller": "updateStudyNotificationPreference",
+          "callee": "supabase\n    .from('study_notification_preferences')\n    .update",
+          "lineNumber": 62
+        },
+        {
+          "caller": "updateStudyNotificationPreference",
+          "callee": "supabase\n    .from",
+          "lineNumber": 62
+        },
+        {
+          "caller": "updateStudyNotificationPreference",
+          "callee": "new Date().toISOString",
+          "lineNumber": 67
+        },
+        {
+          "caller": "sendStudyNotificationTest",
+          "callee": "supabase.functions.invoke",
+          "lineNumber": 78
+        }
+      ],
+      "metrics": {
+        "importCount": 1,
+        "exportCount": 6,
+        "functionCount": 5,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/lib/supabase.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 34,
+      "nonEmptyLines": 28,
+      "functions": [
+        {
+          "name": "isValidSupabaseUrl",
+          "startLine": 6,
+          "endLine": 14,
+          "params": [
+            "value"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "isValidSupabaseUrl",
+          "line": 6,
+          "isDefault": false
+        },
+        {
+          "name": "supabaseConfigured",
+          "line": 17,
+          "isDefault": false
+        },
+        {
+          "name": "supabase",
+          "line": 28,
+          "isDefault": false
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 3,
+        "functionCount": 1,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/lib/theme.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 24,
+      "nonEmptyLines": 20,
+      "functions": [
+        {
+          "name": "resolveTheme",
+          "startLine": 9,
+          "endLine": 12,
+          "params": [
+            "mode",
+            "prefersDark"
+          ]
+        },
+        {
+          "name": "applyTheme",
+          "startLine": 15,
+          "endLine": 24,
+          "params": [
+            "theme",
+            "root"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "THEME_COLORS",
+          "line": 4,
+          "isDefault": false
+        },
+        {
+          "name": "resolveTheme",
+          "line": 9,
+          "isDefault": false
+        },
+        {
+          "name": "applyTheme",
+          "line": 15,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "applyTheme",
+          "callee": "document.querySelector",
+          "lineNumber": 22
+        },
+        {
+          "caller": "applyTheme",
+          "callee": "themeColor?.setAttribute",
+          "lineNumber": 23
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 3,
+        "functionCount": 2,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/main.tsx",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 86,
+      "nonEmptyLines": 73,
+      "functions": [
+        {
+          "name": "disableNativeServiceWorkers",
+          "startLine": 19,
+          "endLine": 32,
+          "params": []
+        },
+        {
+          "name": "configurePwaUpdates",
+          "startLine": 34,
+          "endLine": 74,
+          "params": []
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "disableNativeServiceWorkers",
+          "callee": "Boolean",
+          "lineNumber": 22
+        },
+        {
+          "caller": "disableNativeServiceWorkers",
+          "callee": "navigator.serviceWorker.getRegistrations",
+          "lineNumber": 23
+        },
+        {
+          "caller": "disableNativeServiceWorkers",
+          "callee": "Promise.all",
+          "lineNumber": 24
+        },
+        {
+          "caller": "disableNativeServiceWorkers",
+          "callee": "registrations.map",
+          "lineNumber": 24
+        },
+        {
+          "caller": "disableNativeServiceWorkers",
+          "callee": "registration.unregister",
+          "lineNumber": 24
+        },
+        {
+          "caller": "disableNativeServiceWorkers",
+          "callee": "window.location.reload",
+          "lineNumber": 30
+        },
+        {
+          "caller": "configurePwaUpdates",
+          "callee": "Boolean",
+          "lineNumber": 38
+        },
+        {
+          "caller": "configurePwaUpdates",
+          "callee": "navigator.serviceWorker?.addEventListener",
+          "lineNumber": 41
+        },
+        {
+          "caller": "configurePwaUpdates",
+          "callee": "window.location.reload",
+          "lineNumber": 49
+        },
+        {
+          "caller": "checkForServiceWorkerUpdate",
+          "callee": "navigator.serviceWorker\n      .getRegistration()\n      .then((registration) => registration?.update())\n      .catch",
+          "lineNumber": 54
+        },
+        {
+          "caller": "checkForServiceWorkerUpdate",
+          "callee": "navigator.serviceWorker\n      .getRegistration()\n      .then",
+          "lineNumber": 54
+        },
+        {
+          "caller": "checkForServiceWorkerUpdate",
+          "callee": "navigator.serviceWorker\n      .getRegistration",
+          "lineNumber": 54
+        },
+        {
+          "caller": "checkForServiceWorkerUpdate",
+          "callee": "registration?.update",
+          "lineNumber": 56
+        },
+        {
+          "caller": "configurePwaUpdates",
+          "callee": "registerSW",
+          "lineNumber": 62
+        },
+        {
+          "caller": "onRegisteredSW",
+          "callee": "registration.update",
+          "lineNumber": 66
+        },
+        {
+          "caller": "configurePwaUpdates",
+          "callee": "window.setInterval",
+          "lineNumber": 70
+        },
+        {
+          "caller": "configurePwaUpdates",
+          "callee": "document.addEventListener",
+          "lineNumber": 71
+        },
+        {
+          "caller": "configurePwaUpdates",
+          "callee": "checkForServiceWorkerUpdate",
+          "lineNumber": 72
+        }
+      ],
+      "metrics": {
+        "importCount": 2,
+        "exportCount": 0,
+        "functionCount": 2,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/pages/Auth.tsx",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 182,
+      "nonEmptyLines": 167,
+      "functions": [
+        {
+          "name": "Auth",
+          "startLine": 21,
+          "endLine": 182,
+          "params": []
+        }
+      ],
+      "exports": [
+        {
+          "name": "Auth",
+          "line": 21,
+          "isDefault": true
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "Auth",
+          "callee": "useAuth",
+          "lineNumber": 22
+        },
+        {
+          "caller": "Auth",
+          "callee": "useAuthStore",
+          "lineNumber": 23
+        },
+        {
+          "caller": "Auth",
+          "callee": "useAuthStore",
+          "lineNumber": 24
+        },
+        {
+          "caller": "Auth",
+          "callee": "useNavigate",
+          "lineNumber": 25
+        },
+        {
+          "caller": "Auth",
+          "callee": "useState",
+          "lineNumber": 27
+        },
+        {
+          "caller": "Auth",
+          "callee": "useState",
+          "lineNumber": 28
+        },
+        {
+          "caller": "Auth",
+          "callee": "useState",
+          "lineNumber": 29
+        },
+        {
+          "caller": "Auth",
+          "callee": "differenceInCalendarDays",
+          "lineNumber": 33
+        },
+        {
+          "caller": "Auth",
+          "callee": "parseISO",
+          "lineNumber": 33
+        },
+        {
+          "caller": "Auth",
+          "callee": "username.trim().toLowerCase",
+          "lineNumber": 34
+        },
+        {
+          "caller": "Auth",
+          "callee": "username.trim",
+          "lineNumber": 34
+        },
+        {
+          "caller": "Auth",
+          "callee": "/^[a-z0-9_]{3,32}$/.test",
+          "lineNumber": 37
+        },
+        {
+          "caller": "Auth",
+          "callee": "/^\\d{6}$/.test",
+          "lineNumber": 38
+        },
+        {
+          "caller": "onSubmit",
+          "callee": "e.preventDefault",
+          "lineNumber": 41
+        },
+        {
+          "caller": "onSubmit",
+          "callee": "setState",
+          "lineNumber": 43
+        },
+        {
+          "caller": "onSubmit",
+          "callee": "signIn",
+          "lineNumber": 44
+        },
+        {
+          "caller": "onSubmit",
+          "callee": "setState",
+          "lineNumber": 46
+        },
+        {
+          "caller": "onSubmit",
+          "callee": "setPin",
+          "lineNumber": 47
+        },
+        {
+          "caller": "onSubmit",
+          "callee": "navigate",
+          "lineNumber": 50
+        },
+        {
+          "caller": "Auth",
+          "callee": "setUsername",
+          "lineNumber": 102
+        },
+        {
+          "caller": "Auth",
+          "callee": "enterSandbox",
+          "lineNumber": 162
+        }
+      ],
+      "metrics": {
+        "importCount": 9,
+        "exportCount": 1,
+        "functionCount": 1,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/pages/Buddy.tsx",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 1008,
+      "nonEmptyLines": 962,
+      "functions": [
+        {
+          "name": "placeholderPeer",
+          "startLine": 60,
+          "endLine": 69,
+          "params": [
+            "peerId"
+          ]
+        },
+        {
+          "name": "normalizePeer",
+          "startLine": 72,
+          "endLine": 81,
+          "params": [
+            "p",
+            "peerId"
+          ]
+        },
+        {
+          "name": "peerDisplay",
+          "startLine": 84,
+          "endLine": 89,
+          "params": [
+            "p"
+          ]
+        },
+        {
+          "name": "peerHandle",
+          "startLine": 92,
+          "endLine": 94,
+          "params": [
+            "p"
+          ]
+        },
+        {
+          "name": "Buddy",
+          "startLine": 96,
+          "endLine": 736,
+          "params": []
+        },
+        {
+          "name": "ChatsTab",
+          "startLine": 740,
+          "endLine": 820,
+          "params": [
+            "{\n  loading,\n  active,\n  activeId,\n  userId,\n  onPick,\n  onNew\n}"
+          ]
+        },
+        {
+          "name": "RequestsTab",
+          "startLine": 822,
+          "endLine": 917,
+          "params": [
+            "{\n  incoming,\n  outgoing,\n  busyId,\n  onRespond,\n  onCancel,\n  onNew\n}"
+          ]
+        },
+        {
+          "name": "PausedTab",
+          "startLine": 919,
+          "endLine": 954,
+          "params": [
+            "{\n  rows,\n  busyId,\n  onRetry\n}"
+          ]
+        },
+        {
+          "name": "TabPill",
+          "startLine": 958,
+          "endLine": 999,
+          "params": [
+            "{\n  on,\n  onClick,\n  label,\n  count,\n  highlight = false\n}"
+          ]
+        },
+        {
+          "name": "previewOf",
+          "startLine": 1001,
+          "endLine": 1008,
+          "params": [
+            "m",
+            "isMine"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "Buddy",
+          "line": 96,
+          "isDefault": true
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "placeholderPeer",
+          "callee": "(peerId ?? '').toString",
+          "lineNumber": 61
+        },
+        {
+          "caller": "placeholderPeer",
+          "callee": "safeId.slice",
+          "lineNumber": 62
+        },
+        {
+          "caller": "normalizePeer",
+          "callee": "placeholderPeer",
+          "lineNumber": 73
+        },
+        {
+          "caller": "normalizePeer",
+          "callee": "placeholderPeer",
+          "lineNumber": 74
+        },
+        {
+          "caller": "normalizePeer",
+          "callee": "p.name.trim",
+          "lineNumber": 77
+        },
+        {
+          "caller": "normalizePeer",
+          "callee": "p.username.trim",
+          "lineNumber": 79
+        },
+        {
+          "caller": "peerDisplay",
+          "callee": "(p.name || '').trim",
+          "lineNumber": 85
+        },
+        {
+          "caller": "peerDisplay",
+          "callee": "(p.username || '').trim",
+          "lineNumber": 87
+        },
+        {
+          "caller": "peerHandle",
+          "callee": "(p.username || '').trim",
+          "lineNumber": 93
+        },
+        {
+          "caller": "Buddy",
+          "callee": "useAuth",
+          "lineNumber": 97
+        },
+        {
+          "caller": "Buddy",
+          "callee": "useSearchParams",
+          "lineNumber": 98
+        },
+        {
+          "caller": "Buddy",
+          "callee": "useState",
+          "lineNumber": 99
+        },
+        {
+          "caller": "Buddy",
+          "callee": "useState",
+          "lineNumber": 100
+        },
+        {
+          "caller": "Buddy",
+          "callee": "useState",
+          "lineNumber": 101
+        },
+        {
+          "caller": "Buddy",
+          "callee": "useState",
+          "lineNumber": 102
+        },
+        {
+          "caller": "Buddy",
+          "callee": "useState",
+          "lineNumber": 103
+        },
+        {
+          "caller": "Buddy",
+          "callee": "useState",
+          "lineNumber": 104
+        },
+        {
+          "caller": "Buddy",
+          "callee": "useState",
+          "lineNumber": 105
+        },
+        {
+          "caller": "Buddy",
+          "callee": "useState",
+          "lineNumber": 106
+        },
+        {
+          "caller": "Buddy",
+          "callee": "useState",
+          "lineNumber": 107
+        },
+        {
+          "caller": "Buddy",
+          "callee": "useState",
+          "lineNumber": 108
+        },
+        {
+          "caller": "Buddy",
+          "callee": "useState",
+          "lineNumber": 109
+        },
+        {
+          "caller": "Buddy",
+          "callee": "useState",
+          "lineNumber": 110
+        },
+        {
+          "caller": "Buddy",
+          "callee": "useUiStore",
+          "lineNumber": 111
+        },
+        {
+          "caller": "Buddy",
+          "callee": "useReducedMotion",
+          "lineNumber": 112
+        },
+        {
+          "caller": "Buddy",
+          "callee": "useMediaQuery",
+          "lineNumber": 113
+        },
+        {
+          "caller": "Buddy",
+          "callee": "useCallback",
+          "lineNumber": 116
+        },
+        {
+          "caller": "Buddy",
+          "callee": "setMobileView",
+          "lineNumber": 117
+        },
+        {
+          "caller": "Buddy",
+          "callee": "next.delete",
+          "lineNumber": 119
+        },
+        {
+          "caller": "Buddy",
+          "callee": "setSearchParams",
+          "lineNumber": 120
+        },
+        {
+          "caller": "Buddy",
+          "callee": "useEffect",
+          "lineNumber": 123
+        },
+        {
+          "caller": "onNativeBack",
+          "callee": "event.preventDefault",
+          "lineNumber": 126
+        },
+        {
+          "caller": "onNativeBack",
+          "callee": "closeMobileChat",
+          "lineNumber": 127
+        },
+        {
+          "caller": "Buddy",
+          "callee": "window.addEventListener",
+          "lineNumber": 129
+        },
+        {
+          "caller": "Buddy",
+          "callee": "window.removeEventListener",
+          "lineNumber": 130
+        },
+        {
+          "caller": "Buddy",
+          "callee": "useCallback",
+          "lineNumber": 133
+        },
+        {
+          "caller": "Buddy",
+          "callee": "setLoading",
+          "lineNumber": 135
+        },
+        {
+          "caller": "Buddy",
+          "callee": "setError",
+          "lineNumber": 136
+        },
+        {
+          "caller": "Buddy",
+          "callee": "supabase\n      .from('buddies')\n      .select('*')\n      .or(`user_a.eq.${userId},user_b.eq.${userId}`)\n      .order",
+          "lineNumber": 137
+        },
+        {
+          "caller": "Buddy",
+          "callee": "supabase\n      .from('buddies')\n      .select('*')\n      .or",
+          "lineNumber": 137
+        },
+        {
+          "caller": "Buddy",
+          "callee": "supabase\n      .from('buddies')\n      .select",
+          "lineNumber": 137
+        },
+        {
+          "caller": "Buddy",
+          "callee": "supabase\n      .from",
+          "lineNumber": 137
+        },
+        {
+          "caller": "Buddy",
+          "callee": "setError",
+          "lineNumber": 143
+        },
+        {
+          "caller": "Buddy",
+          "callee": "setLoading",
+          "lineNumber": 144
+        },
+        {
+          "caller": "Buddy",
+          "callee": "supabase.rpc",
+          "lineNumber": 155
+        },
+        {
+          "caller": "Buddy",
+          "callee": "console.warn",
+          "lineNumber": 157
+        },
+        {
+          "caller": "Buddy",
+          "callee": "peerMap.set",
+          "lineNumber": 160
+        },
+        {
+          "caller": "Buddy",
+          "callee": "rows.map",
+          "lineNumber": 164
+        },
+        {
+          "caller": "Buddy",
+          "callee": "normalizePeer",
+          "lineNumber": 168
+        },
+        {
+          "caller": "Buddy",
+          "callee": "peerMap.get",
+          "lineNumber": 168
+        },
+        {
+          "caller": "Buddy",
+          "callee": "list.filter((v) => v.row.status === 'active').slice",
+          "lineNumber": 174
+        },
+        {
+          "caller": "Buddy",
+          "callee": "list.filter",
+          "lineNumber": 174
+        },
+        {
+          "caller": "Buddy",
+          "callee": "Promise.all",
+          "lineNumber": 175
+        },
+        {
+          "caller": "Buddy",
+          "callee": "activeRows.map",
+          "lineNumber": 176
+        },
+        {
+          "caller": "Buddy",
+          "callee": "Promise.all",
+          "lineNumber": 177
+        },
+        {
+          "caller": "Buddy",
+          "callee": "supabase\n            .from('buddy_messages')\n            .select('id, buddy_id, sender_id, kind, body, question_ref, created_at, read_at')\n            .eq('buddy_id', v.row.id)\n            .order('created_at', { ascending: false })\n            .limit",
+          "lineNumber": 178
+        },
+        {
+          "caller": "Buddy",
+          "callee": "supabase\n            .from('buddy_messages')\n            .select('id, buddy_id, sender_id, kind, body, question_ref, created_at, read_at')\n            .eq('buddy_id', v.row.id)\n            .order",
+          "lineNumber": 178
+        },
+        {
+          "caller": "Buddy",
+          "callee": "supabase\n            .from('buddy_messages')\n            .select('id, buddy_id, sender_id, kind, body, question_ref, created_at, read_at')\n            .eq",
+          "lineNumber": 178
+        },
+        {
+          "caller": "Buddy",
+          "callee": "supabase\n            .from('buddy_messages')\n            .select",
+          "lineNumber": 178
+        },
+        {
+          "caller": "Buddy",
+          "callee": "supabase\n            .from",
+          "lineNumber": 178
+        },
+        {
+          "caller": "Buddy",
+          "callee": "supabase\n            .from('buddy_messages')\n            .select('id', { count: 'exact', head: true })\n            .eq('buddy_id', v.row.id)\n            .neq('sender_id', userId)\n            .is",
+          "lineNumber": 184
+        },
+        {
+          "caller": "Buddy",
+          "callee": "supabase\n            .from('buddy_messages')\n            .select('id', { count: 'exact', head: true })\n            .eq('buddy_id', v.row.id)\n            .neq",
+          "lineNumber": 184
+        },
+        {
+          "caller": "Buddy",
+          "callee": "supabase\n            .from('buddy_messages')\n            .select('id', { count: 'exact', head: true })\n            .eq",
+          "lineNumber": 184
+        },
+        {
+          "caller": "Buddy",
+          "callee": "supabase\n            .from('buddy_messages')\n            .select",
+          "lineNumber": 184
+        },
+        {
+          "caller": "Buddy",
+          "callee": "supabase\n            .from",
+          "lineNumber": 184
+        },
+        {
+          "caller": "Buddy",
+          "callee": "setBuddies",
+          "lineNumber": 196
+        },
+        {
+          "caller": "Buddy",
+          "callee": "setLoading",
+          "lineNumber": 197
+        },
+        {
+          "caller": "Buddy",
+          "callee": "useCallback",
+          "lineNumber": 200
+        },
+        {
+          "caller": "Buddy",
+          "callee": "Promise.all",
+          "lineNumber": 203
+        },
+        {
+          "caller": "Buddy",
+          "callee": "supabase\n          .from('buddy_messages')\n          .select('id, buddy_id, sender_id, kind, body, question_ref, created_at, read_at')\n          .eq('buddy_id', buddyId)\n          .order('created_at', { ascending: false })\n          .limit",
+          "lineNumber": 204
+        },
+        {
+          "caller": "Buddy",
+          "callee": "supabase\n          .from('buddy_messages')\n          .select('id, buddy_id, sender_id, kind, body, question_ref, created_at, read_at')\n          .eq('buddy_id', buddyId)\n          .order",
+          "lineNumber": 204
+        },
+        {
+          "caller": "Buddy",
+          "callee": "supabase\n          .from('buddy_messages')\n          .select('id, buddy_id, sender_id, kind, body, question_ref, created_at, read_at')\n          .eq",
+          "lineNumber": 204
+        },
+        {
+          "caller": "Buddy",
+          "callee": "supabase\n          .from('buddy_messages')\n          .select",
+          "lineNumber": 204
+        },
+        {
+          "caller": "Buddy",
+          "callee": "supabase\n          .from",
+          "lineNumber": 204
+        },
+        {
+          "caller": "Buddy",
+          "callee": "supabase\n          .from('buddy_messages')\n          .select('id', { count: 'exact', head: true })\n          .eq('buddy_id', buddyId)\n          .neq('sender_id', userId)\n          .is",
+          "lineNumber": 210
+        },
+        {
+          "caller": "Buddy",
+          "callee": "supabase\n          .from('buddy_messages')\n          .select('id', { count: 'exact', head: true })\n          .eq('buddy_id', buddyId)\n          .neq",
+          "lineNumber": 210
+        },
+        {
+          "caller": "Buddy",
+          "callee": "supabase\n          .from('buddy_messages')\n          .select('id', { count: 'exact', head: true })\n          .eq",
+          "lineNumber": 210
+        },
+        {
+          "caller": "Buddy",
+          "callee": "supabase\n          .from('buddy_messages')\n          .select",
+          "lineNumber": 210
+        },
+        {
+          "caller": "Buddy",
+          "callee": "supabase\n          .from",
+          "lineNumber": 210
+        },
+        {
+          "caller": "Buddy",
+          "callee": "setBuddies",
+          "lineNumber": 218
+        },
+        {
+          "caller": "Buddy",
+          "callee": "current.map",
+          "lineNumber": 219
+        },
+        {
+          "caller": "Buddy",
+          "callee": "useEffect",
+          "lineNumber": 227
+        },
+        {
+          "caller": "Buddy",
+          "callee": "setBuddies",
+          "lineNumber": 229
+        },
+        {
+          "caller": "Buddy",
+          "callee": "reload",
+          "lineNumber": 232
+        },
+        {
+          "caller": "Buddy",
+          "callee": "useEffect",
+          "lineNumber": 236
+        },
+        {
+          "caller": "Buddy",
+          "callee": "supabase\n      .channel(`buddy-previews:${userId}`)\n      .on(\n        'postgres_changes',\n        { event: '*', schema: 'public', table: 'buddy_messages' },\n        (payload) => {\n          const row = (\n            payload.new && Object.keys(payload.new).length > 0 ? payload.new : payload.old\n          ) as Partial<BuddyMessageRow>;\n          if (row.buddy_id) void refreshPreview(row.buddy_id);\n        }\n      )\n      .subscribe",
+          "lineNumber": 238
+        },
+        {
+          "caller": "Buddy",
+          "callee": "supabase\n      .channel(`buddy-previews:${userId}`)\n      .on",
+          "lineNumber": 238
+        },
+        {
+          "caller": "Buddy",
+          "callee": "supabase\n      .channel",
+          "lineNumber": 238
+        },
+        {
+          "caller": "Buddy",
+          "callee": "Object.keys",
+          "lineNumber": 245
+        },
+        {
+          "caller": "Buddy",
+          "callee": "refreshPreview",
+          "lineNumber": 247
+        },
+        {
+          "caller": "Buddy",
+          "callee": "supabase.removeChannel",
+          "lineNumber": 252
+        },
+        {
+          "caller": "Buddy",
+          "callee": "useEffect",
+          "lineNumber": 258
+        },
+        {
+          "caller": "Buddy",
+          "callee": "supabase\n      .channel(`buddies:${userId}`)\n      .on(\n        'postgres_changes',\n        {\n          event: '*',\n          schema: 'public',\n          table: 'buddies',\n          filter: `user_a=eq.${userId}`\n        },\n        () => void reload()\n      )\n      .on(\n        'postgres_changes',\n        {\n          event: '*',\n          schema: 'public',\n          table: 'buddies',\n          filter: `user_b=eq.${userId}`\n        },\n        () => void reload()\n      )\n      .subscribe",
+          "lineNumber": 260
+        },
+        {
+          "caller": "Buddy",
+          "callee": "supabase\n      .channel(`buddies:${userId}`)\n      .on(\n        'postgres_changes',\n        {\n          event: '*',\n          schema: 'public',\n          table: 'buddies',\n          filter: `user_a=eq.${userId}`\n        },\n        () => void reload()\n      )\n      .on",
+          "lineNumber": 260
+        },
+        {
+          "caller": "Buddy",
+          "callee": "supabase\n      .channel(`buddies:${userId}`)\n      .on",
+          "lineNumber": 260
+        },
+        {
+          "caller": "Buddy",
+          "callee": "supabase\n      .channel",
+          "lineNumber": 260
+        },
+        {
+          "caller": "Buddy",
+          "callee": "reload",
+          "lineNumber": 270
+        },
+        {
+          "caller": "Buddy",
+          "callee": "reload",
+          "lineNumber": 280
+        },
+        {
+          "caller": "Buddy",
+          "callee": "supabase.removeChannel",
+          "lineNumber": 284
+        },
+        {
+          "caller": "onSendRequest",
+          "callee": "e.preventDefault",
+          "lineNumber": 289
+        },
+        {
+          "caller": "onSendRequest",
+          "callee": "uname.trim().toLowerCase().replace",
+          "lineNumber": 290
+        },
+        {
+          "caller": "onSendRequest",
+          "callee": "uname.trim().toLowerCase",
+          "lineNumber": 290
+        },
+        {
+          "caller": "onSendRequest",
+          "callee": "uname.trim",
+          "lineNumber": 290
+        },
+        {
+          "caller": "onSendRequest",
+          "callee": "USERNAME_RE.test",
+          "lineNumber": 291
+        },
+        {
+          "caller": "onSendRequest",
+          "callee": "pushToast",
+          "lineNumber": 292
+        },
+        {
+          "caller": "onSendRequest",
+          "callee": "setSending",
+          "lineNumber": 295
+        },
+        {
+          "caller": "onSendRequest",
+          "callee": "sendBuddyRequest",
+          "lineNumber": 296
+        },
+        {
+          "caller": "onSendRequest",
+          "callee": "setSending",
+          "lineNumber": 297
+        },
+        {
+          "caller": "onSendRequest",
+          "callee": "pushToast",
+          "lineNumber": 299
+        },
+        {
+          "caller": "onSendRequest",
+          "callee": "pushToast",
+          "lineNumber": 304
+        },
+        {
+          "caller": "onSendRequest",
+          "callee": "pushToast",
+          "lineNumber": 307
+        },
+        {
+          "caller": "onSendRequest",
+          "callee": "pushToast",
+          "lineNumber": 310
+        },
+        {
+          "caller": "onSendRequest",
+          "callee": "pushToast",
+          "lineNumber": 313
+        },
+        {
+          "caller": "onSendRequest",
+          "callee": "pushToast",
+          "lineNumber": 316
+        },
+        {
+          "caller": "onSendRequest",
+          "callee": "pushToast",
+          "lineNumber": 319
+        },
+        {
+          "caller": "onSendRequest",
+          "callee": "pushToast",
+          "lineNumber": 322
+        },
+        {
+          "caller": "onSendRequest",
+          "callee": "pushToast",
+          "lineNumber": 325
+        },
+        {
+          "caller": "onSendRequest",
+          "callee": "setUname",
+          "lineNumber": 328
+        },
+        {
+          "caller": "onSendRequest",
+          "callee": "setShowAddPanel",
+          "lineNumber": 329
+        },
+        {
+          "caller": "onSendRequest",
+          "callee": "reload",
+          "lineNumber": 330
+        },
+        {
+          "caller": "onRespond",
+          "callee": "setBusyId",
+          "lineNumber": 334
+        },
+        {
+          "caller": "onRespond",
+          "callee": "supabase.rpc",
+          "lineNumber": 336
+        },
+        {
+          "caller": "onRespond",
+          "callee": "reason.trim",
+          "lineNumber": 339
+        },
+        {
+          "caller": "onRespond",
+          "callee": "pushToast",
+          "lineNumber": 342
+        },
+        {
+          "caller": "onRespond",
+          "callee": "pushToast",
+          "lineNumber": 346
+        },
+        {
+          "caller": "onRespond",
+          "callee": "setActiveId",
+          "lineNumber": 347
+        },
+        {
+          "caller": "onRespond",
+          "callee": "setTab",
+          "lineNumber": 348
+        },
+        {
+          "caller": "onRespond",
+          "callee": "setMobileView",
+          "lineNumber": 349
+        },
+        {
+          "caller": "onRespond",
+          "callee": "setSearchParams",
+          "lineNumber": 350
+        },
+        {
+          "caller": "onRespond",
+          "callee": "pushToast",
+          "lineNumber": 352
+        },
+        {
+          "caller": "onRespond",
+          "callee": "setDeclineTarget",
+          "lineNumber": 353
+        },
+        {
+          "caller": "onRespond",
+          "callee": "setDeclineReason",
+          "lineNumber": 354
+        },
+        {
+          "caller": "onRespond",
+          "callee": "reload",
+          "lineNumber": 356
+        },
+        {
+          "caller": "onRespond",
+          "callee": "setBusyId",
+          "lineNumber": 358
+        },
+        {
+          "caller": "onCancelRequest",
+          "callee": "setBusyId",
+          "lineNumber": 363
+        },
+        {
+          "caller": "onCancelRequest",
+          "callee": "supabase.rpc",
+          "lineNumber": 365
+        },
+        {
+          "caller": "onCancelRequest",
+          "callee": "pushToast",
+          "lineNumber": 367
+        },
+        {
+          "caller": "onCancelRequest",
+          "callee": "pushToast",
+          "lineNumber": 370
+        },
+        {
+          "caller": "onCancelRequest",
+          "callee": "reload",
+          "lineNumber": 371
+        },
+        {
+          "caller": "onCancelRequest",
+          "callee": "setBusyId",
+          "lineNumber": 373
+        },
+        {
+          "caller": "onRetry",
+          "callee": "setBusyId",
+          "lineNumber": 378
+        },
+        {
+          "caller": "onRetry",
+          "callee": "peerHandle",
+          "lineNumber": 380
+        },
+        {
+          "caller": "onRetry",
+          "callee": "sendBuddyRequest",
+          "lineNumber": 381
+        },
+        {
+          "caller": "onRetry",
+          "callee": "pushToast",
+          "lineNumber": 383
+        },
+        {
+          "caller": "onRetry",
+          "callee": "pushToast",
+          "lineNumber": 387
+        },
+        {
+          "caller": "onRetry",
+          "callee": "pushToast",
+          "lineNumber": 390
+        },
+        {
+          "caller": "onRetry",
+          "callee": "setTab",
+          "lineNumber": 391
+        },
+        {
+          "caller": "onRetry",
+          "callee": "reload",
+          "lineNumber": 392
+        },
+        {
+          "caller": "onRetry",
+          "callee": "setBusyId",
+          "lineNumber": 394
+        },
+        {
+          "caller": "onUnfriend",
+          "callee": "supabase.rpc",
+          "lineNumber": 399
+        },
+        {
+          "caller": "onUnfriend",
+          "callee": "pushToast",
+          "lineNumber": 401
+        },
+        {
+          "caller": "onUnfriend",
+          "callee": "pushToast",
+          "lineNumber": 404
+        },
+        {
+          "caller": "onUnfriend",
+          "callee": "setActiveId",
+          "lineNumber": 406
+        },
+        {
+          "caller": "onUnfriend",
+          "callee": "setMobileView",
+          "lineNumber": 407
+        },
+        {
+          "caller": "onUnfriend",
+          "callee": "next.delete",
+          "lineNumber": 409
+        },
+        {
+          "caller": "onUnfriend",
+          "callee": "setSearchParams",
+          "lineNumber": 410
+        },
+        {
+          "caller": "onUnfriend",
+          "callee": "reload",
+          "lineNumber": 412
+        },
+        {
+          "caller": "Buddy",
+          "callee": "useMemo",
+          "lineNumber": 415
+        },
+        {
+          "caller": "Buddy",
+          "callee": "buddies.filter",
+          "lineNumber": 416
+        },
+        {
+          "caller": "Buddy",
+          "callee": "useMemo",
+          "lineNumber": 419
+        },
+        {
+          "caller": "Buddy",
+          "callee": "buddies.filter",
+          "lineNumber": 420
+        },
+        {
+          "caller": "Buddy",
+          "callee": "useMemo",
+          "lineNumber": 423
+        },
+        {
+          "caller": "Buddy",
+          "callee": "buddies.filter",
+          "lineNumber": 423
+        },
+        {
+          "caller": "Buddy",
+          "callee": "useMemo",
+          "lineNumber": 424
+        },
+        {
+          "caller": "Buddy",
+          "callee": "buddies\n        .filter((b) => b.row.status === 'active')\n        .sort",
+          "lineNumber": 426
+        },
+        {
+          "caller": "Buddy",
+          "callee": "buddies\n        .filter",
+          "lineNumber": 426
+        },
+        {
+          "caller": "Buddy",
+          "callee": "tb.localeCompare",
+          "lineNumber": 431
+        },
+        {
+          "caller": "Buddy",
+          "callee": "active.find",
+          "lineNumber": 435
+        },
+        {
+          "caller": "Buddy",
+          "callee": "searchParams.get",
+          "lineNumber": 436
+        },
+        {
+          "caller": "Buddy",
+          "callee": "useEffect",
+          "lineNumber": 438
+        },
+        {
+          "caller": "Buddy",
+          "callee": "setActiveId",
+          "lineNumber": 440
+        },
+        {
+          "caller": "Buddy",
+          "callee": "active.some",
+          "lineNumber": 443
+        },
+        {
+          "caller": "Buddy",
+          "callee": "setActiveId",
+          "lineNumber": 444
+        },
+        {
+          "caller": "Buddy",
+          "callee": "setMobileView",
+          "lineNumber": 445
+        },
+        {
+          "caller": "Buddy",
+          "callee": "setMobileView",
+          "lineNumber": 449
+        },
+        {
+          "caller": "Buddy",
+          "callee": "active.some",
+          "lineNumber": 451
+        },
+        {
+          "caller": "Buddy",
+          "callee": "setActiveId",
+          "lineNumber": 452
+        },
+        {
+          "caller": "Buddy",
+          "callee": "reload",
+          "lineNumber": 495
+        },
+        {
+          "caller": "Buddy",
+          "callee": "setShowAddPanel",
+          "lineNumber": 499
+        },
+        {
+          "caller": "Buddy",
+          "callee": "setUname",
+          "lineNumber": 537
+        },
+        {
+          "caller": "Buddy",
+          "callee": "e.target.value.toLowerCase().replace",
+          "lineNumber": 537
+        },
+        {
+          "caller": "Buddy",
+          "callee": "e.target.value.toLowerCase",
+          "lineNumber": 537
+        },
+        {
+          "caller": "Buddy",
+          "callee": "setTab",
+          "lineNumber": 573
+        },
+        {
+          "caller": "Buddy",
+          "callee": "setTab",
+          "lineNumber": 579
+        },
+        {
+          "caller": "Buddy",
+          "callee": "setTab",
+          "lineNumber": 586
+        },
+        {
+          "caller": "Buddy",
+          "callee": "setActiveId",
+          "lineNumber": 599
+        },
+        {
+          "caller": "Buddy",
+          "callee": "setSearchParams",
+          "lineNumber": 600
+        },
+        {
+          "caller": "Buddy",
+          "callee": "setBuddies",
+          "lineNumber": 601
+        },
+        {
+          "caller": "Buddy",
+          "callee": "current.map",
+          "lineNumber": 602
+        },
+        {
+          "caller": "Buddy",
+          "callee": "setMobileView",
+          "lineNumber": 606
+        },
+        {
+          "caller": "Buddy",
+          "callee": "setShowAddPanel",
+          "lineNumber": 608
+        },
+        {
+          "caller": "Buddy",
+          "callee": "onRespond",
+          "lineNumber": 619
+        },
+        {
+          "caller": "Buddy",
+          "callee": "incoming.find",
+          "lineNumber": 621
+        },
+        {
+          "caller": "Buddy",
+          "callee": "setDeclineTarget",
+          "lineNumber": 622
+        },
+        {
+          "caller": "Buddy",
+          "callee": "setDeclineReason",
+          "lineNumber": 623
+        },
+        {
+          "caller": "Buddy",
+          "callee": "onCancelRequest",
+          "lineNumber": 626
+        },
+        {
+          "caller": "Buddy",
+          "callee": "setShowAddPanel",
+          "lineNumber": 627
+        },
+        {
+          "caller": "Buddy",
+          "callee": "onRetry",
+          "lineNumber": 632
+        },
+        {
+          "caller": "Buddy",
+          "callee": "onUnfriend",
+          "lineNumber": 655
+        },
+        {
+          "caller": "Buddy",
+          "callee": "setShowAddPanel",
+          "lineNumber": 673
+        },
+        {
+          "caller": "Buddy",
+          "callee": "setDeclineTarget",
+          "lineNumber": 695
+        },
+        {
+          "caller": "Buddy",
+          "callee": "setDeclineReason",
+          "lineNumber": 696
+        },
+        {
+          "caller": "Buddy",
+          "callee": "peerDisplay",
+          "lineNumber": 701
+        },
+        {
+          "caller": "Buddy",
+          "callee": "setDeclineReason",
+          "lineNumber": 706
+        },
+        {
+          "caller": "Buddy",
+          "callee": "event.target.value.slice",
+          "lineNumber": 706
+        },
+        {
+          "caller": "Buddy",
+          "callee": "setDeclineTarget",
+          "lineNumber": 718
+        },
+        {
+          "caller": "Buddy",
+          "callee": "onRespond",
+          "lineNumber": 727
+        },
+        {
+          "caller": "ChatsTab",
+          "callee": "active.map",
+          "lineNumber": 779
+        },
+        {
+          "caller": "ChatsTab",
+          "callee": "peerDisplay",
+          "lineNumber": 780
+        },
+        {
+          "caller": "ChatsTab",
+          "callee": "onPick",
+          "lineNumber": 785
+        },
+        {
+          "caller": "ChatsTab",
+          "callee": "cn",
+          "lineNumber": 786
+        },
+        {
+          "caller": "ChatsTab",
+          "callee": "shortBuddyTime",
+          "lineNumber": 799
+        },
+        {
+          "caller": "ChatsTab",
+          "callee": "previewOf",
+          "lineNumber": 805
+        },
+        {
+          "caller": "ChatsTab",
+          "callee": "peerHandle",
+          "lineNumber": 806
+        },
+        {
+          "caller": "RequestsTab",
+          "callee": "incoming.map",
+          "lineNumber": 856
+        },
+        {
+          "caller": "RequestsTab",
+          "callee": "peerDisplay",
+          "lineNumber": 857
+        },
+        {
+          "caller": "RequestsTab",
+          "callee": "onRespond",
+          "lineNumber": 869
+        },
+        {
+          "caller": "RequestsTab",
+          "callee": "onRespond",
+          "lineNumber": 877
+        },
+        {
+          "caller": "RequestsTab",
+          "callee": "outgoing.map",
+          "lineNumber": 893
+        },
+        {
+          "caller": "RequestsTab",
+          "callee": "onCancel",
+          "lineNumber": 906
+        },
+        {
+          "caller": "PausedTab",
+          "callee": "rows.map",
+          "lineNumber": 933
+        },
+        {
+          "caller": "PausedTab",
+          "callee": "onRetry",
+          "lineNumber": 946
+        },
+        {
+          "caller": "TabPill",
+          "callee": "cn",
+          "lineNumber": 975
+        },
+        {
+          "caller": "TabPill",
+          "callee": "cn",
+          "lineNumber": 985
+        },
+        {
+          "caller": "previewOf",
+          "callee": "(m.body ?? '').replace(/\\s+/g, ' ').slice",
+          "lineNumber": 1007
+        },
+        {
+          "caller": "previewOf",
+          "callee": "(m.body ?? '').replace",
+          "lineNumber": 1007
+        }
+      ],
+      "metrics": {
+        "importCount": 16,
+        "exportCount": 1,
+        "functionCount": 10,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/pages/ForgotPin.tsx",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 140,
+      "nonEmptyLines": 130,
+      "functions": [
+        {
+          "name": "ForgotPin",
+          "startLine": 22,
+          "endLine": 140,
+          "params": []
+        }
+      ],
+      "exports": [
+        {
+          "name": "ForgotPin",
+          "line": 22,
+          "isDefault": true
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "ForgotPin",
+          "callee": "useAuth",
+          "lineNumber": 23
+        },
+        {
+          "caller": "ForgotPin",
+          "callee": "useState",
+          "lineNumber": 24
+        },
+        {
+          "caller": "ForgotPin",
+          "callee": "useState",
+          "lineNumber": 25
+        },
+        {
+          "caller": "ForgotPin",
+          "callee": "username.trim().toLowerCase",
+          "lineNumber": 29
+        },
+        {
+          "caller": "ForgotPin",
+          "callee": "username.trim",
+          "lineNumber": 29
+        },
+        {
+          "caller": "ForgotPin",
+          "callee": "USERNAME_RE.test",
+          "lineNumber": 30
+        },
+        {
+          "caller": "ForgotPin",
+          "callee": "differenceInCalendarDays",
+          "lineNumber": 31
+        },
+        {
+          "caller": "ForgotPin",
+          "callee": "parseISO",
+          "lineNumber": 31
+        },
+        {
+          "caller": "onSubmit",
+          "callee": "e.preventDefault",
+          "lineNumber": 34
+        },
+        {
+          "caller": "onSubmit",
+          "callee": "setState",
+          "lineNumber": 36
+        },
+        {
+          "caller": "onSubmit",
+          "callee": "requestPinReset",
+          "lineNumber": 37
+        },
+        {
+          "caller": "onSubmit",
+          "callee": "setState",
+          "lineNumber": 39
+        },
+        {
+          "caller": "onSubmit",
+          "callee": "setState",
+          "lineNumber": 42
+        },
+        {
+          "caller": "ForgotPin",
+          "callee": "setUsername",
+          "lineNumber": 108
+        },
+        {
+          "caller": "ForgotPin",
+          "callee": "e.target.value.toLowerCase",
+          "lineNumber": 108
+        }
+      ],
+      "metrics": {
+        "importCount": 8,
+        "exportCount": 1,
+        "functionCount": 1,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/pages/NotFound.tsx",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 22,
+      "nonEmptyLines": 21,
+      "functions": [
+        {
+          "name": "NotFound",
+          "startLine": 4,
+          "endLine": 22,
+          "params": []
+        }
+      ],
+      "exports": [
+        {
+          "name": "NotFound",
+          "line": 4,
+          "isDefault": true
+        }
+      ],
+      "metrics": {
+        "importCount": 1,
+        "exportCount": 1,
+        "functionCount": 1,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/pages/RequestAccess.tsx",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 334,
+      "nonEmptyLines": 313,
+      "functions": [
+        {
+          "name": "RequestAccess",
+          "startLine": 27,
+          "endLine": 202,
+          "params": []
+        },
+        {
+          "name": "Pitch",
+          "startLine": 204,
+          "endLine": 268,
+          "params": [
+            "{ daysLeft }"
+          ]
+        },
+        {
+          "name": "Field",
+          "startLine": 270,
+          "endLine": 301,
+          "params": [
+            "{\n  label,\n  htmlFor,\n  hint,\n  hintTone = 'faint',\n  children\n}"
+          ]
+        },
+        {
+          "name": "SentPanel",
+          "startLine": 303,
+          "endLine": 334,
+          "params": [
+            "{ dedup, onReset }"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "RequestAccess",
+          "line": 27,
+          "isDefault": true
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "RequestAccess",
+          "callee": "useAuth",
+          "lineNumber": 28
+        },
+        {
+          "caller": "RequestAccess",
+          "callee": "useState",
+          "lineNumber": 29
+        },
+        {
+          "caller": "RequestAccess",
+          "callee": "useState",
+          "lineNumber": 30
+        },
+        {
+          "caller": "RequestAccess",
+          "callee": "useState",
+          "lineNumber": 31
+        },
+        {
+          "caller": "RequestAccess",
+          "callee": "useState",
+          "lineNumber": 32
+        },
+        {
+          "caller": "RequestAccess",
+          "callee": "useState",
+          "lineNumber": 33
+        },
+        {
+          "caller": "RequestAccess",
+          "callee": "useRef",
+          "lineNumber": 34
+        },
+        {
+          "caller": "RequestAccess",
+          "callee": "differenceInCalendarDays",
+          "lineNumber": 38
+        },
+        {
+          "caller": "RequestAccess",
+          "callee": "parseISO",
+          "lineNumber": 38
+        },
+        {
+          "caller": "RequestAccess",
+          "callee": "purpose.trim",
+          "lineNumber": 39
+        },
+        {
+          "caller": "RequestAccess",
+          "callee": "/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test",
+          "lineNumber": 41
+        },
+        {
+          "caller": "RequestAccess",
+          "callee": "email.trim",
+          "lineNumber": 41
+        },
+        {
+          "caller": "RequestAccess",
+          "callee": "name.trim",
+          "lineNumber": 42
+        },
+        {
+          "caller": "onSubmit",
+          "callee": "e.preventDefault",
+          "lineNumber": 46
+        },
+        {
+          "caller": "onSubmit",
+          "callee": "setState",
+          "lineNumber": 48
+        },
+        {
+          "caller": "onSubmit",
+          "callee": "requestAccess",
+          "lineNumber": 49
+        },
+        {
+          "caller": "onSubmit",
+          "callee": "name.trim",
+          "lineNumber": 50
+        },
+        {
+          "caller": "onSubmit",
+          "callee": "email.trim",
+          "lineNumber": 51
+        },
+        {
+          "caller": "onSubmit",
+          "callee": "purpose.trim",
+          "lineNumber": 52
+        },
+        {
+          "caller": "onSubmit",
+          "callee": "website.trim",
+          "lineNumber": 53
+        },
+        {
+          "caller": "onSubmit",
+          "callee": "setState",
+          "lineNumber": 56
+        },
+        {
+          "caller": "onSubmit",
+          "callee": "setState",
+          "lineNumber": 59
+        },
+        {
+          "caller": "RequestAccess",
+          "callee": "setState",
+          "lineNumber": 99
+        },
+        {
+          "caller": "RequestAccess",
+          "callee": "setWebsite",
+          "lineNumber": 121
+        },
+        {
+          "caller": "RequestAccess",
+          "callee": "setName",
+          "lineNumber": 132
+        },
+        {
+          "caller": "RequestAccess",
+          "callee": "setEmail",
+          "lineNumber": 145
+        },
+        {
+          "caller": "RequestAccess",
+          "callee": "setPurpose",
+          "lineNumber": 162
+        },
+        {
+          "caller": "Pitch",
+          "callee": "useMemo",
+          "lineNumber": 205
+        },
+        {
+          "caller": "Pitch",
+          "callee": "bullets.map",
+          "lineNumber": 250
+        },
+        {
+          "caller": "Field",
+          "callee": "cn",
+          "lineNumber": 291
+        }
+      ],
+      "metrics": {
+        "importCount": 9,
+        "exportCount": 1,
+        "functionCount": 4,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/pages/ResetPin.tsx",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 172,
+      "nonEmptyLines": 157,
+      "functions": [
+        {
+          "name": "ResetPin",
+          "startLine": 26,
+          "endLine": 172,
+          "params": []
+        }
+      ],
+      "exports": [
+        {
+          "name": "ResetPin",
+          "line": 26,
+          "isDefault": true
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "ResetPin",
+          "callee": "useState",
+          "lineNumber": 27
+        },
+        {
+          "caller": "ResetPin",
+          "callee": "useState",
+          "lineNumber": 28
+        },
+        {
+          "caller": "ResetPin",
+          "callee": "useState",
+          "lineNumber": 29
+        },
+        {
+          "caller": "ResetPin",
+          "callee": "useNavigate",
+          "lineNumber": 30
+        },
+        {
+          "caller": "ResetPin",
+          "callee": "useEffect",
+          "lineNumber": 32
+        },
+        {
+          "caller": "ResetPin",
+          "callee": "setState",
+          "lineNumber": 34
+        },
+        {
+          "caller": "ResetPin",
+          "callee": "supabase.auth.getSession().then",
+          "lineNumber": 37
+        },
+        {
+          "caller": "ResetPin",
+          "callee": "supabase.auth.getSession",
+          "lineNumber": 37
+        },
+        {
+          "caller": "ResetPin",
+          "callee": "setState",
+          "lineNumber": 39
+        },
+        {
+          "caller": "ResetPin",
+          "callee": "setState",
+          "lineNumber": 41
+        },
+        {
+          "caller": "ResetPin",
+          "callee": "supabase.auth.onAuthStateChange",
+          "lineNumber": 44
+        },
+        {
+          "caller": "ResetPin",
+          "callee": "setState",
+          "lineNumber": 46
+        },
+        {
+          "caller": "ResetPin",
+          "callee": "sub.subscription.unsubscribe",
+          "lineNumber": 49
+        },
+        {
+          "caller": "ResetPin",
+          "callee": "PIN_RE.test",
+          "lineNumber": 54
+        },
+        {
+          "caller": "onSubmit",
+          "callee": "e.preventDefault",
+          "lineNumber": 58
+        },
+        {
+          "caller": "onSubmit",
+          "callee": "setState",
+          "lineNumber": 60
+        },
+        {
+          "caller": "onSubmit",
+          "callee": "supabase.auth.updateUser",
+          "lineNumber": 61
+        },
+        {
+          "caller": "onSubmit",
+          "callee": "setState",
+          "lineNumber": 63
+        },
+        {
+          "caller": "onSubmit",
+          "callee": "supabase.auth.signOut",
+          "lineNumber": 67
+        },
+        {
+          "caller": "onSubmit",
+          "callee": "setState",
+          "lineNumber": 68
+        },
+        {
+          "caller": "onSubmit",
+          "callee": "setTimeout",
+          "lineNumber": 69
+        },
+        {
+          "caller": "onSubmit",
+          "callee": "navigate",
+          "lineNumber": 69
+        },
+        {
+          "caller": "ResetPin",
+          "callee": "differenceInCalendarDays",
+          "lineNumber": 72
+        },
+        {
+          "caller": "ResetPin",
+          "callee": "parseISO",
+          "lineNumber": 72
+        }
+      ],
+      "metrics": {
+        "importCount": 6,
+        "exportCount": 1,
+        "functionCount": 1,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/pages/Settings.tsx",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 1067,
+      "nonEmptyLines": 1017,
+      "functions": [
+        {
+          "name": "humanCountdown",
+          "startLine": 67,
+          "endLine": 73,
+          "params": [
+            "exam",
+            "today"
+          ]
+        },
+        {
+          "name": "Settings",
+          "startLine": 75,
+          "endLine": 337,
+          "params": []
+        },
+        {
+          "name": "PrefBadge",
+          "startLine": 341,
+          "endLine": 343,
+          "params": [
+            "{ label }"
+          ]
+        },
+        {
+          "name": "NumberField",
+          "startLine": 345,
+          "endLine": 375,
+          "params": [
+            "{\n  label,\n  hint,\n  value,\n  min,\n  max,\n  onChange\n}"
+          ]
+        },
+        {
+          "name": "SelectField",
+          "startLine": 377,
+          "endLine": 403,
+          "params": [
+            "{\n  label,\n  hint,\n  value,\n  options,\n  onChange\n}"
+          ]
+        },
+        {
+          "name": "SegmentField",
+          "startLine": 405,
+          "endLine": 445,
+          "params": [
+            "{\n  label,\n  hint,\n  value,\n  options,\n  onChange\n}"
+          ]
+        },
+        {
+          "name": "ToggleRow",
+          "startLine": 447,
+          "endLine": 485,
+          "params": [
+            "{\n  label,\n  hint,\n  value,\n  onChange\n}"
+          ]
+        },
+        {
+          "name": "ProfileCard",
+          "startLine": 489,
+          "endLine": 677,
+          "params": [
+            "{\n  profile,\n  sandbox,\n  userId,\n  onSave,\n  onToast\n}"
+          ]
+        },
+        {
+          "name": "CopyButton",
+          "startLine": 679,
+          "endLine": 699,
+          "params": [
+            "{ value }"
+          ]
+        },
+        {
+          "name": "InvitesCard",
+          "startLine": 703,
+          "endLine": 842,
+          "params": [
+            "{ userId, sandbox }"
+          ]
+        },
+        {
+          "name": "ProgressExportCard",
+          "startLine": 846,
+          "endLine": 912,
+          "params": [
+            "{\n  userId,\n  learnerName\n}"
+          ]
+        },
+        {
+          "name": "DataCard",
+          "startLine": 914,
+          "endLine": 1067,
+          "params": [
+            "{ profile, onBackup }"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "Settings",
+          "line": 75,
+          "isDefault": true
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "humanCountdown",
+          "callee": "differenceInCalendarDays",
+          "lineNumber": 68
+        },
+        {
+          "caller": "humanCountdown",
+          "callee": "parseISO",
+          "lineNumber": 68
+        },
+        {
+          "caller": "humanCountdown",
+          "callee": "Math.abs",
+          "lineNumber": 69
+        },
+        {
+          "caller": "Settings",
+          "callee": "useAuth",
+          "lineNumber": 76
+        },
+        {
+          "caller": "Settings",
+          "callee": "useAuthStore",
+          "lineNumber": 77
+        },
+        {
+          "caller": "Settings",
+          "callee": "useAuthStore",
+          "lineNumber": 78
+        },
+        {
+          "caller": "Settings",
+          "callee": "useAuthStore",
+          "lineNumber": 79
+        },
+        {
+          "caller": "Settings",
+          "callee": "useUiStore",
+          "lineNumber": 80
+        },
+        {
+          "caller": "Settings",
+          "callee": "usePrefsStore",
+          "lineNumber": 81
+        },
+        {
+          "caller": "Settings",
+          "callee": "useState",
+          "lineNumber": 83
+        },
+        {
+          "caller": "onSignOut",
+          "callee": "setSigningOut",
+          "lineNumber": 85
+        },
+        {
+          "caller": "onSignOut",
+          "callee": "signOut",
+          "lineNumber": 87
+        },
+        {
+          "caller": "onSignOut",
+          "callee": "setSigningOut",
+          "lineNumber": 89
+        },
+        {
+          "caller": "Settings",
+          "callee": "needsBackupReminder",
+          "lineNumber": 93
+        },
+        {
+          "caller": "Settings",
+          "callee": "formatDate",
+          "lineNumber": 114
+        },
+        {
+          "caller": "Settings",
+          "callee": "prefs.lastBackupAt.slice",
+          "lineNumber": 114
+        },
+        {
+          "caller": "Settings",
+          "callee": "daysSinceBackup",
+          "lineNumber": 114
+        },
+        {
+          "caller": "Settings",
+          "callee": "prefs.set",
+          "lineNumber": 131
+        },
+        {
+          "caller": "Settings",
+          "callee": "prefs.set",
+          "lineNumber": 139
+        },
+        {
+          "caller": "Settings",
+          "callee": "String",
+          "lineNumber": 144
+        },
+        {
+          "caller": "Settings",
+          "callee": "WEEKDAYS.map",
+          "lineNumber": 145
+        },
+        {
+          "caller": "Settings",
+          "callee": "String",
+          "lineNumber": 145
+        },
+        {
+          "caller": "Settings",
+          "callee": "prefs.set",
+          "lineNumber": 147
+        },
+        {
+          "caller": "Settings",
+          "callee": "Number",
+          "lineNumber": 147
+        },
+        {
+          "caller": "Settings",
+          "callee": "SUBJECTS.map",
+          "lineNumber": 166
+        },
+        {
+          "caller": "Settings",
+          "callee": "prefs.set",
+          "lineNumber": 168
+        },
+        {
+          "caller": "Settings",
+          "callee": "String",
+          "lineNumber": 172
+        },
+        {
+          "caller": "Settings",
+          "callee": "TARGET_DURATIONS_MIN.map",
+          "lineNumber": 173
+        },
+        {
+          "caller": "Settings",
+          "callee": "String",
+          "lineNumber": 173
+        },
+        {
+          "caller": "Settings",
+          "callee": "prefs.set",
+          "lineNumber": 174
+        },
+        {
+          "caller": "Settings",
+          "callee": "Number",
+          "lineNumber": 174
+        },
+        {
+          "caller": "Settings",
+          "callee": "String",
+          "lineNumber": 178
+        },
+        {
+          "caller": "Settings",
+          "callee": "QUESTION_COUNT_CHOICES.map",
+          "lineNumber": 179
+        },
+        {
+          "caller": "Settings",
+          "callee": "String",
+          "lineNumber": 180
+        },
+        {
+          "caller": "Settings",
+          "callee": "prefs.set",
+          "lineNumber": 183
+        },
+        {
+          "caller": "Settings",
+          "callee": "Number",
+          "lineNumber": 183
+        },
+        {
+          "caller": "Settings",
+          "callee": "prefs.set",
+          "lineNumber": 197
+        },
+        {
+          "caller": "Settings",
+          "callee": "prefs.set",
+          "lineNumber": 203
+        },
+        {
+          "caller": "Settings",
+          "callee": "prefs.set",
+          "lineNumber": 213
+        },
+        {
+          "caller": "Settings",
+          "callee": "prefs.set",
+          "lineNumber": 226
+        },
+        {
+          "caller": "Settings",
+          "callee": "prefs.set",
+          "lineNumber": 237
+        },
+        {
+          "caller": "Settings",
+          "callee": "String",
+          "lineNumber": 249
+        },
+        {
+          "caller": "Settings",
+          "callee": "prefs.set",
+          "lineNumber": 256
+        },
+        {
+          "caller": "Settings",
+          "callee": "Number",
+          "lineNumber": 256
+        },
+        {
+          "caller": "Settings",
+          "callee": "formatDate",
+          "lineNumber": 263
+        },
+        {
+          "caller": "Settings",
+          "callee": "prefs.lastBackupAt.slice",
+          "lineNumber": 263
+        },
+        {
+          "caller": "Settings",
+          "callee": "daysSinceBackup",
+          "lineNumber": 263
+        },
+        {
+          "caller": "Settings",
+          "callee": "prefs.reset",
+          "lineNumber": 281
+        },
+        {
+          "caller": "Settings",
+          "callee": "pushToast",
+          "lineNumber": 282
+        },
+        {
+          "caller": "Settings",
+          "callee": "prefs.markBackupNow",
+          "lineNumber": 315
+        },
+        {
+          "caller": "Settings",
+          "callee": "onSignOut",
+          "lineNumber": 324
+        },
+        {
+          "caller": "NumberField",
+          "callee": "onChange",
+          "lineNumber": 369
+        },
+        {
+          "caller": "NumberField",
+          "callee": "Math.max",
+          "lineNumber": 369
+        },
+        {
+          "caller": "NumberField",
+          "callee": "Math.min",
+          "lineNumber": 369
+        },
+        {
+          "caller": "NumberField",
+          "callee": "Math.round",
+          "lineNumber": 369
+        },
+        {
+          "caller": "NumberField",
+          "callee": "Number",
+          "lineNumber": 369
+        },
+        {
+          "caller": "SelectField",
+          "callee": "onChange",
+          "lineNumber": 393
+        },
+        {
+          "caller": "SelectField",
+          "callee": "options.map",
+          "lineNumber": 394
+        },
+        {
+          "caller": "SegmentField",
+          "callee": "options.map",
+          "lineNumber": 422
+        },
+        {
+          "caller": "SegmentField",
+          "callee": "onChange",
+          "lineNumber": 428
+        },
+        {
+          "caller": "SegmentField",
+          "callee": "cn",
+          "lineNumber": 430
+        },
+        {
+          "caller": "ToggleRow",
+          "callee": "haptic",
+          "lineNumber": 467
+        },
+        {
+          "caller": "ToggleRow",
+          "callee": "onChange",
+          "lineNumber": 468
+        },
+        {
+          "caller": "ToggleRow",
+          "callee": "cn",
+          "lineNumber": 471
+        },
+        {
+          "caller": "ToggleRow",
+          "callee": "cn",
+          "lineNumber": 477
+        },
+        {
+          "caller": "ProfileCard",
+          "callee": "useState",
+          "lineNumber": 502
+        },
+        {
+          "caller": "ProfileCard",
+          "callee": "useState",
+          "lineNumber": 503
+        },
+        {
+          "caller": "ProfileCard",
+          "callee": "useState",
+          "lineNumber": 504
+        },
+        {
+          "caller": "ProfileCard",
+          "callee": "useEffect",
+          "lineNumber": 506
+        },
+        {
+          "caller": "ProfileCard",
+          "callee": "setForm",
+          "lineNumber": 507
+        },
+        {
+          "caller": "ProfileCard",
+          "callee": "setDirty",
+          "lineNumber": 508
+        },
+        {
+          "caller": "save",
+          "callee": "setSaving",
+          "lineNumber": 512
+        },
+        {
+          "caller": "save",
+          "callee": "new Set(s).add",
+          "lineNumber": 512
+        },
+        {
+          "caller": "save",
+          "callee": "onSave",
+          "lineNumber": 513
+        },
+        {
+          "caller": "save",
+          "callee": "setSaving",
+          "lineNumber": 514
+        },
+        {
+          "caller": "save",
+          "callee": "next.delete",
+          "lineNumber": 516
+        },
+        {
+          "caller": "save",
+          "callee": "onToast",
+          "lineNumber": 520
+        },
+        {
+          "caller": "save",
+          "callee": "setDirty",
+          "lineNumber": 523
+        },
+        {
+          "caller": "save",
+          "callee": "next.delete",
+          "lineNumber": 525
+        },
+        {
+          "caller": "save",
+          "callee": "onToast",
+          "lineNumber": 528
+        },
+        {
+          "caller": "save",
+          "callee": "String(key).replace",
+          "lineNumber": 528
+        },
+        {
+          "caller": "save",
+          "callee": "String",
+          "lineNumber": 528
+        },
+        {
+          "caller": "mark",
+          "callee": "setForm",
+          "lineNumber": 533
+        },
+        {
+          "caller": "mark",
+          "callee": "setDirty",
+          "lineNumber": 534
+        },
+        {
+          "caller": "mark",
+          "callee": "new Set(s).add",
+          "lineNumber": 534
+        },
+        {
+          "caller": "ProfileCard",
+          "callee": "mark",
+          "lineNumber": 561
+        },
+        {
+          "caller": "ProfileCard",
+          "callee": "saving.has",
+          "lineNumber": 563
+        },
+        {
+          "caller": "ProfileCard",
+          "callee": "dirty.has",
+          "lineNumber": 565
+        },
+        {
+          "caller": "ProfileCard",
+          "callee": "save",
+          "lineNumber": 569
+        },
+        {
+          "caller": "ProfileCard",
+          "callee": "(form?.name ?? '').trim",
+          "lineNumber": 569
+        },
+        {
+          "caller": "ProfileCard",
+          "callee": "saving.has",
+          "lineNumber": 570
+        },
+        {
+          "caller": "ProfileCard",
+          "callee": "mark",
+          "lineNumber": 592
+        },
+        {
+          "caller": "ProfileCard",
+          "callee": "saving.has",
+          "lineNumber": 593
+        },
+        {
+          "caller": "ProfileCard",
+          "callee": "dirty.has",
+          "lineNumber": 595
+        },
+        {
+          "caller": "ProfileCard",
+          "callee": "save",
+          "lineNumber": 599
+        },
+        {
+          "caller": "ProfileCard",
+          "callee": "saving.has",
+          "lineNumber": 600
+        },
+        {
+          "caller": "ProfileCard",
+          "callee": "mark",
+          "lineNumber": 622
+        },
+        {
+          "caller": "ProfileCard",
+          "callee": "Math.max",
+          "lineNumber": 622
+        },
+        {
+          "caller": "ProfileCard",
+          "callee": "Math.round",
+          "lineNumber": 622
+        },
+        {
+          "caller": "ProfileCard",
+          "callee": "Number",
+          "lineNumber": 622
+        },
+        {
+          "caller": "ProfileCard",
+          "callee": "saving.has",
+          "lineNumber": 624
+        },
+        {
+          "caller": "ProfileCard",
+          "callee": "dirty.has",
+          "lineNumber": 626
+        },
+        {
+          "caller": "ProfileCard",
+          "callee": "save",
+          "lineNumber": 630
+        },
+        {
+          "caller": "ProfileCard",
+          "callee": "saving.has",
+          "lineNumber": 631
+        },
+        {
+          "caller": "ProfileCard",
+          "callee": "mark",
+          "lineNumber": 646
+        },
+        {
+          "caller": "ProfileCard",
+          "callee": "saving.has",
+          "lineNumber": 647
+        },
+        {
+          "caller": "ProfileCard",
+          "callee": "TIMEZONES.map",
+          "lineNumber": 649
+        },
+        {
+          "caller": "ProfileCard",
+          "callee": "dirty.has",
+          "lineNumber": 655
+        },
+        {
+          "caller": "ProfileCard",
+          "callee": "save",
+          "lineNumber": 659
+        },
+        {
+          "caller": "ProfileCard",
+          "callee": "saving.has",
+          "lineNumber": 660
+        },
+        {
+          "caller": "CopyButton",
+          "callee": "useState",
+          "lineNumber": 680
+        },
+        {
+          "caller": "CopyButton",
+          "callee": "navigator.clipboard.writeText",
+          "lineNumber": 686
+        },
+        {
+          "caller": "CopyButton",
+          "callee": "setCopied",
+          "lineNumber": 687
+        },
+        {
+          "caller": "CopyButton",
+          "callee": "setTimeout",
+          "lineNumber": 688
+        },
+        {
+          "caller": "CopyButton",
+          "callee": "setCopied",
+          "lineNumber": 688
+        },
+        {
+          "caller": "InvitesCard",
+          "callee": "useState",
+          "lineNumber": 704
+        },
+        {
+          "caller": "InvitesCard",
+          "callee": "useState",
+          "lineNumber": 705
+        },
+        {
+          "caller": "InvitesCard",
+          "callee": "useState",
+          "lineNumber": 706
+        },
+        {
+          "caller": "InvitesCard",
+          "callee": "useState",
+          "lineNumber": 707
+        },
+        {
+          "caller": "InvitesCard",
+          "callee": "useEffect",
+          "lineNumber": 709
+        },
+        {
+          "caller": "InvitesCard",
+          "callee": "setInvites",
+          "lineNumber": 711
+        },
+        {
+          "caller": "InvitesCard",
+          "callee": "reload",
+          "lineNumber": 714
+        },
+        {
+          "caller": "reload",
+          "callee": "setLoading",
+          "lineNumber": 719
+        },
+        {
+          "caller": "reload",
+          "callee": "supabase\n      .from('invites')\n      .select('*')\n      .eq('issued_by', userId)\n      .order",
+          "lineNumber": 720
+        },
+        {
+          "caller": "reload",
+          "callee": "supabase\n      .from('invites')\n      .select('*')\n      .eq",
+          "lineNumber": 720
+        },
+        {
+          "caller": "reload",
+          "callee": "supabase\n      .from('invites')\n      .select",
+          "lineNumber": 720
+        },
+        {
+          "caller": "reload",
+          "callee": "supabase\n      .from",
+          "lineNumber": 720
+        },
+        {
+          "caller": "reload",
+          "callee": "setLoading",
+          "lineNumber": 725
+        },
+        {
+          "caller": "reload",
+          "callee": "setError",
+          "lineNumber": 727
+        },
+        {
+          "caller": "reload",
+          "callee": "setError",
+          "lineNumber": 730
+        },
+        {
+          "caller": "reload",
+          "callee": "setInvites",
+          "lineNumber": 731
+        },
+        {
+          "caller": "createInvite",
+          "callee": "setCreating",
+          "lineNumber": 736
+        },
+        {
+          "caller": "createInvite",
+          "callee": "uuid().replace(/-/g, '').slice",
+          "lineNumber": 737
+        },
+        {
+          "caller": "createInvite",
+          "callee": "uuid().replace",
+          "lineNumber": 737
+        },
+        {
+          "caller": "createInvite",
+          "callee": "uuid",
+          "lineNumber": 737
+        },
+        {
+          "caller": "createInvite",
+          "callee": "expiresAt.setUTCDate",
+          "lineNumber": 739
+        },
+        {
+          "caller": "createInvite",
+          "callee": "expiresAt.getUTCDate",
+          "lineNumber": 739
+        },
+        {
+          "caller": "createInvite",
+          "callee": "supabase.from('invites').insert",
+          "lineNumber": 740
+        },
+        {
+          "caller": "createInvite",
+          "callee": "supabase.from",
+          "lineNumber": 740
+        },
+        {
+          "caller": "createInvite",
+          "callee": "uuid",
+          "lineNumber": 741
+        },
+        {
+          "caller": "createInvite",
+          "callee": "expiresAt.toISOString",
+          "lineNumber": 744
+        },
+        {
+          "caller": "createInvite",
+          "callee": "setCreating",
+          "lineNumber": 746
+        },
+        {
+          "caller": "createInvite",
+          "callee": "setError",
+          "lineNumber": 748
+        },
+        {
+          "caller": "createInvite",
+          "callee": "reload",
+          "lineNumber": 751
+        },
+        {
+          "caller": "InvitesCard",
+          "callee": "invites.filter",
+          "lineNumber": 775
+        },
+        {
+          "caller": "InvitesCard",
+          "callee": "reload",
+          "lineNumber": 778
+        },
+        {
+          "caller": "InvitesCard",
+          "callee": "createInvite",
+          "lineNumber": 785
+        },
+        {
+          "caller": "InvitesCard",
+          "callee": "invites.map",
+          "lineNumber": 807
+        },
+        {
+          "caller": "InvitesCard",
+          "callee": "formatDate",
+          "lineNumber": 825
+        },
+        {
+          "caller": "InvitesCard",
+          "callee": "inv.expires_at.slice",
+          "lineNumber": 825
+        },
+        {
+          "caller": "ProgressExportCard",
+          "callee": "useUiStore",
+          "lineNumber": 853
+        },
+        {
+          "caller": "ProgressExportCard",
+          "callee": "useState",
+          "lineNumber": 854
+        },
+        {
+          "caller": "onDownload",
+          "callee": "setDownloading",
+          "lineNumber": 858
+        },
+        {
+          "caller": "onDownload",
+          "callee": "collectProgressReport",
+          "lineNumber": 860
+        },
+        {
+          "caller": "onDownload",
+          "callee": "downloadProgressReport",
+          "lineNumber": 861
+        },
+        {
+          "caller": "onDownload",
+          "callee": "pushToast",
+          "lineNumber": 862
+        },
+        {
+          "caller": "onDownload",
+          "callee": "pushToast",
+          "lineNumber": 864
+        },
+        {
+          "caller": "onDownload",
+          "callee": "setDownloading",
+          "lineNumber": 866
+        },
+        {
+          "caller": "ProgressExportCard",
+          "callee": "onDownload",
+          "lineNumber": 903
+        },
+        {
+          "caller": "DataCard",
+          "callee": "useUiStore",
+          "lineNumber": 915
+        },
+        {
+          "caller": "DataCard",
+          "callee": "useState",
+          "lineNumber": 916
+        },
+        {
+          "caller": "DataCard",
+          "callee": "useState",
+          "lineNumber": 917
+        },
+        {
+          "caller": "DataCard",
+          "callee": "useRef",
+          "lineNumber": 918
+        },
+        {
+          "caller": "DataCard",
+          "callee": "useMemo",
+          "lineNumber": 920
+        },
+        {
+          "caller": "onExport",
+          "callee": "setBusy",
+          "lineNumber": 923
+        },
+        {
+          "caller": "onExport",
+          "callee": "exportAll",
+          "lineNumber": 925
+        },
+        {
+          "caller": "onExport",
+          "callee": "downloadEnvelope",
+          "lineNumber": 926
+        },
+        {
+          "caller": "onExport",
+          "callee": "onBackup",
+          "lineNumber": 927
+        },
+        {
+          "caller": "onExport",
+          "callee": "pushToast",
+          "lineNumber": 928
+        },
+        {
+          "caller": "onExport",
+          "callee": "pushToast",
+          "lineNumber": 930
+        },
+        {
+          "caller": "onExport",
+          "callee": "setBusy",
+          "lineNumber": 932
+        },
+        {
+          "caller": "onImportPick",
+          "callee": "setBusy",
+          "lineNumber": 940
+        },
+        {
+          "caller": "onImportPick",
+          "callee": "file.text",
+          "lineNumber": 942
+        },
+        {
+          "caller": "onImportPick",
+          "callee": "JSON.parse",
+          "lineNumber": 943
+        },
+        {
+          "caller": "onImportPick",
+          "callee": "isBackupEnvelope",
+          "lineNumber": 944
+        },
+        {
+          "caller": "onImportPick",
+          "callee": "importEnvelope",
+          "lineNumber": 945
+        },
+        {
+          "caller": "onImportPick",
+          "callee": "report.reduce",
+          "lineNumber": 946
+        },
+        {
+          "caller": "onImportPick",
+          "callee": "pushToast",
+          "lineNumber": 947
+        },
+        {
+          "caller": "onImportPick",
+          "callee": "pushToast",
+          "lineNumber": 949
+        },
+        {
+          "caller": "onImportPick",
+          "callee": "setBusy",
+          "lineNumber": 951
+        },
+        {
+          "caller": "onClear",
+          "callee": "setBusy",
+          "lineNumber": 956
+        },
+        {
+          "caller": "onClear",
+          "callee": "wipeLocalState",
+          "lineNumber": 958
+        },
+        {
+          "caller": "onClear",
+          "callee": "pushToast",
+          "lineNumber": 959
+        },
+        {
+          "caller": "onClear",
+          "callee": "pushToast",
+          "lineNumber": 961
+        },
+        {
+          "caller": "onClear",
+          "callee": "setBusy",
+          "lineNumber": 963
+        },
+        {
+          "caller": "onClear",
+          "callee": "setConfirmClear",
+          "lineNumber": 964
+        },
+        {
+          "caller": "DataCard",
+          "callee": "onExport",
+          "lineNumber": 992
+        },
+        {
+          "caller": "DataCard",
+          "callee": "fileRef.current?.click",
+          "lineNumber": 1018
+        },
+        {
+          "caller": "DataCard",
+          "callee": "setConfirmClear",
+          "lineNumber": 1042
+        },
+        {
+          "caller": "DataCard",
+          "callee": "onClear",
+          "lineNumber": 1050
+        },
+        {
+          "caller": "DataCard",
+          "callee": "setConfirmClear",
+          "lineNumber": 1058
+        }
+      ],
+      "metrics": {
+        "importCount": 24,
+        "exportCount": 1,
+        "functionCount": 12,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/pages/Signup.tsx",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 309,
+      "nonEmptyLines": 285,
+      "functions": [
+        {
+          "name": "Signup",
+          "startLine": 25,
+          "endLine": 272,
+          "params": []
+        },
+        {
+          "name": "Field",
+          "startLine": 274,
+          "endLine": 309,
+          "params": [
+            "{\n  label,\n  htmlFor,\n  hint,\n  hintTone = 'faint',\n  children\n}"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "Signup",
+          "line": 25,
+          "isDefault": true
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "Signup",
+          "callee": "useAuth",
+          "lineNumber": 26
+        },
+        {
+          "caller": "Signup",
+          "callee": "useSearchParams",
+          "lineNumber": 27
+        },
+        {
+          "caller": "Signup",
+          "callee": "params.get",
+          "lineNumber": 28
+        },
+        {
+          "caller": "Signup",
+          "callee": "useAuthStore",
+          "lineNumber": 30
+        },
+        {
+          "caller": "Signup",
+          "callee": "useNavigate",
+          "lineNumber": 31
+        },
+        {
+          "caller": "Signup",
+          "callee": "useState",
+          "lineNumber": 33
+        },
+        {
+          "caller": "Signup",
+          "callee": "useState",
+          "lineNumber": 34
+        },
+        {
+          "caller": "Signup",
+          "callee": "useState",
+          "lineNumber": 35
+        },
+        {
+          "caller": "Signup",
+          "callee": "useState",
+          "lineNumber": 36
+        },
+        {
+          "caller": "Signup",
+          "callee": "useState",
+          "lineNumber": 37
+        },
+        {
+          "caller": "Signup",
+          "callee": "useState",
+          "lineNumber": 38
+        },
+        {
+          "caller": "Signup",
+          "callee": "useState",
+          "lineNumber": 39
+        },
+        {
+          "caller": "sanitizeUsername",
+          "callee": "raw.toLowerCase().replace(/[^a-z0-9_]/g, '').slice",
+          "lineNumber": 44
+        },
+        {
+          "caller": "sanitizeUsername",
+          "callee": "raw.toLowerCase().replace",
+          "lineNumber": 44
+        },
+        {
+          "caller": "sanitizeUsername",
+          "callee": "raw.toLowerCase",
+          "lineNumber": 44
+        },
+        {
+          "caller": "Signup",
+          "callee": "useEffect",
+          "lineNumber": 49
+        },
+        {
+          "caller": "Signup",
+          "callee": "sanitizeUsername",
+          "lineNumber": 51
+        },
+        {
+          "caller": "Signup",
+          "callee": "setUsername",
+          "lineNumber": 52
+        },
+        {
+          "caller": "Signup",
+          "callee": "useEffect",
+          "lineNumber": 56
+        },
+        {
+          "caller": "Signup",
+          "callee": "username.trim().toLowerCase",
+          "lineNumber": 57
+        },
+        {
+          "caller": "Signup",
+          "callee": "username.trim",
+          "lineNumber": 57
+        },
+        {
+          "caller": "Signup",
+          "callee": "USERNAME_RE.test",
+          "lineNumber": 58
+        },
+        {
+          "caller": "Signup",
+          "callee": "setUsernameCheck",
+          "lineNumber": 59
+        },
+        {
+          "caller": "Signup",
+          "callee": "setUsernameCheck",
+          "lineNumber": 62
+        },
+        {
+          "caller": "Signup",
+          "callee": "setTimeout",
+          "lineNumber": 63
+        },
+        {
+          "caller": "Signup",
+          "callee": "isUsernameAvailable",
+          "lineNumber": 64
+        },
+        {
+          "caller": "Signup",
+          "callee": "setUsernameCheck",
+          "lineNumber": 65
+        },
+        {
+          "caller": "Signup",
+          "callee": "clearTimeout",
+          "lineNumber": 67
+        },
+        {
+          "caller": "Signup",
+          "callee": "username.trim().toLowerCase",
+          "lineNumber": 72
+        },
+        {
+          "caller": "Signup",
+          "callee": "username.trim",
+          "lineNumber": 72
+        },
+        {
+          "caller": "Signup",
+          "callee": "name.trim",
+          "lineNumber": 73
+        },
+        {
+          "caller": "Signup",
+          "callee": "USERNAME_RE.test",
+          "lineNumber": 75
+        },
+        {
+          "caller": "Signup",
+          "callee": "PIN_RE.test",
+          "lineNumber": 76
+        },
+        {
+          "caller": "Signup",
+          "callee": "missingReasons.push",
+          "lineNumber": 83
+        },
+        {
+          "caller": "Signup",
+          "callee": "missingReasons.push",
+          "lineNumber": 84
+        },
+        {
+          "caller": "Signup",
+          "callee": "missingReasons.push",
+          "lineNumber": 85
+        },
+        {
+          "caller": "Signup",
+          "callee": "missingReasons.push",
+          "lineNumber": 86
+        },
+        {
+          "caller": "onSubmit",
+          "callee": "e.preventDefault",
+          "lineNumber": 89
+        },
+        {
+          "caller": "onSubmit",
+          "callee": "setState",
+          "lineNumber": 91
+        },
+        {
+          "caller": "onSubmit",
+          "callee": "signUp",
+          "lineNumber": 92
+        },
+        {
+          "caller": "onSubmit",
+          "callee": "setState",
+          "lineNumber": 99
+        },
+        {
+          "caller": "onSubmit",
+          "callee": "navigate",
+          "lineNumber": 102
+        },
+        {
+          "caller": "Signup",
+          "callee": "differenceInCalendarDays",
+          "lineNumber": 105
+        },
+        {
+          "caller": "Signup",
+          "callee": "parseISO",
+          "lineNumber": 105
+        },
+        {
+          "caller": "Signup",
+          "callee": "setName",
+          "lineNumber": 169
+        },
+        {
+          "caller": "Signup",
+          "callee": "setUsernameTouched",
+          "lineNumber": 204
+        },
+        {
+          "caller": "Signup",
+          "callee": "setUsername",
+          "lineNumber": 205
+        },
+        {
+          "caller": "Signup",
+          "callee": "sanitizeUsername",
+          "lineNumber": 205
+        },
+        {
+          "caller": "Signup",
+          "callee": "missingReasons.join",
+          "lineNumber": 250
+        },
+        {
+          "caller": "Field",
+          "callee": "cn",
+          "lineNumber": 295
+        }
+      ],
+      "metrics": {
+        "importCount": 11,
+        "exportCount": 1,
+        "functionCount": 2,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/router.tsx",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 100,
+      "nonEmptyLines": 97,
+      "exports": [
+        {
+          "name": "router",
+          "line": 56,
+          "isDefault": false
+        }
+      ],
+      "metrics": {
+        "importCount": 5,
+        "exportCount": 1,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/stores/auth.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 199,
+      "nonEmptyLines": 181,
+      "functions": [
+        {
+          "name": "currentUserId",
+          "startLine": 196,
+          "endLine": 199,
+          "params": []
+        }
+      ],
+      "exports": [
+        {
+          "name": "useAuthStore",
+          "line": 81,
+          "isDefault": false
+        },
+        {
+          "name": "currentUserId",
+          "line": 196,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "currentUserId",
+          "callee": "useAuthStore.getState",
+          "lineNumber": 197
+        }
+      ],
+      "metrics": {
+        "importCount": 7,
+        "exportCount": 2,
+        "functionCount": 1,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/stores/buddyPresence.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 23,
+      "nonEmptyLines": 21,
+      "exports": [
+        {
+          "name": "useBuddyPresenceStore",
+          "line": 10,
+          "isDefault": false
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 1,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/stores/prefs.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 98,
+      "nonEmptyLines": 87,
+      "functions": [
+        {
+          "name": "daysSinceBackup",
+          "startLine": 76,
+          "endLine": 80,
+          "params": [
+            "lastAt",
+            "now"
+          ]
+        },
+        {
+          "name": "needsBackupReminder",
+          "startLine": 83,
+          "endLine": 88,
+          "params": [
+            "prefs",
+            "now"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "DEFAULT_PREFERENCES",
+          "line": 35,
+          "isDefault": false
+        },
+        {
+          "name": "usePrefsStore",
+          "line": 58,
+          "isDefault": false
+        },
+        {
+          "name": "daysSinceBackup",
+          "line": 76,
+          "isDefault": false
+        },
+        {
+          "name": "needsBackupReminder",
+          "line": 83,
+          "isDefault": false
+        },
+        {
+          "name": "WEEKDAYS",
+          "line": 90,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "daysSinceBackup",
+          "callee": "new Date(lastAt).getTime",
+          "lineNumber": 78
+        },
+        {
+          "caller": "daysSinceBackup",
+          "callee": "Math.floor",
+          "lineNumber": 79
+        },
+        {
+          "caller": "daysSinceBackup",
+          "callee": "now.getTime",
+          "lineNumber": 79
+        },
+        {
+          "caller": "needsBackupReminder",
+          "callee": "daysSinceBackup",
+          "lineNumber": 85
+        }
+      ],
+      "metrics": {
+        "importCount": 1,
+        "exportCount": 5,
+        "functionCount": 2,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/stores/ui.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 39,
+      "nonEmptyLines": 30,
+      "functions": [
+        {
+          "name": "toast",
+          "startLine": 37,
+          "endLine": 39,
+          "params": [
+            "message",
+            "tone"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "useUiStore",
+          "line": 22,
+          "isDefault": false
+        },
+        {
+          "name": "toast",
+          "line": 37,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "toast",
+          "callee": "useUiStore.getState().pushToast",
+          "lineNumber": 38
+        },
+        {
+          "caller": "toast",
+          "callee": "useUiStore.getState",
+          "lineNumber": 38
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 2,
+        "functionCount": 1,
+        "classCount": 0
+      }
+    }
+  ]
+}

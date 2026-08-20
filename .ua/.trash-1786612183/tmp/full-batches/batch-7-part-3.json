@@ -1,0 +1,1409 @@
+{
+  "nodes": [
+    {
+      "id": "file:src/lib/revision-pack.ts",
+      "type": "file",
+      "name": "revision-pack.ts",
+      "filePath": "src/lib/revision-pack.ts",
+      "summary": "Builds a prioritized revision pack from weekly fixes, formulas, trigger phrases, repeated mistakes, and due questions and renders it as plain text.",
+      "tags": [
+        "service",
+        "revision",
+        "prioritization"
+      ],
+      "complexity": "moderate",
+      "languageNotes": "TypeScript module."
+    },
+    {
+      "id": "function:src/lib/revision-pack.ts:buildRevisionPack",
+      "type": "function",
+      "name": "buildRevisionPack",
+      "filePath": "src/lib/revision-pack.ts",
+      "lineRange": [
+        23,
+        79
+      ],
+      "summary": "Prioritizes the latest weekly fix, due formulas, slow triggers, repeated mistake patterns, and due or recent mistake questions.",
+      "tags": [
+        "utility",
+        "revision",
+        "prioritization"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/lib/revision-pack.ts:revisionPackText",
+      "type": "function",
+      "name": "revisionPackText",
+      "filePath": "src/lib/revision-pack.ts",
+      "lineRange": [
+        81,
+        112
+      ],
+      "summary": "Renders a revision pack as a structured plain-text checklist.",
+      "tags": [
+        "utility",
+        "revision",
+        "prioritization"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/lib/sessions.ts",
+      "type": "file",
+      "name": "sessions.ts",
+      "filePath": "src/lib/sessions.ts",
+      "summary": "Reconciles audited PYQ practice into canonical sessions and returns only meaningful finished session history while pruning empty records.",
+      "tags": [
+        "service",
+        "study-sessions",
+        "data-access"
+      ],
+      "complexity": "moderate",
+      "languageNotes": "TypeScript module."
+    },
+    {
+      "id": "function:src/lib/sessions.ts:practiceQuestionCount",
+      "type": "function",
+      "name": "practiceQuestionCount",
+      "filePath": "src/lib/sessions.ts",
+      "lineRange": [
+        13,
+        20
+      ],
+      "summary": "Counts canonical session questions while incorporating distinct audited PYQ attempts.",
+      "tags": [
+        "utility",
+        "study-sessions",
+        "data-access"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/sessions.ts:reconcilePyqPracticeSessions",
+      "type": "function",
+      "name": "reconcilePyqPracticeSessions",
+      "filePath": "src/lib/sessions.ts",
+      "lineRange": [
+        27,
+        85
+      ],
+      "summary": "Creates or updates canonical session rows for durable PYQ sets using their audited attempts and local metadata.",
+      "tags": [
+        "utility",
+        "study-sessions",
+        "data-access"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/lib/sessions.ts:finishedSessionsWithQuestions",
+      "type": "function",
+      "name": "finishedSessionsWithQuestions",
+      "filePath": "src/lib/sessions.ts",
+      "lineRange": [
+        91,
+        140
+      ],
+      "summary": "Returns newest-first finished sessions that contain meaningful questions or attempted PYQ sets.",
+      "tags": [
+        "utility",
+        "study-sessions",
+        "data-access"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/lib/sessions.ts:pruneEmptyFinishedSessions",
+      "type": "function",
+      "name": "pruneEmptyFinishedSessions",
+      "filePath": "src/lib/sessions.ts",
+      "lineRange": [
+        148,
+        171
+      ],
+      "summary": "Deletes finished non-PYQ sessions that contain no tagged questions.",
+      "tags": [
+        "utility",
+        "study-sessions",
+        "data-access"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/sessions.ts:recentSessions",
+      "type": "function",
+      "name": "recentSessions",
+      "filePath": "src/lib/sessions.ts",
+      "lineRange": [
+        174,
+        181
+      ],
+      "summary": "Returns a capped newest-first list of meaningful finished sessions.",
+      "tags": [
+        "utility",
+        "study-sessions",
+        "data-access"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/sessions.ts:allSessions",
+      "type": "function",
+      "name": "allSessions",
+      "filePath": "src/lib/sessions.ts",
+      "lineRange": [
+        187,
+        192
+      ],
+      "summary": "Returns every meaningful finished session in newest-first order.",
+      "tags": [
+        "utility",
+        "study-sessions",
+        "data-access"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/lib/topic-evidence.ts",
+      "type": "file",
+      "name": "topic-evidence.ts",
+      "filePath": "src/lib/topic-evidence.ts",
+      "summary": "Combines PYQ attempts, journal questions, re-attempts, and study timestamps into an evidence-based topic status and accuracy summary.",
+      "tags": [
+        "service",
+        "topic-mastery",
+        "learner-evidence"
+      ],
+      "complexity": "moderate",
+      "languageNotes": "TypeScript module."
+    },
+    {
+      "id": "function:src/lib/topic-evidence.ts:buildTopicEvidence",
+      "type": "function",
+      "name": "buildTopicEvidence",
+      "filePath": "src/lib/topic-evidence.ts",
+      "lineRange": [
+        28,
+        83
+      ],
+      "summary": "Combines direct questions, immutable PYQ attempts, open mistakes, recency, and study state into topic evidence and status.",
+      "tags": [
+        "utility",
+        "topic-mastery",
+        "learner-evidence"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/pages/Dashboard.tsx",
+      "type": "file",
+      "name": "Dashboard.tsx",
+      "filePath": "src/pages/Dashboard.tsx",
+      "summary": "Builds the learner dashboard from live local data, showing daily targets, readiness cues, mistake-surface movement, outcomes, coaching, and current priorities.",
+      "tags": [
+        "component",
+        "dashboard",
+        "analytics"
+      ],
+      "complexity": "complex",
+      "languageNotes": "React component written in TypeScript with JSX."
+    },
+    {
+      "id": "function:src/pages/Dashboard.tsx:TargetMeter",
+      "type": "function",
+      "name": "TargetMeter",
+      "filePath": "src/pages/Dashboard.tsx",
+      "lineRange": [
+        46,
+        73
+      ],
+      "summary": "Renders target progress, bounded completion width, and a calm remaining-work message.",
+      "tags": [
+        "component",
+        "dashboard",
+        "analytics"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/pages/Dashboard.tsx:OutcomeKey",
+      "type": "function",
+      "name": "OutcomeKey",
+      "filePath": "src/pages/Dashboard.tsx",
+      "lineRange": [
+        75,
+        94
+      ],
+      "summary": "Renders compact counts for every configured question outcome.",
+      "tags": [
+        "component",
+        "dashboard",
+        "analytics"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/pages/Dashboard.tsx:Dashboard",
+      "type": "function",
+      "name": "Dashboard",
+      "filePath": "src/pages/Dashboard.tsx",
+      "lineRange": [
+        96,
+        446
+      ],
+      "summary": "Queries the local learner store and composes targets, mistake surface, recent activity, outcomes, learning tips, and priority navigation.",
+      "tags": [
+        "component",
+        "dashboard",
+        "analytics"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:src/pages/Pyq.tsx",
+      "type": "file",
+      "name": "Pyq.tsx",
+      "filePath": "src/pages/Pyq.tsx",
+      "summary": "Implements the full PYQ practice experience: set configuration, history filtering, timed navigation, answer decisions, audit receipts, tagging, journaling, and re-attempt scheduling.",
+      "tags": [
+        "component",
+        "pyq",
+        "practice-session"
+      ],
+      "complexity": "complex",
+      "languageNotes": "React component written in TypeScript with JSX."
+    },
+    {
+      "id": "function:src/pages/Pyq.tsx:sourceDraft",
+      "type": "function",
+      "name": "sourceDraft",
+      "filePath": "src/pages/Pyq.tsx",
+      "lineRange": [
+        103,
+        120
+      ],
+      "summary": "Projects a bundled PYQ and captured evidence into the tagging flow’s authoritative source draft.",
+      "tags": [
+        "component",
+        "pyq",
+        "practice-session"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/pages/Pyq.tsx:PracticeSetup",
+      "type": "function",
+      "name": "PracticeSetup",
+      "filePath": "src/pages/Pyq.tsx",
+      "lineRange": [
+        122,
+        474
+      ],
+      "summary": "Renders and manages PYQ scope, order, count, history filters, and resume, save, discard, or start actions.",
+      "tags": [
+        "component",
+        "pyq",
+        "practice-session"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:src/pages/Pyq.tsx:AnswerPad",
+      "type": "function",
+      "name": "AnswerPad",
+      "filePath": "src/pages/Pyq.tsx",
+      "lineRange": [
+        476,
+        544
+      ],
+      "summary": "Renders response controls appropriate to MCQ, MSQ, or NAT questions.",
+      "tags": [
+        "component",
+        "pyq",
+        "practice-session"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/pages/Pyq.tsx:DecisionButtons",
+      "type": "function",
+      "name": "DecisionButtons",
+      "filePath": "src/pages/Pyq.tsx",
+      "lineRange": [
+        546,
+        585
+      ],
+      "summary": "Captures mark, skip, or fifty-fifty exam decisions for the current PYQ.",
+      "tags": [
+        "component",
+        "pyq",
+        "practice-session"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/pages/Pyq.tsx:ResultPanel",
+      "type": "function",
+      "name": "ResultPanel",
+      "filePath": "src/pages/Pyq.tsx",
+      "lineRange": [
+        587,
+        677
+      ],
+      "summary": "Displays the committed answer, correctness, timing, and authoritative solution after a PYQ attempt.",
+      "tags": [
+        "component",
+        "pyq",
+        "practice-session"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/pages/Pyq.tsx:Pyq",
+      "type": "function",
+      "name": "Pyq",
+      "filePath": "src/pages/Pyq.tsx",
+      "lineRange": [
+        684,
+        1672
+      ],
+      "summary": "Coordinates question-bank loading, set lifecycle, timing, answer commits, audit persistence, tagging, journaling, planner state, and navigation.",
+      "tags": [
+        "component",
+        "pyq",
+        "practice-session"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:src/pages/Reattempts.tsx",
+      "type": "file",
+      "name": "Reattempts.tsx",
+      "filePath": "src/pages/Reattempts.tsx",
+      "summary": "Implements the due re-attempt queue and dedicated logged-question and PYQ test sessions, including timers, answer history, immutable receipts, navigation recovery, and ladder grading.",
+      "tags": [
+        "component",
+        "spaced-repetition",
+        "practice-session"
+      ],
+      "complexity": "complex",
+      "languageNotes": "React component written in TypeScript with JSX."
+    },
+    {
+      "id": "function:src/pages/Reattempts.tsx:navigationState",
+      "type": "function",
+      "name": "navigationState",
+      "filePath": "src/pages/Reattempts.tsx",
+      "lineRange": [
+        100,
+        116
+      ],
+      "summary": "Validates and normalizes persisted router state used to resume a multi-question re-attempt round.",
+      "tags": [
+        "component",
+        "spaced-repetition",
+        "practice-session"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/pages/Reattempts.tsx:Ladder",
+      "type": "function",
+      "name": "Ladder",
+      "filePath": "src/pages/Reattempts.tsx",
+      "lineRange": [
+        118,
+        139
+      ],
+      "summary": "Renders the D3, D10, and D30 progression with current and completed rung states.",
+      "tags": [
+        "component",
+        "spaced-repetition",
+        "practice-session"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/pages/Reattempts.tsx:RunningTimer",
+      "type": "function",
+      "name": "RunningTimer",
+      "filePath": "src/pages/Reattempts.tsx",
+      "lineRange": [
+        141,
+        163
+      ],
+      "summary": "Shows the active re-attempt timer and reports final elapsed seconds when the learner finishes.",
+      "tags": [
+        "component",
+        "spaced-repetition",
+        "practice-session"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/pages/Reattempts.tsx:QueueCard",
+      "type": "function",
+      "name": "QueueCard",
+      "filePath": "src/pages/Reattempts.tsx",
+      "lineRange": [
+        165,
+        235
+      ],
+      "summary": "Summarizes one due re-attempt, its subject evidence, carry-forward state, ladder stage, and current attempt state.",
+      "tags": [
+        "component",
+        "spaced-repetition",
+        "practice-session"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/pages/Reattempts.tsx:ExamAnswerPad",
+      "type": "function",
+      "name": "ExamAnswerPad",
+      "filePath": "src/pages/Reattempts.tsx",
+      "lineRange": [
+        257,
+        324
+      ],
+      "summary": "Renders MCQ, MSQ, or NAT input controls for an exam-style re-attempt.",
+      "tags": [
+        "component",
+        "spaced-repetition",
+        "practice-session"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/pages/Reattempts.tsx:ExamDecisionButtons",
+      "type": "function",
+      "name": "ExamDecisionButtons",
+      "filePath": "src/pages/Reattempts.tsx",
+      "lineRange": [
+        326,
+        365
+      ],
+      "summary": "Captures mark, skip, or fifty-fifty decisions during a re-attempt.",
+      "tags": [
+        "component",
+        "spaced-repetition",
+        "practice-session"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/pages/Reattempts.tsx:PyqAnswerHistory",
+      "type": "function",
+      "name": "PyqAnswerHistory",
+      "filePath": "src/pages/Reattempts.tsx",
+      "lineRange": [
+        367,
+        452
+      ],
+      "summary": "Renders chronological immutable PYQ attempt evidence, including the current re-attempt receipt.",
+      "tags": [
+        "component",
+        "spaced-repetition",
+        "practice-session"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/pages/Reattempts.tsx:LoggedQuestionAnswerHistory",
+      "type": "function",
+      "name": "LoggedQuestionAnswerHistory",
+      "filePath": "src/pages/Reattempts.tsx",
+      "lineRange": [
+        454,
+        511
+      ],
+      "summary": "Renders saved and current answers, decisions, and timing for a locally logged question.",
+      "tags": [
+        "component",
+        "spaced-repetition",
+        "practice-session"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/pages/Reattempts.tsx:PyqReattemptSession",
+      "type": "function",
+      "name": "PyqReattemptSession",
+      "filePath": "src/pages/Reattempts.tsx",
+      "lineRange": [
+        513,
+        817
+      ],
+      "summary": "Runs one immutable PYQ re-attempt with timing, answer capture, audit receipt creation, navigation, and ladder result submission.",
+      "tags": [
+        "component",
+        "spaced-repetition",
+        "practice-session"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:src/pages/Reattempts.tsx:ReattemptSession",
+      "type": "function",
+      "name": "ReattemptSession",
+      "filePath": "src/pages/Reattempts.tsx",
+      "lineRange": [
+        819,
+        1411
+      ],
+      "summary": "Runs a logged-question retrieval attempt with prompt editing, concealed answer, timing, evidence capture, navigation, and grading.",
+      "tags": [
+        "component",
+        "spaced-repetition",
+        "practice-session"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:src/pages/Reattempts.tsx:Reattempts",
+      "type": "function",
+      "name": "Reattempts",
+      "filePath": "src/pages/Reattempts.tsx",
+      "lineRange": [
+        1413,
+        1888
+      ],
+      "summary": "Loads the due queue, restores round navigation, resolves logged and PYQ evidence, and coordinates completed, skipped, and mastered re-attempts.",
+      "tags": [
+        "component",
+        "spaced-repetition",
+        "practice-session"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:src/types/index.ts",
+      "type": "file",
+      "name": "index.ts",
+      "filePath": "src/types/index.ts",
+      "summary": "Compatibility barrel that re-exports the project’s shared database row and domain type definitions.",
+      "tags": [
+        "type-definition",
+        "barrel",
+        "data-model"
+      ],
+      "complexity": "simple",
+      "languageNotes": "TypeScript module."
+    }
+  ],
+  "edges": [
+    {
+      "source": "file:src/lib/revision-pack.ts",
+      "target": "file:src/types/index.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/lib/revision-pack.ts",
+      "target": "function:src/lib/revision-pack.ts:buildRevisionPack",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/revision-pack.ts",
+      "target": "function:src/lib/revision-pack.ts:buildRevisionPack",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/revision-pack.ts",
+      "target": "function:src/lib/revision-pack.ts:revisionPackText",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/revision-pack.ts",
+      "target": "function:src/lib/revision-pack.ts:revisionPackText",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/sessions.ts",
+      "target": "file:src/lib/db.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/lib/sessions.ts",
+      "target": "file:src/lib/pyq-session.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/lib/sessions.ts",
+      "target": "file:src/lib/sync.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/lib/sessions.ts",
+      "target": "file:src/types/index.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/lib/sessions.ts",
+      "target": "function:src/lib/sessions.ts:practiceQuestionCount",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/sessions.ts",
+      "target": "function:src/lib/sessions.ts:practiceQuestionCount",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/sessions.ts",
+      "target": "function:src/lib/sessions.ts:reconcilePyqPracticeSessions",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/sessions.ts",
+      "target": "function:src/lib/sessions.ts:reconcilePyqPracticeSessions",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/sessions.ts",
+      "target": "function:src/lib/sessions.ts:finishedSessionsWithQuestions",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/sessions.ts",
+      "target": "function:src/lib/sessions.ts:finishedSessionsWithQuestions",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/sessions.ts",
+      "target": "function:src/lib/sessions.ts:pruneEmptyFinishedSessions",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/sessions.ts",
+      "target": "function:src/lib/sessions.ts:pruneEmptyFinishedSessions",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/sessions.ts",
+      "target": "function:src/lib/sessions.ts:recentSessions",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/sessions.ts",
+      "target": "function:src/lib/sessions.ts:recentSessions",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/sessions.ts",
+      "target": "function:src/lib/sessions.ts:allSessions",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/sessions.ts",
+      "target": "function:src/lib/sessions.ts:allSessions",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/topic-evidence.ts",
+      "target": "file:src/lib/pyq-session.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/lib/topic-evidence.ts",
+      "target": "file:src/types/index.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/lib/topic-evidence.ts",
+      "target": "function:src/lib/topic-evidence.ts:buildTopicEvidence",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/topic-evidence.ts",
+      "target": "function:src/lib/topic-evidence.ts:buildTopicEvidence",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/pages/Dashboard.tsx",
+      "target": "file:src/components/dashboard/HeroCard.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Dashboard.tsx",
+      "target": "file:src/components/dashboard/LearningTips.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Dashboard.tsx",
+      "target": "file:src/components/dashboard/OutcomeDonut.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Dashboard.tsx",
+      "target": "file:src/components/dashboard/OutcomeLegend.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Dashboard.tsx",
+      "target": "file:src/components/dashboard/SurfaceTrendChart.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Dashboard.tsx",
+      "target": "file:src/components/dashboard/WelcomeOverlay.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Dashboard.tsx",
+      "target": "file:src/components/ui/Button.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Dashboard.tsx",
+      "target": "file:src/components/ui/Card.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Dashboard.tsx",
+      "target": "file:src/hooks/useAuth.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Dashboard.tsx",
+      "target": "file:src/lib/analysis.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Dashboard.tsx",
+      "target": "file:src/lib/constants.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Dashboard.tsx",
+      "target": "file:src/lib/db.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Dashboard.tsx",
+      "target": "file:src/lib/do-now.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Dashboard.tsx",
+      "target": "file:src/lib/learning-tips.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Dashboard.tsx",
+      "target": "file:src/lib/planner-storage.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Dashboard.tsx",
+      "target": "file:src/lib/pyq.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Dashboard.tsx",
+      "target": "file:src/lib/sessions.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Dashboard.tsx",
+      "target": "file:src/lib/subjectInk.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Dashboard.tsx",
+      "target": "file:src/lib/utils.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Dashboard.tsx",
+      "target": "file:src/stores/prefs.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Dashboard.tsx",
+      "target": "function:src/pages/Dashboard.tsx:TargetMeter",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/pages/Dashboard.tsx",
+      "target": "function:src/pages/Dashboard.tsx:OutcomeKey",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/pages/Dashboard.tsx",
+      "target": "function:src/pages/Dashboard.tsx:Dashboard",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/pages/Dashboard.tsx",
+      "target": "function:src/pages/Dashboard.tsx:Dashboard",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/pages/Pyq.tsx",
+      "target": "file:src/components/layout/PageHeader.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Pyq.tsx",
+      "target": "file:src/components/pyq/PyqQuestionContent.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Pyq.tsx",
+      "target": "file:src/components/tags/TagFlow.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Pyq.tsx",
+      "target": "file:src/components/tags/sourceDraft.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Pyq.tsx",
+      "target": "file:src/components/ui/Badge.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Pyq.tsx",
+      "target": "file:src/components/ui/Button.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Pyq.tsx",
+      "target": "file:src/components/ui/Card.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Pyq.tsx",
+      "target": "file:src/components/ui/Select.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Pyq.tsx",
+      "target": "file:src/hooks/useAuth.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Pyq.tsx",
+      "target": "file:src/hooks/useTimer.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Pyq.tsx",
+      "target": "file:src/lib/constants.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Pyq.tsx",
+      "target": "file:src/lib/db.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Pyq.tsx",
+      "target": "file:src/lib/image.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Pyq.tsx",
+      "target": "file:src/lib/patterns.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Pyq.tsx",
+      "target": "file:src/lib/planner-execution.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Pyq.tsx",
+      "target": "file:src/lib/pyq-history.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Pyq.tsx",
+      "target": "file:src/lib/pyq-session.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Pyq.tsx",
+      "target": "file:src/lib/pyq.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Pyq.tsx",
+      "target": "file:src/lib/reattempt.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Pyq.tsx",
+      "target": "file:src/lib/sessions.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Pyq.tsx",
+      "target": "file:src/lib/sync.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Pyq.tsx",
+      "target": "file:src/lib/utils.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Pyq.tsx",
+      "target": "file:src/types/index.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Pyq.tsx",
+      "target": "function:src/pages/Pyq.tsx:sourceDraft",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/pages/Pyq.tsx",
+      "target": "function:src/pages/Pyq.tsx:PracticeSetup",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/pages/Pyq.tsx",
+      "target": "function:src/pages/Pyq.tsx:AnswerPad",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/pages/Pyq.tsx",
+      "target": "function:src/pages/Pyq.tsx:DecisionButtons",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/pages/Pyq.tsx",
+      "target": "function:src/pages/Pyq.tsx:ResultPanel",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/pages/Pyq.tsx",
+      "target": "function:src/pages/Pyq.tsx:Pyq",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/pages/Pyq.tsx",
+      "target": "function:src/pages/Pyq.tsx:Pyq",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/pages/Reattempts.tsx",
+      "target": "file:src/components/layout/PageHeader.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Reattempts.tsx",
+      "target": "file:src/components/pyq/PyqQuestionContent.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Reattempts.tsx",
+      "target": "file:src/components/shared/AnswerReveal.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Reattempts.tsx",
+      "target": "file:src/components/shared/ImagePreview.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Reattempts.tsx",
+      "target": "file:src/components/shared/Timer.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Reattempts.tsx",
+      "target": "file:src/components/shared/questionDraft.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Reattempts.tsx",
+      "target": "file:src/components/ui/Badge.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Reattempts.tsx",
+      "target": "file:src/components/ui/Button.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Reattempts.tsx",
+      "target": "file:src/components/ui/Card.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Reattempts.tsx",
+      "target": "file:src/components/ui/Empty.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Reattempts.tsx",
+      "target": "file:src/components/ui/Textarea.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Reattempts.tsx",
+      "target": "file:src/hooks/useAuth.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Reattempts.tsx",
+      "target": "file:src/hooks/useTimer.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Reattempts.tsx",
+      "target": "file:src/lib/constants.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Reattempts.tsx",
+      "target": "file:src/lib/db.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Reattempts.tsx",
+      "target": "file:src/lib/image.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Reattempts.tsx",
+      "target": "file:src/lib/pyq-session.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Reattempts.tsx",
+      "target": "file:src/lib/pyq.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Reattempts.tsx",
+      "target": "file:src/lib/reattempt.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Reattempts.tsx",
+      "target": "file:src/lib/subjectInk.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Reattempts.tsx",
+      "target": "file:src/lib/sync.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Reattempts.tsx",
+      "target": "file:src/lib/utils.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Reattempts.tsx",
+      "target": "file:src/reattempt.css",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Reattempts.tsx",
+      "target": "file:src/stores/ui.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Reattempts.tsx",
+      "target": "file:src/types/index.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Reattempts.tsx",
+      "target": "function:src/pages/Reattempts.tsx:navigationState",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/pages/Reattempts.tsx",
+      "target": "function:src/pages/Reattempts.tsx:Ladder",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/pages/Reattempts.tsx",
+      "target": "function:src/pages/Reattempts.tsx:RunningTimer",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/pages/Reattempts.tsx",
+      "target": "function:src/pages/Reattempts.tsx:QueueCard",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/pages/Reattempts.tsx",
+      "target": "function:src/pages/Reattempts.tsx:ExamAnswerPad",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/pages/Reattempts.tsx",
+      "target": "function:src/pages/Reattempts.tsx:ExamDecisionButtons",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/pages/Reattempts.tsx",
+      "target": "function:src/pages/Reattempts.tsx:PyqAnswerHistory",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/pages/Reattempts.tsx",
+      "target": "function:src/pages/Reattempts.tsx:LoggedQuestionAnswerHistory",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/pages/Reattempts.tsx",
+      "target": "function:src/pages/Reattempts.tsx:PyqReattemptSession",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/pages/Reattempts.tsx",
+      "target": "function:src/pages/Reattempts.tsx:ReattemptSession",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/pages/Reattempts.tsx",
+      "target": "function:src/pages/Reattempts.tsx:Reattempts",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/pages/Reattempts.tsx",
+      "target": "function:src/pages/Reattempts.tsx:Reattempts",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    }
+  ]
+}

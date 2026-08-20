@@ -1,0 +1,50 @@
+{
+  "nodes": [
+    {
+      "id": "file:src/__tests__/go-classes-coa-test-2-import.test.ts",
+      "type": "file",
+      "name": "go-classes-coa-test-2-import.test.ts",
+      "filePath": "src/__tests__/go-classes-coa-test-2-import.test.ts",
+      "summary": "Validates the 15-question GO Classes COA Topic Test 2 import against its official answers and topic taxonomy, including skip and correctness semantics. It also checks that the corresponding Supabase migration preserves learner answers, actual answers, and durable receipt records.",
+      "tags": [
+        "test",
+        "data-validation",
+        "question-import",
+        "database-migration"
+      ],
+      "complexity": "moderate",
+      "languageNotes": "Uses typed JSON fixture loading and exact serialized-answer comparison to cover scalar and multiple-select responses."
+    },
+    {
+      "id": "file:src/__tests__/go-classes-coa-test-2-photos.test.ts",
+      "type": "file",
+      "name": "go-classes-coa-test-2-photos.test.ts",
+      "filePath": "src/__tests__/go-classes-coa-test-2-photos.test.ts",
+      "summary": "Checks that every GO Classes COA Topic Test 2 question references an answer-free practice image while both practice and attempt receipt images remain bundled on disk.",
+      "tags": [
+        "test",
+        "asset-validation",
+        "question-bank",
+        "screenshot-archive"
+      ],
+      "complexity": "simple",
+      "languageNotes": "Combines a dynamic JSON import with filesystem existence checks for generated image assets."
+    },
+    {
+      "id": "file:src/__tests__/go-classes-coa-topic-test-photos.test.ts",
+      "type": "file",
+      "name": "go-classes-coa-topic-test-photos.test.ts",
+      "filePath": "src/__tests__/go-classes-coa-topic-test-photos.test.ts",
+      "summary": "Ensures each question in the original GO Classes COA Topic Test embeds its answer-free practice screenshot and never exposes the corresponding attempt receipt image in question HTML.",
+      "tags": [
+        "test",
+        "asset-validation",
+        "question-bank",
+        "answer-protection"
+      ],
+      "complexity": "simple",
+      "languageNotes": "Resets Vitest mocks and modules before each case, then inspects dynamically imported question-bank JSON."
+    }
+  ],
+  "edges": []
+}

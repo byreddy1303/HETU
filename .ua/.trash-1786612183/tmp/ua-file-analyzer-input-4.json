@@ -1,0 +1,44 @@
+{
+  "projectRoot": "/Users/bkalyankrishnareddy/Desktop/GATE PREP/hetu",
+  "batchFiles": [
+    {
+      "path": "src/__tests__/journal-ui.test.tsx",
+      "language": "typescript",
+      "sizeLines": 63,
+      "fileCategory": "code"
+    }
+  ],
+  "batchImportData": {
+    "src/__tests__/journal-ui.test.tsx": [
+      "src/lib/db.ts",
+      "src/pages/Journal.tsx",
+      "src/types/index.ts"
+    ]
+  },
+  "neighborMap": {
+    "src/__tests__/journal-ui.test.tsx": [
+      {
+        "path": "src/lib/db.ts",
+        "batchIndex": 5,
+        "symbols": [
+          "db",
+          "SYNCED_TABLES",
+          "table",
+          "clearLocalData"
+        ]
+      },
+      {
+        "path": "src/pages/Journal.tsx",
+        "batchIndex": 5,
+        "symbols": [
+          "Journal"
+        ]
+      },
+      {
+        "path": "src/types/index.ts",
+        "batchIndex": 7,
+        "symbols": []
+      }
+    ]
+  }
+}

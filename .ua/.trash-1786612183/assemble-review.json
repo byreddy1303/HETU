@@ -1,0 +1,14 @@
+{
+  "fixedSectionOk": true,
+  "nodesRecovered": 0,
+  "edgesRestored": 0,
+  "crossBatchEdgesAdded": 0,
+  "typesRemapped": 0,
+  "complexityRemapped": 0,
+  "notes": [
+    "The merge corrections were limited to two tested_by direction flips and one invalid tested_by edge drop; this is reasonable and does not indicate a systemic upstream normalization problem.",
+    "The merge report contained no items that could not be fixed, and the assembled graph has no missing IDs, unknown node types, unknown complexity values, or dangling edge references.",
+    "All 356 scanned physical files are represented across 1018 nodes, and all 913 authoritative importMap relationships are present among 2150 edges; import recovery correctly added zero edges.",
+    "No grounded node recovery, edge restoration, remapping, or cross-batch import addition was necessary."
+  ]
+}

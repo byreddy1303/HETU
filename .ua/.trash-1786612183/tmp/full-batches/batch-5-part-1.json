@@ -1,0 +1,1183 @@
+{
+  "nodes": [
+    {
+      "id": "file:src/lib/backup.ts",
+      "type": "file",
+      "name": "backup.ts",
+      "filePath": "src/lib/backup.ts",
+      "summary": "Exports user-owned Dexie data into a versioned JSON envelope, downloads it through the browser, and safely merges valid backup rows back into local-first storage.",
+      "tags": [
+        "utility",
+        "backup",
+        "data-portability",
+        "persistence"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/lib/db.ts",
+      "type": "file",
+      "name": "db.ts",
+      "filePath": "src/lib/db.ts",
+      "summary": "Defines the versioned Dexie database, local row types, synchronized table order, compound indexes, and helpers used as the application’s primary offline data store.",
+      "tags": [
+        "database",
+        "indexeddb",
+        "data-model",
+        "local-first"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/lib/patterns.ts",
+      "type": "file",
+      "name": "patterns.ts",
+      "filePath": "src/lib/patterns.ts",
+      "summary": "Reconciles a question pattern against live question counts, updating an existing pattern or creating its initial persisted metadata.",
+      "tags": [
+        "utility",
+        "pattern-library",
+        "database",
+        "synchronization"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/lib/reattempt.ts",
+      "type": "file",
+      "name": "reattempt.ts",
+      "filePath": "src/lib/reattempt.ts",
+      "summary": "Implements the offline-compatible D3–D10–D30 reattempt ladder, answer evaluation, due-queue construction, scheduling, and result persistence.",
+      "tags": [
+        "service",
+        "reattempt",
+        "spaced-practice",
+        "local-first"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/lib/subjectInk.ts",
+      "type": "file",
+      "name": "subjectInk.ts",
+      "filePath": "src/lib/subjectInk.ts",
+      "summary": "Maps GATE subjects to static Tailwind color tokens used consistently across subject-aware visualizations and controls.",
+      "tags": [
+        "utility",
+        "theming",
+        "subjects",
+        "visual-design"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/lib/subtopics.ts",
+      "type": "file",
+      "name": "subtopics.ts",
+      "filePath": "src/lib/subtopics.ts",
+      "summary": "Defines the canonical GATE CS subtopic taxonomy, syllabus ordering, and selected cross-subject relationships used by topic pickers and progress views.",
+      "tags": [
+        "data-model",
+        "syllabus",
+        "taxonomy",
+        "gate-cs"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:src/lib/sync.ts",
+      "type": "file",
+      "name": "sync.ts",
+      "filePath": "src/lib/sync.ts",
+      "summary": "Runs the local-first Dexie-to-Supabase synchronization engine with FK-ordered pushes, queued deletes, conflict-aware pulls, retry backoff, and lifecycle listeners.",
+      "tags": [
+        "service",
+        "synchronization",
+        "local-first",
+        "supabase",
+        "offline"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/lib/backup.ts:exportAll",
+      "type": "function",
+      "name": "exportAll",
+      "filePath": "src/lib/backup.ts",
+      "lineRange": [
+        19,
+        37
+      ],
+      "summary": "Serializes every synchronized local table for the current user while removing internal synchronization status fields.",
+      "tags": [
+        "utility",
+        "backup",
+        "data-portability",
+        "function"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/backup.ts:downloadEnvelope",
+      "type": "function",
+      "name": "downloadEnvelope",
+      "filePath": "src/lib/backup.ts",
+      "lineRange": [
+        40,
+        52
+      ],
+      "summary": "Creates a dated JSON blob URL and triggers a browser download for a backup envelope.",
+      "tags": [
+        "utility",
+        "backup",
+        "data-portability",
+        "function"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/backup.ts:importEnvelope",
+      "type": "function",
+      "name": "importEnvelope",
+      "filePath": "src/lib/backup.ts",
+      "lineRange": [
+        55,
+        77
+      ],
+      "summary": "Validates the backup version and merges identifiable rows table by table while reporting added and skipped counts.",
+      "tags": [
+        "utility",
+        "backup",
+        "data-portability",
+        "function"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/backup.ts:isBackupEnvelope",
+      "type": "function",
+      "name": "isBackupEnvelope",
+      "filePath": "src/lib/backup.ts",
+      "lineRange": [
+        80,
+        89
+      ],
+      "summary": "Performs a defensive runtime shape check before accepting an unknown value as a backup envelope.",
+      "tags": [
+        "utility",
+        "backup",
+        "data-portability",
+        "function"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/db.ts:table",
+      "type": "function",
+      "name": "table",
+      "filePath": "src/lib/db.ts",
+      "lineRange": [
+        173,
+        175
+      ],
+      "summary": "Returns the typed Dexie table corresponding to a synchronized table name.",
+      "tags": [
+        "database",
+        "indexeddb",
+        "data-model",
+        "function"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/db.ts:clearLocalData",
+      "type": "function",
+      "name": "clearLocalData",
+      "filePath": "src/lib/db.ts",
+      "lineRange": [
+        178,
+        181
+      ],
+      "summary": "Deletes and reopens the IndexedDB database to perform a complete local wipe.",
+      "tags": [
+        "database",
+        "indexeddb",
+        "data-model",
+        "function"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/patterns.ts:reconcileQuestionPattern",
+      "type": "function",
+      "name": "reconcileQuestionPattern",
+      "filePath": "src/lib/patterns.ts",
+      "lineRange": [
+        6,
+        27
+      ],
+      "summary": "Recounts questions for a named pattern and persists either the updated count or a newly initialized pattern row.",
+      "tags": [
+        "utility",
+        "pattern-library",
+        "database",
+        "function"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/reattempt.ts:needsReattempt",
+      "type": "function",
+      "name": "needsReattempt",
+      "filePath": "src/lib/reattempt.ts",
+      "lineRange": [
+        34,
+        36
+      ],
+      "summary": "Looks up whether an outcome category requires a spaced reattempt.",
+      "tags": [
+        "service",
+        "reattempt",
+        "spaced-practice",
+        "function"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/reattempt.ts:savedChoiceKey",
+      "type": "function",
+      "name": "savedChoiceKey",
+      "filePath": "src/lib/reattempt.ts",
+      "lineRange": [
+        66,
+        76
+      ],
+      "summary": "Extracts normalized MCQ or MSQ option keys from a stored answer label while rejecting ambiguous text.",
+      "tags": [
+        "service",
+        "reattempt",
+        "spaced-practice",
+        "function"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/reattempt.ts:evaluateLoggedReattemptAnswer",
+      "type": "function",
+      "name": "evaluateLoggedReattemptAnswer",
+      "filePath": "src/lib/reattempt.ts",
+      "lineRange": [
+        83,
+        103
+      ],
+      "summary": "Grades logged MCQ, MSQ, and numeric answers while returning null when the saved key cannot be checked safely.",
+      "tags": [
+        "service",
+        "reattempt",
+        "spaced-practice",
+        "function"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/reattempt.ts:buildReattemptQueue",
+      "type": "function",
+      "name": "buildReattemptQueue",
+      "filePath": "src/lib/reattempt.ts",
+      "lineRange": [
+        110,
+        124
+      ],
+      "summary": "Partitions reattempt rows into due, upcoming, and mastered groups without rewriting overdue dates.",
+      "tags": [
+        "service",
+        "reattempt",
+        "spaced-practice",
+        "function"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/reattempt.ts:advance",
+      "type": "function",
+      "name": "advance",
+      "filePath": "src/lib/reattempt.ts",
+      "lineRange": [
+        127,
+        149
+      ],
+      "summary": "Applies a clean or failed result to the spaced ladder and appends timestamped answer evidence to history.",
+      "tags": [
+        "service",
+        "reattempt",
+        "spaced-practice",
+        "function"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/reattempt.ts:createReattemptRow",
+      "type": "function",
+      "name": "createReattemptRow",
+      "filePath": "src/lib/reattempt.ts",
+      "lineRange": [
+        151,
+        165
+      ],
+      "summary": "Creates a new D3 ladder row with a client UUID and initial due date.",
+      "tags": [
+        "service",
+        "reattempt",
+        "spaced-practice",
+        "function"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/reattempt.ts:scheduleReattempt",
+      "type": "function",
+      "name": "scheduleReattempt",
+      "filePath": "src/lib/reattempt.ts",
+      "lineRange": [
+        171,
+        181
+      ],
+      "summary": "Idempotently creates and persists the first open reattempt for a question.",
+      "tags": [
+        "service",
+        "reattempt",
+        "spaced-practice",
+        "function"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/reattempt.ts:recordReattemptResult",
+      "type": "function",
+      "name": "recordReattemptResult",
+      "filePath": "src/lib/reattempt.ts",
+      "lineRange": [
+        184,
+        194
+      ],
+      "summary": "Advances an existing ladder row and persists the updated stage, date, and history locally.",
+      "tags": [
+        "service",
+        "reattempt",
+        "spaced-practice",
+        "function"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/subjectInk.ts:subjectInk",
+      "type": "function",
+      "name": "subjectInk",
+      "filePath": "src/lib/subjectInk.ts",
+      "lineRange": [
+        56,
+        58
+      ],
+      "summary": "Returns the static text, dot, and selected-state color tokens for a subject with a slate fallback.",
+      "tags": [
+        "utility",
+        "theming",
+        "subjects",
+        "function"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/subtopics.ts:subtopicsFor",
+      "type": "function",
+      "name": "subtopicsFor",
+      "filePath": "src/lib/subtopics.ts",
+      "lineRange": [
+        222,
+        224
+      ],
+      "summary": "Returns the ordered subtopic specifications for a subject or an empty list for unknown subjects.",
+      "tags": [
+        "data-model",
+        "syllabus",
+        "taxonomy",
+        "function"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/sync.ts:isSyncEnabled",
+      "type": "function",
+      "name": "isSyncEnabled",
+      "filePath": "src/lib/sync.ts",
+      "lineRange": [
+        26,
+        28
+      ],
+      "summary": "Reports whether remote synchronization is currently active.",
+      "tags": [
+        "service",
+        "synchronization",
+        "local-first",
+        "function"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/sync.ts:writeLocal",
+      "type": "function",
+      "name": "writeLocal",
+      "filePath": "src/lib/sync.ts",
+      "lineRange": [
+        31,
+        37
+      ],
+      "summary": "Upserts one local row with the appropriate sync status and schedules an immediate push when enabled.",
+      "tags": [
+        "service",
+        "synchronization",
+        "local-first",
+        "function"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/sync.ts:writeLocalBatch",
+      "type": "function",
+      "name": "writeLocalBatch",
+      "filePath": "src/lib/sync.ts",
+      "lineRange": [
+        39,
+        50
+      ],
+      "summary": "Writes rows across their target tables in one Dexie transaction before scheduling remote synchronization.",
+      "tags": [
+        "service",
+        "synchronization",
+        "local-first",
+        "function"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/sync.ts:deleteLocal",
+      "type": "function",
+      "name": "deleteLocal",
+      "filePath": "src/lib/sync.ts",
+      "lineRange": [
+        53,
+        59
+      ],
+      "summary": "Deletes a row locally, records a durable remote-delete request, and schedules a push.",
+      "tags": [
+        "service",
+        "synchronization",
+        "local-first",
+        "function"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/sync.ts:flushPushQueue",
+      "type": "function",
+      "name": "flushPushQueue",
+      "filePath": "src/lib/sync.ts",
+      "lineRange": [
+        68,
+        116
+      ],
+      "summary": "Pushes pending rows in foreign-key-safe order, drains queued deletes, and retries failures with bounded exponential backoff.",
+      "tags": [
+        "service",
+        "synchronization",
+        "local-first",
+        "function"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/sync.ts:pullAll",
+      "type": "function",
+      "name": "pullAll",
+      "filePath": "src/lib/sync.ts",
+      "lineRange": [
+        119,
+        169
+      ],
+      "summary": "Fetches all synchronized tables concurrently and merges remote rows while preserving unsynced local changes and user isolation.",
+      "tags": [
+        "service",
+        "synchronization",
+        "local-first",
+        "function"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/lib/sync.ts:resumeSync",
+      "type": "function",
+      "name": "resumeSync",
+      "filePath": "src/lib/sync.ts",
+      "lineRange": [
+        182,
+        185
+      ],
+      "summary": "Rechecks pull and push work when a native application returns to the foreground.",
+      "tags": [
+        "service",
+        "synchronization",
+        "local-first",
+        "function"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/sync.ts:initSync",
+      "type": "function",
+      "name": "initSync",
+      "filePath": "src/lib/sync.ts",
+      "lineRange": [
+        188,
+        199
+      ],
+      "summary": "Enables synchronization for a user, installs online and focus listeners once, and starts pull and push reconciliation.",
+      "tags": [
+        "service",
+        "synchronization",
+        "local-first",
+        "function"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/sync.ts:stopSync",
+      "type": "function",
+      "name": "stopSync",
+      "filePath": "src/lib/sync.ts",
+      "lineRange": [
+        201,
+        206
+      ],
+      "summary": "Disables synchronization, clears user and pull state, and cancels the pending push timer.",
+      "tags": [
+        "service",
+        "synchronization",
+        "local-first",
+        "function"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/sync.ts:_enableForTests",
+      "type": "function",
+      "name": "_enableForTests",
+      "filePath": "src/lib/sync.ts",
+      "lineRange": [
+        209,
+        213
+      ],
+      "summary": "Force-enables synchronization state without installing browser listeners so tests can drive the engine directly.",
+      "tags": [
+        "service",
+        "synchronization",
+        "local-first",
+        "function"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:src/lib/db.ts:AirDB",
+      "type": "class",
+      "name": "AirDB",
+      "filePath": "src/lib/db.ts",
+      "lineRange": [
+        39,
+        151
+      ],
+      "summary": "Defines the Dexie database class, typed tables, and schema migrations that add compound indexes and newer study tables through version five.",
+      "tags": [
+        "data-model",
+        "indexeddb",
+        "database",
+        "class"
+      ],
+      "complexity": "moderate"
+    }
+  ],
+  "edges": [
+    {
+      "source": "file:src/lib/backup.ts",
+      "target": "file:src/lib/db.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/lib/backup.ts",
+      "target": "file:src/lib/sync.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/lib/backup.ts",
+      "target": "file:src/types/index.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/lib/db.ts",
+      "target": "file:src/types/index.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/lib/patterns.ts",
+      "target": "file:src/lib/db.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/lib/patterns.ts",
+      "target": "file:src/lib/sync.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/lib/patterns.ts",
+      "target": "file:src/lib/utils.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/lib/reattempt.ts",
+      "target": "file:src/lib/constants.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/lib/reattempt.ts",
+      "target": "file:src/lib/db.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/lib/reattempt.ts",
+      "target": "file:src/lib/sync.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/lib/reattempt.ts",
+      "target": "file:src/lib/utils.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/lib/reattempt.ts",
+      "target": "file:src/types/index.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/lib/sync.ts",
+      "target": "file:src/lib/db.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/lib/sync.ts",
+      "target": "file:src/lib/supabase.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/lib/backup.ts",
+      "target": "function:src/lib/backup.ts:exportAll",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/backup.ts",
+      "target": "function:src/lib/backup.ts:exportAll",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/backup.ts",
+      "target": "function:src/lib/backup.ts:downloadEnvelope",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/backup.ts",
+      "target": "function:src/lib/backup.ts:downloadEnvelope",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/backup.ts",
+      "target": "function:src/lib/backup.ts:importEnvelope",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/backup.ts",
+      "target": "function:src/lib/backup.ts:importEnvelope",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/backup.ts",
+      "target": "function:src/lib/backup.ts:isBackupEnvelope",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/backup.ts",
+      "target": "function:src/lib/backup.ts:isBackupEnvelope",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/db.ts",
+      "target": "function:src/lib/db.ts:table",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/db.ts",
+      "target": "function:src/lib/db.ts:table",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/db.ts",
+      "target": "function:src/lib/db.ts:clearLocalData",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/db.ts",
+      "target": "function:src/lib/db.ts:clearLocalData",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/patterns.ts",
+      "target": "function:src/lib/patterns.ts:reconcileQuestionPattern",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/patterns.ts",
+      "target": "function:src/lib/patterns.ts:reconcileQuestionPattern",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/reattempt.ts",
+      "target": "function:src/lib/reattempt.ts:needsReattempt",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/reattempt.ts",
+      "target": "function:src/lib/reattempt.ts:needsReattempt",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/reattempt.ts",
+      "target": "function:src/lib/reattempt.ts:savedChoiceKey",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/reattempt.ts",
+      "target": "function:src/lib/reattempt.ts:evaluateLoggedReattemptAnswer",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/reattempt.ts",
+      "target": "function:src/lib/reattempt.ts:evaluateLoggedReattemptAnswer",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/reattempt.ts",
+      "target": "function:src/lib/reattempt.ts:buildReattemptQueue",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/reattempt.ts",
+      "target": "function:src/lib/reattempt.ts:buildReattemptQueue",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/reattempt.ts",
+      "target": "function:src/lib/reattempt.ts:advance",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/reattempt.ts",
+      "target": "function:src/lib/reattempt.ts:advance",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/reattempt.ts",
+      "target": "function:src/lib/reattempt.ts:createReattemptRow",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/reattempt.ts",
+      "target": "function:src/lib/reattempt.ts:createReattemptRow",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/reattempt.ts",
+      "target": "function:src/lib/reattempt.ts:scheduleReattempt",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/reattempt.ts",
+      "target": "function:src/lib/reattempt.ts:scheduleReattempt",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/reattempt.ts",
+      "target": "function:src/lib/reattempt.ts:recordReattemptResult",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/reattempt.ts",
+      "target": "function:src/lib/reattempt.ts:recordReattemptResult",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/subjectInk.ts",
+      "target": "function:src/lib/subjectInk.ts:subjectInk",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/subjectInk.ts",
+      "target": "function:src/lib/subjectInk.ts:subjectInk",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/subtopics.ts",
+      "target": "function:src/lib/subtopics.ts:subtopicsFor",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/subtopics.ts",
+      "target": "function:src/lib/subtopics.ts:subtopicsFor",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/sync.ts",
+      "target": "function:src/lib/sync.ts:isSyncEnabled",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/sync.ts",
+      "target": "function:src/lib/sync.ts:isSyncEnabled",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/sync.ts",
+      "target": "function:src/lib/sync.ts:writeLocal",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/sync.ts",
+      "target": "function:src/lib/sync.ts:writeLocal",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/sync.ts",
+      "target": "function:src/lib/sync.ts:writeLocalBatch",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/sync.ts",
+      "target": "function:src/lib/sync.ts:writeLocalBatch",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/sync.ts",
+      "target": "function:src/lib/sync.ts:deleteLocal",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/sync.ts",
+      "target": "function:src/lib/sync.ts:deleteLocal",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/sync.ts",
+      "target": "function:src/lib/sync.ts:flushPushQueue",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/sync.ts",
+      "target": "function:src/lib/sync.ts:flushPushQueue",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/sync.ts",
+      "target": "function:src/lib/sync.ts:pullAll",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/sync.ts",
+      "target": "function:src/lib/sync.ts:pullAll",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/sync.ts",
+      "target": "function:src/lib/sync.ts:resumeSync",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/sync.ts",
+      "target": "function:src/lib/sync.ts:resumeSync",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/sync.ts",
+      "target": "function:src/lib/sync.ts:initSync",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/sync.ts",
+      "target": "function:src/lib/sync.ts:initSync",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/sync.ts",
+      "target": "function:src/lib/sync.ts:stopSync",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/sync.ts",
+      "target": "function:src/lib/sync.ts:stopSync",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/sync.ts",
+      "target": "function:src/lib/sync.ts:_enableForTests",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/sync.ts",
+      "target": "function:src/lib/sync.ts:_enableForTests",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/db.ts",
+      "target": "class:src/lib/db.ts:AirDB",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/db.ts",
+      "target": "file:src/__tests__/isolation.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/lib/db.ts",
+      "target": "file:src/__tests__/mocks-ui.test.tsx",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/lib/db.ts",
+      "target": "file:src/__tests__/planner-execution.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/lib/db.ts",
+      "target": "file:src/__tests__/progress_export.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/lib/db.ts",
+      "target": "file:src/__tests__/pyq-attempt-log.test.tsx",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/lib/db.ts",
+      "target": "file:src/__tests__/pyq-navigation.test.tsx",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/lib/db.ts",
+      "target": "file:src/__tests__/quick-capture.test.tsx",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/lib/db.ts",
+      "target": "file:src/__tests__/reattempt-ui.test.tsx",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/lib/db.ts",
+      "target": "file:src/__tests__/reattempt.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/lib/db.ts",
+      "target": "file:src/__tests__/sessions.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/lib/db.ts",
+      "target": "file:src/__tests__/sync.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/lib/reattempt.ts",
+      "target": "file:src/__tests__/reattempt.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/lib/sync.ts",
+      "target": "file:src/__tests__/sessions.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/lib/sync.ts",
+      "target": "file:src/__tests__/sync.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    }
+  ]
+}

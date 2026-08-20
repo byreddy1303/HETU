@@ -1,0 +1,1408 @@
+{
+  "nodes": [
+    {
+      "id": "file:src/components/buddy/BuddyAvatar.tsx",
+      "type": "file",
+      "name": "BuddyAvatar.tsx",
+      "filePath": "src/components/buddy/BuddyAvatar.tsx",
+      "summary": "Displays a buddy initial with deterministic color styling, responsive sizing, and an optional online-presence indicator.",
+      "tags": [
+        "component",
+        "buddy",
+        "avatar",
+        "presence"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/components/buddy/BuddyChat.tsx",
+      "type": "file",
+      "name": "BuddyChat.tsx",
+      "filePath": "src/components/buddy/BuddyChat.tsx",
+      "summary": "Implements the responsive real-time buddy conversation surface with message pagination, optimistic sending, typing and read state, presence, question sharing, and unfriend controls.",
+      "tags": [
+        "component",
+        "buddy-chat",
+        "realtime",
+        "messaging",
+        "question-sharing"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:src/components/buddy/BuddyPresenceRuntime.tsx",
+      "type": "file",
+      "name": "BuddyPresenceRuntime.tsx",
+      "filePath": "src/components/buddy/BuddyPresenceRuntime.tsx",
+      "summary": "Maintains Supabase Presence channels for active buddy relationships and projects synchronized online user IDs into the buddy presence store.",
+      "tags": [
+        "component",
+        "presence",
+        "realtime",
+        "supabase"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/components/dashboard/WelcomeOverlay.tsx",
+      "type": "file",
+      "name": "WelcomeOverlay.tsx",
+      "filePath": "src/components/dashboard/WelcomeOverlay.tsx",
+      "summary": "Presents a multi-slide onboarding overlay and persists dismissal locally and to the signed-in user profile.",
+      "tags": [
+        "component",
+        "onboarding",
+        "dashboard",
+        "persistence"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/components/native/NativeRuntime.tsx",
+      "type": "file",
+      "name": "NativeRuntime.tsx",
+      "filePath": "src/components/native/NativeRuntime.tsx",
+      "summary": "Bridges Capacitor app lifecycle events into the web application, handling Android Back, deep links, keyboard dismissal, native chrome, and sync resume.",
+      "tags": [
+        "component",
+        "native-runtime",
+        "capacitor",
+        "deep-linking",
+        "lifecycle"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/components/notifications/BuddyNotificationRuntime.tsx",
+      "type": "file",
+      "name": "BuddyNotificationRuntime.tsx",
+      "filePath": "src/components/notifications/BuddyNotificationRuntime.tsx",
+      "summary": "Keeps push registration synchronized and routes native notification actions into application navigation for authenticated users.",
+      "tags": [
+        "component",
+        "push-notifications",
+        "native-runtime",
+        "routing"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/components/settings/AccessRequestsCard.tsx",
+      "type": "file",
+      "name": "AccessRequestsCard.tsx",
+      "filePath": "src/components/settings/AccessRequestsCard.tsx",
+      "summary": "Provides the owner-facing access request queue with status tabs, approval and decline workflows, invite-link recovery, reasons, and copy controls.",
+      "tags": [
+        "component",
+        "access-management",
+        "approval-workflow",
+        "settings"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:src/components/settings/BuddyNotificationsCard.tsx",
+      "type": "file",
+      "name": "BuddyNotificationsCard.tsx",
+      "filePath": "src/components/settings/BuddyNotificationsCard.tsx",
+      "summary": "Manages buddy-message notification consent and delivery state, including device guidance, temporary snoozing, and foreground-preview preferences.",
+      "tags": [
+        "component",
+        "buddy-notifications",
+        "push-notifications",
+        "settings",
+        "snooze"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:src/components/settings/NotificationTimeEditor.tsx",
+      "type": "file",
+      "name": "NotificationTimeEditor.tsx",
+      "filePath": "src/components/settings/NotificationTimeEditor.tsx",
+      "summary": "Edits an hour-and-minute notification schedule with native numeric controls, web selects, bounded values, staged changes, and asynchronous save recovery.",
+      "tags": [
+        "component",
+        "notifications",
+        "time-input",
+        "settings"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/components/settings/NotificationsCard.tsx",
+      "type": "file",
+      "name": "NotificationsCard.tsx",
+      "filePath": "src/components/settings/NotificationsCard.tsx",
+      "summary": "Configures daily digest delivery through Telegram and email, including connection lifecycle, local schedule and timezone, backup preference, and test sends.",
+      "tags": [
+        "component",
+        "notifications",
+        "telegram",
+        "digest",
+        "settings"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:src/components/settings/StudyNotificationsCard.tsx",
+      "type": "file",
+      "name": "StudyNotificationsCard.tsx",
+      "filePath": "src/components/settings/StudyNotificationsCard.tsx",
+      "summary": "Controls separate study-notification consent and per-category schedules, with preference persistence and interactive test delivery.",
+      "tags": [
+        "component",
+        "study-notifications",
+        "scheduling",
+        "settings"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:src/components/shared/Brand.tsx",
+      "type": "file",
+      "name": "Brand.tsx",
+      "filePath": "src/components/shared/Brand.tsx",
+      "summary": "Defines the reusable HETU brand mark and size-aware wordmark used across navigation, loading, authentication, and error surfaces.",
+      "tags": [
+        "component",
+        "branding",
+        "shared-interface",
+        "svg"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/components/shared/LoadingScreen.tsx",
+      "type": "file",
+      "name": "LoadingScreen.tsx",
+      "filePath": "src/components/shared/LoadingScreen.tsx",
+      "summary": "Shows the branded application loading screen with motion that respects the user reduced-motion preference.",
+      "tags": [
+        "component",
+        "loading-state",
+        "branding",
+        "accessibility"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/components/shared/RequireAuth.tsx",
+      "type": "file",
+      "name": "RequireAuth.tsx",
+      "filePath": "src/components/shared/RequireAuth.tsx",
+      "summary": "Guards protected content behind authentication readiness, rendering a loading screen until the auth hook permits access.",
+      "tags": [
+        "component",
+        "authentication",
+        "route-guard",
+        "loading-state"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/components/buddy/BuddyAvatar.tsx:BuddyAvatar",
+      "type": "function",
+      "name": "BuddyAvatar",
+      "filePath": "src/components/buddy/BuddyAvatar.tsx",
+      "lineRange": [
+        25,
+        58
+      ],
+      "summary": "Renders a deterministic initial avatar and optional online marker for a buddy identity.",
+      "tags": [
+        "component",
+        "avatar",
+        "presence"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/components/buddy/BuddyChat.tsx:BuddyChat",
+      "type": "function",
+      "name": "BuddyChat",
+      "filePath": "src/components/buddy/BuddyChat.tsx",
+      "lineRange": [
+        82,
+        779
+      ],
+      "summary": "Runs the full real-time buddy conversation workflow, from loading and subscribing through optimistic sends, reads, typing, scrolling, and question sharing.",
+      "tags": [
+        "component",
+        "buddy-chat",
+        "realtime",
+        "messaging"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:src/components/buddy/BuddyChat.tsx:MessageBubble",
+      "type": "function",
+      "name": "MessageBubble",
+      "filePath": "src/components/buddy/BuddyChat.tsx",
+      "lineRange": [
+        781,
+        850
+      ],
+      "summary": "Renders one text or shared-question message with sender alignment, grouping shape, delivery state, timestamp, and entrance animation.",
+      "tags": [
+        "component",
+        "message-rendering",
+        "buddy-chat"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/components/buddy/BuddyChat.tsx:QuestionCard",
+      "type": "function",
+      "name": "QuestionCard",
+      "filePath": "src/components/buddy/BuddyChat.tsx",
+      "lineRange": [
+        862,
+        915
+      ],
+      "summary": "Formats a shared question reference as a compact subject-colored card with source and timing metadata.",
+      "tags": [
+        "component",
+        "question-sharing",
+        "buddy-chat"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/components/buddy/BuddyChat.tsx:QuestionPicker",
+      "type": "function",
+      "name": "QuestionPicker",
+      "filePath": "src/components/buddy/BuddyChat.tsx",
+      "lineRange": [
+        917,
+        1058
+      ],
+      "summary": "Loads the user question library and provides a searchable, keyboard-dismissible picker for sharing a question into chat.",
+      "tags": [
+        "component",
+        "question-picker",
+        "search",
+        "buddy-chat"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/components/buddy/BuddyPresenceRuntime.tsx:BuddyPresenceRuntime",
+      "type": "function",
+      "name": "BuddyPresenceRuntime",
+      "filePath": "src/components/buddy/BuddyPresenceRuntime.tsx",
+      "lineRange": [
+        18,
+        105
+      ],
+      "summary": "Creates and reconciles one presence channel per active buddy, refreshing channels on relationship and visibility changes.",
+      "tags": [
+        "component",
+        "presence",
+        "realtime",
+        "lifecycle"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/components/dashboard/WelcomeOverlay.tsx:WelcomeOverlay",
+      "type": "function",
+      "name": "WelcomeOverlay",
+      "filePath": "src/components/dashboard/WelcomeOverlay.tsx",
+      "lineRange": [
+        52,
+        204
+      ],
+      "summary": "Controls onboarding slide navigation, accessibility dismissal, and durable welcome-seen persistence.",
+      "tags": [
+        "component",
+        "onboarding",
+        "persistence"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/components/native/NativeRuntime.tsx:NativeRuntime",
+      "type": "function",
+      "name": "NativeRuntime",
+      "filePath": "src/components/native/NativeRuntime.tsx",
+      "lineRange": [
+        25,
+        107
+      ],
+      "summary": "Registers native lifecycle listeners and translates Back presses and app URLs into safe router and sync actions.",
+      "tags": [
+        "component",
+        "capacitor",
+        "native-navigation",
+        "lifecycle"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/components/notifications/BuddyNotificationRuntime.tsx:BuddyNotificationRuntime",
+      "type": "function",
+      "name": "BuddyNotificationRuntime",
+      "filePath": "src/components/notifications/BuddyNotificationRuntime.tsx",
+      "lineRange": [
+        14,
+        58
+      ],
+      "summary": "Synchronizes push registration and consumes native notification actions before navigating to the resolved in-app route.",
+      "tags": [
+        "component",
+        "push-notifications",
+        "routing",
+        "lifecycle"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/components/settings/AccessRequestsCard.tsx:AccessRequestsCard",
+      "type": "function",
+      "name": "AccessRequestsCard",
+      "filePath": "src/components/settings/AccessRequestsCard.tsx",
+      "lineRange": [
+        21,
+        230
+      ],
+      "summary": "Loads and filters account requests for the owner and coordinates approval, decline, invite, and toast state.",
+      "tags": [
+        "component",
+        "access-management",
+        "approval-workflow"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:src/components/settings/AccessRequestsCard.tsx:TabButton",
+      "type": "function",
+      "name": "TabButton",
+      "filePath": "src/components/settings/AccessRequestsCard.tsx",
+      "lineRange": [
+        232,
+        265
+      ],
+      "summary": "Renders a tone-aware request-status tab with selection state and an optional count badge.",
+      "tags": [
+        "component",
+        "tab-control",
+        "access-management"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/components/settings/AccessRequestsCard.tsx:RequestRow",
+      "type": "function",
+      "name": "RequestRow",
+      "filePath": "src/components/settings/AccessRequestsCard.tsx",
+      "lineRange": [
+        267,
+        434
+      ],
+      "summary": "Displays request metadata and expands into approval, invite-copy, or reasoned decline controls based on status.",
+      "tags": [
+        "component",
+        "access-request",
+        "approval-workflow"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/components/settings/AccessRequestsCard.tsx:CopyButton",
+      "type": "function",
+      "name": "CopyButton",
+      "filePath": "src/components/settings/AccessRequestsCard.tsx",
+      "lineRange": [
+        446,
+        467
+      ],
+      "summary": "Copies an invite or email value to the clipboard and briefly reports successful completion.",
+      "tags": [
+        "component",
+        "clipboard",
+        "feedback"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/components/settings/BuddyNotificationsCard.tsx:BuddyNotificationsCard",
+      "type": "function",
+      "name": "BuddyNotificationsCard",
+      "filePath": "src/components/settings/BuddyNotificationsCard.tsx",
+      "lineRange": [
+        50,
+        310
+      ],
+      "summary": "Coordinates buddy push opt-in, delivery diagnostics, snooze windows, and preview preference updates.",
+      "tags": [
+        "component",
+        "buddy-notifications",
+        "push-notifications",
+        "settings"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:src/components/settings/BuddyNotificationsCard.tsx:DeliveryStep",
+      "type": "function",
+      "name": "DeliveryStep",
+      "filePath": "src/components/settings/BuddyNotificationsCard.tsx",
+      "lineRange": [
+        312,
+        330
+      ],
+      "summary": "Displays one labeled step in the notification delivery-status explanation.",
+      "tags": [
+        "component",
+        "status-display",
+        "notifications"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/components/settings/NotificationTimeEditor.tsx:NotificationTimeEditor",
+      "type": "function",
+      "name": "NotificationTimeEditor",
+      "filePath": "src/components/settings/NotificationTimeEditor.tsx",
+      "lineRange": [
+        28,
+        196
+      ],
+      "summary": "Maintains bounded draft clock values and selects native or web controls before saving both fields atomically.",
+      "tags": [
+        "component",
+        "time-input",
+        "notifications",
+        "validation"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/components/settings/NotificationsCard.tsx:NotificationsCard",
+      "type": "function",
+      "name": "NotificationsCard",
+      "filePath": "src/components/settings/NotificationsCard.tsx",
+      "lineRange": [
+        27,
+        369
+      ],
+      "summary": "Coordinates Telegram linking, digest enablement, schedule and timezone updates, email backup, and test delivery.",
+      "tags": [
+        "component",
+        "notifications",
+        "telegram",
+        "settings"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:src/components/settings/NotificationsCard.tsx:DetailField",
+      "type": "function",
+      "name": "DetailField",
+      "filePath": "src/components/settings/NotificationsCard.tsx",
+      "lineRange": [
+        371,
+        389
+      ],
+      "summary": "Provides a consistently labeled and icon-decorated field row for digest settings.",
+      "tags": [
+        "component",
+        "form-field",
+        "settings"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/components/settings/NotificationsCard.tsx:MasterToggle",
+      "type": "function",
+      "name": "MasterToggle",
+      "filePath": "src/components/settings/NotificationsCard.tsx",
+      "lineRange": [
+        391,
+        421
+      ],
+      "summary": "Renders the accessible master digest switch with disabled state and animated visual feedback.",
+      "tags": [
+        "component",
+        "toggle",
+        "accessibility"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/components/settings/StudyNotificationsCard.tsx:StudyNotificationsCard",
+      "type": "function",
+      "name": "StudyNotificationsCard",
+      "filePath": "src/components/settings/StudyNotificationsCard.tsx",
+      "lineRange": [
+        28,
+        226
+      ],
+      "summary": "Loads study notification preferences and manages master consent, category enablement, schedule updates, and test sends.",
+      "tags": [
+        "component",
+        "study-notifications",
+        "scheduling",
+        "settings"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/components/shared/Brand.tsx:BrandMark",
+      "type": "function",
+      "name": "BrandMark",
+      "filePath": "src/components/shared/Brand.tsx",
+      "lineRange": [
+        17,
+        36
+      ],
+      "summary": "Renders the reusable decorative or labeled SVG symbol for the HETU brand.",
+      "tags": [
+        "component",
+        "branding",
+        "svg",
+        "accessibility"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/components/shared/Brand.tsx:Brand",
+      "type": "function",
+      "name": "Brand",
+      "filePath": "src/components/shared/Brand.tsx",
+      "lineRange": [
+        38,
+        59
+      ],
+      "summary": "Combines the brand mark with a size-aware HETU wordmark.",
+      "tags": [
+        "component",
+        "branding",
+        "shared-interface"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/components/shared/LoadingScreen.tsx:LoadingScreen",
+      "type": "function",
+      "name": "LoadingScreen",
+      "filePath": "src/components/shared/LoadingScreen.tsx",
+      "lineRange": [
+        4,
+        19
+      ],
+      "summary": "Renders a centered brand loading indicator with reduced-motion-aware animation.",
+      "tags": [
+        "component",
+        "loading-state",
+        "accessibility"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/components/shared/RequireAuth.tsx:RequireAuth",
+      "type": "function",
+      "name": "RequireAuth",
+      "filePath": "src/components/shared/RequireAuth.tsx",
+      "lineRange": [
+        6,
+        11
+      ],
+      "summary": "Uses authentication state to withhold protected children behind the shared loading screen.",
+      "tags": [
+        "component",
+        "authentication",
+        "route-guard"
+      ],
+      "complexity": "simple"
+    }
+  ],
+  "edges": [
+    {
+      "source": "file:src/components/buddy/BuddyAvatar.tsx",
+      "target": "file:src/lib/utils.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/buddy/BuddyChat.tsx",
+      "target": "file:src/components/buddy/BuddyAvatar.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/buddy/BuddyChat.tsx",
+      "target": "file:src/components/ui/Button.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/buddy/BuddyChat.tsx",
+      "target": "file:src/components/ui/Dialog.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/buddy/BuddyChat.tsx",
+      "target": "file:src/hooks/useMediaQuery.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/buddy/BuddyChat.tsx",
+      "target": "file:src/lib/buddy.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/buddy/BuddyChat.tsx",
+      "target": "file:src/lib/buddyNotifications.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/buddy/BuddyChat.tsx",
+      "target": "file:src/lib/db.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/buddy/BuddyChat.tsx",
+      "target": "file:src/lib/subjectInk.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/buddy/BuddyChat.tsx",
+      "target": "file:src/lib/supabase.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/buddy/BuddyChat.tsx",
+      "target": "file:src/lib/utils.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/buddy/BuddyChat.tsx",
+      "target": "file:src/stores/buddyPresence.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/buddy/BuddyChat.tsx",
+      "target": "file:src/types/index.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/buddy/BuddyPresenceRuntime.tsx",
+      "target": "file:src/lib/buddy.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/buddy/BuddyPresenceRuntime.tsx",
+      "target": "file:src/lib/supabase.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/buddy/BuddyPresenceRuntime.tsx",
+      "target": "file:src/stores/auth.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/buddy/BuddyPresenceRuntime.tsx",
+      "target": "file:src/stores/buddyPresence.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/dashboard/WelcomeOverlay.tsx",
+      "target": "file:src/components/ui/Button.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/dashboard/WelcomeOverlay.tsx",
+      "target": "file:src/lib/db.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/dashboard/WelcomeOverlay.tsx",
+      "target": "file:src/lib/supabase.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/dashboard/WelcomeOverlay.tsx",
+      "target": "file:src/lib/utils.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/dashboard/WelcomeOverlay.tsx",
+      "target": "file:src/stores/auth.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/native/NativeRuntime.tsx",
+      "target": "file:src/lib/native.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/native/NativeRuntime.tsx",
+      "target": "file:src/lib/sync.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/native/NativeRuntime.tsx",
+      "target": "file:src/router.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/native/NativeRuntime.tsx",
+      "target": "file:src/stores/auth.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/native/NativeRuntime.tsx",
+      "target": "file:src/stores/ui.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/notifications/BuddyNotificationRuntime.tsx",
+      "target": "file:src/lib/buddyNotifications.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/notifications/BuddyNotificationRuntime.tsx",
+      "target": "file:src/lib/native.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/notifications/BuddyNotificationRuntime.tsx",
+      "target": "file:src/router.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/notifications/BuddyNotificationRuntime.tsx",
+      "target": "file:src/stores/auth.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/settings/AccessRequestsCard.tsx",
+      "target": "file:src/components/ui/Badge.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/settings/AccessRequestsCard.tsx",
+      "target": "file:src/components/ui/Button.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/settings/AccessRequestsCard.tsx",
+      "target": "file:src/components/ui/Card.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/settings/AccessRequestsCard.tsx",
+      "target": "file:src/components/ui/Empty.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/settings/AccessRequestsCard.tsx",
+      "target": "file:src/components/ui/Textarea.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/settings/AccessRequestsCard.tsx",
+      "target": "file:src/lib/edge.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/settings/AccessRequestsCard.tsx",
+      "target": "file:src/lib/supabase.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/settings/AccessRequestsCard.tsx",
+      "target": "file:src/lib/utils.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/settings/AccessRequestsCard.tsx",
+      "target": "file:src/stores/ui.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/settings/AccessRequestsCard.tsx",
+      "target": "file:src/types/index.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/settings/BuddyNotificationsCard.tsx",
+      "target": "file:src/components/ui/Button.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/settings/BuddyNotificationsCard.tsx",
+      "target": "file:src/components/ui/Card.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/settings/BuddyNotificationsCard.tsx",
+      "target": "file:src/lib/buddyNotifications.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/settings/BuddyNotificationsCard.tsx",
+      "target": "file:src/lib/native.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/settings/BuddyNotificationsCard.tsx",
+      "target": "file:src/lib/utils.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/settings/BuddyNotificationsCard.tsx",
+      "target": "file:src/stores/auth.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/settings/BuddyNotificationsCard.tsx",
+      "target": "file:src/stores/ui.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/settings/BuddyNotificationsCard.tsx",
+      "target": "file:src/types/index.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/settings/NotificationTimeEditor.tsx",
+      "target": "file:src/components/ui/Button.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/settings/NotificationTimeEditor.tsx",
+      "target": "file:src/lib/native.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/settings/NotificationTimeEditor.tsx",
+      "target": "file:src/lib/utils.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/settings/NotificationsCard.tsx",
+      "target": "file:src/components/settings/NotificationTimeEditor.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/settings/NotificationsCard.tsx",
+      "target": "file:src/components/ui/Button.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/settings/NotificationsCard.tsx",
+      "target": "file:src/components/ui/Card.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/settings/NotificationsCard.tsx",
+      "target": "file:src/lib/constants.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/settings/NotificationsCard.tsx",
+      "target": "file:src/lib/supabase.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/settings/NotificationsCard.tsx",
+      "target": "file:src/lib/utils.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/settings/NotificationsCard.tsx",
+      "target": "file:src/stores/auth.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/settings/NotificationsCard.tsx",
+      "target": "file:src/stores/ui.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/settings/NotificationsCard.tsx",
+      "target": "file:src/types/index.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/settings/StudyNotificationsCard.tsx",
+      "target": "file:src/components/settings/NotificationTimeEditor.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/settings/StudyNotificationsCard.tsx",
+      "target": "file:src/components/ui/Button.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/settings/StudyNotificationsCard.tsx",
+      "target": "file:src/components/ui/Card.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/settings/StudyNotificationsCard.tsx",
+      "target": "file:src/lib/buddyNotifications.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/settings/StudyNotificationsCard.tsx",
+      "target": "file:src/lib/studyNotifications.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/settings/StudyNotificationsCard.tsx",
+      "target": "file:src/stores/auth.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/settings/StudyNotificationsCard.tsx",
+      "target": "file:src/stores/ui.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/settings/StudyNotificationsCard.tsx",
+      "target": "file:src/types/index.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/shared/Brand.tsx",
+      "target": "file:src/lib/utils.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/shared/LoadingScreen.tsx",
+      "target": "file:src/components/shared/Brand.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/shared/RequireAuth.tsx",
+      "target": "file:src/components/shared/LoadingScreen.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/shared/RequireAuth.tsx",
+      "target": "file:src/hooks/useAuth.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/buddy/BuddyAvatar.tsx",
+      "target": "function:src/components/buddy/BuddyAvatar.tsx:BuddyAvatar",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/components/buddy/BuddyAvatar.tsx",
+      "target": "function:src/components/buddy/BuddyAvatar.tsx:BuddyAvatar",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/components/buddy/BuddyChat.tsx",
+      "target": "function:src/components/buddy/BuddyChat.tsx:BuddyChat",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/components/buddy/BuddyChat.tsx",
+      "target": "function:src/components/buddy/BuddyChat.tsx:BuddyChat",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/components/buddy/BuddyChat.tsx",
+      "target": "function:src/components/buddy/BuddyChat.tsx:MessageBubble",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/components/buddy/BuddyChat.tsx",
+      "target": "function:src/components/buddy/BuddyChat.tsx:QuestionCard",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/components/buddy/BuddyChat.tsx",
+      "target": "function:src/components/buddy/BuddyChat.tsx:QuestionPicker",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/components/buddy/BuddyPresenceRuntime.tsx",
+      "target": "function:src/components/buddy/BuddyPresenceRuntime.tsx:BuddyPresenceRuntime",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/components/buddy/BuddyPresenceRuntime.tsx",
+      "target": "function:src/components/buddy/BuddyPresenceRuntime.tsx:BuddyPresenceRuntime",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/components/dashboard/WelcomeOverlay.tsx",
+      "target": "function:src/components/dashboard/WelcomeOverlay.tsx:WelcomeOverlay",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/components/dashboard/WelcomeOverlay.tsx",
+      "target": "function:src/components/dashboard/WelcomeOverlay.tsx:WelcomeOverlay",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/components/native/NativeRuntime.tsx",
+      "target": "function:src/components/native/NativeRuntime.tsx:NativeRuntime",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/components/native/NativeRuntime.tsx",
+      "target": "function:src/components/native/NativeRuntime.tsx:NativeRuntime",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/components/notifications/BuddyNotificationRuntime.tsx",
+      "target": "function:src/components/notifications/BuddyNotificationRuntime.tsx:BuddyNotificationRuntime",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/components/notifications/BuddyNotificationRuntime.tsx",
+      "target": "function:src/components/notifications/BuddyNotificationRuntime.tsx:BuddyNotificationRuntime",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/components/settings/AccessRequestsCard.tsx",
+      "target": "function:src/components/settings/AccessRequestsCard.tsx:AccessRequestsCard",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/components/settings/AccessRequestsCard.tsx",
+      "target": "function:src/components/settings/AccessRequestsCard.tsx:AccessRequestsCard",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/components/settings/AccessRequestsCard.tsx",
+      "target": "function:src/components/settings/AccessRequestsCard.tsx:TabButton",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/components/settings/AccessRequestsCard.tsx",
+      "target": "function:src/components/settings/AccessRequestsCard.tsx:RequestRow",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/components/settings/AccessRequestsCard.tsx",
+      "target": "function:src/components/settings/AccessRequestsCard.tsx:CopyButton",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/components/settings/BuddyNotificationsCard.tsx",
+      "target": "function:src/components/settings/BuddyNotificationsCard.tsx:BuddyNotificationsCard",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/components/settings/BuddyNotificationsCard.tsx",
+      "target": "function:src/components/settings/BuddyNotificationsCard.tsx:BuddyNotificationsCard",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/components/settings/BuddyNotificationsCard.tsx",
+      "target": "function:src/components/settings/BuddyNotificationsCard.tsx:DeliveryStep",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/components/settings/NotificationTimeEditor.tsx",
+      "target": "function:src/components/settings/NotificationTimeEditor.tsx:NotificationTimeEditor",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/components/settings/NotificationTimeEditor.tsx",
+      "target": "function:src/components/settings/NotificationTimeEditor.tsx:NotificationTimeEditor",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/components/settings/NotificationsCard.tsx",
+      "target": "function:src/components/settings/NotificationsCard.tsx:NotificationsCard",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/components/settings/NotificationsCard.tsx",
+      "target": "function:src/components/settings/NotificationsCard.tsx:NotificationsCard",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/components/settings/NotificationsCard.tsx",
+      "target": "function:src/components/settings/NotificationsCard.tsx:DetailField",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/components/settings/NotificationsCard.tsx",
+      "target": "function:src/components/settings/NotificationsCard.tsx:MasterToggle",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/components/settings/StudyNotificationsCard.tsx",
+      "target": "function:src/components/settings/StudyNotificationsCard.tsx:StudyNotificationsCard",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/components/settings/StudyNotificationsCard.tsx",
+      "target": "function:src/components/settings/StudyNotificationsCard.tsx:StudyNotificationsCard",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/components/shared/Brand.tsx",
+      "target": "function:src/components/shared/Brand.tsx:BrandMark",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/components/shared/Brand.tsx",
+      "target": "function:src/components/shared/Brand.tsx:BrandMark",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/components/shared/Brand.tsx",
+      "target": "function:src/components/shared/Brand.tsx:Brand",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/components/shared/Brand.tsx",
+      "target": "function:src/components/shared/Brand.tsx:Brand",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/components/shared/LoadingScreen.tsx",
+      "target": "function:src/components/shared/LoadingScreen.tsx:LoadingScreen",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/components/shared/LoadingScreen.tsx",
+      "target": "function:src/components/shared/LoadingScreen.tsx:LoadingScreen",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/components/shared/RequireAuth.tsx",
+      "target": "function:src/components/shared/RequireAuth.tsx:RequireAuth",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/components/shared/RequireAuth.tsx",
+      "target": "function:src/components/shared/RequireAuth.tsx:RequireAuth",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    }
+  ]
+}

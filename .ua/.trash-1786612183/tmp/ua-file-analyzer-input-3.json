@@ -1,0 +1,340 @@
+{
+  "projectRoot": "/Users/bkalyankrishnareddy/Desktop/GATE PREP/hetu",
+  "batchFiles": [
+    {
+      "path": "src/components/shared/RootErrorBoundary.tsx",
+      "language": "typescript",
+      "sizeLines": 69,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/components/shared/ThemeToggle.tsx",
+      "language": "typescript",
+      "sizeLines": 50,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/components/ui/Button.tsx",
+      "language": "typescript",
+      "sizeLines": 78,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/components/ui/Toast.tsx",
+      "language": "typescript",
+      "sizeLines": 56,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/hooks/useMediaQuery.ts",
+      "language": "typescript",
+      "sizeLines": 20,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/lib/buddy.ts",
+      "language": "typescript",
+      "sizeLines": 112,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/lib/buddyNotifications.ts",
+      "language": "typescript",
+      "sizeLines": 447,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/lib/edge.ts",
+      "language": "typescript",
+      "sizeLines": 303,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/lib/lazyWithRetry.ts",
+      "language": "typescript",
+      "sizeLines": 37,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/lib/native.ts",
+      "language": "typescript",
+      "sizeLines": 113,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/lib/queryClient.ts",
+      "language": "typescript",
+      "sizeLines": 11,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/lib/studyNotifications.ts",
+      "language": "typescript",
+      "sizeLines": 85,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/lib/supabase.ts",
+      "language": "typescript",
+      "sizeLines": 34,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/lib/theme.ts",
+      "language": "typescript",
+      "sizeLines": 24,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main.tsx",
+      "language": "typescript",
+      "sizeLines": 86,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/pages/Auth.tsx",
+      "language": "typescript",
+      "sizeLines": 182,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/pages/Buddy.tsx",
+      "language": "typescript",
+      "sizeLines": 1008,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/pages/ForgotPin.tsx",
+      "language": "typescript",
+      "sizeLines": 140,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/pages/NotFound.tsx",
+      "language": "typescript",
+      "sizeLines": 22,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/pages/RequestAccess.tsx",
+      "language": "typescript",
+      "sizeLines": 334,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/pages/ResetPin.tsx",
+      "language": "typescript",
+      "sizeLines": 172,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/pages/Settings.tsx",
+      "language": "typescript",
+      "sizeLines": 1067,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/pages/Signup.tsx",
+      "language": "typescript",
+      "sizeLines": 309,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/router.tsx",
+      "language": "typescript",
+      "sizeLines": 100,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/stores/auth.ts",
+      "language": "typescript",
+      "sizeLines": 199,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/stores/buddyPresence.ts",
+      "language": "typescript",
+      "sizeLines": 23,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/stores/prefs.ts",
+      "language": "typescript",
+      "sizeLines": 98,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/stores/ui.ts",
+      "language": "typescript",
+      "sizeLines": 39,
+      "fileCategory": "code"
+    }
+  ],
+  "batchImportData": {
+    "src/components/shared/RootErrorBoundary.tsx": [
+      "src/components/shared/Brand.tsx"
+    ],
+    "src/components/shared/ThemeToggle.tsx": [
+      "src/lib/native.ts",
+      "src/lib/theme.ts",
+      "src/lib/utils.ts",
+      "src/stores/prefs.ts"
+    ],
+    "src/components/ui/Button.tsx": [
+      "src/lib/native.ts",
+      "src/lib/utils.ts"
+    ],
+    "src/components/ui/Toast.tsx": [
+      "src/lib/native.ts",
+      "src/lib/utils.ts",
+      "src/stores/ui.ts"
+    ],
+    "src/hooks/useMediaQuery.ts": [],
+    "src/lib/buddy.ts": [
+      "src/types/index.ts"
+    ],
+    "src/lib/buddyNotifications.ts": [
+      "src/lib/native.ts",
+      "src/lib/supabase.ts"
+    ],
+    "src/lib/edge.ts": [
+      "src/lib/supabase.ts"
+    ],
+    "src/lib/lazyWithRetry.ts": [],
+    "src/lib/native.ts": [
+      "src/lib/theme.ts",
+      "src/stores/prefs.ts"
+    ],
+    "src/lib/queryClient.ts": [],
+    "src/lib/studyNotifications.ts": [
+      "src/lib/supabase.ts"
+    ],
+    "src/lib/supabase.ts": [],
+    "src/lib/theme.ts": [],
+    "src/main.tsx": [
+      "src/App.tsx",
+      "src/index.css"
+    ],
+    "src/pages/Auth.tsx": [
+      "src/components/auth/PinInput.tsx",
+      "src/components/shared/Brand.tsx",
+      "src/components/shared/ThemeToggle.tsx",
+      "src/components/ui/Button.tsx",
+      "src/components/ui/Input.tsx",
+      "src/hooks/useAuth.ts",
+      "src/lib/constants.ts",
+      "src/lib/supabase.ts",
+      "src/stores/auth.ts"
+    ],
+    "src/pages/Buddy.tsx": [
+      "src/components/buddy/BuddyAvatar.tsx",
+      "src/components/buddy/BuddyChat.tsx",
+      "src/components/layout/PageHeader.tsx",
+      "src/components/ui/Button.tsx",
+      "src/components/ui/Card.tsx",
+      "src/components/ui/Dialog.tsx",
+      "src/components/ui/Textarea.tsx",
+      "src/hooks/useAuth.ts",
+      "src/hooks/useMediaQuery.ts",
+      "src/lib/buddy.ts",
+      "src/lib/edge.ts",
+      "src/lib/native.ts",
+      "src/lib/supabase.ts",
+      "src/lib/utils.ts",
+      "src/stores/ui.ts",
+      "src/types/index.ts"
+    ],
+    "src/pages/ForgotPin.tsx": [
+      "src/components/shared/Brand.tsx",
+      "src/components/shared/ThemeToggle.tsx",
+      "src/components/ui/Button.tsx",
+      "src/components/ui/Input.tsx",
+      "src/hooks/useAuth.ts",
+      "src/lib/constants.ts",
+      "src/lib/edge.ts",
+      "src/lib/supabase.ts"
+    ],
+    "src/pages/NotFound.tsx": [
+      "src/components/shared/ThemeToggle.tsx"
+    ],
+    "src/pages/RequestAccess.tsx": [
+      "src/components/shared/Brand.tsx",
+      "src/components/shared/ThemeToggle.tsx",
+      "src/components/ui/Button.tsx",
+      "src/components/ui/Input.tsx",
+      "src/components/ui/Textarea.tsx",
+      "src/hooks/useAuth.ts",
+      "src/lib/constants.ts",
+      "src/lib/edge.ts",
+      "src/lib/utils.ts"
+    ],
+    "src/pages/ResetPin.tsx": [
+      "src/components/auth/PinInput.tsx",
+      "src/components/shared/Brand.tsx",
+      "src/components/shared/ThemeToggle.tsx",
+      "src/components/ui/Button.tsx",
+      "src/lib/constants.ts",
+      "src/lib/supabase.ts"
+    ],
+    "src/pages/Settings.tsx": [
+      "src/components/layout/PageHeader.tsx",
+      "src/components/settings/AccessRequestsCard.tsx",
+      "src/components/settings/BuddyNotificationsCard.tsx",
+      "src/components/settings/NotificationsCard.tsx",
+      "src/components/settings/StudyNotificationsCard.tsx",
+      "src/components/ui/Badge.tsx",
+      "src/components/ui/Button.tsx",
+      "src/components/ui/Card.tsx",
+      "src/components/ui/Empty.tsx",
+      "src/components/ui/Input.tsx",
+      "src/components/ui/Select.tsx",
+      "src/hooks/useAuth.ts",
+      "src/lib/backup.ts",
+      "src/lib/constants.ts",
+      "src/lib/isolation.ts",
+      "src/lib/native.ts",
+      "src/lib/progress-export.ts",
+      "src/lib/supabase.ts",
+      "src/lib/theme.ts",
+      "src/lib/utils.ts",
+      "src/stores/auth.ts",
+      "src/stores/prefs.ts",
+      "src/stores/ui.ts",
+      "src/types/index.ts"
+    ],
+    "src/pages/Signup.tsx": [
+      "src/components/auth/PinInput.tsx",
+      "src/components/shared/Brand.tsx",
+      "src/components/shared/ThemeToggle.tsx",
+      "src/components/ui/Button.tsx",
+      "src/components/ui/Input.tsx",
+      "src/hooks/useAuth.ts",
+      "src/lib/constants.ts",
+      "src/lib/edge.ts",
+      "src/lib/supabase.ts",
+      "src/lib/utils.ts",
+      "src/stores/auth.ts"
+    ],
+    "src/router.tsx": [
+      "src/components/layout/Shell.tsx",
+      "src/components/shared/LoadingScreen.tsx",
+      "src/components/shared/RequireAuth.tsx",
+      "src/components/shared/RootErrorBoundary.tsx",
+      "src/lib/lazyWithRetry.ts"
+    ],
+    "src/stores/auth.ts": [
+      "src/lib/buddyNotifications.ts",
+      "src/lib/constants.ts",
+      "src/lib/db.ts",
+      "src/lib/edge.ts",
+      "src/lib/isolation.ts",
+      "src/lib/supabase.ts",
+      "src/types/index.ts"
+    ],
+    "src/stores/buddyPresence.ts": [],
+    "src/stores/prefs.ts": [
+      "src/lib/theme.ts"
+    ],
+    "src/stores/ui.ts": []
+  }
+}

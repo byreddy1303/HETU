@@ -1,0 +1,1760 @@
+{
+  "nodes": [
+    {
+      "id": "file:src/__tests__/cron-auth.test.ts",
+      "type": "file",
+      "name": "cron-auth.test.ts",
+      "filePath": "src/__tests__/cron-auth.test.ts",
+      "summary": "Verifies JWT role-claim extraction for valid service-role tokens, non-service roles, malformed tokens, and missing claims.",
+      "tags": [
+        "test",
+        "vitest",
+        "authorization"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/__tests__/digest-schedule.test.ts",
+      "type": "file",
+      "name": "digest-schedule.test.ts",
+      "filePath": "src/__tests__/digest-schedule.test.ts",
+      "summary": "Exercises timezone-aware digest clock calculation and the grace-window logic that decides when a scheduled digest is due.",
+      "tags": [
+        "test",
+        "vitest",
+        "scheduling"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/__tests__/study-notification-copy.test.ts",
+      "type": "file",
+      "name": "study-notification-copy.test.ts",
+      "filePath": "src/__tests__/study-notification-copy.test.ts",
+      "summary": "Validates study-plan parsing and concise notification copy for detailed day plans and daily PYQ reminders.",
+      "tags": [
+        "test",
+        "vitest",
+        "study-notifications"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/__tests__/telegram.test.ts",
+      "type": "file",
+      "name": "telegram.test.ts",
+      "filePath": "src/__tests__/telegram.test.ts",
+      "summary": "Covers Telegram command parsing, timezone date helpers, timetable and digest renderers, message limits, and deterministic motivational content.",
+      "tags": [
+        "test",
+        "vitest",
+        "telegram"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:src/components/shared/DailyQuote.tsx",
+      "type": "file",
+      "name": "DailyQuote.tsx",
+      "filePath": "src/components/shared/DailyQuote.tsx",
+      "summary": "Renders a deterministic motivational quote selected from the current date and authenticated user, giving the shared shell stable daily encouragement.",
+      "tags": [
+        "component",
+        "daily-quote",
+        "motivational-content"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/components/shared/DailyQuote.tsx:DailyQuote",
+      "type": "function",
+      "name": "DailyQuote",
+      "filePath": "src/components/shared/DailyQuote.tsx",
+      "lineRange": [
+        5,
+        24
+      ],
+      "summary": "Selects and renders the authenticated user’s deterministic quote for the current day.",
+      "tags": [
+        "component",
+        "react",
+        "daily-quote"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/lib/motivational-quotes.ts",
+      "type": "file",
+      "name": "motivational-quotes.ts",
+      "filePath": "src/lib/motivational-quotes.ts",
+      "summary": "Exposes the shared quote catalog through browser-facing aliases and provides deterministic daily and random quote selection helpers.",
+      "tags": [
+        "utility",
+        "motivational-content",
+        "quote-selection"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/motivational-quotes.ts:quoteForDate",
+      "type": "function",
+      "name": "quoteForDate",
+      "filePath": "src/lib/motivational-quotes.ts",
+      "lineRange": [
+        15,
+        17
+      ],
+      "summary": "Selects a stable motivational quote for an ISO date and optional seed salt.",
+      "tags": [
+        "utility",
+        "motivational-content",
+        "quote-selection"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/motivational-quotes.ts:randomQuote",
+      "type": "function",
+      "name": "randomQuote",
+      "filePath": "src/lib/motivational-quotes.ts",
+      "lineRange": [
+        20,
+        23
+      ],
+      "summary": "Returns a randomly selected motivational quote from the shared catalog.",
+      "tags": [
+        "utility",
+        "motivational-content",
+        "quote-selection"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/lib/one_liners.ts",
+      "type": "file",
+      "name": "one_liners.ts",
+      "filePath": "src/lib/one_liners.ts",
+      "summary": "Provides a compatibility alias for motivational one-liners and deterministic date-and-seed selection.",
+      "tags": [
+        "utility",
+        "motivational-content",
+        "quote-selection"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/one_liners.ts:pickOneLinerFor",
+      "type": "function",
+      "name": "pickOneLinerFor",
+      "filePath": "src/lib/one_liners.ts",
+      "lineRange": [
+        12,
+        14
+      ],
+      "summary": "Selects a stable one-liner for a date and seed through the shared quote picker.",
+      "tags": [
+        "utility",
+        "motivational-content",
+        "quote-selection"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:supabase/functions/_shared/cors.ts",
+      "type": "file",
+      "name": "cors.ts",
+      "filePath": "supabase/functions/_shared/cors.ts",
+      "summary": "Defines permissive CORS headers and a consistent JSON Response helper reused by Supabase Edge Function handlers.",
+      "tags": [
+        "service",
+        "http",
+        "cors"
+      ],
+      "complexity": "simple",
+      "languageNotes": "TypeScript targeting the Deno-based Supabase Functions runtime."
+    },
+    {
+      "id": "function:supabase/functions/_shared/cors.ts:json",
+      "type": "function",
+      "name": "json",
+      "filePath": "supabase/functions/_shared/cors.ts",
+      "lineRange": [
+        7,
+        12
+      ],
+      "summary": "Serializes a value into a JSON Response with shared CORS and content-type headers.",
+      "tags": [
+        "utility",
+        "http",
+        "serialization"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:supabase/functions/_shared/cron-auth.ts",
+      "type": "file",
+      "name": "cron-auth.ts",
+      "filePath": "supabase/functions/_shared/cron-auth.ts",
+      "summary": "Decodes JWT payloads defensively to identify service-role cron invocations without accepting malformed tokens.",
+      "tags": [
+        "service",
+        "authorization",
+        "jwt"
+      ],
+      "complexity": "simple",
+      "languageNotes": "TypeScript targeting the Deno-based Supabase Functions runtime."
+    },
+    {
+      "id": "function:supabase/functions/_shared/cron-auth.ts:jwtRoleClaim",
+      "type": "function",
+      "name": "jwtRoleClaim",
+      "filePath": "supabase/functions/_shared/cron-auth.ts",
+      "lineRange": [
+        6,
+        18
+      ],
+      "summary": "Safely decodes a JWT payload and returns its string role claim when available.",
+      "tags": [
+        "utility",
+        "authorization",
+        "jwt"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:supabase/functions/_shared/digest-schedule.ts",
+      "type": "file",
+      "name": "digest-schedule.ts",
+      "filePath": "supabase/functions/_shared/digest-schedule.ts",
+      "summary": "Computes a user-local calendar clock and determines whether a configured digest time falls within the current grace window.",
+      "tags": [
+        "service",
+        "scheduling",
+        "timezone"
+      ],
+      "complexity": "moderate",
+      "languageNotes": "TypeScript targeting the Deno-based Supabase Functions runtime."
+    },
+    {
+      "id": "function:supabase/functions/_shared/digest-schedule.ts:localDigestClock",
+      "type": "function",
+      "name": "localDigestClock",
+      "filePath": "supabase/functions/_shared/digest-schedule.ts",
+      "lineRange": [
+        9,
+        46
+      ],
+      "summary": "Converts an instant into local date, weekday, hour, and minute fields for a requested timezone.",
+      "tags": [
+        "utility",
+        "scheduling",
+        "timezone"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:supabase/functions/_shared/digest-schedule.ts:isDigestTimeDue",
+      "type": "function",
+      "name": "isDigestTimeDue",
+      "filePath": "supabase/functions/_shared/digest-schedule.ts",
+      "lineRange": [
+        53,
+        71
+      ],
+      "summary": "Checks whether a local clock is at or shortly after a configured digest time.",
+      "tags": [
+        "utility",
+        "scheduling",
+        "timezone"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:supabase/functions/_shared/email.ts",
+      "type": "file",
+      "name": "email.ts",
+      "filePath": "supabase/functions/_shared/email.ts",
+      "summary": "Routes transactional email through Gmail or Resend and builds escaped HTML templates for access, invite, PIN-reset, and buddy workflows.",
+      "tags": [
+        "service",
+        "email",
+        "notification-copy"
+      ],
+      "complexity": "complex",
+      "languageNotes": "TypeScript targeting the Deno-based Supabase Functions runtime."
+    },
+    {
+      "id": "function:supabase/functions/_shared/email.ts:sendViaGmail",
+      "type": "function",
+      "name": "sendViaGmail",
+      "filePath": "supabase/functions/_shared/email.ts",
+      "lineRange": [
+        45,
+        70
+      ],
+      "summary": "Sends one transactional email through a configured Gmail SMTP transport.",
+      "tags": [
+        "service",
+        "email",
+        "notification-copy"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:supabase/functions/_shared/email.ts:sendViaResend",
+      "type": "function",
+      "name": "sendViaResend",
+      "filePath": "supabase/functions/_shared/email.ts",
+      "lineRange": [
+        72,
+        99
+      ],
+      "summary": "Sends one transactional email through the Resend HTTP API and normalizes provider errors.",
+      "tags": [
+        "service",
+        "email",
+        "notification-copy"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:supabase/functions/_shared/email.ts:sendEmail",
+      "type": "function",
+      "name": "sendEmail",
+      "filePath": "supabase/functions/_shared/email.ts",
+      "lineRange": [
+        101,
+        112
+      ],
+      "summary": "Chooses the configured email provider and returns a normalized delivery result.",
+      "tags": [
+        "service",
+        "email",
+        "notification-copy"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:supabase/functions/_shared/email.ts:shell",
+      "type": "function",
+      "name": "shell",
+      "filePath": "supabase/functions/_shared/email.ts",
+      "lineRange": [
+        116,
+        137
+      ],
+      "summary": "Wraps notification-specific markup in the shared branded responsive email document.",
+      "tags": [
+        "service",
+        "email",
+        "notification-copy"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:supabase/functions/_shared/email.ts:newRequestNotification",
+      "type": "function",
+      "name": "newRequestNotification",
+      "filePath": "supabase/functions/_shared/email.ts",
+      "lineRange": [
+        150,
+        179
+      ],
+      "summary": "Builds the owner email announcing a new access request.",
+      "tags": [
+        "service",
+        "email",
+        "notification-copy"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:supabase/functions/_shared/email.ts:inviteApproved",
+      "type": "function",
+      "name": "inviteApproved",
+      "filePath": "supabase/functions/_shared/email.ts",
+      "lineRange": [
+        181,
+        203
+      ],
+      "summary": "Builds the requester email containing an approved signup invitation.",
+      "tags": [
+        "service",
+        "email",
+        "notification-copy"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:supabase/functions/_shared/email.ts:pinResetRequested",
+      "type": "function",
+      "name": "pinResetRequested",
+      "filePath": "supabase/functions/_shared/email.ts",
+      "lineRange": [
+        205,
+        224
+      ],
+      "summary": "Builds the account-recovery email containing a PIN reset link.",
+      "tags": [
+        "service",
+        "email",
+        "notification-copy"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:supabase/functions/_shared/email.ts:buddyRequestReceived",
+      "type": "function",
+      "name": "buddyRequestReceived",
+      "filePath": "supabase/functions/_shared/email.ts",
+      "lineRange": [
+        226,
+        246
+      ],
+      "summary": "Builds the email notifying a user that a buddy request arrived.",
+      "tags": [
+        "service",
+        "email",
+        "notification-copy"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:supabase/functions/_shared/email.ts:inviteDeclined",
+      "type": "function",
+      "name": "inviteDeclined",
+      "filePath": "supabase/functions/_shared/email.ts",
+      "lineRange": [
+        248,
+        265
+      ],
+      "summary": "Builds the email explaining that an access request was declined.",
+      "tags": [
+        "service",
+        "email",
+        "notification-copy"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:supabase/functions/_shared/push.ts",
+      "type": "file",
+      "name": "push.ts",
+      "filePath": "supabase/functions/_shared/push.ts",
+      "summary": "Provides Web Push and Firebase Cloud Messaging delivery, service-account token exchange, payload normalization, and permanent-error classification.",
+      "tags": [
+        "service",
+        "push-notifications",
+        "delivery"
+      ],
+      "complexity": "complex",
+      "languageNotes": "TypeScript targeting the Deno-based Supabase Functions runtime."
+    },
+    {
+      "id": "function:supabase/functions/_shared/push.ts:truncate",
+      "type": "function",
+      "name": "truncate",
+      "filePath": "supabase/functions/_shared/push.ts",
+      "lineRange": [
+        55,
+        58
+      ],
+      "summary": "Clamps optional push text to a provider-safe maximum length.",
+      "tags": [
+        "service",
+        "push-notifications",
+        "delivery"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:supabase/functions/_shared/push.ts:serviceAccount",
+      "type": "function",
+      "name": "serviceAccount",
+      "filePath": "supabase/functions/_shared/push.ts",
+      "lineRange": [
+        60,
+        78
+      ],
+      "summary": "Loads and validates Firebase service-account credentials from the runtime environment.",
+      "tags": [
+        "service",
+        "push-notifications",
+        "delivery"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:supabase/functions/_shared/push.ts:getFcmAccessToken",
+      "type": "function",
+      "name": "getFcmAccessToken",
+      "filePath": "supabase/functions/_shared/push.ts",
+      "lineRange": [
+        80,
+        122
+      ],
+      "summary": "Creates a signed service-account assertion and exchanges it for a cached Firebase access token.",
+      "tags": [
+        "service",
+        "push-notifications",
+        "delivery"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:supabase/functions/_shared/push.ts:sendWebPush",
+      "type": "function",
+      "name": "sendWebPush",
+      "filePath": "supabase/functions/_shared/push.ts",
+      "lineRange": [
+        148,
+        188
+      ],
+      "summary": "Delivers normalized notification copy to a browser Web Push subscription.",
+      "tags": [
+        "service",
+        "push-notifications",
+        "delivery"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:supabase/functions/_shared/push.ts:sendNativePush",
+      "type": "function",
+      "name": "sendNativePush",
+      "filePath": "supabase/functions/_shared/push.ts",
+      "lineRange": [
+        190,
+        316
+      ],
+      "summary": "Builds and sends an Android FCM payload with routes, actions, and optional inline reply metadata.",
+      "tags": [
+        "service",
+        "push-notifications",
+        "delivery"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:supabase/functions/_shared/push.ts:deliverToSubscription",
+      "type": "function",
+      "name": "deliverToSubscription",
+      "filePath": "supabase/functions/_shared/push.ts",
+      "lineRange": [
+        318,
+        343
+      ],
+      "summary": "Dispatches notification copy through the web or native provider selected by the subscription platform.",
+      "tags": [
+        "service",
+        "push-notifications",
+        "delivery"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:supabase/functions/_shared/push.ts:PushDeliveryError",
+      "type": "class",
+      "name": "PushDeliveryError",
+      "filePath": "supabase/functions/_shared/push.ts",
+      "lineRange": [
+        40,
+        50
+      ],
+      "summary": "Carries normalized push-provider failure details, including whether a subscription should be disabled permanently.",
+      "tags": [
+        "error-handling",
+        "push-notifications",
+        "delivery"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:supabase/functions/_shared/quotes.ts",
+      "type": "file",
+      "name": "quotes.ts",
+      "filePath": "supabase/functions/_shared/quotes.ts",
+      "summary": "Stores the curated motivational quote catalog and selects stable daily quotes and time-sensitive greetings.",
+      "tags": [
+        "service",
+        "motivational-content",
+        "quote-selection"
+      ],
+      "complexity": "moderate",
+      "languageNotes": "TypeScript targeting the Deno-based Supabase Functions runtime."
+    },
+    {
+      "id": "function:supabase/functions/_shared/quotes.ts:pickQuoteForDay",
+      "type": "function",
+      "name": "pickQuoteForDay",
+      "filePath": "supabase/functions/_shared/quotes.ts",
+      "lineRange": [
+        92,
+        100
+      ],
+      "summary": "Hashes a date and seed into a stable index in the curated quote catalog.",
+      "tags": [
+        "utility",
+        "motivational-content",
+        "quote-selection"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:supabase/functions/_shared/quotes.ts:greetingForHour",
+      "type": "function",
+      "name": "greetingForHour",
+      "filePath": "supabase/functions/_shared/quotes.ts",
+      "lineRange": [
+        102,
+        109
+      ],
+      "summary": "Returns a personalized morning, afternoon, or evening greeting for a local hour.",
+      "tags": [
+        "utility",
+        "motivational-content",
+        "quote-selection"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:supabase/functions/_shared/study-notification-copy.ts",
+      "type": "file",
+      "name": "study-notification-copy.ts",
+      "filePath": "supabase/functions/_shared/study-notification-copy.ts",
+      "summary": "Parses planner blocks and produces compact, actionable copy for detailed study-plan and daily PYQ notifications.",
+      "tags": [
+        "service",
+        "study-notifications",
+        "notification-copy"
+      ],
+      "complexity": "moderate",
+      "languageNotes": "TypeScript targeting the Deno-based Supabase Functions runtime."
+    },
+    {
+      "id": "function:supabase/functions/_shared/study-notification-copy.ts:formatMinutes",
+      "type": "function",
+      "name": "formatMinutes",
+      "filePath": "supabase/functions/_shared/study-notification-copy.ts",
+      "lineRange": [
+        45,
+        51
+      ],
+      "summary": "Formats a minute count as compact hours-and-minutes notification text.",
+      "tags": [
+        "utility",
+        "study-planning",
+        "notification-copy"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:supabase/functions/_shared/study-notification-copy.ts:parseStudyPlanBlocks",
+      "type": "function",
+      "name": "parseStudyPlanBlocks",
+      "filePath": "supabase/functions/_shared/study-notification-copy.ts",
+      "lineRange": [
+        53,
+        74
+      ],
+      "summary": "Parses serialized planner data into normalized study blocks while tolerating invalid input.",
+      "tags": [
+        "utility",
+        "study-planning",
+        "notification-copy"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:supabase/functions/_shared/study-notification-copy.ts:detailedDayPlanCopy",
+      "type": "function",
+      "name": "detailedDayPlanCopy",
+      "filePath": "supabase/functions/_shared/study-notification-copy.ts",
+      "lineRange": [
+        84,
+        131
+      ],
+      "summary": "Builds concise notification title and body text from the day’s remaining planner blocks.",
+      "tags": [
+        "utility",
+        "study-planning",
+        "notification-copy"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:supabase/functions/_shared/study-notification-copy.ts:dailyPyqCopy",
+      "type": "function",
+      "name": "dailyPyqCopy",
+      "filePath": "supabase/functions/_shared/study-notification-copy.ts",
+      "lineRange": [
+        137,
+        160
+      ],
+      "summary": "Builds a daily PYQ reminder from unfinished PYQ blocks and attempt context.",
+      "tags": [
+        "utility",
+        "study-planning",
+        "notification-copy"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:supabase/functions/_shared/telegram.ts",
+      "type": "file",
+      "name": "telegram.ts",
+      "filePath": "supabase/functions/_shared/telegram.ts",
+      "summary": "Implements Telegram command parsing, timezone date helpers, HTML-safe study-plan renderers, and Bot API message delivery.",
+      "tags": [
+        "service",
+        "telegram",
+        "message-formatting"
+      ],
+      "complexity": "complex",
+      "languageNotes": "TypeScript targeting the Deno-based Supabase Functions runtime."
+    },
+    {
+      "id": "function:supabase/functions/_shared/telegram.ts:parseTelegramCommand",
+      "type": "function",
+      "name": "parseTelegramCommand",
+      "filePath": "supabase/functions/_shared/telegram.ts",
+      "lineRange": [
+        61,
+        73
+      ],
+      "summary": "Normalizes Telegram bot input into a supported command without bot-name suffixes.",
+      "tags": [
+        "service",
+        "telegram",
+        "message-formatting"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:supabase/functions/_shared/telegram.ts:parseTelegramStudySessions",
+      "type": "function",
+      "name": "parseTelegramStudySessions",
+      "filePath": "supabase/functions/_shared/telegram.ts",
+      "lineRange": [
+        75,
+        97
+      ],
+      "summary": "Parses stored planner session data into normalized Telegram-renderable sessions.",
+      "tags": [
+        "service",
+        "telegram",
+        "message-formatting"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:supabase/functions/_shared/telegram.ts:isoDateForTimezone",
+      "type": "function",
+      "name": "isoDateForTimezone",
+      "filePath": "supabase/functions/_shared/telegram.ts",
+      "lineRange": [
+        99,
+        112
+      ],
+      "summary": "Formats an instant as an ISO calendar date in a requested timezone.",
+      "tags": [
+        "service",
+        "telegram",
+        "message-formatting"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:supabase/functions/_shared/telegram.ts:weekIsoDatesForTimezone",
+      "type": "function",
+      "name": "weekIsoDatesForTimezone",
+      "filePath": "supabase/functions/_shared/telegram.ts",
+      "lineRange": [
+        121,
+        127
+      ],
+      "summary": "Returns the seven local ISO dates in the week containing the supplied instant.",
+      "tags": [
+        "service",
+        "telegram",
+        "message-formatting"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:supabase/functions/_shared/telegram.ts:tomorrowIsoDateForTimezone",
+      "type": "function",
+      "name": "tomorrowIsoDateForTimezone",
+      "filePath": "supabase/functions/_shared/telegram.ts",
+      "lineRange": [
+        129,
+        131
+      ],
+      "summary": "Returns tomorrow’s local ISO date for a supplied instant and timezone.",
+      "tags": [
+        "service",
+        "telegram",
+        "message-formatting"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:supabase/functions/_shared/telegram.ts:escapeTelegramHtml",
+      "type": "function",
+      "name": "escapeTelegramHtml",
+      "filePath": "supabase/functions/_shared/telegram.ts",
+      "lineRange": [
+        133,
+        139
+      ],
+      "summary": "Escapes user-controlled text for Telegram’s HTML parse mode.",
+      "tags": [
+        "service",
+        "telegram",
+        "message-formatting"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:supabase/functions/_shared/telegram.ts:airJournalUrl",
+      "type": "function",
+      "name": "airJournalUrl",
+      "filePath": "supabase/functions/_shared/telegram.ts",
+      "lineRange": [
+        141,
+        145
+      ],
+      "summary": "Builds an application deep link for a normalized route.",
+      "tags": [
+        "service",
+        "telegram",
+        "message-formatting"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:supabase/functions/_shared/telegram.ts:escapeCompactTelegramHtml",
+      "type": "function",
+      "name": "escapeCompactTelegramHtml",
+      "filePath": "supabase/functions/_shared/telegram.ts",
+      "lineRange": [
+        160,
+        172
+      ],
+      "summary": "Compacts visible text and escapes it without exceeding Telegram’s encoded-length constraints.",
+      "tags": [
+        "service",
+        "telegram",
+        "message-formatting"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:supabase/functions/_shared/telegram.ts:timetableDayLabel",
+      "type": "function",
+      "name": "timetableDayLabel",
+      "filePath": "supabase/functions/_shared/telegram.ts",
+      "lineRange": [
+        174,
+        184
+      ],
+      "summary": "Formats an ISO date as a short weekday-and-day timetable label.",
+      "tags": [
+        "service",
+        "telegram",
+        "message-formatting"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:supabase/functions/_shared/telegram.ts:timetableWeekLabel",
+      "type": "function",
+      "name": "timetableWeekLabel",
+      "filePath": "supabase/functions/_shared/telegram.ts",
+      "lineRange": [
+        186,
+        196
+      ],
+      "summary": "Formats an ISO date as a short week range label.",
+      "tags": [
+        "service",
+        "telegram",
+        "message-formatting"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:supabase/functions/_shared/telegram.ts:fullDateLabel",
+      "type": "function",
+      "name": "fullDateLabel",
+      "filePath": "supabase/functions/_shared/telegram.ts",
+      "lineRange": [
+        198,
+        208
+      ],
+      "summary": "Formats an ISO date as a full human-readable calendar label.",
+      "tags": [
+        "service",
+        "telegram",
+        "message-formatting"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:supabase/functions/_shared/telegram.ts:renderTelegramDay",
+      "type": "function",
+      "name": "renderTelegramDay",
+      "filePath": "supabase/functions/_shared/telegram.ts",
+      "lineRange": [
+        210,
+        260
+      ],
+      "summary": "Renders one day’s sessions, due re-attempts, and actions as bounded Telegram HTML.",
+      "tags": [
+        "service",
+        "telegram",
+        "message-formatting"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:supabase/functions/_shared/telegram.ts:renderTelegramDigest",
+      "type": "function",
+      "name": "renderTelegramDigest",
+      "filePath": "supabase/functions/_shared/telegram.ts",
+      "lineRange": [
+        262,
+        264
+      ],
+      "summary": "Renders the standard daily Telegram digest from study context.",
+      "tags": [
+        "service",
+        "telegram",
+        "message-formatting"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:supabase/functions/_shared/telegram.ts:renderTelegramTodayUpdate",
+      "type": "function",
+      "name": "renderTelegramTodayUpdate",
+      "filePath": "supabase/functions/_shared/telegram.ts",
+      "lineRange": [
+        266,
+        278
+      ],
+      "summary": "Renders an on-demand current-day Telegram plan update.",
+      "tags": [
+        "service",
+        "telegram",
+        "message-formatting"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:supabase/functions/_shared/telegram.ts:renderTelegramConnectionTest",
+      "type": "function",
+      "name": "renderTelegramConnectionTest",
+      "filePath": "supabase/functions/_shared/telegram.ts",
+      "lineRange": [
+        280,
+        292
+      ],
+      "summary": "Renders the confirmation message used to test a Telegram connection.",
+      "tags": [
+        "service",
+        "telegram",
+        "message-formatting"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:supabase/functions/_shared/telegram.ts:renderTelegramTimetable",
+      "type": "function",
+      "name": "renderTelegramTimetable",
+      "filePath": "supabase/functions/_shared/telegram.ts",
+      "lineRange": [
+        294,
+        342
+      ],
+      "summary": "Renders a grouped weekly study timetable within Telegram message limits.",
+      "tags": [
+        "service",
+        "telegram",
+        "message-formatting"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:supabase/functions/_shared/telegram.ts:renderTelegramTomorrowPlan",
+      "type": "function",
+      "name": "renderTelegramTomorrowPlan",
+      "filePath": "supabase/functions/_shared/telegram.ts",
+      "lineRange": [
+        344,
+        392
+      ],
+      "summary": "Renders tomorrow’s planned sessions and navigation action for Telegram.",
+      "tags": [
+        "service",
+        "telegram",
+        "message-formatting"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:supabase/functions/_shared/telegram.ts:sendTelegramMessage",
+      "type": "function",
+      "name": "sendTelegramMessage",
+      "filePath": "supabase/functions/_shared/telegram.ts",
+      "lineRange": [
+        394,
+        437
+      ],
+      "summary": "Posts an HTML message and optional application button through the Telegram Bot API.",
+      "tags": [
+        "service",
+        "telegram",
+        "message-formatting"
+      ],
+      "complexity": "simple"
+    }
+  ],
+  "edges": [
+    {
+      "source": "file:src/__tests__/cron-auth.test.ts",
+      "target": "file:supabase/functions/_shared/cron-auth.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/__tests__/digest-schedule.test.ts",
+      "target": "file:supabase/functions/_shared/digest-schedule.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/__tests__/study-notification-copy.test.ts",
+      "target": "file:supabase/functions/_shared/study-notification-copy.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/__tests__/telegram.test.ts",
+      "target": "file:src/lib/one_liners.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/__tests__/telegram.test.ts",
+      "target": "file:supabase/functions/_shared/quotes.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/__tests__/telegram.test.ts",
+      "target": "file:supabase/functions/_shared/telegram.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/shared/DailyQuote.tsx",
+      "target": "file:src/hooks/useAuth.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/shared/DailyQuote.tsx",
+      "target": "file:src/lib/motivational-quotes.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/shared/DailyQuote.tsx",
+      "target": "file:src/lib/utils.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/shared/DailyQuote.tsx",
+      "target": "function:src/components/shared/DailyQuote.tsx:DailyQuote",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/components/shared/DailyQuote.tsx",
+      "target": "function:src/components/shared/DailyQuote.tsx:DailyQuote",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/motivational-quotes.ts",
+      "target": "file:supabase/functions/_shared/quotes.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/lib/motivational-quotes.ts",
+      "target": "function:src/lib/motivational-quotes.ts:quoteForDate",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/motivational-quotes.ts",
+      "target": "function:src/lib/motivational-quotes.ts:quoteForDate",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/motivational-quotes.ts",
+      "target": "function:src/lib/motivational-quotes.ts:randomQuote",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/motivational-quotes.ts",
+      "target": "function:src/lib/motivational-quotes.ts:randomQuote",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/one_liners.ts",
+      "target": "file:src/lib/motivational-quotes.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/lib/one_liners.ts",
+      "target": "function:src/lib/one_liners.ts:pickOneLinerFor",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/one_liners.ts",
+      "target": "function:src/lib/one_liners.ts:pickOneLinerFor",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/_shared/cors.ts",
+      "target": "function:supabase/functions/_shared/cors.ts:json",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:supabase/functions/_shared/cors.ts",
+      "target": "function:supabase/functions/_shared/cors.ts:json",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/_shared/cron-auth.ts",
+      "target": "function:supabase/functions/_shared/cron-auth.ts:jwtRoleClaim",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:supabase/functions/_shared/cron-auth.ts",
+      "target": "function:supabase/functions/_shared/cron-auth.ts:jwtRoleClaim",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/_shared/digest-schedule.ts",
+      "target": "function:supabase/functions/_shared/digest-schedule.ts:localDigestClock",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:supabase/functions/_shared/digest-schedule.ts",
+      "target": "function:supabase/functions/_shared/digest-schedule.ts:localDigestClock",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/_shared/digest-schedule.ts",
+      "target": "function:supabase/functions/_shared/digest-schedule.ts:isDigestTimeDue",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:supabase/functions/_shared/digest-schedule.ts",
+      "target": "function:supabase/functions/_shared/digest-schedule.ts:isDigestTimeDue",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/_shared/email.ts",
+      "target": "function:supabase/functions/_shared/email.ts:sendViaGmail",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:supabase/functions/_shared/email.ts",
+      "target": "function:supabase/functions/_shared/email.ts:sendViaResend",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:supabase/functions/_shared/email.ts",
+      "target": "function:supabase/functions/_shared/email.ts:sendEmail",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:supabase/functions/_shared/email.ts",
+      "target": "function:supabase/functions/_shared/email.ts:sendEmail",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/_shared/email.ts",
+      "target": "function:supabase/functions/_shared/email.ts:shell",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:supabase/functions/_shared/email.ts",
+      "target": "function:supabase/functions/_shared/email.ts:newRequestNotification",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:supabase/functions/_shared/email.ts",
+      "target": "function:supabase/functions/_shared/email.ts:newRequestNotification",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/_shared/email.ts",
+      "target": "function:supabase/functions/_shared/email.ts:inviteApproved",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:supabase/functions/_shared/email.ts",
+      "target": "function:supabase/functions/_shared/email.ts:inviteApproved",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/_shared/email.ts",
+      "target": "function:supabase/functions/_shared/email.ts:pinResetRequested",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:supabase/functions/_shared/email.ts",
+      "target": "function:supabase/functions/_shared/email.ts:pinResetRequested",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/_shared/email.ts",
+      "target": "function:supabase/functions/_shared/email.ts:buddyRequestReceived",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:supabase/functions/_shared/email.ts",
+      "target": "function:supabase/functions/_shared/email.ts:buddyRequestReceived",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/_shared/email.ts",
+      "target": "function:supabase/functions/_shared/email.ts:inviteDeclined",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:supabase/functions/_shared/email.ts",
+      "target": "function:supabase/functions/_shared/email.ts:inviteDeclined",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/_shared/push.ts",
+      "target": "function:supabase/functions/_shared/push.ts:truncate",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:supabase/functions/_shared/push.ts",
+      "target": "function:supabase/functions/_shared/push.ts:truncate",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/_shared/push.ts",
+      "target": "function:supabase/functions/_shared/push.ts:serviceAccount",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:supabase/functions/_shared/push.ts",
+      "target": "function:supabase/functions/_shared/push.ts:serviceAccount",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/_shared/push.ts",
+      "target": "function:supabase/functions/_shared/push.ts:getFcmAccessToken",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:supabase/functions/_shared/push.ts",
+      "target": "function:supabase/functions/_shared/push.ts:getFcmAccessToken",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/_shared/push.ts",
+      "target": "function:supabase/functions/_shared/push.ts:sendWebPush",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:supabase/functions/_shared/push.ts",
+      "target": "function:supabase/functions/_shared/push.ts:sendWebPush",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/_shared/push.ts",
+      "target": "function:supabase/functions/_shared/push.ts:sendNativePush",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:supabase/functions/_shared/push.ts",
+      "target": "function:supabase/functions/_shared/push.ts:sendNativePush",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/_shared/push.ts",
+      "target": "function:supabase/functions/_shared/push.ts:deliverToSubscription",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:supabase/functions/_shared/push.ts",
+      "target": "function:supabase/functions/_shared/push.ts:deliverToSubscription",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/_shared/push.ts",
+      "target": "class:supabase/functions/_shared/push.ts:PushDeliveryError",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:supabase/functions/_shared/push.ts",
+      "target": "class:supabase/functions/_shared/push.ts:PushDeliveryError",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/_shared/quotes.ts",
+      "target": "function:supabase/functions/_shared/quotes.ts:pickQuoteForDay",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:supabase/functions/_shared/quotes.ts",
+      "target": "function:supabase/functions/_shared/quotes.ts:pickQuoteForDay",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/_shared/quotes.ts",
+      "target": "function:supabase/functions/_shared/quotes.ts:greetingForHour",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:supabase/functions/_shared/quotes.ts",
+      "target": "function:supabase/functions/_shared/quotes.ts:greetingForHour",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/_shared/study-notification-copy.ts",
+      "target": "function:supabase/functions/_shared/study-notification-copy.ts:formatMinutes",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:supabase/functions/_shared/study-notification-copy.ts",
+      "target": "function:supabase/functions/_shared/study-notification-copy.ts:formatMinutes",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/_shared/study-notification-copy.ts",
+      "target": "function:supabase/functions/_shared/study-notification-copy.ts:parseStudyPlanBlocks",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:supabase/functions/_shared/study-notification-copy.ts",
+      "target": "function:supabase/functions/_shared/study-notification-copy.ts:parseStudyPlanBlocks",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/_shared/study-notification-copy.ts",
+      "target": "function:supabase/functions/_shared/study-notification-copy.ts:detailedDayPlanCopy",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:supabase/functions/_shared/study-notification-copy.ts",
+      "target": "function:supabase/functions/_shared/study-notification-copy.ts:detailedDayPlanCopy",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/_shared/study-notification-copy.ts",
+      "target": "function:supabase/functions/_shared/study-notification-copy.ts:dailyPyqCopy",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:supabase/functions/_shared/study-notification-copy.ts",
+      "target": "function:supabase/functions/_shared/study-notification-copy.ts:dailyPyqCopy",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/_shared/telegram.ts",
+      "target": "function:supabase/functions/_shared/telegram.ts:parseTelegramCommand",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:supabase/functions/_shared/telegram.ts",
+      "target": "function:supabase/functions/_shared/telegram.ts:parseTelegramCommand",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/_shared/telegram.ts",
+      "target": "function:supabase/functions/_shared/telegram.ts:parseTelegramStudySessions",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:supabase/functions/_shared/telegram.ts",
+      "target": "function:supabase/functions/_shared/telegram.ts:parseTelegramStudySessions",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/_shared/telegram.ts",
+      "target": "function:supabase/functions/_shared/telegram.ts:isoDateForTimezone",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:supabase/functions/_shared/telegram.ts",
+      "target": "function:supabase/functions/_shared/telegram.ts:isoDateForTimezone",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/_shared/telegram.ts",
+      "target": "function:supabase/functions/_shared/telegram.ts:weekIsoDatesForTimezone",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:supabase/functions/_shared/telegram.ts",
+      "target": "function:supabase/functions/_shared/telegram.ts:weekIsoDatesForTimezone",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/_shared/telegram.ts",
+      "target": "function:supabase/functions/_shared/telegram.ts:tomorrowIsoDateForTimezone",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:supabase/functions/_shared/telegram.ts",
+      "target": "function:supabase/functions/_shared/telegram.ts:tomorrowIsoDateForTimezone",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/_shared/telegram.ts",
+      "target": "function:supabase/functions/_shared/telegram.ts:escapeTelegramHtml",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:supabase/functions/_shared/telegram.ts",
+      "target": "function:supabase/functions/_shared/telegram.ts:escapeTelegramHtml",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/_shared/telegram.ts",
+      "target": "function:supabase/functions/_shared/telegram.ts:airJournalUrl",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:supabase/functions/_shared/telegram.ts",
+      "target": "function:supabase/functions/_shared/telegram.ts:airJournalUrl",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/_shared/telegram.ts",
+      "target": "function:supabase/functions/_shared/telegram.ts:escapeCompactTelegramHtml",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:supabase/functions/_shared/telegram.ts",
+      "target": "function:supabase/functions/_shared/telegram.ts:timetableDayLabel",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:supabase/functions/_shared/telegram.ts",
+      "target": "function:supabase/functions/_shared/telegram.ts:timetableWeekLabel",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:supabase/functions/_shared/telegram.ts",
+      "target": "function:supabase/functions/_shared/telegram.ts:fullDateLabel",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:supabase/functions/_shared/telegram.ts",
+      "target": "function:supabase/functions/_shared/telegram.ts:renderTelegramDay",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:supabase/functions/_shared/telegram.ts",
+      "target": "function:supabase/functions/_shared/telegram.ts:renderTelegramDigest",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:supabase/functions/_shared/telegram.ts",
+      "target": "function:supabase/functions/_shared/telegram.ts:renderTelegramDigest",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/_shared/telegram.ts",
+      "target": "function:supabase/functions/_shared/telegram.ts:renderTelegramTodayUpdate",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:supabase/functions/_shared/telegram.ts",
+      "target": "function:supabase/functions/_shared/telegram.ts:renderTelegramTodayUpdate",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/_shared/telegram.ts",
+      "target": "function:supabase/functions/_shared/telegram.ts:renderTelegramConnectionTest",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:supabase/functions/_shared/telegram.ts",
+      "target": "function:supabase/functions/_shared/telegram.ts:renderTelegramConnectionTest",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/_shared/telegram.ts",
+      "target": "function:supabase/functions/_shared/telegram.ts:renderTelegramTimetable",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:supabase/functions/_shared/telegram.ts",
+      "target": "function:supabase/functions/_shared/telegram.ts:renderTelegramTimetable",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/_shared/telegram.ts",
+      "target": "function:supabase/functions/_shared/telegram.ts:renderTelegramTomorrowPlan",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:supabase/functions/_shared/telegram.ts",
+      "target": "function:supabase/functions/_shared/telegram.ts:renderTelegramTomorrowPlan",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/_shared/telegram.ts",
+      "target": "function:supabase/functions/_shared/telegram.ts:sendTelegramMessage",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:supabase/functions/_shared/telegram.ts",
+      "target": "function:supabase/functions/_shared/telegram.ts:sendTelegramMessage",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/_shared/cron-auth.ts",
+      "target": "file:src/__tests__/cron-auth.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:supabase/functions/_shared/digest-schedule.ts",
+      "target": "file:src/__tests__/digest-schedule.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:supabase/functions/_shared/study-notification-copy.ts",
+      "target": "file:src/__tests__/study-notification-copy.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/lib/one_liners.ts",
+      "target": "file:src/__tests__/telegram.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:supabase/functions/_shared/quotes.ts",
+      "target": "file:src/__tests__/telegram.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:supabase/functions/_shared/telegram.ts",
+      "target": "file:src/__tests__/telegram.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    }
+  ]
+}

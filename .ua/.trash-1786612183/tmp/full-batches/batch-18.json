@@ -1,0 +1,20 @@
+{
+  "nodes": [
+    {
+      "id": "file:.ua/.understandignore",
+      "type": "file",
+      "name": ".understandignore",
+      "filePath": ".ua/.understandignore",
+      "summary": "Defines repository-specific exclusions for knowledge-graph analysis, omitting secrets, machine-local state, generated artifacts, and large reference datasets while retaining relevant source and test files.",
+      "tags": [
+        "configuration",
+        "analysis-scope",
+        "security",
+        "artifact-filtering"
+      ],
+      "complexity": "simple",
+      "languageNotes": "Uses gitignore-compatible glob patterns, including recursive wildcards and directory exclusions."
+    }
+  ],
+  "edges": []
+}

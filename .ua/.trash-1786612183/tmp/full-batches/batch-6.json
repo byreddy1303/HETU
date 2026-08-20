@@ -1,0 +1,1454 @@
+{
+  "nodes": [
+    {
+      "id": "file:src/__tests__/analysis.test.ts",
+      "type": "file",
+      "name": "analysis.test.ts",
+      "filePath": "src/__tests__/analysis.test.ts",
+      "summary": "Verifies study-analysis calculations for mistake-surface history, outcomes, sessions, due work, weekly summaries, heatmaps, calibration, and active-day streaks against fixed evidence.",
+      "tags": [
+        "test",
+        "vitest",
+        "analytics",
+        "study-metrics"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:src/__tests__/analysis.test.ts:q",
+      "type": "function",
+      "name": "q",
+      "filePath": "src/__tests__/analysis.test.ts",
+      "lineRange": [
+        22,
+        45
+      ],
+      "summary": "Builds a complete QuestionRow fixture with stable defaults and focused field overrides for analytics cases.",
+      "tags": [
+        "test",
+        "vitest",
+        "analytics",
+        "study-metrics"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/__tests__/analysis.test.ts:ra",
+      "type": "function",
+      "name": "ra",
+      "filePath": "src/__tests__/analysis.test.ts",
+      "lineRange": [
+        47,
+        58
+      ],
+      "summary": "Builds a complete ReattemptRow fixture with stable scheduling defaults and focused overrides.",
+      "tags": [
+        "test",
+        "vitest",
+        "analytics",
+        "study-metrics"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/__tests__/learning_tips.test.ts",
+      "type": "file",
+      "name": "learning_tips.test.ts",
+      "filePath": "src/__tests__/learning_tips.test.ts",
+      "summary": "Checks that dashboard learning tips choose one complementary, evidence-driven recommendation without duplicating the visible due queue and provide a useful empty-data default.",
+      "tags": [
+        "test",
+        "vitest",
+        "learning-tips"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/__tests__/learning_tips.test.ts:question",
+      "type": "function",
+      "name": "question",
+      "filePath": "src/__tests__/learning_tips.test.ts",
+      "lineRange": [
+        5,
+        28
+      ],
+      "summary": "Creates a representative question fixture whose outcome and metadata can be varied for tip-priority scenarios.",
+      "tags": [
+        "test",
+        "vitest",
+        "learning-tips"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/__tests__/missing-tags-confirm.test.tsx",
+      "type": "file",
+      "name": "missing-tags-confirm.test.tsx",
+      "filePath": "src/__tests__/missing-tags-confirm.test.tsx",
+      "summary": "Covers missing-tag save behavior, whitespace normalization, confirmation action priority, and direct saving of Session questions without an unnecessary popup.",
+      "tags": [
+        "test",
+        "vitest",
+        "tagging",
+        "component"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/__tests__/mocks.test.ts",
+      "type": "file",
+      "name": "mocks.test.ts",
+      "filePath": "src/__tests__/mocks.test.ts",
+      "summary": "Validates mock-exam input integrity and derived reporting for normalized score, answered accuracy, best and worst attempts, and latest-score movement.",
+      "tags": [
+        "test",
+        "vitest",
+        "mock-exams"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/__tests__/mocks.test.ts:row",
+      "type": "function",
+      "name": "row",
+      "filePath": "src/__tests__/mocks.test.ts",
+      "lineRange": [
+        17,
+        26
+      ],
+      "summary": "Creates a minimal mock-exam history row with aligned score and correctness values.",
+      "tags": [
+        "test",
+        "vitest",
+        "mock-exams"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/__tests__/pyq-attempt-log.test.tsx",
+      "type": "file",
+      "name": "pyq-attempt-log.test.tsx",
+      "filePath": "src/__tests__/pyq-attempt-log.test.tsx",
+      "summary": "Exercises committed PYQ attempt persistence, including atomic answer and snapshot capture, canonical journal grouping, compatible bank-version resume, and saved-set discard.",
+      "tags": [
+        "test",
+        "vitest",
+        "pyq",
+        "persistence"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:src/__tests__/pyq-history.test.ts",
+      "type": "file",
+      "name": "pyq-history.test.ts",
+      "filePath": "src/__tests__/pyq-history.test.ts",
+      "summary": "Verifies PYQ history filters use the latest attempt and correctly distinguish unseen, wrong, guessed, slow, skipped, repeated, and analyzed questions.",
+      "tags": [
+        "test",
+        "vitest",
+        "pyq",
+        "history-filter"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/__tests__/pyq-history.test.ts:attempt",
+      "type": "function",
+      "name": "attempt",
+      "filePath": "src/__tests__/pyq-history.test.ts",
+      "lineRange": [
+        11,
+        39
+      ],
+      "summary": "Creates a detailed PYQ attempt fixture with overridable answer, timing, and decision fields for history filtering.",
+      "tags": [
+        "test",
+        "vitest",
+        "pyq",
+        "history-filter"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/__tests__/pyq-navigation.test.tsx",
+      "type": "file",
+      "name": "pyq-navigation.test.tsx",
+      "filePath": "src/__tests__/pyq-navigation.test.tsx",
+      "summary": "Tests PYQ practice navigation rules that lock committed answers while allowing a previously skipped question to be answered after revisiting it.",
+      "tags": [
+        "test",
+        "vitest",
+        "pyq",
+        "navigation"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/__tests__/pyq-rendering.test.tsx",
+      "type": "file",
+      "name": "pyq-rendering.test.tsx",
+      "filePath": "src/__tests__/pyq-rendering.test.tsx",
+      "summary": "Tests archived PYQ HTML repair and KaTeX rendering for tables, bare math environments, legacy delimiters, matrices, eqalign syntax, and full answer choices.",
+      "tags": [
+        "test",
+        "vitest",
+        "pyq",
+        "math-rendering"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/__tests__/pyq-session.test.ts",
+      "type": "file",
+      "name": "pyq-session.test.ts",
+      "filePath": "src/__tests__/pyq-session.test.ts",
+      "summary": "Verifies deterministic PYQ session and attempt IDs, timer restoration, progress transitions, completion and abandonment, canonical session projection, skips, snapshots, and re-attempt receipts.",
+      "tags": [
+        "test",
+        "vitest",
+        "pyq",
+        "session-management"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:src/__tests__/pyq.test.ts",
+      "type": "file",
+      "name": "pyq.test.ts",
+      "filePath": "src/__tests__/pyq.test.ts",
+      "summary": "Covers PYQ text flattening, MCQ/MSQ/NAT grading, answer logging, image embedding, inferred outcomes, practice scope, manifest compatibility, HTML normalization, and bundled-bank integrity.",
+      "tags": [
+        "test",
+        "vitest",
+        "pyq",
+        "validation"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:src/__tests__/pyq.test.ts:question",
+      "type": "function",
+      "name": "question",
+      "filePath": "src/__tests__/pyq.test.ts",
+      "lineRange": [
+        28,
+        50
+      ],
+      "summary": "Creates a representative audited PYQ fixture whose type, answer, scope, and source fields can be varied by tests.",
+      "tags": [
+        "test",
+        "vitest",
+        "pyq",
+        "validation"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/__tests__/reattempt-ui.test.tsx",
+      "type": "file",
+      "name": "reattempt-ui.test.tsx",
+      "filePath": "src/__tests__/reattempt-ui.test.tsx",
+      "summary": "Exercises the end-to-end re-attempt UI for logged and PYQ questions, including legacy restoration, answer locking, skipped-question revisits, queue entry, automatic scheduling, numeric input, and image preview.",
+      "tags": [
+        "test",
+        "vitest",
+        "reattempt",
+        "user-interface"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:src/__tests__/reattempt-ui.test.tsx:seedDueQuestion",
+      "type": "function",
+      "name": "seedDueQuestion",
+      "filePath": "src/__tests__/reattempt-ui.test.tsx",
+      "lineRange": [
+        73,
+        110
+      ],
+      "summary": "Persists a due journal question and its re-attempt row for UI solve-flow scenarios.",
+      "tags": [
+        "test",
+        "vitest",
+        "reattempt",
+        "user-interface"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/__tests__/reattempt-ui.test.tsx:seedDuePyq",
+      "type": "function",
+      "name": "seedDuePyq",
+      "filePath": "src/__tests__/reattempt-ui.test.tsx",
+      "lineRange": [
+        112,
+        203
+      ],
+      "summary": "Builds and persists a canonical PYQ session, failed attempt, journal projection, and scheduled re-attempt.",
+      "tags": [
+        "test",
+        "vitest",
+        "reattempt",
+        "user-interface"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/__tests__/reattempt-ui.test.tsx:seedLegacyDuePyq",
+      "type": "function",
+      "name": "seedLegacyDuePyq",
+      "filePath": "src/__tests__/reattempt-ui.test.tsx",
+      "lineRange": [
+        205,
+        295
+      ],
+      "summary": "Persists a capture-version-one PYQ attempt and noncanonical journal evidence to test legacy re-attempt reconstruction.",
+      "tags": [
+        "test",
+        "vitest",
+        "reattempt",
+        "user-interface"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/__tests__/revision-pack.test.ts",
+      "type": "file",
+      "name": "revision-pack.test.ts",
+      "filePath": "src/__tests__/revision-pack.test.ts",
+      "summary": "Checks that revision-pack generation prioritizes due retrieval work and recurring mistake patterns.",
+      "tags": [
+        "test",
+        "vitest",
+        "revision-pack"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/__tests__/sessions.test.ts",
+      "type": "file",
+      "name": "sessions.test.ts",
+      "filePath": "src/__tests__/sessions.test.ts",
+      "summary": "Tests session-history database queries, pruning of empty completed sessions, preservation of running work, and reconciliation of legacy PYQ practice into canonical journal grouping.",
+      "tags": [
+        "test",
+        "vitest",
+        "session-history",
+        "database"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/__tests__/sessions.test.ts:session",
+      "type": "function",
+      "name": "session",
+      "filePath": "src/__tests__/sessions.test.ts",
+      "lineRange": [
+        18,
+        36
+      ],
+      "summary": "Creates a synced session fixture with configurable creation time and completion state.",
+      "tags": [
+        "test",
+        "vitest",
+        "session-history",
+        "database"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/__tests__/sessions.test.ts:question",
+      "type": "function",
+      "name": "question",
+      "filePath": "src/__tests__/sessions.test.ts",
+      "lineRange": [
+        38,
+        61
+      ],
+      "summary": "Creates a synced question fixture attached to a chosen session for history-query tests.",
+      "tags": [
+        "test",
+        "vitest",
+        "session-history",
+        "database"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/__tests__/topic-evidence.test.ts",
+      "type": "file",
+      "name": "topic-evidence.test.ts",
+      "filePath": "src/__tests__/topic-evidence.test.ts",
+      "summary": "Verifies topic-evidence classification for untouched, manually studied, strong, and revision-needed states while combining PYQ and journal evidence without double counting.",
+      "tags": [
+        "test",
+        "vitest",
+        "topic-evidence",
+        "analytics"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/__tests__/topic-evidence.test.ts:build",
+      "type": "function",
+      "name": "build",
+      "filePath": "src/__tests__/topic-evidence.test.ts",
+      "lineRange": [
+        5,
+        16
+      ],
+      "summary": "Calls topic-evidence analysis with stable subject and date defaults plus scenario-specific overrides.",
+      "tags": [
+        "test",
+        "vitest",
+        "topic-evidence",
+        "analytics"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/__tests__/topic-evidence.test.ts:attempt",
+      "type": "function",
+      "name": "attempt",
+      "filePath": "src/__tests__/topic-evidence.test.ts",
+      "lineRange": [
+        18,
+        27
+      ],
+      "summary": "Creates a compact PYQ attempt fixture with topic snapshot and deterministic correctness metadata.",
+      "tags": [
+        "test",
+        "vitest",
+        "topic-evidence",
+        "analytics"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/components/dashboard/HeroCard.tsx",
+      "type": "file",
+      "name": "HeroCard.tsx",
+      "filePath": "src/components/dashboard/HeroCard.tsx",
+      "summary": "Renders the dashboard hero with a time-sensitive greeting, queue-aware next-move message, primary action, overdue context, date, and optional exam countdown.",
+      "tags": [
+        "component",
+        "dashboard",
+        "next-action",
+        "progress"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/components/dashboard/HeroCard.tsx:HeroCard",
+      "type": "function",
+      "name": "HeroCard",
+      "filePath": "src/components/dashboard/HeroCard.tsx",
+      "lineRange": [
+        25,
+        101
+      ],
+      "summary": "Chooses queue-aware dashboard guidance and renders the primary action beside due, date, and exam-countdown context.",
+      "tags": [
+        "component",
+        "dashboard",
+        "next-action",
+        "progress"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/components/dashboard/LearningTips.tsx",
+      "type": "file",
+      "name": "LearningTips.tsx",
+      "filePath": "src/components/dashboard/LearningTips.tsx",
+      "summary": "Displays the highest-priority evidence-based learning tip with tone-specific accent styling and hides itself when no tip is available.",
+      "tags": [
+        "component",
+        "dashboard",
+        "learning-tips"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/components/dashboard/LearningTips.tsx:LearningTips",
+      "type": "function",
+      "name": "LearningTips",
+      "filePath": "src/components/dashboard/LearningTips.tsx",
+      "lineRange": [
+        12,
+        45
+      ],
+      "summary": "Selects the first learning tip and renders its title and evidence-based body with semantic tone styling.",
+      "tags": [
+        "component",
+        "dashboard",
+        "learning-tips"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/components/dashboard/OutcomeDonut.tsx",
+      "type": "file",
+      "name": "OutcomeDonut.tsx",
+      "filePath": "src/components/dashboard/OutcomeDonut.tsx",
+      "summary": "Visualizes nonzero last-session outcome counts as an accessible Recharts donut with a centered total question count.",
+      "tags": [
+        "component",
+        "dashboard",
+        "data-visualization",
+        "outcomes"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/components/dashboard/OutcomeDonut.tsx:OutcomeDonut",
+      "type": "function",
+      "name": "OutcomeDonut",
+      "filePath": "src/components/dashboard/OutcomeDonut.tsx",
+      "lineRange": [
+        14,
+        59
+      ],
+      "summary": "Filters empty outcome buckets and renders the remaining distribution as an accessible donut chart with a total.",
+      "tags": [
+        "component",
+        "dashboard",
+        "data-visualization",
+        "outcomes"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/components/dashboard/OutcomeLegend.tsx",
+      "type": "file",
+      "name": "OutcomeLegend.tsx",
+      "filePath": "src/components/dashboard/OutcomeLegend.tsx",
+      "summary": "Provides an animated, keyboard-dismissible popover explaining each outcome code, color, and re-attempt implication.",
+      "tags": [
+        "component",
+        "dashboard",
+        "outcomes",
+        "accessibility"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/components/dashboard/OutcomeLegend.tsx:OutcomeLegend",
+      "type": "function",
+      "name": "OutcomeLegend",
+      "filePath": "src/components/dashboard/OutcomeLegend.tsx",
+      "lineRange": [
+        17,
+        89
+      ],
+      "summary": "Toggles an animated outcome-code reference and closes it on outside click or Escape.",
+      "tags": [
+        "component",
+        "dashboard",
+        "outcomes",
+        "accessibility"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/components/dashboard/SurfaceTrendChart.tsx",
+      "type": "file",
+      "name": "SurfaceTrendChart.tsx",
+      "filePath": "src/components/dashboard/SurfaceTrendChart.tsx",
+      "summary": "Plots the trailing open mistake surface as an accessible step-area chart with computed bounds, formatted dates, and detailed hover values.",
+      "tags": [
+        "component",
+        "dashboard",
+        "data-visualization",
+        "mistake-surface"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/components/dashboard/SurfaceTrendChart.tsx:SurfaceTrendChart",
+      "type": "function",
+      "name": "SurfaceTrendChart",
+      "filePath": "src/components/dashboard/SurfaceTrendChart.tsx",
+      "lineRange": [
+        14,
+        104
+      ],
+      "summary": "Computes a safe chart ceiling and renders open mistake-surface points with formatted axes, gradient area, and tooltip.",
+      "tags": [
+        "component",
+        "dashboard",
+        "data-visualization",
+        "mistake-surface"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/components/pyq/PyqQuestionContent.tsx",
+      "type": "file",
+      "name": "PyqQuestionContent.tsx",
+      "filePath": "src/components/pyq/PyqQuestionContent.tsx",
+      "summary": "Normalizes and sanitizes archived PYQ HTML before rendering it, then applies tolerant KaTeX auto-rendering to supported inline and display delimiters.",
+      "tags": [
+        "component",
+        "pyq",
+        "math-rendering",
+        "sanitization"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/components/pyq/PyqQuestionContent.tsx:PyqQuestionContent",
+      "type": "function",
+      "name": "PyqQuestionContent",
+      "filePath": "src/components/pyq/PyqQuestionContent.tsx",
+      "lineRange": [
+        7,
+        33
+      ],
+      "summary": "Sanitizes normalized question markup and renders supported mathematical expressions into the mounted content element.",
+      "tags": [
+        "component",
+        "pyq",
+        "math-rendering",
+        "sanitization"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/components/shared/MissingTagsConfirm.tsx",
+      "type": "file",
+      "name": "MissingTagsConfirm.tsx",
+      "filePath": "src/components/shared/MissingTagsConfirm.tsx",
+      "summary": "Presents a warning dialog before saving without both pattern and trigger cues, emphasizing return-to-tagging while allowing an explicit override.",
+      "tags": [
+        "component",
+        "validation",
+        "tagging",
+        "confirmation"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/components/shared/MissingTagsConfirm.tsx:MissingTagsConfirm",
+      "type": "function",
+      "name": "MissingTagsConfirm",
+      "filePath": "src/components/shared/MissingTagsConfirm.tsx",
+      "lineRange": [
+        5,
+        52
+      ],
+      "summary": "Renders the explicit save-without-tags confirmation dialog with a primary return-to-edit action and saving state.",
+      "tags": [
+        "component",
+        "validation",
+        "tagging",
+        "confirmation"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/components/shared/OutcomeBadge.tsx",
+      "type": "file",
+      "name": "OutcomeBadge.tsx",
+      "filePath": "src/components/shared/OutcomeBadge.tsx",
+      "summary": "Renders a compact outcome-code badge using the configured semantic tone and descriptive label.",
+      "tags": [
+        "component",
+        "outcomes",
+        "ui-primitive"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/components/shared/OutcomeBadge.tsx:OutcomeBadge",
+      "type": "function",
+      "name": "OutcomeBadge",
+      "filePath": "src/components/shared/OutcomeBadge.tsx",
+      "lineRange": [
+        12,
+        32
+      ],
+      "summary": "Maps an outcome code to its specification and renders a tone-aware compact label.",
+      "tags": [
+        "component",
+        "outcomes",
+        "ui-primitive"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/components/tags/OutcomeStep.tsx",
+      "type": "file",
+      "name": "OutcomeStep.tsx",
+      "filePath": "src/components/tags/OutcomeStep.tsx",
+      "summary": "Renders all outcome choices as tag options and supports direct keyboard selection plus Escape cancellation.",
+      "tags": [
+        "component",
+        "tagging",
+        "keyboard-navigation",
+        "outcomes"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/components/tags/OutcomeStep.tsx:OutcomeStep",
+      "type": "function",
+      "name": "OutcomeStep",
+      "filePath": "src/components/tags/OutcomeStep.tsx",
+      "lineRange": [
+        6,
+        34
+      ],
+      "summary": "Registers outcome keyboard shortcuts and renders selectable options for each configured outcome code.",
+      "tags": [
+        "component",
+        "tagging",
+        "keyboard-navigation",
+        "outcomes"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/components/tags/PatternStep.tsx",
+      "type": "file",
+      "name": "PatternStep.tsx",
+      "filePath": "src/components/tags/PatternStep.tsx",
+      "summary": "Implements pattern tagging with subject-weighted fuzzy suggestions, keyboard navigation, creation of new names, skip behavior, and embedded naming guidance.",
+      "tags": [
+        "component",
+        "tagging",
+        "fuzzy-search",
+        "keyboard-navigation"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/components/tags/PatternStep.tsx:PatternStep",
+      "type": "function",
+      "name": "PatternStep",
+      "filePath": "src/components/tags/PatternStep.tsx",
+      "lineRange": [
+        16,
+        156
+      ],
+      "summary": "Ranks fuzzy pattern suggestions, supports mouse and keyboard selection, normalizes submitted names, and offers intentional skipping.",
+      "tags": [
+        "component",
+        "tagging",
+        "fuzzy-search",
+        "keyboard-navigation"
+      ],
+      "complexity": "moderate"
+    }
+  ],
+  "edges": [
+    {
+      "source": "file:src/__tests__/analysis.test.ts",
+      "target": "file:src/lib/analysis.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/__tests__/analysis.test.ts",
+      "target": "file:src/types/index.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/__tests__/analysis.test.ts",
+      "target": "function:src/__tests__/analysis.test.ts:q",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/__tests__/analysis.test.ts",
+      "target": "function:src/__tests__/analysis.test.ts:ra",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/__tests__/learning_tips.test.ts",
+      "target": "file:src/lib/learning-tips.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/__tests__/learning_tips.test.ts",
+      "target": "file:src/types/index.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/__tests__/learning_tips.test.ts",
+      "target": "function:src/__tests__/learning_tips.test.ts:question",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/__tests__/missing-tags-confirm.test.tsx",
+      "target": "file:src/components/shared/MissingTagsConfirm.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/__tests__/missing-tags-confirm.test.tsx",
+      "target": "file:src/components/shared/questionDraft.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/__tests__/missing-tags-confirm.test.tsx",
+      "target": "file:src/components/tags/TagFlow.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/__tests__/missing-tags-confirm.test.tsx",
+      "target": "file:src/lib/questionTags.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/__tests__/missing-tags-confirm.test.tsx",
+      "target": "file:src/types/index.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/__tests__/mocks.test.ts",
+      "target": "file:src/lib/mocks.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/__tests__/mocks.test.ts",
+      "target": "file:src/types/index.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/__tests__/mocks.test.ts",
+      "target": "function:src/__tests__/mocks.test.ts:row",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/__tests__/pyq-attempt-log.test.tsx",
+      "target": "file:src/lib/db.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/__tests__/pyq-attempt-log.test.tsx",
+      "target": "file:src/lib/image.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/__tests__/pyq-attempt-log.test.tsx",
+      "target": "file:src/lib/pyq-session.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/__tests__/pyq-attempt-log.test.tsx",
+      "target": "file:src/lib/pyq.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/__tests__/pyq-attempt-log.test.tsx",
+      "target": "file:src/pages/Pyq.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/__tests__/pyq-history.test.ts",
+      "target": "file:src/lib/pyq-history.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/__tests__/pyq-history.test.ts",
+      "target": "file:src/lib/pyq-session.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/__tests__/pyq-history.test.ts",
+      "target": "file:src/lib/pyq.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/__tests__/pyq-history.test.ts",
+      "target": "file:src/types/index.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/__tests__/pyq-history.test.ts",
+      "target": "function:src/__tests__/pyq-history.test.ts:attempt",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/__tests__/pyq-navigation.test.tsx",
+      "target": "file:src/lib/db.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/__tests__/pyq-navigation.test.tsx",
+      "target": "file:src/lib/pyq.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/__tests__/pyq-navigation.test.tsx",
+      "target": "file:src/pages/Pyq.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/__tests__/pyq-rendering.test.tsx",
+      "target": "file:src/components/pyq/PyqQuestionContent.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/__tests__/pyq-session.test.ts",
+      "target": "file:src/lib/pyq-session.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/__tests__/pyq-session.test.ts",
+      "target": "file:src/lib/pyq.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/__tests__/pyq-session.test.ts",
+      "target": "file:src/types/index.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/__tests__/pyq.test.ts",
+      "target": "file:src/lib/pyq.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/__tests__/pyq.test.ts",
+      "target": "function:src/__tests__/pyq.test.ts:question",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/__tests__/reattempt-ui.test.tsx",
+      "target": "file:src/lib/db.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/__tests__/reattempt-ui.test.tsx",
+      "target": "file:src/lib/image.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/__tests__/reattempt-ui.test.tsx",
+      "target": "file:src/lib/pyq-session.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/__tests__/reattempt-ui.test.tsx",
+      "target": "file:src/lib/pyq.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/__tests__/reattempt-ui.test.tsx",
+      "target": "file:src/pages/Dashboard.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/__tests__/reattempt-ui.test.tsx",
+      "target": "file:src/pages/DoNow.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/__tests__/reattempt-ui.test.tsx",
+      "target": "file:src/pages/Reattempts.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/__tests__/reattempt-ui.test.tsx",
+      "target": "file:src/types/index.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/__tests__/reattempt-ui.test.tsx",
+      "target": "function:src/__tests__/reattempt-ui.test.tsx:seedDueQuestion",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/__tests__/reattempt-ui.test.tsx",
+      "target": "function:src/__tests__/reattempt-ui.test.tsx:seedDuePyq",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/__tests__/reattempt-ui.test.tsx",
+      "target": "function:src/__tests__/reattempt-ui.test.tsx:seedLegacyDuePyq",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/__tests__/revision-pack.test.ts",
+      "target": "file:src/lib/revision-pack.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/__tests__/revision-pack.test.ts",
+      "target": "file:src/types/index.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/__tests__/sessions.test.ts",
+      "target": "file:src/lib/db.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/__tests__/sessions.test.ts",
+      "target": "file:src/lib/pyq-session.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/__tests__/sessions.test.ts",
+      "target": "file:src/lib/sessions.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/__tests__/sessions.test.ts",
+      "target": "file:src/lib/sync.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/__tests__/sessions.test.ts",
+      "target": "file:src/types/index.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/__tests__/sessions.test.ts",
+      "target": "function:src/__tests__/sessions.test.ts:session",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/__tests__/sessions.test.ts",
+      "target": "function:src/__tests__/sessions.test.ts:question",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/__tests__/topic-evidence.test.ts",
+      "target": "file:src/lib/topic-evidence.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/__tests__/topic-evidence.test.ts",
+      "target": "file:src/types/index.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/__tests__/topic-evidence.test.ts",
+      "target": "function:src/__tests__/topic-evidence.test.ts:build",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/__tests__/topic-evidence.test.ts",
+      "target": "function:src/__tests__/topic-evidence.test.ts:attempt",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/components/dashboard/HeroCard.tsx",
+      "target": "file:src/lib/utils.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/dashboard/HeroCard.tsx",
+      "target": "function:src/components/dashboard/HeroCard.tsx:HeroCard",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/components/dashboard/HeroCard.tsx",
+      "target": "function:src/components/dashboard/HeroCard.tsx:HeroCard",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/components/dashboard/LearningTips.tsx",
+      "target": "file:src/lib/learning-tips.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/dashboard/LearningTips.tsx",
+      "target": "file:src/lib/utils.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/dashboard/LearningTips.tsx",
+      "target": "function:src/components/dashboard/LearningTips.tsx:LearningTips",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/components/dashboard/LearningTips.tsx",
+      "target": "function:src/components/dashboard/LearningTips.tsx:LearningTips",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/components/dashboard/OutcomeDonut.tsx",
+      "target": "file:src/lib/constants.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/dashboard/OutcomeDonut.tsx",
+      "target": "file:src/types/index.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/dashboard/OutcomeDonut.tsx",
+      "target": "function:src/components/dashboard/OutcomeDonut.tsx:OutcomeDonut",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/components/dashboard/OutcomeDonut.tsx",
+      "target": "function:src/components/dashboard/OutcomeDonut.tsx:OutcomeDonut",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/components/dashboard/OutcomeLegend.tsx",
+      "target": "file:src/lib/constants.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/dashboard/OutcomeLegend.tsx",
+      "target": "file:src/lib/utils.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/dashboard/OutcomeLegend.tsx",
+      "target": "function:src/components/dashboard/OutcomeLegend.tsx:OutcomeLegend",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/components/dashboard/OutcomeLegend.tsx",
+      "target": "function:src/components/dashboard/OutcomeLegend.tsx:OutcomeLegend",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/components/dashboard/SurfaceTrendChart.tsx",
+      "target": "file:src/lib/analysis.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/dashboard/SurfaceTrendChart.tsx",
+      "target": "file:src/lib/utils.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/dashboard/SurfaceTrendChart.tsx",
+      "target": "function:src/components/dashboard/SurfaceTrendChart.tsx:SurfaceTrendChart",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/components/dashboard/SurfaceTrendChart.tsx",
+      "target": "function:src/components/dashboard/SurfaceTrendChart.tsx:SurfaceTrendChart",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/components/pyq/PyqQuestionContent.tsx",
+      "target": "file:src/lib/pyq.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/pyq/PyqQuestionContent.tsx",
+      "target": "function:src/components/pyq/PyqQuestionContent.tsx:PyqQuestionContent",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/components/pyq/PyqQuestionContent.tsx",
+      "target": "function:src/components/pyq/PyqQuestionContent.tsx:PyqQuestionContent",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/components/shared/MissingTagsConfirm.tsx",
+      "target": "file:src/components/ui/Button.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/shared/MissingTagsConfirm.tsx",
+      "target": "file:src/components/ui/Dialog.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/shared/MissingTagsConfirm.tsx",
+      "target": "function:src/components/shared/MissingTagsConfirm.tsx:MissingTagsConfirm",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/components/shared/MissingTagsConfirm.tsx",
+      "target": "function:src/components/shared/MissingTagsConfirm.tsx:MissingTagsConfirm",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/components/shared/OutcomeBadge.tsx",
+      "target": "file:src/lib/constants.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/shared/OutcomeBadge.tsx",
+      "target": "file:src/lib/utils.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/shared/OutcomeBadge.tsx",
+      "target": "file:src/types/index.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/shared/OutcomeBadge.tsx",
+      "target": "function:src/components/shared/OutcomeBadge.tsx:OutcomeBadge",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/components/shared/OutcomeBadge.tsx",
+      "target": "function:src/components/shared/OutcomeBadge.tsx:OutcomeBadge",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/components/tags/OutcomeStep.tsx",
+      "target": "file:src/components/tags/TagOption.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/tags/OutcomeStep.tsx",
+      "target": "file:src/hooks/useKeyboard.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/tags/OutcomeStep.tsx",
+      "target": "file:src/lib/constants.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/tags/OutcomeStep.tsx",
+      "target": "file:src/types/index.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/tags/OutcomeStep.tsx",
+      "target": "function:src/components/tags/OutcomeStep.tsx:OutcomeStep",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/components/tags/OutcomeStep.tsx",
+      "target": "function:src/components/tags/OutcomeStep.tsx:OutcomeStep",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/components/tags/PatternStep.tsx",
+      "target": "file:src/components/ui/Button.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/tags/PatternStep.tsx",
+      "target": "file:src/components/ui/Input.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/tags/PatternStep.tsx",
+      "target": "file:src/lib/utils.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/tags/PatternStep.tsx",
+      "target": "file:src/types/index.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/tags/PatternStep.tsx",
+      "target": "function:src/components/tags/PatternStep.tsx:PatternStep",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/components/tags/PatternStep.tsx",
+      "target": "function:src/components/tags/PatternStep.tsx:PatternStep",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    }
+  ]
+}

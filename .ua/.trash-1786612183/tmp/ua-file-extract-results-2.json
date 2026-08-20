@@ -1,0 +1,4906 @@
+{
+  "scriptCompleted": true,
+  "filesAnalyzed": 28,
+  "filesSkipped": [],
+  "analysisOutcomes": {
+    "structure": {
+      "succeeded": 28,
+      "failed": 0
+    },
+    "callGraph": {
+      "succeeded": 28,
+      "failed": 0,
+      "skipped": 0
+    }
+  },
+  "results": [
+    {
+      "path": "src/App.tsx",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 58,
+      "nonEmptyLines": 55,
+      "functions": [
+        {
+          "name": "App",
+          "startLine": 22,
+          "endLine": 58,
+          "params": []
+        }
+      ],
+      "exports": [
+        {
+          "name": "App",
+          "line": 22,
+          "isDefault": true
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "App",
+          "callee": "useAuthStore",
+          "lineNumber": 23
+        },
+        {
+          "caller": "App",
+          "callee": "usePrefsStore",
+          "lineNumber": 24
+        },
+        {
+          "caller": "App",
+          "callee": "usePrefsStore",
+          "lineNumber": 25
+        },
+        {
+          "caller": "App",
+          "callee": "usePrefsStore",
+          "lineNumber": 26
+        },
+        {
+          "caller": "App",
+          "callee": "useEffect",
+          "lineNumber": 27
+        },
+        {
+          "caller": "App",
+          "callee": "init",
+          "lineNumber": 27
+        },
+        {
+          "caller": "App",
+          "callee": "useEffect",
+          "lineNumber": 28
+        },
+        {
+          "caller": "App",
+          "callee": "useEffect",
+          "lineNumber": 31
+        },
+        {
+          "caller": "App",
+          "callee": "useEffect",
+          "lineNumber": 34
+        },
+        {
+          "caller": "App",
+          "callee": "window.matchMedia",
+          "lineNumber": 35
+        },
+        {
+          "caller": "syncTheme",
+          "callee": "resolveTheme",
+          "lineNumber": 37
+        },
+        {
+          "caller": "syncTheme",
+          "callee": "applyTheme",
+          "lineNumber": 38
+        },
+        {
+          "caller": "syncTheme",
+          "callee": "configureNativeChrome",
+          "lineNumber": 39
+        },
+        {
+          "caller": "App",
+          "callee": "syncTheme",
+          "lineNumber": 42
+        },
+        {
+          "caller": "App",
+          "callee": "systemTheme.addEventListener",
+          "lineNumber": 44
+        },
+        {
+          "caller": "App",
+          "callee": "systemTheme.removeEventListener",
+          "lineNumber": 45
+        }
+      ],
+      "metrics": {
+        "importCount": 11,
+        "exportCount": 1,
+        "functionCount": 1,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/__tests__/buddy-chat-ui.test.tsx",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 204,
+      "nonEmptyLines": 181,
+      "functions": [
+        {
+          "name": "message",
+          "startLine": 85,
+          "endLine": 97,
+          "params": [
+            "overrides"
+          ]
+        },
+        {
+          "name": "setPointer",
+          "startLine": 99,
+          "endLine": 113,
+          "params": [
+            "coarse"
+          ]
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "makeBuilder",
+          "callee": "mocks.update",
+          "lineNumber": 44
+        },
+        {
+          "caller": "makeBuilder",
+          "callee": "mocks.insert",
+          "lineNumber": 48
+        },
+        {
+          "caller": "setPointer",
+          "callee": "Object.defineProperty",
+          "lineNumber": 100
+        },
+        {
+          "caller": "setPointer",
+          "callee": "vi.fn().mockImplementation",
+          "lineNumber": 102
+        },
+        {
+          "caller": "setPointer",
+          "callee": "vi.fn",
+          "lineNumber": 102
+        },
+        {
+          "caller": "setPointer",
+          "callee": "vi.fn",
+          "lineNumber": 106
+        },
+        {
+          "caller": "setPointer",
+          "callee": "vi.fn",
+          "lineNumber": 107
+        },
+        {
+          "caller": "setPointer",
+          "callee": "vi.fn",
+          "lineNumber": 108
+        },
+        {
+          "caller": "setPointer",
+          "callee": "vi.fn",
+          "lineNumber": 109
+        },
+        {
+          "caller": "setPointer",
+          "callee": "vi.fn",
+          "lineNumber": 110
+        }
+      ],
+      "metrics": {
+        "importCount": 2,
+        "exportCount": 0,
+        "functionCount": 2,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/__tests__/buddy-notifications.test.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 44,
+      "nonEmptyLines": 39,
+      "metrics": {
+        "importCount": 1,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/__tests__/buddy-page-ui.test.tsx",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 129,
+      "nonEmptyLines": 117,
+      "functions": [
+        {
+          "name": "LocationProbe",
+          "startLine": 69,
+          "endLine": 77,
+          "params": []
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "LocationProbe",
+          "callee": "useLocation",
+          "lineNumber": 70
+        }
+      ],
+      "metrics": {
+        "importCount": 1,
+        "exportCount": 0,
+        "functionCount": 1,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/__tests__/buddy.test.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 117,
+      "nonEmptyLines": 107,
+      "functions": [
+        {
+          "name": "message",
+          "startLine": 36,
+          "endLine": 47,
+          "params": [
+            "id",
+            "createdAt",
+            "body"
+          ]
+        }
+      ],
+      "metrics": {
+        "importCount": 2,
+        "exportCount": 0,
+        "functionCount": 1,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/__tests__/image-capture.test.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 70,
+      "nonEmptyLines": 61,
+      "classes": [
+        {
+          "name": "InstantImage",
+          "startLine": 8,
+          "endLine": 17,
+          "methods": [
+            "src"
+          ],
+          "properties": [
+            "onload",
+            "onerror",
+            "width",
+            "height"
+          ]
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "src",
+          "callee": "queueMicrotask",
+          "lineNumber": 15
+        },
+        {
+          "caller": "src",
+          "callee": "this.onload",
+          "lineNumber": 15
+        }
+      ],
+      "metrics": {
+        "importCount": 2,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 1
+      }
+    },
+    {
+      "path": "src/__tests__/native.test.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 42,
+      "nonEmptyLines": 36,
+      "metrics": {
+        "importCount": 1,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/__tests__/notification-time-editor-native.test.tsx",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 58,
+      "nonEmptyLines": 48,
+      "metrics": {
+        "importCount": 1,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/__tests__/notification-time-editor.test.tsx",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 50,
+      "nonEmptyLines": 41,
+      "metrics": {
+        "importCount": 1,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/__tests__/pin-input.test.tsx",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 26,
+      "nonEmptyLines": 22,
+      "metrics": {
+        "importCount": 1,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/__tests__/study-notifications.test.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 61,
+      "nonEmptyLines": 55,
+      "metrics": {
+        "importCount": 1,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/__tests__/supabase-config.test.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 15,
+      "nonEmptyLines": 13,
+      "metrics": {
+        "importCount": 1,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/__tests__/theme.test.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 64,
+      "nonEmptyLines": 54,
+      "metrics": {
+        "importCount": 3,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/components/auth/PinInput.tsx",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 99,
+      "nonEmptyLines": 92,
+      "functions": [
+        {
+          "name": "PinInput",
+          "startLine": 17,
+          "endLine": 99,
+          "params": [
+            "{\n  id,\n  value,\n  onChange,\n  disabled,\n  autoFocus,\n  length = 6\n}"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "PinInput",
+          "line": 17,
+          "isDefault": true
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "PinInput",
+          "callee": "useMemo",
+          "lineNumber": 25
+        },
+        {
+          "caller": "PinInput",
+          "callee": "Array.from",
+          "lineNumber": 25
+        },
+        {
+          "caller": "PinInput",
+          "callee": "useRef",
+          "lineNumber": 26
+        },
+        {
+          "caller": "PinInput",
+          "callee": "useEffect",
+          "lineNumber": 28
+        },
+        {
+          "caller": "PinInput",
+          "callee": "refs.current[0]?.focus",
+          "lineNumber": 29
+        },
+        {
+          "caller": "set",
+          "callee": "digit.replace(/\\D/g, '').slice",
+          "lineNumber": 33
+        },
+        {
+          "caller": "set",
+          "callee": "digit.replace",
+          "lineNumber": 33
+        },
+        {
+          "caller": "set",
+          "callee": "value.split",
+          "lineNumber": 34
+        },
+        {
+          "caller": "set",
+          "callee": "next.join('').slice",
+          "lineNumber": 38
+        },
+        {
+          "caller": "set",
+          "callee": "next.join",
+          "lineNumber": 38
+        },
+        {
+          "caller": "set",
+          "callee": "onChange",
+          "lineNumber": 39
+        },
+        {
+          "caller": "set",
+          "callee": "refs.current[idx + 1]?.focus",
+          "lineNumber": 40
+        },
+        {
+          "caller": "onKeyDown",
+          "callee": "value.split",
+          "lineNumber": 46
+        },
+        {
+          "caller": "onKeyDown",
+          "callee": "onChange",
+          "lineNumber": 48
+        },
+        {
+          "caller": "onKeyDown",
+          "callee": "next.join",
+          "lineNumber": 48
+        },
+        {
+          "caller": "onKeyDown",
+          "callee": "refs.current[idx - 1]?.focus",
+          "lineNumber": 49
+        },
+        {
+          "caller": "onKeyDown",
+          "callee": "e.preventDefault",
+          "lineNumber": 50
+        },
+        {
+          "caller": "onKeyDown",
+          "callee": "refs.current[idx - 1]?.focus",
+          "lineNumber": 52
+        },
+        {
+          "caller": "onKeyDown",
+          "callee": "e.preventDefault",
+          "lineNumber": 53
+        },
+        {
+          "caller": "onKeyDown",
+          "callee": "refs.current[idx + 1]?.focus",
+          "lineNumber": 55
+        },
+        {
+          "caller": "onKeyDown",
+          "callee": "e.preventDefault",
+          "lineNumber": 56
+        },
+        {
+          "caller": "onPaste",
+          "callee": "e.clipboardData.getData('text').replace(/\\D/g, '').slice",
+          "lineNumber": 61
+        },
+        {
+          "caller": "onPaste",
+          "callee": "e.clipboardData.getData('text').replace",
+          "lineNumber": 61
+        },
+        {
+          "caller": "onPaste",
+          "callee": "e.clipboardData.getData",
+          "lineNumber": 61
+        },
+        {
+          "caller": "onPaste",
+          "callee": "e.preventDefault",
+          "lineNumber": 63
+        },
+        {
+          "caller": "onPaste",
+          "callee": "onChange",
+          "lineNumber": 64
+        },
+        {
+          "caller": "onPaste",
+          "callee": "refs.current[Math.min(text.length, length - 1)]?.focus",
+          "lineNumber": 65
+        },
+        {
+          "caller": "onPaste",
+          "callee": "Math.min",
+          "lineNumber": 65
+        },
+        {
+          "caller": "PinInput",
+          "callee": "cells.map",
+          "lineNumber": 70
+        },
+        {
+          "caller": "PinInput",
+          "callee": "set",
+          "lineNumber": 83
+        },
+        {
+          "caller": "PinInput",
+          "callee": "onKeyDown",
+          "lineNumber": 84
+        },
+        {
+          "caller": "PinInput",
+          "callee": "e.currentTarget.select",
+          "lineNumber": 86
+        },
+        {
+          "caller": "PinInput",
+          "callee": "cn",
+          "lineNumber": 88
+        }
+      ],
+      "metrics": {
+        "importCount": 1,
+        "exportCount": 1,
+        "functionCount": 1,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/components/buddy/BuddyAvatar.tsx",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 58,
+      "nonEmptyLines": 54,
+      "functions": [
+        {
+          "name": "toneFor",
+          "startLine": 17,
+          "endLine": 23,
+          "params": [
+            "name"
+          ]
+        },
+        {
+          "name": "BuddyAvatar",
+          "startLine": 25,
+          "endLine": 58,
+          "params": [
+            "{\n  name,\n  size = 'md',\n  online,\n  className\n}"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "BuddyAvatar",
+          "line": 25,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "toneFor",
+          "callee": "name.trim().toLowerCase",
+          "lineNumber": 19
+        },
+        {
+          "caller": "toneFor",
+          "callee": "name.trim",
+          "lineNumber": 19
+        },
+        {
+          "caller": "toneFor",
+          "callee": "char.charCodeAt",
+          "lineNumber": 20
+        },
+        {
+          "caller": "toneFor",
+          "callee": "Math.abs",
+          "lineNumber": 22
+        },
+        {
+          "caller": "BuddyAvatar",
+          "callee": "(name || '?').trim().replace(/^@/, '')[0]?.toUpperCase",
+          "lineNumber": 36
+        },
+        {
+          "caller": "BuddyAvatar",
+          "callee": "(name || '?').trim().replace",
+          "lineNumber": 36
+        },
+        {
+          "caller": "BuddyAvatar",
+          "callee": "(name || '?').trim",
+          "lineNumber": 36
+        },
+        {
+          "caller": "BuddyAvatar",
+          "callee": "cn",
+          "lineNumber": 38
+        },
+        {
+          "caller": "BuddyAvatar",
+          "callee": "cn",
+          "lineNumber": 40
+        },
+        {
+          "caller": "BuddyAvatar",
+          "callee": "toneFor",
+          "lineNumber": 43
+        },
+        {
+          "caller": "BuddyAvatar",
+          "callee": "cn",
+          "lineNumber": 50
+        }
+      ],
+      "metrics": {
+        "importCount": 1,
+        "exportCount": 1,
+        "functionCount": 2,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/components/buddy/BuddyChat.tsx",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 1058,
+      "nonEmptyLines": 1016,
+      "functions": [
+        {
+          "name": "displayName",
+          "startLine": 67,
+          "endLine": 73,
+          "params": [
+            "peer"
+          ]
+        },
+        {
+          "name": "firstName",
+          "startLine": 75,
+          "endLine": 80,
+          "params": [
+            "peer"
+          ]
+        },
+        {
+          "name": "BuddyChat",
+          "startLine": 82,
+          "endLine": 779,
+          "params": [
+            "{ buddyId, meId, peer, onUnfriend, onBack, isVisible }"
+          ]
+        },
+        {
+          "name": "MessageBubble",
+          "startLine": 781,
+          "endLine": 850,
+          "params": [
+            "{\n  msg,\n  isMe,\n  isGroupEnd,\n  animateEntrance\n}"
+          ]
+        },
+        {
+          "name": "TypingDots",
+          "startLine": 852,
+          "endLine": 860,
+          "params": []
+        },
+        {
+          "name": "QuestionCard",
+          "startLine": 862,
+          "endLine": 915,
+          "params": [
+            "{ ref_, isMe }"
+          ]
+        },
+        {
+          "name": "QuestionPicker",
+          "startLine": 917,
+          "endLine": 1058,
+          "params": [
+            "{\n  meId,\n  onPick,\n  onClose\n}"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "BuddyChat",
+          "line": 82,
+          "isDefault": true
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "displayName",
+          "callee": "(peer?.name || '').trim",
+          "lineNumber": 68
+        },
+        {
+          "caller": "displayName",
+          "callee": "(peer?.username || '').trim",
+          "lineNumber": 70
+        },
+        {
+          "caller": "firstName",
+          "callee": "(peer?.name || '').trim",
+          "lineNumber": 76
+        },
+        {
+          "caller": "firstName",
+          "callee": "nm.split",
+          "lineNumber": 77
+        },
+        {
+          "caller": "firstName",
+          "callee": "(peer?.username || '').trim",
+          "lineNumber": 78
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "useState",
+          "lineNumber": 83
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "useState",
+          "lineNumber": 84
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "useState",
+          "lineNumber": 85
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "useState",
+          "lineNumber": 86
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "useState",
+          "lineNumber": 87
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "useState",
+          "lineNumber": 88
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "useState",
+          "lineNumber": 89
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "useState",
+          "lineNumber": 90
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "useBuddyPresenceStore",
+          "lineNumber": 91
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "state.onlineUsersByBuddy[buddyId]?.includes",
+          "lineNumber": 92
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "useState",
+          "lineNumber": 94
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "useState",
+          "lineNumber": 95
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "useState",
+          "lineNumber": 96
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "useState",
+          "lineNumber": 97
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "useState",
+          "lineNumber": 98
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "useState",
+          "lineNumber": 101
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "useState",
+          "lineNumber": 102
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "useRef",
+          "lineNumber": 103
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "useRef",
+          "lineNumber": 104
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "useRef",
+          "lineNumber": 105
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "useRef",
+          "lineNumber": 106
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "useRef",
+          "lineNumber": 107
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "useRef",
+          "lineNumber": 108
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "useRef",
+          "lineNumber": 109
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "useRef",
+          "lineNumber": 110
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "useRef",
+          "lineNumber": 111
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "useRef",
+          "lineNumber": 112
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "useRef",
+          "lineNumber": 113
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "useReducedMotion",
+          "lineNumber": 114
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "useMediaQuery",
+          "lineNumber": 115
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "useEffect",
+          "lineNumber": 117
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "window.setTimeout",
+          "lineNumber": 119
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "menuRef.current?.querySelector<HTMLButtonElement>('[role=\"menuitem\"]')?.focus",
+          "lineNumber": 120
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "menuRef.current?.querySelector",
+          "lineNumber": 120
+        },
+        {
+          "caller": "onKeyDown",
+          "callee": "setMenuOpen",
+          "lineNumber": 124
+        },
+        {
+          "caller": "onKeyDown",
+          "callee": "menuButtonRef.current?.focus",
+          "lineNumber": 125
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "window.addEventListener",
+          "lineNumber": 127
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "window.clearTimeout",
+          "lineNumber": 129
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "window.removeEventListener",
+          "lineNumber": 130
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "useEffect",
+          "lineNumber": 135
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "setMessages",
+          "lineNumber": 137
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "setLoading",
+          "lineNumber": 138
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "setLoadingOlder",
+          "lineNumber": 139
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "setHasOlder",
+          "lineNumber": 140
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "setError",
+          "lineNumber": 141
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "setPeerTyping",
+          "lineNumber": 142
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "setConnection",
+          "lineNumber": 143
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "setMenuOpen",
+          "lineNumber": 144
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "setConfirmUnfriend",
+          "lineNumber": 145
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "setIsAtBottom",
+          "lineNumber": 146
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "setPendingBelow",
+          "lineNumber": 147
+        },
+        {
+          "caller": "load",
+          "callee": "supabase\n        .from('buddy_messages')\n        .select('*')\n        .eq('buddy_id', buddyId)\n        .order('created_at', { ascending: false })\n        .limit",
+          "lineNumber": 155
+        },
+        {
+          "caller": "load",
+          "callee": "supabase\n        .from('buddy_messages')\n        .select('*')\n        .eq('buddy_id', buddyId)\n        .order",
+          "lineNumber": 155
+        },
+        {
+          "caller": "load",
+          "callee": "supabase\n        .from('buddy_messages')\n        .select('*')\n        .eq",
+          "lineNumber": 155
+        },
+        {
+          "caller": "load",
+          "callee": "supabase\n        .from('buddy_messages')\n        .select",
+          "lineNumber": 155
+        },
+        {
+          "caller": "load",
+          "callee": "supabase\n        .from",
+          "lineNumber": 155
+        },
+        {
+          "caller": "load",
+          "callee": "setError",
+          "lineNumber": 163
+        },
+        {
+          "caller": "load",
+          "callee": "setLoading",
+          "lineNumber": 164
+        },
+        {
+          "caller": "load",
+          "callee": "setError",
+          "lineNumber": 167
+        },
+        {
+          "caller": "load",
+          "callee": "[...((data as BuddyMessageRow[]) ?? [])].reverse",
+          "lineNumber": 170
+        },
+        {
+          "caller": "load",
+          "callee": "setMessages",
+          "lineNumber": 171
+        },
+        {
+          "caller": "load",
+          "callee": "mergeBuddyMessages",
+          "lineNumber": 171
+        },
+        {
+          "caller": "load",
+          "callee": "setHasOlder",
+          "lineNumber": 172
+        },
+        {
+          "caller": "load",
+          "callee": "setLoading",
+          "lineNumber": 173
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "load",
+          "lineNumber": 175
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "supabase.channel",
+          "lineNumber": 177
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "buddyRealtimeTopic",
+          "lineNumber": 177
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "channel\n      .on(\n        'postgres_changes',\n        {\n          event: 'INSERT',\n          schema: 'public',\n          table: 'buddy_messages',\n          filter: `buddy_id=eq.${buddyId}`\n        },\n        (payload) => {\n          const row = payload.new as BuddyMessageRow;\n          setMessages((prev) => mergeBuddyMessages(prev, [row]));\n        }\n      )\n      .on(\n        'postgres_changes',\n        {\n          event: 'UPDATE',\n          schema: 'public',\n          table: 'buddy_messages',\n          filter: `buddy_id=eq.${buddyId}`\n        },\n        (payload) => {\n          const row = payload.new as BuddyMessageRow;\n          setMessages((prev) => prev.map((m) => (m.id === row.id ? { ...m, ...row } : m)));\n        }\n      )\n      .on('broadcast', { event: 'typing' }, (payload) => {\n        const p = payload.payload as { from?: string } | undefined;\n        if (!p?.from || p.from === meId) return;\n        setPeerTyping(true);\n        if (peerTypingTimer.current) clearTimeout(peerTypingTimer.current);\n        peerTypingTimer.current = setTimeout(() => setPeerTyping(false), TYPING_TIMEOUT_MS);\n      })\n      .subscribe",
+          "lineNumber": 179
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "channel\n      .on(\n        'postgres_changes',\n        {\n          event: 'INSERT',\n          schema: 'public',\n          table: 'buddy_messages',\n          filter: `buddy_id=eq.${buddyId}`\n        },\n        (payload) => {\n          const row = payload.new as BuddyMessageRow;\n          setMessages((prev) => mergeBuddyMessages(prev, [row]));\n        }\n      )\n      .on(\n        'postgres_changes',\n        {\n          event: 'UPDATE',\n          schema: 'public',\n          table: 'buddy_messages',\n          filter: `buddy_id=eq.${buddyId}`\n        },\n        (payload) => {\n          const row = payload.new as BuddyMessageRow;\n          setMessages((prev) => prev.map((m) => (m.id === row.id ? { ...m, ...row } : m)));\n        }\n      )\n      .on",
+          "lineNumber": 179
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "channel\n      .on(\n        'postgres_changes',\n        {\n          event: 'INSERT',\n          schema: 'public',\n          table: 'buddy_messages',\n          filter: `buddy_id=eq.${buddyId}`\n        },\n        (payload) => {\n          const row = payload.new as BuddyMessageRow;\n          setMessages((prev) => mergeBuddyMessages(prev, [row]));\n        }\n      )\n      .on",
+          "lineNumber": 179
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "channel\n      .on",
+          "lineNumber": 179
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "setMessages",
+          "lineNumber": 190
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "mergeBuddyMessages",
+          "lineNumber": 190
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "setMessages",
+          "lineNumber": 203
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "prev.map",
+          "lineNumber": 203
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "setPeerTyping",
+          "lineNumber": 209
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "clearTimeout",
+          "lineNumber": 210
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "setTimeout",
+          "lineNumber": 211
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "setPeerTyping",
+          "lineNumber": 211
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "setConnection",
+          "lineNumber": 215
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "load",
+          "lineNumber": 218
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "setConnection",
+          "lineNumber": 220
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "setConnection",
+          "lineNumber": 222
+        },
+        {
+          "caller": "resyncWhenVisible",
+          "callee": "load",
+          "lineNumber": 229
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "document.addEventListener",
+          "lineNumber": 231
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "document.removeEventListener",
+          "lineNumber": 235
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "clearTimeout",
+          "lineNumber": 236
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "supabase.removeChannel",
+          "lineNumber": 238
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "useCallback",
+          "lineNumber": 242
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "setLoadingOlder",
+          "lineNumber": 248
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "supabase\n      .from('buddy_messages')\n      .select('*')\n      .eq('buddy_id', buddyId)\n      .lt('created_at', oldest.created_at)\n      .order('created_at', { ascending: false })\n      .limit",
+          "lineNumber": 249
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "supabase\n      .from('buddy_messages')\n      .select('*')\n      .eq('buddy_id', buddyId)\n      .lt('created_at', oldest.created_at)\n      .order",
+          "lineNumber": 249
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "supabase\n      .from('buddy_messages')\n      .select('*')\n      .eq('buddy_id', buddyId)\n      .lt",
+          "lineNumber": 249
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "supabase\n      .from('buddy_messages')\n      .select('*')\n      .eq",
+          "lineNumber": 249
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "supabase\n      .from('buddy_messages')\n      .select",
+          "lineNumber": 249
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "supabase\n      .from",
+          "lineNumber": 249
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "setLoadingOlder",
+          "lineNumber": 256
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "setError",
+          "lineNumber": 258
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "[...((data as BuddyMessageRow[]) ?? [])].reverse",
+          "lineNumber": 261
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "setMessages",
+          "lineNumber": 263
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "mergeBuddyMessages",
+          "lineNumber": 263
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "setHasOlder",
+          "lineNumber": 264
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "window.requestAnimationFrame",
+          "lineNumber": 265
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "useCallback",
+          "lineNumber": 275
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "messages\n      .filter((m) => m.sender_id !== meId && m.read_at === null)\n      .map",
+          "lineNumber": 277
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "messages\n      .filter",
+          "lineNumber": 277
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "new Date().toISOString",
+          "lineNumber": 281
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "setMessages",
+          "lineNumber": 283
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "prev.map",
+          "lineNumber": 283
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "unreadIdSet.has",
+          "lineNumber": 283
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "supabase\n      .from('buddy_messages')\n      .update({ read_at: now })\n      .eq('buddy_id', buddyId)\n      .neq('sender_id', meId)\n      .in",
+          "lineNumber": 284
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "supabase\n      .from('buddy_messages')\n      .update({ read_at: now })\n      .eq('buddy_id', buddyId)\n      .neq",
+          "lineNumber": 284
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "supabase\n      .from('buddy_messages')\n      .update({ read_at: now })\n      .eq",
+          "lineNumber": 284
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "supabase\n      .from('buddy_messages')\n      .update",
+          "lineNumber": 284
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "supabase\n      .from",
+          "lineNumber": 284
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "setMessages",
+          "lineNumber": 292
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "prev.map",
+          "lineNumber": 292
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "unreadIdSet.has",
+          "lineNumber": 292
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "useEffect",
+          "lineNumber": 296
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "markRead",
+          "lineNumber": 297
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "useEffect",
+          "lineNumber": 300
+        },
+        {
+          "caller": "markWhenVisible",
+          "callee": "markRead",
+          "lineNumber": 302
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "document.addEventListener",
+          "lineNumber": 304
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "document.removeEventListener",
+          "lineNumber": 305
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "useEffect",
+          "lineNumber": 310
+        },
+        {
+          "caller": "heartbeat",
+          "callee": "touchActiveBuddy(buddyId).catch",
+          "lineNumber": 313
+        },
+        {
+          "caller": "heartbeat",
+          "callee": "touchActiveBuddy",
+          "lineNumber": 313
+        },
+        {
+          "caller": "heartbeat",
+          "callee": "touchActiveBuddy(null).catch",
+          "lineNumber": 315
+        },
+        {
+          "caller": "heartbeat",
+          "callee": "touchActiveBuddy",
+          "lineNumber": 315
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "heartbeat",
+          "lineNumber": 318
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "window.setInterval",
+          "lineNumber": 319
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "document.addEventListener",
+          "lineNumber": 320
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "window.clearInterval",
+          "lineNumber": 322
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "document.removeEventListener",
+          "lineNumber": 323
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "touchActiveBuddy(null).catch",
+          "lineNumber": 324
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "touchActiveBuddy",
+          "lineNumber": 324
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "useCallback",
+          "lineNumber": 328
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "setIsAtBottom",
+          "lineNumber": 334
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "setPendingBelow",
+          "lineNumber": 335
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "useCallback",
+          "lineNumber": 338
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "list.scrollTo",
+          "lineNumber": 342
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "setIsAtBottom",
+          "lineNumber": 344
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "setPendingBelow",
+          "lineNumber": 345
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "useEffect",
+          "lineNumber": 351
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "messages.at",
+          "lineNumber": 352
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "scrollToBottom",
+          "lineNumber": 356
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "scrollToBottom",
+          "lineNumber": 358
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "setPendingBelow",
+          "lineNumber": 360
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "useLayoutEffect",
+          "lineNumber": 366
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "Math.min",
+          "lineNumber": 370
+        },
+        {
+          "caller": "broadcastTyping",
+          "callee": "Date.now",
+          "lineNumber": 378
+        },
+        {
+          "caller": "broadcastTyping",
+          "callee": "ch.send",
+          "lineNumber": 381
+        },
+        {
+          "caller": "sendText",
+          "callee": "draft.trim",
+          "lineNumber": 385
+        },
+        {
+          "caller": "sendText",
+          "callee": "setSending",
+          "lineNumber": 387
+        },
+        {
+          "caller": "sendText",
+          "callee": "crypto.randomUUID",
+          "lineNumber": 389
+        },
+        {
+          "caller": "sendText",
+          "callee": "new Date().toISOString",
+          "lineNumber": 395
+        },
+        {
+          "caller": "sendText",
+          "callee": "setMessages",
+          "lineNumber": 398
+        },
+        {
+          "caller": "sendText",
+          "callee": "mergeBuddyMessages",
+          "lineNumber": 398
+        },
+        {
+          "caller": "sendText",
+          "callee": "setDraft",
+          "lineNumber": 399
+        },
+        {
+          "caller": "sendText",
+          "callee": "supabase.from('buddy_messages').insert",
+          "lineNumber": 400
+        },
+        {
+          "caller": "sendText",
+          "callee": "supabase.from",
+          "lineNumber": 400
+        },
+        {
+          "caller": "sendText",
+          "callee": "setSending",
+          "lineNumber": 407
+        },
+        {
+          "caller": "sendText",
+          "callee": "setMessages",
+          "lineNumber": 409
+        },
+        {
+          "caller": "sendText",
+          "callee": "m.filter",
+          "lineNumber": 409
+        },
+        {
+          "caller": "sendText",
+          "callee": "setDraft",
+          "lineNumber": 410
+        },
+        {
+          "caller": "sendText",
+          "callee": "setError",
+          "lineNumber": 411
+        },
+        {
+          "caller": "sendText",
+          "callee": "setError",
+          "lineNumber": 413
+        },
+        {
+          "caller": "sendText",
+          "callee": "notifyBuddyMessage",
+          "lineNumber": 414
+        },
+        {
+          "caller": "shareQuestion",
+          "callee": "setPicker",
+          "lineNumber": 419
+        },
+        {
+          "caller": "shareQuestion",
+          "callee": "setSending",
+          "lineNumber": 420
+        },
+        {
+          "caller": "shareQuestion",
+          "callee": "safeQuestionRef",
+          "lineNumber": 421
+        },
+        {
+          "caller": "shareQuestion",
+          "callee": "crypto.randomUUID",
+          "lineNumber": 423
+        },
+        {
+          "caller": "shareQuestion",
+          "callee": "new Date().toISOString",
+          "lineNumber": 429
+        },
+        {
+          "caller": "shareQuestion",
+          "callee": "setMessages",
+          "lineNumber": 432
+        },
+        {
+          "caller": "shareQuestion",
+          "callee": "mergeBuddyMessages",
+          "lineNumber": 432
+        },
+        {
+          "caller": "shareQuestion",
+          "callee": "supabase.from('buddy_messages').insert",
+          "lineNumber": 433
+        },
+        {
+          "caller": "shareQuestion",
+          "callee": "supabase.from",
+          "lineNumber": 433
+        },
+        {
+          "caller": "shareQuestion",
+          "callee": "setSending",
+          "lineNumber": 440
+        },
+        {
+          "caller": "shareQuestion",
+          "callee": "setMessages",
+          "lineNumber": 442
+        },
+        {
+          "caller": "shareQuestion",
+          "callee": "m.filter",
+          "lineNumber": 442
+        },
+        {
+          "caller": "shareQuestion",
+          "callee": "setError",
+          "lineNumber": 443
+        },
+        {
+          "caller": "shareQuestion",
+          "callee": "setError",
+          "lineNumber": 445
+        },
+        {
+          "caller": "shareQuestion",
+          "callee": "notifyBuddyMessage",
+          "lineNumber": 446
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "useMemo",
+          "lineNumber": 450
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "groupBuddyMessages",
+          "lineNumber": 450
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "displayName",
+          "lineNumber": 451
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "cn",
+          "lineNumber": 480
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "setMenuOpen",
+          "lineNumber": 504
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "setMenuOpen",
+          "lineNumber": 521
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "menuButtonRef.current?.focus",
+          "lineNumber": 522
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "setMenuOpen",
+          "lineNumber": 536
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "setConfirmUnfriend",
+          "lineNumber": 537
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "setRetryKey",
+          "lineNumber": 560
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "loadOlder",
+          "lineNumber": 599
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "grouped.map",
+          "lineNumber": 606
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "formatDate",
+          "lineNumber": 609
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "day.clusters.map",
+          "lineNumber": 611
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "cluster.rows.map",
+          "lineNumber": 613
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "scrollToBottom",
+          "lineNumber": 640
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "firstName",
+          "lineNumber": 673
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "setPicker",
+          "lineNumber": 684
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "setDraft",
+          "lineNumber": 696
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "e.target.value.slice",
+          "lineNumber": 696
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "broadcastTyping",
+          "lineNumber": 697
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "e.preventDefault",
+          "lineNumber": 701
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "sendText",
+          "lineNumber": 702
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "firstName",
+          "lineNumber": 705
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "firstName",
+          "lineNumber": 707
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "sendText",
+          "lineNumber": 731
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "draft.trim",
+          "lineNumber": 732
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "setConfirmUnfriend",
+          "lineNumber": 744
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "setConfirmUnfriend",
+          "lineNumber": 752
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "setConfirmUnfriend",
+          "lineNumber": 759
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "onUnfriend",
+          "lineNumber": 760
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "shareQuestion",
+          "lineNumber": 772
+        },
+        {
+          "caller": "BuddyChat",
+          "callee": "setPicker",
+          "lineNumber": 773
+        },
+        {
+          "caller": "MessageBubble",
+          "callee": "new Date(msg.created_at).toLocaleTimeString",
+          "lineNumber": 792
+        },
+        {
+          "caller": "MessageBubble",
+          "callee": "cn",
+          "lineNumber": 801
+        },
+        {
+          "caller": "MessageBubble",
+          "callee": "cn",
+          "lineNumber": 804
+        },
+        {
+          "caller": "MessageBubble",
+          "callee": "isSharedQuestionRef",
+          "lineNumber": 812
+        },
+        {
+          "caller": "MessageBubble",
+          "callee": "cn",
+          "lineNumber": 820
+        },
+        {
+          "caller": "MessageBubble",
+          "callee": "cn",
+          "lineNumber": 823
+        },
+        {
+          "caller": "MessageBubble",
+          "callee": "cn",
+          "lineNumber": 824
+        },
+        {
+          "caller": "MessageBubble",
+          "callee": "cn",
+          "lineNumber": 832
+        },
+        {
+          "caller": "QuestionCard",
+          "callee": "subjectInk",
+          "lineNumber": 863
+        },
+        {
+          "caller": "QuestionCard",
+          "callee": "Math.round",
+          "lineNumber": 869
+        },
+        {
+          "caller": "QuestionCard",
+          "callee": "cn",
+          "lineNumber": 872
+        },
+        {
+          "caller": "QuestionCard",
+          "callee": "cn",
+          "lineNumber": 877
+        },
+        {
+          "caller": "QuestionCard",
+          "callee": "cn",
+          "lineNumber": 883
+        },
+        {
+          "caller": "QuestionPicker",
+          "callee": "useState",
+          "lineNumber": 926
+        },
+        {
+          "caller": "QuestionPicker",
+          "callee": "useState",
+          "lineNumber": 927
+        },
+        {
+          "caller": "QuestionPicker",
+          "callee": "useState",
+          "lineNumber": 928
+        },
+        {
+          "caller": "QuestionPicker",
+          "callee": "useReducedMotion",
+          "lineNumber": 929
+        },
+        {
+          "caller": "QuestionPicker",
+          "callee": "useEffect",
+          "lineNumber": 931
+        },
+        {
+          "caller": "load",
+          "callee": "db.questions.where('user_id').equals(meId).toArray",
+          "lineNumber": 934
+        },
+        {
+          "caller": "load",
+          "callee": "db.questions.where('user_id').equals",
+          "lineNumber": 934
+        },
+        {
+          "caller": "load",
+          "callee": "db.questions.where",
+          "lineNumber": 934
+        },
+        {
+          "caller": "load",
+          "callee": "setRows",
+          "lineNumber": 936
+        },
+        {
+          "caller": "load",
+          "callee": "all.sort((a, b) => b.created_at.localeCompare(a.created_at)).slice",
+          "lineNumber": 936
+        },
+        {
+          "caller": "load",
+          "callee": "all.sort",
+          "lineNumber": 936
+        },
+        {
+          "caller": "load",
+          "callee": "b.created_at.localeCompare",
+          "lineNumber": 936
+        },
+        {
+          "caller": "load",
+          "callee": "setLoading",
+          "lineNumber": 937
+        },
+        {
+          "caller": "QuestionPicker",
+          "callee": "load",
+          "lineNumber": 939
+        },
+        {
+          "caller": "QuestionPicker",
+          "callee": "useEffect",
+          "lineNumber": 945
+        },
+        {
+          "caller": "onKeyDown",
+          "callee": "onClose",
+          "lineNumber": 947
+        },
+        {
+          "caller": "QuestionPicker",
+          "callee": "window.addEventListener",
+          "lineNumber": 949
+        },
+        {
+          "caller": "QuestionPicker",
+          "callee": "window.removeEventListener",
+          "lineNumber": 950
+        },
+        {
+          "caller": "QuestionPicker",
+          "callee": "useMemo",
+          "lineNumber": 953
+        },
+        {
+          "caller": "QuestionPicker",
+          "callee": "q.trim().toLowerCase",
+          "lineNumber": 954
+        },
+        {
+          "caller": "QuestionPicker",
+          "callee": "q.trim",
+          "lineNumber": 954
+        },
+        {
+          "caller": "QuestionPicker",
+          "callee": "rows.filter",
+          "lineNumber": 956
+        },
+        {
+          "caller": "QuestionPicker",
+          "callee": "[r.subject, r.subtopic, r.question_text, r.source_ref]\n        .filter(Boolean)\n        .some",
+          "lineNumber": 957
+        },
+        {
+          "caller": "QuestionPicker",
+          "callee": "[r.subject, r.subtopic, r.question_text, r.source_ref]\n        .filter",
+          "lineNumber": 957
+        },
+        {
+          "caller": "QuestionPicker",
+          "callee": "String(v).toLowerCase().includes",
+          "lineNumber": 959
+        },
+        {
+          "caller": "QuestionPicker",
+          "callee": "String(v).toLowerCase",
+          "lineNumber": 959
+        },
+        {
+          "caller": "QuestionPicker",
+          "callee": "String",
+          "lineNumber": 959
+        },
+        {
+          "caller": "QuestionPicker",
+          "callee": "e.stopPropagation",
+          "lineNumber": 977
+        },
+        {
+          "caller": "QuestionPicker",
+          "callee": "setQ",
+          "lineNumber": 998
+        },
+        {
+          "caller": "QuestionPicker",
+          "callee": "filtered.slice(0, 50).map",
+          "lineNumber": 1020
+        },
+        {
+          "caller": "QuestionPicker",
+          "callee": "filtered.slice",
+          "lineNumber": 1020
+        },
+        {
+          "caller": "QuestionPicker",
+          "callee": "onPick",
+          "lineNumber": 1024
+        },
+        {
+          "caller": "QuestionPicker",
+          "callee": "cn",
+          "lineNumber": 1028
+        },
+        {
+          "caller": "QuestionPicker",
+          "callee": "subjectInk",
+          "lineNumber": 1030
+        },
+        {
+          "caller": "QuestionPicker",
+          "callee": "formatDate",
+          "lineNumber": 1045
+        },
+        {
+          "caller": "QuestionPicker",
+          "callee": "r.created_at.slice",
+          "lineNumber": 1045
+        }
+      ],
+      "metrics": {
+        "importCount": 12,
+        "exportCount": 1,
+        "functionCount": 7,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/components/buddy/BuddyPresenceRuntime.tsx",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 105,
+      "nonEmptyLines": 92,
+      "functions": [
+        {
+          "name": "BuddyPresenceRuntime",
+          "startLine": 18,
+          "endLine": 105,
+          "params": []
+        }
+      ],
+      "exports": [
+        {
+          "name": "BuddyPresenceRuntime",
+          "line": 18,
+          "isDefault": true
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "BuddyPresenceRuntime",
+          "callee": "useAuthStore",
+          "lineNumber": 19
+        },
+        {
+          "caller": "BuddyPresenceRuntime",
+          "callee": "useAuthStore",
+          "lineNumber": 20
+        },
+        {
+          "caller": "BuddyPresenceRuntime",
+          "callee": "useAuthStore",
+          "lineNumber": 21
+        },
+        {
+          "caller": "BuddyPresenceRuntime",
+          "callee": "useEffect",
+          "lineNumber": 23
+        },
+        {
+          "caller": "BuddyPresenceRuntime",
+          "callee": "useBuddyPresenceStore.getState",
+          "lineNumber": 28
+        },
+        {
+          "caller": "track",
+          "callee": "channel.track",
+          "lineNumber": 31
+        },
+        {
+          "caller": "track",
+          "callee": "new Date().toISOString",
+          "lineNumber": 31
+        },
+        {
+          "caller": "addPresenceChannel",
+          "callee": "presenceChannels.has",
+          "lineNumber": 34
+        },
+        {
+          "caller": "addPresenceChannel",
+          "callee": "supabase.channel",
+          "lineNumber": 35
+        },
+        {
+          "caller": "addPresenceChannel",
+          "callee": "buddyPresenceTopic",
+          "lineNumber": 35
+        },
+        {
+          "caller": "addPresenceChannel",
+          "callee": "presenceChannels.set",
+          "lineNumber": 38
+        },
+        {
+          "caller": "addPresenceChannel",
+          "callee": "channel\n        .on('presence', { event: 'sync' }, () => {\n          useBuddyPresenceStore\n            .getState()\n            .setOnlineUsers(buddyId, buddyPresenceUserIds(channel.presenceState()));\n        })\n        .subscribe",
+          "lineNumber": 39
+        },
+        {
+          "caller": "addPresenceChannel",
+          "callee": "channel\n        .on",
+          "lineNumber": 39
+        },
+        {
+          "caller": "addPresenceChannel",
+          "callee": "useBuddyPresenceStore\n            .getState()\n            .setOnlineUsers",
+          "lineNumber": 41
+        },
+        {
+          "caller": "addPresenceChannel",
+          "callee": "useBuddyPresenceStore\n            .getState",
+          "lineNumber": 41
+        },
+        {
+          "caller": "addPresenceChannel",
+          "callee": "buddyPresenceUserIds",
+          "lineNumber": 43
+        },
+        {
+          "caller": "addPresenceChannel",
+          "callee": "channel.presenceState",
+          "lineNumber": 43
+        },
+        {
+          "caller": "addPresenceChannel",
+          "callee": "track",
+          "lineNumber": 46
+        },
+        {
+          "caller": "syncPresenceChannels",
+          "callee": "supabase\n        .from('buddies')\n        .select('id')\n        .eq('status', 'active')\n        .or",
+          "lineNumber": 51
+        },
+        {
+          "caller": "syncPresenceChannels",
+          "callee": "supabase\n        .from('buddies')\n        .select('id')\n        .eq",
+          "lineNumber": 51
+        },
+        {
+          "caller": "syncPresenceChannels",
+          "callee": "supabase\n        .from('buddies')\n        .select",
+          "lineNumber": 51
+        },
+        {
+          "caller": "syncPresenceChannels",
+          "callee": "supabase\n        .from",
+          "lineNumber": 51
+        },
+        {
+          "caller": "syncPresenceChannels",
+          "callee": "((data as ActiveBuddyRow[] | null) ?? []).map",
+          "lineNumber": 58
+        },
+        {
+          "caller": "syncPresenceChannels",
+          "callee": "activeIds.has",
+          "lineNumber": 60
+        },
+        {
+          "caller": "syncPresenceChannels",
+          "callee": "presenceChannels.delete",
+          "lineNumber": 61
+        },
+        {
+          "caller": "syncPresenceChannels",
+          "callee": "useBuddyPresenceStore.getState().removeBuddy",
+          "lineNumber": 62
+        },
+        {
+          "caller": "syncPresenceChannels",
+          "callee": "useBuddyPresenceStore.getState",
+          "lineNumber": 62
+        },
+        {
+          "caller": "syncPresenceChannels",
+          "callee": "supabase.removeChannel",
+          "lineNumber": 63
+        },
+        {
+          "caller": "syncPresenceChannels",
+          "callee": "addPresenceChannel",
+          "lineNumber": 65
+        },
+        {
+          "caller": "BuddyPresenceRuntime",
+          "callee": "syncPresenceChannels",
+          "lineNumber": 68
+        },
+        {
+          "caller": "BuddyPresenceRuntime",
+          "callee": "supabase\n      .channel(`buddy-presence-links:${userId}`)\n      .on(\n        'postgres_changes',\n        { event: '*', schema: 'public', table: 'buddies', filter: `user_a=eq.${userId}` },\n        () => void syncPresenceChannels()\n      )\n      .on(\n        'postgres_changes',\n        { event: '*', schema: 'public', table: 'buddies', filter: `user_b=eq.${userId}` },\n        () => void syncPresenceChannels()\n      )\n      .subscribe",
+          "lineNumber": 71
+        },
+        {
+          "caller": "BuddyPresenceRuntime",
+          "callee": "supabase\n      .channel(`buddy-presence-links:${userId}`)\n      .on(\n        'postgres_changes',\n        { event: '*', schema: 'public', table: 'buddies', filter: `user_a=eq.${userId}` },\n        () => void syncPresenceChannels()\n      )\n      .on",
+          "lineNumber": 71
+        },
+        {
+          "caller": "BuddyPresenceRuntime",
+          "callee": "supabase\n      .channel(`buddy-presence-links:${userId}`)\n      .on",
+          "lineNumber": 71
+        },
+        {
+          "caller": "BuddyPresenceRuntime",
+          "callee": "supabase\n      .channel",
+          "lineNumber": 71
+        },
+        {
+          "caller": "BuddyPresenceRuntime",
+          "callee": "syncPresenceChannels",
+          "lineNumber": 76
+        },
+        {
+          "caller": "BuddyPresenceRuntime",
+          "callee": "syncPresenceChannels",
+          "lineNumber": 81
+        },
+        {
+          "caller": "refreshWhenVisible",
+          "callee": "syncPresenceChannels",
+          "lineNumber": 87
+        },
+        {
+          "caller": "refreshWhenVisible",
+          "callee": "presenceChannels.values",
+          "lineNumber": 88
+        },
+        {
+          "caller": "refreshWhenVisible",
+          "callee": "track",
+          "lineNumber": 88
+        },
+        {
+          "caller": "BuddyPresenceRuntime",
+          "callee": "document.addEventListener",
+          "lineNumber": 90
+        },
+        {
+          "caller": "BuddyPresenceRuntime",
+          "callee": "window.addEventListener",
+          "lineNumber": 91
+        },
+        {
+          "caller": "BuddyPresenceRuntime",
+          "callee": "document.removeEventListener",
+          "lineNumber": 95
+        },
+        {
+          "caller": "BuddyPresenceRuntime",
+          "callee": "window.removeEventListener",
+          "lineNumber": 96
+        },
+        {
+          "caller": "BuddyPresenceRuntime",
+          "callee": "supabase.removeChannel",
+          "lineNumber": 97
+        },
+        {
+          "caller": "BuddyPresenceRuntime",
+          "callee": "presenceChannels.values",
+          "lineNumber": 98
+        },
+        {
+          "caller": "BuddyPresenceRuntime",
+          "callee": "supabase.removeChannel",
+          "lineNumber": 98
+        },
+        {
+          "caller": "BuddyPresenceRuntime",
+          "callee": "presenceChannels.clear",
+          "lineNumber": 99
+        },
+        {
+          "caller": "BuddyPresenceRuntime",
+          "callee": "presenceStore.reset",
+          "lineNumber": 100
+        }
+      ],
+      "metrics": {
+        "importCount": 4,
+        "exportCount": 1,
+        "functionCount": 1,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/components/dashboard/WelcomeOverlay.tsx",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 204,
+      "nonEmptyLines": 192,
+      "functions": [
+        {
+          "name": "WelcomeOverlay",
+          "startLine": 52,
+          "endLine": 204,
+          "params": []
+        }
+      ],
+      "exports": [
+        {
+          "name": "WelcomeOverlay",
+          "line": 52,
+          "isDefault": true
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "WelcomeOverlay",
+          "callee": "useState",
+          "lineNumber": 53
+        },
+        {
+          "caller": "WelcomeOverlay",
+          "callee": "useState",
+          "lineNumber": 54
+        },
+        {
+          "caller": "WelcomeOverlay",
+          "callee": "useRef",
+          "lineNumber": 55
+        },
+        {
+          "caller": "WelcomeOverlay",
+          "callee": "useAuthStore",
+          "lineNumber": 56
+        },
+        {
+          "caller": "WelcomeOverlay",
+          "callee": "useAuthStore",
+          "lineNumber": 57
+        },
+        {
+          "caller": "WelcomeOverlay",
+          "callee": "useAuthStore",
+          "lineNumber": 58
+        },
+        {
+          "caller": "WelcomeOverlay",
+          "callee": "useEffect",
+          "lineNumber": 60
+        },
+        {
+          "caller": "check",
+          "callee": "db.meta.get",
+          "lineNumber": 66
+        },
+        {
+          "caller": "check",
+          "callee": "setVisible",
+          "lineNumber": 72
+        },
+        {
+          "caller": "check",
+          "callee": "setVisible",
+          "lineNumber": 76
+        },
+        {
+          "caller": "WelcomeOverlay",
+          "callee": "check",
+          "lineNumber": 78
+        },
+        {
+          "caller": "WelcomeOverlay",
+          "callee": "useCallback",
+          "lineNumber": 84
+        },
+        {
+          "caller": "WelcomeOverlay",
+          "callee": "new Date().toISOString",
+          "lineNumber": 86
+        },
+        {
+          "caller": "WelcomeOverlay",
+          "callee": "db.meta.put",
+          "lineNumber": 88
+        },
+        {
+          "caller": "WelcomeOverlay",
+          "callee": "setVisible",
+          "lineNumber": 92
+        },
+        {
+          "caller": "WelcomeOverlay",
+          "callee": "supabase\n      .from('users')\n      .update({ welcome_seen_at: stamp })\n      .eq",
+          "lineNumber": 95
+        },
+        {
+          "caller": "WelcomeOverlay",
+          "callee": "supabase\n      .from('users')\n      .update",
+          "lineNumber": 95
+        },
+        {
+          "caller": "WelcomeOverlay",
+          "callee": "supabase\n      .from",
+          "lineNumber": 95
+        },
+        {
+          "caller": "WelcomeOverlay",
+          "callee": "refreshProfile",
+          "lineNumber": 99
+        },
+        {
+          "caller": "WelcomeOverlay",
+          "callee": "useEffect",
+          "lineNumber": 102
+        },
+        {
+          "caller": "onKeyDown",
+          "callee": "dismiss",
+          "lineNumber": 105
+        },
+        {
+          "caller": "WelcomeOverlay",
+          "callee": "window.addEventListener",
+          "lineNumber": 107
+        },
+        {
+          "caller": "WelcomeOverlay",
+          "callee": "window.removeEventListener",
+          "lineNumber": 108
+        },
+        {
+          "caller": "WelcomeOverlay",
+          "callee": "dismiss",
+          "lineNumber": 137
+        },
+        {
+          "caller": "WelcomeOverlay",
+          "callee": "SLIDES.map",
+          "lineNumber": 166
+        },
+        {
+          "caller": "WelcomeOverlay",
+          "callee": "cn",
+          "lineNumber": 169
+        },
+        {
+          "caller": "WelcomeOverlay",
+          "callee": "setIdx",
+          "lineNumber": 179
+        },
+        {
+          "caller": "WelcomeOverlay",
+          "callee": "Math.max",
+          "lineNumber": 179
+        },
+        {
+          "caller": "WelcomeOverlay",
+          "callee": "dismiss",
+          "lineNumber": 184
+        },
+        {
+          "caller": "WelcomeOverlay",
+          "callee": "setIdx",
+          "lineNumber": 191
+        },
+        {
+          "caller": "WelcomeOverlay",
+          "callee": "Math.min",
+          "lineNumber": 191
+        }
+      ],
+      "metrics": {
+        "importCount": 5,
+        "exportCount": 1,
+        "functionCount": 1,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/components/native/NativeRuntime.tsx",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 107,
+      "nonEmptyLines": 95,
+      "functions": [
+        {
+          "name": "isTextEntry",
+          "startLine": 16,
+          "endLine": 22,
+          "params": [
+            "element"
+          ]
+        },
+        {
+          "name": "NativeRuntime",
+          "startLine": 25,
+          "endLine": 107,
+          "params": []
+        }
+      ],
+      "exports": [
+        {
+          "name": "NativeRuntime",
+          "line": 25,
+          "isDefault": true
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "NativeRuntime",
+          "callee": "useAuthStore",
+          "lineNumber": 26
+        },
+        {
+          "caller": "NativeRuntime",
+          "callee": "useState",
+          "lineNumber": 27
+        },
+        {
+          "caller": "NativeRuntime",
+          "callee": "useEffect",
+          "lineNumber": 29
+        },
+        {
+          "caller": "NativeRuntime",
+          "callee": "configureNativeChrome",
+          "lineNumber": 32
+        },
+        {
+          "caller": "NativeRuntime",
+          "callee": "NativeApp.toggleBackButtonHandler({ enabled: true }).catch",
+          "lineNumber": 33
+        },
+        {
+          "caller": "NativeRuntime",
+          "callee": "NativeApp.toggleBackButtonHandler",
+          "lineNumber": 33
+        },
+        {
+          "caller": "NativeRuntime",
+          "callee": "NativeApp.addListener",
+          "lineNumber": 37
+        },
+        {
+          "caller": "NativeRuntime",
+          "callee": "isTextEntry",
+          "lineNumber": 38
+        },
+        {
+          "caller": "NativeRuntime",
+          "callee": "(document.activeElement as HTMLElement).blur",
+          "lineNumber": 39
+        },
+        {
+          "caller": "NativeRuntime",
+          "callee": "Keyboard.hide().catch",
+          "lineNumber": 40
+        },
+        {
+          "caller": "NativeRuntime",
+          "callee": "Keyboard.hide",
+          "lineNumber": 40
+        },
+        {
+          "caller": "NativeRuntime",
+          "callee": "document.querySelector",
+          "lineNumber": 44
+        },
+        {
+          "caller": "NativeRuntime",
+          "callee": "window.dispatchEvent",
+          "lineNumber": 46
+        },
+        {
+          "caller": "NativeRuntime",
+          "callee": "window.dispatchEvent",
+          "lineNumber": 51
+        },
+        {
+          "caller": "NativeRuntime",
+          "callee": "Date.now",
+          "lineNumber": 55
+        },
+        {
+          "caller": "NativeRuntime",
+          "callee": "resolveNativeBackAction",
+          "lineNumber": 56
+        },
+        {
+          "caller": "NativeRuntime",
+          "callee": "router.navigate",
+          "lineNumber": 60
+        },
+        {
+          "caller": "NativeRuntime",
+          "callee": "router.navigate",
+          "lineNumber": 64
+        },
+        {
+          "caller": "NativeRuntime",
+          "callee": "haptic",
+          "lineNumber": 68
+        },
+        {
+          "caller": "NativeRuntime",
+          "callee": "toast",
+          "lineNumber": 69
+        },
+        {
+          "caller": "NativeRuntime",
+          "callee": "NativeApp.minimizeApp",
+          "lineNumber": 73
+        },
+        {
+          "caller": "NativeRuntime",
+          "callee": "NativeApp.addListener",
+          "lineNumber": 77
+        },
+        {
+          "caller": "NativeRuntime",
+          "callee": "String",
+          "lineNumber": 78
+        },
+        {
+          "caller": "NativeRuntime",
+          "callee": "resumeSync",
+          "lineNumber": 81
+        },
+        {
+          "caller": "NativeRuntime",
+          "callee": "NativeApp.addListener",
+          "lineNumber": 84
+        },
+        {
+          "caller": "NativeRuntime",
+          "callee": "routeFromAppUrl",
+          "lineNumber": 85
+        },
+        {
+          "caller": "NativeRuntime",
+          "callee": "setPendingRoute",
+          "lineNumber": 86
+        },
+        {
+          "caller": "NativeRuntime",
+          "callee": "NativeApp.getLaunchUrl().then",
+          "lineNumber": 90
+        },
+        {
+          "caller": "NativeRuntime",
+          "callee": "NativeApp.getLaunchUrl",
+          "lineNumber": 90
+        },
+        {
+          "caller": "NativeRuntime",
+          "callee": "routeFromAppUrl",
+          "lineNumber": 91
+        },
+        {
+          "caller": "NativeRuntime",
+          "callee": "setPendingRoute",
+          "lineNumber": 92
+        },
+        {
+          "caller": "NativeRuntime",
+          "callee": "listener.then",
+          "lineNumber": 96
+        },
+        {
+          "caller": "NativeRuntime",
+          "callee": "handle.remove",
+          "lineNumber": 96
+        },
+        {
+          "caller": "NativeRuntime",
+          "callee": "useEffect",
+          "lineNumber": 100
+        },
+        {
+          "caller": "NativeRuntime",
+          "callee": "router.navigate",
+          "lineNumber": 102
+        },
+        {
+          "caller": "NativeRuntime",
+          "callee": "setPendingRoute",
+          "lineNumber": 103
+        }
+      ],
+      "metrics": {
+        "importCount": 5,
+        "exportCount": 1,
+        "functionCount": 2,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/components/notifications/BuddyNotificationRuntime.tsx",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 58,
+      "nonEmptyLines": 52,
+      "functions": [
+        {
+          "name": "BuddyNotificationRuntime",
+          "startLine": 14,
+          "endLine": 58,
+          "params": []
+        }
+      ],
+      "exports": [
+        {
+          "name": "BuddyNotificationRuntime",
+          "line": 14,
+          "isDefault": true
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "BuddyNotificationRuntime",
+          "callee": "useAuthStore",
+          "lineNumber": 15
+        },
+        {
+          "caller": "BuddyNotificationRuntime",
+          "callee": "useState",
+          "lineNumber": 16
+        },
+        {
+          "caller": "BuddyNotificationRuntime",
+          "callee": "useEffect",
+          "lineNumber": 18
+        },
+        {
+          "caller": "BuddyNotificationRuntime",
+          "callee": "pushNotificationsOptedIn",
+          "lineNumber": 19
+        },
+        {
+          "caller": "BuddyNotificationRuntime",
+          "callee": "syncBuddyPushRegistration().catch",
+          "lineNumber": 20
+        },
+        {
+          "caller": "BuddyNotificationRuntime",
+          "callee": "syncBuddyPushRegistration",
+          "lineNumber": 20
+        },
+        {
+          "caller": "syncWhenVisible",
+          "callee": "syncBuddyPushRegistration().catch",
+          "lineNumber": 24
+        },
+        {
+          "caller": "syncWhenVisible",
+          "callee": "syncBuddyPushRegistration",
+          "lineNumber": 24
+        },
+        {
+          "caller": "BuddyNotificationRuntime",
+          "callee": "document.addEventListener",
+          "lineNumber": 27
+        },
+        {
+          "caller": "BuddyNotificationRuntime",
+          "callee": "window.addEventListener",
+          "lineNumber": 28
+        },
+        {
+          "caller": "BuddyNotificationRuntime",
+          "callee": "document.removeEventListener",
+          "lineNumber": 30
+        },
+        {
+          "caller": "BuddyNotificationRuntime",
+          "callee": "window.removeEventListener",
+          "lineNumber": 31
+        },
+        {
+          "caller": "BuddyNotificationRuntime",
+          "callee": "useEffect",
+          "lineNumber": 35
+        },
+        {
+          "caller": "BuddyNotificationRuntime",
+          "callee": "PushNotifications.addListener",
+          "lineNumber": 38
+        },
+        {
+          "caller": "BuddyNotificationRuntime",
+          "callee": "saveNativePushToken(token.value).catch",
+          "lineNumber": 39
+        },
+        {
+          "caller": "BuddyNotificationRuntime",
+          "callee": "saveNativePushToken",
+          "lineNumber": 39
+        },
+        {
+          "caller": "BuddyNotificationRuntime",
+          "callee": "PushNotifications.addListener",
+          "lineNumber": 41
+        },
+        {
+          "caller": "BuddyNotificationRuntime",
+          "callee": "routeFromPushData",
+          "lineNumber": 42
+        },
+        {
+          "caller": "BuddyNotificationRuntime",
+          "callee": "setPendingRoute",
+          "lineNumber": 43
+        },
+        {
+          "caller": "BuddyNotificationRuntime",
+          "callee": "listener.then",
+          "lineNumber": 47
+        },
+        {
+          "caller": "BuddyNotificationRuntime",
+          "callee": "handle.remove",
+          "lineNumber": 47
+        },
+        {
+          "caller": "BuddyNotificationRuntime",
+          "callee": "useEffect",
+          "lineNumber": 51
+        },
+        {
+          "caller": "BuddyNotificationRuntime",
+          "callee": "router.navigate",
+          "lineNumber": 53
+        },
+        {
+          "caller": "BuddyNotificationRuntime",
+          "callee": "setPendingRoute",
+          "lineNumber": 54
+        }
+      ],
+      "metrics": {
+        "importCount": 4,
+        "exportCount": 1,
+        "functionCount": 1,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/components/settings/AccessRequestsCard.tsx",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 467,
+      "nonEmptyLines": 446,
+      "functions": [
+        {
+          "name": "AccessRequestsCard",
+          "startLine": 21,
+          "endLine": 230,
+          "params": [
+            "{ userId }"
+          ]
+        },
+        {
+          "name": "TabButton",
+          "startLine": 232,
+          "endLine": 265,
+          "params": [
+            "{\n  on,\n  onClick,\n  label,\n  count,\n  tone\n}"
+          ]
+        },
+        {
+          "name": "RequestRow",
+          "startLine": 267,
+          "endLine": 434,
+          "params": [
+            "{\n  req,\n  inviteUrl,\n  busy,\n  onApprove,\n  onDecline\n}"
+          ]
+        },
+        {
+          "name": "StatusBadge",
+          "startLine": 436,
+          "endLine": 444,
+          "params": [
+            "{ status }"
+          ]
+        },
+        {
+          "name": "CopyButton",
+          "startLine": 446,
+          "endLine": 467,
+          "params": [
+            "{ value, label = 'Copy email' }"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "AccessRequestsCard",
+          "line": 21,
+          "isDefault": true
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "AccessRequestsCard",
+          "callee": "useState",
+          "lineNumber": 22
+        },
+        {
+          "caller": "AccessRequestsCard",
+          "callee": "useState",
+          "lineNumber": 23
+        },
+        {
+          "caller": "AccessRequestsCard",
+          "callee": "useState",
+          "lineNumber": 24
+        },
+        {
+          "caller": "AccessRequestsCard",
+          "callee": "useState",
+          "lineNumber": 25
+        },
+        {
+          "caller": "AccessRequestsCard",
+          "callee": "useState",
+          "lineNumber": 26
+        },
+        {
+          "caller": "AccessRequestsCard",
+          "callee": "useState",
+          "lineNumber": 27
+        },
+        {
+          "caller": "AccessRequestsCard",
+          "callee": "useState",
+          "lineNumber": 28
+        },
+        {
+          "caller": "AccessRequestsCard",
+          "callee": "useUiStore",
+          "lineNumber": 29
+        },
+        {
+          "caller": "AccessRequestsCard",
+          "callee": "useEffect",
+          "lineNumber": 31
+        },
+        {
+          "caller": "check",
+          "callee": "setIsOwner",
+          "lineNumber": 35
+        },
+        {
+          "caller": "check",
+          "callee": "supabase.rpc",
+          "lineNumber": 38
+        },
+        {
+          "caller": "check",
+          "callee": "setIsOwner",
+          "lineNumber": 39
+        },
+        {
+          "caller": "AccessRequestsCard",
+          "callee": "check",
+          "lineNumber": 41
+        },
+        {
+          "caller": "AccessRequestsCard",
+          "callee": "useEffect",
+          "lineNumber": 47
+        },
+        {
+          "caller": "AccessRequestsCard",
+          "callee": "reload",
+          "lineNumber": 48
+        },
+        {
+          "caller": "AccessRequestsCard",
+          "callee": "useMemo",
+          "lineNumber": 51
+        },
+        {
+          "caller": "AccessRequestsCard",
+          "callee": "(rows ?? []).forEach",
+          "lineNumber": 53
+        },
+        {
+          "caller": "AccessRequestsCard",
+          "callee": "useMemo",
+          "lineNumber": 57
+        },
+        {
+          "caller": "AccessRequestsCard",
+          "callee": "(rows ?? []).filter",
+          "lineNumber": 58
+        },
+        {
+          "caller": "reload",
+          "callee": "setLoading",
+          "lineNumber": 63
+        },
+        {
+          "caller": "reload",
+          "callee": "supabase\n      .from('account_requests')\n      .select('*')\n      .order('created_at', { ascending: false })\n      .limit",
+          "lineNumber": 64
+        },
+        {
+          "caller": "reload",
+          "callee": "supabase\n      .from('account_requests')\n      .select('*')\n      .order",
+          "lineNumber": 64
+        },
+        {
+          "caller": "reload",
+          "callee": "supabase\n      .from('account_requests')\n      .select",
+          "lineNumber": 64
+        },
+        {
+          "caller": "reload",
+          "callee": "supabase\n      .from",
+          "lineNumber": 64
+        },
+        {
+          "caller": "reload",
+          "callee": "setLoading",
+          "lineNumber": 69
+        },
+        {
+          "caller": "reload",
+          "callee": "setError",
+          "lineNumber": 71
+        },
+        {
+          "caller": "reload",
+          "callee": "setError",
+          "lineNumber": 74
+        },
+        {
+          "caller": "reload",
+          "callee": "setRows",
+          "lineNumber": 76
+        },
+        {
+          "caller": "reload",
+          "callee": "list\n      .filter((r) => r.status === 'approved' && r.invite_id)\n      .map",
+          "lineNumber": 79
+        },
+        {
+          "caller": "reload",
+          "callee": "list\n      .filter",
+          "lineNumber": 79
+        },
+        {
+          "caller": "reload",
+          "callee": "setInviteUrls",
+          "lineNumber": 83
+        },
+        {
+          "caller": "reload",
+          "callee": "supabase\n      .from('invites')\n      .select('id,token,expires_at')\n      .in",
+          "lineNumber": 86
+        },
+        {
+          "caller": "reload",
+          "callee": "supabase\n      .from('invites')\n      .select",
+          "lineNumber": 86
+        },
+        {
+          "caller": "reload",
+          "callee": "supabase\n      .from",
+          "lineNumber": 86
+        },
+        {
+          "caller": "reload",
+          "callee": "Date.now",
+          "lineNumber": 91
+        },
+        {
+          "caller": "reload",
+          "callee": "(invites as { id: string; token: string; expires_at: string }[]).find",
+          "lineNumber": 97
+        },
+        {
+          "caller": "reload",
+          "callee": "new Date(inv.expires_at).getTime",
+          "lineNumber": 101
+        },
+        {
+          "caller": "reload",
+          "callee": "encodeURIComponent",
+          "lineNumber": 102
+        },
+        {
+          "caller": "reload",
+          "callee": "setInviteUrls",
+          "lineNumber": 104
+        },
+        {
+          "caller": "onApprove",
+          "callee": "setBusyId",
+          "lineNumber": 110
+        },
+        {
+          "caller": "onApprove",
+          "callee": "approveRequest",
+          "lineNumber": 111
+        },
+        {
+          "caller": "onApprove",
+          "callee": "setBusyId",
+          "lineNumber": 112
+        },
+        {
+          "caller": "onApprove",
+          "callee": "pushToast",
+          "lineNumber": 115
+        },
+        {
+          "caller": "onApprove",
+          "callee": "pushToast",
+          "lineNumber": 117
+        },
+        {
+          "caller": "onApprove",
+          "callee": "reload",
+          "lineNumber": 122
+        },
+        {
+          "caller": "onApprove",
+          "callee": "pushToast",
+          "lineNumber": 125
+        },
+        {
+          "caller": "onDecline",
+          "callee": "setBusyId",
+          "lineNumber": 129
+        },
+        {
+          "caller": "onDecline",
+          "callee": "declineRequest",
+          "lineNumber": 130
+        },
+        {
+          "caller": "onDecline",
+          "callee": "setBusyId",
+          "lineNumber": 131
+        },
+        {
+          "caller": "onDecline",
+          "callee": "pushToast",
+          "lineNumber": 133
+        },
+        {
+          "caller": "onDecline",
+          "callee": "reload",
+          "lineNumber": 139
+        },
+        {
+          "caller": "onDecline",
+          "callee": "pushToast",
+          "lineNumber": 142
+        },
+        {
+          "caller": "AccessRequestsCard",
+          "callee": "setTab",
+          "lineNumber": 153
+        },
+        {
+          "caller": "AccessRequestsCard",
+          "callee": "setTab",
+          "lineNumber": 160
+        },
+        {
+          "caller": "AccessRequestsCard",
+          "callee": "setTab",
+          "lineNumber": 167
+        },
+        {
+          "caller": "AccessRequestsCard",
+          "callee": "reload",
+          "lineNumber": 172
+        },
+        {
+          "caller": "AccessRequestsCard",
+          "callee": "visible.map",
+          "lineNumber": 206
+        },
+        {
+          "caller": "AccessRequestsCard",
+          "callee": "onApprove",
+          "lineNumber": 220
+        },
+        {
+          "caller": "AccessRequestsCard",
+          "callee": "onDecline",
+          "lineNumber": 221
+        },
+        {
+          "caller": "TabButton",
+          "callee": "cn",
+          "lineNumber": 254
+        },
+        {
+          "caller": "TabButton",
+          "callee": "cn",
+          "lineNumber": 262
+        },
+        {
+          "caller": "RequestRow",
+          "callee": "useState",
+          "lineNumber": 280
+        },
+        {
+          "caller": "RequestRow",
+          "callee": "useState",
+          "lineNumber": 281
+        },
+        {
+          "caller": "RequestRow",
+          "callee": "useState",
+          "lineNumber": 282
+        },
+        {
+          "caller": "RequestRow",
+          "callee": "useState",
+          "lineNumber": 283
+        },
+        {
+          "caller": "RequestRow",
+          "callee": "formatDate",
+          "lineNumber": 288
+        },
+        {
+          "caller": "RequestRow",
+          "callee": "req.decided_at.slice",
+          "lineNumber": 288
+        },
+        {
+          "caller": "RequestRow",
+          "callee": "formatDate",
+          "lineNumber": 304
+        },
+        {
+          "caller": "RequestRow",
+          "callee": "req.created_at.slice",
+          "lineNumber": 304
+        },
+        {
+          "caller": "RequestRow",
+          "callee": "setExpanded",
+          "lineNumber": 309
+        },
+        {
+          "caller": "RequestRow",
+          "callee": "cn",
+          "lineNumber": 316
+        },
+        {
+          "caller": "RequestRow",
+          "callee": "setDeclining",
+          "lineNumber": 379
+        },
+        {
+          "caller": "RequestRow",
+          "callee": "setReason",
+          "lineNumber": 393
+        },
+        {
+          "caller": "RequestRow",
+          "callee": "setNotify",
+          "lineNumber": 401
+        },
+        {
+          "caller": "RequestRow",
+          "callee": "setDeclining",
+          "lineNumber": 411
+        },
+        {
+          "caller": "RequestRow",
+          "callee": "setReason",
+          "lineNumber": 412
+        },
+        {
+          "caller": "RequestRow",
+          "callee": "onDecline",
+          "lineNumber": 421
+        },
+        {
+          "caller": "RequestRow",
+          "callee": "reason.trim",
+          "lineNumber": 421
+        },
+        {
+          "caller": "CopyButton",
+          "callee": "useState",
+          "lineNumber": 447
+        },
+        {
+          "caller": "CopyButton",
+          "callee": "navigator.clipboard.writeText",
+          "lineNumber": 453
+        },
+        {
+          "caller": "CopyButton",
+          "callee": "setCopied",
+          "lineNumber": 454
+        },
+        {
+          "caller": "CopyButton",
+          "callee": "setTimeout",
+          "lineNumber": 455
+        },
+        {
+          "caller": "CopyButton",
+          "callee": "setCopied",
+          "lineNumber": 455
+        }
+      ],
+      "metrics": {
+        "importCount": 10,
+        "exportCount": 1,
+        "functionCount": 5,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/components/settings/BuddyNotificationsCard.tsx",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 330,
+      "nonEmptyLines": 308,
+      "functions": [
+        {
+          "name": "isIosBrowser",
+          "startLine": 26,
+          "endLine": 28,
+          "params": []
+        },
+        {
+          "name": "isStandaloneWebApp",
+          "startLine": 30,
+          "endLine": 35,
+          "params": []
+        },
+        {
+          "name": "deviceLabel",
+          "startLine": 37,
+          "endLine": 41,
+          "params": [
+            "state"
+          ]
+        },
+        {
+          "name": "minutesUntilTomorrow",
+          "startLine": 44,
+          "endLine": 48,
+          "params": []
+        },
+        {
+          "name": "BuddyNotificationsCard",
+          "startLine": 50,
+          "endLine": 310,
+          "params": [
+            "{ profile, sandbox }"
+          ]
+        },
+        {
+          "name": "DeliveryStep",
+          "startLine": 312,
+          "endLine": 330,
+          "params": [
+            "{\n  icon,\n  label,\n  detail\n}"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "BuddyNotificationsCard",
+          "line": 50,
+          "isDefault": true
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "isIosBrowser",
+          "callee": "/iPad|iPhone|iPod/.test",
+          "lineNumber": 27
+        },
+        {
+          "caller": "isStandaloneWebApp",
+          "callee": "window.matchMedia",
+          "lineNumber": 32
+        },
+        {
+          "caller": "isStandaloneWebApp",
+          "callee": "Boolean",
+          "lineNumber": 33
+        },
+        {
+          "caller": "minutesUntilTomorrow",
+          "callee": "now.getFullYear",
+          "lineNumber": 46
+        },
+        {
+          "caller": "minutesUntilTomorrow",
+          "callee": "now.getMonth",
+          "lineNumber": 46
+        },
+        {
+          "caller": "minutesUntilTomorrow",
+          "callee": "now.getDate",
+          "lineNumber": 46
+        },
+        {
+          "caller": "minutesUntilTomorrow",
+          "callee": "Math.ceil",
+          "lineNumber": 47
+        },
+        {
+          "caller": "minutesUntilTomorrow",
+          "callee": "tomorrow.getTime",
+          "lineNumber": 47
+        },
+        {
+          "caller": "minutesUntilTomorrow",
+          "callee": "now.getTime",
+          "lineNumber": 47
+        },
+        {
+          "caller": "BuddyNotificationsCard",
+          "callee": "useUiStore",
+          "lineNumber": 51
+        },
+        {
+          "caller": "BuddyNotificationsCard",
+          "callee": "useState",
+          "lineNumber": 52
+        },
+        {
+          "caller": "BuddyNotificationsCard",
+          "callee": "useState",
+          "lineNumber": 53
+        },
+        {
+          "caller": "BuddyNotificationsCard",
+          "callee": "useState",
+          "lineNumber": 54
+        },
+        {
+          "caller": "BuddyNotificationsCard",
+          "callee": "useState",
+          "lineNumber": 55
+        },
+        {
+          "caller": "BuddyNotificationsCard",
+          "callee": "useCallback",
+          "lineNumber": 57
+        },
+        {
+          "caller": "BuddyNotificationsCard",
+          "callee": "setState",
+          "lineNumber": 59
+        },
+        {
+          "caller": "BuddyNotificationsCard",
+          "callee": "getBuddyNotificationState",
+          "lineNumber": 59
+        },
+        {
+          "caller": "BuddyNotificationsCard",
+          "callee": "useCallback",
+          "lineNumber": 62
+        },
+        {
+          "caller": "BuddyNotificationsCard",
+          "callee": "setSnooze",
+          "lineNumber": 64
+        },
+        {
+          "caller": "BuddyNotificationsCard",
+          "callee": "getSnoozeStatus",
+          "lineNumber": 64
+        },
+        {
+          "caller": "BuddyNotificationsCard",
+          "callee": "useEffect",
+          "lineNumber": 67
+        },
+        {
+          "caller": "BuddyNotificationsCard",
+          "callee": "refresh",
+          "lineNumber": 68
+        },
+        {
+          "caller": "BuddyNotificationsCard",
+          "callee": "refreshSnooze",
+          "lineNumber": 69
+        },
+        {
+          "caller": "BuddyNotificationsCard",
+          "callee": "window.addEventListener",
+          "lineNumber": 70
+        },
+        {
+          "caller": "BuddyNotificationsCard",
+          "callee": "window.addEventListener",
+          "lineNumber": 71
+        },
+        {
+          "caller": "BuddyNotificationsCard",
+          "callee": "window.removeEventListener",
+          "lineNumber": 73
+        },
+        {
+          "caller": "BuddyNotificationsCard",
+          "callee": "window.removeEventListener",
+          "lineNumber": 74
+        },
+        {
+          "caller": "BuddyNotificationsCard",
+          "callee": "Boolean",
+          "lineNumber": 80
+        },
+        {
+          "caller": "BuddyNotificationsCard",
+          "callee": "isIosBrowser",
+          "lineNumber": 82
+        },
+        {
+          "caller": "BuddyNotificationsCard",
+          "callee": "isStandaloneWebApp",
+          "lineNumber": 82
+        },
+        {
+          "caller": "toggle",
+          "callee": "pushToast",
+          "lineNumber": 86
+        },
+        {
+          "caller": "toggle",
+          "callee": "setBusy",
+          "lineNumber": 89
+        },
+        {
+          "caller": "toggle",
+          "callee": "disableBuddyNotifications",
+          "lineNumber": 91
+        },
+        {
+          "caller": "toggle",
+          "callee": "enableBuddyNotifications",
+          "lineNumber": 92
+        },
+        {
+          "caller": "toggle",
+          "callee": "setBusy",
+          "lineNumber": 93
+        },
+        {
+          "caller": "toggle",
+          "callee": "refresh",
+          "lineNumber": 94
+        },
+        {
+          "caller": "toggle",
+          "callee": "pushToast",
+          "lineNumber": 96
+        },
+        {
+          "caller": "toggle",
+          "callee": "pushToast",
+          "lineNumber": 99
+        },
+        {
+          "caller": "toggle",
+          "callee": "deviceLabel(state).toLowerCase",
+          "lineNumber": 101
+        },
+        {
+          "caller": "toggle",
+          "callee": "deviceLabel",
+          "lineNumber": 101
+        },
+        {
+          "caller": "toggle",
+          "callee": "deviceLabel(state).toLowerCase",
+          "lineNumber": 102
+        },
+        {
+          "caller": "toggle",
+          "callee": "deviceLabel",
+          "lineNumber": 102
+        },
+        {
+          "caller": "handleSnooze",
+          "callee": "pushToast",
+          "lineNumber": 109
+        },
+        {
+          "caller": "handleSnooze",
+          "callee": "setSnoozeBusy",
+          "lineNumber": 112
+        },
+        {
+          "caller": "handleSnooze",
+          "callee": "snoozeNotifications",
+          "lineNumber": 113
+        },
+        {
+          "caller": "handleSnooze",
+          "callee": "setSnoozeBusy",
+          "lineNumber": 114
+        },
+        {
+          "caller": "handleSnooze",
+          "callee": "refreshSnooze",
+          "lineNumber": 115
+        },
+        {
+          "caller": "handleSnooze",
+          "callee": "pushToast",
+          "lineNumber": 117
+        },
+        {
+          "caller": "handleSnooze",
+          "callee": "Math.floor",
+          "lineNumber": 120
+        },
+        {
+          "caller": "handleSnooze",
+          "callee": "pushToast",
+          "lineNumber": 122
+        },
+        {
+          "caller": "handleClearSnooze",
+          "callee": "setSnoozeBusy",
+          "lineNumber": 127
+        },
+        {
+          "caller": "handleClearSnooze",
+          "callee": "clearSnooze",
+          "lineNumber": 128
+        },
+        {
+          "caller": "handleClearSnooze",
+          "callee": "setSnoozeBusy",
+          "lineNumber": 129
+        },
+        {
+          "caller": "handleClearSnooze",
+          "callee": "refreshSnooze",
+          "lineNumber": 130
+        },
+        {
+          "caller": "handleClearSnooze",
+          "callee": "pushToast",
+          "lineNumber": 132
+        },
+        {
+          "caller": "handleClearSnooze",
+          "callee": "pushToast",
+          "lineNumber": 135
+        },
+        {
+          "caller": "setPreview",
+          "callee": "useAuthStore\n      .getState()\n      .updateProfile",
+          "lineNumber": 139
+        },
+        {
+          "caller": "setPreview",
+          "callee": "useAuthStore\n      .getState",
+          "lineNumber": 139
+        },
+        {
+          "caller": "setPreview",
+          "callee": "pushToast",
+          "lineNumber": 143
+        },
+        {
+          "caller": "setPreview",
+          "callee": "pushToast",
+          "lineNumber": 146
+        },
+        {
+          "caller": "BuddyNotificationsCard",
+          "callee": "cn",
+          "lineNumber": 163
+        },
+        {
+          "caller": "BuddyNotificationsCard",
+          "callee": "deviceLabel",
+          "lineNumber": 192
+        },
+        {
+          "caller": "BuddyNotificationsCard",
+          "callee": "toggle",
+          "lineNumber": 208
+        },
+        {
+          "caller": "BuddyNotificationsCard",
+          "callee": "new Date(snooze.quietUntil).toLocaleTimeString",
+          "lineNumber": 241
+        },
+        {
+          "caller": "BuddyNotificationsCard",
+          "callee": "new Date(snooze.quietUntil).toLocaleDateString",
+          "lineNumber": 246
+        },
+        {
+          "caller": "BuddyNotificationsCard",
+          "callee": "handleClearSnooze",
+          "lineNumber": 264
+        },
+        {
+          "caller": "BuddyNotificationsCard",
+          "callee": "[{ label: '1 hour', minutes: 60 }, { label: '3 hours', minutes: 180 }, { label: 'Until tomorrow', minutes: minutesUntilTomorrow() }].map",
+          "lineNumber": 272
+        },
+        {
+          "caller": "BuddyNotificationsCard",
+          "callee": "minutesUntilTomorrow",
+          "lineNumber": 272
+        },
+        {
+          "caller": "BuddyNotificationsCard",
+          "callee": "handleSnooze",
+          "lineNumber": 278
+        },
+        {
+          "caller": "BuddyNotificationsCard",
+          "callee": "setPreview",
+          "lineNumber": 302
+        }
+      ],
+      "metrics": {
+        "importCount": 8,
+        "exportCount": 1,
+        "functionCount": 6,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/components/settings/NotificationTimeEditor.tsx",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 196,
+      "nonEmptyLines": 181,
+      "functions": [
+        {
+          "name": "NotificationTimeEditor",
+          "startLine": 28,
+          "endLine": 196,
+          "params": [
+            "{\n  idPrefix,\n  label,\n  hour,\n  minute,\n  disabled = false,\n  compact = false,\n  className,\n  onSave\n}"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "NotificationTimeEditor",
+          "line": 28,
+          "isDefault": true
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "NotificationTimeEditor",
+          "callee": "useState",
+          "lineNumber": 38
+        },
+        {
+          "caller": "NotificationTimeEditor",
+          "callee": "useState",
+          "lineNumber": 39
+        },
+        {
+          "caller": "NotificationTimeEditor",
+          "callee": "useState",
+          "lineNumber": 40
+        },
+        {
+          "caller": "NotificationTimeEditor",
+          "callee": "useEffect",
+          "lineNumber": 42
+        },
+        {
+          "caller": "NotificationTimeEditor",
+          "callee": "setDraftHour",
+          "lineNumber": 43
+        },
+        {
+          "caller": "NotificationTimeEditor",
+          "callee": "setDraftMinute",
+          "lineNumber": 44
+        },
+        {
+          "caller": "save",
+          "callee": "setSaving",
+          "lineNumber": 51
+        },
+        {
+          "caller": "save",
+          "callee": "onSave",
+          "lineNumber": 53
+        },
+        {
+          "caller": "save",
+          "callee": "setDraftHour",
+          "lineNumber": 55
+        },
+        {
+          "caller": "save",
+          "callee": "setDraftMinute",
+          "lineNumber": 56
+        },
+        {
+          "caller": "save",
+          "callee": "setSaving",
+          "lineNumber": 59
+        },
+        {
+          "caller": "NotificationTimeEditor",
+          "callee": "cn",
+          "lineNumber": 63
+        },
+        {
+          "caller": "updateNativeValue",
+          "callee": "Number.isFinite",
+          "lineNumber": 71
+        },
+        {
+          "caller": "updateNativeValue",
+          "callee": "update",
+          "lineNumber": 72
+        },
+        {
+          "caller": "updateNativeValue",
+          "callee": "Math.min",
+          "lineNumber": 72
+        },
+        {
+          "caller": "updateNativeValue",
+          "callee": "Math.max",
+          "lineNumber": 72
+        },
+        {
+          "caller": "updateNativeValue",
+          "callee": "Math.trunc",
+          "lineNumber": 72
+        },
+        {
+          "caller": "timeControl",
+          "callee": "event.currentTarget.select",
+          "lineNumber": 102
+        },
+        {
+          "caller": "timeControl",
+          "callee": "updateNativeValue",
+          "lineNumber": 103
+        },
+        {
+          "caller": "timeControl",
+          "callee": "cn",
+          "lineNumber": 108
+        },
+        {
+          "caller": "timeControl",
+          "callee": "onChange",
+          "lineNumber": 118
+        },
+        {
+          "caller": "timeControl",
+          "callee": "Number",
+          "lineNumber": 118
+        },
+        {
+          "caller": "timeControl",
+          "callee": "options.map",
+          "lineNumber": 122
+        },
+        {
+          "caller": "NotificationTimeEditor",
+          "callee": "cn",
+          "lineNumber": 133
+        },
+        {
+          "caller": "NotificationTimeEditor",
+          "callee": "cn",
+          "lineNumber": 139
+        },
+        {
+          "caller": "NotificationTimeEditor",
+          "callee": "timeControl",
+          "lineNumber": 142
+        },
+        {
+          "caller": "NotificationTimeEditor",
+          "callee": "cn",
+          "lineNumber": 155
+        },
+        {
+          "caller": "NotificationTimeEditor",
+          "callee": "cn",
+          "lineNumber": 164
+        },
+        {
+          "caller": "NotificationTimeEditor",
+          "callee": "timeControl",
+          "lineNumber": 167
+        },
+        {
+          "caller": "NotificationTimeEditor",
+          "callee": "cn",
+          "lineNumber": 181
+        },
+        {
+          "caller": "NotificationTimeEditor",
+          "callee": "save",
+          "lineNumber": 182
+        }
+      ],
+      "metrics": {
+        "importCount": 3,
+        "exportCount": 1,
+        "functionCount": 1,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/components/settings/NotificationsCard.tsx",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 421,
+      "nonEmptyLines": 395,
+      "functions": [
+        {
+          "name": "NotificationsCard",
+          "startLine": 27,
+          "endLine": 369,
+          "params": [
+            "{ profile, sandbox }"
+          ]
+        },
+        {
+          "name": "DetailField",
+          "startLine": 371,
+          "endLine": 389,
+          "params": [
+            "{\n  label,\n  icon,\n  children\n}"
+          ]
+        },
+        {
+          "name": "MasterToggle",
+          "startLine": 391,
+          "endLine": 421,
+          "params": [
+            "{\n  checked,\n  disabled,\n  onChange\n}"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "NotificationsCard",
+          "line": 27,
+          "isDefault": true
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "NotificationsCard",
+          "callee": "useUiStore",
+          "lineNumber": 28
+        },
+        {
+          "caller": "NotificationsCard",
+          "callee": "useState",
+          "lineNumber": 29
+        },
+        {
+          "caller": "NotificationsCard",
+          "callee": "useState",
+          "lineNumber": 30
+        },
+        {
+          "caller": "NotificationsCard",
+          "callee": "useState",
+          "lineNumber": 31
+        },
+        {
+          "caller": "NotificationsCard",
+          "callee": "useState",
+          "lineNumber": 32
+        },
+        {
+          "caller": "NotificationsCard",
+          "callee": "useState",
+          "lineNumber": 33
+        },
+        {
+          "caller": "NotificationsCard",
+          "callee": "useState",
+          "lineNumber": 34
+        },
+        {
+          "caller": "NotificationsCard",
+          "callee": "useCallback",
+          "lineNumber": 36
+        },
+        {
+          "caller": "NotificationsCard",
+          "callee": "setLoadingTelegram",
+          "lineNumber": 38
+        },
+        {
+          "caller": "NotificationsCard",
+          "callee": "supabase\n      .from('telegram_subscriptions')\n      .select('*')\n      .eq('user_id', profile.id)\n      .maybeSingle",
+          "lineNumber": 39
+        },
+        {
+          "caller": "NotificationsCard",
+          "callee": "supabase\n      .from('telegram_subscriptions')\n      .select('*')\n      .eq",
+          "lineNumber": 39
+        },
+        {
+          "caller": "NotificationsCard",
+          "callee": "supabase\n      .from('telegram_subscriptions')\n      .select",
+          "lineNumber": 39
+        },
+        {
+          "caller": "NotificationsCard",
+          "callee": "supabase\n      .from",
+          "lineNumber": 39
+        },
+        {
+          "caller": "NotificationsCard",
+          "callee": "setLoadingTelegram",
+          "lineNumber": 44
+        },
+        {
+          "caller": "NotificationsCard",
+          "callee": "pushToast",
+          "lineNumber": 46
+        },
+        {
+          "caller": "NotificationsCard",
+          "callee": "setTelegram",
+          "lineNumber": 50
+        },
+        {
+          "caller": "NotificationsCard",
+          "callee": "setAwaitingConnection",
+          "lineNumber": 52
+        },
+        {
+          "caller": "NotificationsCard",
+          "callee": "setConnectUrl",
+          "lineNumber": 53
+        },
+        {
+          "caller": "NotificationsCard",
+          "callee": "useEffect",
+          "lineNumber": 57
+        },
+        {
+          "caller": "NotificationsCard",
+          "callee": "loadTelegram",
+          "lineNumber": 58
+        },
+        {
+          "caller": "onFocus",
+          "callee": "loadTelegram",
+          "lineNumber": 59
+        },
+        {
+          "caller": "NotificationsCard",
+          "callee": "window.addEventListener",
+          "lineNumber": 60
+        },
+        {
+          "caller": "NotificationsCard",
+          "callee": "window.removeEventListener",
+          "lineNumber": 61
+        },
+        {
+          "caller": "NotificationsCard",
+          "callee": "useEffect",
+          "lineNumber": 64
+        },
+        {
+          "caller": "NotificationsCard",
+          "callee": "window.setInterval",
+          "lineNumber": 66
+        },
+        {
+          "caller": "NotificationsCard",
+          "callee": "loadTelegram",
+          "lineNumber": 66
+        },
+        {
+          "caller": "NotificationsCard",
+          "callee": "window.setTimeout",
+          "lineNumber": 67
+        },
+        {
+          "caller": "NotificationsCard",
+          "callee": "setAwaitingConnection",
+          "lineNumber": 67
+        },
+        {
+          "caller": "NotificationsCard",
+          "callee": "window.clearInterval",
+          "lineNumber": 69
+        },
+        {
+          "caller": "NotificationsCard",
+          "callee": "window.clearTimeout",
+          "lineNumber": 70
+        },
+        {
+          "caller": "NotificationsCard",
+          "callee": "Boolean",
+          "lineNumber": 76
+        },
+        {
+          "caller": "NotificationsCard",
+          "callee": "Boolean",
+          "lineNumber": 77
+        },
+        {
+          "caller": "patchProfile",
+          "callee": "useAuthStore.getState().updateProfile",
+          "lineNumber": 88
+        },
+        {
+          "caller": "patchProfile",
+          "callee": "useAuthStore.getState",
+          "lineNumber": 88
+        },
+        {
+          "caller": "patchProfile",
+          "callee": "pushToast",
+          "lineNumber": 90
+        },
+        {
+          "caller": "setTelegramEnabled",
+          "callee": "pushToast",
+          "lineNumber": 98
+        },
+        {
+          "caller": "setTelegramEnabled",
+          "callee": "supabase.rpc",
+          "lineNumber": 101
+        },
+        {
+          "caller": "setTelegramEnabled",
+          "callee": "pushToast",
+          "lineNumber": 105
+        },
+        {
+          "caller": "setTelegramEnabled",
+          "callee": "loadTelegram",
+          "lineNumber": 108
+        },
+        {
+          "caller": "setTelegramEnabled",
+          "callee": "pushToast",
+          "lineNumber": 109
+        },
+        {
+          "caller": "beginConnection",
+          "callee": "pushToast",
+          "lineNumber": 117
+        },
+        {
+          "caller": "beginConnection",
+          "callee": "setConnecting",
+          "lineNumber": 120
+        },
+        {
+          "caller": "beginConnection",
+          "callee": "supabase.rpc",
+          "lineNumber": 121
+        },
+        {
+          "caller": "beginConnection",
+          "callee": "setConnecting",
+          "lineNumber": 122
+        },
+        {
+          "caller": "beginConnection",
+          "callee": "pushToast",
+          "lineNumber": 124
+        },
+        {
+          "caller": "beginConnection",
+          "callee": "pushToast",
+          "lineNumber": 129
+        },
+        {
+          "caller": "beginConnection",
+          "callee": "setConnectUrl",
+          "lineNumber": 132
+        },
+        {
+          "caller": "beginConnection",
+          "callee": "encodeURIComponent",
+          "lineNumber": 132
+        },
+        {
+          "caller": "beginConnection",
+          "callee": "setAwaitingConnection",
+          "lineNumber": 133
+        },
+        {
+          "caller": "disconnectTelegram",
+          "callee": "supabase.rpc",
+          "lineNumber": 137
+        },
+        {
+          "caller": "disconnectTelegram",
+          "callee": "pushToast",
+          "lineNumber": 139
+        },
+        {
+          "caller": "disconnectTelegram",
+          "callee": "setTelegram",
+          "lineNumber": 142
+        },
+        {
+          "caller": "disconnectTelegram",
+          "callee": "setConnectUrl",
+          "lineNumber": 143
+        },
+        {
+          "caller": "disconnectTelegram",
+          "callee": "setAwaitingConnection",
+          "lineNumber": 144
+        },
+        {
+          "caller": "disconnectTelegram",
+          "callee": "pushToast",
+          "lineNumber": 145
+        },
+        {
+          "caller": "saveTime",
+          "callee": "patchProfile",
+          "lineNumber": 150
+        },
+        {
+          "caller": "saveTime",
+          "callee": "String(hour).padStart",
+          "lineNumber": 155
+        },
+        {
+          "caller": "saveTime",
+          "callee": "String",
+          "lineNumber": 155
+        },
+        {
+          "caller": "saveTime",
+          "callee": "String(minute).padStart",
+          "lineNumber": 155
+        },
+        {
+          "caller": "saveTime",
+          "callee": "String",
+          "lineNumber": 155
+        },
+        {
+          "caller": "saveTime",
+          "callee": "pushToast",
+          "lineNumber": 156
+        },
+        {
+          "caller": "saveTimezone",
+          "callee": "patchProfile",
+          "lineNumber": 163
+        },
+        {
+          "caller": "saveTimezone",
+          "callee": "pushToast",
+          "lineNumber": 164
+        },
+        {
+          "caller": "saveEmailBackup",
+          "callee": "patchProfile",
+          "lineNumber": 169
+        },
+        {
+          "caller": "saveEmailBackup",
+          "callee": "pushToast",
+          "lineNumber": 170
+        },
+        {
+          "caller": "sendTest",
+          "callee": "setSending",
+          "lineNumber": 176
+        },
+        {
+          "caller": "sendTest",
+          "callee": "supabase.functions.invoke",
+          "lineNumber": 177
+        },
+        {
+          "caller": "sendTest",
+          "callee": "setSending",
+          "lineNumber": 180
+        },
+        {
+          "caller": "sendTest",
+          "callee": "pushToast",
+          "lineNumber": 182
+        },
+        {
+          "caller": "sendTest",
+          "callee": "pushToast",
+          "lineNumber": 191
+        },
+        {
+          "caller": "sendTest",
+          "callee": "loadTelegram",
+          "lineNumber": 192
+        },
+        {
+          "caller": "sendTest",
+          "callee": "pushToast",
+          "lineNumber": 195
+        },
+        {
+          "caller": "NotificationsCard",
+          "callee": "cn",
+          "lineNumber": 204
+        },
+        {
+          "caller": "NotificationsCard",
+          "callee": "setTelegramEnabled",
+          "lineNumber": 235
+        },
+        {
+          "caller": "NotificationsCard",
+          "callee": "beginConnection",
+          "lineNumber": 267
+        },
+        {
+          "caller": "NotificationsCard",
+          "callee": "window.open",
+          "lineNumber": 277
+        },
+        {
+          "caller": "NotificationsCard",
+          "callee": "loadTelegram",
+          "lineNumber": 286
+        },
+        {
+          "caller": "NotificationsCard",
+          "callee": "disconnectTelegram",
+          "lineNumber": 294
+        },
+        {
+          "caller": "NotificationsCard",
+          "callee": "String(profile.digest_hour_local).padStart",
+          "lineNumber": 319
+        },
+        {
+          "caller": "NotificationsCard",
+          "callee": "String",
+          "lineNumber": 319
+        },
+        {
+          "caller": "NotificationsCard",
+          "callee": "String(profile.digest_minute_local ?? 0).padStart",
+          "lineNumber": 320
+        },
+        {
+          "caller": "NotificationsCard",
+          "callee": "String",
+          "lineNumber": 320
+        },
+        {
+          "caller": "NotificationsCard",
+          "callee": "saveTimezone",
+          "lineNumber": 331
+        },
+        {
+          "caller": "NotificationsCard",
+          "callee": "TIMEZONES.map",
+          "lineNumber": 334
+        },
+        {
+          "caller": "NotificationsCard",
+          "callee": "saveEmailBackup",
+          "lineNumber": 356
+        },
+        {
+          "caller": "NotificationsCard",
+          "callee": "sendTest",
+          "lineNumber": 361
+        },
+        {
+          "caller": "MasterToggle",
+          "callee": "onChange",
+          "lineNumber": 407
+        },
+        {
+          "caller": "MasterToggle",
+          "callee": "cn",
+          "lineNumber": 408
+        },
+        {
+          "caller": "MasterToggle",
+          "callee": "cn",
+          "lineNumber": 414
+        }
+      ],
+      "metrics": {
+        "importCount": 9,
+        "exportCount": 1,
+        "functionCount": 3,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/components/settings/StudyNotificationsCard.tsx",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 226,
+      "nonEmptyLines": 216,
+      "functions": [
+        {
+          "name": "StudyNotificationsCard",
+          "startLine": 28,
+          "endLine": 226,
+          "params": [
+            "{ profile, sandbox }"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "StudyNotificationsCard",
+          "line": 28,
+          "isDefault": true
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "StudyNotificationsCard",
+          "callee": "useAuthStore",
+          "lineNumber": 29
+        },
+        {
+          "caller": "StudyNotificationsCard",
+          "callee": "useUiStore",
+          "lineNumber": 30
+        },
+        {
+          "caller": "StudyNotificationsCard",
+          "callee": "useState",
+          "lineNumber": 31
+        },
+        {
+          "caller": "StudyNotificationsCard",
+          "callee": "useState",
+          "lineNumber": 32
+        },
+        {
+          "caller": "StudyNotificationsCard",
+          "callee": "useState",
+          "lineNumber": 33
+        },
+        {
+          "caller": "StudyNotificationsCard",
+          "callee": "useState",
+          "lineNumber": 34
+        },
+        {
+          "caller": "StudyNotificationsCard",
+          "callee": "useCallback",
+          "lineNumber": 36
+        },
+        {
+          "caller": "StudyNotificationsCard",
+          "callee": "setLoading",
+          "lineNumber": 38
+        },
+        {
+          "caller": "StudyNotificationsCard",
+          "callee": "setPreferences",
+          "lineNumber": 40
+        },
+        {
+          "caller": "StudyNotificationsCard",
+          "callee": "ensureStudyNotificationPreferences",
+          "lineNumber": 40
+        },
+        {
+          "caller": "StudyNotificationsCard",
+          "callee": "pushToast",
+          "lineNumber": 42
+        },
+        {
+          "caller": "StudyNotificationsCard",
+          "callee": "setLoading",
+          "lineNumber": 44
+        },
+        {
+          "caller": "StudyNotificationsCard",
+          "callee": "useEffect",
+          "lineNumber": 48
+        },
+        {
+          "caller": "StudyNotificationsCard",
+          "callee": "load",
+          "lineNumber": 49
+        },
+        {
+          "caller": "toggleMaster",
+          "callee": "setSaving",
+          "lineNumber": 54
+        },
+        {
+          "caller": "toggleMaster",
+          "callee": "enableStudyNotifications",
+          "lineNumber": 57
+        },
+        {
+          "caller": "toggleMaster",
+          "callee": "setPreferences",
+          "lineNumber": 59
+        },
+        {
+          "caller": "toggleMaster",
+          "callee": "ensureStudyNotificationPreferences",
+          "lineNumber": 59
+        },
+        {
+          "caller": "toggleMaster",
+          "callee": "disableStudyNotifications",
+          "lineNumber": 61
+        },
+        {
+          "caller": "toggleMaster",
+          "callee": "updateProfile",
+          "lineNumber": 64
+        },
+        {
+          "caller": "toggleMaster",
+          "callee": "pushToast",
+          "lineNumber": 66
+        },
+        {
+          "caller": "toggleMaster",
+          "callee": "pushToast",
+          "lineNumber": 71
+        },
+        {
+          "caller": "toggleMaster",
+          "callee": "setSaving",
+          "lineNumber": 73
+        },
+        {
+          "caller": "updateCategory",
+          "callee": "setPreferences",
+          "lineNumber": 83
+        },
+        {
+          "caller": "updateCategory",
+          "callee": "rows.map",
+          "lineNumber": 84
+        },
+        {
+          "caller": "updateCategory",
+          "callee": "setSaving",
+          "lineNumber": 86
+        },
+        {
+          "caller": "updateCategory",
+          "callee": "updateStudyNotificationPreference",
+          "lineNumber": 88
+        },
+        {
+          "caller": "updateCategory",
+          "callee": "setPreferences",
+          "lineNumber": 91
+        },
+        {
+          "caller": "updateCategory",
+          "callee": "pushToast",
+          "lineNumber": 92
+        },
+        {
+          "caller": "updateCategory",
+          "callee": "setSaving",
+          "lineNumber": 95
+        },
+        {
+          "caller": "sendTest",
+          "callee": "setTesting",
+          "lineNumber": 101
+        },
+        {
+          "caller": "sendTest",
+          "callee": "sendStudyNotificationTest",
+          "lineNumber": 103
+        },
+        {
+          "caller": "sendTest",
+          "callee": "pushToast",
+          "lineNumber": 104
+        },
+        {
+          "caller": "sendTest",
+          "callee": "pushToast",
+          "lineNumber": 106
+        },
+        {
+          "caller": "sendTest",
+          "callee": "setTesting",
+          "lineNumber": 108
+        },
+        {
+          "caller": "StudyNotificationsCard",
+          "callee": "preferences.map",
+          "lineNumber": 112
+        },
+        {
+          "caller": "StudyNotificationsCard",
+          "callee": "studyPushOptedIn",
+          "lineNumber": 116
+        },
+        {
+          "caller": "StudyNotificationsCard",
+          "callee": "toggleMaster",
+          "lineNumber": 145
+        },
+        {
+          "caller": "StudyNotificationsCard",
+          "callee": "STUDY_NOTIFICATION_CATEGORIES.map",
+          "lineNumber": 157
+        },
+        {
+          "caller": "StudyNotificationsCard",
+          "callee": "byCategory.get",
+          "lineNumber": 158
+        },
+        {
+          "caller": "StudyNotificationsCard",
+          "callee": "updateCategory",
+          "lineNumber": 174
+        },
+        {
+          "caller": "StudyNotificationsCard",
+          "callee": "updateCategory",
+          "lineNumber": 191
+        },
+        {
+          "caller": "StudyNotificationsCard",
+          "callee": "sendTest",
+          "lineNumber": 201
+        }
+      ],
+      "metrics": {
+        "importCount": 8,
+        "exportCount": 1,
+        "functionCount": 1,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/components/shared/Brand.tsx",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 59,
+      "nonEmptyLines": 54,
+      "functions": [
+        {
+          "name": "BrandMark",
+          "startLine": 17,
+          "endLine": 36,
+          "params": [
+            "{\n  className,\n  decorative = false\n}"
+          ]
+        },
+        {
+          "name": "Brand",
+          "startLine": 38,
+          "endLine": 59,
+          "params": [
+            "{\n  size = 'md',\n  className\n}"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "BrandMark",
+          "line": 17,
+          "isDefault": false
+        },
+        {
+          "name": "Brand",
+          "line": 38,
+          "isDefault": true
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "BrandMark",
+          "callee": "cn",
+          "lineNumber": 33
+        },
+        {
+          "caller": "Brand",
+          "callee": "cn",
+          "lineNumber": 46
+        },
+        {
+          "caller": "Brand",
+          "callee": "cn",
+          "lineNumber": 50
+        }
+      ],
+      "metrics": {
+        "importCount": 1,
+        "exportCount": 2,
+        "functionCount": 2,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/components/shared/LoadingScreen.tsx",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 19,
+      "nonEmptyLines": 18,
+      "functions": [
+        {
+          "name": "LoadingScreen",
+          "startLine": 4,
+          "endLine": 19,
+          "params": []
+        }
+      ],
+      "exports": [
+        {
+          "name": "LoadingScreen",
+          "line": 4,
+          "isDefault": true
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "LoadingScreen",
+          "callee": "useReducedMotion",
+          "lineNumber": 5
+        }
+      ],
+      "metrics": {
+        "importCount": 1,
+        "exportCount": 1,
+        "functionCount": 1,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/components/shared/RequireAuth.tsx",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 11,
+      "nonEmptyLines": 10,
+      "functions": [
+        {
+          "name": "RequireAuth",
+          "startLine": 6,
+          "endLine": 11,
+          "params": [
+            "{ children }"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "RequireAuth",
+          "line": 6,
+          "isDefault": true
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "RequireAuth",
+          "callee": "useAuth",
+          "lineNumber": 7
+        }
+      ],
+      "metrics": {
+        "importCount": 2,
+        "exportCount": 1,
+        "functionCount": 1,
+        "classCount": 0
+      }
+    }
+  ]
+}

@@ -1,0 +1,1170 @@
+{
+  "nodes": [
+    {
+      "id": "file:src/lib/queryClient.ts",
+      "type": "file",
+      "name": "queryClient.ts",
+      "filePath": "src/lib/queryClient.ts",
+      "summary": "Creates the shared TanStack Query client with retry, freshness, and window-focus refetch defaults for remote data.",
+      "tags": [
+        "configuration",
+        "data-fetching",
+        "react-query"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/lib/studyNotifications.ts",
+      "type": "file",
+      "name": "studyNotifications.ts",
+      "filePath": "src/lib/studyNotifications.ts",
+      "summary": "Defines study-reminder categories and manages their Supabase-backed schedule preferences, validation, and test delivery.",
+      "tags": [
+        "service",
+        "study-reminders",
+        "notifications",
+        "supabase"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/lib/studyNotifications.ts:notificationTime",
+      "type": "function",
+      "name": "notificationTime",
+      "filePath": "src/lib/studyNotifications.ts",
+      "lineRange": [
+        35,
+        37
+      ],
+      "summary": "Formats a stored reminder hour and minute as a zero-padded local time string.",
+      "tags": [
+        "service",
+        "study-reminders",
+        "notifications",
+        "supabase"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/studyNotifications.ts:parseNotificationTime",
+      "type": "function",
+      "name": "parseNotificationTime",
+      "filePath": "src/lib/studyNotifications.ts",
+      "lineRange": [
+        39,
+        46
+      ],
+      "summary": "Parses and validates a strict 24-hour HH:MM reminder time.",
+      "tags": [
+        "service",
+        "study-reminders",
+        "notifications",
+        "supabase"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/studyNotifications.ts:ensureStudyNotificationPreferences",
+      "type": "function",
+      "name": "ensureStudyNotificationPreferences",
+      "filePath": "src/lib/studyNotifications.ts",
+      "lineRange": [
+        48,
+        52
+      ],
+      "summary": "Requests the complete server-side study-reminder preference set for the current user.",
+      "tags": [
+        "service",
+        "study-reminders",
+        "notifications",
+        "supabase"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/studyNotifications.ts:updateStudyNotificationPreference",
+      "type": "function",
+      "name": "updateStudyNotificationPreference",
+      "filePath": "src/lib/studyNotifications.ts",
+      "lineRange": [
+        54,
+        72
+      ],
+      "summary": "Updates one reminder category and clears prior send or mute state when its scheduled time changes.",
+      "tags": [
+        "service",
+        "study-reminders",
+        "notifications",
+        "supabase"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/studyNotifications.ts:sendStudyNotificationTest",
+      "type": "function",
+      "name": "sendStudyNotificationTest",
+      "filePath": "src/lib/studyNotifications.ts",
+      "lineRange": [
+        74,
+        85
+      ],
+      "summary": "Invokes forced test delivery for a study category and verifies at least one enabled device received it.",
+      "tags": [
+        "service",
+        "study-reminders",
+        "notifications",
+        "supabase"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/lib/supabase.ts",
+      "type": "file",
+      "name": "supabase.ts",
+      "filePath": "src/lib/supabase.ts",
+      "summary": "Validates Supabase environment configuration and creates a persistent auth client while retaining a local-only fallback that keeps the app bootable.",
+      "tags": [
+        "service",
+        "supabase",
+        "configuration",
+        "authentication"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/supabase.ts:isValidSupabaseUrl",
+      "type": "function",
+      "name": "isValidSupabaseUrl",
+      "filePath": "src/lib/supabase.ts",
+      "lineRange": [
+        6,
+        14
+      ],
+      "summary": "Validates that a supplied Supabase endpoint is a syntactically valid HTTP or HTTPS URL.",
+      "tags": [
+        "service",
+        "supabase",
+        "configuration",
+        "authentication"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/lib/theme.ts",
+      "type": "file",
+      "name": "theme.ts",
+      "filePath": "src/lib/theme.ts",
+      "summary": "Resolves system-aware color modes and applies the selected theme to document data attributes, form controls, and PWA chrome metadata.",
+      "tags": [
+        "utility",
+        "theme",
+        "appearance",
+        "pwa"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/theme.ts:resolveTheme",
+      "type": "function",
+      "name": "resolveTheme",
+      "filePath": "src/lib/theme.ts",
+      "lineRange": [
+        9,
+        12
+      ],
+      "summary": "Resolves an explicit or system-following theme mode to light or dark.",
+      "tags": [
+        "utility",
+        "theme",
+        "appearance",
+        "pwa"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/theme.ts:applyTheme",
+      "type": "function",
+      "name": "applyTheme",
+      "filePath": "src/lib/theme.ts",
+      "lineRange": [
+        15,
+        24
+      ],
+      "summary": "Applies a resolved theme to document styling state and the browser theme-color metadata.",
+      "tags": [
+        "utility",
+        "theme",
+        "appearance",
+        "pwa"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/main.tsx",
+      "type": "file",
+      "name": "main.tsx",
+      "filePath": "src/main.tsx",
+      "summary": "Bootstraps the React application and manages deployment freshness by disabling service workers in native builds and polling for PWA updates on the web.",
+      "tags": [
+        "entry-point",
+        "pwa",
+        "service-worker",
+        "react"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/main.tsx:disableNativeServiceWorkers",
+      "type": "function",
+      "name": "disableNativeServiceWorkers",
+      "filePath": "src/main.tsx",
+      "lineRange": [
+        19,
+        32
+      ],
+      "summary": "Unregisters web service workers in a native build and reloads once if the current document remains controlled.",
+      "tags": [
+        "entry-point",
+        "pwa",
+        "service-worker",
+        "react"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/main.tsx:configurePwaUpdates",
+      "type": "function",
+      "name": "configurePwaUpdates",
+      "filePath": "src/main.tsx",
+      "lineRange": [
+        34,
+        74
+      ],
+      "summary": "Registers the PWA worker, reloads on replacement control, and checks for updates periodically and on foregrounding.",
+      "tags": [
+        "entry-point",
+        "pwa",
+        "service-worker",
+        "react"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/pages/Auth.tsx",
+      "type": "file",
+      "name": "Auth.tsx",
+      "filePath": "src/pages/Auth.tsx",
+      "summary": "Implements the username-and-PIN sign-in screen, input validation, authenticated redirects, and a development sandbox fallback when Supabase is unavailable.",
+      "tags": [
+        "component",
+        "authentication",
+        "login",
+        "validation"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/pages/Auth.tsx:Auth",
+      "type": "function",
+      "name": "Auth",
+      "filePath": "src/pages/Auth.tsx",
+      "lineRange": [
+        21,
+        182
+      ],
+      "summary": "Validates username/PIN credentials, performs sign-in, redirects authenticated users, and exposes local sandbox entry during unconfigured development.",
+      "tags": [
+        "component",
+        "authentication",
+        "login",
+        "validation"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/pages/Buddy.tsx",
+      "type": "file",
+      "name": "Buddy.tsx",
+      "filePath": "src/pages/Buddy.tsx",
+      "summary": "Implements the responsive Buddy workspace for chats, incoming and outgoing requests, paused relationships, live previews, realtime updates, and mobile chat navigation.",
+      "tags": [
+        "component",
+        "buddy",
+        "realtime",
+        "responsive-design"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:src/pages/Buddy.tsx:placeholderPeer",
+      "type": "function",
+      "name": "placeholderPeer",
+      "filePath": "src/pages/Buddy.tsx",
+      "lineRange": [
+        60,
+        69
+      ],
+      "summary": "Synthesizes a stable minimal peer identity when profile lookup is unavailable.",
+      "tags": [
+        "component",
+        "buddy",
+        "realtime",
+        "responsive-design"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/pages/Buddy.tsx:normalizePeer",
+      "type": "function",
+      "name": "normalizePeer",
+      "filePath": "src/pages/Buddy.tsx",
+      "lineRange": [
+        72,
+        81
+      ],
+      "summary": "Normalizes nullable peer profile fields against a deterministic placeholder identity.",
+      "tags": [
+        "component",
+        "buddy",
+        "realtime",
+        "responsive-design"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/pages/Buddy.tsx:Buddy",
+      "type": "function",
+      "name": "Buddy",
+      "filePath": "src/pages/Buddy.tsx",
+      "lineRange": [
+        96,
+        736
+      ],
+      "summary": "Loads Buddy relationships and previews, subscribes to realtime changes, handles request lifecycle actions, and coordinates desktop and mobile chat layouts.",
+      "tags": [
+        "component",
+        "buddy",
+        "realtime",
+        "responsive-design"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:src/pages/Buddy.tsx:ChatsTab",
+      "type": "function",
+      "name": "ChatsTab",
+      "filePath": "src/pages/Buddy.tsx",
+      "lineRange": [
+        740,
+        820
+      ],
+      "summary": "Renders active Buddy conversations with last-message previews, unread counts, selection state, and an empty-state action.",
+      "tags": [
+        "component",
+        "buddy",
+        "realtime",
+        "responsive-design"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/pages/Buddy.tsx:RequestsTab",
+      "type": "function",
+      "name": "RequestsTab",
+      "filePath": "src/pages/Buddy.tsx",
+      "lineRange": [
+        822,
+        917
+      ],
+      "summary": "Renders incoming and outgoing Buddy requests with accept, decline, cancel, and create controls.",
+      "tags": [
+        "component",
+        "buddy",
+        "realtime",
+        "responsive-design"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/pages/Buddy.tsx:PausedTab",
+      "type": "function",
+      "name": "PausedTab",
+      "filePath": "src/pages/Buddy.tsx",
+      "lineRange": [
+        919,
+        954
+      ],
+      "summary": "Lists paused Buddy relationships and offers a cooldown-aware request-again action.",
+      "tags": [
+        "component",
+        "buddy",
+        "realtime",
+        "responsive-design"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/pages/Buddy.tsx:TabPill",
+      "type": "function",
+      "name": "TabPill",
+      "filePath": "src/pages/Buddy.tsx",
+      "lineRange": [
+        958,
+        999
+      ],
+      "summary": "Renders a selectable Buddy section tab with count and incoming-request emphasis.",
+      "tags": [
+        "component",
+        "buddy",
+        "realtime",
+        "responsive-design"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/pages/ForgotPin.tsx",
+      "type": "file",
+      "name": "ForgotPin.tsx",
+      "filePath": "src/pages/ForgotPin.tsx",
+      "summary": "Collects a username and requests a non-enumerating PIN recovery email, presenting consistent sent and error states.",
+      "tags": [
+        "component",
+        "authentication",
+        "pin-reset",
+        "form"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/pages/ForgotPin.tsx:ForgotPin",
+      "type": "function",
+      "name": "ForgotPin",
+      "filePath": "src/pages/ForgotPin.tsx",
+      "lineRange": [
+        22,
+        140
+      ],
+      "summary": "Validates a username, requests a recovery email, and presents privacy-preserving sent, unavailable, and error states.",
+      "tags": [
+        "component",
+        "authentication",
+        "pin-reset",
+        "form"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/pages/NotFound.tsx",
+      "type": "file",
+      "name": "NotFound.tsx",
+      "filePath": "src/pages/NotFound.tsx",
+      "summary": "Renders the application 404 page with theme control and a direct route back to the dashboard.",
+      "tags": [
+        "component",
+        "routing",
+        "error-page"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/pages/NotFound.tsx:NotFound",
+      "type": "function",
+      "name": "NotFound",
+      "filePath": "src/pages/NotFound.tsx",
+      "lineRange": [
+        4,
+        22
+      ],
+      "summary": "Displays a themed 404 screen with a link back to the application dashboard.",
+      "tags": [
+        "component",
+        "routing",
+        "error-page"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/pages/RequestAccess.tsx",
+      "type": "file",
+      "name": "RequestAccess.tsx",
+      "filePath": "src/pages/RequestAccess.tsx",
+      "summary": "Combines a public HETU overview with a validated, honeypot-protected access-request form and deduplicated submission feedback.",
+      "tags": [
+        "component",
+        "access-request",
+        "validation",
+        "landing-page"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:src/pages/RequestAccess.tsx:RequestAccess",
+      "type": "function",
+      "name": "RequestAccess",
+      "filePath": "src/pages/RequestAccess.tsx",
+      "lineRange": [
+        27,
+        202
+      ],
+      "summary": "Validates and submits public access-request details, includes a bot honeypot, and switches to a dedup-aware confirmation panel.",
+      "tags": [
+        "component",
+        "access-request",
+        "validation",
+        "landing-page"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/pages/RequestAccess.tsx:Pitch",
+      "type": "function",
+      "name": "Pitch",
+      "filePath": "src/pages/RequestAccess.tsx",
+      "lineRange": [
+        204,
+        268
+      ],
+      "summary": "Presents the product value proposition, core study workflows, invite-only rationale, and exam countdown.",
+      "tags": [
+        "component",
+        "access-request",
+        "validation",
+        "landing-page"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/pages/RequestAccess.tsx:Field",
+      "type": "function",
+      "name": "Field",
+      "filePath": "src/pages/RequestAccess.tsx",
+      "lineRange": [
+        270,
+        301
+      ],
+      "summary": "Wraps a labeled access-request control with optional contextual or warning hint text.",
+      "tags": [
+        "component",
+        "access-request",
+        "validation",
+        "landing-page"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/pages/RequestAccess.tsx:SentPanel",
+      "type": "function",
+      "name": "SentPanel",
+      "filePath": "src/pages/RequestAccess.tsx",
+      "lineRange": [
+        303,
+        334
+      ],
+      "summary": "Shows new or duplicate access-request confirmation and provides sign-in or form-reset actions.",
+      "tags": [
+        "component",
+        "access-request",
+        "validation",
+        "landing-page"
+      ],
+      "complexity": "simple"
+    }
+  ],
+  "edges": [
+    {
+      "source": "file:src/lib/studyNotifications.ts",
+      "target": "file:src/lib/supabase.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/lib/studyNotifications.ts",
+      "target": "function:src/lib/studyNotifications.ts:notificationTime",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/studyNotifications.ts",
+      "target": "function:src/lib/studyNotifications.ts:notificationTime",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/studyNotifications.ts",
+      "target": "function:src/lib/studyNotifications.ts:parseNotificationTime",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/studyNotifications.ts",
+      "target": "function:src/lib/studyNotifications.ts:parseNotificationTime",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/studyNotifications.ts",
+      "target": "function:src/lib/studyNotifications.ts:ensureStudyNotificationPreferences",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/studyNotifications.ts",
+      "target": "function:src/lib/studyNotifications.ts:ensureStudyNotificationPreferences",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/studyNotifications.ts",
+      "target": "function:src/lib/studyNotifications.ts:updateStudyNotificationPreference",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/studyNotifications.ts",
+      "target": "function:src/lib/studyNotifications.ts:updateStudyNotificationPreference",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/studyNotifications.ts",
+      "target": "function:src/lib/studyNotifications.ts:sendStudyNotificationTest",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/studyNotifications.ts",
+      "target": "function:src/lib/studyNotifications.ts:sendStudyNotificationTest",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/supabase.ts",
+      "target": "function:src/lib/supabase.ts:isValidSupabaseUrl",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/supabase.ts",
+      "target": "function:src/lib/supabase.ts:isValidSupabaseUrl",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/theme.ts",
+      "target": "function:src/lib/theme.ts:resolveTheme",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/theme.ts",
+      "target": "function:src/lib/theme.ts:resolveTheme",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/theme.ts",
+      "target": "function:src/lib/theme.ts:applyTheme",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/theme.ts",
+      "target": "function:src/lib/theme.ts:applyTheme",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/main.tsx",
+      "target": "file:src/App.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main.tsx",
+      "target": "file:src/index.css",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main.tsx",
+      "target": "function:src/main.tsx:disableNativeServiceWorkers",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main.tsx",
+      "target": "function:src/main.tsx:configurePwaUpdates",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/pages/Auth.tsx",
+      "target": "file:src/components/auth/PinInput.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Auth.tsx",
+      "target": "file:src/components/shared/Brand.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Auth.tsx",
+      "target": "file:src/components/shared/ThemeToggle.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Auth.tsx",
+      "target": "file:src/components/ui/Button.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Auth.tsx",
+      "target": "file:src/components/ui/Input.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Auth.tsx",
+      "target": "file:src/hooks/useAuth.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Auth.tsx",
+      "target": "file:src/lib/constants.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Auth.tsx",
+      "target": "file:src/lib/supabase.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Auth.tsx",
+      "target": "file:src/stores/auth.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Auth.tsx",
+      "target": "function:src/pages/Auth.tsx:Auth",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/pages/Auth.tsx",
+      "target": "function:src/pages/Auth.tsx:Auth",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/pages/Buddy.tsx",
+      "target": "file:src/components/buddy/BuddyAvatar.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Buddy.tsx",
+      "target": "file:src/components/buddy/BuddyChat.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Buddy.tsx",
+      "target": "file:src/components/layout/PageHeader.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Buddy.tsx",
+      "target": "file:src/components/ui/Button.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Buddy.tsx",
+      "target": "file:src/components/ui/Card.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Buddy.tsx",
+      "target": "file:src/components/ui/Dialog.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Buddy.tsx",
+      "target": "file:src/components/ui/Textarea.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Buddy.tsx",
+      "target": "file:src/hooks/useAuth.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Buddy.tsx",
+      "target": "file:src/hooks/useMediaQuery.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Buddy.tsx",
+      "target": "file:src/lib/buddy.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Buddy.tsx",
+      "target": "file:src/lib/edge.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Buddy.tsx",
+      "target": "file:src/lib/native.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Buddy.tsx",
+      "target": "file:src/lib/supabase.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Buddy.tsx",
+      "target": "file:src/lib/utils.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Buddy.tsx",
+      "target": "file:src/stores/ui.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Buddy.tsx",
+      "target": "file:src/types/index.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Buddy.tsx",
+      "target": "function:src/pages/Buddy.tsx:placeholderPeer",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/pages/Buddy.tsx",
+      "target": "function:src/pages/Buddy.tsx:normalizePeer",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/pages/Buddy.tsx",
+      "target": "function:src/pages/Buddy.tsx:Buddy",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/pages/Buddy.tsx",
+      "target": "function:src/pages/Buddy.tsx:Buddy",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/pages/Buddy.tsx",
+      "target": "function:src/pages/Buddy.tsx:ChatsTab",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/pages/Buddy.tsx",
+      "target": "function:src/pages/Buddy.tsx:RequestsTab",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/pages/Buddy.tsx",
+      "target": "function:src/pages/Buddy.tsx:PausedTab",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/pages/Buddy.tsx",
+      "target": "function:src/pages/Buddy.tsx:TabPill",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/pages/ForgotPin.tsx",
+      "target": "file:src/components/shared/Brand.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/ForgotPin.tsx",
+      "target": "file:src/components/shared/ThemeToggle.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/ForgotPin.tsx",
+      "target": "file:src/components/ui/Button.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/ForgotPin.tsx",
+      "target": "file:src/components/ui/Input.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/ForgotPin.tsx",
+      "target": "file:src/hooks/useAuth.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/ForgotPin.tsx",
+      "target": "file:src/lib/constants.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/ForgotPin.tsx",
+      "target": "file:src/lib/edge.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/ForgotPin.tsx",
+      "target": "file:src/lib/supabase.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/ForgotPin.tsx",
+      "target": "function:src/pages/ForgotPin.tsx:ForgotPin",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/pages/ForgotPin.tsx",
+      "target": "function:src/pages/ForgotPin.tsx:ForgotPin",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/pages/NotFound.tsx",
+      "target": "file:src/components/shared/ThemeToggle.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/NotFound.tsx",
+      "target": "function:src/pages/NotFound.tsx:NotFound",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/pages/NotFound.tsx",
+      "target": "function:src/pages/NotFound.tsx:NotFound",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/pages/RequestAccess.tsx",
+      "target": "file:src/components/shared/Brand.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/RequestAccess.tsx",
+      "target": "file:src/components/shared/ThemeToggle.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/RequestAccess.tsx",
+      "target": "file:src/components/ui/Button.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/RequestAccess.tsx",
+      "target": "file:src/components/ui/Input.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/RequestAccess.tsx",
+      "target": "file:src/components/ui/Textarea.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/RequestAccess.tsx",
+      "target": "file:src/hooks/useAuth.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/RequestAccess.tsx",
+      "target": "file:src/lib/constants.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/RequestAccess.tsx",
+      "target": "file:src/lib/edge.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/RequestAccess.tsx",
+      "target": "file:src/lib/utils.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/RequestAccess.tsx",
+      "target": "function:src/pages/RequestAccess.tsx:RequestAccess",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/pages/RequestAccess.tsx",
+      "target": "function:src/pages/RequestAccess.tsx:RequestAccess",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/pages/RequestAccess.tsx",
+      "target": "function:src/pages/RequestAccess.tsx:Pitch",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/pages/RequestAccess.tsx",
+      "target": "function:src/pages/RequestAccess.tsx:Field",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/pages/RequestAccess.tsx",
+      "target": "function:src/pages/RequestAccess.tsx:SentPanel",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/theme.ts",
+      "target": "file:src/__tests__/theme.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/pages/Buddy.tsx",
+      "target": "file:src/__tests__/buddy-page-ui.test.tsx",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    }
+  ]
+}

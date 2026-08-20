@@ -1,0 +1,122 @@
+{
+  "nodes": [
+    {
+      "id": "config:android/build.gradle",
+      "type": "config",
+      "name": "build.gradle",
+      "filePath": "android/build.gradle",
+      "summary": "Root Android Gradle build configuration that declares build plugins and repositories, loads shared version variables, and provides the project clean task.",
+      "tags": [
+        "configuration",
+        "android",
+        "gradle",
+        "build-system"
+      ],
+      "complexity": "simple",
+      "languageNotes": "Groovy Gradle configuration shared across the Android project."
+    },
+    {
+      "id": "config:android/capacitor.settings.gradle",
+      "type": "config",
+      "name": "capacitor.settings.gradle",
+      "filePath": "android/capacitor.settings.gradle",
+      "summary": "Generated Capacitor settings fragment that registers the native bridge and installed Android plugin modules with the Gradle project graph.",
+      "tags": [
+        "configuration",
+        "android",
+        "capacitor",
+        "plugin-registry"
+      ],
+      "complexity": "simple",
+      "languageNotes": "Declarative Gradle module inclusion generated for Capacitor plugins."
+    },
+    {
+      "id": "config:android/gradle.properties",
+      "type": "config",
+      "name": "gradle.properties",
+      "filePath": "android/gradle.properties",
+      "summary": "Project-wide Gradle properties controlling build-process JVM behavior and AndroidX compatibility for the native Android build.",
+      "tags": [
+        "configuration",
+        "android",
+        "gradle",
+        "build-performance"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:android/gradlew.bat",
+      "type": "file",
+      "name": "gradlew.bat",
+      "filePath": "android/gradlew.bat",
+      "summary": "Windows Gradle wrapper launcher that resolves the project directory and Java runtime, invokes the pinned wrapper bootstrap, forwards command-line arguments, and propagates its exit status.",
+      "tags": [
+        "build-script",
+        "windows",
+        "gradle-wrapper",
+        "automation"
+      ],
+      "complexity": "moderate",
+      "languageNotes": "Conventional Windows batch control flow with labeled setup, execution, and failure paths."
+    },
+    {
+      "id": "config:android/settings.gradle",
+      "type": "config",
+      "name": "settings.gradle",
+      "filePath": "android/settings.gradle",
+      "summary": "Android Gradle settings entry point that assembles the application, Capacitor bridge, and generated plugin settings into one multi-module build.",
+      "tags": [
+        "configuration",
+        "android",
+        "gradle",
+        "module-topology"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "config:android/variables.gradle",
+      "type": "config",
+      "name": "variables.gradle",
+      "filePath": "android/variables.gradle",
+      "summary": "Centralized Android build-version catalog for SDK levels and the AndroidX, Firebase, Cordova, unit-test, and instrumentation-test dependencies.",
+      "tags": [
+        "configuration",
+        "android",
+        "dependency-versions",
+        "gradle"
+      ],
+      "complexity": "simple",
+      "languageNotes": "Groovy extra properties keep native dependency versions consistent across modules."
+    }
+  ],
+  "edges": [
+    {
+      "source": "config:android/build.gradle",
+      "target": "config:android/variables.gradle",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "config:android/gradle.properties",
+      "target": "file:android/gradlew.bat",
+      "type": "configures",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:android/gradlew.bat",
+      "target": "config:android/settings.gradle",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "config:android/settings.gradle",
+      "target": "config:android/capacitor.settings.gradle",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    }
+  ]
+}

@@ -1,0 +1,28 @@
+{
+  "nodes": [
+    {
+      "id": "file:src/__tests__/go-classes-coa-test-2-photos.test.ts",
+      "type": "file",
+      "name": "go-classes-coa-test-2-photos.test.ts",
+      "filePath": "src/__tests__/go-classes-coa-test-2-photos.test.ts",
+      "summary": "Regression-tests the second GO Classes COA screenshot archive by verifying all fifteen questions use bundled answer-free practice images while retaining separate full attempt receipts. It also checks that the follow-up migration writes practice-image paths, never result-receipt paths, into re-attempt and journal image fields.",
+      "tags": [
+        "test",
+        "pyq-assets",
+        "migration-validation",
+        "privacy-boundary"
+      ],
+      "complexity": "moderate",
+      "languageNotes": "Vitest combines a dynamic JSON import with direct filesystem and migration-text assertions to validate both generated content and repository assets."
+    }
+  ],
+  "edges": [
+    {
+      "source": "file:src/__tests__/go-classes-coa-test-2-photos.test.ts",
+      "target": "table:supabase/migrations/20260813000006_go_classes_coa_topic_test_2_answer_free_reattempts.sql:migration",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    }
+  ]
+}

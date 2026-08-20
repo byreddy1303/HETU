@@ -1,0 +1,1817 @@
+{
+  "nodes": [
+    {
+      "id": "file:src/components/shared/RootErrorBoundary.tsx",
+      "type": "file",
+      "name": "RootErrorBoundary.tsx",
+      "filePath": "src/components/shared/RootErrorBoundary.tsx",
+      "summary": "Renders the router-level failure screen and performs a guarded one-time reload when a deployment leaves the browser with stale dynamic chunk URLs.",
+      "tags": [
+        "component",
+        "error-boundary",
+        "error-recovery",
+        "react-router"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/components/shared/RootErrorBoundary.tsx:RootErrorBoundary",
+      "type": "function",
+      "name": "RootErrorBoundary",
+      "filePath": "src/components/shared/RootErrorBoundary.tsx",
+      "lineRange": [
+        6,
+        69
+      ],
+      "summary": "Interprets router errors, detects stale dynamic chunks, reloads at most once automatically, and otherwise presents a branded recovery screen.",
+      "tags": [
+        "component",
+        "error-boundary",
+        "error-recovery",
+        "react-router"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/components/shared/ThemeToggle.tsx",
+      "type": "file",
+      "name": "ThemeToggle.tsx",
+      "filePath": "src/components/shared/ThemeToggle.tsx",
+      "summary": "Provides an accessible light/dark theme toggle that resolves system preference, persists the selected mode, and adds native haptic feedback.",
+      "tags": [
+        "component",
+        "theme",
+        "preferences",
+        "native-feedback"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/components/shared/ThemeToggle.tsx:ThemeToggle",
+      "type": "function",
+      "name": "ThemeToggle",
+      "filePath": "src/components/shared/ThemeToggle.tsx",
+      "lineRange": [
+        8,
+        50
+      ],
+      "summary": "Tracks the operating-system color preference, resolves the active theme, and persists the opposite explicit mode when pressed.",
+      "tags": [
+        "component",
+        "theme",
+        "preferences",
+        "native-feedback"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/components/ui/Button.tsx",
+      "type": "file",
+      "name": "Button.tsx",
+      "filePath": "src/components/ui/Button.tsx",
+      "summary": "Defines the reusable button primitive with visual variants, size presets, forwarded refs, disabled behavior, and optional haptic feedback.",
+      "tags": [
+        "component",
+        "ui-primitive",
+        "accessibility",
+        "native-feedback"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/components/ui/Toast.tsx",
+      "type": "file",
+      "name": "Toast.tsx",
+      "filePath": "src/components/ui/Toast.tsx",
+      "summary": "Mounts the animated global toast stack, maps toast tones to styling, and triggers success or error haptics once per notification.",
+      "tags": [
+        "component",
+        "toast",
+        "animation",
+        "native-feedback"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/components/ui/Toast.tsx:Toaster",
+      "type": "function",
+      "name": "Toaster",
+      "filePath": "src/components/ui/Toast.tsx",
+      "lineRange": [
+        14,
+        56
+      ],
+      "summary": "Renders dismissible animated toasts from the UI store and emits a single tone-appropriate haptic for each new item.",
+      "tags": [
+        "component",
+        "toast",
+        "animation",
+        "native-feedback"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/hooks/useMediaQuery.ts",
+      "type": "file",
+      "name": "useMediaQuery.ts",
+      "filePath": "src/hooks/useMediaQuery.ts",
+      "summary": "Exposes a reactive media-query hook with server-safe initialization and listener cleanup when the query changes.",
+      "tags": [
+        "hook",
+        "responsive-design",
+        "browser-api"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/hooks/useMediaQuery.ts:useMediaQuery",
+      "type": "function",
+      "name": "useMediaQuery",
+      "filePath": "src/hooks/useMediaQuery.ts",
+      "lineRange": [
+        3,
+        20
+      ],
+      "summary": "Returns whether a CSS media query currently matches and keeps the value synchronized through a browser change listener.",
+      "tags": [
+        "hook",
+        "responsive-design",
+        "browser-api"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/lib/buddy.ts",
+      "type": "file",
+      "name": "buddy.ts",
+      "filePath": "src/lib/buddy.ts",
+      "summary": "Provides pure Buddy messaging helpers for realtime topic names, privacy-safe shared question references, message merging, conversation grouping, and compact timestamps.",
+      "tags": [
+        "utility",
+        "buddy",
+        "messaging",
+        "realtime"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/lib/buddy.ts:buddyPresenceTopic",
+      "type": "function",
+      "name": "buddyPresenceTopic",
+      "filePath": "src/lib/buddy.ts",
+      "lineRange": [
+        17,
+        19
+      ],
+      "summary": "Builds the shared Supabase Presence topic name for a Buddy relationship.",
+      "tags": [
+        "utility",
+        "buddy",
+        "messaging",
+        "realtime"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/buddy.ts:buddyRealtimeTopic",
+      "type": "function",
+      "name": "buddyRealtimeTopic",
+      "filePath": "src/lib/buddy.ts",
+      "lineRange": [
+        22,
+        24
+      ],
+      "summary": "Builds the realtime chat and typing topic name for a Buddy relationship.",
+      "tags": [
+        "utility",
+        "buddy",
+        "messaging",
+        "realtime"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/buddy.ts:buddyPresenceUserIds",
+      "type": "function",
+      "name": "buddyPresenceUserIds",
+      "filePath": "src/lib/buddy.ts",
+      "lineRange": [
+        27,
+        31
+      ],
+      "summary": "Extracts user IDs that currently have at least one active Presence connection.",
+      "tags": [
+        "utility",
+        "buddy",
+        "messaging",
+        "realtime"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/buddy.ts:safeQuestionRef",
+      "type": "function",
+      "name": "safeQuestionRef",
+      "filePath": "src/lib/buddy.ts",
+      "lineRange": [
+        34,
+        45
+      ],
+      "summary": "Projects a question row onto the privacy-safe fields permitted in Buddy sharing.",
+      "tags": [
+        "utility",
+        "buddy",
+        "messaging",
+        "realtime"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/buddy.ts:mergeBuddyMessages",
+      "type": "function",
+      "name": "mergeBuddyMessages",
+      "filePath": "src/lib/buddy.ts",
+      "lineRange": [
+        48,
+        57
+      ],
+      "summary": "Deduplicates optimistic and realtime Buddy messages by ID and returns them in chronological order.",
+      "tags": [
+        "utility",
+        "buddy",
+        "messaging",
+        "realtime"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/buddy.ts:groupBuddyMessages",
+      "type": "function",
+      "name": "groupBuddyMessages",
+      "filePath": "src/lib/buddy.ts",
+      "lineRange": [
+        60,
+        88
+      ],
+      "summary": "Groups chronological Buddy messages by day and clusters nearby text messages from the same sender into conversational turns.",
+      "tags": [
+        "utility",
+        "buddy",
+        "messaging",
+        "realtime"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/buddy.ts:shortBuddyTime",
+      "type": "function",
+      "name": "shortBuddyTime",
+      "filePath": "src/lib/buddy.ts",
+      "lineRange": [
+        91,
+        106
+      ],
+      "summary": "Formats a chat timestamp as now, local time, Yesterday, weekday, or compact date according to recency.",
+      "tags": [
+        "utility",
+        "buddy",
+        "messaging",
+        "realtime"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/buddy.ts:isSharedQuestionRef",
+      "type": "function",
+      "name": "isSharedQuestionRef",
+      "filePath": "src/lib/buddy.ts",
+      "lineRange": [
+        108,
+        112
+      ],
+      "summary": "Checks that an unknown value has the minimum shape required for a shared question reference.",
+      "tags": [
+        "utility",
+        "buddy",
+        "messaging",
+        "realtime"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/lib/buddyNotifications.ts",
+      "type": "file",
+      "name": "buddyNotifications.ts",
+      "filePath": "src/lib/buddyNotifications.ts",
+      "summary": "Coordinates web and native push registration for Buddy and study channels, persists per-device opt-ins, invokes notification services, and manages quiet-hour snoozes.",
+      "tags": [
+        "service",
+        "push-notifications",
+        "cross-platform",
+        "supabase"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:src/lib/buddyNotifications.ts:getPushDeviceId",
+      "type": "function",
+      "name": "getPushDeviceId",
+      "filePath": "src/lib/buddyNotifications.ts",
+      "lineRange": [
+        55,
+        61
+      ],
+      "summary": "Returns the stable per-browser push device ID, creating and persisting one when needed.",
+      "tags": [
+        "service",
+        "push-notifications",
+        "cross-platform",
+        "supabase"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/buddyNotifications.ts:buddyPushOptedIn",
+      "type": "function",
+      "name": "buddyPushOptedIn",
+      "filePath": "src/lib/buddyNotifications.ts",
+      "lineRange": [
+        63,
+        65
+      ],
+      "summary": "Reads whether the current device opted into Buddy message notifications.",
+      "tags": [
+        "service",
+        "push-notifications",
+        "cross-platform",
+        "supabase"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/buddyNotifications.ts:studyPushOptedIn",
+      "type": "function",
+      "name": "studyPushOptedIn",
+      "filePath": "src/lib/buddyNotifications.ts",
+      "lineRange": [
+        67,
+        69
+      ],
+      "summary": "Reads whether the current device opted into scheduled study notifications.",
+      "tags": [
+        "service",
+        "push-notifications",
+        "cross-platform",
+        "supabase"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/buddyNotifications.ts:pushNotificationsOptedIn",
+      "type": "function",
+      "name": "pushNotificationsOptedIn",
+      "filePath": "src/lib/buddyNotifications.ts",
+      "lineRange": [
+        71,
+        73
+      ],
+      "summary": "Reports whether either notification channel is enabled on the current device.",
+      "tags": [
+        "service",
+        "push-notifications",
+        "cross-platform",
+        "supabase"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/buddyNotifications.ts:urlBase64ToUint8Array",
+      "type": "function",
+      "name": "urlBase64ToUint8Array",
+      "filePath": "src/lib/buddyNotifications.ts",
+      "lineRange": [
+        88,
+        97
+      ],
+      "summary": "Decodes a URL-safe VAPID public key into the byte array required by the Web Push API.",
+      "tags": [
+        "service",
+        "push-notifications",
+        "cross-platform",
+        "supabase"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/buddyNotifications.ts:upsertWebSubscription",
+      "type": "function",
+      "name": "upsertWebSubscription",
+      "filePath": "src/lib/buddyNotifications.ts",
+      "lineRange": [
+        99,
+        114
+      ],
+      "summary": "Validates a browser push subscription, upserts its endpoint and keys through Supabase, and synchronizes channel flags.",
+      "tags": [
+        "service",
+        "push-notifications",
+        "cross-platform",
+        "supabase"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/buddyNotifications.ts:saveNativePushToken",
+      "type": "function",
+      "name": "saveNativePushToken",
+      "filePath": "src/lib/buddyNotifications.ts",
+      "lineRange": [
+        116,
+        130
+      ],
+      "summary": "Persists a trimmed native push token for the opted-in device and synchronizes its enabled channels.",
+      "tags": [
+        "service",
+        "push-notifications",
+        "cross-platform",
+        "supabase"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/buddyNotifications.ts:registerNativeToken",
+      "type": "function",
+      "name": "registerNativeToken",
+      "filePath": "src/lib/buddyNotifications.ts",
+      "lineRange": [
+        140,
+        204
+      ],
+      "summary": "Creates Android notification channels and resolves a native registration token with listener cleanup and a bounded timeout.",
+      "tags": [
+        "service",
+        "push-notifications",
+        "cross-platform",
+        "supabase"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/lib/buddyNotifications.ts:getBuddyNotificationState",
+      "type": "function",
+      "name": "getBuddyNotificationState",
+      "filePath": "src/lib/buddyNotifications.ts",
+      "lineRange": [
+        206,
+        238
+      ],
+      "summary": "Combines platform support, permission status, server registration, and local opt-in state for the settings UI.",
+      "tags": [
+        "service",
+        "push-notifications",
+        "cross-platform",
+        "supabase"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/buddyNotifications.ts:enableNotificationChannel",
+      "type": "function",
+      "name": "enableNotificationChannel",
+      "filePath": "src/lib/buddyNotifications.ts",
+      "lineRange": [
+        240,
+        298
+      ],
+      "summary": "Requests platform permission, registers a web or native subscription, and rolls back the selected channel on failure.",
+      "tags": [
+        "service",
+        "push-notifications",
+        "cross-platform",
+        "supabase"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/lib/buddyNotifications.ts:enableBuddyNotifications",
+      "type": "function",
+      "name": "enableBuddyNotifications",
+      "filePath": "src/lib/buddyNotifications.ts",
+      "lineRange": [
+        300,
+        302
+      ],
+      "summary": "Enables the Buddy-message notification channel on this device.",
+      "tags": [
+        "service",
+        "push-notifications",
+        "cross-platform",
+        "supabase"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/buddyNotifications.ts:enableStudyNotifications",
+      "type": "function",
+      "name": "enableStudyNotifications",
+      "filePath": "src/lib/buddyNotifications.ts",
+      "lineRange": [
+        304,
+        306
+      ],
+      "summary": "Enables the scheduled-study notification channel on this device.",
+      "tags": [
+        "service",
+        "push-notifications",
+        "cross-platform",
+        "supabase"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/buddyNotifications.ts:disableNotificationChannel",
+      "type": "function",
+      "name": "disableNotificationChannel",
+      "filePath": "src/lib/buddyNotifications.ts",
+      "lineRange": [
+        308,
+        320
+      ],
+      "summary": "Clears one local channel opt-in and synchronizes the remaining channel flags to Supabase.",
+      "tags": [
+        "service",
+        "push-notifications",
+        "cross-platform",
+        "supabase"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/buddyNotifications.ts:disableBuddyNotifications",
+      "type": "function",
+      "name": "disableBuddyNotifications",
+      "filePath": "src/lib/buddyNotifications.ts",
+      "lineRange": [
+        322,
+        324
+      ],
+      "summary": "Disables Buddy-message notifications while preserving any study-reminder registration.",
+      "tags": [
+        "service",
+        "push-notifications",
+        "cross-platform",
+        "supabase"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/buddyNotifications.ts:disableStudyNotifications",
+      "type": "function",
+      "name": "disableStudyNotifications",
+      "filePath": "src/lib/buddyNotifications.ts",
+      "lineRange": [
+        326,
+        328
+      ],
+      "summary": "Disables study reminders while preserving any Buddy-message registration.",
+      "tags": [
+        "service",
+        "push-notifications",
+        "cross-platform",
+        "supabase"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/buddyNotifications.ts:unregisterCurrentPushDevice",
+      "type": "function",
+      "name": "unregisterCurrentPushDevice",
+      "filePath": "src/lib/buddyNotifications.ts",
+      "lineRange": [
+        330,
+        343
+      ],
+      "summary": "Disables both channels and removes the current web or native push registration locally and on Supabase.",
+      "tags": [
+        "service",
+        "push-notifications",
+        "cross-platform",
+        "supabase"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/buddyNotifications.ts:syncBuddyPushRegistration",
+      "type": "function",
+      "name": "syncBuddyPushRegistration",
+      "filePath": "src/lib/buddyNotifications.ts",
+      "lineRange": [
+        346,
+        358
+      ],
+      "summary": "Refreshes an existing permitted web subscription or rotated native token without prompting the user.",
+      "tags": [
+        "service",
+        "push-notifications",
+        "cross-platform",
+        "supabase"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/buddyNotifications.ts:touchActiveBuddy",
+      "type": "function",
+      "name": "touchActiveBuddy",
+      "filePath": "src/lib/buddyNotifications.ts",
+      "lineRange": [
+        360,
+        366
+      ],
+      "summary": "Updates the active Buddy association for the current push device so foreground conversations can be suppressed.",
+      "tags": [
+        "service",
+        "push-notifications",
+        "cross-platform",
+        "supabase"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/buddyNotifications.ts:notifyBuddyMessage",
+      "type": "function",
+      "name": "notifyBuddyMessage",
+      "filePath": "src/lib/buddyNotifications.ts",
+      "lineRange": [
+        369,
+        374
+      ],
+      "summary": "Invokes the Buddy notification function as a best-effort fast path for a newly created message.",
+      "tags": [
+        "service",
+        "push-notifications",
+        "cross-platform",
+        "supabase"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/buddyNotifications.ts:routeFromPushData",
+      "type": "function",
+      "name": "routeFromPushData",
+      "filePath": "src/lib/buddyNotifications.ts",
+      "lineRange": [
+        376,
+        381
+      ],
+      "summary": "Accepts only safe application-relative routes from arbitrary push-notification payload data.",
+      "tags": [
+        "service",
+        "push-notifications",
+        "cross-platform",
+        "supabase"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/buddyNotifications.ts:snoozeNotifications",
+      "type": "function",
+      "name": "snoozeNotifications",
+      "filePath": "src/lib/buddyNotifications.ts",
+      "lineRange": [
+        402,
+        415
+      ],
+      "summary": "Sets bounded device-level push quiet hours through Supabase and returns a structured result.",
+      "tags": [
+        "service",
+        "push-notifications",
+        "cross-platform",
+        "supabase"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/buddyNotifications.ts:clearSnooze",
+      "type": "function",
+      "name": "clearSnooze",
+      "filePath": "src/lib/buddyNotifications.ts",
+      "lineRange": [
+        420,
+        430
+      ],
+      "summary": "Clears device-level notification quiet hours through the shared Supabase RPC.",
+      "tags": [
+        "service",
+        "push-notifications",
+        "cross-platform",
+        "supabase"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/buddyNotifications.ts:getSnoozeStatus",
+      "type": "function",
+      "name": "getSnoozeStatus",
+      "filePath": "src/lib/buddyNotifications.ts",
+      "lineRange": [
+        436,
+        447
+      ],
+      "summary": "Fetches the current device quiet-until timestamp and reports only a still-active snooze.",
+      "tags": [
+        "service",
+        "push-notifications",
+        "cross-platform",
+        "supabase"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/lib/edge.ts",
+      "type": "file",
+      "name": "edge.ts",
+      "filePath": "src/lib/edge.ts",
+      "summary": "Supplies typed client wrappers around Supabase Edge Functions for access requests, invite approval, username/PIN authentication, PIN recovery, and Buddy requests.",
+      "tags": [
+        "api-handler",
+        "edge-functions",
+        "authentication",
+        "supabase"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:src/lib/edge.ts:requestAccess",
+      "type": "function",
+      "name": "requestAccess",
+      "filePath": "src/lib/edge.ts",
+      "lineRange": [
+        52,
+        80
+      ],
+      "summary": "Posts a public access request with anon credentials and normalizes transport and service failures into a typed edge error.",
+      "tags": [
+        "api-handler",
+        "edge-functions",
+        "authentication",
+        "supabase"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/edge.ts:approveRequest",
+      "type": "function",
+      "name": "approveRequest",
+      "filePath": "src/lib/edge.ts",
+      "lineRange": [
+        90,
+        111
+      ],
+      "summary": "Authorizes and submits an owner approval request, returning the created invite and mail-delivery status.",
+      "tags": [
+        "api-handler",
+        "edge-functions",
+        "authentication",
+        "supabase"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/edge.ts:declineRequest",
+      "type": "function",
+      "name": "declineRequest",
+      "filePath": "src/lib/edge.ts",
+      "lineRange": [
+        119,
+        143
+      ],
+      "summary": "Authorizes and submits an owner decline decision with an optional reason and notification preference.",
+      "tags": [
+        "api-handler",
+        "edge-functions",
+        "authentication",
+        "supabase"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/edge.ts:isEdgeError",
+      "type": "function",
+      "name": "isEdgeError",
+      "filePath": "src/lib/edge.ts",
+      "lineRange": [
+        145,
+        147
+      ],
+      "summary": "Narrows an unknown response to the shared failed Edge Function result shape.",
+      "tags": [
+        "api-handler",
+        "edge-functions",
+        "authentication",
+        "supabase"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/edge.ts:signupViaInvite",
+      "type": "function",
+      "name": "signupViaInvite",
+      "filePath": "src/lib/edge.ts",
+      "lineRange": [
+        165,
+        182
+      ],
+      "summary": "Creates an invite-backed username/PIN account through the public signup function and validates its success payload.",
+      "tags": [
+        "api-handler",
+        "edge-functions",
+        "authentication",
+        "supabase"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/edge.ts:loginWithUsernamePin",
+      "type": "function",
+      "name": "loginWithUsernamePin",
+      "filePath": "src/lib/edge.ts",
+      "lineRange": [
+        198,
+        213
+      ],
+      "summary": "Exchanges a username and PIN for Supabase session tokens through the login Edge Function.",
+      "tags": [
+        "api-handler",
+        "edge-functions",
+        "authentication",
+        "supabase"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/edge.ts:requestPinReset",
+      "type": "function",
+      "name": "requestPinReset",
+      "filePath": "src/lib/edge.ts",
+      "lineRange": [
+        219,
+        234
+      ],
+      "summary": "Requests a non-enumerating PIN recovery workflow for a username.",
+      "tags": [
+        "api-handler",
+        "edge-functions",
+        "authentication",
+        "supabase"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/edge.ts:sendBuddyRequest",
+      "type": "function",
+      "name": "sendBuddyRequest",
+      "filePath": "src/lib/edge.ts",
+      "lineRange": [
+        255,
+        284
+      ],
+      "summary": "Submits an authenticated Buddy request and preserves the server status that explains creation, cooldowns, or rejection.",
+      "tags": [
+        "api-handler",
+        "edge-functions",
+        "authentication",
+        "supabase"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/edge.ts:isUsernameAvailable",
+      "type": "function",
+      "name": "isUsernameAvailable",
+      "filePath": "src/lib/edge.ts",
+      "lineRange": [
+        287,
+        303
+      ],
+      "summary": "Performs an optional preflight username availability RPC and fails open so authoritative signup validation remains usable.",
+      "tags": [
+        "api-handler",
+        "edge-functions",
+        "authentication",
+        "supabase"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/lib/lazyWithRetry.ts",
+      "type": "file",
+      "name": "lazyWithRetry.ts",
+      "filePath": "src/lib/lazyWithRetry.ts",
+      "summary": "Wraps React lazy imports with one-time reload recovery for stale deployment chunks while preserving ordinary module-load errors.",
+      "tags": [
+        "utility",
+        "lazy-loading",
+        "error-recovery",
+        "deployment"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/lazyWithRetry.ts:lazyWithRetry",
+      "type": "function",
+      "name": "lazyWithRetry",
+      "filePath": "src/lib/lazyWithRetry.ts",
+      "lineRange": [
+        8,
+        37
+      ],
+      "summary": "Creates a React lazy component that reloads once after chunk-version failures and rethrows unrelated or repeated errors.",
+      "tags": [
+        "utility",
+        "lazy-loading",
+        "error-recovery",
+        "deployment"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/lib/native.ts",
+      "type": "file",
+      "name": "native.ts",
+      "filePath": "src/lib/native.ts",
+      "summary": "Centralizes Capacitor platform detection, best-effort haptics, system chrome styling, deep-link parsing, and Android back-button policy.",
+      "tags": [
+        "service",
+        "native-integration",
+        "capacitor",
+        "navigation"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/lib/native.ts:haptic",
+      "type": "function",
+      "name": "haptic",
+      "filePath": "src/lib/native.ts",
+      "lineRange": [
+        36,
+        62
+      ],
+      "summary": "Maps semantic feedback intents to Capacitor haptic actions and suppresses unsupported, disabled, or failed feedback.",
+      "tags": [
+        "service",
+        "native-integration",
+        "capacitor",
+        "navigation"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/native.ts:configureNativeChrome",
+      "type": "function",
+      "name": "configureNativeChrome",
+      "filePath": "src/lib/native.ts",
+      "lineRange": [
+        64,
+        78
+      ],
+      "summary": "Applies the resolved light or dark style to native system bars and the software keyboard without blocking startup.",
+      "tags": [
+        "service",
+        "native-integration",
+        "capacitor",
+        "navigation"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/native.ts:routeFromAppUrl",
+      "type": "function",
+      "name": "routeFromAppUrl",
+      "filePath": "src/lib/native.ts",
+      "lineRange": [
+        80,
+        94
+      ],
+      "summary": "Parses custom-scheme or HTTP application links into an internal path while rejecting malformed URLs.",
+      "tags": [
+        "service",
+        "native-integration",
+        "capacitor",
+        "navigation"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/native.ts:resolveNativeBackAction",
+      "type": "function",
+      "name": "resolveNativeBackAction",
+      "filePath": "src/lib/native.ts",
+      "lineRange": [
+        97,
+        113
+      ],
+      "summary": "Selects history, root routing, exit arming, or app exit from the current route and recent back-button state.",
+      "tags": [
+        "service",
+        "native-integration",
+        "capacitor",
+        "navigation"
+      ],
+      "complexity": "simple"
+    }
+  ],
+  "edges": [
+    {
+      "source": "file:src/components/shared/RootErrorBoundary.tsx",
+      "target": "file:src/components/shared/Brand.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/shared/RootErrorBoundary.tsx",
+      "target": "function:src/components/shared/RootErrorBoundary.tsx:RootErrorBoundary",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/components/shared/RootErrorBoundary.tsx",
+      "target": "function:src/components/shared/RootErrorBoundary.tsx:RootErrorBoundary",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/components/shared/ThemeToggle.tsx",
+      "target": "file:src/lib/native.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/shared/ThemeToggle.tsx",
+      "target": "file:src/lib/theme.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/shared/ThemeToggle.tsx",
+      "target": "file:src/lib/utils.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/shared/ThemeToggle.tsx",
+      "target": "file:src/stores/prefs.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/shared/ThemeToggle.tsx",
+      "target": "function:src/components/shared/ThemeToggle.tsx:ThemeToggle",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/components/shared/ThemeToggle.tsx",
+      "target": "function:src/components/shared/ThemeToggle.tsx:ThemeToggle",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/components/ui/Button.tsx",
+      "target": "file:src/lib/native.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/ui/Button.tsx",
+      "target": "file:src/lib/utils.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/ui/Toast.tsx",
+      "target": "file:src/lib/native.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/ui/Toast.tsx",
+      "target": "file:src/lib/utils.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/ui/Toast.tsx",
+      "target": "file:src/stores/ui.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/ui/Toast.tsx",
+      "target": "function:src/components/ui/Toast.tsx:Toaster",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/components/ui/Toast.tsx",
+      "target": "function:src/components/ui/Toast.tsx:Toaster",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/hooks/useMediaQuery.ts",
+      "target": "function:src/hooks/useMediaQuery.ts:useMediaQuery",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/hooks/useMediaQuery.ts",
+      "target": "function:src/hooks/useMediaQuery.ts:useMediaQuery",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/buddy.ts",
+      "target": "file:src/types/index.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/lib/buddy.ts",
+      "target": "function:src/lib/buddy.ts:buddyPresenceTopic",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/buddy.ts",
+      "target": "function:src/lib/buddy.ts:buddyPresenceTopic",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/buddy.ts",
+      "target": "function:src/lib/buddy.ts:buddyRealtimeTopic",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/buddy.ts",
+      "target": "function:src/lib/buddy.ts:buddyRealtimeTopic",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/buddy.ts",
+      "target": "function:src/lib/buddy.ts:buddyPresenceUserIds",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/buddy.ts",
+      "target": "function:src/lib/buddy.ts:buddyPresenceUserIds",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/buddy.ts",
+      "target": "function:src/lib/buddy.ts:safeQuestionRef",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/buddy.ts",
+      "target": "function:src/lib/buddy.ts:safeQuestionRef",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/buddy.ts",
+      "target": "function:src/lib/buddy.ts:mergeBuddyMessages",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/buddy.ts",
+      "target": "function:src/lib/buddy.ts:mergeBuddyMessages",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/buddy.ts",
+      "target": "function:src/lib/buddy.ts:groupBuddyMessages",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/buddy.ts",
+      "target": "function:src/lib/buddy.ts:groupBuddyMessages",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/buddy.ts",
+      "target": "function:src/lib/buddy.ts:shortBuddyTime",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/buddy.ts",
+      "target": "function:src/lib/buddy.ts:shortBuddyTime",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/buddy.ts",
+      "target": "function:src/lib/buddy.ts:isSharedQuestionRef",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/buddy.ts",
+      "target": "function:src/lib/buddy.ts:isSharedQuestionRef",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/buddyNotifications.ts",
+      "target": "file:src/lib/native.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/lib/buddyNotifications.ts",
+      "target": "file:src/lib/supabase.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/lib/buddyNotifications.ts",
+      "target": "function:src/lib/buddyNotifications.ts:getPushDeviceId",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/buddyNotifications.ts",
+      "target": "function:src/lib/buddyNotifications.ts:getPushDeviceId",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/buddyNotifications.ts",
+      "target": "function:src/lib/buddyNotifications.ts:buddyPushOptedIn",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/buddyNotifications.ts",
+      "target": "function:src/lib/buddyNotifications.ts:buddyPushOptedIn",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/buddyNotifications.ts",
+      "target": "function:src/lib/buddyNotifications.ts:studyPushOptedIn",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/buddyNotifications.ts",
+      "target": "function:src/lib/buddyNotifications.ts:studyPushOptedIn",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/buddyNotifications.ts",
+      "target": "function:src/lib/buddyNotifications.ts:pushNotificationsOptedIn",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/buddyNotifications.ts",
+      "target": "function:src/lib/buddyNotifications.ts:pushNotificationsOptedIn",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/buddyNotifications.ts",
+      "target": "function:src/lib/buddyNotifications.ts:urlBase64ToUint8Array",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/buddyNotifications.ts",
+      "target": "function:src/lib/buddyNotifications.ts:urlBase64ToUint8Array",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/buddyNotifications.ts",
+      "target": "function:src/lib/buddyNotifications.ts:upsertWebSubscription",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/buddyNotifications.ts",
+      "target": "function:src/lib/buddyNotifications.ts:saveNativePushToken",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/buddyNotifications.ts",
+      "target": "function:src/lib/buddyNotifications.ts:saveNativePushToken",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/buddyNotifications.ts",
+      "target": "function:src/lib/buddyNotifications.ts:registerNativeToken",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/buddyNotifications.ts",
+      "target": "function:src/lib/buddyNotifications.ts:getBuddyNotificationState",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/buddyNotifications.ts",
+      "target": "function:src/lib/buddyNotifications.ts:getBuddyNotificationState",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/buddyNotifications.ts",
+      "target": "function:src/lib/buddyNotifications.ts:enableNotificationChannel",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/buddyNotifications.ts",
+      "target": "function:src/lib/buddyNotifications.ts:enableBuddyNotifications",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/buddyNotifications.ts",
+      "target": "function:src/lib/buddyNotifications.ts:enableBuddyNotifications",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/buddyNotifications.ts",
+      "target": "function:src/lib/buddyNotifications.ts:enableStudyNotifications",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/buddyNotifications.ts",
+      "target": "function:src/lib/buddyNotifications.ts:enableStudyNotifications",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/buddyNotifications.ts",
+      "target": "function:src/lib/buddyNotifications.ts:disableNotificationChannel",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/buddyNotifications.ts",
+      "target": "function:src/lib/buddyNotifications.ts:disableBuddyNotifications",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/buddyNotifications.ts",
+      "target": "function:src/lib/buddyNotifications.ts:disableBuddyNotifications",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/buddyNotifications.ts",
+      "target": "function:src/lib/buddyNotifications.ts:disableStudyNotifications",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/buddyNotifications.ts",
+      "target": "function:src/lib/buddyNotifications.ts:disableStudyNotifications",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/buddyNotifications.ts",
+      "target": "function:src/lib/buddyNotifications.ts:unregisterCurrentPushDevice",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/buddyNotifications.ts",
+      "target": "function:src/lib/buddyNotifications.ts:unregisterCurrentPushDevice",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/buddyNotifications.ts",
+      "target": "function:src/lib/buddyNotifications.ts:syncBuddyPushRegistration",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/buddyNotifications.ts",
+      "target": "function:src/lib/buddyNotifications.ts:syncBuddyPushRegistration",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/buddyNotifications.ts",
+      "target": "function:src/lib/buddyNotifications.ts:touchActiveBuddy",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/buddyNotifications.ts",
+      "target": "function:src/lib/buddyNotifications.ts:touchActiveBuddy",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/buddyNotifications.ts",
+      "target": "function:src/lib/buddyNotifications.ts:notifyBuddyMessage",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/buddyNotifications.ts",
+      "target": "function:src/lib/buddyNotifications.ts:notifyBuddyMessage",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/buddyNotifications.ts",
+      "target": "function:src/lib/buddyNotifications.ts:routeFromPushData",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/buddyNotifications.ts",
+      "target": "function:src/lib/buddyNotifications.ts:routeFromPushData",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/buddyNotifications.ts",
+      "target": "function:src/lib/buddyNotifications.ts:snoozeNotifications",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/buddyNotifications.ts",
+      "target": "function:src/lib/buddyNotifications.ts:snoozeNotifications",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/buddyNotifications.ts",
+      "target": "function:src/lib/buddyNotifications.ts:clearSnooze",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/buddyNotifications.ts",
+      "target": "function:src/lib/buddyNotifications.ts:clearSnooze",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/buddyNotifications.ts",
+      "target": "function:src/lib/buddyNotifications.ts:getSnoozeStatus",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/buddyNotifications.ts",
+      "target": "function:src/lib/buddyNotifications.ts:getSnoozeStatus",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/edge.ts",
+      "target": "file:src/lib/supabase.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/lib/edge.ts",
+      "target": "function:src/lib/edge.ts:requestAccess",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/edge.ts",
+      "target": "function:src/lib/edge.ts:requestAccess",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/edge.ts",
+      "target": "function:src/lib/edge.ts:approveRequest",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/edge.ts",
+      "target": "function:src/lib/edge.ts:approveRequest",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/edge.ts",
+      "target": "function:src/lib/edge.ts:declineRequest",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/edge.ts",
+      "target": "function:src/lib/edge.ts:declineRequest",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/edge.ts",
+      "target": "function:src/lib/edge.ts:isEdgeError",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/edge.ts",
+      "target": "function:src/lib/edge.ts:isEdgeError",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/edge.ts",
+      "target": "function:src/lib/edge.ts:signupViaInvite",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/edge.ts",
+      "target": "function:src/lib/edge.ts:signupViaInvite",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/edge.ts",
+      "target": "function:src/lib/edge.ts:loginWithUsernamePin",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/edge.ts",
+      "target": "function:src/lib/edge.ts:loginWithUsernamePin",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/edge.ts",
+      "target": "function:src/lib/edge.ts:requestPinReset",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/edge.ts",
+      "target": "function:src/lib/edge.ts:requestPinReset",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/edge.ts",
+      "target": "function:src/lib/edge.ts:sendBuddyRequest",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/edge.ts",
+      "target": "function:src/lib/edge.ts:sendBuddyRequest",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/edge.ts",
+      "target": "function:src/lib/edge.ts:isUsernameAvailable",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/edge.ts",
+      "target": "function:src/lib/edge.ts:isUsernameAvailable",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/lazyWithRetry.ts",
+      "target": "function:src/lib/lazyWithRetry.ts:lazyWithRetry",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/lazyWithRetry.ts",
+      "target": "function:src/lib/lazyWithRetry.ts:lazyWithRetry",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/native.ts",
+      "target": "file:src/lib/theme.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/lib/native.ts",
+      "target": "file:src/stores/prefs.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/lib/native.ts",
+      "target": "function:src/lib/native.ts:haptic",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/native.ts",
+      "target": "function:src/lib/native.ts:haptic",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/native.ts",
+      "target": "function:src/lib/native.ts:configureNativeChrome",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/native.ts",
+      "target": "function:src/lib/native.ts:configureNativeChrome",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/native.ts",
+      "target": "function:src/lib/native.ts:routeFromAppUrl",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/native.ts",
+      "target": "function:src/lib/native.ts:routeFromAppUrl",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/native.ts",
+      "target": "function:src/lib/native.ts:resolveNativeBackAction",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/native.ts",
+      "target": "function:src/lib/native.ts:resolveNativeBackAction",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/native.ts",
+      "target": "file:src/__tests__/native.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/lib/buddy.ts",
+      "target": "file:src/__tests__/buddy.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/lib/buddyNotifications.ts",
+      "target": "file:src/__tests__/buddy-notifications.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    }
+  ]
+}

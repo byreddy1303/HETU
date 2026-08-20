@@ -1,0 +1,1352 @@
+{
+  "nodes": [
+    {
+      "id": "file:src/pages/Mocks.tsx",
+      "type": "file",
+      "name": "Mocks.tsx",
+      "filePath": "src/pages/Mocks.tsx",
+      "summary": "Records and edits mock-test scores, subject marks, mistakes, accuracy metrics, history trends, and planner completion state.",
+      "tags": [
+        "component",
+        "mock-tests",
+        "analytics",
+        "form"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:src/pages/Patterns.tsx",
+      "type": "file",
+      "name": "Patterns.tsx",
+      "filePath": "src/pages/Patterns.tsx",
+      "summary": "Aggregates the live pattern library by subject, highlights repeated misses and open reattempts, suggests near-duplicate merges, and supports reversible consolidation.",
+      "tags": [
+        "component",
+        "pattern-library",
+        "analytics",
+        "merge-workflow"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:src/pages/QuickCapture.tsx",
+      "type": "file",
+      "name": "QuickCapture.tsx",
+      "filePath": "src/pages/QuickCapture.tsx",
+      "summary": "Captures a question image and minimum outcome evidence, compresses the image, and persists a standalone question with any required reattempt.",
+      "tags": [
+        "component",
+        "quick-capture",
+        "image-capture",
+        "question-logging"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:src/pages/Readiness.tsx",
+      "type": "file",
+      "name": "Readiness.tsx",
+      "filePath": "src/pages/Readiness.tsx",
+      "summary": "Composes the exam-readiness score, component evidence, next moves, trend projection, per-subject matrix, peer context, and clearly qualified exam-day simulations.",
+      "tags": [
+        "component",
+        "readiness",
+        "analytics",
+        "projection",
+        "study-planning"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:src/pages/RevisionPack.tsx",
+      "type": "file",
+      "name": "RevisionPack.tsx",
+      "filePath": "src/pages/RevisionPack.tsx",
+      "summary": "Builds and displays a focused weekly revision pack of due formulas, trigger phrases, repeated mistakes, priority questions, and the current constraint.",
+      "tags": [
+        "component",
+        "revision",
+        "study-planning",
+        "weekly-pack"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/pages/SessionActive.tsx",
+      "type": "file",
+      "name": "SessionActive.tsx",
+      "filePath": "src/pages/SessionActive.tsx",
+      "summary": "Runs an active focused study session with timers, keyboard shortcuts, question tagging, interruption handling, local persistence, and planner execution updates.",
+      "tags": [
+        "component",
+        "study-session",
+        "timer",
+        "question-logging",
+        "planner"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:src/pages/SessionNew.tsx",
+      "type": "file",
+      "name": "SessionNew.tsx",
+      "filePath": "src/pages/SessionNew.tsx",
+      "summary": "Configures and starts a focused session from preferences or planner parameters, creating its local session row and execution linkage.",
+      "tags": [
+        "component",
+        "study-session",
+        "session-setup",
+        "planner"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:src/pages/Mocks.tsx:blankForm",
+      "type": "function",
+      "name": "blankForm",
+      "filePath": "src/pages/Mocks.tsx",
+      "lineRange": [
+        36,
+        51
+      ],
+      "summary": "Creates the default mock-test form state for a chosen date.",
+      "tags": [
+        "component",
+        "mock-tests",
+        "analytics",
+        "function"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/pages/Mocks.tsx:formFromRow",
+      "type": "function",
+      "name": "formFromRow",
+      "filePath": "src/pages/Mocks.tsx",
+      "lineRange": [
+        53,
+        70
+      ],
+      "summary": "Converts a persisted mock-test row into editable string-based form state.",
+      "tags": [
+        "component",
+        "mock-tests",
+        "analytics",
+        "function"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/pages/Mocks.tsx:Mocks",
+      "type": "function",
+      "name": "Mocks",
+      "filePath": "src/pages/Mocks.tsx",
+      "lineRange": [
+        76,
+        473
+      ],
+      "summary": "Loads mock history, validates and persists form submissions, derives summary metrics, and coordinates edit and deletion workflows.",
+      "tags": [
+        "component",
+        "mock-tests",
+        "analytics",
+        "function"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:src/pages/Mocks.tsx:Field",
+      "type": "function",
+      "name": "Field",
+      "filePath": "src/pages/Mocks.tsx",
+      "lineRange": [
+        475,
+        490
+      ],
+      "summary": "Provides a labeled wrapper for one mock-test form control.",
+      "tags": [
+        "component",
+        "mock-tests",
+        "analytics",
+        "function"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/pages/Mocks.tsx:NumberInput",
+      "type": "function",
+      "name": "NumberInput",
+      "filePath": "src/pages/Mocks.tsx",
+      "lineRange": [
+        492,
+        516
+      ],
+      "summary": "Renders a numeric mock-test input with consistent bounds, labeling, and update behavior.",
+      "tags": [
+        "component",
+        "mock-tests",
+        "analytics",
+        "function"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/pages/Mocks.tsx:Metric",
+      "type": "function",
+      "name": "Metric",
+      "filePath": "src/pages/Mocks.tsx",
+      "lineRange": [
+        518,
+        542
+      ],
+      "summary": "Displays one compact mock summary metric with optional trend tone.",
+      "tags": [
+        "component",
+        "mock-tests",
+        "analytics",
+        "function"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/pages/Patterns.tsx:Patterns",
+      "type": "function",
+      "name": "Patterns",
+      "filePath": "src/pages/Patterns.tsx",
+      "lineRange": [
+        53,
+        500
+      ],
+      "summary": "Combines pattern rows with live question and reattempt evidence, groups them by subject, and manages merge, undo, and reflex status workflows.",
+      "tags": [
+        "component",
+        "pattern-library",
+        "analytics",
+        "function"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:src/pages/QuickCapture.tsx:QuickCapture",
+      "type": "function",
+      "name": "QuickCapture",
+      "filePath": "src/pages/QuickCapture.tsx",
+      "lineRange": [
+        35,
+        230
+      ],
+      "summary": "Collects an image and minimum tagging evidence, compresses the capture, saves a standalone question, and schedules any needed reattempt.",
+      "tags": [
+        "component",
+        "quick-capture",
+        "image-capture",
+        "function"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/pages/Readiness.tsx:Gauge",
+      "type": "function",
+      "name": "Gauge",
+      "filePath": "src/pages/Readiness.tsx",
+      "lineRange": [
+        79,
+        115
+      ],
+      "summary": "Draws the readiness score as a bounded circular gauge with a qualitative score band.",
+      "tags": [
+        "component",
+        "readiness",
+        "analytics",
+        "function"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/pages/Readiness.tsx:Readiness",
+      "type": "function",
+      "name": "Readiness",
+      "filePath": "src/pages/Readiness.tsx",
+      "lineRange": [
+        119,
+        624
+      ],
+      "summary": "Loads readiness evidence, computes scores and projections, stores snapshots and debt, fetches peer context, and composes the full analysis surface.",
+      "tags": [
+        "component",
+        "readiness",
+        "analytics",
+        "function"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:src/pages/Readiness.tsx:DeltaChip",
+      "type": "function",
+      "name": "DeltaChip",
+      "filePath": "src/pages/Readiness.tsx",
+      "lineRange": [
+        628,
+        652
+      ],
+      "summary": "Displays week-over-week readiness movement with directional icon and tone.",
+      "tags": [
+        "component",
+        "readiness",
+        "analytics",
+        "function"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/pages/Readiness.tsx:MoveRow",
+      "type": "function",
+      "name": "MoveRow",
+      "filePath": "src/pages/Readiness.tsx",
+      "lineRange": [
+        656,
+        697
+      ],
+      "summary": "Presents a prioritized readiness action with urgency, rationale, concrete instruction, and optional destination.",
+      "tags": [
+        "component",
+        "readiness",
+        "analytics",
+        "function"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/pages/Readiness.tsx:Sparkline",
+      "type": "function",
+      "name": "Sparkline",
+      "filePath": "src/pages/Readiness.tsx",
+      "lineRange": [
+        701,
+        821
+      ],
+      "summary": "Plots recent readiness snapshots and an optional dashed projection to exam day.",
+      "tags": [
+        "component",
+        "readiness",
+        "analytics",
+        "function"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/pages/Readiness.tsx:SubjectMatrix",
+      "type": "function",
+      "name": "SubjectMatrix",
+      "filePath": "src/pages/Readiness.tsx",
+      "lineRange": [
+        840,
+        929
+      ],
+      "summary": "Sorts and renders per-subject readiness components with evidence-aware color thresholds.",
+      "tags": [
+        "component",
+        "readiness",
+        "analytics",
+        "function"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/pages/Readiness.tsx:SimStat",
+      "type": "function",
+      "name": "SimStat",
+      "filePath": "src/pages/Readiness.tsx",
+      "lineRange": [
+        933,
+        943
+      ],
+      "summary": "Displays one signed exam-day simulation mark result with semantic tone.",
+      "tags": [
+        "component",
+        "readiness",
+        "analytics",
+        "function"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/pages/RevisionPack.tsx:RevisionPack",
+      "type": "function",
+      "name": "RevisionPack",
+      "filePath": "src/pages/RevisionPack.tsx",
+      "lineRange": [
+        14,
+        139
+      ],
+      "summary": "Builds the current revision pack from local evidence and provides copying and grouped study sections.",
+      "tags": [
+        "component",
+        "revision",
+        "study-planning",
+        "function"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/pages/RevisionPack.tsx:PackList",
+      "type": "function",
+      "name": "PackList",
+      "filePath": "src/pages/RevisionPack.tsx",
+      "lineRange": [
+        141,
+        177
+      ],
+      "summary": "Renders a titled revision-pack list with item counts and an empty fallback.",
+      "tags": [
+        "component",
+        "revision",
+        "study-planning",
+        "function"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/pages/SessionActive.tsx:reconcilePattern",
+      "type": "function",
+      "name": "reconcilePattern",
+      "filePath": "src/pages/SessionActive.tsx",
+      "lineRange": [
+        33,
+        50
+      ],
+      "summary": "Updates or initializes pattern counts after a session question is saved.",
+      "tags": [
+        "component",
+        "study-session",
+        "timer",
+        "function"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/pages/SessionActive.tsx:SessionActive",
+      "type": "function",
+      "name": "SessionActive",
+      "filePath": "src/pages/SessionActive.tsx",
+      "lineRange": [
+        52,
+        243
+      ],
+      "summary": "Runs the live session timer and question flow, persists tagged attempts and interruptions, and finishes into review and planner state.",
+      "tags": [
+        "component",
+        "study-session",
+        "timer",
+        "function"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/pages/SessionNew.tsx:Segmented",
+      "type": "function",
+      "name": "Segmented",
+      "filePath": "src/pages/SessionNew.tsx",
+      "lineRange": [
+        21,
+        49
+      ],
+      "summary": "Renders a keyboard-accessible segmented choice control for session configuration.",
+      "tags": [
+        "component",
+        "study-session",
+        "session-setup",
+        "function"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/pages/SessionNew.tsx:SessionNew",
+      "type": "function",
+      "name": "SessionNew",
+      "filePath": "src/pages/SessionNew.tsx",
+      "lineRange": [
+        51,
+        232
+      ],
+      "summary": "Initializes session options from preferences and planner parameters, persists a new focused session, and navigates into it.",
+      "tags": [
+        "component",
+        "study-session",
+        "session-setup",
+        "function"
+      ],
+      "complexity": "moderate"
+    }
+  ],
+  "edges": [
+    {
+      "source": "file:src/pages/Mocks.tsx",
+      "target": "file:src/components/layout/PageHeader.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Mocks.tsx",
+      "target": "file:src/components/ui/Button.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Mocks.tsx",
+      "target": "file:src/components/ui/Card.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Mocks.tsx",
+      "target": "file:src/components/ui/Empty.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Mocks.tsx",
+      "target": "file:src/components/ui/Input.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Mocks.tsx",
+      "target": "file:src/components/ui/Textarea.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Mocks.tsx",
+      "target": "file:src/hooks/useAuth.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Mocks.tsx",
+      "target": "file:src/lib/constants.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Mocks.tsx",
+      "target": "file:src/lib/db.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Mocks.tsx",
+      "target": "file:src/lib/mocks.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Mocks.tsx",
+      "target": "file:src/lib/planner-execution.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Mocks.tsx",
+      "target": "file:src/lib/sync.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Mocks.tsx",
+      "target": "file:src/lib/utils.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Mocks.tsx",
+      "target": "file:src/stores/ui.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Mocks.tsx",
+      "target": "file:src/types/index.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Patterns.tsx",
+      "target": "file:src/components/layout/PageHeader.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Patterns.tsx",
+      "target": "file:src/components/ui/Badge.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Patterns.tsx",
+      "target": "file:src/components/ui/Button.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Patterns.tsx",
+      "target": "file:src/components/ui/Card.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Patterns.tsx",
+      "target": "file:src/components/ui/Dialog.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Patterns.tsx",
+      "target": "file:src/components/ui/Empty.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Patterns.tsx",
+      "target": "file:src/hooks/useAuth.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Patterns.tsx",
+      "target": "file:src/lib/db.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Patterns.tsx",
+      "target": "file:src/lib/subjectInk.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Patterns.tsx",
+      "target": "file:src/lib/sync.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Patterns.tsx",
+      "target": "file:src/lib/utils.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Patterns.tsx",
+      "target": "file:src/types/index.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/QuickCapture.tsx",
+      "target": "file:src/components/layout/PageHeader.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/QuickCapture.tsx",
+      "target": "file:src/components/ui/Button.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/QuickCapture.tsx",
+      "target": "file:src/components/ui/Card.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/QuickCapture.tsx",
+      "target": "file:src/components/ui/Select.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/QuickCapture.tsx",
+      "target": "file:src/components/ui/Textarea.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/QuickCapture.tsx",
+      "target": "file:src/hooks/useAuth.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/QuickCapture.tsx",
+      "target": "file:src/lib/constants.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/QuickCapture.tsx",
+      "target": "file:src/lib/image.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/QuickCapture.tsx",
+      "target": "file:src/lib/reattempt.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/QuickCapture.tsx",
+      "target": "file:src/lib/sync.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/QuickCapture.tsx",
+      "target": "file:src/lib/utils.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/QuickCapture.tsx",
+      "target": "file:src/stores/ui.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/QuickCapture.tsx",
+      "target": "file:src/types/index.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Readiness.tsx",
+      "target": "file:src/components/layout/PageHeader.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Readiness.tsx",
+      "target": "file:src/components/ui/Card.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Readiness.tsx",
+      "target": "file:src/components/ui/Empty.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Readiness.tsx",
+      "target": "file:src/hooks/useAuth.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Readiness.tsx",
+      "target": "file:src/lib/constants.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Readiness.tsx",
+      "target": "file:src/lib/db.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Readiness.tsx",
+      "target": "file:src/lib/readiness-snapshots.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Readiness.tsx",
+      "target": "file:src/lib/readiness.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Readiness.tsx",
+      "target": "file:src/lib/subjectInk.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Readiness.tsx",
+      "target": "file:src/lib/supabase.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Readiness.tsx",
+      "target": "file:src/lib/utils.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/RevisionPack.tsx",
+      "target": "file:src/components/layout/PageHeader.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/RevisionPack.tsx",
+      "target": "file:src/components/ui/Button.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/RevisionPack.tsx",
+      "target": "file:src/components/ui/Card.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/RevisionPack.tsx",
+      "target": "file:src/components/ui/Empty.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/RevisionPack.tsx",
+      "target": "file:src/hooks/useAuth.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/RevisionPack.tsx",
+      "target": "file:src/lib/db.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/RevisionPack.tsx",
+      "target": "file:src/lib/revision-pack.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/RevisionPack.tsx",
+      "target": "file:src/lib/utils.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/RevisionPack.tsx",
+      "target": "file:src/stores/ui.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/SessionActive.tsx",
+      "target": "file:src/components/shared/LoadingScreen.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/SessionActive.tsx",
+      "target": "file:src/components/shared/Timer.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/SessionActive.tsx",
+      "target": "file:src/components/tags/TagFlow.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/SessionActive.tsx",
+      "target": "file:src/components/ui/Button.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/SessionActive.tsx",
+      "target": "file:src/components/ui/Empty.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/SessionActive.tsx",
+      "target": "file:src/components/ui/Kbd.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/SessionActive.tsx",
+      "target": "file:src/hooks/useAuth.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/SessionActive.tsx",
+      "target": "file:src/hooks/useKeyboard.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/SessionActive.tsx",
+      "target": "file:src/hooks/useTimer.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/SessionActive.tsx",
+      "target": "file:src/hooks/useVisibilityChange.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/SessionActive.tsx",
+      "target": "file:src/lib/constants.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/SessionActive.tsx",
+      "target": "file:src/lib/db.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/SessionActive.tsx",
+      "target": "file:src/lib/planner-execution.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/SessionActive.tsx",
+      "target": "file:src/lib/reattempt.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/SessionActive.tsx",
+      "target": "file:src/lib/subjectInk.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/SessionActive.tsx",
+      "target": "file:src/lib/sync.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/SessionActive.tsx",
+      "target": "file:src/lib/utils.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/SessionActive.tsx",
+      "target": "file:src/stores/session.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/SessionActive.tsx",
+      "target": "file:src/types/index.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/SessionNew.tsx",
+      "target": "file:src/components/layout/PageHeader.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/SessionNew.tsx",
+      "target": "file:src/components/ui/Button.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/SessionNew.tsx",
+      "target": "file:src/components/ui/Card.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/SessionNew.tsx",
+      "target": "file:src/components/ui/Kbd.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/SessionNew.tsx",
+      "target": "file:src/hooks/useAuth.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/SessionNew.tsx",
+      "target": "file:src/hooks/useKeyboard.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/SessionNew.tsx",
+      "target": "file:src/lib/constants.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/SessionNew.tsx",
+      "target": "file:src/lib/db.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/SessionNew.tsx",
+      "target": "file:src/lib/planner-execution.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/SessionNew.tsx",
+      "target": "file:src/lib/subjectInk.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/SessionNew.tsx",
+      "target": "file:src/lib/sync.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/SessionNew.tsx",
+      "target": "file:src/lib/utils.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/SessionNew.tsx",
+      "target": "file:src/stores/prefs.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/SessionNew.tsx",
+      "target": "file:src/stores/session.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/SessionNew.tsx",
+      "target": "file:src/types/index.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Mocks.tsx",
+      "target": "function:src/pages/Mocks.tsx:blankForm",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/pages/Mocks.tsx",
+      "target": "function:src/pages/Mocks.tsx:formFromRow",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/pages/Mocks.tsx",
+      "target": "function:src/pages/Mocks.tsx:Mocks",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/pages/Mocks.tsx",
+      "target": "function:src/pages/Mocks.tsx:Mocks",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/pages/Mocks.tsx",
+      "target": "function:src/pages/Mocks.tsx:Field",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/pages/Mocks.tsx",
+      "target": "function:src/pages/Mocks.tsx:NumberInput",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/pages/Mocks.tsx",
+      "target": "function:src/pages/Mocks.tsx:Metric",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/pages/Patterns.tsx",
+      "target": "function:src/pages/Patterns.tsx:Patterns",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/pages/Patterns.tsx",
+      "target": "function:src/pages/Patterns.tsx:Patterns",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/pages/QuickCapture.tsx",
+      "target": "function:src/pages/QuickCapture.tsx:QuickCapture",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/pages/QuickCapture.tsx",
+      "target": "function:src/pages/QuickCapture.tsx:QuickCapture",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/pages/Readiness.tsx",
+      "target": "function:src/pages/Readiness.tsx:Gauge",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/pages/Readiness.tsx",
+      "target": "function:src/pages/Readiness.tsx:Readiness",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/pages/Readiness.tsx",
+      "target": "function:src/pages/Readiness.tsx:Readiness",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/pages/Readiness.tsx",
+      "target": "function:src/pages/Readiness.tsx:DeltaChip",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/pages/Readiness.tsx",
+      "target": "function:src/pages/Readiness.tsx:MoveRow",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/pages/Readiness.tsx",
+      "target": "function:src/pages/Readiness.tsx:Sparkline",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/pages/Readiness.tsx",
+      "target": "function:src/pages/Readiness.tsx:SubjectMatrix",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/pages/Readiness.tsx",
+      "target": "function:src/pages/Readiness.tsx:SimStat",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/pages/RevisionPack.tsx",
+      "target": "function:src/pages/RevisionPack.tsx:RevisionPack",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/pages/RevisionPack.tsx",
+      "target": "function:src/pages/RevisionPack.tsx:RevisionPack",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/pages/RevisionPack.tsx",
+      "target": "function:src/pages/RevisionPack.tsx:PackList",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/pages/SessionActive.tsx",
+      "target": "function:src/pages/SessionActive.tsx:reconcilePattern",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/pages/SessionActive.tsx",
+      "target": "function:src/pages/SessionActive.tsx:SessionActive",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/pages/SessionActive.tsx",
+      "target": "function:src/pages/SessionActive.tsx:SessionActive",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/pages/SessionNew.tsx",
+      "target": "function:src/pages/SessionNew.tsx:Segmented",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/pages/SessionNew.tsx",
+      "target": "function:src/pages/SessionNew.tsx:SessionNew",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/pages/SessionNew.tsx",
+      "target": "function:src/pages/SessionNew.tsx:SessionNew",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/pages/Mocks.tsx",
+      "target": "file:src/__tests__/mocks-ui.test.tsx",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/pages/QuickCapture.tsx",
+      "target": "file:src/__tests__/quick-capture.test.tsx",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    }
+  ]
+}

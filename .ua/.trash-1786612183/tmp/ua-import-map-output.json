@@ -1,0 +1,1482 @@
+{
+  "scriptCompleted": true,
+  "stats": {
+    "filesScanned": 356,
+    "filesWithImports": 203,
+    "totalEdges": 913
+  },
+  "importMap": {
+    ".deploy.env.example": [],
+    ".gitattributes": [],
+    ".nvmrc": [],
+    ".ua/.understandignore": [],
+    ".ua/config.json": [],
+    "AGENTS.md": [],
+    "ANDROID.md": [],
+    "DEPLOY.md": [],
+    "README.md": [],
+    "android-stub/.gitkeep": [],
+    "android/app/build.gradle": [],
+    "android/app/capacitor.build.gradle": [],
+    "android/app/google-services.json": [],
+    "android/app/proguard-rules.pro": [],
+    "android/app/src/androidTest/java/com/getcapacitor/myapp/ExampleInstrumentedTest.java": [],
+    "android/app/src/main/AndroidManifest.xml": [],
+    "android/app/src/main/java/in/airjournal/app/BuddyMessagingService.java": [],
+    "android/app/src/main/java/in/airjournal/app/BuddyReplyReceiver.java": [],
+    "android/app/src/main/java/in/airjournal/app/BuddyReplyWorker.java": [],
+    "android/app/src/main/java/in/airjournal/app/MainActivity.java": [],
+    "android/app/src/main/java/in/airjournal/app/NotificationActionReceiver.java": [],
+    "android/app/src/main/java/in/airjournal/app/NotificationActionWorker.java": [],
+    "android/app/src/main/res/drawable-v24/ic_launcher_foreground.xml": [],
+    "android/app/src/main/res/drawable/hetu_launcher_foreground.xml": [],
+    "android/app/src/main/res/drawable/hetu_splash.xml": [],
+    "android/app/src/main/res/drawable/ic_launcher_background.xml": [],
+    "android/app/src/main/res/drawable/ic_stat_hetu.xml": [],
+    "android/app/src/main/res/layout/activity_main.xml": [],
+    "android/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml": [],
+    "android/app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml": [],
+    "android/app/src/main/res/values/colors.xml": [],
+    "android/app/src/main/res/values/ic_launcher_background.xml": [],
+    "android/app/src/main/res/values/strings.xml": [],
+    "android/app/src/main/res/values/styles.xml": [],
+    "android/app/src/main/res/xml/file_paths.xml": [],
+    "android/app/src/test/java/com/getcapacitor/myapp/ExampleUnitTest.java": [],
+    "android/build.gradle": [],
+    "android/capacitor.settings.gradle": [],
+    "android/gradle.properties": [],
+    "android/gradle/wrapper/gradle-wrapper.jar": [],
+    "android/gradle/wrapper/gradle-wrapper.properties": [],
+    "android/gradlew": [],
+    "android/gradlew.bat": [],
+    "android/keystore.properties.example": [],
+    "android/settings.gradle": [],
+    "android/variables.gradle": [],
+    "capacitor.config.ts": [],
+    "index.html": [],
+    "package.json": [],
+    "playwright.config.ts": [],
+    "postcss.config.js": [],
+    "public/.well-known/assetlinks.json": [],
+    "public/push-sw.js": [],
+    "scripts/audit-pyq-taxonomy.mjs": [
+      "scripts/pyq-taxonomy.mjs"
+    ],
+    "scripts/build-android-release.sh": [],
+    "scripts/build-go-classes-coa-log-migration.mjs": [
+      "scripts/pyq-taxonomy.mjs"
+    ],
+    "scripts/build-go-classes-coa-test-2-log-migration.mjs": [
+      "scripts/pyq-taxonomy.mjs"
+    ],
+    "scripts/build-pyq-bank.mjs": [
+      "scripts/pyq-taxonomy.mjs"
+    ],
+    "scripts/build-topper-notes.mjs": [],
+    "scripts/classify-pyq-bank.mjs": [
+      "scripts/pyq-taxonomy.mjs"
+    ],
+    "scripts/deploy.sh": [],
+    "scripts/pyq-taxonomy.mjs": [],
+    "src/App.tsx": [
+      "src/components/buddy/BuddyPresenceRuntime.tsx",
+      "src/components/native/NativeRuntime.tsx",
+      "src/components/notifications/BuddyNotificationRuntime.tsx",
+      "src/components/shared/LoadingScreen.tsx",
+      "src/components/ui/Toast.tsx",
+      "src/lib/native.ts",
+      "src/lib/queryClient.ts",
+      "src/lib/theme.ts",
+      "src/router.tsx",
+      "src/stores/auth.ts",
+      "src/stores/prefs.ts"
+    ],
+    "src/__tests__/analysis.test.ts": [
+      "src/lib/analysis.ts",
+      "src/types/index.ts"
+    ],
+    "src/__tests__/answer-reveal.test.tsx": [
+      "src/components/shared/AnswerReveal.tsx"
+    ],
+    "src/__tests__/buddy-chat-ui.test.tsx": [
+      "src/components/buddy/BuddyChat.tsx",
+      "src/types/index.ts"
+    ],
+    "src/__tests__/buddy-notifications.test.ts": [
+      "src/lib/buddyNotifications.ts"
+    ],
+    "src/__tests__/buddy-page-ui.test.tsx": [
+      "src/pages/Buddy.tsx"
+    ],
+    "src/__tests__/buddy.test.ts": [
+      "src/lib/buddy.ts",
+      "src/types/index.ts"
+    ],
+    "src/__tests__/contextual_gate_tips.test.ts": [
+      "src/lib/contextual-gate-tips.ts"
+    ],
+    "src/__tests__/cron-auth.test.ts": [
+      "supabase/functions/_shared/cron-auth.ts"
+    ],
+    "src/__tests__/digest-schedule.test.ts": [
+      "supabase/functions/_shared/digest-schedule.ts"
+    ],
+    "src/__tests__/do-now.test.ts": [
+      "src/lib/do-now.ts",
+      "src/lib/planner-storage.ts",
+      "src/types/index.ts"
+    ],
+    "src/__tests__/e2e/dashboard-analysis.spec.ts": [],
+    "src/__tests__/go-classes-coa-test-2-import.test.ts": [],
+    "src/__tests__/go-classes-coa-test-2-photos.test.ts": [],
+    "src/__tests__/go-classes-coa-topic-test-photos.test.ts": [],
+    "src/__tests__/image-capture.test.ts": [
+      "src/lib/image.ts",
+      "src/lib/theme.ts"
+    ],
+    "src/__tests__/isolation.test.ts": [
+      "src/lib/db.ts",
+      "src/lib/isolation.ts",
+      "src/stores/log.ts",
+      "src/stores/prefs.ts",
+      "src/stores/session.ts"
+    ],
+    "src/__tests__/journal-ui.test.tsx": [
+      "src/lib/db.ts",
+      "src/pages/Journal.tsx",
+      "src/types/index.ts"
+    ],
+    "src/__tests__/learning_tips.test.ts": [
+      "src/lib/learning-tips.ts",
+      "src/types/index.ts"
+    ],
+    "src/__tests__/missing-tags-confirm.test.tsx": [
+      "src/components/shared/MissingTagsConfirm.tsx",
+      "src/components/shared/questionDraft.ts",
+      "src/components/tags/TagFlow.tsx",
+      "src/lib/questionTags.ts",
+      "src/types/index.ts"
+    ],
+    "src/__tests__/mocks-ui.test.tsx": [
+      "src/lib/db.ts",
+      "src/pages/Mocks.tsx"
+    ],
+    "src/__tests__/mocks.test.ts": [
+      "src/lib/mocks.ts",
+      "src/types/index.ts"
+    ],
+    "src/__tests__/native-scroll.test.ts": [],
+    "src/__tests__/native.test.ts": [
+      "src/lib/native.ts"
+    ],
+    "src/__tests__/notification-consent.test.ts": [],
+    "src/__tests__/notification-time-editor-native.test.tsx": [
+      "src/components/settings/NotificationTimeEditor.tsx"
+    ],
+    "src/__tests__/notification-time-editor.test.tsx": [
+      "src/components/settings/NotificationTimeEditor.tsx"
+    ],
+    "src/__tests__/pin-input.test.tsx": [
+      "src/components/auth/PinInput.tsx"
+    ],
+    "src/__tests__/planner-execution.test.ts": [
+      "src/lib/db.ts",
+      "src/lib/planner-execution.ts",
+      "src/lib/planner-storage.ts",
+      "src/stores/auth.ts"
+    ],
+    "src/__tests__/planner-native-ui.test.tsx": [
+      "src/components/planner/DayPlanModal.tsx",
+      "src/lib/planner-storage.ts"
+    ],
+    "src/__tests__/planner-ui.test.tsx": [
+      "src/components/planner/DayPlanModal.tsx",
+      "src/lib/planner-storage.ts"
+    ],
+    "src/__tests__/planner_cloud.test.ts": [
+      "src/lib/planner-cloud.ts"
+    ],
+    "src/__tests__/planner_storage.test.ts": [
+      "src/lib/planner-storage.ts",
+      "src/stores/auth.ts"
+    ],
+    "src/__tests__/progress_export.test.ts": [
+      "src/lib/db.ts",
+      "src/lib/planner-storage.ts",
+      "src/lib/progress-export.ts",
+      "src/stores/topic-progress.ts",
+      "src/types/index.ts"
+    ],
+    "src/__tests__/pyq-attempt-log.test.tsx": [
+      "src/lib/db.ts",
+      "src/lib/image.ts",
+      "src/lib/pyq-session.ts",
+      "src/lib/pyq.ts",
+      "src/pages/Pyq.tsx"
+    ],
+    "src/__tests__/pyq-history.test.ts": [
+      "src/lib/pyq-history.ts",
+      "src/lib/pyq-session.ts",
+      "src/lib/pyq.ts",
+      "src/types/index.ts"
+    ],
+    "src/__tests__/pyq-migration.test.ts": [],
+    "src/__tests__/pyq-navigation.test.tsx": [
+      "src/lib/db.ts",
+      "src/lib/pyq.ts",
+      "src/pages/Pyq.tsx"
+    ],
+    "src/__tests__/pyq-rendering.test.tsx": [
+      "src/components/pyq/PyqQuestionContent.tsx"
+    ],
+    "src/__tests__/pyq-session.test.ts": [
+      "src/lib/pyq-session.ts",
+      "src/lib/pyq.ts",
+      "src/types/index.ts"
+    ],
+    "src/__tests__/pyq.test.ts": [
+      "src/lib/pyq.ts"
+    ],
+    "src/__tests__/question-answer.test.ts": [
+      "src/components/shared/questionDraft.ts",
+      "src/types/index.ts"
+    ],
+    "src/__tests__/quick-capture.test.tsx": [
+      "src/lib/db.ts",
+      "src/pages/QuickCapture.tsx"
+    ],
+    "src/__tests__/readiness-snapshots.test.ts": [
+      "src/lib/readiness-snapshots.ts"
+    ],
+    "src/__tests__/readiness.test.ts": [
+      "src/lib/readiness.ts",
+      "src/types/index.ts",
+      "supabase/functions/_shared/readiness-score.ts"
+    ],
+    "src/__tests__/reattempt-ui.test.tsx": [
+      "src/lib/db.ts",
+      "src/lib/image.ts",
+      "src/lib/pyq-session.ts",
+      "src/lib/pyq.ts",
+      "src/pages/Dashboard.tsx",
+      "src/pages/DoNow.tsx",
+      "src/pages/Reattempts.tsx",
+      "src/types/index.ts"
+    ],
+    "src/__tests__/reattempt.test.ts": [
+      "src/lib/db.ts",
+      "src/lib/reattempt.ts",
+      "src/types/index.ts"
+    ],
+    "src/__tests__/revision-pack.test.ts": [
+      "src/lib/revision-pack.ts",
+      "src/types/index.ts"
+    ],
+    "src/__tests__/sessions.test.ts": [
+      "src/lib/db.ts",
+      "src/lib/pyq-session.ts",
+      "src/lib/sessions.ts",
+      "src/lib/sync.ts",
+      "src/types/index.ts"
+    ],
+    "src/__tests__/setup.ts": [],
+    "src/__tests__/study-notification-copy.test.ts": [
+      "supabase/functions/_shared/study-notification-copy.ts"
+    ],
+    "src/__tests__/study-notifications.test.ts": [
+      "src/lib/studyNotifications.ts"
+    ],
+    "src/__tests__/supabase-config.test.ts": [
+      "src/lib/supabase.ts"
+    ],
+    "src/__tests__/sync.test.ts": [
+      "src/lib/db.ts",
+      "src/lib/sync.ts"
+    ],
+    "src/__tests__/telegram.test.ts": [
+      "src/lib/one_liners.ts",
+      "supabase/functions/_shared/quotes.ts",
+      "supabase/functions/_shared/telegram.ts"
+    ],
+    "src/__tests__/theme.test.ts": [
+      "src/components/shared/ThemeToggle.tsx",
+      "src/lib/theme.ts",
+      "src/stores/prefs.ts"
+    ],
+    "src/__tests__/topic-evidence.test.ts": [
+      "src/lib/topic-evidence.ts",
+      "src/types/index.ts"
+    ],
+    "src/__tests__/topic-progress.test.ts": [
+      "src/stores/topic-progress.ts"
+    ],
+    "src/__tests__/topper-notes.test.ts": [],
+    "src/components/auth/PinInput.tsx": [
+      "src/lib/utils.ts"
+    ],
+    "src/components/buddy/BuddyAvatar.tsx": [
+      "src/lib/utils.ts"
+    ],
+    "src/components/buddy/BuddyChat.tsx": [
+      "src/components/buddy/BuddyAvatar.tsx",
+      "src/components/ui/Button.tsx",
+      "src/components/ui/Dialog.tsx",
+      "src/hooks/useMediaQuery.ts",
+      "src/lib/buddy.ts",
+      "src/lib/buddyNotifications.ts",
+      "src/lib/db.ts",
+      "src/lib/subjectInk.ts",
+      "src/lib/supabase.ts",
+      "src/lib/utils.ts",
+      "src/stores/buddyPresence.ts",
+      "src/types/index.ts"
+    ],
+    "src/components/buddy/BuddyPresenceRuntime.tsx": [
+      "src/lib/buddy.ts",
+      "src/lib/supabase.ts",
+      "src/stores/auth.ts",
+      "src/stores/buddyPresence.ts"
+    ],
+    "src/components/dashboard/HeroCard.tsx": [
+      "src/lib/utils.ts"
+    ],
+    "src/components/dashboard/LearningTips.tsx": [
+      "src/lib/learning-tips.ts",
+      "src/lib/utils.ts"
+    ],
+    "src/components/dashboard/OutcomeDonut.tsx": [
+      "src/lib/constants.ts",
+      "src/types/index.ts"
+    ],
+    "src/components/dashboard/OutcomeLegend.tsx": [
+      "src/lib/constants.ts",
+      "src/lib/utils.ts"
+    ],
+    "src/components/dashboard/SurfaceTrendChart.tsx": [
+      "src/lib/analysis.ts",
+      "src/lib/utils.ts"
+    ],
+    "src/components/dashboard/WelcomeOverlay.tsx": [
+      "src/components/ui/Button.tsx",
+      "src/lib/db.ts",
+      "src/lib/supabase.ts",
+      "src/lib/utils.ts",
+      "src/stores/auth.ts"
+    ],
+    "src/components/layout/MobileTabs.tsx": [
+      "src/lib/db.ts",
+      "src/lib/native.ts",
+      "src/lib/utils.ts",
+      "src/stores/session.ts"
+    ],
+    "src/components/layout/Nav.tsx": [
+      "src/components/shared/Brand.tsx",
+      "src/hooks/useAuth.ts",
+      "src/lib/db.ts",
+      "src/lib/utils.ts",
+      "src/stores/auth.ts",
+      "src/stores/session.ts"
+    ],
+    "src/components/layout/PageHeader.tsx": [
+      "src/components/shared/Brand.tsx",
+      "src/lib/utils.ts"
+    ],
+    "src/components/layout/Shell.tsx": [
+      "src/components/layout/MobileTabs.tsx",
+      "src/components/layout/Nav.tsx",
+      "src/components/layout/TopRightControls.tsx",
+      "src/components/shared/Brand.tsx",
+      "src/components/shared/ContextualGateTip.tsx",
+      "src/components/shared/DailyQuote.tsx",
+      "src/components/shared/OfflineBadge.tsx",
+      "src/components/shared/ThemeToggle.tsx",
+      "src/hooks/useSync.ts"
+    ],
+    "src/components/layout/TopRightControls.tsx": [
+      "src/components/shared/OfflineBadge.tsx",
+      "src/components/shared/ThemeToggle.tsx",
+      "src/hooks/useAuth.ts",
+      "src/lib/constants.ts",
+      "src/lib/utils.ts",
+      "src/stores/prefs.ts"
+    ],
+    "src/components/native/NativeRuntime.tsx": [
+      "src/lib/native.ts",
+      "src/lib/sync.ts",
+      "src/router.tsx",
+      "src/stores/auth.ts",
+      "src/stores/ui.ts"
+    ],
+    "src/components/notifications/BuddyNotificationRuntime.tsx": [
+      "src/lib/buddyNotifications.ts",
+      "src/lib/native.ts",
+      "src/router.tsx",
+      "src/stores/auth.ts"
+    ],
+    "src/components/planner/Calendar.tsx": [
+      "src/lib/native.ts",
+      "src/lib/planner-constants.ts",
+      "src/lib/planner-storage.ts",
+      "src/lib/utils.ts"
+    ],
+    "src/components/planner/DayPlanModal.tsx": [
+      "src/components/planner/SubjectPicker.tsx",
+      "src/components/ui/Button.tsx",
+      "src/components/ui/Input.tsx",
+      "src/components/ui/Select.tsx",
+      "src/components/ui/Textarea.tsx",
+      "src/lib/native.ts",
+      "src/lib/planner-constants.ts",
+      "src/lib/planner-storage.ts",
+      "src/lib/utils.ts"
+    ],
+    "src/components/planner/PlannerInsights.tsx": [
+      "src/components/ui/Card.tsx",
+      "src/lib/native.ts",
+      "src/lib/planner-constants.ts",
+      "src/lib/planner-insights.ts",
+      "src/lib/utils.ts"
+    ],
+    "src/components/planner/SubjectPicker.tsx": [
+      "src/lib/native.ts",
+      "src/lib/utils.ts"
+    ],
+    "src/components/pyq/PyqQuestionContent.tsx": [
+      "src/lib/pyq.ts"
+    ],
+    "src/components/settings/AccessRequestsCard.tsx": [
+      "src/components/ui/Badge.tsx",
+      "src/components/ui/Button.tsx",
+      "src/components/ui/Card.tsx",
+      "src/components/ui/Empty.tsx",
+      "src/components/ui/Textarea.tsx",
+      "src/lib/edge.ts",
+      "src/lib/supabase.ts",
+      "src/lib/utils.ts",
+      "src/stores/ui.ts",
+      "src/types/index.ts"
+    ],
+    "src/components/settings/BuddyNotificationsCard.tsx": [
+      "src/components/ui/Button.tsx",
+      "src/components/ui/Card.tsx",
+      "src/lib/buddyNotifications.ts",
+      "src/lib/native.ts",
+      "src/lib/utils.ts",
+      "src/stores/auth.ts",
+      "src/stores/ui.ts",
+      "src/types/index.ts"
+    ],
+    "src/components/settings/NotificationTimeEditor.tsx": [
+      "src/components/ui/Button.tsx",
+      "src/lib/native.ts",
+      "src/lib/utils.ts"
+    ],
+    "src/components/settings/NotificationsCard.tsx": [
+      "src/components/settings/NotificationTimeEditor.tsx",
+      "src/components/ui/Button.tsx",
+      "src/components/ui/Card.tsx",
+      "src/lib/constants.ts",
+      "src/lib/supabase.ts",
+      "src/lib/utils.ts",
+      "src/stores/auth.ts",
+      "src/stores/ui.ts",
+      "src/types/index.ts"
+    ],
+    "src/components/settings/StudyNotificationsCard.tsx": [
+      "src/components/settings/NotificationTimeEditor.tsx",
+      "src/components/ui/Button.tsx",
+      "src/components/ui/Card.tsx",
+      "src/lib/buddyNotifications.ts",
+      "src/lib/studyNotifications.ts",
+      "src/stores/auth.ts",
+      "src/stores/ui.ts",
+      "src/types/index.ts"
+    ],
+    "src/components/shared/AnswerReveal.tsx": [
+      "src/components/ui/Button.tsx",
+      "src/lib/utils.ts"
+    ],
+    "src/components/shared/Brand.tsx": [
+      "src/lib/utils.ts"
+    ],
+    "src/components/shared/ContextualGateTip.tsx": [
+      "src/lib/contextual-gate-tips.ts",
+      "src/lib/utils.ts"
+    ],
+    "src/components/shared/DailyQuote.tsx": [
+      "src/hooks/useAuth.ts",
+      "src/lib/motivational-quotes.ts",
+      "src/lib/utils.ts"
+    ],
+    "src/components/shared/ImagePreview.tsx": [],
+    "src/components/shared/LoadingScreen.tsx": [
+      "src/components/shared/Brand.tsx"
+    ],
+    "src/components/shared/MissingTagsConfirm.tsx": [
+      "src/components/ui/Button.tsx",
+      "src/components/ui/Dialog.tsx"
+    ],
+    "src/components/shared/OfflineBadge.tsx": [
+      "src/hooks/useAuth.ts",
+      "src/hooks/useSync.ts",
+      "src/lib/utils.ts"
+    ],
+    "src/components/shared/OutcomeBadge.tsx": [
+      "src/lib/constants.ts",
+      "src/lib/utils.ts",
+      "src/types/index.ts"
+    ],
+    "src/components/shared/QuestionEditor.tsx": [
+      "src/components/shared/questionDraft.ts",
+      "src/components/ui/Button.tsx",
+      "src/components/ui/Input.tsx",
+      "src/components/ui/Select.tsx",
+      "src/components/ui/Textarea.tsx",
+      "src/lib/constants.ts",
+      "src/lib/image.ts",
+      "src/lib/subtopics.ts",
+      "src/lib/utils.ts"
+    ],
+    "src/components/shared/RequireAuth.tsx": [
+      "src/components/shared/LoadingScreen.tsx",
+      "src/hooks/useAuth.ts"
+    ],
+    "src/components/shared/RootErrorBoundary.tsx": [
+      "src/components/shared/Brand.tsx"
+    ],
+    "src/components/shared/SessionEditor.tsx": [
+      "src/components/ui/Button.tsx",
+      "src/components/ui/Input.tsx",
+      "src/components/ui/Select.tsx",
+      "src/components/ui/Textarea.tsx",
+      "src/lib/constants.ts",
+      "src/lib/db.ts",
+      "src/lib/sync.ts",
+      "src/lib/utils.ts",
+      "src/types/index.ts"
+    ],
+    "src/components/shared/ThemeToggle.tsx": [
+      "src/lib/native.ts",
+      "src/lib/theme.ts",
+      "src/lib/utils.ts",
+      "src/stores/prefs.ts"
+    ],
+    "src/components/shared/Timer.tsx": [
+      "src/lib/utils.ts"
+    ],
+    "src/components/shared/questionDraft.ts": [
+      "src/lib/constants.ts",
+      "src/types/index.ts"
+    ],
+    "src/components/tags/OutcomeStep.tsx": [
+      "src/components/tags/TagOption.tsx",
+      "src/hooks/useKeyboard.ts",
+      "src/lib/constants.ts",
+      "src/types/index.ts"
+    ],
+    "src/components/tags/PatternStep.tsx": [
+      "src/components/ui/Button.tsx",
+      "src/components/ui/Input.tsx",
+      "src/lib/utils.ts",
+      "src/types/index.ts"
+    ],
+    "src/components/tags/RootCauseStep.tsx": [
+      "src/components/tags/TagOption.tsx",
+      "src/hooks/useKeyboard.ts",
+      "src/lib/constants.ts",
+      "src/types/index.ts"
+    ],
+    "src/components/tags/SourceStep.tsx": [
+      "src/components/tags/sourceDraft.ts",
+      "src/components/ui/Button.tsx",
+      "src/components/ui/Input.tsx",
+      "src/components/ui/Kbd.tsx",
+      "src/components/ui/Select.tsx",
+      "src/components/ui/Textarea.tsx",
+      "src/hooks/useKeyboard.ts",
+      "src/lib/constants.ts",
+      "src/lib/image.ts",
+      "src/lib/subtopics.ts",
+      "src/lib/utils.ts"
+    ],
+    "src/components/tags/TagFlow.tsx": [
+      "src/components/tags/OutcomeStep.tsx",
+      "src/components/tags/PatternStep.tsx",
+      "src/components/tags/RootCauseStep.tsx",
+      "src/components/tags/SourceStep.tsx",
+      "src/components/tags/TriggerStep.tsx",
+      "src/components/tags/sourceDraft.ts",
+      "src/components/ui/Button.tsx",
+      "src/lib/constants.ts",
+      "src/lib/native.ts",
+      "src/lib/utils.ts",
+      "src/types/index.ts"
+    ],
+    "src/components/tags/TagOption.tsx": [
+      "src/components/ui/Kbd.tsx",
+      "src/lib/native.ts",
+      "src/lib/utils.ts"
+    ],
+    "src/components/tags/TriggerStep.tsx": [
+      "src/components/ui/Button.tsx",
+      "src/components/ui/Input.tsx"
+    ],
+    "src/components/tags/sourceDraft.ts": [
+      "src/lib/constants.ts"
+    ],
+    "src/components/ui/Badge.tsx": [
+      "src/lib/utils.ts"
+    ],
+    "src/components/ui/Button.tsx": [
+      "src/lib/native.ts",
+      "src/lib/utils.ts"
+    ],
+    "src/components/ui/Card.tsx": [
+      "src/lib/utils.ts"
+    ],
+    "src/components/ui/Dialog.tsx": [
+      "src/lib/utils.ts"
+    ],
+    "src/components/ui/Empty.tsx": [
+      "src/lib/utils.ts"
+    ],
+    "src/components/ui/Input.tsx": [
+      "src/lib/utils.ts"
+    ],
+    "src/components/ui/Kbd.tsx": [
+      "src/lib/utils.ts"
+    ],
+    "src/components/ui/Progress.tsx": [
+      "src/lib/utils.ts"
+    ],
+    "src/components/ui/Select.tsx": [
+      "src/lib/utils.ts"
+    ],
+    "src/components/ui/Tabs.tsx": [
+      "src/lib/native.ts",
+      "src/lib/utils.ts"
+    ],
+    "src/components/ui/Textarea.tsx": [
+      "src/lib/utils.ts"
+    ],
+    "src/components/ui/Toast.tsx": [
+      "src/lib/native.ts",
+      "src/lib/utils.ts",
+      "src/stores/ui.ts"
+    ],
+    "src/hooks/useAuth.ts": [
+      "src/stores/auth.ts"
+    ],
+    "src/hooks/useKeyboard.ts": [],
+    "src/hooks/useMediaQuery.ts": [],
+    "src/hooks/useSync.ts": [
+      "src/hooks/useAuth.ts",
+      "src/lib/db.ts",
+      "src/lib/sync.ts"
+    ],
+    "src/hooks/useTimer.ts": [],
+    "src/hooks/useVisibilityChange.ts": [],
+    "src/index.css": [],
+    "src/lib/analysis.ts": [
+      "src/lib/constants.ts",
+      "src/lib/utils.ts",
+      "src/types/index.ts"
+    ],
+    "src/lib/backup.ts": [
+      "src/lib/db.ts",
+      "src/lib/sync.ts",
+      "src/types/index.ts"
+    ],
+    "src/lib/buddy.ts": [
+      "src/types/index.ts"
+    ],
+    "src/lib/buddyNotifications.ts": [
+      "src/lib/native.ts",
+      "src/lib/supabase.ts"
+    ],
+    "src/lib/constants.ts": [
+      "src/types/index.ts"
+    ],
+    "src/lib/contextual-gate-tips.ts": [],
+    "src/lib/db.ts": [
+      "src/types/index.ts"
+    ],
+    "src/lib/do-now.ts": [
+      "src/lib/constants.ts",
+      "src/lib/planner-execution.ts",
+      "src/lib/planner-storage.ts",
+      "src/lib/pyq-session.ts",
+      "src/types/index.ts"
+    ],
+    "src/lib/edge.ts": [
+      "src/lib/supabase.ts"
+    ],
+    "src/lib/flags.ts": [],
+    "src/lib/image.ts": [
+      "src/lib/theme.ts"
+    ],
+    "src/lib/isolation.ts": [
+      "src/lib/db.ts",
+      "src/stores/log.ts",
+      "src/stores/prefs.ts",
+      "src/stores/session.ts"
+    ],
+    "src/lib/lazyWithRetry.ts": [],
+    "src/lib/learning-tips.ts": [
+      "src/types/index.ts"
+    ],
+    "src/lib/mocks.ts": [
+      "src/types/index.ts"
+    ],
+    "src/lib/motivational-quotes.ts": [
+      "supabase/functions/_shared/quotes.ts"
+    ],
+    "src/lib/native.ts": [
+      "src/lib/theme.ts",
+      "src/stores/prefs.ts"
+    ],
+    "src/lib/one_liners.ts": [
+      "src/lib/motivational-quotes.ts"
+    ],
+    "src/lib/patterns.ts": [
+      "src/lib/db.ts",
+      "src/lib/sync.ts",
+      "src/lib/utils.ts"
+    ],
+    "src/lib/planner-cloud.ts": [
+      "src/lib/planner-storage.ts",
+      "src/lib/supabase.ts"
+    ],
+    "src/lib/planner-constants.ts": [
+      "src/lib/planner-storage.ts"
+    ],
+    "src/lib/planner-execution.ts": [
+      "src/lib/db.ts",
+      "src/lib/planner-storage.ts",
+      "src/lib/utils.ts"
+    ],
+    "src/lib/planner-insights.ts": [
+      "src/lib/planner-storage.ts"
+    ],
+    "src/lib/planner-storage.ts": [
+      "src/stores/auth.ts"
+    ],
+    "src/lib/progress-export.ts": [
+      "src/lib/analysis.ts",
+      "src/lib/constants.ts",
+      "src/lib/db.ts",
+      "src/lib/planner-storage.ts",
+      "src/lib/readiness.ts",
+      "src/lib/subtopics.ts",
+      "src/stores/topic-progress.ts",
+      "src/types/index.ts"
+    ],
+    "src/lib/pyq-history.ts": [
+      "src/lib/constants.ts",
+      "src/lib/pyq-session.ts",
+      "src/lib/pyq.ts",
+      "src/types/index.ts"
+    ],
+    "src/lib/pyq-session.ts": [
+      "src/lib/pyq.ts",
+      "src/lib/utils.ts",
+      "src/types/index.ts"
+    ],
+    "src/lib/pyq.ts": [
+      "src/lib/constants.ts",
+      "src/lib/image.ts",
+      "src/types/index.ts"
+    ],
+    "src/lib/queryClient.ts": [],
+    "src/lib/questionTags.ts": [],
+    "src/lib/readiness-snapshots.ts": [
+      "src/lib/readiness.ts"
+    ],
+    "src/lib/readiness.ts": [
+      "src/lib/utils.ts",
+      "src/types/index.ts"
+    ],
+    "src/lib/reattempt.ts": [
+      "src/lib/constants.ts",
+      "src/lib/db.ts",
+      "src/lib/sync.ts",
+      "src/lib/utils.ts",
+      "src/types/index.ts"
+    ],
+    "src/lib/revision-pack.ts": [
+      "src/types/index.ts"
+    ],
+    "src/lib/sessions.ts": [
+      "src/lib/db.ts",
+      "src/lib/pyq-session.ts",
+      "src/lib/sync.ts",
+      "src/types/index.ts"
+    ],
+    "src/lib/studyNotifications.ts": [
+      "src/lib/supabase.ts"
+    ],
+    "src/lib/subjectInk.ts": [],
+    "src/lib/subtopics.ts": [],
+    "src/lib/supabase.ts": [],
+    "src/lib/sync.ts": [
+      "src/lib/db.ts",
+      "src/lib/supabase.ts"
+    ],
+    "src/lib/theme.ts": [],
+    "src/lib/topic-evidence.ts": [
+      "src/lib/pyq-session.ts",
+      "src/types/index.ts"
+    ],
+    "src/lib/utils.ts": [],
+    "src/main.tsx": [
+      "src/App.tsx",
+      "src/index.css"
+    ],
+    "src/pages/Auth.tsx": [
+      "src/components/auth/PinInput.tsx",
+      "src/components/shared/Brand.tsx",
+      "src/components/shared/ThemeToggle.tsx",
+      "src/components/ui/Button.tsx",
+      "src/components/ui/Input.tsx",
+      "src/hooks/useAuth.ts",
+      "src/lib/constants.ts",
+      "src/lib/supabase.ts",
+      "src/stores/auth.ts"
+    ],
+    "src/pages/Buddy.tsx": [
+      "src/components/buddy/BuddyAvatar.tsx",
+      "src/components/buddy/BuddyChat.tsx",
+      "src/components/layout/PageHeader.tsx",
+      "src/components/ui/Button.tsx",
+      "src/components/ui/Card.tsx",
+      "src/components/ui/Dialog.tsx",
+      "src/components/ui/Textarea.tsx",
+      "src/hooks/useAuth.ts",
+      "src/hooks/useMediaQuery.ts",
+      "src/lib/buddy.ts",
+      "src/lib/edge.ts",
+      "src/lib/native.ts",
+      "src/lib/supabase.ts",
+      "src/lib/utils.ts",
+      "src/stores/ui.ts",
+      "src/types/index.ts"
+    ],
+    "src/pages/Calibration.tsx": [
+      "src/components/layout/PageHeader.tsx",
+      "src/components/ui/Badge.tsx",
+      "src/components/ui/Button.tsx",
+      "src/components/ui/Card.tsx",
+      "src/components/ui/Empty.tsx",
+      "src/hooks/useAuth.ts",
+      "src/lib/analysis.ts",
+      "src/lib/constants.ts",
+      "src/lib/db.ts",
+      "src/lib/subjectInk.ts",
+      "src/lib/sync.ts",
+      "src/lib/utils.ts",
+      "src/types/index.ts"
+    ],
+    "src/pages/Dashboard.tsx": [
+      "src/components/dashboard/HeroCard.tsx",
+      "src/components/dashboard/LearningTips.tsx",
+      "src/components/dashboard/OutcomeDonut.tsx",
+      "src/components/dashboard/OutcomeLegend.tsx",
+      "src/components/dashboard/SurfaceTrendChart.tsx",
+      "src/components/dashboard/WelcomeOverlay.tsx",
+      "src/components/ui/Button.tsx",
+      "src/components/ui/Card.tsx",
+      "src/hooks/useAuth.ts",
+      "src/lib/analysis.ts",
+      "src/lib/constants.ts",
+      "src/lib/db.ts",
+      "src/lib/do-now.ts",
+      "src/lib/learning-tips.ts",
+      "src/lib/planner-storage.ts",
+      "src/lib/pyq.ts",
+      "src/lib/sessions.ts",
+      "src/lib/subjectInk.ts",
+      "src/lib/utils.ts",
+      "src/stores/prefs.ts"
+    ],
+    "src/pages/DevPrimitives.tsx": [
+      "src/components/ui/Badge.tsx",
+      "src/components/ui/Button.tsx",
+      "src/components/ui/Card.tsx",
+      "src/components/ui/Dialog.tsx",
+      "src/components/ui/Empty.tsx",
+      "src/components/ui/Input.tsx",
+      "src/components/ui/Kbd.tsx",
+      "src/components/ui/Progress.tsx",
+      "src/components/ui/Select.tsx",
+      "src/components/ui/Tabs.tsx",
+      "src/components/ui/Textarea.tsx",
+      "src/lib/constants.ts",
+      "src/stores/ui.ts"
+    ],
+    "src/pages/DoNow.tsx": [
+      "src/components/layout/PageHeader.tsx",
+      "src/components/ui/Button.tsx",
+      "src/components/ui/Card.tsx",
+      "src/components/ui/Empty.tsx",
+      "src/hooks/useAuth.ts",
+      "src/lib/db.ts",
+      "src/lib/do-now.ts",
+      "src/lib/planner-execution.ts",
+      "src/lib/planner-storage.ts",
+      "src/lib/utils.ts"
+    ],
+    "src/pages/ForgotPin.tsx": [
+      "src/components/shared/Brand.tsx",
+      "src/components/shared/ThemeToggle.tsx",
+      "src/components/ui/Button.tsx",
+      "src/components/ui/Input.tsx",
+      "src/hooks/useAuth.ts",
+      "src/lib/constants.ts",
+      "src/lib/edge.ts",
+      "src/lib/supabase.ts"
+    ],
+    "src/pages/Formulas.tsx": [
+      "src/components/layout/PageHeader.tsx",
+      "src/components/ui/Badge.tsx",
+      "src/components/ui/Button.tsx",
+      "src/components/ui/Card.tsx",
+      "src/components/ui/Empty.tsx",
+      "src/components/ui/Input.tsx",
+      "src/components/ui/Select.tsx",
+      "src/hooks/useAuth.ts",
+      "src/lib/constants.ts",
+      "src/lib/db.ts",
+      "src/lib/subjectInk.ts",
+      "src/lib/sync.ts",
+      "src/lib/utils.ts",
+      "src/stores/ui.ts",
+      "src/types/index.ts"
+    ],
+    "src/pages/Heatmap.tsx": [
+      "src/components/layout/PageHeader.tsx",
+      "src/components/ui/Card.tsx",
+      "src/components/ui/Empty.tsx",
+      "src/components/ui/Input.tsx",
+      "src/hooks/useAuth.ts",
+      "src/lib/analysis.ts",
+      "src/lib/constants.ts",
+      "src/lib/db.ts",
+      "src/lib/subjectInk.ts",
+      "src/lib/utils.ts",
+      "src/types/index.ts"
+    ],
+    "src/pages/Journal.tsx": [
+      "src/components/layout/PageHeader.tsx",
+      "src/components/shared/AnswerReveal.tsx",
+      "src/components/shared/ImagePreview.tsx",
+      "src/components/shared/QuestionEditor.tsx",
+      "src/components/shared/SessionEditor.tsx",
+      "src/components/shared/questionDraft.ts",
+      "src/components/ui/Badge.tsx",
+      "src/components/ui/Button.tsx",
+      "src/components/ui/Card.tsx",
+      "src/components/ui/Dialog.tsx",
+      "src/components/ui/Empty.tsx",
+      "src/components/ui/Input.tsx",
+      "src/components/ui/Select.tsx",
+      "src/hooks/useAuth.ts",
+      "src/lib/constants.ts",
+      "src/lib/db.ts",
+      "src/lib/sessions.ts",
+      "src/lib/subjectInk.ts",
+      "src/lib/subtopics.ts",
+      "src/lib/sync.ts",
+      "src/lib/utils.ts",
+      "src/types/index.ts"
+    ],
+    "src/pages/Log.tsx": [
+      "src/components/layout/PageHeader.tsx",
+      "src/components/shared/AnswerReveal.tsx",
+      "src/components/shared/QuestionEditor.tsx",
+      "src/components/shared/questionDraft.ts",
+      "src/components/ui/Badge.tsx",
+      "src/components/ui/Button.tsx",
+      "src/components/ui/Card.tsx",
+      "src/components/ui/Dialog.tsx",
+      "src/components/ui/Empty.tsx",
+      "src/hooks/useAuth.ts",
+      "src/lib/constants.ts",
+      "src/lib/db.ts",
+      "src/lib/reattempt.ts",
+      "src/lib/subjectInk.ts",
+      "src/lib/sync.ts",
+      "src/lib/utils.ts",
+      "src/stores/log.ts",
+      "src/types/index.ts"
+    ],
+    "src/pages/Mocks.tsx": [
+      "src/components/layout/PageHeader.tsx",
+      "src/components/ui/Button.tsx",
+      "src/components/ui/Card.tsx",
+      "src/components/ui/Empty.tsx",
+      "src/components/ui/Input.tsx",
+      "src/components/ui/Textarea.tsx",
+      "src/hooks/useAuth.ts",
+      "src/lib/constants.ts",
+      "src/lib/db.ts",
+      "src/lib/mocks.ts",
+      "src/lib/planner-execution.ts",
+      "src/lib/sync.ts",
+      "src/lib/utils.ts",
+      "src/stores/ui.ts",
+      "src/types/index.ts"
+    ],
+    "src/pages/NotFound.tsx": [
+      "src/components/shared/ThemeToggle.tsx"
+    ],
+    "src/pages/Patterns.tsx": [
+      "src/components/layout/PageHeader.tsx",
+      "src/components/ui/Badge.tsx",
+      "src/components/ui/Button.tsx",
+      "src/components/ui/Card.tsx",
+      "src/components/ui/Dialog.tsx",
+      "src/components/ui/Empty.tsx",
+      "src/hooks/useAuth.ts",
+      "src/lib/db.ts",
+      "src/lib/subjectInk.ts",
+      "src/lib/sync.ts",
+      "src/lib/utils.ts",
+      "src/types/index.ts"
+    ],
+    "src/pages/Planner.tsx": [
+      "src/components/layout/PageHeader.tsx",
+      "src/components/planner/Calendar.tsx",
+      "src/components/planner/DayPlanModal.tsx",
+      "src/components/planner/PlannerInsights.tsx",
+      "src/lib/planner-cloud.ts",
+      "src/lib/planner-constants.ts",
+      "src/lib/planner-execution.ts",
+      "src/lib/planner-insights.ts",
+      "src/lib/planner-storage.ts",
+      "src/stores/auth.ts",
+      "src/stores/ui.ts"
+    ],
+    "src/pages/Pyq.tsx": [
+      "src/components/layout/PageHeader.tsx",
+      "src/components/pyq/PyqQuestionContent.tsx",
+      "src/components/tags/TagFlow.tsx",
+      "src/components/tags/sourceDraft.ts",
+      "src/components/ui/Badge.tsx",
+      "src/components/ui/Button.tsx",
+      "src/components/ui/Card.tsx",
+      "src/components/ui/Select.tsx",
+      "src/hooks/useAuth.ts",
+      "src/hooks/useTimer.ts",
+      "src/lib/constants.ts",
+      "src/lib/db.ts",
+      "src/lib/image.ts",
+      "src/lib/patterns.ts",
+      "src/lib/planner-execution.ts",
+      "src/lib/pyq-history.ts",
+      "src/lib/pyq-session.ts",
+      "src/lib/pyq.ts",
+      "src/lib/reattempt.ts",
+      "src/lib/sessions.ts",
+      "src/lib/sync.ts",
+      "src/lib/utils.ts",
+      "src/types/index.ts"
+    ],
+    "src/pages/QuickCapture.tsx": [
+      "src/components/layout/PageHeader.tsx",
+      "src/components/ui/Button.tsx",
+      "src/components/ui/Card.tsx",
+      "src/components/ui/Select.tsx",
+      "src/components/ui/Textarea.tsx",
+      "src/hooks/useAuth.ts",
+      "src/lib/constants.ts",
+      "src/lib/image.ts",
+      "src/lib/reattempt.ts",
+      "src/lib/sync.ts",
+      "src/lib/utils.ts",
+      "src/stores/ui.ts",
+      "src/types/index.ts"
+    ],
+    "src/pages/Readiness.tsx": [
+      "src/components/layout/PageHeader.tsx",
+      "src/components/ui/Card.tsx",
+      "src/components/ui/Empty.tsx",
+      "src/hooks/useAuth.ts",
+      "src/lib/constants.ts",
+      "src/lib/db.ts",
+      "src/lib/readiness-snapshots.ts",
+      "src/lib/readiness.ts",
+      "src/lib/subjectInk.ts",
+      "src/lib/supabase.ts",
+      "src/lib/utils.ts"
+    ],
+    "src/pages/Reattempts.tsx": [
+      "src/components/layout/PageHeader.tsx",
+      "src/components/pyq/PyqQuestionContent.tsx",
+      "src/components/shared/AnswerReveal.tsx",
+      "src/components/shared/ImagePreview.tsx",
+      "src/components/shared/Timer.tsx",
+      "src/components/shared/questionDraft.ts",
+      "src/components/ui/Badge.tsx",
+      "src/components/ui/Button.tsx",
+      "src/components/ui/Card.tsx",
+      "src/components/ui/Empty.tsx",
+      "src/components/ui/Textarea.tsx",
+      "src/hooks/useAuth.ts",
+      "src/hooks/useTimer.ts",
+      "src/lib/constants.ts",
+      "src/lib/db.ts",
+      "src/lib/image.ts",
+      "src/lib/pyq-session.ts",
+      "src/lib/pyq.ts",
+      "src/lib/reattempt.ts",
+      "src/lib/subjectInk.ts",
+      "src/lib/sync.ts",
+      "src/lib/utils.ts",
+      "src/reattempt.css",
+      "src/stores/ui.ts",
+      "src/types/index.ts"
+    ],
+    "src/pages/RequestAccess.tsx": [
+      "src/components/shared/Brand.tsx",
+      "src/components/shared/ThemeToggle.tsx",
+      "src/components/ui/Button.tsx",
+      "src/components/ui/Input.tsx",
+      "src/components/ui/Textarea.tsx",
+      "src/hooks/useAuth.ts",
+      "src/lib/constants.ts",
+      "src/lib/edge.ts",
+      "src/lib/utils.ts"
+    ],
+    "src/pages/ResetPin.tsx": [
+      "src/components/auth/PinInput.tsx",
+      "src/components/shared/Brand.tsx",
+      "src/components/shared/ThemeToggle.tsx",
+      "src/components/ui/Button.tsx",
+      "src/lib/constants.ts",
+      "src/lib/supabase.ts"
+    ],
+    "src/pages/RevisionPack.tsx": [
+      "src/components/layout/PageHeader.tsx",
+      "src/components/ui/Button.tsx",
+      "src/components/ui/Card.tsx",
+      "src/components/ui/Empty.tsx",
+      "src/hooks/useAuth.ts",
+      "src/lib/db.ts",
+      "src/lib/revision-pack.ts",
+      "src/lib/utils.ts",
+      "src/stores/ui.ts"
+    ],
+    "src/pages/SessionActive.tsx": [
+      "src/components/shared/LoadingScreen.tsx",
+      "src/components/shared/Timer.tsx",
+      "src/components/tags/TagFlow.tsx",
+      "src/components/ui/Button.tsx",
+      "src/components/ui/Empty.tsx",
+      "src/components/ui/Kbd.tsx",
+      "src/hooks/useAuth.ts",
+      "src/hooks/useKeyboard.ts",
+      "src/hooks/useTimer.ts",
+      "src/hooks/useVisibilityChange.ts",
+      "src/lib/constants.ts",
+      "src/lib/db.ts",
+      "src/lib/planner-execution.ts",
+      "src/lib/reattempt.ts",
+      "src/lib/subjectInk.ts",
+      "src/lib/sync.ts",
+      "src/lib/utils.ts",
+      "src/stores/session.ts",
+      "src/types/index.ts"
+    ],
+    "src/pages/SessionNew.tsx": [
+      "src/components/layout/PageHeader.tsx",
+      "src/components/ui/Button.tsx",
+      "src/components/ui/Card.tsx",
+      "src/components/ui/Kbd.tsx",
+      "src/hooks/useAuth.ts",
+      "src/hooks/useKeyboard.ts",
+      "src/lib/constants.ts",
+      "src/lib/db.ts",
+      "src/lib/planner-execution.ts",
+      "src/lib/subjectInk.ts",
+      "src/lib/sync.ts",
+      "src/lib/utils.ts",
+      "src/stores/prefs.ts",
+      "src/stores/session.ts",
+      "src/types/index.ts"
+    ],
+    "src/pages/SessionReview.tsx": [
+      "src/components/shared/AnswerReveal.tsx",
+      "src/components/shared/LoadingScreen.tsx",
+      "src/components/shared/QuestionEditor.tsx",
+      "src/components/shared/SessionEditor.tsx",
+      "src/components/shared/questionDraft.ts",
+      "src/components/ui/Badge.tsx",
+      "src/components/ui/Button.tsx",
+      "src/components/ui/Card.tsx",
+      "src/components/ui/Dialog.tsx",
+      "src/components/ui/Empty.tsx",
+      "src/components/ui/Input.tsx",
+      "src/components/ui/Kbd.tsx",
+      "src/lib/constants.ts",
+      "src/lib/db.ts",
+      "src/lib/subjectInk.ts",
+      "src/lib/sync.ts",
+      "src/lib/utils.ts",
+      "src/types/index.ts"
+    ],
+    "src/pages/Settings.tsx": [
+      "src/components/layout/PageHeader.tsx",
+      "src/components/settings/AccessRequestsCard.tsx",
+      "src/components/settings/BuddyNotificationsCard.tsx",
+      "src/components/settings/NotificationsCard.tsx",
+      "src/components/settings/StudyNotificationsCard.tsx",
+      "src/components/ui/Badge.tsx",
+      "src/components/ui/Button.tsx",
+      "src/components/ui/Card.tsx",
+      "src/components/ui/Empty.tsx",
+      "src/components/ui/Input.tsx",
+      "src/components/ui/Select.tsx",
+      "src/hooks/useAuth.ts",
+      "src/lib/backup.ts",
+      "src/lib/constants.ts",
+      "src/lib/isolation.ts",
+      "src/lib/native.ts",
+      "src/lib/progress-export.ts",
+      "src/lib/supabase.ts",
+      "src/lib/theme.ts",
+      "src/lib/utils.ts",
+      "src/stores/auth.ts",
+      "src/stores/prefs.ts",
+      "src/stores/ui.ts",
+      "src/types/index.ts"
+    ],
+    "src/pages/Signup.tsx": [
+      "src/components/auth/PinInput.tsx",
+      "src/components/shared/Brand.tsx",
+      "src/components/shared/ThemeToggle.tsx",
+      "src/components/ui/Button.tsx",
+      "src/components/ui/Input.tsx",
+      "src/hooks/useAuth.ts",
+      "src/lib/constants.ts",
+      "src/lib/edge.ts",
+      "src/lib/supabase.ts",
+      "src/lib/utils.ts",
+      "src/stores/auth.ts"
+    ],
+    "src/pages/SyllabusTracker.tsx": [
+      "src/components/layout/PageHeader.tsx",
+      "src/components/ui/Badge.tsx",
+      "src/components/ui/Input.tsx",
+      "src/components/ui/Progress.tsx",
+      "src/hooks/useAuth.ts",
+      "src/lib/constants.ts",
+      "src/lib/db.ts",
+      "src/lib/native.ts",
+      "src/lib/subjectInk.ts",
+      "src/lib/subtopics.ts",
+      "src/lib/topic-evidence.ts",
+      "src/lib/utils.ts",
+      "src/stores/auth.ts",
+      "src/stores/topic-progress.ts"
+    ],
+    "src/pages/TopperNotes.tsx": [
+      "src/components/layout/PageHeader.tsx",
+      "src/components/ui/Input.tsx",
+      "src/hooks/useAuth.ts",
+      "src/lib/native.ts",
+      "src/lib/subjectInk.ts",
+      "src/lib/utils.ts"
+    ],
+    "src/pages/TriggerDrill.tsx": [
+      "src/components/layout/PageHeader.tsx",
+      "src/components/ui/Badge.tsx",
+      "src/components/ui/Button.tsx",
+      "src/components/ui/Card.tsx",
+      "src/components/ui/Empty.tsx",
+      "src/components/ui/Input.tsx",
+      "src/hooks/useAuth.ts",
+      "src/lib/db.ts",
+      "src/lib/sync.ts",
+      "src/lib/utils.ts",
+      "src/stores/ui.ts",
+      "src/types/index.ts"
+    ],
+    "src/pages/WeeklyReview.tsx": [
+      "src/components/layout/PageHeader.tsx",
+      "src/components/ui/Badge.tsx",
+      "src/components/ui/Button.tsx",
+      "src/components/ui/Card.tsx",
+      "src/components/ui/Empty.tsx",
+      "src/components/ui/Input.tsx",
+      "src/components/ui/Textarea.tsx",
+      "src/hooks/useAuth.ts",
+      "src/lib/analysis.ts",
+      "src/lib/constants.ts",
+      "src/lib/db.ts",
+      "src/lib/subjectInk.ts",
+      "src/lib/sync.ts",
+      "src/lib/utils.ts",
+      "src/types/index.ts"
+    ],
+    "src/reattempt.css": [],
+    "src/router.tsx": [
+      "src/components/layout/Shell.tsx",
+      "src/components/shared/LoadingScreen.tsx",
+      "src/components/shared/RequireAuth.tsx",
+      "src/components/shared/RootErrorBoundary.tsx",
+      "src/lib/lazyWithRetry.ts"
+    ],
+    "src/stores/auth.ts": [
+      "src/lib/buddyNotifications.ts",
+      "src/lib/constants.ts",
+      "src/lib/db.ts",
+      "src/lib/edge.ts",
+      "src/lib/isolation.ts",
+      "src/lib/supabase.ts",
+      "src/types/index.ts"
+    ],
+    "src/stores/buddyPresence.ts": [],
+    "src/stores/log.ts": [
+      "src/components/shared/questionDraft.ts"
+    ],
+    "src/stores/prefs.ts": [
+      "src/lib/theme.ts"
+    ],
+    "src/stores/session.ts": [],
+    "src/stores/topic-progress.ts": [
+      "src/lib/db.ts",
+      "src/lib/sync.ts",
+      "src/lib/utils.ts",
+      "src/stores/auth.ts"
+    ],
+    "src/stores/ui.ts": [],
+    "src/types/db.ts": [],
+    "src/types/index.ts": [],
+    "src/vite-env.d.ts": [],
+    "supabase/config.toml": [],
+    "supabase/functions/_shared/cors.ts": [],
+    "supabase/functions/_shared/cron-auth.ts": [],
+    "supabase/functions/_shared/digest-schedule.ts": [],
+    "supabase/functions/_shared/email.ts": [],
+    "supabase/functions/_shared/push.ts": [],
+    "supabase/functions/_shared/quotes.ts": [],
+    "supabase/functions/_shared/readiness-score.ts": [],
+    "supabase/functions/_shared/study-notification-copy.ts": [],
+    "supabase/functions/_shared/telegram.ts": [],
+    "supabase/functions/_shared/wa.ts": [],
+    "supabase/functions/approve-request/index.ts": [
+      "supabase/functions/_shared/cors.ts",
+      "supabase/functions/_shared/email.ts"
+    ],
+    "supabase/functions/buddy-notifications/deno.json": [],
+    "supabase/functions/buddy-notifications/index.ts": [
+      "supabase/functions/_shared/cors.ts",
+      "supabase/functions/_shared/push.ts"
+    ],
+    "supabase/functions/buddy-request/index.ts": [
+      "supabase/functions/_shared/cors.ts",
+      "supabase/functions/_shared/email.ts",
+      "supabase/functions/_shared/push.ts"
+    ],
+    "supabase/functions/compute-readiness/index.ts": [
+      "supabase/functions/_shared/cors.ts",
+      "supabase/functions/_shared/cron-auth.ts",
+      "supabase/functions/_shared/readiness-score.ts"
+    ],
+    "supabase/functions/daily-digest/index.ts": [
+      "supabase/functions/_shared/cors.ts",
+      "supabase/functions/_shared/cron-auth.ts",
+      "supabase/functions/_shared/digest-schedule.ts",
+      "supabase/functions/_shared/email.ts",
+      "supabase/functions/_shared/quotes.ts",
+      "supabase/functions/_shared/telegram.ts"
+    ],
+    "supabase/functions/decline-request/index.ts": [
+      "supabase/functions/_shared/cors.ts",
+      "supabase/functions/_shared/email.ts"
+    ],
+    "supabase/functions/login/index.ts": [
+      "supabase/functions/_shared/cors.ts"
+    ],
+    "supabase/functions/notification-actions/index.ts": [
+      "supabase/functions/_shared/cors.ts"
+    ],
+    "supabase/functions/request-access/index.ts": [
+      "supabase/functions/_shared/cors.ts",
+      "supabase/functions/_shared/email.ts"
+    ],
+    "supabase/functions/request-pin-reset/index.ts": [
+      "supabase/functions/_shared/cors.ts",
+      "supabase/functions/_shared/email.ts"
+    ],
+    "supabase/functions/schedule-reattempts/index.ts": [
+      "supabase/functions/_shared/cors.ts"
+    ],
+    "supabase/functions/signup-via-invite/index.ts": [
+      "supabase/functions/_shared/cors.ts"
+    ],
+    "supabase/functions/study-notifications/deno.json": [],
+    "supabase/functions/study-notifications/index.ts": [
+      "supabase/functions/_shared/cors.ts",
+      "supabase/functions/_shared/digest-schedule.ts",
+      "supabase/functions/_shared/push.ts",
+      "supabase/functions/_shared/study-notification-copy.ts"
+    ],
+    "supabase/functions/telegram-webhook/index.ts": [
+      "supabase/functions/_shared/cors.ts",
+      "supabase/functions/_shared/quotes.ts",
+      "supabase/functions/_shared/telegram.ts"
+    ],
+    "supabase/migrations/20260717000001_initial_schema.sql": [],
+    "supabase/migrations/20260717000002_rls_policies.sql": [],
+    "supabase/migrations/20260717000003_functions.sql": [],
+    "supabase/migrations/20260717000004_ai_boundaries.sql": [],
+    "supabase/migrations/20260717000005_invite_signup.sql": [],
+    "supabase/migrations/20260718000001_access_requests_and_insights.sql": [],
+    "supabase/migrations/20260718000002_username_pin_auth.sql": [],
+    "supabase/migrations/20260718000003_no_bootstrap.sql": [],
+    "supabase/migrations/20260718000004_approve_search_path_fix.sql": [],
+    "supabase/migrations/20260718000005_welcome_seen.sql": [],
+    "supabase/migrations/20260718000006_buddy_chat.sql": [],
+    "supabase/migrations/20260718000007_planner_and_digest.sql": [],
+    "supabase/migrations/20260718000008_buddy_requests.sql": [],
+    "supabase/migrations/20260718000009_buddy_request_grants.sql": [],
+    "supabase/migrations/20260718000010_digest_cron.sql": [],
+    "supabase/migrations/20260718000011_buddy_peer_visibility.sql": [],
+    "supabase/migrations/20260719000001_wipe_buddies_and_dup_guards.sql": [],
+    "supabase/migrations/20260719000002_unfriend_buddy.sql": [],
+    "supabase/migrations/20260719000003_readiness_snapshots.sql": [],
+    "supabase/migrations/20260721000001_buddy_hardening.sql": [],
+    "supabase/migrations/20260721000002_telegram_digest.sql": [],
+    "supabase/migrations/20260721000003_planner_day_plans.sql": [],
+    "supabase/migrations/20260721000004_sync_query_indexes.sql": [],
+    "supabase/migrations/20260722000001_question_answers.sql": [],
+    "supabase/migrations/20260802000001_pyq_attempts.sql": [],
+    "supabase/migrations/20260807000001_pyq_session_hardening.sql": [],
+    "supabase/migrations/20260807000002_digest_minute_local.sql": [],
+    "supabase/migrations/20260808000001_pyq_attempt_audit.sql": [],
+    "supabase/migrations/20260808000002_session_kinds.sql": [],
+    "supabase/migrations/20260808000003_telegram_digest_cron_vault.sql": [],
+    "supabase/migrations/20260808000004_telegram_digest_cron_secret.sql": [],
+    "supabase/migrations/20260808000005_buddy_push_notifications.sql": [],
+    "supabase/migrations/20260808000006_push_quiet_hours.sql": [],
+    "supabase/migrations/20260810000001_android_inline_replies.sql": [],
+    "supabase/migrations/20260810000002_interactive_study_notifications.sql": [],
+    "supabase/migrations/20260810000003_add_log_study_notification.sql": [],
+    "supabase/migrations/20260810000004_study_notification_minutes.sql": [],
+    "supabase/migrations/20260810000005_practical_study_loop.sql": [],
+    "supabase/migrations/20260811000001_pyq_session_paused.sql": [],
+    "supabase/migrations/20260813000001_reattempt_previous_phase.sql": [],
+    "supabase/migrations/20260813000002_go_classes_coa_topic_test.sql": [],
+    "supabase/migrations/20260813000003_go_classes_coa_topic_test_2.sql": [],
+    "supabase/migrations/20260813000004_go_classes_coa_topic_test_photos.sql": [],
+    "supabase/migrations/20260813000005_go_classes_coa_topic_test_2_photos.sql": [],
+    "supabase/migrations/20260813000006_go_classes_coa_topic_test_2_answer_free_reattempts.sql": [],
+    "tailwind.config.js": [],
+    "tsconfig.json": [],
+    "tsconfig.node.json": [],
+    "vercel.json": [],
+    "vite.config.ts": [],
+    "vitest.config.ts": []
+  }
+}

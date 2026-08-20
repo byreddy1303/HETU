@@ -1,0 +1,1016 @@
+{
+  "scriptCompleted": true,
+  "filesAnalyzed": 13,
+  "filesSkipped": [],
+  "analysisOutcomes": {
+    "structure": {
+      "succeeded": 13,
+      "failed": 0
+    },
+    "callGraph": {
+      "succeeded": 13,
+      "failed": 0,
+      "skipped": 0
+    }
+  },
+  "results": [
+    {
+      "path": "src/__tests__/contextual_gate_tips.test.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 40,
+      "nonEmptyLines": 37,
+      "metrics": {
+        "importCount": 1,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/__tests__/isolation.test.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 102,
+      "nonEmptyLines": 95,
+      "functions": [
+        {
+          "name": "seedAll",
+          "startLine": 15,
+          "endLine": 52,
+          "params": []
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "seedAll",
+          "callee": "usePrefsStore.getState().set",
+          "lineNumber": 17
+        },
+        {
+          "caller": "seedAll",
+          "callee": "usePrefsStore.getState",
+          "lineNumber": 17
+        },
+        {
+          "caller": "seedAll",
+          "callee": "usePrefsStore.getState().set",
+          "lineNumber": 18
+        },
+        {
+          "caller": "seedAll",
+          "callee": "usePrefsStore.getState",
+          "lineNumber": 18
+        },
+        {
+          "caller": "seedAll",
+          "callee": "useSessionStore.getState().begin",
+          "lineNumber": 20
+        },
+        {
+          "caller": "seedAll",
+          "callee": "useSessionStore.getState",
+          "lineNumber": 20
+        },
+        {
+          "caller": "seedAll",
+          "callee": "useSessionStore.getState().enterTag",
+          "lineNumber": 21
+        },
+        {
+          "caller": "seedAll",
+          "callee": "useSessionStore.getState",
+          "lineNumber": 21
+        },
+        {
+          "caller": "seedAll",
+          "callee": "useLogStore.getState().beginMulti",
+          "lineNumber": 23
+        },
+        {
+          "caller": "seedAll",
+          "callee": "useLogStore.getState",
+          "lineNumber": 23
+        },
+        {
+          "caller": "seedAll",
+          "callee": "useLogStore.getState().bumpLogged",
+          "lineNumber": 24
+        },
+        {
+          "caller": "seedAll",
+          "callee": "useLogStore.getState",
+          "lineNumber": 24
+        },
+        {
+          "caller": "seedAll",
+          "callee": "db.meta.put",
+          "lineNumber": 26
+        },
+        {
+          "caller": "seedAll",
+          "callee": "new Date().toISOString",
+          "lineNumber": 26
+        },
+        {
+          "caller": "seedAll",
+          "callee": "db.questions.add",
+          "lineNumber": 27
+        },
+        {
+          "caller": "seedAll",
+          "callee": "new Date().toISOString",
+          "lineNumber": 46
+        },
+        {
+          "caller": "seedAll",
+          "callee": "localStorage.setItem",
+          "lineNumber": 50
+        },
+        {
+          "caller": "seedAll",
+          "callee": "localStorage.setItem",
+          "lineNumber": 51
+        }
+      ],
+      "metrics": {
+        "importCount": 5,
+        "exportCount": 0,
+        "functionCount": 1,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/components/layout/MobileTabs.tsx",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 343,
+      "nonEmptyLines": 322,
+      "functions": [
+        {
+          "name": "MobileTabs",
+          "startLine": 106,
+          "endLine": 312,
+          "params": []
+        },
+        {
+          "name": "TabButton",
+          "startLine": 315,
+          "endLine": 343,
+          "params": [
+            "{ tab, pathname }"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "MobileTabs",
+          "line": 106,
+          "isDefault": true
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "MobileTabs",
+          "callee": "useLocation",
+          "lineNumber": 107
+        },
+        {
+          "caller": "MobileTabs",
+          "callee": "useState",
+          "lineNumber": 108
+        },
+        {
+          "caller": "MobileTabs",
+          "callee": "useReducedMotion",
+          "lineNumber": 109
+        },
+        {
+          "caller": "MobileTabs",
+          "callee": "useRef",
+          "lineNumber": 110
+        },
+        {
+          "caller": "MobileTabs",
+          "callee": "useSessionStore",
+          "lineNumber": 112
+        },
+        {
+          "caller": "MobileTabs",
+          "callee": "useLiveQuery",
+          "lineNumber": 113
+        },
+        {
+          "caller": "MobileTabs",
+          "callee": "db.sessions.get",
+          "lineNumber": 115
+        },
+        {
+          "caller": "MobileTabs",
+          "callee": "MORE_GROUPS.flatMap((g) => g.items)\n    .concat(SETTINGS_ITEM)\n    .some",
+          "lineNumber": 123
+        },
+        {
+          "caller": "MobileTabs",
+          "callee": "MORE_GROUPS.flatMap((g) => g.items)\n    .concat",
+          "lineNumber": 123
+        },
+        {
+          "caller": "MobileTabs",
+          "callee": "MORE_GROUPS.flatMap",
+          "lineNumber": 123
+        },
+        {
+          "caller": "MobileTabs",
+          "callee": "pathname.startsWith",
+          "lineNumber": 125
+        },
+        {
+          "caller": "MobileTabs",
+          "callee": "useEffect",
+          "lineNumber": 129
+        },
+        {
+          "caller": "MobileTabs",
+          "callee": "setMoreOpen",
+          "lineNumber": 129
+        },
+        {
+          "caller": "MobileTabs",
+          "callee": "useEffect",
+          "lineNumber": 132
+        },
+        {
+          "caller": "handler",
+          "callee": "setMoreOpen",
+          "lineNumber": 134
+        },
+        {
+          "caller": "MobileTabs",
+          "callee": "window.addEventListener",
+          "lineNumber": 135
+        },
+        {
+          "caller": "MobileTabs",
+          "callee": "window.removeEventListener",
+          "lineNumber": 136
+        },
+        {
+          "caller": "MobileTabs",
+          "callee": "setMoreOpen",
+          "lineNumber": 156
+        },
+        {
+          "caller": "MobileTabs",
+          "callee": "setMoreOpen",
+          "lineNumber": 176
+        },
+        {
+          "caller": "MobileTabs",
+          "callee": "MORE_GROUPS.map",
+          "lineNumber": 189
+        },
+        {
+          "caller": "MobileTabs",
+          "callee": "group.items.map",
+          "lineNumber": 194
+        },
+        {
+          "caller": "MobileTabs",
+          "callee": "pathname.startsWith",
+          "lineNumber": 196
+        },
+        {
+          "caller": "MobileTabs",
+          "callee": "haptic",
+          "lineNumber": 201
+        },
+        {
+          "caller": "MobileTabs",
+          "callee": "cn",
+          "lineNumber": 202
+        },
+        {
+          "caller": "MobileTabs",
+          "callee": "haptic",
+          "lineNumber": 222
+        },
+        {
+          "caller": "MobileTabs",
+          "callee": "cn",
+          "lineNumber": 223
+        },
+        {
+          "caller": "MobileTabs",
+          "callee": "TABS.slice(0, 2).map",
+          "lineNumber": 247
+        },
+        {
+          "caller": "MobileTabs",
+          "callee": "TABS.slice",
+          "lineNumber": 247
+        },
+        {
+          "caller": "MobileTabs",
+          "callee": "haptic",
+          "lineNumber": 253
+        },
+        {
+          "caller": "MobileTabs",
+          "callee": "cn",
+          "lineNumber": 256
+        },
+        {
+          "caller": "MobileTabs",
+          "callee": "TABS.slice(2).map",
+          "lineNumber": 274
+        },
+        {
+          "caller": "MobileTabs",
+          "callee": "TABS.slice",
+          "lineNumber": 274
+        },
+        {
+          "caller": "MobileTabs",
+          "callee": "haptic",
+          "lineNumber": 280
+        },
+        {
+          "caller": "MobileTabs",
+          "callee": "setMoreOpen",
+          "lineNumber": 281
+        },
+        {
+          "caller": "MobileTabs",
+          "callee": "cn",
+          "lineNumber": 285
+        },
+        {
+          "caller": "TabButton",
+          "callee": "tab.match.some",
+          "lineNumber": 320
+        },
+        {
+          "caller": "TabButton",
+          "callee": "pathname.startsWith",
+          "lineNumber": 320
+        },
+        {
+          "caller": "TabButton",
+          "callee": "haptic",
+          "lineNumber": 326
+        },
+        {
+          "caller": "TabButton",
+          "callee": "cn",
+          "lineNumber": 327
+        }
+      ],
+      "metrics": {
+        "importCount": 4,
+        "exportCount": 1,
+        "functionCount": 2,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/components/layout/Nav.tsx",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 243,
+      "nonEmptyLines": 229,
+      "functions": [
+        {
+          "name": "NavItem",
+          "startLine": 137,
+          "endLine": 156,
+          "params": [
+            "{ item }"
+          ]
+        },
+        {
+          "name": "Group",
+          "startLine": 158,
+          "endLine": 167,
+          "params": [
+            "{ label, items }"
+          ]
+        },
+        {
+          "name": "Nav",
+          "startLine": 169,
+          "endLine": 243,
+          "params": []
+        }
+      ],
+      "exports": [
+        {
+          "name": "Nav",
+          "line": 169,
+          "isDefault": true
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "NavItem",
+          "callee": "cn",
+          "lineNumber": 144
+        },
+        {
+          "caller": "NavItem",
+          "callee": "cn",
+          "lineNumber": 147
+        },
+        {
+          "caller": "Group",
+          "callee": "items.map",
+          "lineNumber": 162
+        },
+        {
+          "caller": "Nav",
+          "callee": "useAuth",
+          "lineNumber": 170
+        },
+        {
+          "caller": "Nav",
+          "callee": "useAuthStore",
+          "lineNumber": 171
+        },
+        {
+          "caller": "Nav",
+          "callee": "useSessionStore",
+          "lineNumber": 172
+        },
+        {
+          "caller": "Nav",
+          "callee": "useLiveQuery",
+          "lineNumber": 176
+        },
+        {
+          "caller": "Nav",
+          "callee": "db.sessions.get",
+          "lineNumber": 178
+        },
+        {
+          "caller": "Nav",
+          "callee": "(profile?.name ?? 'S')[0].toUpperCase",
+          "lineNumber": 221
+        },
+        {
+          "caller": "Nav",
+          "callee": "signOut",
+          "lineNumber": 232
+        }
+      ],
+      "metrics": {
+        "importCount": 6,
+        "exportCount": 1,
+        "functionCount": 3,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/components/layout/Shell.tsx",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 61,
+      "nonEmptyLines": 60,
+      "functions": [
+        {
+          "name": "Shell",
+          "startLine": 13,
+          "endLine": 61,
+          "params": []
+        }
+      ],
+      "exports": [
+        {
+          "name": "Shell",
+          "line": 13,
+          "isDefault": true
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "Shell",
+          "callee": "useSyncBootstrap",
+          "lineNumber": 14
+        },
+        {
+          "caller": "Shell",
+          "callee": "useLocation",
+          "lineNumber": 15
+        },
+        {
+          "caller": "Shell",
+          "callee": "useReducedMotion",
+          "lineNumber": 16
+        },
+        {
+          "caller": "Shell",
+          "callee": "['/', '/today', '/syllabus', '/mocks', '/revision-pack', '/topper-notes'].includes",
+          "lineNumber": 38
+        }
+      ],
+      "metrics": {
+        "importCount": 9,
+        "exportCount": 1,
+        "functionCount": 1,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/components/layout/TopRightControls.tsx",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 42,
+      "nonEmptyLines": 38,
+      "functions": [
+        {
+          "name": "ExamCountdown",
+          "startLine": 10,
+          "endLine": 32,
+          "params": [
+            "{ className }"
+          ]
+        },
+        {
+          "name": "TopRightControls",
+          "startLine": 34,
+          "endLine": 42,
+          "params": [
+            "{ className }"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "ExamCountdown",
+          "line": 10,
+          "isDefault": false
+        },
+        {
+          "name": "TopRightControls",
+          "line": 34,
+          "isDefault": true
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "ExamCountdown",
+          "callee": "useAuth",
+          "lineNumber": 11
+        },
+        {
+          "caller": "ExamCountdown",
+          "callee": "usePrefsStore",
+          "lineNumber": 12
+        },
+        {
+          "caller": "ExamCountdown",
+          "callee": "differenceInCalendarDays",
+          "lineNumber": 13
+        },
+        {
+          "caller": "ExamCountdown",
+          "callee": "parseISO",
+          "lineNumber": 14
+        },
+        {
+          "caller": "ExamCountdown",
+          "callee": "cn",
+          "lineNumber": 23
+        }
+      ],
+      "metrics": {
+        "importCount": 6,
+        "exportCount": 2,
+        "functionCount": 2,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/components/shared/ContextualGateTip.tsx",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 54,
+      "nonEmptyLines": 51,
+      "functions": [
+        {
+          "name": "ContextualGateTip",
+          "startLine": 18,
+          "endLine": 54,
+          "params": [
+            "{\n  pathname,\n  className\n}"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "ContextualGateTip",
+          "line": 18,
+          "isDefault": true
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "ContextualGateTip",
+          "callee": "contextualGateTipForPath",
+          "lineNumber": 25
+        },
+        {
+          "caller": "ContextualGateTip",
+          "callee": "cn",
+          "lineNumber": 30
+        },
+        {
+          "caller": "ContextualGateTip",
+          "callee": "cn",
+          "lineNumber": 37
+        }
+      ],
+      "metrics": {
+        "importCount": 2,
+        "exportCount": 1,
+        "functionCount": 1,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/components/shared/OfflineBadge.tsx",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 28,
+      "nonEmptyLines": 25,
+      "functions": [
+        {
+          "name": "OfflineBadge",
+          "startLine": 6,
+          "endLine": 28,
+          "params": [
+            "{ className }"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "OfflineBadge",
+          "line": 6,
+          "isDefault": true
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "OfflineBadge",
+          "callee": "useOnline",
+          "lineNumber": 7
+        },
+        {
+          "caller": "OfflineBadge",
+          "callee": "usePendingCount",
+          "lineNumber": 8
+        },
+        {
+          "caller": "OfflineBadge",
+          "callee": "useAuth",
+          "lineNumber": 9
+        },
+        {
+          "caller": "OfflineBadge",
+          "callee": "cn",
+          "lineNumber": 13
+        },
+        {
+          "caller": "OfflineBadge",
+          "callee": "cn",
+          "lineNumber": 22
+        }
+      ],
+      "metrics": {
+        "importCount": 3,
+        "exportCount": 1,
+        "functionCount": 1,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/hooks/useSync.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 47,
+      "nonEmptyLines": 44,
+      "functions": [
+        {
+          "name": "useSyncBootstrap",
+          "startLine": 8,
+          "endLine": 16,
+          "params": []
+        },
+        {
+          "name": "useOnline",
+          "startLine": 18,
+          "endLine": 33,
+          "params": []
+        },
+        {
+          "name": "usePendingCount",
+          "startLine": 36,
+          "endLine": 47,
+          "params": []
+        }
+      ],
+      "exports": [
+        {
+          "name": "useSyncBootstrap",
+          "line": 8,
+          "isDefault": false
+        },
+        {
+          "name": "useOnline",
+          "line": 18,
+          "isDefault": false
+        },
+        {
+          "name": "usePendingCount",
+          "line": 36,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "useSyncBootstrap",
+          "callee": "useAuth",
+          "lineNumber": 9
+        },
+        {
+          "caller": "useSyncBootstrap",
+          "callee": "useEffect",
+          "lineNumber": 10
+        },
+        {
+          "caller": "useSyncBootstrap",
+          "callee": "initSync",
+          "lineNumber": 12
+        },
+        {
+          "caller": "useSyncBootstrap",
+          "callee": "stopSync",
+          "lineNumber": 13
+        },
+        {
+          "caller": "useOnline",
+          "callee": "useState",
+          "lineNumber": 19
+        },
+        {
+          "caller": "useOnline",
+          "callee": "useEffect",
+          "lineNumber": 22
+        },
+        {
+          "caller": "up",
+          "callee": "setOnline",
+          "lineNumber": 23
+        },
+        {
+          "caller": "down",
+          "callee": "setOnline",
+          "lineNumber": 24
+        },
+        {
+          "caller": "useOnline",
+          "callee": "window.addEventListener",
+          "lineNumber": 25
+        },
+        {
+          "caller": "useOnline",
+          "callee": "window.addEventListener",
+          "lineNumber": 26
+        },
+        {
+          "caller": "useOnline",
+          "callee": "window.removeEventListener",
+          "lineNumber": 28
+        },
+        {
+          "caller": "useOnline",
+          "callee": "window.removeEventListener",
+          "lineNumber": 29
+        },
+        {
+          "caller": "usePendingCount",
+          "callee": "useLiveQuery",
+          "lineNumber": 38
+        },
+        {
+          "caller": "usePendingCount",
+          "callee": "Promise.all",
+          "lineNumber": 39
+        },
+        {
+          "caller": "usePendingCount",
+          "callee": "SYNCED_TABLES.map",
+          "lineNumber": 40
+        },
+        {
+          "caller": "usePendingCount",
+          "callee": "table(name).where('sync_status').anyOf('pending', 'error').count",
+          "lineNumber": 41
+        },
+        {
+          "caller": "usePendingCount",
+          "callee": "table(name).where('sync_status').anyOf",
+          "lineNumber": 41
+        },
+        {
+          "caller": "usePendingCount",
+          "callee": "table(name).where",
+          "lineNumber": 41
+        },
+        {
+          "caller": "usePendingCount",
+          "callee": "table",
+          "lineNumber": 41
+        },
+        {
+          "caller": "usePendingCount",
+          "callee": "counts.reduce",
+          "lineNumber": 44
+        }
+      ],
+      "metrics": {
+        "importCount": 3,
+        "exportCount": 3,
+        "functionCount": 3,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/lib/contextual-gate-tips.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 163,
+      "nonEmptyLines": 158,
+      "functions": [
+        {
+          "name": "contextualGateTipForPath",
+          "startLine": 142,
+          "endLine": 163,
+          "params": [
+            "pathname"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "contextualGateTipForPath",
+          "line": 142,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "contextualGateTipForPath",
+          "callee": "pathname.replace",
+          "lineNumber": 143
+        },
+        {
+          "caller": "contextualGateTipForPath",
+          "callee": "/^\\/session\\/[^/]+\\/solve$/.test",
+          "lineNumber": 146
+        },
+        {
+          "caller": "contextualGateTipForPath",
+          "callee": "/^\\/session\\/[^/]+\\/review$/.test",
+          "lineNumber": 147
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 1,
+        "functionCount": 1,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/lib/isolation.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 57,
+      "nonEmptyLines": 55,
+      "functions": [
+        {
+          "name": "wipeLocalState",
+          "startLine": 23,
+          "endLine": 57,
+          "params": []
+        }
+      ],
+      "exports": [
+        {
+          "name": "wipeLocalState",
+          "line": 23,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "wipeLocalState",
+          "callee": "usePrefsStore.setState",
+          "lineNumber": 26
+        },
+        {
+          "caller": "wipeLocalState",
+          "callee": "useSessionStore.getState().end",
+          "lineNumber": 31
+        },
+        {
+          "caller": "wipeLocalState",
+          "callee": "useSessionStore.getState",
+          "lineNumber": 31
+        },
+        {
+          "caller": "wipeLocalState",
+          "callee": "useLogStore.getState().end",
+          "lineNumber": 36
+        },
+        {
+          "caller": "wipeLocalState",
+          "callee": "useLogStore.getState",
+          "lineNumber": 36
+        },
+        {
+          "caller": "wipeLocalState",
+          "callee": "localStorage.removeItem",
+          "lineNumber": 41
+        },
+        {
+          "caller": "wipeLocalState",
+          "callee": "localStorage.key",
+          "lineNumber": 46
+        },
+        {
+          "caller": "wipeLocalState",
+          "callee": "key.startsWith",
+          "lineNumber": 47
+        },
+        {
+          "caller": "wipeLocalState",
+          "callee": "localStorage.removeItem",
+          "lineNumber": 47
+        },
+        {
+          "caller": "wipeLocalState",
+          "callee": "clearLocalData",
+          "lineNumber": 53
+        }
+      ],
+      "metrics": {
+        "importCount": 4,
+        "exportCount": 1,
+        "functionCount": 1,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/stores/log.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 68,
+      "nonEmptyLines": 65,
+      "exports": [
+        {
+          "name": "useLogStore",
+          "line": 35,
+          "isDefault": false
+        }
+      ],
+      "metrics": {
+        "importCount": 1,
+        "exportCount": 1,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/stores/session.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 70,
+      "nonEmptyLines": 67,
+      "exports": [
+        {
+          "name": "useSessionStore",
+          "line": 29,
+          "isDefault": false
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 1,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    }
+  ]
+}

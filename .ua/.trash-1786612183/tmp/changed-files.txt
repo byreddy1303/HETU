@@ -1,0 +1,5 @@
+.ua/.understandignore
+src/__tests__/go-classes-coa-test-2-photos.test.ts
+src/__tests__/journal-ui.test.tsx
+src/pages/Journal.tsx
+supabase/migrations/20260813000006_go_classes_coa_topic_test_2_answer_free_reattempts.sql

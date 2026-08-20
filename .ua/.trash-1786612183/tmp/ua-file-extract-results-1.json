@@ -1,0 +1,5582 @@
+{
+  "scriptCompleted": true,
+  "filesAnalyzed": 29,
+  "filesSkipped": [],
+  "analysisOutcomes": {
+    "structure": {
+      "succeeded": 29,
+      "failed": 0
+    },
+    "callGraph": {
+      "succeeded": 29,
+      "failed": 0,
+      "skipped": 0
+    }
+  },
+  "results": [
+    {
+      "path": "src/__tests__/cron-auth.test.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 49,
+      "nonEmptyLines": 42,
+      "functions": [
+        {
+          "name": "jwt",
+          "startLine": 5,
+          "endLine": 11,
+          "params": [
+            "payload"
+          ]
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "jwt",
+          "callee": "btoa(JSON.stringify(payload))\n    .replace(/\\+/g, '-')\n    .replace(/\\//g, '_')\n    .replace",
+          "lineNumber": 6
+        },
+        {
+          "caller": "jwt",
+          "callee": "btoa(JSON.stringify(payload))\n    .replace(/\\+/g, '-')\n    .replace",
+          "lineNumber": 6
+        },
+        {
+          "caller": "jwt",
+          "callee": "btoa(JSON.stringify(payload))\n    .replace",
+          "lineNumber": 6
+        },
+        {
+          "caller": "jwt",
+          "callee": "btoa",
+          "lineNumber": 6
+        },
+        {
+          "caller": "jwt",
+          "callee": "JSON.stringify",
+          "lineNumber": 6
+        }
+      ],
+      "metrics": {
+        "importCount": 1,
+        "exportCount": 0,
+        "functionCount": 1,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/__tests__/digest-schedule.test.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 27,
+      "nonEmptyLines": 24,
+      "metrics": {
+        "importCount": 1,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/__tests__/study-notification-copy.test.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 66,
+      "nonEmptyLines": 60,
+      "metrics": {
+        "importCount": 1,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/__tests__/telegram.test.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 297,
+      "nonEmptyLines": 276,
+      "metrics": {
+        "importCount": 3,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/components/shared/DailyQuote.tsx",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 24,
+      "nonEmptyLines": 22,
+      "functions": [
+        {
+          "name": "DailyQuote",
+          "startLine": 5,
+          "endLine": 24,
+          "params": []
+        }
+      ],
+      "exports": [
+        {
+          "name": "DailyQuote",
+          "line": 5,
+          "isDefault": true
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "DailyQuote",
+          "callee": "useAuth",
+          "lineNumber": 6
+        },
+        {
+          "caller": "DailyQuote",
+          "callee": "todayISO",
+          "lineNumber": 7
+        },
+        {
+          "caller": "DailyQuote",
+          "callee": "pickQuoteForDay",
+          "lineNumber": 8
+        }
+      ],
+      "metrics": {
+        "importCount": 3,
+        "exportCount": 1,
+        "functionCount": 1,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/lib/motivational-quotes.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 23,
+      "nonEmptyLines": 19,
+      "functions": [
+        {
+          "name": "quoteForDate",
+          "startLine": 15,
+          "endLine": 17,
+          "params": [
+            "dateISO",
+            "seedSalt"
+          ]
+        },
+        {
+          "name": "randomQuote",
+          "startLine": 20,
+          "endLine": 23,
+          "params": []
+        }
+      ],
+      "exports": [
+        {
+          "name": "QUOTES",
+          "line": 10,
+          "isDefault": false
+        },
+        {
+          "name": "pickQuoteForDay",
+          "line": 10,
+          "isDefault": false
+        },
+        {
+          "name": "QuotePreset",
+          "line": 10,
+          "isDefault": false
+        },
+        {
+          "name": "MOTIVATIONAL_QUOTES",
+          "line": 12,
+          "isDefault": false
+        },
+        {
+          "name": "quoteForDate",
+          "line": 15,
+          "isDefault": false
+        },
+        {
+          "name": "randomQuote",
+          "line": 20,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "quoteForDate",
+          "callee": "pickQuoteForDay",
+          "lineNumber": 16
+        },
+        {
+          "caller": "randomQuote",
+          "callee": "Math.floor",
+          "lineNumber": 21
+        },
+        {
+          "caller": "randomQuote",
+          "callee": "Math.random",
+          "lineNumber": 21
+        }
+      ],
+      "metrics": {
+        "importCount": 1,
+        "exportCount": 6,
+        "functionCount": 2,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/lib/one_liners.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 14,
+      "nonEmptyLines": 12,
+      "functions": [
+        {
+          "name": "pickOneLinerFor",
+          "startLine": 12,
+          "endLine": 14,
+          "params": [
+            "dateISO",
+            "seed"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "ONE_LINERS",
+          "line": 10,
+          "isDefault": false
+        },
+        {
+          "name": "pickOneLinerFor",
+          "line": 12,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "pickOneLinerFor",
+          "callee": "pickQuoteForDay",
+          "lineNumber": 13
+        }
+      ],
+      "metrics": {
+        "importCount": 1,
+        "exportCount": 2,
+        "functionCount": 1,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "supabase/functions/_shared/cors.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 12,
+      "nonEmptyLines": 11,
+      "functions": [
+        {
+          "name": "json",
+          "startLine": 7,
+          "endLine": 12,
+          "params": [
+            "body",
+            "status",
+            "extra"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "corsHeaders",
+          "line": 1,
+          "isDefault": false
+        },
+        {
+          "name": "json",
+          "line": 7,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "json",
+          "callee": "JSON.stringify",
+          "lineNumber": 8
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 2,
+        "functionCount": 1,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "supabase/functions/_shared/cron-auth.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 18,
+      "nonEmptyLines": 17,
+      "functions": [
+        {
+          "name": "jwtRoleClaim",
+          "startLine": 6,
+          "endLine": 18,
+          "params": [
+            "token"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "jwtRoleClaim",
+          "line": 6,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "jwtRoleClaim",
+          "callee": "token.split",
+          "lineNumber": 7
+        },
+        {
+          "caller": "jwtRoleClaim",
+          "callee": "parts[1].replace(/-/g, '+').replace",
+          "lineNumber": 11
+        },
+        {
+          "caller": "jwtRoleClaim",
+          "callee": "parts[1].replace",
+          "lineNumber": 11
+        },
+        {
+          "caller": "jwtRoleClaim",
+          "callee": "base64.padEnd",
+          "lineNumber": 12
+        },
+        {
+          "caller": "jwtRoleClaim",
+          "callee": "Math.ceil",
+          "lineNumber": 12
+        },
+        {
+          "caller": "jwtRoleClaim",
+          "callee": "JSON.parse",
+          "lineNumber": 13
+        },
+        {
+          "caller": "jwtRoleClaim",
+          "callee": "atob",
+          "lineNumber": 13
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 1,
+        "functionCount": 1,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "supabase/functions/_shared/digest-schedule.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 71,
+      "nonEmptyLines": 69,
+      "functions": [
+        {
+          "name": "localDigestClock",
+          "startLine": 9,
+          "endLine": 46,
+          "params": [
+            "now",
+            "timezone"
+          ]
+        },
+        {
+          "name": "isDigestTimeDue",
+          "startLine": 53,
+          "endLine": 71,
+          "params": [
+            "clock",
+            "targetHour",
+            "targetMinute",
+            "graceMinutes"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "localDigestClock",
+          "line": 9,
+          "isDefault": false
+        },
+        {
+          "name": "isDigestTimeDue",
+          "line": 53,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "localDigestClock",
+          "callee": "new Intl.DateTimeFormat('en-CA', {\n      timeZone: timezone,\n      year: 'numeric',\n      month: '2-digit',\n      day: '2-digit',\n      hour: '2-digit',\n      minute: '2-digit',\n      hour12: false,\n      weekday: 'short'\n    }).formatToParts",
+          "lineNumber": 11
+        },
+        {
+          "caller": "localDigestClock",
+          "callee": "Number.parseInt",
+          "lineNumber": 33
+        },
+        {
+          "caller": "localDigestClock",
+          "callee": "Number.parseInt",
+          "lineNumber": 34
+        },
+        {
+          "caller": "localDigestClock",
+          "callee": "now.getUTCDay",
+          "lineNumber": 36
+        },
+        {
+          "caller": "localDigestClock",
+          "callee": "now.getUTCHours",
+          "lineNumber": 40
+        },
+        {
+          "caller": "localDigestClock",
+          "callee": "now.getUTCMinutes",
+          "lineNumber": 41
+        },
+        {
+          "caller": "localDigestClock",
+          "callee": "now.toISOString().slice",
+          "lineNumber": 42
+        },
+        {
+          "caller": "localDigestClock",
+          "callee": "now.toISOString",
+          "lineNumber": 42
+        },
+        {
+          "caller": "localDigestClock",
+          "callee": "now.getUTCDay",
+          "lineNumber": 43
+        },
+        {
+          "caller": "isDigestTimeDue",
+          "callee": "Number.isInteger",
+          "lineNumber": 60
+        },
+        {
+          "caller": "isDigestTimeDue",
+          "callee": "Number.isInteger",
+          "lineNumber": 63
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 2,
+        "functionCount": 2,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "supabase/functions/_shared/email.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 265,
+      "nonEmptyLines": 244,
+      "functions": [
+        {
+          "name": "normalizeFrom",
+          "startLine": 35,
+          "endLine": 43,
+          "params": [
+            "raw",
+            "fallbackAddr"
+          ]
+        },
+        {
+          "name": "sendViaGmail",
+          "startLine": 45,
+          "endLine": 70,
+          "params": [
+            "input"
+          ]
+        },
+        {
+          "name": "sendViaResend",
+          "startLine": 72,
+          "endLine": 99,
+          "params": [
+            "input"
+          ]
+        },
+        {
+          "name": "sendEmail",
+          "startLine": 101,
+          "endLine": 112,
+          "params": [
+            "input"
+          ]
+        },
+        {
+          "name": "shell",
+          "startLine": 116,
+          "endLine": 137,
+          "params": [
+            "inner"
+          ]
+        },
+        {
+          "name": "escape",
+          "startLine": 139,
+          "endLine": 146,
+          "params": [
+            "s"
+          ]
+        },
+        {
+          "name": "newRequestNotification",
+          "startLine": 150,
+          "endLine": 179,
+          "params": [
+            "args"
+          ]
+        },
+        {
+          "name": "inviteApproved",
+          "startLine": 181,
+          "endLine": 203,
+          "params": [
+            "args"
+          ]
+        },
+        {
+          "name": "pinResetRequested",
+          "startLine": 205,
+          "endLine": 224,
+          "params": [
+            "args"
+          ]
+        },
+        {
+          "name": "buddyRequestReceived",
+          "startLine": 226,
+          "endLine": 246,
+          "params": [
+            "args"
+          ]
+        },
+        {
+          "name": "inviteDeclined",
+          "startLine": 248,
+          "endLine": 265,
+          "params": [
+            "args"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "sendEmail",
+          "line": 101,
+          "isDefault": false
+        },
+        {
+          "name": "newRequestNotification",
+          "line": 150,
+          "isDefault": false
+        },
+        {
+          "name": "inviteApproved",
+          "line": 181,
+          "isDefault": false
+        },
+        {
+          "name": "pinResetRequested",
+          "line": 205,
+          "isDefault": false
+        },
+        {
+          "name": "buddyRequestReceived",
+          "line": 226,
+          "isDefault": false
+        },
+        {
+          "name": "inviteDeclined",
+          "line": 248,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "normalizeFrom",
+          "callee": "raw.trim",
+          "lineNumber": 38
+        },
+        {
+          "caller": "normalizeFrom",
+          "callee": "trimmed.match",
+          "lineNumber": 39
+        },
+        {
+          "caller": "normalizeFrom",
+          "callee": "trimmed.includes",
+          "lineNumber": 41
+        },
+        {
+          "caller": "sendViaGmail",
+          "callee": "Deno.env.get",
+          "lineNumber": 46
+        },
+        {
+          "caller": "sendViaGmail",
+          "callee": "Deno.env.get",
+          "lineNumber": 47
+        },
+        {
+          "caller": "sendViaGmail",
+          "callee": "Deno.env.get",
+          "lineNumber": 49
+        },
+        {
+          "caller": "sendViaGmail",
+          "callee": "normalizeFrom",
+          "lineNumber": 50
+        },
+        {
+          "caller": "sendViaGmail",
+          "callee": "nodemailer.createTransport",
+          "lineNumber": 53
+        },
+        {
+          "caller": "sendViaGmail",
+          "callee": "transporter.sendMail",
+          "lineNumber": 59
+        },
+        {
+          "caller": "sendViaGmail",
+          "callee": "(e as Error).message.slice",
+          "lineNumber": 68
+        },
+        {
+          "caller": "sendViaResend",
+          "callee": "Deno.env.get",
+          "lineNumber": 73
+        },
+        {
+          "caller": "sendViaResend",
+          "callee": "Deno.env.get",
+          "lineNumber": 74
+        },
+        {
+          "caller": "sendViaResend",
+          "callee": "fetch",
+          "lineNumber": 78
+        },
+        {
+          "caller": "sendViaResend",
+          "callee": "JSON.stringify",
+          "lineNumber": 84
+        },
+        {
+          "caller": "sendViaResend",
+          "callee": "res.text().catch",
+          "lineNumber": 94
+        },
+        {
+          "caller": "sendViaResend",
+          "callee": "res.text",
+          "lineNumber": 94
+        },
+        {
+          "caller": "sendViaResend",
+          "callee": "text.slice",
+          "lineNumber": 95
+        },
+        {
+          "caller": "sendViaResend",
+          "callee": "res.json().catch",
+          "lineNumber": 97
+        },
+        {
+          "caller": "sendViaResend",
+          "callee": "res.json",
+          "lineNumber": 97
+        },
+        {
+          "caller": "sendEmail",
+          "callee": "Deno.env.get",
+          "lineNumber": 104
+        },
+        {
+          "caller": "sendEmail",
+          "callee": "Deno.env.get",
+          "lineNumber": 104
+        },
+        {
+          "caller": "sendEmail",
+          "callee": "sendViaGmail",
+          "lineNumber": 105
+        },
+        {
+          "caller": "sendEmail",
+          "callee": "console.warn",
+          "lineNumber": 109
+        },
+        {
+          "caller": "sendEmail",
+          "callee": "sendViaResend",
+          "lineNumber": 111
+        },
+        {
+          "caller": "escape",
+          "callee": "s\n    .replace(/&/g, '&amp;')\n    .replace(/</g, '&lt;')\n    .replace(/>/g, '&gt;')\n    .replace(/\"/g, '&quot;')\n    .replace",
+          "lineNumber": 140
+        },
+        {
+          "caller": "escape",
+          "callee": "s\n    .replace(/&/g, '&amp;')\n    .replace(/</g, '&lt;')\n    .replace(/>/g, '&gt;')\n    .replace",
+          "lineNumber": 140
+        },
+        {
+          "caller": "escape",
+          "callee": "s\n    .replace(/&/g, '&amp;')\n    .replace(/</g, '&lt;')\n    .replace",
+          "lineNumber": 140
+        },
+        {
+          "caller": "escape",
+          "callee": "s\n    .replace(/&/g, '&amp;')\n    .replace",
+          "lineNumber": 140
+        },
+        {
+          "caller": "escape",
+          "callee": "s\n    .replace",
+          "lineNumber": 140
+        },
+        {
+          "caller": "newRequestNotification",
+          "callee": "escape",
+          "lineNumber": 162
+        },
+        {
+          "caller": "newRequestNotification",
+          "callee": "escape",
+          "lineNumber": 164
+        },
+        {
+          "caller": "newRequestNotification",
+          "callee": "escape",
+          "lineNumber": 166
+        },
+        {
+          "caller": "newRequestNotification",
+          "callee": "escape",
+          "lineNumber": 171
+        },
+        {
+          "caller": "newRequestNotification",
+          "callee": "shell",
+          "lineNumber": 177
+        },
+        {
+          "caller": "inviteApproved",
+          "callee": "escape",
+          "lineNumber": 187
+        },
+        {
+          "caller": "inviteApproved",
+          "callee": "args.name.split",
+          "lineNumber": 187
+        },
+        {
+          "caller": "inviteApproved",
+          "callee": "escape",
+          "lineNumber": 190
+        },
+        {
+          "caller": "inviteApproved",
+          "callee": "escape",
+          "lineNumber": 193
+        },
+        {
+          "caller": "inviteApproved",
+          "callee": "shell",
+          "lineNumber": 201
+        },
+        {
+          "caller": "pinResetRequested",
+          "callee": "escape",
+          "lineNumber": 211
+        },
+        {
+          "caller": "pinResetRequested",
+          "callee": "args.name.split",
+          "lineNumber": 211
+        },
+        {
+          "caller": "pinResetRequested",
+          "callee": "escape",
+          "lineNumber": 214
+        },
+        {
+          "caller": "pinResetRequested",
+          "callee": "escape",
+          "lineNumber": 217
+        },
+        {
+          "caller": "pinResetRequested",
+          "callee": "shell",
+          "lineNumber": 222
+        },
+        {
+          "caller": "buddyRequestReceived",
+          "callee": "escape",
+          "lineNumber": 233
+        },
+        {
+          "caller": "buddyRequestReceived",
+          "callee": "escape",
+          "lineNumber": 235
+        },
+        {
+          "caller": "buddyRequestReceived",
+          "callee": "escape",
+          "lineNumber": 238
+        },
+        {
+          "caller": "buddyRequestReceived",
+          "callee": "shell",
+          "lineNumber": 244
+        },
+        {
+          "caller": "inviteDeclined",
+          "callee": "escape",
+          "lineNumber": 253
+        },
+        {
+          "caller": "inviteDeclined",
+          "callee": "escape",
+          "lineNumber": 256
+        },
+        {
+          "caller": "inviteDeclined",
+          "callee": "args.name.split",
+          "lineNumber": 256
+        },
+        {
+          "caller": "inviteDeclined",
+          "callee": "shell",
+          "lineNumber": 263
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 6,
+        "functionCount": 11,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "supabase/functions/_shared/push.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 343,
+      "nonEmptyLines": 321,
+      "functions": [
+        {
+          "name": "truncate",
+          "startLine": 55,
+          "endLine": 58,
+          "params": [
+            "value",
+            "max"
+          ]
+        },
+        {
+          "name": "serviceAccount",
+          "startLine": 60,
+          "endLine": 78,
+          "params": []
+        },
+        {
+          "name": "getFcmAccessToken",
+          "startLine": 80,
+          "endLine": 122,
+          "params": [
+            "account"
+          ]
+        },
+        {
+          "name": "sendWebPush",
+          "startLine": 148,
+          "endLine": 188,
+          "params": [
+            "subscription",
+            "copy"
+          ]
+        },
+        {
+          "name": "sendNativePush",
+          "startLine": 190,
+          "endLine": 316,
+          "params": [
+            "subscription",
+            "copy"
+          ]
+        },
+        {
+          "name": "deliverToSubscription",
+          "startLine": 318,
+          "endLine": 343,
+          "params": [
+            "subscription",
+            "copy"
+          ]
+        }
+      ],
+      "classes": [
+        {
+          "name": "PushDeliveryError",
+          "startLine": 40,
+          "endLine": 50,
+          "methods": [
+            "constructor"
+          ],
+          "properties": [
+            "permanent",
+            "providerStatus"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "PushDeliveryError",
+          "line": 40,
+          "isDefault": false
+        },
+        {
+          "name": "truncate",
+          "line": 55,
+          "isDefault": false
+        },
+        {
+          "name": "serviceAccount",
+          "line": 60,
+          "isDefault": false
+        },
+        {
+          "name": "getFcmAccessToken",
+          "line": 80,
+          "isDefault": false
+        },
+        {
+          "name": "sendWebPush",
+          "line": 148,
+          "isDefault": false
+        },
+        {
+          "name": "sendNativePush",
+          "line": 190,
+          "isDefault": false
+        },
+        {
+          "name": "deliverToSubscription",
+          "line": 318,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "constructor",
+          "callee": "super",
+          "lineNumber": 45
+        },
+        {
+          "caller": "truncate",
+          "callee": "value.slice(0, max - 1).trimEnd",
+          "lineNumber": 57
+        },
+        {
+          "caller": "truncate",
+          "callee": "value.slice",
+          "lineNumber": 57
+        },
+        {
+          "caller": "serviceAccount",
+          "callee": "JSON.parse",
+          "lineNumber": 67
+        },
+        {
+          "caller": "serviceAccount",
+          "callee": "console.error",
+          "lineNumber": 74
+        },
+        {
+          "caller": "getFcmAccessToken",
+          "callee": "Date.now",
+          "lineNumber": 81
+        },
+        {
+          "caller": "getFcmAccessToken",
+          "callee": "Math.floor",
+          "lineNumber": 84
+        },
+        {
+          "caller": "getFcmAccessToken",
+          "callee": "Date.now",
+          "lineNumber": 84
+        },
+        {
+          "caller": "getFcmAccessToken",
+          "callee": "importPKCS8",
+          "lineNumber": 85
+        },
+        {
+          "caller": "getFcmAccessToken",
+          "callee": "new SignJWT({\n    scope: 'https://www.googleapis.com/auth/firebase.messaging'\n  })\n    .setProtectedHeader({ alg: 'RS256', typ: 'JWT' })\n    .setIssuer(account.client_email)\n    .setSubject(account.client_email)\n    .setAudience(account.token_uri ?? 'https://oauth2.googleapis.com/token')\n    .setIssuedAt(now)\n    .setExpirationTime(now + 3600)\n    .sign",
+          "lineNumber": 86
+        },
+        {
+          "caller": "getFcmAccessToken",
+          "callee": "new SignJWT({\n    scope: 'https://www.googleapis.com/auth/firebase.messaging'\n  })\n    .setProtectedHeader({ alg: 'RS256', typ: 'JWT' })\n    .setIssuer(account.client_email)\n    .setSubject(account.client_email)\n    .setAudience(account.token_uri ?? 'https://oauth2.googleapis.com/token')\n    .setIssuedAt(now)\n    .setExpirationTime",
+          "lineNumber": 86
+        },
+        {
+          "caller": "getFcmAccessToken",
+          "callee": "new SignJWT({\n    scope: 'https://www.googleapis.com/auth/firebase.messaging'\n  })\n    .setProtectedHeader({ alg: 'RS256', typ: 'JWT' })\n    .setIssuer(account.client_email)\n    .setSubject(account.client_email)\n    .setAudience(account.token_uri ?? 'https://oauth2.googleapis.com/token')\n    .setIssuedAt",
+          "lineNumber": 86
+        },
+        {
+          "caller": "getFcmAccessToken",
+          "callee": "new SignJWT({\n    scope: 'https://www.googleapis.com/auth/firebase.messaging'\n  })\n    .setProtectedHeader({ alg: 'RS256', typ: 'JWT' })\n    .setIssuer(account.client_email)\n    .setSubject(account.client_email)\n    .setAudience",
+          "lineNumber": 86
+        },
+        {
+          "caller": "getFcmAccessToken",
+          "callee": "new SignJWT({\n    scope: 'https://www.googleapis.com/auth/firebase.messaging'\n  })\n    .setProtectedHeader({ alg: 'RS256', typ: 'JWT' })\n    .setIssuer(account.client_email)\n    .setSubject",
+          "lineNumber": 86
+        },
+        {
+          "caller": "getFcmAccessToken",
+          "callee": "new SignJWT({\n    scope: 'https://www.googleapis.com/auth/firebase.messaging'\n  })\n    .setProtectedHeader({ alg: 'RS256', typ: 'JWT' })\n    .setIssuer",
+          "lineNumber": 86
+        },
+        {
+          "caller": "getFcmAccessToken",
+          "callee": "new SignJWT({\n    scope: 'https://www.googleapis.com/auth/firebase.messaging'\n  })\n    .setProtectedHeader",
+          "lineNumber": 86
+        },
+        {
+          "caller": "getFcmAccessToken",
+          "callee": "fetch",
+          "lineNumber": 97
+        },
+        {
+          "caller": "getFcmAccessToken",
+          "callee": "response.json().catch",
+          "lineNumber": 105
+        },
+        {
+          "caller": "getFcmAccessToken",
+          "callee": "response.json",
+          "lineNumber": 105
+        },
+        {
+          "caller": "getFcmAccessToken",
+          "callee": "truncate",
+          "lineNumber": 112
+        },
+        {
+          "caller": "getFcmAccessToken",
+          "callee": "Date.now",
+          "lineNumber": 119
+        },
+        {
+          "caller": "getFcmAccessToken",
+          "callee": "Math.max",
+          "lineNumber": 119
+        },
+        {
+          "caller": "sendWebPush",
+          "callee": "webpush.setVapidDetails",
+          "lineNumber": 155
+        },
+        {
+          "caller": "sendWebPush",
+          "callee": "webpush.sendNotification",
+          "lineNumber": 157
+        },
+        {
+          "caller": "sendWebPush",
+          "callee": "JSON.stringify",
+          "lineNumber": 162
+        },
+        {
+          "caller": "sendWebPush",
+          "callee": "Number",
+          "lineNumber": 180
+        },
+        {
+          "caller": "sendWebPush",
+          "callee": "truncate",
+          "lineNumber": 183
+        },
+        {
+          "caller": "sendNativePush",
+          "callee": "serviceAccount",
+          "lineNumber": 191
+        },
+        {
+          "caller": "sendNativePush",
+          "callee": "getFcmAccessToken",
+          "lineNumber": 196
+        },
+        {
+          "caller": "sendNativePush",
+          "callee": "crypto.randomUUID",
+          "lineNumber": 197
+        },
+        {
+          "caller": "sendNativePush",
+          "callee": "(copy.actions ?? []).slice",
+          "lineNumber": 200
+        },
+        {
+          "caller": "sendFcm",
+          "callee": "fetch",
+          "lineNumber": 230
+        },
+        {
+          "caller": "sendFcm",
+          "callee": "encodeURIComponent",
+          "lineNumber": 231
+        },
+        {
+          "caller": "sendFcm",
+          "callee": "JSON.stringify",
+          "lineNumber": 238
+        },
+        {
+          "caller": "sendFcm",
+          "callee": "response.json().catch",
+          "lineNumber": 248
+        },
+        {
+          "caller": "sendFcm",
+          "callee": "response.json",
+          "lineNumber": 248
+        },
+        {
+          "caller": "sendFcm",
+          "callee": "payload?.error?.details?.find",
+          "lineNumber": 254
+        },
+        {
+          "caller": "sendFcm",
+          "callee": "truncate",
+          "lineNumber": 258
+        },
+        {
+          "caller": "sendNativePush",
+          "callee": "sendFcm",
+          "lineNumber": 268
+        },
+        {
+          "caller": "sendNativePush",
+          "callee": "sendFcm",
+          "lineNumber": 285
+        },
+        {
+          "caller": "sendNativePush",
+          "callee": "console.warn",
+          "lineNumber": 292
+        },
+        {
+          "caller": "sendNativePush",
+          "callee": "sendFcm",
+          "lineNumber": 297
+        },
+        {
+          "caller": "sendNativePush",
+          "callee": "tagKey.slice",
+          "lineNumber": 312
+        },
+        {
+          "caller": "deliverToSubscription",
+          "callee": "sendWebPush",
+          "lineNumber": 324
+        },
+        {
+          "caller": "deliverToSubscription",
+          "callee": "sendNativePush",
+          "lineNumber": 326
+        },
+        {
+          "caller": "deliverToSubscription",
+          "callee": "truncate",
+          "lineNumber": 340
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 7,
+        "functionCount": 6,
+        "classCount": 1
+      }
+    },
+    {
+      "path": "supabase/functions/_shared/quotes.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 109,
+      "nonEmptyLines": 104,
+      "functions": [
+        {
+          "name": "original",
+          "startLine": 10,
+          "endLine": 13,
+          "params": [
+            "text"
+          ]
+        },
+        {
+          "name": "pickQuoteForDay",
+          "startLine": 92,
+          "endLine": 100,
+          "params": [
+            "isoDate",
+            "seedSalt"
+          ]
+        },
+        {
+          "name": "greetingForHour",
+          "startLine": 102,
+          "endLine": 109,
+          "params": [
+            "hour",
+            "firstName"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "QUOTES",
+          "line": 15,
+          "isDefault": false
+        },
+        {
+          "name": "pickQuoteForDay",
+          "line": 92,
+          "isDefault": false
+        },
+        {
+          "name": "greetingForHour",
+          "line": 102,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "pickQuoteForDay",
+          "callee": "src.charCodeAt",
+          "lineNumber": 96
+        },
+        {
+          "caller": "greetingForHour",
+          "callee": "firstName.trim",
+          "lineNumber": 103
+        },
+        {
+          "caller": "greetingForHour",
+          "callee": "firstName.trim",
+          "lineNumber": 103
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 3,
+        "functionCount": 3,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "supabase/functions/_shared/study-notification-copy.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 160,
+      "nonEmptyLines": 146,
+      "functions": [
+        {
+          "name": "clean",
+          "startLine": 27,
+          "endLine": 33,
+          "params": [
+            "value",
+            "maxLength"
+          ]
+        },
+        {
+          "name": "compact",
+          "startLine": 35,
+          "endLine": 39,
+          "params": [
+            "value",
+            "maxLength"
+          ]
+        },
+        {
+          "name": "plural",
+          "startLine": 41,
+          "endLine": 43,
+          "params": [
+            "value",
+            "singular",
+            "pluralForm"
+          ]
+        },
+        {
+          "name": "formatMinutes",
+          "startLine": 45,
+          "endLine": 51,
+          "params": [
+            "totalMinutes"
+          ]
+        },
+        {
+          "name": "parseStudyPlanBlocks",
+          "startLine": 53,
+          "endLine": 74,
+          "params": [
+            "value"
+          ]
+        },
+        {
+          "name": "blockSubject",
+          "startLine": 76,
+          "endLine": 78,
+          "params": [
+            "block"
+          ]
+        },
+        {
+          "name": "blockDetail",
+          "startLine": 80,
+          "endLine": 82,
+          "params": [
+            "block"
+          ]
+        },
+        {
+          "name": "detailedDayPlanCopy",
+          "startLine": 84,
+          "endLine": 131,
+          "params": [
+            "input"
+          ]
+        },
+        {
+          "name": "isPyqBlock",
+          "startLine": 133,
+          "endLine": 135,
+          "params": [
+            "block"
+          ]
+        },
+        {
+          "name": "dailyPyqCopy",
+          "startLine": 137,
+          "endLine": 160,
+          "params": [
+            "input"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "formatMinutes",
+          "line": 45,
+          "isDefault": false
+        },
+        {
+          "name": "parseStudyPlanBlocks",
+          "line": 53,
+          "isDefault": false
+        },
+        {
+          "name": "detailedDayPlanCopy",
+          "line": 84,
+          "isDefault": false
+        },
+        {
+          "name": "dailyPyqCopy",
+          "line": 137,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "clean",
+          "callee": "String(value ?? '')\n    .replace(/[\\u0000-\\u001f\\u007f]+/g, ' ')\n    .replace(/\\s+/g, ' ')\n    .trim()\n    .slice",
+          "lineNumber": 28
+        },
+        {
+          "caller": "clean",
+          "callee": "String(value ?? '')\n    .replace(/[\\u0000-\\u001f\\u007f]+/g, ' ')\n    .replace(/\\s+/g, ' ')\n    .trim",
+          "lineNumber": 28
+        },
+        {
+          "caller": "clean",
+          "callee": "String(value ?? '')\n    .replace(/[\\u0000-\\u001f\\u007f]+/g, ' ')\n    .replace",
+          "lineNumber": 28
+        },
+        {
+          "caller": "clean",
+          "callee": "String(value ?? '')\n    .replace",
+          "lineNumber": 28
+        },
+        {
+          "caller": "clean",
+          "callee": "String",
+          "lineNumber": 28
+        },
+        {
+          "caller": "compact",
+          "callee": "value.replace(/[ \\t]+/g, ' ').trim",
+          "lineNumber": 36
+        },
+        {
+          "caller": "compact",
+          "callee": "value.replace",
+          "lineNumber": 36
+        },
+        {
+          "caller": "compact",
+          "callee": "normalized.slice(0, Math.max(1, maxLength - 1)).trimEnd",
+          "lineNumber": 38
+        },
+        {
+          "caller": "compact",
+          "callee": "normalized.slice",
+          "lineNumber": 38
+        },
+        {
+          "caller": "compact",
+          "callee": "Math.max",
+          "lineNumber": 38
+        },
+        {
+          "caller": "formatMinutes",
+          "callee": "Math.max",
+          "lineNumber": 46
+        },
+        {
+          "caller": "formatMinutes",
+          "callee": "Math.round",
+          "lineNumber": 46
+        },
+        {
+          "caller": "formatMinutes",
+          "callee": "Math.floor",
+          "lineNumber": 48
+        },
+        {
+          "caller": "parseStudyPlanBlocks",
+          "callee": "Array.isArray",
+          "lineNumber": 54
+        },
+        {
+          "caller": "parseStudyPlanBlocks",
+          "callee": "value.slice",
+          "lineNumber": 56
+        },
+        {
+          "caller": "parseStudyPlanBlocks",
+          "callee": "clean",
+          "lineNumber": 59
+        },
+        {
+          "caller": "parseStudyPlanBlocks",
+          "callee": "Number.isFinite",
+          "lineNumber": 61
+        },
+        {
+          "caller": "parseStudyPlanBlocks",
+          "callee": "Math.max",
+          "lineNumber": 62
+        },
+        {
+          "caller": "parseStudyPlanBlocks",
+          "callee": "Math.min",
+          "lineNumber": 62
+        },
+        {
+          "caller": "parseStudyPlanBlocks",
+          "callee": "Math.round",
+          "lineNumber": 62
+        },
+        {
+          "caller": "parseStudyPlanBlocks",
+          "callee": "blocks.push",
+          "lineNumber": 65
+        },
+        {
+          "caller": "parseStudyPlanBlocks",
+          "callee": "clean",
+          "lineNumber": 67
+        },
+        {
+          "caller": "parseStudyPlanBlocks",
+          "callee": "clean",
+          "lineNumber": 69
+        },
+        {
+          "caller": "parseStudyPlanBlocks",
+          "callee": "clean",
+          "lineNumber": 70
+        },
+        {
+          "caller": "blockDetail",
+          "callee": "compact",
+          "lineNumber": 81
+        },
+        {
+          "caller": "detailedDayPlanCopy",
+          "callee": "input.blocks.slice",
+          "lineNumber": 89
+        },
+        {
+          "caller": "detailedDayPlanCopy",
+          "callee": "input.openItems.slice",
+          "lineNumber": 90
+        },
+        {
+          "caller": "detailedDayPlanCopy",
+          "callee": "blocks.reduce",
+          "lineNumber": 91
+        },
+        {
+          "caller": "detailedDayPlanCopy",
+          "callee": "plural",
+          "lineNumber": 99
+        },
+        {
+          "caller": "detailedDayPlanCopy",
+          "callee": "[\n    'Today’s plan',\n    blocks.length > 0 ? plural(blocks.length, 'block') : '',\n    totalMinutes > 0 ? formatMinutes(totalMinutes) : '',\n    items.length > 0 ? plural(items.length, 'task') : ''\n  ].filter",
+          "lineNumber": 104
+        },
+        {
+          "caller": "detailedDayPlanCopy",
+          "callee": "plural",
+          "lineNumber": 106
+        },
+        {
+          "caller": "detailedDayPlanCopy",
+          "callee": "formatMinutes",
+          "lineNumber": 107
+        },
+        {
+          "caller": "detailedDayPlanCopy",
+          "callee": "plural",
+          "lineNumber": 108
+        },
+        {
+          "caller": "detailedDayPlanCopy",
+          "callee": "blocks.slice(0, 4).entries",
+          "lineNumber": 111
+        },
+        {
+          "caller": "detailedDayPlanCopy",
+          "callee": "blocks.slice",
+          "lineNumber": 111
+        },
+        {
+          "caller": "detailedDayPlanCopy",
+          "callee": "lines.push",
+          "lineNumber": 112
+        },
+        {
+          "caller": "detailedDayPlanCopy",
+          "callee": "compact",
+          "lineNumber": 113
+        },
+        {
+          "caller": "detailedDayPlanCopy",
+          "callee": "blockSubject",
+          "lineNumber": 113
+        },
+        {
+          "caller": "detailedDayPlanCopy",
+          "callee": "formatMinutes",
+          "lineNumber": 113
+        },
+        {
+          "caller": "detailedDayPlanCopy",
+          "callee": "blockDetail",
+          "lineNumber": 113
+        },
+        {
+          "caller": "detailedDayPlanCopy",
+          "callee": "lines.push",
+          "lineNumber": 116
+        },
+        {
+          "caller": "detailedDayPlanCopy",
+          "callee": "plural",
+          "lineNumber": 116
+        },
+        {
+          "caller": "detailedDayPlanCopy",
+          "callee": "items.slice",
+          "lineNumber": 117
+        },
+        {
+          "caller": "detailedDayPlanCopy",
+          "callee": "compact",
+          "lineNumber": 118
+        },
+        {
+          "caller": "detailedDayPlanCopy",
+          "callee": "formatMinutes",
+          "lineNumber": 119
+        },
+        {
+          "caller": "detailedDayPlanCopy",
+          "callee": "lines.push",
+          "lineNumber": 120
+        },
+        {
+          "caller": "detailedDayPlanCopy",
+          "callee": "compact",
+          "lineNumber": 120
+        },
+        {
+          "caller": "detailedDayPlanCopy",
+          "callee": "lines.push",
+          "lineNumber": 122
+        },
+        {
+          "caller": "detailedDayPlanCopy",
+          "callee": "plural",
+          "lineNumber": 122
+        },
+        {
+          "caller": "detailedDayPlanCopy",
+          "callee": "lines.push",
+          "lineNumber": 124
+        },
+        {
+          "caller": "detailedDayPlanCopy",
+          "callee": "plural",
+          "lineNumber": 124
+        },
+        {
+          "caller": "detailedDayPlanCopy",
+          "callee": "compact",
+          "lineNumber": 128
+        },
+        {
+          "caller": "detailedDayPlanCopy",
+          "callee": "titleParts.join",
+          "lineNumber": 128
+        },
+        {
+          "caller": "detailedDayPlanCopy",
+          "callee": "compact",
+          "lineNumber": 129
+        },
+        {
+          "caller": "detailedDayPlanCopy",
+          "callee": "lines.join",
+          "lineNumber": 129
+        },
+        {
+          "caller": "isPyqBlock",
+          "callee": "/\\bpyq\\b|previous year/i.test",
+          "lineNumber": 134
+        },
+        {
+          "caller": "dailyPyqCopy",
+          "callee": "input.blocks.filter",
+          "lineNumber": 138
+        },
+        {
+          "caller": "dailyPyqCopy",
+          "callee": "planned.reduce",
+          "lineNumber": 140
+        },
+        {
+          "caller": "dailyPyqCopy",
+          "callee": "planned\n      .slice(0, 2)\n      .map(\n        (block) =>\n          `${compact(blockSubject(block), 45)} · ${formatMinutes(block.durationMin)} — ${blockDetail(block)}`\n      )\n      .join",
+          "lineNumber": 141
+        },
+        {
+          "caller": "dailyPyqCopy",
+          "callee": "planned\n      .slice(0, 2)\n      .map",
+          "lineNumber": 141
+        },
+        {
+          "caller": "dailyPyqCopy",
+          "callee": "planned\n      .slice",
+          "lineNumber": 141
+        },
+        {
+          "caller": "dailyPyqCopy",
+          "callee": "compact",
+          "lineNumber": 145
+        },
+        {
+          "caller": "dailyPyqCopy",
+          "callee": "blockSubject",
+          "lineNumber": 145
+        },
+        {
+          "caller": "dailyPyqCopy",
+          "callee": "formatMinutes",
+          "lineNumber": 145
+        },
+        {
+          "caller": "dailyPyqCopy",
+          "callee": "blockDetail",
+          "lineNumber": 145
+        },
+        {
+          "caller": "dailyPyqCopy",
+          "callee": "formatMinutes",
+          "lineNumber": 149
+        },
+        {
+          "caller": "dailyPyqCopy",
+          "callee": "compact",
+          "lineNumber": 150
+        },
+        {
+          "caller": "dailyPyqCopy",
+          "callee": "plural",
+          "lineNumber": 151
+        },
+        {
+          "caller": "dailyPyqCopy",
+          "callee": "plural",
+          "lineNumber": 151
+        },
+        {
+          "caller": "dailyPyqCopy",
+          "callee": "plural",
+          "lineNumber": 158
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 4,
+        "functionCount": 10,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "supabase/functions/_shared/telegram.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 437,
+      "nonEmptyLines": 388,
+      "functions": [
+        {
+          "name": "parseTelegramCommand",
+          "startLine": 61,
+          "endLine": 73,
+          "params": [
+            "text"
+          ]
+        },
+        {
+          "name": "parseTelegramStudySessions",
+          "startLine": 75,
+          "endLine": 97,
+          "params": [
+            "value"
+          ]
+        },
+        {
+          "name": "isoDateForTimezone",
+          "startLine": 99,
+          "endLine": 112,
+          "params": [
+            "now",
+            "timeZone"
+          ]
+        },
+        {
+          "name": "addUtcDays",
+          "startLine": 114,
+          "endLine": 118,
+          "params": [
+            "isoDate",
+            "amount"
+          ]
+        },
+        {
+          "name": "weekIsoDatesForTimezone",
+          "startLine": 121,
+          "endLine": 127,
+          "params": [
+            "now",
+            "timeZone"
+          ]
+        },
+        {
+          "name": "tomorrowIsoDateForTimezone",
+          "startLine": 129,
+          "endLine": 131,
+          "params": [
+            "now",
+            "timeZone"
+          ]
+        },
+        {
+          "name": "escapeTelegramHtml",
+          "startLine": 133,
+          "endLine": 139,
+          "params": [
+            "value"
+          ]
+        },
+        {
+          "name": "airJournalUrl",
+          "startLine": 141,
+          "endLine": 145,
+          "params": [
+            "baseUrl",
+            "route"
+          ]
+        },
+        {
+          "name": "formatDuration",
+          "startLine": 147,
+          "endLine": 152,
+          "params": [
+            "totalMinutes"
+          ]
+        },
+        {
+          "name": "compactText",
+          "startLine": 154,
+          "endLine": 158,
+          "params": [
+            "value",
+            "maxLength"
+          ]
+        },
+        {
+          "name": "escapeCompactTelegramHtml",
+          "startLine": 160,
+          "endLine": 172,
+          "params": [
+            "value",
+            "maxVisibleLength",
+            "maxEncodedLength"
+          ]
+        },
+        {
+          "name": "timetableDayLabel",
+          "startLine": 174,
+          "endLine": 184,
+          "params": [
+            "isoDate"
+          ]
+        },
+        {
+          "name": "timetableWeekLabel",
+          "startLine": 186,
+          "endLine": 196,
+          "params": [
+            "isoDate"
+          ]
+        },
+        {
+          "name": "fullDateLabel",
+          "startLine": 198,
+          "endLine": 208,
+          "params": [
+            "isoDate"
+          ]
+        },
+        {
+          "name": "renderTelegramDay",
+          "startLine": 210,
+          "endLine": 260,
+          "params": [
+            "input",
+            "heading"
+          ]
+        },
+        {
+          "name": "renderTelegramDigest",
+          "startLine": 262,
+          "endLine": 264,
+          "params": [
+            "input"
+          ]
+        },
+        {
+          "name": "renderTelegramTodayUpdate",
+          "startLine": 266,
+          "endLine": 278,
+          "params": [
+            "input"
+          ]
+        },
+        {
+          "name": "renderTelegramConnectionTest",
+          "startLine": 280,
+          "endLine": 292,
+          "params": []
+        },
+        {
+          "name": "renderTelegramTimetable",
+          "startLine": 294,
+          "endLine": 342,
+          "params": [
+            "input"
+          ]
+        },
+        {
+          "name": "renderTelegramTomorrowPlan",
+          "startLine": 344,
+          "endLine": 392,
+          "params": [
+            "input"
+          ]
+        },
+        {
+          "name": "sendTelegramMessage",
+          "startLine": 394,
+          "endLine": 437,
+          "params": [
+            "args"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "TELEGRAM_BOT_COMMANDS",
+          "line": 6,
+          "isDefault": false
+        },
+        {
+          "name": "parseTelegramCommand",
+          "line": 61,
+          "isDefault": false
+        },
+        {
+          "name": "parseTelegramStudySessions",
+          "line": 75,
+          "isDefault": false
+        },
+        {
+          "name": "isoDateForTimezone",
+          "line": 99,
+          "isDefault": false
+        },
+        {
+          "name": "weekIsoDatesForTimezone",
+          "line": 121,
+          "isDefault": false
+        },
+        {
+          "name": "tomorrowIsoDateForTimezone",
+          "line": 129,
+          "isDefault": false
+        },
+        {
+          "name": "escapeTelegramHtml",
+          "line": 133,
+          "isDefault": false
+        },
+        {
+          "name": "airJournalUrl",
+          "line": 141,
+          "isDefault": false
+        },
+        {
+          "name": "renderTelegramDigest",
+          "line": 262,
+          "isDefault": false
+        },
+        {
+          "name": "renderTelegramTodayUpdate",
+          "line": 266,
+          "isDefault": false
+        },
+        {
+          "name": "renderTelegramConnectionTest",
+          "line": 280,
+          "isDefault": false
+        },
+        {
+          "name": "renderTelegramTimetable",
+          "line": 294,
+          "isDefault": false
+        },
+        {
+          "name": "renderTelegramTomorrowPlan",
+          "line": 344,
+          "isDefault": false
+        },
+        {
+          "name": "sendTelegramMessage",
+          "line": 394,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "parseTelegramCommand",
+          "callee": "text\n    .trim()\n    .match",
+          "lineNumber": 63
+        },
+        {
+          "caller": "parseTelegramCommand",
+          "callee": "text\n    .trim",
+          "lineNumber": 63
+        },
+        {
+          "caller": "parseTelegramCommand",
+          "callee": "match[1].toLowerCase",
+          "lineNumber": 70
+        },
+        {
+          "caller": "parseTelegramStudySessions",
+          "callee": "Array.isArray",
+          "lineNumber": 76
+        },
+        {
+          "caller": "parseTelegramStudySessions",
+          "callee": "value.slice",
+          "lineNumber": 78
+        },
+        {
+          "caller": "parseTelegramStudySessions",
+          "callee": "row.subject.trim().slice",
+          "lineNumber": 81
+        },
+        {
+          "caller": "parseTelegramStudySessions",
+          "callee": "row.subject.trim",
+          "lineNumber": 81
+        },
+        {
+          "caller": "parseTelegramStudySessions",
+          "callee": "Number.isFinite",
+          "lineNumber": 83
+        },
+        {
+          "caller": "parseTelegramStudySessions",
+          "callee": "Math.max",
+          "lineNumber": 84
+        },
+        {
+          "caller": "parseTelegramStudySessions",
+          "callee": "Math.min",
+          "lineNumber": 84
+        },
+        {
+          "caller": "parseTelegramStudySessions",
+          "callee": "Math.round",
+          "lineNumber": 84
+        },
+        {
+          "caller": "parseTelegramStudySessions",
+          "callee": "sessions.push",
+          "lineNumber": 87
+        },
+        {
+          "caller": "parseTelegramStudySessions",
+          "callee": "row.customSubject.trim().slice",
+          "lineNumber": 90
+        },
+        {
+          "caller": "parseTelegramStudySessions",
+          "callee": "row.customSubject.trim",
+          "lineNumber": 90
+        },
+        {
+          "caller": "parseTelegramStudySessions",
+          "callee": "row.mode.trim().slice",
+          "lineNumber": 92
+        },
+        {
+          "caller": "parseTelegramStudySessions",
+          "callee": "row.mode.trim",
+          "lineNumber": 92
+        },
+        {
+          "caller": "parseTelegramStudySessions",
+          "callee": "row.target.trim().slice",
+          "lineNumber": 93
+        },
+        {
+          "caller": "parseTelegramStudySessions",
+          "callee": "row.target.trim",
+          "lineNumber": 93
+        },
+        {
+          "caller": "isoDateForTimezone",
+          "callee": "new Intl.DateTimeFormat('en-CA', {\n      timeZone,\n      year: 'numeric',\n      month: '2-digit',\n      day: '2-digit'\n    }).formatToParts",
+          "lineNumber": 101
+        },
+        {
+          "caller": "part",
+          "callee": "parts.find",
+          "lineNumber": 107
+        },
+        {
+          "caller": "isoDateForTimezone",
+          "callee": "part",
+          "lineNumber": 108
+        },
+        {
+          "caller": "isoDateForTimezone",
+          "callee": "part",
+          "lineNumber": 108
+        },
+        {
+          "caller": "isoDateForTimezone",
+          "callee": "part",
+          "lineNumber": 108
+        },
+        {
+          "caller": "isoDateForTimezone",
+          "callee": "now.toISOString().slice",
+          "lineNumber": 110
+        },
+        {
+          "caller": "isoDateForTimezone",
+          "callee": "now.toISOString",
+          "lineNumber": 110
+        },
+        {
+          "caller": "addUtcDays",
+          "callee": "date.setUTCDate",
+          "lineNumber": 116
+        },
+        {
+          "caller": "addUtcDays",
+          "callee": "date.getUTCDate",
+          "lineNumber": 116
+        },
+        {
+          "caller": "addUtcDays",
+          "callee": "date.toISOString().slice",
+          "lineNumber": 117
+        },
+        {
+          "caller": "addUtcDays",
+          "callee": "date.toISOString",
+          "lineNumber": 117
+        },
+        {
+          "caller": "weekIsoDatesForTimezone",
+          "callee": "isoDateForTimezone",
+          "lineNumber": 122
+        },
+        {
+          "caller": "weekIsoDatesForTimezone",
+          "callee": "new Date(`${localIsoDate}T12:00:00Z`).getUTCDay",
+          "lineNumber": 123
+        },
+        {
+          "caller": "weekIsoDatesForTimezone",
+          "callee": "addUtcDays",
+          "lineNumber": 125
+        },
+        {
+          "caller": "weekIsoDatesForTimezone",
+          "callee": "Array.from",
+          "lineNumber": 126
+        },
+        {
+          "caller": "weekIsoDatesForTimezone",
+          "callee": "addUtcDays",
+          "lineNumber": 126
+        },
+        {
+          "caller": "tomorrowIsoDateForTimezone",
+          "callee": "addUtcDays",
+          "lineNumber": 130
+        },
+        {
+          "caller": "tomorrowIsoDateForTimezone",
+          "callee": "isoDateForTimezone",
+          "lineNumber": 130
+        },
+        {
+          "caller": "escapeTelegramHtml",
+          "callee": "value\n    .replace(/&/g, '&amp;')\n    .replace(/</g, '&lt;')\n    .replace(/>/g, '&gt;')\n    .replace",
+          "lineNumber": 134
+        },
+        {
+          "caller": "escapeTelegramHtml",
+          "callee": "value\n    .replace(/&/g, '&amp;')\n    .replace(/</g, '&lt;')\n    .replace",
+          "lineNumber": 134
+        },
+        {
+          "caller": "escapeTelegramHtml",
+          "callee": "value\n    .replace(/&/g, '&amp;')\n    .replace",
+          "lineNumber": 134
+        },
+        {
+          "caller": "escapeTelegramHtml",
+          "callee": "value\n    .replace",
+          "lineNumber": 134
+        },
+        {
+          "caller": "airJournalUrl",
+          "callee": "(baseUrl.trim() || 'https://hetu-app.vercel.app').replace",
+          "lineNumber": 142
+        },
+        {
+          "caller": "airJournalUrl",
+          "callee": "baseUrl.trim",
+          "lineNumber": 142
+        },
+        {
+          "caller": "airJournalUrl",
+          "callee": "route.startsWith",
+          "lineNumber": 143
+        },
+        {
+          "caller": "airJournalUrl",
+          "callee": "new URL(normalizedRoute, `${base}/`).toString",
+          "lineNumber": 144
+        },
+        {
+          "caller": "formatDuration",
+          "callee": "Math.floor",
+          "lineNumber": 149
+        },
+        {
+          "caller": "compactText",
+          "callee": "value.replace(/\\s+/g, ' ').trim",
+          "lineNumber": 155
+        },
+        {
+          "caller": "compactText",
+          "callee": "value.replace",
+          "lineNumber": 155
+        },
+        {
+          "caller": "compactText",
+          "callee": "clean.slice(0, Math.max(0, maxLength - 1)).trimEnd",
+          "lineNumber": 157
+        },
+        {
+          "caller": "compactText",
+          "callee": "clean.slice",
+          "lineNumber": 157
+        },
+        {
+          "caller": "compactText",
+          "callee": "Math.max",
+          "lineNumber": 157
+        },
+        {
+          "caller": "escapeCompactTelegramHtml",
+          "callee": "compactText",
+          "lineNumber": 165
+        },
+        {
+          "caller": "escapeCompactTelegramHtml",
+          "callee": "escapeTelegramHtml",
+          "lineNumber": 166
+        },
+        {
+          "caller": "escapeCompactTelegramHtml",
+          "callee": "clean.slice(0, Math.max(1, clean.length - 2)).trimEnd",
+          "lineNumber": 168
+        },
+        {
+          "caller": "escapeCompactTelegramHtml",
+          "callee": "clean.slice",
+          "lineNumber": 168
+        },
+        {
+          "caller": "escapeCompactTelegramHtml",
+          "callee": "Math.max",
+          "lineNumber": 168
+        },
+        {
+          "caller": "escapeCompactTelegramHtml",
+          "callee": "escapeTelegramHtml",
+          "lineNumber": 169
+        },
+        {
+          "caller": "timetableDayLabel",
+          "callee": "new Intl.DateTimeFormat('en-GB', {\n    timeZone: 'UTC',\n    weekday: 'short',\n    day: '2-digit',\n    month: 'short'\n  }).formatToParts",
+          "lineNumber": 176
+        },
+        {
+          "caller": "part",
+          "callee": "parts.find",
+          "lineNumber": 182
+        },
+        {
+          "caller": "timetableDayLabel",
+          "callee": "`${part('weekday')} · ${part('day')} ${part('month')}`.toUpperCase",
+          "lineNumber": 183
+        },
+        {
+          "caller": "timetableDayLabel",
+          "callee": "part",
+          "lineNumber": 183
+        },
+        {
+          "caller": "timetableDayLabel",
+          "callee": "part",
+          "lineNumber": 183
+        },
+        {
+          "caller": "timetableDayLabel",
+          "callee": "part",
+          "lineNumber": 183
+        },
+        {
+          "caller": "timetableWeekLabel",
+          "callee": "new Intl.DateTimeFormat('en-GB', {\n    timeZone: 'UTC',\n    day: '2-digit',\n    month: 'long',\n    year: 'numeric'\n  })\n    .format(date)\n    .toUpperCase",
+          "lineNumber": 188
+        },
+        {
+          "caller": "timetableWeekLabel",
+          "callee": "new Intl.DateTimeFormat('en-GB', {\n    timeZone: 'UTC',\n    day: '2-digit',\n    month: 'long',\n    year: 'numeric'\n  })\n    .format",
+          "lineNumber": 188
+        },
+        {
+          "caller": "fullDateLabel",
+          "callee": "new Intl.DateTimeFormat('en-GB', {\n    timeZone: 'UTC',\n    weekday: 'long',\n    day: '2-digit',\n    month: 'long'\n  }).formatToParts",
+          "lineNumber": 200
+        },
+        {
+          "caller": "part",
+          "callee": "parts.find",
+          "lineNumber": 206
+        },
+        {
+          "caller": "fullDateLabel",
+          "callee": "`${part('weekday')} · ${part('day')} ${part('month')}`.toUpperCase",
+          "lineNumber": 207
+        },
+        {
+          "caller": "fullDateLabel",
+          "callee": "part",
+          "lineNumber": 207
+        },
+        {
+          "caller": "fullDateLabel",
+          "callee": "part",
+          "lineNumber": 207
+        },
+        {
+          "caller": "fullDateLabel",
+          "callee": "part",
+          "lineNumber": 207
+        },
+        {
+          "caller": "renderTelegramDay",
+          "callee": "input.sessions.slice",
+          "lineNumber": 214
+        },
+        {
+          "caller": "renderTelegramDay",
+          "callee": "input.sessions.reduce",
+          "lineNumber": 215
+        },
+        {
+          "caller": "renderTelegramDay",
+          "callee": "Math.max",
+          "lineNumber": 216
+        },
+        {
+          "caller": "renderTelegramDay",
+          "callee": "escapeTelegramHtml",
+          "lineNumber": 221
+        },
+        {
+          "caller": "renderTelegramDay",
+          "callee": "escapeTelegramHtml",
+          "lineNumber": 223
+        },
+        {
+          "caller": "renderTelegramDay",
+          "callee": "escapeTelegramHtml",
+          "lineNumber": 224
+        },
+        {
+          "caller": "renderTelegramDay",
+          "callee": "formatDuration",
+          "lineNumber": 226
+        },
+        {
+          "caller": "renderTelegramDay",
+          "callee": "sessions.forEach",
+          "lineNumber": 230
+        },
+        {
+          "caller": "renderTelegramDay",
+          "callee": "lines.push",
+          "lineNumber": 235
+        },
+        {
+          "caller": "renderTelegramDay",
+          "callee": "String(index + 1).padStart",
+          "lineNumber": 236
+        },
+        {
+          "caller": "renderTelegramDay",
+          "callee": "String",
+          "lineNumber": 236
+        },
+        {
+          "caller": "renderTelegramDay",
+          "callee": "escapeTelegramHtml",
+          "lineNumber": 236
+        },
+        {
+          "caller": "renderTelegramDay",
+          "callee": "formatDuration",
+          "lineNumber": 237
+        },
+        {
+          "caller": "renderTelegramDay",
+          "callee": "escapeTelegramHtml",
+          "lineNumber": 237
+        },
+        {
+          "caller": "renderTelegramDay",
+          "callee": "session.target.trim",
+          "lineNumber": 239
+        },
+        {
+          "caller": "renderTelegramDay",
+          "callee": "lines.push",
+          "lineNumber": 239
+        },
+        {
+          "caller": "renderTelegramDay",
+          "callee": "escapeTelegramHtml",
+          "lineNumber": 239
+        },
+        {
+          "caller": "renderTelegramDay",
+          "callee": "session.target.trim",
+          "lineNumber": 239
+        },
+        {
+          "caller": "renderTelegramDay",
+          "callee": "lines.push",
+          "lineNumber": 240
+        },
+        {
+          "caller": "renderTelegramDay",
+          "callee": "lines.push",
+          "lineNumber": 244
+        },
+        {
+          "caller": "renderTelegramDay",
+          "callee": "lines.push",
+          "lineNumber": 248
+        },
+        {
+          "caller": "renderTelegramDay",
+          "callee": "lines.push",
+          "lineNumber": 250
+        },
+        {
+          "caller": "renderTelegramDay",
+          "callee": "input.subjectCounts.slice",
+          "lineNumber": 251
+        },
+        {
+          "caller": "renderTelegramDay",
+          "callee": "lines.push",
+          "lineNumber": 252
+        },
+        {
+          "caller": "renderTelegramDay",
+          "callee": "escapeTelegramHtml",
+          "lineNumber": 252
+        },
+        {
+          "caller": "renderTelegramDay",
+          "callee": "lines.push",
+          "lineNumber": 257
+        },
+        {
+          "caller": "renderTelegramDay",
+          "callee": "lines.join('\\n').slice",
+          "lineNumber": 259
+        },
+        {
+          "caller": "renderTelegramDay",
+          "callee": "lines.join",
+          "lineNumber": 259
+        },
+        {
+          "caller": "renderTelegramDigest",
+          "callee": "renderTelegramDay",
+          "lineNumber": 263
+        },
+        {
+          "caller": "renderTelegramTodayUpdate",
+          "callee": "renderTelegramDay",
+          "lineNumber": 267
+        },
+        {
+          "caller": "renderTelegramTodayUpdate",
+          "callee": "fullDateLabel",
+          "lineNumber": 269
+        },
+        {
+          "caller": "renderTelegramConnectionTest",
+          "callee": "[\n    '<b>HETU · CONNECTED</b>',\n    '',\n    '<i>“The line is live. The rest is execution.”</i>',\n    '— HETU',\n    '',\n    'Telegram delivery is working.',\n    'Planned days will arrive here at your chosen local time.',\n    '',\n    '<b>No plan. No noise.</b>'\n  ].join",
+          "lineNumber": 281
+        },
+        {
+          "caller": "renderTelegramTimetable",
+          "callee": "input.days.reduce",
+          "lineNumber": 295
+        },
+        {
+          "caller": "renderTelegramTimetable",
+          "callee": "input.days.reduce",
+          "lineNumber": 296
+        },
+        {
+          "caller": "renderTelegramTimetable",
+          "callee": "day.sessions.reduce",
+          "lineNumber": 299
+        },
+        {
+          "caller": "renderTelegramTimetable",
+          "callee": "Math.max",
+          "lineNumber": 299
+        },
+        {
+          "caller": "renderTelegramTimetable",
+          "callee": "timetableWeekLabel",
+          "lineNumber": 305
+        },
+        {
+          "caller": "renderTelegramTimetable",
+          "callee": "formatDuration",
+          "lineNumber": 307
+        },
+        {
+          "caller": "renderTelegramTimetable",
+          "callee": "input.days.slice",
+          "lineNumber": 311
+        },
+        {
+          "caller": "renderTelegramTimetable",
+          "callee": "day.sessions.reduce",
+          "lineNumber": 312
+        },
+        {
+          "caller": "renderTelegramTimetable",
+          "callee": "Math.max",
+          "lineNumber": 313
+        },
+        {
+          "caller": "renderTelegramTimetable",
+          "callee": "formatDuration",
+          "lineNumber": 317
+        },
+        {
+          "caller": "renderTelegramTimetable",
+          "callee": "lines.push",
+          "lineNumber": 318
+        },
+        {
+          "caller": "renderTelegramTimetable",
+          "callee": "timetableDayLabel",
+          "lineNumber": 318
+        },
+        {
+          "caller": "renderTelegramTimetable",
+          "callee": "lines.push",
+          "lineNumber": 321
+        },
+        {
+          "caller": "renderTelegramTimetable",
+          "callee": "day.sessions.forEach",
+          "lineNumber": 325
+        },
+        {
+          "caller": "renderTelegramTimetable",
+          "callee": "escapeCompactTelegramHtml",
+          "lineNumber": 330
+        },
+        {
+          "caller": "renderTelegramTimetable",
+          "callee": "escapeCompactTelegramHtml",
+          "lineNumber": 331
+        },
+        {
+          "caller": "renderTelegramTimetable",
+          "callee": "lines.push",
+          "lineNumber": 332
+        },
+        {
+          "caller": "renderTelegramTimetable",
+          "callee": "String(index + 1).padStart",
+          "lineNumber": 333
+        },
+        {
+          "caller": "renderTelegramTimetable",
+          "callee": "String",
+          "lineNumber": 333
+        },
+        {
+          "caller": "renderTelegramTimetable",
+          "callee": "formatDuration",
+          "lineNumber": 333
+        },
+        {
+          "caller": "renderTelegramTimetable",
+          "callee": "lines.push",
+          "lineNumber": 337
+        },
+        {
+          "caller": "renderTelegramTimetable",
+          "callee": "lines.push",
+          "lineNumber": 340
+        },
+        {
+          "caller": "renderTelegramTimetable",
+          "callee": "lines.join",
+          "lineNumber": 341
+        },
+        {
+          "caller": "renderTelegramTomorrowPlan",
+          "callee": "input.sessions.reduce",
+          "lineNumber": 345
+        },
+        {
+          "caller": "renderTelegramTomorrowPlan",
+          "callee": "Math.max",
+          "lineNumber": 346
+        },
+        {
+          "caller": "renderTelegramTomorrowPlan",
+          "callee": "fullDateLabel",
+          "lineNumber": 351
+        },
+        {
+          "caller": "renderTelegramTomorrowPlan",
+          "callee": "lines.push",
+          "lineNumber": 356
+        },
+        {
+          "caller": "renderTelegramTomorrowPlan",
+          "callee": "lines.join",
+          "lineNumber": 361
+        },
+        {
+          "caller": "renderTelegramTomorrowPlan",
+          "callee": "lines.push",
+          "lineNumber": 364
+        },
+        {
+          "caller": "renderTelegramTomorrowPlan",
+          "callee": "formatDuration",
+          "lineNumber": 365
+        },
+        {
+          "caller": "renderTelegramTomorrowPlan",
+          "callee": "input.sessions.slice",
+          "lineNumber": 369
+        },
+        {
+          "caller": "renderTelegramTomorrowPlan",
+          "callee": "visibleSessions.forEach",
+          "lineNumber": 370
+        },
+        {
+          "caller": "renderTelegramTomorrowPlan",
+          "callee": "escapeCompactTelegramHtml",
+          "lineNumber": 375
+        },
+        {
+          "caller": "renderTelegramTomorrowPlan",
+          "callee": "escapeCompactTelegramHtml",
+          "lineNumber": 376
+        },
+        {
+          "caller": "renderTelegramTomorrowPlan",
+          "callee": "escapeCompactTelegramHtml",
+          "lineNumber": 377
+        },
+        {
+          "caller": "renderTelegramTomorrowPlan",
+          "callee": "lines.push",
+          "lineNumber": 378
+        },
+        {
+          "caller": "renderTelegramTomorrowPlan",
+          "callee": "String(index + 1).padStart",
+          "lineNumber": 379
+        },
+        {
+          "caller": "renderTelegramTomorrowPlan",
+          "callee": "String",
+          "lineNumber": 379
+        },
+        {
+          "caller": "renderTelegramTomorrowPlan",
+          "callee": "formatDuration",
+          "lineNumber": 380
+        },
+        {
+          "caller": "renderTelegramTomorrowPlan",
+          "callee": "lines.push",
+          "lineNumber": 382
+        },
+        {
+          "caller": "renderTelegramTomorrowPlan",
+          "callee": "lines.push",
+          "lineNumber": 383
+        },
+        {
+          "caller": "renderTelegramTomorrowPlan",
+          "callee": "lines.push",
+          "lineNumber": 387
+        },
+        {
+          "caller": "renderTelegramTomorrowPlan",
+          "callee": "lines.push",
+          "lineNumber": 390
+        },
+        {
+          "caller": "renderTelegramTomorrowPlan",
+          "callee": "lines.join",
+          "lineNumber": 391
+        },
+        {
+          "caller": "sendTelegramMessage",
+          "callee": "String",
+          "lineNumber": 404
+        },
+        {
+          "caller": "sendTelegramMessage",
+          "callee": "request",
+          "lineNumber": 417
+        },
+        {
+          "caller": "sendTelegramMessage",
+          "callee": "JSON.stringify",
+          "lineNumber": 420
+        },
+        {
+          "caller": "sendTelegramMessage",
+          "callee": "response.json().catch",
+          "lineNumber": 423
+        },
+        {
+          "caller": "sendTelegramMessage",
+          "callee": "response.json",
+          "lineNumber": 423
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 14,
+        "functionCount": 21,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "supabase/functions/approve-request/index.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 78,
+      "nonEmptyLines": 67,
+      "metrics": {
+        "importCount": 2,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "supabase/functions/buddy-notifications/index.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 514,
+      "nonEmptyLines": 473,
+      "functions": [
+        {
+          "name": "safeEqual",
+          "startLine": 67,
+          "endLine": 72,
+          "params": [
+            "a",
+            "b"
+          ]
+        },
+        {
+          "name": "cleanText",
+          "startLine": 74,
+          "endLine": 79,
+          "params": [
+            "value"
+          ]
+        },
+        {
+          "name": "base64Url",
+          "startLine": 81,
+          "endLine": 85,
+          "params": [
+            "bytes"
+          ]
+        },
+        {
+          "name": "hex",
+          "startLine": 87,
+          "endLine": 89,
+          "params": [
+            "bytes"
+          ]
+        },
+        {
+          "name": "inlineReplyToken",
+          "startLine": 91,
+          "endLine": 113,
+          "params": [
+            "messageId",
+            "subscriptionId",
+            "recipientId"
+          ]
+        },
+        {
+          "name": "notificationActionToken",
+          "startLine": 115,
+          "endLine": 143,
+          "params": [
+            "message",
+            "subscription",
+            "recipientId",
+            "route"
+          ]
+        },
+        {
+          "name": "notificationCopyForSubscription",
+          "startLine": 145,
+          "endLine": 199,
+          "params": [
+            "copy",
+            "subscription",
+            "message",
+            "recipientId"
+          ]
+        },
+        {
+          "name": "senderLabel",
+          "startLine": 201,
+          "endLine": 206,
+          "params": [
+            "sender"
+          ]
+        },
+        {
+          "name": "notificationCopy",
+          "startLine": 208,
+          "endLine": 231,
+          "params": [
+            "message",
+            "sender",
+            "showPreview"
+          ]
+        },
+        {
+          "name": "activeInThisChat",
+          "startLine": 233,
+          "endLine": 237,
+          "params": [
+            "subscription",
+            "buddyId"
+          ]
+        },
+        {
+          "name": "isSnoozed",
+          "startLine": 240,
+          "endLine": 244,
+          "params": [
+            "subscription"
+          ]
+        },
+        {
+          "name": "retryAt",
+          "startLine": 246,
+          "endLine": 249,
+          "params": [
+            "attempt"
+          ]
+        },
+        {
+          "name": "finishJob",
+          "startLine": 251,
+          "endLine": 267,
+          "params": [
+            "job",
+            "state",
+            "error"
+          ]
+        },
+        {
+          "name": "processJob",
+          "startLine": 269,
+          "endLine": 424,
+          "params": [
+            "job"
+          ]
+        },
+        {
+          "name": "authenticatedUserId",
+          "startLine": 426,
+          "endLine": 435,
+          "params": [
+            "req"
+          ]
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "safeEqual",
+          "callee": "a.charCodeAt",
+          "lineNumber": 70
+        },
+        {
+          "caller": "safeEqual",
+          "callee": "b.charCodeAt",
+          "lineNumber": 70
+        },
+        {
+          "caller": "cleanText",
+          "callee": "String(value ?? '')\n    .replace(/[\\u0000-\\u001f\\u007f]+/g, ' ')\n    .replace(/\\s+/g, ' ')\n    .trim",
+          "lineNumber": 75
+        },
+        {
+          "caller": "cleanText",
+          "callee": "String(value ?? '')\n    .replace(/[\\u0000-\\u001f\\u007f]+/g, ' ')\n    .replace",
+          "lineNumber": 75
+        },
+        {
+          "caller": "cleanText",
+          "callee": "String(value ?? '')\n    .replace",
+          "lineNumber": 75
+        },
+        {
+          "caller": "cleanText",
+          "callee": "String",
+          "lineNumber": 75
+        },
+        {
+          "caller": "base64Url",
+          "callee": "String.fromCharCode",
+          "lineNumber": 83
+        },
+        {
+          "caller": "base64Url",
+          "callee": "btoa(binary).replace(/\\+/g, '-').replace(/\\//g, '_').replace",
+          "lineNumber": 84
+        },
+        {
+          "caller": "base64Url",
+          "callee": "btoa(binary).replace(/\\+/g, '-').replace",
+          "lineNumber": 84
+        },
+        {
+          "caller": "base64Url",
+          "callee": "btoa(binary).replace",
+          "lineNumber": 84
+        },
+        {
+          "caller": "base64Url",
+          "callee": "btoa",
+          "lineNumber": 84
+        },
+        {
+          "caller": "hex",
+          "callee": "Array.from(bytes, (byte) => byte.toString(16).padStart(2, '0')).join",
+          "lineNumber": 88
+        },
+        {
+          "caller": "hex",
+          "callee": "Array.from",
+          "lineNumber": 88
+        },
+        {
+          "caller": "hex",
+          "callee": "byte.toString(16).padStart",
+          "lineNumber": 88
+        },
+        {
+          "caller": "hex",
+          "callee": "byte.toString",
+          "lineNumber": 88
+        },
+        {
+          "caller": "inlineReplyToken",
+          "callee": "crypto.subtle.importKey",
+          "lineNumber": 97
+        },
+        {
+          "caller": "inlineReplyToken",
+          "callee": "new TextEncoder().encode",
+          "lineNumber": 99
+        },
+        {
+          "caller": "inlineReplyToken",
+          "callee": "crypto.subtle.sign",
+          "lineNumber": 105
+        },
+        {
+          "caller": "inlineReplyToken",
+          "callee": "new TextEncoder().encode",
+          "lineNumber": 108
+        },
+        {
+          "caller": "inlineReplyToken",
+          "callee": "base64Url",
+          "lineNumber": 110
+        },
+        {
+          "caller": "inlineReplyToken",
+          "callee": "crypto.subtle.digest",
+          "lineNumber": 111
+        },
+        {
+          "caller": "inlineReplyToken",
+          "callee": "new TextEncoder().encode",
+          "lineNumber": 111
+        },
+        {
+          "caller": "inlineReplyToken",
+          "callee": "hex",
+          "lineNumber": 112
+        },
+        {
+          "caller": "notificationActionToken",
+          "callee": "crypto.getRandomValues",
+          "lineNumber": 121
+        },
+        {
+          "caller": "notificationActionToken",
+          "callee": "base64Url",
+          "lineNumber": 122
+        },
+        {
+          "caller": "notificationActionToken",
+          "callee": "crypto.subtle.digest",
+          "lineNumber": 123
+        },
+        {
+          "caller": "notificationActionToken",
+          "callee": "new TextEncoder().encode",
+          "lineNumber": 123
+        },
+        {
+          "caller": "notificationActionToken",
+          "callee": "admin.from('notification_action_tokens').upsert",
+          "lineNumber": 124
+        },
+        {
+          "caller": "notificationActionToken",
+          "callee": "admin.from",
+          "lineNumber": 124
+        },
+        {
+          "caller": "notificationActionToken",
+          "callee": "hex",
+          "lineNumber": 126
+        },
+        {
+          "caller": "notificationActionToken",
+          "callee": "new Date(Date.now() + REPLY_TOKEN_LIFETIME_MS).toISOString",
+          "lineNumber": 136
+        },
+        {
+          "caller": "notificationActionToken",
+          "callee": "Date.now",
+          "lineNumber": 136
+        },
+        {
+          "caller": "notificationActionToken",
+          "callee": "new Date().toISOString",
+          "lineNumber": 137
+        },
+        {
+          "caller": "notificationCopyForSubscription",
+          "callee": "notificationActionToken",
+          "lineNumber": 153
+        },
+        {
+          "caller": "notificationCopyForSubscription",
+          "callee": "console.warn",
+          "lineNumber": 169
+        },
+        {
+          "caller": "notificationCopyForSubscription",
+          "callee": "inlineReplyToken",
+          "lineNumber": 174
+        },
+        {
+          "caller": "notificationCopyForSubscription",
+          "callee": "admin.from('buddy_notification_reply_tokens').upsert",
+          "lineNumber": 175
+        },
+        {
+          "caller": "notificationCopyForSubscription",
+          "callee": "admin.from",
+          "lineNumber": 175
+        },
+        {
+          "caller": "notificationCopyForSubscription",
+          "callee": "new Date(Date.now() + REPLY_TOKEN_LIFETIME_MS).toISOString",
+          "lineNumber": 182
+        },
+        {
+          "caller": "notificationCopyForSubscription",
+          "callee": "Date.now",
+          "lineNumber": 182
+        },
+        {
+          "caller": "notificationCopyForSubscription",
+          "callee": "SUPABASE_URL.replace",
+          "lineNumber": 190
+        },
+        {
+          "caller": "notificationCopyForSubscription",
+          "callee": "console.warn",
+          "lineNumber": 196
+        },
+        {
+          "caller": "senderLabel",
+          "callee": "cleanText",
+          "lineNumber": 202
+        },
+        {
+          "caller": "senderLabel",
+          "callee": "cleanText",
+          "lineNumber": 204
+        },
+        {
+          "caller": "notificationCopy",
+          "callee": "senderLabel",
+          "lineNumber": 213
+        },
+        {
+          "caller": "notificationCopy",
+          "callee": "truncate",
+          "lineNumber": 220
+        },
+        {
+          "caller": "notificationCopy",
+          "callee": "cleanText",
+          "lineNumber": 220
+        },
+        {
+          "caller": "notificationCopy",
+          "callee": "encodeURIComponent",
+          "lineNumber": 226
+        },
+        {
+          "caller": "activeInThisChat",
+          "callee": "Date.parse",
+          "lineNumber": 235
+        },
+        {
+          "caller": "activeInThisChat",
+          "callee": "Number.isFinite",
+          "lineNumber": 236
+        },
+        {
+          "caller": "activeInThisChat",
+          "callee": "Date.now",
+          "lineNumber": 236
+        },
+        {
+          "caller": "isSnoozed",
+          "callee": "Date.parse",
+          "lineNumber": 242
+        },
+        {
+          "caller": "isSnoozed",
+          "callee": "Number.isFinite",
+          "lineNumber": 243
+        },
+        {
+          "caller": "isSnoozed",
+          "callee": "Date.now",
+          "lineNumber": 243
+        },
+        {
+          "caller": "retryAt",
+          "callee": "Math.min",
+          "lineNumber": 247
+        },
+        {
+          "caller": "retryAt",
+          "callee": "Math.max",
+          "lineNumber": 247
+        },
+        {
+          "caller": "retryAt",
+          "callee": "new Date(Date.now() + seconds * 1000).toISOString",
+          "lineNumber": 248
+        },
+        {
+          "caller": "retryAt",
+          "callee": "Date.now",
+          "lineNumber": 248
+        },
+        {
+          "caller": "finishJob",
+          "callee": "admin\n    .from('buddy_notification_outbox')\n    .update({\n      status: state,\n      next_attempt_at: state === 'pending' ? retryAt(job.attempts) : new Date().toISOString(),\n      locked_at: null,\n      completed_at: state === 'completed' ? new Date().toISOString() : null,\n      last_error: error ? truncate(error, 500) : null,\n      updated_at: new Date().toISOString()\n    })\n    .eq",
+          "lineNumber": 256
+        },
+        {
+          "caller": "finishJob",
+          "callee": "admin\n    .from('buddy_notification_outbox')\n    .update",
+          "lineNumber": 256
+        },
+        {
+          "caller": "finishJob",
+          "callee": "admin\n    .from",
+          "lineNumber": 256
+        },
+        {
+          "caller": "finishJob",
+          "callee": "retryAt",
+          "lineNumber": 260
+        },
+        {
+          "caller": "finishJob",
+          "callee": "new Date().toISOString",
+          "lineNumber": 260
+        },
+        {
+          "caller": "finishJob",
+          "callee": "new Date().toISOString",
+          "lineNumber": 262
+        },
+        {
+          "caller": "finishJob",
+          "callee": "truncate",
+          "lineNumber": 263
+        },
+        {
+          "caller": "finishJob",
+          "callee": "new Date().toISOString",
+          "lineNumber": 264
+        },
+        {
+          "caller": "processJob",
+          "callee": "Promise.all",
+          "lineNumber": 272
+        },
+        {
+          "caller": "processJob",
+          "callee": "admin\n          .from('buddy_messages')\n          .select('id, buddy_id, sender_id, kind, body, created_at')\n          .eq('id', job.message_id)\n          .maybeSingle",
+          "lineNumber": 273
+        },
+        {
+          "caller": "processJob",
+          "callee": "admin\n          .from('buddy_messages')\n          .select('id, buddy_id, sender_id, kind, body, created_at')\n          .eq",
+          "lineNumber": 273
+        },
+        {
+          "caller": "processJob",
+          "callee": "admin\n          .from('buddy_messages')\n          .select",
+          "lineNumber": 273
+        },
+        {
+          "caller": "processJob",
+          "callee": "admin\n          .from",
+          "lineNumber": 273
+        },
+        {
+          "caller": "processJob",
+          "callee": "admin\n          .from('push_subscriptions')\n          .select(\n            'id, platform, web_endpoint, web_p256dh, web_auth, native_token, active_buddy_id, last_seen_at, push_quiet_until'\n          )\n          .eq('user_id', job.recipient_id)\n          .eq('enabled', true)\n          .eq",
+          "lineNumber": 278
+        },
+        {
+          "caller": "processJob",
+          "callee": "admin\n          .from('push_subscriptions')\n          .select(\n            'id, platform, web_endpoint, web_p256dh, web_auth, native_token, active_buddy_id, last_seen_at, push_quiet_until'\n          )\n          .eq('user_id', job.recipient_id)\n          .eq",
+          "lineNumber": 278
+        },
+        {
+          "caller": "processJob",
+          "callee": "admin\n          .from('push_subscriptions')\n          .select(\n            'id, platform, web_endpoint, web_p256dh, web_auth, native_token, active_buddy_id, last_seen_at, push_quiet_until'\n          )\n          .eq",
+          "lineNumber": 278
+        },
+        {
+          "caller": "processJob",
+          "callee": "admin\n          .from('push_subscriptions')\n          .select",
+          "lineNumber": 278
+        },
+        {
+          "caller": "processJob",
+          "callee": "admin\n          .from",
+          "lineNumber": 278
+        },
+        {
+          "caller": "processJob",
+          "callee": "finishJob",
+          "lineNumber": 290
+        },
+        {
+          "caller": "processJob",
+          "callee": "finishJob",
+          "lineNumber": 296
+        },
+        {
+          "caller": "processJob",
+          "callee": "admin\n      .from('users')\n      .select('id, name, username, buddy_notification_preview_enabled')\n      .in",
+          "lineNumber": 300
+        },
+        {
+          "caller": "processJob",
+          "callee": "admin\n      .from('users')\n      .select",
+          "lineNumber": 300
+        },
+        {
+          "caller": "processJob",
+          "callee": "admin\n      .from",
+          "lineNumber": 300
+        },
+        {
+          "caller": "processJob",
+          "callee": "profiles.find",
+          "lineNumber": 305
+        },
+        {
+          "caller": "processJob",
+          "callee": "profiles.find",
+          "lineNumber": 306
+        },
+        {
+          "caller": "processJob",
+          "callee": "notificationCopy",
+          "lineNumber": 307
+        },
+        {
+          "caller": "processJob",
+          "callee": "admin.from('buddy_notification_deliveries').upsert",
+          "lineNumber": 313
+        },
+        {
+          "caller": "processJob",
+          "callee": "admin.from",
+          "lineNumber": 313
+        },
+        {
+          "caller": "processJob",
+          "callee": "subscriptions.map",
+          "lineNumber": 314
+        },
+        {
+          "caller": "processJob",
+          "callee": "admin\n      .from('buddy_notification_deliveries')\n      .select('message_id, subscription_id, status, attempts')\n      .eq('message_id', job.message_id)\n      .eq",
+          "lineNumber": 322
+        },
+        {
+          "caller": "processJob",
+          "callee": "admin\n      .from('buddy_notification_deliveries')\n      .select('message_id, subscription_id, status, attempts')\n      .eq",
+          "lineNumber": 322
+        },
+        {
+          "caller": "processJob",
+          "callee": "admin\n      .from('buddy_notification_deliveries')\n      .select",
+          "lineNumber": 322
+        },
+        {
+          "caller": "processJob",
+          "callee": "admin\n      .from",
+          "lineNumber": 322
+        },
+        {
+          "caller": "processJob",
+          "callee": "subscriptions.map",
+          "lineNumber": 330
+        },
+        {
+          "caller": "processJob",
+          "callee": "Promise.all",
+          "lineNumber": 335
+        },
+        {
+          "caller": "processJob",
+          "callee": "deliveries.map",
+          "lineNumber": 336
+        },
+        {
+          "caller": "processJob",
+          "callee": "subscriptionById.get",
+          "lineNumber": 337
+        },
+        {
+          "caller": "processJob",
+          "callee": "activeInThisChat",
+          "lineNumber": 341
+        },
+        {
+          "caller": "processJob",
+          "callee": "isSnoozed",
+          "lineNumber": 341
+        },
+        {
+          "caller": "processJob",
+          "callee": "admin\n            .from('buddy_notification_deliveries')\n            .update({\n              status: 'suppressed',\n              updated_at: new Date().toISOString()\n            })\n            .eq('message_id', job.message_id)\n            .eq",
+          "lineNumber": 342
+        },
+        {
+          "caller": "processJob",
+          "callee": "admin\n            .from('buddy_notification_deliveries')\n            .update({\n              status: 'suppressed',\n              updated_at: new Date().toISOString()\n            })\n            .eq",
+          "lineNumber": 342
+        },
+        {
+          "caller": "processJob",
+          "callee": "admin\n            .from('buddy_notification_deliveries')\n            .update",
+          "lineNumber": 342
+        },
+        {
+          "caller": "processJob",
+          "callee": "admin\n            .from",
+          "lineNumber": 342
+        },
+        {
+          "caller": "processJob",
+          "callee": "new Date().toISOString",
+          "lineNumber": 346
+        },
+        {
+          "caller": "processJob",
+          "callee": "notificationCopyForSubscription",
+          "lineNumber": 353
+        },
+        {
+          "caller": "processJob",
+          "callee": "deliverToSubscription",
+          "lineNumber": 359
+        },
+        {
+          "caller": "processJob",
+          "callee": "admin\n            .from('buddy_notification_deliveries')\n            .update({\n              status: 'sent',\n              attempts: delivery.attempts + 1,\n              provider_status: result.providerStatus,\n              last_error: null,\n              delivered_at: new Date().toISOString(),\n              updated_at: new Date().toISOString()\n            })\n            .eq('message_id', job.message_id)\n            .eq",
+          "lineNumber": 361
+        },
+        {
+          "caller": "processJob",
+          "callee": "admin\n            .from('buddy_notification_deliveries')\n            .update({\n              status: 'sent',\n              attempts: delivery.attempts + 1,\n              provider_status: result.providerStatus,\n              last_error: null,\n              delivered_at: new Date().toISOString(),\n              updated_at: new Date().toISOString()\n            })\n            .eq",
+          "lineNumber": 361
+        },
+        {
+          "caller": "processJob",
+          "callee": "admin\n            .from('buddy_notification_deliveries')\n            .update",
+          "lineNumber": 361
+        },
+        {
+          "caller": "processJob",
+          "callee": "admin\n            .from",
+          "lineNumber": 361
+        },
+        {
+          "caller": "processJob",
+          "callee": "new Date().toISOString",
+          "lineNumber": 368
+        },
+        {
+          "caller": "processJob",
+          "callee": "new Date().toISOString",
+          "lineNumber": 369
+        },
+        {
+          "caller": "processJob",
+          "callee": "errors.push",
+          "lineNumber": 376
+        },
+        {
+          "caller": "processJob",
+          "callee": "Promise.all",
+          "lineNumber": 378
+        },
+        {
+          "caller": "processJob",
+          "callee": "admin\n              .from('buddy_notification_deliveries')\n              .update({\n                status: 'permanent_failure',\n                attempts: delivery.attempts + 1,\n                provider_status: result.providerStatus,\n                last_error: result.error,\n                updated_at: new Date().toISOString()\n              })\n              .eq('message_id', job.message_id)\n              .eq",
+          "lineNumber": 379
+        },
+        {
+          "caller": "processJob",
+          "callee": "admin\n              .from('buddy_notification_deliveries')\n              .update({\n                status: 'permanent_failure',\n                attempts: delivery.attempts + 1,\n                provider_status: result.providerStatus,\n                last_error: result.error,\n                updated_at: new Date().toISOString()\n              })\n              .eq",
+          "lineNumber": 379
+        },
+        {
+          "caller": "processJob",
+          "callee": "admin\n              .from('buddy_notification_deliveries')\n              .update",
+          "lineNumber": 379
+        },
+        {
+          "caller": "processJob",
+          "callee": "admin\n              .from",
+          "lineNumber": 379
+        },
+        {
+          "caller": "processJob",
+          "callee": "new Date().toISOString",
+          "lineNumber": 386
+        },
+        {
+          "caller": "processJob",
+          "callee": "admin\n              .from('push_subscriptions')\n              .update({ enabled: false, updated_at: new Date().toISOString() })\n              .eq",
+          "lineNumber": 390
+        },
+        {
+          "caller": "processJob",
+          "callee": "admin\n              .from('push_subscriptions')\n              .update",
+          "lineNumber": 390
+        },
+        {
+          "caller": "processJob",
+          "callee": "admin\n              .from",
+          "lineNumber": 390
+        },
+        {
+          "caller": "processJob",
+          "callee": "new Date().toISOString",
+          "lineNumber": 392
+        },
+        {
+          "caller": "processJob",
+          "callee": "admin\n          .from('buddy_notification_deliveries')\n          .update({\n            attempts: delivery.attempts + 1,\n            provider_status: result.providerStatus,\n            last_error: result.error,\n            updated_at: new Date().toISOString()\n          })\n          .eq('message_id', job.message_id)\n          .eq",
+          "lineNumber": 399
+        },
+        {
+          "caller": "processJob",
+          "callee": "admin\n          .from('buddy_notification_deliveries')\n          .update({\n            attempts: delivery.attempts + 1,\n            provider_status: result.providerStatus,\n            last_error: result.error,\n            updated_at: new Date().toISOString()\n          })\n          .eq",
+          "lineNumber": 399
+        },
+        {
+          "caller": "processJob",
+          "callee": "admin\n          .from('buddy_notification_deliveries')\n          .update",
+          "lineNumber": 399
+        },
+        {
+          "caller": "processJob",
+          "callee": "admin\n          .from",
+          "lineNumber": 399
+        },
+        {
+          "caller": "processJob",
+          "callee": "new Date().toISOString",
+          "lineNumber": 405
+        },
+        {
+          "caller": "processJob",
+          "callee": "finishJob",
+          "lineNumber": 413
+        },
+        {
+          "caller": "processJob",
+          "callee": "finishJob",
+          "lineNumber": 417
+        },
+        {
+          "caller": "processJob",
+          "callee": "errors.join",
+          "lineNumber": 417
+        },
+        {
+          "caller": "processJob",
+          "callee": "finishJob",
+          "lineNumber": 421
+        },
+        {
+          "caller": "authenticatedUserId",
+          "callee": "req.headers.get('authorization')?.replace",
+          "lineNumber": 427
+        },
+        {
+          "caller": "authenticatedUserId",
+          "callee": "req.headers.get",
+          "lineNumber": 427
+        },
+        {
+          "caller": "authenticatedUserId",
+          "callee": "createClient",
+          "lineNumber": 429
+        },
+        {
+          "caller": "authenticatedUserId",
+          "callee": "asUser.auth.getUser",
+          "lineNumber": 433
+        }
+      ],
+      "metrics": {
+        "importCount": 2,
+        "exportCount": 0,
+        "functionCount": 15,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "supabase/functions/buddy-request/index.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 132,
+      "nonEmptyLines": 116,
+      "metrics": {
+        "importCount": 3,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "supabase/functions/compute-readiness/index.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 144,
+      "nonEmptyLines": 127,
+      "functions": [
+        {
+          "name": "localDate",
+          "startLine": 42,
+          "endLine": 56,
+          "params": [
+            "now",
+            "timeZone"
+          ]
+        },
+        {
+          "name": "daysBetween",
+          "startLine": 58,
+          "endLine": 62,
+          "params": [
+            "from",
+            "to"
+          ]
+        },
+        {
+          "name": "weekStart",
+          "startLine": 64,
+          "endLine": 69,
+          "params": [
+            "date"
+          ]
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "localDate",
+          "callee": "new Intl.DateTimeFormat('en-US', {\n      timeZone,\n      year: 'numeric',\n      month: '2-digit',\n      day: '2-digit'\n    }).formatToParts",
+          "lineNumber": 44
+        },
+        {
+          "caller": "localDate",
+          "callee": "now.toISOString().slice",
+          "lineNumber": 54
+        },
+        {
+          "caller": "localDate",
+          "callee": "now.toISOString",
+          "lineNumber": 54
+        },
+        {
+          "caller": "daysBetween",
+          "callee": "Date.parse",
+          "lineNumber": 59
+        },
+        {
+          "caller": "daysBetween",
+          "callee": "Date.parse",
+          "lineNumber": 60
+        },
+        {
+          "caller": "daysBetween",
+          "callee": "Math.max",
+          "lineNumber": 61
+        },
+        {
+          "caller": "daysBetween",
+          "callee": "Math.ceil",
+          "lineNumber": 61
+        },
+        {
+          "caller": "weekStart",
+          "callee": "value.getUTCDay",
+          "lineNumber": 66
+        },
+        {
+          "caller": "weekStart",
+          "callee": "value.setUTCDate",
+          "lineNumber": 67
+        },
+        {
+          "caller": "weekStart",
+          "callee": "value.getUTCDate",
+          "lineNumber": 67
+        },
+        {
+          "caller": "weekStart",
+          "callee": "value.toISOString().slice",
+          "lineNumber": 68
+        },
+        {
+          "caller": "weekStart",
+          "callee": "value.toISOString",
+          "lineNumber": 68
+        }
+      ],
+      "metrics": {
+        "importCount": 3,
+        "exportCount": 0,
+        "functionCount": 3,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "supabase/functions/daily-digest/index.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 512,
+      "nonEmptyLines": 472,
+      "functions": [
+        {
+          "name": "handleRequest",
+          "startLine": 70,
+          "endLine": 245,
+          "params": [
+            "req"
+          ]
+        },
+        {
+          "name": "telegramDateLabel",
+          "startLine": 262,
+          "endLine": 272,
+          "params": [
+            "isoDate"
+          ]
+        },
+        {
+          "name": "buildDigest",
+          "startLine": 274,
+          "endLine": 394,
+          "params": [
+            "u",
+            "isoDate",
+            "hour",
+            "weekday"
+          ]
+        },
+        {
+          "name": "esc",
+          "startLine": 396,
+          "endLine": 402,
+          "params": [
+            "s"
+          ]
+        },
+        {
+          "name": "renderEmail",
+          "startLine": 404,
+          "endLine": 512,
+          "params": [
+            "args"
+          ]
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "handleRequest",
+          "callee": "json",
+          "lineNumber": 72
+        },
+        {
+          "caller": "handleRequest",
+          "callee": "req.json",
+          "lineNumber": 82
+        },
+        {
+          "caller": "handleRequest",
+          "callee": "(req.headers.get('authorization') ?? '').replace",
+          "lineNumber": 87
+        },
+        {
+          "caller": "handleRequest",
+          "callee": "req.headers.get",
+          "lineNumber": 87
+        },
+        {
+          "caller": "handleRequest",
+          "callee": "req.headers.get",
+          "lineNumber": 88
+        },
+        {
+          "caller": "handleRequest",
+          "callee": "Boolean",
+          "lineNumber": 93
+        },
+        {
+          "caller": "handleRequest",
+          "callee": "jwtRoleClaim",
+          "lineNumber": 95
+        },
+        {
+          "caller": "handleRequest",
+          "callee": "admin.auth.getUser",
+          "lineNumber": 99
+        },
+        {
+          "caller": "handleRequest",
+          "callee": "json",
+          "lineNumber": 101
+        },
+        {
+          "caller": "handleRequest",
+          "callee": "json",
+          "lineNumber": 105
+        },
+        {
+          "caller": "handleRequest",
+          "callee": "admin\n    .from('users')\n    .select(\n      'id, name, email, timezone, digest_email_enabled, digest_hour_local, digest_minute_local, last_digest_sent_on'\n    )\n    .limit",
+          "lineNumber": 115
+        },
+        {
+          "caller": "handleRequest",
+          "callee": "admin\n    .from('users')\n    .select",
+          "lineNumber": 115
+        },
+        {
+          "caller": "handleRequest",
+          "callee": "admin\n    .from",
+          "lineNumber": 115
+        },
+        {
+          "caller": "handleRequest",
+          "callee": "admin\n    .from('telegram_subscriptions')\n    .select('user_id, chat_id, enabled, last_digest_sent_on')\n    .limit",
+          "lineNumber": 121
+        },
+        {
+          "caller": "handleRequest",
+          "callee": "admin\n    .from('telegram_subscriptions')\n    .select",
+          "lineNumber": 121
+        },
+        {
+          "caller": "handleRequest",
+          "callee": "admin\n    .from",
+          "lineNumber": 121
+        },
+        {
+          "caller": "handleRequest",
+          "callee": "userQuery.eq",
+          "lineNumber": 126
+        },
+        {
+          "caller": "handleRequest",
+          "callee": "telegramQuery.eq",
+          "lineNumber": 127
+        },
+        {
+          "caller": "handleRequest",
+          "callee": "Promise.all",
+          "lineNumber": 131
+        },
+        {
+          "caller": "handleRequest",
+          "callee": "console.error",
+          "lineNumber": 133
+        },
+        {
+          "caller": "handleRequest",
+          "callee": "json",
+          "lineNumber": 138
+        },
+        {
+          "caller": "handleRequest",
+          "callee": "subscriptions.map",
+          "lineNumber": 142
+        },
+        {
+          "caller": "handleRequest",
+          "callee": "((userData as UserForDigest[]) ?? []).filter",
+          "lineNumber": 143
+        },
+        {
+          "caller": "handleRequest",
+          "callee": "telegramByUser.get",
+          "lineNumber": 144
+        },
+        {
+          "caller": "handleRequest",
+          "callee": "Boolean",
+          "lineNumber": 145
+        },
+        {
+          "caller": "handleRequest",
+          "callee": "telegramByUser.get",
+          "lineNumber": 150
+        },
+        {
+          "caller": "handleRequest",
+          "callee": "localDigestClock",
+          "lineNumber": 152
+        },
+        {
+          "caller": "handleRequest",
+          "callee": "isDigestTimeDue",
+          "lineNumber": 155
+        },
+        {
+          "caller": "handleRequest",
+          "callee": "report.push",
+          "lineNumber": 156
+        },
+        {
+          "caller": "handleRequest",
+          "callee": "Boolean",
+          "lineNumber": 167
+        },
+        {
+          "caller": "handleRequest",
+          "callee": "Boolean",
+          "lineNumber": 170
+        },
+        {
+          "caller": "handleRequest",
+          "callee": "report.push",
+          "lineNumber": 177
+        },
+        {
+          "caller": "handleRequest",
+          "callee": "buildDigest",
+          "lineNumber": 181
+        },
+        {
+          "caller": "handleRequest",
+          "callee": "report.push",
+          "lineNumber": 186
+        },
+        {
+          "caller": "handleRequest",
+          "callee": "report.push",
+          "lineNumber": 190
+        },
+        {
+          "caller": "handleRequest",
+          "callee": "sendEmail",
+          "lineNumber": 206
+        },
+        {
+          "caller": "handleRequest",
+          "callee": "sendTelegramMessage",
+          "lineNumber": 216
+        },
+        {
+          "caller": "handleRequest",
+          "callee": "renderTelegramConnectionTest",
+          "lineNumber": 219
+        },
+        {
+          "caller": "handleRequest",
+          "callee": "airJournalUrl",
+          "lineNumber": 220
+        },
+        {
+          "caller": "handleRequest",
+          "callee": "admin.from('users').update({ last_digest_sent_on: isoDate }).eq",
+          "lineNumber": 227
+        },
+        {
+          "caller": "handleRequest",
+          "callee": "admin.from('users').update",
+          "lineNumber": 227
+        },
+        {
+          "caller": "handleRequest",
+          "callee": "admin.from",
+          "lineNumber": 227
+        },
+        {
+          "caller": "handleRequest",
+          "callee": "admin\n        .from('telegram_subscriptions')\n        .update({ last_digest_sent_on: isoDate, updated_at: new Date().toISOString() })\n        .eq",
+          "lineNumber": 230
+        },
+        {
+          "caller": "handleRequest",
+          "callee": "admin\n        .from('telegram_subscriptions')\n        .update",
+          "lineNumber": 230
+        },
+        {
+          "caller": "handleRequest",
+          "callee": "admin\n        .from",
+          "lineNumber": 230
+        },
+        {
+          "caller": "handleRequest",
+          "callee": "new Date().toISOString",
+          "lineNumber": 232
+        },
+        {
+          "caller": "handleRequest",
+          "callee": "report.push",
+          "lineNumber": 235
+        },
+        {
+          "caller": "handleRequest",
+          "callee": "json",
+          "lineNumber": 244
+        },
+        {
+          "caller": "telegramDateLabel",
+          "callee": "new Intl.DateTimeFormat('en-GB', {\n    timeZone: 'UTC',\n    weekday: 'long',\n    day: '2-digit',\n    month: 'long'\n  }).formatToParts",
+          "lineNumber": 264
+        },
+        {
+          "caller": "value",
+          "callee": "parts.find",
+          "lineNumber": 270
+        },
+        {
+          "caller": "telegramDateLabel",
+          "callee": "`${value('weekday')} · ${value('day')} ${value('month')}`.toUpperCase",
+          "lineNumber": 271
+        },
+        {
+          "caller": "telegramDateLabel",
+          "callee": "value",
+          "lineNumber": 271
+        },
+        {
+          "caller": "telegramDateLabel",
+          "callee": "value",
+          "lineNumber": 271
+        },
+        {
+          "caller": "telegramDateLabel",
+          "callee": "value",
+          "lineNumber": 271
+        },
+        {
+          "caller": "buildDigest",
+          "callee": "(u.name ?? '').split",
+          "lineNumber": 280
+        },
+        {
+          "caller": "buildDigest",
+          "callee": "greetingForHour",
+          "lineNumber": 281
+        },
+        {
+          "caller": "buildDigest",
+          "callee": "pickQuoteForDay",
+          "lineNumber": 282
+        },
+        {
+          "caller": "buildDigest",
+          "callee": "admin\n    .from('planner_day_plans')\n    .select('sessions')\n    .eq('user_id', u.id)\n    .eq('plan_date', isoDate)\n    .maybeSingle",
+          "lineNumber": 284
+        },
+        {
+          "caller": "buildDigest",
+          "callee": "admin\n    .from('planner_day_plans')\n    .select('sessions')\n    .eq('user_id', u.id)\n    .eq",
+          "lineNumber": 284
+        },
+        {
+          "caller": "buildDigest",
+          "callee": "admin\n    .from('planner_day_plans')\n    .select('sessions')\n    .eq",
+          "lineNumber": 284
+        },
+        {
+          "caller": "buildDigest",
+          "callee": "admin\n    .from('planner_day_plans')\n    .select",
+          "lineNumber": 284
+        },
+        {
+          "caller": "buildDigest",
+          "callee": "admin\n    .from",
+          "lineNumber": 284
+        },
+        {
+          "caller": "buildDigest",
+          "callee": "console.error",
+          "lineNumber": 291
+        },
+        {
+          "caller": "buildDigest",
+          "callee": "parseTelegramStudySessions",
+          "lineNumber": 293
+        },
+        {
+          "caller": "buildDigest",
+          "callee": "admin\n    .from('reattempts')\n    .select('id, question_id, stage')\n    .eq('user_id', u.id)\n    .lte('scheduled_date', isoDate)\n    .neq",
+          "lineNumber": 298
+        },
+        {
+          "caller": "buildDigest",
+          "callee": "admin\n    .from('reattempts')\n    .select('id, question_id, stage')\n    .eq('user_id', u.id)\n    .lte",
+          "lineNumber": 298
+        },
+        {
+          "caller": "buildDigest",
+          "callee": "admin\n    .from('reattempts')\n    .select('id, question_id, stage')\n    .eq",
+          "lineNumber": 298
+        },
+        {
+          "caller": "buildDigest",
+          "callee": "admin\n    .from('reattempts')\n    .select",
+          "lineNumber": 298
+        },
+        {
+          "caller": "buildDigest",
+          "callee": "admin\n    .from",
+          "lineNumber": 298
+        },
+        {
+          "caller": "buildDigest",
+          "callee": "reAttemptRows.map",
+          "lineNumber": 309
+        },
+        {
+          "caller": "buildDigest",
+          "callee": "admin\n      .from('questions')\n      .select('id, subject, question_text')\n      .in",
+          "lineNumber": 310
+        },
+        {
+          "caller": "buildDigest",
+          "callee": "admin\n      .from('questions')\n      .select",
+          "lineNumber": 310
+        },
+        {
+          "caller": "buildDigest",
+          "callee": "admin\n      .from",
+          "lineNumber": 310
+        },
+        {
+          "caller": "buildDigest",
+          "callee": "((qs as { id: string; subject: string; question_text: string | null }[]) ?? []).forEach",
+          "lineNumber": 315
+        },
+        {
+          "caller": "buildDigest",
+          "callee": "map.set",
+          "lineNumber": 316
+        },
+        {
+          "caller": "buildDigest",
+          "callee": "map.get",
+          "lineNumber": 316
+        },
+        {
+          "caller": "buildDigest",
+          "callee": "sampleTitles.push",
+          "lineNumber": 318
+        },
+        {
+          "caller": "buildDigest",
+          "callee": "q.question_text.slice",
+          "lineNumber": 318
+        },
+        {
+          "caller": "buildDigest",
+          "callee": "Array.from(map, ([subject, count]) => ({ subject, count })).sort",
+          "lineNumber": 321
+        },
+        {
+          "caller": "buildDigest",
+          "callee": "Array.from",
+          "lineNumber": 321
+        },
+        {
+          "caller": "buildDigest",
+          "callee": "admin.rpc",
+          "lineNumber": 327
+        },
+        {
+          "caller": "buildDigest",
+          "callee": "admin\n    .from('plan_item_completions')\n    .select('item_id')\n    .eq('user_id', u.id)\n    .eq",
+          "lineNumber": 338
+        },
+        {
+          "caller": "buildDigest",
+          "callee": "admin\n    .from('plan_item_completions')\n    .select('item_id')\n    .eq",
+          "lineNumber": 338
+        },
+        {
+          "caller": "buildDigest",
+          "callee": "admin\n    .from('plan_item_completions')\n    .select",
+          "lineNumber": 338
+        },
+        {
+          "caller": "buildDigest",
+          "callee": "admin\n    .from",
+          "lineNumber": 338
+        },
+        {
+          "caller": "buildDigest",
+          "callee": "((completions as { item_id: string }[]) ?? []).map",
+          "lineNumber": 343
+        },
+        {
+          "caller": "buildDigest",
+          "callee": "planItems.filter",
+          "lineNumber": 344
+        },
+        {
+          "caller": "buildDigest",
+          "callee": "doneIds.has",
+          "lineNumber": 344
+        },
+        {
+          "caller": "buildDigest",
+          "callee": "admin\n      .from('weekly_reviews')\n      .select('this_weeks_fix, week_start')\n      .eq('user_id', u.id)\n      .order('week_start', { ascending: false })\n      .limit",
+          "lineNumber": 349
+        },
+        {
+          "caller": "buildDigest",
+          "callee": "admin\n      .from('weekly_reviews')\n      .select('this_weeks_fix, week_start')\n      .eq('user_id', u.id)\n      .order",
+          "lineNumber": 349
+        },
+        {
+          "caller": "buildDigest",
+          "callee": "admin\n      .from('weekly_reviews')\n      .select('this_weeks_fix, week_start')\n      .eq",
+          "lineNumber": 349
+        },
+        {
+          "caller": "buildDigest",
+          "callee": "admin\n      .from('weekly_reviews')\n      .select",
+          "lineNumber": 349
+        },
+        {
+          "caller": "buildDigest",
+          "callee": "admin\n      .from",
+          "lineNumber": 349
+        },
+        {
+          "caller": "buildDigest",
+          "callee": "renderEmail",
+          "lineNumber": 365
+        },
+        {
+          "caller": "buildDigest",
+          "callee": "renderTelegramDigest",
+          "lineNumber": 378
+        },
+        {
+          "caller": "buildDigest",
+          "callee": "telegramDateLabel",
+          "lineNumber": 379
+        },
+        {
+          "caller": "esc",
+          "callee": "s\n    .replace(/&/g, '&amp;')\n    .replace(/</g, '&lt;')\n    .replace(/>/g, '&gt;')\n    .replace",
+          "lineNumber": 397
+        },
+        {
+          "caller": "esc",
+          "callee": "s\n    .replace(/&/g, '&amp;')\n    .replace(/</g, '&lt;')\n    .replace",
+          "lineNumber": 397
+        },
+        {
+          "caller": "esc",
+          "callee": "s\n    .replace(/&/g, '&amp;')\n    .replace",
+          "lineNumber": 397
+        },
+        {
+          "caller": "esc",
+          "callee": "s\n    .replace",
+          "lineNumber": 397
+        },
+        {
+          "caller": "renderEmail",
+          "callee": "subjectCounts\n            .slice(0, 6)\n            .map(\n              (s) =>\n                `<li>${esc(s.subject)} — <span style=\"font-family:monospace;color:#1B191C;\">${s.count}</span></li>`\n            )\n            .join",
+          "lineNumber": 435
+        },
+        {
+          "caller": "renderEmail",
+          "callee": "subjectCounts\n            .slice(0, 6)\n            .map",
+          "lineNumber": 435
+        },
+        {
+          "caller": "renderEmail",
+          "callee": "subjectCounts\n            .slice",
+          "lineNumber": 435
+        },
+        {
+          "caller": "renderEmail",
+          "callee": "esc",
+          "lineNumber": 439
+        },
+        {
+          "caller": "renderEmail",
+          "callee": "sampleTitles.map((t) => `<li>${esc(t)}</li>`).join",
+          "lineNumber": 449
+        },
+        {
+          "caller": "renderEmail",
+          "callee": "sampleTitles.map",
+          "lineNumber": 449
+        },
+        {
+          "caller": "renderEmail",
+          "callee": "esc",
+          "lineNumber": 449
+        },
+        {
+          "caller": "renderEmail",
+          "callee": "openItems\n            .slice(0, 12)\n            .map(\n              (i) =>\n                `<li>${esc(i.title)}${i.subject ? ` <span style=\"color:#67575D;font-size:11.5px;\">· ${esc(i.subject)}</span>` : ''}${i.target_min ? ` <span style=\"font-family:monospace;color:#7D6C72;font-size:11.5px;\">${i.target_min}m</span>` : ''}</li>`\n            )\n            .join",
+          "lineNumber": 461
+        },
+        {
+          "caller": "renderEmail",
+          "callee": "openItems\n            .slice(0, 12)\n            .map",
+          "lineNumber": 461
+        },
+        {
+          "caller": "renderEmail",
+          "callee": "openItems\n            .slice",
+          "lineNumber": 461
+        },
+        {
+          "caller": "renderEmail",
+          "callee": "esc",
+          "lineNumber": 465
+        },
+        {
+          "caller": "renderEmail",
+          "callee": "esc",
+          "lineNumber": 465
+        },
+        {
+          "caller": "renderEmail",
+          "callee": "esc",
+          "lineNumber": 475
+        },
+        {
+          "caller": "renderEmail",
+          "callee": "esc",
+          "lineNumber": 486
+        },
+        {
+          "caller": "renderEmail",
+          "callee": "esc",
+          "lineNumber": 489
+        },
+        {
+          "caller": "renderEmail",
+          "callee": "esc",
+          "lineNumber": 493
+        },
+        {
+          "caller": "renderEmail",
+          "callee": "esc",
+          "lineNumber": 495
+        },
+        {
+          "caller": "renderEmail",
+          "callee": "esc",
+          "lineNumber": 502
+        }
+      ],
+      "metrics": {
+        "importCount": 6,
+        "exportCount": 0,
+        "functionCount": 5,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "supabase/functions/decline-request/index.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 62,
+      "nonEmptyLines": 53,
+      "metrics": {
+        "importCount": 2,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "supabase/functions/login/index.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 84,
+      "nonEmptyLines": 71,
+      "functions": [
+        {
+          "name": "genericError",
+          "startLine": 34,
+          "endLine": 34,
+          "params": []
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "genericError",
+          "callee": "json",
+          "lineNumber": 34
+        }
+      ],
+      "metrics": {
+        "importCount": 1,
+        "exportCount": 0,
+        "functionCount": 1,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "supabase/functions/notification-actions/index.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 46,
+      "nonEmptyLines": 39,
+      "metrics": {
+        "importCount": 1,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "supabase/functions/request-access/index.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 135,
+      "nonEmptyLines": 119,
+      "functions": [
+        {
+          "name": "validate",
+          "startLine": 31,
+          "endLine": 43,
+          "params": [
+            "b"
+          ]
+        },
+        {
+          "name": "sha256hex",
+          "startLine": 45,
+          "endLine": 51,
+          "params": [
+            "input"
+          ]
+        },
+        {
+          "name": "ownerEmailFromDb",
+          "startLine": 132,
+          "endLine": 135,
+          "params": []
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "validate",
+          "callee": "b.website.trim",
+          "lineNumber": 32
+        },
+        {
+          "caller": "validate",
+          "callee": "b.name.trim",
+          "lineNumber": 36
+        },
+        {
+          "caller": "validate",
+          "callee": "b.email.trim().toLowerCase",
+          "lineNumber": 37
+        },
+        {
+          "caller": "validate",
+          "callee": "b.email.trim",
+          "lineNumber": 37
+        },
+        {
+          "caller": "validate",
+          "callee": "b.purpose.trim",
+          "lineNumber": 38
+        },
+        {
+          "caller": "validate",
+          "callee": "/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test",
+          "lineNumber": 40
+        },
+        {
+          "caller": "sha256hex",
+          "callee": "new TextEncoder().encode",
+          "lineNumber": 46
+        },
+        {
+          "caller": "sha256hex",
+          "callee": "crypto.subtle.digest",
+          "lineNumber": 47
+        },
+        {
+          "caller": "sha256hex",
+          "callee": "Array.from(new Uint8Array(digest))\n    .map((b) => b.toString(16).padStart(2, '0'))\n    .join",
+          "lineNumber": 48
+        },
+        {
+          "caller": "sha256hex",
+          "callee": "Array.from(new Uint8Array(digest))\n    .map",
+          "lineNumber": 48
+        },
+        {
+          "caller": "sha256hex",
+          "callee": "Array.from",
+          "lineNumber": 48
+        },
+        {
+          "caller": "sha256hex",
+          "callee": "b.toString(16).padStart",
+          "lineNumber": 49
+        },
+        {
+          "caller": "sha256hex",
+          "callee": "b.toString",
+          "lineNumber": 49
+        },
+        {
+          "caller": "ownerEmailFromDb",
+          "callee": "admin.rpc",
+          "lineNumber": 133
+        }
+      ],
+      "metrics": {
+        "importCount": 2,
+        "exportCount": 0,
+        "functionCount": 3,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "supabase/functions/request-pin-reset/index.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 79,
+      "nonEmptyLines": 65,
+      "metrics": {
+        "importCount": 2,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "supabase/functions/schedule-reattempts/index.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 8,
+      "nonEmptyLines": 7,
+      "metrics": {
+        "importCount": 1,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "supabase/functions/signup-via-invite/index.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 175,
+      "nonEmptyLines": 155,
+      "functions": [
+        {
+          "name": "inviteBundle",
+          "startLine": 39,
+          "endLine": 53,
+          "params": [
+            "token"
+          ]
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "inviteBundle",
+          "callee": "admin\n    .from('invites')\n    .select('*')\n    .eq('token', token)\n    .maybeSingle",
+          "lineNumber": 41
+        },
+        {
+          "caller": "inviteBundle",
+          "callee": "admin\n    .from('invites')\n    .select('*')\n    .eq",
+          "lineNumber": 41
+        },
+        {
+          "caller": "inviteBundle",
+          "callee": "admin\n    .from('invites')\n    .select",
+          "lineNumber": 41
+        },
+        {
+          "caller": "inviteBundle",
+          "callee": "admin\n    .from",
+          "lineNumber": 41
+        },
+        {
+          "caller": "inviteBundle",
+          "callee": "admin\n    .from('account_requests')\n    .select('email, name')\n    .eq('invite_id', invite.id)\n    .maybeSingle",
+          "lineNumber": 47
+        },
+        {
+          "caller": "inviteBundle",
+          "callee": "admin\n    .from('account_requests')\n    .select('email, name')\n    .eq",
+          "lineNumber": 47
+        },
+        {
+          "caller": "inviteBundle",
+          "callee": "admin\n    .from('account_requests')\n    .select",
+          "lineNumber": 47
+        },
+        {
+          "caller": "inviteBundle",
+          "callee": "admin\n    .from",
+          "lineNumber": 47
+        }
+      ],
+      "metrics": {
+        "importCount": 1,
+        "exportCount": 0,
+        "functionCount": 1,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "supabase/functions/study-notifications/index.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 709,
+      "nonEmptyLines": 677,
+      "functions": [
+        {
+          "name": "safeEqual",
+          "startLine": 117,
+          "endLine": 122,
+          "params": [
+            "a",
+            "b"
+          ]
+        },
+        {
+          "name": "category",
+          "startLine": 124,
+          "endLine": 128,
+          "params": [
+            "value"
+          ]
+        },
+        {
+          "name": "base64Url",
+          "startLine": 130,
+          "endLine": 134,
+          "params": [
+            "bytes"
+          ]
+        },
+        {
+          "name": "hex",
+          "startLine": 136,
+          "endLine": 138,
+          "params": [
+            "bytes"
+          ]
+        },
+        {
+          "name": "freshActionToken",
+          "startLine": 140,
+          "endLine": 145,
+          "params": []
+        },
+        {
+          "name": "issueActionToken",
+          "startLine": 147,
+          "endLine": 175,
+          "params": [
+            "args"
+          ]
+        },
+        {
+          "name": "bodyFor",
+          "startLine": 177,
+          "endLine": 237,
+          "params": [
+            "categoryName",
+            "context"
+          ]
+        },
+        {
+          "name": "loadContext",
+          "startLine": 239,
+          "endLine": 366,
+          "params": [
+            "userId",
+            "today"
+          ]
+        },
+        {
+          "name": "studyCopy",
+          "startLine": 368,
+          "endLine": 405,
+          "params": [
+            "categoryName",
+            "localDate",
+            "context",
+            "actionToken"
+          ]
+        },
+        {
+          "name": "eventCopy",
+          "startLine": 407,
+          "endLine": 428,
+          "params": [
+            "event",
+            "actionToken"
+          ]
+        },
+        {
+          "name": "upsertEvent",
+          "startLine": 430,
+          "endLine": 460,
+          "params": [
+            "args"
+          ]
+        },
+        {
+          "name": "sendScheduled",
+          "startLine": 462,
+          "endLine": 533,
+          "params": [
+            "args"
+          ]
+        },
+        {
+          "name": "sendDueReminders",
+          "startLine": 535,
+          "endLine": 582,
+          "params": [
+            "usersById",
+            "preferences",
+            "subscriptionsById"
+          ]
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "safeEqual",
+          "callee": "a.charCodeAt",
+          "lineNumber": 120
+        },
+        {
+          "caller": "safeEqual",
+          "callee": "b.charCodeAt",
+          "lineNumber": 120
+        },
+        {
+          "caller": "category",
+          "callee": "CATEGORIES.includes",
+          "lineNumber": 125
+        },
+        {
+          "caller": "base64Url",
+          "callee": "String.fromCharCode",
+          "lineNumber": 132
+        },
+        {
+          "caller": "base64Url",
+          "callee": "btoa(binary).replace(/\\+/g, '-').replace(/\\//g, '_').replace",
+          "lineNumber": 133
+        },
+        {
+          "caller": "base64Url",
+          "callee": "btoa(binary).replace(/\\+/g, '-').replace",
+          "lineNumber": 133
+        },
+        {
+          "caller": "base64Url",
+          "callee": "btoa(binary).replace",
+          "lineNumber": 133
+        },
+        {
+          "caller": "base64Url",
+          "callee": "btoa",
+          "lineNumber": 133
+        },
+        {
+          "caller": "hex",
+          "callee": "Array.from(bytes, (byte) => byte.toString(16).padStart(2, '0')).join",
+          "lineNumber": 137
+        },
+        {
+          "caller": "hex",
+          "callee": "Array.from",
+          "lineNumber": 137
+        },
+        {
+          "caller": "hex",
+          "callee": "byte.toString(16).padStart",
+          "lineNumber": 137
+        },
+        {
+          "caller": "hex",
+          "callee": "byte.toString",
+          "lineNumber": 137
+        },
+        {
+          "caller": "freshActionToken",
+          "callee": "crypto.getRandomValues",
+          "lineNumber": 141
+        },
+        {
+          "caller": "freshActionToken",
+          "callee": "base64Url",
+          "lineNumber": 142
+        },
+        {
+          "caller": "freshActionToken",
+          "callee": "crypto.subtle.digest",
+          "lineNumber": 143
+        },
+        {
+          "caller": "freshActionToken",
+          "callee": "new TextEncoder().encode",
+          "lineNumber": 143
+        },
+        {
+          "caller": "freshActionToken",
+          "callee": "hex",
+          "lineNumber": 144
+        },
+        {
+          "caller": "issueActionToken",
+          "callee": "freshActionToken",
+          "lineNumber": 155
+        },
+        {
+          "caller": "issueActionToken",
+          "callee": "admin.from('notification_action_tokens').upsert",
+          "lineNumber": 156
+        },
+        {
+          "caller": "issueActionToken",
+          "callee": "admin.from",
+          "lineNumber": 156
+        },
+        {
+          "caller": "issueActionToken",
+          "callee": "new Date(Date.now() + 8 * 86_400_000).toISOString",
+          "lineNumber": 168
+        },
+        {
+          "caller": "issueActionToken",
+          "callee": "Date.now",
+          "lineNumber": 168
+        },
+        {
+          "caller": "issueActionToken",
+          "callee": "new Date().toISOString",
+          "lineNumber": 169
+        },
+        {
+          "caller": "bodyFor",
+          "callee": "detailedDayPlanCopy",
+          "lineNumber": 180
+        },
+        {
+          "caller": "bodyFor",
+          "callee": "detailedDayPlanCopy",
+          "lineNumber": 186
+        },
+        {
+          "caller": "bodyFor",
+          "callee": "dailyPyqCopy",
+          "lineNumber": 196
+        },
+        {
+          "caller": "bodyFor",
+          "callee": "truncate",
+          "lineNumber": 234
+        },
+        {
+          "caller": "loadContext",
+          "callee": "new Date(Date.now() - 86_400_000).toISOString",
+          "lineNumber": 240
+        },
+        {
+          "caller": "loadContext",
+          "callee": "Date.now",
+          "lineNumber": 240
+        },
+        {
+          "caller": "loadContext",
+          "callee": "new Date(Date.now() - 7 * 86_400_000).toISOString",
+          "lineNumber": 241
+        },
+        {
+          "caller": "loadContext",
+          "callee": "Date.now",
+          "lineNumber": 241
+        },
+        {
+          "caller": "loadContext",
+          "callee": "Promise.all",
+          "lineNumber": 257
+        },
+        {
+          "caller": "loadContext",
+          "callee": "admin\n      .from('planner_day_plans')\n      .select('sessions')\n      .eq('user_id', userId)\n      .eq('plan_date', today)\n      .maybeSingle",
+          "lineNumber": 258
+        },
+        {
+          "caller": "loadContext",
+          "callee": "admin\n      .from('planner_day_plans')\n      .select('sessions')\n      .eq('user_id', userId)\n      .eq",
+          "lineNumber": 258
+        },
+        {
+          "caller": "loadContext",
+          "callee": "admin\n      .from('planner_day_plans')\n      .select('sessions')\n      .eq",
+          "lineNumber": 258
+        },
+        {
+          "caller": "loadContext",
+          "callee": "admin\n      .from('planner_day_plans')\n      .select",
+          "lineNumber": 258
+        },
+        {
+          "caller": "loadContext",
+          "callee": "admin\n      .from",
+          "lineNumber": 258
+        },
+        {
+          "caller": "loadContext",
+          "callee": "admin.rpc",
+          "lineNumber": 264
+        },
+        {
+          "caller": "loadContext",
+          "callee": "admin\n      .from('plan_item_completions')\n      .select('item_id')\n      .eq('user_id', userId)\n      .eq",
+          "lineNumber": 265
+        },
+        {
+          "caller": "loadContext",
+          "callee": "admin\n      .from('plan_item_completions')\n      .select('item_id')\n      .eq",
+          "lineNumber": 265
+        },
+        {
+          "caller": "loadContext",
+          "callee": "admin\n      .from('plan_item_completions')\n      .select",
+          "lineNumber": 265
+        },
+        {
+          "caller": "loadContext",
+          "callee": "admin\n      .from",
+          "lineNumber": 265
+        },
+        {
+          "caller": "loadContext",
+          "callee": "admin\n      .from('reattempts')\n      .select('id', { count: 'exact', head: true })\n      .eq('user_id', userId)\n      .lte('scheduled_date', today)\n      .neq",
+          "lineNumber": 270
+        },
+        {
+          "caller": "loadContext",
+          "callee": "admin\n      .from('reattempts')\n      .select('id', { count: 'exact', head: true })\n      .eq('user_id', userId)\n      .lte",
+          "lineNumber": 270
+        },
+        {
+          "caller": "loadContext",
+          "callee": "admin\n      .from('reattempts')\n      .select('id', { count: 'exact', head: true })\n      .eq",
+          "lineNumber": 270
+        },
+        {
+          "caller": "loadContext",
+          "callee": "admin\n      .from('reattempts')\n      .select",
+          "lineNumber": 270
+        },
+        {
+          "caller": "loadContext",
+          "callee": "admin\n      .from",
+          "lineNumber": 270
+        },
+        {
+          "caller": "loadContext",
+          "callee": "admin\n      .from('pyq_attempts')\n      .select('id', { count: 'exact', head: true })\n      .eq('user_id', userId)\n      .gte",
+          "lineNumber": 276
+        },
+        {
+          "caller": "loadContext",
+          "callee": "admin\n      .from('pyq_attempts')\n      .select('id', { count: 'exact', head: true })\n      .eq",
+          "lineNumber": 276
+        },
+        {
+          "caller": "loadContext",
+          "callee": "admin\n      .from('pyq_attempts')\n      .select",
+          "lineNumber": 276
+        },
+        {
+          "caller": "loadContext",
+          "callee": "admin\n      .from",
+          "lineNumber": 276
+        },
+        {
+          "caller": "loadContext",
+          "callee": "admin\n      .from('sessions')\n      .select('id', { count: 'exact', head: true })\n      .eq('user_id', userId)\n      .eq",
+          "lineNumber": 281
+        },
+        {
+          "caller": "loadContext",
+          "callee": "admin\n      .from('sessions')\n      .select('id', { count: 'exact', head: true })\n      .eq",
+          "lineNumber": 281
+        },
+        {
+          "caller": "loadContext",
+          "callee": "admin\n      .from('sessions')\n      .select",
+          "lineNumber": 281
+        },
+        {
+          "caller": "loadContext",
+          "callee": "admin\n      .from",
+          "lineNumber": 281
+        },
+        {
+          "caller": "loadContext",
+          "callee": "admin\n      .from('questions')\n      .select('id', { count: 'exact', head: true })\n      .eq('user_id', userId)\n      .gte",
+          "lineNumber": 286
+        },
+        {
+          "caller": "loadContext",
+          "callee": "admin\n      .from('questions')\n      .select('id', { count: 'exact', head: true })\n      .eq",
+          "lineNumber": 286
+        },
+        {
+          "caller": "loadContext",
+          "callee": "admin\n      .from('questions')\n      .select",
+          "lineNumber": 286
+        },
+        {
+          "caller": "loadContext",
+          "callee": "admin\n      .from",
+          "lineNumber": 286
+        },
+        {
+          "caller": "loadContext",
+          "callee": "admin\n      .from('questions')\n      .select('id', { count: 'exact', head: true })\n      .eq('user_id', userId)\n      .gte",
+          "lineNumber": 291
+        },
+        {
+          "caller": "loadContext",
+          "callee": "admin\n      .from('questions')\n      .select('id', { count: 'exact', head: true })\n      .eq",
+          "lineNumber": 291
+        },
+        {
+          "caller": "loadContext",
+          "callee": "admin\n      .from('questions')\n      .select",
+          "lineNumber": 291
+        },
+        {
+          "caller": "loadContext",
+          "callee": "admin\n      .from",
+          "lineNumber": 291
+        },
+        {
+          "caller": "loadContext",
+          "callee": "admin\n      .from('questions')\n      .select('id', { count: 'exact', head: true })\n      .eq('user_id', userId)\n      .not('mark_decision', 'is', null)\n      .gte",
+          "lineNumber": 296
+        },
+        {
+          "caller": "loadContext",
+          "callee": "admin\n      .from('questions')\n      .select('id', { count: 'exact', head: true })\n      .eq('user_id', userId)\n      .not",
+          "lineNumber": 296
+        },
+        {
+          "caller": "loadContext",
+          "callee": "admin\n      .from('questions')\n      .select('id', { count: 'exact', head: true })\n      .eq",
+          "lineNumber": 296
+        },
+        {
+          "caller": "loadContext",
+          "callee": "admin\n      .from('questions')\n      .select",
+          "lineNumber": 296
+        },
+        {
+          "caller": "loadContext",
+          "callee": "admin\n      .from",
+          "lineNumber": 296
+        },
+        {
+          "caller": "loadContext",
+          "callee": "admin\n      .from('formulas')\n      .select('id', { count: 'exact', head: true })\n      .eq('user_id', userId)\n      .lte",
+          "lineNumber": 302
+        },
+        {
+          "caller": "loadContext",
+          "callee": "admin\n      .from('formulas')\n      .select('id', { count: 'exact', head: true })\n      .eq",
+          "lineNumber": 302
+        },
+        {
+          "caller": "loadContext",
+          "callee": "admin\n      .from('formulas')\n      .select",
+          "lineNumber": 302
+        },
+        {
+          "caller": "loadContext",
+          "callee": "admin\n      .from",
+          "lineNumber": 302
+        },
+        {
+          "caller": "loadContext",
+          "callee": "admin.from('patterns').select('mastery_level').eq",
+          "lineNumber": 307
+        },
+        {
+          "caller": "loadContext",
+          "callee": "admin.from('patterns').select",
+          "lineNumber": 307
+        },
+        {
+          "caller": "loadContext",
+          "callee": "admin.from",
+          "lineNumber": 307
+        },
+        {
+          "caller": "loadContext",
+          "callee": "admin\n      .from('trigger_phrases')\n      .select('id', { count: 'exact', head: true })\n      .eq",
+          "lineNumber": 308
+        },
+        {
+          "caller": "loadContext",
+          "callee": "admin\n      .from('trigger_phrases')\n      .select",
+          "lineNumber": 308
+        },
+        {
+          "caller": "loadContext",
+          "callee": "admin\n      .from",
+          "lineNumber": 308
+        },
+        {
+          "caller": "loadContext",
+          "callee": "admin\n      .from('readiness_snapshots')\n      .select('score')\n      .eq('user_id', userId)\n      .order('on_date', { ascending: false })\n      .limit(1)\n      .maybeSingle",
+          "lineNumber": 312
+        },
+        {
+          "caller": "loadContext",
+          "callee": "admin\n      .from('readiness_snapshots')\n      .select('score')\n      .eq('user_id', userId)\n      .order('on_date', { ascending: false })\n      .limit",
+          "lineNumber": 312
+        },
+        {
+          "caller": "loadContext",
+          "callee": "admin\n      .from('readiness_snapshots')\n      .select('score')\n      .eq('user_id', userId)\n      .order",
+          "lineNumber": 312
+        },
+        {
+          "caller": "loadContext",
+          "callee": "admin\n      .from('readiness_snapshots')\n      .select('score')\n      .eq",
+          "lineNumber": 312
+        },
+        {
+          "caller": "loadContext",
+          "callee": "admin\n      .from('readiness_snapshots')\n      .select",
+          "lineNumber": 312
+        },
+        {
+          "caller": "loadContext",
+          "callee": "admin\n      .from",
+          "lineNumber": 312
+        },
+        {
+          "caller": "loadContext",
+          "callee": "admin\n      .from('weekly_reviews')\n      .select('this_weeks_fix')\n      .eq('user_id', userId)\n      .order('week_start', { ascending: false })\n      .limit(1)\n      .maybeSingle",
+          "lineNumber": 319
+        },
+        {
+          "caller": "loadContext",
+          "callee": "admin\n      .from('weekly_reviews')\n      .select('this_weeks_fix')\n      .eq('user_id', userId)\n      .order('week_start', { ascending: false })\n      .limit",
+          "lineNumber": 319
+        },
+        {
+          "caller": "loadContext",
+          "callee": "admin\n      .from('weekly_reviews')\n      .select('this_weeks_fix')\n      .eq('user_id', userId)\n      .order",
+          "lineNumber": 319
+        },
+        {
+          "caller": "loadContext",
+          "callee": "admin\n      .from('weekly_reviews')\n      .select('this_weeks_fix')\n      .eq",
+          "lineNumber": 319
+        },
+        {
+          "caller": "loadContext",
+          "callee": "admin\n      .from('weekly_reviews')\n      .select",
+          "lineNumber": 319
+        },
+        {
+          "caller": "loadContext",
+          "callee": "admin\n      .from",
+          "lineNumber": 319
+        },
+        {
+          "caller": "loadContext",
+          "callee": "parseStudyPlanBlocks",
+          "lineNumber": 329
+        },
+        {
+          "caller": "loadContext",
+          "callee": "((completionsResult.data as Array<{ item_id: string }> | null) ?? []).map",
+          "lineNumber": 331
+        },
+        {
+          "caller": "loadContext",
+          "callee": "planItems\n      .filter((item) => !completed.has(item.id))\n      .map",
+          "lineNumber": 344
+        },
+        {
+          "caller": "loadContext",
+          "callee": "planItems\n      .filter",
+          "lineNumber": 344
+        },
+        {
+          "caller": "loadContext",
+          "callee": "completed.has",
+          "lineNumber": 345
+        },
+        {
+          "caller": "loadContext",
+          "callee": "patterns.filter",
+          "lineNumber": 360
+        },
+        {
+          "caller": "studyCopy",
+          "callee": "detailedDayPlanCopy",
+          "lineNumber": 375
+        },
+        {
+          "caller": "studyCopy",
+          "callee": "dailyPyqCopy",
+          "lineNumber": 380
+        },
+        {
+          "caller": "studyCopy",
+          "callee": "bodyFor",
+          "lineNumber": 391
+        },
+        {
+          "caller": "upsertEvent",
+          "callee": "admin\n    .from('study_notification_events')\n    .upsert(\n      {\n        user_id: args.userId,\n        subscription_id: args.subscriptionId,\n        category: args.category,\n        local_date: args.localDate,\n        title: args.title,\n        body: args.body,\n        route: args.route,\n        primary_label: args.primaryLabel,\n        updated_at: new Date().toISOString()\n      },\n      { onConflict: 'user_id,subscription_id,category,local_date' }\n    )\n    .select('id')\n    .single",
+          "lineNumber": 440
+        },
+        {
+          "caller": "upsertEvent",
+          "callee": "admin\n    .from('study_notification_events')\n    .upsert(\n      {\n        user_id: args.userId,\n        subscription_id: args.subscriptionId,\n        category: args.category,\n        local_date: args.localDate,\n        title: args.title,\n        body: args.body,\n        route: args.route,\n        primary_label: args.primaryLabel,\n        updated_at: new Date().toISOString()\n      },\n      { onConflict: 'user_id,subscription_id,category,local_date' }\n    )\n    .select",
+          "lineNumber": 440
+        },
+        {
+          "caller": "upsertEvent",
+          "callee": "admin\n    .from('study_notification_events')\n    .upsert",
+          "lineNumber": 440
+        },
+        {
+          "caller": "upsertEvent",
+          "callee": "admin\n    .from",
+          "lineNumber": 440
+        },
+        {
+          "caller": "upsertEvent",
+          "callee": "new Date().toISOString",
+          "lineNumber": 452
+        },
+        {
+          "caller": "upsertEvent",
+          "callee": "String",
+          "lineNumber": 459
+        },
+        {
+          "caller": "sendScheduled",
+          "callee": "studyCopy",
+          "lineNumber": 471
+        },
+        {
+          "caller": "sendScheduled",
+          "callee": "upsertEvent",
+          "lineNumber": 478
+        },
+        {
+          "caller": "sendScheduled",
+          "callee": "issueActionToken",
+          "lineNumber": 488
+        },
+        {
+          "caller": "sendScheduled",
+          "callee": "deliverToSubscription",
+          "lineNumber": 496
+        },
+        {
+          "caller": "sendScheduled",
+          "callee": "studyCopy",
+          "lineNumber": 498
+        },
+        {
+          "caller": "sendScheduled",
+          "callee": "admin\n        .from('study_notification_events')\n        .update({\n          sent_at: result.error ? null : new Date().toISOString(),\n          provider_status: result.providerStatus,\n          last_error: result.error,\n          updated_at: new Date().toISOString()\n        })\n        .eq",
+          "lineNumber": 500
+        },
+        {
+          "caller": "sendScheduled",
+          "callee": "admin\n        .from('study_notification_events')\n        .update",
+          "lineNumber": 500
+        },
+        {
+          "caller": "sendScheduled",
+          "callee": "admin\n        .from",
+          "lineNumber": 500
+        },
+        {
+          "caller": "sendScheduled",
+          "callee": "new Date().toISOString",
+          "lineNumber": 503
+        },
+        {
+          "caller": "sendScheduled",
+          "callee": "new Date().toISOString",
+          "lineNumber": 506
+        },
+        {
+          "caller": "sendScheduled",
+          "callee": "admin\n            .from('push_subscriptions')\n            .update({ enabled: false })\n            .eq",
+          "lineNumber": 512
+        },
+        {
+          "caller": "sendScheduled",
+          "callee": "admin\n            .from('push_subscriptions')\n            .update",
+          "lineNumber": 512
+        },
+        {
+          "caller": "sendScheduled",
+          "callee": "admin\n            .from",
+          "lineNumber": 512
+        },
+        {
+          "caller": "sendScheduled",
+          "callee": "console.error",
+          "lineNumber": 522
+        },
+        {
+          "caller": "sendScheduled",
+          "callee": "admin\n      .from('study_notification_preferences')\n      .update({ last_sent_on: args.localDate, updated_at: new Date().toISOString() })\n      .eq('user_id', args.user.id)\n      .eq",
+          "lineNumber": 526
+        },
+        {
+          "caller": "sendScheduled",
+          "callee": "admin\n      .from('study_notification_preferences')\n      .update({ last_sent_on: args.localDate, updated_at: new Date().toISOString() })\n      .eq",
+          "lineNumber": 526
+        },
+        {
+          "caller": "sendScheduled",
+          "callee": "admin\n      .from('study_notification_preferences')\n      .update",
+          "lineNumber": 526
+        },
+        {
+          "caller": "sendScheduled",
+          "callee": "admin\n      .from",
+          "lineNumber": 526
+        },
+        {
+          "caller": "sendScheduled",
+          "callee": "new Date().toISOString",
+          "lineNumber": 528
+        },
+        {
+          "caller": "sendDueReminders",
+          "callee": "admin\n    .from('study_notification_events')\n    .select(\n      'id,user_id,subscription_id,category,local_date,title,body,route,primary_label,remind_at,reminder_sent_at'\n    )\n    .not('remind_at', 'is', null)\n    .is('reminder_sent_at', null)\n    .lte('remind_at', new Date().toISOString())\n    .order('remind_at')\n    .limit",
+          "lineNumber": 540
+        },
+        {
+          "caller": "sendDueReminders",
+          "callee": "admin\n    .from('study_notification_events')\n    .select(\n      'id,user_id,subscription_id,category,local_date,title,body,route,primary_label,remind_at,reminder_sent_at'\n    )\n    .not('remind_at', 'is', null)\n    .is('reminder_sent_at', null)\n    .lte('remind_at', new Date().toISOString())\n    .order",
+          "lineNumber": 540
+        },
+        {
+          "caller": "sendDueReminders",
+          "callee": "admin\n    .from('study_notification_events')\n    .select(\n      'id,user_id,subscription_id,category,local_date,title,body,route,primary_label,remind_at,reminder_sent_at'\n    )\n    .not('remind_at', 'is', null)\n    .is('reminder_sent_at', null)\n    .lte",
+          "lineNumber": 540
+        },
+        {
+          "caller": "sendDueReminders",
+          "callee": "admin\n    .from('study_notification_events')\n    .select(\n      'id,user_id,subscription_id,category,local_date,title,body,route,primary_label,remind_at,reminder_sent_at'\n    )\n    .not('remind_at', 'is', null)\n    .is",
+          "lineNumber": 540
+        },
+        {
+          "caller": "sendDueReminders",
+          "callee": "admin\n    .from('study_notification_events')\n    .select(\n      'id,user_id,subscription_id,category,local_date,title,body,route,primary_label,remind_at,reminder_sent_at'\n    )\n    .not",
+          "lineNumber": 540
+        },
+        {
+          "caller": "sendDueReminders",
+          "callee": "admin\n    .from('study_notification_events')\n    .select",
+          "lineNumber": 540
+        },
+        {
+          "caller": "sendDueReminders",
+          "callee": "admin\n    .from",
+          "lineNumber": 540
+        },
+        {
+          "caller": "sendDueReminders",
+          "callee": "new Date().toISOString",
+          "lineNumber": 547
+        },
+        {
+          "caller": "sendDueReminders",
+          "callee": "usersById.get",
+          "lineNumber": 553
+        },
+        {
+          "caller": "sendDueReminders",
+          "callee": "preferences.find",
+          "lineNumber": 554
+        },
+        {
+          "caller": "sendDueReminders",
+          "callee": "subscriptionsById.get",
+          "lineNumber": 557
+        },
+        {
+          "caller": "sendDueReminders",
+          "callee": "issueActionToken",
+          "lineNumber": 561
+        },
+        {
+          "caller": "sendDueReminders",
+          "callee": "deliverToSubscription",
+          "lineNumber": 569
+        },
+        {
+          "caller": "sendDueReminders",
+          "callee": "eventCopy",
+          "lineNumber": 569
+        },
+        {
+          "caller": "sendDueReminders",
+          "callee": "admin\n      .from('study_notification_events')\n      .update({\n        reminder_sent_at: result.error ? null : new Date().toISOString(),\n        provider_status: result.providerStatus,\n        last_error: result.error,\n        updated_at: new Date().toISOString()\n      })\n      .eq",
+          "lineNumber": 570
+        },
+        {
+          "caller": "sendDueReminders",
+          "callee": "admin\n      .from('study_notification_events')\n      .update",
+          "lineNumber": 570
+        },
+        {
+          "caller": "sendDueReminders",
+          "callee": "admin\n      .from",
+          "lineNumber": 570
+        },
+        {
+          "caller": "sendDueReminders",
+          "callee": "new Date().toISOString",
+          "lineNumber": 573
+        },
+        {
+          "caller": "sendDueReminders",
+          "callee": "new Date().toISOString",
+          "lineNumber": 576
+        }
+      ],
+      "metrics": {
+        "importCount": 4,
+        "exportCount": 0,
+        "functionCount": 13,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "supabase/functions/telegram-webhook/index.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 388,
+      "nonEmptyLines": 347,
+      "functions": [
+        {
+          "name": "ensureTelegramCommandMenu",
+          "startLine": 60,
+          "endLine": 83,
+          "params": []
+        },
+        {
+          "name": "reply",
+          "startLine": 85,
+          "endLine": 93,
+          "params": [
+            "chatId",
+            "text",
+            "appRoute"
+          ]
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "ensureTelegramCommandMenu",
+          "callee": "(async () => {\n    try {\n      const response = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/setMyCommands`, {\n        method: 'POST',\n        headers: { 'Content-Type': 'application/json' },\n        body: JSON.stringify({ commands: TELEGRAM_BOT_COMMANDS })\n      });\n      const payload = (await response.json().catch(() => ({}))) as { ok?: boolean };\n      if (!response.ok || payload.ok !== true) {\n        console.error('Telegram command menu registration failed:', response.status);\n        return;\n      }\n      commandMenuReady = true;\n    } catch (error) {\n      console.error('Telegram command menu registration failed:', error);\n    } finally {\n      commandMenuPromise = null;\n    }\n  })",
+          "lineNumber": 63
+        },
+        {
+          "caller": "ensureTelegramCommandMenu",
+          "callee": "fetch",
+          "lineNumber": 65
+        },
+        {
+          "caller": "ensureTelegramCommandMenu",
+          "callee": "JSON.stringify",
+          "lineNumber": 68
+        },
+        {
+          "caller": "ensureTelegramCommandMenu",
+          "callee": "response.json().catch",
+          "lineNumber": 70
+        },
+        {
+          "caller": "ensureTelegramCommandMenu",
+          "callee": "response.json",
+          "lineNumber": 70
+        },
+        {
+          "caller": "ensureTelegramCommandMenu",
+          "callee": "console.error",
+          "lineNumber": 72
+        },
+        {
+          "caller": "ensureTelegramCommandMenu",
+          "callee": "console.error",
+          "lineNumber": 77
+        },
+        {
+          "caller": "reply",
+          "callee": "sendTelegramMessage",
+          "lineNumber": 86
+        },
+        {
+          "caller": "reply",
+          "callee": "airJournalUrl",
+          "lineNumber": 90
+        },
+        {
+          "caller": "reply",
+          "callee": "console.error",
+          "lineNumber": 92
+        }
+      ],
+      "metrics": {
+        "importCount": 3,
+        "exportCount": 0,
+        "functionCount": 2,
+        "classCount": 0
+      }
+    }
+  ]
+}

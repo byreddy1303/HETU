@@ -4,7 +4,6 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import {
   ArrowLeft,
   ArrowRight,
-  Bookmark,
   BookOpenCheck,
   Check,
   CheckCircle2,
@@ -62,7 +61,6 @@ import {
   completePyqSession,
   createPyqAttemptRow,
   createPyqSessionRow,
-  pausePyqSession,
   pyqAttemptId,
   pyqJournalQuestionId,
   pyqPracticeSessionRow,
@@ -125,7 +123,6 @@ function PracticeSetup({
   manifest,
   attempts,
   activeSession,
-  savedSessions,
   config,
   setConfig,
   loading,
@@ -138,7 +135,6 @@ function PracticeSetup({
   manifest: PyqManifest;
   attempts: PyqAttemptRow[];
   activeSession: PyqSessionRow | null;
-  savedSessions: PyqSessionRow[];
   config: AttemptConfig;
   setConfig: (next: AttemptConfig) => void;
   loading: boolean;
@@ -177,11 +173,11 @@ function PracticeSetup({
       />
 
       {activeSession && (
-        <Card className="border-accent/30">
+        <Card>
           <CardBody className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
-            <div className="min-w-0">
+            <div>
               <p className="font-display text-[16px] font-semibold text-text">
-                Unfinished PYQ set
+                Resume unfinished PYQ set
               </p>
               <p className="mt-1 text-[12px] text-text-muted">
                 {activeSession.completed_count} of {activeSession.question_uids.length} submitted ·{' '}
@@ -196,56 +192,16 @@ function PracticeSetup({
               <Button
                 onClick={() => onSave(activeSession)}
                 disabled={loading}
-                title="Save this set so you can start a fresh one and come back later"
+                title="Save submitted answers to journal and start fresh"
               >
-                <Bookmark size={14} />
-                Save set
+                Save to journal
               </Button>
               <Button onClick={() => onDiscard(activeSession)} disabled={loading}>
-                Discard
+                Discard set
               </Button>
             </div>
           </CardBody>
         </Card>
-      )}
-
-      {savedSessions.length > 0 && (
-        <div className="flex flex-col gap-2">
-          <p className="px-1 text-[11px] font-semibold uppercase tracking-widest text-text-faint">
-            Saved sets
-          </p>
-          {savedSessions.map((session) => (
-            <Card key={session.id}>
-              <CardBody className="flex flex-col gap-3 p-3 sm:flex-row sm:items-center sm:justify-between">
-                <div className="flex min-w-0 items-center gap-3">
-                  <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded bg-bg-overlay text-text-faint">
-                    <Bookmark size={15} />
-                  </span>
-                  <div className="min-w-0">
-                    <p className="truncate text-[13.5px] font-semibold text-text">
-                      {session.config.subjectSlug === 'all'
-                        ? 'Mixed subjects'
-                        : manifest.subjects.find((s) => s.slug === session.config.subjectSlug)
-                            ?.label ?? session.config.subjectSlug}
-                    </p>
-                    <p className="mt-0.5 text-[11.5px] text-text-faint">
-                      {session.completed_count} / {session.question_uids.length} done ·{' '}
-                      {secondsToClock(session.elapsed_sec)}
-                    </p>
-                  </div>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  <Button variant="primary" onClick={() => onResume(session)} disabled={loading}>
-                    Resume
-                  </Button>
-                  <Button onClick={() => onDiscard(session)} disabled={loading}>
-                    Discard
-                  </Button>
-                </div>
-              </CardBody>
-            </Card>
-          ))}
-        </div>
       )}
 
       <Card className="overflow-hidden">
@@ -496,10 +452,14 @@ function PracticeSetup({
                 variant="primary"
                 className="w-full"
                 onClick={onStart}
-                disabled={loading}
+                disabled={loading || activeSession !== null}
               >
                 <BookOpenCheck size={17} />
-                {loading ? 'Opening question bank…' : 'Start fresh set'}
+                {loading
+                  ? 'Opening question bank…'
+                  : activeSession
+                    ? 'Save to journal or discard first'
+                    : 'Start practice'}
               </Button>
               <p className="mt-3 text-center text-[11px] leading-relaxed text-text-faint">
                 Questions and diagrams are bundled locally. Your answer stays hidden until you
@@ -785,18 +745,6 @@ export default function Pyq() {
     [userId],
     null
   );
-  const pausedPyqSessions = useLiveQuery(
-    async () => {
-      if (!userId) return [];
-      const rows = await db.pyq_sessions
-        .where('[user_id+status]')
-        .equals([userId, 'paused'])
-        .toArray();
-      return rows.sort((a, b) => b.updated_at.localeCompare(a.updated_at));
-    },
-    [userId],
-    []
-  );
   const patterns = useLiveQuery(
     async () => (userId ? db.patterns.where('user_id').equals(userId).toArray() : []),
     [userId],
@@ -1029,12 +977,31 @@ export default function Pyq() {
   }
 
   async function saveSession(session: PyqSessionRow) {
+    // Mark the session as completed (keeping all submitted answers in the
+    // journal) and clear the active slot so the user can start fresh.
     if (loading) return;
     setLoading(true);
     setStartError(null);
     try {
-      const paused = pausePyqSession(session);
-      await writeLocal('pyq_sessions', paused);
+      const saved = completePyqSession(session);
+      const sessionAttempts = (
+        await db.pyq_attempts.where('user_id').equals(session.user_id).toArray()
+      ).filter((attempt) => attempt.pyq_session_id === session.id);
+      const existingCanonical = await db.sessions.get(session.id);
+      await writeLocalBatch([
+        { name: 'pyq_sessions', row: saved },
+        {
+          name: 'sessions',
+          row: pyqPracticeSessionRow(
+            saved,
+            sessionAttempts.length > 0
+              ? pyqPracticeSubject(sessionAttempts)
+              : existingCanonical?.subject ?? 'PYQ practice',
+            timeZone,
+            existingCanonical
+          )
+        }
+      ]);
       if (pyqSessionId === session.id) {
         setQuestions([]);
         setFinished(false);
@@ -1054,19 +1021,12 @@ export default function Pyq() {
     setLoading(true);
     setStartError(null);
     try {
-      // Auto-pause any active set so the user can start a fresh one
       const activeRows = await db.pyq_sessions
         .where('[user_id+status]')
         .equals([userId, 'active'])
         .toArray();
-      for (const activeRow of activeRows) {
-        await writeLocal('pyq_sessions', pausePyqSession(activeRow));
-      }
-      if (pyqSessionId && activeRows.some((r) => r.id === pyqSessionId)) {
-        setQuestions([]);
-        setFinished(false);
-        setIndex(0);
-        setPyqSessionId(null);
+      if (activeRows.length > 0) {
+        throw new Error('Save to journal or discard the unfinished PYQ set before starting another.');
       }
       const subjects =
         config.subjectSlug === 'all'
@@ -1478,7 +1438,6 @@ export default function Pyq() {
         manifest={manifest}
         attempts={attempts}
         activeSession={activePyqSession ?? null}
-        savedSessions={pausedPyqSessions ?? []}
         config={config}
         setConfig={setConfig}
         loading={loading}

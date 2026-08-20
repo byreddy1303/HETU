@@ -1,0 +1,71 @@
+{
+  "nodes": [
+    {
+      "id": "config:android/app/src/main/res/values/colors.xml",
+      "type": "config",
+      "name": "colors.xml",
+      "filePath": "android/app/src/main/res/values/colors.xml",
+      "summary": "Defines the Android application color resources for the burgundy primary and accent, paper background, dark ink, and gold brand palette.",
+      "tags": [
+        "configuration",
+        "android-resources",
+        "color-palette",
+        "branding"
+      ],
+      "complexity": "simple",
+      "languageNotes": "Android XML resource names provide stable references consumed by themes and native surfaces."
+    },
+    {
+      "id": "config:android/app/src/main/res/values/ic_launcher_background.xml",
+      "type": "config",
+      "name": "ic_launcher_background.xml",
+      "filePath": "android/app/src/main/res/values/ic_launcher_background.xml",
+      "summary": "Defines the paper-colored background resource used by the adaptive Android launcher icon.",
+      "tags": [
+        "configuration",
+        "android-resources",
+        "launcher-icon"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "config:android/app/src/main/res/values/strings.xml",
+      "type": "config",
+      "name": "strings.xml",
+      "filePath": "android/app/src/main/res/values/strings.xml",
+      "summary": "Centralizes Android application identity, custom URL scheme, notification channel labels, reply prompts, action feedback, and mute or reminder status text.",
+      "tags": [
+        "configuration",
+        "android-resources",
+        "localization",
+        "notifications"
+      ],
+      "complexity": "simple",
+      "languageNotes": "Includes Android positional string placeholders for buddy reply and sent-message templates."
+    },
+    {
+      "id": "config:android/app/src/main/res/values/styles.xml",
+      "type": "config",
+      "name": "styles.xml",
+      "filePath": "android/app/src/main/res/values/styles.xml",
+      "summary": "Defines the base, no-action-bar, and splash themes for the native Android shell, including system bar appearance, brand background colors, and launch drawables.",
+      "tags": [
+        "configuration",
+        "android-resources",
+        "theme",
+        "splash-screen"
+      ],
+      "complexity": "simple",
+      "languageNotes": "AppCompat and Android SplashScreen theme inheritance separates normal activity styling from launch-time presentation."
+    }
+  ],
+  "edges": [
+    {
+      "source": "config:android/app/src/main/res/values/styles.xml",
+      "target": "config:android/app/src/main/res/values/colors.xml",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    }
+  ]
+}

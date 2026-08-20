@@ -1,0 +1,1848 @@
+{
+  "nodes": [
+    {
+      "id": "file:src/lib/constants.ts",
+      "type": "file",
+      "name": "constants.ts",
+      "filePath": "src/lib/constants.ts",
+      "summary": "Defines the shared GATE subjects, outcomes, root causes, source types, exam ranges, question formats, timing targets, and application defaults.",
+      "tags": [
+        "service",
+        "domain-model",
+        "configuration"
+      ],
+      "complexity": "complex",
+      "languageNotes": "TypeScript module."
+    },
+    {
+      "id": "function:src/lib/constants.ts:examYears",
+      "type": "function",
+      "name": "examYears",
+      "filePath": "src/lib/constants.ts",
+      "lineRange": [
+        163,
+        176
+      ],
+      "summary": "Generates a descending valid year range for an exam source based on the current exam cycle.",
+      "tags": [
+        "utility",
+        "domain-model",
+        "configuration"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/constants.ts:pyqYears",
+      "type": "function",
+      "name": "pyqYears",
+      "filePath": "src/lib/constants.ts",
+      "lineRange": [
+        179,
+        181
+      ],
+      "summary": "Generates the backward-compatible descending GATE PYQ year range.",
+      "tags": [
+        "utility",
+        "domain-model",
+        "configuration"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/constants.ts:buildSourceRef",
+      "type": "function",
+      "name": "buildSourceRef",
+      "filePath": "src/lib/constants.ts",
+      "lineRange": [
+        184,
+        202
+      ],
+      "summary": "Serializes source kind, year, GATE set, question number, and format into the canonical source reference.",
+      "tags": [
+        "utility",
+        "domain-model",
+        "configuration"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/lib/image.ts",
+      "type": "file",
+      "name": "image.ts",
+      "filePath": "src/lib/image.ts",
+      "summary": "Converts, captures, resizes, and compresses study images into bounded JPEG data URLs for the offline-first question store.",
+      "tags": [
+        "service",
+        "image-processing",
+        "offline-storage"
+      ],
+      "complexity": "moderate",
+      "languageNotes": "TypeScript module."
+    },
+    {
+      "id": "function:src/lib/image.ts:urlToDataUrl",
+      "type": "function",
+      "name": "urlToDataUrl",
+      "filePath": "src/lib/image.ts",
+      "lineRange": [
+        53,
+        64
+      ],
+      "summary": "Fetches an allowed image URL and converts its bytes to a data URL.",
+      "tags": [
+        "utility",
+        "image-processing",
+        "offline-storage"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/image.ts:downscaleDataUrl",
+      "type": "function",
+      "name": "downscaleDataUrl",
+      "filePath": "src/lib/image.ts",
+      "lineRange": [
+        71,
+        82
+      ],
+      "summary": "Draws an image to a bounded canvas and returns compressed JPEG data.",
+      "tags": [
+        "utility",
+        "image-processing",
+        "offline-storage"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/image.ts:waitForElementMedia",
+      "type": "function",
+      "name": "waitForElementMedia",
+      "filePath": "src/lib/image.ts",
+      "lineRange": [
+        84,
+        95
+      ],
+      "summary": "Waits for fonts and descendant images before rasterizing a rendered element.",
+      "tags": [
+        "utility",
+        "image-processing",
+        "offline-storage"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/image.ts:captureElementToDataUrl",
+      "type": "function",
+      "name": "captureElementToDataUrl",
+      "filePath": "src/lib/image.ts",
+      "lineRange": [
+        98,
+        130
+      ],
+      "summary": "Rasterizes a DOM element with theme-aware cloning, downsizes it, and enforces the image-size cap.",
+      "tags": [
+        "utility",
+        "image-processing",
+        "offline-storage"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/image.ts:compressToDataUrl",
+      "type": "function",
+      "name": "compressToDataUrl",
+      "filePath": "src/lib/image.ts",
+      "lineRange": [
+        132,
+        149
+      ],
+      "summary": "Reads an uploaded image, resizes it to the long-edge limit, compresses it, and returns dimensions and byte size.",
+      "tags": [
+        "utility",
+        "image-processing",
+        "offline-storage"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:src/lib/image.ts:ImageTooLargeError",
+      "type": "class",
+      "name": "ImageTooLargeError",
+      "filePath": "src/lib/image.ts",
+      "lineRange": [
+        22,
+        27
+      ],
+      "summary": "Represents a compressed image that still exceeds the application’s offline storage safety limit.",
+      "tags": [
+        "error-handling",
+        "image-processing",
+        "validation"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/lib/learning-tips.ts",
+      "type": "file",
+      "name": "learning-tips.ts",
+      "filePath": "src/lib/learning-tips.ts",
+      "summary": "Applies deterministic coaching rules to recent learner evidence and returns one focused dashboard learning tip.",
+      "tags": [
+        "service",
+        "coaching",
+        "learner-evidence"
+      ],
+      "complexity": "moderate",
+      "languageNotes": "TypeScript module."
+    },
+    {
+      "id": "function:src/lib/learning-tips.ts:buildLearningTips",
+      "type": "function",
+      "name": "buildLearningTips",
+      "filePath": "src/lib/learning-tips.ts",
+      "lineRange": [
+        21,
+        106
+      ],
+      "summary": "Selects one actionable coaching tip from recent mistakes, pace, activity, and retrieval context.",
+      "tags": [
+        "utility",
+        "coaching",
+        "learner-evidence"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/lib/mocks.ts",
+      "type": "file",
+      "name": "mocks.ts",
+      "filePath": "src/lib/mocks.ts",
+      "summary": "Validates mock-test input and calculates score, accuracy, best/worst/latest performance, and score movement summaries.",
+      "tags": [
+        "service",
+        "mock-tests",
+        "validation"
+      ],
+      "complexity": "moderate",
+      "languageNotes": "TypeScript module."
+    },
+    {
+      "id": "function:src/lib/mocks.ts:validateMockDraft",
+      "type": "function",
+      "name": "validateMockDraft",
+      "filePath": "src/lib/mocks.ts",
+      "lineRange": [
+        15,
+        49
+      ],
+      "summary": "Validates mock identity, date, question totals, duration, and score bounds and returns the first user-facing error.",
+      "tags": [
+        "utility",
+        "mock-tests",
+        "validation"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/mocks.ts:mockScorePercent",
+      "type": "function",
+      "name": "mockScorePercent",
+      "filePath": "src/lib/mocks.ts",
+      "lineRange": [
+        51,
+        53
+      ],
+      "summary": "Converts earned and maximum marks to a one-decimal percentage.",
+      "tags": [
+        "utility",
+        "mock-tests",
+        "validation"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/mocks.ts:mockAccuracy",
+      "type": "function",
+      "name": "mockAccuracy",
+      "filePath": "src/lib/mocks.ts",
+      "lineRange": [
+        55,
+        58
+      ],
+      "summary": "Calculates attempted-question accuracy or returns null when nothing was attempted.",
+      "tags": [
+        "utility",
+        "mock-tests",
+        "validation"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/mocks.ts:mockSummary",
+      "type": "function",
+      "name": "mockSummary",
+      "filePath": "src/lib/mocks.ts",
+      "lineRange": [
+        60,
+        79
+      ],
+      "summary": "Identifies best, worst, and latest mock tests and computes the latest score change.",
+      "tags": [
+        "utility",
+        "mock-tests",
+        "validation"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/lib/pyq-history.ts",
+      "type": "file",
+      "name": "pyq-history.ts",
+      "filePath": "src/lib/pyq-history.ts",
+      "summary": "Groups PYQ attempts and filters question-bank items by unseen, repeated, incorrect, guessed, slow, skipped, or unanalyzed history.",
+      "tags": [
+        "service",
+        "pyq",
+        "history-filtering"
+      ],
+      "complexity": "moderate",
+      "languageNotes": "TypeScript module."
+    },
+    {
+      "id": "function:src/lib/pyq-history.ts:attemptsByQuestion",
+      "type": "function",
+      "name": "attemptsByQuestion",
+      "filePath": "src/lib/pyq-history.ts",
+      "lineRange": [
+        17,
+        28
+      ],
+      "summary": "Groups PYQ attempts by question and sorts each history chronologically.",
+      "tags": [
+        "utility",
+        "pyq",
+        "history-filtering"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/pyq-history.ts:analyzedAttemptIds",
+      "type": "function",
+      "name": "analyzedAttemptIds",
+      "filePath": "src/lib/pyq-history.ts",
+      "lineRange": [
+        30,
+        37
+      ],
+      "summary": "Builds the set of persisted journal question IDs used to recognize analyzed attempts.",
+      "tags": [
+        "utility",
+        "pyq",
+        "history-filtering"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/pyq-history.ts:matchesPyqHistory",
+      "type": "function",
+      "name": "matchesPyqHistory",
+      "filePath": "src/lib/pyq-history.ts",
+      "lineRange": [
+        43,
+        66
+      ],
+      "summary": "Tests a PYQ against a selected history filter using latest attempts and journal analysis state.",
+      "tags": [
+        "utility",
+        "pyq",
+        "history-filtering"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/pyq-history.ts:filterPyqByHistory",
+      "type": "function",
+      "name": "filterPyqByHistory",
+      "filePath": "src/lib/pyq-history.ts",
+      "lineRange": [
+        68,
+        79
+      ],
+      "summary": "Groups attempts and filters a question list by the selected practice-history criterion.",
+      "tags": [
+        "utility",
+        "pyq",
+        "history-filtering"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/lib/pyq-session.ts",
+      "type": "file",
+      "name": "pyq-session.ts",
+      "filePath": "src/lib/pyq-session.ts",
+      "summary": "Defines the durable PYQ session and attempt state machine, deterministic audit identifiers, immutable snapshots, journal linkage, and canonical practice sessions.",
+      "tags": [
+        "service",
+        "pyq",
+        "session-state"
+      ],
+      "complexity": "complex",
+      "languageNotes": "TypeScript module."
+    },
+    {
+      "id": "function:src/lib/pyq-session.ts:createPyqSessionRow",
+      "type": "function",
+      "name": "createPyqSessionRow",
+      "filePath": "src/lib/pyq-session.ts",
+      "lineRange": [
+        15,
+        39
+      ],
+      "summary": "Creates a new active PYQ set with selected question IDs, progress counters, timestamps, and bank version.",
+      "tags": [
+        "utility",
+        "pyq",
+        "session-state"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/pyq-session.ts:pyqAttemptId",
+      "type": "function",
+      "name": "pyqAttemptId",
+      "filePath": "src/lib/pyq-session.ts",
+      "lineRange": [
+        41,
+        43
+      ],
+      "summary": "Derives the deterministic identifier for a question attempt within a PYQ session.",
+      "tags": [
+        "utility",
+        "pyq",
+        "session-state"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/pyq-session.ts:pyqJournalQuestionId",
+      "type": "function",
+      "name": "pyqJournalQuestionId",
+      "filePath": "src/lib/pyq-session.ts",
+      "lineRange": [
+        45,
+        47
+      ],
+      "summary": "Derives the deterministic journal question identifier for a PYQ attempt receipt.",
+      "tags": [
+        "utility",
+        "pyq",
+        "session-state"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/pyq-session.ts:pyqSourceAttemptForJournalQuestion",
+      "type": "function",
+      "name": "pyqSourceAttemptForJournalQuestion",
+      "filePath": "src/lib/pyq-session.ts",
+      "lineRange": [
+        54,
+        86
+      ],
+      "summary": "Resolves the immutable PYQ attempt behind a journal row, including a constrained legacy fallback.",
+      "tags": [
+        "utility",
+        "pyq",
+        "session-state"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/pyq-session.ts:pyqQuestionFromAttempt",
+      "type": "function",
+      "name": "pyqQuestionFromAttempt",
+      "filePath": "src/lib/pyq-session.ts",
+      "lineRange": [
+        89,
+        112
+      ],
+      "summary": "Reconstructs the original bundled PYQ and answer metadata from a version-2 immutable attempt snapshot.",
+      "tags": [
+        "utility",
+        "pyq",
+        "session-state"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/pyq-session.ts:pyqReattemptAttemptId",
+      "type": "function",
+      "name": "pyqReattemptAttemptId",
+      "filePath": "src/lib/pyq-session.ts",
+      "lineRange": [
+        115,
+        117
+      ],
+      "summary": "Derives one stable PYQ re-attempt receipt identifier for a ladder round.",
+      "tags": [
+        "utility",
+        "pyq",
+        "session-state"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/pyq-session.ts:createPyqReattemptAttemptRow",
+      "type": "function",
+      "name": "createPyqReattemptAttemptRow",
+      "filePath": "src/lib/pyq-session.ts",
+      "lineRange": [
+        124,
+        182
+      ],
+      "summary": "Builds an immutable PYQ re-attempt receipt without attaching it to the already-closed original practice set.",
+      "tags": [
+        "utility",
+        "pyq",
+        "session-state"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/lib/pyq-session.ts:pyqPracticeSubject",
+      "type": "function",
+      "name": "pyqPracticeSubject",
+      "filePath": "src/lib/pyq-session.ts",
+      "lineRange": [
+        185,
+        192
+      ],
+      "summary": "Derives a human-readable single-subject, mixed-subject, or generic label for PYQ practice rows.",
+      "tags": [
+        "utility",
+        "pyq",
+        "session-state"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/pyq-session.ts:pyqPracticeSessionRow",
+      "type": "function",
+      "name": "pyqPracticeSessionRow",
+      "filePath": "src/lib/pyq-session.ts",
+      "lineRange": [
+        200,
+        227
+      ],
+      "summary": "Projects an audited PYQ set into the canonical session model while preserving existing journal metadata.",
+      "tags": [
+        "utility",
+        "pyq",
+        "session-state"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/pyq-session.ts:startPyqSessionQuestion",
+      "type": "function",
+      "name": "startPyqSessionQuestion",
+      "filePath": "src/lib/pyq-session.ts",
+      "lineRange": [
+        229,
+        250
+      ],
+      "summary": "Validates and records the active question and start timestamp for an open PYQ set.",
+      "tags": [
+        "utility",
+        "pyq",
+        "session-state"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/pyq-session.ts:advancePyqSessionProgress",
+      "type": "function",
+      "name": "advancePyqSessionProgress",
+      "filePath": "src/lib/pyq-session.ts",
+      "lineRange": [
+        252,
+        283
+      ],
+      "summary": "Marks a question completed, advances monotonic progress, and accumulates elapsed time exactly once.",
+      "tags": [
+        "utility",
+        "pyq",
+        "session-state"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/pyq-session.ts:completePyqSession",
+      "type": "function",
+      "name": "completePyqSession",
+      "filePath": "src/lib/pyq-session.ts",
+      "lineRange": [
+        285,
+        296
+      ],
+      "summary": "Closes a PYQ set as completed and finalizes progress and timestamps.",
+      "tags": [
+        "utility",
+        "pyq",
+        "session-state"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/pyq-session.ts:abandonPyqSession",
+      "type": "function",
+      "name": "abandonPyqSession",
+      "filePath": "src/lib/pyq-session.ts",
+      "lineRange": [
+        298,
+        306
+      ],
+      "summary": "Closes a PYQ set as abandoned while clearing active-question timing state.",
+      "tags": [
+        "utility",
+        "pyq",
+        "session-state"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/pyq-session.ts:pausePyqSession",
+      "type": "function",
+      "name": "pausePyqSession",
+      "filePath": "src/lib/pyq-session.ts",
+      "lineRange": [
+        308,
+        319
+      ],
+      "summary": "Pauses an active PYQ set and clears the current question timing state.",
+      "tags": [
+        "utility",
+        "pyq",
+        "session-state"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/pyq-session.ts:pyqQuestionSnapshot",
+      "type": "function",
+      "name": "pyqQuestionSnapshot",
+      "filePath": "src/lib/pyq-session.ts",
+      "lineRange": [
+        321,
+        341
+      ],
+      "summary": "Copies the immutable question-bank fields needed to audit and later restore an attempt.",
+      "tags": [
+        "utility",
+        "pyq",
+        "session-state"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/pyq-session.ts:createPyqAttemptRow",
+      "type": "function",
+      "name": "createPyqAttemptRow",
+      "filePath": "src/lib/pyq-session.ts",
+      "lineRange": [
+        359,
+        431
+      ],
+      "summary": "Validates session state, response type, decision, timing, and bank version and creates the canonical version-2 attempt receipt.",
+      "tags": [
+        "utility",
+        "pyq",
+        "session-state"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/lib/pyq.ts",
+      "type": "file",
+      "name": "pyq.ts",
+      "filePath": "src/lib/pyq.ts",
+      "summary": "Loads and normalizes the bundled PYQ bank, repairs question math markup, evaluates answers, formats evidence, and derives journal text, images, sources, and outcomes.",
+      "tags": [
+        "service",
+        "pyq",
+        "question-bank"
+      ],
+      "complexity": "complex",
+      "languageNotes": "TypeScript module."
+    },
+    {
+      "id": "function:src/lib/pyq.ts:replaceBalancedPyqMathCommand",
+      "type": "function",
+      "name": "replaceBalancedPyqMathCommand",
+      "filePath": "src/lib/pyq.ts",
+      "lineRange": [
+        81,
+        109
+      ],
+      "summary": "Finds balanced braced TeX commands and replaces their bodies without corrupting nested markup.",
+      "tags": [
+        "utility",
+        "pyq",
+        "question-bank"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/pyq.ts:joinPyqMathLines",
+      "type": "function",
+      "name": "joinPyqMathLines",
+      "filePath": "src/lib/pyq.ts",
+      "lineRange": [
+        121,
+        144
+      ],
+      "summary": "Normalizes line breaks and legacy TeX constructs inside extracted PYQ math.",
+      "tags": [
+        "utility",
+        "pyq",
+        "question-bank"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/pyq.ts:pyqMathEndIndex",
+      "type": "function",
+      "name": "pyqMathEndIndex",
+      "filePath": "src/lib/pyq.ts",
+      "lineRange": [
+        146,
+        160
+      ],
+      "summary": "Finds the unescaped closing delimiter for a PYQ math segment while respecting brace nesting.",
+      "tags": [
+        "utility",
+        "pyq",
+        "question-bank"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/pyq.ts:normalizePyqQuestionHtml",
+      "type": "function",
+      "name": "normalizePyqQuestionHtml",
+      "filePath": "src/lib/pyq.ts",
+      "lineRange": [
+        179,
+        228
+      ],
+      "summary": "Protects and normalizes math segments while sanitizing legacy question HTML for reliable rendering.",
+      "tags": [
+        "utility",
+        "pyq",
+        "question-bank"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/lib/pyq.ts:loadPyqManifest",
+      "type": "function",
+      "name": "loadPyqManifest",
+      "filePath": "src/lib/pyq.ts",
+      "lineRange": [
+        236,
+        244
+      ],
+      "summary": "Loads and memoizes the versioned PYQ bank manifest.",
+      "tags": [
+        "utility",
+        "pyq",
+        "question-bank"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/pyq.ts:normalizePyqManifest",
+      "type": "function",
+      "name": "normalizePyqManifest",
+      "filePath": "src/lib/pyq.ts",
+      "lineRange": [
+        246,
+        254
+      ],
+      "summary": "Validates manifest schema expectations and supplies normalized topic arrays.",
+      "tags": [
+        "utility",
+        "pyq",
+        "question-bank"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/pyq.ts:loadPyqQuestions",
+      "type": "function",
+      "name": "loadPyqQuestions",
+      "filePath": "src/lib/pyq.ts",
+      "lineRange": [
+        256,
+        272
+      ],
+      "summary": "Loads, caches, and combines version-matched subject question payloads.",
+      "tags": [
+        "utility",
+        "pyq",
+        "question-bank"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/pyq.ts:loadPyqQuestionByUid",
+      "type": "function",
+      "name": "loadPyqQuestionByUid",
+      "filePath": "src/lib/pyq.ts",
+      "lineRange": [
+        277,
+        291
+      ],
+      "summary": "Locates one question by stable UID, using an optional subject hint before broader lookup.",
+      "tags": [
+        "utility",
+        "pyq",
+        "question-bank"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/pyq.ts:matchesPyqTopicScope",
+      "type": "function",
+      "name": "matchesPyqTopicScope",
+      "filePath": "src/lib/pyq.ts",
+      "lineRange": [
+        293,
+        301
+      ],
+      "summary": "Tests whether a question falls within the configured subject and topic practice scope.",
+      "tags": [
+        "utility",
+        "pyq",
+        "question-bank"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/pyq.ts:evaluatePyqAnswer",
+      "type": "function",
+      "name": "evaluatePyqAnswer",
+      "filePath": "src/lib/pyq.ts",
+      "lineRange": [
+        312,
+        344
+      ],
+      "summary": "Evaluates MCQ, MSQ, or NAT responses while respecting skips, unavailable keys, and numeric tolerance.",
+      "tags": [
+        "utility",
+        "pyq",
+        "question-bank"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/pyq.ts:formatPyqAnswer",
+      "type": "function",
+      "name": "formatPyqAnswer",
+      "filePath": "src/lib/pyq.ts",
+      "lineRange": [
+        346,
+        357
+      ],
+      "summary": "Formats the authoritative answer according to the question type and answer status.",
+      "tags": [
+        "utility",
+        "pyq",
+        "question-bank"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/pyq.ts:pyqAnswerValueForLog",
+      "type": "function",
+      "name": "pyqAnswerValueForLog",
+      "filePath": "src/lib/pyq.ts",
+      "lineRange": [
+        359,
+        364
+      ],
+      "summary": "Normalizes the authoritative answer into the value persisted with an attempt receipt.",
+      "tags": [
+        "utility",
+        "pyq",
+        "question-bank"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/pyq.ts:wrapSnapshotText",
+      "type": "function",
+      "name": "wrapSnapshotText",
+      "filePath": "src/lib/pyq.ts",
+      "lineRange": [
+        374,
+        390
+      ],
+      "summary": "Wraps plain question text into bounded lines for a generated snapshot image.",
+      "tags": [
+        "utility",
+        "pyq",
+        "question-bank"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/pyq.ts:pyqQuestionSnapshotDataUrl",
+      "type": "function",
+      "name": "pyqQuestionSnapshotDataUrl",
+      "filePath": "src/lib/pyq.ts",
+      "lineRange": [
+        392,
+        414
+      ],
+      "summary": "Builds an SVG data URL snapshot containing question identity and readable prompt text.",
+      "tags": [
+        "utility",
+        "pyq",
+        "question-bank"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/pyq.ts:pyqSourceRef",
+      "type": "function",
+      "name": "pyqSourceRef",
+      "filePath": "src/lib/pyq.ts",
+      "lineRange": [
+        416,
+        418
+      ],
+      "summary": "Builds the canonical source reference for a bundled GATE PYQ.",
+      "tags": [
+        "utility",
+        "pyq",
+        "question-bank"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/pyq.ts:pyqPlainText",
+      "type": "function",
+      "name": "pyqPlainText",
+      "filePath": "src/lib/pyq.ts",
+      "lineRange": [
+        420,
+        454
+      ],
+      "summary": "Converts question HTML and math markup into readable plain text for journals and snapshots.",
+      "tags": [
+        "utility",
+        "pyq",
+        "question-bank"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/pyq.ts:firstPyqImage",
+      "type": "function",
+      "name": "firstPyqImage",
+      "filePath": "src/lib/pyq.ts",
+      "lineRange": [
+        456,
+        459
+      ],
+      "summary": "Extracts the first image URL from question HTML when present.",
+      "tags": [
+        "utility",
+        "pyq",
+        "question-bank"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/pyq.ts:resolvePyqJournalImageUrl",
+      "type": "function",
+      "name": "resolvePyqJournalImageUrl",
+      "filePath": "src/lib/pyq.ts",
+      "lineRange": [
+        462,
+        474
+      ],
+      "summary": "Converts a discovered PYQ image to storable data or falls back to a generated question snapshot.",
+      "tags": [
+        "utility",
+        "pyq",
+        "question-bank"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/pyq.ts:inferPyqDirectOutcome",
+      "type": "function",
+      "name": "inferPyqDirectOutcome",
+      "filePath": "src/lib/pyq.ts",
+      "lineRange": [
+        477,
+        486
+      ],
+      "summary": "Infers a direct tag outcome from answer correctness, decision confidence, and target-relative solve time.",
+      "tags": [
+        "utility",
+        "pyq",
+        "question-bank"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/lib/questionTags.ts",
+      "type": "file",
+      "name": "questionTags.ts",
+      "filePath": "src/lib/questionTags.ts",
+      "summary": "Defines the missing-tag confirmation policy; the current policy allows saving without pattern or trigger confirmation.",
+      "tags": [
+        "service",
+        "question-tagging",
+        "validation"
+      ],
+      "complexity": "simple",
+      "languageNotes": "TypeScript module."
+    },
+    {
+      "id": "function:src/lib/questionTags.ts:needsMissingTagsConfirmation",
+      "type": "function",
+      "name": "needsMissingTagsConfirmation",
+      "filePath": "src/lib/questionTags.ts",
+      "lineRange": [
+        1,
+        6
+      ],
+      "summary": "Returns the current policy decision for saving questions without pattern or trigger tags.",
+      "tags": [
+        "utility",
+        "question-tagging",
+        "validation"
+      ],
+      "complexity": "simple"
+    }
+  ],
+  "edges": [
+    {
+      "source": "file:src/lib/constants.ts",
+      "target": "file:src/types/index.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/lib/constants.ts",
+      "target": "function:src/lib/constants.ts:examYears",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/constants.ts",
+      "target": "function:src/lib/constants.ts:examYears",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/constants.ts",
+      "target": "function:src/lib/constants.ts:pyqYears",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/constants.ts",
+      "target": "function:src/lib/constants.ts:pyqYears",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/constants.ts",
+      "target": "function:src/lib/constants.ts:buildSourceRef",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/constants.ts",
+      "target": "function:src/lib/constants.ts:buildSourceRef",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/image.ts",
+      "target": "file:src/lib/theme.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/lib/image.ts",
+      "target": "function:src/lib/image.ts:urlToDataUrl",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/image.ts",
+      "target": "function:src/lib/image.ts:urlToDataUrl",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/image.ts",
+      "target": "function:src/lib/image.ts:downscaleDataUrl",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/image.ts",
+      "target": "function:src/lib/image.ts:waitForElementMedia",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/image.ts",
+      "target": "function:src/lib/image.ts:captureElementToDataUrl",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/image.ts",
+      "target": "function:src/lib/image.ts:captureElementToDataUrl",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/image.ts",
+      "target": "function:src/lib/image.ts:compressToDataUrl",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/image.ts",
+      "target": "function:src/lib/image.ts:compressToDataUrl",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/image.ts",
+      "target": "class:src/lib/image.ts:ImageTooLargeError",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/image.ts",
+      "target": "class:src/lib/image.ts:ImageTooLargeError",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/learning-tips.ts",
+      "target": "file:src/types/index.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/lib/learning-tips.ts",
+      "target": "function:src/lib/learning-tips.ts:buildLearningTips",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/learning-tips.ts",
+      "target": "function:src/lib/learning-tips.ts:buildLearningTips",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/mocks.ts",
+      "target": "file:src/types/index.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/lib/mocks.ts",
+      "target": "function:src/lib/mocks.ts:validateMockDraft",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/mocks.ts",
+      "target": "function:src/lib/mocks.ts:validateMockDraft",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/mocks.ts",
+      "target": "function:src/lib/mocks.ts:mockScorePercent",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/mocks.ts",
+      "target": "function:src/lib/mocks.ts:mockScorePercent",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/mocks.ts",
+      "target": "function:src/lib/mocks.ts:mockAccuracy",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/mocks.ts",
+      "target": "function:src/lib/mocks.ts:mockAccuracy",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/mocks.ts",
+      "target": "function:src/lib/mocks.ts:mockSummary",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/mocks.ts",
+      "target": "function:src/lib/mocks.ts:mockSummary",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/pyq-history.ts",
+      "target": "file:src/lib/constants.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/lib/pyq-history.ts",
+      "target": "file:src/lib/pyq-session.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/lib/pyq-history.ts",
+      "target": "file:src/lib/pyq.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/lib/pyq-history.ts",
+      "target": "file:src/types/index.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/lib/pyq-history.ts",
+      "target": "function:src/lib/pyq-history.ts:attemptsByQuestion",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/pyq-history.ts",
+      "target": "function:src/lib/pyq-history.ts:attemptsByQuestion",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/pyq-history.ts",
+      "target": "function:src/lib/pyq-history.ts:analyzedAttemptIds",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/pyq-history.ts",
+      "target": "function:src/lib/pyq-history.ts:analyzedAttemptIds",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/pyq-history.ts",
+      "target": "function:src/lib/pyq-history.ts:matchesPyqHistory",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/pyq-history.ts",
+      "target": "function:src/lib/pyq-history.ts:matchesPyqHistory",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/pyq-history.ts",
+      "target": "function:src/lib/pyq-history.ts:filterPyqByHistory",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/pyq-history.ts",
+      "target": "function:src/lib/pyq-history.ts:filterPyqByHistory",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/pyq-session.ts",
+      "target": "file:src/lib/pyq.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/lib/pyq-session.ts",
+      "target": "file:src/lib/utils.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/lib/pyq-session.ts",
+      "target": "file:src/types/index.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/lib/pyq-session.ts",
+      "target": "function:src/lib/pyq-session.ts:createPyqSessionRow",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/pyq-session.ts",
+      "target": "function:src/lib/pyq-session.ts:createPyqSessionRow",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/pyq-session.ts",
+      "target": "function:src/lib/pyq-session.ts:pyqAttemptId",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/pyq-session.ts",
+      "target": "function:src/lib/pyq-session.ts:pyqAttemptId",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/pyq-session.ts",
+      "target": "function:src/lib/pyq-session.ts:pyqJournalQuestionId",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/pyq-session.ts",
+      "target": "function:src/lib/pyq-session.ts:pyqJournalQuestionId",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/pyq-session.ts",
+      "target": "function:src/lib/pyq-session.ts:pyqSourceAttemptForJournalQuestion",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/pyq-session.ts",
+      "target": "function:src/lib/pyq-session.ts:pyqSourceAttemptForJournalQuestion",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/pyq-session.ts",
+      "target": "function:src/lib/pyq-session.ts:pyqQuestionFromAttempt",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/pyq-session.ts",
+      "target": "function:src/lib/pyq-session.ts:pyqQuestionFromAttempt",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/pyq-session.ts",
+      "target": "function:src/lib/pyq-session.ts:pyqReattemptAttemptId",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/pyq-session.ts",
+      "target": "function:src/lib/pyq-session.ts:pyqReattemptAttemptId",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/pyq-session.ts",
+      "target": "function:src/lib/pyq-session.ts:createPyqReattemptAttemptRow",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/pyq-session.ts",
+      "target": "function:src/lib/pyq-session.ts:createPyqReattemptAttemptRow",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/pyq-session.ts",
+      "target": "function:src/lib/pyq-session.ts:pyqPracticeSubject",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/pyq-session.ts",
+      "target": "function:src/lib/pyq-session.ts:pyqPracticeSubject",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/pyq-session.ts",
+      "target": "function:src/lib/pyq-session.ts:pyqPracticeSessionRow",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/pyq-session.ts",
+      "target": "function:src/lib/pyq-session.ts:pyqPracticeSessionRow",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/pyq-session.ts",
+      "target": "function:src/lib/pyq-session.ts:startPyqSessionQuestion",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/pyq-session.ts",
+      "target": "function:src/lib/pyq-session.ts:startPyqSessionQuestion",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/pyq-session.ts",
+      "target": "function:src/lib/pyq-session.ts:advancePyqSessionProgress",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/pyq-session.ts",
+      "target": "function:src/lib/pyq-session.ts:advancePyqSessionProgress",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/pyq-session.ts",
+      "target": "function:src/lib/pyq-session.ts:completePyqSession",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/pyq-session.ts",
+      "target": "function:src/lib/pyq-session.ts:completePyqSession",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/pyq-session.ts",
+      "target": "function:src/lib/pyq-session.ts:abandonPyqSession",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/pyq-session.ts",
+      "target": "function:src/lib/pyq-session.ts:abandonPyqSession",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/pyq-session.ts",
+      "target": "function:src/lib/pyq-session.ts:pausePyqSession",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/pyq-session.ts",
+      "target": "function:src/lib/pyq-session.ts:pausePyqSession",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/pyq-session.ts",
+      "target": "function:src/lib/pyq-session.ts:pyqQuestionSnapshot",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/pyq-session.ts",
+      "target": "function:src/lib/pyq-session.ts:pyqQuestionSnapshot",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/pyq-session.ts",
+      "target": "function:src/lib/pyq-session.ts:createPyqAttemptRow",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/pyq-session.ts",
+      "target": "function:src/lib/pyq-session.ts:createPyqAttemptRow",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/pyq.ts",
+      "target": "file:src/lib/constants.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/lib/pyq.ts",
+      "target": "file:src/lib/image.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/lib/pyq.ts",
+      "target": "file:src/types/index.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/lib/pyq.ts",
+      "target": "function:src/lib/pyq.ts:replaceBalancedPyqMathCommand",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/pyq.ts",
+      "target": "function:src/lib/pyq.ts:joinPyqMathLines",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/pyq.ts",
+      "target": "function:src/lib/pyq.ts:pyqMathEndIndex",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/pyq.ts",
+      "target": "function:src/lib/pyq.ts:normalizePyqQuestionHtml",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/pyq.ts",
+      "target": "function:src/lib/pyq.ts:normalizePyqQuestionHtml",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/pyq.ts",
+      "target": "function:src/lib/pyq.ts:loadPyqManifest",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/pyq.ts",
+      "target": "function:src/lib/pyq.ts:loadPyqManifest",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/pyq.ts",
+      "target": "function:src/lib/pyq.ts:normalizePyqManifest",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/pyq.ts",
+      "target": "function:src/lib/pyq.ts:normalizePyqManifest",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/pyq.ts",
+      "target": "function:src/lib/pyq.ts:loadPyqQuestions",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/pyq.ts",
+      "target": "function:src/lib/pyq.ts:loadPyqQuestions",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/pyq.ts",
+      "target": "function:src/lib/pyq.ts:loadPyqQuestionByUid",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/pyq.ts",
+      "target": "function:src/lib/pyq.ts:loadPyqQuestionByUid",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/pyq.ts",
+      "target": "function:src/lib/pyq.ts:matchesPyqTopicScope",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/pyq.ts",
+      "target": "function:src/lib/pyq.ts:matchesPyqTopicScope",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/pyq.ts",
+      "target": "function:src/lib/pyq.ts:evaluatePyqAnswer",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/pyq.ts",
+      "target": "function:src/lib/pyq.ts:evaluatePyqAnswer",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/pyq.ts",
+      "target": "function:src/lib/pyq.ts:formatPyqAnswer",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/pyq.ts",
+      "target": "function:src/lib/pyq.ts:formatPyqAnswer",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/pyq.ts",
+      "target": "function:src/lib/pyq.ts:pyqAnswerValueForLog",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/pyq.ts",
+      "target": "function:src/lib/pyq.ts:pyqAnswerValueForLog",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/pyq.ts",
+      "target": "function:src/lib/pyq.ts:wrapSnapshotText",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/pyq.ts",
+      "target": "function:src/lib/pyq.ts:pyqQuestionSnapshotDataUrl",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/pyq.ts",
+      "target": "function:src/lib/pyq.ts:pyqQuestionSnapshotDataUrl",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/pyq.ts",
+      "target": "function:src/lib/pyq.ts:pyqSourceRef",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/pyq.ts",
+      "target": "function:src/lib/pyq.ts:pyqSourceRef",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/pyq.ts",
+      "target": "function:src/lib/pyq.ts:pyqPlainText",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/pyq.ts",
+      "target": "function:src/lib/pyq.ts:pyqPlainText",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/pyq.ts",
+      "target": "function:src/lib/pyq.ts:firstPyqImage",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/pyq.ts",
+      "target": "function:src/lib/pyq.ts:firstPyqImage",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/pyq.ts",
+      "target": "function:src/lib/pyq.ts:resolvePyqJournalImageUrl",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/pyq.ts",
+      "target": "function:src/lib/pyq.ts:resolvePyqJournalImageUrl",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/pyq.ts",
+      "target": "function:src/lib/pyq.ts:inferPyqDirectOutcome",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/pyq.ts",
+      "target": "function:src/lib/pyq.ts:inferPyqDirectOutcome",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/questionTags.ts",
+      "target": "function:src/lib/questionTags.ts:needsMissingTagsConfirmation",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/questionTags.ts",
+      "target": "function:src/lib/questionTags.ts:needsMissingTagsConfirmation",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    }
+  ]
+}

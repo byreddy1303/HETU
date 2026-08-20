@@ -1,0 +1,539 @@
+{
+  "nodes": [
+    {
+      "id": "file:scripts/build-go-classes-coa-test-2-log-migration.mjs",
+      "type": "file",
+      "name": "build-go-classes-coa-test-2-log-migration.mjs",
+      "filePath": "scripts/build-go-classes-coa-test-2-log-migration.mjs",
+      "summary": "Converts a learner’s 15-question GO Classes COA Topic Test 2 log into an idempotent Supabase SQL migration that preserves immutable PYQ receipts, journal questions, and scheduled D3 re-attempts after validating answer evidence.",
+      "tags": [
+        "migration-generator",
+        "pyq",
+        "data-import",
+        "supabase",
+        "audit-trail"
+      ],
+      "complexity": "complex",
+      "languageNotes": "Top-level ESM reads structured source data, derives stable identifiers and timestamps, and embeds validated JSON into a PostgreSQL procedural migration."
+    },
+    {
+      "id": "function:scripts/build-go-classes-coa-test-2-log-migration.mjs:uuidFromString",
+      "type": "function",
+      "name": "uuidFromString",
+      "filePath": "scripts/build-go-classes-coa-test-2-log-migration.mjs",
+      "lineRange": [
+        25,
+        45
+      ],
+      "summary": "Derives a stable RFC 4122-shaped version-four UUID from a string seed using two evolving integer hashes.",
+      "tags": [
+        "utility",
+        "deterministic-id",
+        "migration-generator"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:scripts/build-go-classes-coa-test-2-log-migration.mjs:plainText",
+      "type": "function",
+      "name": "plainText",
+      "filePath": "scripts/build-go-classes-coa-test-2-log-migration.mjs",
+      "lineRange": [
+        47,
+        81
+      ],
+      "summary": "Converts question HTML into readable journal text while preserving ordered-list labels, line breaks, and table-cell boundaries.",
+      "tags": [
+        "utility",
+        "html-parsing",
+        "data-import"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:scripts/build-pyq-bank.mjs",
+      "type": "file",
+      "name": "build-pyq-bank.mjs",
+      "filePath": "scripts/build-pyq-bank.mjs",
+      "summary": "Builds the audited 3,200-question GATE PYQ archive by combining GateQA, GATE Overflow, ExamSIDE supplements, and learner-provided tests, then classifying questions, localizing images, and writing subject shards, manifest, and provenance data.",
+      "tags": [
+        "build-script",
+        "pyq",
+        "content-pipeline",
+        "web-scraping",
+        "data-validation"
+      ],
+      "complexity": "complex",
+      "languageNotes": "Node ESM uses cached and concurrent network ingestion, JSDOM parsing, strict count assertions, content sanitization, and deterministic artifact generation."
+    },
+    {
+      "id": "function:scripts/build-pyq-bank.mjs:sanitizeSourceHtml",
+      "type": "function",
+      "name": "sanitizeSourceHtml",
+      "filePath": "scripts/build-pyq-bank.mjs",
+      "lineRange": [
+        234,
+        245
+      ],
+      "summary": "Removes scripts, styles, embedded active content, inline event handlers, unsafe JavaScript URLs, and source-only attributes from imported question HTML.",
+      "tags": [
+        "utility",
+        "sanitization",
+        "security"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:scripts/build-pyq-bank.mjs:absoluteImageUrl",
+      "type": "function",
+      "name": "absoluteImageUrl",
+      "filePath": "scripts/build-pyq-bank.mjs",
+      "lineRange": [
+        268,
+        277
+      ],
+      "summary": "Resolves an image reference against GateQA and normalizes the source repository’s legacy Gate_QA path prefix.",
+      "tags": [
+        "utility",
+        "image-processing",
+        "asset-pipeline"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:scripts/build-pyq-bank.mjs:fetchWithRetry",
+      "type": "function",
+      "name": "fetchWithRetry",
+      "filePath": "scripts/build-pyq-bank.mjs",
+      "lineRange": [
+        293,
+        306
+      ],
+      "summary": "Fetches an archive URL with the project user agent and bounded linear backoff before surfacing the final failure.",
+      "tags": [
+        "utility",
+        "data-ingestion",
+        "caching"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:scripts/build-pyq-bank.mjs:cachedJson",
+      "type": "function",
+      "name": "cachedJson",
+      "filePath": "scripts/build-pyq-bank.mjs",
+      "lineRange": [
+        308,
+        319
+      ],
+      "summary": "Returns a parsed JSON artifact from the temporary cache or downloads, persists, and parses it on a cache miss.",
+      "tags": [
+        "utility",
+        "data-ingestion",
+        "caching"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:scripts/build-pyq-bank.mjs:cachedText",
+      "type": "function",
+      "name": "cachedText",
+      "filePath": "scripts/build-pyq-bank.mjs",
+      "lineRange": [
+        321,
+        332
+      ],
+      "summary": "Returns a text artifact from the temporary cache or downloads and persists it on a cache miss.",
+      "tags": [
+        "utility",
+        "data-ingestion",
+        "caching"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:scripts/build-pyq-bank.mjs:extractJavascriptArray",
+      "type": "function",
+      "name": "extractJavascriptArray",
+      "filePath": "scripts/build-pyq-bank.mjs",
+      "lineRange": [
+        334,
+        357
+      ],
+      "summary": "Scans a JavaScript source payload for one balanced array literal while respecting quoted strings and escape characters.",
+      "tags": [
+        "utility",
+        "javascript-parsing",
+        "data-ingestion"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:scripts/build-pyq-bank.mjs:examSideQuestionFromHtml",
+      "type": "function",
+      "name": "examSideQuestionFromHtml",
+      "filePath": "scripts/build-pyq-bank.mjs",
+      "lineRange": [
+        359,
+        385
+      ],
+      "summary": "Extracts ExamSIDE’s embedded structured question array from an allowlisted detail page and finds the record matching its permalink.",
+      "tags": [
+        "utility",
+        "examside",
+        "data-normalization"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:scripts/build-pyq-bank.mjs:loadExamSideSourceRows",
+      "type": "function",
+      "name": "loadExamSideSourceRows",
+      "filePath": "scripts/build-pyq-bank.mjs",
+      "lineRange": [
+        387,
+        436
+      ],
+      "summary": "Builds or loads a cached, deduplicated snapshot of audited ECE and EE Digital Logic detail records using bounded concurrent fetches.",
+      "tags": [
+        "utility",
+        "data-ingestion",
+        "caching"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:scripts/build-pyq-bank.mjs:loadExamSideCseSourceRows",
+      "type": "function",
+      "name": "loadExamSideCseSourceRows",
+      "filePath": "scripts/build-pyq-bank.mjs",
+      "lineRange": [
+        438,
+        488
+      ],
+      "summary": "Builds or loads a sorted cached snapshot of ExamSIDE CSE questions used to replace five incomplete archive years.",
+      "tags": [
+        "utility",
+        "data-ingestion",
+        "caching"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:scripts/build-pyq-bank.mjs:numericExamSideKey",
+      "type": "function",
+      "name": "numericExamSideKey",
+      "filePath": "scripts/build-pyq-bank.mjs",
+      "lineRange": [
+        490,
+        522
+      ],
+      "summary": "Normalizes ExamSIDE numeric answers, converting ranges into midpoint answers with absolute tolerances and rejecting ambiguous values.",
+      "tags": [
+        "utility",
+        "examside",
+        "data-normalization"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:scripts/build-pyq-bank.mjs:examSideQuestionType",
+      "type": "function",
+      "name": "examSideQuestionType",
+      "filePath": "scripts/build-pyq-bank.mjs",
+      "lineRange": [
+        524,
+        533
+      ],
+      "summary": "Maps ExamSIDE bonus, MCQ, MSQ, and numeric metadata into the bank’s supported answer-type vocabulary.",
+      "tags": [
+        "utility",
+        "examside",
+        "data-normalization"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:scripts/build-pyq-bank.mjs:examSideCseClassification",
+      "type": "function",
+      "name": "examSideCseClassification",
+      "filePath": "scripts/build-pyq-bank.mjs",
+      "lineRange": [
+        562,
+        680
+      ],
+      "summary": "Maps ExamSIDE CSE subjects, chapters, and question-text signals onto the project’s canonical subject and topic taxonomy.",
+      "tags": [
+        "utility",
+        "examside",
+        "data-normalization"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:scripts/build-pyq-bank.mjs:examSideDigitalLogicQuestions",
+      "type": "function",
+      "name": "examSideDigitalLogicQuestions",
+      "filePath": "scripts/build-pyq-bank.mjs",
+      "lineRange": [
+        682,
+        727
+      ],
+      "summary": "Transforms audited ECE and EE Digital Logic records into canonical bank questions and enforces the expected 259-question source split.",
+      "tags": [
+        "utility",
+        "examside",
+        "data-normalization"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:scripts/build-pyq-bank.mjs:examSideCseQuestions",
+      "type": "function",
+      "name": "examSideCseQuestions",
+      "filePath": "scripts/build-pyq-bank.mjs",
+      "lineRange": [
+        729,
+        768
+      ],
+      "summary": "Transforms the five replacement-year CSE snapshots into canonical questions and enforces the expected 192-question count.",
+      "tags": [
+        "utility",
+        "examside",
+        "data-normalization"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:scripts/build-pyq-bank.mjs:imageExtension",
+      "type": "function",
+      "name": "imageExtension",
+      "filePath": "scripts/build-pyq-bank.mjs",
+      "lineRange": [
+        770,
+        781
+      ],
+      "summary": "Chooses a safe image filename extension from the HTTP content type, falling back to a validated URL suffix.",
+      "tags": [
+        "utility",
+        "image-processing",
+        "asset-pipeline"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:scripts/build-pyq-bank.mjs:downloadImages",
+      "type": "function",
+      "name": "downloadImages",
+      "filePath": "scripts/build-pyq-bank.mjs",
+      "lineRange": [
+        783,
+        817
+      ],
+      "summary": "Downloads or substitutes remote question images concurrently, validates media types, and writes hash-named local assets with a URL map.",
+      "tags": [
+        "utility",
+        "image-processing",
+        "asset-pipeline"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:scripts/build-pyq-bank.mjs:localizedHtml",
+      "type": "function",
+      "name": "localizedHtml",
+      "filePath": "scripts/build-pyq-bank.mjs",
+      "lineRange": [
+        819,
+        829
+      ],
+      "summary": "Rewrites imported image references to bundled paths and adds lazy, asynchronous image-decoding attributes.",
+      "tags": [
+        "utility",
+        "image-processing",
+        "asset-pipeline"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:scripts/build-pyq-bank.mjs:main",
+      "type": "function",
+      "name": "main",
+      "filePath": "scripts/build-pyq-bank.mjs",
+      "lineRange": [
+        831,
+        1066
+      ],
+      "summary": "Orchestrates source ingestion, normalization, taxonomy classification, count and uniqueness audits, image localization, subject sharding, and manifest and provenance generation.",
+      "tags": [
+        "entry-point",
+        "content-pipeline",
+        "data-validation"
+      ],
+      "complexity": "complex"
+    }
+  ],
+  "edges": [
+    {
+      "source": "file:scripts/build-go-classes-coa-test-2-log-migration.mjs",
+      "target": "file:scripts/pyq-taxonomy.mjs",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:scripts/build-go-classes-coa-test-2-log-migration.mjs",
+      "target": "function:scripts/build-go-classes-coa-test-2-log-migration.mjs:uuidFromString",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:scripts/build-go-classes-coa-test-2-log-migration.mjs",
+      "target": "function:scripts/build-go-classes-coa-test-2-log-migration.mjs:plainText",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:scripts/build-pyq-bank.mjs",
+      "target": "file:scripts/pyq-taxonomy.mjs",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:scripts/build-pyq-bank.mjs",
+      "target": "function:scripts/build-pyq-bank.mjs:sanitizeSourceHtml",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:scripts/build-pyq-bank.mjs",
+      "target": "function:scripts/build-pyq-bank.mjs:absoluteImageUrl",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:scripts/build-pyq-bank.mjs",
+      "target": "function:scripts/build-pyq-bank.mjs:fetchWithRetry",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:scripts/build-pyq-bank.mjs",
+      "target": "function:scripts/build-pyq-bank.mjs:cachedJson",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:scripts/build-pyq-bank.mjs",
+      "target": "function:scripts/build-pyq-bank.mjs:cachedText",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:scripts/build-pyq-bank.mjs",
+      "target": "function:scripts/build-pyq-bank.mjs:extractJavascriptArray",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:scripts/build-pyq-bank.mjs",
+      "target": "function:scripts/build-pyq-bank.mjs:examSideQuestionFromHtml",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:scripts/build-pyq-bank.mjs",
+      "target": "function:scripts/build-pyq-bank.mjs:loadExamSideSourceRows",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:scripts/build-pyq-bank.mjs",
+      "target": "function:scripts/build-pyq-bank.mjs:loadExamSideCseSourceRows",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:scripts/build-pyq-bank.mjs",
+      "target": "function:scripts/build-pyq-bank.mjs:numericExamSideKey",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:scripts/build-pyq-bank.mjs",
+      "target": "function:scripts/build-pyq-bank.mjs:examSideQuestionType",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:scripts/build-pyq-bank.mjs",
+      "target": "function:scripts/build-pyq-bank.mjs:examSideCseClassification",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:scripts/build-pyq-bank.mjs",
+      "target": "function:scripts/build-pyq-bank.mjs:examSideDigitalLogicQuestions",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:scripts/build-pyq-bank.mjs",
+      "target": "function:scripts/build-pyq-bank.mjs:examSideCseQuestions",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:scripts/build-pyq-bank.mjs",
+      "target": "function:scripts/build-pyq-bank.mjs:imageExtension",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:scripts/build-pyq-bank.mjs",
+      "target": "function:scripts/build-pyq-bank.mjs:downloadImages",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:scripts/build-pyq-bank.mjs",
+      "target": "function:scripts/build-pyq-bank.mjs:localizedHtml",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:scripts/build-pyq-bank.mjs",
+      "target": "function:scripts/build-pyq-bank.mjs:main",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "function:scripts/build-pyq-bank.mjs:main",
+      "target": "function:scripts/pyq-taxonomy.mjs:classifyPyqQuestion",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    }
+  ]
+}

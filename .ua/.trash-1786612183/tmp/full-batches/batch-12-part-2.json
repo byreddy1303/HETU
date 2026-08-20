@@ -1,0 +1,573 @@
+{
+  "nodes": [
+    {
+      "id": "table:supabase/migrations/20260721000003_planner_day_plans.sql:migration",
+      "type": "table",
+      "name": "20260721000003_planner_day_plans.sql",
+      "filePath": "supabase/migrations/20260721000003_planner_day_plans.sql",
+      "summary": "Adds per-user daily plan snapshots that persist generated planner payloads and expose them under owner-only row-level security.",
+      "tags": [
+        "database",
+        "migration",
+        "supabase",
+        "study-planning"
+      ],
+      "complexity": "simple",
+      "languageNotes": "PostgreSQL migration designed for Supabase, using database-native constraints, policies, triggers, or RPCs as applicable."
+    },
+    {
+      "id": "table:supabase/migrations/20260721000003_planner_day_plans.sql:planner_day_plans",
+      "type": "table",
+      "name": "planner_day_plans",
+      "filePath": "supabase/migrations/20260721000003_planner_day_plans.sql",
+      "summary": "Persisted daily planner payloads keyed by learner and calendar day. The migration defines 4 captured columns for this relation.",
+      "tags": [
+        "database",
+        "schema-definition",
+        "study-planning",
+        "postgresql"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "table:supabase/migrations/20260721000004_sync_query_indexes.sql:migration",
+      "type": "table",
+      "name": "20260721000004_sync_query_indexes.sql",
+      "filePath": "supabase/migrations/20260721000004_sync_query_indexes.sql",
+      "summary": "Adds synchronization-oriented indexes for incrementally querying user study records by timestamps and ownership keys.",
+      "tags": [
+        "database",
+        "migration",
+        "supabase",
+        "query-performance"
+      ],
+      "complexity": "simple",
+      "languageNotes": "PostgreSQL migration designed for Supabase, using database-native constraints, policies, triggers, or RPCs as applicable."
+    },
+    {
+      "id": "table:supabase/migrations/20260722000001_question_answers.sql:migration",
+      "type": "table",
+      "name": "20260722000001_question_answers.sql",
+      "filePath": "supabase/migrations/20260722000001_question_answers.sql",
+      "summary": "Extends question records with correct-answer storage for later review, feedback, and reattempt evaluation.",
+      "tags": [
+        "database",
+        "migration",
+        "supabase",
+        "question-review"
+      ],
+      "complexity": "simple",
+      "languageNotes": "PostgreSQL migration designed for Supabase, using database-native constraints, policies, triggers, or RPCs as applicable."
+    },
+    {
+      "id": "table:supabase/migrations/20260802000001_pyq_attempts.sql:migration",
+      "type": "table",
+      "name": "20260802000001_pyq_attempts.sql",
+      "filePath": "supabase/migrations/20260802000001_pyq_attempts.sql",
+      "summary": "Introduces immutable previous-year-question attempt history with captured question snapshots, selected answers, outcomes, and timing metadata.",
+      "tags": [
+        "database",
+        "migration",
+        "supabase",
+        "pyq-practice"
+      ],
+      "complexity": "simple",
+      "languageNotes": "PostgreSQL migration designed for Supabase, using database-native constraints, policies, triggers, or RPCs as applicable."
+    },
+    {
+      "id": "table:supabase/migrations/20260802000001_pyq_attempts.sql:pyq_attempts",
+      "type": "table",
+      "name": "pyq_attempts",
+      "filePath": "supabase/migrations/20260802000001_pyq_attempts.sql",
+      "summary": "Immutable previous-year-question attempt snapshots with answers, outcomes, timing, and attempt order. The migration defines 11 captured columns for this relation.",
+      "tags": [
+        "database",
+        "schema-definition",
+        "pyq-practice",
+        "postgresql"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "table:supabase/migrations/20260807000001_pyq_session_hardening.sql:migration",
+      "type": "table",
+      "name": "20260807000001_pyq_session_hardening.sql",
+      "filePath": "supabase/migrations/20260807000001_pyq_session_hardening.sql",
+      "summary": "Adds durable PYQ sessions and links attempts to session context while tightening ownership policies and session lifecycle constraints.",
+      "tags": [
+        "database",
+        "migration",
+        "supabase",
+        "pyq-sessions"
+      ],
+      "complexity": "moderate",
+      "languageNotes": "PostgreSQL migration designed for Supabase, using database-native constraints, policies, triggers, or RPCs as applicable."
+    },
+    {
+      "id": "table:supabase/migrations/20260807000001_pyq_session_hardening.sql:pyq_sessions",
+      "type": "table",
+      "name": "pyq_sessions",
+      "filePath": "supabase/migrations/20260807000001_pyq_session_hardening.sql",
+      "summary": "Durable PYQ practice sessions with filters, progress, lifecycle status, and timing metadata. The migration defines 13 captured columns for this relation.",
+      "tags": [
+        "database",
+        "schema-definition",
+        "pyq-practice",
+        "postgresql"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "table:supabase/migrations/20260807000002_digest_minute_local.sql:migration",
+      "type": "table",
+      "name": "20260807000002_digest_minute_local.sql",
+      "filePath": "supabase/migrations/20260807000002_digest_minute_local.sql",
+      "summary": "Adds a local-minute preference so digest delivery can be scheduled more precisely than whole-hour timezone settings.",
+      "tags": [
+        "database",
+        "migration",
+        "supabase",
+        "scheduled-digest"
+      ],
+      "complexity": "simple",
+      "languageNotes": "PostgreSQL migration designed for Supabase, using database-native constraints, policies, triggers, or RPCs as applicable."
+    },
+    {
+      "id": "table:supabase/migrations/20260808000001_pyq_attempt_audit.sql:migration",
+      "type": "table",
+      "name": "20260808000001_pyq_attempt_audit.sql",
+      "filePath": "supabase/migrations/20260808000001_pyq_attempt_audit.sql",
+      "summary": "Hardens PYQ attempt integrity with audit fields and trigger checks that preserve immutable answers while permitting controlled metadata updates.",
+      "tags": [
+        "database",
+        "migration",
+        "supabase",
+        "audit-integrity"
+      ],
+      "complexity": "moderate",
+      "languageNotes": "PostgreSQL migration designed for Supabase, using database-native constraints, policies, triggers, or RPCs as applicable."
+    },
+    {
+      "id": "table:supabase/migrations/20260808000002_session_kinds.sql:migration",
+      "type": "table",
+      "name": "20260808000002_session_kinds.sql",
+      "filePath": "supabase/migrations/20260808000002_session_kinds.sql",
+      "summary": "Adds a constrained session-kind field that distinguishes ordinary study sessions from supported specialized session modes.",
+      "tags": [
+        "database",
+        "migration",
+        "supabase",
+        "study-sessions"
+      ],
+      "complexity": "simple",
+      "languageNotes": "PostgreSQL migration designed for Supabase, using database-native constraints, policies, triggers, or RPCs as applicable."
+    },
+    {
+      "id": "table:supabase/migrations/20260808000003_telegram_digest_cron_vault.sql:migration",
+      "type": "table",
+      "name": "20260808000003_telegram_digest_cron_vault.sql",
+      "filePath": "supabase/migrations/20260808000003_telegram_digest_cron_vault.sql",
+      "summary": "Reconfigures Telegram digest scheduling to read edge-function credentials from Supabase Vault before making authenticated pg_net requests.",
+      "tags": [
+        "database",
+        "migration",
+        "supabase",
+        "secret-management"
+      ],
+      "complexity": "simple",
+      "languageNotes": "PostgreSQL migration designed for Supabase, using database-native constraints, policies, triggers, or RPCs as applicable."
+    },
+    {
+      "id": "table:supabase/migrations/20260808000004_telegram_digest_cron_secret.sql:migration",
+      "type": "table",
+      "name": "20260808000004_telegram_digest_cron_secret.sql",
+      "filePath": "supabase/migrations/20260808000004_telegram_digest_cron_secret.sql",
+      "summary": "Switches Telegram digest scheduling to a protected database setting for the edge-function secret and recreates the cron invocation.",
+      "tags": [
+        "database",
+        "migration",
+        "supabase",
+        "secret-management"
+      ],
+      "complexity": "simple",
+      "languageNotes": "PostgreSQL migration designed for Supabase, using database-native constraints, policies, triggers, or RPCs as applicable."
+    },
+    {
+      "id": "table:supabase/migrations/20260808000005_buddy_push_notifications.sql:migration",
+      "type": "table",
+      "name": "20260808000005_buddy_push_notifications.sql",
+      "filePath": "supabase/migrations/20260808000005_buddy_push_notifications.sql",
+      "summary": "Builds the buddy push-notification pipeline with device subscriptions, transactional outbox records, delivery attempts, enqueue triggers, and claim/acknowledgement RPCs.",
+      "tags": [
+        "database",
+        "migration",
+        "supabase",
+        "push-notifications"
+      ],
+      "complexity": "complex",
+      "languageNotes": "PostgreSQL migration designed for Supabase, using database-native constraints, policies, triggers, or RPCs as applicable."
+    },
+    {
+      "id": "table:supabase/migrations/20260808000005_buddy_push_notifications.sql:push_subscriptions",
+      "type": "table",
+      "name": "push_subscriptions",
+      "filePath": "supabase/migrations/20260808000005_buddy_push_notifications.sql",
+      "summary": "Per-device Web Push subscriptions and client metadata owned by a user. The migration defines 13 captured columns for this relation.",
+      "tags": [
+        "database",
+        "schema-definition",
+        "notifications",
+        "postgresql"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "table:supabase/migrations/20260808000005_buddy_push_notifications.sql:buddy_notification_outbox",
+      "type": "table",
+      "name": "buddy_notification_outbox",
+      "filePath": "supabase/migrations/20260808000005_buddy_push_notifications.sql",
+      "summary": "Transactional queue of buddy notification jobs awaiting delivery processing. The migration defines 10 captured columns for this relation.",
+      "tags": [
+        "database",
+        "schema-definition",
+        "buddy-system",
+        "postgresql"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "table:supabase/migrations/20260808000005_buddy_push_notifications.sql:buddy_notification_deliveries",
+      "type": "table",
+      "name": "buddy_notification_deliveries",
+      "filePath": "supabase/migrations/20260808000005_buddy_push_notifications.sql",
+      "summary": "Per-subscription delivery attempts and outcomes for buddy notification outbox entries. The migration defines 8 captured columns for this relation.",
+      "tags": [
+        "database",
+        "schema-definition",
+        "buddy-system",
+        "postgresql"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "table:supabase/migrations/20260808000006_push_quiet_hours.sql:migration",
+      "type": "table",
+      "name": "20260808000006_push_quiet_hours.sql",
+      "filePath": "supabase/migrations/20260808000006_push_quiet_hours.sql",
+      "summary": "Adds user-configurable push quiet hours and timezone-aware eligibility logic that suppresses buddy notifications during protected periods.",
+      "tags": [
+        "database",
+        "migration",
+        "supabase",
+        "quiet-hours"
+      ],
+      "complexity": "simple",
+      "languageNotes": "PostgreSQL migration designed for Supabase, using database-native constraints, policies, triggers, or RPCs as applicable."
+    },
+    {
+      "id": "table:supabase/migrations/20260810000001_android_inline_replies.sql:migration",
+      "type": "table",
+      "name": "20260810000001_android_inline_replies.sql",
+      "filePath": "supabase/migrations/20260810000001_android_inline_replies.sql",
+      "summary": "Adds short-lived single-use reply tokens and secure redemption functions that let Android notification actions post buddy replies safely.",
+      "tags": [
+        "database",
+        "migration",
+        "supabase",
+        "inline-replies"
+      ],
+      "complexity": "moderate",
+      "languageNotes": "PostgreSQL migration designed for Supabase, using database-native constraints, policies, triggers, or RPCs as applicable."
+    },
+    {
+      "id": "table:supabase/migrations/20260810000001_android_inline_replies.sql:buddy_notification_reply_tokens",
+      "type": "table",
+      "name": "buddy_notification_reply_tokens",
+      "filePath": "supabase/migrations/20260810000001_android_inline_replies.sql",
+      "summary": "Expiring, single-use tokens that authorize Android inline replies to buddy messages. The migration defines 10 captured columns for this relation.",
+      "tags": [
+        "database",
+        "schema-definition",
+        "buddy-system",
+        "postgresql"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "table:supabase/migrations/20260810000002_interactive_study_notifications.sql:migration",
+      "type": "table",
+      "name": "20260810000002_interactive_study_notifications.sql",
+      "filePath": "supabase/migrations/20260810000002_interactive_study_notifications.sql",
+      "summary": "Introduces configurable interactive study reminders, notification event history, action tokens, scheduling claims, and secure completion flows.",
+      "tags": [
+        "database",
+        "migration",
+        "supabase",
+        "study-reminders"
+      ],
+      "complexity": "complex",
+      "languageNotes": "PostgreSQL migration designed for Supabase, using database-native constraints, policies, triggers, or RPCs as applicable."
+    },
+    {
+      "id": "table:supabase/migrations/20260810000002_interactive_study_notifications.sql:study_notification_preferences",
+      "type": "table",
+      "name": "study_notification_preferences",
+      "filePath": "supabase/migrations/20260810000002_interactive_study_notifications.sql",
+      "summary": "User-specific enablement, local delivery schedule, timezone, and reminder behavior. The migration defines 9 captured columns for this relation.",
+      "tags": [
+        "database",
+        "schema-definition",
+        "notifications",
+        "postgresql"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "table:supabase/migrations/20260810000002_interactive_study_notifications.sql:study_notification_events",
+      "type": "table",
+      "name": "study_notification_events",
+      "filePath": "supabase/migrations/20260810000002_interactive_study_notifications.sql",
+      "summary": "Audit and delivery history for scheduled study notifications and user interactions. The migration defines 15 captured columns for this relation.",
+      "tags": [
+        "database",
+        "schema-definition",
+        "notifications",
+        "postgresql"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "table:supabase/migrations/20260810000002_interactive_study_notifications.sql:notification_action_tokens",
+      "type": "table",
+      "name": "notification_action_tokens",
+      "filePath": "supabase/migrations/20260810000002_interactive_study_notifications.sql",
+      "summary": "Expiring single-use tokens that authorize actions from interactive study notifications. The migration defines 13 captured columns for this relation.",
+      "tags": [
+        "database",
+        "schema-definition",
+        "notifications",
+        "postgresql"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "table:supabase/migrations/20260810000003_add_log_study_notification.sql:migration",
+      "type": "table",
+      "name": "20260810000003_add_log_study_notification.sql",
+      "filePath": "supabase/migrations/20260810000003_add_log_study_notification.sql",
+      "summary": "Adds a server-side logging RPC for study-notification events with ownership validation and idempotent event insertion.",
+      "tags": [
+        "database",
+        "migration",
+        "supabase",
+        "notification-logging"
+      ],
+      "complexity": "simple",
+      "languageNotes": "PostgreSQL migration designed for Supabase, using database-native constraints, policies, triggers, or RPCs as applicable."
+    },
+    {
+      "id": "table:supabase/migrations/20260810000004_study_notification_minutes.sql:migration",
+      "type": "table",
+      "name": "20260810000004_study_notification_minutes.sql",
+      "filePath": "supabase/migrations/20260810000004_study_notification_minutes.sql",
+      "summary": "Extends study notification preferences with minute-level schedule fields and validation for more precise local delivery times.",
+      "tags": [
+        "database",
+        "migration",
+        "supabase",
+        "study-reminders"
+      ],
+      "complexity": "simple",
+      "languageNotes": "PostgreSQL migration designed for Supabase, using database-native constraints, policies, triggers, or RPCs as applicable."
+    },
+    {
+      "id": "table:supabase/migrations/20260810000005_practical_study_loop.sql:migration",
+      "type": "table",
+      "name": "20260810000005_practical_study_loop.sql",
+      "filePath": "supabase/migrations/20260810000005_practical_study_loop.sql",
+      "summary": "Adds mock-test history and topic-progress projections used to connect practice results with readiness and next-action planning.",
+      "tags": [
+        "database",
+        "migration",
+        "supabase",
+        "study-progress"
+      ],
+      "complexity": "moderate",
+      "languageNotes": "PostgreSQL migration designed for Supabase, using database-native constraints, policies, triggers, or RPCs as applicable."
+    },
+    {
+      "id": "table:supabase/migrations/20260810000005_practical_study_loop.sql:mock_tests",
+      "type": "table",
+      "name": "mock_tests",
+      "filePath": "supabase/migrations/20260810000005_practical_study_loop.sql",
+      "summary": "User mock-test results with scores, accuracy, duration, and subject-level breakdowns. The migration defines 17 captured columns for this relation.",
+      "tags": [
+        "database",
+        "schema-definition",
+        "learning-data",
+        "postgresql"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "table:supabase/migrations/20260810000005_practical_study_loop.sql:topic_progress",
+      "type": "table",
+      "name": "topic_progress",
+      "filePath": "supabase/migrations/20260810000005_practical_study_loop.sql",
+      "summary": "Per-user topic mastery and practice projections used by the practical study loop. The migration defines 6 captured columns for this relation.",
+      "tags": [
+        "database",
+        "schema-definition",
+        "learning-data",
+        "postgresql"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "table:supabase/migrations/20260811000001_pyq_session_paused.sql:migration",
+      "type": "table",
+      "name": "20260811000001_pyq_session_paused.sql",
+      "filePath": "supabase/migrations/20260811000001_pyq_session_paused.sql",
+      "summary": "Adds a paused lifecycle state and pause timestamp to PYQ sessions so interrupted attempts can be resumed safely.",
+      "tags": [
+        "database",
+        "migration",
+        "supabase",
+        "session-lifecycle"
+      ],
+      "complexity": "simple",
+      "languageNotes": "PostgreSQL migration designed for Supabase, using database-native constraints, policies, triggers, or RPCs as applicable."
+    },
+    {
+      "id": "table:supabase/migrations/20260813000001_reattempt_previous_phase.sql:migration",
+      "type": "table",
+      "name": "20260813000001_reattempt_previous_phase.sql",
+      "filePath": "supabase/migrations/20260813000001_reattempt_previous_phase.sql",
+      "summary": "Adds previous-phase tracking and a guarded RPC for moving scheduled reattempts through the D3 spaced-practice ladder.",
+      "tags": [
+        "database",
+        "migration",
+        "supabase",
+        "spaced-repetition"
+      ],
+      "complexity": "simple",
+      "languageNotes": "PostgreSQL migration designed for Supabase, using database-native constraints, policies, triggers, or RPCs as applicable."
+    },
+    {
+      "id": "table:supabase/migrations/20260813000002_go_classes_coa_topic_test.sql:migration",
+      "type": "table",
+      "name": "20260813000002_go_classes_coa_topic_test.sql",
+      "filePath": "supabase/migrations/20260813000002_go_classes_coa_topic_test.sql",
+      "summary": "Idempotently imports the first learner-provided GO Classes computer-organization topic test into PYQ attempts, journal questions, and D3 reattempts.",
+      "tags": [
+        "database",
+        "migration",
+        "supabase",
+        "data-import"
+      ],
+      "complexity": "moderate",
+      "languageNotes": "PostgreSQL migration designed for Supabase, using database-native constraints, policies, triggers, or RPCs as applicable."
+    },
+    {
+      "id": "table:supabase/migrations/20260813000003_go_classes_coa_topic_test_2.sql:migration",
+      "type": "table",
+      "name": "20260813000003_go_classes_coa_topic_test_2.sql",
+      "filePath": "supabase/migrations/20260813000003_go_classes_coa_topic_test_2.sql",
+      "summary": "Idempotently imports the second GO Classes computer-organization topic test with immutable question snapshots, outcomes, journal entries, and scheduled reattempts.",
+      "tags": [
+        "database",
+        "migration",
+        "supabase",
+        "data-import"
+      ],
+      "complexity": "moderate",
+      "languageNotes": "PostgreSQL migration designed for Supabase, using database-native constraints, policies, triggers, or RPCs as applicable."
+    }
+  ],
+  "edges": [
+    {
+      "source": "table:supabase/migrations/20260721000003_planner_day_plans.sql:migration",
+      "target": "table:supabase/migrations/20260721000003_planner_day_plans.sql:planner_day_plans",
+      "type": "migrates",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "table:supabase/migrations/20260802000001_pyq_attempts.sql:migration",
+      "target": "table:supabase/migrations/20260802000001_pyq_attempts.sql:pyq_attempts",
+      "type": "migrates",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "table:supabase/migrations/20260807000001_pyq_session_hardening.sql:migration",
+      "target": "table:supabase/migrations/20260807000001_pyq_session_hardening.sql:pyq_sessions",
+      "type": "migrates",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "table:supabase/migrations/20260808000005_buddy_push_notifications.sql:migration",
+      "target": "table:supabase/migrations/20260808000005_buddy_push_notifications.sql:push_subscriptions",
+      "type": "migrates",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "table:supabase/migrations/20260808000005_buddy_push_notifications.sql:migration",
+      "target": "table:supabase/migrations/20260808000005_buddy_push_notifications.sql:buddy_notification_outbox",
+      "type": "migrates",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "table:supabase/migrations/20260808000005_buddy_push_notifications.sql:migration",
+      "target": "table:supabase/migrations/20260808000005_buddy_push_notifications.sql:buddy_notification_deliveries",
+      "type": "migrates",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "table:supabase/migrations/20260810000001_android_inline_replies.sql:migration",
+      "target": "table:supabase/migrations/20260810000001_android_inline_replies.sql:buddy_notification_reply_tokens",
+      "type": "migrates",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "table:supabase/migrations/20260810000002_interactive_study_notifications.sql:migration",
+      "target": "table:supabase/migrations/20260810000002_interactive_study_notifications.sql:study_notification_preferences",
+      "type": "migrates",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "table:supabase/migrations/20260810000002_interactive_study_notifications.sql:migration",
+      "target": "table:supabase/migrations/20260810000002_interactive_study_notifications.sql:study_notification_events",
+      "type": "migrates",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "table:supabase/migrations/20260810000002_interactive_study_notifications.sql:migration",
+      "target": "table:supabase/migrations/20260810000002_interactive_study_notifications.sql:notification_action_tokens",
+      "type": "migrates",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "table:supabase/migrations/20260810000005_practical_study_loop.sql:migration",
+      "target": "table:supabase/migrations/20260810000005_practical_study_loop.sql:mock_tests",
+      "type": "migrates",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "table:supabase/migrations/20260810000005_practical_study_loop.sql:migration",
+      "target": "table:supabase/migrations/20260810000005_practical_study_loop.sql:topic_progress",
+      "type": "migrates",
+      "direction": "forward",
+      "weight": 0.7
+    }
+  ]
+}

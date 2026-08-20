@@ -1,0 +1,24 @@
+Found 6 batch files (6 logical batches, 0 multi-part):
+  batch-existing.json: 1010 nodes, 2106 edges
+  batch-4.json: 1 nodes, 5 edges
+  batch-5.json: 4 nodes, 39 edges
+  batch-12.json: 1 nodes, 0 edges
+  batch-18.json: 1 nodes, 0 edges
+  batch-19.json: 1 nodes, 1 edges
+
+Input: 1018 nodes, 2151 edges
+
+Fixed (3 corrections):
+     2 × tested_by edges flipped (test → production became production → test)
+     1 × tested_by edges dropped (orphan endpoint or test↔test / prod↔prod pair)
+
+Tested-by linker:
+     0 × tested_by edges produced (path-convention supplement, production → test)
+     1 × production nodes tagged "tested"
+
+Output: 1018 nodes, 2150 edges
+
+Imports edge recovery:
+  Recovered 0 `imports` edges from importMap (356 entries scanned)
+
+Written to /Users/bkalyankrishnareddy/Desktop/GATE PREP/hetu/.ua/intermediate/assembled-graph.json (943 KB)

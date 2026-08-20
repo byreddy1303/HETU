@@ -1,0 +1,2718 @@
+{
+  "scriptCompleted": true,
+  "filesAnalyzed": 9,
+  "filesSkipped": [],
+  "analysisOutcomes": {
+    "structure": {
+      "succeeded": 9,
+      "failed": 0
+    },
+    "callGraph": {
+      "succeeded": 9,
+      "failed": 0,
+      "skipped": 0
+    }
+  },
+  "results": [
+    {
+      "path": "src/__tests__/progress_export.test.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 187,
+      "nonEmptyLines": 171,
+      "functions": [
+        {
+          "name": "session",
+          "startLine": 16,
+          "endLine": 30,
+          "params": []
+        },
+        {
+          "name": "question",
+          "startLine": 32,
+          "endLine": 54,
+          "params": [
+            "id",
+            "outcome"
+          ]
+        },
+        {
+          "name": "pattern",
+          "startLine": 56,
+          "endLine": 67,
+          "params": []
+        },
+        {
+          "name": "reattempt",
+          "startLine": 69,
+          "endLine": 79,
+          "params": []
+        },
+        {
+          "name": "progressData",
+          "startLine": 81,
+          "endLine": 110,
+          "params": []
+        },
+        {
+          "name": "metric",
+          "startLine": 112,
+          "endLine": 116,
+          "params": [
+            "report",
+            "component",
+            "name"
+          ]
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "progressData",
+          "callee": "emptyDayPlan",
+          "lineNumber": 82
+        },
+        {
+          "caller": "progressData",
+          "callee": "plannerDay.sessions.push",
+          "lineNumber": 83
+        },
+        {
+          "caller": "progressData",
+          "callee": "session",
+          "lineNumber": 94
+        },
+        {
+          "caller": "progressData",
+          "callee": "question",
+          "lineNumber": 95
+        },
+        {
+          "caller": "progressData",
+          "callee": "question",
+          "lineNumber": 95
+        },
+        {
+          "caller": "progressData",
+          "callee": "pattern",
+          "lineNumber": 96
+        },
+        {
+          "caller": "progressData",
+          "callee": "reattempt",
+          "lineNumber": 97
+        },
+        {
+          "caller": "progressData",
+          "callee": "topicProgressId",
+          "lineNumber": 107
+        },
+        {
+          "caller": "metric",
+          "callee": "report.metrics.find",
+          "lineNumber": 113
+        }
+      ],
+      "metrics": {
+        "importCount": 5,
+        "exportCount": 0,
+        "functionCount": 6,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/__tests__/readiness-snapshots.test.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 65,
+      "nonEmptyLines": 60,
+      "functions": [
+        {
+          "name": "snapshot",
+          "startLine": 10,
+          "endLine": 20,
+          "params": [
+            "date",
+            "score"
+          ]
+        }
+      ],
+      "metrics": {
+        "importCount": 1,
+        "exportCount": 0,
+        "functionCount": 1,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/__tests__/readiness.test.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 310,
+      "nonEmptyLines": 291,
+      "functions": [
+        {
+          "name": "question",
+          "startLine": 20,
+          "endLine": 43,
+          "params": [
+            "o"
+          ]
+        },
+        {
+          "name": "reattempt",
+          "startLine": 45,
+          "endLine": 55,
+          "params": [
+            "stage"
+          ]
+        },
+        {
+          "name": "pattern",
+          "startLine": 57,
+          "endLine": 68,
+          "params": [
+            "name"
+          ]
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "reattempt",
+          "callee": "Math.random",
+          "lineNumber": 47
+        }
+      ],
+      "metrics": {
+        "importCount": 3,
+        "exportCount": 0,
+        "functionCount": 3,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/__tests__/topic-progress.test.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 32,
+      "nonEmptyLines": 25,
+      "metrics": {
+        "importCount": 1,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/lib/progress-export.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 418,
+      "nonEmptyLines": 388,
+      "functions": [
+        {
+          "name": "round",
+          "startLine": 58,
+          "endLine": 61,
+          "params": [
+            "value",
+            "places"
+          ]
+        },
+        {
+          "name": "percentage",
+          "startLine": 63,
+          "endLine": 65,
+          "params": [
+            "numerator",
+            "denominator"
+          ]
+        },
+        {
+          "name": "buildProgressReport",
+          "startLine": 68,
+          "endLine": 326,
+          "params": [
+            "data",
+            "{\n    learnerName,\n    generatedAt = new Date().toISOString()\n  }"
+          ]
+        },
+        {
+          "name": "collectProgressReport",
+          "startLine": 329,
+          "endLine": 385,
+          "params": [
+            "userId",
+            "learnerName"
+          ]
+        },
+        {
+          "name": "csvCell",
+          "startLine": 387,
+          "endLine": 393,
+          "params": [
+            "value"
+          ]
+        },
+        {
+          "name": "progressReportCsv",
+          "startLine": 395,
+          "endLine": 406,
+          "params": [
+            "report"
+          ]
+        },
+        {
+          "name": "downloadProgressReport",
+          "startLine": 408,
+          "endLine": 418,
+          "params": [
+            "report"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "PROGRESS_REPORT_VERSION",
+          "line": 26,
+          "isDefault": false
+        },
+        {
+          "name": "buildProgressReport",
+          "line": 68,
+          "isDefault": false
+        },
+        {
+          "name": "collectProgressReport",
+          "line": 329,
+          "isDefault": false
+        },
+        {
+          "name": "progressReportCsv",
+          "line": 395,
+          "isDefault": false
+        },
+        {
+          "name": "downloadProgressReport",
+          "line": 408,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "round",
+          "callee": "Math.round",
+          "lineNumber": 60
+        },
+        {
+          "caller": "percentage",
+          "callee": "round",
+          "lineNumber": 64
+        },
+        {
+          "caller": "buildProgressReport",
+          "callee": "new Date().toISOString",
+          "lineNumber": 72
+        },
+        {
+          "caller": "add",
+          "callee": "metrics.push",
+          "lineNumber": 77
+        },
+        {
+          "caller": "buildProgressReport",
+          "callee": "data.sessions.filter",
+          "lineNumber": 80
+        },
+        {
+          "caller": "buildProgressReport",
+          "callee": "add",
+          "lineNumber": 81
+        },
+        {
+          "caller": "buildProgressReport",
+          "callee": "add",
+          "lineNumber": 82
+        },
+        {
+          "caller": "buildProgressReport",
+          "callee": "add",
+          "lineNumber": 83
+        },
+        {
+          "caller": "buildProgressReport",
+          "callee": "completedSessions.reduce",
+          "lineNumber": 86
+        },
+        {
+          "caller": "buildProgressReport",
+          "callee": "data.questions.filter",
+          "lineNumber": 90
+        },
+        {
+          "caller": "buildProgressReport",
+          "callee": "add",
+          "lineNumber": 91
+        },
+        {
+          "caller": "buildProgressReport",
+          "callee": "add",
+          "lineNumber": 92
+        },
+        {
+          "caller": "buildProgressReport",
+          "callee": "add",
+          "lineNumber": 93
+        },
+        {
+          "caller": "buildProgressReport",
+          "callee": "percentage",
+          "lineNumber": 93
+        },
+        {
+          "caller": "buildProgressReport",
+          "callee": "add",
+          "lineNumber": 94
+        },
+        {
+          "caller": "buildProgressReport",
+          "callee": "round",
+          "lineNumber": 99
+        },
+        {
+          "caller": "buildProgressReport",
+          "callee": "data.questions.reduce",
+          "lineNumber": 100
+        },
+        {
+          "caller": "buildProgressReport",
+          "callee": "add",
+          "lineNumber": 106
+        },
+        {
+          "caller": "buildProgressReport",
+          "callee": "data.questions.filter",
+          "lineNumber": 109
+        },
+        {
+          "caller": "buildProgressReport",
+          "callee": "data.plannerDays.flatMap",
+          "lineNumber": 114
+        },
+        {
+          "caller": "buildProgressReport",
+          "callee": "add",
+          "lineNumber": 115
+        },
+        {
+          "caller": "buildProgressReport",
+          "callee": "add",
+          "lineNumber": 116
+        },
+        {
+          "caller": "buildProgressReport",
+          "callee": "add",
+          "lineNumber": 117
+        },
+        {
+          "caller": "buildProgressReport",
+          "callee": "plannedSessions.reduce",
+          "lineNumber": 120
+        },
+        {
+          "caller": "buildProgressReport",
+          "callee": "add",
+          "lineNumber": 123
+        },
+        {
+          "caller": "buildProgressReport",
+          "callee": "round",
+          "lineNumber": 128
+        },
+        {
+          "caller": "buildProgressReport",
+          "callee": "data.plannerDays.reduce",
+          "lineNumber": 129
+        },
+        {
+          "caller": "buildProgressReport",
+          "callee": "[...data.mocks].sort",
+          "lineNumber": 135
+        },
+        {
+          "caller": "buildProgressReport",
+          "callee": "a.test_date.localeCompare",
+          "lineNumber": 135
+        },
+        {
+          "caller": "buildProgressReport",
+          "callee": "mocksByDate.at",
+          "lineNumber": 136
+        },
+        {
+          "caller": "buildProgressReport",
+          "callee": "Math.max",
+          "lineNumber": 138
+        },
+        {
+          "caller": "buildProgressReport",
+          "callee": "data.mocks.map",
+          "lineNumber": 138
+        },
+        {
+          "caller": "buildProgressReport",
+          "callee": "percentage",
+          "lineNumber": 138
+        },
+        {
+          "caller": "buildProgressReport",
+          "callee": "add",
+          "lineNumber": 140
+        },
+        {
+          "caller": "buildProgressReport",
+          "callee": "add",
+          "lineNumber": 141
+        },
+        {
+          "caller": "buildProgressReport",
+          "callee": "add",
+          "lineNumber": 142
+        },
+        {
+          "caller": "buildProgressReport",
+          "callee": "percentage",
+          "lineNumber": 145
+        },
+        {
+          "caller": "buildProgressReport",
+          "callee": "add",
+          "lineNumber": 148
+        },
+        {
+          "caller": "buildProgressReport",
+          "callee": "data.mocks.reduce",
+          "lineNumber": 151
+        },
+        {
+          "caller": "buildProgressReport",
+          "callee": "data.pyqAttempts.filter",
+          "lineNumber": 155
+        },
+        {
+          "caller": "buildProgressReport",
+          "callee": "pyqJudged.filter",
+          "lineNumber": 156
+        },
+        {
+          "caller": "buildProgressReport",
+          "callee": "add",
+          "lineNumber": 157
+        },
+        {
+          "caller": "buildProgressReport",
+          "callee": "add",
+          "lineNumber": 158
+        },
+        {
+          "caller": "buildProgressReport",
+          "callee": "data.pyqSessions.filter",
+          "lineNumber": 161
+        },
+        {
+          "caller": "buildProgressReport",
+          "callee": "add",
+          "lineNumber": 164
+        },
+        {
+          "caller": "buildProgressReport",
+          "callee": "add",
+          "lineNumber": 165
+        },
+        {
+          "caller": "buildProgressReport",
+          "callee": "data.pyqAttempts.map",
+          "lineNumber": 168
+        },
+        {
+          "caller": "buildProgressReport",
+          "callee": "add",
+          "lineNumber": 171
+        },
+        {
+          "caller": "buildProgressReport",
+          "callee": "add",
+          "lineNumber": 172
+        },
+        {
+          "caller": "buildProgressReport",
+          "callee": "percentage",
+          "lineNumber": 172
+        },
+        {
+          "caller": "buildProgressReport",
+          "callee": "add",
+          "lineNumber": 173
+        },
+        {
+          "caller": "buildProgressReport",
+          "callee": "round",
+          "lineNumber": 176
+        },
+        {
+          "caller": "buildProgressReport",
+          "callee": "data.pyqAttempts.reduce",
+          "lineNumber": 176
+        },
+        {
+          "caller": "buildProgressReport",
+          "callee": "add",
+          "lineNumber": 180
+        },
+        {
+          "caller": "buildProgressReport",
+          "callee": "add",
+          "lineNumber": 181
+        },
+        {
+          "caller": "buildProgressReport",
+          "callee": "data.patterns.filter",
+          "lineNumber": 184
+        },
+        {
+          "caller": "buildProgressReport",
+          "callee": "data.reattempts.flatMap",
+          "lineNumber": 188
+        },
+        {
+          "caller": "buildProgressReport",
+          "callee": "reattemptHistory.filter",
+          "lineNumber": 189
+        },
+        {
+          "caller": "buildProgressReport",
+          "callee": "add",
+          "lineNumber": 190
+        },
+        {
+          "caller": "buildProgressReport",
+          "callee": "add",
+          "lineNumber": 191
+        },
+        {
+          "caller": "buildProgressReport",
+          "callee": "data.reattempts.filter",
+          "lineNumber": 194
+        },
+        {
+          "caller": "buildProgressReport",
+          "callee": "add",
+          "lineNumber": 197
+        },
+        {
+          "caller": "buildProgressReport",
+          "callee": "data.reattempts.filter",
+          "lineNumber": 200
+        },
+        {
+          "caller": "buildProgressReport",
+          "callee": "add",
+          "lineNumber": 203
+        },
+        {
+          "caller": "buildProgressReport",
+          "callee": "add",
+          "lineNumber": 204
+        },
+        {
+          "caller": "buildProgressReport",
+          "callee": "percentage",
+          "lineNumber": 204
+        },
+        {
+          "caller": "buildProgressReport",
+          "callee": "add",
+          "lineNumber": 206
+        },
+        {
+          "caller": "buildProgressReport",
+          "callee": "add",
+          "lineNumber": 207
+        },
+        {
+          "caller": "buildProgressReport",
+          "callee": "data.weeklyReviews.filter",
+          "lineNumber": 210
+        },
+        {
+          "caller": "buildProgressReport",
+          "callee": "Boolean",
+          "lineNumber": 210
+        },
+        {
+          "caller": "buildProgressReport",
+          "callee": "row.this_weeks_fix?.trim",
+          "lineNumber": 210
+        },
+        {
+          "caller": "buildProgressReport",
+          "callee": "data.questions.filter",
+          "lineNumber": 214
+        },
+        {
+          "caller": "buildProgressReport",
+          "callee": "add",
+          "lineNumber": 215
+        },
+        {
+          "caller": "buildProgressReport",
+          "callee": "add",
+          "lineNumber": 217
+        },
+        {
+          "caller": "buildProgressReport",
+          "callee": "cause[0].toUpperCase",
+          "lineNumber": 219
+        },
+        {
+          "caller": "buildProgressReport",
+          "callee": "cause.slice",
+          "lineNumber": 219
+        },
+        {
+          "caller": "buildProgressReport",
+          "callee": "heatmapQuestions.filter",
+          "lineNumber": 220
+        },
+        {
+          "caller": "buildProgressReport",
+          "callee": "calibrationBySubject",
+          "lineNumber": 225
+        },
+        {
+          "caller": "buildProgressReport",
+          "callee": "calibrationOverall",
+          "lineNumber": 226
+        },
+        {
+          "caller": "buildProgressReport",
+          "callee": "add",
+          "lineNumber": 227
+        },
+        {
+          "caller": "buildProgressReport",
+          "callee": "add",
+          "lineNumber": 228
+        },
+        {
+          "caller": "buildProgressReport",
+          "callee": "add",
+          "lineNumber": 229
+        },
+        {
+          "caller": "buildProgressReport",
+          "callee": "add",
+          "lineNumber": 230
+        },
+        {
+          "caller": "buildProgressReport",
+          "callee": "round",
+          "lineNumber": 230
+        },
+        {
+          "caller": "buildProgressReport",
+          "callee": "add",
+          "lineNumber": 231
+        },
+        {
+          "caller": "buildProgressReport",
+          "callee": "round",
+          "lineNumber": 231
+        },
+        {
+          "caller": "buildProgressReport",
+          "callee": "computeReadiness",
+          "lineNumber": 233
+        },
+        {
+          "caller": "buildProgressReport",
+          "callee": "add",
+          "lineNumber": 238
+        },
+        {
+          "caller": "buildProgressReport",
+          "callee": "add",
+          "lineNumber": 239
+        },
+        {
+          "caller": "buildProgressReport",
+          "callee": "add",
+          "lineNumber": 240
+        },
+        {
+          "caller": "buildProgressReport",
+          "callee": "round",
+          "lineNumber": 240
+        },
+        {
+          "caller": "buildProgressReport",
+          "callee": "add",
+          "lineNumber": 241
+        },
+        {
+          "caller": "buildProgressReport",
+          "callee": "round",
+          "lineNumber": 241
+        },
+        {
+          "caller": "buildProgressReport",
+          "callee": "add",
+          "lineNumber": 242
+        },
+        {
+          "caller": "buildProgressReport",
+          "callee": "round",
+          "lineNumber": 242
+        },
+        {
+          "caller": "buildProgressReport",
+          "callee": "add",
+          "lineNumber": 243
+        },
+        {
+          "caller": "buildProgressReport",
+          "callee": "round",
+          "lineNumber": 243
+        },
+        {
+          "caller": "buildProgressReport",
+          "callee": "(SUBTOPICS_BY_SUBJECT[subject] ?? []).map",
+          "lineNumber": 249
+        },
+        {
+          "caller": "buildProgressReport",
+          "callee": "topics.filter",
+          "lineNumber": 250
+        },
+        {
+          "caller": "buildProgressReport",
+          "callee": "topicProgressId",
+          "lineNumber": 251
+        },
+        {
+          "caller": "buildProgressReport",
+          "callee": "add",
+          "lineNumber": 256
+        },
+        {
+          "caller": "buildProgressReport",
+          "callee": "add",
+          "lineNumber": 257
+        },
+        {
+          "caller": "buildProgressReport",
+          "callee": "percentage",
+          "lineNumber": 257
+        },
+        {
+          "caller": "buildProgressReport",
+          "callee": "add",
+          "lineNumber": 259
+        },
+        {
+          "caller": "buildProgressReport",
+          "callee": "add",
+          "lineNumber": 260
+        },
+        {
+          "caller": "buildProgressReport",
+          "callee": "add",
+          "lineNumber": 261
+        },
+        {
+          "caller": "buildProgressReport",
+          "callee": "percentage",
+          "lineNumber": 261
+        },
+        {
+          "caller": "buildProgressReport",
+          "callee": "add",
+          "lineNumber": 262
+        },
+        {
+          "caller": "buildProgressReport",
+          "callee": "data.triggerPhrases.filter",
+          "lineNumber": 264
+        },
+        {
+          "caller": "buildProgressReport",
+          "callee": "add",
+          "lineNumber": 265
+        },
+        {
+          "caller": "buildProgressReport",
+          "callee": "add",
+          "lineNumber": 266
+        },
+        {
+          "caller": "buildProgressReport",
+          "callee": "add",
+          "lineNumber": 267
+        },
+        {
+          "caller": "buildProgressReport",
+          "callee": "round",
+          "lineNumber": 272
+        },
+        {
+          "caller": "buildProgressReport",
+          "callee": "drilledPhrases.reduce",
+          "lineNumber": 273
+        },
+        {
+          "caller": "buildProgressReport",
+          "callee": "generatedAt.slice",
+          "lineNumber": 279
+        },
+        {
+          "caller": "buildProgressReport",
+          "callee": "add",
+          "lineNumber": 280
+        },
+        {
+          "caller": "buildProgressReport",
+          "callee": "add",
+          "lineNumber": 281
+        },
+        {
+          "caller": "buildProgressReport",
+          "callee": "data.formulas.filter",
+          "lineNumber": 284
+        },
+        {
+          "caller": "buildProgressReport",
+          "callee": "add",
+          "lineNumber": 287
+        },
+        {
+          "caller": "buildProgressReport",
+          "callee": "data.formulas.filter",
+          "lineNumber": 290
+        },
+        {
+          "caller": "buildProgressReport",
+          "callee": "add",
+          "lineNumber": 293
+        },
+        {
+          "caller": "buildProgressReport",
+          "callee": "data.formulas.reduce",
+          "lineNumber": 296
+        },
+        {
+          "caller": "buildProgressReport",
+          "callee": "add",
+          "lineNumber": 300
+        },
+        {
+          "caller": "buildProgressReport",
+          "callee": "add",
+          "lineNumber": 302
+        },
+        {
+          "caller": "buildProgressReport",
+          "callee": "kind.replace",
+          "lineNumber": 304
+        },
+        {
+          "caller": "buildProgressReport",
+          "callee": "data.interruptionLogs.filter",
+          "lineNumber": 305
+        },
+        {
+          "caller": "buildProgressReport",
+          "callee": "[...new Set(data.questions.map((row) => row.subject))].sort",
+          "lineNumber": 310
+        },
+        {
+          "caller": "buildProgressReport",
+          "callee": "data.questions.map",
+          "lineNumber": 310
+        },
+        {
+          "caller": "buildProgressReport",
+          "callee": "data.questions.filter",
+          "lineNumber": 312
+        },
+        {
+          "caller": "buildProgressReport",
+          "callee": "questions.filter",
+          "lineNumber": 313
+        },
+        {
+          "caller": "buildProgressReport",
+          "callee": "add",
+          "lineNumber": 314
+        },
+        {
+          "caller": "buildProgressReport",
+          "callee": "add",
+          "lineNumber": 315
+        },
+        {
+          "caller": "buildProgressReport",
+          "callee": "add",
+          "lineNumber": 316
+        },
+        {
+          "caller": "buildProgressReport",
+          "callee": "add",
+          "lineNumber": 317
+        },
+        {
+          "caller": "buildProgressReport",
+          "callee": "percentage",
+          "lineNumber": 317
+        },
+        {
+          "caller": "collectProgressReport",
+          "callee": "Promise.all",
+          "lineNumber": 346
+        },
+        {
+          "caller": "collectProgressReport",
+          "callee": "db.sessions.where('user_id').equals(userId).toArray",
+          "lineNumber": 347
+        },
+        {
+          "caller": "collectProgressReport",
+          "callee": "db.sessions.where('user_id').equals",
+          "lineNumber": 347
+        },
+        {
+          "caller": "collectProgressReport",
+          "callee": "db.sessions.where",
+          "lineNumber": 347
+        },
+        {
+          "caller": "collectProgressReport",
+          "callee": "db.questions.where('user_id').equals(userId).toArray",
+          "lineNumber": 348
+        },
+        {
+          "caller": "collectProgressReport",
+          "callee": "db.questions.where('user_id').equals",
+          "lineNumber": 348
+        },
+        {
+          "caller": "collectProgressReport",
+          "callee": "db.questions.where",
+          "lineNumber": 348
+        },
+        {
+          "caller": "collectProgressReport",
+          "callee": "db.patterns.where('user_id').equals(userId).toArray",
+          "lineNumber": 349
+        },
+        {
+          "caller": "collectProgressReport",
+          "callee": "db.patterns.where('user_id').equals",
+          "lineNumber": 349
+        },
+        {
+          "caller": "collectProgressReport",
+          "callee": "db.patterns.where",
+          "lineNumber": 349
+        },
+        {
+          "caller": "collectProgressReport",
+          "callee": "db.reattempts.where('user_id').equals(userId).toArray",
+          "lineNumber": 350
+        },
+        {
+          "caller": "collectProgressReport",
+          "callee": "db.reattempts.where('user_id').equals",
+          "lineNumber": 350
+        },
+        {
+          "caller": "collectProgressReport",
+          "callee": "db.reattempts.where",
+          "lineNumber": 350
+        },
+        {
+          "caller": "collectProgressReport",
+          "callee": "db.formulas.where('user_id').equals(userId).toArray",
+          "lineNumber": 351
+        },
+        {
+          "caller": "collectProgressReport",
+          "callee": "db.formulas.where('user_id').equals",
+          "lineNumber": 351
+        },
+        {
+          "caller": "collectProgressReport",
+          "callee": "db.formulas.where",
+          "lineNumber": 351
+        },
+        {
+          "caller": "collectProgressReport",
+          "callee": "db.trigger_phrases.where('user_id').equals(userId).toArray",
+          "lineNumber": 352
+        },
+        {
+          "caller": "collectProgressReport",
+          "callee": "db.trigger_phrases.where('user_id').equals",
+          "lineNumber": 352
+        },
+        {
+          "caller": "collectProgressReport",
+          "callee": "db.trigger_phrases.where",
+          "lineNumber": 352
+        },
+        {
+          "caller": "collectProgressReport",
+          "callee": "db.weekly_reviews.where('user_id').equals(userId).toArray",
+          "lineNumber": 353
+        },
+        {
+          "caller": "collectProgressReport",
+          "callee": "db.weekly_reviews.where('user_id').equals",
+          "lineNumber": 353
+        },
+        {
+          "caller": "collectProgressReport",
+          "callee": "db.weekly_reviews.where",
+          "lineNumber": 353
+        },
+        {
+          "caller": "collectProgressReport",
+          "callee": "db.interruption_logs.where('user_id').equals(userId).toArray",
+          "lineNumber": 354
+        },
+        {
+          "caller": "collectProgressReport",
+          "callee": "db.interruption_logs.where('user_id').equals",
+          "lineNumber": 354
+        },
+        {
+          "caller": "collectProgressReport",
+          "callee": "db.interruption_logs.where",
+          "lineNumber": 354
+        },
+        {
+          "caller": "collectProgressReport",
+          "callee": "db.pyq_sessions.where('user_id').equals(userId).toArray",
+          "lineNumber": 355
+        },
+        {
+          "caller": "collectProgressReport",
+          "callee": "db.pyq_sessions.where('user_id').equals",
+          "lineNumber": 355
+        },
+        {
+          "caller": "collectProgressReport",
+          "callee": "db.pyq_sessions.where",
+          "lineNumber": 355
+        },
+        {
+          "caller": "collectProgressReport",
+          "callee": "db.pyq_attempts.where('user_id').equals(userId).toArray",
+          "lineNumber": 356
+        },
+        {
+          "caller": "collectProgressReport",
+          "callee": "db.pyq_attempts.where('user_id').equals",
+          "lineNumber": 356
+        },
+        {
+          "caller": "collectProgressReport",
+          "callee": "db.pyq_attempts.where",
+          "lineNumber": 356
+        },
+        {
+          "caller": "collectProgressReport",
+          "callee": "db.mock_tests.where('user_id').equals(userId).toArray",
+          "lineNumber": 357
+        },
+        {
+          "caller": "collectProgressReport",
+          "callee": "db.mock_tests.where('user_id').equals",
+          "lineNumber": 357
+        },
+        {
+          "caller": "collectProgressReport",
+          "callee": "db.mock_tests.where",
+          "lineNumber": 357
+        },
+        {
+          "caller": "collectProgressReport",
+          "callee": "db.topic_progress.where('user_id').equals(userId).toArray",
+          "lineNumber": 358
+        },
+        {
+          "caller": "collectProgressReport",
+          "callee": "db.topic_progress.where('user_id').equals",
+          "lineNumber": 358
+        },
+        {
+          "caller": "collectProgressReport",
+          "callee": "db.topic_progress.where",
+          "lineNumber": 358
+        },
+        {
+          "caller": "collectProgressReport",
+          "callee": "useTopicProgressStore.getState",
+          "lineNumber": 361
+        },
+        {
+          "caller": "collectProgressReport",
+          "callee": "topicProgressId",
+          "lineNumber": 364
+        },
+        {
+          "caller": "collectProgressReport",
+          "callee": "buildProgressReport",
+          "lineNumber": 367
+        },
+        {
+          "caller": "collectProgressReport",
+          "callee": "loadAllDayPlans",
+          "lineNumber": 380
+        },
+        {
+          "caller": "csvCell",
+          "callee": "Number.isFinite",
+          "lineNumber": 388
+        },
+        {
+          "caller": "csvCell",
+          "callee": "String",
+          "lineNumber": 388
+        },
+        {
+          "caller": "csvCell",
+          "callee": "String",
+          "lineNumber": 389
+        },
+        {
+          "caller": "csvCell",
+          "callee": "/^[=+\\-@]/.test",
+          "lineNumber": 391
+        },
+        {
+          "caller": "csvCell",
+          "callee": "safe.replace",
+          "lineNumber": 392
+        },
+        {
+          "caller": "progressReportCsv",
+          "callee": "report.metrics.map",
+          "lineNumber": 403
+        },
+        {
+          "caller": "progressReportCsv",
+          "callee": "rows.map((row) => row.map(csvCell).join(',')).join",
+          "lineNumber": 405
+        },
+        {
+          "caller": "progressReportCsv",
+          "callee": "rows.map",
+          "lineNumber": 405
+        },
+        {
+          "caller": "progressReportCsv",
+          "callee": "row.map(csvCell).join",
+          "lineNumber": 405
+        },
+        {
+          "caller": "progressReportCsv",
+          "callee": "row.map",
+          "lineNumber": 405
+        },
+        {
+          "caller": "downloadProgressReport",
+          "callee": "progressReportCsv",
+          "lineNumber": 409
+        },
+        {
+          "caller": "downloadProgressReport",
+          "callee": "URL.createObjectURL",
+          "lineNumber": 410
+        },
+        {
+          "caller": "downloadProgressReport",
+          "callee": "document.createElement",
+          "lineNumber": 411
+        },
+        {
+          "caller": "downloadProgressReport",
+          "callee": "report.generatedAt.slice",
+          "lineNumber": 413
+        },
+        {
+          "caller": "downloadProgressReport",
+          "callee": "document.body.appendChild",
+          "lineNumber": 414
+        },
+        {
+          "caller": "downloadProgressReport",
+          "callee": "link.click",
+          "lineNumber": 415
+        },
+        {
+          "caller": "downloadProgressReport",
+          "callee": "document.body.removeChild",
+          "lineNumber": 416
+        },
+        {
+          "caller": "downloadProgressReport",
+          "callee": "URL.revokeObjectURL",
+          "lineNumber": 417
+        }
+      ],
+      "metrics": {
+        "importCount": 8,
+        "exportCount": 5,
+        "functionCount": 7,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/lib/readiness-snapshots.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 232,
+      "nonEmptyLines": 205,
+      "functions": [
+        {
+          "name": "safeGet",
+          "startLine": 40,
+          "endLine": 48,
+          "params": [
+            "key",
+            "fallback"
+          ]
+        },
+        {
+          "name": "safeSet",
+          "startLine": 50,
+          "endLine": 56,
+          "params": [
+            "key",
+            "value"
+          ]
+        },
+        {
+          "name": "storageKey",
+          "startLine": 60,
+          "endLine": 62,
+          "params": [
+            "userId",
+            "kind"
+          ]
+        },
+        {
+          "name": "loadSnapshots",
+          "startLine": 64,
+          "endLine": 67,
+          "params": [
+            "userId"
+          ]
+        },
+        {
+          "name": "upsertSnapshot",
+          "startLine": 71,
+          "endLine": 78,
+          "params": [
+            "userId",
+            "next"
+          ]
+        },
+        {
+          "name": "weeklyDelta",
+          "startLine": 81,
+          "endLine": 102,
+          "params": [
+            "snapshots"
+          ]
+        },
+        {
+          "name": "projectToExam",
+          "startLine": 114,
+          "endLine": 142,
+          "params": [
+            "snapshots",
+            "daysToExam"
+          ]
+        },
+        {
+          "name": "loadDebt",
+          "startLine": 153,
+          "endLine": 155,
+          "params": [
+            "userId"
+          ]
+        },
+        {
+          "name": "debtKey",
+          "startLine": 157,
+          "endLine": 159,
+          "params": [
+            "subject",
+            "component"
+          ]
+        },
+        {
+          "name": "updateDebt",
+          "startLine": 165,
+          "endLine": 225,
+          "params": [
+            "userId",
+            "today",
+            "overall",
+            "perSubject"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "loadSnapshots",
+          "line": 64,
+          "isDefault": false
+        },
+        {
+          "name": "upsertSnapshot",
+          "line": 71,
+          "isDefault": false
+        },
+        {
+          "name": "weeklyDelta",
+          "line": 81,
+          "isDefault": false
+        },
+        {
+          "name": "projectToExam",
+          "line": 114,
+          "isDefault": false
+        },
+        {
+          "name": "loadDebt",
+          "line": 153,
+          "isDefault": false
+        },
+        {
+          "name": "updateDebt",
+          "line": 165,
+          "isDefault": false
+        },
+        {
+          "name": "DEBT_LABEL",
+          "line": 227,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "safeGet",
+          "callee": "localStorage.getItem",
+          "lineNumber": 42
+        },
+        {
+          "caller": "safeGet",
+          "callee": "JSON.parse",
+          "lineNumber": 44
+        },
+        {
+          "caller": "safeSet",
+          "callee": "localStorage.setItem",
+          "lineNumber": 52
+        },
+        {
+          "caller": "safeSet",
+          "callee": "JSON.stringify",
+          "lineNumber": 52
+        },
+        {
+          "caller": "loadSnapshots",
+          "callee": "safeGet",
+          "lineNumber": 65
+        },
+        {
+          "caller": "loadSnapshots",
+          "callee": "storageKey",
+          "lineNumber": 65
+        },
+        {
+          "caller": "loadSnapshots",
+          "callee": "all.sort",
+          "lineNumber": 66
+        },
+        {
+          "caller": "loadSnapshots",
+          "callee": "a.date.localeCompare",
+          "lineNumber": 66
+        },
+        {
+          "caller": "upsertSnapshot",
+          "callee": "loadSnapshots(userId).filter",
+          "lineNumber": 72
+        },
+        {
+          "caller": "upsertSnapshot",
+          "callee": "loadSnapshots",
+          "lineNumber": 72
+        },
+        {
+          "caller": "upsertSnapshot",
+          "callee": "all.push",
+          "lineNumber": 73
+        },
+        {
+          "caller": "upsertSnapshot",
+          "callee": "all.sort",
+          "lineNumber": 74
+        },
+        {
+          "caller": "upsertSnapshot",
+          "callee": "a.date.localeCompare",
+          "lineNumber": 74
+        },
+        {
+          "caller": "upsertSnapshot",
+          "callee": "all.slice",
+          "lineNumber": 75
+        },
+        {
+          "caller": "upsertSnapshot",
+          "callee": "safeSet",
+          "lineNumber": 76
+        },
+        {
+          "caller": "upsertSnapshot",
+          "callee": "storageKey",
+          "lineNumber": 76
+        },
+        {
+          "caller": "weeklyDelta",
+          "callee": "target.setDate",
+          "lineNumber": 85
+        },
+        {
+          "caller": "weeklyDelta",
+          "callee": "target.getDate",
+          "lineNumber": 85
+        },
+        {
+          "caller": "weeklyDelta",
+          "callee": "target.toISOString().slice",
+          "lineNumber": 86
+        },
+        {
+          "caller": "weeklyDelta",
+          "callee": "target.toISOString",
+          "lineNumber": 86
+        },
+        {
+          "caller": "weeklyDelta",
+          "callee": "Math.abs",
+          "lineNumber": 92
+        },
+        {
+          "caller": "weeklyDelta",
+          "callee": "new Date(s.date).getTime",
+          "lineNumber": 93
+        },
+        {
+          "caller": "weeklyDelta",
+          "callee": "new Date(targetISO).getTime",
+          "lineNumber": 93
+        },
+        {
+          "caller": "projectToExam",
+          "callee": "snapshots.slice",
+          "lineNumber": 118
+        },
+        {
+          "caller": "projectToExam",
+          "callee": "new Date(recent[0].date).getTime",
+          "lineNumber": 120
+        },
+        {
+          "caller": "projectToExam",
+          "callee": "new Date(recent[recent.length - 1].date).getTime",
+          "lineNumber": 122
+        },
+        {
+          "caller": "projectToExam",
+          "callee": "recent.map",
+          "lineNumber": 124
+        },
+        {
+          "caller": "projectToExam",
+          "callee": "new Date(s.date).getTime",
+          "lineNumber": 124
+        },
+        {
+          "caller": "projectToExam",
+          "callee": "recent.map",
+          "lineNumber": 125
+        },
+        {
+          "caller": "projectToExam",
+          "callee": "xs.reduce",
+          "lineNumber": 127
+        },
+        {
+          "caller": "projectToExam",
+          "callee": "ys.reduce",
+          "lineNumber": 128
+        },
+        {
+          "caller": "projectToExam",
+          "callee": "xs.reduce",
+          "lineNumber": 129
+        },
+        {
+          "caller": "projectToExam",
+          "callee": "xs.reduce",
+          "lineNumber": 130
+        },
+        {
+          "caller": "projectToExam",
+          "callee": "Math.round",
+          "lineNumber": 136
+        },
+        {
+          "caller": "projectToExam",
+          "callee": "Math.max",
+          "lineNumber": 138
+        },
+        {
+          "caller": "projectToExam",
+          "callee": "Math.min",
+          "lineNumber": 138
+        },
+        {
+          "caller": "projectToExam",
+          "callee": "Math.round",
+          "lineNumber": 139
+        },
+        {
+          "caller": "loadDebt",
+          "callee": "safeGet",
+          "lineNumber": 154
+        },
+        {
+          "caller": "loadDebt",
+          "callee": "storageKey",
+          "lineNumber": 154
+        },
+        {
+          "caller": "updateDebt",
+          "callee": "loadDebt(userId).map",
+          "lineNumber": 171
+        },
+        {
+          "caller": "updateDebt",
+          "callee": "loadDebt",
+          "lineNumber": 171
+        },
+        {
+          "caller": "observe",
+          "callee": "debtKey",
+          "lineNumber": 179
+        },
+        {
+          "caller": "observe",
+          "callee": "existing.delete",
+          "lineNumber": 181
+        },
+        {
+          "caller": "observe",
+          "callee": "existing.get",
+          "lineNumber": 184
+        },
+        {
+          "caller": "observe",
+          "callee": "existing.set",
+          "lineNumber": 186
+        },
+        {
+          "caller": "observe",
+          "callee": "Math.max",
+          "lineNumber": 197
+        },
+        {
+          "caller": "observe",
+          "callee": "Math.floor",
+          "lineNumber": 199
+        },
+        {
+          "caller": "observe",
+          "callee": "now.getTime",
+          "lineNumber": 200
+        },
+        {
+          "caller": "observe",
+          "callee": "new Date(prev.since).getTime",
+          "lineNumber": 200
+        },
+        {
+          "caller": "observe",
+          "callee": "existing.set",
+          "lineNumber": 204
+        },
+        {
+          "caller": "updateDebt",
+          "callee": "observe",
+          "lineNumber": 208
+        },
+        {
+          "caller": "updateDebt",
+          "callee": "observe",
+          "lineNumber": 209
+        },
+        {
+          "caller": "updateDebt",
+          "callee": "observe",
+          "lineNumber": 210
+        },
+        {
+          "caller": "updateDebt",
+          "callee": "observe",
+          "lineNumber": 211
+        },
+        {
+          "caller": "updateDebt",
+          "callee": "observe",
+          "lineNumber": 216
+        },
+        {
+          "caller": "updateDebt",
+          "callee": "observe",
+          "lineNumber": 217
+        },
+        {
+          "caller": "updateDebt",
+          "callee": "observe",
+          "lineNumber": 218
+        },
+        {
+          "caller": "updateDebt",
+          "callee": "observe",
+          "lineNumber": 219
+        },
+        {
+          "caller": "updateDebt",
+          "callee": "Array.from(existing.values()).sort",
+          "lineNumber": 222
+        },
+        {
+          "caller": "updateDebt",
+          "callee": "Array.from",
+          "lineNumber": 222
+        },
+        {
+          "caller": "updateDebt",
+          "callee": "existing.values",
+          "lineNumber": 222
+        },
+        {
+          "caller": "updateDebt",
+          "callee": "safeSet",
+          "lineNumber": 223
+        },
+        {
+          "caller": "updateDebt",
+          "callee": "storageKey",
+          "lineNumber": 223
+        }
+      ],
+      "metrics": {
+        "importCount": 1,
+        "exportCount": 7,
+        "functionCount": 10,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/lib/readiness.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 568,
+      "nonEmptyLines": 531,
+      "functions": [
+        {
+          "name": "clamp01",
+          "startLine": 42,
+          "endLine": 42,
+          "params": [
+            "n"
+          ]
+        },
+        {
+          "name": "coverage",
+          "startLine": 45,
+          "endLine": 47,
+          "params": [
+            "patternCount"
+          ]
+        },
+        {
+          "name": "retention",
+          "startLine": 50,
+          "endLine": 56,
+          "params": [
+            "reattempts"
+          ]
+        },
+        {
+          "name": "calibration",
+          "startLine": 59,
+          "endLine": 64,
+          "params": [
+            "questions"
+          ]
+        },
+        {
+          "name": "surface",
+          "startLine": 67,
+          "endLine": 69,
+          "params": [
+            "openReattemptCount"
+          ]
+        },
+        {
+          "name": "computeReadiness",
+          "startLine": 71,
+          "endLine": 116,
+          "params": [
+            "inputs"
+          ]
+        },
+        {
+          "name": "readinessComponents",
+          "startLine": 129,
+          "endLine": 167,
+          "params": [
+            "b"
+          ]
+        },
+        {
+          "name": "subjectLibraryTarget",
+          "startLine": 224,
+          "endLine": 227,
+          "params": [
+            "subject"
+          ]
+        },
+        {
+          "name": "computeReadinessBySubject",
+          "startLine": 237,
+          "endLine": 319,
+          "params": [
+            "inputs",
+            "subjects"
+          ]
+        },
+        {
+          "name": "nextMoves",
+          "startLine": 343,
+          "endLine": 419,
+          "params": [
+            "overall",
+            "perSubject"
+          ]
+        },
+        {
+          "name": "estimateAIRBand",
+          "startLine": 434,
+          "endLine": 481,
+          "params": [
+            "score",
+            "daysToExam"
+          ]
+        },
+        {
+          "name": "simulateOnce",
+          "startLine": 509,
+          "endLine": 533,
+          "params": [
+            "perSubject",
+            "random"
+          ]
+        },
+        {
+          "name": "examDaySimulator",
+          "startLine": 535,
+          "endLine": 568,
+          "params": [
+            "perSubject",
+            "runs",
+            "seed"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "TARGET_PATTERN_LIBRARY",
+          "line": 7,
+          "isDefault": false
+        },
+        {
+          "name": "BASELINE_OPEN_SURFACE",
+          "line": 8,
+          "isDefault": false
+        },
+        {
+          "name": "WEIGHTS",
+          "line": 10,
+          "isDefault": false
+        },
+        {
+          "name": "coverage",
+          "line": 45,
+          "isDefault": false
+        },
+        {
+          "name": "retention",
+          "line": 50,
+          "isDefault": false
+        },
+        {
+          "name": "calibration",
+          "line": 59,
+          "isDefault": false
+        },
+        {
+          "name": "surface",
+          "line": 67,
+          "isDefault": false
+        },
+        {
+          "name": "computeReadiness",
+          "line": 71,
+          "isDefault": false
+        },
+        {
+          "name": "readinessComponents",
+          "line": 129,
+          "isDefault": false
+        },
+        {
+          "name": "COMPONENT_TOOLTIPS",
+          "line": 171,
+          "isDefault": false
+        },
+        {
+          "name": "SUBJECT_LIBRARY_WEIGHT",
+          "line": 209,
+          "isDefault": false
+        },
+        {
+          "name": "computeReadinessBySubject",
+          "line": 237,
+          "isDefault": false
+        },
+        {
+          "name": "nextMoves",
+          "line": 343,
+          "isDefault": false
+        },
+        {
+          "name": "estimateAIRBand",
+          "line": 434,
+          "isDefault": false
+        },
+        {
+          "name": "examDaySimulator",
+          "line": 535,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "clamp01",
+          "callee": "Math.max",
+          "lineNumber": 42
+        },
+        {
+          "caller": "clamp01",
+          "callee": "Math.min",
+          "lineNumber": 42
+        },
+        {
+          "caller": "coverage",
+          "callee": "clamp01",
+          "lineNumber": 46
+        },
+        {
+          "caller": "retention",
+          "callee": "reattempts.filter",
+          "lineNumber": 52
+        },
+        {
+          "caller": "retention",
+          "callee": "clamp01",
+          "lineNumber": 55
+        },
+        {
+          "caller": "calibration",
+          "callee": "questions.filter",
+          "lineNumber": 60
+        },
+        {
+          "caller": "calibration",
+          "callee": "marked.filter",
+          "lineNumber": 62
+        },
+        {
+          "caller": "calibration",
+          "callee": "clamp01",
+          "lineNumber": 63
+        },
+        {
+          "caller": "surface",
+          "callee": "clamp01",
+          "lineNumber": 68
+        },
+        {
+          "caller": "computeReadiness",
+          "callee": "todayISO",
+          "lineNumber": 72
+        },
+        {
+          "caller": "computeReadiness",
+          "callee": "inputs.reattempts.filter",
+          "lineNumber": 73
+        },
+        {
+          "caller": "computeReadiness",
+          "callee": "coverage",
+          "lineNumber": 76
+        },
+        {
+          "caller": "computeReadiness",
+          "callee": "inputs.questions.filter",
+          "lineNumber": 77
+        },
+        {
+          "caller": "computeReadiness",
+          "callee": "retention",
+          "lineNumber": 80
+        },
+        {
+          "caller": "computeReadiness",
+          "callee": "clamp01",
+          "lineNumber": 80
+        },
+        {
+          "caller": "computeReadiness",
+          "callee": "calibration",
+          "lineNumber": 81
+        },
+        {
+          "caller": "computeReadiness",
+          "callee": "clamp01",
+          "lineNumber": 81
+        },
+        {
+          "caller": "computeReadiness",
+          "callee": "inputs.reattempts.filter",
+          "lineNumber": 82
+        },
+        {
+          "caller": "computeReadiness",
+          "callee": "surface",
+          "lineNumber": 83
+        },
+        {
+          "caller": "computeReadiness",
+          "callee": "clamp01",
+          "lineNumber": 83
+        },
+        {
+          "caller": "computeReadiness",
+          "callee": "Math.round",
+          "lineNumber": 84
+        },
+        {
+          "caller": "computeReadiness",
+          "callee": "inputs.reattempts.filter",
+          "lineNumber": 110
+        },
+        {
+          "caller": "computeReadiness",
+          "callee": "marked.filter",
+          "lineNumber": 113
+        },
+        {
+          "caller": "readinessComponents",
+          "callee": "Math.round",
+          "lineNumber": 137
+        },
+        {
+          "caller": "readinessComponents",
+          "callee": "Math.round",
+          "lineNumber": 145
+        },
+        {
+          "caller": "readinessComponents",
+          "callee": "Math.round",
+          "lineNumber": 156
+        },
+        {
+          "caller": "readinessComponents",
+          "callee": "Math.round",
+          "lineNumber": 164
+        },
+        {
+          "caller": "subjectLibraryTarget",
+          "callee": "Math.max",
+          "lineNumber": 226
+        },
+        {
+          "caller": "subjectLibraryTarget",
+          "callee": "Math.round",
+          "lineNumber": 226
+        },
+        {
+          "caller": "computeReadinessBySubject",
+          "callee": "questionById.set",
+          "lineNumber": 246
+        },
+        {
+          "caller": "computeReadinessBySubject",
+          "callee": "qBySubj.get",
+          "lineNumber": 247
+        },
+        {
+          "caller": "computeReadinessBySubject",
+          "callee": "list.push",
+          "lineNumber": 248
+        },
+        {
+          "caller": "computeReadinessBySubject",
+          "callee": "qBySubj.set",
+          "lineNumber": 249
+        },
+        {
+          "caller": "computeReadinessBySubject",
+          "callee": "pBySubj.get",
+          "lineNumber": 252
+        },
+        {
+          "caller": "computeReadinessBySubject",
+          "callee": "list.push",
+          "lineNumber": 253
+        },
+        {
+          "caller": "computeReadinessBySubject",
+          "callee": "pBySubj.set",
+          "lineNumber": 254
+        },
+        {
+          "caller": "computeReadinessBySubject",
+          "callee": "questionById.get",
+          "lineNumber": 258
+        },
+        {
+          "caller": "computeReadinessBySubject",
+          "callee": "rBySubj.get",
+          "lineNumber": 260
+        },
+        {
+          "caller": "computeReadinessBySubject",
+          "callee": "list.push",
+          "lineNumber": 261
+        },
+        {
+          "caller": "computeReadinessBySubject",
+          "callee": "rBySubj.set",
+          "lineNumber": 262
+        },
+        {
+          "caller": "computeReadinessBySubject",
+          "callee": "subjects.map",
+          "lineNumber": 264
+        },
+        {
+          "caller": "computeReadinessBySubject",
+          "callee": "qBySubj.get",
+          "lineNumber": 265
+        },
+        {
+          "caller": "computeReadinessBySubject",
+          "callee": "pBySubj.get",
+          "lineNumber": 266
+        },
+        {
+          "caller": "computeReadinessBySubject",
+          "callee": "rBySubj.get",
+          "lineNumber": 267
+        },
+        {
+          "caller": "computeReadinessBySubject",
+          "callee": "subjectLibraryTarget",
+          "lineNumber": 268
+        },
+        {
+          "caller": "computeReadinessBySubject",
+          "callee": "clamp01",
+          "lineNumber": 269
+        },
+        {
+          "caller": "computeReadinessBySubject",
+          "callee": "rs.filter",
+          "lineNumber": 270
+        },
+        {
+          "caller": "computeReadinessBySubject",
+          "callee": "todayISO",
+          "lineNumber": 270
+        },
+        {
+          "caller": "computeReadinessBySubject",
+          "callee": "qs.filter",
+          "lineNumber": 271
+        },
+        {
+          "caller": "computeReadinessBySubject",
+          "callee": "retention",
+          "lineNumber": 272
+        },
+        {
+          "caller": "computeReadinessBySubject",
+          "callee": "clamp01",
+          "lineNumber": 272
+        },
+        {
+          "caller": "computeReadinessBySubject",
+          "callee": "calibration",
+          "lineNumber": 273
+        },
+        {
+          "caller": "computeReadinessBySubject",
+          "callee": "clamp01",
+          "lineNumber": 273
+        },
+        {
+          "caller": "computeReadinessBySubject",
+          "callee": "rs.filter",
+          "lineNumber": 274
+        },
+        {
+          "caller": "computeReadinessBySubject",
+          "callee": "Math.max",
+          "lineNumber": 276
+        },
+        {
+          "caller": "computeReadinessBySubject",
+          "callee": "Math.round",
+          "lineNumber": 278
+        },
+        {
+          "caller": "computeReadinessBySubject",
+          "callee": "clamp01",
+          "lineNumber": 283
+        },
+        {
+          "caller": "computeReadinessBySubject",
+          "callee": "clamp01",
+          "lineNumber": 283
+        },
+        {
+          "caller": "computeReadinessBySubject",
+          "callee": "Math.round",
+          "lineNumber": 284
+        },
+        {
+          "caller": "computeReadinessBySubject",
+          "callee": "rs.filter",
+          "lineNumber": 312
+        },
+        {
+          "caller": "computeReadinessBySubject",
+          "callee": "marked.filter",
+          "lineNumber": 315
+        },
+        {
+          "caller": "nextMoves",
+          "callee": "moves.push",
+          "lineNumber": 360
+        },
+        {
+          "caller": "nextMoves",
+          "callee": "Math.round",
+          "lineNumber": 364
+        },
+        {
+          "caller": "nextMoves",
+          "callee": "moves.push",
+          "lineNumber": 371
+        },
+        {
+          "caller": "nextMoves",
+          "callee": "moves.push",
+          "lineNumber": 382
+        },
+        {
+          "caller": "nextMoves",
+          "callee": "moves.push",
+          "lineNumber": 395
+        },
+        {
+          "caller": "nextMoves",
+          "callee": "Math.round",
+          "lineNumber": 398
+        },
+        {
+          "caller": "nextMoves",
+          "callee": "perSubject.every",
+          "lineNumber": 404
+        },
+        {
+          "caller": "nextMoves",
+          "callee": "moves.push",
+          "lineNumber": 405
+        },
+        {
+          "caller": "nextMoves",
+          "callee": "moves\n    .sort((a, b) => urgencyOrder[a.urgency] - urgencyOrder[b.urgency])\n    .slice",
+          "lineNumber": 416
+        },
+        {
+          "caller": "nextMoves",
+          "callee": "moves\n    .sort",
+          "lineNumber": 416
+        },
+        {
+          "caller": "estimateAIRBand",
+          "callee": "Math.max",
+          "lineNumber": 437
+        },
+        {
+          "caller": "estimateAIRBand",
+          "callee": "Math.max",
+          "lineNumber": 438
+        },
+        {
+          "caller": "simulateOnce",
+          "callee": "perSubjMarks.push",
+          "lineNumber": 517
+        },
+        {
+          "caller": "simulateOnce",
+          "callee": "Math.max",
+          "lineNumber": 522
+        },
+        {
+          "caller": "simulateOnce",
+          "callee": "Math.round",
+          "lineNumber": 523
+        },
+        {
+          "caller": "simulateOnce",
+          "callee": "random",
+          "lineNumber": 526
+        },
+        {
+          "caller": "simulateOnce",
+          "callee": "perSubjMarks.push",
+          "lineNumber": 529
+        },
+        {
+          "caller": "simulateOnce",
+          "callee": "Math.round",
+          "lineNumber": 532
+        },
+        {
+          "caller": "examDaySimulator",
+          "callee": "perSubject.reduce",
+          "lineNumber": 542
+        },
+        {
+          "caller": "examDaySimulator",
+          "callee": "Math.round",
+          "lineNumber": 544
+        },
+        {
+          "caller": "random",
+          "callee": "Math.imul",
+          "lineNumber": 550
+        },
+        {
+          "caller": "random",
+          "callee": "Math.imul",
+          "lineNumber": 551
+        },
+        {
+          "caller": "examDaySimulator",
+          "callee": "totals.push",
+          "lineNumber": 556
+        },
+        {
+          "caller": "examDaySimulator",
+          "callee": "simulateOnce",
+          "lineNumber": 556
+        },
+        {
+          "caller": "examDaySimulator",
+          "callee": "totals.sort",
+          "lineNumber": 558
+        },
+        {
+          "caller": "pick",
+          "callee": "Math.floor",
+          "lineNumber": 559
+        },
+        {
+          "caller": "examDaySimulator",
+          "callee": "totals.reduce",
+          "lineNumber": 560
+        },
+        {
+          "caller": "examDaySimulator",
+          "callee": "pick",
+          "lineNumber": 563
+        },
+        {
+          "caller": "examDaySimulator",
+          "callee": "pick",
+          "lineNumber": 564
+        },
+        {
+          "caller": "examDaySimulator",
+          "callee": "pick",
+          "lineNumber": 565
+        },
+        {
+          "caller": "examDaySimulator",
+          "callee": "Math.round",
+          "lineNumber": 566
+        }
+      ],
+      "metrics": {
+        "importCount": 2,
+        "exportCount": 15,
+        "functionCount": 13,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/stores/topic-progress.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 198,
+      "nonEmptyLines": 175,
+      "functions": [
+        {
+          "name": "topicProgressId",
+          "startLine": 17,
+          "endLine": 19,
+          "params": [
+            "subject",
+            "topic"
+          ]
+        },
+        {
+          "name": "splitTopicProgressId",
+          "startLine": 21,
+          "endLine": 25,
+          "params": [
+            "id"
+          ]
+        },
+        {
+          "name": "topicProgressRowId",
+          "startLine": 27,
+          "endLine": 29,
+          "params": [
+            "userId",
+            "subject",
+            "topic"
+          ]
+        },
+        {
+          "name": "selectCompletionsForUser",
+          "startLine": 31,
+          "endLine": 66,
+          "params": [
+            "byUser",
+            "userId"
+          ]
+        },
+        {
+          "name": "syncTopicProgressFromDb",
+          "startLine": 68,
+          "endLine": 120,
+          "params": [
+            "userId"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "topicProgressId",
+          "line": 17,
+          "isDefault": false
+        },
+        {
+          "name": "topicProgressRowId",
+          "line": 27,
+          "isDefault": false
+        },
+        {
+          "name": "selectCompletionsForUser",
+          "line": 31,
+          "isDefault": false
+        },
+        {
+          "name": "syncTopicProgressFromDb",
+          "line": 68,
+          "isDefault": false
+        },
+        {
+          "name": "useTopicProgressStore",
+          "line": 122,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "splitTopicProgressId",
+          "callee": "id.indexOf",
+          "lineNumber": 22
+        },
+        {
+          "caller": "splitTopicProgressId",
+          "callee": "id.slice",
+          "lineNumber": 24
+        },
+        {
+          "caller": "splitTopicProgressId",
+          "callee": "id.slice",
+          "lineNumber": 24
+        },
+        {
+          "caller": "topicProgressRowId",
+          "callee": "uuidFromString",
+          "lineNumber": 28
+        },
+        {
+          "caller": "selectCompletionsForUser",
+          "callee": "currentUserId",
+          "lineNumber": 37
+        },
+        {
+          "caller": "selectCompletionsForUser",
+          "callee": "Object.keys",
+          "lineNumber": 38
+        },
+        {
+          "caller": "selectCompletionsForUser",
+          "callee": "Object.keys",
+          "lineNumber": 53
+        },
+        {
+          "caller": "selectCompletionsForUser",
+          "callee": "Object.entries",
+          "lineNumber": 59
+        },
+        {
+          "caller": "selectCompletionsForUser",
+          "callee": "Object.keys",
+          "lineNumber": 60
+        },
+        {
+          "caller": "syncTopicProgressFromDb",
+          "callee": "currentUserId",
+          "lineNumber": 70
+        },
+        {
+          "caller": "syncTopicProgressFromDb",
+          "callee": "useTopicProgressStore.getState",
+          "lineNumber": 71
+        },
+        {
+          "caller": "syncTopicProgressFromDb",
+          "callee": "db.meta.get",
+          "lineNumber": 75
+        },
+        {
+          "caller": "syncTopicProgressFromDb",
+          "callee": "db.meta.get",
+          "lineNumber": 79
+        },
+        {
+          "caller": "syncTopicProgressFromDb",
+          "callee": "selectCompletionsForUser",
+          "lineNumber": 82
+        },
+        {
+          "caller": "syncTopicProgressFromDb",
+          "callee": "db.topic_progress\n      .where('user_id')\n      .equals(effectiveUserId)\n      .toArray",
+          "lineNumber": 87
+        },
+        {
+          "caller": "syncTopicProgressFromDb",
+          "callee": "db.topic_progress\n      .where('user_id')\n      .equals",
+          "lineNumber": 87
+        },
+        {
+          "caller": "syncTopicProgressFromDb",
+          "callee": "db.topic_progress\n      .where",
+          "lineNumber": 87
+        },
+        {
+          "caller": "syncTopicProgressFromDb",
+          "callee": "topicProgressId",
+          "lineNumber": 93
+        },
+        {
+          "caller": "syncTopicProgressFromDb",
+          "callee": "Object.entries",
+          "lineNumber": 99
+        },
+        {
+          "caller": "syncTopicProgressFromDb",
+          "callee": "splitTopicProgressId",
+          "lineNumber": 100
+        },
+        {
+          "caller": "syncTopicProgressFromDb",
+          "callee": "topicProgressRowId",
+          "lineNumber": 102
+        },
+        {
+          "caller": "syncTopicProgressFromDb",
+          "callee": "syncedRows.some",
+          "lineNumber": 103
+        },
+        {
+          "caller": "syncTopicProgressFromDb",
+          "callee": "writeLocal",
+          "lineNumber": 104
+        },
+        {
+          "caller": "syncTopicProgressFromDb",
+          "callee": "useTopicProgressStore.setState",
+          "lineNumber": 114
+        }
+      ],
+      "metrics": {
+        "importCount": 4,
+        "exportCount": 5,
+        "functionCount": 5,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "supabase/functions/_shared/readiness-score.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 45,
+      "nonEmptyLines": 39,
+      "functions": [
+        {
+          "name": "clamp01",
+          "startLine": 14,
+          "endLine": 14,
+          "params": [
+            "value"
+          ]
+        },
+        {
+          "name": "computeReadinessScore",
+          "startLine": 17,
+          "endLine": 45,
+          "params": [
+            "questions",
+            "patternCount",
+            "reattempts",
+            "today"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "computeReadinessScore",
+          "line": 17,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "clamp01",
+          "callee": "Math.max",
+          "lineNumber": 14
+        },
+        {
+          "caller": "clamp01",
+          "callee": "Math.min",
+          "lineNumber": 14
+        },
+        {
+          "caller": "computeReadinessScore",
+          "callee": "clamp01",
+          "lineNumber": 23
+        },
+        {
+          "caller": "computeReadinessScore",
+          "callee": "reattempts.filter",
+          "lineNumber": 24
+        },
+        {
+          "caller": "computeReadinessScore",
+          "callee": "eligible.filter",
+          "lineNumber": 27
+        },
+        {
+          "caller": "computeReadinessScore",
+          "callee": "clamp01",
+          "lineNumber": 31
+        },
+        {
+          "caller": "computeReadinessScore",
+          "callee": "questions.filter",
+          "lineNumber": 33
+        },
+        {
+          "caller": "computeReadinessScore",
+          "callee": "marked.filter",
+          "lineNumber": 34
+        },
+        {
+          "caller": "computeReadinessScore",
+          "callee": "clamp01",
+          "lineNumber": 36
+        },
+        {
+          "caller": "computeReadinessScore",
+          "callee": "reattempts.filter",
+          "lineNumber": 38
+        },
+        {
+          "caller": "computeReadinessScore",
+          "callee": "clamp01",
+          "lineNumber": 39
+        },
+        {
+          "caller": "computeReadinessScore",
+          "callee": "clamp01",
+          "lineNumber": 40
+        },
+        {
+          "caller": "computeReadinessScore",
+          "callee": "Math.round",
+          "lineNumber": 42
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 1,
+        "functionCount": 2,
+        "classCount": 0
+      }
+    }
+  ]
+}

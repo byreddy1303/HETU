@@ -1,0 +1,1621 @@
+{
+  "nodes": [
+    {
+      "id": "file:src/lib/utils.ts",
+      "type": "file",
+      "name": "utils.ts",
+      "filePath": "src/lib/utils.ts",
+      "summary": "Provides shared class merging, identifiers, timezone-aware date handling, duration formatting, debouncing, fuzzy distance, clamping, and pluralization helpers.",
+      "tags": [
+        "utility",
+        "date-time",
+        "formatting",
+        "shared-library"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/pages/Calibration.tsx",
+      "type": "file",
+      "name": "Calibration.tsx",
+      "filePath": "src/pages/Calibration.tsx",
+      "summary": "Analyzes mark/skip/50-50 decisions under negative marking, shows overall and subject calibration, and lets learners classify or reset unresolved decisions with undo support.",
+      "tags": [
+        "component",
+        "calibration",
+        "analytics",
+        "decision-making"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:src/pages/DevPrimitives.tsx",
+      "type": "file",
+      "name": "DevPrimitives.tsx",
+      "filePath": "src/pages/DevPrimitives.tsx",
+      "summary": "Displays an internal gallery of the project’s reusable buttons, inputs, badges, keyboard hints, progress, tabs, cards, empty states, toasts, and dialogs.",
+      "tags": [
+        "component",
+        "development",
+        "design-system",
+        "component-gallery"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/pages/Formulas.tsx",
+      "type": "file",
+      "name": "Formulas.tsx",
+      "filePath": "src/pages/Formulas.tsx",
+      "summary": "Manages a subject-grouped formula library and a spaced review queue with recalled, forgotten, edit, and delete workflows.",
+      "tags": [
+        "component",
+        "formula-library",
+        "spaced-practice",
+        "study-tool"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:src/pages/Heatmap.tsx",
+      "type": "file",
+      "name": "Heatmap.tsx",
+      "filePath": "src/pages/Heatmap.tsx",
+      "summary": "Builds a date-filtered weakness heatmap across subjects, subtopics, and root causes, with intensity-scaled cells that navigate to matching journal entries.",
+      "tags": [
+        "component",
+        "weakness-analysis",
+        "heatmap",
+        "analytics"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:src/pages/Journal.tsx",
+      "type": "file",
+      "name": "Journal.tsx",
+      "filePath": "src/pages/Journal.tsx",
+      "summary": "Presents the learner’s question journal with fuzzy search, multi-dimensional filters, pagination, expandable evidence, image and answer review, and question or session editing.",
+      "tags": [
+        "component",
+        "journal",
+        "search",
+        "question-history",
+        "editing"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:src/pages/Log.tsx",
+      "type": "file",
+      "name": "Log.tsx",
+      "filePath": "src/pages/Log.tsx",
+      "summary": "Drives persistent single-question and multi-question logging flows, creates log-only sessions, reconciles patterns and reattempts, and supports editing recent entries.",
+      "tags": [
+        "component",
+        "question-logging",
+        "session",
+        "persistence"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:src/lib/utils.ts:cn",
+      "type": "function",
+      "name": "cn",
+      "filePath": "src/lib/utils.ts",
+      "lineRange": [
+        5,
+        7
+      ],
+      "summary": "Combines conditional class values and resolves conflicting Tailwind utilities.",
+      "tags": [
+        "utility",
+        "date-time",
+        "formatting",
+        "function"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/utils.ts:uuid",
+      "type": "function",
+      "name": "uuid",
+      "filePath": "src/lib/utils.ts",
+      "lineRange": [
+        9,
+        11
+      ],
+      "summary": "Creates a random UUID using the Web Crypto API.",
+      "tags": [
+        "utility",
+        "date-time",
+        "formatting",
+        "function"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/utils.ts:uuidFromString",
+      "type": "function",
+      "name": "uuidFromString",
+      "filePath": "src/lib/utils.ts",
+      "lineRange": [
+        13,
+        33
+      ],
+      "summary": "Derives a stable UUID-shaped identifier from a string using two deterministic integer hash streams.",
+      "tags": [
+        "utility",
+        "date-time",
+        "formatting",
+        "function"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/utils.ts:todayISO",
+      "type": "function",
+      "name": "todayISO",
+      "filePath": "src/lib/utils.ts",
+      "lineRange": [
+        36,
+        38
+      ],
+      "summary": "Returns the current local calendar date in ISO date form.",
+      "tags": [
+        "utility",
+        "date-time",
+        "formatting",
+        "function"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/utils.ts:calendarDateInTimeZone",
+      "type": "function",
+      "name": "calendarDateInTimeZone",
+      "filePath": "src/lib/utils.ts",
+      "lineRange": [
+        46,
+        65
+      ],
+      "summary": "Converts an instant into a calendar date in a named timezone with a safe formatting fallback.",
+      "tags": [
+        "utility",
+        "date-time",
+        "formatting",
+        "function"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/utils.ts:todayISOInTimeZone",
+      "type": "function",
+      "name": "todayISOInTimeZone",
+      "filePath": "src/lib/utils.ts",
+      "lineRange": [
+        68,
+        70
+      ],
+      "summary": "Returns today’s ISO calendar date in the learner’s configured timezone.",
+      "tags": [
+        "utility",
+        "date-time",
+        "formatting",
+        "function"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/utils.ts:addDaysISO",
+      "type": "function",
+      "name": "addDaysISO",
+      "filePath": "src/lib/utils.ts",
+      "lineRange": [
+        72,
+        74
+      ],
+      "summary": "Adds a number of calendar days to an ISO date.",
+      "tags": [
+        "utility",
+        "date-time",
+        "formatting",
+        "function"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/utils.ts:weekStartISO",
+      "type": "function",
+      "name": "weekStartISO",
+      "filePath": "src/lib/utils.ts",
+      "lineRange": [
+        77,
+        80
+      ],
+      "summary": "Returns the Monday ISO date for the week containing a date.",
+      "tags": [
+        "utility",
+        "date-time",
+        "formatting",
+        "function"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/utils.ts:formatDate",
+      "type": "function",
+      "name": "formatDate",
+      "filePath": "src/lib/utils.ts",
+      "lineRange": [
+        82,
+        84
+      ],
+      "summary": "Formats an ISO date using a caller-selected date-fns pattern.",
+      "tags": [
+        "utility",
+        "date-time",
+        "formatting",
+        "function"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/utils.ts:nowISO",
+      "type": "function",
+      "name": "nowISO",
+      "filePath": "src/lib/utils.ts",
+      "lineRange": [
+        86,
+        88
+      ],
+      "summary": "Returns the current instant as an ISO timestamp.",
+      "tags": [
+        "utility",
+        "date-time",
+        "formatting",
+        "function"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/utils.ts:secondsToClock",
+      "type": "function",
+      "name": "secondsToClock",
+      "filePath": "src/lib/utils.ts",
+      "lineRange": [
+        91,
+        99
+      ],
+      "summary": "Formats a non-negative duration as mm:ss or h:mm:ss.",
+      "tags": [
+        "utility",
+        "date-time",
+        "formatting",
+        "function"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/utils.ts:debounce",
+      "type": "function",
+      "name": "debounce",
+      "filePath": "src/lib/utils.ts",
+      "lineRange": [
+        101,
+        107
+      ],
+      "summary": "Wraps a callback so only the latest call runs after the configured delay.",
+      "tags": [
+        "utility",
+        "date-time",
+        "formatting",
+        "function"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/utils.ts:levenshtein",
+      "type": "function",
+      "name": "levenshtein",
+      "filePath": "src/lib/utils.ts",
+      "lineRange": [
+        110,
+        127
+      ],
+      "summary": "Computes case-insensitive Levenshtein edit distance with iterative row buffers.",
+      "tags": [
+        "utility",
+        "date-time",
+        "formatting",
+        "function"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/utils.ts:clamp",
+      "type": "function",
+      "name": "clamp",
+      "filePath": "src/lib/utils.ts",
+      "lineRange": [
+        129,
+        131
+      ],
+      "summary": "Constrains a number to an inclusive lower and upper bound.",
+      "tags": [
+        "utility",
+        "date-time",
+        "formatting",
+        "function"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/utils.ts:plural",
+      "type": "function",
+      "name": "plural",
+      "filePath": "src/lib/utils.ts",
+      "lineRange": [
+        133,
+        135
+      ],
+      "summary": "Selects singular or plural copy from a count.",
+      "tags": [
+        "utility",
+        "date-time",
+        "formatting",
+        "function"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/pages/Calibration.tsx:Calibration",
+      "type": "function",
+      "name": "Calibration",
+      "filePath": "src/pages/Calibration.tsx",
+      "lineRange": [
+        116,
+        429
+      ],
+      "summary": "Loads question evidence, calculates overall and subject calibration, manages classification and undo state, and renders recommendations and decision queues.",
+      "tags": [
+        "component",
+        "calibration",
+        "analytics",
+        "function"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:src/pages/Calibration.tsx:StatCell",
+      "type": "function",
+      "name": "StatCell",
+      "filePath": "src/pages/Calibration.tsx",
+      "lineRange": [
+        431,
+        455
+      ],
+      "summary": "Renders one compact labeled calibration statistic with value-aware styling.",
+      "tags": [
+        "component",
+        "calibration",
+        "analytics",
+        "function"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/pages/Calibration.tsx:MissingRow",
+      "type": "function",
+      "name": "MissingRow",
+      "filePath": "src/pages/Calibration.tsx",
+      "lineRange": [
+        457,
+        589
+      ],
+      "summary": "Expands an unresolved question into mark, 50-50, skip, and correctness choices before persisting the decision.",
+      "tags": [
+        "component",
+        "calibration",
+        "analytics",
+        "function"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/pages/Calibration.tsx:DecidedRow",
+      "type": "function",
+      "name": "DecidedRow",
+      "filePath": "src/pages/Calibration.tsx",
+      "lineRange": [
+        591,
+        631
+      ],
+      "summary": "Displays a recent decision and offers a reset that returns the question to the calibration inbox.",
+      "tags": [
+        "component",
+        "calibration",
+        "analytics",
+        "function"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/pages/DevPrimitives.tsx:DevPrimitives",
+      "type": "function",
+      "name": "DevPrimitives",
+      "filePath": "src/pages/DevPrimitives.tsx",
+      "lineRange": [
+        25,
+        161
+      ],
+      "summary": "Renders an interactive development-only showcase for the project’s shared UI primitives and feedback states.",
+      "tags": [
+        "component",
+        "development",
+        "design-system",
+        "function"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/pages/Formulas.tsx:Formulas",
+      "type": "function",
+      "name": "Formulas",
+      "filePath": "src/pages/Formulas.tsx",
+      "lineRange": [
+        31,
+        217
+      ],
+      "summary": "Loads the formula library, creates formulas, groups them by subject, and coordinates spaced recall and forgotten actions.",
+      "tags": [
+        "component",
+        "formula-library",
+        "spaced-practice",
+        "function"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/pages/Formulas.tsx:FormulaReviewRow",
+      "type": "function",
+      "name": "FormulaReviewRow",
+      "filePath": "src/pages/Formulas.tsx",
+      "lineRange": [
+        219,
+        263
+      ],
+      "summary": "Renders a due formula with recall, forgotten, and delete actions plus review history.",
+      "tags": [
+        "component",
+        "formula-library",
+        "spaced-practice",
+        "function"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/pages/Formulas.tsx:FormulaLibraryRow",
+      "type": "function",
+      "name": "FormulaLibraryRow",
+      "filePath": "src/pages/Formulas.tsx",
+      "lineRange": [
+        265,
+        344
+      ],
+      "summary": "Renders and edits one library formula while showing its next review and forgotten count.",
+      "tags": [
+        "component",
+        "formula-library",
+        "spaced-practice",
+        "function"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/pages/Heatmap.tsx:Heatmap",
+      "type": "function",
+      "name": "Heatmap",
+      "filePath": "src/pages/Heatmap.tsx",
+      "lineRange": [
+        43,
+        421
+      ],
+      "summary": "Aggregates weakness cells for the selected period, derives intensity and attempt rates, and links each intersection to filtered journal evidence.",
+      "tags": [
+        "component",
+        "weakness-analysis",
+        "heatmap",
+        "function"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:src/pages/Journal.tsx:Row",
+      "type": "function",
+      "name": "Row",
+      "filePath": "src/pages/Journal.tsx",
+      "lineRange": [
+        125,
+        323
+      ],
+      "summary": "Renders an expandable question entry with metadata, evidence, image and answer reveal, and edit controls.",
+      "tags": [
+        "component",
+        "journal",
+        "search",
+        "function"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/pages/Journal.tsx:Journal",
+      "type": "function",
+      "name": "Journal",
+      "filePath": "src/pages/Journal.tsx",
+      "lineRange": [
+        325,
+        820
+      ],
+      "summary": "Loads and reconciles journal data, applies URL-backed filters and fuzzy search, paginates results, and coordinates question and session editing.",
+      "tags": [
+        "component",
+        "journal",
+        "search",
+        "function"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:src/pages/Journal.tsx:RecentSessionsCard",
+      "type": "function",
+      "name": "RecentSessionsCard",
+      "filePath": "src/pages/Journal.tsx",
+      "lineRange": [
+        822,
+        919
+      ],
+      "summary": "Displays recent session summaries and routes the user into session-specific journal or review views.",
+      "tags": [
+        "component",
+        "journal",
+        "search",
+        "function"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/pages/Log.tsx:reconcilePattern",
+      "type": "function",
+      "name": "reconcilePattern",
+      "filePath": "src/pages/Log.tsx",
+      "lineRange": [
+        43,
+        60
+      ],
+      "summary": "Recounts a pattern after logging and updates or creates its local metadata row.",
+      "tags": [
+        "component",
+        "question-logging",
+        "session",
+        "function"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/pages/Log.tsx:Log",
+      "type": "function",
+      "name": "Log",
+      "filePath": "src/pages/Log.tsx",
+      "lineRange": [
+        62,
+        567
+      ],
+      "summary": "Coordinates persistent single and batch logging states, saves questions and sessions, schedules reattempts, and manages recent-entry editing.",
+      "tags": [
+        "component",
+        "question-logging",
+        "session",
+        "function"
+      ],
+      "complexity": "complex"
+    }
+  ],
+  "edges": [
+    {
+      "source": "file:src/pages/Calibration.tsx",
+      "target": "file:src/components/layout/PageHeader.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Calibration.tsx",
+      "target": "file:src/components/ui/Badge.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Calibration.tsx",
+      "target": "file:src/components/ui/Button.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Calibration.tsx",
+      "target": "file:src/components/ui/Card.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Calibration.tsx",
+      "target": "file:src/components/ui/Empty.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Calibration.tsx",
+      "target": "file:src/hooks/useAuth.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Calibration.tsx",
+      "target": "file:src/lib/analysis.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Calibration.tsx",
+      "target": "file:src/lib/constants.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Calibration.tsx",
+      "target": "file:src/lib/db.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Calibration.tsx",
+      "target": "file:src/lib/subjectInk.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Calibration.tsx",
+      "target": "file:src/lib/sync.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Calibration.tsx",
+      "target": "file:src/lib/utils.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Calibration.tsx",
+      "target": "file:src/types/index.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/DevPrimitives.tsx",
+      "target": "file:src/components/ui/Badge.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/DevPrimitives.tsx",
+      "target": "file:src/components/ui/Button.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/DevPrimitives.tsx",
+      "target": "file:src/components/ui/Card.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/DevPrimitives.tsx",
+      "target": "file:src/components/ui/Dialog.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/DevPrimitives.tsx",
+      "target": "file:src/components/ui/Empty.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/DevPrimitives.tsx",
+      "target": "file:src/components/ui/Input.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/DevPrimitives.tsx",
+      "target": "file:src/components/ui/Kbd.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/DevPrimitives.tsx",
+      "target": "file:src/components/ui/Progress.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/DevPrimitives.tsx",
+      "target": "file:src/components/ui/Select.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/DevPrimitives.tsx",
+      "target": "file:src/components/ui/Tabs.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/DevPrimitives.tsx",
+      "target": "file:src/components/ui/Textarea.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/DevPrimitives.tsx",
+      "target": "file:src/lib/constants.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/DevPrimitives.tsx",
+      "target": "file:src/stores/ui.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Formulas.tsx",
+      "target": "file:src/components/layout/PageHeader.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Formulas.tsx",
+      "target": "file:src/components/ui/Badge.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Formulas.tsx",
+      "target": "file:src/components/ui/Button.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Formulas.tsx",
+      "target": "file:src/components/ui/Card.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Formulas.tsx",
+      "target": "file:src/components/ui/Empty.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Formulas.tsx",
+      "target": "file:src/components/ui/Input.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Formulas.tsx",
+      "target": "file:src/components/ui/Select.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Formulas.tsx",
+      "target": "file:src/hooks/useAuth.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Formulas.tsx",
+      "target": "file:src/lib/constants.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Formulas.tsx",
+      "target": "file:src/lib/db.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Formulas.tsx",
+      "target": "file:src/lib/subjectInk.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Formulas.tsx",
+      "target": "file:src/lib/sync.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Formulas.tsx",
+      "target": "file:src/lib/utils.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Formulas.tsx",
+      "target": "file:src/stores/ui.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Formulas.tsx",
+      "target": "file:src/types/index.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Heatmap.tsx",
+      "target": "file:src/components/layout/PageHeader.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Heatmap.tsx",
+      "target": "file:src/components/ui/Card.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Heatmap.tsx",
+      "target": "file:src/components/ui/Empty.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Heatmap.tsx",
+      "target": "file:src/components/ui/Input.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Heatmap.tsx",
+      "target": "file:src/hooks/useAuth.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Heatmap.tsx",
+      "target": "file:src/lib/analysis.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Heatmap.tsx",
+      "target": "file:src/lib/constants.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Heatmap.tsx",
+      "target": "file:src/lib/db.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Heatmap.tsx",
+      "target": "file:src/lib/subjectInk.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Heatmap.tsx",
+      "target": "file:src/lib/utils.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Heatmap.tsx",
+      "target": "file:src/types/index.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Journal.tsx",
+      "target": "file:src/components/layout/PageHeader.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Journal.tsx",
+      "target": "file:src/components/shared/AnswerReveal.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Journal.tsx",
+      "target": "file:src/components/shared/ImagePreview.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Journal.tsx",
+      "target": "file:src/components/shared/QuestionEditor.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Journal.tsx",
+      "target": "file:src/components/shared/SessionEditor.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Journal.tsx",
+      "target": "file:src/components/shared/questionDraft.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Journal.tsx",
+      "target": "file:src/components/ui/Badge.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Journal.tsx",
+      "target": "file:src/components/ui/Button.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Journal.tsx",
+      "target": "file:src/components/ui/Card.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Journal.tsx",
+      "target": "file:src/components/ui/Dialog.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Journal.tsx",
+      "target": "file:src/components/ui/Empty.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Journal.tsx",
+      "target": "file:src/components/ui/Input.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Journal.tsx",
+      "target": "file:src/components/ui/Select.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Journal.tsx",
+      "target": "file:src/hooks/useAuth.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Journal.tsx",
+      "target": "file:src/lib/constants.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Journal.tsx",
+      "target": "file:src/lib/db.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Journal.tsx",
+      "target": "file:src/lib/sessions.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Journal.tsx",
+      "target": "file:src/lib/subjectInk.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Journal.tsx",
+      "target": "file:src/lib/subtopics.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Journal.tsx",
+      "target": "file:src/lib/sync.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Journal.tsx",
+      "target": "file:src/lib/utils.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Journal.tsx",
+      "target": "file:src/types/index.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Log.tsx",
+      "target": "file:src/components/layout/PageHeader.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Log.tsx",
+      "target": "file:src/components/shared/AnswerReveal.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Log.tsx",
+      "target": "file:src/components/shared/QuestionEditor.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Log.tsx",
+      "target": "file:src/components/shared/questionDraft.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Log.tsx",
+      "target": "file:src/components/ui/Badge.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Log.tsx",
+      "target": "file:src/components/ui/Button.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Log.tsx",
+      "target": "file:src/components/ui/Card.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Log.tsx",
+      "target": "file:src/components/ui/Dialog.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Log.tsx",
+      "target": "file:src/components/ui/Empty.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Log.tsx",
+      "target": "file:src/hooks/useAuth.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Log.tsx",
+      "target": "file:src/lib/constants.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Log.tsx",
+      "target": "file:src/lib/db.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Log.tsx",
+      "target": "file:src/lib/reattempt.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Log.tsx",
+      "target": "file:src/lib/subjectInk.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Log.tsx",
+      "target": "file:src/lib/sync.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Log.tsx",
+      "target": "file:src/lib/utils.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Log.tsx",
+      "target": "file:src/stores/log.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Log.tsx",
+      "target": "file:src/types/index.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/lib/utils.ts",
+      "target": "function:src/lib/utils.ts:cn",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/utils.ts",
+      "target": "function:src/lib/utils.ts:cn",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/utils.ts",
+      "target": "function:src/lib/utils.ts:uuid",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/utils.ts",
+      "target": "function:src/lib/utils.ts:uuid",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/utils.ts",
+      "target": "function:src/lib/utils.ts:uuidFromString",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/utils.ts",
+      "target": "function:src/lib/utils.ts:uuidFromString",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/utils.ts",
+      "target": "function:src/lib/utils.ts:todayISO",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/utils.ts",
+      "target": "function:src/lib/utils.ts:todayISO",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/utils.ts",
+      "target": "function:src/lib/utils.ts:calendarDateInTimeZone",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/utils.ts",
+      "target": "function:src/lib/utils.ts:calendarDateInTimeZone",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/utils.ts",
+      "target": "function:src/lib/utils.ts:todayISOInTimeZone",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/utils.ts",
+      "target": "function:src/lib/utils.ts:todayISOInTimeZone",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/utils.ts",
+      "target": "function:src/lib/utils.ts:addDaysISO",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/utils.ts",
+      "target": "function:src/lib/utils.ts:addDaysISO",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/utils.ts",
+      "target": "function:src/lib/utils.ts:weekStartISO",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/utils.ts",
+      "target": "function:src/lib/utils.ts:weekStartISO",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/utils.ts",
+      "target": "function:src/lib/utils.ts:formatDate",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/utils.ts",
+      "target": "function:src/lib/utils.ts:formatDate",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/utils.ts",
+      "target": "function:src/lib/utils.ts:nowISO",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/utils.ts",
+      "target": "function:src/lib/utils.ts:nowISO",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/utils.ts",
+      "target": "function:src/lib/utils.ts:secondsToClock",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/utils.ts",
+      "target": "function:src/lib/utils.ts:secondsToClock",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/utils.ts",
+      "target": "function:src/lib/utils.ts:debounce",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/utils.ts",
+      "target": "function:src/lib/utils.ts:debounce",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/utils.ts",
+      "target": "function:src/lib/utils.ts:levenshtein",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/utils.ts",
+      "target": "function:src/lib/utils.ts:levenshtein",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/utils.ts",
+      "target": "function:src/lib/utils.ts:clamp",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/utils.ts",
+      "target": "function:src/lib/utils.ts:clamp",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/utils.ts",
+      "target": "function:src/lib/utils.ts:plural",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/utils.ts",
+      "target": "function:src/lib/utils.ts:plural",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/pages/Calibration.tsx",
+      "target": "function:src/pages/Calibration.tsx:Calibration",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/pages/Calibration.tsx",
+      "target": "function:src/pages/Calibration.tsx:Calibration",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/pages/Calibration.tsx",
+      "target": "function:src/pages/Calibration.tsx:StatCell",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/pages/Calibration.tsx",
+      "target": "function:src/pages/Calibration.tsx:MissingRow",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/pages/Calibration.tsx",
+      "target": "function:src/pages/Calibration.tsx:DecidedRow",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/pages/DevPrimitives.tsx",
+      "target": "function:src/pages/DevPrimitives.tsx:DevPrimitives",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/pages/DevPrimitives.tsx",
+      "target": "function:src/pages/DevPrimitives.tsx:DevPrimitives",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/pages/Formulas.tsx",
+      "target": "function:src/pages/Formulas.tsx:Formulas",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/pages/Formulas.tsx",
+      "target": "function:src/pages/Formulas.tsx:Formulas",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/pages/Formulas.tsx",
+      "target": "function:src/pages/Formulas.tsx:FormulaReviewRow",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/pages/Formulas.tsx",
+      "target": "function:src/pages/Formulas.tsx:FormulaLibraryRow",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/pages/Heatmap.tsx",
+      "target": "function:src/pages/Heatmap.tsx:Heatmap",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/pages/Heatmap.tsx",
+      "target": "function:src/pages/Heatmap.tsx:Heatmap",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/pages/Journal.tsx",
+      "target": "function:src/pages/Journal.tsx:Row",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/pages/Journal.tsx",
+      "target": "function:src/pages/Journal.tsx:Journal",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/pages/Journal.tsx",
+      "target": "function:src/pages/Journal.tsx:Journal",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/pages/Journal.tsx",
+      "target": "function:src/pages/Journal.tsx:RecentSessionsCard",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/pages/Log.tsx",
+      "target": "function:src/pages/Log.tsx:reconcilePattern",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/pages/Log.tsx",
+      "target": "function:src/pages/Log.tsx:Log",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/pages/Log.tsx",
+      "target": "function:src/pages/Log.tsx:Log",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    }
+  ]
+}

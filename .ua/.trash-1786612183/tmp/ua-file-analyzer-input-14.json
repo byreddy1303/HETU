@@ -1,0 +1,28 @@
+{
+  "projectRoot": "/Users/bkalyankrishnareddy/Desktop/GATE PREP/hetu",
+  "batchFiles": [
+    {
+      "path": "android/app/build.gradle",
+      "language": "gradle",
+      "sizeLines": 79,
+      "fileCategory": "config"
+    },
+    {
+      "path": "android/app/capacitor.build.gradle",
+      "language": "gradle",
+      "sizeLines": 24,
+      "fileCategory": "config"
+    },
+    {
+      "path": "android/app/google-services.json",
+      "language": "json",
+      "sizeLines": 28,
+      "fileCategory": "config"
+    }
+  ],
+  "batchImportData": {
+    "android/app/build.gradle": [],
+    "android/app/capacitor.build.gradle": [],
+    "android/app/google-services.json": []
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "nodes": [
+    {
+      "id": "file:.ua/.understandignore",
+      "type": "file",
+      "name": ".understandignore",
+      "filePath": ".ua/.understandignore",
+      "summary": "Defines HETU-specific knowledge-graph scan exclusions for secrets, machine-local deployment state, generated build and test artifacts, analysis outputs, large PYQ datasets, and binary study assets while retaining commented cross-language test-pattern examples.",
+      "tags": [
+        "configuration",
+        "analysis-scope",
+        "security",
+        "artifact-filtering"
+      ],
+      "complexity": "moderate",
+      "languageNotes": "Uses gitignore-compatible glob syntax, comments, directory suffixes, and potential negation rules to control Understand-Anything scanning."
+    }
+  ],
+  "edges": []
+}

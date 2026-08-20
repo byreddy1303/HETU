@@ -1,0 +1,967 @@
+{
+  "nodes": [
+    {
+      "id": "file:src/pages/SessionReview.tsx",
+      "type": "file",
+      "name": "SessionReview.tsx",
+      "filePath": "src/pages/SessionReview.tsx",
+      "summary": "Summarizes a completed session’s outcomes, patterns, timing, tagged questions, and insight while supporting question and session edits.",
+      "tags": [
+        "component",
+        "session-review",
+        "analytics",
+        "editing"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:src/pages/SyllabusTracker.tsx",
+      "type": "file",
+      "name": "SyllabusTracker.tsx",
+      "filePath": "src/pages/SyllabusTracker.tsx",
+      "summary": "Tracks evidence-backed completion across the GATE syllabus with search, filters, progress orbit, subject ledgers, next-topic guidance, and synchronized manual overrides.",
+      "tags": [
+        "component",
+        "syllabus",
+        "progress-tracking",
+        "topic-evidence"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:src/pages/TopperNotes.tsx",
+      "type": "file",
+      "name": "TopperNotes.tsx",
+      "filePath": "src/pages/TopperNotes.tsx",
+      "summary": "Provides a searchable, subject-filtered topper-note library with native-safe hosted PDF opening, local revision progress, note shelves, and a linear-algebra sequence.",
+      "tags": [
+        "component",
+        "topper-notes",
+        "document-library",
+        "native-navigation"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:src/pages/TriggerDrill.tsx",
+      "type": "file",
+      "name": "TriggerDrill.tsx",
+      "filePath": "src/pages/TriggerDrill.tsx",
+      "summary": "Manages trigger-phrase pairs and runs timed reflex drills, recording normalized matches, manual judgments, attempts, and updated response speed.",
+      "tags": [
+        "component",
+        "trigger-drill",
+        "retrieval-practice",
+        "timing"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:src/pages/WeeklyReview.tsx",
+      "type": "file",
+      "name": "WeeklyReview.tsx",
+      "filePath": "src/pages/WeeklyReview.tsx",
+      "summary": "Guides a four-step weekly review from observed data through root cause and weakest concept to one concrete fix, persisting resumable drafts.",
+      "tags": [
+        "component",
+        "weekly-review",
+        "reflection",
+        "analytics",
+        "planning"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:src/pages/SessionReview.tsx:SessionReview",
+      "type": "function",
+      "name": "SessionReview",
+      "filePath": "src/pages/SessionReview.tsx",
+      "lineRange": [
+        42,
+        501
+      ],
+      "summary": "Aggregates completed-session outcomes and timing, captures the insight, and coordinates question, session, and deletion edits.",
+      "tags": [
+        "component",
+        "session-review",
+        "analytics",
+        "function"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:src/pages/SyllabusTracker.tsx:nextTopicFrom",
+      "type": "function",
+      "name": "nextTopicFrom",
+      "filePath": "src/pages/SyllabusTracker.tsx",
+      "lineRange": [
+        75,
+        90
+      ],
+      "summary": "Selects the first unfinished topic from an in-progress subject or the next not-started subject.",
+      "tags": [
+        "component",
+        "syllabus",
+        "progress-tracking",
+        "function"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/pages/SyllabusTracker.tsx:SyllabusTracker",
+      "type": "function",
+      "name": "SyllabusTracker",
+      "filePath": "src/pages/SyllabusTracker.tsx",
+      "lineRange": [
+        92,
+        376
+      ],
+      "summary": "Combines stored completions with question and attempt evidence, applies search and status filters, and coordinates synchronized topic toggles.",
+      "tags": [
+        "component",
+        "syllabus",
+        "progress-tracking",
+        "function"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:src/pages/SyllabusTracker.tsx:SyllabusOrbit",
+      "type": "function",
+      "name": "SyllabusOrbit",
+      "filePath": "src/pages/SyllabusTracker.tsx",
+      "lineRange": [
+        378,
+        433
+      ],
+      "summary": "Visualizes overall syllabus completion as a reduced-motion-aware circular progress orbit.",
+      "tags": [
+        "component",
+        "syllabus",
+        "progress-tracking",
+        "function"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/pages/SyllabusTracker.tsx:SubjectLedger",
+      "type": "function",
+      "name": "SubjectLedger",
+      "filePath": "src/pages/SyllabusTracker.tsx",
+      "lineRange": [
+        435,
+        568
+      ],
+      "summary": "Renders one expandable subject’s topic checklist, progress, evidence status, and completion controls.",
+      "tags": [
+        "component",
+        "syllabus",
+        "progress-tracking",
+        "function"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/pages/SyllabusTracker.tsx:TopicEvidenceLine",
+      "type": "function",
+      "name": "TopicEvidenceLine",
+      "filePath": "src/pages/SyllabusTracker.tsx",
+      "lineRange": [
+        578,
+        609
+      ],
+      "summary": "Explains the observed practice evidence and status supporting a topic completion state.",
+      "tags": [
+        "component",
+        "syllabus",
+        "progress-tracking",
+        "function"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/pages/TopperNotes.tsx:readProgress",
+      "type": "function",
+      "name": "readProgress",
+      "filePath": "src/pages/TopperNotes.tsx",
+      "lineRange": [
+        73,
+        87
+      ],
+      "summary": "Safely hydrates revised note IDs and the last-opened note from user-scoped local storage.",
+      "tags": [
+        "component",
+        "topper-notes",
+        "document-library",
+        "function"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/pages/TopperNotes.tsx:TopperNotes",
+      "type": "function",
+      "name": "TopperNotes",
+      "filePath": "src/pages/TopperNotes.tsx",
+      "lineRange": [
+        110,
+        363
+      ],
+      "summary": "Filters the note manifest, tracks local revision progress, and coordinates browser or native note opening and downloading.",
+      "tags": [
+        "component",
+        "topper-notes",
+        "document-library",
+        "function"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:src/pages/TopperNotes.tsx:SubjectShelf",
+      "type": "function",
+      "name": "SubjectShelf",
+      "filePath": "src/pages/TopperNotes.tsx",
+      "lineRange": [
+        374,
+        428
+      ],
+      "summary": "Renders an ordered subject shelf with completion state and note actions.",
+      "tags": [
+        "component",
+        "topper-notes",
+        "document-library",
+        "function"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/pages/TopperNotes.tsx:LinearAlgebraLab",
+      "type": "function",
+      "name": "LinearAlgebraLab",
+      "filePath": "src/pages/TopperNotes.tsx",
+      "lineRange": [
+        430,
+        460
+      ],
+      "summary": "Presents the engineering-mathematics notes as a focused linear-algebra study sequence.",
+      "tags": [
+        "component",
+        "topper-notes",
+        "document-library",
+        "function"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/pages/TopperNotes.tsx:NoteRow",
+      "type": "function",
+      "name": "NoteRow",
+      "filePath": "src/pages/TopperNotes.tsx",
+      "lineRange": [
+        462,
+        546
+      ],
+      "summary": "Displays note metadata and revision, open, and download actions for one document.",
+      "tags": [
+        "component",
+        "topper-notes",
+        "document-library",
+        "function"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/pages/TriggerDrill.tsx:TriggerDrill",
+      "type": "function",
+      "name": "TriggerDrill",
+      "filePath": "src/pages/TriggerDrill.tsx",
+      "lineRange": [
+        43,
+        276
+      ],
+      "summary": "Loads and orders trigger phrases, times recall attempts, normalizes or requests judgments, persists speed, and manages the phrase library.",
+      "tags": [
+        "component",
+        "trigger-drill",
+        "retrieval-practice",
+        "function"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:src/pages/WeeklyReview.tsx:WeeklyReview",
+      "type": "function",
+      "name": "WeeklyReview",
+      "filePath": "src/pages/WeeklyReview.tsx",
+      "lineRange": [
+        52,
+        311
+      ],
+      "summary": "Hydrates the current weekly draft, summarizes question evidence, enforces each reflective step, and saves the completed review.",
+      "tags": [
+        "component",
+        "weekly-review",
+        "reflection",
+        "function"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:src/pages/WeeklyReview.tsx:DataStep",
+      "type": "function",
+      "name": "DataStep",
+      "filePath": "src/pages/WeeklyReview.tsx",
+      "lineRange": [
+        313,
+        446
+      ],
+      "summary": "Presents the week’s question, subject, pattern, and root-cause evidence before reflection begins.",
+      "tags": [
+        "component",
+        "weekly-review",
+        "reflection",
+        "function"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/pages/WeeklyReview.tsx:DataCell",
+      "type": "function",
+      "name": "DataCell",
+      "filePath": "src/pages/WeeklyReview.tsx",
+      "lineRange": [
+        448,
+        475
+      ],
+      "summary": "Displays one labeled weekly-review statistic with optional emphasis.",
+      "tags": [
+        "component",
+        "weekly-review",
+        "reflection",
+        "function"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/pages/WeeklyReview.tsx:NarrativeStep",
+      "type": "function",
+      "name": "NarrativeStep",
+      "filePath": "src/pages/WeeklyReview.tsx",
+      "lineRange": [
+        477,
+        528
+      ],
+      "summary": "Renders a guided text step for naming the root cause, weakest concept, or concrete weekly fix.",
+      "tags": [
+        "component",
+        "weekly-review",
+        "reflection",
+        "function"
+      ],
+      "complexity": "moderate"
+    }
+  ],
+  "edges": [
+    {
+      "source": "file:src/pages/SessionReview.tsx",
+      "target": "file:src/components/shared/AnswerReveal.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/SessionReview.tsx",
+      "target": "file:src/components/shared/LoadingScreen.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/SessionReview.tsx",
+      "target": "file:src/components/shared/QuestionEditor.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/SessionReview.tsx",
+      "target": "file:src/components/shared/SessionEditor.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/SessionReview.tsx",
+      "target": "file:src/components/shared/questionDraft.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/SessionReview.tsx",
+      "target": "file:src/components/ui/Badge.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/SessionReview.tsx",
+      "target": "file:src/components/ui/Button.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/SessionReview.tsx",
+      "target": "file:src/components/ui/Card.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/SessionReview.tsx",
+      "target": "file:src/components/ui/Dialog.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/SessionReview.tsx",
+      "target": "file:src/components/ui/Empty.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/SessionReview.tsx",
+      "target": "file:src/components/ui/Input.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/SessionReview.tsx",
+      "target": "file:src/components/ui/Kbd.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/SessionReview.tsx",
+      "target": "file:src/lib/constants.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/SessionReview.tsx",
+      "target": "file:src/lib/db.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/SessionReview.tsx",
+      "target": "file:src/lib/subjectInk.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/SessionReview.tsx",
+      "target": "file:src/lib/sync.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/SessionReview.tsx",
+      "target": "file:src/lib/utils.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/SessionReview.tsx",
+      "target": "file:src/types/index.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/SyllabusTracker.tsx",
+      "target": "file:src/components/layout/PageHeader.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/SyllabusTracker.tsx",
+      "target": "file:src/components/ui/Badge.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/SyllabusTracker.tsx",
+      "target": "file:src/components/ui/Input.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/SyllabusTracker.tsx",
+      "target": "file:src/components/ui/Progress.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/SyllabusTracker.tsx",
+      "target": "file:src/hooks/useAuth.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/SyllabusTracker.tsx",
+      "target": "file:src/lib/constants.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/SyllabusTracker.tsx",
+      "target": "file:src/lib/db.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/SyllabusTracker.tsx",
+      "target": "file:src/lib/native.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/SyllabusTracker.tsx",
+      "target": "file:src/lib/subjectInk.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/SyllabusTracker.tsx",
+      "target": "file:src/lib/subtopics.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/SyllabusTracker.tsx",
+      "target": "file:src/lib/topic-evidence.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/SyllabusTracker.tsx",
+      "target": "file:src/lib/utils.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/SyllabusTracker.tsx",
+      "target": "file:src/stores/auth.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/SyllabusTracker.tsx",
+      "target": "file:src/stores/topic-progress.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/TopperNotes.tsx",
+      "target": "file:src/components/layout/PageHeader.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/TopperNotes.tsx",
+      "target": "file:src/components/ui/Input.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/TopperNotes.tsx",
+      "target": "file:src/hooks/useAuth.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/TopperNotes.tsx",
+      "target": "file:src/lib/native.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/TopperNotes.tsx",
+      "target": "file:src/lib/subjectInk.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/TopperNotes.tsx",
+      "target": "file:src/lib/utils.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/TriggerDrill.tsx",
+      "target": "file:src/components/layout/PageHeader.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/TriggerDrill.tsx",
+      "target": "file:src/components/ui/Badge.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/TriggerDrill.tsx",
+      "target": "file:src/components/ui/Button.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/TriggerDrill.tsx",
+      "target": "file:src/components/ui/Card.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/TriggerDrill.tsx",
+      "target": "file:src/components/ui/Empty.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/TriggerDrill.tsx",
+      "target": "file:src/components/ui/Input.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/TriggerDrill.tsx",
+      "target": "file:src/hooks/useAuth.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/TriggerDrill.tsx",
+      "target": "file:src/lib/db.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/TriggerDrill.tsx",
+      "target": "file:src/lib/sync.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/TriggerDrill.tsx",
+      "target": "file:src/lib/utils.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/TriggerDrill.tsx",
+      "target": "file:src/stores/ui.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/TriggerDrill.tsx",
+      "target": "file:src/types/index.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/WeeklyReview.tsx",
+      "target": "file:src/components/layout/PageHeader.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/WeeklyReview.tsx",
+      "target": "file:src/components/ui/Badge.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/WeeklyReview.tsx",
+      "target": "file:src/components/ui/Button.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/WeeklyReview.tsx",
+      "target": "file:src/components/ui/Card.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/WeeklyReview.tsx",
+      "target": "file:src/components/ui/Empty.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/WeeklyReview.tsx",
+      "target": "file:src/components/ui/Input.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/WeeklyReview.tsx",
+      "target": "file:src/components/ui/Textarea.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/WeeklyReview.tsx",
+      "target": "file:src/hooks/useAuth.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/WeeklyReview.tsx",
+      "target": "file:src/lib/analysis.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/WeeklyReview.tsx",
+      "target": "file:src/lib/constants.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/WeeklyReview.tsx",
+      "target": "file:src/lib/db.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/WeeklyReview.tsx",
+      "target": "file:src/lib/subjectInk.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/WeeklyReview.tsx",
+      "target": "file:src/lib/sync.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/WeeklyReview.tsx",
+      "target": "file:src/lib/utils.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/WeeklyReview.tsx",
+      "target": "file:src/types/index.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/SessionReview.tsx",
+      "target": "function:src/pages/SessionReview.tsx:SessionReview",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/pages/SessionReview.tsx",
+      "target": "function:src/pages/SessionReview.tsx:SessionReview",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/pages/SyllabusTracker.tsx",
+      "target": "function:src/pages/SyllabusTracker.tsx:nextTopicFrom",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/pages/SyllabusTracker.tsx",
+      "target": "function:src/pages/SyllabusTracker.tsx:SyllabusTracker",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/pages/SyllabusTracker.tsx",
+      "target": "function:src/pages/SyllabusTracker.tsx:SyllabusTracker",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/pages/SyllabusTracker.tsx",
+      "target": "function:src/pages/SyllabusTracker.tsx:SyllabusOrbit",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/pages/SyllabusTracker.tsx",
+      "target": "function:src/pages/SyllabusTracker.tsx:SubjectLedger",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/pages/SyllabusTracker.tsx",
+      "target": "function:src/pages/SyllabusTracker.tsx:TopicEvidenceLine",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/pages/TopperNotes.tsx",
+      "target": "function:src/pages/TopperNotes.tsx:readProgress",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/pages/TopperNotes.tsx",
+      "target": "function:src/pages/TopperNotes.tsx:TopperNotes",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/pages/TopperNotes.tsx",
+      "target": "function:src/pages/TopperNotes.tsx:TopperNotes",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/pages/TopperNotes.tsx",
+      "target": "function:src/pages/TopperNotes.tsx:SubjectShelf",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/pages/TopperNotes.tsx",
+      "target": "function:src/pages/TopperNotes.tsx:LinearAlgebraLab",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/pages/TopperNotes.tsx",
+      "target": "function:src/pages/TopperNotes.tsx:NoteRow",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/pages/TriggerDrill.tsx",
+      "target": "function:src/pages/TriggerDrill.tsx:TriggerDrill",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/pages/TriggerDrill.tsx",
+      "target": "function:src/pages/TriggerDrill.tsx:TriggerDrill",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/pages/WeeklyReview.tsx",
+      "target": "function:src/pages/WeeklyReview.tsx:WeeklyReview",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/pages/WeeklyReview.tsx",
+      "target": "function:src/pages/WeeklyReview.tsx:WeeklyReview",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/pages/WeeklyReview.tsx",
+      "target": "function:src/pages/WeeklyReview.tsx:DataStep",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/pages/WeeklyReview.tsx",
+      "target": "function:src/pages/WeeklyReview.tsx:DataCell",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/pages/WeeklyReview.tsx",
+      "target": "function:src/pages/WeeklyReview.tsx:NarrativeStep",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    }
+  ]
+}

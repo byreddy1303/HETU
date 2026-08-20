@@ -1,0 +1,985 @@
+{
+  "nodes": [
+    {
+      "id": "file:supabase/functions/approve-request/index.ts",
+      "type": "file",
+      "name": "index.ts",
+      "filePath": "supabase/functions/approve-request/index.ts",
+      "summary": "Authenticates the account owner, approves an access request through a database RPC, creates an invite link, and emails it to the requester.",
+      "tags": [
+        "api-handler",
+        "supabase-function",
+        "access-control"
+      ],
+      "complexity": "moderate",
+      "languageNotes": "TypeScript targeting the Deno-based Supabase Functions runtime."
+    },
+    {
+      "id": "file:supabase/functions/buddy-notifications/index.ts",
+      "type": "file",
+      "name": "index.ts",
+      "filePath": "supabase/functions/buddy-notifications/index.ts",
+      "summary": "Processes buddy-message notification outbox jobs, creates secure Android actions and inline replies, suppresses in-chat or snoozed delivery, and dispatches push notifications.",
+      "tags": [
+        "api-handler",
+        "supabase-function",
+        "buddy-notifications"
+      ],
+      "complexity": "complex",
+      "languageNotes": "TypeScript targeting the Deno-based Supabase Functions runtime."
+    },
+    {
+      "id": "function:supabase/functions/buddy-notifications/index.ts:inlineReplyToken",
+      "type": "function",
+      "name": "inlineReplyToken",
+      "filePath": "supabase/functions/buddy-notifications/index.ts",
+      "lineRange": [
+        91,
+        113
+      ],
+      "summary": "Creates a signed, hashed token bound to a buddy message, device subscription, and recipient.",
+      "tags": [
+        "service",
+        "buddy-notifications",
+        "push-notifications"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:supabase/functions/buddy-notifications/index.ts:notificationActionToken",
+      "type": "function",
+      "name": "notificationActionToken",
+      "filePath": "supabase/functions/buddy-notifications/index.ts",
+      "lineRange": [
+        115,
+        143
+      ],
+      "summary": "Persists a short-lived token authorizing bounded actions for one buddy notification.",
+      "tags": [
+        "service",
+        "buddy-notifications",
+        "push-notifications"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:supabase/functions/buddy-notifications/index.ts:notificationCopyForSubscription",
+      "type": "function",
+      "name": "notificationCopyForSubscription",
+      "filePath": "supabase/functions/buddy-notifications/index.ts",
+      "lineRange": [
+        145,
+        199
+      ],
+      "summary": "Adds platform-specific Android actions and inline reply metadata to buddy notification copy.",
+      "tags": [
+        "service",
+        "buddy-notifications",
+        "push-notifications"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:supabase/functions/buddy-notifications/index.ts:notificationCopy",
+      "type": "function",
+      "name": "notificationCopy",
+      "filePath": "supabase/functions/buddy-notifications/index.ts",
+      "lineRange": [
+        208,
+        231
+      ],
+      "summary": "Builds privacy-aware buddy-message notification text and route metadata.",
+      "tags": [
+        "service",
+        "buddy-notifications",
+        "push-notifications"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:supabase/functions/buddy-notifications/index.ts:finishJob",
+      "type": "function",
+      "name": "finishJob",
+      "filePath": "supabase/functions/buddy-notifications/index.ts",
+      "lineRange": [
+        251,
+        267
+      ],
+      "summary": "Marks an outbox job complete, retryable, or failed with normalized timing and error data.",
+      "tags": [
+        "service",
+        "buddy-notifications",
+        "push-notifications"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:supabase/functions/buddy-notifications/index.ts:processJob",
+      "type": "function",
+      "name": "processJob",
+      "filePath": "supabase/functions/buddy-notifications/index.ts",
+      "lineRange": [
+        269,
+        424
+      ],
+      "summary": "Loads a buddy message and recipient subscriptions, records deliveries, applies suppression rules, and sends each notification.",
+      "tags": [
+        "service",
+        "buddy-notifications",
+        "push-notifications"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:supabase/functions/buddy-notifications/index.ts:authenticatedUserId",
+      "type": "function",
+      "name": "authenticatedUserId",
+      "filePath": "supabase/functions/buddy-notifications/index.ts",
+      "lineRange": [
+        426,
+        435
+      ],
+      "summary": "Resolves the signed-in user ID from a request bearer token.",
+      "tags": [
+        "service",
+        "buddy-notifications",
+        "push-notifications"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:supabase/functions/buddy-request/index.ts",
+      "type": "file",
+      "name": "index.ts",
+      "filePath": "supabase/functions/buddy-request/index.ts",
+      "summary": "Creates an authenticated buddy request through a database RPC and sends best-effort email and push notifications without exposing account existence.",
+      "tags": [
+        "api-handler",
+        "supabase-function",
+        "buddy-request"
+      ],
+      "complexity": "moderate",
+      "languageNotes": "TypeScript targeting the Deno-based Supabase Functions runtime."
+    },
+    {
+      "id": "file:supabase/functions/compute-readiness/index.ts",
+      "type": "file",
+      "name": "index.ts",
+      "filePath": "supabase/functions/compute-readiness/index.ts",
+      "summary": "Runs an authorized weekly cron calculation over question, pattern, re-attempt, and exam data and upserts readiness snapshots for users.",
+      "tags": [
+        "api-handler",
+        "supabase-function",
+        "compute-readiness"
+      ],
+      "complexity": "moderate",
+      "languageNotes": "TypeScript targeting the Deno-based Supabase Functions runtime."
+    },
+    {
+      "id": "function:supabase/functions/compute-readiness/index.ts:localDate",
+      "type": "function",
+      "name": "localDate",
+      "filePath": "supabase/functions/compute-readiness/index.ts",
+      "lineRange": [
+        42,
+        56
+      ],
+      "summary": "Formats an instant as a calendar date in a user timezone with a UTC fallback.",
+      "tags": [
+        "utility",
+        "readiness",
+        "date-handling"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:supabase/functions/daily-digest/index.ts",
+      "type": "file",
+      "name": "index.ts",
+      "filePath": "supabase/functions/daily-digest/index.ts",
+      "summary": "Selects due recipients by local schedule, builds study digests from planner and re-attempt data, and delivers them through email and Telegram.",
+      "tags": [
+        "api-handler",
+        "supabase-function",
+        "daily-digest"
+      ],
+      "complexity": "complex",
+      "languageNotes": "TypeScript targeting the Deno-based Supabase Functions runtime."
+    },
+    {
+      "id": "function:supabase/functions/daily-digest/index.ts:handleRequest",
+      "type": "function",
+      "name": "handleRequest",
+      "filePath": "supabase/functions/daily-digest/index.ts",
+      "lineRange": [
+        70,
+        245
+      ],
+      "summary": "Authorizes a digest invocation, selects due recipients, builds channel content, sends it, and records delivery dates.",
+      "tags": [
+        "service",
+        "daily-digest",
+        "notification"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:supabase/functions/daily-digest/index.ts:telegramDateLabel",
+      "type": "function",
+      "name": "telegramDateLabel",
+      "filePath": "supabase/functions/daily-digest/index.ts",
+      "lineRange": [
+        262,
+        272
+      ],
+      "summary": "Formats an ISO date for use in Telegram digest headings.",
+      "tags": [
+        "service",
+        "daily-digest",
+        "notification"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:supabase/functions/daily-digest/index.ts:buildDigest",
+      "type": "function",
+      "name": "buildDigest",
+      "filePath": "supabase/functions/daily-digest/index.ts",
+      "lineRange": [
+        274,
+        394
+      ],
+      "summary": "Loads planner, re-attempt, question, completion, and review data and assembles email and Telegram digest content.",
+      "tags": [
+        "service",
+        "daily-digest",
+        "notification"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:supabase/functions/daily-digest/index.ts:renderEmail",
+      "type": "function",
+      "name": "renderEmail",
+      "filePath": "supabase/functions/daily-digest/index.ts",
+      "lineRange": [
+        404,
+        512
+      ],
+      "summary": "Renders a branded responsive HTML email from assembled daily digest sections.",
+      "tags": [
+        "service",
+        "daily-digest",
+        "notification"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:supabase/functions/decline-request/index.ts",
+      "type": "file",
+      "name": "index.ts",
+      "filePath": "supabase/functions/decline-request/index.ts",
+      "summary": "Allows the account owner to decline an access request through a database RPC and optionally sends a polite reason by email.",
+      "tags": [
+        "api-handler",
+        "supabase-function",
+        "access-control"
+      ],
+      "complexity": "moderate",
+      "languageNotes": "TypeScript targeting the Deno-based Supabase Functions runtime."
+    },
+    {
+      "id": "file:supabase/functions/login/index.ts",
+      "type": "file",
+      "name": "index.ts",
+      "filePath": "supabase/functions/login/index.ts",
+      "summary": "Maps a username to its private authentication email and performs PIN-based Supabase sign-in while returning uniform errors to prevent account discovery.",
+      "tags": [
+        "api-handler",
+        "supabase-function",
+        "authentication"
+      ],
+      "complexity": "moderate",
+      "languageNotes": "TypeScript targeting the Deno-based Supabase Functions runtime."
+    },
+    {
+      "id": "file:supabase/functions/notification-actions/index.ts",
+      "type": "file",
+      "name": "index.ts",
+      "filePath": "supabase/functions/notification-actions/index.ts",
+      "summary": "Validates opaque notification action tokens and delegates bounded buddy and study actions to a database RPC.",
+      "tags": [
+        "api-handler",
+        "supabase-function",
+        "notification-actions"
+      ],
+      "complexity": "simple",
+      "languageNotes": "TypeScript targeting the Deno-based Supabase Functions runtime."
+    },
+    {
+      "id": "file:supabase/functions/request-access/index.ts",
+      "type": "file",
+      "name": "index.ts",
+      "filePath": "supabase/functions/request-access/index.ts",
+      "summary": "Validates and rate-limits public access requests, stores them without leaking existing accounts, and notifies the owner by email.",
+      "tags": [
+        "api-handler",
+        "supabase-function",
+        "access-control"
+      ],
+      "complexity": "moderate",
+      "languageNotes": "TypeScript targeting the Deno-based Supabase Functions runtime."
+    },
+    {
+      "id": "function:supabase/functions/request-access/index.ts:validate",
+      "type": "function",
+      "name": "validate",
+      "filePath": "supabase/functions/request-access/index.ts",
+      "lineRange": [
+        31,
+        43
+      ],
+      "summary": "Normalizes and validates public access-request fields before persistence.",
+      "tags": [
+        "api-handler",
+        "access-control",
+        "validation"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:supabase/functions/request-pin-reset/index.ts",
+      "type": "file",
+      "name": "index.ts",
+      "filePath": "supabase/functions/request-pin-reset/index.ts",
+      "summary": "Accepts a username, generates a recovery link for the associated account, and sends a PIN-reset email without exposing account existence.",
+      "tags": [
+        "api-handler",
+        "supabase-function",
+        "authentication"
+      ],
+      "complexity": "moderate",
+      "languageNotes": "TypeScript targeting the Deno-based Supabase Functions runtime."
+    },
+    {
+      "id": "file:supabase/functions/schedule-reattempts/index.ts",
+      "type": "file",
+      "name": "index.ts",
+      "filePath": "supabase/functions/schedule-reattempts/index.ts",
+      "summary": "Nightly cron wrapper that invokes the database routine responsible for rolling overdue re-attempts forward.",
+      "tags": [
+        "api-handler",
+        "supabase-function",
+        "schedule-reattempts"
+      ],
+      "complexity": "simple",
+      "languageNotes": "TypeScript targeting the Deno-based Supabase Functions runtime."
+    },
+    {
+      "id": "file:supabase/functions/signup-via-invite/index.ts",
+      "type": "file",
+      "name": "index.ts",
+      "filePath": "supabase/functions/signup-via-invite/index.ts",
+      "summary": "Validates invite-bound identity details, creates an invite-only PIN account atomically, and prevents email or username pivoting.",
+      "tags": [
+        "api-handler",
+        "supabase-function",
+        "authentication"
+      ],
+      "complexity": "moderate",
+      "languageNotes": "TypeScript targeting the Deno-based Supabase Functions runtime."
+    },
+    {
+      "id": "function:supabase/functions/signup-via-invite/index.ts:inviteBundle",
+      "type": "function",
+      "name": "inviteBundle",
+      "filePath": "supabase/functions/signup-via-invite/index.ts",
+      "lineRange": [
+        39,
+        53
+      ],
+      "summary": "Loads an invite together with the account request that established its authoritative identity.",
+      "tags": [
+        "api-handler",
+        "authentication",
+        "invite"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:supabase/functions/study-notifications/index.ts",
+      "type": "file",
+      "name": "index.ts",
+      "filePath": "supabase/functions/study-notifications/index.ts",
+      "summary": "Loads study context, creates actionable notification events, sends scheduled category reminders, and retries due reminders across push subscriptions.",
+      "tags": [
+        "api-handler",
+        "supabase-function",
+        "study-notifications"
+      ],
+      "complexity": "complex",
+      "languageNotes": "TypeScript targeting the Deno-based Supabase Functions runtime."
+    },
+    {
+      "id": "function:supabase/functions/study-notifications/index.ts:issueActionToken",
+      "type": "function",
+      "name": "issueActionToken",
+      "filePath": "supabase/functions/study-notifications/index.ts",
+      "lineRange": [
+        147,
+        175
+      ],
+      "summary": "Creates and stores a short-lived token for the actions attached to a study notification.",
+      "tags": [
+        "service",
+        "study-notifications",
+        "push-notifications"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:supabase/functions/study-notifications/index.ts:bodyFor",
+      "type": "function",
+      "name": "bodyFor",
+      "filePath": "supabase/functions/study-notifications/index.ts",
+      "lineRange": [
+        177,
+        237
+      ],
+      "summary": "Selects contextual notification copy for a study category from the user’s current progress data.",
+      "tags": [
+        "service",
+        "study-notifications",
+        "push-notifications"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:supabase/functions/study-notifications/index.ts:loadContext",
+      "type": "function",
+      "name": "loadContext",
+      "filePath": "supabase/functions/study-notifications/index.ts",
+      "lineRange": [
+        239,
+        366
+      ],
+      "summary": "Loads planner, attempt, question, formula, pattern, readiness, and review signals needed for study notifications.",
+      "tags": [
+        "service",
+        "study-notifications",
+        "push-notifications"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:supabase/functions/study-notifications/index.ts:studyCopy",
+      "type": "function",
+      "name": "studyCopy",
+      "filePath": "supabase/functions/study-notifications/index.ts",
+      "lineRange": [
+        368,
+        405
+      ],
+      "summary": "Combines category metadata, contextual copy, and action-token routes into one push payload.",
+      "tags": [
+        "service",
+        "study-notifications",
+        "push-notifications"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:supabase/functions/study-notifications/index.ts:eventCopy",
+      "type": "function",
+      "name": "eventCopy",
+      "filePath": "supabase/functions/study-notifications/index.ts",
+      "lineRange": [
+        407,
+        428
+      ],
+      "summary": "Rebuilds push copy for a persisted study notification reminder event.",
+      "tags": [
+        "service",
+        "study-notifications",
+        "push-notifications"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:supabase/functions/study-notifications/index.ts:upsertEvent",
+      "type": "function",
+      "name": "upsertEvent",
+      "filePath": "supabase/functions/study-notifications/index.ts",
+      "lineRange": [
+        430,
+        460
+      ],
+      "summary": "Creates or updates the idempotent notification event for a user, subscription, category, and local date.",
+      "tags": [
+        "service",
+        "study-notifications",
+        "push-notifications"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:supabase/functions/study-notifications/index.ts:sendScheduled",
+      "type": "function",
+      "name": "sendScheduled",
+      "filePath": "supabase/functions/study-notifications/index.ts",
+      "lineRange": [
+        462,
+        533
+      ],
+      "summary": "Builds, persists, and delivers scheduled study notifications while recording provider outcomes.",
+      "tags": [
+        "service",
+        "study-notifications",
+        "push-notifications"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:supabase/functions/study-notifications/index.ts:sendDueReminders",
+      "type": "function",
+      "name": "sendDueReminders",
+      "filePath": "supabase/functions/study-notifications/index.ts",
+      "lineRange": [
+        535,
+        582
+      ],
+      "summary": "Finds reminders whose delay has elapsed, validates current settings, sends them, and records outcomes.",
+      "tags": [
+        "service",
+        "study-notifications",
+        "push-notifications"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:supabase/functions/telegram-webhook/index.ts",
+      "type": "file",
+      "name": "index.ts",
+      "filePath": "supabase/functions/telegram-webhook/index.ts",
+      "summary": "Handles authenticated Telegram webhook commands for connecting, pausing, checking, and rendering today, tomorrow, and weekly study plans.",
+      "tags": [
+        "api-handler",
+        "supabase-function",
+        "telegram-webhook"
+      ],
+      "complexity": "complex",
+      "languageNotes": "TypeScript targeting the Deno-based Supabase Functions runtime."
+    },
+    {
+      "id": "function:supabase/functions/telegram-webhook/index.ts:ensureTelegramCommandMenu",
+      "type": "function",
+      "name": "ensureTelegramCommandMenu",
+      "filePath": "supabase/functions/telegram-webhook/index.ts",
+      "lineRange": [
+        60,
+        83
+      ],
+      "summary": "Registers the supported HETU commands with Telegram once per warm function instance.",
+      "tags": [
+        "api-handler",
+        "telegram",
+        "webhook"
+      ],
+      "complexity": "simple"
+    }
+  ],
+  "edges": [
+    {
+      "source": "file:supabase/functions/approve-request/index.ts",
+      "target": "file:supabase/functions/_shared/cors.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/approve-request/index.ts",
+      "target": "file:supabase/functions/_shared/email.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/buddy-notifications/index.ts",
+      "target": "file:supabase/functions/_shared/cors.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/buddy-notifications/index.ts",
+      "target": "file:supabase/functions/_shared/push.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/buddy-notifications/index.ts",
+      "target": "function:supabase/functions/buddy-notifications/index.ts:inlineReplyToken",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:supabase/functions/buddy-notifications/index.ts",
+      "target": "function:supabase/functions/buddy-notifications/index.ts:notificationActionToken",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:supabase/functions/buddy-notifications/index.ts",
+      "target": "function:supabase/functions/buddy-notifications/index.ts:notificationCopyForSubscription",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:supabase/functions/buddy-notifications/index.ts",
+      "target": "function:supabase/functions/buddy-notifications/index.ts:notificationCopy",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:supabase/functions/buddy-notifications/index.ts",
+      "target": "function:supabase/functions/buddy-notifications/index.ts:finishJob",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:supabase/functions/buddy-notifications/index.ts",
+      "target": "function:supabase/functions/buddy-notifications/index.ts:processJob",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:supabase/functions/buddy-notifications/index.ts",
+      "target": "function:supabase/functions/buddy-notifications/index.ts:authenticatedUserId",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:supabase/functions/buddy-request/index.ts",
+      "target": "file:supabase/functions/_shared/cors.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/buddy-request/index.ts",
+      "target": "file:supabase/functions/_shared/email.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/buddy-request/index.ts",
+      "target": "file:supabase/functions/_shared/push.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/compute-readiness/index.ts",
+      "target": "file:supabase/functions/_shared/cors.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/compute-readiness/index.ts",
+      "target": "file:supabase/functions/_shared/cron-auth.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/compute-readiness/index.ts",
+      "target": "file:supabase/functions/_shared/readiness-score.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/compute-readiness/index.ts",
+      "target": "function:supabase/functions/compute-readiness/index.ts:localDate",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:supabase/functions/daily-digest/index.ts",
+      "target": "file:supabase/functions/_shared/cors.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/daily-digest/index.ts",
+      "target": "file:supabase/functions/_shared/cron-auth.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/daily-digest/index.ts",
+      "target": "file:supabase/functions/_shared/digest-schedule.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/daily-digest/index.ts",
+      "target": "file:supabase/functions/_shared/email.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/daily-digest/index.ts",
+      "target": "file:supabase/functions/_shared/quotes.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/daily-digest/index.ts",
+      "target": "file:supabase/functions/_shared/telegram.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/daily-digest/index.ts",
+      "target": "function:supabase/functions/daily-digest/index.ts:handleRequest",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:supabase/functions/daily-digest/index.ts",
+      "target": "function:supabase/functions/daily-digest/index.ts:telegramDateLabel",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:supabase/functions/daily-digest/index.ts",
+      "target": "function:supabase/functions/daily-digest/index.ts:buildDigest",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:supabase/functions/daily-digest/index.ts",
+      "target": "function:supabase/functions/daily-digest/index.ts:renderEmail",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:supabase/functions/decline-request/index.ts",
+      "target": "file:supabase/functions/_shared/cors.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/decline-request/index.ts",
+      "target": "file:supabase/functions/_shared/email.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/login/index.ts",
+      "target": "file:supabase/functions/_shared/cors.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/notification-actions/index.ts",
+      "target": "file:supabase/functions/_shared/cors.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/request-access/index.ts",
+      "target": "file:supabase/functions/_shared/cors.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/request-access/index.ts",
+      "target": "file:supabase/functions/_shared/email.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/request-access/index.ts",
+      "target": "function:supabase/functions/request-access/index.ts:validate",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:supabase/functions/request-pin-reset/index.ts",
+      "target": "file:supabase/functions/_shared/cors.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/request-pin-reset/index.ts",
+      "target": "file:supabase/functions/_shared/email.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/schedule-reattempts/index.ts",
+      "target": "file:supabase/functions/_shared/cors.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/signup-via-invite/index.ts",
+      "target": "file:supabase/functions/_shared/cors.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/signup-via-invite/index.ts",
+      "target": "function:supabase/functions/signup-via-invite/index.ts:inviteBundle",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:supabase/functions/study-notifications/index.ts",
+      "target": "file:supabase/functions/_shared/cors.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/study-notifications/index.ts",
+      "target": "file:supabase/functions/_shared/digest-schedule.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/study-notifications/index.ts",
+      "target": "file:supabase/functions/_shared/push.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/study-notifications/index.ts",
+      "target": "file:supabase/functions/_shared/study-notification-copy.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/study-notifications/index.ts",
+      "target": "function:supabase/functions/study-notifications/index.ts:issueActionToken",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:supabase/functions/study-notifications/index.ts",
+      "target": "function:supabase/functions/study-notifications/index.ts:bodyFor",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:supabase/functions/study-notifications/index.ts",
+      "target": "function:supabase/functions/study-notifications/index.ts:loadContext",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:supabase/functions/study-notifications/index.ts",
+      "target": "function:supabase/functions/study-notifications/index.ts:studyCopy",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:supabase/functions/study-notifications/index.ts",
+      "target": "function:supabase/functions/study-notifications/index.ts:eventCopy",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:supabase/functions/study-notifications/index.ts",
+      "target": "function:supabase/functions/study-notifications/index.ts:upsertEvent",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:supabase/functions/study-notifications/index.ts",
+      "target": "function:supabase/functions/study-notifications/index.ts:sendScheduled",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:supabase/functions/study-notifications/index.ts",
+      "target": "function:supabase/functions/study-notifications/index.ts:sendDueReminders",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:supabase/functions/telegram-webhook/index.ts",
+      "target": "file:supabase/functions/_shared/cors.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/telegram-webhook/index.ts",
+      "target": "file:supabase/functions/_shared/quotes.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/telegram-webhook/index.ts",
+      "target": "file:supabase/functions/_shared/telegram.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:supabase/functions/telegram-webhook/index.ts",
+      "target": "function:supabase/functions/telegram-webhook/index.ts:ensureTelegramCommandMenu",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    }
+  ]
+}

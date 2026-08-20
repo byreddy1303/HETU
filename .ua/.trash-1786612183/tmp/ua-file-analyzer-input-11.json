@@ -1,0 +1,53 @@
+{
+  "projectRoot": "/Users/bkalyankrishnareddy/Desktop/GATE PREP/hetu",
+  "batchFiles": [
+    {
+      "path": "scripts/build-go-classes-coa-test-2-log-migration.mjs",
+      "language": "javascript",
+      "sizeLines": 255,
+      "fileCategory": "code"
+    },
+    {
+      "path": "scripts/build-pyq-bank.mjs",
+      "language": "javascript",
+      "sizeLines": 1068,
+      "fileCategory": "code"
+    }
+  ],
+  "batchImportData": {
+    "scripts/build-go-classes-coa-test-2-log-migration.mjs": [
+      "scripts/pyq-taxonomy.mjs"
+    ],
+    "scripts/build-pyq-bank.mjs": [
+      "scripts/pyq-taxonomy.mjs"
+    ]
+  },
+  "neighborMap": {
+    "scripts/build-go-classes-coa-test-2-log-migration.mjs": [
+      {
+        "path": "scripts/pyq-taxonomy.mjs",
+        "batchIndex": 11,
+        "symbols": [
+          "PYQ_BANK_VERSION",
+          "PYQ_TAXONOMY",
+          "PYQ_MANUAL_CLASSIFICATIONS",
+          "classifyPyqQuestion",
+          "taxonomySubject"
+        ]
+      }
+    ],
+    "scripts/build-pyq-bank.mjs": [
+      {
+        "path": "scripts/pyq-taxonomy.mjs",
+        "batchIndex": 11,
+        "symbols": [
+          "PYQ_BANK_VERSION",
+          "PYQ_TAXONOMY",
+          "PYQ_MANUAL_CLASSIFICATIONS",
+          "classifyPyqQuestion",
+          "taxonomySubject"
+        ]
+      }
+    ]
+  }
+}

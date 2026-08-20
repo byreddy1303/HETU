@@ -1,0 +1,727 @@
+{
+  "nodes": [
+    {
+      "id": "file:src/__tests__/do-now.test.ts",
+      "type": "file",
+      "name": "do-now.test.ts",
+      "filePath": "src/__tests__/do-now.test.ts",
+      "summary": "Verifies the Do Now queue prioritizes due retrieval, analysis, uncertainty, speed, formulas, and planned work while omitting completed blocks and already analyzed PYQs.",
+      "tags": [
+        "test",
+        "vitest",
+        "study-queue",
+        "task-prioritization"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/__tests__/planner-execution.test.ts",
+      "type": "file",
+      "name": "planner-execution.test.ts",
+      "filePath": "src/__tests__/planner-execution.test.ts",
+      "summary": "Tests planner-mode routing, duration-weighted completion, protection against overlong blocks masking unfinished work, and reconciliation from persisted sessions into exact planner blocks.",
+      "tags": [
+        "test",
+        "vitest",
+        "planner",
+        "session-management"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/__tests__/planner-execution.test.ts:block",
+      "type": "function",
+      "name": "block",
+      "filePath": "src/__tests__/planner-execution.test.ts",
+      "lineRange": [
+        15,
+        25
+      ],
+      "summary": "Creates a Planner study-block fixture with stable subject, duration, mode, priority, and target defaults.",
+      "tags": [
+        "test",
+        "vitest",
+        "planner",
+        "session-management"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/__tests__/planner-native-ui.test.tsx",
+      "type": "file",
+      "name": "planner-native-ui.test.tsx",
+      "filePath": "src/__tests__/planner-native-ui.test.tsx",
+      "summary": "Exercises Android Planner sheets, protecting dialogs from WebView-retargeted backdrop taps and covering a complete native session creation flow.",
+      "tags": [
+        "test",
+        "vitest",
+        "planner",
+        "native-ui"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/__tests__/planner-native-ui.test.tsx:NativePlannerHarness",
+      "type": "function",
+      "name": "NativePlannerHarness",
+      "filePath": "src/__tests__/planner-native-ui.test.tsx",
+      "lineRange": [
+        14,
+        25
+      ],
+      "summary": "Hosts a stateful empty day plan in the native DayPlanModal for interaction tests.",
+      "tags": [
+        "test",
+        "vitest",
+        "planner",
+        "native-ui"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/__tests__/planner-ui.test.tsx",
+      "type": "file",
+      "name": "planner-ui.test.tsx",
+      "filePath": "src/__tests__/planner-ui.test.tsx",
+      "summary": "Tests the portalled Planner subject picker, including searchable selection and continued editing of a custom subject name.",
+      "tags": [
+        "test",
+        "vitest",
+        "planner",
+        "subject-picker"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/__tests__/planner-ui.test.tsx:PlannerHarness",
+      "type": "function",
+      "name": "PlannerHarness",
+      "filePath": "src/__tests__/planner-ui.test.tsx",
+      "lineRange": [
+        8,
+        19
+      ],
+      "summary": "Hosts a stateful empty day plan in the DayPlanModal so subject-picker edits can be observed.",
+      "tags": [
+        "test",
+        "vitest",
+        "planner",
+        "subject-picker"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/__tests__/planner_cloud.test.ts",
+      "type": "file",
+      "name": "planner_cloud.test.ts",
+      "filePath": "src/__tests__/planner_cloud.test.ts",
+      "summary": "Verifies cloud range loading accepts only structurally valid Planner sessions and returns sanitized cloud-only plans for requested dates.",
+      "tags": [
+        "test",
+        "vitest",
+        "planner",
+        "cloud-sync"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/__tests__/planner_storage.test.ts",
+      "type": "file",
+      "name": "planner_storage.test.ts",
+      "filePath": "src/__tests__/planner_storage.test.ts",
+      "summary": "Checks user-scoped Planner storage isolation, one-time claiming of legacy rows, and strict ISO-date parsing for deep links.",
+      "tags": [
+        "test",
+        "vitest",
+        "planner",
+        "local-storage"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/components/planner/Calendar.tsx",
+      "type": "file",
+      "name": "Calendar.tsx",
+      "filePath": "src/components/planner/Calendar.tsx",
+      "summary": "Renders a stable six-week monthly Planner grid with a minimum date boundary, today highlighting, plan-duration summaries, subject chips, native haptics, and responsive labels.",
+      "tags": [
+        "component",
+        "planner",
+        "calendar",
+        "responsive-design"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:src/components/planner/Calendar.tsx:Calendar",
+      "type": "function",
+      "name": "Calendar",
+      "filePath": "src/components/planner/Calendar.tsx",
+      "lineRange": [
+        51,
+        220
+      ],
+      "summary": "Builds a fixed six-week month grid and renders selectable in-month days with plan summaries, boundaries, today state, and native feedback.",
+      "tags": [
+        "component",
+        "planner",
+        "calendar",
+        "responsive-design"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/components/planner/DayPlanModal.tsx",
+      "type": "file",
+      "name": "DayPlanModal.tsx",
+      "filePath": "src/components/planner/DayPlanModal.tsx",
+      "summary": "Provides the day-plan view and editor for sessions and end-of-day review, with auto-persisted changes, execution actions, native-safe dismissal, and confirmed clearing.",
+      "tags": [
+        "component",
+        "planner",
+        "form",
+        "local-storage"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:src/components/planner/DayPlanModal.tsx:DayPlanModal",
+      "type": "function",
+      "name": "DayPlanModal",
+      "filePath": "src/components/planner/DayPlanModal.tsx",
+      "lineRange": [
+        46,
+        242
+      ],
+      "summary": "Switches between readable and editable day-plan modes, auto-emits plan changes, handles Escape and native-safe dismissal, and coordinates clear and execution actions.",
+      "tags": [
+        "component",
+        "planner",
+        "form",
+        "local-storage"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/components/planner/DayPlanModal.tsx:ViewMode",
+      "type": "function",
+      "name": "ViewMode",
+      "filePath": "src/components/planner/DayPlanModal.tsx",
+      "lineRange": [
+        246,
+        364
+      ],
+      "summary": "Presents planned sessions, start or completion controls, actual execution facts, and any completed end-of-day review.",
+      "tags": [
+        "component",
+        "planner",
+        "form",
+        "local-storage"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/components/planner/DayPlanModal.tsx:Section",
+      "type": "function",
+      "name": "Section",
+      "filePath": "src/components/planner/DayPlanModal.tsx",
+      "lineRange": [
+        377,
+        420
+      ],
+      "summary": "Renders an always-open native section or a collapsible desktop editor section.",
+      "tags": [
+        "component",
+        "planner",
+        "form",
+        "local-storage"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/components/planner/DayPlanModal.tsx:SessionsEditor",
+      "type": "function",
+      "name": "SessionsEditor",
+      "filePath": "src/components/planner/DayPlanModal.tsx",
+      "lineRange": [
+        424,
+        481
+      ],
+      "summary": "Adds, updates, removes, and totals study-session blocks before emitting the next session list.",
+      "tags": [
+        "component",
+        "planner",
+        "form",
+        "local-storage"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/components/planner/DayPlanModal.tsx:SessionRow",
+      "type": "function",
+      "name": "SessionRow",
+      "filePath": "src/components/planner/DayPlanModal.tsx",
+      "lineRange": [
+        483,
+        615
+      ],
+      "summary": "Renders all editable fields for one planned session, including subject, duration, mode, priority, target, resource, and removal.",
+      "tags": [
+        "component",
+        "planner",
+        "form",
+        "local-storage"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/components/planner/DayPlanModal.tsx:ReviewEditor",
+      "type": "function",
+      "name": "ReviewEditor",
+      "filePath": "src/components/planner/DayPlanModal.tsx",
+      "lineRange": [
+        619,
+        709
+      ],
+      "summary": "Edits completion, reflection, mood, and plan-replication fields for the end-of-day review.",
+      "tags": [
+        "component",
+        "planner",
+        "form",
+        "local-storage"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/components/planner/DayPlanModal.tsx:Field",
+      "type": "function",
+      "name": "Field",
+      "filePath": "src/components/planner/DayPlanModal.tsx",
+      "lineRange": [
+        713,
+        728
+      ],
+      "summary": "Wraps a Planner control with consistent label and layout styling.",
+      "tags": [
+        "component",
+        "planner",
+        "form",
+        "local-storage"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/components/planner/PlannerInsights.tsx",
+      "type": "file",
+      "name": "PlannerInsights.tsx",
+      "filePath": "src/components/planner/PlannerInsights.tsx",
+      "summary": "Displays local 30-day Planner rollups for volume, completion, subject, mode, priority, repeatability, and neglected subjects with native and desktop layouts.",
+      "tags": [
+        "component",
+        "planner",
+        "analytics",
+        "data-visualization"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:src/components/planner/PlannerInsights.tsx:PlannerInsights",
+      "type": "function",
+      "name": "PlannerInsights",
+      "filePath": "src/components/planner/PlannerInsights.tsx",
+      "lineRange": [
+        34,
+        251
+      ],
+      "summary": "Loads local plans for a revision, computes 30-day analytics, and renders platform-specific KPI, share, repeatability, and neglect summaries.",
+      "tags": [
+        "component",
+        "planner",
+        "analytics",
+        "data-visualization"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:src/components/planner/PlannerInsights.tsx:Kpi",
+      "type": "function",
+      "name": "Kpi",
+      "filePath": "src/components/planner/PlannerInsights.tsx",
+      "lineRange": [
+        253,
+        269
+      ],
+      "summary": "Renders one labeled Planner metric with an optional explanatory hint.",
+      "tags": [
+        "component",
+        "planner",
+        "analytics",
+        "data-visualization"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/components/planner/PlannerInsights.tsx:ShareBlock",
+      "type": "function",
+      "name": "ShareBlock",
+      "filePath": "src/components/planner/PlannerInsights.tsx",
+      "lineRange": [
+        271,
+        307
+      ],
+      "summary": "Renders a ranked share distribution as labeled proportional bars with formatted quantities and percentages.",
+      "tags": [
+        "component",
+        "planner",
+        "analytics",
+        "data-visualization"
+      ],
+      "complexity": "simple"
+    }
+  ],
+  "edges": [
+    {
+      "source": "file:src/__tests__/do-now.test.ts",
+      "target": "file:src/lib/do-now.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/__tests__/do-now.test.ts",
+      "target": "file:src/lib/planner-storage.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/__tests__/do-now.test.ts",
+      "target": "file:src/types/index.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/__tests__/planner-execution.test.ts",
+      "target": "file:src/lib/db.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/__tests__/planner-execution.test.ts",
+      "target": "file:src/lib/planner-execution.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/__tests__/planner-execution.test.ts",
+      "target": "file:src/lib/planner-storage.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/__tests__/planner-execution.test.ts",
+      "target": "file:src/stores/auth.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/__tests__/planner-execution.test.ts",
+      "target": "function:src/__tests__/planner-execution.test.ts:block",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/__tests__/planner-native-ui.test.tsx",
+      "target": "file:src/components/planner/DayPlanModal.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/__tests__/planner-native-ui.test.tsx",
+      "target": "file:src/lib/planner-storage.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/__tests__/planner-native-ui.test.tsx",
+      "target": "function:src/__tests__/planner-native-ui.test.tsx:NativePlannerHarness",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/__tests__/planner-ui.test.tsx",
+      "target": "file:src/components/planner/DayPlanModal.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/__tests__/planner-ui.test.tsx",
+      "target": "file:src/lib/planner-storage.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/__tests__/planner-ui.test.tsx",
+      "target": "function:src/__tests__/planner-ui.test.tsx:PlannerHarness",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/__tests__/planner_cloud.test.ts",
+      "target": "file:src/lib/planner-cloud.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/__tests__/planner_storage.test.ts",
+      "target": "file:src/lib/planner-storage.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/__tests__/planner_storage.test.ts",
+      "target": "file:src/stores/auth.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/planner/Calendar.tsx",
+      "target": "file:src/lib/native.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/planner/Calendar.tsx",
+      "target": "file:src/lib/planner-constants.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/planner/Calendar.tsx",
+      "target": "file:src/lib/planner-storage.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/planner/Calendar.tsx",
+      "target": "file:src/lib/utils.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/planner/Calendar.tsx",
+      "target": "function:src/components/planner/Calendar.tsx:Calendar",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/components/planner/Calendar.tsx",
+      "target": "function:src/components/planner/Calendar.tsx:Calendar",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/components/planner/DayPlanModal.tsx",
+      "target": "file:src/components/planner/SubjectPicker.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/planner/DayPlanModal.tsx",
+      "target": "file:src/components/ui/Button.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/planner/DayPlanModal.tsx",
+      "target": "file:src/components/ui/Input.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/planner/DayPlanModal.tsx",
+      "target": "file:src/components/ui/Select.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/planner/DayPlanModal.tsx",
+      "target": "file:src/components/ui/Textarea.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/planner/DayPlanModal.tsx",
+      "target": "file:src/lib/native.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/planner/DayPlanModal.tsx",
+      "target": "file:src/lib/planner-constants.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/planner/DayPlanModal.tsx",
+      "target": "file:src/lib/planner-storage.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/planner/DayPlanModal.tsx",
+      "target": "file:src/lib/utils.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/planner/DayPlanModal.tsx",
+      "target": "function:src/components/planner/DayPlanModal.tsx:DayPlanModal",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/components/planner/DayPlanModal.tsx",
+      "target": "function:src/components/planner/DayPlanModal.tsx:DayPlanModal",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/components/planner/DayPlanModal.tsx",
+      "target": "function:src/components/planner/DayPlanModal.tsx:ViewMode",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/components/planner/DayPlanModal.tsx",
+      "target": "function:src/components/planner/DayPlanModal.tsx:Section",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/components/planner/DayPlanModal.tsx",
+      "target": "function:src/components/planner/DayPlanModal.tsx:SessionsEditor",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/components/planner/DayPlanModal.tsx",
+      "target": "function:src/components/planner/DayPlanModal.tsx:SessionRow",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/components/planner/DayPlanModal.tsx",
+      "target": "function:src/components/planner/DayPlanModal.tsx:ReviewEditor",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/components/planner/DayPlanModal.tsx",
+      "target": "function:src/components/planner/DayPlanModal.tsx:Field",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/components/planner/PlannerInsights.tsx",
+      "target": "file:src/components/ui/Card.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/planner/PlannerInsights.tsx",
+      "target": "file:src/lib/native.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/planner/PlannerInsights.tsx",
+      "target": "file:src/lib/planner-constants.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/planner/PlannerInsights.tsx",
+      "target": "file:src/lib/planner-insights.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/planner/PlannerInsights.tsx",
+      "target": "file:src/lib/utils.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/planner/PlannerInsights.tsx",
+      "target": "function:src/components/planner/PlannerInsights.tsx:PlannerInsights",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/components/planner/PlannerInsights.tsx",
+      "target": "function:src/components/planner/PlannerInsights.tsx:PlannerInsights",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/components/planner/PlannerInsights.tsx",
+      "target": "function:src/components/planner/PlannerInsights.tsx:Kpi",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/components/planner/PlannerInsights.tsx",
+      "target": "function:src/components/planner/PlannerInsights.tsx:ShareBlock",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    }
+  ]
+}

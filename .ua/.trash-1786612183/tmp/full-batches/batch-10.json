@@ -1,0 +1,1392 @@
+{
+  "nodes": [
+    {
+      "id": "file:src/__tests__/progress_export.test.ts",
+      "type": "file",
+      "name": "progress_export.test.ts",
+      "filePath": "src/__tests__/progress_export.test.ts",
+      "summary": "Verifies comprehensive progress metrics, spreadsheet-safe CSV output, numeric values, and strict user scoping during report collection.",
+      "tags": [
+        "test",
+        "vitest",
+        "progress-export"
+      ],
+      "complexity": "moderate",
+      "languageNotes": "TypeScript module."
+    },
+    {
+      "id": "function:src/__tests__/progress_export.test.ts:session",
+      "type": "function",
+      "name": "session",
+      "filePath": "src/__tests__/progress_export.test.ts",
+      "lineRange": [
+        16,
+        30
+      ],
+      "summary": "Builds a representative completed session fixture for progress-report tests.",
+      "tags": [
+        "test-fixture",
+        "vitest",
+        "progress-export"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/__tests__/progress_export.test.ts:question",
+      "type": "function",
+      "name": "question",
+      "filePath": "src/__tests__/progress_export.test.ts",
+      "lineRange": [
+        32,
+        54
+      ],
+      "summary": "Builds a representative question fixture with configurable outcome or readiness evidence.",
+      "tags": [
+        "test-fixture",
+        "vitest",
+        "progress-export"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/__tests__/progress_export.test.ts:pattern",
+      "type": "function",
+      "name": "pattern",
+      "filePath": "src/__tests__/progress_export.test.ts",
+      "lineRange": [
+        56,
+        67
+      ],
+      "summary": "Builds a representative pattern-library fixture for report and readiness tests.",
+      "tags": [
+        "test-fixture",
+        "vitest",
+        "progress-export"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/__tests__/progress_export.test.ts:reattempt",
+      "type": "function",
+      "name": "reattempt",
+      "filePath": "src/__tests__/progress_export.test.ts",
+      "lineRange": [
+        69,
+        79
+      ],
+      "summary": "Builds a representative spaced re-attempt fixture for report and readiness tests.",
+      "tags": [
+        "test-fixture",
+        "vitest",
+        "progress-export"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/__tests__/progress_export.test.ts:progressData",
+      "type": "function",
+      "name": "progressData",
+      "filePath": "src/__tests__/progress_export.test.ts",
+      "lineRange": [
+        81,
+        110
+      ],
+      "summary": "Assembles a complete in-memory learner dataset spanning the progress-report components.",
+      "tags": [
+        "test-fixture",
+        "vitest",
+        "progress-export"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/__tests__/readiness-snapshots.test.ts",
+      "type": "file",
+      "name": "readiness-snapshots.test.ts",
+      "filePath": "src/__tests__/readiness-snapshots.test.ts",
+      "summary": "Covers account-isolated readiness history, prior-week comparisons, and the minimum sample span required for exam projection.",
+      "tags": [
+        "test",
+        "vitest",
+        "readiness-history"
+      ],
+      "complexity": "moderate",
+      "languageNotes": "TypeScript module."
+    },
+    {
+      "id": "function:src/__tests__/readiness-snapshots.test.ts:snapshot",
+      "type": "function",
+      "name": "snapshot",
+      "filePath": "src/__tests__/readiness-snapshots.test.ts",
+      "lineRange": [
+        10,
+        20
+      ],
+      "summary": "Builds a readiness snapshot fixture whose component values track its score.",
+      "tags": [
+        "test-fixture",
+        "vitest",
+        "readiness-history"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/__tests__/readiness.test.ts",
+      "type": "file",
+      "name": "readiness.test.ts",
+      "filePath": "src/__tests__/readiness.test.ts",
+      "summary": "Exercises readiness subscores, evidence tempering, client/server parity, per-subject breakdowns, recommendations, AIR bands, and deterministic exam simulation.",
+      "tags": [
+        "test",
+        "vitest",
+        "readiness"
+      ],
+      "complexity": "complex",
+      "languageNotes": "TypeScript module."
+    },
+    {
+      "id": "function:src/__tests__/readiness.test.ts:question",
+      "type": "function",
+      "name": "question",
+      "filePath": "src/__tests__/readiness.test.ts",
+      "lineRange": [
+        20,
+        43
+      ],
+      "summary": "Builds a representative question fixture with configurable outcome or readiness evidence.",
+      "tags": [
+        "test-fixture",
+        "vitest",
+        "readiness"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/__tests__/readiness.test.ts:reattempt",
+      "type": "function",
+      "name": "reattempt",
+      "filePath": "src/__tests__/readiness.test.ts",
+      "lineRange": [
+        45,
+        55
+      ],
+      "summary": "Builds a representative spaced re-attempt fixture for report and readiness tests.",
+      "tags": [
+        "test-fixture",
+        "vitest",
+        "readiness"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/__tests__/readiness.test.ts:pattern",
+      "type": "function",
+      "name": "pattern",
+      "filePath": "src/__tests__/readiness.test.ts",
+      "lineRange": [
+        57,
+        68
+      ],
+      "summary": "Builds a representative pattern-library fixture for report and readiness tests.",
+      "tags": [
+        "test-fixture",
+        "vitest",
+        "readiness"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/__tests__/topic-progress.test.ts",
+      "type": "file",
+      "name": "topic-progress.test.ts",
+      "filePath": "src/__tests__/topic-progress.test.ts",
+      "summary": "Verifies user-scoped topic completion timestamps and removal when a syllabus topic is unticked.",
+      "tags": [
+        "test",
+        "vitest",
+        "topic-progress"
+      ],
+      "complexity": "simple",
+      "languageNotes": "TypeScript module."
+    },
+    {
+      "id": "file:src/lib/progress-export.ts",
+      "type": "file",
+      "name": "progress-export.ts",
+      "filePath": "src/lib/progress-export.ts",
+      "summary": "Collects learner-owned local data and builds a versioned, spreadsheet-friendly progress report across sessions, journal, planner, PYQs, revision, readiness, syllabus, and focus metrics.",
+      "tags": [
+        "service",
+        "progress-export",
+        "serialization"
+      ],
+      "complexity": "complex",
+      "languageNotes": "TypeScript module."
+    },
+    {
+      "id": "function:src/lib/progress-export.ts:buildProgressReport",
+      "type": "function",
+      "name": "buildProgressReport",
+      "filePath": "src/lib/progress-export.ts",
+      "lineRange": [
+        68,
+        326
+      ],
+      "summary": "Aggregates learner data into versioned numeric metrics for every major study, review, readiness, syllabus, and focus surface.",
+      "tags": [
+        "utility",
+        "progress-export",
+        "serialization"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:src/lib/progress-export.ts:collectProgressReport",
+      "type": "function",
+      "name": "collectProgressReport",
+      "filePath": "src/lib/progress-export.ts",
+      "lineRange": [
+        329,
+        385
+      ],
+      "summary": "Loads only the selected user’s local rows, planner data, and topic completions before building the report.",
+      "tags": [
+        "utility",
+        "progress-export",
+        "serialization"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/lib/progress-export.ts:progressReportCsv",
+      "type": "function",
+      "name": "progressReportCsv",
+      "filePath": "src/lib/progress-export.ts",
+      "lineRange": [
+        395,
+        406
+      ],
+      "summary": "Serializes the progress report as BOM-prefixed, spreadsheet-safe CSV with stable metadata and metric columns.",
+      "tags": [
+        "utility",
+        "progress-export",
+        "serialization"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/progress-export.ts:downloadProgressReport",
+      "type": "function",
+      "name": "downloadProgressReport",
+      "filePath": "src/lib/progress-export.ts",
+      "lineRange": [
+        408,
+        418
+      ],
+      "summary": "Creates a temporary CSV object URL and triggers a dated browser download.",
+      "tags": [
+        "utility",
+        "progress-export",
+        "serialization"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/lib/readiness-snapshots.ts",
+      "type": "file",
+      "name": "readiness-snapshots.ts",
+      "filePath": "src/lib/readiness-snapshots.ts",
+      "summary": "Persists local readiness snapshots, computes weekly movement and exam projections, and tracks long-running weak-component debt overall and by subject.",
+      "tags": [
+        "service",
+        "readiness-history",
+        "local-storage"
+      ],
+      "complexity": "complex",
+      "languageNotes": "TypeScript module."
+    },
+    {
+      "id": "function:src/lib/readiness-snapshots.ts:loadSnapshots",
+      "type": "function",
+      "name": "loadSnapshots",
+      "filePath": "src/lib/readiness-snapshots.ts",
+      "lineRange": [
+        64,
+        67
+      ],
+      "summary": "Loads and chronologically sorts one user’s locally stored readiness snapshots.",
+      "tags": [
+        "utility",
+        "readiness-history",
+        "local-storage"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/readiness-snapshots.ts:upsertSnapshot",
+      "type": "function",
+      "name": "upsertSnapshot",
+      "filePath": "src/lib/readiness-snapshots.ts",
+      "lineRange": [
+        71,
+        78
+      ],
+      "summary": "Idempotently replaces a day’s snapshot, sorts history, trims it to the retention limit, and persists it.",
+      "tags": [
+        "utility",
+        "readiness-history",
+        "local-storage"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/readiness-snapshots.ts:weeklyDelta",
+      "type": "function",
+      "name": "weeklyDelta",
+      "filePath": "src/lib/readiness-snapshots.ts",
+      "lineRange": [
+        81,
+        102
+      ],
+      "summary": "Compares the latest score with the nearest snapshot around seven days earlier when a valid comparison exists.",
+      "tags": [
+        "utility",
+        "readiness-history",
+        "local-storage"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/readiness-snapshots.ts:projectToExam",
+      "type": "function",
+      "name": "projectToExam",
+      "filePath": "src/lib/readiness-snapshots.ts",
+      "lineRange": [
+        114,
+        142
+      ],
+      "summary": "Fits a linear trend to sufficiently broad recent history and projects a bounded exam-day score.",
+      "tags": [
+        "utility",
+        "readiness-history",
+        "local-storage"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/readiness-snapshots.ts:loadDebt",
+      "type": "function",
+      "name": "loadDebt",
+      "filePath": "src/lib/readiness-snapshots.ts",
+      "lineRange": [
+        153,
+        155
+      ],
+      "summary": "Loads the user’s persisted weak-component watchlist.",
+      "tags": [
+        "utility",
+        "readiness-history",
+        "local-storage"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/readiness-snapshots.ts:updateDebt",
+      "type": "function",
+      "name": "updateDebt",
+      "filePath": "src/lib/readiness-snapshots.ts",
+      "lineRange": [
+        165,
+        225
+      ],
+      "summary": "Recomputes overall and per-subject component debt, retaining below-threshold entries and updating the weeks held.",
+      "tags": [
+        "utility",
+        "readiness-history",
+        "local-storage"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/lib/readiness.ts",
+      "type": "file",
+      "name": "readiness.ts",
+      "filePath": "src/lib/readiness.ts",
+      "summary": "Computes evidence-tempered overall and per-subject exam readiness, component contributions, prioritized next moves, coarse AIR bands, and deterministic exam-day simulations.",
+      "tags": [
+        "service",
+        "readiness",
+        "analytics"
+      ],
+      "complexity": "complex",
+      "languageNotes": "TypeScript module."
+    },
+    {
+      "id": "function:src/lib/readiness.ts:coverage",
+      "type": "function",
+      "name": "coverage",
+      "filePath": "src/lib/readiness.ts",
+      "lineRange": [
+        45,
+        47
+      ],
+      "summary": "Normalizes encountered pattern count against the target pattern library.",
+      "tags": [
+        "utility",
+        "readiness",
+        "analytics"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/readiness.ts:retention",
+      "type": "function",
+      "name": "retention",
+      "filePath": "src/lib/readiness.ts",
+      "lineRange": [
+        50,
+        56
+      ],
+      "summary": "Calculates the fraction of eligible re-attempts stabilized at D30 or mastered.",
+      "tags": [
+        "utility",
+        "readiness",
+        "analytics"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/readiness.ts:calibration",
+      "type": "function",
+      "name": "calibration",
+      "filePath": "src/lib/readiness.ts",
+      "lineRange": [
+        59,
+        64
+      ],
+      "summary": "Calculates correctness among questions the learner explicitly chose to mark.",
+      "tags": [
+        "utility",
+        "readiness",
+        "analytics"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/readiness.ts:surface",
+      "type": "function",
+      "name": "surface",
+      "filePath": "src/lib/readiness.ts",
+      "lineRange": [
+        67,
+        69
+      ],
+      "summary": "Converts the open re-attempt count into an inverse mistake-surface score.",
+      "tags": [
+        "utility",
+        "readiness",
+        "analytics"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/readiness.ts:computeReadiness",
+      "type": "function",
+      "name": "computeReadiness",
+      "filePath": "src/lib/readiness.ts",
+      "lineRange": [
+        71,
+        116
+      ],
+      "summary": "Combines evidence-tempered coverage, retention, calibration, and mistake surface into a score, confidence level, and counts.",
+      "tags": [
+        "utility",
+        "readiness",
+        "analytics"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/readiness.ts:readinessComponents",
+      "type": "function",
+      "name": "readinessComponents",
+      "filePath": "src/lib/readiness.ts",
+      "lineRange": [
+        129,
+        167
+      ],
+      "summary": "Expands a readiness breakdown into labeled weighted components and rounded score contributions.",
+      "tags": [
+        "utility",
+        "readiness",
+        "analytics"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/readiness.ts:computeReadinessBySubject",
+      "type": "function",
+      "name": "computeReadinessBySubject",
+      "filePath": "src/lib/readiness.ts",
+      "lineRange": [
+        237,
+        319
+      ],
+      "summary": "Joins re-attempts to questions, slices evidence by subject, scales coverage targets, and computes subject readiness and confidence.",
+      "tags": [
+        "utility",
+        "readiness",
+        "analytics"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/lib/readiness.ts:nextMoves",
+      "type": "function",
+      "name": "nextMoves",
+      "filePath": "src/lib/readiness.ts",
+      "lineRange": [
+        343,
+        419
+      ],
+      "summary": "Ranks up to three concrete calibration, re-attempt, coverage, stabilization, or diagnosis actions from readiness evidence.",
+      "tags": [
+        "utility",
+        "readiness",
+        "analytics"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/lib/readiness.ts:estimateAIRBand",
+      "type": "function",
+      "name": "estimateAIRBand",
+      "filePath": "src/lib/readiness.ts",
+      "lineRange": [
+        434,
+        481
+      ],
+      "summary": "Maps readiness score and remaining runway into a coarse rank band with an explicit caveat.",
+      "tags": [
+        "utility",
+        "readiness",
+        "analytics"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/readiness.ts:simulateOnce",
+      "type": "function",
+      "name": "simulateOnce",
+      "filePath": "src/lib/readiness.ts",
+      "lineRange": [
+        509,
+        533
+      ],
+      "summary": "Runs one subject-weighted exam simulation using calibration as correctness probability and negative marking for misses.",
+      "tags": [
+        "utility",
+        "readiness",
+        "analytics"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/readiness.ts:examDaySimulator",
+      "type": "function",
+      "name": "examDaySimulator",
+      "filePath": "src/lib/readiness.ts",
+      "lineRange": [
+        535,
+        568
+      ],
+      "summary": "Runs a deterministic seeded Monte Carlo simulation and reports P10, median, P90, and mean marks.",
+      "tags": [
+        "utility",
+        "readiness",
+        "analytics"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/stores/topic-progress.ts",
+      "type": "file",
+      "name": "topic-progress.ts",
+      "filePath": "src/stores/topic-progress.ts",
+      "summary": "Maintains user-scoped syllabus completion state in Zustand, migrates legacy local records, and mirrors deterministic topic rows through the offline sync engine.",
+      "tags": [
+        "service",
+        "topic-progress",
+        "state-management"
+      ],
+      "complexity": "moderate",
+      "languageNotes": "TypeScript module."
+    },
+    {
+      "id": "function:src/stores/topic-progress.ts:topicProgressId",
+      "type": "function",
+      "name": "topicProgressId",
+      "filePath": "src/stores/topic-progress.ts",
+      "lineRange": [
+        17,
+        19
+      ],
+      "summary": "Builds the stable subject-and-topic key used in local completion state.",
+      "tags": [
+        "utility",
+        "topic-progress",
+        "state-management"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/stores/topic-progress.ts:topicProgressRowId",
+      "type": "function",
+      "name": "topicProgressRowId",
+      "filePath": "src/stores/topic-progress.ts",
+      "lineRange": [
+        27,
+        29
+      ],
+      "summary": "Derives a deterministic synchronized row ID from user, subject, and topic.",
+      "tags": [
+        "utility",
+        "topic-progress",
+        "state-management"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/stores/topic-progress.ts:selectCompletionsForUser",
+      "type": "function",
+      "name": "selectCompletionsForUser",
+      "filePath": "src/stores/topic-progress.ts",
+      "lineRange": [
+        31,
+        66
+      ],
+      "summary": "Selects an effective user’s completions with ordered fallbacks for migrated legacy identities.",
+      "tags": [
+        "utility",
+        "topic-progress",
+        "state-management"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/stores/topic-progress.ts:syncTopicProgressFromDb",
+      "type": "function",
+      "name": "syncTopicProgressFromDb",
+      "filePath": "src/stores/topic-progress.ts",
+      "lineRange": [
+        68,
+        120
+      ],
+      "summary": "Merges local, legacy, and synchronized topic completion rows and idempotently migrates missing records into offline sync.",
+      "tags": [
+        "utility",
+        "topic-progress",
+        "state-management"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:supabase/functions/_shared/readiness-score.ts",
+      "type": "file",
+      "name": "readiness-score.ts",
+      "filePath": "supabase/functions/_shared/readiness-score.ts",
+      "summary": "Implements the server-side readiness composite kept equivalent to the client scorer for scheduled snapshot computation.",
+      "tags": [
+        "service",
+        "readiness",
+        "supabase-function"
+      ],
+      "complexity": "simple",
+      "languageNotes": "TypeScript targeting the Deno-based Supabase Functions runtime."
+    },
+    {
+      "id": "function:supabase/functions/_shared/readiness-score.ts:computeReadinessScore",
+      "type": "function",
+      "name": "computeReadinessScore",
+      "filePath": "supabase/functions/_shared/readiness-score.ts",
+      "lineRange": [
+        17,
+        45
+      ],
+      "summary": "Computes the server readiness score from the same weighted and sample-tempered evidence used by the client.",
+      "tags": [
+        "utility",
+        "readiness",
+        "supabase-function"
+      ],
+      "complexity": "simple"
+    }
+  ],
+  "edges": [
+    {
+      "source": "file:src/__tests__/progress_export.test.ts",
+      "target": "file:src/lib/db.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/__tests__/progress_export.test.ts",
+      "target": "file:src/lib/planner-storage.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/__tests__/progress_export.test.ts",
+      "target": "file:src/lib/progress-export.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/__tests__/progress_export.test.ts",
+      "target": "file:src/stores/topic-progress.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/__tests__/progress_export.test.ts",
+      "target": "file:src/types/index.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/__tests__/progress_export.test.ts",
+      "target": "function:src/__tests__/progress_export.test.ts:session",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/__tests__/progress_export.test.ts",
+      "target": "function:src/__tests__/progress_export.test.ts:question",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/__tests__/progress_export.test.ts",
+      "target": "function:src/__tests__/progress_export.test.ts:pattern",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/__tests__/progress_export.test.ts",
+      "target": "function:src/__tests__/progress_export.test.ts:reattempt",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/__tests__/progress_export.test.ts",
+      "target": "function:src/__tests__/progress_export.test.ts:progressData",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/__tests__/readiness-snapshots.test.ts",
+      "target": "file:src/lib/readiness-snapshots.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/__tests__/readiness-snapshots.test.ts",
+      "target": "function:src/__tests__/readiness-snapshots.test.ts:snapshot",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/__tests__/readiness.test.ts",
+      "target": "file:src/lib/readiness.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/__tests__/readiness.test.ts",
+      "target": "file:src/types/index.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/__tests__/readiness.test.ts",
+      "target": "file:supabase/functions/_shared/readiness-score.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/__tests__/readiness.test.ts",
+      "target": "function:src/__tests__/readiness.test.ts:question",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/__tests__/readiness.test.ts",
+      "target": "function:src/__tests__/readiness.test.ts:reattempt",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/__tests__/readiness.test.ts",
+      "target": "function:src/__tests__/readiness.test.ts:pattern",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/__tests__/topic-progress.test.ts",
+      "target": "file:src/stores/topic-progress.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/lib/progress-export.ts",
+      "target": "file:src/lib/analysis.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/lib/progress-export.ts",
+      "target": "file:src/lib/constants.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/lib/progress-export.ts",
+      "target": "file:src/lib/db.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/lib/progress-export.ts",
+      "target": "file:src/lib/planner-storage.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/lib/progress-export.ts",
+      "target": "file:src/lib/readiness.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/lib/progress-export.ts",
+      "target": "file:src/lib/subtopics.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/lib/progress-export.ts",
+      "target": "file:src/stores/topic-progress.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/lib/progress-export.ts",
+      "target": "file:src/types/index.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/lib/progress-export.ts",
+      "target": "function:src/lib/progress-export.ts:buildProgressReport",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/progress-export.ts",
+      "target": "function:src/lib/progress-export.ts:buildProgressReport",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/progress-export.ts",
+      "target": "function:src/lib/progress-export.ts:collectProgressReport",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/progress-export.ts",
+      "target": "function:src/lib/progress-export.ts:collectProgressReport",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/progress-export.ts",
+      "target": "function:src/lib/progress-export.ts:progressReportCsv",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/progress-export.ts",
+      "target": "function:src/lib/progress-export.ts:progressReportCsv",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/progress-export.ts",
+      "target": "function:src/lib/progress-export.ts:downloadProgressReport",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/progress-export.ts",
+      "target": "function:src/lib/progress-export.ts:downloadProgressReport",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/readiness-snapshots.ts",
+      "target": "file:src/lib/readiness.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/lib/readiness-snapshots.ts",
+      "target": "function:src/lib/readiness-snapshots.ts:loadSnapshots",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/readiness-snapshots.ts",
+      "target": "function:src/lib/readiness-snapshots.ts:loadSnapshots",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/readiness-snapshots.ts",
+      "target": "function:src/lib/readiness-snapshots.ts:upsertSnapshot",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/readiness-snapshots.ts",
+      "target": "function:src/lib/readiness-snapshots.ts:upsertSnapshot",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/readiness-snapshots.ts",
+      "target": "function:src/lib/readiness-snapshots.ts:weeklyDelta",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/readiness-snapshots.ts",
+      "target": "function:src/lib/readiness-snapshots.ts:weeklyDelta",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/readiness-snapshots.ts",
+      "target": "function:src/lib/readiness-snapshots.ts:projectToExam",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/readiness-snapshots.ts",
+      "target": "function:src/lib/readiness-snapshots.ts:projectToExam",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/readiness-snapshots.ts",
+      "target": "function:src/lib/readiness-snapshots.ts:loadDebt",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/readiness-snapshots.ts",
+      "target": "function:src/lib/readiness-snapshots.ts:loadDebt",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/readiness-snapshots.ts",
+      "target": "function:src/lib/readiness-snapshots.ts:updateDebt",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/readiness-snapshots.ts",
+      "target": "function:src/lib/readiness-snapshots.ts:updateDebt",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/readiness.ts",
+      "target": "file:src/lib/utils.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/lib/readiness.ts",
+      "target": "file:src/types/index.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/lib/readiness.ts",
+      "target": "function:src/lib/readiness.ts:coverage",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/readiness.ts",
+      "target": "function:src/lib/readiness.ts:coverage",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/readiness.ts",
+      "target": "function:src/lib/readiness.ts:retention",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/readiness.ts",
+      "target": "function:src/lib/readiness.ts:retention",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/readiness.ts",
+      "target": "function:src/lib/readiness.ts:calibration",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/readiness.ts",
+      "target": "function:src/lib/readiness.ts:calibration",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/readiness.ts",
+      "target": "function:src/lib/readiness.ts:surface",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/readiness.ts",
+      "target": "function:src/lib/readiness.ts:surface",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/readiness.ts",
+      "target": "function:src/lib/readiness.ts:computeReadiness",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/readiness.ts",
+      "target": "function:src/lib/readiness.ts:computeReadiness",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/readiness.ts",
+      "target": "function:src/lib/readiness.ts:readinessComponents",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/readiness.ts",
+      "target": "function:src/lib/readiness.ts:readinessComponents",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/readiness.ts",
+      "target": "function:src/lib/readiness.ts:computeReadinessBySubject",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/readiness.ts",
+      "target": "function:src/lib/readiness.ts:computeReadinessBySubject",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/readiness.ts",
+      "target": "function:src/lib/readiness.ts:nextMoves",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/readiness.ts",
+      "target": "function:src/lib/readiness.ts:nextMoves",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/readiness.ts",
+      "target": "function:src/lib/readiness.ts:estimateAIRBand",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/readiness.ts",
+      "target": "function:src/lib/readiness.ts:estimateAIRBand",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/readiness.ts",
+      "target": "function:src/lib/readiness.ts:simulateOnce",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/readiness.ts",
+      "target": "function:src/lib/readiness.ts:examDaySimulator",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/readiness.ts",
+      "target": "function:src/lib/readiness.ts:examDaySimulator",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/stores/topic-progress.ts",
+      "target": "file:src/lib/db.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/stores/topic-progress.ts",
+      "target": "file:src/lib/sync.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/stores/topic-progress.ts",
+      "target": "file:src/lib/utils.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/stores/topic-progress.ts",
+      "target": "file:src/stores/auth.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/stores/topic-progress.ts",
+      "target": "function:src/stores/topic-progress.ts:topicProgressId",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/stores/topic-progress.ts",
+      "target": "function:src/stores/topic-progress.ts:topicProgressId",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/stores/topic-progress.ts",
+      "target": "function:src/stores/topic-progress.ts:topicProgressRowId",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/stores/topic-progress.ts",
+      "target": "function:src/stores/topic-progress.ts:topicProgressRowId",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/stores/topic-progress.ts",
+      "target": "function:src/stores/topic-progress.ts:selectCompletionsForUser",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/stores/topic-progress.ts",
+      "target": "function:src/stores/topic-progress.ts:selectCompletionsForUser",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/stores/topic-progress.ts",
+      "target": "function:src/stores/topic-progress.ts:syncTopicProgressFromDb",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/stores/topic-progress.ts",
+      "target": "function:src/stores/topic-progress.ts:syncTopicProgressFromDb",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:supabase/functions/_shared/readiness-score.ts",
+      "target": "function:supabase/functions/_shared/readiness-score.ts:computeReadinessScore",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:supabase/functions/_shared/readiness-score.ts",
+      "target": "function:supabase/functions/_shared/readiness-score.ts:computeReadinessScore",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/__tests__/progress_export.test.ts",
+      "target": "file:src/lib/db.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/__tests__/progress_export.test.ts",
+      "target": "file:src/lib/planner-storage.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/__tests__/progress_export.test.ts",
+      "target": "file:src/lib/progress-export.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/__tests__/progress_export.test.ts",
+      "target": "file:src/stores/topic-progress.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/__tests__/progress_export.test.ts",
+      "target": "file:src/types/index.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/__tests__/readiness-snapshots.test.ts",
+      "target": "file:src/lib/readiness-snapshots.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/__tests__/readiness.test.ts",
+      "target": "file:src/lib/readiness.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/__tests__/readiness.test.ts",
+      "target": "file:src/types/index.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/__tests__/readiness.test.ts",
+      "target": "file:supabase/functions/_shared/readiness-score.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/__tests__/topic-progress.test.ts",
+      "target": "file:src/stores/topic-progress.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    }
+  ]
+}

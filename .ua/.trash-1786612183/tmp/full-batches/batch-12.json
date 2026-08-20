@@ -1,0 +1,64 @@
+{
+  "nodes": [
+    {
+      "id": "table:supabase/migrations/20260813000004_go_classes_coa_topic_test_photos.sql:migration",
+      "type": "table",
+      "name": "20260813000004_go_classes_coa_topic_test_photos.sql",
+      "filePath": "supabase/migrations/20260813000004_go_classes_coa_topic_test_photos.sql",
+      "summary": "Attaches answer-free question crops and full attempt-result screenshots to the first GO Classes COA topic-test records. It updates exactly fifteen PYQ attempt snapshots and fifteen journal questions for the target learner, failing atomically when the expected coverage is not met.",
+      "tags": [
+        "database",
+        "migration",
+        "pyq-practice",
+        "image-metadata"
+      ],
+      "complexity": "moderate",
+      "languageNotes": "PostgreSQL anonymous migration block temporarily relaxes the immutable-attempt trigger, enriches JSONB snapshots idempotently, and verifies affected-row counts."
+    },
+    {
+      "id": "table:supabase/migrations/20260813000005_go_classes_coa_topic_test_2_photos.sql:migration",
+      "type": "table",
+      "name": "20260813000005_go_classes_coa_topic_test_2_photos.sql",
+      "filePath": "supabase/migrations/20260813000005_go_classes_coa_topic_test_2_photos.sql",
+      "summary": "Attaches question crops and learner-result screenshots to the second GO Classes COA topic-test attempt and journal records. It idempotently enriches fifteen immutable attempt snapshots and fifteen matching questions, enforcing complete migration coverage through row-count checks.",
+      "tags": [
+        "database",
+        "migration",
+        "pyq-practice",
+        "image-metadata"
+      ],
+      "complexity": "moderate",
+      "languageNotes": "PostgreSQL anonymous migration block updates JSONB question HTML and screenshot paths while temporarily disabling the immutable-attempt trigger."
+    }
+  ],
+  "edges": [
+    {
+      "source": "table:supabase/migrations/20260813000004_go_classes_coa_topic_test_photos.sql:migration",
+      "target": "table:supabase/migrations/20260802000001_pyq_attempts.sql:pyq_attempts",
+      "type": "migrates",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "table:supabase/migrations/20260813000004_go_classes_coa_topic_test_photos.sql:migration",
+      "target": "table:supabase/migrations/20260717000001_initial_schema.sql:questions",
+      "type": "migrates",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "table:supabase/migrations/20260813000005_go_classes_coa_topic_test_2_photos.sql:migration",
+      "target": "table:supabase/migrations/20260802000001_pyq_attempts.sql:pyq_attempts",
+      "type": "migrates",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "table:supabase/migrations/20260813000005_go_classes_coa_topic_test_2_photos.sql:migration",
+      "target": "table:supabase/migrations/20260717000001_initial_schema.sql:questions",
+      "type": "migrates",
+      "direction": "forward",
+      "weight": 0.7
+    }
+  ]
+}

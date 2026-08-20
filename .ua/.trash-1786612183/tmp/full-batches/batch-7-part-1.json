@@ -1,0 +1,968 @@
+{
+  "nodes": [
+    {
+      "id": "file:src/components/tags/RootCauseStep.tsx",
+      "type": "file",
+      "name": "RootCauseStep.tsx",
+      "filePath": "src/components/tags/RootCauseStep.tsx",
+      "summary": "Renders the root-cause choices in the tagging flow and supports number-key selection and Escape navigation.",
+      "tags": [
+        "component",
+        "question-tagging",
+        "workflow"
+      ],
+      "complexity": "simple",
+      "languageNotes": "React component written in TypeScript with JSX."
+    },
+    {
+      "id": "function:src/components/tags/RootCauseStep.tsx:RootCauseStep",
+      "type": "function",
+      "name": "RootCauseStep",
+      "filePath": "src/components/tags/RootCauseStep.tsx",
+      "lineRange": [
+        6,
+        38
+      ],
+      "summary": "Renders root-cause options and maps configured number keys and Escape to selection and back actions.",
+      "tags": [
+        "component",
+        "question-tagging",
+        "workflow"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/components/tags/TagFlow.tsx",
+      "type": "file",
+      "name": "TagFlow.tsx",
+      "filePath": "src/components/tags/TagFlow.tsx",
+      "summary": "Coordinates the keyboard-first source, outcome, pattern, trigger, and root-cause workflow, including animated navigation, native back handling, and local-first save state.",
+      "tags": [
+        "component",
+        "question-tagging",
+        "workflow"
+      ],
+      "complexity": "complex",
+      "languageNotes": "React component written in TypeScript with JSX."
+    },
+    {
+      "id": "function:src/components/tags/TagFlow.tsx:TagFlow",
+      "type": "function",
+      "name": "TagFlow",
+      "filePath": "src/components/tags/TagFlow.tsx",
+      "lineRange": [
+        54,
+        329
+      ],
+      "summary": "Owns the multi-step tagging state machine, navigation, conditional root-cause step, animation direction, native back behavior, and final persistence.",
+      "tags": [
+        "component",
+        "question-tagging",
+        "workflow"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:src/components/tags/TagOption.tsx",
+      "type": "file",
+      "name": "TagOption.tsx",
+      "filePath": "src/components/tags/TagOption.tsx",
+      "summary": "Provides a reusable keyboard-labeled tagging choice with semantic tones, selected styling, and haptic feedback.",
+      "tags": [
+        "component",
+        "question-tagging",
+        "workflow"
+      ],
+      "complexity": "moderate",
+      "languageNotes": "React component written in TypeScript with JSX."
+    },
+    {
+      "id": "function:src/components/tags/TagOption.tsx:TagOption",
+      "type": "function",
+      "name": "TagOption",
+      "filePath": "src/components/tags/TagOption.tsx",
+      "lineRange": [
+        16,
+        54
+      ],
+      "summary": "Renders one tone-aware tagging choice and emits haptic feedback before selection.",
+      "tags": [
+        "component",
+        "question-tagging",
+        "workflow"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/components/tags/TriggerStep.tsx",
+      "type": "file",
+      "name": "TriggerStep.tsx",
+      "filePath": "src/components/tags/TriggerStep.tsx",
+      "summary": "Captures the exact question phrase that should cue a method, with focused keyboard submission, skip behavior, and explanatory guidance.",
+      "tags": [
+        "component",
+        "question-tagging",
+        "workflow"
+      ],
+      "complexity": "moderate",
+      "languageNotes": "React component written in TypeScript with JSX."
+    },
+    {
+      "id": "function:src/components/tags/TriggerStep.tsx:TriggerStep",
+      "type": "function",
+      "name": "TriggerStep",
+      "filePath": "src/components/tags/TriggerStep.tsx",
+      "lineRange": [
+        5,
+        76
+      ],
+      "summary": "Manages trigger-sentence input, focus, keyboard submission, back navigation, and explicit skip behavior.",
+      "tags": [
+        "component",
+        "question-tagging",
+        "workflow"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/components/tags/sourceDraft.ts",
+      "type": "file",
+      "name": "sourceDraft.ts",
+      "filePath": "src/components/tags/sourceDraft.ts",
+      "summary": "Defines the source-capture draft and creates a new GATE PYQ-oriented default with current year and set metadata.",
+      "tags": [
+        "component",
+        "question-tagging",
+        "workflow"
+      ],
+      "complexity": "simple",
+      "languageNotes": "TypeScript module."
+    },
+    {
+      "id": "function:src/components/tags/sourceDraft.ts:makeInitialSource",
+      "type": "function",
+      "name": "makeInitialSource",
+      "filePath": "src/components/tags/sourceDraft.ts",
+      "lineRange": [
+        26,
+        42
+      ],
+      "summary": "Creates a source draft initialized to the latest available GATE year and applicable set.",
+      "tags": [
+        "component",
+        "question-tagging",
+        "workflow"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/hooks/useKeyboard.ts",
+      "type": "file",
+      "name": "useKeyboard.ts",
+      "filePath": "src/hooks/useKeyboard.ts",
+      "summary": "Registers guarded global keyboard shortcuts while ignoring modified keystrokes and events originating from editable controls.",
+      "tags": [
+        "hook",
+        "react",
+        "keyboard-shortcuts"
+      ],
+      "complexity": "simple",
+      "languageNotes": "TypeScript module."
+    },
+    {
+      "id": "function:src/hooks/useKeyboard.ts:useKeyboard",
+      "type": "function",
+      "name": "useKeyboard",
+      "filePath": "src/hooks/useKeyboard.ts",
+      "lineRange": [
+        18,
+        35
+      ],
+      "summary": "Registers current key handlers globally while excluding modified keys and editable targets.",
+      "tags": [
+        "hook",
+        "react",
+        "keyboard-shortcuts"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/hooks/useTimer.ts",
+      "type": "file",
+      "name": "useTimer.ts",
+      "filePath": "src/hooks/useTimer.ts",
+      "summary": "Returns drift-resistant elapsed seconds derived from an epoch start time and refreshed twice per second.",
+      "tags": [
+        "hook",
+        "react",
+        "timer"
+      ],
+      "complexity": "simple",
+      "languageNotes": "TypeScript module."
+    },
+    {
+      "id": "function:src/hooks/useTimer.ts:useTimer",
+      "type": "function",
+      "name": "useTimer",
+      "filePath": "src/hooks/useTimer.ts",
+      "lineRange": [
+        4,
+        19
+      ],
+      "summary": "Calculates elapsed whole seconds from the system clock and refreshes the value on an interval.",
+      "tags": [
+        "hook",
+        "react",
+        "timer"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/lib/analysis.ts",
+      "type": "file",
+      "name": "analysis.ts",
+      "filePath": "src/lib/analysis.ts",
+      "summary": "Provides deterministic dashboard and weekly-review analytics for mistake surface, outcomes, calibration, heatmaps, weekly summaries, and active study days.",
+      "tags": [
+        "service",
+        "analytics",
+        "learner-evidence"
+      ],
+      "complexity": "complex",
+      "languageNotes": "TypeScript module."
+    },
+    {
+      "id": "function:src/lib/analysis.ts:weeklyDraftFingerprint",
+      "type": "function",
+      "name": "weeklyDraftFingerprint",
+      "filePath": "src/lib/analysis.ts",
+      "lineRange": [
+        21,
+        23
+      ],
+      "summary": "Builds a trimmed fingerprint of the three required weekly-review narratives to detect unsaved edits.",
+      "tags": [
+        "utility",
+        "analytics",
+        "learner-evidence"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/analysis.ts:mistakeSurfaceOpen",
+      "type": "function",
+      "name": "mistakeSurfaceOpen",
+      "filePath": "src/lib/analysis.ts",
+      "lineRange": [
+        40,
+        42
+      ],
+      "summary": "Counts re-attempt records that have not reached the mastered stage.",
+      "tags": [
+        "utility",
+        "analytics",
+        "learner-evidence"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/analysis.ts:mistakeSurfaceTrend",
+      "type": "function",
+      "name": "mistakeSurfaceTrend",
+      "filePath": "src/lib/analysis.ts",
+      "lineRange": [
+        51,
+        65
+      ],
+      "summary": "Compares the current open mistake surface with its reconstructed state one week earlier.",
+      "tags": [
+        "utility",
+        "analytics",
+        "learner-evidence"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/analysis.ts:mistakeSurfaceMovement",
+      "type": "function",
+      "name": "mistakeSurfaceMovement",
+      "filePath": "src/lib/analysis.ts",
+      "lineRange": [
+        68,
+        83
+      ],
+      "summary": "Counts mistake cards opened and mastered over the trailing seven local calendar days.",
+      "tags": [
+        "utility",
+        "analytics",
+        "learner-evidence"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/analysis.ts:mistakeSurfaceSeries",
+      "type": "function",
+      "name": "mistakeSurfaceSeries",
+      "filePath": "src/lib/analysis.ts",
+      "lineRange": [
+        99,
+        129
+      ],
+      "summary": "Reconstructs daily open, opened, and mastered mistake-surface points over a local-calendar window.",
+      "tags": [
+        "utility",
+        "analytics",
+        "learner-evidence"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/analysis.ts:outcomeDistribution",
+      "type": "function",
+      "name": "outcomeDistribution",
+      "filePath": "src/lib/analysis.ts",
+      "lineRange": [
+        132,
+        136
+      ],
+      "summary": "Counts questions into every configured outcome bucket, including zero-count outcomes.",
+      "tags": [
+        "utility",
+        "analytics",
+        "learner-evidence"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/analysis.ts:latestSession",
+      "type": "function",
+      "name": "latestSession",
+      "filePath": "src/lib/analysis.ts",
+      "lineRange": [
+        139,
+        143
+      ],
+      "summary": "Returns the newest finished session by creation timestamp.",
+      "tags": [
+        "utility",
+        "analytics",
+        "learner-evidence"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/analysis.ts:dueTodayCount",
+      "type": "function",
+      "name": "dueTodayCount",
+      "filePath": "src/lib/analysis.ts",
+      "lineRange": [
+        146,
+        148
+      ],
+      "summary": "Counts non-mastered re-attempts scheduled on or before the requested day.",
+      "tags": [
+        "utility",
+        "analytics",
+        "learner-evidence"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/analysis.ts:summarizeWeek",
+      "type": "function",
+      "name": "summarizeWeek",
+      "filePath": "src/lib/analysis.ts",
+      "lineRange": [
+        154,
+        201
+      ],
+      "summary": "Aggregates one local-calendar week by outcome, root cause, subject, and repeated pattern.",
+      "tags": [
+        "utility",
+        "analytics",
+        "learner-evidence"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/analysis.ts:calibrationBySubject",
+      "type": "function",
+      "name": "calibrationBySubject",
+      "filePath": "src/lib/analysis.ts",
+      "lineRange": [
+        227,
+        292
+      ],
+      "summary": "Calculates per-subject decision accuracy and negative-marking expected value and recommends raising, lowering, or holding the answer threshold.",
+      "tags": [
+        "utility",
+        "analytics",
+        "learner-evidence"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/lib/analysis.ts:calibrationOverall",
+      "type": "function",
+      "name": "calibrationOverall",
+      "filePath": "src/lib/analysis.ts",
+      "lineRange": [
+        295,
+        324
+      ],
+      "summary": "Combines subject calibration rows into all-subject decision counts, accuracy, and expected value.",
+      "tags": [
+        "utility",
+        "analytics",
+        "learner-evidence"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/analysis.ts:isMistake",
+      "type": "function",
+      "name": "isMistake",
+      "filePath": "src/lib/analysis.ts",
+      "lineRange": [
+        334,
+        336
+      ],
+      "summary": "Classifies every non-clean outcome as part of the mistake surface.",
+      "tags": [
+        "utility",
+        "analytics",
+        "learner-evidence"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/analysis.ts:heatmapCells",
+      "type": "function",
+      "name": "heatmapCells",
+      "filePath": "src/lib/analysis.ts",
+      "lineRange": [
+        343,
+        366
+      ],
+      "summary": "Buckets dated mistakes by subject, optional subtopic, and root cause for the weakness heatmap.",
+      "tags": [
+        "utility",
+        "analytics",
+        "learner-evidence"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/analysis.ts:heatmapRowTotals",
+      "type": "function",
+      "name": "heatmapRowTotals",
+      "filePath": "src/lib/analysis.ts",
+      "lineRange": [
+        369,
+        376
+      ],
+      "summary": "Totals heatmap cells by subject and subtopic row.",
+      "tags": [
+        "utility",
+        "analytics",
+        "learner-evidence"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/analysis.ts:activeDaysBack",
+      "type": "function",
+      "name": "activeDaysBack",
+      "filePath": "src/lib/analysis.ts",
+      "lineRange": [
+        382,
+        397
+      ],
+      "summary": "Counts consecutive local calendar days ending today that contain at least one tagged question.",
+      "tags": [
+        "utility",
+        "analytics",
+        "learner-evidence"
+      ],
+      "complexity": "simple"
+    }
+  ],
+  "edges": [
+    {
+      "source": "file:src/components/tags/RootCauseStep.tsx",
+      "target": "file:src/components/tags/TagOption.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/tags/RootCauseStep.tsx",
+      "target": "file:src/hooks/useKeyboard.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/tags/RootCauseStep.tsx",
+      "target": "file:src/lib/constants.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/tags/RootCauseStep.tsx",
+      "target": "file:src/types/index.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/tags/RootCauseStep.tsx",
+      "target": "function:src/components/tags/RootCauseStep.tsx:RootCauseStep",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/components/tags/RootCauseStep.tsx",
+      "target": "function:src/components/tags/RootCauseStep.tsx:RootCauseStep",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/components/tags/TagFlow.tsx",
+      "target": "file:src/components/tags/OutcomeStep.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/tags/TagFlow.tsx",
+      "target": "file:src/components/tags/PatternStep.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/tags/TagFlow.tsx",
+      "target": "file:src/components/tags/RootCauseStep.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/tags/TagFlow.tsx",
+      "target": "file:src/components/tags/SourceStep.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/tags/TagFlow.tsx",
+      "target": "file:src/components/tags/TriggerStep.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/tags/TagFlow.tsx",
+      "target": "file:src/components/tags/sourceDraft.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/tags/TagFlow.tsx",
+      "target": "file:src/components/ui/Button.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/tags/TagFlow.tsx",
+      "target": "file:src/lib/constants.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/tags/TagFlow.tsx",
+      "target": "file:src/lib/native.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/tags/TagFlow.tsx",
+      "target": "file:src/lib/utils.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/tags/TagFlow.tsx",
+      "target": "file:src/types/index.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/tags/TagFlow.tsx",
+      "target": "function:src/components/tags/TagFlow.tsx:TagFlow",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/components/tags/TagFlow.tsx",
+      "target": "function:src/components/tags/TagFlow.tsx:TagFlow",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/components/tags/TagOption.tsx",
+      "target": "file:src/components/ui/Kbd.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/tags/TagOption.tsx",
+      "target": "file:src/lib/native.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/tags/TagOption.tsx",
+      "target": "file:src/lib/utils.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/tags/TagOption.tsx",
+      "target": "function:src/components/tags/TagOption.tsx:TagOption",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/components/tags/TagOption.tsx",
+      "target": "function:src/components/tags/TagOption.tsx:TagOption",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/components/tags/TriggerStep.tsx",
+      "target": "file:src/components/ui/Button.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/tags/TriggerStep.tsx",
+      "target": "file:src/components/ui/Input.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/tags/TriggerStep.tsx",
+      "target": "function:src/components/tags/TriggerStep.tsx:TriggerStep",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/components/tags/TriggerStep.tsx",
+      "target": "function:src/components/tags/TriggerStep.tsx:TriggerStep",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/components/tags/sourceDraft.ts",
+      "target": "file:src/lib/constants.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/tags/sourceDraft.ts",
+      "target": "function:src/components/tags/sourceDraft.ts:makeInitialSource",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/components/tags/sourceDraft.ts",
+      "target": "function:src/components/tags/sourceDraft.ts:makeInitialSource",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/hooks/useKeyboard.ts",
+      "target": "function:src/hooks/useKeyboard.ts:useKeyboard",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/hooks/useKeyboard.ts",
+      "target": "function:src/hooks/useKeyboard.ts:useKeyboard",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/hooks/useTimer.ts",
+      "target": "function:src/hooks/useTimer.ts:useTimer",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/hooks/useTimer.ts",
+      "target": "function:src/hooks/useTimer.ts:useTimer",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/analysis.ts",
+      "target": "file:src/lib/constants.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/lib/analysis.ts",
+      "target": "file:src/lib/utils.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/lib/analysis.ts",
+      "target": "file:src/types/index.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/lib/analysis.ts",
+      "target": "function:src/lib/analysis.ts:weeklyDraftFingerprint",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/analysis.ts",
+      "target": "function:src/lib/analysis.ts:weeklyDraftFingerprint",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/analysis.ts",
+      "target": "function:src/lib/analysis.ts:mistakeSurfaceOpen",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/analysis.ts",
+      "target": "function:src/lib/analysis.ts:mistakeSurfaceOpen",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/analysis.ts",
+      "target": "function:src/lib/analysis.ts:mistakeSurfaceTrend",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/analysis.ts",
+      "target": "function:src/lib/analysis.ts:mistakeSurfaceTrend",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/analysis.ts",
+      "target": "function:src/lib/analysis.ts:mistakeSurfaceMovement",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/analysis.ts",
+      "target": "function:src/lib/analysis.ts:mistakeSurfaceMovement",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/analysis.ts",
+      "target": "function:src/lib/analysis.ts:mistakeSurfaceSeries",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/analysis.ts",
+      "target": "function:src/lib/analysis.ts:mistakeSurfaceSeries",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/analysis.ts",
+      "target": "function:src/lib/analysis.ts:outcomeDistribution",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/analysis.ts",
+      "target": "function:src/lib/analysis.ts:outcomeDistribution",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/analysis.ts",
+      "target": "function:src/lib/analysis.ts:latestSession",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/analysis.ts",
+      "target": "function:src/lib/analysis.ts:latestSession",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/analysis.ts",
+      "target": "function:src/lib/analysis.ts:dueTodayCount",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/analysis.ts",
+      "target": "function:src/lib/analysis.ts:dueTodayCount",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/analysis.ts",
+      "target": "function:src/lib/analysis.ts:summarizeWeek",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/analysis.ts",
+      "target": "function:src/lib/analysis.ts:summarizeWeek",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/analysis.ts",
+      "target": "function:src/lib/analysis.ts:calibrationBySubject",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/analysis.ts",
+      "target": "function:src/lib/analysis.ts:calibrationBySubject",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/analysis.ts",
+      "target": "function:src/lib/analysis.ts:calibrationOverall",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/analysis.ts",
+      "target": "function:src/lib/analysis.ts:calibrationOverall",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/analysis.ts",
+      "target": "function:src/lib/analysis.ts:isMistake",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/analysis.ts",
+      "target": "function:src/lib/analysis.ts:isMistake",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/analysis.ts",
+      "target": "function:src/lib/analysis.ts:heatmapCells",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/analysis.ts",
+      "target": "function:src/lib/analysis.ts:heatmapCells",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/analysis.ts",
+      "target": "function:src/lib/analysis.ts:heatmapRowTotals",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/analysis.ts",
+      "target": "function:src/lib/analysis.ts:heatmapRowTotals",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/analysis.ts",
+      "target": "function:src/lib/analysis.ts:activeDaysBack",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/analysis.ts",
+      "target": "function:src/lib/analysis.ts:activeDaysBack",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    }
+  ]
+}

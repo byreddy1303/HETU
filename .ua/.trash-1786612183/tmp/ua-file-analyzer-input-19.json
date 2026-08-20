@@ -1,0 +1,14 @@
+{
+  "projectRoot": "/Users/bkalyankrishnareddy/Desktop/GATE PREP/hetu",
+  "batchFiles": [
+    {
+      "path": "src/__tests__/go-classes-coa-test-2-photos.test.ts",
+      "language": "typescript",
+      "sizeLines": 55,
+      "fileCategory": "code"
+    }
+  ],
+  "batchImportData": {
+    "src/__tests__/go-classes-coa-test-2-photos.test.ts": []
+  }
+}

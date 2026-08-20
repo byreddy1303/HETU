@@ -1,0 +1,1032 @@
+{
+  "scriptCompleted": true,
+  "filesAnalyzed": 1,
+  "filesSkipped": [],
+  "analysisOutcomes": {
+    "structure": {
+      "succeeded": 1,
+      "failed": 0
+    },
+    "callGraph": {
+      "succeeded": 1,
+      "failed": 0,
+      "skipped": 0
+    }
+  },
+  "results": [
+    {
+      "path": "src/pages/Journal.tsx",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 920,
+      "nonEmptyLines": 890,
+      "functions": [
+        {
+          "name": "fuzzy",
+          "startLine": 60,
+          "endLine": 66,
+          "params": [
+            "query",
+            "target"
+          ]
+        },
+        {
+          "name": "detectSourceKind",
+          "startLine": 99,
+          "endLine": 105,
+          "params": [
+            "ref"
+          ]
+        },
+        {
+          "name": "detectFormat",
+          "startLine": 108,
+          "endLine": 114,
+          "params": [
+            "ref"
+          ]
+        },
+        {
+          "name": "Detail",
+          "startLine": 116,
+          "endLine": 123,
+          "params": [
+            "{ label, children }"
+          ]
+        },
+        {
+          "name": "Row",
+          "startLine": 125,
+          "endLine": 323,
+          "params": [
+            "{\n  q,\n  onImage,\n  onEdit\n}"
+          ]
+        },
+        {
+          "name": "Journal",
+          "startLine": 325,
+          "endLine": 821,
+          "params": []
+        },
+        {
+          "name": "RecentSessionsCard",
+          "startLine": 823,
+          "endLine": 920,
+          "params": [
+            "{\n  sessions,\n  countsBySession,\n  selectedId,\n  onSelect,\n  onEdit,\n  onOpenReview\n}"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "Journal",
+          "line": 325,
+          "isDefault": true
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "fuzzy",
+          "callee": "query.trim().toLowerCase",
+          "lineNumber": 61
+        },
+        {
+          "caller": "fuzzy",
+          "callee": "query.trim",
+          "lineNumber": 61
+        },
+        {
+          "caller": "fuzzy",
+          "callee": "target.toLowerCase",
+          "lineNumber": 62
+        },
+        {
+          "caller": "fuzzy",
+          "callee": "t.includes",
+          "lineNumber": 63
+        },
+        {
+          "caller": "fuzzy",
+          "callee": "t.split",
+          "lineNumber": 64
+        },
+        {
+          "caller": "fuzzy",
+          "callee": "q.split(/\\s+/).every",
+          "lineNumber": 65
+        },
+        {
+          "caller": "fuzzy",
+          "callee": "q.split",
+          "lineNumber": 65
+        },
+        {
+          "caller": "fuzzy",
+          "callee": "words.some",
+          "lineNumber": 65
+        },
+        {
+          "caller": "fuzzy",
+          "callee": "w.includes",
+          "lineNumber": 65
+        },
+        {
+          "caller": "fuzzy",
+          "callee": "levenshtein",
+          "lineNumber": 65
+        },
+        {
+          "caller": "detectSourceKind",
+          "callee": "ref.startsWith",
+          "lineNumber": 102
+        },
+        {
+          "caller": "detectFormat",
+          "callee": "ref.endsWith",
+          "lineNumber": 111
+        },
+        {
+          "caller": "Row",
+          "callee": "useState",
+          "lineNumber": 134
+        },
+        {
+          "caller": "Row",
+          "callee": "subjectInk",
+          "lineNumber": 136
+        },
+        {
+          "caller": "Row",
+          "callee": "detectSourceKind",
+          "lineNumber": 138
+        },
+        {
+          "caller": "Row",
+          "callee": "detectFormat",
+          "lineNumber": 139
+        },
+        {
+          "caller": "Row",
+          "callee": "setOpen",
+          "lineNumber": 145
+        },
+        {
+          "caller": "Row",
+          "callee": "formatDate",
+          "lineNumber": 151
+        },
+        {
+          "caller": "Row",
+          "callee": "q.created_at.slice",
+          "lineNumber": 151
+        },
+        {
+          "caller": "Row",
+          "callee": "cn",
+          "lineNumber": 159
+        },
+        {
+          "caller": "Row",
+          "callee": "e.stopPropagation",
+          "lineNumber": 194
+        },
+        {
+          "caller": "Row",
+          "callee": "onImage",
+          "lineNumber": 195
+        },
+        {
+          "caller": "Row",
+          "callee": "cn",
+          "lineNumber": 211
+        },
+        {
+          "caller": "Row",
+          "callee": "secondsToClock",
+          "lineNumber": 216
+        },
+        {
+          "caller": "Row",
+          "callee": "e.stopPropagation",
+          "lineNumber": 224
+        },
+        {
+          "caller": "Row",
+          "callee": "onEdit",
+          "lineNumber": 225
+        },
+        {
+          "caller": "Row",
+          "callee": "cn",
+          "lineNumber": 234
+        },
+        {
+          "caller": "Row",
+          "callee": "ROOT_CAUSES.find",
+          "lineNumber": 259
+        },
+        {
+          "caller": "Row",
+          "callee": "secondsToClock",
+          "lineNumber": 270
+        },
+        {
+          "caller": "Row",
+          "callee": "secondsToClock",
+          "lineNumber": 272
+        },
+        {
+          "caller": "Row",
+          "callee": "onImage",
+          "lineNumber": 283
+        },
+        {
+          "caller": "Row",
+          "callee": "MARK_DECISIONS.find",
+          "lineNumber": 305
+        },
+        {
+          "caller": "Row",
+          "callee": "cn",
+          "lineNumber": 308
+        },
+        {
+          "caller": "Row",
+          "callee": "onEdit",
+          "lineNumber": 316
+        },
+        {
+          "caller": "Journal",
+          "callee": "useAuth",
+          "lineNumber": 326
+        },
+        {
+          "caller": "Journal",
+          "callee": "useNavigate",
+          "lineNumber": 328
+        },
+        {
+          "caller": "Journal",
+          "callee": "useSearchParams",
+          "lineNumber": 329
+        },
+        {
+          "caller": "Journal",
+          "callee": "useState",
+          "lineNumber": 330
+        },
+        {
+          "caller": "Journal",
+          "callee": "params.get",
+          "lineNumber": 332
+        },
+        {
+          "caller": "Journal",
+          "callee": "params.get",
+          "lineNumber": 333
+        },
+        {
+          "caller": "Journal",
+          "callee": "params.get",
+          "lineNumber": 334
+        },
+        {
+          "caller": "Journal",
+          "callee": "params.get",
+          "lineNumber": 335
+        },
+        {
+          "caller": "Journal",
+          "callee": "params.get",
+          "lineNumber": 336
+        },
+        {
+          "caller": "Journal",
+          "callee": "params.get",
+          "lineNumber": 337
+        },
+        {
+          "caller": "Journal",
+          "callee": "params.get",
+          "lineNumber": 338
+        },
+        {
+          "caller": "Journal",
+          "callee": "useState",
+          "lineNumber": 340
+        },
+        {
+          "caller": "Journal",
+          "callee": "useState",
+          "lineNumber": 341
+        },
+        {
+          "caller": "Journal",
+          "callee": "useState",
+          "lineNumber": 342
+        },
+        {
+          "caller": "Journal",
+          "callee": "useState",
+          "lineNumber": 343
+        },
+        {
+          "caller": "Journal",
+          "callee": "useState",
+          "lineNumber": 344
+        },
+        {
+          "caller": "Journal",
+          "callee": "useState",
+          "lineNumber": 345
+        },
+        {
+          "caller": "Journal",
+          "callee": "useState",
+          "lineNumber": 346
+        },
+        {
+          "caller": "Journal",
+          "callee": "useEffect",
+          "lineNumber": 350
+        },
+        {
+          "caller": "Journal",
+          "callee": "reconcilePyqPracticeSessions(userId, timeZone).then",
+          "lineNumber": 352
+        },
+        {
+          "caller": "Journal",
+          "callee": "reconcilePyqPracticeSessions",
+          "lineNumber": 352
+        },
+        {
+          "caller": "Journal",
+          "callee": "pruneEmptyFinishedSessions",
+          "lineNumber": 353
+        },
+        {
+          "caller": "openEdit",
+          "callee": "setEditRow",
+          "lineNumber": 358
+        },
+        {
+          "caller": "openEdit",
+          "callee": "setEditDraft",
+          "lineNumber": 359
+        },
+        {
+          "caller": "openEdit",
+          "callee": "draftFromRow",
+          "lineNumber": 359
+        },
+        {
+          "caller": "saveEdit",
+          "callee": "setSaving",
+          "lineNumber": 364
+        },
+        {
+          "caller": "saveEdit",
+          "callee": "applyDraftToRow",
+          "lineNumber": 366
+        },
+        {
+          "caller": "saveEdit",
+          "callee": "writeLocal",
+          "lineNumber": 367
+        },
+        {
+          "caller": "saveEdit",
+          "callee": "setEditRow",
+          "lineNumber": 368
+        },
+        {
+          "caller": "saveEdit",
+          "callee": "setEditDraft",
+          "lineNumber": 369
+        },
+        {
+          "caller": "saveEdit",
+          "callee": "setSaving",
+          "lineNumber": 371
+        },
+        {
+          "caller": "removeRow",
+          "callee": "setDeleting",
+          "lineNumber": 377
+        },
+        {
+          "caller": "removeRow",
+          "callee": "deleteLocal",
+          "lineNumber": 379
+        },
+        {
+          "caller": "removeRow",
+          "callee": "setEditRow",
+          "lineNumber": 380
+        },
+        {
+          "caller": "removeRow",
+          "callee": "setEditDraft",
+          "lineNumber": 381
+        },
+        {
+          "caller": "removeRow",
+          "callee": "setDeleting",
+          "lineNumber": 383
+        },
+        {
+          "caller": "Journal",
+          "callee": "useLiveQuery",
+          "lineNumber": 387
+        },
+        {
+          "caller": "Journal",
+          "callee": "db.questions.where('user_id').equals(userId).sortBy",
+          "lineNumber": 389
+        },
+        {
+          "caller": "Journal",
+          "callee": "db.questions.where('user_id').equals",
+          "lineNumber": 389
+        },
+        {
+          "caller": "Journal",
+          "callee": "db.questions.where",
+          "lineNumber": 389
+        },
+        {
+          "caller": "Journal",
+          "callee": "rows.reverse",
+          "lineNumber": 390
+        },
+        {
+          "caller": "Journal",
+          "callee": "useLiveQuery",
+          "lineNumber": 393
+        },
+        {
+          "caller": "Journal",
+          "callee": "db.pyq_attempts.where('user_id').equals(userId).toArray",
+          "lineNumber": 394
+        },
+        {
+          "caller": "Journal",
+          "callee": "db.pyq_attempts.where('user_id').equals",
+          "lineNumber": 394
+        },
+        {
+          "caller": "Journal",
+          "callee": "db.pyq_attempts.where",
+          "lineNumber": 394
+        },
+        {
+          "caller": "Journal",
+          "callee": "useLiveQuery",
+          "lineNumber": 400
+        },
+        {
+          "caller": "Journal",
+          "callee": "recentSessions",
+          "lineNumber": 401
+        },
+        {
+          "caller": "Journal",
+          "callee": "useLiveQuery",
+          "lineNumber": 407
+        },
+        {
+          "caller": "Journal",
+          "callee": "allSessions",
+          "lineNumber": 408
+        },
+        {
+          "caller": "Journal",
+          "callee": "useMemo",
+          "lineNumber": 414
+        },
+        {
+          "caller": "Journal",
+          "callee": "map.set",
+          "lineNumber": 417
+        },
+        {
+          "caller": "Journal",
+          "callee": "map.get",
+          "lineNumber": 417
+        },
+        {
+          "caller": "Journal",
+          "callee": "pyqCounts.set",
+          "lineNumber": 422
+        },
+        {
+          "caller": "Journal",
+          "callee": "pyqCounts.get",
+          "lineNumber": 422
+        },
+        {
+          "caller": "Journal",
+          "callee": "map.set",
+          "lineNumber": 424
+        },
+        {
+          "caller": "Journal",
+          "callee": "useMemo",
+          "lineNumber": 428
+        },
+        {
+          "caller": "Journal",
+          "callee": "rows.filter",
+          "lineNumber": 430
+        },
+        {
+          "caller": "Journal",
+          "callee": "rows.filter",
+          "lineNumber": 431
+        },
+        {
+          "caller": "Journal",
+          "callee": "rows.filter",
+          "lineNumber": 432
+        },
+        {
+          "caller": "Journal",
+          "callee": "rows.filter",
+          "lineNumber": 433
+        },
+        {
+          "caller": "Journal",
+          "callee": "rows.filter",
+          "lineNumber": 434
+        },
+        {
+          "caller": "Journal",
+          "callee": "rows.filter",
+          "lineNumber": 435
+        },
+        {
+          "caller": "Journal",
+          "callee": "rows.filter",
+          "lineNumber": 436
+        },
+        {
+          "caller": "Journal",
+          "callee": "rows.filter",
+          "lineNumber": 437
+        },
+        {
+          "caller": "Journal",
+          "callee": "rows.filter",
+          "lineNumber": 438
+        },
+        {
+          "caller": "Journal",
+          "callee": "detectSourceKind",
+          "lineNumber": 438
+        },
+        {
+          "caller": "Journal",
+          "callee": "rows.filter",
+          "lineNumber": 439
+        },
+        {
+          "caller": "Journal",
+          "callee": "detectFormat",
+          "lineNumber": 439
+        },
+        {
+          "caller": "Journal",
+          "callee": "rows.filter",
+          "lineNumber": 440
+        },
+        {
+          "caller": "Journal",
+          "callee": "q.created_at.slice",
+          "lineNumber": 440
+        },
+        {
+          "caller": "Journal",
+          "callee": "rows.filter",
+          "lineNumber": 441
+        },
+        {
+          "caller": "Journal",
+          "callee": "q.created_at.slice",
+          "lineNumber": 441
+        },
+        {
+          "caller": "Journal",
+          "callee": "f.pattern.trim",
+          "lineNumber": 442
+        },
+        {
+          "caller": "Journal",
+          "callee": "rows.filter",
+          "lineNumber": 443
+        },
+        {
+          "caller": "Journal",
+          "callee": "fuzzy",
+          "lineNumber": 443
+        },
+        {
+          "caller": "Journal",
+          "callee": "f.trigger.trim",
+          "lineNumber": 444
+        },
+        {
+          "caller": "Journal",
+          "callee": "rows.filter",
+          "lineNumber": 445
+        },
+        {
+          "caller": "Journal",
+          "callee": "fuzzy",
+          "lineNumber": 445
+        },
+        {
+          "caller": "Journal",
+          "callee": "Math.max",
+          "lineNumber": 449
+        },
+        {
+          "caller": "Journal",
+          "callee": "Math.ceil",
+          "lineNumber": 449
+        },
+        {
+          "caller": "Journal",
+          "callee": "Math.min",
+          "lineNumber": 450
+        },
+        {
+          "caller": "Journal",
+          "callee": "filtered.slice",
+          "lineNumber": 451
+        },
+        {
+          "caller": "Journal",
+          "callee": "Object.values(f).some",
+          "lineNumber": 452
+        },
+        {
+          "caller": "Journal",
+          "callee": "Object.values",
+          "lineNumber": 452
+        },
+        {
+          "caller": "Journal",
+          "callee": "sessionsAll.find",
+          "lineNumber": 459
+        },
+        {
+          "caller": "set",
+          "callee": "setF",
+          "lineNumber": 463
+        },
+        {
+          "caller": "set",
+          "callee": "setPage",
+          "lineNumber": 464
+        },
+        {
+          "caller": "Journal",
+          "callee": "plural",
+          "lineNumber": 474
+        },
+        {
+          "caller": "Journal",
+          "callee": "set",
+          "lineNumber": 483
+        },
+        {
+          "caller": "Journal",
+          "callee": "set",
+          "lineNumber": 490
+        },
+        {
+          "caller": "Journal",
+          "callee": "set",
+          "lineNumber": 500
+        },
+        {
+          "caller": "Journal",
+          "callee": "set",
+          "lineNumber": 502
+        },
+        {
+          "caller": "Journal",
+          "callee": "SUBJECTS.map",
+          "lineNumber": 508
+        },
+        {
+          "caller": "Journal",
+          "callee": "subtopicsFor",
+          "lineNumber": 514
+        },
+        {
+          "caller": "Journal",
+          "callee": "set",
+          "lineNumber": 517
+        },
+        {
+          "caller": "Journal",
+          "callee": "subtopicsFor(f.subject).map",
+          "lineNumber": 522
+        },
+        {
+          "caller": "Journal",
+          "callee": "subtopicsFor",
+          "lineNumber": 522
+        },
+        {
+          "caller": "Journal",
+          "callee": "set",
+          "lineNumber": 531
+        },
+        {
+          "caller": "Journal",
+          "callee": "OUTCOMES.map",
+          "lineNumber": 536
+        },
+        {
+          "caller": "Journal",
+          "callee": "set",
+          "lineNumber": 544
+        },
+        {
+          "caller": "Journal",
+          "callee": "ROOT_CAUSES.map",
+          "lineNumber": 550
+        },
+        {
+          "caller": "Journal",
+          "callee": "set",
+          "lineNumber": 558
+        },
+        {
+          "caller": "Journal",
+          "callee": "MARK_DECISIONS.map",
+          "lineNumber": 563
+        },
+        {
+          "caller": "Journal",
+          "callee": "set",
+          "lineNumber": 571
+        },
+        {
+          "caller": "Journal",
+          "callee": "SOURCE_KINDS.map",
+          "lineNumber": 576
+        },
+        {
+          "caller": "Journal",
+          "callee": "set",
+          "lineNumber": 584
+        },
+        {
+          "caller": "Journal",
+          "callee": "sessionsAll.map",
+          "lineNumber": 590
+        },
+        {
+          "caller": "Journal",
+          "callee": "formatDate",
+          "lineNumber": 592
+        },
+        {
+          "caller": "Journal",
+          "callee": "set",
+          "lineNumber": 598
+        },
+        {
+          "caller": "Journal",
+          "callee": "QUESTION_FORMATS.map",
+          "lineNumber": 603
+        },
+        {
+          "caller": "Journal",
+          "callee": "set",
+          "lineNumber": 612
+        },
+        {
+          "caller": "Journal",
+          "callee": "set",
+          "lineNumber": 621
+        },
+        {
+          "caller": "Journal",
+          "callee": "setF",
+          "lineNumber": 631
+        },
+        {
+          "caller": "Journal",
+          "callee": "setPage",
+          "lineNumber": 632
+        },
+        {
+          "caller": "Journal",
+          "callee": "set",
+          "lineNumber": 646
+        },
+        {
+          "caller": "Journal",
+          "callee": "setEditSession",
+          "lineNumber": 647
+        },
+        {
+          "caller": "Journal",
+          "callee": "navigate",
+          "lineNumber": 648
+        },
+        {
+          "caller": "Journal",
+          "callee": "cn",
+          "lineNumber": 656
+        },
+        {
+          "caller": "Journal",
+          "callee": "subjectInk",
+          "lineNumber": 656
+        },
+        {
+          "caller": "Journal",
+          "callee": "formatDate",
+          "lineNumber": 660
+        },
+        {
+          "caller": "Journal",
+          "callee": "questionCountBySession.get",
+          "lineNumber": 661
+        },
+        {
+          "caller": "Journal",
+          "callee": "plural",
+          "lineNumber": 662
+        },
+        {
+          "caller": "Journal",
+          "callee": "questionCountBySession.get",
+          "lineNumber": 662
+        },
+        {
+          "caller": "Journal",
+          "callee": "navigate",
+          "lineNumber": 675
+        },
+        {
+          "caller": "Journal",
+          "callee": "setEditSession",
+          "lineNumber": 679
+        },
+        {
+          "caller": "Journal",
+          "callee": "set",
+          "lineNumber": 683
+        },
+        {
+          "caller": "Journal",
+          "callee": "pageRows.map",
+          "lineNumber": 711
+        },
+        {
+          "caller": "Journal",
+          "callee": "setPreview",
+          "lineNumber": 715
+        },
+        {
+          "caller": "Journal",
+          "callee": "setPage",
+          "lineNumber": 728
+        },
+        {
+          "caller": "Journal",
+          "callee": "setPage",
+          "lineNumber": 739
+        },
+        {
+          "caller": "Journal",
+          "callee": "setPreview",
+          "lineNumber": 760
+        },
+        {
+          "caller": "Journal",
+          "callee": "setEditRow",
+          "lineNumber": 767
+        },
+        {
+          "caller": "Journal",
+          "callee": "setEditDraft",
+          "lineNumber": 768
+        },
+        {
+          "caller": "Journal",
+          "callee": "removeRow",
+          "lineNumber": 776
+        },
+        {
+          "caller": "Journal",
+          "callee": "setEditRow",
+          "lineNumber": 781
+        },
+        {
+          "caller": "Journal",
+          "callee": "setEditDraft",
+          "lineNumber": 782
+        },
+        {
+          "caller": "Journal",
+          "callee": "saveEdit",
+          "lineNumber": 790
+        },
+        {
+          "caller": "Journal",
+          "callee": "setEditSession",
+          "lineNumber": 802
+        },
+        {
+          "caller": "Journal",
+          "callee": "setEditSession",
+          "lineNumber": 809
+        },
+        {
+          "caller": "Journal",
+          "callee": "set",
+          "lineNumber": 812
+        },
+        {
+          "caller": "Journal",
+          "callee": "setEditSession",
+          "lineNumber": 813
+        },
+        {
+          "caller": "Journal",
+          "callee": "setEditSession",
+          "lineNumber": 815
+        },
+        {
+          "caller": "RecentSessionsCard",
+          "callee": "sessions.map",
+          "lineNumber": 847
+        },
+        {
+          "caller": "RecentSessionsCard",
+          "callee": "subjectInk",
+          "lineNumber": 848
+        },
+        {
+          "caller": "RecentSessionsCard",
+          "callee": "countsBySession.get",
+          "lineNumber": 849
+        },
+        {
+          "caller": "RecentSessionsCard",
+          "callee": "cn",
+          "lineNumber": 854
+        },
+        {
+          "caller": "RecentSessionsCard",
+          "callee": "onSelect",
+          "lineNumber": 861
+        },
+        {
+          "caller": "RecentSessionsCard",
+          "callee": "cn",
+          "lineNumber": 867
+        },
+        {
+          "caller": "RecentSessionsCard",
+          "callee": "formatDate",
+          "lineNumber": 873
+        },
+        {
+          "caller": "RecentSessionsCard",
+          "callee": "cn",
+          "lineNumber": 876
+        },
+        {
+          "caller": "RecentSessionsCard",
+          "callee": "plural",
+          "lineNumber": 881
+        },
+        {
+          "caller": "RecentSessionsCard",
+          "callee": "onEdit",
+          "lineNumber": 899
+        },
+        {
+          "caller": "RecentSessionsCard",
+          "callee": "onOpenReview",
+          "lineNumber": 906
+        }
+      ],
+      "metrics": {
+        "importCount": 22,
+        "exportCount": 1,
+        "functionCount": 7,
+        "classCount": 0
+      }
+    }
+  ]
+}

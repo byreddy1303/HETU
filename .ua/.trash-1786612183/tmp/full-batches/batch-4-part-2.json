@@ -1,0 +1,817 @@
+{
+  "nodes": [
+    {
+      "id": "file:src/components/tags/SourceStep.tsx",
+      "type": "file",
+      "name": "SourceStep.tsx",
+      "filePath": "src/components/tags/SourceStep.tsx",
+      "summary": "Implements the source-capture step for tagging a question, with subject and exam metadata, prompt and answer text, image compression, marks, format, and keyboard shortcuts.",
+      "tags": [
+        "component",
+        "question-tagging",
+        "data-entry"
+      ],
+      "complexity": "complex",
+      "languageNotes": "React component written in TypeScript with JSX."
+    },
+    {
+      "id": "function:src/components/tags/SourceStep.tsx:MarksChip",
+      "type": "function",
+      "name": "MarksChip",
+      "filePath": "src/components/tags/SourceStep.tsx",
+      "lineRange": [
+        29,
+        52
+      ],
+      "summary": "Renders a selectable one-mark or two-mark source metadata chip.",
+      "tags": [
+        "component",
+        "question-tagging",
+        "data-entry"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/components/tags/SourceStep.tsx:FormatChip",
+      "type": "function",
+      "name": "FormatChip",
+      "filePath": "src/components/tags/SourceStep.tsx",
+      "lineRange": [
+        54,
+        80
+      ],
+      "summary": "Renders a selectable question-format chip with explanatory hover text.",
+      "tags": [
+        "component",
+        "question-tagging",
+        "data-entry"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/components/tags/SourceStep.tsx:SetChip",
+      "type": "function",
+      "name": "SetChip",
+      "filePath": "src/components/tags/SourceStep.tsx",
+      "lineRange": [
+        82,
+        105
+      ],
+      "summary": "Renders a selectable GATE set-number chip.",
+      "tags": [
+        "component",
+        "question-tagging",
+        "data-entry"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/components/tags/SourceStep.tsx:SourceStep",
+      "type": "function",
+      "name": "SourceStep",
+      "filePath": "src/components/tags/SourceStep.tsx",
+      "lineRange": [
+        107,
+        427
+      ],
+      "summary": "Manages source-capture state, keeps year, set, and subtopic values valid, compresses images, and submits normalized data.",
+      "tags": [
+        "component",
+        "question-tagging",
+        "data-entry"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:src/components/tags/SourceStep.tsx:ImageUpload",
+      "type": "function",
+      "name": "ImageUpload",
+      "filePath": "src/components/tags/SourceStep.tsx",
+      "lineRange": [
+        429,
+        519
+      ],
+      "summary": "Renders the image capture, preview, replace, remove, loading, and error controls for source evidence.",
+      "tags": [
+        "component",
+        "question-tagging",
+        "data-entry"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/components/ui/Badge.tsx",
+      "type": "file",
+      "name": "Badge.tsx",
+      "filePath": "src/components/ui/Badge.tsx",
+      "summary": "Provides a reusable badge primitive with semantic color tones and composable styling.",
+      "tags": [
+        "component",
+        "ui-primitive",
+        "design-system"
+      ],
+      "complexity": "simple",
+      "languageNotes": "React component written in TypeScript with JSX."
+    },
+    {
+      "id": "function:src/components/ui/Badge.tsx:Badge",
+      "type": "function",
+      "name": "Badge",
+      "filePath": "src/components/ui/Badge.tsx",
+      "lineRange": [
+        19,
+        31
+      ],
+      "summary": "Renders a compact semantic label using the selected tone styles.",
+      "tags": [
+        "component",
+        "ui-primitive",
+        "design-system"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/components/ui/Card.tsx",
+      "type": "file",
+      "name": "Card.tsx",
+      "filePath": "src/components/ui/Card.tsx",
+      "summary": "Provides card container, header, and body primitives used to structure elevated content panels.",
+      "tags": [
+        "component",
+        "ui-primitive",
+        "design-system"
+      ],
+      "complexity": "simple",
+      "languageNotes": "React component written in TypeScript with JSX."
+    },
+    {
+      "id": "function:src/components/ui/Card.tsx:Card",
+      "type": "function",
+      "name": "Card",
+      "filePath": "src/components/ui/Card.tsx",
+      "lineRange": [
+        4,
+        6
+      ],
+      "summary": "Renders the base elevated card container.",
+      "tags": [
+        "component",
+        "ui-primitive",
+        "design-system"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/components/ui/Card.tsx:CardHeader",
+      "type": "function",
+      "name": "CardHeader",
+      "filePath": "src/components/ui/Card.tsx",
+      "lineRange": [
+        8,
+        28
+      ],
+      "summary": "Renders a card title with optional aside content and responsive alignment.",
+      "tags": [
+        "component",
+        "ui-primitive",
+        "design-system"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/components/ui/Card.tsx:CardBody",
+      "type": "function",
+      "name": "CardBody",
+      "filePath": "src/components/ui/Card.tsx",
+      "lineRange": [
+        30,
+        32
+      ],
+      "summary": "Renders the padded body region of a card.",
+      "tags": [
+        "component",
+        "ui-primitive",
+        "design-system"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/components/ui/Dialog.tsx",
+      "type": "file",
+      "name": "Dialog.tsx",
+      "filePath": "src/components/ui/Dialog.tsx",
+      "summary": "Renders an accessible animated modal dialog with backdrop dismissal, Escape handling, body-scroll locking, and focus restoration.",
+      "tags": [
+        "component",
+        "ui-primitive",
+        "design-system"
+      ],
+      "complexity": "moderate",
+      "languageNotes": "React component written in TypeScript with JSX."
+    },
+    {
+      "id": "function:src/components/ui/Dialog.tsx:Dialog",
+      "type": "function",
+      "name": "Dialog",
+      "filePath": "src/components/ui/Dialog.tsx",
+      "lineRange": [
+        6,
+        76
+      ],
+      "summary": "Manages modal focus, Escape and backdrop dismissal, scroll locking, and animated dialog presentation.",
+      "tags": [
+        "component",
+        "ui-primitive",
+        "design-system"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/components/ui/Empty.tsx",
+      "type": "file",
+      "name": "Empty.tsx",
+      "filePath": "src/components/ui/Empty.tsx",
+      "summary": "Renders a consistent empty-state panel with optional hint, action, and custom styling.",
+      "tags": [
+        "component",
+        "ui-primitive",
+        "design-system"
+      ],
+      "complexity": "simple",
+      "languageNotes": "React component written in TypeScript with JSX."
+    },
+    {
+      "id": "function:src/components/ui/Empty.tsx:Empty",
+      "type": "function",
+      "name": "Empty",
+      "filePath": "src/components/ui/Empty.tsx",
+      "lineRange": [
+        4,
+        27
+      ],
+      "summary": "Renders a reusable empty state with optional guidance and action content.",
+      "tags": [
+        "component",
+        "ui-primitive",
+        "design-system"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/components/ui/Input.tsx",
+      "type": "file",
+      "name": "Input.tsx",
+      "filePath": "src/components/ui/Input.tsx",
+      "summary": "Provides a styled, ref-forwarding input primitive with optional monospaced numeric presentation.",
+      "tags": [
+        "component",
+        "ui-primitive",
+        "design-system"
+      ],
+      "complexity": "simple",
+      "languageNotes": "React component written in TypeScript with JSX."
+    },
+    {
+      "id": "file:src/components/ui/Kbd.tsx",
+      "type": "file",
+      "name": "Kbd.tsx",
+      "filePath": "src/components/ui/Kbd.tsx",
+      "summary": "Renders keyboard shortcuts with a compact keycap visual treatment.",
+      "tags": [
+        "component",
+        "ui-primitive",
+        "design-system"
+      ],
+      "complexity": "simple",
+      "languageNotes": "React component written in TypeScript with JSX."
+    },
+    {
+      "id": "function:src/components/ui/Kbd.tsx:Kbd",
+      "type": "function",
+      "name": "Kbd",
+      "filePath": "src/components/ui/Kbd.tsx",
+      "lineRange": [
+        4,
+        16
+      ],
+      "summary": "Renders inline content as a styled keyboard keycap.",
+      "tags": [
+        "component",
+        "ui-primitive",
+        "design-system"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/components/ui/Progress.tsx",
+      "type": "file",
+      "name": "Progress.tsx",
+      "filePath": "src/components/ui/Progress.tsx",
+      "summary": "Renders an accessible bounded progress bar with accent and semantic tone variants.",
+      "tags": [
+        "component",
+        "ui-primitive",
+        "design-system"
+      ],
+      "complexity": "simple",
+      "languageNotes": "React component written in TypeScript with JSX."
+    },
+    {
+      "id": "function:src/components/ui/Progress.tsx:Progress",
+      "type": "function",
+      "name": "Progress",
+      "filePath": "src/components/ui/Progress.tsx",
+      "lineRange": [
+        3,
+        37
+      ],
+      "summary": "Clamps a progress value and renders an accessible tone-aware completion bar.",
+      "tags": [
+        "component",
+        "ui-primitive",
+        "design-system"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/components/ui/Select.tsx",
+      "type": "file",
+      "name": "Select.tsx",
+      "filePath": "src/components/ui/Select.tsx",
+      "summary": "Provides a styled, ref-forwarding native select primitive for forms.",
+      "tags": [
+        "component",
+        "ui-primitive",
+        "design-system"
+      ],
+      "complexity": "simple",
+      "languageNotes": "React component written in TypeScript with JSX."
+    },
+    {
+      "id": "file:src/components/ui/Tabs.tsx",
+      "type": "file",
+      "name": "Tabs.tsx",
+      "filePath": "src/components/ui/Tabs.tsx",
+      "summary": "Renders a compact tab selector with native haptic feedback, keyboard-friendly buttons, and active-state styling.",
+      "tags": [
+        "component",
+        "ui-primitive",
+        "design-system"
+      ],
+      "complexity": "simple",
+      "languageNotes": "React component written in TypeScript with JSX."
+    },
+    {
+      "id": "function:src/components/ui/Tabs.tsx:Tabs",
+      "type": "function",
+      "name": "Tabs",
+      "filePath": "src/components/ui/Tabs.tsx",
+      "lineRange": [
+        9,
+        46
+      ],
+      "summary": "Renders tab buttons, announces selection visually, and triggers light haptics before changing tabs.",
+      "tags": [
+        "component",
+        "ui-primitive",
+        "design-system"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/components/ui/Textarea.tsx",
+      "type": "file",
+      "name": "Textarea.tsx",
+      "filePath": "src/components/ui/Textarea.tsx",
+      "summary": "Provides a styled, ref-forwarding multiline text input primitive.",
+      "tags": [
+        "component",
+        "ui-primitive",
+        "design-system"
+      ],
+      "complexity": "simple",
+      "languageNotes": "React component written in TypeScript with JSX."
+    },
+    {
+      "id": "file:src/hooks/useAuth.ts",
+      "type": "file",
+      "name": "useAuth.ts",
+      "filePath": "src/hooks/useAuth.ts",
+      "summary": "Selects the authenticated user identity, status, and sandbox mode from the central auth store.",
+      "tags": [
+        "hook",
+        "react",
+        "authentication"
+      ],
+      "complexity": "simple",
+      "languageNotes": "TypeScript module."
+    },
+    {
+      "id": "function:src/hooks/useAuth.ts:useAuth",
+      "type": "function",
+      "name": "useAuth",
+      "filePath": "src/hooks/useAuth.ts",
+      "lineRange": [
+        3,
+        10
+      ],
+      "summary": "Returns the stable authentication slice consumed by components and pages.",
+      "tags": [
+        "hook",
+        "react",
+        "authentication"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/hooks/useVisibilityChange.ts",
+      "type": "file",
+      "name": "useVisibilityChange.ts",
+      "filePath": "src/hooks/useVisibilityChange.ts",
+      "summary": "Invokes a current callback when the document becomes hidden, with optional runtime enablement.",
+      "tags": [
+        "hook",
+        "react",
+        "browser-events"
+      ],
+      "complexity": "simple",
+      "languageNotes": "TypeScript module."
+    },
+    {
+      "id": "function:src/hooks/useVisibilityChange.ts:useVisibilityChange",
+      "type": "function",
+      "name": "useVisibilityChange",
+      "filePath": "src/hooks/useVisibilityChange.ts",
+      "lineRange": [
+        4,
+        15
+      ],
+      "summary": "Registers a visibilitychange listener that calls the latest callback when the document becomes hidden.",
+      "tags": [
+        "hook",
+        "react",
+        "browser-events"
+      ],
+      "complexity": "simple"
+    }
+  ],
+  "edges": [
+    {
+      "source": "file:src/components/tags/SourceStep.tsx",
+      "target": "file:src/components/tags/sourceDraft.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/tags/SourceStep.tsx",
+      "target": "file:src/components/ui/Button.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/tags/SourceStep.tsx",
+      "target": "file:src/components/ui/Input.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/tags/SourceStep.tsx",
+      "target": "file:src/components/ui/Kbd.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/tags/SourceStep.tsx",
+      "target": "file:src/components/ui/Select.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/tags/SourceStep.tsx",
+      "target": "file:src/components/ui/Textarea.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/tags/SourceStep.tsx",
+      "target": "file:src/hooks/useKeyboard.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/tags/SourceStep.tsx",
+      "target": "file:src/lib/constants.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/tags/SourceStep.tsx",
+      "target": "file:src/lib/image.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/tags/SourceStep.tsx",
+      "target": "file:src/lib/subtopics.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/tags/SourceStep.tsx",
+      "target": "file:src/lib/utils.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/tags/SourceStep.tsx",
+      "target": "function:src/components/tags/SourceStep.tsx:MarksChip",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/components/tags/SourceStep.tsx",
+      "target": "function:src/components/tags/SourceStep.tsx:FormatChip",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/components/tags/SourceStep.tsx",
+      "target": "function:src/components/tags/SourceStep.tsx:SetChip",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/components/tags/SourceStep.tsx",
+      "target": "function:src/components/tags/SourceStep.tsx:SourceStep",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/components/tags/SourceStep.tsx",
+      "target": "function:src/components/tags/SourceStep.tsx:SourceStep",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/components/tags/SourceStep.tsx",
+      "target": "function:src/components/tags/SourceStep.tsx:ImageUpload",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/components/ui/Badge.tsx",
+      "target": "file:src/lib/utils.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/ui/Badge.tsx",
+      "target": "function:src/components/ui/Badge.tsx:Badge",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/components/ui/Badge.tsx",
+      "target": "function:src/components/ui/Badge.tsx:Badge",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/components/ui/Card.tsx",
+      "target": "file:src/lib/utils.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/ui/Card.tsx",
+      "target": "function:src/components/ui/Card.tsx:Card",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/components/ui/Card.tsx",
+      "target": "function:src/components/ui/Card.tsx:Card",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/components/ui/Card.tsx",
+      "target": "function:src/components/ui/Card.tsx:CardHeader",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/components/ui/Card.tsx",
+      "target": "function:src/components/ui/Card.tsx:CardHeader",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/components/ui/Card.tsx",
+      "target": "function:src/components/ui/Card.tsx:CardBody",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/components/ui/Card.tsx",
+      "target": "function:src/components/ui/Card.tsx:CardBody",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/components/ui/Dialog.tsx",
+      "target": "file:src/lib/utils.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/ui/Dialog.tsx",
+      "target": "function:src/components/ui/Dialog.tsx:Dialog",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/components/ui/Dialog.tsx",
+      "target": "function:src/components/ui/Dialog.tsx:Dialog",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/components/ui/Empty.tsx",
+      "target": "file:src/lib/utils.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/ui/Empty.tsx",
+      "target": "function:src/components/ui/Empty.tsx:Empty",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/components/ui/Empty.tsx",
+      "target": "function:src/components/ui/Empty.tsx:Empty",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/components/ui/Input.tsx",
+      "target": "file:src/lib/utils.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/ui/Kbd.tsx",
+      "target": "file:src/lib/utils.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/ui/Kbd.tsx",
+      "target": "function:src/components/ui/Kbd.tsx:Kbd",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/components/ui/Kbd.tsx",
+      "target": "function:src/components/ui/Kbd.tsx:Kbd",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/components/ui/Progress.tsx",
+      "target": "file:src/lib/utils.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/ui/Progress.tsx",
+      "target": "function:src/components/ui/Progress.tsx:Progress",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/components/ui/Progress.tsx",
+      "target": "function:src/components/ui/Progress.tsx:Progress",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/components/ui/Select.tsx",
+      "target": "file:src/lib/utils.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/ui/Tabs.tsx",
+      "target": "file:src/lib/native.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/ui/Tabs.tsx",
+      "target": "file:src/lib/utils.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/ui/Tabs.tsx",
+      "target": "function:src/components/ui/Tabs.tsx:Tabs",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/components/ui/Tabs.tsx",
+      "target": "function:src/components/ui/Tabs.tsx:Tabs",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/components/ui/Textarea.tsx",
+      "target": "file:src/lib/utils.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/hooks/useAuth.ts",
+      "target": "file:src/stores/auth.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/hooks/useAuth.ts",
+      "target": "function:src/hooks/useAuth.ts:useAuth",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/hooks/useAuth.ts",
+      "target": "function:src/hooks/useAuth.ts:useAuth",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/hooks/useVisibilityChange.ts",
+      "target": "function:src/hooks/useVisibilityChange.ts:useVisibilityChange",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/hooks/useVisibilityChange.ts",
+      "target": "function:src/hooks/useVisibilityChange.ts:useVisibilityChange",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    }
+  ]
+}

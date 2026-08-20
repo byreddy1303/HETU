@@ -1,0 +1,35 @@
+{
+  "projectRoot": "/Users/bkalyankrishnareddy/Desktop/GATE PREP/hetu",
+  "batchFiles": [
+    {
+      "path": "android/app/src/main/res/drawable/hetu_launcher_foreground.xml",
+      "language": "xml",
+      "sizeLines": 22,
+      "fileCategory": "config"
+    },
+    {
+      "path": "android/app/src/main/res/drawable/hetu_splash.xml",
+      "language": "xml",
+      "sizeLines": 9,
+      "fileCategory": "config"
+    },
+    {
+      "path": "android/app/src/main/res/drawable/ic_launcher_background.xml",
+      "language": "xml",
+      "sizeLines": 10,
+      "fileCategory": "config"
+    },
+    {
+      "path": "android/app/src/main/res/drawable/ic_stat_hetu.xml",
+      "language": "xml",
+      "sizeLines": 10,
+      "fileCategory": "config"
+    }
+  ],
+  "batchImportData": {
+    "android/app/src/main/res/drawable/hetu_launcher_foreground.xml": [],
+    "android/app/src/main/res/drawable/hetu_splash.xml": [],
+    "android/app/src/main/res/drawable/ic_launcher_background.xml": [],
+    "android/app/src/main/res/drawable/ic_stat_hetu.xml": []
+  }
+}

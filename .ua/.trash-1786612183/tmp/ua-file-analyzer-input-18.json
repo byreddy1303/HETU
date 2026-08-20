@@ -1,0 +1,15 @@
+{
+  "projectRoot": "/Users/bkalyankrishnareddy/Desktop/GATE PREP/hetu",
+  "batchFiles": [
+    {
+      "path": ".ua/.understandignore",
+      "language": "unknown",
+      "sizeLines": 134,
+      "fileCategory": "code"
+    }
+  ],
+  "batchImportData": {
+    ".ua/.understandignore": []
+  },
+  "neighborMap": {}
+}

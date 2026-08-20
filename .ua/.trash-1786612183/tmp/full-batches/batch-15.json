@@ -1,0 +1,63 @@
+{
+  "nodes": [
+    {
+      "id": "config:android/app/src/main/res/drawable/hetu_launcher_foreground.xml",
+      "type": "config",
+      "name": "hetu_launcher_foreground.xml",
+      "filePath": "android/app/src/main/res/drawable/hetu_launcher_foreground.xml",
+      "summary": "Defines the scalable Android launcher foreground artwork as a grouped three-path vector using the HETU mark and brand palette.",
+      "tags": ["configuration", "android-resource", "launcher-icon", "vector-drawable"],
+      "complexity": "simple"
+    },
+    {
+      "id": "config:android/app/src/main/res/drawable/hetu_splash.xml",
+      "type": "config",
+      "name": "hetu_splash.xml",
+      "filePath": "android/app/src/main/res/drawable/hetu_splash.xml",
+      "summary": "Defines the Android splash drawable as a branded paper-color layer with a centered launcher foreground mark.",
+      "tags": ["configuration", "android-resource", "splash-screen", "layer-list"],
+      "complexity": "simple"
+    },
+    {
+      "id": "config:android/app/src/main/res/drawable/ic_launcher_background.xml",
+      "type": "config",
+      "name": "ic_launcher_background.xml",
+      "filePath": "android/app/src/main/res/drawable/ic_launcher_background.xml",
+      "summary": "Defines the full-canvas paper-colored vector background used behind the adaptive Android launcher foreground.",
+      "tags": ["configuration", "android-resource", "launcher-icon", "vector-drawable"],
+      "complexity": "simple"
+    },
+    {
+      "id": "config:android/app/src/main/res/drawable/ic_stat_hetu.xml",
+      "type": "config",
+      "name": "ic_stat_hetu.xml",
+      "filePath": "android/app/src/main/res/drawable/ic_stat_hetu.xml",
+      "summary": "Defines a compact monochrome HETU vector mark suitable for Android status-bar notification icons.",
+      "tags": ["configuration", "android-resource", "notification-icon", "vector-drawable"],
+      "complexity": "simple"
+    }
+  ],
+  "edges": [
+    {
+      "source": "config:android/app/src/main/res/drawable/hetu_splash.xml",
+      "target": "config:android/app/src/main/res/drawable/hetu_launcher_foreground.xml",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "config:android/app/src/main/res/drawable/hetu_launcher_foreground.xml",
+      "target": "config:android/app/src/main/res/drawable/ic_launcher_background.xml",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "config:android/app/src/main/res/drawable/ic_stat_hetu.xml",
+      "target": "config:android/app/src/main/res/drawable/hetu_launcher_foreground.xml",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    }
+  ]
+}

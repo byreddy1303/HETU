@@ -1,0 +1,1611 @@
+{
+  "nodes": [
+    {
+      "id": "file:src/components/planner/SubjectPicker.tsx",
+      "type": "file",
+      "name": "SubjectPicker.tsx",
+      "filePath": "src/components/planner/SubjectPicker.tsx",
+      "summary": "Implements a searchable, portalled subject dialog designed for reliable use inside Android WebView sheets, with focus management, body scroll locking, and haptic selection.",
+      "tags": [
+        "component",
+        "planner",
+        "search",
+        "native-integration"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/components/planner/SubjectPicker.tsx:SubjectPicker",
+      "type": "function",
+      "name": "SubjectPicker",
+      "filePath": "src/components/planner/SubjectPicker.tsx",
+      "lineRange": [
+        18,
+        162
+      ],
+      "summary": "Filters subject options, manages the portalled dialog lifecycle, protects native backdrop behavior, and emits haptic selections.",
+      "tags": [
+        "component",
+        "planner",
+        "search",
+        "native-integration"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/lib/do-now.ts",
+      "type": "file",
+      "name": "do-now.ts",
+      "filePath": "src/lib/do-now.ts",
+      "summary": "Builds the ordered study-action queue from due re-attempts, unanalyzed or uncertain PYQs, slow correct work, formula reviews, and incomplete Planner blocks.",
+      "tags": [
+        "service",
+        "task-prioritization",
+        "study-queue",
+        "planner"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/lib/do-now.ts:latestAttempts",
+      "type": "function",
+      "name": "latestAttempts",
+      "filePath": "src/lib/do-now.ts",
+      "lineRange": [
+        18,
+        27
+      ],
+      "summary": "Reduces PYQ attempts to the most recent row for each question UID.",
+      "tags": [
+        "service",
+        "task-prioritization",
+        "study-queue",
+        "planner"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/do-now.ts:buildDoNowQueue",
+      "type": "function",
+      "name": "buildDoNowQueue",
+      "filePath": "src/lib/do-now.ts",
+      "lineRange": [
+        29,
+        125
+      ],
+      "summary": "Generates prioritized actionable queue items for due retrieval, unresolved evidence, recall, speed, formulas, and planned blocks.",
+      "tags": [
+        "service",
+        "task-prioritization",
+        "study-queue",
+        "planner"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/lib/planner-cloud.ts",
+      "type": "file",
+      "name": "planner-cloud.ts",
+      "filePath": "src/lib/planner-cloud.ts",
+      "summary": "Mirrors the session portion of Planner days to Supabase, validating remote session payloads and supporting single-day or date-range load, upsert, and deletion.",
+      "tags": [
+        "service",
+        "planner",
+        "supabase",
+        "synchronization"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/lib/planner-cloud.ts:isStudySession",
+      "type": "function",
+      "name": "isStudySession",
+      "filePath": "src/lib/planner-cloud.ts",
+      "lineRange": [
+        18,
+        29
+      ],
+      "summary": "Checks an unknown cloud value for the required Planner study-session fields.",
+      "tags": [
+        "service",
+        "planner",
+        "supabase",
+        "synchronization"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/planner-cloud.ts:loadCloudDayPlan",
+      "type": "function",
+      "name": "loadCloudDayPlan",
+      "filePath": "src/lib/planner-cloud.ts",
+      "lineRange": [
+        38,
+        53
+      ],
+      "summary": "Loads and sanitizes one user Planner day from Supabase with structured error handling.",
+      "tags": [
+        "service",
+        "planner",
+        "supabase",
+        "synchronization"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/planner-cloud.ts:loadCloudDayPlans",
+      "type": "function",
+      "name": "loadCloudDayPlans",
+      "filePath": "src/lib/planner-cloud.ts",
+      "lineRange": [
+        56,
+        74
+      ],
+      "summary": "Loads and sanitizes an ordered user date range so remote plans can hydrate the local calendar.",
+      "tags": [
+        "service",
+        "planner",
+        "supabase",
+        "synchronization"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/planner-cloud.ts:saveCloudDayPlan",
+      "type": "function",
+      "name": "saveCloudDayPlan",
+      "filePath": "src/lib/planner-cloud.ts",
+      "lineRange": [
+        76,
+        87
+      ],
+      "summary": "Upserts the bounded session list and update timestamp for one cloud Planner day.",
+      "tags": [
+        "service",
+        "planner",
+        "supabase",
+        "synchronization"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/planner-cloud.ts:deleteCloudDayPlan",
+      "type": "function",
+      "name": "deleteCloudDayPlan",
+      "filePath": "src/lib/planner-cloud.ts",
+      "lineRange": [
+        89,
+        96
+      ],
+      "summary": "Deletes one user Planner day from the Supabase mirror.",
+      "tags": [
+        "service",
+        "planner",
+        "supabase",
+        "synchronization"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/lib/planner-constants.ts",
+      "type": "file",
+      "name": "planner-constants.ts",
+      "filePath": "src/lib/planner-constants.ts",
+      "summary": "Defines Planner subjects, durations, study modes, priorities, break patterns, day types, energy and mood choices, calendar bounds, and deterministic subject-chip colors.",
+      "tags": [
+        "configuration",
+        "planner",
+        "type-definition",
+        "ui-tokens"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/lib/planner-constants.ts:subjectChipInk",
+      "type": "function",
+      "name": "subjectChipInk",
+      "filePath": "src/lib/planner-constants.ts",
+      "lineRange": [
+        114,
+        128
+      ],
+      "summary": "Hashes a subject name into a deterministic background and text color pair for calendar chips.",
+      "tags": [
+        "configuration",
+        "planner",
+        "type-definition",
+        "ui-tokens"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/lib/planner-execution.ts",
+      "type": "file",
+      "name": "planner-execution.ts",
+      "filePath": "src/lib/planner-execution.ts",
+      "summary": "Connects Planner blocks to PYQ, mock, and focused-session routes, records block execution, derives completion percentage, and reconciles linked Dexie records back into plans.",
+      "tags": [
+        "service",
+        "planner",
+        "session-management",
+        "routing"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/lib/planner-execution.ts:plannerBlockHref",
+      "type": "function",
+      "name": "plannerBlockHref",
+      "filePath": "src/lib/planner-execution.ts",
+      "lineRange": [
+        17,
+        35
+      ],
+      "summary": "Routes a Planner block into PYQ, mock, resumed session, or new focused-session flow with linking parameters.",
+      "tags": [
+        "service",
+        "planner",
+        "session-management",
+        "routing"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/planner-execution.ts:plannerCompletionPercent",
+      "type": "function",
+      "name": "plannerCompletionPercent",
+      "filePath": "src/lib/planner-execution.ts",
+      "lineRange": [
+        37,
+        49
+      ],
+      "summary": "Computes duration-weighted completion while capping each completed block at its planned minutes.",
+      "tags": [
+        "service",
+        "planner",
+        "session-management",
+        "routing"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/planner-execution.ts:updatePlannerBlockExecution",
+      "type": "function",
+      "name": "updatePlannerBlockExecution",
+      "filePath": "src/lib/planner-execution.ts",
+      "lineRange": [
+        58,
+        83
+      ],
+      "summary": "Merges execution facts into a matching block and persists the plan with an automatically recomputed review percentage.",
+      "tags": [
+        "service",
+        "planner",
+        "session-management",
+        "routing"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/planner-execution.ts:markPlannerBlockStarted",
+      "type": "function",
+      "name": "markPlannerBlockStarted",
+      "filePath": "src/lib/planner-execution.ts",
+      "lineRange": [
+        85,
+        91
+      ],
+      "summary": "Marks a Planner block started at the current time without completing it.",
+      "tags": [
+        "service",
+        "planner",
+        "session-management",
+        "routing"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/planner-execution.ts:markPlannerBlockComplete",
+      "type": "function",
+      "name": "markPlannerBlockComplete",
+      "filePath": "src/lib/planner-execution.ts",
+      "lineRange": [
+        93,
+        104
+      ],
+      "summary": "Marks a Planner block manually completed with a positive rounded actual duration.",
+      "tags": [
+        "service",
+        "planner",
+        "session-management",
+        "routing"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/planner-execution.ts:reconcilePlannerExecutions",
+      "type": "function",
+      "name": "reconcilePlannerExecutions",
+      "filePath": "src/lib/planner-execution.ts",
+      "lineRange": [
+        106,
+        160
+      ],
+      "summary": "Reconciles linked focused sessions and mock tests from Dexie into their exact Planner blocks and returns the changed count.",
+      "tags": [
+        "service",
+        "planner",
+        "session-management",
+        "routing"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/lib/planner-insights.ts",
+      "type": "file",
+      "name": "planner-insights.ts",
+      "filePath": "src/lib/planner-insights.ts",
+      "summary": "Loads local Planner days and computes pure cross-day rollups for time, sessions, subject/mode/priority shares, reviews, neglected subjects, day types, and time windows.",
+      "tags": [
+        "analytics",
+        "planner",
+        "aggregation",
+        "utility"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:src/lib/planner-insights.ts:loadAllDayPlans",
+      "type": "function",
+      "name": "loadAllDayPlans",
+      "filePath": "src/lib/planner-insights.ts",
+      "lineRange": [
+        17,
+        34
+      ],
+      "summary": "Loads every valid user-scoped Planner day from localStorage after migrating legacy keys.",
+      "tags": [
+        "analytics",
+        "planner",
+        "aggregation",
+        "utility"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/planner-insights.ts:rollup",
+      "type": "function",
+      "name": "rollup",
+      "filePath": "src/lib/planner-insights.ts",
+      "lineRange": [
+        56,
+        86
+      ],
+      "summary": "Aggregates planned days, minutes, targeted hours, sessions per day, and average session duration.",
+      "tags": [
+        "analytics",
+        "planner",
+        "aggregation",
+        "utility"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/planner-insights.ts:toShares",
+      "type": "function",
+      "name": "toShares",
+      "filePath": "src/lib/planner-insights.ts",
+      "lineRange": [
+        96,
+        106
+      ],
+      "summary": "Converts label-minute totals into descending percentage shares.",
+      "tags": [
+        "analytics",
+        "planner",
+        "aggregation",
+        "utility"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/planner-insights.ts:subjectShare",
+      "type": "function",
+      "name": "subjectShare",
+      "filePath": "src/lib/planner-insights.ts",
+      "lineRange": [
+        108,
+        118
+      ],
+      "summary": "Aggregates planned minutes by resolved subject name and converts them to shares.",
+      "tags": [
+        "analytics",
+        "planner",
+        "aggregation",
+        "utility"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/planner-insights.ts:modeShare",
+      "type": "function",
+      "name": "modeShare",
+      "filePath": "src/lib/planner-insights.ts",
+      "lineRange": [
+        120,
+        128
+      ],
+      "summary": "Aggregates planned minutes by study mode and converts them to shares.",
+      "tags": [
+        "analytics",
+        "planner",
+        "aggregation",
+        "utility"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/planner-insights.ts:priorityShare",
+      "type": "function",
+      "name": "priorityShare",
+      "filePath": "src/lib/planner-insights.ts",
+      "lineRange": [
+        130,
+        138
+      ],
+      "summary": "Aggregates planned minutes by priority and converts them to shares.",
+      "tags": [
+        "analytics",
+        "planner",
+        "aggregation",
+        "utility"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/planner-insights.ts:reviewStats",
+      "type": "function",
+      "name": "reviewStats",
+      "filePath": "src/lib/planner-insights.ts",
+      "lineRange": [
+        151,
+        183
+      ],
+      "summary": "Summarizes completed day reviews, average completion, replication decisions, and end-mood counts.",
+      "tags": [
+        "analytics",
+        "planner",
+        "aggregation",
+        "utility"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/planner-insights.ts:neglectedSubjects",
+      "type": "function",
+      "name": "neglectedSubjects",
+      "filePath": "src/lib/planner-insights.ts",
+      "lineRange": [
+        189,
+        213
+      ],
+      "summary": "Finds canonical subjects below a minimum planned-minute threshold within a recent date window.",
+      "tags": [
+        "analytics",
+        "planner",
+        "aggregation",
+        "utility"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/planner-insights.ts:dayTypeShare",
+      "type": "function",
+      "name": "dayTypeShare",
+      "filePath": "src/lib/planner-insights.ts",
+      "lineRange": [
+        217,
+        231
+      ],
+      "summary": "Converts planned-day counts by day type into descending percentage shares.",
+      "tags": [
+        "analytics",
+        "planner",
+        "aggregation",
+        "utility"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/planner-insights.ts:windowed",
+      "type": "function",
+      "name": "windowed",
+      "filePath": "src/lib/planner-insights.ts",
+      "lineRange": [
+        235,
+        237
+      ],
+      "summary": "Returns only plans whose dates fall within the requested trailing-day window.",
+      "tags": [
+        "analytics",
+        "planner",
+        "aggregation",
+        "utility"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/lib/planner-storage.ts",
+      "type": "file",
+      "name": "planner-storage.ts",
+      "filePath": "src/lib/planner-storage.ts",
+      "summary": "Defines the DayPlan data model and user-scoped localStorage persistence, including defaults, legacy-key migration, safe reads and writes, monthly indexes, and day summaries.",
+      "tags": [
+        "service",
+        "planner",
+        "local-storage",
+        "migration"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:src/lib/planner-storage.ts:dayKeyPrefix",
+      "type": "function",
+      "name": "dayKeyPrefix",
+      "filePath": "src/lib/planner-storage.ts",
+      "lineRange": [
+        11,
+        13
+      ],
+      "summary": "Builds the localStorage Planner key prefix for the current user or signed-out scope.",
+      "tags": [
+        "service",
+        "planner",
+        "local-storage",
+        "migration"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/planner-storage.ts:plannerDateFromSearch",
+      "type": "function",
+      "name": "plannerDateFromSearch",
+      "filePath": "src/lib/planner-storage.ts",
+      "lineRange": [
+        15,
+        22
+      ],
+      "summary": "Extracts and strictly validates a real ISO calendar date from URL search parameters.",
+      "tags": [
+        "service",
+        "planner",
+        "local-storage",
+        "migration"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/planner-storage.ts:migrateLegacyDayPlans",
+      "type": "function",
+      "name": "migrateLegacyDayPlans",
+      "filePath": "src/lib/planner-storage.ts",
+      "lineRange": [
+        25,
+        46
+      ],
+      "summary": "Claims legacy unscoped Planner rows for the current user without overwriting existing scoped data.",
+      "tags": [
+        "service",
+        "planner",
+        "local-storage",
+        "migration"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/planner-storage.ts:emptyDayPlan",
+      "type": "function",
+      "name": "emptyDayPlan",
+      "filePath": "src/lib/planner-storage.ts",
+      "lineRange": [
+        144,
+        175
+      ],
+      "summary": "Creates a new Planner day with default structure, mindset, non-study, review, and update timestamp values.",
+      "tags": [
+        "service",
+        "planner",
+        "local-storage",
+        "migration"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/planner-storage.ts:keyFor",
+      "type": "function",
+      "name": "keyFor",
+      "filePath": "src/lib/planner-storage.ts",
+      "lineRange": [
+        197,
+        199
+      ],
+      "summary": "Builds the user-scoped localStorage key for one plan date.",
+      "tags": [
+        "service",
+        "planner",
+        "local-storage",
+        "migration"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/planner-storage.ts:loadDayPlan",
+      "type": "function",
+      "name": "loadDayPlan",
+      "filePath": "src/lib/planner-storage.ts",
+      "lineRange": [
+        201,
+        204
+      ],
+      "summary": "Migrates legacy rows and safely reads one user-scoped plan by date.",
+      "tags": [
+        "service",
+        "planner",
+        "local-storage",
+        "migration"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/planner-storage.ts:loadAllDayPlans",
+      "type": "function",
+      "name": "loadAllDayPlans",
+      "filePath": "src/lib/planner-storage.ts",
+      "lineRange": [
+        207,
+        222
+      ],
+      "summary": "Loads and validates every locally cached day for a specified user in date order.",
+      "tags": [
+        "service",
+        "planner",
+        "local-storage",
+        "migration"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/planner-storage.ts:saveDayPlan",
+      "type": "function",
+      "name": "saveDayPlan",
+      "filePath": "src/lib/planner-storage.ts",
+      "lineRange": [
+        224,
+        228
+      ],
+      "summary": "Persists a day plan with a refreshed update timestamp and returns the saved value.",
+      "tags": [
+        "service",
+        "planner",
+        "local-storage",
+        "migration"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/planner-storage.ts:cacheDayPlan",
+      "type": "function",
+      "name": "cacheDayPlan",
+      "filePath": "src/lib/planner-storage.ts",
+      "lineRange": [
+        231,
+        233
+      ],
+      "summary": "Caches a server-provided day plan without changing its authoritative update timestamp.",
+      "tags": [
+        "service",
+        "planner",
+        "local-storage",
+        "migration"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/planner-storage.ts:deleteDayPlan",
+      "type": "function",
+      "name": "deleteDayPlan",
+      "filePath": "src/lib/planner-storage.ts",
+      "lineRange": [
+        235,
+        241
+      ],
+      "summary": "Best-effort removes one user-scoped day plan from localStorage.",
+      "tags": [
+        "service",
+        "planner",
+        "local-storage",
+        "migration"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/planner-storage.ts:loadPlanIndexForMonth",
+      "type": "function",
+      "name": "loadPlanIndexForMonth",
+      "filePath": "src/lib/planner-storage.ts",
+      "lineRange": [
+        246,
+        260
+      ],
+      "summary": "Returns the valid stored date keys for one user-scoped calendar month.",
+      "tags": [
+        "service",
+        "planner",
+        "local-storage",
+        "migration"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/planner-storage.ts:summarize",
+      "type": "function",
+      "name": "summarize",
+      "filePath": "src/lib/planner-storage.ts",
+      "lineRange": [
+        268,
+        278
+      ],
+      "summary": "Extracts unique resolved subjects and total planned minutes for a calendar cell.",
+      "tags": [
+        "service",
+        "planner",
+        "local-storage",
+        "migration"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/pages/DoNow.tsx",
+      "type": "file",
+      "name": "DoNow.tsx",
+      "filePath": "src/pages/DoNow.tsx",
+      "summary": "Presents the learner’s ordered Do Now queue from live Dexie evidence and today’s plan, marks planned work as started, and routes each action into its working flow.",
+      "tags": [
+        "component",
+        "study-queue",
+        "planner",
+        "dexie"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/pages/DoNow.tsx:DoNow",
+      "type": "function",
+      "name": "DoNow",
+      "filePath": "src/pages/DoNow.tsx",
+      "lineRange": [
+        25,
+        167
+      ],
+      "summary": "Combines live learner evidence and today’s plan into an ordered queue, reconciles completed work, starts planned blocks, and renders first-action or empty guidance.",
+      "tags": [
+        "component",
+        "study-queue",
+        "planner",
+        "dexie"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/pages/Planner.tsx",
+      "type": "file",
+      "name": "Planner.tsx",
+      "filePath": "src/pages/Planner.tsx",
+      "summary": "Coordinates the calendar, day editor, and insights with user-scoped local-first persistence, execution reconciliation, deep links, and debounced two-way Supabase session mirroring.",
+      "tags": [
+        "component",
+        "planner",
+        "local-first",
+        "synchronization"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:src/pages/Planner.tsx:Planner",
+      "type": "function",
+      "name": "Planner",
+      "filePath": "src/pages/Planner.tsx",
+      "lineRange": [
+        61,
+        366
+      ],
+      "summary": "Manages calendar navigation, local day editing, cloud conflict resolution, debounced synchronization, deep-link hydration, execution actions, and insights refresh.",
+      "tags": [
+        "component",
+        "planner",
+        "local-first",
+        "synchronization"
+      ],
+      "complexity": "complex"
+    }
+  ],
+  "edges": [
+    {
+      "source": "file:src/components/planner/SubjectPicker.tsx",
+      "target": "file:src/lib/native.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/planner/SubjectPicker.tsx",
+      "target": "file:src/lib/utils.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/planner/SubjectPicker.tsx",
+      "target": "function:src/components/planner/SubjectPicker.tsx:SubjectPicker",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/components/planner/SubjectPicker.tsx",
+      "target": "function:src/components/planner/SubjectPicker.tsx:SubjectPicker",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/do-now.ts",
+      "target": "file:src/lib/constants.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/lib/do-now.ts",
+      "target": "file:src/lib/planner-execution.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/lib/do-now.ts",
+      "target": "file:src/lib/planner-storage.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/lib/do-now.ts",
+      "target": "file:src/lib/pyq-session.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/lib/do-now.ts",
+      "target": "file:src/types/index.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/lib/do-now.ts",
+      "target": "function:src/lib/do-now.ts:latestAttempts",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/do-now.ts",
+      "target": "function:src/lib/do-now.ts:buildDoNowQueue",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/do-now.ts",
+      "target": "function:src/lib/do-now.ts:buildDoNowQueue",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/planner-cloud.ts",
+      "target": "file:src/lib/planner-storage.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/lib/planner-cloud.ts",
+      "target": "file:src/lib/supabase.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/lib/planner-cloud.ts",
+      "target": "function:src/lib/planner-cloud.ts:isStudySession",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/planner-cloud.ts",
+      "target": "function:src/lib/planner-cloud.ts:loadCloudDayPlan",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/planner-cloud.ts",
+      "target": "function:src/lib/planner-cloud.ts:loadCloudDayPlan",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/planner-cloud.ts",
+      "target": "function:src/lib/planner-cloud.ts:loadCloudDayPlans",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/planner-cloud.ts",
+      "target": "function:src/lib/planner-cloud.ts:loadCloudDayPlans",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/planner-cloud.ts",
+      "target": "function:src/lib/planner-cloud.ts:saveCloudDayPlan",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/planner-cloud.ts",
+      "target": "function:src/lib/planner-cloud.ts:saveCloudDayPlan",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/planner-cloud.ts",
+      "target": "function:src/lib/planner-cloud.ts:deleteCloudDayPlan",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/planner-cloud.ts",
+      "target": "function:src/lib/planner-cloud.ts:deleteCloudDayPlan",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/planner-constants.ts",
+      "target": "file:src/lib/planner-storage.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/lib/planner-constants.ts",
+      "target": "function:src/lib/planner-constants.ts:subjectChipInk",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/planner-constants.ts",
+      "target": "function:src/lib/planner-constants.ts:subjectChipInk",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/planner-execution.ts",
+      "target": "file:src/lib/db.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/lib/planner-execution.ts",
+      "target": "file:src/lib/planner-storage.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/lib/planner-execution.ts",
+      "target": "file:src/lib/utils.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/lib/planner-execution.ts",
+      "target": "function:src/lib/planner-execution.ts:plannerBlockHref",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/planner-execution.ts",
+      "target": "function:src/lib/planner-execution.ts:plannerBlockHref",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/planner-execution.ts",
+      "target": "function:src/lib/planner-execution.ts:plannerCompletionPercent",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/planner-execution.ts",
+      "target": "function:src/lib/planner-execution.ts:plannerCompletionPercent",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/planner-execution.ts",
+      "target": "function:src/lib/planner-execution.ts:updatePlannerBlockExecution",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/planner-execution.ts",
+      "target": "function:src/lib/planner-execution.ts:updatePlannerBlockExecution",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/planner-execution.ts",
+      "target": "function:src/lib/planner-execution.ts:markPlannerBlockStarted",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/planner-execution.ts",
+      "target": "function:src/lib/planner-execution.ts:markPlannerBlockStarted",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/planner-execution.ts",
+      "target": "function:src/lib/planner-execution.ts:markPlannerBlockComplete",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/planner-execution.ts",
+      "target": "function:src/lib/planner-execution.ts:markPlannerBlockComplete",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/planner-execution.ts",
+      "target": "function:src/lib/planner-execution.ts:reconcilePlannerExecutions",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/planner-execution.ts",
+      "target": "function:src/lib/planner-execution.ts:reconcilePlannerExecutions",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/planner-insights.ts",
+      "target": "file:src/lib/planner-storage.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/lib/planner-insights.ts",
+      "target": "function:src/lib/planner-insights.ts:loadAllDayPlans",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/planner-insights.ts",
+      "target": "function:src/lib/planner-insights.ts:loadAllDayPlans",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/planner-insights.ts",
+      "target": "function:src/lib/planner-insights.ts:rollup",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/planner-insights.ts",
+      "target": "function:src/lib/planner-insights.ts:rollup",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/planner-insights.ts",
+      "target": "function:src/lib/planner-insights.ts:toShares",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/planner-insights.ts",
+      "target": "function:src/lib/planner-insights.ts:subjectShare",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/planner-insights.ts",
+      "target": "function:src/lib/planner-insights.ts:subjectShare",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/planner-insights.ts",
+      "target": "function:src/lib/planner-insights.ts:modeShare",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/planner-insights.ts",
+      "target": "function:src/lib/planner-insights.ts:modeShare",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/planner-insights.ts",
+      "target": "function:src/lib/planner-insights.ts:priorityShare",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/planner-insights.ts",
+      "target": "function:src/lib/planner-insights.ts:priorityShare",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/planner-insights.ts",
+      "target": "function:src/lib/planner-insights.ts:reviewStats",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/planner-insights.ts",
+      "target": "function:src/lib/planner-insights.ts:reviewStats",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/planner-insights.ts",
+      "target": "function:src/lib/planner-insights.ts:neglectedSubjects",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/planner-insights.ts",
+      "target": "function:src/lib/planner-insights.ts:neglectedSubjects",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/planner-insights.ts",
+      "target": "function:src/lib/planner-insights.ts:dayTypeShare",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/planner-insights.ts",
+      "target": "function:src/lib/planner-insights.ts:dayTypeShare",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/planner-insights.ts",
+      "target": "function:src/lib/planner-insights.ts:windowed",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/planner-insights.ts",
+      "target": "function:src/lib/planner-insights.ts:windowed",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/planner-storage.ts",
+      "target": "file:src/stores/auth.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/lib/planner-storage.ts",
+      "target": "function:src/lib/planner-storage.ts:dayKeyPrefix",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/planner-storage.ts",
+      "target": "function:src/lib/planner-storage.ts:dayKeyPrefix",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/planner-storage.ts",
+      "target": "function:src/lib/planner-storage.ts:plannerDateFromSearch",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/planner-storage.ts",
+      "target": "function:src/lib/planner-storage.ts:plannerDateFromSearch",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/planner-storage.ts",
+      "target": "function:src/lib/planner-storage.ts:migrateLegacyDayPlans",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/planner-storage.ts",
+      "target": "function:src/lib/planner-storage.ts:migrateLegacyDayPlans",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/planner-storage.ts",
+      "target": "function:src/lib/planner-storage.ts:emptyDayPlan",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/planner-storage.ts",
+      "target": "function:src/lib/planner-storage.ts:emptyDayPlan",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/planner-storage.ts",
+      "target": "function:src/lib/planner-storage.ts:keyFor",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/planner-storage.ts",
+      "target": "function:src/lib/planner-storage.ts:keyFor",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/planner-storage.ts",
+      "target": "function:src/lib/planner-storage.ts:loadDayPlan",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/planner-storage.ts",
+      "target": "function:src/lib/planner-storage.ts:loadDayPlan",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/planner-storage.ts",
+      "target": "function:src/lib/planner-storage.ts:loadAllDayPlans",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/planner-storage.ts",
+      "target": "function:src/lib/planner-storage.ts:loadAllDayPlans",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/planner-storage.ts",
+      "target": "function:src/lib/planner-storage.ts:saveDayPlan",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/planner-storage.ts",
+      "target": "function:src/lib/planner-storage.ts:saveDayPlan",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/planner-storage.ts",
+      "target": "function:src/lib/planner-storage.ts:cacheDayPlan",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/planner-storage.ts",
+      "target": "function:src/lib/planner-storage.ts:cacheDayPlan",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/planner-storage.ts",
+      "target": "function:src/lib/planner-storage.ts:deleteDayPlan",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/planner-storage.ts",
+      "target": "function:src/lib/planner-storage.ts:deleteDayPlan",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/planner-storage.ts",
+      "target": "function:src/lib/planner-storage.ts:loadPlanIndexForMonth",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/planner-storage.ts",
+      "target": "function:src/lib/planner-storage.ts:loadPlanIndexForMonth",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/planner-storage.ts",
+      "target": "function:src/lib/planner-storage.ts:summarize",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/planner-storage.ts",
+      "target": "function:src/lib/planner-storage.ts:summarize",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/pages/DoNow.tsx",
+      "target": "file:src/components/layout/PageHeader.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/DoNow.tsx",
+      "target": "file:src/components/ui/Button.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/DoNow.tsx",
+      "target": "file:src/components/ui/Card.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/DoNow.tsx",
+      "target": "file:src/components/ui/Empty.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/DoNow.tsx",
+      "target": "file:src/hooks/useAuth.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/DoNow.tsx",
+      "target": "file:src/lib/db.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/DoNow.tsx",
+      "target": "file:src/lib/do-now.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/DoNow.tsx",
+      "target": "file:src/lib/planner-execution.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/DoNow.tsx",
+      "target": "file:src/lib/planner-storage.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/DoNow.tsx",
+      "target": "file:src/lib/utils.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/DoNow.tsx",
+      "target": "function:src/pages/DoNow.tsx:DoNow",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/pages/DoNow.tsx",
+      "target": "function:src/pages/DoNow.tsx:DoNow",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/pages/Planner.tsx",
+      "target": "file:src/components/layout/PageHeader.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Planner.tsx",
+      "target": "file:src/components/planner/Calendar.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Planner.tsx",
+      "target": "file:src/components/planner/DayPlanModal.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Planner.tsx",
+      "target": "file:src/components/planner/PlannerInsights.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Planner.tsx",
+      "target": "file:src/lib/planner-cloud.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Planner.tsx",
+      "target": "file:src/lib/planner-constants.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Planner.tsx",
+      "target": "file:src/lib/planner-execution.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Planner.tsx",
+      "target": "file:src/lib/planner-insights.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Planner.tsx",
+      "target": "file:src/lib/planner-storage.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Planner.tsx",
+      "target": "file:src/stores/auth.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Planner.tsx",
+      "target": "file:src/stores/ui.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Planner.tsx",
+      "target": "function:src/pages/Planner.tsx:Planner",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/pages/Planner.tsx",
+      "target": "function:src/pages/Planner.tsx:Planner",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    }
+  ]
+}

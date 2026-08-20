@@ -1,0 +1,28 @@
+{
+  "nodes": [
+    {
+      "id": "file:vitest.config.ts",
+      "type": "file",
+      "name": "vitest.config.ts",
+      "filePath": "vitest.config.ts",
+      "summary": "Configures Vitest for React unit and component tests in jsdom, including the shared test setup, source alias resolution, test discovery boundaries, and a stable browser-like origin for localStorage.",
+      "tags": [
+        "test-config",
+        "vitest",
+        "react",
+        "jsdom"
+      ],
+      "complexity": "simple",
+      "languageNotes": "TypeScript configuration uses Vitest's defineConfig helper and the Vite React plugin."
+    }
+  ],
+  "edges": [
+    {
+      "source": "file:vitest.config.ts",
+      "target": "file:src/__tests__/setup.ts",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    }
+  ]
+}

@@ -1,0 +1,418 @@
+{
+  "scriptCompleted": true,
+  "filesAnalyzed": 8,
+  "filesSkipped": [
+    "index.html"
+  ],
+  "analysisOutcomes": {
+    "structure": {
+      "succeeded": 8,
+      "failed": 0
+    },
+    "callGraph": {
+      "succeeded": 0,
+      "failed": 0,
+      "skipped": 8
+    }
+  },
+  "results": [
+    {
+      "path": "AGENTS.md",
+      "language": "markdown",
+      "fileCategory": "docs",
+      "totalLines": 4,
+      "nonEmptyLines": 3,
+      "sections": [
+        {
+          "heading": "Repository working agreements",
+          "level": 1,
+          "line": 1
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 1
+      }
+    },
+    {
+      "path": "ANDROID.md",
+      "language": "markdown",
+      "fileCategory": "docs",
+      "totalLines": 141,
+      "nonEmptyLines": 99,
+      "sections": [
+        {
+          "heading": "HETU for Android",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "Product guarantees",
+          "level": 2,
+          "line": 7
+        },
+        {
+          "heading": "Toolchain",
+          "level": 2,
+          "line": 18
+        },
+        {
+          "heading": "First local build",
+          "level": 2,
+          "line": 27
+        },
+        {
+          "heading": "Firebase push setup",
+          "level": 2,
+          "line": 51
+        },
+        {
+          "heading": "Signed production release",
+          "level": 2,
+          "line": 62
+        },
+        {
+          "heading": "Release verification matrix",
+          "level": 2,
+          "line": 110
+        },
+        {
+          "heading": "HTTPS app links",
+          "level": 2,
+          "line": 130
+        },
+        {
+          "heading": "Performance budget",
+          "level": 2,
+          "line": 134
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 9
+      }
+    },
+    {
+      "path": "DEPLOY.md",
+      "language": "markdown",
+      "fileCategory": "docs",
+      "totalLines": 177,
+      "nonEmptyLines": 127,
+      "sections": [
+        {
+          "heading": "DEPLOY.md — Production deployment walkthrough",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "0. Prerequisites",
+          "level": 2,
+          "line": 5
+        },
+        {
+          "heading": "1. Provision Supabase",
+          "level": 2,
+          "line": 15
+        },
+        {
+          "heading": "2. Push schema + seed policies",
+          "level": 2,
+          "line": 26
+        },
+        {
+          "heading": "3. Deploy edge functions",
+          "level": 2,
+          "line": 40
+        },
+        {
+          "heading": "4. Configure secrets",
+          "level": 2,
+          "line": 57
+        },
+        {
+          "heading": "5. Configure Supabase Auth",
+          "level": 2,
+          "line": 103
+        },
+        {
+          "heading": "6. Configure Supabase Auth webhook (optional but recommended)",
+          "level": 2,
+          "line": 112
+        },
+        {
+          "heading": "7. Deploy to Vercel",
+          "level": 2,
+          "line": 116
+        },
+        {
+          "heading": "8. Smoke test",
+          "level": 2,
+          "line": 131
+        },
+        {
+          "heading": "9. Schedule cron jobs",
+          "level": 2,
+          "line": 145
+        },
+        {
+          "heading": "10. Rate limits and quotas",
+          "level": 2,
+          "line": 152
+        },
+        {
+          "heading": "11. Ongoing ops",
+          "level": 2,
+          "line": 159
+        },
+        {
+          "heading": "12. Rollback",
+          "level": 2,
+          "line": 166
+        },
+        {
+          "heading": "13. What to do if the owner leaves",
+          "level": 2,
+          "line": 170
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 15
+      }
+    },
+    {
+      "path": "README.md",
+      "language": "markdown",
+      "fileCategory": "docs",
+      "totalLines": 130,
+      "nonEmptyLines": 89,
+      "sections": [
+        {
+          "heading": "HETU",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "Quick start (development)",
+          "level": 2,
+          "line": 7
+        },
+        {
+          "heading": "First-time user journey",
+          "level": 2,
+          "line": 21
+        },
+        {
+          "heading": "Access flow (production)",
+          "level": 2,
+          "line": 31
+        },
+        {
+          "heading": "Isolation",
+          "level": 2,
+          "line": 52
+        },
+        {
+          "heading": "Docs",
+          "level": 2,
+          "line": 60
+        },
+        {
+          "heading": "Core philosophy",
+          "level": 2,
+          "line": 65
+        },
+        {
+          "heading": "Stack",
+          "level": 2,
+          "line": 76
+        },
+        {
+          "heading": "Testing",
+          "level": 2,
+          "line": 82
+        },
+        {
+          "heading": "Deploy",
+          "level": 2,
+          "line": 93
+        },
+        {
+          "heading": "Android",
+          "level": 2,
+          "line": 118
+        },
+        {
+          "heading": "License",
+          "level": 2,
+          "line": 128
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 12
+      }
+    },
+    {
+      "path": "package.json",
+      "language": "json",
+      "fileCategory": "config",
+      "totalLines": 92,
+      "nonEmptyLines": 92,
+      "sections": [
+        {
+          "heading": "name",
+          "level": 1,
+          "line": 2
+        },
+        {
+          "heading": "private",
+          "level": 1,
+          "line": 3
+        },
+        {
+          "heading": "version",
+          "level": 1,
+          "line": 4
+        },
+        {
+          "heading": "type",
+          "level": 1,
+          "line": 5
+        },
+        {
+          "heading": "description",
+          "level": 1,
+          "line": 6
+        },
+        {
+          "heading": "engines",
+          "level": 1,
+          "line": 7
+        },
+        {
+          "heading": "scripts",
+          "level": 1,
+          "line": 10
+        },
+        {
+          "heading": "dependencies",
+          "level": 1,
+          "line": 33
+        },
+        {
+          "heading": "devDependencies",
+          "level": 1,
+          "line": 65
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 9
+      }
+    },
+    {
+      "path": "tsconfig.json",
+      "language": "json",
+      "fileCategory": "config",
+      "totalLines": 25,
+      "nonEmptyLines": 25,
+      "sections": [
+        {
+          "heading": "compilerOptions",
+          "level": 1,
+          "line": 2
+        },
+        {
+          "heading": "include",
+          "level": 1,
+          "line": 23
+        },
+        {
+          "heading": "references",
+          "level": 1,
+          "line": 24
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 3
+      }
+    },
+    {
+      "path": "tsconfig.node.json",
+      "language": "json",
+      "fileCategory": "config",
+      "totalLines": 12,
+      "nonEmptyLines": 12,
+      "sections": [
+        {
+          "heading": "compilerOptions",
+          "level": 1,
+          "line": 2
+        },
+        {
+          "heading": "include",
+          "level": 1,
+          "line": 11
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 2
+      }
+    },
+    {
+      "path": "vercel.json",
+      "language": "json",
+      "fileCategory": "config",
+      "totalLines": 36,
+      "nonEmptyLines": 36,
+      "sections": [
+        {
+          "heading": "$schema",
+          "level": 1,
+          "line": 2
+        },
+        {
+          "heading": "rewrites",
+          "level": 1,
+          "line": 3
+        },
+        {
+          "heading": "headers",
+          "level": 1,
+          "line": 9
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 3
+      }
+    }
+  ]
+}

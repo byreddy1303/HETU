@@ -1,0 +1,8 @@
+Loaded 349 files (265 code).
+Warning: compute-batches: community size 56 > max 35 — splitting via alphabetical chunking — modularity may decrease
+Warning: compute-batches: community size 47 > max 35 — splitting via alphabetical chunking — modularity may decrease
+Warning: compute-batches: community size 52 > max 35 — splitting via alphabetical chunking — modularity may decrease
+Info: compute-batches: merged 48 small batches (51 files) into 3 misc batches — singletons and orphans consolidated
+Warning: compute-batches: neighborMap for src/lib/utils.ts has high 1-hop degree 78 — exceeds soft cap of 50 — keeping top 50 cross-batch entries (9 dropped by degree sort)
+Warning: compute-batches: neighborMap for src/types/index.ts has high 1-hop degree 65 — exceeds soft cap of 50 — keeping top 50 cross-batch entries (1 dropped by degree sort)
+Wrote 20 batches (sizes: max=42, min=1) to /Users/bkalyankrishnareddy/Desktop/GATE PREP/hetu/.ua/intermediate/batches.json

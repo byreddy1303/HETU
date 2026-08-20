@@ -1,0 +1,36 @@
+{
+  "projectRoot": "/Users/bkalyankrishnareddy/Desktop/GATE PREP/hetu",
+  "batchFiles": [
+    {
+      "path": "android/app/src/main/res/values/colors.xml",
+      "language": "xml",
+      "sizeLines": 9,
+      "fileCategory": "config"
+    },
+    {
+      "path": "android/app/src/main/res/values/ic_launcher_background.xml",
+      "language": "xml",
+      "sizeLines": 4,
+      "fileCategory": "config"
+    },
+    {
+      "path": "android/app/src/main/res/values/strings.xml",
+      "language": "xml",
+      "sizeLines": 24,
+      "fileCategory": "config"
+    },
+    {
+      "path": "android/app/src/main/res/values/styles.xml",
+      "language": "xml",
+      "sizeLines": 30,
+      "fileCategory": "config"
+    }
+  ],
+  "batchImportData": {
+    "android/app/src/main/res/values/colors.xml": [],
+    "android/app/src/main/res/values/ic_launcher_background.xml": [],
+    "android/app/src/main/res/values/strings.xml": [],
+    "android/app/src/main/res/values/styles.xml": []
+  },
+  "neighborMap": {}
+}

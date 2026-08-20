@@ -1,0 +1,1273 @@
+{
+  "scriptCompleted": true,
+  "filesAnalyzed": 24,
+  "filesSkipped": [],
+  "analysisOutcomes": {
+    "structure": {
+      "succeeded": 24,
+      "failed": 0
+    },
+    "callGraph": {
+      "succeeded": 24,
+      "failed": 0,
+      "skipped": 0
+    }
+  },
+  "results": [
+    {
+      "path": "src/__tests__/analysis.test.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 439,
+      "nonEmptyLines": 405,
+      "functions": [
+        {
+          "name": "q",
+          "startLine": 22,
+          "endLine": 45,
+          "params": [
+            "overrides"
+          ]
+        },
+        {
+          "name": "ra",
+          "startLine": 47,
+          "endLine": 58,
+          "params": [
+            "overrides"
+          ]
+        }
+      ],
+      "metrics": {
+        "importCount": 2,
+        "exportCount": 0,
+        "functionCount": 2,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/__tests__/learning_tips.test.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 83,
+      "nonEmptyLines": 78,
+      "functions": [
+        {
+          "name": "question",
+          "startLine": 5,
+          "endLine": 28,
+          "params": [
+            "overrides"
+          ]
+        }
+      ],
+      "metrics": {
+        "importCount": 2,
+        "exportCount": 0,
+        "functionCount": 1,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/__tests__/missing-tags-confirm.test.tsx",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 94,
+      "nonEmptyLines": 85,
+      "metrics": {
+        "importCount": 5,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/__tests__/mocks.test.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 48,
+      "nonEmptyLines": 44,
+      "functions": [
+        {
+          "name": "row",
+          "startLine": 17,
+          "endLine": 26,
+          "params": [
+            "id",
+            "date",
+            "score"
+          ]
+        }
+      ],
+      "metrics": {
+        "importCount": 2,
+        "exportCount": 0,
+        "functionCount": 1,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/__tests__/pyq-attempt-log.test.tsx",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 263,
+      "nonEmptyLines": 241,
+      "metrics": {
+        "importCount": 5,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/__tests__/pyq-history.test.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 81,
+      "nonEmptyLines": 76,
+      "functions": [
+        {
+          "name": "question",
+          "startLine": 7,
+          "endLine": 9,
+          "params": [
+            "id",
+            "marks"
+          ]
+        },
+        {
+          "name": "attempt",
+          "startLine": 11,
+          "endLine": 39,
+          "params": [
+            "id",
+            "questionUid",
+            "patch"
+          ]
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "ids",
+          "callee": "filterPyqByHistory(questions, filter, attempts, []).map",
+          "lineNumber": 65
+        },
+        {
+          "caller": "ids",
+          "callee": "filterPyqByHistory",
+          "lineNumber": 65
+        }
+      ],
+      "metrics": {
+        "importCount": 4,
+        "exportCount": 0,
+        "functionCount": 2,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/__tests__/pyq-navigation.test.tsx",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 194,
+      "nonEmptyLines": 182,
+      "metrics": {
+        "importCount": 3,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/__tests__/pyq-rendering.test.tsx",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 63,
+      "nonEmptyLines": 53,
+      "metrics": {
+        "importCount": 1,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/__tests__/pyq-session.test.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 281,
+      "nonEmptyLines": 259,
+      "metrics": {
+        "importCount": 3,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/__tests__/pyq.test.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 428,
+      "nonEmptyLines": 397,
+      "functions": [
+        {
+          "name": "question",
+          "startLine": 28,
+          "endLine": 50,
+          "params": [
+            "overrides"
+          ]
+        }
+      ],
+      "metrics": {
+        "importCount": 1,
+        "exportCount": 0,
+        "functionCount": 1,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/__tests__/reattempt-ui.test.tsx",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 646,
+      "nonEmptyLines": 592,
+      "functions": [
+        {
+          "name": "seedDueQuestion",
+          "startLine": 73,
+          "endLine": 110,
+          "params": [
+            "scheduledDate",
+            "format"
+          ]
+        },
+        {
+          "name": "seedDuePyq",
+          "startLine": 112,
+          "endLine": 203,
+          "params": [
+            "stage"
+          ]
+        },
+        {
+          "name": "seedLegacyDuePyq",
+          "startLine": 205,
+          "endLine": 295,
+          "params": []
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "seedDueQuestion",
+          "callee": "db.questions.put",
+          "lineNumber": 108
+        },
+        {
+          "caller": "seedDueQuestion",
+          "callee": "db.reattempts.put",
+          "lineNumber": 109
+        },
+        {
+          "caller": "seedDuePyq",
+          "callee": "createPyqSessionRow",
+          "lineNumber": 141
+        },
+        {
+          "caller": "seedDuePyq",
+          "callee": "createPyqAttemptRow",
+          "lineNumber": 156
+        },
+        {
+          "caller": "seedDuePyq",
+          "callee": "Date.parse",
+          "lineNumber": 163
+        },
+        {
+          "caller": "seedDuePyq",
+          "callee": "Date.parse",
+          "lineNumber": 164
+        },
+        {
+          "caller": "seedDuePyq",
+          "callee": "pyqJournalQuestionId",
+          "lineNumber": 167
+        },
+        {
+          "caller": "seedDuePyq",
+          "callee": "db.pyq_sessions.put",
+          "lineNumber": 199
+        },
+        {
+          "caller": "seedDuePyq",
+          "callee": "db.pyq_attempts.put",
+          "lineNumber": 200
+        },
+        {
+          "caller": "seedDuePyq",
+          "callee": "db.questions.put",
+          "lineNumber": 201
+        },
+        {
+          "caller": "seedDuePyq",
+          "callee": "db.reattempts.put",
+          "lineNumber": 202
+        },
+        {
+          "caller": "seedLegacyDuePyq",
+          "callee": "String.raw",
+          "lineNumber": 222
+        },
+        {
+          "caller": "seedLegacyDuePyq",
+          "callee": "createPyqSessionRow",
+          "lineNumber": 226
+        },
+        {
+          "caller": "seedLegacyDuePyq",
+          "callee": "createPyqAttemptRow",
+          "lineNumber": 241
+        },
+        {
+          "caller": "seedLegacyDuePyq",
+          "callee": "Date.parse",
+          "lineNumber": 248
+        },
+        {
+          "caller": "seedLegacyDuePyq",
+          "callee": "Date.parse",
+          "lineNumber": 249
+        },
+        {
+          "caller": "seedLegacyDuePyq",
+          "callee": "db.pyq_attempts.put",
+          "lineNumber": 291
+        },
+        {
+          "caller": "seedLegacyDuePyq",
+          "callee": "db.questions.put",
+          "lineNumber": 292
+        },
+        {
+          "caller": "seedLegacyDuePyq",
+          "callee": "db.reattempts.put",
+          "lineNumber": 293
+        }
+      ],
+      "metrics": {
+        "importCount": 8,
+        "exportCount": 0,
+        "functionCount": 3,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/__tests__/revision-pack.test.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 54,
+      "nonEmptyLines": 53,
+      "metrics": {
+        "importCount": 2,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/__tests__/sessions.test.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 161,
+      "nonEmptyLines": 150,
+      "functions": [
+        {
+          "name": "session",
+          "startLine": 18,
+          "endLine": 36,
+          "params": [
+            "id",
+            "createdAt",
+            "actualDuration"
+          ]
+        },
+        {
+          "name": "question",
+          "startLine": 38,
+          "endLine": 61,
+          "params": [
+            "id",
+            "sessionId"
+          ]
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "session",
+          "callee": "createdAt.slice",
+          "lineNumber": 26
+        }
+      ],
+      "metrics": {
+        "importCount": 5,
+        "exportCount": 0,
+        "functionCount": 2,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/__tests__/topic-evidence.test.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 75,
+      "nonEmptyLines": 69,
+      "functions": [
+        {
+          "name": "build",
+          "startLine": 5,
+          "endLine": 16,
+          "params": [
+            "overrides"
+          ]
+        },
+        {
+          "name": "attempt",
+          "startLine": 18,
+          "endLine": 27,
+          "params": [
+            "id",
+            "correct"
+          ]
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "build",
+          "callee": "buildTopicEvidence",
+          "lineNumber": 6
+        },
+        {
+          "caller": "attempt",
+          "callee": "Number",
+          "lineNumber": 24
+        },
+        {
+          "caller": "attempt",
+          "callee": "id.slice",
+          "lineNumber": 24
+        }
+      ],
+      "metrics": {
+        "importCount": 2,
+        "exportCount": 0,
+        "functionCount": 2,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/components/dashboard/HeroCard.tsx",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 101,
+      "nonEmptyLines": 96,
+      "functions": [
+        {
+          "name": "greeting",
+          "startLine": 5,
+          "endLine": 12,
+          "params": [
+            "hour",
+            "firstName"
+          ]
+        },
+        {
+          "name": "HeroCard",
+          "startLine": 25,
+          "endLine": 101,
+          "params": [
+            "{\n  name,\n  today,\n  showCountdown,\n  daysLeft,\n  due,\n  overdue,\n  queueCount,\n  action\n}"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "HeroCard",
+          "line": 25,
+          "isDefault": true
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "greeting",
+          "callee": "firstName.trim",
+          "lineNumber": 6
+        },
+        {
+          "caller": "HeroCard",
+          "callee": "(name ?? '').split",
+          "lineNumber": 35
+        },
+        {
+          "caller": "HeroCard",
+          "callee": "greeting",
+          "lineNumber": 54
+        },
+        {
+          "caller": "HeroCard",
+          "callee": "new Date().getHours",
+          "lineNumber": 54
+        },
+        {
+          "caller": "HeroCard",
+          "callee": "formatDate",
+          "lineNumber": 89
+        }
+      ],
+      "metrics": {
+        "importCount": 1,
+        "exportCount": 1,
+        "functionCount": 2,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/components/dashboard/LearningTips.tsx",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 45,
+      "nonEmptyLines": 42,
+      "functions": [
+        {
+          "name": "LearningTips",
+          "startLine": 12,
+          "endLine": 45,
+          "params": [
+            "{ tips }"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "LearningTips",
+          "line": 12,
+          "isDefault": true
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "LearningTips",
+          "callee": "cn",
+          "lineNumber": 19
+        },
+        {
+          "caller": "LearningTips",
+          "callee": "cn",
+          "lineNumber": 25
+        }
+      ],
+      "metrics": {
+        "importCount": 2,
+        "exportCount": 1,
+        "functionCount": 1,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/components/dashboard/OutcomeDonut.tsx",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 59,
+      "nonEmptyLines": 56,
+      "functions": [
+        {
+          "name": "OutcomeDonut",
+          "startLine": 14,
+          "endLine": 59,
+          "params": [
+            "{\n  distribution,\n  total\n}"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "OutcomeDonut",
+          "line": 14,
+          "isDefault": true
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "OutcomeDonut",
+          "callee": "OUTCOMES.map((outcome) => ({\n    code: outcome.code,\n    value: distribution[outcome.code]\n  })).filter",
+          "lineNumber": 21
+        },
+        {
+          "caller": "OutcomeDonut",
+          "callee": "OUTCOMES.map",
+          "lineNumber": 21
+        },
+        {
+          "caller": "OutcomeDonut",
+          "callee": "data.map",
+          "lineNumber": 47
+        }
+      ],
+      "metrics": {
+        "importCount": 2,
+        "exportCount": 1,
+        "functionCount": 1,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/components/dashboard/OutcomeLegend.tsx",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 89,
+      "nonEmptyLines": 85,
+      "functions": [
+        {
+          "name": "OutcomeLegend",
+          "startLine": 17,
+          "endLine": 89,
+          "params": []
+        }
+      ],
+      "exports": [
+        {
+          "name": "OutcomeLegend",
+          "line": 17,
+          "isDefault": true
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "OutcomeLegend",
+          "callee": "useState",
+          "lineNumber": 18
+        },
+        {
+          "caller": "OutcomeLegend",
+          "callee": "useRef",
+          "lineNumber": 19
+        },
+        {
+          "caller": "OutcomeLegend",
+          "callee": "useEffect",
+          "lineNumber": 21
+        },
+        {
+          "caller": "onClick",
+          "callee": "containerRef.current.contains",
+          "lineNumber": 25
+        },
+        {
+          "caller": "onClick",
+          "callee": "setOpen",
+          "lineNumber": 25
+        },
+        {
+          "caller": "onEsc",
+          "callee": "setOpen",
+          "lineNumber": 28
+        },
+        {
+          "caller": "OutcomeLegend",
+          "callee": "document.addEventListener",
+          "lineNumber": 30
+        },
+        {
+          "caller": "OutcomeLegend",
+          "callee": "document.addEventListener",
+          "lineNumber": 31
+        },
+        {
+          "caller": "OutcomeLegend",
+          "callee": "document.removeEventListener",
+          "lineNumber": 33
+        },
+        {
+          "caller": "OutcomeLegend",
+          "callee": "document.removeEventListener",
+          "lineNumber": 34
+        },
+        {
+          "caller": "OutcomeLegend",
+          "callee": "setOpen",
+          "lineNumber": 42
+        },
+        {
+          "caller": "OutcomeLegend",
+          "callee": "cn",
+          "lineNumber": 43
+        },
+        {
+          "caller": "OutcomeLegend",
+          "callee": "OUTCOMES.map",
+          "lineNumber": 68
+        },
+        {
+          "caller": "OutcomeLegend",
+          "callee": "cn",
+          "lineNumber": 70
+        }
+      ],
+      "metrics": {
+        "importCount": 2,
+        "exportCount": 1,
+        "functionCount": 1,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/components/dashboard/SurfaceTrendChart.tsx",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 104,
+      "nonEmptyLines": 102,
+      "functions": [
+        {
+          "name": "SurfaceTrendChart",
+          "startLine": 14,
+          "endLine": 104,
+          "params": [
+            "{ data }"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "SurfaceTrendChart",
+          "line": 14,
+          "isDefault": true
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "SurfaceTrendChart",
+          "callee": "useId",
+          "lineNumber": 15
+        },
+        {
+          "caller": "SurfaceTrendChart",
+          "callee": "rawId.replace",
+          "lineNumber": 16
+        },
+        {
+          "caller": "SurfaceTrendChart",
+          "callee": "useMemo",
+          "lineNumber": 17
+        },
+        {
+          "caller": "SurfaceTrendChart",
+          "callee": "Math.max",
+          "lineNumber": 17
+        },
+        {
+          "caller": "SurfaceTrendChart",
+          "callee": "data.map",
+          "lineNumber": 17
+        },
+        {
+          "caller": "SurfaceTrendChart",
+          "callee": "formatDate",
+          "lineNumber": 48
+        },
+        {
+          "caller": "SurfaceTrendChart",
+          "callee": "formatDate",
+          "lineNumber": 75
+        },
+        {
+          "caller": "SurfaceTrendChart",
+          "callee": "String",
+          "lineNumber": 75
+        }
+      ],
+      "metrics": {
+        "importCount": 2,
+        "exportCount": 1,
+        "functionCount": 1,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/components/pyq/PyqQuestionContent.tsx",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 33,
+      "nonEmptyLines": 30,
+      "functions": [
+        {
+          "name": "PyqQuestionContent",
+          "startLine": 7,
+          "endLine": 33,
+          "params": [
+            "{ html }"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "PyqQuestionContent",
+          "line": 7,
+          "isDefault": true
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "PyqQuestionContent",
+          "callee": "useRef",
+          "lineNumber": 8
+        },
+        {
+          "caller": "PyqQuestionContent",
+          "callee": "useMemo",
+          "lineNumber": 9
+        },
+        {
+          "caller": "PyqQuestionContent",
+          "callee": "DOMPurify.sanitize",
+          "lineNumber": 11
+        },
+        {
+          "caller": "PyqQuestionContent",
+          "callee": "normalizePyqQuestionHtml",
+          "lineNumber": 11
+        },
+        {
+          "caller": "PyqQuestionContent",
+          "callee": "useEffect",
+          "lineNumber": 18
+        },
+        {
+          "caller": "PyqQuestionContent",
+          "callee": "renderMathInElement",
+          "lineNumber": 20
+        }
+      ],
+      "metrics": {
+        "importCount": 1,
+        "exportCount": 1,
+        "functionCount": 1,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/components/shared/MissingTagsConfirm.tsx",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 52,
+      "nonEmptyLines": 50,
+      "functions": [
+        {
+          "name": "MissingTagsConfirm",
+          "startLine": 5,
+          "endLine": 52,
+          "params": [
+            "{\n  open,\n  saving = false,\n  onGoBack,\n  onConfirm\n}"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "MissingTagsConfirm",
+          "line": 5,
+          "isDefault": true
+        }
+      ],
+      "metrics": {
+        "importCount": 2,
+        "exportCount": 1,
+        "functionCount": 1,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/components/shared/OutcomeBadge.tsx",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 32,
+      "nonEmptyLines": 30,
+      "functions": [
+        {
+          "name": "OutcomeBadge",
+          "startLine": 12,
+          "endLine": 32,
+          "params": [
+            "{\n  outcome,\n  className\n}"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "OutcomeBadge",
+          "line": 12,
+          "isDefault": true
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "OutcomeBadge",
+          "callee": "cn",
+          "lineNumber": 23
+        }
+      ],
+      "metrics": {
+        "importCount": 3,
+        "exportCount": 1,
+        "functionCount": 1,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/components/tags/OutcomeStep.tsx",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 34,
+      "nonEmptyLines": 33,
+      "functions": [
+        {
+          "name": "OutcomeStep",
+          "startLine": 6,
+          "endLine": 34,
+          "params": [
+            "{\n  selected,\n  onSelect,\n  onCancel\n}"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "OutcomeStep",
+          "line": 6,
+          "isDefault": true
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "OutcomeStep",
+          "callee": "useKeyboard",
+          "lineNumber": 15
+        },
+        {
+          "caller": "OutcomeStep",
+          "callee": "Object.fromEntries",
+          "lineNumber": 17
+        },
+        {
+          "caller": "OutcomeStep",
+          "callee": "OUTCOMES.map",
+          "lineNumber": 17
+        },
+        {
+          "caller": "OutcomeStep",
+          "callee": "onSelect",
+          "lineNumber": 17
+        },
+        {
+          "caller": "OutcomeStep",
+          "callee": "OUTCOMES.map",
+          "lineNumber": 21
+        },
+        {
+          "caller": "OutcomeStep",
+          "callee": "o.key.toUpperCase",
+          "lineNumber": 24
+        },
+        {
+          "caller": "OutcomeStep",
+          "callee": "onSelect",
+          "lineNumber": 29
+        }
+      ],
+      "metrics": {
+        "importCount": 4,
+        "exportCount": 1,
+        "functionCount": 1,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/components/tags/PatternStep.tsx",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 156,
+      "nonEmptyLines": 147,
+      "functions": [
+        {
+          "name": "matches",
+          "startLine": 10,
+          "endLine": 14,
+          "params": [
+            "input",
+            "name"
+          ]
+        },
+        {
+          "name": "PatternStep",
+          "startLine": 16,
+          "endLine": 156,
+          "params": [
+            "{\n  subject,\n  patterns,\n  initial,\n  onSubmit,\n  onBack\n}"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "PatternStep",
+          "line": 16,
+          "isDefault": true
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "matches",
+          "callee": "input.trim().toLowerCase",
+          "lineNumber": 11
+        },
+        {
+          "caller": "matches",
+          "callee": "input.trim",
+          "lineNumber": 11
+        },
+        {
+          "caller": "matches",
+          "callee": "name.toLowerCase",
+          "lineNumber": 12
+        },
+        {
+          "caller": "matches",
+          "callee": "n.includes",
+          "lineNumber": 13
+        },
+        {
+          "caller": "matches",
+          "callee": "levenshtein",
+          "lineNumber": 13
+        },
+        {
+          "caller": "PatternStep",
+          "callee": "useState",
+          "lineNumber": 29
+        },
+        {
+          "caller": "PatternStep",
+          "callee": "useState",
+          "lineNumber": 30
+        },
+        {
+          "caller": "PatternStep",
+          "callee": "useRef",
+          "lineNumber": 31
+        },
+        {
+          "caller": "PatternStep",
+          "callee": "useEffect",
+          "lineNumber": 33
+        },
+        {
+          "caller": "PatternStep",
+          "callee": "inputRef.current?.focus",
+          "lineNumber": 33
+        },
+        {
+          "caller": "PatternStep",
+          "callee": "useMemo",
+          "lineNumber": 35
+        },
+        {
+          "caller": "PatternStep",
+          "callee": "text.trim",
+          "lineNumber": 36
+        },
+        {
+          "caller": "PatternStep",
+          "callee": "patterns.filter",
+          "lineNumber": 37
+        },
+        {
+          "caller": "PatternStep",
+          "callee": "matches",
+          "lineNumber": 37
+        },
+        {
+          "caller": "PatternStep",
+          "callee": "patterns.filter",
+          "lineNumber": 38
+        },
+        {
+          "caller": "PatternStep",
+          "callee": "[...pool]\n      .sort(\n        (a, b) =>\n          Number(b.subject === subject) - Number(a.subject === subject) || b.count - a.count\n      )\n      .slice",
+          "lineNumber": 39
+        },
+        {
+          "caller": "PatternStep",
+          "callee": "[...pool]\n      .sort",
+          "lineNumber": 39
+        },
+        {
+          "caller": "PatternStep",
+          "callee": "Number",
+          "lineNumber": 42
+        },
+        {
+          "caller": "PatternStep",
+          "callee": "Number",
+          "lineNumber": 42
+        },
+        {
+          "caller": "PatternStep",
+          "callee": "suggestions.some",
+          "lineNumber": 47
+        },
+        {
+          "caller": "PatternStep",
+          "callee": "p.name.toLowerCase",
+          "lineNumber": 47
+        },
+        {
+          "caller": "PatternStep",
+          "callee": "text.trim().toLowerCase",
+          "lineNumber": 47
+        },
+        {
+          "caller": "PatternStep",
+          "callee": "text.trim",
+          "lineNumber": 47
+        },
+        {
+          "caller": "submit",
+          "callee": "onSubmit",
+          "lineNumber": 50
+        },
+        {
+          "caller": "submit",
+          "callee": "name.trim",
+          "lineNumber": 50
+        },
+        {
+          "caller": "submit",
+          "callee": "name.trim",
+          "lineNumber": 50
+        },
+        {
+          "caller": "onKeyDown",
+          "callee": "e.preventDefault",
+          "lineNumber": 55
+        },
+        {
+          "caller": "onKeyDown",
+          "callee": "onBack",
+          "lineNumber": 56
+        },
+        {
+          "caller": "onKeyDown",
+          "callee": "e.preventDefault",
+          "lineNumber": 58
+        },
+        {
+          "caller": "onKeyDown",
+          "callee": "setHighlight",
+          "lineNumber": 59
+        },
+        {
+          "caller": "onKeyDown",
+          "callee": "e.preventDefault",
+          "lineNumber": 61
+        },
+        {
+          "caller": "onKeyDown",
+          "callee": "setHighlight",
+          "lineNumber": 62
+        },
+        {
+          "caller": "onKeyDown",
+          "callee": "e.preventDefault",
+          "lineNumber": 64
+        },
+        {
+          "caller": "onKeyDown",
+          "callee": "setText",
+          "lineNumber": 65
+        },
+        {
+          "caller": "onKeyDown",
+          "callee": "setHighlight",
+          "lineNumber": 66
+        },
+        {
+          "caller": "onKeyDown",
+          "callee": "e.preventDefault",
+          "lineNumber": 68
+        },
+        {
+          "caller": "onKeyDown",
+          "callee": "submit",
+          "lineNumber": 69
+        },
+        {
+          "caller": "onKeyDown",
+          "callee": "submit",
+          "lineNumber": 70
+        },
+        {
+          "caller": "PatternStep",
+          "callee": "setText",
+          "lineNumber": 80
+        },
+        {
+          "caller": "PatternStep",
+          "callee": "setHighlight",
+          "lineNumber": 81
+        },
+        {
+          "caller": "PatternStep",
+          "callee": "suggestions.map",
+          "lineNumber": 89
+        },
+        {
+          "caller": "PatternStep",
+          "callee": "submit",
+          "lineNumber": 93
+        },
+        {
+          "caller": "PatternStep",
+          "callee": "setHighlight",
+          "lineNumber": 94
+        },
+        {
+          "caller": "PatternStep",
+          "callee": "cn",
+          "lineNumber": 95
+        },
+        {
+          "caller": "PatternStep",
+          "callee": "cn",
+          "lineNumber": 102
+        },
+        {
+          "caller": "PatternStep",
+          "callee": "text.trim",
+          "lineNumber": 113
+        },
+        {
+          "caller": "PatternStep",
+          "callee": "text.trim",
+          "lineNumber": 116
+        },
+        {
+          "caller": "PatternStep",
+          "callee": "submit",
+          "lineNumber": 150
+        }
+      ],
+      "metrics": {
+        "importCount": 4,
+        "exportCount": 1,
+        "functionCount": 2,
+        "classCount": 0
+      }
+    }
+  ]
+}

@@ -1,0 +1,219 @@
+{
+  "projectRoot": "/Users/bkalyankrishnareddy/Desktop/GATE PREP/hetu",
+  "batchFiles": [
+    {
+      "path": "src/__tests__/do-now.test.ts",
+      "language": "typescript",
+      "sizeLines": 103,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/__tests__/planner-execution.test.ts",
+      "language": "typescript",
+      "sizeLines": 118,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/__tests__/planner-native-ui.test.tsx",
+      "language": "typescript",
+      "sizeLines": 114,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/__tests__/planner-ui.test.tsx",
+      "language": "typescript",
+      "sizeLines": 50,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/__tests__/planner_cloud.test.ts",
+      "language": "typescript",
+      "sizeLines": 61,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/__tests__/planner_storage.test.ts",
+      "language": "typescript",
+      "sizeLines": 63,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/components/planner/Calendar.tsx",
+      "language": "typescript",
+      "sizeLines": 233,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/components/planner/DayPlanModal.tsx",
+      "language": "typescript",
+      "sizeLines": 735,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/components/planner/PlannerInsights.tsx",
+      "language": "typescript",
+      "sizeLines": 307,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/components/planner/SubjectPicker.tsx",
+      "language": "typescript",
+      "sizeLines": 162,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/lib/do-now.ts",
+      "language": "typescript",
+      "sizeLines": 125,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/lib/planner-cloud.ts",
+      "language": "typescript",
+      "sizeLines": 96,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/lib/planner-constants.ts",
+      "language": "typescript",
+      "sizeLines": 132,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/lib/planner-execution.ts",
+      "language": "typescript",
+      "sizeLines": 160,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/lib/planner-insights.ts",
+      "language": "typescript",
+      "sizeLines": 237,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/lib/planner-storage.ts",
+      "language": "typescript",
+      "sizeLines": 278,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/pages/DoNow.tsx",
+      "language": "typescript",
+      "sizeLines": 167,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/pages/Planner.tsx",
+      "language": "typescript",
+      "sizeLines": 366,
+      "fileCategory": "code"
+    }
+  ],
+  "batchImportData": {
+    "src/__tests__/do-now.test.ts": [
+      "src/lib/do-now.ts",
+      "src/lib/planner-storage.ts",
+      "src/types/index.ts"
+    ],
+    "src/__tests__/planner-execution.test.ts": [
+      "src/lib/db.ts",
+      "src/lib/planner-execution.ts",
+      "src/lib/planner-storage.ts",
+      "src/stores/auth.ts"
+    ],
+    "src/__tests__/planner-native-ui.test.tsx": [
+      "src/components/planner/DayPlanModal.tsx",
+      "src/lib/planner-storage.ts"
+    ],
+    "src/__tests__/planner-ui.test.tsx": [
+      "src/components/planner/DayPlanModal.tsx",
+      "src/lib/planner-storage.ts"
+    ],
+    "src/__tests__/planner_cloud.test.ts": [
+      "src/lib/planner-cloud.ts"
+    ],
+    "src/__tests__/planner_storage.test.ts": [
+      "src/lib/planner-storage.ts",
+      "src/stores/auth.ts"
+    ],
+    "src/components/planner/Calendar.tsx": [
+      "src/lib/native.ts",
+      "src/lib/planner-constants.ts",
+      "src/lib/planner-storage.ts",
+      "src/lib/utils.ts"
+    ],
+    "src/components/planner/DayPlanModal.tsx": [
+      "src/components/planner/SubjectPicker.tsx",
+      "src/components/ui/Button.tsx",
+      "src/components/ui/Input.tsx",
+      "src/components/ui/Select.tsx",
+      "src/components/ui/Textarea.tsx",
+      "src/lib/native.ts",
+      "src/lib/planner-constants.ts",
+      "src/lib/planner-storage.ts",
+      "src/lib/utils.ts"
+    ],
+    "src/components/planner/PlannerInsights.tsx": [
+      "src/components/ui/Card.tsx",
+      "src/lib/native.ts",
+      "src/lib/planner-constants.ts",
+      "src/lib/planner-insights.ts",
+      "src/lib/utils.ts"
+    ],
+    "src/components/planner/SubjectPicker.tsx": [
+      "src/lib/native.ts",
+      "src/lib/utils.ts"
+    ],
+    "src/lib/do-now.ts": [
+      "src/lib/constants.ts",
+      "src/lib/planner-execution.ts",
+      "src/lib/planner-storage.ts",
+      "src/lib/pyq-session.ts",
+      "src/types/index.ts"
+    ],
+    "src/lib/planner-cloud.ts": [
+      "src/lib/planner-storage.ts",
+      "src/lib/supabase.ts"
+    ],
+    "src/lib/planner-constants.ts": [
+      "src/lib/planner-storage.ts"
+    ],
+    "src/lib/planner-execution.ts": [
+      "src/lib/db.ts",
+      "src/lib/planner-storage.ts",
+      "src/lib/utils.ts"
+    ],
+    "src/lib/planner-insights.ts": [
+      "src/lib/planner-storage.ts"
+    ],
+    "src/lib/planner-storage.ts": [
+      "src/stores/auth.ts"
+    ],
+    "src/pages/DoNow.tsx": [
+      "src/components/layout/PageHeader.tsx",
+      "src/components/ui/Button.tsx",
+      "src/components/ui/Card.tsx",
+      "src/components/ui/Empty.tsx",
+      "src/hooks/useAuth.ts",
+      "src/lib/db.ts",
+      "src/lib/do-now.ts",
+      "src/lib/planner-execution.ts",
+      "src/lib/planner-storage.ts",
+      "src/lib/utils.ts"
+    ],
+    "src/pages/Planner.tsx": [
+      "src/components/layout/PageHeader.tsx",
+      "src/components/planner/Calendar.tsx",
+      "src/components/planner/DayPlanModal.tsx",
+      "src/components/planner/PlannerInsights.tsx",
+      "src/lib/planner-cloud.ts",
+      "src/lib/planner-constants.ts",
+      "src/lib/planner-execution.ts",
+      "src/lib/planner-insights.ts",
+      "src/lib/planner-storage.ts",
+      "src/stores/auth.ts",
+      "src/stores/ui.ts"
+    ]
+  }
+}

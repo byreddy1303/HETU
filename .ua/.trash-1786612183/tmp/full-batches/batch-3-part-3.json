@@ -1,0 +1,998 @@
+{
+  "nodes": [
+    {
+      "id": "file:src/pages/ResetPin.tsx",
+      "type": "file",
+      "name": "ResetPin.tsx",
+      "filePath": "src/pages/ResetPin.tsx",
+      "summary": "Consumes a Supabase recovery session, validates matching six-digit PINs, updates the credential, and signs out before returning to login.",
+      "tags": [
+        "component",
+        "authentication",
+        "pin-reset",
+        "recovery"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/pages/ResetPin.tsx:ResetPin",
+      "type": "function",
+      "name": "ResetPin",
+      "filePath": "src/pages/ResetPin.tsx",
+      "lineRange": [
+        26,
+        172
+      ],
+      "summary": "Tracks the recovery session, validates matching PINs, updates the password, signs out the recovery session, and redirects to login.",
+      "tags": [
+        "component",
+        "authentication",
+        "pin-reset",
+        "recovery"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/pages/Settings.tsx",
+      "type": "file",
+      "name": "Settings.tsx",
+      "filePath": "src/pages/Settings.tsx",
+      "summary": "Hosts device preferences, synced profile fields, notification controls, invitations, progress export, local backup/restore, storage reset, and sign-out workflows.",
+      "tags": [
+        "component",
+        "settings",
+        "preferences",
+        "data-management"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:src/pages/Settings.tsx:Settings",
+      "type": "function",
+      "name": "Settings",
+      "filePath": "src/pages/Settings.tsx",
+      "lineRange": [
+        75,
+        337
+      ],
+      "summary": "Composes device preferences, profile editing, notification controls, invitations, exports, backups, and session actions into the settings page.",
+      "tags": [
+        "component",
+        "settings",
+        "preferences",
+        "data-management"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:src/pages/Settings.tsx:NumberField",
+      "type": "function",
+      "name": "NumberField",
+      "filePath": "src/pages/Settings.tsx",
+      "lineRange": [
+        345,
+        375
+      ],
+      "summary": "Renders a bounded integer preference input and clamps rounded changes to its configured range.",
+      "tags": [
+        "component",
+        "settings",
+        "preferences",
+        "data-management"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/pages/Settings.tsx:SelectField",
+      "type": "function",
+      "name": "SelectField",
+      "filePath": "src/pages/Settings.tsx",
+      "lineRange": [
+        377,
+        403
+      ],
+      "summary": "Renders a labeled select preference from provided value-label options.",
+      "tags": [
+        "component",
+        "settings",
+        "preferences",
+        "data-management"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/pages/Settings.tsx:SegmentField",
+      "type": "function",
+      "name": "SegmentField",
+      "filePath": "src/pages/Settings.tsx",
+      "lineRange": [
+        405,
+        445
+      ],
+      "summary": "Renders an accessible segmented control for choosing one value from a compact option set.",
+      "tags": [
+        "component",
+        "settings",
+        "preferences",
+        "data-management"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/pages/Settings.tsx:ToggleRow",
+      "type": "function",
+      "name": "ToggleRow",
+      "filePath": "src/pages/Settings.tsx",
+      "lineRange": [
+        447,
+        485
+      ],
+      "summary": "Renders a haptic boolean preference switch with descriptive context and pressed state.",
+      "tags": [
+        "component",
+        "settings",
+        "preferences",
+        "data-management"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/pages/Settings.tsx:ProfileCard",
+      "type": "function",
+      "name": "ProfileCard",
+      "filePath": "src/pages/Settings.tsx",
+      "lineRange": [
+        489,
+        677
+      ],
+      "summary": "Maintains editable profile form state, tracks dirty fields, saves individual fields, and surfaces account metadata.",
+      "tags": [
+        "component",
+        "settings",
+        "preferences",
+        "data-management"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/pages/Settings.tsx:CopyButton",
+      "type": "function",
+      "name": "CopyButton",
+      "filePath": "src/pages/Settings.tsx",
+      "lineRange": [
+        679,
+        699
+      ],
+      "summary": "Copies a value to the clipboard and briefly replaces its icon with success feedback.",
+      "tags": [
+        "component",
+        "settings",
+        "preferences",
+        "data-management"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/pages/Settings.tsx:InvitesCard",
+      "type": "function",
+      "name": "InvitesCard",
+      "filePath": "src/pages/Settings.tsx",
+      "lineRange": [
+        703,
+        842
+      ],
+      "summary": "Loads issued invites, creates expiring invite tokens, and presents active, used, and expired states with copyable links.",
+      "tags": [
+        "component",
+        "settings",
+        "preferences",
+        "data-management"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/pages/Settings.tsx:ProgressExportCard",
+      "type": "function",
+      "name": "ProgressExportCard",
+      "filePath": "src/pages/Settings.tsx",
+      "lineRange": [
+        846,
+        912
+      ],
+      "summary": "Collects the learner progress report, downloads it as CSV, and reports success or failure through toasts.",
+      "tags": [
+        "component",
+        "settings",
+        "preferences",
+        "data-management"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/pages/Settings.tsx:DataCard",
+      "type": "function",
+      "name": "DataCard",
+      "filePath": "src/pages/Settings.tsx",
+      "lineRange": [
+        914,
+        1067
+      ],
+      "summary": "Exports and imports validated local backup envelopes and provides a confirmed local-storage wipe workflow.",
+      "tags": [
+        "component",
+        "settings",
+        "preferences",
+        "data-management"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/pages/Signup.tsx",
+      "type": "file",
+      "name": "Signup.tsx",
+      "filePath": "src/pages/Signup.tsx",
+      "summary": "Implements invite-only account creation with display-name-derived usernames, debounced availability checks, PIN confirmation, and immediate sign-in.",
+      "tags": [
+        "component",
+        "authentication",
+        "signup",
+        "validation"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:src/pages/Signup.tsx:Signup",
+      "type": "function",
+      "name": "Signup",
+      "filePath": "src/pages/Signup.tsx",
+      "lineRange": [
+        25,
+        272
+      ],
+      "summary": "Validates an invite-backed account form, suggests and checks usernames, confirms PINs, creates the account, and navigates after automatic sign-in.",
+      "tags": [
+        "component",
+        "authentication",
+        "signup",
+        "validation"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:src/pages/Signup.tsx:Field",
+      "type": "function",
+      "name": "Field",
+      "filePath": "src/pages/Signup.tsx",
+      "lineRange": [
+        274,
+        309
+      ],
+      "summary": "Wraps a signup control with a label and tone-aware validation hint.",
+      "tags": [
+        "component",
+        "authentication",
+        "signup",
+        "validation"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/router.tsx",
+      "type": "file",
+      "name": "router.tsx",
+      "filePath": "src/router.tsx",
+      "summary": "Defines public and authenticated React Router routes, lazy-loads all pages with chunk recovery, and attaches shared loading and error boundaries.",
+      "tags": [
+        "entry-point",
+        "routing",
+        "lazy-loading",
+        "authentication"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/stores/auth.ts",
+      "type": "file",
+      "name": "auth.ts",
+      "filePath": "src/stores/auth.ts",
+      "summary": "Owns authentication and profile state for username/PIN sessions plus the offline development sandbox, including profile updates and local-state cleanup on sign-out.",
+      "tags": [
+        "state-management",
+        "authentication",
+        "zustand",
+        "offline-mode"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/stores/auth.ts:currentUserId",
+      "type": "function",
+      "name": "currentUserId",
+      "filePath": "src/stores/auth.ts",
+      "lineRange": [
+        196,
+        199
+      ],
+      "summary": "Returns the sandbox profile ID or authenticated Supabase user ID used to scope local rows.",
+      "tags": [
+        "state-management",
+        "authentication",
+        "zustand",
+        "offline-mode"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/stores/buddyPresence.ts",
+      "type": "file",
+      "name": "buddyPresence.ts",
+      "filePath": "src/stores/buddyPresence.ts",
+      "summary": "Stores the currently online user IDs for each Buddy pair and exposes focused update, removal, and reset actions.",
+      "tags": [
+        "state-management",
+        "buddy",
+        "realtime",
+        "zustand"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/stores/prefs.ts",
+      "type": "file",
+      "name": "prefs.ts",
+      "filePath": "src/stores/prefs.ts",
+      "summary": "Persists study targets, session defaults, appearance, haptics, and backup-reminder preferences in local storage with reset and backup-age helpers.",
+      "tags": [
+        "state-management",
+        "preferences",
+        "persistence",
+        "zustand"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/stores/prefs.ts:daysSinceBackup",
+      "type": "function",
+      "name": "daysSinceBackup",
+      "filePath": "src/stores/prefs.ts",
+      "lineRange": [
+        76,
+        80
+      ],
+      "summary": "Computes whole elapsed days since the last recorded backup or returns null when none exists.",
+      "tags": [
+        "state-management",
+        "preferences",
+        "persistence",
+        "zustand"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/stores/prefs.ts:needsBackupReminder",
+      "type": "function",
+      "name": "needsBackupReminder",
+      "filePath": "src/stores/prefs.ts",
+      "lineRange": [
+        83,
+        88
+      ],
+      "summary": "Determines whether the configured backup cadence is enabled and currently due.",
+      "tags": [
+        "state-management",
+        "preferences",
+        "persistence",
+        "zustand"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/stores/ui.ts",
+      "type": "file",
+      "name": "ui.ts",
+      "filePath": "src/stores/ui.ts",
+      "summary": "Maintains global navigation-collapse and toast state, limiting the visible queue and automatically dismissing notifications after a short lifetime.",
+      "tags": [
+        "state-management",
+        "toast",
+        "zustand",
+        "user-interface"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/stores/ui.ts:toast",
+      "type": "function",
+      "name": "toast",
+      "filePath": "src/stores/ui.ts",
+      "lineRange": [
+        37,
+        39
+      ],
+      "summary": "Pushes a global toast through the UI store without requiring a React hook call site.",
+      "tags": [
+        "state-management",
+        "toast",
+        "zustand",
+        "user-interface"
+      ],
+      "complexity": "simple"
+    }
+  ],
+  "edges": [
+    {
+      "source": "file:src/pages/ResetPin.tsx",
+      "target": "file:src/components/auth/PinInput.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/ResetPin.tsx",
+      "target": "file:src/components/shared/Brand.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/ResetPin.tsx",
+      "target": "file:src/components/shared/ThemeToggle.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/ResetPin.tsx",
+      "target": "file:src/components/ui/Button.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/ResetPin.tsx",
+      "target": "file:src/lib/constants.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/ResetPin.tsx",
+      "target": "file:src/lib/supabase.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/ResetPin.tsx",
+      "target": "function:src/pages/ResetPin.tsx:ResetPin",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/pages/ResetPin.tsx",
+      "target": "function:src/pages/ResetPin.tsx:ResetPin",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/pages/Settings.tsx",
+      "target": "file:src/components/layout/PageHeader.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Settings.tsx",
+      "target": "file:src/components/settings/AccessRequestsCard.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Settings.tsx",
+      "target": "file:src/components/settings/BuddyNotificationsCard.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Settings.tsx",
+      "target": "file:src/components/settings/NotificationsCard.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Settings.tsx",
+      "target": "file:src/components/settings/StudyNotificationsCard.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Settings.tsx",
+      "target": "file:src/components/ui/Badge.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Settings.tsx",
+      "target": "file:src/components/ui/Button.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Settings.tsx",
+      "target": "file:src/components/ui/Card.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Settings.tsx",
+      "target": "file:src/components/ui/Empty.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Settings.tsx",
+      "target": "file:src/components/ui/Input.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Settings.tsx",
+      "target": "file:src/components/ui/Select.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Settings.tsx",
+      "target": "file:src/hooks/useAuth.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Settings.tsx",
+      "target": "file:src/lib/backup.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Settings.tsx",
+      "target": "file:src/lib/constants.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Settings.tsx",
+      "target": "file:src/lib/isolation.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Settings.tsx",
+      "target": "file:src/lib/native.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Settings.tsx",
+      "target": "file:src/lib/progress-export.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Settings.tsx",
+      "target": "file:src/lib/supabase.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Settings.tsx",
+      "target": "file:src/lib/theme.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Settings.tsx",
+      "target": "file:src/lib/utils.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Settings.tsx",
+      "target": "file:src/stores/auth.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Settings.tsx",
+      "target": "file:src/stores/prefs.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Settings.tsx",
+      "target": "file:src/stores/ui.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Settings.tsx",
+      "target": "file:src/types/index.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Settings.tsx",
+      "target": "function:src/pages/Settings.tsx:Settings",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/pages/Settings.tsx",
+      "target": "function:src/pages/Settings.tsx:Settings",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/pages/Settings.tsx",
+      "target": "function:src/pages/Settings.tsx:NumberField",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/pages/Settings.tsx",
+      "target": "function:src/pages/Settings.tsx:SelectField",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/pages/Settings.tsx",
+      "target": "function:src/pages/Settings.tsx:SegmentField",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/pages/Settings.tsx",
+      "target": "function:src/pages/Settings.tsx:ToggleRow",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/pages/Settings.tsx",
+      "target": "function:src/pages/Settings.tsx:ProfileCard",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/pages/Settings.tsx",
+      "target": "function:src/pages/Settings.tsx:CopyButton",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/pages/Settings.tsx",
+      "target": "function:src/pages/Settings.tsx:InvitesCard",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/pages/Settings.tsx",
+      "target": "function:src/pages/Settings.tsx:ProgressExportCard",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/pages/Settings.tsx",
+      "target": "function:src/pages/Settings.tsx:DataCard",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/pages/Signup.tsx",
+      "target": "file:src/components/auth/PinInput.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Signup.tsx",
+      "target": "file:src/components/shared/Brand.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Signup.tsx",
+      "target": "file:src/components/shared/ThemeToggle.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Signup.tsx",
+      "target": "file:src/components/ui/Button.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Signup.tsx",
+      "target": "file:src/components/ui/Input.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Signup.tsx",
+      "target": "file:src/hooks/useAuth.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Signup.tsx",
+      "target": "file:src/lib/constants.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Signup.tsx",
+      "target": "file:src/lib/edge.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Signup.tsx",
+      "target": "file:src/lib/supabase.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Signup.tsx",
+      "target": "file:src/lib/utils.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Signup.tsx",
+      "target": "file:src/stores/auth.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Signup.tsx",
+      "target": "function:src/pages/Signup.tsx:Signup",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/pages/Signup.tsx",
+      "target": "function:src/pages/Signup.tsx:Signup",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/pages/Signup.tsx",
+      "target": "function:src/pages/Signup.tsx:Field",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/router.tsx",
+      "target": "file:src/components/layout/Shell.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/router.tsx",
+      "target": "file:src/components/shared/LoadingScreen.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/router.tsx",
+      "target": "file:src/components/shared/RequireAuth.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/router.tsx",
+      "target": "file:src/components/shared/RootErrorBoundary.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/router.tsx",
+      "target": "file:src/lib/lazyWithRetry.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/stores/auth.ts",
+      "target": "file:src/lib/buddyNotifications.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/stores/auth.ts",
+      "target": "file:src/lib/constants.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/stores/auth.ts",
+      "target": "file:src/lib/db.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/stores/auth.ts",
+      "target": "file:src/lib/edge.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/stores/auth.ts",
+      "target": "file:src/lib/isolation.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/stores/auth.ts",
+      "target": "file:src/lib/supabase.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/stores/auth.ts",
+      "target": "file:src/types/index.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/stores/auth.ts",
+      "target": "function:src/stores/auth.ts:currentUserId",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/stores/auth.ts",
+      "target": "function:src/stores/auth.ts:currentUserId",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/stores/prefs.ts",
+      "target": "file:src/lib/theme.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/stores/prefs.ts",
+      "target": "function:src/stores/prefs.ts:daysSinceBackup",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/stores/prefs.ts",
+      "target": "function:src/stores/prefs.ts:daysSinceBackup",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/stores/prefs.ts",
+      "target": "function:src/stores/prefs.ts:needsBackupReminder",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/stores/prefs.ts",
+      "target": "function:src/stores/prefs.ts:needsBackupReminder",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/stores/ui.ts",
+      "target": "function:src/stores/ui.ts:toast",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/stores/ui.ts",
+      "target": "function:src/stores/ui.ts:toast",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/stores/prefs.ts",
+      "target": "file:src/__tests__/theme.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/stores/prefs.ts",
+      "target": "file:src/__tests__/isolation.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/stores/auth.ts",
+      "target": "file:src/__tests__/planner-execution.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/stores/auth.ts",
+      "target": "file:src/__tests__/planner_storage.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    }
+  ]
+}

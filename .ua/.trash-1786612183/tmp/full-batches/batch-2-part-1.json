@@ -1,0 +1,645 @@
+{
+  "nodes": [
+    {
+      "id": "file:src/App.tsx",
+      "type": "file",
+      "name": "App.tsx",
+      "filePath": "src/App.tsx",
+      "summary": "Composes the application root, initializes authentication and preferences, synchronizes the resolved theme with browser and native chrome, and mounts global runtimes around the router.",
+      "tags": [
+        "entry-point",
+        "component",
+        "application-shell",
+        "theme"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/__tests__/buddy-chat-ui.test.tsx",
+      "type": "file",
+      "name": "buddy-chat-ui.test.tsx",
+      "filePath": "src/__tests__/buddy-chat-ui.test.tsx",
+      "summary": "Exercises the buddy chat composer and scrolling behavior, including pointer-specific Enter handling, hidden-conversation read state, and jump-to-latest affordances.",
+      "tags": [
+        "test",
+        "buddy-chat",
+        "user-interface",
+        "interaction"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/__tests__/buddy-notifications.test.ts",
+      "type": "file",
+      "name": "buddy-notifications.test.ts",
+      "filePath": "src/__tests__/buddy-notifications.test.ts",
+      "summary": "Validates buddy notification client helpers for stable device identity, explicit opt-in defaults, VAPID key decoding, and safe local push routes.",
+      "tags": [
+        "test",
+        "notifications",
+        "push-notifications",
+        "validation"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/__tests__/buddy-page-ui.test.tsx",
+      "type": "file",
+      "name": "buddy-page-ui.test.tsx",
+      "filePath": "src/__tests__/buddy-page-ui.test.tsx",
+      "summary": "Verifies that mobile buddy-chat navigation is URL-driven and that native Back returns from a conversation to the buddy list.",
+      "tags": [
+        "test",
+        "buddy-page",
+        "mobile-navigation",
+        "routing"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/__tests__/buddy.test.ts",
+      "type": "file",
+      "name": "buddy.test.ts",
+      "filePath": "src/__tests__/buddy.test.ts",
+      "summary": "Covers buddy-domain helpers for safe shared-question payloads, message merging and grouping, pair-scoped presence, and compact chat timestamps.",
+      "tags": [
+        "test",
+        "buddy-domain",
+        "message-grouping",
+        "validation"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/__tests__/image-capture.test.ts",
+      "type": "file",
+      "name": "image-capture.test.ts",
+      "filePath": "src/__tests__/image-capture.test.ts",
+      "summary": "Checks element screenshot capture behavior and confirms that light-mode styling is isolated to the cloned capture document.",
+      "tags": [
+        "test",
+        "image-capture",
+        "theme-isolation",
+        "browser"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/__tests__/native.test.ts",
+      "type": "file",
+      "name": "native.test.ts",
+      "filePath": "src/__tests__/native.test.ts",
+      "summary": "Tests native deep-link normalization and Android Back policy across history navigation, deep-linked pages, and double-press exit behavior.",
+      "tags": [
+        "test",
+        "native-runtime",
+        "deep-linking",
+        "android"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/__tests__/notification-time-editor-native.test.tsx",
+      "type": "file",
+      "name": "notification-time-editor-native.test.tsx",
+      "filePath": "src/__tests__/notification-time-editor-native.test.tsx",
+      "summary": "Verifies the native notification-time editor uses bounded in-page numeric inputs instead of Android select dialogs.",
+      "tags": [
+        "test",
+        "notifications",
+        "native-interface",
+        "time-input"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/__tests__/notification-time-editor.test.tsx",
+      "type": "file",
+      "name": "notification-time-editor.test.tsx",
+      "filePath": "src/__tests__/notification-time-editor.test.tsx",
+      "summary": "Tests staged hour and minute editing, atomic time saves, and restoration of persisted values after a failed save.",
+      "tags": [
+        "test",
+        "notifications",
+        "time-input",
+        "error-handling"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/__tests__/pin-input.test.tsx",
+      "type": "file",
+      "name": "pin-input.test.tsx",
+      "filePath": "src/__tests__/pin-input.test.tsx",
+      "summary": "Validates numeric keyboard hints, one-character PIN cells, and removal of non-digit input.",
+      "tags": [
+        "test",
+        "authentication",
+        "pin-input",
+        "validation"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/__tests__/study-notifications.test.ts",
+      "type": "file",
+      "name": "study-notifications.test.ts",
+      "filePath": "src/__tests__/study-notifications.test.ts",
+      "summary": "Validates study-notification category coverage, minute-level scheduling, separate consent, interactive actions, and schedule-reset semantics.",
+      "tags": [
+        "test",
+        "study-notifications",
+        "scheduling",
+        "interactive-actions"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/__tests__/supabase-config.test.ts",
+      "type": "file",
+      "name": "supabase-config.test.ts",
+      "filePath": "src/__tests__/supabase-config.test.ts",
+      "summary": "Checks Supabase URL validation for supported project URLs and rejects missing, placeholder, or unsafe values without throwing.",
+      "tags": [
+        "test",
+        "supabase",
+        "configuration",
+        "validation"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/__tests__/theme.test.ts",
+      "type": "file",
+      "name": "theme.test.ts",
+      "filePath": "src/__tests__/theme.test.ts",
+      "summary": "Tests explicit and system theme resolution, semantic DOM and browser-chrome updates, and direct light/dark toggling.",
+      "tags": [
+        "test",
+        "theme",
+        "preferences",
+        "browser-chrome"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/components/auth/PinInput.tsx",
+      "type": "file",
+      "name": "PinInput.tsx",
+      "filePath": "src/components/auth/PinInput.tsx",
+      "summary": "Renders a controlled, configurable numeric PIN as individual cells with focus movement, keyboard navigation, paste handling, and digit sanitization.",
+      "tags": [
+        "component",
+        "authentication",
+        "pin-input",
+        "accessibility"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/App.tsx:App",
+      "type": "function",
+      "name": "App",
+      "filePath": "src/App.tsx",
+      "lineRange": [
+        22,
+        58
+      ],
+      "summary": "Builds the global provider and runtime tree while initializing auth and keeping application theme state synchronized.",
+      "tags": [
+        "entry-point",
+        "component",
+        "initialization"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/__tests__/buddy-chat-ui.test.tsx:message",
+      "type": "function",
+      "name": "message",
+      "filePath": "src/__tests__/buddy-chat-ui.test.tsx",
+      "lineRange": [
+        85,
+        97
+      ],
+      "summary": "Creates a complete buddy-message fixture with caller-provided overrides for UI interaction tests.",
+      "tags": [
+        "test-helper",
+        "fixture",
+        "buddy-message"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/__tests__/buddy-chat-ui.test.tsx:setPointer",
+      "type": "function",
+      "name": "setPointer",
+      "filePath": "src/__tests__/buddy-chat-ui.test.tsx",
+      "lineRange": [
+        99,
+        113
+      ],
+      "summary": "Mocks pointer media queries to switch buddy chat tests between coarse and desktop interaction modes.",
+      "tags": [
+        "test-helper",
+        "browser-mock",
+        "pointer-input"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/__tests__/buddy.test.ts:message",
+      "type": "function",
+      "name": "message",
+      "filePath": "src/__tests__/buddy.test.ts",
+      "lineRange": [
+        36,
+        47
+      ],
+      "summary": "Builds a text buddy-message fixture with deterministic identifiers, timestamps, and delivery fields.",
+      "tags": [
+        "test-helper",
+        "fixture",
+        "buddy-message"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/components/auth/PinInput.tsx:PinInput",
+      "type": "function",
+      "name": "PinInput",
+      "filePath": "src/components/auth/PinInput.tsx",
+      "lineRange": [
+        17,
+        99
+      ],
+      "summary": "Coordinates a controlled multi-cell numeric PIN input, including focus, arrow and backspace behavior, and paste distribution.",
+      "tags": [
+        "component",
+        "pin-input",
+        "keyboard-navigation",
+        "validation"
+      ],
+      "complexity": "moderate"
+    }
+  ],
+  "edges": [
+    {
+      "source": "file:src/App.tsx",
+      "target": "file:src/components/buddy/BuddyPresenceRuntime.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/App.tsx",
+      "target": "file:src/components/native/NativeRuntime.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/App.tsx",
+      "target": "file:src/components/notifications/BuddyNotificationRuntime.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/App.tsx",
+      "target": "file:src/components/shared/LoadingScreen.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/App.tsx",
+      "target": "file:src/components/ui/Toast.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/App.tsx",
+      "target": "file:src/lib/native.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/App.tsx",
+      "target": "file:src/lib/queryClient.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/App.tsx",
+      "target": "file:src/lib/theme.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/App.tsx",
+      "target": "file:src/router.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/App.tsx",
+      "target": "file:src/stores/auth.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/App.tsx",
+      "target": "file:src/stores/prefs.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/__tests__/buddy-chat-ui.test.tsx",
+      "target": "file:src/components/buddy/BuddyChat.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/__tests__/buddy-chat-ui.test.tsx",
+      "target": "file:src/types/index.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/__tests__/buddy-notifications.test.ts",
+      "target": "file:src/lib/buddyNotifications.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/__tests__/buddy-page-ui.test.tsx",
+      "target": "file:src/pages/Buddy.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/__tests__/buddy.test.ts",
+      "target": "file:src/lib/buddy.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/__tests__/buddy.test.ts",
+      "target": "file:src/types/index.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/__tests__/image-capture.test.ts",
+      "target": "file:src/lib/image.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/__tests__/image-capture.test.ts",
+      "target": "file:src/lib/theme.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/__tests__/native.test.ts",
+      "target": "file:src/lib/native.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/__tests__/notification-time-editor-native.test.tsx",
+      "target": "file:src/components/settings/NotificationTimeEditor.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/__tests__/notification-time-editor.test.tsx",
+      "target": "file:src/components/settings/NotificationTimeEditor.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/__tests__/pin-input.test.tsx",
+      "target": "file:src/components/auth/PinInput.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/__tests__/study-notifications.test.ts",
+      "target": "file:src/lib/studyNotifications.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/__tests__/supabase-config.test.ts",
+      "target": "file:src/lib/supabase.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/__tests__/theme.test.ts",
+      "target": "file:src/components/shared/ThemeToggle.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/__tests__/theme.test.ts",
+      "target": "file:src/lib/theme.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/__tests__/theme.test.ts",
+      "target": "file:src/stores/prefs.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/auth/PinInput.tsx",
+      "target": "file:src/lib/utils.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/App.tsx",
+      "target": "function:src/App.tsx:App",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/App.tsx",
+      "target": "function:src/App.tsx:App",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/__tests__/buddy-chat-ui.test.tsx",
+      "target": "function:src/__tests__/buddy-chat-ui.test.tsx:message",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/__tests__/buddy-chat-ui.test.tsx",
+      "target": "function:src/__tests__/buddy-chat-ui.test.tsx:setPointer",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/__tests__/buddy.test.ts",
+      "target": "function:src/__tests__/buddy.test.ts:message",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/components/auth/PinInput.tsx",
+      "target": "function:src/components/auth/PinInput.tsx:PinInput",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/components/auth/PinInput.tsx",
+      "target": "function:src/components/auth/PinInput.tsx:PinInput",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/__tests__/buddy-chat-ui.test.tsx",
+      "target": "file:src/components/buddy/BuddyChat.tsx",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/__tests__/buddy-notifications.test.ts",
+      "target": "file:src/lib/buddyNotifications.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/__tests__/buddy-page-ui.test.tsx",
+      "target": "file:src/pages/Buddy.tsx",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/__tests__/buddy.test.ts",
+      "target": "file:src/lib/buddy.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/__tests__/image-capture.test.ts",
+      "target": "file:src/lib/image.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/__tests__/image-capture.test.ts",
+      "target": "file:src/lib/theme.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/__tests__/native.test.ts",
+      "target": "file:src/lib/native.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/__tests__/notification-time-editor-native.test.tsx",
+      "target": "file:src/components/settings/NotificationTimeEditor.tsx",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/__tests__/notification-time-editor.test.tsx",
+      "target": "file:src/components/settings/NotificationTimeEditor.tsx",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/__tests__/pin-input.test.tsx",
+      "target": "file:src/components/auth/PinInput.tsx",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/__tests__/study-notifications.test.ts",
+      "target": "file:src/lib/studyNotifications.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/__tests__/supabase-config.test.ts",
+      "target": "file:src/lib/supabase.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/__tests__/theme.test.ts",
+      "target": "file:src/components/shared/ThemeToggle.tsx",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/__tests__/theme.test.ts",
+      "target": "file:src/lib/theme.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/__tests__/theme.test.ts",
+      "target": "file:src/stores/prefs.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    }
+  ]
+}

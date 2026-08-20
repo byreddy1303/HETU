@@ -1,0 +1,32 @@
+{
+  "batchNames": [
+    "batch-12.json",
+    "batch-18.json",
+    "batch-19.json",
+    "batch-4.json",
+    "batch-5.json",
+    "batch-existing.json"
+  ],
+  "inputNodes": 1018,
+  "inputEdges": 2151,
+  "graphNodes": 1018,
+  "graphEdges": 2150,
+  "scanFiles": 356,
+  "coveredFiles": 356,
+  "uncoveredFiles": [],
+  "expectedImports": 913,
+  "graphImportEdges": 913,
+  "missingImports": [],
+  "dangling": [],
+  "unknownIdNodes": [],
+  "unknownTypes": [],
+  "unknownComplexities": [],
+  "fixedLines": [
+    "     2 × tested_by edges flipped (test → production became production → test)",
+    "     1 × tested_by edges dropped (orphan endpoint or test↔test / prod↔prod pair)",
+    "     0 × tested_by edges produced (path-convention supplement, production → test)",
+    "     1 × production nodes tagged \"tested\""
+  ],
+  "recoveryZero": true,
+  "couldNotFixPresent": false
+}

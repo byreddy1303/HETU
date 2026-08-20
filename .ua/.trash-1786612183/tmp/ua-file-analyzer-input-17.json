@@ -1,0 +1,49 @@
+{
+  "projectRoot": "/Users/bkalyankrishnareddy/Desktop/GATE PREP/hetu",
+  "batchFiles": [
+    {
+      "path": "android/build.gradle",
+      "language": "gradle",
+      "sizeLines": 29,
+      "fileCategory": "config"
+    },
+    {
+      "path": "android/capacitor.settings.gradle",
+      "language": "gradle",
+      "sizeLines": 21,
+      "fileCategory": "config"
+    },
+    {
+      "path": "android/gradle.properties",
+      "language": "properties",
+      "sizeLines": 22,
+      "fileCategory": "config"
+    },
+    {
+      "path": "android/gradlew.bat",
+      "language": "batch",
+      "sizeLines": 94,
+      "fileCategory": "script"
+    },
+    {
+      "path": "android/settings.gradle",
+      "language": "gradle",
+      "sizeLines": 4,
+      "fileCategory": "config"
+    },
+    {
+      "path": "android/variables.gradle",
+      "language": "gradle",
+      "sizeLines": 18,
+      "fileCategory": "config"
+    }
+  ],
+  "batchImportData": {
+    "android/build.gradle": [],
+    "android/capacitor.settings.gradle": [],
+    "android/gradle.properties": [],
+    "android/gradlew.bat": [],
+    "android/settings.gradle": [],
+    "android/variables.gradle": []
+  }
+}

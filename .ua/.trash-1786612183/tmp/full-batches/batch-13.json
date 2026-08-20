@@ -1,0 +1,206 @@
+{
+  "nodes": [
+    {
+      "id": "document:AGENTS.md",
+      "type": "document",
+      "name": "AGENTS.md",
+      "filePath": "AGENTS.md",
+      "summary": "Records two repository working agreements covering task-scoped commits, pushes to origin, and protection of unrelated changes.",
+      "tags": [
+        "documentation",
+        "repository-policy",
+        "version-control"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "document:ANDROID.md",
+      "type": "document",
+      "name": "ANDROID.md",
+      "filePath": "ANDROID.md",
+      "summary": "Explains how HETU is packaged and released as a local-bundle Capacitor Android app, including Firebase push setup, signing, device verification, app links, and performance budgets.",
+      "tags": [
+        "documentation",
+        "android",
+        "capacitor",
+        "release-process"
+      ],
+      "complexity": "moderate",
+      "languageNotes": "Markdown combines shell commands, numbered release checks, and security constraints for the native distribution workflow."
+    },
+    {
+      "id": "document:DEPLOY.md",
+      "type": "document",
+      "name": "DEPLOY.md",
+      "filePath": "DEPLOY.md",
+      "summary": "Provides an end-to-end production deployment runbook for Supabase, edge functions, secrets, authentication, Vercel, cron schedules, smoke testing, operations, and rollback.",
+      "tags": [
+        "documentation",
+        "deployment",
+        "supabase",
+        "vercel",
+        "operations"
+      ],
+      "complexity": "moderate",
+      "languageNotes": "Markdown runbook is organized as an idempotent, ordered production rollout with explicit CLI commands and verification steps."
+    },
+    {
+      "id": "document:README.md",
+      "type": "document",
+      "name": "README.md",
+      "filePath": "README.md",
+      "summary": "Introduces HETU as a local-first GATE PYQ analysis and buddy-study application, then covers setup, account access, data isolation, product philosophy, stack, testing, deployment, and Android distribution.",
+      "tags": [
+        "documentation",
+        "entry-point",
+        "project-overview",
+        "getting-started"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:index.html",
+      "type": "file",
+      "name": "index.html",
+      "filePath": "index.html",
+      "summary": "Defines the Vite application shell, preloads branding, restores the preferred color theme before React hydration, and mounts the client entry point at the root element.",
+      "tags": [
+        "entry-point",
+        "html-shell",
+        "theme-bootstrap",
+        "vite"
+      ],
+      "complexity": "simple",
+      "languageNotes": "An inline defensive IIFE applies theme data and browser theme color before the ES module entry loads, avoiding a light/dark flash."
+    },
+    {
+      "id": "config:package.json",
+      "type": "config",
+      "name": "package.json",
+      "filePath": "package.json",
+      "summary": "Defines the Node 22 ESM package, Vite and TypeScript build commands, test and deployment scripts, Capacitor Android workflows, and the application dependency set.",
+      "tags": [
+        "configuration",
+        "build-system",
+        "dependencies",
+        "npm-scripts"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "config:tsconfig.json",
+      "type": "config",
+      "name": "tsconfig.json",
+      "filePath": "tsconfig.json",
+      "summary": "Configures strict no-emit TypeScript compilation for browser source code with ES2022 libraries, React JSX, bundler resolution, and the @ path alias.",
+      "tags": [
+        "configuration",
+        "typescript",
+        "strict-mode",
+        "build-system"
+      ],
+      "complexity": "simple",
+      "languageNotes": "Uses project references for Node-side tooling while the main source tree compiles as isolated ESNext modules."
+    },
+    {
+      "id": "config:tsconfig.node.json",
+      "type": "config",
+      "name": "tsconfig.node.json",
+      "filePath": "tsconfig.node.json",
+      "summary": "Defines the composite TypeScript project for Vite and Capacitor configuration files, emitting build metadata into a local cache directory.",
+      "tags": [
+        "configuration",
+        "typescript",
+        "build-tooling"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "config:vercel.json",
+      "type": "config",
+      "name": "vercel.json",
+      "filePath": "vercel.json",
+      "summary": "Configures Vercel SPA fallback routing while preserving static asset and service-worker paths, and assigns tailored cache policies to application assets, PYQ data, notes, and push-worker code.",
+      "tags": [
+        "configuration",
+        "vercel",
+        "routing",
+        "caching"
+      ],
+      "complexity": "simple",
+      "languageNotes": "The fallback rewrite uses a negative-lookahead exclusion list, with immutable, revalidation, stale-while-revalidate, and no-store cache policies by asset class."
+    }
+  ],
+  "edges": [
+    {
+      "source": "document:ANDROID.md",
+      "target": "config:package.json",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:DEPLOY.md",
+      "target": "config:package.json",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:DEPLOY.md",
+      "target": "config:vercel.json",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:README.md",
+      "target": "document:ANDROID.md",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:README.md",
+      "target": "document:DEPLOY.md",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:README.md",
+      "target": "config:package.json",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "config:package.json",
+      "target": "file:index.html",
+      "type": "configures",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "config:package.json",
+      "target": "config:tsconfig.json",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "config:tsconfig.json",
+      "target": "config:tsconfig.node.json",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "config:vercel.json",
+      "target": "file:index.html",
+      "type": "routes",
+      "direction": "forward",
+      "weight": 0.6
+    }
+  ]
+}

@@ -1,0 +1,37 @@
+{
+  "projectRoot": "/Users/bkalyankrishnareddy/Desktop/GATE PREP/hetu",
+  "batchFiles": [
+    {
+      "path": "src/pages/Journal.tsx",
+      "language": "typescript",
+      "sizeLines": 920,
+      "fileCategory": "code"
+    }
+  ],
+  "batchImportData": {
+    "src/pages/Journal.tsx": [
+      "src/components/layout/PageHeader.tsx",
+      "src/components/shared/AnswerReveal.tsx",
+      "src/components/shared/ImagePreview.tsx",
+      "src/components/shared/QuestionEditor.tsx",
+      "src/components/shared/SessionEditor.tsx",
+      "src/components/shared/questionDraft.ts",
+      "src/components/ui/Badge.tsx",
+      "src/components/ui/Button.tsx",
+      "src/components/ui/Card.tsx",
+      "src/components/ui/Dialog.tsx",
+      "src/components/ui/Empty.tsx",
+      "src/components/ui/Input.tsx",
+      "src/components/ui/Select.tsx",
+      "src/hooks/useAuth.ts",
+      "src/lib/constants.ts",
+      "src/lib/db.ts",
+      "src/lib/sessions.ts",
+      "src/lib/subjectInk.ts",
+      "src/lib/subtopics.ts",
+      "src/lib/sync.ts",
+      "src/lib/utils.ts",
+      "src/types/index.ts"
+    ]
+  }
+}

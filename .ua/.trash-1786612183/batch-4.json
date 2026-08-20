@@ -1,0 +1,56 @@
+{
+  "nodes": [
+    {
+      "id": "file:src/__tests__/journal-ui.test.tsx",
+      "type": "file",
+      "name": "journal-ui.test.tsx",
+      "filePath": "src/__tests__/journal-ui.test.tsx",
+      "summary": "Verifies that the Journal initially includes a standalone imported question, renders its pattern and attached image action, and reports the correct entry count under a mocked signed-in sandbox user.",
+      "tags": [
+        "test",
+        "vitest",
+        "journal",
+        "indexeddb"
+      ],
+      "complexity": "moderate",
+      "languageNotes": "React Testing Library renders the page inside MemoryRouter while Vitest mocks authentication and Dexie is cleared and seeded before the assertion."
+    }
+  ],
+  "edges": [
+    {
+      "source": "file:src/__tests__/journal-ui.test.tsx",
+      "target": "file:src/lib/db.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/__tests__/journal-ui.test.tsx",
+      "target": "file:src/pages/Journal.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/__tests__/journal-ui.test.tsx",
+      "target": "file:src/types/index.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/__tests__/journal-ui.test.tsx",
+      "target": "file:src/lib/db.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/__tests__/journal-ui.test.tsx",
+      "target": "file:src/pages/Journal.tsx",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    }
+  ]
+}

@@ -1,0 +1,103 @@
+{
+  "projectRoot": "/Users/bkalyankrishnareddy/Desktop/GATE PREP/hetu",
+  "batchFiles": [
+    {
+      "path": "src/__tests__/progress_export.test.ts",
+      "language": "typescript",
+      "sizeLines": 187,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/__tests__/readiness-snapshots.test.ts",
+      "language": "typescript",
+      "sizeLines": 65,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/__tests__/readiness.test.ts",
+      "language": "typescript",
+      "sizeLines": 310,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/__tests__/topic-progress.test.ts",
+      "language": "typescript",
+      "sizeLines": 32,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/lib/progress-export.ts",
+      "language": "typescript",
+      "sizeLines": 418,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/lib/readiness-snapshots.ts",
+      "language": "typescript",
+      "sizeLines": 232,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/lib/readiness.ts",
+      "language": "typescript",
+      "sizeLines": 568,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/stores/topic-progress.ts",
+      "language": "typescript",
+      "sizeLines": 198,
+      "fileCategory": "code"
+    },
+    {
+      "path": "supabase/functions/_shared/readiness-score.ts",
+      "language": "typescript",
+      "sizeLines": 45,
+      "fileCategory": "code"
+    }
+  ],
+  "batchImportData": {
+    "src/__tests__/progress_export.test.ts": [
+      "src/lib/db.ts",
+      "src/lib/planner-storage.ts",
+      "src/lib/progress-export.ts",
+      "src/stores/topic-progress.ts",
+      "src/types/index.ts"
+    ],
+    "src/__tests__/readiness-snapshots.test.ts": [
+      "src/lib/readiness-snapshots.ts"
+    ],
+    "src/__tests__/readiness.test.ts": [
+      "src/lib/readiness.ts",
+      "src/types/index.ts",
+      "supabase/functions/_shared/readiness-score.ts"
+    ],
+    "src/__tests__/topic-progress.test.ts": [
+      "src/stores/topic-progress.ts"
+    ],
+    "src/lib/progress-export.ts": [
+      "src/lib/analysis.ts",
+      "src/lib/constants.ts",
+      "src/lib/db.ts",
+      "src/lib/planner-storage.ts",
+      "src/lib/readiness.ts",
+      "src/lib/subtopics.ts",
+      "src/stores/topic-progress.ts",
+      "src/types/index.ts"
+    ],
+    "src/lib/readiness-snapshots.ts": [
+      "src/lib/readiness.ts"
+    ],
+    "src/lib/readiness.ts": [
+      "src/lib/utils.ts",
+      "src/types/index.ts"
+    ],
+    "src/stores/topic-progress.ts": [
+      "src/lib/db.ts",
+      "src/lib/sync.ts",
+      "src/lib/utils.ts",
+      "src/stores/auth.ts"
+    ],
+    "supabase/functions/_shared/readiness-score.ts": []
+  }
+}

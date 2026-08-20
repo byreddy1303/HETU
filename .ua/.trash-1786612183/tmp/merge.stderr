@@ -1,0 +1,50 @@
+Found 32 batch files (20 logical batches, 8 multi-part):
+  batch-1-part-1.json: 63 nodes, 105 edges
+  batch-1-part-2.json: 37 nodes, 56 edges
+  batch-2-part-1.json: 19 nodes, 51 edges
+  batch-2-part-2.json: 38 nodes, 112 edges
+  batch-3-part-1.json: 59 nodes, 113 edges
+  batch-3-part-2.json: 34 nodes, 85 edges
+  batch-3-part-3.json: 25 nodes, 82 edges
+  batch-4-part-1.json: 29 nodes, 75 edges
+  batch-4-part-2.json: 29 nodes, 51 edges
+  batch-5-part-1.json: 35 nodes, 82 edges
+  batch-5-part-2.json: 36 nodes, 142 edges
+  batch-5-part-3.json: 28 nodes, 124 edges
+  batch-5-part-4.json: 21 nodes, 86 edges
+  batch-6.json: 47 nodes, 101 edges
+  batch-7-part-1.json: 30 nodes, 68 edges
+  batch-7-part-2.json: 62 nodes, 116 edges
+  batch-7-part-3.json: 36 nodes, 116 edges
+  batch-8-part-1.json: 23 nodes, 49 edges
+  batch-8-part-2.json: 48 nodes, 111 edges
+  batch-9.json: 29 nodes, 78 edges
+  batch-10.json: 44 nodes, 95 edges
+  batch-11.json: 45 nodes, 108 edges
+  batch-12-part-1.json: 48 nodes, 27 edges
+  batch-12-part-2.json: 33 nodes, 12 edges
+  batch-13.json: 9 nodes, 10 edges
+  batch-14.json: 3 nodes, 2 edges
+  batch-15.json: 4 nodes, 3 edges
+  batch-16.json: 4 nodes, 1 edges
+  batch-17.json: 6 nodes, 4 edges
+  batch-18.json: 54 nodes, 76 edges
+  batch-19.json: 32 nodes, 24 edges
+  batch-20.json: 1 nodes, 1 edges
+
+Input: 1011 nodes, 2166 edges
+
+Fixed (57 corrections):
+    40 × tested_by edges flipped (test → production became production → test)
+    17 × tested_by edges dropped (orphan endpoint or test↔test / prod↔prod pair)
+
+Tested-by linker:
+     0 × tested_by edges produced (path-convention supplement, production → test)
+    40 × production nodes tagged "tested"
+
+Output: 1011 nodes, 2149 edges
+
+Imports edge recovery:
+  Recovered 0 `imports` edges from importMap (349 entries scanned)
+
+Written to /Users/bkalyankrishnareddy/Desktop/GATE PREP/hetu/.ua/intermediate/assembled-graph.json (936 KB)

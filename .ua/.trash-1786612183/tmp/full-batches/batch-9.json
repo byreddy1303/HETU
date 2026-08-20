@@ -1,0 +1,1022 @@
+{
+  "nodes": [
+    {
+      "id": "file:src/__tests__/contextual_gate_tips.test.ts",
+      "type": "file",
+      "name": "contextual_gate_tips.test.ts",
+      "filePath": "src/__tests__/contextual_gate_tips.test.ts",
+      "summary": "Validates route-to-coaching-tip selection for all supported study surfaces, trailing slashes, dynamic session routes, and unknown-screen fallback behavior.",
+      "tags": [
+        "test",
+        "contextual-tips",
+        "routing",
+        "validation"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/__tests__/isolation.test.ts",
+      "type": "file",
+      "name": "isolation.test.ts",
+      "filePath": "src/__tests__/isolation.test.ts",
+      "summary": "Exercises the full device-isolation contract by seeding persisted Zustand state, IndexedDB rows, metadata, and localStorage before verifying an account-safe wipe.",
+      "tags": [
+        "test",
+        "data-isolation",
+        "persistence",
+        "security"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/components/layout/MobileTabs.tsx",
+      "type": "file",
+      "name": "MobileTabs.tsx",
+      "filePath": "src/components/layout/MobileTabs.tsx",
+      "summary": "Implements mobile primary navigation with three tabs, a context-aware central session action, haptic feedback, and an animated grouped More sheet.",
+      "tags": [
+        "component",
+        "mobile-navigation",
+        "routing",
+        "session"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:src/components/layout/Nav.tsx",
+      "type": "file",
+      "name": "Nav.tsx",
+      "filePath": "src/components/layout/Nav.tsx",
+      "summary": "Builds the desktop side navigation, grouping study and analysis routes while resolving live-session resume state and authenticated profile controls.",
+      "tags": [
+        "component",
+        "desktop-navigation",
+        "routing",
+        "session"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:src/components/layout/Shell.tsx",
+      "type": "file",
+      "name": "Shell.tsx",
+      "filePath": "src/components/layout/Shell.tsx",
+      "summary": "Composes the authenticated responsive shell, starts synchronization, mounts desktop and mobile navigation, animates routed content, and adds contextual tips and daily quotes.",
+      "tags": [
+        "component",
+        "application-shell",
+        "responsive-layout",
+        "synchronization"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/components/layout/TopRightControls.tsx",
+      "type": "file",
+      "name": "TopRightControls.tsx",
+      "filePath": "src/components/layout/TopRightControls.tsx",
+      "summary": "Combines exam countdown, offline synchronization status, and theme switching into the desktop and mobile shell control cluster.",
+      "tags": [
+        "component",
+        "shell-controls",
+        "exam-countdown",
+        "sync-status"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/components/shared/ContextualGateTip.tsx",
+      "type": "file",
+      "name": "ContextualGateTip.tsx",
+      "filePath": "src/components/shared/ContextualGateTip.tsx",
+      "summary": "Renders a route-specific GATE coaching card with contextual copy, accessible labeling, and subject-ink-inspired tone styling.",
+      "tags": [
+        "component",
+        "contextual-tips",
+        "coaching",
+        "accessibility"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/components/shared/OfflineBadge.tsx",
+      "type": "file",
+      "name": "OfflineBadge.tsx",
+      "filePath": "src/components/shared/OfflineBadge.tsx",
+      "summary": "Shows a quiet sandbox, offline, or queued-sync status and remains hidden when the app is online and fully synchronized.",
+      "tags": [
+        "component",
+        "sync-status",
+        "offline",
+        "feedback"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/hooks/useSync.ts",
+      "type": "file",
+      "name": "useSync.ts",
+      "filePath": "src/hooks/useSync.ts",
+      "summary": "Provides hooks that bootstrap user synchronization, track browser connectivity, and count rows still pending or errored across synchronized tables.",
+      "tags": [
+        "hook",
+        "synchronization",
+        "online-status",
+        "local-first"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/lib/contextual-gate-tips.ts",
+      "type": "file",
+      "name": "contextual-gate-tips.ts",
+      "filePath": "src/lib/contextual-gate-tips.ts",
+      "summary": "Defines the curated route-aware GATE preparation tip catalog and resolves dynamic or normalized paths to the appropriate coaching message.",
+      "tags": [
+        "utility",
+        "contextual-tips",
+        "routing",
+        "content"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/lib/isolation.ts",
+      "type": "file",
+      "name": "isolation.ts",
+      "filePath": "src/lib/isolation.ts",
+      "summary": "Performs a best-effort device wipe across persisted Zustand stores, application-owned localStorage keys, and the Dexie database to prevent cross-account residue.",
+      "tags": [
+        "service",
+        "data-isolation",
+        "security",
+        "persistence"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/stores/log.ts",
+      "type": "file",
+      "name": "log.ts",
+      "filePath": "src/stores/log.ts",
+      "summary": "Defines the persisted Zustand state machine for idle, single-question, and multi-question logging, including sticky drafts and batch session counters.",
+      "tags": [
+        "store",
+        "question-logging",
+        "zustand",
+        "persistence"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/stores/session.ts",
+      "type": "file",
+      "name": "session.ts",
+      "filePath": "src/stores/session.ts",
+      "summary": "Defines persisted ephemeral session-run state for solve and tag modes, planned count, active timer origin, and pending elapsed time.",
+      "tags": [
+        "store",
+        "study-session",
+        "zustand",
+        "persistence"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/__tests__/isolation.test.ts:seedAll",
+      "type": "function",
+      "name": "seedAll",
+      "filePath": "src/__tests__/isolation.test.ts",
+      "lineRange": [
+        15,
+        52
+      ],
+      "summary": "Seeds modified preferences, active session and log stores, Dexie rows and metadata, and owned and foreign localStorage keys for isolation tests.",
+      "tags": [
+        "test",
+        "data-isolation",
+        "persistence",
+        "function"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/components/layout/MobileTabs.tsx:MobileTabs",
+      "type": "function",
+      "name": "MobileTabs",
+      "filePath": "src/components/layout/MobileTabs.tsx",
+      "lineRange": [
+        106,
+        312
+      ],
+      "summary": "Coordinates live-session detection, bottom-tab activity, haptic actions, and the accessible animated More navigation sheet.",
+      "tags": [
+        "component",
+        "mobile-navigation",
+        "routing",
+        "function"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:src/components/layout/MobileTabs.tsx:TabButton",
+      "type": "function",
+      "name": "TabButton",
+      "filePath": "src/components/layout/MobileTabs.tsx",
+      "lineRange": [
+        315,
+        343
+      ],
+      "summary": "Renders one mobile navigation tab with path matching, haptic selection, and a shared animated active indicator.",
+      "tags": [
+        "component",
+        "mobile-navigation",
+        "routing",
+        "function"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/components/layout/Nav.tsx:NavItem",
+      "type": "function",
+      "name": "NavItem",
+      "filePath": "src/components/layout/Nav.tsx",
+      "lineRange": [
+        137,
+        156
+      ],
+      "summary": "Renders a desktop route link with icon, active color treatment, and hover motion.",
+      "tags": [
+        "component",
+        "desktop-navigation",
+        "routing",
+        "function"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/components/layout/Nav.tsx:Group",
+      "type": "function",
+      "name": "Group",
+      "filePath": "src/components/layout/Nav.tsx",
+      "lineRange": [
+        158,
+        167
+      ],
+      "summary": "Renders an optional navigation section label and its ordered route items.",
+      "tags": [
+        "component",
+        "desktop-navigation",
+        "routing",
+        "function"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/components/layout/Nav.tsx:Nav",
+      "type": "function",
+      "name": "Nav",
+      "filePath": "src/components/layout/Nav.tsx",
+      "lineRange": [
+        169,
+        243
+      ],
+      "summary": "Builds grouped desktop navigation, selects resume or new-session routing from live Dexie state, and exposes profile and sign-out controls.",
+      "tags": [
+        "component",
+        "desktop-navigation",
+        "routing",
+        "function"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/components/layout/Shell.tsx:Shell",
+      "type": "function",
+      "name": "Shell",
+      "filePath": "src/components/layout/Shell.tsx",
+      "lineRange": [
+        13,
+        61
+      ],
+      "summary": "Bootstraps sync and arranges responsive headers, navigation, routed page animation, contextual coaching, and daily quote content.",
+      "tags": [
+        "component",
+        "application-shell",
+        "responsive-layout",
+        "function"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/components/layout/TopRightControls.tsx:ExamCountdown",
+      "type": "function",
+      "name": "ExamCountdown",
+      "filePath": "src/components/layout/TopRightControls.tsx",
+      "lineRange": [
+        10,
+        32
+      ],
+      "summary": "Computes days until the configured GATE date and links the optional countdown badge to the planner.",
+      "tags": [
+        "component",
+        "shell-controls",
+        "exam-countdown",
+        "function"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/components/layout/TopRightControls.tsx:TopRightControls",
+      "type": "function",
+      "name": "TopRightControls",
+      "filePath": "src/components/layout/TopRightControls.tsx",
+      "lineRange": [
+        34,
+        42
+      ],
+      "summary": "Groups offline status, exam countdown, and the theme toggle into a reusable shell control row.",
+      "tags": [
+        "component",
+        "shell-controls",
+        "exam-countdown",
+        "function"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/components/shared/ContextualGateTip.tsx:ContextualGateTip",
+      "type": "function",
+      "name": "ContextualGateTip",
+      "filePath": "src/components/shared/ContextualGateTip.tsx",
+      "lineRange": [
+        18,
+        54
+      ],
+      "summary": "Resolves the coaching tip for a pathname and renders its tone-aware accessible card.",
+      "tags": [
+        "component",
+        "contextual-tips",
+        "coaching",
+        "function"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/components/shared/OfflineBadge.tsx:OfflineBadge",
+      "type": "function",
+      "name": "OfflineBadge",
+      "filePath": "src/components/shared/OfflineBadge.tsx",
+      "lineRange": [
+        6,
+        28
+      ],
+      "summary": "Derives sandbox, connectivity, and pending-row state to show only the synchronization status that needs attention.",
+      "tags": [
+        "component",
+        "sync-status",
+        "offline",
+        "function"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/hooks/useSync.ts:useSyncBootstrap",
+      "type": "function",
+      "name": "useSyncBootstrap",
+      "filePath": "src/hooks/useSync.ts",
+      "lineRange": [
+        8,
+        16
+      ],
+      "summary": "Starts the sync engine for a signed-in non-sandbox user and stops it when authentication context changes or unmounts.",
+      "tags": [
+        "hook",
+        "synchronization",
+        "online-status",
+        "function"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/hooks/useSync.ts:useOnline",
+      "type": "function",
+      "name": "useOnline",
+      "filePath": "src/hooks/useSync.ts",
+      "lineRange": [
+        18,
+        33
+      ],
+      "summary": "Tracks navigator connectivity through online and offline browser events.",
+      "tags": [
+        "hook",
+        "synchronization",
+        "online-status",
+        "function"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/hooks/useSync.ts:usePendingCount",
+      "type": "function",
+      "name": "usePendingCount",
+      "filePath": "src/hooks/useSync.ts",
+      "lineRange": [
+        36,
+        47
+      ],
+      "summary": "Live-counts pending and errored rows across all synchronized Dexie tables.",
+      "tags": [
+        "hook",
+        "synchronization",
+        "online-status",
+        "function"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/contextual-gate-tips.ts:contextualGateTipForPath",
+      "type": "function",
+      "name": "contextualGateTipForPath",
+      "filePath": "src/lib/contextual-gate-tips.ts",
+      "lineRange": [
+        142,
+        163
+      ],
+      "summary": "Normalizes a route and selects a tailored coaching tip for static or dynamic study screens, falling back to retrieval-first guidance.",
+      "tags": [
+        "utility",
+        "contextual-tips",
+        "routing",
+        "function"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/isolation.ts:wipeLocalState",
+      "type": "function",
+      "name": "wipeLocalState",
+      "filePath": "src/lib/isolation.ts",
+      "lineRange": [
+        23,
+        57
+      ],
+      "summary": "Independently resets in-memory stores, removes every owned air-prefixed storage key, and clears IndexedDB even when an earlier cleanup step fails.",
+      "tags": [
+        "service",
+        "data-isolation",
+        "security",
+        "function"
+      ],
+      "complexity": "simple"
+    }
+  ],
+  "edges": [
+    {
+      "source": "file:src/__tests__/contextual_gate_tips.test.ts",
+      "target": "file:src/lib/contextual-gate-tips.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/__tests__/isolation.test.ts",
+      "target": "file:src/lib/db.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/__tests__/isolation.test.ts",
+      "target": "file:src/lib/isolation.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/__tests__/isolation.test.ts",
+      "target": "file:src/stores/log.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/__tests__/isolation.test.ts",
+      "target": "file:src/stores/prefs.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/__tests__/isolation.test.ts",
+      "target": "file:src/stores/session.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/layout/MobileTabs.tsx",
+      "target": "file:src/lib/db.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/layout/MobileTabs.tsx",
+      "target": "file:src/lib/native.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/layout/MobileTabs.tsx",
+      "target": "file:src/lib/utils.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/layout/MobileTabs.tsx",
+      "target": "file:src/stores/session.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/layout/Nav.tsx",
+      "target": "file:src/components/shared/Brand.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/layout/Nav.tsx",
+      "target": "file:src/hooks/useAuth.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/layout/Nav.tsx",
+      "target": "file:src/lib/db.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/layout/Nav.tsx",
+      "target": "file:src/lib/utils.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/layout/Nav.tsx",
+      "target": "file:src/stores/auth.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/layout/Nav.tsx",
+      "target": "file:src/stores/session.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/layout/Shell.tsx",
+      "target": "file:src/components/layout/MobileTabs.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/layout/Shell.tsx",
+      "target": "file:src/components/layout/Nav.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/layout/Shell.tsx",
+      "target": "file:src/components/layout/TopRightControls.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/layout/Shell.tsx",
+      "target": "file:src/components/shared/Brand.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/layout/Shell.tsx",
+      "target": "file:src/components/shared/ContextualGateTip.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/layout/Shell.tsx",
+      "target": "file:src/components/shared/DailyQuote.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/layout/Shell.tsx",
+      "target": "file:src/components/shared/OfflineBadge.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/layout/Shell.tsx",
+      "target": "file:src/components/shared/ThemeToggle.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/layout/Shell.tsx",
+      "target": "file:src/hooks/useSync.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/layout/TopRightControls.tsx",
+      "target": "file:src/components/shared/OfflineBadge.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/layout/TopRightControls.tsx",
+      "target": "file:src/components/shared/ThemeToggle.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/layout/TopRightControls.tsx",
+      "target": "file:src/hooks/useAuth.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/layout/TopRightControls.tsx",
+      "target": "file:src/lib/constants.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/layout/TopRightControls.tsx",
+      "target": "file:src/lib/utils.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/layout/TopRightControls.tsx",
+      "target": "file:src/stores/prefs.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/shared/ContextualGateTip.tsx",
+      "target": "file:src/lib/contextual-gate-tips.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/shared/ContextualGateTip.tsx",
+      "target": "file:src/lib/utils.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/shared/OfflineBadge.tsx",
+      "target": "file:src/hooks/useAuth.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/shared/OfflineBadge.tsx",
+      "target": "file:src/hooks/useSync.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/shared/OfflineBadge.tsx",
+      "target": "file:src/lib/utils.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/hooks/useSync.ts",
+      "target": "file:src/hooks/useAuth.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/hooks/useSync.ts",
+      "target": "file:src/lib/db.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/hooks/useSync.ts",
+      "target": "file:src/lib/sync.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/lib/isolation.ts",
+      "target": "file:src/lib/db.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/lib/isolation.ts",
+      "target": "file:src/stores/log.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/lib/isolation.ts",
+      "target": "file:src/stores/prefs.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/lib/isolation.ts",
+      "target": "file:src/stores/session.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/stores/log.ts",
+      "target": "file:src/components/shared/questionDraft.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/__tests__/isolation.test.ts",
+      "target": "function:src/__tests__/isolation.test.ts:seedAll",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/components/layout/MobileTabs.tsx",
+      "target": "function:src/components/layout/MobileTabs.tsx:MobileTabs",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/components/layout/MobileTabs.tsx",
+      "target": "function:src/components/layout/MobileTabs.tsx:MobileTabs",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/components/layout/MobileTabs.tsx",
+      "target": "function:src/components/layout/MobileTabs.tsx:TabButton",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/components/layout/Nav.tsx",
+      "target": "function:src/components/layout/Nav.tsx:NavItem",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/components/layout/Nav.tsx",
+      "target": "function:src/components/layout/Nav.tsx:Group",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/components/layout/Nav.tsx",
+      "target": "function:src/components/layout/Nav.tsx:Nav",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/components/layout/Nav.tsx",
+      "target": "function:src/components/layout/Nav.tsx:Nav",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/components/layout/Shell.tsx",
+      "target": "function:src/components/layout/Shell.tsx:Shell",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/components/layout/Shell.tsx",
+      "target": "function:src/components/layout/Shell.tsx:Shell",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/components/layout/TopRightControls.tsx",
+      "target": "function:src/components/layout/TopRightControls.tsx:ExamCountdown",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/components/layout/TopRightControls.tsx",
+      "target": "function:src/components/layout/TopRightControls.tsx:ExamCountdown",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/components/layout/TopRightControls.tsx",
+      "target": "function:src/components/layout/TopRightControls.tsx:TopRightControls",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/components/layout/TopRightControls.tsx",
+      "target": "function:src/components/layout/TopRightControls.tsx:TopRightControls",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/components/shared/ContextualGateTip.tsx",
+      "target": "function:src/components/shared/ContextualGateTip.tsx:ContextualGateTip",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/components/shared/ContextualGateTip.tsx",
+      "target": "function:src/components/shared/ContextualGateTip.tsx:ContextualGateTip",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/components/shared/OfflineBadge.tsx",
+      "target": "function:src/components/shared/OfflineBadge.tsx:OfflineBadge",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/components/shared/OfflineBadge.tsx",
+      "target": "function:src/components/shared/OfflineBadge.tsx:OfflineBadge",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/hooks/useSync.ts",
+      "target": "function:src/hooks/useSync.ts:useSyncBootstrap",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/hooks/useSync.ts",
+      "target": "function:src/hooks/useSync.ts:useSyncBootstrap",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/hooks/useSync.ts",
+      "target": "function:src/hooks/useSync.ts:useOnline",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/hooks/useSync.ts",
+      "target": "function:src/hooks/useSync.ts:useOnline",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/hooks/useSync.ts",
+      "target": "function:src/hooks/useSync.ts:usePendingCount",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/hooks/useSync.ts",
+      "target": "function:src/hooks/useSync.ts:usePendingCount",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/contextual-gate-tips.ts",
+      "target": "function:src/lib/contextual-gate-tips.ts:contextualGateTipForPath",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/contextual-gate-tips.ts",
+      "target": "function:src/lib/contextual-gate-tips.ts:contextualGateTipForPath",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/isolation.ts",
+      "target": "function:src/lib/isolation.ts:wipeLocalState",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/isolation.ts",
+      "target": "function:src/lib/isolation.ts:wipeLocalState",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/__tests__/contextual_gate_tips.test.ts",
+      "target": "file:src/lib/contextual-gate-tips.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/__tests__/isolation.test.ts",
+      "target": "file:src/lib/db.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/__tests__/isolation.test.ts",
+      "target": "file:src/lib/isolation.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/__tests__/isolation.test.ts",
+      "target": "file:src/stores/log.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/__tests__/isolation.test.ts",
+      "target": "file:src/stores/prefs.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/__tests__/isolation.test.ts",
+      "target": "file:src/stores/session.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    }
+  ]
+}

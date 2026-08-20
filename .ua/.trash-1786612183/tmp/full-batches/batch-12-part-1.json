@@ -1,0 +1,888 @@
+{
+  "nodes": [
+    {
+      "id": "table:supabase/migrations/20260717000001_initial_schema.sql:migration",
+      "type": "table",
+      "name": "20260717000001_initial_schema.sql",
+      "filePath": "supabase/migrations/20260717000001_initial_schema.sql",
+      "summary": "Establishes the original Hetu learning schema, covering users, study sessions, question analysis, spaced reattempts, review artifacts, buddy sharing, study rooms, and invite onboarding.",
+      "tags": [
+        "database",
+        "migration",
+        "supabase",
+        "core-schema"
+      ],
+      "complexity": "complex",
+      "languageNotes": "PostgreSQL migration designed for Supabase, using database-native constraints, policies, triggers, or RPCs as applicable."
+    },
+    {
+      "id": "table:supabase/migrations/20260717000001_initial_schema.sql:users",
+      "type": "table",
+      "name": "users",
+      "filePath": "supabase/migrations/20260717000001_initial_schema.sql",
+      "summary": "Learner profiles, identity attributes, exam targets, practice preferences, and timezone settings. The migration defines 8 captured columns for this relation.",
+      "tags": [
+        "database",
+        "schema-definition",
+        "learning-data",
+        "postgresql"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "table:supabase/migrations/20260717000001_initial_schema.sql:sessions",
+      "type": "table",
+      "name": "sessions",
+      "filePath": "supabase/migrations/20260717000001_initial_schema.sql",
+      "summary": "Daily study sessions with subject, target and actual duration, reflections, and interruption counts. The migration defines 10 captured columns for this relation.",
+      "tags": [
+        "database",
+        "schema-definition",
+        "learning-data",
+        "postgresql"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "table:supabase/migrations/20260717000001_initial_schema.sql:questions",
+      "type": "table",
+      "name": "questions",
+      "filePath": "supabase/migrations/20260717000001_initial_schema.sql",
+      "summary": "Question-level study journal entries with source metadata, outcomes, timing, diagnosis, and mark decisions. The migration defines 18 captured columns for this relation.",
+      "tags": [
+        "database",
+        "schema-definition",
+        "learning-data",
+        "postgresql"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "table:supabase/migrations/20260717000001_initial_schema.sql:patterns",
+      "type": "table",
+      "name": "patterns",
+      "filePath": "supabase/migrations/20260717000001_initial_schema.sql",
+      "summary": "Recurring learner error or insight patterns with frequency, reflex status, and mastery level. The migration defines 8 captured columns for this relation.",
+      "tags": [
+        "database",
+        "schema-definition",
+        "learning-data",
+        "postgresql"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "table:supabase/migrations/20260717000001_initial_schema.sql:reattempts",
+      "type": "table",
+      "name": "reattempts",
+      "filePath": "supabase/migrations/20260717000001_initial_schema.sql",
+      "summary": "Scheduled spaced-repetition work linked to questions, including ladder stage and attempt history. The migration defines 7 captured columns for this relation.",
+      "tags": [
+        "database",
+        "schema-definition",
+        "learning-data",
+        "postgresql"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "table:supabase/migrations/20260717000001_initial_schema.sql:formulas",
+      "type": "table",
+      "name": "formulas",
+      "filePath": "supabase/migrations/20260717000001_initial_schema.sql",
+      "summary": "User-owned formula notes with subject, title, content, and arbitrary metadata. The migration defines 9 captured columns for this relation.",
+      "tags": [
+        "database",
+        "schema-definition",
+        "learning-data",
+        "postgresql"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "table:supabase/migrations/20260717000001_initial_schema.sql:trigger_phrases",
+      "type": "table",
+      "name": "trigger_phrases",
+      "filePath": "supabase/migrations/20260717000001_initial_schema.sql",
+      "summary": "Short personalized recall prompts linked to a subject and optionally to a studied question. The migration defines 7 captured columns for this relation.",
+      "tags": [
+        "database",
+        "schema-definition",
+        "learning-data",
+        "postgresql"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "table:supabase/migrations/20260717000001_initial_schema.sql:weekly_reviews",
+      "type": "table",
+      "name": "weekly_reviews",
+      "filePath": "supabase/migrations/20260717000001_initial_schema.sql",
+      "summary": "Weekly rollups of subject performance, time use, patterns, reattempts, and narrative insights. The migration defines 8 captured columns for this relation.",
+      "tags": [
+        "database",
+        "schema-definition",
+        "learning-data",
+        "postgresql"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "table:supabase/migrations/20260717000001_initial_schema.sql:interruption_logs",
+      "type": "table",
+      "name": "interruption_logs",
+      "filePath": "supabase/migrations/20260717000001_initial_schema.sql",
+      "summary": "Timestamped interruption events attached to a user and optional study session. The migration defines 5 captured columns for this relation.",
+      "tags": [
+        "database",
+        "schema-definition",
+        "learning-data",
+        "postgresql"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "table:supabase/migrations/20260717000001_initial_schema.sql:doubt_sessions",
+      "type": "table",
+      "name": "doubt_sessions",
+      "filePath": "supabase/migrations/20260717000001_initial_schema.sql",
+      "summary": "Learner doubt-resolution conversations with question context, hypothesis, observations, and outcome. The migration defines 12 captured columns for this relation.",
+      "tags": [
+        "database",
+        "schema-definition",
+        "learning-data",
+        "postgresql"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "table:supabase/migrations/20260717000001_initial_schema.sql:variations",
+      "type": "table",
+      "name": "variations",
+      "filePath": "supabase/migrations/20260717000001_initial_schema.sql",
+      "summary": "Generated or recorded variations of source questions used for transfer practice. The migration defines 6 captured columns for this relation.",
+      "tags": [
+        "database",
+        "schema-definition",
+        "learning-data",
+        "postgresql"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "table:supabase/migrations/20260717000001_initial_schema.sql:triangulate_logs",
+      "type": "table",
+      "name": "triangulate_logs",
+      "filePath": "supabase/migrations/20260717000001_initial_schema.sql",
+      "summary": "Triangulation records that combine statements, rules, concepts, derivations, and results. The migration defines 9 captured columns for this relation.",
+      "tags": [
+        "database",
+        "schema-definition",
+        "learning-data",
+        "postgresql"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "table:supabase/migrations/20260717000001_initial_schema.sql:llm_usage_daily",
+      "type": "table",
+      "name": "llm_usage_daily",
+      "filePath": "supabase/migrations/20260717000001_initial_schema.sql",
+      "summary": "Per-user daily counters used to enforce and audit LLM request and token limits. The migration defines 3 captured columns for this relation.",
+      "tags": [
+        "database",
+        "schema-definition",
+        "learning-data",
+        "postgresql"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "table:supabase/migrations/20260717000001_initial_schema.sql:buddies",
+      "type": "table",
+      "name": "buddies",
+      "filePath": "supabase/migrations/20260717000001_initial_schema.sql",
+      "summary": "Canonical two-user buddy relationships with status, sharing permissions, and lifecycle timestamps. The migration defines 5 captured columns for this relation.",
+      "tags": [
+        "database",
+        "schema-definition",
+        "learning-data",
+        "postgresql"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "table:supabase/migrations/20260717000001_initial_schema.sql:shared_insights",
+      "type": "table",
+      "name": "shared_insights",
+      "filePath": "supabase/migrations/20260717000001_initial_schema.sql",
+      "summary": "Buddy-shared learning insights with type, body, and read tracking. The migration defines 5 captured columns for this relation.",
+      "tags": [
+        "database",
+        "schema-definition",
+        "learning-data",
+        "postgresql"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "table:supabase/migrations/20260717000001_initial_schema.sql:question_shares",
+      "type": "table",
+      "name": "question_shares",
+      "filePath": "supabase/migrations/20260717000001_initial_schema.sql",
+      "summary": "Question snapshots shared between buddies with recipient read state. The migration defines 7 captured columns for this relation.",
+      "tags": [
+        "database",
+        "schema-definition",
+        "learning-data",
+        "postgresql"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "table:supabase/migrations/20260717000001_initial_schema.sql:study_rooms",
+      "type": "table",
+      "name": "study_rooms",
+      "filePath": "supabase/migrations/20260717000001_initial_schema.sql",
+      "summary": "Collaborative study rooms owned by a user with subject, title, and active state. The migration defines 8 captured columns for this relation.",
+      "tags": [
+        "database",
+        "schema-definition",
+        "learning-data",
+        "postgresql"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "table:supabase/migrations/20260717000001_initial_schema.sql:study_room_presence",
+      "type": "table",
+      "name": "study_room_presence",
+      "filePath": "supabase/migrations/20260717000001_initial_schema.sql",
+      "summary": "Per-room participant presence and join timestamps keyed by room and user. The migration defines 3 captured columns for this relation.",
+      "tags": [
+        "database",
+        "schema-definition",
+        "learning-data",
+        "postgresql"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "table:supabase/migrations/20260717000001_initial_schema.sql:invites",
+      "type": "table",
+      "name": "invites",
+      "filePath": "supabase/migrations/20260717000001_initial_schema.sql",
+      "summary": "Invite tokens with creator, redemption state, and expiry metadata. The migration defines 6 captured columns for this relation.",
+      "tags": [
+        "database",
+        "schema-definition",
+        "learning-data",
+        "postgresql"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "table:supabase/migrations/20260717000002_rls_policies.sql:migration",
+      "type": "table",
+      "name": "20260717000002_rls_policies.sql",
+      "filePath": "supabase/migrations/20260717000002_rls_policies.sql",
+      "summary": "Enables row-level security across the initial schema and installs ownership- and membership-based policies that isolate each learner’s private study data.",
+      "tags": [
+        "database",
+        "migration",
+        "supabase",
+        "row-level-security"
+      ],
+      "complexity": "moderate",
+      "languageNotes": "PostgreSQL migration designed for Supabase, using database-native constraints, policies, triggers, or RPCs as applicable."
+    },
+    {
+      "id": "table:supabase/migrations/20260717000003_functions.sql:migration",
+      "type": "table",
+      "name": "20260717000003_functions.sql",
+      "filePath": "supabase/migrations/20260717000003_functions.sql",
+      "summary": "Defines foundational PostgreSQL trigger and helper functions for automatic timestamps, user bootstrap behavior, and atomic daily LLM-usage accounting.",
+      "tags": [
+        "database",
+        "migration",
+        "supabase",
+        "database-functions"
+      ],
+      "complexity": "simple",
+      "languageNotes": "PostgreSQL migration designed for Supabase, using database-native constraints, policies, triggers, or RPCs as applicable."
+    },
+    {
+      "id": "table:supabase/migrations/20260717000004_ai_boundaries.sql:migration",
+      "type": "table",
+      "name": "20260717000004_ai_boundaries.sql",
+      "filePath": "supabase/migrations/20260717000004_ai_boundaries.sql",
+      "summary": "Adds an audit table for AI boundary violations so disallowed or unsafe assistant interactions can be recorded per user.",
+      "tags": [
+        "database",
+        "migration",
+        "supabase",
+        "ai-safety"
+      ],
+      "complexity": "simple",
+      "languageNotes": "PostgreSQL migration designed for Supabase, using database-native constraints, policies, triggers, or RPCs as applicable."
+    },
+    {
+      "id": "table:supabase/migrations/20260717000004_ai_boundaries.sql:ai_boundary_violations",
+      "type": "table",
+      "name": "ai_boundary_violations",
+      "filePath": "supabase/migrations/20260717000004_ai_boundaries.sql",
+      "summary": "Audit events for AI boundary violations, including user, category, request, and response excerpts. The migration defines 5 captured columns for this relation.",
+      "tags": [
+        "database",
+        "schema-definition",
+        "learning-data",
+        "postgresql"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "table:supabase/migrations/20260717000005_invite_signup.sql:migration",
+      "type": "table",
+      "name": "20260717000005_invite_signup.sql",
+      "filePath": "supabase/migrations/20260717000005_invite_signup.sql",
+      "summary": "Implements invite-gated signup validation and redemption, allowing approved tokens to create application users while enforcing identity constraints.",
+      "tags": [
+        "database",
+        "migration",
+        "supabase",
+        "onboarding"
+      ],
+      "complexity": "moderate",
+      "languageNotes": "PostgreSQL migration designed for Supabase, using database-native constraints, policies, triggers, or RPCs as applicable."
+    },
+    {
+      "id": "table:supabase/migrations/20260718000001_access_requests_and_insights.sql:migration",
+      "type": "table",
+      "name": "20260718000001_access_requests_and_insights.sql",
+      "filePath": "supabase/migrations/20260718000001_access_requests_and_insights.sql",
+      "summary": "Adds owner-reviewed account requests and per-user daily insight aggregates, together with secure request, approval, and aggregation functions.",
+      "tags": [
+        "database",
+        "migration",
+        "supabase",
+        "access-control"
+      ],
+      "complexity": "complex",
+      "languageNotes": "PostgreSQL migration designed for Supabase, using database-native constraints, policies, triggers, or RPCs as applicable."
+    },
+    {
+      "id": "table:supabase/migrations/20260718000001_access_requests_and_insights.sql:account_requests",
+      "type": "table",
+      "name": "account_requests",
+      "filePath": "supabase/migrations/20260718000001_access_requests_and_insights.sql",
+      "summary": "Public account-access requests with applicant details, review status, decision metadata, and abuse-resistant IP hashing. The migration defines 10 captured columns for this relation.",
+      "tags": [
+        "database",
+        "schema-definition",
+        "learning-data",
+        "postgresql"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "table:supabase/migrations/20260718000001_access_requests_and_insights.sql:insights_daily",
+      "type": "table",
+      "name": "insights_daily",
+      "filePath": "supabase/migrations/20260718000001_access_requests_and_insights.sql",
+      "summary": "Per-user daily study insight aggregates for time, attempts, accuracy, interruptions, and identified patterns. The migration defines 7 captured columns for this relation.",
+      "tags": [
+        "database",
+        "schema-definition",
+        "learning-data",
+        "postgresql"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "table:supabase/migrations/20260718000002_username_pin_auth.sql:migration",
+      "type": "table",
+      "name": "20260718000002_username_pin_auth.sql",
+      "filePath": "supabase/migrations/20260718000002_username_pin_auth.sql",
+      "summary": "Extends users with normalized usernames and PIN authentication, including validation constraints, secure hashing, lookup RPCs, and supporting indexes.",
+      "tags": [
+        "database",
+        "migration",
+        "supabase",
+        "authentication"
+      ],
+      "complexity": "moderate",
+      "languageNotes": "PostgreSQL migration designed for Supabase, using database-native constraints, policies, triggers, or RPCs as applicable."
+    },
+    {
+      "id": "table:supabase/migrations/20260718000003_no_bootstrap.sql:migration",
+      "type": "table",
+      "name": "20260718000003_no_bootstrap.sql",
+      "filePath": "supabase/migrations/20260718000003_no_bootstrap.sql",
+      "summary": "Removes automatic profile bootstrap behavior so new accounts are provisioned only through the controlled invite and approval flows.",
+      "tags": [
+        "database",
+        "migration",
+        "supabase",
+        "onboarding"
+      ],
+      "complexity": "simple",
+      "languageNotes": "PostgreSQL migration designed for Supabase, using database-native constraints, policies, triggers, or RPCs as applicable."
+    },
+    {
+      "id": "table:supabase/migrations/20260718000004_approve_search_path_fix.sql:migration",
+      "type": "table",
+      "name": "20260718000004_approve_search_path_fix.sql",
+      "filePath": "supabase/migrations/20260718000004_approve_search_path_fix.sql",
+      "summary": "Hardens the account-approval function with an explicit search path and restricted execution privileges to reduce security-definer risk.",
+      "tags": [
+        "database",
+        "migration",
+        "supabase",
+        "security-hardening"
+      ],
+      "complexity": "moderate",
+      "languageNotes": "PostgreSQL migration designed for Supabase, using database-native constraints, policies, triggers, or RPCs as applicable."
+    },
+    {
+      "id": "table:supabase/migrations/20260718000005_welcome_seen.sql:migration",
+      "type": "table",
+      "name": "20260718000005_welcome_seen.sql",
+      "filePath": "supabase/migrations/20260718000005_welcome_seen.sql",
+      "summary": "Adds a welcome-seen timestamp to user profiles so the client can persist onboarding completion.",
+      "tags": [
+        "database",
+        "migration",
+        "supabase",
+        "onboarding"
+      ],
+      "complexity": "simple",
+      "languageNotes": "PostgreSQL migration designed for Supabase, using database-native constraints, policies, triggers, or RPCs as applicable."
+    },
+    {
+      "id": "table:supabase/migrations/20260718000006_buddy_chat.sql:migration",
+      "type": "table",
+      "name": "20260718000006_buddy_chat.sql",
+      "filePath": "supabase/migrations/20260718000006_buddy_chat.sql",
+      "summary": "Introduces buddy chat messages with text and question snapshot payloads, member-only row-level policies, and realtime publication support.",
+      "tags": [
+        "database",
+        "migration",
+        "supabase",
+        "buddy-chat"
+      ],
+      "complexity": "moderate",
+      "languageNotes": "PostgreSQL migration designed for Supabase, using database-native constraints, policies, triggers, or RPCs as applicable."
+    },
+    {
+      "id": "table:supabase/migrations/20260718000006_buddy_chat.sql:buddy_messages",
+      "type": "table",
+      "name": "buddy_messages",
+      "filePath": "supabase/migrations/20260718000006_buddy_chat.sql",
+      "summary": "Member-only buddy chat messages carrying either text content or immutable question snapshots. The migration defines 8 captured columns for this relation.",
+      "tags": [
+        "database",
+        "schema-definition",
+        "buddy-system",
+        "postgresql"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "table:supabase/migrations/20260718000007_planner_and_digest.sql:migration",
+      "type": "table",
+      "name": "20260718000007_planner_and_digest.sql",
+      "filePath": "supabase/migrations/20260718000007_planner_and_digest.sql",
+      "summary": "Adds digest preferences plus daily plan items and completion records used to schedule study work and summarize progress.",
+      "tags": [
+        "database",
+        "migration",
+        "supabase",
+        "study-planning"
+      ],
+      "complexity": "moderate",
+      "languageNotes": "PostgreSQL migration designed for Supabase, using database-native constraints, policies, triggers, or RPCs as applicable."
+    },
+    {
+      "id": "table:supabase/migrations/20260718000007_planner_and_digest.sql:plan_items",
+      "type": "table",
+      "name": "plan_items",
+      "filePath": "supabase/migrations/20260718000007_planner_and_digest.sql",
+      "summary": "User-owned planner tasks with scheduling, subject, type, status, and ordering metadata. The migration defines 12 captured columns for this relation.",
+      "tags": [
+        "database",
+        "schema-definition",
+        "study-planning",
+        "postgresql"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "table:supabase/migrations/20260718000007_planner_and_digest.sql:plan_item_completions",
+      "type": "table",
+      "name": "plan_item_completions",
+      "filePath": "supabase/migrations/20260718000007_planner_and_digest.sql",
+      "summary": "Daily completion records that make planner task check-offs idempotent. The migration defines 4 captured columns for this relation.",
+      "tags": [
+        "database",
+        "schema-definition",
+        "study-planning",
+        "postgresql"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "table:supabase/migrations/20260718000008_buddy_requests.sql:migration",
+      "type": "table",
+      "name": "20260718000008_buddy_requests.sql",
+      "filePath": "supabase/migrations/20260718000008_buddy_requests.sql",
+      "summary": "Converts buddy pairing into explicit request, accept, and decline workflows while restricting chat access to active pairs and preventing username enumeration.",
+      "tags": [
+        "database",
+        "migration",
+        "supabase",
+        "buddy-requests"
+      ],
+      "complexity": "moderate",
+      "languageNotes": "PostgreSQL migration designed for Supabase, using database-native constraints, policies, triggers, or RPCs as applicable."
+    },
+    {
+      "id": "table:supabase/migrations/20260718000009_buddy_request_grants.sql:migration",
+      "type": "table",
+      "name": "20260718000009_buddy_request_grants.sql",
+      "filePath": "supabase/migrations/20260718000009_buddy_request_grants.sql",
+      "summary": "Locks buddy lookup and request helper functions to the service role by removing default execution privileges from public client roles.",
+      "tags": [
+        "database",
+        "migration",
+        "supabase",
+        "privilege-hardening"
+      ],
+      "complexity": "simple",
+      "languageNotes": "PostgreSQL migration designed for Supabase, using database-native constraints, policies, triggers, or RPCs as applicable."
+    },
+    {
+      "id": "table:supabase/migrations/20260718000010_digest_cron.sql:migration",
+      "type": "table",
+      "name": "20260718000010_digest_cron.sql",
+      "filePath": "supabase/migrations/20260718000010_digest_cron.sql",
+      "summary": "Schedules the daily-digest edge function every fifteen minutes through pg_cron and pg_net so each user can receive a timezone-local digest.",
+      "tags": [
+        "database",
+        "migration",
+        "supabase",
+        "scheduled-digest"
+      ],
+      "complexity": "simple",
+      "languageNotes": "PostgreSQL migration designed for Supabase, using database-native constraints, policies, triggers, or RPCs as applicable."
+    },
+    {
+      "id": "table:supabase/migrations/20260718000011_buddy_peer_visibility.sql:migration",
+      "type": "table",
+      "name": "20260718000011_buddy_peer_visibility.sql",
+      "filePath": "supabase/migrations/20260718000011_buddy_peer_visibility.sql",
+      "summary": "Exposes a narrow security-definer RPC for retrieving only the public identity fields of users connected through a buddy relationship.",
+      "tags": [
+        "database",
+        "migration",
+        "supabase",
+        "privacy"
+      ],
+      "complexity": "simple",
+      "languageNotes": "PostgreSQL migration designed for Supabase, using database-native constraints, policies, triggers, or RPCs as applicable."
+    },
+    {
+      "id": "table:supabase/migrations/20260719000001_wipe_buddies_and_dup_guards.sql:migration",
+      "type": "table",
+      "name": "20260719000001_wipe_buddies_and_dup_guards.sql",
+      "filePath": "supabase/migrations/20260719000001_wipe_buddies_and_dup_guards.sql",
+      "summary": "Preserves existing buddy data while adding case-insensitive duplicate guards for user email and pending access requests and strengthening invite validation.",
+      "tags": [
+        "database",
+        "migration",
+        "supabase",
+        "duplicate-prevention"
+      ],
+      "complexity": "moderate",
+      "languageNotes": "PostgreSQL migration designed for Supabase, using database-native constraints, policies, triggers, or RPCs as applicable."
+    },
+    {
+      "id": "table:supabase/migrations/20260719000002_unfriend_buddy.sql:migration",
+      "type": "table",
+      "name": "20260719000002_unfriend_buddy.sql",
+      "filePath": "supabase/migrations/20260719000002_unfriend_buddy.sql",
+      "summary": "Adds a member-authorized unfriend RPC that deletes a buddy relationship and cascades its chat history while permitting future re-pairing.",
+      "tags": [
+        "database",
+        "migration",
+        "supabase",
+        "buddy-lifecycle"
+      ],
+      "complexity": "simple",
+      "languageNotes": "PostgreSQL migration designed for Supabase, using database-native constraints, policies, triggers, or RPCs as applicable."
+    },
+    {
+      "id": "table:supabase/migrations/20260719000003_readiness_snapshots.sql:migration",
+      "type": "table",
+      "name": "20260719000003_readiness_snapshots.sql",
+      "filePath": "supabase/migrations/20260719000003_readiness_snapshots.sql",
+      "summary": "Stores daily readiness snapshots and provides secure refresh logic that derives planning signals from recent study activity.",
+      "tags": [
+        "database",
+        "migration",
+        "supabase",
+        "readiness"
+      ],
+      "complexity": "moderate",
+      "languageNotes": "PostgreSQL migration designed for Supabase, using database-native constraints, policies, triggers, or RPCs as applicable."
+    },
+    {
+      "id": "table:supabase/migrations/20260719000003_readiness_snapshots.sql:readiness_snapshots",
+      "type": "table",
+      "name": "readiness_snapshots",
+      "filePath": "supabase/migrations/20260719000003_readiness_snapshots.sql",
+      "summary": "Daily subject readiness scores and explanatory signals derived for each learner. The migration defines 5 captured columns for this relation.",
+      "tags": [
+        "database",
+        "schema-definition",
+        "learning-data",
+        "postgresql"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "table:supabase/migrations/20260721000001_buddy_hardening.sql:migration",
+      "type": "table",
+      "name": "20260721000001_buddy_hardening.sql",
+      "filePath": "supabase/migrations/20260721000001_buddy_hardening.sql",
+      "summary": "Hardens buddy messaging with immutable content, recipient-only read receipts, validated question snapshots, and requester-owned cancellation.",
+      "tags": [
+        "database",
+        "migration",
+        "supabase",
+        "security-hardening"
+      ],
+      "complexity": "moderate",
+      "languageNotes": "PostgreSQL migration designed for Supabase, using database-native constraints, policies, triggers, or RPCs as applicable."
+    },
+    {
+      "id": "table:supabase/migrations/20260721000002_telegram_digest.sql:migration",
+      "type": "table",
+      "name": "20260721000002_telegram_digest.sql",
+      "filePath": "supabase/migrations/20260721000002_telegram_digest.sql",
+      "summary": "Adds Telegram subscription state and secure linking, unlinking, and preference RPCs for delivering scheduled study digests.",
+      "tags": [
+        "database",
+        "migration",
+        "supabase",
+        "telegram"
+      ],
+      "complexity": "moderate",
+      "languageNotes": "PostgreSQL migration designed for Supabase, using database-native constraints, policies, triggers, or RPCs as applicable."
+    },
+    {
+      "id": "table:supabase/migrations/20260721000002_telegram_digest.sql:telegram_subscriptions",
+      "type": "table",
+      "name": "telegram_subscriptions",
+      "filePath": "supabase/migrations/20260721000002_telegram_digest.sql",
+      "summary": "Telegram chat linkage, digest preferences, timezone, and verification state for each user. The migration defines 9 captured columns for this relation.",
+      "tags": [
+        "database",
+        "schema-definition",
+        "telegram",
+        "postgresql"
+      ],
+      "complexity": "moderate"
+    }
+  ],
+  "edges": [
+    {
+      "source": "table:supabase/migrations/20260717000001_initial_schema.sql:migration",
+      "target": "table:supabase/migrations/20260717000001_initial_schema.sql:users",
+      "type": "migrates",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "table:supabase/migrations/20260717000001_initial_schema.sql:migration",
+      "target": "table:supabase/migrations/20260717000001_initial_schema.sql:sessions",
+      "type": "migrates",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "table:supabase/migrations/20260717000001_initial_schema.sql:migration",
+      "target": "table:supabase/migrations/20260717000001_initial_schema.sql:questions",
+      "type": "migrates",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "table:supabase/migrations/20260717000001_initial_schema.sql:migration",
+      "target": "table:supabase/migrations/20260717000001_initial_schema.sql:patterns",
+      "type": "migrates",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "table:supabase/migrations/20260717000001_initial_schema.sql:migration",
+      "target": "table:supabase/migrations/20260717000001_initial_schema.sql:reattempts",
+      "type": "migrates",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "table:supabase/migrations/20260717000001_initial_schema.sql:migration",
+      "target": "table:supabase/migrations/20260717000001_initial_schema.sql:formulas",
+      "type": "migrates",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "table:supabase/migrations/20260717000001_initial_schema.sql:migration",
+      "target": "table:supabase/migrations/20260717000001_initial_schema.sql:trigger_phrases",
+      "type": "migrates",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "table:supabase/migrations/20260717000001_initial_schema.sql:migration",
+      "target": "table:supabase/migrations/20260717000001_initial_schema.sql:weekly_reviews",
+      "type": "migrates",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "table:supabase/migrations/20260717000001_initial_schema.sql:migration",
+      "target": "table:supabase/migrations/20260717000001_initial_schema.sql:interruption_logs",
+      "type": "migrates",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "table:supabase/migrations/20260717000001_initial_schema.sql:migration",
+      "target": "table:supabase/migrations/20260717000001_initial_schema.sql:doubt_sessions",
+      "type": "migrates",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "table:supabase/migrations/20260717000001_initial_schema.sql:migration",
+      "target": "table:supabase/migrations/20260717000001_initial_schema.sql:variations",
+      "type": "migrates",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "table:supabase/migrations/20260717000001_initial_schema.sql:migration",
+      "target": "table:supabase/migrations/20260717000001_initial_schema.sql:triangulate_logs",
+      "type": "migrates",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "table:supabase/migrations/20260717000001_initial_schema.sql:migration",
+      "target": "table:supabase/migrations/20260717000001_initial_schema.sql:llm_usage_daily",
+      "type": "migrates",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "table:supabase/migrations/20260717000001_initial_schema.sql:migration",
+      "target": "table:supabase/migrations/20260717000001_initial_schema.sql:buddies",
+      "type": "migrates",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "table:supabase/migrations/20260717000001_initial_schema.sql:migration",
+      "target": "table:supabase/migrations/20260717000001_initial_schema.sql:shared_insights",
+      "type": "migrates",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "table:supabase/migrations/20260717000001_initial_schema.sql:migration",
+      "target": "table:supabase/migrations/20260717000001_initial_schema.sql:question_shares",
+      "type": "migrates",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "table:supabase/migrations/20260717000001_initial_schema.sql:migration",
+      "target": "table:supabase/migrations/20260717000001_initial_schema.sql:study_rooms",
+      "type": "migrates",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "table:supabase/migrations/20260717000001_initial_schema.sql:migration",
+      "target": "table:supabase/migrations/20260717000001_initial_schema.sql:study_room_presence",
+      "type": "migrates",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "table:supabase/migrations/20260717000001_initial_schema.sql:migration",
+      "target": "table:supabase/migrations/20260717000001_initial_schema.sql:invites",
+      "type": "migrates",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "table:supabase/migrations/20260717000004_ai_boundaries.sql:migration",
+      "target": "table:supabase/migrations/20260717000004_ai_boundaries.sql:ai_boundary_violations",
+      "type": "migrates",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "table:supabase/migrations/20260718000001_access_requests_and_insights.sql:migration",
+      "target": "table:supabase/migrations/20260718000001_access_requests_and_insights.sql:account_requests",
+      "type": "migrates",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "table:supabase/migrations/20260718000001_access_requests_and_insights.sql:migration",
+      "target": "table:supabase/migrations/20260718000001_access_requests_and_insights.sql:insights_daily",
+      "type": "migrates",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "table:supabase/migrations/20260718000006_buddy_chat.sql:migration",
+      "target": "table:supabase/migrations/20260718000006_buddy_chat.sql:buddy_messages",
+      "type": "migrates",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "table:supabase/migrations/20260718000007_planner_and_digest.sql:migration",
+      "target": "table:supabase/migrations/20260718000007_planner_and_digest.sql:plan_items",
+      "type": "migrates",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "table:supabase/migrations/20260718000007_planner_and_digest.sql:migration",
+      "target": "table:supabase/migrations/20260718000007_planner_and_digest.sql:plan_item_completions",
+      "type": "migrates",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "table:supabase/migrations/20260719000003_readiness_snapshots.sql:migration",
+      "target": "table:supabase/migrations/20260719000003_readiness_snapshots.sql:readiness_snapshots",
+      "type": "migrates",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "table:supabase/migrations/20260721000002_telegram_digest.sql:migration",
+      "target": "table:supabase/migrations/20260721000002_telegram_digest.sql:telegram_subscriptions",
+      "type": "migrates",
+      "direction": "forward",
+      "weight": 0.7
+    }
+  ]
+}

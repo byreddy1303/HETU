@@ -1,0 +1,21 @@
+{
+  "nodes": [
+    {
+      "id": "table:supabase/migrations/20260813000006_go_classes_coa_topic_test_2_answer_free_reattempts.sql:migration",
+      "type": "table",
+      "name": "20260813000006_go_classes_coa_topic_test_2_answer_free_reattempts.sql",
+      "filePath": "supabase/migrations/20260813000006_go_classes_coa_topic_test_2_answer_free_reattempts.sql",
+      "summary": "Rewrites GO Classes COA Topic Test 2 attempt snapshots and journal question image links to answer-free practice crops for the target learner. The migration preserves dedicated answer fields and aborts unless exactly 15 attempt rows and 15 question rows are updated.",
+      "tags": [
+        "database",
+        "migration",
+        "supabase",
+        "answer-protection",
+        "question-assets"
+      ],
+      "complexity": "moderate",
+      "languageNotes": "Uses a PostgreSQL anonymous DO block with JSONB updates, temporary trigger suspension, string-derived image paths, row-count diagnostics, and an all-or-nothing assertion."
+    }
+  ],
+  "edges": []
+}

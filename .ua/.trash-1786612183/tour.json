@@ -1,0 +1,155 @@
+[
+  {
+    "order": 1,
+    "title": "Project Overview",
+    "description": "Start with the README to understand HETU as a local-first GATE study system that records structured question evidence, schedules spaced re-attempts, supports buddy study, and surfaces weekly weaknesses. It also introduces the React, Dexie, Zustand, Supabase, and Capacitor architecture that the rest of this tour follows.",
+    "nodeIds": [
+      "document:README.md"
+    ]
+  },
+  {
+    "order": 2,
+    "title": "Runtime Bootstrap",
+    "description": "The browser and native runtime begins in main.tsx, which mounts React and applies different deployment-freshness behavior to web and native builds. This is the narrow bridge from the static host into the application architecture described in the README.",
+    "nodeIds": [
+      "file:src/main.tsx"
+    ],
+    "languageLesson": "A React entry module typically performs one-time platform setup before rendering the root component; keeping that boundary small makes browser and native startup behavior easier to reason about."
+  },
+  {
+    "order": 3,
+    "title": "App Shell and Routes",
+    "description": "App.tsx expands the bootstrap into the application shell by initializing authentication and preferences, applying theme state, and mounting global native, buddy, notification, and query runtimes. The router then separates public and authenticated journeys, lazy-loads feature pages, and provides shared loading and error recovery.",
+    "nodeIds": [
+      "file:src/App.tsx",
+      "file:src/router.tsx"
+    ],
+    "languageLesson": "React composition keeps persistent cross-cutting runtimes above the router, while lazy route modules defer feature code until navigation requires it."
+  },
+  {
+    "order": 4,
+    "title": "Domain and Session State",
+    "description": "With the shell in place, the shared type barrel establishes the data vocabulary used across UI and persistence. The authentication and session stores then hold the current learner profile and the resumable solve-or-tag workflow, giving later feature pages a consistent user-scoped state contract.",
+    "nodeIds": [
+      "file:src/types/index.ts",
+      "file:src/stores/auth.ts",
+      "file:src/stores/session.ts"
+    ]
+  },
+  {
+    "order": 5,
+    "title": "Local-First Data Flow",
+    "description": "HETU treats the versioned Dexie database as its primary offline store, then synchronizes ordered changes with Supabase using conflict-aware pulls, queued deletes, and retry backoff. The Supabase client preserves a local-only fallback, while the isolation helper wipes persisted state between accounts so offline convenience does not weaken data separation.",
+    "nodeIds": [
+      "file:src/lib/db.ts",
+      "file:src/lib/sync.ts",
+      "file:src/lib/supabase.ts",
+      "file:src/lib/isolation.ts"
+    ],
+    "languageLesson": "Dexie provides a typed layer over IndexedDB; explicit schema versions and compound indexes let a browser application evolve local data while retaining transactional offline behavior."
+  },
+  {
+    "order": 6,
+    "title": "PYQ Evidence Capture",
+    "description": "Building on the local-first data layer, the PYQ page coordinates timed practice, answer decisions, immutable receipts, tagging, journaling, and re-attempt scheduling. TagFlow captures source, outcome, pattern, trigger, and root-cause evidence, while the high-scope Journal reconciles sessions and makes local questions and PYQ attempts searchable, filterable, reviewable, and editable; the analysis module turns that evidence into deterministic metrics.",
+    "nodeIds": [
+      "file:src/pages/Pyq.tsx",
+      "file:src/components/tags/TagFlow.tsx",
+      "file:src/pages/Journal.tsx",
+      "file:src/lib/analysis.ts"
+    ]
+  },
+  {
+    "order": 7,
+    "title": "Reattempts and Readiness",
+    "description": "Captured question evidence feeds the offline-compatible D3–D10–D30 re-attempt ladder and the due-session experience. Readiness calculations temper scores by available evidence, while the weekly review guides the learner from observed data to a single concrete corrective action.",
+    "nodeIds": [
+      "file:src/pages/Reattempts.tsx",
+      "file:src/lib/reattempt.ts",
+      "file:src/lib/readiness.ts",
+      "file:src/pages/WeeklyReview.tsx"
+    ]
+  },
+  {
+    "order": 8,
+    "title": "Focused Buddy Study",
+    "description": "The Buddy workspace adds collaboration without replacing the individual study loop: it manages pairing states, realtime updates, live previews, and responsive chat navigation. Pure buddy helpers keep shared question references privacy-safe, BuddyChat handles optimistic conversations and presence, and the notification client coordinates channel opt-ins and quiet hours.",
+    "nodeIds": [
+      "file:src/pages/Buddy.tsx",
+      "file:src/lib/buddy.ts",
+      "file:src/components/buddy/BuddyChat.tsx",
+      "file:src/lib/buddyNotifications.ts"
+    ]
+  },
+  {
+    "order": 9,
+    "title": "Edge Delivery Services",
+    "description": "The client workflows extend into Supabase Edge Functions for scheduled and privileged work. These handlers compute weekly readiness, assemble local-time digests, create actionable study reminders, and process buddy-notification outbox jobs for web and Android delivery.",
+    "nodeIds": [
+      "file:supabase/functions/compute-readiness/index.ts",
+      "file:supabase/functions/daily-digest/index.ts",
+      "file:supabase/functions/study-notifications/index.ts",
+      "file:supabase/functions/buddy-notifications/index.ts"
+    ]
+  },
+  {
+    "order": 10,
+    "title": "Database Foundation",
+    "description": "The original PostgreSQL migration provides the durable model beneath the local database and Edge API, including learner records, study sessions, question evidence, reviews, and collaboration. The questions, reattempts, immutable PYQ attempts, and buddy messages tables show how the core workflows from Steps 6–8 are persisted and related.",
+    "nodeIds": [
+      "table:supabase/migrations/20260717000001_initial_schema.sql:migration",
+      "table:supabase/migrations/20260717000001_initial_schema.sql:questions",
+      "table:supabase/migrations/20260717000001_initial_schema.sql:reattempts",
+      "table:supabase/migrations/20260802000001_pyq_attempts.sql:pyq_attempts",
+      "table:supabase/migrations/20260718000006_buddy_chat.sql:buddy_messages"
+    ],
+    "languageLesson": "Ordered SQL migrations evolve a shared schema incrementally; foreign keys and row-level policies enforce relationships and ownership independently of client code."
+  },
+  {
+    "order": 11,
+    "title": "Schema Evolution",
+    "description": "Later migrations extend that foundation with daily readiness snapshots and the event history, preferences, action tokens, and claims required for interactive reminders. The answer-free re-attempt migration illustrates a data-preserving evolution: it rewrites second-test attempt snapshots and journal image links to practice crops, preserves dedicated answers, and aborts unless every expected row was updated.",
+    "nodeIds": [
+      "table:supabase/migrations/20260719000003_readiness_snapshots.sql:readiness_snapshots",
+      "table:supabase/migrations/20260810000002_interactive_study_notifications.sql:migration",
+      "table:supabase/migrations/20260813000006_go_classes_coa_topic_test_2_answer_free_reattempts.sql:migration"
+    ],
+    "languageLesson": "Idempotent migrations guard against duplicate application, while explicit affected-row checks turn silent partial updates into visible failures."
+  },
+  {
+    "order": 12,
+    "title": "Tests and Tooling",
+    "description": "The package manifest ties together build, test, deployment, and Android commands, while Vitest supplies a jsdom environment and shared browser-like setup for unit and component tests. Representative suites verify account isolation and readiness parity, then protect the final answer-free photo migration by checking that practice images remain separate from full attempt receipts.",
+    "nodeIds": [
+      "config:package.json",
+      "file:vitest.config.ts",
+      "file:src/__tests__/isolation.test.ts",
+      "file:src/__tests__/readiness.test.ts",
+      "file:src/__tests__/go-classes-coa-test-2-photos.test.ts"
+    ],
+    "languageLesson": "Vitest uses jsdom to emulate browser APIs in Node; a stable origin is important when tests exercise storage APIs such as localStorage and IndexedDB wrappers."
+  },
+  {
+    "order": 13,
+    "title": "Web and Backend Deployment",
+    "description": "The deployment runbook turns the tested system into an operational sequence spanning Supabase migrations, Edge Functions, secrets, authentication, cron jobs, Vercel, smoke tests, and rollback. Supabase config defines the local backend and function-auth policies, while Vercel config preserves SPA routing and assigns cache behavior to application, content, and worker assets.",
+    "nodeIds": [
+      "document:DEPLOY.md",
+      "config:supabase/config.toml",
+      "config:vercel.json"
+    ]
+  },
+  {
+    "order": 14,
+    "title": "Android Runtime and Release",
+    "description": "Finally, the Android guide explains how the web application is packaged as a local-bundle Capacitor release with signing, Firebase push, app links, device verification, and performance checks. Gradle builds the application module, the manifest declares the native entry points and notification components, MainActivity hosts the bridge, and BuddyMessagingService turns backend payloads into deep-linked, actionable notifications.",
+    "nodeIds": [
+      "document:ANDROID.md",
+      "config:android/app/build.gradle",
+      "config:android/app/src/main/AndroidManifest.xml",
+      "file:android/app/src/main/java/in/airjournal/app/MainActivity.java",
+      "file:android/app/src/main/java/in/airjournal/app/BuddyMessagingService.java"
+    ],
+    "languageLesson": "AndroidManifest.xml declares platform capabilities and component entry points, while Gradle assembles the Capacitor bridge, Java runtime, resources, and Google Services integration into a signed application."
+  }
+]

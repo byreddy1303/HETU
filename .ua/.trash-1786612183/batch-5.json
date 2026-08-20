@@ -1,0 +1,350 @@
+{
+  "nodes": [
+    {
+      "id": "file:src/pages/Journal.tsx",
+      "type": "file",
+      "name": "Journal.tsx",
+      "filePath": "src/pages/Journal.tsx",
+      "summary": "Implements the learner question journal with live local queries, session reconciliation, fuzzy search, multidimensional filters, pagination, expandable evidence, image and answer review, and question or session editing.",
+      "tags": [
+        "component",
+        "journal",
+        "local-first",
+        "search-filter",
+        "study-history"
+      ],
+      "complexity": "complex",
+      "languageNotes": "Large React page composed from typed functional components, Dexie live queries, memoized filtering, and controlled edit dialogs."
+    },
+    {
+      "id": "function:src/pages/Journal.tsx:Row",
+      "type": "function",
+      "name": "Row",
+      "filePath": "src/pages/Journal.tsx",
+      "lineRange": [
+        125,
+        323
+      ],
+      "summary": "Renders an expandable question-journal row with source, outcome, timing, root-cause, marking, answer, and image evidence plus edit controls.",
+      "tags": [
+        "component",
+        "journal-row",
+        "evidence-display",
+        "interaction"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/pages/Journal.tsx:Journal",
+      "type": "function",
+      "name": "Journal",
+      "filePath": "src/pages/Journal.tsx",
+      "lineRange": [
+        325,
+        821
+      ],
+      "summary": "Orchestrates the authenticated journal page by reconciling sessions, querying local questions and PYQ attempts, applying URL-backed filters, paginating results, and coordinating edits, deletes, previews, and review navigation.",
+      "tags": [
+        "component",
+        "journal",
+        "data-query",
+        "filtering",
+        "editing"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:src/pages/Journal.tsx:RecentSessionsCard",
+      "type": "function",
+      "name": "RecentSessionsCard",
+      "filePath": "src/pages/Journal.tsx",
+      "lineRange": [
+        823,
+        920
+      ],
+      "summary": "Displays recent meaningful study sessions with question counts, selection state, edit actions, and links into completed-session review.",
+      "tags": [
+        "component",
+        "session-history",
+        "navigation",
+        "summary-card"
+      ],
+      "complexity": "moderate"
+    }
+  ],
+  "edges": [
+    {
+      "source": "file:src/pages/Journal.tsx",
+      "target": "function:src/pages/Journal.tsx:Row",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/pages/Journal.tsx",
+      "target": "function:src/pages/Journal.tsx:Journal",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/pages/Journal.tsx",
+      "target": "function:src/pages/Journal.tsx:RecentSessionsCard",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/pages/Journal.tsx",
+      "target": "function:src/pages/Journal.tsx:Journal",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/pages/Journal.tsx",
+      "target": "file:src/components/layout/PageHeader.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Journal.tsx",
+      "target": "file:src/components/shared/AnswerReveal.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Journal.tsx",
+      "target": "file:src/components/shared/ImagePreview.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Journal.tsx",
+      "target": "file:src/components/shared/QuestionEditor.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Journal.tsx",
+      "target": "file:src/components/shared/SessionEditor.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Journal.tsx",
+      "target": "file:src/components/shared/questionDraft.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Journal.tsx",
+      "target": "file:src/components/ui/Badge.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Journal.tsx",
+      "target": "file:src/components/ui/Button.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Journal.tsx",
+      "target": "file:src/components/ui/Card.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Journal.tsx",
+      "target": "file:src/components/ui/Dialog.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Journal.tsx",
+      "target": "file:src/components/ui/Empty.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Journal.tsx",
+      "target": "file:src/components/ui/Input.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Journal.tsx",
+      "target": "file:src/components/ui/Select.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Journal.tsx",
+      "target": "file:src/hooks/useAuth.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Journal.tsx",
+      "target": "file:src/lib/constants.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Journal.tsx",
+      "target": "file:src/lib/db.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Journal.tsx",
+      "target": "file:src/lib/sessions.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Journal.tsx",
+      "target": "file:src/lib/subjectInk.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Journal.tsx",
+      "target": "file:src/lib/subtopics.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Journal.tsx",
+      "target": "file:src/lib/sync.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Journal.tsx",
+      "target": "file:src/lib/utils.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Journal.tsx",
+      "target": "file:src/types/index.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "function:src/pages/Journal.tsx:Journal",
+      "target": "function:src/hooks/useAuth.ts:useAuth",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/pages/Journal.tsx:Journal",
+      "target": "function:src/components/shared/questionDraft.ts:draftFromRow",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/pages/Journal.tsx:Journal",
+      "target": "function:src/components/shared/questionDraft.ts:applyDraftToRow",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/pages/Journal.tsx:Journal",
+      "target": "function:src/lib/sessions.ts:reconcilePyqPracticeSessions",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/pages/Journal.tsx:Journal",
+      "target": "function:src/lib/sessions.ts:pruneEmptyFinishedSessions",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/pages/Journal.tsx:Journal",
+      "target": "function:src/lib/sessions.ts:recentSessions",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/pages/Journal.tsx:Journal",
+      "target": "function:src/lib/sessions.ts:allSessions",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/pages/Journal.tsx:Journal",
+      "target": "function:src/lib/subtopics.ts:subtopicsFor",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/pages/Journal.tsx:Journal",
+      "target": "function:src/lib/sync.ts:writeLocal",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/pages/Journal.tsx:Journal",
+      "target": "function:src/lib/sync.ts:deleteLocal",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/pages/Journal.tsx:Journal",
+      "target": "function:src/lib/utils.ts:formatDate",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/pages/Journal.tsx:Journal",
+      "target": "function:src/lib/utils.ts:plural",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/pages/Journal.tsx",
+      "target": "file:src/__tests__/journal-ui.test.tsx",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    }
+  ]
+}

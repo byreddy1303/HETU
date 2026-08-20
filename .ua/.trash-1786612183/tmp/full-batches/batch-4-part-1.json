@@ -1,0 +1,985 @@
+{
+  "nodes": [
+    {
+      "id": "file:src/__tests__/answer-reveal.test.tsx",
+      "type": "file",
+      "name": "answer-reveal.test.tsx",
+      "filePath": "src/__tests__/answer-reveal.test.tsx",
+      "summary": "Verifies that saved answers stay out of the rendered page until explicitly revealed and that an absent answer exposes the add action.",
+      "tags": [
+        "test",
+        "vitest",
+        "answer-persistence"
+      ],
+      "complexity": "simple",
+      "languageNotes": "React component written in TypeScript with JSX."
+    },
+    {
+      "id": "file:src/__tests__/mocks-ui.test.tsx",
+      "type": "file",
+      "name": "mocks-ui.test.tsx",
+      "filePath": "src/__tests__/mocks-ui.test.tsx",
+      "summary": "Exercises the mock-test form end to end, including total validation, Dexie persistence, recorded mistakes, confirmed deletion, and empty state.",
+      "tags": [
+        "test",
+        "vitest",
+        "mock-tests"
+      ],
+      "complexity": "moderate",
+      "languageNotes": "React component written in TypeScript with JSX."
+    },
+    {
+      "id": "file:src/__tests__/question-answer.test.ts",
+      "type": "file",
+      "name": "question-answer.test.ts",
+      "filePath": "src/__tests__/question-answer.test.ts",
+      "summary": "Checks that the shared question-draft pipeline starts with a blank answer and trims, persists, and reloads entered solution text.",
+      "tags": [
+        "test",
+        "vitest",
+        "answer-persistence"
+      ],
+      "complexity": "simple",
+      "languageNotes": "TypeScript module."
+    },
+    {
+      "id": "file:src/__tests__/quick-capture.test.tsx",
+      "type": "file",
+      "name": "quick-capture.test.tsx",
+      "filePath": "src/__tests__/quick-capture.test.tsx",
+      "summary": "Exercises quick image capture, outcome and mistake entry, question persistence, and creation of the linked D3 re-attempt.",
+      "tags": [
+        "test",
+        "vitest",
+        "quick-capture"
+      ],
+      "complexity": "moderate",
+      "languageNotes": "React component written in TypeScript with JSX."
+    },
+    {
+      "id": "file:src/__tests__/reattempt.test.ts",
+      "type": "file",
+      "name": "reattempt.test.ts",
+      "filePath": "src/__tests__/reattempt.test.ts",
+      "summary": "Covers the spaced re-attempt ladder, answer evaluation, queue partitioning, duplicate prevention, and Dexie-backed result persistence.",
+      "tags": [
+        "test",
+        "vitest",
+        "spaced-repetition"
+      ],
+      "complexity": "moderate",
+      "languageNotes": "TypeScript module."
+    },
+    {
+      "id": "function:src/__tests__/reattempt.test.ts:ladderRow",
+      "type": "function",
+      "name": "ladderRow",
+      "filePath": "src/__tests__/reattempt.test.ts",
+      "lineRange": [
+        17,
+        27
+      ],
+      "summary": "Builds a deterministic re-attempt row fixture at a requested ladder stage and date.",
+      "tags": [
+        "test-fixture",
+        "test",
+        "spaced-repetition"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/__tests__/sync.test.ts",
+      "type": "file",
+      "name": "sync.test.ts",
+      "filePath": "src/__tests__/sync.test.ts",
+      "summary": "Validates offline-first synchronization, ordered pushes, queued deletes, local-pending conflict resolution, parallel pulls, and overlapping refresh deduplication.",
+      "tags": [
+        "test",
+        "vitest",
+        "offline-sync"
+      ],
+      "complexity": "moderate",
+      "languageNotes": "TypeScript module."
+    },
+    {
+      "id": "function:src/__tests__/sync.test.ts:sessionRow",
+      "type": "function",
+      "name": "sessionRow",
+      "filePath": "src/__tests__/sync.test.ts",
+      "lineRange": [
+        27,
+        36
+      ],
+      "summary": "Builds a minimal session fixture for synchronization tests.",
+      "tags": [
+        "test-fixture",
+        "test",
+        "offline-sync"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/components/layout/PageHeader.tsx",
+      "type": "file",
+      "name": "PageHeader.tsx",
+      "filePath": "src/components/layout/PageHeader.tsx",
+      "summary": "Renders the standard page heading, optional description and actions, and a mobile brand mark with shared responsive spacing.",
+      "tags": [
+        "component",
+        "layout",
+        "page-header"
+      ],
+      "complexity": "simple",
+      "languageNotes": "React component written in TypeScript with JSX."
+    },
+    {
+      "id": "function:src/components/layout/PageHeader.tsx:PageHeader",
+      "type": "function",
+      "name": "PageHeader",
+      "filePath": "src/components/layout/PageHeader.tsx",
+      "lineRange": [
+        5,
+        36
+      ],
+      "summary": "Composes the shared responsive page title, supporting copy, actions, and optional mobile brand mark.",
+      "tags": [
+        "component",
+        "layout",
+        "page-header"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/components/shared/AnswerReveal.tsx",
+      "type": "file",
+      "name": "AnswerReveal.tsx",
+      "filePath": "src/components/shared/AnswerReveal.tsx",
+      "summary": "Keeps a saved solution concealed for active recall, toggles an accessible reveal panel, and offers an add action when no answer exists.",
+      "tags": [
+        "component",
+        "shared-ui",
+        "answer-reveal"
+      ],
+      "complexity": "moderate",
+      "languageNotes": "React component written in TypeScript with JSX."
+    },
+    {
+      "id": "function:src/components/shared/AnswerReveal.tsx:AnswerReveal",
+      "type": "function",
+      "name": "AnswerReveal",
+      "filePath": "src/components/shared/AnswerReveal.tsx",
+      "lineRange": [
+        6,
+        112
+      ],
+      "summary": "Manages concealed-answer state and renders accessible add, reveal, and hide interactions.",
+      "tags": [
+        "component",
+        "shared-ui",
+        "question-workflow"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/components/shared/ImagePreview.tsx",
+      "type": "file",
+      "name": "ImagePreview.tsx",
+      "filePath": "src/components/shared/ImagePreview.tsx",
+      "summary": "Provides a full-screen animated question-image viewer with keyboard, wheel, double-click, drag-to-pan, and two-finger pinch zoom controls.",
+      "tags": [
+        "component",
+        "shared-ui",
+        "image-preview"
+      ],
+      "complexity": "complex",
+      "languageNotes": "React component written in TypeScript with JSX."
+    },
+    {
+      "id": "function:src/components/shared/ImagePreview.tsx:ImagePreview",
+      "type": "function",
+      "name": "ImagePreview",
+      "filePath": "src/components/shared/ImagePreview.tsx",
+      "lineRange": [
+        29,
+        238
+      ],
+      "summary": "Coordinates modal lifecycle, zoom state, pan state, pointer gestures, keyboard controls, and animated image rendering.",
+      "tags": [
+        "component",
+        "shared-ui",
+        "question-workflow"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:src/components/shared/QuestionEditor.tsx",
+      "type": "file",
+      "name": "QuestionEditor.tsx",
+      "filePath": "src/components/shared/QuestionEditor.tsx",
+      "summary": "Edits the complete question draft, including source metadata, prompt and answer, compressed image, result analysis, decision data, date, and timing.",
+      "tags": [
+        "component",
+        "shared-ui",
+        "question-editor"
+      ],
+      "complexity": "complex",
+      "languageNotes": "React component written in TypeScript with JSX."
+    },
+    {
+      "id": "function:src/components/shared/QuestionEditor.tsx:Chip",
+      "type": "function",
+      "name": "Chip",
+      "filePath": "src/components/shared/QuestionEditor.tsx",
+      "lineRange": [
+        37,
+        52
+      ],
+      "summary": "Renders a generic toggle chip used for question metadata choices.",
+      "tags": [
+        "component",
+        "shared-ui",
+        "question-workflow"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/components/shared/QuestionEditor.tsx:QuestionEditor",
+      "type": "function",
+      "name": "QuestionEditor",
+      "filePath": "src/components/shared/QuestionEditor.tsx",
+      "lineRange": [
+        63,
+        437
+      ],
+      "summary": "Coordinates the complete controlled question-editing form and compressed image attachment workflow.",
+      "tags": [
+        "component",
+        "shared-ui",
+        "question-workflow"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:src/components/shared/QuestionEditor.tsx:Field",
+      "type": "function",
+      "name": "Field",
+      "filePath": "src/components/shared/QuestionEditor.tsx",
+      "lineRange": [
+        439,
+        454
+      ],
+      "summary": "Wraps a form label and its children in the editor’s consistent vertical field layout.",
+      "tags": [
+        "component",
+        "shared-ui",
+        "question-workflow"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/components/shared/QuestionEditor.tsx:DeleteBar",
+      "type": "function",
+      "name": "DeleteBar",
+      "filePath": "src/components/shared/QuestionEditor.tsx",
+      "lineRange": [
+        457,
+        472
+      ],
+      "summary": "Renders the reusable destructive-action footer for deleting a question.",
+      "tags": [
+        "component",
+        "shared-ui",
+        "question-workflow"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/components/shared/SessionEditor.tsx",
+      "type": "file",
+      "name": "SessionEditor.tsx",
+      "filePath": "src/components/shared/SessionEditor.tsx",
+      "summary": "Edits or deletes an existing study session, synchronizes changes locally, and safely orphans its questions instead of deleting them.",
+      "tags": [
+        "component",
+        "shared-ui",
+        "session-editor"
+      ],
+      "complexity": "moderate",
+      "languageNotes": "React component written in TypeScript with JSX."
+    },
+    {
+      "id": "function:src/components/shared/SessionEditor.tsx:SessionEditor",
+      "type": "function",
+      "name": "SessionEditor",
+      "filePath": "src/components/shared/SessionEditor.tsx",
+      "lineRange": [
+        22,
+        181
+      ],
+      "summary": "Manages session form state, synchronized saves, confirmed deletion, and preservation of orphaned question rows.",
+      "tags": [
+        "component",
+        "shared-ui",
+        "question-workflow"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/components/shared/SessionEditor.tsx:Field",
+      "type": "function",
+      "name": "Field",
+      "filePath": "src/components/shared/SessionEditor.tsx",
+      "lineRange": [
+        183,
+        198
+      ],
+      "summary": "Wraps a form label and its children in the editor’s consistent vertical field layout.",
+      "tags": [
+        "component",
+        "shared-ui",
+        "question-workflow"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/components/shared/Timer.tsx",
+      "type": "file",
+      "name": "Timer.tsx",
+      "filePath": "src/components/shared/Timer.tsx",
+      "summary": "Displays elapsed time against a target with visual urgency states and compact clock formatting.",
+      "tags": [
+        "component",
+        "shared-ui",
+        "timer"
+      ],
+      "complexity": "simple",
+      "languageNotes": "React component written in TypeScript with JSX."
+    },
+    {
+      "id": "function:src/components/shared/Timer.tsx:Timer",
+      "type": "function",
+      "name": "Timer",
+      "filePath": "src/components/shared/Timer.tsx",
+      "lineRange": [
+        4,
+        42
+      ],
+      "summary": "Formats elapsed seconds and derives target-relative visual states for the study timer.",
+      "tags": [
+        "component",
+        "shared-ui",
+        "question-workflow"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/components/shared/questionDraft.ts",
+      "type": "file",
+      "name": "questionDraft.ts",
+      "filePath": "src/components/shared/questionDraft.ts",
+      "summary": "Defines the editable question shape and converts between persisted question rows, normalized editor drafts, and new-question defaults.",
+      "tags": [
+        "data-model",
+        "serialization",
+        "question-editing"
+      ],
+      "complexity": "moderate",
+      "languageNotes": "TypeScript module."
+    },
+    {
+      "id": "function:src/components/shared/questionDraft.ts:detectSource",
+      "type": "function",
+      "name": "detectSource",
+      "filePath": "src/components/shared/questionDraft.ts",
+      "lineRange": [
+        41,
+        74
+      ],
+      "summary": "Parses a persisted source reference into source kind, set, question number, and question format.",
+      "tags": [
+        "utility",
+        "serialization",
+        "question-editing"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/components/shared/questionDraft.ts:draftFromRow",
+      "type": "function",
+      "name": "draftFromRow",
+      "filePath": "src/components/shared/questionDraft.ts",
+      "lineRange": [
+        76,
+        102
+      ],
+      "summary": "Converts a persisted question row into the normalized editor draft shape.",
+      "tags": [
+        "utility",
+        "serialization",
+        "question-editing"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/components/shared/questionDraft.ts:emptyDraft",
+      "type": "function",
+      "name": "emptyDraft",
+      "filePath": "src/components/shared/questionDraft.ts",
+      "lineRange": [
+        104,
+        127
+      ],
+      "summary": "Creates a new question draft with current GATE defaults and empty optional evidence fields.",
+      "tags": [
+        "utility",
+        "serialization",
+        "question-editing"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/components/shared/questionDraft.ts:applyDraftToRow",
+      "type": "function",
+      "name": "applyDraftToRow",
+      "filePath": "src/components/shared/questionDraft.ts",
+      "lineRange": [
+        129,
+        163
+      ],
+      "summary": "Normalizes an edited draft back into a persisted question row while preserving identity and timestamp details.",
+      "tags": [
+        "utility",
+        "serialization",
+        "question-editing"
+      ],
+      "complexity": "simple"
+    }
+  ],
+  "edges": [
+    {
+      "source": "file:src/__tests__/answer-reveal.test.tsx",
+      "target": "file:src/components/shared/AnswerReveal.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/__tests__/mocks-ui.test.tsx",
+      "target": "file:src/lib/db.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/__tests__/mocks-ui.test.tsx",
+      "target": "file:src/pages/Mocks.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/__tests__/question-answer.test.ts",
+      "target": "file:src/components/shared/questionDraft.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/__tests__/question-answer.test.ts",
+      "target": "file:src/types/index.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/__tests__/quick-capture.test.tsx",
+      "target": "file:src/lib/db.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/__tests__/quick-capture.test.tsx",
+      "target": "file:src/pages/QuickCapture.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/__tests__/reattempt.test.ts",
+      "target": "file:src/lib/db.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/__tests__/reattempt.test.ts",
+      "target": "file:src/lib/reattempt.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/__tests__/reattempt.test.ts",
+      "target": "file:src/types/index.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/__tests__/reattempt.test.ts",
+      "target": "function:src/__tests__/reattempt.test.ts:ladderRow",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/__tests__/sync.test.ts",
+      "target": "file:src/lib/db.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/__tests__/sync.test.ts",
+      "target": "file:src/lib/sync.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/__tests__/sync.test.ts",
+      "target": "function:src/__tests__/sync.test.ts:sessionRow",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/components/layout/PageHeader.tsx",
+      "target": "file:src/components/shared/Brand.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/layout/PageHeader.tsx",
+      "target": "file:src/lib/utils.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/layout/PageHeader.tsx",
+      "target": "function:src/components/layout/PageHeader.tsx:PageHeader",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/components/layout/PageHeader.tsx",
+      "target": "function:src/components/layout/PageHeader.tsx:PageHeader",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/components/shared/AnswerReveal.tsx",
+      "target": "file:src/components/ui/Button.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/shared/AnswerReveal.tsx",
+      "target": "file:src/lib/utils.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/shared/AnswerReveal.tsx",
+      "target": "function:src/components/shared/AnswerReveal.tsx:AnswerReveal",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/components/shared/AnswerReveal.tsx",
+      "target": "function:src/components/shared/AnswerReveal.tsx:AnswerReveal",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/components/shared/ImagePreview.tsx",
+      "target": "function:src/components/shared/ImagePreview.tsx:ImagePreview",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/components/shared/ImagePreview.tsx",
+      "target": "function:src/components/shared/ImagePreview.tsx:ImagePreview",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/components/shared/QuestionEditor.tsx",
+      "target": "file:src/components/shared/questionDraft.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/shared/QuestionEditor.tsx",
+      "target": "file:src/components/ui/Button.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/shared/QuestionEditor.tsx",
+      "target": "file:src/components/ui/Input.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/shared/QuestionEditor.tsx",
+      "target": "file:src/components/ui/Select.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/shared/QuestionEditor.tsx",
+      "target": "file:src/components/ui/Textarea.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/shared/QuestionEditor.tsx",
+      "target": "file:src/lib/constants.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/shared/QuestionEditor.tsx",
+      "target": "file:src/lib/image.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/shared/QuestionEditor.tsx",
+      "target": "file:src/lib/subtopics.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/shared/QuestionEditor.tsx",
+      "target": "file:src/lib/utils.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/shared/QuestionEditor.tsx",
+      "target": "function:src/components/shared/QuestionEditor.tsx:Chip",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/components/shared/QuestionEditor.tsx",
+      "target": "function:src/components/shared/QuestionEditor.tsx:QuestionEditor",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/components/shared/QuestionEditor.tsx",
+      "target": "function:src/components/shared/QuestionEditor.tsx:QuestionEditor",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/components/shared/QuestionEditor.tsx",
+      "target": "function:src/components/shared/QuestionEditor.tsx:Field",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/components/shared/QuestionEditor.tsx",
+      "target": "function:src/components/shared/QuestionEditor.tsx:DeleteBar",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/components/shared/QuestionEditor.tsx",
+      "target": "function:src/components/shared/QuestionEditor.tsx:DeleteBar",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/components/shared/SessionEditor.tsx",
+      "target": "file:src/components/ui/Button.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/shared/SessionEditor.tsx",
+      "target": "file:src/components/ui/Input.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/shared/SessionEditor.tsx",
+      "target": "file:src/components/ui/Select.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/shared/SessionEditor.tsx",
+      "target": "file:src/components/ui/Textarea.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/shared/SessionEditor.tsx",
+      "target": "file:src/lib/constants.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/shared/SessionEditor.tsx",
+      "target": "file:src/lib/db.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/shared/SessionEditor.tsx",
+      "target": "file:src/lib/sync.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/shared/SessionEditor.tsx",
+      "target": "file:src/lib/utils.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/shared/SessionEditor.tsx",
+      "target": "file:src/types/index.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/shared/SessionEditor.tsx",
+      "target": "function:src/components/shared/SessionEditor.tsx:SessionEditor",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/components/shared/SessionEditor.tsx",
+      "target": "function:src/components/shared/SessionEditor.tsx:SessionEditor",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/components/shared/SessionEditor.tsx",
+      "target": "function:src/components/shared/SessionEditor.tsx:Field",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/components/shared/Timer.tsx",
+      "target": "file:src/lib/utils.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/shared/Timer.tsx",
+      "target": "function:src/components/shared/Timer.tsx:Timer",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/components/shared/Timer.tsx",
+      "target": "function:src/components/shared/Timer.tsx:Timer",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/components/shared/questionDraft.ts",
+      "target": "file:src/lib/constants.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/shared/questionDraft.ts",
+      "target": "file:src/types/index.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/shared/questionDraft.ts",
+      "target": "function:src/components/shared/questionDraft.ts:detectSource",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/components/shared/questionDraft.ts",
+      "target": "function:src/components/shared/questionDraft.ts:draftFromRow",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/components/shared/questionDraft.ts",
+      "target": "function:src/components/shared/questionDraft.ts:draftFromRow",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/components/shared/questionDraft.ts",
+      "target": "function:src/components/shared/questionDraft.ts:emptyDraft",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/components/shared/questionDraft.ts",
+      "target": "function:src/components/shared/questionDraft.ts:emptyDraft",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/components/shared/questionDraft.ts",
+      "target": "function:src/components/shared/questionDraft.ts:applyDraftToRow",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/components/shared/questionDraft.ts",
+      "target": "function:src/components/shared/questionDraft.ts:applyDraftToRow",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/__tests__/answer-reveal.test.tsx",
+      "target": "file:src/components/shared/AnswerReveal.tsx",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/__tests__/mocks-ui.test.tsx",
+      "target": "file:src/lib/db.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/__tests__/mocks-ui.test.tsx",
+      "target": "file:src/pages/Mocks.tsx",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/__tests__/question-answer.test.ts",
+      "target": "file:src/components/shared/questionDraft.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/__tests__/question-answer.test.ts",
+      "target": "file:src/types/index.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/__tests__/quick-capture.test.tsx",
+      "target": "file:src/lib/db.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/__tests__/quick-capture.test.tsx",
+      "target": "file:src/pages/QuickCapture.tsx",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/__tests__/reattempt.test.ts",
+      "target": "file:src/lib/db.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/__tests__/reattempt.test.ts",
+      "target": "file:src/lib/reattempt.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/__tests__/reattempt.test.ts",
+      "target": "file:src/types/index.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/__tests__/sync.test.ts",
+      "target": "file:src/lib/db.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/__tests__/sync.test.ts",
+      "target": "file:src/lib/sync.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    }
+  ]
+}

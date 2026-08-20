@@ -1,0 +1,3938 @@
+{
+  "scriptCompleted": true,
+  "filesAnalyzed": 18,
+  "filesSkipped": [],
+  "analysisOutcomes": {
+    "structure": {
+      "succeeded": 18,
+      "failed": 0
+    },
+    "callGraph": {
+      "succeeded": 18,
+      "failed": 0,
+      "skipped": 0
+    }
+  },
+  "results": [
+    {
+      "path": "src/__tests__/do-now.test.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 103,
+      "nonEmptyLines": 101,
+      "metrics": {
+        "importCount": 3,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/__tests__/planner-execution.test.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 118,
+      "nonEmptyLines": 106,
+      "functions": [
+        {
+          "name": "block",
+          "startLine": 15,
+          "endLine": 25,
+          "params": [
+            "overrides"
+          ]
+        },
+        {
+          "name": "savePlan",
+          "startLine": 27,
+          "endLine": 31,
+          "params": [
+            "...blocks"
+          ]
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "savePlan",
+          "callee": "emptyDayPlan",
+          "lineNumber": 28
+        },
+        {
+          "caller": "savePlan",
+          "callee": "saveDayPlan",
+          "lineNumber": 30
+        }
+      ],
+      "metrics": {
+        "importCount": 4,
+        "exportCount": 0,
+        "functionCount": 2,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/__tests__/planner-native-ui.test.tsx",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 114,
+      "nonEmptyLines": 97,
+      "functions": [
+        {
+          "name": "NativePlannerHarness",
+          "startLine": 14,
+          "endLine": 25,
+          "params": []
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "NativePlannerHarness",
+          "callee": "useState",
+          "lineNumber": 15
+        },
+        {
+          "caller": "NativePlannerHarness",
+          "callee": "emptyDayPlan",
+          "lineNumber": 15
+        }
+      ],
+      "metrics": {
+        "importCount": 2,
+        "exportCount": 0,
+        "functionCount": 1,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/__tests__/planner-ui.test.tsx",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 50,
+      "nonEmptyLines": 42,
+      "functions": [
+        {
+          "name": "PlannerHarness",
+          "startLine": 8,
+          "endLine": 19,
+          "params": []
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "PlannerHarness",
+          "callee": "useState",
+          "lineNumber": 9
+        },
+        {
+          "caller": "PlannerHarness",
+          "callee": "emptyDayPlan",
+          "lineNumber": 9
+        }
+      ],
+      "metrics": {
+        "importCount": 2,
+        "exportCount": 0,
+        "functionCount": 1,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/__tests__/planner_cloud.test.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 61,
+      "nonEmptyLines": 54,
+      "metrics": {
+        "importCount": 1,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/__tests__/planner_storage.test.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 63,
+      "nonEmptyLines": 56,
+      "functions": [
+        {
+          "name": "actAs",
+          "startLine": 13,
+          "endLine": 19,
+          "params": [
+            "userId"
+          ]
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "actAs",
+          "callee": "useAuthStore.setState",
+          "lineNumber": 14
+        }
+      ],
+      "metrics": {
+        "importCount": 2,
+        "exportCount": 0,
+        "functionCount": 1,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/components/planner/Calendar.tsx",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 233,
+      "nonEmptyLines": 220,
+      "functions": [
+        {
+          "name": "iso",
+          "startLine": 47,
+          "endLine": 49,
+          "params": [
+            "y",
+            "m",
+            "d"
+          ]
+        },
+        {
+          "name": "Calendar",
+          "startLine": 51,
+          "endLine": 220,
+          "params": [
+            "{\n  year,\n  monthIndex,\n  today,\n  planIndex,\n  summaries,\n  onPrevMonth,\n  onNextMonth,\n  onPickDate\n}"
+          ]
+        },
+        {
+          "name": "shortSubject",
+          "startLine": 222,
+          "endLine": 226,
+          "params": [
+            "s"
+          ]
+        },
+        {
+          "name": "formatMin",
+          "startLine": 228,
+          "endLine": 233,
+          "params": [
+            "min"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "Calendar",
+          "line": 51,
+          "isDefault": true
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "iso",
+          "callee": "String(m + 1).padStart",
+          "lineNumber": 48
+        },
+        {
+          "caller": "iso",
+          "callee": "String",
+          "lineNumber": 48
+        },
+        {
+          "caller": "iso",
+          "callee": "String(d).padStart",
+          "lineNumber": 48
+        },
+        {
+          "caller": "iso",
+          "callee": "String",
+          "lineNumber": 48
+        },
+        {
+          "caller": "Calendar",
+          "callee": "useMemo",
+          "lineNumber": 63
+        },
+        {
+          "caller": "Calendar",
+          "callee": "first.getDay",
+          "lineNumber": 65
+        },
+        {
+          "caller": "Calendar",
+          "callee": "new Date(year, monthIndex + 1, 0).getDate",
+          "lineNumber": 66
+        },
+        {
+          "caller": "Calendar",
+          "callee": "new Date(year, monthIndex, 0).getDate",
+          "lineNumber": 67
+        },
+        {
+          "caller": "Calendar",
+          "callee": "arr.push",
+          "lineNumber": 79
+        },
+        {
+          "caller": "Calendar",
+          "callee": "iso",
+          "lineNumber": 79
+        },
+        {
+          "caller": "Calendar",
+          "callee": "arr.push",
+          "lineNumber": 82
+        },
+        {
+          "caller": "Calendar",
+          "callee": "iso",
+          "lineNumber": 82
+        },
+        {
+          "caller": "Calendar",
+          "callee": "arr.push",
+          "lineNumber": 89
+        },
+        {
+          "caller": "Calendar",
+          "callee": "iso",
+          "lineNumber": 89
+        },
+        {
+          "caller": "Calendar",
+          "callee": "iso",
+          "lineNumber": 94
+        },
+        {
+          "caller": "Calendar",
+          "callee": "today.getFullYear",
+          "lineNumber": 94
+        },
+        {
+          "caller": "Calendar",
+          "callee": "today.getMonth",
+          "lineNumber": 94
+        },
+        {
+          "caller": "Calendar",
+          "callee": "today.getDate",
+          "lineNumber": 94
+        },
+        {
+          "caller": "Calendar",
+          "callee": "cn",
+          "lineNumber": 104
+        },
+        {
+          "caller": "Calendar",
+          "callee": "WEEKDAY_LABELS.map",
+          "lineNumber": 129
+        },
+        {
+          "caller": "Calendar",
+          "callee": "w.slice",
+          "lineNumber": 134
+        },
+        {
+          "caller": "Calendar",
+          "callee": "cells.map",
+          "lineNumber": 140
+        },
+        {
+          "caller": "Calendar",
+          "callee": "planIndex.has",
+          "lineNumber": 142
+        },
+        {
+          "caller": "Calendar",
+          "callee": "summaries.get",
+          "lineNumber": 143
+        },
+        {
+          "caller": "Calendar",
+          "callee": "haptic",
+          "lineNumber": 151
+        },
+        {
+          "caller": "Calendar",
+          "callee": "onPickDate",
+          "lineNumber": 152
+        },
+        {
+          "caller": "Calendar",
+          "callee": "formatMin",
+          "lineNumber": 155
+        },
+        {
+          "caller": "Calendar",
+          "callee": "cn",
+          "lineNumber": 156
+        },
+        {
+          "caller": "Calendar",
+          "callee": "cn",
+          "lineNumber": 168
+        },
+        {
+          "caller": "Calendar",
+          "callee": "formatMin",
+          "lineNumber": 177
+        },
+        {
+          "caller": "Calendar",
+          "callee": "summary.subjects.slice(0, 3).map",
+          "lineNumber": 192
+        },
+        {
+          "caller": "Calendar",
+          "callee": "summary.subjects.slice",
+          "lineNumber": 192
+        },
+        {
+          "caller": "Calendar",
+          "callee": "subjectChipInk",
+          "lineNumber": 193
+        },
+        {
+          "caller": "Calendar",
+          "callee": "cn",
+          "lineNumber": 197
+        },
+        {
+          "caller": "Calendar",
+          "callee": "shortSubject",
+          "lineNumber": 203
+        },
+        {
+          "caller": "shortSubject",
+          "callee": "s.slice",
+          "lineNumber": 225
+        },
+        {
+          "caller": "formatMin",
+          "callee": "Math.floor",
+          "lineNumber": 230
+        }
+      ],
+      "metrics": {
+        "importCount": 4,
+        "exportCount": 1,
+        "functionCount": 4,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/components/planner/DayPlanModal.tsx",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 735,
+      "nonEmptyLines": 708,
+      "functions": [
+        {
+          "name": "planHasContent",
+          "startLine": 38,
+          "endLine": 44,
+          "params": [
+            "plan"
+          ]
+        },
+        {
+          "name": "DayPlanModal",
+          "startLine": 46,
+          "endLine": 242,
+          "params": [
+            "{\n  date,\n  plan,\n  onChange,\n  onClose,\n  onDelete,\n  onStartBlock = () => undefined,\n  onCompleteBlock = () => undefined\n}"
+          ]
+        },
+        {
+          "name": "ViewMode",
+          "startLine": 246,
+          "endLine": 364,
+          "params": [
+            "{\n  plan,\n  onStartBlock,\n  onCompleteBlock\n}"
+          ]
+        },
+        {
+          "name": "SummaryStat",
+          "startLine": 366,
+          "endLine": 373,
+          "params": [
+            "{ label, value }"
+          ]
+        },
+        {
+          "name": "Section",
+          "startLine": 377,
+          "endLine": 420,
+          "params": [
+            "{\n  title,\n  description,\n  defaultOpen = false,\n  children\n}"
+          ]
+        },
+        {
+          "name": "SessionsEditor",
+          "startLine": 424,
+          "endLine": 481,
+          "params": [
+            "{\n  sessions,\n  onChange\n}"
+          ]
+        },
+        {
+          "name": "SessionRow",
+          "startLine": 483,
+          "endLine": 615,
+          "params": [
+            "{\n  index,\n  session,\n  onUpdate,\n  onRemove\n}"
+          ]
+        },
+        {
+          "name": "ReviewEditor",
+          "startLine": 619,
+          "endLine": 709,
+          "params": [
+            "{\n  review,\n  onChange\n}"
+          ]
+        },
+        {
+          "name": "Field",
+          "startLine": 713,
+          "endLine": 728,
+          "params": [
+            "{\n  label,\n  className,\n  children\n}"
+          ]
+        },
+        {
+          "name": "formatHours",
+          "startLine": 730,
+          "endLine": 735,
+          "params": [
+            "min"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "DayPlanModal",
+          "line": 46,
+          "isDefault": true
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "planHasContent",
+          "callee": "plan.review.wentWell.trim",
+          "lineNumber": 40
+        },
+        {
+          "caller": "planHasContent",
+          "callee": "plan.review.missed.trim",
+          "lineNumber": 41
+        },
+        {
+          "caller": "DayPlanModal",
+          "callee": "useState",
+          "lineNumber": 55
+        },
+        {
+          "caller": "DayPlanModal",
+          "callee": "useState",
+          "lineNumber": 59
+        },
+        {
+          "caller": "DayPlanModal",
+          "callee": "planHasContent",
+          "lineNumber": 59
+        },
+        {
+          "caller": "DayPlanModal",
+          "callee": "useEffect",
+          "lineNumber": 62
+        },
+        {
+          "caller": "onKey",
+          "callee": "onClose",
+          "lineNumber": 64
+        },
+        {
+          "caller": "DayPlanModal",
+          "callee": "window.addEventListener",
+          "lineNumber": 66
+        },
+        {
+          "caller": "DayPlanModal",
+          "callee": "window.removeEventListener",
+          "lineNumber": 67
+        },
+        {
+          "caller": "update",
+          "callee": "onChange",
+          "lineNumber": 71
+        },
+        {
+          "caller": "DayPlanModal",
+          "callee": "onClose",
+          "lineNumber": 86
+        },
+        {
+          "caller": "DayPlanModal",
+          "callee": "formatDate",
+          "lineNumber": 103
+        },
+        {
+          "caller": "DayPlanModal",
+          "callee": "setMode",
+          "lineNumber": 111
+        },
+        {
+          "caller": "DayPlanModal",
+          "callee": "setMode",
+          "lineNumber": 124
+        },
+        {
+          "caller": "DayPlanModal",
+          "callee": "planHasContent",
+          "lineNumber": 124
+        },
+        {
+          "caller": "DayPlanModal",
+          "callee": "planHasContent",
+          "lineNumber": 127
+        },
+        {
+          "caller": "DayPlanModal",
+          "callee": "setConfirmDelete",
+          "lineNumber": 139
+        },
+        {
+          "caller": "DayPlanModal",
+          "callee": "setConfirmDelete",
+          "lineNumber": 147
+        },
+        {
+          "caller": "DayPlanModal",
+          "callee": "onDelete",
+          "lineNumber": 154
+        },
+        {
+          "caller": "DayPlanModal",
+          "callee": "setConfirmDelete",
+          "lineNumber": 155
+        },
+        {
+          "caller": "DayPlanModal",
+          "callee": "update",
+          "lineNumber": 189
+        },
+        {
+          "caller": "DayPlanModal",
+          "callee": "update",
+          "lineNumber": 201
+        },
+        {
+          "caller": "DayPlanModal",
+          "callee": "setConfirmDelete",
+          "lineNumber": 214
+        },
+        {
+          "caller": "DayPlanModal",
+          "callee": "setConfirmDelete",
+          "lineNumber": 219
+        },
+        {
+          "caller": "DayPlanModal",
+          "callee": "onDelete",
+          "lineNumber": 226
+        },
+        {
+          "caller": "DayPlanModal",
+          "callee": "setConfirmDelete",
+          "lineNumber": 227
+        },
+        {
+          "caller": "ViewMode",
+          "callee": "plan.sessions.reduce",
+          "lineNumber": 255
+        },
+        {
+          "caller": "ViewMode",
+          "callee": "END_MOODS.find",
+          "lineNumber": 257
+        },
+        {
+          "caller": "ViewMode",
+          "callee": "formatHours",
+          "lineNumber": 269
+        },
+        {
+          "caller": "ViewMode",
+          "callee": "plan.sessions.map",
+          "lineNumber": 276
+        },
+        {
+          "caller": "ViewMode",
+          "callee": "String(i + 1).padStart",
+          "lineNumber": 283
+        },
+        {
+          "caller": "ViewMode",
+          "callee": "String",
+          "lineNumber": 283
+        },
+        {
+          "caller": "ViewMode",
+          "callee": "formatHours",
+          "lineNumber": 287
+        },
+        {
+          "caller": "ViewMode",
+          "callee": "onStartBlock",
+          "lineNumber": 313
+        },
+        {
+          "caller": "ViewMode",
+          "callee": "onCompleteBlock",
+          "lineNumber": 316
+        },
+        {
+          "caller": "Section",
+          "callee": "useState",
+          "lineNumber": 388
+        },
+        {
+          "caller": "Section",
+          "callee": "setOpen",
+          "lineNumber": 407
+        },
+        {
+          "caller": "Section",
+          "callee": "cn",
+          "lineNumber": 414
+        },
+        {
+          "caller": "addSession",
+          "callee": "uuid",
+          "lineNumber": 433
+        },
+        {
+          "caller": "addSession",
+          "callee": "onChange",
+          "lineNumber": 440
+        },
+        {
+          "caller": "update",
+          "callee": "onChange",
+          "lineNumber": 443
+        },
+        {
+          "caller": "update",
+          "callee": "sessions.map",
+          "lineNumber": 443
+        },
+        {
+          "caller": "remove",
+          "callee": "onChange",
+          "lineNumber": 446
+        },
+        {
+          "caller": "remove",
+          "callee": "sessions.filter",
+          "lineNumber": 446
+        },
+        {
+          "caller": "SessionsEditor",
+          "callee": "sessions.reduce",
+          "lineNumber": 449
+        },
+        {
+          "caller": "SessionsEditor",
+          "callee": "sessions.map",
+          "lineNumber": 459
+        },
+        {
+          "caller": "SessionsEditor",
+          "callee": "update",
+          "lineNumber": 464
+        },
+        {
+          "caller": "SessionsEditor",
+          "callee": "remove",
+          "lineNumber": 465
+        },
+        {
+          "caller": "SessionsEditor",
+          "callee": "formatHours",
+          "lineNumber": 476
+        },
+        {
+          "caller": "SessionRow",
+          "callee": "onUpdate",
+          "lineNumber": 515
+        },
+        {
+          "caller": "SessionRow",
+          "callee": "onUpdate",
+          "lineNumber": 526
+        },
+        {
+          "caller": "SessionRow",
+          "callee": "onUpdate",
+          "lineNumber": 539
+        },
+        {
+          "caller": "SessionRow",
+          "callee": "Math.max",
+          "lineNumber": 540
+        },
+        {
+          "caller": "SessionRow",
+          "callee": "Math.min",
+          "lineNumber": 540
+        },
+        {
+          "caller": "SessionRow",
+          "callee": "Math.round",
+          "lineNumber": 540
+        },
+        {
+          "caller": "SessionRow",
+          "callee": "Number",
+          "lineNumber": 540
+        },
+        {
+          "caller": "SessionRow",
+          "callee": "formatHours",
+          "lineNumber": 547
+        },
+        {
+          "caller": "SessionRow",
+          "callee": "DURATIONS.filter((d) => d.value > 0).map",
+          "lineNumber": 551
+        },
+        {
+          "caller": "SessionRow",
+          "callee": "DURATIONS.filter",
+          "lineNumber": 551
+        },
+        {
+          "caller": "SessionRow",
+          "callee": "onUpdate",
+          "lineNumber": 557
+        },
+        {
+          "caller": "SessionRow",
+          "callee": "cn",
+          "lineNumber": 558
+        },
+        {
+          "caller": "SessionRow",
+          "callee": "onUpdate",
+          "lineNumber": 574
+        },
+        {
+          "caller": "SessionRow",
+          "callee": "STUDY_MODES.map",
+          "lineNumber": 576
+        },
+        {
+          "caller": "SessionRow",
+          "callee": "onUpdate",
+          "lineNumber": 586
+        },
+        {
+          "caller": "SessionRow",
+          "callee": "PRIORITIES.map",
+          "lineNumber": 588
+        },
+        {
+          "caller": "SessionRow",
+          "callee": "onUpdate",
+          "lineNumber": 599
+        },
+        {
+          "caller": "SessionRow",
+          "callee": "onUpdate",
+          "lineNumber": 607
+        },
+        {
+          "caller": "ReviewEditor",
+          "callee": "onChange",
+          "lineNumber": 635
+        },
+        {
+          "caller": "ReviewEditor",
+          "callee": "Number",
+          "lineNumber": 635
+        },
+        {
+          "caller": "ReviewEditor",
+          "callee": "onChange",
+          "lineNumber": 644
+        },
+        {
+          "caller": "ReviewEditor",
+          "callee": "onChange",
+          "lineNumber": 652
+        },
+        {
+          "caller": "ReviewEditor",
+          "callee": "END_MOODS.map",
+          "lineNumber": 660
+        },
+        {
+          "caller": "ReviewEditor",
+          "callee": "onChange",
+          "lineNumber": 665
+        },
+        {
+          "caller": "ReviewEditor",
+          "callee": "cn",
+          "lineNumber": 670
+        },
+        {
+          "caller": "ReviewEditor",
+          "callee": "(['yes', 'partial', 'no'] as Replicate[]).map",
+          "lineNumber": 684
+        },
+        {
+          "caller": "ReviewEditor",
+          "callee": "onChange",
+          "lineNumber": 689
+        },
+        {
+          "caller": "ReviewEditor",
+          "callee": "cn",
+          "lineNumber": 694
+        },
+        {
+          "caller": "Field",
+          "callee": "cn",
+          "lineNumber": 723
+        },
+        {
+          "caller": "formatHours",
+          "callee": "Math.floor",
+          "lineNumber": 732
+        }
+      ],
+      "metrics": {
+        "importCount": 9,
+        "exportCount": 1,
+        "functionCount": 10,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/components/planner/PlannerInsights.tsx",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 307,
+      "nonEmptyLines": 291,
+      "functions": [
+        {
+          "name": "formatHours",
+          "startLine": 27,
+          "endLine": 32,
+          "params": [
+            "min"
+          ]
+        },
+        {
+          "name": "PlannerInsights",
+          "startLine": 34,
+          "endLine": 251,
+          "params": [
+            "{ revision }"
+          ]
+        },
+        {
+          "name": "Kpi",
+          "startLine": 253,
+          "endLine": 269,
+          "params": [
+            "{\n  label,\n  value,\n  hint\n}"
+          ]
+        },
+        {
+          "name": "ShareBlock",
+          "startLine": 271,
+          "endLine": 307,
+          "params": [
+            "{\n  title,\n  shares,\n  unit = 'min'\n}"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "PlannerInsights",
+          "line": 34,
+          "isDefault": true
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "formatHours",
+          "callee": "Math.floor",
+          "lineNumber": 29
+        },
+        {
+          "caller": "PlannerInsights",
+          "callee": "useMemo",
+          "lineNumber": 44
+        },
+        {
+          "caller": "PlannerInsights",
+          "callee": "loadAllDayPlans",
+          "lineNumber": 46
+        },
+        {
+          "caller": "PlannerInsights",
+          "callee": "windowed",
+          "lineNumber": 47
+        },
+        {
+          "caller": "PlannerInsights",
+          "callee": "rollup",
+          "lineNumber": 51
+        },
+        {
+          "caller": "PlannerInsights",
+          "callee": "subjectShare",
+          "lineNumber": 52
+        },
+        {
+          "caller": "PlannerInsights",
+          "callee": "modeShare",
+          "lineNumber": 53
+        },
+        {
+          "caller": "PlannerInsights",
+          "callee": "priorityShare",
+          "lineNumber": 54
+        },
+        {
+          "caller": "PlannerInsights",
+          "callee": "reviewStats",
+          "lineNumber": 55
+        },
+        {
+          "caller": "PlannerInsights",
+          "callee": "neglectedSubjects",
+          "lineNumber": 56
+        },
+        {
+          "caller": "PlannerInsights",
+          "callee": "String",
+          "lineNumber": 79
+        },
+        {
+          "caller": "PlannerInsights",
+          "callee": "formatHours",
+          "lineNumber": 80
+        },
+        {
+          "caller": "PlannerInsights",
+          "callee": "String",
+          "lineNumber": 83
+        },
+        {
+          "caller": "PlannerInsights",
+          "callee": "subj30.slice",
+          "lineNumber": 104
+        },
+        {
+          "caller": "PlannerInsights",
+          "callee": "String",
+          "lineNumber": 112
+        },
+        {
+          "caller": "PlannerInsights",
+          "callee": "String",
+          "lineNumber": 113
+        },
+        {
+          "caller": "PlannerInsights",
+          "callee": "String",
+          "lineNumber": 114
+        },
+        {
+          "caller": "PlannerInsights",
+          "callee": "neglect30.slice(0, 8).map",
+          "lineNumber": 126
+        },
+        {
+          "caller": "PlannerInsights",
+          "callee": "neglect30.slice",
+          "lineNumber": 126
+        },
+        {
+          "caller": "PlannerInsights",
+          "callee": "String",
+          "lineNumber": 167
+        },
+        {
+          "caller": "PlannerInsights",
+          "callee": "formatHours",
+          "lineNumber": 170
+        },
+        {
+          "caller": "PlannerInsights",
+          "callee": "String",
+          "lineNumber": 174
+        },
+        {
+          "caller": "PlannerInsights",
+          "callee": "subj30.slice",
+          "lineNumber": 189
+        },
+        {
+          "caller": "PlannerInsights",
+          "callee": "neglect30.slice(0, 8).map",
+          "lineNumber": 232
+        },
+        {
+          "caller": "PlannerInsights",
+          "callee": "neglect30.slice",
+          "lineNumber": 232
+        },
+        {
+          "caller": "ShareBlock",
+          "callee": "shares.map",
+          "lineNumber": 286
+        },
+        {
+          "caller": "ShareBlock",
+          "callee": "cn",
+          "lineNumber": 291
+        },
+        {
+          "caller": "ShareBlock",
+          "callee": "Math.max",
+          "lineNumber": 295
+        },
+        {
+          "caller": "ShareBlock",
+          "callee": "Math.round",
+          "lineNumber": 295
+        },
+        {
+          "caller": "ShareBlock",
+          "callee": "formatHours",
+          "lineNumber": 299
+        }
+      ],
+      "metrics": {
+        "importCount": 5,
+        "exportCount": 1,
+        "functionCount": 4,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/components/planner/SubjectPicker.tsx",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 162,
+      "nonEmptyLines": 152,
+      "functions": [
+        {
+          "name": "SubjectPicker",
+          "startLine": 18,
+          "endLine": 162,
+          "params": [
+            "{ value, options, onChange }"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "SubjectPicker",
+          "line": 18,
+          "isDefault": true
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "SubjectPicker",
+          "callee": "useId",
+          "lineNumber": 20
+        },
+        {
+          "caller": "SubjectPicker",
+          "callee": "useRef",
+          "lineNumber": 21
+        },
+        {
+          "caller": "SubjectPicker",
+          "callee": "useState",
+          "lineNumber": 22
+        },
+        {
+          "caller": "SubjectPicker",
+          "callee": "useState",
+          "lineNumber": 23
+        },
+        {
+          "caller": "SubjectPicker",
+          "callee": "useMemo",
+          "lineNumber": 25
+        },
+        {
+          "caller": "SubjectPicker",
+          "callee": "query.trim().toLocaleLowerCase",
+          "lineNumber": 26
+        },
+        {
+          "caller": "SubjectPicker",
+          "callee": "query.trim",
+          "lineNumber": 26
+        },
+        {
+          "caller": "SubjectPicker",
+          "callee": "options.filter",
+          "lineNumber": 28
+        },
+        {
+          "caller": "SubjectPicker",
+          "callee": "option.toLocaleLowerCase().includes",
+          "lineNumber": 28
+        },
+        {
+          "caller": "SubjectPicker",
+          "callee": "option.toLocaleLowerCase",
+          "lineNumber": 28
+        },
+        {
+          "caller": "SubjectPicker",
+          "callee": "useEffect",
+          "lineNumber": 31
+        },
+        {
+          "caller": "SubjectPicker",
+          "callee": "window.setTimeout",
+          "lineNumber": 35
+        },
+        {
+          "caller": "SubjectPicker",
+          "callee": "searchRef.current?.focus",
+          "lineNumber": 35
+        },
+        {
+          "caller": "closeOnEscape",
+          "callee": "setOpen",
+          "lineNumber": 37
+        },
+        {
+          "caller": "SubjectPicker",
+          "callee": "window.addEventListener",
+          "lineNumber": 39
+        },
+        {
+          "caller": "SubjectPicker",
+          "callee": "window.clearTimeout",
+          "lineNumber": 41
+        },
+        {
+          "caller": "SubjectPicker",
+          "callee": "window.removeEventListener",
+          "lineNumber": 42
+        },
+        {
+          "caller": "close",
+          "callee": "setOpen",
+          "lineNumber": 48
+        },
+        {
+          "caller": "close",
+          "callee": "setQuery",
+          "lineNumber": 49
+        },
+        {
+          "caller": "pick",
+          "callee": "onChange",
+          "lineNumber": 53
+        },
+        {
+          "caller": "pick",
+          "callee": "haptic",
+          "lineNumber": 54
+        },
+        {
+          "caller": "pick",
+          "callee": "close",
+          "lineNumber": 55
+        },
+        {
+          "caller": "SubjectPicker",
+          "callee": "setOpen",
+          "lineNumber": 64
+        },
+        {
+          "caller": "SubjectPicker",
+          "callee": "createPortal",
+          "lineNumber": 72
+        },
+        {
+          "caller": "SubjectPicker",
+          "callee": "close",
+          "lineNumber": 79
+        },
+        {
+          "caller": "SubjectPicker",
+          "callee": "setQuery",
+          "lineNumber": 119
+        },
+        {
+          "caller": "SubjectPicker",
+          "callee": "visibleOptions.map",
+          "lineNumber": 134
+        },
+        {
+          "caller": "SubjectPicker",
+          "callee": "pick",
+          "lineNumber": 140
+        },
+        {
+          "caller": "SubjectPicker",
+          "callee": "cn",
+          "lineNumber": 141
+        }
+      ],
+      "metrics": {
+        "importCount": 2,
+        "exportCount": 1,
+        "functionCount": 1,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/lib/do-now.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 125,
+      "nonEmptyLines": 116,
+      "functions": [
+        {
+          "name": "latestAttempts",
+          "startLine": 18,
+          "endLine": 27,
+          "params": [
+            "attempts"
+          ]
+        },
+        {
+          "name": "buildDoNowQueue",
+          "startLine": 29,
+          "endLine": 125,
+          "params": [
+            "args"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "buildDoNowQueue",
+          "line": 29,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "latestAttempts",
+          "callee": "latest.get",
+          "lineNumber": 21
+        },
+        {
+          "caller": "latestAttempts",
+          "callee": "latest.set",
+          "lineNumber": 23
+        },
+        {
+          "caller": "latestAttempts",
+          "callee": "latest.values",
+          "lineNumber": 26
+        },
+        {
+          "caller": "buildDoNowQueue",
+          "callee": "args.reattempts.filter",
+          "lineNumber": 38
+        },
+        {
+          "caller": "buildDoNowQueue",
+          "callee": "items.push",
+          "lineNumber": 42
+        },
+        {
+          "caller": "buildDoNowQueue",
+          "callee": "due.filter",
+          "lineNumber": 46
+        },
+        {
+          "caller": "buildDoNowQueue",
+          "callee": "args.questions.map",
+          "lineNumber": 52
+        },
+        {
+          "caller": "buildDoNowQueue",
+          "callee": "latestAttempts",
+          "lineNumber": 53
+        },
+        {
+          "caller": "buildDoNowQueue",
+          "callee": "latest.filter",
+          "lineNumber": 54
+        },
+        {
+          "caller": "buildDoNowQueue",
+          "callee": "questionIds.has",
+          "lineNumber": 56
+        },
+        {
+          "caller": "buildDoNowQueue",
+          "callee": "pyqJournalQuestionId",
+          "lineNumber": 56
+        },
+        {
+          "caller": "buildDoNowQueue",
+          "callee": "items.push",
+          "lineNumber": 59
+        },
+        {
+          "caller": "buildDoNowQueue",
+          "callee": "latest.filter",
+          "lineNumber": 69
+        },
+        {
+          "caller": "buildDoNowQueue",
+          "callee": "items.push",
+          "lineNumber": 73
+        },
+        {
+          "caller": "buildDoNowQueue",
+          "callee": "latest.filter",
+          "lineNumber": 83
+        },
+        {
+          "caller": "buildDoNowQueue",
+          "callee": "items.push",
+          "lineNumber": 89
+        },
+        {
+          "caller": "buildDoNowQueue",
+          "callee": "args.formulas.filter",
+          "lineNumber": 99
+        },
+        {
+          "caller": "buildDoNowQueue",
+          "callee": "items.push",
+          "lineNumber": 101
+        },
+        {
+          "caller": "buildDoNowQueue",
+          "callee": "items.push",
+          "lineNumber": 115
+        },
+        {
+          "caller": "buildDoNowQueue",
+          "callee": "block.target.trim",
+          "lineNumber": 118
+        },
+        {
+          "caller": "buildDoNowQueue",
+          "callee": "plannerBlockHref",
+          "lineNumber": 121
+        }
+      ],
+      "metrics": {
+        "importCount": 5,
+        "exportCount": 1,
+        "functionCount": 2,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/lib/planner-cloud.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 96,
+      "nonEmptyLines": 85,
+      "functions": [
+        {
+          "name": "isStudySession",
+          "startLine": 18,
+          "endLine": 29,
+          "params": [
+            "value"
+          ]
+        },
+        {
+          "name": "toCloudDayPlan",
+          "startLine": 31,
+          "endLine": 36,
+          "params": [
+            "row"
+          ]
+        },
+        {
+          "name": "loadCloudDayPlan",
+          "startLine": 38,
+          "endLine": 53,
+          "params": [
+            "userId",
+            "date"
+          ]
+        },
+        {
+          "name": "loadCloudDayPlans",
+          "startLine": 56,
+          "endLine": 74,
+          "params": [
+            "userId",
+            "fromDate",
+            "throughDate"
+          ]
+        },
+        {
+          "name": "saveCloudDayPlan",
+          "startLine": 76,
+          "endLine": 87,
+          "params": [
+            "userId",
+            "plan"
+          ]
+        },
+        {
+          "name": "deleteCloudDayPlan",
+          "startLine": 89,
+          "endLine": 96,
+          "params": [
+            "userId",
+            "date"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "loadCloudDayPlan",
+          "line": 38,
+          "isDefault": false
+        },
+        {
+          "name": "loadCloudDayPlans",
+          "line": 56,
+          "isDefault": false
+        },
+        {
+          "name": "saveCloudDayPlan",
+          "line": 76,
+          "isDefault": false
+        },
+        {
+          "name": "deleteCloudDayPlan",
+          "line": 89,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "toCloudDayPlan",
+          "callee": "Array.isArray",
+          "lineNumber": 32
+        },
+        {
+          "caller": "toCloudDayPlan",
+          "callee": "row.sessions.filter(isStudySession).slice",
+          "lineNumber": 33
+        },
+        {
+          "caller": "toCloudDayPlan",
+          "callee": "row.sessions.filter",
+          "lineNumber": 33
+        },
+        {
+          "caller": "loadCloudDayPlan",
+          "callee": "supabase\n    .from('planner_day_plans')\n    .select('plan_date, sessions, updated_at')\n    .eq('user_id', userId)\n    .eq('plan_date', date)\n    .maybeSingle",
+          "lineNumber": 42
+        },
+        {
+          "caller": "loadCloudDayPlan",
+          "callee": "supabase\n    .from('planner_day_plans')\n    .select('plan_date, sessions, updated_at')\n    .eq('user_id', userId)\n    .eq",
+          "lineNumber": 42
+        },
+        {
+          "caller": "loadCloudDayPlan",
+          "callee": "supabase\n    .from('planner_day_plans')\n    .select('plan_date, sessions, updated_at')\n    .eq",
+          "lineNumber": 42
+        },
+        {
+          "caller": "loadCloudDayPlan",
+          "callee": "supabase\n    .from('planner_day_plans')\n    .select",
+          "lineNumber": 42
+        },
+        {
+          "caller": "loadCloudDayPlan",
+          "callee": "supabase\n    .from",
+          "lineNumber": 42
+        },
+        {
+          "caller": "loadCloudDayPlan",
+          "callee": "toCloudDayPlan",
+          "lineNumber": 52
+        },
+        {
+          "caller": "loadCloudDayPlans",
+          "callee": "supabase\n    .from('planner_day_plans')\n    .select('plan_date, sessions, updated_at')\n    .eq('user_id', userId)\n    .gte('plan_date', fromDate)\n    .lte('plan_date', throughDate)\n    .order",
+          "lineNumber": 61
+        },
+        {
+          "caller": "loadCloudDayPlans",
+          "callee": "supabase\n    .from('planner_day_plans')\n    .select('plan_date, sessions, updated_at')\n    .eq('user_id', userId)\n    .gte('plan_date', fromDate)\n    .lte",
+          "lineNumber": 61
+        },
+        {
+          "caller": "loadCloudDayPlans",
+          "callee": "supabase\n    .from('planner_day_plans')\n    .select('plan_date, sessions, updated_at')\n    .eq('user_id', userId)\n    .gte",
+          "lineNumber": 61
+        },
+        {
+          "caller": "loadCloudDayPlans",
+          "callee": "supabase\n    .from('planner_day_plans')\n    .select('plan_date, sessions, updated_at')\n    .eq",
+          "lineNumber": 61
+        },
+        {
+          "caller": "loadCloudDayPlans",
+          "callee": "supabase\n    .from('planner_day_plans')\n    .select",
+          "lineNumber": 61
+        },
+        {
+          "caller": "loadCloudDayPlans",
+          "callee": "supabase\n    .from",
+          "lineNumber": 61
+        },
+        {
+          "caller": "loadCloudDayPlans",
+          "callee": "((data ?? []) as CloudDayPlanRow[]).map",
+          "lineNumber": 71
+        },
+        {
+          "caller": "saveCloudDayPlan",
+          "callee": "supabase.from('planner_day_plans').upsert",
+          "lineNumber": 77
+        },
+        {
+          "caller": "saveCloudDayPlan",
+          "callee": "supabase.from",
+          "lineNumber": 77
+        },
+        {
+          "caller": "saveCloudDayPlan",
+          "callee": "plan.sessions.slice",
+          "lineNumber": 81
+        },
+        {
+          "caller": "deleteCloudDayPlan",
+          "callee": "supabase\n    .from('planner_day_plans')\n    .delete()\n    .eq('user_id', userId)\n    .eq",
+          "lineNumber": 90
+        },
+        {
+          "caller": "deleteCloudDayPlan",
+          "callee": "supabase\n    .from('planner_day_plans')\n    .delete()\n    .eq",
+          "lineNumber": 90
+        },
+        {
+          "caller": "deleteCloudDayPlan",
+          "callee": "supabase\n    .from('planner_day_plans')\n    .delete",
+          "lineNumber": 90
+        },
+        {
+          "caller": "deleteCloudDayPlan",
+          "callee": "supabase\n    .from",
+          "lineNumber": 90
+        }
+      ],
+      "metrics": {
+        "importCount": 2,
+        "exportCount": 4,
+        "functionCount": 6,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/lib/planner-constants.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 132,
+      "nonEmptyLines": 120,
+      "functions": [
+        {
+          "name": "subjectChipInk",
+          "startLine": 114,
+          "endLine": 128,
+          "params": [
+            "subject"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "PLANNER_SUBJECTS",
+          "line": 13,
+          "isDefault": false
+        },
+        {
+          "name": "DURATIONS",
+          "line": 38,
+          "isDefault": false
+        },
+        {
+          "name": "STUDY_MODES",
+          "line": 50,
+          "isDefault": false
+        },
+        {
+          "name": "PRIORITIES",
+          "line": 61,
+          "isDefault": false
+        },
+        {
+          "name": "BREAK_PATTERNS",
+          "line": 68,
+          "isDefault": false
+        },
+        {
+          "name": "DAY_TYPES",
+          "line": 76,
+          "isDefault": false
+        },
+        {
+          "name": "ENERGY_FORECASTS",
+          "line": 86,
+          "isDefault": false
+        },
+        {
+          "name": "MOOD_INTENTS",
+          "line": 96,
+          "isDefault": false
+        },
+        {
+          "name": "END_MOODS",
+          "line": 105,
+          "isDefault": false
+        },
+        {
+          "name": "subjectChipInk",
+          "line": 114,
+          "isDefault": false
+        },
+        {
+          "name": "PLANNER_MIN_YEAR",
+          "line": 131,
+          "isDefault": false
+        },
+        {
+          "name": "PLANNER_MIN_MONTH_INDEX",
+          "line": 132,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "subjectChipInk",
+          "callee": "subject.charCodeAt",
+          "lineNumber": 125
+        },
+        {
+          "caller": "subjectChipInk",
+          "callee": "Math.abs",
+          "lineNumber": 127
+        }
+      ],
+      "metrics": {
+        "importCount": 1,
+        "exportCount": 12,
+        "functionCount": 1,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/lib/planner-execution.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 160,
+      "nonEmptyLines": 151,
+      "functions": [
+        {
+          "name": "subjectName",
+          "startLine": 5,
+          "endLine": 7,
+          "params": [
+            "block"
+          ]
+        },
+        {
+          "name": "pyqCountForMinutes",
+          "startLine": 9,
+          "endLine": 15,
+          "params": [
+            "minutes"
+          ]
+        },
+        {
+          "name": "plannerBlockHref",
+          "startLine": 17,
+          "endLine": 35,
+          "params": [
+            "date",
+            "block"
+          ]
+        },
+        {
+          "name": "plannerCompletionPercent",
+          "startLine": 37,
+          "endLine": 49,
+          "params": [
+            "plan"
+          ]
+        },
+        {
+          "name": "saveWithAutomaticReview",
+          "startLine": 51,
+          "endLine": 56,
+          "params": [
+            "plan"
+          ]
+        },
+        {
+          "name": "updatePlannerBlockExecution",
+          "startLine": 58,
+          "endLine": 83,
+          "params": [
+            "date",
+            "blockId",
+            "patch"
+          ]
+        },
+        {
+          "name": "markPlannerBlockStarted",
+          "startLine": 85,
+          "endLine": 91,
+          "params": [
+            "date",
+            "blockId"
+          ]
+        },
+        {
+          "name": "markPlannerBlockComplete",
+          "startLine": 93,
+          "endLine": 104,
+          "params": [
+            "date",
+            "blockId",
+            "actualMin"
+          ]
+        },
+        {
+          "name": "reconcilePlannerExecutions",
+          "startLine": 106,
+          "endLine": 160,
+          "params": [
+            "userId"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "plannerBlockHref",
+          "line": 17,
+          "isDefault": false
+        },
+        {
+          "name": "plannerCompletionPercent",
+          "line": 37,
+          "isDefault": false
+        },
+        {
+          "name": "updatePlannerBlockExecution",
+          "line": 58,
+          "isDefault": false
+        },
+        {
+          "name": "markPlannerBlockStarted",
+          "line": 85,
+          "isDefault": false
+        },
+        {
+          "name": "markPlannerBlockComplete",
+          "line": 93,
+          "isDefault": false
+        },
+        {
+          "name": "reconcilePlannerExecutions",
+          "line": 106,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "pyqCountForMinutes",
+          "callee": "Math.max",
+          "lineNumber": 10
+        },
+        {
+          "caller": "pyqCountForMinutes",
+          "callee": "Math.round",
+          "lineNumber": 10
+        },
+        {
+          "caller": "plannerBlockHref",
+          "callee": "common.set",
+          "lineNumber": 20
+        },
+        {
+          "caller": "plannerBlockHref",
+          "callee": "subjectName",
+          "lineNumber": 20
+        },
+        {
+          "caller": "plannerBlockHref",
+          "callee": "common.set",
+          "lineNumber": 21
+        },
+        {
+          "caller": "plannerBlockHref",
+          "callee": "pyqCountForMinutes",
+          "lineNumber": 21
+        },
+        {
+          "caller": "plannerBlockHref",
+          "callee": "common.toString",
+          "lineNumber": 22
+        },
+        {
+          "caller": "plannerBlockHref",
+          "callee": "common.set",
+          "lineNumber": 25
+        },
+        {
+          "caller": "plannerBlockHref",
+          "callee": "common.set",
+          "lineNumber": 26
+        },
+        {
+          "caller": "plannerBlockHref",
+          "callee": "common.toString",
+          "lineNumber": 27
+        },
+        {
+          "caller": "plannerBlockHref",
+          "callee": "common.set",
+          "lineNumber": 32
+        },
+        {
+          "caller": "plannerBlockHref",
+          "callee": "subjectName",
+          "lineNumber": 32
+        },
+        {
+          "caller": "plannerBlockHref",
+          "callee": "common.set",
+          "lineNumber": 33
+        },
+        {
+          "caller": "plannerBlockHref",
+          "callee": "String",
+          "lineNumber": 33
+        },
+        {
+          "caller": "plannerBlockHref",
+          "callee": "common.toString",
+          "lineNumber": 34
+        },
+        {
+          "caller": "plannerCompletionPercent",
+          "callee": "plan.sessions.reduce",
+          "lineNumber": 38
+        },
+        {
+          "caller": "plannerCompletionPercent",
+          "callee": "plan.sessions.reduce",
+          "lineNumber": 40
+        },
+        {
+          "caller": "plannerCompletionPercent",
+          "callee": "Math.min",
+          "lineNumber": 44
+        },
+        {
+          "caller": "plannerCompletionPercent",
+          "callee": "Math.min",
+          "lineNumber": 48
+        },
+        {
+          "caller": "plannerCompletionPercent",
+          "callee": "Math.round",
+          "lineNumber": 48
+        },
+        {
+          "caller": "saveWithAutomaticReview",
+          "callee": "saveDayPlan",
+          "lineNumber": 52
+        },
+        {
+          "caller": "saveWithAutomaticReview",
+          "callee": "plannerCompletionPercent",
+          "lineNumber": 54
+        },
+        {
+          "caller": "updatePlannerBlockExecution",
+          "callee": "loadDayPlan",
+          "lineNumber": 63
+        },
+        {
+          "caller": "updatePlannerBlockExecution",
+          "callee": "plan.sessions.map",
+          "lineNumber": 66
+        },
+        {
+          "caller": "updatePlannerBlockExecution",
+          "callee": "saveWithAutomaticReview",
+          "lineNumber": 82
+        },
+        {
+          "caller": "markPlannerBlockStarted",
+          "callee": "updatePlannerBlockExecution",
+          "lineNumber": 86
+        },
+        {
+          "caller": "markPlannerBlockStarted",
+          "callee": "nowISO",
+          "lineNumber": 87
+        },
+        {
+          "caller": "markPlannerBlockComplete",
+          "callee": "updatePlannerBlockExecution",
+          "lineNumber": 98
+        },
+        {
+          "caller": "markPlannerBlockComplete",
+          "callee": "nowISO",
+          "lineNumber": 99
+        },
+        {
+          "caller": "markPlannerBlockComplete",
+          "callee": "nowISO",
+          "lineNumber": 100
+        },
+        {
+          "caller": "markPlannerBlockComplete",
+          "callee": "Math.max",
+          "lineNumber": 101
+        },
+        {
+          "caller": "markPlannerBlockComplete",
+          "callee": "Math.round",
+          "lineNumber": 101
+        },
+        {
+          "caller": "reconcilePlannerExecutions",
+          "callee": "Promise.all",
+          "lineNumber": 107
+        },
+        {
+          "caller": "reconcilePlannerExecutions",
+          "callee": "db.sessions.where('user_id').equals(userId).toArray",
+          "lineNumber": 108
+        },
+        {
+          "caller": "reconcilePlannerExecutions",
+          "callee": "db.sessions.where('user_id').equals",
+          "lineNumber": 108
+        },
+        {
+          "caller": "reconcilePlannerExecutions",
+          "callee": "db.sessions.where",
+          "lineNumber": 108
+        },
+        {
+          "caller": "reconcilePlannerExecutions",
+          "callee": "db.mock_tests.where('user_id').equals(userId).toArray",
+          "lineNumber": 109
+        },
+        {
+          "caller": "reconcilePlannerExecutions",
+          "callee": "db.mock_tests.where('user_id').equals",
+          "lineNumber": 109
+        },
+        {
+          "caller": "reconcilePlannerExecutions",
+          "callee": "db.mock_tests.where",
+          "lineNumber": 109
+        },
+        {
+          "caller": "reconcilePlannerExecutions",
+          "callee": "sessions.flatMap",
+          "lineNumber": 112
+        },
+        {
+          "caller": "reconcilePlannerExecutions",
+          "callee": "mocks.flatMap",
+          "lineNumber": 127
+        },
+        {
+          "caller": "reconcilePlannerExecutions",
+          "callee": "loadDayPlan",
+          "lineNumber": 145
+        },
+        {
+          "caller": "reconcilePlannerExecutions",
+          "callee": "plan?.sessions.find",
+          "lineNumber": 146
+        },
+        {
+          "caller": "reconcilePlannerExecutions",
+          "callee": "updatePlannerBlockExecution",
+          "lineNumber": 156
+        }
+      ],
+      "metrics": {
+        "importCount": 3,
+        "exportCount": 6,
+        "functionCount": 9,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/lib/planner-insights.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 237,
+      "nonEmptyLines": 215,
+      "functions": [
+        {
+          "name": "loadAllDayPlans",
+          "startLine": 17,
+          "endLine": 34,
+          "params": []
+        },
+        {
+          "name": "isoNDaysAgo",
+          "startLine": 36,
+          "endLine": 40,
+          "params": [
+            "n"
+          ]
+        },
+        {
+          "name": "inLastNDays",
+          "startLine": 42,
+          "endLine": 44,
+          "params": [
+            "plan",
+            "days"
+          ]
+        },
+        {
+          "name": "rollup",
+          "startLine": 56,
+          "endLine": 86,
+          "params": [
+            "plans"
+          ]
+        },
+        {
+          "name": "toShares",
+          "startLine": 96,
+          "endLine": 106,
+          "params": [
+            "minutesByLabel"
+          ]
+        },
+        {
+          "name": "subjectShare",
+          "startLine": 108,
+          "endLine": 118,
+          "params": [
+            "plans"
+          ]
+        },
+        {
+          "name": "modeShare",
+          "startLine": 120,
+          "endLine": 128,
+          "params": [
+            "plans"
+          ]
+        },
+        {
+          "name": "priorityShare",
+          "startLine": 130,
+          "endLine": 138,
+          "params": [
+            "plans"
+          ]
+        },
+        {
+          "name": "reviewStats",
+          "startLine": 151,
+          "endLine": 183,
+          "params": [
+            "plans"
+          ]
+        },
+        {
+          "name": "neglectedSubjects",
+          "startLine": 189,
+          "endLine": 213,
+          "params": [
+            "plans",
+            "allSubjects",
+            "windowDays",
+            "minMinutes"
+          ]
+        },
+        {
+          "name": "dayTypeShare",
+          "startLine": 217,
+          "endLine": 231,
+          "params": [
+            "plans"
+          ]
+        },
+        {
+          "name": "windowed",
+          "startLine": 235,
+          "endLine": 237,
+          "params": [
+            "plans",
+            "days"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "loadAllDayPlans",
+          "line": 17,
+          "isDefault": false
+        },
+        {
+          "name": "rollup",
+          "line": 56,
+          "isDefault": false
+        },
+        {
+          "name": "subjectShare",
+          "line": 108,
+          "isDefault": false
+        },
+        {
+          "name": "modeShare",
+          "line": 120,
+          "isDefault": false
+        },
+        {
+          "name": "priorityShare",
+          "line": 130,
+          "isDefault": false
+        },
+        {
+          "name": "reviewStats",
+          "line": 151,
+          "isDefault": false
+        },
+        {
+          "name": "neglectedSubjects",
+          "line": 189,
+          "isDefault": false
+        },
+        {
+          "name": "dayTypeShare",
+          "line": 217,
+          "isDefault": false
+        },
+        {
+          "name": "windowed",
+          "line": 235,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "loadAllDayPlans",
+          "callee": "migrateLegacyDayPlans",
+          "lineNumber": 19
+        },
+        {
+          "caller": "loadAllDayPlans",
+          "callee": "dayKeyPrefix",
+          "lineNumber": 20
+        },
+        {
+          "caller": "loadAllDayPlans",
+          "callee": "localStorage.key",
+          "lineNumber": 23
+        },
+        {
+          "caller": "loadAllDayPlans",
+          "callee": "k.startsWith",
+          "lineNumber": 24
+        },
+        {
+          "caller": "loadAllDayPlans",
+          "callee": "k.slice",
+          "lineNumber": 25
+        },
+        {
+          "caller": "loadAllDayPlans",
+          "callee": "/^\\d{4}-\\d{2}-\\d{2}$/.test",
+          "lineNumber": 26
+        },
+        {
+          "caller": "loadAllDayPlans",
+          "callee": "loadDayPlan",
+          "lineNumber": 27
+        },
+        {
+          "caller": "loadAllDayPlans",
+          "callee": "plans.push",
+          "lineNumber": 28
+        },
+        {
+          "caller": "loadAllDayPlans",
+          "callee": "plans.sort",
+          "lineNumber": 33
+        },
+        {
+          "caller": "loadAllDayPlans",
+          "callee": "a.date.localeCompare",
+          "lineNumber": 33
+        },
+        {
+          "caller": "isoNDaysAgo",
+          "callee": "d.setDate",
+          "lineNumber": 38
+        },
+        {
+          "caller": "isoNDaysAgo",
+          "callee": "d.getDate",
+          "lineNumber": 38
+        },
+        {
+          "caller": "isoNDaysAgo",
+          "callee": "d.toISOString().slice",
+          "lineNumber": 39
+        },
+        {
+          "caller": "isoNDaysAgo",
+          "callee": "d.toISOString",
+          "lineNumber": 39
+        },
+        {
+          "caller": "inLastNDays",
+          "callee": "isoNDaysAgo",
+          "lineNumber": 43
+        },
+        {
+          "caller": "rollup",
+          "callee": "Math.round",
+          "lineNumber": 81
+        },
+        {
+          "caller": "rollup",
+          "callee": "Math.round",
+          "lineNumber": 82
+        },
+        {
+          "caller": "rollup",
+          "callee": "Math.round",
+          "lineNumber": 84
+        },
+        {
+          "caller": "toShares",
+          "callee": "Array.from(minutesByLabel.values()).reduce",
+          "lineNumber": 97
+        },
+        {
+          "caller": "toShares",
+          "callee": "Array.from",
+          "lineNumber": 97
+        },
+        {
+          "caller": "toShares",
+          "callee": "minutesByLabel.values",
+          "lineNumber": 97
+        },
+        {
+          "caller": "toShares",
+          "callee": "Array.from(minutesByLabel.entries())\n    .map(([label, min]) => ({\n      label,\n      min,\n      pct: Math.round((min / total) * 100)\n    }))\n    .sort",
+          "lineNumber": 99
+        },
+        {
+          "caller": "toShares",
+          "callee": "Array.from(minutesByLabel.entries())\n    .map",
+          "lineNumber": 99
+        },
+        {
+          "caller": "toShares",
+          "callee": "Array.from",
+          "lineNumber": 99
+        },
+        {
+          "caller": "toShares",
+          "callee": "minutesByLabel.entries",
+          "lineNumber": 99
+        },
+        {
+          "caller": "toShares",
+          "callee": "Math.round",
+          "lineNumber": 103
+        },
+        {
+          "caller": "subjectShare",
+          "callee": "m.set",
+          "lineNumber": 114
+        },
+        {
+          "caller": "subjectShare",
+          "callee": "m.get",
+          "lineNumber": 114
+        },
+        {
+          "caller": "subjectShare",
+          "callee": "toShares",
+          "lineNumber": 117
+        },
+        {
+          "caller": "modeShare",
+          "callee": "m.set",
+          "lineNumber": 124
+        },
+        {
+          "caller": "modeShare",
+          "callee": "m.get",
+          "lineNumber": 124
+        },
+        {
+          "caller": "modeShare",
+          "callee": "toShares",
+          "lineNumber": 127
+        },
+        {
+          "caller": "priorityShare",
+          "callee": "m.set",
+          "lineNumber": 134
+        },
+        {
+          "caller": "priorityShare",
+          "callee": "m.get",
+          "lineNumber": 134
+        },
+        {
+          "caller": "priorityShare",
+          "callee": "toShares",
+          "lineNumber": 137
+        },
+        {
+          "caller": "reviewStats",
+          "callee": "p.review.wentWell.trim",
+          "lineNumber": 161
+        },
+        {
+          "caller": "reviewStats",
+          "callee": "p.review.missed.trim",
+          "lineNumber": 162
+        },
+        {
+          "caller": "reviewStats",
+          "callee": "Math.round",
+          "lineNumber": 177
+        },
+        {
+          "caller": "neglectedSubjects",
+          "callee": "isoNDaysAgo",
+          "lineNumber": 195
+        },
+        {
+          "caller": "neglectedSubjects",
+          "callee": "m.set",
+          "lineNumber": 197
+        },
+        {
+          "caller": "neglectedSubjects",
+          "callee": "m.has",
+          "lineNumber": 205
+        },
+        {
+          "caller": "neglectedSubjects",
+          "callee": "m.set",
+          "lineNumber": 206
+        },
+        {
+          "caller": "neglectedSubjects",
+          "callee": "m.get",
+          "lineNumber": 206
+        },
+        {
+          "caller": "neglectedSubjects",
+          "callee": "Array.from(m.entries())\n    .filter(([label, min]) => label !== 'Custom...' && min < minMinutes)\n    .map(([label, min]) => ({ label, min }))\n    .sort",
+          "lineNumber": 209
+        },
+        {
+          "caller": "neglectedSubjects",
+          "callee": "Array.from(m.entries())\n    .filter(([label, min]) => label !== 'Custom...' && min < minMinutes)\n    .map",
+          "lineNumber": 209
+        },
+        {
+          "caller": "neglectedSubjects",
+          "callee": "Array.from(m.entries())\n    .filter",
+          "lineNumber": 209
+        },
+        {
+          "caller": "neglectedSubjects",
+          "callee": "Array.from",
+          "lineNumber": 209
+        },
+        {
+          "caller": "neglectedSubjects",
+          "callee": "m.entries",
+          "lineNumber": 209
+        },
+        {
+          "caller": "dayTypeShare",
+          "callee": "m.set",
+          "lineNumber": 220
+        },
+        {
+          "caller": "dayTypeShare",
+          "callee": "m.get",
+          "lineNumber": 220
+        },
+        {
+          "caller": "dayTypeShare",
+          "callee": "Array.from(m.entries())\n    .map(([label, count]) => ({\n      label,\n      min: count, // \"min\" repurposed as raw count\n      pct: Math.round((count / total) * 100)\n    }))\n    .sort",
+          "lineNumber": 224
+        },
+        {
+          "caller": "dayTypeShare",
+          "callee": "Array.from(m.entries())\n    .map",
+          "lineNumber": 224
+        },
+        {
+          "caller": "dayTypeShare",
+          "callee": "Array.from",
+          "lineNumber": 224
+        },
+        {
+          "caller": "dayTypeShare",
+          "callee": "m.entries",
+          "lineNumber": 224
+        },
+        {
+          "caller": "dayTypeShare",
+          "callee": "Math.round",
+          "lineNumber": 228
+        },
+        {
+          "caller": "windowed",
+          "callee": "plans.filter",
+          "lineNumber": 236
+        },
+        {
+          "caller": "windowed",
+          "callee": "inLastNDays",
+          "lineNumber": 236
+        }
+      ],
+      "metrics": {
+        "importCount": 1,
+        "exportCount": 9,
+        "functionCount": 12,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/lib/planner-storage.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 278,
+      "nonEmptyLines": 244,
+      "functions": [
+        {
+          "name": "dayKeyPrefix",
+          "startLine": 11,
+          "endLine": 13,
+          "params": []
+        },
+        {
+          "name": "plannerDateFromSearch",
+          "startLine": 15,
+          "endLine": 22,
+          "params": [
+            "search"
+          ]
+        },
+        {
+          "name": "migrateLegacyDayPlans",
+          "startLine": 25,
+          "endLine": 46,
+          "params": []
+        },
+        {
+          "name": "emptyDayPlan",
+          "startLine": 144,
+          "endLine": 175,
+          "params": [
+            "date"
+          ]
+        },
+        {
+          "name": "safeGet",
+          "startLine": 179,
+          "endLine": 187,
+          "params": [
+            "key"
+          ]
+        },
+        {
+          "name": "safeSet",
+          "startLine": 189,
+          "endLine": 195,
+          "params": [
+            "key",
+            "value"
+          ]
+        },
+        {
+          "name": "keyFor",
+          "startLine": 197,
+          "endLine": 199,
+          "params": [
+            "date"
+          ]
+        },
+        {
+          "name": "loadDayPlan",
+          "startLine": 201,
+          "endLine": 204,
+          "params": [
+            "date"
+          ]
+        },
+        {
+          "name": "loadAllDayPlans",
+          "startLine": 207,
+          "endLine": 222,
+          "params": [
+            "userId"
+          ]
+        },
+        {
+          "name": "saveDayPlan",
+          "startLine": 224,
+          "endLine": 228,
+          "params": [
+            "plan"
+          ]
+        },
+        {
+          "name": "cacheDayPlan",
+          "startLine": 231,
+          "endLine": 233,
+          "params": [
+            "plan"
+          ]
+        },
+        {
+          "name": "deleteDayPlan",
+          "startLine": 235,
+          "endLine": 241,
+          "params": [
+            "date"
+          ]
+        },
+        {
+          "name": "loadPlanIndexForMonth",
+          "startLine": 246,
+          "endLine": 260,
+          "params": [
+            "year",
+            "monthIndex"
+          ]
+        },
+        {
+          "name": "summarize",
+          "startLine": 268,
+          "endLine": 278,
+          "params": [
+            "plan"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "dayKeyPrefix",
+          "line": 11,
+          "isDefault": false
+        },
+        {
+          "name": "plannerDateFromSearch",
+          "line": 15,
+          "isDefault": false
+        },
+        {
+          "name": "migrateLegacyDayPlans",
+          "line": 25,
+          "isDefault": false
+        },
+        {
+          "name": "emptyDayPlan",
+          "line": 144,
+          "isDefault": false
+        },
+        {
+          "name": "keyFor",
+          "line": 197,
+          "isDefault": false
+        },
+        {
+          "name": "loadDayPlan",
+          "line": 201,
+          "isDefault": false
+        },
+        {
+          "name": "loadAllDayPlans",
+          "line": 207,
+          "isDefault": false
+        },
+        {
+          "name": "saveDayPlan",
+          "line": 224,
+          "isDefault": false
+        },
+        {
+          "name": "cacheDayPlan",
+          "line": 231,
+          "isDefault": false
+        },
+        {
+          "name": "deleteDayPlan",
+          "line": 235,
+          "isDefault": false
+        },
+        {
+          "name": "loadPlanIndexForMonth",
+          "line": 246,
+          "isDefault": false
+        },
+        {
+          "name": "summarize",
+          "line": 268,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "dayKeyPrefix",
+          "callee": "currentUserId",
+          "lineNumber": 12
+        },
+        {
+          "caller": "plannerDateFromSearch",
+          "callee": "new URLSearchParams(search).get",
+          "lineNumber": 16
+        },
+        {
+          "caller": "plannerDateFromSearch",
+          "callee": "/^\\d{4}-\\d{2}-\\d{2}$/.test",
+          "lineNumber": 17
+        },
+        {
+          "caller": "plannerDateFromSearch",
+          "callee": "Number.isNaN",
+          "lineNumber": 19
+        },
+        {
+          "caller": "plannerDateFromSearch",
+          "callee": "parsed.getTime",
+          "lineNumber": 19
+        },
+        {
+          "caller": "plannerDateFromSearch",
+          "callee": "parsed.toISOString().slice",
+          "lineNumber": 19
+        },
+        {
+          "caller": "plannerDateFromSearch",
+          "callee": "parsed.toISOString",
+          "lineNumber": 19
+        },
+        {
+          "caller": "migrateLegacyDayPlans",
+          "callee": "currentUserId",
+          "lineNumber": 26
+        },
+        {
+          "caller": "migrateLegacyDayPlans",
+          "callee": "localStorage.key",
+          "lineNumber": 30
+        },
+        {
+          "caller": "migrateLegacyDayPlans",
+          "callee": "key?.startsWith",
+          "lineNumber": 31
+        },
+        {
+          "caller": "migrateLegacyDayPlans",
+          "callee": "legacyKeys.push",
+          "lineNumber": 31
+        },
+        {
+          "caller": "migrateLegacyDayPlans",
+          "callee": "legacyKey.slice",
+          "lineNumber": 34
+        },
+        {
+          "caller": "migrateLegacyDayPlans",
+          "callee": "/^\\d{4}-\\d{2}-\\d{2}$/.test",
+          "lineNumber": 35
+        },
+        {
+          "caller": "migrateLegacyDayPlans",
+          "callee": "dayKeyPrefix",
+          "lineNumber": 36
+        },
+        {
+          "caller": "migrateLegacyDayPlans",
+          "callee": "localStorage.getItem",
+          "lineNumber": 37
+        },
+        {
+          "caller": "migrateLegacyDayPlans",
+          "callee": "localStorage.getItem",
+          "lineNumber": 38
+        },
+        {
+          "caller": "migrateLegacyDayPlans",
+          "callee": "localStorage.setItem",
+          "lineNumber": 39
+        },
+        {
+          "caller": "migrateLegacyDayPlans",
+          "callee": "localStorage.removeItem",
+          "lineNumber": 41
+        },
+        {
+          "caller": "emptyDayPlan",
+          "callee": "new Date().toISOString",
+          "lineNumber": 173
+        },
+        {
+          "caller": "safeGet",
+          "callee": "localStorage.getItem",
+          "lineNumber": 181
+        },
+        {
+          "caller": "safeGet",
+          "callee": "JSON.parse",
+          "lineNumber": 183
+        },
+        {
+          "caller": "safeSet",
+          "callee": "localStorage.setItem",
+          "lineNumber": 191
+        },
+        {
+          "caller": "safeSet",
+          "callee": "JSON.stringify",
+          "lineNumber": 191
+        },
+        {
+          "caller": "keyFor",
+          "callee": "dayKeyPrefix",
+          "lineNumber": 198
+        },
+        {
+          "caller": "loadDayPlan",
+          "callee": "migrateLegacyDayPlans",
+          "lineNumber": 202
+        },
+        {
+          "caller": "loadDayPlan",
+          "callee": "safeGet",
+          "lineNumber": 203
+        },
+        {
+          "caller": "loadDayPlan",
+          "callee": "keyFor",
+          "lineNumber": 203
+        },
+        {
+          "caller": "loadAllDayPlans",
+          "callee": "localStorage.key",
+          "lineNumber": 212
+        },
+        {
+          "caller": "loadAllDayPlans",
+          "callee": "key?.startsWith",
+          "lineNumber": 213
+        },
+        {
+          "caller": "loadAllDayPlans",
+          "callee": "key.slice",
+          "lineNumber": 214
+        },
+        {
+          "caller": "loadAllDayPlans",
+          "callee": "safeGet",
+          "lineNumber": 215
+        },
+        {
+          "caller": "loadAllDayPlans",
+          "callee": "Array.isArray",
+          "lineNumber": 216
+        },
+        {
+          "caller": "loadAllDayPlans",
+          "callee": "plans.push",
+          "lineNumber": 216
+        },
+        {
+          "caller": "loadAllDayPlans",
+          "callee": "plans.sort",
+          "lineNumber": 221
+        },
+        {
+          "caller": "loadAllDayPlans",
+          "callee": "a.date.localeCompare",
+          "lineNumber": 221
+        },
+        {
+          "caller": "saveDayPlan",
+          "callee": "new Date().toISOString",
+          "lineNumber": 225
+        },
+        {
+          "caller": "saveDayPlan",
+          "callee": "safeSet",
+          "lineNumber": 226
+        },
+        {
+          "caller": "saveDayPlan",
+          "callee": "keyFor",
+          "lineNumber": 226
+        },
+        {
+          "caller": "cacheDayPlan",
+          "callee": "safeSet",
+          "lineNumber": 232
+        },
+        {
+          "caller": "cacheDayPlan",
+          "callee": "keyFor",
+          "lineNumber": 232
+        },
+        {
+          "caller": "deleteDayPlan",
+          "callee": "localStorage.removeItem",
+          "lineNumber": 237
+        },
+        {
+          "caller": "deleteDayPlan",
+          "callee": "keyFor",
+          "lineNumber": 237
+        },
+        {
+          "caller": "loadPlanIndexForMonth",
+          "callee": "migrateLegacyDayPlans",
+          "lineNumber": 248
+        },
+        {
+          "caller": "loadPlanIndexForMonth",
+          "callee": "dayKeyPrefix",
+          "lineNumber": 249
+        },
+        {
+          "caller": "loadPlanIndexForMonth",
+          "callee": "String(monthIndex + 1).padStart",
+          "lineNumber": 249
+        },
+        {
+          "caller": "loadPlanIndexForMonth",
+          "callee": "String",
+          "lineNumber": 249
+        },
+        {
+          "caller": "loadPlanIndexForMonth",
+          "callee": "localStorage.key",
+          "lineNumber": 252
+        },
+        {
+          "caller": "loadPlanIndexForMonth",
+          "callee": "k.startsWith",
+          "lineNumber": 254
+        },
+        {
+          "caller": "loadPlanIndexForMonth",
+          "callee": "set.add",
+          "lineNumber": 254
+        },
+        {
+          "caller": "loadPlanIndexForMonth",
+          "callee": "k.slice",
+          "lineNumber": 254
+        },
+        {
+          "caller": "loadPlanIndexForMonth",
+          "callee": "dayKeyPrefix",
+          "lineNumber": 254
+        },
+        {
+          "caller": "summarize",
+          "callee": "subjects.includes",
+          "lineNumber": 274
+        },
+        {
+          "caller": "summarize",
+          "callee": "subjects.push",
+          "lineNumber": 274
+        }
+      ],
+      "metrics": {
+        "importCount": 1,
+        "exportCount": 12,
+        "functionCount": 14,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/pages/DoNow.tsx",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 167,
+      "nonEmptyLines": 158,
+      "functions": [
+        {
+          "name": "DoNow",
+          "startLine": 25,
+          "endLine": 167,
+          "params": []
+        }
+      ],
+      "exports": [
+        {
+          "name": "DoNow",
+          "line": 25,
+          "isDefault": true
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "DoNow",
+          "callee": "useAuth",
+          "lineNumber": 26
+        },
+        {
+          "caller": "DoNow",
+          "callee": "useNavigate",
+          "lineNumber": 27
+        },
+        {
+          "caller": "DoNow",
+          "callee": "todayISOInTimeZone",
+          "lineNumber": 28
+        },
+        {
+          "caller": "DoNow",
+          "callee": "useState",
+          "lineNumber": 29
+        },
+        {
+          "caller": "DoNow",
+          "callee": "useLiveQuery",
+          "lineNumber": 30
+        },
+        {
+          "caller": "DoNow",
+          "callee": "db.reattempts.where('user_id').equals(userId).toArray",
+          "lineNumber": 31
+        },
+        {
+          "caller": "DoNow",
+          "callee": "db.reattempts.where('user_id').equals",
+          "lineNumber": 31
+        },
+        {
+          "caller": "DoNow",
+          "callee": "db.reattempts.where",
+          "lineNumber": 31
+        },
+        {
+          "caller": "DoNow",
+          "callee": "useLiveQuery",
+          "lineNumber": 35
+        },
+        {
+          "caller": "DoNow",
+          "callee": "db.questions.where('user_id').equals(userId).toArray",
+          "lineNumber": 36
+        },
+        {
+          "caller": "DoNow",
+          "callee": "db.questions.where('user_id').equals",
+          "lineNumber": 36
+        },
+        {
+          "caller": "DoNow",
+          "callee": "db.questions.where",
+          "lineNumber": 36
+        },
+        {
+          "caller": "DoNow",
+          "callee": "useLiveQuery",
+          "lineNumber": 40
+        },
+        {
+          "caller": "DoNow",
+          "callee": "db.pyq_attempts.where('user_id').equals(userId).toArray",
+          "lineNumber": 41
+        },
+        {
+          "caller": "DoNow",
+          "callee": "db.pyq_attempts.where('user_id').equals",
+          "lineNumber": 41
+        },
+        {
+          "caller": "DoNow",
+          "callee": "db.pyq_attempts.where",
+          "lineNumber": 41
+        },
+        {
+          "caller": "DoNow",
+          "callee": "useLiveQuery",
+          "lineNumber": 45
+        },
+        {
+          "caller": "DoNow",
+          "callee": "db.formulas.where('user_id').equals(userId).toArray",
+          "lineNumber": 46
+        },
+        {
+          "caller": "DoNow",
+          "callee": "db.formulas.where('user_id').equals",
+          "lineNumber": 46
+        },
+        {
+          "caller": "DoNow",
+          "callee": "db.formulas.where",
+          "lineNumber": 46
+        },
+        {
+          "caller": "DoNow",
+          "callee": "useEffect",
+          "lineNumber": 51
+        },
+        {
+          "caller": "DoNow",
+          "callee": "reconcilePlannerExecutions(userId)\n      .then((changed) => {\n        if (changed > 0) setPlanRevision((value) => value + 1);\n      })\n      .catch",
+          "lineNumber": 53
+        },
+        {
+          "caller": "DoNow",
+          "callee": "reconcilePlannerExecutions(userId)\n      .then",
+          "lineNumber": 53
+        },
+        {
+          "caller": "DoNow",
+          "callee": "reconcilePlannerExecutions",
+          "lineNumber": 53
+        },
+        {
+          "caller": "DoNow",
+          "callee": "setPlanRevision",
+          "lineNumber": 55
+        },
+        {
+          "caller": "DoNow",
+          "callee": "useMemo",
+          "lineNumber": 60
+        },
+        {
+          "caller": "DoNow",
+          "callee": "loadDayPlan",
+          "lineNumber": 62
+        },
+        {
+          "caller": "DoNow",
+          "callee": "useMemo",
+          "lineNumber": 64
+        },
+        {
+          "caller": "DoNow",
+          "callee": "buildDoNowQueue",
+          "lineNumber": 65
+        },
+        {
+          "caller": "start",
+          "callee": "item.id.slice",
+          "lineNumber": 71
+        },
+        {
+          "caller": "start",
+          "callee": "markPlannerBlockStarted",
+          "lineNumber": 72
+        },
+        {
+          "caller": "start",
+          "callee": "navigate",
+          "lineNumber": 74
+        },
+        {
+          "caller": "DoNow",
+          "callee": "start",
+          "lineNumber": 101
+        },
+        {
+          "caller": "DoNow",
+          "callee": "queue.map",
+          "lineNumber": 108
+        },
+        {
+          "caller": "DoNow",
+          "callee": "String(index + 1).padStart",
+          "lineNumber": 115
+        },
+        {
+          "caller": "DoNow",
+          "callee": "String",
+          "lineNumber": 115
+        },
+        {
+          "caller": "DoNow",
+          "callee": "start",
+          "lineNumber": 135
+        },
+        {
+          "caller": "DoNow",
+          "callee": "navigate",
+          "lineNumber": 149
+        },
+        {
+          "caller": "DoNow",
+          "callee": "navigate",
+          "lineNumber": 152
+        }
+      ],
+      "metrics": {
+        "importCount": 10,
+        "exportCount": 1,
+        "functionCount": 1,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/pages/Planner.tsx",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 366,
+      "nonEmptyLines": 336,
+      "functions": [
+        {
+          "name": "todayLocalISO",
+          "startLine": 49,
+          "endLine": 54,
+          "params": [
+            "d"
+          ]
+        },
+        {
+          "name": "persistCloudPlan",
+          "startLine": 56,
+          "endLine": 59,
+          "params": [
+            "userId",
+            "plan"
+          ]
+        },
+        {
+          "name": "Planner",
+          "startLine": 61,
+          "endLine": 366,
+          "params": []
+        }
+      ],
+      "exports": [
+        {
+          "name": "Planner",
+          "line": 61,
+          "isDefault": true
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "todayLocalISO",
+          "callee": "d.getFullYear",
+          "lineNumber": 50
+        },
+        {
+          "caller": "todayLocalISO",
+          "callee": "String(d.getMonth() + 1).padStart",
+          "lineNumber": 51
+        },
+        {
+          "caller": "todayLocalISO",
+          "callee": "String",
+          "lineNumber": 51
+        },
+        {
+          "caller": "todayLocalISO",
+          "callee": "d.getMonth",
+          "lineNumber": 51
+        },
+        {
+          "caller": "todayLocalISO",
+          "callee": "String(d.getDate()).padStart",
+          "lineNumber": 52
+        },
+        {
+          "caller": "todayLocalISO",
+          "callee": "String",
+          "lineNumber": 52
+        },
+        {
+          "caller": "todayLocalISO",
+          "callee": "d.getDate",
+          "lineNumber": 52
+        },
+        {
+          "caller": "persistCloudPlan",
+          "callee": "deleteCloudDayPlan",
+          "lineNumber": 57
+        },
+        {
+          "caller": "persistCloudPlan",
+          "callee": "saveCloudDayPlan",
+          "lineNumber": 58
+        },
+        {
+          "caller": "Planner",
+          "callee": "useNavigate",
+          "lineNumber": 62
+        },
+        {
+          "caller": "Planner",
+          "callee": "useMemo",
+          "lineNumber": 63
+        },
+        {
+          "caller": "Planner",
+          "callee": "todayLocalISO",
+          "lineNumber": 64
+        },
+        {
+          "caller": "Planner",
+          "callee": "useMemo",
+          "lineNumber": 65
+        },
+        {
+          "caller": "Planner",
+          "callee": "plannerDateFromSearch",
+          "lineNumber": 65
+        },
+        {
+          "caller": "Planner",
+          "callee": "useMemo",
+          "lineNumber": 66
+        },
+        {
+          "caller": "Planner",
+          "callee": "through.setDate",
+          "lineNumber": 68
+        },
+        {
+          "caller": "Planner",
+          "callee": "through.getDate",
+          "lineNumber": 68
+        },
+        {
+          "caller": "Planner",
+          "callee": "todayLocalISO",
+          "lineNumber": 69
+        },
+        {
+          "caller": "Planner",
+          "callee": "useUiStore",
+          "lineNumber": 71
+        },
+        {
+          "caller": "Planner",
+          "callee": "useAuthStore",
+          "lineNumber": 72
+        },
+        {
+          "caller": "Planner",
+          "callee": "useAuthStore",
+          "lineNumber": 73
+        },
+        {
+          "caller": "Planner",
+          "callee": "deepLinkedDateValue.getUTCFullYear",
+          "lineNumber": 77
+        },
+        {
+          "caller": "Planner",
+          "callee": "Math.max",
+          "lineNumber": 78
+        },
+        {
+          "caller": "Planner",
+          "callee": "today.getFullYear",
+          "lineNumber": 78
+        },
+        {
+          "caller": "Planner",
+          "callee": "deepLinkedDateValue.getUTCMonth",
+          "lineNumber": 80
+        },
+        {
+          "caller": "Planner",
+          "callee": "today.getFullYear",
+          "lineNumber": 81
+        },
+        {
+          "caller": "Planner",
+          "callee": "Math.max",
+          "lineNumber": 82
+        },
+        {
+          "caller": "Planner",
+          "callee": "today.getMonth",
+          "lineNumber": 82
+        },
+        {
+          "caller": "Planner",
+          "callee": "today.getMonth",
+          "lineNumber": 83
+        },
+        {
+          "caller": "Planner",
+          "callee": "useState",
+          "lineNumber": 85
+        },
+        {
+          "caller": "Planner",
+          "callee": "useState",
+          "lineNumber": 86
+        },
+        {
+          "caller": "Planner",
+          "callee": "useState",
+          "lineNumber": 87
+        },
+        {
+          "caller": "Planner",
+          "callee": "useState",
+          "lineNumber": 88
+        },
+        {
+          "caller": "Planner",
+          "callee": "loadDayPlan",
+          "lineNumber": 89
+        },
+        {
+          "caller": "Planner",
+          "callee": "emptyDayPlan",
+          "lineNumber": 89
+        },
+        {
+          "caller": "Planner",
+          "callee": "useState",
+          "lineNumber": 93
+        },
+        {
+          "caller": "Planner",
+          "callee": "useRef",
+          "lineNumber": 94
+        },
+        {
+          "caller": "Planner",
+          "callee": "useRef",
+          "lineNumber": 95
+        },
+        {
+          "caller": "Planner",
+          "callee": "useRef",
+          "lineNumber": 96
+        },
+        {
+          "caller": "Planner",
+          "callee": "useRef",
+          "lineNumber": 97
+        },
+        {
+          "caller": "Planner",
+          "callee": "useEffect",
+          "lineNumber": 99
+        },
+        {
+          "caller": "Planner",
+          "callee": "reconcilePlannerExecutions(userId).then((changed) => {\n      if (changed > 0) {\n        setRevision((value) => value + 1);\n        setOpenPlan((current) => (current ? loadDayPlan(current.date) ?? current : current));\n      }\n    }).catch",
+          "lineNumber": 101
+        },
+        {
+          "caller": "Planner",
+          "callee": "reconcilePlannerExecutions(userId).then",
+          "lineNumber": 101
+        },
+        {
+          "caller": "Planner",
+          "callee": "reconcilePlannerExecutions",
+          "lineNumber": 101
+        },
+        {
+          "caller": "Planner",
+          "callee": "setRevision",
+          "lineNumber": 103
+        },
+        {
+          "caller": "Planner",
+          "callee": "setOpenPlan",
+          "lineNumber": 104
+        },
+        {
+          "caller": "Planner",
+          "callee": "loadDayPlan",
+          "lineNumber": 104
+        },
+        {
+          "caller": "Planner",
+          "callee": "useEffect",
+          "lineNumber": 109
+        },
+        {
+          "caller": "Planner",
+          "callee": "window.clearTimeout",
+          "lineNumber": 111
+        },
+        {
+          "caller": "Planner",
+          "callee": "persistCloudPlan",
+          "lineNumber": 113
+        },
+        {
+          "caller": "Planner",
+          "callee": "useEffect",
+          "lineNumber": 117
+        },
+        {
+          "caller": "Planner",
+          "callee": "loadAllDayPlans()\n      .filter((plan) => plan.date >= todayISO && plan.sessions.length > 0)\n      .slice",
+          "lineNumber": 120
+        },
+        {
+          "caller": "Planner",
+          "callee": "loadAllDayPlans()\n      .filter",
+          "lineNumber": 120
+        },
+        {
+          "caller": "Planner",
+          "callee": "loadAllDayPlans",
+          "lineNumber": 120
+        },
+        {
+          "caller": "Planner",
+          "callee": "loadCloudDayPlans(userId, todayISO, upcomingThroughISO).then",
+          "lineNumber": 124
+        },
+        {
+          "caller": "Planner",
+          "callee": "loadCloudDayPlans",
+          "lineNumber": 124
+        },
+        {
+          "caller": "Planner",
+          "callee": "localUpcoming.map",
+          "lineNumber": 127
+        },
+        {
+          "caller": "Planner",
+          "callee": "remotePlans.map",
+          "lineNumber": 128
+        },
+        {
+          "caller": "Planner",
+          "callee": "localByDate.keys",
+          "lineNumber": 129
+        },
+        {
+          "caller": "Planner",
+          "callee": "remoteByDate.keys",
+          "lineNumber": 129
+        },
+        {
+          "caller": "Planner",
+          "callee": "Promise.all",
+          "lineNumber": 131
+        },
+        {
+          "caller": "Planner",
+          "callee": "[...dates].map",
+          "lineNumber": 132
+        },
+        {
+          "caller": "Planner",
+          "callee": "localByDate.get",
+          "lineNumber": 133
+        },
+        {
+          "caller": "Planner",
+          "callee": "loadDayPlan",
+          "lineNumber": 133
+        },
+        {
+          "caller": "Planner",
+          "callee": "remoteByDate.get",
+          "lineNumber": 134
+        },
+        {
+          "caller": "Planner",
+          "callee": "cacheDayPlan",
+          "lineNumber": 137
+        },
+        {
+          "caller": "Planner",
+          "callee": "emptyDayPlan",
+          "lineNumber": 138
+        },
+        {
+          "caller": "Planner",
+          "callee": "Date.parse",
+          "lineNumber": 145
+        },
+        {
+          "caller": "Planner",
+          "callee": "Date.parse",
+          "lineNumber": 146
+        },
+        {
+          "caller": "Planner",
+          "callee": "saveCloudDayPlan",
+          "lineNumber": 148
+        },
+        {
+          "caller": "Planner",
+          "callee": "cacheDayPlan",
+          "lineNumber": 155
+        },
+        {
+          "caller": "Planner",
+          "callee": "changed.some",
+          "lineNumber": 163
+        },
+        {
+          "caller": "Planner",
+          "callee": "setRevision",
+          "lineNumber": 163
+        },
+        {
+          "caller": "Planner",
+          "callee": "loadDayPlan",
+          "lineNumber": 165
+        },
+        {
+          "caller": "Planner",
+          "callee": "setOpenPlan",
+          "lineNumber": 167
+        },
+        {
+          "caller": "Planner",
+          "callee": "useMemo",
+          "lineNumber": 178
+        },
+        {
+          "caller": "Planner",
+          "callee": "loadPlanIndexForMonth",
+          "lineNumber": 180
+        },
+        {
+          "caller": "Planner",
+          "callee": "idx.forEach",
+          "lineNumber": 182
+        },
+        {
+          "caller": "Planner",
+          "callee": "loadDayPlan",
+          "lineNumber": 183
+        },
+        {
+          "caller": "Planner",
+          "callee": "map.set",
+          "lineNumber": 184
+        },
+        {
+          "caller": "Planner",
+          "callee": "summarize",
+          "lineNumber": 184
+        },
+        {
+          "caller": "Planner",
+          "callee": "useCallback",
+          "lineNumber": 189
+        },
+        {
+          "caller": "Planner",
+          "callee": "setMonthIndex",
+          "lineNumber": 190
+        },
+        {
+          "caller": "Planner",
+          "callee": "setYear",
+          "lineNumber": 193
+        },
+        {
+          "caller": "Planner",
+          "callee": "useCallback",
+          "lineNumber": 200
+        },
+        {
+          "caller": "Planner",
+          "callee": "setMonthIndex",
+          "lineNumber": 201
+        },
+        {
+          "caller": "Planner",
+          "callee": "setYear",
+          "lineNumber": 203
+        },
+        {
+          "caller": "queuePlanSync",
+          "callee": "persistCloudPlan",
+          "lineNumber": 214
+        },
+        {
+          "caller": "queuePlanSync",
+          "callee": "window.clearTimeout",
+          "lineNumber": 221
+        },
+        {
+          "caller": "queuePlanSync",
+          "callee": "window.setTimeout",
+          "lineNumber": 222
+        },
+        {
+          "caller": "queuePlanSync",
+          "callee": "persistCloudPlan",
+          "lineNumber": 227
+        },
+        {
+          "caller": "queuePlanSync",
+          "callee": "pushToast",
+          "lineNumber": 230
+        },
+        {
+          "caller": "openDate",
+          "callee": "loadDayPlan",
+          "lineNumber": 238
+        },
+        {
+          "caller": "openDate",
+          "callee": "setSelectedDate",
+          "lineNumber": 240
+        },
+        {
+          "caller": "openDate",
+          "callee": "setOpenPlan",
+          "lineNumber": 241
+        },
+        {
+          "caller": "openDate",
+          "callee": "emptyDayPlan",
+          "lineNumber": 241
+        },
+        {
+          "caller": "openDate",
+          "callee": "loadCloudDayPlan(userId, iso).then",
+          "lineNumber": 244
+        },
+        {
+          "caller": "openDate",
+          "callee": "loadCloudDayPlan",
+          "lineNumber": 244
+        },
+        {
+          "caller": "openDate",
+          "callee": "loadDayPlan",
+          "lineNumber": 247
+        },
+        {
+          "caller": "openDate",
+          "callee": "queuePlanSync",
+          "lineNumber": 249
+        },
+        {
+          "caller": "openDate",
+          "callee": "Date.parse",
+          "lineNumber": 253
+        },
+        {
+          "caller": "openDate",
+          "callee": "Date.parse",
+          "lineNumber": 254
+        },
+        {
+          "caller": "openDate",
+          "callee": "queuePlanSync",
+          "lineNumber": 256
+        },
+        {
+          "caller": "openDate",
+          "callee": "emptyDayPlan",
+          "lineNumber": 261
+        },
+        {
+          "caller": "openDate",
+          "callee": "cacheDayPlan",
+          "lineNumber": 265
+        },
+        {
+          "caller": "openDate",
+          "callee": "setOpenPlan",
+          "lineNumber": 266
+        },
+        {
+          "caller": "openDate",
+          "callee": "setRevision",
+          "lineNumber": 267
+        },
+        {
+          "caller": "closeModal",
+          "callee": "setSelectedDate",
+          "lineNumber": 273
+        },
+        {
+          "caller": "closeModal",
+          "callee": "setOpenPlan",
+          "lineNumber": 274
+        },
+        {
+          "caller": "onChangePlan",
+          "callee": "saveDayPlan",
+          "lineNumber": 278
+        },
+        {
+          "caller": "onChangePlan",
+          "callee": "setOpenPlan",
+          "lineNumber": 279
+        },
+        {
+          "caller": "onChangePlan",
+          "callee": "queuePlanSync",
+          "lineNumber": 280
+        },
+        {
+          "caller": "onChangePlan",
+          "callee": "setRevision",
+          "lineNumber": 281
+        },
+        {
+          "caller": "onDeletePlan",
+          "callee": "window.clearTimeout",
+          "lineNumber": 287
+        },
+        {
+          "caller": "onDeletePlan",
+          "callee": "deleteDayPlan",
+          "lineNumber": 290
+        },
+        {
+          "caller": "onDeletePlan",
+          "callee": "deleteCloudDayPlan(userId, selectedDate).then",
+          "lineNumber": 292
+        },
+        {
+          "caller": "onDeletePlan",
+          "callee": "deleteCloudDayPlan",
+          "lineNumber": 292
+        },
+        {
+          "caller": "onDeletePlan",
+          "callee": "pushToast",
+          "lineNumber": 293
+        },
+        {
+          "caller": "onDeletePlan",
+          "callee": "setRevision",
+          "lineNumber": 296
+        },
+        {
+          "caller": "onDeletePlan",
+          "callee": "closeModal",
+          "lineNumber": 297
+        },
+        {
+          "caller": "onDeletePlan",
+          "callee": "pushToast",
+          "lineNumber": 298
+        },
+        {
+          "caller": "startBlock",
+          "callee": "markPlannerBlockStarted",
+          "lineNumber": 303
+        },
+        {
+          "caller": "startBlock",
+          "callee": "setOpenPlan",
+          "lineNumber": 305
+        },
+        {
+          "caller": "startBlock",
+          "callee": "queuePlanSync",
+          "lineNumber": 306
+        },
+        {
+          "caller": "startBlock",
+          "callee": "setRevision",
+          "lineNumber": 307
+        },
+        {
+          "caller": "startBlock",
+          "callee": "plannerBlockHref",
+          "lineNumber": 309
+        },
+        {
+          "caller": "startBlock",
+          "callee": "closeModal",
+          "lineNumber": 310
+        },
+        {
+          "caller": "startBlock",
+          "callee": "navigate",
+          "lineNumber": 311
+        },
+        {
+          "caller": "completeBlock",
+          "callee": "markPlannerBlockComplete",
+          "lineNumber": 316
+        },
+        {
+          "caller": "completeBlock",
+          "callee": "setOpenPlan",
+          "lineNumber": 318
+        },
+        {
+          "caller": "completeBlock",
+          "callee": "queuePlanSync",
+          "lineNumber": 319
+        },
+        {
+          "caller": "completeBlock",
+          "callee": "setRevision",
+          "lineNumber": 320
+        }
+      ],
+      "metrics": {
+        "importCount": 11,
+        "exportCount": 1,
+        "functionCount": 3,
+        "classCount": 0
+      }
+    }
+  ]
+}

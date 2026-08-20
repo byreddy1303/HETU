@@ -1,0 +1,14 @@
+{
+  "projectRoot": "/Users/bkalyankrishnareddy/Desktop/GATE PREP/hetu",
+  "batchFiles": [
+    {
+      "path": "supabase/migrations/20260813000006_go_classes_coa_topic_test_2_answer_free_reattempts.sql",
+      "language": "sql",
+      "sizeLines": 87,
+      "fileCategory": "data"
+    }
+  ],
+  "batchImportData": {
+    "supabase/migrations/20260813000006_go_classes_coa_topic_test_2_answer_free_reattempts.sql": []
+  }
+}

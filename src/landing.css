@@ -1797,6 +1797,443 @@ html[data-theme='dark'] .landing-page {
   }
 }
 
+/* Android app composition. Every rule is gated by Capacitor's native hook so
+   the public desktop and mobile-web landing page keep their existing layout. */
+html[data-native='android'] .landing-page {
+  min-height: calc(100dvh - var(--safe-top) - var(--safe-bottom));
+  overscroll-behavior-y: none;
+}
+
+/* On the narrow native canvas the desktop thread crosses the content. Replace
+   it with a quiet notebook-margin trace that never competes with the copy. */
+html[data-native='android'] .landing-causal-thread {
+  display: none;
+}
+
+html[data-native='android'] .landing-page::after {
+  content: '';
+  position: absolute;
+  inset: 0 auto 0 12px;
+  z-index: 1;
+  width: 1px;
+  pointer-events: none;
+  opacity: 0.2;
+  background-image: linear-gradient(
+    to bottom,
+    var(--landing-garnet) 0 34%,
+    transparent 34% 100%
+  );
+  background-size: 1px 11px;
+}
+
+html[data-native='android'] .landing-nav {
+  top: var(--safe-top);
+  right: var(--safe-right);
+  left: var(--safe-left);
+  grid-template-columns: 1fr auto;
+  height: 60px;
+  gap: 12px;
+  padding: 0 16px;
+  border-radius: 0 0 16px 16px;
+  background: color-mix(in srgb, var(--landing-paper) 94%, transparent);
+  box-shadow: 0 10px 28px -24px color-mix(in srgb, var(--landing-ink) 65%, transparent);
+  backdrop-filter: blur(18px) saturate(1.15);
+}
+
+html[data-native='android'] .landing-nav__brand {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+}
+
+html[data-native='android'] .landing-nav__actions {
+  gap: 8px;
+}
+
+html[data-native='android'] .landing-nav-cta,
+html[data-native='android'] .landing-theme-toggle,
+html[data-native='android'] .landing-nav__actions > .landing-countdown {
+  display: none !important;
+}
+
+html[data-native='android'] .landing-sign-in {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid color-mix(in srgb, var(--landing-garnet) 28%, transparent);
+  border-radius: 999px;
+  padding: 0 16px;
+  color: var(--landing-garnet);
+  background: color-mix(in srgb, var(--landing-paper-raised) 82%, transparent);
+  font-size: 10px;
+}
+
+html[data-native='android'] .landing-sign-in::after {
+  display: none;
+}
+
+html[data-native='android'] .landing-hero {
+  min-height: max(700px, calc(100svh - var(--safe-top) - var(--safe-bottom)));
+  padding: 92px 20px 70px;
+}
+
+html[data-native='android'] .landing-hero__grid {
+  opacity: 0.42;
+  background-size: 44px 44px;
+  mask-image: radial-gradient(ellipse 96% 72% at 50% 42%, black 8%, transparent 76%);
+}
+
+html[data-native='android'] .landing-hero__glow {
+  top: 41%;
+  width: 132vw;
+  opacity: 0.68;
+  transform: translate(-50%, -50%) !important;
+  filter: blur(28px);
+  transition: none;
+}
+
+html[data-native='android'] .landing-evidence-field {
+  display: none;
+}
+
+html[data-native='android'] .landing-hero__content {
+  width: 100%;
+  max-width: 430px;
+  transform: none !important;
+  opacity: 1 !important;
+}
+
+html[data-native='android'] .landing-hero__mark-wrap {
+  width: 60px;
+  height: 60px;
+  margin-bottom: 18px;
+}
+
+html[data-native='android'] .landing-hero__mark {
+  width: 49px;
+}
+
+html[data-native='android'] .landing-kicker {
+  max-width: 310px;
+  font-size: 9px;
+  line-height: 1.55;
+  letter-spacing: 0.13em;
+}
+
+html[data-native='android'] .landing-hero h1 {
+  max-width: 390px;
+  margin-top: 14px;
+  font-size: clamp(45px, 13.8vw, 59px);
+  line-height: 0.91;
+  letter-spacing: -0.061em;
+  text-wrap: balance;
+}
+
+html[data-native='android'] .landing-hero__lede {
+  max-width: 350px;
+  margin-top: 22px;
+  color: color-mix(in srgb, var(--landing-ink) 72%, transparent);
+  font-size: 14px;
+  line-height: 1.58;
+}
+
+html[data-native='android'] .landing-hero__actions,
+html[data-native='android'] .landing-final__actions {
+  width: 100%;
+  gap: 12px;
+  margin-top: 26px;
+}
+
+html[data-native='android'] .landing-primary-cta {
+  width: 100%;
+  max-width: 360px;
+  min-height: 52px;
+  padding: 0 20px;
+  font-size: 13px;
+  touch-action: manipulation;
+}
+
+html[data-native='android'] .landing-text-link {
+  min-height: 44px;
+  align-items: center;
+  padding: 9px 2px 7px;
+  font-size: 12px;
+  touch-action: manipulation;
+}
+
+html[data-native='android'] .landing-hero__proof {
+  display: grid;
+  width: min(100%, 350px);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 7px;
+  margin-top: 23px;
+}
+
+html[data-native='android'] .landing-hero__proof span {
+  min-height: 48px;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  border: 1px solid color-mix(in srgb, var(--landing-ink) 9%, transparent);
+  border-radius: 11px;
+  padding: 7px 5px;
+  color: color-mix(in srgb, var(--landing-ink) 57%, transparent);
+  background: color-mix(in srgb, var(--landing-paper-raised) 62%, transparent);
+  font-size: 7px;
+  line-height: 1.35;
+  text-align: center;
+}
+
+html[data-native='android'] .landing-scroll-cue {
+  bottom: 12px;
+}
+
+html[data-native='android'] .landing-section,
+html[data-native='android'] .landing-section__inner {
+  scroll-margin-top: calc(74px + var(--safe-top));
+}
+
+html[data-native='android'] .landing-section__inner {
+  width: min(calc(100% - 32px), 620px);
+}
+
+html[data-native='android'] .landing-method,
+html[data-native='android'] .landing-evidence-section {
+  padding: 96px 0 112px;
+}
+
+html[data-native='android'] .landing-method__grid,
+html[data-native='android'] .landing-evidence-section__grid {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 44px;
+}
+
+html[data-native='android'] .landing-section-heading h2,
+html[data-native='android'] .landing-final h2 {
+  margin-top: 14px;
+  font-size: clamp(38px, 11.2vw, 52px);
+  line-height: 0.99;
+  letter-spacing: -0.05em;
+  text-wrap: balance;
+}
+
+html[data-native='android'] .landing-copy {
+  margin-top: 18px;
+  font-size: 14px;
+  line-height: 1.62;
+}
+
+html[data-native='android'] .landing-principle {
+  gap: 12px;
+  margin-top: 25px;
+  padding: 18px 0 0;
+}
+
+html[data-native='android'] .landing-principle > span {
+  font-size: 16px;
+}
+
+html[data-native='android'] .landing-principle p {
+  font-size: 11px;
+  line-height: 1.58;
+}
+
+html[data-native='android'] .landing-sheet {
+  border-radius: 14px;
+  box-shadow: 0 24px 54px -38px color-mix(in srgb, var(--landing-ink) 62%, transparent);
+}
+
+html[data-native='android'] .landing-sheet__header,
+html[data-native='android'] .landing-sheet__footer {
+  margin-left: 25px;
+  padding: 15px 13px;
+}
+
+html[data-native='android'] .landing-question {
+  margin-left: 25px;
+  padding: 20px 13px 17px;
+}
+
+html[data-native='android'] .landing-question p {
+  font-size: 12px;
+  line-height: 1.58;
+}
+
+html[data-native='android'] .landing-diagnosis {
+  margin: 0 13px 0 38px;
+}
+
+html[data-native='android'] .landing-diagnosis__row {
+  grid-template-columns: 68px minmax(0, 1fr);
+}
+
+html[data-native='android'] .landing-diagnosis__row strong {
+  overflow-wrap: anywhere;
+  font-size: 10px;
+  line-height: 1.45;
+}
+
+html[data-native='android'] .landing-reattempt {
+  min-height: auto;
+  padding: 116px 0;
+  clip-path: polygon(0 1.25%, 100% 0, 100% 98.75%, 0 100%);
+}
+
+html[data-native='android'] .landing-reattempt__grid,
+html[data-native='android'] .landing-orbit-wrap {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+html[data-native='android'] .landing-reattempt__grid {
+  gap: 46px;
+}
+
+html[data-native='android'] .landing-orbit-wrap {
+  gap: 34px;
+}
+
+html[data-native='android'] .landing-orbit {
+  width: min(100%, 310px);
+}
+
+html[data-native='android'] .landing-orbit__ring,
+html[data-native='android'] .landing-orbit__halo {
+  animation: none !important;
+}
+
+html[data-native='android'] .landing-orbit__ring {
+  transform: none !important;
+}
+
+html[data-native='android'] .landing-recall-list {
+  width: 100%;
+}
+
+html[data-native='android'] .landing-recall-row {
+  grid-template-columns: 42px minmax(0, 1fr);
+  padding: 16px 0;
+}
+
+html[data-native='android'] .landing-recall-row p {
+  font-size: 10px;
+}
+
+html[data-native='android'] .landing-evidence-section__grid {
+  gap: 42px;
+}
+
+html[data-native='android'] .landing-surface-card {
+  border-radius: 14px;
+  box-shadow: 0 24px 54px -38px color-mix(in srgb, var(--landing-ink) 62%, transparent);
+}
+
+html[data-native='android'] .landing-surface-card__top,
+html[data-native='android'] .landing-surface-chart {
+  padding-right: 16px;
+  padding-left: 16px;
+}
+
+html[data-native='android'] .landing-surface-card__top strong {
+  font-size: 25px;
+}
+
+html[data-native='android'] .landing-upstream,
+html[data-native='android'] .landing-cause-bars {
+  padding: 20px 17px;
+}
+
+html[data-native='android'] .landing-manifesto {
+  min-height: 560px;
+  padding: 92px 20px;
+}
+
+html[data-native='android'] .landing-manifesto__field {
+  opacity: 0.72;
+}
+
+html[data-native='android'] .landing-manifesto__field span {
+  animation: none !important;
+}
+
+html[data-native='android'] .landing-manifesto__content > svg {
+  margin-bottom: 19px;
+}
+
+html[data-native='android'] .landing-manifesto__content p {
+  font-size: 21px;
+  line-height: 1.3;
+}
+
+html[data-native='android'] .landing-manifesto__content h2 {
+  margin-top: 8px;
+  font-size: clamp(43px, 12.5vw, 58px);
+  line-height: 0.98;
+}
+
+html[data-native='android'] .landing-manifesto__content > span {
+  margin-top: 23px;
+  font-size: 13px;
+  line-height: 1.62;
+}
+
+html[data-native='android'] .landing-final {
+  min-height: 690px;
+  padding: 106px 20px 82px;
+}
+
+html[data-native='android'] .landing-final h2 {
+  font-size: clamp(47px, 13.6vw, 62px);
+  line-height: 0.94;
+}
+
+html[data-native='android'] .landing-final__content > p:not(.landing-kicker) {
+  margin-top: 21px;
+  font-size: 14px;
+  line-height: 1.58;
+}
+
+html[data-native='android'] .landing-footer {
+  grid-template-columns: 1fr auto;
+  gap: 14px;
+  min-height: 82px;
+  padding: 17px 18px calc(17px + var(--safe-bottom));
+}
+
+html[data-native='android'] .landing-footer p {
+  display: none;
+}
+
+html[data-native='android'] .landing-footer .landing-countdown {
+  display: block;
+  font-size: 8px;
+}
+
+@media (max-width: 370px) {
+  html[data-native='android'] .landing-hero {
+    padding-right: 16px;
+    padding-left: 16px;
+  }
+
+  html[data-native='android'] .landing-hero h1 {
+    font-size: 43px;
+  }
+
+  html[data-native='android'] .landing-section__inner {
+    width: calc(100% - 28px);
+  }
+
+  html[data-native='android'] .landing-diagnosis__row {
+    grid-template-columns: 62px minmax(0, 1fr);
+    gap: 6px;
+  }
+
+  html[data-native='android'] .landing-surface-card__movement {
+    padding: 5px 7px;
+    font-size: 7px;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .landing-hero__mark-ring,
   .landing-scroll-cue b,

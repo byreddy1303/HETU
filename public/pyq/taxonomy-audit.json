@@ -1,18 +1,18 @@
 {
-  "bankVersion": "gate-1990-2026-v7-go-classes-coa-topic-tests",
-  "questionCount": 3200,
-  "uniqueQuestionCount": 3200,
+  "bankVersion": "gate-1990-2026-v8-gate-level-books",
+  "questionCount": 3649,
+  "uniqueQuestionCount": 3649,
   "unclassifiedCount": 0,
   "subjectCount": 14,
   "topicCount": 95,
   "classificationBasis": {
-    "audited-source-scope": 481,
-    "broad-topic-tag": 6,
-    "content-rule": 83,
+    "audited-source-scope": 570,
+    "broad-topic-tag": 11,
+    "content-rule": 92,
     "manual-content-audit": 160,
-    "ordered-topic-tag": 1933,
+    "ordered-topic-tag": 2222,
     "subject-rule": 267,
-    "topic-rule": 270
+    "topic-rule": 327
   },
   "manualCorrectionCount": 160,
   "manualCorrections": [
@@ -1471,42 +1471,42 @@
     },
     {
       "slug": "discrete-mathematics",
-      "count": 293,
+      "count": 335,
       "topics": [
         {
           "slug": "propositional-logic",
           "label": "Propositional Logic",
-          "count": 61
+          "count": 74
         },
         {
           "slug": "set-theory",
           "label": "Set Theory",
-          "count": 26
+          "count": 33
         },
         {
           "slug": "relation",
           "label": "Relation",
-          "count": 25
+          "count": 26
         },
         {
           "slug": "functions",
           "label": "Functions",
-          "count": 24
+          "count": 26
         },
         {
           "slug": "lattice",
           "label": "Lattice",
-          "count": 11
+          "count": 13
         },
         {
           "slug": "group-theory",
           "label": "Group Theory",
-          "count": 32
+          "count": 33
         },
         {
           "slug": "graph-theory",
           "label": "Graph Theory",
-          "count": 60
+          "count": 70
         },
         {
           "slug": "planar-graph",
@@ -1516,85 +1516,85 @@
         {
           "slug": "combination",
           "label": "Combination",
-          "count": 37
+          "count": 42
         },
         {
           "slug": "recurrence",
           "label": "Recurrence",
-          "count": 4
+          "count": 5
         }
       ]
     },
     {
       "slug": "engineering-mathematics",
-      "count": 238,
+      "count": 302,
       "topics": [
         {
           "slug": "linear-algebra",
           "label": "Linear Algebra",
-          "count": 76
+          "count": 95
         },
         {
           "slug": "calculus",
           "label": "Calculus",
-          "count": 84
+          "count": 97
         },
         {
           "slug": "probability-statistics",
           "label": "Probability & Statistics",
-          "count": 78
+          "count": 110
         }
       ]
     },
     {
       "slug": "digital-logic",
-      "count": 475,
+      "count": 506,
       "topics": [
         {
           "slug": "number-system",
           "label": "Number System",
-          "count": 80
+          "count": 87
         },
         {
           "slug": "boolean-algebra",
           "label": "Boolean Algebra",
-          "count": 158
+          "count": 171
         },
         {
           "slug": "combinational-circuit",
           "label": "Combinational Circuit",
-          "count": 104
+          "count": 112
         },
         {
           "slug": "sequential-circuit",
           "label": "Sequential Circuit",
-          "count": 133
+          "count": 136
         }
       ]
     },
     {
       "slug": "coa",
-      "count": 248,
+      "count": 276,
       "topics": [
         {
           "slug": "machine-instruction",
           "label": "Machine Instruction",
-          "count": 59
+          "count": 63
         },
         {
           "slug": "addressing-modes",
           "label": "Addressing Modes",
-          "count": 14
+          "count": 16
         },
         {
           "slug": "alu-data-path-and-control-unit",
           "label": "ALU Data Path and Control Unit",
-          "count": 17
+          "count": 22
         },
         {
           "slug": "io-interface",
           "label": "IO Interface",
-          "count": 15
+          "count": 16
         },
         {
           "slug": "interrupt",
@@ -1604,12 +1604,12 @@
         {
           "slug": "pipeline-processor",
           "label": "Pipeline Processor",
-          "count": 46
+          "count": 54
         },
         {
           "slug": "cache-memory",
           "label": "Cache Memory",
-          "count": 65
+          "count": 73
         },
         {
           "slug": "secondary-storage",
@@ -1625,38 +1625,38 @@
     },
     {
       "slug": "c-programming",
-      "count": 120,
+      "count": 137,
       "topics": [
         {
           "slug": "arithmetic-operation",
           "label": "Arithmetic Operation",
-          "count": 16
+          "count": 18
         },
         {
           "slug": "conditional-statement",
           "label": "Conditional Statement",
-          "count": 2
+          "count": 3
         },
         {
           "slug": "loops",
           "label": "Loops",
-          "count": 15
+          "count": 18
         },
         {
           "slug": "array-and-pointer",
           "label": "Array and Pointer",
-          "count": 39
+          "count": 45
         },
         {
           "slug": "function",
           "label": "Function",
-          "count": 48
+          "count": 53
         }
       ]
     },
     {
       "slug": "data-structure",
-      "count": 190,
+      "count": 231,
       "topics": [
         {
           "slug": "array",
@@ -1666,37 +1666,37 @@
         {
           "slug": "linked-list",
           "label": "Linked List",
-          "count": 16
+          "count": 18
         },
         {
           "slug": "stack",
           "label": "Stack",
-          "count": 20
+          "count": 24
         },
         {
           "slug": "queue",
           "label": "Queue",
-          "count": 9
+          "count": 11
         },
         {
           "slug": "binary-tree",
           "label": "Binary Tree",
-          "count": 30
+          "count": 41
         },
         {
           "slug": "binary-search-tree",
           "label": "Binary Search Tree",
-          "count": 30
+          "count": 37
         },
         {
           "slug": "avl-tree",
           "label": "AVL Tree",
-          "count": 3
+          "count": 4
         },
         {
           "slug": "b-tree",
           "label": "B Tree",
-          "count": 14
+          "count": 19
         },
         {
           "slug": "b-plus-tree",
@@ -1706,7 +1706,7 @@
         {
           "slug": "heap-tree",
           "label": "Heap Tree",
-          "count": 27
+          "count": 30
         },
         {
           "slug": "n-ary-tree",
@@ -1716,84 +1716,84 @@
         {
           "slug": "hashing",
           "label": "Hashing",
-          "count": 17
+          "count": 23
         }
       ]
     },
     {
       "slug": "algorithms",
-      "count": 277,
+      "count": 320,
       "topics": [
         {
           "slug": "asymptotic-notation",
           "label": "Asymptotic Notation",
-          "count": 85
+          "count": 93
         },
         {
           "slug": "recurrence-relation",
           "label": "Recurrence Relation",
-          "count": 41
+          "count": 47
         },
         {
           "slug": "divide-and-conquer",
           "label": "Divide and Conquer",
-          "count": 7
+          "count": 9
         },
         {
           "slug": "sorting",
           "label": "Sorting",
-          "count": 37
+          "count": 49
         },
         {
           "slug": "greedy-technique",
           "label": "Greedy Technique",
-          "count": 10
+          "count": 12
         },
         {
           "slug": "minimum-spanning-tree",
           "label": "Minimum Spanning Tree",
-          "count": 38
+          "count": 41
         },
         {
           "slug": "shortest-path",
           "label": "Shortest Path",
-          "count": 16
+          "count": 18
         },
         {
           "slug": "graph-traversal",
           "label": "Graph Traversal",
-          "count": 26
+          "count": 33
         },
         {
           "slug": "dynamic-programming",
           "label": "Dynamic Programming",
-          "count": 17
+          "count": 18
         }
       ]
     },
     {
       "slug": "theory-of-computation",
-      "count": 235,
+      "count": 273,
       "topics": [
         {
           "slug": "regular-expression",
           "label": "Regular Expression",
-          "count": 18
+          "count": 23
         },
         {
           "slug": "regular-grammar",
           "label": "Regular Grammar",
-          "count": 1
+          "count": 2
         },
         {
           "slug": "regular-language",
           "label": "Regular Language",
-          "count": 45
+          "count": 55
         },
         {
           "slug": "finite-automata",
           "label": "Finite Automata",
-          "count": 57
+          "count": 69
         },
         {
           "slug": "context-free-grammar",
@@ -1803,12 +1803,12 @@
         {
           "slug": "context-free-language",
           "label": "Context Free Language",
-          "count": 40
+          "count": 46
         },
         {
           "slug": "push-down-automata",
           "label": "Push-down Automata",
-          "count": 11
+          "count": 15
         },
         {
           "slug": "recursive-language",
@@ -1829,7 +1829,7 @@
     },
     {
       "slug": "compiler-design",
-      "count": 175,
+      "count": 180,
       "topics": [
         {
           "slug": "lexical-analysis",
@@ -1839,7 +1839,7 @@
         {
           "slug": "parsing",
           "label": "Parsing",
-          "count": 93
+          "count": 98
         },
         {
           "slug": "syntax-directed-translation",
@@ -1865,63 +1865,63 @@
     },
     {
       "slug": "operating-systems",
-      "count": 276,
+      "count": 314,
       "topics": [
         {
           "slug": "process",
           "label": "Process",
-          "count": 28
+          "count": 36
         },
         {
           "slug": "cpu-scheduling",
           "label": "CPU Scheduling",
-          "count": 40
+          "count": 45
         },
         {
           "slug": "process-synchronization",
           "label": "Process Synchronization",
-          "count": 41
+          "count": 49
         },
         {
           "slug": "deadlock",
           "label": "Deadlock",
-          "count": 23
+          "count": 26
         },
         {
           "slug": "memory-management",
           "label": "Memory Management",
-          "count": 89
+          "count": 97
         },
         {
           "slug": "file-systems",
           "label": "File Systems",
-          "count": 18
+          "count": 19
         },
         {
           "slug": "disk-scheduling",
           "label": "Disk Scheduling",
-          "count": 10
+          "count": 13
         },
         {
           "slug": "system-call",
           "label": "System Call",
-          "count": 17
+          "count": 18
         },
         {
           "slug": "thread",
           "label": "Thread",
-          "count": 10
+          "count": 11
         }
       ]
     },
     {
       "slug": "databases",
-      "count": 179,
+      "count": 228,
       "topics": [
         {
           "slug": "er-model",
           "label": "ER Model",
-          "count": 10
+          "count": 13
         },
         {
           "slug": "relational-schema",
@@ -1931,17 +1931,17 @@
         {
           "slug": "relational-algebra",
           "label": "Relational Algebra",
-          "count": 22
+          "count": 32
         },
         {
           "slug": "normal-form",
           "label": "Normal Form",
-          "count": 44
+          "count": 56
         },
         {
           "slug": "transactions",
           "label": "Transactions",
-          "count": 33
+          "count": 39
         },
         {
           "slug": "integrity-constraints",
@@ -1951,28 +1951,28 @@
         {
           "slug": "sql",
           "label": "SQL",
-          "count": 37
+          "count": 50
         },
         {
           "slug": "tuple-calculus",
           "label": "Tuple Calculus",
-          "count": 10
+          "count": 12
         },
         {
           "slug": "file-system",
           "label": "File System",
-          "count": 11
+          "count": 14
         }
       ]
     },
     {
       "slug": "computer-networks",
-      "count": 194,
+      "count": 247,
       "topics": [
         {
           "slug": "osi-layer",
           "label": "OSI Layer",
-          "count": 13
+          "count": 22
         },
         {
           "slug": "physical-layer",
@@ -1982,22 +1982,22 @@
         {
           "slug": "data-link-layer",
           "label": "Data Link Layer",
-          "count": 45
+          "count": 61
         },
         {
           "slug": "network-layer-protocol",
           "label": "Network Layer Protocol",
-          "count": 60
+          "count": 73
         },
         {
           "slug": "transport-layer-protocol",
           "label": "Transport Layer Protocol",
-          "count": 35
+          "count": 45
         },
         {
           "slug": "application-layer-protocols",
           "label": "Application Layer Protocols",
-          "count": 24
+          "count": 29
         },
         {
           "slug": "network-security",

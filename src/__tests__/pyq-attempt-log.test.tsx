@@ -11,11 +11,12 @@ import { captureElementToDataUrl } from '@/lib/image';
 const USER = '00000000-0000-4000-8000-000000000001';
 
 const question: PyqQuestion = {
-  id: 'gate-2026-set1-q1',
-  year: 2026,
-  set: 1,
+  id: 'gate-it-2007-q1',
+  bookSlug: 'gate-it',
+  year: 2007,
+  set: null,
   number: '1',
-  paperLabel: 'GATE CSE 2026 Set 1',
+  paperLabel: 'GATE IT 2007',
   subject: 'Discrete Mathematics',
   subjectSlug: 'discrete-mathematics',
   topic: 'Propositional Logic',
@@ -36,12 +37,13 @@ const manifest: PyqManifest = {
   generatedAt: '2026-08-08T00:00:00.000Z',
   source: 'test',
   sourceUrl: 'https://gateoverflow.in',
-  firstYear: 2026,
-  lastYear: 2026,
+  defaultBookSlug: 'gate-it',
+  firstYear: 2007,
+  lastYear: 2007,
   questionCount: 1,
   imageCount: 0,
   answerStatuses: { available: 1, ambiguous: 0, 'marks-to-all': 0, unsupported: 0 },
-  years: [{ year: 2026, count: 1 }],
+  years: [{ year: 2007, count: 1 }],
   subjects: [
     {
       slug: 'discrete-mathematics',
@@ -49,6 +51,32 @@ const manifest: PyqManifest = {
       count: 1,
       file: '/pyq/discrete-mathematics.json',
       topics: [{ slug: 'propositional-logic', label: 'Propositional Logic', count: 1 }]
+    }
+  ],
+  books: [
+    {
+      slug: 'gate-it',
+      label: 'GATE IT Archive',
+      shortLabel: 'GATE IT',
+      description: 'Test archive',
+      difficultyFloor: 'gate',
+      sourceClass: 'official-exam',
+      source: 'test',
+      sourceUrl: 'https://gateoverflow.in',
+      count: 1,
+      firstYear: 2007,
+      lastYear: 2007,
+      answerStatuses: { available: 1, ambiguous: 0, 'marks-to-all': 0, unsupported: 0 },
+      years: [{ year: 2007, count: 1 }],
+      subjects: [
+        {
+          slug: 'discrete-mathematics',
+          label: 'Discrete Mathematics',
+          count: 1,
+          file: '/pyq/discrete-mathematics.json',
+          topics: [{ slug: 'propositional-logic', label: 'Propositional Logic', count: 1 }]
+        }
+      ]
     }
   ]
 };
@@ -143,6 +171,7 @@ describe('PYQ committed-attempt logging', () => {
       expect(attempt.question_started_at).not.toBeNull();
       expect(attempt.question_snapshot).toMatchObject({
         question_uid: question.id,
+        book_slug: 'gate-it',
         subject: question.subject,
         type: 'MCQ',
         html: question.html
@@ -150,6 +179,7 @@ describe('PYQ committed-attempt logging', () => {
 
       const session = await db.pyq_sessions.get(attempt.pyq_session_id!);
       expect(session?.completed_question_uids).toEqual([question.id]);
+      expect(session?.config.bookSlug).toBe('gate-it');
       expect(session?.current_index).toBe(1);
       expect(session?.elapsed_sec).toBe(attempt.time_spent_sec);
     });
@@ -205,8 +235,8 @@ describe('PYQ committed-attempt logging', () => {
       {
         subjectSlug: 'discrete-mathematics',
         topicSlug: 'all',
-        fromYear: 2026,
-        toYear: 2026,
+        fromYear: 2007,
+        toYear: 2007,
         type: 'all',
         order: 'unseen',
         count: '5'
@@ -236,8 +266,8 @@ describe('PYQ committed-attempt logging', () => {
       {
         subjectSlug: 'discrete-mathematics',
         topicSlug: 'all',
-        fromYear: 2026,
-        toYear: 2026,
+        fromYear: 2007,
+        toYear: 2007,
         type: 'all',
         order: 'unseen',
         count: '5'

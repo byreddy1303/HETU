@@ -1,10 +1,10 @@
 {
-  "bankVersion": "gate-1990-2026-v7-go-classes-coa-topic-tests",
+  "bankVersion": "gate-1990-2026-v8-gate-level-books",
   "sources": [
     {
       "name": "GateQA",
       "url": "https://gateqa.in",
-      "role": "Full question HTML, diagrams, metadata, and answer map"
+      "role": "GATE CSE and IT question HTML, diagrams, metadata, and answer map"
     },
     {
       "name": "GATE Overflow",
@@ -13,13 +13,13 @@
     },
     {
       "name": "Official GATE archive",
-      "url": "https://www.iitk.ac.in/gate/download.php",
-      "role": "Paper-count audit and original wording verification"
+      "url": "https://gate2026.iitg.ac.in/QPs-answer-keys.html",
+      "role": "Official paper and answer-key audit for every admitted GATE book"
     },
     {
       "name": "ExamSIDE",
       "url": "https://questions.examside.com",
-      "role": "ECE and EE Digital Logic question text, diagrams, metadata, and answer keys"
+      "role": "GATE DA/AI overlap and ECE/EE Digital Logic question text, diagrams, metadata, and answer keys"
     },
     {
       "name": "GO Classes",
@@ -29,6 +29,9 @@
   ],
   "notes": [
     "Question content is bundled for the private, invite-only HETU practice experience.",
+    "Every visible book is constrained to a GATE difficulty floor; no below-GATE source is admitted.",
+    "GATE IT excludes Other / Optional material outside the current CSE syllabus.",
+    "GATE DA/AI includes only Algorithms, Data Structures, DBMS, Discrete Mathematics, Linear Algebra, Calculus, and Probability chapters that overlap GATE CSE.",
     "ECE and EE supplements are restricted to the project topics: Number System, Boolean Algebra, Combinational Circuit, and Sequential Circuit.",
     "Converter, semiconductor-memory, logic-family, microprocessor, communication-code, and architecture questions are excluded.",
     "AMBIGUOUS, MARKS_TO_ALL, and UNSUPPORTED records are never assigned an invented answer."

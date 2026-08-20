@@ -19,6 +19,7 @@ import type { PyqSessionConfig } from '@/types';
 import type { PyqQuestion } from '@/lib/pyq';
 
 const mockConfig: PyqSessionConfig = {
+  bookSlug: 'gate-cse',
   subjectSlug: 'algorithms',
   topicSlug: 'shortest-path',
   fromYear: 2020,
@@ -30,6 +31,7 @@ const mockConfig: PyqSessionConfig = {
 
 const question: PyqQuestion = {
   id: 'gate-2026-set1-q1',
+  bookSlug: 'gate-cse',
   year: 2026,
   set: 1,
   number: '1',
@@ -175,6 +177,7 @@ describe('PYQ session logic and determinism', () => {
     expect(attempt.time_spent_sec).toBe(13);
     expect(attempt.question_snapshot).toMatchObject({
       question_uid: question.id,
+      book_slug: 'gate-cse',
       number: '1',
       topic: 'Shortest Path',
       topic_slug: 'shortest-path',
@@ -248,6 +251,7 @@ describe('PYQ session logic and determinism', () => {
     const restored = pyqQuestionFromAttempt(firstAttempt);
     expect(restored).toMatchObject({
       id: question.id,
+      bookSlug: 'gate-cse',
       html: question.html,
       answer: 'B',
       type: 'MCQ'
@@ -277,5 +281,6 @@ describe('PYQ session logic and determinism', () => {
       mark_correct: true,
       capture_version: 2
     });
+    expect(secondAttempt.question_snapshot?.book_slug).toBe('gate-cse');
   });
 });

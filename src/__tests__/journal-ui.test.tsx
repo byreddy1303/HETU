@@ -74,6 +74,7 @@ describe('Journal question list', () => {
   it('shows every receipt and full question detail for a selected PYQ session', async () => {
     const firstQuestion: PyqQuestion = {
       id: 'gate-2025-set1-q12',
+      bookSlug: 'gate-cse',
       year: 2025,
       set: 1,
       number: '12',

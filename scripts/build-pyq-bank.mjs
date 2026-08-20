@@ -6,7 +6,12 @@ import path from 'node:path';
 import process from 'node:process';
 import { fileURLToPath } from 'node:url';
 import { JSDOM } from 'jsdom';
-import { classifyPyqQuestion, PYQ_BANK_VERSION, PYQ_TAXONOMY } from './pyq-taxonomy.mjs';
+import {
+  classifyPyqQuestion,
+  PYQ_BANK_QUESTION_COUNT,
+  PYQ_BANK_VERSION,
+  PYQ_TAXONOMY
+} from './pyq-taxonomy.mjs';
 
 const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(SCRIPT_DIR, '..');
@@ -34,8 +39,69 @@ const IMAGE_OVERRIDES = new Map([
   ]
 ]);
 
-const TITLE_PATTERN =
-  /GATE CSE (?<year>\d{4})(?:\s*\|?\s*Set\s*[-:]?\s*(?<set>\d+))?\s*\|\s*(?:GA\s*(?:\|\s*)?)?Question:\s*(?<question>.+)$/i;
+const GATE_CSE_TITLE_PATTERN =
+  /^GATE CSE (?<year>\d{4})(?:\s*\|?\s*Set\s*[-:]?\s*(?<set>\d+))?\s*\|\s*(?:GA\s*(?:\|\s*)?)?Question:\s*(?<question>.+)$/i;
+const GATE_IT_TITLE_PATTERN =
+  /^GATE IT (?<year>\d{4})(?:\s*\|?\s*Set\s*[-:]?\s*(?<set>\d+))?\s*\|\s*(?:GA\s*(?:\|\s*)?)?Question:\s*(?<question>.+)$/i;
+
+const PYQ_BOOKS = [
+  {
+    slug: 'gate-cse',
+    label: 'GATE CSE Core',
+    shortLabel: 'GATE CSE',
+    description: 'The complete CSE archive, including audited restorations for older papers.',
+    difficultyFloor: 'gate',
+    sourceClass: 'official-exam',
+    source: 'GATE CSE',
+    sourceUrl: 'https://gate2026.iitg.ac.in/QPs-answer-keys.html',
+    expectedCount: 2911
+  },
+  {
+    slug: 'gate-it',
+    label: 'GATE IT Archive',
+    shortLabel: 'GATE IT',
+    description: 'The 2004–2008 Information Technology papers, restricted to the CSE syllabus.',
+    difficultyFloor: 'gate',
+    sourceClass: 'official-exam',
+    source: 'GATE IT',
+    sourceUrl: 'https://gateoverflow.in/previous-years',
+    expectedCount: 360
+  },
+  {
+    slug: 'gate-da-overlap',
+    label: 'GATE DA/AI · CSE Overlap',
+    shortLabel: 'GATE DA/AI',
+    description: 'Only GATE DA/AI questions that directly exercise the current CSE syllabus.',
+    difficultyFloor: 'gate',
+    sourceClass: 'official-exam',
+    source: 'GATE Data Science & Artificial Intelligence',
+    sourceUrl: 'https://gate2026.iitg.ac.in/QPs-answer-keys.html',
+    expectedCount: 89
+  },
+  {
+    slug: 'gate-cross-digital',
+    label: 'Cross-Branch Digital Logic',
+    shortLabel: 'GATE ECE/EE',
+    description: 'Audited ECE and EE questions limited to the GATE CSE Digital Logic syllabus.',
+    difficultyFloor: 'gate',
+    sourceClass: 'official-exam',
+    source: 'GATE ECE and EE',
+    sourceUrl: 'https://questions.examside.com/past-years/gate',
+    expectedCount: 259
+  },
+  {
+    slug: 'go-classes-coa',
+    label: 'GO Classes COA Topic Tests',
+    shortLabel: 'GO Classes COA',
+    description: 'Learner-provided COA tests audited to meet the GATE difficulty floor.',
+    difficultyFloor: 'gate',
+    sourceClass: 'audited-gate-prep',
+    source: 'GO Classes',
+    sourceUrl: 'https://www.goclasses.in/',
+    expectedCount: 30
+  }
+];
+const PYQ_BOOK_BY_SLUG = new Map(PYQ_BOOKS.map((book) => [book.slug, book]));
 
 const SUBJECTS = {
   'General Aptitude': ['general-aptitude', 'General Aptitude'],
@@ -106,6 +172,112 @@ const EXAMSIDE_DIGITAL_LOGIC_CATEGORIES = [
     topicSlug: 'sequential-circuit'
   }
 ];
+
+// GATE DA/AI is admitted only where its published syllabus overlaps the
+// current GATE CSE taxonomy. General Aptitude and every ML/AI/Python chapter
+// are deliberately absent, so this archive adds problem-solving depth without
+// expanding the learner's syllabus by accident.
+const EXAMSIDE_GATE_DA_CATEGORIES = [
+  ['algorithms/complexity-analysis-and-asymptotic-notations', 'algorithms', 'asymptotic-notation'],
+  ['algorithms/divide-and-conquer-method', 'algorithms', 'divide-and-conquer'],
+  ['algorithms/dynamic-programming', 'algorithms', 'dynamic-programming'],
+  ['algorithms/greedy-method', 'algorithms', 'greedy-technique'],
+  ['algorithms/searching-and-sorting', 'algorithms', 'sorting'],
+  [
+    'calculus-and-optimization/functions-of-a-single-variable-limit-continuity-differentiability-taylor-series',
+    'engineering-mathematics',
+    'calculus'
+  ],
+  [
+    'calculus-and-optimization/maxima-and-minima-optimization-involving-a-single-variable',
+    'engineering-mathematics',
+    'calculus'
+  ],
+  ['data-structures/hashing', 'data-structure', 'hashing'],
+  ['data-structures/stacks-and-queues', 'data-structure', 'stack'],
+  ['data-structures/trees', 'data-structure', 'n-ary-tree'],
+  ['database-management-system-and-warehousing/er-diagrams', 'databases', 'er-model'],
+  [
+    'database-management-system-and-warehousing/file-structures-and-indexing',
+    'databases',
+    'file-system'
+  ],
+  [
+    'database-management-system-and-warehousing/functional-dependencies-and-normalization',
+    'databases',
+    'normal-form'
+  ],
+  [
+    'database-management-system-and-warehousing/relational-algebra',
+    'databases',
+    'relational-algebra'
+  ],
+  ['database-management-system-and-warehousing/structured-query-language', 'databases', 'sql'],
+  ['discrete-mathematics/combinatorics', 'discrete-mathematics', 'combination'],
+  ['discrete-mathematics/graph-theory', 'discrete-mathematics', 'graph-theory'],
+  ['discrete-mathematics/mathematical-logic', 'discrete-mathematics', 'propositional-logic'],
+  [
+    'linear-algebra/determinant-rank-nullity-quadratic-forms',
+    'engineering-mathematics',
+    'linear-algebra'
+  ],
+  [
+    'linear-algebra/eigenvalues-eigenvectors-lu-qr-decomposition',
+    'engineering-mathematics',
+    'linear-algebra'
+  ],
+  [
+    'linear-algebra/matrices-types-operations-special-matrices-22-25-properties',
+    'engineering-mathematics',
+    'linear-algebra'
+  ],
+  [
+    'linear-algebra/systems-of-linear-equations-gaussian-elimination',
+    'engineering-mathematics',
+    'linear-algebra'
+  ],
+  [
+    'linear-algebra/vectors-vector-spaces-subspaces-linear-dependence-independence',
+    'engineering-mathematics',
+    'linear-algebra'
+  ],
+  [
+    'probability-and-statistics/conditional-joint-marginal-probability-bayes-theorem',
+    'engineering-mathematics',
+    'probability-statistics'
+  ],
+  [
+    'probability-and-statistics/counting-permutations-combinations',
+    'discrete-mathematics',
+    'combination'
+  ],
+  [
+    'probability-and-statistics/expectation-variance-central-limit-theorem',
+    'engineering-mathematics',
+    'probability-statistics'
+  ],
+  [
+    'probability-and-statistics/mean-median-mode-sd-correlation-covariance',
+    'engineering-mathematics',
+    'probability-statistics'
+  ],
+  [
+    'probability-and-statistics/probability-axioms-sample-space-events',
+    'engineering-mathematics',
+    'probability-statistics'
+  ],
+  [
+    'probability-and-statistics/random-variables-probability-distributions',
+    'engineering-mathematics',
+    'probability-statistics'
+  ]
+].map(([chapterPath, subjectSlug, topicSlug]) => ({
+  exam: 'gate-da',
+  path: `/past-years/gate/gate-da/${chapterPath}`,
+  chapterPath,
+  subjectSlug,
+  topicSlug
+}));
 
 const EXAMSIDE_CSE_REPLACEMENT_YEARS = new Set([1990, 1991, 1992, 1998, 2001]);
 const EXAMSIDE_CSE_SUBJECTS = {
@@ -290,6 +462,24 @@ function stableQuestionSort(a, b) {
   );
 }
 
+function questionYears(rows) {
+  return [...new Set(rows.map((question) => question.year))]
+    .sort((a, b) => b - a)
+    .map((year) => ({
+      year,
+      count: rows.filter((question) => question.year === year).length
+    }));
+}
+
+function questionAnswerStatuses(rows) {
+  return Object.fromEntries(
+    ['available', 'ambiguous', 'marks-to-all', 'unsupported'].map((status) => [
+      status,
+      rows.filter((question) => question.answerStatus === status).length
+    ])
+  );
+}
+
 async function fetchWithRetry(url, attempts = 4) {
   let lastError;
   for (let attempt = 1; attempt <= attempts; attempt += 1) {
@@ -384,9 +574,9 @@ function examSideQuestionFromHtml(html, href) {
   return { question, detailTitle: document.title };
 }
 
-async function loadExamSideSourceRows() {
+async function loadExamSideCategorySourceRows(categories, snapshotName) {
   await mkdir(CACHE, { recursive: true });
-  const snapshotPath = path.join(CACHE, 'examside-digital-logic-1990-2026-v1.json');
+  const snapshotPath = path.join(CACHE, snapshotName);
   try {
     return JSON.parse(await readFile(snapshotPath, 'utf8'));
   } catch {
@@ -394,7 +584,7 @@ async function loadExamSideSourceRows() {
     // structured options and answer keys, so fetch them concurrently and cache
     // the resulting source snapshot for repeatable local rebuilds.
     const chapterRows = await Promise.all(
-      EXAMSIDE_DIGITAL_LOGIC_CATEGORIES.map(async (category) => {
+      categories.map(async (category) => {
         const cacheName = `examside-${category.exam}-${category.path.split('/').at(-1)}.html`;
         const html = await cachedText(`${EXAMSIDE_ROOT}${category.path}`, cacheName);
         const document = new JSDOM(html).window.document;
@@ -433,6 +623,20 @@ async function loadExamSideSourceRows() {
     await writeFile(snapshotPath, `${JSON.stringify(results)}\n`);
     return results;
   }
+}
+
+function loadExamSideSourceRows() {
+  return loadExamSideCategorySourceRows(
+    EXAMSIDE_DIGITAL_LOGIC_CATEGORIES,
+    'examside-digital-logic-1990-2026-v1.json'
+  );
+}
+
+function loadExamSideDaSourceRows() {
+  return loadExamSideCategorySourceRows(
+    EXAMSIDE_GATE_DA_CATEGORIES,
+    'examside-gate-da-cse-overlap-2024-2026-v1.json'
+  );
 }
 
 async function loadExamSideCseSourceRows() {
@@ -522,7 +726,8 @@ function numericExamSideKey(value) {
 }
 
 function examSideQuestionType(source) {
-  if (source.isBonus) return 'MARKS_TO_ALL';
+  if (source.isBonus || /^\s*MTA\s*$/i.test(String(source.question?.en?.answer ?? '')))
+    return 'MARKS_TO_ALL';
   const rawType = String(source.type ?? '').toLowerCase();
   const correct = source.question?.en?.correct_options ?? [];
   if (rawType === 'mcq') return correct.length > 1 ? 'MSQ' : 'MCQ';
@@ -679,6 +884,73 @@ function examSideCseClassification(source) {
   }
 }
 
+function examSideDaClassification(row) {
+  const text = examSidePlainText(row.question);
+  if (row.chapterPath === 'data-structures/stacks-and-queues') {
+    return [row.subjectSlug, /\bqueue\b|\bfifo\b/.test(text) ? 'queue' : 'stack'];
+  }
+  if (row.chapterPath === 'data-structures/trees') {
+    if (/\bavl\b/.test(text)) return [row.subjectSlug, 'avl-tree'];
+    if (/binary search tree|\bbst\b/.test(text)) return [row.subjectSlug, 'binary-search-tree'];
+    if (/\bheap\b/.test(text)) return [row.subjectSlug, 'heap-tree'];
+    if (/binary tree/.test(text)) return [row.subjectSlug, 'binary-tree'];
+  }
+  return [row.subjectSlug, row.topicSlug];
+}
+
+async function examSideDaQuestions() {
+  const sourceRows = await loadExamSideDaSourceRows();
+  const questions = [];
+  for (const row of sourceRows) {
+    const source = row.question;
+    if (source.year < 2024 || source.year > 2026 || source.isOutOfSyllabus) continue;
+    const type = examSideQuestionType(source);
+    const answer = examSideAnswer(source, type);
+    const numericKey = type === 'NAT' ? numericExamSideKey(source.question?.en?.answer) : null;
+    const hasAnswer = answer != null && (!Array.isArray(answer) || answer.length > 0);
+    const answerState = type === 'MARKS_TO_ALL'
+      ? 'marks-to-all'
+      : answerStatus(type, hasAnswer, !hasAnswer);
+    const numberMatch = String(row.detailTitle ?? '').match(/\bQuestion\s+([\d.]+)/i);
+    const setMatch = String(source.paperTitle ?? '').match(/\bSet\s*(\d+)/i);
+    const [subjectSlug, topicSlug] = examSideDaClassification(row);
+    const subject = PYQ_TAXONOMY.find((candidate) => candidate.slug === subjectSlug)?.label;
+    if (!subject) throw new Error(`Unknown GATE DA subject scope: ${subjectSlug}`);
+    questions.push({
+      id: `es:${source.exam}:${source.question_id}`,
+      bookSlug: 'gate-da-overlap',
+      year: source.year,
+      set: setMatch ? Number(setMatch[1]) : null,
+      number: numberMatch?.[1] ?? source.question_id,
+      paperLabel: source.paperTitle || `GATE DA ${source.year}`,
+      subject,
+      subjectSlug,
+      classificationHint: { subjectSlug, topicSlug },
+      subtopics: [row.chapterPath, source.chapter].filter(Boolean),
+      marks: source.marks === 1 || source.marks === 2 ? source.marks : null,
+      type,
+      answer,
+      tolerance: numericKey?.tolerance ?? null,
+      answerStatus: answerState,
+      html: examSideQuestionHtml(source),
+      sourceUrl: row.sourceUrl,
+      answerSource: { kind: 'examside-key', url: row.sourceUrl }
+    });
+  }
+  if (questions.length !== PYQ_BOOK_BY_SLUG.get('gate-da-overlap').expectedCount) {
+    throw new Error(`Expected 89 audited GATE DA/AI CSE-overlap questions, found ${questions.length}`);
+  }
+  const unkeyed = questions.filter(
+    (question) => !['available', 'marks-to-all'].includes(question.answerStatus)
+  );
+  if (unkeyed.length > 0) {
+    throw new Error(
+      `GATE DA/AI admission rejected ${unkeyed.length} question(s) without authoritative keys: ${unkeyed.map((question) => question.id).join(', ')}`
+    );
+  }
+  return questions;
+}
+
 async function examSideDigitalLogicQuestions() {
   const sourceRows = await loadExamSideSourceRows();
   const accepted = [];
@@ -695,6 +967,7 @@ async function examSideDigitalLogicQuestions() {
     const topicSlug = EXAMSIDE_TOPIC_OVERRIDES.get(source.question_id) ?? row.topicSlug;
     accepted.push({
       id: `es:${source.exam}:${source.question_id}`,
+      bookSlug: 'gate-cross-digital',
       year: source.year,
       set: setMatch ? Number(setMatch[1]) : null,
       number: numberMatch?.[1] ?? source.question_id,
@@ -707,7 +980,8 @@ async function examSideDigitalLogicQuestions() {
       type,
       answer,
       tolerance: numericKey?.tolerance ?? null,
-      answerStatus: source.isBonus ? 'marks-to-all' : answerStatus(type, hasAnswer, !hasAnswer),
+      answerStatus:
+        type === 'MARKS_TO_ALL' ? 'marks-to-all' : answerStatus(type, hasAnswer, !hasAnswer),
       html: examSideQuestionHtml(source),
       sourceUrl: row.sourceUrl,
       answerSource: { kind: 'examside-key', url: row.sourceUrl }
@@ -741,6 +1015,7 @@ async function examSideCseQuestions() {
     const hasAnswer = answer != null && (!Array.isArray(answer) || answer.length > 0);
     return {
       id: `es:${source.exam}:${source.question_id}`,
+      bookSlug: 'gate-cse',
       year: source.year,
       set: setMatch ? Number(setMatch[1]) : null,
       number: String(row.archiveNumber),
@@ -756,7 +1031,8 @@ async function examSideCseQuestions() {
       type,
       answer,
       tolerance: numericKey?.tolerance ?? null,
-      answerStatus: source.isBonus ? 'marks-to-all' : answerStatus(type, hasAnswer, !hasAnswer),
+      answerStatus:
+        type === 'MARKS_TO_ALL' ? 'marks-to-all' : answerStatus(type, hasAnswer, !hasAnswer),
       html: examSideQuestionHtml(source),
       sourceUrl: row.sourceUrl,
       answerSource: { kind: 'examside-key', url: row.sourceUrl }
@@ -835,6 +1111,7 @@ async function main() {
     unsupportedPayload,
     supplementalDigitalLogic,
     supplementalCse,
+    supplementalDa,
     customQuestionPayloads
   ] = await Promise.all([
     cachedJson(SEARCH_URL, 'question-search-index.json'),
@@ -842,6 +1119,7 @@ async function main() {
     cachedJson(UNSUPPORTED_URL, 'unsupported-question-uids.json'),
     examSideDigitalLogicQuestions(),
     examSideCseQuestions(),
+    examSideDaQuestions(),
     Promise.all(
       CUSTOM_QUESTION_PATHS.map((filename) => readFile(filename, 'utf8').then(JSON.parse))
     )
@@ -851,16 +1129,23 @@ async function main() {
 
   const primary = [];
   for (const source of searchIndex) {
-    const match = normalizedTitle(source.title).match(TITLE_PATTERN);
+    const title = normalizedTitle(source.title);
+    const cseMatch = title.match(GATE_CSE_TITLE_PATTERN);
+    const itMatch = title.match(GATE_IT_TITLE_PATTERN);
+    const match = cseMatch ?? itMatch;
     if (!match) continue;
     const year = Number(match.groups.year);
     if (year < 1990 || year > 2026) continue;
-    if (EXAMSIDE_CSE_REPLACEMENT_YEARS.has(year)) continue;
+    if (cseMatch && EXAMSIDE_CSE_REPLACEMENT_YEARS.has(year)) continue;
+    if (itMatch && source.subjectLabel === 'Other / Optional') continue;
+    const paperKind = itMatch ? 'IT' : 'CSE';
     primary.push({
       ...source,
+      bookSlug: itMatch ? 'gate-it' : 'gate-cse',
       parsedYear: year,
       parsedSet: match.groups.set ? Number(match.groups.set) : null,
-      parsedNumber: match.groups.question
+      parsedNumber: match.groups.question,
+      parsedPaperLabel: `GATE ${paperKind} ${year}${match.groups.set ? ` Set ${match.groups.set}` : ''}`
     });
   }
 
@@ -886,10 +1171,11 @@ async function main() {
     const type = String(answerMeta?.type || source.type || 'UNSUPPORTED').toUpperCase();
     return {
       id: source.question_uid,
+      bookSlug: source.bookSlug,
       year: source.parsedYear,
       set: source.parsedSet,
       number: source.parsedNumber,
-      paperLabel: `GATE CSE ${source.parsedYear}${source.parsedSet ? ` Set ${source.parsedSet}` : ''}`,
+      paperLabel: source.parsedPaperLabel,
       subject,
       subjectSlug,
       subtopics: tags,
@@ -907,6 +1193,7 @@ async function main() {
   questions.push(
     ...MANUAL_QUESTIONS.map((question) => ({
       ...question,
+      bookSlug: 'gate-cse',
       paperLabel: `GATE CSE ${question.year}`,
       subtopics: question.tags,
       tolerance: null,
@@ -914,10 +1201,14 @@ async function main() {
     }))
   );
   questions.push(...supplementalCse);
+  questions.push(...supplementalDa);
   questions.push(...supplementalDigitalLogic);
   questions.push(
     ...customQuestionPayloads.flatMap((payload) =>
-      payload.questions.map(customQuestionWithImage)
+      payload.questions.map((question) => ({
+        ...customQuestionWithImage(question),
+        bookSlug: 'go-classes-coa'
+      }))
     )
   );
   for (const question of questions) {
@@ -929,10 +1220,38 @@ async function main() {
   }
   questions.sort(stableQuestionSort);
 
-  if (questions.length !== 3200)
-    throw new Error(`Expected 3,200 audited questions, found ${questions.length}`);
+  if (questions.length !== PYQ_BANK_QUESTION_COUNT)
+    throw new Error(
+      `Expected ${PYQ_BANK_QUESTION_COUNT.toLocaleString()} audited questions, found ${questions.length}`
+    );
   const ids = new Set(questions.map((question) => question.id));
   if (ids.size !== questions.length) throw new Error('Duplicate question IDs found in the bank');
+  for (const question of questions) {
+    if (!PYQ_BOOK_BY_SLUG.has(question.bookSlug)) {
+      throw new Error(`Question ${question.id} has an unknown book: ${question.bookSlug}`);
+    }
+  }
+  for (const book of PYQ_BOOKS) {
+    if (book.difficultyFloor !== 'gate') {
+      throw new Error(`Book ${book.slug} violates the GATE difficulty floor`);
+    }
+    const bookQuestions = questions.filter((question) => question.bookSlug === book.slug);
+    if (bookQuestions.length !== book.expectedCount) {
+      throw new Error(
+        `Expected ${book.expectedCount} questions in ${book.slug}, found ${bookQuestions.length}`
+      );
+    }
+  }
+  const gateItUnkeyed = questions.filter(
+    (question) =>
+      question.bookSlug === 'gate-it' &&
+      !['available', 'marks-to-all'].includes(question.answerStatus)
+  );
+  if (gateItUnkeyed.length > 0) {
+    throw new Error(
+      `GATE IT admission rejected ${gateItUnkeyed.length} question(s) without authoritative keys: ${gateItUnkeyed.map((question) => question.id).join(', ')}`
+    );
+  }
 
   const remoteImages = new Set();
   const bundledImages = new Set();
@@ -951,7 +1270,10 @@ async function main() {
       cp(
         path.join(SCRIPT_DIR, 'pyq-assets', directory),
         path.join(IMAGE_OUTPUT, directory),
-        { recursive: true }
+        {
+          recursive: true,
+          filter: (source) => path.basename(source) !== 'README.md'
+        }
       )
     )
   );
@@ -988,31 +1310,54 @@ async function main() {
     )
   );
 
-  const years = [...new Set(questions.map((question) => question.year))]
-    .sort((a, b) => b - a)
-    .map((year) => ({
-      year,
-      count: questions.filter((question) => question.year === year).length
-    }));
-  const answerStatuses = Object.fromEntries(
-    ['available', 'ambiguous', 'marks-to-all', 'unsupported'].map((status) => [
-      status,
-      questions.filter((question) => question.answerStatus === status).length
-    ])
-  );
+  const years = questionYears(questions);
+  const answerStatuses = questionAnswerStatuses(questions);
+  const books = PYQ_BOOKS.map(({ expectedCount, ...book }) => {
+    const rows = questions.filter((question) => question.bookSlug === book.slug);
+    const bookYears = questionYears(rows);
+    const bookSubjects = PYQ_TAXONOMY.flatMap((subject) => {
+      const subjectRows = rows.filter((question) => question.subjectSlug === subject.slug);
+      if (subjectRows.length === 0) return [];
+      return [
+        {
+          slug: subject.slug,
+          label: subject.label,
+          count: subjectRows.length,
+          file: `/pyq/subjects/${subject.slug}.json`,
+          topics: subject.topics
+            .map((topic) => ({
+              ...topic,
+              count: subjectRows.filter((question) => question.topicSlug === topic.slug).length
+            }))
+            .filter((topic) => topic.count > 0)
+        }
+      ];
+    });
+    return {
+      ...book,
+      count: rows.length,
+      firstYear: Math.min(...rows.map((question) => question.year)),
+      lastYear: Math.max(...rows.map((question) => question.year)),
+      answerStatuses: questionAnswerStatuses(rows),
+      years: bookYears,
+      subjects: bookSubjects
+    };
+  });
   const manifest = {
     bankVersion: PYQ_BANK_VERSION,
     generatedAt: new Date().toISOString(),
     source:
-      'GateQA/GATE Overflow CSE archive, syllabus-filtered ExamSIDE ECE/EE Digital Logic records, and the learner-provided GO Classes COA Topic Tests',
+      'Official GATE-level CSE, IT, DA/AI, ECE and EE archives plus audited GO Classes COA topic tests',
     sourceUrl: SOURCE_ROOT,
+    defaultBookSlug: 'gate-cse',
     firstYear: 1990,
     lastYear: 2026,
     questionCount: questions.length,
     imageCount: imageMap.size + bundledImages.size,
     answerStatuses,
     years,
-    subjects
+    subjects,
+    books
   };
   await writeFile(path.join(OUTPUT, 'manifest.json'), `${JSON.stringify(manifest, null, 2)}\n`);
   await writeFile(
@@ -1024,7 +1369,7 @@ async function main() {
           {
             name: 'GateQA',
             url: SOURCE_ROOT,
-            role: 'Full question HTML, diagrams, metadata, and answer map'
+            role: 'GATE CSE and IT question HTML, diagrams, metadata, and answer map'
           },
           {
             name: 'GATE Overflow',
@@ -1033,13 +1378,13 @@ async function main() {
           },
           {
             name: 'Official GATE archive',
-            url: 'https://www.iitk.ac.in/gate/download.php',
-            role: 'Paper-count audit and original wording verification'
+            url: 'https://gate2026.iitg.ac.in/QPs-answer-keys.html',
+            role: 'Official paper and answer-key audit for every admitted GATE book'
           },
           {
             name: 'ExamSIDE',
             url: EXAMSIDE_ROOT,
-            role: 'ECE and EE Digital Logic question text, diagrams, metadata, and answer keys'
+            role: 'GATE DA/AI overlap and ECE/EE Digital Logic question text, diagrams, metadata, and answer keys'
           },
           {
             name: 'GO Classes',
@@ -1049,6 +1394,9 @@ async function main() {
         ],
         notes: [
           'Question content is bundled for the private, invite-only HETU practice experience.',
+          'Every visible book is constrained to a GATE difficulty floor; no below-GATE source is admitted.',
+          'GATE IT excludes Other / Optional material outside the current CSE syllabus.',
+          'GATE DA/AI includes only Algorithms, Data Structures, DBMS, Discrete Mathematics, Linear Algebra, Calculus, and Probability chapters that overlap GATE CSE.',
           'ECE and EE supplements are restricted to the project topics: Number System, Boolean Algebra, Combinational Circuit, and Sequential Circuit.',
           'Converter, semiconductor-memory, logic-family, microprocessor, communication-code, and architecture questions are excluded.',
           'AMBIGUOUS, MARKS_TO_ALL, and UNSUPPORTED records are never assigned an invented answer.'
@@ -1061,6 +1409,9 @@ async function main() {
 
   console.log(
     `Built ${questions.length.toLocaleString()} questions across ${subjects.length} subjects with ${imageMap.size.toLocaleString()} local images.`
+  );
+  console.log(
+    `Books: ${books.map((book) => `${book.label} ${book.count.toLocaleString()}`).join(', ')}`
   );
   console.log(`Answer statuses: ${JSON.stringify(answerStatuses)}`);
 }

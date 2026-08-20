@@ -4,7 +4,9 @@ import { describe, expect, it, vi } from 'vitest';
 import {
   evaluatePyqAnswer,
   formatPyqAnswer,
+  inferPyqBookSlug,
   inferPyqDirectOutcome,
+  matchesPyqBookScope,
   matchesPyqTopicScope,
   normalizePyqQuestionHtml,
   normalizePyqManifest,
@@ -28,6 +30,7 @@ describe('PYQ journal text', () => {
 function question(overrides: Partial<PyqQuestion> = {}): PyqQuestion {
   return {
     id: 'go:test',
+    bookSlug: 'gate-cse',
     year: 2026,
     set: 1,
     number: '1',
@@ -148,6 +151,16 @@ describe('PYQ practice scope', () => {
   it('treats a legacy set without a topic as a complete subject', () => {
     expect(matchesPyqTopicScope(algorithm, { subjectSlug: 'algorithms' })).toBe(true);
   });
+
+  it('scopes books without weakening legacy or all-book sessions', () => {
+    const gateIt = question({ bookSlug: 'gate-it', paperLabel: 'GATE IT 2007' });
+    expect(matchesPyqBookScope(gateIt, { bookSlug: 'gate-it' })).toBe(true);
+    expect(matchesPyqBookScope(gateIt, { bookSlug: 'gate-cse' })).toBe(false);
+    expect(matchesPyqBookScope(gateIt, { bookSlug: 'all' })).toBe(true);
+    expect(matchesPyqBookScope(algorithm, {})).toBe(true);
+    expect(inferPyqBookSlug('GATE AI 2025')).toBe('gate-da-overlap');
+    expect(inferPyqBookSlug('GATE ECE 2019 Set 1')).toBe('gate-cross-digital');
+  });
 });
 
 describe('PYQ manifest compatibility', () => {
@@ -173,7 +186,15 @@ describe('PYQ manifest compatibility', () => {
       ]
     };
 
-    expect(normalizePyqManifest(legacyManifest).subjects[0].topics).toEqual([]);
+    const normalized = normalizePyqManifest(legacyManifest);
+    expect(normalized.subjects[0].topics).toEqual([]);
+    expect(normalized.defaultBookSlug).toBe('gate-cse');
+    expect(normalized.books).toHaveLength(1);
+    expect(normalized.books[0]).toMatchObject({
+      slug: 'gate-cse',
+      difficultyFloor: 'gate',
+      count: 1
+    });
   });
 });
 
@@ -201,7 +222,7 @@ describe('PYQ source HTML normalization', () => {
 });
 
 describe('bundled PYQ bank integrity', () => {
-  it('contains all 3,200 audited questions and no broken local image references', () => {
+  it('contains all 3,649 GATE-level questions and no broken local image references', () => {
     const publicRoot = path.resolve(process.cwd(), 'public');
     const manifest = JSON.parse(
       readFileSync(path.join(publicRoot, 'pyq', 'manifest.json'), 'utf8')
@@ -213,11 +234,22 @@ describe('bundled PYQ bank integrity', () => {
     let topicCount = 0;
     const repairedQuestions: PyqQuestion[] = [];
 
-    expect(manifest.questionCount).toBe(3200);
+    expect(manifest.questionCount).toBe(3649);
     expect(manifest.firstYear).toBe(1990);
     expect(manifest.lastYear).toBe(2026);
     expect(manifest.years).toHaveLength(37);
     expect(manifest.subjects).toHaveLength(14);
+    expect(manifest.defaultBookSlug).toBe('gate-cse');
+    expect(manifest.books).toHaveLength(5);
+    expect(manifest.books.every((book) => book.difficultyFloor === 'gate')).toBe(true);
+    expect(Object.fromEntries(manifest.books.map((book) => [book.slug, book.count]))).toEqual({
+      'gate-cse': 2911,
+      'gate-it': 360,
+      'gate-da-overlap': 89,
+      'gate-cross-digital': 259,
+      'go-classes-coa': 30
+    });
+    const bookSlugs = new Set(manifest.books.map((book) => book.slug));
 
     for (const subject of manifest.subjects) {
       const payload = JSON.parse(readFileSync(path.join(publicRoot, subject.file), 'utf8')) as {
@@ -234,6 +266,7 @@ describe('bundled PYQ bank integrity', () => {
         questionsById.set(row.id, row);
         expect(row.html.trim().length, `empty question ${row.id}`).toBeGreaterThan(0);
         expect(row.subjectSlug).toBe(subject.slug);
+        expect(bookSlugs.has(row.bookSlug), `unknown book ${row.bookSlug}`).toBe(true);
         expect(row.subject).toBe(subject.label);
         expect(expectedTopicCounts.has(row.topicSlug), `unknown topic ${row.topicSlug}`).toBe(true);
         expect(row.topic.trim().length, `empty topic ${row.id}`).toBeGreaterThan(0);
@@ -256,14 +289,14 @@ describe('bundled PYQ bank integrity', () => {
 
     expect(questionCount).toBe(manifest.questionCount);
     expect(topicCount).toBe(95);
-    expect(repairedQuestions).toHaveLength(518);
+    expect(repairedQuestions).toHaveLength(644);
     expect(new Set(repairedQuestions.map((row) => row.subjectSlug)).size).toBe(13);
-    expect(new Set(repairedQuestions.map((row) => row.topicSlug)).size).toBe(83);
+    expect(new Set(repairedQuestions.map((row) => row.topicSlug)).size).toBe(85);
     expect(statuses).toEqual(manifest.answerStatuses);
     expect(statuses).toEqual({
-      available: 3106,
+      available: 3554,
       ambiguous: 3,
-      'marks-to-all': 1,
+      'marks-to-all': 2,
       unsupported: 90
     });
     const taxonomyAudit = JSON.parse(
@@ -273,14 +306,27 @@ describe('bundled PYQ bank integrity', () => {
       classificationBasis: Record<string, number>;
     };
     expect(taxonomyAudit).toMatchObject({
-      questionCount: 3200,
-      uniqueQuestionCount: 3200,
+      questionCount: 3649,
+      uniqueQuestionCount: 3649,
       unclassifiedCount: 0,
       subjectCount: 14,
       topicCount: 95,
       manualCorrectionCount: 160
     });
     expect(taxonomyAudit.classificationBasis['manual-content-audit']).toBe(160);
+
+    for (const book of manifest.books) {
+      const rows = [...questionsById.values()].filter((row) => row.bookSlug === book.slug);
+      expect(rows).toHaveLength(book.count);
+      expect(book.subjects.reduce((total, subject) => total + subject.count, 0)).toBe(book.count);
+    }
+    const newlyImported = [...questionsById.values()].filter((row) =>
+      ['gate-it', 'gate-da-overlap'].includes(row.bookSlug)
+    );
+    expect(newlyImported).toHaveLength(449);
+    expect(
+      newlyImported.every((row) => ['available', 'marks-to-all'].includes(row.answerStatus))
+    ).toBe(true);
 
     const allQuestions = [...questionsById.values()];
     const goClassesCoaTest = allQuestions.filter((row) =>

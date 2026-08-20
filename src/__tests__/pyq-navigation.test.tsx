@@ -11,6 +11,7 @@ const USER = '00000000-0000-4000-8000-000000000001';
 const questions: PyqQuestion[] = [
   {
     id: 'gate-2026-set1-q1',
+    bookSlug: 'gate-cse',
     year: 2026,
     set: 1,
     number: '1',
@@ -31,6 +32,7 @@ const questions: PyqQuestion[] = [
   },
   {
     id: 'gate-2026-set1-q2',
+    bookSlug: 'gate-cse',
     year: 2026,
     set: 1,
     number: '2',
@@ -51,6 +53,7 @@ const questions: PyqQuestion[] = [
   },
   {
     id: 'gate-2026-set1-q3',
+    bookSlug: 'gate-cse',
     year: 2026,
     set: 1,
     number: '3',
@@ -76,6 +79,7 @@ const manifest: PyqManifest = {
   generatedAt: '2026-08-13T00:00:00.000Z',
   source: 'test',
   sourceUrl: 'https://gateoverflow.in',
+  defaultBookSlug: 'gate-cse',
   firstYear: 2026,
   lastYear: 2026,
   questionCount: 3,
@@ -89,6 +93,32 @@ const manifest: PyqManifest = {
       count: 3,
       file: '/pyq/discrete-mathematics.json',
       topics: [{ slug: 'propositional-logic', label: 'Propositional Logic', count: 3 }]
+    }
+  ],
+  books: [
+    {
+      slug: 'gate-cse',
+      label: 'GATE CSE Core',
+      shortLabel: 'GATE CSE',
+      description: 'Test archive',
+      difficultyFloor: 'gate',
+      sourceClass: 'official-exam',
+      source: 'test',
+      sourceUrl: 'https://gateoverflow.in',
+      count: 3,
+      firstYear: 2026,
+      lastYear: 2026,
+      answerStatuses: { available: 3, ambiguous: 0, 'marks-to-all': 0, unsupported: 0 },
+      years: [{ year: 2026, count: 3 }],
+      subjects: [
+        {
+          slug: 'discrete-mathematics',
+          label: 'Discrete Mathematics',
+          count: 3,
+          file: '/pyq/discrete-mathematics.json',
+          topics: [{ slug: 'propositional-logic', label: 'Propositional Logic', count: 3 }]
+        }
+      ]
     }
   ]
 };

@@ -2,7 +2,7 @@ import type { MarkDecision, Outcome, PyqSelectedAnswer, PyqSessionConfig } from 
 import { DEFAULT_TARGET_TIME_SEC, MARKS_TARGET_SEC } from '@/lib/constants';
 import { urlToDataUrl } from '@/lib/image';
 
-export const PYQ_BANK_QUESTION_COUNT = 3200;
+export const PYQ_BANK_QUESTION_COUNT = 3649;
 
 export type PyqQuestionType = 'MCQ' | 'MSQ' | 'NAT' | 'AMBIGUOUS' | 'MARKS_TO_ALL' | 'UNSUPPORTED';
 export type PyqAnswerStatus = 'available' | 'ambiguous' | 'marks-to-all' | 'unsupported';
@@ -15,11 +15,31 @@ export interface PyqSubjectManifest {
   topics: { slug: string; label: string; count: number }[];
 }
 
+export type PyqDifficultyFloor = 'gate' | 'above-gate';
+
+export interface PyqBookManifest {
+  slug: string;
+  label: string;
+  shortLabel: string;
+  description: string;
+  difficultyFloor: PyqDifficultyFloor;
+  sourceClass: 'official-exam' | 'audited-gate-prep';
+  source: string;
+  sourceUrl: string;
+  count: number;
+  firstYear: number;
+  lastYear: number;
+  answerStatuses: Record<PyqAnswerStatus, number>;
+  years: { year: number; count: number }[];
+  subjects: PyqSubjectManifest[];
+}
+
 export interface PyqManifest {
   bankVersion: string;
   generatedAt: string;
   source: string;
   sourceUrl: string;
+  defaultBookSlug: string;
   firstYear: number;
   lastYear: number;
   questionCount: number;
@@ -27,14 +47,24 @@ export interface PyqManifest {
   answerStatuses: Record<PyqAnswerStatus, number>;
   years: { year: number; count: number }[];
   subjects: PyqSubjectManifest[];
+  books: PyqBookManifest[];
 }
 
-type PyqManifestPayload = Omit<PyqManifest, 'subjects'> & {
+type PyqManifestPayload = Omit<PyqManifest, 'subjects' | 'books' | 'defaultBookSlug'> & {
+  defaultBookSlug?: string;
   subjects: Array<Omit<PyqSubjectManifest, 'topics'> & { topics?: PyqSubjectManifest['topics'] }>;
+  books?: Array<
+    Omit<PyqBookManifest, 'subjects'> & {
+      subjects: Array<
+        Omit<PyqSubjectManifest, 'topics'> & { topics?: PyqSubjectManifest['topics'] }
+      >;
+    }
+  >;
 };
 
 export interface PyqQuestion {
   id: string;
+  bookSlug: string;
   year: number;
   set: number | null;
   number: string;
@@ -63,7 +93,7 @@ interface SubjectPayload {
 
 const subjectCache = new Map<string, Promise<SubjectPayload>>();
 let manifestPromise: Promise<PyqManifest> | null = null;
-const PYQ_MANIFEST_SCHEMA = 'topics-v1';
+const PYQ_MANIFEST_SCHEMA = 'books-v1';
 
 const PYQ_MATH_DELIMITERS = [
   { left: '$$$', right: '$$$' },
@@ -244,12 +274,41 @@ export function loadPyqManifest(): Promise<PyqManifest> {
 }
 
 export function normalizePyqManifest(payload: PyqManifestPayload): PyqManifest {
-  return {
-    ...payload,
-    subjects: payload.subjects.map((subject) => ({
+  const normalizeSubjects = (
+    subjects: Array<
+      Omit<PyqSubjectManifest, 'topics'> & { topics?: PyqSubjectManifest['topics'] }
+    >
+  ): PyqSubjectManifest[] =>
+    subjects.map((subject) => ({
       ...subject,
       topics: Array.isArray(subject.topics) ? subject.topics : []
-    }))
+    }));
+  const subjects = normalizeSubjects(payload.subjects);
+  const books = Array.isArray(payload.books)
+    ? payload.books.map((book) => ({ ...book, subjects: normalizeSubjects(book.subjects) }))
+    : [
+        {
+          slug: 'gate-cse',
+          label: 'GATE CSE Core',
+          shortLabel: 'GATE CSE',
+          description: 'Legacy complete question archive.',
+          difficultyFloor: 'gate' as const,
+          sourceClass: 'official-exam' as const,
+          source: payload.source,
+          sourceUrl: payload.sourceUrl,
+          count: payload.questionCount,
+          firstYear: payload.firstYear,
+          lastYear: payload.lastYear,
+          answerStatuses: payload.answerStatuses,
+          years: payload.years,
+          subjects
+        }
+      ];
+  return {
+    ...payload,
+    defaultBookSlug: payload.defaultBookSlug ?? books[0].slug,
+    subjects,
+    books
   };
 }
 
@@ -298,6 +357,31 @@ export function matchesPyqTopicScope(
     config.subjectSlug === 'all' || question.subjectSlug === config.subjectSlug;
   const topicSlug = config.topicSlug ?? 'all';
   return subjectMatches && (topicSlug === 'all' || question.topicSlug === topicSlug);
+}
+
+export function inferPyqBookSlug(paperLabel: string): string {
+  const normalized = paperLabel.trim().toUpperCase();
+  if (normalized.startsWith('GATE IT ')) return 'gate-it';
+  if (normalized.startsWith('GATE DA ') || normalized.startsWith('GATE AI '))
+    return 'gate-da-overlap';
+  if (normalized.startsWith('GATE ECE ') || normalized.startsWith('GATE EE '))
+    return 'gate-cross-digital';
+  if (normalized.startsWith('GO CLASSES ')) return 'go-classes-coa';
+  return 'gate-cse';
+}
+
+export function pyqBookSlugForQuestion(
+  question: Pick<PyqQuestion, 'paperLabel'> & { bookSlug?: string }
+): string {
+  return question.bookSlug?.trim() || inferPyqBookSlug(question.paperLabel);
+}
+
+export function matchesPyqBookScope(
+  question: Pick<PyqQuestion, 'paperLabel'> & { bookSlug?: string },
+  config: Pick<PyqSessionConfig, 'bookSlug'>
+): boolean {
+  const bookSlug = config.bookSlug ?? 'all';
+  return bookSlug === 'all' || pyqBookSlugForQuestion(question) === bookSlug;
 }
 
 function normalizedChoices(value: PyqSelectedAnswer): string[] {

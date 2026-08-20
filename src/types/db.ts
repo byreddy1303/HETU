@@ -200,6 +200,8 @@ export type PyqSelectedAnswer = string | string[] | number | null;
 /** Immutable question-bank facts captured with a submitted attempt. */
 export interface PyqQuestionSnapshot {
   question_uid: string;
+  /** Missing only on v2 receipts created before source books shipped. */
+  book_slug?: string;
   year: number;
   set: number | null;
   number: string;
@@ -219,6 +221,8 @@ export interface PyqQuestionSnapshot {
 }
 
 export interface PyqSessionConfig {
+  /** Missing only on legacy sets created before source books shipped. */
+  bookSlug?: string;
   subjectSlug: string;
   /** Missing only on legacy sets created before topic-wise practice shipped. */
   topicSlug?: string;

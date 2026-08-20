@@ -112,6 +112,7 @@ async function seedDueQuestion(
 async function seedDuePyq(stage: ReattemptRow['stage'] = 'D3') {
   const pyq: PyqQuestion = {
     id: 'gate-2026-set1-q1',
+    bookSlug: 'gate-cse',
     year: 2026,
     set: 1,
     number: '1',
@@ -205,6 +206,7 @@ async function seedDuePyq(stage: ReattemptRow['stage'] = 'D3') {
 async function seedLegacyDuePyq() {
   const pyq: PyqQuestion = {
     id: 'go:1354',
+    bookSlug: 'gate-cse',
     year: 2005,
     set: null,
     number: '18',

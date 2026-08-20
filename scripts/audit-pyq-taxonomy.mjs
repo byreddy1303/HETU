@@ -5,6 +5,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
   classifyPyqQuestion,
+  PYQ_BANK_QUESTION_COUNT,
   PYQ_BANK_VERSION,
   PYQ_MANUAL_CLASSIFICATIONS,
   PYQ_TAXONOMY
@@ -32,7 +33,10 @@ function check(condition, message) {
 
 check(manifest.bankVersion === PYQ_BANK_VERSION, 'Manifest bank version is stale');
 check(audit.bankVersion === PYQ_BANK_VERSION, 'Taxonomy audit bank version is stale');
-check(questions.length === 3200, `Expected 3,200 questions, found ${questions.length}`);
+check(
+  questions.length === PYQ_BANK_QUESTION_COUNT,
+  `Expected ${PYQ_BANK_QUESTION_COUNT.toLocaleString()} questions, found ${questions.length}`
+);
 check(questionById.size === questions.length, 'Question IDs are not unique');
 check(manifest.subjects.length === PYQ_TAXONOMY.length, 'Manifest subject count is incomplete');
 check(
@@ -45,10 +49,26 @@ for (const payload of payloads) {
 }
 
 for (const question of questions) {
+  check(
+    manifest.books.some((book) => book.slug === question.bookSlug),
+    `${question.id} has unknown book ${question.bookSlug}`
+  );
   const expected = classifyPyqQuestion(question);
   check(
     question.subjectSlug === expected.subjectSlug && question.topicSlug === expected.topicSlug,
     `${question.id} is ${question.subjectSlug}/${question.topicSlug}; expected ${expected.subjectSlug}/${expected.topicSlug}`
+  );
+}
+
+check(manifest.defaultBookSlug === 'gate-cse', 'Default PYQ book is stale');
+check(manifest.books.length === 5, 'Manifest must expose exactly five GATE-level books');
+for (const book of manifest.books) {
+  const rows = questions.filter((question) => question.bookSlug === book.slug);
+  check(book.difficultyFloor === 'gate', `${book.slug} violates the GATE difficulty floor`);
+  check(rows.length === book.count, `${book.slug} question count is stale`);
+  check(
+    book.subjects.reduce((total, subject) => total + subject.count, 0) === book.count,
+    `${book.slug} subject counts are stale`
   );
 }
 

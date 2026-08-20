@@ -6,6 +6,7 @@ import process from 'node:process';
 import { fileURLToPath } from 'node:url';
 import {
   classifyPyqQuestion,
+  PYQ_BANK_QUESTION_COUNT,
   PYQ_BANK_VERSION,
   PYQ_MANUAL_CLASSIFICATIONS,
   PYQ_TAXONOMY
@@ -25,9 +26,9 @@ const questions = payloads.flatMap((payload) => payload.questions);
 const originalIds = new Set(questions.map((question) => question.id));
 const manualClassificationEntries = Object.entries(PYQ_MANUAL_CLASSIFICATIONS);
 
-if (questions.length !== 3200 || originalIds.size !== questions.length) {
+if (questions.length !== PYQ_BANK_QUESTION_COUNT || originalIds.size !== questions.length) {
   throw new Error(
-    `Expected 3,200 unique input questions, found ${questions.length} rows and ${originalIds.size} IDs`
+    `Expected ${PYQ_BANK_QUESTION_COUNT.toLocaleString()} unique input questions, found ${questions.length} rows and ${originalIds.size} IDs`
   );
 }
 
@@ -80,6 +81,47 @@ const subjects = PYQ_TAXONOMY.filter((subject) => grouped.has(subject.slug)).map
   };
 });
 
+const books = manifest.books.map((book) => {
+  const rows = classified.filter((question) => question.bookSlug === book.slug);
+  const years = [...new Set(rows.map((question) => question.year))]
+    .sort((a, b) => b - a)
+    .map((year) => ({
+      year,
+      count: rows.filter((question) => question.year === year).length
+    }));
+  return {
+    ...book,
+    count: rows.length,
+    firstYear: Math.min(...rows.map((question) => question.year)),
+    lastYear: Math.max(...rows.map((question) => question.year)),
+    answerStatuses: Object.fromEntries(
+      ['available', 'ambiguous', 'marks-to-all', 'unsupported'].map((status) => [
+        status,
+        rows.filter((question) => question.answerStatus === status).length
+      ])
+    ),
+    years,
+    subjects: PYQ_TAXONOMY.flatMap((subject) => {
+      const subjectRows = rows.filter((question) => question.subjectSlug === subject.slug);
+      if (subjectRows.length === 0) return [];
+      return [
+        {
+          slug: subject.slug,
+          label: subject.label,
+          count: subjectRows.length,
+          file: `/pyq/subjects/${subject.slug}.json`,
+          topics: subject.topics
+            .map((topic) => ({
+              ...topic,
+              count: subjectRows.filter((question) => question.topicSlug === topic.slug).length
+            }))
+            .filter((topic) => topic.count > 0)
+        }
+      ];
+    })
+  };
+});
+
 for (const subject of subjects) {
   await writeFile(
     path.join(OUTPUT, 'subjects', `${subject.slug}.json`),
@@ -108,7 +150,8 @@ const nextManifest = {
       classified.filter((question) => question.answerStatus === status).length
     ])
   ),
-  subjects
+  subjects,
+  books
 };
 await writeFile(manifestPath, `${JSON.stringify(nextManifest, null, 2)}\n`);
 const outputIds = new Set(classified.map((question) => question.id));

@@ -9,7 +9,12 @@ import type {
   SessionRow
 } from '@/types';
 import type { PyqQuestion } from '@/lib/pyq';
-import { evaluatePyqAnswer, pyqAnswerValueForLog } from '@/lib/pyq';
+import {
+  evaluatePyqAnswer,
+  inferPyqBookSlug,
+  pyqAnswerValueForLog,
+  pyqBookSlugForQuestion
+} from '@/lib/pyq';
 import { calendarDateInTimeZone, nowISO, uuid, uuidFromString } from '@/lib/utils';
 
 export function createPyqSessionRow(
@@ -91,6 +96,7 @@ export function pyqQuestionFromAttempt(attempt: PyqAttemptRow): PyqQuestion | nu
   if (attempt.capture_version !== 2 || !snapshot) return null;
   return {
     id: snapshot.question_uid,
+    bookSlug: snapshot.book_slug ?? inferPyqBookSlug(snapshot.paper_label),
     year: snapshot.year,
     set: snapshot.set,
     number: snapshot.number,
@@ -139,6 +145,7 @@ export function createPyqReattemptAttemptRow(args: {
     user_id: args.userId,
     bank_version: args.sourceAttempt.bank_version,
     config: {
+      bookSlug: pyqBookSlugForQuestion(args.question),
       subjectSlug: args.question.subjectSlug,
       topicSlug: args.question.topicSlug,
       fromYear: args.question.year,
@@ -321,6 +328,7 @@ export function pausePyqSession(session: PyqSessionRow, now = nowISO()): PyqSess
 export function pyqQuestionSnapshot(question: PyqQuestion): PyqQuestionSnapshot {
   return {
     question_uid: question.id,
+    book_slug: pyqBookSlugForQuestion(question),
     year: question.year,
     set: question.set,
     number: question.number,

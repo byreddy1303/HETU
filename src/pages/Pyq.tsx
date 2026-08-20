@@ -44,11 +44,13 @@ import { DEFAULT_TARGET_TIME_SEC, MARKS_TARGET_SEC } from '@/lib/constants';
 import {
   firstPyqImage,
   formatPyqAnswer,
+  inferPyqBookSlug,
   inferPyqDirectOutcome,
   pyqQuestionSnapshotDataUrl,
   resolvePyqJournalImageUrl,
   loadPyqManifest,
   loadPyqQuestions,
+  matchesPyqBookScope,
   matchesPyqTopicScope,
   pyqPlainText,
   pyqSourceRef,
@@ -89,6 +91,13 @@ function latestQuestionAttempt(
     if (attempts[index].question_uid === questionUid) return attempts[index];
   }
   return null;
+}
+
+function pyqAttemptBookSlug(attempt: PyqAttemptRow): string {
+  return (
+    attempt.question_snapshot?.book_slug ??
+    inferPyqBookSlug(attempt.question_snapshot?.paper_label ?? 'GATE CSE')
+  );
 }
 
 function answerInputType(question: PyqQuestion): 'MCQ' | 'MSQ' | 'NAT' {
@@ -145,13 +154,37 @@ function PracticeSetup({
   onDiscard: (session: PyqSessionRow) => void;
   onStart: () => void;
 }) {
+  const selectedBookSlug = config.bookSlug ?? manifest.defaultBookSlug;
+  const selectedBook = manifest.books.find((book) => book.slug === selectedBookSlug);
+  const catalogSubjects = selectedBook?.subjects ?? manifest.subjects;
+  const catalogYears = selectedBook?.years ?? manifest.years;
+  const catalogQuestionCount = selectedBook?.count ?? manifest.questionCount;
   const attemptedIds = useMemo(
-    () => new Set(attempts.map((attempt) => attempt.question_uid)),
-    [attempts]
+    () =>
+      new Set(
+        attempts
+          .filter(
+            (attempt) =>
+              selectedBookSlug === 'all' || pyqAttemptBookSlug(attempt) === selectedBookSlug
+          )
+          .map((attempt) => attempt.question_uid)
+      ),
+    [attempts, selectedBookSlug]
   );
+  const seenByBook = useMemo(() => {
+    const ids = new Map<string, Set<string>>();
+    for (const attempt of attempts) {
+      const bookSlug = pyqAttemptBookSlug(attempt);
+      const bookIds = ids.get(bookSlug) ?? new Set<string>();
+      bookIds.add(attempt.question_uid);
+      ids.set(bookSlug, bookIds);
+    }
+    return new Map([...ids].map(([bookSlug, bookIds]) => [bookSlug, bookIds.size]));
+  }, [attempts]);
   const seenBySubject = useMemo(() => {
     const ids = new Map<string, Set<string>>();
     for (const attempt of attempts) {
+      if (selectedBookSlug !== 'all' && pyqAttemptBookSlug(attempt) !== selectedBookSlug) continue;
       const subjectSlug =
         attempt.question_snapshot?.subject_slug ??
         manifest.subjects.find((subject) => subject.label === attempt.subject)?.slug ??
@@ -161,15 +194,26 @@ function PracticeSetup({
       ids.set(subjectSlug, subjectIds);
     }
     return new Map([...ids].map(([subject, subjectIds]) => [subject, subjectIds.size]));
-  }, [attempts, manifest.subjects]);
-  const selectedSubject = manifest.subjects.find((subject) => subject.slug === config.subjectSlug);
+  }, [attempts, manifest.subjects, selectedBookSlug]);
+  const selectedSubject = catalogSubjects.find((subject) => subject.slug === config.subjectSlug);
   const selectedTopics = selectedSubject?.topics ?? [];
   const selectedTopicSlug = config.topicSlug ?? 'all';
+  const selectBook = (bookSlug: string) => {
+    const book = manifest.books.find((candidate) => candidate.slug === bookSlug);
+    setConfig({
+      ...config,
+      bookSlug,
+      subjectSlug: 'all',
+      topicSlug: 'all',
+      fromYear: book?.firstYear ?? manifest.firstYear,
+      toYear: book?.lastYear ?? manifest.lastYear
+    });
+  };
   return (
     <div className="flex flex-col gap-4">
       <PageHeader
         title="GATE PYQs"
-        description="CSE papers from 1990–2026, plus in-syllabus ECE and EE Digital Logic."
+        description={`${manifest.questionCount.toLocaleString()} questions across ${manifest.books.length} books, each held to a GATE difficulty floor.`}
         showMobileMark={false}
       />
 
@@ -205,6 +249,95 @@ function PracticeSetup({
         </Card>
       )}
 
+      <Card>
+        <CardBody className="p-4">
+          <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
+            <div>
+              <p className="u-label">Choose a question book</p>
+              <p className="mt-1 text-[13px] text-text-muted">
+                Every book is GATE level; DA/AI and cross-branch books include only CSE-syllabus overlap.
+              </p>
+            </div>
+            <span className="u-num text-[11px] text-text-faint">
+              {manifest.books.length} audited books
+            </span>
+          </div>
+          <label className="block text-[12px] font-medium text-text-muted sm:hidden">
+            Question book
+            <Select
+              className="mt-1"
+              value={selectedBookSlug}
+              onChange={(event) => selectBook(event.target.value)}
+            >
+              <option value="all">All GATE-level books — {manifest.questionCount}</option>
+              {manifest.books.map((book) => (
+                <option key={book.slug} value={book.slug}>
+                  {book.label} — {book.count}
+                </option>
+              ))}
+            </Select>
+          </label>
+          <div className="hidden grid-cols-1 gap-2 sm:grid sm:grid-cols-2 xl:grid-cols-3">
+            <button
+              type="button"
+              onClick={() => selectBook('all')}
+              aria-pressed={selectedBookSlug === 'all'}
+              className={cn(
+                'min-h-[112px] rounded border p-3 text-left transition-all',
+                selectedBookSlug === 'all'
+                  ? 'border-accent/50 bg-accent-faint shadow-sm'
+                  : 'border-border bg-bg-raised hover:-translate-y-0.5 hover:border-border-hover'
+              )}
+            >
+              <span className="flex items-start justify-between gap-2">
+                <span className="text-[13.5px] font-semibold text-text">All books</span>
+                <Badge tone="accent">GATE+</Badge>
+              </span>
+              <span className="mt-2 block text-[11.5px] leading-relaxed text-text-muted">
+                Mix every admitted source while keeping the same test and logging flow.
+              </span>
+              <span className="u-num mt-2 block text-[11px] text-text-faint">
+                {attempts.length > 0 ? `${new Set(attempts.map((attempt) => attempt.question_uid)).size} / ` : ''}
+                {manifest.questionCount.toLocaleString()} questions
+              </span>
+            </button>
+            {manifest.books.map((book) => {
+              const active = selectedBookSlug === book.slug;
+              const seen = seenByBook.get(book.slug) ?? 0;
+              return (
+                <button
+                  key={book.slug}
+                  type="button"
+                  onClick={() => selectBook(book.slug)}
+                  aria-pressed={active}
+                  className={cn(
+                    'min-h-[112px] rounded border p-3 text-left transition-all',
+                    active
+                      ? 'border-accent/50 bg-accent-faint shadow-sm'
+                      : 'border-border bg-bg-raised hover:-translate-y-0.5 hover:border-border-hover'
+                  )}
+                >
+                  <span className="flex items-start justify-between gap-2">
+                    <span className="text-[13.5px] font-semibold leading-snug text-text">
+                      {book.label}
+                    </span>
+                    <Badge tone="accent">
+                      {book.difficultyFloor === 'above-gate' ? 'Above GATE' : 'GATE level'}
+                    </Badge>
+                  </span>
+                  <span className="mt-2 block text-[11.5px] leading-relaxed text-text-muted">
+                    {book.description}
+                  </span>
+                  <span className="u-num mt-2 block text-[11px] text-text-faint">
+                    {seen}/{book.count} seen · {book.firstYear}–{book.lastYear}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </CardBody>
+      </Card>
+
       <Card className="overflow-hidden">
         <div className="grid lg:grid-cols-[minmax(0,1.45fr)_minmax(300px,0.75fr)]">
           <div className="border-b border-border p-4 lg:border-b-0 lg:border-r">
@@ -212,11 +345,11 @@ function PracticeSetup({
               <div>
                 <p className="u-label">Choose a subject</p>
                 <p className="mt-1 text-[13px] text-text-muted">
-                  Each stack is a complete subject archive.
+                  Each stack is scoped to the selected question book.
                 </p>
               </div>
               <span className="u-num text-[12px] text-text-faint">
-                {attemptedIds.size.toLocaleString()} / {manifest.questionCount.toLocaleString()}{' '}
+                {attemptedIds.size.toLocaleString()} / {catalogQuestionCount.toLocaleString()}{' '}
                 seen
               </span>
             </div>
@@ -229,8 +362,8 @@ function PracticeSetup({
                   setConfig({ ...config, subjectSlug: event.target.value, topicSlug: 'all' })
                 }
               >
-                <option value="all">Mixed subjects — {manifest.questionCount} questions</option>
-                {manifest.subjects.map((subject) => (
+                <option value="all">Mixed subjects — {catalogQuestionCount} questions</option>
+                {catalogSubjects.map((subject) => (
                   <option key={subject.slug} value={subject.slug}>
                     {subject.label} — {subject.count}
                   </option>
@@ -255,11 +388,11 @@ function PracticeSetup({
                     Mixed subjects
                   </span>
                   <span className="u-num mt-1 block text-[11px] text-text-faint">
-                    {manifest.questionCount.toLocaleString()} questions
+                    {catalogQuestionCount.toLocaleString()} questions
                   </span>
                 </span>
               </button>
-              {manifest.subjects.map((subject) => {
+              {catalogSubjects.map((subject) => {
                 const active = config.subjectSlug === subject.slug;
                 const seen = seenBySubject.get(subject.slug) ?? 0;
                 return (
@@ -366,7 +499,7 @@ function PracticeSetup({
                     setConfig({ ...config, fromYear: Number(event.target.value) })
                   }
                 >
-                  {manifest.years
+                  {catalogYears
                     .slice()
                     .reverse()
                     .map(({ year }) => (
@@ -381,7 +514,7 @@ function PracticeSetup({
                   value={config.toYear}
                   onChange={(event) => setConfig({ ...config, toYear: Number(event.target.value) })}
                 >
-                  {manifest.years.map(({ year }) => (
+                  {catalogYears.map(({ year }) => (
                     <option key={year}>{year}</option>
                   ))}
                 </Select>
@@ -689,6 +822,7 @@ export default function Pyq() {
   const [manifest, setManifest] = useState<PyqManifest | null>(null);
   const [manifestError, setManifestError] = useState<string | null>(null);
   const [config, setConfig] = useState<AttemptConfig>(() => ({
+    bookSlug: 'gate-cse',
     subjectSlug: 'discrete-mathematics',
     topicSlug: 'all',
     fromYear: 1990,
@@ -776,6 +910,7 @@ export default function Pyq() {
             : null;
           return {
             ...current,
+            bookSlug: value.defaultBookSlug,
             subjectSlug: requested?.slug ?? current.subjectSlug,
             topicSlug: 'all',
             fromYear: value.firstYear,
@@ -925,6 +1060,7 @@ export default function Pyq() {
       }
       setConfig({
         ...session.config,
+        bookSlug: session.config.bookSlug ?? 'all',
         topicSlug: session.config.topicSlug ?? 'all',
         history: session.config.history ?? 'all'
       });
@@ -1032,14 +1168,17 @@ export default function Pyq() {
           'Save to journal or discard the unfinished PYQ set before starting another.'
         );
       }
+      const selectedBook = manifest.books.find((book) => book.slug === config.bookSlug);
+      const catalogSubjects = selectedBook?.subjects ?? manifest.subjects;
       const subjects =
         config.subjectSlug === 'all'
-          ? manifest.subjects
-          : manifest.subjects.filter((subject) => subject.slug === config.subjectSlug);
+          ? catalogSubjects
+          : catalogSubjects.filter((subject) => subject.slug === config.subjectSlug);
       const low = Math.min(config.fromYear, config.toYear);
       const high = Math.max(config.fromYear, config.toYear);
       let rows = (await loadPyqQuestions(subjects, manifest.bankVersion)).filter(
         (question) =>
+          matchesPyqBookScope(question, config) &&
           matchesPyqTopicScope(question, config) &&
           question.year >= low &&
           question.year <= high &&
@@ -1072,7 +1211,7 @@ export default function Pyq() {
       if (config.count !== 'all') rows = rows.slice(0, Number(config.count));
       if (rows.length === 0)
         throw new Error(
-          'No questions match those filters. Widen the subject, year, type, or history filter.'
+          'No questions match those filters. Widen the book, subject, year, type, or history filter.'
         );
       const session = createPyqSessionRow(userId!, manifest.bankVersion, config, rows);
       const plannerDate = searchParams.get('plannerDate');

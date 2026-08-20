@@ -8,6 +8,7 @@ import DailyQuote from '@/components/shared/DailyQuote';
 import Brand, { BrandMark } from '@/components/shared/Brand';
 import ThemeToggle from '@/components/shared/ThemeToggle';
 import OfflineBadge from '@/components/shared/OfflineBadge';
+import ImmersiveSoundToggle from '@/components/immersive/ImmersiveSoundToggle';
 import { useSyncBootstrap } from '@/hooks/useSync';
 import { SceneProvider } from '@/components/immersive/SceneProvider';
 import ImmersiveScene from '@/components/immersive/ImmersiveScene';
@@ -34,6 +35,7 @@ export default function Shell() {
           <ExamCountdown className="justify-self-center" />
           <div className="flex min-w-0 items-center justify-self-end gap-2">
             <OfflineBadge className="hidden max-w-16 truncate min-[360px]:inline" />
+            <ImmersiveSoundToggle className="hidden min-[390px]:inline-flex" />
             <ThemeToggle className="h-9 w-9" />
           </div>
         </header>

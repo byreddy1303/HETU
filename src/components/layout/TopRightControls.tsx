@@ -5,6 +5,7 @@ import { usePrefsStore } from '@/stores/prefs';
 import { EXAM_DATE_DEFAULT } from '@/lib/constants';
 import ThemeToggle from '@/components/shared/ThemeToggle';
 import OfflineBadge from '@/components/shared/OfflineBadge';
+import ImmersiveSoundToggle from '@/components/immersive/ImmersiveSoundToggle';
 import { cn } from '@/lib/utils';
 
 export function ExamCountdown({ className }: { className?: string }) {
@@ -36,6 +37,7 @@ export default function TopRightControls({ className }: { className?: string }) 
     <div className={`flex items-center gap-2 ${className ?? ''}`}>
       <OfflineBadge />
       <ExamCountdown />
+      <ImmersiveSoundToggle />
       <ThemeToggle className="h-9 w-9 shrink-0" />
     </div>
   );

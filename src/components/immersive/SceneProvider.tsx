@@ -3,6 +3,7 @@ import { useReducedMotion } from 'motion/react';
 import { sceneForPath } from '@/components/immersive/scene';
 import { resolveSceneQuality } from '@/components/immersive/performance';
 import { SceneContext } from '@/components/immersive/scene-context';
+import { usePrefsStore } from '@/stores/prefs';
 import {
   collectSceneElements,
   HOVER_SURFACE_SELECTOR,
@@ -14,8 +15,10 @@ import {
 export function SceneProvider({ pathname, children }: { pathname: string; children: ReactNode }) {
   const rootRef = useRef<HTMLDivElement>(null);
   const parallaxTargetsRef = useRef<HTMLElement[]>([]);
+  const previousOrderRef = useRef(0);
   const prefersReducedMotion = useReducedMotion();
   const reducedMotion = prefersReducedMotion === true;
+  const soundEnabled = usePrefsStore((state) => state.immersiveSoundEnabled);
   const config = useMemo(() => sceneForPath(pathname), [pathname]);
   const quality = useMemo(
     () =>
@@ -38,6 +41,32 @@ export function SceneProvider({ pathname, children }: { pathname: string; childr
     const root = rootRef.current;
     if (!root) return;
 
+    const previousOrder = previousOrderRef.current;
+    previousOrderRef.current = config.order;
+    root.dataset.sceneDirection = config.order < previousOrder ? 'reverse' : 'forward';
+    root.classList.remove('is-scene-arriving');
+    if (reducedMotion) return;
+
+    const frame = window.requestAnimationFrame(() => root.classList.add('is-scene-arriving'));
+    const timer = window.setTimeout(() => root.classList.remove('is-scene-arriving'), 920);
+    return () => {
+      window.cancelAnimationFrame(frame);
+      window.clearTimeout(timer);
+      root.classList.remove('is-scene-arriving');
+    };
+  }, [config.order, pathname, reducedMotion]);
+
+  useEffect(() => {
+    if (!soundEnabled) return;
+    void import('@/components/immersive/sound-engine').then((engine) => {
+      engine.playRouteCue(config.order);
+    });
+  }, [config.order, pathname, soundEnabled]);
+
+  useEffect(() => {
+    const root = rootRef.current;
+    if (!root) return;
+
     const elements = collectSceneElements(root);
     if (!elements) return;
 
@@ -49,6 +78,8 @@ export function SceneProvider({ pathname, children }: { pathname: string; childr
     let normalizedX = 0;
     let normalizedY = 0;
     let cappedScroll = Math.min(window.scrollY, 900);
+    let maxScroll = Math.max(document.documentElement.scrollHeight - window.innerHeight, 0);
+    let scrollProgress = maxScroll > 8 ? Math.min(window.scrollY / maxScroll, 1) : 0;
     let activeSurface: HTMLElement | null = null;
 
     const commitPointer = () => {
@@ -60,7 +91,7 @@ export function SceneProvider({ pathname, children }: { pathname: string; childr
       elements.cursor.style.transform = `translate3d(${latestX.toFixed(1)}px, ${latestY.toFixed(
         1
       )}px, 0) translate(-50%, -50%)`;
-      renderSceneTransforms(elements, normalizedX, normalizedY, cappedScroll);
+      renderSceneTransforms(elements, normalizedX, normalizedY, cappedScroll, scrollProgress);
       updateParallaxTargets(parallaxTargetsRef.current, activeSurface, normalizedX, normalizedY);
     };
 
@@ -80,7 +111,9 @@ export function SceneProvider({ pathname, children }: { pathname: string; childr
     const commitScroll = () => {
       scrollFrame = 0;
       cappedScroll = Math.min(window.scrollY, 900);
-      renderSceneTransforms(elements, normalizedX, normalizedY, cappedScroll);
+      maxScroll = Math.max(document.documentElement.scrollHeight - window.innerHeight, 0);
+      scrollProgress = maxScroll > 8 ? Math.min(window.scrollY / maxScroll, 1) : 0;
+      renderSceneTransforms(elements, normalizedX, normalizedY, cappedScroll, scrollProgress);
     };
 
     const onScroll = () => {
@@ -95,9 +128,21 @@ export function SceneProvider({ pathname, children }: { pathname: string; childr
       window.requestAnimationFrame(() => root.classList.add('is-scene-pulsing'));
       window.clearTimeout(pulseTimer);
       pulseTimer = window.setTimeout(() => root.classList.remove('is-scene-pulsing'), 760);
+
+      const target = event.target instanceof Element ? event.target : null;
+      const isInteractive = Boolean(
+        target?.closest('a, button, input, select, textarea, [role="button"], .u-tactile-tile')
+      );
+      if (soundEnabled && event.isPrimary && isInteractive) {
+        void import('@/components/immersive/sound-engine').then((engine) => {
+          engine.playInteractionCue(event.clientY / Math.max(window.innerHeight, 1));
+        });
+      }
     };
 
     const onResize = () => {
+      maxScroll = Math.max(document.documentElement.scrollHeight - window.innerHeight, 0);
+      scrollProgress = maxScroll > 8 ? Math.min(window.scrollY / maxScroll, 1) : 0;
       if (!pointerFrame) pointerFrame = window.requestAnimationFrame(commitPointer);
     };
 
@@ -108,13 +153,23 @@ export function SceneProvider({ pathname, children }: { pathname: string; childr
     const tracksPointer =
       !reducedMotion && window.matchMedia('(hover: hover) and (pointer: fine)').matches;
     if (!reducedMotion) {
-      renderSceneTransforms(elements, normalizedX, normalizedY, cappedScroll);
+      renderSceneTransforms(elements, normalizedX, normalizedY, cappedScroll, scrollProgress);
       if (tracksPointer) window.addEventListener('pointermove', onPointerMove, { passive: true });
       window.addEventListener('scroll', onScroll, { passive: true });
       window.addEventListener('resize', onResize, { passive: true });
     }
+    if (reducedMotion) renderSceneTransforms(elements, 0, 0, 0, scrollProgress);
     window.addEventListener('pointerdown', onPointerDown, { passive: true });
     document.addEventListener('visibilitychange', onVisibilityChange);
+    const resizeObserver =
+      reducedMotion || typeof ResizeObserver === 'undefined'
+        ? null
+        : new ResizeObserver(() => {
+            maxScroll = Math.max(document.documentElement.scrollHeight - window.innerHeight, 0);
+            scrollProgress = maxScroll > 8 ? Math.min(window.scrollY / maxScroll, 1) : 0;
+            if (!scrollFrame) scrollFrame = window.requestAnimationFrame(commitScroll);
+          });
+    resizeObserver?.observe(document.documentElement);
 
     return () => {
       if (tracksPointer) window.removeEventListener('pointermove', onPointerMove);
@@ -122,11 +177,13 @@ export function SceneProvider({ pathname, children }: { pathname: string; childr
       window.removeEventListener('scroll', onScroll);
       window.removeEventListener('resize', onResize);
       document.removeEventListener('visibilitychange', onVisibilityChange);
+      resizeObserver?.disconnect();
+      activeSurface?.style.removeProperty('transform');
       if (pointerFrame) window.cancelAnimationFrame(pointerFrame);
       if (scrollFrame) window.cancelAnimationFrame(scrollFrame);
       window.clearTimeout(pulseTimer);
     };
-  }, [pathname, reducedMotion]);
+  }, [pathname, reducedMotion, soundEnabled]);
 
   const value = useMemo(
     () => ({ config, quality, reducedMotion }),

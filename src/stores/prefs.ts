@@ -26,6 +26,7 @@ export interface Preferences {
   showCountdown: boolean;
   fontScale: FontScale;
   hapticsEnabled: boolean;
+  immersiveSoundEnabled: boolean;
 
   // Backup nudge
   backupReminderDays: 0 | 7 | 30;
@@ -44,6 +45,7 @@ export const DEFAULT_PREFERENCES: Preferences = {
   showCountdown: true,
   fontScale: 'normal',
   hapticsEnabled: true,
+  immersiveSoundEnabled: false,
   backupReminderDays: 30,
   lastBackupAt: null
 };

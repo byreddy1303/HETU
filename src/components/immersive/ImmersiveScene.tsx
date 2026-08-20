@@ -1,4 +1,5 @@
 import type { CSSProperties } from 'react';
+import DeferredAtmosphere from '@/components/immersive/DeferredAtmosphere';
 import { useImmersiveScene } from '@/components/immersive/scene-context';
 
 export default function ImmersiveScene() {
@@ -6,10 +7,14 @@ export default function ImmersiveScene() {
 
   return (
     <div className="immersive-scene" aria-hidden="true">
+      <DeferredAtmosphere world={config.world} />
       <div className="immersive-scene__wash" />
       <div className="immersive-scene__grid" />
       <div className="immersive-scene__cursor" />
       <div className="immersive-scene__pulse" />
+      <div className="immersive-scene__arrival">
+        <span />
+      </div>
 
       <svg className="immersive-thread" viewBox="0 0 1440 1000" preserveAspectRatio="none">
         <path
@@ -66,6 +71,24 @@ export default function ImmersiveScene() {
 
       <div className="immersive-scene__axis immersive-scene__axis--x">EVIDENCE → ACTION</div>
       <div className="immersive-scene__axis immersive-scene__axis--y">CAUSE / RECALL / PROOF</div>
+
+      <div className="immersive-journey">
+        <span className="immersive-journey__caption">Journey</span>
+        <div className="immersive-journey__track">
+          <span className="immersive-journey__fill" />
+        </div>
+        <div className="immersive-journey__steps">
+          {config.journey.map((step, index) => (
+            <span className="immersive-journey__step" data-step={index} key={step}>
+              <i />
+              <b>{step}</b>
+            </span>
+          ))}
+        </div>
+      </div>
+      <div className="immersive-journey-mobile">
+        <span className="immersive-journey-mobile__fill" />
+      </div>
     </div>
   );
 }

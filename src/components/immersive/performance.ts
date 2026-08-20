@@ -11,8 +11,8 @@ export function resolveSceneQuality(
 ): SceneQuality {
   if (reducedMotion) return 'essential';
   if (!navigatorLike) return 'balanced';
+  if (navigatorLike.connection?.saveData) return 'essential';
   if (
-    navigatorLike.connection?.saveData ||
     (navigatorLike.deviceMemory !== undefined && navigatorLike.deviceMemory <= 4) ||
     navigatorLike.hardwareConcurrency <= 4
   ) {

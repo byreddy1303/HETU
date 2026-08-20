@@ -212,6 +212,12 @@ export default function Settings() {
               value={prefs.hapticsEnabled}
               onChange={(v) => prefs.set('hapticsEnabled', v)}
             />
+            <ToggleRow
+              label="Immersive sound"
+              hint="Optional, quiet interface cues. Sound starts only after you interact."
+              value={prefs.immersiveSoundEnabled}
+              onChange={(v) => prefs.set('immersiveSoundEnabled', v)}
+            />
           </div>
           <div className="flex flex-col gap-3">
             <SegmentField

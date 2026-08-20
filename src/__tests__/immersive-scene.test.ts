@@ -30,6 +30,7 @@ describe('authenticated immersive scene routing', () => {
 
     expect(scene.world).toBe(world);
     expect(scene.nodes.length).toBeGreaterThanOrEqual(4);
+    expect(scene.journey).toHaveLength(4);
     expect(scene.title).not.toHaveLength(0);
   });
 });
@@ -52,7 +53,7 @@ describe('immersive scene performance governor', () => {
         hardwareConcurrency: 12,
         connection: { saveData: true }
       } as Navigator & { connection: { saveData: boolean } })
-    ).toBe('balanced');
+    ).toBe('essential');
   });
 
   it('uses the full scene on capable devices', () => {
@@ -110,5 +111,42 @@ describe('immersive scene compositor runtime', () => {
     expect(hero.style.getPropertyPriority('transform')).toBe('important');
     expect(hero.style.transform).toContain('translate3d(0.90px, -3px, 18px)');
     expect(metric.style.transform).toBe('rotateZ(0.3deg) translate3d(2.00px, 1px, 0)');
+  });
+
+  it('advances the evidence journey without a React render', () => {
+    document.body.innerHTML = `
+      <div id="root">
+        <div class="immersive-scene">
+          <div class="immersive-scene__wash"></div>
+          <div class="immersive-scene__grid"></div>
+          <div class="immersive-scene__cursor"></div>
+          <div class="immersive-scene__pulse"></div>
+          <svg class="immersive-thread"></svg>
+          <div class="immersive-focus-core"></div>
+          <span class="immersive-journey__fill"></span>
+          <span class="immersive-journey-mobile__fill"></span>
+          <span class="immersive-journey__step"></span>
+          <span class="immersive-journey__step"></span>
+          <span class="immersive-journey__step"></span>
+          <span class="immersive-journey__step"></span>
+        </div>
+      </div>
+    `;
+
+    const root = document.querySelector<HTMLElement>('#root');
+    const elements = collectSceneElements(root!);
+    expect(elements).not.toBeNull();
+
+    renderSceneTransforms(elements!, 0, 0, 0, 0.63);
+
+    expect(elements!.journeyFill?.style.transform).toBe('scaleY(0.6300)');
+    expect(elements!.journeyMobileFill?.style.transform).toBe('scaleX(0.6300)');
+    expect(elements!.journeySteps.map((step) => step.dataset.state)).toEqual([
+      'passed',
+      'passed',
+      'current',
+      'waiting'
+    ]);
+    expect(elements!.scene.dataset.chapter).toBe('2');
   });
 });

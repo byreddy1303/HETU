@@ -21,6 +21,8 @@ export interface ImmersiveSceneConfig {
   eyebrow: string;
   title: string;
   index: string;
+  order: number;
+  journey: readonly [string, string, string, string];
   nodes: SceneNode[];
 }
 
@@ -29,6 +31,8 @@ const WORLDS: Record<SceneWorld, Omit<ImmersiveSceneConfig, 'world'>> = {
     eyebrow: 'LIVE EVIDENCE WORLD',
     title: 'Readiness observatory',
     index: '00 / HOME',
+    order: 0,
+    journey: ['Observe', 'Isolate', 'Prioritize', 'Act'],
     nodes: [
       { code: 'R', label: 'clean recall', position: 'north-east', depth: 2 },
       { code: 'RBS', label: 'slow route', position: 'mid-left', depth: 1 },
@@ -41,6 +45,8 @@ const WORLDS: Record<SceneWorld, Omit<ImmersiveSceneConfig, 'world'>> = {
     eyebrow: 'PRIORITY FIELD',
     title: 'The next useful action',
     index: '01 / DO NOW',
+    order: 1,
+    journey: ['Orient', 'Choose', 'Commit', 'Complete'],
     nodes: [
       { code: '01', label: 'due recall', position: 'north-east', depth: 3 },
       { code: '02', label: 'unfinished', position: 'mid-left', depth: 1 },
@@ -52,6 +58,8 @@ const WORLDS: Record<SceneWorld, Omit<ImmersiveSceneConfig, 'world'>> = {
     eyebrow: 'QUESTION ARCHIVE',
     title: 'Past papers in motion',
     index: '02 / PRACTICE',
+    order: 2,
+    journey: ['Search', 'Solve', 'Diagnose', 'Return'],
     nodes: [
       { code: 'PYQ', label: 'question bank', position: 'north-east', depth: 2 },
       { code: 'TAG', label: 'evidence marks', position: 'mid-left', depth: 3 },
@@ -63,6 +71,8 @@ const WORLDS: Record<SceneWorld, Omit<ImmersiveSceneConfig, 'world'>> = {
     eyebrow: 'FOCUS CHAMBER',
     title: 'One question at a time',
     index: '03 / SESSION',
+    order: 3,
+    journey: ['Read', 'Construct', 'Commit', 'Review'],
     nodes: [
       { code: 'Q', label: 'active prompt', position: 'north-east', depth: 1 },
       { code: 'T+', label: 'elapsed time', position: 'mid-left', depth: 3 },
@@ -74,6 +84,8 @@ const WORLDS: Record<SceneWorld, Omit<ImmersiveSceneConfig, 'world'>> = {
     eyebrow: 'RECALL ORBIT',
     title: 'Return until it holds',
     index: '04 / RE-ATTEMPT',
+    order: 4,
+    journey: ['Retrieve', 'Compare', 'Repair', 'Prove'],
     nodes: [
       { code: 'D1', label: 'first return', position: 'north-east', depth: 2 },
       { code: 'D3', label: 'spacing', position: 'mid-right', depth: 3 },
@@ -85,6 +97,8 @@ const WORLDS: Record<SceneWorld, Omit<ImmersiveSceneConfig, 'world'>> = {
     eyebrow: 'STUDY CARTOGRAPHY',
     title: 'Territory, time, direction',
     index: '05 / PLAN',
+    order: 5,
+    journey: ['Map', 'Budget', 'Schedule', 'Protect'],
     nodes: [
       { code: 'TOC', label: 'subject territory', position: 'north-east', depth: 2 },
       { code: 'WK', label: 'weekly constraint', position: 'mid-left', depth: 1 },
@@ -96,6 +110,8 @@ const WORLDS: Record<SceneWorld, Omit<ImmersiveSceneConfig, 'world'>> = {
     eyebrow: 'EVIDENCE LEDGER',
     title: 'A record that teaches back',
     index: '06 / LIBRARY',
+    order: 6,
+    journey: ['Capture', 'Diagnose', 'Connect', 'Recall'],
     nodes: [
       { code: 'WHY', label: 'root cause', position: 'north-east', depth: 2 },
       { code: 'FX', label: 'formula memory', position: 'mid-left', depth: 1 },
@@ -107,6 +123,8 @@ const WORLDS: Record<SceneWorld, Omit<ImmersiveSceneConfig, 'world'>> = {
     eyebrow: 'SHARED SIGNAL',
     title: 'Focused study, together',
     index: '07 / BUDDY',
+    order: 7,
+    journey: ['Signal', 'Align', 'Focus', 'Debrief'],
     nodes: [
       { code: 'LIVE', label: 'presence', position: 'north-east', depth: 3 },
       { code: 'SYNC', label: 'shared focus', position: 'mid-left', depth: 1 },
@@ -118,6 +136,8 @@ const WORLDS: Record<SceneWorld, Omit<ImmersiveSceneConfig, 'world'>> = {
     eyebrow: 'MEASUREMENT FIELD',
     title: 'Turn confidence into signal',
     index: '08 / ANALYSIS',
+    order: 8,
+    journey: ['Measure', 'Compare', 'Adjust', 'Verify'],
     nodes: [
       { code: 'Δ', label: 'movement', position: 'north-east', depth: 2 },
       { code: 'CAL', label: 'confidence gap', position: 'mid-left', depth: 3 },

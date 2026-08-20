@@ -10,6 +10,7 @@ export const PARALLAX_TARGET_SELECTOR = [
 export const HOVER_SURFACE_SELECTOR = '.u-panel, .native-learning-tips';
 
 export interface SceneElements {
+  scene: HTMLElement;
   wash: HTMLElement;
   grid: HTMLElement;
   thread: SVGElement;
@@ -18,6 +19,9 @@ export interface SceneElements {
   evidence: HTMLElement[];
   cursor: HTMLElement;
   pulse: HTMLElement;
+  journeyFill: HTMLElement | null;
+  journeyMobileFill: HTMLElement | null;
+  journeySteps: HTMLElement[];
 }
 
 export function collectSceneElements(root: HTMLElement): SceneElements | null {
@@ -32,6 +36,7 @@ export function collectSceneElements(root: HTMLElement): SceneElements | null {
   if (!scene || !wash || !grid || !thread || !core || !cursor || !pulse) return null;
 
   return {
+    scene,
     wash,
     grid,
     thread,
@@ -39,7 +44,10 @@ export function collectSceneElements(root: HTMLElement): SceneElements | null {
     core,
     evidence: Array.from(scene.querySelectorAll<HTMLElement>('.immersive-evidence')),
     cursor,
-    pulse
+    pulse,
+    journeyFill: scene.querySelector<HTMLElement>('.immersive-journey__fill'),
+    journeyMobileFill: scene.querySelector<HTMLElement>('.immersive-journey-mobile__fill'),
+    journeySteps: Array.from(scene.querySelectorAll<HTMLElement>('.immersive-journey__step'))
   };
 }
 
@@ -56,7 +64,8 @@ export function renderSceneTransforms(
   elements: SceneElements,
   normalizedX: number,
   normalizedY: number,
-  scroll: number
+  scroll: number,
+  scrollProgress = 0
 ) {
   const farX = normalizedX * 4;
   const farY = normalizedY * 3;
@@ -101,6 +110,29 @@ export function renderSceneTransforms(
       2
     )}px, 0) rotate(${evidenceRotation(node)}deg)`;
   }
+
+  renderSceneJourney(elements, scrollProgress);
+}
+
+export function renderSceneJourney(elements: SceneElements, progress: number) {
+  const boundedProgress = Math.max(0, Math.min(progress, 1));
+  const currentStep = Math.min(3, Math.floor(boundedProgress * 4));
+
+  if (elements.journeyFill) {
+    elements.journeyFill.style.transform = `scaleY(${boundedProgress.toFixed(4)})`;
+  }
+  if (elements.journeyMobileFill) {
+    elements.journeyMobileFill.style.transform = `scaleX(${boundedProgress.toFixed(4)})`;
+  }
+
+  for (let index = 0; index < elements.journeySteps.length; index += 1) {
+    const step = elements.journeySteps[index];
+    const state = index === currentStep ? 'current' : index < currentStep ? 'passed' : 'waiting';
+    if (step.dataset.state !== state) step.dataset.state = state;
+  }
+
+  const chapter = String(currentStep);
+  if (elements.scene.dataset.chapter !== chapter) elements.scene.dataset.chapter = chapter;
 }
 
 export function updateParallaxTargets(

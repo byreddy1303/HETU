@@ -1,15 +1,15 @@
 {
-  "bankVersion": "gate-and-cs-exams-1990-2026-v9",
-  "generatedAt": "2026-08-20T10:32:58.994Z",
+  "bankVersion": "gate-and-cs-exams-1990-2026-v10",
+  "generatedAt": "2026-08-22T04:57:49.688Z",
   "source": "Audited GATE, ISRO, IIIT-H PGEE sample, TIFR GS, CMI and UGC NET Computer Science archives plus GO Classes COA topic tests",
   "sourceUrl": "https://gateqa.in",
   "defaultBookSlug": "gate-cse",
   "firstYear": 1990,
   "lastYear": 2026,
-  "questionCount": 4210,
+  "questionCount": 4334,
   "imageCount": 706,
   "answerStatuses": {
-    "available": 4115,
+    "available": 4239,
     "ambiguous": 3,
     "marks-to-all": 2,
     "unsupported": 90
@@ -29,47 +29,47 @@
     },
     {
       "year": 2023,
-      "count": 140
+      "count": 155
     },
     {
       "year": 2022,
-      "count": 88
+      "count": 112
     },
     {
       "year": 2021,
-      "count": 142
+      "count": 151
     },
     {
       "year": 2020,
-      "count": 73
+      "count": 83
     },
     {
       "year": 2019,
-      "count": 65
+      "count": 74
     },
     {
       "year": 2018,
-      "count": 79
+      "count": 89
     },
     {
       "year": 2017,
-      "count": 172
+      "count": 181
     },
     {
       "year": 2016,
-      "count": 173
+      "count": 183
     },
     {
       "year": 2015,
-      "count": 254
+      "count": 264
     },
     {
       "year": 2014,
-      "count": 267
+      "count": 275
     },
     {
       "year": 2013,
-      "count": 85
+      "count": 95
     },
     {
       "year": 2012,
@@ -181,28 +181,28 @@
     {
       "slug": "discrete-mathematics",
       "label": "Discrete Mathematics",
-      "count": 359,
+      "count": 409,
       "file": "/pyq/subjects/discrete-mathematics.json",
       "topics": [
         {
           "slug": "propositional-logic",
           "label": "Propositional Logic",
-          "count": 79
+          "count": 92
         },
         {
           "slug": "set-theory",
           "label": "Set Theory",
-          "count": 35
+          "count": 37
         },
         {
           "slug": "relation",
           "label": "Relation",
-          "count": 26
+          "count": 30
         },
         {
           "slug": "functions",
           "label": "Functions",
-          "count": 28
+          "count": 31
         },
         {
           "slug": "lattice",
@@ -212,40 +212,40 @@
         {
           "slug": "group-theory",
           "label": "Group Theory",
-          "count": 33
+          "count": 34
         },
         {
           "slug": "graph-theory",
           "label": "Graph Theory",
-          "count": 77
+          "count": 90
         },
         {
           "slug": "planar-graph",
           "label": "Planar Graph",
-          "count": 14
+          "count": 15
         },
         {
           "slug": "combination",
           "label": "Combination",
-          "count": 48
+          "count": 60
         },
         {
           "slug": "recurrence",
           "label": "Recurrence",
-          "count": 6
+          "count": 7
         }
       ]
     },
     {
       "slug": "engineering-mathematics",
       "label": "Engineering Mathematics",
-      "count": 733,
+      "count": 750,
       "file": "/pyq/subjects/engineering-mathematics.json",
       "topics": [
         {
           "slug": "linear-algebra",
           "label": "Linear Algebra",
-          "count": 350
+          "count": 353
         },
         {
           "slug": "calculus",
@@ -255,7 +255,7 @@
         {
           "slug": "probability-statistics",
           "label": "Probability & Statistics",
-          "count": 286
+          "count": 300
         }
       ]
     },
@@ -343,7 +343,7 @@
     {
       "slug": "c-programming",
       "label": "C Programming",
-      "count": 145,
+      "count": 154,
       "file": "/pyq/subjects/c-programming.json",
       "topics": [
         {
@@ -359,24 +359,24 @@
         {
           "slug": "loops",
           "label": "Loops",
-          "count": 18
+          "count": 24
         },
         {
           "slug": "array-and-pointer",
           "label": "Array and Pointer",
-          "count": 48
+          "count": 50
         },
         {
           "slug": "function",
           "label": "Function",
-          "count": 58
+          "count": 59
         }
       ]
     },
     {
       "slug": "data-structure",
       "label": "Data Structure",
-      "count": 242,
+      "count": 245,
       "file": "/pyq/subjects/data-structure.json",
       "topics": [
         {
@@ -397,12 +397,12 @@
         {
           "slug": "queue",
           "label": "Queue",
-          "count": 12
+          "count": 13
         },
         {
           "slug": "binary-tree",
           "label": "Binary Tree",
-          "count": 41
+          "count": 42
         },
         {
           "slug": "binary-search-tree",
@@ -427,7 +427,7 @@
         {
           "slug": "heap-tree",
           "label": "Heap Tree",
-          "count": 30
+          "count": 31
         },
         {
           "slug": "n-ary-tree",
@@ -444,18 +444,18 @@
     {
       "slug": "algorithms",
       "label": "Algorithms",
-      "count": 346,
+      "count": 369,
       "file": "/pyq/subjects/algorithms.json",
       "topics": [
         {
           "slug": "asymptotic-notation",
           "label": "Asymptotic Notation",
-          "count": 99
+          "count": 109
         },
         {
           "slug": "recurrence-relation",
           "label": "Recurrence Relation",
-          "count": 53
+          "count": 54
         },
         {
           "slug": "divide-and-conquer",
@@ -465,12 +465,12 @@
         {
           "slug": "sorting",
           "label": "Sorting",
-          "count": 52
+          "count": 58
         },
         {
           "slug": "greedy-technique",
           "label": "Greedy Technique",
-          "count": 12
+          "count": 14
         },
         {
           "slug": "minimum-spanning-tree",
@@ -480,7 +480,7 @@
         {
           "slug": "shortest-path",
           "label": "Shortest Path",
-          "count": 20
+          "count": 24
         },
         {
           "slug": "graph-traversal",
@@ -497,13 +497,13 @@
     {
       "slug": "theory-of-computation",
       "label": "Theory of Computation",
-      "count": 287,
+      "count": 306,
       "file": "/pyq/subjects/theory-of-computation.json",
       "topics": [
         {
           "slug": "regular-expression",
           "label": "Regular Expression",
-          "count": 23
+          "count": 29
         },
         {
           "slug": "regular-grammar",
@@ -513,22 +513,22 @@
         {
           "slug": "regular-language",
           "label": "Regular Language",
-          "count": 57
+          "count": 62
         },
         {
           "slug": "finite-automata",
           "label": "Finite Automata",
-          "count": 71
+          "count": 73
         },
         {
           "slug": "context-free-grammar",
           "label": "Context Free Grammar",
-          "count": 9
+          "count": 10
         },
         {
           "slug": "context-free-language",
           "label": "Context Free Language",
-          "count": 48
+          "count": 51
         },
         {
           "slug": "push-down-automata",
@@ -538,7 +538,7 @@
         {
           "slug": "recursive-language",
           "label": "Recursive Language",
-          "count": 27
+          "count": 28
         },
         {
           "slug": "turing-machine",
@@ -548,14 +548,14 @@
         {
           "slug": "undecidability",
           "label": "Undecidability",
-          "count": 27
+          "count": 28
         }
       ]
     },
     {
       "slug": "compiler-design",
       "label": "Compiler Design",
-      "count": 183,
+      "count": 185,
       "file": "/pyq/subjects/compiler-design.json",
       "topics": [
         {
@@ -581,7 +581,7 @@
         {
           "slug": "runtime-environment",
           "label": "Runtime Environment",
-          "count": 18
+          "count": 20
         },
         {
           "slug": "matching",
@@ -593,7 +593,7 @@
     {
       "slug": "operating-systems",
       "label": "Operating Systems",
-      "count": 324,
+      "count": 325,
       "file": "/pyq/subjects/operating-systems.json",
       "topics": [
         {
@@ -609,7 +609,7 @@
         {
           "slug": "process-synchronization",
           "label": "Process Synchronization",
-          "count": 52
+          "count": 53
         },
         {
           "slug": "deadlock",
@@ -2903,16 +2903,16 @@
       "slug": "tifr-gs-cs",
       "label": "TIFR GS Computer Science",
       "shortLabel": "TIFR GS CS",
-      "description": "Recent official CS sections with marked solutions; diagram-dependent items are excluded.",
+      "description": "Official 2022–2026 CS sections with marked solutions; diagram-dependent items are excluded.",
       "difficultyFloor": "above-gate",
       "sourceClass": "official-exam",
       "source": "TIFR Graduate School Computer Science",
       "sourceUrl": "https://main.tifr.res.in/academics/past_question_papers.php",
-      "count": 36,
-      "firstYear": 2024,
+      "count": 65,
+      "firstYear": 2022,
       "lastYear": 2026,
       "answerStatuses": {
-        "available": 36,
+        "available": 65,
         "ambiguous": 0,
         "marks-to-all": 0,
         "unsupported": 0
@@ -2929,19 +2929,27 @@
         {
           "year": 2024,
           "count": 11
+        },
+        {
+          "year": 2023,
+          "count": 15
+        },
+        {
+          "year": 2022,
+          "count": 14
         }
       ],
       "subjects": [
         {
           "slug": "discrete-mathematics",
           "label": "Discrete Mathematics",
-          "count": 10,
+          "count": 21,
           "file": "/pyq/subjects/discrete-mathematics.json",
           "topics": [
             {
               "slug": "propositional-logic",
               "label": "Propositional Logic",
-              "count": 1
+              "count": 3
             },
             {
               "slug": "set-theory",
@@ -2951,17 +2959,22 @@
             {
               "slug": "functions",
               "label": "Functions",
-              "count": 2
+              "count": 3
+            },
+            {
+              "slug": "group-theory",
+              "label": "Group Theory",
+              "count": 1
             },
             {
               "slug": "graph-theory",
               "label": "Graph Theory",
-              "count": 3
+              "count": 7
             },
             {
               "slug": "combination",
               "label": "Combination",
-              "count": 2
+              "count": 5
             },
             {
               "slug": "recurrence",
@@ -2973,13 +2986,18 @@
         {
           "slug": "engineering-mathematics",
           "label": "Engineering Mathematics",
-          "count": 3,
+          "count": 7,
           "file": "/pyq/subjects/engineering-mathematics.json",
           "topics": [
             {
               "slug": "linear-algebra",
               "label": "Linear Algebra",
-              "count": 3
+              "count": 6
+            },
+            {
+              "slug": "probability-statistics",
+              "label": "Probability & Statistics",
+              "count": 1
             }
           ]
         },
@@ -2999,9 +3017,19 @@
         {
           "slug": "data-structure",
           "label": "Data Structure",
-          "count": 1,
+          "count": 3,
           "file": "/pyq/subjects/data-structure.json",
           "topics": [
+            {
+              "slug": "queue",
+              "label": "Queue",
+              "count": 1
+            },
+            {
+              "slug": "binary-tree",
+              "label": "Binary Tree",
+              "count": 1
+            },
             {
               "slug": "hashing",
               "label": "Hashing",
@@ -3012,18 +3040,18 @@
         {
           "slug": "algorithms",
           "label": "Algorithms",
-          "count": 16,
+          "count": 24,
           "file": "/pyq/subjects/algorithms.json",
           "topics": [
             {
               "slug": "asymptotic-notation",
               "label": "Asymptotic Notation",
-              "count": 4
+              "count": 7
             },
             {
               "slug": "recurrence-relation",
               "label": "Recurrence Relation",
-              "count": 4
+              "count": 5
             },
             {
               "slug": "divide-and-conquer",
@@ -3033,12 +3061,22 @@
             {
               "slug": "sorting",
               "label": "Sorting",
+              "count": 3
+            },
+            {
+              "slug": "greedy-technique",
+              "label": "Greedy Technique",
               "count": 1
             },
             {
               "slug": "minimum-spanning-tree",
               "label": "Minimum Spanning Tree",
               "count": 3
+            },
+            {
+              "slug": "shortest-path",
+              "label": "Shortest Path",
+              "count": 1
             },
             {
               "slug": "graph-traversal",
@@ -3055,18 +3093,28 @@
         {
           "slug": "theory-of-computation",
           "label": "Theory of Computation",
-          "count": 5,
+          "count": 9,
           "file": "/pyq/subjects/theory-of-computation.json",
           "topics": [
+            {
+              "slug": "regular-expression",
+              "label": "Regular Expression",
+              "count": 1
+            },
             {
               "slug": "regular-language",
               "label": "Regular Language",
               "count": 1
             },
             {
+              "slug": "context-free-grammar",
+              "label": "Context Free Grammar",
+              "count": 1
+            },
+            {
               "slug": "context-free-language",
               "label": "Context Free Language",
-              "count": 1
+              "count": 2
             },
             {
               "slug": "push-down-automata",
@@ -3076,7 +3124,7 @@
             {
               "slug": "recursive-language",
               "label": "Recursive Language",
-              "count": 1
+              "count": 2
             },
             {
               "slug": "turing-machine",
@@ -3096,11 +3144,11 @@
       "sourceClass": "official-exam",
       "source": "Chennai Mathematical Institute Computer Science",
       "sourceUrl": "https://www.cmi.ac.in/admissions/syllabus.php",
-      "count": 27,
-      "firstYear": 2023,
+      "count": 122,
+      "firstYear": 2013,
       "lastYear": 2025,
       "answerStatuses": {
-        "available": 27,
+        "available": 122,
         "ambiguous": 0,
         "marks-to-all": 0,
         "unsupported": 0
@@ -3117,78 +3165,171 @@
         {
           "year": 2023,
           "count": 9
+        },
+        {
+          "year": 2022,
+          "count": 10
+        },
+        {
+          "year": 2021,
+          "count": 9
+        },
+        {
+          "year": 2020,
+          "count": 10
+        },
+        {
+          "year": 2019,
+          "count": 9
+        },
+        {
+          "year": 2018,
+          "count": 10
+        },
+        {
+          "year": 2017,
+          "count": 9
+        },
+        {
+          "year": 2016,
+          "count": 10
+        },
+        {
+          "year": 2015,
+          "count": 10
+        },
+        {
+          "year": 2014,
+          "count": 8
+        },
+        {
+          "year": 2013,
+          "count": 10
         }
       ],
       "subjects": [
         {
           "slug": "discrete-mathematics",
           "label": "Discrete Mathematics",
-          "count": 9,
+          "count": 48,
           "file": "/pyq/subjects/discrete-mathematics.json",
           "topics": [
             {
               "slug": "propositional-logic",
               "label": "Propositional Logic",
-              "count": 2
+              "count": 13
             },
             {
               "slug": "set-theory",
               "label": "Set Theory",
-              "count": 1
+              "count": 3
+            },
+            {
+              "slug": "relation",
+              "label": "Relation",
+              "count": 4
+            },
+            {
+              "slug": "functions",
+              "label": "Functions",
+              "count": 2
             },
             {
               "slug": "graph-theory",
               "label": "Graph Theory",
-              "count": 3
+              "count": 12
+            },
+            {
+              "slug": "planar-graph",
+              "label": "Planar Graph",
+              "count": 1
             },
             {
               "slug": "combination",
               "label": "Combination",
-              "count": 3
+              "count": 12
+            },
+            {
+              "slug": "recurrence",
+              "label": "Recurrence",
+              "count": 1
             }
           ]
         },
         {
           "slug": "engineering-mathematics",
           "label": "Engineering Mathematics",
-          "count": 4,
+          "count": 17,
           "file": "/pyq/subjects/engineering-mathematics.json",
           "topics": [
             {
               "slug": "probability-statistics",
               "label": "Probability & Statistics",
-              "count": 4
+              "count": 17
             }
           ]
         },
         {
           "slug": "c-programming",
           "label": "C Programming",
-          "count": 4,
+          "count": 13,
           "file": "/pyq/subjects/c-programming.json",
           "topics": [
             {
+              "slug": "loops",
+              "label": "Loops",
+              "count": 6
+            },
+            {
+              "slug": "array-and-pointer",
+              "label": "Array and Pointer",
+              "count": 2
+            },
+            {
               "slug": "function",
               "label": "Function",
-              "count": 4
+              "count": 5
+            }
+          ]
+        },
+        {
+          "slug": "data-structure",
+          "label": "Data Structure",
+          "count": 1,
+          "file": "/pyq/subjects/data-structure.json",
+          "topics": [
+            {
+              "slug": "heap-tree",
+              "label": "Heap Tree",
+              "count": 1
             }
           ]
         },
         {
           "slug": "algorithms",
           "label": "Algorithms",
-          "count": 5,
+          "count": 20,
           "file": "/pyq/subjects/algorithms.json",
           "topics": [
             {
               "slug": "asymptotic-notation",
               "label": "Asymptotic Notation",
-              "count": 1
+              "count": 8
             },
             {
               "slug": "recurrence-relation",
               "label": "Recurrence Relation",
               "count": 2
+            },
+            {
+              "slug": "sorting",
+              "label": "Sorting",
+              "count": 4
+            },
+            {
+              "slug": "greedy-technique",
+              "label": "Greedy Technique",
+              "count": 1
             },
             {
               "slug": "minimum-spanning-tree",
@@ -3198,43 +3339,71 @@
             {
               "slug": "shortest-path",
               "label": "Shortest Path",
-              "count": 1
+              "count": 4
             }
           ]
         },
         {
           "slug": "theory-of-computation",
           "label": "Theory of Computation",
-          "count": 4,
+          "count": 19,
           "file": "/pyq/subjects/theory-of-computation.json",
           "topics": [
             {
+              "slug": "regular-expression",
+              "label": "Regular Expression",
+              "count": 5
+            },
+            {
               "slug": "regular-language",
               "label": "Regular Language",
-              "count": 1
+              "count": 6
             },
             {
               "slug": "finite-automata",
               "label": "Finite Automata",
-              "count": 2
+              "count": 4
             },
             {
               "slug": "context-free-grammar",
               "label": "Context Free Grammar",
               "count": 1
+            },
+            {
+              "slug": "context-free-language",
+              "label": "Context Free Language",
+              "count": 2
+            },
+            {
+              "slug": "undecidability",
+              "label": "Undecidability",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "slug": "compiler-design",
+          "label": "Compiler Design",
+          "count": 2,
+          "file": "/pyq/subjects/compiler-design.json",
+          "topics": [
+            {
+              "slug": "runtime-environment",
+              "label": "Runtime Environment",
+              "count": 2
             }
           ]
         },
         {
           "slug": "operating-systems",
           "label": "Operating Systems",
-          "count": 1,
+          "count": 2,
           "file": "/pyq/subjects/operating-systems.json",
           "topics": [
             {
               "slug": "process-synchronization",
               "label": "Process Synchronization",
-              "count": 1
+              "count": 2
             }
           ]
         }

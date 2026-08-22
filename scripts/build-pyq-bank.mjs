@@ -131,12 +131,12 @@ const PYQ_BOOKS = [
     slug: 'tifr-gs-cs',
     label: 'TIFR GS Computer Science',
     shortLabel: 'TIFR GS CS',
-    description: 'Recent official CS sections with marked solutions; diagram-dependent items are excluded.',
+    description: 'Official 2022–2026 CS sections with marked solutions; diagram-dependent items are excluded.',
     difficultyFloor: 'above-gate',
     sourceClass: 'official-exam',
     source: 'TIFR Graduate School Computer Science',
     sourceUrl: 'https://main.tifr.res.in/academics/past_question_papers.php',
-    expectedCount: 36
+    expectedCount: 65
   },
   {
     slug: 'cmi-cs-objective',
@@ -147,7 +147,7 @@ const PYQ_BOOKS = [
     sourceClass: 'official-exam',
     source: 'Chennai Mathematical Institute Computer Science',
     sourceUrl: 'https://www.cmi.ac.in/admissions/syllabus.php',
-    expectedCount: 27
+    expectedCount: 122
   },
   {
     slug: 'ugc-net-cs-overlap',

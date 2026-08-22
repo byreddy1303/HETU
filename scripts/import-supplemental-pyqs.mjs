@@ -55,6 +55,7 @@ function questionHtml(value) {
   const cleaned = cleanText(value)
     .replace(/^\s*\d+\.\s*(?:I?2)?\s*/i, '')
     .replace(/^.*(?:GS 20\d{2}.*Page \d+ of \d+|Paper-II|J-87-12).*$/gim, '')
+    .replace(/^[ \t]{20,}\d+[ \t]*$/gim, '')
     .replace(/\n{3,}/g, '\n\n');
   return `<div class="pyq-source-text">${escapeHtml(cleaned).replaceAll('\n', '<br>')}</div>`;
 }
@@ -312,6 +313,37 @@ function importIiith() {
 }
 
 const TIFR_CONFIG = {
+  2022: {
+    url: 'https://main.tifr.res.in/academics/docs/past_QP/GS2022_QP_CSS.pdf',
+    start: /Part B:\s*Computer Science/,
+    end: /—End of CS Section—/,
+    excluded: new Set([2]),
+    hints: {
+      1: ['data-structure', 'queue'], 3: ['algorithms', 'sorting'],
+      4: ['algorithms', 'asymptotic-notation'], 5: ['algorithms', 'asymptotic-notation'],
+      6: ['discrete-mathematics', 'graph-theory'], 7: ['theory-of-computation', 'context-free-grammar'],
+      8: ['theory-of-computation', 'regular-expression'], 9: ['discrete-mathematics', 'combination'],
+      10: ['algorithms', 'asymptotic-notation'], 11: ['algorithms', 'sorting'],
+      12: ['discrete-mathematics', 'graph-theory'], 13: ['algorithms', 'shortest-path'],
+      14: ['engineering-mathematics', 'linear-algebra'], 15: ['engineering-mathematics', 'linear-algebra']
+    }
+  },
+  2023: {
+    url: 'https://main.tifr.res.in/academics/docs/past_QP/GS2023_QP_CSS.pdf',
+    start: /Computer Science Section/,
+    end: /Systems Science Section/,
+    excluded: new Set(),
+    hints: {
+      1: ['discrete-mathematics', 'propositional-logic'], 2: ['theory-of-computation', 'recursive-language'],
+      3: ['algorithms', 'greedy-technique'], 4: ['discrete-mathematics', 'functions'],
+      5: ['engineering-mathematics', 'linear-algebra'], 6: ['algorithms', 'recurrence-relation'],
+      7: ['engineering-mathematics', 'probability-statistics'], 8: ['data-structure', 'binary-tree'],
+      9: ['discrete-mathematics', 'combination'], 10: ['discrete-mathematics', 'graph-theory'],
+      11: ['discrete-mathematics', 'group-theory'], 12: ['discrete-mathematics', 'graph-theory'],
+      13: ['discrete-mathematics', 'combination'], 14: ['discrete-mathematics', 'propositional-logic'],
+      15: ['theory-of-computation', 'context-free-language']
+    }
+  },
   2024: {
     url: 'https://main.tifr.res.in/academics/docs/past_QP/GS2024_QP_CS.pdf',
     start: /\n\s*CS Section\s*\n/,
@@ -405,8 +437,119 @@ async function importTifr(temp) {
 }
 
 const CMI_CONFIG = {
+  2013: {
+    excluded: new Set(),
+    answerOverrides: { 5: ['B', 'D'] },
+    sharedPreambleAfter: { 8: [9, 10] },
+    hints: {
+      1: ['discrete-mathematics', 'combination'], 2: ['engineering-mathematics', 'probability-statistics'],
+      3: ['data-structure', 'heap-tree'], 4: ['theory-of-computation', 'regular-language'],
+      5: ['algorithms', 'sorting'], 6: ['discrete-mathematics', 'graph-theory'],
+      7: ['discrete-mathematics', 'propositional-logic'], 8: ['discrete-mathematics', 'set-theory'],
+      9: ['algorithms', 'sorting'], 10: ['algorithms', 'asymptotic-notation']
+    }
+  },
+  2014: {
+    excluded: new Set([7, 8]),
+    answerOverrides: { 4: ['C'], 6: ['B'], 9: ['D'] },
+    hints: {
+      1: ['discrete-mathematics', 'combination'], 2: ['engineering-mathematics', 'probability-statistics'],
+      3: ['c-programming', 'loops'], 4: ['theory-of-computation', 'undecidability'],
+      5: ['theory-of-computation', 'regular-language'], 6: ['compiler-design', 'runtime-environment'],
+      9: ['discrete-mathematics', 'propositional-logic'], 10: ['discrete-mathematics', 'relation']
+    }
+  },
+  2015: {
+    excluded: new Set(),
+    answerOverrides: { 2: ['B'], 3: ['D'], 4: ['B'], 6: ['B'] },
+    hints: {
+      1: ['discrete-mathematics', 'propositional-logic'], 2: ['discrete-mathematics', 'relation'],
+      3: ['discrete-mathematics', 'propositional-logic'], 4: ['discrete-mathematics', 'graph-theory'],
+      5: ['discrete-mathematics', 'graph-theory'], 6: ['algorithms', 'asymptotic-notation'],
+      7: ['engineering-mathematics', 'probability-statistics'], 8: ['c-programming', 'loops'],
+      9: ['theory-of-computation', 'regular-language'], 10: ['discrete-mathematics', 'combination']
+    }
+  },
+  2016: {
+    excluded: new Set(),
+    hints: {
+      1: ['algorithms', 'shortest-path'], 2: ['discrete-mathematics', 'propositional-logic'],
+      3: ['theory-of-computation', 'regular-expression'], 4: ['algorithms', 'shortest-path'],
+      5: ['discrete-mathematics', 'planar-graph'], 6: ['c-programming', 'loops'],
+      7: ['engineering-mathematics', 'probability-statistics'], 8: ['discrete-mathematics', 'propositional-logic'],
+      9: ['discrete-mathematics', 'graph-theory'], 10: ['compiler-design', 'runtime-environment']
+    }
+  },
+  2017: {
+    excluded: new Set([9]),
+    answerOverrides: { 2: ['C'], 3: ['C'], 4: ['D'] },
+    hints: {
+      1: ['theory-of-computation', 'regular-expression'], 2: ['engineering-mathematics', 'probability-statistics'],
+      3: ['discrete-mathematics', 'propositional-logic'], 4: ['discrete-mathematics', 'graph-theory'],
+      5: ['discrete-mathematics', 'graph-theory'], 6: ['c-programming', 'function'],
+      7: ['operating-systems', 'process-synchronization'], 8: ['algorithms', 'sorting'],
+      10: ['algorithms', 'asymptotic-notation']
+    }
+  },
+  2018: {
+    excluded: new Set(),
+    answerOverrides: { 9: ['B'] },
+    hints: {
+      1: ['theory-of-computation', 'regular-expression'], 2: ['discrete-mathematics', 'propositional-logic'],
+      3: ['discrete-mathematics', 'relation'], 4: ['algorithms', 'shortest-path'],
+      5: ['discrete-mathematics', 'combination'], 6: ['engineering-mathematics', 'probability-statistics'],
+      7: ['discrete-mathematics', 'recurrence'], 8: ['discrete-mathematics', 'combination'],
+      9: ['discrete-mathematics', 'graph-theory'], 10: ['c-programming', 'loops']
+    }
+  },
+  2019: {
+    excluded: new Set([3]),
+    answerOverrides: { 4: ['D'] },
+    sharedPreambleAfter: { 8: [9, 10] },
+    hints: {
+      1: ['theory-of-computation', 'context-free-language'], 2: ['theory-of-computation', 'finite-automata'],
+      4: ['discrete-mathematics', 'functions'], 5: ['discrete-mathematics', 'combination'],
+      6: ['engineering-mathematics', 'probability-statistics'], 7: ['discrete-mathematics', 'graph-theory'],
+      8: ['algorithms', 'asymptotic-notation'], 9: ['algorithms', 'sorting'],
+      10: ['algorithms', 'asymptotic-notation']
+    }
+  },
+  2020: {
+    excluded: new Set(),
+    sharedPreambleAfter: { 6: [7, 8] },
+    hints: {
+      1: ['theory-of-computation', 'finite-automata'], 2: ['theory-of-computation', 'regular-expression'],
+      3: ['discrete-mathematics', 'propositional-logic'], 4: ['discrete-mathematics', 'relation'],
+      5: ['discrete-mathematics', 'functions'], 6: ['discrete-mathematics', 'combination'],
+      7: ['engineering-mathematics', 'probability-statistics'], 8: ['engineering-mathematics', 'probability-statistics'],
+      9: ['engineering-mathematics', 'probability-statistics'], 10: ['algorithms', 'asymptotic-notation']
+    }
+  },
+  2021: {
+    excluded: new Set([5]),
+    sharedPreambleAfter: { 8: [9, 10] },
+    hints: {
+      1: ['discrete-mathematics', 'propositional-logic'], 2: ['theory-of-computation', 'regular-language'],
+      3: ['theory-of-computation', 'regular-expression'], 4: ['discrete-mathematics', 'graph-theory'],
+      6: ['engineering-mathematics', 'probability-statistics'], 7: ['algorithms', 'greedy-technique'],
+      8: ['discrete-mathematics', 'combination'], 9: ['c-programming', 'array-and-pointer'],
+      10: ['c-programming', 'array-and-pointer']
+    }
+  },
+  2022: {
+    excluded: new Set(),
+    sharedPreambleAfter: { 7: [8, 9] },
+    hints: {
+      1: ['discrete-mathematics', 'propositional-logic'], 2: ['discrete-mathematics', 'set-theory'],
+      3: ['theory-of-computation', 'regular-language'], 4: ['theory-of-computation', 'context-free-language'],
+      5: ['engineering-mathematics', 'probability-statistics'], 6: ['discrete-mathematics', 'combination'],
+      7: ['engineering-mathematics', 'probability-statistics'], 8: ['c-programming', 'loops'],
+      9: ['c-programming', 'loops'], 10: ['algorithms', 'asymptotic-notation']
+    }
+  },
   2023: {
     excluded: new Set([6]),
+    sharedPreambleAfter: { 8: [9, 10] },
     hints: {
       1: ['discrete-mathematics', 'combination'], 2: ['discrete-mathematics', 'set-theory'],
       3: ['engineering-mathematics', 'probability-statistics'], 4: ['discrete-mathematics', 'graph-theory'],
@@ -427,6 +570,7 @@ const CMI_CONFIG = {
   },
   2025: {
     excluded: new Set([1]),
+    sharedPreambleAfter: { 7: [8, 9] },
     hints: {
       2: ['theory-of-computation', 'finite-automata'], 3: ['discrete-mathematics', 'propositional-logic'],
       4: ['engineering-mathematics', 'probability-statistics'], 5: ['discrete-mathematics', 'graph-theory'],
@@ -457,12 +601,22 @@ async function importCmi(temp) {
     const end = text.search(/^[ \t\f]*Part B[ \t]*$/m);
     if (end < 0) throw new Error(`Could not find CMI ${year} Part B`);
     const blocks = sequentialBlocks(text.slice(0, end), 1, 10);
+    const sharedPreambles = new Map();
+    for (const [afterText, targets] of Object.entries(config.sharedPreambleAfter ?? {})) {
+      const sourceBlock = blocks.find((block) => block.number === Number(afterText));
+      const preamble = sourceBlock?.text.match(/(?:^|\n)\s*The next two questions[^\n]*[\s\S]*$/i)?.[0]?.trim();
+      if (!preamble) throw new Error(`Could not find CMI ${year} shared preamble after question ${afterText}`);
+      for (const target of targets) sharedPreambles.set(target, preamble);
+    }
     for (const block of blocks) {
       if (config.excluded.has(block.number)) continue;
       const hint = config.hints[block.number];
-      const answers = cmiAnswer(block.text);
+      const answers = config.answerOverrides?.[block.number] ?? cmiAnswer(block.text);
       if (!hint || answers.length === 0) throw new Error(`Incomplete CMI ${year} question ${block.number}`);
       const questionOnly = block.text.split(/\n\s*(?:Answer|Solution)(?:[.:])?/i)[0];
+      const sourceText = sharedPreambles.has(block.number)
+        ? `${sharedPreambles.get(block.number)}\n\n${questionOnly}`
+        : questionOnly;
       questions.push(
         baseQuestion({
           id: `cmi-cs:${year}:${block.number}`,
@@ -472,7 +626,7 @@ async function importCmi(temp) {
           hint,
           type: answers.length > 1 ? 'MSQ' : 'MCQ',
           answer: answers.length > 1 ? answers : answers[0],
-          html: questionHtml(questionOnly),
+          html: questionHtml(sourceText),
           sourceUrl: url,
           answerSource: { kind: 'official-solution', url }
         })

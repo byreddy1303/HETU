@@ -224,7 +224,7 @@ describe('PYQ source HTML normalization', () => {
 });
 
 describe('bundled PYQ bank integrity', () => {
-  it('contains all 4,210 audited questions and no broken local image references', () => {
+  it('contains all 4,334 audited questions and no broken local image references', () => {
     const publicRoot = path.resolve(process.cwd(), 'public');
     const manifest = JSON.parse(
       readFileSync(path.join(publicRoot, 'pyq', 'manifest.json'), 'utf8')
@@ -236,7 +236,7 @@ describe('bundled PYQ bank integrity', () => {
     let topicCount = 0;
     const repairedQuestions: PyqQuestion[] = [];
 
-    expect(manifest.questionCount).toBe(4210);
+    expect(manifest.questionCount).toBe(4334);
     expect(manifest.firstYear).toBe(1990);
     expect(manifest.lastYear).toBe(2026);
     expect(manifest.years).toHaveLength(37);
@@ -254,8 +254,8 @@ describe('bundled PYQ bank integrity', () => {
       'gate-cross-math': 424,
       'isro-cs-overlap': 45,
       'iiith-pgee': 8,
-      'tifr-gs-cs': 36,
-      'cmi-cs-objective': 27,
+      'tifr-gs-cs': 65,
+      'cmi-cs-objective': 122,
       'ugc-net-cs-overlap': 21,
       'go-classes-coa': 30
     });
@@ -299,12 +299,12 @@ describe('bundled PYQ bank integrity', () => {
 
     expect(questionCount).toBe(manifest.questionCount);
     expect(topicCount).toBe(95);
-    expect(repairedQuestions).toHaveLength(791);
+    expect(repairedQuestions).toHaveLength(792);
     expect(new Set(repairedQuestions.map((row) => row.subjectSlug)).size).toBe(13);
     expect(new Set(repairedQuestions.map((row) => row.topicSlug)).size).toBe(85);
     expect(statuses).toEqual(manifest.answerStatuses);
     expect(statuses).toEqual({
-      available: 4115,
+      available: 4239,
       ambiguous: 3,
       'marks-to-all': 2,
       unsupported: 90
@@ -316,8 +316,8 @@ describe('bundled PYQ bank integrity', () => {
       classificationBasis: Record<string, number>;
     };
     expect(taxonomyAudit).toMatchObject({
-      questionCount: 4210,
-      uniqueQuestionCount: 4210,
+      questionCount: 4334,
+      uniqueQuestionCount: 4334,
       unclassifiedCount: 0,
       subjectCount: 14,
       topicCount: 95,
@@ -340,14 +340,50 @@ describe('bundled PYQ bank integrity', () => {
 
     const allQuestions = [...questionsById.values()];
     const variableChoiceQuestions = allQuestions.filter((row) => row.choices !== undefined);
-    expect(variableChoiceQuestions).toHaveLength(137);
-    expect(variableChoiceQuestions.filter((row) => row.choices?.length === 5)).toHaveLength(44);
+    expect(variableChoiceQuestions).toHaveLength(261);
+    expect(variableChoiceQuestions.filter((row) => row.choices?.length === 5)).toHaveLength(73);
     expect(
       variableChoiceQuestions.every((row) => {
         if (row.answerStatus !== 'available' || row.type === 'NAT') return true;
         const answers = Array.isArray(row.answer) ? row.answer : [row.answer];
         return answers.every((answer) => row.choices?.includes(String(answer)));
       })
+    ).toBe(true);
+
+    const tifrBook = manifest.books.find((book) => book.slug === 'tifr-gs-cs');
+    expect(tifrBook?.years).toEqual([
+      { year: 2026, count: 11 },
+      { year: 2025, count: 14 },
+      { year: 2024, count: 11 },
+      { year: 2023, count: 15 },
+      { year: 2022, count: 14 }
+    ]);
+    const cmiBook = manifest.books.find((book) => book.slug === 'cmi-cs-objective');
+    expect(cmiBook?.years).toEqual([
+      { year: 2025, count: 9 },
+      { year: 2024, count: 9 },
+      { year: 2023, count: 9 },
+      { year: 2022, count: 10 },
+      { year: 2021, count: 9 },
+      { year: 2020, count: 10 },
+      { year: 2019, count: 9 },
+      { year: 2018, count: 10 },
+      { year: 2017, count: 9 },
+      { year: 2016, count: 10 },
+      { year: 2015, count: 10 },
+      { year: 2014, count: 8 },
+      { year: 2013, count: 10 }
+    ]);
+    expect(questionsById.get('cmi-cs:2023:9')?.html).toContain('int f(int x, int i)');
+    expect(questionsById.get('cmi-cs:2025:8')?.html).toContain('function foo(n)');
+    expect(ids.has('tifr-gs-cs:2022:2')).toBe(false);
+    expect(ids.has('cmi-cs:2021:5')).toBe(false);
+    expect(
+      allQuestions
+        .filter((row) => ['tifr-gs-cs', 'cmi-cs-objective'].includes(row.bookSlug))
+        .every((row) =>
+          String((row.answerSource as { kind?: string } | null)?.kind).startsWith('official')
+        )
     ).toBe(true);
 
     const goClassesCoaTest = allQuestions.filter((row) =>

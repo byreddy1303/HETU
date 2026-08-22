@@ -1,12 +1,12 @@
 {
-  "bankVersion": "gate-and-cs-exams-1990-2026-v9",
-  "questionCount": 4210,
-  "uniqueQuestionCount": 4210,
+  "bankVersion": "gate-and-cs-exams-1990-2026-v10",
+  "questionCount": 4334,
+  "uniqueQuestionCount": 4334,
   "unclassifiedCount": 0,
   "subjectCount": 14,
   "topicCount": 95,
   "classificationBasis": {
-    "audited-source-scope": 1131,
+    "audited-source-scope": 1255,
     "broad-topic-tag": 11,
     "content-rule": 92,
     "manual-content-audit": 160,
@@ -1471,27 +1471,27 @@
     },
     {
       "slug": "discrete-mathematics",
-      "count": 359,
+      "count": 409,
       "topics": [
         {
           "slug": "propositional-logic",
           "label": "Propositional Logic",
-          "count": 79
+          "count": 92
         },
         {
           "slug": "set-theory",
           "label": "Set Theory",
-          "count": 35
+          "count": 37
         },
         {
           "slug": "relation",
           "label": "Relation",
-          "count": 26
+          "count": 30
         },
         {
           "slug": "functions",
           "label": "Functions",
-          "count": 28
+          "count": 31
         },
         {
           "slug": "lattice",
@@ -1501,38 +1501,38 @@
         {
           "slug": "group-theory",
           "label": "Group Theory",
-          "count": 33
+          "count": 34
         },
         {
           "slug": "graph-theory",
           "label": "Graph Theory",
-          "count": 77
+          "count": 90
         },
         {
           "slug": "planar-graph",
           "label": "Planar Graph",
-          "count": 14
+          "count": 15
         },
         {
           "slug": "combination",
           "label": "Combination",
-          "count": 48
+          "count": 60
         },
         {
           "slug": "recurrence",
           "label": "Recurrence",
-          "count": 6
+          "count": 7
         }
       ]
     },
     {
       "slug": "engineering-mathematics",
-      "count": 733,
+      "count": 750,
       "topics": [
         {
           "slug": "linear-algebra",
           "label": "Linear Algebra",
-          "count": 350
+          "count": 353
         },
         {
           "slug": "calculus",
@@ -1542,7 +1542,7 @@
         {
           "slug": "probability-statistics",
           "label": "Probability & Statistics",
-          "count": 286
+          "count": 300
         }
       ]
     },
@@ -1625,7 +1625,7 @@
     },
     {
       "slug": "c-programming",
-      "count": 145,
+      "count": 154,
       "topics": [
         {
           "slug": "arithmetic-operation",
@@ -1640,23 +1640,23 @@
         {
           "slug": "loops",
           "label": "Loops",
-          "count": 18
+          "count": 24
         },
         {
           "slug": "array-and-pointer",
           "label": "Array and Pointer",
-          "count": 48
+          "count": 50
         },
         {
           "slug": "function",
           "label": "Function",
-          "count": 58
+          "count": 59
         }
       ]
     },
     {
       "slug": "data-structure",
-      "count": 242,
+      "count": 245,
       "topics": [
         {
           "slug": "array",
@@ -1676,12 +1676,12 @@
         {
           "slug": "queue",
           "label": "Queue",
-          "count": 12
+          "count": 13
         },
         {
           "slug": "binary-tree",
           "label": "Binary Tree",
-          "count": 41
+          "count": 42
         },
         {
           "slug": "binary-search-tree",
@@ -1706,7 +1706,7 @@
         {
           "slug": "heap-tree",
           "label": "Heap Tree",
-          "count": 30
+          "count": 31
         },
         {
           "slug": "n-ary-tree",
@@ -1722,17 +1722,17 @@
     },
     {
       "slug": "algorithms",
-      "count": 346,
+      "count": 369,
       "topics": [
         {
           "slug": "asymptotic-notation",
           "label": "Asymptotic Notation",
-          "count": 99
+          "count": 109
         },
         {
           "slug": "recurrence-relation",
           "label": "Recurrence Relation",
-          "count": 53
+          "count": 54
         },
         {
           "slug": "divide-and-conquer",
@@ -1742,12 +1742,12 @@
         {
           "slug": "sorting",
           "label": "Sorting",
-          "count": 52
+          "count": 58
         },
         {
           "slug": "greedy-technique",
           "label": "Greedy Technique",
-          "count": 12
+          "count": 14
         },
         {
           "slug": "minimum-spanning-tree",
@@ -1757,7 +1757,7 @@
         {
           "slug": "shortest-path",
           "label": "Shortest Path",
-          "count": 20
+          "count": 24
         },
         {
           "slug": "graph-traversal",
@@ -1773,12 +1773,12 @@
     },
     {
       "slug": "theory-of-computation",
-      "count": 287,
+      "count": 306,
       "topics": [
         {
           "slug": "regular-expression",
           "label": "Regular Expression",
-          "count": 23
+          "count": 29
         },
         {
           "slug": "regular-grammar",
@@ -1788,22 +1788,22 @@
         {
           "slug": "regular-language",
           "label": "Regular Language",
-          "count": 57
+          "count": 62
         },
         {
           "slug": "finite-automata",
           "label": "Finite Automata",
-          "count": 71
+          "count": 73
         },
         {
           "slug": "context-free-grammar",
           "label": "Context Free Grammar",
-          "count": 9
+          "count": 10
         },
         {
           "slug": "context-free-language",
           "label": "Context Free Language",
-          "count": 48
+          "count": 51
         },
         {
           "slug": "push-down-automata",
@@ -1813,7 +1813,7 @@
         {
           "slug": "recursive-language",
           "label": "Recursive Language",
-          "count": 27
+          "count": 28
         },
         {
           "slug": "turing-machine",
@@ -1823,13 +1823,13 @@
         {
           "slug": "undecidability",
           "label": "Undecidability",
-          "count": 27
+          "count": 28
         }
       ]
     },
     {
       "slug": "compiler-design",
-      "count": 183,
+      "count": 185,
       "topics": [
         {
           "slug": "lexical-analysis",
@@ -1854,7 +1854,7 @@
         {
           "slug": "runtime-environment",
           "label": "Runtime Environment",
-          "count": 18
+          "count": 20
         },
         {
           "slug": "matching",
@@ -1865,7 +1865,7 @@
     },
     {
       "slug": "operating-systems",
-      "count": 324,
+      "count": 325,
       "topics": [
         {
           "slug": "process",
@@ -1880,7 +1880,7 @@
         {
           "slug": "process-synchronization",
           "label": "Process Synchronization",
-          "count": 52
+          "count": 53
         },
         {
           "slug": "deadlock",

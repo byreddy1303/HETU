@@ -5,6 +5,1079 @@
   "importedAt": "2026-08-20",
   "questions": [
     {
+      "id": "tifr-gs-cs:2022:1",
+      "year": 2022,
+      "set": null,
+      "number": "1",
+      "paperLabel": "TIFR GS 2022 · Computer Science",
+      "subject": "data-structure",
+      "subjectSlug": "data-structure",
+      "classificationHint": {
+        "subjectSlug": "data-structure",
+        "topicSlug": "queue"
+      },
+      "topic": "queue",
+      "topicSlug": "queue",
+      "subtopics": [
+        "queue",
+        "tifr-gs-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E"
+      ],
+      "answer": "A",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">Which data structure is commonly used to implement breadth first search in a graph?<br>  (a) A queue<br>  (b) A stack<br>   (c) A heap<br>  (d) A hash table<br>   (e) A splay tree</div>",
+      "sourceUrl": "https://main.tifr.res.in/academics/docs/past_QP/GS2022_QP_CSS.pdf",
+      "answerSource": {
+        "kind": "official-marked-solution",
+        "url": "https://main.tifr.res.in/academics/docs/past_QP/GS2022_QP_CSS.pdf"
+      }
+    },
+    {
+      "id": "tifr-gs-cs:2022:3",
+      "year": 2022,
+      "set": null,
+      "number": "3",
+      "paperLabel": "TIFR GS 2022 · Computer Science",
+      "subject": "algorithms",
+      "subjectSlug": "algorithms",
+      "classificationHint": {
+        "subjectSlug": "algorithms",
+        "topicSlug": "sorting"
+      },
+      "topic": "sorting",
+      "topicSlug": "sorting",
+      "subtopics": [
+        "sorting",
+        "tifr-gs-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E"
+      ],
+      "answer": "C",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">Consider the problem of sorting n single digit integers (base 10). This problem can<br>   be solved in time<br>   (a) O(n log n) but not O(n log log n)<br>   (b) O(n log log n) but not O(n)<br>   (c) O(n) but not O(n/ log log n)<br>   (d) O(n/ log log n)<br>   (e) None of the above.</div>",
+      "sourceUrl": "https://main.tifr.res.in/academics/docs/past_QP/GS2022_QP_CSS.pdf",
+      "answerSource": {
+        "kind": "official-marked-solution",
+        "url": "https://main.tifr.res.in/academics/docs/past_QP/GS2022_QP_CSS.pdf"
+      }
+    },
+    {
+      "id": "tifr-gs-cs:2022:4",
+      "year": 2022,
+      "set": null,
+      "number": "4",
+      "paperLabel": "TIFR GS 2022 · Computer Science",
+      "subject": "algorithms",
+      "subjectSlug": "algorithms",
+      "classificationHint": {
+        "subjectSlug": "algorithms",
+        "topicSlug": "asymptotic-notation"
+      },
+      "topic": "asymptotic-notation",
+      "topicSlug": "asymptotic-notation",
+      "subtopics": [
+        "asymptotic-notation",
+        "tifr-gs-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E"
+      ],
+      "answer": "D",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">Consider the following algorithm for computing the factorial of a positive integer n,<br>   specified in binary:<br>   prod ← 1<br>   for i from 1 to n<br>      prod ← prod × i<br>   output prod<br>   Assume that the number of bit operations required to multiply a k-bit positive integer<br>   with an ℓ-bit positive integer is at least Ω(k +l) and at most O(kl). Then, the number<br>   of bit operations required by this algorithm is<br><br>   (a) O(n)<br>   (b) O(n log n) but ω(n)<br>   (c) O(n2 ) but ω(n log n)<br>  (d) O(n3 ) but ω(n2 )<br>   (e) None of the above</div>",
+      "sourceUrl": "https://main.tifr.res.in/academics/docs/past_QP/GS2022_QP_CSS.pdf",
+      "answerSource": {
+        "kind": "official-marked-solution",
+        "url": "https://main.tifr.res.in/academics/docs/past_QP/GS2022_QP_CSS.pdf"
+      }
+    },
+    {
+      "id": "tifr-gs-cs:2022:5",
+      "year": 2022,
+      "set": null,
+      "number": "5",
+      "paperLabel": "TIFR GS 2022 · Computer Science",
+      "subject": "algorithms",
+      "subjectSlug": "algorithms",
+      "classificationHint": {
+        "subjectSlug": "algorithms",
+        "topicSlug": "asymptotic-notation"
+      },
+      "topic": "asymptotic-notation",
+      "topicSlug": "asymptotic-notation",
+      "subtopics": [
+        "asymptotic-notation",
+        "tifr-gs-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E"
+      ],
+      "answer": "E",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">There is an unsorted list of n integers. You are given 3 distinct integers and you have<br>   to check if all 3 integers are present in the list or not. The only operation that you<br>   are allowed to perform is a comparison. Let A be an algorithm for this task that<br>   performs the least number of comparisons. Let c be the number of comparisons done<br>   by A. Then,<br>   (a) c = 3n<br>   (b) c = 2n + 5<br>   (c) c ≥ 3n − 1<br>   (d) c ≤ n<br>  (e) c ≤ 2n + 3</div>",
+      "sourceUrl": "https://main.tifr.res.in/academics/docs/past_QP/GS2022_QP_CSS.pdf",
+      "answerSource": {
+        "kind": "official-marked-solution",
+        "url": "https://main.tifr.res.in/academics/docs/past_QP/GS2022_QP_CSS.pdf"
+      }
+    },
+    {
+      "id": "tifr-gs-cs:2022:6",
+      "year": 2022,
+      "set": null,
+      "number": "6",
+      "paperLabel": "TIFR GS 2022 · Computer Science",
+      "subject": "discrete-mathematics",
+      "subjectSlug": "discrete-mathematics",
+      "classificationHint": {
+        "subjectSlug": "discrete-mathematics",
+        "topicSlug": "graph-theory"
+      },
+      "topic": "graph-theory",
+      "topicSlug": "graph-theory",
+      "subtopics": [
+        "graph-theory",
+        "tifr-gs-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E"
+      ],
+      "answer": "D",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">We are given a graph G along with a matching M and a vertex cover C in it such<br>   that |M | = |C|. Consider the following statements:<br><br>    (1) M is a maximum matching in G.<br>    (2) C is a minimum vertex cover in G.<br>    (3) G is a bipartite graph.<br><br>   Which of the following is TRUE?<br>   (a) Only statement (1) is correct<br>   (b) Only statement (2) is correct<br>   (c) Only statement (3) is correct<br>  (d) Only statements (1) and (2) are correct<br>   (e) All the three statements (1), (2), and (3) are correct</div>",
+      "sourceUrl": "https://main.tifr.res.in/academics/docs/past_QP/GS2022_QP_CSS.pdf",
+      "answerSource": {
+        "kind": "official-marked-solution",
+        "url": "https://main.tifr.res.in/academics/docs/past_QP/GS2022_QP_CSS.pdf"
+      }
+    },
+    {
+      "id": "tifr-gs-cs:2022:7",
+      "year": 2022,
+      "set": null,
+      "number": "7",
+      "paperLabel": "TIFR GS 2022 · Computer Science",
+      "subject": "theory-of-computation",
+      "subjectSlug": "theory-of-computation",
+      "classificationHint": {
+        "subjectSlug": "theory-of-computation",
+        "topicSlug": "context-free-grammar"
+      },
+      "topic": "context-free-grammar",
+      "topicSlug": "context-free-grammar",
+      "subtopics": [
+        "context-free-grammar",
+        "tifr-gs-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E"
+      ],
+      "answer": "C",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">Consider the following grammar: P, Q, R are non-terminals; c, d are terminals; P is<br>   the start symbol; and the production rules follow.<br><br>   P ::= QR<br>   Q ::= c<br>   Q ::= RcR<br>   R ::= ddQ<br><br>   Which of the following is False:<br>   (a) The length of every string produced by the grammar is even<br>   (b) No string produced by the grammar has an odd number of consecutive d’s<br><br>   (c) No string produced by the grammar has four consecutive d’s<br>   (d) No string produced by the grammar has three consecutive c’s<br>   (e) Every string produced by the grammar has at least has many d’s as c’s</div>",
+      "sourceUrl": "https://main.tifr.res.in/academics/docs/past_QP/GS2022_QP_CSS.pdf",
+      "answerSource": {
+        "kind": "official-marked-solution",
+        "url": "https://main.tifr.res.in/academics/docs/past_QP/GS2022_QP_CSS.pdf"
+      }
+    },
+    {
+      "id": "tifr-gs-cs:2022:8",
+      "year": 2022,
+      "set": null,
+      "number": "8",
+      "paperLabel": "TIFR GS 2022 · Computer Science",
+      "subject": "theory-of-computation",
+      "subjectSlug": "theory-of-computation",
+      "classificationHint": {
+        "subjectSlug": "theory-of-computation",
+        "topicSlug": "regular-expression"
+      },
+      "topic": "regular-expression",
+      "topicSlug": "regular-expression",
+      "subtopics": [
+        "regular-expression",
+        "tifr-gs-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E"
+      ],
+      "answer": "E",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">Let r1 and r2 be two regular expressions. They symbol ≡ stands for equivalence of<br>   two regular expressions in the sense that if r1 ≡ r2 , then both regular expressions<br>   describe the same language. Which of the following is/are FALSE?<br><br>     (i) (r1 r2 )∗ r1 ≡ r1 (r2 r1 )∗<br>    (ii) (r1∗ r2 )∗ r1∗ ≡ (r1 + r2 )∗<br>    (iii) (r1∗ r2∗ )∗ ≡ (r1 + r2 )∗<br>   (a) Only (i) is false<br>   (b) Only (ii) is false<br>   (c) Only (iii) is false<br>   (d) Both (i) and (iii) are false<br>   (e) None of the above</div>",
+      "sourceUrl": "https://main.tifr.res.in/academics/docs/past_QP/GS2022_QP_CSS.pdf",
+      "answerSource": {
+        "kind": "official-marked-solution",
+        "url": "https://main.tifr.res.in/academics/docs/past_QP/GS2022_QP_CSS.pdf"
+      }
+    },
+    {
+      "id": "tifr-gs-cs:2022:9",
+      "year": 2022,
+      "set": null,
+      "number": "9",
+      "paperLabel": "TIFR GS 2022 · Computer Science",
+      "subject": "discrete-mathematics",
+      "subjectSlug": "discrete-mathematics",
+      "classificationHint": {
+        "subjectSlug": "discrete-mathematics",
+        "topicSlug": "combination"
+      },
+      "topic": "combination",
+      "topicSlug": "combination",
+      "subtopics": [
+        "combination",
+        "tifr-gs-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E"
+      ],
+      "answer": "E",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">Let n ≥ 2 be any integer. Which of the following statements is FALSE?<br>   (a) n! divides the product of any n consecutive integers<br>       Pn n<br>   (b)    i=0 i   = 2n<br>   (c) ni = n−1         n−1<br><br>                  i<br>                      + i−1<br>                              , where 1 ≤ i ≤ n − 1<br>   (d) If n is an odd prime, then n divides 2n−1 − 1<br>   (e) n divides 2n<br><br>                    n</div>",
+      "sourceUrl": "https://main.tifr.res.in/academics/docs/past_QP/GS2022_QP_CSS.pdf",
+      "answerSource": {
+        "kind": "official-marked-solution",
+        "url": "https://main.tifr.res.in/academics/docs/past_QP/GS2022_QP_CSS.pdf"
+      }
+    },
+    {
+      "id": "tifr-gs-cs:2022:10",
+      "year": 2022,
+      "set": null,
+      "number": "10",
+      "paperLabel": "TIFR GS 2022 · Computer Science",
+      "subject": "algorithms",
+      "subjectSlug": "algorithms",
+      "classificationHint": {
+        "subjectSlug": "algorithms",
+        "topicSlug": "asymptotic-notation"
+      },
+      "topic": "asymptotic-notation",
+      "topicSlug": "asymptotic-notation",
+      "subtopics": [
+        "asymptotic-notation",
+        "tifr-gs-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E"
+      ],
+      "answer": "A",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">Consider the assertions<br><br>   (A1) Given a directed graph G with positive weights on the edges, two special vertices<br>        s and t, and an integer k - it is NP-complete to determine if G has an s-t path<br>        of length at most k.<br>   (A2) P = NP.<br><br>    Then, which of the following is true?<br>   (a) A1 implies A2 and A2 implies A1<br>   (b) A1 implies A2 and A2 does not imply A1<br>   (c) A1 does not imply A2 and A2 implies A1<br>   (d) A1 does not imply A2 and A2 does not imply A1<br>   (e) None of the above.</div>",
+      "sourceUrl": "https://main.tifr.res.in/academics/docs/past_QP/GS2022_QP_CSS.pdf",
+      "answerSource": {
+        "kind": "official-marked-solution",
+        "url": "https://main.tifr.res.in/academics/docs/past_QP/GS2022_QP_CSS.pdf"
+      }
+    },
+    {
+      "id": "tifr-gs-cs:2022:11",
+      "year": 2022,
+      "set": null,
+      "number": "11",
+      "paperLabel": "TIFR GS 2022 · Computer Science",
+      "subject": "algorithms",
+      "subjectSlug": "algorithms",
+      "classificationHint": {
+        "subjectSlug": "algorithms",
+        "topicSlug": "sorting"
+      },
+      "topic": "sorting",
+      "topicSlug": "sorting",
+      "subtopics": [
+        "sorting",
+        "tifr-gs-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E"
+      ],
+      "answer": "A",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">Consider the following function count, that takes as input a, an array of integers,<br>    and N, the size of the array.<br><br>    int count(int a[], int N) {<br>        int i, j, count_FN;<br>        count_FN = 0;<br>        for (i=1; i&lt;N; i++) {<br>             j=i-1;<br>               while (a[j] &gt; a[i]) {<br>                  count_FN++;<br>                  j--;<br>                }<br>           }<br>        return count_FN;<br>    }<br><br>    Further, let count_IS be the number of comparisons made by the insertion sort<br>    algorithm on the array a.<br>    Which of the following statements is TRUE for some constant c?<br>   (a) For all N ≥ c, there exists an array of size N for which count_IS ≥ N 2 /c,<br>       while count_FN ≤ cN<br>   (b) For all N ≥ c, there exists an array of size N for which count_FN ≥ N 2 /c, while<br>       count_IS ≤ cN<br>    (c) For all N ≥ c, for all arrays of size N, count_FN ≤ count_IS ≤ c × count_FN<br>   (d) For all N ≥ c, for all arrays of size N, count_FN ≥ N 2 /c<br>    (e) None of the above</div>",
+      "sourceUrl": "https://main.tifr.res.in/academics/docs/past_QP/GS2022_QP_CSS.pdf",
+      "answerSource": {
+        "kind": "official-marked-solution",
+        "url": "https://main.tifr.res.in/academics/docs/past_QP/GS2022_QP_CSS.pdf"
+      }
+    },
+    {
+      "id": "tifr-gs-cs:2022:12",
+      "year": 2022,
+      "set": null,
+      "number": "12",
+      "paperLabel": "TIFR GS 2022 · Computer Science",
+      "subject": "discrete-mathematics",
+      "subjectSlug": "discrete-mathematics",
+      "classificationHint": {
+        "subjectSlug": "discrete-mathematics",
+        "topicSlug": "graph-theory"
+      },
+      "topic": "graph-theory",
+      "topicSlug": "graph-theory",
+      "subtopics": [
+        "graph-theory",
+        "tifr-gs-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E"
+      ],
+      "answer": "D",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">Given an undirected graph G, an ordering σ of its vertices is called a perfect ordering<br>    if for every vertex v, the neighbours of v which precede v in σ form a clique in G.<br>    Recall that given an undirected graph G, a clique in G is a subset of vertices every<br>    two of which are connected by an edge, while a perfect colouring of G with k colours<br>    is an assignment of labels from the set {1, 2, . . . , k} to the vertices of G such that no<br>    two vertices which are adjacent in G receive the same label.<br>    Consider the following problems.<br>    Problem Special-Clique<br>    INPUT: An undirected graph G, a positive integer k, and a perfect ordering σ of<br>    the vertices of G.<br>    OUTPUT: Yes, if G has a clique of size at least k, No otherwise.<br>    Problem Special-Colouring<br>    INPUT: An undirected graph G, a positive integer k, and a perfect ordering σ of<br>    the vertices of G.<br>    OUTPUT: Yes, if G has a proper colouring with at most k colours, No otherwise.<br>    Assume that P ̸= N P . Which of the following statements is true?<br>    (a) Both Special-Clique and Special-Colouring are undecidable<br>   (b) Only Special-Clique is in P<br><br>    (c) Only Special-Colouring is in P<br>   (d) Both Special-Clique and Special-Colouring are in P<br>    (e) Neither of Special-Clique and Special-Colouring is in P, but both are<br>        decidable</div>",
+      "sourceUrl": "https://main.tifr.res.in/academics/docs/past_QP/GS2022_QP_CSS.pdf",
+      "answerSource": {
+        "kind": "official-marked-solution",
+        "url": "https://main.tifr.res.in/academics/docs/past_QP/GS2022_QP_CSS.pdf"
+      }
+    },
+    {
+      "id": "tifr-gs-cs:2022:13",
+      "year": 2022,
+      "set": null,
+      "number": "13",
+      "paperLabel": "TIFR GS 2022 · Computer Science",
+      "subject": "algorithms",
+      "subjectSlug": "algorithms",
+      "classificationHint": {
+        "subjectSlug": "algorithms",
+        "topicSlug": "shortest-path"
+      },
+      "topic": "shortest-path",
+      "topicSlug": "shortest-path",
+      "subtopics": [
+        "shortest-path",
+        "tifr-gs-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E"
+      ],
+      "answer": "A",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">Consider a directed graph G = (V, E), where each edge e ∈ E has a positive edge<br>    weight ce . Determine the appropriate choices for the blanks below so that the value<br>    of the following linear program is the length of the shortest directed path in G from<br>    s to t. (Assume that the graph has at least one path from s to t.)<br><br>          (blank 1)imize           Xt<br>                       s.t.        Xs   =     0<br>                              Xw − Xv   (blank 2)   ce   (for each edge e = (v, w) ∈ E).<br><br>   (a) blank 1: max, blank 2: ≤<br>   (b) blank 1: max, blank 2: ≥<br>    (c) blank 1: min, blank 2: ≤<br>   (d) blank 1: min, blank 2: ≥<br>    (e) blank 1: min, blank 2: =</div>",
+      "sourceUrl": "https://main.tifr.res.in/academics/docs/past_QP/GS2022_QP_CSS.pdf",
+      "answerSource": {
+        "kind": "official-marked-solution",
+        "url": "https://main.tifr.res.in/academics/docs/past_QP/GS2022_QP_CSS.pdf"
+      }
+    },
+    {
+      "id": "tifr-gs-cs:2022:14",
+      "year": 2022,
+      "set": null,
+      "number": "14",
+      "paperLabel": "TIFR GS 2022 · Computer Science",
+      "subject": "engineering-mathematics",
+      "subjectSlug": "engineering-mathematics",
+      "classificationHint": {
+        "subjectSlug": "engineering-mathematics",
+        "topicSlug": "linear-algebra"
+      },
+      "topic": "linear-algebra",
+      "topicSlug": "linear-algebra",
+      "subtopics": [
+        "linear-algebra",
+        "tifr-gs-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E"
+      ],
+      "answer": "D",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">Let G be a directed graph (with no self-loops or parallel edges) with n ≥ 2 vertices<br>    and m edges. Consider the n × m incidence matrix M of G, whose rows are indexed<br>    by the vertices of G and the columns by the edges of G. The entry mv,e is defined as<br>    follows.                   <br>                               −1 if e = (v, w) for some vertex w,<br>                               <br>                        mv,e = +1 if e = (u, v) for some vertex u,<br>                               <br>                                 0    otherwise.<br>                               <br><br>    Suppose every vertex of G is reachable from a special source vertex of G. Then, what<br>    is the rank of M ?<br>   (a) m − 1<br>   (b) m − n + 1<br>    (c) ⌈m/2⌉<br>   (d) n − 1<br>    (e) ⌈n/2⌉</div>",
+      "sourceUrl": "https://main.tifr.res.in/academics/docs/past_QP/GS2022_QP_CSS.pdf",
+      "answerSource": {
+        "kind": "official-marked-solution",
+        "url": "https://main.tifr.res.in/academics/docs/past_QP/GS2022_QP_CSS.pdf"
+      }
+    },
+    {
+      "id": "tifr-gs-cs:2022:15",
+      "year": 2022,
+      "set": null,
+      "number": "15",
+      "paperLabel": "TIFR GS 2022 · Computer Science",
+      "subject": "engineering-mathematics",
+      "subjectSlug": "engineering-mathematics",
+      "classificationHint": {
+        "subjectSlug": "engineering-mathematics",
+        "topicSlug": "linear-algebra"
+      },
+      "topic": "linear-algebra",
+      "topicSlug": "linear-algebra",
+      "subtopics": [
+        "linear-algebra",
+        "tifr-gs-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E"
+      ],
+      "answer": "D",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">Let R denote the set of real numbers. Let d ≥ 4 and α ∈ R. Let<br>                (                                d               d<br>                                                                               )<br>                                                 X               X<br>            S = (a0 , a1 , . . . , ad ) ∈ Rd+1 :   ai αi = 0 and   iai αi−1 = 0 .<br>                                             i=0               i=0<br><br>    Then,<br>   (a) S is finite or infinite depending on the value of α<br><br>   (b) S is a 2-dimensional vector subspace of Rd+1<br>   (c) S is a d-dimensional vector subspace of Rd+1<br>  (d) S is a (d − 1)-dimensional vector subspace of Rd+1<br>   (e) For each (a0 , a1 , . . . , ad ) ∈ S, the function<br>                                                      d<br>                                                      X<br>                                               x 7→         ai x i<br>                                                      i=0<br><br>       has a local optimum at α</div>",
+      "sourceUrl": "https://main.tifr.res.in/academics/docs/past_QP/GS2022_QP_CSS.pdf",
+      "answerSource": {
+        "kind": "official-marked-solution",
+        "url": "https://main.tifr.res.in/academics/docs/past_QP/GS2022_QP_CSS.pdf"
+      }
+    },
+    {
+      "id": "tifr-gs-cs:2023:1",
+      "year": 2023,
+      "set": null,
+      "number": "1",
+      "paperLabel": "TIFR GS 2023 · Computer Science",
+      "subject": "discrete-mathematics",
+      "subjectSlug": "discrete-mathematics",
+      "classificationHint": {
+        "subjectSlug": "discrete-mathematics",
+        "topicSlug": "propositional-logic"
+      },
+      "topic": "propositional-logic",
+      "topicSlug": "propositional-logic",
+      "subtopics": [
+        "propositional-logic",
+        "tifr-gs-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E"
+      ],
+      "answer": "A",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">Consider the following two statements:<br><br>         • (P) The current population of Bhutan is greater than the current population of<br>           India.<br>         • (Q) The Moon is smaller than the Earth.<br><br>   Clearly, (P) is false, while (Q) is true. Which of the following logical statements<br>   evaluates to true?<br>  (a) ¬P ⇒ Q<br>   (b) Q ⇒ P<br>   (c) ¬(P ⇒ Q)<br>   (d) P ⇔ Q<br>   (e) None of the above</div>",
+      "sourceUrl": "https://main.tifr.res.in/academics/docs/past_QP/GS2023_QP_CSS.pdf",
+      "answerSource": {
+        "kind": "official-marked-solution",
+        "url": "https://main.tifr.res.in/academics/docs/past_QP/GS2023_QP_CSS.pdf"
+      }
+    },
+    {
+      "id": "tifr-gs-cs:2023:2",
+      "year": 2023,
+      "set": null,
+      "number": "2",
+      "paperLabel": "TIFR GS 2023 · Computer Science",
+      "subject": "theory-of-computation",
+      "subjectSlug": "theory-of-computation",
+      "classificationHint": {
+        "subjectSlug": "theory-of-computation",
+        "topicSlug": "recursive-language"
+      },
+      "topic": "recursive-language",
+      "topicSlug": "recursive-language",
+      "subtopics": [
+        "recursive-language",
+        "tifr-gs-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E"
+      ],
+      "answer": "C",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">Which of the following is true about the set of regular languages and the set of<br>   recursively enumerable languages over a finite alphabet Σ?<br>   (a) The set of regular languages is countable while the set of recursively enumerable<br>       languages is uncountable.<br>   (b) The set of regular languages is uncountable while the set of recursively enumerable<br>       languages is countable.<br>   (c) The set of regular languages and the set of recursively enumerable<br>       languages are both countable.<br>   (d) The set of regular languages and the set of recursively enumerable languages are<br>       both uncountable.<br>   (e) The set of regular languages is countable while whether the set of recursively<br>       enumerable languages is countable or not is not known and is a longstanding<br>       open problem.</div>",
+      "sourceUrl": "https://main.tifr.res.in/academics/docs/past_QP/GS2023_QP_CSS.pdf",
+      "answerSource": {
+        "kind": "official-marked-solution",
+        "url": "https://main.tifr.res.in/academics/docs/past_QP/GS2023_QP_CSS.pdf"
+      }
+    },
+    {
+      "id": "tifr-gs-cs:2023:3",
+      "year": 2023,
+      "set": null,
+      "number": "3",
+      "paperLabel": "TIFR GS 2023 · Computer Science",
+      "subject": "algorithms",
+      "subjectSlug": "algorithms",
+      "classificationHint": {
+        "subjectSlug": "algorithms",
+        "topicSlug": "greedy-technique"
+      },
+      "topic": "greedy-technique",
+      "topicSlug": "greedy-technique",
+      "subtopics": [
+        "greedy-technique",
+        "tifr-gs-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E"
+      ],
+      "answer": "B",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">Given a set F of intervals (si , ti )ni=1 on the integer line (assume all si , ti are distinct),<br>   a subset S of F is said to be independent if no two intervals in S have a non-empty<br>   intersection.<br>   Consider greedy algorithms of the following type:<br>     1 Order the intervals in F according to an ordering σ (soon to be specified).<br>     2 S←∅;                                               // ∅ denotes the empty set.<br>     3 for I in F (in the order specified by σ) do<br>     4    if I does not intersect any of the intervals already present in S then<br>     5        S ← S ∪ {I}<br>     6   return S<br>   Here are three possible choices for the ordering σ:<br><br>  (C1) σ arranges the intervals in F in increasing order of si .<br>  (C2) σ arranges the intervals in F in increasing order of ti .<br>  (C3) σ arranges the intervals in F in increasing order of |si − ti |.<br><br>   For which of these choices of the ordering σ does the algorithm always produce an<br>   independent set of F of maximum size?<br>   (a) Choice (C1) only<br>  (b) Choice (C2) only<br>   (c) Choice (C3) only<br>   (d) Choices (C2) and (C3), but not choice (C1)<br>   (e) Choices (C1) and (C2), but not choice (C3)</div>",
+      "sourceUrl": "https://main.tifr.res.in/academics/docs/past_QP/GS2023_QP_CSS.pdf",
+      "answerSource": {
+        "kind": "official-marked-solution",
+        "url": "https://main.tifr.res.in/academics/docs/past_QP/GS2023_QP_CSS.pdf"
+      }
+    },
+    {
+      "id": "tifr-gs-cs:2023:4",
+      "year": 2023,
+      "set": null,
+      "number": "4",
+      "paperLabel": "TIFR GS 2023 · Computer Science",
+      "subject": "discrete-mathematics",
+      "subjectSlug": "discrete-mathematics",
+      "classificationHint": {
+        "subjectSlug": "discrete-mathematics",
+        "topicSlug": "functions"
+      },
+      "topic": "functions",
+      "topicSlug": "functions",
+      "subtopics": [
+        "functions",
+        "tifr-gs-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E"
+      ],
+      "answer": "A",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">Amar, Balu, and Chhaya are three friends and they play the following game. Chhaya<br>   first chooses a number k ∈ U where U = {1, 2, . . . , 127}. She either gives k to both<br>   Amar and Balu, or else she gives k to Amar and k + 1 to Balu. Amar computes<br>   a function f : U → {0, 1}n on the number he receives from Chhaya and sends the<br>   output of this function to Balu. Using this output and his own input, Balu has<br>   to decide whether Chhaya gave the same number to Amar and him, or if she gave<br>   numbers that differed by 1. What is the minimal n that allows Balu to distinguish<br>   between these two cases?<br>  (a) 1<br>   (b) 2<br>   (c) 7<br>   (d) 127<br>   (e) 128</div>",
+      "sourceUrl": "https://main.tifr.res.in/academics/docs/past_QP/GS2023_QP_CSS.pdf",
+      "answerSource": {
+        "kind": "official-marked-solution",
+        "url": "https://main.tifr.res.in/academics/docs/past_QP/GS2023_QP_CSS.pdf"
+      }
+    },
+    {
+      "id": "tifr-gs-cs:2023:5",
+      "year": 2023,
+      "set": null,
+      "number": "5",
+      "paperLabel": "TIFR GS 2023 · Computer Science",
+      "subject": "engineering-mathematics",
+      "subjectSlug": "engineering-mathematics",
+      "classificationHint": {
+        "subjectSlug": "engineering-mathematics",
+        "topicSlug": "linear-algebra"
+      },
+      "topic": "linear-algebra",
+      "topicSlug": "linear-algebra",
+      "subtopics": [
+        "linear-algebra",
+        "tifr-gs-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E"
+      ],
+      "answer": "C",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">Consider unit vectors a and b in Rn . Let w be an arbitrary vector in Rn and η be a<br>   positive real number such that<br><br>                                   aT b ≥ η &gt; 0 ≥ wT b.<br><br>   Define z = w + b. Consider the following statements.<br><br>   (S1) zT a ≥ aT w + η<br>   (S2) ∥z∥2 ≤ ∥w∥2 + 1<br>   (S3) zT b ≥ 0<br><br>   Choose the correct option from those below.<br>   (a) Statements (S1), (S2), and (S3) are all true.<br>   (b) Statements (S1) and (S2) must be true, but statement (S3) must be false.<br>   (c) Statements (S1) and (S2) must be true, but statement (S3) may be<br>       either true or false.<br><br>   (d) Statements (S1) and (S3) must be true, but statement (S2) may be false.<br>   (e) Statement (S1) may be false.</div>",
+      "sourceUrl": "https://main.tifr.res.in/academics/docs/past_QP/GS2023_QP_CSS.pdf",
+      "answerSource": {
+        "kind": "official-marked-solution",
+        "url": "https://main.tifr.res.in/academics/docs/past_QP/GS2023_QP_CSS.pdf"
+      }
+    },
+    {
+      "id": "tifr-gs-cs:2023:6",
+      "year": 2023,
+      "set": null,
+      "number": "6",
+      "paperLabel": "TIFR GS 2023 · Computer Science",
+      "subject": "algorithms",
+      "subjectSlug": "algorithms",
+      "classificationHint": {
+        "subjectSlug": "algorithms",
+        "topicSlug": "recurrence-relation"
+      },
+      "topic": "recurrence-relation",
+      "topicSlug": "recurrence-relation",
+      "subtopics": [
+        "recurrence-relation",
+        "tifr-gs-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E"
+      ],
+      "answer": "D",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">What is the solution to the following recurrence?<br>                                   (<br>                                    1                if n ≤ 10,<br>                          T (n) = √          √<br>                                      n · T ( n) + n if n &gt; 10.<br><br>   (a) T (n) = Θ(n2 )<br>   (b) T (n) = Θ(n log n)<br>                  √<br>   (c) T (n) = Θ(n log n)<br>  (d) T (n) = Θ(n log log n)<br>   (e) None of the above</div>",
+      "sourceUrl": "https://main.tifr.res.in/academics/docs/past_QP/GS2023_QP_CSS.pdf",
+      "answerSource": {
+        "kind": "official-marked-solution",
+        "url": "https://main.tifr.res.in/academics/docs/past_QP/GS2023_QP_CSS.pdf"
+      }
+    },
+    {
+      "id": "tifr-gs-cs:2023:7",
+      "year": 2023,
+      "set": null,
+      "number": "7",
+      "paperLabel": "TIFR GS 2023 · Computer Science",
+      "subject": "engineering-mathematics",
+      "subjectSlug": "engineering-mathematics",
+      "classificationHint": {
+        "subjectSlug": "engineering-mathematics",
+        "topicSlug": "probability-statistics"
+      },
+      "topic": "probability-statistics",
+      "topicSlug": "probability-statistics",
+      "subtopics": [
+        "probability-statistics",
+        "tifr-gs-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E"
+      ],
+      "answer": "B",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">Consider the random variables N, H, and T sampled as follows. First, N is sampled<br>   from the Poisson(10) distribution. This means that for each integer n ≥ 0,<br>                                               e−10 10n<br>                                   Pr[N = n] =          .<br>                                                 n!<br>   Then N independent fair coins are tossed. H is then the number of heads, and T<br>   the number of tails, obtained in this process. Choose the correct statement from the<br>   ones given below.<br>   (Note: Recall that for any real number x, ex is defined by the infinite series<br>                                              ∞<br>                                         x<br>                                              X xk<br>                                        e =            ,<br>                                              k=0<br>                                                  k!<br><br>   where 0! = 1 by convention.)<br>   (a) H and T are independent and the variance of H is equal to the variance of N .<br>  (b) H and T are independent and the variance of H is half the variance of<br>      N.<br>   (c) H and T are not independent, but they are independent conditioned on N .<br>   (d) H and T are not independent, and E[HT ] &lt; E[H] × E[T ].<br>   (e) H and T are not independent, and E[HT ] &gt; E[H] × E[T ].</div>",
+      "sourceUrl": "https://main.tifr.res.in/academics/docs/past_QP/GS2023_QP_CSS.pdf",
+      "answerSource": {
+        "kind": "official-marked-solution",
+        "url": "https://main.tifr.res.in/academics/docs/past_QP/GS2023_QP_CSS.pdf"
+      }
+    },
+    {
+      "id": "tifr-gs-cs:2023:8",
+      "year": 2023,
+      "set": null,
+      "number": "8",
+      "paperLabel": "TIFR GS 2023 · Computer Science",
+      "subject": "data-structure",
+      "subjectSlug": "data-structure",
+      "classificationHint": {
+        "subjectSlug": "data-structure",
+        "topicSlug": "binary-tree"
+      },
+      "topic": "binary-tree",
+      "topicSlug": "binary-tree",
+      "subtopics": [
+        "binary-tree",
+        "tifr-gs-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E"
+      ],
+      "answer": "A",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">Let U be a finite set and let h be a function mapping U × U to U . Consider the<br>   following process that assigns values to all nodes of a complete binary tree with 128<br>   leaves. Initially, the leaf nodes are assigned arbitrary values from U . Then, the value<br>   that is assigned to an internal node is the output of h on the values assigned to this<br>   node’s children. The value of the tree is given by the value assigned to the root.<br>   Once you have computed the value of the tree, you realize that the initial value that<br>   was assigned to the 53rd leaf was incorrect and you therefore need to use a different<br>   value for the 53rd leaf. Given this incorrect tree as input, at most how many times<br>   would an optimal algorithm need to recompute h in order to obtain the correct value<br>   of the tree?<br><br>   (a) 7<br>   (b) 8<br>    (c) 53<br>   (d) 127<br>    (e) 255</div>",
+      "sourceUrl": "https://main.tifr.res.in/academics/docs/past_QP/GS2023_QP_CSS.pdf",
+      "answerSource": {
+        "kind": "official-marked-solution",
+        "url": "https://main.tifr.res.in/academics/docs/past_QP/GS2023_QP_CSS.pdf"
+      }
+    },
+    {
+      "id": "tifr-gs-cs:2023:9",
+      "year": 2023,
+      "set": null,
+      "number": "9",
+      "paperLabel": "TIFR GS 2023 · Computer Science",
+      "subject": "discrete-mathematics",
+      "subjectSlug": "discrete-mathematics",
+      "classificationHint": {
+        "subjectSlug": "discrete-mathematics",
+        "topicSlug": "combination"
+      },
+      "topic": "combination",
+      "topicSlug": "combination",
+      "subtopics": [
+        "combination",
+        "tifr-gs-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E"
+      ],
+      "answer": "D",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">Fix a positive integer n, and let n = pe11 pe22 · · · pekk be the prime factorization of n.<br>   Here, p1 , . . . , pk are prime numbers and ei ≥ 1 for all 1 ≤ i ≤ k. Call a sequence<br>   (n0 , n1 , . . . , nt ) where n0 = n and nt = 1 relevant if for every 0 ≤ i ≤ t − 1, the<br>   number ni /ni+1 is a prime number. What is the total number of relevant sequences?<br>    (a) (p1 + 1) × (p2 + 1) × · · · × (pk + 1)<br>   (b) (p1 + 1)e1 × (p2 + 1)e2 × · · · × (pk + 1)ek<br>    (c) (e1 + e2 + · · · + ek )!<br>   (d) (e1(e!)×(e<br>              1 +e2 +···+ek )!<br>                  2 !)×···×(ek !)<br><br>    (e) None of the above</div>",
+      "sourceUrl": "https://main.tifr.res.in/academics/docs/past_QP/GS2023_QP_CSS.pdf",
+      "answerSource": {
+        "kind": "official-marked-solution",
+        "url": "https://main.tifr.res.in/academics/docs/past_QP/GS2023_QP_CSS.pdf"
+      }
+    },
+    {
+      "id": "tifr-gs-cs:2023:10",
+      "year": 2023,
+      "set": null,
+      "number": "10",
+      "paperLabel": "TIFR GS 2023 · Computer Science",
+      "subject": "discrete-mathematics",
+      "subjectSlug": "discrete-mathematics",
+      "classificationHint": {
+        "subjectSlug": "discrete-mathematics",
+        "topicSlug": "graph-theory"
+      },
+      "topic": "graph-theory",
+      "topicSlug": "graph-theory",
+      "subtopics": [
+        "graph-theory",
+        "tifr-gs-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E"
+      ],
+      "answer": "C",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">A d-regular graph is one in which every vertex has degree d. Also, a minimum cut<br>    in a graph is a smallest set of edges which, upon removal, disconnects the graph, so<br>    that there are vertices in the resulting graph with no path between them. We are<br>    given two graphs. G1 = (V1 , E1 ) is a connected, 3-regular graph. G2 = (V2 , E2 ) is a<br>    connected, 4-regular graph. The vertex sets V1 and V2 are disjoint. We are further<br>    told that the size of any minimum cut in G1 is the same as the size of any minimum<br>    cut in G2 . Which of the following must be the size of this minimum cut?<br>    (a) 0<br>   (b) 1<br>   (c) 2<br>   (d) 3<br>    (e) 4</div>",
+      "sourceUrl": "https://main.tifr.res.in/academics/docs/past_QP/GS2023_QP_CSS.pdf",
+      "answerSource": {
+        "kind": "official-marked-solution",
+        "url": "https://main.tifr.res.in/academics/docs/past_QP/GS2023_QP_CSS.pdf"
+      }
+    },
+    {
+      "id": "tifr-gs-cs:2023:11",
+      "year": 2023,
+      "set": null,
+      "number": "11",
+      "paperLabel": "TIFR GS 2023 · Computer Science",
+      "subject": "discrete-mathematics",
+      "subjectSlug": "discrete-mathematics",
+      "classificationHint": {
+        "subjectSlug": "discrete-mathematics",
+        "topicSlug": "group-theory"
+      },
+      "topic": "group-theory",
+      "topicSlug": "group-theory",
+      "subtopics": [
+        "group-theory",
+        "tifr-gs-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E"
+      ],
+      "answer": "A",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">Let m = 2877426671. It is known that p = 5754853343 = 2m + 1 is a 10-digit prime<br>    number. What is 16m (mod p)?<br>   (a) 1<br>   (b) 4<br>    (c) 16<br>   (d) 2877426671<br>    (e) 5754853342 (which is actually −1 (mod p))</div>",
+      "sourceUrl": "https://main.tifr.res.in/academics/docs/past_QP/GS2023_QP_CSS.pdf",
+      "answerSource": {
+        "kind": "official-marked-solution",
+        "url": "https://main.tifr.res.in/academics/docs/past_QP/GS2023_QP_CSS.pdf"
+      }
+    },
+    {
+      "id": "tifr-gs-cs:2023:12",
+      "year": 2023,
+      "set": null,
+      "number": "12",
+      "paperLabel": "TIFR GS 2023 · Computer Science",
+      "subject": "discrete-mathematics",
+      "subjectSlug": "discrete-mathematics",
+      "classificationHint": {
+        "subjectSlug": "discrete-mathematics",
+        "topicSlug": "graph-theory"
+      },
+      "topic": "graph-theory",
+      "topicSlug": "graph-theory",
+      "subtopics": [
+        "graph-theory",
+        "tifr-gs-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E"
+      ],
+      "answer": "B",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">A graph G = (V, E) is said to be k-colourable if the set V of vertices can be coloured<br>    with k colours such that no edge has both its endpoints of the same colour. It is<br>    known that the following language 3COL is NP-complete.<br><br>                                      3COL = {G | G is 3-colourable}.<br><br>    Consider the following algorithmic problems (assume that the input graph G is pro-<br>    vided as its adjacency matrix):<br>   (P1) Given a graph G as input, check if G is 2-colourable.<br>   (P2) Given a graph G as input, find the minimum value of k such that G is k-<br>        colourable.<br>   (P3) Given a graph G, check if G is 3-colourable.<br>   (P4) Given a graph G, along with a guarantee that the minimum value of k such that<br>        G is k-colourable is either 2 or 3, decide which of the two is the case.<br>    Assume NP ̸= P. Then, which of the above problems can be solved in polynomial<br>    time?<br>    (a) Only problem (P1)<br>   (b) Only problems (P1) and (P4)<br>    (c) Only problems (P2) and (P3)<br>   (d) Only problems (P1), (P3) and (P4)<br>    (e) Only problems (P1), (P2) and (P4)</div>",
+      "sourceUrl": "https://main.tifr.res.in/academics/docs/past_QP/GS2023_QP_CSS.pdf",
+      "answerSource": {
+        "kind": "official-marked-solution",
+        "url": "https://main.tifr.res.in/academics/docs/past_QP/GS2023_QP_CSS.pdf"
+      }
+    },
+    {
+      "id": "tifr-gs-cs:2023:13",
+      "year": 2023,
+      "set": null,
+      "number": "13",
+      "paperLabel": "TIFR GS 2023 · Computer Science",
+      "subject": "discrete-mathematics",
+      "subjectSlug": "discrete-mathematics",
+      "classificationHint": {
+        "subjectSlug": "discrete-mathematics",
+        "topicSlug": "combination"
+      },
+      "topic": "combination",
+      "topicSlug": "combination",
+      "subtopics": [
+        "combination",
+        "tifr-gs-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E"
+      ],
+      "answer": "E",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">You have a regular tetrahedron and 4 distinct colours. You wish to paint the faces<br>    of the tetrahedron such that each face gets a different colour. How many ways can<br>    you colour the tetrahedron? Recall that a regular tetrahedron is a three-dimensional<br>    solid with exactly four faces, all of which are equilateral triangles: see the sketch<br>    given below (not drawn to scale) for a rough view of such a solid. Two colourings of<br>    the tetrahedron are considered the same if they are identical after possibly rotating<br>    the tetrahedron.<br><br>    (a) 24<br>   (b) 12<br>    (c) 8<br>   (d) 6<br>   (e) 2</div>",
+      "sourceUrl": "https://main.tifr.res.in/academics/docs/past_QP/GS2023_QP_CSS.pdf",
+      "answerSource": {
+        "kind": "official-marked-solution",
+        "url": "https://main.tifr.res.in/academics/docs/past_QP/GS2023_QP_CSS.pdf"
+      }
+    },
+    {
+      "id": "tifr-gs-cs:2023:14",
+      "year": 2023,
+      "set": null,
+      "number": "14",
+      "paperLabel": "TIFR GS 2023 · Computer Science",
+      "subject": "discrete-mathematics",
+      "subjectSlug": "discrete-mathematics",
+      "classificationHint": {
+        "subjectSlug": "discrete-mathematics",
+        "topicSlug": "propositional-logic"
+      },
+      "topic": "propositional-logic",
+      "topicSlug": "propositional-logic",
+      "subtopics": [
+        "propositional-logic",
+        "tifr-gs-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E"
+      ],
+      "answer": "A",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">A k-term T = ℓ1 ∧ ℓ2 ∧ · · · ∧ ℓr is defined to be a conjunction of at most k literals,<br>    where each literal ℓi is a Boolean variable or its negation and r ≤ k. A formula<br>    Φ is said to be a k-DNF if it is of the form T1 ∨ T2 ∨ . . . · · · ∨ Tm where each Ti<br>    is a k-term. An assignment of True/False values to the variables appearing in a<br>    formula Φ is said to be a satisfying assignment for Φ if, under the assignment, Φ<br>    evaluates to True. Otherwise, the assignment is said to be a violating assignment<br>    for Φ. Consider the following statements<br><br>   (S1) Given a 2-DNF Φ, one can find a violating assignment for Φ in polynomial time.<br>   (S2) It is NP-hard to find a violating assignment for a given 3-DNF Φ.<br>   (S3) Given a 3-DNF Φ, one can find a satisfying assignment for Φ in polynomial<br>        time.<br><br>    Which of the following statements are correct?<br>   (a) Statements (S1), (S2), and (S3) are all true.<br>   (b) Statements (S1) and (S2) are true, but statement (S3) is not known to be true.<br>    (c) Statements (S2) is true, but statements (S1) and (S3) are not known to be true.<br>   (d) Statements (S1), (S2), and (S3) are false.<br>    (e) Statements (S1) and (S3) are true, but (S2) is not known to be true.</div>",
+      "sourceUrl": "https://main.tifr.res.in/academics/docs/past_QP/GS2023_QP_CSS.pdf",
+      "answerSource": {
+        "kind": "official-marked-solution",
+        "url": "https://main.tifr.res.in/academics/docs/past_QP/GS2023_QP_CSS.pdf"
+      }
+    },
+    {
+      "id": "tifr-gs-cs:2023:15",
+      "year": 2023,
+      "set": null,
+      "number": "15",
+      "paperLabel": "TIFR GS 2023 · Computer Science",
+      "subject": "theory-of-computation",
+      "subjectSlug": "theory-of-computation",
+      "classificationHint": {
+        "subjectSlug": "theory-of-computation",
+        "topicSlug": "context-free-language"
+      },
+      "topic": "context-free-language",
+      "topicSlug": "context-free-language",
+      "subtopics": [
+        "context-free-language",
+        "tifr-gs-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E"
+      ],
+      "answer": "D",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">Consider the language L = {ai $aj $bk $ | k ⩽ max(i, j), i, j, k ≥ 0} over the alphabet<br>    Σ = {a, b, $}. The complement of the language L, that is, Σ∗ \\ L is denoted by L.<br>    Which of the following is true?<br>    (a) Both L and L are regular languages.<br>   (b) L is a context-free language and L is a regular language.<br>    (c) Both L and L are context-free languages.<br>   (d) L is a context-free language and L is not a context-free language.<br>    (e) Neither is L a context-free language nor is L a context-free language.<br><br></div>",
+      "sourceUrl": "https://main.tifr.res.in/academics/docs/past_QP/GS2023_QP_CSS.pdf",
+      "answerSource": {
+        "kind": "official-marked-solution",
+        "url": "https://main.tifr.res.in/academics/docs/past_QP/GS2023_QP_CSS.pdf"
+      }
+    },
+    {
       "id": "tifr-gs-cs:2024:1",
       "year": 2024,
       "set": null,
@@ -922,7 +1995,7 @@
       "answer": "E",
       "tolerance": null,
       "answerStatus": "available",
-      "html": "<div class=\"pyq-source-text\">Let m be a positive integer and a be an integer such that a ∈ {0, 1, . . . , m − 1}.<br>                                              2<br>    Let Sa = {b : b ∈ {0, 1, . . . , m − 1}, b ≡ a   mod m} be the set of square roots of a<br>    modulo m. Consider the following statements.<br><br>     (i) For all natural numbers m and for all a ∈ {0, 1, . . . , m − 1}, |Sa | ≤ 2.<br><br>     (ii) For all natural numbers m, there exists an a ∈ {0, 1, . . . , m − 1}, |Sa | &gt; 2.<br><br>    (iii) If m is a prime number, then for all a ∈ {0, 1, . . . , m − 1}, |Sa | ≤ 2.<br><br>    (iv) For composite m, |Sa | is not necessarily bounded above by 2.<br><br>    Which of the above statements are TRUE ?<br><br>   (a) Only (i)<br><br>   (b) Both (ii), (iv)<br><br>    (c) Only (iii)<br><br>   (d) Only (iv)<br><br>   (e) Both (iii), (iv)</div>",
+      "html": "<div class=\"pyq-source-text\">Let m be a positive integer and a be an integer such that a ∈ {0, 1, . . . , m − 1}.<br><br>    Let Sa = {b : b ∈ {0, 1, . . . , m − 1}, b ≡ a   mod m} be the set of square roots of a<br>    modulo m. Consider the following statements.<br><br>     (i) For all natural numbers m and for all a ∈ {0, 1, . . . , m − 1}, |Sa | ≤ 2.<br><br>     (ii) For all natural numbers m, there exists an a ∈ {0, 1, . . . , m − 1}, |Sa | &gt; 2.<br><br>    (iii) If m is a prime number, then for all a ∈ {0, 1, . . . , m − 1}, |Sa | ≤ 2.<br><br>    (iv) For composite m, |Sa | is not necessarily bounded above by 2.<br><br>    Which of the above statements are TRUE ?<br><br>   (a) Only (i)<br><br>   (b) Both (ii), (iv)<br><br>    (c) Only (iii)<br><br>   (d) Only (iv)<br><br>   (e) Both (iii), (iv)</div>",
       "sourceUrl": "https://main.tifr.res.in/academics/docs/past_QP/GS2025_QP_CS_LIDS.pdf",
       "answerSource": {
         "kind": "official-marked-solution",

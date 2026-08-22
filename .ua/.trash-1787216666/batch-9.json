@@ -1,0 +1,928 @@
+{
+  "nodes": [
+    {
+      "id": "file:src/__tests__/isolation.test.ts",
+      "type": "file",
+      "name": "isolation.test.ts",
+      "filePath": "src/__tests__/isolation.test.ts",
+      "summary": "Exercises the full device-isolation contract by seeding persisted Zustand state, IndexedDB rows, metadata, and localStorage before verifying an account-safe wipe.",
+      "tags": [
+        "test",
+        "data-isolation",
+        "persistence",
+        "security"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/__tests__/isolation.test.ts:seedAll",
+      "type": "function",
+      "name": "seedAll",
+      "filePath": "src/__tests__/isolation.test.ts",
+      "summary": "Seeds modified preferences, active session and log stores, Dexie rows and metadata, and owned and foreign localStorage keys for isolation tests.",
+      "tags": [
+        "test",
+        "data-isolation",
+        "persistence",
+        "function"
+      ],
+      "complexity": "simple",
+      "lineRange": [
+        16,
+        60
+      ]
+    },
+    {
+      "id": "file:src/components/layout/MobileTabs.tsx",
+      "type": "file",
+      "name": "MobileTabs.tsx",
+      "filePath": "src/components/layout/MobileTabs.tsx",
+      "summary": "Implements mobile primary navigation with three tabs, a context-aware central session action, haptic feedback, and an animated grouped More sheet.",
+      "tags": [
+        "component",
+        "mobile-navigation",
+        "routing",
+        "session"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:src/components/layout/MobileTabs.tsx:MobileTabs",
+      "type": "function",
+      "name": "MobileTabs",
+      "filePath": "src/components/layout/MobileTabs.tsx",
+      "summary": "Coordinates live-session detection, bottom-tab activity, haptic actions, and the accessible animated More navigation sheet.",
+      "tags": [
+        "component",
+        "mobile-navigation",
+        "routing",
+        "function"
+      ],
+      "complexity": "complex",
+      "lineRange": [
+        103,
+        307
+      ]
+    },
+    {
+      "id": "function:src/components/layout/MobileTabs.tsx:TabButton",
+      "type": "function",
+      "name": "TabButton",
+      "filePath": "src/components/layout/MobileTabs.tsx",
+      "summary": "Renders one mobile navigation tab with path matching, haptic selection, and a shared animated active indicator.",
+      "tags": [
+        "component",
+        "mobile-navigation",
+        "routing",
+        "function"
+      ],
+      "complexity": "simple",
+      "lineRange": [
+        310,
+        342
+      ]
+    },
+    {
+      "id": "file:src/components/layout/Nav.tsx",
+      "type": "file",
+      "name": "Nav.tsx",
+      "filePath": "src/components/layout/Nav.tsx",
+      "summary": "Builds the desktop side navigation, grouping study and analysis routes while resolving live-session resume state and authenticated profile controls.",
+      "tags": [
+        "component",
+        "desktop-navigation",
+        "routing",
+        "session"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:src/components/layout/Nav.tsx:NavItem",
+      "type": "function",
+      "name": "NavItem",
+      "filePath": "src/components/layout/Nav.tsx",
+      "summary": "Renders a desktop route link with icon, active color treatment, and hover motion.",
+      "tags": [
+        "component",
+        "desktop-navigation",
+        "routing",
+        "function"
+      ],
+      "complexity": "simple",
+      "lineRange": [
+        142,
+        162
+      ]
+    },
+    {
+      "id": "function:src/components/layout/Nav.tsx:Group",
+      "type": "function",
+      "name": "Group",
+      "filePath": "src/components/layout/Nav.tsx",
+      "summary": "Renders an optional navigation section label and its ordered route items.",
+      "tags": [
+        "component",
+        "desktop-navigation",
+        "routing",
+        "function"
+      ],
+      "complexity": "simple",
+      "lineRange": [
+        164,
+        173
+      ]
+    },
+    {
+      "id": "function:src/components/layout/Nav.tsx:Nav",
+      "type": "function",
+      "name": "Nav",
+      "filePath": "src/components/layout/Nav.tsx",
+      "summary": "Builds grouped desktop navigation, selects resume or new-session routing from live Dexie state, and exposes profile and sign-out controls.",
+      "tags": [
+        "component",
+        "desktop-navigation",
+        "routing",
+        "function"
+      ],
+      "complexity": "moderate",
+      "lineRange": [
+        175,
+        258
+      ]
+    },
+    {
+      "id": "file:src/components/layout/Shell.tsx",
+      "type": "file",
+      "name": "Shell.tsx",
+      "filePath": "src/components/layout/Shell.tsx",
+      "summary": "Composes the responsive application shell, starts synchronization, selects desktop or mobile chrome, provides the immersive scene, and surrounds routed study content with contextual guidance.",
+      "tags": [
+        "component",
+        "application-shell",
+        "responsive-layout",
+        "synchronization"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/components/layout/Shell.tsx:Shell",
+      "type": "function",
+      "name": "Shell",
+      "filePath": "src/components/layout/Shell.tsx",
+      "summary": "Bootstraps synchronization, reads the active route, and provides pathname-aware immersive scene state to the responsive shell chrome.",
+      "tags": [
+        "component",
+        "application-shell",
+        "responsive-layout",
+        "function"
+      ],
+      "complexity": "simple",
+      "lineRange": [
+        16,
+        24
+      ]
+    },
+    {
+      "id": "function:src/components/layout/Shell.tsx:ShellChrome",
+      "type": "function",
+      "name": "ShellChrome",
+      "filePath": "src/components/layout/Shell.tsx",
+      "summary": "Selects desktop or mobile navigation, renders shell controls and routed content, and adds route-specific coaching and daily quotes.",
+      "tags": [
+        "component",
+        "application-shell",
+        "responsive-layout",
+        "routing"
+      ],
+      "complexity": "moderate",
+      "lineRange": [
+        26,
+        74
+      ]
+    },
+    {
+      "id": "file:src/components/layout/TopRightControls.tsx",
+      "type": "file",
+      "name": "TopRightControls.tsx",
+      "filePath": "src/components/layout/TopRightControls.tsx",
+      "summary": "Combines exam countdown, offline synchronization status, and theme switching into the desktop and mobile shell control cluster.",
+      "tags": [
+        "component",
+        "shell-controls",
+        "exam-countdown",
+        "sync-status"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/components/layout/TopRightControls.tsx:ExamCountdown",
+      "type": "function",
+      "name": "ExamCountdown",
+      "filePath": "src/components/layout/TopRightControls.tsx",
+      "summary": "Computes days until the configured GATE date and links the optional countdown badge to the planner.",
+      "tags": [
+        "component",
+        "shell-controls",
+        "exam-countdown",
+        "function"
+      ],
+      "complexity": "simple",
+      "lineRange": [
+        11,
+        33
+      ]
+    },
+    {
+      "id": "function:src/components/layout/TopRightControls.tsx:TopRightControls",
+      "type": "function",
+      "name": "TopRightControls",
+      "filePath": "src/components/layout/TopRightControls.tsx",
+      "summary": "Groups offline status, exam countdown, and the theme toggle into a reusable shell control row.",
+      "tags": [
+        "component",
+        "shell-controls",
+        "exam-countdown",
+        "function"
+      ],
+      "complexity": "simple",
+      "lineRange": [
+        35,
+        44
+      ]
+    },
+    {
+      "id": "file:src/components/shared/OfflineBadge.tsx",
+      "type": "file",
+      "name": "OfflineBadge.tsx",
+      "filePath": "src/components/shared/OfflineBadge.tsx",
+      "summary": "Shows a quiet sandbox, offline, or queued-sync status and remains hidden when the app is online and fully synchronized.",
+      "tags": [
+        "component",
+        "sync-status",
+        "offline",
+        "feedback"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/components/shared/OfflineBadge.tsx:OfflineBadge",
+      "type": "function",
+      "name": "OfflineBadge",
+      "filePath": "src/components/shared/OfflineBadge.tsx",
+      "summary": "Derives sandbox, connectivity, and pending-row state to show only the synchronization status that needs attention.",
+      "tags": [
+        "component",
+        "sync-status",
+        "offline",
+        "function"
+      ],
+      "complexity": "simple",
+      "lineRange": [
+        6,
+        28
+      ]
+    },
+    {
+      "id": "file:src/hooks/useSync.ts",
+      "type": "file",
+      "name": "useSync.ts",
+      "filePath": "src/hooks/useSync.ts",
+      "summary": "Provides hooks that bootstrap user synchronization, track browser connectivity, and count rows still pending or errored across synchronized tables.",
+      "tags": [
+        "hook",
+        "synchronization",
+        "online-status",
+        "local-first"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/hooks/useSync.ts:useSyncBootstrap",
+      "type": "function",
+      "name": "useSyncBootstrap",
+      "filePath": "src/hooks/useSync.ts",
+      "summary": "Starts the sync engine for a signed-in non-sandbox user and stops it when authentication context changes or unmounts.",
+      "tags": [
+        "hook",
+        "synchronization",
+        "online-status",
+        "function"
+      ],
+      "complexity": "simple",
+      "lineRange": [
+        8,
+        16
+      ]
+    },
+    {
+      "id": "function:src/hooks/useSync.ts:useOnline",
+      "type": "function",
+      "name": "useOnline",
+      "filePath": "src/hooks/useSync.ts",
+      "summary": "Tracks navigator connectivity through online and offline browser events.",
+      "tags": [
+        "hook",
+        "synchronization",
+        "online-status",
+        "function"
+      ],
+      "complexity": "simple",
+      "lineRange": [
+        18,
+        33
+      ]
+    },
+    {
+      "id": "function:src/hooks/useSync.ts:usePendingCount",
+      "type": "function",
+      "name": "usePendingCount",
+      "filePath": "src/hooks/useSync.ts",
+      "summary": "Live-counts pending and errored rows across all synchronized Dexie tables.",
+      "tags": [
+        "hook",
+        "synchronization",
+        "online-status",
+        "function"
+      ],
+      "complexity": "simple",
+      "lineRange": [
+        36,
+        48
+      ]
+    },
+    {
+      "id": "file:src/lib/isolation.ts",
+      "type": "file",
+      "name": "isolation.ts",
+      "filePath": "src/lib/isolation.ts",
+      "summary": "Performs a best-effort device wipe across persisted Zustand stores, application-owned localStorage keys, and the Dexie database to prevent cross-account residue.",
+      "tags": [
+        "service",
+        "data-isolation",
+        "security",
+        "persistence",
+        "tested"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/lib/isolation.ts:wipeLocalState",
+      "type": "function",
+      "name": "wipeLocalState",
+      "filePath": "src/lib/isolation.ts",
+      "summary": "Independently resets in-memory stores, removes every owned air-prefixed storage key, and clears IndexedDB even when an earlier cleanup step fails.",
+      "tags": [
+        "service",
+        "data-isolation",
+        "security",
+        "function"
+      ],
+      "complexity": "simple",
+      "lineRange": [
+        24,
+        63
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "source": "file:src/__tests__/isolation.test.ts",
+      "target": "file:src/lib/db.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/__tests__/isolation.test.ts",
+      "target": "file:src/lib/isolation.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/__tests__/isolation.test.ts",
+      "target": "file:src/stores/log.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/__tests__/isolation.test.ts",
+      "target": "file:src/stores/prefs.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/__tests__/isolation.test.ts",
+      "target": "file:src/stores/session.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/__tests__/isolation.test.ts",
+      "target": "function:src/__tests__/isolation.test.ts:seedAll",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/components/layout/MobileTabs.tsx",
+      "target": "file:src/lib/db.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/layout/MobileTabs.tsx",
+      "target": "file:src/lib/native.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/layout/MobileTabs.tsx",
+      "target": "file:src/lib/utils.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/layout/MobileTabs.tsx",
+      "target": "file:src/stores/session.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/layout/MobileTabs.tsx",
+      "target": "function:src/components/layout/MobileTabs.tsx:MobileTabs",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/components/layout/MobileTabs.tsx",
+      "target": "function:src/components/layout/MobileTabs.tsx:MobileTabs",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/components/layout/MobileTabs.tsx",
+      "target": "function:src/components/layout/MobileTabs.tsx:TabButton",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/components/layout/Nav.tsx",
+      "target": "file:src/components/shared/Brand.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/layout/Nav.tsx",
+      "target": "file:src/hooks/useAuth.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/layout/Nav.tsx",
+      "target": "file:src/lib/db.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/layout/Nav.tsx",
+      "target": "file:src/lib/utils.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/layout/Nav.tsx",
+      "target": "file:src/stores/auth.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/layout/Nav.tsx",
+      "target": "file:src/stores/session.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/layout/Nav.tsx",
+      "target": "function:src/components/layout/Nav.tsx:NavItem",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/components/layout/Nav.tsx",
+      "target": "function:src/components/layout/Nav.tsx:Group",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/components/layout/Nav.tsx",
+      "target": "function:src/components/layout/Nav.tsx:Nav",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/components/layout/Nav.tsx",
+      "target": "function:src/components/layout/Nav.tsx:Nav",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/components/layout/Shell.tsx",
+      "target": "file:src/components/layout/MobileTabs.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/layout/Shell.tsx",
+      "target": "file:src/components/layout/Nav.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/layout/Shell.tsx",
+      "target": "file:src/components/layout/TopRightControls.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/layout/Shell.tsx",
+      "target": "file:src/components/shared/Brand.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/layout/Shell.tsx",
+      "target": "file:src/components/shared/ContextualGateTip.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/layout/Shell.tsx",
+      "target": "file:src/components/shared/DailyQuote.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/layout/Shell.tsx",
+      "target": "file:src/components/shared/OfflineBadge.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/layout/Shell.tsx",
+      "target": "file:src/components/shared/ThemeToggle.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/layout/Shell.tsx",
+      "target": "file:src/hooks/useSync.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/layout/Shell.tsx",
+      "target": "function:src/components/layout/Shell.tsx:Shell",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/components/layout/Shell.tsx",
+      "target": "function:src/components/layout/Shell.tsx:Shell",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/components/layout/Shell.tsx",
+      "target": "function:src/components/layout/Shell.tsx:ShellChrome",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/components/layout/TopRightControls.tsx",
+      "target": "file:src/components/shared/OfflineBadge.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/layout/TopRightControls.tsx",
+      "target": "file:src/components/shared/ThemeToggle.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/layout/TopRightControls.tsx",
+      "target": "file:src/hooks/useAuth.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/layout/TopRightControls.tsx",
+      "target": "file:src/lib/constants.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/layout/TopRightControls.tsx",
+      "target": "file:src/lib/utils.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/layout/TopRightControls.tsx",
+      "target": "file:src/stores/prefs.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/layout/TopRightControls.tsx",
+      "target": "function:src/components/layout/TopRightControls.tsx:ExamCountdown",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/components/layout/TopRightControls.tsx",
+      "target": "function:src/components/layout/TopRightControls.tsx:ExamCountdown",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/components/layout/TopRightControls.tsx",
+      "target": "function:src/components/layout/TopRightControls.tsx:TopRightControls",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/components/layout/TopRightControls.tsx",
+      "target": "function:src/components/layout/TopRightControls.tsx:TopRightControls",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/components/shared/OfflineBadge.tsx",
+      "target": "file:src/hooks/useAuth.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/shared/OfflineBadge.tsx",
+      "target": "file:src/hooks/useSync.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/shared/OfflineBadge.tsx",
+      "target": "file:src/lib/utils.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/components/shared/OfflineBadge.tsx",
+      "target": "function:src/components/shared/OfflineBadge.tsx:OfflineBadge",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/components/shared/OfflineBadge.tsx",
+      "target": "function:src/components/shared/OfflineBadge.tsx:OfflineBadge",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/hooks/useSync.ts",
+      "target": "file:src/hooks/useAuth.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/hooks/useSync.ts",
+      "target": "file:src/lib/db.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/hooks/useSync.ts",
+      "target": "file:src/lib/sync.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/hooks/useSync.ts",
+      "target": "function:src/hooks/useSync.ts:useSyncBootstrap",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/hooks/useSync.ts",
+      "target": "function:src/hooks/useSync.ts:useSyncBootstrap",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/hooks/useSync.ts",
+      "target": "function:src/hooks/useSync.ts:useOnline",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/hooks/useSync.ts",
+      "target": "function:src/hooks/useSync.ts:useOnline",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/hooks/useSync.ts",
+      "target": "function:src/hooks/useSync.ts:usePendingCount",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/hooks/useSync.ts",
+      "target": "function:src/hooks/useSync.ts:usePendingCount",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/isolation.ts",
+      "target": "file:src/lib/db.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/lib/isolation.ts",
+      "target": "file:src/stores/log.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/lib/isolation.ts",
+      "target": "file:src/stores/prefs.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/lib/isolation.ts",
+      "target": "file:src/stores/session.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/lib/isolation.ts",
+      "target": "function:src/lib/isolation.ts:wipeLocalState",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/isolation.ts",
+      "target": "function:src/lib/isolation.ts:wipeLocalState",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/isolation.ts",
+      "target": "file:src/__tests__/isolation.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "function:src/components/layout/MobileTabs.tsx:MobileTabs",
+      "target": "function:src/lib/native.ts:haptic",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/components/layout/Nav.tsx:NavItem",
+      "target": "function:src/lib/utils.ts:cn",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/components/layout/Nav.tsx:Nav",
+      "target": "function:src/hooks/useAuth.ts:useAuth",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/components/layout/Shell.tsx:Shell",
+      "target": "function:src/hooks/useSync.ts:useSyncBootstrap",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/components/layout/TopRightControls.tsx:ExamCountdown",
+      "target": "function:src/hooks/useAuth.ts:useAuth",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/components/shared/OfflineBadge.tsx:OfflineBadge",
+      "target": "function:src/hooks/useSync.ts:useOnline",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/components/shared/OfflineBadge.tsx:OfflineBadge",
+      "target": "function:src/hooks/useSync.ts:usePendingCount",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/hooks/useSync.ts:useSyncBootstrap",
+      "target": "function:src/lib/sync.ts:initSync",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/hooks/useSync.ts:useSyncBootstrap",
+      "target": "function:src/lib/sync.ts:stopSync",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/hooks/useSync.ts:usePendingCount",
+      "target": "function:src/lib/db.ts:table",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/lib/isolation.ts:wipeLocalState",
+      "target": "function:src/lib/db.ts:clearLocalData",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    }
+  ]
+}

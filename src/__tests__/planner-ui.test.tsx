@@ -24,7 +24,7 @@ describe('Planner subject picker', () => {
     render(<PlannerHarness />);
 
     await user.click(screen.getByRole('button', { name: 'Add subject' }));
-    await user.click(screen.getByRole('button', { name: 'Mathematics' }));
+    await user.click(screen.getByRole('button', { name: 'Discrete Mathematics' }));
     expect(screen.getByRole('dialog', { name: 'Choose subject' })).toBeInTheDocument();
 
     await user.type(screen.getByRole('searchbox', { name: 'Search subjects' }), 'operating');
@@ -39,7 +39,7 @@ describe('Planner subject picker', () => {
     render(<PlannerHarness />);
 
     await user.click(screen.getByRole('button', { name: 'Add subject' }));
-    await user.click(screen.getByRole('button', { name: 'Mathematics' }));
+    await user.click(screen.getByRole('button', { name: 'Discrete Mathematics' }));
     await user.type(screen.getByRole('searchbox', { name: 'Search subjects' }), 'custom');
     await user.click(screen.getByRole('button', { name: 'Custom...' }));
 

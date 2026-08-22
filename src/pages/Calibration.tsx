@@ -1,4 +1,4 @@
-// F5.4 — MARK / SKIP / 50-50 calibration under -1/3 negative marking.
+// F5.4 — exact-once MARK / SKIP / 50-50 calibration.
 // Shows per-subject accuracy + expected value + a nudge on whether to
 // raise/lower confidence threshold. Also lets the user quickly edit
 // mark_decision / mark_correct on questions that are missing them.
@@ -30,7 +30,8 @@ import { Button } from '@/components/ui/Button';
 import { db } from '@/lib/db';
 import { writeLocal } from '@/lib/sync';
 import { useAuth } from '@/hooks/useAuth';
-import { calibrationBySubject, calibrationOverall, type CalibrationRow } from '@/lib/analysis';
+import { calibrationByEvidence, calibrationOverall, type CalibrationRow } from '@/lib/analysis';
+import { normalizeAttemptEvidence } from '@/lib/attempt-evidence';
 import { cn, formatDate, plural } from '@/lib/utils';
 import { subjectInk } from '@/lib/subjectInk';
 import { OUTCOME_BY_CODE } from '@/lib/constants';
@@ -45,11 +46,7 @@ function fmtEV(v: number): string {
   return v.toFixed(2);
 }
 
-/** Plain-language labels for the three decision options.
- *
- *  MARK is exam jargon: "I chose to answer this question under −⅓ negative
- *  marking." Users kept confusing it with "marked-for-review". The renames
- *  below stick with jargon-free verbs. */
+/** Plain-language labels for the three decision options. */
 const DECISION_OPTIONS: {
   value: MarkDecision;
   label: string;
@@ -60,7 +57,7 @@ const DECISION_OPTIONS: {
   {
     value: 'MARK',
     label: 'I answered it',
-    hint: 'You committed to an option under −⅓ negative marking.',
+    hint: 'You committed to an option; exact marks depend on type and 1/2-mark value.',
     Icon: Check,
     tone: 'accent'
   },
@@ -74,7 +71,7 @@ const DECISION_OPTIONS: {
   {
     value: 'SKIP',
     label: 'Left blank',
-    hint: 'You skipped this question to avoid the −⅓.',
+    hint: 'You left this question unanswered for zero marks.',
     Icon: MinusCircle,
     tone: 'muted'
   }
@@ -86,7 +83,7 @@ const RECOMMENDATION_COPY: Record<
 > = {
   raise: {
     label: 'Skip more',
-    hint: 'Committed-answer accuracy is below the 25% break-even point and answer EV is negative.',
+    hint: 'Accuracy is below the 1-mark MCQ-equivalent decision threshold; inspect the exact type-aware scores before changing policy.',
     tone: 'warn'
   },
   lower: {
@@ -120,8 +117,17 @@ export default function Calibration() {
     [userId],
     []
   );
+  const pyqAttempts = useLiveQuery(
+    async () => (userId ? db.pyq_attempts.where('user_id').equals(userId).toArray() : []),
+    [userId],
+    []
+  );
 
-  const rows = useMemo(() => calibrationBySubject(questions), [questions]);
+  const ledger = useMemo(
+    () => normalizeAttemptEvidence({ attempts: pyqAttempts, questions }),
+    [pyqAttempts, questions]
+  );
+  const rows = useMemo(() => calibrationByEvidence(ledger.events), [ledger.events]);
   const overall = useMemo(() => calibrationOverall(rows), [rows]);
 
   const allMissing = useMemo(
@@ -185,7 +191,7 @@ export default function Calibration() {
     <div className="flex flex-col gap-4">
       <PageHeader
         title="Calibration"
-        description="How well your answer/skip calls hold up under −⅓ negative marking."
+        description="How well your answer/skip calls hold up across exact-once attempt evidence."
       />
 
       <Card>
@@ -204,7 +210,7 @@ export default function Calibration() {
               <StatCell label="Wrong" value={overall.wrong} color="text-danger" />
               <StatCell label="Left blank" value={overall.skipped} muted />
               <div className="flex flex-col gap-1 rounded border border-border bg-bg-overlay/40 px-3 py-2">
-                <span className="u-label">Expected value / Q</span>
+                <span className="u-label">1M MCQ-equivalent EV / Q</span>
                 <span
                   className={cn(
                     'u-num text-[20px] font-semibold leading-none',
@@ -243,7 +249,7 @@ export default function Calibration() {
                     <th className="px-2 py-2 text-right font-mono">50/50</th>
                     <th className="px-2 py-2 text-right font-mono">Blank</th>
                     <th className="px-2 py-2 text-right font-mono">Answer accuracy</th>
-                    <th className="px-2 py-2 text-right font-mono">EV / Q</th>
+                    <th className="px-2 py-2 text-right font-mono">1M MCQ-equiv EV / Q</th>
                     <th className="px-4 py-2 font-mono">Recommendation</th>
                   </tr>
                 </thead>
@@ -282,7 +288,7 @@ export default function Calibration() {
                           {fmtPct(r.accuracy)}
                         </td>
                         <td
-                          data-label="Expected value / Q"
+                          data-label="1M MCQ-equivalent EV / Q"
                           className={cn(
                             'u-num px-2 py-2 text-right font-semibold',
                             r.expectedValue > 0
@@ -386,19 +392,21 @@ export default function Calibration() {
 
       <Card>
         <CardBody className="flex flex-wrap items-center gap-x-6 gap-y-1 text-[12px] text-text-faint">
-          <span className="u-label">EV math</span>
+          <span className="u-label">Official scoring</span>
           <span>
             Blank = <span className="u-num">0</span>
           </span>
           <span>
-            Answered correct = <span className="u-num">+1</span>
+            Correct = <span className="u-num">+1 / +2</span>
           </span>
           <span>
-            Answered wrong = <span className="u-num">−⅓</span>
+            Wrong MCQ = <span className="u-num">−⅓ / −⅔</span>
           </span>
+          <span>Wrong MSQ/NAT = 0 · MSQ has no partial credit</span>
           <span className="ml-auto">
-            EV / Q averages over every recorded decision. Blank answers contribute zero, so the
-            number evaluates the full answer/skip policy.
+            The displayed EV is a disclosed 1-mark MCQ-equivalent decision heuristic for mixed
+            legacy Journal evidence—not expected GATE marks. Exact type-aware scores are stored on
+            v3 PYQ receipts.
           </span>
         </CardBody>
       </Card>

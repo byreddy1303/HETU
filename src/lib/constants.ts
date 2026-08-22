@@ -1,19 +1,5 @@
 import type { Outcome, RootCause, MarkDecision } from '@/types';
-
-export const SUBJECTS = [
-  'Discrete Mathematics',
-  'Engineering Mathematics',
-  'Digital Logic',
-  'COA',
-  'Programming & DS',
-  'Algorithms',
-  'Theory of Computation',
-  'Compiler Design',
-  'Operating Systems',
-  'Databases',
-  'Computer Networks',
-  'General Aptitude'
-] as const;
+export { CANONICAL_SUBJECT_LABELS as SUBJECTS } from '@/lib/subjects';
 
 export interface OutcomeSpec {
   code: Outcome;

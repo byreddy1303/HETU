@@ -1,0 +1,11 @@
+{
+  "projectRoot": "/Users/bkalyankrishnareddy/Desktop/GATE PREP/hetu",
+  "batchFiles": [
+    {"path":"src/__tests__/topic-progress.test.ts","language":"typescript","sizeLines":32,"fileCategory":"code"},
+    {"path":"src/stores/topic-progress.ts","language":"typescript","sizeLines":198,"fileCategory":"code"}
+  ],
+  "batchImportData": {
+    "src/__tests__/topic-progress.test.ts": ["src/stores/topic-progress.ts"],
+    "src/stores/topic-progress.ts": ["src/lib/db.ts","src/lib/sync.ts","src/lib/utils.ts","src/stores/auth.ts"]
+  }
+}

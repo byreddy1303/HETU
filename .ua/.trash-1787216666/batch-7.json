@@ -1,0 +1,1438 @@
+{
+  "nodes": [
+    {
+      "id": "file:src/hooks/useTimer.ts",
+      "type": "file",
+      "name": "useTimer.ts",
+      "filePath": "src/hooks/useTimer.ts",
+      "summary": "Returns drift-resistant elapsed seconds derived from an epoch start time and schedules each refresh on the next displayed-second boundary.",
+      "tags": [
+        "hook",
+        "react",
+        "timer"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/hooks/useTimer.ts:useTimer",
+      "type": "function",
+      "name": "useTimer",
+      "filePath": "src/hooks/useTimer.ts",
+      "summary": "Calculates elapsed whole seconds from the system clock and aligns recursive timeout updates to second boundaries.",
+      "tags": [
+        "hook",
+        "react",
+        "timer"
+      ],
+      "complexity": "simple",
+      "lineRange": [
+        4,
+        26
+      ]
+    },
+    {
+      "id": "file:src/lib/analysis.ts",
+      "type": "file",
+      "name": "analysis.ts",
+      "filePath": "src/lib/analysis.ts",
+      "summary": "Provides deterministic dashboard and weekly-review analytics for mistake surface, outcomes, calibration, heatmaps, weekly summaries, and active study days.",
+      "tags": [
+        "service",
+        "analytics",
+        "learner-evidence"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:src/lib/analysis.ts:weeklyDraftFingerprint",
+      "type": "function",
+      "name": "weeklyDraftFingerprint",
+      "filePath": "src/lib/analysis.ts",
+      "summary": "Builds a trimmed fingerprint of the three required weekly-review narratives to detect unsaved edits.",
+      "tags": [
+        "utility",
+        "analytics",
+        "learner-evidence"
+      ],
+      "complexity": "simple",
+      "lineRange": [
+        16,
+        18
+      ]
+    },
+    {
+      "id": "function:src/lib/analysis.ts:mistakeSurfaceOpen",
+      "type": "function",
+      "name": "mistakeSurfaceOpen",
+      "filePath": "src/lib/analysis.ts",
+      "summary": "Counts re-attempt records that have not reached the mastered stage.",
+      "tags": [
+        "utility",
+        "analytics",
+        "learner-evidence"
+      ],
+      "complexity": "simple",
+      "lineRange": [
+        35,
+        37
+      ]
+    },
+    {
+      "id": "function:src/lib/analysis.ts:mistakeSurfaceTrend",
+      "type": "function",
+      "name": "mistakeSurfaceTrend",
+      "filePath": "src/lib/analysis.ts",
+      "summary": "Compares the current open mistake surface with its reconstructed state one week earlier.",
+      "tags": [
+        "utility",
+        "analytics",
+        "learner-evidence"
+      ],
+      "complexity": "simple",
+      "lineRange": [
+        46,
+        60
+      ]
+    },
+    {
+      "id": "function:src/lib/analysis.ts:mistakeSurfaceMovement",
+      "type": "function",
+      "name": "mistakeSurfaceMovement",
+      "filePath": "src/lib/analysis.ts",
+      "summary": "Counts mistake cards opened and mastered over the trailing seven local calendar days.",
+      "tags": [
+        "utility",
+        "analytics",
+        "learner-evidence"
+      ],
+      "complexity": "simple",
+      "lineRange": [
+        63,
+        78
+      ]
+    },
+    {
+      "id": "function:src/lib/analysis.ts:mistakeSurfaceSeries",
+      "type": "function",
+      "name": "mistakeSurfaceSeries",
+      "filePath": "src/lib/analysis.ts",
+      "summary": "Reconstructs daily open, opened, and mastered mistake-surface points over a local-calendar window.",
+      "tags": [
+        "utility",
+        "analytics",
+        "learner-evidence"
+      ],
+      "complexity": "simple",
+      "lineRange": [
+        94,
+        126
+      ]
+    },
+    {
+      "id": "function:src/lib/analysis.ts:outcomeDistribution",
+      "type": "function",
+      "name": "outcomeDistribution",
+      "filePath": "src/lib/analysis.ts",
+      "summary": "Counts questions into every configured outcome bucket, including zero-count outcomes.",
+      "tags": [
+        "utility",
+        "analytics",
+        "learner-evidence"
+      ],
+      "complexity": "simple",
+      "lineRange": [
+        129,
+        133
+      ]
+    },
+    {
+      "id": "function:src/lib/analysis.ts:latestSession",
+      "type": "function",
+      "name": "latestSession",
+      "filePath": "src/lib/analysis.ts",
+      "summary": "Returns the newest finished session by creation timestamp.",
+      "tags": [
+        "utility",
+        "analytics",
+        "learner-evidence"
+      ],
+      "complexity": "simple",
+      "lineRange": [
+        136,
+        143
+      ]
+    },
+    {
+      "id": "function:src/lib/analysis.ts:dueTodayCount",
+      "type": "function",
+      "name": "dueTodayCount",
+      "filePath": "src/lib/analysis.ts",
+      "summary": "Counts non-mastered re-attempts scheduled on or before the requested day.",
+      "tags": [
+        "utility",
+        "analytics",
+        "learner-evidence"
+      ],
+      "complexity": "simple",
+      "lineRange": [
+        146,
+        148
+      ]
+    },
+    {
+      "id": "function:src/lib/analysis.ts:summarizeWeek",
+      "type": "function",
+      "name": "summarizeWeek",
+      "filePath": "src/lib/analysis.ts",
+      "summary": "Aggregates one local-calendar week by outcome, root cause, subject, and repeated pattern.",
+      "tags": [
+        "utility",
+        "analytics",
+        "learner-evidence"
+      ],
+      "complexity": "simple",
+      "lineRange": [
+        154,
+        201
+      ]
+    },
+    {
+      "id": "function:src/lib/analysis.ts:calibrationBySubject",
+      "type": "function",
+      "name": "calibrationBySubject",
+      "filePath": "src/lib/analysis.ts",
+      "summary": "Calculates per-subject decision accuracy and negative-marking expected value and recommends raising, lowering, or holding the answer threshold.",
+      "tags": [
+        "utility",
+        "analytics",
+        "learner-evidence"
+      ],
+      "complexity": "moderate",
+      "lineRange": [
+        227,
+        286
+      ]
+    },
+    {
+      "id": "function:src/lib/analysis.ts:calibrationOverall",
+      "type": "function",
+      "name": "calibrationOverall",
+      "filePath": "src/lib/analysis.ts",
+      "summary": "Combines subject calibration rows into all-subject decision counts, accuracy, and expected value.",
+      "tags": [
+        "utility",
+        "analytics",
+        "learner-evidence"
+      ],
+      "complexity": "simple",
+      "lineRange": [
+        289,
+        316
+      ]
+    },
+    {
+      "id": "function:src/lib/analysis.ts:isMistake",
+      "type": "function",
+      "name": "isMistake",
+      "filePath": "src/lib/analysis.ts",
+      "summary": "Classifies every non-clean outcome as part of the mistake surface.",
+      "tags": [
+        "utility",
+        "analytics",
+        "learner-evidence"
+      ],
+      "complexity": "simple",
+      "lineRange": [
+        326,
+        328
+      ]
+    },
+    {
+      "id": "function:src/lib/analysis.ts:heatmapCells",
+      "type": "function",
+      "name": "heatmapCells",
+      "filePath": "src/lib/analysis.ts",
+      "summary": "Buckets dated mistakes by subject, optional subtopic, and root cause for the weakness heatmap.",
+      "tags": [
+        "utility",
+        "analytics",
+        "learner-evidence"
+      ],
+      "complexity": "simple",
+      "lineRange": [
+        335,
+        358
+      ]
+    },
+    {
+      "id": "function:src/lib/analysis.ts:heatmapRowTotals",
+      "type": "function",
+      "name": "heatmapRowTotals",
+      "filePath": "src/lib/analysis.ts",
+      "summary": "Totals heatmap cells by subject and subtopic row.",
+      "tags": [
+        "utility",
+        "analytics",
+        "learner-evidence"
+      ],
+      "complexity": "simple",
+      "lineRange": [
+        361,
+        368
+      ]
+    },
+    {
+      "id": "function:src/lib/analysis.ts:activeDaysBack",
+      "type": "function",
+      "name": "activeDaysBack",
+      "filePath": "src/lib/analysis.ts",
+      "summary": "Counts consecutive local calendar days ending today that contain at least one tagged question.",
+      "tags": [
+        "utility",
+        "analytics",
+        "learner-evidence"
+      ],
+      "complexity": "simple",
+      "lineRange": [
+        374,
+        387
+      ]
+    },
+    {
+      "id": "file:src/lib/sessions.ts",
+      "type": "file",
+      "name": "sessions.ts",
+      "filePath": "src/lib/sessions.ts",
+      "summary": "Reconciles audited PYQ practice into canonical sessions and returns only meaningful finished session history while pruning empty records.",
+      "tags": [
+        "service",
+        "study-sessions",
+        "data-access"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/lib/sessions.ts:practiceQuestionCount",
+      "type": "function",
+      "name": "practiceQuestionCount",
+      "filePath": "src/lib/sessions.ts",
+      "summary": "Counts canonical session questions while incorporating distinct audited PYQ attempts.",
+      "tags": [
+        "utility",
+        "study-sessions",
+        "data-access"
+      ],
+      "complexity": "simple",
+      "lineRange": [
+        9,
+        16
+      ]
+    },
+    {
+      "id": "function:src/lib/sessions.ts:reconcilePyqPracticeSessions",
+      "type": "function",
+      "name": "reconcilePyqPracticeSessions",
+      "filePath": "src/lib/sessions.ts",
+      "summary": "Creates or updates canonical session rows for durable PYQ sets using their audited attempts and local metadata.",
+      "tags": [
+        "utility",
+        "study-sessions",
+        "data-access"
+      ],
+      "complexity": "moderate",
+      "lineRange": [
+        23,
+        81
+      ]
+    },
+    {
+      "id": "function:src/lib/sessions.ts:finishedSessionsWithQuestions",
+      "type": "function",
+      "name": "finishedSessionsWithQuestions",
+      "filePath": "src/lib/sessions.ts",
+      "summary": "Returns newest-first finished sessions that contain meaningful questions or attempted PYQ sets.",
+      "tags": [
+        "utility",
+        "study-sessions",
+        "data-access"
+      ],
+      "complexity": "moderate",
+      "lineRange": [
+        87,
+        141
+      ]
+    },
+    {
+      "id": "function:src/lib/sessions.ts:pruneEmptyFinishedSessions",
+      "type": "function",
+      "name": "pruneEmptyFinishedSessions",
+      "filePath": "src/lib/sessions.ts",
+      "summary": "Deletes finished non-PYQ sessions that contain no tagged questions.",
+      "tags": [
+        "utility",
+        "study-sessions",
+        "data-access"
+      ],
+      "complexity": "simple",
+      "lineRange": [
+        149,
+        172
+      ]
+    },
+    {
+      "id": "function:src/lib/sessions.ts:recentSessions",
+      "type": "function",
+      "name": "recentSessions",
+      "filePath": "src/lib/sessions.ts",
+      "summary": "Returns a capped newest-first list of meaningful finished sessions.",
+      "tags": [
+        "utility",
+        "study-sessions",
+        "data-access"
+      ],
+      "complexity": "simple",
+      "lineRange": [
+        175,
+        182
+      ]
+    },
+    {
+      "id": "function:src/lib/sessions.ts:allSessions",
+      "type": "function",
+      "name": "allSessions",
+      "filePath": "src/lib/sessions.ts",
+      "summary": "Returns every meaningful finished session in newest-first order.",
+      "tags": [
+        "utility",
+        "study-sessions",
+        "data-access"
+      ],
+      "complexity": "simple",
+      "lineRange": [
+        188,
+        193
+      ]
+    },
+    {
+      "id": "file:src/pages/Dashboard.tsx",
+      "type": "file",
+      "name": "Dashboard.tsx",
+      "filePath": "src/pages/Dashboard.tsx",
+      "summary": "Builds the learner dashboard from live local data, showing daily targets, readiness cues, mistake-surface movement, outcomes, coaching, and current priorities.",
+      "tags": [
+        "component",
+        "dashboard",
+        "analytics"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:src/pages/Dashboard.tsx:TargetMeter",
+      "type": "function",
+      "name": "TargetMeter",
+      "filePath": "src/pages/Dashboard.tsx",
+      "summary": "Renders target progress, bounded completion width, and a calm remaining-work message.",
+      "tags": [
+        "component",
+        "dashboard",
+        "analytics"
+      ],
+      "complexity": "simple",
+      "lineRange": [
+        46,
+        78
+      ]
+    },
+    {
+      "id": "function:src/pages/Dashboard.tsx:OutcomeKey",
+      "type": "function",
+      "name": "OutcomeKey",
+      "filePath": "src/pages/Dashboard.tsx",
+      "summary": "Renders compact counts for every configured question outcome.",
+      "tags": [
+        "component",
+        "dashboard",
+        "analytics"
+      ],
+      "complexity": "simple",
+      "lineRange": [
+        80,
+        99
+      ]
+    },
+    {
+      "id": "function:src/pages/Dashboard.tsx:Dashboard",
+      "type": "function",
+      "name": "Dashboard",
+      "filePath": "src/pages/Dashboard.tsx",
+      "summary": "Queries the local learner store and composes targets, mistake surface, recent activity, outcomes, learning tips, and priority navigation.",
+      "tags": [
+        "component",
+        "dashboard",
+        "analytics"
+      ],
+      "complexity": "complex",
+      "lineRange": [
+        101,
+        488
+      ]
+    },
+    {
+      "id": "file:src/pages/Pyq.tsx",
+      "type": "file",
+      "name": "Pyq.tsx",
+      "filePath": "src/pages/Pyq.tsx",
+      "summary": "Implements the full PYQ practice experience: set configuration, history filtering, timed navigation, answer decisions, audit receipts, tagging, journaling, and re-attempt scheduling.",
+      "tags": [
+        "component",
+        "pyq",
+        "practice-session"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:src/pages/Pyq.tsx:sourceDraft",
+      "type": "function",
+      "name": "sourceDraft",
+      "filePath": "src/pages/Pyq.tsx",
+      "summary": "Projects a bundled PYQ and captured evidence into the tagging flow’s authoritative source draft.",
+      "tags": [
+        "component",
+        "pyq",
+        "practice-session"
+      ],
+      "complexity": "simple",
+      "lineRange": [
+        104,
+        121
+      ]
+    },
+    {
+      "id": "function:src/pages/Pyq.tsx:PracticeSetup",
+      "type": "function",
+      "name": "PracticeSetup",
+      "filePath": "src/pages/Pyq.tsx",
+      "summary": "Renders and manages PYQ scope, order, count, history filters, and resume, save, discard, or start actions.",
+      "tags": [
+        "component",
+        "pyq",
+        "practice-session"
+      ],
+      "complexity": "complex",
+      "lineRange": [
+        123,
+        475
+      ]
+    },
+    {
+      "id": "function:src/pages/Pyq.tsx:AnswerPad",
+      "type": "function",
+      "name": "AnswerPad",
+      "filePath": "src/pages/Pyq.tsx",
+      "summary": "Renders response controls appropriate to MCQ, MSQ, or NAT questions.",
+      "tags": [
+        "component",
+        "pyq",
+        "practice-session"
+      ],
+      "complexity": "moderate",
+      "lineRange": [
+        477,
+        545
+      ]
+    },
+    {
+      "id": "function:src/pages/Pyq.tsx:DecisionButtons",
+      "type": "function",
+      "name": "DecisionButtons",
+      "filePath": "src/pages/Pyq.tsx",
+      "summary": "Captures mark, skip, or fifty-fifty exam decisions for the current PYQ.",
+      "tags": [
+        "component",
+        "pyq",
+        "practice-session"
+      ],
+      "complexity": "simple",
+      "lineRange": [
+        547,
+        586
+      ]
+    },
+    {
+      "id": "function:src/pages/Pyq.tsx:ResultPanel",
+      "type": "function",
+      "name": "ResultPanel",
+      "filePath": "src/pages/Pyq.tsx",
+      "summary": "Displays the committed answer, correctness, timing, and authoritative solution after a PYQ attempt.",
+      "tags": [
+        "component",
+        "pyq",
+        "practice-session"
+      ],
+      "complexity": "moderate",
+      "lineRange": [
+        588,
+        678
+      ]
+    },
+    {
+      "id": "function:src/pages/Pyq.tsx:Pyq",
+      "type": "function",
+      "name": "Pyq",
+      "filePath": "src/pages/Pyq.tsx",
+      "summary": "Coordinates question-bank loading, set lifecycle, timing, answer commits, audit persistence, tagging, journaling, planner state, and navigation.",
+      "tags": [
+        "component",
+        "pyq",
+        "practice-session"
+      ],
+      "complexity": "complex",
+      "lineRange": [
+        685,
+        1671
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "source": "file:src/hooks/useTimer.ts",
+      "target": "function:src/hooks/useTimer.ts:useTimer",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/hooks/useTimer.ts",
+      "target": "function:src/hooks/useTimer.ts:useTimer",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/analysis.ts",
+      "target": "file:src/lib/constants.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/lib/analysis.ts",
+      "target": "file:src/lib/utils.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/lib/analysis.ts",
+      "target": "file:src/types/index.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/lib/analysis.ts",
+      "target": "function:src/lib/analysis.ts:weeklyDraftFingerprint",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/analysis.ts",
+      "target": "function:src/lib/analysis.ts:weeklyDraftFingerprint",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/analysis.ts",
+      "target": "function:src/lib/analysis.ts:mistakeSurfaceOpen",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/analysis.ts",
+      "target": "function:src/lib/analysis.ts:mistakeSurfaceOpen",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/analysis.ts",
+      "target": "function:src/lib/analysis.ts:mistakeSurfaceTrend",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/analysis.ts",
+      "target": "function:src/lib/analysis.ts:mistakeSurfaceTrend",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/analysis.ts",
+      "target": "function:src/lib/analysis.ts:mistakeSurfaceMovement",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/analysis.ts",
+      "target": "function:src/lib/analysis.ts:mistakeSurfaceMovement",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/analysis.ts",
+      "target": "function:src/lib/analysis.ts:mistakeSurfaceSeries",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/analysis.ts",
+      "target": "function:src/lib/analysis.ts:mistakeSurfaceSeries",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/analysis.ts",
+      "target": "function:src/lib/analysis.ts:outcomeDistribution",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/analysis.ts",
+      "target": "function:src/lib/analysis.ts:outcomeDistribution",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/analysis.ts",
+      "target": "function:src/lib/analysis.ts:latestSession",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/analysis.ts",
+      "target": "function:src/lib/analysis.ts:latestSession",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/analysis.ts",
+      "target": "function:src/lib/analysis.ts:dueTodayCount",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/analysis.ts",
+      "target": "function:src/lib/analysis.ts:dueTodayCount",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/analysis.ts",
+      "target": "function:src/lib/analysis.ts:summarizeWeek",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/analysis.ts",
+      "target": "function:src/lib/analysis.ts:summarizeWeek",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/analysis.ts",
+      "target": "function:src/lib/analysis.ts:calibrationBySubject",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/analysis.ts",
+      "target": "function:src/lib/analysis.ts:calibrationBySubject",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/analysis.ts",
+      "target": "function:src/lib/analysis.ts:calibrationOverall",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/analysis.ts",
+      "target": "function:src/lib/analysis.ts:calibrationOverall",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/analysis.ts",
+      "target": "function:src/lib/analysis.ts:isMistake",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/analysis.ts",
+      "target": "function:src/lib/analysis.ts:isMistake",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/analysis.ts",
+      "target": "function:src/lib/analysis.ts:heatmapCells",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/analysis.ts",
+      "target": "function:src/lib/analysis.ts:heatmapCells",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/analysis.ts",
+      "target": "function:src/lib/analysis.ts:heatmapRowTotals",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/analysis.ts",
+      "target": "function:src/lib/analysis.ts:heatmapRowTotals",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/analysis.ts",
+      "target": "function:src/lib/analysis.ts:activeDaysBack",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/analysis.ts",
+      "target": "function:src/lib/analysis.ts:activeDaysBack",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/sessions.ts",
+      "target": "file:src/lib/db.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/lib/sessions.ts",
+      "target": "file:src/lib/pyq-session.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/lib/sessions.ts",
+      "target": "file:src/lib/sync.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/lib/sessions.ts",
+      "target": "file:src/types/index.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/lib/sessions.ts",
+      "target": "function:src/lib/sessions.ts:practiceQuestionCount",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/sessions.ts",
+      "target": "function:src/lib/sessions.ts:practiceQuestionCount",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/sessions.ts",
+      "target": "function:src/lib/sessions.ts:reconcilePyqPracticeSessions",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/sessions.ts",
+      "target": "function:src/lib/sessions.ts:reconcilePyqPracticeSessions",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/sessions.ts",
+      "target": "function:src/lib/sessions.ts:finishedSessionsWithQuestions",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/sessions.ts",
+      "target": "function:src/lib/sessions.ts:finishedSessionsWithQuestions",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/sessions.ts",
+      "target": "function:src/lib/sessions.ts:pruneEmptyFinishedSessions",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/sessions.ts",
+      "target": "function:src/lib/sessions.ts:pruneEmptyFinishedSessions",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/sessions.ts",
+      "target": "function:src/lib/sessions.ts:recentSessions",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/sessions.ts",
+      "target": "function:src/lib/sessions.ts:recentSessions",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/sessions.ts",
+      "target": "function:src/lib/sessions.ts:allSessions",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/sessions.ts",
+      "target": "function:src/lib/sessions.ts:allSessions",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/pages/Dashboard.tsx",
+      "target": "file:src/components/dashboard/HeroCard.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Dashboard.tsx",
+      "target": "file:src/components/dashboard/LearningTips.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Dashboard.tsx",
+      "target": "file:src/components/dashboard/OutcomeDonut.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Dashboard.tsx",
+      "target": "file:src/components/dashboard/OutcomeLegend.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Dashboard.tsx",
+      "target": "file:src/components/dashboard/SurfaceTrendChart.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Dashboard.tsx",
+      "target": "file:src/components/dashboard/WelcomeOverlay.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Dashboard.tsx",
+      "target": "file:src/components/ui/Button.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Dashboard.tsx",
+      "target": "file:src/components/ui/Card.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Dashboard.tsx",
+      "target": "file:src/hooks/useAuth.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Dashboard.tsx",
+      "target": "file:src/lib/analysis.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Dashboard.tsx",
+      "target": "file:src/lib/constants.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Dashboard.tsx",
+      "target": "file:src/lib/db.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Dashboard.tsx",
+      "target": "file:src/lib/do-now.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Dashboard.tsx",
+      "target": "file:src/lib/learning-tips.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Dashboard.tsx",
+      "target": "file:src/lib/planner-storage.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Dashboard.tsx",
+      "target": "file:src/lib/pyq.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Dashboard.tsx",
+      "target": "file:src/lib/sessions.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Dashboard.tsx",
+      "target": "file:src/lib/subjectInk.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Dashboard.tsx",
+      "target": "file:src/lib/utils.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Dashboard.tsx",
+      "target": "file:src/stores/prefs.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Dashboard.tsx",
+      "target": "function:src/pages/Dashboard.tsx:TargetMeter",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/pages/Dashboard.tsx",
+      "target": "function:src/pages/Dashboard.tsx:OutcomeKey",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/pages/Dashboard.tsx",
+      "target": "function:src/pages/Dashboard.tsx:Dashboard",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/pages/Dashboard.tsx",
+      "target": "function:src/pages/Dashboard.tsx:Dashboard",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/pages/Pyq.tsx",
+      "target": "file:src/components/layout/PageHeader.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Pyq.tsx",
+      "target": "file:src/components/pyq/PyqQuestionContent.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Pyq.tsx",
+      "target": "file:src/components/tags/TagFlow.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Pyq.tsx",
+      "target": "file:src/components/tags/sourceDraft.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Pyq.tsx",
+      "target": "file:src/components/ui/Badge.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Pyq.tsx",
+      "target": "file:src/components/ui/Button.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Pyq.tsx",
+      "target": "file:src/components/ui/Card.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Pyq.tsx",
+      "target": "file:src/components/ui/Select.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Pyq.tsx",
+      "target": "file:src/hooks/useAuth.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Pyq.tsx",
+      "target": "file:src/hooks/useTimer.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Pyq.tsx",
+      "target": "file:src/lib/constants.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Pyq.tsx",
+      "target": "file:src/lib/db.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Pyq.tsx",
+      "target": "file:src/lib/image.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Pyq.tsx",
+      "target": "file:src/lib/patterns.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Pyq.tsx",
+      "target": "file:src/lib/planner-execution.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Pyq.tsx",
+      "target": "file:src/lib/pyq-history.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Pyq.tsx",
+      "target": "file:src/lib/pyq-session.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Pyq.tsx",
+      "target": "file:src/lib/pyq.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Pyq.tsx",
+      "target": "file:src/lib/reattempt.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Pyq.tsx",
+      "target": "file:src/lib/sessions.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Pyq.tsx",
+      "target": "file:src/lib/sync.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Pyq.tsx",
+      "target": "file:src/lib/utils.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Pyq.tsx",
+      "target": "file:src/types/index.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/pages/Pyq.tsx",
+      "target": "function:src/pages/Pyq.tsx:sourceDraft",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/pages/Pyq.tsx",
+      "target": "function:src/pages/Pyq.tsx:PracticeSetup",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/pages/Pyq.tsx",
+      "target": "function:src/pages/Pyq.tsx:AnswerPad",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/pages/Pyq.tsx",
+      "target": "function:src/pages/Pyq.tsx:DecisionButtons",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/pages/Pyq.tsx",
+      "target": "function:src/pages/Pyq.tsx:ResultPanel",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/pages/Pyq.tsx",
+      "target": "function:src/pages/Pyq.tsx:Pyq",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/pages/Pyq.tsx",
+      "target": "function:src/pages/Pyq.tsx:Pyq",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/lib/analysis.ts",
+      "target": "file:src/__tests__/analysis.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/lib/sessions.ts",
+      "target": "file:src/__tests__/sessions.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/pages/Dashboard.tsx",
+      "target": "file:src/__tests__/reattempt-ui.test.tsx",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/pages/Pyq.tsx",
+      "target": "file:src/__tests__/pyq-attempt-log.test.tsx",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/pages/Pyq.tsx",
+      "target": "file:src/__tests__/pyq-navigation.test.tsx",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "function:src/lib/analysis.ts:heatmapCells",
+      "target": "function:src/lib/analysis.ts:isMistake",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/lib/sessions.ts:recentSessions",
+      "target": "function:src/lib/sessions.ts:finishedSessionsWithQuestions",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/lib/sessions.ts:allSessions",
+      "target": "function:src/lib/sessions.ts:finishedSessionsWithQuestions",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/pages/Dashboard.tsx:Dashboard",
+      "target": "function:src/lib/analysis.ts:latestSession",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/pages/Dashboard.tsx:Dashboard",
+      "target": "function:src/lib/analysis.ts:outcomeDistribution",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/pages/Dashboard.tsx:Dashboard",
+      "target": "function:src/lib/analysis.ts:dueTodayCount",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/pages/Dashboard.tsx:Dashboard",
+      "target": "function:src/lib/analysis.ts:mistakeSurfaceOpen",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/pages/Dashboard.tsx:Dashboard",
+      "target": "function:src/lib/analysis.ts:mistakeSurfaceMovement",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/pages/Dashboard.tsx:Dashboard",
+      "target": "function:src/lib/analysis.ts:mistakeSurfaceSeries",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/pages/Pyq.tsx:Pyq",
+      "target": "function:src/hooks/useTimer.ts:useTimer",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    }
+  ]
+}

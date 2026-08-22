@@ -1,4 +1,6 @@
 // Static Tailwind class literals — the scanner must see them whole.
+import { canonicalSubjectLabel } from '@/lib/subjects';
+
 export interface SubjectInk {
   text: string;
   dot: string;
@@ -54,5 +56,5 @@ const SUBJECT_INK: Record<string, SubjectInk> = {
 };
 
 export function subjectInk(subject: string): SubjectInk {
-  return SUBJECT_INK[subject] ?? INKS.slate;
+  return SUBJECT_INK[canonicalSubjectLabel(subject)] ?? INKS.slate;
 }

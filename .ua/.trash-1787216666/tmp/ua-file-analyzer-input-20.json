@@ -1,0 +1,7 @@
+{
+  "projectRoot": "/Users/bkalyankrishnareddy/Desktop/GATE PREP/hetu",
+  "batchFiles": [
+    {"path":"vite.config.ts","language":"typescript","sizeLines":103,"fileCategory":"code"}
+  ],
+  "batchImportData": {"vite.config.ts":[]}
+}

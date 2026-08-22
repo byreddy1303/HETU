@@ -1,4 +1,56 @@
-import type { MockTestRow } from '@/types';
+import type { MockSubjectScore, MockTestRow } from '@/types';
+import { normalizeSubjectIdentity, type SubjectId } from '@/lib/subjects';
+
+export interface NormalizedMockSubjectScore extends MockSubjectScore {
+  subject_id: SubjectId | null;
+}
+
+/**
+ * Canonicalize a mock breakdown without losing split historical categories.
+ * When aliases collapse (notably C Programming + Data Structure), marks are
+ * summed because they represented distinct contributions in the old schema.
+ */
+export function normalizeMockSubjectScores(
+  scores: readonly MockSubjectScore[] | null | undefined
+): NormalizedMockSubjectScore[] {
+  const merged = new Map<string, NormalizedMockSubjectScore>();
+  for (const score of scores ?? []) {
+    if (!score || typeof score.subject !== 'string' || !Number.isFinite(score.marks)) continue;
+    const legacyId = (score as MockSubjectScore & { subject_id?: unknown }).subject_id;
+    const identity = normalizeSubjectIdentity(score.subject, legacyId);
+    if (!identity.label) continue;
+    const key = identity.id ? `id:${identity.id}` : `label:${identity.label}`;
+    const previous = merged.get(key);
+    merged.set(key, {
+      subject: identity.label,
+      subject_id: identity.id,
+      marks: (previous?.marks ?? 0) + score.marks
+    });
+  }
+  return [...merged.values()];
+}
+
+export function mockSubjectScoreRecord(
+  scores: readonly MockSubjectScore[] | null | undefined
+): Record<string, string> {
+  return Object.fromEntries(
+    normalizeMockSubjectScores(scores).map((score) => [score.subject, String(score.marks)])
+  );
+}
+
+/** Convert the editable record back to canonical rows, retaining unknown keys. */
+export function mockSubjectScoresFromRecord(
+  values: Readonly<Record<string, string>>
+): NormalizedMockSubjectScore[] {
+  return normalizeMockSubjectScores(
+    Object.entries(values).flatMap(([subject, value]) => {
+      const trimmed = value.trim();
+      return trimmed && Number.isFinite(Number(trimmed))
+        ? [{ subject, marks: Number(trimmed) }]
+        : [];
+    })
+  );
+}
 
 export interface MockDraft {
   name: string;

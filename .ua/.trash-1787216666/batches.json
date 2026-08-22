@@ -1,0 +1,4990 @@
+{
+  "schemaVersion": 1,
+  "algorithm": "louvain",
+  "totalFiles": 356,
+  "totalBatches": 13,
+  "exportsByPath": {
+    ".deploy.env.example": [],
+    ".gitattributes": [],
+    ".nvmrc": [],
+    ".ua/.understandignore": [],
+    "android-stub/.gitkeep": [],
+    "android/app/proguard-rules.pro": [],
+    "android/app/src/androidTest/java/com/getcapacitor/myapp/ExampleInstrumentedTest.java": [
+      "useAppContext",
+      "ExampleInstrumentedTest"
+    ],
+    "android/app/src/main/java/in/airjournal/app/BuddyMessagingService.java": [
+      "onMessageReceived",
+      "BuddyMessagingService"
+    ],
+    "android/app/src/main/java/in/airjournal/app/BuddyReplyReceiver.java": [
+      "onReceive",
+      "BuddyReplyReceiver"
+    ],
+    "android/app/src/main/java/in/airjournal/app/BuddyReplyWorker.java": [
+      "BuddyReplyWorker",
+      "doWork",
+      "BuddyReplyWorker"
+    ],
+    "android/app/src/main/java/in/airjournal/app/MainActivity.java": [
+      "MainActivity"
+    ],
+    "android/app/src/main/java/in/airjournal/app/NotificationActionReceiver.java": [
+      "onReceive",
+      "NotificationActionReceiver"
+    ],
+    "android/app/src/main/java/in/airjournal/app/NotificationActionWorker.java": [
+      "NotificationActionWorker",
+      "doWork",
+      "NotificationActionWorker"
+    ],
+    "android/app/src/test/java/com/getcapacitor/myapp/ExampleUnitTest.java": [
+      "addition_isCorrect",
+      "ExampleUnitTest"
+    ],
+    "android/gradle/wrapper/gradle-wrapper.jar": [],
+    "android/gradlew": [],
+    "android/keystore.properties.example": [],
+    "capacitor.config.ts": [],
+    "playwright.config.ts": [],
+    "postcss.config.js": [],
+    "public/push-sw.js": [],
+    "scripts/audit-pyq-taxonomy.mjs": [],
+    "scripts/build-go-classes-coa-log-migration.mjs": [],
+    "scripts/build-go-classes-coa-test-2-log-migration.mjs": [],
+    "scripts/build-pyq-bank.mjs": [],
+    "scripts/build-topper-notes.mjs": [],
+    "scripts/classify-pyq-bank.mjs": [],
+    "scripts/pyq-taxonomy.mjs": [
+      "PYQ_BANK_VERSION",
+      "PYQ_TAXONOMY",
+      "PYQ_MANUAL_CLASSIFICATIONS",
+      "classifyPyqQuestion",
+      "taxonomySubject"
+    ],
+    "src/App.tsx": [
+      "App"
+    ],
+    "src/__tests__/analysis.test.ts": [],
+    "src/__tests__/answer-reveal.test.tsx": [],
+    "src/__tests__/buddy-chat-ui.test.tsx": [],
+    "src/__tests__/buddy-notifications.test.ts": [],
+    "src/__tests__/buddy-page-ui.test.tsx": [],
+    "src/__tests__/buddy.test.ts": [],
+    "src/__tests__/contextual_gate_tips.test.ts": [],
+    "src/__tests__/cron-auth.test.ts": [],
+    "src/__tests__/digest-schedule.test.ts": [],
+    "src/__tests__/do-now.test.ts": [],
+    "src/__tests__/e2e/dashboard-analysis.spec.ts": [],
+    "src/__tests__/go-classes-coa-test-2-import.test.ts": [],
+    "src/__tests__/go-classes-coa-test-2-photos.test.ts": [],
+    "src/__tests__/go-classes-coa-topic-test-photos.test.ts": [],
+    "src/__tests__/image-capture.test.ts": [],
+    "src/__tests__/isolation.test.ts": [],
+    "src/__tests__/journal-ui.test.tsx": [],
+    "src/__tests__/learning_tips.test.ts": [],
+    "src/__tests__/missing-tags-confirm.test.tsx": [],
+    "src/__tests__/mocks-ui.test.tsx": [],
+    "src/__tests__/mocks.test.ts": [],
+    "src/__tests__/native-scroll.test.ts": [],
+    "src/__tests__/native.test.ts": [],
+    "src/__tests__/notification-consent.test.ts": [],
+    "src/__tests__/notification-time-editor-native.test.tsx": [],
+    "src/__tests__/notification-time-editor.test.tsx": [],
+    "src/__tests__/pin-input.test.tsx": [],
+    "src/__tests__/planner-execution.test.ts": [],
+    "src/__tests__/planner-native-ui.test.tsx": [],
+    "src/__tests__/planner-ui.test.tsx": [],
+    "src/__tests__/planner_cloud.test.ts": [],
+    "src/__tests__/planner_storage.test.ts": [],
+    "src/__tests__/progress_export.test.ts": [],
+    "src/__tests__/pyq-attempt-log.test.tsx": [],
+    "src/__tests__/pyq-history.test.ts": [],
+    "src/__tests__/pyq-migration.test.ts": [],
+    "src/__tests__/pyq-navigation.test.tsx": [],
+    "src/__tests__/pyq-rendering.test.tsx": [],
+    "src/__tests__/pyq-session.test.ts": [],
+    "src/__tests__/pyq.test.ts": [],
+    "src/__tests__/question-answer.test.ts": [],
+    "src/__tests__/quick-capture.test.tsx": [],
+    "src/__tests__/readiness-snapshots.test.ts": [],
+    "src/__tests__/readiness.test.ts": [],
+    "src/__tests__/reattempt-ui.test.tsx": [],
+    "src/__tests__/reattempt.test.ts": [],
+    "src/__tests__/revision-pack.test.ts": [],
+    "src/__tests__/sessions.test.ts": [],
+    "src/__tests__/setup.ts": [],
+    "src/__tests__/study-notification-copy.test.ts": [],
+    "src/__tests__/study-notifications.test.ts": [],
+    "src/__tests__/supabase-config.test.ts": [],
+    "src/__tests__/sync.test.ts": [],
+    "src/__tests__/telegram.test.ts": [],
+    "src/__tests__/theme.test.ts": [],
+    "src/__tests__/topic-evidence.test.ts": [],
+    "src/__tests__/topic-progress.test.ts": [],
+    "src/__tests__/topper-notes.test.ts": [],
+    "src/components/auth/PinInput.tsx": [
+      "PinInput"
+    ],
+    "src/components/buddy/BuddyAvatar.tsx": [
+      "BuddyAvatar"
+    ],
+    "src/components/buddy/BuddyChat.tsx": [
+      "BuddyChat"
+    ],
+    "src/components/buddy/BuddyPresenceRuntime.tsx": [
+      "BuddyPresenceRuntime"
+    ],
+    "src/components/dashboard/HeroCard.tsx": [
+      "HeroCard"
+    ],
+    "src/components/dashboard/LearningTips.tsx": [
+      "LearningTips"
+    ],
+    "src/components/dashboard/OutcomeDonut.tsx": [
+      "OutcomeDonut"
+    ],
+    "src/components/dashboard/OutcomeLegend.tsx": [
+      "OutcomeLegend"
+    ],
+    "src/components/dashboard/SurfaceTrendChart.tsx": [
+      "SurfaceTrendChart"
+    ],
+    "src/components/dashboard/WelcomeOverlay.tsx": [
+      "WelcomeOverlay"
+    ],
+    "src/components/layout/MobileTabs.tsx": [
+      "MobileTabs"
+    ],
+    "src/components/layout/Nav.tsx": [
+      "Nav"
+    ],
+    "src/components/layout/PageHeader.tsx": [
+      "PageHeader"
+    ],
+    "src/components/layout/Shell.tsx": [
+      "Shell"
+    ],
+    "src/components/layout/TopRightControls.tsx": [
+      "ExamCountdown",
+      "TopRightControls"
+    ],
+    "src/components/native/NativeRuntime.tsx": [
+      "NativeRuntime"
+    ],
+    "src/components/notifications/BuddyNotificationRuntime.tsx": [
+      "BuddyNotificationRuntime"
+    ],
+    "src/components/planner/Calendar.tsx": [
+      "Calendar"
+    ],
+    "src/components/planner/DayPlanModal.tsx": [
+      "DayPlanModal"
+    ],
+    "src/components/planner/PlannerInsights.tsx": [
+      "PlannerInsights"
+    ],
+    "src/components/planner/SubjectPicker.tsx": [
+      "SubjectPicker"
+    ],
+    "src/components/pyq/PyqQuestionContent.tsx": [
+      "PyqQuestionContent"
+    ],
+    "src/components/settings/AccessRequestsCard.tsx": [
+      "AccessRequestsCard"
+    ],
+    "src/components/settings/BuddyNotificationsCard.tsx": [
+      "BuddyNotificationsCard"
+    ],
+    "src/components/settings/NotificationTimeEditor.tsx": [
+      "NotificationTimeEditor"
+    ],
+    "src/components/settings/NotificationsCard.tsx": [
+      "NotificationsCard"
+    ],
+    "src/components/settings/StudyNotificationsCard.tsx": [
+      "StudyNotificationsCard"
+    ],
+    "src/components/shared/AnswerReveal.tsx": [
+      "AnswerReveal"
+    ],
+    "src/components/shared/Brand.tsx": [
+      "BrandMark",
+      "Brand"
+    ],
+    "src/components/shared/ContextualGateTip.tsx": [
+      "ContextualGateTip"
+    ],
+    "src/components/shared/DailyQuote.tsx": [
+      "DailyQuote"
+    ],
+    "src/components/shared/ImagePreview.tsx": [
+      "ImagePreview"
+    ],
+    "src/components/shared/LoadingScreen.tsx": [
+      "LoadingScreen"
+    ],
+    "src/components/shared/MissingTagsConfirm.tsx": [
+      "MissingTagsConfirm"
+    ],
+    "src/components/shared/OfflineBadge.tsx": [
+      "OfflineBadge"
+    ],
+    "src/components/shared/OutcomeBadge.tsx": [
+      "OutcomeBadge"
+    ],
+    "src/components/shared/QuestionEditor.tsx": [
+      "QuestionEditor",
+      "DeleteBar"
+    ],
+    "src/components/shared/RequireAuth.tsx": [
+      "RequireAuth"
+    ],
+    "src/components/shared/RootErrorBoundary.tsx": [
+      "RootErrorBoundary"
+    ],
+    "src/components/shared/SessionEditor.tsx": [
+      "SessionEditor"
+    ],
+    "src/components/shared/ThemeToggle.tsx": [
+      "ThemeToggle"
+    ],
+    "src/components/shared/Timer.tsx": [
+      "Timer"
+    ],
+    "src/components/shared/questionDraft.ts": [
+      "draftFromRow",
+      "emptyDraft",
+      "applyDraftToRow"
+    ],
+    "src/components/tags/OutcomeStep.tsx": [
+      "OutcomeStep"
+    ],
+    "src/components/tags/PatternStep.tsx": [
+      "PatternStep"
+    ],
+    "src/components/tags/RootCauseStep.tsx": [
+      "RootCauseStep"
+    ],
+    "src/components/tags/SourceStep.tsx": [
+      "SourceStep"
+    ],
+    "src/components/tags/TagFlow.tsx": [
+      "TagFlow"
+    ],
+    "src/components/tags/TagOption.tsx": [
+      "TagOption"
+    ],
+    "src/components/tags/TriggerStep.tsx": [
+      "TriggerStep"
+    ],
+    "src/components/tags/sourceDraft.ts": [
+      "makeInitialSource"
+    ],
+    "src/components/ui/Badge.tsx": [
+      "Badge"
+    ],
+    "src/components/ui/Button.tsx": [
+      "Button"
+    ],
+    "src/components/ui/Card.tsx": [
+      "Card",
+      "CardHeader",
+      "CardBody"
+    ],
+    "src/components/ui/Dialog.tsx": [
+      "Dialog"
+    ],
+    "src/components/ui/Empty.tsx": [
+      "Empty"
+    ],
+    "src/components/ui/Input.tsx": [
+      "Input"
+    ],
+    "src/components/ui/Kbd.tsx": [
+      "Kbd"
+    ],
+    "src/components/ui/Progress.tsx": [
+      "Progress"
+    ],
+    "src/components/ui/Select.tsx": [
+      "Select"
+    ],
+    "src/components/ui/Tabs.tsx": [
+      "Tabs"
+    ],
+    "src/components/ui/Textarea.tsx": [
+      "Textarea"
+    ],
+    "src/components/ui/Toast.tsx": [
+      "Toaster"
+    ],
+    "src/hooks/useAuth.ts": [
+      "useAuth"
+    ],
+    "src/hooks/useKeyboard.ts": [
+      "useKeyboard"
+    ],
+    "src/hooks/useMediaQuery.ts": [
+      "useMediaQuery"
+    ],
+    "src/hooks/useSync.ts": [
+      "useSyncBootstrap",
+      "useOnline",
+      "usePendingCount"
+    ],
+    "src/hooks/useTimer.ts": [
+      "useTimer"
+    ],
+    "src/hooks/useVisibilityChange.ts": [
+      "useVisibilityChange"
+    ],
+    "src/lib/analysis.ts": [
+      "weeklyDraftFingerprint",
+      "mistakeSurfaceOpen",
+      "mistakeSurfaceTrend",
+      "mistakeSurfaceMovement",
+      "mistakeSurfaceSeries",
+      "outcomeDistribution",
+      "latestSession",
+      "dueTodayCount",
+      "summarizeWeek",
+      "calibrationBySubject",
+      "calibrationOverall",
+      "isMistake",
+      "heatmapCells",
+      "heatmapRowTotals",
+      "activeDaysBack"
+    ],
+    "src/lib/backup.ts": [
+      "BACKUP_VERSION",
+      "exportAll",
+      "downloadEnvelope",
+      "importEnvelope",
+      "isBackupEnvelope"
+    ],
+    "src/lib/buddy.ts": [
+      "buddyPresenceTopic",
+      "buddyRealtimeTopic",
+      "buddyPresenceUserIds",
+      "safeQuestionRef",
+      "mergeBuddyMessages",
+      "groupBuddyMessages",
+      "shortBuddyTime",
+      "isSharedQuestionRef"
+    ],
+    "src/lib/buddyNotifications.ts": [
+      "getPushDeviceId",
+      "buddyPushOptedIn",
+      "studyPushOptedIn",
+      "pushNotificationsOptedIn",
+      "urlBase64ToUint8Array",
+      "saveNativePushToken",
+      "getBuddyNotificationState",
+      "enableBuddyNotifications",
+      "enableStudyNotifications",
+      "disableBuddyNotifications",
+      "disableStudyNotifications",
+      "unregisterCurrentPushDevice",
+      "syncBuddyPushRegistration",
+      "touchActiveBuddy",
+      "notifyBuddyMessage",
+      "routeFromPushData",
+      "snoozeNotifications",
+      "clearSnooze",
+      "getSnoozeStatus"
+    ],
+    "src/lib/constants.ts": [
+      "SUBJECTS",
+      "OUTCOMES",
+      "OUTCOME_BY_CODE",
+      "OUTCOME_KEYS",
+      "ROOT_CAUSES",
+      "MARK_DECISIONS",
+      "SOURCE_KINDS",
+      "SOURCE_KIND_BY_VALUE",
+      "PYQ_TWO_SETS_FROM",
+      "examYears",
+      "pyqYears",
+      "buildSourceRef",
+      "MARKS_TARGET_SEC",
+      "QUESTION_FORMATS",
+      "TARGET_DURATIONS_MIN",
+      "QUESTION_COUNT_CHOICES",
+      "DEFAULT_TARGET_TIME_SEC",
+      "REATTEMPT_FIRST_DELAY_DAYS",
+      "EXAM_DATE_DEFAULT",
+      "TIMEZONES",
+      "INVITE_TTL_DAYS",
+      "FORMULA_REVIEW_INTERVALS"
+    ],
+    "src/lib/contextual-gate-tips.ts": [
+      "contextualGateTipForPath"
+    ],
+    "src/lib/db.ts": [
+      "db",
+      "SYNCED_TABLES",
+      "table",
+      "clearLocalData"
+    ],
+    "src/lib/do-now.ts": [
+      "buildDoNowQueue"
+    ],
+    "src/lib/edge.ts": [
+      "requestAccess",
+      "approveRequest",
+      "declineRequest",
+      "isEdgeError",
+      "signupViaInvite",
+      "loginWithUsernamePin",
+      "requestPinReset",
+      "sendBuddyRequest",
+      "isUsernameAvailable"
+    ],
+    "src/lib/flags.ts": [
+      "FREEZE_DATE",
+      "isFrozen"
+    ],
+    "src/lib/image.ts": [
+      "ImageTooLargeError",
+      "urlToDataUrl",
+      "captureElementToDataUrl",
+      "compressToDataUrl"
+    ],
+    "src/lib/isolation.ts": [
+      "wipeLocalState"
+    ],
+    "src/lib/lazyWithRetry.ts": [
+      "lazyWithRetry"
+    ],
+    "src/lib/learning-tips.ts": [
+      "buildLearningTips"
+    ],
+    "src/lib/mocks.ts": [
+      "validateMockDraft",
+      "mockScorePercent",
+      "mockAccuracy",
+      "mockSummary"
+    ],
+    "src/lib/motivational-quotes.ts": [
+      "QUOTES",
+      "pickQuoteForDay",
+      "QuotePreset",
+      "MOTIVATIONAL_QUOTES",
+      "quoteForDate",
+      "randomQuote"
+    ],
+    "src/lib/native.ts": [
+      "BACK_EXIT_WINDOW_MS",
+      "isNativeApp",
+      "nativePlatform",
+      "haptic",
+      "configureNativeChrome",
+      "routeFromAppUrl",
+      "resolveNativeBackAction"
+    ],
+    "src/lib/one_liners.ts": [
+      "ONE_LINERS",
+      "pickOneLinerFor"
+    ],
+    "src/lib/patterns.ts": [
+      "reconcileQuestionPattern"
+    ],
+    "src/lib/planner-cloud.ts": [
+      "loadCloudDayPlan",
+      "loadCloudDayPlans",
+      "saveCloudDayPlan",
+      "deleteCloudDayPlan"
+    ],
+    "src/lib/planner-constants.ts": [
+      "PLANNER_SUBJECTS",
+      "DURATIONS",
+      "STUDY_MODES",
+      "PRIORITIES",
+      "BREAK_PATTERNS",
+      "DAY_TYPES",
+      "ENERGY_FORECASTS",
+      "MOOD_INTENTS",
+      "END_MOODS",
+      "subjectChipInk",
+      "PLANNER_MIN_YEAR",
+      "PLANNER_MIN_MONTH_INDEX"
+    ],
+    "src/lib/planner-execution.ts": [
+      "plannerBlockHref",
+      "plannerCompletionPercent",
+      "updatePlannerBlockExecution",
+      "markPlannerBlockStarted",
+      "markPlannerBlockComplete",
+      "reconcilePlannerExecutions"
+    ],
+    "src/lib/planner-insights.ts": [
+      "loadAllDayPlans",
+      "rollup",
+      "subjectShare",
+      "modeShare",
+      "priorityShare",
+      "reviewStats",
+      "neglectedSubjects",
+      "dayTypeShare",
+      "windowed"
+    ],
+    "src/lib/planner-storage.ts": [
+      "dayKeyPrefix",
+      "plannerDateFromSearch",
+      "migrateLegacyDayPlans",
+      "emptyDayPlan",
+      "keyFor",
+      "loadDayPlan",
+      "loadAllDayPlans",
+      "saveDayPlan",
+      "cacheDayPlan",
+      "deleteDayPlan",
+      "loadPlanIndexForMonth",
+      "summarize"
+    ],
+    "src/lib/progress-export.ts": [
+      "PROGRESS_REPORT_VERSION",
+      "buildProgressReport",
+      "collectProgressReport",
+      "progressReportCsv",
+      "downloadProgressReport"
+    ],
+    "src/lib/pyq-history.ts": [
+      "PYQ_HISTORY_OPTIONS",
+      "attemptsByQuestion",
+      "analyzedAttemptIds",
+      "matchesPyqHistory",
+      "filterPyqByHistory"
+    ],
+    "src/lib/pyq-session.ts": [
+      "createPyqSessionRow",
+      "pyqAttemptId",
+      "pyqJournalQuestionId",
+      "pyqSourceAttemptForJournalQuestion",
+      "pyqQuestionFromAttempt",
+      "pyqReattemptAttemptId",
+      "createPyqReattemptAttemptRow",
+      "pyqPracticeSubject",
+      "pyqPracticeSessionRow",
+      "startPyqSessionQuestion",
+      "advancePyqSessionProgress",
+      "completePyqSession",
+      "abandonPyqSession",
+      "pausePyqSession",
+      "pyqQuestionSnapshot",
+      "createPyqAttemptRow"
+    ],
+    "src/lib/pyq.ts": [
+      "PYQ_BANK_QUESTION_COUNT",
+      "normalizePyqQuestionHtml",
+      "loadPyqManifest",
+      "normalizePyqManifest",
+      "loadPyqQuestions",
+      "loadPyqQuestionByUid",
+      "matchesPyqTopicScope",
+      "evaluatePyqAnswer",
+      "formatPyqAnswer",
+      "pyqAnswerValueForLog",
+      "pyqQuestionSnapshotDataUrl",
+      "pyqSourceRef",
+      "pyqPlainText",
+      "firstPyqImage",
+      "resolvePyqJournalImageUrl",
+      "inferPyqDirectOutcome"
+    ],
+    "src/lib/queryClient.ts": [],
+    "src/lib/questionTags.ts": [
+      "needsMissingTagsConfirmation"
+    ],
+    "src/lib/readiness-snapshots.ts": [
+      "loadSnapshots",
+      "upsertSnapshot",
+      "weeklyDelta",
+      "projectToExam",
+      "loadDebt",
+      "updateDebt",
+      "DEBT_LABEL"
+    ],
+    "src/lib/readiness.ts": [
+      "TARGET_PATTERN_LIBRARY",
+      "BASELINE_OPEN_SURFACE",
+      "WEIGHTS",
+      "coverage",
+      "retention",
+      "calibration",
+      "surface",
+      "computeReadiness",
+      "readinessComponents",
+      "COMPONENT_TOOLTIPS",
+      "SUBJECT_LIBRARY_WEIGHT",
+      "computeReadinessBySubject",
+      "nextMoves",
+      "estimateAIRBand",
+      "examDaySimulator"
+    ],
+    "src/lib/reattempt.ts": [
+      "needsReattempt",
+      "evaluateLoggedReattemptAnswer",
+      "buildReattemptQueue",
+      "advance",
+      "createReattemptRow",
+      "scheduleReattempt",
+      "recordReattemptResult"
+    ],
+    "src/lib/revision-pack.ts": [
+      "buildRevisionPack",
+      "revisionPackText"
+    ],
+    "src/lib/sessions.ts": [
+      "practiceQuestionCount",
+      "reconcilePyqPracticeSessions",
+      "finishedSessionsWithQuestions",
+      "pruneEmptyFinishedSessions",
+      "recentSessions",
+      "allSessions"
+    ],
+    "src/lib/studyNotifications.ts": [
+      "STUDY_NOTIFICATION_CATEGORIES",
+      "notificationTime",
+      "parseNotificationTime",
+      "ensureStudyNotificationPreferences",
+      "updateStudyNotificationPreference",
+      "sendStudyNotificationTest"
+    ],
+    "src/lib/subjectInk.ts": [
+      "subjectInk"
+    ],
+    "src/lib/subtopics.ts": [
+      "SUBTOPICS_BY_SUBJECT",
+      "subtopicsFor"
+    ],
+    "src/lib/supabase.ts": [
+      "isValidSupabaseUrl",
+      "supabaseConfigured",
+      "supabase"
+    ],
+    "src/lib/sync.ts": [
+      "isSyncEnabled",
+      "writeLocal",
+      "writeLocalBatch",
+      "deleteLocal",
+      "flushPushQueue",
+      "pullAll",
+      "resumeSync",
+      "initSync",
+      "stopSync",
+      "_enableForTests"
+    ],
+    "src/lib/theme.ts": [
+      "THEME_COLORS",
+      "resolveTheme",
+      "applyTheme"
+    ],
+    "src/lib/topic-evidence.ts": [
+      "buildTopicEvidence"
+    ],
+    "src/lib/utils.ts": [
+      "cn",
+      "uuid",
+      "uuidFromString",
+      "todayISO",
+      "calendarDateInTimeZone",
+      "todayISOInTimeZone",
+      "addDaysISO",
+      "weekStartISO",
+      "formatDate",
+      "nowISO",
+      "secondsToClock",
+      "debounce",
+      "levenshtein",
+      "clamp",
+      "plural"
+    ],
+    "src/main.tsx": [],
+    "src/pages/Auth.tsx": [
+      "Auth"
+    ],
+    "src/pages/Buddy.tsx": [
+      "Buddy"
+    ],
+    "src/pages/Calibration.tsx": [
+      "Calibration"
+    ],
+    "src/pages/Dashboard.tsx": [
+      "Dashboard"
+    ],
+    "src/pages/DevPrimitives.tsx": [
+      "DevPrimitives"
+    ],
+    "src/pages/DoNow.tsx": [
+      "DoNow"
+    ],
+    "src/pages/ForgotPin.tsx": [
+      "ForgotPin"
+    ],
+    "src/pages/Formulas.tsx": [
+      "Formulas"
+    ],
+    "src/pages/Heatmap.tsx": [
+      "Heatmap"
+    ],
+    "src/pages/Journal.tsx": [
+      "Journal"
+    ],
+    "src/pages/Log.tsx": [
+      "Log"
+    ],
+    "src/pages/Mocks.tsx": [
+      "Mocks"
+    ],
+    "src/pages/NotFound.tsx": [
+      "NotFound"
+    ],
+    "src/pages/Patterns.tsx": [
+      "Patterns"
+    ],
+    "src/pages/Planner.tsx": [
+      "Planner"
+    ],
+    "src/pages/Pyq.tsx": [
+      "Pyq"
+    ],
+    "src/pages/QuickCapture.tsx": [
+      "QuickCapture"
+    ],
+    "src/pages/Readiness.tsx": [
+      "Readiness"
+    ],
+    "src/pages/Reattempts.tsx": [
+      "Reattempts"
+    ],
+    "src/pages/RequestAccess.tsx": [
+      "RequestAccess"
+    ],
+    "src/pages/ResetPin.tsx": [
+      "ResetPin"
+    ],
+    "src/pages/RevisionPack.tsx": [
+      "RevisionPack"
+    ],
+    "src/pages/SessionActive.tsx": [
+      "SessionActive"
+    ],
+    "src/pages/SessionNew.tsx": [
+      "SessionNew"
+    ],
+    "src/pages/SessionReview.tsx": [
+      "SessionReview"
+    ],
+    "src/pages/Settings.tsx": [
+      "Settings"
+    ],
+    "src/pages/Signup.tsx": [
+      "Signup"
+    ],
+    "src/pages/SyllabusTracker.tsx": [
+      "SyllabusTracker"
+    ],
+    "src/pages/TopperNotes.tsx": [
+      "TopperNotes"
+    ],
+    "src/pages/TriggerDrill.tsx": [
+      "TriggerDrill"
+    ],
+    "src/pages/WeeklyReview.tsx": [
+      "WeeklyReview"
+    ],
+    "src/router.tsx": [
+      "router"
+    ],
+    "src/stores/auth.ts": [
+      "preloadAuthActions",
+      "useAuthStore",
+      "currentUserId"
+    ],
+    "src/stores/buddyPresence.ts": [
+      "useBuddyPresenceStore"
+    ],
+    "src/stores/log.ts": [
+      "useLogStore"
+    ],
+    "src/stores/prefs.ts": [
+      "DEFAULT_PREFERENCES",
+      "usePrefsStore",
+      "daysSinceBackup",
+      "needsBackupReminder",
+      "WEEKDAYS"
+    ],
+    "src/stores/session.ts": [
+      "useSessionStore"
+    ],
+    "src/stores/topic-progress.ts": [
+      "topicProgressId",
+      "topicProgressRowId",
+      "selectCompletionsForUser",
+      "mergeTopicProgressRows",
+      "syncTopicProgressFromDb",
+      "useTopicProgressStore"
+    ],
+    "src/stores/ui.ts": [
+      "useUiStore",
+      "toast"
+    ],
+    "src/types/db.ts": [],
+    "src/types/index.ts": [],
+    "src/vite-env.d.ts": [],
+    "supabase/functions/_shared/cors.ts": [
+      "corsHeaders",
+      "json"
+    ],
+    "supabase/functions/_shared/cron-auth.ts": [
+      "jwtRoleClaim"
+    ],
+    "supabase/functions/_shared/digest-schedule.ts": [
+      "localDigestClock",
+      "isDigestTimeDue"
+    ],
+    "supabase/functions/_shared/email.ts": [
+      "sendEmail",
+      "newRequestNotification",
+      "inviteApproved",
+      "pinResetRequested",
+      "buddyRequestReceived",
+      "inviteDeclined"
+    ],
+    "supabase/functions/_shared/push.ts": [
+      "PushDeliveryError",
+      "truncate",
+      "serviceAccount",
+      "getFcmAccessToken",
+      "sendWebPush",
+      "sendNativePush",
+      "deliverToSubscription"
+    ],
+    "supabase/functions/_shared/quotes.ts": [
+      "QUOTES",
+      "pickQuoteForDay",
+      "greetingForHour"
+    ],
+    "supabase/functions/_shared/readiness-score.ts": [
+      "computeReadinessScore"
+    ],
+    "supabase/functions/_shared/study-notification-copy.ts": [
+      "formatMinutes",
+      "parseStudyPlanBlocks",
+      "detailedDayPlanCopy",
+      "dailyPyqCopy"
+    ],
+    "supabase/functions/_shared/telegram.ts": [
+      "TELEGRAM_BOT_COMMANDS",
+      "parseTelegramCommand",
+      "parseTelegramStudySessions",
+      "isoDateForTimezone",
+      "weekIsoDatesForTimezone",
+      "tomorrowIsoDateForTimezone",
+      "escapeTelegramHtml",
+      "airJournalUrl",
+      "renderTelegramDigest",
+      "renderTelegramTodayUpdate",
+      "renderTelegramConnectionTest",
+      "renderTelegramTimetable",
+      "renderTelegramTomorrowPlan",
+      "sendTelegramMessage"
+    ],
+    "supabase/functions/_shared/wa.ts": [
+      "waConfigured",
+      "sendWhatsAppTemplate"
+    ],
+    "supabase/functions/approve-request/index.ts": [],
+    "supabase/functions/buddy-notifications/index.ts": [],
+    "supabase/functions/buddy-request/index.ts": [],
+    "supabase/functions/compute-readiness/index.ts": [],
+    "supabase/functions/daily-digest/index.ts": [],
+    "supabase/functions/decline-request/index.ts": [],
+    "supabase/functions/login/index.ts": [],
+    "supabase/functions/notification-actions/index.ts": [],
+    "supabase/functions/request-access/index.ts": [],
+    "supabase/functions/request-pin-reset/index.ts": [],
+    "supabase/functions/schedule-reattempts/index.ts": [],
+    "supabase/functions/signup-via-invite/index.ts": [],
+    "supabase/functions/study-notifications/index.ts": [],
+    "supabase/functions/telegram-webhook/index.ts": [],
+    "tailwind.config.js": [],
+    "vite.config.ts": [],
+    "vitest.config.ts": []
+  },
+  "batches": [
+    {
+      "batchIndex": 2,
+      "files": [
+        {
+          "path": "src/App.tsx",
+          "language": "typescript",
+          "sizeLines": 58,
+          "fileCategory": "code"
+        },
+        {
+          "path": "src/__tests__/theme.test.ts",
+          "language": "typescript",
+          "sizeLines": 64,
+          "fileCategory": "code"
+        },
+        {
+          "path": "src/components/dashboard/WelcomeOverlay.tsx",
+          "language": "typescript",
+          "sizeLines": 204,
+          "fileCategory": "code"
+        },
+        {
+          "path": "src/components/shared/LoadingScreen.tsx",
+          "language": "typescript",
+          "sizeLines": 19,
+          "fileCategory": "code"
+        },
+        {
+          "path": "src/components/shared/RequireAuth.tsx",
+          "language": "typescript",
+          "sizeLines": 11,
+          "fileCategory": "code"
+        }
+      ],
+      "batchImportData": {
+        "src/App.tsx": [
+          "src/components/buddy/BuddyPresenceRuntime.tsx",
+          "src/components/native/NativeRuntime.tsx",
+          "src/components/notifications/BuddyNotificationRuntime.tsx",
+          "src/components/shared/LoadingScreen.tsx",
+          "src/components/ui/Toast.tsx",
+          "src/lib/native.ts",
+          "src/lib/queryClient.ts",
+          "src/lib/theme.ts",
+          "src/router.tsx",
+          "src/stores/auth.ts",
+          "src/stores/prefs.ts"
+        ],
+        "src/__tests__/theme.test.ts": [
+          "src/components/shared/ThemeToggle.tsx",
+          "src/lib/theme.ts",
+          "src/stores/prefs.ts"
+        ],
+        "src/components/dashboard/WelcomeOverlay.tsx": [
+          "src/components/ui/Button.tsx",
+          "src/lib/db.ts",
+          "src/lib/supabase.ts",
+          "src/lib/utils.ts",
+          "src/stores/auth.ts"
+        ],
+        "src/components/shared/LoadingScreen.tsx": [
+          "src/components/shared/Brand.tsx"
+        ],
+        "src/components/shared/RequireAuth.tsx": [
+          "src/components/shared/LoadingScreen.tsx",
+          "src/hooks/useAuth.ts"
+        ]
+      },
+      "neighborMap": {
+        "src/App.tsx": [
+          {
+            "path": "src/components/buddy/BuddyPresenceRuntime.tsx",
+            "batchIndex": 2,
+            "symbols": [
+              "BuddyPresenceRuntime"
+            ]
+          },
+          {
+            "path": "src/components/native/NativeRuntime.tsx",
+            "batchIndex": 2,
+            "symbols": [
+              "NativeRuntime"
+            ]
+          },
+          {
+            "path": "src/components/notifications/BuddyNotificationRuntime.tsx",
+            "batchIndex": 2,
+            "symbols": [
+              "BuddyNotificationRuntime"
+            ]
+          },
+          {
+            "path": "src/components/ui/Toast.tsx",
+            "batchIndex": 3,
+            "symbols": [
+              "Toaster"
+            ]
+          },
+          {
+            "path": "src/lib/native.ts",
+            "batchIndex": 3,
+            "symbols": [
+              "BACK_EXIT_WINDOW_MS",
+              "isNativeApp",
+              "nativePlatform",
+              "haptic",
+              "configureNativeChrome",
+              "routeFromAppUrl",
+              "resolveNativeBackAction"
+            ]
+          },
+          {
+            "path": "src/lib/queryClient.ts",
+            "batchIndex": 3,
+            "symbols": []
+          },
+          {
+            "path": "src/lib/theme.ts",
+            "batchIndex": 3,
+            "symbols": [
+              "THEME_COLORS",
+              "resolveTheme",
+              "applyTheme"
+            ]
+          },
+          {
+            "path": "src/router.tsx",
+            "batchIndex": 3,
+            "symbols": [
+              "router"
+            ]
+          },
+          {
+            "path": "src/stores/auth.ts",
+            "batchIndex": 3,
+            "symbols": [
+              "preloadAuthActions",
+              "useAuthStore",
+              "currentUserId"
+            ]
+          },
+          {
+            "path": "src/stores/prefs.ts",
+            "batchIndex": 3,
+            "symbols": [
+              "DEFAULT_PREFERENCES",
+              "usePrefsStore",
+              "daysSinceBackup",
+              "needsBackupReminder",
+              "WEEKDAYS"
+            ]
+          },
+          {
+            "path": "src/main.tsx",
+            "batchIndex": 3,
+            "symbols": []
+          }
+        ],
+        "src/__tests__/theme.test.ts": [
+          {
+            "path": "src/components/shared/ThemeToggle.tsx",
+            "batchIndex": 3,
+            "symbols": [
+              "ThemeToggle"
+            ]
+          },
+          {
+            "path": "src/lib/theme.ts",
+            "batchIndex": 3,
+            "symbols": [
+              "THEME_COLORS",
+              "resolveTheme",
+              "applyTheme"
+            ]
+          },
+          {
+            "path": "src/stores/prefs.ts",
+            "batchIndex": 3,
+            "symbols": [
+              "DEFAULT_PREFERENCES",
+              "usePrefsStore",
+              "daysSinceBackup",
+              "needsBackupReminder",
+              "WEEKDAYS"
+            ]
+          }
+        ],
+        "src/components/dashboard/WelcomeOverlay.tsx": [
+          {
+            "path": "src/components/ui/Button.tsx",
+            "batchIndex": 3,
+            "symbols": [
+              "Button"
+            ]
+          },
+          {
+            "path": "src/lib/db.ts",
+            "batchIndex": 5,
+            "symbols": [
+              "db",
+              "SYNCED_TABLES",
+              "table",
+              "clearLocalData"
+            ]
+          },
+          {
+            "path": "src/lib/supabase.ts",
+            "batchIndex": 3,
+            "symbols": [
+              "isValidSupabaseUrl",
+              "supabaseConfigured",
+              "supabase"
+            ]
+          },
+          {
+            "path": "src/lib/utils.ts",
+            "batchIndex": 5,
+            "symbols": [
+              "cn",
+              "uuid",
+              "uuidFromString",
+              "todayISO",
+              "calendarDateInTimeZone",
+              "todayISOInTimeZone",
+              "addDaysISO",
+              "weekStartISO",
+              "formatDate",
+              "nowISO",
+              "secondsToClock",
+              "debounce",
+              "levenshtein",
+              "clamp",
+              "plural"
+            ]
+          },
+          {
+            "path": "src/stores/auth.ts",
+            "batchIndex": 3,
+            "symbols": [
+              "preloadAuthActions",
+              "useAuthStore",
+              "currentUserId"
+            ]
+          },
+          {
+            "path": "src/pages/Dashboard.tsx",
+            "batchIndex": 7,
+            "symbols": [
+              "Dashboard"
+            ]
+          }
+        ],
+        "src/components/shared/LoadingScreen.tsx": [
+          {
+            "path": "src/components/shared/Brand.tsx",
+            "batchIndex": 2,
+            "symbols": [
+              "BrandMark",
+              "Brand"
+            ]
+          },
+          {
+            "path": "src/pages/SessionActive.tsx",
+            "batchIndex": 5,
+            "symbols": [
+              "SessionActive"
+            ]
+          },
+          {
+            "path": "src/pages/SessionReview.tsx",
+            "batchIndex": 5,
+            "symbols": [
+              "SessionReview"
+            ]
+          },
+          {
+            "path": "src/router.tsx",
+            "batchIndex": 3,
+            "symbols": [
+              "router"
+            ]
+          }
+        ],
+        "src/components/shared/RequireAuth.tsx": [
+          {
+            "path": "src/hooks/useAuth.ts",
+            "batchIndex": 4,
+            "symbols": [
+              "useAuth"
+            ]
+          },
+          {
+            "path": "src/router.tsx",
+            "batchIndex": 3,
+            "symbols": [
+              "router"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "batchIndex": 3,
+      "files": [
+        {
+          "path": "src/components/shared/RootErrorBoundary.tsx",
+          "language": "typescript",
+          "sizeLines": 69,
+          "fileCategory": "code"
+        },
+        {
+          "path": "src/components/shared/ThemeToggle.tsx",
+          "language": "typescript",
+          "sizeLines": 50,
+          "fileCategory": "code"
+        },
+        {
+          "path": "src/components/ui/Toast.tsx",
+          "language": "typescript",
+          "sizeLines": 56,
+          "fileCategory": "code"
+        },
+        {
+          "path": "src/lib/lazyWithRetry.ts",
+          "language": "typescript",
+          "sizeLines": 37,
+          "fileCategory": "code"
+        },
+        {
+          "path": "src/lib/queryClient.ts",
+          "language": "typescript",
+          "sizeLines": 11,
+          "fileCategory": "code"
+        },
+        {
+          "path": "src/main.tsx",
+          "language": "typescript",
+          "sizeLines": 86,
+          "fileCategory": "code"
+        },
+        {
+          "path": "src/pages/Auth.tsx",
+          "language": "typescript",
+          "sizeLines": 182,
+          "fileCategory": "code"
+        },
+        {
+          "path": "src/pages/Settings.tsx",
+          "language": "typescript",
+          "sizeLines": 1067,
+          "fileCategory": "code"
+        },
+        {
+          "path": "src/stores/auth.ts",
+          "language": "typescript",
+          "sizeLines": 199,
+          "fileCategory": "code"
+        },
+        {
+          "path": "src/stores/prefs.ts",
+          "language": "typescript",
+          "sizeLines": 98,
+          "fileCategory": "code"
+        }
+      ],
+      "batchImportData": {
+        "src/components/shared/RootErrorBoundary.tsx": [
+          "src/components/shared/Brand.tsx"
+        ],
+        "src/components/shared/ThemeToggle.tsx": [
+          "src/lib/native.ts",
+          "src/lib/theme.ts",
+          "src/lib/utils.ts",
+          "src/stores/prefs.ts"
+        ],
+        "src/components/ui/Toast.tsx": [
+          "src/lib/native.ts",
+          "src/lib/utils.ts",
+          "src/stores/ui.ts"
+        ],
+        "src/lib/lazyWithRetry.ts": [],
+        "src/lib/queryClient.ts": [],
+        "src/main.tsx": [
+          "src/App.tsx",
+          "src/index.css"
+        ],
+        "src/pages/Auth.tsx": [
+          "src/components/auth/PinInput.tsx",
+          "src/components/shared/Brand.tsx",
+          "src/components/shared/ThemeToggle.tsx",
+          "src/components/ui/Button.tsx",
+          "src/components/ui/Input.tsx",
+          "src/hooks/useAuth.ts",
+          "src/lib/constants.ts",
+          "src/lib/supabase.ts",
+          "src/stores/auth.ts"
+        ],
+        "src/pages/Settings.tsx": [
+          "src/components/layout/PageHeader.tsx",
+          "src/components/settings/AccessRequestsCard.tsx",
+          "src/components/settings/BuddyNotificationsCard.tsx",
+          "src/components/settings/NotificationsCard.tsx",
+          "src/components/settings/StudyNotificationsCard.tsx",
+          "src/components/ui/Badge.tsx",
+          "src/components/ui/Button.tsx",
+          "src/components/ui/Card.tsx",
+          "src/components/ui/Empty.tsx",
+          "src/components/ui/Input.tsx",
+          "src/components/ui/Select.tsx",
+          "src/hooks/useAuth.ts",
+          "src/lib/backup.ts",
+          "src/lib/constants.ts",
+          "src/lib/isolation.ts",
+          "src/lib/native.ts",
+          "src/lib/progress-export.ts",
+          "src/lib/supabase.ts",
+          "src/lib/theme.ts",
+          "src/lib/utils.ts",
+          "src/stores/auth.ts",
+          "src/stores/prefs.ts",
+          "src/stores/ui.ts",
+          "src/types/index.ts"
+        ],
+        "src/stores/auth.ts": [
+          "src/lib/buddyNotifications.ts",
+          "src/lib/constants.ts",
+          "src/lib/db.ts",
+          "src/lib/edge.ts",
+          "src/lib/isolation.ts",
+          "src/lib/supabase.ts",
+          "src/types/index.ts"
+        ],
+        "src/stores/prefs.ts": [
+          "src/lib/theme.ts"
+        ]
+      },
+      "neighborMap": {
+        "src/components/shared/RootErrorBoundary.tsx": [
+          {
+            "path": "src/components/shared/Brand.tsx",
+            "batchIndex": 2,
+            "symbols": [
+              "BrandMark",
+              "Brand"
+            ]
+          },
+          {
+            "path": "src/router.tsx",
+            "batchIndex": 3,
+            "symbols": [
+              "router"
+            ]
+          }
+        ],
+        "src/components/shared/ThemeToggle.tsx": [
+          {
+            "path": "src/lib/native.ts",
+            "batchIndex": 3,
+            "symbols": [
+              "BACK_EXIT_WINDOW_MS",
+              "isNativeApp",
+              "nativePlatform",
+              "haptic",
+              "configureNativeChrome",
+              "routeFromAppUrl",
+              "resolveNativeBackAction"
+            ]
+          },
+          {
+            "path": "src/lib/theme.ts",
+            "batchIndex": 3,
+            "symbols": [
+              "THEME_COLORS",
+              "resolveTheme",
+              "applyTheme"
+            ]
+          },
+          {
+            "path": "src/lib/utils.ts",
+            "batchIndex": 5,
+            "symbols": [
+              "cn",
+              "uuid",
+              "uuidFromString",
+              "todayISO",
+              "calendarDateInTimeZone",
+              "todayISOInTimeZone",
+              "addDaysISO",
+              "weekStartISO",
+              "formatDate",
+              "nowISO",
+              "secondsToClock",
+              "debounce",
+              "levenshtein",
+              "clamp",
+              "plural"
+            ]
+          },
+          {
+            "path": "src/__tests__/theme.test.ts",
+            "batchIndex": 2,
+            "symbols": []
+          },
+          {
+            "path": "src/components/layout/Shell.tsx",
+            "batchIndex": 9,
+            "symbols": [
+              "Shell"
+            ]
+          },
+          {
+            "path": "src/components/layout/TopRightControls.tsx",
+            "batchIndex": 9,
+            "symbols": [
+              "ExamCountdown",
+              "TopRightControls"
+            ]
+          },
+          {
+            "path": "src/pages/ForgotPin.tsx",
+            "batchIndex": 3,
+            "symbols": [
+              "ForgotPin"
+            ]
+          },
+          {
+            "path": "src/pages/NotFound.tsx",
+            "batchIndex": 3,
+            "symbols": [
+              "NotFound"
+            ]
+          },
+          {
+            "path": "src/pages/RequestAccess.tsx",
+            "batchIndex": 3,
+            "symbols": [
+              "RequestAccess"
+            ]
+          },
+          {
+            "path": "src/pages/ResetPin.tsx",
+            "batchIndex": 3,
+            "symbols": [
+              "ResetPin"
+            ]
+          },
+          {
+            "path": "src/pages/Signup.tsx",
+            "batchIndex": 3,
+            "symbols": [
+              "Signup"
+            ]
+          }
+        ],
+        "src/components/ui/Toast.tsx": [
+          {
+            "path": "src/lib/native.ts",
+            "batchIndex": 3,
+            "symbols": [
+              "BACK_EXIT_WINDOW_MS",
+              "isNativeApp",
+              "nativePlatform",
+              "haptic",
+              "configureNativeChrome",
+              "routeFromAppUrl",
+              "resolveNativeBackAction"
+            ]
+          },
+          {
+            "path": "src/lib/utils.ts",
+            "batchIndex": 5,
+            "symbols": [
+              "cn",
+              "uuid",
+              "uuidFromString",
+              "todayISO",
+              "calendarDateInTimeZone",
+              "todayISOInTimeZone",
+              "addDaysISO",
+              "weekStartISO",
+              "formatDate",
+              "nowISO",
+              "secondsToClock",
+              "debounce",
+              "levenshtein",
+              "clamp",
+              "plural"
+            ]
+          },
+          {
+            "path": "src/stores/ui.ts",
+            "batchIndex": 3,
+            "symbols": [
+              "useUiStore",
+              "toast"
+            ]
+          },
+          {
+            "path": "src/App.tsx",
+            "batchIndex": 2,
+            "symbols": [
+              "App"
+            ]
+          }
+        ],
+        "src/lib/lazyWithRetry.ts": [
+          {
+            "path": "src/router.tsx",
+            "batchIndex": 3,
+            "symbols": [
+              "router"
+            ]
+          }
+        ],
+        "src/lib/queryClient.ts": [
+          {
+            "path": "src/App.tsx",
+            "batchIndex": 2,
+            "symbols": [
+              "App"
+            ]
+          }
+        ],
+        "src/main.tsx": [
+          {
+            "path": "src/App.tsx",
+            "batchIndex": 2,
+            "symbols": [
+              "App"
+            ]
+          },
+          {
+            "path": "src/index.css",
+            "batchIndex": 19,
+            "symbols": []
+          }
+        ],
+        "src/pages/Auth.tsx": [
+          {
+            "path": "src/components/auth/PinInput.tsx",
+            "batchIndex": 2,
+            "symbols": [
+              "PinInput"
+            ]
+          },
+          {
+            "path": "src/components/shared/Brand.tsx",
+            "batchIndex": 2,
+            "symbols": [
+              "BrandMark",
+              "Brand"
+            ]
+          },
+          {
+            "path": "src/components/ui/Button.tsx",
+            "batchIndex": 3,
+            "symbols": [
+              "Button"
+            ]
+          },
+          {
+            "path": "src/components/ui/Input.tsx",
+            "batchIndex": 4,
+            "symbols": [
+              "Input"
+            ]
+          },
+          {
+            "path": "src/hooks/useAuth.ts",
+            "batchIndex": 4,
+            "symbols": [
+              "useAuth"
+            ]
+          },
+          {
+            "path": "src/lib/constants.ts",
+            "batchIndex": 7,
+            "symbols": [
+              "SUBJECTS",
+              "OUTCOMES",
+              "OUTCOME_BY_CODE",
+              "OUTCOME_KEYS",
+              "ROOT_CAUSES",
+              "MARK_DECISIONS",
+              "SOURCE_KINDS",
+              "SOURCE_KIND_BY_VALUE",
+              "PYQ_TWO_SETS_FROM",
+              "examYears",
+              "pyqYears",
+              "buildSourceRef",
+              "MARKS_TARGET_SEC",
+              "QUESTION_FORMATS",
+              "TARGET_DURATIONS_MIN",
+              "QUESTION_COUNT_CHOICES",
+              "DEFAULT_TARGET_TIME_SEC",
+              "REATTEMPT_FIRST_DELAY_DAYS",
+              "EXAM_DATE_DEFAULT",
+              "TIMEZONES",
+              "INVITE_TTL_DAYS",
+              "FORMULA_REVIEW_INTERVALS"
+            ]
+          },
+          {
+            "path": "src/lib/supabase.ts",
+            "batchIndex": 3,
+            "symbols": [
+              "isValidSupabaseUrl",
+              "supabaseConfigured",
+              "supabase"
+            ]
+          }
+        ],
+        "src/pages/Settings.tsx": [
+          {
+            "path": "src/components/layout/PageHeader.tsx",
+            "batchIndex": 4,
+            "symbols": [
+              "PageHeader"
+            ]
+          },
+          {
+            "path": "src/components/settings/AccessRequestsCard.tsx",
+            "batchIndex": 2,
+            "symbols": [
+              "AccessRequestsCard"
+            ]
+          },
+          {
+            "path": "src/components/settings/BuddyNotificationsCard.tsx",
+            "batchIndex": 2,
+            "symbols": [
+              "BuddyNotificationsCard"
+            ]
+          },
+          {
+            "path": "src/components/settings/NotificationsCard.tsx",
+            "batchIndex": 2,
+            "symbols": [
+              "NotificationsCard"
+            ]
+          },
+          {
+            "path": "src/components/settings/StudyNotificationsCard.tsx",
+            "batchIndex": 2,
+            "symbols": [
+              "StudyNotificationsCard"
+            ]
+          },
+          {
+            "path": "src/components/ui/Badge.tsx",
+            "batchIndex": 4,
+            "symbols": [
+              "Badge"
+            ]
+          },
+          {
+            "path": "src/components/ui/Button.tsx",
+            "batchIndex": 3,
+            "symbols": [
+              "Button"
+            ]
+          },
+          {
+            "path": "src/components/ui/Card.tsx",
+            "batchIndex": 4,
+            "symbols": [
+              "Card",
+              "CardHeader",
+              "CardBody"
+            ]
+          },
+          {
+            "path": "src/components/ui/Empty.tsx",
+            "batchIndex": 4,
+            "symbols": [
+              "Empty"
+            ]
+          },
+          {
+            "path": "src/components/ui/Input.tsx",
+            "batchIndex": 4,
+            "symbols": [
+              "Input"
+            ]
+          },
+          {
+            "path": "src/components/ui/Select.tsx",
+            "batchIndex": 4,
+            "symbols": [
+              "Select"
+            ]
+          },
+          {
+            "path": "src/hooks/useAuth.ts",
+            "batchIndex": 4,
+            "symbols": [
+              "useAuth"
+            ]
+          },
+          {
+            "path": "src/lib/backup.ts",
+            "batchIndex": 5,
+            "symbols": [
+              "BACKUP_VERSION",
+              "exportAll",
+              "downloadEnvelope",
+              "importEnvelope",
+              "isBackupEnvelope"
+            ]
+          },
+          {
+            "path": "src/lib/constants.ts",
+            "batchIndex": 7,
+            "symbols": [
+              "SUBJECTS",
+              "OUTCOMES",
+              "OUTCOME_BY_CODE",
+              "OUTCOME_KEYS",
+              "ROOT_CAUSES",
+              "MARK_DECISIONS",
+              "SOURCE_KINDS",
+              "SOURCE_KIND_BY_VALUE",
+              "PYQ_TWO_SETS_FROM",
+              "examYears",
+              "pyqYears",
+              "buildSourceRef",
+              "MARKS_TARGET_SEC",
+              "QUESTION_FORMATS",
+              "TARGET_DURATIONS_MIN",
+              "QUESTION_COUNT_CHOICES",
+              "DEFAULT_TARGET_TIME_SEC",
+              "REATTEMPT_FIRST_DELAY_DAYS",
+              "EXAM_DATE_DEFAULT",
+              "TIMEZONES",
+              "INVITE_TTL_DAYS",
+              "FORMULA_REVIEW_INTERVALS"
+            ]
+          },
+          {
+            "path": "src/lib/isolation.ts",
+            "batchIndex": 9,
+            "symbols": [
+              "wipeLocalState"
+            ]
+          },
+          {
+            "path": "src/lib/native.ts",
+            "batchIndex": 3,
+            "symbols": [
+              "BACK_EXIT_WINDOW_MS",
+              "isNativeApp",
+              "nativePlatform",
+              "haptic",
+              "configureNativeChrome",
+              "routeFromAppUrl",
+              "resolveNativeBackAction"
+            ]
+          },
+          {
+            "path": "src/lib/progress-export.ts",
+            "batchIndex": 10,
+            "symbols": [
+              "PROGRESS_REPORT_VERSION",
+              "buildProgressReport",
+              "collectProgressReport",
+              "progressReportCsv",
+              "downloadProgressReport"
+            ]
+          },
+          {
+            "path": "src/lib/supabase.ts",
+            "batchIndex": 3,
+            "symbols": [
+              "isValidSupabaseUrl",
+              "supabaseConfigured",
+              "supabase"
+            ]
+          },
+          {
+            "path": "src/lib/theme.ts",
+            "batchIndex": 3,
+            "symbols": [
+              "THEME_COLORS",
+              "resolveTheme",
+              "applyTheme"
+            ]
+          },
+          {
+            "path": "src/lib/utils.ts",
+            "batchIndex": 5,
+            "symbols": [
+              "cn",
+              "uuid",
+              "uuidFromString",
+              "todayISO",
+              "calendarDateInTimeZone",
+              "todayISOInTimeZone",
+              "addDaysISO",
+              "weekStartISO",
+              "formatDate",
+              "nowISO",
+              "secondsToClock",
+              "debounce",
+              "levenshtein",
+              "clamp",
+              "plural"
+            ]
+          },
+          {
+            "path": "src/stores/ui.ts",
+            "batchIndex": 3,
+            "symbols": [
+              "useUiStore",
+              "toast"
+            ]
+          },
+          {
+            "path": "src/types/index.ts",
+            "batchIndex": 7,
+            "symbols": []
+          }
+        ],
+        "src/stores/auth.ts": [
+          {
+            "path": "src/lib/buddyNotifications.ts",
+            "batchIndex": 3,
+            "symbols": [
+              "getPushDeviceId",
+              "buddyPushOptedIn",
+              "studyPushOptedIn",
+              "pushNotificationsOptedIn",
+              "urlBase64ToUint8Array",
+              "saveNativePushToken",
+              "getBuddyNotificationState",
+              "enableBuddyNotifications",
+              "enableStudyNotifications",
+              "disableBuddyNotifications",
+              "disableStudyNotifications",
+              "unregisterCurrentPushDevice",
+              "syncBuddyPushRegistration",
+              "touchActiveBuddy",
+              "notifyBuddyMessage",
+              "routeFromPushData",
+              "snoozeNotifications",
+              "clearSnooze",
+              "getSnoozeStatus"
+            ]
+          },
+          {
+            "path": "src/lib/constants.ts",
+            "batchIndex": 7,
+            "symbols": [
+              "SUBJECTS",
+              "OUTCOMES",
+              "OUTCOME_BY_CODE",
+              "OUTCOME_KEYS",
+              "ROOT_CAUSES",
+              "MARK_DECISIONS",
+              "SOURCE_KINDS",
+              "SOURCE_KIND_BY_VALUE",
+              "PYQ_TWO_SETS_FROM",
+              "examYears",
+              "pyqYears",
+              "buildSourceRef",
+              "MARKS_TARGET_SEC",
+              "QUESTION_FORMATS",
+              "TARGET_DURATIONS_MIN",
+              "QUESTION_COUNT_CHOICES",
+              "DEFAULT_TARGET_TIME_SEC",
+              "REATTEMPT_FIRST_DELAY_DAYS",
+              "EXAM_DATE_DEFAULT",
+              "TIMEZONES",
+              "INVITE_TTL_DAYS",
+              "FORMULA_REVIEW_INTERVALS"
+            ]
+          },
+          {
+            "path": "src/lib/db.ts",
+            "batchIndex": 5,
+            "symbols": [
+              "db",
+              "SYNCED_TABLES",
+              "table",
+              "clearLocalData"
+            ]
+          },
+          {
+            "path": "src/lib/edge.ts",
+            "batchIndex": 3,
+            "symbols": [
+              "requestAccess",
+              "approveRequest",
+              "declineRequest",
+              "isEdgeError",
+              "signupViaInvite",
+              "loginWithUsernamePin",
+              "requestPinReset",
+              "sendBuddyRequest",
+              "isUsernameAvailable"
+            ]
+          },
+          {
+            "path": "src/lib/isolation.ts",
+            "batchIndex": 9,
+            "symbols": [
+              "wipeLocalState"
+            ]
+          },
+          {
+            "path": "src/lib/supabase.ts",
+            "batchIndex": 3,
+            "symbols": [
+              "isValidSupabaseUrl",
+              "supabaseConfigured",
+              "supabase"
+            ]
+          },
+          {
+            "path": "src/types/index.ts",
+            "batchIndex": 7,
+            "symbols": []
+          },
+          {
+            "path": "src/App.tsx",
+            "batchIndex": 2,
+            "symbols": [
+              "App"
+            ]
+          },
+          {
+            "path": "src/__tests__/planner-execution.test.ts",
+            "batchIndex": 8,
+            "symbols": []
+          },
+          {
+            "path": "src/__tests__/planner_storage.test.ts",
+            "batchIndex": 8,
+            "symbols": []
+          },
+          {
+            "path": "src/components/buddy/BuddyPresenceRuntime.tsx",
+            "batchIndex": 2,
+            "symbols": [
+              "BuddyPresenceRuntime"
+            ]
+          },
+          {
+            "path": "src/components/dashboard/WelcomeOverlay.tsx",
+            "batchIndex": 2,
+            "symbols": [
+              "WelcomeOverlay"
+            ]
+          },
+          {
+            "path": "src/components/layout/Nav.tsx",
+            "batchIndex": 9,
+            "symbols": [
+              "Nav"
+            ]
+          },
+          {
+            "path": "src/components/native/NativeRuntime.tsx",
+            "batchIndex": 2,
+            "symbols": [
+              "NativeRuntime"
+            ]
+          },
+          {
+            "path": "src/components/notifications/BuddyNotificationRuntime.tsx",
+            "batchIndex": 2,
+            "symbols": [
+              "BuddyNotificationRuntime"
+            ]
+          },
+          {
+            "path": "src/components/settings/BuddyNotificationsCard.tsx",
+            "batchIndex": 2,
+            "symbols": [
+              "BuddyNotificationsCard"
+            ]
+          },
+          {
+            "path": "src/components/settings/NotificationsCard.tsx",
+            "batchIndex": 2,
+            "symbols": [
+              "NotificationsCard"
+            ]
+          },
+          {
+            "path": "src/components/settings/StudyNotificationsCard.tsx",
+            "batchIndex": 2,
+            "symbols": [
+              "StudyNotificationsCard"
+            ]
+          },
+          {
+            "path": "src/hooks/useAuth.ts",
+            "batchIndex": 4,
+            "symbols": [
+              "useAuth"
+            ]
+          },
+          {
+            "path": "src/lib/planner-storage.ts",
+            "batchIndex": 8,
+            "symbols": [
+              "dayKeyPrefix",
+              "plannerDateFromSearch",
+              "migrateLegacyDayPlans",
+              "emptyDayPlan",
+              "keyFor",
+              "loadDayPlan",
+              "loadAllDayPlans",
+              "saveDayPlan",
+              "cacheDayPlan",
+              "deleteDayPlan",
+              "loadPlanIndexForMonth",
+              "summarize"
+            ]
+          },
+          {
+            "path": "src/pages/Planner.tsx",
+            "batchIndex": 8,
+            "symbols": [
+              "Planner"
+            ]
+          },
+          {
+            "path": "src/pages/Signup.tsx",
+            "batchIndex": 3,
+            "symbols": [
+              "Signup"
+            ]
+          },
+          {
+            "path": "src/pages/SyllabusTracker.tsx",
+            "batchIndex": 5,
+            "symbols": [
+              "SyllabusTracker"
+            ]
+          },
+          {
+            "path": "src/stores/topic-progress.ts",
+            "batchIndex": 10,
+            "symbols": [
+              "topicProgressId",
+              "topicProgressRowId",
+              "selectCompletionsForUser",
+              "mergeTopicProgressRows",
+              "syncTopicProgressFromDb",
+              "useTopicProgressStore"
+            ]
+          }
+        ],
+        "src/stores/prefs.ts": [
+          {
+            "path": "src/lib/theme.ts",
+            "batchIndex": 3,
+            "symbols": [
+              "THEME_COLORS",
+              "resolveTheme",
+              "applyTheme"
+            ]
+          },
+          {
+            "path": "src/App.tsx",
+            "batchIndex": 2,
+            "symbols": [
+              "App"
+            ]
+          },
+          {
+            "path": "src/__tests__/isolation.test.ts",
+            "batchIndex": 9,
+            "symbols": []
+          },
+          {
+            "path": "src/__tests__/theme.test.ts",
+            "batchIndex": 2,
+            "symbols": []
+          },
+          {
+            "path": "src/components/layout/TopRightControls.tsx",
+            "batchIndex": 9,
+            "symbols": [
+              "ExamCountdown",
+              "TopRightControls"
+            ]
+          },
+          {
+            "path": "src/lib/isolation.ts",
+            "batchIndex": 9,
+            "symbols": [
+              "wipeLocalState"
+            ]
+          },
+          {
+            "path": "src/lib/native.ts",
+            "batchIndex": 3,
+            "symbols": [
+              "BACK_EXIT_WINDOW_MS",
+              "isNativeApp",
+              "nativePlatform",
+              "haptic",
+              "configureNativeChrome",
+              "routeFromAppUrl",
+              "resolveNativeBackAction"
+            ]
+          },
+          {
+            "path": "src/pages/Dashboard.tsx",
+            "batchIndex": 7,
+            "symbols": [
+              "Dashboard"
+            ]
+          },
+          {
+            "path": "src/pages/SessionNew.tsx",
+            "batchIndex": 5,
+            "symbols": [
+              "SessionNew"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "batchIndex": 4,
+      "files": [
+        {
+          "path": "src/__tests__/answer-reveal.test.tsx",
+          "language": "typescript",
+          "sizeLines": 28,
+          "fileCategory": "code"
+        },
+        {
+          "path": "src/__tests__/journal-ui.test.tsx",
+          "language": "typescript",
+          "sizeLines": 63,
+          "fileCategory": "code"
+        },
+        {
+          "path": "src/__tests__/sync.test.ts",
+          "language": "typescript",
+          "sizeLines": 144,
+          "fileCategory": "code"
+        },
+        {
+          "path": "src/components/shared/AnswerReveal.tsx",
+          "language": "typescript",
+          "sizeLines": 112,
+          "fileCategory": "code"
+        }
+      ],
+      "batchImportData": {
+        "src/__tests__/answer-reveal.test.tsx": [
+          "src/components/shared/AnswerReveal.tsx"
+        ],
+        "src/__tests__/journal-ui.test.tsx": [
+          "src/lib/db.ts",
+          "src/pages/Journal.tsx",
+          "src/types/index.ts"
+        ],
+        "src/__tests__/sync.test.ts": [
+          "src/lib/db.ts",
+          "src/lib/sync.ts"
+        ],
+        "src/components/shared/AnswerReveal.tsx": [
+          "src/components/ui/Button.tsx",
+          "src/lib/utils.ts"
+        ]
+      },
+      "neighborMap": {
+        "src/__tests__/journal-ui.test.tsx": [
+          {
+            "path": "src/lib/db.ts",
+            "batchIndex": 5,
+            "symbols": [
+              "db",
+              "SYNCED_TABLES",
+              "table",
+              "clearLocalData"
+            ]
+          },
+          {
+            "path": "src/pages/Journal.tsx",
+            "batchIndex": 5,
+            "symbols": [
+              "Journal"
+            ]
+          },
+          {
+            "path": "src/types/index.ts",
+            "batchIndex": 7,
+            "symbols": []
+          }
+        ],
+        "src/__tests__/sync.test.ts": [
+          {
+            "path": "src/lib/db.ts",
+            "batchIndex": 5,
+            "symbols": [
+              "db",
+              "SYNCED_TABLES",
+              "table",
+              "clearLocalData"
+            ]
+          },
+          {
+            "path": "src/lib/sync.ts",
+            "batchIndex": 5,
+            "symbols": [
+              "isSyncEnabled",
+              "writeLocal",
+              "writeLocalBatch",
+              "deleteLocal",
+              "flushPushQueue",
+              "pullAll",
+              "resumeSync",
+              "initSync",
+              "stopSync",
+              "_enableForTests"
+            ]
+          }
+        ],
+        "src/components/shared/AnswerReveal.tsx": [
+          {
+            "path": "src/components/ui/Button.tsx",
+            "batchIndex": 3,
+            "symbols": [
+              "Button"
+            ]
+          },
+          {
+            "path": "src/lib/utils.ts",
+            "batchIndex": 5,
+            "symbols": [
+              "cn",
+              "uuid",
+              "uuidFromString",
+              "todayISO",
+              "calendarDateInTimeZone",
+              "todayISOInTimeZone",
+              "addDaysISO",
+              "weekStartISO",
+              "formatDate",
+              "nowISO",
+              "secondsToClock",
+              "debounce",
+              "levenshtein",
+              "clamp",
+              "plural"
+            ]
+          },
+          {
+            "path": "src/pages/Journal.tsx",
+            "batchIndex": 5,
+            "symbols": [
+              "Journal"
+            ]
+          },
+          {
+            "path": "src/pages/Log.tsx",
+            "batchIndex": 5,
+            "symbols": [
+              "Log"
+            ]
+          },
+          {
+            "path": "src/pages/Reattempts.tsx",
+            "batchIndex": 7,
+            "symbols": [
+              "Reattempts"
+            ]
+          },
+          {
+            "path": "src/pages/SessionReview.tsx",
+            "batchIndex": 5,
+            "symbols": [
+              "SessionReview"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "batchIndex": 5,
+      "files": [
+        {
+          "path": "src/lib/sync.ts",
+          "language": "typescript",
+          "sizeLines": 213,
+          "fileCategory": "code"
+        },
+        {
+          "path": "src/pages/Journal.tsx",
+          "language": "typescript",
+          "sizeLines": 920,
+          "fileCategory": "code"
+        },
+        {
+          "path": "src/pages/SessionActive.tsx",
+          "language": "typescript",
+          "sizeLines": 243,
+          "fileCategory": "code"
+        },
+        {
+          "path": "src/pages/SyllabusTracker.tsx",
+          "language": "typescript",
+          "sizeLines": 609,
+          "fileCategory": "code"
+        }
+      ],
+      "batchImportData": {
+        "src/lib/sync.ts": [
+          "src/lib/db.ts",
+          "src/lib/supabase.ts"
+        ],
+        "src/pages/Journal.tsx": [
+          "src/components/layout/PageHeader.tsx",
+          "src/components/shared/AnswerReveal.tsx",
+          "src/components/shared/ImagePreview.tsx",
+          "src/components/shared/QuestionEditor.tsx",
+          "src/components/shared/SessionEditor.tsx",
+          "src/components/shared/questionDraft.ts",
+          "src/components/ui/Badge.tsx",
+          "src/components/ui/Button.tsx",
+          "src/components/ui/Card.tsx",
+          "src/components/ui/Dialog.tsx",
+          "src/components/ui/Empty.tsx",
+          "src/components/ui/Input.tsx",
+          "src/components/ui/Select.tsx",
+          "src/hooks/useAuth.ts",
+          "src/lib/constants.ts",
+          "src/lib/db.ts",
+          "src/lib/sessions.ts",
+          "src/lib/subjectInk.ts",
+          "src/lib/subtopics.ts",
+          "src/lib/sync.ts",
+          "src/lib/utils.ts",
+          "src/types/index.ts"
+        ],
+        "src/pages/SessionActive.tsx": [
+          "src/components/shared/LoadingScreen.tsx",
+          "src/components/shared/Timer.tsx",
+          "src/components/tags/TagFlow.tsx",
+          "src/components/ui/Button.tsx",
+          "src/components/ui/Empty.tsx",
+          "src/components/ui/Kbd.tsx",
+          "src/hooks/useAuth.ts",
+          "src/hooks/useKeyboard.ts",
+          "src/hooks/useTimer.ts",
+          "src/hooks/useVisibilityChange.ts",
+          "src/lib/constants.ts",
+          "src/lib/db.ts",
+          "src/lib/planner-execution.ts",
+          "src/lib/reattempt.ts",
+          "src/lib/subjectInk.ts",
+          "src/lib/sync.ts",
+          "src/lib/utils.ts",
+          "src/stores/session.ts",
+          "src/types/index.ts"
+        ],
+        "src/pages/SyllabusTracker.tsx": [
+          "src/components/layout/PageHeader.tsx",
+          "src/components/ui/Badge.tsx",
+          "src/components/ui/Input.tsx",
+          "src/components/ui/Progress.tsx",
+          "src/hooks/useAuth.ts",
+          "src/lib/constants.ts",
+          "src/lib/db.ts",
+          "src/lib/native.ts",
+          "src/lib/subjectInk.ts",
+          "src/lib/subtopics.ts",
+          "src/lib/topic-evidence.ts",
+          "src/lib/utils.ts",
+          "src/stores/auth.ts",
+          "src/stores/topic-progress.ts"
+        ]
+      },
+      "neighborMap": {
+        "src/lib/sync.ts": [
+          {
+            "path": "src/lib/db.ts",
+            "batchIndex": 5,
+            "symbols": [
+              "db",
+              "SYNCED_TABLES",
+              "table",
+              "clearLocalData"
+            ]
+          },
+          {
+            "path": "src/lib/supabase.ts",
+            "batchIndex": 3,
+            "symbols": [
+              "isValidSupabaseUrl",
+              "supabaseConfigured",
+              "supabase"
+            ]
+          },
+          {
+            "path": "src/__tests__/sessions.test.ts",
+            "batchIndex": 6,
+            "symbols": []
+          },
+          {
+            "path": "src/__tests__/sync.test.ts",
+            "batchIndex": 4,
+            "symbols": []
+          },
+          {
+            "path": "src/components/native/NativeRuntime.tsx",
+            "batchIndex": 2,
+            "symbols": [
+              "NativeRuntime"
+            ]
+          },
+          {
+            "path": "src/components/shared/SessionEditor.tsx",
+            "batchIndex": 4,
+            "symbols": [
+              "SessionEditor"
+            ]
+          },
+          {
+            "path": "src/hooks/useSync.ts",
+            "batchIndex": 9,
+            "symbols": [
+              "useSyncBootstrap",
+              "useOnline",
+              "usePendingCount"
+            ]
+          },
+          {
+            "path": "src/lib/backup.ts",
+            "batchIndex": 5,
+            "symbols": [
+              "BACKUP_VERSION",
+              "exportAll",
+              "downloadEnvelope",
+              "importEnvelope",
+              "isBackupEnvelope"
+            ]
+          },
+          {
+            "path": "src/lib/patterns.ts",
+            "batchIndex": 5,
+            "symbols": [
+              "reconcileQuestionPattern"
+            ]
+          },
+          {
+            "path": "src/lib/reattempt.ts",
+            "batchIndex": 5,
+            "symbols": [
+              "needsReattempt",
+              "evaluateLoggedReattemptAnswer",
+              "buildReattemptQueue",
+              "advance",
+              "createReattemptRow",
+              "scheduleReattempt",
+              "recordReattemptResult"
+            ]
+          },
+          {
+            "path": "src/lib/sessions.ts",
+            "batchIndex": 7,
+            "symbols": [
+              "practiceQuestionCount",
+              "reconcilePyqPracticeSessions",
+              "finishedSessionsWithQuestions",
+              "pruneEmptyFinishedSessions",
+              "recentSessions",
+              "allSessions"
+            ]
+          },
+          {
+            "path": "src/pages/Calibration.tsx",
+            "batchIndex": 5,
+            "symbols": [
+              "Calibration"
+            ]
+          },
+          {
+            "path": "src/pages/Formulas.tsx",
+            "batchIndex": 5,
+            "symbols": [
+              "Formulas"
+            ]
+          },
+          {
+            "path": "src/pages/Log.tsx",
+            "batchIndex": 5,
+            "symbols": [
+              "Log"
+            ]
+          },
+          {
+            "path": "src/pages/Mocks.tsx",
+            "batchIndex": 5,
+            "symbols": [
+              "Mocks"
+            ]
+          },
+          {
+            "path": "src/pages/Patterns.tsx",
+            "batchIndex": 5,
+            "symbols": [
+              "Patterns"
+            ]
+          },
+          {
+            "path": "src/pages/Pyq.tsx",
+            "batchIndex": 7,
+            "symbols": [
+              "Pyq"
+            ]
+          },
+          {
+            "path": "src/pages/QuickCapture.tsx",
+            "batchIndex": 5,
+            "symbols": [
+              "QuickCapture"
+            ]
+          },
+          {
+            "path": "src/pages/Reattempts.tsx",
+            "batchIndex": 7,
+            "symbols": [
+              "Reattempts"
+            ]
+          },
+          {
+            "path": "src/pages/SessionNew.tsx",
+            "batchIndex": 5,
+            "symbols": [
+              "SessionNew"
+            ]
+          },
+          {
+            "path": "src/pages/SessionReview.tsx",
+            "batchIndex": 5,
+            "symbols": [
+              "SessionReview"
+            ]
+          },
+          {
+            "path": "src/pages/TriggerDrill.tsx",
+            "batchIndex": 5,
+            "symbols": [
+              "TriggerDrill"
+            ]
+          },
+          {
+            "path": "src/pages/WeeklyReview.tsx",
+            "batchIndex": 5,
+            "symbols": [
+              "WeeklyReview"
+            ]
+          },
+          {
+            "path": "src/stores/topic-progress.ts",
+            "batchIndex": 10,
+            "symbols": [
+              "topicProgressId",
+              "topicProgressRowId",
+              "selectCompletionsForUser",
+              "mergeTopicProgressRows",
+              "syncTopicProgressFromDb",
+              "useTopicProgressStore"
+            ]
+          }
+        ],
+        "src/pages/Journal.tsx": [
+          {
+            "path": "src/components/layout/PageHeader.tsx",
+            "batchIndex": 4,
+            "symbols": [
+              "PageHeader"
+            ]
+          },
+          {
+            "path": "src/components/shared/AnswerReveal.tsx",
+            "batchIndex": 4,
+            "symbols": [
+              "AnswerReveal"
+            ]
+          },
+          {
+            "path": "src/components/shared/ImagePreview.tsx",
+            "batchIndex": 4,
+            "symbols": [
+              "ImagePreview"
+            ]
+          },
+          {
+            "path": "src/components/shared/QuestionEditor.tsx",
+            "batchIndex": 4,
+            "symbols": [
+              "QuestionEditor",
+              "DeleteBar"
+            ]
+          },
+          {
+            "path": "src/components/shared/SessionEditor.tsx",
+            "batchIndex": 4,
+            "symbols": [
+              "SessionEditor"
+            ]
+          },
+          {
+            "path": "src/components/shared/questionDraft.ts",
+            "batchIndex": 4,
+            "symbols": [
+              "draftFromRow",
+              "emptyDraft",
+              "applyDraftToRow"
+            ]
+          },
+          {
+            "path": "src/components/ui/Badge.tsx",
+            "batchIndex": 4,
+            "symbols": [
+              "Badge"
+            ]
+          },
+          {
+            "path": "src/components/ui/Button.tsx",
+            "batchIndex": 3,
+            "symbols": [
+              "Button"
+            ]
+          },
+          {
+            "path": "src/components/ui/Card.tsx",
+            "batchIndex": 4,
+            "symbols": [
+              "Card",
+              "CardHeader",
+              "CardBody"
+            ]
+          },
+          {
+            "path": "src/components/ui/Dialog.tsx",
+            "batchIndex": 4,
+            "symbols": [
+              "Dialog"
+            ]
+          },
+          {
+            "path": "src/components/ui/Empty.tsx",
+            "batchIndex": 4,
+            "symbols": [
+              "Empty"
+            ]
+          },
+          {
+            "path": "src/components/ui/Input.tsx",
+            "batchIndex": 4,
+            "symbols": [
+              "Input"
+            ]
+          },
+          {
+            "path": "src/components/ui/Select.tsx",
+            "batchIndex": 4,
+            "symbols": [
+              "Select"
+            ]
+          },
+          {
+            "path": "src/hooks/useAuth.ts",
+            "batchIndex": 4,
+            "symbols": [
+              "useAuth"
+            ]
+          },
+          {
+            "path": "src/lib/constants.ts",
+            "batchIndex": 7,
+            "symbols": [
+              "SUBJECTS",
+              "OUTCOMES",
+              "OUTCOME_BY_CODE",
+              "OUTCOME_KEYS",
+              "ROOT_CAUSES",
+              "MARK_DECISIONS",
+              "SOURCE_KINDS",
+              "SOURCE_KIND_BY_VALUE",
+              "PYQ_TWO_SETS_FROM",
+              "examYears",
+              "pyqYears",
+              "buildSourceRef",
+              "MARKS_TARGET_SEC",
+              "QUESTION_FORMATS",
+              "TARGET_DURATIONS_MIN",
+              "QUESTION_COUNT_CHOICES",
+              "DEFAULT_TARGET_TIME_SEC",
+              "REATTEMPT_FIRST_DELAY_DAYS",
+              "EXAM_DATE_DEFAULT",
+              "TIMEZONES",
+              "INVITE_TTL_DAYS",
+              "FORMULA_REVIEW_INTERVALS"
+            ]
+          },
+          {
+            "path": "src/lib/db.ts",
+            "batchIndex": 5,
+            "symbols": [
+              "db",
+              "SYNCED_TABLES",
+              "table",
+              "clearLocalData"
+            ]
+          },
+          {
+            "path": "src/lib/sessions.ts",
+            "batchIndex": 7,
+            "symbols": [
+              "practiceQuestionCount",
+              "reconcilePyqPracticeSessions",
+              "finishedSessionsWithQuestions",
+              "pruneEmptyFinishedSessions",
+              "recentSessions",
+              "allSessions"
+            ]
+          },
+          {
+            "path": "src/lib/subjectInk.ts",
+            "batchIndex": 5,
+            "symbols": [
+              "subjectInk"
+            ]
+          },
+          {
+            "path": "src/lib/subtopics.ts",
+            "batchIndex": 5,
+            "symbols": [
+              "SUBTOPICS_BY_SUBJECT",
+              "subtopicsFor"
+            ]
+          },
+          {
+            "path": "src/lib/utils.ts",
+            "batchIndex": 5,
+            "symbols": [
+              "cn",
+              "uuid",
+              "uuidFromString",
+              "todayISO",
+              "calendarDateInTimeZone",
+              "todayISOInTimeZone",
+              "addDaysISO",
+              "weekStartISO",
+              "formatDate",
+              "nowISO",
+              "secondsToClock",
+              "debounce",
+              "levenshtein",
+              "clamp",
+              "plural"
+            ]
+          },
+          {
+            "path": "src/types/index.ts",
+            "batchIndex": 7,
+            "symbols": []
+          },
+          {
+            "path": "src/__tests__/journal-ui.test.tsx",
+            "batchIndex": 4,
+            "symbols": []
+          }
+        ],
+        "src/pages/SessionActive.tsx": [
+          {
+            "path": "src/components/shared/LoadingScreen.tsx",
+            "batchIndex": 2,
+            "symbols": [
+              "LoadingScreen"
+            ]
+          },
+          {
+            "path": "src/components/shared/Timer.tsx",
+            "batchIndex": 4,
+            "symbols": [
+              "Timer"
+            ]
+          },
+          {
+            "path": "src/components/tags/TagFlow.tsx",
+            "batchIndex": 7,
+            "symbols": [
+              "TagFlow"
+            ]
+          },
+          {
+            "path": "src/components/ui/Button.tsx",
+            "batchIndex": 3,
+            "symbols": [
+              "Button"
+            ]
+          },
+          {
+            "path": "src/components/ui/Empty.tsx",
+            "batchIndex": 4,
+            "symbols": [
+              "Empty"
+            ]
+          },
+          {
+            "path": "src/components/ui/Kbd.tsx",
+            "batchIndex": 4,
+            "symbols": [
+              "Kbd"
+            ]
+          },
+          {
+            "path": "src/hooks/useAuth.ts",
+            "batchIndex": 4,
+            "symbols": [
+              "useAuth"
+            ]
+          },
+          {
+            "path": "src/hooks/useKeyboard.ts",
+            "batchIndex": 7,
+            "symbols": [
+              "useKeyboard"
+            ]
+          },
+          {
+            "path": "src/hooks/useTimer.ts",
+            "batchIndex": 7,
+            "symbols": [
+              "useTimer"
+            ]
+          },
+          {
+            "path": "src/hooks/useVisibilityChange.ts",
+            "batchIndex": 4,
+            "symbols": [
+              "useVisibilityChange"
+            ]
+          },
+          {
+            "path": "src/lib/constants.ts",
+            "batchIndex": 7,
+            "symbols": [
+              "SUBJECTS",
+              "OUTCOMES",
+              "OUTCOME_BY_CODE",
+              "OUTCOME_KEYS",
+              "ROOT_CAUSES",
+              "MARK_DECISIONS",
+              "SOURCE_KINDS",
+              "SOURCE_KIND_BY_VALUE",
+              "PYQ_TWO_SETS_FROM",
+              "examYears",
+              "pyqYears",
+              "buildSourceRef",
+              "MARKS_TARGET_SEC",
+              "QUESTION_FORMATS",
+              "TARGET_DURATIONS_MIN",
+              "QUESTION_COUNT_CHOICES",
+              "DEFAULT_TARGET_TIME_SEC",
+              "REATTEMPT_FIRST_DELAY_DAYS",
+              "EXAM_DATE_DEFAULT",
+              "TIMEZONES",
+              "INVITE_TTL_DAYS",
+              "FORMULA_REVIEW_INTERVALS"
+            ]
+          },
+          {
+            "path": "src/lib/db.ts",
+            "batchIndex": 5,
+            "symbols": [
+              "db",
+              "SYNCED_TABLES",
+              "table",
+              "clearLocalData"
+            ]
+          },
+          {
+            "path": "src/lib/planner-execution.ts",
+            "batchIndex": 8,
+            "symbols": [
+              "plannerBlockHref",
+              "plannerCompletionPercent",
+              "updatePlannerBlockExecution",
+              "markPlannerBlockStarted",
+              "markPlannerBlockComplete",
+              "reconcilePlannerExecutions"
+            ]
+          },
+          {
+            "path": "src/lib/reattempt.ts",
+            "batchIndex": 5,
+            "symbols": [
+              "needsReattempt",
+              "evaluateLoggedReattemptAnswer",
+              "buildReattemptQueue",
+              "advance",
+              "createReattemptRow",
+              "scheduleReattempt",
+              "recordReattemptResult"
+            ]
+          },
+          {
+            "path": "src/lib/subjectInk.ts",
+            "batchIndex": 5,
+            "symbols": [
+              "subjectInk"
+            ]
+          },
+          {
+            "path": "src/lib/utils.ts",
+            "batchIndex": 5,
+            "symbols": [
+              "cn",
+              "uuid",
+              "uuidFromString",
+              "todayISO",
+              "calendarDateInTimeZone",
+              "todayISOInTimeZone",
+              "addDaysISO",
+              "weekStartISO",
+              "formatDate",
+              "nowISO",
+              "secondsToClock",
+              "debounce",
+              "levenshtein",
+              "clamp",
+              "plural"
+            ]
+          },
+          {
+            "path": "src/stores/session.ts",
+            "batchIndex": 9,
+            "symbols": [
+              "useSessionStore"
+            ]
+          },
+          {
+            "path": "src/types/index.ts",
+            "batchIndex": 7,
+            "symbols": []
+          }
+        ],
+        "src/pages/SyllabusTracker.tsx": [
+          {
+            "path": "src/components/layout/PageHeader.tsx",
+            "batchIndex": 4,
+            "symbols": [
+              "PageHeader"
+            ]
+          },
+          {
+            "path": "src/components/ui/Badge.tsx",
+            "batchIndex": 4,
+            "symbols": [
+              "Badge"
+            ]
+          },
+          {
+            "path": "src/components/ui/Input.tsx",
+            "batchIndex": 4,
+            "symbols": [
+              "Input"
+            ]
+          },
+          {
+            "path": "src/components/ui/Progress.tsx",
+            "batchIndex": 4,
+            "symbols": [
+              "Progress"
+            ]
+          },
+          {
+            "path": "src/hooks/useAuth.ts",
+            "batchIndex": 4,
+            "symbols": [
+              "useAuth"
+            ]
+          },
+          {
+            "path": "src/lib/constants.ts",
+            "batchIndex": 7,
+            "symbols": [
+              "SUBJECTS",
+              "OUTCOMES",
+              "OUTCOME_BY_CODE",
+              "OUTCOME_KEYS",
+              "ROOT_CAUSES",
+              "MARK_DECISIONS",
+              "SOURCE_KINDS",
+              "SOURCE_KIND_BY_VALUE",
+              "PYQ_TWO_SETS_FROM",
+              "examYears",
+              "pyqYears",
+              "buildSourceRef",
+              "MARKS_TARGET_SEC",
+              "QUESTION_FORMATS",
+              "TARGET_DURATIONS_MIN",
+              "QUESTION_COUNT_CHOICES",
+              "DEFAULT_TARGET_TIME_SEC",
+              "REATTEMPT_FIRST_DELAY_DAYS",
+              "EXAM_DATE_DEFAULT",
+              "TIMEZONES",
+              "INVITE_TTL_DAYS",
+              "FORMULA_REVIEW_INTERVALS"
+            ]
+          },
+          {
+            "path": "src/lib/db.ts",
+            "batchIndex": 5,
+            "symbols": [
+              "db",
+              "SYNCED_TABLES",
+              "table",
+              "clearLocalData"
+            ]
+          },
+          {
+            "path": "src/lib/native.ts",
+            "batchIndex": 3,
+            "symbols": [
+              "BACK_EXIT_WINDOW_MS",
+              "isNativeApp",
+              "nativePlatform",
+              "haptic",
+              "configureNativeChrome",
+              "routeFromAppUrl",
+              "resolveNativeBackAction"
+            ]
+          },
+          {
+            "path": "src/lib/subjectInk.ts",
+            "batchIndex": 5,
+            "symbols": [
+              "subjectInk"
+            ]
+          },
+          {
+            "path": "src/lib/subtopics.ts",
+            "batchIndex": 5,
+            "symbols": [
+              "SUBTOPICS_BY_SUBJECT",
+              "subtopicsFor"
+            ]
+          },
+          {
+            "path": "src/lib/topic-evidence.ts",
+            "batchIndex": 7,
+            "symbols": [
+              "buildTopicEvidence"
+            ]
+          },
+          {
+            "path": "src/lib/utils.ts",
+            "batchIndex": 5,
+            "symbols": [
+              "cn",
+              "uuid",
+              "uuidFromString",
+              "todayISO",
+              "calendarDateInTimeZone",
+              "todayISOInTimeZone",
+              "addDaysISO",
+              "weekStartISO",
+              "formatDate",
+              "nowISO",
+              "secondsToClock",
+              "debounce",
+              "levenshtein",
+              "clamp",
+              "plural"
+            ]
+          },
+          {
+            "path": "src/stores/auth.ts",
+            "batchIndex": 3,
+            "symbols": [
+              "preloadAuthActions",
+              "useAuthStore",
+              "currentUserId"
+            ]
+          },
+          {
+            "path": "src/stores/topic-progress.ts",
+            "batchIndex": 10,
+            "symbols": [
+              "topicProgressId",
+              "topicProgressRowId",
+              "selectCompletionsForUser",
+              "mergeTopicProgressRows",
+              "syncTopicProgressFromDb",
+              "useTopicProgressStore"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "batchIndex": 6,
+      "files": [
+        {
+          "path": "src/components/dashboard/HeroCard.tsx",
+          "language": "typescript",
+          "sizeLines": 101,
+          "fileCategory": "code"
+        },
+        {
+          "path": "src/components/dashboard/LearningTips.tsx",
+          "language": "typescript",
+          "sizeLines": 45,
+          "fileCategory": "code"
+        },
+        {
+          "path": "src/components/dashboard/OutcomeDonut.tsx",
+          "language": "typescript",
+          "sizeLines": 59,
+          "fileCategory": "code"
+        },
+        {
+          "path": "src/components/dashboard/OutcomeLegend.tsx",
+          "language": "typescript",
+          "sizeLines": 89,
+          "fileCategory": "code"
+        },
+        {
+          "path": "src/components/dashboard/SurfaceTrendChart.tsx",
+          "language": "typescript",
+          "sizeLines": 104,
+          "fileCategory": "code"
+        }
+      ],
+      "batchImportData": {
+        "src/components/dashboard/HeroCard.tsx": [
+          "src/lib/utils.ts"
+        ],
+        "src/components/dashboard/LearningTips.tsx": [
+          "src/lib/learning-tips.ts",
+          "src/lib/utils.ts"
+        ],
+        "src/components/dashboard/OutcomeDonut.tsx": [
+          "src/lib/constants.ts",
+          "src/types/index.ts"
+        ],
+        "src/components/dashboard/OutcomeLegend.tsx": [
+          "src/lib/constants.ts",
+          "src/lib/utils.ts"
+        ],
+        "src/components/dashboard/SurfaceTrendChart.tsx": [
+          "src/lib/analysis.ts",
+          "src/lib/utils.ts"
+        ]
+      },
+      "neighborMap": {
+        "src/components/dashboard/HeroCard.tsx": [
+          {
+            "path": "src/lib/utils.ts",
+            "batchIndex": 5,
+            "symbols": [
+              "cn",
+              "uuid",
+              "uuidFromString",
+              "todayISO",
+              "calendarDateInTimeZone",
+              "todayISOInTimeZone",
+              "addDaysISO",
+              "weekStartISO",
+              "formatDate",
+              "nowISO",
+              "secondsToClock",
+              "debounce",
+              "levenshtein",
+              "clamp",
+              "plural"
+            ]
+          },
+          {
+            "path": "src/pages/Dashboard.tsx",
+            "batchIndex": 7,
+            "symbols": [
+              "Dashboard"
+            ]
+          }
+        ],
+        "src/components/dashboard/LearningTips.tsx": [
+          {
+            "path": "src/lib/learning-tips.ts",
+            "batchIndex": 7,
+            "symbols": [
+              "buildLearningTips"
+            ]
+          },
+          {
+            "path": "src/lib/utils.ts",
+            "batchIndex": 5,
+            "symbols": [
+              "cn",
+              "uuid",
+              "uuidFromString",
+              "todayISO",
+              "calendarDateInTimeZone",
+              "todayISOInTimeZone",
+              "addDaysISO",
+              "weekStartISO",
+              "formatDate",
+              "nowISO",
+              "secondsToClock",
+              "debounce",
+              "levenshtein",
+              "clamp",
+              "plural"
+            ]
+          },
+          {
+            "path": "src/pages/Dashboard.tsx",
+            "batchIndex": 7,
+            "symbols": [
+              "Dashboard"
+            ]
+          }
+        ],
+        "src/components/dashboard/OutcomeDonut.tsx": [
+          {
+            "path": "src/lib/constants.ts",
+            "batchIndex": 7,
+            "symbols": [
+              "SUBJECTS",
+              "OUTCOMES",
+              "OUTCOME_BY_CODE",
+              "OUTCOME_KEYS",
+              "ROOT_CAUSES",
+              "MARK_DECISIONS",
+              "SOURCE_KINDS",
+              "SOURCE_KIND_BY_VALUE",
+              "PYQ_TWO_SETS_FROM",
+              "examYears",
+              "pyqYears",
+              "buildSourceRef",
+              "MARKS_TARGET_SEC",
+              "QUESTION_FORMATS",
+              "TARGET_DURATIONS_MIN",
+              "QUESTION_COUNT_CHOICES",
+              "DEFAULT_TARGET_TIME_SEC",
+              "REATTEMPT_FIRST_DELAY_DAYS",
+              "EXAM_DATE_DEFAULT",
+              "TIMEZONES",
+              "INVITE_TTL_DAYS",
+              "FORMULA_REVIEW_INTERVALS"
+            ]
+          },
+          {
+            "path": "src/types/index.ts",
+            "batchIndex": 7,
+            "symbols": []
+          },
+          {
+            "path": "src/pages/Dashboard.tsx",
+            "batchIndex": 7,
+            "symbols": [
+              "Dashboard"
+            ]
+          }
+        ],
+        "src/components/dashboard/OutcomeLegend.tsx": [
+          {
+            "path": "src/lib/constants.ts",
+            "batchIndex": 7,
+            "symbols": [
+              "SUBJECTS",
+              "OUTCOMES",
+              "OUTCOME_BY_CODE",
+              "OUTCOME_KEYS",
+              "ROOT_CAUSES",
+              "MARK_DECISIONS",
+              "SOURCE_KINDS",
+              "SOURCE_KIND_BY_VALUE",
+              "PYQ_TWO_SETS_FROM",
+              "examYears",
+              "pyqYears",
+              "buildSourceRef",
+              "MARKS_TARGET_SEC",
+              "QUESTION_FORMATS",
+              "TARGET_DURATIONS_MIN",
+              "QUESTION_COUNT_CHOICES",
+              "DEFAULT_TARGET_TIME_SEC",
+              "REATTEMPT_FIRST_DELAY_DAYS",
+              "EXAM_DATE_DEFAULT",
+              "TIMEZONES",
+              "INVITE_TTL_DAYS",
+              "FORMULA_REVIEW_INTERVALS"
+            ]
+          },
+          {
+            "path": "src/lib/utils.ts",
+            "batchIndex": 5,
+            "symbols": [
+              "cn",
+              "uuid",
+              "uuidFromString",
+              "todayISO",
+              "calendarDateInTimeZone",
+              "todayISOInTimeZone",
+              "addDaysISO",
+              "weekStartISO",
+              "formatDate",
+              "nowISO",
+              "secondsToClock",
+              "debounce",
+              "levenshtein",
+              "clamp",
+              "plural"
+            ]
+          },
+          {
+            "path": "src/pages/Dashboard.tsx",
+            "batchIndex": 7,
+            "symbols": [
+              "Dashboard"
+            ]
+          }
+        ],
+        "src/components/dashboard/SurfaceTrendChart.tsx": [
+          {
+            "path": "src/lib/analysis.ts",
+            "batchIndex": 7,
+            "symbols": [
+              "weeklyDraftFingerprint",
+              "mistakeSurfaceOpen",
+              "mistakeSurfaceTrend",
+              "mistakeSurfaceMovement",
+              "mistakeSurfaceSeries",
+              "outcomeDistribution",
+              "latestSession",
+              "dueTodayCount",
+              "summarizeWeek",
+              "calibrationBySubject",
+              "calibrationOverall",
+              "isMistake",
+              "heatmapCells",
+              "heatmapRowTotals",
+              "activeDaysBack"
+            ]
+          },
+          {
+            "path": "src/lib/utils.ts",
+            "batchIndex": 5,
+            "symbols": [
+              "cn",
+              "uuid",
+              "uuidFromString",
+              "todayISO",
+              "calendarDateInTimeZone",
+              "todayISOInTimeZone",
+              "addDaysISO",
+              "weekStartISO",
+              "formatDate",
+              "nowISO",
+              "secondsToClock",
+              "debounce",
+              "levenshtein",
+              "clamp",
+              "plural"
+            ]
+          },
+          {
+            "path": "src/pages/Dashboard.tsx",
+            "batchIndex": 7,
+            "symbols": [
+              "Dashboard"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "batchIndex": 7,
+      "files": [
+        {
+          "path": "src/hooks/useTimer.ts",
+          "language": "typescript",
+          "sizeLines": 19,
+          "fileCategory": "code"
+        },
+        {
+          "path": "src/lib/analysis.ts",
+          "language": "typescript",
+          "sizeLines": 397,
+          "fileCategory": "code"
+        },
+        {
+          "path": "src/lib/sessions.ts",
+          "language": "typescript",
+          "sizeLines": 192,
+          "fileCategory": "code"
+        },
+        {
+          "path": "src/pages/Dashboard.tsx",
+          "language": "typescript",
+          "sizeLines": 446,
+          "fileCategory": "code"
+        },
+        {
+          "path": "src/pages/Pyq.tsx",
+          "language": "typescript",
+          "sizeLines": 1672,
+          "fileCategory": "code"
+        }
+      ],
+      "batchImportData": {
+        "src/hooks/useTimer.ts": [],
+        "src/lib/analysis.ts": [
+          "src/lib/constants.ts",
+          "src/lib/utils.ts",
+          "src/types/index.ts"
+        ],
+        "src/lib/sessions.ts": [
+          "src/lib/db.ts",
+          "src/lib/pyq-session.ts",
+          "src/lib/sync.ts",
+          "src/types/index.ts"
+        ],
+        "src/pages/Dashboard.tsx": [
+          "src/components/dashboard/HeroCard.tsx",
+          "src/components/dashboard/LearningTips.tsx",
+          "src/components/dashboard/OutcomeDonut.tsx",
+          "src/components/dashboard/OutcomeLegend.tsx",
+          "src/components/dashboard/SurfaceTrendChart.tsx",
+          "src/components/dashboard/WelcomeOverlay.tsx",
+          "src/components/ui/Button.tsx",
+          "src/components/ui/Card.tsx",
+          "src/hooks/useAuth.ts",
+          "src/lib/analysis.ts",
+          "src/lib/constants.ts",
+          "src/lib/db.ts",
+          "src/lib/do-now.ts",
+          "src/lib/learning-tips.ts",
+          "src/lib/planner-storage.ts",
+          "src/lib/pyq.ts",
+          "src/lib/sessions.ts",
+          "src/lib/subjectInk.ts",
+          "src/lib/utils.ts",
+          "src/stores/prefs.ts"
+        ],
+        "src/pages/Pyq.tsx": [
+          "src/components/layout/PageHeader.tsx",
+          "src/components/pyq/PyqQuestionContent.tsx",
+          "src/components/tags/TagFlow.tsx",
+          "src/components/tags/sourceDraft.ts",
+          "src/components/ui/Badge.tsx",
+          "src/components/ui/Button.tsx",
+          "src/components/ui/Card.tsx",
+          "src/components/ui/Select.tsx",
+          "src/hooks/useAuth.ts",
+          "src/hooks/useTimer.ts",
+          "src/lib/constants.ts",
+          "src/lib/db.ts",
+          "src/lib/image.ts",
+          "src/lib/patterns.ts",
+          "src/lib/planner-execution.ts",
+          "src/lib/pyq-history.ts",
+          "src/lib/pyq-session.ts",
+          "src/lib/pyq.ts",
+          "src/lib/reattempt.ts",
+          "src/lib/sessions.ts",
+          "src/lib/sync.ts",
+          "src/lib/utils.ts",
+          "src/types/index.ts"
+        ]
+      },
+      "neighborMap": {
+        "src/hooks/useTimer.ts": [
+          {
+            "path": "src/pages/Reattempts.tsx",
+            "batchIndex": 7,
+            "symbols": [
+              "Reattempts"
+            ]
+          },
+          {
+            "path": "src/pages/SessionActive.tsx",
+            "batchIndex": 5,
+            "symbols": [
+              "SessionActive"
+            ]
+          }
+        ],
+        "src/lib/analysis.ts": [
+          {
+            "path": "src/lib/constants.ts",
+            "batchIndex": 7,
+            "symbols": [
+              "SUBJECTS",
+              "OUTCOMES",
+              "OUTCOME_BY_CODE",
+              "OUTCOME_KEYS",
+              "ROOT_CAUSES",
+              "MARK_DECISIONS",
+              "SOURCE_KINDS",
+              "SOURCE_KIND_BY_VALUE",
+              "PYQ_TWO_SETS_FROM",
+              "examYears",
+              "pyqYears",
+              "buildSourceRef",
+              "MARKS_TARGET_SEC",
+              "QUESTION_FORMATS",
+              "TARGET_DURATIONS_MIN",
+              "QUESTION_COUNT_CHOICES",
+              "DEFAULT_TARGET_TIME_SEC",
+              "REATTEMPT_FIRST_DELAY_DAYS",
+              "EXAM_DATE_DEFAULT",
+              "TIMEZONES",
+              "INVITE_TTL_DAYS",
+              "FORMULA_REVIEW_INTERVALS"
+            ]
+          },
+          {
+            "path": "src/lib/utils.ts",
+            "batchIndex": 5,
+            "symbols": [
+              "cn",
+              "uuid",
+              "uuidFromString",
+              "todayISO",
+              "calendarDateInTimeZone",
+              "todayISOInTimeZone",
+              "addDaysISO",
+              "weekStartISO",
+              "formatDate",
+              "nowISO",
+              "secondsToClock",
+              "debounce",
+              "levenshtein",
+              "clamp",
+              "plural"
+            ]
+          },
+          {
+            "path": "src/types/index.ts",
+            "batchIndex": 7,
+            "symbols": []
+          },
+          {
+            "path": "src/__tests__/analysis.test.ts",
+            "batchIndex": 6,
+            "symbols": []
+          },
+          {
+            "path": "src/components/dashboard/SurfaceTrendChart.tsx",
+            "batchIndex": 6,
+            "symbols": [
+              "SurfaceTrendChart"
+            ]
+          },
+          {
+            "path": "src/lib/progress-export.ts",
+            "batchIndex": 10,
+            "symbols": [
+              "PROGRESS_REPORT_VERSION",
+              "buildProgressReport",
+              "collectProgressReport",
+              "progressReportCsv",
+              "downloadProgressReport"
+            ]
+          },
+          {
+            "path": "src/pages/Calibration.tsx",
+            "batchIndex": 5,
+            "symbols": [
+              "Calibration"
+            ]
+          },
+          {
+            "path": "src/pages/Heatmap.tsx",
+            "batchIndex": 5,
+            "symbols": [
+              "Heatmap"
+            ]
+          },
+          {
+            "path": "src/pages/WeeklyReview.tsx",
+            "batchIndex": 5,
+            "symbols": [
+              "WeeklyReview"
+            ]
+          }
+        ],
+        "src/lib/sessions.ts": [
+          {
+            "path": "src/lib/db.ts",
+            "batchIndex": 5,
+            "symbols": [
+              "db",
+              "SYNCED_TABLES",
+              "table",
+              "clearLocalData"
+            ]
+          },
+          {
+            "path": "src/lib/pyq-session.ts",
+            "batchIndex": 7,
+            "symbols": [
+              "createPyqSessionRow",
+              "pyqAttemptId",
+              "pyqJournalQuestionId",
+              "pyqSourceAttemptForJournalQuestion",
+              "pyqQuestionFromAttempt",
+              "pyqReattemptAttemptId",
+              "createPyqReattemptAttemptRow",
+              "pyqPracticeSubject",
+              "pyqPracticeSessionRow",
+              "startPyqSessionQuestion",
+              "advancePyqSessionProgress",
+              "completePyqSession",
+              "abandonPyqSession",
+              "pausePyqSession",
+              "pyqQuestionSnapshot",
+              "createPyqAttemptRow"
+            ]
+          },
+          {
+            "path": "src/lib/sync.ts",
+            "batchIndex": 5,
+            "symbols": [
+              "isSyncEnabled",
+              "writeLocal",
+              "writeLocalBatch",
+              "deleteLocal",
+              "flushPushQueue",
+              "pullAll",
+              "resumeSync",
+              "initSync",
+              "stopSync",
+              "_enableForTests"
+            ]
+          },
+          {
+            "path": "src/types/index.ts",
+            "batchIndex": 7,
+            "symbols": []
+          },
+          {
+            "path": "src/__tests__/sessions.test.ts",
+            "batchIndex": 6,
+            "symbols": []
+          },
+          {
+            "path": "src/pages/Journal.tsx",
+            "batchIndex": 5,
+            "symbols": [
+              "Journal"
+            ]
+          }
+        ],
+        "src/pages/Dashboard.tsx": [
+          {
+            "path": "src/components/dashboard/HeroCard.tsx",
+            "batchIndex": 6,
+            "symbols": [
+              "HeroCard"
+            ]
+          },
+          {
+            "path": "src/components/dashboard/LearningTips.tsx",
+            "batchIndex": 6,
+            "symbols": [
+              "LearningTips"
+            ]
+          },
+          {
+            "path": "src/components/dashboard/OutcomeDonut.tsx",
+            "batchIndex": 6,
+            "symbols": [
+              "OutcomeDonut"
+            ]
+          },
+          {
+            "path": "src/components/dashboard/OutcomeLegend.tsx",
+            "batchIndex": 6,
+            "symbols": [
+              "OutcomeLegend"
+            ]
+          },
+          {
+            "path": "src/components/dashboard/SurfaceTrendChart.tsx",
+            "batchIndex": 6,
+            "symbols": [
+              "SurfaceTrendChart"
+            ]
+          },
+          {
+            "path": "src/components/dashboard/WelcomeOverlay.tsx",
+            "batchIndex": 2,
+            "symbols": [
+              "WelcomeOverlay"
+            ]
+          },
+          {
+            "path": "src/components/ui/Button.tsx",
+            "batchIndex": 3,
+            "symbols": [
+              "Button"
+            ]
+          },
+          {
+            "path": "src/components/ui/Card.tsx",
+            "batchIndex": 4,
+            "symbols": [
+              "Card",
+              "CardHeader",
+              "CardBody"
+            ]
+          },
+          {
+            "path": "src/hooks/useAuth.ts",
+            "batchIndex": 4,
+            "symbols": [
+              "useAuth"
+            ]
+          },
+          {
+            "path": "src/lib/constants.ts",
+            "batchIndex": 7,
+            "symbols": [
+              "SUBJECTS",
+              "OUTCOMES",
+              "OUTCOME_BY_CODE",
+              "OUTCOME_KEYS",
+              "ROOT_CAUSES",
+              "MARK_DECISIONS",
+              "SOURCE_KINDS",
+              "SOURCE_KIND_BY_VALUE",
+              "PYQ_TWO_SETS_FROM",
+              "examYears",
+              "pyqYears",
+              "buildSourceRef",
+              "MARKS_TARGET_SEC",
+              "QUESTION_FORMATS",
+              "TARGET_DURATIONS_MIN",
+              "QUESTION_COUNT_CHOICES",
+              "DEFAULT_TARGET_TIME_SEC",
+              "REATTEMPT_FIRST_DELAY_DAYS",
+              "EXAM_DATE_DEFAULT",
+              "TIMEZONES",
+              "INVITE_TTL_DAYS",
+              "FORMULA_REVIEW_INTERVALS"
+            ]
+          },
+          {
+            "path": "src/lib/db.ts",
+            "batchIndex": 5,
+            "symbols": [
+              "db",
+              "SYNCED_TABLES",
+              "table",
+              "clearLocalData"
+            ]
+          },
+          {
+            "path": "src/lib/do-now.ts",
+            "batchIndex": 8,
+            "symbols": [
+              "buildDoNowQueue"
+            ]
+          },
+          {
+            "path": "src/lib/learning-tips.ts",
+            "batchIndex": 7,
+            "symbols": [
+              "buildLearningTips"
+            ]
+          },
+          {
+            "path": "src/lib/planner-storage.ts",
+            "batchIndex": 8,
+            "symbols": [
+              "dayKeyPrefix",
+              "plannerDateFromSearch",
+              "migrateLegacyDayPlans",
+              "emptyDayPlan",
+              "keyFor",
+              "loadDayPlan",
+              "loadAllDayPlans",
+              "saveDayPlan",
+              "cacheDayPlan",
+              "deleteDayPlan",
+              "loadPlanIndexForMonth",
+              "summarize"
+            ]
+          },
+          {
+            "path": "src/lib/pyq.ts",
+            "batchIndex": 7,
+            "symbols": [
+              "PYQ_BANK_QUESTION_COUNT",
+              "normalizePyqQuestionHtml",
+              "loadPyqManifest",
+              "normalizePyqManifest",
+              "loadPyqQuestions",
+              "loadPyqQuestionByUid",
+              "matchesPyqTopicScope",
+              "evaluatePyqAnswer",
+              "formatPyqAnswer",
+              "pyqAnswerValueForLog",
+              "pyqQuestionSnapshotDataUrl",
+              "pyqSourceRef",
+              "pyqPlainText",
+              "firstPyqImage",
+              "resolvePyqJournalImageUrl",
+              "inferPyqDirectOutcome"
+            ]
+          },
+          {
+            "path": "src/lib/subjectInk.ts",
+            "batchIndex": 5,
+            "symbols": [
+              "subjectInk"
+            ]
+          },
+          {
+            "path": "src/lib/utils.ts",
+            "batchIndex": 5,
+            "symbols": [
+              "cn",
+              "uuid",
+              "uuidFromString",
+              "todayISO",
+              "calendarDateInTimeZone",
+              "todayISOInTimeZone",
+              "addDaysISO",
+              "weekStartISO",
+              "formatDate",
+              "nowISO",
+              "secondsToClock",
+              "debounce",
+              "levenshtein",
+              "clamp",
+              "plural"
+            ]
+          },
+          {
+            "path": "src/stores/prefs.ts",
+            "batchIndex": 3,
+            "symbols": [
+              "DEFAULT_PREFERENCES",
+              "usePrefsStore",
+              "daysSinceBackup",
+              "needsBackupReminder",
+              "WEEKDAYS"
+            ]
+          },
+          {
+            "path": "src/__tests__/reattempt-ui.test.tsx",
+            "batchIndex": 6,
+            "symbols": []
+          }
+        ],
+        "src/pages/Pyq.tsx": [
+          {
+            "path": "src/components/layout/PageHeader.tsx",
+            "batchIndex": 4,
+            "symbols": [
+              "PageHeader"
+            ]
+          },
+          {
+            "path": "src/components/pyq/PyqQuestionContent.tsx",
+            "batchIndex": 6,
+            "symbols": [
+              "PyqQuestionContent"
+            ]
+          },
+          {
+            "path": "src/components/tags/TagFlow.tsx",
+            "batchIndex": 7,
+            "symbols": [
+              "TagFlow"
+            ]
+          },
+          {
+            "path": "src/components/tags/sourceDraft.ts",
+            "batchIndex": 7,
+            "symbols": [
+              "makeInitialSource"
+            ]
+          },
+          {
+            "path": "src/components/ui/Badge.tsx",
+            "batchIndex": 4,
+            "symbols": [
+              "Badge"
+            ]
+          },
+          {
+            "path": "src/components/ui/Button.tsx",
+            "batchIndex": 3,
+            "symbols": [
+              "Button"
+            ]
+          },
+          {
+            "path": "src/components/ui/Card.tsx",
+            "batchIndex": 4,
+            "symbols": [
+              "Card",
+              "CardHeader",
+              "CardBody"
+            ]
+          },
+          {
+            "path": "src/components/ui/Select.tsx",
+            "batchIndex": 4,
+            "symbols": [
+              "Select"
+            ]
+          },
+          {
+            "path": "src/hooks/useAuth.ts",
+            "batchIndex": 4,
+            "symbols": [
+              "useAuth"
+            ]
+          },
+          {
+            "path": "src/lib/constants.ts",
+            "batchIndex": 7,
+            "symbols": [
+              "SUBJECTS",
+              "OUTCOMES",
+              "OUTCOME_BY_CODE",
+              "OUTCOME_KEYS",
+              "ROOT_CAUSES",
+              "MARK_DECISIONS",
+              "SOURCE_KINDS",
+              "SOURCE_KIND_BY_VALUE",
+              "PYQ_TWO_SETS_FROM",
+              "examYears",
+              "pyqYears",
+              "buildSourceRef",
+              "MARKS_TARGET_SEC",
+              "QUESTION_FORMATS",
+              "TARGET_DURATIONS_MIN",
+              "QUESTION_COUNT_CHOICES",
+              "DEFAULT_TARGET_TIME_SEC",
+              "REATTEMPT_FIRST_DELAY_DAYS",
+              "EXAM_DATE_DEFAULT",
+              "TIMEZONES",
+              "INVITE_TTL_DAYS",
+              "FORMULA_REVIEW_INTERVALS"
+            ]
+          },
+          {
+            "path": "src/lib/db.ts",
+            "batchIndex": 5,
+            "symbols": [
+              "db",
+              "SYNCED_TABLES",
+              "table",
+              "clearLocalData"
+            ]
+          },
+          {
+            "path": "src/lib/image.ts",
+            "batchIndex": 7,
+            "symbols": [
+              "ImageTooLargeError",
+              "urlToDataUrl",
+              "captureElementToDataUrl",
+              "compressToDataUrl"
+            ]
+          },
+          {
+            "path": "src/lib/patterns.ts",
+            "batchIndex": 5,
+            "symbols": [
+              "reconcileQuestionPattern"
+            ]
+          },
+          {
+            "path": "src/lib/planner-execution.ts",
+            "batchIndex": 8,
+            "symbols": [
+              "plannerBlockHref",
+              "plannerCompletionPercent",
+              "updatePlannerBlockExecution",
+              "markPlannerBlockStarted",
+              "markPlannerBlockComplete",
+              "reconcilePlannerExecutions"
+            ]
+          },
+          {
+            "path": "src/lib/pyq-history.ts",
+            "batchIndex": 7,
+            "symbols": [
+              "PYQ_HISTORY_OPTIONS",
+              "attemptsByQuestion",
+              "analyzedAttemptIds",
+              "matchesPyqHistory",
+              "filterPyqByHistory"
+            ]
+          },
+          {
+            "path": "src/lib/pyq-session.ts",
+            "batchIndex": 7,
+            "symbols": [
+              "createPyqSessionRow",
+              "pyqAttemptId",
+              "pyqJournalQuestionId",
+              "pyqSourceAttemptForJournalQuestion",
+              "pyqQuestionFromAttempt",
+              "pyqReattemptAttemptId",
+              "createPyqReattemptAttemptRow",
+              "pyqPracticeSubject",
+              "pyqPracticeSessionRow",
+              "startPyqSessionQuestion",
+              "advancePyqSessionProgress",
+              "completePyqSession",
+              "abandonPyqSession",
+              "pausePyqSession",
+              "pyqQuestionSnapshot",
+              "createPyqAttemptRow"
+            ]
+          },
+          {
+            "path": "src/lib/pyq.ts",
+            "batchIndex": 7,
+            "symbols": [
+              "PYQ_BANK_QUESTION_COUNT",
+              "normalizePyqQuestionHtml",
+              "loadPyqManifest",
+              "normalizePyqManifest",
+              "loadPyqQuestions",
+              "loadPyqQuestionByUid",
+              "matchesPyqTopicScope",
+              "evaluatePyqAnswer",
+              "formatPyqAnswer",
+              "pyqAnswerValueForLog",
+              "pyqQuestionSnapshotDataUrl",
+              "pyqSourceRef",
+              "pyqPlainText",
+              "firstPyqImage",
+              "resolvePyqJournalImageUrl",
+              "inferPyqDirectOutcome"
+            ]
+          },
+          {
+            "path": "src/lib/reattempt.ts",
+            "batchIndex": 5,
+            "symbols": [
+              "needsReattempt",
+              "evaluateLoggedReattemptAnswer",
+              "buildReattemptQueue",
+              "advance",
+              "createReattemptRow",
+              "scheduleReattempt",
+              "recordReattemptResult"
+            ]
+          },
+          {
+            "path": "src/lib/sync.ts",
+            "batchIndex": 5,
+            "symbols": [
+              "isSyncEnabled",
+              "writeLocal",
+              "writeLocalBatch",
+              "deleteLocal",
+              "flushPushQueue",
+              "pullAll",
+              "resumeSync",
+              "initSync",
+              "stopSync",
+              "_enableForTests"
+            ]
+          },
+          {
+            "path": "src/lib/utils.ts",
+            "batchIndex": 5,
+            "symbols": [
+              "cn",
+              "uuid",
+              "uuidFromString",
+              "todayISO",
+              "calendarDateInTimeZone",
+              "todayISOInTimeZone",
+              "addDaysISO",
+              "weekStartISO",
+              "formatDate",
+              "nowISO",
+              "secondsToClock",
+              "debounce",
+              "levenshtein",
+              "clamp",
+              "plural"
+            ]
+          },
+          {
+            "path": "src/types/index.ts",
+            "batchIndex": 7,
+            "symbols": []
+          },
+          {
+            "path": "src/__tests__/pyq-attempt-log.test.tsx",
+            "batchIndex": 6,
+            "symbols": []
+          },
+          {
+            "path": "src/__tests__/pyq-navigation.test.tsx",
+            "batchIndex": 6,
+            "symbols": []
+          }
+        ]
+      }
+    },
+    {
+      "batchIndex": 8,
+      "files": [
+        {
+          "path": "src/pages/DoNow.tsx",
+          "language": "typescript",
+          "sizeLines": 167,
+          "fileCategory": "code"
+        }
+      ],
+      "batchImportData": {
+        "src/pages/DoNow.tsx": [
+          "src/components/layout/PageHeader.tsx",
+          "src/components/ui/Button.tsx",
+          "src/components/ui/Card.tsx",
+          "src/components/ui/Empty.tsx",
+          "src/hooks/useAuth.ts",
+          "src/lib/db.ts",
+          "src/lib/do-now.ts",
+          "src/lib/planner-execution.ts",
+          "src/lib/planner-storage.ts",
+          "src/lib/utils.ts"
+        ]
+      },
+      "neighborMap": {
+        "src/pages/DoNow.tsx": [
+          {
+            "path": "src/components/layout/PageHeader.tsx",
+            "batchIndex": 4,
+            "symbols": [
+              "PageHeader"
+            ]
+          },
+          {
+            "path": "src/components/ui/Button.tsx",
+            "batchIndex": 3,
+            "symbols": [
+              "Button"
+            ]
+          },
+          {
+            "path": "src/components/ui/Card.tsx",
+            "batchIndex": 4,
+            "symbols": [
+              "Card",
+              "CardHeader",
+              "CardBody"
+            ]
+          },
+          {
+            "path": "src/components/ui/Empty.tsx",
+            "batchIndex": 4,
+            "symbols": [
+              "Empty"
+            ]
+          },
+          {
+            "path": "src/hooks/useAuth.ts",
+            "batchIndex": 4,
+            "symbols": [
+              "useAuth"
+            ]
+          },
+          {
+            "path": "src/lib/db.ts",
+            "batchIndex": 5,
+            "symbols": [
+              "db",
+              "SYNCED_TABLES",
+              "table",
+              "clearLocalData"
+            ]
+          },
+          {
+            "path": "src/lib/do-now.ts",
+            "batchIndex": 8,
+            "symbols": [
+              "buildDoNowQueue"
+            ]
+          },
+          {
+            "path": "src/lib/planner-execution.ts",
+            "batchIndex": 8,
+            "symbols": [
+              "plannerBlockHref",
+              "plannerCompletionPercent",
+              "updatePlannerBlockExecution",
+              "markPlannerBlockStarted",
+              "markPlannerBlockComplete",
+              "reconcilePlannerExecutions"
+            ]
+          },
+          {
+            "path": "src/lib/planner-storage.ts",
+            "batchIndex": 8,
+            "symbols": [
+              "dayKeyPrefix",
+              "plannerDateFromSearch",
+              "migrateLegacyDayPlans",
+              "emptyDayPlan",
+              "keyFor",
+              "loadDayPlan",
+              "loadAllDayPlans",
+              "saveDayPlan",
+              "cacheDayPlan",
+              "deleteDayPlan",
+              "loadPlanIndexForMonth",
+              "summarize"
+            ]
+          },
+          {
+            "path": "src/lib/utils.ts",
+            "batchIndex": 5,
+            "symbols": [
+              "cn",
+              "uuid",
+              "uuidFromString",
+              "todayISO",
+              "calendarDateInTimeZone",
+              "todayISOInTimeZone",
+              "addDaysISO",
+              "weekStartISO",
+              "formatDate",
+              "nowISO",
+              "secondsToClock",
+              "debounce",
+              "levenshtein",
+              "clamp",
+              "plural"
+            ]
+          },
+          {
+            "path": "src/__tests__/reattempt-ui.test.tsx",
+            "batchIndex": 6,
+            "symbols": []
+          }
+        ]
+      }
+    },
+    {
+      "batchIndex": 9,
+      "files": [
+        {
+          "path": "src/__tests__/isolation.test.ts",
+          "language": "typescript",
+          "sizeLines": 102,
+          "fileCategory": "code"
+        },
+        {
+          "path": "src/components/layout/MobileTabs.tsx",
+          "language": "typescript",
+          "sizeLines": 343,
+          "fileCategory": "code"
+        },
+        {
+          "path": "src/components/layout/Nav.tsx",
+          "language": "typescript",
+          "sizeLines": 243,
+          "fileCategory": "code"
+        },
+        {
+          "path": "src/components/layout/Shell.tsx",
+          "language": "typescript",
+          "sizeLines": 61,
+          "fileCategory": "code"
+        },
+        {
+          "path": "src/components/layout/TopRightControls.tsx",
+          "language": "typescript",
+          "sizeLines": 42,
+          "fileCategory": "code"
+        },
+        {
+          "path": "src/components/shared/OfflineBadge.tsx",
+          "language": "typescript",
+          "sizeLines": 28,
+          "fileCategory": "code"
+        },
+        {
+          "path": "src/hooks/useSync.ts",
+          "language": "typescript",
+          "sizeLines": 47,
+          "fileCategory": "code"
+        },
+        {
+          "path": "src/lib/isolation.ts",
+          "language": "typescript",
+          "sizeLines": 57,
+          "fileCategory": "code"
+        }
+      ],
+      "batchImportData": {
+        "src/__tests__/isolation.test.ts": [
+          "src/lib/db.ts",
+          "src/lib/isolation.ts",
+          "src/stores/log.ts",
+          "src/stores/prefs.ts",
+          "src/stores/session.ts"
+        ],
+        "src/components/layout/MobileTabs.tsx": [
+          "src/lib/db.ts",
+          "src/lib/native.ts",
+          "src/lib/utils.ts",
+          "src/stores/session.ts"
+        ],
+        "src/components/layout/Nav.tsx": [
+          "src/components/shared/Brand.tsx",
+          "src/hooks/useAuth.ts",
+          "src/lib/db.ts",
+          "src/lib/utils.ts",
+          "src/stores/auth.ts",
+          "src/stores/session.ts"
+        ],
+        "src/components/layout/Shell.tsx": [
+          "src/components/layout/MobileTabs.tsx",
+          "src/components/layout/Nav.tsx",
+          "src/components/layout/TopRightControls.tsx",
+          "src/components/shared/Brand.tsx",
+          "src/components/shared/ContextualGateTip.tsx",
+          "src/components/shared/DailyQuote.tsx",
+          "src/components/shared/OfflineBadge.tsx",
+          "src/components/shared/ThemeToggle.tsx",
+          "src/hooks/useSync.ts"
+        ],
+        "src/components/layout/TopRightControls.tsx": [
+          "src/components/shared/OfflineBadge.tsx",
+          "src/components/shared/ThemeToggle.tsx",
+          "src/hooks/useAuth.ts",
+          "src/lib/constants.ts",
+          "src/lib/utils.ts",
+          "src/stores/prefs.ts"
+        ],
+        "src/components/shared/OfflineBadge.tsx": [
+          "src/hooks/useAuth.ts",
+          "src/hooks/useSync.ts",
+          "src/lib/utils.ts"
+        ],
+        "src/hooks/useSync.ts": [
+          "src/hooks/useAuth.ts",
+          "src/lib/db.ts",
+          "src/lib/sync.ts"
+        ],
+        "src/lib/isolation.ts": [
+          "src/lib/db.ts",
+          "src/stores/log.ts",
+          "src/stores/prefs.ts",
+          "src/stores/session.ts"
+        ]
+      },
+      "neighborMap": {
+        "src/__tests__/isolation.test.ts": [
+          {
+            "path": "src/lib/db.ts",
+            "batchIndex": 5,
+            "symbols": [
+              "db",
+              "SYNCED_TABLES",
+              "table",
+              "clearLocalData"
+            ]
+          },
+          {
+            "path": "src/stores/log.ts",
+            "batchIndex": 9,
+            "symbols": [
+              "useLogStore"
+            ]
+          },
+          {
+            "path": "src/stores/prefs.ts",
+            "batchIndex": 3,
+            "symbols": [
+              "DEFAULT_PREFERENCES",
+              "usePrefsStore",
+              "daysSinceBackup",
+              "needsBackupReminder",
+              "WEEKDAYS"
+            ]
+          },
+          {
+            "path": "src/stores/session.ts",
+            "batchIndex": 9,
+            "symbols": [
+              "useSessionStore"
+            ]
+          }
+        ],
+        "src/components/layout/MobileTabs.tsx": [
+          {
+            "path": "src/lib/db.ts",
+            "batchIndex": 5,
+            "symbols": [
+              "db",
+              "SYNCED_TABLES",
+              "table",
+              "clearLocalData"
+            ]
+          },
+          {
+            "path": "src/lib/native.ts",
+            "batchIndex": 3,
+            "symbols": [
+              "BACK_EXIT_WINDOW_MS",
+              "isNativeApp",
+              "nativePlatform",
+              "haptic",
+              "configureNativeChrome",
+              "routeFromAppUrl",
+              "resolveNativeBackAction"
+            ]
+          },
+          {
+            "path": "src/lib/utils.ts",
+            "batchIndex": 5,
+            "symbols": [
+              "cn",
+              "uuid",
+              "uuidFromString",
+              "todayISO",
+              "calendarDateInTimeZone",
+              "todayISOInTimeZone",
+              "addDaysISO",
+              "weekStartISO",
+              "formatDate",
+              "nowISO",
+              "secondsToClock",
+              "debounce",
+              "levenshtein",
+              "clamp",
+              "plural"
+            ]
+          },
+          {
+            "path": "src/stores/session.ts",
+            "batchIndex": 9,
+            "symbols": [
+              "useSessionStore"
+            ]
+          }
+        ],
+        "src/components/layout/Nav.tsx": [
+          {
+            "path": "src/components/shared/Brand.tsx",
+            "batchIndex": 2,
+            "symbols": [
+              "BrandMark",
+              "Brand"
+            ]
+          },
+          {
+            "path": "src/hooks/useAuth.ts",
+            "batchIndex": 4,
+            "symbols": [
+              "useAuth"
+            ]
+          },
+          {
+            "path": "src/lib/db.ts",
+            "batchIndex": 5,
+            "symbols": [
+              "db",
+              "SYNCED_TABLES",
+              "table",
+              "clearLocalData"
+            ]
+          },
+          {
+            "path": "src/lib/utils.ts",
+            "batchIndex": 5,
+            "symbols": [
+              "cn",
+              "uuid",
+              "uuidFromString",
+              "todayISO",
+              "calendarDateInTimeZone",
+              "todayISOInTimeZone",
+              "addDaysISO",
+              "weekStartISO",
+              "formatDate",
+              "nowISO",
+              "secondsToClock",
+              "debounce",
+              "levenshtein",
+              "clamp",
+              "plural"
+            ]
+          },
+          {
+            "path": "src/stores/auth.ts",
+            "batchIndex": 3,
+            "symbols": [
+              "preloadAuthActions",
+              "useAuthStore",
+              "currentUserId"
+            ]
+          },
+          {
+            "path": "src/stores/session.ts",
+            "batchIndex": 9,
+            "symbols": [
+              "useSessionStore"
+            ]
+          }
+        ],
+        "src/components/layout/Shell.tsx": [
+          {
+            "path": "src/components/shared/Brand.tsx",
+            "batchIndex": 2,
+            "symbols": [
+              "BrandMark",
+              "Brand"
+            ]
+          },
+          {
+            "path": "src/components/shared/ContextualGateTip.tsx",
+            "batchIndex": 9,
+            "symbols": [
+              "ContextualGateTip"
+            ]
+          },
+          {
+            "path": "src/components/shared/DailyQuote.tsx",
+            "batchIndex": 1,
+            "symbols": [
+              "DailyQuote"
+            ]
+          },
+          {
+            "path": "src/components/shared/ThemeToggle.tsx",
+            "batchIndex": 3,
+            "symbols": [
+              "ThemeToggle"
+            ]
+          },
+          {
+            "path": "src/router.tsx",
+            "batchIndex": 3,
+            "symbols": [
+              "router"
+            ]
+          }
+        ],
+        "src/components/layout/TopRightControls.tsx": [
+          {
+            "path": "src/components/shared/ThemeToggle.tsx",
+            "batchIndex": 3,
+            "symbols": [
+              "ThemeToggle"
+            ]
+          },
+          {
+            "path": "src/hooks/useAuth.ts",
+            "batchIndex": 4,
+            "symbols": [
+              "useAuth"
+            ]
+          },
+          {
+            "path": "src/lib/constants.ts",
+            "batchIndex": 7,
+            "symbols": [
+              "SUBJECTS",
+              "OUTCOMES",
+              "OUTCOME_BY_CODE",
+              "OUTCOME_KEYS",
+              "ROOT_CAUSES",
+              "MARK_DECISIONS",
+              "SOURCE_KINDS",
+              "SOURCE_KIND_BY_VALUE",
+              "PYQ_TWO_SETS_FROM",
+              "examYears",
+              "pyqYears",
+              "buildSourceRef",
+              "MARKS_TARGET_SEC",
+              "QUESTION_FORMATS",
+              "TARGET_DURATIONS_MIN",
+              "QUESTION_COUNT_CHOICES",
+              "DEFAULT_TARGET_TIME_SEC",
+              "REATTEMPT_FIRST_DELAY_DAYS",
+              "EXAM_DATE_DEFAULT",
+              "TIMEZONES",
+              "INVITE_TTL_DAYS",
+              "FORMULA_REVIEW_INTERVALS"
+            ]
+          },
+          {
+            "path": "src/lib/utils.ts",
+            "batchIndex": 5,
+            "symbols": [
+              "cn",
+              "uuid",
+              "uuidFromString",
+              "todayISO",
+              "calendarDateInTimeZone",
+              "todayISOInTimeZone",
+              "addDaysISO",
+              "weekStartISO",
+              "formatDate",
+              "nowISO",
+              "secondsToClock",
+              "debounce",
+              "levenshtein",
+              "clamp",
+              "plural"
+            ]
+          },
+          {
+            "path": "src/stores/prefs.ts",
+            "batchIndex": 3,
+            "symbols": [
+              "DEFAULT_PREFERENCES",
+              "usePrefsStore",
+              "daysSinceBackup",
+              "needsBackupReminder",
+              "WEEKDAYS"
+            ]
+          }
+        ],
+        "src/components/shared/OfflineBadge.tsx": [
+          {
+            "path": "src/hooks/useAuth.ts",
+            "batchIndex": 4,
+            "symbols": [
+              "useAuth"
+            ]
+          },
+          {
+            "path": "src/lib/utils.ts",
+            "batchIndex": 5,
+            "symbols": [
+              "cn",
+              "uuid",
+              "uuidFromString",
+              "todayISO",
+              "calendarDateInTimeZone",
+              "todayISOInTimeZone",
+              "addDaysISO",
+              "weekStartISO",
+              "formatDate",
+              "nowISO",
+              "secondsToClock",
+              "debounce",
+              "levenshtein",
+              "clamp",
+              "plural"
+            ]
+          }
+        ],
+        "src/hooks/useSync.ts": [
+          {
+            "path": "src/hooks/useAuth.ts",
+            "batchIndex": 4,
+            "symbols": [
+              "useAuth"
+            ]
+          },
+          {
+            "path": "src/lib/db.ts",
+            "batchIndex": 5,
+            "symbols": [
+              "db",
+              "SYNCED_TABLES",
+              "table",
+              "clearLocalData"
+            ]
+          },
+          {
+            "path": "src/lib/sync.ts",
+            "batchIndex": 5,
+            "symbols": [
+              "isSyncEnabled",
+              "writeLocal",
+              "writeLocalBatch",
+              "deleteLocal",
+              "flushPushQueue",
+              "pullAll",
+              "resumeSync",
+              "initSync",
+              "stopSync",
+              "_enableForTests"
+            ]
+          }
+        ],
+        "src/lib/isolation.ts": [
+          {
+            "path": "src/lib/db.ts",
+            "batchIndex": 5,
+            "symbols": [
+              "db",
+              "SYNCED_TABLES",
+              "table",
+              "clearLocalData"
+            ]
+          },
+          {
+            "path": "src/stores/log.ts",
+            "batchIndex": 9,
+            "symbols": [
+              "useLogStore"
+            ]
+          },
+          {
+            "path": "src/stores/prefs.ts",
+            "batchIndex": 3,
+            "symbols": [
+              "DEFAULT_PREFERENCES",
+              "usePrefsStore",
+              "daysSinceBackup",
+              "needsBackupReminder",
+              "WEEKDAYS"
+            ]
+          },
+          {
+            "path": "src/stores/session.ts",
+            "batchIndex": 9,
+            "symbols": [
+              "useSessionStore"
+            ]
+          },
+          {
+            "path": "src/pages/Settings.tsx",
+            "batchIndex": 3,
+            "symbols": [
+              "Settings"
+            ]
+          },
+          {
+            "path": "src/stores/auth.ts",
+            "batchIndex": 3,
+            "symbols": [
+              "preloadAuthActions",
+              "useAuthStore",
+              "currentUserId"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "batchIndex": 10,
+      "files": [
+        {
+          "path": "src/__tests__/topic-progress.test.ts",
+          "language": "typescript",
+          "sizeLines": 32,
+          "fileCategory": "code"
+        },
+        {
+          "path": "src/stores/topic-progress.ts",
+          "language": "typescript",
+          "sizeLines": 198,
+          "fileCategory": "code"
+        }
+      ],
+      "batchImportData": {
+        "src/__tests__/topic-progress.test.ts": [
+          "src/stores/topic-progress.ts"
+        ],
+        "src/stores/topic-progress.ts": [
+          "src/lib/db.ts",
+          "src/lib/sync.ts",
+          "src/lib/utils.ts",
+          "src/stores/auth.ts"
+        ]
+      },
+      "neighborMap": {
+        "src/stores/topic-progress.ts": [
+          {
+            "path": "src/lib/db.ts",
+            "batchIndex": 5,
+            "symbols": [
+              "db",
+              "SYNCED_TABLES",
+              "table",
+              "clearLocalData"
+            ]
+          },
+          {
+            "path": "src/lib/sync.ts",
+            "batchIndex": 5,
+            "symbols": [
+              "isSyncEnabled",
+              "writeLocal",
+              "writeLocalBatch",
+              "deleteLocal",
+              "flushPushQueue",
+              "pullAll",
+              "resumeSync",
+              "initSync",
+              "stopSync",
+              "_enableForTests"
+            ]
+          },
+          {
+            "path": "src/lib/utils.ts",
+            "batchIndex": 5,
+            "symbols": [
+              "cn",
+              "uuid",
+              "uuidFromString",
+              "todayISO",
+              "calendarDateInTimeZone",
+              "todayISOInTimeZone",
+              "addDaysISO",
+              "weekStartISO",
+              "formatDate",
+              "nowISO",
+              "secondsToClock",
+              "debounce",
+              "levenshtein",
+              "clamp",
+              "plural"
+            ]
+          },
+          {
+            "path": "src/stores/auth.ts",
+            "batchIndex": 3,
+            "symbols": [
+              "preloadAuthActions",
+              "useAuthStore",
+              "currentUserId"
+            ]
+          },
+          {
+            "path": "src/__tests__/progress_export.test.ts",
+            "batchIndex": 10,
+            "symbols": []
+          },
+          {
+            "path": "src/lib/progress-export.ts",
+            "batchIndex": 10,
+            "symbols": [
+              "PROGRESS_REPORT_VERSION",
+              "buildProgressReport",
+              "collectProgressReport",
+              "progressReportCsv",
+              "downloadProgressReport"
+            ]
+          },
+          {
+            "path": "src/pages/SyllabusTracker.tsx",
+            "batchIndex": 5,
+            "symbols": [
+              "SyllabusTracker"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "batchIndex": 13,
+      "files": [
+        {
+          "path": "index.html",
+          "language": "html",
+          "sizeLines": 39,
+          "fileCategory": "markup"
+        },
+        {
+          "path": "package.json",
+          "language": "json",
+          "sizeLines": 92,
+          "fileCategory": "config"
+        }
+      ],
+      "batchImportData": {
+        "index.html": [],
+        "package.json": []
+      },
+      "neighborMap": {}
+    },
+    {
+      "batchIndex": 18,
+      "files": [
+        {
+          "path": ".ua/.understandignore",
+          "language": "unknown",
+          "sizeLines": 135,
+          "fileCategory": "code"
+        },
+        {
+          "path": ".ua/config.json",
+          "language": "json",
+          "sizeLines": 3,
+          "fileCategory": "config"
+        }
+      ],
+      "batchImportData": {
+        ".ua/.understandignore": [],
+        ".ua/config.json": []
+      },
+      "neighborMap": {}
+    },
+    {
+      "batchIndex": 19,
+      "files": [
+        {
+          "path": "playwright.config.ts",
+          "language": "typescript",
+          "sizeLines": 19,
+          "fileCategory": "code"
+        },
+        {
+          "path": "src/__tests__/e2e/dashboard-analysis.spec.ts",
+          "language": "typescript",
+          "sizeLines": 52,
+          "fileCategory": "code"
+        },
+        {
+          "path": "src/__tests__/setup.ts",
+          "language": "typescript",
+          "sizeLines": 54,
+          "fileCategory": "code"
+        },
+        {
+          "path": "src/index.css",
+          "language": "css",
+          "sizeLines": 1740,
+          "fileCategory": "markup"
+        }
+      ],
+      "batchImportData": {
+        "playwright.config.ts": [],
+        "src/__tests__/e2e/dashboard-analysis.spec.ts": [],
+        "src/__tests__/setup.ts": [],
+        "src/index.css": []
+      },
+      "neighborMap": {
+        "src/index.css": [
+          {
+            "path": "src/main.tsx",
+            "batchIndex": 3,
+            "symbols": []
+          }
+        ]
+      }
+    },
+    {
+      "batchIndex": 20,
+      "files": [
+        {
+          "path": "vite.config.ts",
+          "language": "typescript",
+          "sizeLines": 103,
+          "fileCategory": "code"
+        }
+      ],
+      "batchImportData": {
+        "vite.config.ts": []
+      },
+      "neighborMap": {}
+    }
+  ]
+}

@@ -4,7 +4,10 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { corsHeaders, json } from '../_shared/cors.ts';
 import { jwtRoleClaim } from '../_shared/cron-auth.ts';
-import { computeReadinessScore } from '../_shared/readiness-score.ts';
+import {
+  computeReadinessScoreResult,
+  READINESS_CALCULATION_VERSION
+} from '../_shared/readiness-score.ts';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 declare const Deno: any;
@@ -22,6 +25,14 @@ interface UserRow {
 }
 
 interface QuestionRow {
+  id: string;
+  user_id: string;
+  source_pyq_attempt_id: string | null;
+  mark_decision: string | null;
+  mark_correct: boolean | null;
+}
+
+interface AttemptRow {
   id: string;
   user_id: string;
   mark_decision: string | null;
@@ -68,6 +79,25 @@ function weekStart(date: string): string {
   return value.toISOString().slice(0, 10);
 }
 
+const PAGE_SIZE = 1_000;
+
+/** Fixed global limits silently drop evidence for mature accounts. Paginate
+ * every source to exhaustion so the weekly ledger stays exact. */
+async function loadAll<T>(table: string, columns: string): Promise<T[]> {
+  const rows: T[] = [];
+  for (let from = 0; ; from += PAGE_SIZE) {
+    const result = await admin
+      .from(table)
+      .select(columns)
+      .order('id', { ascending: true })
+      .range(from, from + PAGE_SIZE - 1);
+    if (result.error) throw result.error;
+    const page = (result.data as T[] | null) ?? [];
+    rows.push(...page);
+    if (page.length < PAGE_SIZE) return rows;
+  }
+}
+
 Deno.serve(async (req: Request): Promise<Response> => {
   if (req.method === 'OPTIONS') return new Response(null, { headers: corsHeaders });
   if (req.method !== 'POST') return json({ ok: false, error: 'method not allowed' }, 405);
@@ -78,35 +108,44 @@ Deno.serve(async (req: Request): Promise<Response> => {
   );
   if (!isServiceCall) return json({ ok: false, error: 'cron authorization required' }, 403);
 
-  const [usersResult, questionsResult, patternsResult, reattemptsResult] = await Promise.all([
-    admin.from('users').select('id, exam_date, timezone').limit(10_000),
-    admin.from('questions').select('id, user_id, mark_decision, mark_correct').limit(100_000),
-    admin.from('patterns').select('user_id').limit(100_000),
-    admin
-      .from('reattempts')
-      .select('user_id, stage, scheduled_date, history')
-      .limit(100_000)
-  ]);
-
-  const firstError =
-    usersResult.error ?? questionsResult.error ?? patternsResult.error ?? reattemptsResult.error;
-  if (firstError) {
-    console.error('Readiness input load failed:', firstError.message);
+  let users: UserRow[];
+  let questions: QuestionRow[];
+  let attempts: AttemptRow[];
+  let patterns: PatternRow[];
+  let reattempts: ReattemptRow[];
+  try {
+    [users, questions, attempts, patterns, reattempts] = await Promise.all([
+      loadAll<UserRow>('users', 'id, exam_date, timezone'),
+      loadAll<QuestionRow>(
+        'questions',
+        'id, user_id, source_pyq_attempt_id, mark_decision, mark_correct'
+      ),
+      loadAll<AttemptRow>('pyq_attempts', 'id, user_id, mark_decision, mark_correct'),
+      loadAll<PatternRow>('patterns', 'user_id'),
+      loadAll<ReattemptRow>('reattempts', 'user_id, stage, scheduled_date, history')
+    ]);
+  } catch (error) {
+    console.error(
+      'Readiness input load failed:',
+      error instanceof Error ? error.message : String(error)
+    );
     return json({ ok: false, error: 'could not load readiness inputs' }, 500);
   }
 
-  const users = (usersResult.data as UserRow[]) ?? [];
-  const questions = (questionsResult.data as QuestionRow[]) ?? [];
-  const patterns = (patternsResult.data as PatternRow[]) ?? [];
-  const reattempts = (reattemptsResult.data as ReattemptRow[]) ?? [];
   const now = new Date();
   const questionsByUser = new Map<string, QuestionRow[]>();
+  const attemptsByUser = new Map<string, AttemptRow[]>();
   const patternCountByUser = new Map<string, number>();
   const reattemptsByUser = new Map<string, ReattemptRow[]>();
   for (const row of questions) {
     const list = questionsByUser.get(row.user_id) ?? [];
     list.push(row);
     questionsByUser.set(row.user_id, list);
+  }
+  for (const row of attempts) {
+    const list = attemptsByUser.get(row.user_id) ?? [];
+    list.push(row);
+    attemptsByUser.set(row.user_id, list);
   }
   for (const row of patterns) {
     patternCountByUser.set(row.user_id, (patternCountByUser.get(row.user_id) ?? 0) + 1);
@@ -120,13 +159,24 @@ Deno.serve(async (req: Request): Promise<Response> => {
   const snapshots = users.map((user) => {
     const today = localDate(now, user.timezone || 'Asia/Kolkata');
     const userQuestions = questionsByUser.get(user.id) ?? [];
+    const userAttempts = attemptsByUser.get(user.id) ?? [];
     const patternCount = patternCountByUser.get(user.id) ?? 0;
     const userReattempts = reattemptsByUser.get(user.id) ?? [];
+    const result = computeReadinessScoreResult(
+      userAttempts,
+      userQuestions,
+      patternCount,
+      userReattempts,
+      today
+    );
     return {
       user_id: user.id,
       on_date: weekStart(today),
-      score: computeReadinessScore(userQuestions, patternCount, userReattempts, today),
-      days_to_exam: daysBetween(today, user.exam_date)
+      score: result.score,
+      days_to_exam: daysBetween(today, user.exam_date),
+      calculation_version: READINESS_CALCULATION_VERSION,
+      evidence_counts: result.counts,
+      components: result.components
     };
   });
 

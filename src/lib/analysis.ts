@@ -3,7 +3,9 @@
 // of the corresponding SQL queries the server would run.
 import { subDays } from 'date-fns';
 import type { Outcome, QuestionRow, ReattemptRow, RootCause, SessionRow } from '@/types';
+import type { AttemptEvidenceEvent } from '@/lib/attempt-evidence';
 import { OUTCOMES } from '@/lib/constants';
+import { canonicalSubjectLabel } from '@/lib/subjects';
 import {
   addDaysISO,
   calendarDateInTimeZone,
@@ -215,7 +217,9 @@ export interface CalibrationRow {
 }
 
 /**
- * F5.4 — per-subject calibration. Under GATE's -1/3 negative marking:
+ * F5.4 — per-subject decision calibration. The legacy EV field is a disclosed
+ * one-mark-MCQ equivalent heuristic, because manual Journal rows do not carry
+ * verified question type/marks. Exact GATE scoring lives in gate-scoring.ts:
  *   skip → 0, MARK correct → +1, MARK wrong → -1/3, 50-50 correct → +1,
  *   50-50 wrong → -1/3 (same payoff as MARK since answer is committed).
  * Recommendation:
@@ -224,14 +228,23 @@ export interface CalibrationRow {
  *   - accuracy > 80%, answer EV > 0.6, and some skips → lower threshold
  *   - else → hold
  */
-export function calibrationBySubject(questions: QuestionRow[]): CalibrationRow[] {
+interface CalibrationEvidenceInput {
+  subject: string;
+  decision: QuestionRow['mark_decision'];
+  correct: boolean | null;
+}
+
+function calibrationRows(evidence: readonly CalibrationEvidenceInput[]): CalibrationRow[] {
   const per = new Map<string, CalibrationRow>();
-  for (const q of questions) {
-    if (!q.mark_decision) continue;
-    let row = per.get(q.subject);
+  for (const entry of evidence) {
+    if (!entry.decision) continue;
+    // Defective/unverified keys are evidence events, but they cannot honestly
+    // enter an accuracy or EV denominator.
+    if (entry.decision !== 'SKIP' && entry.correct == null) continue;
+    let row = per.get(entry.subject);
     if (!row) {
       row = {
-        subject: q.subject,
+        subject: entry.subject,
         marked: 0,
         markedCorrect: 0,
         markedWrong: 0,
@@ -243,17 +256,17 @@ export function calibrationBySubject(questions: QuestionRow[]): CalibrationRow[]
         answeredExpectedValue: 0,
         recommendation: 'insufficient'
       };
-      per.set(q.subject, row);
+      per.set(entry.subject, row);
     }
-    if (q.mark_decision === 'SKIP') {
+    if (entry.decision === 'SKIP') {
       row.skipped += 1;
-    } else if (q.mark_decision === 'MARK') {
+    } else if (entry.decision === 'MARK') {
       row.marked += 1;
-      if (q.mark_correct === true) row.markedCorrect += 1;
-      else if (q.mark_correct === false) row.markedWrong += 1;
-    } else if (q.mark_decision === 'FIFTY_FIFTY') {
+      if (entry.correct === true) row.markedCorrect += 1;
+      else if (entry.correct === false) row.markedWrong += 1;
+    } else if (entry.decision === 'FIFTY_FIFTY') {
       row.fiftyFifty += 1;
-      if (q.mark_correct === true) row.fiftyFiftyCorrect += 1;
+      if (entry.correct === true) row.fiftyFiftyCorrect += 1;
     }
   }
   for (const row of per.values()) {
@@ -264,9 +277,8 @@ export function calibrationBySubject(questions: QuestionRow[]): CalibrationRow[]
     row.accuracy = decided === 0 ? null : correct / decided;
     row.answeredExpectedValue = decided === 0 ? 0 : value / decided;
     row.expectedValue = decided + row.skipped === 0 ? 0 : value / (decided + row.skipped);
-    // Under GATE −1/3 marking, break-even is at 25% accuracy. Anything below
-    // that is a guaranteed money-loser; anything above 80% is leaving points
-    // on the table. Sample size < 4 stays explicitly inconclusive.
+    // The one-mark-MCQ equivalent breaks even at 25%. This recommendation is
+    // a decision heuristic only; exact type-aware v3 receipt marks stay primary.
     if (decided < 4) {
       row.recommendation = 'insufficient';
     } else if (
@@ -288,6 +300,28 @@ export function calibrationBySubject(questions: QuestionRow[]): CalibrationRow[]
   }
   return [...per.values()].sort(
     (a, b) => a.expectedValue - b.expectedValue || b.marked - a.marked
+  );
+}
+
+/** Compatibility analysis for independent/manual Journal decisions. */
+export function calibrationBySubject(questions: QuestionRow[]): CalibrationRow[] {
+  return calibrationRows(
+    questions.map((question) => ({
+      subject: canonicalSubjectLabel(question.subject),
+      decision: question.mark_decision,
+      correct: question.mark_correct
+    }))
+  );
+}
+
+/** Authoritative exact-once calibration counts from the attempt ledger. */
+export function calibrationByEvidence(events: AttemptEvidenceEvent[]): CalibrationRow[] {
+  return calibrationRows(
+    events.map((event) => ({
+      subject: canonicalSubjectLabel(event.subject),
+      decision: event.decision,
+      correct: event.correct
+    }))
   );
 }
 

@@ -169,7 +169,8 @@ describe('PYQ practice navigation', () => {
     await waitFor(async () => {
       expect(
         (await db.pyq_attempts.toArray()).find(
-          (attempt) => attempt.question_uid === questions[1].id
+          (attempt) =>
+            attempt.question_uid === questions[1].id && attempt.mark_decision === 'MARK'
         )
       ).toMatchObject({ selected_answer: 'C', mark_decision: 'MARK' });
     });
@@ -183,12 +184,24 @@ describe('PYQ practice navigation', () => {
 
     await waitFor(async () => {
       const attempts = await db.pyq_attempts.orderBy('attempted_at').toArray();
-      expect(attempts).toHaveLength(2);
-      expect(attempts.find((attempt) => attempt.question_uid === questions[1].id)).toMatchObject({
+      expect(attempts).toHaveLength(3);
+      const secondQuestionAttempts = attempts
+        .filter((attempt) => attempt.question_uid === questions[1].id)
+        .sort((left, right) => left.attempt_number - right.attempt_number);
+      expect(secondQuestionAttempts).toHaveLength(2);
+      expect(secondQuestionAttempts[0]).toMatchObject({
+        attempt_number: 1,
+        selected_answer: null,
+        mark_decision: 'SKIP',
+        mark_correct: null
+      });
+      expect(secondQuestionAttempts[1]).toMatchObject({
+        attempt_number: 2,
         selected_answer: 'C',
         mark_decision: 'MARK',
         mark_correct: true
       });
+      expect(secondQuestionAttempts[0].id).not.toBe(secondQuestionAttempts[1].id);
     });
   });
 });

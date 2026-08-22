@@ -3,8 +3,12 @@ import {
   createPyqAttemptRow,
   createPyqReattemptAttemptRow,
   createPyqSessionRow,
+  legacyPyqJournalQuestionId,
+  nextPyqAttemptNumber,
+  nextReattemptRoundAttemptNumber,
   pyqAttemptId,
   pyqJournalQuestionId,
+  pyqAttemptScorePresentation,
   pyqQuestionFromAttempt,
   pyqReattemptAttemptId,
   pyqSourceAttemptForJournalQuestion,
@@ -91,8 +95,10 @@ describe('PYQ session logic and determinism', () => {
     expect(advanced.current_question_uid).toBeNull();
     expect(advanced.current_question_started_at).toBeNull();
 
-    const duplicate = advancePyqSessionProgress(advanced, 'q1', 1, 17);
-    expect(duplicate.elapsed_sec).toBe(17);
+    const retry = advancePyqSessionProgress(advanced, 'q1', 1, 17);
+    expect(retry.completed_question_uids).toEqual(['q1']);
+    expect(retry.completed_count).toBe(1);
+    expect(retry.elapsed_sec).toBe(34);
   });
 
   it('restores a persisted question start without resetting its timer', () => {
@@ -168,7 +174,14 @@ describe('PYQ session logic and determinism', () => {
     expect(attempt.selected_answer).toBe('A');
     expect(attempt.correct_answer).toBe('B');
     expect(attempt.mark_correct).toBe(false);
-    expect(attempt.capture_version).toBe(2);
+    expect(attempt.capture_version).toBe(3);
+    expect(attempt).toMatchObject({
+      question_type: 'MCQ',
+      question_marks: 1,
+      score_thirds: -1,
+      scoring_status: 'scored',
+      scoring_version: 1
+    });
     expect(attempt.question_started_at).toBe('2026-08-08T08:00:00.000Z');
     expect(attempt.attempted_at).toBe('2026-08-08T08:00:12.345Z');
     expect(attempt.time_spent_ms).toBe(12_345);
@@ -180,6 +193,18 @@ describe('PYQ session logic and determinism', () => {
       topic_slug: 'shortest-path',
       type: 'MCQ',
       html: question.html
+    });
+    expect(pyqAttemptScorePresentation(attempt)).toEqual({
+      label: 'GATE -⅓',
+      covered: true,
+      detail: 'Exact GATE-rule score using the stored question type and marks.'
+    });
+    expect(
+      pyqAttemptScorePresentation({ score_thirds: null, scoring_status: 'unscorable' })
+    ).toEqual({
+      label: 'Marks unavailable',
+      covered: false,
+      detail: 'Excluded from exact-score coverage because scoring metadata is incomplete.'
     });
   });
 
@@ -235,10 +260,12 @@ describe('PYQ session logic and determinism', () => {
       pyqSourceAttemptForJournalQuestion(
         {
           id: 'random-legacy-journal-id',
+          user_id: legacyAttempt.user_id,
           session_id: null,
           subject: legacyAttempt.subject,
           source_year: legacyAttempt.year,
           source_ref: 'GATE PYQ · 2026 · Q 1 · MCQ',
+          source_pyq_attempt_id: null,
           created_at: legacyAttempt.attempted_at
         },
         [legacyAttempt]
@@ -256,7 +283,8 @@ describe('PYQ session logic and determinism', () => {
     const secondAttempt = createPyqReattemptAttemptRow({
       userId: 'user-1',
       reattemptId: 'reattempt-1',
-      completedRoundCount: 0,
+      reattemptRound: 0,
+      roundAttemptNumber: 1,
       sourceAttempt: firstAttempt,
       question: restored!,
       selectedAnswer: 'B',
@@ -275,7 +303,16 @@ describe('PYQ session logic and determinism', () => {
       selected_answer: 'B',
       correct_answer: 'B',
       mark_correct: true,
-      capture_version: 2
+      capture_version: 3,
+      reattempt_id: 'reattempt-1',
+      reattempt_round: 0,
+      round_attempt_number: 1
     });
+
+    const skippedRoundAttempt = { ...secondAttempt, mark_decision: 'SKIP' as const };
+    expect(nextReattemptRoundAttemptNumber([skippedRoundAttempt], 'reattempt-1', 0)).toBe(2);
+    expect(pyqReattemptAttemptId('reattempt-1', 0, 2)).not.toBe(secondAttempt.id);
+    expect(nextPyqAttemptNumber([firstAttempt, secondAttempt], session.id, question.id)).toBe(2);
+    expect(legacyPyqJournalQuestionId(firstAttempt.id)).not.toBe(journalQuestionId);
   });
 });

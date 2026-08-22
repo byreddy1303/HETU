@@ -16,7 +16,6 @@ import {
   HelpCircle,
   History,
   Rocket,
-  Sparkles,
   TrendingUp,
   Users2
 } from 'lucide-react';
@@ -30,8 +29,6 @@ import {
   computeReadiness,
   computeReadinessBySubject,
   COMPONENT_TOOLTIPS,
-  estimateAIRBand,
-  examDaySimulator,
   nextMoves,
   readinessComponents,
   type NextMove,
@@ -40,6 +37,7 @@ import {
 } from '@/lib/readiness';
 import {
   DEBT_LABEL,
+  READINESS_CALCULATION_VERSION,
   loadDebt,
   loadSnapshots,
   projectToExam,
@@ -50,6 +48,8 @@ import {
   type ReadinessSnapshot
 } from '@/lib/readiness-snapshots';
 import { EXAM_DATE_DEFAULT, SUBJECTS } from '@/lib/constants';
+import { mockScorePercent } from '@/lib/mocks';
+import { GATE_2027_BLUEPRINT, GATE_2027_OFFICIAL_SOURCES } from '@/lib/gate-2027';
 import { cn, todayISOInTimeZone, weekStartISO } from '@/lib/utils';
 import { subjectInk } from '@/lib/subjectInk';
 
@@ -84,7 +84,13 @@ function Gauge({ score }: { score: number }) {
   const band = scoreBand(score);
   return (
     <div className="relative flex flex-col items-center">
-      <svg width="180" height="180" viewBox="0 0 180 180" className="overflow-visible">
+      <svg
+        width="180"
+        height="180"
+        viewBox="0 0 180 180"
+        className="overflow-visible"
+        aria-hidden="true"
+      >
         <circle
           cx="90"
           cy="90"
@@ -136,32 +142,51 @@ export default function Readiness() {
     [userId],
     []
   );
+  const pyqAttempts = useLiveQuery(
+    () => (userId ? db.pyq_attempts.where('user_id').equals(userId).toArray() : []),
+    [userId],
+    []
+  );
+  const mocks = useLiveQuery(
+    () => (userId ? db.mock_tests.where('user_id').equals(userId).toArray() : []),
+    [userId],
+    []
+  );
 
   const breakdown = useMemo(
-    () => computeReadiness({ questions, reattempts, patterns }),
-    [questions, reattempts, patterns]
+    () => computeReadiness({ questions, pyqAttempts, reattempts, patterns }),
+    [questions, pyqAttempts, reattempts, patterns]
   );
 
   const perSubject = useMemo(
-    () => computeReadinessBySubject({ questions, reattempts, patterns }, SUBJECTS),
-    [questions, reattempts, patterns]
+    () =>
+      computeReadinessBySubject(
+        { questions, pyqAttempts, reattempts, patterns },
+        SUBJECTS
+      ),
+    [questions, pyqAttempts, reattempts, patterns]
   );
 
   const components = useMemo(() => readinessComponents(breakdown), [breakdown]);
 
   const daysLeft = Math.max(
     0,
-    differenceInCalendarDays(parseISO(profile?.exam_date ?? EXAM_DATE_DEFAULT), new Date())
-  );
-
-  const airBand = useMemo(
-    () => estimateAIRBand(breakdown.score, daysLeft),
-    [breakdown.score, daysLeft]
+    differenceInCalendarDays(parseISO(profile?.exam_date ?? EXAM_DATE_DEFAULT), parseISO(today))
   );
 
   const moves = useMemo(() => nextMoves(breakdown, perSubject), [breakdown, perSubject]);
-
-  const simulator = useMemo(() => examDaySimulator(perSubject, 600), [perSubject]);
+  const mockSignal = useMemo(() => {
+    const recent = [...mocks]
+      .sort((left, right) => left.test_date.localeCompare(right.test_date))
+      .slice(-5);
+    const normalized = recent.map(mockScorePercent);
+    return {
+      recent,
+      latest: recent.at(-1) ?? null,
+      low: normalized.length > 0 ? Math.min(...normalized) : null,
+      high: normalized.length > 0 ? Math.max(...normalized) : null
+    };
+  }, [mocks]);
 
   /* -------- weekly snapshots + watchlist (per-user localStorage) -------- */
 
@@ -190,7 +215,16 @@ export default function Readiness() {
       retention: breakdown.retention,
       calibration: breakdown.calibration,
       surface: breakdown.surface,
-      daysToExam: daysLeft
+      daysToExam: daysLeft,
+      calculationVersion: READINESS_CALCULATION_VERSION,
+      evidenceCounts: {
+        attempts: breakdown.counts.attempts,
+        correct: breakdown.counts.correct,
+        wrong: breakdown.counts.wrong,
+        skipped: breakdown.counts.skipped,
+        ungraded: breakdown.counts.ungraded,
+        uncertain: breakdown.counts.uncertain
+      }
     };
     setSnapshots(upsertSnapshot(userId, next));
     setWatchlist(updateDebt(userId, snapshotWeek, breakdown, perSubject));
@@ -199,7 +233,11 @@ export default function Readiness() {
   const trendSnapshots = useMemo(() => {
     const byDate = new Map(cloudSnapshots.map((snapshot) => [snapshot.date, snapshot]));
     for (const snapshot of snapshots) byDate.set(snapshot.date, snapshot);
-    return [...byDate.values()].sort((a, b) => a.date.localeCompare(b.date));
+    return [...byDate.values()]
+      .filter(
+        (snapshot) => snapshot.calculationVersion === READINESS_CALCULATION_VERSION
+      )
+      .sort((a, b) => a.date.localeCompare(b.date));
   }, [cloudSnapshots, snapshots]);
 
   const delta = useMemo(() => weeklyDelta(trendSnapshots), [trendSnapshots]);
@@ -222,14 +260,30 @@ export default function Readiness() {
           user_id: userId,
           on_date: weekStartISO(today),
           score: breakdown.score,
-          days_to_exam: daysLeft
+          days_to_exam: daysLeft,
+          calculation_version: READINESS_CALCULATION_VERSION,
+          evidence_counts: {
+            attempts: breakdown.counts.attempts,
+            correct: breakdown.counts.correct,
+            wrong: breakdown.counts.wrong,
+            skipped: breakdown.counts.skipped,
+            ungraded: breakdown.counts.ungraded,
+            uncertain: breakdown.counts.uncertain
+          },
+          components: {
+            coverage: breakdown.coverage,
+            retention: breakdown.retention,
+            calibration: breakdown.calibration,
+            surface: breakdown.surface
+          }
         },
         { onConflict: 'user_id,on_date' }
       );
       const [historyResult, medianResult] = await Promise.all([
         supabase
           .from('readiness_snapshots')
-          .select('on_date, score, days_to_exam')
+          .select('on_date, score, days_to_exam, calculation_version, evidence_counts')
+          .eq('calculation_version', READINESS_CALCULATION_VERSION)
           .order('on_date', { ascending: true })
           .limit(180),
         supabase.rpc('readiness_median_for_band', { band_width_days: 7 })
@@ -244,7 +298,12 @@ export default function Readiness() {
             retention: 0,
             calibration: 0,
             surface: 0,
-            daysToExam: snapshot.days_to_exam
+            daysToExam: snapshot.days_to_exam,
+            calculationVersion: snapshot.calculation_version ?? 1,
+            evidenceCounts:
+              snapshot.evidence_counts && typeof snapshot.evidence_counts === 'object'
+                ? (snapshot.evidence_counts as Record<string, number>)
+                : undefined
           }))
         );
       }
@@ -263,9 +322,10 @@ export default function Readiness() {
     return () => {
       cancelled = true;
     };
-  }, [sandbox, userId, breakdown.score, daysLeft, today]);
+  }, [sandbox, userId, breakdown, daysLeft, today]);
 
-  const anyData = questions.length + reattempts.length + patterns.length > 0;
+  const anyData =
+    questions.length + pyqAttempts.length + reattempts.length + patterns.length + mocks.length > 0;
   const confidenceCopy =
     breakdown.confidence === 'grounded'
       ? 'Grounded signal — the component samples are large enough to use this as a planning measure.'
@@ -287,6 +347,75 @@ export default function Readiness() {
         />
       ) : (
         <>
+          {/* --- Outcome evidence and official blueprint --- */}
+          <Card className="order-1">
+            <CardHeader
+              title="Recorded mock outcomes"
+              aside={
+                <a
+                  href={GATE_2027_OFFICIAL_SOURCES.pattern}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-[11px] text-text-faint hover:text-accent"
+                >
+                  official 2027 pattern · {GATE_2027_BLUEPRINT.totalMarks} marks
+                </a>
+              }
+            />
+            <CardBody className="flex flex-col gap-4">
+              {mockSignal.latest ? (
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                  <div className="rounded border border-border bg-bg-overlay/40 p-3">
+                    <p className="u-label">Latest recorded mock</p>
+                    <p className="mt-1 font-display text-[24px] font-bold text-text">
+                      <span className="u-num">{mockSignal.latest.total_marks}</span>
+                      <span className="text-[13px] font-normal text-text-muted">
+                        {' '}/ {mockSignal.latest.max_marks}
+                      </span>
+                    </p>
+                    <p className="mt-1 text-[11px] text-text-faint">
+                      {mockSignal.latest.name} · {mockSignal.latest.test_date}
+                    </p>
+                  </div>
+                  <div className="rounded border border-border bg-bg-overlay/40 p-3">
+                    <p className="u-label">Recent normalized range</p>
+                    <p className="u-num mt-1 text-[24px] font-bold text-text">
+                      {mockSignal.low}–{mockSignal.high}%
+                    </p>
+                    <p className="mt-1 text-[11px] text-text-faint">
+                      last {mockSignal.recent.length} recorded mock
+                      {mockSignal.recent.length === 1 ? '' : 's'}
+                    </p>
+                  </div>
+                  <div className="rounded border border-border bg-bg-overlay/40 p-3">
+                    <p className="u-label">Official paper blueprint</p>
+                    <p className="u-num mt-1 text-[16px] font-semibold text-text">
+                      {GATE_2027_BLUEPRINT.durationMinutes} min · {GATE_2027_BLUEPRINT.questionCount} questions
+                    </p>
+                    <p className="mt-1 text-[11px] leading-relaxed text-text-faint">
+                      GA {GATE_2027_BLUEPRINT.sectionMarks.generalAptitude} · Engineering Mathematics{' '}
+                      {GATE_2027_BLUEPRINT.sectionMarks.engineeringMathematics} · CS{' '}
+                      {GATE_2027_BLUEPRINT.sectionMarks.coreSubject}
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                <div className="rounded border border-border bg-bg-overlay/40 p-3 text-[12.5px] text-text-muted">
+                  No mock has been recorded yet.{' '}
+                  <Link to="/mocks" className="text-accent hover:text-accent-hover">
+                    Record one
+                  </Link>{' '}
+                  to make marks—the closest available outcome signal—lead this page.
+                </div>
+              )}
+              <div className="rounded border border-warn/30 bg-warn/5 p-3 text-[12px] leading-relaxed text-text-muted">
+                Recorded mocks are manually entered; unseen-paper, full-length, and validity flags are
+                not captured yet. AIR modelling is not prospectively validated, so no numeric rank
+                estimate is shown.
+              </div>
+            </CardBody>
+          </Card>
+
           {/* --- Evidence-adjusted gauge --- */}
           <Card className="order-2">
             <CardBody className="grid grid-cols-1 items-center gap-6 sm:grid-cols-[auto_1fr]">
@@ -313,8 +442,13 @@ export default function Readiness() {
                     re-attempts
                   </span>
                   <span>
-                    <span className="u-num text-text">{breakdown.counts.markedDecisions}</span>{' '}
-                    answered decisions
+                    <span className="u-num text-success">{breakdown.counts.correct}</span> correct ·{' '}
+                    <span className="u-num text-danger">{breakdown.counts.wrong}</span> wrong ·{' '}
+                    <span className="u-num text-text">{breakdown.counts.skipped}</span> skipped
+                  </span>
+                  <span>
+                    <span className="u-num text-text">{breakdown.counts.uncertain}</span>{' '}
+                    uncertain
                   </span>
                 </div>
               </div>
@@ -390,7 +524,8 @@ export default function Readiness() {
                     >
                       {projection.projectedScore}
                     </span>{' '}
-                    by exam day (T−{daysLeft}). Based on the last{' '}
+                    readiness points by exam day (T−{daysLeft}). This is a simple product-score
+                    trend—not expected GATE marks or AIR—and is based on the last{' '}
                     <span className="u-num">{projection.sampleDays}</span> snapshots.
                   </p>
                 )}
@@ -475,44 +610,6 @@ export default function Readiness() {
               <SubjectMatrix rows={perSubject} />
             </CardBody>
           </Card>
-
-          {/* --- Exam-day simulator --- */}
-          <details className="order-6 rounded-lg border border-border bg-bg-raised shadow-card">
-            <summary className="cursor-pointer px-4 py-3 font-display text-[14px] font-semibold text-text">
-              Experimental exam estimates
-            </summary>
-            <Card className="border-0 shadow-none">
-              <CardHeader
-                title="Exam-day simulator"
-                aside={
-                  <span className="inline-flex items-center gap-1 text-[11px] text-text-faint">
-                    <Sparkles size={11} strokeWidth={1.75} /> {simulator.runs} Monte Carlo runs
-                  </span>
-                }
-              />
-              <CardBody className="flex flex-col gap-3">
-                <div className="rounded border border-warn/30 bg-warn/5 p-3">
-                  <p className="u-label text-warn">Rough rank mapping · not validated</p>
-                  <p className="mt-1 font-display text-[15px] font-semibold text-text">
-                    {airBand.label}
-                  </p>
-                  <p className="mt-1 text-[12px] leading-relaxed text-text-muted">
-                    {airBand.caveat} Treat this as a coarse scenario, not a prediction.
-                  </p>
-                </div>
-                <div className="grid grid-cols-3 gap-3">
-                  <SimStat label="Unlucky (p10)" value={simulator.p10} tone="text-danger" />
-                  <SimStat label="Median (p50)" value={simulator.p50} tone="text-text" />
-                  <SimStat label="Lucky (p90)" value={simulator.p90} tone="text-success" />
-                </div>
-                <p className="text-[12.5px] text-text-muted">
-                  Based on per-subject calibration + engagement. Correct = +2 marks, wrong = −⅔.
-                  Skipped is a wash. The gap between p10 and p90 is variance — narrow it by lifting
-                  calibration.
-                </p>
-              </CardBody>
-            </Card>
-          </details>
 
           {/* --- Persistent evidence watchlist + optional peer context --- */}
           <div className="order-1 grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -916,7 +1013,7 @@ function SubjectMatrix({ rows }: { rows: SubjectReadiness[] }) {
                   className="px-4 py-2 text-[11px] text-text-faint"
                 >
                   {r.hasSignal
-                    ? `${r.counts.questions}q · ${r.counts.patterns}p · ${r.counts.eligibleReattempts}r · ${r.counts.markedDecisions}d`
+                    ? `${r.counts.attempts}a · ${r.counts.patterns}p · ${r.counts.eligibleReattempts}r · ${r.counts.uncertain} uncertain`
                     : 'no data yet'}
                 </td>
               </tr>
@@ -924,20 +1021,6 @@ function SubjectMatrix({ rows }: { rows: SubjectReadiness[] }) {
           })}
         </tbody>
       </table>
-    </div>
-  );
-}
-
-/* -------------------------- simulator stat -------------------------- */
-
-function SimStat({ label, value, tone }: { label: string; value: number; tone: string }) {
-  return (
-    <div className="rounded border border-border bg-bg-overlay/40 px-3 py-3 text-center">
-      <p className="u-label">{label}</p>
-      <p className={cn('u-num mt-1 text-[24px] font-bold leading-none', tone)}>
-        {value >= 0 ? value : `−${Math.abs(value)}`}
-      </p>
-      <p className="mt-1 text-[10.5px] text-text-faint">marks</p>
     </div>
   );
 }

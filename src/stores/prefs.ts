@@ -5,6 +5,7 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import type { ThemeMode } from '@/lib/theme';
+import { normalizeSubjectIdentity, type SubjectId } from '@/lib/subjects';
 
 export type FontScale = 'small' | 'normal' | 'large';
 export type DurationMin = 30 | 60 | 90 | 120;
@@ -17,6 +18,7 @@ export interface Preferences {
 
   // Session defaults
   defaultSubject: string | null;
+  defaultSubjectId: SubjectId | null;
   defaultDurationMin: DurationMin;
   defaultQuestionCount: number;
 
@@ -37,6 +39,7 @@ export const DEFAULT_PREFERENCES: Preferences = {
   weeklySessionTarget: 6,
   weeklyReviewDay: 1, // Monday
   defaultSubject: null, // "pick each time" until user picks a default
+  defaultSubjectId: null,
   defaultDurationMin: 60,
   defaultQuestionCount: 10,
   colorTheme: 'system',
@@ -55,19 +58,53 @@ interface PrefsState extends Preferences {
   markBackupNow: () => void;
 }
 
+export function normalizePreferencePatch(patch: Partial<Preferences>): Partial<Preferences> {
+  if (!('defaultSubject' in patch) && !('defaultSubjectId' in patch)) return patch;
+  const identity = normalizeSubjectIdentity(patch.defaultSubject, patch.defaultSubjectId);
+  return {
+    ...patch,
+    defaultSubject: identity.label || null,
+    defaultSubjectId: identity.id
+  };
+}
+
 export const usePrefsStore = create<PrefsState>()(
   persist(
     (set) => ({
       ...DEFAULT_PREFERENCES,
-      set: (key, value) => set({ [key]: value } as Partial<PrefsState>),
-      patch: (p) => set(p as Partial<PrefsState>),
+      set: (key, value) =>
+        set(
+          normalizePreferencePatch({ [key]: value } as Partial<Preferences>) as Partial<PrefsState>
+        ),
+      patch: (p) => set(normalizePreferencePatch(p) as Partial<PrefsState>),
       reset: () => set({ ...DEFAULT_PREFERENCES }),
       markBackupNow: () => set({ lastBackupAt: new Date().toISOString() })
     }),
     {
       name: 'air.prefs',
-      version: 1,
-      storage: createJSONStorage(() => localStorage)
+      version: 2,
+      storage: createJSONStorage(() => localStorage),
+      migrate: (persisted) => {
+        const previous = (persisted ?? {}) as Partial<Preferences>;
+        return {
+          ...previous,
+          ...normalizePreferencePatch({
+            defaultSubject: previous.defaultSubject,
+            defaultSubjectId: previous.defaultSubjectId
+          })
+        } as PrefsState;
+      },
+      merge: (persisted, current) => {
+        const previous = (persisted ?? {}) as Partial<Preferences>;
+        return {
+          ...current,
+          ...previous,
+          ...normalizePreferencePatch({
+            defaultSubject: previous.defaultSubject,
+            defaultSubjectId: previous.defaultSubjectId
+          })
+        };
+      }
     }
   )
 );

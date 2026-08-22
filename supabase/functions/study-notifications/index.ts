@@ -313,6 +313,7 @@ async function loadContext(userId: string, today: string): Promise<StudyContext>
       .from('readiness_snapshots')
       .select('score')
       .eq('user_id', userId)
+      .eq('calculation_version', 2)
       .order('on_date', { ascending: false })
       .limit(1)
       .maybeSingle(),

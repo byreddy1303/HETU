@@ -1,0 +1,873 @@
+{
+  "version": "gate-cs-2027-official-v1",
+  "retrievedOn": "2026-08-22",
+  "paperCode": "CS",
+  "sources": {
+    "pattern": "https://gate2027.iitm.ac.in/question_paper_pattern",
+    "syllabusIndex": "https://gate2027.iitm.ac.in/exam_papers_and_syllabus",
+    "computerScienceSyllabus": "https://gate2027.iitm.ac.in/static/doc/GATE2027_Syllabus/CS_GATE2027_Syllabus.pdf",
+    "generalAptitudeSyllabus": "https://gate2027.iitm.ac.in/static/doc/GATE2027_Syllabus/GA_GATE2027_Syllabus.pdf"
+  },
+  "blueprint": {
+    "durationMinutes": 180,
+    "questionCount": 65,
+    "totalMarks": 100,
+    "sectionMarks": {
+      "generalAptitude": 15,
+      "engineeringMathematics": 13,
+      "coreSubject": 72
+    },
+    "questionMarks": [1, 2],
+    "questionTypes": ["MCQ", "MSQ", "NAT"],
+    "scoring": {
+      "mcqWrongPenalty": "one-third-of-question-marks",
+      "msqWrongPenaltyMarks": 0,
+      "natWrongPenaltyMarks": 0,
+      "msqPartialCredit": false
+    }
+  },
+  "subjectScopes": [
+    {
+      "subjectId": "discrete-mathematics",
+      "officialCurrent": [
+        {
+          "id": "logic",
+          "label": "Propositional and first order logic",
+          "bankCoverage": "broad",
+          "bankTopicKeys": ["discrete-mathematics/propositional-logic"]
+        },
+        {
+          "id": "sets-relations-functions",
+          "label": "Sets, relations and functions",
+          "bankCoverage": "explicit",
+          "bankTopicKeys": [
+            "discrete-mathematics/set-theory",
+            "discrete-mathematics/relation",
+            "discrete-mathematics/functions"
+          ]
+        },
+        {
+          "id": "partial-orders-lattices",
+          "label": "Partial orders and lattices",
+          "bankCoverage": "broad",
+          "bankTopicKeys": ["discrete-mathematics/relation", "discrete-mathematics/lattice"]
+        },
+        {
+          "id": "monoids-groups",
+          "label": "Monoids and groups",
+          "bankCoverage": "broad",
+          "bankTopicKeys": ["discrete-mathematics/group-theory"]
+        },
+        {
+          "id": "graphs",
+          "label": "Graphs: connectivity, matching and colouring",
+          "bankCoverage": "broad",
+          "bankTopicKeys": ["discrete-mathematics/graph-theory"]
+        },
+        {
+          "id": "combinatorics",
+          "label": "Combinatorics: counting, recurrence relations and generating functions",
+          "bankCoverage": "broad",
+          "bankTopicKeys": ["discrete-mathematics/combination", "discrete-mathematics/recurrence"]
+        }
+      ],
+      "supporting": [
+        {
+          "id": "planarity",
+          "label": "Planar graphs",
+          "bankTopicKeys": ["discrete-mathematics/planar-graph"],
+          "reason": "Useful graph theory, but planarity is not named in the official 2027 CS syllabus."
+        }
+      ],
+      "historical": []
+    },
+    {
+      "subjectId": "engineering-mathematics",
+      "officialCurrent": [
+        {
+          "id": "linear-algebra",
+          "label": "Matrices, determinants, systems of linear equations, eigenvalues and eigenvectors, and LU decomposition",
+          "bankCoverage": "broad",
+          "bankTopicKeys": ["engineering-mathematics/linear-algebra"]
+        },
+        {
+          "id": "calculus",
+          "label": "Limits, continuity, differentiability, maxima and minima, mean value theorem, and integration",
+          "bankCoverage": "broad",
+          "bankTopicKeys": ["engineering-mathematics/calculus"]
+        },
+        {
+          "id": "probability-distributions",
+          "label": "Random variables and uniform, normal, exponential, Poisson and binomial distributions",
+          "bankCoverage": "broad",
+          "bankTopicKeys": ["engineering-mathematics/probability-statistics"]
+        },
+        {
+          "id": "statistics-and-bayes",
+          "label": "Mean, median, mode, standard deviation, conditional probability and Bayes theorem",
+          "bankCoverage": "broad",
+          "bankTopicKeys": ["engineering-mathematics/probability-statistics"]
+        }
+      ],
+      "supporting": [
+        {
+          "id": "advanced-linear-algebra",
+          "label": "QR, SVD and other advanced decompositions",
+          "bankTopicKeys": [],
+          "reason": "Useful enrichment; the official 2027 syllabus names LU decomposition only."
+        }
+      ],
+      "historical": []
+    },
+    {
+      "subjectId": "digital-logic",
+      "officialCurrent": [
+        {
+          "id": "boolean-minimization",
+          "label": "Boolean algebra and minimization by algebraic technique, Karnaugh map and tabular method",
+          "bankCoverage": "broad",
+          "bankTopicKeys": ["digital-logic/boolean-algebra"]
+        },
+        {
+          "id": "combinational-sequential",
+          "label": "Design of combinational and sequential circuits",
+          "bankCoverage": "explicit",
+          "bankTopicKeys": [
+            "digital-logic/combinational-circuit",
+            "digital-logic/sequential-circuit"
+          ]
+        },
+        {
+          "id": "number-representation-arithmetic",
+          "label": "Number representation and arithmetic: fixed and floating point",
+          "bankCoverage": "broad",
+          "bankTopicKeys": ["digital-logic/number-system"]
+        }
+      ],
+      "supporting": [],
+      "historical": []
+    },
+    {
+      "subjectId": "coa",
+      "officialCurrent": [
+        {
+          "id": "instruction-set-addressing",
+          "label": "Instruction set and addressing modes",
+          "bankCoverage": "explicit",
+          "bankTopicKeys": ["coa/machine-instruction", "coa/addressing-modes"]
+        },
+        {
+          "id": "alu",
+          "label": "Design of arithmetic and logic unit",
+          "bankCoverage": "broad",
+          "bankTopicKeys": ["coa/alu-data-path-and-control-unit"]
+        },
+        {
+          "id": "control-unit",
+          "label": "Hardwired and microprogrammed control-unit design",
+          "bankCoverage": "broad",
+          "bankTopicKeys": ["coa/alu-data-path-and-control-unit"]
+        },
+        {
+          "id": "memory",
+          "label": "Memory interfacing and hierarchy: performance and cache-memory mapping",
+          "bankCoverage": "broad",
+          "bankTopicKeys": ["coa/cache-memory", "coa/memory-chip-design"]
+        },
+        {
+          "id": "io-interface",
+          "label": "I/O interface, interrupt and DMA",
+          "bankCoverage": "broad",
+          "bankTopicKeys": ["coa/io-interface", "coa/interrupt"]
+        },
+        {
+          "id": "pipelining",
+          "label": "Instruction pipelining and pipeline hazards",
+          "bankCoverage": "broad",
+          "bankTopicKeys": ["coa/pipeline-processor"]
+        }
+      ],
+      "supporting": [
+        {
+          "id": "secondary-storage",
+          "label": "Secondary storage",
+          "bankTopicKeys": ["coa/secondary-storage"],
+          "reason": "Useful architecture context, but not named in the official 2027 CS syllabus."
+        }
+      ],
+      "historical": []
+    },
+    {
+      "subjectId": "programming-data-structures",
+      "officialCurrent": [
+        {
+          "id": "c-programming",
+          "label": "Programming in C",
+          "bankCoverage": "broad",
+          "bankTopicKeys": [
+            "c-programming/arithmetic-operation",
+            "c-programming/conditional-statement",
+            "c-programming/loops",
+            "c-programming/array-and-pointer",
+            "c-programming/function"
+          ]
+        },
+        {
+          "id": "recursion",
+          "label": "Recursion",
+          "bankCoverage": "broad",
+          "bankTopicKeys": ["c-programming/function"]
+        },
+        {
+          "id": "data-structures",
+          "label": "Arrays, stacks, queues, linked lists, trees, binary search trees, binary heaps and graphs",
+          "bankCoverage": "broad",
+          "bankTopicKeys": [
+            "data-structure/array",
+            "data-structure/linked-list",
+            "data-structure/stack",
+            "data-structure/queue",
+            "data-structure/binary-tree",
+            "data-structure/binary-search-tree",
+            "data-structure/heap-tree",
+            "data-structure/n-ary-tree"
+          ]
+        }
+      ],
+      "supporting": [
+        {
+          "id": "balanced-search-trees",
+          "label": "AVL trees",
+          "bankTopicKeys": ["data-structure/avl-tree"],
+          "reason": "A useful tree specialization, but not named explicitly in the official 2027 CS syllabus."
+        }
+      ],
+      "historical": [
+        {
+          "id": "misplaced-database-index-trees",
+          "label": "B and B+ trees under Data Structures",
+          "bankTopicKeys": ["data-structure/b-tree", "data-structure/b-plus-tree"],
+          "reason": "B and B+ indexing belongs to the current Databases scope and should be re-homed without deleting historical questions."
+        },
+        {
+          "id": "misplaced-hashing",
+          "label": "Hashing under Data Structures",
+          "bankTopicKeys": ["data-structure/hashing"],
+          "reason": "Hashing belongs to the current Algorithms scope and should be re-homed without deleting historical questions."
+        }
+      ]
+    },
+    {
+      "subjectId": "algorithms",
+      "officialCurrent": [
+        {
+          "id": "search-sort-hash",
+          "label": "Searching, sorting and hashing",
+          "bankCoverage": "broad",
+          "bankTopicKeys": ["algorithms/sorting", "data-structure/hashing"]
+        },
+        {
+          "id": "complexity",
+          "label": "Asymptotic worst-case time and space complexity",
+          "bankCoverage": "explicit",
+          "bankTopicKeys": ["algorithms/asymptotic-notation"]
+        },
+        {
+          "id": "design-techniques",
+          "label": "Greedy, dynamic programming and divide-and-conquer",
+          "bankCoverage": "explicit",
+          "bankTopicKeys": [
+            "algorithms/greedy-technique",
+            "algorithms/dynamic-programming",
+            "algorithms/divide-and-conquer"
+          ]
+        },
+        {
+          "id": "graph-algorithms",
+          "label": "Graph traversals, minimum spanning trees and shortest paths",
+          "bankCoverage": "explicit",
+          "bankTopicKeys": [
+            "algorithms/graph-traversal",
+            "algorithms/minimum-spanning-tree",
+            "algorithms/shortest-path"
+          ]
+        }
+      ],
+      "supporting": [
+        {
+          "id": "recurrence-analysis",
+          "label": "Recurrence-relation analysis",
+          "bankTopicKeys": ["algorithms/recurrence-relation"],
+          "reason": "Useful for complexity analysis; recurrence relations are named under Discrete Mathematics rather than Algorithms."
+        }
+      ],
+      "historical": []
+    },
+    {
+      "subjectId": "theory-of-computation",
+      "officialCurrent": [
+        {
+          "id": "regular-expressions-automata",
+          "label": "Regular expressions and finite automata",
+          "bankCoverage": "explicit",
+          "bankTopicKeys": [
+            "theory-of-computation/regular-expression",
+            "theory-of-computation/finite-automata"
+          ]
+        },
+        {
+          "id": "cfg-pda",
+          "label": "Context-free grammars and push-down automata",
+          "bankCoverage": "explicit",
+          "bankTopicKeys": [
+            "theory-of-computation/context-free-grammar",
+            "theory-of-computation/push-down-automata"
+          ]
+        },
+        {
+          "id": "language-classes",
+          "label": "Regular and context-free languages",
+          "bankCoverage": "explicit",
+          "bankTopicKeys": [
+            "theory-of-computation/regular-language",
+            "theory-of-computation/context-free-language",
+            "theory-of-computation/regular-grammar"
+          ]
+        },
+        {
+          "id": "pumping-lemma",
+          "label": "Pumping lemma",
+          "bankCoverage": "broad",
+          "bankTopicKeys": [
+            "theory-of-computation/regular-language",
+            "theory-of-computation/context-free-language"
+          ]
+        },
+        {
+          "id": "turing-undecidability",
+          "label": "Turing machines and undecidability",
+          "bankCoverage": "explicit",
+          "bankTopicKeys": [
+            "theory-of-computation/turing-machine",
+            "theory-of-computation/undecidability",
+            "theory-of-computation/recursive-language"
+          ]
+        }
+      ],
+      "supporting": [],
+      "historical": []
+    },
+    {
+      "subjectId": "compiler-design",
+      "officialCurrent": [
+        {
+          "id": "lexical-analysis",
+          "label": "Lexical analysis",
+          "bankCoverage": "explicit",
+          "bankTopicKeys": ["compiler-design/lexical-analysis"]
+        },
+        {
+          "id": "parsing",
+          "label": "Parsing",
+          "bankCoverage": "explicit",
+          "bankTopicKeys": ["compiler-design/parsing"]
+        },
+        {
+          "id": "syntax-directed-translation",
+          "label": "Syntax-directed translation",
+          "bankCoverage": "explicit",
+          "bankTopicKeys": ["compiler-design/syntax-directed-translation"]
+        },
+        {
+          "id": "runtime-environments",
+          "label": "Runtime environments",
+          "bankCoverage": "explicit",
+          "bankTopicKeys": ["compiler-design/runtime-environment"]
+        },
+        {
+          "id": "intermediate-code",
+          "label": "Intermediate code generation",
+          "bankCoverage": "explicit",
+          "bankTopicKeys": ["compiler-design/intermediate-code-generation"]
+        },
+        {
+          "id": "local-optimisation",
+          "label": "Local optimisation",
+          "bankCoverage": "review-required",
+          "bankTopicKeys": ["compiler-design/matching"]
+        },
+        {
+          "id": "data-flow",
+          "label": "Data-flow analyses: constant propagation, liveness analysis and common-subexpression elimination",
+          "bankCoverage": "review-required",
+          "bankTopicKeys": ["compiler-design/matching"]
+        }
+      ],
+      "supporting": [],
+      "historical": [
+        {
+          "id": "matching-label",
+          "label": "Matching",
+          "bankTopicKeys": ["compiler-design/matching"],
+          "reason": "The label is not an official topic and conflates optimization/data-flow questions; rows require content review before relabeling."
+        }
+      ]
+    },
+    {
+      "subjectId": "operating-systems",
+      "officialCurrent": [
+        {
+          "id": "system-calls",
+          "label": "System calls",
+          "bankCoverage": "explicit",
+          "bankTopicKeys": ["operating-systems/system-call"]
+        },
+        {
+          "id": "processes-threads",
+          "label": "Processes and threads",
+          "bankCoverage": "explicit",
+          "bankTopicKeys": ["operating-systems/process", "operating-systems/thread"]
+        },
+        {
+          "id": "ipc",
+          "label": "Inter-process communication",
+          "bankCoverage": "missing",
+          "bankTopicKeys": []
+        },
+        {
+          "id": "concurrency-synchronization",
+          "label": "Concurrency and synchronization",
+          "bankCoverage": "explicit",
+          "bankTopicKeys": ["operating-systems/process-synchronization"]
+        },
+        {
+          "id": "deadlock",
+          "label": "Deadlock",
+          "bankCoverage": "explicit",
+          "bankTopicKeys": ["operating-systems/deadlock"]
+        },
+        {
+          "id": "scheduling",
+          "label": "CPU and I/O scheduling",
+          "bankCoverage": "broad",
+          "bankTopicKeys": ["operating-systems/cpu-scheduling", "operating-systems/disk-scheduling"]
+        },
+        {
+          "id": "memory",
+          "label": "Memory management and virtual memory",
+          "bankCoverage": "broad",
+          "bankTopicKeys": ["operating-systems/memory-management"]
+        },
+        {
+          "id": "file-systems",
+          "label": "File systems",
+          "bankCoverage": "explicit",
+          "bankTopicKeys": ["operating-systems/file-systems"]
+        }
+      ],
+      "supporting": [],
+      "historical": []
+    },
+    {
+      "subjectId": "databases",
+      "officialCurrent": [
+        {
+          "id": "er-model",
+          "label": "ER model",
+          "bankCoverage": "explicit",
+          "bankTopicKeys": ["databases/er-model"]
+        },
+        {
+          "id": "relational-model",
+          "label": "Relational model: relational algebra, tuple calculus and SQL",
+          "bankCoverage": "explicit",
+          "bankTopicKeys": [
+            "databases/relational-schema",
+            "databases/relational-algebra",
+            "databases/tuple-calculus",
+            "databases/sql"
+          ]
+        },
+        {
+          "id": "integrity-normal-forms",
+          "label": "Integrity constraints and normal forms",
+          "bankCoverage": "explicit",
+          "bankTopicKeys": ["databases/integrity-constraints", "databases/normal-form"]
+        },
+        {
+          "id": "file-organization",
+          "label": "File organization",
+          "bankCoverage": "broad",
+          "bankTopicKeys": ["databases/file-system"]
+        },
+        {
+          "id": "indexing",
+          "label": "Indexing, including B and B+ trees",
+          "bankCoverage": "broad",
+          "bankTopicKeys": [
+            "databases/file-system",
+            "data-structure/b-tree",
+            "data-structure/b-plus-tree"
+          ]
+        },
+        {
+          "id": "transactions-concurrency",
+          "label": "Transactions and concurrency control",
+          "bankCoverage": "broad",
+          "bankTopicKeys": ["databases/transactions"]
+        }
+      ],
+      "supporting": [
+        {
+          "id": "recovery-mvcc",
+          "label": "Recovery and MVCC extensions",
+          "bankTopicKeys": [],
+          "reason": "Useful database depth; not named explicitly in the official 2027 CS syllabus."
+        }
+      ],
+      "historical": []
+    },
+    {
+      "subjectId": "computer-networks",
+      "officialCurrent": [
+        {
+          "id": "layering",
+          "label": "Principles of layering",
+          "bankCoverage": "broad",
+          "bankTopicKeys": ["computer-networks/osi-layer"]
+        },
+        {
+          "id": "switching-performance",
+          "label": "Circuit, packet and virtual-circuit switching, and performance metrics",
+          "bankCoverage": "missing",
+          "bankTopicKeys": []
+        },
+        {
+          "id": "data-link",
+          "label": "Data-link error detection, Medium Access Control and Ethernet",
+          "bankCoverage": "broad",
+          "bankTopicKeys": ["computer-networks/data-link-layer"]
+        },
+        {
+          "id": "routing",
+          "label": "Distance-vector and link-state routing",
+          "bankCoverage": "broad",
+          "bankTopicKeys": ["computer-networks/network-layer-protocol"]
+        },
+        {
+          "id": "ipv4",
+          "label": "IPv4 fragmentation, CIDR notation and Network Address Translation",
+          "bankCoverage": "broad",
+          "bankTopicKeys": ["computer-networks/network-layer-protocol"]
+        },
+        {
+          "id": "tcp",
+          "label": "TCP flow control and congestion control, and the socket API",
+          "bankCoverage": "broad",
+          "bankTopicKeys": ["computer-networks/transport-layer-protocol"]
+        },
+        {
+          "id": "dns-http",
+          "label": "DNS and HTTP",
+          "bankCoverage": "broad",
+          "bankTopicKeys": ["computer-networks/application-layer-protocols"]
+        }
+      ],
+      "supporting": [
+        {
+          "id": "physical-layer",
+          "label": "Physical-layer detail",
+          "bankTopicKeys": ["computer-networks/physical-layer"],
+          "reason": "Useful prerequisite material, but not named as a standalone topic in the official 2027 CS syllabus."
+        }
+      ],
+      "historical": [
+        {
+          "id": "network-security",
+          "label": "Network security",
+          "bankTopicKeys": ["computer-networks/network-security"],
+          "reason": "Retained for historical practice; not present in the official 2027 CS syllabus."
+        }
+      ]
+    },
+    {
+      "subjectId": "general-aptitude",
+      "officialCurrent": [
+        {
+          "id": "grammar",
+          "label": "Basic English grammar: tenses, articles, adjectives, prepositions, conjunctions, verb-noun agreement and other parts of speech",
+          "bankCoverage": "broad",
+          "bankTopicKeys": ["general-aptitude/general-aptitude"]
+        },
+        {
+          "id": "vocabulary",
+          "label": "Words, idioms and phrases in context",
+          "bankCoverage": "broad",
+          "bankTopicKeys": ["general-aptitude/general-aptitude"]
+        },
+        {
+          "id": "reading-sequencing",
+          "label": "Reading and comprehension, and narrative sequencing",
+          "bankCoverage": "broad",
+          "bankTopicKeys": ["general-aptitude/general-aptitude"]
+        },
+        {
+          "id": "data-interpretation",
+          "label": "Data interpretation using graphs, 2D and 3D plots, maps and tables",
+          "bankCoverage": "broad",
+          "bankTopicKeys": ["general-aptitude/general-aptitude"]
+        },
+        {
+          "id": "numerical-computation",
+          "label": "Ratios, percentages, powers, exponents, logarithms, permutations, combinations and series",
+          "bankCoverage": "broad",
+          "bankTopicKeys": ["general-aptitude/general-aptitude"]
+        },
+        {
+          "id": "geometry-statistics",
+          "label": "Mensuration, geometry, elementary statistics and probability",
+          "bankCoverage": "broad",
+          "bankTopicKeys": ["general-aptitude/general-aptitude"]
+        },
+        {
+          "id": "logic",
+          "label": "Deduction and induction",
+          "bankCoverage": "broad",
+          "bankTopicKeys": ["general-aptitude/general-aptitude"]
+        },
+        {
+          "id": "analogy-numerical-reasoning",
+          "label": "Analogy, numerical relations and reasoning",
+          "bankCoverage": "broad",
+          "bankTopicKeys": ["general-aptitude/general-aptitude"]
+        },
+        {
+          "id": "shape-transformations",
+          "label": "Translation, rotation, scaling, mirroring, assembling and grouping of shapes",
+          "bankCoverage": "broad",
+          "bankTopicKeys": ["general-aptitude/general-aptitude"]
+        },
+        {
+          "id": "spatial-patterns",
+          "label": "Paper folding, cutting, and patterns in two and three dimensions",
+          "bankCoverage": "broad",
+          "bankTopicKeys": ["general-aptitude/general-aptitude"]
+        }
+      ],
+      "supporting": [],
+      "historical": []
+    }
+  ],
+  "bankTaxonomy": [
+    {
+      "bankSubjectSlug": "general-aptitude",
+      "canonicalSubjectId": "general-aptitude",
+      "current": ["general-aptitude"],
+      "supporting": [],
+      "historical": [],
+      "reviewRequired": []
+    },
+    {
+      "bankSubjectSlug": "discrete-mathematics",
+      "canonicalSubjectId": "discrete-mathematics",
+      "current": [
+        "propositional-logic",
+        "set-theory",
+        "relation",
+        "functions",
+        "lattice",
+        "group-theory",
+        "graph-theory",
+        "combination",
+        "recurrence"
+      ],
+      "supporting": ["planar-graph"],
+      "historical": [],
+      "reviewRequired": []
+    },
+    {
+      "bankSubjectSlug": "engineering-mathematics",
+      "canonicalSubjectId": "engineering-mathematics",
+      "current": ["linear-algebra", "calculus", "probability-statistics"],
+      "supporting": [],
+      "historical": [],
+      "reviewRequired": []
+    },
+    {
+      "bankSubjectSlug": "digital-logic",
+      "canonicalSubjectId": "digital-logic",
+      "current": [
+        "number-system",
+        "boolean-algebra",
+        "combinational-circuit",
+        "sequential-circuit"
+      ],
+      "supporting": [],
+      "historical": [],
+      "reviewRequired": []
+    },
+    {
+      "bankSubjectSlug": "coa",
+      "canonicalSubjectId": "coa",
+      "current": [
+        "machine-instruction",
+        "addressing-modes",
+        "alu-data-path-and-control-unit",
+        "io-interface",
+        "interrupt",
+        "pipeline-processor",
+        "cache-memory",
+        "memory-chip-design"
+      ],
+      "supporting": ["secondary-storage"],
+      "historical": [],
+      "reviewRequired": []
+    },
+    {
+      "bankSubjectSlug": "c-programming",
+      "canonicalSubjectId": "programming-data-structures",
+      "current": [
+        "arithmetic-operation",
+        "conditional-statement",
+        "loops",
+        "array-and-pointer",
+        "function"
+      ],
+      "supporting": [],
+      "historical": [],
+      "reviewRequired": []
+    },
+    {
+      "bankSubjectSlug": "data-structure",
+      "canonicalSubjectId": "programming-data-structures",
+      "current": [
+        "array",
+        "linked-list",
+        "stack",
+        "queue",
+        "binary-tree",
+        "binary-search-tree",
+        "heap-tree",
+        "n-ary-tree"
+      ],
+      "supporting": ["avl-tree"],
+      "historical": [],
+      "reviewRequired": ["b-tree", "b-plus-tree", "hashing"]
+    },
+    {
+      "bankSubjectSlug": "algorithms",
+      "canonicalSubjectId": "algorithms",
+      "current": [
+        "asymptotic-notation",
+        "divide-and-conquer",
+        "sorting",
+        "greedy-technique",
+        "minimum-spanning-tree",
+        "shortest-path",
+        "graph-traversal",
+        "dynamic-programming"
+      ],
+      "supporting": ["recurrence-relation"],
+      "historical": [],
+      "reviewRequired": []
+    },
+    {
+      "bankSubjectSlug": "theory-of-computation",
+      "canonicalSubjectId": "theory-of-computation",
+      "current": [
+        "regular-expression",
+        "regular-grammar",
+        "regular-language",
+        "finite-automata",
+        "context-free-grammar",
+        "context-free-language",
+        "push-down-automata",
+        "recursive-language",
+        "turing-machine",
+        "undecidability"
+      ],
+      "supporting": [],
+      "historical": [],
+      "reviewRequired": []
+    },
+    {
+      "bankSubjectSlug": "compiler-design",
+      "canonicalSubjectId": "compiler-design",
+      "current": [
+        "lexical-analysis",
+        "parsing",
+        "syntax-directed-translation",
+        "intermediate-code-generation",
+        "runtime-environment"
+      ],
+      "supporting": [],
+      "historical": [],
+      "reviewRequired": ["matching"]
+    },
+    {
+      "bankSubjectSlug": "operating-systems",
+      "canonicalSubjectId": "operating-systems",
+      "current": [
+        "process",
+        "cpu-scheduling",
+        "process-synchronization",
+        "deadlock",
+        "memory-management",
+        "file-systems",
+        "disk-scheduling",
+        "system-call",
+        "thread"
+      ],
+      "supporting": [],
+      "historical": [],
+      "reviewRequired": []
+    },
+    {
+      "bankSubjectSlug": "databases",
+      "canonicalSubjectId": "databases",
+      "current": [
+        "er-model",
+        "relational-schema",
+        "relational-algebra",
+        "normal-form",
+        "transactions",
+        "integrity-constraints",
+        "sql",
+        "tuple-calculus",
+        "file-system"
+      ],
+      "supporting": [],
+      "historical": [],
+      "reviewRequired": []
+    },
+    {
+      "bankSubjectSlug": "computer-networks",
+      "canonicalSubjectId": "computer-networks",
+      "current": [
+        "osi-layer",
+        "data-link-layer",
+        "network-layer-protocol",
+        "transport-layer-protocol",
+        "application-layer-protocols"
+      ],
+      "supporting": ["physical-layer"],
+      "historical": ["network-security"],
+      "reviewRequired": []
+    },
+    {
+      "bankSubjectSlug": "other-optional",
+      "canonicalSubjectId": null,
+      "current": [],
+      "supporting": [],
+      "historical": ["software-engineering"],
+      "reviewRequired": []
+    }
+  ],
+  "auditPolicy": {
+    "current": "Directly named by, or a necessary subdivision of, the official 2027 syllabus.",
+    "supporting": "Useful preparation material not named as a standalone official 2027 topic.",
+    "historical": "Retained for provenance and older-paper practice, but excluded from current-syllabus coverage.",
+    "reviewRequired": "Potentially in scope under another subject or a misleading bucket; content review is required before migration.",
+    "scopeLimit": "This registry audits taxonomy scope, not the correctness of every individual question classification."
+  }
+}

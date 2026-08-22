@@ -10,6 +10,10 @@ import {
   PYQ_MANUAL_CLASSIFICATIONS,
   PYQ_TAXONOMY
 } from './pyq-taxonomy.mjs';
+import {
+  verifiedPdfAnswerKeyMark,
+  VERIFIED_PDF_MARK_POLICY_VERSION
+} from './pyq-marks.mjs';
 
 const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(SCRIPT_DIR, '..');
@@ -21,7 +25,14 @@ const payloads = await Promise.all(
     JSON.parse(await readFile(path.join(ROOT, 'public', subject.file), 'utf8'))
   )
 );
-const questions = payloads.flatMap((payload) => payload.questions);
+const inputQuestions = payloads.flatMap((payload) => payload.questions);
+const correctedPdfMarkIds = [];
+const questions = inputQuestions.map((question) => {
+  const verifiedMark = verifiedPdfAnswerKeyMark(question.answerSource);
+  if (verifiedMark == null || question.marks === verifiedMark) return question;
+  correctedPdfMarkIds.push(question.id);
+  return { ...question, marks: verifiedMark };
+});
 const originalIds = new Set(questions.map((question) => question.id));
 const manualClassificationEntries = Object.entries(PYQ_MANUAL_CLASSIFICATIONS);
 
@@ -80,6 +91,39 @@ const subjects = PYQ_TAXONOMY.filter((subject) => grouped.has(subject.slug)).map
   };
 });
 
+const verifiedPdfRows = classified.filter(
+  (question) => verifiedPdfAnswerKeyMark(question.answerSource) != null
+);
+const verifiedPdfMismatches = verifiedPdfRows.filter(
+  (question) => question.marks !== verifiedPdfAnswerKeyMark(question.answerSource)
+);
+const verifiedPdfMarkMetadata = {
+  policyVersion: VERIFIED_PDF_MARK_POLICY_VERSION,
+  authoritativeSourceKind: 'pdf_answer_key',
+  questionCount: verifiedPdfRows.length,
+  oneMarkCount: verifiedPdfRows.filter((question) => question.marks === 1).length,
+  twoMarkCount: verifiedPdfRows.filter((question) => question.marks === 2).length,
+  correctedQuestionIds: [
+    ...new Set([
+      ...(manifest.verifiedPdfMarkMetadata?.correctedQuestionIds ?? []),
+      ...correctedPdfMarkIds
+    ])
+  ].sort()
+};
+if (
+  verifiedPdfMarkMetadata.questionCount !== 130 ||
+  verifiedPdfMarkMetadata.oneMarkCount !== 60 ||
+  verifiedPdfMarkMetadata.twoMarkCount !== 70 ||
+  verifiedPdfMismatches.length > 0
+) {
+  throw new Error(
+    `Verified PDF mark invariant failed: ${JSON.stringify({
+      ...verifiedPdfMarkMetadata,
+      mismatchIds: verifiedPdfMismatches.map((question) => question.id)
+    })}`
+  );
+}
+
 for (const subject of subjects) {
   await writeFile(
     path.join(OUTPUT, 'subjects', `${subject.slug}.json`),
@@ -108,9 +152,30 @@ const nextManifest = {
       classified.filter((question) => question.answerStatus === status).length
     ])
   ),
+  verifiedPdfMarkMetadata,
   subjects
 };
 await writeFile(manifestPath, `${JSON.stringify(nextManifest, null, 2)}\n`);
+const provenancePath = path.join(OUTPUT, 'provenance.json');
+const provenance = JSON.parse(await readFile(provenancePath, 'utf8'));
+await writeFile(
+  provenancePath,
+  `${JSON.stringify(
+    {
+      ...provenance,
+      bankVersion: PYQ_BANK_VERSION,
+      verifiedPdfMarkMetadata,
+      notes: [
+        ...(provenance.notes ?? []).filter(
+          (note) => !String(note).startsWith('For rows backed by a structured PDF answer key')
+        ),
+        'For rows backed by a structured PDF answer key, that key\'s 1/2-mark value is authoritative over contradictory archive tags.'
+      ]
+    },
+    null,
+    2
+  )}\n`
+);
 const outputIds = new Set(classified.map((question) => question.id));
 await writeFile(
   path.join(OUTPUT, 'taxonomy-audit.json'),

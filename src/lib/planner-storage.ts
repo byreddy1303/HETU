@@ -5,6 +5,7 @@
 //   air.planner.<user-id>.YYYY-MM-DD   → DayPlan for that date
 
 import { currentUserId } from '@/stores/auth';
+import { canonicalSubjectLabel, normalizeSubjectIdentity, type SubjectId } from '@/lib/subjects';
 
 const LEGACY_DAY_KEY_PREFIX = 'planner_';
 
@@ -81,6 +82,8 @@ export type Replicate = 'yes' | 'partial' | 'no';
 export interface StudySession {
   id: string;
   subject: string;
+  /** Stable canonical identity; null for Custom... and unknown legacy labels. */
+  subjectId?: SubjectId | null;
   /** When subject === 'Custom...' the free-text name lives here. */
   customSubject?: string;
   /** Planned duration in minutes. */
@@ -194,13 +197,45 @@ function safeSet(key: string, value: unknown): void {
   }
 }
 
+/** Canonicalize known subject aliases without disturbing custom/unknown text. */
+export function normalizeStudySession(session: StudySession): StudySession {
+  if (session.subject === 'Custom...') {
+    return { ...session, subjectId: null };
+  }
+  const legacySnakeId = (session as StudySession & { subject_id?: unknown }).subject_id;
+  const identity = normalizeSubjectIdentity(session.subject, session.subjectId ?? legacySnakeId);
+  return {
+    ...session,
+    subject: identity.label,
+    subjectId: identity.id
+  };
+}
+
+/** Normalize all nested subject identities while retaining every plan/session. */
+export function normalizeDayPlan(plan: DayPlan): DayPlan {
+  return {
+    ...plan,
+    sessions: Array.isArray(plan.sessions)
+      ? plan.sessions.map(normalizeStudySession)
+      : plan.sessions
+  };
+}
+
+function migrateCachedPlan(key: string, plan: DayPlan): DayPlan {
+  const normalized = normalizeDayPlan(plan);
+  if (JSON.stringify(normalized) !== JSON.stringify(plan)) safeSet(key, normalized);
+  return normalized;
+}
+
 export function keyFor(date: string): string {
   return `${dayKeyPrefix()}${date}`;
 }
 
 export function loadDayPlan(date: string): DayPlan | null {
   migrateLegacyDayPlans();
-  return safeGet<DayPlan>(keyFor(date));
+  const key = keyFor(date);
+  const plan = safeGet<DayPlan>(key);
+  return plan ? migrateCachedPlan(key, plan) : null;
 }
 
 /** Return every locally cached Planner day owned by one user. */
@@ -213,7 +248,9 @@ export function loadAllDayPlans(userId: string): DayPlan[] {
       if (!key?.startsWith(prefix)) continue;
       const date = key.slice(prefix.length);
       const plan = safeGet<DayPlan>(key);
-      if (plan?.date === date && Array.isArray(plan.sessions)) plans.push(plan);
+      if (plan?.date === date && Array.isArray(plan.sessions)) {
+        plans.push(migrateCachedPlan(key, plan));
+      }
     }
   } catch {
     return [];
@@ -222,14 +259,14 @@ export function loadAllDayPlans(userId: string): DayPlan[] {
 }
 
 export function saveDayPlan(plan: DayPlan): DayPlan {
-  const saved = { ...plan, updatedAt: new Date().toISOString() };
+  const saved = normalizeDayPlan({ ...plan, updatedAt: new Date().toISOString() });
   safeSet(keyFor(plan.date), saved);
   return saved;
 }
 
 /** Cache a server copy without making it look newer than the server row. */
 export function cacheDayPlan(plan: DayPlan): void {
-  safeSet(keyFor(plan.date), plan);
+  safeSet(keyFor(plan.date), normalizeDayPlan(plan));
 }
 
 export function deleteDayPlan(date: string): void {
@@ -270,7 +307,10 @@ export function summarize(plan: DayPlan | null): DayCellSummary {
   const subjects: string[] = [];
   let totalMin = 0;
   for (const s of plan.sessions) {
-    const label = s.subject === 'Custom...' && s.customSubject ? s.customSubject : s.subject;
+    const label =
+      s.subject === 'Custom...' && s.customSubject
+        ? s.customSubject
+        : canonicalSubjectLabel(s.subject);
     if (label && !subjects.includes(label)) subjects.push(label);
     totalMin += s.durationMin || 0;
   }

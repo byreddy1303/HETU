@@ -1,0 +1,9 @@
+Loaded 356 files (269 code).
+Warning: compute-batches: exports extraction failed for src/lib/queryClient.ts (read error: ENOENT: no such file or directory, open 'src/lib/queryClient.ts') — symbols=[] in neighborMap — cross-batch edges to this file limited to file-level
+Warning: compute-batches: community size 56 > max 35 — splitting via alphabetical chunking — modularity may decrease
+Warning: compute-batches: community size 47 > max 35 — splitting via alphabetical chunking — modularity may decrease
+Warning: compute-batches: community size 53 > max 35 — splitting via alphabetical chunking — modularity may decrease
+Info: compute-batches: merged 51 small batches (54 files) into 3 misc batches — singletons and orphans consolidated
+Warning: compute-batches: neighborMap for src/lib/utils.ts has high 1-hop degree 78 — exceeds soft cap of 50 — keeping top 50 cross-batch entries (9 dropped by degree sort)
+Warning: compute-batches: neighborMap for src/types/index.ts has high 1-hop degree 66 — exceeds soft cap of 50 — keeping top 50 cross-batch entries (2 dropped by degree sort)
+Wrote 5 batches (sizes: max=5, min=1) to .ua/intermediate/batches.json

@@ -2,7 +2,7 @@ import type { FormulaRow, PyqAttemptRow, QuestionRow, ReattemptRow } from '@/typ
 import type { DayPlan } from '@/lib/planner-storage';
 import { DEFAULT_TARGET_TIME_SEC, MARKS_TARGET_SEC } from '@/lib/constants';
 import { plannerBlockHref } from '@/lib/planner-execution';
-import { pyqJournalQuestionId } from '@/lib/pyq-session';
+import { pyqSourceAttemptForJournalQuestion } from '@/lib/pyq-session';
 
 export type DoNowKind = 'reattempt' | 'analysis' | 'guess' | 'slow' | 'formula' | 'planned';
 
@@ -49,11 +49,18 @@ export function buildDoNowQueue(args: {
     });
   }
 
-  const questionIds = new Set(args.questions.map((question) => question.id));
   const latest = latestAttempts(args.pyqAttempts);
+  const analyzedAttemptIds = new Set<string>();
+  for (const question of args.questions) {
+    if (question.source_pyq_attempt_id) {
+      analyzedAttemptIds.add(question.source_pyq_attempt_id);
+      continue;
+    }
+    const source = pyqSourceAttemptForJournalQuestion(question, args.pyqAttempts);
+    if (source) analyzedAttemptIds.add(source.id);
+  }
   const unanalyzed = latest.filter(
-    (attempt) =>
-      attempt.mark_correct === false && !questionIds.has(pyqJournalQuestionId(attempt.id))
+    (attempt) => attempt.mark_correct === false && !analyzedAttemptIds.has(attempt.id)
   );
   if (unanalyzed.length > 0) {
     items.push({

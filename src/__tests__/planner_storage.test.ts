@@ -60,4 +60,77 @@ describe('Planner local isolation', () => {
     expect(plannerDateFromSearch('?date=2026-02-31')).toBeNull();
     expect(plannerDateFromSearch('?date=tomorrow')).toBeNull();
   });
+
+  it('migrates aliases on read while retaining every session and unknown label', () => {
+    const userId = '11111111-1111-4111-8111-111111111111';
+    const date = '2026-07-24';
+    actAs(userId);
+    const legacy = emptyDayPlan(date);
+    legacy.sessions = [
+      {
+        id: 'coa',
+        subject: 'Computer Organization',
+        durationMin: 60,
+        mode: 'Deep Study',
+        priority: 'P2 High',
+        target: 'Pipeline'
+      },
+      {
+        id: 'unknown',
+        subject: 'Software Engineering',
+        durationMin: 30,
+        mode: 'Revision',
+        priority: 'P4 Low',
+        target: 'Historical topic'
+      }
+    ];
+    localStorage.setItem(keyFor(date), JSON.stringify(legacy));
+
+    const migrated = loadDayPlan(date);
+
+    expect(migrated?.sessions).toHaveLength(2);
+    expect(migrated?.sessions[0]).toMatchObject({ subject: 'COA', subjectId: 'coa' });
+    expect(migrated?.sessions[1]).toMatchObject({
+      subject: 'Software Engineering',
+      subjectId: null
+    });
+    expect(JSON.parse(localStorage.getItem(keyFor(date)) ?? '{}').sessions[0]).toMatchObject({
+      subject: 'COA',
+      subjectId: 'coa'
+    });
+  });
+
+  it('stores split programming aliases under one canonical identity without dropping blocks', () => {
+    actAs('11111111-1111-4111-8111-111111111111');
+    const plan = emptyDayPlan('2026-07-25');
+    plan.sessions = [
+      {
+        id: 'c',
+        subject: 'C Programming',
+        durationMin: 60,
+        mode: 'Deep Study',
+        priority: 'P2 High',
+        target: 'Pointers'
+      },
+      {
+        id: 'ds',
+        subject: 'Data Structures',
+        durationMin: 60,
+        mode: 'Problem Solving',
+        priority: 'P2 High',
+        target: 'Trees'
+      }
+    ];
+
+    const saved = saveDayPlan(plan);
+
+    expect(saved.sessions).toHaveLength(2);
+    expect(saved.sessions.map((session) => session.subject)).toEqual([
+      'Programming & DS',
+      'Programming & DS'
+    ]);
+    expect(
+      saved.sessions.every((session) => session.subjectId === 'programming-data-structures')
+    ).toBe(true);
+  });
 });

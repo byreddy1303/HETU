@@ -3,7 +3,9 @@
 import type { PyqAttemptRow, QuestionRow, SessionRow } from '@/types';
 import { db } from '@/lib/db';
 import { deleteLocal, writeLocalBatch } from '@/lib/sync';
+import { normalizeAttemptEvidence } from '@/lib/attempt-evidence';
 import {
+  legacyPyqJournalQuestionId,
   pyqJournalQuestionId,
   pyqPracticeSessionRow,
   pyqPracticeSubject
@@ -14,9 +16,10 @@ export function practiceQuestionCount(
   questions: QuestionRow[],
   pyqAttempts: PyqAttemptRow[]
 ): number {
-  const pyqJournalIds = new Set(pyqAttempts.map((attempt) => pyqJournalQuestionId(attempt.id)));
-  const nonPyqQuestions = questions.filter((question) => !pyqJournalIds.has(question.id)).length;
-  return nonPyqQuestions + pyqAttempts.length;
+  const ledger = normalizeAttemptEvidence({ attempts: pyqAttempts, questions });
+  const suppressed = new Set(ledger.suppressedJournalQuestionIds);
+  const independentQuestions = questions.filter((question) => !suppressed.has(question.id)).length;
+  return independentQuestions + ledger.counts.pyqAttempts;
 }
 
 /**
@@ -68,8 +71,10 @@ export async function reconcilePyqPracticeSessions(
     }
 
     for (const attempt of sessionAttempts) {
-      const journalId = pyqJournalQuestionId(attempt.id);
-      const journalRow = questionById.get(journalId);
+      const journalRow =
+        questions.find((question) => question.source_pyq_attempt_id === attempt.id) ??
+        questionById.get(pyqJournalQuestionId(attempt.id)) ??
+        questionById.get(legacyPyqJournalQuestionId(attempt.id));
       if (journalRow && journalRow.session_id !== pyqSession.id) {
         const regrouped: QuestionRow = { ...journalRow, session_id: pyqSession.id };
         writes.push({

@@ -7,6 +7,12 @@ import process from 'node:process';
 import { fileURLToPath } from 'node:url';
 import { JSDOM } from 'jsdom';
 import { classifyPyqQuestion, PYQ_BANK_VERSION, PYQ_TAXONOMY } from './pyq-taxonomy.mjs';
+import {
+  isMarksMetadataTag,
+  marksFromQuestionMetadata,
+  verifiedPdfAnswerKeyMark,
+  VERIFIED_PDF_MARK_POLICY_VERSION
+} from './pyq-marks.mjs';
 
 const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(SCRIPT_DIR, '..');
@@ -217,17 +223,11 @@ function answerStatus(type, hasAnswer, unsupported) {
   return 'available';
 }
 
-function marksFromTags(tags) {
-  if (tags.includes('one-mark')) return 1;
-  if (tags.includes('two-marks')) return 2;
-  return null;
-}
-
 function cleanTags(tags) {
   const ignored =
-    /^(?:gate|isro|barc|ugcnet|pgee|tifr|easy$|normal$|hard$|one-mark$|two-marks$|non-gate|out-of|subjective$|descriptive$)/i;
+    /^(?:gate|isro|barc|ugcnet|pgee|tifr|easy$|normal$|hard$|non-gate|out-of|subjective$|descriptive$)/i;
   return [...new Set((tags ?? []).map((tag) => String(tag).trim()).filter(Boolean))]
-    .filter((tag) => !ignored.test(tag))
+    .filter((tag) => !ignored.test(tag) && !isMarksMetadataTag(tag))
     .slice(0, 8);
 }
 
@@ -893,7 +893,9 @@ async function main() {
       subject,
       subjectSlug,
       subtopics: tags,
-      marks: marksFromTags(detail.tags ?? source.tags ?? []),
+      // The official PDF key is authoritative when GateQA exposes mutually
+      // contradictory one-mark/two-marks tags (notably in the 2026 papers).
+      marks: marksFromQuestionMetadata(detail.tags ?? source.tags ?? [], answerMeta?.source),
       type,
       answer: answerMeta?.answer ?? null,
       tolerance: answerMeta?.tolerance ?? null,
@@ -1000,6 +1002,16 @@ async function main() {
       questions.filter((question) => question.answerStatus === status).length
     ])
   );
+  const verifiedPdfMarkRows = questions.filter(
+    (question) => verifiedPdfAnswerKeyMark(question.answerSource) != null
+  );
+  const verifiedPdfMarkMetadata = {
+    policyVersion: VERIFIED_PDF_MARK_POLICY_VERSION,
+    authoritativeSourceKind: 'pdf_answer_key',
+    questionCount: verifiedPdfMarkRows.length,
+    oneMarkCount: verifiedPdfMarkRows.filter((question) => question.marks === 1).length,
+    twoMarkCount: verifiedPdfMarkRows.filter((question) => question.marks === 2).length
+  };
   const manifest = {
     bankVersion: PYQ_BANK_VERSION,
     generatedAt: new Date().toISOString(),
@@ -1011,6 +1023,7 @@ async function main() {
     questionCount: questions.length,
     imageCount: imageMap.size + bundledImages.size,
     answerStatuses,
+    verifiedPdfMarkMetadata,
     years,
     subjects
   };
@@ -1020,6 +1033,7 @@ async function main() {
     `${JSON.stringify(
       {
         bankVersion: PYQ_BANK_VERSION,
+        verifiedPdfMarkMetadata,
         sources: [
           {
             name: 'GateQA',
@@ -1051,6 +1065,7 @@ async function main() {
           'Question content is bundled for the private, invite-only HETU practice experience.',
           'ECE and EE supplements are restricted to the project topics: Number System, Boolean Algebra, Combinational Circuit, and Sequential Circuit.',
           'Converter, semiconductor-memory, logic-family, microprocessor, communication-code, and architecture questions are excluded.',
+          'For rows backed by a structured PDF answer key, that key\'s 1/2-mark value is authoritative over contradictory archive tags.',
           'AMBIGUOUS, MARKS_TO_ALL, and UNSUPPORTED records are never assigned an invented answer.'
         ]
       },

@@ -1,0 +1,2995 @@
+{
+  "scriptCompleted": true,
+  "filesAnalyzed": 4,
+  "filesSkipped": [],
+  "analysisOutcomes": {
+    "structure": {
+      "succeeded": 4,
+      "failed": 0
+    },
+    "callGraph": {
+      "succeeded": 4,
+      "failed": 0,
+      "skipped": 0
+    }
+  },
+  "results": [
+    {
+      "path": "src/lib/sync.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 242,
+      "nonEmptyLines": 215,
+      "functions": [
+        {
+          "name": "isSyncEnabled",
+          "startLine": 27,
+          "endLine": 29,
+          "params": []
+        },
+        {
+          "name": "trackLocalWrite",
+          "startLine": 31,
+          "endLine": 38,
+          "params": [
+            "operation"
+          ]
+        },
+        {
+          "name": "waitForLocalWrites",
+          "startLine": 40,
+          "endLine": 44,
+          "params": []
+        },
+        {
+          "name": "writeLocal",
+          "startLine": 47,
+          "endLine": 54,
+          "params": [
+            "name",
+            "row"
+          ]
+        },
+        {
+          "name": "writeLocalBatch",
+          "startLine": 56,
+          "endLine": 71,
+          "params": [
+            "rows"
+          ]
+        },
+        {
+          "name": "deleteLocal",
+          "startLine": 74,
+          "endLine": 85,
+          "params": [
+            "name",
+            "id"
+          ]
+        },
+        {
+          "name": "schedulePush",
+          "startLine": 87,
+          "endLine": 91,
+          "params": [
+            "delayMs"
+          ]
+        },
+        {
+          "name": "flushPushQueue",
+          "startLine": 94,
+          "endLine": 145,
+          "params": []
+        },
+        {
+          "name": "pullAll",
+          "startLine": 148,
+          "endLine": 198,
+          "params": [
+            "userId"
+          ]
+        },
+        {
+          "name": "onOnline",
+          "startLine": 200,
+          "endLine": 203,
+          "params": []
+        },
+        {
+          "name": "onFocus",
+          "startLine": 205,
+          "endLine": 208,
+          "params": []
+        },
+        {
+          "name": "resumeSync",
+          "startLine": 211,
+          "endLine": 214,
+          "params": []
+        },
+        {
+          "name": "initSync",
+          "startLine": 217,
+          "endLine": 228,
+          "params": [
+            "userId"
+          ]
+        },
+        {
+          "name": "stopSync",
+          "startLine": 230,
+          "endLine": 235,
+          "params": []
+        },
+        {
+          "name": "_enableForTests",
+          "startLine": 238,
+          "endLine": 242,
+          "params": [
+            "userId"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "isSyncEnabled",
+          "line": 27,
+          "isDefault": false
+        },
+        {
+          "name": "writeLocal",
+          "line": 47,
+          "isDefault": false
+        },
+        {
+          "name": "writeLocalBatch",
+          "line": 56,
+          "isDefault": false
+        },
+        {
+          "name": "deleteLocal",
+          "line": 74,
+          "isDefault": false
+        },
+        {
+          "name": "flushPushQueue",
+          "line": 94,
+          "isDefault": false
+        },
+        {
+          "name": "pullAll",
+          "line": 148,
+          "isDefault": false
+        },
+        {
+          "name": "resumeSync",
+          "line": 211,
+          "isDefault": false
+        },
+        {
+          "name": "initSync",
+          "line": 217,
+          "isDefault": false
+        },
+        {
+          "name": "stopSync",
+          "line": 230,
+          "isDefault": false
+        },
+        {
+          "name": "_enableForTests",
+          "line": 238,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "trackLocalWrite",
+          "callee": "localWritesInFlight.add",
+          "lineNumber": 32
+        },
+        {
+          "caller": "trackLocalWrite",
+          "callee": "operation.then",
+          "lineNumber": 33
+        },
+        {
+          "caller": "trackLocalWrite",
+          "callee": "localWritesInFlight.delete",
+          "lineNumber": 34
+        },
+        {
+          "caller": "trackLocalWrite",
+          "callee": "localWritesInFlight.delete",
+          "lineNumber": 35
+        },
+        {
+          "caller": "waitForLocalWrites",
+          "callee": "Promise.allSettled",
+          "lineNumber": 42
+        },
+        {
+          "caller": "writeLocal",
+          "callee": "trackLocalWrite",
+          "lineNumber": 48
+        },
+        {
+          "caller": "writeLocal",
+          "callee": "(async () => {\n      await table(name).put({ ...row, sync_status: syncEnabled ? 'pending' : 'synced' });\n      if (syncEnabled) schedulePush(0);\n    })",
+          "lineNumber": 49
+        },
+        {
+          "caller": "writeLocal",
+          "callee": "table(name).put",
+          "lineNumber": 50
+        },
+        {
+          "caller": "writeLocal",
+          "callee": "table",
+          "lineNumber": 50
+        },
+        {
+          "caller": "writeLocal",
+          "callee": "schedulePush",
+          "lineNumber": 51
+        },
+        {
+          "caller": "writeLocalBatch",
+          "callee": "Promise.resolve",
+          "lineNumber": 59
+        },
+        {
+          "caller": "writeLocalBatch",
+          "callee": "trackLocalWrite",
+          "lineNumber": 60
+        },
+        {
+          "caller": "writeLocalBatch",
+          "callee": "(async () => {\n      const targets = [...new Set(rows.map(({ name }) => name))].map((name) => table(name));\n      await db.transaction('rw', targets, async () => {\n        for (const { name, row } of rows) {\n          await table(name).put({ ...row, sync_status: syncEnabled ? 'pending' : 'synced' });\n        }\n      });\n      if (syncEnabled) schedulePush(0);\n    })",
+          "lineNumber": 61
+        },
+        {
+          "caller": "writeLocalBatch",
+          "callee": "[...new Set(rows.map(({ name }) => name))].map",
+          "lineNumber": 62
+        },
+        {
+          "caller": "writeLocalBatch",
+          "callee": "rows.map",
+          "lineNumber": 62
+        },
+        {
+          "caller": "writeLocalBatch",
+          "callee": "table",
+          "lineNumber": 62
+        },
+        {
+          "caller": "writeLocalBatch",
+          "callee": "db.transaction",
+          "lineNumber": 63
+        },
+        {
+          "caller": "writeLocalBatch",
+          "callee": "table(name).put",
+          "lineNumber": 65
+        },
+        {
+          "caller": "writeLocalBatch",
+          "callee": "table",
+          "lineNumber": 65
+        },
+        {
+          "caller": "writeLocalBatch",
+          "callee": "schedulePush",
+          "lineNumber": 68
+        },
+        {
+          "caller": "deleteLocal",
+          "callee": "trackLocalWrite",
+          "lineNumber": 75
+        },
+        {
+          "caller": "deleteLocal",
+          "callee": "(async () => {\n      await table(name).delete(id);\n      if (!syncEnabled) return;\n      const queue =\n        ((await db.meta.get('delete_queue'))?.value as QueuedDelete[] | undefined) ?? [];\n      await db.meta.put({ key: 'delete_queue', value: [...queue, { table: name, id }] });\n      schedulePush(0);\n    })",
+          "lineNumber": 76
+        },
+        {
+          "caller": "deleteLocal",
+          "callee": "table(name).delete",
+          "lineNumber": 77
+        },
+        {
+          "caller": "deleteLocal",
+          "callee": "table",
+          "lineNumber": 77
+        },
+        {
+          "caller": "deleteLocal",
+          "callee": "db.meta.get",
+          "lineNumber": 80
+        },
+        {
+          "caller": "deleteLocal",
+          "callee": "db.meta.put",
+          "lineNumber": 81
+        },
+        {
+          "caller": "deleteLocal",
+          "callee": "schedulePush",
+          "lineNumber": 82
+        },
+        {
+          "caller": "schedulePush",
+          "callee": "clearTimeout",
+          "lineNumber": 89
+        },
+        {
+          "caller": "schedulePush",
+          "callee": "setTimeout",
+          "lineNumber": 90
+        },
+        {
+          "caller": "schedulePush",
+          "callee": "flushPushQueue",
+          "lineNumber": 90
+        },
+        {
+          "caller": "flushPushQueue",
+          "callee": "Promise.resolve",
+          "lineNumber": 95
+        },
+        {
+          "caller": "flushPushQueue",
+          "callee": "Promise.resolve",
+          "lineNumber": 96
+        },
+        {
+          "caller": "flushPushQueue",
+          "callee": "pushInFlight.then",
+          "lineNumber": 101
+        },
+        {
+          "caller": "flushPushQueue",
+          "callee": "flushPushQueue",
+          "lineNumber": 101
+        },
+        {
+          "caller": "flushPushQueue",
+          "callee": "(async () => {\n    await waitForLocalWrites();\n    let hadError = false;\n    for (const name of SYNCED_TABLES) {\n      const rows = await table(name).where('sync_status').anyOf('pending', 'error').toArray();\n      if (rows.length === 0) continue;\n      const payload = rows.map(({ sync_status: _s, ...rest }) => rest);\n      const { error } = await supabase.from(name).upsert(payload);\n      if (error) {\n        hadError = true;\n        console.warn(`[sync] push failed for ${name}: ${error.message}`);\n        break; // FK order matters — do not push child tables past a failed parent\n      }\n      await table(name).bulkPut(rows.map((r) => ({ ...r, sync_status: 'synced' as const })));\n    }\n\n    if (!hadError) {\n      const queue =\n        ((await db.meta.get('delete_queue'))?.value as QueuedDelete[] | undefined) ?? [];\n      const remaining: QueuedDelete[] = [];\n      for (const d of queue) {\n        const { error } = await supabase.from(d.table).delete().eq('id', d.id);\n        if (error) {\n          console.warn(`[sync] delete failed for ${d.table}/${d.id}: ${error.message}`);\n          remaining.push(d);\n          hadError = true;\n        }\n      }\n      await db.meta.put({ key: 'delete_queue', value: remaining });\n    }\n\n    if (hadError) {\n      backoffMs = Math.min(backoffMs * 2, BACKOFF_MAX_MS);\n      schedulePush(backoffMs);\n    } else {\n      backoffMs = 2000;\n    }\n  })().finally",
+          "lineNumber": 103
+        },
+        {
+          "caller": "flushPushQueue",
+          "callee": "(async () => {\n    await waitForLocalWrites();\n    let hadError = false;\n    for (const name of SYNCED_TABLES) {\n      const rows = await table(name).where('sync_status').anyOf('pending', 'error').toArray();\n      if (rows.length === 0) continue;\n      const payload = rows.map(({ sync_status: _s, ...rest }) => rest);\n      const { error } = await supabase.from(name).upsert(payload);\n      if (error) {\n        hadError = true;\n        console.warn(`[sync] push failed for ${name}: ${error.message}`);\n        break; // FK order matters — do not push child tables past a failed parent\n      }\n      await table(name).bulkPut(rows.map((r) => ({ ...r, sync_status: 'synced' as const })));\n    }\n\n    if (!hadError) {\n      const queue =\n        ((await db.meta.get('delete_queue'))?.value as QueuedDelete[] | undefined) ?? [];\n      const remaining: QueuedDelete[] = [];\n      for (const d of queue) {\n        const { error } = await supabase.from(d.table).delete().eq('id', d.id);\n        if (error) {\n          console.warn(`[sync] delete failed for ${d.table}/${d.id}: ${error.message}`);\n          remaining.push(d);\n          hadError = true;\n        }\n      }\n      await db.meta.put({ key: 'delete_queue', value: remaining });\n    }\n\n    if (hadError) {\n      backoffMs = Math.min(backoffMs * 2, BACKOFF_MAX_MS);\n      schedulePush(backoffMs);\n    } else {\n      backoffMs = 2000;\n    }\n  })",
+          "lineNumber": 103
+        },
+        {
+          "caller": "flushPushQueue",
+          "callee": "waitForLocalWrites",
+          "lineNumber": 104
+        },
+        {
+          "caller": "flushPushQueue",
+          "callee": "table(name).where('sync_status').anyOf('pending', 'error').toArray",
+          "lineNumber": 107
+        },
+        {
+          "caller": "flushPushQueue",
+          "callee": "table(name).where('sync_status').anyOf",
+          "lineNumber": 107
+        },
+        {
+          "caller": "flushPushQueue",
+          "callee": "table(name).where",
+          "lineNumber": 107
+        },
+        {
+          "caller": "flushPushQueue",
+          "callee": "table",
+          "lineNumber": 107
+        },
+        {
+          "caller": "flushPushQueue",
+          "callee": "rows.map",
+          "lineNumber": 109
+        },
+        {
+          "caller": "flushPushQueue",
+          "callee": "supabase.from(name).upsert",
+          "lineNumber": 110
+        },
+        {
+          "caller": "flushPushQueue",
+          "callee": "supabase.from",
+          "lineNumber": 110
+        },
+        {
+          "caller": "flushPushQueue",
+          "callee": "console.warn",
+          "lineNumber": 113
+        },
+        {
+          "caller": "flushPushQueue",
+          "callee": "table(name).bulkPut",
+          "lineNumber": 116
+        },
+        {
+          "caller": "flushPushQueue",
+          "callee": "table",
+          "lineNumber": 116
+        },
+        {
+          "caller": "flushPushQueue",
+          "callee": "rows.map",
+          "lineNumber": 116
+        },
+        {
+          "caller": "flushPushQueue",
+          "callee": "db.meta.get",
+          "lineNumber": 121
+        },
+        {
+          "caller": "flushPushQueue",
+          "callee": "supabase.from(d.table).delete().eq",
+          "lineNumber": 124
+        },
+        {
+          "caller": "flushPushQueue",
+          "callee": "supabase.from(d.table).delete",
+          "lineNumber": 124
+        },
+        {
+          "caller": "flushPushQueue",
+          "callee": "supabase.from",
+          "lineNumber": 124
+        },
+        {
+          "caller": "flushPushQueue",
+          "callee": "console.warn",
+          "lineNumber": 126
+        },
+        {
+          "caller": "flushPushQueue",
+          "callee": "remaining.push",
+          "lineNumber": 127
+        },
+        {
+          "caller": "flushPushQueue",
+          "callee": "db.meta.put",
+          "lineNumber": 131
+        },
+        {
+          "caller": "flushPushQueue",
+          "callee": "Math.min",
+          "lineNumber": 135
+        },
+        {
+          "caller": "flushPushQueue",
+          "callee": "schedulePush",
+          "lineNumber": 136
+        },
+        {
+          "caller": "pullAll",
+          "callee": "Promise.resolve",
+          "lineNumber": 149
+        },
+        {
+          "caller": "pullAll",
+          "callee": "(async () => {\n    // Every table is independent on pull. Starting all requests together makes\n    // refresh latency approach the slowest request, not the sum of eight RTTs.\n    const results = await Promise.all(\n      SYNCED_TABLES.map(async (name) => ({\n        name,\n        result: await supabase.from(name).select('*').eq('user_id', userId)\n      }))\n    );\n\n    // A sign-out/user switch can happen while the network batch is in flight.\n    // Never merge the previous account's response into the newly opened DB.\n    if (!syncEnabled || currentUserId !== userId) return;\n\n    await Promise.all(\n      results.map(async ({ name, result: { data, error } }) => {\n        if (error) {\n          console.warn(`[sync] pull failed for ${name}: ${error.message}`);\n          return;\n        }\n        if (!data?.length) return;\n\n        const remoteRows = data as { id: string }[];\n        const target = table(name);\n        await db.transaction('rw', target, async () => {\n          const localRows = await target.bulkGet(remoteRows.map((row) => row.id));\n          const merged = remoteRows.flatMap((remote, index) => {\n            const local = localRows[index];\n            if (local && local.sync_status !== 'synced') {\n              console.info(`[sync] conflict on ${name}/${remote.id}: local pending wins`);\n              return [];\n            }\n            return [{ ...remote, sync_status: 'synced' as const }];\n          });\n          if (merged.length > 0) await target.bulkPut(merged);\n        });\n      })\n    );\n    lastPullAt = Date.now();\n  })().finally",
+          "lineNumber": 153
+        },
+        {
+          "caller": "pullAll",
+          "callee": "(async () => {\n    // Every table is independent on pull. Starting all requests together makes\n    // refresh latency approach the slowest request, not the sum of eight RTTs.\n    const results = await Promise.all(\n      SYNCED_TABLES.map(async (name) => ({\n        name,\n        result: await supabase.from(name).select('*').eq('user_id', userId)\n      }))\n    );\n\n    // A sign-out/user switch can happen while the network batch is in flight.\n    // Never merge the previous account's response into the newly opened DB.\n    if (!syncEnabled || currentUserId !== userId) return;\n\n    await Promise.all(\n      results.map(async ({ name, result: { data, error } }) => {\n        if (error) {\n          console.warn(`[sync] pull failed for ${name}: ${error.message}`);\n          return;\n        }\n        if (!data?.length) return;\n\n        const remoteRows = data as { id: string }[];\n        const target = table(name);\n        await db.transaction('rw', target, async () => {\n          const localRows = await target.bulkGet(remoteRows.map((row) => row.id));\n          const merged = remoteRows.flatMap((remote, index) => {\n            const local = localRows[index];\n            if (local && local.sync_status !== 'synced') {\n              console.info(`[sync] conflict on ${name}/${remote.id}: local pending wins`);\n              return [];\n            }\n            return [{ ...remote, sync_status: 'synced' as const }];\n          });\n          if (merged.length > 0) await target.bulkPut(merged);\n        });\n      })\n    );\n    lastPullAt = Date.now();\n  })",
+          "lineNumber": 153
+        },
+        {
+          "caller": "pullAll",
+          "callee": "Promise.all",
+          "lineNumber": 156
+        },
+        {
+          "caller": "pullAll",
+          "callee": "SYNCED_TABLES.map",
+          "lineNumber": 157
+        },
+        {
+          "caller": "pullAll",
+          "callee": "supabase.from(name).select('*').eq",
+          "lineNumber": 159
+        },
+        {
+          "caller": "pullAll",
+          "callee": "supabase.from(name).select",
+          "lineNumber": 159
+        },
+        {
+          "caller": "pullAll",
+          "callee": "supabase.from",
+          "lineNumber": 159
+        },
+        {
+          "caller": "pullAll",
+          "callee": "Promise.all",
+          "lineNumber": 167
+        },
+        {
+          "caller": "pullAll",
+          "callee": "results.map",
+          "lineNumber": 168
+        },
+        {
+          "caller": "pullAll",
+          "callee": "console.warn",
+          "lineNumber": 170
+        },
+        {
+          "caller": "pullAll",
+          "callee": "table",
+          "lineNumber": 176
+        },
+        {
+          "caller": "pullAll",
+          "callee": "db.transaction",
+          "lineNumber": 177
+        },
+        {
+          "caller": "pullAll",
+          "callee": "target.bulkGet",
+          "lineNumber": 178
+        },
+        {
+          "caller": "pullAll",
+          "callee": "remoteRows.map",
+          "lineNumber": 178
+        },
+        {
+          "caller": "pullAll",
+          "callee": "remoteRows.flatMap",
+          "lineNumber": 179
+        },
+        {
+          "caller": "pullAll",
+          "callee": "console.info",
+          "lineNumber": 182
+        },
+        {
+          "caller": "pullAll",
+          "callee": "target.bulkPut",
+          "lineNumber": 187
+        },
+        {
+          "caller": "pullAll",
+          "callee": "Date.now",
+          "lineNumber": 191
+        },
+        {
+          "caller": "onOnline",
+          "callee": "schedulePush",
+          "lineNumber": 201
+        },
+        {
+          "caller": "onOnline",
+          "callee": "Date.now",
+          "lineNumber": 202
+        },
+        {
+          "caller": "onOnline",
+          "callee": "pullAll",
+          "lineNumber": 202
+        },
+        {
+          "caller": "onFocus",
+          "callee": "Date.now",
+          "lineNumber": 206
+        },
+        {
+          "caller": "onFocus",
+          "callee": "pullAll",
+          "lineNumber": 206
+        },
+        {
+          "caller": "onFocus",
+          "callee": "schedulePush",
+          "lineNumber": 207
+        },
+        {
+          "caller": "resumeSync",
+          "callee": "onFocus",
+          "lineNumber": 213
+        },
+        {
+          "caller": "initSync",
+          "callee": "window.addEventListener",
+          "lineNumber": 223
+        },
+        {
+          "caller": "initSync",
+          "callee": "window.addEventListener",
+          "lineNumber": 224
+        },
+        {
+          "caller": "initSync",
+          "callee": "pullAll",
+          "lineNumber": 226
+        },
+        {
+          "caller": "initSync",
+          "callee": "schedulePush",
+          "lineNumber": 227
+        },
+        {
+          "caller": "stopSync",
+          "callee": "clearTimeout",
+          "lineNumber": 234
+        }
+      ],
+      "metrics": {
+        "importCount": 2,
+        "exportCount": 10,
+        "functionCount": 15,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/pages/Journal.tsx",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 1272,
+      "nonEmptyLines": 1228,
+      "functions": [
+        {
+          "name": "fuzzy",
+          "startLine": 61,
+          "endLine": 67,
+          "params": [
+            "query",
+            "target"
+          ]
+        },
+        {
+          "name": "detectSourceKind",
+          "startLine": 100,
+          "endLine": 106,
+          "params": [
+            "ref"
+          ]
+        },
+        {
+          "name": "detectFormat",
+          "startLine": 109,
+          "endLine": 115,
+          "params": [
+            "ref"
+          ]
+        },
+        {
+          "name": "Detail",
+          "startLine": 117,
+          "endLine": 124,
+          "params": [
+            "{ label, children }"
+          ]
+        },
+        {
+          "name": "Row",
+          "startLine": 126,
+          "endLine": 324,
+          "params": [
+            "{\n  q,\n  onImage,\n  onEdit\n}"
+          ]
+        },
+        {
+          "name": "formatAttemptAnswer",
+          "startLine": 326,
+          "endLine": 330,
+          "params": [
+            "value"
+          ]
+        },
+        {
+          "name": "officialAnswer",
+          "startLine": 332,
+          "endLine": 337,
+          "params": [
+            "attempt"
+          ]
+        },
+        {
+          "name": "attemptResult",
+          "startLine": 339,
+          "endLine": 354,
+          "params": [
+            "attempt"
+          ]
+        },
+        {
+          "name": "PyqAttemptDetail",
+          "startLine": 356,
+          "endLine": 553,
+          "params": [
+            "{\n  attempt,\n  position,\n  journal,\n  onImage,\n  onEdit\n}"
+          ]
+        },
+        {
+          "name": "PyqSessionDetails",
+          "startLine": 555,
+          "endLine": 621,
+          "params": [
+            "{\n  attempts,\n  journalsByAttempt,\n  onImage,\n  onEdit\n}"
+          ]
+        },
+        {
+          "name": "Journal",
+          "startLine": 623,
+          "endLine": 1170,
+          "params": []
+        },
+        {
+          "name": "RecentSessionsCard",
+          "startLine": 1172,
+          "endLine": 1272,
+          "params": [
+            "{\n  sessions,\n  countsBySession,\n  selectedId,\n  onSelect,\n  onEdit,\n  onOpenReview\n}"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "Journal",
+          "line": 623,
+          "isDefault": true
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "fuzzy",
+          "callee": "query.trim().toLowerCase",
+          "lineNumber": 62
+        },
+        {
+          "caller": "fuzzy",
+          "callee": "query.trim",
+          "lineNumber": 62
+        },
+        {
+          "caller": "fuzzy",
+          "callee": "target.toLowerCase",
+          "lineNumber": 63
+        },
+        {
+          "caller": "fuzzy",
+          "callee": "t.includes",
+          "lineNumber": 64
+        },
+        {
+          "caller": "fuzzy",
+          "callee": "t.split",
+          "lineNumber": 65
+        },
+        {
+          "caller": "fuzzy",
+          "callee": "q.split(/\\s+/).every",
+          "lineNumber": 66
+        },
+        {
+          "caller": "fuzzy",
+          "callee": "q.split",
+          "lineNumber": 66
+        },
+        {
+          "caller": "fuzzy",
+          "callee": "words.some",
+          "lineNumber": 66
+        },
+        {
+          "caller": "fuzzy",
+          "callee": "w.includes",
+          "lineNumber": 66
+        },
+        {
+          "caller": "fuzzy",
+          "callee": "levenshtein",
+          "lineNumber": 66
+        },
+        {
+          "caller": "detectSourceKind",
+          "callee": "ref.startsWith",
+          "lineNumber": 103
+        },
+        {
+          "caller": "detectFormat",
+          "callee": "ref.endsWith",
+          "lineNumber": 112
+        },
+        {
+          "caller": "Row",
+          "callee": "useState",
+          "lineNumber": 135
+        },
+        {
+          "caller": "Row",
+          "callee": "subjectInk",
+          "lineNumber": 137
+        },
+        {
+          "caller": "Row",
+          "callee": "detectSourceKind",
+          "lineNumber": 139
+        },
+        {
+          "caller": "Row",
+          "callee": "detectFormat",
+          "lineNumber": 140
+        },
+        {
+          "caller": "Row",
+          "callee": "setOpen",
+          "lineNumber": 146
+        },
+        {
+          "caller": "Row",
+          "callee": "formatDate",
+          "lineNumber": 152
+        },
+        {
+          "caller": "Row",
+          "callee": "q.created_at.slice",
+          "lineNumber": 152
+        },
+        {
+          "caller": "Row",
+          "callee": "cn",
+          "lineNumber": 160
+        },
+        {
+          "caller": "Row",
+          "callee": "e.stopPropagation",
+          "lineNumber": 195
+        },
+        {
+          "caller": "Row",
+          "callee": "onImage",
+          "lineNumber": 196
+        },
+        {
+          "caller": "Row",
+          "callee": "cn",
+          "lineNumber": 212
+        },
+        {
+          "caller": "Row",
+          "callee": "secondsToClock",
+          "lineNumber": 217
+        },
+        {
+          "caller": "Row",
+          "callee": "e.stopPropagation",
+          "lineNumber": 225
+        },
+        {
+          "caller": "Row",
+          "callee": "onEdit",
+          "lineNumber": 226
+        },
+        {
+          "caller": "Row",
+          "callee": "cn",
+          "lineNumber": 235
+        },
+        {
+          "caller": "Row",
+          "callee": "ROOT_CAUSES.find",
+          "lineNumber": 260
+        },
+        {
+          "caller": "Row",
+          "callee": "secondsToClock",
+          "lineNumber": 271
+        },
+        {
+          "caller": "Row",
+          "callee": "secondsToClock",
+          "lineNumber": 273
+        },
+        {
+          "caller": "Row",
+          "callee": "onImage",
+          "lineNumber": 284
+        },
+        {
+          "caller": "Row",
+          "callee": "MARK_DECISIONS.find",
+          "lineNumber": 306
+        },
+        {
+          "caller": "Row",
+          "callee": "cn",
+          "lineNumber": 309
+        },
+        {
+          "caller": "Row",
+          "callee": "onEdit",
+          "lineNumber": 317
+        },
+        {
+          "caller": "formatAttemptAnswer",
+          "callee": "Array.isArray",
+          "lineNumber": 328
+        },
+        {
+          "caller": "formatAttemptAnswer",
+          "callee": "value.join",
+          "lineNumber": 328
+        },
+        {
+          "caller": "formatAttemptAnswer",
+          "callee": "String",
+          "lineNumber": 329
+        },
+        {
+          "caller": "officialAnswer",
+          "callee": "formatAttemptAnswer",
+          "lineNumber": 333
+        },
+        {
+          "caller": "PyqAttemptDetail",
+          "callee": "attemptResult",
+          "lineNumber": 370
+        },
+        {
+          "caller": "PyqAttemptDetail",
+          "callee": "MARK_DECISIONS.find",
+          "lineNumber": 371
+        },
+        {
+          "caller": "PyqAttemptDetail",
+          "callee": "String",
+          "lineNumber": 372
+        },
+        {
+          "caller": "PyqAttemptDetail",
+          "callee": "formatAttemptAnswer",
+          "lineNumber": 379
+        },
+        {
+          "caller": "PyqAttemptDetail",
+          "callee": "cn",
+          "lineNumber": 386
+        },
+        {
+          "caller": "PyqAttemptDetail",
+          "callee": "String(position).padStart",
+          "lineNumber": 391
+        },
+        {
+          "caller": "PyqAttemptDetail",
+          "callee": "String",
+          "lineNumber": 391
+        },
+        {
+          "caller": "PyqAttemptDetail",
+          "callee": "snapshot.subtopics.join",
+          "lineNumber": 408
+        },
+        {
+          "caller": "PyqAttemptDetail",
+          "callee": "cn",
+          "lineNumber": 419
+        },
+        {
+          "caller": "PyqAttemptDetail",
+          "callee": "onImage",
+          "lineNumber": 443
+        },
+        {
+          "caller": "PyqAttemptDetail",
+          "callee": "officialAnswer",
+          "lineNumber": 470
+        },
+        {
+          "caller": "PyqAttemptDetail",
+          "callee": "secondsToClock",
+          "lineNumber": 480
+        },
+        {
+          "caller": "PyqAttemptDetail",
+          "callee": "formatDate",
+          "lineNumber": 487
+        },
+        {
+          "caller": "PyqAttemptDetail",
+          "callee": "onEdit",
+          "lineNumber": 517
+        },
+        {
+          "caller": "PyqAttemptDetail",
+          "callee": "ROOT_CAUSES.find",
+          "lineNumber": 530
+        },
+        {
+          "caller": "PyqSessionDetails",
+          "callee": "attempts.filter",
+          "lineNumber": 566
+        },
+        {
+          "caller": "PyqSessionDetails",
+          "callee": "attempts.filter",
+          "lineNumber": 567
+        },
+        {
+          "caller": "PyqSessionDetails",
+          "callee": "attempts.filter",
+          "lineNumber": 570
+        },
+        {
+          "caller": "PyqSessionDetails",
+          "callee": "plural",
+          "lineNumber": 580
+        },
+        {
+          "caller": "PyqSessionDetails",
+          "callee": "[\n              ['Correct', correct, 'text-success'],\n              ['Incorrect', incorrect, 'text-danger'],\n              ['Skipped', skipped, 'text-warn'],\n              ['Analyzed', journalsByAttempt.size, 'text-accent']\n            ].map",
+          "lineNumber": 587
+        },
+        {
+          "caller": "PyqSessionDetails",
+          "callee": "String",
+          "lineNumber": 593
+        },
+        {
+          "caller": "PyqSessionDetails",
+          "callee": "cn",
+          "lineNumber": 594
+        },
+        {
+          "caller": "PyqSessionDetails",
+          "callee": "attempts.map",
+          "lineNumber": 600
+        },
+        {
+          "caller": "PyqSessionDetails",
+          "callee": "journalsByAttempt.get",
+          "lineNumber": 605
+        },
+        {
+          "caller": "Journal",
+          "callee": "useAuth",
+          "lineNumber": 624
+        },
+        {
+          "caller": "Journal",
+          "callee": "useNavigate",
+          "lineNumber": 626
+        },
+        {
+          "caller": "Journal",
+          "callee": "useSearchParams",
+          "lineNumber": 627
+        },
+        {
+          "caller": "Journal",
+          "callee": "useState",
+          "lineNumber": 628
+        },
+        {
+          "caller": "Journal",
+          "callee": "params.get",
+          "lineNumber": 630
+        },
+        {
+          "caller": "Journal",
+          "callee": "params.get",
+          "lineNumber": 631
+        },
+        {
+          "caller": "Journal",
+          "callee": "params.get",
+          "lineNumber": 632
+        },
+        {
+          "caller": "Journal",
+          "callee": "params.get",
+          "lineNumber": 633
+        },
+        {
+          "caller": "Journal",
+          "callee": "params.get",
+          "lineNumber": 634
+        },
+        {
+          "caller": "Journal",
+          "callee": "params.get",
+          "lineNumber": 635
+        },
+        {
+          "caller": "Journal",
+          "callee": "params.get",
+          "lineNumber": 636
+        },
+        {
+          "caller": "Journal",
+          "callee": "useState",
+          "lineNumber": 638
+        },
+        {
+          "caller": "Journal",
+          "callee": "useState",
+          "lineNumber": 639
+        },
+        {
+          "caller": "Journal",
+          "callee": "useState",
+          "lineNumber": 640
+        },
+        {
+          "caller": "Journal",
+          "callee": "useState",
+          "lineNumber": 641
+        },
+        {
+          "caller": "Journal",
+          "callee": "useState",
+          "lineNumber": 642
+        },
+        {
+          "caller": "Journal",
+          "callee": "useState",
+          "lineNumber": 643
+        },
+        {
+          "caller": "Journal",
+          "callee": "useState",
+          "lineNumber": 644
+        },
+        {
+          "caller": "Journal",
+          "callee": "useEffect",
+          "lineNumber": 648
+        },
+        {
+          "caller": "Journal",
+          "callee": "reconcilePyqPracticeSessions(userId, timeZone).then",
+          "lineNumber": 650
+        },
+        {
+          "caller": "Journal",
+          "callee": "reconcilePyqPracticeSessions",
+          "lineNumber": 650
+        },
+        {
+          "caller": "Journal",
+          "callee": "pruneEmptyFinishedSessions",
+          "lineNumber": 651
+        },
+        {
+          "caller": "openEdit",
+          "callee": "setEditRow",
+          "lineNumber": 656
+        },
+        {
+          "caller": "openEdit",
+          "callee": "setEditDraft",
+          "lineNumber": 657
+        },
+        {
+          "caller": "openEdit",
+          "callee": "draftFromRow",
+          "lineNumber": 657
+        },
+        {
+          "caller": "saveEdit",
+          "callee": "setSaving",
+          "lineNumber": 662
+        },
+        {
+          "caller": "saveEdit",
+          "callee": "applyDraftToRow",
+          "lineNumber": 664
+        },
+        {
+          "caller": "saveEdit",
+          "callee": "writeLocal",
+          "lineNumber": 665
+        },
+        {
+          "caller": "saveEdit",
+          "callee": "setEditRow",
+          "lineNumber": 666
+        },
+        {
+          "caller": "saveEdit",
+          "callee": "setEditDraft",
+          "lineNumber": 667
+        },
+        {
+          "caller": "saveEdit",
+          "callee": "setSaving",
+          "lineNumber": 669
+        },
+        {
+          "caller": "removeRow",
+          "callee": "setDeleting",
+          "lineNumber": 675
+        },
+        {
+          "caller": "removeRow",
+          "callee": "deleteLocal",
+          "lineNumber": 677
+        },
+        {
+          "caller": "removeRow",
+          "callee": "setEditRow",
+          "lineNumber": 678
+        },
+        {
+          "caller": "removeRow",
+          "callee": "setEditDraft",
+          "lineNumber": 679
+        },
+        {
+          "caller": "removeRow",
+          "callee": "setDeleting",
+          "lineNumber": 681
+        },
+        {
+          "caller": "Journal",
+          "callee": "useLiveQuery",
+          "lineNumber": 685
+        },
+        {
+          "caller": "Journal",
+          "callee": "db.questions.where('user_id').equals(userId).sortBy",
+          "lineNumber": 687
+        },
+        {
+          "caller": "Journal",
+          "callee": "db.questions.where('user_id').equals",
+          "lineNumber": 687
+        },
+        {
+          "caller": "Journal",
+          "callee": "db.questions.where",
+          "lineNumber": 687
+        },
+        {
+          "caller": "Journal",
+          "callee": "rows.reverse",
+          "lineNumber": 688
+        },
+        {
+          "caller": "Journal",
+          "callee": "useLiveQuery",
+          "lineNumber": 691
+        },
+        {
+          "caller": "Journal",
+          "callee": "db.pyq_attempts.where('user_id').equals(userId).toArray",
+          "lineNumber": 692
+        },
+        {
+          "caller": "Journal",
+          "callee": "db.pyq_attempts.where('user_id').equals",
+          "lineNumber": 692
+        },
+        {
+          "caller": "Journal",
+          "callee": "db.pyq_attempts.where",
+          "lineNumber": 692
+        },
+        {
+          "caller": "Journal",
+          "callee": "useLiveQuery",
+          "lineNumber": 700
+        },
+        {
+          "caller": "Journal",
+          "callee": "allSessions",
+          "lineNumber": 701
+        },
+        {
+          "caller": "Journal",
+          "callee": "sessionsAll.slice",
+          "lineNumber": 705
+        },
+        {
+          "caller": "Journal",
+          "callee": "useMemo",
+          "lineNumber": 708
+        },
+        {
+          "caller": "Journal",
+          "callee": "map.set",
+          "lineNumber": 711
+        },
+        {
+          "caller": "Journal",
+          "callee": "map.get",
+          "lineNumber": 711
+        },
+        {
+          "caller": "Journal",
+          "callee": "pyqCounts.set",
+          "lineNumber": 716
+        },
+        {
+          "caller": "Journal",
+          "callee": "pyqCounts.get",
+          "lineNumber": 716
+        },
+        {
+          "caller": "Journal",
+          "callee": "map.set",
+          "lineNumber": 718
+        },
+        {
+          "caller": "Journal",
+          "callee": "useDeferredValue",
+          "lineNumber": 722
+        },
+        {
+          "caller": "Journal",
+          "callee": "useMemo",
+          "lineNumber": 723
+        },
+        {
+          "caller": "Journal",
+          "callee": "deferredFilters.pattern.trim",
+          "lineNumber": 724
+        },
+        {
+          "caller": "Journal",
+          "callee": "deferredFilters.trigger.trim",
+          "lineNumber": 725
+        },
+        {
+          "caller": "Journal",
+          "callee": "(questions ?? []).filter",
+          "lineNumber": 727
+        },
+        {
+          "caller": "Journal",
+          "callee": "detectSourceKind",
+          "lineNumber": 748
+        },
+        {
+          "caller": "Journal",
+          "callee": "detectFormat",
+          "lineNumber": 752
+        },
+        {
+          "caller": "Journal",
+          "callee": "question.created_at.slice",
+          "lineNumber": 755
+        },
+        {
+          "caller": "Journal",
+          "callee": "fuzzy",
+          "lineNumber": 758
+        },
+        {
+          "caller": "Journal",
+          "callee": "fuzzy",
+          "lineNumber": 760
+        },
+        {
+          "caller": "Journal",
+          "callee": "Math.max",
+          "lineNumber": 767
+        },
+        {
+          "caller": "Journal",
+          "callee": "Math.ceil",
+          "lineNumber": 767
+        },
+        {
+          "caller": "Journal",
+          "callee": "Math.min",
+          "lineNumber": 768
+        },
+        {
+          "caller": "Journal",
+          "callee": "filtered.slice",
+          "lineNumber": 769
+        },
+        {
+          "caller": "Journal",
+          "callee": "Object.values(f).some",
+          "lineNumber": 770
+        },
+        {
+          "caller": "Journal",
+          "callee": "Object.values",
+          "lineNumber": 770
+        },
+        {
+          "caller": "Journal",
+          "callee": "sessionsAll.find",
+          "lineNumber": 777
+        },
+        {
+          "caller": "Journal",
+          "callee": "useMemo",
+          "lineNumber": 779
+        },
+        {
+          "caller": "Journal",
+          "callee": "pyqAttempts\n      .filter((attempt) => attempt.pyq_session_id === selectedSession.id)\n      .sort",
+          "lineNumber": 781
+        },
+        {
+          "caller": "Journal",
+          "callee": "pyqAttempts\n      .filter",
+          "lineNumber": 781
+        },
+        {
+          "caller": "Journal",
+          "callee": "a.attempted_at.localeCompare",
+          "lineNumber": 785
+        },
+        {
+          "caller": "Journal",
+          "callee": "useMemo",
+          "lineNumber": 788
+        },
+        {
+          "caller": "Journal",
+          "callee": "pyqSourceAttemptForJournalQuestion",
+          "lineNumber": 792
+        },
+        {
+          "caller": "Journal",
+          "callee": "map.set",
+          "lineNumber": 793
+        },
+        {
+          "caller": "set",
+          "callee": "setF",
+          "lineNumber": 799
+        },
+        {
+          "caller": "set",
+          "callee": "setPage",
+          "lineNumber": 800
+        },
+        {
+          "caller": "Journal",
+          "callee": "plural",
+          "lineNumber": 809
+        },
+        {
+          "caller": "Journal",
+          "callee": "plural",
+          "lineNumber": 812
+        },
+        {
+          "caller": "Journal",
+          "callee": "set",
+          "lineNumber": 821
+        },
+        {
+          "caller": "Journal",
+          "callee": "set",
+          "lineNumber": 828
+        },
+        {
+          "caller": "Journal",
+          "callee": "set",
+          "lineNumber": 838
+        },
+        {
+          "caller": "Journal",
+          "callee": "set",
+          "lineNumber": 840
+        },
+        {
+          "caller": "Journal",
+          "callee": "SUBJECTS.map",
+          "lineNumber": 846
+        },
+        {
+          "caller": "Journal",
+          "callee": "subtopicsFor",
+          "lineNumber": 852
+        },
+        {
+          "caller": "Journal",
+          "callee": "set",
+          "lineNumber": 855
+        },
+        {
+          "caller": "Journal",
+          "callee": "subtopicsFor(f.subject).map",
+          "lineNumber": 860
+        },
+        {
+          "caller": "Journal",
+          "callee": "subtopicsFor",
+          "lineNumber": 860
+        },
+        {
+          "caller": "Journal",
+          "callee": "set",
+          "lineNumber": 869
+        },
+        {
+          "caller": "Journal",
+          "callee": "OUTCOMES.map",
+          "lineNumber": 874
+        },
+        {
+          "caller": "Journal",
+          "callee": "set",
+          "lineNumber": 882
+        },
+        {
+          "caller": "Journal",
+          "callee": "ROOT_CAUSES.map",
+          "lineNumber": 888
+        },
+        {
+          "caller": "Journal",
+          "callee": "set",
+          "lineNumber": 896
+        },
+        {
+          "caller": "Journal",
+          "callee": "MARK_DECISIONS.map",
+          "lineNumber": 901
+        },
+        {
+          "caller": "Journal",
+          "callee": "set",
+          "lineNumber": 909
+        },
+        {
+          "caller": "Journal",
+          "callee": "SOURCE_KINDS.map",
+          "lineNumber": 914
+        },
+        {
+          "caller": "Journal",
+          "callee": "set",
+          "lineNumber": 922
+        },
+        {
+          "caller": "Journal",
+          "callee": "sessionsAll.map",
+          "lineNumber": 928
+        },
+        {
+          "caller": "Journal",
+          "callee": "formatDate",
+          "lineNumber": 930
+        },
+        {
+          "caller": "Journal",
+          "callee": "set",
+          "lineNumber": 937
+        },
+        {
+          "caller": "Journal",
+          "callee": "QUESTION_FORMATS.map",
+          "lineNumber": 942
+        },
+        {
+          "caller": "Journal",
+          "callee": "set",
+          "lineNumber": 951
+        },
+        {
+          "caller": "Journal",
+          "callee": "set",
+          "lineNumber": 960
+        },
+        {
+          "caller": "Journal",
+          "callee": "setF",
+          "lineNumber": 970
+        },
+        {
+          "caller": "Journal",
+          "callee": "setPage",
+          "lineNumber": 971
+        },
+        {
+          "caller": "Journal",
+          "callee": "set",
+          "lineNumber": 985
+        },
+        {
+          "caller": "Journal",
+          "callee": "setEditSession",
+          "lineNumber": 986
+        },
+        {
+          "caller": "Journal",
+          "callee": "navigate",
+          "lineNumber": 987
+        },
+        {
+          "caller": "Journal",
+          "callee": "cn",
+          "lineNumber": 995
+        },
+        {
+          "caller": "Journal",
+          "callee": "subjectInk",
+          "lineNumber": 995
+        },
+        {
+          "caller": "Journal",
+          "callee": "formatDate",
+          "lineNumber": 999
+        },
+        {
+          "caller": "Journal",
+          "callee": "questionCountBySession.get",
+          "lineNumber": 1000
+        },
+        {
+          "caller": "Journal",
+          "callee": "plural",
+          "lineNumber": 1001
+        },
+        {
+          "caller": "Journal",
+          "callee": "questionCountBySession.get",
+          "lineNumber": 1002
+        },
+        {
+          "caller": "Journal",
+          "callee": "navigate",
+          "lineNumber": 1017
+        },
+        {
+          "caller": "Journal",
+          "callee": "setEditSession",
+          "lineNumber": 1021
+        },
+        {
+          "caller": "Journal",
+          "callee": "set",
+          "lineNumber": 1025
+        },
+        {
+          "caller": "Journal",
+          "callee": "setPreview",
+          "lineNumber": 1037
+        },
+        {
+          "caller": "Journal",
+          "callee": "pageRows.map",
+          "lineNumber": 1060
+        },
+        {
+          "caller": "Journal",
+          "callee": "setPreview",
+          "lineNumber": 1064
+        },
+        {
+          "caller": "Journal",
+          "callee": "setPage",
+          "lineNumber": 1077
+        },
+        {
+          "caller": "Journal",
+          "callee": "setPage",
+          "lineNumber": 1088
+        },
+        {
+          "caller": "Journal",
+          "callee": "setPreview",
+          "lineNumber": 1109
+        },
+        {
+          "caller": "Journal",
+          "callee": "setEditRow",
+          "lineNumber": 1116
+        },
+        {
+          "caller": "Journal",
+          "callee": "setEditDraft",
+          "lineNumber": 1117
+        },
+        {
+          "caller": "Journal",
+          "callee": "removeRow",
+          "lineNumber": 1125
+        },
+        {
+          "caller": "Journal",
+          "callee": "setEditRow",
+          "lineNumber": 1130
+        },
+        {
+          "caller": "Journal",
+          "callee": "setEditDraft",
+          "lineNumber": 1131
+        },
+        {
+          "caller": "Journal",
+          "callee": "saveEdit",
+          "lineNumber": 1139
+        },
+        {
+          "caller": "Journal",
+          "callee": "setEditSession",
+          "lineNumber": 1151
+        },
+        {
+          "caller": "Journal",
+          "callee": "setEditSession",
+          "lineNumber": 1158
+        },
+        {
+          "caller": "Journal",
+          "callee": "set",
+          "lineNumber": 1161
+        },
+        {
+          "caller": "Journal",
+          "callee": "setEditSession",
+          "lineNumber": 1162
+        },
+        {
+          "caller": "Journal",
+          "callee": "setEditSession",
+          "lineNumber": 1164
+        },
+        {
+          "caller": "RecentSessionsCard",
+          "callee": "sessions.map",
+          "lineNumber": 1196
+        },
+        {
+          "caller": "RecentSessionsCard",
+          "callee": "subjectInk",
+          "lineNumber": 1197
+        },
+        {
+          "caller": "RecentSessionsCard",
+          "callee": "countsBySession.get",
+          "lineNumber": 1198
+        },
+        {
+          "caller": "RecentSessionsCard",
+          "callee": "cn",
+          "lineNumber": 1203
+        },
+        {
+          "caller": "RecentSessionsCard",
+          "callee": "onSelect",
+          "lineNumber": 1210
+        },
+        {
+          "caller": "RecentSessionsCard",
+          "callee": "cn",
+          "lineNumber": 1216
+        },
+        {
+          "caller": "RecentSessionsCard",
+          "callee": "formatDate",
+          "lineNumber": 1222
+        },
+        {
+          "caller": "RecentSessionsCard",
+          "callee": "cn",
+          "lineNumber": 1225
+        },
+        {
+          "caller": "RecentSessionsCard",
+          "callee": "plural",
+          "lineNumber": 1230
+        },
+        {
+          "caller": "RecentSessionsCard",
+          "callee": "onEdit",
+          "lineNumber": 1251
+        },
+        {
+          "caller": "RecentSessionsCard",
+          "callee": "onOpenReview",
+          "lineNumber": 1258
+        }
+      ],
+      "metrics": {
+        "importCount": 22,
+        "exportCount": 1,
+        "functionCount": 12,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/pages/SessionActive.tsx",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 374,
+      "nonEmptyLines": 354,
+      "functions": [
+        {
+          "name": "reconcilePattern",
+          "startLine": 42,
+          "endLine": 59,
+          "params": [
+            "userId",
+            "subject",
+            "name"
+          ]
+        },
+        {
+          "name": "SessionActive",
+          "startLine": 75,
+          "endLine": 374,
+          "params": []
+        }
+      ],
+      "exports": [
+        {
+          "name": "SessionActive",
+          "line": 75,
+          "isDefault": true
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "reconcilePattern",
+          "callee": "db.questions.where('[user_id+pattern_name]').equals([userId, name]).count",
+          "lineNumber": 43
+        },
+        {
+          "caller": "reconcilePattern",
+          "callee": "db.questions.where('[user_id+pattern_name]').equals",
+          "lineNumber": 43
+        },
+        {
+          "caller": "reconcilePattern",
+          "callee": "db.questions.where",
+          "lineNumber": 43
+        },
+        {
+          "caller": "reconcilePattern",
+          "callee": "db.patterns.where('[user_id+name]').equals([userId, name]).first",
+          "lineNumber": 44
+        },
+        {
+          "caller": "reconcilePattern",
+          "callee": "db.patterns.where('[user_id+name]').equals",
+          "lineNumber": 44
+        },
+        {
+          "caller": "reconcilePattern",
+          "callee": "db.patterns.where",
+          "lineNumber": 44
+        },
+        {
+          "caller": "reconcilePattern",
+          "callee": "writeLocal",
+          "lineNumber": 46
+        },
+        {
+          "caller": "reconcilePattern",
+          "callee": "writeLocal",
+          "lineNumber": 48
+        },
+        {
+          "caller": "reconcilePattern",
+          "callee": "uuid",
+          "lineNumber": 49
+        },
+        {
+          "caller": "reconcilePattern",
+          "callee": "nowISO",
+          "lineNumber": 56
+        },
+        {
+          "caller": "SessionActive",
+          "callee": "useParams",
+          "lineNumber": 76
+        },
+        {
+          "caller": "SessionActive",
+          "callee": "useNavigate",
+          "lineNumber": 77
+        },
+        {
+          "caller": "SessionActive",
+          "callee": "useAuth",
+          "lineNumber": 78
+        },
+        {
+          "caller": "SessionActive",
+          "callee": "useSessionStore",
+          "lineNumber": 79
+        },
+        {
+          "caller": "SessionActive",
+          "callee": "useReducedMotion",
+          "lineNumber": 80
+        },
+        {
+          "caller": "SessionActive",
+          "callee": "useState",
+          "lineNumber": 81
+        },
+        {
+          "caller": "SessionActive",
+          "callee": "useLiveQuery",
+          "lineNumber": 83
+        },
+        {
+          "caller": "SessionActive",
+          "callee": "db.sessions.get",
+          "lineNumber": 83
+        },
+        {
+          "caller": "SessionActive",
+          "callee": "useLiveQuery",
+          "lineNumber": 85
+        },
+        {
+          "caller": "SessionActive",
+          "callee": "db.questions.where('session_id').equals(id).count",
+          "lineNumber": 85
+        },
+        {
+          "caller": "SessionActive",
+          "callee": "db.questions.where('session_id').equals",
+          "lineNumber": 85
+        },
+        {
+          "caller": "SessionActive",
+          "callee": "db.questions.where",
+          "lineNumber": 85
+        },
+        {
+          "caller": "SessionActive",
+          "callee": "useLiveQuery",
+          "lineNumber": 87
+        },
+        {
+          "caller": "SessionActive",
+          "callee": "db.patterns.where('user_id').equals(userId).toArray",
+          "lineNumber": 88
+        },
+        {
+          "caller": "SessionActive",
+          "callee": "db.patterns.where('user_id').equals",
+          "lineNumber": 88
+        },
+        {
+          "caller": "SessionActive",
+          "callee": "db.patterns.where",
+          "lineNumber": 88
+        },
+        {
+          "caller": "SessionActive",
+          "callee": "useSessionStore",
+          "lineNumber": 99
+        },
+        {
+          "caller": "SessionActive",
+          "callee": "useEffect",
+          "lineNumber": 100
+        },
+        {
+          "caller": "SessionActive",
+          "callee": "useSessionStore.getState",
+          "lineNumber": 101
+        },
+        {
+          "caller": "SessionActive",
+          "callee": "beginStore",
+          "lineNumber": 101
+        },
+        {
+          "caller": "SessionActive",
+          "callee": "useTimer",
+          "lineNumber": 104
+        },
+        {
+          "caller": "SessionActive",
+          "callee": "useTimer",
+          "lineNumber": 105
+        },
+        {
+          "caller": "SessionActive",
+          "callee": "parseISO(session.created_at).getTime",
+          "lineNumber": 105
+        },
+        {
+          "caller": "SessionActive",
+          "callee": "parseISO",
+          "lineNumber": 105
+        },
+        {
+          "caller": "openTag",
+          "callee": "store.enterTag",
+          "lineNumber": 112
+        },
+        {
+          "caller": "finish",
+          "callee": "db.questions.where('session_id').equals(id).count",
+          "lineNumber": 117
+        },
+        {
+          "caller": "finish",
+          "callee": "db.questions.where('session_id').equals",
+          "lineNumber": 117
+        },
+        {
+          "caller": "finish",
+          "callee": "db.questions.where",
+          "lineNumber": 117
+        },
+        {
+          "caller": "finish",
+          "callee": "deleteLocal",
+          "lineNumber": 122
+        },
+        {
+          "caller": "finish",
+          "callee": "store.end",
+          "lineNumber": 123
+        },
+        {
+          "caller": "finish",
+          "callee": "navigate",
+          "lineNumber": 124
+        },
+        {
+          "caller": "finish",
+          "callee": "Math.max",
+          "lineNumber": 127
+        },
+        {
+          "caller": "finish",
+          "callee": "Math.round",
+          "lineNumber": 129
+        },
+        {
+          "caller": "finish",
+          "callee": "Date.now",
+          "lineNumber": 129
+        },
+        {
+          "caller": "finish",
+          "callee": "parseISO(session.created_at).getTime",
+          "lineNumber": 129
+        },
+        {
+          "caller": "finish",
+          "callee": "parseISO",
+          "lineNumber": 129
+        },
+        {
+          "caller": "finish",
+          "callee": "writeLocal",
+          "lineNumber": 131
+        },
+        {
+          "caller": "finish",
+          "callee": "updatePlannerBlockExecution",
+          "lineNumber": 133
+        },
+        {
+          "caller": "finish",
+          "callee": "nowISO",
+          "lineNumber": 136
+        },
+        {
+          "caller": "finish",
+          "callee": "store.end",
+          "lineNumber": 141
+        },
+        {
+          "caller": "finish",
+          "callee": "navigate",
+          "lineNumber": 142
+        },
+        {
+          "caller": "saveTag",
+          "callee": "uuid",
+          "lineNumber": 150
+        },
+        {
+          "caller": "saveTag",
+          "callee": "buildSourceRef",
+          "lineNumber": 156
+        },
+        {
+          "caller": "saveTag",
+          "callee": "nowISO",
+          "lineNumber": 174
+        },
+        {
+          "caller": "saveTag",
+          "callee": "writeLocal",
+          "lineNumber": 176
+        },
+        {
+          "caller": "saveTag",
+          "callee": "reconcilePattern",
+          "lineNumber": 177
+        },
+        {
+          "caller": "saveTag",
+          "callee": "needsReattempt",
+          "lineNumber": 178
+        },
+        {
+          "caller": "saveTag",
+          "callee": "scheduleReattempt",
+          "lineNumber": 178
+        },
+        {
+          "caller": "saveTag",
+          "callee": "window.scrollTo",
+          "lineNumber": 182
+        },
+        {
+          "caller": "saveTag",
+          "callee": "setSavedReceipt",
+          "lineNumber": 183
+        },
+        {
+          "caller": "saveTag",
+          "callee": "String(qIndex).padStart",
+          "lineNumber": 186
+        },
+        {
+          "caller": "saveTag",
+          "callee": "String",
+          "lineNumber": 186
+        },
+        {
+          "caller": "saveTag",
+          "callee": "haptic",
+          "lineNumber": 189
+        },
+        {
+          "caller": "saveTag",
+          "callee": "window.setTimeout",
+          "lineNumber": 193
+        },
+        {
+          "caller": "saveTag",
+          "callee": "finish",
+          "lineNumber": 198
+        },
+        {
+          "caller": "saveTag",
+          "callee": "setSavedReceipt",
+          "lineNumber": 201
+        },
+        {
+          "caller": "saveTag",
+          "callee": "store.startQuestion",
+          "lineNumber": 202
+        },
+        {
+          "caller": "SessionActive",
+          "callee": "useKeyboard",
+          "lineNumber": 205
+        },
+        {
+          "caller": "SessionActive",
+          "callee": "useVisibilityChange",
+          "lineNumber": 208
+        },
+        {
+          "caller": "SessionActive",
+          "callee": "(async () => {\n      if (!userId) return;\n      const current = await db.sessions.get(id);\n      if (!current || current.actual_duration_min !== null) return;\n      await writeLocal('interruption_logs', {\n        id: uuid(),\n        user_id: userId,\n        session_id: id,\n        ts: nowISO(),\n        kind: 'tab_switch' as const\n      });\n      await writeLocal('sessions', {\n        ...current,\n        interruptions_count: current.interruptions_count + 1\n      });\n    })",
+          "lineNumber": 209
+        },
+        {
+          "caller": "SessionActive",
+          "callee": "db.sessions.get",
+          "lineNumber": 211
+        },
+        {
+          "caller": "SessionActive",
+          "callee": "writeLocal",
+          "lineNumber": 213
+        },
+        {
+          "caller": "SessionActive",
+          "callee": "uuid",
+          "lineNumber": 214
+        },
+        {
+          "caller": "SessionActive",
+          "callee": "nowISO",
+          "lineNumber": 217
+        },
+        {
+          "caller": "SessionActive",
+          "callee": "writeLocal",
+          "lineNumber": 220
+        },
+        {
+          "caller": "SessionActive",
+          "callee": "navigate",
+          "lineNumber": 233
+        },
+        {
+          "caller": "SessionActive",
+          "callee": "subjectInk",
+          "lineNumber": 243
+        },
+        {
+          "caller": "SessionActive",
+          "callee": "String(displayedQuestionIndex).padStart",
+          "lineNumber": 260
+        },
+        {
+          "caller": "SessionActive",
+          "callee": "String",
+          "lineNumber": 260
+        },
+        {
+          "caller": "SessionActive",
+          "callee": "String(planned).padStart",
+          "lineNumber": 265
+        },
+        {
+          "caller": "SessionActive",
+          "callee": "String",
+          "lineNumber": 265
+        },
+        {
+          "caller": "SessionActive",
+          "callee": "secondsToClock",
+          "lineNumber": 267
+        },
+        {
+          "caller": "SessionActive",
+          "callee": "cn",
+          "lineNumber": 287
+        },
+        {
+          "caller": "SessionActive",
+          "callee": "cn",
+          "lineNumber": 339
+        },
+        {
+          "caller": "SessionActive",
+          "callee": "finish",
+          "lineNumber": 344
+        },
+        {
+          "caller": "SessionActive",
+          "callee": "String(qIndex).padStart",
+          "lineNumber": 364
+        },
+        {
+          "caller": "SessionActive",
+          "callee": "String",
+          "lineNumber": 364
+        },
+        {
+          "caller": "SessionActive",
+          "callee": "store.cancelTag",
+          "lineNumber": 367
+        }
+      ],
+      "metrics": {
+        "importCount": 19,
+        "exportCount": 1,
+        "functionCount": 2,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/pages/SyllabusTracker.tsx",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 627,
+      "nonEmptyLines": 600,
+      "functions": [
+        {
+          "name": "summariesFor",
+          "startLine": 58,
+          "endLine": 67,
+          "params": [
+            "completions"
+          ]
+        },
+        {
+          "name": "nextTopicFrom",
+          "startLine": 69,
+          "endLine": 84,
+          "params": [
+            "summaries",
+            "completions"
+          ]
+        },
+        {
+          "name": "SyllabusTracker",
+          "startLine": 86,
+          "endLine": 380,
+          "params": []
+        },
+        {
+          "name": "SyllabusOrbit",
+          "startLine": 382,
+          "endLine": 440,
+          "params": [
+            "{ summaries, percent }"
+          ]
+        },
+        {
+          "name": "SubjectLedger",
+          "startLine": 442,
+          "endLine": 584,
+          "params": [
+            "{\n  index,\n  summary,\n  topics,\n  completions,\n  evidence,\n  open,\n  onToggle,\n  onTopicChange\n}"
+          ]
+        },
+        {
+          "name": "TopicEvidenceLine",
+          "startLine": 594,
+          "endLine": 627,
+          "params": [
+            "{\n  evidence,\n  completedAt\n}"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "SyllabusTracker",
+          "line": 86,
+          "isDefault": true
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "summariesFor",
+          "callee": "SUBJECTS.map",
+          "lineNumber": 59
+        },
+        {
+          "caller": "summariesFor",
+          "callee": "(SUBTOPICS_BY_SUBJECT[subject] ?? []).map",
+          "lineNumber": 60
+        },
+        {
+          "caller": "summariesFor",
+          "callee": "topics.filter",
+          "lineNumber": 61
+        },
+        {
+          "caller": "summariesFor",
+          "callee": "topicProgressId",
+          "lineNumber": 61
+        },
+        {
+          "caller": "summariesFor",
+          "callee": "Math.round",
+          "lineNumber": 62
+        },
+        {
+          "caller": "nextTopicFrom",
+          "callee": "summaries.find",
+          "lineNumber": 73
+        },
+        {
+          "caller": "nextTopicFrom",
+          "callee": "summaries.find",
+          "lineNumber": 74
+        },
+        {
+          "caller": "nextTopicFrom",
+          "callee": "subject.topics.find",
+          "lineNumber": 76
+        },
+        {
+          "caller": "nextTopicFrom",
+          "callee": "topicProgressId",
+          "lineNumber": 77
+        },
+        {
+          "caller": "SyllabusTracker",
+          "callee": "useAuth",
+          "lineNumber": 87
+        },
+        {
+          "caller": "SyllabusTracker",
+          "callee": "useReducedMotion",
+          "lineNumber": 88
+        },
+        {
+          "caller": "SyllabusTracker",
+          "callee": "currentUserId",
+          "lineNumber": 89
+        },
+        {
+          "caller": "SyllabusTracker",
+          "callee": "useTopicProgressStore",
+          "lineNumber": 90
+        },
+        {
+          "caller": "SyllabusTracker",
+          "callee": "useTopicProgressStore",
+          "lineNumber": 91
+        },
+        {
+          "caller": "SyllabusTracker",
+          "callee": "todayISOInTimeZone",
+          "lineNumber": 92
+        },
+        {
+          "caller": "SyllabusTracker",
+          "callee": "useLiveQuery",
+          "lineNumber": 93
+        },
+        {
+          "caller": "SyllabusTracker",
+          "callee": "db.questions.where('user_id').equals(userId).toArray",
+          "lineNumber": 94
+        },
+        {
+          "caller": "SyllabusTracker",
+          "callee": "db.questions.where('user_id').equals",
+          "lineNumber": 94
+        },
+        {
+          "caller": "SyllabusTracker",
+          "callee": "db.questions.where",
+          "lineNumber": 94
+        },
+        {
+          "caller": "SyllabusTracker",
+          "callee": "useLiveQuery",
+          "lineNumber": 98
+        },
+        {
+          "caller": "SyllabusTracker",
+          "callee": "db.pyq_attempts.where('user_id').equals(userId).toArray",
+          "lineNumber": 99
+        },
+        {
+          "caller": "SyllabusTracker",
+          "callee": "db.pyq_attempts.where('user_id').equals",
+          "lineNumber": 99
+        },
+        {
+          "caller": "SyllabusTracker",
+          "callee": "db.pyq_attempts.where",
+          "lineNumber": 99
+        },
+        {
+          "caller": "SyllabusTracker",
+          "callee": "useLiveQuery",
+          "lineNumber": 103
+        },
+        {
+          "caller": "SyllabusTracker",
+          "callee": "db.reattempts.where('user_id').equals(userId).toArray",
+          "lineNumber": 104
+        },
+        {
+          "caller": "SyllabusTracker",
+          "callee": "db.reattempts.where('user_id').equals",
+          "lineNumber": 104
+        },
+        {
+          "caller": "SyllabusTracker",
+          "callee": "db.reattempts.where",
+          "lineNumber": 104
+        },
+        {
+          "caller": "SyllabusTracker",
+          "callee": "useLiveQuery",
+          "lineNumber": 108
+        },
+        {
+          "caller": "SyllabusTracker",
+          "callee": "db.topic_progress.where('user_id').equals(effectiveUserId).toArray",
+          "lineNumber": 109
+        },
+        {
+          "caller": "SyllabusTracker",
+          "callee": "db.topic_progress.where('user_id').equals",
+          "lineNumber": 109
+        },
+        {
+          "caller": "SyllabusTracker",
+          "callee": "db.topic_progress.where",
+          "lineNumber": 109
+        },
+        {
+          "caller": "SyllabusTracker",
+          "callee": "useEffect",
+          "lineNumber": 114
+        },
+        {
+          "caller": "SyllabusTracker",
+          "callee": "syncTopicProgressFromDb",
+          "lineNumber": 115
+        },
+        {
+          "caller": "SyllabusTracker",
+          "callee": "useMemo",
+          "lineNumber": 121
+        },
+        {
+          "caller": "SyllabusTracker",
+          "callee": "mergeTopicProgressRows",
+          "lineNumber": 122
+        },
+        {
+          "caller": "SyllabusTracker",
+          "callee": "useMemo",
+          "lineNumber": 125
+        },
+        {
+          "caller": "SyllabusTracker",
+          "callee": "summariesFor",
+          "lineNumber": 125
+        },
+        {
+          "caller": "SyllabusTracker",
+          "callee": "useMemo",
+          "lineNumber": 126
+        },
+        {
+          "caller": "SyllabusTracker",
+          "callee": "(SUBTOPICS_BY_SUBJECT[subject] ?? []).map",
+          "lineNumber": 129
+        },
+        {
+          "caller": "SyllabusTracker",
+          "callee": "topicProgressId",
+          "lineNumber": 130
+        },
+        {
+          "caller": "SyllabusTracker",
+          "callee": "map.set",
+          "lineNumber": 131
+        },
+        {
+          "caller": "SyllabusTracker",
+          "callee": "buildTopicEvidence",
+          "lineNumber": 133
+        },
+        {
+          "caller": "SyllabusTracker",
+          "callee": "useMemo",
+          "lineNumber": 147
+        },
+        {
+          "caller": "SyllabusTracker",
+          "callee": "nextTopicFrom",
+          "lineNumber": 147
+        },
+        {
+          "caller": "SyllabusTracker",
+          "callee": "useState",
+          "lineNumber": 148
+        },
+        {
+          "caller": "SyllabusTracker",
+          "callee": "useState",
+          "lineNumber": 149
+        },
+        {
+          "caller": "SyllabusTracker",
+          "callee": "useState",
+          "lineNumber": 150
+        },
+        {
+          "caller": "SyllabusTracker",
+          "callee": "summaries.reduce",
+          "lineNumber": 154
+        },
+        {
+          "caller": "SyllabusTracker",
+          "callee": "summaries.reduce",
+          "lineNumber": 155
+        },
+        {
+          "caller": "SyllabusTracker",
+          "callee": "Math.round",
+          "lineNumber": 156
+        },
+        {
+          "caller": "SyllabusTracker",
+          "callee": "summaries.filter",
+          "lineNumber": 157
+        },
+        {
+          "caller": "SyllabusTracker",
+          "callee": "query.trim().toLocaleLowerCase",
+          "lineNumber": 158
+        },
+        {
+          "caller": "SyllabusTracker",
+          "callee": "query.trim",
+          "lineNumber": 158
+        },
+        {
+          "caller": "SyllabusTracker",
+          "callee": "summaries.filter",
+          "lineNumber": 159
+        },
+        {
+          "caller": "SyllabusTracker",
+          "callee": "summary.subject.toLocaleLowerCase().includes",
+          "lineNumber": 163
+        },
+        {
+          "caller": "SyllabusTracker",
+          "callee": "summary.subject.toLocaleLowerCase",
+          "lineNumber": 163
+        },
+        {
+          "caller": "SyllabusTracker",
+          "callee": "summary.topics.some",
+          "lineNumber": 164
+        },
+        {
+          "caller": "SyllabusTracker",
+          "callee": "topic.toLocaleLowerCase().includes",
+          "lineNumber": 164
+        },
+        {
+          "caller": "SyllabusTracker",
+          "callee": "topic.toLocaleLowerCase",
+          "lineNumber": 164
+        },
+        {
+          "caller": "SyllabusTracker",
+          "callee": "visibleSummaries.reduce",
+          "lineNumber": 168
+        },
+        {
+          "caller": "SyllabusTracker",
+          "callee": "summary.topics.filter",
+          "lineNumber": 171
+        },
+        {
+          "caller": "SyllabusTracker",
+          "callee": "summary.subject.toLocaleLowerCase().includes",
+          "lineNumber": 173
+        },
+        {
+          "caller": "SyllabusTracker",
+          "callee": "summary.subject.toLocaleLowerCase",
+          "lineNumber": 173
+        },
+        {
+          "caller": "SyllabusTracker",
+          "callee": "topic.toLocaleLowerCase().includes",
+          "lineNumber": 174
+        },
+        {
+          "caller": "SyllabusTracker",
+          "callee": "topic.toLocaleLowerCase",
+          "lineNumber": 174
+        },
+        {
+          "caller": "SyllabusTracker",
+          "callee": "Object.entries(completions)\n    .sort(([, left], [, right]) => right.localeCompare(left))\n    .slice(0, 3)\n    .map",
+          "lineNumber": 179
+        },
+        {
+          "caller": "SyllabusTracker",
+          "callee": "Object.entries(completions)\n    .sort(([, left], [, right]) => right.localeCompare(left))\n    .slice",
+          "lineNumber": 179
+        },
+        {
+          "caller": "SyllabusTracker",
+          "callee": "Object.entries(completions)\n    .sort",
+          "lineNumber": 179
+        },
+        {
+          "caller": "SyllabusTracker",
+          "callee": "Object.entries",
+          "lineNumber": 179
+        },
+        {
+          "caller": "SyllabusTracker",
+          "callee": "right.localeCompare",
+          "lineNumber": 180
+        },
+        {
+          "caller": "SyllabusTracker",
+          "callee": "id.indexOf",
+          "lineNumber": 183
+        },
+        {
+          "caller": "SyllabusTracker",
+          "callee": "id.slice",
+          "lineNumber": 185
+        },
+        {
+          "caller": "SyllabusTracker",
+          "callee": "id.slice",
+          "lineNumber": 186
+        },
+        {
+          "caller": "toggleSubject",
+          "callee": "setOpenSubjects",
+          "lineNumber": 192
+        },
+        {
+          "caller": "toggleSubject",
+          "callee": "next.has",
+          "lineNumber": 194
+        },
+        {
+          "caller": "toggleSubject",
+          "callee": "next.delete",
+          "lineNumber": 194
+        },
+        {
+          "caller": "toggleSubject",
+          "callee": "next.add",
+          "lineNumber": 195
+        },
+        {
+          "caller": "toggleTopic",
+          "callee": "setCompleted",
+          "lineNumber": 201
+        },
+        {
+          "caller": "toggleTopic",
+          "callee": "topicProgressId",
+          "lineNumber": 201
+        },
+        {
+          "caller": "toggleTopic",
+          "callee": "haptic",
+          "lineNumber": 202
+        },
+        {
+          "caller": "openRecommended",
+          "callee": "setOpenSubjects",
+          "lineNumber": 207
+        },
+        {
+          "caller": "openRecommended",
+          "callee": "setFilter",
+          "lineNumber": 208
+        },
+        {
+          "caller": "openRecommended",
+          "callee": "setQuery",
+          "lineNumber": 209
+        },
+        {
+          "caller": "openRecommended",
+          "callee": "requestAnimationFrame",
+          "lineNumber": 210
+        },
+        {
+          "caller": "openRecommended",
+          "callee": "document.getElementById(`subject-${SUBJECTS.indexOf(nextTopic.subject)}`)?.scrollIntoView",
+          "lineNumber": 211
+        },
+        {
+          "caller": "openRecommended",
+          "callee": "document.getElementById",
+          "lineNumber": 211
+        },
+        {
+          "caller": "openRecommended",
+          "callee": "SUBJECTS.indexOf",
+          "lineNumber": 211
+        },
+        {
+          "caller": "SyllabusTracker",
+          "callee": "recent.map",
+          "lineNumber": 276
+        },
+        {
+          "caller": "SyllabusTracker",
+          "callee": "formatDate",
+          "lineNumber": 280
+        },
+        {
+          "caller": "SyllabusTracker",
+          "callee": "setQuery",
+          "lineNumber": 303
+        },
+        {
+          "caller": "SyllabusTracker",
+          "callee": "FILTERS.map",
+          "lineNumber": 313
+        },
+        {
+          "caller": "SyllabusTracker",
+          "callee": "setFilter",
+          "lineNumber": 318
+        },
+        {
+          "caller": "SyllabusTracker",
+          "callee": "cn",
+          "lineNumber": 319
+        },
+        {
+          "caller": "SyllabusTracker",
+          "callee": "plural",
+          "lineNumber": 334
+        },
+        {
+          "caller": "SyllabusTracker",
+          "callee": "plural",
+          "lineNumber": 335
+        },
+        {
+          "caller": "SyllabusTracker",
+          "callee": "visibleSummaries.map",
+          "lineNumber": 344
+        },
+        {
+          "caller": "SyllabusTracker",
+          "callee": "summary.topics.filter",
+          "lineNumber": 346
+        },
+        {
+          "caller": "SyllabusTracker",
+          "callee": "summary.subject.toLocaleLowerCase().includes",
+          "lineNumber": 348
+        },
+        {
+          "caller": "SyllabusTracker",
+          "callee": "summary.subject.toLocaleLowerCase",
+          "lineNumber": 348
+        },
+        {
+          "caller": "SyllabusTracker",
+          "callee": "topic.toLocaleLowerCase().includes",
+          "lineNumber": 349
+        },
+        {
+          "caller": "SyllabusTracker",
+          "callee": "topic.toLocaleLowerCase",
+          "lineNumber": 349
+        },
+        {
+          "caller": "SyllabusTracker",
+          "callee": "openSubjects.has",
+          "lineNumber": 352
+        },
+        {
+          "caller": "SyllabusTracker",
+          "callee": "SUBJECTS.indexOf",
+          "lineNumber": 356
+        },
+        {
+          "caller": "SyllabusTracker",
+          "callee": "toggleSubject",
+          "lineNumber": 362
+        },
+        {
+          "caller": "SyllabusTracker",
+          "callee": "toggleTopic",
+          "lineNumber": 363
+        },
+        {
+          "caller": "SyllabusOrbit",
+          "callee": "summaries.map",
+          "lineNumber": 394
+        },
+        {
+          "caller": "SyllabusOrbit",
+          "callee": "summaries.map",
+          "lineNumber": 410
+        },
+        {
+          "caller": "SubjectLedger",
+          "callee": "subjectInk",
+          "lineNumber": 461
+        },
+        {
+          "caller": "SubjectLedger",
+          "callee": "cn",
+          "lineNumber": 474
+        },
+        {
+          "caller": "SubjectLedger",
+          "callee": "String(index + 1).padStart",
+          "lineNumber": 484
+        },
+        {
+          "caller": "SubjectLedger",
+          "callee": "String",
+          "lineNumber": 484
+        },
+        {
+          "caller": "SubjectLedger",
+          "callee": "cn",
+          "lineNumber": 489
+        },
+        {
+          "caller": "SubjectLedger",
+          "callee": "cn",
+          "lineNumber": 505
+        },
+        {
+          "caller": "SubjectLedger",
+          "callee": "cn",
+          "lineNumber": 522
+        },
+        {
+          "caller": "SubjectLedger",
+          "callee": "topics.map",
+          "lineNumber": 533
+        },
+        {
+          "caller": "SubjectLedger",
+          "callee": "topicProgressId",
+          "lineNumber": 534
+        },
+        {
+          "caller": "SubjectLedger",
+          "callee": "Boolean",
+          "lineNumber": 536
+        },
+        {
+          "caller": "SubjectLedger",
+          "callee": "evidence.get",
+          "lineNumber": 537
+        },
+        {
+          "caller": "SubjectLedger",
+          "callee": "cn",
+          "lineNumber": 541
+        },
+        {
+          "caller": "SubjectLedger",
+          "callee": "onTopicChange",
+          "lineNumber": 551
+        },
+        {
+          "caller": "SubjectLedger",
+          "callee": "cn",
+          "lineNumber": 555
+        },
+        {
+          "caller": "SubjectLedger",
+          "callee": "cn",
+          "lineNumber": 567
+        },
+        {
+          "caller": "TopicEvidenceLine",
+          "callee": "[\n    evidence.practiced > 0 ? `${evidence.practiced} practiced` : null,\n    evidence.accuracy !== null ? `${Math.round(evidence.accuracy * 100)}%` : null,\n    evidence.openMistakes > 0 ? `${evidence.openMistakes} open` : null,\n    evidence.lastPracticed ? `last ${formatDate(evidence.lastPracticed, 'dd MMM')}` : null\n  ].filter",
+          "lineNumber": 610
+        },
+        {
+          "caller": "TopicEvidenceLine",
+          "callee": "Math.round",
+          "lineNumber": 612
+        },
+        {
+          "caller": "TopicEvidenceLine",
+          "callee": "formatDate",
+          "lineNumber": 614
+        },
+        {
+          "caller": "TopicEvidenceLine",
+          "callee": "cn",
+          "lineNumber": 618
+        },
+        {
+          "caller": "TopicEvidenceLine",
+          "callee": "facts.join",
+          "lineNumber": 620
+        },
+        {
+          "caller": "TopicEvidenceLine",
+          "callee": "formatDate",
+          "lineNumber": 623
+        }
+      ],
+      "metrics": {
+        "importCount": 14,
+        "exportCount": 1,
+        "functionCount": 6,
+        "classCount": 0
+      }
+    }
+  ]
+}

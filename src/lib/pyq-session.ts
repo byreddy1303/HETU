@@ -1,5 +1,6 @@
 import type {
   MarkDecision,
+  PyqAttemptScoringStatus,
   PyqAttemptRow,
   PyqQuestionSnapshot,
   PyqSelectedAnswer,
@@ -10,6 +11,8 @@ import type {
 } from '@/types';
 import type { PyqQuestion } from '@/lib/pyq';
 import { evaluatePyqAnswer, pyqAnswerValueForLog } from '@/lib/pyq';
+import { scoreGateOutcome } from '@/lib/gate-scoring';
+import { normalizeSubjectIdentity } from '@/lib/subjects';
 import { calendarDateInTimeZone, nowISO, uuid, uuidFromString } from '@/lib/utils';
 
 export function createPyqSessionRow(
@@ -46,6 +49,99 @@ export function pyqJournalQuestionId(attemptId: string): string {
   return uuidFromString(`pyq-journal-question:${attemptId}`);
 }
 
+/** Deterministic seed used by the first production PYQ Journal migration. */
+export function legacyPyqJournalQuestionId(attemptId: string): string {
+  return uuidFromString(`pyq-journal:${attemptId}`);
+}
+
+type PyqJournalIdentity = Pick<
+  QuestionRow,
+  | 'id'
+  | 'user_id'
+  | 'session_id'
+  | 'subject'
+  | 'subject_id'
+  | 'source_year'
+  | 'source_ref'
+  | 'source_pyq_attempt_id'
+  | 'created_at'
+> &
+  Partial<Pick<QuestionRow, 'mark_decision' | 'mark_correct' | 'time_spent_sec'>>;
+
+/** Resolve only explicit or deterministic links; no lossy legacy inference. */
+export function pyqDeterministicSourceAttemptForJournalQuestion(
+  journalQuestion: string | PyqJournalIdentity,
+  attempts: PyqAttemptRow[]
+): PyqAttemptRow | null {
+  const journalQuestionId =
+    typeof journalQuestion === 'string' ? journalQuestion : journalQuestion.id;
+  if (typeof journalQuestion !== 'string' && journalQuestion.source_pyq_attempt_id) {
+    const linked = attempts.filter(
+      (attempt) =>
+        attempt.id === journalQuestion.source_pyq_attempt_id &&
+        attempt.user_id === journalQuestion.user_id
+    );
+    return linked.length === 1 ? linked[0] : null;
+  }
+  return (
+    attempts.find(
+      (attempt) =>
+        (typeof journalQuestion === 'string' || attempt.user_id === journalQuestion.user_id) &&
+        (pyqJournalQuestionId(attempt.id) === journalQuestionId ||
+          legacyPyqJournalQuestionId(attempt.id) === journalQuestionId)
+    ) ?? null
+  );
+}
+
+function legacyPyqCandidates(
+  journalQuestion: PyqJournalIdentity,
+  attempts: PyqAttemptRow[]
+): PyqAttemptRow[] {
+  if (!journalQuestion.source_ref?.toLowerCase().includes('gate')) return [];
+  return attempts.filter(
+    (attempt) =>
+      attempt.capture_version !== 2 &&
+      attempt.capture_version !== 3 &&
+      attempt.user_id === journalQuestion.user_id &&
+      attempt.attempted_at === journalQuestion.created_at &&
+      normalizeSubjectIdentity(attempt.subject, attempt.subject_id).label ===
+        normalizeSubjectIdentity(journalQuestion.subject, journalQuestion.subject_id).label &&
+      (journalQuestion.source_year == null || attempt.year === journalQuestion.source_year) &&
+      (journalQuestion.session_id == null || attempt.pyq_session_id === journalQuestion.session_id) &&
+      (journalQuestion.mark_decision === undefined ||
+        attempt.mark_decision === journalQuestion.mark_decision) &&
+      (journalQuestion.mark_correct === undefined ||
+        attempt.mark_correct === journalQuestion.mark_correct) &&
+      (journalQuestion.time_spent_sec === undefined ||
+        attempt.time_spent_sec === journalQuestion.time_spent_sec)
+  );
+}
+
+/**
+ * Return only bidirectionally unique analysis→attempt pairs. This is the safe
+ * migration/import API: two plausible Journal rows may never both acquire the
+ * one-analysis-per-attempt FK.
+ */
+export function pyqJournalSourceMap(
+  journalQuestions: PyqJournalIdentity[],
+  attempts: PyqAttemptRow[]
+): Map<string, PyqAttemptRow> {
+  const soleCandidate = new Map<string, PyqAttemptRow>();
+  const questionCountByAttempt = new Map<string, number>();
+  for (const question of journalQuestions) {
+    if (question.source_pyq_attempt_id) continue;
+    const deterministic = pyqDeterministicSourceAttemptForJournalQuestion(question, attempts);
+    const candidates = deterministic ? [deterministic] : legacyPyqCandidates(question, attempts);
+    if (candidates.length !== 1) continue;
+    const [candidate] = candidates;
+    soleCandidate.set(question.id, candidate);
+    questionCountByAttempt.set(candidate.id, (questionCountByAttempt.get(candidate.id) ?? 0) + 1);
+  }
+  return new Map(
+    [...soleCandidate].filter(([, attempt]) => questionCountByAttempt.get(attempt.id) === 1)
+  );
+}
+
 /**
  * Resolve the immutable PYQ receipt that produced an auto-journal row. The
  * journal ID is deterministic, so this does not rely on lossy source labels or
@@ -54,41 +150,23 @@ export function pyqJournalQuestionId(attemptId: string): string {
 export function pyqSourceAttemptForJournalQuestion(
   journalQuestion:
     | string
-    | Pick<
-        QuestionRow,
-        'id' | 'session_id' | 'subject' | 'source_year' | 'source_ref' | 'created_at'
-      >,
+    | PyqJournalIdentity,
   attempts: PyqAttemptRow[]
 ): PyqAttemptRow | null {
-  const journalQuestionId =
-    typeof journalQuestion === 'string' ? journalQuestion : journalQuestion.id;
-  const exact = attempts.find(
-    (attempt) =>
-      attempt.capture_version === 2 &&
-      attempt.question_snapshot !== null &&
-      pyqJournalQuestionId(attempt.id) === journalQuestionId
-  );
+  const exact = pyqDeterministicSourceAttemptForJournalQuestion(journalQuestion, attempts);
   if (exact || typeof journalQuestion === 'string') return exact ?? null;
 
   // Journal rows created before immutable v2 receipts used random IDs. Their
   // creation timestamp was copied directly from the source attempt, which lets
   // us reconnect the legacy row without guessing from flattened prompt text.
-  if (!journalQuestion.source_ref?.toLowerCase().includes('gate')) return null;
-  const legacyMatches = attempts.filter(
-    (attempt) =>
-      attempt.capture_version !== 2 &&
-      attempt.attempted_at === journalQuestion.created_at &&
-      attempt.subject === journalQuestion.subject &&
-      (journalQuestion.source_year == null || attempt.year === journalQuestion.source_year) &&
-      (journalQuestion.session_id == null || attempt.pyq_session_id === journalQuestion.session_id)
-  );
+  const legacyMatches = legacyPyqCandidates(journalQuestion, attempts);
   return legacyMatches.length === 1 ? legacyMatches[0] : null;
 }
 
 /** Restore the exact bundled PYQ, including its original option HTML and key. */
 export function pyqQuestionFromAttempt(attempt: PyqAttemptRow): PyqQuestion | null {
   const snapshot = attempt.question_snapshot;
-  if (attempt.capture_version !== 2 || !snapshot) return null;
+  if ((attempt.capture_version !== 2 && attempt.capture_version !== 3) || !snapshot) return null;
   return {
     id: snapshot.question_uid,
     year: snapshot.year,
@@ -111,20 +189,117 @@ export function pyqQuestionFromAttempt(attempt: PyqAttemptRow): PyqQuestion | nu
   };
 }
 
-/** One durable receipt per due-round, even across reloads before ladder grading. */
-export function pyqReattemptAttemptId(reattemptId: string, completedRoundCount: number): string {
-  return uuidFromString(`pyq-reattempt:${reattemptId}:${completedRoundCount}`);
+/**
+ * One durable receipt per commit inside a due round. The first receipt keeps
+ * the historical seed so existing local/server rows remain addressable.
+ */
+export function pyqReattemptAttemptId(
+  reattemptId: string,
+  reattemptRound: number,
+  roundAttemptNumber = 1
+): string {
+  const seed = `pyq-reattempt:${reattemptId}:${reattemptRound}`;
+  return uuidFromString(roundAttemptNumber === 1 ? seed : `${seed}:${roundAttemptNumber}`);
+}
+
+export function nextPyqAttemptNumber(
+  attempts: Array<Pick<PyqAttemptRow, 'attempt_number' | 'pyq_session_id' | 'question_uid'>>,
+  pyqSessionId: string,
+  questionUid: string
+): number {
+  return (
+    attempts.reduce(
+      (highest, attempt) =>
+        attempt.pyq_session_id === pyqSessionId && attempt.question_uid === questionUid
+          ? Math.max(highest, attempt.attempt_number)
+          : highest,
+      0
+    ) + 1
+  );
+}
+
+export function nextReattemptRoundAttemptNumber(
+  attempts: PyqAttemptRow[],
+  reattemptId: string,
+  reattemptRound: number
+): number {
+  let highest = 0;
+  for (const attempt of attempts) {
+    if (attempt.reattempt_id === reattemptId && attempt.reattempt_round === reattemptRound) {
+      highest = Math.max(highest, attempt.round_attempt_number ?? 1);
+      continue;
+    }
+    // Pre-origin receipts used exactly this first-attempt ID.
+    if (
+      attempt.id === pyqReattemptAttemptId(reattemptId, reattemptRound) &&
+      attempt.reattempt_id == null
+    ) {
+      highest = Math.max(highest, 1);
+    }
+  }
+  return highest + 1;
+}
+
+export interface PyqAttemptScoringCapture {
+  scoreThirds: number | null;
+  status: PyqAttemptScoringStatus;
+  scoringVersion: number;
+}
+
+export interface PyqAttemptScorePresentation {
+  label: string;
+  covered: boolean;
+  detail: string;
+}
+
+/** Compact, exact third-mark presentation shared by both attempt surfaces. */
+export function pyqAttemptScorePresentation(
+  attempt: Pick<PyqAttemptRow, 'score_thirds' | 'scoring_status'>
+): PyqAttemptScorePresentation {
+  if (
+    attempt.scoring_status == null ||
+    attempt.scoring_status === 'unscorable' ||
+    attempt.score_thirds == null
+  ) {
+    return {
+      label: 'Marks unavailable',
+      covered: false,
+      detail: 'Excluded from exact-score coverage because scoring metadata is incomplete.'
+    };
+  }
+  const thirds = attempt.score_thirds;
+  const magnitude = Math.abs(thirds);
+  const marks =
+    magnitude === 0
+      ? '0'
+      : magnitude === 1
+        ? '⅓'
+        : magnitude === 2
+          ? '⅔'
+          : magnitude % 3 === 0
+            ? String(magnitude / 3)
+            : (magnitude / 3).toFixed(2).replace(/0+$/, '').replace(/\.$/, '');
+  const delta = thirds > 0 ? `+${marks}` : thirds < 0 ? `-${marks}` : marks;
+  return {
+    label: `GATE ${delta}`,
+    covered: true,
+    detail:
+      attempt.scoring_status === 'bonus'
+        ? 'Exact GATE-rule score from stored metadata · marks awarded to all.'
+        : 'Exact GATE-rule score using the stored question type and marks.'
+  };
 }
 
 /**
- * Create the capture-version-2 receipt for a spaced PYQ re-attempt. Re-attempt
+ * Create an immutable receipt for a spaced PYQ re-attempt. Re-attempt
  * receipts intentionally have no practice-session FK: they belong to the PYQ's
  * chronological answer history, not to the already-closed original set.
  */
 export function createPyqReattemptAttemptRow(args: {
   userId: string;
   reattemptId: string;
-  completedRoundCount: number;
+  reattemptRound: number;
+  roundAttemptNumber: number;
   sourceAttempt: PyqAttemptRow;
   question: PyqQuestion;
   selectedAnswer: PyqSelectedAnswer;
@@ -133,6 +308,7 @@ export function createPyqReattemptAttemptRow(args: {
   committedAtMs: number;
   screenshotUrl: string | null;
   attemptNumber: number;
+  scoring?: PyqAttemptScoringCapture;
 }): PyqAttemptRow {
   const syntheticSession: PyqSessionRow = {
     id: args.sourceAttempt.pyq_session_id ?? args.sourceAttempt.id,
@@ -172,12 +348,16 @@ export function createPyqReattemptAttemptRow(args: {
     questionStartedAtMs: args.questionStartedAtMs,
     committedAtMs: args.committedAtMs,
     screenshotUrl: args.screenshotUrl,
-    attemptNumber: args.attemptNumber
+    attemptNumber: args.attemptNumber,
+    scoring: args.scoring
   });
   return {
     ...attempt,
-    id: pyqReattemptAttemptId(args.reattemptId, args.completedRoundCount),
-    pyq_session_id: null
+    id: pyqReattemptAttemptId(args.reattemptId, args.reattemptRound, args.roundAttemptNumber),
+    pyq_session_id: null,
+    reattempt_id: args.reattemptId,
+    reattempt_round: args.reattemptRound,
+    round_attempt_number: args.roundAttemptNumber
   };
 }
 
@@ -266,16 +446,15 @@ export function advancePyqSessionProgress(
   if (nextIndex < 0 || nextIndex > session.question_uids.length) {
     throw new Error('PYQ progress is outside the selected set.');
   }
-  const alreadyCompleted = session.completed_question_uids.includes(questionUid);
   const completed = Array.from(new Set([...session.completed_question_uids, questionUid]));
   return {
     ...session,
     completed_question_uids: completed,
     current_index: Math.max(session.current_index, nextIndex),
     completed_count: Math.max(session.completed_count, completed.length),
-    elapsed_sec: alreadyCompleted
-      ? session.elapsed_sec
-      : session.elapsed_sec + Math.max(0, Math.round(timeSpentSec)),
+    // Completed-question coverage is unique, but elapsed time is a ledger sum:
+    // a later answer after a skip is real work and must not replace the skip.
+    elapsed_sec: session.elapsed_sec + Math.max(0, Math.round(timeSpentSec)),
     current_question_uid: null,
     current_question_started_at: null,
     updated_at: now
@@ -355,7 +534,7 @@ function answerMatchesQuestionType(question: PyqQuestion, value: PyqSelectedAnsw
   return typeof value === 'string';
 }
 
-/** Build the only valid version-2 attempt record used by the UI. */
+/** Build the only valid immutable attempt record used by the UI. */
 export function createPyqAttemptRow(args: {
   userId: string;
   session: PyqSessionRow;
@@ -368,6 +547,7 @@ export function createPyqAttemptRow(args: {
   screenshotUrl: string | null;
   attemptNumber?: number;
   retryingSkippedAttempt?: boolean;
+  scoring?: PyqAttemptScoringCapture;
 }): PyqAttemptRow {
   if (args.session.status !== 'active') {
     throw new Error('Cannot submit an answer to a closed PYQ set.');
@@ -405,27 +585,47 @@ export function createPyqAttemptRow(args: {
     Math.min(args.questionStartedAtMs, args.committedAtMs)
   ).toISOString();
   const correctAnswer = pyqAnswerValueForLog(args.question);
+  const subject = normalizeSubjectIdentity(args.question.subject, args.question.subjectSlug);
+  const markCorrect = evaluatePyqAnswer(args.question, selectedAnswer, args.decision);
+  const scored =
+    args.scoring ??
+    scoreGateOutcome({
+      questionType: args.question.type,
+      marks: args.question.marks,
+      answerStatus: args.question.answerStatus,
+      decision: args.decision,
+      correctness: markCorrect
+    });
 
   return {
     id: pyqAttemptId(args.session.id, args.question.id, attemptNumber),
     user_id: args.userId,
     pyq_session_id: args.session.id,
     question_uid: args.question.id,
-    subject: args.question.subject,
+    subject: subject.label || args.question.subject,
+    subject_id: subject.id,
     year: args.question.year,
     attempt_number: attemptNumber,
     selected_answer: selectedAnswer,
     correct_answer: correctAnswer,
-    capture_version: 2,
+    capture_version: 3,
     question_snapshot: pyqQuestionSnapshot(args.question),
     answer_status: args.question.answerStatus,
     screenshot_url: args.screenshotUrl,
     mark_decision: args.decision,
-    mark_correct: evaluatePyqAnswer(args.question, selectedAnswer, args.decision),
+    mark_correct: markCorrect,
     question_started_at: questionStartedAt,
     time_spent_ms: timeSpentMs,
     time_spent_sec: Math.max(1, Math.ceil(timeSpentMs / 1000)),
     bank_version: args.bankVersion,
-    attempted_at: attemptedAt
+    attempted_at: attemptedAt,
+    question_type: args.question.type,
+    question_marks: args.question.marks,
+    score_thirds: scored.scoreThirds,
+    scoring_status: scored.status,
+    scoring_version: scored.scoringVersion,
+    reattempt_id: null,
+    reattempt_round: null,
+    round_attempt_number: null
   };
 }

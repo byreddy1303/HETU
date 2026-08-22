@@ -1,0 +1,15 @@
+{
+  "projectRoot": "/Users/bkalyankrishnareddy/Desktop/GATE PREP/hetu",
+  "batchFiles": [
+    {"path":"playwright.config.ts","language":"typescript","sizeLines":19,"fileCategory":"code"},
+    {"path":"src/__tests__/e2e/dashboard-analysis.spec.ts","language":"typescript","sizeLines":52,"fileCategory":"code"},
+    {"path":"src/__tests__/setup.ts","language":"typescript","sizeLines":54,"fileCategory":"code"},
+    {"path":"src/index.css","language":"css","sizeLines":1740,"fileCategory":"markup"}
+  ],
+  "batchImportData": {
+    "playwright.config.ts":[],
+    "src/__tests__/e2e/dashboard-analysis.spec.ts":[],
+    "src/__tests__/setup.ts":[],
+    "src/index.css":[]
+  }
+}

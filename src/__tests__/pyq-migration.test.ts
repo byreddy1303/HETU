@@ -19,4 +19,84 @@ describe('PYQ production audit migration', () => {
     expect(sql).toContain('Committed PYQ attempts are immutable');
     expect(sql).toContain('drop policy if exists del_own on public.pyq_attempts');
   });
+
+  it('adds canonical identities, write-once source links, v3 scoring, and versioned readiness', () => {
+    const sql = readFileSync(
+      path.resolve(
+        process.cwd(),
+        'supabase/migrations/20260822000001_phase1_canonical_evidence.sql'
+      ),
+      'utf8'
+    );
+
+    expect(sql).toContain('gate_subject_id');
+    expect(sql).toContain("regexp_replace(lower(trim(coalesce(value, '')))");
+    expect(sql).toContain("when 'computer organization' then 'coa'");
+    expect(sql).toContain("when 'c programming' then 'programming-data-structures'");
+    expect(sql).toContain('source_pyq_attempt_id');
+    expect(sql).toContain('questions_source_pyq_attempt_owner_fk');
+    expect(sql).toContain('questions_source_attempt_write_once');
+    expect(sql).toContain('questions_one_analysis_per_pyq_attempt');
+    expect(sql).toContain('question_marks smallint');
+    expect(sql).toContain('score_thirds smallint');
+    expect(sql).toContain('pyq_attempts_v3_audit_check');
+    expect(sql).toContain('pyq_attempts_question_type_check');
+    expect(sql).toContain("upper(question_type) = 'MARKS_TO_ALL'");
+    expect(sql).toContain("upper(question_type) in ('MCQ', 'MSQ', 'NAT')");
+    expect(sql).toContain('pyq_attempts_unique_reattempt_submission');
+    expect(sql).toContain('planner_day_plans_gate_subjects');
+    expect(sql).toContain('mock_tests_gate_subjects');
+    expect(sql).toContain('a_set_gate_subject_identity');
+    expect(sql).toContain("jsonb_typeof(payload) is distinct from 'array'");
+    expect(sql).not.toContain(
+      "case when jsonb_typeof(payload) = 'array' then payload else '[]'::jsonb end"
+    );
+    expect(sql).toContain("jsonb_build_object('subjectId', null)");
+    expect(sql).toContain("jsonb_build_object('subject_id', null)");
+    expect(sql).toContain("new.subject is distinct from old.subject");
+    expect(sql).toContain('new.subject_id := null');
+    expect(sql).toContain('attempt.capture_version in (0, 1)');
+    expect(sql).toContain("question.source_ref ilike '%gate%'");
+    expect(sql).toContain('public.gate_subject_id(attempt.subject) is not null');
+    expect(sql).toContain('question.session_id = attempt.pyq_session_id');
+    expect(sql).toContain("public.gate_subject_id(question_snapshot->>'subject') is not null");
+    expect(sql).toContain("subject_id = public.gate_subject_id(question_snapshot->>'subject')");
+    expect(sql).toContain("trim(subject) = trim(question_snapshot->>'subject')");
+    expect(sql).toContain('and scoring_status = case');
+    expect(sql).toContain("and answer_status = 'marks-to-all' then 'bonus'");
+    expect(sql).toContain("and (mark_decision = 'SKIP' or mark_correct is not null) then 'scored'");
+    expect(sql).toContain("else 'unscorable'");
+    expect(sql).toContain('(to_jsonb(new) - rollout_fields) = (to_jsonb(old) - rollout_fields)');
+    expect(sql).toContain('calculation_version smallint not null default 1');
+    expect(sql).toContain('readiness_snapshots_v2_evidence_check');
+    expect(sql).toContain('readiness_snapshots_methodology_guard');
+    expect(sql).toContain('current_version constant smallint := 2');
+    expect(sql).toContain('disable trigger pyq_attempts_immutable');
+    expect(sql).toContain('exception when others then');
+    expect(sql).toContain('enable trigger pyq_attempts_immutable');
+  });
+
+  it('runs the canonical subject trigger before the immutable receipt trigger', () => {
+    const phaseOneSql = readFileSync(
+      path.resolve(
+        process.cwd(),
+        'supabase/migrations/20260822000001_phase1_canonical_evidence.sql'
+      ),
+      'utf8'
+    );
+    const auditSql = readFileSync(
+      path.resolve(process.cwd(), 'supabase/migrations/20260808000001_pyq_attempt_audit.sql'),
+      'utf8'
+    );
+    const canonicalizer = phaseOneSql.match(
+      /create trigger ([a-z_]+) before insert or update of subject, subject_id/
+    )?.[1];
+    const immutabilityGuard = auditSql.match(
+      /create trigger ([a-z_]+)\s+before update on public\.pyq_attempts/
+    )?.[1];
+
+    expect(canonicalizer).toBe('a_set_gate_subject_identity');
+    expect(immutabilityGuard).toBe('pyq_attempts_immutable');
+    expect(canonicalizer!.localeCompare(immutabilityGuard!)).toBeLessThan(0);
+  });
 });

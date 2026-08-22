@@ -1,0 +1,1354 @@
+{
+  "registryVersion": "gate-cs-2027-official-v1",
+  "registryRetrievedOn": "2026-08-22",
+  "officialSources": {
+    "pattern": "https://gate2027.iitm.ac.in/question_paper_pattern",
+    "syllabusIndex": "https://gate2027.iitm.ac.in/exam_papers_and_syllabus",
+    "computerScienceSyllabus": "https://gate2027.iitm.ac.in/static/doc/GATE2027_Syllabus/CS_GATE2027_Syllabus.pdf",
+    "generalAptitudeSyllabus": "https://gate2027.iitm.ac.in/static/doc/GATE2027_Syllabus/GA_GATE2027_Syllabus.pdf"
+  },
+  "blueprint": {
+    "durationMinutes": 180,
+    "questionCount": 65,
+    "totalMarks": 100,
+    "sectionMarks": {
+      "generalAptitude": 15,
+      "engineeringMathematics": 13,
+      "coreSubject": 72
+    },
+    "questionMarks": [
+      1,
+      2
+    ],
+    "questionTypes": [
+      "MCQ",
+      "MSQ",
+      "NAT"
+    ],
+    "scoring": {
+      "mcqWrongPenalty": "one-third-of-question-marks",
+      "msqWrongPenaltyMarks": 0,
+      "natWrongPenaltyMarks": 0,
+      "msqPartialCredit": false
+    }
+  },
+  "bankVersion": "gate-1990-2026-v8-verified-pdf-marks",
+  "bankGeneratedAt": "2026-08-22T09:50:34.489Z",
+  "auditKind": "independent-official-scope-audit",
+  "scopeLimit": "This registry audits taxonomy scope, not the correctness of every individual question classification.",
+  "bank": {
+    "questionCount": 3200,
+    "bankSubjectCount": 14,
+    "bankTopicCount": 95,
+    "canonicalSubjectQuestionCounts": {
+      "discrete-mathematics": 293,
+      "engineering-mathematics": 238,
+      "digital-logic": 475,
+      "coa": 248,
+      "programming-data-structures": 310,
+      "algorithms": 277,
+      "theory-of-computation": 235,
+      "compiler-design": 175,
+      "operating-systems": 276,
+      "databases": 179,
+      "computer-networks": 194,
+      "general-aptitude": 267
+    },
+    "questionScopeCounts": {
+      "current": 3023,
+      "supporting": 72,
+      "historical": 44,
+      "review-required": 61
+    },
+    "questionTypes": {
+      "AMBIGUOUS": 3,
+      "MARKS_TO_ALL": 1,
+      "MCQ": 2366,
+      "MSQ": 180,
+      "NAT": 540,
+      "SUBJECTIVE": 20,
+      "UNSUPPORTED": 90
+    },
+    "marks": {
+      "1": 470,
+      "2": 368,
+      "unknown": 2362
+    },
+    "answerStatuses": {
+      "ambiguous": 3,
+      "available": 3106,
+      "marks-to-all": 1,
+      "unsupported": 90
+    },
+    "scoringMetadata": {
+      "standardQuestionCount": 3086,
+      "answerAvailableStandardQuestionCount": 3086,
+      "marksPresentRuleEvaluableQuestionCount": 791,
+      "marksPresentRuleEvaluablePercentOfAnswerAvailableStandard": 25.6,
+      "officialKeyVerifiedExactQuestionCount": 130,
+      "officialKeyVerifiedOneMarkCount": 60,
+      "officialKeyVerifiedTwoMarkCount": 70,
+      "unverifiedMarkProvenanceRuleEvaluableCount": 661,
+      "pdfMarkConflicts": [],
+      "policy": "Stored MCQ/MSQ/NAT rows with a valid answer, answer provenance, and 1/2-mark metadata are GATE-rule-evaluable. Only matching structured PDF-answer-key marks are labelled official-key verified exact; tag-only marks are not promoted to verified provenance."
+    }
+  },
+  "officialTopicCoverage": {
+    "currentLeafCount": 69,
+    "byCoverage": {
+      "broad": 42,
+      "explicit": 23,
+      "missing": 2,
+      "review-required": 2
+    },
+    "nonExplicitCoverage": [
+      {
+        "subjectId": "discrete-mathematics",
+        "topicId": "logic",
+        "label": "Propositional and first order logic",
+        "coverage": "broad",
+        "bankTopicKeys": [
+          "discrete-mathematics/propositional-logic"
+        ]
+      },
+      {
+        "subjectId": "discrete-mathematics",
+        "topicId": "partial-orders-lattices",
+        "label": "Partial orders and lattices",
+        "coverage": "broad",
+        "bankTopicKeys": [
+          "discrete-mathematics/relation",
+          "discrete-mathematics/lattice"
+        ]
+      },
+      {
+        "subjectId": "discrete-mathematics",
+        "topicId": "monoids-groups",
+        "label": "Monoids and groups",
+        "coverage": "broad",
+        "bankTopicKeys": [
+          "discrete-mathematics/group-theory"
+        ]
+      },
+      {
+        "subjectId": "discrete-mathematics",
+        "topicId": "graphs",
+        "label": "Graphs: connectivity, matching and colouring",
+        "coverage": "broad",
+        "bankTopicKeys": [
+          "discrete-mathematics/graph-theory"
+        ]
+      },
+      {
+        "subjectId": "discrete-mathematics",
+        "topicId": "combinatorics",
+        "label": "Combinatorics: counting, recurrence relations and generating functions",
+        "coverage": "broad",
+        "bankTopicKeys": [
+          "discrete-mathematics/combination",
+          "discrete-mathematics/recurrence"
+        ]
+      },
+      {
+        "subjectId": "engineering-mathematics",
+        "topicId": "linear-algebra",
+        "label": "Matrices, determinants, systems of linear equations, eigenvalues and eigenvectors, and LU decomposition",
+        "coverage": "broad",
+        "bankTopicKeys": [
+          "engineering-mathematics/linear-algebra"
+        ]
+      },
+      {
+        "subjectId": "engineering-mathematics",
+        "topicId": "calculus",
+        "label": "Limits, continuity, differentiability, maxima and minima, mean value theorem, and integration",
+        "coverage": "broad",
+        "bankTopicKeys": [
+          "engineering-mathematics/calculus"
+        ]
+      },
+      {
+        "subjectId": "engineering-mathematics",
+        "topicId": "probability-distributions",
+        "label": "Random variables and uniform, normal, exponential, Poisson and binomial distributions",
+        "coverage": "broad",
+        "bankTopicKeys": [
+          "engineering-mathematics/probability-statistics"
+        ]
+      },
+      {
+        "subjectId": "engineering-mathematics",
+        "topicId": "statistics-and-bayes",
+        "label": "Mean, median, mode, standard deviation, conditional probability and Bayes theorem",
+        "coverage": "broad",
+        "bankTopicKeys": [
+          "engineering-mathematics/probability-statistics"
+        ]
+      },
+      {
+        "subjectId": "digital-logic",
+        "topicId": "boolean-minimization",
+        "label": "Boolean algebra and minimization by algebraic technique, Karnaugh map and tabular method",
+        "coverage": "broad",
+        "bankTopicKeys": [
+          "digital-logic/boolean-algebra"
+        ]
+      },
+      {
+        "subjectId": "digital-logic",
+        "topicId": "number-representation-arithmetic",
+        "label": "Number representation and arithmetic: fixed and floating point",
+        "coverage": "broad",
+        "bankTopicKeys": [
+          "digital-logic/number-system"
+        ]
+      },
+      {
+        "subjectId": "coa",
+        "topicId": "alu",
+        "label": "Design of arithmetic and logic unit",
+        "coverage": "broad",
+        "bankTopicKeys": [
+          "coa/alu-data-path-and-control-unit"
+        ]
+      },
+      {
+        "subjectId": "coa",
+        "topicId": "control-unit",
+        "label": "Hardwired and microprogrammed control-unit design",
+        "coverage": "broad",
+        "bankTopicKeys": [
+          "coa/alu-data-path-and-control-unit"
+        ]
+      },
+      {
+        "subjectId": "coa",
+        "topicId": "memory",
+        "label": "Memory interfacing and hierarchy: performance and cache-memory mapping",
+        "coverage": "broad",
+        "bankTopicKeys": [
+          "coa/cache-memory",
+          "coa/memory-chip-design"
+        ]
+      },
+      {
+        "subjectId": "coa",
+        "topicId": "io-interface",
+        "label": "I/O interface, interrupt and DMA",
+        "coverage": "broad",
+        "bankTopicKeys": [
+          "coa/io-interface",
+          "coa/interrupt"
+        ]
+      },
+      {
+        "subjectId": "coa",
+        "topicId": "pipelining",
+        "label": "Instruction pipelining and pipeline hazards",
+        "coverage": "broad",
+        "bankTopicKeys": [
+          "coa/pipeline-processor"
+        ]
+      },
+      {
+        "subjectId": "programming-data-structures",
+        "topicId": "c-programming",
+        "label": "Programming in C",
+        "coverage": "broad",
+        "bankTopicKeys": [
+          "c-programming/arithmetic-operation",
+          "c-programming/conditional-statement",
+          "c-programming/loops",
+          "c-programming/array-and-pointer",
+          "c-programming/function"
+        ]
+      },
+      {
+        "subjectId": "programming-data-structures",
+        "topicId": "recursion",
+        "label": "Recursion",
+        "coverage": "broad",
+        "bankTopicKeys": [
+          "c-programming/function"
+        ]
+      },
+      {
+        "subjectId": "programming-data-structures",
+        "topicId": "data-structures",
+        "label": "Arrays, stacks, queues, linked lists, trees, binary search trees, binary heaps and graphs",
+        "coverage": "broad",
+        "bankTopicKeys": [
+          "data-structure/array",
+          "data-structure/linked-list",
+          "data-structure/stack",
+          "data-structure/queue",
+          "data-structure/binary-tree",
+          "data-structure/binary-search-tree",
+          "data-structure/heap-tree",
+          "data-structure/n-ary-tree"
+        ]
+      },
+      {
+        "subjectId": "algorithms",
+        "topicId": "search-sort-hash",
+        "label": "Searching, sorting and hashing",
+        "coverage": "broad",
+        "bankTopicKeys": [
+          "algorithms/sorting",
+          "data-structure/hashing"
+        ]
+      },
+      {
+        "subjectId": "theory-of-computation",
+        "topicId": "pumping-lemma",
+        "label": "Pumping lemma",
+        "coverage": "broad",
+        "bankTopicKeys": [
+          "theory-of-computation/regular-language",
+          "theory-of-computation/context-free-language"
+        ]
+      },
+      {
+        "subjectId": "compiler-design",
+        "topicId": "local-optimisation",
+        "label": "Local optimisation",
+        "coverage": "review-required",
+        "bankTopicKeys": [
+          "compiler-design/matching"
+        ]
+      },
+      {
+        "subjectId": "compiler-design",
+        "topicId": "data-flow",
+        "label": "Data-flow analyses: constant propagation, liveness analysis and common-subexpression elimination",
+        "coverage": "review-required",
+        "bankTopicKeys": [
+          "compiler-design/matching"
+        ]
+      },
+      {
+        "subjectId": "operating-systems",
+        "topicId": "ipc",
+        "label": "Inter-process communication",
+        "coverage": "missing",
+        "bankTopicKeys": []
+      },
+      {
+        "subjectId": "operating-systems",
+        "topicId": "scheduling",
+        "label": "CPU and I/O scheduling",
+        "coverage": "broad",
+        "bankTopicKeys": [
+          "operating-systems/cpu-scheduling",
+          "operating-systems/disk-scheduling"
+        ]
+      },
+      {
+        "subjectId": "operating-systems",
+        "topicId": "memory",
+        "label": "Memory management and virtual memory",
+        "coverage": "broad",
+        "bankTopicKeys": [
+          "operating-systems/memory-management"
+        ]
+      },
+      {
+        "subjectId": "databases",
+        "topicId": "file-organization",
+        "label": "File organization",
+        "coverage": "broad",
+        "bankTopicKeys": [
+          "databases/file-system"
+        ]
+      },
+      {
+        "subjectId": "databases",
+        "topicId": "indexing",
+        "label": "Indexing, including B and B+ trees",
+        "coverage": "broad",
+        "bankTopicKeys": [
+          "databases/file-system",
+          "data-structure/b-tree",
+          "data-structure/b-plus-tree"
+        ]
+      },
+      {
+        "subjectId": "databases",
+        "topicId": "transactions-concurrency",
+        "label": "Transactions and concurrency control",
+        "coverage": "broad",
+        "bankTopicKeys": [
+          "databases/transactions"
+        ]
+      },
+      {
+        "subjectId": "computer-networks",
+        "topicId": "layering",
+        "label": "Principles of layering",
+        "coverage": "broad",
+        "bankTopicKeys": [
+          "computer-networks/osi-layer"
+        ]
+      },
+      {
+        "subjectId": "computer-networks",
+        "topicId": "switching-performance",
+        "label": "Circuit, packet and virtual-circuit switching, and performance metrics",
+        "coverage": "missing",
+        "bankTopicKeys": []
+      },
+      {
+        "subjectId": "computer-networks",
+        "topicId": "data-link",
+        "label": "Data-link error detection, Medium Access Control and Ethernet",
+        "coverage": "broad",
+        "bankTopicKeys": [
+          "computer-networks/data-link-layer"
+        ]
+      },
+      {
+        "subjectId": "computer-networks",
+        "topicId": "routing",
+        "label": "Distance-vector and link-state routing",
+        "coverage": "broad",
+        "bankTopicKeys": [
+          "computer-networks/network-layer-protocol"
+        ]
+      },
+      {
+        "subjectId": "computer-networks",
+        "topicId": "ipv4",
+        "label": "IPv4 fragmentation, CIDR notation and Network Address Translation",
+        "coverage": "broad",
+        "bankTopicKeys": [
+          "computer-networks/network-layer-protocol"
+        ]
+      },
+      {
+        "subjectId": "computer-networks",
+        "topicId": "tcp",
+        "label": "TCP flow control and congestion control, and the socket API",
+        "coverage": "broad",
+        "bankTopicKeys": [
+          "computer-networks/transport-layer-protocol"
+        ]
+      },
+      {
+        "subjectId": "computer-networks",
+        "topicId": "dns-http",
+        "label": "DNS and HTTP",
+        "coverage": "broad",
+        "bankTopicKeys": [
+          "computer-networks/application-layer-protocols"
+        ]
+      },
+      {
+        "subjectId": "general-aptitude",
+        "topicId": "grammar",
+        "label": "Basic English grammar: tenses, articles, adjectives, prepositions, conjunctions, verb-noun agreement and other parts of speech",
+        "coverage": "broad",
+        "bankTopicKeys": [
+          "general-aptitude/general-aptitude"
+        ]
+      },
+      {
+        "subjectId": "general-aptitude",
+        "topicId": "vocabulary",
+        "label": "Words, idioms and phrases in context",
+        "coverage": "broad",
+        "bankTopicKeys": [
+          "general-aptitude/general-aptitude"
+        ]
+      },
+      {
+        "subjectId": "general-aptitude",
+        "topicId": "reading-sequencing",
+        "label": "Reading and comprehension, and narrative sequencing",
+        "coverage": "broad",
+        "bankTopicKeys": [
+          "general-aptitude/general-aptitude"
+        ]
+      },
+      {
+        "subjectId": "general-aptitude",
+        "topicId": "data-interpretation",
+        "label": "Data interpretation using graphs, 2D and 3D plots, maps and tables",
+        "coverage": "broad",
+        "bankTopicKeys": [
+          "general-aptitude/general-aptitude"
+        ]
+      },
+      {
+        "subjectId": "general-aptitude",
+        "topicId": "numerical-computation",
+        "label": "Ratios, percentages, powers, exponents, logarithms, permutations, combinations and series",
+        "coverage": "broad",
+        "bankTopicKeys": [
+          "general-aptitude/general-aptitude"
+        ]
+      },
+      {
+        "subjectId": "general-aptitude",
+        "topicId": "geometry-statistics",
+        "label": "Mensuration, geometry, elementary statistics and probability",
+        "coverage": "broad",
+        "bankTopicKeys": [
+          "general-aptitude/general-aptitude"
+        ]
+      },
+      {
+        "subjectId": "general-aptitude",
+        "topicId": "logic",
+        "label": "Deduction and induction",
+        "coverage": "broad",
+        "bankTopicKeys": [
+          "general-aptitude/general-aptitude"
+        ]
+      },
+      {
+        "subjectId": "general-aptitude",
+        "topicId": "analogy-numerical-reasoning",
+        "label": "Analogy, numerical relations and reasoning",
+        "coverage": "broad",
+        "bankTopicKeys": [
+          "general-aptitude/general-aptitude"
+        ]
+      },
+      {
+        "subjectId": "general-aptitude",
+        "topicId": "shape-transformations",
+        "label": "Translation, rotation, scaling, mirroring, assembling and grouping of shapes",
+        "coverage": "broad",
+        "bankTopicKeys": [
+          "general-aptitude/general-aptitude"
+        ]
+      },
+      {
+        "subjectId": "general-aptitude",
+        "topicId": "spatial-patterns",
+        "label": "Paper folding, cutting, and patterns in two and three dimensions",
+        "coverage": "broad",
+        "bankTopicKeys": [
+          "general-aptitude/general-aptitude"
+        ]
+      }
+    ]
+  },
+  "supportingAndHistorical": [
+    {
+      "subjectId": "discrete-mathematics",
+      "supporting": [
+        {
+          "id": "planarity",
+          "label": "Planar graphs",
+          "bankTopicKeys": [
+            "discrete-mathematics/planar-graph"
+          ],
+          "reason": "Useful graph theory, but planarity is not named in the official 2027 CS syllabus."
+        }
+      ],
+      "historical": []
+    },
+    {
+      "subjectId": "engineering-mathematics",
+      "supporting": [
+        {
+          "id": "advanced-linear-algebra",
+          "label": "QR, SVD and other advanced decompositions",
+          "bankTopicKeys": [],
+          "reason": "Useful enrichment; the official 2027 syllabus names LU decomposition only."
+        }
+      ],
+      "historical": []
+    },
+    {
+      "subjectId": "coa",
+      "supporting": [
+        {
+          "id": "secondary-storage",
+          "label": "Secondary storage",
+          "bankTopicKeys": [
+            "coa/secondary-storage"
+          ],
+          "reason": "Useful architecture context, but not named in the official 2027 CS syllabus."
+        }
+      ],
+      "historical": []
+    },
+    {
+      "subjectId": "programming-data-structures",
+      "supporting": [
+        {
+          "id": "balanced-search-trees",
+          "label": "AVL trees",
+          "bankTopicKeys": [
+            "data-structure/avl-tree"
+          ],
+          "reason": "A useful tree specialization, but not named explicitly in the official 2027 CS syllabus."
+        }
+      ],
+      "historical": [
+        {
+          "id": "misplaced-database-index-trees",
+          "label": "B and B+ trees under Data Structures",
+          "bankTopicKeys": [
+            "data-structure/b-tree",
+            "data-structure/b-plus-tree"
+          ],
+          "reason": "B and B+ indexing belongs to the current Databases scope and should be re-homed without deleting historical questions."
+        },
+        {
+          "id": "misplaced-hashing",
+          "label": "Hashing under Data Structures",
+          "bankTopicKeys": [
+            "data-structure/hashing"
+          ],
+          "reason": "Hashing belongs to the current Algorithms scope and should be re-homed without deleting historical questions."
+        }
+      ]
+    },
+    {
+      "subjectId": "algorithms",
+      "supporting": [
+        {
+          "id": "recurrence-analysis",
+          "label": "Recurrence-relation analysis",
+          "bankTopicKeys": [
+            "algorithms/recurrence-relation"
+          ],
+          "reason": "Useful for complexity analysis; recurrence relations are named under Discrete Mathematics rather than Algorithms."
+        }
+      ],
+      "historical": []
+    },
+    {
+      "subjectId": "compiler-design",
+      "supporting": [],
+      "historical": [
+        {
+          "id": "matching-label",
+          "label": "Matching",
+          "bankTopicKeys": [
+            "compiler-design/matching"
+          ],
+          "reason": "The label is not an official topic and conflates optimization/data-flow questions; rows require content review before relabeling."
+        }
+      ]
+    },
+    {
+      "subjectId": "databases",
+      "supporting": [
+        {
+          "id": "recovery-mvcc",
+          "label": "Recovery and MVCC extensions",
+          "bankTopicKeys": [],
+          "reason": "Useful database depth; not named explicitly in the official 2027 CS syllabus."
+        }
+      ],
+      "historical": []
+    },
+    {
+      "subjectId": "computer-networks",
+      "supporting": [
+        {
+          "id": "physical-layer",
+          "label": "Physical-layer detail",
+          "bankTopicKeys": [
+            "computer-networks/physical-layer"
+          ],
+          "reason": "Useful prerequisite material, but not named as a standalone topic in the official 2027 CS syllabus."
+        }
+      ],
+      "historical": [
+        {
+          "id": "network-security",
+          "label": "Network security",
+          "bankTopicKeys": [
+            "computer-networks/network-security"
+          ],
+          "reason": "Retained for historical practice; not present in the official 2027 CS syllabus."
+        }
+      ]
+    }
+  ],
+  "bankTopicScopes": [
+    {
+      "bankSubjectSlug": "general-aptitude",
+      "canonicalSubjectId": "general-aptitude",
+      "topicSlug": "general-aptitude",
+      "status": "current",
+      "questionCount": 267
+    },
+    {
+      "bankSubjectSlug": "discrete-mathematics",
+      "canonicalSubjectId": "discrete-mathematics",
+      "topicSlug": "propositional-logic",
+      "status": "current",
+      "questionCount": 61
+    },
+    {
+      "bankSubjectSlug": "discrete-mathematics",
+      "canonicalSubjectId": "discrete-mathematics",
+      "topicSlug": "set-theory",
+      "status": "current",
+      "questionCount": 26
+    },
+    {
+      "bankSubjectSlug": "discrete-mathematics",
+      "canonicalSubjectId": "discrete-mathematics",
+      "topicSlug": "relation",
+      "status": "current",
+      "questionCount": 25
+    },
+    {
+      "bankSubjectSlug": "discrete-mathematics",
+      "canonicalSubjectId": "discrete-mathematics",
+      "topicSlug": "functions",
+      "status": "current",
+      "questionCount": 24
+    },
+    {
+      "bankSubjectSlug": "discrete-mathematics",
+      "canonicalSubjectId": "discrete-mathematics",
+      "topicSlug": "lattice",
+      "status": "current",
+      "questionCount": 11
+    },
+    {
+      "bankSubjectSlug": "discrete-mathematics",
+      "canonicalSubjectId": "discrete-mathematics",
+      "topicSlug": "group-theory",
+      "status": "current",
+      "questionCount": 32
+    },
+    {
+      "bankSubjectSlug": "discrete-mathematics",
+      "canonicalSubjectId": "discrete-mathematics",
+      "topicSlug": "graph-theory",
+      "status": "current",
+      "questionCount": 60
+    },
+    {
+      "bankSubjectSlug": "discrete-mathematics",
+      "canonicalSubjectId": "discrete-mathematics",
+      "topicSlug": "planar-graph",
+      "status": "supporting",
+      "questionCount": 13
+    },
+    {
+      "bankSubjectSlug": "discrete-mathematics",
+      "canonicalSubjectId": "discrete-mathematics",
+      "topicSlug": "combination",
+      "status": "current",
+      "questionCount": 37
+    },
+    {
+      "bankSubjectSlug": "discrete-mathematics",
+      "canonicalSubjectId": "discrete-mathematics",
+      "topicSlug": "recurrence",
+      "status": "current",
+      "questionCount": 4
+    },
+    {
+      "bankSubjectSlug": "engineering-mathematics",
+      "canonicalSubjectId": "engineering-mathematics",
+      "topicSlug": "linear-algebra",
+      "status": "current",
+      "questionCount": 76
+    },
+    {
+      "bankSubjectSlug": "engineering-mathematics",
+      "canonicalSubjectId": "engineering-mathematics",
+      "topicSlug": "calculus",
+      "status": "current",
+      "questionCount": 84
+    },
+    {
+      "bankSubjectSlug": "engineering-mathematics",
+      "canonicalSubjectId": "engineering-mathematics",
+      "topicSlug": "probability-statistics",
+      "status": "current",
+      "questionCount": 78
+    },
+    {
+      "bankSubjectSlug": "digital-logic",
+      "canonicalSubjectId": "digital-logic",
+      "topicSlug": "number-system",
+      "status": "current",
+      "questionCount": 80
+    },
+    {
+      "bankSubjectSlug": "digital-logic",
+      "canonicalSubjectId": "digital-logic",
+      "topicSlug": "boolean-algebra",
+      "status": "current",
+      "questionCount": 158
+    },
+    {
+      "bankSubjectSlug": "digital-logic",
+      "canonicalSubjectId": "digital-logic",
+      "topicSlug": "combinational-circuit",
+      "status": "current",
+      "questionCount": 104
+    },
+    {
+      "bankSubjectSlug": "digital-logic",
+      "canonicalSubjectId": "digital-logic",
+      "topicSlug": "sequential-circuit",
+      "status": "current",
+      "questionCount": 133
+    },
+    {
+      "bankSubjectSlug": "coa",
+      "canonicalSubjectId": "coa",
+      "topicSlug": "machine-instruction",
+      "status": "current",
+      "questionCount": 59
+    },
+    {
+      "bankSubjectSlug": "coa",
+      "canonicalSubjectId": "coa",
+      "topicSlug": "addressing-modes",
+      "status": "current",
+      "questionCount": 14
+    },
+    {
+      "bankSubjectSlug": "coa",
+      "canonicalSubjectId": "coa",
+      "topicSlug": "alu-data-path-and-control-unit",
+      "status": "current",
+      "questionCount": 17
+    },
+    {
+      "bankSubjectSlug": "coa",
+      "canonicalSubjectId": "coa",
+      "topicSlug": "io-interface",
+      "status": "current",
+      "questionCount": 15
+    },
+    {
+      "bankSubjectSlug": "coa",
+      "canonicalSubjectId": "coa",
+      "topicSlug": "interrupt",
+      "status": "current",
+      "questionCount": 13
+    },
+    {
+      "bankSubjectSlug": "coa",
+      "canonicalSubjectId": "coa",
+      "topicSlug": "pipeline-processor",
+      "status": "current",
+      "questionCount": 46
+    },
+    {
+      "bankSubjectSlug": "coa",
+      "canonicalSubjectId": "coa",
+      "topicSlug": "cache-memory",
+      "status": "current",
+      "questionCount": 65
+    },
+    {
+      "bankSubjectSlug": "coa",
+      "canonicalSubjectId": "coa",
+      "topicSlug": "secondary-storage",
+      "status": "supporting",
+      "questionCount": 9
+    },
+    {
+      "bankSubjectSlug": "coa",
+      "canonicalSubjectId": "coa",
+      "topicSlug": "memory-chip-design",
+      "status": "current",
+      "questionCount": 10
+    },
+    {
+      "bankSubjectSlug": "c-programming",
+      "canonicalSubjectId": "programming-data-structures",
+      "topicSlug": "arithmetic-operation",
+      "status": "current",
+      "questionCount": 16
+    },
+    {
+      "bankSubjectSlug": "c-programming",
+      "canonicalSubjectId": "programming-data-structures",
+      "topicSlug": "conditional-statement",
+      "status": "current",
+      "questionCount": 2
+    },
+    {
+      "bankSubjectSlug": "c-programming",
+      "canonicalSubjectId": "programming-data-structures",
+      "topicSlug": "loops",
+      "status": "current",
+      "questionCount": 15
+    },
+    {
+      "bankSubjectSlug": "c-programming",
+      "canonicalSubjectId": "programming-data-structures",
+      "topicSlug": "array-and-pointer",
+      "status": "current",
+      "questionCount": 39
+    },
+    {
+      "bankSubjectSlug": "c-programming",
+      "canonicalSubjectId": "programming-data-structures",
+      "topicSlug": "function",
+      "status": "current",
+      "questionCount": 48
+    },
+    {
+      "bankSubjectSlug": "data-structure",
+      "canonicalSubjectId": "programming-data-structures",
+      "topicSlug": "array",
+      "status": "current",
+      "questionCount": 12
+    },
+    {
+      "bankSubjectSlug": "data-structure",
+      "canonicalSubjectId": "programming-data-structures",
+      "topicSlug": "linked-list",
+      "status": "current",
+      "questionCount": 16
+    },
+    {
+      "bankSubjectSlug": "data-structure",
+      "canonicalSubjectId": "programming-data-structures",
+      "topicSlug": "stack",
+      "status": "current",
+      "questionCount": 20
+    },
+    {
+      "bankSubjectSlug": "data-structure",
+      "canonicalSubjectId": "programming-data-structures",
+      "topicSlug": "queue",
+      "status": "current",
+      "questionCount": 9
+    },
+    {
+      "bankSubjectSlug": "data-structure",
+      "canonicalSubjectId": "programming-data-structures",
+      "topicSlug": "binary-tree",
+      "status": "current",
+      "questionCount": 30
+    },
+    {
+      "bankSubjectSlug": "data-structure",
+      "canonicalSubjectId": "programming-data-structures",
+      "topicSlug": "binary-search-tree",
+      "status": "current",
+      "questionCount": 30
+    },
+    {
+      "bankSubjectSlug": "data-structure",
+      "canonicalSubjectId": "programming-data-structures",
+      "topicSlug": "avl-tree",
+      "status": "supporting",
+      "questionCount": 3
+    },
+    {
+      "bankSubjectSlug": "data-structure",
+      "canonicalSubjectId": "programming-data-structures",
+      "topicSlug": "b-tree",
+      "status": "review-required",
+      "questionCount": 14
+    },
+    {
+      "bankSubjectSlug": "data-structure",
+      "canonicalSubjectId": "programming-data-structures",
+      "topicSlug": "b-plus-tree",
+      "status": "review-required",
+      "questionCount": 5
+    },
+    {
+      "bankSubjectSlug": "data-structure",
+      "canonicalSubjectId": "programming-data-structures",
+      "topicSlug": "heap-tree",
+      "status": "current",
+      "questionCount": 27
+    },
+    {
+      "bankSubjectSlug": "data-structure",
+      "canonicalSubjectId": "programming-data-structures",
+      "topicSlug": "n-ary-tree",
+      "status": "current",
+      "questionCount": 7
+    },
+    {
+      "bankSubjectSlug": "data-structure",
+      "canonicalSubjectId": "programming-data-structures",
+      "topicSlug": "hashing",
+      "status": "review-required",
+      "questionCount": 17
+    },
+    {
+      "bankSubjectSlug": "algorithms",
+      "canonicalSubjectId": "algorithms",
+      "topicSlug": "asymptotic-notation",
+      "status": "current",
+      "questionCount": 85
+    },
+    {
+      "bankSubjectSlug": "algorithms",
+      "canonicalSubjectId": "algorithms",
+      "topicSlug": "recurrence-relation",
+      "status": "supporting",
+      "questionCount": 41
+    },
+    {
+      "bankSubjectSlug": "algorithms",
+      "canonicalSubjectId": "algorithms",
+      "topicSlug": "divide-and-conquer",
+      "status": "current",
+      "questionCount": 7
+    },
+    {
+      "bankSubjectSlug": "algorithms",
+      "canonicalSubjectId": "algorithms",
+      "topicSlug": "sorting",
+      "status": "current",
+      "questionCount": 37
+    },
+    {
+      "bankSubjectSlug": "algorithms",
+      "canonicalSubjectId": "algorithms",
+      "topicSlug": "greedy-technique",
+      "status": "current",
+      "questionCount": 10
+    },
+    {
+      "bankSubjectSlug": "algorithms",
+      "canonicalSubjectId": "algorithms",
+      "topicSlug": "minimum-spanning-tree",
+      "status": "current",
+      "questionCount": 38
+    },
+    {
+      "bankSubjectSlug": "algorithms",
+      "canonicalSubjectId": "algorithms",
+      "topicSlug": "shortest-path",
+      "status": "current",
+      "questionCount": 16
+    },
+    {
+      "bankSubjectSlug": "algorithms",
+      "canonicalSubjectId": "algorithms",
+      "topicSlug": "graph-traversal",
+      "status": "current",
+      "questionCount": 26
+    },
+    {
+      "bankSubjectSlug": "algorithms",
+      "canonicalSubjectId": "algorithms",
+      "topicSlug": "dynamic-programming",
+      "status": "current",
+      "questionCount": 17
+    },
+    {
+      "bankSubjectSlug": "theory-of-computation",
+      "canonicalSubjectId": "theory-of-computation",
+      "topicSlug": "regular-expression",
+      "status": "current",
+      "questionCount": 18
+    },
+    {
+      "bankSubjectSlug": "theory-of-computation",
+      "canonicalSubjectId": "theory-of-computation",
+      "topicSlug": "regular-grammar",
+      "status": "current",
+      "questionCount": 1
+    },
+    {
+      "bankSubjectSlug": "theory-of-computation",
+      "canonicalSubjectId": "theory-of-computation",
+      "topicSlug": "regular-language",
+      "status": "current",
+      "questionCount": 45
+    },
+    {
+      "bankSubjectSlug": "theory-of-computation",
+      "canonicalSubjectId": "theory-of-computation",
+      "topicSlug": "finite-automata",
+      "status": "current",
+      "questionCount": 57
+    },
+    {
+      "bankSubjectSlug": "theory-of-computation",
+      "canonicalSubjectId": "theory-of-computation",
+      "topicSlug": "context-free-grammar",
+      "status": "current",
+      "questionCount": 6
+    },
+    {
+      "bankSubjectSlug": "theory-of-computation",
+      "canonicalSubjectId": "theory-of-computation",
+      "topicSlug": "context-free-language",
+      "status": "current",
+      "questionCount": 40
+    },
+    {
+      "bankSubjectSlug": "theory-of-computation",
+      "canonicalSubjectId": "theory-of-computation",
+      "topicSlug": "push-down-automata",
+      "status": "current",
+      "questionCount": 11
+    },
+    {
+      "bankSubjectSlug": "theory-of-computation",
+      "canonicalSubjectId": "theory-of-computation",
+      "topicSlug": "recursive-language",
+      "status": "current",
+      "questionCount": 24
+    },
+    {
+      "bankSubjectSlug": "theory-of-computation",
+      "canonicalSubjectId": "theory-of-computation",
+      "topicSlug": "turing-machine",
+      "status": "current",
+      "questionCount": 6
+    },
+    {
+      "bankSubjectSlug": "theory-of-computation",
+      "canonicalSubjectId": "theory-of-computation",
+      "topicSlug": "undecidability",
+      "status": "current",
+      "questionCount": 27
+    },
+    {
+      "bankSubjectSlug": "compiler-design",
+      "canonicalSubjectId": "compiler-design",
+      "topicSlug": "lexical-analysis",
+      "status": "current",
+      "questionCount": 8
+    },
+    {
+      "bankSubjectSlug": "compiler-design",
+      "canonicalSubjectId": "compiler-design",
+      "topicSlug": "parsing",
+      "status": "current",
+      "questionCount": 93
+    },
+    {
+      "bankSubjectSlug": "compiler-design",
+      "canonicalSubjectId": "compiler-design",
+      "topicSlug": "syntax-directed-translation",
+      "status": "current",
+      "questionCount": 17
+    },
+    {
+      "bankSubjectSlug": "compiler-design",
+      "canonicalSubjectId": "compiler-design",
+      "topicSlug": "intermediate-code-generation",
+      "status": "current",
+      "questionCount": 14
+    },
+    {
+      "bankSubjectSlug": "compiler-design",
+      "canonicalSubjectId": "compiler-design",
+      "topicSlug": "runtime-environment",
+      "status": "current",
+      "questionCount": 18
+    },
+    {
+      "bankSubjectSlug": "compiler-design",
+      "canonicalSubjectId": "compiler-design",
+      "topicSlug": "matching",
+      "status": "review-required",
+      "questionCount": 25
+    },
+    {
+      "bankSubjectSlug": "operating-systems",
+      "canonicalSubjectId": "operating-systems",
+      "topicSlug": "process",
+      "status": "current",
+      "questionCount": 28
+    },
+    {
+      "bankSubjectSlug": "operating-systems",
+      "canonicalSubjectId": "operating-systems",
+      "topicSlug": "cpu-scheduling",
+      "status": "current",
+      "questionCount": 40
+    },
+    {
+      "bankSubjectSlug": "operating-systems",
+      "canonicalSubjectId": "operating-systems",
+      "topicSlug": "process-synchronization",
+      "status": "current",
+      "questionCount": 41
+    },
+    {
+      "bankSubjectSlug": "operating-systems",
+      "canonicalSubjectId": "operating-systems",
+      "topicSlug": "deadlock",
+      "status": "current",
+      "questionCount": 23
+    },
+    {
+      "bankSubjectSlug": "operating-systems",
+      "canonicalSubjectId": "operating-systems",
+      "topicSlug": "memory-management",
+      "status": "current",
+      "questionCount": 89
+    },
+    {
+      "bankSubjectSlug": "operating-systems",
+      "canonicalSubjectId": "operating-systems",
+      "topicSlug": "file-systems",
+      "status": "current",
+      "questionCount": 18
+    },
+    {
+      "bankSubjectSlug": "operating-systems",
+      "canonicalSubjectId": "operating-systems",
+      "topicSlug": "disk-scheduling",
+      "status": "current",
+      "questionCount": 10
+    },
+    {
+      "bankSubjectSlug": "operating-systems",
+      "canonicalSubjectId": "operating-systems",
+      "topicSlug": "system-call",
+      "status": "current",
+      "questionCount": 17
+    },
+    {
+      "bankSubjectSlug": "operating-systems",
+      "canonicalSubjectId": "operating-systems",
+      "topicSlug": "thread",
+      "status": "current",
+      "questionCount": 10
+    },
+    {
+      "bankSubjectSlug": "databases",
+      "canonicalSubjectId": "databases",
+      "topicSlug": "er-model",
+      "status": "current",
+      "questionCount": 10
+    },
+    {
+      "bankSubjectSlug": "databases",
+      "canonicalSubjectId": "databases",
+      "topicSlug": "relational-schema",
+      "status": "current",
+      "questionCount": 3
+    },
+    {
+      "bankSubjectSlug": "databases",
+      "canonicalSubjectId": "databases",
+      "topicSlug": "relational-algebra",
+      "status": "current",
+      "questionCount": 22
+    },
+    {
+      "bankSubjectSlug": "databases",
+      "canonicalSubjectId": "databases",
+      "topicSlug": "normal-form",
+      "status": "current",
+      "questionCount": 44
+    },
+    {
+      "bankSubjectSlug": "databases",
+      "canonicalSubjectId": "databases",
+      "topicSlug": "transactions",
+      "status": "current",
+      "questionCount": 33
+    },
+    {
+      "bankSubjectSlug": "databases",
+      "canonicalSubjectId": "databases",
+      "topicSlug": "integrity-constraints",
+      "status": "current",
+      "questionCount": 9
+    },
+    {
+      "bankSubjectSlug": "databases",
+      "canonicalSubjectId": "databases",
+      "topicSlug": "sql",
+      "status": "current",
+      "questionCount": 37
+    },
+    {
+      "bankSubjectSlug": "databases",
+      "canonicalSubjectId": "databases",
+      "topicSlug": "tuple-calculus",
+      "status": "current",
+      "questionCount": 10
+    },
+    {
+      "bankSubjectSlug": "databases",
+      "canonicalSubjectId": "databases",
+      "topicSlug": "file-system",
+      "status": "current",
+      "questionCount": 11
+    },
+    {
+      "bankSubjectSlug": "computer-networks",
+      "canonicalSubjectId": "computer-networks",
+      "topicSlug": "osi-layer",
+      "status": "current",
+      "questionCount": 13
+    },
+    {
+      "bankSubjectSlug": "computer-networks",
+      "canonicalSubjectId": "computer-networks",
+      "topicSlug": "physical-layer",
+      "status": "supporting",
+      "questionCount": 6
+    },
+    {
+      "bankSubjectSlug": "computer-networks",
+      "canonicalSubjectId": "computer-networks",
+      "topicSlug": "data-link-layer",
+      "status": "current",
+      "questionCount": 45
+    },
+    {
+      "bankSubjectSlug": "computer-networks",
+      "canonicalSubjectId": "computer-networks",
+      "topicSlug": "network-layer-protocol",
+      "status": "current",
+      "questionCount": 60
+    },
+    {
+      "bankSubjectSlug": "computer-networks",
+      "canonicalSubjectId": "computer-networks",
+      "topicSlug": "transport-layer-protocol",
+      "status": "current",
+      "questionCount": 35
+    },
+    {
+      "bankSubjectSlug": "computer-networks",
+      "canonicalSubjectId": "computer-networks",
+      "topicSlug": "application-layer-protocols",
+      "status": "current",
+      "questionCount": 24
+    },
+    {
+      "bankSubjectSlug": "computer-networks",
+      "canonicalSubjectId": "computer-networks",
+      "topicSlug": "network-security",
+      "status": "historical",
+      "questionCount": 11
+    },
+    {
+      "bankSubjectSlug": "other-optional",
+      "canonicalSubjectId": null,
+      "topicSlug": "software-engineering",
+      "status": "historical",
+      "questionCount": 33
+    }
+  ],
+  "policies": {
+    "current": "Directly named by, or a necessary subdivision of, the official 2027 syllabus.",
+    "supporting": "Useful preparation material not named as a standalone official 2027 topic.",
+    "historical": "Retained for provenance and older-paper practice, but excluded from current-syllabus coverage.",
+    "reviewRequired": "Potentially in scope under another subject or a misleading bucket; content review is required before migration.",
+    "scopeLimit": "This registry audits taxonomy scope, not the correctness of every individual question classification."
+  },
+  "conclusions": [
+    "The 3,200-question immutable bank is preserved; this audit does not delete or rewrite questions.",
+    "Historical and supporting questions remain available but are excluded from current-syllabus coverage evidence.",
+    "Broad and review-required leaves are visible gaps, not claims of verified row-level coverage.",
+    "Structured PDF-answer-key marks are authoritative over contradictory archive tags; the 2026 split is locked at 60 one-mark and 70 two-mark questions."
+  ]
+}

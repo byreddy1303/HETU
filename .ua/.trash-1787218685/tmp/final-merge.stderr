@@ -1,0 +1,21 @@
+Found 6 batch files (6 logical batches, 0 multi-part):
+  batch-existing.json: 931 nodes, 1975 edges
+  batch-4.json: 1 nodes, 5 edges
+  batch-6.json: 9 nodes, 34 edges
+  batch-7.json: 47 nodes, 118 edges
+  batch-11.json: 41 nodes, 43 edges
+  batch-19.json: 1 nodes, 0 edges
+
+Input: 1030 nodes, 2175 edges
+
+Tested-by linker:
+     0 × tested_by edges produced (path-convention supplement, production → test)
+     4 × production nodes tagged "tested"
+
+Output: 1030 nodes, 2175 edges
+
+Imports edge recovery:
+  Recovered 14 `imports` edges from importMap (356 entries scanned)
+  Skipped 1 importMap target paths with no `file:` node in graph
+
+Written to /Users/bkalyankrishnareddy/Desktop/GATE PREP/hetu/.ua/intermediate/assembled-graph.json (963 KB)

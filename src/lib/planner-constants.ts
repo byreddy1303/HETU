@@ -8,25 +8,11 @@ import type {
   Priority,
   StudyMode
 } from '@/lib/planner-storage';
+import { CANONICAL_SUBJECT_LABELS, canonicalSubjectLabel } from '@/lib/subjects';
 
 /** GATE CS subjects only, plus a few workflow-oriented entries. */
 export const PLANNER_SUBJECTS: readonly string[] = [
-  'Mathematics',
-  'Discrete Math',
-  'Linear Algebra',
-  'Probability & Statistics',
-  'C Programming',
-  'Data Structures',
-  'Algorithms',
-  'DBMS',
-  'Operating Systems',
-  'Computer Networks',
-  'Theory of Computation',
-  'Compiler Design',
-  'Digital Logic',
-  'Computer Organization',
-  'Engineering Mathematics',
-  'Aptitude & Reasoning',
+  ...CANONICAL_SUBJECT_LABELS,
   'Previous Year Questions',
   'Full Mock Test',
   'Topic-wise Mini Test',
@@ -58,12 +44,7 @@ export const STUDY_MODES: readonly StudyMode[] = [
   'Doubt Clearing'
 ];
 
-export const PRIORITIES: readonly Priority[] = [
-  'P1 Critical',
-  'P2 High',
-  'P3 Medium',
-  'P4 Low'
-];
+export const PRIORITIES: readonly Priority[] = ['P1 Critical', 'P2 High', 'P3 Medium', 'P4 Low'];
 
 export const BREAK_PATTERNS: readonly { value: BreakPattern; label: string }[] = [
   { value: 'p25', label: 'Pomodoro 25/5' },
@@ -102,7 +83,10 @@ export const MOOD_INTENTS: readonly string[] = [
 ];
 
 /** Storage-safe id → display label pairs for end-of-day mood. */
-export const END_MOODS: readonly { value: 'drained' | 'flat' | 'ok' | 'strong' | 'fired_up'; label: string }[] = [
+export const END_MOODS: readonly {
+  value: 'drained' | 'flat' | 'ok' | 'strong' | 'fired_up';
+  label: string;
+}[] = [
   { value: 'drained', label: 'Drained' },
   { value: 'flat', label: 'Flat' },
   { value: 'ok', label: 'OK' },
@@ -120,9 +104,10 @@ export function subjectChipInk(subject: string): { bg: string; text: string } {
     { bg: 'bg-ink-marigold/15', text: 'text-ink-marigold' },
     { bg: 'bg-ink-slate/12', text: 'text-ink-slate' }
   ];
+  const stableSubject = canonicalSubjectLabel(subject);
   let h = 0;
-  for (let i = 0; i < subject.length; i++) {
-    h = (h * 31 + subject.charCodeAt(i)) | 0;
+  for (let i = 0; i < stableSubject.length; i++) {
+    h = (h * 31 + stableSubject.charCodeAt(i)) | 0;
   }
   return palette[Math.abs(h) % palette.length];
 }

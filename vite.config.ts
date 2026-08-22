@@ -70,7 +70,7 @@ export default defineConfig(({ mode }) => {
                 url.pathname.endsWith('.json'),
               handler: 'NetworkFirst',
               options: {
-                cacheName: 'air-pyq-data-v3',
+                cacheName: 'air-pyq-data-v4',
                 networkTimeoutSeconds: 5,
                 expiration: { maxEntries: 32, maxAgeSeconds: 60 * 60 * 24 * 30 }
               }

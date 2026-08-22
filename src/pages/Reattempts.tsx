@@ -43,6 +43,8 @@ import {
 } from '@/lib/pyq';
 import {
   createPyqReattemptAttemptRow,
+  nextReattemptRoundAttemptNumber,
+  pyqAttemptScorePresentation,
   pyqQuestionFromAttempt,
   pyqReattemptAttemptId,
   pyqSourceAttemptForJournalQuestion
@@ -250,7 +252,9 @@ function formatAttemptAnswer(value: PyqSelectedAnswer): string {
 }
 
 function savedAttemptAnswer(attempt: PyqAttemptRow): string {
-  if (attempt.capture_version !== 2) return 'Legacy attempt — learner answer not verified';
+  if (attempt.capture_version !== 2 && attempt.capture_version !== 3) {
+    return 'Legacy attempt — learner answer not verified';
+  }
   if (attempt.mark_decision === 'SKIP') return 'Left blank';
   return formatAttemptAnswer(attempt.selected_answer);
 }
@@ -403,6 +407,7 @@ function PyqAnswerHistory({
       : currentAttempt.mark_correct
         ? CheckCircle2
         : XCircle;
+  const score = pyqAttemptScorePresentation(currentAttempt);
 
   return (
     <section
@@ -450,6 +455,10 @@ function PyqAnswerHistory({
               </dd>
             </div>
           </dl>
+          <div className="mt-3 flex flex-wrap items-center gap-2">
+            <Badge tone={score.covered ? 'accent' : 'warn'}>{score.label}</Badge>
+            <span className="text-[11px] text-text-faint">{score.detail}</span>
+          </div>
         </div>
       </div>
     </section>
@@ -521,6 +530,7 @@ function PyqReattemptSession({
   question,
   sourceAttempt,
   attempts,
+  reattemptRound,
   existingAttempt,
   position,
   total,
@@ -536,6 +546,7 @@ function PyqReattemptSession({
   question: PyqQuestion;
   sourceAttempt: PyqAttemptRow;
   attempts: PyqAttemptRow[];
+  reattemptRound: number;
   existingAttempt: PyqAttemptRow | null;
   position: number;
   total: number;
@@ -615,13 +626,18 @@ function PyqReattemptSession({
     setSubmitting(true);
     setSubmitError(null);
     try {
-      const roundAttemptId = pyqReattemptAttemptId(row.id, row.history.length);
+      const roundAttemptNumber = nextReattemptRoundAttemptNumber(
+        attempts,
+        row.id,
+        reattemptRound
+      );
+      const roundAttemptId = pyqReattemptAttemptId(
+        row.id,
+        reattemptRound,
+        roundAttemptNumber
+      );
       const alreadySaved = await db.pyq_attempts.get(roundAttemptId);
-      if (alreadySaved && alreadySaved.mark_decision !== 'SKIP') {
-        setLocalAttempt(alreadySaved);
-        return;
-      }
-      if (alreadySaved && decision === 'SKIP') {
+      if (alreadySaved) {
         setLocalAttempt(alreadySaved);
         return;
       }
@@ -640,7 +656,8 @@ function PyqReattemptSession({
       const attempt = createPyqReattemptAttemptRow({
         userId,
         reattemptId: row.id,
-        completedRoundCount: row.history.length,
+        reattemptRound,
+        roundAttemptNumber,
         sourceAttempt,
         question,
         selectedAnswer: selectedAnswer(),
@@ -648,7 +665,11 @@ function PyqReattemptSession({
         questionStartedAtMs,
         committedAtMs,
         screenshotUrl,
-        attemptNumber: alreadySaved?.attempt_number ?? attempts.length + 1
+        attemptNumber:
+          attempts.reduce(
+            (highest, candidate) => Math.max(highest, candidate.attempt_number),
+            0
+          ) + 1
       });
       await writeLocal('pyq_attempts', attempt);
       setLocalAttempt(attempt);
@@ -1527,13 +1548,26 @@ export default function Reattempts() {
         .filter((candidate) => candidate.question_uid === activePyqSource.question_uid)
         .sort((a, b) => a.attempted_at.localeCompare(b.attempted_at))
     : [];
-  const existingRoundAttempt = activeRow
-    ? ((pyqAttempts ?? []).find(
-        (candidate) =>
-          candidate.id ===
-          pyqReattemptAttemptId(activeRow.id, roundById[activeRow.id] ?? activeRow.history.length)
-      ) ?? null)
+  const activeReattemptRound = activeRow
+    ? (roundById[activeRow.id] ?? activeRow.history.length)
     : null;
+  const existingRoundAttempt =
+    activeRow && activeReattemptRound !== null
+      ? ((pyqAttempts ?? [])
+          .filter(
+            (candidate) =>
+              (candidate.reattempt_id === activeRow.id &&
+                candidate.reattempt_round === activeReattemptRound) ||
+              (candidate.reattempt_id == null &&
+                candidate.id === pyqReattemptAttemptId(activeRow.id, activeReattemptRound))
+          )
+          .sort(
+            (left, right) =>
+              (left.round_attempt_number ?? 1) - (right.round_attempt_number ?? 1) ||
+              left.attempted_at.localeCompare(right.attempted_at)
+          )
+          .at(-1) ?? null)
+      : null;
 
   useEffect(() => {
     if (!activePyqSource || snapshotPyqQuestion) return;
@@ -1741,6 +1775,7 @@ export default function Reattempts() {
           question={activePyqQuestion}
           sourceAttempt={activePyqSource}
           attempts={activePyqAttempts}
+          reattemptRound={activeReattemptRound ?? activeRow.history.length}
           existingAttempt={existingRoundAttempt}
           position={Math.max(1, activePosition + 1)}
           total={queueIds.length}

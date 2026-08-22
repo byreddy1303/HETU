@@ -1,0 +1,258 @@
+{
+  "scriptCompleted": true,
+  "filesAnalyzed": 1,
+  "filesSkipped": [],
+  "analysisOutcomes": {
+    "structure": {
+      "succeeded": 1,
+      "failed": 0
+    },
+    "callGraph": {
+      "succeeded": 1,
+      "failed": 0,
+      "skipped": 0
+    }
+  },
+  "results": [
+    {
+      "path": "src/pages/DoNow.tsx",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 267,
+      "nonEmptyLines": 258,
+      "functions": [
+        {
+          "name": "DoNow",
+          "startLine": 27,
+          "endLine": 267,
+          "params": []
+        }
+      ],
+      "exports": [
+        {
+          "name": "DoNow",
+          "line": 27,
+          "isDefault": true
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "DoNow",
+          "callee": "useAuth",
+          "lineNumber": 28
+        },
+        {
+          "caller": "DoNow",
+          "callee": "useNavigate",
+          "lineNumber": 29
+        },
+        {
+          "caller": "DoNow",
+          "callee": "todayISOInTimeZone",
+          "lineNumber": 30
+        },
+        {
+          "caller": "DoNow",
+          "callee": "useState",
+          "lineNumber": 31
+        },
+        {
+          "caller": "DoNow",
+          "callee": "useReducedMotion",
+          "lineNumber": 32
+        },
+        {
+          "caller": "DoNow",
+          "callee": "useLiveQuery",
+          "lineNumber": 33
+        },
+        {
+          "caller": "DoNow",
+          "callee": "db.reattempts.where('user_id').equals(userId).toArray",
+          "lineNumber": 34
+        },
+        {
+          "caller": "DoNow",
+          "callee": "db.reattempts.where('user_id').equals",
+          "lineNumber": 34
+        },
+        {
+          "caller": "DoNow",
+          "callee": "db.reattempts.where",
+          "lineNumber": 34
+        },
+        {
+          "caller": "DoNow",
+          "callee": "useLiveQuery",
+          "lineNumber": 38
+        },
+        {
+          "caller": "DoNow",
+          "callee": "db.questions.where('user_id').equals(userId).toArray",
+          "lineNumber": 39
+        },
+        {
+          "caller": "DoNow",
+          "callee": "db.questions.where('user_id').equals",
+          "lineNumber": 39
+        },
+        {
+          "caller": "DoNow",
+          "callee": "db.questions.where",
+          "lineNumber": 39
+        },
+        {
+          "caller": "DoNow",
+          "callee": "useLiveQuery",
+          "lineNumber": 43
+        },
+        {
+          "caller": "DoNow",
+          "callee": "db.pyq_attempts.where('user_id').equals(userId).toArray",
+          "lineNumber": 44
+        },
+        {
+          "caller": "DoNow",
+          "callee": "db.pyq_attempts.where('user_id').equals",
+          "lineNumber": 44
+        },
+        {
+          "caller": "DoNow",
+          "callee": "db.pyq_attempts.where",
+          "lineNumber": 44
+        },
+        {
+          "caller": "DoNow",
+          "callee": "useLiveQuery",
+          "lineNumber": 48
+        },
+        {
+          "caller": "DoNow",
+          "callee": "db.formulas.where('user_id').equals(userId).toArray",
+          "lineNumber": 49
+        },
+        {
+          "caller": "DoNow",
+          "callee": "db.formulas.where('user_id').equals",
+          "lineNumber": 49
+        },
+        {
+          "caller": "DoNow",
+          "callee": "db.formulas.where",
+          "lineNumber": 49
+        },
+        {
+          "caller": "DoNow",
+          "callee": "useEffect",
+          "lineNumber": 54
+        },
+        {
+          "caller": "DoNow",
+          "callee": "reconcilePlannerExecutions(userId)\n      .then((changed) => {\n        if (changed > 0) setPlanRevision((value) => value + 1);\n      })\n      .catch",
+          "lineNumber": 56
+        },
+        {
+          "caller": "DoNow",
+          "callee": "reconcilePlannerExecutions(userId)\n      .then",
+          "lineNumber": 56
+        },
+        {
+          "caller": "DoNow",
+          "callee": "reconcilePlannerExecutions",
+          "lineNumber": 56
+        },
+        {
+          "caller": "DoNow",
+          "callee": "setPlanRevision",
+          "lineNumber": 58
+        },
+        {
+          "caller": "DoNow",
+          "callee": "useMemo",
+          "lineNumber": 63
+        },
+        {
+          "caller": "DoNow",
+          "callee": "loadDayPlan",
+          "lineNumber": 65
+        },
+        {
+          "caller": "DoNow",
+          "callee": "useMemo",
+          "lineNumber": 67
+        },
+        {
+          "caller": "DoNow",
+          "callee": "buildDoNowQueue",
+          "lineNumber": 68
+        },
+        {
+          "caller": "start",
+          "callee": "item.id.slice",
+          "lineNumber": 74
+        },
+        {
+          "caller": "start",
+          "callee": "markPlannerBlockStarted",
+          "lineNumber": 75
+        },
+        {
+          "caller": "start",
+          "callee": "navigate",
+          "lineNumber": 77
+        },
+        {
+          "caller": "DoNow",
+          "callee": "start",
+          "lineNumber": 162
+        },
+        {
+          "caller": "DoNow",
+          "callee": "queue.map",
+          "lineNumber": 171
+        },
+        {
+          "caller": "DoNow",
+          "callee": "Math.min",
+          "lineNumber": 188
+        },
+        {
+          "caller": "DoNow",
+          "callee": "Math.min",
+          "lineNumber": 194
+        },
+        {
+          "caller": "DoNow",
+          "callee": "String(index + 1).padStart",
+          "lineNumber": 202
+        },
+        {
+          "caller": "DoNow",
+          "callee": "String",
+          "lineNumber": 202
+        },
+        {
+          "caller": "DoNow",
+          "callee": "start",
+          "lineNumber": 222
+        },
+        {
+          "caller": "DoNow",
+          "callee": "navigate",
+          "lineNumber": 247
+        },
+        {
+          "caller": "DoNow",
+          "callee": "navigate",
+          "lineNumber": 250
+        }
+      ],
+      "metrics": {
+        "importCount": 10,
+        "exportCount": 1,
+        "functionCount": 1,
+        "classCount": 0
+      }
+    }
+  ]
+}

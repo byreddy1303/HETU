@@ -1,8 +1,8 @@
-import { calibrationBySubject, calibrationOverall } from '@/lib/analysis';
 import { SUBJECTS } from '@/lib/constants';
 import { db } from '@/lib/db';
+import { normalizeAttemptEvidence } from '@/lib/attempt-evidence';
 import { loadAllDayPlans, type DayPlan } from '@/lib/planner-storage';
-import { computeReadiness } from '@/lib/readiness';
+import { computeReadiness, READINESS_CALCULATION_VERSION } from '@/lib/readiness';
 import { SUBTOPICS_BY_SUBJECT } from '@/lib/subtopics';
 import {
   topicProgressId,
@@ -23,7 +23,7 @@ import type {
   WeeklyReviewRow
 } from '@/types';
 
-export const PROGRESS_REPORT_VERSION = 1;
+export const PROGRESS_REPORT_VERSION = 2;
 
 export interface ProgressMetric {
   component: string;
@@ -152,8 +152,24 @@ export function buildProgressReport(
     'count'
   );
 
-  const pyqJudged = data.pyqAttempts.filter((row) => row.mark_correct !== null);
-  const pyqCorrect = pyqJudged.filter((row) => row.mark_correct === true).length;
+  const attemptLedger = normalizeAttemptEvidence({
+    attempts: data.pyqAttempts,
+    questions: data.questions
+  });
+  const scoredAttempts = data.pyqAttempts.filter(
+    (row) =>
+      (row.scoring_status === 'scored' || row.scoring_status === 'bonus') &&
+      typeof row.score_thirds === 'number' &&
+      (row.question_marks === 1 || row.question_marks === 2)
+  );
+  const scoreThirds = scoredAttempts.reduce(
+    (sum, row) => sum + (row.score_thirds ?? 0),
+    0
+  );
+  const maxThirds = scoredAttempts.reduce(
+    (sum, row) => sum + (row.question_marks ?? 0) * 3,
+    0
+  );
   add('PYQ practice', 'Practice sets', data.pyqSessions.length, 'count');
   add(
     'PYQ practice',
@@ -161,15 +177,36 @@ export function buildProgressReport(
     data.pyqSessions.filter((row) => row.status === 'completed').length,
     'count'
   );
-  add('PYQ practice', 'Attempts', data.pyqAttempts.length, 'count');
+  add('PYQ practice', 'Immutable attempt receipts', data.pyqAttempts.length, 'count');
   add(
     'PYQ practice',
     'Unique questions seen',
     new Set(data.pyqAttempts.map((row) => row.question_uid)).size,
     'count'
   );
-  add('PYQ practice', 'Correct judged attempts', pyqCorrect, 'count');
-  add('PYQ practice', 'Judged accuracy', percentage(pyqCorrect, pyqJudged.length), '%');
+  add('PYQ practice', 'Correct attempts', attemptLedger.counts.correct, 'count');
+  add('PYQ practice', 'Wrong attempts', attemptLedger.counts.wrong, 'count');
+  add('PYQ practice', 'Skipped attempts', attemptLedger.counts.skipped, 'count');
+  add('PYQ practice', 'Ungraded attempts', attemptLedger.counts.ungraded, 'count');
+  add('PYQ practice', 'Uncertain decisions', attemptLedger.counts.uncertain, 'count');
+  add(
+    'PYQ practice',
+    'Graded accuracy',
+    percentage(
+      attemptLedger.counts.correct,
+      attemptLedger.counts.correct + attemptLedger.counts.wrong
+    ),
+    '%'
+  );
+  add('PYQ practice', 'Exactly scored receipts', scoredAttempts.length, 'count');
+  add('PYQ practice', 'Exact earned score', round(scoreThirds / 3, 2), 'marks');
+  add('PYQ practice', 'Exact scorable maximum', round(maxThirds / 3, 2), 'marks');
+  add(
+    'PYQ practice',
+    'Exact scoring coverage',
+    percentage(scoredAttempts.length, data.pyqAttempts.length),
+    '%'
+  );
   add(
     'PYQ practice',
     'Attempt time',
@@ -222,20 +259,29 @@ export function buildProgressReport(
     );
   }
 
-  const calibrationRows = calibrationBySubject(data.questions);
-  const calibration = calibrationOverall(calibrationRows);
-  add('Calibration', 'Committed answers', calibration.decided, 'count');
-  add('Calibration', 'Correct committed answers', calibration.correct, 'count');
-  add('Calibration', 'Skipped decisions', calibration.skipped, 'count');
-  add('Calibration', 'Committed-answer accuracy', round((calibration.accuracy ?? 0) * 100), '%');
-  add('Calibration', 'Expected value per decision', round(calibration.expectedValue, 2), 'marks');
+  add('Calibration', 'Exact-once evidence events', attemptLedger.counts.total, 'count');
+  add('Calibration', 'Correct graded answers', attemptLedger.counts.correct, 'count');
+  add('Calibration', 'Wrong graded answers', attemptLedger.counts.wrong, 'count');
+  add('Calibration', 'Skipped decisions', attemptLedger.counts.skipped, 'count');
+  add('Calibration', 'Uncertain decisions', attemptLedger.counts.uncertain, 'count');
+  add(
+    'Calibration',
+    'Graded-answer accuracy',
+    percentage(
+      attemptLedger.counts.correct,
+      attemptLedger.counts.correct + attemptLedger.counts.wrong
+    ),
+    '%'
+  );
 
   const readiness = computeReadiness({
     questions: data.questions,
+    pyqAttempts: data.pyqAttempts,
     reattempts: data.reattempts,
     patterns: data.patterns
   });
   add('Readiness', 'Overall score', readiness.score, 'points');
+  add('Readiness', 'Calculation version', READINESS_CALCULATION_VERSION, 'version');
   add('Readiness', 'Confidence', readiness.confidence);
   add('Readiness', 'Coverage', round(readiness.coverage * 100), '%');
   add('Readiness', 'Retention', round(readiness.retention * 100), '%');

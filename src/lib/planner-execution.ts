@@ -1,9 +1,12 @@
 import { db } from '@/lib/db';
 import { loadDayPlan, saveDayPlan, type DayPlan, type StudySession } from '@/lib/planner-storage';
 import { nowISO } from '@/lib/utils';
+import { canonicalSubjectLabel } from '@/lib/subjects';
 
 function subjectName(block: StudySession): string {
-  return block.subject === 'Custom...' && block.customSubject ? block.customSubject : block.subject;
+  return block.subject === 'Custom...' && block.customSubject
+    ? block.customSubject
+    : canonicalSubjectLabel(block.subject);
 }
 
 function pyqCountForMinutes(minutes: number): '5' | '10' | '25' | '50' {

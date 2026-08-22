@@ -1,0 +1,41 @@
+{
+  "projectRoot": "/Users/bkalyankrishnareddy/Desktop/GATE PREP/hetu",
+  "batchFiles": [
+    {
+      "path": "scripts/audit-pyq-taxonomy.mjs",
+      "language": "javascript",
+      "sizeLines": 92,
+      "fileCategory": "code"
+    },
+    {
+      "path": "scripts/build-pyq-bank.mjs",
+      "language": "javascript",
+      "sizeLines": 1068,
+      "fileCategory": "code"
+    },
+    {
+      "path": "scripts/classify-pyq-bank.mjs",
+      "language": "javascript",
+      "sizeLines": 165,
+      "fileCategory": "code"
+    },
+    {
+      "path": "scripts/pyq-taxonomy.mjs",
+      "language": "javascript",
+      "sizeLines": 1946,
+      "fileCategory": "code"
+    }
+  ],
+  "batchImportData": {
+    "scripts/audit-pyq-taxonomy.mjs": [
+      "scripts/pyq-taxonomy.mjs"
+    ],
+    "scripts/build-pyq-bank.mjs": [
+      "scripts/pyq-taxonomy.mjs"
+    ],
+    "scripts/classify-pyq-bank.mjs": [
+      "scripts/pyq-taxonomy.mjs"
+    ],
+    "scripts/pyq-taxonomy.mjs": []
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "nodes": [
+    {
+      "id": "file:src/types/db.ts",
+      "type": "file",
+      "name": "db.ts",
+      "filePath": "src/types/db.ts",
+      "summary": "Defines the application's Supabase and local persistence contracts for users, study sessions, questions, reattempts, planning, social features, and durable PYQ practice. Its PYQ compatibility shapes preserve immutable attempt receipts while allowing legacy rows to omit the newly added question-snapshot book_slug and session-config bookSlug fields.",
+      "tags": [
+        "type-definition",
+        "data-model",
+        "persistence-contract",
+        "pyq"
+      ],
+      "complexity": "complex",
+      "languageNotes": "TypeScript interfaces mirror nullable database rows explicitly while optional fields document backward-compatible evolution of JSON-backed session and snapshot payloads."
+    }
+  ],
+  "edges": []
+}

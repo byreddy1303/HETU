@@ -90,3 +90,7 @@ if (failures.length > 0) {
 console.log(
   `Audited ${questions.length.toLocaleString()} unique PYQs across ${manifest.subjects.length} subjects and 95 topics; ${manualEntries.length} content corrections are locked.`
 );
+
+// Keep the existing classifier-regression audit and the independent official
+// 2027 scope audit in the same CI/package command.
+await import('./audit-gate-2027-taxonomy.mjs');

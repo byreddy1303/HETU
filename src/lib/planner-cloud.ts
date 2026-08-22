@@ -1,7 +1,7 @@
 // Narrow Supabase mirror for Planner study sessions. The rest of DayPlan stays
 // local-only; this is the minimum server data required for Telegram delivery.
 import { supabase } from '@/lib/supabase';
-import type { StudySession } from '@/lib/planner-storage';
+import { normalizeStudySession, type StudySession } from '@/lib/planner-storage';
 
 export interface CloudDayPlan {
   date: string;
@@ -30,7 +30,7 @@ function isStudySession(value: unknown): value is StudySession {
 
 function toCloudDayPlan(row: CloudDayPlanRow): CloudDayPlan {
   const sessions = Array.isArray(row.sessions)
-    ? row.sessions.filter(isStudySession).slice(0, 24)
+    ? row.sessions.filter(isStudySession).slice(0, 24).map(normalizeStudySession)
     : [];
   return { date: row.plan_date, sessions, updatedAt: row.updated_at };
 }
@@ -74,11 +74,12 @@ export async function loadCloudDayPlans(
 }
 
 export async function saveCloudDayPlan(userId: string, plan: CloudDayPlan): Promise<string | null> {
+  const sessions = plan.sessions.slice(0, 24).map(normalizeStudySession);
   const { error } = await supabase.from('planner_day_plans').upsert(
     {
       user_id: userId,
       plan_date: plan.date,
-      sessions: plan.sessions.slice(0, 24),
+      sessions,
       updated_at: plan.updatedAt
     },
     { onConflict: 'user_id,plan_date' }

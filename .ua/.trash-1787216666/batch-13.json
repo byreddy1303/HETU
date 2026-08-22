@@ -1,0 +1,24 @@
+{
+  "nodes": [
+    {
+      "id": "file:index.html",
+      "type": "file",
+      "name": "index.html",
+      "filePath": "index.html",
+      "summary": "Defines the Vite application shell, metadata and icons, applies the stored light/dark theme before first paint, and mounts the React entry point at the root element.",
+      "tags": ["entry-point", "markup", "theme-bootstrap", "application-shell"],
+      "complexity": "simple",
+      "languageNotes": "An inline defensive theme bootstrap runs before the module entry script to avoid a flash of the wrong color scheme."
+    },
+    {
+      "id": "config:package.json",
+      "type": "config",
+      "name": "package.json",
+      "filePath": "package.json",
+      "summary": "Declares HETU's Node 22+ ESM package, development and native-build workflows, quality checks, PYQ data tooling, and the React, Capacitor, local-first storage, testing, and PWA dependency set.",
+      "tags": ["configuration", "build-system", "dependency-management", "scripts", "nodejs"],
+      "complexity": "moderate"
+    }
+  ],
+  "edges": []
+}

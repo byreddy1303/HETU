@@ -1,0 +1,127 @@
+[
+  {
+    "order": 1,
+    "title": "Boot the Client",
+    "description": "Start at src/main.tsx, where HETU mounts the React client and separates native-shell behavior from web PWA update checks. The README supplies the product intent—local-first GATE practice with structured diagnosis and spaced re-attempts—while the package and Vite configurations show the runtime, build, and offline-delivery contract that makes that intent executable.",
+    "nodeIds": [
+      "file:src/main.tsx",
+      "document:README.md",
+      "config:package.json",
+      "file:vite.config.ts"
+    ],
+    "languageLesson": "A React entry module should stay composition-focused: create the root, mount the application, and delegate domain behavior. PWA lifecycle code is deliberately gated by runtime so a Capacitor shell does not compete with browser service-worker caching."
+  },
+  {
+    "order": 2,
+    "title": "Enter the App Shell",
+    "description": "Building on the boot module, App.tsx initializes identity and display preferences before mounting global runtimes, feedback, and navigation. The router then lazy-loads public and authenticated pages behind shared recovery boundaries, while the two Zustand stores hold the small amount of cross-cutting client state needed to choose the correct experience.",
+    "nodeIds": [
+      "file:src/App.tsx",
+      "file:src/router.tsx",
+      "file:src/stores/auth.ts",
+      "file:src/stores/prefs.ts"
+    ],
+    "languageLesson": "React shells are effective composition boundaries: stores retain durable global state, route modules are code-split, and feature pages remain independently loadable instead of accumulating startup work in the entry point."
+  },
+  {
+    "order": 3,
+    "title": "Model Local Study State",
+    "description": "The shell lands on a local-first foundation rather than calling the network for every interaction. Shared TypeScript contracts define learners, sessions, questions, PYQ receipts, and re-attempts, while the versioned Dexie database implements those contracts with synchronized-table ordering and indexes so study work remains usable offline.",
+    "nodeIds": [
+      "file:src/types/db.ts",
+      "file:src/types/index.ts",
+      "file:src/lib/db.ts"
+    ],
+    "languageLesson": "TypeScript interfaces act as the boundary vocabulary shared by UI, IndexedDB, and Supabase. Dexie schema versions make browser-database changes explicit, and compound indexes keep user-scoped offline queries efficient."
+  },
+  {
+    "order": 4,
+    "title": "Synchronize Without Losing Work",
+    "description": "With Dexie established as the immediate store, sync.ts moves tracked writes to Supabase in foreign-key-safe order, queues deletes, retries transient failures, and protects pending local edits during pulls. The Supabase client preserves a local-only fallback, while row-level security and synchronization indexes enforce the same tenant and incremental-query boundaries on the server.",
+    "nodeIds": [
+      "file:src/lib/sync.ts",
+      "file:src/lib/supabase.ts",
+      "table:supabase/migrations/20260717000002_rls_policies.sql:migration",
+      "table:supabase/migrations/20260721000004_sync_query_indexes.sql:migration"
+    ],
+    "languageLesson": "Local-first synchronization is a reconciliation problem: preserve unsent local intent, push dependencies before their children, make deletes durable, and let retries be safe. Database RLS remains the authority even when the client already scopes every row by user."
+  },
+  {
+    "order": 5,
+    "title": "Build the PYQ Corpus",
+    "description": "The study loop begins before runtime with a reproducible content pipeline. The builder combines audited question sources and localizes assets, the canonical taxonomy classifies every item, and the reclassifier plus audit scripts prove that regenerated shards retain stable identities and intentional manual corrections.",
+    "nodeIds": [
+      "file:scripts/build-pyq-bank.mjs",
+      "file:scripts/pyq-taxonomy.mjs",
+      "file:scripts/classify-pyq-bank.mjs",
+      "file:scripts/audit-pyq-taxonomy.mjs"
+    ],
+    "languageLesson": "A generated content bank should be treated like compiled output: source adapters normalize inputs, deterministic IDs preserve references, and an independent audit checks invariants after every rebuild."
+  },
+  {
+    "order": 6,
+    "title": "Load and Render Questions",
+    "description": "Runtime practice consumes the generated corpus through pyq.ts, which normalizes bank manifests, repairs archived markup, grades MCQ/MSQ/NAT answers, and derives evidence for the journal. PyqQuestionContent forms the safe display boundary by sanitizing source HTML and applying tolerant KaTeX rendering, keeping imperfect historical formatting away from the rest of the test interface.",
+    "nodeIds": [
+      "file:src/lib/pyq.ts",
+      "file:src/components/pyq/PyqQuestionContent.tsx"
+    ],
+    "languageLesson": "Rendering third-party HTML safely requires a pipeline: normalize known legacy shapes, sanitize untrusted markup, then enhance the remaining text with math rendering. Keeping that pipeline in one component prevents source-specific quirks from leaking across the UI."
+  },
+  {
+    "order": 7,
+    "title": "Run a Practice Set",
+    "description": "Pyq.tsx composes corpus loading into the learner-facing test flow: configure scope, filter by history, navigate timed questions, commit decisions, and continue into tagging or review. It is the orchestration point where the content rules from the previous two steps meet local persistence, while keeping resumed sets tied to their saved question identities.",
+    "nodeIds": [
+      "file:src/pages/Pyq.tsx"
+    ],
+    "languageLesson": "A complex React page is easiest to reason about as a state machine: configuration leads to an active set, individual questions transition from open to committed or skipped, and completion produces durable review artifacts."
+  },
+  {
+    "order": 8,
+    "title": "Commit Immutable Attempts",
+    "description": "The practice page delegates its audit contract to pyq-session.ts, which assigns deterministic identifiers, captures immutable question snapshots, links journal rows, and projects a canonical practice session. The database tables preserve both session configuration and every answer receipt, and the audit migration rejects answer mutation while still allowing narrowly controlled metadata updates.",
+    "nodeIds": [
+      "file:src/lib/pyq-session.ts",
+      "table:supabase/migrations/20260802000001_pyq_attempts.sql:pyq_attempts",
+      "table:supabase/migrations/20260807000001_pyq_session_hardening.sql:pyq_sessions",
+      "table:supabase/migrations/20260808000001_pyq_attempt_audit.sql:migration"
+    ],
+    "languageLesson": "Immutable snapshots make historical evidence independent of later bank edits. Deterministic IDs and idempotent writes let offline retries converge on one receipt instead of duplicating a learner's attempt."
+  },
+  {
+    "order": 9,
+    "title": "Diagnose the Mistake",
+    "description": "Once an attempt is durable, Log.tsx turns the result into structured learning evidence rather than a disposable score. The shared editor captures source, outcome, timing, pattern, trigger, root cause, and decision data, while deterministic analysis functions aggregate those records into calibration and weakness signals used elsewhere in HETU.",
+    "nodeIds": [
+      "file:src/pages/Log.tsx",
+      "file:src/components/shared/QuestionEditor.tsx",
+      "file:src/lib/analysis.ts"
+    ],
+    "languageLesson": "Separating pure aggregation functions from React views makes analysis reproducible and easy to test. Persisting diagnosis as structured fields enables longitudinal queries that free-form notes alone cannot support."
+  },
+  {
+    "order": 10,
+    "title": "Close the Reattempt Loop",
+    "description": "Root-cause review feeds the offline-compatible D3–D10–D30 ladder implemented in reattempt.ts. Reattempts.tsx reconstructs logged and PYQ questions into dedicated test sessions with answer locking, timers, navigation recovery, and immutable receipts, while the phase-tracking migration guards progress through the ladder on the server.",
+    "nodeIds": [
+      "file:src/lib/reattempt.ts",
+      "file:src/pages/Reattempts.tsx",
+      "table:supabase/migrations/20260813000001_reattempt_previous_phase.sql:migration"
+    ],
+    "languageLesson": "A spaced-practice queue should derive due work from persisted stages and dates rather than component memory. Guarded transitions make repeated offline or server calls safe and preserve the learner's previous phase for auditability."
+  },
+  {
+    "order": 11,
+    "title": "Verify the Full Loop",
+    "description": "Finish by following the tests that protect the architectural story end to end. Bank integrity and grading, durable session transitions, atomic attempt logging, re-attempt UI behavior, and offline synchronization are each covered separately, so adding content or changing the interface cannot silently weaken logging, restoration, or tenant-safe persistence.",
+    "nodeIds": [
+      "file:src/__tests__/pyq.test.ts",
+      "file:src/__tests__/pyq-session.test.ts",
+      "file:src/__tests__/pyq-attempt-log.test.tsx",
+      "file:src/__tests__/reattempt-ui.test.tsx",
+      "file:src/__tests__/sync.test.ts"
+    ],
+    "languageLesson": "Vitest unit tests pin pure invariants, while React integration tests verify multi-step state transitions and persisted side effects. Together they test the boundaries where generated content, UI state, IndexedDB, and Supabase contracts meet."
+  }
+]

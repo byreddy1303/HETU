@@ -1,0 +1,4143 @@
+{
+  "scriptCompleted": true,
+  "filesAnalyzed": 3,
+  "filesSkipped": [],
+  "analysisOutcomes": {
+    "structure": {
+      "succeeded": 3,
+      "failed": 0
+    },
+    "callGraph": {
+      "succeeded": 3,
+      "failed": 0,
+      "skipped": 0
+    }
+  },
+  "results": [
+    {
+      "path": "src/lib/pyq-session.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 439,
+      "nonEmptyLines": 418,
+      "functions": [
+        {
+          "name": "createPyqSessionRow",
+          "startLine": 20,
+          "endLine": 44,
+          "params": [
+            "userId",
+            "bankVersion",
+            "config",
+            "questions",
+            "now"
+          ]
+        },
+        {
+          "name": "pyqAttemptId",
+          "startLine": 46,
+          "endLine": 48,
+          "params": [
+            "pyqSessionId",
+            "questionUid",
+            "attemptNumber"
+          ]
+        },
+        {
+          "name": "pyqJournalQuestionId",
+          "startLine": 50,
+          "endLine": 52,
+          "params": [
+            "attemptId"
+          ]
+        },
+        {
+          "name": "pyqSourceAttemptForJournalQuestion",
+          "startLine": 59,
+          "endLine": 91,
+          "params": [
+            "journalQuestion",
+            "attempts"
+          ]
+        },
+        {
+          "name": "pyqQuestionFromAttempt",
+          "startLine": 94,
+          "endLine": 118,
+          "params": [
+            "attempt"
+          ]
+        },
+        {
+          "name": "pyqReattemptAttemptId",
+          "startLine": 121,
+          "endLine": 123,
+          "params": [
+            "reattemptId",
+            "completedRoundCount"
+          ]
+        },
+        {
+          "name": "createPyqReattemptAttemptRow",
+          "startLine": 130,
+          "endLine": 189,
+          "params": [
+            "args"
+          ]
+        },
+        {
+          "name": "pyqPracticeSubject",
+          "startLine": 192,
+          "endLine": 199,
+          "params": [
+            "rows"
+          ]
+        },
+        {
+          "name": "pyqPracticeSessionRow",
+          "startLine": 207,
+          "endLine": 234,
+          "params": [
+            "session",
+            "subject",
+            "timeZone",
+            "existing"
+          ]
+        },
+        {
+          "name": "startPyqSessionQuestion",
+          "startLine": 236,
+          "endLine": 257,
+          "params": [
+            "session",
+            "questionUid",
+            "now"
+          ]
+        },
+        {
+          "name": "advancePyqSessionProgress",
+          "startLine": 259,
+          "endLine": 290,
+          "params": [
+            "session",
+            "questionUid",
+            "nextIndex",
+            "timeSpentSec",
+            "now"
+          ]
+        },
+        {
+          "name": "completePyqSession",
+          "startLine": 292,
+          "endLine": 303,
+          "params": [
+            "session",
+            "now"
+          ]
+        },
+        {
+          "name": "abandonPyqSession",
+          "startLine": 305,
+          "endLine": 313,
+          "params": [
+            "session",
+            "now"
+          ]
+        },
+        {
+          "name": "pausePyqSession",
+          "startLine": 315,
+          "endLine": 326,
+          "params": [
+            "session",
+            "now"
+          ]
+        },
+        {
+          "name": "pyqQuestionSnapshot",
+          "startLine": 328,
+          "endLine": 349,
+          "params": [
+            "question"
+          ]
+        },
+        {
+          "name": "hasCommittedAnswer",
+          "startLine": 351,
+          "endLine": 355,
+          "params": [
+            "value"
+          ]
+        },
+        {
+          "name": "answerMatchesQuestionType",
+          "startLine": 357,
+          "endLine": 364,
+          "params": [
+            "question",
+            "value"
+          ]
+        },
+        {
+          "name": "createPyqAttemptRow",
+          "startLine": 367,
+          "endLine": 439,
+          "params": [
+            "args"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "createPyqSessionRow",
+          "line": 20,
+          "isDefault": false
+        },
+        {
+          "name": "pyqAttemptId",
+          "line": 46,
+          "isDefault": false
+        },
+        {
+          "name": "pyqJournalQuestionId",
+          "line": 50,
+          "isDefault": false
+        },
+        {
+          "name": "pyqSourceAttemptForJournalQuestion",
+          "line": 59,
+          "isDefault": false
+        },
+        {
+          "name": "pyqQuestionFromAttempt",
+          "line": 94,
+          "isDefault": false
+        },
+        {
+          "name": "pyqReattemptAttemptId",
+          "line": 121,
+          "isDefault": false
+        },
+        {
+          "name": "createPyqReattemptAttemptRow",
+          "line": 130,
+          "isDefault": false
+        },
+        {
+          "name": "pyqPracticeSubject",
+          "line": 192,
+          "isDefault": false
+        },
+        {
+          "name": "pyqPracticeSessionRow",
+          "line": 207,
+          "isDefault": false
+        },
+        {
+          "name": "startPyqSessionQuestion",
+          "line": 236,
+          "isDefault": false
+        },
+        {
+          "name": "advancePyqSessionProgress",
+          "line": 259,
+          "isDefault": false
+        },
+        {
+          "name": "completePyqSession",
+          "line": 292,
+          "isDefault": false
+        },
+        {
+          "name": "abandonPyqSession",
+          "line": 305,
+          "isDefault": false
+        },
+        {
+          "name": "pausePyqSession",
+          "line": 315,
+          "isDefault": false
+        },
+        {
+          "name": "pyqQuestionSnapshot",
+          "line": 328,
+          "isDefault": false
+        },
+        {
+          "name": "createPyqAttemptRow",
+          "line": 367,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "createPyqSessionRow",
+          "callee": "nowISO",
+          "lineNumber": 25
+        },
+        {
+          "caller": "createPyqSessionRow",
+          "callee": "uuid",
+          "lineNumber": 28
+        },
+        {
+          "caller": "createPyqSessionRow",
+          "callee": "questions.map",
+          "lineNumber": 32
+        },
+        {
+          "caller": "pyqAttemptId",
+          "callee": "uuidFromString",
+          "lineNumber": 47
+        },
+        {
+          "caller": "pyqJournalQuestionId",
+          "callee": "uuidFromString",
+          "lineNumber": 51
+        },
+        {
+          "caller": "pyqSourceAttemptForJournalQuestion",
+          "callee": "attempts.find",
+          "lineNumber": 70
+        },
+        {
+          "caller": "pyqSourceAttemptForJournalQuestion",
+          "callee": "pyqJournalQuestionId",
+          "lineNumber": 74
+        },
+        {
+          "caller": "pyqSourceAttemptForJournalQuestion",
+          "callee": "journalQuestion.source_ref?.toLowerCase().includes",
+          "lineNumber": 81
+        },
+        {
+          "caller": "pyqSourceAttemptForJournalQuestion",
+          "callee": "journalQuestion.source_ref?.toLowerCase",
+          "lineNumber": 81
+        },
+        {
+          "caller": "pyqSourceAttemptForJournalQuestion",
+          "callee": "attempts.filter",
+          "lineNumber": 82
+        },
+        {
+          "caller": "pyqQuestionFromAttempt",
+          "callee": "inferPyqBookSlug",
+          "lineNumber": 99
+        },
+        {
+          "caller": "pyqReattemptAttemptId",
+          "callee": "uuidFromString",
+          "lineNumber": 122
+        },
+        {
+          "caller": "createPyqReattemptAttemptRow",
+          "callee": "pyqBookSlugForQuestion",
+          "lineNumber": 148
+        },
+        {
+          "caller": "createPyqReattemptAttemptRow",
+          "callee": "new Date(args.questionStartedAtMs).toISOString",
+          "lineNumber": 167
+        },
+        {
+          "caller": "createPyqReattemptAttemptRow",
+          "callee": "new Date(args.questionStartedAtMs).toISOString",
+          "lineNumber": 168
+        },
+        {
+          "caller": "createPyqReattemptAttemptRow",
+          "callee": "new Date(args.questionStartedAtMs).toISOString",
+          "lineNumber": 169
+        },
+        {
+          "caller": "createPyqReattemptAttemptRow",
+          "callee": "createPyqAttemptRow",
+          "lineNumber": 172
+        },
+        {
+          "caller": "createPyqReattemptAttemptRow",
+          "callee": "pyqReattemptAttemptId",
+          "lineNumber": 186
+        },
+        {
+          "caller": "pyqPracticeSubject",
+          "callee": "rows.map((row) => row.subject).filter",
+          "lineNumber": 195
+        },
+        {
+          "caller": "pyqPracticeSubject",
+          "callee": "rows.map",
+          "lineNumber": 195
+        },
+        {
+          "caller": "pyqPracticeSessionRow",
+          "callee": "Math.max",
+          "lineNumber": 216
+        },
+        {
+          "caller": "pyqPracticeSessionRow",
+          "callee": "Math.ceil",
+          "lineNumber": 216
+        },
+        {
+          "caller": "pyqPracticeSessionRow",
+          "callee": "calendarDateInTimeZone",
+          "lineNumber": 223
+        },
+        {
+          "caller": "startPyqSessionQuestion",
+          "callee": "nowISO",
+          "lineNumber": 239
+        },
+        {
+          "caller": "startPyqSessionQuestion",
+          "callee": "session.question_uids.includes",
+          "lineNumber": 242
+        },
+        {
+          "caller": "advancePyqSessionProgress",
+          "callee": "nowISO",
+          "lineNumber": 264
+        },
+        {
+          "caller": "advancePyqSessionProgress",
+          "callee": "session.question_uids.includes",
+          "lineNumber": 267
+        },
+        {
+          "caller": "advancePyqSessionProgress",
+          "callee": "Number.isFinite",
+          "lineNumber": 270
+        },
+        {
+          "caller": "advancePyqSessionProgress",
+          "callee": "session.completed_question_uids.includes",
+          "lineNumber": 276
+        },
+        {
+          "caller": "advancePyqSessionProgress",
+          "callee": "Array.from",
+          "lineNumber": 277
+        },
+        {
+          "caller": "advancePyqSessionProgress",
+          "callee": "Math.max",
+          "lineNumber": 281
+        },
+        {
+          "caller": "advancePyqSessionProgress",
+          "callee": "Math.max",
+          "lineNumber": 282
+        },
+        {
+          "caller": "advancePyqSessionProgress",
+          "callee": "Math.max",
+          "lineNumber": 285
+        },
+        {
+          "caller": "advancePyqSessionProgress",
+          "callee": "Math.round",
+          "lineNumber": 285
+        },
+        {
+          "caller": "completePyqSession",
+          "callee": "nowISO",
+          "lineNumber": 292
+        },
+        {
+          "caller": "completePyqSession",
+          "callee": "Math.max",
+          "lineNumber": 296
+        },
+        {
+          "caller": "completePyqSession",
+          "callee": "Math.max",
+          "lineNumber": 297
+        },
+        {
+          "caller": "abandonPyqSession",
+          "callee": "nowISO",
+          "lineNumber": 305
+        },
+        {
+          "caller": "pausePyqSession",
+          "callee": "nowISO",
+          "lineNumber": 315
+        },
+        {
+          "caller": "pyqQuestionSnapshot",
+          "callee": "pyqBookSlugForQuestion",
+          "lineNumber": 331
+        },
+        {
+          "caller": "hasCommittedAnswer",
+          "callee": "Array.isArray",
+          "lineNumber": 353
+        },
+        {
+          "caller": "hasCommittedAnswer",
+          "callee": "value.trim",
+          "lineNumber": 354
+        },
+        {
+          "caller": "answerMatchesQuestionType",
+          "callee": "hasCommittedAnswer",
+          "lineNumber": 358
+        },
+        {
+          "caller": "answerMatchesQuestionType",
+          "callee": "Array.isArray",
+          "lineNumber": 360
+        },
+        {
+          "caller": "answerMatchesQuestionType",
+          "callee": "Number.isFinite",
+          "lineNumber": 360
+        },
+        {
+          "caller": "answerMatchesQuestionType",
+          "callee": "Number",
+          "lineNumber": 360
+        },
+        {
+          "caller": "answerMatchesQuestionType",
+          "callee": "Array.isArray",
+          "lineNumber": 362
+        },
+        {
+          "caller": "createPyqAttemptRow",
+          "callee": "args.session.completed_question_uids.includes",
+          "lineNumber": 388
+        },
+        {
+          "caller": "createPyqAttemptRow",
+          "callee": "answerMatchesQuestionType",
+          "lineNumber": 396
+        },
+        {
+          "caller": "createPyqAttemptRow",
+          "callee": "Number.isFinite",
+          "lineNumber": 402
+        },
+        {
+          "caller": "createPyqAttemptRow",
+          "callee": "Number.isFinite",
+          "lineNumber": 402
+        },
+        {
+          "caller": "createPyqAttemptRow",
+          "callee": "Number.isInteger",
+          "lineNumber": 407
+        },
+        {
+          "caller": "createPyqAttemptRow",
+          "callee": "Math.max",
+          "lineNumber": 410
+        },
+        {
+          "caller": "createPyqAttemptRow",
+          "callee": "Math.round",
+          "lineNumber": 410
+        },
+        {
+          "caller": "createPyqAttemptRow",
+          "callee": "new Date(args.committedAtMs).toISOString",
+          "lineNumber": 411
+        },
+        {
+          "caller": "createPyqAttemptRow",
+          "callee": "new Date(\n    Math.min(args.questionStartedAtMs, args.committedAtMs)\n  ).toISOString",
+          "lineNumber": 412
+        },
+        {
+          "caller": "createPyqAttemptRow",
+          "callee": "Math.min",
+          "lineNumber": 413
+        },
+        {
+          "caller": "createPyqAttemptRow",
+          "callee": "pyqAnswerValueForLog",
+          "lineNumber": 415
+        },
+        {
+          "caller": "createPyqAttemptRow",
+          "callee": "pyqAttemptId",
+          "lineNumber": 418
+        },
+        {
+          "caller": "createPyqAttemptRow",
+          "callee": "pyqQuestionSnapshot",
+          "lineNumber": 428
+        },
+        {
+          "caller": "createPyqAttemptRow",
+          "callee": "evaluatePyqAnswer",
+          "lineNumber": 432
+        },
+        {
+          "caller": "createPyqAttemptRow",
+          "callee": "Math.max",
+          "lineNumber": 435
+        },
+        {
+          "caller": "createPyqAttemptRow",
+          "callee": "Math.ceil",
+          "lineNumber": 435
+        }
+      ],
+      "metrics": {
+        "importCount": 3,
+        "exportCount": 16,
+        "functionCount": 18,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/lib/pyq.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 570,
+      "nonEmptyLines": 526,
+      "functions": [
+        {
+          "name": "replaceBalancedPyqMathCommand",
+          "startLine": 111,
+          "endLine": 139,
+          "params": [
+            "value",
+            "command",
+            "transform"
+          ]
+        },
+        {
+          "name": "normalizePyqTextCommands",
+          "startLine": 141,
+          "endLine": 149,
+          "params": [
+            "value"
+          ]
+        },
+        {
+          "name": "joinPyqMathLines",
+          "startLine": 151,
+          "endLine": 174,
+          "params": [
+            "value"
+          ]
+        },
+        {
+          "name": "pyqMathEndIndex",
+          "startLine": 176,
+          "endLine": 190,
+          "params": [
+            "value",
+            "delimiter",
+            "startIndex"
+          ]
+        },
+        {
+          "name": "normalizePyqMathSegment",
+          "startLine": 192,
+          "endLine": 197,
+          "params": [
+            "segment",
+            "left",
+            "right"
+          ]
+        },
+        {
+          "name": "normalizePyqQuestionHtml",
+          "startLine": 209,
+          "endLine": 258,
+          "params": [
+            "html"
+          ]
+        },
+        {
+          "name": "fetchJson",
+          "startLine": 260,
+          "endLine": 264,
+          "params": [
+            "url"
+          ]
+        },
+        {
+          "name": "loadPyqManifest",
+          "startLine": 266,
+          "endLine": 274,
+          "params": []
+        },
+        {
+          "name": "normalizePyqManifest",
+          "startLine": 276,
+          "endLine": 313,
+          "params": [
+            "payload"
+          ]
+        },
+        {
+          "name": "loadPyqQuestions",
+          "startLine": 315,
+          "endLine": 331,
+          "params": [
+            "subjects",
+            "bankVersion"
+          ]
+        },
+        {
+          "name": "loadPyqQuestionByUid",
+          "startLine": 336,
+          "endLine": 350,
+          "params": [
+            "questionUid",
+            "subjectHint"
+          ]
+        },
+        {
+          "name": "matchesPyqTopicScope",
+          "startLine": 352,
+          "endLine": 360,
+          "params": [
+            "question",
+            "config"
+          ]
+        },
+        {
+          "name": "inferPyqBookSlug",
+          "startLine": 362,
+          "endLine": 371,
+          "params": [
+            "paperLabel"
+          ]
+        },
+        {
+          "name": "pyqBookSlugForQuestion",
+          "startLine": 373,
+          "endLine": 377,
+          "params": [
+            "question"
+          ]
+        },
+        {
+          "name": "matchesPyqBookScope",
+          "startLine": 379,
+          "endLine": 385,
+          "params": [
+            "question",
+            "config"
+          ]
+        },
+        {
+          "name": "normalizedChoices",
+          "startLine": 387,
+          "endLine": 394,
+          "params": [
+            "value"
+          ]
+        },
+        {
+          "name": "evaluatePyqAnswer",
+          "startLine": 396,
+          "endLine": 428,
+          "params": [
+            "question",
+            "selected",
+            "decision"
+          ]
+        },
+        {
+          "name": "formatPyqAnswer",
+          "startLine": 430,
+          "endLine": 441,
+          "params": [
+            "question"
+          ]
+        },
+        {
+          "name": "pyqAnswerValueForLog",
+          "startLine": 443,
+          "endLine": 448,
+          "params": [
+            "question"
+          ]
+        },
+        {
+          "name": "escapeSvgText",
+          "startLine": 450,
+          "endLine": 456,
+          "params": [
+            "value"
+          ]
+        },
+        {
+          "name": "wrapSnapshotText",
+          "startLine": 458,
+          "endLine": 474,
+          "params": [
+            "value",
+            "maxChars"
+          ]
+        },
+        {
+          "name": "pyqQuestionSnapshotDataUrl",
+          "startLine": 476,
+          "endLine": 498,
+          "params": [
+            "question"
+          ]
+        },
+        {
+          "name": "pyqSourceRef",
+          "startLine": 500,
+          "endLine": 502,
+          "params": [
+            "question"
+          ]
+        },
+        {
+          "name": "pyqPlainText",
+          "startLine": 504,
+          "endLine": 538,
+          "params": [
+            "html"
+          ]
+        },
+        {
+          "name": "firstPyqImage",
+          "startLine": 540,
+          "endLine": 543,
+          "params": [
+            "html"
+          ]
+        },
+        {
+          "name": "resolvePyqJournalImageUrl",
+          "startLine": 546,
+          "endLine": 558,
+          "params": [
+            "html",
+            "hint"
+          ]
+        },
+        {
+          "name": "inferPyqDirectOutcome",
+          "startLine": 561,
+          "endLine": 570,
+          "params": [
+            "question",
+            "markDecision",
+            "timeSpentSec"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "PYQ_BANK_QUESTION_COUNT",
+          "line": 5,
+          "isDefault": false
+        },
+        {
+          "name": "normalizePyqQuestionHtml",
+          "line": 209,
+          "isDefault": false
+        },
+        {
+          "name": "loadPyqManifest",
+          "line": 266,
+          "isDefault": false
+        },
+        {
+          "name": "normalizePyqManifest",
+          "line": 276,
+          "isDefault": false
+        },
+        {
+          "name": "loadPyqQuestions",
+          "line": 315,
+          "isDefault": false
+        },
+        {
+          "name": "loadPyqQuestionByUid",
+          "line": 336,
+          "isDefault": false
+        },
+        {
+          "name": "matchesPyqTopicScope",
+          "line": 352,
+          "isDefault": false
+        },
+        {
+          "name": "inferPyqBookSlug",
+          "line": 362,
+          "isDefault": false
+        },
+        {
+          "name": "pyqBookSlugForQuestion",
+          "line": 373,
+          "isDefault": false
+        },
+        {
+          "name": "matchesPyqBookScope",
+          "line": 379,
+          "isDefault": false
+        },
+        {
+          "name": "evaluatePyqAnswer",
+          "line": 396,
+          "isDefault": false
+        },
+        {
+          "name": "formatPyqAnswer",
+          "line": 430,
+          "isDefault": false
+        },
+        {
+          "name": "pyqAnswerValueForLog",
+          "line": 443,
+          "isDefault": false
+        },
+        {
+          "name": "pyqQuestionSnapshotDataUrl",
+          "line": 476,
+          "isDefault": false
+        },
+        {
+          "name": "pyqSourceRef",
+          "line": 500,
+          "isDefault": false
+        },
+        {
+          "name": "pyqPlainText",
+          "line": 504,
+          "isDefault": false
+        },
+        {
+          "name": "firstPyqImage",
+          "line": 540,
+          "isDefault": false
+        },
+        {
+          "name": "resolvePyqJournalImageUrl",
+          "line": 546,
+          "isDefault": false
+        },
+        {
+          "name": "inferPyqDirectOutcome",
+          "line": 561,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "replaceBalancedPyqMathCommand",
+          "callee": "value.indexOf",
+          "lineNumber": 119
+        },
+        {
+          "caller": "replaceBalancedPyqMathCommand",
+          "callee": "value.slice",
+          "lineNumber": 120
+        },
+        {
+          "caller": "replaceBalancedPyqMathCommand",
+          "callee": "value.slice",
+          "lineNumber": 133
+        },
+        {
+          "caller": "replaceBalancedPyqMathCommand",
+          "callee": "value.slice",
+          "lineNumber": 135
+        },
+        {
+          "caller": "replaceBalancedPyqMathCommand",
+          "callee": "transform",
+          "lineNumber": 135
+        },
+        {
+          "caller": "replaceBalancedPyqMathCommand",
+          "callee": "value.slice",
+          "lineNumber": 135
+        },
+        {
+          "caller": "normalizePyqTextCommands",
+          "callee": "value.replace",
+          "lineNumber": 142
+        },
+        {
+          "caller": "normalizePyqTextCommands",
+          "callee": "body.split",
+          "lineNumber": 143
+        },
+        {
+          "caller": "normalizePyqTextCommands",
+          "callee": "chunks[index].replace",
+          "lineNumber": 145
+        },
+        {
+          "caller": "normalizePyqTextCommands",
+          "callee": "chunks.join",
+          "lineNumber": 147
+        },
+        {
+          "caller": "joinPyqMathLines",
+          "callee": "value\n    .replace(PYQ_MATH_BREAK_PATTERN, '\\n')\n    .replace(/&nbsp;/gi, ' ')\n    .replace(/\\u00a0/g, ' ')\n    .replace(/\\\\renewcommand\\s*\\{\\\\arraystretch\\}\\s*\\{([^{}]+)\\}/g, '\\\\def\\\\arraystretch{$1}')\n    .replace(/p\\{\\s*\\d+(?:\\.\\d+)?(?:cm|mm|in|pt|em|ex)\\s*\\}/g, 'l')\n    .replace(/\\^?\\\\hat\\{\\}/g, '\\\\mathbin{\\\\char`\\\\^}')\n    .replace",
+          "lineNumber": 152
+        },
+        {
+          "caller": "joinPyqMathLines",
+          "callee": "value\n    .replace(PYQ_MATH_BREAK_PATTERN, '\\n')\n    .replace(/&nbsp;/gi, ' ')\n    .replace(/\\u00a0/g, ' ')\n    .replace(/\\\\renewcommand\\s*\\{\\\\arraystretch\\}\\s*\\{([^{}]+)\\}/g, '\\\\def\\\\arraystretch{$1}')\n    .replace(/p\\{\\s*\\d+(?:\\.\\d+)?(?:cm|mm|in|pt|em|ex)\\s*\\}/g, 'l')\n    .replace",
+          "lineNumber": 152
+        },
+        {
+          "caller": "joinPyqMathLines",
+          "callee": "value\n    .replace(PYQ_MATH_BREAK_PATTERN, '\\n')\n    .replace(/&nbsp;/gi, ' ')\n    .replace(/\\u00a0/g, ' ')\n    .replace(/\\\\renewcommand\\s*\\{\\\\arraystretch\\}\\s*\\{([^{}]+)\\}/g, '\\\\def\\\\arraystretch{$1}')\n    .replace",
+          "lineNumber": 152
+        },
+        {
+          "caller": "joinPyqMathLines",
+          "callee": "value\n    .replace(PYQ_MATH_BREAK_PATTERN, '\\n')\n    .replace(/&nbsp;/gi, ' ')\n    .replace(/\\u00a0/g, ' ')\n    .replace",
+          "lineNumber": 152
+        },
+        {
+          "caller": "joinPyqMathLines",
+          "callee": "value\n    .replace(PYQ_MATH_BREAK_PATTERN, '\\n')\n    .replace(/&nbsp;/gi, ' ')\n    .replace",
+          "lineNumber": 152
+        },
+        {
+          "caller": "joinPyqMathLines",
+          "callee": "value\n    .replace(PYQ_MATH_BREAK_PATTERN, '\\n')\n    .replace",
+          "lineNumber": 152
+        },
+        {
+          "caller": "joinPyqMathLines",
+          "callee": "value\n    .replace",
+          "lineNumber": 152
+        },
+        {
+          "caller": "joinPyqMathLines",
+          "callee": "replaceBalancedPyqMathCommand",
+          "lineNumber": 163
+        },
+        {
+          "caller": "joinPyqMathLines",
+          "callee": "body.replace",
+          "lineNumber": 166
+        },
+        {
+          "caller": "joinPyqMathLines",
+          "callee": "replaceBalancedPyqMathCommand",
+          "lineNumber": 168
+        },
+        {
+          "caller": "joinPyqMathLines",
+          "callee": "body.replace",
+          "lineNumber": 171
+        },
+        {
+          "caller": "joinPyqMathLines",
+          "callee": "normalizePyqTextCommands",
+          "lineNumber": 173
+        },
+        {
+          "caller": "pyqMathEndIndex",
+          "callee": "value.slice",
+          "lineNumber": 181
+        },
+        {
+          "caller": "normalizePyqMathSegment",
+          "callee": "joinPyqMathLines",
+          "lineNumber": 193
+        },
+        {
+          "caller": "normalizePyqMathSegment",
+          "callee": "segment.slice",
+          "lineNumber": 193
+        },
+        {
+          "caller": "normalizePyqMathSegment",
+          "callee": "/\\\\begin\\{align\\*?\\}/.test",
+          "lineNumber": 195
+        },
+        {
+          "caller": "normalizePyqQuestionHtml",
+          "callee": "html.indexOf",
+          "lineNumber": 218
+        },
+        {
+          "caller": "normalizePyqQuestionHtml",
+          "callee": "html.slice",
+          "lineNumber": 229
+        },
+        {
+          "caller": "normalizePyqQuestionHtml",
+          "callee": "pyqMathEndIndex",
+          "lineNumber": 232
+        },
+        {
+          "caller": "normalizePyqQuestionHtml",
+          "callee": "html.slice",
+          "lineNumber": 235
+        },
+        {
+          "caller": "normalizePyqQuestionHtml",
+          "callee": "html.slice",
+          "lineNumber": 239
+        },
+        {
+          "caller": "normalizePyqQuestionHtml",
+          "callee": "mathSegments.push",
+          "lineNumber": 241
+        },
+        {
+          "caller": "normalizePyqQuestionHtml",
+          "callee": "normalizePyqMathSegment",
+          "lineNumber": 242
+        },
+        {
+          "caller": "normalizePyqQuestionHtml",
+          "callee": "html.slice",
+          "lineNumber": 243
+        },
+        {
+          "caller": "normalizePyqQuestionHtml",
+          "callee": "tokenized.replace",
+          "lineNumber": 250
+        },
+        {
+          "caller": "normalizePyqQuestionHtml",
+          "callee": "joinPyqMathLines",
+          "lineNumber": 252
+        },
+        {
+          "caller": "normalizePyqQuestionHtml",
+          "callee": "wrapped.replace",
+          "lineNumber": 254
+        },
+        {
+          "caller": "normalizePyqQuestionHtml",
+          "callee": "Number",
+          "lineNumber": 256
+        },
+        {
+          "caller": "fetchJson",
+          "callee": "fetch",
+          "lineNumber": 261
+        },
+        {
+          "caller": "fetchJson",
+          "callee": "response.json",
+          "lineNumber": 263
+        },
+        {
+          "caller": "loadPyqManifest",
+          "callee": "fetchJson<PyqManifestPayload>(\n    `/pyq/manifest.json?schema=${PYQ_MANIFEST_SCHEMA}`\n  ).then",
+          "lineNumber": 270
+        },
+        {
+          "caller": "loadPyqManifest",
+          "callee": "fetchJson",
+          "lineNumber": 270
+        },
+        {
+          "caller": "normalizeSubjects",
+          "callee": "subjects.map",
+          "lineNumber": 282
+        },
+        {
+          "caller": "normalizeSubjects",
+          "callee": "Array.isArray",
+          "lineNumber": 284
+        },
+        {
+          "caller": "normalizePyqManifest",
+          "callee": "normalizeSubjects",
+          "lineNumber": 286
+        },
+        {
+          "caller": "normalizePyqManifest",
+          "callee": "Array.isArray",
+          "lineNumber": 287
+        },
+        {
+          "caller": "normalizePyqManifest",
+          "callee": "payload.books.map",
+          "lineNumber": 288
+        },
+        {
+          "caller": "normalizePyqManifest",
+          "callee": "normalizeSubjects",
+          "lineNumber": 288
+        },
+        {
+          "caller": "loadPyqQuestions",
+          "callee": "Promise.all",
+          "lineNumber": 319
+        },
+        {
+          "caller": "loadPyqQuestions",
+          "callee": "subjects.map",
+          "lineNumber": 320
+        },
+        {
+          "caller": "loadPyqQuestions",
+          "callee": "encodeURIComponent",
+          "lineNumber": 321
+        },
+        {
+          "caller": "loadPyqQuestions",
+          "callee": "subjectCache.get",
+          "lineNumber": 322
+        },
+        {
+          "caller": "loadPyqQuestions",
+          "callee": "fetchJson",
+          "lineNumber": 324
+        },
+        {
+          "caller": "loadPyqQuestions",
+          "callee": "subjectCache.set",
+          "lineNumber": 325
+        },
+        {
+          "caller": "loadPyqQuestions",
+          "callee": "payloads.flatMap",
+          "lineNumber": 330
+        },
+        {
+          "caller": "loadPyqQuestionByUid",
+          "callee": "loadPyqManifest",
+          "lineNumber": 340
+        },
+        {
+          "caller": "loadPyqQuestionByUid",
+          "callee": "subjectHint.trim().toLowerCase",
+          "lineNumber": 341
+        },
+        {
+          "caller": "loadPyqQuestionByUid",
+          "callee": "subjectHint.trim",
+          "lineNumber": 341
+        },
+        {
+          "caller": "loadPyqQuestionByUid",
+          "callee": "manifest.subjects.find",
+          "lineNumber": 342
+        },
+        {
+          "caller": "loadPyqQuestionByUid",
+          "callee": "candidate.slug.toLowerCase",
+          "lineNumber": 344
+        },
+        {
+          "caller": "loadPyqQuestionByUid",
+          "callee": "candidate.label.toLowerCase",
+          "lineNumber": 345
+        },
+        {
+          "caller": "loadPyqQuestionByUid",
+          "callee": "loadPyqQuestions",
+          "lineNumber": 348
+        },
+        {
+          "caller": "loadPyqQuestionByUid",
+          "callee": "questions.find",
+          "lineNumber": 349
+        },
+        {
+          "caller": "inferPyqBookSlug",
+          "callee": "paperLabel.trim().toUpperCase",
+          "lineNumber": 363
+        },
+        {
+          "caller": "inferPyqBookSlug",
+          "callee": "paperLabel.trim",
+          "lineNumber": 363
+        },
+        {
+          "caller": "inferPyqBookSlug",
+          "callee": "normalized.startsWith",
+          "lineNumber": 364
+        },
+        {
+          "caller": "inferPyqBookSlug",
+          "callee": "normalized.startsWith",
+          "lineNumber": 365
+        },
+        {
+          "caller": "inferPyqBookSlug",
+          "callee": "normalized.startsWith",
+          "lineNumber": 365
+        },
+        {
+          "caller": "inferPyqBookSlug",
+          "callee": "normalized.startsWith",
+          "lineNumber": 367
+        },
+        {
+          "caller": "inferPyqBookSlug",
+          "callee": "normalized.startsWith",
+          "lineNumber": 367
+        },
+        {
+          "caller": "inferPyqBookSlug",
+          "callee": "normalized.startsWith",
+          "lineNumber": 369
+        },
+        {
+          "caller": "pyqBookSlugForQuestion",
+          "callee": "question.bookSlug?.trim",
+          "lineNumber": 376
+        },
+        {
+          "caller": "pyqBookSlugForQuestion",
+          "callee": "inferPyqBookSlug",
+          "lineNumber": 376
+        },
+        {
+          "caller": "matchesPyqBookScope",
+          "callee": "pyqBookSlugForQuestion",
+          "lineNumber": 384
+        },
+        {
+          "caller": "normalizedChoices",
+          "callee": "Array.isArray",
+          "lineNumber": 388
+        },
+        {
+          "caller": "normalizedChoices",
+          "callee": "String",
+          "lineNumber": 388
+        },
+        {
+          "caller": "normalizedChoices",
+          "callee": "raw\n    .map(String)\n    .map((choice) => choice.trim().toUpperCase())\n    .filter(Boolean)\n    .sort",
+          "lineNumber": 389
+        },
+        {
+          "caller": "normalizedChoices",
+          "callee": "raw\n    .map(String)\n    .map((choice) => choice.trim().toUpperCase())\n    .filter",
+          "lineNumber": 389
+        },
+        {
+          "caller": "normalizedChoices",
+          "callee": "raw\n    .map(String)\n    .map",
+          "lineNumber": 389
+        },
+        {
+          "caller": "normalizedChoices",
+          "callee": "raw\n    .map",
+          "lineNumber": 389
+        },
+        {
+          "caller": "normalizedChoices",
+          "callee": "choice.trim().toUpperCase",
+          "lineNumber": 391
+        },
+        {
+          "caller": "normalizedChoices",
+          "callee": "choice.trim",
+          "lineNumber": 391
+        },
+        {
+          "caller": "evaluatePyqAnswer",
+          "callee": "normalizedChoices",
+          "lineNumber": 404
+        },
+        {
+          "caller": "evaluatePyqAnswer",
+          "callee": "String(question.answer).trim().toUpperCase",
+          "lineNumber": 404
+        },
+        {
+          "caller": "evaluatePyqAnswer",
+          "callee": "String(question.answer).trim",
+          "lineNumber": 404
+        },
+        {
+          "caller": "evaluatePyqAnswer",
+          "callee": "String",
+          "lineNumber": 404
+        },
+        {
+          "caller": "evaluatePyqAnswer",
+          "callee": "normalizedChoices(selected).join",
+          "lineNumber": 409
+        },
+        {
+          "caller": "evaluatePyqAnswer",
+          "callee": "normalizedChoices",
+          "lineNumber": 409
+        },
+        {
+          "caller": "evaluatePyqAnswer",
+          "callee": "normalizedChoices(question.answer as string[]).join",
+          "lineNumber": 410
+        },
+        {
+          "caller": "evaluatePyqAnswer",
+          "callee": "normalizedChoices",
+          "lineNumber": 410
+        },
+        {
+          "caller": "evaluatePyqAnswer",
+          "callee": "Number",
+          "lineNumber": 415
+        },
+        {
+          "caller": "evaluatePyqAnswer",
+          "callee": "Number.isFinite",
+          "lineNumber": 416
+        },
+        {
+          "caller": "evaluatePyqAnswer",
+          "callee": "Array.isArray",
+          "lineNumber": 417
+        },
+        {
+          "caller": "evaluatePyqAnswer",
+          "callee": "Math.max",
+          "lineNumber": 418
+        },
+        {
+          "caller": "evaluatePyqAnswer",
+          "callee": "accepted.some",
+          "lineNumber": 419
+        },
+        {
+          "caller": "evaluatePyqAnswer",
+          "callee": "Number",
+          "lineNumber": 420
+        },
+        {
+          "caller": "evaluatePyqAnswer",
+          "callee": "Number.isFinite",
+          "lineNumber": 422
+        },
+        {
+          "caller": "evaluatePyqAnswer",
+          "callee": "Math.abs",
+          "lineNumber": 422
+        },
+        {
+          "caller": "formatPyqAnswer",
+          "callee": "Array.isArray",
+          "lineNumber": 436
+        },
+        {
+          "caller": "formatPyqAnswer",
+          "callee": "question.answer.map(String).join",
+          "lineNumber": 438
+        },
+        {
+          "caller": "formatPyqAnswer",
+          "callee": "question.answer.map",
+          "lineNumber": 438
+        },
+        {
+          "caller": "formatPyqAnswer",
+          "callee": "String",
+          "lineNumber": 440
+        },
+        {
+          "caller": "pyqAnswerValueForLog",
+          "callee": "Array.isArray",
+          "lineNumber": 445
+        },
+        {
+          "caller": "pyqAnswerValueForLog",
+          "callee": "question.answer.map(String).sort",
+          "lineNumber": 445
+        },
+        {
+          "caller": "pyqAnswerValueForLog",
+          "callee": "question.answer.map",
+          "lineNumber": 445
+        },
+        {
+          "caller": "pyqAnswerValueForLog",
+          "callee": "String",
+          "lineNumber": 447
+        },
+        {
+          "caller": "escapeSvgText",
+          "callee": "value\n    .replace(/&/g, '&amp;')\n    .replace(/</g, '&lt;')\n    .replace(/>/g, '&gt;')\n    .replace",
+          "lineNumber": 451
+        },
+        {
+          "caller": "escapeSvgText",
+          "callee": "value\n    .replace(/&/g, '&amp;')\n    .replace(/</g, '&lt;')\n    .replace",
+          "lineNumber": 451
+        },
+        {
+          "caller": "escapeSvgText",
+          "callee": "value\n    .replace(/&/g, '&amp;')\n    .replace",
+          "lineNumber": 451
+        },
+        {
+          "caller": "escapeSvgText",
+          "callee": "value\n    .replace",
+          "lineNumber": 451
+        },
+        {
+          "caller": "wrapSnapshotText",
+          "callee": "value.replace(/\\s+/g, ' ').trim().slice(0, maxChars).split",
+          "lineNumber": 459
+        },
+        {
+          "caller": "wrapSnapshotText",
+          "callee": "value.replace(/\\s+/g, ' ').trim().slice",
+          "lineNumber": 459
+        },
+        {
+          "caller": "wrapSnapshotText",
+          "callee": "value.replace(/\\s+/g, ' ').trim",
+          "lineNumber": 459
+        },
+        {
+          "caller": "wrapSnapshotText",
+          "callee": "value.replace",
+          "lineNumber": 459
+        },
+        {
+          "caller": "wrapSnapshotText",
+          "callee": "lines.push",
+          "lineNumber": 465
+        },
+        {
+          "caller": "wrapSnapshotText",
+          "callee": "lines.push",
+          "lineNumber": 472
+        },
+        {
+          "caller": "pyqQuestionSnapshotDataUrl",
+          "callee": "pyqSourceRef",
+          "lineNumber": 477
+        },
+        {
+          "caller": "pyqQuestionSnapshotDataUrl",
+          "callee": "wrapSnapshotText",
+          "lineNumber": 478
+        },
+        {
+          "caller": "pyqQuestionSnapshotDataUrl",
+          "callee": "pyqPlainText",
+          "lineNumber": 478
+        },
+        {
+          "caller": "pyqQuestionSnapshotDataUrl",
+          "callee": "escapeSvgText",
+          "lineNumber": 480
+        },
+        {
+          "caller": "pyqQuestionSnapshotDataUrl",
+          "callee": "escapeSvgText",
+          "lineNumber": 481
+        },
+        {
+          "caller": "pyqQuestionSnapshotDataUrl",
+          "callee": "body.map",
+          "lineNumber": 482
+        },
+        {
+          "caller": "pyqQuestionSnapshotDataUrl",
+          "callee": "escapeSvgText",
+          "lineNumber": 484
+        },
+        {
+          "caller": "pyqQuestionSnapshotDataUrl",
+          "callee": "lines.join",
+          "lineNumber": 495
+        },
+        {
+          "caller": "pyqQuestionSnapshotDataUrl",
+          "callee": "encodeURIComponent",
+          "lineNumber": 497
+        },
+        {
+          "caller": "pyqSourceRef",
+          "callee": "[question.paperLabel, `Q ${question.number}`, question.type].join",
+          "lineNumber": 501
+        },
+        {
+          "caller": "pyqPlainText",
+          "callee": "new DOMParser().parseFromString",
+          "lineNumber": 505
+        },
+        {
+          "caller": "orderedListMarker",
+          "callee": "list.getAttribute",
+          "lineNumber": 507
+        },
+        {
+          "caller": "orderedListMarker",
+          "callee": "list.getAttribute",
+          "lineNumber": 508
+        },
+        {
+          "caller": "orderedListMarker",
+          "callee": "/upper-alpha/i.test",
+          "lineNumber": 509
+        },
+        {
+          "caller": "orderedListMarker",
+          "callee": "String.fromCharCode",
+          "lineNumber": 509
+        },
+        {
+          "caller": "orderedListMarker",
+          "callee": "/lower-alpha/i.test",
+          "lineNumber": 510
+        },
+        {
+          "caller": "orderedListMarker",
+          "callee": "String.fromCharCode",
+          "lineNumber": 510
+        },
+        {
+          "caller": "orderedListMarker",
+          "callee": "String",
+          "lineNumber": 511
+        },
+        {
+          "caller": "pyqPlainText",
+          "callee": "document.querySelectorAll",
+          "lineNumber": 514
+        },
+        {
+          "caller": "pyqPlainText",
+          "callee": "Array.from(list.children).filter",
+          "lineNumber": 515
+        },
+        {
+          "caller": "pyqPlainText",
+          "callee": "Array.from",
+          "lineNumber": 515
+        },
+        {
+          "caller": "pyqPlainText",
+          "callee": "items.forEach",
+          "lineNumber": 518
+        },
+        {
+          "caller": "pyqPlainText",
+          "callee": "item.prepend",
+          "lineNumber": 519
+        },
+        {
+          "caller": "pyqPlainText",
+          "callee": "document.createTextNode",
+          "lineNumber": 519
+        },
+        {
+          "caller": "pyqPlainText",
+          "callee": "orderedListMarker",
+          "lineNumber": 519
+        },
+        {
+          "caller": "pyqPlainText",
+          "callee": "item.append",
+          "lineNumber": 520
+        },
+        {
+          "caller": "pyqPlainText",
+          "callee": "document.createTextNode",
+          "lineNumber": 520
+        },
+        {
+          "caller": "pyqPlainText",
+          "callee": "document.querySelectorAll",
+          "lineNumber": 523
+        },
+        {
+          "caller": "pyqPlainText",
+          "callee": "lineBreak.replaceWith",
+          "lineNumber": 524
+        },
+        {
+          "caller": "pyqPlainText",
+          "callee": "document.createTextNode",
+          "lineNumber": 524
+        },
+        {
+          "caller": "pyqPlainText",
+          "callee": "document.querySelectorAll",
+          "lineNumber": 526
+        },
+        {
+          "caller": "pyqPlainText",
+          "callee": "element.append",
+          "lineNumber": 527
+        },
+        {
+          "caller": "pyqPlainText",
+          "callee": "document.createTextNode",
+          "lineNumber": 527
+        },
+        {
+          "caller": "pyqPlainText",
+          "callee": "document.body.textContent\n      ?.replace(/\\u00a0/g, ' ')\n      .split(/\\n+/)\n      .map((line) => line.replace(/[\\t ]+/g, ' ').trim())\n      .filter(Boolean)\n      .join",
+          "lineNumber": 531
+        },
+        {
+          "caller": "pyqPlainText",
+          "callee": "document.body.textContent\n      ?.replace(/\\u00a0/g, ' ')\n      .split(/\\n+/)\n      .map((line) => line.replace(/[\\t ]+/g, ' ').trim())\n      .filter",
+          "lineNumber": 531
+        },
+        {
+          "caller": "pyqPlainText",
+          "callee": "document.body.textContent\n      ?.replace(/\\u00a0/g, ' ')\n      .split(/\\n+/)\n      .map",
+          "lineNumber": 531
+        },
+        {
+          "caller": "pyqPlainText",
+          "callee": "document.body.textContent\n      ?.replace(/\\u00a0/g, ' ')\n      .split",
+          "lineNumber": 531
+        },
+        {
+          "caller": "pyqPlainText",
+          "callee": "document.body.textContent\n      ?.replace",
+          "lineNumber": 531
+        },
+        {
+          "caller": "pyqPlainText",
+          "callee": "line.replace(/[\\t ]+/g, ' ').trim",
+          "lineNumber": 534
+        },
+        {
+          "caller": "pyqPlainText",
+          "callee": "line.replace",
+          "lineNumber": 534
+        },
+        {
+          "caller": "firstPyqImage",
+          "callee": "new DOMParser().parseFromString",
+          "lineNumber": 541
+        },
+        {
+          "caller": "firstPyqImage",
+          "callee": "document.querySelector('img')?.getAttribute",
+          "lineNumber": 542
+        },
+        {
+          "caller": "firstPyqImage",
+          "callee": "document.querySelector",
+          "lineNumber": 542
+        },
+        {
+          "caller": "resolvePyqJournalImageUrl",
+          "callee": "hint?.trim",
+          "lineNumber": 550
+        },
+        {
+          "caller": "resolvePyqJournalImageUrl",
+          "callee": "firstPyqImage",
+          "lineNumber": 550
+        },
+        {
+          "caller": "resolvePyqJournalImageUrl",
+          "callee": "candidate.startsWith",
+          "lineNumber": 552
+        },
+        {
+          "caller": "resolvePyqJournalImageUrl",
+          "callee": "urlToDataUrl",
+          "lineNumber": 554
+        }
+      ],
+      "metrics": {
+        "importCount": 3,
+        "exportCount": 19,
+        "functionCount": 27,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/pages/Pyq.tsx",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 1810,
+      "nonEmptyLines": 1760,
+      "functions": [
+        {
+          "name": "latestQuestionAttempt",
+          "startLine": 86,
+          "endLine": 94,
+          "params": [
+            "attempts",
+            "questionUid"
+          ]
+        },
+        {
+          "name": "pyqAttemptBookSlug",
+          "startLine": 96,
+          "endLine": 101,
+          "params": [
+            "attempt"
+          ]
+        },
+        {
+          "name": "answerInputType",
+          "startLine": 103,
+          "endLine": 106,
+          "params": [
+            "question"
+          ]
+        },
+        {
+          "name": "answerText",
+          "startLine": 108,
+          "endLine": 111,
+          "params": [
+            "question"
+          ]
+        },
+        {
+          "name": "sourceDraft",
+          "startLine": 113,
+          "endLine": 130,
+          "params": [
+            "question",
+            "screenshot"
+          ]
+        },
+        {
+          "name": "PracticeSetup",
+          "startLine": 132,
+          "endLine": 608,
+          "params": [
+            "{\n  manifest,\n  attempts,\n  activeSession,\n  config,\n  setConfig,\n  loading,\n  error,\n  onResume,\n  onSave,\n  onDiscard,\n  onStart\n}"
+          ]
+        },
+        {
+          "name": "AnswerPad",
+          "startLine": 610,
+          "endLine": 678,
+          "params": [
+            "{\n  question,\n  choices,\n  numeric,\n  disabled,\n  onChoices,\n  onNumeric\n}"
+          ]
+        },
+        {
+          "name": "DecisionButtons",
+          "startLine": 680,
+          "endLine": 719,
+          "params": [
+            "{\n  value,\n  disabled,\n  onChange\n}"
+          ]
+        },
+        {
+          "name": "ResultPanel",
+          "startLine": 721,
+          "endLine": 811,
+          "params": [
+            "{ question, attempt }"
+          ]
+        },
+        {
+          "name": "formatAttemptAnswer",
+          "startLine": 813,
+          "endLine": 816,
+          "params": [
+            "value"
+          ]
+        },
+        {
+          "name": "Pyq",
+          "startLine": 818,
+          "endLine": 1810,
+          "params": []
+        }
+      ],
+      "exports": [
+        {
+          "name": "Pyq",
+          "line": 818,
+          "isDefault": true
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "pyqAttemptBookSlug",
+          "callee": "inferPyqBookSlug",
+          "lineNumber": 99
+        },
+        {
+          "caller": "answerText",
+          "callee": "formatPyqAnswer",
+          "lineNumber": 109
+        },
+        {
+          "caller": "sourceDraft",
+          "callee": "['MCQ', 'MSQ', 'NAT'].includes",
+          "lineNumber": 114
+        },
+        {
+          "caller": "sourceDraft",
+          "callee": "pyqPlainText",
+          "lineNumber": 126
+        },
+        {
+          "caller": "sourceDraft",
+          "callee": "answerText",
+          "lineNumber": 127
+        },
+        {
+          "caller": "sourceDraft",
+          "callee": "firstPyqImage",
+          "lineNumber": 128
+        },
+        {
+          "caller": "PracticeSetup",
+          "callee": "manifest.books.find",
+          "lineNumber": 158
+        },
+        {
+          "caller": "PracticeSetup",
+          "callee": "useMemo",
+          "lineNumber": 162
+        },
+        {
+          "caller": "PracticeSetup",
+          "callee": "attempts\n          .filter(\n            (attempt) =>\n              selectedBookSlug === 'all' || pyqAttemptBookSlug(attempt) === selectedBookSlug\n          )\n          .map",
+          "lineNumber": 165
+        },
+        {
+          "caller": "PracticeSetup",
+          "callee": "attempts\n          .filter",
+          "lineNumber": 165
+        },
+        {
+          "caller": "PracticeSetup",
+          "callee": "pyqAttemptBookSlug",
+          "lineNumber": 168
+        },
+        {
+          "caller": "PracticeSetup",
+          "callee": "useMemo",
+          "lineNumber": 174
+        },
+        {
+          "caller": "PracticeSetup",
+          "callee": "pyqAttemptBookSlug",
+          "lineNumber": 177
+        },
+        {
+          "caller": "PracticeSetup",
+          "callee": "ids.get",
+          "lineNumber": 178
+        },
+        {
+          "caller": "PracticeSetup",
+          "callee": "bookIds.add",
+          "lineNumber": 179
+        },
+        {
+          "caller": "PracticeSetup",
+          "callee": "ids.set",
+          "lineNumber": 180
+        },
+        {
+          "caller": "PracticeSetup",
+          "callee": "[...ids].map",
+          "lineNumber": 182
+        },
+        {
+          "caller": "PracticeSetup",
+          "callee": "useMemo",
+          "lineNumber": 184
+        },
+        {
+          "caller": "PracticeSetup",
+          "callee": "pyqAttemptBookSlug",
+          "lineNumber": 187
+        },
+        {
+          "caller": "PracticeSetup",
+          "callee": "manifest.subjects.find",
+          "lineNumber": 190
+        },
+        {
+          "caller": "PracticeSetup",
+          "callee": "ids.get",
+          "lineNumber": 192
+        },
+        {
+          "caller": "PracticeSetup",
+          "callee": "subjectIds.add",
+          "lineNumber": 193
+        },
+        {
+          "caller": "PracticeSetup",
+          "callee": "ids.set",
+          "lineNumber": 194
+        },
+        {
+          "caller": "PracticeSetup",
+          "callee": "[...ids].map",
+          "lineNumber": 196
+        },
+        {
+          "caller": "PracticeSetup",
+          "callee": "catalogSubjects.find",
+          "lineNumber": 198
+        },
+        {
+          "caller": "selectBook",
+          "callee": "manifest.books.find",
+          "lineNumber": 202
+        },
+        {
+          "caller": "selectBook",
+          "callee": "setConfig",
+          "lineNumber": 203
+        },
+        {
+          "caller": "PracticeSetup",
+          "callee": "manifest.questionCount.toLocaleString",
+          "lineNumber": 216
+        },
+        {
+          "caller": "PracticeSetup",
+          "callee": "secondsToClock",
+          "lineNumber": 229
+        },
+        {
+          "caller": "PracticeSetup",
+          "callee": "onResume",
+          "lineNumber": 234
+        },
+        {
+          "caller": "PracticeSetup",
+          "callee": "onSave",
+          "lineNumber": 238
+        },
+        {
+          "caller": "PracticeSetup",
+          "callee": "onDiscard",
+          "lineNumber": 244
+        },
+        {
+          "caller": "PracticeSetup",
+          "callee": "selectBook",
+          "lineNumber": 270
+        },
+        {
+          "caller": "PracticeSetup",
+          "callee": "manifest.books.map",
+          "lineNumber": 273
+        },
+        {
+          "caller": "PracticeSetup",
+          "callee": "selectBook",
+          "lineNumber": 283
+        },
+        {
+          "caller": "PracticeSetup",
+          "callee": "cn",
+          "lineNumber": 285
+        },
+        {
+          "caller": "PracticeSetup",
+          "callee": "attempts.map",
+          "lineNumber": 300
+        },
+        {
+          "caller": "PracticeSetup",
+          "callee": "manifest.questionCount.toLocaleString",
+          "lineNumber": 301
+        },
+        {
+          "caller": "PracticeSetup",
+          "callee": "manifest.books.map",
+          "lineNumber": 304
+        },
+        {
+          "caller": "PracticeSetup",
+          "callee": "seenByBook.get",
+          "lineNumber": 306
+        },
+        {
+          "caller": "PracticeSetup",
+          "callee": "selectBook",
+          "lineNumber": 311
+        },
+        {
+          "caller": "PracticeSetup",
+          "callee": "cn",
+          "lineNumber": 313
+        },
+        {
+          "caller": "PracticeSetup",
+          "callee": "attemptedIds.size.toLocaleString",
+          "lineNumber": 352
+        },
+        {
+          "caller": "PracticeSetup",
+          "callee": "catalogQuestionCount.toLocaleString",
+          "lineNumber": 352
+        },
+        {
+          "caller": "PracticeSetup",
+          "callee": "setConfig",
+          "lineNumber": 362
+        },
+        {
+          "caller": "PracticeSetup",
+          "callee": "catalogSubjects.map",
+          "lineNumber": 366
+        },
+        {
+          "caller": "PracticeSetup",
+          "callee": "setConfig",
+          "lineNumber": 376
+        },
+        {
+          "caller": "PracticeSetup",
+          "callee": "cn",
+          "lineNumber": 378
+        },
+        {
+          "caller": "PracticeSetup",
+          "callee": "catalogQuestionCount.toLocaleString",
+          "lineNumber": 391
+        },
+        {
+          "caller": "PracticeSetup",
+          "callee": "catalogSubjects.map",
+          "lineNumber": 395
+        },
+        {
+          "caller": "PracticeSetup",
+          "callee": "seenBySubject.get",
+          "lineNumber": 397
+        },
+        {
+          "caller": "PracticeSetup",
+          "callee": "setConfig",
+          "lineNumber": 403
+        },
+        {
+          "caller": "PracticeSetup",
+          "callee": "cn",
+          "lineNumber": 406
+        },
+        {
+          "caller": "PracticeSetup",
+          "callee": "cn",
+          "lineNumber": 415
+        },
+        {
+          "caller": "PracticeSetup",
+          "callee": "setConfig",
+          "lineNumber": 445
+        },
+        {
+          "caller": "PracticeSetup",
+          "callee": "cn",
+          "lineNumber": 447
+        },
+        {
+          "caller": "PracticeSetup",
+          "callee": "selectedTopics.map",
+          "lineNumber": 461
+        },
+        {
+          "caller": "PracticeSetup",
+          "callee": "setConfig",
+          "lineNumber": 467
+        },
+        {
+          "caller": "PracticeSetup",
+          "callee": "cn",
+          "lineNumber": 469
+        },
+        {
+          "caller": "PracticeSetup",
+          "callee": "setConfig",
+          "lineNumber": 499
+        },
+        {
+          "caller": "PracticeSetup",
+          "callee": "Number",
+          "lineNumber": 499
+        },
+        {
+          "caller": "PracticeSetup",
+          "callee": "catalogYears\n                    .slice()\n                    .reverse()\n                    .map",
+          "lineNumber": 502
+        },
+        {
+          "caller": "PracticeSetup",
+          "callee": "catalogYears\n                    .slice()\n                    .reverse",
+          "lineNumber": 502
+        },
+        {
+          "caller": "PracticeSetup",
+          "callee": "catalogYears\n                    .slice",
+          "lineNumber": 502
+        },
+        {
+          "caller": "PracticeSetup",
+          "callee": "setConfig",
+          "lineNumber": 515
+        },
+        {
+          "caller": "PracticeSetup",
+          "callee": "Number",
+          "lineNumber": 515
+        },
+        {
+          "caller": "PracticeSetup",
+          "callee": "catalogYears.map",
+          "lineNumber": 517
+        },
+        {
+          "caller": "PracticeSetup",
+          "callee": "setConfig",
+          "lineNumber": 528
+        },
+        {
+          "caller": "PracticeSetup",
+          "callee": "setConfig",
+          "lineNumber": 543
+        },
+        {
+          "caller": "PracticeSetup",
+          "callee": "setConfig",
+          "lineNumber": 559
+        },
+        {
+          "caller": "PracticeSetup",
+          "callee": "PYQ_HISTORY_OPTIONS.map",
+          "lineNumber": 562
+        },
+        {
+          "caller": "PracticeSetup",
+          "callee": "setConfig",
+          "lineNumber": 574
+        },
+        {
+          "caller": "AnswerPad",
+          "callee": "answerInputType",
+          "lineNumber": 625
+        },
+        {
+          "caller": "AnswerPad",
+          "callee": "onNumeric",
+          "lineNumber": 636
+        },
+        {
+          "caller": "AnswerPad",
+          "callee": "CHOICES.map",
+          "lineNumber": 650
+        },
+        {
+          "caller": "AnswerPad",
+          "callee": "choices.includes",
+          "lineNumber": 651
+        },
+        {
+          "caller": "AnswerPad",
+          "callee": "onChoices",
+          "lineNumber": 658
+        },
+        {
+          "caller": "AnswerPad",
+          "callee": "onChoices",
+          "lineNumber": 660
+        },
+        {
+          "caller": "AnswerPad",
+          "callee": "choices.filter",
+          "lineNumber": 661
+        },
+        {
+          "caller": "AnswerPad",
+          "callee": "cn",
+          "lineNumber": 664
+        },
+        {
+          "caller": "DecisionButtons",
+          "callee": "options.map",
+          "lineNumber": 698
+        },
+        {
+          "caller": "DecisionButtons",
+          "callee": "onChange",
+          "lineNumber": 704
+        },
+        {
+          "caller": "DecisionButtons",
+          "callee": "cn",
+          "lineNumber": 705
+        },
+        {
+          "caller": "ResultPanel",
+          "callee": "formatAttemptAnswer",
+          "lineNumber": 743
+        },
+        {
+          "caller": "ResultPanel",
+          "callee": "formatAttemptAnswer",
+          "lineNumber": 747
+        },
+        {
+          "caller": "ResultPanel",
+          "callee": "answerText(question).replace",
+          "lineNumber": 748
+        },
+        {
+          "caller": "ResultPanel",
+          "callee": "answerText",
+          "lineNumber": 748
+        },
+        {
+          "caller": "ResultPanel",
+          "callee": "cn",
+          "lineNumber": 752
+        },
+        {
+          "caller": "ResultPanel",
+          "callee": "cn",
+          "lineNumber": 764
+        },
+        {
+          "caller": "ResultPanel",
+          "callee": "secondsToClock",
+          "lineNumber": 773
+        },
+        {
+          "caller": "ResultPanel",
+          "callee": "new Date(attempt.attempted_at).toLocaleString",
+          "lineNumber": 794
+        },
+        {
+          "caller": "ResultPanel",
+          "callee": "secondsToClock",
+          "lineNumber": 796
+        },
+        {
+          "caller": "ResultPanel",
+          "callee": "(attempt.time_spent_ms / 1000).toFixed",
+          "lineNumber": 797
+        },
+        {
+          "caller": "formatAttemptAnswer",
+          "callee": "Array.isArray",
+          "lineNumber": 815
+        },
+        {
+          "caller": "formatAttemptAnswer",
+          "callee": "value.join",
+          "lineNumber": 815
+        },
+        {
+          "caller": "formatAttemptAnswer",
+          "callee": "String",
+          "lineNumber": 815
+        },
+        {
+          "caller": "Pyq",
+          "callee": "useAuth",
+          "lineNumber": 819
+        },
+        {
+          "caller": "Pyq",
+          "callee": "useSearchParams",
+          "lineNumber": 820
+        },
+        {
+          "caller": "Pyq",
+          "callee": "useState",
+          "lineNumber": 822
+        },
+        {
+          "caller": "Pyq",
+          "callee": "useState",
+          "lineNumber": 823
+        },
+        {
+          "caller": "Pyq",
+          "callee": "useState",
+          "lineNumber": 824
+        },
+        {
+          "caller": "Pyq",
+          "callee": "['5', '10', '25', '50', 'all'].includes",
+          "lineNumber": 832
+        },
+        {
+          "caller": "Pyq",
+          "callee": "searchParams.get",
+          "lineNumber": 832
+        },
+        {
+          "caller": "Pyq",
+          "callee": "searchParams.get",
+          "lineNumber": 833
+        },
+        {
+          "caller": "Pyq",
+          "callee": "PYQ_HISTORY_OPTIONS.some",
+          "lineNumber": 835
+        },
+        {
+          "caller": "Pyq",
+          "callee": "searchParams.get",
+          "lineNumber": 835
+        },
+        {
+          "caller": "Pyq",
+          "callee": "searchParams.get",
+          "lineNumber": 836
+        },
+        {
+          "caller": "Pyq",
+          "callee": "useState",
+          "lineNumber": 839
+        },
+        {
+          "caller": "Pyq",
+          "callee": "useState",
+          "lineNumber": 840
+        },
+        {
+          "caller": "Pyq",
+          "callee": "useState",
+          "lineNumber": 841
+        },
+        {
+          "caller": "Pyq",
+          "callee": "useState",
+          "lineNumber": 842
+        },
+        {
+          "caller": "Pyq",
+          "callee": "useState",
+          "lineNumber": 843
+        },
+        {
+          "caller": "Pyq",
+          "callee": "useState",
+          "lineNumber": 844
+        },
+        {
+          "caller": "Pyq",
+          "callee": "useState",
+          "lineNumber": 845
+        },
+        {
+          "caller": "Pyq",
+          "callee": "useState",
+          "lineNumber": 846
+        },
+        {
+          "caller": "Pyq",
+          "callee": "useState",
+          "lineNumber": 847
+        },
+        {
+          "caller": "Pyq",
+          "callee": "useState",
+          "lineNumber": 848
+        },
+        {
+          "caller": "Pyq",
+          "callee": "useState",
+          "lineNumber": 849
+        },
+        {
+          "caller": "Pyq",
+          "callee": "useState",
+          "lineNumber": 850
+        },
+        {
+          "caller": "Pyq",
+          "callee": "useState",
+          "lineNumber": 851
+        },
+        {
+          "caller": "Pyq",
+          "callee": "useState",
+          "lineNumber": 852
+        },
+        {
+          "caller": "Pyq",
+          "callee": "useState",
+          "lineNumber": 853
+        },
+        {
+          "caller": "Pyq",
+          "callee": "useState",
+          "lineNumber": 854
+        },
+        {
+          "caller": "Pyq",
+          "callee": "useState",
+          "lineNumber": 855
+        },
+        {
+          "caller": "Pyq",
+          "callee": "useState",
+          "lineNumber": 856
+        },
+        {
+          "caller": "Pyq",
+          "callee": "useRef",
+          "lineNumber": 857
+        },
+        {
+          "caller": "Pyq",
+          "callee": "useRef",
+          "lineNumber": 858
+        },
+        {
+          "caller": "Pyq",
+          "callee": "useRef",
+          "lineNumber": 859
+        },
+        {
+          "caller": "Pyq",
+          "callee": "useRef",
+          "lineNumber": 860
+        },
+        {
+          "caller": "Pyq",
+          "callee": "useRef",
+          "lineNumber": 861
+        },
+        {
+          "caller": "Pyq",
+          "callee": "useLiveQuery",
+          "lineNumber": 864
+        },
+        {
+          "caller": "Pyq",
+          "callee": "db.pyq_attempts.where('user_id').equals(userId).toArray",
+          "lineNumber": 865
+        },
+        {
+          "caller": "Pyq",
+          "callee": "db.pyq_attempts.where('user_id').equals",
+          "lineNumber": 865
+        },
+        {
+          "caller": "Pyq",
+          "callee": "db.pyq_attempts.where",
+          "lineNumber": 865
+        },
+        {
+          "caller": "Pyq",
+          "callee": "useLiveQuery",
+          "lineNumber": 869
+        },
+        {
+          "caller": "Pyq",
+          "callee": "db.pyq_sessions\n        .where('[user_id+status]')\n        .equals([userId, 'active'])\n        .toArray",
+          "lineNumber": 872
+        },
+        {
+          "caller": "Pyq",
+          "callee": "db.pyq_sessions\n        .where('[user_id+status]')\n        .equals",
+          "lineNumber": 872
+        },
+        {
+          "caller": "Pyq",
+          "callee": "db.pyq_sessions\n        .where",
+          "lineNumber": 872
+        },
+        {
+          "caller": "Pyq",
+          "callee": "rows.sort",
+          "lineNumber": 876
+        },
+        {
+          "caller": "Pyq",
+          "callee": "b.updated_at.localeCompare",
+          "lineNumber": 876
+        },
+        {
+          "caller": "Pyq",
+          "callee": "useLiveQuery",
+          "lineNumber": 881
+        },
+        {
+          "caller": "Pyq",
+          "callee": "db.patterns.where('user_id').equals(userId).toArray",
+          "lineNumber": 882
+        },
+        {
+          "caller": "Pyq",
+          "callee": "db.patterns.where('user_id').equals",
+          "lineNumber": 882
+        },
+        {
+          "caller": "Pyq",
+          "callee": "db.patterns.where",
+          "lineNumber": 882
+        },
+        {
+          "caller": "Pyq",
+          "callee": "useLiveQuery",
+          "lineNumber": 886
+        },
+        {
+          "caller": "Pyq",
+          "callee": "db.questions.where('user_id').equals(userId).toArray",
+          "lineNumber": 887
+        },
+        {
+          "caller": "Pyq",
+          "callee": "db.questions.where('user_id').equals",
+          "lineNumber": 887
+        },
+        {
+          "caller": "Pyq",
+          "callee": "db.questions.where",
+          "lineNumber": 887
+        },
+        {
+          "caller": "Pyq",
+          "callee": "useEffect",
+          "lineNumber": 892
+        },
+        {
+          "caller": "Pyq",
+          "callee": "reconcilePyqPracticeSessions",
+          "lineNumber": 894
+        },
+        {
+          "caller": "Pyq",
+          "callee": "useEffect",
+          "lineNumber": 897
+        },
+        {
+          "caller": "Pyq",
+          "callee": "loadPyqManifest()\n      .then((value) => {\n        if (!active) return;\n        setManifest(value);\n        setConfig((current) => {\n          const requestedSubject = searchParams.get('subject');\n          const requested = requestedSubject\n            ? value.subjects.find(\n                (subject) =>\n                  subject.label.toLocaleLowerCase() === requestedSubject.toLocaleLowerCase()\n              )\n            : null;\n          return {\n            ...current,\n            bookSlug: value.defaultBookSlug,\n            subjectSlug: requested?.slug ?? current.subjectSlug,\n            topicSlug: 'all',\n            fromYear: value.firstYear,\n            toYear: value.lastYear\n          };\n        });\n      })\n      .catch",
+          "lineNumber": 899
+        },
+        {
+          "caller": "Pyq",
+          "callee": "loadPyqManifest()\n      .then",
+          "lineNumber": 899
+        },
+        {
+          "caller": "Pyq",
+          "callee": "loadPyqManifest",
+          "lineNumber": 899
+        },
+        {
+          "caller": "Pyq",
+          "callee": "setManifest",
+          "lineNumber": 902
+        },
+        {
+          "caller": "Pyq",
+          "callee": "setConfig",
+          "lineNumber": 903
+        },
+        {
+          "caller": "Pyq",
+          "callee": "searchParams.get",
+          "lineNumber": 904
+        },
+        {
+          "caller": "Pyq",
+          "callee": "value.subjects.find",
+          "lineNumber": 906
+        },
+        {
+          "caller": "Pyq",
+          "callee": "subject.label.toLocaleLowerCase",
+          "lineNumber": 908
+        },
+        {
+          "caller": "Pyq",
+          "callee": "requestedSubject.toLocaleLowerCase",
+          "lineNumber": 908
+        },
+        {
+          "caller": "Pyq",
+          "callee": "setManifestError",
+          "lineNumber": 923
+        },
+        {
+          "caller": "Pyq",
+          "callee": "latestQuestionAttempt",
+          "lineNumber": 934
+        },
+        {
+          "caller": "Pyq",
+          "callee": "useEffect",
+          "lineNumber": 935
+        },
+        {
+          "caller": "Pyq",
+          "callee": "window.scrollTo",
+          "lineNumber": 937
+        },
+        {
+          "caller": "Pyq",
+          "callee": "latestQuestionAttempt",
+          "lineNumber": 938
+        },
+        {
+          "caller": "Pyq",
+          "callee": "setStartedAt",
+          "lineNumber": 941
+        },
+        {
+          "caller": "Pyq",
+          "callee": "Date.now",
+          "lineNumber": 946
+        },
+        {
+          "caller": "Pyq",
+          "callee": "setChoices",
+          "lineNumber": 950
+        },
+        {
+          "caller": "Pyq",
+          "callee": "Array.isArray",
+          "lineNumber": 951
+        },
+        {
+          "caller": "Pyq",
+          "callee": "savedAnswer.map",
+          "lineNumber": 952
+        },
+        {
+          "caller": "Pyq",
+          "callee": "answerInputType",
+          "lineNumber": 953
+        },
+        {
+          "caller": "Pyq",
+          "callee": "setNumeric",
+          "lineNumber": 957
+        },
+        {
+          "caller": "Pyq",
+          "callee": "answerInputType",
+          "lineNumber": 958
+        },
+        {
+          "caller": "Pyq",
+          "callee": "String",
+          "lineNumber": 958
+        },
+        {
+          "caller": "Pyq",
+          "callee": "setDecision",
+          "lineNumber": 960
+        },
+        {
+          "caller": "Pyq",
+          "callee": "setSubmitted",
+          "lineNumber": 961
+        },
+        {
+          "caller": "Pyq",
+          "callee": "setSubmitting",
+          "lineNumber": 962
+        },
+        {
+          "caller": "Pyq",
+          "callee": "setJournalOpen",
+          "lineNumber": 963
+        },
+        {
+          "caller": "Pyq",
+          "callee": "setJournalSaved",
+          "lineNumber": 964
+        },
+        {
+          "caller": "Pyq",
+          "callee": "setQuestionScreenshot",
+          "lineNumber": 965
+        },
+        {
+          "caller": "Pyq",
+          "callee": "setSubmitError",
+          "lineNumber": 966
+        },
+        {
+          "caller": "Pyq",
+          "callee": "useEffect",
+          "lineNumber": 969
+        },
+        {
+          "caller": "Pyq",
+          "callee": "window.scrollTo",
+          "lineNumber": 970
+        },
+        {
+          "caller": "Pyq",
+          "callee": "useTimer",
+          "lineNumber": 973
+        },
+        {
+          "caller": "questionsForSession",
+          "callee": "loadPyqQuestions",
+          "lineNumber": 978
+        },
+        {
+          "caller": "questionsForSession",
+          "callee": "rows.map",
+          "lineNumber": 979
+        },
+        {
+          "caller": "questionsForSession",
+          "callee": "session.question_uids.flatMap",
+          "lineNumber": 980
+        },
+        {
+          "caller": "questionsForSession",
+          "callee": "byId.get",
+          "lineNumber": 981
+        },
+        {
+          "caller": "resumeSession",
+          "callee": "setLoading",
+          "lineNumber": 988
+        },
+        {
+          "caller": "resumeSession",
+          "callee": "setStartError",
+          "lineNumber": 989
+        },
+        {
+          "caller": "resumeSession",
+          "callee": "db.pyq_sessions\n          .where('[user_id+status]')\n          .equals([userId, 'active'])\n          .toArray",
+          "lineNumber": 993
+        },
+        {
+          "caller": "resumeSession",
+          "callee": "db.pyq_sessions\n          .where('[user_id+status]')\n          .equals",
+          "lineNumber": 993
+        },
+        {
+          "caller": "resumeSession",
+          "callee": "db.pyq_sessions\n          .where",
+          "lineNumber": 993
+        },
+        {
+          "caller": "resumeSession",
+          "callee": "writeLocal",
+          "lineNumber": 998
+        },
+        {
+          "caller": "resumeSession",
+          "callee": "pausePyqSession",
+          "lineNumber": 998
+        },
+        {
+          "caller": "resumeSession",
+          "callee": "activeRows.some",
+          "lineNumber": 1000
+        },
+        {
+          "caller": "resumeSession",
+          "callee": "setQuestions",
+          "lineNumber": 1001
+        },
+        {
+          "caller": "resumeSession",
+          "callee": "setFinished",
+          "lineNumber": 1002
+        },
+        {
+          "caller": "resumeSession",
+          "callee": "setIndex",
+          "lineNumber": 1003
+        },
+        {
+          "caller": "resumeSession",
+          "callee": "setPyqSessionId",
+          "lineNumber": 1004
+        },
+        {
+          "caller": "resumeSession",
+          "callee": "questionsForSession",
+          "lineNumber": 1008
+        },
+        {
+          "caller": "resumeSession",
+          "callee": "new Date().toISOString",
+          "lineNumber": 1024
+        },
+        {
+          "caller": "resumeSession",
+          "callee": "new Date().toISOString",
+          "lineNumber": 1029
+        },
+        {
+          "caller": "resumeSession",
+          "callee": "completePyqSession",
+          "lineNumber": 1031
+        },
+        {
+          "caller": "resumeSession",
+          "callee": "(\n        await db.pyq_attempts.where('user_id').equals(session.user_id).toArray()\n      )\n        .filter((attempt) => attempt.pyq_session_id === session.id)\n        .sort",
+          "lineNumber": 1032
+        },
+        {
+          "caller": "resumeSession",
+          "callee": "(\n        await db.pyq_attempts.where('user_id').equals(session.user_id).toArray()\n      )\n        .filter",
+          "lineNumber": 1032
+        },
+        {
+          "caller": "resumeSession",
+          "callee": "db.pyq_attempts.where('user_id').equals(session.user_id).toArray",
+          "lineNumber": 1033
+        },
+        {
+          "caller": "resumeSession",
+          "callee": "db.pyq_attempts.where('user_id').equals",
+          "lineNumber": 1033
+        },
+        {
+          "caller": "resumeSession",
+          "callee": "db.pyq_attempts.where",
+          "lineNumber": 1033
+        },
+        {
+          "caller": "resumeSession",
+          "callee": "a.attempted_at.localeCompare",
+          "lineNumber": 1036
+        },
+        {
+          "caller": "resumeSession",
+          "callee": "db.sessions.get",
+          "lineNumber": 1037
+        },
+        {
+          "caller": "resumeSession",
+          "callee": "pyqPracticeSessionRow",
+          "lineNumber": 1038
+        },
+        {
+          "caller": "resumeSession",
+          "callee": "pyqPracticeSubject",
+          "lineNumber": 1040
+        },
+        {
+          "caller": "resumeSession",
+          "callee": "writeLocalBatch",
+          "lineNumber": 1044
+        },
+        {
+          "caller": "resumeSession",
+          "callee": "Math.min",
+          "lineNumber": 1050
+        },
+        {
+          "caller": "resumeSession",
+          "callee": "Math.max",
+          "lineNumber": 1050
+        },
+        {
+          "caller": "resumeSession",
+          "callee": "startPyqSessionQuestion",
+          "lineNumber": 1053
+        },
+        {
+          "caller": "resumeSession",
+          "callee": "writeLocal",
+          "lineNumber": 1054
+        },
+        {
+          "caller": "resumeSession",
+          "callee": "Date.parse",
+          "lineNumber": 1055
+        },
+        {
+          "caller": "resumeSession",
+          "callee": "Number.isFinite",
+          "lineNumber": 1058
+        },
+        {
+          "caller": "resumeSession",
+          "callee": "Date.now",
+          "lineNumber": 1058
+        },
+        {
+          "caller": "resumeSession",
+          "callee": "setConfig",
+          "lineNumber": 1061
+        },
+        {
+          "caller": "resumeSession",
+          "callee": "setQuestions",
+          "lineNumber": 1067
+        },
+        {
+          "caller": "resumeSession",
+          "callee": "setIndex",
+          "lineNumber": 1068
+        },
+        {
+          "caller": "resumeSession",
+          "callee": "setCompleted",
+          "lineNumber": 1069
+        },
+        {
+          "caller": "resumeSession",
+          "callee": "setFinished",
+          "lineNumber": 1070
+        },
+        {
+          "caller": "resumeSession",
+          "callee": "setAnalyzedCount",
+          "lineNumber": 1071
+        },
+        {
+          "caller": "resumeSession",
+          "callee": "setPyqSessionId",
+          "lineNumber": 1072
+        },
+        {
+          "caller": "resumeSession",
+          "callee": "setStartError",
+          "lineNumber": 1074
+        },
+        {
+          "caller": "resumeSession",
+          "callee": "setLoading",
+          "lineNumber": 1076
+        },
+        {
+          "caller": "discardSession",
+          "callee": "setLoading",
+          "lineNumber": 1082
+        },
+        {
+          "caller": "discardSession",
+          "callee": "setStartError",
+          "lineNumber": 1083
+        },
+        {
+          "caller": "discardSession",
+          "callee": "abandonPyqSession",
+          "lineNumber": 1085
+        },
+        {
+          "caller": "discardSession",
+          "callee": "(\n        await db.pyq_attempts.where('user_id').equals(session.user_id).toArray()\n      ).filter",
+          "lineNumber": 1086
+        },
+        {
+          "caller": "discardSession",
+          "callee": "db.pyq_attempts.where('user_id').equals(session.user_id).toArray",
+          "lineNumber": 1087
+        },
+        {
+          "caller": "discardSession",
+          "callee": "db.pyq_attempts.where('user_id').equals",
+          "lineNumber": 1087
+        },
+        {
+          "caller": "discardSession",
+          "callee": "db.pyq_attempts.where",
+          "lineNumber": 1087
+        },
+        {
+          "caller": "discardSession",
+          "callee": "db.sessions.get",
+          "lineNumber": 1089
+        },
+        {
+          "caller": "discardSession",
+          "callee": "writeLocalBatch",
+          "lineNumber": 1090
+        },
+        {
+          "caller": "discardSession",
+          "callee": "pyqPracticeSessionRow",
+          "lineNumber": 1094
+        },
+        {
+          "caller": "discardSession",
+          "callee": "pyqPracticeSubject",
+          "lineNumber": 1097
+        },
+        {
+          "caller": "discardSession",
+          "callee": "setQuestions",
+          "lineNumber": 1105
+        },
+        {
+          "caller": "discardSession",
+          "callee": "setFinished",
+          "lineNumber": 1106
+        },
+        {
+          "caller": "discardSession",
+          "callee": "setIndex",
+          "lineNumber": 1107
+        },
+        {
+          "caller": "discardSession",
+          "callee": "setPyqSessionId",
+          "lineNumber": 1108
+        },
+        {
+          "caller": "discardSession",
+          "callee": "setStartError",
+          "lineNumber": 1111
+        },
+        {
+          "caller": "discardSession",
+          "callee": "setLoading",
+          "lineNumber": 1113
+        },
+        {
+          "caller": "saveSession",
+          "callee": "setLoading",
+          "lineNumber": 1121
+        },
+        {
+          "caller": "saveSession",
+          "callee": "setStartError",
+          "lineNumber": 1122
+        },
+        {
+          "caller": "saveSession",
+          "callee": "completePyqSession",
+          "lineNumber": 1124
+        },
+        {
+          "caller": "saveSession",
+          "callee": "(\n        await db.pyq_attempts.where('user_id').equals(session.user_id).toArray()\n      ).filter",
+          "lineNumber": 1125
+        },
+        {
+          "caller": "saveSession",
+          "callee": "db.pyq_attempts.where('user_id').equals(session.user_id).toArray",
+          "lineNumber": 1126
+        },
+        {
+          "caller": "saveSession",
+          "callee": "db.pyq_attempts.where('user_id').equals",
+          "lineNumber": 1126
+        },
+        {
+          "caller": "saveSession",
+          "callee": "db.pyq_attempts.where",
+          "lineNumber": 1126
+        },
+        {
+          "caller": "saveSession",
+          "callee": "db.sessions.get",
+          "lineNumber": 1128
+        },
+        {
+          "caller": "saveSession",
+          "callee": "writeLocalBatch",
+          "lineNumber": 1129
+        },
+        {
+          "caller": "saveSession",
+          "callee": "pyqPracticeSessionRow",
+          "lineNumber": 1133
+        },
+        {
+          "caller": "saveSession",
+          "callee": "pyqPracticeSubject",
+          "lineNumber": 1136
+        },
+        {
+          "caller": "saveSession",
+          "callee": "setQuestions",
+          "lineNumber": 1144
+        },
+        {
+          "caller": "saveSession",
+          "callee": "setFinished",
+          "lineNumber": 1145
+        },
+        {
+          "caller": "saveSession",
+          "callee": "setIndex",
+          "lineNumber": 1146
+        },
+        {
+          "caller": "saveSession",
+          "callee": "setPyqSessionId",
+          "lineNumber": 1147
+        },
+        {
+          "caller": "saveSession",
+          "callee": "setStartError",
+          "lineNumber": 1150
+        },
+        {
+          "caller": "saveSession",
+          "callee": "setLoading",
+          "lineNumber": 1152
+        },
+        {
+          "caller": "startPractice",
+          "callee": "setLoading",
+          "lineNumber": 1159
+        },
+        {
+          "caller": "startPractice",
+          "callee": "setStartError",
+          "lineNumber": 1160
+        },
+        {
+          "caller": "startPractice",
+          "callee": "db.pyq_sessions\n        .where('[user_id+status]')\n        .equals([userId, 'active'])\n        .toArray",
+          "lineNumber": 1162
+        },
+        {
+          "caller": "startPractice",
+          "callee": "db.pyq_sessions\n        .where('[user_id+status]')\n        .equals",
+          "lineNumber": 1162
+        },
+        {
+          "caller": "startPractice",
+          "callee": "db.pyq_sessions\n        .where",
+          "lineNumber": 1162
+        },
+        {
+          "caller": "startPractice",
+          "callee": "manifest.books.find",
+          "lineNumber": 1171
+        },
+        {
+          "caller": "startPractice",
+          "callee": "catalogSubjects.filter",
+          "lineNumber": 1176
+        },
+        {
+          "caller": "startPractice",
+          "callee": "Math.min",
+          "lineNumber": 1177
+        },
+        {
+          "caller": "startPractice",
+          "callee": "Math.max",
+          "lineNumber": 1178
+        },
+        {
+          "caller": "startPractice",
+          "callee": "(await loadPyqQuestions(subjects, manifest.bankVersion)).filter",
+          "lineNumber": 1179
+        },
+        {
+          "caller": "startPractice",
+          "callee": "loadPyqQuestions",
+          "lineNumber": 1179
+        },
+        {
+          "caller": "startPractice",
+          "callee": "matchesPyqBookScope",
+          "lineNumber": 1181
+        },
+        {
+          "caller": "startPractice",
+          "callee": "matchesPyqTopicScope",
+          "lineNumber": 1182
+        },
+        {
+          "caller": "startPractice",
+          "callee": "filterPyqByHistory",
+          "lineNumber": 1187
+        },
+        {
+          "caller": "startPractice",
+          "callee": "attempts.map",
+          "lineNumber": 1188
+        },
+        {
+          "caller": "startPractice",
+          "callee": "rows.slice().sort",
+          "lineNumber": 1189
+        },
+        {
+          "caller": "startPractice",
+          "callee": "rows.slice",
+          "lineNumber": 1189
+        },
+        {
+          "caller": "startPractice",
+          "callee": "Math.random",
+          "lineNumber": 1189
+        },
+        {
+          "caller": "startPractice",
+          "callee": "rows\n          .slice()\n          .sort",
+          "lineNumber": 1191
+        },
+        {
+          "caller": "startPractice",
+          "callee": "rows\n          .slice",
+          "lineNumber": 1191
+        },
+        {
+          "caller": "startPractice",
+          "callee": "a.number.localeCompare",
+          "lineNumber": 1195
+        },
+        {
+          "caller": "startPractice",
+          "callee": "rows\n          .slice()\n          .sort",
+          "lineNumber": 1198
+        },
+        {
+          "caller": "startPractice",
+          "callee": "rows\n          .slice",
+          "lineNumber": 1198
+        },
+        {
+          "caller": "startPractice",
+          "callee": "a.number.localeCompare",
+          "lineNumber": 1202
+        },
+        {
+          "caller": "startPractice",
+          "callee": "rows\n          .slice()\n          .sort",
+          "lineNumber": 1205
+        },
+        {
+          "caller": "startPractice",
+          "callee": "rows\n          .slice",
+          "lineNumber": 1205
+        },
+        {
+          "caller": "startPractice",
+          "callee": "Number",
+          "lineNumber": 1209
+        },
+        {
+          "caller": "startPractice",
+          "callee": "attemptedIds.has",
+          "lineNumber": 1209
+        },
+        {
+          "caller": "startPractice",
+          "callee": "Number",
+          "lineNumber": 1209
+        },
+        {
+          "caller": "startPractice",
+          "callee": "attemptedIds.has",
+          "lineNumber": 1209
+        },
+        {
+          "caller": "startPractice",
+          "callee": "rows.slice",
+          "lineNumber": 1211
+        },
+        {
+          "caller": "startPractice",
+          "callee": "Number",
+          "lineNumber": 1211
+        },
+        {
+          "caller": "startPractice",
+          "callee": "createPyqSessionRow",
+          "lineNumber": 1216
+        },
+        {
+          "caller": "startPractice",
+          "callee": "searchParams.get",
+          "lineNumber": 1217
+        },
+        {
+          "caller": "startPractice",
+          "callee": "searchParams.get",
+          "lineNumber": 1218
+        },
+        {
+          "caller": "startPractice",
+          "callee": "markPlannerBlockStarted",
+          "lineNumber": 1219
+        },
+        {
+          "caller": "startPractice",
+          "callee": "pyqPracticeSessionRow",
+          "lineNumber": 1221
+        },
+        {
+          "caller": "startPractice",
+          "callee": "pyqPracticeSubject",
+          "lineNumber": 1221
+        },
+        {
+          "caller": "startPractice",
+          "callee": "writeLocalBatch",
+          "lineNumber": 1225
+        },
+        {
+          "caller": "startPractice",
+          "callee": "Date.parse",
+          "lineNumber": 1232
+        },
+        {
+          "caller": "startPractice",
+          "callee": "Number.isFinite",
+          "lineNumber": 1235
+        },
+        {
+          "caller": "startPractice",
+          "callee": "Date.now",
+          "lineNumber": 1235
+        },
+        {
+          "caller": "startPractice",
+          "callee": "setPyqSessionId",
+          "lineNumber": 1237
+        },
+        {
+          "caller": "startPractice",
+          "callee": "setQuestions",
+          "lineNumber": 1238
+        },
+        {
+          "caller": "startPractice",
+          "callee": "setIndex",
+          "lineNumber": 1239
+        },
+        {
+          "caller": "startPractice",
+          "callee": "setCompleted",
+          "lineNumber": 1240
+        },
+        {
+          "caller": "startPractice",
+          "callee": "setFinished",
+          "lineNumber": 1241
+        },
+        {
+          "caller": "startPractice",
+          "callee": "setAnalyzedCount",
+          "lineNumber": 1242
+        },
+        {
+          "caller": "startPractice",
+          "callee": "setStartError",
+          "lineNumber": 1244
+        },
+        {
+          "caller": "startPractice",
+          "callee": "setLoading",
+          "lineNumber": 1247
+        },
+        {
+          "caller": "repeatCurrentSet",
+          "callee": "setLoading",
+          "lineNumber": 1254
+        },
+        {
+          "caller": "repeatCurrentSet",
+          "callee": "setStartError",
+          "lineNumber": 1255
+        },
+        {
+          "caller": "repeatCurrentSet",
+          "callee": "db.pyq_sessions\n        .where('[user_id+status]')\n        .equals([userId, 'active'])\n        .toArray",
+          "lineNumber": 1257
+        },
+        {
+          "caller": "repeatCurrentSet",
+          "callee": "db.pyq_sessions\n        .where('[user_id+status]')\n        .equals",
+          "lineNumber": 1257
+        },
+        {
+          "caller": "repeatCurrentSet",
+          "callee": "db.pyq_sessions\n        .where",
+          "lineNumber": 1257
+        },
+        {
+          "caller": "repeatCurrentSet",
+          "callee": "writeLocal",
+          "lineNumber": 1262
+        },
+        {
+          "caller": "repeatCurrentSet",
+          "callee": "pausePyqSession",
+          "lineNumber": 1262
+        },
+        {
+          "caller": "repeatCurrentSet",
+          "callee": "createPyqSessionRow",
+          "lineNumber": 1264
+        },
+        {
+          "caller": "repeatCurrentSet",
+          "callee": "writeLocalBatch",
+          "lineNumber": 1265
+        },
+        {
+          "caller": "repeatCurrentSet",
+          "callee": "pyqPracticeSessionRow",
+          "lineNumber": 1269
+        },
+        {
+          "caller": "repeatCurrentSet",
+          "callee": "pyqPracticeSubject",
+          "lineNumber": 1269
+        },
+        {
+          "caller": "repeatCurrentSet",
+          "callee": "Date.parse",
+          "lineNumber": 1272
+        },
+        {
+          "caller": "repeatCurrentSet",
+          "callee": "Number.isFinite",
+          "lineNumber": 1275
+        },
+        {
+          "caller": "repeatCurrentSet",
+          "callee": "Date.now",
+          "lineNumber": 1275
+        },
+        {
+          "caller": "repeatCurrentSet",
+          "callee": "setPyqSessionId",
+          "lineNumber": 1277
+        },
+        {
+          "caller": "repeatCurrentSet",
+          "callee": "setIndex",
+          "lineNumber": 1278
+        },
+        {
+          "caller": "repeatCurrentSet",
+          "callee": "setCompleted",
+          "lineNumber": 1279
+        },
+        {
+          "caller": "repeatCurrentSet",
+          "callee": "setFinished",
+          "lineNumber": 1280
+        },
+        {
+          "caller": "repeatCurrentSet",
+          "callee": "setAnalyzedCount",
+          "lineNumber": 1281
+        },
+        {
+          "caller": "repeatCurrentSet",
+          "callee": "setStartError",
+          "lineNumber": 1283
+        },
+        {
+          "caller": "repeatCurrentSet",
+          "callee": "setLoading",
+          "lineNumber": 1286
+        },
+        {
+          "caller": "questionRowFromAttempt",
+          "callee": "inferPyqDirectOutcome",
+          "lineNumber": 1298
+        },
+        {
+          "caller": "questionRowFromAttempt",
+          "callee": "uuid",
+          "lineNumber": 1300
+        },
+        {
+          "caller": "questionRowFromAttempt",
+          "callee": "pyqSourceRef",
+          "lineNumber": 1306
+        },
+        {
+          "caller": "questionRowFromAttempt",
+          "callee": "pyqPlainText",
+          "lineNumber": 1307
+        },
+        {
+          "caller": "questionRowFromAttempt",
+          "callee": "answerText",
+          "lineNumber": 1308
+        },
+        {
+          "caller": "persistJournalRow",
+          "callee": "needsReattempt",
+          "lineNumber": 1324
+        },
+        {
+          "caller": "persistJournalRow",
+          "callee": "db.reattempts.where('question_id').equals(row.id).first",
+          "lineNumber": 1325
+        },
+        {
+          "caller": "persistJournalRow",
+          "callee": "db.reattempts.where('question_id').equals",
+          "lineNumber": 1325
+        },
+        {
+          "caller": "persistJournalRow",
+          "callee": "db.reattempts.where",
+          "lineNumber": 1325
+        },
+        {
+          "caller": "persistJournalRow",
+          "callee": "writes.push",
+          "lineNumber": 1327
+        },
+        {
+          "caller": "persistJournalRow",
+          "callee": "createReattemptRow",
+          "lineNumber": 1327
+        },
+        {
+          "caller": "persistJournalRow",
+          "callee": "writeLocalBatch",
+          "lineNumber": 1330
+        },
+        {
+          "caller": "persistJournalRow",
+          "callee": "reconcileQuestionPattern",
+          "lineNumber": 1331
+        },
+        {
+          "caller": "persistJournalRow",
+          "callee": "setJournalSaved",
+          "lineNumber": 1332
+        },
+        {
+          "caller": "persistJournalRow",
+          "callee": "setAnalyzedCount",
+          "lineNumber": 1333
+        },
+        {
+          "caller": "captureQuestionSnapshot",
+          "callee": "captureElementToDataUrl",
+          "lineNumber": 1340
+        },
+        {
+          "caller": "captureQuestionSnapshot",
+          "callee": "resolvePyqJournalImageUrl(current.html).catch",
+          "lineNumber": 1346
+        },
+        {
+          "caller": "captureQuestionSnapshot",
+          "callee": "resolvePyqJournalImageUrl",
+          "lineNumber": 1346
+        },
+        {
+          "caller": "captureQuestionSnapshot",
+          "callee": "pyqQuestionSnapshotDataUrl",
+          "lineNumber": 1349
+        },
+        {
+          "caller": "journalImageUrl",
+          "callee": "resolvePyqJournalImageUrl(\n      current.html,\n      draft?.source.imageDataUrl ?? null\n    ).catch",
+          "lineNumber": 1358
+        },
+        {
+          "caller": "journalImageUrl",
+          "callee": "resolvePyqJournalImageUrl",
+          "lineNumber": 1358
+        },
+        {
+          "caller": "journalImageUrl",
+          "callee": "pyqQuestionSnapshotDataUrl",
+          "lineNumber": 1362
+        },
+        {
+          "caller": "selectedAnswer",
+          "callee": "answerInputType",
+          "lineNumber": 1367
+        },
+        {
+          "caller": "selectedAnswer",
+          "callee": "numeric.trim",
+          "lineNumber": 1368
+        },
+        {
+          "caller": "selectedAnswer",
+          "callee": "numeric.trim",
+          "lineNumber": 1368
+        },
+        {
+          "caller": "selectedAnswer",
+          "callee": "choices.slice().sort",
+          "lineNumber": 1369
+        },
+        {
+          "caller": "selectedAnswer",
+          "callee": "choices.slice",
+          "lineNumber": 1369
+        },
+        {
+          "caller": "submitAnswer",
+          "callee": "Date.now",
+          "lineNumber": 1384
+        },
+        {
+          "caller": "submitAnswer",
+          "callee": "Math.min",
+          "lineNumber": 1385
+        },
+        {
+          "caller": "submitAnswer",
+          "callee": "setSubmitError",
+          "lineNumber": 1386
+        },
+        {
+          "caller": "submitAnswer",
+          "callee": "db.pyq_sessions.get",
+          "lineNumber": 1387
+        },
+        {
+          "caller": "submitAnswer",
+          "callee": "setSubmitError",
+          "lineNumber": 1389
+        },
+        {
+          "caller": "submitAnswer",
+          "callee": "selectedAnswer",
+          "lineNumber": 1392
+        },
+        {
+          "caller": "submitAnswer",
+          "callee": "Array.isArray",
+          "lineNumber": 1396
+        },
+        {
+          "caller": "submitAnswer",
+          "callee": "Number.isFinite",
+          "lineNumber": 1397
+        },
+        {
+          "caller": "submitAnswer",
+          "callee": "setSubmitting",
+          "lineNumber": 1401
+        },
+        {
+          "caller": "submitAnswer",
+          "callee": "pyqAttemptId",
+          "lineNumber": 1404
+        },
+        {
+          "caller": "submitAnswer",
+          "callee": "db.pyq_attempts.get",
+          "lineNumber": 1405
+        },
+        {
+          "caller": "submitAnswer",
+          "callee": "setQuestionScreenshot",
+          "lineNumber": 1407
+        },
+        {
+          "caller": "submitAnswer",
+          "callee": "setSubmitted",
+          "lineNumber": 1408
+        },
+        {
+          "caller": "submitAnswer",
+          "callee": "setCompleted",
+          "lineNumber": 1409
+        },
+        {
+          "caller": "submitAnswer",
+          "callee": "rows.some",
+          "lineNumber": 1410
+        },
+        {
+          "caller": "submitAnswer",
+          "callee": "setQuestionScreenshot",
+          "lineNumber": 1415
+        },
+        {
+          "caller": "submitAnswer",
+          "callee": "setSubmitted",
+          "lineNumber": 1416
+        },
+        {
+          "caller": "submitAnswer",
+          "callee": "captureQuestionSnapshot",
+          "lineNumber": 1419
+        },
+        {
+          "caller": "submitAnswer",
+          "callee": "setQuestionScreenshot",
+          "lineNumber": 1420
+        },
+        {
+          "caller": "submitAnswer",
+          "callee": "createPyqAttemptRow",
+          "lineNumber": 1421
+        },
+        {
+          "caller": "submitAnswer",
+          "callee": "advancePyqSessionProgress",
+          "lineNumber": 1434
+        },
+        {
+          "caller": "submitAnswer",
+          "callee": "Math.max",
+          "lineNumber": 1445
+        },
+        {
+          "caller": "submitAnswer",
+          "callee": "questionRowFromAttempt",
+          "lineNumber": 1458
+        },
+        {
+          "caller": "submitAnswer",
+          "callee": "pyqJournalQuestionId",
+          "lineNumber": 1459
+        },
+        {
+          "caller": "submitAnswer",
+          "callee": "writes.push",
+          "lineNumber": 1461
+        },
+        {
+          "caller": "submitAnswer",
+          "callee": "needsReattempt",
+          "lineNumber": 1462
+        },
+        {
+          "caller": "submitAnswer",
+          "callee": "db.reattempts.where('question_id').equals(row.id).first",
+          "lineNumber": 1463
+        },
+        {
+          "caller": "submitAnswer",
+          "callee": "db.reattempts.where('question_id').equals",
+          "lineNumber": 1463
+        },
+        {
+          "caller": "submitAnswer",
+          "callee": "db.reattempts.where",
+          "lineNumber": 1463
+        },
+        {
+          "caller": "submitAnswer",
+          "callee": "writes.push",
+          "lineNumber": 1465
+        },
+        {
+          "caller": "submitAnswer",
+          "callee": "createReattemptRow",
+          "lineNumber": 1465
+        },
+        {
+          "caller": "submitAnswer",
+          "callee": "writeLocalBatch",
+          "lineNumber": 1470
+        },
+        {
+          "caller": "submitAnswer",
+          "callee": "setSubmitted",
+          "lineNumber": 1471
+        },
+        {
+          "caller": "submitAnswer",
+          "callee": "setCompleted",
+          "lineNumber": 1472
+        },
+        {
+          "caller": "submitAnswer",
+          "callee": "rows.some",
+          "lineNumber": 1473
+        },
+        {
+          "caller": "submitAnswer",
+          "callee": "rows.map",
+          "lineNumber": 1474
+        },
+        {
+          "caller": "submitAnswer",
+          "callee": "setJournalSaved",
+          "lineNumber": 1478
+        },
+        {
+          "caller": "submitAnswer",
+          "callee": "setAnalyzedCount",
+          "lineNumber": 1479
+        },
+        {
+          "caller": "submitAnswer",
+          "callee": "setSubmitError",
+          "lineNumber": 1482
+        },
+        {
+          "caller": "submitAnswer",
+          "callee": "setSubmitting",
+          "lineNumber": 1489
+        },
+        {
+          "caller": "saveJournalAnalysis",
+          "callee": "journalImageUrl",
+          "lineNumber": 1495
+        },
+        {
+          "caller": "saveJournalAnalysis",
+          "callee": "questionRowFromAttempt",
+          "lineNumber": 1497
+        },
+        {
+          "caller": "saveJournalAnalysis",
+          "callee": "pyqJournalQuestionId",
+          "lineNumber": 1498
+        },
+        {
+          "caller": "saveJournalAnalysis",
+          "callee": "persistJournalRow",
+          "lineNumber": 1500
+        },
+        {
+          "caller": "saveJournalAnalysis",
+          "callee": "setJournalOpen",
+          "lineNumber": 1501
+        },
+        {
+          "caller": "markSessionComplete",
+          "callee": "db.pyq_sessions.get",
+          "lineNumber": 1505
+        },
+        {
+          "caller": "markSessionComplete",
+          "callee": "completePyqSession",
+          "lineNumber": 1507
+        },
+        {
+          "caller": "markSessionComplete",
+          "callee": "db.sessions.get",
+          "lineNumber": 1508
+        },
+        {
+          "caller": "markSessionComplete",
+          "callee": "writeLocalBatch",
+          "lineNumber": 1509
+        },
+        {
+          "caller": "markSessionComplete",
+          "callee": "pyqPracticeSessionRow",
+          "lineNumber": 1513
+        },
+        {
+          "caller": "markSessionComplete",
+          "callee": "pyqPracticeSubject",
+          "lineNumber": 1515
+        },
+        {
+          "caller": "goNext",
+          "callee": "markSessionComplete",
+          "lineNumber": 1527
+        },
+        {
+          "caller": "goNext",
+          "callee": "window.scrollTo",
+          "lineNumber": 1528
+        },
+        {
+          "caller": "goNext",
+          "callee": "setFinished",
+          "lineNumber": 1529
+        },
+        {
+          "caller": "goNext",
+          "callee": "db.pyq_sessions.get",
+          "lineNumber": 1532
+        },
+        {
+          "caller": "goNext",
+          "callee": "setSubmitError",
+          "lineNumber": 1534
+        },
+        {
+          "caller": "goNext",
+          "callee": "startPyqSessionQuestion",
+          "lineNumber": 1537
+        },
+        {
+          "caller": "goNext",
+          "callee": "writeLocal",
+          "lineNumber": 1538
+        },
+        {
+          "caller": "goNext",
+          "callee": "Date.parse",
+          "lineNumber": 1539
+        },
+        {
+          "caller": "goNext",
+          "callee": "Number.isFinite",
+          "lineNumber": 1542
+        },
+        {
+          "caller": "goNext",
+          "callee": "Date.now",
+          "lineNumber": 1542
+        },
+        {
+          "caller": "goNext",
+          "callee": "setIndex",
+          "lineNumber": 1544
+        },
+        {
+          "caller": "goPrevious",
+          "callee": "setIndex",
+          "lineNumber": 1549
+        },
+        {
+          "caller": "exitSet",
+          "callee": "window.scrollTo",
+          "lineNumber": 1553
+        },
+        {
+          "caller": "exitSet",
+          "callee": "setQuestions",
+          "lineNumber": 1554
+        },
+        {
+          "caller": "exitSet",
+          "callee": "setFinished",
+          "lineNumber": 1555
+        },
+        {
+          "caller": "exitSet",
+          "callee": "setIndex",
+          "lineNumber": 1556
+        },
+        {
+          "caller": "exitSet",
+          "callee": "setPyqSessionId",
+          "lineNumber": 1557
+        },
+        {
+          "caller": "Pyq",
+          "callee": "resumeSession",
+          "lineNumber": 1583
+        },
+        {
+          "caller": "Pyq",
+          "callee": "saveSession",
+          "lineNumber": 1584
+        },
+        {
+          "caller": "Pyq",
+          "callee": "discardSession",
+          "lineNumber": 1585
+        },
+        {
+          "caller": "Pyq",
+          "callee": "startPractice",
+          "lineNumber": 1586
+        },
+        {
+          "caller": "Pyq",
+          "callee": "completed.filter",
+          "lineNumber": 1592
+        },
+        {
+          "caller": "Pyq",
+          "callee": "graded.filter",
+          "lineNumber": 1593
+        },
+        {
+          "caller": "Pyq",
+          "callee": "completed.filter",
+          "lineNumber": 1594
+        },
+        {
+          "caller": "Pyq",
+          "callee": "plural",
+          "lineNumber": 1599
+        },
+        {
+          "caller": "Pyq",
+          "callee": "[\n                ['Submitted', completed.length],\n                ['Correct', correct],\n                ['Left blank', skipped],\n                ['Analyzed', analyzedCount]\n              ].map",
+          "lineNumber": 1615
+        },
+        {
+          "caller": "Pyq",
+          "callee": "String",
+          "lineNumber": 1622
+        },
+        {
+          "caller": "Pyq",
+          "callee": "Math.round",
+          "lineNumber": 1633
+        },
+        {
+          "caller": "Pyq",
+          "callee": "repeatCurrentSet",
+          "lineNumber": 1638
+        },
+        {
+          "caller": "Pyq",
+          "callee": "startPractice",
+          "lineNumber": 1641
+        },
+        {
+          "caller": "Pyq",
+          "callee": "answerInputType",
+          "lineNumber": 1653
+        },
+        {
+          "caller": "Pyq",
+          "callee": "numeric.trim",
+          "lineNumber": 1656
+        },
+        {
+          "caller": "Pyq",
+          "callee": "Number.isFinite",
+          "lineNumber": 1656
+        },
+        {
+          "caller": "Pyq",
+          "callee": "Number",
+          "lineNumber": 1656
+        },
+        {
+          "caller": "Pyq",
+          "callee": "setJournalOpen",
+          "lineNumber": 1666
+        },
+        {
+          "caller": "Pyq",
+          "callee": "sourceDraft",
+          "lineNumber": 1678
+        },
+        {
+          "caller": "Pyq",
+          "callee": "setJournalOpen",
+          "lineNumber": 1681
+        },
+        {
+          "caller": "Pyq",
+          "callee": "secondsToClock",
+          "lineNumber": 1705
+        },
+        {
+          "caller": "Pyq",
+          "callee": "submitAnswer",
+          "lineNumber": 1756
+        },
+        {
+          "caller": "Pyq",
+          "callee": "goNext",
+          "lineNumber": 1769
+        },
+        {
+          "caller": "Pyq",
+          "callee": "setJournalOpen",
+          "lineNumber": 1798
+        },
+        {
+          "caller": "Pyq",
+          "callee": "setJournalOpen",
+          "lineNumber": 1800
+        }
+      ],
+      "metrics": {
+        "importCount": 23,
+        "exportCount": 1,
+        "functionCount": 11,
+        "classCount": 0
+      }
+    }
+  ]
+}

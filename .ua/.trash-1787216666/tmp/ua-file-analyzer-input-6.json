@@ -1,0 +1,56 @@
+{
+  "projectRoot": "/Users/bkalyankrishnareddy/Desktop/GATE PREP/hetu",
+  "batchFiles": [
+    {
+      "path": "src/components/dashboard/HeroCard.tsx",
+      "language": "typescript",
+      "sizeLines": 101,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/components/dashboard/LearningTips.tsx",
+      "language": "typescript",
+      "sizeLines": 45,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/components/dashboard/OutcomeDonut.tsx",
+      "language": "typescript",
+      "sizeLines": 59,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/components/dashboard/OutcomeLegend.tsx",
+      "language": "typescript",
+      "sizeLines": 89,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/components/dashboard/SurfaceTrendChart.tsx",
+      "language": "typescript",
+      "sizeLines": 104,
+      "fileCategory": "code"
+    }
+  ],
+  "batchImportData": {
+    "src/components/dashboard/HeroCard.tsx": [
+      "src/lib/utils.ts"
+    ],
+    "src/components/dashboard/LearningTips.tsx": [
+      "src/lib/learning-tips.ts",
+      "src/lib/utils.ts"
+    ],
+    "src/components/dashboard/OutcomeDonut.tsx": [
+      "src/lib/constants.ts",
+      "src/types/index.ts"
+    ],
+    "src/components/dashboard/OutcomeLegend.tsx": [
+      "src/lib/constants.ts",
+      "src/lib/utils.ts"
+    ],
+    "src/components/dashboard/SurfaceTrendChart.tsx": [
+      "src/lib/analysis.ts",
+      "src/lib/utils.ts"
+    ]
+  }
+}

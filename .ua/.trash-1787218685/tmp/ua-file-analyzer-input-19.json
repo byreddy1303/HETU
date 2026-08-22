@@ -1,0 +1,14 @@
+{
+  "projectRoot": "/Users/bkalyankrishnareddy/Desktop/GATE PREP/hetu",
+  "batchFiles": [
+    {
+      "path": "src/types/db.ts",
+      "language": "typescript",
+      "sizeLines": 414,
+      "fileCategory": "code"
+    }
+  ],
+  "batchImportData": {
+    "src/types/db.ts": []
+  }
+}

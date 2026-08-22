@@ -1,0 +1,111 @@
+{
+  "projectRoot": "/Users/bkalyankrishnareddy/Desktop/GATE PREP/hetu",
+  "batchFiles": [
+    {
+      "path": "src/__tests__/isolation.test.ts",
+      "language": "typescript",
+      "sizeLines": 102,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/components/layout/MobileTabs.tsx",
+      "language": "typescript",
+      "sizeLines": 343,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/components/layout/Nav.tsx",
+      "language": "typescript",
+      "sizeLines": 243,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/components/layout/Shell.tsx",
+      "language": "typescript",
+      "sizeLines": 61,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/components/layout/TopRightControls.tsx",
+      "language": "typescript",
+      "sizeLines": 42,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/components/shared/OfflineBadge.tsx",
+      "language": "typescript",
+      "sizeLines": 28,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/hooks/useSync.ts",
+      "language": "typescript",
+      "sizeLines": 47,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/lib/isolation.ts",
+      "language": "typescript",
+      "sizeLines": 57,
+      "fileCategory": "code"
+    }
+  ],
+  "batchImportData": {
+    "src/__tests__/isolation.test.ts": [
+      "src/lib/db.ts",
+      "src/lib/isolation.ts",
+      "src/stores/log.ts",
+      "src/stores/prefs.ts",
+      "src/stores/session.ts"
+    ],
+    "src/components/layout/MobileTabs.tsx": [
+      "src/lib/db.ts",
+      "src/lib/native.ts",
+      "src/lib/utils.ts",
+      "src/stores/session.ts"
+    ],
+    "src/components/layout/Nav.tsx": [
+      "src/components/shared/Brand.tsx",
+      "src/hooks/useAuth.ts",
+      "src/lib/db.ts",
+      "src/lib/utils.ts",
+      "src/stores/auth.ts",
+      "src/stores/session.ts"
+    ],
+    "src/components/layout/Shell.tsx": [
+      "src/components/layout/MobileTabs.tsx",
+      "src/components/layout/Nav.tsx",
+      "src/components/layout/TopRightControls.tsx",
+      "src/components/shared/Brand.tsx",
+      "src/components/shared/ContextualGateTip.tsx",
+      "src/components/shared/DailyQuote.tsx",
+      "src/components/shared/OfflineBadge.tsx",
+      "src/components/shared/ThemeToggle.tsx",
+      "src/hooks/useSync.ts"
+    ],
+    "src/components/layout/TopRightControls.tsx": [
+      "src/components/shared/OfflineBadge.tsx",
+      "src/components/shared/ThemeToggle.tsx",
+      "src/hooks/useAuth.ts",
+      "src/lib/constants.ts",
+      "src/lib/utils.ts",
+      "src/stores/prefs.ts"
+    ],
+    "src/components/shared/OfflineBadge.tsx": [
+      "src/hooks/useAuth.ts",
+      "src/hooks/useSync.ts",
+      "src/lib/utils.ts"
+    ],
+    "src/hooks/useSync.ts": [
+      "src/hooks/useAuth.ts",
+      "src/lib/db.ts",
+      "src/lib/sync.ts"
+    ],
+    "src/lib/isolation.ts": [
+      "src/lib/db.ts",
+      "src/stores/log.ts",
+      "src/stores/prefs.ts",
+      "src/stores/session.ts"
+    ]
+  }
+}

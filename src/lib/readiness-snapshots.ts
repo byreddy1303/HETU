@@ -8,7 +8,10 @@
 
 import type { ReadinessBreakdown, ReadinessComponentKey, SubjectReadiness } from '@/lib/readiness';
 
-const STORAGE_PREFIX = 'air-journal:readiness:v2';
+export const READINESS_CALCULATION_VERSION = 2 as const;
+
+const STORAGE_PREFIX = 'air-journal:readiness:v3';
+const LEGACY_STORAGE_PREFIX = 'air-journal:readiness:v2';
 
 /** Kept modest so localStorage stays cheap. 180 days is more than any GATE
  *  prep cycle needs. */
@@ -24,6 +27,9 @@ export interface ReadinessSnapshot {
   calibration: number;
   surface: number;
   daysToExam: number;
+  /** Version 1 was Journal-only. Version 2 uses the immutable attempt ledger. */
+  calculationVersion: number;
+  evidenceCounts?: Record<string, number>;
 }
 
 export interface DebtEntry {
@@ -57,19 +63,42 @@ function safeSet(key: string, value: unknown): void {
 
 /* ---------------------------- snapshots ---------------------------- */
 
-function storageKey(userId: string, kind: 'snapshots' | 'watchlist'): string {
-  return `${STORAGE_PREFIX}:${userId}:${kind}`;
+function storageKey(
+  userId: string,
+  kind: 'snapshots' | 'watchlist',
+  prefix = STORAGE_PREFIX
+): string {
+  return `${prefix}:${userId}:${kind}`;
 }
 
 export function loadSnapshots(userId: string): ReadinessSnapshot[] {
-  const all = safeGet<ReadinessSnapshot[]>(storageKey(userId, 'snapshots'), []);
-  return all.sort((a, b) => a.date.localeCompare(b.date));
+  const current = safeGet<ReadinessSnapshot[]>(storageKey(userId, 'snapshots'), []);
+  if (current.length > 0) {
+    return current
+      .map((row) => ({ ...row, calculationVersion: row.calculationVersion ?? 1 }))
+      .sort((a, b) => a.date.localeCompare(b.date));
+  }
+
+  // The v2 local envelope pre-dates methodology versioning. Preserve those
+  // rows explicitly as calculation version 1 instead of silently treating
+  // them as comparable with the corrected attempt-ledger series.
+  const legacy = safeGet<Array<Omit<ReadinessSnapshot, 'calculationVersion'>>>(
+    storageKey(userId, 'snapshots', LEGACY_STORAGE_PREFIX),
+    []
+  );
+  const migrated = legacy
+    .map((row) => ({ ...row, calculationVersion: 1 }))
+    .sort((a, b) => a.date.localeCompare(b.date));
+  if (migrated.length > 0) safeSet(storageKey(userId, 'snapshots'), migrated);
+  return migrated;
 }
 
 /** Idempotent upsert of today's snapshot. Overwrites the row for `date` if
  *  it exists so the latest score for the day wins. */
 export function upsertSnapshot(userId: string, next: ReadinessSnapshot): ReadinessSnapshot[] {
-  const all = loadSnapshots(userId).filter((s) => s.date !== next.date);
+  const all = loadSnapshots(userId).filter(
+    (s) => s.date !== next.date || s.calculationVersion !== next.calculationVersion
+  );
   all.push(next);
   all.sort((a, b) => a.date.localeCompare(b.date));
   const trimmed = all.slice(-MAX_SNAPSHOTS);
@@ -81,13 +110,17 @@ export function upsertSnapshot(userId: string, next: ReadinessSnapshot): Readine
 export function weeklyDelta(snapshots: ReadinessSnapshot[]): number | null {
   if (snapshots.length < 2) return null;
   const today = snapshots[snapshots.length - 1];
+  const comparable = snapshots.filter(
+    (snapshot) => snapshot.calculationVersion === today.calculationVersion
+  );
+  if (comparable.length < 2) return null;
   const target = new Date(today.date);
   target.setDate(target.getDate() - 7);
   const targetISO = target.toISOString().slice(0, 10);
   // pick the snapshot with the smallest positive diff from the target
   let best: ReadinessSnapshot | null = null;
   let bestDiff = Infinity;
-  for (const s of snapshots) {
+  for (const s of comparable) {
     if (s.date === today.date) continue;
     const diff = Math.abs(
       new Date(s.date).getTime() - new Date(targetISO).getTime()
@@ -115,7 +148,10 @@ export function projectToExam(
   snapshots: ReadinessSnapshot[],
   daysToExam: number
 ): Projection | null {
-  const recent = snapshots.slice(-30);
+  const latestVersion = snapshots.at(-1)?.calculationVersion;
+  const recent = snapshots
+    .filter((snapshot) => snapshot.calculationVersion === latestVersion)
+    .slice(-30);
   if (recent.length < 4) return null;
   const t0 = new Date(recent[0].date).getTime();
   const spanDays =
@@ -151,7 +187,14 @@ const HEALTHY_THRESHOLDS: Record<ReadinessComponentKey, number> = {
 };
 
 export function loadDebt(userId: string): DebtEntry[] {
-  return safeGet<DebtEntry[]>(storageKey(userId, 'watchlist'), []);
+  const current = safeGet<DebtEntry[]>(storageKey(userId, 'watchlist'), []);
+  if (current.length > 0) return current;
+  const legacy = safeGet<DebtEntry[]>(
+    storageKey(userId, 'watchlist', LEGACY_STORAGE_PREFIX),
+    []
+  );
+  if (legacy.length > 0) safeSet(storageKey(userId, 'watchlist'), legacy);
+  return legacy;
 }
 
 function debtKey(subject: string | null, component: ReadinessComponentKey): string {

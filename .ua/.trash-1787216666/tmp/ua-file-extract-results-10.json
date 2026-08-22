@@ -1,0 +1,248 @@
+{
+  "scriptCompleted": true,
+  "filesAnalyzed": 2,
+  "filesSkipped": [],
+  "analysisOutcomes": {
+    "structure": {
+      "succeeded": 2,
+      "failed": 0
+    },
+    "callGraph": {
+      "succeeded": 2,
+      "failed": 0,
+      "skipped": 0
+    }
+  },
+  "results": [
+    {
+      "path": "src/__tests__/topic-progress.test.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 59,
+      "nonEmptyLines": 48,
+      "metrics": {
+        "importCount": 1,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/stores/topic-progress.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 196,
+      "nonEmptyLines": 172,
+      "functions": [
+        {
+          "name": "topicProgressId",
+          "startLine": 17,
+          "endLine": 19,
+          "params": [
+            "subject",
+            "topic"
+          ]
+        },
+        {
+          "name": "splitTopicProgressId",
+          "startLine": 21,
+          "endLine": 25,
+          "params": [
+            "id"
+          ]
+        },
+        {
+          "name": "topicProgressRowId",
+          "startLine": 27,
+          "endLine": 29,
+          "params": [
+            "userId",
+            "subject",
+            "topic"
+          ]
+        },
+        {
+          "name": "selectCompletionsForUser",
+          "startLine": 31,
+          "endLine": 59,
+          "params": [
+            "byUser",
+            "userId"
+          ]
+        },
+        {
+          "name": "mergeTopicProgressRows",
+          "startLine": 62,
+          "endLine": 74,
+          "params": [
+            "completions",
+            "rows"
+          ]
+        },
+        {
+          "name": "syncTopicProgressFromDb",
+          "startLine": 76,
+          "endLine": 121,
+          "params": [
+            "userId"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "topicProgressId",
+          "line": 17,
+          "isDefault": false
+        },
+        {
+          "name": "topicProgressRowId",
+          "line": 27,
+          "isDefault": false
+        },
+        {
+          "name": "selectCompletionsForUser",
+          "line": 31,
+          "isDefault": false
+        },
+        {
+          "name": "mergeTopicProgressRows",
+          "line": 62,
+          "isDefault": false
+        },
+        {
+          "name": "syncTopicProgressFromDb",
+          "line": 76,
+          "isDefault": false
+        },
+        {
+          "name": "useTopicProgressStore",
+          "line": 123,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "splitTopicProgressId",
+          "callee": "id.indexOf",
+          "lineNumber": 22
+        },
+        {
+          "caller": "splitTopicProgressId",
+          "callee": "id.slice",
+          "lineNumber": 24
+        },
+        {
+          "caller": "splitTopicProgressId",
+          "callee": "id.slice",
+          "lineNumber": 24
+        },
+        {
+          "caller": "topicProgressRowId",
+          "callee": "uuidFromString",
+          "lineNumber": 28
+        },
+        {
+          "caller": "selectCompletionsForUser",
+          "callee": "currentUserId",
+          "lineNumber": 37
+        },
+        {
+          "caller": "selectCompletionsForUser",
+          "callee": "Object.prototype.hasOwnProperty.call",
+          "lineNumber": 38
+        },
+        {
+          "caller": "selectCompletionsForUser",
+          "callee": "Object.keys",
+          "lineNumber": 53
+        },
+        {
+          "caller": "mergeTopicProgressRows",
+          "callee": "topicProgressId",
+          "lineNumber": 70
+        },
+        {
+          "caller": "syncTopicProgressFromDb",
+          "callee": "currentUserId",
+          "lineNumber": 78
+        },
+        {
+          "caller": "syncTopicProgressFromDb",
+          "callee": "useTopicProgressStore.getState",
+          "lineNumber": 79
+        },
+        {
+          "caller": "syncTopicProgressFromDb",
+          "callee": "db.meta.get",
+          "lineNumber": 83
+        },
+        {
+          "caller": "syncTopicProgressFromDb",
+          "callee": "db.meta.get",
+          "lineNumber": 87
+        },
+        {
+          "caller": "syncTopicProgressFromDb",
+          "callee": "selectCompletionsForUser",
+          "lineNumber": 90
+        },
+        {
+          "caller": "syncTopicProgressFromDb",
+          "callee": "db.topic_progress.where('user_id').equals(effectiveUserId).toArray",
+          "lineNumber": 95
+        },
+        {
+          "caller": "syncTopicProgressFromDb",
+          "callee": "db.topic_progress.where('user_id').equals",
+          "lineNumber": 95
+        },
+        {
+          "caller": "syncTopicProgressFromDb",
+          "callee": "db.topic_progress.where",
+          "lineNumber": 95
+        },
+        {
+          "caller": "syncTopicProgressFromDb",
+          "callee": "mergeTopicProgressRows",
+          "lineNumber": 96
+        },
+        {
+          "caller": "syncTopicProgressFromDb",
+          "callee": "Object.entries",
+          "lineNumber": 100
+        },
+        {
+          "caller": "syncTopicProgressFromDb",
+          "callee": "splitTopicProgressId",
+          "lineNumber": 101
+        },
+        {
+          "caller": "syncTopicProgressFromDb",
+          "callee": "topicProgressRowId",
+          "lineNumber": 103
+        },
+        {
+          "caller": "syncTopicProgressFromDb",
+          "callee": "syncedRows.some",
+          "lineNumber": 104
+        },
+        {
+          "caller": "syncTopicProgressFromDb",
+          "callee": "writeLocal",
+          "lineNumber": 105
+        },
+        {
+          "caller": "syncTopicProgressFromDb",
+          "callee": "useTopicProgressStore.setState",
+          "lineNumber": 115
+        }
+      ],
+      "metrics": {
+        "importCount": 4,
+        "exportCount": 6,
+        "functionCount": 6,
+        "classCount": 0
+      }
+    }
+  ]
+}

@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { ArrowDownRight, ArrowUpRight, Pencil, Plus, Trash2 } from 'lucide-react';
-import type { MockSubjectScore, MockTestRow } from '@/types';
+import type { MockTestRow } from '@/types';
 import PageHeader from '@/components/layout/PageHeader';
 import { Card, CardBody, CardHeader } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
@@ -15,7 +15,14 @@ import { SUBJECTS } from '@/lib/constants';
 import { db } from '@/lib/db';
 import { deleteLocal, writeLocal } from '@/lib/sync';
 import { markPlannerBlockComplete } from '@/lib/planner-execution';
-import { mockAccuracy, mockScorePercent, mockSummary, validateMockDraft } from '@/lib/mocks';
+import {
+  mockAccuracy,
+  mockScorePercent,
+  mockSubjectScoreRecord,
+  mockSubjectScoresFromRecord,
+  mockSummary,
+  validateMockDraft
+} from '@/lib/mocks';
 import { cn, formatDate, nowISO, todayISO, uuid } from '@/lib/utils';
 
 interface FormState {
@@ -62,9 +69,7 @@ function formFromRow(row: MockTestRow): FormState {
     wrong: String(row.wrong),
     skipped: String(row.skipped),
     duration: String(row.duration_min),
-    subjectScores: Object.fromEntries(
-      row.subject_scores.map((item) => [item.subject, String(item.marks)])
-    ),
+    subjectScores: mockSubjectScoreRecord(row.subject_scores),
     mistakes: [row.mistakes[0] ?? '', row.mistakes[1] ?? '', row.mistakes[2] ?? '']
   };
 }
@@ -130,10 +135,7 @@ export default function Mocks() {
     try {
       const existing = form.id ? await db.mock_tests.get(form.id) : null;
       const now = nowISO();
-      const subjectScores: MockSubjectScore[] = SUBJECTS.flatMap((subject) => {
-        const value = form.subjectScores[subject]?.trim();
-        return value && Number.isFinite(Number(value)) ? [{ subject, marks: Number(value) }] : [];
-      });
+      const subjectScores = mockSubjectScoresFromRecord(form.subjectScores);
       const row: MockTestRow = {
         id: existing?.id ?? uuid(),
         user_id: userId,

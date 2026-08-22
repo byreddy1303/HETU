@@ -1,7 +1,7 @@
 import type { PyqAttemptRow, PyqHistoryFilter, QuestionRow } from '@/types';
 import type { PyqQuestion } from '@/lib/pyq';
 import { MARKS_TARGET_SEC, DEFAULT_TARGET_TIME_SEC } from '@/lib/constants';
-import { pyqJournalQuestionId } from '@/lib/pyq-session';
+import { pyqSourceAttemptForJournalQuestion } from '@/lib/pyq-session';
 
 export const PYQ_HISTORY_OPTIONS: { value: PyqHistoryFilter; label: string }[] = [
   { value: 'all', label: 'All questions' },
@@ -27,12 +27,19 @@ export function attemptsByQuestion(attempts: PyqAttemptRow[]): Map<string, PyqAt
   return grouped;
 }
 
-export function analyzedAttemptIds(questions: QuestionRow[]): Set<string> {
-  const questionIds = new Set(questions.map((question) => question.id));
+export function analyzedAttemptIds(
+  questions: QuestionRow[],
+  attempts: PyqAttemptRow[]
+): Set<string> {
   const ids = new Set<string>();
-  // PYQ journal IDs are deterministic, so no fragile source-text matching is needed.
-  // The caller can cheaply test all known attempts against this set.
-  for (const id of questionIds) ids.add(id);
+  for (const question of questions) {
+    if (question.source_pyq_attempt_id) {
+      ids.add(question.source_pyq_attempt_id);
+      continue;
+    }
+    const attempt = pyqSourceAttemptForJournalQuestion(question, attempts);
+    if (attempt) ids.add(attempt.id);
+  }
   return ids;
 }
 
@@ -44,7 +51,7 @@ export function matchesPyqHistory(
   question: Pick<PyqQuestion, 'id' | 'marks'>,
   filter: PyqHistoryFilter,
   grouped: Map<string, PyqAttemptRow[]>,
-  journalQuestionIds: Set<string>
+  analyzedAttempts: Set<string>
 ): boolean {
   if (filter === 'all') return true;
   const attempts = grouped.get(question.id) ?? [];
@@ -59,9 +66,7 @@ export function matchesPyqHistory(
     return latest.mark_correct === true && latest.time_spent_sec > targetSeconds(question);
   if (filter === 'skipped') return latest.mark_decision === 'SKIP';
   if (filter === 'unanalyzed')
-    return (
-      latest.mark_correct === false && !journalQuestionIds.has(pyqJournalQuestionId(latest.id))
-    );
+    return latest.mark_correct === false && !analyzedAttempts.has(latest.id);
   return true;
 }
 
@@ -72,8 +77,8 @@ export function filterPyqByHistory(
   journalQuestions: QuestionRow[]
 ): PyqQuestion[] {
   const grouped = attemptsByQuestion(attempts);
-  const journalQuestionIds = analyzedAttemptIds(journalQuestions);
+  const analyzedAttempts = analyzedAttemptIds(journalQuestions, attempts);
   return questions.filter((question) =>
-    matchesPyqHistory(question, filter, grouped, journalQuestionIds)
+    matchesPyqHistory(question, filter, grouped, analyzedAttempts)
   );
 }

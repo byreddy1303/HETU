@@ -1,0 +1,332 @@
+{
+  "nodes": [
+    {
+      "id": "file:src/__tests__/pyq-attempt-log.test.tsx",
+      "type": "file",
+      "name": "pyq-attempt-log.test.tsx",
+      "filePath": "src/__tests__/pyq-attempt-log.test.tsx",
+      "summary": "Validates the end-to-end PYQ commit workflow for a selected GATE book, including answer/key separation, timer and image capture, atomic attempt snapshots, canonical journal linkage, version-compatible resume, and discard behavior.",
+      "tags": ["test", "pyq", "attempt-logging", "integration-test", "persistence"],
+      "complexity": "complex",
+      "languageNotes": "Testing Library simulates learner interaction while mocked bank fetches and screenshot capture isolate the browser workflow from network and canvas behavior."
+    },
+    {
+      "id": "file:src/__tests__/pyq-navigation.test.tsx",
+      "type": "file",
+      "name": "pyq-navigation.test.tsx",
+      "filePath": "src/__tests__/pyq-navigation.test.tsx",
+      "summary": "Tests navigation inside a multi-question PYQ set, proving committed answers remain locked while a skipped question can be revisited, answered, and logged exactly once.",
+      "tags": ["test", "pyq", "navigation", "interaction-test", "attempt-state"],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:src/__tests__/pyq-session.test.ts",
+      "type": "file",
+      "name": "pyq-session.test.ts",
+      "filePath": "src/__tests__/pyq-session.test.ts",
+      "summary": "Unit-tests deterministic PYQ session and attempt primitives, including progress transitions, canonical session projection, immutable snapshots with book identity, legacy recovery, and durable reattempt receipts.",
+      "tags": ["test", "pyq", "session-state", "reattempt", "determinism"],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:src/__tests__/pyq.test.ts",
+      "type": "file",
+      "name": "pyq.test.ts",
+      "filePath": "src/__tests__/pyq.test.ts",
+      "summary": "Covers PYQ answer evaluation, HTML and journal normalization, book and topic scoping, legacy manifest compatibility, and exhaustive integrity checks for the bundled 3,649-question GATE-level bank.",
+      "tags": ["test", "pyq", "data-integrity", "answer-grading", "book-catalog"],
+      "complexity": "complex",
+      "languageNotes": "The suite combines pure function assertions with direct filesystem validation of generated manifest, subject shards, taxonomy audit, source-book counts, and local image references."
+    },
+    {
+      "id": "function:src/__tests__/pyq.test.ts:question",
+      "type": "function",
+      "name": "question",
+      "filePath": "src/__tests__/pyq.test.ts",
+      "lineRange": [30, 53],
+      "summary": "Builds a complete GATE CSE PYQ fixture and applies focused overrides for grading, scoping, and formatting test cases.",
+      "tags": ["test-fixture", "factory", "pyq", "utility"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/__tests__/reattempt-ui.test.tsx",
+      "type": "file",
+      "name": "reattempt-ui.test.tsx",
+      "filePath": "src/__tests__/reattempt-ui.test.tsx",
+      "summary": "Exercises the complete reattempt solve flow for logged questions and PYQs, covering legacy bank restoration, locked-versus-skipped review navigation, automatic spaced-stage transitions, second-attempt receipts, numeric answers, dashboard routing, and image zoom.",
+      "tags": ["test", "reattempt", "pyq", "integration-test", "spaced-practice"],
+      "complexity": "complex",
+      "languageNotes": "The suite seeds Dexie with both current capture-version snapshots and legacy journal-only records to verify backward-compatible reconstruction."
+    },
+    {
+      "id": "function:src/__tests__/reattempt-ui.test.tsx:seedDueQuestion",
+      "type": "function",
+      "name": "seedDueQuestion",
+      "filePath": "src/__tests__/reattempt-ui.test.tsx",
+      "lineRange": [73, 110],
+      "summary": "Seeds a due journal question and its D3 reattempt record, with configurable schedule and answer format for UI workflow tests.",
+      "tags": ["test-fixture", "database-seed", "reattempt", "utility"],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/__tests__/reattempt-ui.test.tsx:seedDuePyq",
+      "type": "function",
+      "name": "seedDuePyq",
+      "filePath": "src/__tests__/reattempt-ui.test.tsx",
+      "lineRange": [112, 204],
+      "summary": "Creates a current-version PYQ session, incorrect first attempt, canonical journal evidence, and due reattempt so the UI can reconstruct and grade a second solve.",
+      "tags": ["test-fixture", "database-seed", "pyq", "reattempt", "snapshot"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/__tests__/reattempt-ui.test.tsx:seedLegacyDuePyq",
+      "type": "function",
+      "name": "seedLegacyDuePyq",
+      "filePath": "src/__tests__/reattempt-ui.test.tsx",
+      "lineRange": [206, 297],
+      "summary": "Seeds a capture-version-one PYQ attempt without a snapshot plus matching legacy journal evidence, enabling fallback recovery of archived math and options from the active bank.",
+      "tags": ["test-fixture", "legacy-compatibility", "pyq", "database-seed", "reattempt"],
+      "complexity": "moderate"
+    }
+  ],
+  "edges": [
+    {
+      "source": "file:src/__tests__/pyq-attempt-log.test.tsx",
+      "target": "file:src/lib/db.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/__tests__/pyq-attempt-log.test.tsx",
+      "target": "file:src/lib/image.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/__tests__/pyq-attempt-log.test.tsx",
+      "target": "file:src/lib/pyq-session.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/__tests__/pyq-attempt-log.test.tsx",
+      "target": "file:src/lib/pyq.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/__tests__/pyq-attempt-log.test.tsx",
+      "target": "file:src/pages/Pyq.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/__tests__/pyq-navigation.test.tsx",
+      "target": "file:src/lib/db.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/__tests__/pyq-navigation.test.tsx",
+      "target": "file:src/lib/pyq.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/__tests__/pyq-navigation.test.tsx",
+      "target": "file:src/pages/Pyq.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/__tests__/pyq-session.test.ts",
+      "target": "file:src/lib/pyq-session.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/__tests__/pyq-session.test.ts",
+      "target": "file:src/lib/pyq.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/__tests__/pyq-session.test.ts",
+      "target": "file:src/types/index.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/__tests__/pyq.test.ts",
+      "target": "file:src/lib/pyq.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/__tests__/reattempt-ui.test.tsx",
+      "target": "file:src/lib/db.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/__tests__/reattempt-ui.test.tsx",
+      "target": "file:src/lib/image.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/__tests__/reattempt-ui.test.tsx",
+      "target": "file:src/lib/pyq-session.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/__tests__/reattempt-ui.test.tsx",
+      "target": "file:src/lib/pyq.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/__tests__/reattempt-ui.test.tsx",
+      "target": "file:src/pages/Dashboard.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/__tests__/reattempt-ui.test.tsx",
+      "target": "file:src/pages/DoNow.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/__tests__/reattempt-ui.test.tsx",
+      "target": "file:src/pages/Reattempts.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/__tests__/reattempt-ui.test.tsx",
+      "target": "file:src/types/index.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/__tests__/pyq.test.ts",
+      "target": "function:src/__tests__/pyq.test.ts:question",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/__tests__/reattempt-ui.test.tsx",
+      "target": "function:src/__tests__/reattempt-ui.test.tsx:seedDueQuestion",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/__tests__/reattempt-ui.test.tsx",
+      "target": "function:src/__tests__/reattempt-ui.test.tsx:seedDuePyq",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/__tests__/reattempt-ui.test.tsx",
+      "target": "function:src/__tests__/reattempt-ui.test.tsx:seedLegacyDuePyq",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "function:src/__tests__/reattempt-ui.test.tsx:seedDuePyq",
+      "target": "function:src/lib/pyq-session.ts:createPyqSessionRow",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/__tests__/reattempt-ui.test.tsx:seedDuePyq",
+      "target": "function:src/lib/pyq-session.ts:createPyqAttemptRow",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/__tests__/reattempt-ui.test.tsx:seedDuePyq",
+      "target": "function:src/lib/pyq-session.ts:pyqJournalQuestionId",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/__tests__/reattempt-ui.test.tsx:seedLegacyDuePyq",
+      "target": "function:src/lib/pyq-session.ts:createPyqSessionRow",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/__tests__/reattempt-ui.test.tsx:seedLegacyDuePyq",
+      "target": "function:src/lib/pyq-session.ts:createPyqAttemptRow",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/pages/Pyq.tsx",
+      "target": "file:src/__tests__/pyq-attempt-log.test.tsx",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/pages/Pyq.tsx",
+      "target": "file:src/__tests__/pyq-navigation.test.tsx",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/lib/pyq-session.ts",
+      "target": "file:src/__tests__/pyq-session.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/lib/pyq.ts",
+      "target": "file:src/__tests__/pyq.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/pages/Reattempts.tsx",
+      "target": "file:src/__tests__/reattempt-ui.test.tsx",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    }
+  ]
+}

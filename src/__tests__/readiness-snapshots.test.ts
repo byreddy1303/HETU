@@ -15,7 +15,8 @@ function snapshot(date: string, score: number): ReadinessSnapshot {
     retention: score / 100,
     calibration: score / 100,
     surface: score / 100,
-    daysToExam: 100
+    daysToExam: 100,
+    calculationVersion: 2
   };
 }
 
@@ -61,5 +62,22 @@ describe('readiness snapshots', () => {
         100
       )
     ).not.toBeNull();
+  });
+
+  it('never mixes the legacy Journal-only series into version-2 trends', () => {
+    const legacy = { ...snapshot('2026-07-06', 99), calculationVersion: 1 };
+    const current = snapshot('2026-07-13', 47);
+    expect(weeklyDelta([legacy, current])).toBeNull();
+    expect(
+      projectToExam(
+        [
+          legacy,
+          snapshot('2026-07-13', 42),
+          snapshot('2026-07-20', 44),
+          snapshot('2026-07-27', 46)
+        ],
+        100
+      )
+    ).toBeNull();
   });
 });

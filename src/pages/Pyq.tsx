@@ -63,7 +63,9 @@ import {
   completePyqSession,
   createPyqAttemptRow,
   createPyqSessionRow,
+  nextPyqAttemptNumber,
   pausePyqSession,
+  pyqAttemptScorePresentation,
   pyqAttemptId,
   pyqJournalQuestionId,
   pyqPracticeSessionRow,
@@ -637,7 +639,7 @@ function ResultPanel({ question, attempt }: { question: PyqQuestion; attempt: Py
         ? CheckCircle2
         : XCircle;
   const learnerAnswer =
-    attempt.capture_version === 2
+    attempt.capture_version === 2 || attempt.capture_version === 3
       ? attempt.mark_decision === 'SKIP'
         ? 'Left blank'
         : formatAttemptAnswer(attempt.selected_answer)
@@ -646,6 +648,7 @@ function ResultPanel({ question, attempt }: { question: PyqQuestion; attempt: Py
     attempt.answer_status === 'available'
       ? formatAttemptAnswer(attempt.correct_answer)
       : answerText(question).replace(/^Answer key:\s*/i, '');
+  const score = pyqAttemptScorePresentation(attempt);
   return (
     <section
       aria-label="PYQ attempt receipt"
@@ -690,6 +693,10 @@ function ResultPanel({ question, attempt }: { question: PyqQuestion; attempt: Py
                 Accepted tolerance: ±{question.tolerance.abs}
               </p>
             )}
+          <div className="mt-3 flex flex-wrap items-center gap-2">
+            <Badge tone={score.covered ? 'accent' : 'warn'}>{score.label}</Badge>
+            <span className="text-[11px] text-text-faint">{score.detail}</span>
+          </div>
           <p className="mt-2 text-[11px] text-text-faint">
             Committed {new Date(attempt.attempted_at).toLocaleString()} ·{' '}
             {attempt.time_spent_ms == null
@@ -1196,7 +1203,8 @@ export default function Pyq() {
       id: uuid(),
       user_id: userId!,
       session_id: attempt.pyq_session_id,
-      subject: current.subject,
+      subject: attempt.subject,
+      subject_id: attempt.subject_id ?? null,
       subtopic: current.topic,
       source_year: current.year,
       source_ref: pyqSourceRef(current),
@@ -1211,6 +1219,7 @@ export default function Pyq() {
       root_cause: draft?.root_cause ?? null,
       mark_decision: attempt.mark_decision,
       mark_correct: attempt.mark_correct,
+      source_pyq_attempt_id: attempt.id,
       created_at: attempt.attempted_at
     };
   }
@@ -1301,20 +1310,20 @@ export default function Pyq() {
     submittingRef.current = true;
     setSubmitting(true);
     try {
-      const attemptNumber = 1;
+      const questionAttempts = await db.pyq_attempts
+        .where('[pyq_session_id+question_uid]')
+        .equals([session.id, current.id])
+        .toArray();
+      const priorAttempt = latestQuestionAttempt(questionAttempts, current.id);
+      const attemptNumber = nextPyqAttemptNumber(questionAttempts, session.id, current.id);
       const id = pyqAttemptId(session.id, current.id, attemptNumber);
       const existing = await db.pyq_attempts.get(id);
-      if (existing && existing.mark_decision !== 'SKIP') {
+      if (existing) {
         setQuestionScreenshot(existing.screenshot_url);
         setSubmitted(existing);
         setCompleted((rows) =>
           rows.some((row) => row.id === existing.id) ? rows : [...rows, existing]
         );
-        return;
-      }
-      if (existing && decision === 'SKIP') {
-        setQuestionScreenshot(existing.screenshot_url);
-        setSubmitted(existing);
         return;
       }
       const screenshot = await captureQuestionSnapshot();
@@ -1330,25 +1339,15 @@ export default function Pyq() {
         committedAtMs,
         screenshotUrl: screenshot,
         attemptNumber,
-        retryingSkippedAttempt: existing?.mark_decision === 'SKIP'
+        retryingSkippedAttempt: priorAttempt?.mark_decision === 'SKIP'
       });
-      const advancedSession = advancePyqSessionProgress(
+      const nextSession = advancePyqSessionProgress(
         session,
         current.id,
         index + 1,
         attempt.time_spent_sec,
         attempt.attempted_at
       );
-      const nextSession =
-        existing?.mark_decision === 'SKIP'
-          ? {
-              ...advancedSession,
-              elapsed_sec: Math.max(
-                0,
-                advancedSession.elapsed_sec - existing.time_spent_sec + attempt.time_spent_sec
-              )
-            }
-          : advancedSession;
       const writes: Parameters<typeof writeLocalBatch>[0] = [
         { name: 'pyq_attempts', row: attempt },
         { name: 'pyq_sessions', row: nextSession }
@@ -1494,11 +1493,25 @@ export default function Pyq() {
     const graded = completed.filter((attempt) => attempt.mark_correct != null);
     const correct = graded.filter((attempt) => attempt.mark_correct).length;
     const skipped = completed.filter((attempt) => attempt.mark_decision === 'SKIP').length;
+    const exactlyScored = completed.filter(
+      (attempt) =>
+        (attempt.scoring_status === 'scored' || attempt.scoring_status === 'bonus') &&
+        typeof attempt.score_thirds === 'number' &&
+        (attempt.question_marks === 1 || attempt.question_marks === 2)
+    );
+    const scoreThirds = exactlyScored.reduce(
+      (sum, attempt) => sum + (attempt.score_thirds ?? 0),
+      0
+    );
+    const maxThirds = exactlyScored.reduce(
+      (sum, attempt) => sum + (attempt.question_marks ?? 0) * 3,
+      0
+    );
     return (
       <div className="mx-auto flex w-full max-w-3xl flex-col gap-4">
         <PageHeader
           title="Practice set complete"
-          description={`${completed.length} ${plural(completed.length, 'question')} submitted without exposing a key early.`}
+          description={`${completed.length} immutable ${plural(completed.length, 'attempt')} saved without exposing a key early.`}
         />
         <Card>
           <CardBody className="p-6 sm:p-8">
@@ -1535,6 +1548,17 @@ export default function Pyq() {
                 ? `${Math.round((correct / graded.length) * 100)}% across ${graded.length} answered questions`
                 : 'no graded answers in this set'}
               .
+            </p>
+            <p className="mt-2 text-[12px] text-text-muted">
+              GATE-rule score from stored metadata:{' '}
+              <span className="u-num font-semibold text-text">
+                {(scoreThirds / 3).toFixed(2).replace(/\.00$/, '')} /{' '}
+                {(maxThirds / 3).toFixed(2).replace(/\.00$/, '')}
+              </span>{' '}
+              marks across {exactlyScored.length} of {completed.length} receipts
+              {exactlyScored.length < completed.length
+                ? '; the rest are excluded because verified type/marks metadata is incomplete.'
+                : '.'}
             </p>
             <div className="mt-6 flex flex-wrap gap-2">
               <Button variant="primary" onClick={() => void repeatCurrentSet()} disabled={loading}>

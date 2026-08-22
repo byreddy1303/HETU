@@ -13,6 +13,7 @@ export type SyncStatus = 'synced' | 'pending' | 'error';
 export type PyqSessionStatus = 'active' | 'completed' | 'abandoned' | 'paused';
 export type SessionKind = 'focused' | 'log' | 'pyq';
 export type PyqAttemptAnswerStatus = 'available' | 'ambiguous' | 'marks-to-all' | 'unsupported';
+export type PyqAttemptScoringStatus = 'scored' | 'bonus' | 'unscorable';
 export type PyqHistoryFilter =
   | 'all'
   | 'unseen'
@@ -64,6 +65,7 @@ export interface PlanItemRow {
   user_id: string;
   title: string;
   subject: string | null;
+  subject_id?: string | null;
   notes: string | null;
   due_date: string;
   rrule_kind: PlanRRuleKind;
@@ -88,6 +90,7 @@ export interface SessionRow {
   kind?: SessionKind;
   date: string;
   subject: string;
+  subject_id?: string | null;
   target_duration_min: number;
   actual_duration_min: number | null;
   insight: string | null;
@@ -104,6 +107,7 @@ export interface QuestionRow {
   user_id: string;
   session_id: string | null;
   subject: string;
+  subject_id?: string | null;
   subtopic: string | null;
   source_year: number | null;
   source_ref: string | null;
@@ -120,6 +124,11 @@ export interface QuestionRow {
   root_cause: RootCause | null;
   mark_decision: MarkDecision | null;
   mark_correct: boolean | null;
+  /**
+   * Immutable receipt that this Journal analysis annotates. Null/absent means
+   * that the row is independent manual or legacy evidence.
+   */
+  source_pyq_attempt_id?: string | null;
   created_at: string;
 }
 
@@ -128,6 +137,7 @@ export interface PatternRow {
   user_id: string;
   name: string;
   subject: string;
+  subject_id?: string | null;
   count: number;
   is_reflexed: boolean;
   mastery_level: number;
@@ -160,6 +170,7 @@ export interface FormulaRow {
   user_id: string;
   name: string;
   subject: string;
+  subject_id?: string | null;
   expression: string;
   forgot_count: number;
   last_reviewed: string | null;
@@ -233,6 +244,7 @@ export interface PyqSessionConfig {
 
 export interface MockSubjectScore {
   subject: string;
+  subject_id?: string | null;
   marks: number;
 }
 
@@ -260,6 +272,7 @@ export interface TopicProgressRow {
   id: string;
   user_id: string;
   subject: string;
+  subject_id?: string | null;
   topic: string;
   completed_at: string;
   updated_at: string;
@@ -287,6 +300,7 @@ export interface PyqSessionRow {
 /**
  * An immutable submitted bank attempt. Capture version 2 stores the exact
  * learner response, official key, question snapshot, and millisecond timing.
+ * Capture version 3 additionally freezes the official scoring inputs/result.
  * Versions 0/1 are retained only for honest legacy-data handling.
  */
 export interface PyqAttemptRow {
@@ -295,11 +309,12 @@ export interface PyqAttemptRow {
   pyq_session_id: string | null;
   question_uid: string;
   subject: string;
+  subject_id?: string | null;
   year: number;
   attempt_number: number;
   selected_answer: PyqSelectedAnswer;
   correct_answer: PyqSelectedAnswer;
-  capture_version: 0 | 1 | 2;
+  capture_version: 0 | 1 | 2 | 3;
   question_snapshot: PyqQuestionSnapshot | null;
   answer_status: PyqAttemptAnswerStatus;
   screenshot_url: string | null;
@@ -310,6 +325,19 @@ export interface PyqAttemptRow {
   time_spent_sec: number;
   bank_version: string;
   attempted_at: string;
+  /** Frozen GATE scoring facts. Nullable/absent only on pre-v3 receipts. */
+  question_type?: string | null;
+  question_marks?: 1 | 2 | null;
+  score_thirds?: number | null;
+  scoring_status?: PyqAttemptScoringStatus | null;
+  scoring_version?: number | null;
+  /**
+   * Explicit spaced-review origin. A review round may contain several
+   * receipts (for example, skip then answer) without overwriting either.
+   */
+  reattempt_id?: string | null;
+  reattempt_round?: number | null;
+  round_attempt_number?: number | null;
 }
 
 export interface BuddyRow {
@@ -371,6 +399,7 @@ export interface StudyRoomRow {
   id: string;
   name: string;
   subject: string;
+  subject_id?: string | null;
   start_time: string;
   duration_min: number;
   participants: string[];

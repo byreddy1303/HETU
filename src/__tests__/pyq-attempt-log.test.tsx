@@ -119,9 +119,11 @@ describe('PYQ committed-attempt logging', () => {
     await user.click(screen.getByRole('button', { name: /^Answered/ }));
     await user.click(screen.getByRole('button', { name: 'Commit & reveal key' }));
 
-    expect(captureElementToDataUrl).toHaveBeenCalledWith(expect.any(HTMLElement), {
-      theme: 'light'
-    });
+    await waitFor(() =>
+      expect(captureElementToDataUrl).toHaveBeenCalledWith(expect.any(HTMLElement), {
+        theme: 'light'
+      })
+    );
 
     const receipt = await screen.findByRole('region', { name: 'PYQ attempt receipt' });
     expect(within(receipt).getByText('Not correct')).toBeInTheDocument();
@@ -129,6 +131,10 @@ describe('PYQ committed-attempt logging', () => {
     expect(within(receipt).getByText('A')).toBeInTheDocument();
     expect(within(receipt).getByText('Correct answer')).toBeInTheDocument();
     expect(within(receipt).getByText('B')).toBeInTheDocument();
+    expect(within(receipt).getByText('GATE -⅓')).toBeInTheDocument();
+    expect(
+      within(receipt).getByText('Exact GATE-rule score using the stored question type and marks.')
+    ).toBeInTheDocument();
 
     await waitFor(async () => {
       const attempts = await db.pyq_attempts.toArray();
@@ -137,7 +143,14 @@ describe('PYQ committed-attempt logging', () => {
       expect(attempt.selected_answer).toBe('A');
       expect(attempt.correct_answer).toBe('B');
       expect(attempt.mark_correct).toBe(false);
-      expect(attempt.capture_version).toBe(2);
+      expect(attempt.capture_version).toBe(3);
+      expect(attempt).toMatchObject({
+        question_type: 'MCQ',
+        question_marks: 1,
+        score_thirds: -1,
+        scoring_status: 'scored',
+        scoring_version: 1
+      });
       expect(attempt.screenshot_url).toBe('data:image/png;base64,cXVlc3Rpb24tc25hcHNob3Q=');
       expect(attempt.time_spent_ms).toBeGreaterThan(0);
       expect(attempt.time_spent_sec).toBe(Math.max(1, Math.ceil(attempt.time_spent_ms! / 1000)));
@@ -194,6 +207,7 @@ describe('PYQ committed-attempt logging', () => {
       const [journalRow] = await db.questions.toArray();
       expect(attempt.mark_correct).toBe(true);
       expect(journalRow.session_id).toBe(attempt.pyq_session_id);
+      expect(journalRow.source_pyq_attempt_id).toBe(attempt.id);
       expect(journalRow.image_url).toBe(SAFE_PYQ_IMAGE);
       expect(journalRow.image_url).not.toBe(attempt.screenshot_url);
       expect(await db.sessions.get(attempt.pyq_session_id!)).toMatchObject({ kind: 'pyq' });

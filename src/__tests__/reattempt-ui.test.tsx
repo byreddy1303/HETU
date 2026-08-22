@@ -500,7 +500,13 @@ describe('re-attempt solve flow', () => {
         selected_answer: 'B',
         correct_answer: 'B',
         mark_correct: true,
-        capture_version: 2
+        capture_version: 3,
+        score_thirds: 3,
+        scoring_status: 'scored',
+        scoring_version: 1,
+        reattempt_id: 'reattempt-pyq',
+        reattempt_round: 0,
+        round_attempt_number: 1
       });
       expect(attempts[1].screenshot_url).toMatch(/^data:image\/png;base64,/);
       expect(attempts[1].screenshot_url).not.toContain('/attempt-q');
@@ -545,8 +551,25 @@ describe('re-attempt solve flow', () => {
         .where('question_uid')
         .equals('gate-2026-set1-q1')
         .toArray();
-      expect(attempts).toHaveLength(2);
-      expect(attempts.find((attempt) => attempt.pyq_session_id === null)).toMatchObject({
+      expect(attempts).toHaveLength(3);
+      const reviewAttempts = attempts
+        .filter((attempt) => attempt.pyq_session_id === null)
+        .sort(
+          (left, right) =>
+            (left.round_attempt_number ?? 1) - (right.round_attempt_number ?? 1)
+        );
+      expect(reviewAttempts[0]).toMatchObject({
+        id: pyqReattemptAttemptId('reattempt-pyq', 0, 1),
+        attempt_number: 2,
+        round_attempt_number: 1,
+        selected_answer: null,
+        mark_decision: 'SKIP',
+        mark_correct: null
+      });
+      expect(reviewAttempts[1]).toMatchObject({
+        id: pyqReattemptAttemptId('reattempt-pyq', 0, 2),
+        attempt_number: 3,
+        round_attempt_number: 2,
         selected_answer: 'B',
         mark_decision: 'MARK',
         mark_correct: true

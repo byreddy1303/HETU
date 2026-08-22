@@ -91,7 +91,7 @@ describe('native Planner sheets', () => {
     render(<NativePlannerHarness />);
 
     await user.click(screen.getByRole('button', { name: 'Add subject' }));
-    await user.click(screen.getByRole('button', { name: 'Mathematics' }));
+    await user.click(screen.getByRole('button', { name: 'Discrete Mathematics' }));
     await user.type(screen.getByRole('searchbox', { name: 'Search subjects' }), 'operating');
     await user.click(screen.getByRole('button', { name: 'Operating Systems' }));
 

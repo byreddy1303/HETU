@@ -7,11 +7,12 @@
 // through so the caller controls IO.
 
 import type { DayPlan } from '@/lib/planner-storage';
-import {
-  dayKeyPrefix,
-  loadDayPlan,
-  migrateLegacyDayPlans
-} from '@/lib/planner-storage';
+import { dayKeyPrefix, loadDayPlan, migrateLegacyDayPlans } from '@/lib/planner-storage';
+import { canonicalSubjectLabel } from '@/lib/subjects';
+
+function plannedSubjectLabel(subject: string, customSubject?: string): string {
+  return subject === 'Custom...' && customSubject ? customSubject : canonicalSubjectLabel(subject);
+}
 
 /** Load every DayPlan currently in localStorage. Skips corrupt rows. */
 export function loadAllDayPlans(): DayPlan[] {
@@ -80,8 +81,7 @@ export function rollup(plans: DayPlan[]): Rollup {
     totalMinPlanned: totalMin,
     totalHoursTargeted: Math.round(totalTargeted * 10) / 10,
     avgSessionsPerDay: Math.round((totalSessions / plans.length) * 10) / 10,
-    avgSessionDurationMin:
-      totalSessions === 0 ? 0 : Math.round(totalSessionMin / totalSessions)
+    avgSessionDurationMin: totalSessions === 0 ? 0 : Math.round(totalSessionMin / totalSessions)
   };
 }
 
@@ -109,8 +109,7 @@ export function subjectShare(plans: DayPlan[]): Share[] {
   const m = new Map<string, number>();
   for (const p of plans) {
     for (const s of p.sessions) {
-      const name =
-        s.subject === 'Custom...' && s.customSubject ? s.customSubject : s.subject;
+      const name = plannedSubjectLabel(s.subject, s.customSubject);
       m.set(name, (m.get(name) ?? 0) + (s.durationMin || 0));
     }
   }
@@ -194,14 +193,11 @@ export function neglectedSubjects(
 ): { label: string; min: number }[] {
   const cutoff = isoNDaysAgo(windowDays);
   const m = new Map<string, number>();
-  for (const s of allSubjects) m.set(s, 0);
+  for (const s of allSubjects) m.set(canonicalSubjectLabel(s), 0);
   for (const p of plans) {
     if (p.date < cutoff) continue;
     for (const sess of p.sessions) {
-      const name =
-        sess.subject === 'Custom...' && sess.customSubject
-          ? sess.customSubject
-          : sess.subject;
+      const name = plannedSubjectLabel(sess.subject, sess.customSubject);
       if (!m.has(name)) continue; // ignore Custom subjects — can't tell if they're canonical
       m.set(name, (m.get(name) ?? 0) + (sess.durationMin || 0));
     }

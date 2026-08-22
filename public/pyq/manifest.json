@@ -1,6 +1,6 @@
 {
-  "bankVersion": "gate-1990-2026-v7-go-classes-coa-topic-tests",
-  "generatedAt": "2026-08-13T07:40:50.694Z",
+  "bankVersion": "gate-1990-2026-v8-verified-pdf-marks",
+  "generatedAt": "2026-08-22T09:50:34.489Z",
   "source": "GateQA/GATE Overflow CSE archive, syllabus-filtered ExamSIDE ECE/EE Digital Logic records, and the learner-provided GO Classes COA Topic Tests",
   "sourceUrl": "https://gateqa.in",
   "firstYear": 1990,
@@ -751,5 +751,55 @@
         }
       ]
     }
-  ]
+  ],
+  "verifiedPdfMarkMetadata": {
+    "policyVersion": "pdf-answer-key-marks-v1",
+    "authoritativeSourceKind": "pdf_answer_key",
+    "questionCount": 130,
+    "oneMarkCount": 60,
+    "twoMarkCount": 70,
+    "correctedQuestionIds": [
+      "go:523026",
+      "go:523027",
+      "go:523028",
+      "go:523029",
+      "go:523031",
+      "go:523032",
+      "go:523034",
+      "go:523037",
+      "go:523038",
+      "go:523039",
+      "go:523040",
+      "go:523041",
+      "go:523044",
+      "go:523045",
+      "go:523046",
+      "go:523048",
+      "go:523052",
+      "go:523054",
+      "go:523080",
+      "go:523081",
+      "go:523082",
+      "go:523083",
+      "go:523084",
+      "go:523091",
+      "go:523092",
+      "go:523094",
+      "go:523096",
+      "go:523097",
+      "go:523106",
+      "go:523107",
+      "go:523110",
+      "go:523111",
+      "go:523114",
+      "go:523115",
+      "go:523117",
+      "go:523118",
+      "go:523148",
+      "go:523149",
+      "go:523150",
+      "go:523151",
+      "go:523152"
+    ]
+  }
 }

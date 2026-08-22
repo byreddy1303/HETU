@@ -1,0 +1,595 @@
+{
+  "version": "1.0.0",
+  "project": {
+    "name": "hetu",
+    "languages": [
+      "TypeScript",
+      "JavaScript",
+      "Java",
+      "SQL",
+      "CSS",
+      "HTML",
+      "Shell"
+    ],
+    "frameworks": [
+      "React",
+      "Vite",
+      "Vitest",
+      "Tailwind CSS",
+      "Zustand",
+      "Dexie",
+      "Supabase",
+      "Capacitor"
+    ],
+    "description": "HETU is a local-first GATE preparation system that turns timed question practice into immutable attempt evidence, mistake diagnosis, spaced re-attempts, adaptive planning, readiness and rank signals, and focused buddy study.",
+    "analyzedAt": "2026-08-22T08:14:12Z",
+    "gitCommitHash": "4e6fa5e8d00aa8359bc5358dbcbc4ddbdcc10f2e"
+  },
+  "nodes": [
+    {
+      "id": "domain:learner-access-and-account-security",
+      "type": "domain",
+      "name": "Learner Access and Account Security",
+      "summary": "This domain controls HETU's invite-only learner onboarding, username/PIN authentication, account recovery, and owner-reviewed access queue. It also establishes the authenticated user boundary that scopes local and remote study data and prevents account enumeration or cross-user residue.",
+      "tags": ["authentication", "invite-only", "access-control", "tenant-isolation"],
+      "complexity": "complex",
+      "domainMeta": {
+        "entities": ["Account Request", "Invite", "Learner Profile", "Authentication Session", "PIN Recovery Session"],
+        "businessRules": [
+          "Accounts can only be created from an approved, unexpired invite bound to the requester's identity.",
+          "Username and PIN failures must use uniform responses so account existence is not disclosed.",
+          "Every persisted learner record is scoped to the authenticated user, and sign-out wipes account-sensitive local state."
+        ],
+        "crossDomainInteractions": [
+          "Supplies the learner identity used to scope study, planner, PYQ, readiness, notification, and buddy records.",
+          "Owner decisions trigger transactional email and invitation delivery in the engagement domain."
+        ]
+      }
+    },
+    {
+      "id": "domain:focused-study-and-question-analysis",
+      "type": "domain",
+      "name": "Focused Study and Question Analysis",
+      "summary": "This domain runs the core solve, time, tag, log, journal, and review lifecycle for individual questions and focused sessions. It converts raw practice into structured evidence about outcomes, recurring patterns, trigger phrases, root causes, timing, and concrete weekly corrections.",
+      "tags": ["study-sessions", "question-logging", "root-cause-analysis", "journal"],
+      "complexity": "complex",
+      "domainMeta": {
+        "entities": ["Study Session", "Question Journal Entry", "Outcome", "Pattern", "Trigger Phrase", "Root Cause", "Weekly Review"],
+        "businessRules": [
+          "A question can be saved locally while offline and must retain its user, session, timing, and analysis evidence.",
+          "Non-clean outcomes can create spaced re-attempt work, while clean outcomes do not.",
+          "Deleting a session must preserve its questions as standalone evidence rather than deleting learner history."
+        ],
+        "crossDomainInteractions": [
+          "Receives immutable PYQ receipts for deeper journal analysis.",
+          "Feeds mistakes, patterns, timing, and weekly fixes into spaced mastery, planning, and readiness calculations."
+        ]
+      }
+    },
+    {
+      "id": "domain:pyq-practice-and-attempt-integrity",
+      "type": "domain",
+      "name": "PYQ Practice and Attempt Integrity",
+      "summary": "This domain builds and serves HETU's audited GATE-level previous-year-question catalog and runs book-aware, timed practice sets. It preserves every committed answer as an immutable, versioned receipt containing the presented question snapshot, answer, decision, timing, session, and source identity.",
+      "tags": ["pyq", "question-bank", "attempt-receipts", "audit-integrity"],
+      "complexity": "complex",
+      "domainMeta": {
+        "entities": ["PYQ Book", "Question Bank", "PYQ Session", "PYQ Attempt", "Question Snapshot", "Answer Key", "Taxonomy"],
+        "businessRules": [
+          "Only allowlisted GATE-level source books with locked counts, stable IDs, and audited taxonomy may enter the catalog.",
+          "Committed answers are immutable and retries must reuse deterministic attempt identifiers.",
+          "A receipt must preserve the exact question and book identity so later bank changes cannot rewrite history."
+        ],
+        "crossDomainInteractions": [
+          "Creates canonical journal questions for focused analysis without losing the source attempt receipt.",
+          "Incorrect, uncertain, slow, or skipped attempts can enter the spaced re-attempt ladder.",
+          "Attempt history contributes to topic mastery, readiness, and prioritized daily work."
+        ]
+      }
+    },
+    {
+      "id": "domain:spaced-mastery-and-revision",
+      "type": "domain",
+      "name": "Spaced Mastery and Revision",
+      "summary": "This domain turns diagnosed weaknesses into retrieval practice through the D3-D10-D30 re-attempt ladder, formula recall, trigger drills, and focused revision packs. It keeps answer evidence concealed during recall, advances only on successful retrieval, and prioritizes unresolved work over passive review.",
+      "tags": ["spaced-repetition", "retrieval-practice", "revision", "mastery"],
+      "complexity": "complex",
+      "domainMeta": {
+        "entities": ["Re-attempt", "Ladder Stage", "Formula", "Trigger Phrase", "Revision Pack", "Recall History"],
+        "businessRules": [
+          "Eligible mistakes begin at D3 and advance through D10 and D30 only after a clean result.",
+          "There may be only one open re-attempt for the same question at a time.",
+          "Recall surfaces keep saved answers hidden until the learner explicitly reveals or submits an answer."
+        ],
+        "crossDomainInteractions": [
+          "Consumes outcomes and attempt receipts from question analysis and PYQ practice.",
+          "Supplies due work, retention evidence, and open mistake surface to planning, notifications, and readiness."
+        ]
+      }
+    },
+    {
+      "id": "domain:study-planning-progress-and-readiness",
+      "type": "domain",
+      "name": "Study Planning, Progress, and Readiness",
+      "summary": "This domain converts learner evidence into day plans, an ordered Do Now queue, syllabus and topic status, mock-test trends, readiness scores, and qualified rank outlooks. It closes the loop from observed performance to a concrete next action while keeping projections explicitly dependent on evidence and remaining exam runway.",
+      "tags": ["planner", "readiness", "rank-outlook", "topic-mastery", "next-actions"],
+      "complexity": "complex",
+      "domainMeta": {
+        "entities": ["Day Plan", "Study Block", "Do Now Item", "Mock Test", "Topic Progress", "Readiness Snapshot", "AIR Band"],
+        "businessRules": [
+          "Plan completion is duration-weighted and one overlong block cannot conceal unfinished planned work.",
+          "Readiness combines evidence-tempered coverage, retention, calibration, and open mistake surface rather than raw question volume alone.",
+          "AIR bands and exam simulations are qualified projections, not guaranteed ranks, and require sufficient evidence for confidence."
+        ],
+        "crossDomainInteractions": [
+          "Aggregates session, journal, PYQ, re-attempt, formula, pattern, mock, and syllabus evidence.",
+          "Supplies prioritized work and contextual study data to reminders, digests, dashboards, and Telegram commands."
+        ]
+      }
+    },
+    {
+      "id": "domain:buddy-collaboration-and-engagement",
+      "type": "domain",
+      "name": "Buddy Collaboration and Study Engagement",
+      "summary": "This domain manages buddy relationships, realtime presence and chat, privacy-safe question sharing, and multi-channel study engagement. It delivers buddy messages, planner digests, and actionable study reminders through web push, Android, email, and Telegram while respecting consent, quiet hours, foreground suppression, and retry safety.",
+      "tags": ["buddy", "realtime-chat", "notifications", "telegram", "push-delivery"],
+      "complexity": "complex",
+      "domainMeta": {
+        "entities": ["Buddy Relationship", "Buddy Request", "Buddy Message", "Shared Question Reference", "Push Subscription", "Notification Event", "Telegram Subscription", "Daily Digest"],
+        "businessRules": [
+          "Only active buddy members may read or write a conversation, and shared questions expose only privacy-safe snapshot fields.",
+          "Notification channels require explicit per-device consent and must honor quiet hours, snoozes, and active-chat suppression.",
+          "Interactive actions use expiring single-use tokens and delivery jobs must be idempotent and retry-aware."
+        ],
+        "crossDomainInteractions": [
+          "Requires authenticated identities and active relationship membership from the access domain.",
+          "Uses planner, re-attempt, PYQ, formula, readiness, and review context to create relevant study guidance.",
+          "Shared question references can open individual PYQ or journal practice contexts."
+        ]
+      }
+    },
+
+    {
+      "id": "flow:request-and-review-access",
+      "type": "flow",
+      "name": "Request and Review Access",
+      "summary": "A prospective learner submits a privacy-safe access request, the owner reviews it, and an approval produces an invitation while a decline can send a reasoned response.",
+      "tags": ["access-request", "owner-review", "invite"],
+      "complexity": "complex",
+      "domainMeta": {"entryPoint": "Submit the public Request Access form", "entryType": "manual"}
+    },
+    {
+      "id": "flow:create-invite-only-account",
+      "type": "flow",
+      "name": "Create Invite-Only Account",
+      "summary": "An approved invite is validated against authoritative identity data before a unique username and six-digit PIN account is created and signed in.",
+      "tags": ["signup", "invite-redemption", "identity-validation"],
+      "complexity": "complex",
+      "domainMeta": {"entryPoint": "Open the signup page with an invite token", "entryType": "manual"}
+    },
+    {
+      "id": "flow:authenticate-and-recover-pin",
+      "type": "flow",
+      "name": "Authenticate and Recover PIN",
+      "summary": "Learners exchange a username and PIN for a Supabase session or use a non-enumerating email recovery path to replace a forgotten PIN.",
+      "tags": ["login", "pin-recovery", "session"],
+      "complexity": "moderate",
+      "domainMeta": {"entryPoint": "Open sign-in or Forgot PIN", "entryType": "manual"}
+    },
+
+    {
+      "id": "flow:run-focused-study-session",
+      "type": "flow",
+      "name": "Run Focused Study Session",
+      "summary": "A learner configures a session, solves timed questions, tags structured evidence, persists local-first records, and reviews the completed session.",
+      "tags": ["study-session", "timer", "tagging", "review"],
+      "complexity": "complex",
+      "domainMeta": {"entryPoint": "Start a new focused session", "entryType": "manual"}
+    },
+    {
+      "id": "flow:capture-and-log-question",
+      "type": "flow",
+      "name": "Capture and Log Question",
+      "summary": "A learner quickly captures or edits a standalone question, records outcome evidence, persists it, and creates due re-attempt work when required.",
+      "tags": ["quick-capture", "question-log", "image", "reattempt"],
+      "complexity": "moderate",
+      "domainMeta": {"entryPoint": "Open Quick Capture or Log", "entryType": "manual"}
+    },
+    {
+      "id": "flow:review-mistake-journal",
+      "type": "flow",
+      "name": "Review Mistake Journal",
+      "summary": "The learner searches preserved question and session evidence, recalls concealed answers, edits diagnoses, and turns weekly patterns into one concrete fix.",
+      "tags": ["journal", "mistake-review", "answer-recall", "weekly-review"],
+      "complexity": "complex",
+      "domainMeta": {"entryPoint": "Open Journal or Weekly Review", "entryType": "manual"}
+    },
+
+    {
+      "id": "flow:build-audited-pyq-catalog",
+      "type": "flow",
+      "name": "Build Audited PYQ Catalog",
+      "summary": "Repository automation ingests only allowlisted GATE-level sources, applies the canonical taxonomy, localizes assets, emits immutable shards, and audits catalog invariants.",
+      "tags": ["pyq-bank", "content-pipeline", "taxonomy", "audit"],
+      "complexity": "complex",
+      "domainMeta": {"entryPoint": "Run the PYQ bank build command", "entryType": "cli"}
+    },
+    {
+      "id": "flow:run-pyq-practice-set",
+      "type": "flow",
+      "name": "Run PYQ Practice Set",
+      "summary": "A learner selects an audited book and scope, starts or resumes a durable set, solves timed questions, and advances through committed and skipped items.",
+      "tags": ["pyq-practice", "book-filter", "timed-test", "session-resume"],
+      "complexity": "complex",
+      "domainMeta": {"entryPoint": "Open PYQ Practice", "entryType": "manual"}
+    },
+    {
+      "id": "flow:commit-and-analyze-pyq-attempt",
+      "type": "flow",
+      "name": "Commit and Analyze PYQ Attempt",
+      "summary": "A submitted PYQ answer is graded, captured as an immutable receipt, atomically linked to canonical study history, and optionally expanded into journal analysis.",
+      "tags": ["attempt-commit", "immutable-receipt", "answer-evaluation", "journal-analysis"],
+      "complexity": "complex",
+      "domainMeta": {"entryPoint": "Submit a decision for the current PYQ", "entryType": "event"}
+    },
+
+    {
+      "id": "flow:execute-spaced-reattempt-ladder",
+      "type": "flow",
+      "name": "Execute Spaced Re-attempt Ladder",
+      "summary": "Eligible mistakes are scheduled at D3, surfaced when due, re-solved without premature answer exposure, and advanced or rescheduled from fresh evidence.",
+      "tags": ["reattempt", "d3-d10-d30", "retrieval", "mastery"],
+      "complexity": "complex",
+      "domainMeta": {"entryPoint": "Open the due Re-attempts queue", "entryType": "manual"}
+    },
+    {
+      "id": "flow:practice-formulas-and-triggers",
+      "type": "flow",
+      "name": "Practice Formulas and Triggers",
+      "summary": "Learners review due formulas and timed trigger phrases, explicitly judge recall, and persist the next review state and response-speed evidence.",
+      "tags": ["formula-recall", "trigger-drill", "retrieval-practice"],
+      "complexity": "moderate",
+      "domainMeta": {"entryPoint": "Open Formulas or Trigger Drill", "entryType": "manual"}
+    },
+    {
+      "id": "flow:assemble-weekly-revision-pack",
+      "type": "flow",
+      "name": "Assemble Weekly Revision Pack",
+      "summary": "The latest weekly constraint, due retrieval work, slow triggers, recurring mistakes, and priority questions are combined into one focused, copyable revision checklist.",
+      "tags": ["revision-pack", "weekly-fix", "prioritization"],
+      "complexity": "moderate",
+      "domainMeta": {"entryPoint": "Open Revision Pack", "entryType": "manual"}
+    },
+
+    {
+      "id": "flow:plan-and-execute-study-day",
+      "type": "flow",
+      "name": "Plan and Execute Study Day",
+      "summary": "A learner creates subject and mode blocks for a calendar day, mirrors the plan, launches work from a block, and reconciles actual execution back into duration-weighted completion.",
+      "tags": ["planner", "day-plan", "study-block", "execution"],
+      "complexity": "complex",
+      "domainMeta": {"entryPoint": "Select a date in Planner", "entryType": "manual"}
+    },
+    {
+      "id": "flow:build-do-now-queue",
+      "type": "flow",
+      "name": "Build Do Now Queue",
+      "summary": "Live due, unresolved, uncertain, slow, formula, and planned-work evidence is ranked into an actionable queue whose first item routes directly into execution.",
+      "tags": ["do-now", "task-prioritization", "next-action"],
+      "complexity": "moderate",
+      "domainMeta": {"entryPoint": "Open Do Now", "entryType": "manual"}
+    },
+    {
+      "id": "flow:calculate-readiness-and-rank-outlook",
+      "type": "flow",
+      "name": "Calculate Readiness and Rank Outlook",
+      "summary": "HETU combines evidence-tempered coverage, retention, calibration, and mistake surface into readiness, tracks movement, recommends next moves, and presents qualified AIR and exam-day projections.",
+      "tags": ["readiness", "air-band", "exam-simulation", "recommendations"],
+      "complexity": "complex",
+      "domainMeta": {"entryPoint": "Open Readiness or run the weekly readiness job", "entryType": "manual"}
+    },
+    {
+      "id": "flow:track-mocks-and-topic-mastery",
+      "type": "flow",
+      "name": "Track Mocks and Topic Mastery",
+      "summary": "Mock results and per-topic PYQ, journal, re-attempt, recency, and manual study evidence are persisted and combined to recommend the next unfinished or weak topic.",
+      "tags": ["mock-tests", "topic-progress", "syllabus", "mastery"],
+      "complexity": "complex",
+      "domainMeta": {"entryPoint": "Record a mock or open Syllabus Tracker", "entryType": "manual"}
+    },
+
+    {
+      "id": "flow:manage-buddy-relationship",
+      "type": "flow",
+      "name": "Manage Buddy Relationship",
+      "summary": "An authenticated learner requests a buddy by username, the peer accepts or declines, and the workspace maintains active, outgoing, incoming, and paused relationship states.",
+      "tags": ["buddy-request", "relationship-lifecycle", "privacy"],
+      "complexity": "moderate",
+      "domainMeta": {"entryPoint": "Create or act on a Buddy request", "entryType": "manual"}
+    },
+    {
+      "id": "flow:chat-and-share-questions",
+      "type": "flow",
+      "name": "Chat and Share Questions",
+      "summary": "Active buddies establish presence, exchange realtime messages, share privacy-safe question snapshots, and reconcile optimistic, delivered, read, and typing state.",
+      "tags": ["buddy-chat", "realtime", "presence", "question-sharing"],
+      "complexity": "complex",
+      "domainMeta": {"entryPoint": "Open an active Buddy conversation", "entryType": "manual"}
+    },
+    {
+      "id": "flow:deliver-buddy-notifications",
+      "type": "flow",
+      "name": "Deliver Buddy Notifications",
+      "summary": "New buddy messages enqueue idempotent delivery jobs that apply privacy, consent, snooze, and foreground rules before web or Android push and interactive actions are delivered.",
+      "tags": ["buddy-notifications", "push", "outbox", "inline-reply"],
+      "complexity": "complex",
+      "domainMeta": {"entryPoint": "Buddy message outbox event", "entryType": "event"}
+    },
+    {
+      "id": "flow:deliver-study-reminders-and-digests",
+      "type": "flow",
+      "name": "Deliver Study Reminders and Digests",
+      "summary": "User-local schedules select due learners, assemble planner and practice context, and deliver consented reminders or digests through push, email, and Telegram with durable event outcomes.",
+      "tags": ["study-reminders", "daily-digest", "telegram", "scheduling"],
+      "complexity": "complex",
+      "domainMeta": {"entryPoint": "Scheduled digest or reminder invocation", "entryType": "cron"}
+    },
+
+    {"id": "step:request-and-review-access:validate-public-request", "type": "step", "name": "Validate Public Request", "summary": "Collect applicant identity and purpose, reject invalid input, and use a honeypot to deter automated submissions.", "tags": ["access-request", "validation"], "complexity": "moderate", "filePath": "src/pages/RequestAccess.tsx", "lineRange": [27, 202]},
+    {"id": "step:request-and-review-access:submit-edge-request", "type": "step", "name": "Submit Edge Request", "summary": "Send the normalized public request with anonymous credentials and normalize transport or service errors.", "tags": ["access-request", "edge-function"], "complexity": "moderate", "filePath": "src/lib/edge.ts", "lineRange": [52, 80]},
+    {"id": "step:request-and-review-access:store-rate-limited-request", "type": "step", "name": "Store Rate-Limited Request", "summary": "Validate fields again, rate-limit submissions, persist without exposing existing accounts, and notify the owner.", "tags": ["access-request", "rate-limit", "privacy"], "complexity": "complex", "filePath": "supabase/functions/request-access/index.ts"},
+    {"id": "step:request-and-review-access:review-owner-queue", "type": "step", "name": "Review Owner Queue", "summary": "Load account requests by status and present approval, decline, reason, and invite recovery actions to the owner.", "tags": ["owner-review", "access-management"], "complexity": "moderate", "filePath": "src/components/settings/AccessRequestsCard.tsx", "lineRange": [21, 230]},
+    {"id": "step:request-and-review-access:approve-and-issue-invite", "type": "step", "name": "Approve and Issue Invite", "summary": "Authorize the owner decision, create an invitation, and return its email delivery status for recovery or copying.", "tags": ["approval", "invite", "email"], "complexity": "complex", "filePath": "src/lib/edge.ts", "lineRange": [90, 111]},
+
+    {"id": "step:create-invite-only-account:collect-signup-details", "type": "step", "name": "Collect Signup Details", "summary": "Hydrate the invite-backed form, derive a username suggestion, and validate identity and matching PINs.", "tags": ["signup", "form", "pin"], "complexity": "moderate", "filePath": "src/pages/Signup.tsx", "lineRange": [25, 272]},
+    {"id": "step:create-invite-only-account:check-username-availability", "type": "step", "name": "Check Username Availability", "summary": "Perform a non-authoritative username availability preflight while preserving server-side signup as the final decision.", "tags": ["username", "availability", "privacy"], "complexity": "simple", "filePath": "src/lib/edge.ts", "lineRange": [287, 303]},
+    {"id": "step:create-invite-only-account:submit-invite-signup", "type": "step", "name": "Submit Invite Signup", "summary": "Send the invite token, identity, username, and PIN to the public signup function and validate its response.", "tags": ["signup", "invite", "edge-function"], "complexity": "moderate", "filePath": "src/lib/edge.ts", "lineRange": [165, 182]},
+    {"id": "step:create-invite-only-account:bind-authoritative-identity", "type": "step", "name": "Bind Authoritative Identity", "summary": "Load the invite and original account request together so signup cannot pivot to another email or identity.", "tags": ["invite", "identity-binding", "security"], "complexity": "complex", "filePath": "supabase/functions/signup-via-invite/index.ts", "lineRange": [39, 53]},
+    {"id": "step:create-invite-only-account:create-and-sign-in-account", "type": "step", "name": "Create and Sign In Account", "summary": "Atomically redeem the invite, create the PIN account, and establish the learner session used by protected routes.", "tags": ["account-creation", "invite-redemption", "authentication"], "complexity": "complex", "filePath": "supabase/functions/signup-via-invite/index.ts"},
+
+    {"id": "step:authenticate-and-recover-pin:validate-login-form", "type": "step", "name": "Validate Login Form", "summary": "Accept a normalized username and six-digit PIN and present deferred, uniform authentication feedback.", "tags": ["login", "validation", "pin"], "complexity": "moderate", "filePath": "src/pages/Auth.tsx", "lineRange": [21, 186]},
+    {"id": "step:authenticate-and-recover-pin:exchange-credentials", "type": "step", "name": "Exchange Credentials", "summary": "Exchange username and PIN for Supabase session tokens through the authentication Edge Function.", "tags": ["login", "session-token", "edge-function"], "complexity": "complex", "filePath": "src/lib/edge.ts", "lineRange": [198, 213]},
+    {"id": "step:authenticate-and-recover-pin:request-private-recovery", "type": "step", "name": "Request Private Recovery", "summary": "Collect a username and show the same sent state regardless of whether an account can be recovered.", "tags": ["pin-recovery", "privacy"], "complexity": "moderate", "filePath": "src/pages/ForgotPin.tsx", "lineRange": [22, 140]},
+    {"id": "step:authenticate-and-recover-pin:send-recovery-email", "type": "step", "name": "Send Recovery Email", "summary": "Ask the recovery function to generate and email a reset link without exposing account existence.", "tags": ["pin-recovery", "email", "edge-function"], "complexity": "moderate", "filePath": "src/lib/edge.ts", "lineRange": [219, 234]},
+    {"id": "step:authenticate-and-recover-pin:replace-pin-and-sign-out", "type": "step", "name": "Replace PIN and Sign Out", "summary": "Validate the recovery session and matching PINs, update the credential, then sign out before returning to login.", "tags": ["pin-reset", "credential-update", "session-cleanup"], "complexity": "complex", "filePath": "src/pages/ResetPin.tsx", "lineRange": [26, 172]},
+
+    {"id": "step:run-focused-study-session:configure-session", "type": "step", "name": "Configure Session", "summary": "Choose subject, target duration, and question count, optionally link a planner block, and persist the new session.", "tags": ["session-setup", "planner-link"], "complexity": "moderate", "filePath": "src/pages/SessionNew.tsx", "lineRange": [51, 232]},
+    {"id": "step:run-focused-study-session:solve-with-timers", "type": "step", "name": "Solve with Timers", "summary": "Run question and session timers, preserve reload-safe progress, and record interruptions while the learner solves.", "tags": ["study-session", "timer", "interruptions"], "complexity": "complex", "filePath": "src/pages/SessionActive.tsx", "lineRange": [75, 374]},
+    {"id": "step:run-focused-study-session:tag-learning-evidence", "type": "step", "name": "Tag Learning Evidence", "summary": "Capture source, outcome, pattern, trigger, and conditional root-cause evidence through the tagging state machine.", "tags": ["tagging", "outcome", "root-cause"], "complexity": "complex", "filePath": "src/components/tags/TagFlow.tsx", "lineRange": [54, 329]},
+    {"id": "step:run-focused-study-session:persist-question-and-session", "type": "step", "name": "Persist Question and Session", "summary": "Write related question, session, pattern, and re-attempt changes atomically to local-first storage and queue synchronization.", "tags": ["local-first", "transaction", "sync"], "complexity": "complex", "filePath": "src/lib/sync.ts", "lineRange": [56, 71]},
+    {"id": "step:run-focused-study-session:review-session-outcomes", "type": "step", "name": "Review Session Outcomes", "summary": "Aggregate timing, outcomes, patterns, questions, and insight and allow safe edits after completion.", "tags": ["session-review", "analytics", "editing"], "complexity": "moderate", "filePath": "src/pages/SessionReview.tsx", "lineRange": [42, 501]},
+
+    {"id": "step:capture-and-log-question:capture-compressed-image", "type": "step", "name": "Capture Compressed Image", "summary": "Read, resize, compress, and size-check a question image for bounded offline persistence.", "tags": ["image-capture", "compression", "offline-storage"], "complexity": "moderate", "filePath": "src/lib/image.ts", "lineRange": [132, 149]},
+    {"id": "step:capture-and-log-question:collect-minimum-evidence", "type": "step", "name": "Collect Minimum Evidence", "summary": "Capture the standalone question, outcome, mistake information, and other minimum fields needed for useful review.", "tags": ["quick-capture", "outcome", "question-log"], "complexity": "moderate", "filePath": "src/pages/QuickCapture.tsx", "lineRange": [35, 230]},
+    {"id": "step:capture-and-log-question:normalize-question-draft", "type": "step", "name": "Normalize Question Draft", "summary": "Convert the edited draft into a canonical persisted question row while retaining identity and timestamps.", "tags": ["question-draft", "normalization", "persistence"], "complexity": "moderate", "filePath": "src/components/shared/questionDraft.ts", "lineRange": [129, 163]},
+    {"id": "step:capture-and-log-question:schedule-required-reattempt", "type": "step", "name": "Schedule Required Re-attempt", "summary": "Idempotently create the first open D3 record when the captured outcome requires retrieval practice.", "tags": ["reattempt", "d3", "idempotency"], "complexity": "moderate", "filePath": "src/lib/reattempt.ts", "lineRange": [171, 181]},
+    {"id": "step:capture-and-log-question:surface-in-journal", "type": "step", "name": "Surface in Journal", "summary": "Make the standalone evidence searchable and editable alongside session and PYQ history.", "tags": ["journal", "search", "editing"], "complexity": "moderate", "filePath": "src/pages/Journal.tsx", "lineRange": [623, 1170]},
+
+    {"id": "step:review-mistake-journal:load-and-filter-evidence", "type": "step", "name": "Load and Filter Evidence", "summary": "Load questions, sessions, and PYQ receipts and apply URL-aware filters, search, and pagination.", "tags": ["journal", "filtering", "evidence"], "complexity": "complex", "filePath": "src/pages/Journal.tsx", "lineRange": [623, 1170]},
+    {"id": "step:review-mistake-journal:inspect-diagnosed-entry", "type": "step", "name": "Inspect Diagnosed Entry", "summary": "Expand a row to inspect source, outcome, timing, root cause, image, and analysis details.", "tags": ["journal-entry", "root-cause", "review"], "complexity": "moderate", "filePath": "src/pages/Journal.tsx", "lineRange": [126, 324]},
+    {"id": "step:review-mistake-journal:recall-concealed-answer", "type": "step", "name": "Recall Concealed Answer", "summary": "Keep the saved answer hidden until the learner explicitly reveals it or chooses to add missing answer evidence.", "tags": ["active-recall", "answer-reveal", "accessibility"], "complexity": "moderate", "filePath": "src/components/shared/AnswerReveal.tsx", "lineRange": [8, 150]},
+    {"id": "step:review-mistake-journal:edit-question-diagnosis", "type": "step", "name": "Edit Question Diagnosis", "summary": "Update source, answer, timing, outcome, pattern, trigger, and root-cause evidence without changing record identity.", "tags": ["question-editor", "diagnosis", "data-integrity"], "complexity": "complex", "filePath": "src/components/shared/QuestionEditor.tsx", "lineRange": [63, 437]},
+    {"id": "step:review-mistake-journal:commit-weekly-fix", "type": "step", "name": "Commit Weekly Fix", "summary": "Summarize the week's evidence, name the root cause and weakest concept, and persist one concrete corrective action.", "tags": ["weekly-review", "reflection", "planning"], "complexity": "moderate", "filePath": "src/pages/WeeklyReview.tsx", "lineRange": [52, 311]},
+
+    {"id": "step:build-audited-pyq-catalog:ingest-allowlisted-sources", "type": "step", "name": "Ingest Allowlisted Sources", "summary": "Load only explicitly admitted GATE-level sources and reject count, provenance, or answer-key drift.", "tags": ["pyq-builder", "source-admission", "validation"], "complexity": "complex", "filePath": "scripts/build-pyq-bank.mjs", "lineRange": [1107, 1417]},
+    {"id": "step:build-audited-pyq-catalog:classify-canonical-taxonomy", "type": "step", "name": "Classify Canonical Taxonomy", "summary": "Apply locked corrections, source-scope hints, and subject-specific rules to assign canonical subjects and topics.", "tags": ["taxonomy", "classification", "manual-audit"], "complexity": "complex", "filePath": "scripts/pyq-taxonomy.mjs", "lineRange": [1895, 1943]},
+    {"id": "step:build-audited-pyq-catalog:localize-question-assets", "type": "step", "name": "Localize Question Assets", "summary": "Download, validate, hash, and rewrite question images into immutable local bank paths.", "tags": ["image-assets", "localization", "integrity"], "complexity": "complex", "filePath": "scripts/build-pyq-bank.mjs", "lineRange": [1059, 1105]},
+    {"id": "step:build-audited-pyq-catalog:emit-versioned-bank", "type": "step", "name": "Emit Versioned Bank", "summary": "Write subject shards, book aggregates, manifest, audit metadata, and provenance for runtime loading.", "tags": ["manifest", "question-shards", "versioning"], "complexity": "complex", "filePath": "scripts/build-pyq-bank.mjs", "lineRange": [1107, 1417]},
+    {"id": "step:build-audited-pyq-catalog:audit-bank-invariants", "type": "step", "name": "Audit Bank Invariants", "summary": "Verify stable IDs, exact global and per-book counts, five admitted books, taxonomy stability, and locked classifications.", "tags": ["audit", "data-integrity", "difficulty-floor"], "complexity": "complex", "filePath": "scripts/audit-pyq-taxonomy.mjs"},
+
+    {"id": "step:run-pyq-practice-set:configure-book-and-scope", "type": "step", "name": "Configure Book and Scope", "summary": "Choose book, subject, topic, year, type, history, order, and count while resetting invalid dependent filters.", "tags": ["book-selector", "practice-config", "filters"], "complexity": "complex", "filePath": "src/pages/Pyq.tsx", "lineRange": [132, 608]},
+    {"id": "step:run-pyq-practice-set:load-catalog-and-questions", "type": "step", "name": "Load Catalog and Questions", "summary": "Load the versioned manifest and cached subject shards, then apply book and topic scope.", "tags": ["pyq-catalog", "manifest", "question-loader"], "complexity": "moderate", "filePath": "src/lib/pyq.ts", "lineRange": [266, 331]},
+    {"id": "step:run-pyq-practice-set:create-durable-set", "type": "step", "name": "Create Durable Set", "summary": "Persist the ordered question UIDs, filter configuration, timing anchors, and initial progress for safe resume.", "tags": ["pyq-session", "durable-state", "resume"], "complexity": "complex", "filePath": "src/lib/pyq-session.ts", "lineRange": [20, 44]},
+    {"id": "step:run-pyq-practice-set:start-timed-question", "type": "step", "name": "Start Timed Question", "summary": "Move the session cursor to a valid question and start its timing window without losing prior progress.", "tags": ["pyq-session", "timer", "cursor"], "complexity": "moderate", "filePath": "src/lib/pyq-session.ts", "lineRange": [236, 257]},
+    {"id": "step:run-pyq-practice-set:capture-answer-and-decision", "type": "step", "name": "Capture Answer and Decision", "summary": "Collect MCQ, MSQ, or NAT input and require an explicit mark, skip, or uncertainty decision before commit.", "tags": ["answer-pad", "decision", "submission"], "complexity": "moderate", "filePath": "src/pages/Pyq.tsx", "lineRange": [610, 719]},
+
+    {"id": "step:commit-and-analyze-pyq-attempt:grade-submitted-answer", "type": "step", "name": "Grade Submitted Answer", "summary": "Evaluate MCQ, MSQ, or tolerance-aware NAT input while preserving skipped and unavailable-key states.", "tags": ["answer-evaluation", "mcq", "msq", "nat"], "complexity": "complex", "filePath": "src/lib/pyq.ts", "lineRange": [396, 428]},
+    {"id": "step:commit-and-analyze-pyq-attempt:create-immutable-receipt", "type": "step", "name": "Create Immutable Receipt", "summary": "Validate session and bank invariants and capture timing, answers, decision, screenshot, book, and exact question snapshot.", "tags": ["immutable-receipt", "snapshot", "validation"], "complexity": "complex", "filePath": "src/lib/pyq-session.ts", "lineRange": [367, 439]},
+    {"id": "step:commit-and-analyze-pyq-attempt:persist-atomic-history", "type": "step", "name": "Persist Atomic History", "summary": "Write the attempt, canonical journal question, session projection, and related records as one local-first batch.", "tags": ["atomic-write", "journal-link", "local-first"], "complexity": "complex", "filePath": "src/lib/sync.ts", "lineRange": [56, 71]},
+    {"id": "step:commit-and-analyze-pyq-attempt:advance-session-progress", "type": "step", "name": "Advance Session Progress", "summary": "Mark the committed question complete, accumulate elapsed time, and advance idempotently to the next item.", "tags": ["session-progress", "idempotency", "navigation"], "complexity": "moderate", "filePath": "src/lib/pyq-session.ts", "lineRange": [259, 290]},
+    {"id": "step:commit-and-analyze-pyq-attempt:expand-journal-analysis", "type": "step", "name": "Expand Journal Analysis", "summary": "Seed a journal draft from the receipt and collect pattern, trigger, and root-cause evidence without altering the attempt facts.", "tags": ["journal-analysis", "tagging", "receipt-link"], "complexity": "complex", "filePath": "src/pages/Pyq.tsx", "lineRange": [113, 130]},
+
+    {"id": "step:execute-spaced-reattempt-ladder:classify-retrieval-need", "type": "step", "name": "Classify Retrieval Need", "summary": "Map answer decision, correctness, and pace into the outcome used by mistake analysis and re-attempt policy.", "tags": ["outcome", "reattempt-policy", "timing"], "complexity": "moderate", "filePath": "src/lib/pyq.ts", "lineRange": [561, 570]},
+    {"id": "step:execute-spaced-reattempt-ladder:schedule-d3-card", "type": "step", "name": "Schedule D3 Card", "summary": "Create one idempotent open re-attempt with its initial D3 due date.", "tags": ["d3", "scheduling", "idempotency"], "complexity": "moderate", "filePath": "src/lib/reattempt.ts", "lineRange": [171, 181]},
+    {"id": "step:execute-spaced-reattempt-ladder:build-due-queue", "type": "step", "name": "Build Due Queue", "summary": "Partition re-attempts into due, upcoming, and mastered groups without rewriting overdue dates.", "tags": ["due-queue", "spaced-practice", "mastery"], "complexity": "moderate", "filePath": "src/lib/reattempt.ts", "lineRange": [110, 124]},
+    {"id": "step:execute-spaced-reattempt-ladder:run-fresh-retrieval", "type": "step", "name": "Run Fresh Retrieval", "summary": "Restore logged or immutable PYQ evidence, conceal answers, time the attempt, and collect a fresh response.", "tags": ["retrieval", "answer-concealment", "timer"], "complexity": "complex", "filePath": "src/pages/Reattempts.tsx", "lineRange": [1413, 1888]},
+    {"id": "step:execute-spaced-reattempt-ladder:advance-or-reschedule", "type": "step", "name": "Advance or Reschedule", "summary": "Persist the result history and move the card toward D10, D30, or mastery, or return it to the prior stage after failure.", "tags": ["ladder-transition", "result-history", "mastery"], "complexity": "complex", "filePath": "src/lib/reattempt.ts", "lineRange": [184, 194]},
+
+    {"id": "step:practice-formulas-and-triggers:load-due-formulas", "type": "step", "name": "Load Due Formulas", "summary": "Load the subject-grouped formula library and identify formulas whose spaced review is due.", "tags": ["formula-library", "due-review"], "complexity": "moderate", "filePath": "src/pages/Formulas.tsx", "lineRange": [31, 217]},
+    {"id": "step:practice-formulas-and-triggers:judge-formula-recall", "type": "step", "name": "Judge Formula Recall", "summary": "Let the learner mark each due formula recalled or forgotten and inspect its prior review history.", "tags": ["formula-recall", "self-assessment"], "complexity": "simple", "filePath": "src/pages/Formulas.tsx", "lineRange": [219, 263]},
+    {"id": "step:practice-formulas-and-triggers:load-trigger-drill", "type": "step", "name": "Load Trigger Drill", "summary": "Order personalized question phrases and methods for a timed reflex drill.", "tags": ["trigger-phrase", "retrieval-drill", "timing"], "complexity": "moderate", "filePath": "src/pages/TriggerDrill.tsx", "lineRange": [43, 276]},
+    {"id": "step:practice-formulas-and-triggers:time-and-judge-trigger", "type": "step", "name": "Time and Judge Trigger", "summary": "Normalize a recalled method or request a manual judgment and capture response duration.", "tags": ["trigger-recall", "manual-judgment", "response-speed"], "complexity": "moderate", "filePath": "src/pages/TriggerDrill.tsx", "lineRange": [43, 276]},
+    {"id": "step:practice-formulas-and-triggers:persist-retrieval-state", "type": "step", "name": "Persist Retrieval State", "summary": "Update formula scheduling, forgotten counts, trigger attempts, and average response speed for future prioritization.", "tags": ["retrieval-history", "scheduling", "persistence"], "complexity": "moderate", "filePath": "src/pages/TriggerDrill.tsx", "lineRange": [43, 276]},
+
+    {"id": "step:assemble-weekly-revision-pack:load-current-weekly-fix", "type": "step", "name": "Load Current Weekly Fix", "summary": "Use the latest completed weekly review's concrete correction as the pack's current constraint.", "tags": ["weekly-review", "constraint", "revision"], "complexity": "simple", "filePath": "src/pages/WeeklyReview.tsx", "lineRange": [52, 311]},
+    {"id": "step:assemble-weekly-revision-pack:collect-due-retrieval-evidence", "type": "step", "name": "Collect Due Retrieval Evidence", "summary": "Gather due formulas, slow triggers, repeated patterns, and due or recent mistake questions.", "tags": ["retrieval-evidence", "mistakes", "patterns"], "complexity": "moderate", "filePath": "src/lib/revision-pack.ts", "lineRange": [23, 79]},
+    {"id": "step:assemble-weekly-revision-pack:prioritize-pack-items", "type": "step", "name": "Prioritize Pack Items", "summary": "Order the weekly fix and retrieval work so the most actionable unresolved evidence appears first.", "tags": ["prioritization", "revision-pack", "next-action"], "complexity": "moderate", "filePath": "src/lib/revision-pack.ts", "lineRange": [23, 79]},
+    {"id": "step:assemble-weekly-revision-pack:render-grouped-pack", "type": "step", "name": "Render Grouped Pack", "summary": "Display the current constraint and grouped formula, trigger, mistake, and question lists with counts.", "tags": ["revision-pack", "grouped-list", "study-plan"], "complexity": "simple", "filePath": "src/pages/RevisionPack.tsx", "lineRange": [14, 177]},
+    {"id": "step:assemble-weekly-revision-pack:copy-study-checklist", "type": "step", "name": "Copy Study Checklist", "summary": "Serialize the pack into a structured plain-text checklist for use outside the screen.", "tags": ["checklist", "export", "revision"], "complexity": "simple", "filePath": "src/lib/revision-pack.ts", "lineRange": [81, 112]},
+
+    {"id": "step:plan-and-execute-study-day:select-calendar-day", "type": "step", "name": "Select Calendar Day", "summary": "Navigate a stable six-week calendar and select a valid day with existing duration and subject summaries.", "tags": ["planner", "calendar", "day-plan"], "complexity": "moderate", "filePath": "src/components/planner/Calendar.tsx", "lineRange": [51, 220]},
+    {"id": "step:plan-and-execute-study-day:edit-study-blocks", "type": "step", "name": "Edit Study Blocks", "summary": "Add or update subject, duration, mode, priority, target, and resource fields and maintain the day's review.", "tags": ["study-block", "plan-editor", "day-review"], "complexity": "complex", "filePath": "src/components/planner/DayPlanModal.tsx", "lineRange": [424, 709]},
+    {"id": "step:plan-and-execute-study-day:persist-local-and-cloud-plan", "type": "step", "name": "Persist Local and Cloud Plan", "summary": "Save the user-scoped day locally and debounce a validated session mirror to Supabase with conflict resolution.", "tags": ["local-first", "cloud-sync", "planner"], "complexity": "complex", "filePath": "src/pages/Planner.tsx", "lineRange": [61, 366]},
+    {"id": "step:plan-and-execute-study-day:launch-linked-work", "type": "step", "name": "Launch Linked Work", "summary": "Route the selected block into PYQ, mock, resumed, or new focused-session work and mark it started.", "tags": ["planner-execution", "routing", "study-session"], "complexity": "moderate", "filePath": "src/lib/planner-execution.ts", "lineRange": [17, 35]},
+    {"id": "step:plan-and-execute-study-day:reconcile-actual-completion", "type": "step", "name": "Reconcile Actual Completion", "summary": "Join completed sessions and mock tests back to their exact blocks and recompute duration-weighted day completion.", "tags": ["execution-reconciliation", "completion", "analytics"], "complexity": "complex", "filePath": "src/lib/planner-execution.ts", "lineRange": [106, 160]},
+
+    {"id": "step:build-do-now-queue:reduce-latest-attempts", "type": "step", "name": "Reduce Latest Attempts", "summary": "Select the latest receipt per PYQ so queue decisions reflect current evidence rather than duplicate history.", "tags": ["pyq-history", "latest-attempt", "deduplication"], "complexity": "moderate", "filePath": "src/lib/do-now.ts", "lineRange": [18, 27]},
+    {"id": "step:build-do-now-queue:rank-actionable-work", "type": "step", "name": "Rank Actionable Work", "summary": "Prioritize due re-attempts, unanalyzed or uncertain PYQs, slow correct work, formula reviews, and unfinished planner blocks.", "tags": ["task-prioritization", "study-queue", "evidence"], "complexity": "complex", "filePath": "src/lib/do-now.ts", "lineRange": [29, 125]},
+    {"id": "step:build-do-now-queue:reconcile-and-display-queue", "type": "step", "name": "Reconcile and Display Queue", "summary": "Combine live Dexie evidence with today's plan, reconcile completed work, and present the highest-value next action.", "tags": ["do-now", "dexie", "next-action"], "complexity": "moderate", "filePath": "src/pages/DoNow.tsx", "lineRange": [27, 267]},
+    {"id": "step:build-do-now-queue:start-selected-action", "type": "step", "name": "Start Selected Action", "summary": "Mark a linked planner block started when applicable and route the learner into the working flow.", "tags": ["planner-block", "routing", "execution"], "complexity": "moderate", "filePath": "src/lib/planner-execution.ts", "lineRange": [85, 91]},
+
+    {"id": "step:calculate-readiness-and-rank-outlook:compute-core-readiness", "type": "step", "name": "Compute Core Readiness", "summary": "Combine sample-tempered coverage, retention, calibration, and open mistake surface into a score and confidence level.", "tags": ["readiness-score", "evidence-tempering", "confidence"], "complexity": "complex", "filePath": "src/lib/readiness.ts", "lineRange": [71, 116]},
+    {"id": "step:calculate-readiness-and-rank-outlook:calculate-subject-breakdown", "type": "step", "name": "Calculate Subject Breakdown", "summary": "Join re-attempt and question evidence, scale subject coverage targets, and calculate readiness by subject.", "tags": ["subject-readiness", "coverage", "retention"], "complexity": "complex", "filePath": "src/lib/readiness.ts", "lineRange": [237, 319]},
+    {"id": "step:calculate-readiness-and-rank-outlook:store-trend-and-debt", "type": "step", "name": "Store Trend and Debt", "summary": "Upsert the daily snapshot, compare prior weeks, and retain weak components that remain below threshold.", "tags": ["readiness-snapshot", "weekly-delta", "weakness-debt"], "complexity": "complex", "filePath": "src/lib/readiness-snapshots.ts", "lineRange": [64, 225]},
+    {"id": "step:calculate-readiness-and-rank-outlook:project-rank-and-exam-marks", "type": "step", "name": "Project Rank and Exam Marks", "summary": "Map readiness and runway to a caveated AIR band and run a deterministic Monte Carlo marks simulation.", "tags": ["air-band", "exam-simulation", "projection"], "complexity": "complex", "filePath": "src/lib/readiness.ts", "lineRange": [434, 568]},
+    {"id": "step:calculate-readiness-and-rank-outlook:present-next-moves", "type": "step", "name": "Present Next Moves", "summary": "Render score components, trend, subject matrix, prioritized actions, peer context, and explicitly qualified projections.", "tags": ["readiness", "next-moves", "dashboard"], "complexity": "complex", "filePath": "src/pages/Readiness.tsx", "lineRange": [119, 624]},
+
+    {"id": "step:track-mocks-and-topic-mastery:validate-mock-result", "type": "step", "name": "Validate Mock Result", "summary": "Validate mock identity, date, totals, duration, score bounds, and internally consistent answer counts.", "tags": ["mock-test", "validation", "score"], "complexity": "moderate", "filePath": "src/lib/mocks.ts", "lineRange": [15, 49]},
+    {"id": "step:track-mocks-and-topic-mastery:persist-mock-and-trends", "type": "step", "name": "Persist Mock and Trends", "summary": "Store mock scores, accuracy, mistakes, subject marks, history trends, and linked planner completion.", "tags": ["mock-history", "analytics", "planner"], "complexity": "complex", "filePath": "src/pages/Mocks.tsx", "lineRange": [76, 473]},
+    {"id": "step:track-mocks-and-topic-mastery:build-topic-evidence", "type": "step", "name": "Build Topic Evidence", "summary": "Combine PYQ attempts, journal questions, open re-attempts, study state, accuracy, and recency without double counting.", "tags": ["topic-evidence", "pyq", "mistakes"], "complexity": "complex", "filePath": "src/lib/topic-evidence.ts", "lineRange": [28, 83]},
+    {"id": "step:track-mocks-and-topic-mastery:synchronize-topic-progress", "type": "step", "name": "Synchronize Topic Progress", "summary": "Merge user-scoped manual completions with Dexie and delayed cloud rows while migrating legacy records idempotently.", "tags": ["topic-progress", "sync", "migration"], "complexity": "complex", "filePath": "src/stores/topic-progress.ts", "lineRange": [76, 121]},
+    {"id": "step:track-mocks-and-topic-mastery:recommend-next-topic", "type": "step", "name": "Recommend Next Topic", "summary": "Present syllabus completion with practice evidence and select the next unfinished topic from active or untouched subjects.", "tags": ["syllabus", "recommendation", "next-topic"], "complexity": "moderate", "filePath": "src/pages/SyllabusTracker.tsx", "lineRange": [86, 380]},
+
+    {"id": "step:manage-buddy-relationship:submit-buddy-request", "type": "step", "name": "Submit Buddy Request", "summary": "Send an authenticated username request and preserve the server status for creation, cooldown, or rejection.", "tags": ["buddy-request", "authentication", "cooldown"], "complexity": "moderate", "filePath": "src/lib/edge.ts", "lineRange": [255, 284]},
+    {"id": "step:manage-buddy-relationship:create-private-request", "type": "step", "name": "Create Private Request", "summary": "Create the request through a protected database workflow and send best-effort notification without exposing account existence.", "tags": ["buddy-request", "privacy", "notification"], "complexity": "complex", "filePath": "supabase/functions/buddy-request/index.ts"},
+    {"id": "step:manage-buddy-relationship:act-on-request", "type": "step", "name": "Act on Request", "summary": "Let recipients accept or decline, requesters cancel, and paused peers request again when cooldown allows.", "tags": ["buddy-lifecycle", "accept", "decline"], "complexity": "moderate", "filePath": "src/pages/Buddy.tsx", "lineRange": [822, 954]},
+    {"id": "step:manage-buddy-relationship:refresh-relationship-workspace", "type": "step", "name": "Refresh Relationship Workspace", "summary": "Reload relationships and previews and reconcile active, incoming, outgoing, and paused states through realtime updates.", "tags": ["buddy-workspace", "realtime", "relationship-state"], "complexity": "complex", "filePath": "src/pages/Buddy.tsx", "lineRange": [96, 736]},
+
+    {"id": "step:chat-and-share-questions:establish-pair-presence", "type": "step", "name": "Establish Pair Presence", "summary": "Create one presence channel per active buddy and synchronize online peer IDs as visibility changes.", "tags": ["presence", "realtime", "buddy"], "complexity": "complex", "filePath": "src/components/buddy/BuddyPresenceRuntime.tsx", "lineRange": [18, 105]},
+    {"id": "step:chat-and-share-questions:load-and-subscribe-conversation", "type": "step", "name": "Load and Subscribe Conversation", "summary": "Load paginated messages and subscribe to chat, typing, read, and relationship changes for the selected buddy.", "tags": ["buddy-chat", "subscription", "pagination"], "complexity": "complex", "filePath": "src/components/buddy/BuddyChat.tsx", "lineRange": [82, 779]},
+    {"id": "step:chat-and-share-questions:project-safe-question-reference", "type": "step", "name": "Project Safe Question Reference", "summary": "Reduce a selected question to the privacy-safe fields permitted in a shared buddy message.", "tags": ["question-sharing", "privacy", "snapshot"], "complexity": "moderate", "filePath": "src/lib/buddy.ts", "lineRange": [34, 45]},
+    {"id": "step:chat-and-share-questions:send-and-merge-message", "type": "step", "name": "Send and Merge Message", "summary": "Insert an optimistic text or question message and deduplicate it against realtime delivery in chronological order.", "tags": ["optimistic-update", "message-merge", "realtime"], "complexity": "complex", "filePath": "src/lib/buddy.ts", "lineRange": [48, 57]},
+    {"id": "step:chat-and-share-questions:render-delivery-and-read-state", "type": "step", "name": "Render Delivery and Read State", "summary": "Display grouped messages with sender alignment, timestamps, delivery state, shared-question details, and read behavior.", "tags": ["message-rendering", "read-state", "question-card"], "complexity": "moderate", "filePath": "src/components/buddy/BuddyChat.tsx", "lineRange": [781, 915]},
+
+    {"id": "step:deliver-buddy-notifications:enqueue-outbox-job", "type": "step", "name": "Enqueue Outbox Job", "summary": "Create a transactional notification job when a buddy message is committed so delivery can be claimed idempotently.", "tags": ["outbox", "buddy-message", "idempotency"], "complexity": "complex", "filePath": "supabase/migrations/20260808000005_buddy_push_notifications.sql"},
+    {"id": "step:deliver-buddy-notifications:load-job-and-subscriptions", "type": "step", "name": "Load Job and Subscriptions", "summary": "Load the message and recipient devices, record delivery rows, and apply active-chat, snooze, and consent rules.", "tags": ["delivery-job", "subscriptions", "suppression"], "complexity": "complex", "filePath": "supabase/functions/buddy-notifications/index.ts", "lineRange": [269, 424]},
+    {"id": "step:deliver-buddy-notifications:issue-secure-actions", "type": "step", "name": "Issue Secure Actions", "summary": "Create expiring action and inline-reply tokens and attach only platform-supported actions to the notification.", "tags": ["action-token", "inline-reply", "security"], "complexity": "complex", "filePath": "supabase/functions/buddy-notifications/index.ts", "lineRange": [91, 199]},
+    {"id": "step:deliver-buddy-notifications:dispatch-web-or-native-push", "type": "step", "name": "Dispatch Web or Native Push", "summary": "Normalize copy and deliver through browser Web Push or Android FCM while classifying permanent provider failures.", "tags": ["web-push", "fcm", "delivery"], "complexity": "complex", "filePath": "supabase/functions/_shared/push.ts", "lineRange": [148, 343]},
+    {"id": "step:deliver-buddy-notifications:execute-interactive-action", "type": "step", "name": "Execute Interactive Action", "summary": "Render the native notification and use durable WorkManager delivery for inline replies or bounded authenticated actions.", "tags": ["android", "workmanager", "interactive-action"], "complexity": "complex", "filePath": "android/app/src/main/java/in/airjournal/app/BuddyMessagingService.java", "lineRange": [39, 218]},
+
+    {"id": "step:deliver-study-reminders-and-digests:configure-consent-and-schedule", "type": "step", "name": "Configure Consent and Schedule", "summary": "Persist separate notification consent, category enablement, timezone, and minute-level local delivery schedules.", "tags": ["notification-consent", "schedule", "settings"], "complexity": "moderate", "filePath": "src/components/settings/StudyNotificationsCard.tsx", "lineRange": [28, 226]},
+    {"id": "step:deliver-study-reminders-and-digests:select-due-local-time", "type": "step", "name": "Select Due Local Time", "summary": "Convert the invocation time into each learner's local clock and decide whether the configured schedule is inside its grace window.", "tags": ["timezone", "cron", "due-window"], "complexity": "complex", "filePath": "supabase/functions/_shared/digest-schedule.ts", "lineRange": [9, 71]},
+    {"id": "step:deliver-study-reminders-and-digests:load-current-study-context", "type": "step", "name": "Load Current Study Context", "summary": "Load planner, attempts, questions, formulas, patterns, readiness, reviews, and due work required for contextual guidance.", "tags": ["study-context", "planner", "readiness"], "complexity": "complex", "filePath": "supabase/functions/study-notifications/index.ts", "lineRange": [239, 366]},
+    {"id": "step:deliver-study-reminders-and-digests:build-actionable-copy", "type": "step", "name": "Build Actionable Copy", "summary": "Compose category-specific reminder or daily digest content with safe routes, concise plan details, and motivational context.", "tags": ["notification-copy", "daily-digest", "deep-link"], "complexity": "complex", "filePath": "supabase/functions/study-notifications/index.ts", "lineRange": [368, 460]},
+    {"id": "step:deliver-study-reminders-and-digests:deliver-record-and-retry", "type": "step", "name": "Deliver, Record, and Retry", "summary": "Send through enabled push, email, or Telegram channels, persist outcomes, and retry reminders whose delay has elapsed.", "tags": ["delivery", "telegram", "email", "retry"], "complexity": "complex", "filePath": "supabase/functions/study-notifications/index.ts", "lineRange": [462, 582]}
+  ],
+  "edges": [
+    {"source": "domain:learner-access-and-account-security", "target": "flow:request-and-review-access", "type": "contains_flow", "direction": "forward", "weight": 1.0},
+    {"source": "domain:learner-access-and-account-security", "target": "flow:create-invite-only-account", "type": "contains_flow", "direction": "forward", "weight": 1.0},
+    {"source": "domain:learner-access-and-account-security", "target": "flow:authenticate-and-recover-pin", "type": "contains_flow", "direction": "forward", "weight": 1.0},
+    {"source": "domain:focused-study-and-question-analysis", "target": "flow:run-focused-study-session", "type": "contains_flow", "direction": "forward", "weight": 1.0},
+    {"source": "domain:focused-study-and-question-analysis", "target": "flow:capture-and-log-question", "type": "contains_flow", "direction": "forward", "weight": 1.0},
+    {"source": "domain:focused-study-and-question-analysis", "target": "flow:review-mistake-journal", "type": "contains_flow", "direction": "forward", "weight": 1.0},
+    {"source": "domain:pyq-practice-and-attempt-integrity", "target": "flow:build-audited-pyq-catalog", "type": "contains_flow", "direction": "forward", "weight": 1.0},
+    {"source": "domain:pyq-practice-and-attempt-integrity", "target": "flow:run-pyq-practice-set", "type": "contains_flow", "direction": "forward", "weight": 1.0},
+    {"source": "domain:pyq-practice-and-attempt-integrity", "target": "flow:commit-and-analyze-pyq-attempt", "type": "contains_flow", "direction": "forward", "weight": 1.0},
+    {"source": "domain:spaced-mastery-and-revision", "target": "flow:execute-spaced-reattempt-ladder", "type": "contains_flow", "direction": "forward", "weight": 1.0},
+    {"source": "domain:spaced-mastery-and-revision", "target": "flow:practice-formulas-and-triggers", "type": "contains_flow", "direction": "forward", "weight": 1.0},
+    {"source": "domain:spaced-mastery-and-revision", "target": "flow:assemble-weekly-revision-pack", "type": "contains_flow", "direction": "forward", "weight": 1.0},
+    {"source": "domain:study-planning-progress-and-readiness", "target": "flow:plan-and-execute-study-day", "type": "contains_flow", "direction": "forward", "weight": 1.0},
+    {"source": "domain:study-planning-progress-and-readiness", "target": "flow:build-do-now-queue", "type": "contains_flow", "direction": "forward", "weight": 1.0},
+    {"source": "domain:study-planning-progress-and-readiness", "target": "flow:calculate-readiness-and-rank-outlook", "type": "contains_flow", "direction": "forward", "weight": 1.0},
+    {"source": "domain:study-planning-progress-and-readiness", "target": "flow:track-mocks-and-topic-mastery", "type": "contains_flow", "direction": "forward", "weight": 1.0},
+    {"source": "domain:buddy-collaboration-and-engagement", "target": "flow:manage-buddy-relationship", "type": "contains_flow", "direction": "forward", "weight": 1.0},
+    {"source": "domain:buddy-collaboration-and-engagement", "target": "flow:chat-and-share-questions", "type": "contains_flow", "direction": "forward", "weight": 1.0},
+    {"source": "domain:buddy-collaboration-and-engagement", "target": "flow:deliver-buddy-notifications", "type": "contains_flow", "direction": "forward", "weight": 1.0},
+    {"source": "domain:buddy-collaboration-and-engagement", "target": "flow:deliver-study-reminders-and-digests", "type": "contains_flow", "direction": "forward", "weight": 1.0},
+
+    {"source": "flow:request-and-review-access", "target": "step:request-and-review-access:validate-public-request", "type": "flow_step", "direction": "forward", "weight": 0.1},
+    {"source": "flow:request-and-review-access", "target": "step:request-and-review-access:submit-edge-request", "type": "flow_step", "direction": "forward", "weight": 0.2},
+    {"source": "flow:request-and-review-access", "target": "step:request-and-review-access:store-rate-limited-request", "type": "flow_step", "direction": "forward", "weight": 0.3},
+    {"source": "flow:request-and-review-access", "target": "step:request-and-review-access:review-owner-queue", "type": "flow_step", "direction": "forward", "weight": 0.4},
+    {"source": "flow:request-and-review-access", "target": "step:request-and-review-access:approve-and-issue-invite", "type": "flow_step", "direction": "forward", "weight": 0.5},
+    {"source": "flow:create-invite-only-account", "target": "step:create-invite-only-account:collect-signup-details", "type": "flow_step", "direction": "forward", "weight": 0.1},
+    {"source": "flow:create-invite-only-account", "target": "step:create-invite-only-account:check-username-availability", "type": "flow_step", "direction": "forward", "weight": 0.2},
+    {"source": "flow:create-invite-only-account", "target": "step:create-invite-only-account:submit-invite-signup", "type": "flow_step", "direction": "forward", "weight": 0.3},
+    {"source": "flow:create-invite-only-account", "target": "step:create-invite-only-account:bind-authoritative-identity", "type": "flow_step", "direction": "forward", "weight": 0.4},
+    {"source": "flow:create-invite-only-account", "target": "step:create-invite-only-account:create-and-sign-in-account", "type": "flow_step", "direction": "forward", "weight": 0.5},
+    {"source": "flow:authenticate-and-recover-pin", "target": "step:authenticate-and-recover-pin:validate-login-form", "type": "flow_step", "direction": "forward", "weight": 0.1},
+    {"source": "flow:authenticate-and-recover-pin", "target": "step:authenticate-and-recover-pin:exchange-credentials", "type": "flow_step", "direction": "forward", "weight": 0.2},
+    {"source": "flow:authenticate-and-recover-pin", "target": "step:authenticate-and-recover-pin:request-private-recovery", "type": "flow_step", "direction": "forward", "weight": 0.3},
+    {"source": "flow:authenticate-and-recover-pin", "target": "step:authenticate-and-recover-pin:send-recovery-email", "type": "flow_step", "direction": "forward", "weight": 0.4},
+    {"source": "flow:authenticate-and-recover-pin", "target": "step:authenticate-and-recover-pin:replace-pin-and-sign-out", "type": "flow_step", "direction": "forward", "weight": 0.5},
+
+    {"source": "flow:run-focused-study-session", "target": "step:run-focused-study-session:configure-session", "type": "flow_step", "direction": "forward", "weight": 0.1},
+    {"source": "flow:run-focused-study-session", "target": "step:run-focused-study-session:solve-with-timers", "type": "flow_step", "direction": "forward", "weight": 0.2},
+    {"source": "flow:run-focused-study-session", "target": "step:run-focused-study-session:tag-learning-evidence", "type": "flow_step", "direction": "forward", "weight": 0.3},
+    {"source": "flow:run-focused-study-session", "target": "step:run-focused-study-session:persist-question-and-session", "type": "flow_step", "direction": "forward", "weight": 0.4},
+    {"source": "flow:run-focused-study-session", "target": "step:run-focused-study-session:review-session-outcomes", "type": "flow_step", "direction": "forward", "weight": 0.5},
+    {"source": "flow:capture-and-log-question", "target": "step:capture-and-log-question:capture-compressed-image", "type": "flow_step", "direction": "forward", "weight": 0.1},
+    {"source": "flow:capture-and-log-question", "target": "step:capture-and-log-question:collect-minimum-evidence", "type": "flow_step", "direction": "forward", "weight": 0.2},
+    {"source": "flow:capture-and-log-question", "target": "step:capture-and-log-question:normalize-question-draft", "type": "flow_step", "direction": "forward", "weight": 0.3},
+    {"source": "flow:capture-and-log-question", "target": "step:capture-and-log-question:schedule-required-reattempt", "type": "flow_step", "direction": "forward", "weight": 0.4},
+    {"source": "flow:capture-and-log-question", "target": "step:capture-and-log-question:surface-in-journal", "type": "flow_step", "direction": "forward", "weight": 0.5},
+    {"source": "flow:review-mistake-journal", "target": "step:review-mistake-journal:load-and-filter-evidence", "type": "flow_step", "direction": "forward", "weight": 0.1},
+    {"source": "flow:review-mistake-journal", "target": "step:review-mistake-journal:inspect-diagnosed-entry", "type": "flow_step", "direction": "forward", "weight": 0.2},
+    {"source": "flow:review-mistake-journal", "target": "step:review-mistake-journal:recall-concealed-answer", "type": "flow_step", "direction": "forward", "weight": 0.3},
+    {"source": "flow:review-mistake-journal", "target": "step:review-mistake-journal:edit-question-diagnosis", "type": "flow_step", "direction": "forward", "weight": 0.4},
+    {"source": "flow:review-mistake-journal", "target": "step:review-mistake-journal:commit-weekly-fix", "type": "flow_step", "direction": "forward", "weight": 0.5},
+
+    {"source": "flow:build-audited-pyq-catalog", "target": "step:build-audited-pyq-catalog:ingest-allowlisted-sources", "type": "flow_step", "direction": "forward", "weight": 0.1},
+    {"source": "flow:build-audited-pyq-catalog", "target": "step:build-audited-pyq-catalog:classify-canonical-taxonomy", "type": "flow_step", "direction": "forward", "weight": 0.2},
+    {"source": "flow:build-audited-pyq-catalog", "target": "step:build-audited-pyq-catalog:localize-question-assets", "type": "flow_step", "direction": "forward", "weight": 0.3},
+    {"source": "flow:build-audited-pyq-catalog", "target": "step:build-audited-pyq-catalog:emit-versioned-bank", "type": "flow_step", "direction": "forward", "weight": 0.4},
+    {"source": "flow:build-audited-pyq-catalog", "target": "step:build-audited-pyq-catalog:audit-bank-invariants", "type": "flow_step", "direction": "forward", "weight": 0.5},
+    {"source": "flow:run-pyq-practice-set", "target": "step:run-pyq-practice-set:configure-book-and-scope", "type": "flow_step", "direction": "forward", "weight": 0.1},
+    {"source": "flow:run-pyq-practice-set", "target": "step:run-pyq-practice-set:load-catalog-and-questions", "type": "flow_step", "direction": "forward", "weight": 0.2},
+    {"source": "flow:run-pyq-practice-set", "target": "step:run-pyq-practice-set:create-durable-set", "type": "flow_step", "direction": "forward", "weight": 0.3},
+    {"source": "flow:run-pyq-practice-set", "target": "step:run-pyq-practice-set:start-timed-question", "type": "flow_step", "direction": "forward", "weight": 0.4},
+    {"source": "flow:run-pyq-practice-set", "target": "step:run-pyq-practice-set:capture-answer-and-decision", "type": "flow_step", "direction": "forward", "weight": 0.5},
+    {"source": "flow:commit-and-analyze-pyq-attempt", "target": "step:commit-and-analyze-pyq-attempt:grade-submitted-answer", "type": "flow_step", "direction": "forward", "weight": 0.1},
+    {"source": "flow:commit-and-analyze-pyq-attempt", "target": "step:commit-and-analyze-pyq-attempt:create-immutable-receipt", "type": "flow_step", "direction": "forward", "weight": 0.2},
+    {"source": "flow:commit-and-analyze-pyq-attempt", "target": "step:commit-and-analyze-pyq-attempt:persist-atomic-history", "type": "flow_step", "direction": "forward", "weight": 0.3},
+    {"source": "flow:commit-and-analyze-pyq-attempt", "target": "step:commit-and-analyze-pyq-attempt:advance-session-progress", "type": "flow_step", "direction": "forward", "weight": 0.4},
+    {"source": "flow:commit-and-analyze-pyq-attempt", "target": "step:commit-and-analyze-pyq-attempt:expand-journal-analysis", "type": "flow_step", "direction": "forward", "weight": 0.5},
+
+    {"source": "flow:execute-spaced-reattempt-ladder", "target": "step:execute-spaced-reattempt-ladder:classify-retrieval-need", "type": "flow_step", "direction": "forward", "weight": 0.1},
+    {"source": "flow:execute-spaced-reattempt-ladder", "target": "step:execute-spaced-reattempt-ladder:schedule-d3-card", "type": "flow_step", "direction": "forward", "weight": 0.2},
+    {"source": "flow:execute-spaced-reattempt-ladder", "target": "step:execute-spaced-reattempt-ladder:build-due-queue", "type": "flow_step", "direction": "forward", "weight": 0.3},
+    {"source": "flow:execute-spaced-reattempt-ladder", "target": "step:execute-spaced-reattempt-ladder:run-fresh-retrieval", "type": "flow_step", "direction": "forward", "weight": 0.4},
+    {"source": "flow:execute-spaced-reattempt-ladder", "target": "step:execute-spaced-reattempt-ladder:advance-or-reschedule", "type": "flow_step", "direction": "forward", "weight": 0.5},
+    {"source": "flow:practice-formulas-and-triggers", "target": "step:practice-formulas-and-triggers:load-due-formulas", "type": "flow_step", "direction": "forward", "weight": 0.1},
+    {"source": "flow:practice-formulas-and-triggers", "target": "step:practice-formulas-and-triggers:judge-formula-recall", "type": "flow_step", "direction": "forward", "weight": 0.2},
+    {"source": "flow:practice-formulas-and-triggers", "target": "step:practice-formulas-and-triggers:load-trigger-drill", "type": "flow_step", "direction": "forward", "weight": 0.3},
+    {"source": "flow:practice-formulas-and-triggers", "target": "step:practice-formulas-and-triggers:time-and-judge-trigger", "type": "flow_step", "direction": "forward", "weight": 0.4},
+    {"source": "flow:practice-formulas-and-triggers", "target": "step:practice-formulas-and-triggers:persist-retrieval-state", "type": "flow_step", "direction": "forward", "weight": 0.5},
+    {"source": "flow:assemble-weekly-revision-pack", "target": "step:assemble-weekly-revision-pack:load-current-weekly-fix", "type": "flow_step", "direction": "forward", "weight": 0.1},
+    {"source": "flow:assemble-weekly-revision-pack", "target": "step:assemble-weekly-revision-pack:collect-due-retrieval-evidence", "type": "flow_step", "direction": "forward", "weight": 0.2},
+    {"source": "flow:assemble-weekly-revision-pack", "target": "step:assemble-weekly-revision-pack:prioritize-pack-items", "type": "flow_step", "direction": "forward", "weight": 0.3},
+    {"source": "flow:assemble-weekly-revision-pack", "target": "step:assemble-weekly-revision-pack:render-grouped-pack", "type": "flow_step", "direction": "forward", "weight": 0.4},
+    {"source": "flow:assemble-weekly-revision-pack", "target": "step:assemble-weekly-revision-pack:copy-study-checklist", "type": "flow_step", "direction": "forward", "weight": 0.5},
+
+    {"source": "flow:plan-and-execute-study-day", "target": "step:plan-and-execute-study-day:select-calendar-day", "type": "flow_step", "direction": "forward", "weight": 0.1},
+    {"source": "flow:plan-and-execute-study-day", "target": "step:plan-and-execute-study-day:edit-study-blocks", "type": "flow_step", "direction": "forward", "weight": 0.2},
+    {"source": "flow:plan-and-execute-study-day", "target": "step:plan-and-execute-study-day:persist-local-and-cloud-plan", "type": "flow_step", "direction": "forward", "weight": 0.3},
+    {"source": "flow:plan-and-execute-study-day", "target": "step:plan-and-execute-study-day:launch-linked-work", "type": "flow_step", "direction": "forward", "weight": 0.4},
+    {"source": "flow:plan-and-execute-study-day", "target": "step:plan-and-execute-study-day:reconcile-actual-completion", "type": "flow_step", "direction": "forward", "weight": 0.5},
+    {"source": "flow:build-do-now-queue", "target": "step:build-do-now-queue:reduce-latest-attempts", "type": "flow_step", "direction": "forward", "weight": 0.2},
+    {"source": "flow:build-do-now-queue", "target": "step:build-do-now-queue:rank-actionable-work", "type": "flow_step", "direction": "forward", "weight": 0.4},
+    {"source": "flow:build-do-now-queue", "target": "step:build-do-now-queue:reconcile-and-display-queue", "type": "flow_step", "direction": "forward", "weight": 0.6},
+    {"source": "flow:build-do-now-queue", "target": "step:build-do-now-queue:start-selected-action", "type": "flow_step", "direction": "forward", "weight": 0.8},
+    {"source": "flow:calculate-readiness-and-rank-outlook", "target": "step:calculate-readiness-and-rank-outlook:compute-core-readiness", "type": "flow_step", "direction": "forward", "weight": 0.1},
+    {"source": "flow:calculate-readiness-and-rank-outlook", "target": "step:calculate-readiness-and-rank-outlook:calculate-subject-breakdown", "type": "flow_step", "direction": "forward", "weight": 0.2},
+    {"source": "flow:calculate-readiness-and-rank-outlook", "target": "step:calculate-readiness-and-rank-outlook:store-trend-and-debt", "type": "flow_step", "direction": "forward", "weight": 0.3},
+    {"source": "flow:calculate-readiness-and-rank-outlook", "target": "step:calculate-readiness-and-rank-outlook:project-rank-and-exam-marks", "type": "flow_step", "direction": "forward", "weight": 0.4},
+    {"source": "flow:calculate-readiness-and-rank-outlook", "target": "step:calculate-readiness-and-rank-outlook:present-next-moves", "type": "flow_step", "direction": "forward", "weight": 0.5},
+    {"source": "flow:track-mocks-and-topic-mastery", "target": "step:track-mocks-and-topic-mastery:validate-mock-result", "type": "flow_step", "direction": "forward", "weight": 0.1},
+    {"source": "flow:track-mocks-and-topic-mastery", "target": "step:track-mocks-and-topic-mastery:persist-mock-and-trends", "type": "flow_step", "direction": "forward", "weight": 0.2},
+    {"source": "flow:track-mocks-and-topic-mastery", "target": "step:track-mocks-and-topic-mastery:build-topic-evidence", "type": "flow_step", "direction": "forward", "weight": 0.3},
+    {"source": "flow:track-mocks-and-topic-mastery", "target": "step:track-mocks-and-topic-mastery:synchronize-topic-progress", "type": "flow_step", "direction": "forward", "weight": 0.4},
+    {"source": "flow:track-mocks-and-topic-mastery", "target": "step:track-mocks-and-topic-mastery:recommend-next-topic", "type": "flow_step", "direction": "forward", "weight": 0.5},
+
+    {"source": "flow:manage-buddy-relationship", "target": "step:manage-buddy-relationship:submit-buddy-request", "type": "flow_step", "direction": "forward", "weight": 0.2},
+    {"source": "flow:manage-buddy-relationship", "target": "step:manage-buddy-relationship:create-private-request", "type": "flow_step", "direction": "forward", "weight": 0.4},
+    {"source": "flow:manage-buddy-relationship", "target": "step:manage-buddy-relationship:act-on-request", "type": "flow_step", "direction": "forward", "weight": 0.6},
+    {"source": "flow:manage-buddy-relationship", "target": "step:manage-buddy-relationship:refresh-relationship-workspace", "type": "flow_step", "direction": "forward", "weight": 0.8},
+    {"source": "flow:chat-and-share-questions", "target": "step:chat-and-share-questions:establish-pair-presence", "type": "flow_step", "direction": "forward", "weight": 0.1},
+    {"source": "flow:chat-and-share-questions", "target": "step:chat-and-share-questions:load-and-subscribe-conversation", "type": "flow_step", "direction": "forward", "weight": 0.2},
+    {"source": "flow:chat-and-share-questions", "target": "step:chat-and-share-questions:project-safe-question-reference", "type": "flow_step", "direction": "forward", "weight": 0.3},
+    {"source": "flow:chat-and-share-questions", "target": "step:chat-and-share-questions:send-and-merge-message", "type": "flow_step", "direction": "forward", "weight": 0.4},
+    {"source": "flow:chat-and-share-questions", "target": "step:chat-and-share-questions:render-delivery-and-read-state", "type": "flow_step", "direction": "forward", "weight": 0.5},
+    {"source": "flow:deliver-buddy-notifications", "target": "step:deliver-buddy-notifications:enqueue-outbox-job", "type": "flow_step", "direction": "forward", "weight": 0.1},
+    {"source": "flow:deliver-buddy-notifications", "target": "step:deliver-buddy-notifications:load-job-and-subscriptions", "type": "flow_step", "direction": "forward", "weight": 0.2},
+    {"source": "flow:deliver-buddy-notifications", "target": "step:deliver-buddy-notifications:issue-secure-actions", "type": "flow_step", "direction": "forward", "weight": 0.3},
+    {"source": "flow:deliver-buddy-notifications", "target": "step:deliver-buddy-notifications:dispatch-web-or-native-push", "type": "flow_step", "direction": "forward", "weight": 0.4},
+    {"source": "flow:deliver-buddy-notifications", "target": "step:deliver-buddy-notifications:execute-interactive-action", "type": "flow_step", "direction": "forward", "weight": 0.5},
+    {"source": "flow:deliver-study-reminders-and-digests", "target": "step:deliver-study-reminders-and-digests:configure-consent-and-schedule", "type": "flow_step", "direction": "forward", "weight": 0.1},
+    {"source": "flow:deliver-study-reminders-and-digests", "target": "step:deliver-study-reminders-and-digests:select-due-local-time", "type": "flow_step", "direction": "forward", "weight": 0.2},
+    {"source": "flow:deliver-study-reminders-and-digests", "target": "step:deliver-study-reminders-and-digests:load-current-study-context", "type": "flow_step", "direction": "forward", "weight": 0.3},
+    {"source": "flow:deliver-study-reminders-and-digests", "target": "step:deliver-study-reminders-and-digests:build-actionable-copy", "type": "flow_step", "direction": "forward", "weight": 0.4},
+    {"source": "flow:deliver-study-reminders-and-digests", "target": "step:deliver-study-reminders-and-digests:deliver-record-and-retry", "type": "flow_step", "direction": "forward", "weight": 0.5},
+
+    {"source": "domain:learner-access-and-account-security", "target": "domain:focused-study-and-question-analysis", "type": "cross_domain", "direction": "forward", "description": "Authenticated identity scopes every session, question, pattern, and journal record and controls protected study routes.", "weight": 0.6},
+    {"source": "domain:learner-access-and-account-security", "target": "domain:pyq-practice-and-attempt-integrity", "type": "cross_domain", "direction": "forward", "description": "Learner identity owns durable PYQ sessions and immutable attempt receipts.", "weight": 0.6},
+    {"source": "domain:learner-access-and-account-security", "target": "domain:buddy-collaboration-and-engagement", "type": "cross_domain", "direction": "forward", "description": "Approved accounts and authenticated membership gate buddy relationships, chat access, subscriptions, and delivery actions.", "weight": 0.6},
+    {"source": "domain:pyq-practice-and-attempt-integrity", "target": "domain:focused-study-and-question-analysis", "type": "cross_domain", "direction": "forward", "description": "Each committed PYQ attempt can create a canonical journal question for pattern, trigger, and root-cause analysis.", "weight": 0.6},
+    {"source": "domain:pyq-practice-and-attempt-integrity", "target": "domain:spaced-mastery-and-revision", "type": "cross_domain", "direction": "forward", "description": "Incorrect, uncertain, slow, or skipped PYQ receipts become reconstructable spaced re-attempt work.", "weight": 0.6},
+    {"source": "domain:focused-study-and-question-analysis", "target": "domain:spaced-mastery-and-revision", "type": "cross_domain", "direction": "forward", "description": "Diagnosed non-clean outcomes, formulas, trigger phrases, and weekly fixes supply retrieval and revision work.", "weight": 0.6},
+    {"source": "domain:focused-study-and-question-analysis", "target": "domain:study-planning-progress-and-readiness", "type": "cross_domain", "direction": "forward", "description": "Session volume, outcomes, patterns, timing, calibration decisions, and weekly review evidence feed plans and readiness.", "weight": 0.6},
+    {"source": "domain:spaced-mastery-and-revision", "target": "domain:study-planning-progress-and-readiness", "type": "cross_domain", "direction": "forward", "description": "Due work, retention, mastery, formula reviews, and open mistake surface shape the Do Now queue and readiness score.", "weight": 0.6},
+    {"source": "domain:study-planning-progress-and-readiness", "target": "domain:buddy-collaboration-and-engagement", "type": "cross_domain", "direction": "forward", "description": "Plans, due work, readiness, mocks, formulas, and reviews provide the context for reminders, digests, and Telegram study commands.", "weight": 0.6},
+    {"source": "domain:buddy-collaboration-and-engagement", "target": "domain:pyq-practice-and-attempt-integrity", "type": "cross_domain", "direction": "forward", "description": "Privacy-safe shared question references let buddies navigate back into the relevant practice evidence without sharing private analysis fields.", "weight": 0.6}
+  ],
+  "layers": [],
+  "tour": []
+}

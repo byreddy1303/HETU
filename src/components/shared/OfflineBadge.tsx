@@ -1,4 +1,4 @@
-import { useOnline, usePendingCount } from '@/hooks/useSync';
+import { useOnline, usePendingCount, useInitialPullPending } from '@/hooks/useSync';
 import { useAuth } from '@/hooks/useAuth';
 import { cn } from '@/lib/utils';
 
@@ -6,6 +6,7 @@ import { cn } from '@/lib/utils';
 export default function OfflineBadge({ className }: { className?: string }) {
   const online = useOnline();
   const pending = usePendingCount();
+  const initialPull = useInitialPullPending();
   const { sandbox } = useAuth();
 
   if (sandbox) {
@@ -15,14 +16,14 @@ export default function OfflineBadge({ className }: { className?: string }) {
       </span>
     );
   }
-  if (online && pending === 0) return null;
+  if (online && pending === 0 && !initialPull) return null;
 
   return (
     <span
       className={cn('u-label', online ? 'text-text-muted' : 'text-warn', className)}
-      title={online ? 'Sync in progress' : 'Offline — writes are saved locally'}
+      title={online ? (initialPull ? 'Downloading latest data' : 'Sync in progress') : 'Offline — writes are saved locally'}
     >
-      {online ? `syncing ${pending}` : `offline${pending > 0 ? ` · ${pending} queued` : ''}`}
+      {online ? (initialPull ? 'syncing...' : `syncing ${pending}`) : `offline${pending > 0 ? ` · ${pending} queued` : ''}`}
     </span>
   );
 }

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { table, SYNCED_TABLES } from '@/lib/db';
-import { initSync, stopSync } from '@/lib/sync';
+import { initSync, stopSync, isInitialPullActive, subscribeInitialPull } from '@/lib/sync';
 import { useAuth } from '@/hooks/useAuth';
 
 /** Boot the sync engine for the signed-in user. Mount once (Shell). */
@@ -44,4 +44,10 @@ export function usePendingCount(): number {
       return counts.reduce((total, count) => total + count, 0);
     }, []) ?? 0
   );
+}
+
+export function useInitialPullPending(): boolean {
+  const [pending, setPending] = useState(isInitialPullActive);
+  useEffect(() => subscribeInitialPull(() => setPending(isInitialPullActive())), []);
+  return pending;
 }

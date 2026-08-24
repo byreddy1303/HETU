@@ -33,6 +33,7 @@ import {
 } from '@/lib/sessions';
 import { PYQ_BANK_QUESTION_COUNT } from '@/lib/pyq';
 import { buildDoNowQueue } from '@/lib/do-now';
+import { awaitInitialPull } from '@/lib/sync';
 import { loadDayPlan } from '@/lib/planner-storage';
 import {
   dueTodayCount,
@@ -131,9 +132,9 @@ export default function Dashboard() {
 
   useEffect(() => {
     if (!userId) return;
-    void reconcilePyqPracticeSessions(userId, timeZone).then(() =>
-      pruneEmptyFinishedSessions(userId)
-    );
+    void reconcilePyqPracticeSessions(userId, timeZone)
+      .then(() => awaitInitialPull(userId))
+      .then(() => pruneEmptyFinishedSessions(userId));
   }, [userId, timeZone]);
 
   const weeklyFixRow = useLiveQuery(async () => {

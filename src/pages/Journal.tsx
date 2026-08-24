@@ -7,7 +7,7 @@ import { AnimatePresence, motion } from 'motion/react';
 import { ChevronDown, ChevronRight, Pencil } from 'lucide-react';
 import type { QuestionRow, SessionRow } from '@/types';
 import { db } from '@/lib/db';
-import { writeLocal, deleteLocal } from '@/lib/sync';
+import { writeLocal, deleteLocal, awaitInitialPull } from '@/lib/sync';
 import {
   pruneEmptyFinishedSessions,
   allSessions,
@@ -349,9 +349,9 @@ export default function Journal() {
   // (from before the auto-delete-on-finish landed).
   useEffect(() => {
     if (!userId) return;
-    void reconcilePyqPracticeSessions(userId, timeZone).then(() =>
-      pruneEmptyFinishedSessions(userId)
-    );
+    void reconcilePyqPracticeSessions(userId, timeZone)
+      .then(() => awaitInitialPull(userId))
+      .then(() => pruneEmptyFinishedSessions(userId));
   }, [userId, timeZone]);
 
   function openEdit(row: QuestionRow) {

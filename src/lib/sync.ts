@@ -40,6 +40,29 @@ let pullInFlight: Promise<void> | null = null;
 let pullingForUserId: string | null = null;
 let initialPullBarrier: Promise<void> | null = null;
 let initialPullForUserId: string | null = null;
+const initialPullListeners = new Set<() => void>();
+
+function notifyInitialPullChange() {
+  initialPullListeners.forEach((l) => l());
+}
+
+export function subscribeInitialPull(listener: () => void) {
+  initialPullListeners.add(listener);
+  return () => {
+    initialPullListeners.delete(listener);
+  };
+}
+
+export function isInitialPullActive() {
+  return initialPullBarrier !== null;
+}
+
+export function awaitInitialPull(userId: string): Promise<void> {
+  if (initialPullForUserId === userId && initialPullBarrier) {
+    return initialPullBarrier;
+  }
+  return Promise.resolve();
+}
 let pullRetryTimer: ReturnType<typeof setTimeout> | undefined;
 let followUpPushNeeded = false;
 let pullBackoffMs = 2000;
@@ -1045,11 +1068,13 @@ function beginInitialPull(userId: string, pushDelayAfterSuccess = 0): void {
   const barrier = pullAll(userId);
   initialPullBarrier = barrier;
   initialPullForUserId = userId;
+  notifyInitialPullChange();
   void barrier.then(
     () => {
       if (initialPullBarrier !== barrier || !syncContextIsCurrent(userId)) return;
       initialPullBarrier = null;
       initialPullForUserId = null;
+      notifyInitialPullChange();
       pullBackoffMs = 2000;
       schedulePush(pushDelayAfterSuccess);
     },
@@ -1098,6 +1123,7 @@ export function initSync(userId: string): void {
   if (userChanged) {
     initialPullBarrier = null;
     initialPullForUserId = null;
+    notifyInitialPullChange();
     lastPullAt = 0;
     backoffMs = 2000;
     pullBackoffMs = 2000;
@@ -1124,6 +1150,7 @@ export function stopSync(): void {
   pullingForUserId = null;
   initialPullBarrier = null;
   initialPullForUserId = null;
+  notifyInitialPullChange();
   clearTimeout(pushTimer);
   clearTimeout(pullRetryTimer);
 }
@@ -1136,5 +1163,6 @@ export function _enableForTests(userId: string): void {
   pullBackoffMs = 2000;
   initialPullBarrier = null;
   initialPullForUserId = null;
+  notifyInitialPullChange();
   clearTimeout(pullRetryTimer);
 }

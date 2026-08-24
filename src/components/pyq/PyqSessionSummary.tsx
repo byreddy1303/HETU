@@ -639,9 +639,10 @@ export default function PyqSessionSummary({ session, attempts }: PyqSessionSumma
       (attempt) => attempt && attempt.capture_version >= 2 && attempt.question_snapshot
     )?.question_snapshot;
   const subject = firstSnapshot?.subject ?? humanizeSlug(session.config.subjectSlug);
+  const isMultiTopic = session.config.topicSlug && session.config.topicSlug.includes(',');
   const topic =
     session.config.topicSlug && session.config.topicSlug !== 'all'
-      ? (firstSnapshot?.topic ?? humanizeSlug(session.config.topicSlug))
+      ? isMultiTopic ? 'Multiple topics' : (firstSnapshot?.topic ?? humanizeSlug(session.config.topicSlug))
       : 'Mixed topics';
   const frozenSnapshotCount = summary.questions.filter(
     (question) =>

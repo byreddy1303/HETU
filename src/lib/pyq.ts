@@ -363,7 +363,8 @@ export function matchesPyqTopicScope(
   const subjectMatches =
     config.subjectSlug === 'all' || question.subjectSlug === config.subjectSlug;
   const topicSlug = config.topicSlug ?? 'all';
-  return subjectMatches && (topicSlug === 'all' || question.topicSlug === topicSlug);
+  if (topicSlug === 'all') return subjectMatches;
+  return subjectMatches && topicSlug.split(',').includes(question.topicSlug);
 }
 
 export function inferPyqBookSlug(paperLabel: string): string {

@@ -732,12 +732,28 @@ function PracticeSetup({
                     </span>
                   </button>
                   {selectedTopics.map((topic) => {
-                    const active = selectedTopicSlug === topic.slug;
+                    const activeList = selectedTopicSlug === 'all' ? [] : selectedTopicSlug.split(',');
+                    const active = activeList.includes(topic.slug);
                     return (
                       <button
                         key={topic.slug}
                         type="button"
-                        onClick={() => setConfig({ ...config, topicSlug: topic.slug })}
+                        onClick={() => {
+                          let newList: string[];
+                          if (selectedTopicSlug === 'all') {
+                            newList = [topic.slug];
+                          } else {
+                            if (active) {
+                              newList = activeList.filter((t) => t !== topic.slug);
+                            } else {
+                              newList = [...activeList, topic.slug];
+                            }
+                          }
+                          setConfig({
+                            ...config,
+                            topicSlug: newList.length > 0 ? newList.join(',') : 'all'
+                          });
+                        }}
                         aria-pressed={active}
                         className={cn(
                           'flex min-h-[56px] items-center justify-between gap-3 rounded border px-3 py-2 text-left transition-all',

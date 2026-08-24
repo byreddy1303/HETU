@@ -526,9 +526,11 @@ function ResponseCard({
         <div className="flex flex-wrap gap-1.5 border-b border-border bg-bg-overlay/25 px-4 py-3">
           {snapshot ? <Badge tone="accent">{snapshot.subject}</Badge> : null}
           <Badge>{type}</Badge>
-          <Badge>
-            {marks == null ? 'Marks unavailable' : `${marks} mark${marks === 1 ? '' : 's'}`}
-          </Badge>
+          {marks != null && (
+            <Badge>
+              {marks} mark{marks === 1 ? '' : 's'}
+            </Badge>
+          )}
           <Badge>{topic}</Badge>
           <Badge tone={question.visited ? 'neutral' : 'warn'}>
             {question.visited ? 'Visited' : 'Not visited'}

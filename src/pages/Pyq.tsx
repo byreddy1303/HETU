@@ -1168,10 +1168,12 @@ function ResultPanel({ question, attempt }: { question: PyqQuestion; attempt: Py
                 Accepted tolerance: ±{question.tolerance.abs}
               </p>
             )}
-          <div className="mt-3 flex flex-wrap items-center gap-2">
-            <Badge tone={score.covered ? 'accent' : 'warn'}>{score.label}</Badge>
-            <span className="text-[11px] text-text-faint">{score.detail}</span>
-          </div>
+          {score.covered && (
+            <div className="mt-3 flex flex-wrap items-center gap-2">
+              <Badge tone="accent">{score.label}</Badge>
+              <span className="text-[11px] text-text-faint">{score.detail}</span>
+            </div>
+          )}
           <p className="mt-2 text-[11px] text-text-faint">
             Committed {new Date(attempt.attempted_at).toLocaleString()} ·{' '}
             {attempt.time_spent_ms == null

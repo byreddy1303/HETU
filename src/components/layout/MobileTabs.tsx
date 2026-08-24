@@ -25,7 +25,7 @@ import {
   Target,
   Users,
   X,
-  Zap,
+  Zap
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { useLiveQuery } from 'dexie-react-hooks';
@@ -43,9 +43,9 @@ interface Tab {
 }
 
 const TABS: Tab[] = [
-  { to: '/',        label: 'Home',    icon: Gauge,       match: ['/'] },
-  { to: '/log',     label: 'Log',     icon: PenLine,     match: ['/log'] },
-  { to: '/planner', label: 'Planner', icon: CalendarDays, match: ['/planner'] },
+  { to: '/', label: 'Home', icon: Gauge, match: ['/'] },
+  { to: '/log', label: 'Log', icon: PenLine, match: ['/log'] },
+  { to: '/planner', label: 'Planner', icon: CalendarDays, match: ['/planner'] }
 ];
 
 /* ─── More sheet groups ──────────────────────────────────────── */
@@ -59,45 +59,43 @@ const MORE_GROUPS: { label: string; items: MoreItem[] }[] = [
   {
     label: 'Study',
     items: [
-      { to: '/journal',       label: 'Journal',       icon: NotebookText },
-      { to: '/today',         label: 'Do now',        icon: ClipboardList },
-      { to: '/capture',       label: 'Quick capture', icon: Camera },
-      { to: '/revision-pack', label: 'Revision pack', icon: ClipboardList },
-    ],
+      { to: '/journal', label: 'Journal', icon: NotebookText },
+      { to: '/today', label: 'Do now', icon: ClipboardList },
+      { to: '/capture', label: 'Quick capture', icon: Camera },
+      { to: '/revision-pack', label: 'Revision pack', icon: ClipboardList }
+    ]
   },
   {
     label: 'Practice',
     items: [
-      { to: '/pyq',        label: 'PYQ practice', icon: LibraryBig },
-      { to: '/mocks',      label: 'Mock tests',   icon: FileCheck2 },
-      { to: '/reattempts', label: 'Re-attempts',  icon: RotateCcw },
-    ],
+      { to: '/pyq', label: 'PYQ practice', icon: LibraryBig },
+      { to: '/mocks', label: 'Mock tests', icon: FileCheck2 },
+      { to: '/reattempts', label: 'Re-attempts', icon: RotateCcw }
+    ]
   },
   {
     label: 'Analysis',
     items: [
-      { to: '/weekly-review', label: 'Weekly review',    icon: CalendarCheck },
-      { to: '/heatmap',       label: 'Heatmap',          icon: Grid3x3 },
-      { to: '/calibration',   label: 'Calibration',      icon: Target },
-      { to: '/readiness',     label: 'Readiness',        icon: Compass },
-      { to: '/patterns',      label: 'Patterns',         icon: Shapes },
-    ],
+      { to: '/weekly-review', label: 'Weekly review', icon: CalendarCheck },
+      { to: '/heatmap', label: 'Heatmap', icon: Grid3x3 },
+      { to: '/calibration', label: 'Calibration', icon: Target },
+      { to: '/readiness', label: 'Readiness', icon: Compass },
+      { to: '/patterns', label: 'Patterns', icon: Shapes }
+    ]
   },
   {
     label: 'Learn',
     items: [
-      { to: '/topper-notes',  label: 'Topper notes',    icon: BookOpen },
-      { to: '/syllabus',      label: 'Syllabus tracker', icon: ListChecks },
-      { to: '/trigger-drill', label: 'Trigger drill',    icon: Zap },
-      { to: '/formulas',      label: 'Formulas',         icon: Sigma },
-    ],
+      { to: '/topper-notes', label: 'Topper notes', icon: BookOpen },
+      { to: '/syllabus', label: 'Syllabus tracker', icon: ListChecks },
+      { to: '/trigger-drill', label: 'Trigger drill', icon: Zap },
+      { to: '/formulas', label: 'Formulas', icon: Sigma }
+    ]
   },
   {
     label: 'Community',
-    items: [
-      { to: '/buddy', label: 'Buddy', icon: Users },
-    ],
-  },
+    items: [{ to: '/buddy', label: 'Buddy', icon: Users }]
+  }
 ];
 
 const SETTINGS_ITEM: MoreItem = { to: '/settings', label: 'Settings', icon: Settings };
@@ -126,12 +124,16 @@ export default function MobileTabs() {
   const moreHighlighted = moreOpen || moreActive;
 
   // Close sheet on navigation
-  useEffect(() => { setMoreOpen(false); }, [pathname]);
+  useEffect(() => {
+    setMoreOpen(false);
+  }, [pathname]);
 
   // Keyboard close
   useEffect(() => {
     if (!moreOpen) return;
-    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') setMoreOpen(false); };
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setMoreOpen(false);
+    };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
   }, [moreOpen]);
@@ -244,7 +246,9 @@ export default function MobileTabs() {
         aria-label="Primary navigation"
       >
         {/* First 2 tabs: Home, Log */}
-        {TABS.slice(0, 2).map((tab) => <TabButton key={tab.to} tab={tab} pathname={pathname} />)}
+        {TABS.slice(0, 2).map((tab) => (
+          <TabButton key={tab.to} tab={tab} pathname={pathname} />
+        ))}
 
         {/* FAB — centre */}
         <div className="flex flex-1 items-center justify-center">
@@ -271,7 +275,9 @@ export default function MobileTabs() {
         </div>
 
         {/* Last tab: Planner */}
-        {TABS.slice(2).map((tab) => <TabButton key={tab.to} tab={tab} pathname={pathname} />)}
+        {TABS.slice(2).map((tab) => (
+          <TabButton key={tab.to} tab={tab} pathname={pathname} />
+        ))}
 
         {/* More button */}
         <button
@@ -295,12 +301,16 @@ export default function MobileTabs() {
             />
           )}
           <svg
-            width="19" height="19" viewBox="0 0 19 19" fill="none"
-            xmlns="http://www.w3.org/2000/svg" aria-hidden="true"
+            width="19"
+            height="19"
+            viewBox="0 0 19 19"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            aria-hidden="true"
             className="transition-transform duration-150"
             style={{ transform: moreOpen ? 'rotate(90deg)' : 'none' }}
           >
-            <circle cx="4"  cy="9.5" r="1.5" fill="currentColor" />
+            <circle cx="4" cy="9.5" r="1.5" fill="currentColor" />
             <circle cx="9.5" cy="9.5" r="1.5" fill="currentColor" />
             <circle cx="15" cy="9.5" r="1.5" fill="currentColor" />
           </svg>

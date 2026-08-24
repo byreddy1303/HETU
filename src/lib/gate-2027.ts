@@ -123,6 +123,9 @@ validateRegistry();
 const scopeBySubject = new Map<SubjectId, Gate2027SubjectScope>(
   registry.subjectScopes.map((scope) => [scope.subjectId, scope])
 );
+const bankScopeBySubjectSlug = new Map<string, Gate2027BankTaxonomyScope>(
+  registry.bankTaxonomy.map((scope) => [scope.bankSubjectSlug, scope])
+);
 
 export const GATE_2027_REGISTRY_VERSION = registry.version;
 export const GATE_2027_RETRIEVED_ON = registry.retrievedOn;
@@ -143,6 +146,26 @@ export const GATE_2027_OFFICIAL_TOPIC_LEAVES = GATE_2027_SUBJECTS.flatMap((subje
 
 export function gate2027Subject(subjectId: SubjectId): Gate2027Subject {
   return GATE_2027_SUBJECTS.find((subject) => subject.id === subjectId)!;
+}
+
+/** Resolve one immutable-bank topic to its audited 2027 scope classification. */
+export function gate2027BankTopicStatus(bankTopicKey: string): Gate2027TaxonomyStatus | null {
+  const divider = bankTopicKey.indexOf('/');
+  if (divider <= 0 || divider === bankTopicKey.length - 1) return null;
+  const bankSubjectSlug = bankTopicKey.slice(0, divider);
+  const topicSlug = bankTopicKey.slice(divider + 1);
+  const scope = bankScopeBySubjectSlug.get(bankSubjectSlug);
+  if (!scope) return null;
+
+  const memberships: Gate2027TaxonomyStatus[] = [];
+  if (scope.current.includes(topicSlug)) memberships.push('current');
+  if (scope.supporting.includes(topicSlug)) memberships.push('supporting');
+  if (scope.historical.includes(topicSlug)) memberships.push('historical');
+  if (scope.reviewRequired.includes(topicSlug)) memberships.push('reviewRequired');
+  if (memberships.length > 1) {
+    throw new Error(`Bank topic ${bankTopicKey} has multiple GATE 2027 statuses.`);
+  }
+  return memberships[0] ?? null;
 }
 
 /** Complete versioned registry for exports, diagnostics, and readiness UI copy. */

@@ -154,17 +154,17 @@ export default function Readiness() {
   );
 
   const breakdown = useMemo(
-    () => computeReadiness({ questions, pyqAttempts, reattempts, patterns }),
-    [questions, pyqAttempts, reattempts, patterns]
+    () => computeReadiness({ questions, pyqAttempts, reattempts, patterns, asOfDate: today }),
+    [questions, pyqAttempts, reattempts, patterns, today]
   );
 
   const perSubject = useMemo(
     () =>
       computeReadinessBySubject(
-        { questions, pyqAttempts, reattempts, patterns },
+        { questions, pyqAttempts, reattempts, patterns, asOfDate: today },
         SUBJECTS
       ),
-    [questions, pyqAttempts, reattempts, patterns]
+    [questions, pyqAttempts, reattempts, patterns, today]
   );
 
   const components = useMemo(() => readinessComponents(breakdown), [breakdown]);
@@ -234,9 +234,7 @@ export default function Readiness() {
     const byDate = new Map(cloudSnapshots.map((snapshot) => [snapshot.date, snapshot]));
     for (const snapshot of snapshots) byDate.set(snapshot.date, snapshot);
     return [...byDate.values()]
-      .filter(
-        (snapshot) => snapshot.calculationVersion === READINESS_CALCULATION_VERSION
-      )
+      .filter((snapshot) => snapshot.calculationVersion === READINESS_CALCULATION_VERSION)
       .sort((a, b) => a.date.localeCompare(b.date));
   }, [cloudSnapshots, snapshots]);
 
@@ -370,7 +368,8 @@ export default function Readiness() {
                     <p className="mt-1 font-display text-[24px] font-bold text-text">
                       <span className="u-num">{mockSignal.latest.total_marks}</span>
                       <span className="text-[13px] font-normal text-text-muted">
-                        {' '}/ {mockSignal.latest.max_marks}
+                        {' '}
+                        / {mockSignal.latest.max_marks}
                       </span>
                     </p>
                     <p className="mt-1 text-[11px] text-text-faint">
@@ -390,11 +389,12 @@ export default function Readiness() {
                   <div className="rounded border border-border bg-bg-overlay/40 p-3">
                     <p className="u-label">Official paper blueprint</p>
                     <p className="u-num mt-1 text-[16px] font-semibold text-text">
-                      {GATE_2027_BLUEPRINT.durationMinutes} min · {GATE_2027_BLUEPRINT.questionCount} questions
+                      {GATE_2027_BLUEPRINT.durationMinutes} min ·{' '}
+                      {GATE_2027_BLUEPRINT.questionCount} questions
                     </p>
                     <p className="mt-1 text-[11px] leading-relaxed text-text-faint">
-                      GA {GATE_2027_BLUEPRINT.sectionMarks.generalAptitude} · Engineering Mathematics{' '}
-                      {GATE_2027_BLUEPRINT.sectionMarks.engineeringMathematics} · CS{' '}
+                      GA {GATE_2027_BLUEPRINT.sectionMarks.generalAptitude} · Engineering
+                      Mathematics {GATE_2027_BLUEPRINT.sectionMarks.engineeringMathematics} · CS{' '}
                       {GATE_2027_BLUEPRINT.sectionMarks.coreSubject}
                     </p>
                   </div>
@@ -409,9 +409,9 @@ export default function Readiness() {
                 </div>
               )}
               <div className="rounded border border-warn/30 bg-warn/5 p-3 text-[12px] leading-relaxed text-text-muted">
-                Recorded mocks are manually entered; unseen-paper, full-length, and validity flags are
-                not captured yet. AIR modelling is not prospectively validated, so no numeric rank
-                estimate is shown.
+                Recorded mocks are manually entered; unseen-paper, full-length, and validity flags
+                are not captured yet. AIR modelling is not prospectively validated, so no numeric
+                rank estimate is shown.
               </div>
             </CardBody>
           </Card>
@@ -447,8 +447,7 @@ export default function Readiness() {
                     <span className="u-num text-text">{breakdown.counts.skipped}</span> skipped
                   </span>
                   <span>
-                    <span className="u-num text-text">{breakdown.counts.uncertain}</span>{' '}
-                    uncertain
+                    <span className="u-num text-text">{breakdown.counts.uncertain}</span> uncertain
                   </span>
                 </div>
               </div>

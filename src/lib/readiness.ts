@@ -1,16 +1,8 @@
 // F5.3 — exam-day readiness score. Composite of four subscores; each is a
 // [0..1] fraction, then weighted per §5.3. Pure math so the same function
 // runs client-side (for immediate feedback) and inside compute-readiness.
-import type {
-  PatternRow,
-  PyqAttemptRow,
-  QuestionRow,
-  ReattemptRow
-} from '@/types';
-import {
-  normalizeAttemptEvidence,
-  type AttemptEvidenceEvent
-} from '@/lib/attempt-evidence';
+import type { PatternRow, PyqAttemptRow, QuestionRow, ReattemptRow } from '@/types';
+import { normalizeAttemptEvidence, type AttemptEvidenceEvent } from '@/lib/attempt-evidence';
 import { canonicalSubjectLabel } from '@/lib/subjects';
 import { todayISO } from '@/lib/utils';
 
@@ -32,6 +24,8 @@ export interface ReadinessInputs {
   pyqAttempts?: PyqAttemptRow[];
   reattempts: ReattemptRow[];
   patterns: PatternRow[];
+  /** Calendar date in the learner/profile timezone (YYYY-MM-DD). */
+  asOfDate?: string;
 }
 
 export interface ReadinessBreakdown {
@@ -70,9 +64,7 @@ export function coverage(patternCount: number): number {
 /** Retention: fraction of re-attempts that reached D30 or MASTERED. */
 export function retention(reattempts: ReattemptRow[]): number {
   if (reattempts.length === 0) return 0;
-  const stabilised = reattempts.filter(
-    (r) => r.stage === 'D30' || r.stage === 'MASTERED'
-  ).length;
+  const stabilised = reattempts.filter((r) => r.stage === 'D30' || r.stage === 'MASTERED').length;
   return clamp01(stabilised / reattempts.length);
 }
 
@@ -93,7 +85,7 @@ export function surface(openReattemptCount: number): number {
 }
 
 export function computeReadiness(inputs: ReadinessInputs): ReadinessBreakdown {
-  const asOf = todayISO();
+  const asOf = inputs.asOfDate ?? todayISO();
   const ledger = normalizeAttemptEvidence({
     attempts: inputs.pyqAttempts ?? [],
     questions: inputs.questions
@@ -119,8 +111,7 @@ export function computeReadiness(inputs: ReadinessInputs): ReadinessBreakdown {
   const confidence =
     ledger.events.length >= 50 && answered >= 15 && eligibleReattempts.length >= 12
       ? 'grounded'
-      : ledger.events.length >= 20 &&
-          (answered >= 5 || eligibleReattempts.length >= 5)
+      : ledger.events.length >= 20 && (answered >= 5 || eligibleReattempts.length >= 5)
         ? 'developing'
         : 'early';
   return {
@@ -142,7 +133,11 @@ export function computeReadiness(inputs: ReadinessInputs): ReadinessBreakdown {
       patterns: inputs.patterns.length,
       totalReattempts: inputs.reattempts.length,
       eligibleReattempts: eligibleReattempts.length,
-      stabilised: inputs.reattempts.filter((r) => r.stage === 'D30' || r.stage === 'MASTERED').length,
+      // Keep the displayed/snapshotted numerator on the same eligible cohort
+      // used by retention (and by the weekly edge scorer). A future, untouched
+      // row must not appear in the numerator before it is due.
+      stabilised: eligibleReattempts.filter((r) => r.stage === 'D30' || r.stage === 'MASTERED')
+        .length,
       openReattempts,
       markedDecisions: answered,
       markedCorrect: ledger.counts.correct
@@ -219,7 +214,7 @@ export const COMPONENT_TOOLTIPS: Record<
   },
   calibration: {
     what: 'Accuracy across graded immutable answer receipts, including 50-50 decisions, tempered until ten answers are logged.',
-    lift: 'Tighten your MARK/SKIP threshold in /calibration and stop gambling on rows you can\'t justify.',
+    lift: "Tighten your MARK/SKIP threshold in /calibration and stop gambling on rows you can't justify.",
     healthy: '≥ 65%.'
   },
   surface: {
@@ -257,6 +252,7 @@ export function computeReadinessBySubject(
   inputs: ReadinessInputs,
   subjects: readonly string[]
 ): SubjectReadiness[] {
+  const asOf = inputs.asOfDate ?? todayISO();
   const events = normalizeAttemptEvidence({
     attempts: inputs.pyqAttempts ?? [],
     questions: inputs.questions
@@ -296,7 +292,7 @@ export function computeReadinessBySubject(
     const rs = rBySubj.get(subject) ?? [];
     const target = subjectLibraryTarget(subject, subjects.length);
     const cov = clamp01(ps.length / target);
-    const eligible = rs.filter((r) => r.history.length > 0 || r.scheduled_date <= todayISO());
+    const eligible = rs.filter((r) => r.history.length > 0 || r.scheduled_date <= asOf);
     const correct = subjectEvents.filter((event) => event.outcome === 'correct').length;
     const wrong = subjectEvents.filter((event) => event.outcome === 'wrong').length;
     const answered = correct + wrong;
@@ -304,8 +300,7 @@ export function computeReadinessBySubject(
     const cal = calibration(subjectEvents) * clamp01(answered / 5);
     const openReattempts = rs.filter((r) => r.stage !== 'MASTERED').length;
     const perSubjBaseline = Math.max(4, Math.round(BASELINE_OPEN_SURFACE / subjects.length));
-    const surf =
-      clamp01(1 - openReattempts / perSubjBaseline) * clamp01(subjectEvents.length / 10);
+    const surf = clamp01(1 - openReattempts / perSubjBaseline) * clamp01(subjectEvents.length / 10);
     const score = Math.round(
       (cov * WEIGHTS.coverage +
         ret * WEIGHTS.retention +
@@ -339,13 +334,12 @@ export function computeReadinessBySubject(
         skipped: subjectEvents.filter((event) => event.outcome === 'skipped').length,
         ungraded: subjectEvents.filter((event) => event.outcome === 'ungraded').length,
         uncertain: subjectEvents.filter((event) => event.uncertain).length,
-        legacyJournalAttempts: subjectEvents.filter(
-          (event) => event.source === 'legacy-journal'
-        ).length,
+        legacyJournalAttempts: subjectEvents.filter((event) => event.source === 'legacy-journal')
+          .length,
         patterns: ps.length,
         totalReattempts: rs.length,
         eligibleReattempts: eligible.length,
-        stabilised: rs.filter((r) => r.stage === 'D30' || r.stage === 'MASTERED').length,
+        stabilised: eligible.filter((r) => r.stage === 'D30' || r.stage === 'MASTERED').length,
         openReattempts,
         markedDecisions: answered,
         markedCorrect: correct
@@ -376,23 +370,14 @@ const OPEN_REATTEMPT_ALERT = 8;
 const LOW_COVERAGE_MAX = 0.15;
 
 /** Return up to 3 concrete next moves, prioritised by urgency. */
-export function nextMoves(
-  overall: ReadinessBreakdown,
-  perSubject: SubjectReadiness[]
-): NextMove[] {
+export function nextMoves(overall: ReadinessBreakdown, perSubject: SubjectReadiness[]): NextMove[] {
   const moves: NextMove[] = [];
 
   for (const s of perSubject) {
     if (!s.hasSignal) continue;
     const answerAccuracy =
-      s.counts.markedDecisions === 0
-        ? null
-        : s.counts.markedCorrect / s.counts.markedDecisions;
-    if (
-      s.counts.markedDecisions >= 5 &&
-      answerAccuracy != null &&
-      answerAccuracy < 0.25
-    ) {
+      s.counts.markedDecisions === 0 ? null : s.counts.markedCorrect / s.counts.markedDecisions;
+    if (s.counts.markedDecisions >= 5 && answerAccuracy != null && answerAccuracy < 0.25) {
       moves.push({
         kind: 'calibrate',
         subject: s.subject,
@@ -449,7 +434,5 @@ export function nextMoves(
   }
 
   const urgencyOrder = { high: 0, medium: 1, low: 2 };
-  return moves
-    .sort((a, b) => urgencyOrder[a.urgency] - urgencyOrder[b.urgency])
-    .slice(0, 3);
+  return moves.sort((a, b) => urgencyOrder[a.urgency] - urgencyOrder[b.urgency]).slice(0, 3);
 }

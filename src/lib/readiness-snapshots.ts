@@ -8,7 +8,9 @@
 
 import type { ReadinessBreakdown, ReadinessComponentKey, SubjectReadiness } from '@/lib/readiness';
 
-export const READINESS_CALCULATION_VERSION = 2 as const;
+// Re-export the calculation module's version so storage/UI cannot drift from
+// the formula they are snapshotting.
+export { READINESS_CALCULATION_VERSION } from '@/lib/readiness';
 
 const STORAGE_PREFIX = 'air-journal:readiness:v3';
 const LEGACY_STORAGE_PREFIX = 'air-journal:readiness:v2';
@@ -122,9 +124,7 @@ export function weeklyDelta(snapshots: ReadinessSnapshot[]): number | null {
   let bestDiff = Infinity;
   for (const s of comparable) {
     if (s.date === today.date) continue;
-    const diff = Math.abs(
-      new Date(s.date).getTime() - new Date(targetISO).getTime()
-    );
+    const diff = Math.abs(new Date(s.date).getTime() - new Date(targetISO).getTime());
     if (diff < bestDiff) {
       bestDiff = diff;
       best = s;
@@ -154,8 +154,7 @@ export function projectToExam(
     .slice(-30);
   if (recent.length < 4) return null;
   const t0 = new Date(recent[0].date).getTime();
-  const spanDays =
-    (new Date(recent[recent.length - 1].date).getTime() - t0) / 86400000;
+  const spanDays = (new Date(recent[recent.length - 1].date).getTime() - t0) / 86400000;
   if (spanDays < 21) return null;
   const xs = recent.map((s) => (new Date(s.date).getTime() - t0) / 86400000);
   const ys = recent.map((s) => s.score);
@@ -189,10 +188,7 @@ const HEALTHY_THRESHOLDS: Record<ReadinessComponentKey, number> = {
 export function loadDebt(userId: string): DebtEntry[] {
   const current = safeGet<DebtEntry[]>(storageKey(userId, 'watchlist'), []);
   if (current.length > 0) return current;
-  const legacy = safeGet<DebtEntry[]>(
-    storageKey(userId, 'watchlist', LEGACY_STORAGE_PREFIX),
-    []
-  );
+  const legacy = safeGet<DebtEntry[]>(storageKey(userId, 'watchlist', LEGACY_STORAGE_PREFIX), []);
   if (legacy.length > 0) safeSet(storageKey(userId, 'watchlist'), legacy);
   return legacy;
 }
@@ -214,11 +210,7 @@ export function updateDebt(
   const existing = new Map<string, DebtEntry>(loadDebt(userId).map((d) => [d.key, d]));
   const now = new Date(today);
 
-  function observe(
-    subject: string | null,
-    component: ReadinessComponentKey,
-    value: number
-  ) {
+  function observe(subject: string | null, component: ReadinessComponentKey, value: number) {
     const k = debtKey(subject, component);
     if (value >= HEALTHY_THRESHOLDS[component]) {
       existing.delete(k);
@@ -239,10 +231,7 @@ export function updateDebt(
     // Count weeks between since and today.
     const weeks = Math.max(
       0,
-      Math.floor(
-        (now.getTime() - new Date(prev.since).getTime()) /
-          (7 * 86400000)
-      )
+      Math.floor((now.getTime() - new Date(prev.since).getTime()) / (7 * 86400000))
     );
     existing.set(k, { ...prev, weeksHeld: weeks, lastSeen: today });
   }

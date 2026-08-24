@@ -132,5 +132,82 @@ describe('canonical attempt evidence', () => {
     expect(ledger.counts.total).toBe(0);
     expect(ledger.suppressedJournalQuestionIds).toEqual(['linked-only']);
   });
-});
 
+  it('treats an explicit analysis link as occupying the receipt for legacy pairing', () => {
+    const legacy = attempt('occupied-receipt', 'MARK', true, {
+      capture_version: 1,
+      question_started_at: null,
+      time_spent_ms: null,
+      attempted_at: '2026-08-20T09:00:00.000Z'
+    });
+    const explicit = journal('explicit-owner', 'MARK', true, {
+      source_pyq_attempt_id: legacy.id
+    });
+    const coincidentalLegacy = journal('independent-legacy', 'MARK', true, {
+      created_at: '2026-08-20T09:00:00.000+00:00'
+    });
+
+    const ledger = normalizeAttemptEvidence({
+      attempts: [legacy],
+      questions: [explicit, coincidentalLegacy]
+    });
+
+    expect(ledger.events.map((event) => event.id)).toEqual([
+      'legacy-journal:independent-legacy',
+      `pyq-attempt:${legacy.id}`
+    ]);
+    expect(ledger.suppressedJournalQuestionIds).toEqual(['explicit-owner']);
+  });
+
+  it('recovers outcome-only legacy decisions without overriding explicit fields', () => {
+    const inferredGuess = journal('outcome-only-guess', null, null, { outcome: 'RBG' });
+    const explicitWrong = journal('explicit-wrong', 'MARK', false, { outcome: 'RBS' });
+
+    const ledger = normalizeAttemptEvidence({
+      attempts: [],
+      questions: [inferredGuess, explicitWrong]
+    });
+
+    expect(ledger.events).toEqual([
+      expect.objectContaining({
+        id: 'legacy-journal:explicit-wrong',
+        decision: 'MARK',
+        outcome: 'wrong',
+        uncertain: false,
+        correct: false
+      }),
+      expect.objectContaining({
+        id: 'legacy-journal:outcome-only-guess',
+        decision: 'FIFTY_FIFTY',
+        outcome: 'correct',
+        uncertain: true,
+        correct: true
+      })
+    ]);
+  });
+
+  it('counts a duplicated independent Journal primary key only once', () => {
+    const duplicate = journal('duplicate-independent', 'FIFTY_FIFTY', false, {
+      source_ref: 'Own notes'
+    });
+
+    const ledger = normalizeAttemptEvidence({
+      attempts: [],
+      questions: [duplicate, { ...duplicate }]
+    });
+
+    expect(ledger.events).toEqual([
+      expect.objectContaining({
+        id: 'legacy-journal:duplicate-independent',
+        outcome: 'wrong',
+        uncertain: true
+      })
+    ]);
+    expect(ledger.counts).toMatchObject({
+      total: 1,
+      wrong: 1,
+      uncertain: 1,
+      legacyJournal: 1
+    });
+  });
+});

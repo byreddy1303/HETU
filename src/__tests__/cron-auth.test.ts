@@ -21,7 +21,9 @@ describe('daily digest cron authorization', () => {
       "const cronSecret = req.headers.get('x-air-journal-cron-secret') ?? ''"
     );
     expect(source).toContain('cronSecret === DIGEST_CRON_SECRET');
-    expect(source).toMatch(/import \{[\s\S]*parseTelegramStudySessions,[\s\S]*\} from '\.\.\/_shared\/telegram\.ts'/);
+    expect(source).toMatch(
+      /import \{[\s\S]*parseTelegramStudySessions,[\s\S]*\} from '\.\.\/_shared\/telegram\.ts'/
+    );
   });
 
   it('recognizes the service-role claim from a gateway-verified JWT', () => {
@@ -45,5 +47,14 @@ describe('readiness cron authorization', () => {
     expect(source).toContain("jwtRoleClaim(token) === 'service_role'");
     expect(source).toContain("error: 'cron authorization required'");
     expect(source).not.toContain('stub — implemented in S27');
+  });
+
+  it('paginates every evidence table and mirrors the browser exam-date fallback', () => {
+    const source = readFileSync('supabase/functions/compute-readiness/index.ts', 'utf8');
+    expect(source).toContain('const PAGE_SIZE = 1_000');
+    expect(source).toContain(".order('id', { ascending: true }).limit(PAGE_SIZE)");
+    expect(source).toContain("query.gt('id', afterId)");
+    expect(source).not.toContain('.range(');
+    expect(source).toContain('user.exam_date ?? EXAM_DATE_DEFAULT');
   });
 });

@@ -15,6 +15,10 @@ coverage
 playwright-report
 test-results
 
+# Local understand-anything scratch/output overlays (canonical graphs stay tracked)
+.ua/.trash-*/
+.ua/diff-overlay.json
+
 # Native build outputs and machine-local Android configuration
 android/.gradle
 android/.idea

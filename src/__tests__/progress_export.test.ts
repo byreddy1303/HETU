@@ -9,13 +9,7 @@ import {
   type ProgressData,
   type ProgressReport
 } from '@/lib/progress-export';
-import type {
-  PatternRow,
-  PyqAttemptRow,
-  QuestionRow,
-  ReattemptRow,
-  SessionRow
-} from '@/types';
+import type { PatternRow, PyqAttemptRow, QuestionRow, ReattemptRow, SessionRow } from '@/types';
 
 const USER_ID = '11111111-1111-4111-8111-111111111111';
 
@@ -84,10 +78,7 @@ function reattempt(): ReattemptRow {
   };
 }
 
-function pyqAttempt(
-  id: string,
-  overrides: Partial<PyqAttemptRow> = {}
-): PyqAttemptRow {
+function pyqAttempt(id: string, overrides: Partial<PyqAttemptRow> = {}): PyqAttemptRow {
   return {
     id,
     user_id: USER_ID,
@@ -177,6 +168,9 @@ describe('progress report export', () => {
     expect(metric(report, 'Patterns', 'Reflexed patterns')).toBe(1);
     expect(metric(report, 'Re-attempts', 'Clean review rate')).toBe(100);
     expect(metric(report, 'Syllabus tracker', 'Databases topics completed')).toBe(1);
+    expect(metric(report, 'Syllabus tracker', 'Total topics')).toBe(69);
+    expect(metric(report, 'Syllabus tracker', 'Registry version')).toBe('gate-cs-2027-official-v1');
+    expect(report.version).toBe(3);
     expect(metric(report, 'Subject: Databases', 'Clean solve rate')).toBe(50);
 
     const components = new Set(report.metrics.map((row) => row.component));
@@ -200,6 +194,39 @@ describe('progress report export', () => {
         'Subject: Databases'
       ])
     );
+  });
+
+  it('excludes retained supporting and historical tags from official completion', () => {
+    const data = progressData();
+    data.topicCompletions[topicProgressId('Databases', 'Recovery — Logging & Checkpoints')] =
+      '2026-08-02T12:00:00.000Z';
+    data.topicCompletions[
+      topicProgressId('Computer Networks', 'Security — Symmetric & Public-Key')
+    ] = '2026-08-03T12:00:00.000Z';
+
+    const report = buildProgressReport(data, {
+      learnerName: 'Kalyan',
+      generatedAt: '2026-08-08T10:00:00.000Z'
+    });
+    expect(metric(report, 'Syllabus tracker', 'Databases topics completed')).toBe(1);
+    expect(metric(report, 'Syllabus tracker', 'Computer Networks topics completed')).toBe(0);
+    expect(metric(report, 'Syllabus tracker', 'Topics completed')).toBe(1);
+  });
+
+  it('does not turn shared broad bank labels into multiple completed leaves', () => {
+    const data = progressData();
+    data.topicCompletions = {
+      [topicProgressId('General Aptitude', 'general aptitude')]: '2026-08-03T12:00:00.000Z',
+      [topicProgressId('Databases', 'file system')]: '2026-08-04T12:00:00.000Z'
+    };
+
+    const report = buildProgressReport(data, {
+      learnerName: 'Kalyan',
+      generatedAt: '2026-08-08T10:00:00.000Z'
+    });
+    expect(metric(report, 'Syllabus tracker', 'General Aptitude topics completed')).toBe(0);
+    expect(metric(report, 'Syllabus tracker', 'Databases topics completed')).toBe(0);
+    expect(metric(report, 'Syllabus tracker', 'Topics completed')).toBe(0);
   });
 
   it('emits a BOM CSV, keeps numbers numeric, and neutralizes spreadsheet formulas', () => {
@@ -251,10 +278,30 @@ describe('progress report export', () => {
     expect(metric(report, 'PYQ practice', 'Ungraded attempts')).toBe(1);
     expect(metric(report, 'PYQ practice', 'Uncertain decisions')).toBe(1);
     expect(metric(report, 'PYQ practice', 'Exactly scored receipts')).toBe(3);
-    expect(metric(report, 'PYQ practice', 'Exact earned score')).toBe(1.67);
-    expect(metric(report, 'PYQ practice', 'Exact scorable maximum')).toBe(4);
+    expect(metric(report, 'PYQ practice', 'Exact scoring version')).toBe(1);
+    expect(metric(report, 'PYQ practice', 'Exact score thirds')).toBe(5);
+    expect(metric(report, 'PYQ practice', 'Exact maximum thirds')).toBe(12);
+    expect(metric(report, 'PYQ practice', 'GATE-rule earned score')).toBe(1.67);
+    expect(metric(report, 'PYQ practice', 'GATE-rule scorable maximum')).toBe(4);
     expect(metric(report, 'PYQ practice', 'Exact scoring coverage')).toBe(75);
     expect(metric(report, 'Readiness', 'Calculation version')).toBe(2);
+  });
+
+  it('excludes unknown scoring versions and invariant-breaking stored scores', () => {
+    const data = progressData();
+    data.pyqAttempts = [
+      pyqAttempt('valid'),
+      pyqAttempt('future-version', { scoring_version: 2 }),
+      pyqAttempt('bad-score', { score_thirds: 0 })
+    ];
+
+    const report = buildProgressReport(data, {
+      learnerName: 'Kalyan',
+      generatedAt: '2026-08-08T10:00:00.000Z'
+    });
+    expect(metric(report, 'PYQ practice', 'Exactly scored receipts')).toBe(1);
+    expect(metric(report, 'PYQ practice', 'Exact score thirds')).toBe(6);
+    expect(metric(report, 'PYQ practice', 'Exact scoring coverage')).toBe(33.3);
   });
 
   it('collects only rows belonging to the requested user', async () => {

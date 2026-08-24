@@ -13,10 +13,7 @@ import {
   surface
 } from '@/lib/readiness';
 import { normalizeAttemptEvidence } from '@/lib/attempt-evidence';
-import {
-  legacyPyqJournalQuestionId,
-  pyqJournalQuestionId
-} from '@/lib/pyq-session';
+import { legacyPyqJournalQuestionId, pyqJournalQuestionId } from '@/lib/pyq-session';
 import { GATE_2027_BLUEPRINT } from '@/lib/gate-2027';
 import type {
   MarkDecision,
@@ -29,6 +26,7 @@ import type {
 } from '@/types';
 import {
   computeReadinessScore,
+  computeReadinessScoreResult,
   readinessEvidenceCounts
 } from '../../supabase/functions/_shared/readiness-score';
 
@@ -113,6 +111,19 @@ function pattern(name: string, subject = 'Discrete Mathematics'): PatternRow {
     is_reflexed: false,
     mastery_level: 0,
     first_seen_at: '2026-07-18T00:00:00.000Z'
+  };
+}
+
+function clientEvidenceCounts(attempts: PyqAttemptRow[], questions: QuestionRow[]) {
+  const counts = normalizeAttemptEvidence({ attempts, questions }).counts;
+  return {
+    attempts: counts.total,
+    correct: counts.correct,
+    wrong: counts.wrong,
+    skipped: counts.skipped,
+    ungraded: counts.ungraded,
+    uncertain: counts.uncertain,
+    legacyJournalAttempts: counts.legacyJournal
   };
 }
 
@@ -255,6 +266,112 @@ describe('authoritative exact-once evidence', () => {
     });
   });
 
+  it('mirrors the bounded random-id legacy resolver in the weekly scorer', () => {
+    const legacy = attempt('legacy-weekly', 'MARK', false, {
+      capture_version: 1,
+      subject: 'Computer Network',
+      subject_id: null,
+      pyq_session_id: 'legacy-session',
+      attempted_at: '2026-07-18T05:30:00.000Z',
+      time_spent_sec: 42
+    });
+    const mirror = question({
+      id: 'random-legacy-mirror',
+      session_id: 'legacy-session',
+      subject: 'Computer Networks',
+      subject_id: 'computer-networks',
+      source_year: 2026,
+      source_ref: 'GATE PYQ · 2026',
+      created_at: '2026-07-18T11:00:00+05:30',
+      time_spent_sec: 42,
+      mark_decision: 'MARK',
+      mark_correct: false
+    });
+
+    const exactMirror = readinessEvidenceCounts([legacy], [mirror]);
+    expect(exactMirror).toEqual(clientEvidenceCounts([legacy], [mirror]));
+    expect(exactMirror).toMatchObject({
+      attempts: 1,
+      wrong: 1,
+      legacyJournalAttempts: 0
+    });
+
+    // Two compatible receipts make the relationship ambiguous, so the
+    // Journal row remains independent compatibility evidence.
+    const ambiguousAttempts = [legacy, { ...legacy, id: 'legacy-weekly-2' }];
+    const ambiguous = readinessEvidenceCounts(ambiguousAttempts, [mirror]);
+    expect(ambiguous).toEqual(clientEvidenceCounts(ambiguousAttempts, [mirror]));
+    expect(ambiguous).toMatchObject({
+      attempts: 3,
+      wrong: 3,
+      legacyJournalAttempts: 1
+    });
+  });
+
+  it('requires GATE to be a standalone source token in the weekly legacy resolver', () => {
+    const legacy = attempt('source-boundary', 'MARK', true, {
+      capture_version: 1,
+      subject: 'Algorithms',
+      attempted_at: '2026-07-18T05:30:00.000Z'
+    });
+    const coincidentalSubstring = question({
+      id: 'aggregate-not-gate',
+      source_ref: 'Aggregate exercises',
+      subject: 'Algorithms',
+      created_at: legacy.attempted_at,
+      time_spent_sec: legacy.time_spent_sec,
+      mark_decision: 'MARK',
+      mark_correct: true
+    });
+    const explicitToken = question({
+      ...coincidentalSubstring,
+      id: 'gate-token',
+      source_ref: '[GATE] PYQ'
+    });
+
+    const substringCounts = readinessEvidenceCounts([legacy], [coincidentalSubstring]);
+    expect(substringCounts).toEqual(clientEvidenceCounts([legacy], [coincidentalSubstring]));
+    expect(substringCounts).toMatchObject({
+      attempts: 2,
+      correct: 2,
+      legacyJournalAttempts: 1
+    });
+    const tokenCounts = readinessEvidenceCounts([legacy], [explicitToken]);
+    expect(tokenCounts).toEqual(clientEvidenceCounts([legacy], [explicitToken]));
+    expect(tokenCounts).toMatchObject({
+      attempts: 1,
+      correct: 1,
+      legacyJournalAttempts: 0
+    });
+  });
+
+  it('does not infer a legacy source link from matching unknown subject labels', () => {
+    const legacy = attempt('unknown-subject', 'MARK', false, {
+      capture_version: 1,
+      subject: 'Legacy Elective',
+      subject_id: null,
+      attempted_at: '2026-07-18T05:30:00.000Z'
+    });
+    const customJournal = question({
+      id: 'unknown-subject-journal',
+      source_ref: 'GATE practice',
+      subject: 'Legacy Elective',
+      subject_id: null,
+      created_at: legacy.attempted_at,
+      time_spent_sec: legacy.time_spent_sec,
+      mark_decision: legacy.mark_decision,
+      mark_correct: legacy.mark_correct
+    });
+
+    const counts = readinessEvidenceCounts([legacy], [customJournal]);
+    expect(counts).toEqual(clientEvidenceCounts([legacy], [customJournal]));
+    expect(counts).toMatchObject({
+      attempts: 2,
+      wrong: 2,
+      legacyJournalAttempts: 1
+    });
+  });
+
   it('keeps a truly unlinked legacy Journal decision as compatibility evidence', () => {
     const result = computeReadiness({
       pyqAttempts: [],
@@ -265,6 +382,44 @@ describe('authoritative exact-once evidence', () => {
     expect(result.counts.attempts).toBe(1);
     expect(result.counts.correct).toBe(1);
     expect(result.counts.legacyJournalAttempts).toBe(1);
+  });
+
+  it('keeps outcome-only legacy Journal evidence in the weekly scorer', () => {
+    const rows = (
+      [
+        ['R', null, null],
+        ['RBS', null, null],
+        ['RBG', null, null],
+        ['W-C', null, null],
+        ['W-E', null, null],
+        ['W-R', null, null],
+        // Missing fields fall back independently while explicit fields win.
+        ['R', 'MARK', null],
+        ['W-C', 'FIFTY_FIFTY', null],
+        // Explicit fields remain authoritative over the legacy outcome.
+        ['R', 'MARK', false]
+      ] as const
+    ).map(([outcome, mark_decision, mark_correct], index) =>
+      question({
+        id: `legacy-outcome-${index}`,
+        outcome,
+        mark_decision,
+        mark_correct,
+        source_pyq_attempt_id: null
+      })
+    );
+
+    const edgeCounts = readinessEvidenceCounts([], rows);
+    expect(edgeCounts).toEqual(clientEvidenceCounts([], rows));
+    expect(edgeCounts).toEqual({
+      attempts: 9,
+      correct: 4,
+      wrong: 5,
+      skipped: 0,
+      ungraded: 0,
+      uncertain: 2,
+      legacyJournalAttempts: 9
+    });
   });
 });
 
@@ -288,12 +443,7 @@ describe('computeReadiness', () => {
 
   it('keeps the evidence-tempered composite deterministic', () => {
     const patterns = Array.from({ length: 200 }, (_, index) => pattern(`p${index}`));
-    const reattempts = [
-      reattempt('D30'),
-      reattempt('D30'),
-      reattempt('MASTERED'),
-      reattempt('D3')
-    ];
+    const reattempts = [reattempt('D30'), reattempt('D30'), reattempt('MASTERED'), reattempt('D3')];
     const attempts = [
       attempt('a', 'MARK', true),
       attempt('b', 'MARK', true),
@@ -310,11 +460,7 @@ describe('computeReadiness', () => {
 
   it('matches the weekly edge-function scorer', () => {
     const attempts = Array.from({ length: 20 }, (_, index) =>
-      attempt(
-        `attempt-${index}`,
-        index === 19 ? 'FIFTY_FIFTY' : 'MARK',
-        index < 14 ? true : false
-      )
+      attempt(`attempt-${index}`, index === 19 ? 'FIFTY_FIFTY' : 'MARK', index < 14 ? true : false)
     );
     const reattempts = [
       reattempt('MASTERED'),
@@ -327,9 +473,65 @@ describe('computeReadiness', () => {
       reattempt('D3')
     ];
     const patterns = Array.from({ length: 80 }, (_, index) => pattern(`p-${index}`));
-    const client = computeReadiness({ questions: [], pyqAttempts: attempts, reattempts, patterns });
+    const client = computeReadiness({
+      questions: [],
+      pyqAttempts: attempts,
+      reattempts,
+      patterns,
+      asOfDate: '2026-08-22'
+    });
     const edge = computeReadinessScore(attempts, [], patterns.length, reattempts, '2026-08-22');
     expect(edge).toBe(client.score);
+
+    const edgeResult = computeReadinessScoreResult(
+      attempts,
+      [],
+      patterns.length,
+      reattempts,
+      '2026-08-22'
+    );
+    expect(edgeResult.components).toEqual({
+      coverage: client.coverage,
+      retention: client.retention,
+      calibration: client.calibration,
+      surface: client.surface
+    });
+    expect(edgeResult.counts).toMatchObject({
+      attempts: client.counts.attempts,
+      correct: client.counts.correct,
+      wrong: client.counts.wrong,
+      skipped: client.counts.skipped,
+      ungraded: client.counts.ungraded,
+      uncertain: client.counts.uncertain,
+      legacyJournalAttempts: client.counts.legacyJournalAttempts,
+      patterns: client.counts.patterns,
+      eligibleReattempts: client.counts.eligibleReattempts,
+      stabilised: client.counts.stabilised,
+      openReattempts: client.counts.openReattempts
+    });
+  });
+
+  it('uses the supplied learner-local date for overall and subject eligibility', () => {
+    const dueTomorrow = {
+      ...reattempt('D30'),
+      scheduled_date: '2026-08-23'
+    };
+    const inputs = {
+      questions: [question()],
+      pyqAttempts: [],
+      reattempts: [dueTomorrow],
+      patterns: [],
+      asOfDate: '2026-08-22'
+    };
+
+    const beforeDue = computeReadiness(inputs);
+    const subjectBeforeDue = computeReadinessBySubject(inputs, ['Discrete Mathematics'])[0];
+    expect(beforeDue.counts).toMatchObject({ eligibleReattempts: 0, stabilised: 0 });
+    expect(subjectBeforeDue.counts).toMatchObject({ eligibleReattempts: 0, stabilised: 0 });
+    expect(computeReadiness({ ...inputs, asOfDate: '2026-08-23' }).counts).toMatchObject({
+      eligibleReattempts: 1,
+      stabilised: 1
+    });
   });
 });
 

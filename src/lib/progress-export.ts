@@ -1,9 +1,12 @@
 import { SUBJECTS } from '@/lib/constants';
 import { db } from '@/lib/db';
 import { normalizeAttemptEvidence } from '@/lib/attempt-evidence';
+import { GATE_2027_REGISTRY_VERSION } from '@/lib/gate-2027';
+import { GATE_SCORING_VERSION } from '@/lib/gate-scoring';
 import { loadAllDayPlans, type DayPlan } from '@/lib/planner-storage';
 import { computeReadiness, READINESS_CALCULATION_VERSION } from '@/lib/readiness';
-import { SUBTOPICS_BY_SUBJECT } from '@/lib/subtopics';
+import { aggregatePyqAttemptScores } from '@/lib/pyq-session';
+import { official2027TopicsFor, type Official2027TopicSpec } from '@/lib/subtopics';
 import {
   topicProgressId,
   useTopicProgressStore,
@@ -23,7 +26,7 @@ import type {
   WeeklyReviewRow
 } from '@/types';
 
-export const PROGRESS_REPORT_VERSION = 2;
+export const PROGRESS_REPORT_VERSION = 3;
 
 export interface ProgressMetric {
   component: string;
@@ -64,6 +67,19 @@ function percentage(numerator: number, denominator: number): number {
   return denominator === 0 ? 0 : round((numerator / denominator) * 100);
 }
 
+function officialTopicCompletedAt(
+  completions: TopicCompletions,
+  topic: Official2027TopicSpec
+): string | null {
+  return (
+    topic.completionAliases
+      .map((alias) => completions[topicProgressId(alias.subject, alias.topic)])
+      .filter((completedAt): completedAt is string => Boolean(completedAt))
+      .sort()
+      .at(-1) ?? null
+  );
+}
+
 /** Build a compact, spreadsheet-friendly view of every learner-facing progress area. */
 export function buildProgressReport(
   data: ProgressData,
@@ -97,8 +113,7 @@ export function buildProgressReport(
     data.questions.length === 0
       ? 0
       : round(
-          data.questions.reduce((sum, row) => sum + row.time_spent_sec, 0) /
-            data.questions.length
+          data.questions.reduce((sum, row) => sum + row.time_spent_sec, 0) / data.questions.length
         ),
     'seconds'
   );
@@ -156,20 +171,7 @@ export function buildProgressReport(
     attempts: data.pyqAttempts,
     questions: data.questions
   });
-  const scoredAttempts = data.pyqAttempts.filter(
-    (row) =>
-      (row.scoring_status === 'scored' || row.scoring_status === 'bonus') &&
-      typeof row.score_thirds === 'number' &&
-      (row.question_marks === 1 || row.question_marks === 2)
-  );
-  const scoreThirds = scoredAttempts.reduce(
-    (sum, row) => sum + (row.score_thirds ?? 0),
-    0
-  );
-  const maxThirds = scoredAttempts.reduce(
-    (sum, row) => sum + (row.question_marks ?? 0) * 3,
-    0
-  );
+  const exactScores = aggregatePyqAttemptScores(data.pyqAttempts);
   add('PYQ practice', 'Practice sets', data.pyqSessions.length, 'count');
   add(
     'PYQ practice',
@@ -198,13 +200,16 @@ export function buildProgressReport(
     ),
     '%'
   );
-  add('PYQ practice', 'Exactly scored receipts', scoredAttempts.length, 'count');
-  add('PYQ practice', 'Exact earned score', round(scoreThirds / 3, 2), 'marks');
-  add('PYQ practice', 'Exact scorable maximum', round(maxThirds / 3, 2), 'marks');
+  add('PYQ practice', 'Exactly scored receipts', exactScores.coveredCount, 'count');
+  add('PYQ practice', 'Exact scoring version', GATE_SCORING_VERSION, 'version');
+  add('PYQ practice', 'Exact score thirds', exactScores.scoreThirds, 'third-marks');
+  add('PYQ practice', 'Exact maximum thirds', exactScores.maxThirds, 'third-marks');
+  add('PYQ practice', 'GATE-rule earned score', round(exactScores.scoreMarks, 2), 'marks');
+  add('PYQ practice', 'GATE-rule scorable maximum', exactScores.maxMarks, 'marks');
   add(
     'PYQ practice',
     'Exact scoring coverage',
-    percentage(scoredAttempts.length, data.pyqAttempts.length),
+    percentage(exactScores.coveredCount, data.pyqAttempts.length),
     '%'
   );
   add(
@@ -238,7 +243,12 @@ export function buildProgressReport(
     'count'
   );
   add('Re-attempts', 'Reviews completed', reattemptHistory.length, 'count');
-  add('Re-attempts', 'Clean review rate', percentage(cleanReattempts, reattemptHistory.length), '%');
+  add(
+    'Re-attempts',
+    'Clean review rate',
+    percentage(cleanReattempts, reattemptHistory.length),
+    '%'
+  );
 
   add('Weekly review', 'Reviews saved', data.weeklyReviews.length, 'count');
   add(
@@ -278,7 +288,8 @@ export function buildProgressReport(
     questions: data.questions,
     pyqAttempts: data.pyqAttempts,
     reattempts: data.reattempts,
-    patterns: data.patterns
+    patterns: data.patterns,
+    asOfDate: generatedAt.slice(0, 10)
   });
   add('Readiness', 'Overall score', readiness.score, 'points');
   add('Readiness', 'Calculation version', READINESS_CALCULATION_VERSION, 'version');
@@ -291,10 +302,11 @@ export function buildProgressReport(
   let syllabusTopics = 0;
   let completedTopics = 0;
   let completedSubjects = 0;
+  add('Syllabus tracker', 'Registry version', GATE_2027_REGISTRY_VERSION, 'version');
   for (const subject of SUBJECTS) {
-    const topics = (SUBTOPICS_BY_SUBJECT[subject] ?? []).map((topic) => topic.value);
-    const completed = topics.filter(
-      (topic) => data.topicCompletions[topicProgressId(subject, topic)]
+    const topics = official2027TopicsFor(subject);
+    const completed = topics.filter((topic) =>
+      officialTopicCompletedAt(data.topicCompletions, topic)
     ).length;
     syllabusTopics += topics.length;
     completedTopics += completed;

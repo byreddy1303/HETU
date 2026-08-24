@@ -1,6 +1,5 @@
 import type {
   MarkDecision,
-  PyqAttemptScoringStatus,
   PyqAttemptRow,
   PyqQuestionSnapshot,
   PyqSelectedAnswer,
@@ -10,8 +9,14 @@ import type {
   SessionRow
 } from '@/types';
 import type { PyqQuestion } from '@/lib/pyq';
-import { evaluatePyqAnswer, pyqAnswerValueForLog } from '@/lib/pyq';
-import { scoreGateOutcome } from '@/lib/gate-scoring';
+import { pyqAnswerValueForLog } from '@/lib/pyq';
+import {
+  aggregateGateScores,
+  evaluateGateAnswer,
+  scoreGateOutcome,
+  validatedStoredGateScore,
+  type GateCoveredScoreResult
+} from '@/lib/gate-scoring';
 import { normalizeSubjectIdentity } from '@/lib/subjects';
 import { calendarDateInTimeZone, nowISO, uuid, uuidFromString } from '@/lib/utils';
 
@@ -97,17 +102,30 @@ function legacyPyqCandidates(
   journalQuestion: PyqJournalIdentity,
   attempts: PyqAttemptRow[]
 ): PyqAttemptRow[] {
-  if (!journalQuestion.source_ref?.toLowerCase().includes('gate')) return [];
+  // Require a standalone ASCII token. A substring check would misclassify
+  // unrelated labels such as "Aggregate exercises" as official GATE rows.
+  if (!/(^|[^a-z0-9])gate([^a-z0-9]|$)/i.test(journalQuestion.source_ref ?? '')) return [];
+  const journalCreatedAt = Date.parse(journalQuestion.created_at);
+  const journalSubject = normalizeSubjectIdentity(
+    journalQuestion.subject,
+    journalQuestion.subject_id
+  );
+  if (!journalSubject.id) return [];
   return attempts.filter(
     (attempt) =>
       attempt.capture_version !== 2 &&
       attempt.capture_version !== 3 &&
       attempt.user_id === journalQuestion.user_id &&
-      attempt.attempted_at === journalQuestion.created_at &&
-      normalizeSubjectIdentity(attempt.subject, attempt.subject_id).label ===
-        normalizeSubjectIdentity(journalQuestion.subject, journalQuestion.subject_id).label &&
+      (() => {
+        const attemptedAt = Date.parse(attempt.attempted_at);
+        return Number.isFinite(journalCreatedAt) && Number.isFinite(attemptedAt)
+          ? attemptedAt === journalCreatedAt
+          : attempt.attempted_at === journalQuestion.created_at;
+      })() &&
+      normalizeSubjectIdentity(attempt.subject, attempt.subject_id).id === journalSubject.id &&
       (journalQuestion.source_year == null || attempt.year === journalQuestion.source_year) &&
-      (journalQuestion.session_id == null || attempt.pyq_session_id === journalQuestion.session_id) &&
+      (journalQuestion.session_id == null ||
+        attempt.pyq_session_id === journalQuestion.session_id) &&
       (journalQuestion.mark_decision === undefined ||
         attempt.mark_decision === journalQuestion.mark_decision) &&
       (journalQuestion.mark_correct === undefined ||
@@ -128,6 +146,23 @@ export function pyqJournalSourceMap(
 ): Map<string, PyqAttemptRow> {
   const soleCandidate = new Map<string, PyqAttemptRow>();
   const questionCountByAttempt = new Map<string, number>();
+  const attemptsByOwnerAndId = new Map(
+    attempts.map((attempt) => [`${attempt.user_id}\u0000${attempt.id}`, attempt] as const)
+  );
+
+  // An explicit link already consumes the one-analysis slot even when another
+  // legacy row also happens to match the receipt heuristically. Counting it
+  // first keeps the unlinked row independent instead of creating a duplicate
+  // source link that the database's partial unique index would reject.
+  for (const question of journalQuestions) {
+    if (!question.source_pyq_attempt_id) continue;
+    const linked = attemptsByOwnerAndId.get(
+      `${question.user_id}\u0000${question.source_pyq_attempt_id}`
+    );
+    if (linked) {
+      questionCountByAttempt.set(linked.id, (questionCountByAttempt.get(linked.id) ?? 0) + 1);
+    }
+  }
   for (const question of journalQuestions) {
     if (question.source_pyq_attempt_id) continue;
     const deterministic = pyqDeterministicSourceAttemptForJournalQuestion(question, attempts);
@@ -148,9 +183,7 @@ export function pyqJournalSourceMap(
  * question text matching.
  */
 export function pyqSourceAttemptForJournalQuestion(
-  journalQuestion:
-    | string
-    | PyqJournalIdentity,
+  journalQuestion: string | PyqJournalIdentity,
   attempts: PyqAttemptRow[]
 ): PyqAttemptRow | null {
   const exact = pyqDeterministicSourceAttemptForJournalQuestion(journalQuestion, attempts);
@@ -240,34 +273,61 @@ export function nextReattemptRoundAttemptNumber(
   return highest + 1;
 }
 
-export interface PyqAttemptScoringCapture {
-  scoreThirds: number | null;
-  status: PyqAttemptScoringStatus;
-  scoringVersion: number;
-}
-
 export interface PyqAttemptScorePresentation {
   label: string;
   covered: boolean;
   detail: string;
 }
 
+export type PyqAttemptScoreReceipt = Pick<
+  PyqAttemptRow,
+  | 'question_type'
+  | 'question_marks'
+  | 'answer_status'
+  | 'mark_decision'
+  | 'mark_correct'
+  | 'score_thirds'
+  | 'scoring_status'
+  | 'scoring_version'
+>;
+
+/** Return a covered v1 result only when every frozen scoring fact agrees. */
+export function validatedPyqAttemptScore(
+  attempt: PyqAttemptScoreReceipt
+): GateCoveredScoreResult | null {
+  return validatedStoredGateScore({
+    questionType: attempt.question_type,
+    marks: attempt.question_marks,
+    answerStatus: attempt.answer_status,
+    decision: attempt.mark_decision,
+    correctness: attempt.mark_correct,
+    scoreThirds: attempt.score_thirds,
+    scoringStatus: attempt.scoring_status,
+    scoringVersion: attempt.scoring_version
+  });
+}
+
+export function aggregatePyqAttemptScores(attempts: readonly PyqAttemptScoreReceipt[]) {
+  const results = attempts.flatMap((attempt) => {
+    const result = validatedPyqAttemptScore(attempt);
+    return result ? [result] : [];
+  });
+  return { ...aggregateGateScores(results), coveredCount: results.length };
+}
+
 /** Compact, exact third-mark presentation shared by both attempt surfaces. */
 export function pyqAttemptScorePresentation(
-  attempt: Pick<PyqAttemptRow, 'score_thirds' | 'scoring_status'>
+  attempt: PyqAttemptScoreReceipt
 ): PyqAttemptScorePresentation {
-  if (
-    attempt.scoring_status == null ||
-    attempt.scoring_status === 'unscorable' ||
-    attempt.score_thirds == null
-  ) {
+  const score = validatedPyqAttemptScore(attempt);
+  if (!score) {
     return {
       label: 'Marks unavailable',
       covered: false,
-      detail: 'Excluded from exact-score coverage because scoring metadata is incomplete.'
+      detail: 'Excluded because versioned scoring metadata is incomplete or inconsistent.'
     };
   }
-  const thirds = attempt.score_thirds;
+  const thirds = score.scoreThirds;
   const magnitude = Math.abs(thirds);
   const marks =
     magnitude === 0
@@ -284,7 +344,7 @@ export function pyqAttemptScorePresentation(
     label: `GATE ${delta}`,
     covered: true,
     detail:
-      attempt.scoring_status === 'bonus'
+      score.status === 'bonus'
         ? 'Exact GATE-rule score from stored metadata · marks awarded to all.'
         : 'Exact GATE-rule score using the stored question type and marks.'
   };
@@ -308,7 +368,6 @@ export function createPyqReattemptAttemptRow(args: {
   committedAtMs: number;
   screenshotUrl: string | null;
   attemptNumber: number;
-  scoring?: PyqAttemptScoringCapture;
 }): PyqAttemptRow {
   const syntheticSession: PyqSessionRow = {
     id: args.sourceAttempt.pyq_session_id ?? args.sourceAttempt.id,
@@ -348,8 +407,7 @@ export function createPyqReattemptAttemptRow(args: {
     questionStartedAtMs: args.questionStartedAtMs,
     committedAtMs: args.committedAtMs,
     screenshotUrl: args.screenshotUrl,
-    attemptNumber: args.attemptNumber,
-    scoring: args.scoring
+    attemptNumber: args.attemptNumber
   });
   return {
     ...attempt,
@@ -547,7 +605,6 @@ export function createPyqAttemptRow(args: {
   screenshotUrl: string | null;
   attemptNumber?: number;
   retryingSkippedAttempt?: boolean;
-  scoring?: PyqAttemptScoringCapture;
 }): PyqAttemptRow {
   if (args.session.status !== 'active') {
     throw new Error('Cannot submit an answer to a closed PYQ set.');
@@ -586,16 +643,22 @@ export function createPyqAttemptRow(args: {
   ).toISOString();
   const correctAnswer = pyqAnswerValueForLog(args.question);
   const subject = normalizeSubjectIdentity(args.question.subject, args.question.subjectSlug);
-  const markCorrect = evaluatePyqAnswer(args.question, selectedAnswer, args.decision);
-  const scored =
-    args.scoring ??
-    scoreGateOutcome({
-      questionType: args.question.type,
-      marks: args.question.marks,
-      answerStatus: args.question.answerStatus,
-      decision: args.decision,
-      correctness: markCorrect
-    });
+  const markCorrect = evaluateGateAnswer({
+    questionType: args.question.type,
+    marks: args.question.marks,
+    answerStatus: args.question.answerStatus,
+    decision: args.decision,
+    selectedAnswer,
+    correctAnswer,
+    tolerance: args.question.tolerance
+  });
+  const scored = scoreGateOutcome({
+    questionType: args.question.type,
+    marks: args.question.marks,
+    answerStatus: args.question.answerStatus,
+    decision: args.decision,
+    correctness: markCorrect
+  });
 
   return {
     id: pyqAttemptId(args.session.id, args.question.id, attemptNumber),

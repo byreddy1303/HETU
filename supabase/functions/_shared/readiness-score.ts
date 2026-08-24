@@ -4,6 +4,13 @@ export interface ReadinessAttemptInput {
   id: string;
   mark_decision: string | null;
   mark_correct: boolean | null;
+  capture_version?: number;
+  attempted_at?: string;
+  subject?: string;
+  subject_id?: string | null;
+  year?: number;
+  pyq_session_id?: string | null;
+  time_spent_sec?: number;
 }
 
 export interface ReadinessQuestionInput {
@@ -11,6 +18,14 @@ export interface ReadinessQuestionInput {
   source_pyq_attempt_id?: string | null;
   mark_decision: string | null;
   mark_correct: boolean | null;
+  outcome?: string | null;
+  source_ref?: string | null;
+  created_at?: string;
+  subject?: string;
+  subject_id?: string | null;
+  source_year?: number | null;
+  session_id?: string | null;
+  time_spent_sec?: number;
 }
 
 export interface ReadinessReattemptInput {
@@ -49,6 +64,98 @@ export interface ReadinessScoreResult {
 const TARGET_PATTERNS = 400;
 const SURFACE_BASELINE = 50;
 const clamp01 = (value: number) => Math.max(0, Math.min(1, value));
+
+const SUBJECTS = [
+  ['discrete-mathematics', 'Discrete Mathematics', 'Discrete Math', 'DM'],
+  [
+    'engineering-mathematics',
+    'Engineering Mathematics',
+    'Engineering Math',
+    'Engineering Maths',
+    'Linear Algebra',
+    'Probability & Statistics',
+    'Probability and Statistics'
+  ],
+  ['digital-logic', 'Digital Logic', 'Digital Electronics', 'DL'],
+  [
+    'coa',
+    'COA',
+    'Computer Organization',
+    'Computer Organisation',
+    'Computer Organization and Architecture',
+    'Computer Organisation and Architecture',
+    'Computer Organization & Architecture',
+    'Computer Architecture'
+  ],
+  [
+    'programming-data-structures',
+    'Programming & DS',
+    'Programming and DS',
+    'Programming and Data Structures',
+    'Programming & Data Structures',
+    'Programming Data Structures',
+    'C Programming',
+    'C Programming + Data Structure',
+    'C Programming and Data Structure',
+    'Data Structure',
+    'Data Structures',
+    'c-programming',
+    'data-structure'
+  ],
+  ['algorithms', 'Algorithms', 'Algorithm', 'Algo'],
+  [
+    'theory-of-computation',
+    'Theory of Computation',
+    'Theory Of Computation',
+    'TOC',
+    'Automata Theory'
+  ],
+  ['compiler-design', 'Compiler Design', 'Compilers', 'Compiler', 'CD'],
+  ['operating-systems', 'Operating Systems', 'Operating System', 'OS'],
+  [
+    'databases',
+    'Databases',
+    'Database',
+    'Database Management System',
+    'Database Management Systems',
+    'DBMS'
+  ],
+  ['computer-networks', 'Computer Networks', 'Computer Network', 'Networking', 'CN'],
+  [
+    'general-aptitude',
+    'General Aptitude',
+    'Aptitude',
+    'Aptitude & Reasoning',
+    'Aptitude and Reasoning',
+    'GA'
+  ]
+] as const;
+
+function subjectLookupKey(value: string): string {
+  return value
+    .trim()
+    .toLocaleLowerCase('en-IN')
+    .replace(/&|\+/g, ' and ')
+    .replace(/[_/.-]+/g, ' ')
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim()
+    .replace(/\s+/g, ' ');
+}
+
+const SUBJECT_ID_BY_KEY = new Map<string, string>();
+for (const [id, label, ...aliases] of SUBJECTS) {
+  for (const value of [id, label, ...aliases]) {
+    SUBJECT_ID_BY_KEY.set(subjectLookupKey(value), id);
+  }
+}
+
+/** Byte-equivalent boundary behavior with src/lib/subjects.ts. */
+function normalizedSubjectId(label?: string, storedId?: string | null): string | null {
+  const trimmed = label?.trim() ?? '';
+  if (trimmed) return SUBJECT_ID_BY_KEY.get(subjectLookupKey(trimmed)) ?? null;
+  if (!storedId) return null;
+  return SUBJECT_ID_BY_KEY.get(subjectLookupKey(storedId)) ?? null;
+}
 
 // Keep this byte-equivalent with src/lib/utils.ts. Historical PYQ analyses used
 // both deterministic seeds, before the explicit source-attempt FK existed.
@@ -92,6 +199,102 @@ function addOutcome(
   }
 }
 
+function journalEvidence(
+  row: ReadinessQuestionInput
+): { markDecision: string | null; markCorrect: boolean | null } | null {
+  let fallback: { markDecision: string; markCorrect: boolean } | null = null;
+  if (row.outcome === 'R' || row.outcome === 'RBS') {
+    fallback = { markDecision: 'MARK', markCorrect: true };
+  } else if (row.outcome === 'RBG') {
+    fallback = { markDecision: 'FIFTY_FIFTY', markCorrect: true };
+  } else if (row.outcome === 'W-C' || row.outcome === 'W-E' || row.outcome === 'W-R') {
+    fallback = { markDecision: 'MARK', markCorrect: false };
+  }
+  const markDecision = row.mark_decision ?? fallback?.markDecision ?? null;
+  if (markDecision == null) return null;
+  return {
+    markDecision,
+    markCorrect: row.mark_correct ?? fallback?.markCorrect ?? null
+  };
+}
+
+function sameInstant(left?: string, right?: string): boolean {
+  if (left == null || right == null) return false;
+  const leftMs = Date.parse(left);
+  const rightMs = Date.parse(right);
+  return Number.isFinite(leftMs) && Number.isFinite(rightMs) ? leftMs === rightMs : left === right;
+}
+
+function randomLegacyCandidates(
+  question: ReadinessQuestionInput,
+  attempts: ReadinessAttemptInput[]
+): ReadinessAttemptInput[] {
+  // `gate` must be a source token, not a substring such as "aggregate".
+  // Keep this boundary equivalent to the client legacy resolver and the SQL
+  // migration's case-insensitive POSIX expression.
+  if (!/(^|[^a-z0-9])gate([^a-z0-9]|$)/i.test(question.source_ref ?? '')) return [];
+  const questionSubjectId = normalizedSubjectId(question.subject, question.subject_id);
+  if (!questionSubjectId) return [];
+  return attempts.filter(
+    (attempt) =>
+      attempt.capture_version !== 2 &&
+      attempt.capture_version !== 3 &&
+      sameInstant(attempt.attempted_at, question.created_at) &&
+      normalizedSubjectId(attempt.subject, attempt.subject_id) === questionSubjectId &&
+      (question.source_year == null || attempt.year === question.source_year) &&
+      (question.session_id == null || attempt.pyq_session_id === question.session_id) &&
+      (question.mark_decision === undefined || attempt.mark_decision === question.mark_decision) &&
+      (question.mark_correct === undefined || attempt.mark_correct === question.mark_correct) &&
+      (question.time_spent_sec === undefined || attempt.time_spent_sec === question.time_spent_sec)
+  );
+}
+
+/**
+ * Mirror the client's bounded legacy resolver. A random-id Journal row is an
+ * annotation only when both sides have exactly one compatible candidate.
+ * Ambiguity is preserved as independent compatibility evidence.
+ */
+function safeLegacyMirrorIds(
+  attempts: ReadinessAttemptInput[],
+  questions: ReadinessQuestionInput[]
+): Set<string> {
+  const attemptsById = new Map(attempts.map((attempt) => [attempt.id, attempt] as const));
+  const deterministicAttemptByQuestionId = new Map<string, ReadinessAttemptInput>();
+  for (const attempt of attempts) {
+    deterministicAttemptByQuestionId.set(
+      uuidFromString(`pyq-journal-question:${attempt.id}`),
+      attempt
+    );
+    deterministicAttemptByQuestionId.set(uuidFromString(`pyq-journal:${attempt.id}`), attempt);
+  }
+  const soleCandidate = new Map<string, ReadinessAttemptInput>();
+  const questionCountByAttempt = new Map<string, number>();
+
+  for (const question of questions) {
+    if (!question.source_pyq_attempt_id) continue;
+    const linked = attemptsById.get(question.source_pyq_attempt_id);
+    if (linked) {
+      questionCountByAttempt.set(linked.id, (questionCountByAttempt.get(linked.id) ?? 0) + 1);
+    }
+  }
+
+  for (const question of questions) {
+    if (question.source_pyq_attempt_id) continue;
+    const deterministic = deterministicAttemptByQuestionId.get(question.id);
+    const candidates = deterministic ? [deterministic] : randomLegacyCandidates(question, attempts);
+    if (candidates.length !== 1) continue;
+    const [candidate] = candidates;
+    soleCandidate.set(question.id, candidate);
+    questionCountByAttempt.set(candidate.id, (questionCountByAttempt.get(candidate.id) ?? 0) + 1);
+  }
+
+  return new Set(
+    [...soleCandidate]
+      .filter(([, attempt]) => questionCountByAttempt.get(attempt.id) === 1)
+      .map(([questionId]) => questionId)
+  );
+}
+
 /**
  * Convert immutable PYQ receipts plus unlinked legacy Journal decisions into
  * exact-once readiness evidence. Linked analysis rows carry diagnosis only;
@@ -112,23 +315,29 @@ export function readinessEvidenceCounts(
   };
   const seenAttemptIds = new Set<string>();
   const mirroredJournalIds = new Set<string>();
+  const uniqueAttempts: ReadinessAttemptInput[] = [];
   for (const row of attempts) {
     if (seenAttemptIds.has(row.id)) continue;
     seenAttemptIds.add(row.id);
+    uniqueAttempts.push(row);
     mirroredJournalIds.add(uuidFromString(`pyq-journal-question:${row.id}`));
     mirroredJournalIds.add(uuidFromString(`pyq-journal:${row.id}`));
     addOutcome(counts, row.mark_decision, row.mark_correct);
   }
+  const legacyMirrorIds = safeLegacyMirrorIds(uniqueAttempts, questions);
   const seenQuestionIds = new Set<string>();
   for (const row of questions) {
+    const evidence = journalEvidence(row);
     if (
       row.source_pyq_attempt_id ||
       mirroredJournalIds.has(row.id) ||
-      row.mark_decision == null
-    ) continue;
+      legacyMirrorIds.has(row.id) ||
+      evidence == null
+    )
+      continue;
     if (seenQuestionIds.has(row.id)) continue;
     seenQuestionIds.add(row.id);
-    addOutcome(counts, row.mark_decision, row.mark_correct);
+    addOutcome(counts, evidence.markDecision, evidence.markCorrect);
     counts.legacyJournalAttempts += 1;
   }
   return counts;
@@ -185,11 +394,6 @@ export function computeReadinessScore(
   reattempts: ReadinessReattemptInput[],
   today: string
 ): number {
-  return computeReadinessScoreResult(
-    attempts,
-    legacyQuestions,
-    patternCount,
-    reattempts,
-    today
-  ).score;
+  return computeReadinessScoreResult(attempts, legacyQuestions, patternCount, reattempts, today)
+    .score;
 }

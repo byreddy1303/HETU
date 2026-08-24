@@ -5,6 +5,7 @@ import {
   evaluateGateAnswer,
   scoreGateAnswer,
   scoreGateOutcome,
+  validatedStoredGateScore,
   type GateOutcomeScoreInput
 } from '@/lib/gate-scoring';
 
@@ -128,6 +129,12 @@ describe('official GATE scoring', () => {
       status: 'unscorable',
       reason: 'missing-marks'
     });
+    for (const marks of [0, 1.5, 3, Number.NaN, '1'] as unknown[]) {
+      expect(scoreGateOutcome(outcome({ marks: marks as number }))).toMatchObject({
+        status: 'unscorable',
+        reason: 'invalid-marks'
+      });
+    }
     expect(
       scoreGateOutcome(
         outcome({ questionType: 'AMBIGUOUS', answerStatus: 'ambiguous', correctness: null })
@@ -197,5 +204,62 @@ describe('official GATE scoring', () => {
       bonusCount: 0,
       unscorableCount: 0
     });
+  });
+
+  it('accepts only supported, invariant-compatible stored scoring receipts', () => {
+    const stored = {
+      questionType: 'MCQ',
+      marks: 2,
+      answerStatus: 'available',
+      decision: 'MARK' as const,
+      correctness: false,
+      scoreThirds: -2,
+      scoringStatus: 'scored',
+      scoringVersion: GATE_SCORING_VERSION
+    };
+    expect(validatedStoredGateScore(stored)).toMatchObject({
+      status: 'scored',
+      scoreThirds: -2
+    });
+    expect(
+      validatedStoredGateScore({
+        ...stored,
+        decision: 'SKIP',
+        correctness: null,
+        scoreThirds: 0
+      })
+    ).toMatchObject({ status: 'scored', outcome: 'skipped', scoreThirds: 0 });
+    expect(
+      validatedStoredGateScore({
+        ...stored,
+        questionType: 'MARKS_TO_ALL',
+        answerStatus: 'marks-to-all',
+        correctness: null,
+        scoreThirds: 6,
+        scoringStatus: 'bonus'
+      })
+    ).toMatchObject({ status: 'bonus', scoreThirds: 6 });
+    expect(validatedStoredGateScore({ ...stored, scoringVersion: 2 })).toBeNull();
+    expect(validatedStoredGateScore({ ...stored, scoreThirds: 0 })).toBeNull();
+    expect(validatedStoredGateScore({ ...stored, scoringStatus: 'bonus' })).toBeNull();
+    expect(validatedStoredGateScore({ ...stored, questionType: 'mcq' })).toBeNull();
+    expect(
+      validatedStoredGateScore({
+        ...stored,
+        decision: 'SKIP',
+        correctness: false,
+        scoreThirds: 0
+      })
+    ).toBeNull();
+    expect(
+      validatedStoredGateScore({
+        ...stored,
+        questionType: 'MARKS_TO_ALL',
+        answerStatus: 'marks-to-all',
+        correctness: true,
+        scoreThirds: 6,
+        scoringStatus: 'bonus'
+      })
+    ).toBeNull();
   });
 });

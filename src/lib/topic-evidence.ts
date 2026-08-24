@@ -1,6 +1,7 @@
 import type { PyqAttemptRow, QuestionRow, ReattemptRow } from '@/types';
 import { normalizeAttemptEvidence } from '@/lib/attempt-evidence';
 import { canonicalSubjectLabel } from '@/lib/subjects';
+import type { TopicEvidenceAlias } from '@/lib/subtopics';
 
 export type TopicEvidenceStatus =
   'not-started' | 'studied' | 'active' | 'needs-revision' | 'strong';
@@ -15,8 +16,41 @@ export interface TopicEvidence {
   lastPracticed: string | null;
 }
 
-function same(value: string | null | undefined, expected: string): boolean {
-  return value?.trim().toLocaleLowerCase() === expected.trim().toLocaleLowerCase();
+function topicLookupKey(value: string | null | undefined): string {
+  return (value ?? '')
+    .normalize('NFKC')
+    .trim()
+    .toLocaleLowerCase()
+    .replace(/\+/g, ' plus ')
+    .replace(/&/g, ' ')
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim()
+    .replace(/\s+/g, ' ');
+}
+
+function sameTopic(value: string | null | undefined, expected: string): boolean {
+  const actualKey = topicLookupKey(value);
+  return actualKey.length > 0 && actualKey === topicLookupKey(expected);
+}
+
+function matchesAlias(
+  subject: string,
+  topic: string | null | undefined,
+  aliases: readonly TopicEvidenceAlias[]
+): boolean {
+  const canonicalSubject = canonicalSubjectLabel(subject);
+  return aliases.some(
+    (alias) =>
+      canonicalSubjectLabel(alias.subject) === canonicalSubject && sameTopic(topic, alias.topic)
+  );
+}
+
+function attemptBankTopicKey(attempt: PyqAttemptRow | undefined): string | null {
+  const snapshot = attempt?.question_snapshot;
+  if (!snapshot?.subject_slug?.trim() || !snapshot.topic_slug?.trim()) return null;
+  return `${snapshot.subject_slug.trim().toLocaleLowerCase()}/${snapshot.topic_slug
+    .trim()
+    .toLocaleLowerCase()}`;
 }
 
 function daysSince(value: string, today: string): number {
@@ -34,18 +68,42 @@ export function buildTopicEvidence(args: {
   attempts: PyqAttemptRow[];
   reattempts: ReattemptRow[];
   today: string;
+  /** Safe current-scope labels retained from older tracker/tag vocabularies. */
+  topicAliases?: readonly TopicEvidenceAlias[];
+  /** Audited immutable-bank keys which may feed this official leaf. */
+  bankTopicKeys?: readonly string[];
+  /** Safe legacy evidence on a conservatively mapped leaf cannot claim strong mastery. */
+  allowStrong?: boolean;
 }): TopicEvidence {
-  const events = normalizeAttemptEvidence({ attempts: args.attempts, questions: args.questions })
-    .events.filter(
-      (event) =>
-        canonicalSubjectLabel(event.subject) === canonicalSubjectLabel(args.subject) &&
-        same(event.topic, args.topic)
-    );
-  const questions = args.questions.filter(
-    (question) =>
-      canonicalSubjectLabel(question.subject) === canonicalSubjectLabel(args.subject) &&
-      same(question.subtopic, args.topic)
+  const aliases: TopicEvidenceAlias[] = [
+    { subject: args.subject, topic: args.topic },
+    ...(args.topicAliases ?? [])
+  ];
+  const allowedBankTopicKeys = new Set(
+    (args.bankTopicKeys ?? []).map((key) => key.trim().toLocaleLowerCase())
   );
+  const attemptsById = new Map(args.attempts.map((attempt) => [attempt.id, attempt]));
+  const events = normalizeAttemptEvidence({
+    attempts: args.attempts,
+    questions: args.questions
+  }).events.filter((event) => {
+    const bankTopicKey = event.attemptId
+      ? attemptBankTopicKey(attemptsById.get(event.attemptId))
+      : null;
+    // Immutable-bank identity is authoritative when present. Do not let a
+    // broad/shared/review-required key fall through to a coincidentally
+    // matching display label and become leaf-level practice evidence.
+    if (bankTopicKey !== null) return allowedBankTopicKeys.has(bankTopicKey);
+    return matchesAlias(event.subject, event.topic, aliases);
+  });
+  const questions = args.questions.filter((question) => {
+    const sourceAttempt = question.source_pyq_attempt_id
+      ? attemptsById.get(question.source_pyq_attempt_id)
+      : undefined;
+    const bankTopicKey = attemptBankTopicKey(sourceAttempt);
+    if (bankTopicKey !== null) return allowedBankTopicKeys.has(bankTopicKey);
+    return matchesAlias(question.subject, question.subtopic, aliases);
+  });
   const judged = events.filter(
     (event) => event.outcome === 'correct' || event.outcome === 'wrong'
   ).length;
@@ -77,5 +135,6 @@ export function buildTopicEvidence(args: {
   } else {
     status = 'active';
   }
+  if (status === 'strong' && args.allowStrong === false) status = 'active';
   return { status, practiced, judged, correct, accuracy, openMistakes, lastPracticed };
 }

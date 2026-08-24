@@ -1,7 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
 
 async function enterLocalSandbox(page: Page) {
-  await page.goto('/');
+  await page.goto('/auth');
 
   const enter = page.getByRole('button', { name: 'Enter local sandbox' });
   await expect(enter).toBeVisible();
@@ -47,6 +47,6 @@ test('Dashboard and practical study-loop routes render in the local-first shell'
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('/');
   await expect(page.getByRole('link', { name: 'Home', exact: true })).toBeVisible();
-  await expect(page.getByRole('button', { name: 'More', exact: true })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'More sections', exact: true })).toBeVisible();
   await expect(page.getByRole('button', { name: /ordered actions\. Open Do now/ })).toBeVisible();
 });

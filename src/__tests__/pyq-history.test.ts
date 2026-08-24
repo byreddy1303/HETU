@@ -75,7 +75,13 @@ describe('PYQ history filters', () => {
     expect(filterPyqByHistory(questions, 'unanalyzed', attempts, []).map((row) => row.id)).toEqual([
       'wrong'
     ]);
-    const journal = [{ id: pyqJournalQuestionId('a-wrong') }] as QuestionRow[];
+    const journal = [
+      {
+        id: pyqJournalQuestionId('a-wrong'),
+        user_id: 'user-1',
+        source_pyq_attempt_id: null
+      }
+    ] as QuestionRow[];
     expect(filterPyqByHistory(questions, 'unanalyzed', attempts, journal)).toEqual([]);
   });
 });

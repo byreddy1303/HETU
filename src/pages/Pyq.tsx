@@ -62,6 +62,7 @@ import {
   advancePyqSessionProgress,
   completePyqSession,
   createPyqAttemptRow,
+  aggregatePyqAttemptScores,
   createPyqSessionRow,
   nextPyqAttemptNumber,
   pausePyqSession,
@@ -1493,20 +1494,7 @@ export default function Pyq() {
     const graded = completed.filter((attempt) => attempt.mark_correct != null);
     const correct = graded.filter((attempt) => attempt.mark_correct).length;
     const skipped = completed.filter((attempt) => attempt.mark_decision === 'SKIP').length;
-    const exactlyScored = completed.filter(
-      (attempt) =>
-        (attempt.scoring_status === 'scored' || attempt.scoring_status === 'bonus') &&
-        typeof attempt.score_thirds === 'number' &&
-        (attempt.question_marks === 1 || attempt.question_marks === 2)
-    );
-    const scoreThirds = exactlyScored.reduce(
-      (sum, attempt) => sum + (attempt.score_thirds ?? 0),
-      0
-    );
-    const maxThirds = exactlyScored.reduce(
-      (sum, attempt) => sum + (attempt.question_marks ?? 0) * 3,
-      0
-    );
+    const exactScores = aggregatePyqAttemptScores(completed);
     return (
       <div className="mx-auto flex w-full max-w-3xl flex-col gap-4">
         <PageHeader
@@ -1552,12 +1540,12 @@ export default function Pyq() {
             <p className="mt-2 text-[12px] text-text-muted">
               GATE-rule score from stored metadata:{' '}
               <span className="u-num font-semibold text-text">
-                {(scoreThirds / 3).toFixed(2).replace(/\.00$/, '')} /{' '}
-                {(maxThirds / 3).toFixed(2).replace(/\.00$/, '')}
+                {exactScores.scoreMarks.toFixed(2).replace(/\.00$/, '')} /{' '}
+                {exactScores.maxMarks.toFixed(2).replace(/\.00$/, '')}
               </span>{' '}
-              marks across {exactlyScored.length} of {completed.length} receipts
-              {exactlyScored.length < completed.length
-                ? '; the rest are excluded because verified type/marks metadata is incomplete.'
+              marks across {exactScores.coveredCount} of {completed.length} receipts
+              {exactScores.coveredCount < completed.length
+                ? '; the rest are excluded because stored type/marks metadata is incomplete or inconsistent.'
                 : '.'}
             </p>
             <div className="mt-6 flex flex-wrap gap-2">

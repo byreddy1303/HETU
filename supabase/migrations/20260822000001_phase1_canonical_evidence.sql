@@ -204,15 +204,15 @@ with normalized as (
     plan.plan_date,
     jsonb_agg(
       case
-        when public.gate_subject_id(item.value->>'subject') is null then
+        when identity.subject_id is null then
           case
             when jsonb_typeof(item.value) = 'object' then
               (item.value - 'subject_id') || jsonb_build_object('subjectId', null)
             else item.value
           end
         else (item.value - 'subject_id') || jsonb_build_object(
-          'subject', public.gate_subject_label(item.value->>'subject'),
-          'subjectId', public.gate_subject_id(item.value->>'subject')
+          'subject', public.gate_subject_label(identity.subject_id),
+          'subjectId', identity.subject_id
         )
       end
       order by item.ordinality
@@ -220,6 +220,14 @@ with normalized as (
   from public.planner_day_plans as plan
   cross join lateral jsonb_array_elements(plan.sessions)
     with ordinality as item(value, ordinality)
+  cross join lateral (
+    select coalesce(
+      public.gate_subject_id(item.value->>'subject'),
+      case when trim(coalesce(item.value->>'subject', '')) = '' then
+        public.gate_subject_id(coalesce(item.value->>'subjectId', item.value->>'subject_id'))
+      end
+    ) as subject_id
+  ) as identity
   group by plan.user_id, plan.plan_date
 )
 update public.planner_day_plans as plan
@@ -234,7 +242,12 @@ with expanded as (
     mock.id,
     item.ordinality,
     item.value,
-    public.gate_subject_id(item.value->>'subject') as subject_id
+    coalesce(
+      public.gate_subject_id(item.value->>'subject'),
+      case when trim(coalesce(item.value->>'subject', '')) = '' then
+        public.gate_subject_id(item.value->>'subject_id')
+      end
+    ) as subject_id
   from public.mock_tests as mock
   cross join lateral jsonb_array_elements(mock.subject_scores)
     with ordinality as item(value, ordinality)
@@ -245,33 +258,37 @@ with expanded as (
     jsonb_build_object(
       'subject', public.gate_subject_label(subject_id),
       'subject_id', subject_id,
-      'marks', sum(
-        case
-          when jsonb_typeof(value->'marks') = 'number' then (value->>'marks')::numeric
-          else 0
-        end
-      )
+      'marks', sum((value->>'marks')::numeric)
     ) as value
   from expanded
   where subject_id is not null
+    and jsonb_typeof(value) = 'object'
+    and jsonb_typeof(value->'marks') = 'number'
   group by id, subject_id
-), preserved_unknown as (
+), preserved_other as (
   select
     id,
     ordinality,
     case
-      when jsonb_typeof(value) = 'object' then
+      when jsonb_typeof(value) is distinct from 'object' then value
+      when subject_id is not null then
+        (value - 'subjectId') || jsonb_build_object(
+          'subject', public.gate_subject_label(subject_id),
+          'subject_id', subject_id
+        )
+      else
         (value - 'subjectId') || jsonb_build_object('subject_id', null)
-      else value
     end as value
   from expanded
   where subject_id is null
+     or jsonb_typeof(value) is distinct from 'object'
+     or jsonb_typeof(value->'marks') is distinct from 'number'
 ), normalized as (
   select id, jsonb_agg(value order by ordinality) as scores
   from (
     select * from merged_known
     union all
-    select * from preserved_unknown
+    select * from preserved_other
   ) as rows
   group by id
 )
@@ -299,15 +316,15 @@ as $$
       select coalesce(
         jsonb_agg(
           case
-            when public.gate_subject_id(item.value->>'subject') is null then
+            when identity.subject_id is null then
               case
                 when jsonb_typeof(item.value) = 'object' then
                   (item.value - 'subject_id') || jsonb_build_object('subjectId', null)
                 else item.value
               end
             else (item.value - 'subject_id') || jsonb_build_object(
-              'subject', public.gate_subject_label(item.value->>'subject'),
-              'subjectId', public.gate_subject_id(item.value->>'subject')
+              'subject', public.gate_subject_label(identity.subject_id),
+              'subjectId', identity.subject_id
             )
           end
           order by item.ordinality
@@ -316,6 +333,14 @@ as $$
       )
       from jsonb_array_elements(payload)
         with ordinality as item(value, ordinality)
+      cross join lateral (
+        select coalesce(
+          public.gate_subject_id(item.value->>'subject'),
+          case when trim(coalesce(item.value->>'subject', '')) = '' then
+            public.gate_subject_id(coalesce(item.value->>'subjectId', item.value->>'subject_id'))
+          end
+        ) as subject_id
+      ) as identity
     )
   end;
 $$;
@@ -335,7 +360,12 @@ as $$
         select
           item.ordinality,
           item.value,
-          public.gate_subject_id(item.value->>'subject') as subject_id
+          coalesce(
+            public.gate_subject_id(item.value->>'subject'),
+            case when trim(coalesce(item.value->>'subject', '')) = '' then
+              public.gate_subject_id(item.value->>'subject_id')
+            end
+          ) as subject_id
         from jsonb_array_elements(payload)
           with ordinality as item(value, ordinality)
       ), normalized as (
@@ -344,26 +374,30 @@ as $$
           jsonb_build_object(
             'subject', public.gate_subject_label(subject_id),
             'subject_id', subject_id,
-            'marks', sum(
-              case
-                when jsonb_typeof(value->'marks') = 'number' then (value->>'marks')::numeric
-                else 0
-              end
-            )
+            'marks', sum((value->>'marks')::numeric)
           ) as value
         from expanded
         where subject_id is not null
+          and jsonb_typeof(value) = 'object'
+          and jsonb_typeof(value->'marks') = 'number'
         group by subject_id
         union all
         select
           ordinality,
           case
-            when jsonb_typeof(value) = 'object' then
+            when jsonb_typeof(value) is distinct from 'object' then value
+            when subject_id is not null then
+              (value - 'subjectId') || jsonb_build_object(
+                'subject', public.gate_subject_label(subject_id),
+                'subject_id', subject_id
+              )
+            else
               (value - 'subjectId') || jsonb_build_object('subject_id', null)
-            else value
           end
         from expanded
         where subject_id is null
+           or jsonb_typeof(value) is distinct from 'object'
+           or jsonb_typeof(value->'marks') is distinct from 'number'
       )
       select coalesce(jsonb_agg(value order by ordinality), '[]'::jsonb)
       from normalized
@@ -405,15 +439,18 @@ declare
   resolved_id text;
 begin
   resolved_id := public.gate_subject_id(new.subject);
+  -- Match the client boundary rule: a meaningful label wins, but an ID may
+  -- supply the identity when the label is blank. Unknown/custom labels remain
+  -- readable and any stale ID is cleared rather than being trusted.
+  if resolved_id is null
+     and trim(coalesce(new.subject, '')) = '' then
+    resolved_id := public.gate_subject_id(new.subject_id);
+  end if;
   if resolved_id is not null then
     new.subject_id := resolved_id;
-    new.subject := public.gate_subject_label(new.subject);
-  elsif tg_op = 'UPDATE' and new.subject is distinct from old.subject then
-    -- An UPDATE carries the old id forward unless we explicitly clear it when
-    -- the label changes to an unknown/custom value (or to NULL where allowed).
+    new.subject := public.gate_subject_label(resolved_id);
+  else
     new.subject_id := null;
-  elsif new.subject_id is not null then
-    raise exception 'Unknown canonical GATE subject: %', new.subject_id;
   end if;
   return new;
 end;
@@ -499,8 +536,14 @@ with candidates as (
    and (question.source_year is null or question.source_year = attempt.year)
    and (question.session_id is null or question.session_id = attempt.pyq_session_id)
   where question.source_pyq_attempt_id is null
-    and question.source_ref ilike '%gate%'
+    and question.source_ref ~* '(^|[^a-z0-9])gate([^a-z0-9]|$)'
     and question.mark_decision is not null
+    and not exists (
+      select 1
+      from public.questions as linked_question
+      where linked_question.user_id = attempt.user_id
+        and linked_question.source_pyq_attempt_id = attempt.id
+    )
 ), unique_pairs as (
   select question_id, attempt_id
   from candidates
@@ -563,29 +606,39 @@ begin
     update public.pyq_attempts
     set question_type = nullif(upper(question_snapshot->>'type'), ''),
         question_marks = case
-          when question_snapshot->>'marks' in ('1', '2')
-            then (question_snapshot->>'marks')::smallint
+          when jsonb_typeof(question_snapshot->'marks') = 'number'
+               and (question_snapshot->>'marks')::numeric in (1, 2)
+            then (question_snapshot->>'marks')::numeric::smallint
           else null
         end,
         scoring_status = case
-          when answer_status = 'marks-to-all'
-               and question_snapshot->>'marks' in ('1', '2') then 'bonus'
+          when upper(coalesce(question_snapshot->>'type', '')) = 'MARKS_TO_ALL'
+               and answer_status = 'marks-to-all'
+               and jsonb_typeof(question_snapshot->'marks') = 'number'
+               and (question_snapshot->>'marks')::numeric in (1, 2) then 'bonus'
           when upper(coalesce(question_snapshot->>'type', '')) in ('MCQ', 'MSQ', 'NAT')
-               and question_snapshot->>'marks' in ('1', '2')
+               and answer_status = 'available'
+               and jsonb_typeof(question_snapshot->'marks') = 'number'
+               and (question_snapshot->>'marks')::numeric in (1, 2)
                and (mark_decision = 'SKIP' or mark_correct is not null) then 'scored'
           else 'unscorable'
         end,
         score_thirds = case
-          when answer_status = 'marks-to-all'
-               and question_snapshot->>'marks' in ('1', '2')
-            then (question_snapshot->>'marks')::smallint * 3
+          when upper(coalesce(question_snapshot->>'type', '')) = 'MARKS_TO_ALL'
+               and answer_status = 'marks-to-all'
+               and jsonb_typeof(question_snapshot->'marks') = 'number'
+               and (question_snapshot->>'marks')::numeric in (1, 2)
+            then (question_snapshot->>'marks')::numeric::smallint * 3
           when upper(coalesce(question_snapshot->>'type', '')) in ('MCQ', 'MSQ', 'NAT')
-               and question_snapshot->>'marks' in ('1', '2') then
+               and answer_status = 'available'
+               and jsonb_typeof(question_snapshot->'marks') = 'number'
+               and (question_snapshot->>'marks')::numeric in (1, 2) then
             case
               when mark_decision = 'SKIP' then 0
-              when mark_correct is true then (question_snapshot->>'marks')::smallint * 3
+              when mark_correct is true
+                then (question_snapshot->>'marks')::numeric::smallint * 3
               when mark_correct is false and upper(question_snapshot->>'type') = 'MCQ'
-                then -(question_snapshot->>'marks')::smallint
+                then -(question_snapshot->>'marks')::numeric::smallint
               when mark_correct is false then 0
               else null
             end
@@ -642,14 +695,42 @@ alter table public.pyq_attempts
   drop constraint if exists pyq_attempts_v3_audit_check,
   add constraint pyq_attempts_v3_audit_check check (
     capture_version <> 3
-    or (
+    or coalesce((
       question_snapshot is not null
       and jsonb_typeof(question_snapshot) = 'object'
       and question_snapshot ?& array[
-        'question_uid', 'year', 'number', 'paper_label', 'subject',
-        'subject_slug', 'subtopics', 'type', 'answer_status', 'answer_source',
-        'html', 'source_url'
+        'question_uid', 'year', 'set', 'number', 'paper_label', 'subject',
+        'subject_slug', 'topic', 'topic_slug', 'subtopics', 'marks', 'type',
+        'tolerance', 'answer_status', 'answer_source', 'html', 'source_url'
       ]
+      and jsonb_typeof(question_snapshot->'question_uid') = 'string'
+      and jsonb_typeof(question_snapshot->'year') = 'number'
+      and jsonb_typeof(question_snapshot->'set') in ('number', 'null')
+      and jsonb_typeof(question_snapshot->'number') = 'string'
+      and jsonb_typeof(question_snapshot->'paper_label') = 'string'
+      and jsonb_typeof(question_snapshot->'subject') = 'string'
+      and jsonb_typeof(question_snapshot->'subject_slug') = 'string'
+      and jsonb_typeof(question_snapshot->'topic') = 'string'
+      and jsonb_typeof(question_snapshot->'topic_slug') = 'string'
+      and jsonb_typeof(question_snapshot->'subtopics') = 'array'
+      and not jsonb_path_exists(
+        question_snapshot->'subtopics',
+        '$[*] ? (@.type() != "string")'
+      )
+      and jsonb_typeof(question_snapshot->'marks') in ('number', 'null')
+      and jsonb_typeof(question_snapshot->'type') = 'string'
+      and jsonb_typeof(question_snapshot->'tolerance') in ('object', 'null')
+      and (
+        jsonb_typeof(question_snapshot->'tolerance') = 'null'
+        or not (question_snapshot->'tolerance' ? 'abs')
+        or (
+          jsonb_typeof(question_snapshot->'tolerance'->'abs') = 'number'
+          and (question_snapshot->'tolerance'->>'abs')::numeric >= 0
+        )
+      )
+      and jsonb_typeof(question_snapshot->'answer_status') = 'string'
+      and jsonb_typeof(question_snapshot->'html') = 'string'
+      and jsonb_typeof(question_snapshot->'source_url') = 'string'
       and question_snapshot->>'question_uid' = question_uid
       and question_snapshot->>'year' = year::text
       and question_snapshot->>'answer_status' = answer_status
@@ -673,8 +754,9 @@ alter table public.pyq_attempts
       and question_type is not null
       and question_type = upper(question_snapshot->>'type')
       and question_marks is not distinct from case
-        when question_snapshot->>'marks' in ('1', '2')
-          then (question_snapshot->>'marks')::smallint
+        when jsonb_typeof(question_snapshot->'marks') = 'number'
+             and (question_snapshot->>'marks')::numeric in (1, 2)
+          then (question_snapshot->>'marks')::numeric::smallint
         else null
       end
       and scoring_status is not null
@@ -704,6 +786,7 @@ alter table public.pyq_attempts
           scoring_status = 'bonus'
           and upper(question_type) = 'MARKS_TO_ALL'
           and answer_status = 'marks-to-all'
+          and mark_correct is null
           and score_thirds = question_marks * 3
         )
         or (
@@ -723,7 +806,7 @@ alter table public.pyq_attempts
           )
         )
       )
-    )
+    ), false)
   );
 
 -- Readiness v2 is a methodology break. Keep the original two-column primary

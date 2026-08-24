@@ -1,8 +1,0 @@
-{
-  "projectRoot": "/Users/bkalyankrishnareddy/Desktop/GATE PREP/hetu",
-  "batchFiles": [
-    {"path":".ua/.understandignore","language":"unknown","sizeLines":135,"fileCategory":"code"},
-    {"path":".ua/config.json","language":"json","sizeLines":3,"fileCategory":"config"}
-  ],
-  "batchImportData": {".ua/.understandignore":[],".ua/config.json":[]}
-}

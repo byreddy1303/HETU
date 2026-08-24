@@ -72,4 +72,93 @@ describe('topic evidence', () => {
       accuracy: 0.5
     });
   });
+
+  it('resolves immutable PYQ evidence through an audited bank topic key', () => {
+    const bankAttempt = attempt('a0', true);
+    bankAttempt.subject = 'Database Management System';
+    bankAttempt.question_snapshot = {
+      subject_slug: 'databases',
+      topic_slug: 'relational-algebra',
+      topic: 'Relational Algebra'
+    } as PyqAttemptRow['question_snapshot'];
+
+    expect(
+      build({
+        subject: 'Databases',
+        topic: 'Relational model: relational algebra, tuple calculus and SQL',
+        bankTopicKeys: ['databases/relational-algebra'],
+        attempts: [bankAttempt]
+      })
+    ).toMatchObject({ practiced: 1, judged: 1, correct: 1 });
+  });
+
+  it('does not let a disallowed bank key fall through to a matching display label', () => {
+    const broadAttempt = attempt('a0', false);
+    broadAttempt.subject = 'General Aptitude';
+    broadAttempt.question_snapshot = {
+      subject_slug: 'general-aptitude',
+      topic_slug: 'general-aptitude',
+      topic: 'Reading comprehension and narrative sequencing'
+    } as PyqAttemptRow['question_snapshot'];
+    const linkedAnalysis = {
+      id: 'linked-broad-analysis',
+      subject: 'General Aptitude',
+      subtopic: 'Reading comprehension and narrative sequencing',
+      outcome: 'W-C',
+      source_pyq_attempt_id: broadAttempt.id,
+      created_at: broadAttempt.attempted_at
+    } as QuestionRow;
+
+    expect(
+      build({
+        subject: 'General Aptitude',
+        topic: 'Reading comprehension and narrative sequencing',
+        bankTopicKeys: [],
+        attempts: [broadAttempt],
+        questions: [linkedAnalysis],
+        reattempts: [{ question_id: linkedAnalysis.id, stage: 'D3' } as ReattemptRow]
+      })
+    ).toMatchObject({
+      status: 'not-started',
+      practiced: 0,
+      judged: 0,
+      openMistakes: 0
+    });
+  });
+
+  it('resolves a safe legacy detailed tag without accepting an unrelated topic', () => {
+    const legacy = {
+      id: 'legacy-sql',
+      subject: 'DBMS',
+      subtopic: 'SQL — Joins & Subqueries',
+      outcome: 'R',
+      mark_decision: 'MARK',
+      mark_correct: true,
+      time_spent_sec: 90,
+      created_at: '2026-08-09T10:00:00Z'
+    } as QuestionRow;
+    const supporting = {
+      ...legacy,
+      id: 'legacy-recovery',
+      subtopic: 'Recovery — Logging & Checkpoints'
+    } as QuestionRow;
+
+    expect(
+      build({
+        subject: 'Databases',
+        topic: 'Relational model: relational algebra, tuple calculus and SQL',
+        topicAliases: [{ subject: 'Databases', topic: 'SQL — Joins & Subqueries' }],
+        questions: [legacy, supporting]
+      })
+    ).toMatchObject({ practiced: 1, judged: 1, correct: 1 });
+  });
+
+  it('does not claim strong mastery from a broad topic mapping', () => {
+    const attempts = [0, 1, 2, 3, 4].map((index) => attempt(`a${index}`, index !== 4));
+    expect(build({ attempts, allowStrong: false })).toMatchObject({
+      status: 'active',
+      practiced: 5,
+      accuracy: 0.8
+    });
+  });
 });

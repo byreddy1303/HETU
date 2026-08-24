@@ -142,8 +142,7 @@ export async function importEnvelope(
     if (question.source_pyq_attempt_id) continue;
     const source = safeSourceByQuestionId.get(question.id);
     if (source) {
-      const { sync_status: _syncStatus, ...row } = question;
-      await writeLocal('questions', { ...row, source_pyq_attempt_id: source.id });
+      await writeLocal('questions', { ...question, source_pyq_attempt_id: source.id });
     }
   }
   return report;

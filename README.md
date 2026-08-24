@@ -1,6 +1,6 @@
 # HETU
 
-Local-first, multi-user GATE PYQ analysis app. Captures every solved question as structured data (outcome / pattern / trigger / root cause), schedules spaced re-attempts, supports focused one-to-one buddy study, and surfaces one weekly upstream weakness. An optional Telegram bot can deliver one daily study-only digest.
+Local-first, multi-user GATE PYQ analysis app. Captures every PYQ decision as an immutable performance event, offers optional structured Journal analysis (pattern / trigger / root cause), schedules spaced re-attempts, supports focused one-to-one buddy study, and surfaces one weekly upstream weakness. An optional Telegram bot can deliver one daily study-only digest.
 
 Built for GATE 2027 CS, targeting AIR <100.
 
@@ -24,7 +24,7 @@ Open `http://localhost:5173/dev/primitives` to preview the design system in dev.
 2. Owner (you) receives an email; approves from **Settings → Access requests**.
 3. Approval creates an invite; requester receives a one-time link that expires in 7 days.
 4. Sign-in via magic link or Google OAuth. Dashboard opens with a walkthrough.
-5. First session → tag 5 questions → re-attempts populate automatically.
+5. First session → answer or skip PYQs → optionally analyse mistakes → re-attempts populate automatically.
 
 The **first person to sign up becomes the owner** (bootstrap in `20260717000005_invite_signup.sql`). Every account after that must arrive via invite. Public sign-up is blocked at the database trigger; there is no way around it from the client.
 
@@ -66,7 +66,9 @@ Each account's data is fully separate:
 
 The tool compresses your mistake surface. It does not replace your reasoning.
 
-- Every question you solve produces 4 tags (30 sec): outcome, pattern, trigger, root cause.
+- Every PYQ decision—correct, wrong, skipped, or uncertain—is recorded once as immutable performance evidence. Journal analysis is optional and never gates readiness evidence.
+- Scorable questions use the official GATE rules for 1/2-mark MCQ, MSQ, and NAT items. Integer-thirds arithmetic avoids rounding drift; incomplete type/mark metadata remains visibly unscorable.
+- Readiness uses the official GATE 2027 section blueprint (15 marks General Aptitude, 13 Engineering Mathematics, 72 core CS). Recorded mock marks and their uncertainty lead the view; numeric AIR prediction remains disabled until prospectively validated.
 - Wrong / slow / guessed answers auto-enter a spaced re-attempt ladder (3 → 10 → 30 days).
 - Buddy chat lets you discuss and share a stripped question snapshot without exposing outcomes, patterns, or root causes.
 - Buddy message alerts are an explicit per-device opt-in and work on installed phone PWAs, desktop browsers, and configured Android builds.
@@ -85,6 +87,7 @@ Total monthly cost at low volumes: ₹0. See `DEPLOY.md` for the scaling thresho
 npm run typecheck        # strict TypeScript
 npm run lint             # ESLint (0 warnings tolerated)
 npm run test             # Vitest — analysis, isolation, Buddy, tips, sync, reattempt ladder
+npm run pyq:audit        # independent GATE 2027 taxonomy + mark-provenance audit
 npm run test:e2e         # Playwright — auth, tag flow, offline sync, buddy invite
 ```
 

@@ -200,11 +200,15 @@ describe('PYQ session logic and determinism', () => {
       detail: 'Exact GATE-rule score using the stored question type and marks.'
     });
     expect(
-      pyqAttemptScorePresentation({ score_thirds: null, scoring_status: 'unscorable' })
+      pyqAttemptScorePresentation({
+        ...attempt,
+        score_thirds: null,
+        scoring_status: 'unscorable'
+      })
     ).toEqual({
       label: 'Marks unavailable',
       covered: false,
-      detail: 'Excluded from exact-score coverage because scoring metadata is incomplete.'
+      detail: 'Excluded because versioned scoring metadata is incomplete or inconsistent.'
     });
   });
 
@@ -227,6 +231,86 @@ describe('PYQ session logic and determinism', () => {
     expect(attempt.mark_correct).toBeNull();
     expect(attempt.time_spent_ms).toBe(1);
     expect(attempt.time_spent_sec).toBe(1);
+  });
+
+  it('uses the pure scorer evaluator for MCQ, exact-set MSQ, and tolerance-aware NAT', () => {
+    const capture = (candidate: PyqQuestion, selectedAnswer: string | string[] | number) => {
+      const session = createPyqSessionRow('user-1', '2.0.0', mockConfig, [candidate]);
+      return createPyqAttemptRow({
+        userId: 'user-1',
+        session,
+        question: candidate,
+        selectedAnswer,
+        decision: 'MARK',
+        bankVersion: '2.0.0',
+        questionStartedAtMs: 1_000,
+        committedAtMs: 2_000,
+        screenshotUrl: null
+      });
+    };
+
+    expect(capture({ ...question, id: 'mcq', answer: 'B' }, 'b')).toMatchObject({
+      mark_correct: true,
+      score_thirds: 3,
+      scoring_status: 'scored'
+    });
+    expect(
+      capture({ ...question, id: 'msq', type: 'MSQ', marks: 2, answer: ['B', 'D'] }, ['D', 'B'])
+    ).toMatchObject({ mark_correct: true, score_thirds: 6, scoring_status: 'scored' });
+    expect(
+      capture({ ...question, id: 'msq-subset', type: 'MSQ', marks: 2, answer: ['B', 'D'] }, ['B'])
+    ).toMatchObject({ mark_correct: false, score_thirds: 0, scoring_status: 'scored' });
+    expect(
+      capture(
+        {
+          ...question,
+          id: 'nat-tolerance',
+          type: 'NAT',
+          answer: 0.5,
+          tolerance: { abs: 0.01 }
+        },
+        0.509
+      )
+    ).toMatchObject({ mark_correct: true, score_thirds: 3, scoring_status: 'scored' });
+    expect(
+      capture(
+        {
+          ...question,
+          id: 'nat-invalid-tolerance',
+          type: 'NAT',
+          answer: 0.5,
+          tolerance: { abs: -0.01 }
+        },
+        0.5
+      )
+    ).toMatchObject({
+      mark_correct: null,
+      score_thirds: null,
+      scoring_status: 'unscorable'
+    });
+  });
+
+  it('retains evaluated correctness when marks metadata is missing', () => {
+    const missingMarks = { ...question, id: 'missing-marks', marks: null };
+    const session = createPyqSessionRow('user-1', '2.0.0', mockConfig, [missingMarks]);
+    const attempt = createPyqAttemptRow({
+      userId: 'user-1',
+      session,
+      question: missingMarks,
+      selectedAnswer: 'B',
+      decision: 'MARK',
+      bankVersion: '2.0.0',
+      questionStartedAtMs: 1_000,
+      committedAtMs: 2_000,
+      screenshotUrl: null
+    });
+
+    expect(attempt).toMatchObject({
+      mark_correct: true,
+      question_marks: null,
+      score_thirds: null,
+      scoring_status: 'unscorable'
+    });
   });
 
   it('reconstructs an exact PYQ and creates a durable second-attempt receipt', () => {
@@ -264,13 +348,50 @@ describe('PYQ session logic and determinism', () => {
           session_id: null,
           subject: legacyAttempt.subject,
           source_year: legacyAttempt.year,
-          source_ref: 'GATE PYQ · 2026 · Q 1 · MCQ',
+          source_ref: 'Official GATE-PYQ · 2026 · Q 1 · MCQ',
+          source_pyq_attempt_id: null,
+          created_at: '1970-01-01T00:00:02.000+00:00'
+        },
+        [legacyAttempt]
+      )
+    ).toBe(legacyAttempt);
+    expect(
+      pyqSourceAttemptForJournalQuestion(
+        {
+          id: 'not-a-gate-source',
+          user_id: legacyAttempt.user_id,
+          session_id: null,
+          subject: legacyAttempt.subject,
+          source_year: legacyAttempt.year,
+          source_ref: 'Aggregate exercises',
           source_pyq_attempt_id: null,
           created_at: legacyAttempt.attempted_at
         },
         [legacyAttempt]
       )
-    ).toBe(legacyAttempt);
+    ).toBeNull();
+    const customSubjectAttempt = {
+      ...legacyAttempt,
+      id: 'unknown-subject-attempt',
+      subject: 'Custom Legacy Subject',
+      subject_id: null
+    };
+    expect(
+      pyqSourceAttemptForJournalQuestion(
+        {
+          id: 'unknown-subject-analysis',
+          user_id: customSubjectAttempt.user_id,
+          session_id: null,
+          subject: customSubjectAttempt.subject,
+          subject_id: null,
+          source_year: customSubjectAttempt.year,
+          source_ref: 'GATE PYQ',
+          source_pyq_attempt_id: null,
+          created_at: customSubjectAttempt.attempted_at
+        },
+        [customSubjectAttempt]
+      )
+    ).toBeNull();
 
     const restored = pyqQuestionFromAttempt(firstAttempt);
     expect(restored).toMatchObject({

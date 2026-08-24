@@ -5,10 +5,7 @@ import { describe, expect, it } from 'vitest';
 describe('PYQ production audit migration', () => {
   it('enforces one active set and immutable version-2 attempt receipts', () => {
     const sql = readFileSync(
-      path.resolve(
-        process.cwd(),
-        'supabase/migrations/20260808000001_pyq_attempt_audit.sql'
-      ),
+      path.resolve(process.cwd(), 'supabase/migrations/20260808000001_pyq_attempt_audit.sql'),
       'utf8'
     );
 
@@ -53,19 +50,44 @@ describe('PYQ production audit migration', () => {
     );
     expect(sql).toContain("jsonb_build_object('subjectId', null)");
     expect(sql).toContain("jsonb_build_object('subject_id', null)");
-    expect(sql).toContain("new.subject is distinct from old.subject");
+    expect(sql).toContain("jsonb_typeof(value->'marks') is distinct from 'number'");
+    expect(sql).not.toContain('else 0\n');
+    expect(sql).toContain("trim(coalesce(new.subject, '')) = ''");
+    expect(sql).toContain('resolved_id := public.gate_subject_id(new.subject_id)');
     expect(sql).toContain('new.subject_id := null');
+    expect(
+      sql.match(
+        /public\.gate_subject_id\(coalesce\(item\.value->>'subjectId', item\.value->>'subject_id'\)\)/g
+      )
+    ).toHaveLength(2);
+    expect(sql.match(/public\.gate_subject_id\(item\.value->>'subject_id'\)/g)).toHaveLength(2);
     expect(sql).toContain('attempt.capture_version in (0, 1)');
-    expect(sql).toContain("question.source_ref ilike '%gate%'");
+    expect(sql).toContain("question.source_ref ~* '(^|[^a-z0-9])gate([^a-z0-9]|$)'");
+    expect(sql).not.toContain("question.source_ref ilike '%gate%'");
     expect(sql).toContain('public.gate_subject_id(attempt.subject) is not null');
     expect(sql).toContain('question.session_id = attempt.pyq_session_id');
+    expect(sql).toContain('linked_question.source_pyq_attempt_id = attempt.id');
     expect(sql).toContain("public.gate_subject_id(question_snapshot->>'subject') is not null");
     expect(sql).toContain("subject_id = public.gate_subject_id(question_snapshot->>'subject')");
     expect(sql).toContain("trim(subject) = trim(question_snapshot->>'subject')");
+    expect(sql).toContain("'subtopics', 'marks', 'type'");
+    expect(sql).toContain("jsonb_typeof(question_snapshot->'subtopics') = 'array'");
+    expect(sql).toContain('not jsonb_path_exists(');
+    expect(sql).toContain("jsonb_typeof(question_snapshot->'marks') in ('number', 'null')");
+    expect(sql).toContain("jsonb_typeof(question_snapshot->'tolerance') in ('object', 'null')");
+    expect(sql).not.toContain("question_snapshot->>'marks' in ('1', '2')");
+    expect(
+      sql.match(/jsonb_typeof\(question_snapshot->'marks'\) = 'number'/g)?.length
+    ).toBeGreaterThanOrEqual(6);
+    expect(sql).toContain("(question_snapshot->>'marks')::numeric in (1, 2)");
     expect(sql).toContain('and scoring_status = case');
     expect(sql).toContain("and answer_status = 'marks-to-all' then 'bonus'");
+    expect(sql).toContain('and mark_correct is null');
     expect(sql).toContain("and (mark_decision = 'SKIP' or mark_correct is not null) then 'scored'");
+    expect(sql.match(/question_snapshot->>'type', ''\)\) = 'MARKS_TO_ALL'/g)).toHaveLength(2);
+    expect(sql.match(/and answer_status = 'available'/g)?.length).toBeGreaterThanOrEqual(4);
     expect(sql).toContain("else 'unscorable'");
+    expect(sql).toContain('or coalesce((');
     expect(sql).toContain('(to_jsonb(new) - rollout_fields) = (to_jsonb(old) - rollout_fields)');
     expect(sql).toContain('calculation_version smallint not null default 1');
     expect(sql).toContain('readiness_snapshots_v2_evidence_check');

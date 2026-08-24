@@ -11,13 +11,7 @@ export const GATE_SCORING_VERSION = 1 as const;
 export const GATE_THIRDS_PER_MARK = 3 as const;
 
 export type GateQuestionType =
-  | 'MCQ'
-  | 'MSQ'
-  | 'NAT'
-  | 'AMBIGUOUS'
-  | 'MARKS_TO_ALL'
-  | 'SUBJECTIVE'
-  | 'UNSUPPORTED';
+  'MCQ' | 'MSQ' | 'NAT' | 'AMBIGUOUS' | 'MARKS_TO_ALL' | 'SUBJECTIVE' | 'UNSUPPORTED';
 
 export type GateScorableQuestionType = Extract<GateQuestionType, 'MCQ' | 'MSQ' | 'NAT'>;
 export type GateAnswerStatus = 'available' | 'ambiguous' | 'marks-to-all' | 'unsupported';
@@ -90,6 +84,7 @@ export interface GateUnscorableResult extends GateScoreBase {
 }
 
 export type GateScoreResult = GateScoredResult | GateBonusResult | GateUnscorableResult;
+export type GateCoveredScoreResult = GateScoredResult | GateBonusResult;
 
 function confidenceFor(decision: GateMarkDecision): GateConfidence {
   if (decision === 'SKIP') return 'skipped';
@@ -294,6 +289,56 @@ export function scoreGateAnswer(input: GateAnswerScoreInput): GateScoreResult {
     decision: input.decision,
     correctness: evaluateGateAnswer(input)
   });
+}
+
+export interface GateStoredScoreInput extends Omit<GateOutcomeScoreInput, 'correctness'> {
+  correctness: boolean | null | undefined;
+  scoreThirds: number | null | undefined;
+  scoringStatus: string | null | undefined;
+  scoringVersion: number | null | undefined;
+}
+
+/**
+ * Recompute and validate a persisted score before presenting or aggregating it.
+ * Unknown versions, stale formulas, impossible bonuses, and incomplete rows are
+ * excluded instead of being relabelled as exact.
+ */
+export function validatedStoredGateScore(
+  input: GateStoredScoreInput
+): GateCoveredScoreResult | null {
+  if (input.scoringVersion !== GATE_SCORING_VERSION) return null;
+  if (
+    input.questionType !== 'MCQ' &&
+    input.questionType !== 'MSQ' &&
+    input.questionType !== 'NAT' &&
+    input.questionType !== 'MARKS_TO_ALL'
+  ) {
+    return null;
+  }
+  if (input.marks !== 1 && input.marks !== 2) return null;
+  if (input.answerStatus !== 'available' && input.answerStatus !== 'marks-to-all') {
+    return null;
+  }
+  if (input.decision !== 'MARK' && input.decision !== 'SKIP' && input.decision !== 'FIFTY_FIFTY') {
+    return null;
+  }
+  if (input.correctness !== null && typeof input.correctness !== 'boolean') return null;
+  const expected = scoreGateOutcome({
+    questionType: input.questionType,
+    marks: input.marks,
+    answerStatus: input.answerStatus,
+    decision: input.decision,
+    correctness: input.correctness ?? null
+  });
+  if (expected.status === 'unscorable') return null;
+  if (
+    input.scoringStatus !== expected.status ||
+    input.scoreThirds !== expected.scoreThirds ||
+    input.correctness !== expected.correctness
+  ) {
+    return null;
+  }
+  return expected;
 }
 
 export interface GateScoreAggregate {

@@ -1,13 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
-import {
-  Check,
-  ChevronDown,
-  CircleCheckBig,
-  Search,
-  Sparkles,
-  Target
-} from 'lucide-react';
+import { Check, ChevronDown, CircleCheckBig, Search, Sparkles, Target } from 'lucide-react';
 import { useReducedMotion } from 'motion/react';
 import PageHeader from '@/components/layout/PageHeader';
 import { Badge } from '@/components/ui/Badge';
@@ -15,9 +8,10 @@ import { Input } from '@/components/ui/Input';
 import { Progress } from '@/components/ui/Progress';
 import { useAuth } from '@/hooks/useAuth';
 import { SUBJECTS } from '@/lib/constants';
+import { GATE_2027_REGISTRY_VERSION } from '@/lib/gate-2027';
 import { haptic } from '@/lib/native';
 import { subjectInk } from '@/lib/subjectInk';
-import { SUBTOPICS_BY_SUBJECT } from '@/lib/subtopics';
+import { official2027TopicsFor, type Official2027TopicSpec } from '@/lib/subtopics';
 import { cn, formatDate, plural } from '@/lib/utils';
 import { todayISOInTimeZone } from '@/lib/utils';
 import { db } from '@/lib/db';
@@ -40,10 +34,27 @@ type Subject = (typeof SUBJECTS)[number];
 
 interface SubjectSummary {
   subject: Subject;
-  topics: string[];
+  topics: Official2027TopicSpec[];
   completed: number;
   percent: number;
   status: Exclude<SubjectFilter, 'all'>;
+}
+
+function completionIdsFor(topic: Official2027TopicSpec): string[] {
+  return [
+    ...new Set(topic.completionAliases.map((alias) => topicProgressId(alias.subject, alias.topic)))
+  ];
+}
+
+function completedAtFor(
+  completions: TopicCompletions,
+  topic: Official2027TopicSpec
+): string | undefined {
+  return completionIdsFor(topic)
+    .map((id) => completions[id])
+    .filter((completedAt): completedAt is string => Boolean(completedAt))
+    .sort()
+    .at(-1);
 }
 
 const FILTERS: { value: SubjectFilter; label: string }[] = [
@@ -64,10 +75,11 @@ const ORBIT_COLORS = [
 
 function summariesFor(completions: TopicCompletions): SubjectSummary[] {
   return SUBJECTS.map((subject) => {
-    const topics = (SUBTOPICS_BY_SUBJECT[subject] ?? []).map((topic) => topic.value);
-    const completed = topics.filter((topic) => completions[topicProgressId(subject, topic)]).length;
+    const topics = official2027TopicsFor(subject);
+    const completed = topics.filter((topic) => completedAtFor(completions, topic)).length;
     const percent = topics.length ? Math.round((completed / topics.length) * 100) : 0;
-    const status = completed === topics.length ? 'complete' : completed > 0 ? 'in-progress' : 'not-started';
+    const status =
+      completed === topics.length ? 'complete' : completed > 0 ? 'in-progress' : 'not-started';
     return { subject, topics, completed, percent, status };
   });
 }
@@ -75,13 +87,11 @@ function summariesFor(completions: TopicCompletions): SubjectSummary[] {
 function nextTopicFrom(
   summaries: SubjectSummary[],
   completions: TopicCompletions
-): { subject: Subject; topic: string } | null {
+): { subject: Subject; topic: Official2027TopicSpec } | null {
   const active = summaries.find((summary) => summary.status === 'in-progress');
   const subject = active ?? summaries.find((summary) => summary.status === 'not-started');
   if (!subject) return null;
-  const topic = subject.topics.find(
-    (candidate) => !completions[topicProgressId(subject.subject, candidate)]
-  );
+  const topic = subject.topics.find((candidate) => !completedAtFor(completions, candidate));
   if (!topic) return null;
   return {
     subject: subject.subject,
@@ -98,17 +108,17 @@ export default function SyllabusTracker() {
   const effectiveUserId = userId ?? currentUserId() ?? 'guest';
   const today = todayISOInTimeZone(profile?.timezone ?? 'Asia/Kolkata');
   const questions = useLiveQuery(
-    () => userId ? db.questions.where('user_id').equals(userId).toArray() : [],
+    () => (userId ? db.questions.where('user_id').equals(userId).toArray() : []),
     [userId],
     []
   );
   const attempts = useLiveQuery(
-    () => userId ? db.pyq_attempts.where('user_id').equals(userId).toArray() : [],
+    () => (userId ? db.pyq_attempts.where('user_id').equals(userId).toArray() : []),
     [userId],
     []
   );
   const reattempts = useLiveQuery(
-    () => userId ? db.reattempts.where('user_id').equals(userId).toArray() : [],
+    () => (userId ? db.reattempts.where('user_id').equals(userId).toArray() : []),
     [userId],
     []
   );
@@ -125,17 +135,23 @@ export default function SyllabusTracker() {
   const evidenceByTopic = useMemo(() => {
     const map = new Map<string, TopicEvidence>();
     for (const subject of SUBJECTS) {
-      for (const topic of (SUBTOPICS_BY_SUBJECT[subject] ?? []).map((item) => item.value)) {
-        const id = topicProgressId(subject, topic);
-        map.set(id, buildTopicEvidence({
-          subject,
-          topic,
-          studiedAt: completions[id] ?? null,
-          questions,
-          attempts,
-          reattempts,
-          today
-        }));
+      for (const topic of official2027TopicsFor(subject)) {
+        const id = topicProgressId(subject, topic.value);
+        map.set(
+          id,
+          buildTopicEvidence({
+            subject,
+            topic: topic.value,
+            studiedAt: completedAtFor(completions, topic) ?? null,
+            questions,
+            attempts,
+            reattempts,
+            today,
+            topicAliases: topic.evidenceAliases,
+            bankTopicKeys: topic.evidenceBankTopicKeys,
+            allowStrong: topic.bankCoverage === 'explicit'
+          })
+        );
       }
     }
     return map;
@@ -157,7 +173,7 @@ export default function SyllabusTracker() {
     const matchesQuery =
       !normalizedQuery ||
       summary.subject.toLocaleLowerCase().includes(normalizedQuery) ||
-      summary.topics.some((topic) => topic.toLocaleLowerCase().includes(normalizedQuery));
+      summary.topics.some((topic) => topic.value.toLocaleLowerCase().includes(normalizedQuery));
     return matchesFilter && matchesQuery;
   });
   const matchingTopicCount = normalizedQuery
@@ -167,22 +183,20 @@ export default function SyllabusTracker() {
           summary.topics.filter(
             (topic) =>
               summary.subject.toLocaleLowerCase().includes(normalizedQuery) ||
-              topic.toLocaleLowerCase().includes(normalizedQuery)
+              topic.value.toLocaleLowerCase().includes(normalizedQuery)
           ).length,
         0
       )
     : null;
-  const recent = Object.entries(completions)
-    .sort(([, left], [, right]) => right.localeCompare(left))
-    .slice(0, 3)
-    .map(([id, completedAt]) => {
-      const divider = id.indexOf('::');
-      return {
-        subject: id.slice(0, divider),
-        topic: id.slice(divider + 2),
-        completedAt
-      };
-    });
+  const recent = summaries
+    .flatMap((summary) =>
+      summary.topics.flatMap((topic) => {
+        const completedAt = completedAtFor(completions, topic);
+        return completedAt ? [{ subject: summary.subject, topic: topic.value, completedAt }] : [];
+      })
+    )
+    .sort((left, right) => right.completedAt.localeCompare(left.completedAt))
+    .slice(0, 3);
 
   function toggleSubject(subject: string) {
     setOpenSubjects((current) => {
@@ -193,8 +207,14 @@ export default function SyllabusTracker() {
     });
   }
 
-  function toggleTopic(subject: string, topic: string, completed: boolean) {
-    setCompleted(effectiveUserId, topicProgressId(subject, topic), completed);
+  function toggleTopic(topic: Official2027TopicSpec, completed: boolean) {
+    if (completed) {
+      setCompleted(effectiveUserId, topicProgressId(topic.subject, topic.value), true);
+    } else {
+      // completionAliases are globally unique to this official leaf. Shared
+      // legacy/bank labels are intentionally left untouched.
+      for (const id of completionIdsFor(topic)) setCompleted(effectiveUserId, id, false);
+    }
     haptic(completed ? 'success' : 'selection');
   }
 
@@ -215,7 +235,7 @@ export default function SyllabusTracker() {
     <div className="flex flex-col gap-4">
       <PageHeader
         title="Syllabus tracker"
-        description="Mark what you studied; PYQ evidence, open mistakes, and recency determine the working status."
+        description="Track official GATE 2027 leaves only. Detailed legacy tags still contribute evidence when their mapping is safe; supporting and historical topics do not inflate completion."
       />
 
       <section className="relative overflow-hidden rounded-lg border border-border bg-bg-raised shadow-card">
@@ -227,10 +247,11 @@ export default function SyllabusTracker() {
             <div className="flex flex-wrap items-center gap-2">
               <Badge tone={overallPercent === 100 ? 'success' : 'accent'}>
                 {overallPercent === 100 ? <CircleCheckBig size={12} /> : <Target size={12} />}
-                {overallPercent === 100 ? 'Study pass recorded' : 'AIR roadmap'}
+                {overallPercent === 100 ? 'Official study pass recorded' : 'Official 2027 scope'}
               </Badge>
               <span className="u-num text-[11px] text-text-faint">
-                {completedSubjects}/{SUBJECTS.length} subjects complete
+                {completedSubjects}/{SUBJECTS.length} subjects complete ·{' '}
+                {GATE_2027_REGISTRY_VERSION}
               </span>
             </div>
 
@@ -241,7 +262,7 @@ export default function SyllabusTracker() {
                   Smart next step
                 </p>
                 <h2 className="mt-1 font-display text-xl font-bold tracking-tight text-text">
-                  {nextTopic.topic}
+                  {nextTopic.topic.value}
                 </h2>
                 <p className="mt-0.5 text-[13px] text-text-muted">Continue {nextTopic.subject}</p>
                 <button
@@ -257,7 +278,7 @@ export default function SyllabusTracker() {
               <div className="mt-4">
                 <p className="u-label">First study pass complete</p>
                 <h2 className="mt-1 font-display text-xl font-bold text-success">
-                  Every topic is marked studied.
+                  Every official leaf is marked studied.
                 </h2>
                 <p className="mt-1 text-[13px] text-text-muted">
                   Keep the edge by pairing this with PYQs, re-attempts, and timed mocks.
@@ -297,7 +318,7 @@ export default function SyllabusTracker() {
             <Input
               value={query}
               onChange={(event) => setQuery(event.target.value)}
-              placeholder="Find a topic or subject…"
+              placeholder="Find an official topic or subject…"
               className="pl-9"
               aria-label="Search syllabus topics"
             />
@@ -330,7 +351,9 @@ export default function SyllabusTracker() {
               ? `${visibleSummaries.length} ${plural(visibleSummaries.length, 'subject')}`
               : `${matchingTopicCount} matching ${plural(matchingTopicCount, 'topic')}`}
           </span>
-          <span className="u-num">{totalCompleted}/{totalTopics} topics</span>
+          <span className="u-num">
+            {totalCompleted}/{totalTopics} official leaves
+          </span>
         </div>
       </section>
 
@@ -340,7 +363,7 @@ export default function SyllabusTracker() {
             ? summary.topics.filter(
                 (topic) =>
                   summary.subject.toLocaleLowerCase().includes(normalizedQuery) ||
-                  topic.toLocaleLowerCase().includes(normalizedQuery)
+                  topic.value.toLocaleLowerCase().includes(normalizedQuery)
               )
             : summary.topics;
           const isOpen = normalizedQuery ? true : openSubjects.has(summary.subject);
@@ -354,9 +377,7 @@ export default function SyllabusTracker() {
               evidence={evidenceByTopic}
               open={isOpen}
               onToggle={() => toggleSubject(summary.subject)}
-              onTopicChange={(topic, completed) =>
-                toggleTopic(summary.subject, topic, completed)
-              }
+              onTopicChange={toggleTopic}
             />
           );
         })}
@@ -381,7 +402,10 @@ function SyllabusOrbit({ summaries, percent }: { summaries: SubjectSummary[]; pe
   const step = 100 / summaries.length;
 
   return (
-    <div className="mx-auto flex w-[190px] flex-col items-center lg:mx-0" aria-label={`${percent}% of syllabus complete`}>
+    <div
+      className="mx-auto flex w-[190px] flex-col items-center lg:mx-0"
+      aria-label={`${percent}% of syllabus complete`}
+    >
       <div className="relative h-[180px] w-[180px]">
         <svg viewBox="0 0 128 128" className="h-full w-full -rotate-90" aria-hidden="true">
           {summaries.map((summary, index) => (
@@ -422,7 +446,7 @@ function SyllabusOrbit({ summaries, percent }: { summaries: SubjectSummary[]; pe
         </svg>
         <div className="absolute inset-0 flex flex-col items-center justify-center">
           <span className="u-num text-4xl font-bold leading-none text-text">{percent}%</span>
-          <span className="u-label mt-2">topics studied</span>
+          <span className="u-label mt-2">official leaves studied</span>
         </div>
       </div>
       <p className="-mt-1 text-center text-[11px] leading-relaxed text-text-faint">
@@ -444,12 +468,12 @@ function SubjectLedger({
 }: {
   index: number;
   summary: SubjectSummary;
-  topics: string[];
+  topics: Official2027TopicSpec[];
   completions: TopicCompletions;
   evidence: Map<string, TopicEvidence>;
   open: boolean;
   onToggle: () => void;
-  onTopicChange: (topic: string, completed: boolean) => void;
+  onTopicChange: (topic: Official2027TopicSpec, completed: boolean) => void;
 }) {
   const ink = subjectInk(summary.subject);
   return (
@@ -466,10 +490,16 @@ function SubjectLedger({
         <span
           className={cn(
             'u-num flex h-8 w-8 items-center justify-center rounded-full text-[11px] font-semibold',
-            summary.status === 'complete' ? 'bg-success-faint text-success' : 'bg-bg-overlay text-text-faint'
+            summary.status === 'complete'
+              ? 'bg-success-faint text-success'
+              : 'bg-bg-overlay text-text-faint'
           )}
         >
-          {summary.status === 'complete' ? <Check size={14} strokeWidth={2.5} /> : String(index + 1).padStart(2, '0')}
+          {summary.status === 'complete' ? (
+            <Check size={14} strokeWidth={2.5} />
+          ) : (
+            String(index + 1).padStart(2, '0')
+          )}
         </span>
         <span className="min-w-0">
           <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
@@ -506,7 +536,10 @@ function SubjectLedger({
           </span>
           <ChevronDown
             size={17}
-            className={cn('text-text-faint transition-transform duration-200', open && 'rotate-180')}
+            className={cn(
+              'text-text-faint transition-transform duration-200',
+              open && 'rotate-180'
+            )}
           />
         </span>
       </button>
@@ -515,17 +548,17 @@ function SubjectLedger({
         <div className="border-t border-border bg-bg/40 p-2 sm:p-3">
           <div className="grid gap-1.5 sm:grid-cols-2">
             {topics.map((topic) => {
-              const id = topicProgressId(summary.subject, topic);
-              const completedAt = completions[id];
+              const id = topicProgressId(summary.subject, topic.value);
+              const completedAt = completedAtFor(completions, topic);
               const completed = Boolean(completedAt);
               const topicEvidence = evidence.get(id);
               return (
                 <label
-                  key={topic}
+                  key={topic.id}
                   className={cn(
                     'group/topic flex min-h-12 cursor-pointer items-start gap-3 rounded border px-3 py-2.5 transition-[border-color,background-color,transform]',
-                      completed
-                        ? 'border-success/25 bg-success-faint/45'
+                    completed
+                      ? 'border-success/25 bg-success-faint/45'
                       : 'border-transparent bg-bg-raised hover:border-border-hover hover:-translate-y-px'
                   )}
                 >
@@ -553,7 +586,8 @@ function SubjectLedger({
                         completed ? 'text-text-muted' : 'text-text'
                       )}
                     >
-                      {topic}
+                      <span>{topic.value}</span>
+                      <CoverageHint coverage={topic.bankCoverage} />
                     </span>
                     <TopicEvidenceLine evidence={topicEvidence} completedAt={completedAt} />
                   </span>
@@ -564,6 +598,30 @@ function SubjectLedger({
         </div>
       )}
     </section>
+  );
+}
+
+const COVERAGE_HINT = {
+  broad: 'Broad bank mapping',
+  missing: 'No mapped bank topic',
+  'review-required': 'Row review needed'
+} as const;
+
+function CoverageHint({ coverage }: { coverage: Official2027TopicSpec['bankCoverage'] }) {
+  if (coverage === 'explicit') return null;
+  return (
+    <span
+      className="ml-1.5 inline-flex rounded-full bg-bg-overlay px-1.5 py-0.5 align-middle text-[8.5px] font-semibold text-text-faint"
+      title={
+        coverage === 'broad'
+          ? 'The bank topic is broader than this official leaf. It remains a coverage diagnostic and does not automatically count as leaf-level practice or mastery.'
+          : coverage === 'review-required'
+            ? 'Bank rows must be reviewed before they can count as official leaf evidence.'
+            : 'No immutable-bank topic is currently mapped to this official leaf.'
+      }
+    >
+      {COVERAGE_HINT[coverage]}
+    </span>
   );
 }
 
@@ -600,7 +658,9 @@ function TopicEvidenceLine({
   return (
     <span className="mt-1 block text-[9.5px] leading-relaxed">
       <span className={cn('font-semibold', tone)}>{EVIDENCE_LABEL[evidence.status]}</span>
-      {facts.length > 0 ? <span className="u-num text-text-faint"> · {facts.join(' · ')}</span> : null}
+      {facts.length > 0 ? (
+        <span className="u-num text-text-faint"> · {facts.join(' · ')}</span>
+      ) : null}
       {completedAt && evidence.practiced === 0 ? (
         <span className="u-num text-text-faint"> · marked {formatDate(completedAt, 'dd MMM')}</span>
       ) : null}

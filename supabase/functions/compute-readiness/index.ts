@@ -20,7 +20,7 @@ const admin = createClient(SUPABASE_URL, SERVICE, {
 
 interface UserRow {
   id: string;
-  exam_date: string;
+  exam_date: string | null;
   timezone: string | null;
 }
 
@@ -30,6 +30,14 @@ interface QuestionRow {
   source_pyq_attempt_id: string | null;
   mark_decision: string | null;
   mark_correct: boolean | null;
+  outcome: string;
+  source_ref: string | null;
+  created_at: string;
+  subject: string;
+  subject_id: string | null;
+  source_year: number | null;
+  session_id: string | null;
+  time_spent_sec: number;
 }
 
 interface AttemptRow {
@@ -37,13 +45,22 @@ interface AttemptRow {
   user_id: string;
   mark_decision: string | null;
   mark_correct: boolean | null;
+  capture_version: number;
+  attempted_at: string;
+  subject: string;
+  subject_id: string | null;
+  year: number;
+  pyq_session_id: string | null;
+  time_spent_sec: number;
 }
 
 interface PatternRow {
+  id: string;
   user_id: string;
 }
 
 interface ReattemptRow {
+  id: string;
   user_id: string;
   stage: 'D3' | 'D10' | 'D30' | 'MASTERED';
   scheduled_date: string;
@@ -80,21 +97,31 @@ function weekStart(date: string): string {
 }
 
 const PAGE_SIZE = 1_000;
+// Keep null-profile behavior identical to the browser readiness page. The
+// database column predates a NOT NULL constraint, so one legacy profile must
+// not turn the whole weekly upsert into a null days_to_exam failure.
+const EXAM_DATE_DEFAULT = '2027-02-06';
 
-/** Fixed global limits silently drop evidence for mature accounts. Paginate
- * every source to exhaustion so the weekly ledger stays exact. */
-async function loadAll<T>(table: string, columns: string): Promise<T[]> {
+/** Fixed global limits silently drop evidence for mature accounts. Use an ID
+ * cursor instead of live OFFSET pages, which can skip/duplicate rows when a
+ * concurrent delete shifts the table between requests. Every projection passed
+ * here includes the UUID primary key used as the cursor. */
+async function loadAll<T extends { id: string }>(table: string, columns: string): Promise<T[]> {
   const rows: T[] = [];
-  for (let from = 0; ; from += PAGE_SIZE) {
-    const result = await admin
-      .from(table)
-      .select(columns)
-      .order('id', { ascending: true })
-      .range(from, from + PAGE_SIZE - 1);
+  let afterId: string | null = null;
+  for (;;) {
+    let query = admin.from(table).select(columns).order('id', { ascending: true }).limit(PAGE_SIZE);
+    if (afterId) query = query.gt('id', afterId);
+    const result = await query;
     if (result.error) throw result.error;
     const page = (result.data as T[] | null) ?? [];
     rows.push(...page);
     if (page.length < PAGE_SIZE) return rows;
+    const nextAfterId = page.at(-1)?.id;
+    if (!nextAfterId || nextAfterId === afterId) {
+      throw new Error(`Readiness pagination did not advance for ${table}.`);
+    }
+    afterId = nextAfterId;
   }
 }
 
@@ -118,11 +145,14 @@ Deno.serve(async (req: Request): Promise<Response> => {
       loadAll<UserRow>('users', 'id, exam_date, timezone'),
       loadAll<QuestionRow>(
         'questions',
-        'id, user_id, source_pyq_attempt_id, mark_decision, mark_correct'
+        'id, user_id, source_pyq_attempt_id, mark_decision, mark_correct, outcome, source_ref, created_at, subject, subject_id, source_year, session_id, time_spent_sec'
       ),
-      loadAll<AttemptRow>('pyq_attempts', 'id, user_id, mark_decision, mark_correct'),
-      loadAll<PatternRow>('patterns', 'user_id'),
-      loadAll<ReattemptRow>('reattempts', 'user_id, stage, scheduled_date, history')
+      loadAll<AttemptRow>(
+        'pyq_attempts',
+        'id, user_id, mark_decision, mark_correct, capture_version, attempted_at, subject, subject_id, year, pyq_session_id, time_spent_sec'
+      ),
+      loadAll<PatternRow>('patterns', 'id, user_id'),
+      loadAll<ReattemptRow>('reattempts', 'id, user_id, stage, scheduled_date, history')
     ]);
   } catch (error) {
     console.error(
@@ -173,7 +203,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
       user_id: user.id,
       on_date: weekStart(today),
       score: result.score,
-      days_to_exam: daysBetween(today, user.exam_date),
+      days_to_exam: daysBetween(today, user.exam_date ?? EXAM_DATE_DEFAULT),
       calculation_version: READINESS_CALCULATION_VERSION,
       evidence_counts: result.counts,
       components: result.components

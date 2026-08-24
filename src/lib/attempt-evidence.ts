@@ -73,7 +73,22 @@ function eventFromAttempt(attempt: PyqAttemptRow): AttemptEvidenceEvent {
 }
 
 function eventFromJournal(question: QuestionRow): AttemptEvidenceEvent | null {
-  if (question.mark_decision == null) return null;
+  const legacyOutcome = (() => {
+    switch (question.outcome) {
+      case 'R':
+      case 'RBS':
+        return { decision: 'MARK' as const, correct: true };
+      case 'RBG':
+        return { decision: 'FIFTY_FIFTY' as const, correct: true };
+      case 'W-C':
+      case 'W-E':
+      case 'W-R':
+        return { decision: 'MARK' as const, correct: false };
+    }
+  })();
+  const decision = question.mark_decision ?? legacyOutcome?.decision;
+  if (!decision) return null;
+  const correct = question.mark_correct ?? legacyOutcome?.correct ?? null;
   return {
     id: `legacy-journal:${question.id}`,
     source: 'legacy-journal',
@@ -84,10 +99,10 @@ function eventFromJournal(question: QuestionRow): AttemptEvidenceEvent | null {
     subject: question.subject,
     topic: question.subtopic,
     occurredAt: question.created_at,
-    decision: question.mark_decision,
-    outcome: outcomeFor(question.mark_decision, question.mark_correct),
-    uncertain: question.mark_decision === 'FIFTY_FIFTY',
-    correct: question.mark_correct,
+    decision,
+    outcome: outcomeFor(decision, correct),
+    uncertain: decision === 'FIFTY_FIFTY',
+    correct,
     timeSpentSec: Math.max(0, question.time_spent_sec)
   };
 }
@@ -145,7 +160,8 @@ export function normalizeAttemptEvidence(args: {
     ])
   );
   const safeLegacyLinks = pyqJournalSourceMap(args.questions, attempts);
-  const suppressedJournalQuestionIds: string[] = [];
+  const suppressedJournalQuestionIds = new Set<string>();
+  const seenIndependentJournalIds = new Set<string>();
   const events = attempts.map(eventFromAttempt);
 
   for (const question of args.questions) {
@@ -154,22 +170,27 @@ export function normalizeAttemptEvidence(args: {
       deterministicJournalIds.has(question.id) ||
       safeLegacyLinks.has(question.id)
     ) {
-      suppressedJournalQuestionIds.push(question.id);
+      suppressedJournalQuestionIds.add(question.id);
       continue;
     }
     const event = eventFromJournal(question);
-    if (event) events.push(event);
+    if (!event || seenIndependentJournalIds.has(question.id)) continue;
+    // A corrupted/imported array can repeat the same primary key even though
+    // IndexedDB and Postgres cannot. Match the server scorer's first-countable
+    // semantics so one Journal row never contributes two learner events.
+    seenIndependentJournalIds.add(question.id);
+    events.push(event);
   }
 
   events.sort(
     (left, right) =>
       left.occurredAt.localeCompare(right.occurredAt) || left.id.localeCompare(right.id)
   );
-  suppressedJournalQuestionIds.sort();
+  const suppressedIds = [...suppressedJournalQuestionIds].sort();
   return {
     events,
     counts: countsFor(events),
-    suppressedJournalQuestionIds,
+    suppressedJournalQuestionIds: suppressedIds,
     duplicateAttemptIds: [...duplicateAttemptIds].sort()
   };
 }

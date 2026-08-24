@@ -275,6 +275,8 @@ describe('PYQ session logic and determinism', () => {
       type: 'MCQ',
       html: question.html
     });
+    expect(attempt.question_snapshot?.book_slug).toBe('gate-cse');
+    expect(attempt.question_snapshot).not.toHaveProperty('choices');
     expect(pyqAttemptScorePresentation(attempt)).toEqual({
       label: 'GATE -⅓',
       covered: true,
@@ -431,6 +433,97 @@ describe('PYQ session logic and determinism', () => {
       question_marks: null,
       score_thirds: null,
       scoring_status: 'unscorable'
+    });
+  });
+
+  it('round-trips source books and variable choices through immutable v3 re-attempts', () => {
+    const choices = ['A', 'B', 'C', 'D', 'E'];
+    const sourcedQuestion: PyqQuestion = {
+      ...question,
+      id: 'tifr-gs-2026-q1',
+      bookSlug: 'tifr-gs-cs',
+      paperLabel: 'TIFR GS 2026',
+      choices,
+      answer: 'E'
+    };
+    const session = createPyqSessionRow(
+      'user-1',
+      'multi-book-v1',
+      { ...mockConfig, bookSlug: 'tifr-gs-cs' },
+      [sourcedQuestion],
+      '2026-08-08T08:00:00.000Z'
+    );
+    const firstAttempt = createPyqAttemptRow({
+      userId: 'user-1',
+      session,
+      question: sourcedQuestion,
+      selectedAnswer: 'D',
+      decision: 'MARK',
+      bankVersion: 'multi-book-v1',
+      questionStartedAtMs: 1_000,
+      committedAtMs: 2_000,
+      screenshotUrl: null
+    });
+
+    expect(session.config.bookSlug).toBe('tifr-gs-cs');
+    expect(firstAttempt.question_snapshot).toMatchObject({
+      book_slug: 'tifr-gs-cs',
+      choices: ['A', 'B', 'C', 'D', 'E']
+    });
+    expect(firstAttempt.question_snapshot?.choices).not.toBe(choices);
+    choices[0] = 'mutated after capture';
+    expect(firstAttempt.question_snapshot?.choices).toEqual(['A', 'B', 'C', 'D', 'E']);
+
+    const restored = pyqQuestionFromAttempt(firstAttempt);
+    expect(restored).toMatchObject({
+      id: sourcedQuestion.id,
+      bookSlug: 'tifr-gs-cs',
+      choices: ['A', 'B', 'C', 'D', 'E'],
+      answer: 'E'
+    });
+    expect(restored?.choices).not.toBe(firstAttempt.question_snapshot?.choices);
+    restored!.choices![1] = 'mutated after restore';
+    expect(firstAttempt.question_snapshot?.choices).toEqual(['A', 'B', 'C', 'D', 'E']);
+
+    const legacySnapshot = { ...firstAttempt.question_snapshot! };
+    delete legacySnapshot.book_slug;
+    expect(
+      pyqQuestionFromAttempt({
+        ...firstAttempt,
+        capture_version: 2,
+        question_snapshot: legacySnapshot
+      })
+    ).toMatchObject({ bookSlug: 'tifr-gs-cs' });
+
+    const reattempt = createPyqReattemptAttemptRow({
+      userId: 'user-1',
+      reattemptId: 'tifr-reattempt-1',
+      reattemptRound: 1,
+      roundAttemptNumber: 1,
+      sourceAttempt: firstAttempt,
+      question: { ...restored!, choices: ['A', 'B', 'C', 'D', 'E'] },
+      selectedAnswer: 'E',
+      decision: 'MARK',
+      questionStartedAtMs: 3_000,
+      committedAtMs: 4_000,
+      screenshotUrl: null,
+      attemptNumber: 2
+    });
+
+    expect(reattempt).toMatchObject({
+      capture_version: 3,
+      correct_answer: 'E',
+      selected_answer: 'E',
+      mark_correct: true,
+      score_thirds: 3,
+      scoring_status: 'scored',
+      reattempt_id: 'tifr-reattempt-1',
+      reattempt_round: 1,
+      round_attempt_number: 1,
+      question_snapshot: {
+        book_slug: 'tifr-gs-cs',
+        choices: ['A', 'B', 'C', 'D', 'E']
+      }
     });
   });
 

@@ -1,0 +1,4415 @@
+{
+  "bookSlug": "cmi-cs-objective",
+  "source": "CMI MSc/PhD Computer Science",
+  "sourceUrl": "https://www.cmi.ac.in/admissions/syllabus.php",
+  "importedAt": "2026-08-20",
+  "questions": [
+    {
+      "id": "cmi-cs:2013:1",
+      "year": 2013,
+      "set": null,
+      "number": "1",
+      "paperLabel": "CMI MSc/PhD CS 2013 · Part A",
+      "subject": "discrete-mathematics",
+      "subjectSlug": "discrete-mathematics",
+      "classificationHint": {
+        "subjectSlug": "discrete-mathematics",
+        "topicSlug": "combination"
+      },
+      "topic": "combination",
+      "topicSlug": "combination",
+      "subtopics": [
+        "combination",
+        "cmi-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "A",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">Ball Mart has 107 different items in stock across all its stores worldwide. The company<br>     has collected billing data for 1010 customer transactions. Each individual bill has at<br>     most 10 distinct items in it.<br>     Ball Mart’s CEO wants to optimize the company’s inventory and has asked for a list<br>     of those items that appear in at least 2% of the billed transactions. Which of the<br>     following is the most precise upper bound one can compute for the number of such<br>     items, given the data?<br>     (a) 500                  (b) 1000                     (c) 5000                 (d) 20000</div>",
+      "sourceUrl": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2013-solutions.pdf",
+      "answerSource": {
+        "kind": "official-solution",
+        "url": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2013-solutions.pdf"
+      }
+    },
+    {
+      "id": "cmi-cs:2013:2",
+      "year": 2013,
+      "set": null,
+      "number": "2",
+      "paperLabel": "CMI MSc/PhD CS 2013 · Part A",
+      "subject": "engineering-mathematics",
+      "subjectSlug": "engineering-mathematics",
+      "classificationHint": {
+        "subjectSlug": "engineering-mathematics",
+        "topicSlug": "probability-statistics"
+      },
+      "topic": "probability-statistics",
+      "topicSlug": "probability-statistics",
+      "subtopics": [
+        "probability-statistics",
+        "cmi-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "B",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">10% of all email you receive is spam. Your spam filter is 90% reliable: that is, 90%<br>     of the mails it marks as spam are indeed spam and 90% of spam mails are correctly<br>     labelled as spam. If you see a mail marked spam by your filter, what is the probability<br>     that it really is spam?<br>     (a) 10%                    (b) 50%                     (c) 70%                  (d) 90%</div>",
+      "sourceUrl": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2013-solutions.pdf",
+      "answerSource": {
+        "kind": "official-solution",
+        "url": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2013-solutions.pdf"
+      }
+    },
+    {
+      "id": "cmi-cs:2013:3",
+      "year": 2013,
+      "set": null,
+      "number": "3",
+      "paperLabel": "CMI MSc/PhD CS 2013 · Part A",
+      "subject": "data-structure",
+      "subjectSlug": "data-structure",
+      "classificationHint": {
+        "subjectSlug": "data-structure",
+        "topicSlug": "heap-tree"
+      },
+      "topic": "heap-tree",
+      "topicSlug": "heap-tree",
+      "subtopics": [
+        "heap-tree",
+        "cmi-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "B",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">When a user submits a query, a search engine does the following. For every webpage<br>     that has been visited by the search engine, it computes a score indicating how relevant<br>     that page is to the query. Finally, it reports the pages with the top k scores on the<br>     screen, for a number k specified by the user. A good data structure for accumulating<br>     the scores and ranking them is:<br>     (a) a queue           (b) a heap             (c) a stack         (d) a binary search tree<br><br></div>",
+      "sourceUrl": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2013-solutions.pdf",
+      "answerSource": {
+        "kind": "official-solution",
+        "url": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2013-solutions.pdf"
+      }
+    },
+    {
+      "id": "cmi-cs:2013:4",
+      "year": 2013,
+      "set": null,
+      "number": "4",
+      "paperLabel": "CMI MSc/PhD CS 2013 · Part A",
+      "subject": "theory-of-computation",
+      "subjectSlug": "theory-of-computation",
+      "classificationHint": {
+        "subjectSlug": "theory-of-computation",
+        "topicSlug": "regular-language"
+      },
+      "topic": "regular-language",
+      "topicSlug": "regular-language",
+      "subtopics": [
+        "regular-language",
+        "cmi-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "A",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">Consider the set of all words over the alphabet {x, y, z} where the number of y’s is not<br>   divisible by 2 or 7 and no x appears after a z. This language is:<br><br>   (a) regular<br>   (b) not known to be regular<br>    (c) context-free but not regular<br>   (d) recursively enumerable but not context-free</div>",
+      "sourceUrl": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2013-solutions.pdf",
+      "answerSource": {
+        "kind": "official-solution",
+        "url": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2013-solutions.pdf"
+      }
+    },
+    {
+      "id": "cmi-cs:2013:5",
+      "year": 2013,
+      "set": null,
+      "number": "5",
+      "paperLabel": "CMI MSc/PhD CS 2013 · Part A",
+      "subject": "algorithms",
+      "subjectSlug": "algorithms",
+      "classificationHint": {
+        "subjectSlug": "algorithms",
+        "topicSlug": "sorting"
+      },
+      "topic": "sorting",
+      "topicSlug": "sorting",
+      "subtopics": [
+        "sorting",
+        "cmi-cs"
+      ],
+      "marks": null,
+      "type": "MSQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": [
+        "B",
+        "D"
+      ],
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">You have n lists, each consisting of m integers sorted in ascending order. Merging<br>   these lists into a single sorted list will take time:<br>   (a) O(nm log m)            (b) O(mn log n)            (c) O(m + n)             (d) O(mn)<br><br></div>",
+      "sourceUrl": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2013-solutions.pdf",
+      "answerSource": {
+        "kind": "official-solution",
+        "url": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2013-solutions.pdf"
+      }
+    },
+    {
+      "id": "cmi-cs:2013:6",
+      "year": 2013,
+      "set": null,
+      "number": "6",
+      "paperLabel": "CMI MSc/PhD CS 2013 · Part A",
+      "subject": "discrete-mathematics",
+      "subjectSlug": "discrete-mathematics",
+      "classificationHint": {
+        "subjectSlug": "discrete-mathematics",
+        "topicSlug": "graph-theory"
+      },
+      "topic": "graph-theory",
+      "topicSlug": "graph-theory",
+      "subtopics": [
+        "graph-theory",
+        "cmi-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "D",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">A simple graph is one in which there are no self loops and each pair of distinct vertices<br>   is connected by at most one edge. Let G be a simple graph on 8 vertices such that<br>   there is a vertex of degree 1, a vertex of degree 2, a vertex of degree 3, a vertex of<br>   degree 4, a vertex of degree 5, a vertex of degree 6 and a vertex of degree 7. Which of<br>   the following can be the degree of the last vertex?<br>   (a) 3                           (b) 0                             (c) 5                           (d) 4</div>",
+      "sourceUrl": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2013-solutions.pdf",
+      "answerSource": {
+        "kind": "official-solution",
+        "url": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2013-solutions.pdf"
+      }
+    },
+    {
+      "id": "cmi-cs:2013:7",
+      "year": 2013,
+      "set": null,
+      "number": "7",
+      "paperLabel": "CMI MSc/PhD CS 2013 · Part A",
+      "subject": "discrete-mathematics",
+      "subjectSlug": "discrete-mathematics",
+      "classificationHint": {
+        "subjectSlug": "discrete-mathematics",
+        "topicSlug": "propositional-logic"
+      },
+      "topic": "propositional-logic",
+      "topicSlug": "propositional-logic",
+      "subtopics": [
+        "propositional-logic",
+        "cmi-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "C",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">Consider the following two statements.<br><br>   (A) There are infinitely many interesting whole numbers.<br>   (B) There are finitely many uninteresting whole numbers.<br><br>                                          A<br><br>                             B            C           D<br><br>                             E                         F<br><br>                                     G        H<br><br>             Figure 1: A graph meeting the constraints in Question 6.<br><br>  Which of the following is true?<br><br>   (a) Statements A and B are equivalent.<br>   (b) Statement A implies statement B.<br>   (c) Statement B implies statement A.<br>   (d) None of the above.</div>",
+      "sourceUrl": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2013-solutions.pdf",
+      "answerSource": {
+        "kind": "official-solution",
+        "url": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2013-solutions.pdf"
+      }
+    },
+    {
+      "id": "cmi-cs:2013:8",
+      "year": 2013,
+      "set": null,
+      "number": "8",
+      "paperLabel": "CMI MSc/PhD CS 2013 · Part A",
+      "subject": "discrete-mathematics",
+      "subjectSlug": "discrete-mathematics",
+      "classificationHint": {
+        "subjectSlug": "discrete-mathematics",
+        "topicSlug": "set-theory"
+      },
+      "topic": "set-theory",
+      "topicSlug": "set-theory",
+      "subtopics": [
+        "set-theory",
+        "cmi-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "B",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">In the passing out batch, 54 students know Java, 39 know Python and 43 know C++.<br>   Of these, 15 know both Java and Python, 17 know both Python and C++ and 23<br>   know both Java and C++ and 11 know all three languages. If there are 100 students<br>   in the class, how many know none of these three languages?<br>  (a) 3                     (b) 8                      (c) 17                     (d) 19</div>",
+      "sourceUrl": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2013-solutions.pdf",
+      "answerSource": {
+        "kind": "official-solution",
+        "url": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2013-solutions.pdf"
+      }
+    },
+    {
+      "id": "cmi-cs:2013:9",
+      "year": 2013,
+      "set": null,
+      "number": "9",
+      "paperLabel": "CMI MSc/PhD CS 2013 · Part A",
+      "subject": "algorithms",
+      "subjectSlug": "algorithms",
+      "classificationHint": {
+        "subjectSlug": "algorithms",
+        "topicSlug": "sorting"
+      },
+      "topic": "sorting",
+      "topicSlug": "sorting",
+      "subtopics": [
+        "sorting",
+        "cmi-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "C",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">The next two questions are based on the following program.<br>                    procedure mystery (A : array [1..100] of int)<br>                      int i,j,position,tmp;<br>                      begin<br>                        for j := 1 to 100 do<br>                          position := j;<br>                          for i := j to 100 do<br>                             if (A[i] &gt; A[position]) then<br>                                position := i;<br>                             endfor<br>                          tmp := A[j];<br>                          A[j] := A[position];<br>                          A[position] := tmp;<br>                        endfor<br>                      end<br><br>9. When the procedure terminates, the array A has been:<br>     (a) Reversed                              (b) Left unaltered<br>     (c) Sorted in descending order            (d) Sorted in ascending order</div>",
+      "sourceUrl": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2013-solutions.pdf",
+      "answerSource": {
+        "kind": "official-solution",
+        "url": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2013-solutions.pdf"
+      }
+    },
+    {
+      "id": "cmi-cs:2013:10",
+      "year": 2013,
+      "set": null,
+      "number": "10",
+      "paperLabel": "CMI MSc/PhD CS 2013 · Part A",
+      "subject": "algorithms",
+      "subjectSlug": "algorithms",
+      "classificationHint": {
+        "subjectSlug": "algorithms",
+        "topicSlug": "asymptotic-notation"
+      },
+      "topic": "asymptotic-notation",
+      "topicSlug": "asymptotic-notation",
+      "subtopics": [
+        "asymptotic-notation",
+        "cmi-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "B",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">The next two questions are based on the following program.<br>                    procedure mystery (A : array [1..100] of int)<br>                      int i,j,position,tmp;<br>                      begin<br>                        for j := 1 to 100 do<br>                          position := j;<br>                          for i := j to 100 do<br>                             if (A[i] &gt; A[position]) then<br>                                position := i;<br>                             endfor<br>                          tmp := A[j];<br>                          A[j] := A[position];<br>                          A[position] := tmp;<br>                        endfor<br>                      end<br><br>10. The number of times the test A[i] &gt; A[position] is executed is:<br>     (a) 100           (b) 5050            (c) 10000            (d) Depends on contents of A</div>",
+      "sourceUrl": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2013-solutions.pdf",
+      "answerSource": {
+        "kind": "official-solution",
+        "url": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2013-solutions.pdf"
+      }
+    },
+    {
+      "id": "cmi-cs:2014:1",
+      "year": 2014,
+      "set": null,
+      "number": "1",
+      "paperLabel": "CMI MSc/PhD CS 2014 · Part A",
+      "subject": "discrete-mathematics",
+      "subjectSlug": "discrete-mathematics",
+      "classificationHint": {
+        "subjectSlug": "discrete-mathematics",
+        "topicSlug": "combination"
+      },
+      "topic": "combination",
+      "topicSlug": "combination",
+      "subtopics": [
+        "combination",
+        "cmi-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "A",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">For the inter-hostel six-a-side football tournament, a team of 6 players is to be chosen<br>   from 11 players consisting of 5 forwards, 4 defenders and 2 goalkeepers. The team<br>   must include at least 2 forwards, at least 2 defenders and at least 1 goalkeeper. Find<br>   the number of different ways in which the team can be chosen.<br>   (a) 260                   (b) 340                    (c) 720                   (d) 1440</div>",
+      "sourceUrl": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2014-solutions.pdf",
+      "answerSource": {
+        "kind": "official-solution",
+        "url": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2014-solutions.pdf"
+      }
+    },
+    {
+      "id": "cmi-cs:2014:2",
+      "year": 2014,
+      "set": null,
+      "number": "2",
+      "paperLabel": "CMI MSc/PhD CS 2014 · Part A",
+      "subject": "engineering-mathematics",
+      "subjectSlug": "engineering-mathematics",
+      "classificationHint": {
+        "subjectSlug": "engineering-mathematics",
+        "topicSlug": "probability-statistics"
+      },
+      "topic": "probability-statistics",
+      "topicSlug": "probability-statistics",
+      "subtopics": [
+        "probability-statistics",
+        "cmi-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "C",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">The 12 houses on one side of a street are numbered with even numbers starting at 2 and<br>   going up to 24. A free newspaper is delivered on Monday to 3 different houses chosen<br>   at random from these 12. Find the probability that at least 2 of these newspapers are<br>   delivered to houses with numbers strictly greater than 14.<br>        7                          5                         4                         5<br>   (a)                       (b)                        (c)                       (d)<br>       11                         12                        11                        22<br><br>                   4</div>",
+      "sourceUrl": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2014-solutions.pdf",
+      "answerSource": {
+        "kind": "official-solution",
+        "url": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2014-solutions.pdf"
+      }
+    },
+    {
+      "id": "cmi-cs:2014:3",
+      "year": 2014,
+      "set": null,
+      "number": "3",
+      "paperLabel": "CMI MSc/PhD CS 2014 · Part A",
+      "subject": "c-programming",
+      "subjectSlug": "c-programming",
+      "classificationHint": {
+        "subjectSlug": "c-programming",
+        "topicSlug": "loops"
+      },
+      "topic": "loops",
+      "topicSlug": "loops",
+      "subtopics": [
+        "loops",
+        "cmi-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "B",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">In the code fragment on                 i := 0; j := 0; k := 0;<br>   the right, start and end                for (m := start; m &lt;= end; m := m+1){<br>   are integer values and                    k := k + m;<br>   prime(x) is a function                    if (prime(m)){<br>   that returns true if x is                    i := i + m;<br>   a prime number and false                  }else{<br>   otherwise.                                   j := j + m;<br>                                             }<br>  At the end of the loop:                  }<br><br>  (a) k &lt; i+j       (b) k = i+j       (c) k &gt; i+j        (d) Depends on start and end</div>",
+      "sourceUrl": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2014-solutions.pdf",
+      "answerSource": {
+        "kind": "official-solution",
+        "url": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2014-solutions.pdf"
+      }
+    },
+    {
+      "id": "cmi-cs:2014:4",
+      "year": 2014,
+      "set": null,
+      "number": "4",
+      "paperLabel": "CMI MSc/PhD CS 2014 · Part A",
+      "subject": "theory-of-computation",
+      "subjectSlug": "theory-of-computation",
+      "classificationHint": {
+        "subjectSlug": "theory-of-computation",
+        "topicSlug": "undecidability"
+      },
+      "topic": "undecidability",
+      "topicSlug": "undecidability",
+      "subtopics": [
+        "undecidability",
+        "cmi-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "C",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">Alan’s task is to design an algorithm for a decision problem P . He knows that there<br>   is an algorithm A that transforms instances of P to instances of the Halting Problem<br>   such that yes instances of P map to yes instances of the Halting Problem, and no<br>   instances of P map to no instances of the Halting problem. Which of the following is<br>   true.<br><br>  (a) The existence of A implies the existence of an algorithm for P .<br>  (b) The existence of A implies that there is no algorithm for P .<br>   (c) The existence of A says nothing about whether there is an algorithm for P .<br>  (d) The Halting Problem can be solved using A.<br><br>              (c) The existence of A says nothing about whether there is an</div>",
+      "sourceUrl": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2014-solutions.pdf",
+      "answerSource": {
+        "kind": "official-solution",
+        "url": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2014-solutions.pdf"
+      }
+    },
+    {
+      "id": "cmi-cs:2014:5",
+      "year": 2014,
+      "set": null,
+      "number": "5",
+      "paperLabel": "CMI MSc/PhD CS 2014 · Part A",
+      "subject": "theory-of-computation",
+      "subjectSlug": "theory-of-computation",
+      "classificationHint": {
+        "subjectSlug": "theory-of-computation",
+        "topicSlug": "regular-language"
+      },
+      "topic": "regular-language",
+      "topicSlug": "regular-language",
+      "subtopics": [
+        "regular-language",
+        "cmi-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "C",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">Let Σ = {a, b}. For a word w ∈ Σ∗ , let na (x) denote the number of a’s in w and let<br>   nb (x) denote the number of b’s in w. Consider the following language:<br><br>                            L := {xy | x, y ∈ Σ∗ , na (x) = nb (y)}<br><br>   What can we say about L?<br>   (a) L is regular, but not context-free.        (b) L is context-free, but not regular.<br>   (c) L is Σ∗ .                                  (d) None of these.</div>",
+      "sourceUrl": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2014-solutions.pdf",
+      "answerSource": {
+        "kind": "official-solution",
+        "url": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2014-solutions.pdf"
+      }
+    },
+    {
+      "id": "cmi-cs:2014:6",
+      "year": 2014,
+      "set": null,
+      "number": "6",
+      "paperLabel": "CMI MSc/PhD CS 2014 · Part A",
+      "subject": "compiler-design",
+      "subjectSlug": "compiler-design",
+      "classificationHint": {
+        "subjectSlug": "compiler-design",
+        "topicSlug": "runtime-environment"
+      },
+      "topic": "runtime-environment",
+      "topicSlug": "runtime-environment",
+      "subtopics": [
+        "runtime-environment",
+        "cmi-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "B",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">Suppose we are working with a programming language that supports automatic garbage<br>   collection. This means that:<br><br>   (a) Uninitialized variables are assigned null values.<br>  (b) Unreferenced dynamically allocated memory is added back to free space.<br>   (c) Unreachable if-then-else branches are pruned.<br>  (d) Expressions where array indices exceed array bounds are flagged.<br><br>               (b) Unreferenced dynamically allocated memory is added back to free</div>",
+      "sourceUrl": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2014-solutions.pdf",
+      "answerSource": {
+        "kind": "official-solution",
+        "url": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2014-solutions.pdf"
+      }
+    },
+    {
+      "id": "cmi-cs:2014:9",
+      "year": 2014,
+      "set": null,
+      "number": "9",
+      "paperLabel": "CMI MSc/PhD CS 2014 · Part A",
+      "subject": "discrete-mathematics",
+      "subjectSlug": "discrete-mathematics",
+      "classificationHint": {
+        "subjectSlug": "discrete-mathematics",
+        "topicSlug": "propositional-logic"
+      },
+      "topic": "propositional-logic",
+      "topicSlug": "propositional-logic",
+      "subtopics": [
+        "propositional-logic",
+        "cmi-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "D",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">A company is due to send a shipment to a client and the CEO has resigned. To select<br>    a new CEO, some candidates have been interviewed. One of them will be chosen<br>    through a vote. If the workers union resort to a strike and the candidates have to<br>    be interviewed again, then the shipment deadline will be missed. If there are more<br>    abstainers than voters in the vote to choose the new CEO, then the candidates have<br>    to be interviewed again. Suppose that the shipment was sent on time. Which of the<br>    following is a valid conclusion?<br><br>   (a) The workers union did not resort to a strike.<br>   (b) The number of voters was more than the number of abstainers.<br>    (c) (a) or (b).<br>   (d) If the workers union resorted to a strike, then the number of voters was greater<br>       than or equal to the number of abstainers.<br><br>                (d) If the workers union resorted to a strike, then the number of</div>",
+      "sourceUrl": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2014-solutions.pdf",
+      "answerSource": {
+        "kind": "official-solution",
+        "url": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2014-solutions.pdf"
+      }
+    },
+    {
+      "id": "cmi-cs:2014:10",
+      "year": 2014,
+      "set": null,
+      "number": "10",
+      "paperLabel": "CMI MSc/PhD CS 2014 · Part A",
+      "subject": "discrete-mathematics",
+      "subjectSlug": "discrete-mathematics",
+      "classificationHint": {
+        "subjectSlug": "discrete-mathematics",
+        "topicSlug": "relation"
+      },
+      "topic": "relation",
+      "topicSlug": "relation",
+      "subtopics": [
+        "relation",
+        "cmi-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "B",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">Avinash is taller than Abhay. Bharat is taller than Vinu and Vinay is taller than<br>    Bharat. Which of the following is a minimal set of additional information that can<br>    determine the tallest person?<br><br>  (a) Vinay is taller than Avinash and Abhay is taller than Bharat.<br>  (b) Avinash is taller than Vinay.<br>   (c) Abhay is shorter than Vinay.<br>  (d) None of the above.</div>",
+      "sourceUrl": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2014-solutions.pdf",
+      "answerSource": {
+        "kind": "official-solution",
+        "url": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2014-solutions.pdf"
+      }
+    },
+    {
+      "id": "cmi-cs:2015:1",
+      "year": 2015,
+      "set": null,
+      "number": "1",
+      "paperLabel": "CMI MSc/PhD CS 2015 · Part A",
+      "subject": "discrete-mathematics",
+      "subjectSlug": "discrete-mathematics",
+      "classificationHint": {
+        "subjectSlug": "discrete-mathematics",
+        "topicSlug": "propositional-logic"
+      },
+      "topic": "propositional-logic",
+      "topicSlug": "propositional-logic",
+      "subtopics": [
+        "propositional-logic",
+        "cmi-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "D",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">Twin primes are pairs of numbers p and p+2 such that both are primes—for instance, 5<br>   and 7, 11 and 13, 41 and 43. The Twin Prime Conjecture says that there are infinitely<br>   many twin primes.<br>   Let TwinPrime(n) be a predicate that is true if n and n+2 are twin primes. Which<br>   of the following formulas, interpreted over positive integers, expresses that there are<br>   only finitely many twin primes?<br><br>   (a) ∀m. ∃n. m ≤ n and not(TwinPrime(n))<br>  (b) ∃m. ∀n. n ≤ m implies TwinPrime(n)<br>   (c) ∀m. ∃n. n ≤ m and TwinPrime(n)<br>  (d) ∃m. ∀n. TwinPrime(n) implies n ≤ m</div>",
+      "sourceUrl": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2015-solutions.pdf",
+      "answerSource": {
+        "kind": "official-solution",
+        "url": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2015-solutions.pdf"
+      }
+    },
+    {
+      "id": "cmi-cs:2015:2",
+      "year": 2015,
+      "set": null,
+      "number": "2",
+      "paperLabel": "CMI MSc/PhD CS 2015 · Part A",
+      "subject": "discrete-mathematics",
+      "subjectSlug": "discrete-mathematics",
+      "classificationHint": {
+        "subjectSlug": "discrete-mathematics",
+        "topicSlug": "relation"
+      },
+      "topic": "relation",
+      "topicSlug": "relation",
+      "subtopics": [
+        "relation",
+        "cmi-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "B",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">A binary relation R ⊆ (S × S) is said to be Euclidean if for every a, b, c ∈ S, (a, b) ∈ R<br>   and (a, c) ∈ R implies (b, c) ∈ R. Which of the following statements is valid?<br><br>   (a) If R is Euclidean, (b, a) ∈ R and (c, a) ∈ R, then (b, c) ∈ R, for every a, b, c ∈ S.<br>  (b) If R is reflexive and Euclidean, (a, b) ∈ R implies (b, a) ∈ R, for every a, b ∈ S.<br>   (c) If R is Euclidean, (a, b) ∈ R and (b, c) ∈ R, then (a, c) ∈ R, for every a, b, c ∈ S.<br>  (d) None of the above.<br><br>               (b) If R is reflexive and Euclidean, (a, b) ∈ R implies (b, a) ∈ R, for</div>",
+      "sourceUrl": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2015-solutions.pdf",
+      "answerSource": {
+        "kind": "official-solution",
+        "url": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2015-solutions.pdf"
+      }
+    },
+    {
+      "id": "cmi-cs:2015:3",
+      "year": 2015,
+      "set": null,
+      "number": "3",
+      "paperLabel": "CMI MSc/PhD CS 2015 · Part A",
+      "subject": "discrete-mathematics",
+      "subjectSlug": "discrete-mathematics",
+      "classificationHint": {
+        "subjectSlug": "discrete-mathematics",
+        "topicSlug": "propositional-logic"
+      },
+      "topic": "propositional-logic",
+      "topicSlug": "propositional-logic",
+      "subtopics": [
+        "propositional-logic",
+        "cmi-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "D",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">Suppose each edge of an undirected graph is coloured using one of three colours —<br>   red, blue or green. Consider the following property of such graphs: if any vertex is<br>   the endpoint of a red coloured edge, then it is either an endpoint of a blue coloured<br>   edge or not an endpoint of any green coloured edge. If a graph G does not satisfy this<br>   property, which of the following statements about G are valid?<br><br>  (a) There is a red coloured edge.<br>  (b) Any vertex that is the endpoint of a red coloured edge is also the endpoint of a<br>      green coloured edge.<br>   (c) There is a vertex that is not an endpoint of any blue coloured edge but is an<br>       endpoint of a green coloured edge and a red coloured edge.<br>  (d) (a) and (c).</div>",
+      "sourceUrl": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2015-solutions.pdf",
+      "answerSource": {
+        "kind": "official-solution",
+        "url": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2015-solutions.pdf"
+      }
+    },
+    {
+      "id": "cmi-cs:2015:4",
+      "year": 2015,
+      "set": null,
+      "number": "4",
+      "paperLabel": "CMI MSc/PhD CS 2015 · Part A",
+      "subject": "discrete-mathematics",
+      "subjectSlug": "discrete-mathematics",
+      "classificationHint": {
+        "subjectSlug": "discrete-mathematics",
+        "topicSlug": "graph-theory"
+      },
+      "topic": "graph-theory",
+      "topicSlug": "graph-theory",
+      "subtopics": [
+        "graph-theory",
+        "cmi-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "B",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">A college prepares its timetable by grouping courses in slots A, B, C, . . . All courses in a<br>   slot meet at the same time, and courses in different slots have disjoint timings. Course<br>   registration has been completed and the administration now knows which students<br>   are registered for each course. If the same student is registered for two courses, the<br>   courses must be assigned different slots. The administration is trying to compute the<br>   minimum number of slots required to prepare the timetable.<br>   The administration decides to model this as a graph where the nodes are the courses<br>   and edges represent pairs of courses with an overlapping audience. In this setting, the<br>   graph theoretic question to be answered is:<br><br>   (a) Find a spanning tree with minimum number of edges.<br>   (b) Find a minimal colouring.<br>   (c) Find a minimum size vertex cover.<br>   (d) Find a maximum size independent set.</div>",
+      "sourceUrl": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2015-solutions.pdf",
+      "answerSource": {
+        "kind": "official-solution",
+        "url": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2015-solutions.pdf"
+      }
+    },
+    {
+      "id": "cmi-cs:2015:5",
+      "year": 2015,
+      "set": null,
+      "number": "5",
+      "paperLabel": "CMI MSc/PhD CS 2015 · Part A",
+      "subject": "discrete-mathematics",
+      "subjectSlug": "discrete-mathematics",
+      "classificationHint": {
+        "subjectSlug": "discrete-mathematics",
+        "topicSlug": "graph-theory"
+      },
+      "topic": "graph-theory",
+      "topicSlug": "graph-theory",
+      "subtopics": [
+        "graph-theory",
+        "cmi-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "B",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">An undirected graph has 10 vertices labelled {1, 2, . . . , 10} and 37 edges. Vertices<br>   1, 3, 5, 7, 9 have degree 8 and vertices 2, 4, 6, 8 have degree 7. What is the degree of<br>   vertex 10?<br>   (a) 5                        (b) 6                        (c) 7                       (d) 8</div>",
+      "sourceUrl": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2015-solutions.pdf",
+      "answerSource": {
+        "kind": "official-solution",
+        "url": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2015-solutions.pdf"
+      }
+    },
+    {
+      "id": "cmi-cs:2015:6",
+      "year": 2015,
+      "set": null,
+      "number": "6",
+      "paperLabel": "CMI MSc/PhD CS 2015 · Part A",
+      "subject": "algorithms",
+      "subjectSlug": "algorithms",
+      "classificationHint": {
+        "subjectSlug": "algorithms",
+        "topicSlug": "asymptotic-notation"
+      },
+      "topic": "asymptotic-notation",
+      "topicSlug": "asymptotic-notation",
+      "subtopics": [
+        "asymptotic-notation",
+        "cmi-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "B",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">Suppose we have constructed a polynomial time reduction from problem A to problem<br>   B. Which of the following can we infer from this fact?<br><br>   (a) If the best algorithm for B takes exponential time, there is no polynomial time<br>       algorithm for A.<br>   (b) If the best algorithm for A takes exponential time, there is no polynomial time<br>       algorithm for B.<br>   (c) If we have a polynomial time algorithm for A, we must also have a polynomial<br>       time algorithm for B.<br>   (d) If we don’t know whether there is a polynomial time algorithm for B, there cannot<br>       be a polynomial time algorithm for A.<br><br>               (b) If the best algorithm for A takes exponential time, there is no</div>",
+      "sourceUrl": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2015-solutions.pdf",
+      "answerSource": {
+        "kind": "official-solution",
+        "url": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2015-solutions.pdf"
+      }
+    },
+    {
+      "id": "cmi-cs:2015:7",
+      "year": 2015,
+      "set": null,
+      "number": "7",
+      "paperLabel": "CMI MSc/PhD CS 2015 · Part A",
+      "subject": "engineering-mathematics",
+      "subjectSlug": "engineering-mathematics",
+      "classificationHint": {
+        "subjectSlug": "engineering-mathematics",
+        "topicSlug": "probability-statistics"
+      },
+      "topic": "probability-statistics",
+      "topicSlug": "probability-statistics",
+      "subtopics": [
+        "probability-statistics",
+        "cmi-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "C",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">You arrive at a snack bar and you can’t decide whether to order a lime juice or a lassi.<br>   You decide to throw a fair 6-sided die to make the choice, as follows.<br><br>      • If you throw 2 or 6 you order a lime juice.<br>      • If you throw a 4, you order a lassi.<br>      • Otherwise, you throw the die again and follow the same algorithm.<br><br>   What is the probability that you end up ordering a lime juice?<br>   (a) 13                     (b) 12                       (c) 23                     (d) 34</div>",
+      "sourceUrl": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2015-solutions.pdf",
+      "answerSource": {
+        "kind": "official-solution",
+        "url": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2015-solutions.pdf"
+      }
+    },
+    {
+      "id": "cmi-cs:2015:8",
+      "year": 2015,
+      "set": null,
+      "number": "8",
+      "paperLabel": "CMI MSc/PhD CS 2015 · Part A",
+      "subject": "c-programming",
+      "subjectSlug": "c-programming",
+      "classificationHint": {
+        "subjectSlug": "c-programming",
+        "topicSlug": "loops"
+      },
+      "topic": "loops",
+      "topicSlug": "loops",
+      "subtopics": [
+        "loops",
+        "cmi-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "C",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">How many times is the comparison i ≥ n performed in the following program?<br><br>    int i=85, n=5;<br>    main() {<br>             while (i &gt;= n) {<br>                     i=i-1;<br>                     n=n+1;<br>             }<br>    }<br><br>    (a) 40                    (b) 41                      (c) 42                    (d) 43</div>",
+      "sourceUrl": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2015-solutions.pdf",
+      "answerSource": {
+        "kind": "official-solution",
+        "url": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2015-solutions.pdf"
+      }
+    },
+    {
+      "id": "cmi-cs:2015:9",
+      "year": 2015,
+      "set": null,
+      "number": "9",
+      "paperLabel": "CMI MSc/PhD CS 2015 · Part A",
+      "subject": "theory-of-computation",
+      "subjectSlug": "theory-of-computation",
+      "classificationHint": {
+        "subjectSlug": "theory-of-computation",
+        "topicSlug": "regular-language"
+      },
+      "topic": "regular-language",
+      "topicSlug": "regular-language",
+      "subtopics": [
+        "regular-language",
+        "cmi-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "D",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">Let L1 and L2 be languages over an alphabet Σ such that L1 ⊆ L2 . Which of the<br>    following is true:<br>   (a) If L2 is regular, then L1 must also be regular.<br>   (b) If L1 is regular, then L2 must also be regular.<br>   (c) Either both L1 and L2 are regular, or both are not regular.<br>   (d) None of the above.</div>",
+      "sourceUrl": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2015-solutions.pdf",
+      "answerSource": {
+        "kind": "official-solution",
+        "url": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2015-solutions.pdf"
+      }
+    },
+    {
+      "id": "cmi-cs:2015:10",
+      "year": 2015,
+      "set": null,
+      "number": "10",
+      "paperLabel": "CMI MSc/PhD CS 2015 · Part A",
+      "subject": "discrete-mathematics",
+      "subjectSlug": "discrete-mathematics",
+      "classificationHint": {
+        "subjectSlug": "discrete-mathematics",
+        "topicSlug": "combination"
+      },
+      "topic": "combination",
+      "topicSlug": "combination",
+      "subtopics": [
+        "combination",
+        "cmi-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "C",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">The school athletics coach has to choose 4 students for the relay team. He calculates<br>    that there are 3876 ways of choosing the team if the order in which the runners are<br>    placed is not considered. How many ways are there of choosing the team if the order<br>    of the runners is to be taken into account?<br>    (a) Between 12,000 and 25,000                 (b) Between 30,000 and 60,000<br>    (c) Between 75,000 and 99,999                 (d) More than 100,000</div>",
+      "sourceUrl": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2015-solutions.pdf",
+      "answerSource": {
+        "kind": "official-solution",
+        "url": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2015-solutions.pdf"
+      }
+    },
+    {
+      "id": "cmi-cs:2016:1",
+      "year": 2016,
+      "set": null,
+      "number": "1",
+      "paperLabel": "CMI MSc/PhD CS 2016 · Part A",
+      "subject": "algorithms",
+      "subjectSlug": "algorithms",
+      "classificationHint": {
+        "subjectSlug": "algorithms",
+        "topicSlug": "shortest-path"
+      },
+      "topic": "shortest-path",
+      "topicSlug": "shortest-path",
+      "subtopics": [
+        "shortest-path",
+        "cmi-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "B",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">In a connected undirected graph, the distance between two vertices is the number<br>   of edges in the shortest path between them. Suppose we denote by P the following<br>   property: there exists a vertex that is a neighbour of all other vertices. Consider the<br>   following statements:<br><br>    (i) If P is false, then there is a pair of vertices such that the distance between them<br>        is at least 4.<br>    (ii) If P is true, then the distance between any pair of vertices is at most 2.<br><br>   What can you say about these statements?<br>   (a) Only (i) is true.                          (b) Only (ii) is true.<br>   (c) Both (i) and (ii) are true.                (d) Neither (i) nor (ii) is true.</div>",
+      "sourceUrl": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2016-solutions.pdf",
+      "answerSource": {
+        "kind": "official-solution",
+        "url": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2016-solutions.pdf"
+      }
+    },
+    {
+      "id": "cmi-cs:2016:2",
+      "year": 2016,
+      "set": null,
+      "number": "2",
+      "paperLabel": "CMI MSc/PhD CS 2016 · Part A",
+      "subject": "discrete-mathematics",
+      "subjectSlug": "discrete-mathematics",
+      "classificationHint": {
+        "subjectSlug": "discrete-mathematics",
+        "topicSlug": "propositional-logic"
+      },
+      "topic": "propositional-logic",
+      "topicSlug": "propositional-logic",
+      "subtopics": [
+        "propositional-logic",
+        "cmi-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "D",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">The symbol | reads as “divides”, and - as “does not divide”. For instance, 2 | 6 and<br>   2 - 5 are both true. Consider the following statements:<br><br>    (i) There exists a positive integer a such that (2 | (a3 − 1)) and (2 | a).<br>    (ii) There exists a positive integer b such that 6 - (b3 − b).<br><br>   What can you say about these statements?<br>   (a) Only (i) is true.                          (b) Only (ii) is true.<br>   (c) Both (i) and (ii) are true.                (d) Neither (i) nor (ii) is true.<br><br></div>",
+      "sourceUrl": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2016-solutions.pdf",
+      "answerSource": {
+        "kind": "official-solution",
+        "url": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2016-solutions.pdf"
+      }
+    },
+    {
+      "id": "cmi-cs:2016:3",
+      "year": 2016,
+      "set": null,
+      "number": "3",
+      "paperLabel": "CMI MSc/PhD CS 2016 · Part A",
+      "subject": "theory-of-computation",
+      "subjectSlug": "theory-of-computation",
+      "classificationHint": {
+        "subjectSlug": "theory-of-computation",
+        "topicSlug": "regular-expression"
+      },
+      "topic": "regular-expression",
+      "topicSlug": "regular-expression",
+      "subtopics": [
+        "regular-expression",
+        "cmi-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "B",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">For a regular expression e, let L(e) be the language generated by e. If e is an expression<br>   that has no Kleene star ∗ occurring in it, which of the following is true about e in<br>   general?<br><br>   (a) L(e) is empty.<br>  (b) L(e) is finite.<br>   (c) Complement of L(e) is empty.<br>  (d) Both L(e) and its complement are infinite.</div>",
+      "sourceUrl": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2016-solutions.pdf",
+      "answerSource": {
+        "kind": "official-solution",
+        "url": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2016-solutions.pdf"
+      }
+    },
+    {
+      "id": "cmi-cs:2016:4",
+      "year": 2016,
+      "set": null,
+      "number": "4",
+      "paperLabel": "CMI MSc/PhD CS 2016 · Part A",
+      "subject": "algorithms",
+      "subjectSlug": "algorithms",
+      "classificationHint": {
+        "subjectSlug": "algorithms",
+        "topicSlug": "shortest-path"
+      },
+      "topic": "shortest-path",
+      "topicSlug": "shortest-path",
+      "subtopics": [
+        "shortest-path",
+        "cmi-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "C",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">Consider a weighted undirected graph G with positive edge weights. Let (u, v) be an<br>   edge in the graph. It is known that the shortest path from a vertex s to u has weight<br>   53 and the shortest path from s to v has weight 65. Which of the statements is always<br>   true?<br><br>   (a) Weight of (u, v) ≤ 12.<br>  (b) Weight of (u, v) = 12.<br>   (c) Weight of (u, v) ≥ 12.<br>  (d) Nothing can be said about the weight of (u, v).</div>",
+      "sourceUrl": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2016-solutions.pdf",
+      "answerSource": {
+        "kind": "official-solution",
+        "url": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2016-solutions.pdf"
+      }
+    },
+    {
+      "id": "cmi-cs:2016:5",
+      "year": 2016,
+      "set": null,
+      "number": "5",
+      "paperLabel": "CMI MSc/PhD CS 2016 · Part A",
+      "subject": "discrete-mathematics",
+      "subjectSlug": "discrete-mathematics",
+      "classificationHint": {
+        "subjectSlug": "discrete-mathematics",
+        "topicSlug": "planar-graph"
+      },
+      "topic": "planar-graph",
+      "topicSlug": "planar-graph",
+      "subtopics": [
+        "planar-graph",
+        "cmi-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "B",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">A dodecahedron is a regular solid with 12 faces, each face being a regular pentagon.<br>   How many edges are there? And how many vertices?<br>  (a) 60 edges and 20 vertices.                   (b) 30 edges and 20 vertices.<br>  (c) 60 edges and 50 vertices.                   (d) 30 edges and 50 vertices.</div>",
+      "sourceUrl": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2016-solutions.pdf",
+      "answerSource": {
+        "kind": "official-solution",
+        "url": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2016-solutions.pdf"
+      }
+    },
+    {
+      "id": "cmi-cs:2016:6",
+      "year": 2016,
+      "set": null,
+      "number": "6",
+      "paperLabel": "CMI MSc/PhD CS 2016 · Part A",
+      "subject": "c-programming",
+      "subjectSlug": "c-programming",
+      "classificationHint": {
+        "subjectSlug": "c-programming",
+        "topicSlug": "loops"
+      },
+      "topic": "loops",
+      "topicSlug": "loops",
+      "subtopics": [
+        "loops",
+        "cmi-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "C",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">In the code fragment to the right, start and<br>   end are integer values and prime(x) is a                i := 0; j := 0; k := 0;<br>   function that returns true if x is a prime              for (m := start;<br>   number and false otherwise.                                  m &lt;= end;<br>                                                                m := m+1){<br>  At the end of the loop:                                    if (prime(m)){<br>                                                               i := i + m;<br>    (a) k == i-j.                                              k := k - m;<br>                                                             }else{<br>    (b) k == j-i.<br>                                                               j := j - m;<br>    (c) k == -j-i.                                             k := k + m;<br>                                                             }<br>    (d) Depends on start and end.                          }</div>",
+      "sourceUrl": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2016-solutions.pdf",
+      "answerSource": {
+        "kind": "official-solution",
+        "url": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2016-solutions.pdf"
+      }
+    },
+    {
+      "id": "cmi-cs:2016:7",
+      "year": 2016,
+      "set": null,
+      "number": "7",
+      "paperLabel": "CMI MSc/PhD CS 2016 · Part A",
+      "subject": "engineering-mathematics",
+      "subjectSlug": "engineering-mathematics",
+      "classificationHint": {
+        "subjectSlug": "engineering-mathematics",
+        "topicSlug": "probability-statistics"
+      },
+      "topic": "probability-statistics",
+      "topicSlug": "probability-statistics",
+      "subtopics": [
+        "probability-statistics",
+        "cmi-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "C",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">Varsha lives alone and dislikes cooking, so she goes out for dinner every evening. She<br>   has two favourite restaurants, Dosa Paradise and Kababs Unlimited, to which she<br>   travels by local train. The train to Dosa Paradise runs every 10 minutes, at 0, 10, 20,<br>   30, 40 and 50 minutes past the hour. The train to Kababs Unlimited runs every 20<br>   minutes, at 8, 28 and 48 minutes past the hour. She reaches the station at a random<br>   time between 7:15 pm and 8:15 pm and chooses between the two restaurants based on<br>   the next available train. What is the probability that she ends up eating in Kababs<br>   Unlimited ?<br>       1                           1                         2                          1<br>   (a)                        (b)                        (c)                       (d)<br>       5                           3                         5                          2<br><br></div>",
+      "sourceUrl": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2016-solutions.pdf",
+      "answerSource": {
+        "kind": "official-solution",
+        "url": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2016-solutions.pdf"
+      }
+    },
+    {
+      "id": "cmi-cs:2016:8",
+      "year": 2016,
+      "set": null,
+      "number": "8",
+      "paperLabel": "CMI MSc/PhD CS 2016 · Part A",
+      "subject": "discrete-mathematics",
+      "subjectSlug": "discrete-mathematics",
+      "classificationHint": {
+        "subjectSlug": "discrete-mathematics",
+        "topicSlug": "propositional-logic"
+      },
+      "topic": "propositional-logic",
+      "topicSlug": "propositional-logic",
+      "subtopics": [
+        "propositional-logic",
+        "cmi-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "B",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">An advertisement for a tennis magazine states, “If I’m not playing tennis, I’m watching<br>    tennis. And if I’m not watching tennis, I’m reading about tennis.” We can assume<br>    that the speaker can do at most one of these activities at a time. What is the speaker<br>    doing?<br>    (a) Playing tennis.                           (b) Watching tennis.<br>    (c) Reading about tennis.                     (d) None of the above.</div>",
+      "sourceUrl": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2016-solutions.pdf",
+      "answerSource": {
+        "kind": "official-solution",
+        "url": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2016-solutions.pdf"
+      }
+    },
+    {
+      "id": "cmi-cs:2016:9",
+      "year": 2016,
+      "set": null,
+      "number": "9",
+      "paperLabel": "CMI MSc/PhD CS 2016 · Part A",
+      "subject": "discrete-mathematics",
+      "subjectSlug": "discrete-mathematics",
+      "classificationHint": {
+        "subjectSlug": "discrete-mathematics",
+        "topicSlug": "graph-theory"
+      },
+      "topic": "graph-theory",
+      "topicSlug": "graph-theory",
+      "subtopics": [
+        "graph-theory",
+        "cmi-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "C",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">ScamTel has won a state government contract to connect 17 cities by high-speed<br>    fibre optic links. Each link will connect a pair of cities so that the entire network is<br>    connected—there is a path from each city to every other city. The contract requires<br>    the network to remain connected if any single link fails. What is the minimum number<br>    of links that ScamTel needs to set up?<br>    (a) 34                      (b) 32                    (c) 17                    (d) 16</div>",
+      "sourceUrl": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2016-solutions.pdf",
+      "answerSource": {
+        "kind": "official-solution",
+        "url": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2016-solutions.pdf"
+      }
+    },
+    {
+      "id": "cmi-cs:2016:10",
+      "year": 2016,
+      "set": null,
+      "number": "10",
+      "paperLabel": "CMI MSc/PhD CS 2016 · Part A",
+      "subject": "compiler-design",
+      "subjectSlug": "compiler-design",
+      "classificationHint": {
+        "subjectSlug": "compiler-design",
+        "topicSlug": "runtime-environment"
+      },
+      "topic": "runtime-environment",
+      "topicSlug": "runtime-environment",
+      "subtopics": [
+        "runtime-environment",
+        "cmi-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "A",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">Which of the following relationships holds in general between the scope of a variable<br>    and the lifetime of a variable (in a language like C or Java)?<br>    (a) The scope of a variable is contained in the lifetime of the variable.<br>   (b) The scope of a variable is the same as the lifetime of the variable.<br>    (c) The lifetime of a variable is disjoint from the scope of the variable.<br>   (d) None of the above.<br><br></div>",
+      "sourceUrl": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2016-solutions.pdf",
+      "answerSource": {
+        "kind": "official-solution",
+        "url": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2016-solutions.pdf"
+      }
+    },
+    {
+      "id": "cmi-cs:2017:1",
+      "year": 2017,
+      "set": null,
+      "number": "1",
+      "paperLabel": "CMI MSc/PhD CS 2017 · Part A",
+      "subject": "theory-of-computation",
+      "subjectSlug": "theory-of-computation",
+      "classificationHint": {
+        "subjectSlug": "theory-of-computation",
+        "topicSlug": "regular-expression"
+      },
+      "topic": "regular-expression",
+      "topicSlug": "regular-expression",
+      "subtopics": [
+        "regular-expression",
+        "cmi-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "C",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">The regular expression (a∗ + b)∗ is equivalent to which of the following regular expres-<br>   sions:<br>   (a) a∗ b∗                      (b) (a∗ b + b)∗               (c) (a + b∗ )∗   (d) (a∗ b)∗</div>",
+      "sourceUrl": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2017-solutions.pdf",
+      "answerSource": {
+        "kind": "official-solution",
+        "url": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2017-solutions.pdf"
+      }
+    },
+    {
+      "id": "cmi-cs:2017:2",
+      "year": 2017,
+      "set": null,
+      "number": "2",
+      "paperLabel": "CMI MSc/PhD CS 2017 · Part A",
+      "subject": "engineering-mathematics",
+      "subjectSlug": "engineering-mathematics",
+      "classificationHint": {
+        "subjectSlug": "engineering-mathematics",
+        "topicSlug": "probability-statistics"
+      },
+      "topic": "probability-statistics",
+      "topicSlug": "probability-statistics",
+      "subtopics": [
+        "probability-statistics",
+        "cmi-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "C",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">An FM radio channel has a repository of 10 songs. Each day, the channel plays 3<br>   distinct songs that are chosen randomly from the repository.<br>   Mary decides to tune in to the radio channel on the weekend after her exams. What<br>   is the probability that no song gets repeated during these 2 days?<br>          10 2       10 −1<br><br>   (a)    3<br>               ·      6<br>          10        10 −2<br><br>  (b)     6<br>                ·   3<br>          107<br>                10 −2<br>   (c)3<br>          · 3<br>                · 3<br>                     −1<br>  (d) 10  · 73 · 10<br><br>      3           6<br><br>                                            −2<br>                                  · 73 · 10</div>",
+      "sourceUrl": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2017-solutions.pdf",
+      "answerSource": {
+        "kind": "official-solution",
+        "url": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2017-solutions.pdf"
+      }
+    },
+    {
+      "id": "cmi-cs:2017:3",
+      "year": 2017,
+      "set": null,
+      "number": "3",
+      "paperLabel": "CMI MSc/PhD CS 2017 · Part A",
+      "subject": "discrete-mathematics",
+      "subjectSlug": "discrete-mathematics",
+      "classificationHint": {
+        "subjectSlug": "discrete-mathematics",
+        "topicSlug": "propositional-logic"
+      },
+      "topic": "propositional-logic",
+      "topicSlug": "propositional-logic",
+      "subtopics": [
+        "propositional-logic",
+        "cmi-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "C",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">Four siblings go shopping with their father. If Abhay gets shoes, then Asha does not<br>   get a necklace. If Arun gets a T-shirt, then Aditi gets bangles. If Abhay does not get<br>   shoes or Aditi gets bangles, the mother will be happy. Which of the following is true?<br><br>   (a) If the mother is happy, then Aditi got bangles.<br><br>  (b) If Aditi got bangles, then Abhay got shoes.<br>   (c) If the mother is not happy, then Asha did not get a necklace and Arun did not<br>       get a T-shirt.<br>  (d) None of the above.</div>",
+      "sourceUrl": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2017-solutions.pdf",
+      "answerSource": {
+        "kind": "official-solution",
+        "url": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2017-solutions.pdf"
+      }
+    },
+    {
+      "id": "cmi-cs:2017:4",
+      "year": 2017,
+      "set": null,
+      "number": "4",
+      "paperLabel": "CMI MSc/PhD CS 2017 · Part A",
+      "subject": "discrete-mathematics",
+      "subjectSlug": "discrete-mathematics",
+      "classificationHint": {
+        "subjectSlug": "discrete-mathematics",
+        "topicSlug": "graph-theory"
+      },
+      "topic": "graph-theory",
+      "topicSlug": "graph-theory",
+      "subtopics": [
+        "graph-theory",
+        "cmi-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "D",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">City authorities are concerned about traffic accidents on major roads. They would like<br>   to have ambulances stationed at road intersections to quickly reach the scene of any<br>   accident along these roads. To minimize response time, ambulances are to be located<br>   at intersections with traffic lights so that any segment of road can be reached by at<br>   least one ambulance that does not have to pass through a traffic light to reach the<br>   scene of the accident. If we model the road network as a graph, where intersections<br>   with traffic lights are vertices and edges represent road segments between traffic lights,<br>   the graph theoretic question to be answered is:<br><br>   (a) Find a spanning tree with minimum number of edges.<br>  (b) Find a spanning tree with minimum cost.<br>   (c) Find a minimal colouring.<br>  (d) Find a minimum size vertex cover.</div>",
+      "sourceUrl": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2017-solutions.pdf",
+      "answerSource": {
+        "kind": "official-solution",
+        "url": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2017-solutions.pdf"
+      }
+    },
+    {
+      "id": "cmi-cs:2017:5",
+      "year": 2017,
+      "set": null,
+      "number": "5",
+      "paperLabel": "CMI MSc/PhD CS 2017 · Part A",
+      "subject": "discrete-mathematics",
+      "subjectSlug": "discrete-mathematics",
+      "classificationHint": {
+        "subjectSlug": "discrete-mathematics",
+        "topicSlug": "graph-theory"
+      },
+      "topic": "graph-theory",
+      "topicSlug": "graph-theory",
+      "subtopics": [
+        "graph-theory",
+        "cmi-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "A",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">Let G be an arbitrary graph on n vertices with 4n − 16 edges. Consider the following<br>   statements:<br><br>     I There is a vertex of degree smaller than 8 in G.<br>    II There is a vertex such that there are less than 16 vertices at distance exactly 2<br>       from it.<br><br>   Which of the following is true:<br>   (a) I only                                     (b) II only<br>   (c) Both I and II                              (d) Neither I nor II<br><br></div>",
+      "sourceUrl": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2017-solutions.pdf",
+      "answerSource": {
+        "kind": "official-solution",
+        "url": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2017-solutions.pdf"
+      }
+    },
+    {
+      "id": "cmi-cs:2017:6",
+      "year": 2017,
+      "set": null,
+      "number": "6",
+      "paperLabel": "CMI MSc/PhD CS 2017 · Part A",
+      "subject": "c-programming",
+      "subjectSlug": "c-programming",
+      "classificationHint": {
+        "subjectSlug": "c-programming",
+        "topicSlug": "function"
+      },
+      "topic": "function",
+      "topicSlug": "function",
+      "subtopics": [
+        "function",
+        "cmi-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "B",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">What does the following function compute in terms of n and d, for integer values of<br>   d? Note that the operation / denotes floating point division, even if the arguments<br>   are both integers.<br><br>     function foo(n,d){<br>       if (d == 0){<br>          return 1;<br>       }else{<br>         if (d &lt; 0){<br>           return foo(n,d+1)/n;<br>         }else{<br>           return n*foo(n,d-1);<br>     }}}<br><br>  (a) logd n if d &lt; 0, nd if d &gt; 0.<br>  (b) nd for all values of d.<br>  (c) n × d if d &gt; 0, n ÷ d if d &lt; 0.<br>  (d) n × d for all values of d.</div>",
+      "sourceUrl": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2017-solutions.pdf",
+      "answerSource": {
+        "kind": "official-solution",
+        "url": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2017-solutions.pdf"
+      }
+    },
+    {
+      "id": "cmi-cs:2017:7",
+      "year": 2017,
+      "set": null,
+      "number": "7",
+      "paperLabel": "CMI MSc/PhD CS 2017 · Part A",
+      "subject": "operating-systems",
+      "subjectSlug": "operating-systems",
+      "classificationHint": {
+        "subjectSlug": "operating-systems",
+        "topicSlug": "process-synchronization"
+      },
+      "topic": "process-synchronization",
+      "topicSlug": "process-synchronization",
+      "subtopics": [
+        "process-synchronization",
+        "cmi-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "C",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">Consider the following functions f() and g().<br><br>         f(){                                g(){<br>           w = 5;                               z = w+1;<br>           w = 2*z + 2;                         z = 3*z - w;<br>         }                                      print(z);<br>                                              }<br><br>   We start with w and z set to 0 and execute f() and g() in parallel—that is, at each<br>   step we either execute one statement from f() or one statement from g(). Which of<br>   the following is not a possible value printed by g()?<br>   (a) -2                            (b) -1                             (c) 2              (d) 4</div>",
+      "sourceUrl": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2017-solutions.pdf",
+      "answerSource": {
+        "kind": "official-solution",
+        "url": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2017-solutions.pdf"
+      }
+    },
+    {
+      "id": "cmi-cs:2017:8",
+      "year": 2017,
+      "set": null,
+      "number": "8",
+      "paperLabel": "CMI MSc/PhD CS 2017 · Part A",
+      "subject": "algorithms",
+      "subjectSlug": "algorithms",
+      "classificationHint": {
+        "subjectSlug": "algorithms",
+        "topicSlug": "sorting"
+      },
+      "topic": "sorting",
+      "topicSlug": "sorting",
+      "subtopics": [
+        "sorting",
+        "cmi-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "C",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">A stable sort preserves the order of values that are equal with respect to the comparison<br>   function. We have a list of three dimensional points<br>                    [(7, 1, 8), (3, 5, 7), (6, 1, 4), (6, 5, 9), (0, 2, 5), (9, 0, 9)].<br>   We sort these in ascending order by the second coordinate. Which of the folllowing<br>   corresponds to a stable sort of this input?<br><br>   (a) [(9, 0, 9), (7, 1, 8), (6, 1, 4), (0, 2, 5), (6, 5, 9), (3, 5, 7)]<br>  (b) [(0, 2, 5), (3, 5, 7), (6, 1, 4), (6, 5, 9), (7, 1, 8), (9, 0, 9)]<br>   (c) [(9, 0, 9), (7, 1, 8), (6, 1, 4), (0, 2, 5), (3, 5, 7), (6, 5, 9)]<br>  (d) [(9, 0, 9), (6, 1, 4), (7, 1, 8), (0, 2, 5), (3, 5, 7), (6, 5, 9)]</div>",
+      "sourceUrl": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2017-solutions.pdf",
+      "answerSource": {
+        "kind": "official-solution",
+        "url": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2017-solutions.pdf"
+      }
+    },
+    {
+      "id": "cmi-cs:2017:10",
+      "year": 2017,
+      "set": null,
+      "number": "10",
+      "paperLabel": "CMI MSc/PhD CS 2017 · Part A",
+      "subject": "algorithms",
+      "subjectSlug": "algorithms",
+      "classificationHint": {
+        "subjectSlug": "algorithms",
+        "topicSlug": "asymptotic-notation"
+      },
+      "topic": "asymptotic-notation",
+      "topicSlug": "asymptotic-notation",
+      "subtopics": [
+        "asymptotic-notation",
+        "cmi-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "B",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">We have constructed a polynomial time reduction from problem A to problem B.<br>    Which of the following is a valid inference?<br><br>      (a) If the best algorithm for B takes exponential time, there is no polynomial time<br>          algorithm for A<br>      (b) If the best algorithm for A takes exponential time, there is no polynomial time<br>          algorithm for B.<br>      (c) If we have a polynomial time algorithm for A, we must also have a polynomial<br>          time algorithm for B.<br>      (d) If we don’t know whether there is a polynomial time algorithm for B, there cannot<br>          be a polynomial time algorithm for A.</div>",
+      "sourceUrl": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2017-solutions.pdf",
+      "answerSource": {
+        "kind": "official-solution",
+        "url": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2017-solutions.pdf"
+      }
+    },
+    {
+      "id": "cmi-cs:2018:1",
+      "year": 2018,
+      "set": null,
+      "number": "1",
+      "paperLabel": "CMI MSc/PhD CS 2018 · Part A",
+      "subject": "theory-of-computation",
+      "subjectSlug": "theory-of-computation",
+      "classificationHint": {
+        "subjectSlug": "theory-of-computation",
+        "topicSlug": "regular-expression"
+      },
+      "topic": "regular-expression",
+      "topicSlug": "regular-expression",
+      "subtopics": [
+        "regular-expression",
+        "cmi-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "D",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">Which of the words below matches the regular expression a(a + b)∗ b + b(a + b)∗ a?<br>   (a) aba                   (b) bab                   (c) abba                   (d) aabb</div>",
+      "sourceUrl": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2018-solutions.pdf",
+      "answerSource": {
+        "kind": "official-solution",
+        "url": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2018-solutions.pdf"
+      }
+    },
+    {
+      "id": "cmi-cs:2018:2",
+      "year": 2018,
+      "set": null,
+      "number": "2",
+      "paperLabel": "CMI MSc/PhD CS 2018 · Part A",
+      "subject": "discrete-mathematics",
+      "subjectSlug": "discrete-mathematics",
+      "classificationHint": {
+        "subjectSlug": "discrete-mathematics",
+        "topicSlug": "propositional-logic"
+      },
+      "topic": "propositional-logic",
+      "topicSlug": "propositional-logic",
+      "subtopics": [
+        "propositional-logic",
+        "cmi-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "C",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">Akash, Bharani, Chetan and Deepa are invited to a party. If Bharani and Chetan<br>   attend, then Deepa will attend too. If Bharani does not attend, then Akash will not<br>   attend. If Deepa does not attend, which of the following is true?<br>   (a) Chetan does not attend                  (b) Akash does not attend<br>   (c) either (a) or (b)                       (d) none of the above</div>",
+      "sourceUrl": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2018-solutions.pdf",
+      "answerSource": {
+        "kind": "official-solution",
+        "url": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2018-solutions.pdf"
+      }
+    },
+    {
+      "id": "cmi-cs:2018:3",
+      "year": 2018,
+      "set": null,
+      "number": "3",
+      "paperLabel": "CMI MSc/PhD CS 2018 · Part A",
+      "subject": "discrete-mathematics",
+      "subjectSlug": "discrete-mathematics",
+      "classificationHint": {
+        "subjectSlug": "discrete-mathematics",
+        "topicSlug": "relation"
+      },
+      "topic": "relation",
+      "topicSlug": "relation",
+      "subtopics": [
+        "relation",
+        "cmi-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "C",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">In a running race, Geetha finishes ahead of Shalini and Vani finishes after Aparna.<br>   Divya finishes ahead of Aparna. Which of the following is a minimal set of additional<br>   information that can determine the winner?<br><br>   (a) Geetha finishes ahead of Divya and Vani finishes ahead of Shalini.<br>  (b) Aparna finishes ahead of Shalini.<br>   (c) Divya finishes ahead of Geetha.<br>  (d) None of the above.<br><br></div>",
+      "sourceUrl": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2018-solutions.pdf",
+      "answerSource": {
+        "kind": "official-solution",
+        "url": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2018-solutions.pdf"
+      }
+    },
+    {
+      "id": "cmi-cs:2018:4",
+      "year": 2018,
+      "set": null,
+      "number": "4",
+      "paperLabel": "CMI MSc/PhD CS 2018 · Part A",
+      "subject": "algorithms",
+      "subjectSlug": "algorithms",
+      "classificationHint": {
+        "subjectSlug": "algorithms",
+        "topicSlug": "shortest-path"
+      },
+      "topic": "shortest-path",
+      "topicSlug": "shortest-path",
+      "subtopics": [
+        "shortest-path",
+        "cmi-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "A",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">Let G = (V, E) be an undirected simple graph, and s be a designated vertex in G. For<br>   each v ∈ V , let d(v) be the length of a shortest path between s and v. For an edge<br>   (u, v) in G, what can not be the value of d(u) − d(v)?<br>   (a) 2                       (b) -1                      (c) 0                      (d) 1</div>",
+      "sourceUrl": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2018-solutions.pdf",
+      "answerSource": {
+        "kind": "official-solution",
+        "url": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2018-solutions.pdf"
+      }
+    },
+    {
+      "id": "cmi-cs:2018:5",
+      "year": 2018,
+      "set": null,
+      "number": "5",
+      "paperLabel": "CMI MSc/PhD CS 2018 · Part A",
+      "subject": "discrete-mathematics",
+      "subjectSlug": "discrete-mathematics",
+      "classificationHint": {
+        "subjectSlug": "discrete-mathematics",
+        "topicSlug": "combination"
+      },
+      "topic": "combination",
+      "topicSlug": "combination",
+      "subtopics": [
+        "combination",
+        "cmi-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "C",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">How many paths are there in the plane from (0, 0) to (m, n) ∈ N × N, if the possible<br>   steps from (i, j) are either (i + 1, j) or (i, j + 1)?<br>       ( )                         (m)                        (m+n)<br>   (a) 2mn<br>                              (b)   n<br>                                                          (c)   n<br>                                                                               (d) mn</div>",
+      "sourceUrl": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2018-solutions.pdf",
+      "answerSource": {
+        "kind": "official-solution",
+        "url": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2018-solutions.pdf"
+      }
+    },
+    {
+      "id": "cmi-cs:2018:6",
+      "year": 2018,
+      "set": null,
+      "number": "6",
+      "paperLabel": "CMI MSc/PhD CS 2018 · Part A",
+      "subject": "engineering-mathematics",
+      "subjectSlug": "engineering-mathematics",
+      "classificationHint": {
+        "subjectSlug": "engineering-mathematics",
+        "topicSlug": "probability-statistics"
+      },
+      "topic": "probability-statistics",
+      "topicSlug": "probability-statistics",
+      "subtopics": [
+        "probability-statistics",
+        "cmi-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "D",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">You are given two coins A and B that look identical. The probability that coin A<br>   turns up heads is 41 , while the probability that coin B turns up heads is 43 . You choose<br>   one of the coins at random and toss it twice. If both the outcomes are heads, what is<br>   the probability that you chose coin B?<br>       1<br>   (a) 16                      (b) 12                         9<br>                                                          (c) 16                         9<br>                                                                                     (d) 10</div>",
+      "sourceUrl": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2018-solutions.pdf",
+      "answerSource": {
+        "kind": "official-solution",
+        "url": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2018-solutions.pdf"
+      }
+    },
+    {
+      "id": "cmi-cs:2018:7",
+      "year": 2018,
+      "set": null,
+      "number": "7",
+      "paperLabel": "CMI MSc/PhD CS 2018 · Part A",
+      "subject": "discrete-mathematics",
+      "subjectSlug": "discrete-mathematics",
+      "classificationHint": {
+        "subjectSlug": "discrete-mathematics",
+        "topicSlug": "recurrence"
+      },
+      "topic": "recurrence",
+      "topicSlug": "recurrence",
+      "subtopics": [
+        "recurrence",
+        "cmi-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "B",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">Let Cn be the number of strings w consisting of n X’s and n Y ’s such that no initial<br>   segment of w has more Y ’s than X’s. Now consider the following problem. A person<br>   stands on the edge of a swimming pool holding a bag of n red and n blue balls. He<br>   draws a ball out one at a time and discards it. If he draws a blue ball, he takes one<br>   step back, if he draws a red ball, he moves one step forward. What is the probability<br>   that the person remains dry?<br>       Cn                       Cn                      n · Cn                   n · Cn<br>   (a) 2n                  (b) (2n)                 (c)                      (d) (2n)<br>       2                         n<br>                                                        (2n)!                       n</div>",
+      "sourceUrl": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2018-solutions.pdf",
+      "answerSource": {
+        "kind": "official-solution",
+        "url": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2018-solutions.pdf"
+      }
+    },
+    {
+      "id": "cmi-cs:2018:8",
+      "year": 2018,
+      "set": null,
+      "number": "8",
+      "paperLabel": "CMI MSc/PhD CS 2018 · Part A",
+      "subject": "discrete-mathematics",
+      "subjectSlug": "discrete-mathematics",
+      "classificationHint": {
+        "subjectSlug": "discrete-mathematics",
+        "topicSlug": "combination"
+      },
+      "topic": "combination",
+      "topicSlug": "combination",
+      "subtopics": [
+        "combination",
+        "cmi-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "C",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">There are 7 switches on a switchboard, some of which are on and some of which are<br>   off. In one move, you pick any 2 switches and toggle each of them—if the switch you<br>   pick is currently off, you turn it on, if it is on, you turn it off. Your aim is to execute<br>   a sequence of moves and turn all 7 switches on. For which of the following initial<br>   configurations is this not possible? Each configuration lists the initial positions of the<br>   7 switches in sequence, from switch 1 to switch 7.<br>   (a) (off,on,off,on,off,off,on)                    (b) (off,on,on,on,on,on,off)<br>   (c) (on,off,on,on,on,on,on)                       (d) (off,off,off,off,off,on,off)</div>",
+      "sourceUrl": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2018-solutions.pdf",
+      "answerSource": {
+        "kind": "official-solution",
+        "url": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2018-solutions.pdf"
+      }
+    },
+    {
+      "id": "cmi-cs:2018:9",
+      "year": 2018,
+      "set": null,
+      "number": "9",
+      "paperLabel": "CMI MSc/PhD CS 2018 · Part A",
+      "subject": "discrete-mathematics",
+      "subjectSlug": "discrete-mathematics",
+      "classificationHint": {
+        "subjectSlug": "discrete-mathematics",
+        "topicSlug": "graph-theory"
+      },
+      "topic": "graph-theory",
+      "topicSlug": "graph-theory",
+      "subtopics": [
+        "graph-theory",
+        "cmi-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "B",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">Your college has sent a contingent to take part in a cultural festival at a neighbouring<br>   institution. Several team events are part of the programme. Each event takes place<br>   through the day with many elimination rounds. Your contingent is multi-talented<br>   and each individual has the skills to take part in a subset of the events. However,<br>   the same individual cannot be part of the team for two different events because of a<br>   possible clash in timings. Your aim is to create teams to take part in as many events<br>   as possible.<br>   To do this, you decide to model the problem as a graph where the nodes are the<br>   events and edges represent pairs of events where the team that you plan to send<br>   shares a member. In this setting, the graph theoretic question to be answered is:<br><br>   (a) Find a maximum length simple cycle<br><br>    (b) Find a maximum size independent set<br>    (c) Find a maximum matching<br>    (d) Find a maximal connected component</div>",
+      "sourceUrl": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2018-solutions.pdf",
+      "answerSource": {
+        "kind": "official-solution",
+        "url": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2018-solutions.pdf"
+      }
+    },
+    {
+      "id": "cmi-cs:2018:10",
+      "year": 2018,
+      "set": null,
+      "number": "10",
+      "paperLabel": "CMI MSc/PhD CS 2018 · Part A",
+      "subject": "c-programming",
+      "subjectSlug": "c-programming",
+      "classificationHint": {
+        "subjectSlug": "c-programming",
+        "topicSlug": "loops"
+      },
+      "topic": "loops",
+      "topicSlug": "loops",
+      "subtopics": [
+        "loops",
+        "cmi-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "C",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">What does the following function compute in terms of n and d, for integer values of n<br>    and d, d &gt; 1? Note that a//b denotes the quotient (integer part) of a ÷ b, for integers<br>    a and b. For instance 7//3 is 2.<br><br>          function foo(n,d){<br>            x := 0;<br>            while (n &gt;= 1) {<br>              x := x+1;<br>              n := n//d;<br>            }<br>            return(x);<br>          }<br><br>    (a) The number of ways of choosing d elements from a set of size n.<br>    (b) The number of ways of rearranging d elements from a set of size n.<br>    (c) The number of digits in the base d representation of n.<br>    (d) The number of ways of partitioning n elements into groups of size d.</div>",
+      "sourceUrl": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2018-solutions.pdf",
+      "answerSource": {
+        "kind": "official-solution",
+        "url": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2018-solutions.pdf"
+      }
+    },
+    {
+      "id": "cmi-cs:2019:1",
+      "year": 2019,
+      "set": null,
+      "number": "1",
+      "paperLabel": "CMI MSc/PhD CS 2019 · Part A",
+      "subject": "theory-of-computation",
+      "subjectSlug": "theory-of-computation",
+      "classificationHint": {
+        "subjectSlug": "theory-of-computation",
+        "topicSlug": "context-free-language"
+      },
+      "topic": "context-free-language",
+      "topicSlug": "context-free-language",
+      "subtopics": [
+        "context-free-language",
+        "cmi-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "C",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">Let L1 := { an bm | m, n ≥ 0 and m ≥ n } and L2 := { an bm | m, n ≥ 0 and m &lt; n }.<br>   The language L1 ∪ L2 is:<br>   (a) regular, but not context-free          (b) context-free, but not regular<br>   (c) both regular and context-free          (d) neither regular nor context-free</div>",
+      "sourceUrl": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2019-solutions.pdf",
+      "answerSource": {
+        "kind": "official-solution",
+        "url": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2019-solutions.pdf"
+      }
+    },
+    {
+      "id": "cmi-cs:2019:2",
+      "year": 2019,
+      "set": null,
+      "number": "2",
+      "paperLabel": "CMI MSc/PhD CS 2019 · Part A",
+      "subject": "theory-of-computation",
+      "subjectSlug": "theory-of-computation",
+      "classificationHint": {
+        "subjectSlug": "theory-of-computation",
+        "topicSlug": "finite-automata"
+      },
+      "topic": "finite-automata",
+      "topicSlug": "finite-automata",
+      "subtopics": [
+        "finite-automata",
+        "cmi-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "A",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">Let A be an NFA with n states. Which of the following is necessarily true?<br><br>   (a) The shortest word in L(A) has length at most n−1.<br>  (b) The shortest word in L(A) has length at least n.<br>   (c) The shortest word not in L(A) has length at most n−1.<br>  (d) The shortest word not in L(A) has length at least n.</div>",
+      "sourceUrl": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2019-solutions.pdf",
+      "answerSource": {
+        "kind": "official-solution",
+        "url": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2019-solutions.pdf"
+      }
+    },
+    {
+      "id": "cmi-cs:2019:4",
+      "year": 2019,
+      "set": null,
+      "number": "4",
+      "paperLabel": "CMI MSc/PhD CS 2019 · Part A",
+      "subject": "discrete-mathematics",
+      "subjectSlug": "discrete-mathematics",
+      "classificationHint": {
+        "subjectSlug": "discrete-mathematics",
+        "topicSlug": "functions"
+      },
+      "topic": "functions",
+      "topicSlug": "functions",
+      "subtopics": [
+        "functions",
+        "cmi-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "D",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">There are five buckets, each of which can be open or closed. An arrangement is a<br>   specification of which buckets are open and which are closed. Every person likes some<br>   of the arrangements and dislikes the rest. You host a party, and amazingly, no two<br>   people on the guest list have the same likes and dislikes. What is the maximum number<br>   of guests possible?<br><br>                              (b) 52<br><br>   (a) 52                                                  (c) 25                 (d) 22</div>",
+      "sourceUrl": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2019-solutions.pdf",
+      "answerSource": {
+        "kind": "official-solution",
+        "url": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2019-solutions.pdf"
+      }
+    },
+    {
+      "id": "cmi-cs:2019:5",
+      "year": 2019,
+      "set": null,
+      "number": "5",
+      "paperLabel": "CMI MSc/PhD CS 2019 · Part A",
+      "subject": "discrete-mathematics",
+      "subjectSlug": "discrete-mathematics",
+      "classificationHint": {
+        "subjectSlug": "discrete-mathematics",
+        "topicSlug": "combination"
+      },
+      "topic": "combination",
+      "topicSlug": "combination",
+      "subtopics": [
+        "combination",
+        "cmi-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "B",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">Let π = [x1 , x2 , . . . , xn ] be a permutation of {1, 2, . . . , n}. For k &lt; n, we say that π<br>   has its first ascent at k if x1 &gt; x2 . . . &gt; xk and xk &lt; xk+1 . How many permutations<br>   have their first ascent at k?<br>                                                                                      n        n<br>   (a) nk - (k+1)n<br>                               (b) n!       n!            n!           n!<br><br>                                     k!<br>                                        − (k+1)!    (c) (k+1)! − (k+2)!         (d) (k+1)  - (k+2)</div>",
+      "sourceUrl": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2019-solutions.pdf",
+      "answerSource": {
+        "kind": "official-solution",
+        "url": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2019-solutions.pdf"
+      }
+    },
+    {
+      "id": "cmi-cs:2019:6",
+      "year": 2019,
+      "set": null,
+      "number": "6",
+      "paperLabel": "CMI MSc/PhD CS 2019 · Part A",
+      "subject": "engineering-mathematics",
+      "subjectSlug": "engineering-mathematics",
+      "classificationHint": {
+        "subjectSlug": "engineering-mathematics",
+        "topicSlug": "probability-statistics"
+      },
+      "topic": "probability-statistics",
+      "topicSlug": "probability-statistics",
+      "subtopics": [
+        "probability-statistics",
+        "cmi-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "D",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">Suppose you alternate between throwing a normal six-sided fair die and tossing a fair<br>   coin. You start by throwing the die. What is the probability that you will see a 5 on<br>   the die before you see tails on the coin?<br>      1<br>  (a) 12                       (b) 16                      (c) 29                   (d) 27</div>",
+      "sourceUrl": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2019-solutions.pdf",
+      "answerSource": {
+        "kind": "official-solution",
+        "url": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2019-solutions.pdf"
+      }
+    },
+    {
+      "id": "cmi-cs:2019:7",
+      "year": 2019,
+      "set": null,
+      "number": "7",
+      "paperLabel": "CMI MSc/PhD CS 2019 · Part A",
+      "subject": "discrete-mathematics",
+      "subjectSlug": "discrete-mathematics",
+      "classificationHint": {
+        "subjectSlug": "discrete-mathematics",
+        "topicSlug": "graph-theory"
+      },
+      "topic": "graph-theory",
+      "topicSlug": "graph-theory",
+      "subtopics": [
+        "graph-theory",
+        "cmi-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "A",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">An interschool basketball tournament is being held at the Olympic sports complex.<br>   There are multiple basketball courts. Matches are scheduled in parallel, with staggered<br>   timings, to ensure that spectators always have some match or other available to watch.<br>   Each match requires a team of referees and linesmen. Two matches that overlap<br>   require disjoint teams of referees and linesmen. The tournament organizers would<br>   like to determine how many teams of referees and linesmen they need to mobilize to<br>   effectively conduct the tournament. To determine this, which graph theoretic problem<br>   do the organizers have to solve?<br><br>  (a) Find a minimal colouring.<br>  (b) Find a minimal spanning tree.<br>   (c) Find a minimal cut.<br>  (d) Find a minimal vertex cover.</div>",
+      "sourceUrl": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2019-solutions.pdf",
+      "answerSource": {
+        "kind": "official-solution",
+        "url": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2019-solutions.pdf"
+      }
+    },
+    {
+      "id": "cmi-cs:2019:8",
+      "year": 2019,
+      "set": null,
+      "number": "8",
+      "paperLabel": "CMI MSc/PhD CS 2019 · Part A",
+      "subject": "algorithms",
+      "subjectSlug": "algorithms",
+      "classificationHint": {
+        "subjectSlug": "algorithms",
+        "topicSlug": "asymptotic-notation"
+      },
+      "topic": "asymptotic-notation",
+      "topicSlug": "asymptotic-notation",
+      "subtopics": [
+        "asymptotic-notation",
+        "cmi-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "C",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">We have constructed a polynomial time reduction from problem A to problem B.<br>    Which of the following is not a possible scenario?<br><br>   (a) We know of polynomial time algorithms for both A and B.<br>   (b) We only know of exponential time algorithms for both A and B.<br>   (c) We only know an exponential time algorithm for A, but we have a polynomial<br>       time algorithm for B.<br>   (d) We only know an exponential time algorithm for B, but we have a polynomial<br>       time algorithm for A.</div>",
+      "sourceUrl": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2019-solutions.pdf",
+      "answerSource": {
+        "kind": "official-solution",
+        "url": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2019-solutions.pdf"
+      }
+    },
+    {
+      "id": "cmi-cs:2019:9",
+      "year": 2019,
+      "set": null,
+      "number": "9",
+      "paperLabel": "CMI MSc/PhD CS 2019 · Part A",
+      "subject": "algorithms",
+      "subjectSlug": "algorithms",
+      "classificationHint": {
+        "subjectSlug": "algorithms",
+        "topicSlug": "sorting"
+      },
+      "topic": "sorting",
+      "topicSlug": "sorting",
+      "subtopics": [
+        "sorting",
+        "cmi-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "A",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">The next two questions refer to the following program.<br> In the code below reverse(A,i,j) takes an array A, indices i and j with i ≤ j, and re-<br> verses the segment A[i], A[i+1],. . . ,A[j]. For instance if A = [0,1,2,3,4,5,6,7] then,<br> after we apply reverse(A,3,6), the contents of the array will be A = [0,1,2,6,5,4,3,7].<br> function mystery (A[0..99]) {<br>   int i,j,m;<br>   for (i = 0; i &lt; 100; i++) {<br>     m = i;<br>     for (j = i; j &lt; 100, j++) {<br>       if (A[j] &gt; A[m]) {<br>         m = j;<br>       }<br>     }<br>     reverse(A,i,m);<br>   }<br>   return;<br> }<br><br>9. When the procedure terminates, the array A has been:<br>    (a) Sorted in descending order             (b) Sorted in ascending order<br>    (c) Reversed                               (d) Left unaltered</div>",
+      "sourceUrl": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2019-solutions.pdf",
+      "answerSource": {
+        "kind": "official-solution",
+        "url": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2019-solutions.pdf"
+      }
+    },
+    {
+      "id": "cmi-cs:2019:10",
+      "year": 2019,
+      "set": null,
+      "number": "10",
+      "paperLabel": "CMI MSc/PhD CS 2019 · Part A",
+      "subject": "algorithms",
+      "subjectSlug": "algorithms",
+      "classificationHint": {
+        "subjectSlug": "algorithms",
+        "topicSlug": "asymptotic-notation"
+      },
+      "topic": "asymptotic-notation",
+      "topicSlug": "asymptotic-notation",
+      "subtopics": [
+        "asymptotic-notation",
+        "cmi-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "B",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">The next two questions refer to the following program.<br> In the code below reverse(A,i,j) takes an array A, indices i and j with i ≤ j, and re-<br> verses the segment A[i], A[i+1],. . . ,A[j]. For instance if A = [0,1,2,3,4,5,6,7] then,<br> after we apply reverse(A,3,6), the contents of the array will be A = [0,1,2,6,5,4,3,7].<br> function mystery (A[0..99]) {<br>   int i,j,m;<br>   for (i = 0; i &lt; 100; i++) {<br>     m = i;<br>     for (j = i; j &lt; 100, j++) {<br>       if (A[j] &gt; A[m]) {<br>         m = j;<br>       }<br>     }<br>     reverse(A,i,m);<br>   }<br>   return;<br> }<br><br>10. The number of times the test A[j] &gt; A[m] is executed is:<br>   (a) 4950         (b) 5050          (c) 10000       (d) Depends on the contents of A<br><br></div>",
+      "sourceUrl": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2019-solutions.pdf",
+      "answerSource": {
+        "kind": "official-solution",
+        "url": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2019-solutions.pdf"
+      }
+    },
+    {
+      "id": "cmi-cs:2020:1",
+      "year": 2020,
+      "set": null,
+      "number": "1",
+      "paperLabel": "CMI MSc/PhD CS 2020 · Part A",
+      "subject": "theory-of-computation",
+      "subjectSlug": "theory-of-computation",
+      "classificationHint": {
+        "subjectSlug": "theory-of-computation",
+        "topicSlug": "finite-automata"
+      },
+      "topic": "finite-automata",
+      "topicSlug": "finite-automata",
+      "subtopics": [
+        "finite-automata",
+        "cmi-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "D",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">Which of the following languages over the alphabet {0, 1} are not recognized by de-<br>   terministic finite state automata (DFA) with three states?<br><br>   (a) Words which do not have 11 as a contiguous subword<br>  (b) Binary representations of multiples of three<br>   (c) Words that have 11 as a suﬀix<br>  (d) Words that do not contain 101 as a contiguous subword</div>",
+      "sourceUrl": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2020-solutions.pdf",
+      "answerSource": {
+        "kind": "official-solution",
+        "url": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2020-solutions.pdf"
+      }
+    },
+    {
+      "id": "cmi-cs:2020:2",
+      "year": 2020,
+      "set": null,
+      "number": "2",
+      "paperLabel": "CMI MSc/PhD CS 2020 · Part A",
+      "subject": "theory-of-computation",
+      "subjectSlug": "theory-of-computation",
+      "classificationHint": {
+        "subjectSlug": "theory-of-computation",
+        "topicSlug": "regular-expression"
+      },
+      "topic": "regular-expression",
+      "topicSlug": "regular-expression",
+      "subtopics": [
+        "regular-expression",
+        "cmi-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "C",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">Consider the following regular expressions over alphabet {a, b}, where the notation<br>   (a + b)+ means (a + b)(a + b)∗ :<br><br>                                     r1 = (a + b)+ a (a + b)∗<br>                                     r2 = (a + b)∗ b (a + b)+<br><br>   Let L1 and L2 be the languages defined by r1 and r2 , respectively. Which of the<br>   following regular expressions define L1 ∩ L2 ?<br>   (a) (a + b)+ a (a + b)∗ b (a + b)+             (b) (a + b)∗ a b (a + b)∗<br>              ∗         ∗<br>   (c) (a + b) b (a + b) a (a + b) ∗<br>                                                  (d) (a + b)∗ a (a + b)∗ b (a + b)∗</div>",
+      "sourceUrl": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2020-solutions.pdf",
+      "answerSource": {
+        "kind": "official-solution",
+        "url": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2020-solutions.pdf"
+      }
+    },
+    {
+      "id": "cmi-cs:2020:3",
+      "year": 2020,
+      "set": null,
+      "number": "3",
+      "paperLabel": "CMI MSc/PhD CS 2020 · Part A",
+      "subject": "discrete-mathematics",
+      "subjectSlug": "discrete-mathematics",
+      "classificationHint": {
+        "subjectSlug": "discrete-mathematics",
+        "topicSlug": "propositional-logic"
+      },
+      "topic": "propositional-logic",
+      "topicSlug": "propositional-logic",
+      "subtopics": [
+        "propositional-logic",
+        "cmi-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "A",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">Some children are given boxes containing sweets. Harish is happy if he gets either<br>   gems or toffees. Rekha is happy if she gets both bubble gums and peppermints. Some<br>   of the boxes are special, which means that if the box contains either gems or toffees,<br>   then it also contains bubble gums and peppermints. If Harish and Rekha are given<br>   boxes that are not special, which of the following can we infer?<br><br>   (a) Harish is happy<br>  (b) No bubble gums in Rekha’s box<br>   (c) No toffees in Harish’s box<br>  (d) There are peppermints in Rekha’s box</div>",
+      "sourceUrl": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2020-solutions.pdf",
+      "answerSource": {
+        "kind": "official-solution",
+        "url": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2020-solutions.pdf"
+      }
+    },
+    {
+      "id": "cmi-cs:2020:4",
+      "year": 2020,
+      "set": null,
+      "number": "4",
+      "paperLabel": "CMI MSc/PhD CS 2020 · Part A",
+      "subject": "discrete-mathematics",
+      "subjectSlug": "discrete-mathematics",
+      "classificationHint": {
+        "subjectSlug": "discrete-mathematics",
+        "topicSlug": "relation"
+      },
+      "topic": "relation",
+      "topicSlug": "relation",
+      "subtopics": [
+        "relation",
+        "cmi-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "B",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">In a class, every student likes exactly one novelist and one musician. If two students<br>   like the same novelist, they also like the same musician. The class can be divided into<br>   novelist groups, each group consisting of all students who like one novelist. Similarly,<br>   musician groups can be formed. So each student belongs to one musician group and<br>   one novelist group. Which of the following is a valid conclusion?<br><br>  (a) There are more musician groups than novelist groups<br>  (b) There are at least as many novelist groups as musician groups<br>   (c) For every musician group, there is a bigger novelist group<br>  (d) For every novelist group, there is a musician group of the same size</div>",
+      "sourceUrl": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2020-solutions.pdf",
+      "answerSource": {
+        "kind": "official-solution",
+        "url": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2020-solutions.pdf"
+      }
+    },
+    {
+      "id": "cmi-cs:2020:5",
+      "year": 2020,
+      "set": null,
+      "number": "5",
+      "paperLabel": "CMI MSc/PhD CS 2020 · Part A",
+      "subject": "discrete-mathematics",
+      "subjectSlug": "discrete-mathematics",
+      "classificationHint": {
+        "subjectSlug": "discrete-mathematics",
+        "topicSlug": "functions"
+      },
+      "topic": "functions",
+      "topicSlug": "functions",
+      "subtopics": [
+        "functions",
+        "cmi-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "D",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">A boolean function on n variables is a function f that takes an n-tuple of boolean<br>   values x ∈ {0, 1}n as input and produces a boolean value f (x) ∈ {0, 1} as output.<br>  We say that a boolean function f is symmetric if, for all inputs x, y ∈ {0, 1}n with<br>  the same number of zeros (and hence the same number of ones), f (x) = f (y). What<br>  is the number of symmetric boolean functions on n variables?<br>                                                    ∑n ( )<br>                                                         n<br>  (a) n + 1               (b) n!                (c)                           (d) 2n+1<br>                                                    i=0<br>                                                         i</div>",
+      "sourceUrl": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2020-solutions.pdf",
+      "answerSource": {
+        "kind": "official-solution",
+        "url": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2020-solutions.pdf"
+      }
+    },
+    {
+      "id": "cmi-cs:2020:6",
+      "year": 2020,
+      "set": null,
+      "number": "6",
+      "paperLabel": "CMI MSc/PhD CS 2020 · Part A",
+      "subject": "discrete-mathematics",
+      "subjectSlug": "discrete-mathematics",
+      "classificationHint": {
+        "subjectSlug": "discrete-mathematics",
+        "topicSlug": "combination"
+      },
+      "topic": "combination",
+      "topicSlug": "combination",
+      "subtopics": [
+        "combination",
+        "cmi-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "B",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">There are n songs segregated into 3 playlists. Assume that each playlist has at least<br>   one song. For all n, the number of ways of choosing three songs consisting of one song<br>   from each playlist is:<br>                                                            ( )<br>         n3                         n3                       n<br>   (a) &gt;                      (b) ≤                     (c)                       (d) n3<br>         27                         27                       3<br><br>                     n3</div>",
+      "sourceUrl": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2020-solutions.pdf",
+      "answerSource": {
+        "kind": "official-solution",
+        "url": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2020-solutions.pdf"
+      }
+    },
+    {
+      "id": "cmi-cs:2020:7",
+      "year": 2020,
+      "set": null,
+      "number": "7",
+      "paperLabel": "CMI MSc/PhD CS 2020 · Part A",
+      "subject": "engineering-mathematics",
+      "subjectSlug": "engineering-mathematics",
+      "classificationHint": {
+        "subjectSlug": "engineering-mathematics",
+        "topicSlug": "probability-statistics"
+      },
+      "topic": "probability-statistics",
+      "topicSlug": "probability-statistics",
+      "subtopics": [
+        "probability-statistics",
+        "cmi-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "C",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">The next two questions are based on the following facts.<br><br>Basketball shots are classified into close-range, mid-range and long-range shots. Long<br>range shots are worth 3 points, while close-range and mid-range shots are worth 2 points.<br>Of the shots that LeBron James attempts, 45% are close-range, 25% are mid-range, and<br>30% are long-range. He successfully makes 80% of the close-range shots, 48% of the<br>mid-range shots, and 40% of the long-range shots.<br><br>7. What is the probability that a LeBron shot attempt is successful?<br>       1                         4                        3                               4<br>   (a)                       (b)                      (c)                           (d)<br>       2                         5                        5                               7<br>                  3</div>",
+      "sourceUrl": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2020-solutions.pdf",
+      "answerSource": {
+        "kind": "official-solution",
+        "url": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2020-solutions.pdf"
+      }
+    },
+    {
+      "id": "cmi-cs:2020:8",
+      "year": 2020,
+      "set": null,
+      "number": "8",
+      "paperLabel": "CMI MSc/PhD CS 2020 · Part A",
+      "subject": "engineering-mathematics",
+      "subjectSlug": "engineering-mathematics",
+      "classificationHint": {
+        "subjectSlug": "engineering-mathematics",
+        "topicSlug": "probability-statistics"
+      },
+      "topic": "probability-statistics",
+      "topicSlug": "probability-statistics",
+      "subtopics": [
+        "probability-statistics",
+        "cmi-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "D",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">The next two questions are based on the following facts.<br><br>Basketball shots are classified into close-range, mid-range and long-range shots. Long<br>range shots are worth 3 points, while close-range and mid-range shots are worth 2 points.<br>Of the shots that LeBron James attempts, 45% are close-range, 25% are mid-range, and<br>30% are long-range. He successfully makes 80% of the close-range shots, 48% of the<br>mid-range shots, and 40% of the long-range shots.<br><br>8. What is the probability that a successful 2-point shot attempt by LeBron is a close-<br>   range shot?<br>       2                         3                          3                        3<br>   (a)                       (b)                        (c)                     (d)<br>       5                         5                          7                        4<br>                  3</div>",
+      "sourceUrl": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2020-solutions.pdf",
+      "answerSource": {
+        "kind": "official-solution",
+        "url": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2020-solutions.pdf"
+      }
+    },
+    {
+      "id": "cmi-cs:2020:9",
+      "year": 2020,
+      "set": null,
+      "number": "9",
+      "paperLabel": "CMI MSc/PhD CS 2020 · Part A",
+      "subject": "engineering-mathematics",
+      "subjectSlug": "engineering-mathematics",
+      "classificationHint": {
+        "subjectSlug": "engineering-mathematics",
+        "topicSlug": "probability-statistics"
+      },
+      "topic": "probability-statistics",
+      "topicSlug": "probability-statistics",
+      "subtopics": [
+        "probability-statistics",
+        "cmi-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "B",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">A fair coin is repeatedly tossed. Each time a head appears, 1 rupee is added to the<br>   first bag. Each time a tail appears, 2 rupees are put in the second bag.<br>  What is the probability that both the bags have the same amount of money after 6<br>  coin tosses?<br>      1                           6!                      22                   6!<br>  (a) 6                  (b)                          (c)                 (d) 6<br>      2                      2! · 4! · 26                 26                   2<br>                       6!</div>",
+      "sourceUrl": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2020-solutions.pdf",
+      "answerSource": {
+        "kind": "official-solution",
+        "url": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2020-solutions.pdf"
+      }
+    },
+    {
+      "id": "cmi-cs:2020:10",
+      "year": 2020,
+      "set": null,
+      "number": "10",
+      "paperLabel": "CMI MSc/PhD CS 2020 · Part A",
+      "subject": "algorithms",
+      "subjectSlug": "algorithms",
+      "classificationHint": {
+        "subjectSlug": "algorithms",
+        "topicSlug": "asymptotic-notation"
+      },
+      "topic": "asymptotic-notation",
+      "topicSlug": "asymptotic-notation",
+      "subtopics": [
+        "asymptotic-notation",
+        "cmi-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "D",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">We have a procedure P (n) that makes multiple calls to a procedure Q(m), and runs in<br>    polynomial time in n. Unfortunately, a significant flaw was discovered in Q(m), and<br>    it had to be replaced by R(m), which runs in exponential time in m. Thankfully, P<br>    is still correct when we replace each call to Q(m) with a call to R(m) instead. Which<br>    of the following can we definitely say about the modified version of P ?<br><br>    (a) P (n) still runs in polynomial time in n.<br>   (b) P (n) requires exponential time in n.<br>    (c) P (n) runs in polynomial time in n if the number of calls made to Q is proportional<br>        to log n.<br>   (d) P (n) runs in polynomial time in n if, for each call Q(m), m ≤ log n.</div>",
+      "sourceUrl": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2020-solutions.pdf",
+      "answerSource": {
+        "kind": "official-solution",
+        "url": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2020-solutions.pdf"
+      }
+    },
+    {
+      "id": "cmi-cs:2021:1",
+      "year": 2021,
+      "set": null,
+      "number": "1",
+      "paperLabel": "CMI MSc/PhD CS 2021 · Part A",
+      "subject": "discrete-mathematics",
+      "subjectSlug": "discrete-mathematics",
+      "classificationHint": {
+        "subjectSlug": "discrete-mathematics",
+        "topicSlug": "propositional-logic"
+      },
+      "topic": "propositional-logic",
+      "topicSlug": "propositional-logic",
+      "subtopics": [
+        "propositional-logic",
+        "cmi-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "C",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">If the milkman doesn’t deliver milk or the geyser doesn’t work, then Akash will be<br>   late for school and lunch will be cooked late. Suppose lunch was actually cooked on<br>   time. Which of the following is definitely true?<br>   (a) Akash was late for school                 (b) Akash reached school in time<br>   (c) Geyser worked                             (d) Milkman did not deliver milk</div>",
+      "sourceUrl": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2021-solutions.pdf",
+      "answerSource": {
+        "kind": "official-solution",
+        "url": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2021-solutions.pdf"
+      }
+    },
+    {
+      "id": "cmi-cs:2021:2",
+      "year": 2021,
+      "set": null,
+      "number": "2",
+      "paperLabel": "CMI MSc/PhD CS 2021 · Part A",
+      "subject": "theory-of-computation",
+      "subjectSlug": "theory-of-computation",
+      "classificationHint": {
+        "subjectSlug": "theory-of-computation",
+        "topicSlug": "regular-language"
+      },
+      "topic": "regular-language",
+      "topicSlug": "regular-language",
+      "subtopics": [
+        "regular-language",
+        "cmi-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "B",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">Let L be the language over {a, b} that contains the same number of occurrences of a<br>   and b. Which of the following languages is regular?<br>   (a) L ∩ a∗ b∗                                (b) (L ∩ a∗ b∗ ) ∪ a∗ b∗<br>   (c) L ∪ a∗ b∗                                (d) (L ∩ a∗ b∗ ) ∪ b∗ a∗</div>",
+      "sourceUrl": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2021-solutions.pdf",
+      "answerSource": {
+        "kind": "official-solution",
+        "url": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2021-solutions.pdf"
+      }
+    },
+    {
+      "id": "cmi-cs:2021:3",
+      "year": 2021,
+      "set": null,
+      "number": "3",
+      "paperLabel": "CMI MSc/PhD CS 2021 · Part A",
+      "subject": "theory-of-computation",
+      "subjectSlug": "theory-of-computation",
+      "classificationHint": {
+        "subjectSlug": "theory-of-computation",
+        "topicSlug": "regular-expression"
+      },
+      "topic": "regular-expression",
+      "topicSlug": "regular-expression",
+      "subtopics": [
+        "regular-expression",
+        "cmi-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "D",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">Which of the following regular expressions represents binary strings that are multiples<br>   of 3? Note that we consider the leftmost bit to be the most significant.<br>   (a) ((11)0∗ )∗                               (b) (10∗ )∗<br>   (c) 1(01∗ )∗                                 (d) (11 + 101∗ 01 + 0)∗<br><br></div>",
+      "sourceUrl": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2021-solutions.pdf",
+      "answerSource": {
+        "kind": "official-solution",
+        "url": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2021-solutions.pdf"
+      }
+    },
+    {
+      "id": "cmi-cs:2021:4",
+      "year": 2021,
+      "set": null,
+      "number": "4",
+      "paperLabel": "CMI MSc/PhD CS 2021 · Part A",
+      "subject": "discrete-mathematics",
+      "subjectSlug": "discrete-mathematics",
+      "classificationHint": {
+        "subjectSlug": "discrete-mathematics",
+        "topicSlug": "graph-theory"
+      },
+      "topic": "graph-theory",
+      "topicSlug": "graph-theory",
+      "subtopics": [
+        "graph-theory",
+        "cmi-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "C",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">Consider the following statements about finite simple graphs G:<br><br>    (i) If each vertex of a graph G has degree at least 2 then G contains a cycle as a<br>        subgraph.<br>    (ii) If the number of edges of a graph G is at least as large as the number of its<br>         vertices, then G contains a cycle as a subgraph.<br><br>  Which of the above two statements holds for all graphs?<br>  (a) (i) only                               (b) (ii) only<br>  (c) both (i) and (ii)                      (d) neither of them</div>",
+      "sourceUrl": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2021-solutions.pdf",
+      "answerSource": {
+        "kind": "official-solution",
+        "url": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2021-solutions.pdf"
+      }
+    },
+    {
+      "id": "cmi-cs:2021:6",
+      "year": 2021,
+      "set": null,
+      "number": "6",
+      "paperLabel": "CMI MSc/PhD CS 2021 · Part A",
+      "subject": "engineering-mathematics",
+      "subjectSlug": "engineering-mathematics",
+      "classificationHint": {
+        "subjectSlug": "engineering-mathematics",
+        "topicSlug": "probability-statistics"
+      },
+      "topic": "probability-statistics",
+      "topicSlug": "probability-statistics",
+      "subtopics": [
+        "probability-statistics",
+        "cmi-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "A",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">In the chamber containing the Philosopher’s stone, Harry sees a deck of 5 cards, each<br>   with a distinct number from 1 to 5. Harry removes two cards from the deck, one at<br>   time. What is the probability that the two cards selected are such that the first card’s<br>   number is exactly one more than the number on the second card?<br>   (a) 1/5                                      (b) 4/25<br>   (c) 1/4                                      (d) 2/5</div>",
+      "sourceUrl": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2021-solutions.pdf",
+      "answerSource": {
+        "kind": "official-solution",
+        "url": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2021-solutions.pdf"
+      }
+    },
+    {
+      "id": "cmi-cs:2021:7",
+      "year": 2021,
+      "set": null,
+      "number": "7",
+      "paperLabel": "CMI MSc/PhD CS 2021 · Part A",
+      "subject": "algorithms",
+      "subjectSlug": "algorithms",
+      "classificationHint": {
+        "subjectSlug": "algorithms",
+        "topicSlug": "greedy-technique"
+      },
+      "topic": "greedy-technique",
+      "topicSlug": "greedy-technique",
+      "subtopics": [
+        "greedy-technique",
+        "cmi-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "A",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">You are given a sequence of letters x1 x2 . . . xn where each xi ∈ {a, b, c, d, e, f, g, h}.<br>   You can form a new sequence from the given sequence as follows. Start with x1 . Place<br>   xm+1 either to the left or to the right of the sequence already built from x1 x2 . . . xm .<br>   For instance, from dcbeb you can form ecdbb through the steps d → cd → cdb →<br>   ecdb → ecdbb and bbcde through the steps d → cd → bcd → bcde → bbcde.<br>   What is the largest sequence in lexicographic (dictionary) order that you can form<br>   from the input sequence becgdfg?<br>   (a) ggebcdf               (b) ggfedcb                (c) ggecbdf               (d) ggfebcd</div>",
+      "sourceUrl": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2021-solutions.pdf",
+      "answerSource": {
+        "kind": "official-solution",
+        "url": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2021-solutions.pdf"
+      }
+    },
+    {
+      "id": "cmi-cs:2021:8",
+      "year": 2021,
+      "set": null,
+      "number": "8",
+      "paperLabel": "CMI MSc/PhD CS 2021 · Part A",
+      "subject": "discrete-mathematics",
+      "subjectSlug": "discrete-mathematics",
+      "classificationHint": {
+        "subjectSlug": "discrete-mathematics",
+        "topicSlug": "combination"
+      },
+      "topic": "combination",
+      "topicSlug": "combination",
+      "subtopics": [
+        "combination",
+        "cmi-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "B",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">There is a basket full of apples, oranges, mangoes, pears and pomegranates. You want<br>   to pick three fruits from the basket. Multiple pieces of the same fruit can be picked.<br>   However, if you pick mangoes, you cannot pick apples.<br>   In how many ways can you pick three fruits satisfying this condition?<br>   (a) 14                      (b) 30                      (c) 28                      (d) 20</div>",
+      "sourceUrl": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2021-solutions.pdf",
+      "answerSource": {
+        "kind": "official-solution",
+        "url": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2021-solutions.pdf"
+      }
+    },
+    {
+      "id": "cmi-cs:2021:9",
+      "year": 2021,
+      "set": null,
+      "number": "9",
+      "paperLabel": "CMI MSc/PhD CS 2021 · Part A",
+      "subject": "c-programming",
+      "subjectSlug": "c-programming",
+      "classificationHint": {
+        "subjectSlug": "c-programming",
+        "topicSlug": "array-and-pointer"
+      },
+      "topic": "array-and-pointer",
+      "topicSlug": "array-and-pointer",
+      "subtopics": [
+        "array-and-pointer",
+        "cmi-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "D",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">The next two questions refer to the following procedure.<br><br>The procedure operates on three arrays A[0..99], B[0..99] and C[0..99], which are<br>initialized with integer values.<br><br>     procedure mystery() {<br>         for (i = 0; i &lt; 100; i++) { C[i] = A[i]; }<br>         p = 99;<br>         for (i = 0; i &lt; 100; i++) {<br>             B[p] = C[0];<br>             p = p-1;<br>             for (j = 1; j &lt; 100; j++) {<br>                 C[j-1] = C[j];<br>             }<br>         }<br>     }<br><br>9. When the procedure terminates, which of the following statements can be asserted<br>    about the array B?<br><br>   (a) All elements of B are equal to A[0]<br>   (b) B contains the elements of A sorted in descending order<br>   (c) All values of B are the same<br>   (d) B contains the elements of A in reverse order</div>",
+      "sourceUrl": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2021-solutions.pdf",
+      "answerSource": {
+        "kind": "official-solution",
+        "url": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2021-solutions.pdf"
+      }
+    },
+    {
+      "id": "cmi-cs:2021:10",
+      "year": 2021,
+      "set": null,
+      "number": "10",
+      "paperLabel": "CMI MSc/PhD CS 2021 · Part A",
+      "subject": "c-programming",
+      "subjectSlug": "c-programming",
+      "classificationHint": {
+        "subjectSlug": "c-programming",
+        "topicSlug": "array-and-pointer"
+      },
+      "topic": "array-and-pointer",
+      "topicSlug": "array-and-pointer",
+      "subtopics": [
+        "array-and-pointer",
+        "cmi-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "C",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">The next two questions refer to the following procedure.<br><br>The procedure operates on three arrays A[0..99], B[0..99] and C[0..99], which are<br>initialized with integer values.<br><br>     procedure mystery() {<br>         for (i = 0; i &lt; 100; i++) { C[i] = A[i]; }<br>         p = 99;<br>         for (i = 0; i &lt; 100; i++) {<br>             B[p] = C[0];<br>             p = p-1;<br>             for (j = 1; j &lt; 100; j++) {<br>                 C[j-1] = C[j];<br>             }<br>         }<br>     }<br><br>10. When the procedure terminates, which of the following statements can be asserted<br>    about the array C?<br><br>   (a) It contains the elements of A sorted in ascending order<br>   (b) It contains the elements of A sorted in descending order<br>   (c) All values are equal to A[99]<br>   (d) All values are equal to A[0]</div>",
+      "sourceUrl": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2021-solutions.pdf",
+      "answerSource": {
+        "kind": "official-solution",
+        "url": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2021-solutions.pdf"
+      }
+    },
+    {
+      "id": "cmi-cs:2022:1",
+      "year": 2022,
+      "set": null,
+      "number": "1",
+      "paperLabel": "CMI MSc/PhD CS 2022 · Part A",
+      "subject": "discrete-mathematics",
+      "subjectSlug": "discrete-mathematics",
+      "classificationHint": {
+        "subjectSlug": "discrete-mathematics",
+        "topicSlug": "propositional-logic"
+      },
+      "topic": "propositional-logic",
+      "topicSlug": "propositional-logic",
+      "subtopics": [
+        "propositional-logic",
+        "cmi-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "D",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">If Vinay finishes his homework and the school closes early, then he can play in the<br>   park or eat an ice cream. He will end up at the dispensary with tummy ache if he eats<br>   ice cream and plays in the park. Which of the following can be correctly inferred?<br><br>   (a) If he doesn’t end up in the dispensary with tummy ache, then he did not finish<br>       his homework or the school closed late.<br>  (b) If he doesn’t end up in the dispensary with tummy ache, he didn’t eat ice cream<br>      and he didn’t play in the park.<br>   (c) Both (a) and (b)<br>  (d) None of the above.</div>",
+      "sourceUrl": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2022-solutions.pdf",
+      "answerSource": {
+        "kind": "official-solution",
+        "url": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2022-solutions.pdf"
+      }
+    },
+    {
+      "id": "cmi-cs:2022:2",
+      "year": 2022,
+      "set": null,
+      "number": "2",
+      "paperLabel": "CMI MSc/PhD CS 2022 · Part A",
+      "subject": "discrete-mathematics",
+      "subjectSlug": "discrete-mathematics",
+      "classificationHint": {
+        "subjectSlug": "discrete-mathematics",
+        "topicSlug": "set-theory"
+      },
+      "topic": "set-theory",
+      "topicSlug": "set-theory",
+      "subtopics": [
+        "set-theory",
+        "cmi-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "D",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">There are n members of Chennai Mathematical Institute. Most of them are very<br>   studious, and like to own lots of books. Now the following facts have been learnt.<br><br>     • No two members own exactly the same number of books.<br>     • Each member owns strictly less than n books.<br>     • No member has exactly 200 books.<br><br>   Given the above information, which of the following is not a possible value of n?<br><br>   (a) 100<br>  (b) 199<br>   (c) 200<br>  (d) 201<br><br></div>",
+      "sourceUrl": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2022-solutions.pdf",
+      "answerSource": {
+        "kind": "official-solution",
+        "url": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2022-solutions.pdf"
+      }
+    },
+    {
+      "id": "cmi-cs:2022:3",
+      "year": 2022,
+      "set": null,
+      "number": "3",
+      "paperLabel": "CMI MSc/PhD CS 2022 · Part A",
+      "subject": "theory-of-computation",
+      "subjectSlug": "theory-of-computation",
+      "classificationHint": {
+        "subjectSlug": "theory-of-computation",
+        "topicSlug": "regular-language"
+      },
+      "topic": "regular-language",
+      "topicSlug": "regular-language",
+      "subtopics": [
+        "regular-language",
+        "cmi-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "A",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">Which of the following assertions about regular languages is incorrect?<br><br>   (a) Every subset of a regular language is regular.<br>  (b) For every regular language L, there is a subset of L that is regular.<br>   (c) For every language L, there is a superset of L that is regular.<br>  (d) The complement of every regular language is regular.</div>",
+      "sourceUrl": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2022-solutions.pdf",
+      "answerSource": {
+        "kind": "official-solution",
+        "url": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2022-solutions.pdf"
+      }
+    },
+    {
+      "id": "cmi-cs:2022:4",
+      "year": 2022,
+      "set": null,
+      "number": "4",
+      "paperLabel": "CMI MSc/PhD CS 2022 · Part A",
+      "subject": "theory-of-computation",
+      "subjectSlug": "theory-of-computation",
+      "classificationHint": {
+        "subjectSlug": "theory-of-computation",
+        "topicSlug": "context-free-language"
+      },
+      "topic": "context-free-language",
+      "topicSlug": "context-free-language",
+      "subtopics": [
+        "context-free-language",
+        "cmi-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "C",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">Consider the following languages over the alphabet {a, b, c, d}<br><br>     • L1 = {an bn cm dm | n, m ≥ 0}<br>     • L2 = {an bm cn dm | n, m ≥ 0}<br>     • L3 = {an bm cm dn | n, m ≥ 0}<br><br>   Which of these languages is/are context-free?<br><br>   (a) None of them.<br>  (b) Only L1 and L2 .<br>   (c) Only L1 and L3 .<br>  (d) All of them.</div>",
+      "sourceUrl": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2022-solutions.pdf",
+      "answerSource": {
+        "kind": "official-solution",
+        "url": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2022-solutions.pdf"
+      }
+    },
+    {
+      "id": "cmi-cs:2022:5",
+      "year": 2022,
+      "set": null,
+      "number": "5",
+      "paperLabel": "CMI MSc/PhD CS 2022 · Part A",
+      "subject": "engineering-mathematics",
+      "subjectSlug": "engineering-mathematics",
+      "classificationHint": {
+        "subjectSlug": "engineering-mathematics",
+        "topicSlug": "probability-statistics"
+      },
+      "topic": "probability-statistics",
+      "topicSlug": "probability-statistics",
+      "subtopics": [
+        "probability-statistics",
+        "cmi-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "B",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">As part of a class activity, students in a class of 50 were asked to keep track of the<br>   total number of hours that they spent looking at the screen of some digital device on a<br>   specific day. It was found that the average screentime for the class was 4 hours. What<br>   is the maximum possible number of students with at least 16 hours of screentime?<br>  (a) 11<br>  (b) 12<br>  (c) 13<br>  (d) 14</div>",
+      "sourceUrl": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2022-solutions.pdf",
+      "answerSource": {
+        "kind": "official-solution",
+        "url": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2022-solutions.pdf"
+      }
+    },
+    {
+      "id": "cmi-cs:2022:6",
+      "year": 2022,
+      "set": null,
+      "number": "6",
+      "paperLabel": "CMI MSc/PhD CS 2022 · Part A",
+      "subject": "discrete-mathematics",
+      "subjectSlug": "discrete-mathematics",
+      "classificationHint": {
+        "subjectSlug": "discrete-mathematics",
+        "topicSlug": "combination"
+      },
+      "topic": "combination",
+      "topicSlug": "combination",
+      "subtopics": [
+        "combination",
+        "cmi-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "C",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">The Telvio mobile service provider allows each customer to choose a part of their 10-<br>   digit mobile number when getting a new connection. The first two digits of the number<br>   are fixed by the company based on the customer’s region. The customer can choose<br>   the last four digits as they wish. The company chooses each of the remaining four<br>   digits uniformly at random, and without replacement, from the list {0, 1, 2, . . . , 9}.<br>   Note that this means that the digits in positions 3, 4, 5 and 6 in a Telvio number are<br>   all different.<br>   What is the probability that in the mobile number assigned to a new customer by<br>   Telvio, the digits in positions 3, 4, 5 and 6 appear in increasing order when read from<br>   left to right?<br>  (a) 14<br>        1<br>  (b) 16<br>        1<br>  (c) 24<br>        1<br>  (d) 32<br><br>                1</div>",
+      "sourceUrl": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2022-solutions.pdf",
+      "answerSource": {
+        "kind": "official-solution",
+        "url": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2022-solutions.pdf"
+      }
+    },
+    {
+      "id": "cmi-cs:2022:7",
+      "year": 2022,
+      "set": null,
+      "number": "7",
+      "paperLabel": "CMI MSc/PhD CS 2022 · Part A",
+      "subject": "engineering-mathematics",
+      "subjectSlug": "engineering-mathematics",
+      "classificationHint": {
+        "subjectSlug": "engineering-mathematics",
+        "topicSlug": "probability-statistics"
+      },
+      "topic": "probability-statistics",
+      "topicSlug": "probability-statistics",
+      "subtopics": [
+        "probability-statistics",
+        "cmi-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "A",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">Consider a random graph G on n vertices where for each pair of vertices u, v, there is<br>   an edge (u, v) with probability p ∈ [0, 1]. What is the expected number of cycles of<br>   length 3 in this graph?<br>       ( )<br>   (a) n3 · p3<br>        p3<br>  (b)<br>      (n3 )<br>  (c) n3 p3<br>  (d) None of the above<br><br>                   (n)</div>",
+      "sourceUrl": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2022-solutions.pdf",
+      "answerSource": {
+        "kind": "official-solution",
+        "url": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2022-solutions.pdf"
+      }
+    },
+    {
+      "id": "cmi-cs:2022:8",
+      "year": 2022,
+      "set": null,
+      "number": "8",
+      "paperLabel": "CMI MSc/PhD CS 2022 · Part A",
+      "subject": "c-programming",
+      "subjectSlug": "c-programming",
+      "classificationHint": {
+        "subjectSlug": "c-programming",
+        "topicSlug": "loops"
+      },
+      "topic": "loops",
+      "topicSlug": "loops",
+      "subtopics": [
+        "loops",
+        "cmi-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "C",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">The next two questions refer to the following two functions.<br><br>           int f(int m) {                               int g(int m) {<br>               int a, b, c, d;                              int a = 1;<br>               a = 0; b = 0;                                int i = 0;<br>               c = 0; d = 1;                                while (i &lt; m) {<br>               while (a &lt; m) {                                  i = i+1;<br>                   a = a + 1;                                   a = 2*a;<br>                   b = b + c;                               }<br>                   int temp = d;                            return a;<br>                   d = c;                               }<br>                   c = temp;<br>               }<br>               return b;<br>           }<br><br>8. What is the result of f(100)?<br><br>  (a) 100<br>  (b) 5050<br>   (c) 50<br>  (d) 1</div>",
+      "sourceUrl": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2022-solutions.pdf",
+      "answerSource": {
+        "kind": "official-solution",
+        "url": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2022-solutions.pdf"
+      }
+    },
+    {
+      "id": "cmi-cs:2022:9",
+      "year": 2022,
+      "set": null,
+      "number": "9",
+      "paperLabel": "CMI MSc/PhD CS 2022 · Part A",
+      "subject": "c-programming",
+      "subjectSlug": "c-programming",
+      "classificationHint": {
+        "subjectSlug": "c-programming",
+        "topicSlug": "loops"
+      },
+      "topic": "loops",
+      "topicSlug": "loops",
+      "subtopics": [
+        "loops",
+        "cmi-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "B",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">The next two questions refer to the following two functions.<br><br>           int f(int m) {                               int g(int m) {<br>               int a, b, c, d;                              int a = 1;<br>               a = 0; b = 0;                                int i = 0;<br>               c = 0; d = 1;                                while (i &lt; m) {<br>               while (a &lt; m) {                                  i = i+1;<br>                   a = a + 1;                                   a = 2*a;<br>                   b = b + c;                               }<br>                   int temp = d;                            return a;<br>                   d = c;                               }<br>                   c = temp;<br>               }<br>               return b;<br>           }<br><br>9. If g(f(n)) = 32, which of the following is a possible value of n?<br><br>  (a) 8<br>  (b) 11<br>   (c) 5<br>  (d) 64<br><br></div>",
+      "sourceUrl": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2022-solutions.pdf",
+      "answerSource": {
+        "kind": "official-solution",
+        "url": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2022-solutions.pdf"
+      }
+    },
+    {
+      "id": "cmi-cs:2022:10",
+      "year": 2022,
+      "set": null,
+      "number": "10",
+      "paperLabel": "CMI MSc/PhD CS 2022 · Part A",
+      "subject": "algorithms",
+      "subjectSlug": "algorithms",
+      "classificationHint": {
+        "subjectSlug": "algorithms",
+        "topicSlug": "asymptotic-notation"
+      },
+      "topic": "asymptotic-notation",
+      "topicSlug": "asymptotic-notation",
+      "subtopics": [
+        "asymptotic-notation",
+        "cmi-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "B",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">What can you conclude from the following statements about problems A and B?<br><br>      (I) There is a polynomial-time algorithm to solve A.<br>     (II) There is an exponential-time algorithm to solve B.<br>    (III) B can be reduced to A in polynomial-time.<br><br>   (a) Not all of them can be simultaneously true.<br>   (b) There is a polynomial-time algorithm for B.<br>   (c) A cannot be reduced to B in polynomial-time.<br>   (d) There is no exponential-time algorithm for A.</div>",
+      "sourceUrl": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2022-solutions.pdf",
+      "answerSource": {
+        "kind": "official-solution",
+        "url": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2022-solutions.pdf"
+      }
+    },
+    {
+      "id": "cmi-cs:2023:1",
+      "year": 2023,
+      "set": null,
+      "number": "1",
+      "paperLabel": "CMI MSc/PhD CS 2023 · Part A",
+      "subject": "discrete-mathematics",
+      "subjectSlug": "discrete-mathematics",
+      "classificationHint": {
+        "subjectSlug": "discrete-mathematics",
+        "topicSlug": "combination"
+      },
+      "topic": "combination",
+      "topicSlug": "combination",
+      "subtopics": [
+        "combination",
+        "cmi-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "B",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">A candy factory uses 5 fruit flavours {A, B, C, D, E}. Each candy is made using one or<br>   more of these flavours. The taste of a candy depends on which flavours are included.<br>   A kid may prefer some combination of flavours more than others. For example, the<br>   kid may prefer the combination {A, B, C} over {B, C}. The preference order of a kid<br>   is a total ordering of all the combinations, the ones occurring earlier being preferred<br>   more.<br>   Suppose you want to throw a party and do not want more than one kid with the same<br>   preference order. What is the maximum number of kids that can attend such a party?<br>   (a) (2(5!) ) − 1         (b) ((25 ) − 1)!           (c) ((5 ∗ 4)/2) − 1           (d) 5 ∗ 5</div>",
+      "sourceUrl": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2023-solutions.pdf",
+      "answerSource": {
+        "kind": "official-solution",
+        "url": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2023-solutions.pdf"
+      }
+    },
+    {
+      "id": "cmi-cs:2023:2",
+      "year": 2023,
+      "set": null,
+      "number": "2",
+      "paperLabel": "CMI MSc/PhD CS 2023 · Part A",
+      "subject": "discrete-mathematics",
+      "subjectSlug": "discrete-mathematics",
+      "classificationHint": {
+        "subjectSlug": "discrete-mathematics",
+        "topicSlug": "set-theory"
+      },
+      "topic": "set-theory",
+      "topicSlug": "set-theory",
+      "subtopics": [
+        "set-theory",
+        "cmi-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "B",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">How many elements are in the following set?<br><br>                              {(A, B) | A ⊆ B ⊆ {1, 2, 3, . . . , n}}<br><br>   (a) 2n−1                    (b) 3n                      (c) 2n+1                   (d) 22n</div>",
+      "sourceUrl": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2023-solutions.pdf",
+      "answerSource": {
+        "kind": "official-solution",
+        "url": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2023-solutions.pdf"
+      }
+    },
+    {
+      "id": "cmi-cs:2023:3",
+      "year": 2023,
+      "set": null,
+      "number": "3",
+      "paperLabel": "CMI MSc/PhD CS 2023 · Part A",
+      "subject": "engineering-mathematics",
+      "subjectSlug": "engineering-mathematics",
+      "classificationHint": {
+        "subjectSlug": "engineering-mathematics",
+        "topicSlug": "probability-statistics"
+      },
+      "topic": "probability-statistics",
+      "topicSlug": "probability-statistics",
+      "subtopics": [
+        "probability-statistics",
+        "cmi-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "C",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">At a kindergarten, 2024 kids sit in a circle. Suddenly, each kid randomly pokes either<br>   the kid to their left or the one to their right. What is the expected number of unpoked<br>   kids?<br>   (a) 1                     (b) 253                      (c) 506                        (d) 1012</div>",
+      "sourceUrl": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2023-solutions.pdf",
+      "answerSource": {
+        "kind": "official-solution",
+        "url": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2023-solutions.pdf"
+      }
+    },
+    {
+      "id": "cmi-cs:2023:4",
+      "year": 2023,
+      "set": null,
+      "number": "4",
+      "paperLabel": "CMI MSc/PhD CS 2023 · Part A",
+      "subject": "discrete-mathematics",
+      "subjectSlug": "discrete-mathematics",
+      "classificationHint": {
+        "subjectSlug": "discrete-mathematics",
+        "topicSlug": "graph-theory"
+      },
+      "topic": "graph-theory",
+      "topicSlug": "graph-theory",
+      "subtopics": [
+        "graph-theory",
+        "cmi-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "C",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">A graph is k-regular if all the vertices have degree exactly k. What is the minimum<br>   number of vertices in a k-regular graph that has no 3-length cycles?<br>   (a) k                    (b) k + 1                     (c) 2k                     (d) 2k + 1</div>",
+      "sourceUrl": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2023-solutions.pdf",
+      "answerSource": {
+        "kind": "official-solution",
+        "url": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2023-solutions.pdf"
+      }
+    },
+    {
+      "id": "cmi-cs:2023:5",
+      "year": 2023,
+      "set": null,
+      "number": "5",
+      "paperLabel": "CMI MSc/PhD CS 2023 · Part A",
+      "subject": "discrete-mathematics",
+      "subjectSlug": "discrete-mathematics",
+      "classificationHint": {
+        "subjectSlug": "discrete-mathematics",
+        "topicSlug": "graph-theory"
+      },
+      "topic": "graph-theory",
+      "topicSlug": "graph-theory",
+      "subtopics": [
+        "graph-theory",
+        "cmi-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "A",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">In a connected graph, any two paths of maximum length:<br><br>   (a) have at least one vertex in common, but not necessarily an edge in common<br>  (b) have at least one edge in common<br>   (c) have at least two common vertices, but not necessarily an edge in common<br>  (d) have at least two edges in common<br><br></div>",
+      "sourceUrl": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2023-solutions.pdf",
+      "answerSource": {
+        "kind": "official-solution",
+        "url": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2023-solutions.pdf"
+      }
+    },
+    {
+      "id": "cmi-cs:2023:7",
+      "year": 2023,
+      "set": null,
+      "number": "7",
+      "paperLabel": "CMI MSc/PhD CS 2023 · Part A",
+      "subject": "theory-of-computation",
+      "subjectSlug": "theory-of-computation",
+      "classificationHint": {
+        "subjectSlug": "theory-of-computation",
+        "topicSlug": "regular-language"
+      },
+      "topic": "regular-language",
+      "topicSlug": "regular-language",
+      "subtopics": [
+        "regular-language",
+        "cmi-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "A",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">Let L be a regular language, and let n = 10. Which of the following statements is<br>   true?<br><br>  (a) L ∪ {an bn } is regular<br>  (b) L ∪ {an bn } is context-free, but not regular<br>  (c) L ∪ {an bn } is regular, but not context-free<br>  (d) L ∪ {an bn } is not context-free<br><br></div>",
+      "sourceUrl": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2023-solutions.pdf",
+      "answerSource": {
+        "kind": "official-solution",
+        "url": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2023-solutions.pdf"
+      }
+    },
+    {
+      "id": "cmi-cs:2023:8",
+      "year": 2023,
+      "set": null,
+      "number": "8",
+      "paperLabel": "CMI MSc/PhD CS 2023 · Part A",
+      "subject": "algorithms",
+      "subjectSlug": "algorithms",
+      "classificationHint": {
+        "subjectSlug": "algorithms",
+        "topicSlug": "asymptotic-notation"
+      },
+      "topic": "asymptotic-notation",
+      "topicSlug": "asymptotic-notation",
+      "subtopics": [
+        "asymptotic-notation",
+        "cmi-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "C",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">Let f : N → N and g : N → N be functions over the set N of natural numbers. We<br>   will say:<br><br>    • f (n) = O(g(n)) if there exist natural numbers c and x0 such that f (n) ≤ c g(n)<br>      for all n ≥ x0<br>    • f (n) = 2O(g(n)) if there exist natural numbers c and x0 such that f (n) ≤ 2(c g(n))<br>      for all n ≥ x0 .<br><br>  Consider the following statements<br><br>                         (I) 3n = O(2n )               (II) 3n = 2O(n)<br><br>  (a) Both (I) and (II) are true                  (b) (I) is true and (II) is false<br>  (c) (I) is false and (II) is true               (d) Both (I) and (II) are false</div>",
+      "sourceUrl": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2023-solutions.pdf",
+      "answerSource": {
+        "kind": "official-solution",
+        "url": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2023-solutions.pdf"
+      }
+    },
+    {
+      "id": "cmi-cs:2023:9",
+      "year": 2023,
+      "set": null,
+      "number": "9",
+      "paperLabel": "CMI MSc/PhD CS 2023 · Part A",
+      "subject": "c-programming",
+      "subjectSlug": "c-programming",
+      "classificationHint": {
+        "subjectSlug": "c-programming",
+        "topicSlug": "function"
+      },
+      "topic": "function",
+      "topicSlug": "function",
+      "subtopics": [
+        "function",
+        "cmi-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "C",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">The next two questions refer to the following two functions. We assume that all the<br>arguments are non-negative integers. The operation x div 2 divides x by 2 and returns<br>an integer, discarding the fractional part.<br><br>   int f(int x, int i) {                           int g(int x) {<br>       if (i == 0) {                                   if (x &lt;= 2)<br>           if (even x)                                      return 1;<br>                return 0;                              else<br>           else                                             return 1 + g(x div 3);<br>                return 1;                          }<br>       } else {<br>           return f(x div 2, i-1);<br>       }<br>   }<br><br>9. For how many values of i will f(1000,i) return 1?<br>  (a) 2                        (b) 5                      (c) 6                       (d) 10<br><br></div>",
+      "sourceUrl": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2023-solutions.pdf",
+      "answerSource": {
+        "kind": "official-solution",
+        "url": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2023-solutions.pdf"
+      }
+    },
+    {
+      "id": "cmi-cs:2023:10",
+      "year": 2023,
+      "set": null,
+      "number": "10",
+      "paperLabel": "CMI MSc/PhD CS 2023 · Part A",
+      "subject": "c-programming",
+      "subjectSlug": "c-programming",
+      "classificationHint": {
+        "subjectSlug": "c-programming",
+        "topicSlug": "function"
+      },
+      "topic": "function",
+      "topicSlug": "function",
+      "subtopics": [
+        "function",
+        "cmi-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "B",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">The next two questions refer to the following two functions. We assume that all the<br>arguments are non-negative integers. The operation x div 2 divides x by 2 and returns<br>an integer, discarding the fractional part.<br><br>   int f(int x, int i) {                           int g(int x) {<br>       if (i == 0) {                                   if (x &lt;= 2)<br>           if (even x)                                      return 1;<br>                return 0;                              else<br>           else                                             return 1 + g(x div 3);<br>                return 1;                          }<br>       } else {<br>           return f(x div 2, i-1);<br>       }<br>   }<br><br>10. What is the value of g(10000)?<br>   (a) 3                      (b) 9                       (c) 12                      (d) 15</div>",
+      "sourceUrl": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2023-solutions.pdf",
+      "answerSource": {
+        "kind": "official-solution",
+        "url": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2023-solutions.pdf"
+      }
+    },
+    {
+      "id": "cmi-cs:2024:1",
+      "year": 2024,
+      "set": null,
+      "number": "1",
+      "paperLabel": "CMI MSc/PhD CS 2024 · Part A",
+      "subject": "discrete-mathematics",
+      "subjectSlug": "discrete-mathematics",
+      "classificationHint": {
+        "subjectSlug": "discrete-mathematics",
+        "topicSlug": "propositional-logic"
+      },
+      "topic": "propositional-logic",
+      "topicSlug": "propositional-logic",
+      "subtopics": [
+        "propositional-logic",
+        "cmi-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "C",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">All inhabitants of the Old Forest are either Ents or Bents. Ents always tell the truth<br>   and Bents always lie. During a visit to the Old Forest, you encounter four inhabitants<br>   – A, B, C and D. They make the following assertions.<br><br>        A:   Exactly one of us is a Bent.<br>        B:   Exactly two of us are Bents.<br>        C:   Exactly three of us are Bents.<br>        D:   Exactly four of us are Bents.<br><br>   How many of them are Bents?<br>   (a) 1                       (b) 2                       (c) 3                        (d) 4</div>",
+      "sourceUrl": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2024-solutions.pdf",
+      "answerSource": {
+        "kind": "official-solution",
+        "url": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2024-solutions.pdf"
+      }
+    },
+    {
+      "id": "cmi-cs:2024:2",
+      "year": 2024,
+      "set": null,
+      "number": "2",
+      "paperLabel": "CMI MSc/PhD CS 2024 · Part A",
+      "subject": "discrete-mathematics",
+      "subjectSlug": "discrete-mathematics",
+      "classificationHint": {
+        "subjectSlug": "discrete-mathematics",
+        "topicSlug": "combination"
+      },
+      "topic": "combination",
+      "topicSlug": "combination",
+      "subtopics": [
+        "combination",
+        "cmi-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "A",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">Friends Akshay and Bipasha go to a fun fair, and decide to explore the stalls separately.<br>   Each of them visits a stall every 10 minutes, starting at 8am. If a stall that Akshay<br>   visits is one that he has not seen before, he texts new to Bipasha; otherwise he texts<br>   old. If a stall that Bipasha visits is new to her she texts new to Akshay; otherwise<br>   she texts old. A round refers to such a pair of messages, one sent by Akshay and the<br>   other sent by Bipasha. If there are 50 stalls, what is the maximum number of rounds<br>   they can go before both of them text old to each other in the same round?<br>   (a) 99                    (b) 100                     (c) 2500                     (d) 50</div>",
+      "sourceUrl": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2024-solutions.pdf",
+      "answerSource": {
+        "kind": "official-solution",
+        "url": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2024-solutions.pdf"
+      }
+    },
+    {
+      "id": "cmi-cs:2024:4",
+      "year": 2024,
+      "set": null,
+      "number": "4",
+      "paperLabel": "CMI MSc/PhD CS 2024 · Part A",
+      "subject": "engineering-mathematics",
+      "subjectSlug": "engineering-mathematics",
+      "classificationHint": {
+        "subjectSlug": "engineering-mathematics",
+        "topicSlug": "probability-statistics"
+      },
+      "topic": "probability-statistics",
+      "topicSlug": "probability-statistics",
+      "subtopics": [
+        "probability-statistics",
+        "cmi-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "A",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">Rohit and Ben participate in a new toss system introduced by the ICC. The umpire<br>   repeatedly tosses a fair coin (which comes up heads with probability 21 and tails with<br>   probability 12 ), until one of them wins. Rohit wins if the result of two consecutive<br>   tosses is heads (i.e., the pattern HH is seen), while Ben wins if the pattern TH is seen.<br>   What are the winning probabilities for Rohit and Ben?<br>   (a) 41 and 34            (b) 14 and 14            (c) 12 and 12             (d) 13 and 23</div>",
+      "sourceUrl": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2024-solutions.pdf",
+      "answerSource": {
+        "kind": "official-solution",
+        "url": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2024-solutions.pdf"
+      }
+    },
+    {
+      "id": "cmi-cs:2024:5",
+      "year": 2024,
+      "set": null,
+      "number": "5",
+      "paperLabel": "CMI MSc/PhD CS 2024 · Part A",
+      "subject": "theory-of-computation",
+      "subjectSlug": "theory-of-computation",
+      "classificationHint": {
+        "subjectSlug": "theory-of-computation",
+        "topicSlug": "context-free-grammar"
+      },
+      "topic": "context-free-grammar",
+      "topicSlug": "context-free-grammar",
+      "subtopics": [
+        "context-free-grammar",
+        "cmi-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "C",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">Let Σ = {a, b, c}. What is the language generated by the following grammar?<br>                                        S := ϵ | aS | Sb | cS<br><br>   (a) (a + b + c)∗ b∗                                (b) (a + b + c)∗ c∗<br>   (c) (a + c)∗ b∗                                    (d) (a + b)∗ c∗</div>",
+      "sourceUrl": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2024-solutions.pdf",
+      "answerSource": {
+        "kind": "official-solution",
+        "url": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2024-solutions.pdf"
+      }
+    },
+    {
+      "id": "cmi-cs:2024:6",
+      "year": 2024,
+      "set": null,
+      "number": "6",
+      "paperLabel": "CMI MSc/PhD CS 2024 · Part A",
+      "subject": "theory-of-computation",
+      "subjectSlug": "theory-of-computation",
+      "classificationHint": {
+        "subjectSlug": "theory-of-computation",
+        "topicSlug": "finite-automata"
+      },
+      "topic": "finite-automata",
+      "topicSlug": "finite-automata",
+      "subtopics": [
+        "finite-automata",
+        "cmi-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "B",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">Let Σ = {a1 , a2 , . . . , an } for some n ≥ 1. Consider the two languages:<br>                L1 = {w ∈ Σ∗ | ∃ai ∈ Σ such that ai occurs at least two times in w}<br>                L2 = Σ∗ (a1 a1 + a2 a2 + · · · an an ) Σ∗<br><br>   Which of the following statements are true?<br><br>      (I) There is an NFA with O(n) states accepting L1 .<br>     (II) There is a DFA with O(n) states accepting L1 .<br>    (III) There is an NFA with O(n) states accepting L2 .<br>    (IV) There is a DFA with O(n) states accepting L2 .<br>   (a) All of the above                               (b) I, III, IV<br>   (c) I and III                                      (d) I, II and III</div>",
+      "sourceUrl": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2024-solutions.pdf",
+      "answerSource": {
+        "kind": "official-solution",
+        "url": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2024-solutions.pdf"
+      }
+    },
+    {
+      "id": "cmi-cs:2024:7",
+      "year": 2024,
+      "set": null,
+      "number": "7",
+      "paperLabel": "CMI MSc/PhD CS 2024 · Part A",
+      "subject": "algorithms",
+      "subjectSlug": "algorithms",
+      "classificationHint": {
+        "subjectSlug": "algorithms",
+        "topicSlug": "recurrence-relation"
+      },
+      "topic": "recurrence-relation",
+      "topicSlug": "recurrence-relation",
+      "subtopics": [
+        "recurrence-relation",
+        "cmi-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "C",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">Consider the following two recurrence relations:<br><br>     • T1 (n) = T1 ( n2 ) + T1 ( n3 ) + Θ(n), T1 (1) = 2<br>     • T2 (n) = T2 ( 2n<br><br>                        ) + T2 ( n3 ) + Θ(n), T2 (1) = 2<br><br>  Which of the following statements is true?<br><br>   (a) T1 (n) = Θ(n) and T2 (n) = Θ(n)<br>   (b) T1 (n) = Θ(n log n) and T2 (n) = Θ(n log n)<br>    (c) T1 (n) = Θ(n) and T2 (n) = Θ(n log n)<br>   (d) T1 (n) = Θ(n log n) and T2 (n) = Θ(n)</div>",
+      "sourceUrl": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2024-solutions.pdf",
+      "answerSource": {
+        "kind": "official-solution",
+        "url": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2024-solutions.pdf"
+      }
+    },
+    {
+      "id": "cmi-cs:2024:8",
+      "year": 2024,
+      "set": null,
+      "number": "8",
+      "paperLabel": "CMI MSc/PhD CS 2024 · Part A",
+      "subject": "algorithms",
+      "subjectSlug": "algorithms",
+      "classificationHint": {
+        "subjectSlug": "algorithms",
+        "topicSlug": "minimum-spanning-tree"
+      },
+      "topic": "minimum-spanning-tree",
+      "topicSlug": "minimum-spanning-tree",
+      "subtopics": [
+        "minimum-spanning-tree",
+        "cmi-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "A",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">i 3j<br>                    ≤ 8(i + 1 + 2j − 2 + 1)2i+1 3j−1 + 8(i + 2j − 2 + 1)2i 3j−1 + 8 · 2i 3j<br>                    ≤ 8(2(i + 2j)/3 + (i + 2j)/3 + 1)2i 3j<br>                    = 8(i + 2j + 1)2i 3j .<br><br>        Now<br><br>                                      T2 (n) ≤ T2 (3k )<br>                                             = S(0, k)<br>                                             ≤ 8(0 + 2k + 1)20 3k<br>                                             ≤ 8 · 3n · (2 log3 n + 3)<br>                                             ≤ 96n log3 n.<br><br>        Thus T2 (n) = Θ(n log n).<br><br> 8. Let G be an undirected connected graph with distinct edge weights. Let emax be the<br>    edge with maximum weight and emin the edge with minimum weight. What can you<br>    say about the following statements?<br><br>      (I) Every minimum spanning tree of G must contain emin<br>     (II) Every minimum spanning tree must exclude emax<br><br>   (a) I is True, but II is False                   (b) I is False, but II is True<br>   (c) Both I and II are False                      (d) Both I and II are True</div>",
+      "sourceUrl": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2024-solutions.pdf",
+      "answerSource": {
+        "kind": "official-solution",
+        "url": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2024-solutions.pdf"
+      }
+    },
+    {
+      "id": "cmi-cs:2024:9",
+      "year": 2024,
+      "set": null,
+      "number": "9",
+      "paperLabel": "CMI MSc/PhD CS 2024 · Part A",
+      "subject": "algorithms",
+      "subjectSlug": "algorithms",
+      "classificationHint": {
+        "subjectSlug": "algorithms",
+        "topicSlug": "shortest-path"
+      },
+      "topic": "shortest-path",
+      "topicSlug": "shortest-path",
+      "subtopics": [
+        "shortest-path",
+        "cmi-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "C",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">Let G be a directed graph with distinct and nonnegative edge weights. Let s be a<br>    starting vertex and t a destination vertex. Assume that G has at least one s-t path.<br>    What can you say about the following statements?<br><br>      (I) Every shortest s-t path (minimum weight) must include the minimum-weight<br>          edge of G.<br>     (II) Every shortest s-t path must exclude the maximum-weight edge of G.<br><br>   (a) I is True, but II is False                   (b) I is False, but II is True<br>   (c) Both I and II are False                      (d) Both I and II are True<br>                                          0     100            10</div>",
+      "sourceUrl": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2024-solutions.pdf",
+      "answerSource": {
+        "kind": "official-solution",
+        "url": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2024-solutions.pdf"
+      }
+    },
+    {
+      "id": "cmi-cs:2024:10",
+      "year": 2024,
+      "set": null,
+      "number": "10",
+      "paperLabel": "CMI MSc/PhD CS 2024 · Part A",
+      "subject": "c-programming",
+      "subjectSlug": "c-programming",
+      "classificationHint": {
+        "subjectSlug": "c-programming",
+        "topicSlug": "function"
+      },
+      "topic": "function",
+      "topicSlug": "function",
+      "subtopics": [
+        "function",
+        "cmi-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "D",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">In the following code, A is an array indexed from 0, and for two integers a, b the<br>    expression a//b returns ⌊ ab ⌋, the largest integer which is not larger than a/b.<br><br>   foo(A, first, last)<br>   1 if first ≥ last<br>   2     then return A[first]<br>   3     else<br>   4            mid ← (first + last)//2<br>   5            l ← foo(A, first, mid )<br>   6            r ← foo(A, mid +1, last)<br>   7            return l + r<br><br>   If A = [1, 2, 3, 4, 5, 6], what will foo(A, 0, 5) return?<br>   (a) 3                       (b) 7                       (c) 15                    (d) 21</div>",
+      "sourceUrl": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2024-solutions.pdf",
+      "answerSource": {
+        "kind": "official-solution",
+        "url": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2024-solutions.pdf"
+      }
+    },
+    {
+      "id": "cmi-cs:2025:2",
+      "year": 2025,
+      "set": null,
+      "number": "2",
+      "paperLabel": "CMI MSc/PhD CS 2025 · Part A",
+      "subject": "theory-of-computation",
+      "subjectSlug": "theory-of-computation",
+      "classificationHint": {
+        "subjectSlug": "theory-of-computation",
+        "topicSlug": "finite-automata"
+      },
+      "topic": "finite-automata",
+      "topicSlug": "finite-automata",
+      "subtopics": [
+        "finite-automata",
+        "cmi-cs"
+      ],
+      "marks": null,
+      "type": "MSQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": [
+        "B",
+        "D"
+      ],
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">Which of the following languages over {a, b} can be accepted using a DFA with a single<br>   accepting state?<br>  (a) a∗ + b∗            (b) ab + ba            (c) (a + b)∗ (ab + ba)            (d) (a + b)∗ ab<br><br></div>",
+      "sourceUrl": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2025-solutions.pdf",
+      "answerSource": {
+        "kind": "official-solution",
+        "url": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2025-solutions.pdf"
+      }
+    },
+    {
+      "id": "cmi-cs:2025:3",
+      "year": 2025,
+      "set": null,
+      "number": "3",
+      "paperLabel": "CMI MSc/PhD CS 2025 · Part A",
+      "subject": "discrete-mathematics",
+      "subjectSlug": "discrete-mathematics",
+      "classificationHint": {
+        "subjectSlug": "discrete-mathematics",
+        "topicSlug": "propositional-logic"
+      },
+      "topic": "propositional-logic",
+      "topicSlug": "propositional-logic",
+      "subtopics": [
+        "propositional-logic",
+        "cmi-cs"
+      ],
+      "marks": null,
+      "type": "MSQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">Aruna always eats paranthas or curd rice at lunch if pizza is not available. She eats<br>   curd rice only if pickles are available. Yesterday, Aruna’s mother had fresh pickles<br>   ready at lunch time, and also banned pizza delivery at home. What can you say about<br>   Aruna’s lunch yesterday?<br><br>   (a) Aruna ate curd rice.<br>  (b) Aruna did not eat curd rice.<br>   (c) Aruna ate paranthas.<br>  (d) Aruna ate both curd rice and paranthas.</div>",
+      "sourceUrl": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2025-solutions.pdf",
+      "answerSource": {
+        "kind": "official-solution",
+        "url": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2025-solutions.pdf"
+      }
+    },
+    {
+      "id": "cmi-cs:2025:4",
+      "year": 2025,
+      "set": null,
+      "number": "4",
+      "paperLabel": "CMI MSc/PhD CS 2025 · Part A",
+      "subject": "engineering-mathematics",
+      "subjectSlug": "engineering-mathematics",
+      "classificationHint": {
+        "subjectSlug": "engineering-mathematics",
+        "topicSlug": "probability-statistics"
+      },
+      "topic": "probability-statistics",
+      "topicSlug": "probability-statistics",
+      "subtopics": [
+        "probability-statistics",
+        "cmi-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "C",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">Consider a biased coin which has probability p of turning up heads (and 1−p of turning<br>   up tails), and consider an experiment where we toss the coin repeatedly. What is the<br>   expected number of tosses before seeing a head ? (Recall that this is given by the<br>            X∞<br>   formula      kpk , where pk is the probability that the coin turns up heads for the first<br>              k=1<br>   time on the k-th toss.)<br>   (a) 1/p2               (b) 1/(1 − p)2               (c) 1/p               (d) 1/(1 − p)<br><br></div>",
+      "sourceUrl": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2025-solutions.pdf",
+      "answerSource": {
+        "kind": "official-solution",
+        "url": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2025-solutions.pdf"
+      }
+    },
+    {
+      "id": "cmi-cs:2025:5",
+      "year": 2025,
+      "set": null,
+      "number": "5",
+      "paperLabel": "CMI MSc/PhD CS 2025 · Part A",
+      "subject": "discrete-mathematics",
+      "subjectSlug": "discrete-mathematics",
+      "classificationHint": {
+        "subjectSlug": "discrete-mathematics",
+        "topicSlug": "graph-theory"
+      },
+      "topic": "graph-theory",
+      "topicSlug": "graph-theory",
+      "subtopics": [
+        "graph-theory",
+        "cmi-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "A",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">In a finite directed graph, every vertex has exactly three incoming edges. Which of<br>   the following statements is guaranteed to be true?<br><br>  (a) Some vertex has at least three edges leaving it.<br>  (b) Exactly three edges leave every vertex.<br>   (c) Some vertex has exactly three edges leaving it.<br>  (d) None of the above is true.</div>",
+      "sourceUrl": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2025-solutions.pdf",
+      "answerSource": {
+        "kind": "official-solution",
+        "url": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2025-solutions.pdf"
+      }
+    },
+    {
+      "id": "cmi-cs:2025:6",
+      "year": 2025,
+      "set": null,
+      "number": "6",
+      "paperLabel": "CMI MSc/PhD CS 2025 · Part A",
+      "subject": "discrete-mathematics",
+      "subjectSlug": "discrete-mathematics",
+      "classificationHint": {
+        "subjectSlug": "discrete-mathematics",
+        "topicSlug": "combination"
+      },
+      "topic": "combination",
+      "topicSlug": "combination",
+      "subtopics": [
+        "combination",
+        "cmi-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "B",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">Let X be a set of size n. What is the size of the set {(A, B) | A, B ⊆ X, A ∩ B = ∅}?<br>  (a) 3n − 2n                         (b) 3n                         (c) 4n                        (d) 2n+1</div>",
+      "sourceUrl": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2025-solutions.pdf",
+      "answerSource": {
+        "kind": "official-solution",
+        "url": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2025-solutions.pdf"
+      }
+    },
+    {
+      "id": "cmi-cs:2025:7",
+      "year": 2025,
+      "set": null,
+      "number": "7",
+      "paperLabel": "CMI MSc/PhD CS 2025 · Part A",
+      "subject": "engineering-mathematics",
+      "subjectSlug": "engineering-mathematics",
+      "classificationHint": {
+        "subjectSlug": "engineering-mathematics",
+        "topicSlug": "probability-statistics"
+      },
+      "topic": "probability-statistics",
+      "topicSlug": "probability-statistics",
+      "subtopics": [
+        "probability-statistics",
+        "cmi-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "D",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">Rohit Sharma is facing Shardul Thakur’s bowling in the IPL. 40% of Shardul’s deliv-<br>   eries to Rohit are good length balls, 40% are short pitched, and 20% are overpitched.<br>   Rohit hits a boundary 40% of the time off good length balls, and 80% of the time off<br>   short pitched and overpitched balls. Given that Rohit has hit a boundary off Shardul’s<br>   last ball, what is the probability that it was short-pitched?<br>  (a) 1/4                   (b) 1/3                    (c) 1/5                    (d) 1/2</div>",
+      "sourceUrl": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2025-solutions.pdf",
+      "answerSource": {
+        "kind": "official-solution",
+        "url": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2025-solutions.pdf"
+      }
+    },
+    {
+      "id": "cmi-cs:2025:8",
+      "year": 2025,
+      "set": null,
+      "number": "8",
+      "paperLabel": "CMI MSc/PhD CS 2025 · Part A",
+      "subject": "c-programming",
+      "subjectSlug": "c-programming",
+      "classificationHint": {
+        "subjectSlug": "c-programming",
+        "topicSlug": "function"
+      },
+      "topic": "function",
+      "topicSlug": "function",
+      "subtopics": [
+        "function",
+        "cmi-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "C",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">The next two questions pertain to the following code which takes a non-negative integer<br>as input.<br>  function foo(n)<br>      if (n = 0) then<br>          return 0<br>      else if (n = 1) then<br>          return 1<br>      else if (n = 2) then<br>          return 3<br>      else<br>          return n + foo(n − 1) + foo(n − 2)<br>      end if<br>  end function<br><br>8. What is the value returned by foo(5)?<br>  (a) 10                     (b) 14                     (c) 26                     (d) 35</div>",
+      "sourceUrl": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2025-solutions.pdf",
+      "answerSource": {
+        "kind": "official-solution",
+        "url": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2025-solutions.pdf"
+      }
+    },
+    {
+      "id": "cmi-cs:2025:9",
+      "year": 2025,
+      "set": null,
+      "number": "9",
+      "paperLabel": "CMI MSc/PhD CS 2025 · Part A",
+      "subject": "algorithms",
+      "subjectSlug": "algorithms",
+      "classificationHint": {
+        "subjectSlug": "algorithms",
+        "topicSlug": "recurrence-relation"
+      },
+      "topic": "recurrence-relation",
+      "topicSlug": "recurrence-relation",
+      "subtopics": [
+        "recurrence-relation",
+        "cmi-cs"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "D",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">The next two questions pertain to the following code which takes a non-negative integer<br>as input.<br>  function foo(n)<br>      if (n = 0) then<br>          return 0<br>      else if (n = 1) then<br>          return 1<br>      else if (n = 2) then<br>          return 3<br>      else<br>          return n + foo(n − 1) + foo(n − 2)<br>      end if<br>  end function<br><br>9. Which of the following best describes the running time of foo(m)?<br><br>  (a) Linear in m.<br>  (b) Quadratic in m.<br>   (c) Cubic in m.<br>  (d) Exponential in m.<br><br></div>",
+      "sourceUrl": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2025-solutions.pdf",
+      "answerSource": {
+        "kind": "official-solution",
+        "url": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2025-solutions.pdf"
+      }
+    },
+    {
+      "id": "cmi-cs:2025:10",
+      "year": 2025,
+      "set": null,
+      "number": "10",
+      "paperLabel": "CMI MSc/PhD CS 2025 · Part A",
+      "subject": "operating-systems",
+      "subjectSlug": "operating-systems",
+      "classificationHint": {
+        "subjectSlug": "operating-systems",
+        "topicSlug": "process-synchronization"
+      },
+      "topic": "process-synchronization",
+      "topicSlug": "process-synchronization",
+      "subtopics": [
+        "process-synchronization",
+        "cmi-cs"
+      ],
+      "marks": null,
+      "type": "MSQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": [
+        "B",
+        "C",
+        "D"
+      ],
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">Consider the following two procedures proc1 and proc2, which run in parallel after<br>    initialising x to 0. Running in parallel means that between any two lines of code<br>    in one process, any number of lines of the other process may run. Note that x is a<br>    shared variable which both processes can read/modify, while temp1 and temp2 are<br>    local variables that only the corresponding processes can access.<br><br>                                 int x = 0;<br>        proc1 {                                    proc2 {<br>            int temp1 = x;                             int temp2 = x;<br>            x = temp1 + 1;                             x = temp2 + 1;<br>            temp1 = x;                             }<br>            x = temp1 + 1;<br>        }<br><br>   Which of the following values are possible for x after both processes have come to a<br>   halt?<br>   (a) 0                      (b) 1                       (c) 2                       (d) 3</div>",
+      "sourceUrl": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2025-solutions.pdf",
+      "answerSource": {
+        "kind": "official-solution",
+        "url": "https://www.cmi.ac.in/admissions/sample-qp/pgcs2025-solutions.pdf"
+      }
+    }
+  ]
+}

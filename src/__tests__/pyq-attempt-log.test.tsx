@@ -4,7 +4,7 @@ import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import { db } from '@/lib/db';
 import Pyq from '@/pages/Pyq';
-import type { PyqManifest, PyqQuestion } from '@/lib/pyq';
+import { normalizePyqManifest, type PyqManifest, type PyqQuestion } from '@/lib/pyq';
 import { createPyqSessionRow } from '@/lib/pyq-session';
 import { captureElementToDataUrl } from '@/lib/image';
 
@@ -32,7 +32,7 @@ const question: PyqQuestion = {
   answerSource: null
 };
 
-const manifest: PyqManifest = {
+const manifest: PyqManifest = normalizePyqManifest({
   bankVersion: 'test-bank-v2',
   generatedAt: '2026-08-08T00:00:00.000Z',
   source: 'test',
@@ -52,7 +52,7 @@ const manifest: PyqManifest = {
       topics: [{ slug: 'propositional-logic', label: 'Propositional Logic', count: 1 }]
     }
   ]
-};
+});
 
 vi.mock('@/hooks/useAuth', () => ({
   useAuth: () => ({
@@ -229,6 +229,86 @@ describe('PYQ committed-attempt logging', () => {
     });
   });
 
+  it('starts a clean session when practicing the completed questions again', async () => {
+    const user = userEvent.setup();
+    render(
+      <MemoryRouter>
+        <Pyq />
+      </MemoryRouter>
+    );
+
+    await user.click(await screen.findByRole('button', { name: 'Start practice set' }));
+    const [firstSession] = await db.pyq_sessions.toArray();
+    await user.click(await screen.findByRole('button', { name: 'A' }));
+    await user.click(screen.getByRole('button', { name: /^Answered/ }));
+    await user.click(screen.getByRole('button', { name: 'Commit & reveal key' }));
+    expect(await screen.findByRole('region', { name: 'PYQ attempt receipt' })).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Finish set' }));
+
+    expect(await screen.findByText('Practice set complete')).toBeInTheDocument();
+    expect(
+      await db.pyq_attempts.where('pyq_session_id').equals(firstSession.id).count()
+    ).toBe(1);
+    await user.click(screen.getByRole('button', { name: /^Practice these questions again/i }));
+
+    expect(await screen.findByText('Which proposition is a tautology?')).toBeInTheDocument();
+    expect(screen.queryByRole('region', { name: 'PYQ attempt receipt' })).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'A' })).toBeEnabled();
+    expect(screen.getByRole('button', { name: 'A' })).toHaveAttribute('aria-pressed', 'false');
+    expect(screen.getByRole('button', { name: /^Answered/ })).toBeEnabled();
+
+    const repeatedSession = (await db.pyq_sessions.toArray()).find(
+      (session) => session.id !== firstSession.id
+    );
+    expect(repeatedSession).toMatchObject({
+      status: 'active',
+      current_index: 0,
+      completed_count: 0,
+      completed_question_uids: []
+    });
+
+    await user.click(screen.getByRole('button', { name: 'B' }));
+    await user.click(screen.getByRole('button', { name: /^Answered/ }));
+    await user.click(screen.getByRole('button', { name: 'Commit & reveal key' }));
+    expect(await screen.findByRole('region', { name: 'PYQ attempt receipt' })).toBeInTheDocument();
+
+    await waitFor(async () => {
+      const attempts = await db.pyq_attempts.orderBy('attempted_at').toArray();
+      expect(attempts).toHaveLength(2);
+      expect(attempts.map((attempt) => attempt.pyq_session_id)).toEqual(
+        expect.arrayContaining([firstSession.id, repeatedSession!.id])
+      );
+      expect(
+        attempts.find((attempt) => attempt.pyq_session_id === repeatedSession!.id)
+      ).toMatchObject({ selected_answer: 'B', attempt_number: 1 });
+    });
+  });
+
+  it('keeps the workspace open and reports an error when its session disappears before Finish', async () => {
+    const user = userEvent.setup();
+    render(
+      <MemoryRouter>
+        <Pyq />
+      </MemoryRouter>
+    );
+
+    await user.click(await screen.findByRole('button', { name: 'Start practice set' }));
+    const [startedSession] = await db.pyq_sessions.toArray();
+    await user.click(await screen.findByRole('button', { name: 'A' }));
+    await user.click(screen.getByRole('button', { name: /^Answered/ }));
+    await user.click(screen.getByRole('button', { name: 'Commit & reveal key' }));
+    expect(await screen.findByRole('region', { name: 'PYQ attempt receipt' })).toBeInTheDocument();
+
+    await db.pyq_sessions.delete(startedSession.id);
+    await user.click(screen.getByRole('button', { name: 'Finish set' }));
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'Could not continue this practice set: The active Practice session could not be found.'
+    );
+    expect(screen.queryByText('Practice set complete')).not.toBeInTheDocument();
+    expect(screen.getByRole('region', { name: 'PYQ attempt receipt' })).toBeInTheDocument();
+  });
+
   it('lets Commit win a rapid Commit-then-Pause race without pausing or duplicating the receipt', async () => {
     const user = userEvent.setup();
     render(
@@ -247,10 +327,11 @@ describe('PYQ committed-attempt logging', () => {
     const readGate = new Promise<void>((resolve) => {
       releaseRead = resolve;
     });
-    const getSpy = vi.spyOn(db.pyq_sessions, 'get').mockImplementationOnce(async (key) => {
+    const delayedGet = (async (key: string) => {
       await readGate;
       return originalGet(key);
-    });
+    }) as unknown as typeof db.pyq_sessions.get;
+    const getSpy = vi.spyOn(db.pyq_sessions, 'get').mockImplementationOnce(delayedGet);
 
     const commit = screen.getByRole('button', { name: 'Commit & reveal key' });
     const pause = screen.getByRole('button', { name: 'Pause practice' });
@@ -299,10 +380,11 @@ describe('PYQ committed-attempt logging', () => {
     const readGate = new Promise<void>((resolve) => {
       releaseRead = resolve;
     });
-    const getSpy = vi.spyOn(db.pyq_sessions, 'get').mockImplementationOnce(async (key) => {
+    const delayedGet = (async (key: string) => {
       await readGate;
       return originalGet(key);
-    });
+    }) as unknown as typeof db.pyq_sessions.get;
+    const getSpy = vi.spyOn(db.pyq_sessions, 'get').mockImplementationOnce(delayedGet);
 
     const pause = screen.getByRole('button', { name: 'Pause practice' });
     const commit = screen.getByRole('button', { name: 'Commit & reveal key' });
@@ -345,10 +427,11 @@ describe('PYQ committed-attempt logging', () => {
     const readGate = new Promise<void>((resolve) => {
       releaseRead = resolve;
     });
-    const getSpy = vi.spyOn(db.pyq_sessions, 'get').mockImplementationOnce(async (key) => {
+    const delayedGet = (async (key: string) => {
       await readGate;
       return originalGet(key);
-    });
+    }) as unknown as typeof db.pyq_sessions.get;
+    const getSpy = vi.spyOn(db.pyq_sessions, 'get').mockImplementationOnce(delayedGet);
 
     const finish = screen.getByRole('button', { name: 'Finish set' });
     const pause = screen.getByRole('button', { name: 'Pause practice' });
@@ -392,10 +475,11 @@ describe('PYQ committed-attempt logging', () => {
     const readGate = new Promise<void>((resolve) => {
       releaseRead = resolve;
     });
-    const getSpy = vi.spyOn(db.pyq_sessions, 'get').mockImplementationOnce(async (key) => {
+    const delayedGet = (async (key: string) => {
       await readGate;
       return originalGet(key);
-    });
+    }) as unknown as typeof db.pyq_sessions.get;
+    const getSpy = vi.spyOn(db.pyq_sessions, 'get').mockImplementationOnce(delayedGet);
 
     const pause = screen.getByRole('button', { name: 'Pause practice' });
     const finish = screen.getByRole('button', { name: 'Finish set' });

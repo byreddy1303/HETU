@@ -74,6 +74,13 @@ describe('PYQ production audit migration', () => {
     expect(sql).toContain("jsonb_typeof(question_snapshot->'subtopics') = 'array'");
     expect(sql).toContain('not jsonb_path_exists(');
     expect(sql).toContain("jsonb_typeof(question_snapshot->'marks') in ('number', 'null')");
+    expect(sql).toContain("not (question_snapshot ? 'book_slug')");
+    expect(sql).toContain("jsonb_typeof(question_snapshot->'book_slug') = 'string'");
+    expect(sql).toContain("trim(question_snapshot->>'book_slug') <> ''");
+    expect(sql).toContain("not (question_snapshot ? 'choices')");
+    expect(sql).toContain("jsonb_typeof(question_snapshot->'choices') = 'array'");
+    expect(sql).toContain("jsonb_array_length(question_snapshot->'choices') > 0");
+    expect(sql).toContain('@.type() != "string" || @ == ""');
     expect(sql).toContain("jsonb_typeof(question_snapshot->'tolerance') in ('object', 'null')");
     expect(sql).not.toContain("question_snapshot->>'marks' in ('1', '2')");
     expect(
@@ -96,6 +103,21 @@ describe('PYQ production audit migration', () => {
     expect(sql).toContain('disable trigger pyq_attempts_immutable');
     expect(sql).toContain('exception when others then');
     expect(sql).toContain('enable trigger pyq_attempts_immutable');
+
+    const requiredV3SnapshotKeys = sql.match(
+      /question_snapshot \?& array\[([\s\S]*?)\]\s+and jsonb_typeof\(question_snapshot->'question_uid'\)/
+    )?.[1];
+    expect(requiredV3SnapshotKeys).toBeDefined();
+    expect(requiredV3SnapshotKeys).not.toContain("'book_slug'");
+    expect(requiredV3SnapshotKeys).not.toContain("'choices'");
+
+    const v2Backfill = sql.match(
+      /-- Backfill only facts present in the immutable v2 snapshot\.([\s\S]*?)-- An older offline client/
+    )?.[1];
+    expect(v2Backfill).toBeDefined();
+    expect(v2Backfill).toContain('where capture_version = 2');
+    expect(v2Backfill).not.toContain('book_slug');
+    expect(v2Backfill).not.toContain('choices');
   });
 
   it('runs the canonical subject trigger before the immutable receipt trigger', () => {

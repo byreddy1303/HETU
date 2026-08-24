@@ -61,14 +61,14 @@ const MORE_GROUPS: { label: string; items: MoreItem[] }[] = [
     items: [
       { to: '/journal', label: 'Journal', icon: NotebookText },
       { to: '/today', label: 'Do now', icon: ClipboardList },
-      { to: '/capture', label: 'Quick capture', icon: Camera },
+      { to: '/pyq', label: 'PYQ practice', icon: LibraryBig },
       { to: '/revision-pack', label: 'Revision pack', icon: ClipboardList }
     ]
   },
   {
     label: 'Practice',
     items: [
-      { to: '/pyq', label: 'PYQ practice', icon: LibraryBig },
+      { to: '/capture', label: 'Quick capture', icon: Camera },
       { to: '/mocks', label: 'Mock tests', icon: FileCheck2 },
       { to: '/reattempts', label: 'Re-attempts', icon: RotateCcw }
     ]

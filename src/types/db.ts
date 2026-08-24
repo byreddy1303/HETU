@@ -229,6 +229,8 @@ export interface PyqPracticeDraft {
 /** Immutable question-bank facts captured with a submitted attempt. */
 export interface PyqQuestionSnapshot {
   question_uid: string;
+  /** Missing on receipts created before source-book sessions shipped. */
+  book_slug?: string;
   year: number;
   set: number | null;
   number: string;
@@ -240,6 +242,8 @@ export interface PyqQuestionSnapshot {
   subtopics: string[];
   marks: 1 | 2 | null;
   type: string;
+  /** Missing on receipts created before variable option sets shipped. */
+  choices?: string[];
   tolerance: { abs?: number } | null;
   answer_status: PyqAttemptAnswerStatus;
   answer_source: unknown;
@@ -248,6 +252,8 @@ export interface PyqQuestionSnapshot {
 }
 
 export interface PyqSessionConfig {
+  /** Missing on legacy sets created before source-book sessions shipped. */
+  bookSlug?: string;
   subjectSlug: string;
   /** Missing only on legacy sets created before topic-wise practice shipped. */
   topicSlug?: string;

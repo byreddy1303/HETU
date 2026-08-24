@@ -7,9 +7,9 @@ export default function OfflineBadge({ className }: { className?: string }) {
   const online = useOnline();
   const pending = usePendingCount();
   const initialPull = useInitialPullPending();
-  const { sandbox } = useAuth();
+  const auth = useAuth();
 
-  if (sandbox) {
+  if (auth.sandbox) {
     return (
       <span className={cn('u-label text-text-faint', className)} title="Local sandbox — no sync">
         sandbox

@@ -218,6 +218,7 @@ async function seedLegacyDuePyq() {
     subtopics: ['K-map'],
     marks: null,
     type: 'MCQ',
+    choices: ['A', 'B', 'C', 'D', 'E'],
     answer: 'A',
     tolerance: null,
     answerStatus: 'available',
@@ -328,6 +329,7 @@ describe('re-attempt solve flow', () => {
     expect(container).not.toHaveTextContent('$BC’D’');
     expect(loadPyqQuestionByUid).toHaveBeenCalledWith('go:1354', 'Digital Logic');
     expect(screen.getByRole('button', { name: 'A' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'E' })).toBeInTheDocument();
   });
 
   it('automatically checks a logged MCQ and advances it after the answer is committed', async () => {
@@ -555,8 +557,7 @@ describe('re-attempt solve flow', () => {
       const reviewAttempts = attempts
         .filter((attempt) => attempt.pyq_session_id === null)
         .sort(
-          (left, right) =>
-            (left.round_attempt_number ?? 1) - (right.round_attempt_number ?? 1)
+          (left, right) => (left.round_attempt_number ?? 1) - (right.round_attempt_number ?? 1)
         );
       expect(reviewAttempts[0]).toMatchObject({
         id: pyqReattemptAttemptId('reattempt-pyq', 0, 1),

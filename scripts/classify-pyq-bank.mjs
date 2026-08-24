@@ -6,6 +6,7 @@ import process from 'node:process';
 import { fileURLToPath } from 'node:url';
 import {
   classifyPyqQuestion,
+  PYQ_BANK_QUESTION_COUNT,
   PYQ_BANK_VERSION,
   PYQ_MANUAL_CLASSIFICATIONS,
   PYQ_TAXONOMY
@@ -36,9 +37,9 @@ const questions = inputQuestions.map((question) => {
 const originalIds = new Set(questions.map((question) => question.id));
 const manualClassificationEntries = Object.entries(PYQ_MANUAL_CLASSIFICATIONS);
 
-if (questions.length !== 3200 || originalIds.size !== questions.length) {
+if (questions.length !== PYQ_BANK_QUESTION_COUNT || originalIds.size !== questions.length) {
   throw new Error(
-    `Expected 3,200 unique input questions, found ${questions.length} rows and ${originalIds.size} IDs`
+    `Expected ${PYQ_BANK_QUESTION_COUNT.toLocaleString()} unique input questions, found ${questions.length} rows and ${originalIds.size} IDs`
   );
 }
 
@@ -114,6 +115,7 @@ if (
   verifiedPdfMarkMetadata.questionCount !== 130 ||
   verifiedPdfMarkMetadata.oneMarkCount !== 60 ||
   verifiedPdfMarkMetadata.twoMarkCount !== 70 ||
+  verifiedPdfMarkMetadata.correctedQuestionIds.length !== 41 ||
   verifiedPdfMismatches.length > 0
 ) {
   throw new Error(
@@ -123,6 +125,66 @@ if (
     })}`
   );
 }
+
+if (!Array.isArray(manifest.books) || manifest.books.length !== 11) {
+  throw new Error(`Expected eleven audited PYQ books, found ${manifest.books?.length ?? 0}`);
+}
+const knownBookSlugs = new Set(manifest.books.map((book) => book.slug));
+const unknownBookRows = classified.filter((question) => !knownBookSlugs.has(question.bookSlug));
+if (unknownBookRows.length > 0) {
+  throw new Error(
+    `Questions reference unknown books: ${unknownBookRows.map((question) => question.id).join(', ')}`
+  );
+}
+
+function questionYears(rows) {
+  return [...new Set(rows.map((question) => question.year))]
+    .sort((a, b) => b - a)
+    .map((year) => ({
+      year,
+      count: rows.filter((question) => question.year === year).length
+    }));
+}
+
+function questionAnswerStatuses(rows) {
+  return Object.fromEntries(
+    ['available', 'ambiguous', 'marks-to-all', 'unsupported'].map((status) => [
+      status,
+      rows.filter((question) => question.answerStatus === status).length
+    ])
+  );
+}
+
+const books = manifest.books.map((book) => {
+  const rows = classified.filter((question) => question.bookSlug === book.slug);
+  if (rows.length === 0) throw new Error(`Book ${book.slug} has no questions`);
+  return {
+    ...book,
+    count: rows.length,
+    firstYear: Math.min(...rows.map((question) => question.year)),
+    lastYear: Math.max(...rows.map((question) => question.year)),
+    answerStatuses: questionAnswerStatuses(rows),
+    years: questionYears(rows),
+    subjects: PYQ_TAXONOMY.flatMap((subject) => {
+      const subjectRows = rows.filter((question) => question.subjectSlug === subject.slug);
+      if (subjectRows.length === 0) return [];
+      return [
+        {
+          slug: subject.slug,
+          label: subject.label,
+          count: subjectRows.length,
+          file: `/pyq/subjects/${subject.slug}.json`,
+          topics: subject.topics
+            .map((topic) => ({
+              ...topic,
+              count: subjectRows.filter((question) => question.topicSlug === topic.slug).length
+            }))
+            .filter((topic) => topic.count > 0)
+        }
+      ];
+    })
+  };
+});
 
 for (const subject of subjects) {
   await writeFile(
@@ -153,7 +215,8 @@ const nextManifest = {
     ])
   ),
   verifiedPdfMarkMetadata,
-  subjects
+  subjects,
+  books
 };
 await writeFile(manifestPath, `${JSON.stringify(nextManifest, null, 2)}\n`);
 const provenancePath = path.join(OUTPUT, 'provenance.json');

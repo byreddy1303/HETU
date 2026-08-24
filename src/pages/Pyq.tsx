@@ -52,16 +52,19 @@ import {
   answerFreePyqImageUrl,
   firstPyqImage,
   formatPyqAnswer,
+  inferPyqBookSlug,
   inferPyqDirectOutcome,
   pyqQuestionSnapshotDataUrl,
   resolvePyqJournalImageUrl,
   loadPyqManifest,
   loadPyqQuestions,
+  matchesPyqBookScope,
   matchesPyqTopicScope,
   pyqPlainText,
   pyqSourceRef,
   type PyqManifest,
-  type PyqQuestion
+  type PyqQuestion,
+  type PyqSourceClass
 } from '@/lib/pyq';
 import {
   abandonPyqSession,
@@ -101,9 +104,9 @@ import {
 type Order = 'unseen' | 'random' | 'newest' | 'oldest';
 type CountChoice = '5' | '10' | '15' | '25' | '50' | 'all';
 type TypeFilter = PyqSessionConfig['type'];
-type AttemptConfig = PyqSessionConfig;
+type AttemptConfig = PyqSessionConfig & { bookSlug?: string };
 
-const CHOICES = ['A', 'B', 'C', 'D'];
+const DEFAULT_CHOICES = ['A', 'B', 'C', 'D'] as const;
 const PRACTICE_MODE_FEATURES = [
   'Feedback after each answer',
   'No overall time limit',
@@ -130,6 +133,26 @@ function pauseStoredPyqSession(session: PyqSessionRow): PyqSessionRow {
   });
 }
 
+function savedPracticeElapsedSeconds(session: PyqSessionRow): number {
+  return (
+    session.elapsed_sec +
+    Math.ceil(Math.max(0, session.config.practiceDraft?.elapsed_ms ?? 0) / 1000)
+  );
+}
+
+function difficultyLabel(value: PyqManifest['books'][number]['difficultyFloor']): string {
+  if (value === 'above-gate') return 'Above GATE';
+  if (value === 'mixed') return 'Mixed level';
+  return 'GATE level';
+}
+
+function sourceClassLabel(value: PyqSourceClass): string {
+  if (value === 'official-sample') return 'Official sample';
+  if (value === 'reconstructed-exam') return 'Reconstructed';
+  if (value === 'audited-gate-prep') return 'Audited prep';
+  return 'Official exam';
+}
+
 function latestQuestionAttempt(
   attempts: PyqAttemptRow[],
   questionUid: string
@@ -138,6 +161,12 @@ function latestQuestionAttempt(
     if (attempts[index].question_uid === questionUid) return attempts[index];
   }
   return null;
+}
+
+function pyqAttemptBookSlug(attempt: PyqAttemptRow): string {
+  const snapshot = attempt.question_snapshot as
+    (NonNullable<PyqAttemptRow['question_snapshot']> & { book_slug?: string }) | null;
+  return snapshot?.book_slug ?? inferPyqBookSlug(snapshot?.paper_label ?? 'GATE CSE');
 }
 
 function answerInputType(question: PyqQuestion): 'MCQ' | 'MSQ' | 'NAT' {
@@ -200,13 +229,37 @@ function PracticeSetup({
   onReview: (session: PyqSessionRow) => void;
   onStart: () => void;
 }) {
+  const selectedBookSlug = config.bookSlug ?? manifest.defaultBookSlug;
+  const selectedBook = manifest.books.find((book) => book.slug === selectedBookSlug);
+  const catalogSubjects = selectedBook?.subjects ?? manifest.subjects;
+  const catalogYears = selectedBook?.years ?? manifest.years;
+  const catalogQuestionCount = selectedBook?.count ?? manifest.questionCount;
   const attemptedIds = useMemo(
-    () => new Set(attempts.map((attempt) => attempt.question_uid)),
-    [attempts]
+    () =>
+      new Set(
+        attempts
+          .filter(
+            (attempt) =>
+              selectedBookSlug === 'all' || pyqAttemptBookSlug(attempt) === selectedBookSlug
+          )
+          .map((attempt) => attempt.question_uid)
+      ),
+    [attempts, selectedBookSlug]
   );
+  const seenByBook = useMemo(() => {
+    const ids = new Map<string, Set<string>>();
+    for (const attempt of attempts) {
+      const bookSlug = pyqAttemptBookSlug(attempt);
+      const bookIds = ids.get(bookSlug) ?? new Set<string>();
+      bookIds.add(attempt.question_uid);
+      ids.set(bookSlug, bookIds);
+    }
+    return new Map([...ids].map(([bookSlug, bookIds]) => [bookSlug, bookIds.size]));
+  }, [attempts]);
   const seenBySubject = useMemo(() => {
     const ids = new Map<string, Set<string>>();
     for (const attempt of attempts) {
+      if (selectedBookSlug !== 'all' && pyqAttemptBookSlug(attempt) !== selectedBookSlug) continue;
       const subjectSlug =
         attempt.question_snapshot?.subject_slug ??
         manifest.subjects.find((subject) => subject.label === attempt.subject)?.slug ??
@@ -216,15 +269,26 @@ function PracticeSetup({
       ids.set(subjectSlug, subjectIds);
     }
     return new Map([...ids].map(([subject, subjectIds]) => [subject, subjectIds.size]));
-  }, [attempts, manifest.subjects]);
-  const selectedSubject = manifest.subjects.find((subject) => subject.slug === config.subjectSlug);
+  }, [attempts, manifest.subjects, selectedBookSlug]);
+  const selectedSubject = catalogSubjects.find((subject) => subject.slug === config.subjectSlug);
   const selectedTopics = selectedSubject?.topics ?? [];
   const selectedTopicSlug = config.topicSlug ?? 'all';
+  const selectBook = (bookSlug: string) => {
+    const book = manifest.books.find((candidate) => candidate.slug === bookSlug);
+    setConfig({
+      ...config,
+      bookSlug,
+      subjectSlug: 'all',
+      topicSlug: 'all',
+      fromYear: book?.firstYear ?? manifest.firstYear,
+      toYear: book?.lastYear ?? manifest.lastYear
+    });
+  };
   return (
     <div className="flex flex-col gap-4">
       <PageHeader
         title="GATE PYQs"
-        description="CSE papers from 1990–2026, plus in-syllabus ECE and EE Digital Logic."
+        description={`${manifest.questionCount.toLocaleString()} questions across ${manifest.books.length} books, each held to a GATE difficulty floor.`}
         showMobileMark={false}
       />
 
@@ -242,9 +306,13 @@ function PracticeSetup({
                 {activeSession.config.mode === 'exam' ? 'answered' : 'submitted'} ·{' '}
                 {activeSession.config.mode === 'exam' && activeSession.config.examState
                   ? `${secondsToClock(pyqExamRemainingSeconds(activeSession))} remaining`
-                  : `${secondsToClock(activeSession.elapsed_sec)} logged`}
+                  : `${secondsToClock(savedPracticeElapsedSeconds(activeSession))} active work saved`}
               </p>
-              {error && <p className="mt-2 text-[12px] text-danger">{error}</p>}
+              {error && (
+                <p role="alert" className="mt-2 text-[12px] text-danger">
+                  {error}
+                </p>
+              )}
             </div>
             <div className="flex flex-wrap gap-2">
               <Button variant="primary" onClick={() => onResume(activeSession)} disabled={loading}>
@@ -293,7 +361,7 @@ function PracticeSetup({
                       {session.config.mode === 'exam' ? 'answered' : 'done'} ·{' '}
                       {session.config.mode === 'exam' && session.config.examState
                         ? `${secondsToClock(pyqExamRemainingSeconds(session))} left`
-                        : secondsToClock(session.elapsed_sec)}
+                        : `${secondsToClock(savedPracticeElapsedSeconds(session))} active work saved`}
                     </p>
                   </div>
                 </div>
@@ -441,6 +509,99 @@ function PracticeSetup({
         </Card>
       </section>
 
+      <Card>
+        <CardBody className="p-4">
+          <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
+            <div>
+              <p className="u-label">Step 2 · Choose a question book</p>
+              <p className="mt-1 text-[13px] text-text-muted">
+                Each catalog shows its source class and difficulty band; GATE CSE remains the
+                default.
+              </p>
+            </div>
+            <span className="u-num text-[11px] text-text-faint">
+              {manifest.books.length} audited books
+            </span>
+          </div>
+          <label className="block text-[12px] font-medium text-text-muted sm:hidden">
+            Question book
+            <Select
+              className="mt-1"
+              value={selectedBookSlug}
+              onChange={(event) => selectBook(event.target.value)}
+            >
+              <option value="all">All books — {manifest.questionCount}</option>
+              {manifest.books.map((book) => (
+                <option key={book.slug} value={book.slug}>
+                  {book.label} — {book.count}
+                </option>
+              ))}
+            </Select>
+          </label>
+          <div className="hidden grid-cols-1 gap-2 sm:grid sm:grid-cols-2 xl:grid-cols-3">
+            <button
+              type="button"
+              onClick={() => selectBook('all')}
+              aria-pressed={selectedBookSlug === 'all'}
+              className={cn(
+                'min-h-[112px] rounded border p-3 text-left transition-all',
+                selectedBookSlug === 'all'
+                  ? 'border-accent/50 bg-accent-faint shadow-sm'
+                  : 'border-border bg-bg-raised hover:-translate-y-0.5 hover:border-border-hover'
+              )}
+            >
+              <span className="flex items-start justify-between gap-2">
+                <span className="text-[13.5px] font-semibold text-text">All books</span>
+                <Badge tone="accent">GATE+</Badge>
+              </span>
+              <span className="mt-2 block text-[11.5px] leading-relaxed text-text-muted">
+                Mix every admitted source while keeping the same practice or exam flow.
+              </span>
+              <span className="u-num mt-2 block text-[11px] text-text-faint">
+                {attempts.length > 0
+                  ? `${new Set(attempts.map((attempt) => attempt.question_uid)).size} / `
+                  : ''}
+                {manifest.questionCount.toLocaleString()} questions
+              </span>
+            </button>
+            {manifest.books.map((book) => {
+              const active = selectedBookSlug === book.slug;
+              const seen = seenByBook.get(book.slug) ?? 0;
+              return (
+                <button
+                  key={book.slug}
+                  type="button"
+                  onClick={() => selectBook(book.slug)}
+                  aria-pressed={active}
+                  className={cn(
+                    'min-h-[112px] rounded border p-3 text-left transition-all',
+                    active
+                      ? 'border-accent/50 bg-accent-faint shadow-sm'
+                      : 'border-border bg-bg-raised hover:-translate-y-0.5 hover:border-border-hover'
+                  )}
+                >
+                  <span className="flex items-start justify-between gap-2">
+                    <span className="text-[13.5px] font-semibold leading-snug text-text">
+                      {book.label}
+                    </span>
+                    <span className="flex shrink-0 flex-col items-end gap-1">
+                      <Badge tone="accent">{difficultyLabel(book.difficultyFloor)}</Badge>
+                      <Badge>{sourceClassLabel(book.sourceClass)}</Badge>
+                    </span>
+                  </span>
+                  <span className="mt-2 block text-[11.5px] leading-relaxed text-text-muted">
+                    {book.description}
+                  </span>
+                  <span className="u-num mt-2 block text-[11px] text-text-faint">
+                    {seen}/{book.count} seen · {book.firstYear}–{book.lastYear}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </CardBody>
+      </Card>
+
       <Card className="overflow-hidden">
         <div className="flex flex-col gap-1 border-b border-border bg-bg-overlay/25 p-4 sm:p-5">
           <p className="u-label">Step 2 · Configure the set</p>
@@ -457,12 +618,11 @@ function PracticeSetup({
               <div>
                 <p className="u-label">Choose a subject</p>
                 <p className="mt-1 text-[13px] text-text-muted">
-                  Each stack is a complete subject archive.
+                  Each stack is scoped to the selected question book.
                 </p>
               </div>
               <span className="u-num text-[12px] text-text-faint">
-                {attemptedIds.size.toLocaleString()} / {manifest.questionCount.toLocaleString()}{' '}
-                seen
+                {attemptedIds.size.toLocaleString()} / {catalogQuestionCount.toLocaleString()} seen
               </span>
             </div>
             <label className="block text-[12px] font-medium text-text-muted sm:hidden">
@@ -474,8 +634,8 @@ function PracticeSetup({
                   setConfig({ ...config, subjectSlug: event.target.value, topicSlug: 'all' })
                 }
               >
-                <option value="all">Mixed subjects — {manifest.questionCount} questions</option>
-                {manifest.subjects.map((subject) => (
+                <option value="all">Mixed subjects — {catalogQuestionCount} questions</option>
+                {catalogSubjects.map((subject) => (
                   <option key={subject.slug} value={subject.slug}>
                     {subject.label} — {subject.count}
                   </option>
@@ -500,11 +660,11 @@ function PracticeSetup({
                     Mixed subjects
                   </span>
                   <span className="u-num mt-1 block text-[11px] text-text-faint">
-                    {manifest.questionCount.toLocaleString()} questions
+                    {catalogQuestionCount.toLocaleString()} questions
                   </span>
                 </span>
               </button>
-              {manifest.subjects.map((subject) => {
+              {catalogSubjects.map((subject) => {
                 const active = config.subjectSlug === subject.slug;
                 const seen = seenBySubject.get(subject.slug) ?? 0;
                 return (
@@ -628,7 +788,7 @@ function PracticeSetup({
                     setConfig({ ...config, fromYear: Number(event.target.value) })
                   }
                 >
-                  {manifest.years
+                  {catalogYears
                     .slice()
                     .reverse()
                     .map(({ year }) => (
@@ -643,7 +803,7 @@ function PracticeSetup({
                   value={config.toYear}
                   onChange={(event) => setConfig({ ...config, toYear: Number(event.target.value) })}
                 >
-                  {manifest.years.map(({ year }) => (
+                  {catalogYears.map(({ year }) => (
                     <option key={year}>{year}</option>
                   ))}
                 </Select>
@@ -711,7 +871,11 @@ function PracticeSetup({
               </label>
             </div>
             <div className="mt-auto pt-6">
-              {error && !activeSession && <p className="mb-3 text-[12px] text-danger">{error}</p>}
+              {error && !activeSession && (
+                <p role="alert" className="mb-3 text-[12px] text-danger">
+                  {error}
+                </p>
+              )}
               <Button variant="primary" className="w-full" onClick={onStart} disabled={loading}>
                 <BookOpenCheck size={17} />
                 {loading
@@ -816,6 +980,7 @@ function AnswerPad({
   onNumeric: (value: string) => void;
 }) {
   const inputType = answerInputType(question);
+  const answerChoices = question.choices?.length ? question.choices : DEFAULT_CHOICES;
   if (inputType === 'NAT') {
     return (
       <label className="block text-[12px] font-medium text-text-muted">
@@ -839,8 +1004,13 @@ function AnswerPad({
       <legend className="u-label mb-2">
         Your answer {inputType === 'MSQ' ? '— select all that apply' : ''}
       </legend>
-      <div className="grid grid-cols-4 gap-2">
-        {CHOICES.map((choice) => {
+      <div
+        className={cn(
+          'grid gap-2',
+          answerChoices.length > 4 ? 'grid-cols-2 sm:grid-cols-5' : 'grid-cols-4'
+        )}
+      >
+        {answerChoices.map((choice) => {
           const active = choices.includes(choice);
           return (
             <button
@@ -1021,6 +1191,7 @@ export default function Pyq() {
   const [manifest, setManifest] = useState<PyqManifest | null>(null);
   const [manifestError, setManifestError] = useState<string | null>(null);
   const [config, setConfig] = useState<AttemptConfig>(() => ({
+    bookSlug: 'gate-cse',
     subjectSlug: 'discrete-mathematics',
     topicSlug: 'all',
     fromYear: 1990,
@@ -1133,19 +1304,26 @@ export default function Pyq() {
         if (!active) return;
         setManifest(value);
         setConfig((current) => {
+          const defaultBook = value.books.find((book) => book.slug === value.defaultBookSlug);
+          const defaultSubjects = defaultBook?.subjects ?? value.subjects;
           const requestedSubject = searchParams.get('subject');
           const requested = requestedSubject
-            ? value.subjects.find(
+            ? defaultSubjects.find(
                 (subject) =>
                   subject.label.toLocaleLowerCase() === requestedSubject.toLocaleLowerCase()
               )
             : null;
           return {
             ...current,
-            subjectSlug: requested?.slug ?? current.subjectSlug,
+            bookSlug: value.defaultBookSlug,
+            subjectSlug:
+              requested?.slug ??
+              (defaultSubjects.some((subject) => subject.slug === current.subjectSlug)
+                ? current.subjectSlug
+                : 'all'),
             topicSlug: 'all',
-            fromYear: value.firstYear,
-            toYear: value.lastYear
+            fromYear: defaultBook?.firstYear ?? value.firstYear,
+            toYear: defaultBook?.lastYear ?? value.lastYear
           };
         });
       })
@@ -1322,7 +1500,14 @@ export default function Pyq() {
         );
       }
       const isExam = session.config.mode === 'exam';
-      const exhausted = !isExam && session.current_index >= rows.length;
+      const savedPracticeQuestionUid = isExam
+        ? null
+        : (session.current_question_uid ?? session.config.practiceDraft?.question_uid ?? null);
+      const hasResumablePracticeQuestion =
+        savedPracticeQuestionUid !== null &&
+        rows.some((question) => question.id === savedPracticeQuestionUid);
+      const exhausted =
+        !isExam && session.current_index >= rows.length && !hasResumablePracticeQuestion;
       // Bank rebuilds can add coverage or correct taxonomy without removing a
       // saved set's questions. Once every durable question ID resolves, move
       // the set to the current version instead of stranding it permanently.
@@ -1361,7 +1546,18 @@ export default function Pyq() {
           : []),
         { name: 'sessions', row: canonical }
       ]);
-      const nextIndex = Math.min(durableSession.current_index, Math.max(0, rows.length - 1));
+      const resumablePracticeQuestionUid = isExam
+        ? null
+        : (durableSession.current_question_uid ??
+          durableSession.config.practiceDraft?.question_uid ??
+          null);
+      const resumablePracticeIndex = resumablePracticeQuestionUid
+        ? rows.findIndex((question) => question.id === resumablePracticeQuestionUid)
+        : -1;
+      const nextIndex =
+        resumablePracticeIndex >= 0
+          ? resumablePracticeIndex
+          : Math.min(durableSession.current_index, Math.max(0, rows.length - 1));
       let resumedSession = durableSession;
       if (!exhausted) {
         resumedSession = isExam
@@ -1378,10 +1574,12 @@ export default function Pyq() {
           };
         }
       }
+      const resumedConfig = resumedSession.config as AttemptConfig;
       setConfig({
-        ...resumedSession.config,
-        topicSlug: resumedSession.config.topicSlug ?? 'all',
-        history: resumedSession.config.history ?? 'all'
+        ...resumedConfig,
+        bookSlug: resumedConfig.bookSlug ?? 'all',
+        topicSlug: resumedConfig.topicSlug ?? 'all',
+        history: resumedConfig.history ?? 'all'
       });
       setQuestions(rows);
       setIndex(nextIndex);
@@ -1455,22 +1653,40 @@ export default function Pyq() {
       const currentSession =
         persistedSession ??
         (loadedSessionRef.current?.id === session.id ? loadedSessionRef.current : session);
+      const pauseNowMs = Date.now();
+      const visiblePracticeQuestion =
+        currentSession.config.mode !== 'exam' && current && !submitted ? current : null;
+      const practicePauseTarget =
+        visiblePracticeQuestion &&
+        currentSession.current_question_uid !== visiblePracticeQuestion.id
+          ? {
+              ...currentSession,
+              current_question_uid: visiblePracticeQuestion.id,
+              current_question_started_at: new Date(
+                Math.min(startedAt ?? pauseNowMs, pauseNowMs)
+              ).toISOString()
+            }
+          : currentSession;
       const paused =
         currentSession.config.mode === 'exam'
-          ? pausePyqExamSession(currentSession)
-          : currentSession.current_question_uid
-            ? pausePyqPracticeSession(currentSession, {
-                questionUid: currentSession.current_question_uid,
-                selectedAnswer:
-                  current?.id === currentSession.current_question_uid && !submitted
-                    ? selectedAnswer(current)
-                    : (currentSession.config.practiceDraft?.selected_answer ?? null),
-                markDecision:
-                  current?.id === currentSession.current_question_uid && !submitted
-                    ? decision
-                    : (currentSession.config.practiceDraft?.mark_decision ?? null)
-              })
-            : pausePyqSession(currentSession);
+          ? pausePyqExamSession(currentSession, pauseNowMs)
+          : practicePauseTarget.current_question_uid
+            ? pausePyqPracticeSession(
+                practicePauseTarget,
+                {
+                  questionUid: practicePauseTarget.current_question_uid,
+                  selectedAnswer:
+                    visiblePracticeQuestion?.id === practicePauseTarget.current_question_uid
+                      ? selectedAnswer(visiblePracticeQuestion)
+                      : (practicePauseTarget.config.practiceDraft?.selected_answer ?? null),
+                  markDecision:
+                    visiblePracticeQuestion?.id === practicePauseTarget.current_question_uid
+                      ? decision
+                      : (practicePauseTarget.config.practiceDraft?.mark_decision ?? null)
+                },
+                pauseNowMs
+              )
+            : pausePyqSession(practicePauseTarget, new Date(pauseNowMs).toISOString());
       await writeLocal('pyq_sessions', paused);
       if (pyqSessionId === session.id) {
         setQuestions([]);
@@ -1525,14 +1741,17 @@ export default function Pyq() {
         setIndex(0);
         setPyqSessionId(null);
       }
+      const selectedBook = manifest.books.find((book) => book.slug === config.bookSlug);
+      const catalogSubjects = selectedBook?.subjects ?? manifest.subjects;
       const subjects =
         config.subjectSlug === 'all'
-          ? manifest.subjects
-          : manifest.subjects.filter((subject) => subject.slug === config.subjectSlug);
+          ? catalogSubjects
+          : catalogSubjects.filter((subject) => subject.slug === config.subjectSlug);
       const low = Math.min(config.fromYear, config.toYear);
       const high = Math.max(config.fromYear, config.toYear);
       let rows = (await loadPyqQuestions(subjects, manifest.bankVersion)).filter(
         (question) =>
+          matchesPyqBookScope(question, config) &&
           matchesPyqTopicScope(question, config) &&
           question.year >= low &&
           question.year <= high &&
@@ -1565,9 +1784,9 @@ export default function Pyq() {
       if (config.count !== 'all') rows = rows.slice(0, Number(config.count));
       if (rows.length === 0)
         throw new Error(
-          'No questions match those filters. Widen the subject, year, type, or history filter.'
+          'No questions match those filters. Widen the book, subject, year, type, or history filter.'
         );
-      const sessionConfig =
+      const sessionConfig: AttemptConfig =
         config.mode === 'exam'
           ? createPyqExamConfig(
               { ...config, practiceDraft: undefined },
@@ -1632,7 +1851,7 @@ export default function Pyq() {
       for (const activeRow of activeRows) {
         await writeLocal('pyq_sessions', pauseStoredPyqSession(activeRow));
       }
-      const repeatedConfig =
+      const repeatedConfig: AttemptConfig =
         config.mode === 'exam'
           ? createPyqExamConfig(
               { ...config, practiceDraft: undefined },
@@ -1663,8 +1882,16 @@ export default function Pyq() {
       setPyqSessionId(session.id);
       loadedSessionRef.current = session;
       setLoadedSession(session);
+      // Replace the array even when the repeated set has one question so the
+      // per-question hydration effect cannot retain the completed receipt.
+      setQuestions([...questions]);
       setIndex(0);
       setCompleted([]);
+      setChoices([]);
+      setNumeric('');
+      setDecision(null);
+      setSubmitted(null);
+      setSubmitError(null);
       setFinished(false);
       setAnalyzedCount(0);
     } catch (error) {
@@ -2046,23 +2273,27 @@ export default function Pyq() {
   }
 
   async function markSessionComplete() {
-    const session = pyqSessionId ? await db.pyq_sessions.get(pyqSessionId) : null;
-    if (session && session.status === 'active') {
-      const completedSession = completePyqSession(session);
-      const existingCanonical = await db.sessions.get(session.id);
-      await writeLocalBatch([
-        { name: 'pyq_sessions', row: completedSession },
-        {
-          name: 'sessions',
-          row: pyqPracticeSessionRow(
-            completedSession,
-            pyqPracticeSubject(questions),
-            timeZone,
-            existingCanonical
-          )
-        }
-      ]);
+    if (!pyqSessionId) throw new Error('The active Practice session could not be found.');
+    const session = await db.pyq_sessions.get(pyqSessionId);
+    if (!session) throw new Error('The active Practice session could not be found.');
+    if (session.status === 'completed') return;
+    if (session.status !== 'active') {
+      throw new Error('This Practice session is no longer active. Resume it before finishing.');
     }
+    const completedSession = completePyqSession(session);
+    const existingCanonical = await db.sessions.get(session.id);
+    await writeLocalBatch([
+      { name: 'pyq_sessions', row: completedSession },
+      {
+        name: 'sessions',
+        row: pyqPracticeSessionRow(
+          completedSession,
+          pyqPracticeSubject(questions),
+          timeZone,
+          existingCanonical
+        )
+      }
+    ]);
   }
 
   async function goNext() {

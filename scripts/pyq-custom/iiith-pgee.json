@@ -1,0 +1,309 @@
+{
+  "bookSlug": "iiith-pgee",
+  "source": "IIIT Hyderabad PGEE 2018 sample paper",
+  "sourceUrl": "https://pgadmissions.iiit.ac.in/monsoon_syllabus/",
+  "importedAt": "2026-08-20",
+  "questions": [
+    {
+      "id": "iiith-pgee:2018-sample:1",
+      "year": 2018,
+      "set": null,
+      "number": "1",
+      "paperLabel": "IIIT-H PGEE 2018 · Audited Sample",
+      "subject": "c-programming",
+      "subjectSlug": "c-programming",
+      "classificationHint": {
+        "subjectSlug": "c-programming",
+        "topicSlug": "array-and-pointer"
+      },
+      "topic": "array-and-pointer",
+      "topicSlug": "array-and-pointer",
+      "subtopics": [
+        "array-and-pointer",
+        "iiith-pgee"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E"
+      ],
+      "answer": "B",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">What will the following code fragment output?<br><br>int P[5] = {3,1,4,2,0};<br>for (i=0; i &lt; 5; i++) Q[P[i]] = P[i];<br>for (i=0; i &lt; 5; i++) printf(&quot;%d&quot;, Q[i]);<br><br>(A) 31420<br>(B) 01234<br>(C) 21403<br>(D) 43210<br>(E) 12340</div>",
+      "sourceUrl": "https://raw.githubusercontent.com/nineRishav/PGEE-IIITH/master/IIITH%20PGEE%202018%20-Sample%20Paper.pdf",
+      "answerSource": {
+        "kind": "independent-audit",
+        "note": "The official sample has no published key; deterministic answers were independently derived and only high-confidence items were admitted."
+      }
+    },
+    {
+      "id": "iiith-pgee:2018-sample:2",
+      "year": 2018,
+      "set": null,
+      "number": "2",
+      "paperLabel": "IIIT-H PGEE 2018 · Audited Sample",
+      "subject": "c-programming",
+      "subjectSlug": "c-programming",
+      "classificationHint": {
+        "subjectSlug": "c-programming",
+        "topicSlug": "array-and-pointer"
+      },
+      "topic": "array-and-pointer",
+      "topicSlug": "array-and-pointer",
+      "subtopics": [
+        "array-and-pointer",
+        "iiith-pgee"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E"
+      ],
+      "answer": "C",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">What will the following code fragment output?<br><br>void fun(int *a, int b) { b++; a[2] = a[1] + 3; }<br>void main() {<br>  int A[5] = {0,1,2,3,4};<br>  fun(A, A[2]); printf(&quot;%d&quot;, A[2]);<br>}<br><br>(A) 2<br>(B) 3<br>(C) 4<br>(D) 5<br>(E) 6</div>",
+      "sourceUrl": "https://raw.githubusercontent.com/nineRishav/PGEE-IIITH/master/IIITH%20PGEE%202018%20-Sample%20Paper.pdf",
+      "answerSource": {
+        "kind": "independent-audit",
+        "note": "The official sample has no published key; deterministic answers were independently derived and only high-confidence items were admitted."
+      }
+    },
+    {
+      "id": "iiith-pgee:2018-sample:3",
+      "year": 2018,
+      "set": null,
+      "number": "3",
+      "paperLabel": "IIIT-H PGEE 2018 · Audited Sample",
+      "subject": "discrete-mathematics",
+      "subjectSlug": "discrete-mathematics",
+      "classificationHint": {
+        "subjectSlug": "discrete-mathematics",
+        "topicSlug": "propositional-logic"
+      },
+      "topic": "propositional-logic",
+      "topicSlug": "propositional-logic",
+      "subtopics": [
+        "propositional-logic",
+        "iiith-pgee"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E"
+      ],
+      "answer": "D",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">Consider the statement: “If n is divisible by 30 then n is divisible by 2 and by 3 and by 5.” Which statement is equivalent?<br><br>(A) If n is not divisible by 30 then n is divisible by 2 or by 3 or by 5.<br>(B) If n is not divisible by 30 then n is not divisible by 2 or not by 3 or not by 5.<br>(C) If n is divisible by 2, 3 and 5 then n is divisible by 30.<br>(D) If n is not divisible by 2 or not by 3 or not by 5 then n is not divisible by 30.<br>(E) If n is divisible by 2 or by 3 or by 5 then n is divisible by 30.</div>",
+      "sourceUrl": "https://raw.githubusercontent.com/nineRishav/PGEE-IIITH/master/IIITH%20PGEE%202018%20-Sample%20Paper.pdf",
+      "answerSource": {
+        "kind": "independent-audit",
+        "note": "The official sample has no published key; deterministic answers were independently derived and only high-confidence items were admitted."
+      }
+    },
+    {
+      "id": "iiith-pgee:2018-sample:4",
+      "year": 2018,
+      "set": null,
+      "number": "4",
+      "paperLabel": "IIIT-H PGEE 2018 · Audited Sample",
+      "subject": "discrete-mathematics",
+      "subjectSlug": "discrete-mathematics",
+      "classificationHint": {
+        "subjectSlug": "discrete-mathematics",
+        "topicSlug": "propositional-logic"
+      },
+      "topic": "propositional-logic",
+      "topicSlug": "propositional-logic",
+      "subtopics": [
+        "propositional-logic",
+        "iiith-pgee"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E"
+      ],
+      "answer": "A",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">Which statement is the contrapositive of: “You win the game if you know the rules but are not overconfident.”<br><br>(A) If you lose the game then you do not know the rules or you are overconfident.<br>(B) A sufficient condition that you win is that you know the rules or are not overconfident.<br>(C) If you do not know the rules or are overconfident you lose the game.<br>(D) If you know the rules and are overconfident then you win the game.<br>(E) A necessary condition that you know the rules or are not overconfident is that you win.</div>",
+      "sourceUrl": "https://raw.githubusercontent.com/nineRishav/PGEE-IIITH/master/IIITH%20PGEE%202018%20-Sample%20Paper.pdf",
+      "answerSource": {
+        "kind": "independent-audit",
+        "note": "The official sample has no published key; deterministic answers were independently derived and only high-confidence items were admitted."
+      }
+    },
+    {
+      "id": "iiith-pgee:2018-sample:6",
+      "year": 2018,
+      "set": null,
+      "number": "6",
+      "paperLabel": "IIIT-H PGEE 2018 · Audited Sample",
+      "subject": "algorithms",
+      "subjectSlug": "algorithms",
+      "classificationHint": {
+        "subjectSlug": "algorithms",
+        "topicSlug": "sorting"
+      },
+      "topic": "sorting",
+      "topicSlug": "sorting",
+      "subtopics": [
+        "sorting",
+        "iiith-pgee"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E"
+      ],
+      "answer": "D",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">Call a sorting algorithm “oblivious” if it has the same best-case and worst-case runtime. Which of these standard sorting algorithms are oblivious: (i) Merge sort, (ii) Bubble sort, (iii) Quick sort, and (iv) Heap sort?<br><br>(A) All of the above<br>(B) (i), (ii), and (iii)<br>(C) Only (ii)<br>(D) (i) and (iv)<br>(E) None of the above</div>",
+      "sourceUrl": "https://raw.githubusercontent.com/nineRishav/PGEE-IIITH/master/IIITH%20PGEE%202018%20-Sample%20Paper.pdf",
+      "answerSource": {
+        "kind": "independent-audit",
+        "note": "The official sample has no published key; deterministic answers were independently derived and only high-confidence items were admitted."
+      }
+    },
+    {
+      "id": "iiith-pgee:2018-sample:7",
+      "year": 2018,
+      "set": null,
+      "number": "7",
+      "paperLabel": "IIIT-H PGEE 2018 · Audited Sample",
+      "subject": "digital-logic",
+      "subjectSlug": "digital-logic",
+      "classificationHint": {
+        "subjectSlug": "digital-logic",
+        "topicSlug": "number-system"
+      },
+      "topic": "number-system",
+      "topicSlug": "number-system",
+      "subtopics": [
+        "number-system",
+        "iiith-pgee"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E"
+      ],
+      "answer": "B",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">What is the 2’s-complement representation of the integer -1 using 16 and 8 bits respectively?<br><br>(A) 0xFF, 0xF<br>(B) 0xFFFF, 0xFF<br>(C) 0xFF00, 0xF0<br>(D) 0xF000, 0xF0<br>(E) 0x1000, 0xF0</div>",
+      "sourceUrl": "https://raw.githubusercontent.com/nineRishav/PGEE-IIITH/master/IIITH%20PGEE%202018%20-Sample%20Paper.pdf",
+      "answerSource": {
+        "kind": "independent-audit",
+        "note": "The official sample has no published key; deterministic answers were independently derived and only high-confidence items were admitted."
+      }
+    },
+    {
+      "id": "iiith-pgee:2018-sample:8",
+      "year": 2018,
+      "set": null,
+      "number": "8",
+      "paperLabel": "IIIT-H PGEE 2018 · Audited Sample",
+      "subject": "digital-logic",
+      "subjectSlug": "digital-logic",
+      "classificationHint": {
+        "subjectSlug": "digital-logic",
+        "topicSlug": "combinational-circuit"
+      },
+      "topic": "combinational-circuit",
+      "topicSlug": "combinational-circuit",
+      "subtopics": [
+        "combinational-circuit",
+        "iiith-pgee"
+      ],
+      "marks": null,
+      "type": "MSQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E"
+      ],
+      "answer": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">Choose the digital building blocks from the following list using which any Boolean function can be realized.<br><br>(A) 2-to-1 multiplexer<br>(B) 4-to-1 multiplexer<br>(C) 8-to-1 multiplexer<br>(D) 16-to-1 multiplexer<br>(E) None of the above</div>",
+      "sourceUrl": "https://raw.githubusercontent.com/nineRishav/PGEE-IIITH/master/IIITH%20PGEE%202018%20-Sample%20Paper.pdf",
+      "answerSource": {
+        "kind": "independent-audit",
+        "note": "The official sample has no published key; deterministic answers were independently derived and only high-confidence items were admitted."
+      }
+    },
+    {
+      "id": "iiith-pgee:2018-sample:11",
+      "year": 2018,
+      "set": null,
+      "number": "11",
+      "paperLabel": "IIIT-H PGEE 2018 · Audited Sample",
+      "subject": "algorithms",
+      "subjectSlug": "algorithms",
+      "classificationHint": {
+        "subjectSlug": "algorithms",
+        "topicSlug": "dynamic-programming"
+      },
+      "topic": "dynamic-programming",
+      "topicSlug": "dynamic-programming",
+      "subtopics": [
+        "dynamic-programming",
+        "iiith-pgee"
+      ],
+      "marks": null,
+      "type": "MCQ",
+      "choices": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E"
+      ],
+      "answer": "D",
+      "tolerance": null,
+      "answerStatus": "available",
+      "html": "<div class=\"pyq-source-text\">Using dynamic programming, what is the minimum scalar-multiplication cost of a matrix-chain product with dimensions ⟨25, 75, 20, 95, 110⟩?<br><br>(A) 2500<br>(B) 12050<br>(C) 45075<br>(D) 301500<br>(E) 6725</div>",
+      "sourceUrl": "https://raw.githubusercontent.com/nineRishav/PGEE-IIITH/master/IIITH%20PGEE%202018%20-Sample%20Paper.pdf",
+      "answerSource": {
+        "kind": "independent-audit",
+        "note": "The official sample has no published key; deterministic answers were independently derived and only high-confidence items were admitted."
+      }
+    }
+  ]
+}

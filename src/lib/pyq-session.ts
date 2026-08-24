@@ -9,7 +9,11 @@ import type {
   SessionRow
 } from '@/types';
 import type { PyqQuestion } from '@/lib/pyq';
-import { pyqAnswerValueForLog } from '@/lib/pyq';
+import {
+  inferPyqBookSlug,
+  pyqAnswerValueForLog,
+  pyqBookSlugForQuestion
+} from '@/lib/pyq';
 import {
   aggregateGateScores,
   evaluateGateAnswer,
@@ -200,8 +204,15 @@ export function pyqSourceAttemptForJournalQuestion(
 export function pyqQuestionFromAttempt(attempt: PyqAttemptRow): PyqQuestion | null {
   const snapshot = attempt.question_snapshot;
   if ((attempt.capture_version !== 2 && attempt.capture_version !== 3) || !snapshot) return null;
+  const choices =
+    Array.isArray(snapshot.choices) &&
+    snapshot.choices.length > 0 &&
+    snapshot.choices.every((choice) => typeof choice === 'string')
+      ? [...snapshot.choices]
+      : undefined;
   return {
     id: snapshot.question_uid,
+    bookSlug: snapshot.book_slug?.trim() || inferPyqBookSlug(snapshot.paper_label),
     year: snapshot.year,
     set: snapshot.set,
     number: snapshot.number,
@@ -213,6 +224,7 @@ export function pyqQuestionFromAttempt(attempt: PyqAttemptRow): PyqQuestion | nu
     subtopics: [...snapshot.subtopics],
     marks: snapshot.marks,
     type: snapshot.type as PyqQuestion['type'],
+    ...(choices ? { choices } : {}),
     answer: attempt.correct_answer as PyqQuestion['answer'],
     tolerance: snapshot.tolerance ? { ...snapshot.tolerance } : null,
     answerStatus: snapshot.answer_status,
@@ -374,6 +386,7 @@ export function createPyqReattemptAttemptRow(args: {
     user_id: args.userId,
     bank_version: args.sourceAttempt.bank_version,
     config: {
+      bookSlug: pyqBookSlugForQuestion(args.question),
       subjectSlug: args.question.subjectSlug,
       topicSlug: args.question.topicSlug,
       fromYear: args.question.year,
@@ -585,7 +598,7 @@ export function pausePyqPracticeSession(
   }
   if (
     session.current_question_uid !== draft.questionUid ||
-    session.question_uids[session.current_index] !== draft.questionUid
+    !session.question_uids.includes(draft.questionUid)
   ) {
     throw new Error('Only the current practice question can be paused.');
   }
@@ -626,8 +639,10 @@ export function pausePyqPracticeSession(
 }
 
 export function pyqQuestionSnapshot(question: PyqQuestion): PyqQuestionSnapshot {
+  const choices = question.choices?.length ? [...question.choices] : undefined;
   return {
     question_uid: question.id,
+    book_slug: pyqBookSlugForQuestion(question),
     year: question.year,
     set: question.set,
     number: question.number,
@@ -639,6 +654,7 @@ export function pyqQuestionSnapshot(question: PyqQuestion): PyqQuestionSnapshot 
     subtopics: [...question.subtopics],
     marks: question.marks,
     type: question.type,
+    ...(choices ? { choices } : {}),
     tolerance: question.tolerance ? { ...question.tolerance } : null,
     answer_status: question.answerStatus,
     answer_source: question.answerSource === undefined ? null : question.answerSource,

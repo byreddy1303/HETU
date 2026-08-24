@@ -60,7 +60,7 @@ export default defineConfig(({ mode }) => {
               handler: 'CacheFirst',
               options: {
                 cacheName: 'air-pyq-images-v1',
-                expiration: { maxEntries: 400, maxAgeSeconds: 60 * 60 * 24 * 365 }
+                expiration: { maxEntries: 800, maxAgeSeconds: 60 * 60 * 24 * 365 }
               }
             },
             {
@@ -70,7 +70,7 @@ export default defineConfig(({ mode }) => {
                 url.pathname.endsWith('.json'),
               handler: 'NetworkFirst',
               options: {
-                cacheName: 'air-pyq-data-v4',
+                cacheName: 'air-pyq-data-v5',
                 networkTimeoutSeconds: 5,
                 expiration: { maxEntries: 32, maxAgeSeconds: 60 * 60 * 24 * 30 }
               }

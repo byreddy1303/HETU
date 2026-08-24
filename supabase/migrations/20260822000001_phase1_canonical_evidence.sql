@@ -719,6 +719,27 @@ alter table public.pyq_attempts
       )
       and jsonb_typeof(question_snapshot->'marks') in ('number', 'null')
       and jsonb_typeof(question_snapshot->'type') = 'string'
+      -- Source-book and option metadata was added after the first v2 receipts.
+      -- Keep both keys optional for backfill compatibility, but reject malformed
+      -- nested values whenever a v3 writer supplies them.
+      and (
+        not (question_snapshot ? 'book_slug')
+        or (
+          jsonb_typeof(question_snapshot->'book_slug') = 'string'
+          and trim(question_snapshot->>'book_slug') <> ''
+        )
+      )
+      and (
+        not (question_snapshot ? 'choices')
+        or (
+          jsonb_typeof(question_snapshot->'choices') = 'array'
+          and jsonb_array_length(question_snapshot->'choices') > 0
+          and not jsonb_path_exists(
+            question_snapshot->'choices',
+            '$[*] ? (@.type() != "string" || @ == "")'
+          )
+        )
+      )
       and jsonb_typeof(question_snapshot->'tolerance') in ('object', 'null')
       and (
         jsonb_typeof(question_snapshot->'tolerance') = 'null'

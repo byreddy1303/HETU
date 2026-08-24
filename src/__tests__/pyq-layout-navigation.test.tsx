@@ -23,7 +23,7 @@ describe('PYQ layout navigation', () => {
     await db.sessions.clear();
   });
 
-  it('keeps Quick capture in the desktop primary group and PYQ practice in Analysis', () => {
+  it('keeps PYQ practice in the desktop primary group and Quick capture in Analysis', () => {
     render(
       <MemoryRouter>
         <Nav />
@@ -34,20 +34,20 @@ describe('PYQ layout navigation', () => {
     const analysisHeading = within(navigation).getByText('Analysis');
     const analysisGroup = analysisHeading.parentElement;
     expect(analysisGroup).not.toBeNull();
-    expect(within(analysisGroup!).getByRole('link', { name: 'PYQ practice' })).toHaveAttribute(
+    expect(within(analysisGroup!).getByRole('link', { name: 'Quick capture' })).toHaveAttribute(
       'href',
-      '/pyq'
+      '/capture'
     );
-    expect(within(analysisGroup!).queryByRole('link', { name: 'Quick capture' })).toBeNull();
+    expect(within(analysisGroup!).queryByRole('link', { name: 'PYQ practice' })).toBeNull();
 
-    const pyqLink = within(navigation).getByRole('link', { name: 'Quick capture' });
-    expect(pyqLink).toHaveAttribute('href', '/capture');
+    const pyqLink = within(navigation).getByRole('link', { name: 'PYQ practice' });
+    expect(pyqLink).toHaveAttribute('href', '/pyq');
     expect(
       pyqLink.compareDocumentPosition(analysisHeading) & Node.DOCUMENT_POSITION_FOLLOWING
     ).toBeTruthy();
   });
 
-  it('places Quick capture under Study and PYQ practice under Practice on mobile', async () => {
+  it('places PYQ practice under Study and Quick capture under Practice on mobile', async () => {
     const user = userEvent.setup();
     render(
       <MemoryRouter>
@@ -61,15 +61,15 @@ describe('PYQ layout navigation', () => {
     const practiceGroup = within(dialog).getByText('Practice').parentElement;
     expect(studyGroup).not.toBeNull();
     expect(practiceGroup).not.toBeNull();
-    expect(within(studyGroup!).getByRole('link', { name: 'Quick capture' })).toHaveAttribute(
-      'href',
-      '/capture'
-    );
-    expect(within(studyGroup!).queryByRole('link', { name: 'PYQ practice' })).toBeNull();
-    expect(within(practiceGroup!).getByRole('link', { name: 'PYQ practice' })).toHaveAttribute(
+    expect(within(studyGroup!).getByRole('link', { name: 'PYQ practice' })).toHaveAttribute(
       'href',
       '/pyq'
     );
-    expect(within(practiceGroup!).queryByRole('link', { name: 'Quick capture' })).toBeNull();
+    expect(within(studyGroup!).queryByRole('link', { name: 'Quick capture' })).toBeNull();
+    expect(within(practiceGroup!).getByRole('link', { name: 'Quick capture' })).toHaveAttribute(
+      'href',
+      '/capture'
+    );
+    expect(within(practiceGroup!).queryByRole('link', { name: 'PYQ practice' })).toBeNull();
   });
 });

@@ -48,6 +48,9 @@ export function usePendingCount(): number {
 
 export function useInitialPullPending(): boolean {
   const [pending, setPending] = useState(isInitialPullActive);
-  useEffect(() => subscribeInitialPull(() => setPending(isInitialPullActive())), []);
+  useEffect(() => {
+    const unsubscribe = subscribeInitialPull(() => setPending(isInitialPullActive()));
+    return () => { unsubscribe(); };
+  }, []);
   return pending;
 }

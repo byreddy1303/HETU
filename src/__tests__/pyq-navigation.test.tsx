@@ -68,6 +68,28 @@ const questions: PyqQuestion[] = [
     html: '<p>Which option completes the third question?</p>',
     sourceUrl: 'https://gateoverflow.in/test/3',
     answerSource: null
+  },
+  {
+    id: 'tifr-2025-q1',
+    bookSlug: 'tifr-gs-cs',
+    year: 2025,
+    set: null,
+    number: '1',
+    paperLabel: 'TIFR GS CS 2025',
+    subject: 'Discrete Mathematics',
+    subjectSlug: 'discrete-mathematics',
+    topic: 'Propositional Logic',
+    topicSlug: 'propositional-logic',
+    subtopics: ['Logic'],
+    marks: 1,
+    type: 'MCQ',
+    choices: ['A', 'B', 'C', 'D', 'E'],
+    answer: 'E',
+    tolerance: null,
+    answerStatus: 'available',
+    html: '<p>Which TIFR option is valid?</p>',
+    sourceUrl: 'https://tifr.example/question/1',
+    answerSource: null
   }
 ];
 
@@ -76,19 +98,73 @@ const manifest: PyqManifest = {
   generatedAt: '2026-08-13T00:00:00.000Z',
   source: 'test',
   sourceUrl: 'https://gateoverflow.in',
-  firstYear: 2026,
+  defaultBookSlug: 'gate-cse',
+  firstYear: 2025,
   lastYear: 2026,
-  questionCount: 3,
+  questionCount: 4,
   imageCount: 0,
-  answerStatuses: { available: 3, ambiguous: 0, 'marks-to-all': 0, unsupported: 0 },
-  years: [{ year: 2026, count: 3 }],
+  answerStatuses: { available: 4, ambiguous: 0, 'marks-to-all': 0, unsupported: 0 },
+  years: [
+    { year: 2025, count: 1 },
+    { year: 2026, count: 3 }
+  ],
   subjects: [
     {
       slug: 'discrete-mathematics',
       label: 'Discrete Mathematics',
-      count: 3,
+      count: 4,
       file: '/pyq/discrete-mathematics.json',
-      topics: [{ slug: 'propositional-logic', label: 'Propositional Logic', count: 3 }]
+      topics: [{ slug: 'propositional-logic', label: 'Propositional Logic', count: 4 }]
+    }
+  ],
+  books: [
+    {
+      slug: 'gate-cse',
+      label: 'GATE CSE Core',
+      shortLabel: 'GATE CSE',
+      description: 'Core GATE questions.',
+      difficultyFloor: 'gate',
+      sourceClass: 'official-exam',
+      source: 'test',
+      sourceUrl: 'https://gateoverflow.in',
+      count: 3,
+      firstYear: 2026,
+      lastYear: 2026,
+      answerStatuses: { available: 3, ambiguous: 0, 'marks-to-all': 0, unsupported: 0 },
+      years: [{ year: 2026, count: 3 }],
+      subjects: [
+        {
+          slug: 'discrete-mathematics',
+          label: 'Discrete Mathematics',
+          count: 3,
+          file: '/pyq/discrete-mathematics.json',
+          topics: [{ slug: 'propositional-logic', label: 'Propositional Logic', count: 3 }]
+        }
+      ]
+    },
+    {
+      slug: 'tifr-gs-cs',
+      label: 'TIFR GS Computer Science',
+      shortLabel: 'TIFR GS CS',
+      description: 'Above-GATE TIFR questions.',
+      difficultyFloor: 'above-gate',
+      sourceClass: 'official-exam',
+      source: 'test',
+      sourceUrl: 'https://tifr.example',
+      count: 1,
+      firstYear: 2025,
+      lastYear: 2025,
+      answerStatuses: { available: 1, ambiguous: 0, 'marks-to-all': 0, unsupported: 0 },
+      years: [{ year: 2025, count: 1 }],
+      subjects: [
+        {
+          slug: 'discrete-mathematics',
+          label: 'Discrete Mathematics',
+          count: 1,
+          file: '/pyq/discrete-mathematics.json',
+          topics: [{ slug: 'propositional-logic', label: 'Propositional Logic', count: 1 }]
+        }
+      ]
     }
   ]
 };
@@ -142,9 +218,7 @@ describe('PYQ practice navigation', () => {
       </MemoryRouter>
     );
 
-    await user.click(
-      await screen.findByRole('button', { name: /Start (?:fresh set|practice)/ })
-    );
+    await user.click(await screen.findByRole('button', { name: /Start (?:fresh set|practice)/ }));
     await user.click(await screen.findByRole('button', { name: 'A' }));
     await user.click(screen.getByRole('button', { name: /^Answered/ }));
     await user.click(screen.getByRole('button', { name: 'Commit & reveal key' }));
@@ -169,8 +243,7 @@ describe('PYQ practice navigation', () => {
     await waitFor(async () => {
       expect(
         (await db.pyq_attempts.toArray()).find(
-          (attempt) =>
-            attempt.question_uid === questions[1].id && attempt.mark_decision === 'MARK'
+          (attempt) => attempt.question_uid === questions[1].id && attempt.mark_decision === 'MARK'
         )
       ).toMatchObject({ selected_answer: 'C', mark_decision: 'MARK' });
     });
@@ -202,6 +275,30 @@ describe('PYQ practice navigation', () => {
         mark_correct: true
       });
       expect(secondQuestionAttempts[0].id).not.toBe(secondQuestionAttempts[1].id);
+    });
+  });
+
+  it('filters the bank by book and renders every source-provided answer choice', async () => {
+    const user = userEvent.setup();
+    render(
+      <MemoryRouter>
+        <Pyq />
+      </MemoryRouter>
+    );
+
+    await user.click(await screen.findByRole('button', { name: /TIFR GS Computer Science/ }));
+    await user.click(screen.getByRole('button', { name: 'Start practice set' }));
+
+    expect(await screen.findByText('Which TIFR option is valid?')).toBeInTheDocument();
+    expect(screen.queryByText('Which proposition is a tautology?')).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'E' })).toBeInTheDocument();
+
+    await waitFor(async () => {
+      const [session] = await db.pyq_sessions.toArray();
+      expect(session.question_uids).toEqual(['tifr-2025-q1']);
+      expect((session.config as typeof session.config & { bookSlug?: string }).bookSlug).toBe(
+        'tifr-gs-cs'
+      );
     });
   });
 });

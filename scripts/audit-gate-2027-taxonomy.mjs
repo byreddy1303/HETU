@@ -257,6 +257,17 @@ function hasAnswerProvenance(question) {
   );
 }
 
+function answerProvenanceKind(question) {
+  if (typeof question.answerSource === 'string') {
+    return question.answerSource.trim() ? 'legacy-string' : 'missing';
+  }
+  if (!question.answerSource || typeof question.answerSource !== 'object') return 'missing';
+  if (typeof question.answerSource.kind === 'string' && question.answerSource.kind.trim()) {
+    return question.answerSource.kind;
+  }
+  return Object.keys(question.answerSource).length > 0 ? 'legacy-structured' : 'missing';
+}
+
 function hasValidScoringAnswer(question) {
   if (question.type === 'MCQ') {
     return !Array.isArray(question.answer) && String(question.answer ?? '').trim().length > 0;
@@ -291,6 +302,26 @@ const invalidRuleCandidates = answerAvailableStandard.filter(
 for (const question of invalidRuleCandidates) {
   check(false, `${question.id} has marks but lacks a valid answer/provenance for rule scoring`);
 }
+
+const bonusQuestions = questions.filter(
+  (question) => question.type === 'MARKS_TO_ALL' || question.answerStatus === 'marks-to-all'
+);
+for (const question of bonusQuestions) {
+  check(
+    question.type === 'MARKS_TO_ALL' && question.answerStatus === 'marks-to-all',
+    `${question.id} has inconsistent MARKS_TO_ALL metadata`
+  );
+  check(question.answer == null, `${question.id} invents an answer for a marks-to-all row`);
+}
+const ruleEvaluableBonus = bonusQuestions.filter(
+  (question) =>
+    (question.marks === 1 || question.marks === 2) && hasAnswerProvenance(question)
+);
+check(bonusQuestions.length === 2, `Expected two marks-to-all rows, found ${bonusQuestions.length}`);
+check(
+  ruleEvaluableBonus.length === 1,
+  `Expected one rule-evaluable marks-to-all row, found ${ruleEvaluableBonus.length}`
+);
 
 const pdfAnswerKeyRows = questions.filter(
   (question) => question.answerSource?.kind === 'pdf_answer_key'
@@ -352,14 +383,27 @@ const report = {
     questionTypes: countBy(questions, (question) => question.type),
     marks: countBy(questions, (question) => question.marks),
     answerStatuses: countBy(questions, (question) => question.answerStatus),
+    answerProvenanceKinds: countBy(questions, answerProvenanceKind),
+    books: (manifest.books ?? []).map((book) => ({
+      slug: book.slug,
+      label: book.label,
+      questionCount: book.count,
+      sourceClass: book.sourceClass,
+      difficultyFloor: book.difficultyFloor,
+      sourceUrl: book.sourceUrl
+    })),
     scoringMetadata: {
       standardQuestionCount: standardQuestions.length,
       answerAvailableStandardQuestionCount: answerAvailableStandard.length,
-      marksPresentRuleEvaluableQuestionCount: marksPresentRuleEvaluable.length,
-      marksPresentRuleEvaluablePercentOfAnswerAvailableStandard: roundedPercent(
+      standardRuleEvaluableQuestionCount: marksPresentRuleEvaluable.length,
+      standardRuleEvaluablePercentOfAnswerAvailableStandard: roundedPercent(
         marksPresentRuleEvaluable.length,
         answerAvailableStandard.length
       ),
+      marksToAllQuestionCount: bonusQuestions.length,
+      ruleEvaluableMarksToAllQuestionCount: ruleEvaluableBonus.length,
+      totalRuleEvaluableQuestionCount:
+        marksPresentRuleEvaluable.length + ruleEvaluableBonus.length,
       officialKeyVerifiedExactQuestionCount: verifiedPdfExact.length,
       officialKeyVerifiedOneMarkCount: verifiedPdfOneMark,
       officialKeyVerifiedTwoMarkCount: verifiedPdfTwoMark,
@@ -367,7 +411,7 @@ const report = {
         marksPresentRuleEvaluable.length - verifiedPdfExact.length,
       pdfMarkConflicts,
       policy:
-        'Stored MCQ/MSQ/NAT rows with a valid answer, answer provenance, and 1/2-mark metadata are GATE-rule-evaluable. Only matching structured PDF-answer-key marks are labelled official-key verified exact; tag-only marks are not promoted to verified provenance.'
+        'Stored MCQ/MSQ/NAT rows with a valid answer, answer provenance, and 1/2-mark metadata are standard GATE-rule-evaluable rows. MARKS_TO_ALL rows are counted separately and are rule-evaluable only when 1/2-mark metadata and provenance are present. Only matching structured PDF-answer-key marks are labelled official-key verified exact; tag-only marks are not promoted to verified provenance.'
     }
   },
   officialTopicCoverage: {
@@ -385,9 +429,11 @@ const report = {
   bankTopicScopes: topicRows,
   policies: registry.auditPolicy,
   conclusions: [
-    'The 3,200-question immutable bank is preserved; this audit does not delete or rewrite questions.',
+    `The ${questions.length.toLocaleString()}-question immutable bank is preserved; this audit does not delete or rewrite questions.`,
     'Historical and supporting questions remain available but are excluded from current-syllabus coverage evidence.',
     'Broad and review-required leaves are visible gaps, not claims of verified row-level coverage.',
+    'Book sourceClass and difficultyFloor describe a source collection; row-level answer and mark authority remains explicit in answerSource.',
+    `${marksPresentRuleEvaluable.length.toLocaleString()} standard rows and ${ruleEvaluableBonus.length.toLocaleString()} marks-to-all row are GATE-rule-evaluable from stored metadata; only ${verifiedPdfExact.length.toLocaleString()} standard rows have official PDF-key-verified marks.`,
     'Structured PDF-answer-key marks are authoritative over contradictory archive tags; the 2026 split is locked at 60 one-mark and 70 two-mark questions.'
   ]
 };
@@ -406,5 +452,5 @@ if (writeArtifact) {
 }
 
 console.log(
-  `Audited ${questions.length.toLocaleString()} PYQs against ${officialLeaves.length} official topic leaves (${marksPresentRuleEvaluable.length.toLocaleString()} rule-evaluable; ${verifiedPdfExact.length.toLocaleString()} official-key verified exact).`
+  `Audited ${questions.length.toLocaleString()} PYQs against ${officialLeaves.length} official topic leaves (${marksPresentRuleEvaluable.length.toLocaleString()} standard + ${ruleEvaluableBonus.length.toLocaleString()} bonus rule-evaluable; ${verifiedPdfExact.length.toLocaleString()} official-key verified exact).`
 );

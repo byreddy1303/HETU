@@ -6,7 +6,12 @@ import path from 'node:path';
 import process from 'node:process';
 import { fileURLToPath } from 'node:url';
 import { JSDOM } from 'jsdom';
-import { classifyPyqQuestion, PYQ_BANK_VERSION, PYQ_TAXONOMY } from './pyq-taxonomy.mjs';
+import {
+  classifyPyqQuestion,
+  PYQ_BANK_QUESTION_COUNT,
+  PYQ_BANK_VERSION,
+  PYQ_TAXONOMY
+} from './pyq-taxonomy.mjs';
 import {
   isMarksMetadataTag,
   marksFromQuestionMetadata,
@@ -24,7 +29,12 @@ const BUNDLED_CUSTOM_ASSET_DIRS = [
 ];
 const CUSTOM_QUESTION_PATHS = [
   'go-classes-coa-topic-test.json',
-  'go-classes-coa-topic-test-2.json'
+  'go-classes-coa-topic-test-2.json',
+  'isro-cs-overlap.json',
+  'iiith-pgee.json',
+  'tifr-gs-cs.json',
+  'cmi-cs-objective.json',
+  'ugc-net-cs-overlap.json'
 ].map((filename) => path.join(SCRIPT_DIR, 'pyq-custom', filename));
 const CACHE = '/tmp/air-journal-pyq-cache';
 const SOURCE_ROOT = 'https://gateqa.in';
@@ -40,8 +50,135 @@ const IMAGE_OVERRIDES = new Map([
   ]
 ]);
 
-const TITLE_PATTERN =
-  /GATE CSE (?<year>\d{4})(?:\s*\|?\s*Set\s*[-:]?\s*(?<set>\d+))?\s*\|\s*(?:GA\s*(?:\|\s*)?)?Question:\s*(?<question>.+)$/i;
+const GATE_CSE_TITLE_PATTERN =
+  /^GATE CSE (?<year>\d{4})(?:\s*\|?\s*Set\s*[-:]?\s*(?<set>\d+))?\s*\|\s*(?:GA\s*(?:\|\s*)?)?Question:\s*(?<question>.+)$/i;
+const GATE_IT_TITLE_PATTERN =
+  /^GATE IT (?<year>\d{4})(?:\s*\|?\s*Set\s*[-:]?\s*(?<set>\d+))?\s*\|\s*(?:GA\s*(?:\|\s*)?)?Question:\s*(?<question>.+)$/i;
+
+const PYQ_BOOKS = [
+  {
+    slug: 'gate-cse',
+    label: 'GATE CSE Core',
+    shortLabel: 'GATE CSE',
+    description: 'The complete CSE archive, including audited restorations for older papers.',
+    difficultyFloor: 'gate',
+    sourceClass: 'official-exam',
+    source: 'GATE CSE',
+    sourceUrl: 'https://gate2026.iitg.ac.in/QPs-answer-keys.html',
+    expectedCount: 2911
+  },
+  {
+    slug: 'gate-it',
+    label: 'GATE IT Archive',
+    shortLabel: 'GATE IT',
+    description: 'The 2004–2008 Information Technology papers, restricted to the CSE syllabus.',
+    difficultyFloor: 'gate',
+    sourceClass: 'official-exam',
+    source: 'GATE IT',
+    sourceUrl: 'https://gateoverflow.in/previous-years',
+    expectedCount: 360
+  },
+  {
+    slug: 'gate-da-overlap',
+    label: 'GATE DA/AI · CSE Overlap',
+    shortLabel: 'GATE DA/AI',
+    description: 'Only GATE DA/AI questions that directly exercise the current CSE syllabus.',
+    difficultyFloor: 'gate',
+    sourceClass: 'official-exam',
+    source: 'GATE Data Science & Artificial Intelligence',
+    sourceUrl: 'https://gate2026.iitg.ac.in/QPs-answer-keys.html',
+    expectedCount: 89
+  },
+  {
+    slug: 'gate-cross-digital',
+    label: 'Cross-Branch Digital Logic',
+    shortLabel: 'GATE ECE/EE',
+    description: 'Audited ECE and EE questions limited to the GATE CSE Digital Logic syllabus.',
+    difficultyFloor: 'gate',
+    sourceClass: 'official-exam',
+    source: 'GATE ECE and EE',
+    sourceUrl: 'https://questions.examside.com/past-years/gate',
+    expectedCount: 259
+  },
+  {
+    slug: 'gate-cross-math',
+    label: 'Cross-Branch Engineering Mathematics',
+    shortLabel: 'GATE Math',
+    description: 'Official ECE, EE, ME, CE and IN questions limited to Linear Algebra and Probability.',
+    difficultyFloor: 'gate',
+    sourceClass: 'official-exam',
+    source: 'GATE ECE, EE, ME, CE and IN',
+    sourceUrl: 'https://questions.examside.com/past-years/gate',
+    expectedCount: 424
+  },
+  {
+    slug: 'isro-cs-overlap',
+    label: 'ISRO Scientist/Engineer CS',
+    shortLabel: 'ISRO CS',
+    description: 'Official ISRO CS questions filtered to the current GATE CSE syllabus.',
+    difficultyFloor: 'mixed',
+    sourceClass: 'official-exam',
+    source: 'ISRO Scientist/Engineer CS',
+    sourceUrl: 'https://www.isro.gov.in/ICRB_Recruitment9.html',
+    expectedCount: 45
+  },
+  {
+    slug: 'iiith-pgee',
+    label: 'IIIT-H PGEE · Audited Sample',
+    shortLabel: 'IIIT-H PGEE',
+    description: 'High-confidence CSE questions from the published PGEE sample, independently keyed.',
+    difficultyFloor: 'mixed',
+    sourceClass: 'official-sample',
+    source: 'IIIT Hyderabad PGEE',
+    sourceUrl: 'https://pgadmissions.iiit.ac.in/monsoon_syllabus/',
+    expectedCount: 8
+  },
+  {
+    slug: 'tifr-gs-cs',
+    label: 'TIFR GS Computer Science',
+    shortLabel: 'TIFR GS CS',
+    description: 'Official 2022–2026 CS sections with marked solutions; diagram-dependent items are excluded.',
+    difficultyFloor: 'above-gate',
+    sourceClass: 'official-exam',
+    source: 'TIFR Graduate School Computer Science',
+    sourceUrl: 'https://main.tifr.res.in/academics/past_question_papers.php',
+    expectedCount: 65
+  },
+  {
+    slug: 'cmi-cs-objective',
+    label: 'CMI MSc/PhD CS · Objective',
+    shortLabel: 'CMI CS',
+    description: 'Official Part A objective questions and solutions, excluding diagram-dependent items.',
+    difficultyFloor: 'above-gate',
+    sourceClass: 'official-exam',
+    source: 'Chennai Mathematical Institute Computer Science',
+    sourceUrl: 'https://www.cmi.ac.in/admissions/syllabus.php',
+    expectedCount: 122
+  },
+  {
+    slug: 'ugc-net-cs-overlap',
+    label: 'UGC NET CS · Filtered Overlap',
+    shortLabel: 'UGC NET CS',
+    description: 'Official keyed questions restricted to useful GATE CSE overlap; dated and flawed items are excluded.',
+    difficultyFloor: 'mixed',
+    sourceClass: 'official-exam',
+    source: 'UGC NET Computer Science',
+    sourceUrl: 'https://www.ugcnetonline.in/previous_question_papers.php',
+    expectedCount: 21
+  },
+  {
+    slug: 'go-classes-coa',
+    label: 'GO Classes COA Topic Tests',
+    shortLabel: 'GO Classes COA',
+    description: 'Learner-provided COA tests audited to meet the GATE difficulty floor.',
+    difficultyFloor: 'gate',
+    sourceClass: 'audited-gate-prep',
+    source: 'GO Classes',
+    sourceUrl: 'https://www.goclasses.in/',
+    expectedCount: 30
+  }
+];
+const PYQ_BOOK_BY_SLUG = new Map(PYQ_BOOKS.map((book) => [book.slug, book]));
 
 const SUBJECTS = {
   'General Aptitude': ['general-aptitude', 'General Aptitude'],
@@ -112,6 +249,127 @@ const EXAMSIDE_DIGITAL_LOGIC_CATEGORIES = [
     topicSlug: 'sequential-circuit'
   }
 ];
+
+const EXAMSIDE_CROSS_BRANCH_MATH_CATEGORIES = [
+  ...['gate-ece', 'gate-ee', 'gate-me', 'gate-ce', 'gate-in'].flatMap((exam) => [
+    {
+      exam,
+      path: `/past-years/gate/${exam}/engineering-mathematics/linear-algebra`,
+      topicSlug: 'linear-algebra'
+    },
+    {
+      exam,
+      path: `/past-years/gate/${exam}/engineering-mathematics/probability-and-statistics`,
+      topicSlug: 'probability-statistics'
+    }
+  ])
+];
+
+// GATE DA/AI is admitted only where its published syllabus overlaps the
+// current GATE CSE taxonomy. General Aptitude and every ML/AI/Python chapter
+// are deliberately absent, so this archive adds problem-solving depth without
+// expanding the learner's syllabus by accident.
+const EXAMSIDE_GATE_DA_CATEGORIES = [
+  ['algorithms/complexity-analysis-and-asymptotic-notations', 'algorithms', 'asymptotic-notation'],
+  ['algorithms/divide-and-conquer-method', 'algorithms', 'divide-and-conquer'],
+  ['algorithms/dynamic-programming', 'algorithms', 'dynamic-programming'],
+  ['algorithms/greedy-method', 'algorithms', 'greedy-technique'],
+  ['algorithms/searching-and-sorting', 'algorithms', 'sorting'],
+  [
+    'calculus-and-optimization/functions-of-a-single-variable-limit-continuity-differentiability-taylor-series',
+    'engineering-mathematics',
+    'calculus'
+  ],
+  [
+    'calculus-and-optimization/maxima-and-minima-optimization-involving-a-single-variable',
+    'engineering-mathematics',
+    'calculus'
+  ],
+  ['data-structures/hashing', 'data-structure', 'hashing'],
+  ['data-structures/stacks-and-queues', 'data-structure', 'stack'],
+  ['data-structures/trees', 'data-structure', 'n-ary-tree'],
+  ['database-management-system-and-warehousing/er-diagrams', 'databases', 'er-model'],
+  [
+    'database-management-system-and-warehousing/file-structures-and-indexing',
+    'databases',
+    'file-system'
+  ],
+  [
+    'database-management-system-and-warehousing/functional-dependencies-and-normalization',
+    'databases',
+    'normal-form'
+  ],
+  [
+    'database-management-system-and-warehousing/relational-algebra',
+    'databases',
+    'relational-algebra'
+  ],
+  ['database-management-system-and-warehousing/structured-query-language', 'databases', 'sql'],
+  ['discrete-mathematics/combinatorics', 'discrete-mathematics', 'combination'],
+  ['discrete-mathematics/graph-theory', 'discrete-mathematics', 'graph-theory'],
+  ['discrete-mathematics/mathematical-logic', 'discrete-mathematics', 'propositional-logic'],
+  [
+    'linear-algebra/determinant-rank-nullity-quadratic-forms',
+    'engineering-mathematics',
+    'linear-algebra'
+  ],
+  [
+    'linear-algebra/eigenvalues-eigenvectors-lu-qr-decomposition',
+    'engineering-mathematics',
+    'linear-algebra'
+  ],
+  [
+    'linear-algebra/matrices-types-operations-special-matrices-22-25-properties',
+    'engineering-mathematics',
+    'linear-algebra'
+  ],
+  [
+    'linear-algebra/systems-of-linear-equations-gaussian-elimination',
+    'engineering-mathematics',
+    'linear-algebra'
+  ],
+  [
+    'linear-algebra/vectors-vector-spaces-subspaces-linear-dependence-independence',
+    'engineering-mathematics',
+    'linear-algebra'
+  ],
+  [
+    'probability-and-statistics/conditional-joint-marginal-probability-bayes-theorem',
+    'engineering-mathematics',
+    'probability-statistics'
+  ],
+  [
+    'probability-and-statistics/counting-permutations-combinations',
+    'discrete-mathematics',
+    'combination'
+  ],
+  [
+    'probability-and-statistics/expectation-variance-central-limit-theorem',
+    'engineering-mathematics',
+    'probability-statistics'
+  ],
+  [
+    'probability-and-statistics/mean-median-mode-sd-correlation-covariance',
+    'engineering-mathematics',
+    'probability-statistics'
+  ],
+  [
+    'probability-and-statistics/probability-axioms-sample-space-events',
+    'engineering-mathematics',
+    'probability-statistics'
+  ],
+  [
+    'probability-and-statistics/random-variables-probability-distributions',
+    'engineering-mathematics',
+    'probability-statistics'
+  ]
+].map(([chapterPath, subjectSlug, topicSlug]) => ({
+  exam: 'gate-da',
+  path: `/past-years/gate/gate-da/${chapterPath}`,
+  chapterPath,
+  subjectSlug,
+  topicSlug
+}));
 
 const EXAMSIDE_CSE_REPLACEMENT_YEARS = new Set([1990, 1991, 1992, 1998, 2001]);
 const EXAMSIDE_CSE_SUBJECTS = {
@@ -223,6 +481,18 @@ function answerStatus(type, hasAnswer, unsupported) {
   return 'available';
 }
 
+// Before the PDF-key authority policy shipped, the builder checked one-mark
+// before two-marks. The 2026 archive happens to carry both tags on 91 rows, so
+// that legacy ordering emitted the wrong value for the 41 two-mark rows. Keep
+// this tiny compatibility parser only to make the corrected-ID provenance
+// reproducible; all emitted marks use the conflict-safe parser above.
+function legacyArchiveMark(tags) {
+  const normalized = (tags ?? []).map((tag) => String(tag).trim().toLowerCase());
+  if (normalized.includes('one-mark')) return 1;
+  if (normalized.includes('two-marks')) return 2;
+  return null;
+}
+
 function cleanTags(tags) {
   const ignored =
     /^(?:gate|isro|barc|ugcnet|pgee|tifr|easy$|normal$|hard$|non-gate|out-of|subjective$|descriptive$)/i;
@@ -287,6 +557,24 @@ function stableQuestionSort(a, b) {
     (b.set ?? 0) - (a.set ?? 0) ||
     naturalQuestionNumber(a.number) - naturalQuestionNumber(b.number) ||
     a.id.localeCompare(b.id)
+  );
+}
+
+function questionYears(rows) {
+  return [...new Set(rows.map((question) => question.year))]
+    .sort((a, b) => b - a)
+    .map((year) => ({
+      year,
+      count: rows.filter((question) => question.year === year).length
+    }));
+}
+
+function questionAnswerStatuses(rows) {
+  return Object.fromEntries(
+    ['available', 'ambiguous', 'marks-to-all', 'unsupported'].map((status) => [
+      status,
+      rows.filter((question) => question.answerStatus === status).length
+    ])
   );
 }
 
@@ -384,9 +672,9 @@ function examSideQuestionFromHtml(html, href) {
   return { question, detailTitle: document.title };
 }
 
-async function loadExamSideSourceRows() {
+async function loadExamSideCategorySourceRows(categories, snapshotName) {
   await mkdir(CACHE, { recursive: true });
-  const snapshotPath = path.join(CACHE, 'examside-digital-logic-1990-2026-v1.json');
+  const snapshotPath = path.join(CACHE, snapshotName);
   try {
     return JSON.parse(await readFile(snapshotPath, 'utf8'));
   } catch {
@@ -394,7 +682,7 @@ async function loadExamSideSourceRows() {
     // structured options and answer keys, so fetch them concurrently and cache
     // the resulting source snapshot for repeatable local rebuilds.
     const chapterRows = await Promise.all(
-      EXAMSIDE_DIGITAL_LOGIC_CATEGORIES.map(async (category) => {
+      categories.map(async (category) => {
         const cacheName = `examside-${category.exam}-${category.path.split('/').at(-1)}.html`;
         const html = await cachedText(`${EXAMSIDE_ROOT}${category.path}`, cacheName);
         const document = new JSDOM(html).window.document;
@@ -433,6 +721,27 @@ async function loadExamSideSourceRows() {
     await writeFile(snapshotPath, `${JSON.stringify(results)}\n`);
     return results;
   }
+}
+
+function loadExamSideSourceRows() {
+  return loadExamSideCategorySourceRows(
+    EXAMSIDE_DIGITAL_LOGIC_CATEGORIES,
+    'examside-digital-logic-1990-2026-v1.json'
+  );
+}
+
+function loadExamSideCrossBranchMathRows() {
+  return loadExamSideCategorySourceRows(
+    EXAMSIDE_CROSS_BRANCH_MATH_CATEGORIES,
+    'examside-cross-branch-math-1990-2026-v1.json'
+  );
+}
+
+function loadExamSideDaSourceRows() {
+  return loadExamSideCategorySourceRows(
+    EXAMSIDE_GATE_DA_CATEGORIES,
+    'examside-gate-da-cse-overlap-2024-2026-v1.json'
+  );
 }
 
 async function loadExamSideCseSourceRows() {
@@ -522,7 +831,8 @@ function numericExamSideKey(value) {
 }
 
 function examSideQuestionType(source) {
-  if (source.isBonus) return 'MARKS_TO_ALL';
+  if (source.isBonus || /^\s*MTA\s*$/i.test(String(source.question?.en?.answer ?? '')))
+    return 'MARKS_TO_ALL';
   const rawType = String(source.type ?? '').toLowerCase();
   const correct = source.question?.en?.correct_options ?? [];
   if (rawType === 'mcq') return correct.length > 1 ? 'MSQ' : 'MCQ';
@@ -679,6 +989,73 @@ function examSideCseClassification(source) {
   }
 }
 
+function examSideDaClassification(row) {
+  const text = examSidePlainText(row.question);
+  if (row.chapterPath === 'data-structures/stacks-and-queues') {
+    return [row.subjectSlug, /\bqueue\b|\bfifo\b/.test(text) ? 'queue' : 'stack'];
+  }
+  if (row.chapterPath === 'data-structures/trees') {
+    if (/\bavl\b/.test(text)) return [row.subjectSlug, 'avl-tree'];
+    if (/binary search tree|\bbst\b/.test(text)) return [row.subjectSlug, 'binary-search-tree'];
+    if (/\bheap\b/.test(text)) return [row.subjectSlug, 'heap-tree'];
+    if (/binary tree/.test(text)) return [row.subjectSlug, 'binary-tree'];
+  }
+  return [row.subjectSlug, row.topicSlug];
+}
+
+async function examSideDaQuestions() {
+  const sourceRows = await loadExamSideDaSourceRows();
+  const questions = [];
+  for (const row of sourceRows) {
+    const source = row.question;
+    if (source.year < 2024 || source.year > 2026 || source.isOutOfSyllabus) continue;
+    const type = examSideQuestionType(source);
+    const answer = examSideAnswer(source, type);
+    const numericKey = type === 'NAT' ? numericExamSideKey(source.question?.en?.answer) : null;
+    const hasAnswer = answer != null && (!Array.isArray(answer) || answer.length > 0);
+    const answerState = type === 'MARKS_TO_ALL'
+      ? 'marks-to-all'
+      : answerStatus(type, hasAnswer, !hasAnswer);
+    const numberMatch = String(row.detailTitle ?? '').match(/\bQuestion\s+([\d.]+)/i);
+    const setMatch = String(source.paperTitle ?? '').match(/\bSet\s*(\d+)/i);
+    const [subjectSlug, topicSlug] = examSideDaClassification(row);
+    const subject = PYQ_TAXONOMY.find((candidate) => candidate.slug === subjectSlug)?.label;
+    if (!subject) throw new Error(`Unknown GATE DA subject scope: ${subjectSlug}`);
+    questions.push({
+      id: `es:${source.exam}:${source.question_id}`,
+      bookSlug: 'gate-da-overlap',
+      year: source.year,
+      set: setMatch ? Number(setMatch[1]) : null,
+      number: numberMatch?.[1] ?? source.question_id,
+      paperLabel: source.paperTitle || `GATE DA ${source.year}`,
+      subject,
+      subjectSlug,
+      classificationHint: { subjectSlug, topicSlug },
+      subtopics: [row.chapterPath, source.chapter].filter(Boolean),
+      marks: source.marks === 1 || source.marks === 2 ? source.marks : null,
+      type,
+      answer,
+      tolerance: numericKey?.tolerance ?? null,
+      answerStatus: answerState,
+      html: examSideQuestionHtml(source),
+      sourceUrl: row.sourceUrl,
+      answerSource: { kind: 'examside-key', url: row.sourceUrl }
+    });
+  }
+  if (questions.length !== PYQ_BOOK_BY_SLUG.get('gate-da-overlap').expectedCount) {
+    throw new Error(`Expected 89 audited GATE DA/AI CSE-overlap questions, found ${questions.length}`);
+  }
+  const unkeyed = questions.filter(
+    (question) => !['available', 'marks-to-all'].includes(question.answerStatus)
+  );
+  if (unkeyed.length > 0) {
+    throw new Error(
+      `GATE DA/AI admission rejected ${unkeyed.length} question(s) without authoritative keys: ${unkeyed.map((question) => question.id).join(', ')}`
+    );
+  }
+  return questions;
+}
+
 async function examSideDigitalLogicQuestions() {
   const sourceRows = await loadExamSideSourceRows();
   const accepted = [];
@@ -695,6 +1072,7 @@ async function examSideDigitalLogicQuestions() {
     const topicSlug = EXAMSIDE_TOPIC_OVERRIDES.get(source.question_id) ?? row.topicSlug;
     accepted.push({
       id: `es:${source.exam}:${source.question_id}`,
+      bookSlug: 'gate-cross-digital',
       year: source.year,
       set: setMatch ? Number(setMatch[1]) : null,
       number: numberMatch?.[1] ?? source.question_id,
@@ -707,7 +1085,8 @@ async function examSideDigitalLogicQuestions() {
       type,
       answer,
       tolerance: numericKey?.tolerance ?? null,
-      answerStatus: source.isBonus ? 'marks-to-all' : answerStatus(type, hasAnswer, !hasAnswer),
+      answerStatus:
+        type === 'MARKS_TO_ALL' ? 'marks-to-all' : answerStatus(type, hasAnswer, !hasAnswer),
       html: examSideQuestionHtml(source),
       sourceUrl: row.sourceUrl,
       answerSource: { kind: 'examside-key', url: row.sourceUrl }
@@ -722,6 +1101,48 @@ async function examSideDigitalLogicQuestions() {
     throw new Error(
       `Expected 259 audited ECE/EE Digital Logic questions (189 ECE, 70 EE), found ${accepted.length}`
     );
+  }
+  return accepted;
+}
+
+async function examSideCrossBranchMathQuestions() {
+  const sourceRows = await loadExamSideCrossBranchMathRows();
+  const accepted = [];
+  for (const row of sourceRows) {
+    const source = row.question;
+    if (source.year < 1990 || source.year > 2026 || source.isOutOfSyllabus) continue;
+    const type = examSideQuestionType(source);
+    const answer = examSideAnswer(source, type);
+    const numericKey = type === 'NAT' ? numericExamSideKey(source.question?.en?.answer) : null;
+    const hasAnswer = answer != null && (!Array.isArray(answer) || answer.length > 0);
+    const answerState =
+      type === 'MARKS_TO_ALL' ? 'marks-to-all' : answerStatus(type, hasAnswer, !hasAnswer);
+    if (!['available', 'marks-to-all'].includes(answerState)) continue;
+    const setMatch = String(source.paperTitle ?? '').match(/\bSet\s*(\d+)/i);
+    const numberMatch = String(row.detailTitle ?? '').match(/\bQuestion\s+([\d.]+)/i);
+    accepted.push({
+      id: `es:${source.exam}:${source.question_id}`,
+      bookSlug: 'gate-cross-math',
+      year: source.year,
+      set: setMatch ? Number(setMatch[1]) : null,
+      number: numberMatch?.[1] ?? source.question_id,
+      paperLabel: source.paperTitle,
+      subject: 'Engineering Mathematics',
+      subjectSlug: 'engineering-mathematics',
+      classificationHint: {
+        subjectSlug: 'engineering-mathematics',
+        topicSlug: row.topicSlug
+      },
+      subtopics: [row.topicSlug, source.chapter].filter(Boolean),
+      marks: source.marks === 1 || source.marks === 2 ? source.marks : null,
+      type,
+      answer,
+      tolerance: numericKey?.tolerance ?? null,
+      answerStatus: answerState,
+      html: examSideQuestionHtml(source),
+      sourceUrl: row.sourceUrl,
+      answerSource: { kind: 'examside-key', url: row.sourceUrl }
+    });
   }
   return accepted;
 }
@@ -741,6 +1162,7 @@ async function examSideCseQuestions() {
     const hasAnswer = answer != null && (!Array.isArray(answer) || answer.length > 0);
     return {
       id: `es:${source.exam}:${source.question_id}`,
+      bookSlug: 'gate-cse',
       year: source.year,
       set: setMatch ? Number(setMatch[1]) : null,
       number: String(row.archiveNumber),
@@ -756,7 +1178,8 @@ async function examSideCseQuestions() {
       type,
       answer,
       tolerance: numericKey?.tolerance ?? null,
-      answerStatus: source.isBonus ? 'marks-to-all' : answerStatus(type, hasAnswer, !hasAnswer),
+      answerStatus:
+        type === 'MARKS_TO_ALL' ? 'marks-to-all' : answerStatus(type, hasAnswer, !hasAnswer),
       html: examSideQuestionHtml(source),
       sourceUrl: row.sourceUrl,
       answerSource: { kind: 'examside-key', url: row.sourceUrl }
@@ -805,6 +1228,11 @@ async function downloadImages(urls) {
         bytes = Buffer.from(await response.arrayBuffer());
         extension = imageExtension(contentType, url);
       }
+      if (extension === '.svg') {
+        bytes = Buffer.from(
+          bytes.toString('utf8').replaceAll('\r\n', '\n').replace(/[ \t]+\n/g, '\n')
+        );
+      }
       const digest = createHash('sha1').update(url).digest('hex').slice(0, 12);
       const filename = `${digest}${extension}`;
       await writeFile(path.join(IMAGE_OUTPUT, filename), bytes);
@@ -834,33 +1262,45 @@ async function main() {
     answerPayload,
     unsupportedPayload,
     supplementalDigitalLogic,
+    supplementalCrossBranchMath,
     supplementalCse,
+    supplementalDa,
     customQuestionPayloads
   ] = await Promise.all([
     cachedJson(SEARCH_URL, 'question-search-index.json'),
     cachedJson(ANSWERS_URL, 'answers-by-question-uid.json'),
     cachedJson(UNSUPPORTED_URL, 'unsupported-question-uids.json'),
     examSideDigitalLogicQuestions(),
+    examSideCrossBranchMathQuestions(),
     examSideCseQuestions(),
+    examSideDaQuestions(),
     Promise.all(
       CUSTOM_QUESTION_PATHS.map((filename) => readFile(filename, 'utf8').then(JSON.parse))
     )
   ]);
   const answers = answerPayload.records_by_question_uid ?? answerPayload;
   const unsupported = new Set(unsupportedPayload.question_uids ?? []);
+  const correctedPdfMarkIds = [];
 
   const primary = [];
   for (const source of searchIndex) {
-    const match = normalizedTitle(source.title).match(TITLE_PATTERN);
+    const title = normalizedTitle(source.title);
+    const cseMatch = title.match(GATE_CSE_TITLE_PATTERN);
+    const itMatch = title.match(GATE_IT_TITLE_PATTERN);
+    const match = cseMatch ?? itMatch;
     if (!match) continue;
     const year = Number(match.groups.year);
     if (year < 1990 || year > 2026) continue;
-    if (EXAMSIDE_CSE_REPLACEMENT_YEARS.has(year)) continue;
+    if (cseMatch && EXAMSIDE_CSE_REPLACEMENT_YEARS.has(year)) continue;
+    if (itMatch && source.subjectLabel === 'Other / Optional') continue;
+    const paperKind = itMatch ? 'IT' : 'CSE';
     primary.push({
       ...source,
+      bookSlug: itMatch ? 'gate-it' : 'gate-cse',
       parsedYear: year,
       parsedSet: match.groups.set ? Number(match.groups.set) : null,
-      parsedNumber: match.groups.question
+      parsedNumber: match.groups.question,
+      parsedPaperLabel: `GATE ${paperKind} ${year}${match.groups.set ? ` Set ${match.groups.set}` : ''}`
     });
   }
 
@@ -882,20 +1322,27 @@ async function main() {
       throw new Error(`Missing full question detail for ${source.question_uid}`);
     const answerMeta = answers[source.question_uid] ?? null;
     const [subjectSlug, subject] = slugLabel(source.subjectLabel);
-    const tags = cleanTags(detail.tags ?? source.tags ?? []);
+    const metadataTags = detail.tags ?? source.tags ?? [];
+    const tags = cleanTags(metadataTags);
     const type = String(answerMeta?.type || source.type || 'UNSUPPORTED').toUpperCase();
+    const verifiedPdfMark = verifiedPdfAnswerKeyMark(answerMeta?.source);
+    const legacyMark = legacyArchiveMark(metadataTags);
+    if (verifiedPdfMark != null && legacyMark != null && verifiedPdfMark !== legacyMark) {
+      correctedPdfMarkIds.push(source.question_uid);
+    }
     return {
       id: source.question_uid,
+      bookSlug: source.bookSlug,
       year: source.parsedYear,
       set: source.parsedSet,
       number: source.parsedNumber,
-      paperLabel: `GATE CSE ${source.parsedYear}${source.parsedSet ? ` Set ${source.parsedSet}` : ''}`,
+      paperLabel: source.parsedPaperLabel,
       subject,
       subjectSlug,
       subtopics: tags,
-      // The official PDF key is authoritative when GateQA exposes mutually
-      // contradictory one-mark/two-marks tags (notably in the 2026 papers).
-      marks: marksFromQuestionMetadata(detail.tags ?? source.tags ?? [], answerMeta?.source),
+      // The structured official PDF key wins when archive tags contradict
+      // one another (notably on the 2026 CSE papers).
+      marks: marksFromQuestionMetadata(metadataTags, answerMeta?.source),
       type,
       answer: answerMeta?.answer ?? null,
       tolerance: answerMeta?.tolerance ?? null,
@@ -909,6 +1356,7 @@ async function main() {
   questions.push(
     ...MANUAL_QUESTIONS.map((question) => ({
       ...question,
+      bookSlug: 'gate-cse',
       paperLabel: `GATE CSE ${question.year}`,
       subtopics: question.tags,
       tolerance: null,
@@ -916,10 +1364,15 @@ async function main() {
     }))
   );
   questions.push(...supplementalCse);
+  questions.push(...supplementalDa);
   questions.push(...supplementalDigitalLogic);
+  questions.push(...supplementalCrossBranchMath);
   questions.push(
     ...customQuestionPayloads.flatMap((payload) =>
-      payload.questions.map(customQuestionWithImage)
+      payload.questions.map((question) => ({
+        ...customQuestionWithImage(question),
+        bookSlug: payload.bookSlug ?? 'go-classes-coa'
+      }))
     )
   );
   for (const question of questions) {
@@ -931,10 +1384,38 @@ async function main() {
   }
   questions.sort(stableQuestionSort);
 
-  if (questions.length !== 3200)
-    throw new Error(`Expected 3,200 audited questions, found ${questions.length}`);
+  if (questions.length !== PYQ_BANK_QUESTION_COUNT)
+    throw new Error(
+      `Expected ${PYQ_BANK_QUESTION_COUNT.toLocaleString()} audited questions, found ${questions.length}`
+    );
   const ids = new Set(questions.map((question) => question.id));
   if (ids.size !== questions.length) throw new Error('Duplicate question IDs found in the bank');
+  for (const question of questions) {
+    if (!PYQ_BOOK_BY_SLUG.has(question.bookSlug)) {
+      throw new Error(`Question ${question.id} has an unknown book: ${question.bookSlug}`);
+    }
+  }
+  for (const book of PYQ_BOOKS) {
+    if (!['gate', 'above-gate', 'mixed'].includes(book.difficultyFloor)) {
+      throw new Error(`Book ${book.slug} has an invalid difficulty band`);
+    }
+    const bookQuestions = questions.filter((question) => question.bookSlug === book.slug);
+    if (bookQuestions.length !== book.expectedCount) {
+      throw new Error(
+        `Expected ${book.expectedCount} questions in ${book.slug}, found ${bookQuestions.length}`
+      );
+    }
+  }
+  const gateItUnkeyed = questions.filter(
+    (question) =>
+      question.bookSlug === 'gate-it' &&
+      !['available', 'marks-to-all'].includes(question.answerStatus)
+  );
+  if (gateItUnkeyed.length > 0) {
+    throw new Error(
+      `GATE IT admission rejected ${gateItUnkeyed.length} question(s) without authoritative keys: ${gateItUnkeyed.map((question) => question.id).join(', ')}`
+    );
+  }
 
   const remoteImages = new Set();
   const bundledImages = new Set();
@@ -953,7 +1434,10 @@ async function main() {
       cp(
         path.join(SCRIPT_DIR, 'pyq-assets', directory),
         path.join(IMAGE_OUTPUT, directory),
-        { recursive: true }
+        {
+          recursive: true,
+          filter: (source) => path.basename(source) !== 'README.md'
+        }
       )
     )
   );
@@ -990,34 +1474,74 @@ async function main() {
     )
   );
 
-  const years = [...new Set(questions.map((question) => question.year))]
-    .sort((a, b) => b - a)
-    .map((year) => ({
-      year,
-      count: questions.filter((question) => question.year === year).length
-    }));
-  const answerStatuses = Object.fromEntries(
-    ['available', 'ambiguous', 'marks-to-all', 'unsupported'].map((status) => [
-      status,
-      questions.filter((question) => question.answerStatus === status).length
-    ])
-  );
+  const years = questionYears(questions);
+  const answerStatuses = questionAnswerStatuses(questions);
   const verifiedPdfMarkRows = questions.filter(
     (question) => verifiedPdfAnswerKeyMark(question.answerSource) != null
+  );
+  const verifiedPdfMarkMismatches = verifiedPdfMarkRows.filter(
+    (question) => question.marks !== verifiedPdfAnswerKeyMark(question.answerSource)
   );
   const verifiedPdfMarkMetadata = {
     policyVersion: VERIFIED_PDF_MARK_POLICY_VERSION,
     authoritativeSourceKind: 'pdf_answer_key',
     questionCount: verifiedPdfMarkRows.length,
     oneMarkCount: verifiedPdfMarkRows.filter((question) => question.marks === 1).length,
-    twoMarkCount: verifiedPdfMarkRows.filter((question) => question.marks === 2).length
+    twoMarkCount: verifiedPdfMarkRows.filter((question) => question.marks === 2).length,
+    correctedQuestionIds: [...new Set(correctedPdfMarkIds)].sort()
   };
+  if (
+    verifiedPdfMarkMetadata.questionCount !== 130 ||
+    verifiedPdfMarkMetadata.oneMarkCount !== 60 ||
+    verifiedPdfMarkMetadata.twoMarkCount !== 70 ||
+    verifiedPdfMarkMetadata.correctedQuestionIds.length !== 41 ||
+    verifiedPdfMarkMismatches.length > 0
+  ) {
+    throw new Error(
+      `Verified PDF mark invariant failed: ${JSON.stringify({
+        ...verifiedPdfMarkMetadata,
+        mismatchIds: verifiedPdfMarkMismatches.map((question) => question.id)
+      })}`
+    );
+  }
+  const books = PYQ_BOOKS.map(({ expectedCount, ...book }) => {
+    const rows = questions.filter((question) => question.bookSlug === book.slug);
+    const bookYears = questionYears(rows);
+    const bookSubjects = PYQ_TAXONOMY.flatMap((subject) => {
+      const subjectRows = rows.filter((question) => question.subjectSlug === subject.slug);
+      if (subjectRows.length === 0) return [];
+      return [
+        {
+          slug: subject.slug,
+          label: subject.label,
+          count: subjectRows.length,
+          file: `/pyq/subjects/${subject.slug}.json`,
+          topics: subject.topics
+            .map((topic) => ({
+              ...topic,
+              count: subjectRows.filter((question) => question.topicSlug === topic.slug).length
+            }))
+            .filter((topic) => topic.count > 0)
+        }
+      ];
+    });
+    return {
+      ...book,
+      count: rows.length,
+      firstYear: Math.min(...rows.map((question) => question.year)),
+      lastYear: Math.max(...rows.map((question) => question.year)),
+      answerStatuses: questionAnswerStatuses(rows),
+      years: bookYears,
+      subjects: bookSubjects
+    };
+  });
   const manifest = {
     bankVersion: PYQ_BANK_VERSION,
     generatedAt: new Date().toISOString(),
     source:
-      'GateQA/GATE Overflow CSE archive, syllabus-filtered ExamSIDE ECE/EE Digital Logic records, and the learner-provided GO Classes COA Topic Tests',
+      'Audited GATE, ISRO, IIIT-H PGEE sample, TIFR GS, CMI and UGC NET Computer Science archives plus GO Classes COA topic tests',
     sourceUrl: SOURCE_ROOT,
+    defaultBookSlug: 'gate-cse',
     firstYear: 1990,
     lastYear: 2026,
     questionCount: questions.length,
@@ -1025,8 +1549,12 @@ async function main() {
     answerStatuses,
     verifiedPdfMarkMetadata,
     years,
-    subjects
+    subjects,
+    books
   };
+  if (manifest.imageCount !== 706) {
+    throw new Error(`Expected 706 referenced local images, found ${manifest.imageCount}`);
+  }
   await writeFile(path.join(OUTPUT, 'manifest.json'), `${JSON.stringify(manifest, null, 2)}\n`);
   await writeFile(
     path.join(OUTPUT, 'provenance.json'),
@@ -1038,7 +1566,7 @@ async function main() {
           {
             name: 'GateQA',
             url: SOURCE_ROOT,
-            role: 'Full question HTML, diagrams, metadata, and answer map'
+            role: 'GATE CSE and IT question HTML, diagrams, metadata, and answer map'
           },
           {
             name: 'GATE Overflow',
@@ -1047,13 +1575,38 @@ async function main() {
           },
           {
             name: 'Official GATE archive',
-            url: 'https://www.iitk.ac.in/gate/download.php',
-            role: 'Paper-count audit and original wording verification'
+            url: 'https://gate2026.iitg.ac.in/QPs-answer-keys.html',
+            role: 'Official paper-pattern reference for admitted GATE collections; row-level answer and mark authority remains explicit in answerSource'
           },
           {
             name: 'ExamSIDE',
             url: EXAMSIDE_ROOT,
-            role: 'ECE and EE Digital Logic question text, diagrams, metadata, and answer keys'
+            role: 'GATE DA/AI overlap, cross-branch Engineering Mathematics, and ECE/EE Digital Logic question text, diagrams, metadata, and answer keys'
+          },
+          {
+            name: 'ISRO',
+            url: PYQ_BOOK_BY_SLUG.get('isro-cs-overlap').sourceUrl,
+            role: 'Official Scientist/Engineer CS paper and answer key'
+          },
+          {
+            name: 'IIIT Hyderabad',
+            url: PYQ_BOOK_BY_SLUG.get('iiith-pgee').sourceUrl,
+            role: 'Current PGEE syllabus and provenance for the independently keyed official sample'
+          },
+          {
+            name: 'TIFR',
+            url: PYQ_BOOK_BY_SLUG.get('tifr-gs-cs').sourceUrl,
+            role: 'Official Graduate School Computer Science papers with marked solutions'
+          },
+          {
+            name: 'Chennai Mathematical Institute',
+            url: PYQ_BOOK_BY_SLUG.get('cmi-cs-objective').sourceUrl,
+            role: 'Official MSc/PhD Computer Science papers and solutions'
+          },
+          {
+            name: 'UGC NET',
+            url: PYQ_BOOK_BY_SLUG.get('ugc-net-cs-overlap').sourceUrl,
+            role: 'Official Computer Science paper and answer key, restricted to audited syllabus overlap'
           },
           {
             name: 'GO Classes',
@@ -1063,7 +1616,15 @@ async function main() {
         ],
         notes: [
           'Question content is bundled for the private, invite-only HETU practice experience.',
+          'Every supplemental book carries an explicit GATE-level, mixed-level, or above-GATE difficulty band.',
+          'GATE IT excludes Other / Optional material outside the current CSE syllabus.',
+          'GATE DA/AI includes only Algorithms, Data Structures, DBMS, Discrete Mathematics, Linear Algebra, Calculus, and Probability chapters that overlap GATE CSE.',
           'ECE and EE supplements are restricted to the project topics: Number System, Boolean Algebra, Combinational Circuit, and Sequential Circuit.',
+          'Cross-branch Engineering Mathematics is restricted to Linear Algebra and Probability & Statistics from ECE, EE, ME, CE, and IN papers.',
+          'IIIT-H PGEE sample questions are explicitly identified as independently audited because no official answer key is published with the sample.',
+          'TIFR and CMI are stretch collections; UGC NET and ISRO are mixed-level supplements. GATE CSE remains the default book.',
+          'A book source class describes the source paper or collection, not row-level verification of every stored answer or mark; answerSource carries that provenance.',
+          'Diagram-dependent, incomplete, obsolete, off-syllabus, and demonstrably flawed supplemental questions are excluded.',
           'Converter, semiconductor-memory, logic-family, microprocessor, communication-code, and architecture questions are excluded.',
           'For rows backed by a structured PDF answer key, that key\'s 1/2-mark value is authoritative over contradictory archive tags.',
           'AMBIGUOUS, MARKS_TO_ALL, and UNSUPPORTED records are never assigned an invented answer.'
@@ -1076,6 +1637,9 @@ async function main() {
 
   console.log(
     `Built ${questions.length.toLocaleString()} questions across ${subjects.length} subjects with ${imageMap.size.toLocaleString()} local images.`
+  );
+  console.log(
+    `Books: ${books.map((book) => `${book.label} ${book.count.toLocaleString()}`).join(', ')}`
   );
   console.log(`Answer statuses: ${JSON.stringify(answerStatuses)}`);
 }

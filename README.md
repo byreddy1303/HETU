@@ -75,6 +75,35 @@ The tool compresses your mistake surface. It does not replace your reasoning.
 - Weekly, you write ONE upstream weakness to fix that week; the dashboard turns your own tags into small, actionable learning notes.
 - No streaks, gamified reward loops, marketing alerts, or third-party analytics. Buddy alerts and Telegram delivery are explicit opt-ins.
 
+## Bundled question bank
+
+Bank version `gate-and-cs-exams-1990-2026-v11-verified-pdf-marks` contains 4,334 unique questions in 11 explicit books. GATE CSE Core remains the default 2,911-question book; the other 1,423 questions are opt-in depth or overlap collections:
+
+| Book | Questions | Difficulty band |
+| --- | ---: | --- |
+| GATE CSE Core | 2,911 | GATE |
+| GATE IT Archive | 360 | GATE |
+| GATE DA/AI · CSE Overlap | 89 | GATE |
+| Cross-Branch Digital Logic | 259 | GATE |
+| Cross-Branch Engineering Mathematics | 424 | GATE |
+| ISRO Scientist/Engineer CS | 45 | Mixed |
+| IIIT-H PGEE · Audited Sample | 8 | Mixed |
+| TIFR GS Computer Science | 65 | Above GATE |
+| CMI MSc/PhD CS · Objective | 122 | Above GATE |
+| UGC NET CS · Filtered Overlap | 21 | Mixed |
+| GO Classes COA Topic Tests | 30 | GATE |
+
+A book's `sourceClass` describes its source paper or collection; it does not certify every stored answer or mark. Each question's `answerSource` records row-level provenance. The audit currently finds 1,303 standard MCQ/MSQ/NAT rows plus one `MARKS_TO_ALL` row that are GATE-rule-evaluable from stored metadata. Of those, only 130 rows have official PDF-answer-key-verified marks (60 one-mark and 70 two-mark); tag-derived marks remain useful for practice scoring but are not labelled officially verified.
+
+The bank tooling is intentionally explicit:
+
+```bash
+npm run pyq:import:supplemental  # rebuild audited supplemental source JSON (requires pdftotext)
+npm run pyq:build                # rebuild the immutable subject shards and manifest
+npm run pyq:classify             # reapply the locked taxonomy classifier
+npm run pyq:audit                # verify counts, images, provenance, scoring metadata, and official scope
+```
+
 ## Stack
 
 React 18 + Vite + TypeScript · Tailwind · Zustand · Dexie · React Query · Supabase (Postgres 15 + Auth + Edge Functions) · Web Push/VAPID · Firebase Cloud Messaging for native Android · Telegram Bot API · Resend.

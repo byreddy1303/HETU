@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter, Route, Routes, useParams } from 'react-router-dom';
 import { db } from '@/lib/db';
-import type { PyqManifest, PyqQuestion } from '@/lib/pyq';
+import { normalizePyqManifest, type PyqManifest, type PyqQuestion } from '@/lib/pyq';
 import { writeLocal, writeLocalBatch } from '@/lib/sync';
 import Pyq from '@/pages/Pyq';
 
@@ -72,7 +72,7 @@ const questions: PyqQuestion[] = [
   }
 ];
 
-const manifest: PyqManifest = {
+const manifest: PyqManifest = normalizePyqManifest({
   bankVersion: 'exam-mode-test-bank',
   generatedAt: '2026-08-24T00:00:00.000Z',
   source: 'test',
@@ -98,7 +98,7 @@ const manifest: PyqManifest = {
       ]
     }
   ]
-};
+});
 
 vi.mock('@/hooks/useAuth', () => ({
   useAuth: () => ({

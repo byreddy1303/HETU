@@ -3,9 +3,10 @@ import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import { db } from '@/lib/db';
-import type { PyqManifest, PyqQuestion } from '@/lib/pyq';
+import { normalizePyqManifest, type PyqManifest, type PyqQuestion } from '@/lib/pyq';
 import { createPyqSessionRow } from '@/lib/pyq-session';
 import { writeLocal } from '@/lib/sync';
+import { secondsToClock } from '@/lib/utils';
 import Pyq from '@/pages/Pyq';
 
 const USER = '00000000-0000-4000-8000-000000000001';
@@ -31,33 +32,42 @@ const question: PyqQuestion = {
   answerSource: null
 };
 
-const manifest: PyqManifest = {
+const secondQuestion: PyqQuestion = {
+  ...question,
+  id: 'mode-pause-q2',
+  number: '2',
+  answer: 'C',
+  html: '<p>Which option completes the second question?</p>',
+  sourceUrl: 'https://gateoverflow.in/mode-pause/2'
+};
+
+const manifest: PyqManifest = normalizePyqManifest({
   bankVersion: 'mode-pause-test-bank',
   generatedAt: '2026-08-24T00:00:00.000Z',
   source: 'test',
   sourceUrl: 'https://gateoverflow.in',
   firstYear: 2026,
   lastYear: 2026,
-  questionCount: 1,
+  questionCount: 2,
   imageCount: 0,
-  answerStatuses: { available: 1, ambiguous: 0, 'marks-to-all': 0, unsupported: 0 },
-  years: [{ year: 2026, count: 1 }],
+  answerStatuses: { available: 2, ambiguous: 0, 'marks-to-all': 0, unsupported: 0 },
+  years: [{ year: 2026, count: 2 }],
   subjects: [
     {
       slug: 'discrete-mathematics',
       label: 'Discrete Mathematics',
-      count: 1,
+      count: 2,
       file: '/pyq/discrete-mathematics.json',
       topics: [
         {
           slug: 'propositional-logic',
           label: 'Propositional Logic',
-          count: 1
+          count: 2
         }
       ]
     }
   ]
-};
+});
 
 vi.mock('@/hooks/useAuth', () => ({
   useAuth: () => ({
@@ -88,7 +98,7 @@ describe('PYQ mode selection and pause controls', () => {
         return Response.json({
           bankVersion: manifest.bankVersion,
           subject: question.subject,
-          questions: [question]
+          questions: [question, secondQuestion]
         });
       }
       return new Response(null, { status: 404 });
@@ -182,6 +192,79 @@ describe('PYQ mode selection and pause controls', () => {
     await waitFor(async () => {
       expect(await db.pyq_sessions.get(startedSession.id)).toMatchObject({ status: 'active' });
     });
+  });
+
+  it('resumes the draft on a revisited skipped question even after the final question was answered', async () => {
+    const user = userEvent.setup();
+    render(
+      <MemoryRouter>
+        <Pyq />
+      </MemoryRouter>
+    );
+
+    await user.click(await screen.findByRole('button', { name: 'Start practice set' }));
+    expect(await screen.findByText('Which proposition is a tautology?')).toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: /^Left blank/ }));
+    await user.click(screen.getByRole('button', { name: 'Commit & reveal key' }));
+    await user.click(await screen.findByRole('button', { name: 'Next question' }));
+
+    expect(
+      await screen.findByText('Which option completes the second question?')
+    ).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'C' }));
+    await user.click(screen.getByRole('button', { name: /^Answered/ }));
+    await user.click(screen.getByRole('button', { name: 'Commit & reveal key' }));
+
+    const [startedSession] = await db.pyq_sessions.toArray();
+    await waitFor(async () => {
+      expect(await db.pyq_sessions.get(startedSession.id)).toMatchObject({
+        status: 'active',
+        current_index: 2,
+        completed_question_uids: [question.id, secondQuestion.id]
+      });
+    });
+
+    await user.click(screen.getByRole('button', { name: 'Previous question' }));
+    expect(await screen.findByText(/Previously skipped/)).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'B' }));
+    await user.click(screen.getByRole('button', { name: 'Guessed 50/50: uncertain' }));
+    await user.click(screen.getByRole('button', { name: 'Pause practice' }));
+
+    let pausedElapsed = '';
+    await waitFor(async () => {
+      const paused = await db.pyq_sessions.get(startedSession.id);
+      expect(paused).toMatchObject({
+        status: 'paused',
+        current_index: 2,
+        current_question_uid: null,
+        config: {
+          practiceDraft: {
+            question_uid: question.id,
+            selected_answer: 'B',
+            mark_decision: 'FIFTY_FIFTY'
+          }
+        }
+      });
+      pausedElapsed = secondsToClock(
+        paused!.elapsed_sec + Math.ceil((paused!.config.practiceDraft?.elapsed_ms ?? 0) / 1000)
+      );
+    });
+
+    expect(await screen.findByText('Paused sessions')).toBeInTheDocument();
+    expect(screen.getByText(new RegExp(`${pausedElapsed} active work saved`))).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Resume practice' }));
+
+    expect(await screen.findByText('Which proposition is a tautology?')).toBeInTheDocument();
+    expect(screen.queryByText('Practice set complete')).not.toBeInTheDocument();
+    expect(screen.getByText(/Previously skipped/)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'B' })).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByRole('button', { name: 'B' })).toBeEnabled();
+    expect(screen.getByRole('button', { name: 'Guessed 50/50: uncertain' })).toHaveAttribute(
+      'aria-pressed',
+      'true'
+    );
+    expect(screen.getByRole('button', { name: 'Commit & reveal key' })).toBeEnabled();
   });
 
   it('shows persisted active time as soon as a paused Practice draft is resumed', async () => {

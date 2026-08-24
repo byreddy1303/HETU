@@ -70,9 +70,9 @@ const BUDDY_ITEM: Item = {
 
 const ANALYSIS: Item[] = [
   {
-    to: '/pyq',
-    label: 'PYQ practice',
-    icon: LibraryBig,
+    to: '/capture',
+    label: 'Quick capture',
+    icon: Camera,
     active: 'bg-ink-rose/10 text-ink-rose'
   },
   { to: '/mocks', label: 'Mock tests', icon: FileCheck2, active: 'bg-ink-teal/10 text-ink-teal' },
@@ -187,9 +187,9 @@ export default function Nav() {
     { to: '/', label: 'Dashboard', icon: Gauge, active: 'bg-accent-faint text-accent' },
     { to: '/today', label: 'Do now', icon: ClipboardList, active: 'bg-accent-faint text-accent' },
     {
-      to: '/capture',
-      label: 'Quick capture',
-      icon: Camera,
+      to: '/pyq',
+      label: 'PYQ practice',
+      icon: LibraryBig,
       active: 'bg-accent-faint text-accent'
     },
     LOG_ITEM,

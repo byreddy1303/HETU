@@ -4,10 +4,13 @@ import { describe, expect, it, vi } from 'vitest';
 import {
   evaluatePyqAnswer,
   formatPyqAnswer,
+  inferPyqBookSlug,
   inferPyqDirectOutcome,
+  matchesPyqBookScope,
   matchesPyqTopicScope,
   normalizePyqQuestionHtml,
   normalizePyqManifest,
+  pyqBookSlugForQuestion,
   pyqPlainText,
   pyqAnswerValueForLog,
   resolvePyqJournalImageUrl,
@@ -148,6 +151,20 @@ describe('PYQ practice scope', () => {
   it('treats a legacy set without a topic as a complete subject', () => {
     expect(matchesPyqTopicScope(algorithm, { subjectSlug: 'algorithms' })).toBe(true);
   });
+
+  it('filters explicit catalog identities and infers legacy book identities', () => {
+    const tifr = question({ paperLabel: 'TIFR GS CS 2025' });
+    const explicitlyCataloged = question({
+      bookSlug: 'gate-cross-math',
+      paperLabel: 'GATE ECE 2025'
+    });
+
+    expect(inferPyqBookSlug(tifr.paperLabel)).toBe('tifr-gs-cs');
+    expect(pyqBookSlugForQuestion(explicitlyCataloged)).toBe('gate-cross-math');
+    expect(matchesPyqBookScope(tifr, { bookSlug: 'tifr-gs-cs' })).toBe(true);
+    expect(matchesPyqBookScope(tifr, { bookSlug: 'gate-cse' })).toBe(false);
+    expect(matchesPyqBookScope(tifr, {})).toBe(true);
+  });
 });
 
 describe('PYQ manifest compatibility', () => {
@@ -173,7 +190,16 @@ describe('PYQ manifest compatibility', () => {
       ]
     };
 
-    expect(normalizePyqManifest(legacyManifest).subjects[0].topics).toEqual([]);
+    const normalized = normalizePyqManifest(legacyManifest);
+    expect(normalized.subjects[0].topics).toEqual([]);
+    expect(normalized.defaultBookSlug).toBe('gate-cse');
+    expect(normalized.books).toEqual([
+      expect.objectContaining({
+        slug: 'gate-cse',
+        count: legacyManifest.questionCount,
+        subjects: normalized.subjects
+      })
+    ]);
   });
 });
 
@@ -201,7 +227,7 @@ describe('PYQ source HTML normalization', () => {
 });
 
 describe('bundled PYQ bank integrity', () => {
-  it('contains all 3,200 audited questions and no broken local image references', () => {
+  it('contains all 4,334 audited questions and no broken local image references', () => {
     const publicRoot = path.resolve(process.cwd(), 'public');
     const manifest = JSON.parse(
       readFileSync(path.join(publicRoot, 'pyq', 'manifest.json'), 'utf8')
@@ -213,11 +239,30 @@ describe('bundled PYQ bank integrity', () => {
     let topicCount = 0;
     const repairedQuestions: PyqQuestion[] = [];
 
-    expect(manifest.questionCount).toBe(3200);
+    expect(manifest.questionCount).toBe(4334);
     expect(manifest.firstYear).toBe(1990);
     expect(manifest.lastYear).toBe(2026);
     expect(manifest.years).toHaveLength(37);
     expect(manifest.subjects).toHaveLength(14);
+    expect(manifest.defaultBookSlug).toBe('gate-cse');
+    expect(manifest.books).toHaveLength(11);
+    expect(new Set(manifest.books.map((book) => book.difficultyFloor))).toEqual(
+      new Set(['gate', 'mixed', 'above-gate'])
+    );
+    expect(Object.fromEntries(manifest.books.map((book) => [book.slug, book.count]))).toEqual({
+      'gate-cse': 2911,
+      'gate-it': 360,
+      'gate-da-overlap': 89,
+      'gate-cross-digital': 259,
+      'gate-cross-math': 424,
+      'isro-cs-overlap': 45,
+      'iiith-pgee': 8,
+      'tifr-gs-cs': 65,
+      'cmi-cs-objective': 122,
+      'ugc-net-cs-overlap': 21,
+      'go-classes-coa': 30
+    });
+    const bookSlugs = new Set(manifest.books.map((book) => book.slug));
 
     for (const subject of manifest.subjects) {
       const payload = JSON.parse(readFileSync(path.join(publicRoot, subject.file), 'utf8')) as {
@@ -234,6 +279,7 @@ describe('bundled PYQ bank integrity', () => {
         questionsById.set(row.id, row);
         expect(row.html.trim().length, `empty question ${row.id}`).toBeGreaterThan(0);
         expect(row.subjectSlug).toBe(subject.slug);
+        expect(bookSlugs.has(row.bookSlug ?? ''), `unknown book ${row.bookSlug}`).toBe(true);
         expect(row.subject).toBe(subject.label);
         expect(expectedTopicCounts.has(row.topicSlug), `unknown topic ${row.topicSlug}`).toBe(true);
         expect(row.topic.trim().length, `empty topic ${row.id}`).toBeGreaterThan(0);
@@ -256,14 +302,14 @@ describe('bundled PYQ bank integrity', () => {
 
     expect(questionCount).toBe(manifest.questionCount);
     expect(topicCount).toBe(95);
-    expect(repairedQuestions).toHaveLength(518);
+    expect(repairedQuestions).toHaveLength(792);
     expect(new Set(repairedQuestions.map((row) => row.subjectSlug)).size).toBe(13);
-    expect(new Set(repairedQuestions.map((row) => row.topicSlug)).size).toBe(83);
+    expect(new Set(repairedQuestions.map((row) => row.topicSlug)).size).toBe(85);
     expect(statuses).toEqual(manifest.answerStatuses);
     expect(statuses).toEqual({
-      available: 3106,
+      available: 4239,
       ambiguous: 3,
-      'marks-to-all': 1,
+      'marks-to-all': 2,
       unsupported: 90
     });
     const taxonomyAudit = JSON.parse(
@@ -273,8 +319,8 @@ describe('bundled PYQ bank integrity', () => {
       classificationBasis: Record<string, number>;
     };
     expect(taxonomyAudit).toMatchObject({
-      questionCount: 3200,
-      uniqueQuestionCount: 3200,
+      questionCount: 4334,
+      uniqueQuestionCount: 4334,
       unclassifiedCount: 0,
       subjectCount: 14,
       topicCount: 95,
@@ -282,7 +328,31 @@ describe('bundled PYQ bank integrity', () => {
     });
     expect(taxonomyAudit.classificationBasis['manual-content-audit']).toBe(160);
 
+    for (const book of manifest.books) {
+      const rows = [...questionsById.values()].filter((row) => row.bookSlug === book.slug);
+      expect(rows).toHaveLength(book.count);
+      expect(book.subjects.reduce((total, subject) => total + subject.count, 0)).toBe(book.count);
+    }
+    const newlyImported = [...questionsById.values()].filter((row) =>
+      ['gate-it', 'gate-da-overlap'].includes(row.bookSlug ?? '')
+    );
+    expect(newlyImported).toHaveLength(449);
+    expect(
+      newlyImported.every((row) => ['available', 'marks-to-all'].includes(row.answerStatus))
+    ).toBe(true);
+
     const allQuestions = [...questionsById.values()];
+    const variableChoiceQuestions = allQuestions.filter((row) => row.choices !== undefined);
+    expect(variableChoiceQuestions).toHaveLength(261);
+    expect(variableChoiceQuestions.filter((row) => row.choices?.length === 5)).toHaveLength(73);
+    expect(
+      variableChoiceQuestions.every((row) => {
+        if (row.answerStatus !== 'available' || row.type === 'NAT') return true;
+        const answers = Array.isArray(row.answer) ? row.answer : [row.answer];
+        return answers.every((answer) => row.choices?.includes(String(answer)));
+      })
+    ).toBe(true);
+
     const goClassesCoaTest = allQuestions.filter((row) =>
       row.id.startsWith('goclasses:coa-topic-test:')
     );
@@ -371,9 +441,7 @@ describe('bundled PYQ bank integrity', () => {
       2001: 54
     });
 
-    const supplementalDigital = allQuestions.filter(
-      (row) => row.id.startsWith('es:gate-ece:') || row.id.startsWith('es:gate-ee:')
-    );
+    const supplementalDigital = allQuestions.filter((row) => row.bookSlug === 'gate-cross-digital');
     expect(supplementalDigital).toHaveLength(259);
     expect(supplementalDigital.filter((row) => row.id.startsWith('es:gate-ece:'))).toHaveLength(
       189
@@ -383,6 +451,15 @@ describe('bundled PYQ bank integrity', () => {
       new Set(['number-system', 'boolean-algebra', 'combinational-circuit', 'sequential-circuit'])
     );
     expect(supplementalDigital.every((row) => row.subjectSlug === 'digital-logic')).toBe(true);
+
+    const supplementalMath = allQuestions.filter((row) => row.bookSlug === 'gate-cross-math');
+    expect(supplementalMath).toHaveLength(424);
+    expect(supplementalMath.every((row) => row.subjectSlug === 'engineering-mathematics')).toBe(
+      true
+    );
+    expect(new Set(supplementalMath.map((row) => row.topicSlug))).toEqual(
+      new Set(['linear-algebra', 'probability-statistics'])
+    );
     for (const excludedId of [
       'es:gate-ece:mh0zaha8',
       'es:gate-ece:lxkz4pq9',

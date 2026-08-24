@@ -906,12 +906,9 @@ function PracticeSetup({
                 Reopen the full score, timing chart, and every response.
               </p>
             </div>
-            <span className="u-num text-[11px] text-text-faint">
-              {completedSessions.length} recent
-            </span>
           </div>
-          <div className="grid gap-2 sm:grid-cols-2">
-            {completedSessions.map((session) => {
+          <div className="grid gap-2">
+            {completedSessions.slice(0, 1).map((session) => {
               const sessionAttempts = attempts.filter(
                 (attempt) => attempt.pyq_session_id === session.id
               );

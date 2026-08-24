@@ -33,6 +33,7 @@ import type {
 import type { SourceDraft } from '@/components/tags/sourceDraft';
 import type { TagDraft } from '@/components/tags/TagFlow';
 import PageHeader from '@/components/layout/PageHeader';
+import ScientificCalculator, { CalculatorTrigger } from '@/components/shared/ScientificCalculator';
 import PyqExamWorkspace from '@/components/pyq/PyqExamWorkspace';
 import PyqQuestionContent from '@/components/pyq/PyqQuestionContent';
 import TagFlow from '@/components/tags/TagFlow';
@@ -1226,6 +1227,7 @@ export default function Pyq() {
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [loadedSession, setLoadedSession] = useState<PyqSessionRow | null>(null);
   const [examSubmitOpen, setExamSubmitOpen] = useState(false);
+  const [calcOpen, setCalcOpen] = useState(false);
   const questionCaptureRef = useRef<HTMLDivElement>(null);
   const submittingRef = useRef(false);
   const pausingSessionRef = useRef(false);
@@ -2713,6 +2715,10 @@ export default function Pyq() {
             <Clock3 size={13} />
             {secondsToClock(shownSeconds)}
           </span>
+          <CalculatorTrigger
+            onClick={() => setCalcOpen((v) => !v)}
+            active={calcOpen}
+          />
         </div>
       </div>
 
@@ -2826,6 +2832,8 @@ export default function Pyq() {
           </div>
         </CardBody>
       </Card>
+
+      <ScientificCalculator open={calcOpen} onClose={() => setCalcOpen(false)} />
     </div>
   );
 }

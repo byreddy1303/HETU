@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import {
   ArrowLeft,
   ArrowRight,
@@ -20,6 +21,7 @@ import {
   type PyqExamQuestionStatus
 } from '@/lib/pyq-exam';
 import PyqQuestionContent from '@/components/pyq/PyqQuestionContent';
+import ScientificCalculator, { CalculatorTrigger } from '@/components/shared/ScientificCalculator';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { Card, CardBody, CardHeader } from '@/components/ui/Card';
@@ -397,8 +399,10 @@ export default function PyqExamWorkspace({
   const urgent = remainingSec <= 5 * 60;
   const hasResponse = choices.length > 0 || numeric.trim().length > 0;
   const isLastQuestion = index >= questions.length - 1;
+  const [calcOpen, setCalcOpen] = useState(false);
 
   return (
+    <>
     <section
       aria-label="Timed PYQ exam workspace"
       className="relative left-1/2 flex w-full -translate-x-1/2 flex-col gap-3 md:w-[min(1180px,calc(100vw-268px))]"
@@ -456,6 +460,10 @@ export default function PyqExamWorkspace({
             <Clock3 size={15} aria-hidden="true" />
             {secondsToClock(remainingSec)}
           </div>
+          <CalculatorTrigger
+            onClick={() => setCalcOpen((v) => !v)}
+            active={calcOpen}
+          />
         </div>
       </header>
 
@@ -617,5 +625,7 @@ export default function PyqExamWorkspace({
         </div>
       )}
     </section>
-  );
+
+    <ScientificCalculator open={calcOpen} onClose={() => setCalcOpen(false)} />
+  </>);
 }

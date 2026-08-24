@@ -11,18 +11,13 @@ export type ShareStatus = 'sent' | 'solved' | 'discussed';
 export type InterruptionKind = 'tab_switch' | 'idle' | 'exit';
 export type SyncStatus = 'synced' | 'pending' | 'error';
 export type PyqSessionStatus = 'active' | 'completed' | 'abandoned' | 'paused';
+export type PyqSessionMode = 'practice' | 'exam';
+export type PyqExamSubmissionReason = 'manual' | 'time-expired';
 export type SessionKind = 'focused' | 'log' | 'pyq';
 export type PyqAttemptAnswerStatus = 'available' | 'ambiguous' | 'marks-to-all' | 'unsupported';
 export type PyqAttemptScoringStatus = 'scored' | 'bonus' | 'unscorable';
 export type PyqHistoryFilter =
-  | 'all'
-  | 'unseen'
-  | 'incorrect'
-  | 'guessed'
-  | 'slow'
-  | 'skipped'
-  | 'unanalyzed'
-  | 'repeated';
+  'all' | 'unseen' | 'incorrect' | 'guessed' | 'slow' | 'skipped' | 'unanalyzed' | 'repeated';
 
 export interface UserRow {
   id: string;
@@ -208,6 +203,18 @@ export interface InterruptionLogRow {
 
 export type PyqSelectedAnswer = string | string[] | number | null;
 
+/** Mutable response ledger kept on a timed session until final submission. */
+export interface PyqExamState {
+  duration_sec: number;
+  deadline_at: string | null;
+  paused_remaining_sec: number | null;
+  responses: Record<string, PyqSelectedAnswer>;
+  visited_question_uids: string[];
+  marked_for_review_question_uids: string[];
+  time_by_question_ms: Record<string, number>;
+  submission_reason: PyqExamSubmissionReason | null;
+}
+
 /** Immutable question-bank facts captured with a submitted attempt. */
 export interface PyqQuestionSnapshot {
   question_uid: string;
@@ -237,9 +244,13 @@ export interface PyqSessionConfig {
   toYear: number;
   type: 'all' | 'MCQ' | 'MSQ' | 'NAT';
   order: 'unseen' | 'random' | 'newest' | 'oldest';
-  count: '5' | '10' | '25' | '50' | 'all';
+  count: '5' | '10' | '15' | '25' | '50' | 'all';
   /** Missing on practice sets saved before history filters shipped. */
   history?: PyqHistoryFilter;
+  /** Missing on legacy sets, which always use the original guided-practice flow. */
+  mode?: PyqSessionMode;
+  /** Present only for exam mode; lives in JSONB so draft answers remain editable. */
+  examState?: PyqExamState;
 }
 
 export interface MockSubjectScore {

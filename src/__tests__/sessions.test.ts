@@ -158,4 +158,62 @@ describe('session history', () => {
     });
     expect((await db.questions.get(journalRow.id))?.session_id).toBe(pyqSession.id);
   });
+
+  it('keeps paused PYQ exams out of finished history even when draft-era receipts exist', async () => {
+    const basePyq: Omit<PyqSessionRow, 'id' | 'status'> & { sync_status: 'synced' } = {
+      user_id: USER,
+      bank_version: 'test',
+      config: {
+        subjectSlug: 'algorithms',
+        topicSlug: 'all',
+        fromYear: 2020,
+        toYear: 2026,
+        type: 'all',
+        order: 'unseen',
+        count: '5'
+      },
+      question_uids: ['gate-q1'],
+      completed_question_uids: ['gate-q1'],
+      current_index: 1,
+      completed_count: 1,
+      elapsed_sec: 75,
+      current_question_uid: null,
+      current_question_started_at: null,
+      started_at: '2026-07-24T09:00:00.000Z',
+      updated_at: '2026-07-24T09:02:00.000Z',
+      completed_at: null,
+      sync_status: 'synced'
+    };
+    const paused: PyqSessionRow & { sync_status: 'synced' } = {
+      ...basePyq,
+      id: 'paused-pyq',
+      status: 'paused'
+    };
+    const completed: PyqSessionRow & { sync_status: 'synced' } = {
+      ...basePyq,
+      id: 'completed-pyq',
+      status: 'completed',
+      completed_at: '2026-07-24T09:02:00.000Z'
+    };
+    const receipt = (id: string, pyqSessionId: string) =>
+      ({
+        id,
+        user_id: USER,
+        pyq_session_id: pyqSessionId,
+        question_uid: 'gate-q1',
+        subject: 'Algorithms',
+        attempted_at: '2026-07-24T09:01:00.000Z',
+        sync_status: 'synced'
+      }) as PyqAttemptRow & { sync_status: 'synced' };
+
+    await db.pyq_sessions.bulkPut([paused, completed]);
+    await db.pyq_attempts.bulkPut([
+      receipt('paused-receipt', paused.id),
+      receipt('completed-receipt', completed.id)
+    ]);
+
+    expect((await finishedSessionsWithQuestions(USER)).map((row) => row.id)).toEqual([
+      completed.id
+    ]);
+  });
 });

@@ -23,6 +23,7 @@ import { Empty } from '@/components/ui/Empty';
 import { Dialog } from '@/components/ui/Dialog';
 import QuestionEditor, { DeleteBar } from '@/components/shared/QuestionEditor';
 import SessionEditor from '@/components/shared/SessionEditor';
+import PyqSessionSummary from '@/components/pyq/PyqSessionSummary';
 import { applyDraftToRow, draftFromRow, type EditorDraft } from '@/components/shared/questionDraft';
 
 const TONE_BG: Record<'ok' | 'slow' | 'guess' | 'wrong', string> = {
@@ -52,6 +53,7 @@ export default function SessionReview() {
     () => db.pyq_attempts.where('pyq_session_id').equals(id).sortBy('attempted_at'),
     [id]
   );
+  const pyqSession = useLiveQuery(async () => (await db.pyq_sessions.get(id)) ?? null, [id]);
 
   const [draft, setDraft] = useState<string>();
   const [nudged, setNudged] = useState(false);
@@ -119,7 +121,12 @@ export default function SessionReview() {
     };
   }, [questions]);
 
-  if (session === undefined || questions === undefined || pyqAttempts === undefined)
+  if (
+    session === undefined ||
+    questions === undefined ||
+    pyqAttempts === undefined ||
+    pyqSession === undefined
+  )
     return <LoadingScreen />;
   if (session === null)
     return (
@@ -189,69 +196,99 @@ export default function SessionReview() {
         </div>
       </div>
 
-      <Card>
-        <CardHeader
-          title="Outcomes"
-          aside={
-            session.interruptions_count > 0 ? (
-              <span className="u-num text-[12px] text-text-faint">
-                {session.interruptions_count} interruption
-                {session.interruptions_count === 1 ? '' : 's'}
-              </span>
-            ) : undefined
-          }
-        />
-        <CardBody className="flex flex-col gap-4">
-          {session.kind === 'pyq' && questions.length < pyqAttempts.length && (
-            <p className="text-[12px] text-text-faint">
-              Outcome analysis covers {questions.length} of {pyqAttempts.length} submitted PYQs. The
-              remaining attempt receipts are still preserved in PYQ practice.
+      {session.kind === 'pyq' ? (
+        pyqSession ? (
+          <PyqSessionSummary session={pyqSession} attempts={pyqAttempts} />
+        ) : (
+          <Card>
+            <CardHeader title="PYQ report unavailable" />
+            <CardBody>
+              <p className="text-[12px] leading-relaxed text-text-muted">
+                This legacy session is missing its PYQ session ledger. Its Journal analysis remains
+                available below, but exact response, score, and answer-key facts cannot be rebuilt.
+              </p>
+            </CardBody>
+          </Card>
+        )
+      ) : null}
+
+      {session.kind === 'pyq' && questions.length === 0 && pyqAttempts.length > 0 ? (
+        <Card>
+          <CardHeader title="Journal analysis" />
+          <CardBody>
+            <p className="text-[12px] leading-relaxed text-text-faint">
+              Outcome analysis covers 0 of {pyqAttempts.length} submitted PYQs. The remaining
+              attempt receipts are still preserved in PYQ practice.
             </p>
-          )}
-          {questions.length > 0 && (
-            <div className="flex h-2.5 overflow-hidden rounded-full bg-bg-overlay">
-              {OUTCOMES.filter((o) => stats.byOutcome.get(o.code)).map((o) => (
-                <motion.div
-                  key={o.code}
-                  className={TONE_BG[o.tone]}
-                  initial={{ width: '0%' }}
-                  animate={{
-                    width: `${((stats.byOutcome.get(o.code) ?? 0) / questions.length) * 100}%`
-                  }}
-                  transition={{ type: 'spring', stiffness: 120, damping: 24, delay: 0.2 }}
-                />
-              ))}
-            </div>
-          )}
-          <div className="grid grid-cols-3 gap-2 md:grid-cols-6">
-            {OUTCOMES.map((o) => {
-              const n = stats.byOutcome.get(o.code) ?? 0;
-              return (
-                <div
-                  key={o.code}
-                  title={o.label}
-                  className={cn(
-                    'rounded border px-2.5 py-2',
-                    n > 0
-                      ? 'border-border bg-bg-raised shadow-sm'
-                      : 'border-transparent bg-bg-overlay/50'
-                  )}
-                >
-                  <p
+          </CardBody>
+        </Card>
+      ) : null}
+
+      {(session.kind !== 'pyq' || questions.length > 0) && (
+        <Card>
+          <CardHeader
+            title={session.kind === 'pyq' ? 'Journal analysis outcomes' : 'Outcomes'}
+            aside={
+              session.interruptions_count > 0 ? (
+                <span className="u-num text-[12px] text-text-faint">
+                  {session.interruptions_count} interruption
+                  {session.interruptions_count === 1 ? '' : 's'}
+                </span>
+              ) : undefined
+            }
+          />
+          <CardBody className="flex flex-col gap-4">
+            {session.kind === 'pyq' && questions.length < pyqAttempts.length && (
+              <p className="text-[12px] text-text-faint">
+                Outcome analysis covers {questions.length} of {pyqAttempts.length} submitted PYQs.
+                The remaining attempt receipts are still preserved in PYQ practice.
+              </p>
+            )}
+            {questions.length > 0 && (
+              <div className="flex h-2.5 overflow-hidden rounded-full bg-bg-overlay">
+                {OUTCOMES.filter((o) => stats.byOutcome.get(o.code)).map((o) => (
+                  <motion.div
+                    key={o.code}
+                    className={TONE_BG[o.tone]}
+                    initial={{ width: '0%' }}
+                    animate={{
+                      width: `${((stats.byOutcome.get(o.code) ?? 0) / questions.length) * 100}%`
+                    }}
+                    transition={{ type: 'spring', stiffness: 120, damping: 24, delay: 0.2 }}
+                  />
+                ))}
+              </div>
+            )}
+            <div className="grid grid-cols-3 gap-2 md:grid-cols-6">
+              {OUTCOMES.map((o) => {
+                const n = stats.byOutcome.get(o.code) ?? 0;
+                return (
+                  <div
+                    key={o.code}
+                    title={o.label}
                     className={cn(
-                      'u-num text-[20px] font-semibold leading-none',
-                      n > 0 ? TONE_TEXT[o.tone] : 'text-text-faint'
+                      'rounded border px-2.5 py-2',
+                      n > 0
+                        ? 'border-border bg-bg-raised shadow-sm'
+                        : 'border-transparent bg-bg-overlay/50'
                     )}
                   >
-                    {n}
-                  </p>
-                  <p className="u-label mt-1.5">{o.code}</p>
-                </div>
-              );
-            })}
-          </div>
-        </CardBody>
-      </Card>
+                    <p
+                      className={cn(
+                        'u-num text-[20px] font-semibold leading-none',
+                        n > 0 ? TONE_TEXT[o.tone] : 'text-text-faint'
+                      )}
+                    >
+                      {n}
+                    </p>
+                    <p className="u-label mt-1.5">{o.code}</p>
+                  </div>
+                );
+              })}
+            </div>
+          </CardBody>
+        </Card>
+      )}
 
       {stats.patterns.length > 0 && (
         <Card>

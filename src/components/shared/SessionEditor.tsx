@@ -94,12 +94,17 @@ export default function SessionEditor({
             onChange={(e) => setTarget(Number(e.target.value))}
             disabled={isPyq}
           >
-            {isPyq && <option value={0}>Untimed PYQ set</option>}
-            {TARGET_DURATIONS_MIN.map((m) => (
-              <option key={m} value={m}>
-                {m}m
+            {isPyq ? (
+              <option value={target}>
+                {target > 0 ? `Timed PYQ exam — ${target}m` : 'Untimed PYQ set'}
               </option>
-            ))}
+            ) : (
+              TARGET_DURATIONS_MIN.map((m) => (
+                <option key={m} value={m}>
+                  {m}m
+                </option>
+              ))
+            )}
           </Select>
         </Field>
         <Field label="Actual duration (minutes)">

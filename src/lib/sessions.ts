@@ -56,7 +56,7 @@ export async function reconcilePyqPracticeSessions(
       pyqSession,
       sessionAttempts.length > 0
         ? pyqPracticeSubject(sessionAttempts)
-        : existing?.subject ?? 'PYQ practice',
+        : (existing?.subject ?? 'PYQ practice'),
       timeZone,
       existing
     );
@@ -128,7 +128,7 @@ export async function finishedSessionsWithQuestions(
         pyqSession,
         sessionAttempts.length > 0
           ? pyqPracticeSubject(sessionAttempts)
-          : existing?.subject ?? 'PYQ practice',
+          : (existing?.subject ?? 'PYQ practice'),
         timeZone,
         existing
       )
@@ -138,7 +138,12 @@ export async function finishedSessionsWithQuestions(
   return [...canonicalById.values()]
     .filter((session) => {
       const pyq = pyqById.get(session.id);
-      if (pyq) return pyq.status !== 'active' && attemptedPyqSessionIds.has(session.id);
+      if (pyq) {
+        return (
+          (pyq.status === 'completed' || pyq.status === 'abandoned') &&
+          attemptedPyqSessionIds.has(session.id)
+        );
+      }
       return session.actual_duration_min !== null && populatedSessionIds.has(session.id);
     })
     .sort((a, b) => b.created_at.localeCompare(a.created_at));

@@ -35,9 +35,15 @@ export default function Shell() {
       <main className="native-shell-main pb-[calc(4.5rem+var(--safe-bottom))] md:pb-0 md:pl-[220px]">
         <div
           className={`u-shell-content mx-auto w-full px-4 pb-6 pt-16 md:py-8 ${
-            ['/', '/today', '/syllabus', '/mocks', '/revision-pack', '/topper-notes'].includes(
-              pathname
-            )
+            [
+              '/',
+              '/today',
+              '/syllabus',
+              '/mocks',
+              '/pyq',
+              '/revision-pack',
+              '/topper-notes'
+            ].includes(pathname) || pathname.endsWith('/review')
               ? 'max-w-[1120px]'
               : 'max-w-[800px]'
           }`}

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
 import {
   ArrowLeft,
@@ -29,12 +29,14 @@ import type {
 import type { SourceDraft } from '@/components/tags/sourceDraft';
 import type { TagDraft } from '@/components/tags/TagFlow';
 import PageHeader from '@/components/layout/PageHeader';
+import PyqExamWorkspace from '@/components/pyq/PyqExamWorkspace';
 import PyqQuestionContent from '@/components/pyq/PyqQuestionContent';
 import TagFlow from '@/components/tags/TagFlow';
 import { Card, CardBody, CardHeader } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { Select } from '@/components/ui/Select';
+import { Dialog } from '@/components/ui/Dialog';
 import { db } from '@/lib/db';
 import { useAuth } from '@/hooks/useAuth';
 import { useTimer } from '@/hooks/useTimer';
@@ -78,9 +80,21 @@ import { captureElementToDataUrl } from '@/lib/image';
 import { cn, plural, secondsToClock, uuid } from '@/lib/utils';
 import { filterPyqByHistory, PYQ_HISTORY_OPTIONS } from '@/lib/pyq-history';
 import { markPlannerBlockStarted } from '@/lib/planner-execution';
+import {
+  checkpointPyqExamSession,
+  createPyqExamConfig,
+  finalizePyqExam,
+  isPyqExamAnswerPresent,
+  pausePyqExamSession,
+  pyqExamPaletteCounts,
+  pyqExamRemainingSeconds,
+  resumePyqExamSession,
+  setPyqExamResponse,
+  setPyqExamReviewMark
+} from '@/lib/pyq-exam';
 
 type Order = 'unseen' | 'random' | 'newest' | 'oldest';
-type CountChoice = '5' | '10' | '25' | '50' | 'all';
+type CountChoice = '5' | '10' | '15' | '25' | '50' | 'all';
 type TypeFilter = PyqSessionConfig['type'];
 type AttemptConfig = PyqSessionConfig;
 
@@ -130,6 +144,7 @@ function PracticeSetup({
   attempts,
   activeSession,
   savedSessions,
+  completedSessions,
   config,
   setConfig,
   loading,
@@ -137,12 +152,14 @@ function PracticeSetup({
   onResume,
   onSave,
   onDiscard,
+  onReview,
   onStart
 }: {
   manifest: PyqManifest;
   attempts: PyqAttemptRow[];
   activeSession: PyqSessionRow | null;
   savedSessions: PyqSessionRow[];
+  completedSessions: PyqSessionRow[];
   config: AttemptConfig;
   setConfig: (next: AttemptConfig) => void;
   loading: boolean;
@@ -150,6 +167,7 @@ function PracticeSetup({
   onResume: (session: PyqSessionRow) => void;
   onSave: (session: PyqSessionRow) => void;
   onDiscard: (session: PyqSessionRow) => void;
+  onReview: (session: PyqSessionRow) => void;
   onStart: () => void;
 }) {
   const attemptedIds = useMemo(
@@ -184,10 +202,17 @@ function PracticeSetup({
         <Card className="border-accent/30">
           <CardBody className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="min-w-0">
-              <p className="font-display text-[16px] font-semibold text-text">Unfinished PYQ set</p>
+              <p className="font-display text-[16px] font-semibold text-text">
+                {activeSession.config.mode === 'exam'
+                  ? 'Timed exam in progress'
+                  : 'Unfinished PYQ set'}
+              </p>
               <p className="mt-1 text-[12px] text-text-muted">
-                {activeSession.completed_count} of {activeSession.question_uids.length} submitted ·{' '}
-                {secondsToClock(activeSession.elapsed_sec)} logged
+                {activeSession.completed_count} of {activeSession.question_uids.length}{' '}
+                {activeSession.config.mode === 'exam' ? 'answered' : 'submitted'} ·{' '}
+                {activeSession.config.mode === 'exam' && activeSession.config.examState
+                  ? `${secondsToClock(pyqExamRemainingSeconds(activeSession))} remaining`
+                  : `${secondsToClock(activeSession.elapsed_sec)} logged`}
               </p>
               {error && <p className="mt-2 text-[12px] text-danger">{error}</p>}
             </div>
@@ -224,15 +249,19 @@ function PracticeSetup({
                     <Bookmark size={15} />
                   </span>
                   <div className="min-w-0">
-                    <p className="truncate text-[13.5px] font-semibold text-text">
+                    <p className="flex items-center gap-2 truncate text-[13.5px] font-semibold text-text">
+                      {session.config.mode === 'exam' ? <Badge tone="guess">Exam</Badge> : null}
                       {session.config.subjectSlug === 'all'
                         ? 'Mixed subjects'
                         : (manifest.subjects.find((s) => s.slug === session.config.subjectSlug)
                             ?.label ?? session.config.subjectSlug)}
                     </p>
                     <p className="mt-0.5 text-[11.5px] text-text-faint">
-                      {session.completed_count} / {session.question_uids.length} done ·{' '}
-                      {secondsToClock(session.elapsed_sec)}
+                      {session.completed_count} / {session.question_uids.length}{' '}
+                      {session.config.mode === 'exam' ? 'answered' : 'done'} ·{' '}
+                      {session.config.mode === 'exam' && session.config.examState
+                        ? `${secondsToClock(pyqExamRemainingSeconds(session))} left`
+                        : secondsToClock(session.elapsed_sec)}
                     </p>
                   </div>
                 </div>
@@ -400,7 +429,55 @@ function PracticeSetup({
           </div>
 
           <div className="flex flex-col bg-bg-overlay/25 p-4">
-            <p className="u-label">Build this practice set</p>
+            <p className="u-label">Choose a session mode</p>
+            <div className="mt-3 grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                aria-pressed={(config.mode ?? 'practice') === 'practice'}
+                onClick={() => setConfig({ ...config, mode: 'practice', examState: undefined })}
+                className={cn(
+                  'rounded border p-3 text-left transition-colors',
+                  (config.mode ?? 'practice') === 'practice'
+                    ? 'border-accent/45 bg-accent-faint'
+                    : 'border-border bg-bg-raised hover:border-border-hover'
+                )}
+              >
+                <span className="block text-[13px] font-semibold text-text">Practice</span>
+                <span className="mt-1 block text-[11px] leading-snug text-text-faint">
+                  Reveal each key after committing.
+                </span>
+              </button>
+              <button
+                type="button"
+                aria-pressed={config.mode === 'exam'}
+                onClick={() =>
+                  setConfig({
+                    ...config,
+                    mode: 'exam',
+                    count: config.count === 'all' ? '15' : config.count,
+                    examState: undefined
+                  })
+                }
+                className={cn(
+                  'rounded border p-3 text-left transition-colors',
+                  config.mode === 'exam'
+                    ? 'border-ink-violet/45 bg-guess-faint'
+                    : 'border-border bg-bg-raised hover:border-border-hover'
+                )}
+              >
+                <span className="block text-[13px] font-semibold text-text">Exam mode</span>
+                <span className="mt-1 block text-[11px] leading-snug text-text-faint">
+                  One clock, free navigation, keys after submit.
+                </span>
+              </button>
+            </div>
+            {config.mode === 'exam' ? (
+              <p className="mt-3 rounded border border-ink-violet/20 bg-guess-faint px-3 py-2 text-[11px] leading-relaxed text-text-muted">
+                The clock allows 3 minutes per question. Draft responses and review flags are saved
+                locally until you submit.
+              </p>
+            ) : null}
+            <p className="u-label mt-5">Build this set</p>
             <div className="mt-4 grid grid-cols-2 gap-3">
               <label className="text-[12px] font-medium text-text-muted">
                 From year
@@ -457,9 +534,10 @@ function PracticeSetup({
                 >
                   <option value="5">5</option>
                   <option value="10">10</option>
+                  <option value="15">15</option>
                   <option value="25">25</option>
                   <option value="50">50</option>
-                  <option value="all">All matching</option>
+                  {config.mode !== 'exam' ? <option value="all">All matching</option> : null}
                 </Select>
               </label>
               <label className="col-span-2 text-[12px] font-medium text-text-muted">
@@ -496,16 +574,88 @@ function PracticeSetup({
               {error && !activeSession && <p className="mb-3 text-[12px] text-danger">{error}</p>}
               <Button variant="primary" className="w-full" onClick={onStart} disabled={loading}>
                 <BookOpenCheck size={17} />
-                {loading ? 'Opening question bank…' : 'Start fresh set'}
+                {loading
+                  ? 'Opening question bank…'
+                  : config.mode === 'exam'
+                    ? 'Start timed exam'
+                    : 'Start fresh set'}
               </Button>
               <p className="mt-3 text-center text-[11px] leading-relaxed text-text-faint">
-                Questions and diagrams are bundled locally. Your answer stays hidden until you
-                commit.
+                {config.mode === 'exam'
+                  ? 'No answer key or correctness is shown before final submission.'
+                  : 'Questions and diagrams are bundled locally. Your answer stays hidden until you commit.'}
               </p>
             </div>
           </div>
         </div>
       </Card>
+
+      {completedSessions.length > 0 ? (
+        <section aria-labelledby="pyq-session-history" className="pt-2">
+          <div className="mb-2 flex items-end justify-between gap-3 px-1">
+            <div>
+              <p id="pyq-session-history" className="u-label">
+                Session reports
+              </p>
+              <p className="mt-1 text-[12px] text-text-faint">
+                Reopen the full score, timing chart, and every response.
+              </p>
+            </div>
+            <span className="u-num text-[11px] text-text-faint">
+              {completedSessions.length} recent
+            </span>
+          </div>
+          <div className="grid gap-2 sm:grid-cols-2">
+            {completedSessions.map((session) => {
+              const sessionAttempts = attempts.filter(
+                (attempt) => attempt.pyq_session_id === session.id
+              );
+              const latestByQuestion = new Map<string, PyqAttemptRow>();
+              for (const attempt of sessionAttempts) {
+                const previous = latestByQuestion.get(attempt.question_uid);
+                if (!previous || attempt.attempt_number >= previous.attempt_number) {
+                  latestByQuestion.set(attempt.question_uid, attempt);
+                }
+              }
+              const correct = [...latestByQuestion.values()].filter(
+                (attempt) => attempt.mark_correct === true
+              ).length;
+              return (
+                <Card key={session.id}>
+                  <CardBody className="flex items-center justify-between gap-3 p-3">
+                    <div className="min-w-0">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <Badge tone={session.config.mode === 'exam' ? 'guess' : 'neutral'}>
+                          {session.config.mode === 'exam' ? 'Exam' : 'Practice'}
+                        </Badge>
+                        <span className="u-num text-[10px] text-text-faint">
+                          {new Date(
+                            session.completed_at ?? session.updated_at
+                          ).toLocaleDateString()}
+                        </span>
+                      </div>
+                      <p className="mt-1.5 truncate text-[13px] font-semibold text-text">
+                        {session.config.subjectSlug === 'all'
+                          ? 'Mixed subjects'
+                          : (manifest.subjects.find(
+                              (subject) => subject.slug === session.config.subjectSlug
+                            )?.label ?? session.config.subjectSlug)}
+                      </p>
+                      <p className="mt-0.5 text-[11px] text-text-faint">
+                        {correct}/{session.question_uids.length} correct ·{' '}
+                        {secondsToClock(session.elapsed_sec)}
+                      </p>
+                    </div>
+                    <Button size="sm" onClick={() => onReview(session)}>
+                      View report <ArrowRight size={13} />
+                    </Button>
+                  </CardBody>
+                </Card>
+              );
+            })}
+          </div>
+        </section>
+      ) : null}
     </div>
   );
 }
@@ -726,6 +876,7 @@ function formatAttemptAnswer(value: PyqSelectedAnswer): string {
 export default function Pyq() {
   const { userId, profile } = useAuth();
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const timeZone = profile?.timezone ?? 'Asia/Kolkata';
   const [manifest, setManifest] = useState<PyqManifest | null>(null);
   const [manifestError, setManifestError] = useState<string | null>(null);
@@ -736,12 +887,13 @@ export default function Pyq() {
     toYear: 2026,
     type: 'all',
     order: 'unseen',
-    count: (['5', '10', '25', '50', 'all'].includes(searchParams.get('count') ?? '')
+    count: (['5', '10', '15', '25', '50', 'all'].includes(searchParams.get('count') ?? '')
       ? searchParams.get('count')
       : '10') as CountChoice,
     history: (PYQ_HISTORY_OPTIONS.some((option) => option.value === searchParams.get('history'))
       ? searchParams.get('history')
-      : 'all') as PyqHistoryFilter
+      : 'all') as PyqHistoryFilter,
+    mode: 'practice'
   }));
   const [questions, setQuestions] = useState<PyqQuestion[]>([]);
   const [loading, setLoading] = useState(false);
@@ -761,12 +913,20 @@ export default function Pyq() {
   const [questionScreenshot, setQuestionScreenshot] = useState<string | null>(null);
   const [pyqSessionId, setPyqSessionId] = useState<string | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [loadedSession, setLoadedSession] = useState<PyqSessionRow | null>(null);
+  const [examSubmitOpen, setExamSubmitOpen] = useState(false);
   const questionCaptureRef = useRef<HTMLDivElement>(null);
   const submittingRef = useRef(false);
   const startingRef = useRef(false);
   const questionStartRef = useRef<{ questionUid: string; startedAtMs: number } | null>(null);
   const completedRef = useRef(completed);
+  const loadedSessionRef = useRef<PyqSessionRow | null>(loadedSession);
+  const examWriteQueueRef = useRef<Promise<void>>(Promise.resolve());
+  const finalizeExamRef = useRef<(reason: 'manual' | 'time-expired') => Promise<void>>(
+    async () => {}
+  );
   completedRef.current = completed;
+  loadedSessionRef.current = loadedSession;
 
   const attempts = useLiveQuery(
     async () => (userId ? db.pyq_attempts.where('user_id').equals(userId).toArray() : []),
@@ -793,6 +953,18 @@ export default function Pyq() {
         .equals([userId, 'paused'])
         .toArray();
       return rows.sort((a, b) => b.updated_at.localeCompare(a.updated_at));
+    },
+    [userId],
+    []
+  );
+  const completedPyqSessions = useLiveQuery(
+    async () => {
+      if (!userId) return [];
+      const rows = await db.pyq_sessions
+        .where('[user_id+status]')
+        .equals([userId, 'completed'])
+        .toArray();
+      return rows.sort((a, b) => b.updated_at.localeCompare(a.updated_at)).slice(0, 8);
     },
     [userId],
     []
@@ -853,6 +1025,31 @@ export default function Pyq() {
   useEffect(() => {
     if (!currentId) return;
     window.scrollTo({ top: 0, behavior: 'auto' });
+    const openSession = loadedSessionRef.current;
+    if (openSession?.config.mode === 'exam' && openSession.config.examState) {
+      const savedAnswer = openSession.config.examState.responses[currentId];
+      setStartedAt(null);
+      setChoices(
+        Array.isArray(savedAnswer)
+          ? savedAnswer.map(String)
+          : typeof savedAnswer === 'string' && answerInputType(questions[index]) !== 'NAT'
+            ? [savedAnswer]
+            : []
+      );
+      setNumeric(
+        answerInputType(questions[index]) === 'NAT' && savedAnswer != null
+          ? String(savedAnswer)
+          : ''
+      );
+      setDecision(null);
+      setSubmitted(null);
+      setSubmitting(false);
+      setJournalOpen(false);
+      setJournalSaved(false);
+      setQuestionScreenshot(firstPyqImage(questions[index].html));
+      setSubmitError(null);
+      return;
+    }
     const priorAttempt = latestQuestionAttempt(completedRef.current, currentId);
     const lockedAttempt = priorAttempt?.mark_decision === 'SKIP' ? null : priorAttempt;
     const persistedStart = questionStartRef.current;
@@ -894,6 +1091,39 @@ export default function Pyq() {
 
   const liveSeconds = useTimer(submitted ? null : startedAt);
   const shownSeconds = submitted?.time_spent_sec ?? liveSeconds;
+  const timedExamActive =
+    loadedSession?.config.mode === 'exam' &&
+    loadedSession.status === 'active' &&
+    questions.length > 0 &&
+    !finished;
+  const examStartedMs = timedExamActive
+    ? Date.parse(loadedSession.current_question_started_at ?? '')
+    : Number.NaN;
+  useTimer(Number.isFinite(examStartedMs) ? examStartedMs : null);
+  const examRemainingSec =
+    timedExamActive && loadedSession ? pyqExamRemainingSeconds(loadedSession) : 0;
+
+  useEffect(() => {
+    if (!timedExamActive || examRemainingSec > 0 || submittingRef.current) return;
+    void finalizeExamRef.current('time-expired');
+  }, [examRemainingSec, timedExamActive]);
+
+  function setLoadedExamSession(next: PyqSessionRow, persist = true) {
+    loadedSessionRef.current = next;
+    setLoadedSession(next);
+    if (!persist) return;
+    const queued = examWriteQueueRef.current
+      .catch(() => undefined)
+      .then(() => writeLocal('pyq_sessions', next));
+    examWriteQueueRef.current = queued;
+    void queued.catch((error: unknown) => {
+      setSubmitError(
+        error instanceof Error
+          ? `Exam draft was not saved: ${error.message}`
+          : 'Exam draft was not saved. Try the action again.'
+      );
+    });
+  }
 
   async function questionsForSession(session: PyqSessionRow): Promise<PyqQuestion[]> {
     if (!manifest) return [];
@@ -917,7 +1147,12 @@ export default function Pyq() {
           .equals([userId, 'active'])
           .toArray();
         for (const activeRow of activeRows) {
-          await writeLocal('pyq_sessions', pausePyqSession(activeRow));
+          await writeLocal(
+            'pyq_sessions',
+            activeRow.config.mode === 'exam'
+              ? pausePyqExamSession(activeRow)
+              : pausePyqSession(activeRow)
+          );
         }
         if (pyqSessionId && activeRows.some((r) => r.id === pyqSessionId)) {
           setQuestions([]);
@@ -933,7 +1168,8 @@ export default function Pyq() {
           'This saved set no longer matches the local question bank. Discard it before continuing.'
         );
       }
-      const exhausted = session.current_index >= rows.length;
+      const isExam = session.config.mode === 'exam';
+      const exhausted = !isExam && session.current_index >= rows.length;
       // Bank rebuilds can add coverage or correct taxonomy without removing a
       // saved set's questions. Once every durable question ID resolves, move
       // the set to the current version instead of stranding it permanently.
@@ -946,8 +1182,11 @@ export default function Pyq() {
               updated_at: new Date().toISOString()
             };
       // Reactivate paused sessions
-      const activatedSession: PyqSessionRow =
-        compatibleSession.status !== 'active'
+      const activatedSession: PyqSessionRow = isExam
+        ? compatibleSession.status === 'paused'
+          ? resumePyqExamSession(compatibleSession)
+          : compatibleSession
+        : compatibleSession.status !== 'active'
           ? { ...compatibleSession, status: 'active', updated_at: new Date().toISOString() }
           : compatibleSession;
       const durableSession = exhausted ? completePyqSession(activatedSession) : activatedSession;
@@ -972,18 +1211,24 @@ export default function Pyq() {
       const nextIndex = Math.min(durableSession.current_index, Math.max(0, rows.length - 1));
       let resumedSession = durableSession;
       if (!exhausted) {
-        resumedSession = startPyqSessionQuestion(durableSession, rows[nextIndex].id);
+        resumedSession = isExam
+          ? durableSession.current_question_uid
+            ? durableSession
+            : checkpointPyqExamSession(durableSession, rows[nextIndex].id)
+          : startPyqSessionQuestion(durableSession, rows[nextIndex].id);
         if (resumedSession !== durableSession) await writeLocal('pyq_sessions', resumedSession);
-        const resumedAt = Date.parse(resumedSession.current_question_started_at ?? '');
-        questionStartRef.current = {
-          questionUid: rows[nextIndex].id,
-          startedAtMs: Number.isFinite(resumedAt) ? resumedAt : Date.now()
-        };
+        if (!isExam) {
+          const resumedAt = Date.parse(resumedSession.current_question_started_at ?? '');
+          questionStartRef.current = {
+            questionUid: rows[nextIndex].id,
+            startedAtMs: Number.isFinite(resumedAt) ? resumedAt : Date.now()
+          };
+        }
       }
       setConfig({
-        ...session.config,
-        topicSlug: session.config.topicSlug ?? 'all',
-        history: session.config.history ?? 'all'
+        ...resumedSession.config,
+        topicSlug: resumedSession.config.topicSlug ?? 'all',
+        history: resumedSession.config.history ?? 'all'
       });
       setQuestions(rows);
       setIndex(nextIndex);
@@ -991,6 +1236,8 @@ export default function Pyq() {
       setFinished(exhausted);
       setAnalyzedCount(0);
       setPyqSessionId(session.id);
+      loadedSessionRef.current = resumedSession;
+      setLoadedSession(resumedSession);
     } catch (error) {
       setStartError(error instanceof Error ? error.message : 'Could not resume that PYQ set.');
     } finally {
@@ -1027,6 +1274,8 @@ export default function Pyq() {
         setFinished(false);
         setIndex(0);
         setPyqSessionId(null);
+        loadedSessionRef.current = null;
+        setLoadedSession(null);
       }
     } catch (error) {
       setStartError(error instanceof Error ? error.message : 'Could not discard that PYQ set.');
@@ -1040,16 +1289,26 @@ export default function Pyq() {
     setLoading(true);
     setStartError(null);
     try {
-      const paused = pausePyqSession(session);
+      await examWriteQueueRef.current.catch(() => undefined);
+      const currentSession =
+        loadedSessionRef.current?.id === session.id ? loadedSessionRef.current : session;
+      const paused =
+        currentSession.config.mode === 'exam'
+          ? pausePyqExamSession(currentSession)
+          : pausePyqSession(currentSession);
       await writeLocal('pyq_sessions', paused);
       if (pyqSessionId === session.id) {
         setQuestions([]);
         setFinished(false);
         setIndex(0);
         setPyqSessionId(null);
+        loadedSessionRef.current = null;
+        setLoadedSession(null);
       }
     } catch (error) {
-      setStartError(error instanceof Error ? error.message : 'Could not save that PYQ set.');
+      const message = error instanceof Error ? error.message : 'Could not save that PYQ set.';
+      if (session.config.mode === 'exam') setSubmitError(`Exam was not saved: ${message}`);
+      else setStartError(message);
     } finally {
       setLoading(false);
     }
@@ -1067,7 +1326,12 @@ export default function Pyq() {
         .equals([userId, 'active'])
         .toArray();
       for (const activeRow of activeRows) {
-        await writeLocal('pyq_sessions', pausePyqSession(activeRow));
+        await writeLocal(
+          'pyq_sessions',
+          activeRow.config.mode === 'exam'
+            ? pausePyqExamSession(activeRow)
+            : pausePyqSession(activeRow)
+        );
       }
       if (pyqSessionId && activeRows.some((r) => r.id === pyqSessionId)) {
         setQuestions([]);
@@ -1117,7 +1381,14 @@ export default function Pyq() {
         throw new Error(
           'No questions match those filters. Widen the subject, year, type, or history filter.'
         );
-      const session = createPyqSessionRow(userId!, manifest.bankVersion, config, rows);
+      const sessionConfig =
+        config.mode === 'exam'
+          ? createPyqExamConfig(
+              config,
+              rows.map((question) => question.id)
+            )
+          : { ...config, mode: 'practice' as const, examState: undefined };
+      const session = createPyqSessionRow(userId!, manifest.bankVersion, sessionConfig, rows);
       const plannerDate = searchParams.get('plannerDate');
       const plannerBlockId = searchParams.get('plannerBlock');
       if (plannerDate && plannerBlockId) markPlannerBlockStarted(plannerDate, plannerBlockId);
@@ -1133,12 +1404,17 @@ export default function Pyq() {
           row: canonical
         }
       ]);
-      const firstStartedAt = Date.parse(session.current_question_started_at ?? '');
-      questionStartRef.current = {
-        questionUid: rows[0].id,
-        startedAtMs: Number.isFinite(firstStartedAt) ? firstStartedAt : Date.now()
-      };
+      if (session.config.mode !== 'exam') {
+        const firstStartedAt = Date.parse(session.current_question_started_at ?? '');
+        questionStartRef.current = {
+          questionUid: rows[0].id,
+          startedAtMs: Number.isFinite(firstStartedAt) ? firstStartedAt : Date.now()
+        };
+      }
+      setConfig(sessionConfig);
       setPyqSessionId(session.id);
+      loadedSessionRef.current = session;
+      setLoadedSession(session);
       setQuestions(rows);
       setIndex(0);
       setCompleted([]);
@@ -1163,9 +1439,21 @@ export default function Pyq() {
         .equals([userId, 'active'])
         .toArray();
       for (const activeRow of activeRows) {
-        await writeLocal('pyq_sessions', pausePyqSession(activeRow));
+        await writeLocal(
+          'pyq_sessions',
+          activeRow.config.mode === 'exam'
+            ? pausePyqExamSession(activeRow)
+            : pausePyqSession(activeRow)
+        );
       }
-      const session = createPyqSessionRow(userId, manifest.bankVersion, config, questions);
+      const repeatedConfig =
+        config.mode === 'exam'
+          ? createPyqExamConfig(
+              config,
+              questions.map((question) => question.id)
+            )
+          : { ...config, mode: 'practice' as const, examState: undefined };
+      const session = createPyqSessionRow(userId, manifest.bankVersion, repeatedConfig, questions);
       await writeLocalBatch([
         { name: 'pyq_sessions', row: session },
         {
@@ -1173,12 +1461,17 @@ export default function Pyq() {
           row: pyqPracticeSessionRow(session, pyqPracticeSubject(questions), timeZone)
         }
       ]);
-      const firstStartedAt = Date.parse(session.current_question_started_at ?? '');
-      questionStartRef.current = {
-        questionUid: questions[0].id,
-        startedAtMs: Number.isFinite(firstStartedAt) ? firstStartedAt : Date.now()
-      };
+      if (session.config.mode !== 'exam') {
+        const firstStartedAt = Date.parse(session.current_question_started_at ?? '');
+        questionStartRef.current = {
+          questionUid: questions[0].id,
+          startedAtMs: Number.isFinite(firstStartedAt) ? firstStartedAt : Date.now()
+        };
+      }
+      setConfig(repeatedConfig);
       setPyqSessionId(session.id);
+      loadedSessionRef.current = session;
+      setLoadedSession(session);
       setIndex(0);
       setCompleted([]);
       setFinished(false);
@@ -1280,6 +1573,124 @@ export default function Pyq() {
     if (inputType === 'MSQ') return choices.slice().sort();
     return choices[0] ?? null;
   }
+
+  function changeExamChoices(nextChoices: string[]) {
+    setChoices(nextChoices);
+    const session = loadedSessionRef.current;
+    if (!current || !session || session.config.mode !== 'exam') return;
+    const answer = answerInputType(current) === 'MSQ' ? nextChoices : nextChoices[0];
+    setLoadedExamSession(setPyqExamResponse(session, current, answer));
+  }
+
+  function changeExamNumeric(value: string) {
+    setNumeric(value);
+    const session = loadedSessionRef.current;
+    if (!current || !session || session.config.mode !== 'exam') return;
+    setLoadedExamSession(
+      setPyqExamResponse(
+        session,
+        current,
+        value.trim() !== '' && Number.isFinite(Number(value)) ? value.trim() : undefined
+      )
+    );
+  }
+
+  function navigateExam(nextIndex: number) {
+    const session = loadedSessionRef.current;
+    if (!session || session.config.mode !== 'exam' || submittingRef.current) return;
+    const boundedIndex = Math.max(0, Math.min(nextIndex, questions.length - 1));
+    const nextQuestion = questions[boundedIndex];
+    if (!nextQuestion) return;
+    const nextSession = checkpointPyqExamSession(session, nextQuestion.id);
+    setLoadedExamSession(nextSession);
+    setIndex(boundedIndex);
+  }
+
+  function markExamForReviewAndNext() {
+    const session = loadedSessionRef.current;
+    if (!current || !session || session.config.mode !== 'exam' || submittingRef.current) return;
+    const marked = setPyqExamReviewMark(session, current.id, true);
+    const nextIndex = Math.min(index + 1, questions.length - 1);
+    const nextQuestion = questions[nextIndex];
+    const nextSession = nextQuestion ? checkpointPyqExamSession(marked, nextQuestion.id) : marked;
+    setLoadedExamSession(nextSession);
+    if (nextIndex !== index) setIndex(nextIndex);
+  }
+
+  function clearExamResponse() {
+    const session = loadedSessionRef.current;
+    if (!current || !session || session.config.mode !== 'exam' || submittingRef.current) return;
+    setChoices([]);
+    setNumeric('');
+    setLoadedExamSession(setPyqExamResponse(session, current, undefined));
+  }
+
+  function saveExamAndNext() {
+    if (index + 1 >= questions.length) {
+      setExamSubmitOpen(true);
+      return;
+    }
+    navigateExam(index + 1);
+  }
+
+  async function submitExam(reason: 'manual' | 'time-expired') {
+    const session = loadedSessionRef.current;
+    if (
+      !manifest ||
+      !userId ||
+      !session ||
+      session.config.mode !== 'exam' ||
+      session.status !== 'active' ||
+      questions.length === 0 ||
+      submittingRef.current
+    ) {
+      return;
+    }
+    submittingRef.current = true;
+    setSubmitting(true);
+    setExamSubmitOpen(false);
+    setSubmitError(null);
+    try {
+      await examWriteQueueRef.current.catch(() => undefined);
+      const finalized = finalizePyqExam({
+        userId,
+        session: loadedSessionRef.current ?? session,
+        questions,
+        bankVersion: manifest.bankVersion,
+        reason
+      });
+      const existingCanonical = await db.sessions.get(session.id);
+      await writeLocalBatch([
+        ...finalized.attempts.map((attempt) => ({ name: 'pyq_attempts' as const, row: attempt })),
+        { name: 'pyq_sessions', row: finalized.session },
+        {
+          name: 'sessions',
+          row: pyqPracticeSessionRow(
+            finalized.session,
+            pyqPracticeSubject(questions),
+            timeZone,
+            existingCanonical
+          )
+        }
+      ]);
+      loadedSessionRef.current = finalized.session;
+      setLoadedSession(finalized.session);
+      setCompleted(finalized.attempts);
+      setFinished(true);
+      navigate(`/session/${session.id}/review`);
+    } catch (error) {
+      setSubmitError(
+        error instanceof Error
+          ? `Exam was not submitted: ${error.message}`
+          : 'Exam was not submitted. Your saved responses are still available.'
+      );
+    } finally {
+      submittingRef.current = false;
+      setSubmitting(false);
+    }
+  }
+
+  finalizeExamRef.current = submitExam;
 
   async function submitAnswer() {
     if (
@@ -1456,6 +1867,8 @@ export default function Pyq() {
     setFinished(false);
     setIndex(0);
     setPyqSessionId(null);
+    loadedSessionRef.current = null;
+    setLoadedSession(null);
   }
 
   if (!manifest) {
@@ -1478,6 +1891,7 @@ export default function Pyq() {
         attempts={attempts}
         activeSession={activePyqSession ?? null}
         savedSessions={pausedPyqSessions ?? []}
+        completedSessions={completedPyqSessions ?? []}
         config={config}
         setConfig={setConfig}
         loading={loading}
@@ -1485,6 +1899,7 @@ export default function Pyq() {
         onResume={(session) => void resumeSession(session)}
         onSave={(session) => void saveSession(session)}
         onDiscard={(session) => void discardSession(session)}
+        onReview={(session) => navigate(`/session/${session.id}/review`)}
         onStart={() => void startPractice()}
       />
     );
@@ -1549,7 +1964,15 @@ export default function Pyq() {
                 : '.'}
             </p>
             <div className="mt-6 flex flex-wrap gap-2">
-              <Button variant="primary" onClick={() => void repeatCurrentSet()} disabled={loading}>
+              {pyqSessionId ? (
+                <Button
+                  variant="primary"
+                  onClick={() => navigate(`/session/${pyqSessionId}/review`)}
+                >
+                  Open detailed report
+                </Button>
+              ) : null}
+              <Button onClick={() => void repeatCurrentSet()} disabled={loading}>
                 Repeat this exact set
               </Button>
               <Button onClick={() => void startPractice()} disabled={loading}>
@@ -1571,6 +1994,93 @@ export default function Pyq() {
       : choices.length > 0;
   const canSubmit = !!decision && (decision === 'SKIP' || hasAnswer) && !submitting;
   const previouslySkipped = latestCurrentAttempt?.mark_decision === 'SKIP' && !submitted;
+
+  if (
+    loadedSession?.config.mode === 'exam' &&
+    loadedSession.config.examState &&
+    loadedSession.status === 'active'
+  ) {
+    const paletteCounts = pyqExamPaletteCounts(loadedSession, questions);
+    const currentHasAnswer = isPyqExamAnswerPresent(
+      current,
+      loadedSession.config.examState.responses[current.id]
+    );
+    return (
+      <>
+        <PyqExamWorkspace
+          session={loadedSession}
+          questions={questions}
+          index={index}
+          choices={choices}
+          numeric={numeric}
+          remainingSec={examRemainingSec}
+          submitting={submitting}
+          error={submitError}
+          onChoices={changeExamChoices}
+          onNumeric={changeExamNumeric}
+          onNavigate={navigateExam}
+          onMarkAndNext={markExamForReviewAndNext}
+          onClear={clearExamResponse}
+          onSaveAndNext={saveExamAndNext}
+          onPrevious={() => navigateExam(index - 1)}
+          onSubmit={() => setExamSubmitOpen(true)}
+          onSaveAndExit={() => void saveSession(loadedSession)}
+        />
+        <Dialog
+          open={examSubmitOpen}
+          onClose={() => {
+            if (!submitting) setExamSubmitOpen(false);
+          }}
+          title="Submit timed exam?"
+          className="max-w-xl"
+        >
+          <p className="text-[13px] leading-relaxed text-text-muted">
+            Submission locks every response and reveals the answer keys in your detailed report. You
+            cannot edit this exam afterward.
+          </p>
+          <div className="mt-4 overflow-hidden rounded border border-border">
+            <div className="grid grid-cols-[minmax(0,1fr)_70px] border-b border-border bg-bg-overlay/45 px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.08em] text-text-faint">
+              <span>Status</span>
+              <span className="text-right">Questions</span>
+            </div>
+            {[
+              ['Answered', paletteCounts.answered + paletteCounts.answeredAndMarked],
+              ['Not answered', paletteCounts.notAnswered + paletteCounts.markedForReview],
+              ['Not visited', paletteCounts.notVisited],
+              ['Marked for review', paletteCounts.markedForReview + paletteCounts.answeredAndMarked]
+            ].map(([label, value]) => (
+              <div
+                key={String(label)}
+                className="grid grid-cols-[minmax(0,1fr)_70px] border-b border-border/70 px-3 py-2.5 text-[13px] last:border-b-0"
+              >
+                <span className="text-text-muted">{label}</span>
+                <span className="u-num text-right font-semibold text-text">{value}</span>
+              </div>
+            ))}
+          </div>
+          <p className="mt-3 text-[11px] leading-relaxed text-text-faint">
+            Question {index + 1} is {currentHasAnswer ? 'answered' : 'currently blank'}. You have{' '}
+            <span className="u-num font-semibold text-text">
+              {secondsToClock(examRemainingSec)}
+            </span>{' '}
+            remaining.
+          </p>
+          <div className="mt-5 flex flex-wrap justify-end gap-2 border-t border-border pt-4">
+            <Button onClick={() => setExamSubmitOpen(false)} disabled={submitting}>
+              Return to exam
+            </Button>
+            <Button
+              variant="primary"
+              onClick={() => void submitExam('manual')}
+              disabled={submitting}
+            >
+              {submitting ? 'Submitting…' : 'Submit exam'}
+            </Button>
+          </div>
+        </Dialog>
+      </>
+    );
+  }
 
   if (journalOpen && submitted) {
     return (

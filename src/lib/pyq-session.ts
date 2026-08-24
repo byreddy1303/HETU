@@ -441,7 +441,7 @@ export function pyqPracticeSessionRow(
   timeZone = 'Asia/Kolkata',
   existing?: SessionRow | null
 ): SessionRow {
-  const closed = session.status !== 'active';
+  const closed = session.status === 'completed' || session.status === 'abandoned';
   const actualDuration = closed
     ? session.completed_count > 0
       ? Math.max(1, Math.ceil(session.elapsed_sec / 60))
@@ -453,7 +453,10 @@ export function pyqPracticeSessionRow(
     kind: 'pyq',
     date: existing?.date ?? calendarDateInTimeZone(session.started_at, timeZone),
     subject: subject || existing?.subject || 'PYQ practice',
-    target_duration_min: 0,
+    target_duration_min:
+      session.config.mode === 'exam' && session.config.examState
+        ? Math.ceil(session.config.examState.duration_sec / 60)
+        : 0,
     actual_duration_min: actualDuration,
     insight: existing?.insight ?? null,
     sadhana_done: existing?.sadhana_done ?? false,

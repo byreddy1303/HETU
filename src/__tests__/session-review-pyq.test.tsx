@@ -146,7 +146,7 @@ describe('historical PYQ session review', () => {
       </MemoryRouter>
     );
 
-    const pageHeading = await screen.findByRole('heading', { name: 'Session logged' });
+    const pageHeading = await screen.findByRole('heading', { name: 'Exam submitted' });
     expect(pageHeading.nextElementSibling).toHaveTextContent('3 submitted · 0 analyzed · 1m');
     expect(screen.getByText('PYQ session report')).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Algorithms' })).toBeInTheDocument();
@@ -211,5 +211,9 @@ describe('historical PYQ session review', () => {
         'Outcome analysis covers 0 of 3 submitted PYQs. The remaining attempt receipts are still preserved in PYQ practice.'
       )
     ).toBeInTheDocument();
+
+    expect(screen.getByRole('button', { name: 'Back to PYQ setup' })).toBeEnabled();
+    expect(screen.queryByRole('button', { name: 'Skip' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Finish' })).not.toBeInTheDocument();
   });
 });

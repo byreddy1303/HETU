@@ -1,6 +1,5 @@
 // Session review (F2.4): outcome summary, patterns hit, time distribution,
-// and a single-sentence insight. Skipping the insight is allowed and silent;
-// finishing without one gets a soft nudge, never a block.
+// and an optional single-sentence takeaway with an explicit return destination.
 import { useMemo, useState } from 'react';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
@@ -56,7 +55,6 @@ export default function SessionReview() {
   const pyqSession = useLiveQuery(async () => (await db.pyq_sessions.get(id)) ?? null, [id]);
 
   const [draft, setDraft] = useState<string>();
-  const [nudged, setNudged] = useState(false);
   const [editRow, setEditRow] = useState<QuestionRow | null>(null);
   const [editDraft, setEditDraft] = useState<EditorDraft | null>(null);
   const [saving, setSaving] = useState(false);
@@ -140,19 +138,23 @@ export default function SessionReview() {
 
   const ink = subjectInk(session.subject);
   const value = draft ?? session.insight ?? '';
+  const returnPath = session.kind === 'pyq' ? '/pyq' : '/';
+  const returnLabel = session.kind === 'pyq' ? 'Back to PYQ setup' : 'Go to dashboard';
+  const pageTitle =
+    session.kind === 'pyq'
+      ? pyqSession?.config.mode === 'exam'
+        ? 'Exam submitted'
+        : 'Practice session complete'
+      : 'Session logged';
 
   const finish = async () => {
     const text = value.trim();
     if (text) {
       await writeLocal('sessions', { ...session, insight: text });
-      navigate('/');
+      navigate(returnPath);
       return;
     }
-    if (!nudged) {
-      setNudged(true);
-      return;
-    }
-    navigate('/');
+    navigate(returnPath);
   };
 
   return (
@@ -160,7 +162,7 @@ export default function SessionReview() {
       <div className="flex flex-wrap items-start justify-between gap-4 pb-2">
         <div className="u-margin-line">
           <h1 className="font-display text-[26px] font-bold leading-tight tracking-tight">
-            Session logged
+            {pageTitle}
           </h1>
           <p className="mt-0.5 text-[13.5px] text-text-muted">
             <span className={cn('font-medium', ink.text)}>{session.subject}</span>
@@ -182,16 +184,22 @@ export default function SessionReview() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="ghost" size="sm" onClick={() => setEditSessionOpen(true)}>
-            Edit session
-          </Button>
+          {session.kind !== 'pyq' ? (
+            <Button variant="ghost" size="sm" onClick={() => setEditSessionOpen(true)}>
+              Edit session details
+            </Button>
+          ) : null}
           <motion.span
             className="u-stamp"
             initial={{ opacity: 0, scale: 1.7, rotate: 6 }}
             animate={{ opacity: 1, scale: 1, rotate: -4 }}
             transition={{ type: 'spring', stiffness: 320, damping: 19, delay: 0.15 }}
           >
-            logged
+            {session.kind === 'pyq'
+              ? pyqSession?.config.mode === 'exam'
+                ? 'submitted'
+                : 'complete'
+              : 'logged'}
           </motion.span>
         </div>
       </div>
@@ -446,8 +454,11 @@ export default function SessionReview() {
       )}
 
       <Card>
-        <CardHeader title="Biggest insight" aside={<span className="u-label">optional</span>} />
+        <CardHeader title="Save one takeaway" aside={<span className="u-label">optional</span>} />
         <CardBody className="flex flex-col gap-3">
+          <p className="text-[12px] leading-relaxed text-text-muted">
+            Capture one change for your next session, or return without writing anything.
+          </p>
           <Input
             value={value}
             onChange={(e) => setDraft(e.target.value)}
@@ -457,24 +468,26 @@ export default function SessionReview() {
                 void finish();
               }
             }}
-            placeholder="One sentence — what will you do differently next time?"
-            aria-label="Biggest insight"
+            placeholder="What will you do differently next time?"
+            aria-label="Session takeaway"
           />
-          {nudged && !value.trim() && (
-            <p className="text-[12px] text-warn">
-              One sentence locks the lesson in — or press Finish again to leave without it.
-            </p>
-          )}
           <div className="flex flex-wrap items-center justify-between gap-3">
             <p className="text-[12px] text-text-faint">
-              <Kbd>Enter</Kbd> <span className="ml-1">saves to the session log.</span>
+              <Kbd>Enter</Kbd>{' '}
+              <span className="ml-1">saves the takeaway and returns to your next step.</span>
             </p>
             <div className="flex gap-2">
-              <Button variant="ghost" onClick={() => navigate('/')}>
-                Skip
-              </Button>
+              {value.trim() ? (
+                <Button variant="ghost" onClick={() => navigate(returnPath)}>
+                  Leave without saving
+                </Button>
+              ) : null}
               <Button variant="primary" onClick={() => void finish()}>
-                {value.trim() ? 'Save & finish' : 'Finish'}
+                {value.trim()
+                  ? session.kind === 'pyq'
+                    ? 'Save takeaway & back to PYQ setup'
+                    : 'Save takeaway & go to dashboard'
+                  : returnLabel}
               </Button>
             </div>
           </div>

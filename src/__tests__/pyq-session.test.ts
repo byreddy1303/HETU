@@ -17,6 +17,7 @@ import {
   advancePyqSessionProgress,
   completePyqSession,
   abandonPyqSession,
+  pausePyqPracticeSession,
   startPyqSessionQuestion
 } from '@/lib/pyq-session';
 import type { PyqSessionConfig } from '@/types';
@@ -110,6 +111,86 @@ describe('PYQ session logic and determinism', () => {
       '2026-08-08T08:00:00.000Z'
     );
     expect(startPyqSessionQuestion(session, 'q1', '2026-08-08T08:01:00.000Z')).toBe(session);
+  });
+
+  it('preserves the response, confidence, and active timing when practice is paused', () => {
+    const session = createPyqSessionRow(
+      'user-1',
+      '1.0.0',
+      { ...mockConfig, mode: 'practice' },
+      [{ id: 'q1' }],
+      '2026-08-08T08:00:00.000Z'
+    );
+    const paused = pausePyqPracticeSession(
+      session,
+      { questionUid: 'q1', selectedAnswer: ['A', 'C'], markDecision: 'FIFTY_FIFTY' },
+      Date.parse('2026-08-08T08:00:12.345Z')
+    );
+
+    expect(paused.status).toBe('paused');
+    expect(paused.current_question_uid).toBeNull();
+    expect(paused.current_question_started_at).toBeNull();
+    expect(paused.config.practiceDraft).toEqual({
+      question_uid: 'q1',
+      selected_answer: ['A', 'C'],
+      mark_decision: 'FIFTY_FIFTY',
+      elapsed_ms: 12_345,
+      first_started_at: '2026-08-08T08:00:00.000Z'
+    });
+  });
+
+  it('accumulates repeated active segments without counting the paused gap', () => {
+    const original = createPyqSessionRow(
+      'user-1',
+      '1.0.0',
+      { ...mockConfig, mode: 'practice' },
+      [{ id: 'q1' }],
+      '2026-08-08T08:00:00.000Z'
+    );
+    const firstPause = pausePyqPracticeSession(
+      original,
+      { questionUid: 'q1', selectedAnswer: 'A', markDecision: 'MARK' },
+      Date.parse('2026-08-08T08:00:10.000Z')
+    );
+    const resumed = startPyqSessionQuestion(
+      { ...firstPause, status: 'active' },
+      'q1',
+      '2026-08-08T08:10:00.000Z'
+    );
+    const secondPause = pausePyqPracticeSession(
+      resumed,
+      { questionUid: 'q1', selectedAnswer: 'B', markDecision: 'MARK' },
+      Date.parse('2026-08-08T08:10:05.500Z')
+    );
+
+    expect(secondPause.config.practiceDraft).toMatchObject({
+      selected_answer: 'B',
+      elapsed_ms: 15_500,
+      first_started_at: '2026-08-08T08:00:00.000Z'
+    });
+  });
+
+  it('clears a matching practice draft after its question is committed', () => {
+    const active = createPyqSessionRow(
+      'user-1',
+      '1.0.0',
+      { ...mockConfig, mode: 'practice' },
+      [{ id: 'q1' }],
+      '2026-08-08T08:00:00.000Z'
+    );
+    const paused = pausePyqPracticeSession(
+      active,
+      { questionUid: 'q1', selectedAnswer: 'B', markDecision: 'MARK' },
+      Date.parse('2026-08-08T08:00:03.000Z')
+    );
+    const resumed = startPyqSessionQuestion(
+      { ...paused, status: 'active' },
+      'q1',
+      '2026-08-08T08:05:00.000Z'
+    );
+
+    const advanced = advancePyqSessionProgress(resumed, 'q1', 1, 4);
+    expect(advanced.config.practiceDraft).toBeUndefined();
   });
 
   it('completes and abandons sessions properly', () => {
@@ -210,6 +291,46 @@ describe('PYQ session logic and determinism', () => {
       covered: false,
       detail: 'Excluded because versioned scoring metadata is incomplete or inconsistent.'
     });
+  });
+
+  it('uses explicit active-work timing while retaining the true first start', () => {
+    const session = createPyqSessionRow(
+      'user-1',
+      '2.0.0',
+      mockConfig,
+      [question],
+      '2026-08-08T08:00:00.000Z'
+    );
+    const attempt = createPyqAttemptRow({
+      userId: 'user-1',
+      session,
+      question,
+      selectedAnswer: 'B',
+      decision: 'MARK',
+      bankVersion: '2.0.0',
+      questionStartedAtMs: Date.parse('2026-08-08T08:00:00.000Z'),
+      committedAtMs: Date.parse('2026-08-08T08:30:00.000Z'),
+      timeSpentMs: 15_500,
+      screenshotUrl: null
+    });
+
+    expect(attempt.question_started_at).toBe('2026-08-08T08:00:00.000Z');
+    expect(attempt.time_spent_ms).toBe(15_500);
+    expect(attempt.time_spent_sec).toBe(16);
+    expect(() =>
+      createPyqAttemptRow({
+        userId: 'user-1',
+        session,
+        question,
+        selectedAnswer: 'B',
+        decision: 'MARK',
+        bankVersion: '2.0.0',
+        questionStartedAtMs: 1_000,
+        committedAtMs: 2_000,
+        timeSpentMs: -1,
+        screenshotUrl: null
+      })
+    ).toThrow('PYQ attempt time must be a non-negative number.');
   });
 
   it('records skips without a phantom learner answer', () => {

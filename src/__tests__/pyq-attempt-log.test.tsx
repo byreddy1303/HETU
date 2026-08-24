@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { render, screen, waitFor, within } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import { db } from '@/lib/db';
@@ -106,7 +106,7 @@ describe('PYQ committed-attempt logging', () => {
       </MemoryRouter>
     );
 
-    await user.click(await screen.findByRole('button', { name: 'Start fresh set' }));
+    await user.click(await screen.findByRole('button', { name: 'Start practice set' }));
     expect(await screen.findByText('Which proposition is a tautology?')).toBeInTheDocument();
     const [startedPyqSession] = await db.pyq_sessions.toArray();
     expect(await db.sessions.get(startedPyqSession.id)).toMatchObject({
@@ -135,6 +135,10 @@ describe('PYQ committed-attempt logging', () => {
     expect(
       within(receipt).getByText('Exact GATE-rule score using the stored question type and marks.')
     ).toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: 'Continue analysis' }));
+    expect(await screen.findByRole('button', { name: 'Pause practice' })).toBeEnabled();
+    await user.click(screen.getByRole('button', { name: 'Back to answer' }));
 
     await waitFor(async () => {
       const attempts = await db.pyq_attempts.toArray();
@@ -176,7 +180,7 @@ describe('PYQ committed-attempt logging', () => {
         <Pyq />
       </MemoryRouter>
     );
-    await user.click(await screen.findByRole('button', { name: 'Resume set' }));
+    await user.click(await screen.findByRole('button', { name: 'Resume practice' }));
     expect(await screen.findByText('Practice set complete')).toBeInTheDocument();
     await waitFor(async () => {
       const [session] = await db.pyq_sessions.toArray();
@@ -187,6 +191,17 @@ describe('PYQ committed-attempt logging', () => {
         actual_duration_min: 1
       });
     });
+    expect(screen.getByRole('button', { name: /^View detailed report/i })).toBeEnabled();
+    expect(screen.getByRole('button', { name: /^Practice these questions again/i })).toBeEnabled();
+    expect(
+      screen.getByRole('button', { name: /^Start a new set with the same filters/i })
+    ).toBeEnabled();
+    expect(screen.getByRole('button', { name: /^Choose a different set/i })).toBeEnabled();
+    expect(
+      screen.queryByRole('button', { name: /Repeat this exact set/i })
+    ).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /Repeat these filters/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /Change filters/i })).not.toBeInTheDocument();
   });
 
   it('groups auto-journaled PYQ evidence under its canonical session', async () => {
@@ -197,7 +212,7 @@ describe('PYQ committed-attempt logging', () => {
       </MemoryRouter>
     );
 
-    await user.click(await screen.findByRole('button', { name: 'Start fresh set' }));
+    await user.click(await screen.findByRole('button', { name: 'Start practice set' }));
     await user.click(await screen.findByRole('button', { name: 'B' }));
     await user.click(screen.getByRole('button', { name: /^Answered/ }));
     await user.click(screen.getByRole('button', { name: 'Commit & reveal key' }));
@@ -212,6 +227,196 @@ describe('PYQ committed-attempt logging', () => {
       expect(journalRow.image_url).not.toBe(attempt.screenshot_url);
       expect(await db.sessions.get(attempt.pyq_session_id!)).toMatchObject({ kind: 'pyq' });
     });
+  });
+
+  it('lets Commit win a rapid Commit-then-Pause race without pausing or duplicating the receipt', async () => {
+    const user = userEvent.setup();
+    render(
+      <MemoryRouter>
+        <Pyq />
+      </MemoryRouter>
+    );
+
+    await user.click(await screen.findByRole('button', { name: 'Start practice set' }));
+    await user.click(await screen.findByRole('button', { name: 'A' }));
+    await user.click(screen.getByRole('button', { name: /^Answered/ }));
+
+    const [startedSession] = await db.pyq_sessions.toArray();
+    const originalGet = db.pyq_sessions.get.bind(db.pyq_sessions);
+    let releaseRead!: () => void;
+    const readGate = new Promise<void>((resolve) => {
+      releaseRead = resolve;
+    });
+    const getSpy = vi.spyOn(db.pyq_sessions, 'get').mockImplementationOnce(async (key) => {
+      await readGate;
+      return originalGet(key);
+    });
+
+    const commit = screen.getByRole('button', { name: 'Commit & reveal key' });
+    const pause = screen.getByRole('button', { name: 'Pause practice' });
+    act(() => {
+      fireEvent.click(commit);
+      fireEvent.click(pause);
+    });
+
+    await waitFor(() => expect(getSpy).toHaveBeenCalledTimes(1));
+    releaseRead();
+
+    await waitFor(async () => {
+      const attempts = await db.pyq_attempts
+        .where('pyq_session_id')
+        .equals(startedSession.id)
+        .toArray();
+      expect(attempts).toHaveLength(1);
+      expect(await db.pyq_sessions.get(startedSession.id)).toMatchObject({
+        status: 'active',
+        completed_count: 1
+      });
+    });
+    expect(await screen.findByRole('region', { name: 'PYQ attempt receipt' })).toBeInTheDocument();
+    expect(screen.queryByText('Paused sessions')).not.toBeInTheDocument();
+    expect(
+      await db.pyq_attempts.where('pyq_session_id').equals(startedSession.id).count()
+    ).toBe(1);
+    getSpy.mockRestore();
+  });
+
+  it('lets Pause win a rapid Pause-then-Commit race without creating a receipt', async () => {
+    const user = userEvent.setup();
+    render(
+      <MemoryRouter>
+        <Pyq />
+      </MemoryRouter>
+    );
+
+    await user.click(await screen.findByRole('button', { name: 'Start practice set' }));
+    await user.click(await screen.findByRole('button', { name: 'A' }));
+    await user.click(screen.getByRole('button', { name: /^Answered/ }));
+
+    const [startedSession] = await db.pyq_sessions.toArray();
+    const originalGet = db.pyq_sessions.get.bind(db.pyq_sessions);
+    let releaseRead!: () => void;
+    const readGate = new Promise<void>((resolve) => {
+      releaseRead = resolve;
+    });
+    const getSpy = vi.spyOn(db.pyq_sessions, 'get').mockImplementationOnce(async (key) => {
+      await readGate;
+      return originalGet(key);
+    });
+
+    const pause = screen.getByRole('button', { name: 'Pause practice' });
+    const commit = screen.getByRole('button', { name: 'Commit & reveal key' });
+    act(() => {
+      fireEvent.click(pause);
+      fireEvent.click(commit);
+    });
+
+    await waitFor(() => expect(getSpy).toHaveBeenCalledTimes(1));
+    releaseRead();
+
+    await waitFor(async () => {
+      expect(await db.pyq_sessions.get(startedSession.id)).toMatchObject({ status: 'paused' });
+    });
+    expect(await screen.findByText('Paused sessions')).toBeInTheDocument();
+    expect(
+      await db.pyq_attempts.where('pyq_session_id').equals(startedSession.id).count()
+    ).toBe(0);
+    expect(screen.queryByRole('region', { name: 'PYQ attempt receipt' })).not.toBeInTheDocument();
+    getSpy.mockRestore();
+  });
+
+  it('lets Finish win a rapid Finish-then-Pause race without leaving a completed receipt in a paused session', async () => {
+    const user = userEvent.setup();
+    render(
+      <MemoryRouter>
+        <Pyq />
+      </MemoryRouter>
+    );
+
+    await user.click(await screen.findByRole('button', { name: 'Start practice set' }));
+    await user.click(await screen.findByRole('button', { name: 'A' }));
+    await user.click(screen.getByRole('button', { name: /^Answered/ }));
+    await user.click(screen.getByRole('button', { name: 'Commit & reveal key' }));
+    expect(await screen.findByRole('region', { name: 'PYQ attempt receipt' })).toBeInTheDocument();
+
+    const [startedSession] = await db.pyq_sessions.toArray();
+    const originalGet = db.pyq_sessions.get.bind(db.pyq_sessions);
+    let releaseRead!: () => void;
+    const readGate = new Promise<void>((resolve) => {
+      releaseRead = resolve;
+    });
+    const getSpy = vi.spyOn(db.pyq_sessions, 'get').mockImplementationOnce(async (key) => {
+      await readGate;
+      return originalGet(key);
+    });
+
+    const finish = screen.getByRole('button', { name: 'Finish set' });
+    const pause = screen.getByRole('button', { name: 'Pause practice' });
+    act(() => {
+      fireEvent.click(finish);
+      fireEvent.click(pause);
+    });
+
+    await waitFor(() => expect(getSpy).toHaveBeenCalledTimes(1));
+    releaseRead();
+
+    expect(await screen.findByText('Practice set complete')).toBeInTheDocument();
+    expect(await db.pyq_sessions.get(startedSession.id)).toMatchObject({
+      status: 'completed',
+      completed_count: 1
+    });
+    expect(
+      await db.pyq_attempts.where('pyq_session_id').equals(startedSession.id).count()
+    ).toBe(1);
+    expect(screen.queryByText('Paused sessions')).not.toBeInTheDocument();
+    getSpy.mockRestore();
+  });
+
+  it('lets Pause win a rapid Pause-then-Finish race without completing the paused session', async () => {
+    const user = userEvent.setup();
+    render(
+      <MemoryRouter>
+        <Pyq />
+      </MemoryRouter>
+    );
+
+    await user.click(await screen.findByRole('button', { name: 'Start practice set' }));
+    await user.click(await screen.findByRole('button', { name: 'A' }));
+    await user.click(screen.getByRole('button', { name: /^Answered/ }));
+    await user.click(screen.getByRole('button', { name: 'Commit & reveal key' }));
+    expect(await screen.findByRole('region', { name: 'PYQ attempt receipt' })).toBeInTheDocument();
+
+    const [startedSession] = await db.pyq_sessions.toArray();
+    const originalGet = db.pyq_sessions.get.bind(db.pyq_sessions);
+    let releaseRead!: () => void;
+    const readGate = new Promise<void>((resolve) => {
+      releaseRead = resolve;
+    });
+    const getSpy = vi.spyOn(db.pyq_sessions, 'get').mockImplementationOnce(async (key) => {
+      await readGate;
+      return originalGet(key);
+    });
+
+    const pause = screen.getByRole('button', { name: 'Pause practice' });
+    const finish = screen.getByRole('button', { name: 'Finish set' });
+    act(() => {
+      fireEvent.click(pause);
+      fireEvent.click(finish);
+    });
+
+    await waitFor(() => expect(getSpy).toHaveBeenCalledTimes(1));
+    releaseRead();
+
+    expect(await screen.findByText('Paused sessions')).toBeInTheDocument();
+    expect(await db.pyq_sessions.get(startedSession.id)).toMatchObject({
+      status: 'paused',
+      completed_count: 1
+    });
+    expect(
+      await db.pyq_attempts.where('pyq_session_id').equals(startedSession.id).count()
+    ).toBe(1);
+    expect(screen.queryByText('Practice set complete')).not.toBeInTheDocument();
+    getSpy.mockRestore();
   });
 
   it('resumes a compatible saved set after the question bank version changes', async () => {
@@ -238,7 +443,7 @@ describe('PYQ committed-attempt logging', () => {
       </MemoryRouter>
     );
 
-    await user.click(await screen.findByRole('button', { name: 'Resume set' }));
+    await user.click(await screen.findByRole('button', { name: 'Resume practice' }));
     expect(await screen.findByText('Which proposition is a tautology?')).toBeInTheDocument();
     await waitFor(async () => {
       expect((await db.pyq_sessions.get(saved.id))?.bank_version).toBe(manifest.bankVersion);
@@ -269,11 +474,11 @@ describe('PYQ committed-attempt logging', () => {
       </MemoryRouter>
     );
 
-    await user.click(await screen.findByRole('button', { name: 'Discard' }));
+    await user.click(await screen.findByRole('button', { name: 'Discard session' }));
     await waitFor(async () => {
       expect((await db.pyq_sessions.get(saved.id))?.status).toBe('abandoned');
     });
-    expect(screen.queryByRole('button', { name: 'Resume set' })).not.toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Start fresh set' })).toBeEnabled();
+    expect(screen.queryByRole('button', { name: 'Resume practice' })).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Start practice set' })).toBeEnabled();
   });
 });

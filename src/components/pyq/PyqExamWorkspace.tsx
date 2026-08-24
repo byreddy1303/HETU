@@ -7,7 +7,7 @@ import {
   Clock3,
   Eraser,
   Flag,
-  LogOut,
+  Pause,
   Send,
   Square
 } from 'lucide-react';
@@ -61,7 +61,7 @@ interface PyqExamWorkspaceProps {
   onSaveAndNext: () => void;
   onPrevious: () => void;
   onSubmit: () => void;
-  onSaveAndExit: () => void;
+  onPause: () => void;
 }
 
 function answerInputType(question: PyqQuestion): 'MCQ' | 'MSQ' | 'NAT' {
@@ -390,12 +390,13 @@ export default function PyqExamWorkspace({
   onSaveAndNext,
   onPrevious,
   onSubmit,
-  onSaveAndExit
+  onPause
 }: PyqExamWorkspaceProps) {
   const current = questions[index];
   const counts = pyqExamPaletteCounts(session, questions);
   const urgent = remainingSec <= 5 * 60;
   const hasResponse = choices.length > 0 || numeric.trim().length > 0;
+  const isLastQuestion = index >= questions.length - 1;
 
   return (
     <section
@@ -404,17 +405,26 @@ export default function PyqExamWorkspace({
     >
       <header className="sticky top-[calc(56px+var(--safe-top))] z-20 rounded-lg border border-border bg-bg-raised/95 px-3 py-2 shadow-card backdrop-blur md:top-2 sm:px-4">
         <div className="flex flex-wrap items-center justify-between gap-2.5">
-          <Button
-            variant="ghost"
-            size="sm"
-            disabled={submitting}
-            onClick={onSaveAndExit}
-            aria-label="Save exam progress and exit"
-            className="-ml-1"
-          >
-            <LogOut size={14} />
-            Save &amp; exit
-          </Button>
+          <div className="flex flex-col items-start">
+            <Button
+              variant="ghost"
+              size="sm"
+              disabled={submitting}
+              onClick={onPause}
+              aria-label="Pause exam"
+              aria-describedby="pyq-exam-pause-hint"
+              className="-ml-1 whitespace-nowrap"
+            >
+              <Pause size={14} />
+              Pause exam
+            </Button>
+            <span
+              id="pyq-exam-pause-hint"
+              className="hidden pl-2 text-[9.5px] text-text-faint sm:block"
+            >
+              Progress saved · timer stops
+            </span>
+          </div>
 
           <div className="order-3 flex w-full items-center justify-between gap-3 border-t border-border pt-2.5 sm:order-none sm:w-auto sm:border-0 sm:pt-0">
             <div className="text-left sm:text-center">
@@ -465,7 +475,7 @@ export default function PyqExamWorkspace({
               This exam has no question at the selected position.
             </p>
             <p className="mt-1 text-[12.5px] text-text-muted">
-              Save and exit, then resume the set to reload its question order.
+              Pause the exam, then resume it to reload the saved question order.
             </p>
           </CardBody>
         </Card>
@@ -575,7 +585,7 @@ export default function PyqExamWorkspace({
               <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
                 <Button variant="secondary" size="sm" disabled={submitting} onClick={onMarkAndNext}>
                   <Bookmark size={14} />
-                  Mark for review &amp; next
+                  {isLastQuestion ? 'Mark for review' : 'Mark for review & next'}
                 </Button>
                 <Button
                   variant="ghost"
@@ -598,8 +608,8 @@ export default function PyqExamWorkspace({
                   Previous
                 </Button>
                 <Button variant="primary" size="sm" disabled={submitting} onClick={onSaveAndNext}>
-                  Save &amp; next
-                  <ArrowRight size={14} />
+                  {isLastQuestion ? 'Review & submit' : 'Save & next'}
+                  {isLastQuestion ? <Send size={14} /> : <ArrowRight size={14} />}
                 </Button>
               </div>
             </CardBody>

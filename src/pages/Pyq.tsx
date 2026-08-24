@@ -4,6 +4,7 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import {
   ArrowLeft,
   ArrowRight,
+  BarChart3,
   Bookmark,
   BookOpenCheck,
   Check,
@@ -12,7 +13,10 @@ import {
   ExternalLink,
   FileQuestion,
   LibraryBig,
+  Pause,
+  RotateCcw,
   Shuffle,
+  SlidersHorizontal,
   XCircle
 } from 'lucide-react';
 import type {
@@ -67,6 +71,7 @@ import {
   aggregatePyqAttemptScores,
   createPyqSessionRow,
   nextPyqAttemptNumber,
+  pausePyqPracticeSession,
   pausePyqSession,
   pyqAttemptScorePresentation,
   pyqAttemptId,
@@ -99,6 +104,31 @@ type TypeFilter = PyqSessionConfig['type'];
 type AttemptConfig = PyqSessionConfig;
 
 const CHOICES = ['A', 'B', 'C', 'D'];
+const PRACTICE_MODE_FEATURES = [
+  'Feedback after each answer',
+  'No overall time limit',
+  'Confidence tracking',
+  'Pause with your draft saved'
+];
+const EXAM_MODE_FEATURES = [
+  'One timed question paper',
+  'Free question navigation',
+  'Mark questions for review',
+  'Pause stops the timer'
+];
+
+function pauseStoredPyqSession(session: PyqSessionRow): PyqSessionRow {
+  if (session.config.mode === 'exam') return pausePyqExamSession(session);
+  if (!session.current_question_uid) return pausePyqSession(session);
+  const savedDraft = session.config.practiceDraft;
+  return pausePyqPracticeSession(session, {
+    questionUid: session.current_question_uid,
+    selectedAnswer:
+      savedDraft?.question_uid === session.current_question_uid ? savedDraft.selected_answer : null,
+    markDecision:
+      savedDraft?.question_uid === session.current_question_uid ? savedDraft.mark_decision : null
+  });
+}
 
 function latestQuestionAttempt(
   attempts: PyqAttemptRow[],
@@ -204,8 +234,8 @@ function PracticeSetup({
             <div className="min-w-0">
               <p className="font-display text-[16px] font-semibold text-text">
                 {activeSession.config.mode === 'exam'
-                  ? 'Timed exam in progress'
-                  : 'Unfinished PYQ set'}
+                  ? 'Exam currently open'
+                  : 'Practice session currently open'}
               </p>
               <p className="mt-1 text-[12px] text-text-muted">
                 {activeSession.completed_count} of {activeSession.question_uids.length}{' '}
@@ -218,18 +248,18 @@ function PracticeSetup({
             </div>
             <div className="flex flex-wrap gap-2">
               <Button variant="primary" onClick={() => onResume(activeSession)} disabled={loading}>
-                Resume set
+                {activeSession.config.mode === 'exam' ? 'Resume exam' : 'Resume practice'}
               </Button>
               <Button
                 onClick={() => onSave(activeSession)}
                 disabled={loading}
-                title="Save this set so you can start a fresh one and come back later"
+                title="Pause this session so you can return to it later"
               >
-                <Bookmark size={14} />
-                Save set
+                <Pause size={14} />
+                {activeSession.config.mode === 'exam' ? 'Pause exam' : 'Pause practice'}
               </Button>
-              <Button onClick={() => onDiscard(activeSession)} disabled={loading}>
-                Discard
+              <Button variant="danger" onClick={() => onDiscard(activeSession)} disabled={loading}>
+                Discard session
               </Button>
             </div>
           </CardBody>
@@ -239,7 +269,7 @@ function PracticeSetup({
       {savedSessions.length > 0 && (
         <div className="flex flex-col gap-2">
           <p className="px-1 text-[11px] font-semibold uppercase tracking-widest text-text-faint">
-            Saved sets
+            Paused sessions
           </p>
           {savedSessions.map((session) => (
             <Card key={session.id}>
@@ -250,7 +280,9 @@ function PracticeSetup({
                   </span>
                   <div className="min-w-0">
                     <p className="flex items-center gap-2 truncate text-[13.5px] font-semibold text-text">
-                      {session.config.mode === 'exam' ? <Badge tone="guess">Exam</Badge> : null}
+                      <Badge tone={session.config.mode === 'exam' ? 'guess' : 'accent'}>
+                        {session.config.mode === 'exam' ? 'Exam' : 'Practice'}
+                      </Badge>
                       {session.config.subjectSlug === 'all'
                         ? 'Mixed subjects'
                         : (manifest.subjects.find((s) => s.slug === session.config.subjectSlug)
@@ -267,10 +299,10 @@ function PracticeSetup({
                 </div>
                 <div className="flex flex-wrap gap-2">
                   <Button variant="primary" onClick={() => onResume(session)} disabled={loading}>
-                    Resume
+                    {session.config.mode === 'exam' ? 'Resume exam' : 'Resume practice'}
                   </Button>
-                  <Button onClick={() => onDiscard(session)} disabled={loading}>
-                    Discard
+                  <Button variant="danger" onClick={() => onDiscard(session)} disabled={loading}>
+                    Discard session
                   </Button>
                 </div>
               </CardBody>
@@ -279,7 +311,146 @@ function PracticeSetup({
         </div>
       )}
 
+      <section aria-labelledby="pyq-mode-heading">
+        <Card className="overflow-hidden border-border-hover">
+          <CardBody className="p-0">
+            <div className="flex flex-col gap-3 border-b border-border bg-bg-overlay/25 p-4 sm:flex-row sm:items-end sm:justify-between sm:p-5">
+              <div>
+                <p className="u-label">Step 1 · Choose a mode</p>
+                <h2
+                  id="pyq-mode-heading"
+                  className="mt-1 font-display text-[20px] font-bold tracking-tight text-text sm:text-[23px]"
+                >
+                  Choose how you want to work
+                </h2>
+                <p className="mt-1 max-w-2xl text-[12.5px] leading-relaxed text-text-muted">
+                  Learn with feedback in Practice mode, or simulate test conditions in Exam mode.
+                  Both can be paused and resumed.
+                </p>
+              </div>
+              <Badge tone={config.mode === 'exam' ? 'guess' : 'accent'} className="self-start">
+                {config.mode === 'exam' ? 'Exam selected' : 'Practice selected'}
+              </Badge>
+            </div>
+
+            <div className="grid md:grid-cols-2">
+              <button
+                type="button"
+                aria-pressed={(config.mode ?? 'practice') === 'practice'}
+                onClick={() =>
+                  setConfig({
+                    ...config,
+                    mode: 'practice',
+                    examState: undefined,
+                    practiceDraft: undefined
+                  })
+                }
+                className={cn(
+                  'group relative min-h-[230px] overflow-hidden border-b border-border p-5 text-left transition-all focus-visible:z-10 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-accent-faint md:border-b-0 md:border-r sm:p-6',
+                  (config.mode ?? 'practice') === 'practice'
+                    ? 'bg-accent-faint/70 shadow-[inset_5px_0_0_rgb(var(--color-accent))]'
+                    : 'bg-bg-raised hover:bg-accent-faint/35'
+                )}
+              >
+                <span className="flex items-start justify-between gap-4">
+                  <span className="flex h-11 w-11 items-center justify-center rounded-lg border border-accent/25 bg-bg-raised text-accent shadow-sm">
+                    <BookOpenCheck size={21} aria-hidden="true" />
+                  </span>
+                  <span
+                    className={cn(
+                      'flex h-6 w-6 items-center justify-center rounded-full border transition-colors',
+                      (config.mode ?? 'practice') === 'practice'
+                        ? 'border-accent bg-accent text-accent-contrast'
+                        : 'border-border-hover text-transparent'
+                    )}
+                    aria-hidden="true"
+                  >
+                    <Check size={13} strokeWidth={3} />
+                  </span>
+                </span>
+                <span className="mt-4 block font-display text-[19px] font-bold text-text">
+                  Practice mode
+                </span>
+                <span className="mt-1 block text-[12.5px] leading-relaxed text-text-muted">
+                  Work through one question at a time with the answer key and result revealed after
+                  each committed response.
+                </span>
+                <span className="mt-4 grid gap-2 text-[11.5px] text-text-muted sm:grid-cols-2">
+                  {PRACTICE_MODE_FEATURES.map((item) => (
+                    <span key={item} className="flex items-center gap-2">
+                      <CheckCircle2 size={13} className="shrink-0 text-accent" />
+                      {item}
+                    </span>
+                  ))}
+                </span>
+              </button>
+
+              <button
+                type="button"
+                aria-pressed={config.mode === 'exam'}
+                onClick={() =>
+                  setConfig({
+                    ...config,
+                    mode: 'exam',
+                    count: config.count === 'all' ? '15' : config.count,
+                    examState: undefined,
+                    practiceDraft: undefined
+                  })
+                }
+                className={cn(
+                  'group relative min-h-[230px] overflow-hidden p-5 text-left transition-all focus-visible:z-10 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-guess-faint sm:p-6',
+                  config.mode === 'exam'
+                    ? 'bg-guess-faint/75 shadow-[inset_5px_0_0_rgb(var(--color-ink-violet))]'
+                    : 'bg-bg-raised hover:bg-guess-faint/35'
+                )}
+              >
+                <span className="flex items-start justify-between gap-4">
+                  <span className="flex h-11 w-11 items-center justify-center rounded-lg border border-ink-violet/25 bg-bg-raised text-ink-violet shadow-sm">
+                    <Clock3 size={21} aria-hidden="true" />
+                  </span>
+                  <span
+                    className={cn(
+                      'flex h-6 w-6 items-center justify-center rounded-full border transition-colors',
+                      config.mode === 'exam'
+                        ? 'border-ink-violet bg-ink-violet text-white'
+                        : 'border-border-hover text-transparent'
+                    )}
+                    aria-hidden="true"
+                  >
+                    <Check size={13} strokeWidth={3} />
+                  </span>
+                </span>
+                <span className="mt-4 block font-display text-[19px] font-bold text-text">
+                  Exam mode
+                </span>
+                <span className="mt-1 block text-[12.5px] leading-relaxed text-text-muted">
+                  Use one countdown, move freely between questions, and see answer keys only after
+                  final submission.
+                </span>
+                <span className="mt-4 grid gap-2 text-[11.5px] text-text-muted sm:grid-cols-2">
+                  {EXAM_MODE_FEATURES.map((item) => (
+                    <span key={item} className="flex items-center gap-2">
+                      <CheckCircle2 size={13} className="shrink-0 text-ink-violet" />
+                      {item}
+                    </span>
+                  ))}
+                </span>
+              </button>
+            </div>
+          </CardBody>
+        </Card>
+      </section>
+
       <Card className="overflow-hidden">
+        <div className="flex flex-col gap-1 border-b border-border bg-bg-overlay/25 p-4 sm:p-5">
+          <p className="u-label">Step 2 · Configure the set</p>
+          <h2 className="font-display text-[18px] font-bold text-text">
+            {config.mode === 'exam' ? 'Build your timed exam' : 'Build your practice session'}
+          </h2>
+          <p className="text-[12px] text-text-muted">
+            Choose the questions below, then start in the selected mode.
+          </p>
+        </div>
         <div className="grid lg:grid-cols-[minmax(0,1.45fr)_minmax(300px,0.75fr)]">
           <div className="border-b border-border p-4 lg:border-b-0 lg:border-r">
             <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
@@ -429,55 +600,24 @@ function PracticeSetup({
           </div>
 
           <div className="flex flex-col bg-bg-overlay/25 p-4">
-            <p className="u-label">Choose a session mode</p>
-            <div className="mt-3 grid grid-cols-2 gap-2">
-              <button
-                type="button"
-                aria-pressed={(config.mode ?? 'practice') === 'practice'}
-                onClick={() => setConfig({ ...config, mode: 'practice', examState: undefined })}
-                className={cn(
-                  'rounded border p-3 text-left transition-colors',
-                  (config.mode ?? 'practice') === 'practice'
-                    ? 'border-accent/45 bg-accent-faint'
-                    : 'border-border bg-bg-raised hover:border-border-hover'
-                )}
-              >
-                <span className="block text-[13px] font-semibold text-text">Practice</span>
-                <span className="mt-1 block text-[11px] leading-snug text-text-faint">
-                  Reveal each key after committing.
-                </span>
-              </button>
-              <button
-                type="button"
-                aria-pressed={config.mode === 'exam'}
-                onClick={() =>
-                  setConfig({
-                    ...config,
-                    mode: 'exam',
-                    count: config.count === 'all' ? '15' : config.count,
-                    examState: undefined
-                  })
-                }
-                className={cn(
-                  'rounded border p-3 text-left transition-colors',
-                  config.mode === 'exam'
-                    ? 'border-ink-violet/45 bg-guess-faint'
-                    : 'border-border bg-bg-raised hover:border-border-hover'
-                )}
-              >
-                <span className="block text-[13px] font-semibold text-text">Exam mode</span>
-                <span className="mt-1 block text-[11px] leading-snug text-text-faint">
-                  One clock, free navigation, keys after submit.
-                </span>
-              </button>
-            </div>
-            {config.mode === 'exam' ? (
-              <p className="mt-3 rounded border border-ink-violet/20 bg-guess-faint px-3 py-2 text-[11px] leading-relaxed text-text-muted">
-                The clock allows 3 minutes per question. Draft responses and review flags are saved
-                locally until you submit.
+            <div
+              className={cn(
+                'rounded border px-3 py-2.5',
+                config.mode === 'exam'
+                  ? 'border-ink-violet/20 bg-guess-faint'
+                  : 'border-accent/20 bg-accent-faint'
+              )}
+            >
+              <p className="u-label">{config.mode === 'exam' ? 'Exam rules' : 'Practice rules'}</p>
+              <p className="mt-1 text-[11.5px] leading-relaxed text-text-muted">
+                {config.mode === 'exam'
+                  ? '3 minutes per question feed one shared countdown. Keys stay hidden until submission.'
+                  : 'There is no overall timer. Commit each response to reveal its key before moving on.'}
               </p>
-            ) : null}
-            <p className="u-label mt-5">Build this set</p>
+            </div>
+            <p className="u-label mt-5">
+              {config.mode === 'exam' ? 'Exam settings' : 'Practice settings'}
+            </p>
             <div className="mt-4 grid grid-cols-2 gap-3">
               <label className="text-[12px] font-medium text-text-muted">
                 From year
@@ -541,7 +681,7 @@ function PracticeSetup({
                 </Select>
               </label>
               <label className="col-span-2 text-[12px] font-medium text-text-muted">
-                Practice history
+                Question history
                 <Select
                   className="mt-1"
                   value={config.history ?? 'all'}
@@ -578,7 +718,7 @@ function PracticeSetup({
                   ? 'Opening question bank…'
                   : config.mode === 'exam'
                     ? 'Start timed exam'
-                    : 'Start fresh set'}
+                    : 'Start practice set'}
               </Button>
               <p className="mt-3 text-center text-[11px] leading-relaxed text-text-faint">
                 {config.mode === 'exam'
@@ -746,7 +886,7 @@ function DecisionButtons({
   ];
   return (
     <fieldset disabled={disabled}>
-      <legend className="u-label mb-2">Exam decision</legend>
+      <legend className="u-label mb-2">How did this answer feel?</legend>
       <div className="grid gap-2 sm:grid-cols-3">
         {options.map((option) => (
           <button
@@ -917,6 +1057,7 @@ export default function Pyq() {
   const [examSubmitOpen, setExamSubmitOpen] = useState(false);
   const questionCaptureRef = useRef<HTMLDivElement>(null);
   const submittingRef = useRef(false);
+  const pausingSessionRef = useRef(false);
   const startingRef = useRef(false);
   const questionStartRef = useRef<{ questionUid: string; startedAtMs: number } | null>(null);
   const completedRef = useRef(completed);
@@ -1052,6 +1193,12 @@ export default function Pyq() {
     }
     const priorAttempt = latestQuestionAttempt(completedRef.current, currentId);
     const lockedAttempt = priorAttempt?.mark_decision === 'SKIP' ? null : priorAttempt;
+    const practiceDraft =
+      !lockedAttempt &&
+      openSession?.config.mode !== 'exam' &&
+      openSession?.config.practiceDraft?.question_uid === currentId
+        ? openSession.config.practiceDraft
+        : null;
     const persistedStart = questionStartRef.current;
     setStartedAt(
       lockedAttempt
@@ -1061,7 +1208,7 @@ export default function Pyq() {
           : Date.now()
     );
     questionStartRef.current = null;
-    const savedAnswer = lockedAttempt?.selected_answer;
+    const savedAnswer = lockedAttempt?.selected_answer ?? practiceDraft?.selected_answer;
     setChoices(
       Array.isArray(savedAnswer)
         ? savedAnswer.map(String)
@@ -1069,10 +1216,8 @@ export default function Pyq() {
           ? [savedAnswer]
           : []
     );
-    setNumeric(
-      lockedAttempt && answerInputType(questions[index]) === 'NAT' ? String(savedAnswer ?? '') : ''
-    );
-    setDecision(lockedAttempt?.mark_decision ?? null);
+    setNumeric(answerInputType(questions[index]) === 'NAT' ? String(savedAnswer ?? '') : '');
+    setDecision(lockedAttempt?.mark_decision ?? practiceDraft?.mark_decision ?? null);
     setSubmitted(lockedAttempt ?? null);
     setSubmitting(false);
     setJournalOpen(false);
@@ -1090,7 +1235,13 @@ export default function Pyq() {
   }, [journalOpen]);
 
   const liveSeconds = useTimer(submitted ? null : startedAt);
-  const shownSeconds = submitted?.time_spent_sec ?? liveSeconds;
+  const practiceDraftElapsedSec =
+    !submitted &&
+    loadedSession?.config.mode !== 'exam' &&
+    loadedSession?.config.practiceDraft?.question_uid === currentId
+      ? Math.floor(loadedSession.config.practiceDraft.elapsed_ms / 1000)
+      : 0;
+  const shownSeconds = submitted?.time_spent_sec ?? practiceDraftElapsedSec + liveSeconds;
   const timedExamActive =
     loadedSession?.config.mode === 'exam' &&
     loadedSession.status === 'active' &&
@@ -1104,7 +1255,14 @@ export default function Pyq() {
     timedExamActive && loadedSession ? pyqExamRemainingSeconds(loadedSession) : 0;
 
   useEffect(() => {
-    if (!timedExamActive || examRemainingSec > 0 || submittingRef.current) return;
+    if (
+      !timedExamActive ||
+      examRemainingSec > 0 ||
+      submittingRef.current ||
+      pausingSessionRef.current
+    ) {
+      return;
+    }
     void finalizeExamRef.current('time-expired');
   }, [examRemainingSec, timedExamActive]);
 
@@ -1147,12 +1305,7 @@ export default function Pyq() {
           .equals([userId, 'active'])
           .toArray();
         for (const activeRow of activeRows) {
-          await writeLocal(
-            'pyq_sessions',
-            activeRow.config.mode === 'exam'
-              ? pausePyqExamSession(activeRow)
-              : pausePyqSession(activeRow)
-          );
+          await writeLocal('pyq_sessions', pauseStoredPyqSession(activeRow));
         }
         if (pyqSessionId && activeRows.some((r) => r.id === pyqSessionId)) {
           setQuestions([]);
@@ -1285,17 +1438,39 @@ export default function Pyq() {
   }
 
   async function saveSession(session: PyqSessionRow) {
-    if (loading) return;
+    const pausingExam = session.config.mode === 'exam';
+    const pausingOpenSession = pyqSessionId === session.id && questions.length > 0;
+    let pauseFailed = false;
+    if (loading || pausingSessionRef.current || submittingRef.current) return;
+    pausingSessionRef.current = true;
+    if (pausingExam) {
+      setSubmitting(true);
+    }
     setLoading(true);
-    setStartError(null);
+    if (pausingOpenSession) setSubmitError(null);
+    else setStartError(null);
     try {
       await examWriteQueueRef.current.catch(() => undefined);
+      const persistedSession = await db.pyq_sessions.get(session.id);
       const currentSession =
-        loadedSessionRef.current?.id === session.id ? loadedSessionRef.current : session;
+        persistedSession ??
+        (loadedSessionRef.current?.id === session.id ? loadedSessionRef.current : session);
       const paused =
         currentSession.config.mode === 'exam'
           ? pausePyqExamSession(currentSession)
-          : pausePyqSession(currentSession);
+          : currentSession.current_question_uid
+            ? pausePyqPracticeSession(currentSession, {
+                questionUid: currentSession.current_question_uid,
+                selectedAnswer:
+                  current?.id === currentSession.current_question_uid && !submitted
+                    ? selectedAnswer(current)
+                    : (currentSession.config.practiceDraft?.selected_answer ?? null),
+                markDecision:
+                  current?.id === currentSession.current_question_uid && !submitted
+                    ? decision
+                    : (currentSession.config.practiceDraft?.mark_decision ?? null)
+              })
+            : pausePyqSession(currentSession);
       await writeLocal('pyq_sessions', paused);
       if (pyqSessionId === session.id) {
         setQuestions([]);
@@ -1306,11 +1481,27 @@ export default function Pyq() {
         setLoadedSession(null);
       }
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Could not save that PYQ set.';
-      if (session.config.mode === 'exam') setSubmitError(`Exam was not saved: ${message}`);
-      else setStartError(message);
+      pauseFailed = true;
+      const message = error instanceof Error ? error.message : 'Could not pause that PYQ session.';
+      const pauseMessage = pausingExam ? `Exam was not paused: ${message}` : message;
+      if (pausingOpenSession) setSubmitError(pauseMessage);
+      else setStartError(pauseMessage);
     } finally {
+      if (pausingExam) {
+        setSubmitting(false);
+      }
+      pausingSessionRef.current = false;
       setLoading(false);
+      const resumableExam = loadedSessionRef.current;
+      if (
+        pausingExam &&
+        pauseFailed &&
+        resumableExam?.config.mode === 'exam' &&
+        resumableExam.status === 'active' &&
+        pyqExamRemainingSeconds(resumableExam) <= 0
+      ) {
+        void finalizeExamRef.current('time-expired');
+      }
     }
   }
 
@@ -1326,12 +1517,7 @@ export default function Pyq() {
         .equals([userId, 'active'])
         .toArray();
       for (const activeRow of activeRows) {
-        await writeLocal(
-          'pyq_sessions',
-          activeRow.config.mode === 'exam'
-            ? pausePyqExamSession(activeRow)
-            : pausePyqSession(activeRow)
-        );
+        await writeLocal('pyq_sessions', pauseStoredPyqSession(activeRow));
       }
       if (pyqSessionId && activeRows.some((r) => r.id === pyqSessionId)) {
         setQuestions([]);
@@ -1384,10 +1570,15 @@ export default function Pyq() {
       const sessionConfig =
         config.mode === 'exam'
           ? createPyqExamConfig(
-              config,
+              { ...config, practiceDraft: undefined },
               rows.map((question) => question.id)
             )
-          : { ...config, mode: 'practice' as const, examState: undefined };
+          : {
+              ...config,
+              mode: 'practice' as const,
+              examState: undefined,
+              practiceDraft: undefined
+            };
       const session = createPyqSessionRow(userId!, manifest.bankVersion, sessionConfig, rows);
       const plannerDate = searchParams.get('plannerDate');
       const plannerBlockId = searchParams.get('plannerBlock');
@@ -1439,20 +1630,20 @@ export default function Pyq() {
         .equals([userId, 'active'])
         .toArray();
       for (const activeRow of activeRows) {
-        await writeLocal(
-          'pyq_sessions',
-          activeRow.config.mode === 'exam'
-            ? pausePyqExamSession(activeRow)
-            : pausePyqSession(activeRow)
-        );
+        await writeLocal('pyq_sessions', pauseStoredPyqSession(activeRow));
       }
       const repeatedConfig =
         config.mode === 'exam'
           ? createPyqExamConfig(
-              config,
+              { ...config, practiceDraft: undefined },
               questions.map((question) => question.id)
             )
-          : { ...config, mode: 'practice' as const, examState: undefined };
+          : {
+              ...config,
+              mode: 'practice' as const,
+              examState: undefined,
+              practiceDraft: undefined
+            };
       const session = createPyqSessionRow(userId, manifest.bankVersion, repeatedConfig, questions);
       await writeLocalBatch([
         { name: 'pyq_sessions', row: session },
@@ -1575,6 +1766,7 @@ export default function Pyq() {
   }
 
   function changeExamChoices(nextChoices: string[]) {
+    if (submittingRef.current || pausingSessionRef.current) return;
     setChoices(nextChoices);
     const session = loadedSessionRef.current;
     if (!current || !session || session.config.mode !== 'exam') return;
@@ -1583,6 +1775,7 @@ export default function Pyq() {
   }
 
   function changeExamNumeric(value: string) {
+    if (submittingRef.current || pausingSessionRef.current) return;
     setNumeric(value);
     const session = loadedSessionRef.current;
     if (!current || !session || session.config.mode !== 'exam') return;
@@ -1597,7 +1790,14 @@ export default function Pyq() {
 
   function navigateExam(nextIndex: number) {
     const session = loadedSessionRef.current;
-    if (!session || session.config.mode !== 'exam' || submittingRef.current) return;
+    if (
+      !session ||
+      session.config.mode !== 'exam' ||
+      submittingRef.current ||
+      pausingSessionRef.current
+    ) {
+      return;
+    }
     const boundedIndex = Math.max(0, Math.min(nextIndex, questions.length - 1));
     const nextQuestion = questions[boundedIndex];
     if (!nextQuestion) return;
@@ -1608,7 +1808,15 @@ export default function Pyq() {
 
   function markExamForReviewAndNext() {
     const session = loadedSessionRef.current;
-    if (!current || !session || session.config.mode !== 'exam' || submittingRef.current) return;
+    if (
+      !current ||
+      !session ||
+      session.config.mode !== 'exam' ||
+      submittingRef.current ||
+      pausingSessionRef.current
+    ) {
+      return;
+    }
     const marked = setPyqExamReviewMark(session, current.id, true);
     const nextIndex = Math.min(index + 1, questions.length - 1);
     const nextQuestion = questions[nextIndex];
@@ -1619,13 +1827,22 @@ export default function Pyq() {
 
   function clearExamResponse() {
     const session = loadedSessionRef.current;
-    if (!current || !session || session.config.mode !== 'exam' || submittingRef.current) return;
+    if (
+      !current ||
+      !session ||
+      session.config.mode !== 'exam' ||
+      submittingRef.current ||
+      pausingSessionRef.current
+    ) {
+      return;
+    }
     setChoices([]);
     setNumeric('');
     setLoadedExamSession(setPyqExamResponse(session, current, undefined));
   }
 
   function saveExamAndNext() {
+    if (submittingRef.current || pausingSessionRef.current) return;
     if (index + 1 >= questions.length) {
       setExamSubmitOpen(true);
       return;
@@ -1642,7 +1859,8 @@ export default function Pyq() {
       session.config.mode !== 'exam' ||
       session.status !== 'active' ||
       questions.length === 0 ||
-      submittingRef.current
+      submittingRef.current ||
+      pausingSessionRef.current
     ) {
       return;
     }
@@ -1700,28 +1918,41 @@ export default function Pyq() {
       !decision ||
       submitted ||
       submitting ||
-      submittingRef.current
+      submittingRef.current ||
+      pausingSessionRef.current
     )
       return;
-    const committedAtMs = Date.now();
-    const questionStartedAtMs = Math.min(startedAt ?? committedAtMs, committedAtMs);
-    setSubmitError(null);
-    const session = pyqSessionId ? await db.pyq_sessions.get(pyqSessionId) : null;
-    if (!session) {
-      setSubmitError('The active set could not be found. Return to PYQ setup and resume it.');
-      return;
-    }
     const selected = selectedAnswer(current);
     if (
       decision !== 'SKIP' &&
       (selected == null ||
         (Array.isArray(selected) && selected.length === 0) ||
         (typeof selected === 'number' && !Number.isFinite(selected)))
-    )
+    ) {
       return;
+    }
+    const committedAtMs = Date.now();
+    const activeSegmentStartedAtMs = Math.min(startedAt ?? committedAtMs, committedAtMs);
+    setSubmitError(null);
     submittingRef.current = true;
     setSubmitting(true);
     try {
+      const session = pyqSessionId ? await db.pyq_sessions.get(pyqSessionId) : null;
+      if (!session) {
+        setSubmitError('The active set could not be found. Return to PYQ setup and resume it.');
+        return;
+      }
+      const practiceDraft =
+        session.config.mode !== 'exam' && session.config.practiceDraft?.question_uid === current.id
+          ? session.config.practiceDraft
+          : null;
+      const firstStartedAtMs = Date.parse(practiceDraft?.first_started_at ?? '');
+      const questionStartedAtMs = Number.isFinite(firstStartedAtMs)
+        ? Math.min(firstStartedAtMs, committedAtMs)
+        : activeSegmentStartedAtMs;
+      const timeSpentMs = practiceDraft
+        ? practiceDraft.elapsed_ms + Math.max(0, committedAtMs - activeSegmentStartedAtMs)
+        : undefined;
       const questionAttempts = await db.pyq_attempts
         .where('[pyq_session_id+question_uid]')
         .equals([session.id, current.id])
@@ -1749,6 +1980,7 @@ export default function Pyq() {
         bankVersion: manifest.bankVersion,
         questionStartedAtMs,
         committedAtMs,
+        timeSpentMs,
         screenshotUrl: screenshot,
         attemptNumber,
         retryingSkippedAttempt: priorAttempt?.mark_decision === 'SKIP'
@@ -1834,30 +2066,45 @@ export default function Pyq() {
   }
 
   async function goNext() {
-    const nextIndex = index + 1;
-    if (nextIndex >= questions.length) {
-      await markSessionComplete();
-      window.scrollTo({ top: 0, behavior: 'auto' });
-      setFinished(true);
-      return;
+    if (loading || submittingRef.current || pausingSessionRef.current) return;
+    submittingRef.current = true;
+    setSubmitting(true);
+    setSubmitError(null);
+    try {
+      const nextIndex = index + 1;
+      if (nextIndex >= questions.length) {
+        await markSessionComplete();
+        window.scrollTo({ top: 0, behavior: 'auto' });
+        setFinished(true);
+        return;
+      }
+      const session = pyqSessionId ? await db.pyq_sessions.get(pyqSessionId) : null;
+      if (!session) {
+        setSubmitError('The active set could not be found. Return to PYQ setup and resume it.');
+        return;
+      }
+      const startedSession = startPyqSessionQuestion(session, questions[nextIndex].id);
+      if (startedSession !== session) await writeLocal('pyq_sessions', startedSession);
+      const nextStartedAt = Date.parse(startedSession.current_question_started_at ?? '');
+      questionStartRef.current = {
+        questionUid: questions[nextIndex].id,
+        startedAtMs: Number.isFinite(nextStartedAt) ? nextStartedAt : Date.now()
+      };
+      setIndex(nextIndex);
+    } catch (error) {
+      setSubmitError(
+        error instanceof Error
+          ? `Could not continue this practice set: ${error.message}`
+          : 'Could not continue this practice set. Try again.'
+      );
+    } finally {
+      submittingRef.current = false;
+      setSubmitting(false);
     }
-    const session = pyqSessionId ? await db.pyq_sessions.get(pyqSessionId) : null;
-    if (!session) {
-      setSubmitError('The active set could not be found. Return to PYQ setup and resume it.');
-      return;
-    }
-    const startedSession = startPyqSessionQuestion(session, questions[nextIndex].id);
-    if (startedSession !== session) await writeLocal('pyq_sessions', startedSession);
-    const nextStartedAt = Date.parse(startedSession.current_question_started_at ?? '');
-    questionStartRef.current = {
-      questionUid: questions[nextIndex].id,
-      startedAtMs: Number.isFinite(nextStartedAt) ? nextStartedAt : Date.now()
-    };
-    setIndex(nextIndex);
   }
 
   function goPrevious() {
-    if (index <= 0) return;
+    if (index <= 0 || loading || submittingRef.current || pausingSessionRef.current) return;
     setIndex(index - 1);
   }
 
@@ -1963,23 +2210,83 @@ export default function Pyq() {
                 ? '; the rest are excluded because stored type/marks metadata is incomplete or inconsistent.'
                 : '.'}
             </p>
-            <div className="mt-6 flex flex-wrap gap-2">
-              {pyqSessionId ? (
-                <Button
-                  variant="primary"
-                  onClick={() => navigate(`/session/${pyqSessionId}/review`)}
+            <section
+              aria-labelledby="practice-next-step"
+              className="mt-6 border-t border-border pt-5"
+            >
+              <h3 id="practice-next-step" className="font-display text-[17px] font-bold text-text">
+                What would you like to do next?
+              </h3>
+              <p className="mt-1 text-[12px] text-text-muted">
+                This session is already saved. Choose the destination that matches your next task.
+              </p>
+              <div className="mt-4 grid gap-2 sm:grid-cols-2">
+                {pyqSessionId ? (
+                  <button
+                    type="button"
+                    onClick={() => navigate(`/session/${pyqSessionId}/review`)}
+                    className="group flex min-h-[92px] items-start gap-3 rounded border border-accent bg-accent p-4 text-left text-accent-contrast shadow-key transition-all hover:-translate-y-px hover:bg-accent-hover hover:shadow-key-hover focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-accent-faint"
+                  >
+                    <BarChart3 size={19} className="mt-0.5 shrink-0" />
+                    <span>
+                      <span className="block text-[13.5px] font-semibold">
+                        View detailed report
+                      </span>
+                      <span className="mt-1 block text-[11px] leading-relaxed opacity-85">
+                        Review your score, timing, and every submitted answer.
+                      </span>
+                    </span>
+                  </button>
+                ) : null}
+                <button
+                  type="button"
+                  onClick={() => void repeatCurrentSet()}
+                  disabled={loading}
+                  className="group flex min-h-[92px] items-start gap-3 rounded border border-border bg-bg-raised p-4 text-left text-text shadow-sm transition-all hover:-translate-y-px hover:border-border-hover hover:shadow-card focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-accent-faint disabled:cursor-wait disabled:opacity-50"
                 >
-                  Open detailed report
-                </Button>
-              ) : null}
-              <Button onClick={() => void repeatCurrentSet()} disabled={loading}>
-                Repeat this exact set
-              </Button>
-              <Button onClick={() => void startPractice()} disabled={loading}>
-                Repeat these filters
-              </Button>
-              <Button onClick={exitSet}>Change filters</Button>
-            </div>
+                  <RotateCcw size={18} className="mt-0.5 shrink-0 text-accent" />
+                  <span>
+                    <span className="block text-[13.5px] font-semibold">
+                      Practice these questions again
+                    </span>
+                    <span className="mt-1 block text-[11px] leading-relaxed text-text-muted">
+                      Start over with this exact question list in the same order.
+                    </span>
+                  </span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => void startPractice()}
+                  disabled={loading}
+                  className="group flex min-h-[92px] items-start gap-3 rounded border border-border bg-bg-raised p-4 text-left text-text shadow-sm transition-all hover:-translate-y-px hover:border-border-hover hover:shadow-card focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-accent-faint disabled:cursor-wait disabled:opacity-50"
+                >
+                  <Shuffle size={18} className="mt-0.5 shrink-0 text-ink-violet" />
+                  <span>
+                    <span className="block text-[13.5px] font-semibold">
+                      Start a new set with the same filters
+                    </span>
+                    <span className="mt-1 block text-[11px] leading-relaxed text-text-muted">
+                      Pull another batch from the same subject, years, type, and history.
+                    </span>
+                  </span>
+                </button>
+                <button
+                  type="button"
+                  onClick={exitSet}
+                  className="group flex min-h-[92px] items-start gap-3 rounded border border-border bg-bg-overlay/25 p-4 text-left text-text transition-all hover:-translate-y-px hover:border-border-hover hover:bg-bg-overlay/50 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-accent-faint"
+                >
+                  <SlidersHorizontal size={18} className="mt-0.5 shrink-0 text-text-muted" />
+                  <span>
+                    <span className="block text-[13.5px] font-semibold">
+                      Choose a different set
+                    </span>
+                    <span className="mt-1 block text-[11px] leading-relaxed text-text-muted">
+                      Return to setup to change the mode, subject, or filters.
+                    </span>
+                  </span>
+                </button>
+              </div>
+            </section>
           </CardBody>
         </Card>
       </div>
@@ -1992,7 +2299,7 @@ export default function Pyq() {
     inputType === 'NAT'
       ? numeric.trim() !== '' && Number.isFinite(Number(numeric))
       : choices.length > 0;
-  const canSubmit = !!decision && (decision === 'SKIP' || hasAnswer) && !submitting;
+  const canSubmit = !!decision && (decision === 'SKIP' || hasAnswer) && !submitting && !loading;
   const previouslySkipped = latestCurrentAttempt?.mark_decision === 'SKIP' && !submitted;
 
   if (
@@ -2024,7 +2331,7 @@ export default function Pyq() {
           onSaveAndNext={saveExamAndNext}
           onPrevious={() => navigateExam(index - 1)}
           onSubmit={() => setExamSubmitOpen(true)}
-          onSaveAndExit={() => void saveSession(loadedSession)}
+          onPause={() => void saveSession(loadedSession)}
         />
         <Dialog
           open={examSubmitOpen}
@@ -2044,10 +2351,11 @@ export default function Pyq() {
               <span className="text-right">Questions</span>
             </div>
             {[
-              ['Answered', paletteCounts.answered + paletteCounts.answeredAndMarked],
-              ['Not answered', paletteCounts.notAnswered + paletteCounts.markedForReview],
-              ['Not visited', paletteCounts.notVisited],
-              ['Marked for review', paletteCounts.markedForReview + paletteCounts.answeredAndMarked]
+              ['Answered', paletteCounts.answered],
+              ['Answered & marked for review', paletteCounts.answeredAndMarked],
+              ['Not answered', paletteCounts.notAnswered],
+              ['Marked for review', paletteCounts.markedForReview],
+              ['Not visited', paletteCounts.notVisited]
             ].map(([label, value]) => (
               <div
                 key={String(label)}
@@ -2085,13 +2393,39 @@ export default function Pyq() {
   if (journalOpen && submitted) {
     return (
       <div className="mx-auto w-full max-w-4xl">
-        <button
-          type="button"
-          onClick={() => setJournalOpen(false)}
-          className="mb-4 inline-flex items-center gap-1 text-[12px] font-medium text-text-muted hover:text-text"
-        >
-          <ArrowLeft size={14} /> Back to answer
-        </button>
+        <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
+          <button
+            type="button"
+            onClick={() => setJournalOpen(false)}
+            className="inline-flex items-center gap-1 text-[12px] font-medium text-text-muted hover:text-text"
+          >
+            <ArrowLeft size={14} /> Back to answer
+          </button>
+          <div className="flex flex-col items-end">
+            <Button
+              variant="ghost"
+              size="sm"
+              disabled={loading || submitting || !loadedSession}
+              onClick={() => {
+                if (loadedSession) void saveSession(loadedSession);
+              }}
+              aria-label="Pause practice"
+              aria-describedby="pyq-analysis-pause-hint"
+              className="-mr-2 whitespace-nowrap"
+            >
+              <Pause size={14} />
+              {loading ? 'Pausing…' : 'Pause practice'}
+            </Button>
+            <span id="pyq-analysis-pause-hint" className="text-[9.5px] text-text-faint">
+              Session progress is saved
+            </span>
+          </div>
+        </div>
+        {submitError ? (
+          <p role="alert" className="mb-3 text-[12px] leading-relaxed text-danger">
+            {submitError}
+          </p>
+        ) : null}
         <Card>
           <CardBody className="p-5 sm:p-6">
             <TagFlow
@@ -2113,23 +2447,52 @@ export default function Pyq() {
   return (
     <div className="mx-auto flex w-full max-w-5xl flex-col gap-4">
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border pb-3">
-        <button
-          type="button"
-          onClick={exitSet}
-          className="inline-flex items-center gap-1 text-[12px] font-medium text-text-muted hover:text-text"
-        >
-          <ArrowLeft size={14} /> Exit set
-        </button>
+        <div className="flex flex-col items-start">
+          <Button
+            variant="ghost"
+            size="sm"
+            disabled={loading || submitting || !loadedSession}
+            onClick={() => {
+              if (loadedSession) void saveSession(loadedSession);
+            }}
+            aria-label="Pause practice"
+            aria-describedby="pyq-practice-pause-hint"
+            className="-ml-2 whitespace-nowrap"
+          >
+            <Pause size={14} />
+            {loading ? 'Pausing…' : 'Pause practice'}
+          </Button>
+          <span
+            id="pyq-practice-pause-hint"
+            className="hidden pl-1 text-[9.5px] text-text-faint sm:block"
+          >
+            Draft and active time are saved
+          </span>
+        </div>
         <div className="flex items-center gap-3">
           <span className="u-num text-[12px] text-text-muted">
             Q {index + 1}/{questions.length}
           </span>
-          <span className="inline-flex items-center gap-1 font-mono text-[12px] text-text-faint">
+          <span
+            role="timer"
+            aria-label={`${secondsToClock(shownSeconds)} active time on this question`}
+            aria-atomic="true"
+            className="inline-flex items-center gap-1 font-mono text-[12px] text-text-faint"
+          >
             <Clock3 size={13} />
             {secondsToClock(shownSeconds)}
           </span>
         </div>
       </div>
+
+      {submitError ? (
+        <p
+          role="alert"
+          className="rounded border border-danger/25 bg-danger-faint px-3 py-2 text-[12px] leading-relaxed text-danger"
+        >
+          {submitError}
+        </p>
+      ) : null}
 
       <div ref={questionCaptureRef}>
         <Card className="overflow-hidden">
@@ -2161,12 +2524,16 @@ export default function Pyq() {
             question={current}
             choices={choices}
             numeric={numeric}
-            disabled={!!submitted}
+            disabled={!!submitted || submitting || loading}
             onChoices={setChoices}
             onNumeric={setNumeric}
           />
           <div className="flex flex-col gap-4 border-t border-border pt-4 lg:border-l lg:border-t-0 lg:pl-5 lg:pt-0">
-            <DecisionButtons value={decision} disabled={!!submitted} onChange={setDecision} />
+            <DecisionButtons
+              value={decision}
+              disabled={!!submitted || submitting || loading}
+              onChange={setDecision}
+            />
             {!submitted ? (
               <div>
                 {previouslySkipped ? (
@@ -2185,32 +2552,27 @@ export default function Pyq() {
                 </Button>
                 <div className="mt-3 flex flex-wrap gap-2">
                   {index > 0 ? (
-                    <Button onClick={goPrevious} disabled={submitting}>
+                    <Button onClick={goPrevious} disabled={submitting || loading}>
                       <ArrowLeft size={15} /> Previous question
                     </Button>
                   ) : null}
                   {previouslySkipped ? (
-                    <Button onClick={() => void goNext()} disabled={submitting}>
+                    <Button onClick={() => void goNext()} disabled={submitting || loading}>
                       Keep skipped & next <ArrowRight size={15} />
                     </Button>
                   ) : null}
                 </div>
-                {submitError && (
-                  <p role="alert" className="mt-2 text-[12px] leading-relaxed text-danger">
-                    {submitError}
-                  </p>
-                )}
               </div>
             ) : (
               <div className="flex flex-col gap-3">
                 <ResultPanel question={current} attempt={submitted} />
                 <div className="flex flex-wrap gap-2">
                   {index > 0 ? (
-                    <Button onClick={goPrevious}>
+                    <Button onClick={goPrevious} disabled={loading || submitting}>
                       <ArrowLeft size={15} /> Previous question
                     </Button>
                   ) : null}
-                  <Button variant="primary" onClick={goNext}>
+                  <Button variant="primary" onClick={goNext} disabled={loading || submitting}>
                     {index + 1 === questions.length ? 'Finish set' : 'Next question'}
                     <ArrowRight size={15} />
                   </Button>
@@ -2219,9 +2581,13 @@ export default function Pyq() {
                       Saved to journal
                     </Badge>
                   ) : submitted.mark_correct === false ? (
-                    <Button onClick={() => setJournalOpen(true)}>Continue analysis</Button>
+                    <Button onClick={() => setJournalOpen(true)} disabled={loading || submitting}>
+                      Continue analysis
+                    </Button>
                   ) : (
-                    <Button onClick={() => setJournalOpen(true)}>Analyze in Journal</Button>
+                    <Button onClick={() => setJournalOpen(true)} disabled={loading || submitting}>
+                      Analyze in Journal
+                    </Button>
                   )}
                 </div>
               </div>

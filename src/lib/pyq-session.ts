@@ -508,8 +508,13 @@ export function advancePyqSessionProgress(
     throw new Error('PYQ progress is outside the selected set.');
   }
   const completed = Array.from(new Set([...session.completed_question_uids, questionUid]));
+  const config =
+    session.config.practiceDraft?.question_uid === questionUid
+      ? { ...session.config, practiceDraft: undefined }
+      : session.config;
   return {
     ...session,
+    config,
     completed_question_uids: completed,
     current_index: Math.max(session.current_index, nextIndex),
     completed_count: Math.max(session.completed_count, completed.length),
@@ -552,6 +557,68 @@ export function pausePyqSession(session: PyqSessionRow, now = nowISO()): PyqSess
   return {
     ...session,
     status: 'paused',
+    current_question_uid: null,
+    current_question_started_at: null,
+    updated_at: now
+  };
+}
+
+/**
+ * Pause guided practice without losing the in-progress response or charging
+ * the learner for time away. A resumed question opens a fresh live segment;
+ * this helper folds that segment into the persisted elapsed-time ledger.
+ */
+export function pausePyqPracticeSession(
+  session: PyqSessionRow,
+  draft: {
+    questionUid: string;
+    selectedAnswer: PyqSelectedAnswer;
+    markDecision: MarkDecision | null;
+  },
+  nowMs = Date.now()
+): PyqSessionRow {
+  if (session.status !== 'active') {
+    throw new Error('Only an active PYQ practice set can be paused.');
+  }
+  if (session.config.mode === 'exam') {
+    throw new Error('Timed exams must use the exam pause flow.');
+  }
+  if (
+    session.current_question_uid !== draft.questionUid ||
+    session.question_uids[session.current_index] !== draft.questionUid
+  ) {
+    throw new Error('Only the current practice question can be paused.');
+  }
+  if (!Number.isFinite(nowMs)) {
+    throw new Error('Practice pause time must be valid.');
+  }
+  const segmentStartedMs = Date.parse(session.current_question_started_at ?? '');
+  if (!Number.isFinite(segmentStartedMs)) {
+    throw new Error('The current practice question has no valid start time.');
+  }
+
+  const previousDraft =
+    session.config.practiceDraft?.question_uid === draft.questionUid
+      ? session.config.practiceDraft
+      : null;
+  const segmentElapsedMs = Math.max(0, nowMs - segmentStartedMs);
+  const elapsedMs = Math.max(0, previousDraft?.elapsed_ms ?? 0) + segmentElapsedMs;
+  const firstStartedAt = previousDraft?.first_started_at ?? session.current_question_started_at!;
+  const now = new Date(nowMs).toISOString();
+
+  return {
+    ...session,
+    status: 'paused',
+    config: {
+      ...session.config,
+      practiceDraft: {
+        question_uid: draft.questionUid,
+        selected_answer: draft.selectedAnswer,
+        mark_decision: draft.markDecision,
+        elapsed_ms: elapsedMs,
+        first_started_at: firstStartedAt
+      }
+    },
     current_question_uid: null,
     current_question_started_at: null,
     updated_at: now
@@ -605,6 +672,8 @@ export function createPyqAttemptRow(args: {
   bankVersion: string;
   questionStartedAtMs: number;
   committedAtMs: number;
+  /** Explicit active-work duration for a response restored from a paused draft. */
+  timeSpentMs?: number;
   screenshotUrl: string | null;
   attemptNumber?: number;
   retryingSkippedAttempt?: boolean;
@@ -634,12 +703,21 @@ export function createPyqAttemptRow(args: {
   if (!Number.isFinite(args.questionStartedAtMs) || !Number.isFinite(args.committedAtMs)) {
     throw new Error('PYQ attempt timestamps must be valid.');
   }
+  if (
+    args.timeSpentMs !== undefined &&
+    (!Number.isFinite(args.timeSpentMs) || args.timeSpentMs < 0)
+  ) {
+    throw new Error('PYQ attempt time must be a non-negative number.');
+  }
 
   const attemptNumber = args.attemptNumber ?? 1;
   if (!Number.isInteger(attemptNumber) || attemptNumber < 1) {
     throw new Error('PYQ attempt number must be a positive integer.');
   }
-  const timeSpentMs = Math.max(1, Math.round(args.committedAtMs - args.questionStartedAtMs));
+  const timeSpentMs = Math.max(
+    1,
+    Math.round(args.timeSpentMs ?? args.committedAtMs - args.questionStartedAtMs)
+  );
   const attemptedAt = new Date(args.committedAtMs).toISOString();
   const questionStartedAt = new Date(
     Math.min(args.questionStartedAtMs, args.committedAtMs)

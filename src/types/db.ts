@@ -215,6 +215,17 @@ export interface PyqExamState {
   submission_reason: PyqExamSubmissionReason | null;
 }
 
+/** Mutable response/timing checkpoint kept while guided practice is paused. */
+export interface PyqPracticeDraft {
+  question_uid: string;
+  selected_answer: PyqSelectedAnswer;
+  mark_decision: MarkDecision | null;
+  /** Sum of active work segments only; time spent paused is excluded. */
+  elapsed_ms: number;
+  /** Original start of the question, retained across every pause/resume cycle. */
+  first_started_at: string;
+}
+
 /** Immutable question-bank facts captured with a submitted attempt. */
 export interface PyqQuestionSnapshot {
   question_uid: string;
@@ -251,6 +262,8 @@ export interface PyqSessionConfig {
   mode?: PyqSessionMode;
   /** Present only for exam mode; lives in JSONB so draft answers remain editable. */
   examState?: PyqExamState;
+  /** Present only while a guided-practice question has a resumable checkpoint. */
+  practiceDraft?: PyqPracticeDraft;
 }
 
 export interface MockSubjectScore {

@@ -13,7 +13,10 @@ import {
   PYQ_TAXONOMY
 } from './pyq-taxonomy.mjs';
 import {
+  GATE_PAPER_PATTERN_MARK_POLICY_VERSION,
   isMarksMetadataTag,
+  marksFromGateQuestionNumber,
+  marksFromQuestionContext,
   marksFromQuestionMetadata,
   verifiedPdfAnswerKeyMark,
   VERIFIED_PDF_MARK_POLICY_VERSION
@@ -1174,7 +1177,15 @@ async function examSideCseQuestions() {
         topicSlug: canonicalTopicSlug
       },
       subtopics: [source.chapter].filter(Boolean),
-      marks: source.marks === 1 || source.marks === 2 ? source.marks : null,
+      marks:
+        source.marks === 1 || source.marks === 2
+          ? source.marks
+          : marksFromGateQuestionNumber({
+              bookSlug: 'gate-cse',
+              year: source.year,
+              number: String(row.archiveNumber),
+              subjectSlug
+            }),
       type,
       answer,
       tolerance: numericKey?.tolerance ?? null,
@@ -1323,13 +1334,20 @@ async function main() {
     const answerMeta = answers[source.question_uid] ?? null;
     const [subjectSlug, subject] = slugLabel(source.subjectLabel);
     const metadataTags = detail.tags ?? source.tags ?? [];
+    const markMetadataTags = [...(detail.tags ?? []), ...(source.tags ?? [])];
     const tags = cleanTags(metadataTags);
     const type = String(answerMeta?.type || source.type || 'UNSUPPORTED').toUpperCase();
     const verifiedPdfMark = verifiedPdfAnswerKeyMark(answerMeta?.source);
-    const legacyMark = legacyArchiveMark(metadataTags);
+    const legacyMark = legacyArchiveMark(markMetadataTags);
     if (verifiedPdfMark != null && legacyMark != null && verifiedPdfMark !== legacyMark) {
       correctedPdfMarkIds.push(source.question_uid);
     }
+    const questionContext = {
+      bookSlug: source.bookSlug,
+      year: source.parsedYear,
+      number: source.parsedNumber,
+      subjectSlug
+    };
     return {
       id: source.question_uid,
       bookSlug: source.bookSlug,
@@ -1341,8 +1359,9 @@ async function main() {
       subjectSlug,
       subtopics: tags,
       // The structured official PDF key wins when archive tags contradict
-      // one another (notably on the 2026 CSE papers).
-      marks: marksFromQuestionMetadata(metadataTags, answerMeta?.source),
+      // one another (notably on the 2026 CSE papers); documented GATE paper
+      // numbering is the fallback when archive metadata omits marks.
+      marks: marksFromQuestionContext(questionContext, markMetadataTags, answerMeta?.source),
       type,
       answer: answerMeta?.answer ?? null,
       tolerance: answerMeta?.tolerance ?? null,
@@ -1354,14 +1373,23 @@ async function main() {
   });
 
   questions.push(
-    ...MANUAL_QUESTIONS.map((question) => ({
-      ...question,
-      bookSlug: 'gate-cse',
-      paperLabel: `GATE CSE ${question.year}`,
-      subtopics: question.tags,
-      tolerance: null,
-      answerSource: { kind: 'manual-audit' }
-    }))
+    ...MANUAL_QUESTIONS.map((question) => {
+      const row = {
+        ...question,
+        bookSlug: 'gate-cse',
+        paperLabel: `GATE CSE ${question.year}`,
+        subtopics: question.tags,
+        tolerance: null,
+        answerSource: { kind: 'manual-audit' }
+      };
+      return {
+        ...row,
+        marks:
+          question.marks === 1 || question.marks === 2
+            ? question.marks
+            : marksFromGateQuestionNumber(row)
+      };
+    })
   );
   questions.push(...supplementalCse);
   questions.push(...supplementalDa);

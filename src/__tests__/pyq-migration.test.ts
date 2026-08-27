@@ -143,4 +143,33 @@ describe('PYQ production audit migration', () => {
     expect(immutabilityGuard).toBe('pyq_attempts_immutable');
     expect(canonicalizer!.localeCompare(immutabilityGuard!)).toBeLessThan(0);
   });
+
+  it('stores qualified mock evidence with owner-safe PYQ links and strict readiness criteria', () => {
+    const sql = readFileSync(
+      path.resolve(process.cwd(), 'supabase/migrations/20260827102350_qualified_mock_evidence.sql'),
+      'utf8'
+    );
+
+    expect(sql).toContain("add column source_kind text not null default 'manual'");
+    expect(sql).toContain("add column evidence_status text not null default 'supporting'");
+    expect(sql).toContain("default array['conditions-unknown']::text[]");
+    expect(sql).toContain('mock_tests_qualified_evidence_check');
+    expect(sql).toContain('total_questions = 65');
+    expect(sql).toContain('max_marks = 100');
+    expect(sql).toContain("paper_scope = 'full_length'");
+    expect(sql).toContain("freshness = 'unseen'");
+    expect(sql).toContain('timed is true');
+    expect(sql).toContain('closed_book is true');
+    expect(sql).toContain('single_sitting is true');
+    expect(sql).toContain('scoring_coverage_pct = 100');
+    expect(sql).toContain('cardinality(evidence_reasons) = 0');
+    expect(sql).toContain('foreign key (source_pyq_session_id, user_id)');
+    expect(sql).toContain('references public.pyq_sessions (id, user_id)');
+    expect(sql).toContain('on delete set null (source_pyq_session_id)');
+    expect(sql).toContain('mock_tests_one_per_pyq_session');
+    expect(sql).toContain('revoke all on table public.mock_tests from anon');
+    expect(sql).toContain(
+      'grant select, insert, update, delete on table public.mock_tests to authenticated'
+    );
+  });
 });

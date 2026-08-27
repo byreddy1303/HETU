@@ -3,6 +3,7 @@ import {
   checkpointPyqExamSession,
   createPyqExamConfig,
   finalizePyqExam,
+  setPyqExamConfidence,
   setPyqExamResponse,
   setPyqExamReviewMark
 } from '@/lib/pyq-exam';
@@ -131,13 +132,16 @@ describe('PYQ session summary aggregation', () => {
     let session = examSession(questions);
 
     session = setPyqExamResponse(session, questions[0], 'B', START_MS + 100);
+    session = setPyqExamConfidence(session, 'q1', 'high', START_MS + 200);
     session = checkpointPyqExamSession(session, 'q2', START_MS + 1_000);
     session = setPyqExamResponse(session, questions[1], 'A', START_MS + 1_200);
     session = setPyqExamReviewMark(session, 'q2', true, START_MS + 1_300);
+    session = setPyqExamConfidence(session, 'q2', 'medium', START_MS + 1_500);
     session = checkpointPyqExamSession(session, 'q3', START_MS + 3_500);
     session = setPyqExamResponse(session, questions[2], ['B'], START_MS + 4_000);
     session = checkpointPyqExamSession(session, 'q4', START_MS + 7_000);
     session = setPyqExamReviewMark(session, 'q4', true, START_MS + 7_500);
+    session = setPyqExamConfidence(session, 'q4', 'low', START_MS + 7_600);
 
     const finalized = finalizePyqExam({
       userId: 'user-1',
@@ -160,6 +164,7 @@ describe('PYQ session summary aggregation', () => {
       unscorable: 0,
       notVisited: 0,
       markedForReview: 2,
+      confidence: { high: 1, medium: 1, low: 1, unset: 1 },
       oneMarkQuestions: 1,
       twoMarkQuestions: 3,
       knownMaxMarks: 7,
@@ -179,14 +184,47 @@ describe('PYQ session summary aggregation', () => {
         outcome: entry.outcome,
         visited: entry.visited,
         review: entry.markedForReview,
+        confidence: entry.confidence,
         time: entry.timeSpentSec,
         scoreThirds: entry.scoreThirds
       }))
     ).toEqual([
-      { id: 'q1', outcome: 'correct', visited: true, review: false, time: 1, scoreThirds: 6 },
-      { id: 'q2', outcome: 'wrong', visited: true, review: true, time: 3, scoreThirds: -1 },
-      { id: 'q3', outcome: 'wrong', visited: true, review: false, time: 4, scoreThirds: 0 },
-      { id: 'q4', outcome: 'skipped', visited: true, review: true, time: 4, scoreThirds: 0 }
+      {
+        id: 'q1',
+        outcome: 'correct',
+        visited: true,
+        review: false,
+        confidence: 'high',
+        time: 1,
+        scoreThirds: 6
+      },
+      {
+        id: 'q2',
+        outcome: 'wrong',
+        visited: true,
+        review: true,
+        confidence: 'medium',
+        time: 3,
+        scoreThirds: -1
+      },
+      {
+        id: 'q3',
+        outcome: 'wrong',
+        visited: true,
+        review: false,
+        confidence: null,
+        time: 4,
+        scoreThirds: 0
+      },
+      {
+        id: 'q4',
+        outcome: 'skipped',
+        visited: true,
+        review: true,
+        confidence: 'low',
+        time: 4,
+        scoreThirds: 0
+      }
     ]);
   });
 });

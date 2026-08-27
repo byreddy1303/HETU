@@ -13,6 +13,18 @@ export type SyncStatus = 'synced' | 'pending' | 'error';
 export type PyqSessionStatus = 'active' | 'completed' | 'abandoned' | 'paused';
 export type PyqSessionMode = 'practice' | 'exam';
 export type PyqExamSubmissionReason = 'manual' | 'time-expired';
+export type PyqExamKind = 'timed-set' | 'full-paper';
+export type PyqExamConfidence = 'high' | 'medium' | 'low';
+export type PyqExamValidityStatus = 'qualified' | 'supporting';
+export type PyqExamValidityReason =
+  | 'not-full-paper'
+  | 'prior-exposure'
+  | 'paused'
+  | 'closed-book-unconfirmed'
+  | 'incomplete-visit-coverage'
+  | 'low-active-time'
+  | 'incomplete-scoring'
+  | 'nonstandard-paper';
 export type SessionKind = 'focused' | 'log' | 'pyq';
 export type PyqAttemptAnswerStatus = 'available' | 'ambiguous' | 'marks-to-all' | 'unsupported';
 export type PyqAttemptScoringStatus = 'scored' | 'bonus' | 'unscorable';
@@ -203,6 +215,19 @@ export interface InterruptionLogRow {
 
 export type PyqSelectedAnswer = string | string[] | number | null;
 
+/** Auditable facts used to qualify a finalized full-paper benchmark. */
+export interface PyqExamValidityMetrics {
+  question_count: number;
+  total_marks: number;
+  scorable_question_count: number;
+  scorable_marks: number;
+  visited_question_count: number;
+  active_time_sec: number;
+  prior_exposure_count: number | null;
+  pause_count: number | null;
+  closed_book_confirmed: boolean;
+}
+
 /** Mutable response ledger kept on a timed session until final submission. */
 export interface PyqExamState {
   duration_sec: number;
@@ -213,6 +238,18 @@ export interface PyqExamState {
   marked_for_review_question_uids: string[];
   time_by_question_ms: Record<string, number>;
   submission_reason: PyqExamSubmissionReason | null;
+  /** Missing on legacy exams, which are treated as ordinary timed sets. */
+  prior_exposure_question_uids?: string[];
+  /** Learner confidence is intentionally captured without revealing the answer. */
+  confidence_by_question?: Record<string, PyqExamConfidence>;
+  /** Missing on legacy exams, where pause history was not recorded. */
+  pause_count?: number;
+  /** Explicit user confirmation; absence never qualifies as closed-book evidence. */
+  closed_book_confirmed?: boolean;
+  /** Finalized evidence classification. Absent while active and on legacy receipts. */
+  validity_status?: PyqExamValidityStatus;
+  validity_reasons?: PyqExamValidityReason[];
+  validity_metrics?: PyqExamValidityMetrics;
 }
 
 /** Mutable response/timing checkpoint kept while guided practice is paused. */
@@ -266,6 +303,10 @@ export interface PyqSessionConfig {
   history?: PyqHistoryFilter;
   /** Missing on legacy sets, which always use the original guided-practice flow. */
   mode?: PyqSessionMode;
+  /** Missing on legacy exams, which use timed-set semantics. */
+  examKind?: PyqExamKind;
+  /** Stable id into the versioned benchmark-paper catalog. */
+  benchmarkPaperId?: string;
   /** Present only for exam mode; lives in JSONB so draft answers remain editable. */
   examState?: PyqExamState;
   /** Present only while a guided-practice question has a resumable checkpoint. */
@@ -277,6 +318,11 @@ export interface MockSubjectScore {
   subject_id?: string | null;
   marks: number;
 }
+
+export type MockSourceKind = 'manual' | 'pyq_exam';
+export type MockPaperScope = 'full_length' | 'sectional' | 'topic' | 'unknown';
+export type MockFreshness = 'unseen' | 'partially_seen' | 'repeated' | 'unknown';
+export type MockEvidenceStatus = 'qualified' | 'supporting' | 'excluded';
 
 export interface MockTestRow {
   id: string;
@@ -296,6 +342,20 @@ export interface MockTestRow {
   planner_block_id: string | null;
   created_at: string;
   updated_at: string;
+  /**
+   * Optional only for compatibility with rows/backups written before qualified
+   * mock evidence shipped. Storage boundaries materialize the full shape.
+   */
+  source_kind?: MockSourceKind;
+  source_pyq_session_id?: string | null;
+  paper_scope?: MockPaperScope;
+  freshness?: MockFreshness;
+  timed?: boolean | null;
+  closed_book?: boolean | null;
+  single_sitting?: boolean | null;
+  evidence_status?: MockEvidenceStatus;
+  evidence_reasons?: string[];
+  scoring_coverage_pct?: number | null;
 }
 
 export interface TopicProgressRow {

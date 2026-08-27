@@ -1,4 +1,4 @@
-import type { PyqAttemptRow, PyqSessionRow } from '@/types';
+import type { PyqAttemptRow, PyqExamConfidence, PyqSessionRow } from '@/types';
 import { scoreGateOutcome, type GateScoreResult } from '@/lib/gate-scoring';
 
 export type PyqSummaryOutcome =
@@ -12,6 +12,7 @@ export interface PyqQuestionSummary {
   outcome: PyqSummaryOutcome;
   visited: boolean;
   markedForReview: boolean;
+  confidence: PyqExamConfidence | null;
   timeSpentSec: number;
   scoreThirds: number | null;
   maxThirds: number | null;
@@ -30,6 +31,7 @@ export interface PyqSessionSummaryData {
   unscorable: number;
   notVisited: number;
   markedForReview: number;
+  confidence: Record<PyqExamConfidence | 'unset', number>;
   oneMarkQuestions: number;
   twoMarkQuestions: number;
   knownMaxMarks: number;
@@ -125,6 +127,7 @@ export function buildPyqSessionSummary(
   );
   const visited = new Set(examState?.visited_question_uids ?? []);
   const marked = new Set(examState?.marked_for_review_question_uids ?? []);
+  const confidenceByQuestion = examState?.confidence_by_question ?? {};
   const questionUids =
     session.question_uids.length > 0 ? session.question_uids : [...latest.keys()];
 
@@ -132,6 +135,7 @@ export function buildPyqSessionSummary(
     const attempt = latest.get(questionUid) ?? null;
     const exactScore = attempt ? exactStoredScore(attempt) : null;
     const examTimeMs = examState?.time_by_question_ms[questionUid];
+    const recordedConfidence = confidenceByQuestion[questionUid];
     return {
       questionUid,
       questionNumber: index + 1,
@@ -141,6 +145,12 @@ export function buildPyqSessionSummary(
       outcome: outcomeForAttempt(attempt),
       visited: examState ? visited.has(questionUid) : attempt !== null,
       markedForReview: marked.has(questionUid),
+      confidence:
+        recordedConfidence === 'high' ||
+        recordedConfidence === 'medium' ||
+        recordedConfidence === 'low'
+          ? recordedConfidence
+          : null,
       timeSpentSec:
         typeof examTimeMs === 'number' && Number.isFinite(examTimeMs)
           ? Math.max(0, Math.round(examTimeMs / 1000))
@@ -158,6 +168,12 @@ export function buildPyqSessionSummary(
   let unscorable = 0;
   let notVisited = 0;
   let markedForReview = 0;
+  const confidence: Record<PyqExamConfidence | 'unset', number> = {
+    high: 0,
+    medium: 0,
+    low: 0,
+    unset: 0
+  };
   let oneMarkQuestions = 0;
   let twoMarkQuestions = 0;
   let knownMaxMarks = 0;
@@ -173,6 +189,7 @@ export function buildPyqSessionSummary(
     else unscorable += 1;
     if (!question.visited) notVisited += 1;
     if (question.markedForReview) markedForReview += 1;
+    confidence[question.confidence ?? 'unset'] += 1;
     const marks = knownQuestionMarks(question.attempt);
     if (marks === 1) oneMarkQuestions += 1;
     if (marks === 2) twoMarkQuestions += 1;
@@ -206,6 +223,7 @@ export function buildPyqSessionSummary(
     unscorable,
     notVisited,
     markedForReview,
+    confidence,
     oneMarkQuestions,
     twoMarkQuestions,
     knownMaxMarks,

@@ -2,6 +2,7 @@
 // Mirrors Postgres 1:1 plus `sync_status`. IDs are client-generated UUIDs that
 // become the canonical Postgres PKs, so no local-id remapping is ever needed.
 import Dexie, { type Table } from 'dexie';
+import { normalizeMockTestRow } from '@/lib/mocks';
 import { normalizeSubjectIdentity } from '@/lib/subjects';
 import { scoreGateOutcome } from '@/lib/gate-scoring';
 import { pyqJournalSourceMap } from '@/lib/pyq-session';
@@ -312,6 +313,20 @@ class AirDB extends Dexie {
           }
         });
       });
+    this.version(7)
+      .stores({
+        mock_tests:
+          'id, user_id, test_date, updated_at, source_kind, source_pyq_session_id, paper_scope, freshness, evidence_status, sync_status, [user_id+test_date], [user_id+evidence_status], [user_id+source_pyq_session_id]'
+      })
+      .upgrade((transaction) =>
+        transaction
+          .table('mock_tests')
+          .toCollection()
+          .modify((value) => {
+            const row = value as LocalMockTest;
+            Object.assign(row, normalizeMockTestRow(row));
+          })
+      );
   }
 }
 

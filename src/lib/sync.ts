@@ -3,7 +3,7 @@
 // upserts pending rows to Supabase in FK-safe order with exponential backoff.
 // Pulls merge server rows into Dexie; local rows still pending always win.
 import { db, table, SYNCED_TABLES, type SyncedTableName } from '@/lib/db';
-import { normalizeMockSubjectScores } from '@/lib/mocks';
+import { normalizeMockSubjectScores, normalizeMockTestRow } from '@/lib/mocks';
 import { supabase, supabaseConfigured } from '@/lib/supabase';
 import {
   legacyPyqJournalQuestionId,
@@ -153,6 +153,7 @@ function normalizeLocalWrite<T extends { id: string }>(name: SyncedTableName, ro
       }>
     );
   }
+  if (name === 'mock_tests') return normalizeMockTestRow(normalized) as T;
   return normalized as T;
 }
 

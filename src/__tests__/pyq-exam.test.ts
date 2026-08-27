@@ -1,15 +1,19 @@
 import { describe, expect, it } from 'vitest';
 import {
   PYQ_EXAM_SECONDS_PER_QUESTION,
+  PYQ_FULL_PAPER_DURATION_SECONDS,
   checkpointPyqExamSession,
   createPyqExamConfig,
   finalizePyqExam,
+  getPyqExamConfidence,
   pausePyqExamSession,
   pyqExamDurationSeconds,
   pyqExamPaletteCounts,
   pyqExamQuestionStatus,
   pyqExamRemainingSeconds,
   resumePyqExamSession,
+  setPyqExamClosedBookConfirmed,
+  setPyqExamConfidence,
   setPyqExamResponse,
   setPyqExamReviewMark
 } from '@/lib/pyq-exam';
@@ -68,6 +72,45 @@ function examSession(questions: readonly PyqQuestion[], nowMs = START_MS): PyqSe
   );
 }
 
+function fullPaperQuestions(): PyqQuestion[] {
+  return Array.from({ length: 65 }, (_, index) =>
+    question(`full-${index + 1}`, {
+      number: String(index + 1),
+      marks: index < 30 ? 1 : 2
+    })
+  );
+}
+
+function fullPaperSession(
+  questions: readonly PyqQuestion[],
+  options: { priorExposureQuestionUids?: readonly string[]; closedBookConfirmed?: boolean } = {}
+): PyqSessionRow {
+  const config = createPyqExamConfig(
+    {
+      ...baseConfig,
+      subjectSlug: 'all',
+      topicSlug: 'all',
+      count: 'all',
+      examKind: 'full-paper',
+      benchmarkPaperId: 'gate-cse-2026-set-1'
+    },
+    questions.map((candidate) => candidate.id),
+    {
+      paperMetadata: { questionCount: 65, maxMarks: 100 },
+      priorExposureQuestionUids: options.priorExposureQuestionUids,
+      closedBookConfirmed: options.closedBookConfirmed
+    },
+    START_MS
+  );
+  return createPyqSessionRow(
+    'user-1',
+    'bank-3',
+    config,
+    [...questions],
+    new Date(START_MS).toISOString()
+  );
+}
+
 describe('PYQ timed exam state', () => {
   it('initializes a deadline-based exam and visits only the opening question', () => {
     const questions = [question('q1'), question('q2'), question('q3')];
@@ -79,6 +122,7 @@ describe('PYQ timed exam state', () => {
     );
     expect(() => pyqExamDurationSeconds(0)).toThrow('A timed exam needs at least one question.');
     expect(session.config.mode).toBe('exam');
+    expect(session.config.examKind).toBe('timed-set');
     expect(state).toEqual({
       duration_sec: 540,
       deadline_at: '2026-08-24T04:39:00.000Z',
@@ -87,7 +131,11 @@ describe('PYQ timed exam state', () => {
       visited_question_uids: ['q1'],
       marked_for_review_question_uids: [],
       time_by_question_ms: {},
-      submission_reason: null
+      submission_reason: null,
+      prior_exposure_question_uids: [],
+      confidence_by_question: {},
+      pause_count: 0,
+      closed_book_confirmed: false
     });
     expect(pyqExamRemainingSeconds(session, START_MS)).toBe(540);
     expect(pyqExamRemainingSeconds(session, START_MS + 1_001)).toBe(539);
@@ -159,6 +207,7 @@ describe('PYQ timed exam state', () => {
     expect(paused.status).toBe('paused');
     expect(paused.config.examState?.deadline_at).toBeNull();
     expect(paused.config.examState?.paused_remaining_sec).toBe(325);
+    expect(paused.config.examState?.pause_count).toBe(1);
     expect(paused.config.examState?.time_by_question_ms.q1).toBe(35_250);
     expect(pyqExamRemainingSeconds(paused, START_MS + 10 * 60_000)).toBe(325);
 
@@ -171,6 +220,56 @@ describe('PYQ timed exam state', () => {
     expect(resumed.config.examState?.deadline_at).toBe(new Date(resumedAt + 325_000).toISOString());
     expect(pyqExamRemainingSeconds(resumed, resumedAt)).toBe(325);
     expect(pyqExamRemainingSeconds(resumed, resumedAt + 1_250)).toBe(324);
+  });
+
+  it('sets, gets, and clears confidence without changing the learner response', () => {
+    const questions = [question('q1'), question('q2')];
+    let session = examSession(questions);
+
+    expect(getPyqExamConfidence(session, 'q1')).toBeNull();
+    session = setPyqExamResponse(session, questions[0], 'A', START_MS + 1);
+    session = setPyqExamConfidence(session, 'q1', 'medium', START_MS + 2);
+    expect(getPyqExamConfidence(session, 'q1')).toBe('medium');
+    expect(session.config.examState?.responses.q1).toBe('A');
+
+    session = setPyqExamConfidence(session, 'q1', null, START_MS + 3);
+    expect(getPyqExamConfidence(session, 'q1')).toBeNull();
+    expect(session.config.examState?.responses.q1).toBe('A');
+    expect(() => getPyqExamConfidence(session, 'outside-exam')).toThrow(
+      'Question is not part of this exam.'
+    );
+  });
+
+  it('enforces the authentic 65-question, 100-mark, 180-minute full-paper profile', () => {
+    const questions = fullPaperQuestions();
+    const session = fullPaperSession(questions, { closedBookConfirmed: true });
+
+    expect(session.config.examState?.duration_sec).toBe(PYQ_FULL_PAPER_DURATION_SECONDS);
+    expect(pyqExamDurationSeconds(65, 'full-paper')).toBe(180 * 60);
+    expect(() =>
+      createPyqExamConfig(
+        {
+          ...baseConfig,
+          examKind: 'full-paper',
+          benchmarkPaperId: 'gate-cse-2026-set-1'
+        },
+        questions.slice(1).map((candidate) => candidate.id),
+        { paperMetadata: { questionCount: 65, maxMarks: 100 } },
+        START_MS
+      )
+    ).toThrow('exactly 65 questions');
+    expect(() =>
+      createPyqExamConfig(
+        {
+          ...baseConfig,
+          examKind: 'full-paper',
+          benchmarkPaperId: 'gate-cse-2026-set-1'
+        },
+        questions.map((candidate) => candidate.id),
+        { paperMetadata: { questionCount: 65, maxMarks: 99 } },
+        START_MS
+      )
+    ).toThrow('must declare 65 questions and 100 marks');
   });
 });
 
@@ -279,6 +378,88 @@ describe('PYQ exam submission receipts', () => {
       { question: 'msq-partial', correct: false, scoreThirds: 0, scoringStatus: 'scored' },
       { question: 'nat-close', correct: true, scoreThirds: 6, scoringStatus: 'scored' },
       { question: 'nat-far', correct: false, scoreThirds: 0, scoringStatus: 'scored' }
+    ]);
+  });
+
+  it('converts medium and low confidence into immutable uncertain decisions', () => {
+    const questions = [question('medium'), question('high')];
+    let session = examSession(questions);
+    session = setPyqExamResponse(session, questions[0], 'B', START_MS + 1_000);
+    session = setPyqExamConfidence(session, questions[0].id, 'medium', START_MS + 1_100);
+    session = checkpointPyqExamSession(session, questions[1].id, START_MS + 2_000);
+    session = setPyqExamResponse(session, questions[1], 'B', START_MS + 3_000);
+    session = setPyqExamConfidence(session, questions[1].id, 'high', START_MS + 3_100);
+
+    const { attempts } = finalizePyqExam({
+      userId: 'user-1',
+      session,
+      questions,
+      bankVersion: 'bank-3',
+      reason: 'manual',
+      nowMs: START_MS + 4_000
+    });
+
+    expect(attempts.map((attempt) => attempt.mark_decision)).toEqual(['FIFTY_FIFTY', 'MARK']);
+  });
+
+  it('qualifies only a fresh closed-book single-sitting full paper with complete evidence', () => {
+    const questions = fullPaperQuestions();
+    let session = fullPaperSession(questions);
+    session = setPyqExamClosedBookConfirmed(session, true, START_MS + 1);
+    for (let index = 1; index < questions.length; index += 1) {
+      session = checkpointPyqExamSession(session, questions[index].id, START_MS + index * 1_000);
+    }
+
+    const finalized = finalizePyqExam({
+      userId: 'user-1',
+      session,
+      questions,
+      bankVersion: 'bank-3',
+      reason: 'manual',
+      nowMs: START_MS + 60 * 60_000
+    });
+
+    expect(finalized.session.config.examState).toMatchObject({
+      validity_status: 'qualified',
+      validity_reasons: [],
+      validity_metrics: {
+        question_count: 65,
+        total_marks: 100,
+        scorable_question_count: 65,
+        scorable_marks: 100,
+        visited_question_count: 65,
+        active_time_sec: 3600,
+        prior_exposure_count: 0,
+        pause_count: 0,
+        closed_book_confirmed: true
+      }
+    });
+  });
+
+  it('records every concrete reason a compromised full paper is only supporting evidence', () => {
+    const questions = fullPaperQuestions();
+    let session = fullPaperSession(questions, {
+      priorExposureQuestionUids: [questions[0].id]
+    });
+    session = pausePyqExamSession(session, START_MS + 60_000);
+    session = resumePyqExamSession(session, START_MS + 120_000);
+
+    const finalized = finalizePyqExam({
+      userId: 'user-1',
+      session,
+      questions,
+      bankVersion: 'bank-3',
+      reason: 'manual',
+      nowMs: START_MS + 10 * 60_000
+    });
+
+    expect(finalized.session.config.examState?.validity_status).toBe('supporting');
+    expect(finalized.session.config.examState?.validity_reasons).toEqual([
+      'prior-exposure',
+      'paused',
+      'closed-book-unconfirmed',
+      'incomplete-visit-coverage',
+      'low-active-time'
     ]);
   });
 });

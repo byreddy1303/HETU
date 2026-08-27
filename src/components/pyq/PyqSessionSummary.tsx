@@ -9,12 +9,20 @@ import {
   ExternalLink,
   FileQuestion,
   ListChecks,
+  LockKeyhole,
+  ShieldAlert,
+  ShieldCheck,
   Sigma,
   Sparkles,
   XCircle,
   type LucideIcon
 } from 'lucide-react';
-import type { PyqAttemptRow, PyqSelectedAnswer, PyqSessionRow } from '@/types';
+import type {
+  PyqAttemptRow,
+  PyqExamValidityReason,
+  PyqSelectedAnswer,
+  PyqSessionRow
+} from '@/types';
 import PyqQuestionContent from '@/components/pyq/PyqQuestionContent';
 import { Badge } from '@/components/ui/Badge';
 import { Card, CardBody, CardHeader } from '@/components/ui/Card';
@@ -81,6 +89,17 @@ const OUTCOME_META: Record<
     barClass: 'bg-text-faint',
     icon: FileQuestion
   }
+};
+
+const VALIDITY_REASON_LABELS: Record<PyqExamValidityReason, string> = {
+  'not-full-paper': 'Timed set, not a full paper',
+  'prior-exposure': 'Paper was not fully unseen',
+  paused: 'Timer was paused',
+  'closed-book-unconfirmed': 'Closed-book conditions were not confirmed',
+  'incomplete-visit-coverage': 'Not all 65 questions were visited',
+  'low-active-time': 'Active time was below the credibility threshold',
+  'incomplete-scoring': 'Exact scoring did not cover all 100 marks',
+  'nonstandard-paper': 'Paper identity or structure was nonstandard'
 };
 
 function formatMarks(value: number, signed = false): string {
@@ -254,6 +273,102 @@ function LedgerCard({
         ))}
       </dl>
     </section>
+  );
+}
+
+function ExamEvidenceReceipt({ session }: { session: PyqSessionRow }) {
+  if (session.config.mode !== 'exam') return null;
+  const state = session.config.examState;
+  const qualified = state?.validity_status === 'qualified';
+  const reasons = state?.validity_reasons ?? ['not-full-paper'];
+  const metrics = state?.validity_metrics;
+  const fullPaper = session.config.examKind === 'full-paper';
+
+  return (
+    <aside
+      aria-label="Exam evidence validity"
+      className={cn(
+        'overflow-hidden rounded border shadow-sm',
+        qualified ? 'border-success/35 bg-success-faint' : 'border-warn/35 bg-warn-faint'
+      )}
+    >
+      <div className="flex flex-col gap-3 border-b border-current/10 px-4 py-4 sm:flex-row sm:items-start sm:justify-between sm:px-5">
+        <div className="flex items-start gap-3">
+          <span
+            className={cn(
+              'flex h-10 w-10 shrink-0 items-center justify-center rounded-full border bg-bg-raised',
+              qualified ? 'border-success/30 text-success' : 'border-warn/30 text-warn'
+            )}
+          >
+            {qualified ? <ShieldCheck size={19} /> : <ShieldAlert size={19} />}
+          </span>
+          <div>
+            <p className="u-label">Readiness evidence receipt</p>
+            <h3 className="mt-1 font-display text-[18px] font-bold text-text">
+              {qualified ? 'Qualified benchmark evidence' : 'Supporting evidence only'}
+            </h3>
+            <p className="mt-1 max-w-2xl text-[11.5px] leading-relaxed text-text-muted">
+              {qualified
+                ? 'This outcome may enter the qualified mock range because every recorded validity condition passed.'
+                : 'The score remains useful for diagnosis, but it does not enter the qualified readiness range.'}
+            </p>
+          </div>
+        </div>
+        {fullPaper ? (
+          <div className="grid shrink-0 grid-cols-3 gap-px overflow-hidden rounded border border-border bg-border text-center">
+            {[
+              ['65', 'questions'],
+              ['100', 'marks'],
+              ['180', 'minutes']
+            ].map(([value, label]) => (
+              <div key={label} className="min-w-[64px] bg-bg-raised px-2 py-2">
+                <p className="u-num text-[16px] font-bold text-text">{value}</p>
+                <p className="text-[8.5px] uppercase tracking-wide text-text-faint">{label}</p>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <Badge tone="warn">Timed diagnostic</Badge>
+        )}
+      </div>
+
+      {metrics ? (
+        <dl className="grid grid-cols-2 gap-px bg-border/70 sm:grid-cols-5">
+          {[
+            ['Visited', `${metrics.visited_question_count}/${metrics.question_count}`],
+            ['Scored', `${metrics.scorable_marks}/${metrics.total_marks} marks`],
+            ['Active time', secondsToClock(metrics.active_time_sec)],
+            ['Prior exposure', metrics.prior_exposure_count ?? 'Unknown'],
+            [
+              'Conditions',
+              `${metrics.closed_book_confirmed ? 'Closed book' : 'Unconfirmed'} · ${metrics.pause_count ?? 'Unknown'} pause${metrics.pause_count === 1 ? '' : 's'}`
+            ]
+          ].map(([label, value]) => (
+            <div key={String(label)} className="bg-bg-raised px-3 py-3">
+              <dt className="u-label">{label}</dt>
+              <dd className="mt-1 text-[11.5px] font-semibold leading-snug text-text">{value}</dd>
+            </div>
+          ))}
+        </dl>
+      ) : null}
+
+      {!qualified ? (
+        <div className="px-4 py-3 sm:px-5">
+          <p className="u-label mb-2">Why it did not qualify</p>
+          <ul className="flex flex-wrap gap-1.5">
+            {reasons.map((reason) => (
+              <li key={reason}>
+                <Badge tone="warn">{VALIDITY_REASON_LABELS[reason]}</Badge>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : (
+        <div className="flex items-center gap-2 px-4 py-3 text-[11.5px] font-medium text-success sm:px-5">
+          <LockKeyhole size={14} /> Fresh paper · closed book · single sitting · complete scoring
+        </div>
+      )}
+    </aside>
   );
 }
 
@@ -507,6 +622,11 @@ function ResponseCard({
                 <Bookmark size={10} aria-hidden="true" /> Review
               </Badge>
             ) : null}
+            {question.confidence ? (
+              <Badge tone={question.confidence === 'high' ? 'success' : 'guess'}>
+                {question.confidence[0].toUpperCase() + question.confidence.slice(1)} confidence
+              </Badge>
+            ) : null}
             {!question.visited ? <Badge>Not visited</Badge> : null}
           </div>
           <div className="mt-1 flex flex-wrap gap-x-3 gap-y-0.5 text-[10.5px] text-text-faint">
@@ -579,7 +699,12 @@ function ResponseCard({
               ['Outcome', outcome.label],
               ['Score', scoreLabel],
               ['Time', secondsToClock(question.timeSpentSec)],
-              ['Response state', question.visited ? 'Visited' : 'Not visited']
+              [
+                'Confidence',
+                question.confidence
+                  ? question.confidence[0].toUpperCase() + question.confidence.slice(1)
+                  : 'Not recorded'
+              ]
             ].map(([label, value]) => (
               <div key={label} className="min-w-0 bg-bg-raised p-3">
                 <dt className="u-label">{label}</dt>
@@ -641,10 +766,17 @@ export default function PyqSessionSummary({ session, attempts }: PyqSessionSumma
       (attempt) => attempt && attempt.capture_version >= 2 && attempt.question_snapshot
     )?.question_snapshot;
   const subject = firstSnapshot?.subject ?? humanizeSlug(session.config.subjectSlug);
+  const fullPaper = session.config.mode === 'exam' && session.config.examKind === 'full-paper';
+  const reportTitle = fullPaper
+    ? (firstSnapshot?.paper_label ?? humanizeSlug(session.config.benchmarkPaperId ?? 'Full paper'))
+    : subject;
   const isMultiTopic = session.config.topicSlug && session.config.topicSlug.includes(',');
-  const topic =
-    session.config.topicSlug && session.config.topicSlug !== 'all'
-      ? isMultiTopic ? 'Multiple topics' : (firstSnapshot?.topic ?? humanizeSlug(session.config.topicSlug))
+  const topic = fullPaper
+    ? 'Official full paper'
+    : session.config.topicSlug && session.config.topicSlug !== 'all'
+      ? isMultiTopic
+        ? 'Multiple topics'
+        : (firstSnapshot?.topic ?? humanizeSlug(session.config.topicSlug))
       : 'Mixed topics';
   const frozenSnapshotCount = summary.questions.filter(
     (question) =>
@@ -659,7 +791,11 @@ export default function PyqSessionSummary({ session, attempts }: PyqSessionSumma
     summary.totalQuestions > 0 && frozenSnapshotCount === summary.totalQuestions;
   const durationLabel =
     summary.durationSec == null ? 'Untimed' : secondsToClock(summary.durationSec);
-  const modeLabel = session.config.mode === 'exam' ? 'Exam mode' : 'Practice mode';
+  const modeLabel = fullPaper
+    ? 'Full-paper exam'
+    : session.config.mode === 'exam'
+      ? 'Timed-set exam'
+      : 'Practice mode';
   const yearRange =
     session.config.fromYear === session.config.toYear
       ? String(session.config.fromYear)
@@ -685,7 +821,7 @@ export default function PyqSessionSummary({ session, attempts }: PyqSessionSumma
               <div className="u-margin-line min-w-0">
                 <p className="u-label text-accent">PYQ session report</p>
                 <h2 className="mt-1 font-display text-[24px] font-bold leading-tight tracking-tight text-text sm:text-[30px]">
-                  {subject}
+                  {reportTitle}
                 </h2>
                 <p className="mt-1 text-[12.5px] text-text-muted">
                   {topic} · {yearRange} · {sessionDate(session.started_at)}
@@ -780,7 +916,9 @@ export default function PyqSessionSummary({ session, attempts }: PyqSessionSumma
         </CardBody>
       </Card>
 
-      <section aria-label="Session ledgers" className="grid gap-3 md:grid-cols-3">
+      <ExamEvidenceReceipt session={session} />
+
+      <section aria-label="Session ledgers" className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
         <LedgerCard
           title="Response ledger"
           icon={ListChecks}
@@ -831,6 +969,26 @@ export default function PyqSessionSummary({ session, attempts }: PyqSessionSumma
             { label: 'Time taken', value: secondsToClock(summary.elapsedSec) }
           ]}
         />
+        {session.config.mode === 'exam' ? (
+          <LedgerCard
+            title="Confidence ledger"
+            icon={CircleHelp}
+            items={[
+              {
+                label: 'High confidence',
+                value: summary.confidence.high,
+                valueClass: 'text-success'
+              },
+              {
+                label: 'Medium confidence',
+                value: summary.confidence.medium,
+                valueClass: 'text-guess'
+              },
+              { label: 'Low confidence', value: summary.confidence.low, valueClass: 'text-guess' },
+              { label: 'Not recorded', value: summary.confidence.unset }
+            ]}
+          />
+        ) : null}
       </section>
 
       {!exactScoreCoverage ||

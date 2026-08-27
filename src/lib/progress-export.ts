@@ -4,6 +4,7 @@ import { normalizeAttemptEvidence } from '@/lib/attempt-evidence';
 import { GATE_2027_REGISTRY_VERSION } from '@/lib/gate-2027';
 import { GATE_SCORING_VERSION } from '@/lib/gate-scoring';
 import { loadAllDayPlans, type DayPlan } from '@/lib/planner-storage';
+import { normalizeMockEvidence } from '@/lib/mocks';
 import { computeReadiness, READINESS_CALCULATION_VERSION } from '@/lib/readiness';
 import { aggregatePyqAttemptScores } from '@/lib/pyq-session';
 import { official2027TopicsFor, type Official2027TopicSpec } from '@/lib/subtopics';
@@ -26,7 +27,7 @@ import type {
   WeeklyReviewRow
 } from '@/types';
 
-export const PROGRESS_REPORT_VERSION = 3;
+export const PROGRESS_REPORT_VERSION = 4;
 
 export interface ProgressMetric {
   component: string;
@@ -147,17 +148,34 @@ export function buildProgressReport(
     '%'
   );
 
-  const mocksByDate = [...data.mocks].sort((a, b) => a.test_date.localeCompare(b.test_date));
-  const latestMock = mocksByDate.at(-1);
-  const bestMockPercent = data.mocks.length
-    ? Math.max(...data.mocks.map((row) => percentage(row.total_marks, row.max_marks)))
+  const normalizedMocks = data.mocks.map((row) => normalizeMockEvidence(row));
+  const qualifiedMocks = normalizedMocks.filter((row) => row.evidence_status === 'qualified');
+  const qualifiedByDate = qualifiedMocks.sort((a, b) => a.test_date.localeCompare(b.test_date));
+  const latestQualifiedMock = qualifiedByDate.at(-1);
+  const bestQualifiedMockPercent = qualifiedMocks.length
+    ? Math.max(...qualifiedMocks.map((row) => percentage(row.total_marks, row.max_marks)))
     : 0;
   add('Mock tests', 'Mocks recorded', data.mocks.length, 'count');
-  add('Mock tests', 'Best score', bestMockPercent, '%');
+  add('Mock tests', 'Qualified full-paper outcomes', qualifiedMocks.length, 'count');
   add(
     'Mock tests',
-    'Latest score',
-    latestMock ? percentage(latestMock.total_marks, latestMock.max_marks) : 0,
+    'Supporting outcomes',
+    normalizedMocks.filter((row) => row.evidence_status === 'supporting').length,
+    'count'
+  );
+  add(
+    'Mock tests',
+    'Excluded outcomes',
+    normalizedMocks.filter((row) => row.evidence_status === 'excluded').length,
+    'count'
+  );
+  add('Mock tests', 'Best qualified score', bestQualifiedMockPercent, '%');
+  add(
+    'Mock tests',
+    'Latest qualified score',
+    latestQualifiedMock
+      ? percentage(latestQualifiedMock.total_marks, latestQualifiedMock.max_marks)
+      : 0,
     '%'
   );
   add(

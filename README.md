@@ -68,7 +68,9 @@ The tool compresses your mistake surface. It does not replace your reasoning.
 
 - Every PYQ decision—correct, wrong, skipped, or uncertain—is recorded once as immutable performance evidence. Journal analysis is optional and never gates readiness evidence.
 - Scorable questions use the official GATE rules for 1/2-mark MCQ, MSQ, and NAT items. Integer-thirds arithmetic avoids rounding drift; incomplete type/mark metadata remains visibly unscorable.
-- Readiness uses the official GATE 2027 section blueprint (15 marks General Aptitude, 13 Engineering Mathematics, 72 core CS). Recorded mock marks and their uncertainty lead the view; numeric AIR prediction remains disabled until prospectively validated.
+- Exam mode includes structurally complete GATE CSE 2026 Set 1 and Set 2 benchmark papers in official order: 65 questions, 100 marks, and one 180-minute countdown. Regular practice protects unseen benchmark questions by default so a sealed paper remains available for an authentic first attempt.
+- An automatic PYQ full-paper outcome becomes qualified readiness evidence only when the paper was unseen, timed, closed book, unpaused, fully visited, active for a credible duration, and 100% exactly scorable. External mocks must explicitly confirm the corresponding paper and test conditions. Every compromise remains an inspectable supporting-evidence reason rather than being inferred from the score.
+- Readiness uses the official GATE 2027 section blueprint (15 marks General Aptitude, 13 Engineering Mathematics, 72 core CS) and computes its mock outcome range from qualified full-paper evidence only. Supporting and excluded runs remain visible for diagnosis; numeric AIR prediction remains disabled until prospectively validated.
 - Wrong / slow / guessed answers auto-enter a spaced re-attempt ladder (3 → 10 → 30 days).
 - Buddy chat lets you discuss and share a stripped question snapshot without exposing outcomes, patterns, or root causes.
 - Buddy message alerts are an explicit per-device opt-in and work on installed phone PWAs, desktop browsers, and configured Android builds.

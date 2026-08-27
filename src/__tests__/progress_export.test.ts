@@ -9,7 +9,14 @@ import {
   type ProgressData,
   type ProgressReport
 } from '@/lib/progress-export';
-import type { PatternRow, PyqAttemptRow, QuestionRow, ReattemptRow, SessionRow } from '@/types';
+import type {
+  MockTestRow,
+  PatternRow,
+  PyqAttemptRow,
+  QuestionRow,
+  ReattemptRow,
+  SessionRow
+} from '@/types';
 
 const USER_ID = '11111111-1111-4111-8111-111111111111';
 
@@ -75,6 +82,44 @@ function reattempt(): ReattemptRow {
     stage: 'MASTERED',
     history: [{ date: '2026-08-03', result: 'clean', timeSpent: 80 }],
     created_at: '2026-08-01T06:15:00.000Z'
+  };
+}
+
+function mockEvidence(
+  id: string,
+  date: string,
+  score: number,
+  overrides: Partial<MockTestRow> = {}
+): MockTestRow {
+  return {
+    id,
+    user_id: USER_ID,
+    name: id,
+    test_date: date,
+    total_marks: score,
+    max_marks: 100,
+    total_questions: 65,
+    correct: 40,
+    wrong: 10,
+    skipped: 15,
+    duration_min: 180,
+    subject_scores: [],
+    mistakes: [],
+    planner_date: null,
+    planner_block_id: null,
+    created_at: `${date}T06:00:00.000Z`,
+    updated_at: `${date}T09:00:00.000Z`,
+    source_kind: 'manual',
+    source_pyq_session_id: null,
+    paper_scope: 'full_length',
+    freshness: 'unseen',
+    timed: true,
+    closed_book: true,
+    single_sitting: true,
+    evidence_status: 'qualified',
+    evidence_reasons: [],
+    scoring_coverage_pct: 100,
+    ...overrides
   };
 }
 
@@ -170,7 +215,7 @@ describe('progress report export', () => {
     expect(metric(report, 'Syllabus tracker', 'Databases topics completed')).toBe(1);
     expect(metric(report, 'Syllabus tracker', 'Total topics')).toBe(69);
     expect(metric(report, 'Syllabus tracker', 'Registry version')).toBe('gate-cs-2027-official-v1');
-    expect(report.version).toBe(3);
+    expect(report.version).toBe(4);
     expect(metric(report, 'Subject: Databases', 'Clean solve rate')).toBe(50);
 
     const components = new Set(report.metrics.map((row) => row.component));
@@ -302,6 +347,33 @@ describe('progress report export', () => {
     expect(metric(report, 'PYQ practice', 'Exactly scored receipts')).toBe(1);
     expect(metric(report, 'PYQ practice', 'Exact score thirds')).toBe(6);
     expect(metric(report, 'PYQ practice', 'Exact scoring coverage')).toBe(33.3);
+  });
+
+  it('reports mock outcome ranges from qualified evidence only', () => {
+    const data = progressData();
+    data.mocks = [
+      mockEvidence('qualified-best', '2026-08-10', 62),
+      mockEvidence('qualified-latest', '2026-08-20', 58),
+      mockEvidence('supporting-high-score', '2026-08-24', 99, {
+        freshness: 'repeated',
+        evidence_status: 'supporting'
+      }),
+      mockEvidence('explicitly-excluded', '2026-08-25', 100, {
+        evidence_status: 'excluded'
+      })
+    ];
+
+    const report = buildProgressReport(data, {
+      learnerName: 'Kalyan',
+      generatedAt: '2026-08-27T10:00:00.000Z'
+    });
+
+    expect(metric(report, 'Mock tests', 'Mocks recorded')).toBe(4);
+    expect(metric(report, 'Mock tests', 'Qualified full-paper outcomes')).toBe(2);
+    expect(metric(report, 'Mock tests', 'Supporting outcomes')).toBe(1);
+    expect(metric(report, 'Mock tests', 'Excluded outcomes')).toBe(1);
+    expect(metric(report, 'Mock tests', 'Best qualified score')).toBe(62);
+    expect(metric(report, 'Mock tests', 'Latest qualified score')).toBe(58);
   });
 
   it('collects only rows belonging to the requested user', async () => {

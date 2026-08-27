@@ -563,6 +563,83 @@ function stableQuestionSort(a, b) {
   );
 }
 
+const BENCHMARK_QUESTION_TYPES = new Set(['MCQ', 'MSQ', 'NAT']);
+const GATE_CSE_BENCHMARK_LABEL = /^GATE CSE (?<year>\d{4})(?: Set (?<set>\d+))?$/i;
+
+function benchmarkPaperIdentity(question) {
+  if (question.bookSlug !== 'gate-cse') return null;
+  const paperLabel = normalizedTitle(question.paperLabel);
+  const match = paperLabel.match(GATE_CSE_BENCHMARK_LABEL);
+  if (!match?.groups) return null;
+
+  const year = Number(match.groups.year);
+  const set = match.groups.set == null ? null : Number(match.groups.set);
+  if (question.year !== year || question.set !== set) return null;
+  return { paperLabel, year, set };
+}
+
+function benchmarkQuestionSort(left, right) {
+  const leftIsGa = left.subjectSlug === 'general-aptitude' || /^GA[-_\s]*\d+/i.test(left.number);
+  const rightIsGa = right.subjectSlug === 'general-aptitude' || /^GA[-_\s]*\d+/i.test(right.number);
+  return (
+    Number(rightIsGa) - Number(leftIsGa) ||
+    naturalQuestionNumber(left.number) - naturalQuestionNumber(right.number) ||
+    left.id.localeCompare(right.id)
+  );
+}
+
+function benchmarkPaperId(paperLabel) {
+  return paperLabel
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '');
+}
+
+function benchmarkPapersForManifest(questions) {
+  const grouped = new Map();
+  for (const question of questions) {
+    const identity = benchmarkPaperIdentity(question);
+    if (!identity) continue;
+    const key = `${identity.year}\u0000${identity.set ?? ''}\u0000${identity.paperLabel}`;
+    if (!grouped.has(key)) grouped.set(key, { identity, questionsByUid: new Map() });
+    grouped.get(key).questionsByUid.set(question.id, question);
+  }
+
+  return [...grouped.values()]
+    .flatMap(({ identity, questionsByUid }) => {
+      const paperQuestions = [...questionsByUid.values()];
+      const hasKnownMarks = paperQuestions.every(
+        (question) => question.marks === 1 || question.marks === 2
+      );
+      const isBenchmark =
+        paperQuestions.length === 65 &&
+        hasKnownMarks &&
+        paperQuestions.reduce((sum, question) => sum + question.marks, 0) === 100 &&
+        paperQuestions.every((question) => BENCHMARK_QUESTION_TYPES.has(question.type)) &&
+        paperQuestions.every((question) => question.answerStatus === 'available');
+      if (!isBenchmark) return [];
+
+      return [
+        {
+          id: benchmarkPaperId(identity.paperLabel),
+          bookSlug: 'gate-cse',
+          paperLabel: identity.paperLabel,
+          year: identity.year,
+          set: identity.set,
+          questionCount: 65,
+          maxMarks: 100,
+          questionUids: paperQuestions.sort(benchmarkQuestionSort).map((question) => question.id)
+        }
+      ];
+    })
+    .sort(
+      (left, right) =>
+        right.year - left.year ||
+        (left.set ?? 0) - (right.set ?? 0) ||
+        left.paperLabel.localeCompare(right.paperLabel)
+    );
+}
+
 function questionYears(rows) {
   return [...new Set(rows.map((question) => question.year))]
     .sort((a, b) => b - a)
@@ -1563,6 +1640,7 @@ async function main() {
       subjects: bookSubjects
     };
   });
+  const benchmarkPapers = benchmarkPapersForManifest(questions);
   const manifest = {
     bankVersion: PYQ_BANK_VERSION,
     generatedAt: new Date().toISOString(),
@@ -1576,6 +1654,8 @@ async function main() {
     imageCount: imageMap.size + bundledImages.size,
     answerStatuses,
     verifiedPdfMarkMetadata,
+    gatePaperPatternMarkPolicyVersion: GATE_PAPER_PATTERN_MARK_POLICY_VERSION,
+    benchmarkPapers,
     years,
     subjects,
     books
@@ -1590,6 +1670,8 @@ async function main() {
       {
         bankVersion: PYQ_BANK_VERSION,
         verifiedPdfMarkMetadata,
+        gatePaperPatternMarkPolicyVersion: GATE_PAPER_PATTERN_MARK_POLICY_VERSION,
+        benchmarkPapers,
         sources: [
           {
             name: 'GateQA',

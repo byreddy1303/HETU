@@ -48,7 +48,7 @@ import {
   type ReadinessSnapshot
 } from '@/lib/readiness-snapshots';
 import { EXAM_DATE_DEFAULT, SUBJECTS } from '@/lib/constants';
-import { mockScorePercent } from '@/lib/mocks';
+import { mockScorePercent, normalizeMockEvidence } from '@/lib/mocks';
 import { GATE_2027_BLUEPRINT, GATE_2027_OFFICIAL_SOURCES } from '@/lib/gate-2027';
 import { cn, todayISOInTimeZone, weekStartISO } from '@/lib/utils';
 import { subjectInk } from '@/lib/subjectInk';
@@ -176,15 +176,20 @@ export default function Readiness() {
 
   const moves = useMemo(() => nextMoves(breakdown, perSubject), [breakdown, perSubject]);
   const mockSignal = useMemo(() => {
-    const recent = [...mocks]
+    const normalizedMocks = mocks.map((row) => normalizeMockEvidence(row));
+    const qualified = normalizedMocks.filter((row) => row.evidence_status === 'qualified');
+    const recent = qualified
       .sort((left, right) => left.test_date.localeCompare(right.test_date))
       .slice(-5);
-    const normalized = recent.map(mockScorePercent);
+    const scores = recent.map(mockScorePercent);
     return {
       recent,
       latest: recent.at(-1) ?? null,
-      low: normalized.length > 0 ? Math.min(...normalized) : null,
-      high: normalized.length > 0 ? Math.max(...normalized) : null
+      low: scores.length > 0 ? Math.min(...scores) : null,
+      high: scores.length > 0 ? Math.max(...scores) : null,
+      qualifiedCount: qualified.length,
+      supportingCount: normalizedMocks.filter((row) => row.evidence_status === 'supporting').length,
+      excludedCount: normalizedMocks.filter((row) => row.evidence_status === 'excluded').length
     };
   }, [mocks]);
 
@@ -348,7 +353,7 @@ export default function Readiness() {
           {/* --- Outcome evidence and official blueprint --- */}
           <Card className="order-1">
             <CardHeader
-              title="Recorded mock outcomes"
+              title="Qualified mock outcomes"
               aside={
                 <a
                   href={GATE_2027_OFFICIAL_SOURCES.pattern}
@@ -361,10 +366,11 @@ export default function Readiness() {
               }
             />
             <CardBody className="flex flex-col gap-4">
-              {mockSignal.latest ? (
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
                   <div className="rounded border border-border bg-bg-overlay/40 p-3">
-                    <p className="u-label">Latest recorded mock</p>
+                  {mockSignal.latest ? (
+                    <>
+                      <p className="u-label">Latest qualified paper</p>
                     <p className="mt-1 font-display text-[24px] font-bold text-text">
                       <span className="u-num">{mockSignal.latest.total_marks}</span>
                       <span className="text-[13px] font-normal text-text-muted">
@@ -375,8 +381,23 @@ export default function Readiness() {
                     <p className="mt-1 text-[11px] text-text-faint">
                       {mockSignal.latest.name} · {mockSignal.latest.test_date}
                     </p>
+                    </>
+                  ) : (
+                    <>
+                      <p className="u-label">Latest qualified paper</p>
+                      <p className="mt-1 text-[14px] font-semibold text-text">
+                        No qualified run yet
+                      </p>
+                      <p className="mt-1 text-[11px] leading-relaxed text-text-faint">
+                        Take an unseen full paper in PYQ Exam mode or record all external test
+                        conditions.
+                      </p>
+                    </>
+                  )}
                   </div>
                   <div className="rounded border border-border bg-bg-overlay/40 p-3">
+                  {mockSignal.latest ? (
+                    <>
                     <p className="u-label">Recent normalized range</p>
                     <p className="u-num mt-1 text-[24px] font-bold text-text">
                       {mockSignal.low}–{mockSignal.high}%
@@ -385,33 +406,44 @@ export default function Readiness() {
                       last {mockSignal.recent.length} recorded mock
                       {mockSignal.recent.length === 1 ? '' : 's'}
                     </p>
+                    </>
+                  ) : (
+                    <>
+                      <p className="u-label">Evidence ledger</p>
+                      <p className="u-num mt-1 text-[20px] font-bold text-text">
+                        {mockSignal.qualifiedCount} qualified · {mockSignal.supportingCount}{' '}
+                        supporting
+                      </p>
+                      <p className="mt-1 text-[11px] text-text-faint">
+                        Supporting runs remain useful for diagnosis but do not set this range.
+                      </p>
+                    </>
+                  )}
                   </div>
                   <div className="rounded border border-border bg-bg-overlay/40 p-3">
                     <p className="u-label">Official paper blueprint</p>
                     <p className="u-num mt-1 text-[16px] font-semibold text-text">
-                      {GATE_2027_BLUEPRINT.durationMinutes} min ·{' '}
-                      {GATE_2027_BLUEPRINT.questionCount} questions
+                    {GATE_2027_BLUEPRINT.durationMinutes} min · {GATE_2027_BLUEPRINT.questionCount}{' '}
+                    questions
                     </p>
                     <p className="mt-1 text-[11px] leading-relaxed text-text-faint">
-                      GA {GATE_2027_BLUEPRINT.sectionMarks.generalAptitude} · Engineering
-                      Mathematics {GATE_2027_BLUEPRINT.sectionMarks.engineeringMathematics} · CS{' '}
+                    GA {GATE_2027_BLUEPRINT.sectionMarks.generalAptitude} · Engineering Mathematics{' '}
+                    {GATE_2027_BLUEPRINT.sectionMarks.engineeringMathematics} · CS{' '}
                       {GATE_2027_BLUEPRINT.sectionMarks.coreSubject}
                     </p>
                   </div>
                 </div>
-              ) : (
-                <div className="rounded border border-border bg-bg-overlay/40 p-3 text-[12.5px] text-text-muted">
-                  No mock has been recorded yet.{' '}
-                  <Link to="/mocks" className="text-accent hover:text-accent-hover">
-                    Record one
-                  </Link>{' '}
-                  to make marks—the closest available outcome signal—lead this page.
-                </div>
-              )}
               <div className="rounded border border-warn/30 bg-warn/5 p-3 text-[12px] leading-relaxed text-text-muted">
-                Recorded mocks are manually entered; unseen-paper, full-length, and validity flags
-                are not captured yet. AIR modelling is not prospectively validated, so no numeric
-                rank estimate is shown.
+                Only fresh, timed, closed-book, single-sitting 65-question/100-mark papers with 100%
+                scoring coverage feed this range. {mockSignal.supportingCount} supporting and{' '}
+                {mockSignal.excludedCount} excluded record
+                {mockSignal.supportingCount + mockSignal.excludedCount === 1 ? ' is' : 's are'} kept
+                in{' '}
+                <Link to="/mocks" className="font-medium text-accent hover:text-accent-hover">
+                  Mock tests
+                </Link>
+                . AIR modelling is not prospectively validated, so no numeric rank estimate is
+                shown.
               </div>
             </CardBody>
           </Card>

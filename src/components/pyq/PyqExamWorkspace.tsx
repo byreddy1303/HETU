@@ -12,9 +12,10 @@ import {
   Send,
   Square
 } from 'lucide-react';
-import type { PyqSessionRow } from '@/types';
+import type { PyqExamConfidence, PyqSessionRow } from '@/types';
 import type { PyqQuestion } from '@/lib/pyq';
 import {
+  getPyqExamConfidence,
   pyqExamPaletteCounts,
   pyqExamQuestionStatus,
   type PyqExamPaletteCounts,
@@ -64,6 +65,8 @@ interface PyqExamWorkspaceProps {
   onPrevious: () => void;
   onSubmit: () => void;
   onPause: () => void;
+  /** Optional while legacy callers are migrated; controls remain visible but disabled. */
+  onConfidence?: (confidence: PyqExamConfidence) => void;
 }
 
 function answerInputType(question: PyqQuestion): 'MCQ' | 'MSQ' | 'NAT' {
@@ -190,16 +193,20 @@ function ResponsePad({
   choices,
   numeric,
   submitting,
+  confidence,
   onChoices,
-  onNumeric
+  onNumeric,
+  onConfidence
 }: {
   question: PyqQuestion;
   status: PyqExamQuestionStatus;
   choices: string[];
   numeric: string;
   submitting: boolean;
+  confidence: PyqExamConfidence | null;
   onChoices: (choices: string[]) => void;
   onNumeric: (value: string) => void;
+  onConfidence?: (confidence: PyqExamConfidence) => void;
 }) {
   const inputType = answerInputType(question);
   const statusTone =
@@ -305,6 +312,40 @@ function ResponsePad({
             </div>
           </fieldset>
         )}
+
+        <fieldset
+          className="mt-5 border-t border-border pt-4"
+          disabled={submitting || !onConfidence}
+        >
+          <legend className="text-[13px] font-semibold text-text">Answer confidence</legend>
+          <p className="mt-0.5 text-[11.5px] text-text-faint">
+            Record how certain you feel. The answer remains sealed until submission.
+          </p>
+          <div className="mt-3 grid grid-cols-3 gap-2">
+            {(['high', 'medium', 'low'] as const).map((value) => {
+              const selected = confidence === value;
+              const label = value[0].toUpperCase() + value.slice(1);
+              return (
+                <button
+                  key={value}
+                  type="button"
+                  aria-label={`${label} confidence`}
+                  aria-pressed={selected}
+                  onClick={() => onConfidence?.(value)}
+                  className={cn(
+                    'min-h-10 rounded border px-2 text-[12px] font-semibold transition-colors',
+                    selected
+                      ? 'border-accent bg-accent-faint text-accent shadow-sm'
+                      : 'border-border bg-bg-raised text-text-muted hover:border-border-hover hover:text-text',
+                    (submitting || !onConfidence) && 'cursor-not-allowed opacity-55'
+                  )}
+                >
+                  {label}
+                </button>
+              );
+            })}
+          </div>
+        </fieldset>
       </CardBody>
     </Card>
   );
@@ -392,7 +433,8 @@ export default function PyqExamWorkspace({
   onSaveAndNext,
   onPrevious,
   onSubmit,
-  onPause
+  onPause,
+  onConfidence
 }: PyqExamWorkspaceProps) {
   const current = questions[index];
   const counts = pyqExamPaletteCounts(session, questions);
@@ -530,8 +572,10 @@ export default function PyqExamWorkspace({
               choices={choices}
               numeric={numeric}
               submitting={submitting}
+              confidence={getPyqExamConfidence(session, current.id)}
               onChoices={onChoices}
               onNumeric={onNumeric}
+              onConfidence={onConfidence}
             />
           </div>
 

@@ -1,6 +1,7 @@
 import type { MarkDecision, Outcome, PyqSelectedAnswer, PyqSessionConfig } from '@/types';
 import { DEFAULT_TARGET_TIME_SEC, MARKS_TARGET_SEC } from '@/lib/constants';
 import { urlToDataUrl } from '@/lib/image';
+import type { PyqBenchmarkManifestFields, PyqBenchmarkPaperManifest } from '@/lib/pyq-benchmark';
 
 export const PYQ_BANK_QUESTION_COUNT = 4334;
 
@@ -37,7 +38,7 @@ export interface PyqBookManifest {
   subjects: PyqSubjectManifest[];
 }
 
-export interface PyqManifest {
+export interface PyqManifest extends PyqBenchmarkManifestFields {
   bankVersion: string;
   generatedAt: string;
   source: string;
@@ -53,8 +54,13 @@ export interface PyqManifest {
   books: PyqBookManifest[];
 }
 
-type PyqManifestPayload = Omit<PyqManifest, 'subjects' | 'books' | 'defaultBookSlug'> & {
+type PyqManifestPayload = Omit<
+  PyqManifest,
+  'subjects' | 'books' | 'defaultBookSlug' | 'benchmarkPapers'
+> & {
   defaultBookSlug?: string;
+  /** Absent in banks generated before full-paper benchmarks shipped. */
+  benchmarkPapers?: PyqBenchmarkPaperManifest[];
   subjects: Array<Omit<PyqSubjectManifest, 'topics'> & { topics?: PyqSubjectManifest['topics'] }>;
   books?: Array<
     Omit<PyqBookManifest, 'subjects'> & {
@@ -99,7 +105,7 @@ interface SubjectPayload {
 
 const subjectCache = new Map<string, Promise<SubjectPayload>>();
 let manifestPromise: Promise<PyqManifest> | null = null;
-const PYQ_MANIFEST_SCHEMA = 'books-v2';
+const PYQ_MANIFEST_SCHEMA = 'benchmark-papers-v3';
 
 const PYQ_MATH_DELIMITERS = [
   { left: '$$$', right: '$$$' },
@@ -315,7 +321,8 @@ export function normalizePyqManifest(payload: PyqManifestPayload): PyqManifest {
       ? payload.defaultBookSlug!
       : books[0].slug,
     subjects,
-    books
+    books,
+    benchmarkPapers: Array.isArray(payload.benchmarkPapers) ? payload.benchmarkPapers : []
   };
 }
 

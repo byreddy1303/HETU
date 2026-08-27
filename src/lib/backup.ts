@@ -5,7 +5,7 @@
 import { db, SYNCED_TABLES, type SyncedTableName } from '@/lib/db';
 import { writeLocal } from '@/lib/sync';
 import { normalizeSubjectIdentity } from '@/lib/subjects';
-import { normalizeMockSubjectScores } from '@/lib/mocks';
+import { normalizeMockSubjectScores, normalizeMockTestRow } from '@/lib/mocks';
 import { scoreGateOutcome } from '@/lib/gate-scoring';
 import { pyqJournalSourceMap } from '@/lib/pyq-session';
 import type { UserRow } from '@/types';
@@ -34,6 +34,7 @@ function migrateImportedRow(
       row.subject_scores as Array<{ subject: string; subject_id?: string | null; marks: number }>
     );
   }
+  if (name === 'mock_tests') return normalizeMockTestRow(row);
   if (name === 'pyq_attempts' && row.capture_version === 2) {
     const snapshot =
       row.question_snapshot && typeof row.question_snapshot === 'object'
@@ -70,7 +71,7 @@ export async function exportAll(profile: UserRow | null): Promise<BackupEnvelope
     rows[name] = list.map((r) => {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { sync_status, ...rest } = r as { sync_status?: unknown } & Record<string, unknown>;
-      return rest;
+      return name === 'mock_tests' ? normalizeMockTestRow(rest) : rest;
     });
   }
   return {

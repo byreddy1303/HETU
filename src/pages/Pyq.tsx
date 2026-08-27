@@ -13,8 +13,11 @@ import {
   ExternalLink,
   FileQuestion,
   LibraryBig,
+  LockKeyhole,
   Pause,
   RotateCcw,
+  ShieldAlert,
+  ShieldCheck,
   Shuffle,
   SlidersHorizontal,
   XCircle
@@ -23,6 +26,7 @@ import type {
   MarkDecision,
   Outcome,
   PyqAttemptRow,
+  PyqExamConfidence,
   PyqHistoryFilter,
   PyqSelectedAnswer,
   PyqSessionConfig,
@@ -98,9 +102,12 @@ import {
   pyqExamPaletteCounts,
   pyqExamRemainingSeconds,
   resumePyqExamSession,
+  setPyqExamConfidence,
   setPyqExamResponse,
   setPyqExamReviewMark
 } from '@/lib/pyq-exam';
+import { pyqBenchmarkPaperExposure, type PyqBenchmarkPaper } from '@/lib/pyq-benchmark';
+import { mockTestFromFinalizedPyqExam } from '@/lib/pyq-mock-evidence';
 
 type Order = 'unseen' | 'random' | 'newest' | 'oldest';
 type CountChoice = '5' | '10' | '15' | '25' | '50' | 'all';
@@ -115,10 +122,10 @@ const PRACTICE_MODE_FEATURES = [
   'Pause with your draft saved'
 ];
 const EXAM_MODE_FEATURES = [
-  'One timed question paper',
+  'Timed set or full paper',
   'Free question navigation',
-  'Mark questions for review',
-  'Pause stops the timer'
+  'Confidence + review marks',
+  'Validity receipt at submit'
 ];
 
 function pauseStoredPyqSession(session: PyqSessionRow): PyqSessionRow {
@@ -199,6 +206,173 @@ function sourceDraft(question: PyqQuestion, screenshot: string | null): SourceDr
   };
 }
 
+function benchmarkFreshnessLabel(paper: PyqBenchmarkPaper): string {
+  if (paper.freshness === 'unseen') return 'Sealed · unseen';
+  if (paper.freshness === 'repeated') return 'Fully exposed';
+  return `${paper.priorExposureCount} of ${paper.questionCount} seen`;
+}
+
+function FullPaperSetup({
+  papers,
+  selectedPaperId,
+  closedBookConfirmed,
+  loading,
+  error,
+  onSelectPaper,
+  onClosedBookConfirmed,
+  onStart
+}: {
+  papers: PyqBenchmarkPaper[];
+  selectedPaperId: string | null;
+  closedBookConfirmed: boolean;
+  loading: boolean;
+  error: string | null;
+  onSelectPaper: (paper: PyqBenchmarkPaper) => void;
+  onClosedBookConfirmed: (confirmed: boolean) => void;
+  onStart: () => void;
+}) {
+  const selectedPaper = papers.find((paper) => paper.id === selectedPaperId) ?? null;
+  const canQualify = selectedPaper?.sealed === true && closedBookConfirmed;
+
+  return (
+    <Card className="overflow-hidden border-ink-violet/25">
+      <div className="border-b border-border bg-guess-faint/55 p-4 sm:p-5">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <p className="u-label text-ink-violet">Step 2 · Select an official paper</p>
+            <h2 className="mt-1 font-display text-[20px] font-bold tracking-tight text-text">
+              Open one sealed benchmark
+            </h2>
+            <p className="mt-1 max-w-2xl text-[12.5px] leading-relaxed text-text-muted">
+              The complete paper opens in official order with one 180-minute countdown. Answer keys
+              stay hidden until final submission.
+            </p>
+          </div>
+          <div className="grid shrink-0 grid-cols-3 gap-px overflow-hidden rounded border border-ink-violet/20 bg-ink-violet/20 text-center">
+            {[
+              ['65', 'questions'],
+              ['100', 'marks'],
+              ['180', 'minutes']
+            ].map(([value, label]) => (
+              <div key={label} className="min-w-[68px] bg-bg-raised px-2 py-2">
+                <p className="u-num text-[17px] font-bold text-text">{value}</p>
+                <p className="text-[9px] uppercase tracking-wide text-text-faint">{label}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <CardBody className="flex flex-col gap-5 p-4 sm:p-5">
+        {papers.length === 0 ? (
+          <div className="rounded border border-warn/30 bg-warn-faint p-4">
+            <p className="text-[13px] font-semibold text-text">No qualified paper in this bank</p>
+            <p className="mt-1 text-[12px] leading-relaxed text-text-muted">
+              A paper appears here only when all 65 questions, all 100 marks, supported answer
+              types, and official keys are present.
+            </p>
+          </div>
+        ) : (
+          <div className="grid gap-3 sm:grid-cols-2">
+            {papers.map((paper) => {
+              const selected = paper.id === selectedPaperId;
+              return (
+                <button
+                  key={paper.id}
+                  type="button"
+                  aria-pressed={selected}
+                  onClick={() => onSelectPaper(paper)}
+                  className={cn(
+                    'group relative min-h-[150px] rounded border p-4 text-left transition-all focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-guess-faint',
+                    selected
+                      ? 'border-ink-violet/55 bg-guess-faint shadow-card'
+                      : 'border-border bg-bg-raised hover:-translate-y-0.5 hover:border-border-hover'
+                  )}
+                >
+                  <span className="flex items-start justify-between gap-3">
+                    <span
+                      className={cn(
+                        'flex h-10 w-10 items-center justify-center rounded-lg border',
+                        paper.sealed
+                          ? 'border-success/25 bg-success-faint text-success'
+                          : 'border-warn/25 bg-warn-faint text-warn'
+                      )}
+                    >
+                      {paper.sealed ? <ShieldCheck size={19} /> : <ShieldAlert size={19} />}
+                    </span>
+                    <Badge tone={paper.sealed ? 'success' : 'warn'}>
+                      {benchmarkFreshnessLabel(paper)}
+                    </Badge>
+                  </span>
+                  <span className="mt-4 block font-display text-[17px] font-bold text-text">
+                    {paper.paperLabel}
+                  </span>
+                  <span className="mt-1 block text-[11.5px] leading-relaxed text-text-muted">
+                    {paper.sealed
+                      ? 'No prior answer receipt touches this paper. Eligible for unseen evidence.'
+                      : 'You can retake this paper, but the outcome will remain supporting evidence.'}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        )}
+
+        <label className="flex cursor-pointer items-start gap-3 rounded border border-border bg-bg-overlay/30 p-3.5">
+          <input
+            type="checkbox"
+            checked={closedBookConfirmed}
+            onChange={(event) => onClosedBookConfirmed(event.target.checked)}
+            className="mt-0.5 h-4 w-4 rounded border-border text-accent focus:ring-accent"
+          />
+          <span>
+            <span className="flex items-center gap-1.5 text-[12.5px] font-semibold text-text">
+              <LockKeyhole size={14} className="text-ink-violet" /> Closed-book conditions
+            </span>
+            <span className="mt-1 block text-[11.5px] leading-relaxed text-text-muted">
+              I will use no notes, answer keys, search, or outside help. Pausing later is allowed
+              for recovery, but it changes this run to supporting evidence.
+            </span>
+          </span>
+        </label>
+
+        <div className="rounded border border-border bg-bg-overlay/20 p-3">
+          <p className="flex items-center gap-2 text-[12px] font-semibold text-text">
+            {canQualify ? (
+              <ShieldCheck size={15} className="text-success" />
+            ) : (
+              <ShieldAlert size={15} className="text-warn" />
+            )}
+            {canQualify
+              ? 'Eligible to become qualified evidence'
+              : 'This start is supporting evidence'}
+          </p>
+          <p className="mt-1 text-[11px] leading-relaxed text-text-faint">
+            Qualification is decided again at submission from exposure, pause history, visit
+            coverage, active time, and exact scoring coverage. A label is never inferred from the
+            score alone.
+          </p>
+        </div>
+
+        {error && (
+          <p role="alert" className="text-[12px] text-danger">
+            {error}
+          </p>
+        )}
+        <Button
+          variant="primary"
+          className="w-full sm:self-end sm:w-auto"
+          onClick={onStart}
+          disabled={loading || !selectedPaper}
+        >
+          <Clock3 size={17} />
+          {loading ? 'Opening official paper…' : 'Start 3-hour full paper'}
+        </Button>
+      </CardBody>
+    </Card>
+  );
+}
+
 function PracticeSetup({
   manifest,
   attempts,
@@ -207,12 +381,16 @@ function PracticeSetup({
   completedSessions,
   config,
   setConfig,
+  includeReservedBenchmarkQuestions,
+  closedBookConfirmed,
   loading,
   error,
   onResume,
   onSave,
   onDiscard,
   onReview,
+  onIncludeReservedBenchmarkQuestions,
+  onClosedBookConfirmed,
   onStart
 }: {
   manifest: PyqManifest;
@@ -222,12 +400,16 @@ function PracticeSetup({
   completedSessions: PyqSessionRow[];
   config: AttemptConfig;
   setConfig: (next: AttemptConfig) => void;
+  includeReservedBenchmarkQuestions: boolean;
+  closedBookConfirmed: boolean;
   loading: boolean;
   error: string | null;
   onResume: (session: PyqSessionRow) => void;
   onSave: (session: PyqSessionRow) => void;
   onDiscard: (session: PyqSessionRow) => void;
   onReview: (session: PyqSessionRow) => void;
+  onIncludeReservedBenchmarkQuestions: (included: boolean) => void;
+  onClosedBookConfirmed: (confirmed: boolean) => void;
   onStart: () => void;
 }) {
   const selectedBookSlug = config.bookSlug ?? manifest.defaultBookSlug;
@@ -235,6 +417,21 @@ function PracticeSetup({
   const catalogSubjects = selectedBook?.subjects ?? manifest.subjects;
   const catalogYears = selectedBook?.years ?? manifest.years;
   const catalogQuestionCount = selectedBook?.count ?? manifest.questionCount;
+  const benchmarkPapers = useMemo(
+    () =>
+      manifest.benchmarkPapers.map((paper) => ({
+        ...paper,
+        ...pyqBenchmarkPaperExposure(paper, attempts)
+      })),
+    [attempts, manifest.benchmarkPapers]
+  );
+  const selectedBenchmarkPaper =
+    benchmarkPapers.find((paper) => paper.id === config.benchmarkPaperId) ??
+    benchmarkPapers.find((paper) => paper.sealed) ??
+    benchmarkPapers[0] ??
+    null;
+  const fullPaperSelected = config.mode === 'exam' && config.examKind === 'full-paper';
+  const sealedBenchmarkCount = benchmarkPapers.filter((paper) => paper.sealed).length;
   const attemptedIds = useMemo(
     () =>
       new Set(
@@ -410,6 +607,8 @@ function PracticeSetup({
                   setConfig({
                     ...config,
                     mode: 'practice',
+                    examKind: undefined,
+                    benchmarkPaperId: undefined,
                     examState: undefined,
                     practiceDraft: undefined
                   })
@@ -461,6 +660,7 @@ function PracticeSetup({
                   setConfig({
                     ...config,
                     mode: 'exam',
+                    examKind: config.examKind ?? 'timed-set',
                     count: config.count === 'all' ? '15' : config.count,
                     examState: undefined,
                     practiceDraft: undefined
@@ -510,6 +710,103 @@ function PracticeSetup({
         </Card>
       </section>
 
+      {config.mode === 'exam' && (
+        <Card className="overflow-hidden">
+          <CardHeader title="Step 2 · Choose the exam format" />
+          <CardBody className="grid gap-2 p-3 sm:grid-cols-2">
+            <button
+              type="button"
+              aria-pressed={(config.examKind ?? 'timed-set') === 'timed-set'}
+              onClick={() =>
+                setConfig({
+                  ...config,
+                  examKind: 'timed-set',
+                  benchmarkPaperId: undefined,
+                  count: config.count === 'all' ? '15' : config.count
+                })
+              }
+              className={cn(
+                'rounded border p-3 text-left transition-all',
+                (config.examKind ?? 'timed-set') === 'timed-set'
+                  ? 'border-accent/45 bg-accent-faint shadow-sm'
+                  : 'border-border bg-bg-raised hover:border-border-hover'
+              )}
+            >
+              <span className="flex items-center justify-between gap-2">
+                <span className="text-[13.5px] font-semibold text-text">Timed set</span>
+                <Badge tone="accent">3 min / question</Badge>
+              </span>
+              <span className="mt-1.5 block text-[11.5px] leading-relaxed text-text-muted">
+                Build a shorter diagnostic set from subjects, years, type, and history filters.
+              </span>
+            </button>
+            <button
+              type="button"
+              aria-pressed={config.examKind === 'full-paper'}
+              onClick={() => {
+                const paper = selectedBenchmarkPaper;
+                setConfig({
+                  ...config,
+                  mode: 'exam',
+                  examKind: 'full-paper',
+                  benchmarkPaperId: paper?.id,
+                  bookSlug: paper?.bookSlug ?? 'gate-cse',
+                  subjectSlug: 'all',
+                  topicSlug: 'all',
+                  fromYear: paper?.year ?? config.fromYear,
+                  toYear: paper?.year ?? config.toYear,
+                  type: 'all',
+                  history: 'all',
+                  order: 'oldest',
+                  count: 'all'
+                });
+              }}
+              className={cn(
+                'rounded border p-3 text-left transition-all',
+                config.examKind === 'full-paper'
+                  ? 'border-ink-violet/45 bg-guess-faint shadow-sm'
+                  : 'border-border bg-bg-raised hover:border-border-hover'
+              )}
+            >
+              <span className="flex items-center justify-between gap-2">
+                <span className="text-[13.5px] font-semibold text-text">Official full paper</span>
+                <Badge tone="guess">65Q · 100M · 180m</Badge>
+              </span>
+              <span className="mt-1.5 block text-[11.5px] leading-relaxed text-text-muted">
+                Take a verified GATE CSE paper and receive an explicit evidence-validity receipt.
+              </span>
+            </button>
+          </CardBody>
+        </Card>
+      )}
+
+      {fullPaperSelected ? (
+        <FullPaperSetup
+          papers={benchmarkPapers}
+          selectedPaperId={selectedBenchmarkPaper?.id ?? null}
+          closedBookConfirmed={closedBookConfirmed}
+          loading={loading}
+          error={!activeSession ? error : null}
+          onSelectPaper={(paper) =>
+            setConfig({
+              ...config,
+              benchmarkPaperId: paper.id,
+              bookSlug: paper.bookSlug,
+              subjectSlug: 'all',
+              topicSlug: 'all',
+              fromYear: paper.year,
+              toYear: paper.year,
+              type: 'all',
+              history: 'all',
+              order: 'oldest',
+              count: 'all'
+            })
+          }
+          onClosedBookConfirmed={onClosedBookConfirmed}
+          onStart={onStart}
+        />
+      ) : (
+        <>
       <Card>
         <CardBody className="p-4">
           <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
@@ -623,7 +920,8 @@ function PracticeSetup({
                 </p>
               </div>
               <span className="u-num text-[12px] text-text-faint">
-                {attemptedIds.size.toLocaleString()} / {catalogQuestionCount.toLocaleString()} seen
+                    {attemptedIds.size.toLocaleString()} / {catalogQuestionCount.toLocaleString()}{' '}
+                    seen
               </span>
             </div>
             <label className="block text-[12px] font-medium text-text-muted sm:hidden">
@@ -685,7 +983,10 @@ function PracticeSetup({
                   >
                     <LibraryBig
                       size={17}
-                      className={cn('mt-0.5 shrink-0', active ? 'text-accent' : 'text-text-faint')}
+                          className={cn(
+                            'mt-0.5 shrink-0',
+                            active ? 'text-accent' : 'text-text-faint'
+                          )}
                     />
                     <span className="min-w-0">
                       <span className="block text-[13.5px] font-semibold leading-snug text-text">
@@ -732,7 +1033,8 @@ function PracticeSetup({
                     </span>
                   </button>
                   {selectedTopics.map((topic) => {
-                    const activeList = selectedTopicSlug === 'all' ? [] : selectedTopicSlug.split(',');
+                        const activeList =
+                          selectedTopicSlug === 'all' ? [] : selectedTopicSlug.split(',');
                     const active = activeList.includes(topic.slug);
                     return (
                       <button
@@ -785,13 +1087,35 @@ function PracticeSetup({
                   : 'border-accent/20 bg-accent-faint'
               )}
             >
-              <p className="u-label">{config.mode === 'exam' ? 'Exam rules' : 'Practice rules'}</p>
+                  <p className="u-label">
+                    {config.mode === 'exam' ? 'Exam rules' : 'Practice rules'}
+                  </p>
               <p className="mt-1 text-[11.5px] leading-relaxed text-text-muted">
                 {config.mode === 'exam'
                   ? '3 minutes per question feed one shared countdown. Keys stay hidden until submission.'
                   : 'There is no overall timer. Commit each response to reveal its key before moving on.'}
               </p>
             </div>
+                {sealedBenchmarkCount > 0 && (
+                  <label className="mt-3 flex cursor-pointer items-start gap-2 rounded border border-success/20 bg-success-faint/50 p-2.5">
+                    <input
+                      type="checkbox"
+                      checked={includeReservedBenchmarkQuestions}
+                      onChange={(event) =>
+                        onIncludeReservedBenchmarkQuestions(event.target.checked)
+                      }
+                      className="mt-0.5 h-4 w-4 rounded border-border text-accent focus:ring-accent"
+                    />
+                    <span className="text-[11px] leading-relaxed text-text-muted">
+                      <span className="block font-semibold text-text">
+                        Allow sealed benchmark questions in this regular set
+                      </span>
+                      Off by default. {sealedBenchmarkCount} unseen full-paper
+                      {sealedBenchmarkCount === 1 ? ' reserve stays' : ' reserves stay'} intact for
+                      a future authentic attempt.
+                    </span>
+                  </label>
+                )}
             <p className="u-label mt-5">
               {config.mode === 'exam' ? 'Exam settings' : 'Practice settings'}
             </p>
@@ -818,7 +1142,9 @@ function PracticeSetup({
                 <Select
                   className="mt-1"
                   value={config.toYear}
-                  onChange={(event) => setConfig({ ...config, toYear: Number(event.target.value) })}
+                      onChange={(event) =>
+                        setConfig({ ...config, toYear: Number(event.target.value) })
+                      }
                 >
                   {catalogYears.map(({ year }) => (
                     <option key={year}>{year}</option>
@@ -878,7 +1204,9 @@ function PracticeSetup({
                 <Select
                   className="mt-1"
                   value={config.order}
-                  onChange={(event) => setConfig({ ...config, order: event.target.value as Order })}
+                      onChange={(event) =>
+                        setConfig({ ...config, order: event.target.value as Order })
+                      }
                 >
                   <option value="unseen">Unseen first</option>
                   <option value="random">Random</option>
@@ -910,6 +1238,8 @@ function PracticeSetup({
           </div>
         </div>
       </Card>
+        </>
+      )}
 
       {completedSessions.length > 0 ? (
         <section aria-labelledby="pyq-session-history" className="pt-2">
@@ -1222,6 +1552,8 @@ export default function Pyq() {
       : 'all') as PyqHistoryFilter,
     mode: 'practice'
   }));
+  const [includeReservedBenchmarkQuestions, setIncludeReservedBenchmarkQuestions] = useState(false);
+  const [closedBookConfirmed, setClosedBookConfirmed] = useState(false);
   const [questions, setQuestions] = useState<PyqQuestion[]>([]);
   const [loading, setLoading] = useState(false);
   const [startError, setStartError] = useState<string | null>(null);
@@ -1598,6 +1930,7 @@ export default function Pyq() {
         topicSlug: resumedConfig.topicSlug ?? 'all',
         history: resumedConfig.history ?? 'all'
       });
+      setClosedBookConfirmed(resumedSession.config.examState?.closed_book_confirmed === true);
       setQuestions(rows);
       setIndex(nextIndex);
       setCompleted(savedAttempts);
@@ -1758,6 +2091,76 @@ export default function Pyq() {
         setIndex(0);
         setPyqSessionId(null);
       }
+      const attemptedIds = new Set(attempts.map((attempt) => attempt.question_uid));
+      const isFullPaper = config.mode === 'exam' && config.examKind === 'full-paper';
+      let rows: PyqQuestion[];
+      let sessionConfig: AttemptConfig;
+
+      if (isFullPaper) {
+        const paper = manifest.benchmarkPapers.find(
+          (candidate) => candidate.id === config.benchmarkPaperId
+        );
+        if (!paper) throw new Error('Select a verified full paper before starting.');
+        const paperBook = manifest.books.find((book) => book.slug === paper.bookSlug);
+        if (!paperBook) throw new Error('The selected paper book is unavailable in this bank.');
+        const paperRows = await loadPyqQuestions(paperBook.subjects, manifest.bankVersion);
+        const byId = new Map(paperRows.map((question) => [question.id, question]));
+        rows = paper.questionUids.flatMap((questionUid) => {
+          const question = byId.get(questionUid);
+          return question ? [question] : [];
+        });
+        const maxMarks = rows.reduce(
+          (sum, question) =>
+            sum + (question.marks === 1 || question.marks === 2 ? question.marks : 0),
+          0
+        );
+        const exactPaper =
+          rows.length === paper.questionCount &&
+          new Set(rows.map((question) => question.id)).size === paper.questionCount &&
+          maxMarks === paper.maxMarks &&
+          rows.every(
+            (question) =>
+              matchesPyqBookScope(question, { bookSlug: paper.bookSlug }) &&
+              question.paperLabel === paper.paperLabel &&
+              question.year === paper.year &&
+              question.set === paper.set &&
+              ['MCQ', 'MSQ', 'NAT'].includes(question.type) &&
+              question.answerStatus === 'available'
+          );
+        if (!exactPaper) {
+          throw new Error(
+            'This benchmark no longer resolves to the verified 65-question, 100-mark paper. Refresh the local question bank before starting.'
+          );
+        }
+        sessionConfig = createPyqExamConfig(
+          {
+            ...config,
+            bookSlug: paper.bookSlug,
+            subjectSlug: 'all',
+            topicSlug: 'all',
+            fromYear: paper.year,
+            toYear: paper.year,
+            type: 'all',
+            history: 'all',
+            order: 'oldest',
+            count: 'all',
+            examKind: 'full-paper',
+            benchmarkPaperId: paper.id,
+            practiceDraft: undefined
+          },
+          paper.questionUids,
+          {
+            paperMetadata: {
+              questionCount: paper.questionCount,
+              maxMarks: paper.maxMarks
+            },
+            priorExposureQuestionUids: paper.questionUids.filter((questionUid) =>
+              attemptedIds.has(questionUid)
+            ),
+            closedBookConfirmed
+          }
+        );
+      } else {
       const selectedBook = manifest.books.find((book) => book.slug === config.bookSlug);
       const catalogSubjects = selectedBook?.subjects ?? manifest.subjects;
       const subjects =
@@ -1766,7 +2169,7 @@ export default function Pyq() {
           : catalogSubjects.filter((subject) => subject.slug === config.subjectSlug);
       const low = Math.min(config.fromYear, config.toYear);
       const high = Math.max(config.fromYear, config.toYear);
-      let rows = (await loadPyqQuestions(subjects, manifest.bankVersion)).filter(
+        rows = (await loadPyqQuestions(subjects, manifest.bankVersion)).filter(
         (question) =>
           matchesPyqBookScope(question, config) &&
           matchesPyqTopicScope(question, config) &&
@@ -1774,8 +2177,15 @@ export default function Pyq() {
           question.year <= high &&
           (config.type === 'all' || question.type === config.type)
       );
+        if (!includeReservedBenchmarkQuestions) {
+          const reservedQuestionUids = new Set(
+            manifest.benchmarkPapers
+              .filter((paper) => pyqBenchmarkPaperExposure(paper, attempts).sealed)
+              .flatMap((paper) => paper.questionUids)
+          );
+          rows = rows.filter((question) => !reservedQuestionUids.has(question.id));
+        }
       rows = filterPyqByHistory(rows, config.history ?? 'all', attempts, journalQuestions);
-      const attemptedIds = new Set(attempts.map((attempt) => attempt.question_uid));
       if (config.order === 'random') rows = rows.slice().sort(() => Math.random() - 0.5);
       else if (config.order === 'oldest')
         rows = rows
@@ -1799,22 +2209,33 @@ export default function Pyq() {
               Number(attemptedIds.has(a.id)) - Number(attemptedIds.has(b.id)) || b.year - a.year
           );
       if (config.count !== 'all') rows = rows.slice(0, Number(config.count));
-      if (rows.length === 0)
+        if (rows.length === 0) {
         throw new Error(
-          'No questions match those filters. Widen the book, subject, year, type, or history filter.'
+            includeReservedBenchmarkQuestions
+              ? 'No questions match those filters. Widen the book, subject, year, type, or history filter.'
+              : 'No non-reserved questions match those filters. Widen the filters or explicitly allow sealed benchmark questions.'
         );
-      const sessionConfig: AttemptConfig =
+        }
+        sessionConfig =
         config.mode === 'exam'
           ? createPyqExamConfig(
-              { ...config, practiceDraft: undefined },
+                {
+                  ...config,
+                  examKind: 'timed-set',
+                  benchmarkPaperId: undefined,
+                  practiceDraft: undefined
+                },
               rows.map((question) => question.id)
             )
           : {
               ...config,
-              mode: 'practice' as const,
+                mode: 'practice',
+                examKind: undefined,
+                benchmarkPaperId: undefined,
               examState: undefined,
               practiceDraft: undefined
             };
+      }
       const session = createPyqSessionRow(userId!, manifest.bankVersion, sessionConfig, rows);
       const plannerDate = searchParams.get('plannerDate');
       const plannerBlockId = searchParams.get('plannerBlock');
@@ -1868,18 +2289,47 @@ export default function Pyq() {
       for (const activeRow of activeRows) {
         await writeLocal('pyq_sessions', pauseStoredPyqSession(activeRow));
       }
-      const repeatedConfig: AttemptConfig =
-        config.mode === 'exam'
-          ? createPyqExamConfig(
+      let repeatedConfig: AttemptConfig;
+      if (config.mode === 'exam' && config.examKind === 'full-paper') {
+        const paper = manifest.benchmarkPapers.find(
+          (candidate) => candidate.id === config.benchmarkPaperId
+        );
+        if (!paper) throw new Error('The original benchmark paper is no longer available.');
+        const exposed = new Set([...attempts, ...completed].map((attempt) => attempt.question_uid));
+        repeatedConfig = createPyqExamConfig(
               { ...config, practiceDraft: undefined },
+          questions.map((question) => question.id),
+          {
+            paperMetadata: {
+              questionCount: paper.questionCount,
+              maxMarks: paper.maxMarks
+            },
+            priorExposureQuestionUids: paper.questionUids.filter((questionUid) =>
+              exposed.has(questionUid)
+            ),
+            closedBookConfirmed
+          }
+        );
+      } else if (config.mode === 'exam') {
+        repeatedConfig = createPyqExamConfig(
+          {
+            ...config,
+            examKind: 'timed-set',
+            benchmarkPaperId: undefined,
+            practiceDraft: undefined
+          },
               questions.map((question) => question.id)
-            )
-          : {
+        );
+      } else {
+        repeatedConfig = {
               ...config,
-              mode: 'practice' as const,
+          mode: 'practice',
+          examKind: undefined,
+          benchmarkPaperId: undefined,
               examState: undefined,
               practiceDraft: undefined
             };
+      }
       const session = createPyqSessionRow(userId, manifest.bankVersion, repeatedConfig, questions);
       await writeLocalBatch([
         { name: 'pyq_sessions', row: session },
@@ -2032,6 +2482,20 @@ export default function Pyq() {
     );
   }
 
+  function changeExamConfidence(confidence: PyqExamConfidence) {
+    const session = loadedSessionRef.current;
+    if (
+      !current ||
+      !session ||
+      session.config.mode !== 'exam' ||
+      submittingRef.current ||
+      pausingSessionRef.current
+    ) {
+      return;
+    }
+    setLoadedExamSession(setPyqExamConfidence(session, current.id, confidence));
+  }
+
   function navigateExam(nextIndex: number) {
     const session = loadedSessionRef.current;
     if (
@@ -2082,7 +2546,8 @@ export default function Pyq() {
     }
     setChoices([]);
     setNumeric('');
-    setLoadedExamSession(setPyqExamResponse(session, current, undefined));
+    const cleared = setPyqExamResponse(session, current, undefined);
+    setLoadedExamSession(setPyqExamConfidence(cleared, current.id, null));
   }
 
   function saveExamAndNext() {
@@ -2121,10 +2586,16 @@ export default function Pyq() {
         bankVersion: manifest.bankVersion,
         reason
       });
+      const mockTest = mockTestFromFinalizedPyqExam({
+        session: finalized.session,
+        attempts: finalized.attempts,
+        timeZone
+      });
       const existingCanonical = await db.sessions.get(session.id);
       await writeLocalBatch([
         ...finalized.attempts.map((attempt) => ({ name: 'pyq_attempts' as const, row: attempt })),
         { name: 'pyq_sessions', row: finalized.session },
+        ...(mockTest ? ([{ name: 'mock_tests', row: mockTest }] as const) : []),
         {
           name: 'sessions',
           row: pyqPracticeSessionRow(
@@ -2389,12 +2860,16 @@ export default function Pyq() {
         completedSessions={completedPyqSessions ?? []}
         config={config}
         setConfig={setConfig}
+        includeReservedBenchmarkQuestions={includeReservedBenchmarkQuestions}
+        closedBookConfirmed={closedBookConfirmed}
         loading={loading}
         error={startError}
         onResume={(session) => void resumeSession(session)}
         onSave={(session) => void saveSession(session)}
         onDiscard={(session) => void discardSession(session)}
         onReview={(session) => navigate(`/session/${session.id}/review`)}
+        onIncludeReservedBenchmarkQuestions={setIncludeReservedBenchmarkQuestions}
+        onClosedBookConfirmed={setClosedBookConfirmed}
         onStart={() => void startPractice()}
       />
     );
@@ -2573,6 +3048,7 @@ export default function Pyq() {
           error={submitError}
           onChoices={changeExamChoices}
           onNumeric={changeExamNumeric}
+          onConfidence={changeExamConfidence}
           onNavigate={navigateExam}
           onMarkAndNext={markExamForReviewAndNext}
           onClear={clearExamResponse}
@@ -2730,10 +3206,7 @@ export default function Pyq() {
             <Clock3 size={13} />
             {secondsToClock(shownSeconds)}
           </span>
-          <CalculatorTrigger
-            onClick={() => setCalcOpen((v) => !v)}
-            active={calcOpen}
-          />
+          <CalculatorTrigger onClick={() => setCalcOpen((v) => !v)} active={calcOpen} />
         </div>
       </div>
 

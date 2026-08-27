@@ -108,6 +108,7 @@ const manifest: PyqManifest = {
     { year: 2025, count: 1 },
     { year: 2026, count: 3 }
   ],
+  benchmarkPapers: [],
   subjects: [
     {
       slug: 'discrete-mathematics',

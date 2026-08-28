@@ -13,6 +13,8 @@ export interface PyqQuestionSummary {
   visited: boolean;
   markedForReview: boolean;
   confidence: PyqExamConfidence | null;
+  /** Exact cumulative active time when the receipt/session ledger captured it. */
+  timeSpentMs?: number;
   timeSpentSec: number;
   scoreThirds: number | null;
   maxThirds: number | null;
@@ -104,6 +106,13 @@ function knownQuestionMarks(attempt: PyqAttemptRow | null): 1 | 2 | null {
   return snapshotMarks === 1 || snapshotMarks === 2 ? snapshotMarks : null;
 }
 
+function validAttemptTimeMs(attempt: PyqAttemptRow): number {
+  if (attempt.time_spent_ms != null && Number.isFinite(attempt.time_spent_ms)) {
+    return Math.max(0, attempt.time_spent_ms);
+  }
+  return Number.isFinite(attempt.time_spent_sec) ? Math.max(0, attempt.time_spent_sec) * 1000 : 0;
+}
+
 export function buildPyqSessionSummary(
   session: PyqSessionRow,
   attempts: readonly PyqAttemptRow[]
@@ -128,6 +137,15 @@ export function buildPyqSessionSummary(
   const visited = new Set(examState?.visited_question_uids ?? []);
   const marked = new Set(examState?.marked_for_review_question_uids ?? []);
   const confidenceByQuestion = examState?.confidence_by_question ?? {};
+  const practiceTimeMsByQuestion = new Map<string, number>();
+  if (!examState) {
+    for (const attempt of sessionAttempts) {
+      practiceTimeMsByQuestion.set(
+        attempt.question_uid,
+        (practiceTimeMsByQuestion.get(attempt.question_uid) ?? 0) + validAttemptTimeMs(attempt)
+      );
+    }
+  }
   const questionUids =
     session.question_uids.length > 0 ? session.question_uids : [...latest.keys()];
 
@@ -135,6 +153,10 @@ export function buildPyqSessionSummary(
     const attempt = latest.get(questionUid) ?? null;
     const exactScore = attempt ? exactStoredScore(attempt) : null;
     const examTimeMs = examState?.time_by_question_ms[questionUid];
+    const hasExamTime = typeof examTimeMs === 'number' && Number.isFinite(examTimeMs);
+    const timeSpentMs = hasExamTime
+      ? Math.max(0, examTimeMs)
+      : (practiceTimeMsByQuestion.get(questionUid) ?? 0);
     const recordedConfidence = confidenceByQuestion[questionUid];
     return {
       questionUid,
@@ -151,10 +173,10 @@ export function buildPyqSessionSummary(
         recordedConfidence === 'low'
           ? recordedConfidence
           : null,
-      timeSpentSec:
-        typeof examTimeMs === 'number' && Number.isFinite(examTimeMs)
-          ? Math.max(0, Math.round(examTimeMs / 1000))
-          : (attempt?.time_spent_sec ?? 0),
+      timeSpentMs,
+      timeSpentSec: hasExamTime
+        ? Math.max(0, Math.round(examTimeMs / 1000))
+        : Math.max(0, Math.ceil(timeSpentMs / 1000)),
       scoreThirds: exactScore && exactScore.status !== 'unscorable' ? exactScore.scoreThirds : null,
       maxThirds: exactScore?.maxThirds ?? null,
       scoringCovered: exactScore !== null && exactScore.status !== 'unscorable'

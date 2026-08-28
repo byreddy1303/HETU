@@ -151,6 +151,13 @@ describe('historical PYQ session review', () => {
     expect(screen.getByText('PYQ session report')).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Algorithms' })).toBeInTheDocument();
     expect(screen.getByRole('img', { name: '50% graded accuracy' })).toBeInTheDocument();
+    const improvementInsights = screen.getByRole('region', { name: 'Improvement insights' });
+    expect(within(improvementInsights).getByText('Median pace:').parentElement).toHaveTextContent(
+      '7s per timed question'
+    );
+    expect(within(improvementInsights).getByText('Accuracy:').parentElement).toHaveTextContent(
+      '50% correct (1 question), 50% incorrect (1 question) across 2 graded attempts'
+    );
 
     const responseLedger = screen.getByRole('region', { name: 'Response ledger' });
     expect(

@@ -64,6 +64,97 @@ function examSession(questions: readonly PyqQuestion[], nowMs = START_MS): PyqSe
 }
 
 describe('PYQ session summary aggregation', () => {
+  it('keeps the latest practice outcome while summing time across skip-and-retry receipts', () => {
+    const candidate = question('practice-retry');
+    const session = createPyqSessionRow(
+      'user-1',
+      'bank-3',
+      baseConfig,
+      [candidate],
+      new Date(START_MS).toISOString()
+    );
+    const skipped = createPyqAttemptRow({
+      userId: 'user-1',
+      session,
+      question: candidate,
+      selectedAnswer: null,
+      decision: 'SKIP',
+      bankVersion: 'bank-3',
+      questionStartedAtMs: START_MS,
+      committedAtMs: START_MS + 2_000,
+      screenshotUrl: null,
+      attemptNumber: 1
+    });
+    const answered = createPyqAttemptRow({
+      userId: 'user-1',
+      session,
+      question: candidate,
+      selectedAnswer: 'B',
+      decision: 'MARK',
+      bankVersion: 'bank-3',
+      questionStartedAtMs: START_MS + 2_000,
+      committedAtMs: START_MS + 7_000,
+      screenshotUrl: null,
+      attemptNumber: 2,
+      retryingSkippedAttempt: true
+    });
+
+    const summary = buildPyqSessionSummary(session, [skipped, answered]);
+
+    expect(summary.questions[0]).toMatchObject({
+      attempt: answered,
+      outcome: 'correct',
+      timeSpentMs: 7_000,
+      timeSpentSec: 7
+    });
+  });
+
+  it('rounds cumulative retry timing once instead of summing per-receipt rounding', () => {
+    const candidate = question('practice-subsecond-retry');
+    const session = createPyqSessionRow(
+      'user-1',
+      'bank-3',
+      baseConfig,
+      [candidate],
+      new Date(START_MS).toISOString()
+    );
+    const skipped = createPyqAttemptRow({
+      userId: 'user-1',
+      session,
+      question: candidate,
+      selectedAnswer: null,
+      decision: 'SKIP',
+      bankVersion: 'bank-3',
+      questionStartedAtMs: START_MS,
+      committedAtMs: START_MS + 500,
+      timeSpentMs: 500,
+      screenshotUrl: null,
+      attemptNumber: 1
+    });
+    const answered = createPyqAttemptRow({
+      userId: 'user-1',
+      session,
+      question: candidate,
+      selectedAnswer: 'B',
+      decision: 'MARK',
+      bankVersion: 'bank-3',
+      questionStartedAtMs: START_MS + 500,
+      committedAtMs: START_MS + 1_000,
+      timeSpentMs: 500,
+      screenshotUrl: null,
+      attemptNumber: 2,
+      retryingSkippedAttempt: true
+    });
+
+    const summary = buildPyqSessionSummary(session, [skipped, answered]);
+
+    expect(summary.questions[0]).toMatchObject({
+      attempt: answered,
+      timeSpentMs: 1_000,
+      timeSpentSec: 1
+    });
+  });
+
   it('uses only the latest receipt per question while retaining the raw receipt audit count', () => {
     const candidate = question('q1');
     const session = examSession([candidate]);

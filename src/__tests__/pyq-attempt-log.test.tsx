@@ -182,6 +182,7 @@ describe('PYQ committed-attempt logging', () => {
     );
     await user.click(await screen.findByRole('button', { name: 'Resume practice' }));
     expect(await screen.findByText('Practice set complete')).toBeInTheDocument();
+    expect(screen.getByRole('region', { name: 'Improvement insights' })).toBeInTheDocument();
     await waitFor(async () => {
       const [session] = await db.pyq_sessions.toArray();
       expect(session.status).toBe('completed');

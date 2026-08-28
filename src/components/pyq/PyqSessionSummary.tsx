@@ -24,6 +24,7 @@ import type {
   PyqSessionRow
 } from '@/types';
 import PyqQuestionContent from '@/components/pyq/PyqQuestionContent';
+import PyqImprovementInsights from '@/components/pyq/PyqImprovementInsights';
 import { Badge } from '@/components/ui/Badge';
 import { Card, CardBody, CardHeader } from '@/components/ui/Card';
 import { Select } from '@/components/ui/Select';
@@ -990,6 +991,8 @@ export default function PyqSessionSummary({ session, attempts }: PyqSessionSumma
           />
         ) : null}
       </section>
+
+      <PyqImprovementInsights questions={summary.questions} />
 
       {!exactScoreCoverage ||
       !exactSnapshotCoverage ||

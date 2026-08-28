@@ -39,6 +39,7 @@ import type { TagDraft } from '@/components/tags/TagFlow';
 import PageHeader from '@/components/layout/PageHeader';
 import ScientificCalculator, { CalculatorTrigger } from '@/components/shared/ScientificCalculator';
 import PyqExamWorkspace from '@/components/pyq/PyqExamWorkspace';
+import PyqImprovementInsights from '@/components/pyq/PyqImprovementInsights';
 import PyqQuestionContent from '@/components/pyq/PyqQuestionContent';
 import TagFlow from '@/components/tags/TagFlow';
 import { Card, CardBody, CardHeader } from '@/components/ui/Card';
@@ -108,6 +109,7 @@ import {
 } from '@/lib/pyq-exam';
 import { pyqBenchmarkPaperExposure, type PyqBenchmarkPaper } from '@/lib/pyq-benchmark';
 import { mockTestFromFinalizedPyqExam } from '@/lib/pyq-mock-evidence';
+import { buildPyqSessionSummary } from '@/lib/pyq-summary';
 
 type Order = 'unseen' | 'random' | 'newest' | 'oldest';
 type CountChoice = '5' | '10' | '15' | '25' | '50' | 'all';
@@ -2782,6 +2784,8 @@ export default function Pyq() {
         )
       }
     ]);
+    loadedSessionRef.current = completedSession;
+    setLoadedSession(completedSession);
   }
 
   async function goNext() {
@@ -2880,6 +2884,9 @@ export default function Pyq() {
     const correct = graded.filter((attempt) => attempt.mark_correct).length;
     const skipped = completed.filter((attempt) => attempt.mark_decision === 'SKIP').length;
     const exactScores = aggregatePyqAttemptScores(completed);
+    const completionSummary = loadedSession
+      ? buildPyqSessionSummary(loadedSession, completed)
+      : null;
     return (
       <div className="mx-auto flex w-full max-w-3xl flex-col gap-4">
         <PageHeader
@@ -2933,10 +2940,16 @@ export default function Pyq() {
                 ? '; the rest are excluded because stored type/marks metadata is incomplete or inconsistent.'
                 : '.'}
             </p>
-            <section
-              aria-labelledby="practice-next-step"
-              className="mt-6 border-t border-border pt-5"
-            >
+          </CardBody>
+        </Card>
+
+        {completionSummary ? (
+          <PyqImprovementInsights questions={completionSummary.questions} />
+        ) : null}
+
+        <Card>
+          <CardBody className="p-6 sm:p-8">
+            <section aria-labelledby="practice-next-step">
               <h3 id="practice-next-step" className="font-display text-[17px] font-bold text-text">
                 What would you like to do next?
               </h3>

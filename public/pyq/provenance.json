@@ -1,5 +1,5 @@
 {
-  "bankVersion": "gate-and-cs-exams-1990-2026-v11-verified-pdf-marks",
+  "bankVersion": "gate-and-cs-exams-1990-2026-v12-complete-gate-marks",
   "sources": [
     {
       "name": "GateQA",
@@ -116,5 +116,24 @@
       "go:523151",
       "go:523152"
     ]
+  },
+  "gatePaperPatternMarkPolicyVersion": "gate-paper-allocation-marks-v2",
+  "markMetadata": {
+    "policyVersion": "gate-paper-allocation-marks-v2",
+    "auditFile": "/pyq/marks-audit.json",
+    "gateQuestionCount": 4043,
+    "assignedCount": 4043,
+    "missingCount": 0,
+    "newlyAssignedCount": 2722,
+    "correctedExistingCount": 96,
+    "distribution": {
+      "1": 1720,
+      "2": 2252,
+      "4": 1,
+      "5": 62,
+      "6": 1,
+      "8": 2,
+      "10": 5
+    }
   }
 }

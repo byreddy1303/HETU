@@ -1,5 +1,5 @@
 import type { MarkDecision, Outcome, PyqSelectedAnswer, PyqSessionConfig } from '@/types';
-import { DEFAULT_TARGET_TIME_SEC, MARKS_TARGET_SEC } from '@/lib/constants';
+import { targetTimeSecForMarks } from '@/lib/constants';
 import { urlToDataUrl } from '@/lib/image';
 import type { PyqBenchmarkManifestFields, PyqBenchmarkPaperManifest } from '@/lib/pyq-benchmark';
 
@@ -85,7 +85,7 @@ export interface PyqQuestion {
   topic: string;
   topicSlug: string;
   subtopics: string[];
-  marks: 1 | 2 | null;
+  marks: number | null;
   type: PyqQuestionType;
   /** Option labels supplied by the source; legacy four-option questions omit this. */
   choices?: string[];
@@ -597,7 +597,7 @@ export function inferPyqDirectOutcome(
   timeSpentSec: number
 ): Outcome {
   if (markDecision === 'FIFTY_FIFTY') return 'RBG';
-  const target = question.marks ? MARKS_TARGET_SEC[question.marks] : DEFAULT_TARGET_TIME_SEC;
+  const target = targetTimeSecForMarks(question.marks);
   if (timeSpentSec > target) return 'RBS';
   return 'R';
 }

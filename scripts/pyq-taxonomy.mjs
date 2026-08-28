@@ -1,4 +1,4 @@
-export const PYQ_BANK_VERSION = 'gate-and-cs-exams-1990-2026-v11-verified-pdf-marks';
+export const PYQ_BANK_VERSION = 'gate-and-cs-exams-1990-2026-v12-complete-gate-marks';
 export const PYQ_BANK_QUESTION_COUNT = 4334;
 
 export const PYQ_TAXONOMY = [

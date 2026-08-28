@@ -116,6 +116,10 @@ describe('PYQ answer evaluation', () => {
     expect(inferPyqDirectOutcome(mcq, 'MARK', 60)).toBe('R');
     expect(inferPyqDirectOutcome(mcq, 'MARK', 200)).toBe('RBS');
     expect(inferPyqDirectOutcome(mcq, 'FIFTY_FIFTY', 60)).toBe('RBG');
+
+    const legacyFiveMark = question({ marks: 5 });
+    expect(inferPyqDirectOutcome(legacyFiveMark, 'MARK', 449)).toBe('R');
+    expect(inferPyqDirectOutcome(legacyFiveMark, 'MARK', 451)).toBe('RBS');
   });
 });
 

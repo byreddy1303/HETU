@@ -16,7 +16,8 @@ export interface SourceDraft {
   year: number | null;
   set: 1 | 2 | null;
   questionNumber: string | null;
-  marks: 1 | 2 | null;
+  /** Manual entry offers modern 1/2-mark choices; locked PYQs may carry a legacy allocation. */
+  marks: number | null;
   format: QuestionFormat | null;
   questionText: string | null;
   answerText: string | null;

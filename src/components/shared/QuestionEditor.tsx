@@ -308,6 +308,11 @@ export default function QuestionEditor({
               onClick={() => set('marks', draft.marks === 2 ? null : 2)}
               value={2}
             />
+            {draft.marks != null && draft.marks !== 1 && draft.marks !== 2 && (
+              <span className="u-num text-[11px] font-semibold text-text-muted">
+                {draft.marks}m legacy
+              </span>
+            )}
           </div>
         </Field>
       </div>

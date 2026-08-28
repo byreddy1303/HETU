@@ -18,6 +18,7 @@ import {
   marksFromGateQuestionNumber,
   marksFromQuestionContext,
   marksFromQuestionMetadata,
+  sourceArchiveMark,
   verifiedPdfAnswerKeyMark,
   VERIFIED_PDF_MARK_POLICY_VERSION
 } from './pyq-marks.mjs';
@@ -1112,7 +1113,7 @@ async function examSideDaQuestions() {
       subjectSlug,
       classificationHint: { subjectSlug, topicSlug },
       subtopics: [row.chapterPath, source.chapter].filter(Boolean),
-      marks: source.marks === 1 || source.marks === 2 ? source.marks : null,
+      marks: sourceArchiveMark(source.marks, row.sourceUrl),
       type,
       answer,
       tolerance: numericKey?.tolerance ?? null,
@@ -1161,7 +1162,7 @@ async function examSideDigitalLogicQuestions() {
       subjectSlug: 'digital-logic',
       classificationHint: { subjectSlug: 'digital-logic', topicSlug },
       subtopics: [topicSlug, source.chapter],
-      marks: source.marks === 1 || source.marks === 2 ? source.marks : null,
+      marks: sourceArchiveMark(source.marks, row.sourceUrl),
       type,
       answer,
       tolerance: numericKey?.tolerance ?? null,
@@ -1214,7 +1215,7 @@ async function examSideCrossBranchMathQuestions() {
         topicSlug: row.topicSlug
       },
       subtopics: [row.topicSlug, source.chapter].filter(Boolean),
-      marks: source.marks === 1 || source.marks === 2 ? source.marks : null,
+      marks: sourceArchiveMark(source.marks, row.sourceUrl),
       type,
       answer,
       tolerance: numericKey?.tolerance ?? null,
@@ -1255,14 +1256,13 @@ async function examSideCseQuestions() {
       },
       subtopics: [source.chapter].filter(Boolean),
       marks:
-        source.marks === 1 || source.marks === 2
-          ? source.marks
-          : marksFromGateQuestionNumber({
-              bookSlug: 'gate-cse',
-              year: source.year,
-              number: String(row.archiveNumber),
-              subjectSlug
-            }),
+        sourceArchiveMark(source.marks, row.sourceUrl) ??
+        marksFromGateQuestionNumber({
+          bookSlug: 'gate-cse',
+          year: source.year,
+          number: String(row.archiveNumber),
+          subjectSlug
+        }),
       type,
       answer,
       tolerance: numericKey?.tolerance ?? null,
@@ -1461,10 +1461,7 @@ async function main() {
       };
       return {
         ...row,
-        marks:
-          question.marks === 1 || question.marks === 2
-            ? question.marks
-            : marksFromGateQuestionNumber(row)
+        marks: sourceArchiveMark(question.marks, question.sourceUrl) ?? marksFromGateQuestionNumber(row)
       };
     })
   );

@@ -277,7 +277,7 @@ export interface PyqQuestionSnapshot {
   topic: string;
   topic_slug: string;
   subtopics: string[];
-  marks: 1 | 2 | null;
+  marks: number | null;
   type: string;
   /** Missing on receipts created before variable option sets shipped. */
   choices?: string[];

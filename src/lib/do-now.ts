@@ -1,6 +1,6 @@
 import type { FormulaRow, PyqAttemptRow, QuestionRow, ReattemptRow } from '@/types';
 import type { DayPlan } from '@/lib/planner-storage';
-import { DEFAULT_TARGET_TIME_SEC, MARKS_TARGET_SEC } from '@/lib/constants';
+import { targetTimeSecForMarks } from '@/lib/constants';
 import { plannerBlockHref } from '@/lib/planner-execution';
 import { pyqSourceAttemptForJournalQuestion } from '@/lib/pyq-session';
 
@@ -89,7 +89,7 @@ export function buildDoNowQueue(args: {
 
   const slow = latest.filter((attempt) => {
     const marks = attempt.question_snapshot?.marks;
-    const target = marks ? MARKS_TARGET_SEC[marks] : DEFAULT_TARGET_TIME_SEC;
+    const target = targetTimeSecForMarks(marks);
     return attempt.mark_correct === true && attempt.time_spent_sec > target;
   });
   if (slow.length > 0) {

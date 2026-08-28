@@ -53,7 +53,7 @@ import { useTimer } from '@/hooks/useTimer';
 import { writeLocal, writeLocalBatch } from '@/lib/sync';
 import { createReattemptRow, needsReattempt } from '@/lib/reattempt';
 import { reconcileQuestionPattern } from '@/lib/patterns';
-import { DEFAULT_TARGET_TIME_SEC, MARKS_TARGET_SEC } from '@/lib/constants';
+import { targetTimeSecForMarks } from '@/lib/constants';
 import {
   answerFreePyqImageUrl,
   firstPyqImage,
@@ -2393,7 +2393,7 @@ export default function Pyq() {
       answer_text: answerText(current),
       image_url: imageUrl,
       time_spent_sec: attempt.time_spent_sec,
-      target_time_sec: current.marks ? MARKS_TARGET_SEC[current.marks] : DEFAULT_TARGET_TIME_SEC,
+      target_time_sec: targetTimeSecForMarks(current.marks),
       outcome,
       pattern_name: draft?.pattern_name ?? null,
       trigger_sentence: draft?.trigger_sentence ?? null,
@@ -3246,7 +3246,11 @@ export default function Pyq() {
               <div className="flex flex-wrap gap-1.5">
                 <Badge tone="accent">{current.subject}</Badge>
                 <Badge>{current.type}</Badge>
-                {current.marks && <Badge>{current.marks} mark</Badge>}
+                {current.marks && (
+                  <Badge>
+                    {current.marks} mark{current.marks === 1 ? '' : 's'}
+                  </Badge>
+                )}
               </div>
             }
           />

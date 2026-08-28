@@ -2,7 +2,6 @@
 // file exports only a component (keeps React Fast Refresh happy).
 import type { MarkDecision, Outcome, QuestionRow, RootCause } from '@/types';
 import {
-  DEFAULT_TARGET_TIME_SEC,
   MARKS_TARGET_SEC,
   PYQ_TWO_SETS_FROM,
   QUESTION_FORMATS,
@@ -10,6 +9,7 @@ import {
   SOURCE_KIND_BY_VALUE,
   buildSourceRef,
   examYears,
+  targetTimeSecForMarks,
   type QuestionFormat,
   type SourceKind
 } from '@/lib/constants';
@@ -24,7 +24,8 @@ export interface EditorDraft {
   sourceSet: 1 | 2 | null;
   questionNumber: string | null;
   format: QuestionFormat | null;
-  marks: 1 | 2 | null;
+  /** Manual entry offers 1/2 marks; an audited legacy PYQ may carry a larger value. */
+  marks: number | null;
   questionText: string | null;
   answerText: string | null;
   imageDataUrl: string | null;
@@ -75,9 +76,17 @@ function detectSource(row: Pick<QuestionRow, 'source_ref' | 'source_year'>): {
 
 export function draftFromRow(row: QuestionRow): EditorDraft {
   const src = detectSource(row);
-  let marks: 1 | 2 | null = null;
+  let marks: number | null = null;
   if (row.target_time_sec === MARKS_TARGET_SEC[1]) marks = 1;
   else if (row.target_time_sec === MARKS_TARGET_SEC[2]) marks = 2;
+  else if (
+    src.kind === 'pyq' &&
+    Number.isFinite(row.target_time_sec) &&
+    row.target_time_sec > 0 &&
+    row.target_time_sec % MARKS_TARGET_SEC[1] === 0
+  ) {
+    marks = row.target_time_sec / MARKS_TARGET_SEC[1];
+  }
   return {
     subject: row.subject,
     subtopic: row.subtopic,
@@ -131,7 +140,7 @@ export function applyDraftToRow(row: QuestionRow, draft: EditorDraft): QuestionR
   const created_at = originalTime.startsWith('T')
     ? `${draft.createdDate}${originalTime}`
     : `${draft.createdDate}T00:00:00.000Z`;
-  const target = draft.marks != null ? MARKS_TARGET_SEC[draft.marks] : DEFAULT_TARGET_TIME_SEC;
+  const target = targetTimeSecForMarks(draft.marks);
   const spec = SOURCE_KIND_BY_VALUE[draft.sourceKind];
   const isYearBased = !!spec.hasYear;
   const isPyq = draft.sourceKind === 'pyq';

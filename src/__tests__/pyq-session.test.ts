@@ -295,6 +295,31 @@ describe('PYQ session logic and determinism', () => {
     });
   });
 
+  it('preserves a legacy allocation without forcing it through modern GATE scoring', () => {
+    const legacyQuestion = { ...question, id: 'gate-1995-q7b', year: 1995, marks: 5 };
+    const session = createPyqSessionRow('user-1', '2.0.0', mockConfig, [legacyQuestion]);
+    const attempt = createPyqAttemptRow({
+      userId: 'user-1',
+      session,
+      question: legacyQuestion,
+      selectedAnswer: 'B',
+      decision: 'MARK',
+      bankVersion: '2.0.0',
+      questionStartedAtMs: Date.parse('2026-08-08T08:00:00.000Z'),
+      committedAtMs: Date.parse('2026-08-08T08:00:12.000Z'),
+      screenshotUrl: null
+    });
+
+    expect(attempt.question_snapshot?.marks).toBe(5);
+    expect(attempt.question_marks).toBeNull();
+    expect(attempt.mark_correct).toBe(true);
+    expect(attempt).toMatchObject({
+      score_thirds: null,
+      scoring_status: 'unscorable',
+      scoring_version: 1
+    });
+  });
+
   it('uses explicit active-work timing while retaining the true first start', () => {
     const session = createPyqSessionRow(
       'user-1',

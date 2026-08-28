@@ -14,7 +14,11 @@ import type { QuestionRow } from '@/types';
 import { db } from '@/lib/db';
 import { deleteLocal, writeLocal } from '@/lib/sync';
 import { needsReattempt, scheduleReattempt } from '@/lib/reattempt';
-import { DEFAULT_TARGET_TIME_SEC, MARKS_TARGET_SEC, buildSourceRef } from '@/lib/constants';
+import {
+  DEFAULT_TARGET_TIME_SEC,
+  buildSourceRef,
+  targetTimeSecForMarks
+} from '@/lib/constants';
 import { cn, uuid, nowISO, secondsToClock } from '@/lib/utils';
 import { subjectInk } from '@/lib/subjectInk';
 import { useAuth } from '@/hooks/useAuth';
@@ -119,7 +123,7 @@ export default function SessionActive() {
   async function saveTag(draft: TagDraft) {
     if (!session || !userId) return;
     const { source } = draft;
-    const target = source.marks != null ? MARKS_TARGET_SEC[source.marks] : DEFAULT_TARGET_TIME_SEC;
+    const target = targetTimeSecForMarks(source.marks);
     const q: QuestionRow = {
       id: uuid(),
       user_id: userId,

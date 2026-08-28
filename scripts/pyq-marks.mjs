@@ -1,9 +1,19 @@
 /** Pure parsing helpers for source-archive mark metadata. */
 
 export const VERIFIED_PDF_MARK_POLICY_VERSION = 'pdf-answer-key-marks-v1';
-export const GATE_PAPER_PATTERN_MARK_POLICY_VERSION = 'gate-paper-pattern-marks-v1';
+export const GATE_PAPER_PATTERN_MARK_POLICY_VERSION = 'gate-paper-allocation-marks-v2';
 
-const SECTIONED_GATE_CSE_YEARS = new Set([1995, 1999, 2000, 2001, 2002]);
+const SECTIONED_GATE_CSE_YEARS = new Set([1995, 1996, 1999, 2000, 2001, 2002]);
+
+// The 1994 mirror preserves the paper but not a marks column beside every
+// sub-question. These allocations are cross-checked against the archived paper
+// structure and the question-level ExamSIDE records that reproduce its marks.
+const GATE_CSE_1994_QUESTION_ONE_MARKS = new Set([1, 4, 5, 6, 9, 12, 19, 21]);
+const GATE_CSE_1994_QUESTION_TWO_MARKS = new Set([
+  2, 3, 7, 8, 10, 11, 13, 14, 15, 16, 17, 18, 20, 22, 23, 24
+]);
+const GATE_CSE_1994_QUESTION_THREE_ONE_MARKS = new Set([1, 2, 3, 6, 7, 8, 9, 11, 12]);
+const GATE_CSE_1994_QUESTION_THREE_TWO_MARKS = new Set([4, 5, 10, 13]);
 
 function normalizedTag(rawTag) {
   return String(rawTag)
@@ -31,6 +41,27 @@ export function marksFromTags(tags) {
   }
   // Conflicting or absent source metadata must remain unknown; never guess.
   return found.size === 1 ? [...found][0] : null;
+}
+
+/** Preserve any finite, positive mark allocation published by an archive. */
+export function normalizedSourceMark(value) {
+  const marks = typeof value === 'string' && value.trim() ? Number(value) : value;
+  if (typeof marks !== 'number' || !Number.isFinite(marks) || marks <= 0 || marks > 100) {
+    return null;
+  }
+  return marks;
+}
+
+/**
+ * ExamSIDE publishes the allocation both as structured metadata and in its
+ * canonical URL (`...-marks-5-...`). Prefer the structured value, retaining the
+ * URL parser as a reproducible fallback for legacy snapshots.
+ */
+export function sourceArchiveMark(value, sourceUrl) {
+  const direct = normalizedSourceMark(value);
+  if (direct != null) return direct;
+  const match = String(sourceUrl ?? '').match(/(?:^|[-_/])marks?-(\d+(?:\.\d+)?)(?:[-_/.]|$)/i);
+  return normalizedSourceMark(match?.[1]);
 }
 
 /**
@@ -71,8 +102,9 @@ function isGateAptitudeQuestion(question) {
  *
  * This is intentionally narrower than generic mark inference:
  * - applies only to GATE CSE/IT rows used by this bank;
- * - returns only values supported by the app scoring contract (1 or 2);
- * - leaves non-GATE supplements and older incompatible mark schemes unknown.
+ * - preserves the larger allocations used by the pre-1998 descriptive papers;
+ * - leaves non-GATE supplements and paper rows without a published allocation
+ *   unknown instead of inventing a split.
  */
 export function marksFromGateQuestionNumber(question) {
   const bookSlug = String(question?.bookSlug ?? '').toLowerCase();
@@ -83,12 +115,64 @@ export function marksFromGateQuestionNumber(question) {
 
   const rawNumber = String(question?.number ?? '').trim();
   if (bookSlug === 'gate-cse' && SECTIONED_GATE_CSE_YEARS.has(year)) {
-    const sectionMatch = rawNumber.match(/^0?([12])\.\d+/);
+    const sectionMatch = rawNumber.match(/^0?([12])[.\-]\d+/);
     if (sectionMatch) return sectionMatch[1] === '1' ? 1 : 2;
   }
 
   const questionNo = firstQuestionNumber(rawNumber);
   if (questionNo == null) return null;
+
+  // The legacy papers state allocations once per section. Preserve those
+  // published section rules, including their descriptive 5-mark questions.
+  if (bookSlug === 'gate-cse' && year === 1993) {
+    // This archive row intentionally bundles official sub-questions 7.1, 7.2
+    // and 7.3. The paper assigns 2 marks to each part, so the row represents 6.
+    if (/^0?7\.1\s*,\s*2\s*,\s*3(?:\D|$)/.test(rawNumber)) return 6;
+    const sectionMatch = rawNumber.match(/^0?([1-8])[.\-]/);
+    if (sectionMatch) {
+      const section = Number(sectionMatch[1]);
+      if (section === 1 || section === 2) return 1;
+      if (section >= 6 && section <= 8) return 2;
+    }
+    if (questionNo >= 9 && questionNo <= 28) return 5;
+    return null;
+  }
+
+  if (bookSlug === 'gate-cse' && year === 1994) {
+    const sectionMatch = rawNumber.match(/^0?([123])[.\-](\d+)/);
+    if (sectionMatch?.[1] === '1') {
+      const subQuestion = Number(sectionMatch[2]);
+      if (GATE_CSE_1994_QUESTION_ONE_MARKS.has(subQuestion)) return 1;
+      if (GATE_CSE_1994_QUESTION_TWO_MARKS.has(subQuestion)) return 2;
+      return null;
+    }
+    if (sectionMatch?.[1] === '2') return 2;
+    if (sectionMatch?.[1] === '3') {
+      const subQuestion = Number(sectionMatch[2]);
+      if (GATE_CSE_1994_QUESTION_THREE_ONE_MARKS.has(subQuestion)) return 1;
+      if (GATE_CSE_1994_QUESTION_THREE_TWO_MARKS.has(subQuestion)) return 2;
+      return null;
+    }
+    if (questionNo >= 9 && questionNo <= 28) return 5;
+    return null;
+  }
+
+  if (bookSlug === 'gate-cse' && (year === 1995 || year === 1996)) {
+    if (questionNo >= 3 && questionNo <= 27) return 5;
+    return null;
+  }
+
+  if (bookSlug === 'gate-cse' && year === 1997) {
+    const sectionMatch = rawNumber.match(/^0?([1-6])[.\-]/);
+    if (sectionMatch) return Number(sectionMatch[1]) <= 3 ? 1 : 2;
+    if (questionNo >= 7) return 5;
+    return null;
+  }
+
+  if (bookSlug === 'gate-cse' && (year === 1999 || year === 2000 || year === 2002)) {
+    if (questionNo >= 3) return 5;
+    return null;
+  }
 
   // Recent GATE CSE rows in this archive store GA and technical questions in
   // separate local numbering ranges. Official master papers still carry the
@@ -142,5 +226,9 @@ export function marksFromGateQuestionNumber(question) {
  * GATE paper patterns for archive rows whose source metadata omitted marks.
  */
 export function marksFromQuestionContext(question, tags, answerSource) {
-  return marksFromQuestionMetadata(tags, answerSource) ?? marksFromGateQuestionNumber(question);
+  return (
+    verifiedPdfAnswerKeyMark(answerSource) ??
+    marksFromGateQuestionNumber(question) ??
+    marksFromTags(tags)
+  );
 }

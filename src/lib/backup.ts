@@ -41,7 +41,10 @@ function migrateImportedRow(
         ? (row.question_snapshot as Record<string, unknown>)
         : null;
     row.question_type ??= typeof snapshot?.type === 'string' ? snapshot.type : null;
-    row.question_marks ??= snapshot?.marks === 1 || snapshot?.marks === 2 ? snapshot.marks : null;
+    const storedMarks = row.question_marks ?? snapshot?.marks;
+    // `question_marks` is a normalized v3 scoring fact and supports only the
+    // modern 1/2-mark scheme. The snapshot still retains larger legacy marks.
+    row.question_marks = storedMarks === 1 || storedMarks === 2 ? storedMarks : null;
     if (row.scoring_version == null) {
       const scored = scoreGateOutcome({
         questionType: typeof row.question_type === 'string' ? row.question_type : null,

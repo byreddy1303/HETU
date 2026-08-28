@@ -129,10 +129,18 @@ describe('official GATE scoring', () => {
       status: 'unscorable',
       reason: 'missing-marks'
     });
-    for (const marks of [0, 1.5, 3, Number.NaN, '1'] as unknown[]) {
+    for (const marks of [0, Number.NaN, '1'] as unknown[]) {
       expect(scoreGateOutcome(outcome({ marks: marks as number }))).toMatchObject({
         status: 'unscorable',
         reason: 'invalid-marks'
+      });
+    }
+    for (const marks of [1.5, 3, 5, 10]) {
+      expect(scoreGateOutcome(outcome({ marks }))).toMatchObject({
+        status: 'unscorable',
+        reason: 'unsupported-mark-scheme',
+        marks: null,
+        maxThirds: null
       });
     }
     expect(

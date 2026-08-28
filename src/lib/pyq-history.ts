@@ -1,6 +1,6 @@
 import type { PyqAttemptRow, PyqHistoryFilter, QuestionRow } from '@/types';
 import type { PyqQuestion } from '@/lib/pyq';
-import { MARKS_TARGET_SEC, DEFAULT_TARGET_TIME_SEC } from '@/lib/constants';
+import { targetTimeSecForMarks } from '@/lib/constants';
 import { pyqSourceAttemptForJournalQuestion } from '@/lib/pyq-session';
 
 export const PYQ_HISTORY_OPTIONS: { value: PyqHistoryFilter; label: string }[] = [
@@ -44,7 +44,7 @@ export function analyzedAttemptIds(
 }
 
 function targetSeconds(question: Pick<PyqQuestion, 'marks'>): number {
-  return question.marks ? MARKS_TARGET_SEC[question.marks] : DEFAULT_TARGET_TIME_SEC;
+  return targetTimeSecForMarks(question.marks);
 }
 
 export function matchesPyqHistory(

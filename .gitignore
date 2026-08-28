@@ -19,6 +19,9 @@ test-results
 .ua/.trash-*/
 .ua/diff-overlay.json
 
+# Machine-local official/legacy GATE paper downloads (URLs + checksums are tracked)
+/references/gate-papers/pdfs/
+
 # Native build outputs and machine-local Android configuration
 android/.gradle
 android/.idea

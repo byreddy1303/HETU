@@ -187,11 +187,29 @@ export function buildSourceRef(
   return parts.join(' · ');
 }
 
-/** GATE marks a question at 1 or 2 marks; target time roughly tracks that. */
+/** Modern GATE marks a question at 1 or 2 marks; target time roughly tracks that. */
 export const MARKS_TARGET_SEC: Record<1 | 2, number> = {
   1: 90,
   2: 180
 };
+
+export const DEFAULT_TARGET_TIME_SEC = 120;
+
+/**
+ * Return a solve-time target for modern and legacy GATE mark allocations.
+ *
+ * Modern 1/2-mark questions retain their established targets. Older papers
+ * also contain larger positive allocations, for which the same 90 seconds per
+ * mark scale provides a deterministic target. Missing or malformed metadata
+ * keeps the neutral default instead of inventing a mark value.
+ */
+export function targetTimeSecForMarks(marks: number | null | undefined): number {
+  if (marks === 1 || marks === 2) return MARKS_TARGET_SEC[marks];
+  if (typeof marks === 'number' && Number.isFinite(marks) && marks > 0) {
+    return Math.round(marks * MARKS_TARGET_SEC[1]);
+  }
+  return DEFAULT_TARGET_TIME_SEC;
+}
 
 /** GATE question format. MCQ = single-choice, MSQ = multi-select (no negatives), NAT = numeric. */
 export type QuestionFormat = 'MCQ' | 'MSQ' | 'NAT';
@@ -217,8 +235,6 @@ export const QUESTION_COUNT_CHOICES: { value: number; label: string }[] = [
   { value: 20, label: '20' },
   { value: 65, label: 'Full paper' }
 ];
-
-export const DEFAULT_TARGET_TIME_SEC = 120;
 
 /** First re-attempt is always scheduled +3 days (ladder D3 → D10 → D30). */
 export const REATTEMPT_FIRST_DELAY_DAYS = 3;

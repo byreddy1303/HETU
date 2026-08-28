@@ -144,6 +144,19 @@ describe('PYQ production audit migration', () => {
     expect(canonicalizer!.localeCompare(immutabilityGuard!)).toBeLessThan(0);
   });
 
+  it('accepts attempt receipts for the 1990 questions shipped in the GATE bank', () => {
+    const sql = readFileSync(
+      path.resolve(
+        process.cwd(),
+        'supabase/migrations/20260828000001_gate_1990_attempt_year.sql'
+      ),
+      'utf8'
+    );
+
+    expect(sql).toContain('drop constraint if exists pyq_attempts_year_check');
+    expect(sql).toContain('check (year between 1990 and 2100)');
+  });
+
   it('stores qualified mock evidence with owner-safe PYQ links and strict readiness criteria', () => {
     const sql = readFileSync(
       path.resolve(process.cwd(), 'supabase/migrations/20260827102350_qualified_mock_evidence.sql'),

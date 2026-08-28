@@ -767,7 +767,11 @@ function PyqReattemptSession({
               <div className="flex flex-wrap gap-1.5">
                 <Badge tone="accent">{question.subject}</Badge>
                 <Badge>{question.type}</Badge>
-                {question.marks ? <Badge>{question.marks} mark</Badge> : null}
+                {question.marks ? (
+                  <Badge>
+                    {question.marks} mark{question.marks === 1 ? '' : 's'}
+                  </Badge>
+                ) : null}
               </div>
             }
           />

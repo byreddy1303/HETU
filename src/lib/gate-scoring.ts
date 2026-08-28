@@ -64,6 +64,7 @@ export interface GateBonusResult extends GateScoreBase {
 
 export type GateUnscorableReason =
   | 'missing-marks'
+  | 'unsupported-mark-scheme'
   | 'invalid-marks'
   | 'ambiguous-answer'
   | 'unsupported-answer'
@@ -143,7 +144,13 @@ export function scoreGateOutcome(input: GateOutcomeScoreInput): GateScoreResult 
   } as const;
 
   if (input.marks == null) return unscorable(input, 'missing-marks');
-  if (marks == null) return unscorable(input, 'invalid-marks');
+  if (marks == null) {
+    const reason =
+      typeof input.marks === 'number' && Number.isFinite(input.marks) && input.marks > 0
+        ? 'unsupported-mark-scheme'
+        : 'invalid-marks';
+    return unscorable(input, reason);
+  }
   const maxThirds = (marks * GATE_THIRDS_PER_MARK) as 3 | 6;
 
   const bonusByType = type === 'MARKS_TO_ALL';

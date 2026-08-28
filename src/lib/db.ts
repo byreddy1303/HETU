@@ -275,7 +275,8 @@ class AirDB extends Dexie {
             row.question_type = row.question_snapshot?.type ?? null;
           }
           if (row.question_marks === undefined) {
-            row.question_marks = row.question_snapshot?.marks ?? null;
+            const snapshotMarks = row.question_snapshot?.marks;
+            row.question_marks = snapshotMarks === 1 || snapshotMarks === 2 ? snapshotMarks : null;
           }
           if (row.capture_version === 2 && row.scoring_version == null) {
             const scored = scoreGateOutcome({

@@ -33,7 +33,7 @@ export interface PyqBenchmarkQuestionInput {
   set: number | null;
   number: string;
   subjectSlug: string;
-  marks: 1 | 2 | null;
+  marks: number | null;
   type: string;
   answerStatus: string;
 }

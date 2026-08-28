@@ -38,4 +38,19 @@ describe('question answer persistence', () => {
     expect(saved.answer_text).toBe('Run Dijkstra from the source.');
     expect(draftFromRow(saved).answerText).toBe('Run Dijkstra from the source.');
   });
+
+  it('preserves an audited legacy PYQ mark allocation through journal edits', () => {
+    const legacy = {
+      ...question,
+      source_year: 1996,
+      source_ref: 'GATE PYQ · 1996 · Q14',
+      target_time_sec: 450
+    };
+    const draft = draftFromRow(legacy);
+
+    expect(draft.marks).toBe(5);
+    expect(applyDraftToRow(legacy, { ...draft, answerText: 'Audited answer.' }).target_time_sec).toBe(
+      450
+    );
+  });
 });

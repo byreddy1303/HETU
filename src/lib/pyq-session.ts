@@ -780,7 +780,11 @@ export function createPyqAttemptRow(args: {
     bank_version: args.bankVersion,
     attempted_at: attemptedAt,
     question_type: args.question.type,
-    question_marks: args.question.marks,
+    // The v3 scoring ledger models the modern 1/2-mark scheme. Preserve a
+    // larger legacy allocation in question_snapshot while leaving its
+    // normalized scoring mark null so the receipt is explicitly unscorable.
+    question_marks:
+      args.question.marks === 1 || args.question.marks === 2 ? args.question.marks : null,
     score_thirds: scored.scoreThirds,
     scoring_status: scored.status,
     scoring_version: scored.scoringVersion,

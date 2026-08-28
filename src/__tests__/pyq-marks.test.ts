@@ -3,8 +3,11 @@ import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import {
   isMarksMetadataTag,
+  marksFromGateQuestionNumber,
+  marksFromQuestionContext,
   marksFromQuestionMetadata,
   marksFromTags,
+  sourceArchiveMark,
   verifiedPdfAnswerKeyMark
 } from '../../scripts/pyq-marks.mjs';
 
@@ -66,6 +69,46 @@ describe('PYQ source mark tags', () => {
     ).toBeNull();
   });
 
+  it('preserves larger allocations published in legacy archive URLs', () => {
+    expect(sourceArchiveMark(null, 'https://example.test/question-marks-5-example')).toBe(5);
+    expect(sourceArchiveMark(null, 'https://example.test/question-marks-10-example')).toBe(10);
+    expect(sourceArchiveMark(8, 'https://example.test/question-marks-1-example')).toBe(8);
+    expect(sourceArchiveMark(-1, 'https://example.test/question-without-marks')).toBeNull();
+  });
+
+  it('applies the published descriptive-section allocations for legacy CSE papers', () => {
+    expect(
+      marksFromGateQuestionNumber({ bookSlug: 'gate-cse', year: 1993, number: '7.1,2,3' })
+    ).toBe(6);
+    expect(
+      marksFromGateQuestionNumber({ bookSlug: 'gate-cse', year: 1994, number: '1.2' })
+    ).toBe(2);
+    expect(
+      marksFromGateQuestionNumber({ bookSlug: 'gate-cse', year: 1994, number: '9' })
+    ).toBe(5);
+    expect(
+      marksFromGateQuestionNumber({ bookSlug: 'gate-cse', year: 1997, number: '4.3' })
+    ).toBe(2);
+    expect(
+      marksFromGateQuestionNumber({ bookSlug: 'gate-cse', year: 2000, number: '18' })
+    ).toBe(5);
+  });
+
+  it('lets the published paper allocation repair a stale archive tag', () => {
+    expect(
+      marksFromQuestionContext(
+        {
+          bookSlug: 'gate-cse',
+          year: 2025,
+          number: '42',
+          subjectSlug: 'algorithms'
+        },
+        ['one-mark'],
+        null
+      )
+    ).toBe(2);
+  });
+
   it('locks the shipped 2026 PDF-key rows to the official 60x1M/70x2M split', async () => {
     const root = process.cwd();
     const manifest = JSON.parse(
@@ -105,5 +148,38 @@ describe('PYQ source mark tags', () => {
       oneMarkCount: 60,
       twoMarkCount: 70
     });
+  });
+
+  it('ships a complete, audited mark allocation for every GATE-derived row', async () => {
+    const root = process.cwd();
+    const audit = JSON.parse(
+      await readFile(path.join(root, 'public', 'pyq', 'marks-audit.json'), 'utf8')
+    ) as {
+      result: {
+        gateQuestionCount: number;
+        gateMissingBefore: number;
+        gateNewlyAssigned: number;
+        gateCorrectedExisting: number;
+        gateMissingAfter: number;
+      };
+      modernCompletePaperChecks: Array<{
+        questionCount: number;
+        representedMarkSum: number;
+      }>;
+    };
+
+    expect(audit.result).toMatchObject({
+      gateQuestionCount: 4043,
+      gateMissingBefore: 2722,
+      gateNewlyAssigned: 2722,
+      gateCorrectedExisting: 96,
+      gateMissingAfter: 0
+    });
+    expect(audit.modernCompletePaperChecks).toHaveLength(6);
+    expect(
+      audit.modernCompletePaperChecks.every(
+        (paper) => paper.questionCount === 65 && paper.representedMarkSum === 100
+      )
+    ).toBe(true);
   });
 });

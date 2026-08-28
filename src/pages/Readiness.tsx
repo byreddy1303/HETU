@@ -403,7 +403,7 @@ export default function Readiness() {
                       {mockSignal.low}–{mockSignal.high}%
                     </p>
                     <p className="mt-1 text-[11px] text-text-faint">
-                      last {mockSignal.recent.length} recorded mock
+                      last {mockSignal.recent.length} qualified paper
                       {mockSignal.recent.length === 1 ? '' : 's'}
                     </p>
                     </>

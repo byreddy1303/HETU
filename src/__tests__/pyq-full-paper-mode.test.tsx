@@ -128,7 +128,7 @@ describe('authentic PYQ full-paper mode', () => {
     await user.click(screen.getByRole('button', { name: 'Start 3-hour full paper' }));
 
     expect(
-      await screen.findByRole('region', { name: 'Timed PYQ exam workspace' })
+      await screen.findByRole('region', { name: 'Official full paper workspace' })
     ).toBeInTheDocument();
     expect(screen.getByRole('timer')).toHaveTextContent('3:00:00');
     const [startedSession] = await db.pyq_sessions.toArray();

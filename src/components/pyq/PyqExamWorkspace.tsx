@@ -441,12 +441,13 @@ export default function PyqExamWorkspace({
   const urgent = remainingSec <= 5 * 60;
   const hasResponse = choices.length > 0 || numeric.trim().length > 0;
   const isLastQuestion = index >= questions.length - 1;
+  const isFullPaper = session.config.examKind === 'full-paper';
   const [calcOpen, setCalcOpen] = useState(false);
 
   return (
     <>
     <section
-      aria-label="Timed PYQ exam workspace"
+      aria-label={`${isFullPaper ? 'Official full paper' : 'Timed PYQ exam'} workspace`}
       className="relative left-1/2 flex w-full -translate-x-1/2 flex-col gap-3 md:w-[min(1180px,calc(100vw-268px))]"
     >
       <header className="sticky top-[calc(56px+var(--safe-top))] z-20 rounded-lg border border-border bg-bg-raised/95 px-3 py-2 shadow-card backdrop-blur md:top-2 sm:px-4">
@@ -474,7 +475,9 @@ export default function PyqExamWorkspace({
 
           <div className="order-3 flex w-full items-center justify-between gap-3 border-t border-border pt-2.5 sm:order-none sm:w-auto sm:border-0 sm:pt-0">
             <div className="text-left sm:text-center">
-              <p className="u-label">Timed PYQ exam</p>
+              <p className="u-label">
+                {isFullPaper ? 'Official full paper' : 'Timed PYQ exam'}
+              </p>
               <p className="u-num mt-0.5 text-[12px] font-semibold text-text">
                 Question {Math.min(index + 1, questions.length)} of {questions.length}
               </p>

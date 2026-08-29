@@ -155,6 +155,7 @@ describe('PYQ source mark tags', () => {
     const audit = JSON.parse(
       await readFile(path.join(root, 'public', 'pyq', 'marks-audit.json'), 'utf8')
     ) as {
+      schemaVersion: number;
       result: {
         gateQuestionCount: number;
         gateMissingBefore: number;
@@ -166,8 +167,10 @@ describe('PYQ source mark tags', () => {
         questionCount: number;
         representedMarkSum: number;
       }>;
+      markEvidenceByQuestionId: Record<string, string>;
     };
 
+    expect(audit.schemaVersion).toBe(2);
     expect(audit.result).toMatchObject({
       gateQuestionCount: 4043,
       gateMissingBefore: 2722,
@@ -181,5 +184,7 @@ describe('PYQ source mark tags', () => {
         (paper) => paper.questionCount === 65 && paper.representedMarkSum === 100
       )
     ).toBe(true);
+    expect(Object.keys(audit.markEvidenceByQuestionId)).toHaveLength(4043);
+    expect(Object.values(audit.markEvidenceByQuestionId).every(Boolean)).toBe(true);
   });
 });

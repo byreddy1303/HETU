@@ -319,8 +319,8 @@ const ruleEvaluableBonus = bonusQuestions.filter(
 );
 check(bonusQuestions.length === 2, `Expected two marks-to-all rows, found ${bonusQuestions.length}`);
 check(
-  ruleEvaluableBonus.length === 1,
-  `Expected one rule-evaluable marks-to-all row, found ${ruleEvaluableBonus.length}`
+  ruleEvaluableBonus.length === 2,
+  `Expected two rule-evaluable marks-to-all rows, found ${ruleEvaluableBonus.length}`
 );
 
 const pdfAnswerKeyRows = questions.filter(
@@ -433,7 +433,7 @@ const report = {
     'Historical and supporting questions remain available but are excluded from current-syllabus coverage evidence.',
     'Broad and review-required leaves are visible gaps, not claims of verified row-level coverage.',
     'Book sourceClass and difficultyFloor describe a source collection; row-level answer and mark authority remains explicit in answerSource.',
-    `${marksPresentRuleEvaluable.length.toLocaleString()} standard rows and ${ruleEvaluableBonus.length.toLocaleString()} marks-to-all row are GATE-rule-evaluable from stored metadata; only ${verifiedPdfExact.length.toLocaleString()} standard rows have official PDF-key-verified marks.`,
+    `${marksPresentRuleEvaluable.length.toLocaleString()} standard rows and ${ruleEvaluableBonus.length.toLocaleString()} marks-to-all rows are GATE-rule-evaluable from stored metadata; only ${verifiedPdfExact.length.toLocaleString()} standard rows have official PDF-key-verified marks.`,
     'Structured PDF-answer-key marks are authoritative over contradictory archive tags; the 2026 split is locked at 60 one-mark and 70 two-mark questions.'
   ]
 };

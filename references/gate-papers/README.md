@@ -60,7 +60,7 @@ The verifier checks:
 
 Each `papers` entry includes:
 
-- `classification`: `official` or `legacy-mirror`;
+- `classification`: `official`, `legacy-mirror`, or `readable-mirror`;
 - `localPath`: path relative to this directory;
 - `sourceUrl`: direct file/archive acquisition URL;
 - `sourcePageUrl`: the human-readable index page identifying that source;
@@ -68,6 +68,7 @@ Each `papers` entry includes:
 - `sizeBytes`, `sha256`, and `pages`;
 - `pageCountMethod` and `pdfValidation`; and
 - `archiveId` and `archiveEntry` when the PDF came from the official ZIP.
+- `supplements` when a readable mirror exists only to accompany a malformed official archive member.
 
 The `knownGaps` array is part of the audit trail. Do not remove a gap merely because a question transcription exists online; add a local paper only after its provenance and bytes are recorded.
 

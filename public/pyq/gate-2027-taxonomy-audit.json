@@ -32,8 +32,8 @@
       "msqPartialCredit": false
     }
   },
-  "bankVersion": "gate-and-cs-exams-1990-2026-v11-verified-pdf-marks",
-  "bankGeneratedAt": "2026-08-24T05:37:53.188Z",
+  "bankVersion": "gate-and-cs-exams-1990-2026-v12-complete-gate-marks",
+  "bankGeneratedAt": "2026-08-29T02:06:35.098Z",
   "auditKind": "independent-official-scope-audit",
   "scopeLimit": "This registry audits taxonomy scope, not the correctness of every individual question classification.",
   "bank": {
@@ -70,9 +70,14 @@
       "UNSUPPORTED": 90
     },
     "marks": {
-      "1": 767,
-      "2": 584,
-      "unknown": 2983
+      "1": 1730,
+      "2": 2272,
+      "4": 1,
+      "5": 62,
+      "6": 1,
+      "8": 2,
+      "10": 5,
+      "unknown": 261
     },
     "answerStatuses": {
       "ambiguous": 3,
@@ -80,17 +85,124 @@
       "marks-to-all": 2,
       "unsupported": 90
     },
+    "answerProvenanceKinds": {
+      "examside-key": 964,
+      "gateoverflow_top_answer": 79,
+      "independent-audit": 8,
+      "learner-provided-screenshot": 30,
+      "legacy-structured": 2799,
+      "manual-audit": 3,
+      "missing": 3,
+      "official-answer-key": 66,
+      "official-marked-solution": 65,
+      "official-solution": 122,
+      "pdf_answer_key": 130,
+      "question_uid": 65
+    },
+    "books": [
+      {
+        "slug": "gate-cse",
+        "label": "GATE CSE Core",
+        "questionCount": 2911,
+        "sourceClass": "official-exam",
+        "difficultyFloor": "gate",
+        "sourceUrl": "https://gate2026.iitg.ac.in/QPs-answer-keys.html"
+      },
+      {
+        "slug": "gate-it",
+        "label": "GATE IT Archive",
+        "questionCount": 360,
+        "sourceClass": "official-exam",
+        "difficultyFloor": "gate",
+        "sourceUrl": "https://gateoverflow.in/previous-years"
+      },
+      {
+        "slug": "gate-da-overlap",
+        "label": "GATE DA/AI · CSE Overlap",
+        "questionCount": 89,
+        "sourceClass": "official-exam",
+        "difficultyFloor": "gate",
+        "sourceUrl": "https://gate2026.iitg.ac.in/QPs-answer-keys.html"
+      },
+      {
+        "slug": "gate-cross-digital",
+        "label": "Cross-Branch Digital Logic",
+        "questionCount": 259,
+        "sourceClass": "official-exam",
+        "difficultyFloor": "gate",
+        "sourceUrl": "https://questions.examside.com/past-years/gate"
+      },
+      {
+        "slug": "gate-cross-math",
+        "label": "Cross-Branch Engineering Mathematics",
+        "questionCount": 424,
+        "sourceClass": "official-exam",
+        "difficultyFloor": "gate",
+        "sourceUrl": "https://questions.examside.com/past-years/gate"
+      },
+      {
+        "slug": "isro-cs-overlap",
+        "label": "ISRO Scientist/Engineer CS",
+        "questionCount": 45,
+        "sourceClass": "official-exam",
+        "difficultyFloor": "mixed",
+        "sourceUrl": "https://www.isro.gov.in/ICRB_Recruitment9.html"
+      },
+      {
+        "slug": "iiith-pgee",
+        "label": "IIIT-H PGEE · Audited Sample",
+        "questionCount": 8,
+        "sourceClass": "official-sample",
+        "difficultyFloor": "mixed",
+        "sourceUrl": "https://pgadmissions.iiit.ac.in/monsoon_syllabus/"
+      },
+      {
+        "slug": "tifr-gs-cs",
+        "label": "TIFR GS Computer Science",
+        "questionCount": 65,
+        "sourceClass": "official-exam",
+        "difficultyFloor": "above-gate",
+        "sourceUrl": "https://main.tifr.res.in/academics/past_question_papers.php"
+      },
+      {
+        "slug": "cmi-cs-objective",
+        "label": "CMI MSc/PhD CS · Objective",
+        "questionCount": 122,
+        "sourceClass": "official-exam",
+        "difficultyFloor": "above-gate",
+        "sourceUrl": "https://www.cmi.ac.in/admissions/syllabus.php"
+      },
+      {
+        "slug": "ugc-net-cs-overlap",
+        "label": "UGC NET CS · Filtered Overlap",
+        "questionCount": 21,
+        "sourceClass": "official-exam",
+        "difficultyFloor": "mixed",
+        "sourceUrl": "https://www.ugcnetonline.in/previous_question_papers.php"
+      },
+      {
+        "slug": "go-classes-coa",
+        "label": "GO Classes COA Topic Tests",
+        "questionCount": 30,
+        "sourceClass": "audited-gate-prep",
+        "difficultyFloor": "gate",
+        "sourceUrl": "https://www.goclasses.in/"
+      }
+    ],
     "scoringMetadata": {
       "standardQuestionCount": 4219,
       "answerAvailableStandardQuestionCount": 4219,
-      "marksPresentRuleEvaluableQuestionCount": 1303,
-      "marksPresentRuleEvaluablePercentOfAnswerAvailableStandard": 30.9,
+      "standardRuleEvaluableQuestionCount": 3938,
+      "standardRuleEvaluablePercentOfAnswerAvailableStandard": 93.3,
+      "marksToAllQuestionCount": 2,
+      "ruleEvaluableMarksToAllQuestionCount": 2,
+      "totalRuleEvaluableQuestionCount": 3940,
       "officialKeyVerifiedExactQuestionCount": 130,
       "officialKeyVerifiedOneMarkCount": 60,
       "officialKeyVerifiedTwoMarkCount": 70,
-      "unverifiedMarkProvenanceRuleEvaluableCount": 1173,
+      "unverifiedMarkProvenanceRuleEvaluableCount": 3808,
       "pdfMarkConflicts": [],
-      "policy": "Stored MCQ/MSQ/NAT rows with a valid answer, answer provenance, and 1/2-mark metadata are GATE-rule-evaluable. Only matching structured PDF-answer-key marks are labelled official-key verified exact; tag-only marks are not promoted to verified provenance."
+      "policy": "Stored MCQ/MSQ/NAT rows with a valid answer, answer provenance, and 1/2-mark metadata are standard GATE-rule-evaluable rows. MARKS_TO_ALL rows are counted separately and are rule-evaluable only when 1/2-mark metadata and provenance are present. Only matching structured PDF-answer-key marks are labelled official-key verified exact; tag-only marks are not promoted to verified provenance."
     }
   },
   "officialTopicCoverage": {
@@ -1349,6 +1461,8 @@
     "The 4,334-question immutable bank is preserved; this audit does not delete or rewrite questions.",
     "Historical and supporting questions remain available but are excluded from current-syllabus coverage evidence.",
     "Broad and review-required leaves are visible gaps, not claims of verified row-level coverage.",
+    "Book sourceClass and difficultyFloor describe a source collection; row-level answer and mark authority remains explicit in answerSource.",
+    "3,938 standard rows and 2 marks-to-all rows are GATE-rule-evaluable from stored metadata; only 130 standard rows have official PDF-key-verified marks.",
     "Structured PDF-answer-key marks are authoritative over contradictory archive tags; the 2026 split is locked at 60 one-mark and 70 two-mark questions."
   ]
 }

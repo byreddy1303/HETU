@@ -257,6 +257,7 @@ export interface PyqPracticeDraft {
   question_uid: string;
   selected_answer: PyqSelectedAnswer;
   mark_decision: MarkDecision | null;
+  confidence?: PyqExamConfidence | null;
   /** Sum of active work segments only; time spent paused is excluded. */
   elapsed_ms: number;
   /** Original start of the question, retained across every pause/resume cycle. */
@@ -410,6 +411,7 @@ export interface PyqAttemptRow {
   screenshot_url: string | null;
   mark_decision: MarkDecision;
   mark_correct: boolean | null;
+  confidence?: PyqExamConfidence | null;
   question_started_at: string | null;
   time_spent_ms: number | null;
   time_spent_sec: number;

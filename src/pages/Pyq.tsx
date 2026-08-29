@@ -139,7 +139,9 @@ function pauseStoredPyqSession(session: PyqSessionRow): PyqSessionRow {
     selectedAnswer:
       savedDraft?.question_uid === session.current_question_uid ? savedDraft.selected_answer : null,
     markDecision:
-      savedDraft?.question_uid === session.current_question_uid ? savedDraft.mark_decision : null
+      savedDraft?.question_uid === session.current_question_uid ? savedDraft.mark_decision : null,
+    confidence:
+      savedDraft?.question_uid === session.current_question_uid ? savedDraft.confidence : null
   });
 }
 
@@ -1386,42 +1388,97 @@ function AnswerPad({
   );
 }
 
-function DecisionButtons({
-  value,
+function PracticeConfidenceButtons({
+  confidence,
+  decision,
   disabled,
   onChange
 }: {
-  value: MarkDecision | null;
+  confidence: PyqExamConfidence | null;
+  decision: MarkDecision | null;
   disabled: boolean;
-  onChange: (value: MarkDecision) => void;
+  onChange: (confidence: PyqExamConfidence | null, decision: MarkDecision) => void;
 }) {
-  const options: { value: MarkDecision; label: string; hint: string }[] = [
-    { value: 'MARK', label: 'Answered', hint: 'committed' },
-    { value: 'FIFTY_FIFTY', label: 'Guessed 50/50', hint: 'uncertain' },
-    { value: 'SKIP', label: 'Left blank', hint: 'skipped' }
+  const options: {
+    confidence: PyqExamConfidence | null;
+    decision: MarkDecision;
+    label: string;
+    hint: string;
+    ariaLabel: string;
+    tone: 'success' | 'guess' | 'neutral';
+  }[] = [
+    {
+      confidence: 'high',
+      decision: 'MARK',
+      label: 'High',
+      hint: 'Answered',
+      ariaLabel: 'Answered: committed',
+      tone: 'success'
+    },
+    {
+      confidence: 'medium',
+      decision: 'FIFTY_FIFTY',
+      label: 'Medium',
+      hint: '50/50',
+      ariaLabel: 'Guessed 50/50: uncertain',
+      tone: 'guess'
+    },
+    {
+      confidence: 'low',
+      decision: 'FIFTY_FIFTY',
+      label: 'Low',
+      hint: 'Guessed',
+      ariaLabel: 'Guessed: uncertain',
+      tone: 'guess'
+    },
+    {
+      confidence: null,
+      decision: 'SKIP',
+      label: 'Skip',
+      hint: 'Left blank',
+      ariaLabel: 'Left blank: skipped',
+      tone: 'neutral'
+    }
   ];
   return (
     <fieldset disabled={disabled}>
-      <legend className="u-label mb-2">How did this answer feel?</legend>
-      <div className="grid gap-2 sm:grid-cols-3">
-        {options.map((option) => (
-          <button
-            key={option.value}
-            type="button"
-            aria-label={`${option.label}: ${option.hint}`}
-            aria-pressed={value === option.value}
-            onClick={() => onChange(option.value)}
-            className={cn(
-              'rounded border px-3 py-2.5 text-left transition-colors',
-              value === option.value
-                ? 'border-ink-violet/40 bg-ink-violet/10 text-ink-violet'
-                : 'border-border bg-bg-raised text-text-muted hover:border-border-hover'
-            )}
-          >
-            <span className="block text-[12.5px] font-semibold">{option.label}</span>
-            <span className="u-label mt-0.5 block">{option.hint}</span>
-          </button>
-        ))}
+      <legend className="text-[13px] font-semibold text-text">How confident do you feel?</legend>
+      <p className="mt-0.5 text-[11.5px] text-text-faint">
+        Record how certain you feel.
+      </p>
+      <div className="mt-3 grid grid-cols-4 gap-2">
+        {options.map((option) => {
+          const isSelected =
+            option.decision === 'SKIP'
+              ? decision === 'SKIP'
+              : decision !== 'SKIP' &&
+                (confidence === option.confidence ||
+                  (confidence === null && option.confidence === 'high' && decision === 'MARK') ||
+                  (confidence === null && option.confidence === 'medium' && decision === 'FIFTY_FIFTY'));
+
+          return (
+            <button
+              key={option.label}
+              type="button"
+              aria-label={option.ariaLabel}
+              aria-pressed={isSelected}
+              onClick={() => onChange(option.confidence, option.decision)}
+              className={cn(
+                'flex flex-col items-center justify-center rounded border p-2 text-center transition-all',
+                isSelected
+                  ? option.tone === 'success'
+                    ? 'border-accent bg-accent-faint text-accent shadow-sm font-semibold'
+                    : option.tone === 'guess'
+                      ? 'border-ink-violet/50 bg-guess-faint text-ink-violet shadow-sm font-semibold'
+                      : 'border-border-hover bg-bg-overlay text-text shadow-sm font-semibold'
+                  : 'border-border bg-bg-raised text-text-muted hover:border-border-hover hover:text-text'
+              )}
+            >
+              <span className="text-[13px] font-semibold">{option.label}</span>
+              <span className="mt-0.5 text-[10.5px] text-text-faint">{option.hint}</span>
+            </button>
+          );
+        })}
       </div>
     </fieldset>
   );
@@ -1500,12 +1557,15 @@ function ResultPanel({ question, attempt }: { question: PyqQuestion; attempt: Py
                 Accepted tolerance: ±{question.tolerance.abs}
               </p>
             )}
-          {score.covered && (
-            <div className="mt-3 flex flex-wrap items-center gap-2">
-              <Badge tone="accent">{score.label}</Badge>
-              <span className="text-[11px] text-text-faint">{score.detail}</span>
-            </div>
-          )}
+          <div className="mt-3 flex flex-wrap items-center gap-2">
+            {score.covered && <Badge tone="accent">{score.label}</Badge>}
+            {attempt.confidence && (
+              <Badge tone={attempt.confidence === 'high' ? 'success' : 'guess'}>
+                {attempt.confidence[0].toUpperCase() + attempt.confidence.slice(1)} confidence
+              </Badge>
+            )}
+            {score.covered && <span className="text-[11px] text-text-faint">{score.detail}</span>}
+          </div>
           <p className="mt-2 text-[11px] text-text-faint">
             Committed {new Date(attempt.attempted_at).toLocaleString()} ·{' '}
             {attempt.time_spent_ms == null
@@ -1564,6 +1624,7 @@ export default function Pyq() {
   const [choices, setChoices] = useState<string[]>([]);
   const [numeric, setNumeric] = useState('');
   const [decision, setDecision] = useState<MarkDecision | null>(null);
+  const [confidence, setConfidence] = useState<PyqExamConfidence | null>(null);
   const [submitted, setSubmitted] = useState<PyqAttemptRow | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [completed, setCompleted] = useState<PyqAttemptRow[]>([]);
@@ -1712,6 +1773,7 @@ export default function Pyq() {
           : ''
       );
       setDecision(null);
+      setConfidence(null);
       setSubmitted(null);
       setSubmitting(false);
       setJournalOpen(false);
@@ -1746,7 +1808,13 @@ export default function Pyq() {
           : []
     );
     setNumeric(answerInputType(questions[index]) === 'NAT' ? String(savedAnswer ?? '') : '');
-    setDecision(lockedAttempt?.mark_decision ?? practiceDraft?.mark_decision ?? null);
+    const savedDecision = lockedAttempt?.mark_decision ?? practiceDraft?.mark_decision ?? null;
+    const savedConfidence =
+      lockedAttempt?.confidence ??
+      practiceDraft?.confidence ??
+      (savedDecision === 'MARK' ? 'high' : savedDecision === 'FIFTY_FIFTY' ? 'medium' : null);
+    setDecision(savedDecision);
+    setConfidence(savedConfidence);
     setSubmitted(lockedAttempt ?? null);
     setSubmitting(false);
     setJournalOpen(false);
@@ -2034,7 +2102,11 @@ export default function Pyq() {
                   markDecision:
                     visiblePracticeQuestion?.id === practicePauseTarget.current_question_uid
                       ? decision
-                      : (practicePauseTarget.config.practiceDraft?.mark_decision ?? null)
+                      : (practicePauseTarget.config.practiceDraft?.mark_decision ?? null),
+                  confidence:
+                    visiblePracticeQuestion?.id === practicePauseTarget.current_question_uid
+                      ? confidence
+                      : (practicePauseTarget.config.practiceDraft?.confidence ?? null)
                 },
                 pauseNowMs
               )
@@ -2359,6 +2431,7 @@ export default function Pyq() {
       setChoices([]);
       setNumeric('');
       setDecision(null);
+      setConfidence(null);
       setSubmitted(null);
       setSubmitError(null);
       setFinished(false);
@@ -2694,6 +2767,7 @@ export default function Pyq() {
         question: current,
         selectedAnswer: selected,
         decision,
+        confidence,
         bankVersion: manifest.bankVersion,
         questionStartedAtMs,
         committedAtMs,
@@ -3267,14 +3341,34 @@ export default function Pyq() {
             choices={choices}
             numeric={numeric}
             disabled={!!submitted || submitting || loading}
-            onChoices={setChoices}
-            onNumeric={setNumeric}
+            onChoices={(nextChoices) => {
+              setChoices(nextChoices);
+              if (nextChoices.length > 0 && (decision === null || decision === 'SKIP')) {
+                setDecision('MARK');
+                setConfidence('high');
+              }
+            }}
+            onNumeric={(nextNumeric) => {
+              setNumeric(nextNumeric);
+              if (nextNumeric.trim().length > 0 && (decision === null || decision === 'SKIP')) {
+                setDecision('MARK');
+                setConfidence('high');
+              }
+            }}
           />
           <div className="flex flex-col gap-4 border-t border-border pt-4 lg:border-l lg:border-t-0 lg:pl-5 lg:pt-0">
-            <DecisionButtons
-              value={decision}
+            <PracticeConfidenceButtons
+              confidence={confidence}
+              decision={decision}
               disabled={!!submitted || submitting || loading}
-              onChange={setDecision}
+              onChange={(newConfidence, newDecision) => {
+                setConfidence(newConfidence);
+                setDecision(newDecision);
+                if (newDecision === 'SKIP') {
+                  setChoices([]);
+                  setNumeric('');
+                }
+              }}
             />
             {!submitted ? (
               <div>

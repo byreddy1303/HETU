@@ -157,7 +157,13 @@ export function buildPyqSessionSummary(
     const timeSpentMs = hasExamTime
       ? Math.max(0, examTimeMs)
       : (practiceTimeMsByQuestion.get(questionUid) ?? 0);
-    const recordedConfidence = confidenceByQuestion[questionUid];
+    const rawConfidence = examState
+      ? confidenceByQuestion[questionUid]
+      : (attempt?.confidence ?? confidenceByQuestion[questionUid]);
+    const recordedConfidence =
+      rawConfidence === 'high' || rawConfidence === 'medium' || rawConfidence === 'low'
+        ? rawConfidence
+        : null;
     return {
       questionUid,
       questionNumber: index + 1,
@@ -167,12 +173,7 @@ export function buildPyqSessionSummary(
       outcome: outcomeForAttempt(attempt),
       visited: examState ? visited.has(questionUid) : attempt !== null,
       markedForReview: marked.has(questionUid),
-      confidence:
-        recordedConfidence === 'high' ||
-        recordedConfidence === 'medium' ||
-        recordedConfidence === 'low'
-          ? recordedConfidence
-          : null,
+      confidence: recordedConfidence,
       timeSpentMs,
       timeSpentSec: hasExamTime
         ? Math.max(0, Math.round(examTimeMs / 1000))

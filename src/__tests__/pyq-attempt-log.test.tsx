@@ -566,4 +566,29 @@ describe('PYQ committed-attempt logging', () => {
     expect(screen.queryByRole('button', { name: 'Resume practice' })).not.toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Start practice set' })).toBeEnabled();
   });
+
+  it('records confidence in practice mode and displays the confidence badge on receipt', async () => {
+    const user = userEvent.setup();
+    render(
+      <MemoryRouter>
+        <Pyq />
+      </MemoryRouter>
+    );
+
+    await user.click(await screen.findByRole('button', { name: /Start practice set/i }));
+    expect(await screen.findByText('Which proposition is a tautology?')).toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: 'A' }));
+    // Select Low confidence (aria-label: "Guessed: uncertain")
+    await user.click(screen.getByRole('button', { name: 'Guessed: uncertain' }));
+    await user.click(screen.getByRole('button', { name: 'Commit & reveal key' }));
+
+    const receipt = await screen.findByRole('region', { name: 'PYQ attempt receipt' });
+    expect(within(receipt).getByText('Low confidence')).toBeInTheDocument();
+
+    const attempts = await db.pyq_attempts.toArray();
+    expect(attempts).toHaveLength(1);
+    expect(attempts[0].confidence).toBe('low');
+    expect(attempts[0].mark_decision).toBe('FIFTY_FIFTY');
+  });
 });

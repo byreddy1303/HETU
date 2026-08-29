@@ -1,6 +1,7 @@
 import type {
   MarkDecision,
   PyqAttemptRow,
+  PyqExamConfidence,
   PyqQuestionSnapshot,
   PyqSelectedAnswer,
   PyqSessionConfig,
@@ -587,6 +588,7 @@ export function pausePyqPracticeSession(
     questionUid: string;
     selectedAnswer: PyqSelectedAnswer;
     markDecision: MarkDecision | null;
+    confidence?: PyqExamConfidence | null;
   },
   nowMs = Date.now()
 ): PyqSessionRow {
@@ -628,6 +630,7 @@ export function pausePyqPracticeSession(
         question_uid: draft.questionUid,
         selected_answer: draft.selectedAnswer,
         mark_decision: draft.markDecision,
+        ...(draft.confidence !== undefined ? { confidence: draft.confidence } : {}),
         elapsed_ms: elapsedMs,
         first_started_at: firstStartedAt
       }
@@ -685,6 +688,7 @@ export function createPyqAttemptRow(args: {
   question: PyqQuestion;
   selectedAnswer: PyqSelectedAnswer;
   decision: MarkDecision;
+  confidence?: PyqExamConfidence | null;
   bankVersion: string;
   questionStartedAtMs: number;
   committedAtMs: number;
@@ -774,6 +778,14 @@ export function createPyqAttemptRow(args: {
     screenshot_url: args.screenshotUrl,
     mark_decision: args.decision,
     mark_correct: markCorrect,
+    confidence:
+      args.confidence !== undefined
+        ? args.confidence
+        : args.decision === 'MARK'
+          ? 'high'
+          : args.decision === 'FIFTY_FIFTY'
+            ? 'medium'
+            : null,
     question_started_at: questionStartedAt,
     time_spent_ms: timeSpentMs,
     time_spent_sec: Math.max(1, Math.ceil(timeSpentMs / 1000)),

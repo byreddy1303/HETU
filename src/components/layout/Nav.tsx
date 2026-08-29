@@ -21,13 +21,15 @@ import {
   BookOpen,
   Camera,
   ClipboardList,
-  FileCheck2
+  FileCheck2,
+  PanelLeftClose
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { useAuthStore } from '@/stores/auth';
 import { useAuth } from '@/hooks/useAuth';
 import { useSessionStore } from '@/stores/session';
+import { useUiStore } from '@/stores/ui';
 import { db } from '@/lib/db';
 import { cn } from '@/lib/utils';
 import Brand from '@/components/shared/Brand';
@@ -175,6 +177,8 @@ export default function Nav() {
   const { profile, sandbox } = useAuth();
   const signOut = useAuthStore((s) => s.signOut);
   const storedSessionId = useSessionStore((s) => s.sessionId);
+  const navCollapsed = useUiStore((s) => s.navCollapsed);
+  const setNavCollapsed = useUiStore((s) => s.setNavCollapsed);
   // Confirm the stored session is still live (row exists, unfinished) — a
   // stale localStorage entry after a "finish" that crashed shouldn't hijack
   // the Session tab. useLiveQuery re-evaluates as Dexie changes.
@@ -212,9 +216,24 @@ export default function Nav() {
   ];
 
   return (
-    <aside className="native-side-nav fixed inset-y-0 left-0 z-30 hidden w-[224px] flex-col border-r border-border bg-bg md:flex">
-      <div className="flex items-center px-4 pb-4 pt-4">
+    <aside
+      className={cn(
+        'native-side-nav fixed inset-y-0 left-0 z-30 hidden w-[224px] flex-col border-r border-border bg-bg transition-transform duration-200 ease-in-out md:flex',
+        navCollapsed && '-translate-x-full pointer-events-none'
+      )}
+      aria-hidden={navCollapsed}
+    >
+      <div className="flex items-center justify-between px-4 pb-4 pt-4">
         <Brand />
+        <button
+          type="button"
+          onClick={() => setNavCollapsed(true)}
+          aria-label="Collapse sidebar"
+          title="Collapse sidebar (Ctrl+B)"
+          className="flex h-7 w-7 items-center justify-center rounded text-text-faint transition-colors hover:bg-bg-overlay hover:text-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+        >
+          <PanelLeftClose size={16} strokeWidth={1.75} />
+        </button>
       </div>
 
       <nav className="flex flex-1 flex-col gap-0.5 overflow-y-auto px-2">

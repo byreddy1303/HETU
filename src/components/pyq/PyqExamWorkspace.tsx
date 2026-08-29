@@ -26,6 +26,7 @@ import ScientificCalculator, { CalculatorTrigger } from '@/components/shared/Sci
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { Card, CardBody, CardHeader } from '@/components/ui/Card';
+import { useUiStore } from '@/stores/ui';
 import { cn, secondsToClock } from '@/lib/utils';
 
 const ANSWER_CHOICES = ['A', 'B', 'C', 'D'] as const;
@@ -451,12 +452,18 @@ export default function PyqExamWorkspace({
   const isLastQuestion = index >= questions.length - 1;
   const isFullPaper = session.config.examKind === 'full-paper';
   const [calcOpen, setCalcOpen] = useState(false);
+  const navCollapsed = useUiStore((s) => s.navCollapsed);
 
   return (
     <>
     <section
       aria-label={`${isFullPaper ? 'Official full paper' : 'Timed PYQ exam'} workspace`}
-      className="relative left-1/2 flex w-full -translate-x-1/2 flex-col gap-3 md:w-[min(1180px,calc(100vw-268px))]"
+      className={cn(
+        'relative left-1/2 flex w-full -translate-x-1/2 flex-col gap-3',
+        navCollapsed
+          ? 'md:w-[min(1240px,calc(100vw-48px))]'
+          : 'md:w-[min(1180px,calc(100vw-268px))]'
+      )}
     >
       <header className="sticky top-[calc(56px+var(--safe-top))] z-20 rounded-lg border border-border bg-bg-raised/95 px-3 py-2 shadow-card backdrop-blur md:top-2 sm:px-4">
         <div className="flex flex-wrap items-center justify-between gap-2.5">

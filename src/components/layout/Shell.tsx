@@ -1,5 +1,7 @@
+import { useEffect } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import { motion, useReducedMotion } from 'motion/react';
+import { PanelLeftOpen } from 'lucide-react';
 import Nav from '@/components/layout/Nav';
 import MobileTabs from '@/components/layout/MobileTabs';
 import TopRightControls, { ExamCountdown } from '@/components/layout/TopRightControls';
@@ -9,14 +11,55 @@ import Brand, { BrandMark } from '@/components/shared/Brand';
 import ThemeToggle from '@/components/shared/ThemeToggle';
 import OfflineBadge from '@/components/shared/OfflineBadge';
 import { useSyncBootstrap } from '@/hooks/useSync';
+import { useUiStore } from '@/stores/ui';
+import { cn } from '@/lib/utils';
 
 export default function Shell() {
   useSyncBootstrap();
   const { pathname } = useLocation();
   const reduceMotion = useReducedMotion();
+  const navCollapsed = useUiStore((s) => s.navCollapsed);
+  const setNavCollapsed = useUiStore((s) => s.setNavCollapsed);
+  const toggleNavCollapsed = useUiStore((s) => s.toggleNavCollapsed);
+
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      const target = event.target as HTMLElement | null;
+      if (
+        target &&
+        (target.tagName === 'INPUT' ||
+          target.tagName === 'TEXTAREA' ||
+          target.tagName === 'SELECT' ||
+          target.isContentEditable)
+      ) {
+        return;
+      }
+      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'b') {
+        event.preventDefault();
+        toggleNavCollapsed();
+      }
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [toggleNavCollapsed]);
+
   return (
     <div className="min-h-dvh">
       <Nav />
+      {/* Floating expand button on desktop when sidebar is collapsed */}
+      {navCollapsed && (
+        <div className="fixed left-4 top-3.5 z-40 hidden md:block">
+          <button
+            type="button"
+            onClick={() => setNavCollapsed(false)}
+            aria-label="Expand sidebar"
+            title="Expand sidebar (Ctrl+B)"
+            className="flex h-8 w-8 items-center justify-center rounded-full border border-border bg-bg-raised/95 text-text shadow-sm backdrop-blur transition-all hover:bg-bg-overlay hover:border-border-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+          >
+            <PanelLeftOpen size={16} strokeWidth={1.75} />
+          </button>
+        </div>
+      )}
       {/* Top Right Corner Controls (Countdown T-Days, Nightshift Toggle, Offline status) */}
       <div className="fixed right-4 top-3.5 z-40 hidden md:block">
         <TopRightControls />
@@ -32,7 +75,12 @@ export default function Shell() {
           <ThemeToggle className="h-9 w-9" />
         </div>
       </header>
-      <main className="native-shell-main pb-[calc(4.5rem+var(--safe-bottom))] md:pb-0 md:pl-[220px]">
+      <main
+        className={cn(
+          'native-shell-main pb-[calc(4.5rem+var(--safe-bottom))] transition-[padding] duration-200 ease-in-out md:pb-0',
+          navCollapsed ? 'md:pl-0' : 'md:pl-[220px]'
+        )}
+      >
         <div
           className={`u-shell-content mx-auto w-full px-4 pb-6 pt-16 md:py-8 ${
             [

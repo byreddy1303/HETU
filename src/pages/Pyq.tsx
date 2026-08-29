@@ -1513,6 +1513,13 @@ function ResultPanel({ question, attempt }: { question: PyqQuestion; attempt: Py
       ? formatAttemptAnswer(attempt.correct_answer)
       : answerText(question).replace(/^Answer key:\s*/i, '');
   const score = pyqAttemptScorePresentation(attempt);
+  const effectiveConfidence =
+    attempt.confidence ??
+    (attempt.mark_decision === 'MARK'
+      ? 'high'
+      : attempt.mark_decision === 'FIFTY_FIFTY'
+        ? 'medium'
+        : null);
   return (
     <section
       aria-label="PYQ attempt receipt"
@@ -1559,9 +1566,9 @@ function ResultPanel({ question, attempt }: { question: PyqQuestion; attempt: Py
             )}
           <div className="mt-3 flex flex-wrap items-center gap-2">
             {score.covered && <Badge tone="accent">{score.label}</Badge>}
-            {attempt.confidence && (
-              <Badge tone={attempt.confidence === 'high' ? 'success' : 'guess'}>
-                {attempt.confidence[0].toUpperCase() + attempt.confidence.slice(1)} confidence
+            {effectiveConfidence && (
+              <Badge tone={effectiveConfidence === 'high' ? 'success' : 'guess'}>
+                {effectiveConfidence[0].toUpperCase() + effectiveConfidence.slice(1)} confidence
               </Badge>
             )}
             {score.covered && <span className="text-[11px] text-text-faint">{score.detail}</span>}

@@ -159,7 +159,13 @@ export function buildPyqSessionSummary(
       : (practiceTimeMsByQuestion.get(questionUid) ?? 0);
     const rawConfidence = examState
       ? confidenceByQuestion[questionUid]
-      : (attempt?.confidence ?? confidenceByQuestion[questionUid]);
+      : (attempt?.confidence ??
+        (attempt?.mark_decision === 'MARK'
+          ? 'high'
+          : attempt?.mark_decision === 'FIFTY_FIFTY'
+            ? 'medium'
+            : null) ??
+        confidenceByQuestion[questionUid]);
     const recordedConfidence =
       rawConfidence === 'high' || rawConfidence === 'medium' || rawConfidence === 'low'
         ? rawConfidence

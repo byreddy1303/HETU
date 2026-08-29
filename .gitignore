@@ -21,6 +21,7 @@ test-results
 
 # Machine-local official/legacy GATE paper downloads (URLs + checksums are tracked)
 /references/gate-papers/pdfs/
+tmp/
 
 # Native build outputs and machine-local Android configuration
 android/.gradle

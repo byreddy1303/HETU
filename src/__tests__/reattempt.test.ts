@@ -90,7 +90,9 @@ describe('evaluateLoggedReattemptAnswer', () => {
   it('checks MCQ and MSQ keys without depending on choice order', () => {
     expect(evaluateLoggedReattemptAnswer('MCQ', 'B', 'Answer key: b', 'MARK')).toBe(true);
     expect(evaluateLoggedReattemptAnswer('MCQ', 'A', 'B', 'MARK')).toBe(false);
+    expect(evaluateLoggedReattemptAnswer('MCQ', 'E', 'Answer key: E', 'MARK')).toBe(true);
     expect(evaluateLoggedReattemptAnswer('MSQ', ['C', 'A'], 'A, C', 'MARK')).toBe(true);
+    expect(evaluateLoggedReattemptAnswer('MSQ', ['E', 'B'], 'B, E', 'MARK')).toBe(true);
   });
 
   it('checks exact NAT values and treats a skipped answer as incorrect', () => {

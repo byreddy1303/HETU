@@ -16,13 +16,14 @@ function safeEval(expr: string): number {
   const transformed = expr
     .replace(/×/g, '*')
     .replace(/÷/g, '/')
-    .replace(/\^/g, '**')          // display uses ^, JS uses **
-    .replace(/π/g, String(Math.PI))
-    // Replace standalone 'e' (Euler's number) — not followed by a digit (scientific notation)
-    // and not preceded by a digit followed by nothing (handled by lookahead below)
-    .replace(/(?<![0-9])e(?![0-9+\-])/g, String(Math.E));
+    .replace(/\s*mod\s*/g, '%')
+    .replace(/\^/g, '**') // display uses ^, JS uses **
+    .replace(/π/g, `(${Math.PI})`)
+    .replace(/(?<![0-9])e(?![0-9+-])/g, `(${Math.E})`)
+    // Implicit multiplication: 5(2+3) -> 5*(2+3), (2)(3) -> (2)*(3)
+    .replace(/([0-9e)])\s*\(/g, '$1*(')
+    .replace(/\)\s*([0-9e(])/g, ')*$1');
 
-  // eslint-disable-next-line no-new-func
   const result = Function('"use strict"; return (' + transformed + ')')() as number;
   if (typeof result !== 'number') throw new Error('Not a number');
   return result;
@@ -30,6 +31,8 @@ function safeEval(expr: string): number {
 
 function formatResult(n: number): string {
   if (!Number.isFinite(n) || Number.isNaN(n)) return 'Error';
+  // Round near-zero precision artifacts (e.g. sin(180 deg) or cos(90 deg))
+  if (Math.abs(n) < 1e-12) return '0';
   const s = parseFloat(n.toPrecision(10)).toString();
   return s;
 }
@@ -41,11 +44,11 @@ function formatResult(n: number): string {
 type AngleMode = 'DEG' | 'RAD';
 
 interface CalcState {
-  display: string;       // what the user sees (uses ^ for power, ÷ ×)
+  display: string; // what the user sees (uses ^ for power, ÷ ×, mod)
   angleMode: AngleMode;
   memory: number;
   justEvaluated: boolean; // after = or a unary fn, next digit starts fresh
-  isShift: boolean;       // 2nd / shift mode (for inverses)
+  isShift: boolean; // 2nd / shift mode (for inverses)
   error: boolean;
 }
 
@@ -58,11 +61,7 @@ const INIT: CalcState = {
   error: false
 };
 
-const OPERATORS = ['+', '-', '×', '÷', '^'];
-
-function endsWithOperator(s: string): boolean {
-  return OPERATORS.some((op) => s.endsWith(op));
-}
+const OPERATORS = ['+', '-', '×', '÷', '^', ' mod '];
 
 /* ─────────────────────────────────────────────────────────────
    Calculator logic
@@ -98,26 +97,32 @@ function processKey(state: CalcState, key: string): CalcState {
   const append = (token: string): CalcState => {
     if (state.error) {
       // After an error, any input starts fresh
-      if (/[0-9]/.test(token)) return { ...state, display: token, error: false };
+      if (/[0-9πe(]/.test(token)) return { ...state, display: token, error: false };
       return state;
     }
     // After = or a unary result: a digit/constant starts a new expression
-    if (justEvaluated && /[0-9π(]/.test(token)) {
+    if (justEvaluated && /[0-9πe(]/.test(token)) {
       return { ...state, display: token, justEvaluated: false };
     }
-    // Replace leading zero only for plain digits
+    // Replace leading zero only for plain digits, open paren, or constants
+    const isLeadingZero = display === '0';
     const next =
-      display === '0' && /^[0-9]$/.test(token) ? token : display + token;
+      isLeadingZero && (/^[0-9]$/.test(token) || token === '(' || token === 'π' || token === 'e')
+        ? token
+        : display + token;
     return { ...state, display: next, justEvaluated: false, error: false };
   };
 
-  /** Append an infix operator (+, -, ×, ÷, ^). */
+  /** Append an infix operator (+, -, ×, ÷, ^, mod). */
   const appendOp = (op: string): CalcState => {
     if (state.error) return state;
     let base = display;
     // If the display already ends with an operator, replace it
-    if (endsWithOperator(base)) {
-      base = base.slice(0, -1);
+    for (const o of OPERATORS) {
+      if (base.endsWith(o)) {
+        base = base.slice(0, -o.length);
+        break;
+      }
     }
     return { ...state, display: base + op, justEvaluated: false };
   };
@@ -139,7 +144,7 @@ function processKey(state: CalcState, key: string): CalcState {
       if (state.error) return state;
       if (justEvaluated) return { ...state, display: '0.', justEvaluated: false };
       // Only add a dot if the current number segment doesn't already have one
-      const lastSegment = display.split(/[+\-×÷^(]/).pop() ?? '';
+      const lastSegment = display.split(/[+\-×÷^()]|\smod\s/).pop() ?? '';
       if (lastSegment.includes('.')) return state;
       return { ...state, display: display + '.', justEvaluated: false };
     }
@@ -149,7 +154,8 @@ function processKey(state: CalcState, key: string): CalcState {
     case '-': return appendOp('-');
     case '×': return appendOp('×');
     case '÷': return appendOp('÷');
-    case '^': return appendOp('^');    // xʸ maps to this
+    case '^': return appendOp('^');
+    case 'mod': return appendOp(' mod ');
 
     /* ── Parentheses ── */
     case '(': return append('(');
@@ -157,6 +163,17 @@ function processKey(state: CalcState, key: string): CalcState {
 
     /* ── Percent ── */
     case '%': return applyUnary((v) => v / 100);
+
+    /* ── Sign toggle (±) ── */
+    case '±': {
+      if (state.error) return state;
+      if (/^-?[0-9]+(\.[0-9]+)?$/.test(display)) {
+        if (display === '0') return state;
+        const toggled = display.startsWith('-') ? display.slice(1) : '-' + display;
+        return { ...state, display: toggled };
+      }
+      return applyUnary((v) => -v);
+    }
 
     /* ── Constants ── */
     case 'π': return append('π');
@@ -180,6 +197,10 @@ function processKey(state: CalcState, key: string): CalcState {
       return { ...INIT, angleMode, memory };
     case 'DEL': {
       if (justEvaluated || display === '0') return { ...state, display: '0', justEvaluated: false };
+      if (display.endsWith(' mod ')) {
+        const next = display.slice(0, -5);
+        return { ...state, display: next.length > 0 ? next : '0' };
+      }
       const next = display.length > 1 ? display.slice(0, -1) : '0';
       return { ...state, display: next };
     }
@@ -214,16 +235,33 @@ function processKey(state: CalcState, key: string): CalcState {
       return isShift
         ? applyUnary((v) => Math.exp(v))
         : applyUnary((v) => Math.log(v));
+    case '10ˣ':
+      return isShift
+        ? applyUnary((v) => Math.log10(v))
+        : applyUnary((v) => Math.pow(10, v));
+    case 'eˣ':
+      return isShift
+        ? applyUnary((v) => Math.log(v))
+        : applyUnary((v) => Math.exp(v));
 
     /* ── Powers / roots ── */
-    case 'x²': return applyUnary((v) => v * v);
-    case 'x³': return applyUnary((v) => v * v * v);
-    case 'xʸ': return appendOp('^');   // enter base, press xʸ, enter exponent, press =
+    case 'x²':
+      return isShift
+        ? applyUnary((v) => Math.sqrt(v))
+        : applyUnary((v) => v * v);
+    case 'x³':
+      return isShift
+        ? applyUnary((v) => Math.cbrt(v))
+        : applyUnary((v) => v * v * v);
+    case 'xʸ': return appendOp('^');
     case '√':
       return isShift
         ? applyUnary((v) => v * v)
         : applyUnary((v) => Math.sqrt(v));
-    case '∛': return applyUnary((v) => Math.cbrt(v));
+    case '∛':
+      return isShift
+        ? applyUnary((v) => v * v * v)
+        : applyUnary((v) => Math.cbrt(v));
     case '1/x': return applyUnary((v) => 1 / v);
     case '|x|': return applyUnary((v) => Math.abs(v));
     case 'n!':
@@ -256,7 +294,7 @@ function processKey(state: CalcState, key: string): CalcState {
 }
 
 /* ─────────────────────────────────────────────────────────────
-   Button layout
+   Button definitions & layout
    ────────────────────────────────────────────────────────────── */
 
 type BtnVariant = 'digit' | 'op' | 'fn' | 'eq' | 'clear' | 'mem' | 'shift';
@@ -266,85 +304,93 @@ interface BtnDef {
   label?: string;
   shiftLabel?: string;
   variant: BtnVariant;
-  span?: number; // flex grow factor (default 1)
 }
 
-// Each row MUST have the same total span = 8 so columns stay aligned.
-const BUTTONS: BtnDef[][] = [
-  // Row 1 — 8 equal cols
-  [
-    { key: 'SHIFT',  label: '2nd', variant: 'shift' },
-    { key: 'DEG',   variant: 'fn' },
-    { key: 'RAD',   variant: 'fn' },
-    { key: 'MC',    variant: 'mem' },
-    { key: 'MR',    variant: 'mem' },
-    { key: 'MS',    variant: 'mem' },
-    { key: 'M+',    variant: 'mem' },
-    { key: 'M-',    variant: 'mem' }
-  ],
-  // Row 2 — 8 trig/fn cols
-  [
-    { key: 'sin',  shiftLabel: 'sin⁻¹', variant: 'fn' },
-    { key: 'cos',  shiftLabel: 'cos⁻¹', variant: 'fn' },
-    { key: 'tan',  shiftLabel: 'tan⁻¹', variant: 'fn' },
-    { key: 'log',  shiftLabel: '10ˣ',   variant: 'fn' },
-    { key: 'ln',   shiftLabel: 'eˣ',    variant: 'fn' },
-    { key: 'n!',   variant: 'fn' },
-    { key: '|x|',  variant: 'fn' },
-    { key: '1/x',  variant: 'fn' }
-  ],
-  // Row 3 — 8 power/constant cols
-  [
-    { key: 'x²',  variant: 'fn' },
-    { key: 'x³',  variant: 'fn' },
-    { key: 'xʸ',  shiftLabel: 'xʸ', variant: 'fn' },
-    { key: '√',   shiftLabel: 'x²', variant: 'fn' },
-    { key: '∛',   variant: 'fn' },
-    { key: 'π',   variant: 'fn' },
-    { key: 'e',   variant: 'fn' },
-    { key: '%',   variant: 'fn' }
-  ],
-  // Row 4 — parens + clear + operators (8 cols)
-  [
-    { key: '(',   variant: 'op' },
-    { key: ')',   variant: 'op' },
-    { key: 'AC',  variant: 'clear' },
-    { key: 'DEL', label: '⌫', variant: 'clear' },
-    { key: '÷',   variant: 'op' },
-    { key: '×',   variant: 'op' },
-    { key: '-',   variant: 'op' },
-    { key: '+',   variant: 'op' }
-  ],
-  // Row 5 — 7 8 9 | 4 5 6 | 1 2  (8 cols)
-  [
-    { key: '7', variant: 'digit' },
-    { key: '8', variant: 'digit' },
-    { key: '9', variant: 'digit' },
-    { key: '4', variant: 'digit' },
-    { key: '5', variant: 'digit' },
-    { key: '6', variant: 'digit' },
-    { key: '1', variant: 'digit' },
-    { key: '2', variant: 'digit' }
-  ],
-  // Row 6 — 3(1) + 0(2) + .(1) + =(2) + 3 = 8 … but 4 items × flex = wrong
-  // FIX: use span to make total = 8: 3=1, 0=2, .=1, =3 → 1+2+1+3=7 ✗
-  // Better: give = span 2 and 0 span 2 → 1+2+1+2=6, add 2 more: keep explicit widths
-  // SOLUTION: 8 cols = 3(1) + 0(3) + .(1) + =(3) → 1+3+1+3=8 ✓
-  [
-    { key: '3', variant: 'digit', span: 1 },
-    { key: '0', variant: 'digit', span: 3 },
-    { key: '.', variant: 'digit', span: 1 },
-    { key: '=', variant: 'eq',    span: 3 }
-  ]
+// Mode and memory controls (Top bar: 8 cols)
+const TOP_ROW_BUTTONS: BtnDef[] = [
+  { key: 'SHIFT', label: '2nd', variant: 'shift' },
+  { key: 'DEG', variant: 'fn' },
+  { key: 'RAD', variant: 'fn' },
+  { key: 'MC', variant: 'mem' },
+  { key: 'MR', variant: 'mem' },
+  { key: 'MS', variant: 'mem' },
+  { key: 'M+', variant: 'mem' },
+  { key: 'M-', variant: 'mem' }
+];
+
+// Scientific math functions (Left section: 4 cols x 5 rows)
+const SCIENTIFIC_BUTTONS: BtnDef[] = [
+  // Row 1: Trig + Pi
+  { key: 'sin', shiftLabel: 'sin⁻¹', variant: 'fn' },
+  { key: 'cos', shiftLabel: 'cos⁻¹', variant: 'fn' },
+  { key: 'tan', shiftLabel: 'tan⁻¹', variant: 'fn' },
+  { key: 'π', variant: 'fn' },
+
+  // Row 2: Logs & Constants
+  { key: 'ln', shiftLabel: 'eˣ', variant: 'fn' },
+  { key: 'log', shiftLabel: '10ˣ', variant: 'fn' },
+  { key: 'e', variant: 'fn' },
+  { key: '%', variant: 'fn' },
+
+  // Row 3: Powers & Square roots
+  { key: 'x²', shiftLabel: '√', variant: 'fn' },
+  { key: 'x³', shiftLabel: '∛', variant: 'fn' },
+  { key: 'xʸ', variant: 'fn' },
+  { key: '√', shiftLabel: 'x²', variant: 'fn' },
+
+  // Row 4: Roots, reciprocal, abs, factorial
+  { key: '∛', shiftLabel: 'x³', variant: 'fn' },
+  { key: '1/x', variant: 'fn' },
+  { key: '|x|', variant: 'fn' },
+  { key: 'n!', variant: 'fn' },
+
+  // Row 5: Sign, exponents, mod
+  { key: '±', variant: 'fn' },
+  { key: '10ˣ', shiftLabel: 'log', variant: 'fn' },
+  { key: 'eˣ', shiftLabel: 'ln', variant: 'fn' },
+  { key: 'mod', variant: 'fn' }
+];
+
+// Number pad & basic operators (Right section: 4 cols x 5 rows)
+const NUMERIC_BUTTONS: BtnDef[] = [
+  // Row 1: Parentheses and clear/delete
+  { key: '(', variant: 'op' },
+  { key: ')', variant: 'op' },
+  { key: 'AC', variant: 'clear' },
+  { key: 'DEL', label: '⌫', variant: 'clear' },
+
+  // Row 2: 7 8 9 ÷
+  { key: '7', variant: 'digit' },
+  { key: '8', variant: 'digit' },
+  { key: '9', variant: 'digit' },
+  { key: '÷', variant: 'op' },
+
+  // Row 3: 4 5 6 ×
+  { key: '4', variant: 'digit' },
+  { key: '5', variant: 'digit' },
+  { key: '6', variant: 'digit' },
+  { key: '×', variant: 'op' },
+
+  // Row 4: 1 2 3 -
+  { key: '1', variant: 'digit' },
+  { key: '2', variant: 'digit' },
+  { key: '3', variant: 'digit' },
+  { key: '-', variant: 'op' },
+
+  // Row 5: 0 . + =
+  { key: '0', variant: 'digit' },
+  { key: '.', variant: 'digit' },
+  { key: '+', variant: 'op' },
+  { key: '=', variant: 'eq' }
 ];
 
 const VARIANT_CLASSES: Record<BtnVariant, string> = {
-  digit: 'bg-bg-raised border-border text-text hover:bg-bg-overlay hover:border-border-hover font-mono text-[14px] font-semibold',
-  op:    'bg-accent-faint border-accent/30 text-accent hover:bg-accent/20 font-semibold text-[15px]',
-  fn:    'bg-bg-overlay border-border text-text-muted hover:bg-bg-raised hover:text-text text-[11px] font-medium',
-  eq:    'bg-accent border-accent text-accent-contrast hover:opacity-90 font-bold text-[16px]',
-  clear: 'bg-danger-faint border-danger/30 text-danger hover:bg-danger/20 font-semibold text-[12px]',
-  mem:   'bg-guess-faint border-guess/30 text-guess hover:bg-guess/20 text-[10.5px] font-medium',
+  digit: 'bg-bg-raised border-border text-text hover:bg-bg-overlay hover:border-border-hover font-mono text-[15px] font-semibold',
+  op: 'bg-accent-faint border-accent/30 text-accent hover:bg-accent/20 font-semibold text-[15px]',
+  fn: 'bg-bg-overlay border-border text-text-muted hover:bg-bg-raised hover:text-text text-[12px] font-medium',
+  eq: 'bg-accent border-accent text-accent-contrast hover:opacity-90 font-bold text-[16px] shadow-sm',
+  clear: 'bg-danger-faint border-danger/30 text-danger hover:bg-danger/20 font-semibold text-[12.5px]',
+  mem: 'bg-guess-faint border-guess/30 text-guess hover:bg-guess/20 text-[11px] font-medium',
   shift: 'border font-semibold text-[11px]'
 };
 
@@ -372,10 +418,10 @@ export default function ScientificCalculator({ open, onClose }: ScientificCalcul
   // Set initial position once
   useEffect(() => {
     if (open && pos === null) {
-      setPos({
-        x: Math.max(8, window.innerWidth - 416),
-        y: Math.max(8, Math.round((window.innerHeight - 580) / 2))
-      });
+      const calcW = Math.min(460, window.innerWidth - 16);
+      const initialX = Math.max(8, window.innerWidth > 600 ? window.innerWidth - 476 : Math.round((window.innerWidth - calcW) / 2));
+      const initialY = Math.max(8, Math.round((window.innerHeight - 440) / 2));
+      setPos({ x: initialX, y: initialY });
     }
   }, [open, pos]);
 
@@ -393,8 +439,8 @@ export default function ScientificCalculator({ open, onClose }: ScientificCalcul
         '0': '0', '1': '1', '2': '2', '3': '3', '4': '4',
         '5': '5', '6': '6', '7': '7', '8': '8', '9': '9',
         '.': '.', '+': '+', '-': '-', '*': '×', '/': '÷',
-        '^': '^', Enter: '=', '=': '=', Backspace: 'DEL', Delete: 'AC',
-        '(': '(', ')': ')'
+        '^': '^', '%': '%', Enter: '=', '=': '=', Backspace: 'DEL', Delete: 'AC',
+        Escape: 'AC', '(': '(', ')': ')'
       };
       if (map[e.key]) {
         e.preventDefault();
@@ -416,9 +462,11 @@ export default function ScientificCalculator({ open, onClose }: ScientificCalcul
 
     const move = (me: MouseEvent) => {
       if (!dragState.current.active) return;
+      const maxX = Math.max(0, window.innerWidth - 280);
+      const maxY = Math.max(0, window.innerHeight - 80);
       setPos({
-        x: Math.max(0, Math.min(me.clientX - dragState.current.ox, window.innerWidth - 408)),
-        y: Math.max(0, Math.min(me.clientY - dragState.current.oy, window.innerHeight - 80))
+        x: Math.max(0, Math.min(me.clientX - dragState.current.ox, maxX)),
+        y: Math.max(0, Math.min(me.clientY - dragState.current.oy, maxY))
       });
     };
 
@@ -444,11 +492,11 @@ export default function ScientificCalculator({ open, onClose }: ScientificCalcul
       aria-label="Scientific calculator"
       aria-modal="false"
       style={{ position: 'fixed', left: pos.x, top: pos.y, zIndex: 70 }}
-      className="w-[400px] rounded-xl border border-border bg-bg-raised shadow-lift select-none"
+      className="w-[460px] max-w-[calc(100vw-16px)] rounded-xl border border-border bg-bg-raised shadow-lift select-none overflow-hidden"
     >
       {/* ── Drag handle / header ── */}
       <div
-        className="flex cursor-grab items-center justify-between gap-2 rounded-t-xl border-b border-border bg-bg-overlay/60 px-3 py-2 active:cursor-grabbing"
+        className="flex cursor-grab items-center justify-between gap-2 border-b border-border bg-bg-overlay/60 px-3 py-2 active:cursor-grabbing"
         onMouseDown={startDrag}
       >
         <div className="flex items-center gap-1.5 text-text-muted pointer-events-none">
@@ -489,10 +537,10 @@ export default function ScientificCalculator({ open, onClose }: ScientificCalcul
       </div>
 
       {/* ── Display ── */}
-      <div className="bg-bg px-4 py-3 border-b border-border">
+      <div className="bg-bg px-4 py-2.5 border-b border-border">
         <div
           className={cn(
-            'min-h-[34px] break-all text-right font-mono text-[22px] font-semibold leading-tight',
+            'min-h-[34px] break-all text-right font-mono text-[22px] font-semibold leading-tight tracking-tight',
             calc.error ? 'text-danger' : 'text-text'
           )}
           aria-live="polite"
@@ -501,54 +549,101 @@ export default function ScientificCalculator({ open, onClose }: ScientificCalcul
         >
           {displayText}
         </div>
-        <div className="mt-0.5 h-3.5 text-right font-mono text-[11px] text-text-faint">
-          {calc.isShift ? '2nd functions active' : ''}
+        <div className="mt-0.5 flex items-center justify-between text-right font-mono text-[11px] text-text-faint">
+          <span>{calc.memory !== 0 ? `M = ${formatResult(calc.memory)}` : ''}</span>
+          <span>{calc.isShift ? '2nd mode active' : ''}</span>
         </div>
       </div>
 
-      {/* ── Buttons ── */}
-      <div className="flex flex-col gap-1 p-2">
-        {BUTTONS.map((row, ri) => (
-          <div key={ri} className="flex gap-1">
-            {row.map((btn) => {
-              const span = btn.span ?? 1;
-              const isDegActive = btn.key === 'DEG' && calc.angleMode === 'DEG';
-              const isRadActive = btn.key === 'RAD' && calc.angleMode === 'RAD';
-              const isShiftActive = btn.key === 'SHIFT' && calc.isShift;
-              const isActive = isDegActive || isRadActive || isShiftActive;
+      {/* ── Top bar: Mode & Memory (8 cols) ── */}
+      <div className="grid grid-cols-8 gap-1 border-b border-border/60 bg-bg-overlay/30 p-2">
+        {TOP_ROW_BUTTONS.map((btn) => {
+          const isDegActive = btn.key === 'DEG' && calc.angleMode === 'DEG';
+          const isRadActive = btn.key === 'RAD' && calc.angleMode === 'RAD';
+          const isShiftActive = btn.key === 'SHIFT' && calc.isShift;
+          const isActive = isDegActive || isRadActive || isShiftActive;
+          const label = btn.label ?? btn.key;
 
-              const label =
-                calc.isShift && btn.shiftLabel ? btn.shiftLabel : (btn.label ?? btn.key);
+          return (
+            <button
+              key={btn.key}
+              type="button"
+              onClick={() => press(btn.key)}
+              aria-label={label}
+              aria-pressed={
+                btn.key === 'SHIFT' || btn.key === 'DEG' || btn.key === 'RAD'
+                  ? isActive
+                  : undefined
+              }
+              className={cn(
+                'flex h-7 items-center justify-center rounded border transition-all active:scale-95 text-[10.5px]',
+                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent',
+                btn.variant === 'shift'
+                  ? isActive
+                    ? 'border-accent bg-accent text-accent-contrast font-bold shadow-sm'
+                    : 'border-border bg-bg-overlay text-text-muted hover:bg-bg-raised hover:text-text font-semibold'
+                  : btn.variant === 'mem'
+                  ? VARIANT_CLASSES.mem
+                  : isActive
+                  ? 'border-accent bg-accent-faint text-accent font-bold ring-1 ring-accent'
+                  : VARIANT_CLASSES.fn
+              )}
+            >
+              {label}
+            </button>
+          );
+        })}
+      </div>
 
-              return (
-                <button
-                  key={btn.key}
-                  type="button"
-                  onClick={() => press(btn.key)}
-                  aria-label={label}
-                  aria-pressed={
-                    btn.key === 'SHIFT' || btn.key === 'DEG' || btn.key === 'RAD'
-                      ? isActive
-                      : undefined
-                  }
-                  style={{ flex: span }}
-                  className={cn(
-                    'rounded border py-2 transition-all active:scale-95',
-                    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent',
-                    btn.variant === 'shift'
-                      ? isActive
-                        ? 'border-accent bg-accent text-accent-contrast'
-                        : 'border-border bg-bg-overlay text-text-muted hover:bg-bg-raised hover:text-text'
-                      : VARIANT_CLASSES[btn.variant],
-                    (isDegActive || isRadActive) && 'ring-1 ring-accent'
-                  )}
-                >
-                  {label}
-                </button>
-              );
-            })}
-          </div>
-        ))}
+      {/* ── Main Keypad Area: Scientific (Left) + Numeric (Right) ── */}
+      <div className="flex gap-2 p-2">
+        {/* Scientific Functions Panel (4 cols x 5 rows) */}
+        <div className="grid flex-1 grid-cols-4 gap-1">
+          {SCIENTIFIC_BUTTONS.map((btn) => {
+            const label =
+              calc.isShift && btn.shiftLabel ? btn.shiftLabel : (btn.label ?? btn.key);
+            return (
+              <button
+                key={btn.key}
+                type="button"
+                onClick={() => press(btn.key)}
+                aria-label={label}
+                className={cn(
+                  'flex h-9 items-center justify-center rounded border transition-all active:scale-95',
+                  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent',
+                  VARIANT_CLASSES[btn.variant]
+                )}
+              >
+                {label}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Divider */}
+        <div className="w-[1px] self-stretch bg-border/60 my-0.5" />
+
+        {/* Numeric & Basic Arithmetic Panel (4 cols x 5 rows) */}
+        <div className="grid flex-1 grid-cols-4 gap-1">
+          {NUMERIC_BUTTONS.map((btn) => {
+            const label = btn.label ?? btn.key;
+            return (
+              <button
+                key={btn.key}
+                type="button"
+                onClick={() => press(btn.key)}
+                aria-label={label}
+                className={cn(
+                  'flex h-9 items-center justify-center rounded border transition-all active:scale-95',
+                  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent',
+                  VARIANT_CLASSES[btn.variant]
+                )}
+              >
+                {label}
+              </button>
+            );
+          })}
+        </div>
       </div>
     </div>
   );
@@ -586,3 +681,4 @@ export function CalculatorTrigger({
     </button>
   );
 }
+

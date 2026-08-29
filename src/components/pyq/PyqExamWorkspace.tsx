@@ -209,6 +209,7 @@ function ResponsePad({
   onConfidence?: (confidence: PyqExamConfidence) => void;
 }) {
   const inputType = answerInputType(question);
+  const answerChoices = question.choices?.length ? question.choices : ANSWER_CHOICES;
   const statusTone =
     status === 'answered'
       ? 'success'
@@ -258,8 +259,15 @@ function ResponsePad({
                 ? 'Multiple selections are allowed for this question.'
                 : 'Choosing another option replaces your current response.'}
             </p>
-            <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
-              {ANSWER_CHOICES.map((choice) => {
+            <div
+              className={cn(
+                'mt-3 grid gap-2',
+                answerChoices.length > 4
+                  ? 'grid-cols-2 sm:grid-cols-5'
+                  : 'grid-cols-2 sm:grid-cols-4'
+              )}
+            >
+              {answerChoices.map((choice) => {
                 const selected = choices.includes(choice);
                 return (
                   <label

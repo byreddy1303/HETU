@@ -67,9 +67,9 @@ function savedChoiceKey(value: PyqSelectedAnswer): string[] {
   if (Array.isArray(value)) return normalizedChoices(value);
   if (value == null) return [];
   const answer = stripAnswerLabel(String(value)).toUpperCase();
-  const exact = answer.match(/^\(?([A-D])\)?[.)]?$/);
+  const exact = answer.match(/^\(?([A-E])\)?[.)]?$/);
   if (exact) return [exact[1]];
-  if (/^[A-D](?:\s*[,/&+]\s*[A-D])+$/i.test(answer)) {
+  if (/^[A-E](?:\s*[,/&+]\s*[A-E])+$/i.test(answer)) {
     return answer.split(/\s*[,/&+]\s*/).sort();
   }
   return [];

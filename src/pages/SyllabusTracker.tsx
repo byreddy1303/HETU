@@ -8,10 +8,9 @@ import { Input } from '@/components/ui/Input';
 import { Progress } from '@/components/ui/Progress';
 import { useAuth } from '@/hooks/useAuth';
 import { SUBJECTS } from '@/lib/constants';
-import { GATE_2027_REGISTRY_VERSION } from '@/lib/gate-2027';
 import { haptic } from '@/lib/native';
 import { subjectInk } from '@/lib/subjectInk';
-import { official2027TopicsFor, type Official2027TopicSpec } from '@/lib/subtopics';
+import { SUBTOPICS_BY_SUBJECT } from '@/lib/subtopics';
 import { cn, formatDate, plural } from '@/lib/utils';
 import { todayISOInTimeZone } from '@/lib/utils';
 import { db } from '@/lib/db';
@@ -36,27 +35,10 @@ type Subject = (typeof SUBJECTS)[number];
 
 interface SubjectSummary {
   subject: Subject;
-  topics: Official2027TopicSpec[];
+  topics: string[];
   completed: number;
   percent: number;
   status: Exclude<SubjectFilter, 'all'>;
-}
-
-function completionIdsFor(topic: Official2027TopicSpec): string[] {
-  return [
-    ...new Set(topic.completionAliases.map((alias) => topicProgressId(alias.subject, alias.topic)))
-  ];
-}
-
-function completedAtFor(
-  completions: TopicCompletions,
-  topic: Official2027TopicSpec
-): string | undefined {
-  return completionIdsFor(topic)
-    .map((id) => completions[id])
-    .filter((completedAt): completedAt is string => Boolean(completedAt))
-    .sort()
-    .at(-1);
 }
 
 const FILTERS: { value: SubjectFilter; label: string }[] = [
@@ -77,8 +59,10 @@ const ORBIT_COLORS = [
 
 function summariesFor(completions: TopicCompletions): SubjectSummary[] {
   return SUBJECTS.map((subject) => {
-    const topics = official2027TopicsFor(subject);
-    const completed = topics.filter((topic) => completedAtFor(completions, topic)).length;
+    const topics = (SUBTOPICS_BY_SUBJECT[subject] ?? []).map((topic) => topic.value);
+    const completed = topics.filter(
+      (topic) => completions[topicProgressId(subject, topic)]
+    ).length;
     const percent = topics.length ? Math.round((completed / topics.length) * 100) : 0;
     const status =
       completed === topics.length ? 'complete' : completed > 0 ? 'in-progress' : 'not-started';
@@ -89,11 +73,13 @@ function summariesFor(completions: TopicCompletions): SubjectSummary[] {
 function nextTopicFrom(
   summaries: SubjectSummary[],
   completions: TopicCompletions
-): { subject: Subject; topic: Official2027TopicSpec } | null {
+): { subject: Subject; topic: string } | null {
   const active = summaries.find((summary) => summary.status === 'in-progress');
   const subject = active ?? summaries.find((summary) => summary.status === 'not-started');
   if (!subject) return null;
-  const topic = subject.topics.find((candidate) => !completedAtFor(completions, candidate));
+  const topic = subject.topics.find(
+    (candidate) => !completions[topicProgressId(subject.subject, candidate)]
+  );
   if (!topic) return null;
   return {
     subject: subject.subject,
@@ -153,27 +139,26 @@ export default function SyllabusTracker() {
   const evidenceByTopic = useMemo(() => {
     const map = new Map<string, TopicEvidence>();
     for (const subject of SUBJECTS) {
-      for (const topic of official2027TopicsFor(subject)) {
+      const topics = SUBTOPICS_BY_SUBJECT[subject] ?? [];
+      for (const topic of topics) {
         const id = topicProgressId(subject, topic.value);
         map.set(
           id,
           buildTopicEvidence({
             subject,
             topic: topic.value,
-            studiedAt: completedAtFor(completions, topic) ?? null,
+            studiedAt: completions[id] ?? null,
             questions,
             attempts,
             reattempts,
-            today,
-            topicAliases: topic.evidenceAliases,
-            bankTopicKeys: topic.evidenceBankTopicKeys,
-            allowStrong: topic.bankCoverage === 'explicit'
+            today
           })
         );
       }
     }
     return map;
   }, [attempts, completions, questions, reattempts, today]);
+
   const nextTopic = useMemo(() => nextTopicFrom(summaries, completions), [summaries, completions]);
   const [query, setQuery] = useState('');
   const [filter, setFilter] = useState<SubjectFilter>('all');
@@ -186,14 +171,16 @@ export default function SyllabusTracker() {
   const overallPercent = totalTopics ? Math.round((totalCompleted / totalTopics) * 100) : 0;
   const completedSubjects = summaries.filter((summary) => summary.status === 'complete').length;
   const normalizedQuery = query.trim().toLocaleLowerCase();
+
   const visibleSummaries = summaries.filter((summary) => {
     const matchesFilter = filter === 'all' || summary.status === filter;
     const matchesQuery =
       !normalizedQuery ||
       summary.subject.toLocaleLowerCase().includes(normalizedQuery) ||
-      summary.topics.some((topic) => topic.value.toLocaleLowerCase().includes(normalizedQuery));
+      summary.topics.some((topic) => topic.toLocaleLowerCase().includes(normalizedQuery));
     return matchesFilter && matchesQuery;
   });
+
   const matchingTopicCount = normalizedQuery
     ? visibleSummaries.reduce(
         (sum, summary) =>
@@ -201,16 +188,17 @@ export default function SyllabusTracker() {
           summary.topics.filter(
             (topic) =>
               summary.subject.toLocaleLowerCase().includes(normalizedQuery) ||
-              topic.value.toLocaleLowerCase().includes(normalizedQuery)
+              topic.toLocaleLowerCase().includes(normalizedQuery)
           ).length,
         0
       )
     : null;
+
   const recent = summaries
     .flatMap((summary) =>
       summary.topics.flatMap((topic) => {
-        const completedAt = completedAtFor(completions, topic);
-        return completedAt ? [{ subject: summary.subject, topic: topic.value, completedAt }] : [];
+        const completedAt = completions[topicProgressId(summary.subject, topic)];
+        return completedAt ? [{ subject: summary.subject, topic, completedAt }] : [];
       })
     )
     .sort((left, right) => right.completedAt.localeCompare(left.completedAt))
@@ -225,21 +213,13 @@ export default function SyllabusTracker() {
     });
   }
 
-  async function toggleTopic(topic: Official2027TopicSpec, completed: boolean) {
+  async function toggleTopic(subject: string, topic: string, completed: boolean) {
     if (!effectiveUserId) {
       pushToast('Sign in before changing syllabus progress.', 'neutral');
       return;
     }
     try {
-      if (completed) {
-        await setCompleted(effectiveUserId, topicProgressId(topic.subject, topic.value), true);
-      } else {
-        // completionAliases are globally unique to this official leaf. Shared
-        // legacy/bank labels are intentionally left untouched.
-        await Promise.all(
-          completionIdsFor(topic).map((id) => setCompleted(effectiveUserId, id, false))
-        );
-      }
+      await setCompleted(effectiveUserId, topicProgressId(subject, topic), completed);
       haptic(completed ? 'success' : 'selection');
     } catch (error) {
       pushToast(
@@ -268,7 +248,7 @@ export default function SyllabusTracker() {
     <div className="flex flex-col gap-4">
       <PageHeader
         title="Syllabus tracker"
-        description="Track official GATE 2027 leaves only. Detailed legacy tags still contribute evidence when their mapping is safe; supporting and historical topics do not inflate completion."
+        description="Track topic coverage across the complete GATE CSE syllabus with verified practice evidence."
       />
 
       <section className="relative overflow-hidden rounded-lg border border-border bg-bg-raised shadow-card">
@@ -280,11 +260,10 @@ export default function SyllabusTracker() {
             <div className="flex flex-wrap items-center gap-2">
               <Badge tone={overallPercent === 100 ? 'success' : 'accent'}>
                 {overallPercent === 100 ? <CircleCheckBig size={12} /> : <Target size={12} />}
-                {overallPercent === 100 ? 'Official study pass recorded' : 'Official 2027 scope'}
+                {overallPercent === 100 ? 'Syllabus complete' : 'GATE CSE scope'}
               </Badge>
               <span className="u-num text-[11px] text-text-faint">
-                {completedSubjects}/{SUBJECTS.length} subjects complete ·{' '}
-                {GATE_2027_REGISTRY_VERSION}
+                {completedSubjects}/{SUBJECTS.length} subjects complete
               </span>
             </div>
 
@@ -295,7 +274,7 @@ export default function SyllabusTracker() {
                   Smart next step
                 </p>
                 <h2 className="mt-1 font-display text-xl font-bold tracking-tight text-text">
-                  {nextTopic.topic.value}
+                  {nextTopic.topic}
                 </h2>
                 <p className="mt-0.5 text-[13px] text-text-muted">Continue {nextTopic.subject}</p>
                 <button
@@ -311,7 +290,7 @@ export default function SyllabusTracker() {
               <div className="mt-4">
                 <p className="u-label">First study pass complete</p>
                 <h2 className="mt-1 font-display text-xl font-bold text-success">
-                  Every official leaf is marked studied.
+                  Every topic is marked studied.
                 </h2>
                 <p className="mt-1 text-[13px] text-text-muted">
                   Keep the edge by pairing this with PYQs, re-attempts, and timed mocks.
@@ -351,7 +330,7 @@ export default function SyllabusTracker() {
             <Input
               value={query}
               onChange={(event) => setQuery(event.target.value)}
-              placeholder="Find an official topic or subject…"
+              placeholder="Find a topic or subject…"
               className="pl-9"
               aria-label="Search syllabus topics"
             />
@@ -385,7 +364,7 @@ export default function SyllabusTracker() {
               : `${matchingTopicCount} matching ${plural(matchingTopicCount, 'topic')}`}
           </span>
           <span className="u-num">
-            {totalCompleted}/{totalTopics} official leaves
+            {totalCompleted}/{totalTopics} topics
           </span>
         </div>
       </section>
@@ -396,7 +375,7 @@ export default function SyllabusTracker() {
             ? summary.topics.filter(
                 (topic) =>
                   summary.subject.toLocaleLowerCase().includes(normalizedQuery) ||
-                  topic.value.toLocaleLowerCase().includes(normalizedQuery)
+                  topic.toLocaleLowerCase().includes(normalizedQuery)
               )
             : summary.topics;
           const isOpen = normalizedQuery ? true : openSubjects.has(summary.subject);
@@ -479,7 +458,7 @@ function SyllabusOrbit({ summaries, percent }: { summaries: SubjectSummary[]; pe
         </svg>
         <div className="absolute inset-0 flex flex-col items-center justify-center">
           <span className="u-num text-4xl font-bold leading-none text-text">{percent}%</span>
-          <span className="u-label mt-2">official leaves studied</span>
+          <span className="u-label mt-2">topics studied</span>
         </div>
       </div>
       <p className="-mt-1 text-center text-[11px] leading-relaxed text-text-faint">
@@ -501,12 +480,12 @@ function SubjectLedger({
 }: {
   index: number;
   summary: SubjectSummary;
-  topics: Official2027TopicSpec[];
+  topics: string[];
   completions: TopicCompletions;
   evidence: Map<string, TopicEvidence>;
   open: boolean;
   onToggle: () => void;
-  onTopicChange: (topic: Official2027TopicSpec, completed: boolean) => void;
+  onTopicChange: (subject: string, topic: string, completed: boolean) => void;
 }) {
   const ink = subjectInk(summary.subject);
   return (
@@ -581,13 +560,13 @@ function SubjectLedger({
         <div className="border-t border-border bg-bg/40 p-2 sm:p-3">
           <div className="grid gap-1.5 sm:grid-cols-2">
             {topics.map((topic) => {
-              const id = topicProgressId(summary.subject, topic.value);
-              const completedAt = completedAtFor(completions, topic);
+              const id = topicProgressId(summary.subject, topic);
+              const completedAt = completions[id];
               const completed = Boolean(completedAt);
               const topicEvidence = evidence.get(id);
               return (
                 <label
-                  key={topic.id}
+                  key={topic}
                   className={cn(
                     'group/topic flex min-h-12 cursor-pointer items-start gap-3 rounded border px-3 py-2.5 transition-[border-color,background-color,transform]',
                     completed
@@ -598,7 +577,9 @@ function SubjectLedger({
                   <input
                     type="checkbox"
                     checked={completed}
-                    onChange={(event) => onTopicChange(topic, event.target.checked)}
+                    onChange={(event) =>
+                      onTopicChange(summary.subject, topic, event.target.checked)
+                    }
                     className="peer sr-only"
                   />
                   <span
@@ -619,8 +600,7 @@ function SubjectLedger({
                         completed ? 'text-text-muted' : 'text-text'
                       )}
                     >
-                      <span>{topic.value}</span>
-                      <CoverageHint coverage={topic.bankCoverage} />
+                      {topic}
                     </span>
                     <TopicEvidenceLine evidence={topicEvidence} completedAt={completedAt} />
                   </span>
@@ -631,30 +611,6 @@ function SubjectLedger({
         </div>
       )}
     </section>
-  );
-}
-
-const COVERAGE_HINT = {
-  broad: 'Broad bank mapping',
-  missing: 'No mapped bank topic',
-  'review-required': 'Row review needed'
-} as const;
-
-function CoverageHint({ coverage }: { coverage: Official2027TopicSpec['bankCoverage'] }) {
-  if (coverage === 'explicit') return null;
-  return (
-    <span
-      className="ml-1.5 inline-flex rounded-full bg-bg-overlay px-1.5 py-0.5 align-middle text-[8.5px] font-semibold text-text-faint"
-      title={
-        coverage === 'broad'
-          ? 'The bank topic is broader than this official leaf. It remains a coverage diagnostic and does not automatically count as leaf-level practice or mastery.'
-          : coverage === 'review-required'
-            ? 'Bank rows must be reviewed before they can count as official leaf evidence.'
-            : 'No immutable-bank topic is currently mapped to this official leaf.'
-      }
-    >
-      {COVERAGE_HINT[coverage]}
-    </span>
   );
 }
 

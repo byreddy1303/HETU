@@ -42,7 +42,7 @@ describe('SyllabusTracker UI and SyllabusOrbit chart', () => {
     expect(orbitWrapper).toBeInTheDocument();
 
     // SVG contains 12 interactive segment groups (one per subject)
-    const svg = container.querySelector('svg[viewBox="0 0 160 160"]');
+    const svg = container.querySelector('svg[viewBox="0 0 200 200"]');
     expect(svg).toBeTruthy();
     const segmentGroups = svg!.querySelectorAll('g[role="button"]');
     expect(segmentGroups.length).toBe(12);

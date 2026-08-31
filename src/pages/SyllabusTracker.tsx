@@ -63,20 +63,35 @@ const SUBJECT_INK_COLOR: Record<Subject, string> = {
   'General Aptitude': 'rgb(var(--color-ink-marigold))'
 };
 
-function polarToCartesian(cx: number, cy: number, r: number, angleInDegrees: number) {
-  const radians = ((angleInDegrees - 90) * Math.PI) / 180;
-  return {
-    x: Number((cx + r * Math.cos(radians)).toFixed(3)),
-    y: Number((cy + r * Math.sin(radians)).toFixed(3))
-  };
+/** Convert polar to cartesian for SVG arc commands. */
+function polar(cx: number, cy: number, r: number, deg: number) {
+  const rad = ((deg - 90) * Math.PI) / 180;
+  return { x: cx + r * Math.cos(rad), y: cy + r * Math.sin(rad) };
 }
 
-function describeArc(cx: number, cy: number, r: number, startAngle: number, endAngle: number) {
-  if (endAngle <= startAngle) return '';
-  const start = polarToCartesian(cx, cy, r, startAngle);
-  const end = polarToCartesian(cx, cy, r, endAngle);
-  const arcSweep = endAngle - startAngle <= 180 ? '0' : '1';
-  return `M ${start.x} ${start.y} A ${r} ${r} 0 ${arcSweep} 1 ${end.x} ${end.y}`;
+/** Build an annular wedge (filled donut slice) path from startDeg to endDeg. */
+function donutSlice(
+  cx: number,
+  cy: number,
+  outerR: number,
+  innerR: number,
+  startDeg: number,
+  endDeg: number
+) {
+  const span = endDeg - startDeg;
+  if (span <= 0) return '';
+  const large = span > 180 ? 1 : 0;
+  const oStart = polar(cx, cy, outerR, startDeg);
+  const oEnd = polar(cx, cy, outerR, endDeg);
+  const iStart = polar(cx, cy, innerR, startDeg);
+  const iEnd = polar(cx, cy, innerR, endDeg);
+  return [
+    `M ${oStart.x} ${oStart.y}`,
+    `A ${outerR} ${outerR} 0 ${large} 1 ${oEnd.x} ${oEnd.y}`,
+    `L ${iEnd.x} ${iEnd.y}`,
+    `A ${innerR} ${innerR} 0 ${large} 0 ${iStart.x} ${iStart.y}`,
+    'Z'
+  ].join(' ');
 }
 
 function summariesFor(completions: TopicCompletions): SubjectSummary[] {
@@ -467,48 +482,41 @@ function SyllabusOrbit({
     [summaries, hoveredSubject]
   );
 
-  const cx = 80;
-  const cy = 80;
-  const radius = 58;
-  const strokeWidth = 7.5;
+  const cx = 100;
+  const cy = 100;
+  const outerR = 92;
+  const innerR = 68;
   const n = summaries.length;
-  const step = 360 / Math.max(1, n);
-  const gap = 3.5;
-  const availableSpan = step - gap;
+  const sliceDeg = 360 / Math.max(1, n); // 30° per subject
+  const gapDeg = 1.2; // thin gap between slices
 
   return (
     <div
-      className="mx-auto flex w-[200px] flex-col items-center lg:mx-0"
+      className="mx-auto flex w-[220px] flex-col items-center lg:mx-0"
       aria-label={`${percent}% of syllabus complete`}
     >
-      <div className="relative h-[180px] w-[180px] sm:h-[190px] sm:w-[190px]">
-        <svg viewBox="0 0 160 160" className="h-full w-full select-none" aria-hidden="true">
-          {/* Subtle guide ring behind all segments */}
-          <circle
-            cx={cx}
-            cy={cy}
-            r={radius}
-            fill="none"
-            stroke="currentColor"
-            className="text-border/40"
-            strokeWidth="1"
-            strokeDasharray="2 3"
-          />
-
+      <div className="relative h-[200px] w-[200px]">
+        <svg viewBox="0 0 200 200" className="h-full w-full select-none" aria-hidden="true">
           {summaries.map((summary, index) => {
-            const startAngle = index * step + gap / 2;
-            const endAngle = (index + 1) * step - gap / 2;
-            const baseArcPath = describeArc(cx, cy, radius, startAngle, endAngle);
+            const startDeg = index * sliceDeg + gapDeg / 2;
+            const endDeg = (index + 1) * sliceDeg - gapDeg / 2;
+            const inkColor =
+              SUBJECT_INK_COLOR[summary.subject] ?? 'rgb(var(--color-ink-cobalt))';
             const fraction = summary.topics.length
               ? summary.completed / summary.topics.length
               : 0;
-            const progressEndAngle = startAngle + fraction * availableSpan;
-            const progressArcPath =
-              fraction > 0 ? describeArc(cx, cy, radius, startAngle, progressEndAngle) : '';
+            const spanDeg = endDeg - startDeg;
+            const progressEndDeg = startDeg + fraction * spanDeg;
             const isHovered = hoveredSubject === summary.subject;
-            const inkColor =
-              SUBJECT_INK_COLOR[summary.subject] ?? 'rgb(var(--color-ink-cobalt))';
-            const currentStrokeWidth = isHovered ? strokeWidth + 2.5 : strokeWidth;
+            const isComplete = summary.status === 'complete';
+
+            // Background slice (full segment, faint)
+            const bgPath = donutSlice(cx, cy, outerR, innerR, startDeg, endDeg);
+            // Progress slice (partial fill)
+            const fgPath =
+              fraction > 0
+                ? donutSlice(cx, cy, outerR, innerR, startDeg, progressEndDeg)
+                : '';
 
             return (
               <g
@@ -529,44 +537,37 @@ function SyllabusOrbit({
                   }
                 }}
               >
-                {/* Background Track Segment */}
+                {/* Background wedge */}
                 <path
-                  d={baseArcPath}
-                  fill="none"
-                  stroke={inkColor}
-                  strokeOpacity={isHovered ? 0.35 : 0.16}
-                  strokeWidth={currentStrokeWidth}
-                  strokeLinecap="butt"
-                  className="transition-[stroke-width,stroke-opacity] duration-150"
+                  d={bgPath}
+                  fill={inkColor}
+                  fillOpacity={isHovered ? 0.2 : 0.1}
+                  className="transition-[fill-opacity] duration-150"
                 />
 
-                {/* Active Progress Fill */}
-                {progressArcPath ? (
+                {/* Progress wedge */}
+                {fgPath && (
                   <path
-                    d={progressArcPath}
-                    fill="none"
-                    stroke={
-                      summary.status === 'complete' ? 'rgb(var(--color-success))' : inkColor
-                    }
-                    strokeWidth={currentStrokeWidth}
-                    strokeLinecap="butt"
-                    className="transition-[stroke-width,stroke] duration-150"
+                    d={fgPath}
+                    fill={isComplete ? 'rgb(var(--color-success))' : inkColor}
+                    fillOpacity={isHovered ? 1 : 0.75}
+                    className="transition-[fill-opacity] duration-150"
                   />
-                ) : null}
+                )}
               </g>
             );
           })}
         </svg>
 
         {/* Center Readout */}
-        <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center p-3 text-center">
+        <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center p-6 text-center">
           {hoveredSummary ? (
             <>
               <span className="u-num text-3xl font-bold leading-none tracking-tight text-text">
                 {hoveredSummary.percent}%
               </span>
               <span
-                className="mt-1 line-clamp-1 max-w-[120px] truncate text-[11px] font-semibold text-text"
+                className="mt-1 line-clamp-1 max-w-[110px] truncate text-[11px] font-semibold text-text"
                 title={hoveredSummary.subject}
               >
                 {hoveredSummary.subject}
@@ -601,6 +602,7 @@ function SyllabusOrbit({
     </div>
   );
 }
+
 
 function SubjectLedger({
   index,

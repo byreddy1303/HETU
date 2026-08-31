@@ -48,14 +48,36 @@ const FILTERS: { value: SubjectFilter; label: string }[] = [
   { value: 'complete', label: 'All studied' }
 ];
 
-const ORBIT_COLORS = [
-  'rgb(var(--color-ink-violet))',
-  'rgb(var(--color-ink-cobalt))',
-  'rgb(var(--color-ink-teal))',
-  'rgb(var(--color-ink-slate))',
-  'rgb(var(--color-ink-rose))',
-  'rgb(var(--color-ink-marigold))'
-];
+const SUBJECT_INK_COLOR: Record<Subject, string> = {
+  'Discrete Mathematics': 'rgb(var(--color-ink-violet))',
+  'Engineering Mathematics': 'rgb(var(--color-ink-cobalt))',
+  'Digital Logic': 'rgb(var(--color-ink-teal))',
+  COA: 'rgb(var(--color-ink-slate))',
+  'Programming & DS': 'rgb(var(--color-ink-rose))',
+  Algorithms: 'rgb(var(--color-ink-marigold))',
+  'Theory of Computation': 'rgb(var(--color-ink-violet))',
+  'Compiler Design': 'rgb(var(--color-ink-cobalt))',
+  'Operating Systems': 'rgb(var(--color-ink-teal))',
+  Databases: 'rgb(var(--color-ink-slate))',
+  'Computer Networks': 'rgb(var(--color-ink-rose))',
+  'General Aptitude': 'rgb(var(--color-ink-marigold))'
+};
+
+function polarToCartesian(cx: number, cy: number, r: number, angleInDegrees: number) {
+  const radians = ((angleInDegrees - 90) * Math.PI) / 180;
+  return {
+    x: Number((cx + r * Math.cos(radians)).toFixed(3)),
+    y: Number((cy + r * Math.sin(radians)).toFixed(3))
+  };
+}
+
+function describeArc(cx: number, cy: number, r: number, startAngle: number, endAngle: number) {
+  if (endAngle <= startAngle) return '';
+  const start = polarToCartesian(cx, cy, r, startAngle);
+  const end = polarToCartesian(cx, cy, r, endAngle);
+  const arcSweep = endAngle - startAngle <= 180 ? '0' : '1';
+  return `M ${start.x} ${start.y} A ${r} ${r} 0 ${arcSweep} 1 ${end.x} ${end.y}`;
+}
 
 function summariesFor(completions: TopicCompletions): SubjectSummary[] {
   return SUBJECTS.map((subject) => {
@@ -244,6 +266,18 @@ export default function SyllabusTracker() {
     });
   }
 
+  function handleSelectSubject(subject: Subject) {
+    setOpenSubjects((current) => new Set([...current, subject]));
+    setFilter('all');
+    setQuery('');
+    requestAnimationFrame(() => {
+      document.getElementById(`subject-${SUBJECTS.indexOf(subject)}`)?.scrollIntoView({
+        behavior: reduceMotion ? 'auto' : 'smooth',
+        block: 'start'
+      });
+    });
+  }
+
   return (
     <div className="flex flex-col gap-4">
       <PageHeader
@@ -254,7 +288,13 @@ export default function SyllabusTracker() {
       <section className="relative overflow-hidden rounded-lg border border-border bg-bg-raised shadow-card">
         <div className="absolute inset-x-0 top-0 h-1 bg-[linear-gradient(90deg,rgb(var(--color-ink-violet)),rgb(var(--color-ink-cobalt)),rgb(var(--color-ink-teal)),rgb(var(--color-ink-marigold)))]" />
         <div className="grid gap-5 p-4 sm:p-6 lg:grid-cols-[220px_minmax(0,1fr)] lg:items-center">
-          <SyllabusOrbit summaries={summaries} percent={overallPercent} />
+          <SyllabusOrbit
+            summaries={summaries}
+            percent={overallPercent}
+            totalCompleted={totalCompleted}
+            totalTopics={totalTopics}
+            onSelectSubject={handleSelectSubject}
+          />
 
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
@@ -408,61 +448,155 @@ export default function SyllabusTracker() {
   );
 }
 
-function SyllabusOrbit({ summaries, percent }: { summaries: SubjectSummary[]; percent: number }) {
-  const radius = 54;
-  const segment = 6.45;
-  const step = 100 / summaries.length;
+function SyllabusOrbit({
+  summaries,
+  percent,
+  totalCompleted,
+  totalTopics,
+  onSelectSubject
+}: {
+  summaries: SubjectSummary[];
+  percent: number;
+  totalCompleted: number;
+  totalTopics: number;
+  onSelectSubject?: (subject: Subject) => void;
+}) {
+  const [hoveredSubject, setHoveredSubject] = useState<Subject | null>(null);
+  const hoveredSummary = useMemo(
+    () => summaries.find((s) => s.subject === hoveredSubject) ?? null,
+    [summaries, hoveredSubject]
+  );
+
+  const cx = 80;
+  const cy = 80;
+  const radius = 58;
+  const strokeWidth = 7.5;
+  const n = summaries.length;
+  const step = 360 / Math.max(1, n);
+  const gap = 3.5;
+  const availableSpan = step - gap;
 
   return (
     <div
-      className="mx-auto flex w-[190px] flex-col items-center lg:mx-0"
+      className="mx-auto flex w-[200px] flex-col items-center lg:mx-0"
       aria-label={`${percent}% of syllabus complete`}
     >
-      <div className="relative h-[180px] w-[180px]">
-        <svg viewBox="0 0 128 128" className="h-full w-full -rotate-90" aria-hidden="true">
-          {summaries.map((summary, index) => (
-            <circle
-              key={`base-${summary.subject}`}
-              cx="64"
-              cy="64"
-              r={radius}
-              pathLength="100"
-              fill="none"
-              stroke={ORBIT_COLORS[index % ORBIT_COLORS.length]}
-              strokeOpacity="0.13"
-              strokeWidth="7"
-              strokeLinecap="round"
-              strokeDasharray={`${segment} ${100 - segment}`}
-              strokeDashoffset={-index * step}
-            />
-          ))}
+      <div className="relative h-[180px] w-[180px] sm:h-[190px] sm:w-[190px]">
+        <svg viewBox="0 0 160 160" className="h-full w-full select-none" aria-hidden="true">
+          {/* Subtle guide ring behind all segments */}
+          <circle
+            cx={cx}
+            cy={cy}
+            r={radius}
+            fill="none"
+            stroke="currentColor"
+            className="text-border/40"
+            strokeWidth="1"
+            strokeDasharray="2 3"
+          />
+
           {summaries.map((summary, index) => {
-            const filled = segment * (summary.percent / 100);
-            if (filled === 0) return null;
+            const startAngle = index * step + gap / 2;
+            const endAngle = (index + 1) * step - gap / 2;
+            const baseArcPath = describeArc(cx, cy, radius, startAngle, endAngle);
+            const fraction = summary.topics.length
+              ? summary.completed / summary.topics.length
+              : 0;
+            const progressEndAngle = startAngle + fraction * availableSpan;
+            const progressArcPath =
+              fraction > 0 ? describeArc(cx, cy, radius, startAngle, progressEndAngle) : '';
+            const isHovered = hoveredSubject === summary.subject;
+            const inkColor =
+              SUBJECT_INK_COLOR[summary.subject] ?? 'rgb(var(--color-ink-cobalt))';
+            const currentStrokeWidth = isHovered ? strokeWidth + 2.5 : strokeWidth;
+
             return (
-              <circle
-                key={`fill-${summary.subject}`}
-                cx="64"
-                cy="64"
-                r={radius}
-                pathLength="100"
-                fill="none"
-                stroke={ORBIT_COLORS[index % ORBIT_COLORS.length]}
-                strokeWidth="7"
-                strokeLinecap="round"
-                strokeDasharray={`${filled} ${100 - filled}`}
-                strokeDashoffset={-index * step}
-              />
+              <g
+                key={summary.subject}
+                className="cursor-pointer outline-none"
+                onMouseEnter={() => setHoveredSubject(summary.subject)}
+                onMouseLeave={() =>
+                  setHoveredSubject((curr) => (curr === summary.subject ? null : curr))
+                }
+                onClick={() => onSelectSubject?.(summary.subject)}
+                role="button"
+                tabIndex={0}
+                aria-label={`${summary.subject}: ${summary.completed} of ${summary.topics.length} topics studied (${summary.percent}%)`}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    onSelectSubject?.(summary.subject);
+                  }
+                }}
+              >
+                {/* Background Track Segment */}
+                <path
+                  d={baseArcPath}
+                  fill="none"
+                  stroke={inkColor}
+                  strokeOpacity={isHovered ? 0.35 : 0.16}
+                  strokeWidth={currentStrokeWidth}
+                  strokeLinecap="butt"
+                  className="transition-[stroke-width,stroke-opacity] duration-150"
+                />
+
+                {/* Active Progress Fill */}
+                {progressArcPath ? (
+                  <path
+                    d={progressArcPath}
+                    fill="none"
+                    stroke={
+                      summary.status === 'complete' ? 'rgb(var(--color-success))' : inkColor
+                    }
+                    strokeWidth={currentStrokeWidth}
+                    strokeLinecap="butt"
+                    className="transition-[stroke-width,stroke] duration-150"
+                  />
+                ) : null}
+              </g>
             );
           })}
         </svg>
-        <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <span className="u-num text-4xl font-bold leading-none text-text">{percent}%</span>
-          <span className="u-label mt-2">topics studied</span>
+
+        {/* Center Readout */}
+        <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center p-3 text-center">
+          {hoveredSummary ? (
+            <>
+              <span className="u-num text-3xl font-bold leading-none tracking-tight text-text">
+                {hoveredSummary.percent}%
+              </span>
+              <span
+                className="mt-1 line-clamp-1 max-w-[120px] truncate text-[11px] font-semibold text-text"
+                title={hoveredSummary.subject}
+              >
+                {hoveredSummary.subject}
+              </span>
+              <span className="u-num mt-0.5 text-[10px] text-text-faint">
+                {hoveredSummary.completed}/{hoveredSummary.topics.length} studied
+              </span>
+            </>
+          ) : (
+            <>
+              <span className="u-num text-4xl font-bold leading-none tracking-tight text-text">
+                {percent}%
+              </span>
+              <span className="u-label mt-1 text-[10px] uppercase tracking-wider text-text-muted">
+                topics studied
+              </span>
+              <span className="u-num mt-0.5 text-[11px] text-text-faint">
+                {totalCompleted}/{totalTopics}
+              </span>
+            </>
+          )}
         </div>
       </div>
-      <p className="-mt-1 text-center text-[11px] leading-relaxed text-text-faint">
-        One segment per subject
+
+      <p className="mt-1 text-center text-[11px] leading-relaxed text-text-faint">
+        {hoveredSubject ? (
+          <span className="font-medium text-text-muted">Click to view {hoveredSubject}</span>
+        ) : (
+          <span>12 subjects · Click to jump</span>
+        )}
       </p>
     </div>
   );

@@ -1,7 +1,7 @@
 // User preferences — everything users can tune to change day-to-day behaviour.
-// Persisted to localStorage so the values survive reloads and outlive Dexie
-// wipes. Not synced to Supabase yet; export/import via /settings picks them up
-// because backup.ts includes the whole store.
+// localStorage is the immediate/offline cache. For authenticated accounts the
+// account-state runtime hydrates this store from Supabase and mirrors changes
+// back to the database, so clearing this device does not erase the preferences.
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import type { ThemeMode } from '@/lib/theme';

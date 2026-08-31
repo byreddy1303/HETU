@@ -4,7 +4,7 @@
 // The score math still lives in lib/readiness.ts (pure); this page composes
 // the pieces. Peer median is the only non-local piece — it round-trips to
 // the readiness_median_for_band() RPC when the user is signed in.
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { differenceInCalendarDays, parseISO } from 'date-fns';
@@ -38,8 +38,14 @@ import {
 import {
   DEBT_LABEL,
   READINESS_CALCULATION_VERSION,
+  cacheDebt,
+  cacheRemoteSnapshotHistory,
+  fetchCurrentReadinessSnapshotHistory,
+  flushReadinessSnapshots,
+  hasStoredDebt,
   loadDebt,
   loadSnapshots,
+  normalizeDebtEntries,
   projectToExam,
   updateDebt,
   upsertSnapshot,
@@ -52,6 +58,8 @@ import { mockScorePercent, normalizeMockEvidence } from '@/lib/mocks';
 import { GATE_2027_BLUEPRINT, GATE_2027_OFFICIAL_SOURCES } from '@/lib/gate-2027';
 import { cn, todayISOInTimeZone, weekStartISO } from '@/lib/utils';
 import { subjectInk } from '@/lib/subjectInk';
+import { useUiStore } from '@/stores/ui';
+import { loadAccountDocument, queueAccountDocumentWrite } from '@/lib/account-documents';
 
 const ACCENT_BY_KEY: Record<ReadinessComponentKey, string> = {
   coverage: 'bg-ink-cobalt/10 text-ink-cobalt',
@@ -124,6 +132,9 @@ function Gauge({ score }: { score: number }) {
 
 export default function Readiness() {
   const { userId, sandbox, profile } = useAuth();
+  const pushToast = useUiStore((state) => state.pushToast);
+  const reportedCloudIssueForUser = useRef<string | null>(null);
+  const reportedWatchlistIssueForUser = useRef<string | null>(null);
   const timeZone = profile?.timezone ?? 'Asia/Kolkata';
   const today = todayISOInTimeZone(timeZone);
 
@@ -193,22 +204,57 @@ export default function Readiness() {
     };
   }, [mocks]);
 
-  /* -------- weekly snapshots + watchlist (per-user localStorage) -------- */
+  /* -------- durable weekly snapshots + evidence watchlist -------- */
 
   const [snapshots, setSnapshots] = useState<ReadinessSnapshot[]>([]);
   const [cloudSnapshots, setCloudSnapshots] = useState<ReadinessSnapshot[]>([]);
   const [watchlist, setWatchlist] = useState<DebtEntry[]>([]);
+  const [watchlistReady, setWatchlistReady] = useState(false);
 
   useEffect(() => {
+    reportedCloudIssueForUser.current = null;
+    reportedWatchlistIssueForUser.current = null;
+    setCloudSnapshots([]);
+    setWatchlistReady(false);
     if (!userId) {
       setSnapshots([]);
-      setCloudSnapshots([]);
       setWatchlist([]);
       return;
     }
     setSnapshots(loadSnapshots(userId));
-    setWatchlist(loadDebt(userId));
-  }, [userId]);
+    const localWatchlist = loadDebt(userId);
+    setWatchlist(localWatchlist);
+    if (sandbox) {
+      setWatchlistReady(true);
+      return;
+    }
+
+    let active = true;
+    void loadAccountDocument(userId, 'readiness_watchlist', {
+      normalize: normalizeDebtEntries,
+      legacyData: hasStoredDebt(userId) ? localWatchlist : null
+    })
+      .then((result) => {
+        if (!active) return;
+        const restored = cacheDebt(userId, result.data ?? []);
+        setWatchlist(restored);
+        setWatchlistReady(true);
+        if (result.error) {
+          reportedWatchlistIssueForUser.current = userId;
+          pushToast('Readiness watchlist is cached here; database sync will retry.', 'neutral');
+        }
+      })
+      .catch((error) => {
+        if (!active) return;
+        console.error('[readiness] watchlist database load failed:', error);
+        reportedWatchlistIssueForUser.current = userId;
+        setWatchlistReady(true);
+        pushToast('Readiness watchlist is cached here; database sync will retry.', 'neutral');
+      });
+    return () => {
+      active = false;
+    };
+  }, [pushToast, sandbox, userId]);
 
   useEffect(() => {
     if (!userId) return;
@@ -232,8 +278,28 @@ export default function Readiness() {
       }
     };
     setSnapshots(upsertSnapshot(userId, next));
-    setWatchlist(updateDebt(userId, snapshotWeek, breakdown, perSubject));
   }, [userId, today, breakdown, perSubject, daysLeft]);
+
+  useEffect(() => {
+    if (!userId || !watchlistReady) return;
+    const next = updateDebt(userId, weekStartISO(today), breakdown, perSubject);
+    setWatchlist(next);
+    if (sandbox) return;
+    const reportError = () => {
+      if (reportedWatchlistIssueForUser.current === userId) return;
+      reportedWatchlistIssueForUser.current = userId;
+      pushToast('Readiness watchlist is cached here; database sync will retry.', 'neutral');
+    };
+    try {
+      void queueAccountDocumentWrite(userId, 'readiness_watchlist', next)
+        .then((error) => {
+          if (error) reportError();
+        })
+        .catch(reportError);
+    } catch {
+      reportError();
+    }
+  }, [breakdown, perSubject, pushToast, sandbox, today, userId, watchlistReady]);
 
   const trendSnapshots = useMemo(() => {
     const byDate = new Map(cloudSnapshots.map((snapshot) => [snapshot.date, snapshot]));
@@ -255,77 +321,71 @@ export default function Readiness() {
   useEffect(() => {
     if (sandbox || !supabaseConfigured || !userId) return;
     let cancelled = false;
-    void (async () => {
-      // Persist today's snapshot to the DB so the median RPC has data to work
-      // with. Idempotent — the (user_id, on_date) PK dedupes.
-      await supabase.from('readiness_snapshots').upsert(
-        {
-          user_id: userId,
-          on_date: weekStartISO(today),
-          score: breakdown.score,
-          days_to_exam: daysLeft,
-          calculation_version: READINESS_CALCULATION_VERSION,
-          evidence_counts: {
-            attempts: breakdown.counts.attempts,
-            correct: breakdown.counts.correct,
-            wrong: breakdown.counts.wrong,
-            skipped: breakdown.counts.skipped,
-            ungraded: breakdown.counts.ungraded,
-            uncertain: breakdown.counts.uncertain
-          },
-          components: {
-            coverage: breakdown.coverage,
-            retention: breakdown.retention,
-            calibration: breakdown.calibration,
-            surface: breakdown.surface
-          }
-        },
-        { onConflict: 'user_id,on_date' }
-      );
-      const [historyResult, medianResult] = await Promise.all([
-        supabase
-          .from('readiness_snapshots')
-          .select('on_date, score, days_to_exam, calculation_version, evidence_counts')
-          .eq('calculation_version', READINESS_CALCULATION_VERSION)
-          .order('on_date', { ascending: true })
-          .limit(180),
-        supabase.rpc('readiness_median_for_band', { band_width_days: 7 })
-      ]);
+
+    const reportCloudIssue = (detail: string, kind: 'history' | 'peer') => {
       if (cancelled) return;
-      if (!historyResult.error) {
-        setCloudSnapshots(
-          (historyResult.data ?? []).map((snapshot) => ({
-            date: snapshot.on_date,
-            score: snapshot.score,
-            coverage: 0,
-            retention: 0,
-            calibration: 0,
-            surface: 0,
-            daysToExam: snapshot.days_to_exam,
-            calculationVersion: snapshot.calculation_version ?? 1,
-            evidenceCounts:
-              snapshot.evidence_counts && typeof snapshot.evidence_counts === 'object'
-                ? (snapshot.evidence_counts as Record<string, number>)
-                : undefined
-          }))
+      if (kind === 'history') console.error('[readiness] database history sync failed:', detail);
+      else console.warn('[readiness] peer comparison query failed:', detail);
+      if (reportedCloudIssueForUser.current === userId) return;
+      reportedCloudIssueForUser.current = userId;
+      pushToast(
+        kind === 'history'
+          ? 'Readiness history is still safe on this device, but database sync could not be confirmed. It will retry.'
+          : 'Peer comparison is temporarily unavailable. Your readiness history is still saved.',
+        kind === 'history' ? 'danger' : 'neutral'
+      );
+    };
+
+    void (async () => {
+      try {
+        // This migrates every exact-user cache row, then verifies it. It is
+        // also exported as the logout/cache-wipe durability barrier.
+        const flushError = await flushReadinessSnapshots(userId);
+        if (flushError) {
+          reportCloudIssue(flushError, 'history');
+          return;
+        }
+
+        const [historyResult, medianResult] = await Promise.all([
+          fetchCurrentReadinessSnapshotHistory(userId, READINESS_CALCULATION_VERSION),
+          supabase.rpc('readiness_median_for_band', { band_width_days: 7 })
+        ]);
+        if (cancelled) return;
+        if (historyResult.error) {
+          reportCloudIssue(historyResult.error, 'history');
+          return;
+        }
+
+        const cached = cacheRemoteSnapshotHistory(
+          userId,
+          historyResult.snapshots,
+          READINESS_CALCULATION_VERSION
         );
+        setSnapshots(cached);
+        setCloudSnapshots(historyResult.snapshots);
+
+        if (medianResult.error) {
+          reportCloudIssue(medianResult.error.message, 'peer');
+          return;
+        }
+        const data = medianResult.data;
+        const row = Array.isArray(data) ? data[0] : data;
+        const median =
+          row && typeof row.median === 'number'
+            ? row.median
+            : row && typeof row.median === 'string'
+              ? Number(row.median)
+              : null;
+        const sampleSize = row && typeof row.sample_size === 'number' ? row.sample_size : 0;
+        setPeer({ median, sampleSize });
+      } catch (error) {
+        reportCloudIssue((error as Error).message || 'Unknown database error', 'history');
       }
-      if (medianResult.error) return;
-      const data = medianResult.data;
-      const row = Array.isArray(data) ? data[0] : data;
-      const median =
-        row && typeof row.median === 'number'
-          ? row.median
-          : row && typeof row.median === 'string'
-            ? Number(row.median)
-            : null;
-      const sampleSize = row && typeof row.sample_size === 'number' ? row.sample_size : 0;
-      setPeer({ median, sampleSize });
     })();
     return () => {
       cancelled = true;
     };
-  }, [sandbox, userId, breakdown, daysLeft, today]);
+  }, [sandbox, userId, breakdown, daysLeft, today, pushToast]);
 
   const anyData =
     questions.length + pyqAttempts.length + reattempts.length + patterns.length + mocks.length > 0;
@@ -366,21 +426,21 @@ export default function Readiness() {
               }
             />
             <CardBody className="flex flex-col gap-4">
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-                  <div className="rounded border border-border bg-bg-overlay/40 p-3">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                <div className="rounded border border-border bg-bg-overlay/40 p-3">
                   {mockSignal.latest ? (
                     <>
                       <p className="u-label">Latest qualified paper</p>
-                    <p className="mt-1 font-display text-[24px] font-bold text-text">
-                      <span className="u-num">{mockSignal.latest.total_marks}</span>
-                      <span className="text-[13px] font-normal text-text-muted">
-                        {' '}
-                        / {mockSignal.latest.max_marks}
-                      </span>
-                    </p>
-                    <p className="mt-1 text-[11px] text-text-faint">
-                      {mockSignal.latest.name} · {mockSignal.latest.test_date}
-                    </p>
+                      <p className="mt-1 font-display text-[24px] font-bold text-text">
+                        <span className="u-num">{mockSignal.latest.total_marks}</span>
+                        <span className="text-[13px] font-normal text-text-muted">
+                          {' '}
+                          / {mockSignal.latest.max_marks}
+                        </span>
+                      </p>
+                      <p className="mt-1 text-[11px] text-text-faint">
+                        {mockSignal.latest.name} · {mockSignal.latest.test_date}
+                      </p>
                     </>
                   ) : (
                     <>
@@ -394,18 +454,18 @@ export default function Readiness() {
                       </p>
                     </>
                   )}
-                  </div>
-                  <div className="rounded border border-border bg-bg-overlay/40 p-3">
+                </div>
+                <div className="rounded border border-border bg-bg-overlay/40 p-3">
                   {mockSignal.latest ? (
                     <>
-                    <p className="u-label">Recent normalized range</p>
-                    <p className="u-num mt-1 text-[24px] font-bold text-text">
-                      {mockSignal.low}–{mockSignal.high}%
-                    </p>
-                    <p className="mt-1 text-[11px] text-text-faint">
-                      last {mockSignal.recent.length} qualified paper
-                      {mockSignal.recent.length === 1 ? '' : 's'}
-                    </p>
+                      <p className="u-label">Recent normalized range</p>
+                      <p className="u-num mt-1 text-[24px] font-bold text-text">
+                        {mockSignal.low}–{mockSignal.high}%
+                      </p>
+                      <p className="mt-1 text-[11px] text-text-faint">
+                        last {mockSignal.recent.length} qualified paper
+                        {mockSignal.recent.length === 1 ? '' : 's'}
+                      </p>
                     </>
                   ) : (
                     <>
@@ -419,20 +479,20 @@ export default function Readiness() {
                       </p>
                     </>
                   )}
-                  </div>
-                  <div className="rounded border border-border bg-bg-overlay/40 p-3">
-                    <p className="u-label">Official paper blueprint</p>
-                    <p className="u-num mt-1 text-[16px] font-semibold text-text">
+                </div>
+                <div className="rounded border border-border bg-bg-overlay/40 p-3">
+                  <p className="u-label">Official paper blueprint</p>
+                  <p className="u-num mt-1 text-[16px] font-semibold text-text">
                     {GATE_2027_BLUEPRINT.durationMinutes} min · {GATE_2027_BLUEPRINT.questionCount}{' '}
                     questions
-                    </p>
-                    <p className="mt-1 text-[11px] leading-relaxed text-text-faint">
+                  </p>
+                  <p className="mt-1 text-[11px] leading-relaxed text-text-faint">
                     GA {GATE_2027_BLUEPRINT.sectionMarks.generalAptitude} · Engineering Mathematics{' '}
                     {GATE_2027_BLUEPRINT.sectionMarks.engineeringMathematics} · CS{' '}
-                      {GATE_2027_BLUEPRINT.sectionMarks.coreSubject}
-                    </p>
-                  </div>
+                    {GATE_2027_BLUEPRINT.sectionMarks.coreSubject}
+                  </p>
                 </div>
+              </div>
               <div className="rounded border border-warn/30 bg-warn/5 p-3 text-[12px] leading-relaxed text-text-muted">
                 Only fresh, timed, closed-book, single-sitting 65-question/100-mark papers with 100%
                 scoring coverage feed this range. {mockSignal.supportingCount} supporting and{' '}

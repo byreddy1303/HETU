@@ -1,35 +1,53 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   normalizeTopicCompletions,
+  selectCompletionsForUser,
   topicProgressId,
   useTopicProgressStore
 } from '@/stores/topic-progress';
+import { db } from '@/lib/db';
 
 describe('topic progress store', () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     localStorage.clear();
+    await db.topic_progress.clear();
     useTopicProgressStore.setState({ byUser: {} });
   });
 
-  it('keeps completion records scoped to each user', () => {
+  it('keeps completion records scoped to each user', async () => {
     vi.setSystemTime(new Date('2026-08-08T10:00:00.000Z'));
     const id = topicProgressId('Algorithms', 'Divide & Conquer');
 
-    useTopicProgressStore.getState().setCompleted('user-a', id, true);
+    await useTopicProgressStore.getState().setCompleted('user-a', id, true);
 
     expect(useTopicProgressStore.getState().byUser['user-a'][id]).toBe('2026-08-08T10:00:00.000Z');
     expect(useTopicProgressStore.getState().byUser['user-b']).toBeUndefined();
     vi.useRealTimers();
   });
 
-  it('removes the timestamp when a topic is unticked', () => {
+  it('removes the timestamp when a topic is unticked', async () => {
     const id = topicProgressId('Databases', 'ER Model');
     const store = useTopicProgressStore.getState();
 
-    store.setCompleted('user-a', id, true);
-    useTopicProgressStore.getState().setCompleted('user-a', id, false);
+    await store.setCompleted('user-a', id, true);
+    await useTopicProgressStore.getState().setCompleted('user-a', id, false);
 
     expect(useTopicProgressStore.getState().byUser['user-a'][id]).toBeUndefined();
+  });
+
+  it('selects exactly one account and never borrows another user completion', () => {
+    const algorithms = topicProgressId('Algorithms', 'Divide & Conquer');
+    const databases = topicProgressId('Databases', 'ER Model');
+    const byUser = {
+      'user-a': { [algorithms]: '2026-08-08T10:00:00.000Z' },
+      'user-b': { [databases]: '2026-08-09T10:00:00.000Z' }
+    };
+
+    expect(selectCompletionsForUser(byUser, 'user-b')).toEqual({
+      [databases]: '2026-08-09T10:00:00.000Z'
+    });
+    expect(selectCompletionsForUser(byUser, 'user-with-no-progress')).toEqual({});
+    expect(selectCompletionsForUser(byUser, null)).toEqual({});
   });
 
   it('uses canonical subject keys for aliases', () => {
@@ -50,9 +68,11 @@ describe('topic progress store', () => {
     });
   });
 
-  it('normalizes alias input before updating the persisted user map', () => {
+  it('normalizes alias input before updating the persisted user map', async () => {
     vi.setSystemTime(new Date('2026-08-08T10:00:00.000Z'));
-    useTopicProgressStore.getState().setCompleted('user-a', 'Computer Organization::Cache', true);
+    await useTopicProgressStore
+      .getState()
+      .setCompleted('user-a', 'Computer Organization::Cache', true);
 
     expect(useTopicProgressStore.getState().byUser['user-a']).toEqual({
       'COA::Cache': '2026-08-08T10:00:00.000Z'

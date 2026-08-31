@@ -1,4 +1,6 @@
-// Persistent state for the /log flow. Two modes:
+// Resumable state for the /log flow. localStorage is the immediate/offline
+// cache; authenticated accounts are also mirrored by the account-state runtime
+// so an in-progress entry survives cache clears and device changes. Two modes:
 //   'single'   — a one-shot entry; committed and cleared on save.
 //   'multi'    — a batch: the user picks a subject / source once, then logs
 //                as many questions as they want. Each save writes a row but
@@ -15,7 +17,7 @@ import type { EditorDraft } from '@/components/shared/questionDraft';
 
 export type LogMode = 'idle' | 'single' | 'multi';
 
-interface LogState {
+export interface LogDraftSnapshot {
   mode: LogMode;
   /** Only set in 'multi' mode: the SessionRow id these logs belong to. */
   sessionId: string | null;
@@ -25,6 +27,17 @@ interface LogState {
   loggedCount: number;
   /** Persisted in-progress draft so nav-away doesn't lose typing. */
   draft: EditorDraft | null;
+}
+
+export const EMPTY_LOG_DRAFT: LogDraftSnapshot = {
+  mode: 'idle',
+  sessionId: null,
+  startedAt: null,
+  loggedCount: 0,
+  draft: null
+};
+
+interface LogState extends LogDraftSnapshot {
   beginSingle: () => void;
   beginMulti: (sessionId: string) => void;
   bumpLogged: () => void;
@@ -35,12 +48,9 @@ interface LogState {
 export const useLogStore = create<LogState>()(
   persist(
     (set) => ({
-      mode: 'idle',
-      sessionId: null,
-      startedAt: null,
-      loggedCount: 0,
-      draft: null,
-      beginSingle: () => set({ mode: 'single', sessionId: null, startedAt: null, loggedCount: 0, draft: null }),
+      ...EMPTY_LOG_DRAFT,
+      beginSingle: () =>
+        set({ mode: 'single', sessionId: null, startedAt: null, loggedCount: 0, draft: null }),
       beginMulti: (sessionId) =>
         set({
           mode: 'multi',
@@ -51,14 +61,7 @@ export const useLogStore = create<LogState>()(
         }),
       bumpLogged: () => set((s) => ({ loggedCount: s.loggedCount + 1 })),
       setDraft: (draft) => set({ draft }),
-      end: () =>
-        set({
-          mode: 'idle',
-          sessionId: null,
-          startedAt: null,
-          loggedCount: 0,
-          draft: null
-        })
+      end: () => set({ ...EMPTY_LOG_DRAFT })
     }),
     {
       name: 'air.log',

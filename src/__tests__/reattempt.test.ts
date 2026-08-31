@@ -149,7 +149,9 @@ describe('scheduling (Dexie-backed)', () => {
     expect(row?.stage).toBe('D3');
     expect(row?.scheduled_date).toBe('2026-07-20');
     const stored = await db.reattempts.get(row!.id);
-    expect(stored?.sync_status).toBe('synced'); // sandbox: sync disabled in tests
+    // A configured client can receive this write before initSync finishes.
+    // Keeping it pending ensures the first authenticated sync cannot skip it.
+    expect(stored?.sync_status).toBe('pending');
   });
 
   it('does not duplicate an open ladder for the same question', async () => {

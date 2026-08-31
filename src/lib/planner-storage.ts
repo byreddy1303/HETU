@@ -1,5 +1,6 @@
-// localStorage helpers for the calendar-based Planner. Kept isolated so we
-// can migrate to Dexie/Supabase later without touching the UI.
+// localStorage cache helpers for the calendar-based Planner. Signed-in plans
+// are durably persisted in Supabase by planner-cloud; these user-scoped rows
+// keep editing instant and preserve an offline cache.
 //
 // Storage keys:
 //   air.planner.<user-id>.YYYY-MM-DD   → DayPlan for that date
@@ -8,6 +9,20 @@ import { currentUserId } from '@/stores/auth';
 import { canonicalSubjectLabel, normalizeSubjectIdentity, type SubjectId } from '@/lib/subjects';
 
 const LEGACY_DAY_KEY_PREFIX = 'planner_';
+
+function cachedPlanUpdatedAt(raw: string | null, date: string): number | null {
+  if (!raw) return null;
+  try {
+    const value = JSON.parse(raw) as unknown;
+    if (typeof value !== 'object' || value === null || Array.isArray(value)) return null;
+    const candidate = value as Record<string, unknown>;
+    if (candidate.date !== date || !Array.isArray(candidate.sessions)) return null;
+    const parsed = typeof candidate.updatedAt === 'string' ? Date.parse(candidate.updatedAt) : 0;
+    return Number.isFinite(parsed) ? parsed : 0;
+  } catch {
+    return null;
+  }
+}
 
 export function dayKeyPrefix(): string {
   return `air.planner.${currentUserId() ?? 'signed-out'}.`;
@@ -22,9 +37,10 @@ export function plannerDateFromSearch(search: string): string | null {
     : value;
 }
 
-/** Claim pre-multi-user Planner rows for the currently signed-in user once. */
-export function migrateLegacyDayPlans(): void {
-  if (!currentUserId()) return;
+/** Claim pre-multi-user Planner rows for one explicitly identified user once. */
+export function migrateLegacyDayPlansForUser(userId: string): void {
+  if (!userId) return;
+  const scopedPrefix = `air.planner.${userId}.`;
   try {
     const legacyKeys: string[] = [];
     for (let i = 0; i < localStorage.length; i++) {
@@ -34,16 +50,40 @@ export function migrateLegacyDayPlans(): void {
     for (const legacyKey of legacyKeys) {
       const date = legacyKey.slice(LEGACY_DAY_KEY_PREFIX.length);
       if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) continue;
-      const scopedKey = `${dayKeyPrefix()}${date}`;
-      if (!localStorage.getItem(scopedKey)) {
-        const value = localStorage.getItem(legacyKey);
-        if (value) localStorage.setItem(scopedKey, value);
+      const scopedKey = `${scopedPrefix}${date}`;
+      const legacyRaw = localStorage.getItem(legacyKey);
+      const legacyUpdatedAt = cachedPlanUpdatedAt(legacyRaw, date);
+      // A malformed legacy value stays in place instead of being silently
+      // discarded. It can be inspected or recovered by a later migration.
+      if (legacyRaw === null || legacyUpdatedAt === null) continue;
+
+      const scopedRaw = localStorage.getItem(scopedKey);
+      const scopedUpdatedAt = cachedPlanUpdatedAt(scopedRaw, date);
+      let expectedScopedRaw = scopedRaw;
+      if (scopedUpdatedAt === null || legacyUpdatedAt >= scopedUpdatedAt) {
+        localStorage.setItem(scopedKey, legacyRaw);
+        expectedScopedRaw = legacyRaw;
       }
-      localStorage.removeItem(legacyKey);
+
+      // Remove the unscoped copy only after a valid equal-or-newer payload is
+      // verifiably present in the exact user's namespace.
+      if (
+        expectedScopedRaw !== null &&
+        localStorage.getItem(scopedKey) === expectedScopedRaw &&
+        cachedPlanUpdatedAt(expectedScopedRaw, date) !== null
+      ) {
+        localStorage.removeItem(legacyKey);
+      }
     }
   } catch {
     // Best-effort migration; the legacy row remains available for retry.
   }
+}
+
+/** Claim pre-multi-user Planner rows for the currently signed-in user once. */
+export function migrateLegacyDayPlans(): void {
+  const userId = currentUserId();
+  if (userId) migrateLegacyDayPlansForUser(userId);
 }
 
 /* ------------------------------ types ------------------------------ */

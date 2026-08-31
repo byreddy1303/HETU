@@ -1,7 +1,6 @@
-// /settings — settings that actually change day-to-day behaviour. Preferences
-// live in a localStorage-backed zustand store; profile fields (name, exam,
-// timezone, rank) round-trip through Supabase (or Dexie meta in sandbox);
-// invites + local data operations are one click each.
+// /settings — settings that actually change day-to-day behaviour. Signed-in
+// preferences and resumable drafts live in Supabase with a local offline cache;
+// profile fields also round-trip through Supabase (or Dexie in sandbox).
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { differenceInCalendarDays, parseISO } from 'date-fns';
 import {
@@ -44,6 +43,7 @@ import {
 import type { ThemeMode } from '@/lib/theme';
 import { supabase, supabaseConfigured } from '@/lib/supabase';
 import { wipeLocalState } from '@/lib/isolation';
+import { clearLocalCacheSafely } from '@/lib/durability';
 import {
   EXAM_DATE_DEFAULT,
   INVITE_TTL_DAYS,
@@ -84,7 +84,8 @@ export default function Settings() {
   async function onSignOut() {
     setSigningOut(true);
     try {
-      await signOut();
+      const result = await signOut();
+      if (result.error) pushToast(result.error, 'danger');
     } finally {
       setSigningOut(false);
     }
@@ -99,7 +100,7 @@ export default function Settings() {
         description={
           sandbox
             ? 'Local sandbox — changes save to this device only.'
-            : 'Everything here saves as you edit. Profile fields sync; preferences stay on this device.'
+            : 'Everything here saves as you edit. Profile fields, preferences, and resumable drafts sync to your account.'
         }
       />
 
@@ -311,15 +312,20 @@ export default function Settings() {
       <InvitesCard userId={userId} sandbox={sandbox} />
 
       {/* --- Usage -------------------------------------------------------- */}
-      {/* Local-only sandbox users need a manual backup because there is no server copy. */}
-      {sandbox && <DataCard profile={profile} onBackup={() => prefs.markBackupNow()} />}
+      <DataCard
+        profile={profile}
+        userId={userId}
+        sandbox={sandbox}
+        onBackup={() => prefs.markBackupNow()}
+      />
 
       {/* --- Session ------------------------------------------------------ */}
       <Card>
         <CardHeader title="Session" />
         <CardBody className="flex flex-wrap items-center justify-between gap-3">
           <p className="text-[12px] text-text-muted">
-            Signing out wipes local Dexie storage on this device. Server data stays put.
+            Sign-out first confirms every pending database write, then removes only this device's
+            cache. If anything is still pending, sign-out is safely blocked.
           </p>
           <Button variant="danger" onClick={() => void onSignOut()} disabled={signingOut}>
             <LogOut size={14} className="mr-1" strokeWidth={1.75} />
@@ -911,7 +917,17 @@ function ProgressExportCard({
   );
 }
 
-function DataCard({ profile, onBackup }: { profile: UserRow | null; onBackup: () => void }) {
+function DataCard({
+  profile,
+  userId,
+  sandbox,
+  onBackup
+}: {
+  profile: UserRow | null;
+  userId: string | null;
+  sandbox: boolean;
+  onBackup: () => void;
+}) {
   const pushToast = useUiStore((s) => s.pushToast);
   const [busy, setBusy] = useState<'export' | 'import' | 'clear' | null>(null);
   const [confirmClear, setConfirmClear] = useState(false);
@@ -955,8 +971,20 @@ function DataCard({ profile, onBackup }: { profile: UserRow | null; onBackup: ()
   async function onClear() {
     setBusy('clear');
     try {
-      await wipeLocalState();
-      pushToast('Local storage wiped. Server data untouched.', 'neutral');
+      if (sandbox) {
+        await wipeLocalState();
+      } else {
+        if (!userId) throw new Error('No signed-in account was found.');
+        const result = await clearLocalCacheSafely(userId);
+        if (!result.ok) throw new Error(result.error ?? 'Database sync did not finish.');
+      }
+      pushToast(
+        sandbox
+          ? 'Local sandbox data cleared.'
+          : 'Device cache cleared. Restoring your account from the database…',
+        'neutral'
+      );
+      window.location.reload();
     } catch (err) {
       pushToast(`Clear failed: ${(err as Error).message}`, 'neutral');
     } finally {
@@ -975,7 +1003,8 @@ function DataCard({ profile, onBackup }: { profile: UserRow | null; onBackup: ()
         <div className="rounded border border-border/70 bg-bg-overlay/40 px-3 py-2 text-[12px] text-text-muted">
           <p>
             Take a copy of your journal off the app, put an old backup back in, or clear this
-            device's cache. Server data (Supabase) is untouched by any of these unless you sign out.
+            device's cache. Signed-in data is confirmed in Supabase before a cache clear; signing
+            out never deletes server data.
           </p>
         </div>
         <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border pt-3">
@@ -1057,7 +1086,7 @@ function DataCard({ profile, onBackup }: { profile: UserRow | null; onBackup: ()
           ) : (
             <Button variant="danger" onClick={() => setConfirmClear(true)} disabled={busy !== null}>
               <Trash2 size={14} strokeWidth={1.75} className="mr-1" />
-              Wipe local storage
+              Clear device cache
             </Button>
           )}
         </div>

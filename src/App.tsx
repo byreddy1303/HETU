@@ -12,6 +12,7 @@ import BuddyPresenceRuntime from '@/components/buddy/BuddyPresenceRuntime';
 import LoadingScreen from '@/components/shared/LoadingScreen';
 import { applyTheme, resolveTheme } from '@/lib/theme';
 import { configureNativeChrome } from '@/lib/native';
+import { useAccountState } from '@/hooks/useAccountState';
 
 const FONT_SCALE_PX: Record<'small' | 'normal' | 'large', string> = {
   small: '14px',
@@ -24,6 +25,7 @@ export default function App() {
   const fontScale = usePrefsStore((s) => s.fontScale);
   const compactRows = usePrefsStore((s) => s.compactRows);
   const colorTheme = usePrefsStore((s) => s.colorTheme);
+  useAccountState();
   useEffect(() => init(), [init]);
   useEffect(() => {
     document.documentElement.style.fontSize = FONT_SCALE_PX[fontScale];

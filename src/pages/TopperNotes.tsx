@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type MouseEvent } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type MouseEvent } from 'react';
 import { Browser as CapacitorBrowser } from '@capacitor/browser';
 import {
   ArrowRight,
@@ -14,9 +14,16 @@ import {
 import PageHeader from '@/components/layout/PageHeader';
 import { Input } from '@/components/ui/Input';
 import { useAuth } from '@/hooks/useAuth';
+import {
+  flushAccountDocumentWrites,
+  loadAccountDocument,
+  normalizeReferenceProgress,
+  queueAccountDocumentWrite
+} from '@/lib/account-documents';
 import { isNativeApp } from '@/lib/native';
 import { subjectInk } from '@/lib/subjectInk';
 import { cn } from '@/lib/utils';
+import { useUiStore } from '@/stores/ui';
 import notesManifest from '@/data/topper-notes.json';
 
 interface TopperNote {
@@ -42,6 +49,7 @@ type Subject = (typeof SUBJECTS)[number];
 type SubjectFilter = 'All subjects' | Subject;
 
 const notes = notesManifest as TopperNote[];
+const NOTE_IDS = new Set(notes.map((note) => note.id));
 const EMPTY_PROGRESS: NotesProgress = { revisedIds: [], lastOpenedId: null };
 const configuredAppOrigin = import.meta.env.VITE_APP_URL as string | undefined;
 const NOTES_ORIGIN = (
@@ -72,18 +80,33 @@ function progressKey(userId: string | null): string {
 
 function readProgress(userId: string | null): NotesProgress {
   try {
-    const parsed = JSON.parse(
-      localStorage.getItem(progressKey(userId)) ?? 'null'
-    ) as Partial<NotesProgress> | null;
-    return {
-      revisedIds: Array.isArray(parsed?.revisedIds)
-        ? parsed.revisedIds.filter((id): id is string => typeof id === 'string')
-        : [],
-      lastOpenedId: typeof parsed?.lastOpenedId === 'string' ? parsed.lastOpenedId : null
-    };
+    return normalizeReferenceProgress(
+      JSON.parse(localStorage.getItem(progressKey(userId)) ?? 'null'),
+      NOTE_IDS
+    );
   } catch {
     return EMPTY_PROGRESS;
   }
+}
+
+function hasStoredProgress(userId: string): boolean {
+  try {
+    return localStorage.getItem(progressKey(userId)) !== null;
+  } catch {
+    return false;
+  }
+}
+
+function cacheProgress(userId: string | null, progress: NotesProgress): void {
+  try {
+    localStorage.setItem(progressKey(userId), JSON.stringify(progress));
+  } catch {
+    // The visible React state and the durable writer still retain the edit.
+  }
+}
+
+function syncErrorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : 'Topper Notes database sync failed.';
 }
 
 function assetHref(href: string): string {
@@ -108,14 +131,74 @@ function plural(count: number, word: string): string {
 }
 
 export default function TopperNotes() {
-  const { userId } = useAuth();
+  const { userId, sandbox } = useAuth();
+  const pushToast = useUiStore((state) => state.pushToast);
   const [query, setQuery] = useState('');
   const [filter, setFilter] = useState<SubjectFilter>('All subjects');
   const [progress, setProgress] = useState<NotesProgress>(() => readProgress(userId));
+  const progressRef = useRef(progress);
+  const syncErrorShownRef = useRef(false);
+
+  const reportSyncResult = useCallback(
+    (error: string | null) => {
+      if (error && !syncErrorShownRef.current) {
+        syncErrorShownRef.current = true;
+        pushToast('Topper Notes are cached here; database sync will retry when online.', 'neutral');
+      } else if (!error) {
+        syncErrorShownRef.current = false;
+      }
+    },
+    [pushToast]
+  );
 
   useEffect(() => {
-    setProgress(readProgress(userId));
-  }, [userId]);
+    const localProgress = readProgress(userId);
+    progressRef.current = localProgress;
+    setProgress(localProgress);
+
+    // The development sandbox intentionally stays device-local. Real accounts
+    // hydrate from Supabase; the old key is supplied only as a one-time legacy
+    // migration when the database has no document yet.
+    if (!userId || sandbox) return;
+    let active = true;
+    const legacyData = hasStoredProgress(userId) ? localProgress : null;
+
+    void loadAccountDocument(userId, 'topper_notes', {
+      normalize: (value) => normalizeReferenceProgress(value, NOTE_IDS),
+      legacyData
+    })
+      .then((result) => {
+        if (!active) return;
+        const next = result.data ?? EMPTY_PROGRESS;
+        progressRef.current = next;
+        setProgress(next);
+        if (result.data) cacheProgress(userId, next);
+        reportSyncResult(result.error);
+      })
+      .catch((error) => {
+        if (active) reportSyncResult(syncErrorMessage(error));
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [reportSyncResult, sandbox, userId]);
+
+  useEffect(() => {
+    if (!userId || sandbox) return;
+    const retry = () => {
+      void flushAccountDocumentWrites(userId)
+        .then(reportSyncResult)
+        .catch((error) => reportSyncResult(syncErrorMessage(error)));
+    };
+
+    window.addEventListener('online', retry);
+    window.addEventListener('focus', retry);
+    return () => {
+      window.removeEventListener('online', retry);
+      window.removeEventListener('focus', retry);
+    };
+  }, [reportSyncResult, sandbox, userId]);
 
   const normalizedQuery = query.trim().toLocaleLowerCase();
   const visibleNotes = useMemo(
@@ -141,11 +224,19 @@ export default function TopperNotes() {
   const lastOpened = notes.find((note) => note.id === progress.lastOpenedId) ?? null;
 
   function saveProgress(update: (current: NotesProgress) => NotesProgress) {
-    setProgress((current) => {
-      const next = update(current);
-      localStorage.setItem(progressKey(userId), JSON.stringify(next));
-      return next;
-    });
+    const next = normalizeReferenceProgress(update(progressRef.current), NOTE_IDS);
+    progressRef.current = next;
+    setProgress(next);
+    cacheProgress(userId, next);
+
+    if (!userId || sandbox) return;
+    try {
+      void queueAccountDocumentWrite(userId, 'topper_notes', next)
+        .then(reportSyncResult)
+        .catch((error) => reportSyncResult(syncErrorMessage(error)));
+    } catch (error) {
+      reportSyncResult(syncErrorMessage(error));
+    }
   }
 
   function rememberOpened(noteId: string) {
@@ -190,7 +281,9 @@ export default function TopperNotes() {
           <div className="flex items-center justify-between gap-3">
             <div>
               <p className="u-label">Your revision index</p>
-              <p className="mt-1 text-[12px] text-text-faint">Saved on this device</p>
+              <p className="mt-1 text-[12px] text-text-faint">
+                {sandbox ? 'Saved on this device (sandbox)' : 'Saved to your account database'}
+              </p>
             </div>
             <span className="u-num text-[13px] font-semibold text-text">
               {revisedCount}/{notes.length}

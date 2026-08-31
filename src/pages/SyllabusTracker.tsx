@@ -22,12 +22,14 @@ import {
 } from '@/lib/topic-evidence';
 import { currentUserId } from '@/stores/auth';
 import {
+  completionsFromTopicRows,
   selectCompletionsForUser,
   syncTopicProgressFromDb,
   topicProgressId,
   useTopicProgressStore,
   type TopicCompletions
 } from '@/stores/topic-progress';
+import { useUiStore } from '@/stores/ui';
 
 type SubjectFilter = 'all' | 'in-progress' | 'not-started' | 'complete';
 type Subject = (typeof SUBJECTS)[number];
@@ -104,8 +106,9 @@ export default function SyllabusTracker() {
   const reduceMotion = useReducedMotion();
   const byUser = useTopicProgressStore((state) => state.byUser);
   const setCompleted = useTopicProgressStore((state) => state.setCompleted);
+  const pushToast = useUiStore((state) => state.pushToast);
 
-  const effectiveUserId = userId ?? currentUserId() ?? 'guest';
+  const effectiveUserId = userId ?? currentUserId();
   const today = todayISOInTimeZone(profile?.timezone ?? 'Asia/Kolkata');
   const questions = useLiveQuery(
     () => (userId ? db.questions.where('user_id').equals(userId).toArray() : []),
@@ -122,15 +125,30 @@ export default function SyllabusTracker() {
     [userId],
     []
   );
+  const topicProgressRows = useLiveQuery(
+    () =>
+      effectiveUserId ? db.topic_progress.where('user_id').equals(effectiveUserId).toArray() : [],
+    [effectiveUserId],
+    []
+  );
 
   useEffect(() => {
-    void syncTopicProgressFromDb(effectiveUserId);
-  }, [effectiveUserId]);
+    if (!effectiveUserId) return;
+    void syncTopicProgressFromDb(effectiveUserId).catch((error: unknown) => {
+      console.warn(error);
+      pushToast('Syllabus progress is safe on this device; database sync will retry.', 'neutral');
+    });
+  }, [effectiveUserId, pushToast]);
 
-  const completions = useMemo(
-    () => selectCompletionsForUser(byUser, effectiveUserId),
-    [byUser, effectiveUserId]
-  );
+  const completions = useMemo(() => {
+    const cached = selectCompletionsForUser(byUser, effectiveUserId);
+    const rows = completionsFromTopicRows(topicProgressRows);
+    const merged = { ...cached };
+    for (const [id, completedAt] of Object.entries(rows)) {
+      if (!merged[id] || merged[id] < completedAt) merged[id] = completedAt;
+    }
+    return merged;
+  }, [byUser, effectiveUserId, topicProgressRows]);
   const summaries = useMemo(() => summariesFor(completions), [completions]);
   const evidenceByTopic = useMemo(() => {
     const map = new Map<string, TopicEvidence>();
@@ -207,15 +225,30 @@ export default function SyllabusTracker() {
     });
   }
 
-  function toggleTopic(topic: Official2027TopicSpec, completed: boolean) {
-    if (completed) {
-      setCompleted(effectiveUserId, topicProgressId(topic.subject, topic.value), true);
-    } else {
-      // completionAliases are globally unique to this official leaf. Shared
-      // legacy/bank labels are intentionally left untouched.
-      for (const id of completionIdsFor(topic)) setCompleted(effectiveUserId, id, false);
+  async function toggleTopic(topic: Official2027TopicSpec, completed: boolean) {
+    if (!effectiveUserId) {
+      pushToast('Sign in before changing syllabus progress.', 'neutral');
+      return;
     }
-    haptic(completed ? 'success' : 'selection');
+    try {
+      if (completed) {
+        await setCompleted(effectiveUserId, topicProgressId(topic.subject, topic.value), true);
+      } else {
+        // completionAliases are globally unique to this official leaf. Shared
+        // legacy/bank labels are intentionally left untouched.
+        await Promise.all(
+          completionIdsFor(topic).map((id) => setCompleted(effectiveUserId, id, false))
+        );
+      }
+      haptic(completed ? 'success' : 'selection');
+    } catch (error) {
+      pushToast(
+        error instanceof Error
+          ? error.message
+          : 'Saved on this device; database sync will retry automatically.',
+        'neutral'
+      );
+    }
   }
 
   function openRecommended() {

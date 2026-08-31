@@ -695,7 +695,14 @@ async function putLocalRow<T extends { id: string }>(
       return;
     }
   }
-  await target.put({ ...normalizedRow, sync_status: syncEnabled ? 'pending' : 'synced' });
+  // A configured production client can receive writes before initSync has
+  // finished (for example while restoring a persisted draft during login).
+  // Those rows must remain eligible for the first authenticated push instead
+  // of being incorrectly labelled as already present on the server.
+  await target.put({
+    ...normalizedRow,
+    sync_status: supabaseConfigured ? 'pending' : 'synced'
+  });
 }
 
 export function isSyncEnabled(): boolean {
@@ -914,6 +921,77 @@ export function flushPushQueue(): Promise<void> {
   return pushInFlight;
 }
 
+/** Number of writes/deletes for this account that are not yet confirmed by
+ * Supabase. This is intentionally account-scoped so a stale cache belonging
+ * to another signed-out user cannot prevent the active account from leaving. */
+export async function pendingSyncCount(userId: string): Promise<number> {
+  const pendingRows = await Promise.all(
+    SYNCED_TABLES.map(async (name) => {
+      const rows = await table(name).where('sync_status').anyOf('pending', 'error').toArray();
+      return rows.filter(
+        (row) => (row as Record<string, unknown>)['user_id'] === userId
+      ).length;
+    })
+  );
+  const queue =
+    ((await db.meta.get('delete_queue'))?.value as QueuedDelete[] | undefined) ?? [];
+  const queuedDeletes = queue.filter(
+    (entry) => entry.user_id == null || entry.user_id === userId
+  ).length;
+  return pendingRows.reduce((total, count) => total + count, queuedDeletes);
+}
+
+/** Flush and verify every local-first write before destructive local cleanup.
+ * A failed initial pull is treated as unsafe even when no pending rows are
+ * visible, because we cannot prove the device cache is represented remotely. */
+export async function flushPendingSync(userId: string): Promise<boolean> {
+  if (!supabaseConfigured) return true;
+  if (!syncEnabled || currentUserId !== userId) return false;
+  if (typeof navigator !== 'undefined' && !navigator.onLine) return false;
+  try {
+    await awaitInitialPull(userId);
+    await flushPushQueue();
+    return (await pendingSyncCount(userId)) === 0;
+  } catch {
+    return false;
+  }
+}
+
+async function pruneSyncedRowsMissingFromRemote(
+  name: SyncedTableName,
+  userId: string,
+  remoteIds: Set<string>
+): Promise<void> {
+  // PYQ attempt receipts are append-only locally and remotely. If a server
+  // administrator removes one unexpectedly, retain the device copy rather
+  // than converting that incident into a second data-loss event.
+  if (name === 'pyq_attempts') return;
+  const target = table(name);
+  const snapshotKey = `remote_snapshot:${userId}:${name}`;
+  await db.transaction('rw', [target, db.meta], async () => {
+    if (!syncContextIsCurrent(userId)) throw new SyncContextChangedError();
+    const previousSnapshot = await db.meta.get(snapshotKey);
+    const previouslyRemote = new Set(
+      Array.isArray(previousSnapshot?.value)
+        ? previousSnapshot.value.filter((id): id is string => typeof id === 'string')
+        : []
+    );
+    const localRows = await target.toArray();
+    const missingIds = localRows.flatMap((row) => {
+      const record = row as { id: string; user_id?: string; sync_status?: string };
+      return record.user_id === userId &&
+        record.sync_status === 'synced' &&
+        previouslyRemote.has(record.id) &&
+        !remoteIds.has(record.id)
+        ? [record.id]
+        : [];
+    });
+    if (!syncContextIsCurrent(userId)) throw new SyncContextChangedError();
+    if (missingIds.length > 0) await target.bulkDelete(missingIds);
+    await db.meta.put({ key: snapshotKey, value: [...remoteIds] });
+  });
+}
+
 /** Merge a complete, paginated server snapshot into Dexie. Fetch failures are
  * propagated before any table merges, so an initial-pull barrier can never
  * release on a partial parent snapshot. */
@@ -958,6 +1036,11 @@ export function pullAll(userId: string): Promise<void> {
       if (!syncContextIsCurrent(userId)) throw new SyncContextChangedError();
       const remoteRows = (data as { id: string }[]).filter(
         (row) => !deletedKeys.has(`${name}\u0000${row.id}`)
+      );
+      await pruneSyncedRowsMissingFromRemote(
+        name,
+        userId,
+        new Set(remoteRows.map((row) => row.id))
       );
       if (remoteRows.length === 0) continue;
       const target = table(name);

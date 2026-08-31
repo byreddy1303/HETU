@@ -1,4 +1,4 @@
-// Cross-day analytics for the planner. Reads every localStorage DayPlan
+// Cross-day analytics for the planner. Reads every locally cached DayPlan
 // (user-scoped air.planner.* keys) and rolls up the summaries that the /planner
 // insights card renders.
 //
@@ -14,7 +14,7 @@ function plannedSubjectLabel(subject: string, customSubject?: string): string {
   return subject === 'Custom...' && customSubject ? customSubject : canonicalSubjectLabel(subject);
 }
 
-/** Load every DayPlan currently in localStorage. Skips corrupt rows. */
+/** Load every currently cached DayPlan. Skips corrupt rows. */
 export function loadAllDayPlans(): DayPlan[] {
   const plans: DayPlan[] = [];
   migrateLegacyDayPlans();

@@ -179,6 +179,12 @@ export default function Nav() {
   const storedSessionId = useSessionStore((s) => s.sessionId);
   const navCollapsed = useUiStore((s) => s.navCollapsed);
   const setNavCollapsed = useUiStore((s) => s.setNavCollapsed);
+  const pushToast = useUiStore((s) => s.pushToast);
+
+  async function handleSignOut() {
+    const result = await signOut();
+    if (result.error) pushToast(result.error, 'danger');
+  }
   // Confirm the stored session is still live (row exists, unfinished) — a
   // stale localStorage entry after a "finish" that crashed shouldn't hijack
   // the Session tab. useLiveQuery re-evaluates as Dexie changes.
@@ -258,7 +264,7 @@ export default function Nav() {
           </div>
           <button
             type="button"
-            onClick={() => void signOut()}
+            onClick={() => void handleSignOut()}
             aria-label="Sign out"
             title="Sign out"
             className="shrink-0 rounded-full p-1.5 text-text-faint transition-colors hover:bg-danger-faint hover:text-danger"

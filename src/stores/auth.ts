@@ -12,6 +12,8 @@ import { loginWithUsernamePin, signupViaInvite } from '@/lib/edge';
 import type { UserRow } from '@/types';
 import { EXAM_DATE_DEFAULT } from '@/lib/constants';
 import { unregisterCurrentPushDevice } from '@/lib/buddyNotifications';
+import { flushAllDurableState } from '@/lib/durability';
+import { initSync, stopSync } from '@/lib/sync';
 
 export type AuthStatus = 'loading' | 'signed_out' | 'signed_in';
 
@@ -33,7 +35,7 @@ interface AuthState {
   signIn: (username: string, pin: string) => Promise<{ error?: string }>;
   signUp: (payload: SignupPayload) => Promise<{ error?: string }>;
   enterSandbox: () => Promise<void>;
-  signOut: () => Promise<void>;
+  signOut: () => Promise<{ error?: string }>;
   refreshProfile: () => Promise<void>;
   updateProfile: (patch: ProfilePatch) => Promise<{ error?: string }>;
 }
@@ -165,14 +167,64 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   signOut: async () => {
     if (get().sandbox) {
-      await wipeLocalState();
+      try {
+        await wipeLocalState();
+      } catch (error) {
+        const detail = error instanceof Error ? error.message : 'Local cache cleanup failed.';
+        return { error: detail };
+      }
       set({ status: 'signed_out', profile: null, sandbox: false, user: null });
-      return;
+      return {};
     }
-    await unregisterCurrentPushDevice();
-    await supabase.auth.signOut();
-    await wipeLocalState();
+
+    const userId = get().user?.id;
+    if (!userId) return { error: 'No signed-in account was found.' };
+    const durable = await flushAllDurableState(userId);
+    if (!durable.ok) return { error: durable.error };
+
+    try {
+      await unregisterCurrentPushDevice();
+    } catch (error) {
+      console.warn('[air] Push-device cleanup did not finish during sign-out.', error);
+    }
+
+    // Resolve the listener controls before the final barrier. Any local edit
+    // that lands while this module loads is still captured by that barrier.
+    const accountState = await import('@/lib/account-state');
+
+    // Push cleanup can take long enough for another local edit/background
+    // write to land. Re-run the complete barrier so the exact state at the
+    // irreversible auth boundary is confirmed in Supabase.
+    const finalDurable = await flushAllDurableState(userId);
+    if (!finalDurable.ok) return { error: finalDurable.error };
+
+    accountState.stopAccountStateSync(userId);
+    stopSync();
+    // Freeze authenticated routes before yielding to the network request. No
+    // UI event can create an unobserved local edit after the final barrier.
+    set({ status: 'loading' });
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      set({ status: 'signed_in' });
+      initSync(userId);
+      void accountState.startAccountStateSync(userId).catch((restartError) => {
+        console.error('[air] Account sync could not restart after sign-out failed.', restartError);
+      });
+      return { error: error.message };
+    }
+    let cleanupError: string | null = null;
+    try {
+      await wipeLocalState();
+    } catch (error) {
+      cleanupError =
+        error instanceof Error ? error.message : 'This device cache was not fully cleared.';
+    }
     set({ status: 'signed_out', profile: null, user: null });
+    return cleanupError
+      ? {
+          error: `You are signed out and your database data is safe, but local cleanup was incomplete. ${cleanupError}`
+        }
+      : {};
   },
 
   updateProfile: async (patch) => {

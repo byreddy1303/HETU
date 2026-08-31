@@ -4,7 +4,7 @@
 //
 // The Dexie/IndexedDB behaviour is exercised via fake-indexeddb (already
 // wired for other tests). localStorage is stubbed by jsdom.
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import 'fake-indexeddb/auto';
 import { DEFAULT_PREFERENCES, usePrefsStore } from '@/stores/prefs';
 import { useSessionStore } from '@/stores/session';
@@ -48,6 +48,7 @@ async function seedAll() {
   });
   // Localstorage: also drop some rogue air.* keys so we can prove the sweep.
   localStorage.setItem('air.mystery', 'nope');
+  localStorage.setItem('air-journal:readiness:v3:u-1:watchlist', 'nope');
   localStorage.setItem('unrelated.key', 'keep-me');
 }
 
@@ -96,7 +97,23 @@ describe('wipeLocalState()', () => {
     expect(localStorage.getItem('air.prefs')).toBeNull();
     expect(localStorage.getItem('air.session')).toBeNull();
     expect(localStorage.getItem('air.log')).toBeNull();
+    expect(localStorage.getItem('air-journal:readiness:v3:u-1:watchlist')).toBeNull();
     // Non-app keys must survive — never touch storage we don't own.
     expect(localStorage.getItem('unrelated.key')).toBe('keep-me');
+  });
+
+  it('attempts every cleanup step but rejects instead of reporting a partial wipe', async () => {
+    await seedAll();
+    const deleteSpy = vi.spyOn(db, 'delete').mockRejectedValueOnce(new Error('IndexedDB busy'));
+
+    await expect(wipeLocalState()).rejects.toThrow(
+      'Local cache cleanup was incomplete: offline database.'
+    );
+
+    expect(localStorage.getItem('air.mystery')).toBeNull();
+    expect(usePrefsStore.getState().dailyQuestionTarget).toBe(
+      DEFAULT_PREFERENCES.dailyQuestionTarget
+    );
+    deleteSpy.mockRestore();
   });
 });

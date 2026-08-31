@@ -12,6 +12,7 @@ import PinInput from '@/components/auth/PinInput';
 import { differenceInCalendarDays, parseISO } from 'date-fns';
 import Brand from '@/components/shared/Brand';
 import ThemeToggle from '@/components/shared/ThemeToggle';
+import { useAuthStore } from '@/stores/auth';
 
 type ScreenState =
   | { kind: 'checking' }
@@ -28,6 +29,7 @@ export default function ResetPin() {
   const [pin, setPin] = useState('');
   const [confirm, setConfirm] = useState('');
   const navigate = useNavigate();
+  const signOut = useAuthStore((store) => store.signOut);
 
   useEffect(() => {
     if (!supabaseConfigured) {
@@ -64,7 +66,11 @@ export default function ResetPin() {
       return;
     }
     // Sign out so the user re-authenticates with the new PIN (clean session state).
-    await supabase.auth.signOut();
+    const signOutResult = await signOut();
+    if (signOutResult.error) {
+      setState({ kind: 'error', message: signOutResult.error });
+      return;
+    }
     setState({ kind: 'done' });
     setTimeout(() => navigate('/auth', { replace: true }), 1500);
   }
@@ -122,9 +128,7 @@ export default function ResetPin() {
             </div>
           )}
 
-          {(state.kind === 'ready' ||
-            state.kind === 'sending' ||
-            state.kind === 'error') && (
+          {(state.kind === 'ready' || state.kind === 'sending' || state.kind === 'error') && (
             <form onSubmit={onSubmit} noValidate>
               <label className="u-label block">New 6-digit PIN</label>
               <div className="mt-2">
@@ -132,7 +136,11 @@ export default function ResetPin() {
               </div>
               <label className="u-label mt-4 block">Confirm new PIN</label>
               <div className="mt-2">
-                <PinInput value={confirm} onChange={setConfirm} disabled={state.kind === 'sending'} />
+                <PinInput
+                  value={confirm}
+                  onChange={setConfirm}
+                  disabled={state.kind === 'sending'}
+                />
               </div>
               <Button
                 type="submit"

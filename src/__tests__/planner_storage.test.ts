@@ -5,6 +5,7 @@ import {
   keyFor,
   loadAllDayPlans,
   loadDayPlan,
+  migrateLegacyDayPlansForUser,
   plannerDateFromSearch,
   saveDayPlan
 } from '@/lib/planner-storage';
@@ -53,6 +54,33 @@ describe('Planner local isolation', () => {
     expect(loadDayPlan(date)?.date).toBe(date);
     expect(localStorage.getItem(`planner_${date}`)).toBeNull();
     expect(localStorage.getItem(keyFor(date))).not.toBeNull();
+  });
+
+  it('keeps the newest valid plan when scoped and legacy copies overlap', () => {
+    const userId = '11111111-1111-4111-8111-111111111111';
+    const date = '2026-07-24';
+    const scoped = {
+      ...emptyDayPlan(date),
+      updatedAt: '2026-07-24T08:00:00.000Z',
+      review: { ...emptyDayPlan(date).review, wentWell: 'Older scoped copy' }
+    };
+    const legacy = {
+      ...emptyDayPlan(date),
+      updatedAt: '2026-07-24T18:00:00.000Z',
+      review: { ...emptyDayPlan(date).review, wentWell: 'Newest legacy copy' }
+    };
+    localStorage.setItem(`air.planner.${userId}.${date}`, JSON.stringify(scoped));
+    localStorage.setItem(`planner_${date}`, JSON.stringify(legacy));
+
+    migrateLegacyDayPlansForUser(userId);
+
+    expect(JSON.parse(localStorage.getItem(`air.planner.${userId}.${date}`) ?? '{}')).toMatchObject(
+      {
+        updatedAt: legacy.updatedAt,
+        review: { wentWell: 'Newest legacy copy' }
+      }
+    );
+    expect(localStorage.getItem(`planner_${date}`)).toBeNull();
   });
 
   it('accepts only real ISO dates from Telegram planner links', () => {

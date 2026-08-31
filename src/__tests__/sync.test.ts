@@ -8,7 +8,9 @@ import {
   writeLocalBatch,
   deleteLocal,
   flushPushQueue,
+  flushPendingSync,
   initSync,
+  pendingSyncCount,
   pullAll,
   stopSync,
   _enableForTests
@@ -150,6 +152,16 @@ describe('sync engine (F1.3)', () => {
     ]);
   });
 
+  it('keeps a configured pre-init write pending for the first authenticated sync', async () => {
+    stopSync();
+
+    await writeLocal('sessions', sessionRow('pre-init-write'));
+
+    expect(mocks.upsert).not.toHaveBeenCalled();
+    expect((await table('sessions').get('pre-init-write'))?.sync_status).toBe('pending');
+    expect(await pendingSyncCount(USER)).toBe(1);
+  });
+
   it('offline write stays pending, then syncs when back online', async () => {
     const onLine = vi.spyOn(navigator, 'onLine', 'get').mockReturnValue(false);
     await writeLocal('sessions', sessionRow('s-1'));
@@ -168,6 +180,30 @@ describe('sync engine (F1.3)', () => {
     expect(pushed[0].id).toBe('s-1');
     expect('sync_status' in pushed[0]).toBe(false);
     expect((await table('sessions').get('s-1'))?.sync_status).toBe('synced');
+  });
+
+  it('flushPendingSync returns true only after every pending row is acknowledged', async () => {
+    await seed('sessions', sessionRow('verified-flush'), 'pending');
+
+    await expect(flushPendingSync(USER)).resolves.toBe(true);
+
+    expect(mocks.upsert).toHaveBeenCalledWith(
+      'sessions',
+      expect.arrayContaining([expect.objectContaining({ id: 'verified-flush' })])
+    );
+    expect((await table('sessions').get('verified-flush'))?.sync_status).toBe('synced');
+    expect(await pendingSyncCount(USER)).toBe(0);
+  });
+
+  it('flushPendingSync returns false and preserves pending data after a failed push', async () => {
+    vi.spyOn(console, 'warn').mockImplementation(() => {});
+    mocks.upsert.mockResolvedValue({ error: { message: 'database unavailable' } });
+    await seed('sessions', sessionRow('failed-verified-flush'), 'pending');
+
+    await expect(flushPendingSync(USER)).resolves.toBe(false);
+
+    expect((await table('sessions').get('failed-verified-flush'))?.sync_status).toBe('pending');
+    expect(await pendingSyncCount(USER)).toBe(1);
   });
 
   it('acknowledges only the exact revision sent while an edit is in flight', async () => {
@@ -378,6 +414,34 @@ describe('sync engine (F1.3)', () => {
     const overwritten = (await table('sessions').get('s-5')) as unknown as { subject: string; sync_status: string };
     expect(overwritten.subject).toBe('REMOTE');
     expect(overwritten.sync_status).toBe('synced');
+  });
+
+  it('converges a remote deletion only after prior observation and preserves local-only data', async () => {
+    await seed('sessions', sessionRow('first-pull-local-only', 'LOCAL ONLY'), 'synced');
+    let remoteSessions = [sessionRow('previously-observed-remote', 'REMOTE')];
+    mocks.selectPage.mockImplementation(async (name: string) =>
+      name === 'sessions' ? { data: remoteSessions, error: null } : { data: [], error: null }
+    );
+
+    await pullAll(USER);
+
+    expect(await table('sessions').get('first-pull-local-only')).toMatchObject({
+      subject: 'LOCAL ONLY',
+      sync_status: 'synced'
+    });
+    expect(await table('sessions').get('previously-observed-remote')).toMatchObject({
+      subject: 'REMOTE',
+      sync_status: 'synced'
+    });
+
+    remoteSessions = [];
+    await pullAll(USER);
+
+    expect(await table('sessions').get('previously-observed-remote')).toBeUndefined();
+    expect(await table('sessions').get('first-pull-local-only')).toMatchObject({
+      subject: 'LOCAL ONLY',
+      sync_status: 'synced'
+    });
   });
 
   it('waits for an active push before issuing any pull request', async () => {

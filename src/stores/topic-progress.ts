@@ -1,18 +1,22 @@
 import { create } from 'zustand';
-import { createJSONStorage, persist } from 'zustand/middleware';
 import { db } from '@/lib/db';
-import { currentUserId } from '@/stores/auth';
-import { deleteLocal, writeLocal } from '@/lib/sync';
+import {
+  awaitInitialPull,
+  deleteLocal,
+  flushPendingSync,
+  isSyncEnabled,
+  writeLocal
+} from '@/lib/sync';
 import { nowISO, uuidFromString } from '@/lib/utils';
 import { canonicalSubjectId, canonicalSubjectLabel } from '@/lib/subjects';
+import type { TopicProgressRow } from '@/types';
 
 export type TopicCompletions = Record<string, string>;
 
 interface TopicProgressState {
-  /** Completion timestamp by user id, then stable subject/topic key. */
+  /** In-memory view cache only. Supabase/Dexie rows are the source of truth. */
   byUser: Record<string, TopicCompletions>;
-  setCompleted: (userId: string | null | undefined, topicId: string, completed: boolean) => void;
-  migrateUserCompletions: (targetUserId: string) => void;
+  setCompleted: (userId: string, topicId: string, completed: boolean) => Promise<void>;
 }
 
 export function topicProgressId(subject: string, topic: string): string {
@@ -72,6 +76,19 @@ function mergeCompletions(...groups: (TopicCompletions | null | undefined)[]): T
   return merged;
 }
 
+export function completionsFromTopicRows(
+  rows: Array<Pick<TopicProgressRow, 'subject' | 'topic' | 'completed_at'>>
+): TopicCompletions {
+  const completions: TopicCompletions = {};
+  for (const row of rows) {
+    const key = topicProgressId(row.subject, row.topic);
+    if (!completions[key] || completions[key] < row.completed_at) {
+      completions[key] = row.completed_at;
+    }
+  }
+  return completions;
+}
+
 async function matchingTopicRows(userId: string, subject: string, topic: string) {
   const canonicalSubject = canonicalSubjectLabel(subject);
   return (await db.topic_progress.where('user_id').equals(userId).toArray()).filter(
@@ -114,191 +131,140 @@ async function removeTopicCompletion(
   await Promise.all(rows.map((row) => deleteLocal('topic_progress', row.id)));
 }
 
+/** Never borrow another account's progress as a fallback. */
 export function selectCompletionsForUser(
   byUser: Record<string, TopicCompletions> | undefined,
   userId?: string | null
 ): TopicCompletions {
-  if (!byUser) return {};
-
-  const effectiveId = userId || currentUserId() || 'guest';
-  if (byUser[effectiveId] && Object.keys(byUser[effectiveId]).length > 0) {
-    return normalizeTopicCompletions(byUser[effectiveId]);
-  }
-
-  // Priority search for legacy / fallback user keys (sandbox, guest, default, undefined, null)
-  const fallbackKeys = [
-    '00000000-0000-4000-8000-00000000dev0',
-    'guest',
-    'sandbox',
-    'default',
-    'undefined',
-    'null'
-  ];
-
-  for (const key of fallbackKeys) {
-    if (key !== effectiveId && byUser[key] && Object.keys(byUser[key]).length > 0) {
-      return normalizeTopicCompletions(byUser[key]);
-    }
-  }
-
-  // Fallback: search any non-empty completions in byUser
-  for (const [key, comp] of Object.entries(byUser)) {
-    if (key !== effectiveId && comp && Object.keys(comp).length > 0) {
-      return normalizeTopicCompletions(comp);
-    }
-  }
-
-  return {};
+  if (!byUser || !userId) return {};
+  return normalizeTopicCompletions(byUser[userId]);
 }
 
-export async function syncTopicProgressFromDb(userId?: string | null): Promise<void> {
+function recordValue(value: unknown): Record<string, unknown> | null {
+  return value && typeof value === 'object' && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : null;
+}
+
+function byUserFromLegacyValue(value: unknown): Record<string, TopicCompletions> {
+  const root = recordValue(value);
+  if (!root) return {};
+  const state = recordValue(root['state']);
+  const candidate = recordValue(state?.['byUser']) ?? recordValue(root['byUser']) ?? root;
+  return normalizeByUser(candidate as Record<string, TopicCompletions>);
+}
+
+function localStorageLegacyByUser(): Record<string, TopicCompletions> {
   try {
-    const effectiveUserId = userId || currentUserId() || 'guest';
-    const store = useTopicProgressStore.getState();
-    const current = normalizeTopicCompletions(store.byUser[effectiveUserId]);
-
-    let restored: TopicCompletions | null = null;
-    const userRow = await db.meta.get(`topic_progress_${effectiveUserId}`);
-    if (userRow?.value && typeof userRow.value === 'object') {
-      restored = normalizeTopicCompletions(userRow.value as TopicCompletions);
-    } else {
-      const globalRow = await db.meta.get('air.topic-progress');
-      if (globalRow?.value && typeof globalRow.value === 'object') {
-        const g = globalRow.value as Record<string, TopicCompletions>;
-        restored = selectCompletionsForUser(g, effectiveUserId);
-      }
-    }
-
-    const legacy = mergeCompletions(restored, current);
-    const syncedRows = await db.topic_progress.where('user_id').equals(effectiveUserId).toArray();
-    const merged: TopicCompletions = { ...legacy };
-    for (const row of syncedRows) {
-      const key = topicProgressId(row.subject, row.topic);
-      if (!merged[key] || merged[key] < row.completed_at) merged[key] = row.completed_at;
-    }
-
-    // One-time migration of legacy localStorage/meta progress into the normal
-    // local-first sync engine. Deterministic IDs make repeated runs idempotent.
-    for (const [key, completedAt] of Object.entries(legacy)) {
-      const parsed = splitTopicProgressId(key);
-      if (!parsed) continue;
-      const id = topicProgressRowId(effectiveUserId, parsed.subject, parsed.topic);
-      if (
-        syncedRows.some(
-          (row) =>
-            canonicalSubjectLabel(row.subject) === parsed.subject &&
-            row.topic.trim() === parsed.topic
-        )
-      )
-        continue;
-      await writeLocal('topic_progress', {
-        id,
-        user_id: effectiveUserId,
-        subject: parsed.subject,
-        subject_id: canonicalSubjectId(parsed.subject),
-        topic: parsed.topic,
-        completed_at: completedAt,
-        updated_at: completedAt
-      });
-    }
-
-    useTopicProgressStore.setState((s) => ({
-      byUser: { ...s.byUser, [effectiveUserId]: merged }
-    }));
-    await db.meta.put({ key: `topic_progress_${effectiveUserId}`, value: merged });
+    const raw = localStorage.getItem('air.topic-progress');
+    return raw ? byUserFromLegacyValue(JSON.parse(raw)) : {};
   } catch {
-    // Ignore errors when IndexedDB is disabled or unavailable
+    return {};
   }
 }
 
-export const useTopicProgressStore = create<TopicProgressState>()(
-  persist(
-    (set, get) => ({
-      byUser: {},
-      setCompleted: (userId, topicId, completed) =>
-        set((state) => {
-          const effectiveUserId = userId || currentUserId() || 'guest';
-          const existing = normalizeTopicCompletions(state.byUser[effectiveUserId]);
-          const base =
-            existing && Object.keys(existing).length > 0
-              ? existing
-              : selectCompletionsForUser(state.byUser, effectiveUserId);
+async function legacyCompletionsForUser(userId: string): Promise<TopicCompletions> {
+  const userRow = await db.meta.get(`topic_progress_${userId}`);
+  const globalRow = await db.meta.get('air.topic-progress');
+  return mergeCompletions(
+    selectCompletionsForUser(localStorageLegacyByUser(), userId),
+    normalizeTopicCompletions(userRow?.value as TopicCompletions | undefined),
+    selectCompletionsForUser(byUserFromLegacyValue(globalRow?.value), userId),
+    selectCompletionsForUser(useTopicProgressStore.getState().byUser, userId)
+  );
+}
 
-          const next = { ...base };
-          const parsed = splitTopicProgressId(topicId);
-          const canonicalTopicId = parsed ? topicProgressId(parsed.subject, parsed.topic) : topicId;
+async function removeMigratedLegacyUser(userId: string): Promise<void> {
+  await db.meta.delete(`topic_progress_${userId}`);
 
-          if (completed) next[canonicalTopicId] = new Date().toISOString();
-          else delete next[canonicalTopicId];
-
-          const nextByUser = {
-            ...state.byUser,
-            [effectiveUserId]: next
-          };
-
-          try {
-            void db.meta.put({ key: 'air.topic-progress', value: nextByUser });
-            if (effectiveUserId) {
-              void db.meta.put({ key: `topic_progress_${effectiveUserId}`, value: next });
-            }
-            if (parsed) {
-              if (completed) {
-                const timestamp = next[canonicalTopicId] ?? nowISO();
-                void persistTopicCompletion(
-                  effectiveUserId,
-                  parsed.subject,
-                  parsed.topic,
-                  timestamp
-                ).catch(() => undefined);
-              } else {
-                void removeTopicCompletion(effectiveUserId, parsed.subject, parsed.topic).catch(
-                  () => undefined
-                );
-              }
-            }
-          } catch {
-            // Ignore IndexedDB write errors
-          }
-
-          return { byUser: nextByUser };
-        }),
-
-      migrateUserCompletions: (targetUserId: string) => {
-        const state = get();
-        const completions = normalizeTopicCompletions(
-          selectCompletionsForUser(state.byUser, targetUserId)
-        );
-        if (completions && Object.keys(completions).length > 0) {
-          set({
-            byUser: {
-              ...state.byUser,
-              [targetUserId]: completions
-            }
-          });
-          try {
-            void db.meta.put({ key: `topic_progress_${targetUserId}`, value: completions });
-          } catch {
-            // ignore
-          }
-        }
-      }
-    }),
-    {
-      name: 'air.topic-progress',
-      version: 2,
-      storage: createJSONStorage(() => localStorage),
-      migrate: (persisted) => {
-        const previous = (persisted ?? {}) as Partial<TopicProgressState>;
-        return { ...previous, byUser: normalizeByUser(previous.byUser) } as TopicProgressState;
-      },
-      merge: (persisted, current) => {
-        const previous = (persisted ?? {}) as Partial<TopicProgressState>;
-        return {
-          ...current,
-          ...previous,
-          byUser: normalizeByUser(previous.byUser)
-        };
-      }
+  const globalRow = await db.meta.get('air.topic-progress');
+  const globalByUser = byUserFromLegacyValue(globalRow?.value);
+  if (userId in globalByUser) {
+    delete globalByUser[userId];
+    if (Object.keys(globalByUser).length > 0) {
+      await db.meta.put({ key: 'air.topic-progress', value: globalByUser });
+    } else {
+      await db.meta.delete('air.topic-progress');
     }
-  )
-);
+  }
+
+  try {
+    const raw = localStorage.getItem('air.topic-progress');
+    if (!raw) return;
+    const parsed = recordValue(JSON.parse(raw));
+    if (!parsed) return;
+    const state = recordValue(parsed['state']);
+    const byUser = recordValue(state?.['byUser']) ?? recordValue(parsed['byUser']);
+    if (!byUser || !(userId in byUser)) return;
+    delete byUser[userId];
+    if (Object.keys(byUser).length === 0) {
+      localStorage.removeItem('air.topic-progress');
+    } else {
+      localStorage.setItem('air.topic-progress', JSON.stringify(parsed));
+    }
+  } catch {
+    // A malformed legacy cache is not a reason to disturb the durable rows.
+  }
+}
+
+/** Wait for the account's remote snapshot, then migrate only that account's
+ * old Zustand/meta cache into normal topic_progress rows. */
+export async function syncTopicProgressFromDb(userId: string): Promise<void> {
+  await awaitInitialPull(userId);
+
+  const legacy = await legacyCompletionsForUser(userId);
+  const beforeRows = await db.topic_progress.where('user_id').equals(userId).toArray();
+  const before = completionsFromTopicRows(beforeRows);
+
+  for (const [key, completedAt] of Object.entries(legacy)) {
+    const parsed = splitTopicProgressId(key);
+    if (!parsed) continue;
+    if (before[key] && before[key] >= completedAt) continue;
+    await persistTopicCompletion(userId, parsed.subject, parsed.topic, completedAt);
+  }
+
+  const durable = !isSyncEnabled() || (await flushPendingSync(userId));
+  const rows = await db.topic_progress.where('user_id').equals(userId).toArray();
+  const merged = mergeCompletions(legacy, completionsFromTopicRows(rows));
+  useTopicProgressStore.setState((state) => ({
+    byUser: { ...state.byUser, [userId]: merged }
+  }));
+
+  if (isSyncEnabled() && durable) await removeMigratedLegacyUser(userId);
+  if (isSyncEnabled() && !durable) {
+    throw new Error(
+      'Syllabus progress is queued locally and will retry when the database is reachable.'
+    );
+  }
+}
+
+export const useTopicProgressStore = create<TopicProgressState>()((set) => ({
+  byUser: {},
+  setCompleted: async (userId, topicId, completed) => {
+    const parsed = splitTopicProgressId(topicId);
+    if (!parsed) throw new Error(`Invalid syllabus topic id: ${topicId}`);
+    const canonicalTopicId = topicProgressId(parsed.subject, parsed.topic);
+    const timestamp = nowISO();
+
+    set((state) => {
+      const next = { ...selectCompletionsForUser(state.byUser, userId) };
+      if (completed) next[canonicalTopicId] = timestamp;
+      else delete next[canonicalTopicId];
+      return { byUser: { ...state.byUser, [userId]: next } };
+    });
+
+    if (completed) {
+      await persistTopicCompletion(userId, parsed.subject, parsed.topic, timestamp);
+    } else {
+      await removeTopicCompletion(userId, parsed.subject, parsed.topic);
+    }
+
+    if (isSyncEnabled() && !(await flushPendingSync(userId))) {
+      throw new Error('Saved on this device; database sync will retry automatically.');
+    }
+  }
+}));
+
+export function resetTopicProgressMemory(): void {
+  useTopicProgressStore.setState({ byUser: {} });
+}

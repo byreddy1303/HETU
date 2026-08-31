@@ -1,8 +1,7 @@
 // /planner — calendar-based study planner.
 //
-// Everything is local-first: DayPlans live in user-scoped localStorage.
-// Study sessions are mirrored to the signed-in user's Supabase row so the
-// opt-in Telegram digest can read that day's plan.
+// Complete DayPlans are durable in Supabase. user-scoped localStorage is the
+// responsive cache used by the calendar and offline UI.
 //
 // Structure:
 //   - calendar grid (full-width) with click-to-open day modal
@@ -16,11 +15,11 @@ import Calendar from '@/components/planner/Calendar';
 import DayPlanModal from '@/components/planner/DayPlanModal';
 import PlannerInsights from '@/components/planner/PlannerInsights';
 import {
-  deleteCloudDayPlan,
+  flushPlannerCloudWrites,
   loadCloudDayPlan,
   loadCloudDayPlans,
-  saveCloudDayPlan,
-  type CloudDayPlan
+  queuePlannerCloudDelete,
+  queuePlannerCloudWrite
 } from '@/lib/planner-cloud';
 import { useUiStore } from '@/stores/ui';
 import { useAuthStore } from '@/stores/auth';
@@ -53,9 +52,9 @@ function todayLocalISO(d: Date): string {
   return `${y}-${m}-${day}`;
 }
 
-async function persistCloudPlan(userId: string, plan: CloudDayPlan): Promise<string | null> {
-  if (plan.sessions.length === 0) return deleteCloudDayPlan(userId, plan.date);
-  return saveCloudDayPlan(userId, plan);
+function updatedAtMs(value: string): number {
+  const parsed = Date.parse(value);
+  return Number.isFinite(parsed) ? parsed : 0;
 }
 
 export default function Planner() {
@@ -63,11 +62,6 @@ export default function Planner() {
   const today = useMemo(() => new Date(), []);
   const todayISO = todayLocalISO(today);
   const deepLinkedDate = useMemo(() => plannerDateFromSearch(window.location.search), []);
-  const upcomingThroughISO = useMemo(() => {
-    const through = new Date(today);
-    through.setDate(through.getDate() + 44);
-    return todayLocalISO(through);
-  }, [today]);
   const pushToast = useUiStore((s) => s.pushToast);
   const userId = useAuthStore((s) => s.user?.id ?? null);
   const sandbox = useAuthStore((s) => s.sandbox);
@@ -91,89 +85,117 @@ export default function Planner() {
   // bumping `revision` after saves/deletes forces the summary memo to refetch
   // localStorage without diving into React refs.
   const [revision, setRevision] = useState(0);
-  const syncTimerRef = useRef<number | null>(null);
-  const pendingCloudPlanRef = useRef<CloudDayPlan | null>(null);
+  const [cloudRefreshRevision, setCloudRefreshRevision] = useState(0);
   const syncErrorShownRef = useRef(false);
   const cloudLoadTokenRef = useRef(0);
+  const cloudHydrationTokenRef = useRef(0);
+
+  const reportCloudWriteResult = useCallback(
+    (error: string | null) => {
+      if (error && !syncErrorShownRef.current) {
+        syncErrorShownRef.current = true;
+        pushToast('Plan is cached here; database sync will retry when online.', 'neutral');
+      } else if (!error) {
+        syncErrorShownRef.current = false;
+      }
+    },
+    [pushToast]
+  );
+
+  const queuePlanSync = useCallback(
+    (plan: DayPlan) => {
+      if (!userId || sandbox) return;
+      void queuePlannerCloudWrite(userId, plan).then(reportCloudWriteResult);
+    },
+    [reportCloudWriteResult, sandbox, userId]
+  );
 
   useEffect(() => {
     if (!userId) return;
-    void reconcilePlannerExecutions(userId).then((changed) => {
-      if (changed > 0) {
-        setRevision((value) => value + 1);
-        setOpenPlan((current) => (current ? loadDayPlan(current.date) ?? current : current));
-      }
-    }).catch(() => undefined);
-  }, [userId]);
+    void reconcilePlannerExecutions(userId)
+      .then((changed) => {
+        if (changed > 0) {
+          // Reconciliation can update more than the currently open date. Queue
+          // every cached plan; the module queue coalesces unchanged dates.
+          loadAllDayPlans().forEach(queuePlanSync);
+          setRevision((value) => value + 1);
+          setOpenPlan((current) => (current ? (loadDayPlan(current.date) ?? current) : current));
+        }
+      })
+      .catch(() => undefined);
+  }, [queuePlanSync, userId]);
 
   useEffect(() => {
-    return () => {
-      if (syncTimerRef.current !== null) window.clearTimeout(syncTimerRef.current);
-      const pending = pendingCloudPlanRef.current;
-      if (pending && userId && !sandbox) void persistCloudPlan(userId, pending);
+    if (!userId || sandbox) return;
+    const retry = () => {
+      void flushPlannerCloudWrites(userId).then(reportCloudWriteResult);
+      setCloudRefreshRevision((value) => value + 1);
     };
-  }, [sandbox, userId]);
+    window.addEventListener('online', retry);
+    window.addEventListener('focus', retry);
+    return () => {
+      window.removeEventListener('online', retry);
+      window.removeEventListener('focus', retry);
+      void flushPlannerCloudWrites(userId).then(reportCloudWriteResult);
+    };
+  }, [reportCloudWriteResult, sandbox, userId]);
 
   useEffect(() => {
     if (!userId || sandbox) return;
     let active = true;
-    const localUpcoming = loadAllDayPlans()
-      .filter((plan) => plan.date >= todayISO && plan.sessions.length > 0)
-      .slice(0, 45);
+    const loadToken = ++cloudHydrationTokenRef.current;
+    const localPlans = loadAllDayPlans();
 
-    void loadCloudDayPlans(userId, todayISO, upcomingThroughISO).then(
-      async ({ plans: remotePlans, error }) => {
-        if (error) return;
-        const localByDate = new Map(localUpcoming.map((plan) => [plan.date, plan]));
-        const remoteByDate = new Map(remotePlans.map((plan) => [plan.date, plan]));
-        const dates = new Set([...localByDate.keys(), ...remoteByDate.keys()]);
+    void loadCloudDayPlans(userId).then(({ plans: remotePlans, error }) => {
+      if (!active || loadToken !== cloudHydrationTokenRef.current) return;
+      if (error) {
+        reportCloudWriteResult(error);
+        return;
+      }
+      const localByDate = new Map(localPlans.map((plan) => [plan.date, plan]));
+      const remoteByDate = new Map(remotePlans.map((plan) => [plan.date, plan]));
+      const dates = new Set([...localByDate.keys(), ...remoteByDate.keys()]);
+      let cacheChanged = false;
 
-        const changed = await Promise.all(
-          [...dates].map(async (date) => {
-            const local = localByDate.get(date) ?? loadDayPlan(date);
-            const remote = remoteByDate.get(date) ?? null;
-            if (!local) {
-              if (!remote) return false;
-              cacheDayPlan({
-                ...emptyDayPlan(date),
-                sessions: remote.sessions,
-                updatedAt: remote.updatedAt
-              });
-              return true;
-            }
-
-            const localUpdated = Date.parse(local.updatedAt);
-            const remoteUpdated = remote ? Date.parse(remote.updatedAt) : 0;
-            if (!remote || localUpdated >= remoteUpdated) {
-              await saveCloudDayPlan(userId, {
-                date: local.date,
-                sessions: local.sessions,
-                updatedAt: local.updatedAt
-              });
-              return false;
-            }
-            cacheDayPlan({
-              ...local,
-              sessions: remote.sessions,
-              updatedAt: remote.updatedAt
-            });
-            return true;
-          })
-        );
-        if (active && changed.some(Boolean)) setRevision((value) => value + 1);
-        if (active && deepLinkedDate) {
-          const hydrated = loadDayPlan(deepLinkedDate);
-          if (hydrated) {
-            setOpenPlan((current) => (current?.date === deepLinkedDate ? hydrated : current));
+      for (const date of dates) {
+        const local = loadDayPlan(date);
+        const remote = remoteByDate.get(date) ?? null;
+        if (!local) {
+          if (remote) {
+            cacheDayPlan(remote);
+            cacheChanged = true;
           }
+          continue;
+        }
+
+        if (!remote || updatedAtMs(local.updatedAt) >= updatedAtMs(remote.updatedAt)) {
+          queuePlanSync(local);
+          continue;
+        }
+        cacheDayPlan(remote);
+        cacheChanged = true;
+      }
+
+      if (cacheChanged) setRevision((value) => value + 1);
+      if (deepLinkedDate) {
+        const hydrated = loadDayPlan(deepLinkedDate);
+        if (hydrated) {
+          setOpenPlan((current) => (current?.date === deepLinkedDate ? hydrated : current));
         }
       }
-    );
+    });
 
     return () => {
       active = false;
     };
-  }, [deepLinkedDate, sandbox, todayISO, upcomingThroughISO, userId]);
+  }, [
+    cloudRefreshRevision,
+    deepLinkedDate,
+    queuePlanSync,
+    reportCloudWriteResult,
+    sandbox,
+    userId
+  ]);
 
   const { planIndex, summaries } = useMemo(() => {
     void revision;
@@ -207,33 +229,6 @@ export default function Planner() {
     });
   }, []);
 
-  function queuePlanSync(plan: DayPlan) {
-    if (!userId || sandbox) return;
-    const previous = pendingCloudPlanRef.current;
-    if (previous && previous.date !== plan.date) {
-      void persistCloudPlan(userId, previous);
-    }
-    pendingCloudPlanRef.current = {
-      date: plan.date,
-      sessions: plan.sessions,
-      updatedAt: plan.updatedAt
-    };
-    if (syncTimerRef.current !== null) window.clearTimeout(syncTimerRef.current);
-    syncTimerRef.current = window.setTimeout(async () => {
-      syncTimerRef.current = null;
-      const pending = pendingCloudPlanRef.current;
-      pendingCloudPlanRef.current = null;
-      if (!pending) return;
-      const error = await persistCloudPlan(userId, pending);
-      if (error && !syncErrorShownRef.current) {
-        syncErrorShownRef.current = true;
-        pushToast('Plan saved on this device, but Telegram sync is offline.', 'neutral');
-      } else if (!error) {
-        syncErrorShownRef.current = false;
-      }
-    }, 400);
-  }
-
   function openDate(iso: string) {
     const existing = loadDayPlan(iso);
     const loadToken = ++cloudLoadTokenRef.current;
@@ -250,20 +245,15 @@ export default function Planner() {
         return;
       }
 
-      const localUpdated = latestLocal ? Date.parse(latestLocal.updatedAt) : 0;
-      const remoteUpdated = Date.parse(remote.updatedAt);
+      const localUpdated = latestLocal ? updatedAtMs(latestLocal.updatedAt) : 0;
+      const remoteUpdated = updatedAtMs(remote.updatedAt);
       if (latestLocal && localUpdated >= remoteUpdated) {
         queuePlanSync(latestLocal);
         return;
       }
 
-      const hydrated: DayPlan = {
-        ...(latestLocal ?? emptyDayPlan(iso)),
-        sessions: remote.sessions,
-        updatedAt: remote.updatedAt
-      };
-      cacheDayPlan(hydrated);
-      setOpenPlan((current) => (current?.date === iso ? hydrated : current));
+      cacheDayPlan(remote);
+      setOpenPlan((current) => (current?.date === iso ? remote : current));
       setRevision((value) => value + 1);
     });
   }
@@ -284,14 +274,10 @@ export default function Planner() {
   function onDeletePlan() {
     if (!selectedDate) return;
     cloudLoadTokenRef.current += 1;
-    if (syncTimerRef.current !== null) window.clearTimeout(syncTimerRef.current);
-    syncTimerRef.current = null;
-    pendingCloudPlanRef.current = null;
+    cloudHydrationTokenRef.current += 1;
     deleteDayPlan(selectedDate);
     if (userId && !sandbox) {
-      void deleteCloudDayPlan(userId, selectedDate).then((error) => {
-        if (error) pushToast('Local plan cleared; Telegram sync will retry later.', 'neutral');
-      });
+      void queuePlannerCloudDelete(userId, selectedDate).then(reportCloudWriteResult);
     }
     setRevision((n) => n + 1);
     closeModal();
@@ -359,7 +345,7 @@ export default function Planner() {
         Today: <span className="u-num text-text">{todayISO}</span>.{' '}
         {sandbox
           ? 'Plans are stored on this device.'
-          : 'Study sessions save locally and sync privately for Telegram.'}
+          : 'Complete plans are saved privately to your account database; this device keeps a fast cache.'}
       </p>
     </div>
   );

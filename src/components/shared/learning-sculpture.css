@@ -1,0 +1,101 @@
+.learning-sculpture {
+  position: relative;
+  isolation: isolate;
+  width: 100%;
+  min-height: 460px;
+  overflow: hidden;
+  contain: layout paint;
+}
+
+.learning-sculpture--compact {
+  min-height: 300px;
+}
+
+.learning-sculpture__canvas {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.learning-sculpture__halo {
+  position: absolute;
+  inset: 9% 10% 13%;
+  border-radius: 50%;
+  background:
+    radial-gradient(ellipse at 55% 40%, rgb(207 89 130 / 13%), transparent 62%),
+    radial-gradient(ellipse at 35% 67%, rgb(219 131 100 / 8%), transparent 54%);
+  filter: blur(18px);
+  pointer-events: none;
+}
+
+.learning-sculpture__ground {
+  position: absolute;
+  z-index: 1;
+  right: 26%;
+  bottom: 7%;
+  left: 26%;
+  height: 5%;
+  border-radius: 50%;
+  background: radial-gradient(ellipse, rgb(217 121 156 / 17%), transparent 70%);
+  filter: blur(13px);
+  pointer-events: none;
+}
+
+.learning-sculpture__fallback {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 60%;
+  max-width: 370px;
+  aspect-ratio: 1;
+  border: 30px solid rgb(193 94 133 / 35%);
+  border-radius: 50%;
+  transform: translate(-50%, -55%) rotate(-28deg) rotateX(38deg);
+  box-shadow:
+    inset 5px 8px 20px rgb(255 197 179 / 15%),
+    3px 8px 30px rgb(231 148 170 / 12%);
+  pointer-events: none;
+}
+
+.learning-sculpture__fallback span {
+  position: absolute;
+  inset: -20px;
+  border: 1px solid rgb(255 183 161 / 60%);
+  border-radius: 50%;
+}
+
+.learning-sculpture__fallback span:nth-child(2) {
+  inset: -10px;
+  border-color: rgb(235 134 174 / 65%);
+}
+
+.learning-sculpture__fallback span:nth-child(3) {
+  inset: 0;
+  border-color: rgb(255 202 179 / 65%);
+}
+
+.learning-sculpture[data-ready='true'] .learning-sculpture__fallback {
+  visibility: hidden;
+}
+
+@media (max-width: 640px) {
+  .learning-sculpture {
+    min-height: 340px;
+  }
+
+  .learning-sculpture--compact {
+    min-height: 250px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .learning-sculpture *,
+  .learning-sculpture *::before,
+  .learning-sculpture *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}

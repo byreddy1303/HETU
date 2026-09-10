@@ -1,708 +1,548 @@
-import { useEffect, useRef, type CSSProperties } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { differenceInCalendarDays, parseISO } from 'date-fns';
-import { motion, useReducedMotion, useScroll, useSpring, useTransform } from 'motion/react';
+import { useReducedMotion } from 'motion/react';
 import {
   ArrowDown,
   ArrowRight,
+  BookOpen,
   Check,
-  CircleDot,
-  Clock3,
+  ChevronRight,
   Fingerprint,
-  Focus,
+  Layers3,
+  LockKeyhole,
+  MousePointer2,
+  Pause,
+  Play,
   RotateCcw,
-  Sparkles
+  ScanLine,
+  SlidersHorizontal
 } from 'lucide-react';
-import Brand, { BrandMark } from '@/components/shared/Brand';
+import Brand from '@/components/shared/Brand';
 import ThemeToggle from '@/components/shared/ThemeToggle';
-import { EXAM_DATE_DEFAULT } from '@/lib/constants';
+import LearningSculpture from '@/components/shared/LearningSculpture';
 import '@/landing.css';
 
-const EVIDENCE = [
+const STAGES = [
   {
-    code: 'W-C',
-    detail: 'concept',
-    subject: 'Theory of Computation',
-    className: 'landing-evidence--one',
-    duration: 7.6
+    name: 'Practice',
+    verb: 'Meet the question.',
+    description:
+      'Solve with intent. Capture your answer, pace, and confidence while the reasoning is fresh.',
+    signal: 'An answer becomes evidence',
+    icon: ScanLine,
+    color: 'rose'
   },
   {
-    code: 'RBS',
-    detail: 'over target',
-    subject: 'Algorithms',
-    className: 'landing-evidence--two',
-    duration: 8.8
+    name: 'Diagnose',
+    verb: 'Find the reason.',
+    description:
+      'Look beneath right or wrong. Connect a recurring pattern to the cause you can actually change.',
+    signal: 'A mistake becomes a connection',
+    icon: Fingerprint,
+    color: 'gold'
   },
   {
-    code: 'RBG',
-    detail: 'could not justify',
-    subject: 'Computer Networks',
-    className: 'landing-evidence--three',
-    duration: 7.1
-  },
-  {
-    code: 'W-R',
-    detail: 'reading',
-    subject: 'Operating Systems',
-    className: 'landing-evidence--four',
-    duration: 9.2
-  },
-  {
-    code: 'W-E',
-    detail: 'execution',
-    subject: 'Engineering Mathematics',
-    className: 'landing-evidence--five',
-    duration: 8.1
+    name: 'Recall',
+    verb: 'Make it stay.',
+    description:
+      'Return without the hints. Rebuild the method, then test your understanding on a fresh problem.',
+    signal: 'A return becomes understanding',
+    icon: RotateCcw,
+    color: 'sage'
   }
 ] as const;
 
-const DIAGNOSIS = [
-  { label: 'Outcome', value: 'RBS · right, but slow', tone: 'warn' },
-  { label: 'Pattern', value: 'Cache address breakdown', tone: 'cobalt' },
-  { label: 'Trigger', value: 'Index and offset looked interchangeable', tone: 'violet' },
-  { label: 'Root cause', value: 'Representation', tone: 'accent' }
-] as const;
+function QuestionExample() {
+  const [step, setStep] = useState(0);
+  const [answer, setAnswer] = useState<number | null>(null);
+  const [revealed, setRevealed] = useState(false);
+  const correct = answer === 8;
+  const panelRef = useRef<HTMLDivElement>(null);
+  const focusNextPanel = useRef(false);
 
-const RECALL_STAGES = [
-  { day: 'D3', title: 'Interrupt the path', body: 'Solve again before the wrong route settles.' },
-  {
-    day: 'D10',
-    title: 'Rebuild it cleanly',
-    body: 'Recall the method without recognition doing the work.'
-  },
-  {
-    day: 'D30',
-    title: 'Prove it stayed',
-    body: 'One final retrieval before the evidence graduates.'
+  function advanceTo(nextStep: number) {
+    focusNextPanel.current = true;
+    setStep(nextStep);
   }
-] as const;
 
-function Reveal({
-  children,
-  className,
-  delay = 0
-}: {
-  children: React.ReactNode;
-  className?: string;
-  delay?: number;
-}) {
-  const reduceMotion = useReducedMotion();
-  return (
-    <motion.div
-      className={className}
-      initial={reduceMotion ? false : { opacity: 0, y: 28 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.22 }}
-      transition={{ duration: 0.72, delay, ease: [0.22, 1, 0.36, 1] }}
-    >
-      {children}
-    </motion.div>
-  );
-}
+  useEffect(() => {
+    if (focusNextPanel.current) {
+      panelRef.current?.focus({ preventScroll: true });
+      focusNextPanel.current = false;
+    }
+  }, [step]);
 
-function SectionHeading({
-  label,
-  title,
-  body,
-  light = false
-}: {
-  label: string;
-  title: React.ReactNode;
-  body: string;
-  light?: boolean;
-}) {
   return (
-    <Reveal className="landing-section-heading">
-      <p className={`landing-kicker${light ? ' landing-kicker--light' : ''}`}>{label}</p>
-      <h2>{title}</h2>
-      <p className={light ? 'landing-copy landing-copy--light' : 'landing-copy'}>{body}</p>
-    </Reveal>
-  );
-}
-
-function FloatingEvidence({ reduceMotion }: { reduceMotion: boolean }) {
-  return (
-    <div className="landing-evidence-field" aria-hidden="true">
-      {EVIDENCE.map((item, index) => (
-        <motion.div
-          key={item.code}
-          className={`landing-evidence ${item.className}`}
-          animate={
-            reduceMotion
-              ? undefined
-              : {
-                  y: [0, index % 2 === 0 ? -12 : 10, 0],
-                  rotate: [0, index % 2 === 0 ? 1.4 : -1.2, 0]
-                }
-          }
-          transition={{
-            duration: item.duration,
-            ease: 'easeInOut',
-            repeat: Infinity,
-            delay: index * -0.9
-          }}
-        >
-          <span>{item.code}</span>
-          <div>
-            <strong>{item.detail}</strong>
-            <small>{item.subject}</small>
-          </div>
-        </motion.div>
-      ))}
+    <div className="observatory-example">
+      <div className="observatory-example__toolbar">
+        <span>
+          <span className="observatory-status-dot" /> Interactive example
+        </span>
+        <span>Computer Organization</span>
+      </div>
+      <div className="observatory-example__steps" role="group" aria-label="Explore the example">
+        {STAGES.map((stage, index) => (
+          <button
+            type="button"
+            key={stage.name}
+            aria-pressed={step === index}
+            onClick={() => setStep(index)}
+          >
+            <span>{index + 1}</span>
+            {stage.name}
+            <ChevronRight size={14} aria-hidden="true" />
+          </button>
+        ))}
+      </div>
+      <div
+        ref={panelRef}
+        className="observatory-example__body"
+        role="region"
+        aria-label={`${STAGES[step].name} example`}
+        tabIndex={-1}
+      >
+        {step === 0 && (
+          <>
+            <div className="observatory-question-meta">
+              <span>Cache addressing</span>
+              <span>Try a quick question</span>
+            </div>
+            <h3>
+              A 16 KiB direct-mapped cache has 64-byte blocks. How many index bits does it need?
+            </h3>
+            <div
+              className="observatory-answers"
+              role="group"
+              aria-label="Choose the number of index bits"
+            >
+              {[6, 8, 10, 14].map((value) => (
+                <button
+                  key={value}
+                  type="button"
+                  aria-pressed={answer === value}
+                  onClick={() => setAnswer(value)}
+                >
+                  <span>{value} bits</span>
+                  {answer === value && <Check size={16} aria-hidden="true" />}
+                </button>
+              ))}
+            </div>
+            <div className="observatory-answer-feedback" aria-live="polite">
+              {answer === null ? (
+                <p>Your answer is just the beginning. Choose an option to see why.</p>
+              ) : (
+                <>
+                  <p>
+                    <strong>{correct ? 'That’s right.' : 'There’s a useful clue here.'}</strong>{' '}
+                    {correct
+                      ? 'Now make the reasoning explicit.'
+                      : 'Separate the block offset from the cache index.'}
+                  </p>
+                  <button type="button" onClick={() => advanceTo(1)}>
+                    Explore the reasoning <ArrowRight size={15} aria-hidden="true" />
+                  </button>
+                </>
+              )}
+            </div>
+          </>
+        )}
+        {step === 1 && (
+          <>
+            <div className="observatory-question-meta">
+              <span>Look beneath the answer</span>
+              <Fingerprint size={18} aria-hidden="true" />
+            </div>
+            <h3>The block size and the number of lines answer different questions.</h3>
+            <div
+              className="observatory-address"
+              aria-label="An address consists of tag bits, 8 index bits, and 6 offset bits"
+            >
+              <span>
+                Tag<small>which block?</small>
+              </span>
+              <span>
+                Index · 8 bits<small>which line?</small>
+              </span>
+              <span>
+                Offset · 6 bits<small>which byte?</small>
+              </span>
+            </div>
+            <p className="observatory-explanation">
+              16,384 bytes ÷ 64 bytes = 256 cache lines. Selecting one of 256 lines needs log₂(256)
+              = <strong>8 index bits</strong>.
+            </p>
+            <div className="observatory-cause">
+              <Fingerprint size={19} aria-hidden="true" />
+              <div>
+                <strong>A cause worth checking</strong>
+                <p>Confusing a location inside a block with a location inside the cache.</p>
+              </div>
+            </div>
+            <button className="observatory-example-next" type="button" onClick={() => advanceTo(2)}>
+              Try a fresh retrieval <ArrowRight size={15} aria-hidden="true" />
+            </button>
+          </>
+        )}
+        {step === 2 && (
+          <>
+            <div className="observatory-question-meta">
+              <span>Fresh transfer check</span>
+              <RotateCcw size={18} aria-hidden="true" />
+            </div>
+            <h3>
+              Same idea. A different cache.
+              <br />
+              What changes with 32 KiB and 128-byte blocks?
+            </h3>
+            <p className="observatory-explanation">
+              Before revealing the answer, reconstruct the number of lines and the number of index
+              bits.
+            </p>
+            <button
+              className="observatory-recall-reveal"
+              type="button"
+              aria-expanded={revealed}
+              aria-controls="recall-answer"
+              onClick={() => setRevealed(!revealed)}
+            >
+              {revealed ? 'Hide the answer' : 'Reveal the reasoning'}
+              <RotateCcw size={16} aria-hidden="true" />
+            </button>
+            <div id="recall-answer" className="observatory-recall-answer" hidden={!revealed}>
+              <strong>Still 8 index bits. Now 7 offset bits.</strong>
+              <p>
+                32,768 ÷ 128 = 256 lines. The line count stays the same; the larger block needs one
+                more offset bit.
+              </p>
+            </div>
+            <p className="observatory-example-note">
+              In your workspace, weak answers enter a spaced recall schedule. This example shows the
+              method without saving any study data.
+            </p>
+          </>
+        )}
+      </div>
+      <div className="observatory-example__footer">
+        <LockKeyhole size={13} aria-hidden="true" /> A small demonstration. Your actual evidence
+        stays yours.
+      </div>
     </div>
   );
 }
 
-function DiagnosticSheet() {
-  const reduceMotion = useReducedMotion();
-  return (
-    <Reveal className="landing-sheet-wrap" delay={0.08}>
-      <motion.div
-        className="landing-sheet-shadow landing-sheet-shadow--back"
-        initial={reduceMotion ? false : { rotate: 0, x: 0, y: 0 }}
-        whileInView={{ rotate: -4, x: -24, y: 18 }}
-        viewport={{ once: true, amount: 0.35 }}
-        transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
-        aria-hidden="true"
-      />
-      <motion.div
-        className="landing-sheet-shadow landing-sheet-shadow--middle"
-        initial={reduceMotion ? false : { rotate: 0, x: 0, y: 0 }}
-        whileInView={{ rotate: 3, x: 20, y: 10 }}
-        viewport={{ once: true, amount: 0.35 }}
-        transition={{ duration: 0.9, delay: 0.08, ease: [0.22, 1, 0.36, 1] }}
-        aria-hidden="true"
-      />
-      <article className="landing-sheet">
-        <header className="landing-sheet__header">
-          <div>
-            <span>Practice evidence</span>
-            <strong>Computer Organization</strong>
-          </div>
-          <div className="landing-sheet__time">
-            <Clock3 size={14} aria-hidden="true" />
-            <span>02:41</span>
-          </div>
-        </header>
-
-        <div className="landing-question">
-          <span>Question 17 · 2 marks</span>
-          <p>
-            The solve was correct. The address split took nearly twice the target time. What
-            actually slowed it down?
-          </p>
-          <div className="landing-question__marks" aria-hidden="true">
-            <i />
-            <i />
-            <i className="is-selected" />
-            <i />
-          </div>
-        </div>
-
-        <div className="landing-diagnosis" aria-label="Example question diagnosis">
-          {DIAGNOSIS.map((item, index) => (
-            <motion.div
-              key={item.label}
-              className={`landing-diagnosis__row landing-diagnosis__row--${item.tone}`}
-              initial={reduceMotion ? false : { opacity: 0, x: 24 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true, amount: 0.6 }}
-              transition={{ duration: 0.52, delay: 0.16 + index * 0.1 }}
-            >
-              <span>{item.label}</span>
-              <strong>{item.value}</strong>
-            </motion.div>
-          ))}
-        </div>
-
-        <footer className="landing-sheet__footer">
-          <div>
-            <RotateCcw size={15} aria-hidden="true" />
-            <span>Returns in 3 days</span>
-          </div>
-          <span>4 tags · about 30 sec</span>
-        </footer>
-      </article>
-    </Reveal>
-  );
-}
-
-function RecallOrbit() {
-  const reduceMotion = useReducedMotion();
-  return (
-    <Reveal className="landing-orbit-wrap">
-      <div className="landing-orbit" aria-hidden="true">
-        <div className="landing-orbit__halo" />
-        <motion.div
-          className="landing-orbit__ring landing-orbit__ring--thirty"
-          animate={reduceMotion ? undefined : { rotate: 360 }}
-          transition={{ duration: 46, repeat: Infinity, ease: 'linear' }}
-        >
-          <span className="landing-orbit__node landing-orbit__node--thirty">D30</span>
-        </motion.div>
-        <motion.div
-          className="landing-orbit__ring landing-orbit__ring--ten"
-          animate={reduceMotion ? undefined : { rotate: -360 }}
-          transition={{ duration: 32, repeat: Infinity, ease: 'linear' }}
-        >
-          <span className="landing-orbit__node landing-orbit__node--ten">D10</span>
-        </motion.div>
-        <motion.div
-          className="landing-orbit__ring landing-orbit__ring--three"
-          animate={reduceMotion ? undefined : { rotate: 360 }}
-          transition={{ duration: 20, repeat: Infinity, ease: 'linear' }}
-        >
-          <span className="landing-orbit__node landing-orbit__node--three">D3</span>
-        </motion.div>
-        <div className="landing-orbit__core">
-          <BrandMark decorative className="landing-orbit__mark" />
-          <span>one mistake</span>
-          <strong>three clean recalls</strong>
-        </div>
-      </div>
-      <div className="landing-recall-list">
-        {RECALL_STAGES.map((stage, index) => (
-          <motion.div
-            className="landing-recall-row"
-            key={stage.day}
-            initial={reduceMotion ? false : { opacity: 0, x: 22 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true, amount: 0.7 }}
-            transition={{ duration: 0.52, delay: index * 0.12 }}
-          >
-            <span>{stage.day}</span>
-            <div>
-              <strong>{stage.title}</strong>
-              <p>{stage.body}</p>
-            </div>
-          </motion.div>
-        ))}
-      </div>
-    </Reveal>
-  );
-}
-
-function SurfaceCard() {
-  const reduceMotion = useReducedMotion();
-  const points = [
-    { cx: 44, cy: 67, tone: 'danger' },
-    { cx: 100, cy: 52, tone: 'warn' },
-    { cx: 159, cy: 58, tone: 'danger' },
-    { cx: 219, cy: 34, tone: 'violet' },
-    { cx: 279, cy: 40, tone: 'warn' },
-    { cx: 340, cy: 22, tone: 'success' }
-  ];
-
-  return (
-    <Reveal className="landing-surface-card" delay={0.08}>
-      <div className="landing-surface-card__top">
-        <div>
-          <span className="landing-ui-label">Mistake surface</span>
-          <strong>17 open</strong>
-        </div>
-        <span className="landing-surface-card__movement">−6 this month</span>
-      </div>
-
-      <div className="landing-surface-chart">
-        <div className="landing-surface-chart__axis">
-          <span>noisy</span>
-          <span>clear</span>
-        </div>
-        <svg viewBox="0 0 384 96" role="img" aria-label="Mistake surface trending down">
-          <path className="landing-surface-chart__grid" d="M12 76H372M12 48H372M12 20H372" />
-          <motion.path
-            className="landing-surface-chart__area"
-            d="M12 74 C48 72, 72 47, 104 52 S157 65, 184 49 S231 27, 260 39 S318 40, 372 17 L372 88 L12 88 Z"
-            initial={reduceMotion ? false : { opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true, amount: 0.6 }}
-            transition={{ duration: 0.8 }}
-          />
-          <motion.path
-            className="landing-surface-chart__line"
-            d="M12 74 C48 72, 72 47, 104 52 S157 65, 184 49 S231 27, 260 39 S318 40, 372 17"
-            initial={reduceMotion ? false : { pathLength: 0 }}
-            whileInView={{ pathLength: 1 }}
-            viewport={{ once: true, amount: 0.6 }}
-            transition={{ duration: 1.35, ease: [0.22, 1, 0.36, 1] }}
-          />
-          {points.map((point, index) => (
-            <motion.circle
-              key={`${point.cx}-${point.cy}`}
-              className={`landing-surface-chart__point landing-surface-chart__point--${point.tone}`}
-              cx={point.cx}
-              cy={point.cy}
-              r="4"
-              initial={reduceMotion ? false : { scale: 0, opacity: 0 }}
-              whileInView={{ scale: 1, opacity: 1 }}
-              viewport={{ once: true }}
-              transition={{
-                type: 'spring',
-                stiffness: 300,
-                damping: 18,
-                delay: 0.25 + index * 0.08
-              }}
-            />
-          ))}
-        </svg>
-        <div className="landing-surface-chart__months">
-          <span>Aug</span>
-          <span>Sep</span>
-          <span>Oct</span>
-          <span>Nov</span>
-          <span>Dec</span>
-        </div>
-      </div>
-
-      <div className="landing-surface-card__grid">
-        <div className="landing-upstream">
-          <span className="landing-ui-label">Upstream weakness · this week</span>
-          <p>Translating a verbal constraint into the right representation.</p>
-          <div>
-            <Focus size={15} aria-hidden="true" />
-            <span>One fix, not five</span>
-          </div>
-        </div>
-        <div className="landing-cause-bars">
-          <span className="landing-ui-label">Root-cause mix</span>
-          {[
-            ['Strategy', '68%'],
-            ['Reading', '44%'],
-            ['Concept', '31%']
-          ].map(([label, width], index) => (
-            <div className="landing-cause-bar" key={label}>
-              <div>
-                <span>{label}</span>
-                <small>{width}</small>
-              </div>
-              <i>
-                <motion.b
-                  initial={reduceMotion ? false : { width: 0 }}
-                  whileInView={{ width }}
-                  viewport={{ once: true, amount: 0.8 }}
-                  transition={{ duration: 0.8, delay: 0.12 + index * 0.1 }}
-                />
-              </i>
-            </div>
-          ))}
-        </div>
-      </div>
-    </Reveal>
-  );
-}
-
-function CausalThread({
-  progress,
-  reduced
-}: {
-  progress: ReturnType<typeof useSpring>;
-  reduced: boolean;
-}) {
-  const path =
-    'M680 160 C810 310 440 410 520 690 C590 930 720 920 628 1190 C540 1450 350 1470 420 1770 C476 2015 666 2030 595 2310 C520 2600 382 2670 470 2940 C550 3190 720 3280 610 3540 C530 3730 395 3820 500 4060 C552 4180 580 4300 505 4480';
-
-  return (
-    <svg
-      className="landing-causal-thread"
-      viewBox="0 0 1000 4600"
-      preserveAspectRatio="none"
-      aria-hidden="true"
-    >
-      <path
-        className="landing-causal-thread__ghost"
-        d={path}
-      />
-      {reduced ? (
-        <path className="landing-causal-thread__live" d={path} />
-      ) : (
-        <motion.path
-          className="landing-causal-thread__live"
-          d={path}
-          style={{ pathLength: progress }}
-        />
-      )}
-    </svg>
-  );
-}
-
 export default function Landing() {
-  const pageRef = useRef<HTMLDivElement>(null);
-  const heroRef = useRef<HTMLElement>(null);
+  const [phase, setPhase] = useState(0);
+  const [paused, setPaused] = useState(false);
   const reduceMotion = useReducedMotion();
-  const { scrollYProgress } = useScroll({
-    target: pageRef,
-    offset: ['start start', 'end end']
-  });
-  const { scrollYProgress: heroProgress } = useScroll({
-    target: heroRef,
-    offset: ['start start', 'end start']
-  });
-  const threadProgress = useSpring(scrollYProgress, { stiffness: 90, damping: 28, mass: 0.45 });
-  const heroY = useTransform(heroProgress, [0, 1], [0, 150]);
-  const heroOpacity = useTransform(heroProgress, [0, 0.82], [1, 0]);
-  const daysLeft = Math.max(0, differenceInCalendarDays(parseISO(EXAM_DATE_DEFAULT), new Date()));
+  const stage = STAGES[phase];
+  const StageIcon = stage.icon;
 
   useEffect(() => {
     const previousTitle = document.title;
-    document.title = 'HETU — Find the reason behind every mistake';
+    document.title = 'HETU — Understand. Rebuild. Remember.';
     return () => {
       document.title = previousTitle;
     };
   }, []);
 
-  function trackPointer(event: React.PointerEvent<HTMLDivElement>) {
-    if (reduceMotion) return;
-    const bounds = event.currentTarget.getBoundingClientRect();
-    const x = (event.clientX - bounds.left) / bounds.width - 0.5;
-    const y = (event.clientY - bounds.top) / bounds.height - 0.5;
-    event.currentTarget.style.setProperty('--landing-pointer-x', `${x * 18}px`);
-    event.currentTarget.style.setProperty('--landing-pointer-y', `${y * 18}px`);
-  }
-
   return (
-    <div
-      ref={pageRef}
-      className="landing-page"
-      onPointerMove={trackPointer}
-      style={
-        {
-          '--landing-pointer-x': '0px',
-          '--landing-pointer-y': '0px'
-        } as CSSProperties
-      }
-    >
-      <a className="landing-skip" href="#landing-main">
-        Skip to the method
+    <div className="observatory-landing">
+      <a className="observatory-skip" href="#observatory-main">
+        Skip to content
       </a>
-      <CausalThread progress={threadProgress} reduced={Boolean(reduceMotion)} />
-
-      <header className="landing-nav">
-        <Link to="/" aria-label="HETU home" className="landing-nav__brand">
-          <Brand size="sm" />
-        </Link>
-        <nav aria-label="Landing page">
-          <a href="#method">The method</a>
-          <a href="#reattempt">Re-attempts</a>
-          <a href="#evidence">Evidence</a>
-        </nav>
-        <div className="landing-nav__actions">
-          <span className="landing-countdown">T−{daysLeft}d</span>
-          <ThemeToggle className="landing-theme-toggle" />
-          <Link to="/auth" className="landing-sign-in">
-            Sign in
+      <div className="observatory-header-shell">
+        <header className="observatory-nav">
+          <Link to="/" aria-label="HETU home" className="observatory-brand">
+            <Brand />
           </Link>
-          <Link to="/request-access" className="landing-nav-cta">
-            Request access <ArrowRight size={14} aria-hidden="true" />
-          </Link>
-        </div>
-      </header>
-
-      <main id="landing-main">
-        <section ref={heroRef} className="landing-hero" aria-labelledby="landing-title">
-          <div className="landing-hero__grid" aria-hidden="true" />
-          <div className="landing-hero__glow" aria-hidden="true" />
-          <FloatingEvidence reduceMotion={Boolean(reduceMotion)} />
-
-          <motion.div
-            className="landing-hero__content"
-            style={reduceMotion ? undefined : { y: heroY, opacity: heroOpacity }}
+          <nav aria-label="Landing page">
+            <a href="#method">The learning loop</a>
+            <a href="#workspace">Your workspace</a>
+          </nav>
+          <div className="observatory-nav__actions">
+            <ThemeToggle className="observatory-theme" />
+            <Link to="/auth" className="observatory-signin">
+              Sign in
+            </Link>
+            <Link to="/request-access" className="observatory-button observatory-button--small">
+              Request access <ArrowRight size={15} aria-hidden="true" />
+            </Link>
+          </div>
+        </header>
+      </div>
+      <main id="observatory-main" tabIndex={-1}>
+        <div className="observatory-opening">
+          <section className="observatory-hero" aria-labelledby="observatory-title">
+            <div className="observatory-hero__copy">
+              <p className="observatory-intro">
+                <span className="observatory-status-dot" /> A focused workspace for GATE CS
+              </p>
+              <h1 id="observatory-title">
+                Understand.
+                <br />
+                Rebuild.
+                <br />
+                Remember.
+              </h1>
+              <p className="observatory-hero__description">
+                Every mistake has a reason. Find yours, connect the dots, and build understanding
+                that stays with you.
+              </p>
+              <div className="observatory-hero__actions">
+                <Link to="/request-access" className="observatory-button">
+                  Request access <ArrowRight size={17} aria-hidden="true" />
+                </Link>
+                <a href="#method" className="observatory-explore">
+                  Explore the method <ArrowDown size={15} aria-hidden="true" />
+                </a>
+              </div>
+              <div className="observatory-hero__footnote">
+                <span>Built for GATE 2027</span>
+                <span>Driven by your evidence</span>
+              </div>
+            </div>
+            <div className="observatory-instrument" data-phase={stage.color}>
+              <div className="observatory-instrument__top">
+                <span>The learning loop</span>
+                {!reduceMotion && (
+                  <button
+                    type="button"
+                    onClick={() => setPaused(!paused)}
+                    aria-label={paused ? 'Resume sculpture motion' : 'Pause sculpture motion'}
+                    aria-pressed={paused}
+                  >
+                    {paused ? (
+                      <Play size={13} aria-hidden="true" />
+                    ) : (
+                      <Pause size={13} aria-hidden="true" />
+                    )}
+                    {paused ? 'Resume' : 'Pause motion'}
+                  </button>
+                )}
+              </div>
+              <LearningSculpture className="observatory-sculpture" phase={phase} paused={paused} />
+              <span className="observatory-orbit-label observatory-orbit-label--practice">
+                Practice<span>Capture the evidence</span>
+              </span>
+              <span className="observatory-orbit-label observatory-orbit-label--diagnose">
+                Diagnose<span>Find the connection</span>
+              </span>
+              <span className="observatory-orbit-label observatory-orbit-label--recall">
+                Recall<span>Rebuild the method</span>
+              </span>
+              <div className="observatory-instrument__caption" aria-live="polite">
+                <span className="observatory-instrument__icon">
+                  <StageIcon size={21} strokeWidth={1.5} aria-hidden="true" />
+                </span>
+                <div>
+                  <span>{stage.name}</span>
+                  <p>{stage.signal}</p>
+                </div>
+                <span className="observatory-instrument__index">0{phase + 1} / 03</span>
+              </div>
+              {!paused && !reduceMotion && (
+                <span className="observatory-pointer-hint">
+                  <MousePointer2 size={12} aria-hidden="true" /> Move your pointer to explore
+                </span>
+              )}
+            </div>
+          </section>
+          <div
+            className="observatory-stage-rail"
+            role="group"
+            aria-label="Explore the learning loop"
           >
-            <motion.div
-              className="landing-hero__mark-wrap"
-              initial={reduceMotion ? false : { opacity: 0, scale: 0.88, rotate: -5 }}
-              animate={{ opacity: 1, scale: 1, rotate: 0 }}
-              transition={{ duration: 0.85, ease: [0.22, 1, 0.36, 1] }}
-            >
-              <BrandMark decorative className="landing-hero__mark" />
-              <span className="landing-hero__mark-ring" aria-hidden="true" />
-            </motion.div>
-            <motion.p
-              className="landing-kicker"
-              initial={reduceMotion ? false : { opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.12 }}
-            >
-              A mistake-surface instrument for GATE CS
-            </motion.p>
-            <motion.h1
-              id="landing-title"
-              initial={reduceMotion ? false : { opacity: 0, y: 24 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.78, delay: 0.16, ease: [0.22, 1, 0.36, 1] }}
-            >
-              Your mistakes
-              <span>are not random.</span>
-            </motion.h1>
-            <motion.p
-              className="landing-hero__lede"
-              initial={reduceMotion ? false : { opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.72, delay: 0.26 }}
-            >
-              HETU traces every wrong, slow, or guessed solve back to its cause—then brings it back
-              when recall can change the outcome.
-            </motion.p>
-            <motion.div
-              className="landing-hero__actions"
-              initial={reduceMotion ? false : { opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.68, delay: 0.34 }}
-            >
-              <Link to="/request-access" className="landing-primary-cta">
-                Trace my weak spots <ArrowRight size={17} aria-hidden="true" />
-              </Link>
-              <a href="#method" className="landing-text-link">
-                See the method <ArrowDown size={15} aria-hidden="true" />
-              </a>
-            </motion.div>
-            <motion.div
-              className="landing-hero__proof"
-              initial={reduceMotion ? false : { opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.7, delay: 0.5 }}
-            >
-              <span>
-                <Fingerprint size={14} /> Local-first
-              </span>
-              <span>
-                <CircleDot size={14} /> No streaks
-              </span>
-              <span>
-                <Focus size={14} /> One fix per week
-              </span>
-            </motion.div>
-          </motion.div>
-
-          <div className="landing-scroll-cue" aria-hidden="true">
-            <span>trace the cause</span>
-            <i>
-              <b />
-            </i>
+            {STAGES.map((item, index) => {
+              const Icon = item.icon;
+              return (
+                <button
+                  key={item.name}
+                  type="button"
+                  aria-pressed={phase === index}
+                  onClick={() => setPhase(index)}
+                >
+                  <span className="observatory-stage-number">0{index + 1}</span>
+                  <div>
+                    <span className="observatory-stage-name">
+                      <Icon size={16} aria-hidden="true" />
+                      {item.name}
+                    </span>
+                    <strong>{item.verb}</strong>
+                    <p>{item.description}</p>
+                  </div>
+                  <ArrowRight size={17} className="observatory-stage-arrow" aria-hidden="true" />
+                </button>
+              );
+            })}
           </div>
-        </section>
+        </div>
 
-        <section className="landing-section landing-method">
-          <div id="method" className="landing-section__inner landing-method__grid">
-            <div className="landing-method__copy">
-              <SectionHeading
-                label="01 · Capture the signal"
-                title={
-                  <>
-                    A solved question is only the <em>surface.</em>
-                  </>
-                }
-                body="The useful part comes next. Four quick tags turn a vague feeling—‘I knew this’—into evidence you can revisit and compare."
-              />
-              <Reveal className="landing-principle">
-                <span>30 sec</span>
-                <p>
-                  Outcome, pattern, trigger, root cause. Short enough to do after every question;
-                  specific enough to reveal repetition.
-                </p>
-              </Reveal>
-            </div>
-            <DiagnosticSheet />
-          </div>
-        </section>
-
-        <section className="landing-section landing-reattempt">
-          <div id="reattempt" className="landing-section__inner landing-reattempt__grid">
-            <SectionHeading
-              light
-              label="02 · Return with intent"
-              title={
-                <>
-                  A mistake should move through time—not live in a <em>graveyard.</em>
-                </>
-              }
-              body="Anything wrong, slow, or guessed enters a quiet recall ladder. Each return asks for a cleaner reconstruction, not a familiar-looking answer."
-            />
-            <RecallOrbit />
-          </div>
-        </section>
-
-        <section className="landing-section landing-evidence-section">
-          <div id="evidence" className="landing-section__inner landing-evidence-section__grid">
-            <SurfaceCard />
-            <div className="landing-evidence-section__copy">
-              <SectionHeading
-                label="03 · Compress the surface"
-                title={
-                  <>
-                    The mess becomes a shape you can <em>act on.</em>
-                  </>
-                }
-                body="Across subjects and sessions, HETU connects repeated causes. Your dashboard orders today’s work and your weekly review chooses one upstream weakness to fix."
-              />
-              <Reveal className="landing-evidence-notes">
-                <div>
-                  <Check size={16} />
-                  <span>Due work rises to the top.</span>
-                </div>
-                <div>
-                  <Check size={16} />
-                  <span>Your own tags explain why.</span>
-                </div>
-                <div>
-                  <Check size={16} />
-                  <span>No leaderboard decides what matters.</span>
-                </div>
-              </Reveal>
-            </div>
-          </div>
-        </section>
-
-        <section className="landing-section landing-manifesto">
-          <div className="landing-manifesto__field" aria-hidden="true">
-            <span>W-C</span>
-            <span>RBS</span>
-            <span>W-R</span>
-            <span>RBG</span>
-            <span>W-E</span>
-          </div>
-          <Reveal className="landing-manifesto__content">
-            <Sparkles size={22} aria-hidden="true" />
-            <p>
-              The goal is not to <em>feel</em> prepared.
-            </p>
-            <h2>The goal is to have evidence.</h2>
-            <span>
-              A quiet record of what failed, what changed, and what you can now retrieve cleanly.
+        <section
+          className="observatory-method observatory-section"
+          id="method"
+          aria-labelledby="method-title"
+        >
+          <div className="observatory-method__copy">
+            <span className="observatory-section-symbol">
+              <Fingerprint size={26} strokeWidth={1.4} aria-hidden="true" />
             </span>
-          </Reveal>
-        </section>
-
-        <section className="landing-section landing-final">
-          <div className="landing-final__mark" aria-hidden="true">
-            <BrandMark decorative />
-          </div>
-          <Reveal className="landing-final__content">
-            <p className="landing-kicker">GATE 2027 · AIR &lt; 100</p>
-            <h2>
-              Find the reason.
+            <h2 id="method-title">
+              The answer is
               <br />
-              Change the outcome.
+              only the beginning.
             </h2>
             <p>
-              Start with five real questions. Tag them honestly. Let the evidence decide what
-              deserves another look.
+              Getting a question wrong is a moment. Understanding why is a turning point. HETU helps
+              you take the next step, with a clear path from practice to lasting recall.
             </p>
-            <div className="landing-final__actions">
-              <Link to="/request-access" className="landing-primary-cta">
-                Request access <ArrowRight size={17} aria-hidden="true" />
-              </Link>
-              <Link to="/auth" className="landing-text-link">
-                I already have an invite
-              </Link>
+            <div className="observatory-method__note">
+              <span />
+              <p>
+                Try the loop for yourself.
+                <br />
+                <strong>One question. A little more clarity.</strong>
+              </p>
             </div>
-          </Reveal>
+            <a className="observatory-inline-link" href="#workspace">
+              See what’s in your workspace <ArrowDown size={15} aria-hidden="true" />
+            </a>
+          </div>
+          <QuestionExample />
+        </section>
+
+        <section
+          id="workspace"
+          className="observatory-workspace observatory-section"
+          aria-labelledby="workspace-title"
+        >
+          <div className="observatory-section-head">
+            <h2 id="workspace-title">
+              A place for your
+              <br />
+              best thinking.
+            </h2>
+            <p>
+              Everything has a place in the loop.
+              <br />
+              Choose your next move, then give it your full attention.
+            </p>
+          </div>
+          <div className="observatory-workspace-grid">
+            <article className="observatory-feature observatory-feature--practice">
+              <div className="observatory-feature__title">
+                <BookOpen size={21} strokeWidth={1.5} aria-hidden="true" />
+                <span>Focused practice</span>
+              </div>
+              <div className="observatory-book-scene" aria-hidden="true">
+                <div className="observatory-book observatory-book--back">
+                  <span>Retrieve</span>
+                </div>
+                <div className="observatory-book observatory-book--middle">
+                  <span>Understand</span>
+                </div>
+                <div className="observatory-book observatory-book--front">
+                  <span>HETU</span>
+                  <strong>
+                    Think it
+                    <br />
+                    through.
+                  </strong>
+                  <span>GATE CS / Practice</span>
+                </div>
+              </div>
+              <h3>Go beyond the answer key.</h3>
+              <p>
+                Practice from the question bank, record your confidence, and keep full papers
+                reserved for exam conditions.
+              </p>
+            </article>
+            <article className="observatory-feature observatory-feature--plan">
+              <div className="observatory-feature__title">
+                <SlidersHorizontal size={21} strokeWidth={1.5} aria-hidden="true" />
+                <span>A deliberate day</span>
+              </div>
+              <div className="observatory-plan-scene" aria-label="Illustrative daily plan">
+                <span className="observatory-preview-label">An example study block</span>
+                <div>
+                  <span className="observatory-plan-dot" />
+                  <span>
+                    Recall what’s due<small>Rebuild before you review</small>
+                  </span>
+                  <RotateCcw size={15} aria-hidden="true" />
+                </div>
+                <div>
+                  <span className="observatory-plan-dot" />
+                  <span>
+                    Make room to focus<small>Your capacity. Your plan.</small>
+                  </span>
+                  <Layers3 size={15} aria-hidden="true" />
+                </div>
+                <div>
+                  <span className="observatory-plan-dot" />
+                  <span>
+                    Practice with intent<small>Turn the next answer into evidence</small>
+                  </span>
+                  <ArrowRight size={15} aria-hidden="true" />
+                </div>
+              </div>
+              <h3>Know what deserves today.</h3>
+              <p>
+                Bring due reviews and planned practice into one ordered list, with room for the time
+                you actually have.
+              </p>
+            </article>
+            <article className="observatory-feature observatory-feature--insight">
+              <div className="observatory-feature__title">
+                <Fingerprint size={21} strokeWidth={1.5} aria-hidden="true" />
+                <span>Connected evidence</span>
+              </div>
+              <div className="observatory-connections" aria-hidden="true">
+                <svg viewBox="0 0 320 190">
+                  <path d="M45 36 Q160 36 160 96M276 40 Q160 40 160 96M42 157 Q160 157 160 96M277 152 Q160 152 160 96" />
+                  <circle cx="45" cy="36" r="5" />
+                  <circle cx="276" cy="40" r="5" />
+                  <circle cx="42" cy="157" r="5" />
+                  <circle cx="277" cy="152" r="5" />
+                </svg>
+                <span className="observatory-connection-core">
+                  <Fingerprint size={32} strokeWidth={1.2} />
+                </span>
+                <span>Patterns</span>
+                <span>Triggers</span>
+                <span>Outcomes</span>
+                <span>Root causes</span>
+              </div>
+              <h3>See the reason underneath.</h3>
+              <p>
+                Connect recurring mistakes across sessions and use your weekly review to choose one
+                upstream weakness to work on.
+              </p>
+            </article>
+          </div>
+        </section>
+
+        <section className="observatory-invitation" aria-labelledby="invitation-title">
+          <div className="observatory-invitation__halo" aria-hidden="true" />
+          <p>Your next session can change what comes after it.</p>
+          <h2 id="invitation-title">
+            A little more clarity.
+            <br />
+            Every time you return.
+          </h2>
+          <Link to="/request-access" className="observatory-button">
+            Request access <ArrowRight size={17} aria-hidden="true" />
+          </Link>
+          <Link to="/auth" className="observatory-invitation__signin">
+            Already have an account? Sign in
+          </Link>
         </section>
       </main>
-
-      <footer className="landing-footer">
-        <Brand size="sm" />
-        <p>The tool compresses your mistake surface. It does not replace your reasoning.</p>
-        <span className="landing-countdown">GATE CS · T−{daysLeft}d</span>
+      <footer className="observatory-footer">
+        <Link to="/" aria-label="HETU home">
+          <Brand size="sm" />
+        </Link>
+        <p>Find the reason. Change the outcome.</p>
+        <span>Made for thoughtful practice.</span>
       </footer>
     </div>
   );

@@ -37,6 +37,8 @@ import {
 import { useAuthStore } from '@/stores/auth';
 import { useLogStore } from '@/stores/log';
 import { usePrefsStore } from '@/stores/prefs';
+import { EMPTY_PYQ_PREFERENCES, usePyqPreferencesStore } from '@/stores/pyq-preferences';
+import { EMPTY_PLANNER_TEMPLATES, usePlannerTemplatesStore } from '@/stores/planner-templates';
 import { useSessionStore } from '@/stores/session';
 
 const USER_ID = '33333333-3333-4333-8333-333333333333';
@@ -70,6 +72,46 @@ function remoteAccountRows(dailyQuestionTarget = 41) {
           startedAt: null,
           loggedCount: 2,
           draft: null
+        }
+      }
+    },
+    {
+      namespace: 'pyq_preferences',
+      payload: {
+        schemaVersion: 1,
+        data: {
+          lastConfig: null,
+          lastPreset: 'repair',
+          selectionSeed: 'remote-repair-set',
+          savedPrescriptions: []
+        }
+      }
+    },
+    {
+      namespace: 'planner_templates',
+      payload: {
+        schemaVersion: 1,
+        data: {
+          templates: [
+            {
+              id: 'remote-template',
+              name: 'Remote repair block',
+              block: {
+                subject: 'Algorithms',
+                subjectId: 'algorithms',
+                customSubject: null,
+                durationMin: 45,
+                mode: 'PYQ Practice',
+                priority: 'P1 Critical',
+                target: 'Repair graph mistakes',
+                resource: null,
+                startAt: null
+              },
+              recurrence: null,
+              createdAt: '2026-09-01T10:00:00.000Z',
+              updatedAt: '2026-09-01T10:00:00.000Z'
+            }
+          ]
         }
       }
     }
@@ -113,6 +155,8 @@ describe('account-state cold-start migration', () => {
       loggedCount: 4,
       draft: null
     });
+    usePyqPreferencesStore.setState({ ...EMPTY_PYQ_PREFERENCES });
+    usePlannerTemplatesStore.setState({ ...EMPTY_PLANNER_TEMPLATES });
   });
 
   afterEach(() => {
@@ -121,16 +165,18 @@ describe('account-state cold-start migration', () => {
     localStorage.clear();
   });
 
-  it('upserts all three local namespaces when the account has no database rows yet', async () => {
+  it('upserts every local namespace when the account has no database rows yet', async () => {
     await retryAccountStateSync(USER_ID);
     await flushAccountStateWrites(USER_ID);
 
     expect(mocks.query.in).toHaveBeenCalledWith('namespace', [
       'preferences',
       'active_session',
-      'log_draft'
+      'log_draft',
+      'pyq_preferences',
+      'planner_templates'
     ]);
-    expect(mocks.query.upsert).toHaveBeenCalledTimes(3);
+    expect(mocks.query.upsert).toHaveBeenCalledTimes(5);
     expect(
       mocks.query.upsert.mock.calls.every(
         ([, options]) => options?.onConflict === 'user_id,namespace'
@@ -179,6 +225,22 @@ describe('account-state cold-start migration', () => {
         }
       }
     });
+    expect(byNamespace.get('pyq_preferences')).toMatchObject({
+      user_id: USER_ID,
+      namespace: 'pyq_preferences',
+      payload: {
+        schemaVersion: 1,
+        data: EMPTY_PYQ_PREFERENCES
+      }
+    });
+    expect(byNamespace.get('planner_templates')).toMatchObject({
+      user_id: USER_ID,
+      namespace: 'planner_templates',
+      payload: {
+        schemaVersion: 1,
+        data: EMPTY_PLANNER_TEMPLATES
+      }
+    });
     expect(hasPendingAccountStateWrites(USER_ID)).toBe(false);
   });
 
@@ -203,6 +265,69 @@ describe('account-state cold-start migration', () => {
       loggedCount: 2,
       draft: null
     });
+    expect(usePyqPreferencesStore.getState()).toMatchObject({
+      lastPreset: 'repair',
+      selectionSeed: 'remote-repair-set',
+      savedPrescriptions: []
+    });
+    expect(usePlannerTemplatesStore.getState().templates).toEqual([
+      expect.objectContaining({
+        id: 'remote-template',
+        name: 'Remote repair block',
+        block: expect.objectContaining({
+          subject: 'Algorithms',
+          subjectId: 'algorithms',
+          durationMin: 45,
+          mode: 'PYQ Practice'
+        })
+      })
+    ]);
+    expect(hasPendingAccountStateWrites(USER_ID)).toBe(false);
+  });
+
+  it('mirrors Planner template edits through their own retryable namespace', async () => {
+    mocks.query.in.mockResolvedValue({ data: remoteAccountRows(), error: null });
+    await retryAccountStateSync(USER_ID);
+    mocks.query.upsert.mockClear();
+
+    usePlannerTemplatesStore.getState().saveTemplate({
+      id: 'local-template',
+      name: 'Local focused block',
+      block: {
+        subject: 'Databases',
+        subjectId: 'databases',
+        customSubject: null,
+        durationMin: 60,
+        mode: 'Revision',
+        priority: 'P2 High',
+        target: 'Review normalization',
+        resource: null,
+        startAt: null
+      },
+      recurrence: null
+    });
+
+    await flushAccountStateWrites(USER_ID);
+
+    expect(mocks.query.upsert).toHaveBeenCalledTimes(1);
+    expect(mocks.query.upsert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        user_id: USER_ID,
+        namespace: 'planner_templates',
+        payload: expect.objectContaining({
+          schemaVersion: 1,
+          data: expect.objectContaining({
+            templates: expect.arrayContaining([
+              expect.objectContaining({ id: 'local-template', name: 'Local focused block' })
+            ])
+          })
+        })
+      }),
+      { onConflict: 'user_id,namespace' }
+    );
+    expect(
+      localStorage.getItem(`air.account-state-pending.${USER_ID}.planner_templates`)
+    ).toBeNull();
     expect(hasPendingAccountStateWrites(USER_ID)).toBe(false);
   });
 
@@ -239,9 +364,7 @@ describe('account-state cold-start migration', () => {
       }),
       { onConflict: 'user_id,namespace' }
     );
-    expect(
-      localStorage.getItem(`air.account-state-pending.${USER_ID}.preferences`)
-    ).toBeNull();
+    expect(localStorage.getItem(`air.account-state-pending.${USER_ID}.preferences`)).toBeNull();
     expect(hasPendingAccountStateWrites(USER_ID)).toBe(false);
   });
 });

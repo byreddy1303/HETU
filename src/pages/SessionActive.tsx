@@ -56,7 +56,8 @@ async function reconcilePattern(userId: string, subject: string, name: string) {
 export default function SessionActive() {
   const { id = '' } = useParams();
   const navigate = useNavigate();
-  const { userId } = useAuth();
+  const { userId, profile } = useAuth();
+  const timeZone = profile?.timezone ?? 'Asia/Kolkata';
   const store = useSessionStore();
 
   const session = useLiveQuery(async () => (await db.sessions.get(id)) ?? null, [id]);
@@ -153,7 +154,9 @@ export default function SessionActive() {
     };
     await writeLocal('questions', q);
     if (draft.pattern_name) await reconcilePattern(userId, source.subject, draft.pattern_name);
-    if (needsReattempt(draft.outcome)) await scheduleReattempt(userId, q.id);
+    if (needsReattempt(draft.outcome)) {
+      await scheduleReattempt(userId, q.id, session.date, timeZone);
+    }
     if (planned && taggedCount + 1 >= planned) {
       await finish();
       return;

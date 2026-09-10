@@ -8,6 +8,7 @@ import { createPyqSessionRow } from '@/lib/pyq-session';
 import { writeLocal } from '@/lib/sync';
 import { secondsToClock } from '@/lib/utils';
 import Pyq from '@/pages/Pyq';
+import { usePyqPreferencesStore } from '@/stores/pyq-preferences';
 
 const USER = '00000000-0000-4000-8000-000000000001';
 
@@ -90,6 +91,7 @@ vi.mock('@/lib/sync', async (importOriginal) => {
 describe('PYQ mode selection and pause controls', () => {
   beforeEach(async () => {
     vi.mocked(writeLocal).mockClear();
+    usePyqPreferencesStore.getState().reset();
     vi.stubGlobal('scrollTo', vi.fn());
     vi.spyOn(globalThis, 'fetch').mockImplementation(async (input) => {
       const url = new URL(String(input), 'https://air-journal.test');

@@ -149,10 +149,10 @@ describe('sub-scores', () => {
     expect(coverage(TARGET_PATTERN_LIBRARY * 2)).toBe(1);
   });
 
-  it('retention is 0 with no re-attempts and 1 when all are stabilised', () => {
+  it('credits only a demonstrated due-D30 pass, not a row waiting at D30', () => {
     expect(retention([])).toBe(0);
     expect(retention([reattempt('D3'), reattempt('D10')])).toBe(0);
-    expect(retention([reattempt('D30'), reattempt('MASTERED')])).toBe(1);
+    expect(retention([reattempt('D30'), reattempt('MASTERED')])).toBe(0.5);
   });
 
   it('calibration uses correct/wrong events and includes uncertain answers', () => {
@@ -452,10 +452,10 @@ describe('computeReadiness', () => {
     ];
     const result = computeReadiness({ questions: [], pyqAttempts: attempts, reattempts, patterns });
     expect(result.coverage).toBeCloseTo(0.5, 3);
-    expect(result.retention).toBeCloseTo(0.375, 3);
+    expect(result.retention).toBeCloseTo(0.125, 3);
     expect(result.calibration).toBeCloseTo(0.2, 3);
     expect(result.surface).toBeCloseTo(0.188, 3);
-    expect(result.score).toBe(33);
+    expect(result.score).toBe(27);
   });
 
   it('matches the weekly edge-function scorer', () => {
@@ -530,7 +530,7 @@ describe('computeReadiness', () => {
     expect(subjectBeforeDue.counts).toMatchObject({ eligibleReattempts: 0, stabilised: 0 });
     expect(computeReadiness({ ...inputs, asOfDate: '2026-08-23' }).counts).toMatchObject({
       eligibleReattempts: 1,
-      stabilised: 1
+      stabilised: 0
     });
   });
 });

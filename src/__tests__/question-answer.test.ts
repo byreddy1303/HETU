@@ -53,4 +53,28 @@ describe('question answer persistence', () => {
       450
     );
   });
+
+  it('persists one valid structured NAT rule and normalizes inclusive range order', () => {
+    const draft = emptyDraft('Algorithms', '2026-07-22');
+    const ranged = applyDraftToRow(question, {
+      ...draft,
+      format: 'NAT',
+      natToleranceAbs: 0.5,
+      natAcceptedMin: 2,
+      natAcceptedMax: 1
+    });
+
+    expect(ranged).toMatchObject({
+      nat_tolerance_abs: null,
+      nat_accepted_min: 1,
+      nat_accepted_max: 2
+    });
+    expect(
+      applyDraftToRow(question, {
+        ...draft,
+        format: 'NAT',
+        natToleranceAbs: -0.1
+      }).nat_tolerance_abs
+    ).toBeNull();
+  });
 });

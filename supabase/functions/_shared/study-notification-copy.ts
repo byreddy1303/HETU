@@ -53,7 +53,7 @@ export function formatMinutes(totalMinutes: number): string {
 export function parseStudyPlanBlocks(value: unknown): StudyPlanBlock[] {
   if (!Array.isArray(value)) return [];
   const blocks: StudyPlanBlock[] = [];
-  for (const item of value.slice(0, 24)) {
+  for (const item of openPlannerSessions(value)) {
     if (!item || typeof item !== 'object') continue;
     const row = item as Record<string, unknown>;
     const subject = clean(row.subject, 80);
@@ -86,7 +86,7 @@ export function detailedDayPlanCopy(input: DetailedPlanInput): {
   title: string;
   body: string;
 } {
-  const blocks = input.blocks.slice(0, 24);
+  const blocks = input.blocks;
   const items = input.openItems.slice(0, 24);
   const totalMinutes = blocks.reduce((sum, block) => sum + block.durationMin, 0);
   const hasPlan = blocks.length > 0 || items.length > 0;
@@ -158,3 +158,4 @@ export function dailyPyqCopy(input: PyqReminderInput): { title: string; body: st
     body: `${plural(input.attemptedLast24h, 'PYQ')} solved in the last 24h. Start today’s subject-wise set now and complete at least 10 questions.`
   };
 }
+import { openPlannerSessions } from './planner-reminders.ts';

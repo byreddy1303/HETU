@@ -89,6 +89,12 @@ export default function QuestionEditor({
     onChange({ ...draft, [k]: v });
   }
 
+  function optionalNumber(value: string): number | null {
+    if (value.trim() === '') return null;
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : null;
+  }
+
   async function pickImage(file: File | undefined) {
     if (!file) return;
     setImageError(null);
@@ -224,6 +230,58 @@ export default function QuestionEditor({
           </p>
         </Field>
       </div>
+
+      {draft.format === 'NAT' ? (
+        <div className="rounded border border-ink-violet/15 bg-ink-violet/5 px-3 py-3">
+          <p className="u-label text-ink-violet">Numeric acceptance rule</p>
+          <p className="mt-1 text-[11px] leading-relaxed text-text-faint">
+            Leave all three blank for an exact numeric match. Use either an absolute ± tolerance
+            or an inclusive minimum/maximum range.
+          </p>
+          <div className="mt-3 grid gap-3 sm:grid-cols-3">
+            <Field label="± tolerance">
+              <Input
+                type="number"
+                min="0"
+                step="any"
+                value={draft.natToleranceAbs ?? ''}
+                onChange={(event) => set('natToleranceAbs', optionalNumber(event.target.value))}
+                placeholder="0.01"
+              />
+            </Field>
+            <Field label="Inclusive minimum">
+              <Input
+                type="number"
+                step="any"
+                value={draft.natAcceptedMin ?? ''}
+                onChange={(event) => set('natAcceptedMin', optionalNumber(event.target.value))}
+                placeholder="1.49"
+              />
+            </Field>
+            <Field label="Inclusive maximum">
+              <Input
+                type="number"
+                step="any"
+                value={draft.natAcceptedMax ?? ''}
+                onChange={(event) => set('natAcceptedMax', optionalNumber(event.target.value))}
+                placeholder="1.51"
+              />
+            </Field>
+          </div>
+          {(draft.natAcceptedMin == null) !== (draft.natAcceptedMax == null) ? (
+            <p role="alert" className="mt-2 text-[11px] text-warn">
+              Enter both range endpoints to save an inclusive range.
+            </p>
+          ) : null}
+          {draft.natToleranceAbs != null &&
+          draft.natAcceptedMin != null &&
+          draft.natAcceptedMax != null ? (
+            <p role="status" className="mt-2 text-[11px] text-text-muted">
+              The inclusive range is authoritative; the tolerance will not be saved.
+            </p>
+          ) : null}
+        </div>
+      ) : null}
 
       {/* Photo — available for every source, always. */}
       <Field label="Question photo (optional)">

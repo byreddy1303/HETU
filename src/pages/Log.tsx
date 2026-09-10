@@ -27,7 +27,15 @@ import { needsReattempt, scheduleReattempt } from '@/lib/reattempt';
 import { useAuth } from '@/hooks/useAuth';
 import { useLogStore } from '@/stores/log';
 import { OUTCOME_BY_CODE } from '@/lib/constants';
-import { cn, formatDate, nowISO, plural, secondsToClock, todayISO, uuid } from '@/lib/utils';
+import {
+  cn,
+  formatDate,
+  nowISO,
+  plural,
+  secondsToClock,
+  todayISOInTimeZone,
+  uuid
+} from '@/lib/utils';
 import { subjectInk } from '@/lib/subjectInk';
 import QuestionEditor, { DeleteBar } from '@/components/shared/QuestionEditor';
 import AnswerReveal from '@/components/shared/AnswerReveal';
@@ -60,8 +68,9 @@ async function reconcilePattern(userId: string, subject: string, name: string) {
 }
 
 export default function Log() {
-  const { userId } = useAuth();
-  const today = todayISO();
+  const { userId, profile } = useAuth();
+  const timeZone = profile?.timezone ?? 'Asia/Kolkata';
+  const today = todayISOInTimeZone(timeZone);
 
   const {
     mode,
@@ -184,7 +193,9 @@ export default function Log() {
       const row = applyDraftToRow(skeleton, draft);
       await writeLocal('questions', row);
       if (row.pattern_name) await reconcilePattern(userId, row.subject, row.pattern_name);
-      if (needsReattempt(row.outcome)) await scheduleReattempt(userId, row.id);
+      if (needsReattempt(row.outcome)) {
+        await scheduleReattempt(userId, row.id, today, timeZone);
+      }
       setFlash(row.id);
       setTimeout(() => setFlash(null), 2200);
 

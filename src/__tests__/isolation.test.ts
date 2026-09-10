@@ -9,6 +9,8 @@ import 'fake-indexeddb/auto';
 import { DEFAULT_PREFERENCES, usePrefsStore } from '@/stores/prefs';
 import { useSessionStore } from '@/stores/session';
 import { useLogStore } from '@/stores/log';
+import { EMPTY_PYQ_PREFERENCES, usePyqPreferencesStore } from '@/stores/pyq-preferences';
+import { EMPTY_PLANNER_TEMPLATES, usePlannerTemplatesStore } from '@/stores/planner-templates';
 import { db } from '@/lib/db';
 import { wipeLocalState } from '@/lib/isolation';
 
@@ -22,6 +24,38 @@ async function seedAll() {
   // Log: pretend we're mid-batch.
   useLogStore.getState().beginMulti('sess-456');
   useLogStore.getState().bumpLogged();
+  usePyqPreferencesStore.getState().remember(
+    {
+      bookSlug: 'gate-cse',
+      subjectSlug: 'algorithms',
+      topicSlug: 'all',
+      fromYear: 1990,
+      toYear: 2026,
+      type: 'all',
+      order: 'random',
+      count: '10',
+      history: 'all',
+      mode: 'practice'
+    },
+    'diagnose',
+    'isolation-proof'
+  );
+  usePlannerTemplatesStore.getState().saveTemplate({
+    id: 'planner-template-1',
+    name: 'Morning algorithms',
+    block: {
+      subject: 'Algorithms',
+      subjectId: 'algorithms',
+      customSubject: null,
+      durationMin: 60,
+      mode: 'Problem Solving',
+      priority: 'P2 High',
+      target: 'Solve graph problems',
+      resource: null,
+      startAt: '07:00'
+    },
+    recurrence: null
+  });
   // Dexie: real row + meta entry.
   await db.meta.put({ key: 'welcome_seen_at', value: new Date().toISOString() });
   await db.questions.add({
@@ -61,6 +95,8 @@ describe('wipeLocalState()', () => {
     usePrefsStore.setState({ ...DEFAULT_PREFERENCES });
     useSessionStore.getState().end();
     useLogStore.getState().end();
+    usePyqPreferencesStore.setState({ ...EMPTY_PYQ_PREFERENCES });
+    usePlannerTemplatesStore.setState({ ...EMPTY_PLANNER_TEMPLATES });
   });
 
   it('resets zustand stores back to their initial state', async () => {
@@ -68,6 +104,8 @@ describe('wipeLocalState()', () => {
     expect(usePrefsStore.getState().dailyQuestionTarget).toBe(42);
     expect(useSessionStore.getState().sessionId).toBe('s-123');
     expect(useLogStore.getState().mode).toBe('multi');
+    expect(usePyqPreferencesStore.getState().lastPreset).toBe('diagnose');
+    expect(usePlannerTemplatesStore.getState().templates).toHaveLength(1);
 
     await wipeLocalState();
 
@@ -79,6 +117,8 @@ describe('wipeLocalState()', () => {
     expect(useSessionStore.getState().mode).toBe('solve');
     expect(useLogStore.getState().mode).toBe('idle');
     expect(useLogStore.getState().loggedCount).toBe(0);
+    expect(usePyqPreferencesStore.getState()).toMatchObject(EMPTY_PYQ_PREFERENCES);
+    expect(usePlannerTemplatesStore.getState()).toMatchObject(EMPTY_PLANNER_TEMPLATES);
   });
 
   it('wipes Dexie tables including meta', async () => {
@@ -97,6 +137,8 @@ describe('wipeLocalState()', () => {
     expect(localStorage.getItem('air.prefs')).toBeNull();
     expect(localStorage.getItem('air.session')).toBeNull();
     expect(localStorage.getItem('air.log')).toBeNull();
+    expect(localStorage.getItem('air.pyq-preferences')).toBeNull();
+    expect(localStorage.getItem('air.planner-templates')).toBeNull();
     expect(localStorage.getItem('air-journal:readiness:v3:u-1:watchlist')).toBeNull();
     // Non-app keys must survive — never touch storage we don't own.
     expect(localStorage.getItem('unrelated.key')).toBe('keep-me');

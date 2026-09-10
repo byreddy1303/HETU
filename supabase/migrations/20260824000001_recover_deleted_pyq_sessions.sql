@@ -32,6 +32,11 @@ declare
   v_q_coa1  text[];
   v_q_coa2  text[];
 begin
+  -- This repair applies only to the existing account. Fresh local databases
+  -- and new installations have no such history to restore.
+  if not exists (select 1 from public.users where id = v_uid) then
+    return;
+  end if;
 
   -- ── 0. Bypass immutability trigger ─────────────────────────────────────
   ALTER TABLE public.pyq_attempts DISABLE TRIGGER pyq_attempts_immutable;

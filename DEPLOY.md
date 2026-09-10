@@ -2,6 +2,11 @@
 
 Follow this document top-to-bottom to take HETU from a fresh clone to a working production URL with a functional access-request pipeline. Every step is idempotent — you can run the whole thing again to roll changes.
 
+For the closed learning loop update, first follow [the dedicated release gate](docs/closed-loop-release.md).
+Its versioned Planner RPC and recovery tables must be available before the new client and notification
+functions ship. The guide also covers already-recorded empty migration scaffolds, backup v3, and
+the Android/multi-device checks that are not established by a local build.
+
 ## 0. Prerequisites
 
 - Node 22 LTS or newer locally (required by the maintained Capacitor toolchain).

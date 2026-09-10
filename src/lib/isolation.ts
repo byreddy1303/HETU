@@ -8,6 +8,8 @@ import { DEFAULT_PREFERENCES, usePrefsStore } from '@/stores/prefs';
 import { useSessionStore } from '@/stores/session';
 import { useLogStore } from '@/stores/log';
 import { resetTopicProgressMemory } from '@/stores/topic-progress';
+import { usePyqPreferencesStore } from '@/stores/pyq-preferences';
+import { usePlannerTemplatesStore } from '@/stores/planner-templates';
 
 const KNOWN_LOCALSTORAGE_KEYS = ['air.prefs', 'air.session', 'air.log'];
 
@@ -39,6 +41,16 @@ export async function wipeLocalState(): Promise<void> {
     useLogStore.getState().end();
   } catch {
     failures.push('log draft memory');
+  }
+  try {
+    usePyqPreferencesStore.getState().reset();
+  } catch {
+    failures.push('PYQ preferences memory');
+  }
+  try {
+    usePlannerTemplatesStore.getState().reset();
+  } catch {
+    failures.push('Planner templates memory');
   }
   try {
     resetTopicProgressMemory();

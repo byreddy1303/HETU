@@ -334,6 +334,51 @@ describe('sync engine (F1.3)', () => {
     ).toBe('SKIP');
   });
 
+  it('keeps learning events append-only across idempotent writes, batches, and deletes', async () => {
+    const event = {
+      id: 'event-append-only',
+      user_id: USER,
+      learning_item_id: 'learning-item-1',
+      event_type: 'created',
+      occurred_at: '2026-08-20T09:00:00.000Z',
+      local_date: '2026-08-20',
+      timezone: 'Asia/Kolkata',
+      source_pyq_attempt_id: null,
+      recovery_session_id: null,
+      grade: null,
+      is_correct: null,
+      answer: null,
+      confidence: null,
+      time_spent_ms: null,
+      hint_used: false,
+      idempotency_key: 'created:learning-item-1',
+      metadata: { source: 'test' },
+      created_at: '2026-08-20T09:00:00.000Z'
+    };
+    await writeLocal('learning_events', event);
+    await expect(writeLocal('learning_events', { ...event })).resolves.toBeUndefined();
+    await expect(
+      writeLocal('learning_events', { ...event, metadata: { source: 'rewritten' } })
+    ).rejects.toThrow('Learning event event-append-only is append-only.');
+    await expect(
+      writeLocalBatch([
+        { name: 'sessions', row: sessionRow('event-batch-rollback') },
+        {
+          name: 'learning_events',
+          row: { ...event, event_type: 'reopened' } as { id: string } & Record<string, unknown>
+        }
+      ])
+    ).rejects.toThrow('Learning event event-append-only is append-only.');
+    await expect(deleteLocal('learning_events', event.id)).rejects.toThrow(
+      'Learning events cannot be deleted.'
+    );
+    expect(await table('sessions').get('event-batch-rollback')).toBeUndefined();
+    expect(await table('learning_events').get(event.id)).toMatchObject({
+      event_type: 'created',
+      metadata: { source: 'test' }
+    });
+  });
+
   it('rolls back a mixed local batch when it would mutate a receipt', async () => {
     await seed(
       'pyq_attempts',

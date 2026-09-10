@@ -5,6 +5,7 @@ import {
   GATE_2027_BLUEPRINT,
   GATE_2027_OFFICIAL_TOPIC_LEAVES,
   GATE_2027_SUBJECTS,
+  gate2027BankSubjectSlugs,
   gate2027BankTopicStatus,
   gate2027Subject
 } from '@/lib/gate-2027';
@@ -30,6 +31,14 @@ describe('official GATE 2027 registry', () => {
     expect(GATE_2027_SUBJECTS.map((subject) => subject.id)).toEqual(CANONICAL_SUBJECT_IDS);
     expect(new Set(GATE_2027_SUBJECTS.map((subject) => subject.id))).toHaveLength(12);
     expect(GATE_2027_SUBJECTS.every((subject) => subject.officialCurrent.length > 0)).toBe(true);
+  });
+
+  it('maps canonical syllabus subjects to every immutable bank file deterministically', () => {
+    expect(gate2027BankSubjectSlugs('programming-data-structures')).toEqual([
+      'c-programming',
+      'data-structure'
+    ]);
+    expect(gate2027BankSubjectSlugs('operating-systems')).toEqual(['operating-systems']);
   });
 
   it('exposes current leaves and non-current scope metadata separately', () => {

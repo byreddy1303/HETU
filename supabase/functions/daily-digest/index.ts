@@ -13,7 +13,7 @@
 //   quote           — deterministic per-day pick, one per user
 //   re_attempts     — count + up-to-8 lines grouped by subject
 //   planner         — today's synced calendar study sessions
-//   planner_items   — legacy plan_items_due_on, for email compatibility
+//   planner_items   — unfinished unified DayPlan blocks, also used by email
 //   weekly_fix      — Mondays only, latest 'this_weeks_fix' if present
 //
 // Delivery: optional email and opt-in Telegram bot message. Delivery markers
@@ -25,6 +25,7 @@ import { jwtRoleClaim } from '../_shared/cron-auth.ts';
 import { isDigestTimeDue, localDigestClock } from '../_shared/digest-schedule.ts';
 import { sendEmail } from '../_shared/email.ts';
 import { greetingForHour, pickQuoteForDay } from '../_shared/quotes.ts';
+import { openPlannerSessions } from '../_shared/planner-reminders.ts';
 import {
   airJournalUrl,
   parseTelegramStudySessions,
@@ -286,12 +287,13 @@ async function buildDigest(
     .select('sessions')
     .eq('user_id', u.id)
     .eq('plan_date', isoDate)
+    .is('deleted_at', null)
     .maybeSingle();
   if (storedPlanError) {
     console.error('Planner day load failed:', u.id, storedPlanError.message);
   }
   const studySessions = parseTelegramStudySessions(
-    (storedPlan as { sessions?: unknown } | null)?.sessions
+    openPlannerSessions((storedPlan as { sessions?: unknown } | null)?.sessions)
   );
 
   // Re-attempts due today (not yet done)
@@ -323,25 +325,13 @@ async function buildDigest(
     );
   }
 
-  // Planner items due today, minus completed
-  const { data: plannerDue } = await admin.rpc('plan_items_due_on', {
-    uid: u.id,
-    on_date: isoDate
-  });
-  const planItems =
-    (plannerDue as {
-      id: string;
-      title: string;
-      subject: string | null;
-      target_min: number | null;
-    }[]) ?? [];
-  const { data: completions } = await admin
-    .from('plan_item_completions')
-    .select('item_id')
-    .eq('user_id', u.id)
-    .eq('on_date', isoDate);
-  const doneIds = new Set(((completions as { item_id: string }[]) ?? []).map((c) => c.item_id));
-  const openItems = planItems.filter((i) => !doneIds.has(i.id));
+  // Every channel reads the same remaining blocks, including migrated legacy work.
+  const openItems = studySessions.map((session, index) => ({
+    id: `day-block-${index}`,
+    title: session.target || session.mode,
+    subject: session.subject === 'Custom...' ? session.customSubject || session.subject : session.subject,
+    target_min: session.durationMin
+  }));
 
   // Weekly fix — only on Mondays (ISO weekday 1). JS getUTCDay/Intl short: Mon=1.
   let weeklyFix: string | null = null;

@@ -75,7 +75,7 @@ export function parseTelegramCommand(text: string | undefined): TelegramCommand 
 export function parseTelegramStudySessions(value: unknown): TelegramStudySession[] {
   if (!Array.isArray(value)) return [];
   const sessions: TelegramStudySession[] = [];
-  for (const item of value.slice(0, 24)) {
+  for (const item of value) {
     if (!item || typeof item !== 'object') continue;
     const row = item as Record<string, unknown>;
     const subject = typeof row.subject === 'string' ? row.subject.trim().slice(0, 120) : '';

@@ -41,7 +41,7 @@ export interface ReadinessSnapshot {
   calibration: number;
   surface: number;
   daysToExam: number;
-  /** Version 1 was Journal-only. Version 2 uses the immutable attempt ledger. */
+  /** v1 was Journal-only; v2 added attempt receipts; v3 requires a due-D30 pass. */
   calculationVersion: number;
   evidenceCounts?: Record<string, number>;
 }

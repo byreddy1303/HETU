@@ -95,8 +95,11 @@ describe('native Planner sheets', () => {
     await user.type(screen.getByRole('searchbox', { name: 'Search subjects' }), 'operating');
     await user.click(screen.getByRole('button', { name: 'Operating Systems' }));
 
-    fireEvent.change(screen.getByRole('spinbutton'), { target: { value: '90' } });
-    const [mode, priority] = screen.getAllByRole('combobox');
+    fireEvent.change(screen.getByRole('spinbutton', { name: 'Action 1 duration minutes' }), {
+      target: { value: '90' }
+    });
+    const mode = screen.getByRole('combobox', { name: 'Action 1 study mode' });
+    const priority = screen.getByRole('combobox', { name: 'Action 1 priority' });
     await user.selectOptions(mode, 'PYQ Practice');
     await user.selectOptions(priority, 'P1 Critical');
     await user.type(

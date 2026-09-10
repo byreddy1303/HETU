@@ -26,11 +26,27 @@ import {
 } from '@/stores/session';
 import { EMPTY_LOG_DRAFT, useLogStore, type LogDraftSnapshot, type LogMode } from '@/stores/log';
 import { useAuthStore } from '@/stores/auth';
+import {
+  normalizePyqPreferencesSnapshot,
+  usePyqPreferencesStore,
+  type PyqPreferencesSnapshot
+} from '@/stores/pyq-preferences';
+import {
+  normalizePlannerTemplatesSnapshot,
+  usePlannerTemplatesStore,
+  type PlannerTemplatesSnapshot
+} from '@/stores/planner-templates';
 import type { MarkDecision, Outcome, RootCause } from '@/types';
 
 export const ACCOUNT_STATE_SCHEMA_VERSION = 1 as const;
 
-export const ACCOUNT_STATE_NAMESPACES = ['preferences', 'active_session', 'log_draft'] as const;
+export const ACCOUNT_STATE_NAMESPACES = [
+  'preferences',
+  'active_session',
+  'log_draft',
+  'pyq_preferences',
+  'planner_templates'
+] as const;
 
 export type AccountStateNamespace = (typeof ACCOUNT_STATE_NAMESPACES)[number];
 
@@ -38,6 +54,8 @@ interface AccountStateDataByNamespace {
   preferences: Preferences;
   active_session: ActiveSessionSnapshot;
   log_draft: LogDraftSnapshot;
+  pyq_preferences: PyqPreferencesSnapshot;
+  planner_templates: PlannerTemplatesSnapshot;
 }
 
 export interface AccountStatePayload<T> {
@@ -291,6 +309,9 @@ function normalizeEditorDraft(value: unknown): EditorDraft | null {
     marks: marks !== null && marks > 0 ? marks : null,
     questionText: nullableString(value.questionText),
     answerText: nullableString(value.answerText),
+    natToleranceAbs: nullableFiniteNumber(value.natToleranceAbs),
+    natAcceptedMin: nullableFiniteNumber(value.natAcceptedMin),
+    natAcceptedMax: nullableFiniteNumber(value.natAcceptedMax),
     imageDataUrl: nullableString(value.imageDataUrl),
     outcome: enumValue(value.outcome, OUTCOME_VALUES, 'R'),
     patternName: nullableString(value.patternName),
@@ -327,6 +348,10 @@ export function normalizeAccountStatePayload<N extends AccountStateNamespace>(
       return normalizeActiveSession(payload) as AccountStateDataByNamespace[N];
     case 'log_draft':
       return normalizeLogDraft(payload) as AccountStateDataByNamespace[N];
+    case 'pyq_preferences':
+      return normalizePyqPreferencesSnapshot(payload) as AccountStateDataByNamespace[N];
+    case 'planner_templates':
+      return normalizePlannerTemplatesSnapshot(payload) as AccountStateDataByNamespace[N];
   }
 }
 
@@ -376,6 +401,14 @@ function logDraftSnapshot(): LogDraftSnapshot {
   };
 }
 
+function pyqPreferencesSnapshot(): PyqPreferencesSnapshot {
+  return normalizePyqPreferencesSnapshot(usePyqPreferencesStore.getState());
+}
+
+function plannerTemplatesSnapshot(): PlannerTemplatesSnapshot {
+  return normalizePlannerTemplatesSnapshot(usePlannerTemplatesStore.getState());
+}
+
 function currentData<N extends AccountStateNamespace>(
   namespace: N
 ): AccountStateDataByNamespace[N] {
@@ -386,6 +419,10 @@ function currentData<N extends AccountStateNamespace>(
       return activeSessionSnapshot() as AccountStateDataByNamespace[N];
     case 'log_draft':
       return logDraftSnapshot() as AccountStateDataByNamespace[N];
+    case 'pyq_preferences':
+      return pyqPreferencesSnapshot() as AccountStateDataByNamespace[N];
+    case 'planner_templates':
+      return plannerTemplatesSnapshot() as AccountStateDataByNamespace[N];
   }
 }
 
@@ -413,6 +450,12 @@ function hydrateNamespace(namespace: AccountStateNamespace, payload: unknown): v
       return;
     case 'log_draft':
       useLogStore.setState(normalizeAccountStatePayload(namespace, payload));
+      return;
+    case 'pyq_preferences':
+      usePyqPreferencesStore.setState(normalizeAccountStatePayload(namespace, payload));
+      return;
+    case 'planner_templates':
+      usePlannerTemplatesStore.setState(normalizeAccountStatePayload(namespace, payload));
       return;
   }
 }
@@ -612,6 +655,8 @@ function installSubscriptions(userId: string, generation: number): void {
   subscribe('preferences', (listener) => usePrefsStore.subscribe(listener));
   subscribe('active_session', (listener) => useSessionStore.subscribe(listener));
   subscribe('log_draft', (listener) => useLogStore.subscribe(listener));
+  subscribe('pyq_preferences', (listener) => usePyqPreferencesStore.subscribe(listener));
+  subscribe('planner_templates', (listener) => usePlannerTemplatesStore.subscribe(listener));
 }
 
 async function waitForLocalHydration(): Promise<void> {
@@ -631,7 +676,9 @@ async function waitForLocalHydration(): Promise<void> {
   await Promise.all([
     waitFor(usePrefsStore.persist),
     waitFor(useSessionStore.persist),
-    waitFor(useLogStore.persist)
+    waitFor(useLogStore.persist),
+    waitFor(usePyqPreferencesStore.persist),
+    waitFor(usePlannerTemplatesStore.persist)
   ]);
 }
 

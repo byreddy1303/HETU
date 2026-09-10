@@ -12,7 +12,7 @@ import { SUBJECTS } from '@/lib/constants';
 import { compressToDataUrl } from '@/lib/image';
 import { writeLocal } from '@/lib/sync';
 import { scheduleReattempt } from '@/lib/reattempt';
-import { cn, nowISO, uuid } from '@/lib/utils';
+import { cn, nowISO, todayISOInTimeZone, uuid } from '@/lib/utils';
 
 const QUICK_OUTCOMES: { value: Outcome; label: string; hint: string }[] = [
   { value: 'W-C', label: 'Wrong · concept', hint: 'Did not know or recall the method' },
@@ -33,7 +33,8 @@ const ROOT_CAUSE: Partial<Record<Outcome, RootCause>> = {
 };
 
 export default function QuickCapture() {
-  const { userId } = useAuth();
+  const { userId, profile } = useAuth();
+  const timeZone = profile?.timezone ?? 'Asia/Kolkata';
   const pushToast = useUiStore((state) => state.pushToast);
   const [subject, setSubject] = useState<string>(SUBJECTS[0]);
   const [outcome, setOutcome] = useState<Outcome>('W-C');
@@ -86,7 +87,7 @@ export default function QuickCapture() {
         created_at: nowISO()
       };
       await writeLocal('questions', row);
-      await scheduleReattempt(userId, row.id);
+      await scheduleReattempt(userId, row.id, todayISOInTimeZone(timeZone), timeZone);
       setImageUrl(null);
       setImageName('');
       setNote('');

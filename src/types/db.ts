@@ -6,6 +6,43 @@ export type RootCause = 'concept' | 'formula' | 'reading' | 'computation' | 'str
 export type MarkDecision = 'MARK' | 'SKIP' | 'FIFTY_FIFTY';
 export type ReattemptStage = 'D3' | 'D10' | 'D30' | 'MASTERED';
 export type ReattemptResult = 'clean' | 'fail';
+export type LearningSourceKind = 'pyq' | 'manual';
+export type LearningAnalysisState = 'pending' | 'completed' | 'not-required';
+export type LearningRecoveryState = 'active' | 'remediation' | 'transfer' | 'mastered' | 'paused';
+export type LearningStage = ReattemptStage | 'TRANSFER';
+export type RecoveryGrade = 'again' | 'hard' | 'good' | 'easy';
+export type LearningEventType =
+  | 'created'
+  | 'answer_committed'
+  | 'retrieval_started'
+  | 'retrieval_again'
+  | 'retrieval_hard'
+  | 'retrieval_good'
+  | 'retrieval_easy'
+  | 'hint_revealed'
+  | 'deferred'
+  | 'interrupted'
+  | 'analysis_completed'
+  | 'remediation_started'
+  | 'remediation_completed'
+  | 'transfer_assigned'
+  | 'transfer_passed'
+  | 'transfer_failed'
+  | 'mastered'
+  | 'reopened';
+export type RecoverySessionStatus =
+  | 'active'
+  | 'paused'
+  | 'completed'
+  | 'abandoned'
+  | 'interrupted';
+export type RecoverySessionMode =
+  | 'due'
+  | 'minutes-10'
+  | 'minutes-20'
+  | 'minutes-30'
+  | 'questions-5'
+  | 'all';
 export type BuddyStatus = 'pending' | 'active' | 'paused';
 export type ShareStatus = 'sent' | 'solved' | 'discussed';
 export type InterruptionKind = 'tab_switch' | 'idle' | 'exit';
@@ -120,6 +157,10 @@ export interface QuestionRow {
   source_ref: string | null;
   question_text: string | null;
   answer_text: string | null;
+  /** Optional structured grading rule for manually logged NAT questions. */
+  nat_tolerance_abs?: number | null;
+  nat_accepted_min?: number | null;
+  nat_accepted_max?: number | null;
   /** One-sentence reflection used by the mobile quick-capture flow. */
   capture_note?: string | null;
   image_url: string | null;
@@ -169,7 +210,79 @@ export interface ReattemptRow {
   scheduled_date: string;
   stage: ReattemptStage;
   history: ReattemptHistoryEntry[];
+  /** Compatibility link to the canonical schedule projection. */
+  learning_item_id?: string | null;
   created_at: string;
+}
+
+/** One learner-owned identity and active schedule for an underlying question. */
+export interface LearningItemRow {
+  id: string;
+  user_id: string;
+  source_kind: LearningSourceKind;
+  question_uid: string | null;
+  source_question_id: string | null;
+  content_fingerprint: string | null;
+  subject: string;
+  topic: string | null;
+  origin_pyq_attempt_id: string | null;
+  latest_pyq_attempt_id: string | null;
+  analysis_state: LearningAnalysisState;
+  recovery_state: LearningRecoveryState;
+  stage: LearningStage;
+  scheduled_date: string | null;
+  reason_flags: string[];
+  lapse_count: number;
+  successful_retrieval_count: number;
+  last_grade: RecoveryGrade | null;
+  last_interval_days: number | null;
+  successful_due_d30_at: string | null;
+  transfer_passed_at: string | null;
+  mastered_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+/** Immutable evidence beneath a learning item. */
+export interface LearningEventRow {
+  id: string;
+  user_id: string;
+  learning_item_id: string;
+  event_type: LearningEventType;
+  occurred_at: string;
+  local_date: string;
+  timezone: string;
+  source_pyq_attempt_id: string | null;
+  recovery_session_id: string | null;
+  grade: RecoveryGrade | null;
+  is_correct: boolean | null;
+  answer: unknown;
+  confidence: PyqExamConfidence | null;
+  time_spent_ms: number | null;
+  hint_used: boolean;
+  idempotency_key: string;
+  metadata: Record<string, unknown>;
+  created_at: string;
+}
+
+/** Refresh-safe checkpoint for a bounded blind-retrieval session. */
+export interface RecoverySessionRow {
+  id: string;
+  user_id: string;
+  status: RecoverySessionStatus;
+  mode: RecoverySessionMode;
+  selection_seed: string;
+  item_ids: string[];
+  current_index: number;
+  queue_snapshot: Array<Record<string, unknown>>;
+  draft_answer: unknown;
+  elapsed_by_item_ms: Record<string, number>;
+  deferred_item_ids: string[];
+  hinted_item_ids: string[];
+  current_item_started_at: string | null;
+  started_at: string;
+  updated_at: string;
+  completed_at: string | null;
 }
 
 export interface FormulaRow {
@@ -293,6 +406,8 @@ export interface PyqSessionConfig {
   /** Missing on legacy sets created before source-book sessions shipped. */
   bookSlug?: string;
   subjectSlug: string;
+  /** Exact bank subjects when one canonical syllabus subject spans several files. */
+  subjectSlugs?: string[];
   /** Missing only on legacy sets created before topic-wise practice shipped. */
   topicSlug?: string;
   fromYear: number;
@@ -302,6 +417,24 @@ export interface PyqSessionConfig {
   count: '5' | '10' | '15' | '25' | '50' | 'all';
   /** Missing on practice sets saved before history filters shipped. */
   history?: PyqHistoryFilter;
+  /** Reproducible recommendation metadata retained with the immutable set receipt. */
+  recommendationPreset?:
+    | 'custom'
+    | 'learn'
+    | 'diagnose'
+    | 'repair'
+    | 'speed'
+    | 'transfer'
+    | 'mixed-gate'
+    | 'full-paper';
+  selectionSeed?: string;
+  recommendationReasons?: string[];
+  savedPrescriptionId?: string;
+  savedPrescriptionName?: string;
+  /** Immutable Planner launch contract that produced this exact set, when linked. */
+  plannerPrescriptionId?: string;
+  /** Approved Planner time budget retained independently of actual elapsed time. */
+  plannerTimeBudgetMin?: number;
   /** Missing on legacy sets, which always use the original guided-practice flow. */
   mode?: PyqSessionMode;
   /** Missing on legacy exams, which use timed-set semantics. */

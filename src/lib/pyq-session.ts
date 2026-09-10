@@ -470,7 +470,7 @@ export function pyqPracticeSessionRow(
     target_duration_min:
       session.config.mode === 'exam' && session.config.examState
         ? Math.ceil(session.config.examState.duration_sec / 60)
-        : 0,
+        : Math.max(0, Math.round(session.config.plannerTimeBudgetMin ?? 0)),
     actual_duration_min: actualDuration,
     insight: existing?.insight ?? null,
     sadhana_done: existing?.sadhana_done ?? false,

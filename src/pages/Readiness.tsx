@@ -8,6 +8,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { differenceInCalendarDays, parseISO } from 'date-fns';
+import type { LearningEventRow, LearningItemRow } from '@/types';
 import {
   ArrowDown,
   ArrowRight,
@@ -56,10 +57,14 @@ import {
 import { EXAM_DATE_DEFAULT, SUBJECTS } from '@/lib/constants';
 import { mockScorePercent, normalizeMockEvidence } from '@/lib/mocks';
 import { GATE_2027_BLUEPRINT, GATE_2027_OFFICIAL_SOURCES } from '@/lib/gate-2027';
-import { cn, todayISOInTimeZone, weekStartISO } from '@/lib/utils';
+import { cn, nowISO, todayISOInTimeZone, weekStartISO } from '@/lib/utils';
 import { subjectInk } from '@/lib/subjectInk';
 import { useUiStore } from '@/stores/ui';
 import { loadAccountDocument, queueAccountDocumentWrite } from '@/lib/account-documents';
+import {
+  buildLongitudinalLearningSignals,
+  persistDailyLearningAggregateCache
+} from '@/lib/longitudinal-learning';
 
 const ACCENT_BY_KEY: Record<ReadinessComponentKey, string> = {
   coverage: 'bg-ink-cobalt/10 text-ink-cobalt',
@@ -74,6 +79,11 @@ const BAR_BY_KEY: Record<ReadinessComponentKey, string> = {
   calibration: 'bg-ink-violet',
   surface: 'bg-ink-rose'
 };
+
+const EMPTY_LEARNING_EVIDENCE: {
+  items: LearningItemRow[];
+  events: LearningEventRow[];
+} = { items: [], events: [] };
 
 function scoreBand(score: number): { label: string; tone: string } {
   if (score >= 75) return { label: 'strong', tone: 'text-success' };
@@ -163,20 +173,67 @@ export default function Readiness() {
     [userId],
     []
   );
+  const learningEvidence = useLiveQuery(
+    async () => {
+      if (!userId) return EMPTY_LEARNING_EVIDENCE;
+      const [items, events] = await Promise.all([
+        db.learning_items.where('user_id').equals(userId).toArray(),
+        db.learning_events.where('user_id').equals(userId).toArray()
+      ]);
+      return { items, events };
+    },
+    [userId],
+    EMPTY_LEARNING_EVIDENCE
+  );
 
   const breakdown = useMemo(
-    () => computeReadiness({ questions, pyqAttempts, reattempts, patterns, asOfDate: today }),
-    [questions, pyqAttempts, reattempts, patterns, today]
+    () =>
+      computeReadiness({
+        questions,
+        pyqAttempts,
+        reattempts,
+        patterns,
+        asOfDate: today
+      }),
+    [patterns, pyqAttempts, questions, reattempts, today]
   );
 
   const perSubject = useMemo(
     () =>
       computeReadinessBySubject(
-        { questions, pyqAttempts, reattempts, patterns, asOfDate: today },
+        {
+          questions,
+          pyqAttempts,
+          reattempts,
+          patterns,
+          asOfDate: today
+        },
         SUBJECTS
       ),
-    [questions, pyqAttempts, reattempts, patterns, today]
+    [patterns, pyqAttempts, questions, reattempts, today]
   );
+
+  const learningSignals = useMemo(
+    () =>
+      buildLongitudinalLearningSignals({
+        items: learningEvidence.items,
+        events: learningEvidence.events,
+        periodStart: weekStartISO(today),
+        periodEnd: today,
+        asOfDate: today
+      }),
+    [learningEvidence.events, learningEvidence.items, today]
+  );
+
+  useEffect(() => {
+    if (!userId) return;
+    persistDailyLearningAggregateCache({
+      userId,
+      throughDate: today,
+      series: learningSignals.aggregateSeries,
+      updatedAt: nowISO()
+    });
+  }, [learningSignals.aggregateSeries, today, userId]);
 
   const components = useMemo(() => readinessComponents(breakdown), [breakdown]);
 
@@ -388,7 +445,14 @@ export default function Readiness() {
   }, [sandbox, userId, breakdown, daysLeft, today, pushToast]);
 
   const anyData =
-    questions.length + pyqAttempts.length + reattempts.length + patterns.length + mocks.length > 0;
+    questions.length +
+      pyqAttempts.length +
+      reattempts.length +
+      patterns.length +
+      mocks.length +
+      learningEvidence.items.length +
+      learningEvidence.events.length >
+    0;
   const confidenceCopy =
     breakdown.confidence === 'grounded'
       ? 'Grounded signal — the component samples are large enough to use this as a planning measure.'
@@ -562,6 +626,149 @@ export default function Readiness() {
               </ul>
             </Card>
           )}
+
+          {/* --- Canonical durable-recovery north star --- */}
+          <Card className="order-1">
+            <CardHeader
+              title="Durable recovery"
+              aside={
+                <span className="text-[11px] text-text-faint">
+                  due-D30 or delayed transfer only
+                </span>
+              }
+            />
+            <CardBody className="flex flex-col gap-4">
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                <div className="rounded border border-border bg-bg-overlay/40 p-3">
+                  <p className="u-label">North star</p>
+                  <p
+                    className={cn(
+                      'u-num mt-1 text-[24px] font-bold',
+                      learningSignals.durableRecovery.denominator > 0
+                        ? 'text-success'
+                        : 'text-text-faint'
+                    )}
+                  >
+                    {learningSignals.durableRecovery.denominator > 0
+                      ? `${Math.round(learningSignals.durableRecovery.rate * 100)}%`
+                      : '—'}
+                  </p>
+                  <p className="mt-1 text-[11px] text-text-faint">
+                    {learningSignals.durableRecovery.numerator}/
+                    {learningSignals.durableRecovery.denominator} canonical items durable
+                  </p>
+                </div>
+                <div className="rounded border border-border bg-bg-overlay/40 p-3">
+                  <p className="u-label">Wrong → clean</p>
+                  <p className="u-num mt-1 text-[20px] font-bold text-text">
+                    {learningSignals.analytics.wrongToClean7Days.denominator > 0
+                      ? `${Math.round(learningSignals.analytics.wrongToClean7Days.rate * 100)}%`
+                      : '—'}{' '}
+                    /{' '}
+                    {learningSignals.analytics.wrongToClean30Days.denominator > 0
+                      ? `${Math.round(learningSignals.analytics.wrongToClean30Days.rate * 100)}%`
+                      : '—'}
+                  </p>
+                  <p className="mt-1 text-[11px] text-text-faint">within 7d / 30d</p>
+                </div>
+                <div className="rounded border border-border bg-bg-overlay/40 p-3">
+                  <p className="u-label">Due surface</p>
+                  <p className="u-num mt-1 text-[24px] font-bold text-warn">
+                    {learningSignals.dueBacklog}
+                  </p>
+                  <p className="mt-1 text-[11px] text-text-faint">
+                    {learningSignals.overdueBacklog} overdue · P90{' '}
+                    {learningSignals.analytics.overdueAge.p90Days}d
+                  </p>
+                </div>
+                <div className="rounded border border-border bg-bg-overlay/40 p-3">
+                  <p className="u-label">Weekly burn-down</p>
+                  <p
+                    className={cn(
+                      'u-num mt-1 text-[24px] font-bold',
+                      learningSignals.totals.backlogNet <= 0 ? 'text-success' : 'text-danger'
+                    )}
+                  >
+                    {learningSignals.totals.backlogNet > 0 ? '+' : ''}
+                    {learningSignals.totals.backlogNet}
+                  </p>
+                  <p className="mt-1 text-[11px] text-text-faint">
+                    new + lapses − mastered
+                  </p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 gap-2 text-[12px] text-text-muted sm:grid-cols-2">
+                <p>
+                  Hint-free correct recall:{' '}
+                  <span className="u-num text-text">
+                    {learningSignals.totals.hintFreeRecall.numerator}/
+                    {learningSignals.totals.hintFreeRecall.denominator}
+                  </span>
+                </p>
+                <p>
+                  Transfer success:{' '}
+                  <span className="u-num text-text">
+                    {learningSignals.analytics.transferSuccess.numerator}/
+                    {learningSignals.analytics.transferSuccess.denominator}
+                  </span>
+                </p>
+                <p>
+                  Remediation conversion:{' '}
+                  <span className="u-num text-text">
+                    {learningSignals.analytics.remediationConversion.numerator}/
+                    {learningSignals.analytics.remediationConversion.denominator}
+                  </span>
+                </p>
+                <p>
+                  Original → recovery time:{' '}
+                  <span className="u-num text-text">
+                    {learningSignals.analytics.averageTimeImprovementPct == null
+                      ? 'insufficient evidence'
+                      : `${Math.round(learningSignals.analytics.averageTimeImprovementPct)}% faster`}
+                  </span>
+                </p>
+              </div>
+
+              {learningSignals.analytics.stagePassRates.length > 0 && (
+                <div className="flex flex-wrap gap-1.5" aria-label="Recovery stage pass rates">
+                  {learningSignals.analytics.stagePassRates.map((stage) => (
+                    <span
+                      key={stage.stage}
+                      className="rounded border border-border bg-bg-raised px-2 py-1 font-mono text-[10px] text-text-muted"
+                    >
+                      {stage.stage} · {Math.round(stage.rate * 100)}% ({stage.numerator}/
+                      {stage.denominator})
+                    </span>
+                  ))}
+                </div>
+              )}
+
+              <div className="rounded border border-accent/25 bg-accent-faint/35 p-3">
+                <p className="u-label text-accent">Next recovery move</p>
+                <p className="mt-1 font-display text-[15px] font-semibold text-text">
+                  {learningSignals.priority.title}
+                </p>
+                <p className="mt-1 text-[12px] leading-relaxed text-text-muted">
+                  {learningSignals.priority.reason}
+                </p>
+                <Link
+                  to={learningSignals.priority.href}
+                  className="mt-2 inline-flex items-center gap-1 text-[12px] font-semibold text-accent hover:text-accent-hover"
+                >
+                  Do this next <ArrowRight size={13} strokeWidth={1.75} />
+                </Link>
+              </div>
+
+              <p className="text-[11px] leading-relaxed text-text-faint">
+                This separate readiness input uses canonical learning identities only, so linked
+                legacy re-attempt mirrors cannot inflate it. The versioned readiness composite
+                remains unchanged until its client and server scorers can migrate together.{' '}
+                {learningSignals.duplicateItemsIgnored} duplicate identities and{' '}
+                {learningSignals.duplicateEventsIgnored} event retries were ignored.
+              </p>
+            </CardBody>
+          </Card>
 
           {/* --- Trend chart + projection --- */}
           <details className="order-5 rounded-lg border border-border bg-bg-raised shadow-card">

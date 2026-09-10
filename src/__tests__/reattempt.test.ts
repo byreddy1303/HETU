@@ -101,6 +101,21 @@ describe('evaluateLoggedReattemptAnswer', () => {
     expect(evaluateLoggedReattemptAnswer('MCQ', null, 'B', 'SKIP')).toBe(false);
   });
 
+  it('supports explicit tolerance and inclusive ranges for manually logged NAT answers', () => {
+    expect(evaluateLoggedReattemptAnswer('NAT', '42.58', '42.5 ± 0.1', 'MARK')).toBe(true);
+    expect(evaluateLoggedReattemptAnswer('NAT', '42.61', '42.5 ± 0.1', 'MARK')).toBe(false);
+    expect(evaluateLoggedReattemptAnswer('NAT', '-1.25', '-1.5 to -1.0', 'MARK')).toBe(true);
+    expect(evaluateLoggedReattemptAnswer('NAT', '7.2', '7', 'MARK', { toleranceAbs: 0.25 })).toBe(
+      true
+    );
+    expect(
+      evaluateLoggedReattemptAnswer('NAT', '9.5', 'legacy note', 'MARK', {
+        acceptedMin: 9.25,
+        acceptedMax: 9.75
+      })
+    ).toBe(true);
+  });
+
   it('does not guess when a saved answer is not a checkable key', () => {
     expect(
       evaluateLoggedReattemptAnswer(
@@ -141,7 +156,34 @@ describe('buildReattemptQueue', () => {
 
 describe('scheduling (Dexie-backed)', () => {
   beforeEach(async () => {
-    await db.reattempts.clear();
+    await Promise.all([
+      db.questions.clear(),
+      db.reattempts.clear(),
+      db.learning_items.clear(),
+      db.learning_events.clear()
+    ]);
+    await db.questions.put({
+      id: 'q-9',
+      user_id: USER,
+      session_id: null,
+      subject: 'Algorithms',
+      subtopic: 'Graphs',
+      source_year: null,
+      source_ref: 'Manual',
+      question_text: 'Find a shortest path.',
+      answer_text: 'C',
+      image_url: null,
+      time_spent_sec: 180,
+      target_time_sec: 120,
+      outcome: 'W-C',
+      pattern_name: 'relax edges',
+      trigger_sentence: 'Write the invariant first.',
+      root_cause: 'concept',
+      mark_decision: 'MARK',
+      mark_correct: false,
+      created_at: '2026-07-17T09:00:00.000Z',
+      sync_status: 'synced'
+    });
   });
 
   it('creates a D3 row due today + 3', async () => {
@@ -152,6 +194,15 @@ describe('scheduling (Dexie-backed)', () => {
     // A configured client can receive this write before initSync finishes.
     // Keeping it pending ensures the first authenticated sync cannot skip it.
     expect(stored?.sync_status).toBe('pending');
+    expect((await db.learning_items.toArray())[0]).toMatchObject({
+      source_kind: 'manual',
+      source_question_id: 'q-9',
+      scheduled_date: '2026-07-20'
+    });
+    expect((await db.learning_events.toArray())[0]).toMatchObject({
+      event_type: 'created',
+      learning_item_id: row?.learning_item_id
+    });
   });
 
   it('does not duplicate an open ladder for the same question', async () => {

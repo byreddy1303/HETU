@@ -15,6 +15,7 @@ import { captureElementToDataUrl } from '@/lib/image';
 import Dashboard from '@/pages/Dashboard';
 import DoNow from '@/pages/DoNow';
 import Reattempts from '@/pages/Reattempts';
+import { scheduleReattempt } from '@/lib/reattempt';
 
 const USER = '00000000-0000-4000-8000-000000000001';
 const QUESTION = 'Which schedules are conflict serializable, and why?';
@@ -305,7 +306,10 @@ describe('re-attempt solve flow', () => {
       db.pyq_attempts.clear(),
       db.pyq_sessions.clear(),
       db.sessions.clear(),
-      db.weekly_reviews.clear()
+      db.weekly_reviews.clear(),
+      db.learning_items.clear(),
+      db.learning_events.clear(),
+      db.recovery_sessions.clear()
     ]);
     vi.mocked(captureElementToDataUrl).mockClear();
     vi.mocked(loadPyqQuestionByUid).mockReset().mockResolvedValue(null);
@@ -368,6 +372,46 @@ describe('re-attempt solve flow', () => {
         correctAnswer: ANSWER,
         markDecision: 'MARK'
       });
+    });
+  });
+
+  it('keeps canonical recovery blind, records an explicit cue, and caps assisted recall at Hard', async () => {
+    await seedDueQuestion();
+    await scheduleReattempt(USER, 'question-due', '2026-07-17', 'Asia/Kolkata');
+    const user = userEvent.setup();
+
+    render(
+      <MemoryRouter initialEntries={['/reattempts']}>
+        <Routes>
+          <Route path="/reattempts" element={<Reattempts />} />
+        </Routes>
+      </MemoryRouter>
+    );
+
+    expect(await screen.findByText('Must recover today')).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: /5 questions/i }));
+    expect(await screen.findByText(QUESTION)).toBeInTheDocument();
+    expect(screen.queryByText(PATTERN)).not.toBeInTheDocument();
+    expect(
+      screen.queryByText('Draw the precedence graph before judging the schedule.')
+    ).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: /Reveal opening cue/i }));
+    expect(
+      await screen.findByText('Draw the precedence graph before judging the schedule.')
+    ).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'C' }));
+    await user.click(screen.getByRole('button', { name: /High confidence/i }));
+    await user.click(screen.getByRole('button', { name: /Commit & reveal/i }));
+
+    expect(await screen.findByText('Hard')).toBeInTheDocument();
+    expect(screen.getByText(PATTERN)).toBeInTheDocument();
+    expect(screen.getByText('Actual answer')).toBeInTheDocument();
+    await waitFor(async () => {
+      const events = await db.learning_events.toArray();
+      expect(events.map((event) => event.event_type)).toEqual(
+        expect.arrayContaining(['hint_revealed', 'retrieval_hard'])
+      );
     });
   });
 

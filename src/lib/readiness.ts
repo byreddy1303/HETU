@@ -6,7 +6,7 @@ import { normalizeAttemptEvidence, type AttemptEvidenceEvent } from '@/lib/attem
 import { canonicalSubjectLabel } from '@/lib/subjects';
 import { todayISO } from '@/lib/utils';
 
-export const READINESS_CALCULATION_VERSION = 2 as const;
+export const READINESS_CALCULATION_VERSION = 3 as const;
 
 export const TARGET_PATTERN_LIBRARY = 400;
 export const BASELINE_OPEN_SURFACE = 50;
@@ -47,7 +47,7 @@ export interface ReadinessBreakdown {
     patterns: number;
     totalReattempts: number;
     eligibleReattempts: number;
-    stabilised: number; // D30 + MASTERED
+    stabilised: number; // demonstrated due-D30 recall (legacy MASTERED)
     openReattempts: number;
     markedDecisions: number;
     markedCorrect: number;
@@ -61,10 +61,11 @@ export function coverage(patternCount: number): number {
   return clamp01(patternCount / TARGET_PATTERN_LIBRARY);
 }
 
-/** Retention: fraction of re-attempts that reached D30 or MASTERED. */
+/** Retention: fraction that demonstrated the due D30 retrieval. Merely waiting
+ * at D30 is future intent, not retention evidence. */
 export function retention(reattempts: ReattemptRow[]): number {
   if (reattempts.length === 0) return 0;
-  const stabilised = reattempts.filter((r) => r.stage === 'D30' || r.stage === 'MASTERED').length;
+  const stabilised = reattempts.filter((r) => r.stage === 'MASTERED').length;
   return clamp01(stabilised / reattempts.length);
 }
 
@@ -136,8 +137,7 @@ export function computeReadiness(inputs: ReadinessInputs): ReadinessBreakdown {
       // Keep the displayed/snapshotted numerator on the same eligible cohort
       // used by retention (and by the weekly edge scorer). A future, untouched
       // row must not appear in the numerator before it is due.
-      stabilised: eligibleReattempts.filter((r) => r.stage === 'D30' || r.stage === 'MASTERED')
-        .length,
+      stabilised: eligibleReattempts.filter((r) => r.stage === 'MASTERED').length,
       openReattempts,
       markedDecisions: answered,
       markedCorrect: ledger.counts.correct
@@ -169,7 +169,7 @@ export function readinessComponents(b: ReadinessBreakdown): ReadinessComponent[]
     {
       key: 'retention',
       label: 'Retention',
-      hint: `${b.counts.stabilised} of ${b.counts.eligibleReattempts} due or attempted rows at D30 / mastered`,
+      hint: `${b.counts.stabilised} of ${b.counts.eligibleReattempts} due or attempted rows passed the due D30 retrieval`,
       weight: WEIGHTS.retention,
       value: b.retention,
       contribution: Math.round(b.retention * WEIGHTS.retention * 100)
@@ -208,8 +208,8 @@ export const COMPONENT_TOOLTIPS: Record<
     healthy: '≥ 60% by T−90.'
   },
   retention: {
-    what: 'Fraction of due or previously attempted re-attempts that reached D30 or mastered, tempered while the sample is small.',
-    lift: 'Clear open D3/D10 re-attempts before starting fresh material.',
+    what: 'Fraction of due or previously attempted re-attempts that passed the due D30 retrieval, tempered while the sample is small.',
+    lift: 'Clear due D3/D10/D30 retrievals before starting fresh material.',
     healthy: '≥ 55%.'
   },
   calibration: {
@@ -339,7 +339,7 @@ export function computeReadinessBySubject(
         patterns: ps.length,
         totalReattempts: rs.length,
         eligibleReattempts: eligible.length,
-        stabilised: eligible.filter((r) => r.stage === 'D30' || r.stage === 'MASTERED').length,
+        stabilised: eligible.filter((r) => r.stage === 'MASTERED').length,
         openReattempts,
         markedDecisions: answered,
         markedCorrect: correct

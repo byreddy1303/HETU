@@ -25,6 +25,7 @@ import {
   weekIsoDatesForTimezone
 } from '../_shared/telegram.ts';
 import { pickQuoteForDay } from '../_shared/quotes.ts';
+import { openPlannerSessions } from '../_shared/planner-reminders.ts';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 declare const Deno: any;
@@ -242,6 +243,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
           .select('plan_date, sessions')
           .eq('user_id', subscription.user_id)
           .eq('plan_date', todayDate)
+          .is('deleted_at', null)
           .maybeSingle(),
         admin
           .from('reattempts')
@@ -291,7 +293,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
         quote: quote.text,
         quoteAttribution: quote.attribution,
         sessions: parseTelegramStudySessions(
-          (planResult.data as StoredPlannerDay | null)?.sessions
+          openPlannerSessions((planResult.data as StoredPlannerDay | null)?.sessions)
         ),
         reAttemptTotal: reattemptRows.length,
         subjectCounts: [...subjectCounts]
@@ -309,6 +311,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
         .select('plan_date, sessions')
         .eq('user_id', subscription.user_id)
         .eq('plan_date', tomorrowDate)
+        .is('deleted_at', null)
         .maybeSingle();
       if (planError) {
         console.error(
@@ -334,6 +337,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
       .select('plan_date, sessions')
       .eq('user_id', subscription.user_id)
       .gte('plan_date', weekDates[0])
+      .is('deleted_at', null)
       .lte('plan_date', weekDates[6])
       .order('plan_date', { ascending: true });
     if (plansError) {

@@ -5,6 +5,8 @@ import { MemoryRouter, Route, Routes, useParams } from 'react-router-dom';
 import { db } from '@/lib/db';
 import { normalizePyqManifest, type PyqManifest, type PyqQuestion } from '@/lib/pyq';
 import { writeLocal, writeLocalBatch } from '@/lib/sync';
+import { usePyqPreferencesStore } from '@/stores/pyq-preferences';
+import { needsRecoveryCapture } from '@/lib/learning-recovery';
 import Pyq from '@/pages/Pyq';
 
 const USER = '00000000-0000-4000-8000-000000000001';
@@ -126,6 +128,7 @@ function HistoricalReviewDestination() {
 
 describe('PYQ timed exam mode', () => {
   beforeEach(async () => {
+    usePyqPreferencesStore.getState().reset();
     vi.mocked(writeLocal).mockClear();
     vi.mocked(writeLocalBatch).mockClear();
     vi.stubGlobal('scrollTo', vi.fn());
@@ -145,6 +148,10 @@ describe('PYQ timed exam mode', () => {
       db.pyq_attempts.clear(),
       db.pyq_sessions.clear(),
       db.questions.clear(),
+      db.learning_events.clear(),
+      db.recovery_sessions.clear(),
+      db.learning_items.clear(),
+      db.reattempts.clear(),
       db.sessions.clear()
     ]);
   });
@@ -255,6 +262,10 @@ describe('PYQ timed exam mode', () => {
       expect(
         questions.map((question) => attemptsByQuestion.get(question.id)?.mark_decision)
       ).toEqual(['MARK', 'SKIP', 'MARK']);
+      const weakAttempts = attempts.filter(needsRecoveryCapture);
+      expect(await db.learning_items.count()).toBe(weakAttempts.length);
+      expect(await db.learning_events.count()).toBe(weakAttempts.length);
+      expect(await db.reattempts.count()).toBe(weakAttempts.length);
 
       expect(await db.pyq_sessions.get(startedSession.id)).toMatchObject({
         status: 'completed',
@@ -404,9 +415,9 @@ describe('PYQ timed exam mode', () => {
           }
         }
       });
-      expect(
-        await db.pyq_attempts.where('pyq_session_id').equals(startedSession.id).count()
-      ).toBe(questions.length);
+      expect(await db.pyq_attempts.where('pyq_session_id').equals(startedSession.id).count()).toBe(
+        questions.length
+      );
     });
 
     await new Promise<void>((resolve) => setTimeout(resolve, 600));
@@ -415,8 +426,8 @@ describe('PYQ timed exam mode', () => {
       .mocked(writeLocalBatch)
       .mock.calls.filter(([rows]) => rows.some(({ name }) => name === 'pyq_attempts'));
     expect(finalizationWrites).toHaveLength(1);
-    expect(
-      await db.pyq_attempts.where('pyq_session_id').equals(startedSession.id).count()
-    ).toBe(questions.length);
+    expect(await db.pyq_attempts.where('pyq_session_id').equals(startedSession.id).count()).toBe(
+      questions.length
+    );
   });
 });

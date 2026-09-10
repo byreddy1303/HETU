@@ -2,6 +2,8 @@ import type { MarkDecision, Outcome, PyqSelectedAnswer, PyqSessionConfig } from 
 import { targetTimeSecForMarks } from '@/lib/constants';
 import { urlToDataUrl } from '@/lib/image';
 import type { PyqBenchmarkManifestFields, PyqBenchmarkPaperManifest } from '@/lib/pyq-benchmark';
+import { canonicalSubjectId } from '@/lib/subjects';
+import { gate2027BankSubjectSlugs } from '@/lib/gate-2027';
 
 export const PYQ_BANK_QUESTION_COUNT = 4334;
 
@@ -353,22 +355,29 @@ export async function loadPyqQuestionByUid(
 ): Promise<PyqQuestion | null> {
   const manifest = await loadPyqManifest();
   const normalizedHint = subjectHint.trim().toLowerCase();
-  const subject = manifest.subjects.find(
+  const directSubject = manifest.subjects.find(
     (candidate) =>
       candidate.slug.toLowerCase() === normalizedHint ||
       candidate.label.toLowerCase() === normalizedHint
   );
-  if (!subject) return null;
-  const questions = await loadPyqQuestions([subject], manifest.bankVersion);
+  const canonicalId = canonicalSubjectId(subjectHint);
+  const canonicalBankSlugs = canonicalId ? gate2027BankSubjectSlugs(canonicalId) : [];
+  const subjects = directSubject
+    ? [directSubject]
+    : manifest.subjects.filter((candidate) => canonicalBankSlugs.includes(candidate.slug));
+  if (subjects.length === 0) return null;
+  const questions = await loadPyqQuestions(subjects, manifest.bankVersion);
   return questions.find((question) => question.id === questionUid) ?? null;
 }
 
 export function matchesPyqTopicScope(
   question: PyqQuestion,
-  config: Pick<PyqSessionConfig, 'subjectSlug' | 'topicSlug'>
+  config: Pick<PyqSessionConfig, 'subjectSlug' | 'subjectSlugs' | 'topicSlug'>
 ): boolean {
   const subjectMatches =
-    config.subjectSlug === 'all' || question.subjectSlug === config.subjectSlug;
+    config.subjectSlug === 'all'
+      ? !config.subjectSlugs?.length || config.subjectSlugs.includes(question.subjectSlug)
+      : question.subjectSlug === config.subjectSlug;
   const topicSlug = config.topicSlug ?? 'all';
   if (topicSlug === 'all') return subjectMatches;
   return subjectMatches && topicSlug.split(',').includes(question.topicSlug);

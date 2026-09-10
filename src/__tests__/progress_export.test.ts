@@ -329,7 +329,7 @@ describe('progress report export', () => {
     expect(metric(report, 'PYQ practice', 'GATE-rule earned score')).toBe(1.67);
     expect(metric(report, 'PYQ practice', 'GATE-rule scorable maximum')).toBe(4);
     expect(metric(report, 'PYQ practice', 'Exact scoring coverage')).toBe(75);
-    expect(metric(report, 'Readiness', 'Calculation version')).toBe(2);
+    expect(metric(report, 'Readiness', 'Calculation version')).toBe(3);
   });
 
   it('excludes unknown scoring versions and invariant-breaking stored scores', () => {

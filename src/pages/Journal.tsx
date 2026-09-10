@@ -43,6 +43,7 @@ import QuestionEditor, { DeleteBar } from '@/components/shared/QuestionEditor';
 import SessionEditor from '@/components/shared/SessionEditor';
 import { applyDraftToRow, draftFromRow, type EditorDraft } from '@/components/shared/questionDraft';
 import { subtopicsFor } from '@/lib/subtopics';
+import { markLearningAnalysisCompleted } from '@/lib/learning-recovery';
 
 const PAGE_SIZE = 50;
 
@@ -327,6 +328,7 @@ export default function Journal() {
   const timeZone = profile?.timezone ?? 'Asia/Kolkata';
   const navigate = useNavigate();
   const [params] = useSearchParams();
+  const sourceAttemptId = params.get('sourceAttempt');
   const [f, setF] = useState<Filters>(() => ({
     ...EMPTY_FILTERS,
     pattern: params.get('pattern') ?? '',
@@ -365,6 +367,13 @@ export default function Journal() {
     try {
       const merged = applyDraftToRow(editRow, editDraft);
       await writeLocal('questions', merged);
+      if (merged.source_pyq_attempt_id) {
+        await markLearningAnalysisCompleted({
+          userId: merged.user_id,
+          sourceAttemptId: merged.source_pyq_attempt_id,
+          timeZone
+        });
+      }
       setEditRow(null);
       setEditDraft(null);
     } finally {
@@ -395,6 +404,14 @@ export default function Journal() {
     [userId],
     []
   );
+
+  useEffect(() => {
+    if (!sourceAttemptId || !questions || editRow) return;
+    const row = questions.find((question) => question.source_pyq_attempt_id === sourceAttemptId);
+    if (!row) return;
+    setEditRow(row);
+    setEditDraft(draftFromRow(row));
+  }, [editRow, questions, sourceAttemptId]);
 
   // Newest-first past sessions for the strip below the filter bar.
   const recent = useLiveQuery(
@@ -427,6 +444,9 @@ export default function Journal() {
 
   const filtered = useMemo(() => {
     let rows = questions ?? [];
+    if (sourceAttemptId) {
+      rows = rows.filter((question) => question.source_pyq_attempt_id === sourceAttemptId);
+    }
     if (f.session === 'standalone') rows = rows.filter((q) => q.session_id === null);
     else if (f.session) rows = rows.filter((q) => q.session_id === f.session);
     if (f.subject) rows = rows.filter((q) => q.subject === f.subject);
@@ -444,7 +464,7 @@ export default function Journal() {
     if (f.trigger.trim())
       rows = rows.filter((q) => q.trigger_sentence && fuzzy(f.trigger, q.trigger_sentence));
     return rows;
-  }, [questions, f]);
+  }, [questions, f, sourceAttemptId]);
 
   const pages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const current = Math.min(page, pages - 1);

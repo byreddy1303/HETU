@@ -1,4 +1,4 @@
-export const READINESS_CALCULATION_VERSION = 2 as const;
+export const READINESS_CALCULATION_VERSION = 3 as const;
 
 export interface ReadinessAttemptInput {
   id: string;
@@ -356,9 +356,8 @@ export function computeReadinessScoreResult(
   const eligible = reattempts.filter(
     (row) => (row.history?.length ?? 0) > 0 || row.scheduled_date <= today
   );
-  const stabilised = eligible.filter(
-    (row) => row.stage === 'D30' || row.stage === 'MASTERED'
-  ).length;
+  // D30 is a pending 30-day test. Only MASTERED proves that due retrieval.
+  const stabilised = eligible.filter((row) => row.stage === 'MASTERED').length;
   const retentionRaw = eligible.length === 0 ? 0 : stabilised / eligible.length;
   const retention = retentionRaw * clamp01(eligible.length / 8);
 

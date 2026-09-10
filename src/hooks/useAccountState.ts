@@ -7,6 +7,8 @@ import {
 import { supabaseConfigured } from '@/lib/supabase';
 import { useAuthStore } from '@/stores/auth';
 import { flushAllDurableState } from '@/lib/durability';
+import { awaitInitialPull } from '@/lib/sync';
+import { backfillLocalLearningEvidence } from '@/lib/learning-recovery';
 
 /**
  * Bind durable account-state hydration and retry handling to the active login.
@@ -15,8 +17,11 @@ import { flushAllDurableState } from '@/lib/durability';
 export function useAccountState(): void {
   const status = useAuthStore((state) => state.status);
   const userId = useAuthStore((state) => state.user?.id ?? null);
+  const profileId = useAuthStore((state) => state.profile?.id ?? null);
+  const timeZone = useAuthStore((state) => state.profile?.timezone ?? 'Asia/Kolkata');
   const sandbox = useAuthStore((state) => state.sandbox);
   const canSync = status === 'signed_in' && !sandbox && supabaseConfigured && !!userId;
+  const recoveryOwnerId = userId ?? profileId;
 
   useEffect(() => {
     if (!canSync || !userId) return;
@@ -28,6 +33,22 @@ export function useAccountState(): void {
     });
     return () => stopAccountStateSync(userId);
   }, [canSync, userId]);
+
+  useEffect(() => {
+    if (status !== 'signed_in' || !recoveryOwnerId) return;
+    let cancelled = false;
+    const backfill = async () => {
+      if (canSync) await awaitInitialPull(recoveryOwnerId);
+      if (cancelled) return;
+      await backfillLocalLearningEvidence(recoveryOwnerId, timeZone);
+    };
+    void backfill().catch((error) => {
+      console.error('[air] Recovery evidence migration is waiting to retry.', error);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [canSync, recoveryOwnerId, status, timeZone]);
 
   useEffect(() => {
     if (!canSync || !userId) return;

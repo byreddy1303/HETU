@@ -19,7 +19,10 @@ import type {
   PyqSessionRow,
   PyqAttemptRow,
   MockTestRow,
-  TopicProgressRow
+  TopicProgressRow,
+  LearningItemRow,
+  LearningEventRow,
+  RecoverySessionRow
 } from '@/types';
 
 export type LocalSession = Local<SessionRow>;
@@ -34,6 +37,9 @@ export type LocalPyqSession = Local<PyqSessionRow>;
 export type LocalPyqAttempt = Local<PyqAttemptRow>;
 export type LocalMockTest = Local<MockTestRow>;
 export type LocalTopicProgress = Local<TopicProgressRow>;
+export type LocalLearningItem = Local<LearningItemRow>;
+export type LocalLearningEvent = Local<LearningEventRow>;
+export type LocalRecoverySession = Local<RecoverySessionRow>;
 
 interface MetaRow {
   key: string;
@@ -65,6 +71,9 @@ class AirDB extends Dexie {
   pyq_attempts!: Table<LocalPyqAttempt, string>;
   mock_tests!: Table<LocalMockTest, string>;
   topic_progress!: Table<LocalTopicProgress, string>;
+  learning_items!: Table<LocalLearningItem, string>;
+  learning_events!: Table<LocalLearningEvent, string>;
+  recovery_sessions!: Table<LocalRecoverySession, string>;
   meta!: Table<MetaRow, string>;
 
   constructor() {
@@ -328,6 +337,16 @@ class AirDB extends Dexie {
             Object.assign(row, normalizeMockTestRow(row));
           })
       );
+    this.version(8).stores({
+      reattempts:
+        'id, user_id, question_id, learning_item_id, scheduled_date, stage, sync_status, [user_id+scheduled_date], [user_id+learning_item_id]',
+      learning_items:
+        'id, user_id, source_kind, question_uid, source_question_id, scheduled_date, recovery_state, stage, updated_at, sync_status, [user_id+question_uid], [user_id+source_question_id], [user_id+scheduled_date], [user_id+recovery_state]',
+      learning_events:
+        'id, user_id, learning_item_id, event_type, occurred_at, source_pyq_attempt_id, recovery_session_id, idempotency_key, sync_status, [user_id+learning_item_id], [user_id+event_type], [user_id+idempotency_key]',
+      recovery_sessions:
+        'id, user_id, status, mode, updated_at, sync_status, [user_id+status], [user_id+updated_at]'
+    });
   }
 }
 
@@ -339,6 +358,9 @@ export const SYNCED_TABLES = [
   'pyq_sessions',
   'pyq_attempts',
   'questions',
+  'learning_items',
+  'recovery_sessions',
+  'learning_events',
   'patterns',
   'reattempts',
   'formulas',

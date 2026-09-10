@@ -9,6 +9,7 @@
 import type { DayPlan } from '@/lib/planner-storage';
 import { dayKeyPrefix, loadDayPlan, migrateLegacyDayPlans } from '@/lib/planner-storage';
 import { canonicalSubjectLabel } from '@/lib/subjects';
+import { addDaysISO, todayISO } from '@/lib/utils';
 
 function plannedSubjectLabel(subject: string, customSubject?: string): string {
   return subject === 'Custom...' && customSubject ? customSubject : canonicalSubjectLabel(subject);
@@ -34,14 +35,30 @@ export function loadAllDayPlans(): DayPlan[] {
   return plans.sort((a, b) => a.date.localeCompare(b.date));
 }
 
-function isoNDaysAgo(n: number): string {
-  const d = new Date();
-  d.setDate(d.getDate() - n);
-  return d.toISOString().slice(0, 10);
+export interface PlannerDateBuckets {
+  past: DayPlan[];
+  today: DayPlan[];
+  future: DayPlan[];
 }
 
-function inLastNDays(plan: DayPlan, days: number): boolean {
-  return plan.date >= isoNDaysAgo(days);
+/** Split plans relative to one explicit calendar date without reordering them. */
+export function bucketPlansByDate(
+  plans: readonly DayPlan[],
+  asOfDate: string = todayISO()
+): PlannerDateBuckets {
+  const buckets: PlannerDateBuckets = { past: [], today: [], future: [] };
+  for (const plan of plans) {
+    if (plan.date < asOfDate) buckets.past.push(plan);
+    else if (plan.date > asOfDate) buckets.future.push(plan);
+    else buckets.today.push(plan);
+  }
+  return buckets;
+}
+
+function inLastNDays(plan: DayPlan, days: number, asOfDate: string): boolean {
+  if (days <= 0 || plan.date > asOfDate) return false;
+  const firstDate = addDaysISO(asOfDate, 1 - Math.floor(days));
+  return plan.date >= firstDate;
 }
 
 /* ---------------------------- basic rollups --------------------------- */
@@ -189,13 +206,14 @@ export function neglectedSubjects(
   plans: DayPlan[],
   allSubjects: readonly string[],
   windowDays: number,
-  minMinutes: number
+  minMinutes: number,
+  asOfDate: string = todayISO()
 ): { label: string; min: number }[] {
-  const cutoff = isoNDaysAgo(windowDays);
+  const cutoff = addDaysISO(asOfDate, 1 - Math.max(1, Math.floor(windowDays)));
   const m = new Map<string, number>();
   for (const s of allSubjects) m.set(canonicalSubjectLabel(s), 0);
   for (const p of plans) {
-    if (p.date < cutoff) continue;
+    if (p.date < cutoff || p.date > asOfDate) continue;
     for (const sess of p.sessions) {
       const name = plannedSubjectLabel(sess.subject, sess.customSubject);
       if (!m.has(name)) continue; // ignore Custom subjects — can't tell if they're canonical
@@ -228,6 +246,6 @@ export function dayTypeShare(plans: DayPlan[]): Share[] {
 
 /* ---------------------------- window helpers ---------------------------- */
 
-export function windowed(plans: DayPlan[], days: number): DayPlan[] {
-  return plans.filter((p) => inLastNDays(p, days));
+export function windowed(plans: DayPlan[], days: number, asOfDate: string = todayISO()): DayPlan[] {
+  return plans.filter((plan) => inLastNDays(plan, days, asOfDate));
 }

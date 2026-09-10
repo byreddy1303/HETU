@@ -6,8 +6,10 @@ import {
   loadAllDayPlans,
   loadDayPlan,
   migrateLegacyDayPlansForUser,
+  normalizeDayPlan,
   plannerDateFromSearch,
-  saveDayPlan
+  saveDayPlan,
+  type DayPlan
 } from '@/lib/planner-storage';
 import { useAuthStore } from '@/stores/auth';
 
@@ -160,5 +162,242 @@ describe('Planner local isolation', () => {
     expect(
       saved.sessions.every((session) => session.subjectId === 'programming-data-structures')
     ).toBe(true);
+  });
+
+  it('repairs malformed capacity, windows, and nested day fields deterministically', () => {
+    const source = {
+      ...emptyDayPlan('2026-07-26'),
+      availability: {
+        availableMin: Number.POSITIVE_INFINITY,
+        protectedBufferMin: Number.NEGATIVE_INFINITY,
+        timeWindows: [
+          {
+            id: ' ',
+            label: 42,
+            start: '25:00',
+            end: null,
+            energy: 'wired'
+          },
+          {
+            id: 'study',
+            label: ' Morning focus ',
+            start: '06:30',
+            end: '08:00',
+            energy: 'high'
+          },
+          {
+            id: 'study',
+            label: '',
+            start: '08:15',
+            end: '09:00',
+            energy: 'invalid'
+          },
+          null
+        ]
+      },
+      structure: null,
+      mindset: {
+        energyForecast: 'low',
+        moodIntent: 12,
+        motivationNote: null
+      },
+      nonStudy: null,
+      review: {
+        completionPct: Number.NaN,
+        endMood: 'ecstatic',
+        replicate: 'maybe'
+      }
+    } as unknown as DayPlan;
+
+    const normalized = normalizeDayPlan(source);
+
+    expect(normalized.availability).toEqual({
+      availableMin: 360,
+      protectedBufferMin: 45,
+      timeWindows: [
+        {
+          id: 'legacy-window-1',
+          label: 'Window 1',
+          start: '',
+          end: '',
+          energy: 'low'
+        },
+        {
+          id: 'study',
+          label: 'Morning focus',
+          start: '06:30',
+          end: '08:00',
+          energy: 'high'
+        },
+        {
+          id: 'study-2',
+          label: 'Window 3',
+          start: '08:15',
+          end: '09:00',
+          energy: 'low'
+        }
+      ]
+    });
+    expect(normalized.structure).toEqual(emptyDayPlan(source.date).structure);
+    expect(normalized.mindset).toEqual({
+      energyForecast: 'low',
+      moodIntent: 'Focused Grind',
+      motivationNote: ''
+    });
+    expect(normalized.nonStudy).toEqual(emptyDayPlan(source.date).nonStudy);
+    expect(normalized.review).toMatchObject({ completionPct: 0, endMood: '', replicate: '' });
+    expect(normalizeDayPlan(normalized)).toEqual(normalized);
+  });
+
+  it('coerces recoverable legacy sessions while removing non-finite execution facts', () => {
+    const source = {
+      ...emptyDayPlan('2026-07-27'),
+      availability: {
+        availableMin: '525.4',
+        protectedBufferMin: '900',
+        timeWindows: []
+      },
+      sessions: [
+        {
+          id: ' ',
+          subject: 17,
+          durationMin: Number.NaN,
+          mode: 'Napping',
+          priority: 'Urgent',
+          target: 99,
+          startAt: '99:00',
+          actionHref: 'https://example.com',
+          execution: {
+            sessionId: 42,
+            startedAt: 'not-a-date',
+            completedAt: null,
+            actualMin: Number.POSITIVE_INFINITY,
+            manual: 'yes'
+          }
+        },
+        {
+          id: 'duplicate',
+          subject: '',
+          subjectId: 'coa',
+          durationMin: '91.6',
+          mode: 'Revision',
+          priority: 'P1 Critical',
+          target: 'Pipeline transfer',
+          startAt: '07:15',
+          execution: {
+            sessionId: ' focus-1 ',
+            startedAt: 'bad',
+            completedAt: '2026-07-27T08:46:00.000Z',
+            actualMin: '46.7',
+            manual: false
+          }
+        },
+        {
+          id: 'duplicate',
+          subject: 'Software Engineering',
+          durationMin: -8,
+          mode: 'Deep Study',
+          priority: 'P2 High',
+          target: 'Legacy elective'
+        },
+        'unrecoverable'
+      ]
+    } as unknown as DayPlan;
+
+    const normalized = normalizeDayPlan(source);
+
+    expect(normalized.availability).toMatchObject({
+      availableMin: 525,
+      protectedBufferMin: 480
+    });
+    expect(normalized.sessions).toHaveLength(3);
+    expect(normalized.sessions.map((session) => session.id)).toEqual([
+      'legacy-session-2026-07-27-1',
+      'duplicate',
+      'duplicate-2'
+    ]);
+    expect(normalized.sessions[0]).toMatchObject({
+      subject: 'Custom...',
+      subjectId: null,
+      durationMin: 60,
+      mode: 'Deep Study',
+      priority: 'P2 High',
+      target: ''
+    });
+    expect(normalized.sessions[0].startAt).toBeUndefined();
+    expect(normalized.sessions[0].actionHref).toBeUndefined();
+    expect(normalized.sessions[0].execution).toBeUndefined();
+    expect(normalized.sessions[1]).toMatchObject({
+      subject: 'COA',
+      subjectId: 'coa',
+      durationMin: 92,
+      startAt: '07:15',
+      execution: {
+        sessionId: 'focus-1',
+        startedAt: null,
+        completedAt: '2026-07-27T08:46:00.000Z',
+        actualMin: 47,
+        manual: false
+      }
+    });
+    expect(normalized.sessions[2]).toMatchObject({
+      subject: 'Software Engineering',
+      subjectId: null,
+      durationMin: 1
+    });
+  });
+
+  it('bounds and deduplicates multi-bank PYQ subject scopes on hydration', () => {
+    const plan = emptyDayPlan('2026-07-28');
+    plan.sessions = [
+      {
+        id: 'programming-pyq',
+        subject: 'Programming & DS',
+        durationMin: 60,
+        mode: 'PYQ Practice',
+        priority: 'P1 Critical',
+        target: 'Mixed programming transfer',
+        launch: {
+          kind: 'pyq',
+          prescription: {
+            schemaVersion: 1,
+            id: 'prescription-1',
+            plannerDate: plan.date,
+            plannerBlockId: 'programming-pyq',
+            exactQuestionUids: [],
+            config: {
+              subjectSlug: 'all',
+              subjectSlugs: [
+                ' c-programming ',
+                'data-structure',
+                'c-programming',
+                '',
+                42,
+                'x'.repeat(81)
+              ]
+            }
+          },
+          resolvedQuestionUids: [],
+          resolvedAt: null,
+          pyqSessionId: null
+        }
+      }
+    ] as unknown as DayPlan['sessions'];
+
+    const [session] = normalizeDayPlan(plan).sessions;
+
+    expect(session.launch?.prescription.config.subjectSlugs).toEqual([
+      'c-programming',
+      'data-structure'
+    ]);
+
+    const rawConfig = plan.sessions[0].launch?.prescription.config as unknown as Record<
+      string,
+      unknown
+    >;
+    rawConfig.subjectSlugs = [' ', 42, 'x'.repeat(81)];
+    expect(normalizeDayPlan(plan).sessions[0].launch?.prescription.config).not.toHaveProperty(
+      'subjectSlugs'
+    );
   });
 });

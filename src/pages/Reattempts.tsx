@@ -1,15 +1,18 @@
 // Question-first spaced re-attempt queue. Each due item launches a dedicated
 // test session instead of expanding inside the queue.
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
 import {
   ArrowLeft,
   ArrowRight,
   BookOpen,
+  BrainCircuit,
   CheckCircle2,
   Clock3,
   FileQuestion,
+  Lightbulb,
+  PauseCircle,
   PencilLine,
   Play,
   RotateCcw,
@@ -18,10 +21,14 @@ import {
   ZoomIn
 } from 'lucide-react';
 import type {
+  LearningItemRow,
   MarkDecision,
+  PyqExamConfidence,
   PyqAttemptRow,
   PyqSelectedAnswer,
   QuestionRow,
+  RecoverySessionMode,
+  RecoverySessionRow,
   ReattemptRow,
   ReattemptStage
 } from '@/types';
@@ -33,14 +40,27 @@ import {
   type ReattemptAnswerEvidence
 } from '@/lib/reattempt';
 import { writeLocal } from '@/lib/sync';
-import { OUTCOME_BY_CODE, type QuestionFormat } from '@/lib/constants';
-import { cn, formatDate, plural, secondsToClock, todayISO } from '@/lib/utils';
+import {
+  OUTCOME_BY_CODE,
+  targetTimeSecForMarks,
+  type QuestionFormat
+} from '@/lib/constants';
+import {
+  cn,
+  formatDate,
+  plural,
+  secondsToClock,
+  todayISOInTimeZone
+} from '@/lib/utils';
 import {
   answerFreePyqImageUrl,
   firstPyqImage,
   loadPyqQuestionByUid,
+  loadPyqManifest,
+  loadPyqQuestions,
   type PyqQuestion
 } from '@/lib/pyq';
+import { pyqBenchmarkPaperExposure } from '@/lib/pyq-benchmark';
 import {
   createPyqReattemptAttemptRow,
   nextReattemptRoundAttemptNumber,
@@ -54,6 +74,27 @@ import { subjectInk } from '@/lib/subjectInk';
 import { useAuth } from '@/hooks/useAuth';
 import { useTimer } from '@/hooks/useTimer';
 import { useUiStore } from '@/stores/ui';
+import {
+  buildRecoverySprint,
+  forecastRecoveryLoad,
+  type RecoveryCandidate,
+  type RecoveryGradeDecision
+} from '@/lib/recovery-engine';
+import {
+  checkpointRecoverySession,
+  deferRecoveryItem,
+  interruptRecoverySession,
+  latestResumableRecoverySession,
+  recordRecoveryRetrieval,
+  revealRecoveryHint,
+  startRecoverySession
+} from '@/lib/recovery-session';
+import {
+  assignRecoveryTransfer,
+  completeRecoveryRemediation,
+  selectExactTopicTransferQuestion,
+  transferAssignmentFromEvents
+} from '@/lib/recovery-workflows';
 import PageHeader from '@/components/layout/PageHeader';
 import PyqQuestionContent from '@/components/pyq/PyqQuestionContent';
 import { draftFromRow } from '@/components/shared/questionDraft';
@@ -88,6 +129,14 @@ function plainTextQuestionHtml(value: string): string {
     .replace(/\r?\n/g, '<br>');
 }
 
+function subjectSlugHint(value: string): string {
+  return value
+    .trim()
+    .toLocaleLowerCase('en')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '');
+}
+
 interface AttemptState {
   rowId: string;
   startedAt: number | null;
@@ -102,6 +151,68 @@ interface ReattemptNavigationState {
   completedIds: string[];
   attemptsById: Record<string, AttemptState>;
   lastIndex: number;
+}
+
+interface RecoveryAnswerDraft {
+  itemId: string;
+  choices: string[];
+  numeric: string;
+  confidence: PyqExamConfidence | null;
+}
+
+interface RecoverySelfCheck {
+  answer: PyqSelectedAnswer;
+  confidence: PyqExamConfidence;
+  elapsedSec: number;
+  correctAnswer: PyqSelectedAnswer;
+  sourcePyqAttemptId: string | null;
+}
+
+interface RecoveryFeedback {
+  itemId: string;
+  session: RecoverySessionRow;
+  grade: RecoveryGradeDecision;
+  explanation: string;
+  answer: PyqSelectedAnswer;
+  correctAnswer: PyqSelectedAnswer;
+  elapsedSec: number;
+  wasTransfer: boolean;
+}
+
+const RECOVERY_SPRINT_OPTIONS: Array<{
+  mode: RecoverySessionMode;
+  label: string;
+  shortLabel: string;
+}> = [
+  { mode: 'minutes-10', label: '10-minute sprint', shortLabel: '10 min' },
+  { mode: 'minutes-20', label: '20-minute sprint', shortLabel: '20 min' },
+  { mode: 'minutes-30', label: '30-minute sprint', shortLabel: '30 min' },
+  { mode: 'questions-5', label: '5-question sprint', shortLabel: '5 questions' },
+  { mode: 'all', label: 'All due questions', shortLabel: 'All due' }
+];
+
+function recoveryDraft(value: unknown, itemId: string): RecoveryAnswerDraft {
+  if (!value || typeof value !== 'object') {
+    return { itemId, choices: [], numeric: '', confidence: null };
+  }
+  const candidate = value as Partial<RecoveryAnswerDraft>;
+  if (candidate.itemId !== itemId) {
+    return { itemId, choices: [], numeric: '', confidence: null };
+  }
+  const confidence =
+    candidate.confidence === 'high' ||
+    candidate.confidence === 'medium' ||
+    candidate.confidence === 'low'
+      ? candidate.confidence
+      : null;
+  return {
+    itemId,
+    choices: Array.isArray(candidate.choices)
+      ? candidate.choices.filter((choice): choice is string => typeof choice === 'string')
+      : [],
+    numeric: typeof candidate.numeric === 'string' ? candidate.numeric : '',
+    confidence
+  };
 }
 
 function navigationState(value: unknown): ReattemptNavigationState | null {
@@ -533,6 +644,823 @@ function LoggedQuestionAnswerHistory({
   );
 }
 
+function RecoveryConfidencePicker({
+  value,
+  disabled,
+  onChange
+}: {
+  value: PyqExamConfidence | null;
+  disabled: boolean;
+  onChange: (value: PyqExamConfidence) => void;
+}) {
+  const options: Array<{ value: PyqExamConfidence; label: string; hint: string }> = [
+    { value: 'high', label: 'High confidence', hint: 'I can justify the method' },
+    { value: 'medium', label: 'Medium confidence', hint: 'Mostly certain' },
+    { value: 'low', label: 'Low confidence', hint: 'Unsure or guessing' }
+  ];
+  return (
+    <fieldset disabled={disabled}>
+      <legend className="u-label mb-2">Recall confidence</legend>
+      <div className="grid gap-2 sm:grid-cols-3">
+        {options.map((option) => (
+          <button
+            key={option.value}
+            type="button"
+            aria-pressed={value === option.value}
+            onClick={() => onChange(option.value)}
+            className={cn(
+              'rounded border px-3 py-2.5 text-left transition-colors',
+              value === option.value
+                ? 'border-ink-violet/40 bg-ink-violet/10 text-ink-violet'
+                : 'border-border bg-bg-raised text-text-muted hover:border-border-hover'
+            )}
+          >
+            <span className="block text-[12.5px] font-semibold">{option.label}</span>
+            <span className="u-label mt-0.5 block">{option.hint}</span>
+          </button>
+        ))}
+      </div>
+    </fieldset>
+  );
+}
+
+function RecoveryRevealedContext({
+  question,
+  answer,
+  correctAnswer
+}: {
+  question: QuestionRow | null;
+  answer: PyqSelectedAnswer;
+  correctAnswer: PyqSelectedAnswer;
+}) {
+  return (
+    <section aria-label="Recovery evidence revealed" className="rounded border border-border p-4">
+      <p className="u-label">Post-attempt review</p>
+      <dl className="mt-3 grid gap-3 text-[12px] sm:grid-cols-2">
+        <div>
+          <dt className="u-label">Your answer</dt>
+          <dd className="mt-0.5 whitespace-pre-wrap font-mono font-semibold text-text">
+            {answer == null ? "I don't know" : formatAttemptAnswer(answer)}
+          </dd>
+        </div>
+        <div>
+          <dt className="u-label">Actual answer</dt>
+          <dd className="mt-0.5 whitespace-pre-wrap font-semibold text-text">
+            {correctAnswer == null || String(correctAnswer).trim() === ''
+              ? 'No checkable answer was stored'
+              : formatAttemptAnswer(correctAnswer)}
+          </dd>
+        </div>
+        {question?.pattern_name ? (
+          <div>
+            <dt className="u-label">Pattern</dt>
+            <dd className="u-highlight mt-0.5 font-semibold text-text">{question.pattern_name}</dd>
+          </div>
+        ) : null}
+        {question?.trigger_sentence ? (
+          <div>
+            <dt className="u-label">Opening trigger</dt>
+            <dd className="mt-0.5 text-text">{question.trigger_sentence}</dd>
+          </div>
+        ) : null}
+        {question ? (
+          <div>
+            <dt className="u-label">Prior outcome</dt>
+            <dd className="mt-0.5 font-semibold text-text">{question.outcome}</dd>
+          </div>
+        ) : null}
+      </dl>
+    </section>
+  );
+}
+
+function RecoveryResultPanel({
+  feedback,
+  question,
+  hasNext,
+  onContinue,
+  transferAction
+}: {
+  feedback: RecoveryFeedback;
+  question: QuestionRow | null;
+  hasNext: boolean;
+  onContinue: () => void;
+  transferAction?: ReactNode;
+}) {
+  const gradeLabel = `${feedback.grade.grade[0].toUpperCase()}${feedback.grade.grade.slice(1)}`;
+  const tone =
+    feedback.grade.grade === 'again'
+      ? 'danger'
+      : feedback.grade.grade === 'hard'
+        ? 'warn'
+        : 'success';
+  return (
+    <section
+      aria-label="Recovery grade result"
+      className={cn(
+        'rounded-[18px] border p-4 shadow-card sm:p-5',
+        feedback.grade.grade === 'again'
+          ? 'border-danger/30 bg-danger-faint'
+          : feedback.grade.grade === 'hard'
+            ? 'border-warn/30 bg-warn-faint'
+            : 'border-success/30 bg-success-faint'
+      )}
+    >
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <p className="u-label">Retrieval grade</p>
+          <p className="mt-1 font-display text-[24px] font-semibold text-text">{gradeLabel}</p>
+        </div>
+        <Badge tone={tone}>{secondsToClock(feedback.elapsedSec)}</Badge>
+      </div>
+      <div className="mt-3 flex flex-wrap gap-1.5" aria-label="Grade reasons">
+        {feedback.grade.reasons.map((reason) => (
+          <Badge key={reason}>{reason}</Badge>
+        ))}
+      </div>
+      <p className="mt-3 text-[13px] leading-relaxed text-text-muted">{feedback.explanation}</p>
+      <div className="mt-4">
+        <RecoveryRevealedContext
+          question={question}
+          answer={feedback.answer}
+          correctAnswer={feedback.correctAnswer}
+        />
+      </div>
+      <Button className="mt-4 w-full sm:w-auto" onClick={onContinue}>
+        {hasNext ? (
+          <>
+            Next question <ArrowRight size={15} />
+          </>
+        ) : (
+          'Finish sprint'
+        )}
+      </Button>
+      {transferAction ? <div className="mt-3">{transferAction}</div> : null}
+    </section>
+  );
+}
+
+function RecoveryRemediationPanel({
+  session,
+  item,
+  today,
+  timeZone,
+  onCompleted
+}: {
+  session: RecoverySessionRow;
+  item: LearningItemRow;
+  today: string;
+  timeZone: string;
+  onCompleted: (session: RecoverySessionRow | null) => void;
+}) {
+  const [openingMove, setOpeningMove] = useState('');
+  const [focusedPlan, setFocusedPlan] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function save() {
+    if (saving) return;
+    setSaving(true);
+    setError(null);
+    try {
+      const result = await completeRecoveryRemediation({
+        item,
+        correctedOpeningMove: openingMove,
+        focusedPlan,
+        today,
+        timeZone,
+        session
+      });
+      onCompleted(result.session);
+    } catch (cause) {
+      setError(
+        cause instanceof Error ? cause.message : 'The remediation plan could not be saved.'
+      );
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <Card className="border-warn/30 bg-warn-faint/30">
+      <CardHeader
+        title="Focused remediation required"
+        aside={<Badge tone="warn">{item.lapse_count} lapses</Badge>}
+      />
+      <CardBody className="grid gap-4 p-4 sm:p-5">
+        <p className="text-[13px] leading-relaxed text-text-muted">
+          Repeating the same prompt is no longer useful evidence. Correct the first move and choose
+          one bounded repair action; the next blind retrieval will be scheduled three days later.
+        </p>
+        <label className="text-[12px] font-medium text-text-muted">
+          Corrected opening move
+          <Textarea
+            className="mt-1"
+            rows={3}
+            value={openingMove}
+            onChange={(event) => setOpeningMove(event.target.value)}
+            placeholder="When I see …, I will first … because …"
+          />
+        </label>
+        <label className="text-[12px] font-medium text-text-muted">
+          One focused remediation action
+          <Textarea
+            className="mt-1"
+            rows={3}
+            value={focusedPlan}
+            onChange={(event) => setFocusedPlan(event.target.value)}
+            placeholder="Solve three counterexamples without notes, then explain the invariant."
+          />
+        </label>
+        {error ? (
+          <p role="alert" className="text-[12px] text-danger">
+            {error}
+          </p>
+        ) : null}
+        <Button onClick={() => void save()} disabled={saving}>
+          {saving ? 'Saving remediation…' : 'Save repair & schedule blind check'}
+        </Button>
+      </CardBody>
+    </Card>
+  );
+}
+
+function CanonicalRecoverySession({
+  session,
+  item,
+  row,
+  question,
+  pyqQuestion,
+  sourceAttempt,
+  attempts,
+  today,
+  timeZone,
+  feedback,
+  onFeedback,
+  onContinue,
+  onDeferred,
+  onInterrupted,
+  onRemediated,
+  transferAction
+}: {
+  session: RecoverySessionRow;
+  item: LearningItemRow;
+  row: ReattemptRow | null;
+  question: QuestionRow | null;
+  pyqQuestion: PyqQuestion | null;
+  sourceAttempt: PyqAttemptRow | null;
+  attempts: PyqAttemptRow[];
+  today: string;
+  timeZone: string;
+  feedback: RecoveryFeedback | null;
+  onFeedback: (feedback: RecoveryFeedback) => void;
+  onContinue: () => void;
+  onDeferred: () => void;
+  onInterrupted: () => void;
+  onRemediated: (session: RecoverySessionRow | null) => void;
+  transferAction?: ReactNode;
+}) {
+  const initialDraft = recoveryDraft(session.draft_answer, item.id);
+  const [choices, setChoices] = useState<string[]>(initialDraft.choices);
+  const [numeric, setNumeric] = useState(initialDraft.numeric);
+  const [confidence, setConfidence] = useState<PyqExamConfidence | null>(
+    initialDraft.confidence
+  );
+  const [selfCheck, setSelfCheck] = useState<RecoverySelfCheck | null>(null);
+  const [cueRevealed, setCueRevealed] = useState(
+    session.hinted_item_ids.includes(item.id)
+  );
+  const [working, setWorking] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [imageOpen, setImageOpen] = useState(false);
+  const sessionWriteRef = useRef<Promise<RecoverySessionRow>>(Promise.resolve(session));
+  const inputType = pyqQuestion
+    ? pyqAnswerInputType(pyqQuestion)
+    : question
+      ? draftFromRow(question).format
+      : null;
+  const availableChoices = pyqQuestion?.choices ?? DEFAULT_PYQ_CHOICES;
+  const targetSec = pyqQuestion
+    ? targetTimeSecForMarks(pyqQuestion.marks)
+    : (question?.target_time_sec ?? 120);
+  const startedAtMs = session.current_item_started_at
+    ? Date.parse(session.current_item_started_at)
+    : Number.NaN;
+  const liveSeconds = useTimer(
+    feedback || selfCheck || !Number.isFinite(startedAtMs) ? null : startedAtMs
+  );
+  const elapsedSec = Math.max(
+    0,
+    Math.ceil((session.elapsed_by_item_ms[item.id] ?? 0) / 1000) + liveSeconds
+  );
+  const openingCue = question?.trigger_sentence?.trim() || question?.pattern_name?.trim() || '';
+  const questionImageUrl = answerFreePyqImageUrl(question?.image_url);
+  const revealed = !!feedback || !!selfCheck;
+  const selected: PyqSelectedAnswer =
+    inputType === 'NAT'
+      ? numeric.trim() || null
+      : inputType === 'MSQ'
+        ? choices.slice().sort()
+        : (choices[0] ?? null);
+  const hasAnswer =
+    inputType === 'NAT'
+      ? numeric.trim() !== '' && Number.isFinite(Number(numeric))
+      : inputType === 'MCQ' || inputType === 'MSQ'
+        ? choices.length > 0
+        : false;
+  const canCommit = !!confidence && !!inputType && hasAnswer && !working;
+  const position = Math.min(session.item_ids.length, session.current_index + 1);
+
+  if (item.recovery_state === 'remediation') {
+    return (
+      <div className="mx-auto flex w-full max-w-3xl flex-col gap-4">
+        <div className="border-b border-border pb-3">
+          <p className="u-label text-warn">
+            Recovery remediation · {position}/{session.item_ids.length}
+          </p>
+          <p className="mt-1 text-[13px] font-semibold text-text">
+            {item.subject}
+            {item.topic ? ` · ${item.topic}` : ''}
+          </p>
+        </div>
+        <RecoveryRemediationPanel
+          session={session}
+          item={item}
+          today={today}
+          timeZone={timeZone}
+          onCompleted={onRemediated}
+        />
+      </div>
+    );
+  }
+
+  function persistDraft(next: RecoveryAnswerDraft) {
+    sessionWriteRef.current = sessionWriteRef.current
+      .then((current) => checkpointRecoverySession(current, { draft_answer: next }))
+      .catch((cause) => {
+        setError(cause instanceof Error ? cause.message : 'The answer draft could not be saved.');
+        return session;
+      });
+  }
+
+  function updateChoices(next: string[]) {
+    setChoices(next);
+    persistDraft({ itemId: item.id, choices: next, numeric, confidence });
+  }
+
+  function updateNumeric(next: string) {
+    setNumeric(next);
+    persistDraft({ itemId: item.id, choices, numeric: next, confidence });
+  }
+
+  function updateConfidence(next: PyqExamConfidence) {
+    setConfidence(next);
+    persistDraft({ itemId: item.id, choices, numeric, confidence: next });
+  }
+
+  async function revealCue() {
+    if (!openingCue || cueRevealed || working) return;
+    setWorking(true);
+    setError(null);
+    try {
+      const current = await sessionWriteRef.current;
+      const updated = await revealRecoveryHint({
+        session: current,
+        item,
+        timeZone
+      });
+      sessionWriteRef.current = Promise.resolve(updated);
+      setCueRevealed(true);
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : 'The opening cue could not be recorded.');
+    } finally {
+      setWorking(false);
+    }
+  }
+
+  async function createRecoveryPyqReceipt(
+    answer: PyqSelectedAnswer,
+    decision: MarkDecision,
+    recordedConfidence: PyqExamConfidence | null,
+    seconds: number
+  ): Promise<PyqAttemptRow | null> {
+    if (!pyqQuestion || !sourceAttempt) return null;
+    const receiptOriginId = row?.id ?? item.id;
+    const reattemptRound = item.successful_retrieval_count + item.lapse_count;
+    const roundAttemptNumber = nextReattemptRoundAttemptNumber(
+      attempts,
+      receiptOriginId,
+      reattemptRound
+    );
+    const receiptId = pyqReattemptAttemptId(
+      receiptOriginId,
+      reattemptRound,
+      roundAttemptNumber
+    );
+    const alreadySaved = await db.pyq_attempts.get(receiptId);
+    if (alreadySaved) return alreadySaved;
+    const committedAtMs = Date.now();
+    const attempt = createPyqReattemptAttemptRow({
+      userId: item.user_id,
+      reattemptId: receiptOriginId,
+      reattemptRound,
+      roundAttemptNumber,
+      sourceAttempt,
+      question: pyqQuestion,
+      selectedAnswer: answer,
+      decision,
+      questionStartedAtMs: Math.max(0, committedAtMs - Math.max(1, seconds) * 1000),
+      committedAtMs,
+      screenshotUrl: answerFreePyqImageUrl(
+        firstPyqImage(pyqQuestion.html) ?? sourceAttempt.screenshot_url
+      ),
+      attemptNumber:
+        attempts.reduce((highest, candidate) => Math.max(highest, candidate.attempt_number), 0) + 1
+    });
+    const withConfidence: PyqAttemptRow = { ...attempt, confidence: recordedConfidence };
+    await writeLocal('pyq_attempts', withConfidence);
+    return withConfidence;
+  }
+
+  async function recordRetrieval(args: {
+    correct: boolean;
+    blank?: boolean;
+    answer: PyqSelectedAnswer;
+    correctAnswer: PyqSelectedAnswer;
+    confidence: PyqExamConfidence;
+    seconds: number;
+    sourcePyqAttemptId?: string | null;
+  }) {
+    const current = await sessionWriteRef.current;
+    const result = await recordRecoveryRetrieval({
+      session: current,
+      item,
+      evidence: {
+        correct: args.correct,
+        blank: args.blank,
+        timeSpentSec: Math.max(1, args.seconds),
+        targetTimeSec: targetSec,
+        confidence: args.confidence,
+        hintUsed: cueRevealed || current.hinted_item_ids.includes(item.id),
+        priorSuccessfulRetrievals: item.successful_retrieval_count
+      },
+      answer: args.answer,
+      sourcePyqAttemptId: args.sourcePyqAttemptId,
+      timeZone,
+      today
+    });
+    sessionWriteRef.current = Promise.resolve(result.session);
+    onFeedback({
+      itemId: item.id,
+      session: result.session,
+      grade: result.grade,
+      explanation: result.explanation,
+      answer: args.answer,
+      correctAnswer: args.correctAnswer,
+      elapsedSec: Math.max(1, args.seconds),
+      wasTransfer: item.stage === 'TRANSFER'
+    });
+  }
+
+  async function commitAnswer() {
+    if (!canCommit || !confidence) return;
+    setWorking(true);
+    setError(null);
+    try {
+      const seconds = Math.max(1, elapsedSec);
+      if (pyqQuestion && sourceAttempt) {
+        const receipt = await createRecoveryPyqReceipt(selected, 'MARK', confidence, seconds);
+        if (receipt?.mark_correct == null) {
+          setSelfCheck({
+            answer: selected,
+            confidence,
+            elapsedSec: seconds,
+            correctAnswer: receipt?.correct_answer ?? null,
+            sourcePyqAttemptId: receipt?.id ?? null
+          });
+          return;
+        }
+        await recordRetrieval({
+          correct: receipt.mark_correct,
+          answer: receipt.selected_answer,
+          correctAnswer: receipt.correct_answer,
+          confidence,
+          seconds,
+          sourcePyqAttemptId: receipt.id
+        });
+        return;
+      }
+
+      const verdict =
+        question && inputType
+          ? evaluateLoggedReattemptAnswer(
+              inputType,
+              selected,
+              question.answer_text,
+              'MARK',
+              {
+                toleranceAbs: question.nat_tolerance_abs,
+                acceptedMin: question.nat_accepted_min,
+                acceptedMax: question.nat_accepted_max
+              }
+            )
+          : null;
+      const correctAnswer = question?.answer_text ?? null;
+      if (verdict == null) {
+        setSelfCheck({
+          answer: selected,
+          confidence,
+          elapsedSec: seconds,
+          correctAnswer,
+          sourcePyqAttemptId: null
+        });
+        return;
+      }
+      await recordRetrieval({
+        correct: verdict,
+        answer: selected,
+        correctAnswer,
+        confidence,
+        seconds,
+        sourcePyqAttemptId: null
+      });
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : 'The retrieval result could not be saved.');
+    } finally {
+      setWorking(false);
+    }
+  }
+
+  async function recordDontKnow() {
+    if (working) return;
+    setWorking(true);
+    setError(null);
+    try {
+      const seconds = Math.max(1, elapsedSec);
+      const receipt = await createRecoveryPyqReceipt(null, 'SKIP', null, seconds);
+      await recordRetrieval({
+        correct: false,
+        blank: true,
+        answer: null,
+        correctAnswer: receipt?.correct_answer ?? question?.answer_text ?? null,
+        confidence: 'low',
+        seconds,
+        sourcePyqAttemptId: receipt?.id ?? null
+      });
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : 'The failed recall could not be saved.');
+    } finally {
+      setWorking(false);
+    }
+  }
+
+  async function recordSelfCheck(correct: boolean) {
+    if (!selfCheck || working) return;
+    setWorking(true);
+    setError(null);
+    try {
+      await recordRetrieval({
+        correct,
+        answer: selfCheck.answer,
+        correctAnswer: selfCheck.correctAnswer,
+        confidence: selfCheck.confidence,
+        seconds: selfCheck.elapsedSec,
+        sourcePyqAttemptId: selfCheck.sourcePyqAttemptId
+      });
+      setSelfCheck(null);
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : 'The self-check could not be saved.');
+    } finally {
+      setWorking(false);
+    }
+  }
+
+  async function defer() {
+    if (working) return;
+    setWorking(true);
+    setError(null);
+    try {
+      const current = await sessionWriteRef.current;
+      const result = await deferRecoveryItem({
+        session: current,
+        item,
+        today,
+        timeZone,
+        reason: 'learner chose Not now'
+      });
+      sessionWriteRef.current = Promise.resolve(result.session);
+      onDeferred();
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : 'This question could not be deferred.');
+    } finally {
+      setWorking(false);
+    }
+  }
+
+  async function interrupt() {
+    if (working) return;
+    setWorking(true);
+    setError(null);
+    try {
+      const current = await sessionWriteRef.current;
+      const updated = await interruptRecoverySession({
+        session: current,
+        item,
+        timeZone,
+        reason: 'learner paused the recovery sprint',
+        elapsedMs: Math.max(0, elapsedSec * 1000)
+      });
+      sessionWriteRef.current = Promise.resolve(updated);
+      onInterrupted();
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : 'The sprint could not be paused.');
+    } finally {
+      setWorking(false);
+    }
+  }
+
+  return (
+    <div className="mx-auto flex w-full max-w-5xl flex-col gap-4">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border pb-3">
+        <button
+          type="button"
+          onClick={() => void interrupt()}
+          className="inline-flex items-center gap-1 text-[12px] font-medium text-text-muted hover:text-text"
+        >
+          <PauseCircle size={14} /> Pause & exit
+        </button>
+        <div className="flex items-center gap-3">
+          <span className="u-num text-[12px] text-text-muted">
+            Recovery {position}/{session.item_ids.length}
+          </span>
+          <span className="inline-flex items-center gap-1 font-mono text-[12px] text-text-faint">
+            <Clock3 size={13} /> {secondsToClock(feedback?.elapsedSec ?? elapsedSec)}
+          </span>
+        </div>
+      </div>
+
+      <Card className="overflow-hidden">
+        <CardHeader
+          title={
+            <span className="flex items-center gap-2">
+              <BrainCircuit size={16} className="text-accent" />
+              {pyqQuestion
+                ? `${pyqQuestion.paperLabel} · Q ${pyqQuestion.number}`
+                : (question?.source_ref ?? 'Blind retrieval')}
+            </span>
+          }
+          aside={
+            <div className="flex flex-wrap gap-1.5">
+              <Badge tone="accent">{item.subject}</Badge>
+              <Badge>{item.stage === 'D30' ? 'D30 check pending' : item.stage}</Badge>
+            </div>
+          }
+        />
+        <CardBody className="flex flex-col gap-5 p-5 sm:p-7">
+          {pyqQuestion ? <PyqQuestionContent html={pyqQuestion.html} /> : null}
+          {!pyqQuestion && question?.question_text?.trim() ? (
+            <PyqQuestionContent html={plainTextQuestionHtml(question.question_text)} />
+          ) : null}
+          {questionImageUrl ? (
+            <button
+              type="button"
+              onClick={() => setImageOpen(true)}
+              aria-label="Open question image full screen"
+              className="overflow-hidden rounded-xl border border-border bg-white"
+            >
+              <img
+                src={questionImageUrl}
+                alt="Question to recover"
+                className="mx-auto max-h-[62dvh] w-full object-contain"
+              />
+            </button>
+          ) : null}
+          {!pyqQuestion && !question?.question_text?.trim() && !questionImageUrl ? (
+            <p className="rounded-xl border border-dashed border-warn/35 bg-warn/5 p-4 text-[13px] text-text-muted">
+              The prompt is not available on this device. Use the source reference above before
+              grading the retrieval.
+            </p>
+          ) : null}
+
+          {!revealed && openingCue ? (
+            <div className="rounded-xl border border-accent/20 bg-accent-faint/40 p-3">
+              {cueRevealed ? (
+                <div>
+                  <p className="u-label">Opening cue revealed · grade capped at Hard</p>
+                  <p className="mt-1 text-[13px] font-medium text-text">{openingCue}</p>
+                </div>
+              ) : (
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div>
+                    <p className="text-[13px] font-medium text-text">Need one opening cue?</p>
+                    <p className="mt-1 text-[11.5px] text-text-muted">
+                      Revealing it is recorded and caps a correct retrieval at Hard.
+                    </p>
+                  </div>
+                  <Button variant="ghost" size="sm" onClick={() => void revealCue()} disabled={working}>
+                    <Lightbulb size={14} /> Reveal opening cue
+                  </Button>
+                </div>
+              )}
+            </div>
+          ) : null}
+        </CardBody>
+      </Card>
+
+      {feedback ? (
+        <RecoveryResultPanel
+          feedback={feedback}
+          question={question}
+          hasNext={feedback.session.current_index < feedback.session.item_ids.length}
+          onContinue={onContinue}
+          transferAction={transferAction}
+        />
+      ) : selfCheck ? (
+        <Card>
+          <CardBody className="flex flex-col gap-4 p-4 sm:p-5">
+            <RecoveryRevealedContext
+              question={question}
+              answer={selfCheck.answer}
+              correctAnswer={selfCheck.correctAnswer}
+            />
+            <div>
+              <p className="text-[13px] font-medium text-text">Did your result and method match?</p>
+              <p className="mt-1 text-[12px] text-text-muted">
+                This item has no definitive machine-checkable key, so record an honest self-check.
+              </p>
+              <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                <Button variant="danger" onClick={() => void recordSelfCheck(false)} disabled={working}>
+                  No — record Again
+                </Button>
+                <Button onClick={() => void recordSelfCheck(true)} disabled={working}>
+                  Yes — grade retrieval
+                </Button>
+              </div>
+            </div>
+          </CardBody>
+        </Card>
+      ) : (
+        <Card>
+          <CardBody className="grid gap-5 p-4 sm:p-5 lg:grid-cols-[minmax(0,1fr)_minmax(320px,0.8fr)]">
+            <div>
+              {inputType ? (
+                <ExamAnswerPad
+                  inputType={inputType}
+                  availableChoices={availableChoices}
+                  choices={choices}
+                  numeric={numeric}
+                  disabled={working}
+                  onChoices={updateChoices}
+                  onNumeric={updateNumeric}
+                />
+              ) : (
+                <p className="text-[13px] text-text-muted">
+                  The original answer controls are unavailable. Use “I don't know” or defer until
+                  the source can be restored.
+                </p>
+              )}
+            </div>
+            <div className="flex flex-col gap-4 border-t border-border pt-4 lg:border-l lg:border-t-0 lg:pl-5 lg:pt-0">
+              <RecoveryConfidencePicker
+                value={confidence}
+                disabled={working}
+                onChange={updateConfidence}
+              />
+              <Button variant="primary" onClick={() => void commitAnswer()} disabled={!canCommit}>
+                Commit & reveal
+              </Button>
+              <div className="grid gap-2 sm:grid-cols-2">
+                <Button variant="danger" onClick={() => void recordDontKnow()} disabled={working}>
+                  I don't know
+                </Button>
+                <Button variant="ghost" onClick={() => void defer()} disabled={working}>
+                  Not now
+                </Button>
+              </div>
+              <p className="text-[11.5px] leading-relaxed text-text-faint">
+                “I don't know” is failed recall and schedules recovery. “Not now” is a neutral,
+                one-day defer. Pausing keeps this item and its elapsed work.
+              </p>
+              {error ? (
+                <p role="alert" className="text-[12px] leading-relaxed text-danger">
+                  {error}
+                </p>
+              ) : null}
+            </div>
+          </CardBody>
+        </Card>
+      )}
+
+      <ImagePreview
+        src={questionImageUrl}
+        caption={question?.source_ref ?? 'Question to recover'}
+        open={imageOpen}
+        onClose={() => setImageOpen(false)}
+      />
+    </div>
+  );
+}
+
 function PyqReattemptSession({
   userId,
   row,
@@ -957,7 +1885,12 @@ function ReattemptSession({
         inputType!,
         currentAttempt.selectedAnswer!,
         question?.answer_text ?? null,
-        currentAttempt.decision!
+        currentAttempt.decision!,
+        {
+          toleranceAbs: question?.nat_tolerance_abs,
+          acceptedMin: question?.nat_accepted_min,
+          acceptedMax: question?.nat_accepted_max
+        }
       )
     : null;
 
@@ -1444,7 +2377,7 @@ function ReattemptSession({
 }
 
 export default function Reattempts() {
-  const { userId } = useAuth();
+  const { userId, profile } = useAuth();
   const pushToast = useUiStore((state) => state.pushToast);
   const navigate = useNavigate();
   const location = useLocation();
@@ -1454,7 +2387,12 @@ export default function Reattempts() {
   const [attemptsByRowId, setAttemptsByRowId] = useState<Record<string, AttemptState>>(
     () => routeNavigation?.attemptsById ?? {}
   );
-  const today = todayISO();
+  const [recoveryFeedback, setRecoveryFeedback] = useState<RecoveryFeedback | null>(null);
+  const [startingRecoveryMode, setStartingRecoveryMode] = useState<RecoverySessionMode | null>(null);
+  const [assigningTransfer, setAssigningTransfer] = useState(false);
+  const recoveryAutoStartRef = useRef(false);
+  const timeZone = profile?.timezone ?? 'Asia/Kolkata';
+  const today = todayISOInTimeZone(timeZone);
 
   const reattempts = useLiveQuery(
     () => (userId ? db.reattempts.where('user_id').equals(userId).toArray() : []),
@@ -1464,10 +2402,30 @@ export default function Reattempts() {
     () => (userId ? db.pyq_attempts.where('user_id').equals(userId).toArray() : []),
     [userId]
   );
+  const learningItems = useLiveQuery(
+    () => (userId ? db.learning_items.where('user_id').equals(userId).toArray() : []),
+    [userId]
+  );
+  const learningEvents = useLiveQuery(
+    () => (userId ? db.learning_events.where('user_id').equals(userId).toArray() : []),
+    [userId]
+  );
+  const resumableRecoverySession = useLiveQuery(
+    () => (userId ? latestResumableRecoverySession(userId) : null),
+    [userId],
+    null
+  );
 
   const questionIds = useMemo(
-    () => [...new Set((reattempts ?? []).map((row) => row.question_id))],
-    [reattempts]
+    () => [
+      ...new Set([
+        ...(reattempts ?? []).map((row) => row.question_id),
+        ...(learningItems ?? []).flatMap((item) =>
+          item.source_question_id ? [item.source_question_id] : []
+        )
+      ])
+    ],
+    [learningItems, reattempts]
   );
   const questionIdsKey = questionIds.join('|');
   const questions = useLiveQuery(
@@ -1494,13 +2452,194 @@ export default function Reattempts() {
     return byQuestionId;
   }, [pyqAttempts, qById, questionIds]);
 
+  const learningItemById = useMemo(
+    () => new Map((learningItems ?? []).map((item) => [item.id, item])),
+    [learningItems]
+  );
+  const reattemptByLearningItemId = useMemo(() => {
+    const byId = new Map<string, ReattemptRow>();
+    for (const row of reattempts ?? []) {
+      if (row.learning_item_id) byId.set(row.learning_item_id, row);
+    }
+    return byId;
+  }, [reattempts]);
+  const attemptById = useMemo(
+    () => new Map((pyqAttempts ?? []).map((attempt) => [attempt.id, attempt])),
+    [pyqAttempts]
+  );
+  const allRecoveryCandidates = useMemo<RecoveryCandidate[]>(
+    () =>
+      (learningItems ?? []).flatMap((item) => {
+        if (
+          !item.scheduled_date ||
+          item.recovery_state === 'mastered' ||
+          item.recovery_state === 'paused'
+        ) {
+          return [];
+        }
+        const sourceAttempt = item.latest_pyq_attempt_id
+          ? attemptById.get(item.latest_pyq_attempt_id)
+          : item.origin_pyq_attempt_id
+            ? attemptById.get(item.origin_pyq_attempt_id)
+            : null;
+        const loggedQuestion = item.source_question_id
+          ? qById.get(item.source_question_id)
+          : reattemptByLearningItemId.get(item.id)
+            ? qById.get(reattemptByLearningItemId.get(item.id)!.question_id)
+            : null;
+        const marks = sourceAttempt?.question_marks ?? sourceAttempt?.question_snapshot?.marks ?? null;
+        return [
+          {
+            item,
+            estimatedSeconds: loggedQuestion?.target_time_sec ?? targetTimeSecForMarks(marks),
+            marks,
+            confidenceSurprise: item.reason_flags.includes('high-confidence-wrong')
+          }
+        ];
+      }),
+    [attemptById, learningItems, qById, reattemptByLearningItemId]
+  );
+  const recoveryCandidates = useMemo(
+    () =>
+      allRecoveryCandidates.filter(
+        (candidate) => (candidate.item.scheduled_date ?? '') <= today
+      ),
+    [allRecoveryCandidates, today]
+  );
+  const activeRecoverySession =
+    recoveryFeedback?.session ??
+    (resumableRecoverySession?.status === 'active' ? resumableRecoverySession : null);
+  const recoveryItemId =
+    recoveryFeedback?.itemId ??
+    (activeRecoverySession
+      ? (activeRecoverySession.item_ids[activeRecoverySession.current_index] ?? null)
+      : null);
+  const activeRecoveryItem = recoveryItemId ? (learningItemById.get(recoveryItemId) ?? null) : null;
+  const activeRecoveryRow = activeRecoveryItem
+    ? (reattemptByLearningItemId.get(activeRecoveryItem.id) ?? null)
+    : null;
+  const activeRecoveryQuestion = activeRecoveryItem
+    ? (activeRecoveryItem.source_question_id
+        ? qById.get(activeRecoveryItem.source_question_id)
+        : activeRecoveryRow
+          ? qById.get(activeRecoveryRow.question_id)
+          : null) ?? null
+    : null;
+  const activeRecoverySource = activeRecoveryItem
+    ? (activeRecoveryItem.latest_pyq_attempt_id
+        ? attemptById.get(activeRecoveryItem.latest_pyq_attempt_id)
+        : activeRecoveryItem.origin_pyq_attempt_id
+          ? attemptById.get(activeRecoveryItem.origin_pyq_attempt_id)
+          : null) ?? null
+    : null;
+  const activeTransferAssignment = activeRecoveryItem
+    ? transferAssignmentFromEvents(learningEvents ?? [], activeRecoveryItem.id)
+    : null;
+  const activeRecoveryQuestionUid =
+    activeRecoveryItem?.stage === 'TRANSFER' && activeTransferAssignment
+      ? activeTransferAssignment.questionUid
+      : (activeRecoverySource?.question_uid ?? activeRecoveryItem?.question_uid ?? null);
+  const activeRecoveryAttempts = activeRecoveryQuestionUid
+    ? (pyqAttempts ?? [])
+        .filter((attempt) => attempt.question_uid === activeRecoveryQuestionUid)
+        .sort((left, right) => left.attempted_at.localeCompare(right.attempted_at))
+    : [];
+  const recoverySnapshotQuestion = useMemo(
+    () =>
+      activeRecoverySource?.question_uid === activeRecoveryQuestionUid
+        ? pyqQuestionFromAttempt(activeRecoverySource)
+        : null,
+    [activeRecoveryQuestionUid, activeRecoverySource]
+  );
+  const [recoveryPyqRestore, setRecoveryPyqRestore] = useState<{
+    sourceKey: string;
+    loading: boolean;
+    question: PyqQuestion | null;
+  } | null>(null);
+  const recoveryRestoreKey =
+    activeRecoverySource && activeRecoveryQuestionUid
+      ? `${activeRecoverySource.id}:${activeRecoveryQuestionUid}`
+      : null;
+  const matchingRecoveryRestore =
+    recoveryRestoreKey && recoveryPyqRestore?.sourceKey === recoveryRestoreKey
+      ? recoveryPyqRestore
+      : null;
+  const recoveryPyqLoading =
+    !!recoveryRestoreKey &&
+    !recoverySnapshotQuestion &&
+    (!matchingRecoveryRestore || matchingRecoveryRestore.loading);
+  const activeRecoveryPyqQuestion =
+    recoverySnapshotQuestion ?? matchingRecoveryRestore?.question ?? null;
+
   const { due, upcoming, mastered } = useMemo(
     () => buildReattemptQueue(reattempts ?? [], today),
     [reattempts, today]
   );
+  const legacyDue = due.filter(
+    (row) => !row.learning_item_id || !learningItemById.has(row.learning_item_id)
+  );
+  const legacyUpcoming = upcoming.filter(
+    (row) => !row.learning_item_id || !learningItemById.has(row.learning_item_id)
+  );
+  const canonicalMastered = (learningItems ?? []).filter(
+    (item) => item.recovery_state === 'mastered'
+  ).length;
+  const legacyMastered = (reattempts ?? []).filter(
+    (row) =>
+      row.stage === 'MASTERED' &&
+      (!row.learning_item_id || !learningItemById.has(row.learning_item_id))
+  ).length;
+  const dueCount = recoveryCandidates.length + legacyDue.length;
+  const upcomingCount =
+    (learningItems ?? []).filter(
+      (item) =>
+        item.recovery_state !== 'mastered' &&
+        item.recovery_state !== 'paused' &&
+        item.scheduled_date != null &&
+        item.scheduled_date > today
+    ).length + legacyUpcoming.length;
+  const masteredCount =
+    learningItems === undefined ? mastered : canonicalMastered + legacyMastered;
+  const recoveryPreviews = useMemo(
+    () =>
+      Object.fromEntries(
+        RECOVERY_SPRINT_OPTIONS.map((option) => [
+          option.mode,
+          buildRecoverySprint(recoveryCandidates, option.mode, today)
+        ])
+      ) as Record<RecoverySessionMode, ReturnType<typeof buildRecoverySprint>>,
+    [recoveryCandidates, today]
+  );
+  const recommendedRecoverySprint = recoveryPreviews['minutes-20'];
+  const sevenDayRecoveryForecast = useMemo(
+    () => forecastRecoveryLoad(allRecoveryCandidates, today, 7),
+    [allRecoveryCandidates, today]
+  );
+  const thirtyDayRecoveryForecast = useMemo(
+    () => forecastRecoveryLoad(allRecoveryCandidates, today, 30),
+    [allRecoveryCandidates, today]
+  );
+  const thirtyDayRecoveryTotal = thirtyDayRecoveryForecast.reduce(
+    (total, day) => total + day.itemCount,
+    0
+  );
   const upcomingGroups = useMemo(() => {
     const groups = new Map<string, { count: number; subjects: Set<string> }>();
-    for (const row of upcoming) {
+    for (const item of learningItems ?? []) {
+      if (
+        !item.scheduled_date ||
+        item.scheduled_date <= today ||
+        item.recovery_state === 'mastered' ||
+        item.recovery_state === 'paused'
+      ) {
+        continue;
+      }
+      const group = groups.get(item.scheduled_date) ?? { count: 0, subjects: new Set<string>() };
+      group.count += 1;
+      if (item.subject) group.subjects.add(item.subject);
+      groups.set(item.scheduled_date, group);
+    }
+    for (const row of legacyUpcoming) {
       const group = groups.get(row.scheduled_date) ?? { count: 0, subjects: new Set<string>() };
       group.count += 1;
       const subject = qById.get(row.question_id)?.subject;
@@ -1512,12 +2651,12 @@ export default function Reattempts() {
       count: group.count,
       subjects: [...group.subjects]
     }));
-  }, [upcoming, qById]);
-  const defaultQueueIds = due.map((row) => row.id);
+  }, [learningItems, legacyUpcoming, qById, today]);
+  const defaultQueueIds = legacyDue.map((row) => row.id);
   const queueIds = routeNavigation?.queueIds.length ? routeNavigation.queueIds : defaultQueueIds;
   const roundById =
     routeNavigation?.roundById ??
-    Object.fromEntries(due.map((row) => [row.id, row.history.length]));
+    Object.fromEntries(legacyDue.map((row) => [row.id, row.history.length]));
   const completedIds = routeNavigation?.completedIds ?? [];
   const activeRow = reattemptId
     ? (due.find((row) => row.id === reattemptId) ??
@@ -1573,6 +2712,36 @@ export default function Reattempts() {
           .at(-1) ?? null)
       : null;
 
+  const beginRecoverySprint = useCallback(
+    async (mode: RecoverySessionMode) => {
+      if (!userId || recoveryCandidates.length === 0 || startingRecoveryMode) return;
+      recoveryAutoStartRef.current = true;
+      setStartingRecoveryMode(mode);
+      setRecoveryFeedback(null);
+      try {
+        const result = await startRecoverySession({
+          userId,
+          mode,
+          candidates: recoveryCandidates,
+          today
+        });
+        pushToast(
+          `${result.sprint.selected.length} ${plural(result.sprint.selected.length, 'question')} · about ${Math.max(1, Math.ceil(result.sprint.estimatedSeconds / 60))} min`,
+          'success'
+        );
+      } catch (cause) {
+        recoveryAutoStartRef.current = false;
+        pushToast(
+          cause instanceof Error ? cause.message : 'The recovery sprint could not be started.',
+          'neutral'
+        );
+      } finally {
+        setStartingRecoveryMode(null);
+      }
+    },
+    [pushToast, recoveryCandidates, startingRecoveryMode, today, userId]
+  );
+
   useEffect(() => {
     if (!activePyqSource || snapshotPyqQuestion) return;
     let cancelled = false;
@@ -1606,9 +2775,76 @@ export default function Reattempts() {
   }, [activePyqSource, snapshotPyqQuestion]);
 
   useEffect(() => {
-    if (reattemptId || searchParams.get('open') !== 'first' || due.length === 0) return;
-    navigate(`/reattempts/${encodeURIComponent(due[0].id)}`, { replace: true });
-  }, [due, navigate, reattemptId, searchParams]);
+    if (
+      !activeRecoverySource ||
+      !activeRecoveryQuestionUid ||
+      !recoveryRestoreKey ||
+      recoverySnapshotQuestion
+    ) {
+      return;
+    }
+    let cancelled = false;
+    setRecoveryPyqRestore({
+      sourceKey: recoveryRestoreKey,
+      loading: true,
+      question: null
+    });
+    void loadPyqQuestionByUid(activeRecoveryQuestionUid, activeRecoverySource.subject)
+      .then((question) => {
+        if (!cancelled) {
+          setRecoveryPyqRestore({
+            sourceKey: recoveryRestoreKey,
+            loading: false,
+            question
+          });
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setRecoveryPyqRestore({
+            sourceKey: recoveryRestoreKey,
+            loading: false,
+            question: null
+          });
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [
+    activeRecoveryQuestionUid,
+    activeRecoverySource,
+    recoveryRestoreKey,
+    recoverySnapshotQuestion
+  ]);
+
+  useEffect(() => {
+    if (
+      reattemptId ||
+      searchParams.get('open') !== 'first' ||
+      activeRecoverySession ||
+      startingRecoveryMode ||
+      recoveryAutoStartRef.current
+    ) {
+      return;
+    }
+    if (recoveryCandidates.length > 0) {
+      void beginRecoverySprint('due');
+      return;
+    }
+    if (legacyDue.length > 0) {
+      navigate(`/reattempts/${encodeURIComponent(legacyDue[0].id)}`, { replace: true });
+    }
+  }, [
+    activeRecoverySession,
+    beginRecoverySprint,
+    legacyDue,
+    navigate,
+    reattemptId,
+    recoveryCandidates,
+    searchParams,
+    startingRecoveryMode
+  ]);
 
   useEffect(() => {
     if (!activeRow) return;
@@ -1624,16 +2860,84 @@ export default function Reattempts() {
     });
   }, [activePyqSource, activeRow]);
 
+  async function resumeRecoverySession(session: RecoverySessionRow) {
+    try {
+      recoveryAutoStartRef.current = true;
+      setRecoveryFeedback(null);
+      await checkpointRecoverySession(session, {
+        status: 'active',
+        current_item_started_at: new Date().toISOString(),
+        completed_at: null
+      });
+      pushToast('Recovery sprint resumed from the saved question.', 'success');
+    } catch (cause) {
+      pushToast(
+        cause instanceof Error ? cause.message : 'The recovery sprint could not be resumed.',
+        'neutral'
+      );
+    }
+  }
+
+  async function assignFreshTransfer(item: LearningItemRow) {
+    if (!pyqAttempts || assigningTransfer) return;
+    setAssigningTransfer(true);
+    try {
+      const manifest = await loadPyqManifest();
+      const subjectHint = activeRecoveryPyqQuestion?.subjectSlug ?? subjectSlugHint(item.subject);
+      const subject = manifest.subjects.find(
+        (candidate) =>
+          candidate.slug.toLocaleLowerCase('en') === subjectHint.toLocaleLowerCase('en') ||
+          candidate.label.toLocaleLowerCase('en') === item.subject.toLocaleLowerCase('en')
+      );
+      if (!subject) throw new Error('The exact source subject is unavailable in this bank.');
+      const questions = await loadPyqQuestions([subject], manifest.bankVersion);
+      const reserved = new Set<string>();
+      for (const paper of manifest.benchmarkPapers) {
+        if (pyqBenchmarkPaperExposure(paper, pyqAttempts).sealed) {
+          for (const questionUid of paper.questionUids) reserved.add(questionUid);
+        }
+      }
+      const selection = selectExactTopicTransferQuestion({
+        item,
+        questions,
+        attempts: pyqAttempts,
+        reservedQuestionUids: reserved
+      });
+      if (!selection.question) {
+        throw new Error(
+          'No unseen, answerable same-topic transfer remains outside the sealed-paper reserve.'
+        );
+      }
+      const assigned = await assignRecoveryTransfer({
+        item,
+        question: selection.question,
+        today,
+        timeZone
+      });
+      pushToast(
+        `${selection.question.paperLabel} Q${selection.question.number} assigned for ${formatDate(assigned.scheduled_date!, 'dd MMM')} · exact same topic, unseen, reserve-safe.`,
+        'success'
+      );
+    } catch (cause) {
+      pushToast(
+        cause instanceof Error ? cause.message : 'A fresh transfer could not be assigned.',
+        'neutral'
+      );
+    } finally {
+      setAssigningTransfer(false);
+    }
+  }
+
   function openSession(rowId: string) {
     const runningAttempt = Object.values(attemptsByRowId).find((attempt) => attempt.startedAt);
     if (runningAttempt && runningAttempt.rowId !== rowId) {
       pushToast('Finish the running attempt before opening another question.', 'neutral');
       return;
     }
-    const nextQueueIds = due.map((row) => row.id);
+    const nextQueueIds = legacyDue.map((row) => row.id);
     const nextNavigation: ReattemptNavigationState = {
       queueIds: nextQueueIds,
-      roundById: Object.fromEntries(due.map((row) => [row.id, row.history.length])),
+      roundById: Object.fromEntries(legacyDue.map((row) => [row.id, row.history.length])),
       completedIds: [],
       attemptsById: {},
       lastIndex: nextQueueIds.indexOf(rowId)
@@ -1737,6 +3041,85 @@ export default function Reattempts() {
   async function saveAnswer(question: QuestionRow, answer: string) {
     await writeLocal('questions', { ...question, answer_text: answer });
     pushToast('Answer saved and kept concealed.', 'success');
+  }
+
+  function continueRecoverySession() {
+    const completed = recoveryFeedback?.session.status === 'completed';
+    setRecoveryFeedback(null);
+    if (completed) {
+      recoveryAutoStartRef.current = false;
+      pushToast('Recovery sprint complete. Every result is saved as evidence.', 'success');
+    }
+  }
+
+  function leaveRecoverySession(message: string) {
+    setRecoveryFeedback(null);
+    recoveryAutoStartRef.current = false;
+    pushToast(message, 'neutral');
+  }
+
+  if (!reattemptId && activeRecoverySession) {
+    if (learningItems === undefined || pyqAttempts === undefined || !activeRecoveryItem) {
+      return (
+        <Card>
+          <CardBody className="py-12 text-center text-[13px] text-text-faint">
+            Restoring the saved recovery sprint…
+          </CardBody>
+        </Card>
+      );
+    }
+    if (activeRecoverySource && recoveryPyqLoading) {
+      return (
+        <Card>
+          <CardBody className="py-12 text-center text-[13px] text-text-faint">
+            Restoring the original PYQ without revealing its answer…
+          </CardBody>
+        </Card>
+      );
+    }
+    return (
+      <CanonicalRecoverySession
+        key={`${activeRecoverySession.id}:${activeRecoveryItem.id}`}
+        session={activeRecoverySession}
+        item={activeRecoveryItem}
+        row={activeRecoveryRow}
+        question={activeRecoveryQuestion}
+        pyqQuestion={activeRecoveryPyqQuestion}
+        sourceAttempt={activeRecoverySource}
+        attempts={activeRecoveryAttempts}
+        today={today}
+        timeZone={timeZone}
+        feedback={
+          recoveryFeedback?.itemId === activeRecoveryItem.id ? recoveryFeedback : null
+        }
+        onFeedback={setRecoveryFeedback}
+        onContinue={continueRecoverySession}
+        onDeferred={() => leaveRecoverySession('Not now recorded without a lapse.')}
+        onInterrupted={() => leaveRecoverySession('Sprint paused at the saved question.')}
+        onRemediated={(session) => {
+          recoveryAutoStartRef.current = session?.status === 'active';
+          setRecoveryFeedback(null);
+          pushToast('Remediation saved. The blind D3 check is now scheduled.', 'success');
+        }}
+        transferAction={
+          recoveryFeedback &&
+          !recoveryFeedback.wasTransfer &&
+          activeRecoveryItem.source_kind === 'pyq' &&
+          activeRecoveryItem.stage !== 'TRANSFER' &&
+          (recoveryFeedback.grade.grade === 'good' ||
+            recoveryFeedback.grade.grade === 'easy') ? (
+            <Button
+              variant="ghost"
+              onClick={() => void assignFreshTransfer(activeRecoveryItem)}
+              disabled={assigningTransfer}
+            >
+              <ScanSearch size={15} />
+              {assigningTransfer ? 'Finding exact-topic transfer…' : 'Try fresh transfer in 3 days'}
+            </Button>
+          ) : undefined
+        }
+      />
+    );
   }
 
   if (reattemptId && reattempts !== undefined && !activeRow) {
@@ -1850,11 +3233,35 @@ export default function Reattempts() {
       <PageHeader
         title="Re-attempts"
         description={
-          reattempts === undefined
+          reattempts === undefined || learningItems === undefined
             ? 'Loading…'
-            : `${due.length} due · ${upcoming.length} upcoming · ${mastered} mastered`
+            : `${dueCount} due · ${upcomingCount} upcoming · ${masteredCount} mastered`
         }
       />
+
+      {resumableRecoverySession && resumableRecoverySession.status !== 'active' ? (
+        <Card className="border-ink-violet/25 bg-ink-violet/[0.04]">
+          <CardBody className="flex flex-wrap items-center justify-between gap-4 p-4 sm:p-5">
+            <div>
+              <p className="u-label text-ink-violet">Saved recovery sprint</p>
+              <p className="mt-1 text-[14px] font-semibold text-text">
+                Question {Math.min(
+                  resumableRecoverySession.item_ids.length,
+                  resumableRecoverySession.current_index + 1
+                )}{' '}
+                of {resumableRecoverySession.item_ids.length}
+              </p>
+              <p className="mt-1 text-[12px] text-text-muted">
+                Draft, elapsed time, revealed cues, and position are preserved on this device and
+                synced to your account.
+              </p>
+            </div>
+            <Button onClick={() => void resumeRecoverySession(resumableRecoverySession)}>
+              <Play size={15} /> Resume blind retrieval
+            </Button>
+          </CardBody>
+        </Card>
+      ) : null}
 
       {routeNavigation && routeNavigation.lastIndex >= 0 ? (
         <Card>
@@ -1872,7 +3279,99 @@ export default function Reattempts() {
         </Card>
       ) : null}
 
-      {due.length > 0 ? (
+      {recoveryCandidates.length > 0 ? (
+        <section className="flex flex-col gap-3" aria-label="Canonical recovery due now">
+          <Card className="overflow-hidden border-accent/25">
+            <CardHeader
+              title={
+                <div>
+                  <p>Must recover today</p>
+                  <p className="mt-1 text-[11.5px] font-normal text-text-muted">
+                    {recoveryCandidates.length} due · {recommendedRecoverySprint.selected.length}{' '}
+                    fit a 20-minute sprint
+                  </p>
+                </div>
+              }
+            />
+            <CardBody className="grid gap-4 p-4 sm:p-5">
+              <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-5">
+                {RECOVERY_SPRINT_OPTIONS.map((option) => {
+                  const preview = recoveryPreviews[option.mode];
+                  return (
+                    <button
+                      key={option.mode}
+                      type="button"
+                      disabled={startingRecoveryMode !== null || preview.selected.length === 0}
+                      onClick={() => void beginRecoverySprint(option.mode)}
+                      className="rounded-xl border border-border bg-bg-raised px-3 py-3 text-left transition-colors hover:border-accent/35 hover:bg-accent-faint disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      <span className="block text-[12.5px] font-semibold text-text">
+                        {option.shortLabel}
+                      </span>
+                      <span className="u-label mt-1 block">
+                        {preview.selected.length} {plural(preview.selected.length, 'question')}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+              <div className="grid gap-2 sm:grid-cols-2">
+                {recommendedRecoverySprint.mustRecoverToday.slice(0, 6).map((candidate) => (
+                  <div
+                    key={candidate.item.id}
+                    className="rounded-xl border border-border bg-bg-raised px-3 py-3"
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <p className="text-[12.5px] font-semibold text-text">
+                          {candidate.item.subject}
+                          {candidate.item.topic ? ` · ${candidate.item.topic}` : ''}
+                        </p>
+                        <div className="mt-2 flex flex-wrap gap-1.5" aria-label="Priority reasons">
+                          {candidate.reasons.map((reason) => (
+                            <Badge key={reason}>{reason}</Badge>
+                          ))}
+                        </div>
+                      </div>
+                      <span className="u-num shrink-0 text-[11px] text-text-faint">
+                        ~{Math.max(1, Math.ceil(candidate.estimatedSeconds / 60))}m
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              {recommendedRecoverySprint.ifTime.length > 0 ? (
+                <p className="text-[12px] text-text-muted">
+                  If time: {recommendedRecoverySprint.ifTime.length} more prioritized by overdue
+                  age, lapses, marks, confidence surprise, and subject interleaving.
+                </p>
+              ) : null}
+            </CardBody>
+          </Card>
+        </section>
+      ) : null}
+
+      {allRecoveryCandidates.length > 0 ? (
+        <Card>
+          <CardHeader
+            title="Recovery load forecast"
+            aside={<span className="u-num text-[11px] text-text-faint">{thirtyDayRecoveryTotal} in 30d</span>}
+          />
+          <CardBody className="grid grid-cols-2 gap-2 p-4 sm:grid-cols-4 lg:grid-cols-7">
+            {sevenDayRecoveryForecast.map((day, index) => (
+              <div key={day.date} className="rounded-xl border border-border bg-bg-raised px-3 py-3">
+                <p className="u-label">{index === 0 ? 'Today' : formatDate(day.date, 'EEE')}</p>
+                <p className="mt-1 font-display text-[20px] font-semibold text-text">{day.itemCount}</p>
+                <p className="mt-0.5 text-[11px] text-text-faint">
+                  ~{day.estimatedMinutes}m{day.overdue > 0 ? ` · ${day.overdue} overdue` : ''}
+                </p>
+              </div>
+            ))}
+          </CardBody>
+        </Card>
+      ) : null}
+
+      {legacyDue.length > 0 ? (
         <section className="flex flex-col gap-3" aria-label="Questions due now">
           <div className="flex flex-wrap items-end justify-between gap-4 px-1">
             <div>
@@ -1883,13 +3382,13 @@ export default function Reattempts() {
               </p>
             </div>
             <div className="flex items-center gap-3">
-              <span className="u-num text-[12px] text-text-faint">{due.length}</span>
-              <Button variant="primary" onClick={() => openSession(due[0].id)}>
+              <span className="u-num text-[12px] text-text-faint">{legacyDue.length}</span>
+              <Button variant="primary" onClick={() => openSession(legacyDue[0].id)}>
                 <Play size={15} /> Start test
               </Button>
             </div>
           </div>
-          {due.map((row) => (
+          {legacyDue.map((row) => (
             <QueueCard
               key={row.id}
               row={row}
@@ -1900,14 +3399,14 @@ export default function Reattempts() {
             />
           ))}
         </section>
-      ) : (
+      ) : recoveryCandidates.length === 0 ? (
         <Empty
           title="Nothing due"
           hint="The queue fills as you tag RBS, RBG and W-* questions. First rung lands 3 days after the mistake."
         />
-      )}
+      ) : null}
 
-      {upcoming.length > 0 ? (
+      {upcomingCount > 0 ? (
         <Card>
           <CardHeader title="Upcoming" />
           <div>

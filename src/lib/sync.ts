@@ -129,6 +129,7 @@ const SUBJECT_ROW_TABLES = new Set<SyncedTableName>([
   'patterns',
   'formulas',
   'pyq_attempts',
+  'learning_items',
   'topic_progress'
 ]);
 
@@ -684,13 +685,21 @@ async function putLocalRow<T extends { id: string }>(
 ): Promise<void> {
   const target = table(name);
   const normalizedRow = normalizeLocalWrite(name, row);
-  if (name === 'pyq_attempts') {
+  if (name === 'pyq_attempts' || name === 'learning_events') {
     const existing = (await target.get(normalizedRow.id)) as
       | ({ id: string } & Record<string, unknown>)
       | undefined;
     if (existing) {
-      if (!sameImmutableAttempt(existing, normalizedRow as T & Record<string, unknown>)) {
-        throw new Error(`Committed PYQ attempt ${normalizedRow.id} is immutable.`);
+      const unchanged =
+        name === 'pyq_attempts'
+          ? sameImmutableAttempt(existing, normalizedRow as T & Record<string, unknown>)
+          : sameSyncedPayload(existing, normalizedRow as T & Record<string, unknown>);
+      if (!unchanged) {
+        throw new Error(
+          name === 'pyq_attempts'
+            ? `Committed PYQ attempt ${normalizedRow.id} is immutable.`
+            : `Learning event ${normalizedRow.id} is append-only.`
+        );
       }
       return;
     }
@@ -733,8 +742,12 @@ export async function writeLocalBatch(
 
 /** Delete locally now; queue the remote delete if we cannot reach the server. */
 export async function deleteLocal(name: SyncedTableName, id: string): Promise<void> {
-  if (name === 'pyq_attempts') {
-    throw new Error('Committed PYQ attempts cannot be deleted.');
+  if (name === 'pyq_attempts' || name === 'learning_events') {
+    throw new Error(
+      name === 'pyq_attempts'
+        ? 'Committed PYQ attempts cannot be deleted.'
+        : 'Learning events cannot be deleted.'
+    );
   }
   const target = table(name);
   const enabledForUser = syncEnabled ? currentUserId : null;
@@ -863,8 +876,8 @@ export function flushPushQueue(): Promise<void> {
       );
       for (const d of ownedQueue) {
         if (!syncContextIsCurrent(pushingForUserId)) return;
-        if (d.table === 'pyq_attempts') {
-          console.warn(`[sync] discarded forbidden immutable delete for pyq_attempts/${d.id}`);
+        if (d.table === 'pyq_attempts' || d.table === 'learning_events') {
+          console.warn(`[sync] discarded forbidden immutable delete for ${d.table}/${d.id}`);
           await removeQueuedDelete(d, pushingForUserId);
           continue;
         }

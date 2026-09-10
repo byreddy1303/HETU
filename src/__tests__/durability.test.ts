@@ -7,8 +7,13 @@ const mocks = vi.hoisted(() => ({
   syncTopicProgressFromDb: vi.fn(),
   migrateLegacyDayPlansForUser: vi.fn(),
   loadAllDayPlans: vi.fn(),
+  loadPlannerDayTombstones: vi.fn(),
+  loadPlannerDaySyncState: vi.fn(),
+  cacheDayPlanForUser: vi.fn(),
+  cachePlannerDayTombstone: vi.fn(),
   loadCloudDayPlans: vi.fn(),
   queuePlannerCloudWrite: vi.fn(),
+  queuePlannerCloudDelete: vi.fn(),
   flushPlannerCloudWrites: vi.fn(),
   hasPendingPlannerCloudWrites: vi.fn(),
   flushAccountStateWrites: vi.fn(),
@@ -39,12 +44,17 @@ vi.mock('@/stores/topic-progress', () => ({
 
 vi.mock('@/lib/planner-storage', () => ({
   migrateLegacyDayPlansForUser: mocks.migrateLegacyDayPlansForUser,
-  loadAllDayPlans: mocks.loadAllDayPlans
+  loadAllDayPlans: mocks.loadAllDayPlans,
+  loadPlannerDayTombstones: mocks.loadPlannerDayTombstones,
+  loadPlannerDaySyncState: mocks.loadPlannerDaySyncState,
+  cacheDayPlanForUser: mocks.cacheDayPlanForUser,
+  cachePlannerDayTombstone: mocks.cachePlannerDayTombstone
 }));
 
 vi.mock('@/lib/planner-cloud', () => ({
   loadCloudDayPlans: mocks.loadCloudDayPlans,
   queuePlannerCloudWrite: mocks.queuePlannerCloudWrite,
+  queuePlannerCloudDelete: mocks.queuePlannerCloudDelete,
   flushPlannerCloudWrites: mocks.flushPlannerCloudWrites,
   hasPendingPlannerCloudWrites: mocks.hasPendingPlannerCloudWrites
 }));
@@ -90,8 +100,11 @@ describe('durability barrier', () => {
     mocks.syncTopicProgressFromDb.mockResolvedValue(undefined);
     mocks.flushPendingSync.mockResolvedValue(true);
     mocks.loadAllDayPlans.mockReturnValue([]);
-    mocks.loadCloudDayPlans.mockResolvedValue({ plans: [], error: null });
+    mocks.loadPlannerDayTombstones.mockReturnValue([]);
+    mocks.loadPlannerDaySyncState.mockReturnValue(null);
+    mocks.loadCloudDayPlans.mockResolvedValue({ plans: [], tombstones: [], error: null });
     mocks.queuePlannerCloudWrite.mockResolvedValue(null);
+    mocks.queuePlannerCloudDelete.mockResolvedValue(null);
     mocks.flushPlannerCloudWrites.mockResolvedValue(null);
     mocks.hasPendingPlannerCloudWrites.mockReturnValue(false);
     mocks.flushAccountStateWrites.mockResolvedValue(undefined);
@@ -168,6 +181,55 @@ describe('durability barrier', () => {
     expect(mocks.wipeLocalState).not.toHaveBeenCalled();
   });
 
+  it('applies a newer remote tombstone instead of resurrecting a stale local day', async () => {
+    const localPlan = {
+      date: '2026-08-29',
+      updatedAt: '2026-08-29T06:00:00.000Z',
+      syncRevision: 1
+    };
+    const tombstone = {
+      date: localPlan.date,
+      revision: 2,
+      updatedAt: '2026-08-29T07:00:00.000Z',
+      deletedAt: '2026-08-29T06:59:00.000Z'
+    };
+    mocks.loadAllDayPlans.mockReturnValue([localPlan]);
+    mocks.loadPlannerDaySyncState.mockReturnValue({
+      date: localPlan.date,
+      revision: 1,
+      updatedAt: localPlan.updatedAt,
+      deletedAt: null
+    });
+    mocks.loadCloudDayPlans.mockResolvedValue({ plans: [], tombstones: [tombstone], error: null });
+
+    expect(await flushAllDurableState('user-tombstone')).toEqual({ ok: true });
+
+    expect(mocks.cachePlannerDayTombstone).toHaveBeenCalledWith('user-tombstone', tombstone);
+    expect(mocks.queuePlannerCloudWrite).not.toHaveBeenCalled();
+  });
+
+  it('flushes an offline local tombstone instead of hydrating the older live row', async () => {
+    const date = '2026-08-30';
+    const localTombstone = {
+      date,
+      revision: 4,
+      updatedAt: '2026-08-30T10:00:00.000Z',
+      deletedAt: '2026-08-30T10:00:00.000Z'
+    };
+    mocks.loadPlannerDayTombstones.mockReturnValue([localTombstone]);
+    mocks.loadPlannerDaySyncState.mockReturnValue(localTombstone);
+    mocks.loadCloudDayPlans.mockResolvedValue({
+      plans: [{ date, updatedAt: '2026-08-30T09:00:00.000Z', syncRevision: 4 }],
+      tombstones: [],
+      error: null
+    });
+
+    expect(await flushAllDurableState('user-local-delete')).toEqual({ ok: true });
+
+    expect(mocks.queuePlannerCloudDelete).toHaveBeenCalledWith('user-local-delete', date);
+    expect(mocks.cacheDayPlanForUser).not.toHaveBeenCalled();
+  });
+
   it('returns a no-data-cleared error when any database queue remains pending', async () => {
     mocks.flushPendingSync.mockResolvedValue(false);
 
@@ -216,6 +278,20 @@ describe('durability barrier', () => {
     expect(result.error).toContain('air.topper-notes.user-corrupt');
     expect(result.error).toContain('was left untouched');
     expect(localStorage.getItem('air.topper-notes.user-corrupt')).toBe('{not valid JSON');
+    expect(mocks.initSync).not.toHaveBeenCalled();
+    expect(mocks.wipeLocalState).not.toHaveBeenCalled();
+  });
+
+  it('preserves an unreadable Planner outbox instead of discarding an offline write', async () => {
+    localStorage.setItem(
+      'air.planner-cloud-pending.user-corrupt-outbox.2026-08-31',
+      '{not valid JSON'
+    );
+
+    const result = await clearLocalCacheSafely('user-corrupt-outbox');
+
+    expect(result.ok).toBe(false);
+    expect(result.error).toContain('air.planner-cloud-pending.user-corrupt-outbox.2026-08-31');
     expect(mocks.initSync).not.toHaveBeenCalled();
     expect(mocks.wipeLocalState).not.toHaveBeenCalled();
   });

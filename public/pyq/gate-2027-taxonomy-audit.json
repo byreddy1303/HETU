@@ -63,9 +63,9 @@
     "questionTypes": {
       "AMBIGUOUS": 3,
       "MARKS_TO_ALL": 2,
-      "MCQ": 3332,
+      "MCQ": 3337,
       "MSQ": 226,
-      "NAT": 661,
+      "NAT": 656,
       "SUBJECTIVE": 20,
       "UNSUPPORTED": 90
     },
@@ -86,18 +86,19 @@
       "unsupported": 90
     },
     "answerProvenanceKinds": {
-      "examside-key": 964,
+      "examside-key": 963,
       "gateoverflow_top_answer": 79,
       "independent-audit": 8,
       "learner-provided-screenshot": 30,
-      "legacy-structured": 2799,
+      "legacy-structured": 2785,
       "manual-audit": 3,
       "missing": 3,
+      "official_key": 16,
       "official-answer-key": 66,
       "official-marked-solution": 65,
       "official-solution": 122,
       "pdf_answer_key": 130,
-      "question_uid": 65
+      "question_uid": 64
     },
     "books": [
       {

@@ -24,6 +24,8 @@ import QuestionEditor, { DeleteBar } from '@/components/shared/QuestionEditor';
 import SessionEditor from '@/components/shared/SessionEditor';
 import PyqSessionSummary from '@/components/pyq/PyqSessionSummary';
 import { applyDraftToRow, draftFromRow, type EditorDraft } from '@/components/shared/questionDraft';
+import { useAuth } from '@/hooks/useAuth';
+import { markLearningAnalysisCompleted } from '@/lib/learning-recovery';
 
 const TONE_BG: Record<'ok' | 'slow' | 'guess' | 'wrong', string> = {
   ok: 'bg-success',
@@ -42,6 +44,8 @@ const TONE_TEXT: Record<'ok' | 'slow' | 'guess' | 'wrong', string> = {
 export default function SessionReview() {
   const { id = '' } = useParams();
   const navigate = useNavigate();
+  const { profile } = useAuth();
+  const timeZone = profile?.timezone ?? 'Asia/Kolkata';
 
   const session = useLiveQuery(async () => (await db.sessions.get(id)) ?? null, [id]);
   const questions = useLiveQuery(
@@ -72,6 +76,13 @@ export default function SessionReview() {
     try {
       const merged = applyDraftToRow(editRow, editDraft);
       await writeLocal('questions', merged);
+      if (merged.source_pyq_attempt_id) {
+        await markLearningAnalysisCompleted({
+          userId: merged.user_id,
+          sourceAttemptId: merged.source_pyq_attempt_id,
+          timeZone
+        });
+      }
       setEditRow(null);
       setEditDraft(null);
     } finally {

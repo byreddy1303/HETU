@@ -3,12 +3,26 @@
 Status: active  
 Owner: repository implementation program  
 Started: 2026-08-30  
+Last verified: 2026-09-10
 Branch: `codex/closed-learning-loop`
 
 This document is the durable source of truth for implementing the complete Planner → PYQ →
 Recovery → Mastery program. It intentionally tracks product behavior, data contracts, migration
 work, tests, and rollout safeguards in one place so future work can resume without reconstructing
 the original audit.
+
+## Current checkpoint
+
+The main local implementation is present. Release acceptance is still active: no production
+migration or deployment has been performed in this tranche. Checked implementation tasks below
+refer to local code and automated evidence, not a claim of production or physical-device testing.
+“Complete” ledger rows have local implementation/test coverage; the whole goal remains active until
+Phase 7 and the release gates in [closed-loop-release.md](closed-loop-release.md) are resolved.
+
+Next session must start with the remaining acceptance list, not repeat the feature brainstorm:
+physical Android app-kill/resume; authenticated two-device/offline acceptance; keyboard focus and
+nested-dialog Escape behavior; complete React/traceability review; and deployment/migration
+verification against the intended environment. Preserve every recommendation.
 
 ## Objective
 
@@ -235,157 +249,157 @@ Recommendation is a pure, testable compiler over local evidence:
 
 - [x] Persist this master plan.
 - [x] Record baseline test counts and key fixtures.
-- [ ] Create branch and push initial plan.
-- [ ] Add a traceability check to keep this file current in every tranche.
+- [x] Create branch and push initial plan.
+- [x] Add a traceability check to keep this file current in every tranche.
 
 ### Phase 1 — trustworthy recovery foundation
 
-- [ ] Create `learning_items`, `learning_events`, and required linkage columns.
-- [ ] Add RLS, explicit grants, indexes, constraints, and two-user policy tests.
-- [ ] Revoke/harden the unsafe retry RPC and fix re-attempt UPDATE `WITH CHECK`.
-- [ ] Import existing re-attempt JSON history into append-only events.
-- [ ] Merge duplicate ladders by canonical PYQ identity without losing events.
-- [ ] Add local Dexie models, indexes, sync mappings, isolation, export, and backup support.
-- [ ] Create a minimal learning item for every wrong, skipped, guessed-correct, slow-correct, or
+- [x] Create `learning_items`, `learning_events`, and required linkage columns.
+- [x] Add RLS, explicit grants, indexes, constraints, and two-user policy tests.
+- [x] Revoke/harden the unsafe retry RPC and fix re-attempt UPDATE `WITH CHECK`.
+- [x] Import existing re-attempt JSON history into append-only events.
+- [x] Merge duplicate ladders by canonical PYQ identity without losing events.
+- [x] Add local Dexie models, indexes, sync mappings, isolation, export, and backup support.
+- [x] Create a minimal learning item for every wrong, skipped, guessed-correct, slow-correct, or
       low-confidence attempt in guided practice.
-- [ ] Create recovery items for weak timed-set/full-paper receipts at exam finalization.
-- [ ] Keep Journal analysis optional and link later diagnoses to the canonical item.
-- [ ] Replace device-local retry dates with profile-timezone calendar dates.
-- [ ] Fix Planner “last 30 days” so future dates are excluded.
-- [ ] Fix readiness so waiting at D30 is not treated as successful D30 recall.
-- [ ] Add tests for automatic capture, idempotency, canonical merging, timezone rollover, and honest
+- [x] Create recovery items for weak timed-set/full-paper receipts at exam finalization.
+- [x] Keep Journal analysis optional and link later diagnoses to the canonical item.
+- [x] Replace device-local retry dates with profile-timezone calendar dates.
+- [x] Fix Planner “last 30 days” so future dates are excluded.
+- [x] Fix readiness so waiting at D30 is not treated as successful D30 recall.
+- [x] Add tests for automatic capture, idempotency, canonical merging, timezone rollover, and honest
       readiness credit.
-- [ ] Support exact, numeric-tolerance, and inclusive-range evaluation for manual NAT answers.
+- [x] Support exact, numeric-tolerance, and inclusive-range evaluation for manual NAT answers.
 
 ### Phase 2 — blind and durable recovery
 
-- [ ] Hide pattern, trigger, prior answer, and outcome until answer commitment.
-- [ ] Add explicit “Reveal opening cue,” log hint use, and grade assisted answers Hard.
-- [ ] Add Again/Hard/Good/Easy grading derived from correctness, time, confidence, and hint use.
-- [ ] Add explicit Not now / interrupted semantics and durable events.
-- [ ] Add durable recovery sessions with queue snapshot, timers, drafts, positions, and resume.
-- [ ] Add bounded 10/20/30-minute and 5-question recovery sprints.
-- [ ] Prioritize by overdue age, lapse count, confidence surprise, marks, weekly focus, and estimated
+- [x] Hide pattern, trigger, prior answer, and outcome until answer commitment.
+- [x] Add explicit “Reveal opening cue,” log hint use, and grade assisted answers Hard.
+- [x] Add Again/Hard/Good/Easy grading derived from correctness, time, confidence, and hint use.
+- [x] Add explicit Not now / interrupted semantics and durable events.
+- [x] Add durable recovery sessions with queue snapshot, timers, drafts, positions, and resume.
+- [x] Add bounded 10/20/30-minute and 5-question recovery sprints.
+- [x] Prioritize by overdue age, lapse count, confidence surprise, marks, weekly focus, and estimated
       duration while interleaving subjects/patterns.
-- [ ] Add Must recover today and If time partitions with reason chips.
-- [ ] Add remediation state after repeated lapses.
-- [ ] Add corrected-opening-move capture and focused remediation-plan action.
-- [ ] Add exact same-topic transfer assignment and pass/fail handling.
-- [ ] Add recovery sprint reports and seven-day forecast.
-- [ ] Preserve all legacy rows and support compatibility rendering.
+- [x] Add Must recover today and If time partitions with reason chips.
+- [x] Add remediation state after repeated lapses.
+- [x] Add corrected-opening-move capture and focused remediation-plan action.
+- [x] Add exact same-topic transfer assignment and pass/fail handling.
+- [x] Add recovery sprint reports and seven-day forecast.
+- [x] Preserve all legacy rows and support compatibility rendering.
 
 ### Phase 3 — recommended PYQ practice
 
-- [ ] Add seeded, deterministic, stratified question selection.
-- [ ] Balance mixed sets across subject/topic/year/marks without exposing sealed papers.
-- [ ] Rank using weakness, confidence, lapse, recency, weekly focus, and planner prescription.
-- [ ] Add reason chips explaining every selected cohort.
-- [ ] Add Recommended Set presets: Learn, Diagnose, Repair, Speed, Transfer, Mixed GATE, Full Paper.
-- [ ] Add live preflight: exact match count, unseen/seen split, cohort split, marks, estimated time,
+- [x] Add seeded, deterministic, stratified question selection.
+- [x] Balance mixed sets across subject/topic/year/marks without exposing sealed papers.
+- [x] Rank using weakness, confidence, lapse, recency, weekly focus, and planner prescription.
+- [x] Add reason chips explaining every selected cohort.
+- [x] Add Recommended Set presets: Learn, Diagnose, Repair, Speed, Transfer, Mixed GATE, Full Paper.
+- [x] Add live preflight: exact match count, unseen/seen split, cohort split, marks, estimated time,
       distribution, and reserved-paper exclusions.
-- [ ] Remember last configuration and support named saved prescriptions.
-- [ ] Add complete searchable PYQ session history.
-- [ ] Extend confidence ledgers and insights to guided practice.
-- [ ] Add high-confidence-wrong and confidence-calibration reporting by subject/topic.
-- [ ] Compare personal pace with mark-based targets and rolling personal baselines.
-- [ ] Make improvement insights actionable with exact UID subsets.
-- [ ] Add Practice exact subset, Add to recovery, Analyze first, Plan repair, and Try transfer actions.
-- [ ] Make exact-set repetition secondary to transfer practice.
+- [x] Remember last configuration and support named saved prescriptions.
+- [x] Add complete searchable PYQ session history.
+- [x] Extend confidence ledgers and insights to guided practice.
+- [x] Add high-confidence-wrong and confidence-calibration reporting by subject/topic.
+- [x] Compare personal pace with mark-based targets and rolling personal baselines.
+- [x] Make improvement insights actionable with exact UID subsets.
+- [x] Add Practice exact subset, Add to recovery, Analyze first, Plan repair, and Try transfer actions.
+- [x] Make exact-set repetition secondary to transfer practice.
 
 ### Phase 4 — executable and capacity-aware Planner
 
-- [ ] Add daily available minutes, optional time windows, energy, and protected buffer.
-- [ ] Add planned-versus-available capacity meter and overload guidance.
-- [ ] Add agenda ordering, optional start time, drag/reorder, and Start next action.
-- [ ] Add typed launch prescriptions and result receipts to planner blocks.
-- [ ] Resolve PYQ prescriptions to exact sets at start and feed outcomes back at completion.
-- [ ] Forecast due recovery load for tomorrow and the next seven/thirty days.
-- [ ] Estimate future review load when adding a new PYQ block.
-- [ ] Add Build my day compiler using review debt, weekly focus, readiness, formulas, priorities,
+- [x] Add daily available minutes, optional time windows, energy, and protected buffer.
+- [x] Add planned-versus-available capacity meter and overload guidance.
+- [x] Add agenda ordering, optional start time, drag/reorder, and Start next action.
+- [x] Add typed launch prescriptions and result receipts to planner blocks.
+- [x] Resolve PYQ prescriptions to exact sets at start and feed outcomes back at completion.
+- [x] Forecast due recovery load for tomorrow and the next seven/thirty days.
+- [x] Estimate future review load when adding a new PYQ block.
+- [x] Add Build my day compiler using review debt, weekly focus, readiness, formulas, priorities,
       energy, and capacity.
-- [ ] Require user approval and show recommendation reasons.
-- [ ] Make Replicate Yes/Partial/No actionable.
-- [ ] Add Copy yesterday, Copy last weekday, templates, recurrence, and selected-block copy.
-- [ ] Add one-tap unfinished-block rollover.
-- [ ] Add mobile week/agenda view with visible subjects and durations.
-- [ ] Add plan-vs-actual time/questions/outcomes and estimation calibration by subject/mode.
-- [ ] Make neglected-subject and weak-topic insights create a block directly.
+- [x] Require user approval and show recommendation reasons.
+- [x] Make Replicate Yes/Partial/No actionable.
+- [x] Add Copy yesterday, Copy last weekday, templates, recurrence, and selected-block copy.
+- [x] Add one-tap unfinished-block rollover.
+- [x] Add mobile week/agenda view with visible subjects and durations.
+- [x] Add plan-vs-actual time/questions/outcomes and estimation calibration by subject/mode.
+- [x] Make neglected-subject and weak-topic insights create a block directly.
 
 ### Phase 5 — unified Planner durability
 
-- [ ] Consolidate legacy `plan_items` / completions with current `planner_day_plans` behavior.
-- [ ] Migrate manageable recurring items into typed planner templates/blocks.
-- [ ] Update digest and study-notification functions to the unified source.
-- [ ] Sync the complete DayPlan, reviews, capacity, launch prescriptions, and results.
-- [ ] Add versioned conflict handling and deletion tombstones.
-- [ ] Add durable planner outbox/retry behavior.
-- [ ] Include planner data in backup/restore and progress export.
-- [ ] Prevent stale-device resurrection after deletion.
-- [ ] Verify multi-device create/update/delete conflicts.
+- [x] Consolidate legacy `plan_items` / completions with current `planner_day_plans` behavior.
+- [x] Migrate manageable recurring items into typed planner templates/blocks.
+- [x] Update digest and study-notification functions to the unified source.
+- [x] Sync the complete DayPlan, reviews, capacity, launch prescriptions, and results.
+- [x] Add versioned conflict handling and deletion tombstones.
+- [x] Add durable planner outbox/retry behavior.
+- [x] Include planner data in backup/restore and progress export.
+- [x] Prevent stale-device resurrection after deletion.
+- [ ] Verify multi-device create/update/delete conflicts on authenticated devices (local RPC and outbox simulations pass).
 
 ### Phase 6 — longitudinal learning and readiness
 
-- [ ] Add wrong-to-clean conversion at 7/30 days.
-- [ ] Add Again/Hard/Good/Easy and D3/D10/D30 pass rates.
-- [ ] Add hint-free recall, transfer success, mastered lapse, and remediation conversion.
-- [ ] Add median/P90 overdue age and backlog burn-down vs new mistakes.
-- [ ] Add original-to-recovery time improvement.
-- [ ] Add analysis completion rate and recovery by subject/pattern/root cause.
-- [ ] Add plan estimation error, rollover rate, and setup-to-start time.
-- [ ] Feed recovery evidence into Weekly Review and Readiness without double counting.
-- [ ] Use a durable-recovery north star instead of streaks or raw activity.
+- [x] Add wrong-to-clean conversion at 7/30 days.
+- [x] Add Again/Hard/Good/Easy and D3/D10/D30 pass rates.
+- [x] Add hint-free recall, transfer success, mastered lapse, and remediation conversion.
+- [x] Add median/P90 overdue age and backlog burn-down vs new mistakes.
+- [x] Add original-to-recovery time improvement.
+- [x] Add analysis completion rate and recovery by subject/pattern/root cause.
+- [x] Add plan estimation error, rollover rate, and setup-to-start time.
+- [x] Feed recovery evidence into Weekly Review and Readiness without double counting.
+- [x] Use a durable-recovery north star instead of streaks or raw activity.
 
 ### Phase 7 — verification and release
 
-- [ ] Unit tests for all pure selection, scheduling, capacity, and analytics logic.
-- [ ] Component tests for blind retrieval, hints, defer/interruption, presets, preflight, actions,
+- [x] Unit tests for all pure selection, scheduling, capacity, and analytics logic.
+- [x] Component tests for blind retrieval, hints, defer/interruption, presets, preflight, actions,
       planner capacity, rollover, and mobile agenda.
-- [ ] Integration tests for attempt → learning item → recovery → transfer → mastery.
-- [ ] Supabase RLS allow/deny tests and database advisors.
+- [x] Integration tests for attempt → learning item → recovery → transfer → mastery.
+- [x] Supabase RLS allow/deny tests and database advisors.
 - [ ] Offline, refresh, app-kill/resume, and conflict tests.
-- [ ] Typecheck, lint, complete Vitest suite, bank audit, and Playwright suite.
-- [ ] Browser screenshots at desktop/mobile widths, dark mode, and reduced motion.
+- [x] Typecheck, lint, complete Vitest suite, bank audit, and Playwright suite.
+- [x] Browser screenshots at desktop/mobile widths, dark mode, and reduced motion.
 - [ ] Android/native smoke verification for Planner, PYQ, and Recovery.
 - [ ] React best-practices review across every edited TSX component.
 - [ ] Accessibility review: keyboard, focus, labels, live status, color-independent evidence.
-- [ ] Update README, deployment docs, data export docs, and migration notes.
+- [x] Update README, deployment docs, data export docs, and migration notes.
 - [ ] Verify every traceability item below and remove no requirement silently.
 
 ## Traceability ledger
 
 | Recommendation | Phase | Status |
 | --- | ---: | --- |
-| Automatic weak-attempt capture, including exams | 1 | Pending |
-| Journal enrichment never gates recovery | 1 | Pending |
-| One canonical learning identity / one schedule | 1 | Pending |
-| Append-only learning events | 1 | Pending |
-| Blind retrieval and explicit hint evidence | 2 | Pending |
-| Failure vs defer vs interruption | 2 | Pending |
-| Again/Hard/Good/Easy adaptive grading | 2 | Pending |
-| Durable recovery sessions | 2 | Pending |
-| Bounded workload-aware recovery sprints | 2 | Pending |
-| Remediation/leech state | 2 | Pending |
-| Transfer checks before durable mastery | 2–3 | Pending |
-| Recommended PYQ set presets | 3 | Pending |
-| Seeded stratified question selection | 3 | Pending |
-| Live setup preflight | 3 | Pending |
-| Confidence-aware selection and reports | 3 | Pending |
-| Exact actionable report subsets | 3 | Pending |
-| Complete searchable session history | 3 | Pending |
-| Capacity-aware Build my day | 4 | Pending |
-| Executable planner prescriptions/results | 4 | Pending |
-| Review load forecast | 4 | Pending |
-| Agenda/time windows/buffer | 4 | Pending |
-| Replicate/copy/template/recurrence/rollover | 4–5 | Pending |
-| Plan-vs-actual and estimation calibration | 4 | Pending |
-| Mobile agenda/week visibility | 4 | Pending |
-| Full planner sync, tombstones, outbox, backup | 5 | Pending |
-| Unify legacy and current planner sources | 5 | Pending |
-| Recovery-focused Weekly Review and Readiness | 6 | Pending |
-| Honest past/today/future analytics | 1, 4, 6 | Pending |
-| RLS/RPC hardening and explicit API grants | 1 | Pending |
-| Manual NAT exact/tolerance/range evaluation | 1 | Pending |
-| No passive-only insights; every priority insight has an action | 2–6 | Pending |
+| Automatic weak-attempt capture, including exams | 1 | Complete |
+| Journal enrichment never gates recovery | 1 | Complete |
+| One canonical learning identity / one schedule | 1 | Complete |
+| Append-only learning events | 1 | Complete |
+| Blind retrieval and explicit hint evidence | 2 | Complete |
+| Failure vs defer vs interruption | 2 | Complete |
+| Again/Hard/Good/Easy adaptive grading | 2 | Complete |
+| Durable recovery sessions | 2 | Complete |
+| Bounded workload-aware recovery sprints | 2 | Complete |
+| Remediation/leech state | 2 | Complete |
+| Transfer checks before durable mastery | 2–3 | Complete |
+| Recommended PYQ set presets | 3 | Complete |
+| Seeded stratified question selection | 3 | Complete |
+| Live setup preflight | 3 | Complete |
+| Confidence-aware selection and reports | 3 | Complete |
+| Exact actionable report subsets | 3 | Complete |
+| Complete searchable session history | 3 | Complete |
+| Capacity-aware Build my day | 4 | Complete |
+| Executable planner prescriptions/results | 4 | Complete |
+| Review load forecast | 4 | Complete |
+| Agenda/time windows/buffer | 4 | Complete |
+| Replicate/copy/template/recurrence/rollover | 4–5 | Complete |
+| Plan-vs-actual and estimation calibration | 4 | Complete |
+| Mobile agenda/week visibility | 4 | Complete |
+| Full planner sync, tombstones, outbox, backup | 5 | In progress |
+| Unify legacy and current planner sources | 5 | In progress |
+| Recovery-focused Weekly Review and Readiness | 6 | Complete |
+| Honest past/today/future analytics | 1, 4, 6 | Complete |
+| RLS/RPC hardening and explicit API grants | 1 | Complete |
+| Manual NAT exact/tolerance/range evaluation | 1 | Complete |
+| No passive-only insights; every priority insight has an action | 2–6 | In progress |
 
 ## Verification log
 
@@ -402,6 +416,39 @@ known limitations. Never mark an item complete based only on code inspection.
   Data API grants/exposure decisions; Node 22 is already compatible with current client support.
 - Official RLS guidance reviewed: public tables require RLS, UPDATE policies require `USING` and
   `WITH CHECK`, and exposed `SECURITY DEFINER` functions require explicit execution control.
+
+### 2026-09-10 — integrated implementation and local acceptance
+
+- `npm run typecheck`, `npm run lint`, and `npm run build` passed.
+- Final Vitest run: 107 files / 619 tests passed, including the extra malformed-outbox regression.
+- `PLAYWRIGHT_PORT=5187 npm run test:e2e`: 3 browser stories passed. They cover
+  study-route navigation; explicit Build my day approval, protected buffer, refresh persistence,
+  mobile width and reduced motion; real-bank skipped PYQ → canonical due recovery without Journal;
+  blind answers, two interruption/resume cycles, saved answer draft, and neutral defer.
+- `supabase test db --local`: 2 pgTAP files / 41 tests passed, covering two-user RLS,
+  append-only evidence, unsafe RPC denial, Planner revisions, idempotency, conflicts, tombstones,
+  explicit recreation, and privacy.
+- `npm run test:planner-migration`: 7 assertions passed while replaying the actual Planner
+  migration over legacy fixtures inside a rolled-back transaction. Existing reviews and blocks,
+  recorded completions, archived legacy rows, and the canonical template envelope are preserved.
+- `npm run pyq:audit`: 4,334 questions / 14 subjects / 95 topics audited; the derived taxonomy
+  summary was refreshed to match the already-committed bank. No question or answer was rewritten.
+  `npm run pyq:marks:audit`: 4,043 GATE rows verified; none missing marks.
+- `npm run build:native` passed. This is a Capacitor asset build, **not** physical Android QA.
+  `adb devices -l` returned no connected device/emulator, so device acceptance remains open.
+- Local security advisors report three inherited warnings: mutable search_path on
+  `increment_llm_usage`, public `citext`, and the public access-request INSERT policy. No
+  learning/Planner-specific warning was returned. These inherited findings remain documented.
+- Build retains an existing ineffective-dynamic-import warning for `account-state.ts`; the
+  module is also statically imported. No build error.
+- Screenshots are generated by the browser specs in `test-results/`; durable command/test
+  references are retained here because generated test artifacts are intentionally ignored.
+- Push/email/Telegram reminders use unfinished unified DayPlan blocks and ignore tombstones.
+  Completed blocks are omitted; legacy conversion no longer leaves email reading an empty source.
+- Backup preflight rejects malformed outbox payloads and cross-account rows before any import.
+  Conflict copies remain exportable without being automatically replayed or resurrecting deleted days.
+- Remaining: physical-device and authenticated deployment checks, full keyboard/focus review,
+  and independent final traceability acceptance. No production release is implied.
 
 ## Decision log
 

@@ -8,11 +8,7 @@
 import { useMemo } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import {
-  PLANNER_MIN_MONTH_INDEX,
-  PLANNER_MIN_YEAR,
-  subjectChipInk
-} from '@/lib/planner-constants';
+import { PLANNER_MIN_MONTH_INDEX, PLANNER_MIN_YEAR, subjectChipInk } from '@/lib/planner-constants';
 import type { DayCellSummary } from '@/lib/planner-storage';
 import { haptic, isNativeApp } from '@/lib/native';
 
@@ -93,6 +89,22 @@ export default function Calendar({
 
   const todayISO = iso(today.getFullYear(), today.getMonth(), today.getDate());
   const native = isNativeApp;
+  const weekDates = useMemo(() => {
+    const anchor =
+      today.getFullYear() === year && today.getMonth() === monthIndex
+        ? new Date(year, monthIndex, today.getDate())
+        : new Date(year, monthIndex, 1);
+    anchor.setDate(anchor.getDate() - anchor.getDay());
+    return Array.from({ length: 7 }, (_, index) => {
+      const date = new Date(anchor);
+      date.setDate(anchor.getDate() + index);
+      return {
+        iso: iso(date.getFullYear(), date.getMonth(), date.getDate()),
+        weekday: WEEKDAY_LABELS[index],
+        day: date.getDate()
+      };
+    });
+  }, [monthIndex, today, year]);
 
   return (
     <div className="native-planner-calendar flex flex-col rounded-lg border border-border bg-bg-raised">
@@ -215,6 +227,73 @@ export default function Calendar({
           );
         })}
       </div>
+
+      {native && (
+        <section
+          className="native-mobile-agenda border-t border-border bg-bg-raised"
+          aria-labelledby="native-week-agenda-heading"
+        >
+          <div className="flex items-center justify-between border-b border-border px-4 py-3">
+            <div>
+              <p className="u-label">Seven-day agenda</p>
+              <h3
+                id="native-week-agenda-heading"
+                className="mt-0.5 font-display text-[16px] font-semibold text-text"
+              >
+                Week at a glance
+              </h3>
+            </div>
+            <span className="u-num text-[10px] text-text-faint">
+              {weekDates[0].iso.slice(5)} — {weekDates[6].iso.slice(5)}
+            </span>
+          </div>
+          <ol className="divide-y divide-border">
+            {weekDates.map((date) => {
+              const summary = summaries.get(date.iso);
+              const planned = planIndex.has(date.iso);
+              return (
+                <li key={date.iso}>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      haptic('selection');
+                      onPickDate(date.iso);
+                    }}
+                    className="grid min-h-[64px] w-full grid-cols-[52px_minmax(0,1fr)_auto] items-center gap-3 px-4 py-2.5 text-left hover:bg-accent-faint/25"
+                    aria-label={`${date.iso} agenda, ${summary?.totalMin ? formatMin(summary.totalMin) : 'no time'} planned`}
+                  >
+                    <span>
+                      <span className="block text-[10px] font-semibold uppercase tracking-wide text-text-faint">
+                        {date.weekday}
+                      </span>
+                      <span className="u-num mt-0.5 block text-[14px] font-semibold text-text">
+                        {date.day}
+                      </span>
+                    </span>
+                    <span className="min-w-0">
+                      {planned && summary?.subjects.length ? (
+                        <span className="block truncate text-[12px] font-semibold text-text">
+                          {summary.subjects.join(' · ')}
+                        </span>
+                      ) : (
+                        <span className="block text-[11.5px] text-text-faint">Unplanned</span>
+                      )}
+                      <span className="mt-0.5 block text-[10.5px] text-text-muted">
+                        {planned
+                          ? `${summary?.subjects.length ?? 0} subject${summary?.subjects.length === 1 ? '' : 's'}`
+                          : 'Tap to build this day'}
+                      </span>
+                    </span>
+                    <span className="u-num text-[11.5px] font-semibold text-accent">
+                      {summary?.totalMin ? formatMin(summary.totalMin) : '—'}
+                    </span>
+                  </button>
+                </li>
+              );
+            })}
+          </ol>
+        </section>
+      )}
     </div>
   );
 }

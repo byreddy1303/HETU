@@ -150,6 +150,15 @@ describe('PYQ practice scope', () => {
         matchesPyqTopicScope(row, { subjectSlug: 'algorithms', topicSlug: 'sorting' })
       )
     ).toEqual([sorting]);
+    expect(
+      [algorithm, sorting, database].filter((row) =>
+        matchesPyqTopicScope(row, {
+          subjectSlug: 'all',
+          subjectSlugs: ['databases'],
+          topicSlug: 'all'
+        })
+      )
+    ).toEqual([database]);
   });
 
   it('treats a legacy set without a topic as a complete subject', () => {

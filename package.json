@@ -19,6 +19,8 @@
     "pyq:audit": "node scripts/audit-pyq-taxonomy.mjs",
     "pyq:marks": "node scripts/reconcile-pyq-marks.mjs --write",
     "pyq:marks:audit": "node scripts/reconcile-pyq-marks.mjs --check",
+    "plan:check": "node scripts/check-closed-loop-plan.mjs",
+    "test:planner-migration": "node scripts/verify-planner-migration.mjs",
     "gate:papers:verify": "node scripts/download-gate-papers.mjs --verify",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "typecheck": "tsc --noEmit",

@@ -5,6 +5,7 @@ import { MemoryRouter, Route, Routes, useParams } from 'react-router-dom';
 import { db } from '@/lib/db';
 import { normalizePyqManifest, type PyqManifest, type PyqQuestion } from '@/lib/pyq';
 import Pyq from '@/pages/Pyq';
+import { usePyqPreferencesStore } from '@/stores/pyq-preferences';
 
 const USER = '00000000-0000-4000-8000-000000000001';
 
@@ -82,6 +83,7 @@ function ReviewDestination() {
 describe('authentic PYQ full-paper mode', () => {
   beforeEach(async () => {
     vi.stubGlobal('scrollTo', vi.fn());
+    usePyqPreferencesStore.getState().reset();
     vi.spyOn(globalThis, 'fetch').mockImplementation(async (input) => {
       const url = new URL(String(input), 'https://hetu.test');
       if (url.pathname === '/pyq/manifest.json') return Response.json(manifest);
@@ -151,7 +153,11 @@ describe('authentic PYQ full-paper mode', () => {
     await user.click(within(confirmation).getByRole('button', { name: 'Submit exam' }));
 
     expect(
-      await screen.findByRole('heading', { name: `Full paper report ${startedSession.id}` })
+      await screen.findByRole(
+        'heading',
+        { name: `Full paper report ${startedSession.id}` },
+        { timeout: 5_000 }
+      )
     ).toBeInTheDocument();
     await waitFor(async () => {
       expect(await db.pyq_attempts.where('pyq_session_id').equals(startedSession.id).count()).toBe(

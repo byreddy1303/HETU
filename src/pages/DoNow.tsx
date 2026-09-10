@@ -10,7 +10,8 @@ import { useAuth } from '@/hooks/useAuth';
 import { db } from '@/lib/db';
 import { buildDoNowQueue, type DoNowItem } from '@/lib/do-now';
 import { loadDayPlan } from '@/lib/planner-storage';
-import { markPlannerBlockStarted, reconcilePlannerExecutions } from '@/lib/planner-execution';
+import { reconcilePlannerExecutions, startPlannerBlock } from '@/lib/planner-execution';
+import { queuePlannerCloudWrite } from '@/lib/planner-cloud';
 import { todayISOInTimeZone } from '@/lib/utils';
 
 const KIND_LABEL: Record<DoNowItem['kind'], string> = {
@@ -23,7 +24,7 @@ const KIND_LABEL: Record<DoNowItem['kind'], string> = {
 };
 
 export default function DoNow() {
-  const { userId, profile } = useAuth();
+  const { userId, profile, sandbox } = useAuth();
   const navigate = useNavigate();
   const today = todayISOInTimeZone(profile?.timezone ?? 'Asia/Kolkata');
   const [planRevision, setPlanRevision] = useState(0);
@@ -69,7 +70,13 @@ export default function DoNow() {
   function start(item: DoNowItem) {
     if (item.kind === 'planned' && plan) {
       const blockId = item.id.slice('plan-'.length);
-      markPlannerBlockStarted(plan.date, blockId);
+      const started = startPlannerBlock(plan.date, blockId);
+      if (started) {
+        if (userId && !sandbox) void queuePlannerCloudWrite(userId, started.plan);
+        setPlanRevision((value) => value + 1);
+        navigate(started.href);
+        return;
+      }
     }
     navigate(item.href);
   }

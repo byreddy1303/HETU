@@ -1,0 +1,87 @@
+import { expect, test, type Page } from '@playwright/test';
+
+async function enterSandbox(page: Page) {
+  await page.goto('/auth');
+  await page.getByRole('button', { name: 'Enter local sandbox' }).click();
+  await page.getByRole('button', { name: 'Skip walkthrough' }).click();
+  await expect(page.getByRole('button', { name: /ordered actions\. Open Do now/ })).toBeVisible();
+}
+
+test('approved capacity and ordered work survive reload and remain usable on mobile', async ({ page }, testInfo) => {
+  const errors: string[] = [];
+  page.on('pageerror', (error) => errors.push(error.message));
+  await enterSandbox(page);
+  await page.getByRole('button', { name: 'Show controls' }).click();
+  await page.getByRole('button', { name: 'Switch to dark mode' }).click();
+  await page.goto('/planner?date=2026-09-10');
+  const dialog = page.getByRole('dialog');
+  await dialog.getByRole('spinbutton', { name: 'Minutes available', exact: true }).fill('90');
+  await dialog.getByRole('spinbutton', { name: 'Protected buffer minutes' }).fill('15');
+  await dialog.getByRole('button', { name: 'Build my day', exact: true }).click();
+  await expect(dialog.getByText('Proposed evidence rail · approval required')).toBeVisible();
+  await expect(dialog.getByRole('spinbutton', { name: /Action \d duration minutes/ })).toHaveCount(0);
+  await dialog.getByRole('button', { name: 'Approve day', exact: true }).click();
+  const durations = dialog.getByRole('spinbutton', { name: /Action \d duration minutes/ });
+  await expect(durations).toHaveCount(3);
+  const minutes = await durations.evaluateAll((inputs) => inputs.reduce((sum, input) => sum + Number((input as HTMLInputElement).value), 0));
+  expect(minutes).toBeLessThanOrEqual(75);
+  await dialog.getByRole('button', { name: 'Save', exact: true }).click();
+  await expect(dialog.getByRole('button', { name: 'Start next', exact: true })).toBeVisible();
+  await page.reload();
+  await expect(dialog.getByRole('button', { name: 'Start next', exact: true })).toBeVisible();
+  await page.evaluate(() => document.fonts.ready);
+  await page.screenshot({ path: testInfo.outputPath('planner-desktop.png') });
+  await dialog.getByRole('button', { name: 'Close', exact: true }).click();
+  await page.getByRole('button', { name: 'Show controls' }).click();
+  await page.getByRole('button', { name: 'Switch to light mode' }).click();
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/planner?date=2026-09-10');
+  await expect(dialog.getByRole('button', { name: 'Start next', exact: true })).toBeVisible();
+  await expect(dialog.getByRole('region', { name: 'Day capacity' })).toContainText('15m');
+  await expect(dialog).toHaveCSS('opacity', '1');
+  await page.evaluate(() => document.fonts.ready);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+  await page.screenshot({ path: testInfo.outputPath('planner-mobile-light-reduced-motion.png') });
+  expect(errors).toEqual([]);
+});
+
+test('a skipped PYQ creates blind recovery without Journal and preserves an interrupted draft', async ({ page }, testInfo) => {
+  const errors: string[] = [];
+  page.on('pageerror', (error) => errors.push(error.message));
+  await page.clock.install({ time: new Date('2026-09-10T06:00:00Z') });
+  await enterSandbox(page);
+  await page.goto('/pyq');
+  await page.getByRole('button', { name: /^Learn Build first-pass/ }).click();
+  await page.getByRole('textbox', { name: 'Reproducibility seed' }).fill('closed-loop-browser');
+  await page.getByRole('combobox', { name: 'Question type', exact: true }).selectOption('MCQ');
+  await page.getByRole('combobox', { name: 'Questions', exact: true }).selectOption('5');
+  await expect(page.getByText('Selected distribution', { exact: true })).toBeVisible();
+  await page.getByRole('button', { name: 'Start practice set', exact: true }).click();
+  await page.getByRole('button', { name: 'Left blank: skipped' }).click();
+  await page.getByRole('button', { name: 'Commit & reveal key' }).click();
+  await expect(page.getByRole('region', { name: 'PYQ attempt receipt' })).toBeVisible();
+  await page.getByRole('button', { name: 'Pause practice' }).click();
+  await page.clock.setFixedTime(new Date('2026-09-14T06:00:00Z'));
+  await page.goto('/reattempts');
+  await expect(page.getByRole('region', { name: 'Canonical recovery due now' })).toBeVisible();
+  await page.getByRole('button', { name: /^5 questions 1 question$/ }).click();
+  await expect(page.getByRole('button', { name: 'Commit & reveal', exact: true })).toBeVisible();
+  await expect(page.getByRole('region', { name: 'Recovery evidence revealed' })).toHaveCount(0);
+  await page.getByRole('button', { name: 'A', exact: true }).click();
+  await page.getByRole('button', { name: 'Pause & exit' }).click();
+  await expect(page.getByRole('button', { name: 'Resume blind retrieval' })).toBeVisible();
+  await page.reload();
+  await page.getByRole('button', { name: 'Resume blind retrieval' }).click();
+  await expect(page.getByRole('button', { name: 'A', exact: true })).toHaveAttribute('aria-pressed', 'true');
+  await expect(page.getByRole('region', { name: 'Recovery evidence revealed' })).toHaveCount(0);
+  await page.getByRole('button', { name: 'Pause & exit' }).click();
+  await expect(page.getByRole('button', { name: 'Resume blind retrieval' })).toBeVisible();
+  await page.reload();
+  await page.getByRole('button', { name: 'Resume blind retrieval' }).click();
+  await expect(page.getByRole('button', { name: 'A', exact: true })).toHaveAttribute('aria-pressed', 'true');
+  await page.screenshot({ path: testInfo.outputPath('recovery-resumed-blind.png') });
+  await page.getByRole('button', { name: 'Not now', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'Re-attempts', exact: true })).toBeVisible();
+  expect(errors).toEqual([]);
+});

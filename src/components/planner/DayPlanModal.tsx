@@ -4,14 +4,30 @@
 //
 // Persistence: writes on every field change to localStorage via
 // planner-storage; the modal itself carries no async state.
-import { useEffect, useState } from 'react';
-import { motion } from 'motion/react';
-import { Check, ChevronDown, Clock, Pencil, Plus, Trash2, X } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
+import { motion, useReducedMotion } from 'motion/react';
+import {
+  AlertTriangle,
+  ArrowDown,
+  ArrowUp,
+  Check,
+  ChevronDown,
+  Clock,
+  GripVertical,
+  Pencil,
+  Play,
+  Plus,
+  ShieldCheck,
+  Trash2,
+  X
+} from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
 import { Textarea } from '@/components/ui/Textarea';
 import SubjectPicker from '@/components/planner/SubjectPicker';
+import PlannerBuildMyDay from '@/components/planner/PlannerBuildMyDay';
+import PlannerOperationsPanel from '@/components/planner/PlannerOperationsPanel';
 import { cn, formatDate, uuid } from '@/lib/utils';
 import {
   DURATIONS,
@@ -22,6 +38,14 @@ import {
 } from '@/lib/planner-constants';
 import type { DayPlan, Priority, Replicate, StudyMode, StudySession } from '@/lib/planner-storage';
 import { isNativeApp } from '@/lib/native';
+import {
+  nextPlannerSession,
+  plannerCapacitySummary,
+  plannerWindowMinutes,
+  reorderPlannerSessions
+} from '@/lib/planner-capacity';
+import type { PlannerWorkCandidate } from '@/lib/planner-compiler';
+import type { ReviewLoadWindows } from '@/lib/planner-review-load';
 
 interface Props {
   date: string;
@@ -31,6 +55,10 @@ interface Props {
   onDelete: () => void;
   onStartBlock?: (block: StudySession) => void;
   onCompleteBlock?: (block: StudySession) => void;
+  evidenceCandidates?: readonly PlannerWorkCandidate[];
+  reviewForecast?: ReviewLoadWindows;
+  historicalRecoveryCapture?: { capturedCount: number; attemptedCount: number };
+  onPersistPlans?: (plans: DayPlan[], message: string) => void;
 }
 
 /** A plan is considered "filled" once any user-authored field has content.
@@ -50,7 +78,11 @@ export default function DayPlanModal({
   onClose,
   onDelete,
   onStartBlock = () => undefined,
-  onCompleteBlock = () => undefined
+  onCompleteBlock = () => undefined,
+  evidenceCandidates = [],
+  reviewForecast,
+  historicalRecoveryCapture,
+  onPersistPlans
 }: Props) {
   const [confirmDelete, setConfirmDelete] = useState(false);
   // Empty plan → open straight into edit mode. Filled plan → view first,
@@ -58,6 +90,7 @@ export default function DayPlanModal({
   // is really "done editing" — the round-trip is UX affordance, not I/O.
   const [mode, setMode] = useState<'view' | 'edit'>(() => (planHasContent(plan) ? 'view' : 'edit'));
   const native = isNativeApp;
+  const reduceMotion = useReducedMotion();
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -73,10 +106,10 @@ export default function DayPlanModal({
 
   return (
     <motion.div
-      initial={{ opacity: 0 }}
+      initial={reduceMotion ? false : { opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      transition={{ duration: 0.15 }}
+      transition={{ duration: reduceMotion ? 0 : 0.15 }}
       className="planner-day-overlay fixed inset-0 z-[60] flex items-start justify-center overflow-y-auto bg-text/30 p-3 backdrop-blur-[2px] sm:p-6"
       onMouseDown={(e) => {
         // Android WebView can retarget the synthetic mouse event to this
@@ -87,10 +120,10 @@ export default function DayPlanModal({
       }}
     >
       <motion.div
-        initial={{ y: 16, opacity: 0, scale: 0.98 }}
+        initial={reduceMotion ? false : { y: 16, opacity: 0, scale: 0.98 }}
         animate={{ y: 0, opacity: 1, scale: 1 }}
         exit={{ y: 8, opacity: 0 }}
-        transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+        transition={reduceMotion ? { duration: 0 } : { type: 'spring', stiffness: 380, damping: 30 }}
         role="dialog"
         aria-modal="true"
         aria-labelledby="day-plan-title"
@@ -172,26 +205,50 @@ export default function DayPlanModal({
 
         <div className="planner-day-body flex flex-col gap-3 p-4 sm:p-5">
           {mode === 'view' ? (
-            <ViewMode
-              plan={plan}
-              onStartBlock={onStartBlock}
-              onCompleteBlock={onCompleteBlock}
-            />
+            <ViewMode plan={plan} onStartBlock={onStartBlock} onCompleteBlock={onCompleteBlock} />
           ) : (
             <>
               <Section
-                title={native ? 'Study sessions' : '1 · Study sessions'}
+                title={native ? 'Capacity' : '1 · Capacity & protected time'}
+                description="Set the real minutes this day can carry before choosing work."
+                defaultOpen
+              >
+                <AvailabilityEditor plan={plan} onChange={onChange} />
+              </Section>
+
+              <Section
+                title={native ? 'Study sessions' : '2 · Ordered agenda'}
                 description={native ? 'Build a realistic sequence for this day.' : undefined}
                 defaultOpen
               >
+                {reviewForecast && (
+                  <div className="mb-4">
+                    <PlannerBuildMyDay
+                      plan={plan}
+                      candidates={evidenceCandidates}
+                      reviewForecast={reviewForecast}
+                      historicalCapture={historicalRecoveryCapture}
+                      onApprove={onChange}
+                    />
+                  </div>
+                )}
                 <SessionsEditor
                   sessions={plan.sessions}
                   onChange={(sessions) => update('sessions', sessions)}
                 />
               </Section>
 
+              {onPersistPlans && (
+                <Section
+                  title={native ? 'Copy & templates' : '3 · Copy, rollover & recurrence'}
+                  description="Reuse planning intent without copying execution evidence."
+                >
+                  <PlannerOperationsPanel plan={plan} onPersistPlans={onPersistPlans} />
+                </Section>
+              )}
+
               <Section
-                title={native ? 'Review the day' : '2 · Review (fill after the day)'}
+                title={native ? 'Review the day' : '4 · Review (fill after the day)'}
                 description={
                   native ? 'Return after studying and record what actually happened.' : undefined
                 }
@@ -253,12 +310,36 @@ function ViewMode({
   onCompleteBlock: (block: StudySession) => void;
 }) {
   const totalMin = plan.sessions.reduce((s, x) => s + (x.durationMin || 0), 0);
+  const next = nextPlannerSession(plan.sessions);
   const endMoodLabel = plan.review.endMood
     ? END_MOODS.find((m) => m.value === plan.review.endMood)?.label
     : null;
 
   return (
     <div className="planner-view flex flex-col gap-4">
+      <CapacityLedger plan={plan} />
+
+      {plan.sessions.length > 0 && (
+        <div className="border-y border-border bg-bg px-3 py-3">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <p className="u-label">Next executable action</p>
+              <p className="mt-1 text-[13px] font-semibold text-text">
+                {next
+                  ? `${displaySubject(next)} · ${next.durationMin}m${next.startAt ? ` · ${next.startAt}` : ''}`
+                  : 'All planned actions are complete'}
+              </p>
+            </div>
+            {next && (
+              <Button size="sm" variant="primary" onClick={() => onStartBlock(next)}>
+                <Play size={11} fill="currentColor" className="mr-1" />
+                {next.execution?.startedAt ? 'Resume next' : 'Start next'}
+              </Button>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Sessions */}
       <div className="planner-view-block rounded border border-border bg-bg">
         <div className="flex items-center justify-between border-b border-border/70 px-3 py-2">
@@ -274,8 +355,7 @@ function ViewMode({
         ) : (
           <ul className="divide-y divide-border">
             {plan.sessions.map((s, i) => {
-              const name =
-                s.subject === 'Custom...' && s.customSubject ? s.customSubject : s.subject;
+              const name = displaySubject(s);
               return (
                 <li key={s.id} className="planner-view-session px-3 py-2.5">
                   <div className="flex flex-wrap items-baseline gap-2">
@@ -289,6 +369,9 @@ function ViewMode({
                     <span className="text-[11.5px] text-text-muted">
                       {s.mode} · {s.priority}
                     </span>
+                    {s.startAt && (
+                      <span className="u-num text-[11px] text-text-faint">starts {s.startAt}</span>
+                    )}
                   </div>
                   {s.target && (
                     <p className="mt-1 text-[12.5px] text-text-muted">
@@ -313,9 +396,16 @@ function ViewMode({
                         <Button size="sm" variant="primary" onClick={() => onStartBlock(s)}>
                           {s.execution?.startedAt ? 'Resume work' : 'Start work'}
                         </Button>
-                        <Button size="sm" variant="ghost" onClick={() => onCompleteBlock(s)}>
-                          Mark complete
-                        </Button>
+                        {s.mode !== 'PYQ Practice' && (
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => onCompleteBlock(s)}
+                            title="Close this block without linked question evidence"
+                          >
+                            Mark complete · manual
+                          </Button>
+                        )}
                       </>
                     )}
                   </div>
@@ -359,6 +449,129 @@ function ViewMode({
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+function displaySubject(session: StudySession): string {
+  return session.subject === 'Custom...' && session.customSubject
+    ? session.customSubject
+    : session.subject;
+}
+
+function CapacityLedger({ plan }: { plan: DayPlan }) {
+  const summary = plannerCapacitySummary(plan);
+  const statusClass =
+    summary.status === 'overloaded'
+      ? 'text-danger'
+      : summary.status === 'at-capacity'
+        ? 'text-warn'
+        : 'text-success';
+
+  return (
+    <section className="overflow-hidden border-y border-border bg-bg" aria-label="Day capacity">
+      <div className="grid grid-cols-2 divide-x divide-border border-b border-border sm:grid-cols-4">
+        <CapacityStat label="Available" value={`${summary.grossAvailableMin}m`} />
+        <CapacityStat label="Protected" value={`${summary.protectedBufferMin}m`} />
+        <CapacityStat label="Schedulable" value={`${summary.netAvailableMin}m`} />
+        <CapacityStat
+          label={summary.overloadMin > 0 ? 'Overload' : 'Unplanned'}
+          value={`${summary.overloadMin || summary.remainingMin}m`}
+          valueClass={statusClass}
+        />
+      </div>
+      <div className="px-3 py-3">
+        <div className="mb-2 flex items-center justify-between gap-3 text-[11.5px]">
+          <span className="u-label">Capacity rail</span>
+          <span className="u-num text-text-muted">
+            {summary.plannedMin}m planned / {summary.netAvailableMin}m schedulable
+          </span>
+        </div>
+        <div
+          className="h-2 overflow-hidden rounded-full border border-border bg-bg-overlay"
+          role="progressbar"
+          aria-label="Planned capacity"
+          aria-valuemin={0}
+          aria-valuemax={Math.max(1, summary.netAvailableMin)}
+          aria-valuenow={Math.min(summary.plannedMin, Math.max(1, summary.netAvailableMin))}
+        >
+          <div
+            className={cn(
+              'h-full transition-[width] motion-reduce:transition-none',
+              summary.status === 'overloaded'
+                ? 'bg-danger'
+                : summary.status === 'at-capacity'
+                  ? 'bg-warn'
+                  : 'bg-success'
+            )}
+            style={{ width: `${summary.utilizationPct}%` }}
+          />
+        </div>
+        <p
+          className={cn('mt-2 flex items-start gap-1.5 text-[11.5px]', statusClass)}
+          aria-live="polite"
+        >
+          {summary.status === 'overloaded' ? (
+            <AlertTriangle size={13} className="mt-0.5 shrink-0" aria-hidden />
+          ) : (
+            <ShieldCheck size={13} className="mt-0.5 shrink-0" aria-hidden />
+          )}
+          <span>{summary.guidance}</span>
+        </p>
+      </div>
+      {plan.sessions.length > 0 && (
+        <ol
+          className="flex overflow-x-auto border-t border-border px-3 py-2"
+          aria-label="Evidence rail"
+        >
+          {plan.sessions.map((session, index) => {
+            const state = session.execution?.completedAt
+              ? 'committed'
+              : session.execution?.startedAt
+                ? 'active'
+                : 'planned';
+            return (
+              <li
+                key={session.id}
+                className="relative flex min-w-[132px] flex-1 items-center gap-2 pr-3 text-[10.5px] text-text-muted after:absolute after:left-[13px] after:right-0 after:top-[8px] after:h-px after:bg-border last:after:hidden"
+              >
+                <span
+                  className={cn(
+                    'relative z-10 grid h-[17px] w-[17px] shrink-0 place-items-center rounded-full border bg-bg-raised u-num text-[8px]',
+                    state === 'committed'
+                      ? 'border-success text-success'
+                      : state === 'active'
+                        ? 'border-accent text-accent'
+                        : 'border-border text-text-faint'
+                  )}
+                >
+                  {index + 1}
+                </span>
+                <span className="relative z-10 truncate bg-bg pr-1">
+                  {displaySubject(session)} · {state}
+                </span>
+              </li>
+            );
+          })}
+        </ol>
+      )}
+    </section>
+  );
+}
+
+function CapacityStat({
+  label,
+  value,
+  valueClass
+}: {
+  label: string;
+  value: string;
+  valueClass?: string;
+}) {
+  return (
+    <div className="px-3 py-2.5">
+      <p className="u-label">{label}</p>
+      <p className={cn('mt-1 u-num text-[13px] font-semibold text-text', valueClass)}>{value}</p>
     </div>
   );
 }
@@ -419,6 +632,222 @@ function Section({
   );
 }
 
+/* --------------------------- capacity editor ---------------------------- */
+
+function AvailabilityEditor({
+  plan,
+  onChange
+}: {
+  plan: DayPlan;
+  onChange: (next: DayPlan) => void;
+}) {
+  const capacity = plannerCapacitySummary(plan);
+  const windowMin = useMemo(
+    () =>
+      plan.availability.timeWindows.reduce((sum, window) => sum + plannerWindowMinutes(window), 0),
+    [plan.availability.timeWindows]
+  );
+
+  function updateAvailability(patch: Partial<DayPlan['availability']>) {
+    onChange({
+      ...plan,
+      availability: { ...plan.availability, ...patch }
+    });
+  }
+
+  function updateWindow(
+    id: string,
+    patch: Partial<DayPlan['availability']['timeWindows'][number]>
+  ) {
+    updateAvailability({
+      timeWindows: plan.availability.timeWindows.map((window) =>
+        window.id === id ? { ...window, ...patch } : window
+      )
+    });
+  }
+
+  function addWindow() {
+    updateAvailability({
+      timeWindows: [
+        ...plan.availability.timeWindows,
+        {
+          id: uuid(),
+          label: `Window ${plan.availability.timeWindows.length + 1}`,
+          start: '06:00',
+          end: '08:00',
+          energy: plan.mindset.energyForecast
+        }
+      ]
+    });
+  }
+
+  return (
+    <div className="flex flex-col gap-4">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+        <Field label="Minutes available">
+          <Input
+            aria-label="Minutes available"
+            type="number"
+            min={0}
+            max={960}
+            value={plan.availability.availableMin}
+            onChange={(event) =>
+              updateAvailability({
+                availableMin: Math.max(
+                  0,
+                  Math.min(960, Math.round(Number(event.target.value) || 0))
+                )
+              })
+            }
+          />
+        </Field>
+        <Field label="Protected buffer">
+          <Input
+            aria-label="Protected buffer minutes"
+            type="number"
+            min={0}
+            max={480}
+            value={plan.availability.protectedBufferMin}
+            onChange={(event) =>
+              updateAvailability({
+                protectedBufferMin: Math.max(
+                  0,
+                  Math.min(480, Math.round(Number(event.target.value) || 0))
+                )
+              })
+            }
+          />
+        </Field>
+        <Field label="Energy forecast">
+          <Select
+            aria-label="Energy forecast"
+            value={plan.mindset.energyForecast}
+            onChange={(event) =>
+              onChange({
+                ...plan,
+                mindset: {
+                  ...plan.mindset,
+                  energyForecast: event.target.value as DayPlan['mindset']['energyForecast']
+                }
+              })
+            }
+          >
+            <option value="high">High · hard problems</option>
+            <option value="medium">Medium · mixed work</option>
+            <option value="low">Low · recall and review</option>
+            <option value="recovery">Recovery · minimum viable day</option>
+          </Select>
+        </Field>
+      </div>
+
+      <CapacityLedger plan={plan} />
+
+      <div className="border-t border-border pt-3">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <p className="u-label">Optional time windows</p>
+            <p className="mt-1 text-[11.5px] text-text-muted">
+              Windows constrain compiler start times. Array order remains your agenda order.
+            </p>
+          </div>
+          <Button size="sm" variant="secondary" onClick={addWindow}>
+            <Plus size={11} className="mr-1" /> Add window
+          </Button>
+        </div>
+        {plan.availability.timeWindows.length === 0 ? (
+          <p className="mt-3 border-l-2 border-border pl-3 text-[11.5px] text-text-faint">
+            No fixed windows. Hetu will use the available-minute budget without assigning clock
+            times.
+          </p>
+        ) : (
+          <div className="mt-3 flex flex-col divide-y divide-border border-y border-border">
+            {plan.availability.timeWindows.map((window, index) => {
+              const minutes = plannerWindowMinutes(window);
+              return (
+                <div
+                  key={window.id}
+                  className="grid grid-cols-1 gap-2 py-3 sm:grid-cols-[minmax(120px,1fr)_110px_110px_150px_auto] sm:items-end"
+                >
+                  <Field label={`Window ${index + 1} label`}>
+                    <Input
+                      aria-label={`Window ${index + 1} label`}
+                      value={window.label}
+                      maxLength={40}
+                      onChange={(event) => updateWindow(window.id, { label: event.target.value })}
+                    />
+                  </Field>
+                  <Field label="Starts">
+                    <Input
+                      aria-label={`Window ${index + 1} start time`}
+                      type="time"
+                      value={window.start}
+                      onChange={(event) => updateWindow(window.id, { start: event.target.value })}
+                    />
+                  </Field>
+                  <Field label="Ends">
+                    <Input
+                      aria-label={`Window ${index + 1} end time`}
+                      type="time"
+                      value={window.end}
+                      onChange={(event) => updateWindow(window.id, { end: event.target.value })}
+                    />
+                  </Field>
+                  <Field label="Window energy">
+                    <Select
+                      aria-label={`Window ${index + 1} energy`}
+                      value={window.energy}
+                      onChange={(event) =>
+                        updateWindow(window.id, {
+                          energy: event.target.value as DayPlan['mindset']['energyForecast']
+                        })
+                      }
+                    >
+                      <option value="high">High</option>
+                      <option value="medium">Medium</option>
+                      <option value="low">Low</option>
+                      <option value="recovery">Recovery</option>
+                    </Select>
+                  </Field>
+                  <div className="flex items-center justify-between gap-2 sm:justify-end">
+                    <span
+                      className={cn(
+                        'u-num text-[10.5px]',
+                        minutes > 0 ? 'text-text-faint' : 'text-danger'
+                      )}
+                    >
+                      {minutes > 0 ? `${minutes}m` : 'invalid'}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        updateAvailability({
+                          timeWindows: plan.availability.timeWindows.filter(
+                            (candidate) => candidate.id !== window.id
+                          )
+                        })
+                      }
+                      className="rounded p-1.5 text-text-faint hover:bg-danger-faint hover:text-danger"
+                      aria-label={`Remove window ${index + 1}`}
+                    >
+                      <Trash2 size={13} />
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+        {windowMin > 0 && windowMin < capacity.netAvailableMin && (
+          <p className="mt-2 flex items-center gap-1.5 text-[11.5px] text-warn">
+            <AlertTriangle size={12} aria-hidden /> Fixed windows expose {windowMin}m, which is less
+            than the {capacity.netAvailableMin}m schedulable budget.
+          </p>
+        )}
+      </div>
+    </div>
+  );
+}
+
 /* ---------------------------- sessions editor ---------------------------- */
 
 function SessionsEditor({
@@ -428,6 +857,8 @@ function SessionsEditor({
   sessions: StudySession[];
   onChange: (next: StudySession[]) => void;
 }) {
+  const [draggedId, setDraggedId] = useState<string | null>(null);
+
   function addSession() {
     const next: StudySession = {
       id: uuid(),
@@ -445,6 +876,9 @@ function SessionsEditor({
   function remove(id: string) {
     onChange(sessions.filter((s) => s.id !== id));
   }
+  function move(id: string, targetIndex: number) {
+    onChange(reorderPlannerSessions(sessions, id, targetIndex));
+  }
 
   const total = sessions.reduce((s, x) => s + (x.durationMin || 0), 0);
 
@@ -457,13 +891,41 @@ function SessionsEditor({
       ) : (
         <div className="planner-session-list flex flex-col gap-2">
           {sessions.map((s, i) => (
-            <SessionRow
+            <div
               key={s.id}
-              index={i}
-              session={s}
-              onUpdate={(patch) => update(s.id, patch)}
-              onRemove={() => remove(s.id)}
-            />
+              draggable
+              onDragStart={(event) => {
+                setDraggedId(s.id);
+                event.dataTransfer.effectAllowed = 'move';
+                event.dataTransfer.setData('text/plain', s.id);
+              }}
+              onDragEnd={() => setDraggedId(null)}
+              onDragOver={(event) => {
+                event.preventDefault();
+                event.dataTransfer.dropEffect = 'move';
+              }}
+              onDrop={(event) => {
+                event.preventDefault();
+                const id = event.dataTransfer.getData('text/plain') || draggedId;
+                if (id) move(id, i);
+                setDraggedId(null);
+              }}
+              className={cn(
+                'transition-opacity motion-reduce:transition-none',
+                draggedId === s.id && 'opacity-50'
+              )}
+            >
+              <SessionRow
+                index={i}
+                session={s}
+                canMoveUp={i > 0}
+                canMoveDown={i < sessions.length - 1}
+                onMoveUp={() => move(s.id, i - 1)}
+                onMoveDown={() => move(s.id, i + 1)}
+                onUpdate={(patch) => update(s.id, patch)}
+                onRemove={() => remove(s.id)}
+              />
+            </div>
           ))}
         </div>
       )}
@@ -483,11 +945,19 @@ function SessionsEditor({
 function SessionRow({
   index,
   session,
+  canMoveUp,
+  canMoveDown,
+  onMoveUp,
+  onMoveDown,
   onUpdate,
   onRemove
 }: {
   index: number;
   session: StudySession;
+  canMoveUp: boolean;
+  canMoveDown: boolean;
+  onMoveUp: () => void;
+  onMoveDown: () => void;
   onUpdate: (patch: Partial<StudySession>) => void;
   onRemove: () => void;
 }) {
@@ -496,15 +966,37 @@ function SessionRow({
   return (
     <div className="planner-session-card rounded border border-border/70 bg-bg-raised px-3 py-2.5">
       <div className="mb-2 flex items-center justify-between">
-        <p className="u-label">Session {index + 1}</p>
-        <button
-          type="button"
-          onClick={onRemove}
-          className="rounded p-1 text-text-faint transition-colors hover:bg-danger-faint hover:text-danger"
-          aria-label="Remove session"
-        >
-          <Trash2 size={12} strokeWidth={1.75} />
-        </button>
+        <p className="u-label inline-flex items-center gap-1.5">
+          <GripVertical size={12} aria-hidden /> Action {index + 1}
+        </p>
+        <div className="flex items-center gap-0.5">
+          <button
+            type="button"
+            onClick={onMoveUp}
+            disabled={!canMoveUp}
+            className="rounded p-1 text-text-faint transition-colors hover:bg-bg-overlay hover:text-text disabled:opacity-30"
+            aria-label={`Move action ${index + 1} earlier`}
+          >
+            <ArrowUp size={12} />
+          </button>
+          <button
+            type="button"
+            onClick={onMoveDown}
+            disabled={!canMoveDown}
+            className="rounded p-1 text-text-faint transition-colors hover:bg-bg-overlay hover:text-text disabled:opacity-30"
+            aria-label={`Move action ${index + 1} later`}
+          >
+            <ArrowDown size={12} />
+          </button>
+          <button
+            type="button"
+            onClick={onRemove}
+            className="rounded p-1 text-text-faint transition-colors hover:bg-danger-faint hover:text-danger"
+            aria-label="Remove session"
+          >
+            <Trash2 size={12} strokeWidth={1.75} />
+          </button>
+        </div>
       </div>
       <div className="planner-session-fields grid grid-cols-1 gap-2 sm:grid-cols-2">
         <Field label="Subject">
@@ -531,6 +1023,7 @@ function SessionRow({
         <Field label="Duration (minutes)">
           <div className="flex items-center gap-2">
             <Input
+              aria-label={`Action ${index + 1} duration minutes`}
               type="number"
               min={1}
               max={720}
@@ -570,6 +1063,7 @@ function SessionRow({
         </Field>
         <Field label="Study mode">
           <Select
+            aria-label={`Action ${index + 1} study mode`}
             value={session.mode}
             onChange={(e) => onUpdate({ mode: e.target.value as StudyMode })}
           >
@@ -582,6 +1076,7 @@ function SessionRow({
         </Field>
         <Field label="Priority">
           <Select
+            aria-label={`Action ${index + 1} priority`}
             value={session.priority}
             onChange={(e) => onUpdate({ priority: e.target.value as Priority })}
           >
@@ -591,6 +1086,14 @@ function SessionRow({
               </option>
             ))}
           </Select>
+        </Field>
+        <Field label="Optional start time">
+          <Input
+            aria-label={`Action ${index + 1} start time`}
+            type="time"
+            value={session.startAt ?? ''}
+            onChange={(event) => onUpdate({ startAt: event.target.value || null })}
+          />
         </Field>
         <Field label="Target / goal" className="sm:col-span-2">
           <Textarea

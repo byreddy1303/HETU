@@ -24,13 +24,21 @@ function unreadableLegacyCacheKey(userId: string): string | null {
     `air-journal:readiness:v3:${userId}:watchlist`
   ]);
   const scopedPlannerPrefix = `air.planner.${userId}.`;
+  const scopedPlannerSyncPrefix = `air.planner-sync.${userId}.`;
+  const scopedPlannerOutboxPrefix = `air.planner-cloud-pending.${userId}.`;
 
   try {
     for (let index = 0; index < localStorage.length; index += 1) {
       const key = localStorage.key(index);
       if (!key) continue;
       const isLegacyPlanner = /^planner_\d{4}-\d{2}-\d{2}$/.test(key);
-      if (!exactKeys.has(key) && !key.startsWith(scopedPlannerPrefix) && !isLegacyPlanner) {
+      if (
+        !exactKeys.has(key) &&
+        !key.startsWith(scopedPlannerPrefix) &&
+        !key.startsWith(scopedPlannerSyncPrefix) &&
+        !key.startsWith(scopedPlannerOutboxPrefix) &&
+        !isLegacyPlanner
+      ) {
         continue;
       }
       const raw = localStorage.getItem(key);
@@ -48,7 +56,17 @@ function unreadableLegacyCacheKey(userId: string): string | null {
 }
 
 async function flushPlannerState(userId: string): Promise<void> {
-  const [{ loadAllDayPlans, migrateLegacyDayPlansForUser }, planner] = await Promise.all([
+  const [
+    {
+      cacheDayPlanForUser,
+      cachePlannerDayTombstone,
+      loadAllDayPlans,
+      loadPlannerDaySyncState,
+      loadPlannerDayTombstones,
+      migrateLegacyDayPlansForUser
+    },
+    planner
+  ] = await Promise.all([
     import('@/lib/planner-storage'),
     import('@/lib/planner-cloud')
   ]);
@@ -56,17 +74,73 @@ async function flushPlannerState(userId: string): Promise<void> {
   // Planner page was never opened during this login.
   migrateLegacyDayPlansForUser(userId);
   const localPlans = loadAllDayPlans(userId);
+  const localTombstones = loadPlannerDayTombstones(userId);
   const remoteResult = await planner.loadCloudDayPlans(userId);
   if (remoteResult.error) throw new Error(remoteResult.error);
 
   // This also migrates Planner caches created before full-plan cloud storage
-  // shipped. Compare timestamps so an old device never overwrites newer data.
+  // shipped. Revision is authoritative; timestamps only break ties between an
+  // acknowledged version and a newer local edit based on that same version.
   const remoteByDate = new Map(remoteResult.plans.map((plan) => [plan.date, plan]));
-  for (const local of localPlans) {
-    const remote = remoteByDate.get(local.date);
-    if (!remote || updatedAtMs(local.updatedAt) >= updatedAtMs(remote.updatedAt)) {
+  const remoteTombstones = new Map(
+    remoteResult.tombstones.map((state) => [state.date, state])
+  );
+  const localByDate = new Map(localPlans.map((plan) => [plan.date, plan]));
+  const localTombstoneByDate = new Map(localTombstones.map((state) => [state.date, state]));
+  const dates = new Set([
+    ...localByDate.keys(),
+    ...localTombstoneByDate.keys(),
+    ...remoteByDate.keys(),
+    ...remoteTombstones.keys()
+  ]);
+
+  for (const date of dates) {
+    const local = localByDate.get(date) ?? null;
+    const localState = loadPlannerDaySyncState(userId, date);
+    const remote = remoteByDate.get(date) ?? null;
+    const remoteTombstone = remoteTombstones.get(date) ?? null;
+
+    if (remoteTombstone) {
+      const localRevision = Math.max(local?.syncRevision ?? 0, localState?.revision ?? 0);
+      const localWins =
+        local &&
+        !localState?.deletedAt &&
+        (localRevision > remoteTombstone.revision ||
+          (localRevision === remoteTombstone.revision &&
+            updatedAtMs(local.updatedAt) > updatedAtMs(remoteTombstone.updatedAt)));
+      if (localWins) {
+        const error = await planner.queuePlannerCloudWrite(userId, local);
+        if (error) throw new Error(error);
+      } else if ((localState?.revision ?? 0) > remoteTombstone.revision) {
+        const error = await planner.queuePlannerCloudDelete(userId, date);
+        if (error) throw new Error(error);
+      } else {
+        cachePlannerDayTombstone(userId, remoteTombstone);
+      }
+      continue;
+    }
+
+    if (localState?.deletedAt) {
+      const error = await planner.queuePlannerCloudDelete(userId, date);
+      if (error) throw new Error(error);
+      continue;
+    }
+
+    if (!local) {
+      if (remote) cacheDayPlanForUser(userId, remote);
+      continue;
+    }
+    const localRevision = Math.max(local.syncRevision ?? 0, localState?.revision ?? 0);
+    const localWins =
+      !remote ||
+      localRevision > (remote.syncRevision ?? 0) ||
+      (localRevision === (remote.syncRevision ?? 0) &&
+        updatedAtMs(local.updatedAt) >= updatedAtMs(remote.updatedAt));
+    if (localWins) {
       const error = await planner.queuePlannerCloudWrite(userId, local);
       if (error) throw new Error(error);
+    } else if (remote) {
+      cacheDayPlanForUser(userId, remote);
     }
   }
 

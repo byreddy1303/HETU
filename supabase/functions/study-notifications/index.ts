@@ -241,8 +241,6 @@ async function loadContext(userId: string, today: string): Promise<StudyContext>
   const recent7d = new Date(Date.now() - 7 * 86_400_000).toISOString();
   const [
     storedPlan,
-    planItemsResult,
-    completionsResult,
     reattemptResult,
     pyqResult,
     sessionResult,
@@ -260,13 +258,8 @@ async function loadContext(userId: string, today: string): Promise<StudyContext>
       .select('sessions')
       .eq('user_id', userId)
       .eq('plan_date', today)
+      .is('deleted_at', null)
       .maybeSingle(),
-    admin.rpc('plan_items_due_on', { uid: userId, on_date: today }),
-    admin
-      .from('plan_item_completions')
-      .select('item_id')
-      .eq('user_id', userId)
-      .eq('on_date', today),
     admin
       .from('reattempts')
       .select('id', { count: 'exact', head: true })
@@ -313,7 +306,7 @@ async function loadContext(userId: string, today: string): Promise<StudyContext>
       .from('readiness_snapshots')
       .select('score')
       .eq('user_id', userId)
-      .eq('calculation_version', 2)
+      .eq('calculation_version', 3)
       .order('on_date', { ascending: false })
       .limit(1)
       .maybeSingle(),
@@ -328,28 +321,12 @@ async function loadContext(userId: string, today: string): Promise<StudyContext>
 
   const sessions = (storedPlan.data as { sessions?: unknown } | null)?.sessions;
   const planBlocks = parseStudyPlanBlocks(sessions);
-  const completed = new Set(
-    ((completionsResult.data as Array<{ item_id: string }> | null) ?? []).map((row) => row.item_id)
-  );
-  const planItems =
-    (planItemsResult.data as Array<{
-      id: string;
-      title: string;
-      subject: string | null;
-      target_min: number | null;
-    }> | null) ?? [];
   const patterns = (patternResult.data as Array<{ mastery_level: number | null }> | null) ?? [];
 
   return {
     planBlocks,
-    openPlanItems: planItems
-      .filter((item) => !completed.has(item.id))
-      .map((item) => ({
-        id: item.id,
-        title: item.title,
-        subject: item.subject,
-        targetMin: item.target_min
-      })),
+    // Legacy items are migrated into planBlocks; listing both would count them twice.
+    openPlanItems: [],
     reattemptsDue: reattemptResult.count ?? 0,
     pyqLast24h: pyqResult.count ?? 0,
     sessionsToday: sessionResult.count ?? 0,

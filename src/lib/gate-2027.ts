@@ -148,6 +148,14 @@ export function gate2027Subject(subjectId: SubjectId): Gate2027Subject {
   return GATE_2027_SUBJECTS.find((subject) => subject.id === subjectId)!;
 }
 
+/** One canonical syllabus subject may span several immutable-bank subject files. */
+export function gate2027BankSubjectSlugs(subjectId: SubjectId): string[] {
+  return registry.bankTaxonomy
+    .filter((scope) => scope.canonicalSubjectId === subjectId)
+    .map((scope) => scope.bankSubjectSlug)
+    .sort((left, right) => left.localeCompare(right));
+}
+
 /** Resolve one immutable-bank topic to its audited 2027 scope classification. */
 export function gate2027BankTopicStatus(bankTopicKey: string): Gate2027TaxonomyStatus | null {
   const divider = bankTopicKey.indexOf('/');

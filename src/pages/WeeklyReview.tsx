@@ -3,15 +3,15 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { motion } from 'motion/react';
+import { Link } from 'react-router-dom';
 import { AlertCircle, ArrowLeft, ArrowRight } from 'lucide-react';
-import type { WeeklyReviewRow } from '@/types';
+import type { LearningEventRow, LearningItemRow, WeeklyReviewRow } from '@/types';
 import PageHeader from '@/components/layout/PageHeader';
 import { Card, CardBody, CardHeader } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Textarea } from '@/components/ui/Textarea';
 import { Badge } from '@/components/ui/Badge';
-import { Empty } from '@/components/ui/Empty';
 import { db } from '@/lib/db';
 import { useAuth } from '@/hooks/useAuth';
 import { writeLocal } from '@/lib/sync';
@@ -31,6 +31,11 @@ import {
 } from '@/lib/utils';
 import { subjectInk } from '@/lib/subjectInk';
 import { ROOT_CAUSES } from '@/lib/constants';
+import {
+  buildLongitudinalLearningSignals,
+  persistDailyLearningAggregateCache,
+  type LongitudinalLearningSignals
+} from '@/lib/longitudinal-learning';
 
 export type WeeklyStep = 1 | 2 | 3 | 4;
 
@@ -49,6 +54,11 @@ const EMPTY_DRAFT: Draft = {
   this_weeks_fix: ''
 };
 
+const EMPTY_LEARNING_EVIDENCE: {
+  items: LearningItemRow[];
+  events: LearningEventRow[];
+} = { items: [], events: [] };
+
 export default function WeeklyReview() {
   const { userId, profile } = useAuth();
   const timeZone = profile?.timezone ?? 'Asia/Kolkata';
@@ -58,6 +68,19 @@ export default function WeeklyReview() {
     async () => (userId ? db.questions.where('user_id').equals(userId).toArray() : []),
     [userId],
     []
+  );
+
+  const learningEvidence = useLiveQuery(
+    async () => {
+      if (!userId) return EMPTY_LEARNING_EVIDENCE;
+      const [items, events] = await Promise.all([
+        db.learning_items.where('user_id').equals(userId).toArray(),
+        db.learning_events.where('user_id').equals(userId).toArray()
+      ]);
+      return { items, events };
+    },
+    [userId],
+    EMPTY_LEARNING_EVIDENCE
   );
 
   const existing = useLiveQuery(
@@ -96,6 +119,28 @@ export default function WeeklyReview() {
     () => summarizeWeek(questions, weekStart, timeZone),
     [questions, weekStart, timeZone]
   );
+  const today = todayISOInTimeZone(timeZone);
+  const learningSignals = useMemo(
+    () =>
+      buildLongitudinalLearningSignals({
+        items: learningEvidence.items,
+        events: learningEvidence.events,
+        periodStart: weekStart,
+        periodEnd: summary.weekEnd,
+        asOfDate: today
+      }),
+    [learningEvidence.events, learningEvidence.items, summary.weekEnd, today, weekStart]
+  );
+
+  useEffect(() => {
+    if (!userId) return;
+    persistDailyLearningAggregateCache({
+      userId,
+      throughDate: today,
+      series: learningSignals.aggregateSeries,
+      updatedAt: nowISO()
+    });
+  }, [learningSignals.aggregateSeries, today, userId]);
 
   const currentDirty = weeklyDraftFingerprint(draft) !== savedFingerprint;
 
@@ -227,7 +272,7 @@ export default function WeeklyReview() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ type: 'spring', stiffness: 380, damping: 34 }}
       >
-        {step === 1 && <DataStep summary={summary} />}
+        {step === 1 && <DataStep summary={summary} learning={learningSignals} />}
         {step === 2 && (
           <NarrativeStep
             label="Root cause of this week's misses"
@@ -310,15 +355,13 @@ export default function WeeklyReview() {
   );
 }
 
-function DataStep({ summary }: { summary: WeeklyDataSummary }) {
-  if (summary.totalQ === 0) {
-    return (
-      <Empty
-        title="No questions logged this week"
-        hint="Weekly review looks at what you tagged Mon–Sun. Solve, tag, come back."
-      />
-    );
-  }
+function DataStep({
+  summary,
+  learning
+}: {
+  summary: WeeklyDataSummary;
+  learning: LongitudinalLearningSignals;
+}) {
   const notClean = summary.totalQ - summary.clean;
   const cleanRate = summary.totalQ === 0 ? 0 : Math.round((summary.clean / summary.totalQ) * 100);
   const volumeLeader = summary.bySubject[0];
@@ -330,24 +373,95 @@ function DataStep({ summary }: { summary: WeeklyDataSummary }) {
     )[0];
   return (
     <div className="flex flex-col gap-4">
+      {summary.totalQ > 0 && (
+        <Card>
+          <CardHeader title="This week's data" />
+          <CardBody>
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+              <DataCell label="Total Q" value={summary.totalQ} color="text-text" />
+              <DataCell label="Not clean" value={notClean} color="text-danger" />
+              <DataCell label="Clean" value={summary.clean} color="text-success" />
+              <DataCell label="Clean rate" value={cleanRate} color="text-ink-teal" suffix="%" />
+            </div>
+            <p className="mt-3 text-[12px] text-text-muted">
+              Outcome mix:{' '}
+              <span className="u-num text-warn">{summary.slow} slow</span> ·{' '}
+              <span className="u-num text-guess">{summary.guess} guessed</span> ·{' '}
+              <span className="u-num text-danger">{summary.wrong} wrong</span>
+              <span className="text-text-faint">
+                {' '}({summary.byOutcome['W-C']} concept, {summary.byOutcome['W-E']} execution,{' '}
+                {summary.byOutcome['W-R']} reading)
+              </span>
+            </p>
+          </CardBody>
+        </Card>
+      )}
+
       <Card>
-        <CardHeader title="This week's data" />
-        <CardBody>
+        <CardHeader
+          title="Recovery evidence"
+          aside={<span className="text-[11px] text-text-faint">durable recovery north star</span>}
+        />
+        <CardBody className="flex flex-col gap-3">
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-            <DataCell label="Total Q" value={summary.totalQ} color="text-text" />
-            <DataCell label="Not clean" value={notClean} color="text-danger" />
-            <DataCell label="Clean" value={summary.clean} color="text-success" />
-            <DataCell label="Clean rate" value={cleanRate} color="text-ink-teal" suffix="%" />
+            <DataCell
+              label="Durable"
+              value={
+                learning.durableRecovery.denominator > 0
+                  ? Math.round(learning.durableRecovery.rate * 100)
+                  : '—'
+              }
+              color="text-success"
+              suffix={learning.durableRecovery.denominator > 0 ? '%' : ''}
+            />
+            <DataCell
+              label="New mistakes"
+              value={learning.totals.newMistakes}
+              color="text-danger"
+            />
+            <DataCell
+              label="Mastered"
+              value={learning.totals.mastered}
+              color="text-success"
+            />
+            <DataCell label="Due now" value={learning.dueBacklog} color="text-warn" />
           </div>
-          <p className="mt-3 text-[12px] text-text-muted">
-            Outcome mix:{' '}
-            <span className="u-num text-warn">{summary.slow} slow</span> ·{' '}
-            <span className="u-num text-guess">{summary.guess} guessed</span> ·{' '}
-            <span className="u-num text-danger">{summary.wrong} wrong</span>
-            <span className="text-text-faint">
-              {' '}({summary.byOutcome['W-C']} concept, {summary.byOutcome['W-E']} execution,{' '}
-              {summary.byOutcome['W-R']} reading)
+          <p className="text-[12px] leading-relaxed text-text-muted">
+            Blind retrieval:{' '}
+            <span className="u-num text-text">
+              {learning.totals.hintFreeRecall.numerator}/
+              {learning.totals.hintFreeRecall.denominator} hint-free correct
+            </span>{' '}
+            · grades{' '}
+            <span className="u-num text-danger">{learning.totals.grades.again} Again</span> /{' '}
+            <span className="u-num text-warn">{learning.totals.grades.hard} Hard</span> /{' '}
+            <span className="u-num text-success">{learning.totals.grades.good} Good</span> /{' '}
+            <span className="u-num text-success">{learning.totals.grades.easy} Easy</span> · transfer{' '}
+            <span className="u-num text-text">
+              {learning.totals.transferSuccess.numerator}/
+              {learning.totals.transferSuccess.denominator}
             </span>
+          </p>
+          <div className="rounded border border-accent/25 bg-accent-faint/35 p-3">
+            <p className="u-label text-accent">Next evidence-bearing move</p>
+            <p className="mt-1 font-display text-[15px] font-semibold text-text">
+              {learning.priority.title}
+            </p>
+            <p className="mt-1 text-[12px] leading-relaxed text-text-muted">
+              {learning.priority.reason}
+            </p>
+            <Link
+              to={learning.priority.href}
+              className="mt-2 inline-flex items-center gap-1 text-[12px] font-semibold text-accent hover:text-accent-hover"
+            >
+              Take this action <ArrowRight size={13} strokeWidth={1.75} />
+            </Link>
+          </div>
+          <p className="text-[11px] leading-relaxed text-text-faint">
+            {learning.uniqueItemCount} canonical identities · {learning.uniqueEventCount} immutable
+            recovery events · {learning.duplicateItemsIgnored} duplicate identities and{' '}
+            {learning.duplicateEventsIgnored} event retries ignored. Attempt receipts remain in the
+            question ledger, so recovery evidence is not counted twice.
           </p>
         </CardBody>
       </Card>
@@ -453,7 +567,7 @@ function DataCell({
   suffix = ''
 }: {
   label: string;
-  value: number;
+  value: number | string;
   color: string;
   muted?: boolean;
   suffix?: string;
@@ -464,7 +578,7 @@ function DataCell({
       <span
         className={cn(
           'u-num text-[20px] font-semibold leading-none',
-          value > 0 ? color : 'text-text-faint',
+          (typeof value === 'number' ? value > 0 : value !== '—') ? color : 'text-text-faint',
           muted && 'text-[16px]'
         )}
       >

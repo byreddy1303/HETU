@@ -28,6 +28,9 @@ export interface EditorDraft {
   marks: number | null;
   questionText: string | null;
   answerText: string | null;
+  natToleranceAbs: number | null;
+  natAcceptedMin: number | null;
+  natAcceptedMax: number | null;
   imageDataUrl: string | null;
   outcome: Outcome;
   patternName: string | null;
@@ -98,6 +101,9 @@ export function draftFromRow(row: QuestionRow): EditorDraft {
     marks,
     questionText: row.question_text,
     answerText: row.answer_text,
+    natToleranceAbs: row.nat_tolerance_abs ?? null,
+    natAcceptedMin: row.nat_accepted_min ?? null,
+    natAcceptedMax: row.nat_accepted_max ?? null,
     imageDataUrl: row.image_url,
     outcome: row.outcome,
     patternName: row.pattern_name,
@@ -123,6 +129,9 @@ export function emptyDraft(subject: string, today: string): EditorDraft {
     marks: null,
     questionText: null,
     answerText: null,
+    natToleranceAbs: null,
+    natAcceptedMin: null,
+    natAcceptedMax: null,
     imageDataUrl: null,
     outcome: 'R',
     patternName: null,
@@ -144,6 +153,20 @@ export function applyDraftToRow(row: QuestionRow, draft: EditorDraft): QuestionR
   const spec = SOURCE_KIND_BY_VALUE[draft.sourceKind];
   const isYearBased = !!spec.hasYear;
   const isPyq = draft.sourceKind === 'pyq';
+  const hasNatRange = draft.natAcceptedMin != null && draft.natAcceptedMax != null;
+  const natMin = hasNatRange
+    ? Math.min(draft.natAcceptedMin as number, draft.natAcceptedMax as number)
+    : null;
+  const natMax = hasNatRange
+    ? Math.max(draft.natAcceptedMin as number, draft.natAcceptedMax as number)
+    : null;
+  const natTolerance =
+    !hasNatRange &&
+    draft.natToleranceAbs != null &&
+    Number.isFinite(draft.natToleranceAbs) &&
+    draft.natToleranceAbs >= 0
+      ? draft.natToleranceAbs
+      : null;
   return {
     ...row,
     subject: draft.subject,
@@ -158,6 +181,9 @@ export function applyDraftToRow(row: QuestionRow, draft: EditorDraft): QuestionR
     ),
     question_text: draft.questionText?.trim() || null,
     answer_text: draft.answerText?.trim() || null,
+    nat_tolerance_abs: draft.format === 'NAT' ? natTolerance : null,
+    nat_accepted_min: draft.format === 'NAT' ? natMin : null,
+    nat_accepted_max: draft.format === 'NAT' ? natMax : null,
     image_url: draft.imageDataUrl,
     time_spent_sec: draft.timeSpentSec,
     target_time_sec: target,

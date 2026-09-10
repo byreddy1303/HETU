@@ -61,6 +61,8 @@ Each account's data is fully separate:
 
 - [`DEPLOY.md`](./DEPLOY.md) — Production deployment walkthrough (Supabase + Vercel + Resend).
 - [`ANDROID.md`](./ANDROID.md) — Android APK/AAB builds, signing, device QA, and release workflow.
+- [`docs/closed-learning-loop-plan.md`](./docs/closed-learning-loop-plan.md) — All 31 Planner/PYQ/recovery recommendations, implementation status, and verification evidence.
+- [`docs/closed-loop-release.md`](./docs/closed-loop-release.md) — Migration order, device acceptance gates, backup v3, and conflict recovery.
 
 ## Core philosophy
 
@@ -71,7 +73,9 @@ The tool compresses your mistake surface. It does not replace your reasoning.
 - Exam mode includes structurally complete GATE CSE 2026 Set 1 and Set 2 benchmark papers in official order: 65 questions, 100 marks, and one 180-minute countdown. Regular practice protects unseen benchmark questions by default so a sealed paper remains available for an authentic first attempt.
 - An automatic PYQ full-paper outcome becomes qualified readiness evidence only when the paper was unseen, timed, closed book, unpaused, fully visited, active for a credible duration, and 100% exactly scorable. External mocks must explicitly confirm the corresponding paper and test conditions. Every compromise remains an inspectable supporting-evidence reason rather than being inferred from the score.
 - Readiness uses the official GATE 2027 section blueprint (15 marks General Aptitude, 13 Engineering Mathematics, 72 core CS) and computes its mock outcome range from qualified full-paper evidence only. Supporting and excluded runs remain visible for diagnosis; numeric AIR prediction remains disabled until prospectively validated.
-- Wrong / slow / guessed answers auto-enter a spaced re-attempt ladder (3 → 10 → 30 days).
+- Weak practice and exam answers automatically enter one canonical recovery schedule, whether or not Journal analysis is written. Blind retrieval uses Again/Hard/Good/Easy grading, explicit hints/defer, durable sprints, remediation, and fresh transfer checks. Waiting at D30 is not mastery evidence.
+- Planner uses entered capacity, protected buffer, review debt, and evidence priorities to propose an approved day. Typed PYQ blocks carry exact launch prescriptions and outcome receipts; copy, templates, recurrence, rollover, and mobile agenda preserve learner control.
+- Recommended PYQ presets use reproducible seeds, exact preflight counts, reserved-paper protection, searchable session history, and actionable confidence/pace cohorts.
 - Buddy chat lets you discuss and share a stripped question snapshot without exposing outcomes, patterns, or root causes.
 - Buddy message alerts are an explicit per-device opt-in and work on installed phone PWAs, desktop browsers, and configured Android builds.
 - Weekly, you write ONE upstream weakness to fix that week; the dashboard turns your own tags into small, actionable learning notes.
@@ -95,7 +99,7 @@ Bank version `gate-and-cs-exams-1990-2026-v11-verified-pdf-marks` contains 4,334
 | UGC NET CS · Filtered Overlap | 21 | Mixed |
 | GO Classes COA Topic Tests | 30 | GATE |
 
-A book's `sourceClass` describes its source paper or collection; it does not certify every stored answer or mark. Each question's `answerSource` records row-level provenance. The audit currently finds 1,303 standard MCQ/MSQ/NAT rows plus one `MARKS_TO_ALL` row that are GATE-rule-evaluable from stored metadata. Of those, only 130 rows have official PDF-answer-key-verified marks (60 one-mark and 70 two-mark); tag-derived marks remain useful for practice scoring but are not labelled officially verified.
+A book's `sourceClass` describes its source paper or collection; it does not certify every stored answer or mark. Each question's `answerSource` records row-level provenance. The audit currently finds 3,938 standard MCQ/MSQ/NAT rows plus two `MARKS_TO_ALL` rows that are GATE-rule-evaluable from stored metadata. Of those, only 130 rows have official PDF-answer-key-verified marks (60 one-mark and 70 two-mark); tag-derived marks remain useful for practice scoring but are not labelled officially verified.
 
 The bank tooling is intentionally explicit:
 
@@ -119,10 +123,13 @@ npm run typecheck        # strict TypeScript
 npm run lint             # ESLint (0 warnings tolerated)
 npm run test             # Vitest — analysis, isolation, Buddy, tips, sync, reattempt ladder
 npm run pyq:audit        # independent GATE 2027 taxonomy + mark-provenance audit
-npm run test:e2e         # Playwright — auth, tag flow, offline sync, buddy invite
+npm run test:e2e         # Playwright — local routes, Planner persistence, PYQ → recovery
 ```
 
-CI runs all five on every push to `main`.
+The Playwright suite covers local-sandbox route navigation, approved Planner capacity surviving
+refresh, and PYQ → blind recovery with repeated pause/resume. It does not yet prove hosted
+multi-device or physical Android behavior. Run `npm run plan:check` and the database checks in the
+release guide before each implementation handoff; no repository CI workflow is currently checked in.
 
 ## Deploy
 

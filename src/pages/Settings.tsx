@@ -938,7 +938,7 @@ function DataCard({
   async function onExport() {
     setBusy('export');
     try {
-      const env = await exportAll(profile);
+      const env = await exportAll(profile, userId);
       downloadEnvelope(env);
       onBackup();
       pushToast('Backup saved to Downloads.', 'success');
@@ -958,9 +958,17 @@ function DataCard({
       const text = await file.text();
       const parsed = JSON.parse(text) as unknown;
       if (!isBackupEnvelope(parsed)) throw new Error('not a valid backup');
-      const report = await importEnvelope(parsed);
-      const total = report.reduce((s, r) => s + r.added, 0);
-      pushToast(`Imported ${total} rows across ${report.length} tables.`, 'success');
+      const report = await importEnvelope(parsed, userId);
+      const rowTotal = report.reduce((sum, row) => sum + row.added, 0);
+      const plannerTotal =
+        report.planner.dayPlansAdded +
+        report.planner.tombstonesAdded +
+        report.planner.templatesAdded +
+        report.planner.outboxRestored;
+      pushToast(
+        `Imported ${rowTotal} study rows and ${plannerTotal} Planner records.`,
+        'success'
+      );
     } catch (err) {
       pushToast(`Import failed: ${(err as Error).message}`, 'neutral');
     } finally {
@@ -1013,9 +1021,9 @@ function DataCard({
               1 · Download a backup
             </p>
             <p className="text-[12px] text-text-muted">
-              Saves a JSON file of every question, session, pattern, and note on this device to your
-              Downloads folder. Use it as a safety net or to move to a new browser. Buddy-shared
-              rows are excluded.
+              Saves every question, session, pattern, note, Planner day, template, deletion marker,
+              and pending offline Planner change on this device. Use it as a safety net or to move
+              to a new browser. Buddy-shared rows are excluded.
             </p>
           </div>
           <Button variant="primary" onClick={() => void onExport()} disabled={busy !== null}>

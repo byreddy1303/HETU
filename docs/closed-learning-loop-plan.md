@@ -448,7 +448,8 @@ known limitations. Never mark an item complete based only on code inspection.
 - Backup preflight rejects malformed outbox payloads and cross-account rows before any import.
   Conflict copies remain exportable without being automatically replayed or resurrecting deleted days.
 - Remaining: physical-device and authenticated deployment checks, full keyboard/focus review,
-  and independent final traceability acceptance. No production release is implied.
+  conflict-copy preservation through logout/cache wipe (currently local/exportable rather than
+  independently cloud-acknowledged), and final traceability acceptance. No production release is implied.
 
 ## Decision log
 

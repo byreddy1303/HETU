@@ -65,6 +65,10 @@ The build's `account-state.ts` dynamic/static import warning is non-blocking but
 - Two authenticated clients: create/edit/delete a day, edit while another write is in flight,
   reconnect the stale client, and verify deleted days stay deleted. Check explicit recreation at
   the acknowledged revision and confirm conflicting local work is retained in the backup.
+  Finish conflict-copy handling during logout/cache clearing: diagnostic conflict copies are
+  currently local/exportable, not a separately acknowledged cloud record. The ordinary successful
+  outbox flush does not by itself prove those copies survive a local wipe. This remains a release
+  gate; retain a backup before clearing local state while conflicts exist.
 - Offline: edit capacity, reviews, typed PYQ blocks and templates; interrupt practice and recovery;
   close the app; reopen and reconnect. Confirm queue order, answers, elapsed work, hints, and the
   Planner receipt converge without duplicate attempt events.

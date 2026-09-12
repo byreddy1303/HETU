@@ -365,7 +365,7 @@ export interface PyqExamState {
   validity_metrics?: PyqExamValidityMetrics;
 }
 
-/** Mutable response/timing checkpoint kept while guided practice is paused. */
+/** Mutable response/timing checkpoint kept while a practice question is inactive. */
 export interface PyqPracticeDraft {
   question_uid: string;
   selected_answer: PyqSelectedAnswer;
@@ -437,14 +437,18 @@ export interface PyqSessionConfig {
   plannerTimeBudgetMin?: number;
   /** Missing on legacy sets, which always use the original guided-practice flow. */
   mode?: PyqSessionMode;
+  /** Missing on legacy sets, which show one practice question at a time. */
+  practiceView?: 'single' | 'multiple';
   /** Missing on legacy exams, which use timed-set semantics. */
   examKind?: PyqExamKind;
   /** Stable id into the versioned benchmark-paper catalog. */
   benchmarkPaperId?: string;
   /** Present only for exam mode; lives in JSONB so draft answers remain editable. */
   examState?: PyqExamState;
-  /** Present only while a guided-practice question has a resumable checkpoint. */
+  /** Current/resumable checkpoint alias, retained for legacy practice sessions. */
   practiceDraft?: PyqPracticeDraft;
+  /** Per-question checkpoints bounded by the questions selected for this set. */
+  practiceDrafts?: Record<string, PyqPracticeDraft>;
 }
 
 export interface MockSubjectScore {

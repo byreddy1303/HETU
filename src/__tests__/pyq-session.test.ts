@@ -17,6 +17,8 @@ import {
   advancePyqSessionProgress,
   completePyqSession,
   abandonPyqSession,
+  getPyqPracticeDraft,
+  navigatePyqPracticeQuestion,
   pausePyqPracticeSession,
   startPyqSessionQuestion
 } from '@/lib/pyq-session';
@@ -191,6 +193,261 @@ describe('PYQ session logic and determinism', () => {
 
     const advanced = advancePyqSessionProgress(resumed, 'q1', 1, 4);
     expect(advanced.config.practiceDraft).toBeUndefined();
+    expect(advanced.config.practiceDrafts).toBeUndefined();
+  });
+
+  it('retains MCQ, MSQ and NAT drafts with independent active time across navigation', () => {
+    const startedAt = Date.parse('2026-08-08T08:00:00.000Z');
+    const original = createPyqSessionRow(
+      'user-1',
+      '1.0.0',
+      { ...mockConfig, mode: 'practice', practiceView: 'multiple' },
+      [{ id: 'mcq' }, { id: 'msq' }, { id: 'nat' }],
+      new Date(startedAt).toISOString()
+    );
+    const atMsq = navigatePyqPracticeQuestion(
+      original,
+      'msq',
+      { questionUid: 'mcq', selectedAnswer: 'B', markDecision: 'MARK', confidence: 'high' },
+      startedAt + 5_000
+    );
+    const msqAnswer = ['A', 'C'];
+    const atNat = navigatePyqPracticeQuestion(
+      atMsq,
+      'nat',
+      { questionUid: 'msq', selectedAnswer: msqAnswer, markDecision: 'FIFTY_FIFTY' },
+      startedAt + 12_000
+    );
+    msqAnswer.push('D');
+    const backAtMcq = navigatePyqPracticeQuestion(
+      atNat,
+      'mcq',
+      { questionUid: 'nat', selectedAnswer: '0.', markDecision: null, confidence: 'low' },
+      startedAt + 23_000
+    );
+    const paused = pausePyqPracticeSession(
+      backAtMcq,
+      { questionUid: 'mcq', selectedAnswer: 'B', markDecision: 'MARK', confidence: 'high' },
+      startedAt + 26_000
+    );
+
+    expect(getPyqPracticeDraft(paused, 'mcq')).toMatchObject({
+      selected_answer: 'B',
+      confidence: 'high',
+      elapsed_ms: 8_000,
+      first_started_at: original.started_at
+    });
+    expect(getPyqPracticeDraft(paused, 'msq')).toMatchObject({
+      selected_answer: ['A', 'C'],
+      elapsed_ms: 7_000,
+      first_started_at: new Date(startedAt + 5_000).toISOString()
+    });
+    expect(getPyqPracticeDraft(paused, 'nat')).toMatchObject({
+      selected_answer: '0.',
+      confidence: 'low',
+      elapsed_ms: 11_000
+    });
+    expect(backAtMcq.current_question_uid).toBe('mcq');
+    expect(backAtMcq.config.practiceDraft?.selected_answer).toBe('B');
+    expect(paused.current_index).toBe(0);
+    expect(paused.completed_question_uids).toEqual([]);
+    expect(paused.elapsed_sec).toBe(0);
+  });
+
+  it('preserves every draft over pause/resume and excludes the paused gap', () => {
+    const original = createPyqSessionRow(
+      'user-1',
+      '1.0.0',
+      { ...mockConfig, mode: 'practice', practiceView: 'multiple' },
+      [{ id: 'q1' }, { id: 'q2' }],
+      new Date(0).toISOString()
+    );
+    const secondQuestion = navigatePyqPracticeQuestion(
+      original,
+      'q2',
+      { questionUid: 'q1', selectedAnswer: 0, markDecision: 'MARK' },
+      2_000
+    );
+    const paused = pausePyqPracticeSession(
+      secondQuestion,
+      { questionUid: 'q2', selectedAnswer: ['B', 'D'], markDecision: 'FIFTY_FIFTY' },
+      5_000
+    );
+    const resumed = startPyqSessionQuestion(
+      { ...paused, status: 'active' },
+      'q2',
+      new Date(65_000).toISOString()
+    );
+    const returned = navigatePyqPracticeQuestion(
+      resumed,
+      'q1',
+      { questionUid: 'q2', selectedAnswer: ['B', 'D'], markDecision: 'FIFTY_FIFTY' },
+      69_000
+    );
+    expect(getPyqPracticeDraft(returned, 'q2')).toMatchObject({
+      selected_answer: ['B', 'D'],
+      elapsed_ms: 7_000,
+      first_started_at: new Date(2_000).toISOString()
+    });
+    expect(returned.config.practiceDraft).toMatchObject({
+      question_uid: 'q1',
+      selected_answer: 0,
+      elapsed_ms: 2_000
+    });
+  });
+
+  it('migrates the legacy alias with precedence and bounds drafts to selected questions', () => {
+    const original = createPyqSessionRow(
+      'user-1',
+      '1.0.0',
+      { ...mockConfig, mode: 'practice' },
+      [{ id: 'q1' }, { id: 'q2' }],
+      new Date(0).toISOString()
+    );
+    const legacy = {
+      question_uid: 'q2',
+      selected_answer: 'B',
+      mark_decision: 'MARK' as const,
+      elapsed_ms: 4_000,
+      first_started_at: new Date(0).toISOString()
+    };
+    const session = {
+      ...original,
+      config: {
+        ...original.config,
+        practiceDraft: legacy,
+        practiceDrafts: {
+          q2: { ...legacy, selected_answer: 'stale' },
+          outside: { ...legacy, question_uid: 'outside' }
+        }
+      }
+    };
+    const navigated = navigatePyqPracticeQuestion(
+      session,
+      'q2',
+      { questionUid: 'q1', selectedAnswer: 'A', markDecision: null },
+      2_000
+    );
+    expect(getPyqPracticeDraft(session, 'q2')).toBe(legacy);
+    expect(getPyqPracticeDraft(session, 'outside')).toBeUndefined();
+    expect(navigated.config.practiceDraft).toBe(legacy);
+    expect(Object.keys(navigated.config.practiceDrafts!).sort()).toEqual(['q1', 'q2']);
+    expect(getPyqPracticeDraft(navigated, 'q1')?.elapsed_ms).toBe(2_000);
+  });
+
+  it('commits arbitrary practice order, preserves remaining drafts, and keeps progress monotonic', () => {
+    const firstQuestion = { ...question, id: 'q1' };
+    const lastQuestion = { ...question, id: 'q2' };
+    const original = createPyqSessionRow(
+      'user-1',
+      '1.0.0',
+      { ...mockConfig, mode: 'practice', practiceView: 'multiple' },
+      [firstQuestion, lastQuestion],
+      new Date(0).toISOString()
+    );
+    const atLastQuestion = navigatePyqPracticeQuestion(
+      original,
+      'q2',
+      { questionUid: 'q1', selectedAnswer: 'A', markDecision: 'MARK' },
+      2_000
+    );
+    const commit = (session: typeof original, candidate: PyqQuestion, committedAtMs: number) =>
+      createPyqAttemptRow({
+        userId: 'user-1',
+        session,
+        question: candidate,
+        selectedAnswer: 'B',
+        decision: 'MARK',
+        bankVersion: '1.0.0',
+        questionStartedAtMs: 2_000,
+        committedAtMs,
+        screenshotUrl: null
+      });
+    expect(commit(atLastQuestion, lastQuestion, 5_000).question_uid).toBe('q2');
+    const lastCommitted = advancePyqSessionProgress(atLastQuestion, 'q2', 2, 3);
+    expect(lastCommitted.current_index).toBe(2);
+    expect(lastCommitted.completed_count).toBe(1);
+    expect(lastCommitted.config.practiceDrafts?.q1.selected_answer).toBe('A');
+    const returned = navigatePyqPracticeQuestion(lastCommitted, 'q1', null, 50_000);
+    expect(returned.current_index).toBe(2);
+    expect(returned.elapsed_sec).toBe(3);
+    expect(returned.config.practiceDraft?.elapsed_ms).toBe(2_000);
+    const singleView = {
+      ...returned,
+      config: { ...returned.config, practiceView: 'single' as const }
+    };
+    expect(commit(singleView, firstQuestion, 52_000).question_uid).toBe('q1');
+    expect(() => commit(singleView, lastQuestion, 52_000)).toThrow(
+      'Only the current PYQ can be committed.'
+    );
+    const allCommitted = advancePyqSessionProgress(singleView, 'q1', 1, 4);
+    expect(allCommitted.current_index).toBe(2);
+    expect(allCommitted.completed_count).toBe(2);
+    expect(allCommitted.elapsed_sec).toBe(7);
+    expect(allCommitted.config.practiceDraft).toBeUndefined();
+    expect(allCommitted.config.practiceDrafts).toBeUndefined();
+    expect(completePyqSession(allCommitted).status).toBe('completed');
+  });
+
+  it('clears only the committed draft while retaining a different resumable alias', () => {
+    const original = createPyqSessionRow(
+      'user-1',
+      '1.0.0',
+      mockConfig,
+      [{ id: 'q1' }, { id: 'q2' }],
+      new Date(0).toISOString()
+    );
+    const atSecond = navigatePyqPracticeQuestion(
+      original,
+      'q2',
+      { questionUid: 'q1', selectedAnswer: 'A', markDecision: 'MARK' },
+      1_000
+    );
+    const atFirst = navigatePyqPracticeQuestion(
+      atSecond,
+      'q1',
+      { questionUid: 'q2', selectedAnswer: 'B', markDecision: 'MARK' },
+      2_000
+    );
+    const committed = advancePyqSessionProgress(atFirst, 'q2', 2, 1);
+    expect(committed.config.practiceDraft?.question_uid).toBe('q1');
+    expect(Object.keys(committed.config.practiceDrafts!)).toEqual(['q1']);
+    expect(atFirst.config.practiceDrafts?.q2).toBeDefined();
+  });
+
+  it('rejects invalid navigation without creating unowned or untimed checkpoints', () => {
+    const original = createPyqSessionRow(
+      'user-1',
+      '1.0.0',
+      mockConfig,
+      [{ id: 'q1' }, { id: 'q2' }],
+      new Date(0).toISOString()
+    );
+    expect(() => navigatePyqPracticeQuestion(original, 'outside', null, 2_000)).toThrow(
+      'Question is not part of this PYQ set.'
+    );
+    expect(() => navigatePyqPracticeQuestion(original, 'q2', null, Number.NaN)).toThrow(
+      'Practice navigation time must be valid.'
+    );
+    expect(() =>
+      navigatePyqPracticeQuestion(
+        original,
+        'q2',
+        { questionUid: 'q2', selectedAnswer: 'B', markDecision: null },
+        2_000
+      )
+    ).toThrow('Only the current practice question can be checkpointed.');
+    expect(() =>
+      navigatePyqPracticeQuestion({ ...original, status: 'paused' }, 'q2', null, 2_000)
+    ).toThrow('Only an active PYQ practice set can be navigated.');
+    expect(() =>
+      navigatePyqPracticeQuestion(
+        { ...original, config: { ...original.config, mode: 'exam' } },
+        'q2',
+        null,
+        2_000
+      )
+    ).toThrow('Timed exams must use the exam navigation flow.');
   });
 
   it('completes and abandons sessions properly', () => {

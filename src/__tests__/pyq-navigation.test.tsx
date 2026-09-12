@@ -4,6 +4,8 @@ import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import { db } from '@/lib/db';
 import type { PyqManifest, PyqQuestion } from '@/lib/pyq';
+import { createPyqSessionRow, pausePyqSession } from '@/lib/pyq-session';
+import { usePyqPreferencesStore } from '@/stores/pyq-preferences';
 import Pyq from '@/pages/Pyq';
 
 const USER = '00000000-0000-4000-8000-000000000001';
@@ -190,7 +192,16 @@ vi.mock('@/lib/image', async (importOriginal) => {
 
 describe('PYQ practice navigation', () => {
   beforeEach(async () => {
+    usePyqPreferencesStore.getState().reset();
     vi.stubGlobal('scrollTo', vi.fn());
+    vi.stubGlobal(
+      'IntersectionObserver',
+      class {
+        observe() {}
+        unobserve() {}
+        disconnect() {}
+      }
+    );
     vi.spyOn(globalThis, 'fetch').mockImplementation(async (input) => {
       const url = new URL(String(input), 'https://air-journal.test');
       if (url.pathname === '/pyq/manifest.json') return Response.json(manifest);
@@ -279,16 +290,35 @@ describe('PYQ practice navigation', () => {
     });
   });
 
-  it('filters the bank by book and renders every source-provided answer choice', async () => {
+  it('preserves a previously saved non-core session and every source-provided answer choice', async () => {
     const user = userEvent.setup();
+    const saved = pausePyqSession(
+      createPyqSessionRow(
+        USER,
+        manifest.bankVersion,
+        {
+          bookSlug: 'tifr-gs-cs',
+          subjectSlug: 'all',
+          topicSlug: 'all',
+          fromYear: 2025,
+          toYear: 2025,
+          type: 'all',
+          order: 'oldest',
+          count: '5',
+          history: 'all',
+          mode: 'practice'
+        },
+        [questions[3]]
+      )
+    );
+    await db.pyq_sessions.add({ ...saved, sync_status: 'pending' });
     render(
       <MemoryRouter>
         <Pyq />
       </MemoryRouter>
     );
 
-    await user.click(await screen.findByRole('button', { name: /TIFR GS Computer Science/ }));
-    await user.click(screen.getByRole('button', { name: 'Start practice set' }));
+    await user.click(await screen.findByRole('button', { name: 'Resume practice' }));
 
     expect(await screen.findByText('Which TIFR option is valid?')).toBeInTheDocument();
     expect(screen.queryByText('Which proposition is a tautology?')).not.toBeInTheDocument();

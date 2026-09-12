@@ -2,6 +2,7 @@ import type {
   MarkDecision,
   PyqAttemptRow,
   PyqExamConfidence,
+  PyqPracticeDraft,
   PyqQuestionSnapshot,
   PyqSelectedAnswer,
   PyqSessionConfig,
@@ -522,10 +523,16 @@ export function advancePyqSessionProgress(
     throw new Error('PYQ progress is outside the selected set.');
   }
   const completed = Array.from(new Set([...session.completed_question_uids, questionUid]));
-  const config =
-    session.config.practiceDraft?.question_uid === questionUid
-      ? { ...session.config, practiceDraft: undefined }
-      : session.config;
+  const practiceDrafts = pyqPracticeDrafts(session);
+  delete practiceDrafts[questionUid];
+  const config = {
+    ...session.config,
+    practiceDraft:
+      session.config.practiceDraft?.question_uid === questionUid
+        ? undefined
+        : session.config.practiceDraft,
+    practiceDrafts: Object.keys(practiceDrafts).length > 0 ? practiceDrafts : undefined
+  };
   return {
     ...session,
     config,
@@ -577,19 +584,84 @@ export function pausePyqSession(session: PyqSessionRow, now = nowISO()): PyqSess
   };
 }
 
+type PyqPracticeDraftInput = {
+  questionUid: string;
+  selectedAnswer: PyqSelectedAnswer;
+  markDecision: MarkDecision | null;
+  confidence?: PyqExamConfidence | null;
+};
+
+/** Read the legacy/current alias first, then another question's saved checkpoint. */
+export function getPyqPracticeDraft(
+  session: PyqSessionRow,
+  questionUid: string
+): PyqPracticeDraft | undefined {
+  if (!session.question_uids.includes(questionUid)) return undefined;
+  if (session.config.practiceDraft?.question_uid === questionUid) {
+    return session.config.practiceDraft;
+  }
+  const draft = session.config.practiceDrafts?.[questionUid];
+  return draft?.question_uid === questionUid ? draft : undefined;
+}
+
+/** Preserve old aliases while bounding the draft ledger to this session's set. */
+function pyqPracticeDrafts(session: PyqSessionRow): Record<string, PyqPracticeDraft> {
+  const questionUids = new Set(session.question_uids);
+  const drafts = Object.fromEntries(
+    Object.entries(session.config.practiceDrafts ?? {}).filter(
+      ([questionUid, draft]) =>
+        questionUids.has(questionUid) && draft?.question_uid === questionUid
+    )
+  );
+  const legacyDraft = session.config.practiceDraft;
+  if (legacyDraft && questionUids.has(legacyDraft.question_uid)) {
+    drafts[legacyDraft.question_uid] = legacyDraft;
+  }
+  return drafts;
+}
+
+function checkpointPyqPracticeQuestion(
+  session: PyqSessionRow,
+  draft: PyqPracticeDraftInput,
+  nowMs: number
+): PyqPracticeDraft {
+  if (
+    session.current_question_uid !== draft.questionUid ||
+    !session.question_uids.includes(draft.questionUid)
+  ) {
+    throw new Error('Only the current practice question can be checkpointed.');
+  }
+  if (!Number.isFinite(nowMs)) {
+    throw new Error('Practice checkpoint time must be valid.');
+  }
+  const segmentStartedMs = Date.parse(session.current_question_started_at ?? '');
+  if (!Number.isFinite(segmentStartedMs)) {
+    throw new Error('The current practice question has no valid start time.');
+  }
+
+  const previousDraft = getPyqPracticeDraft(session, draft.questionUid);
+  const segmentElapsedMs = Math.max(0, nowMs - segmentStartedMs);
+  const elapsedMs = Math.max(0, previousDraft?.elapsed_ms ?? 0) + segmentElapsedMs;
+  const firstStartedAt = previousDraft?.first_started_at ?? session.current_question_started_at!;
+  return {
+    question_uid: draft.questionUid,
+    selected_answer: Array.isArray(draft.selectedAnswer)
+      ? [...draft.selectedAnswer]
+      : draft.selectedAnswer,
+    mark_decision: draft.markDecision,
+    ...(draft.confidence !== undefined ? { confidence: draft.confidence } : {}),
+    elapsed_ms: elapsedMs,
+    first_started_at: firstStartedAt
+  };
+}
+
 /**
- * Pause guided practice without losing the in-progress response or charging
- * the learner for time away. A resumed question opens a fresh live segment;
- * this helper folds that segment into the persisted elapsed-time ledger.
+ * Pause practice without losing any response or charging time away. Each
+ * resumed question opens a fresh segment on its own active-time ledger.
  */
 export function pausePyqPracticeSession(
   session: PyqSessionRow,
-  draft: {
-    questionUid: string;
-    selectedAnswer: PyqSelectedAnswer;
-    markDecision: MarkDecision | null;
-    confidence?: PyqExamConfidence | null;
-  },
+  draft: PyqPracticeDraftInput,
   nowMs = Date.now()
 ): PyqSessionRow {
   if (session.status !== 'active') {
@@ -598,27 +670,7 @@ export function pausePyqPracticeSession(
   if (session.config.mode === 'exam') {
     throw new Error('Timed exams must use the exam pause flow.');
   }
-  if (
-    session.current_question_uid !== draft.questionUid ||
-    !session.question_uids.includes(draft.questionUid)
-  ) {
-    throw new Error('Only the current practice question can be paused.');
-  }
-  if (!Number.isFinite(nowMs)) {
-    throw new Error('Practice pause time must be valid.');
-  }
-  const segmentStartedMs = Date.parse(session.current_question_started_at ?? '');
-  if (!Number.isFinite(segmentStartedMs)) {
-    throw new Error('The current practice question has no valid start time.');
-  }
-
-  const previousDraft =
-    session.config.practiceDraft?.question_uid === draft.questionUid
-      ? session.config.practiceDraft
-      : null;
-  const segmentElapsedMs = Math.max(0, nowMs - segmentStartedMs);
-  const elapsedMs = Math.max(0, previousDraft?.elapsed_ms ?? 0) + segmentElapsedMs;
-  const firstStartedAt = previousDraft?.first_started_at ?? session.current_question_started_at!;
+  const checkpoint = checkpointPyqPracticeQuestion(session, draft, nowMs);
   const now = new Date(nowMs).toISOString();
 
   return {
@@ -626,17 +678,48 @@ export function pausePyqPracticeSession(
     status: 'paused',
     config: {
       ...session.config,
-      practiceDraft: {
-        question_uid: draft.questionUid,
-        selected_answer: draft.selectedAnswer,
-        mark_decision: draft.markDecision,
-        ...(draft.confidence !== undefined ? { confidence: draft.confidence } : {}),
-        elapsed_ms: elapsedMs,
-        first_started_at: firstStartedAt
-      }
+      practiceDraft: checkpoint,
+      practiceDrafts: { ...pyqPracticeDrafts(session), [draft.questionUid]: checkpoint }
     },
     current_question_uid: null,
     current_question_started_at: null,
+    updated_at: now
+  };
+}
+
+/** Change focus without completing questions or counting time on other cards. */
+export function navigatePyqPracticeQuestion(
+  session: PyqSessionRow,
+  targetUid: string,
+  draft: PyqPracticeDraftInput | null,
+  nowMs = Date.now()
+): PyqSessionRow {
+  if (session.status !== 'active') {
+    throw new Error('Only an active PYQ practice set can be navigated.');
+  }
+  if (session.config.mode === 'exam') {
+    throw new Error('Timed exams must use the exam navigation flow.');
+  }
+  if (!session.question_uids.includes(targetUid)) {
+    throw new Error('Question is not part of this PYQ set.');
+  }
+  if (!Number.isFinite(nowMs)) {
+    throw new Error('Practice navigation time must be valid.');
+  }
+  const practiceDrafts = pyqPracticeDrafts(session);
+  if (draft) {
+    practiceDrafts[draft.questionUid] = checkpointPyqPracticeQuestion(session, draft, nowMs);
+  }
+  const now = new Date(nowMs).toISOString();
+  return {
+    ...session,
+    config: {
+      ...session.config,
+      practiceDraft: practiceDrafts[targetUid],
+      practiceDrafts: Object.keys(practiceDrafts).length > 0 ? practiceDrafts : undefined
+    },
+    current_question_uid: targetUid,
+    current_question_started_at: now,
     updated_at: now
   };
 }
@@ -707,10 +790,12 @@ export function createPyqAttemptRow(args: {
   const retryingCompletedSkip =
     args.retryingSkippedAttempt === true &&
     args.session.completed_question_uids.includes(args.question.id);
-  if (
-    args.session.question_uids[args.session.current_index] !== args.question.id &&
-    !retryingCompletedSkip
-  ) {
+  const currentQuestionUid =
+    args.session.config.mode !== 'exam'
+      ? (args.session.current_question_uid ??
+        args.session.question_uids[args.session.current_index])
+      : args.session.question_uids[args.session.current_index];
+  if (currentQuestionUid !== args.question.id && !retryingCompletedSkip) {
     throw new Error('Only the current PYQ can be committed.');
   }
   const selectedAnswer = args.decision === 'SKIP' ? null : args.selectedAnswer;

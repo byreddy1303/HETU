@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import {
   EMPTY_PYQ_PREFERENCES,
+  normalizePyqPreferenceConfig,
   normalizePyqPreferencesSnapshot,
   usePyqPreferencesStore,
   type PyqSavedPrescription
@@ -50,8 +51,10 @@ describe('PYQ preference persistence boundary', () => {
           count: '10',
           history: 'incorrect',
           mode: 'exam',
+          practiceView: 'multiple',
           examState: { responses: { secret: 'A' } },
-          practiceDraft: { selected_answer: 'B' }
+          practiceDraft: { selected_answer: 'B' },
+          practiceDrafts: { secret: { selected_answer: ['A', 'C'] } }
         },
         savedPrescriptions: []
       }
@@ -65,11 +68,29 @@ describe('PYQ preference persistence boundary', () => {
         subjectSlugs: ['c-programming', 'data-structure'],
         fromYear: 1990,
         toYear: 2026,
-        mode: 'exam'
+        mode: 'exam',
+        practiceView: 'multiple'
       }
     });
     expect(normalized.lastConfig).not.toHaveProperty('examState');
     expect(normalized.lastConfig).not.toHaveProperty('practiceDraft');
+    expect(normalized.lastConfig).not.toHaveProperty('practiceDrafts');
+  });
+
+  it('remembers multiple-question practice and defaults legacy or invalid views to single', () => {
+    const config = prescription('view').config;
+    expect(normalizePyqPreferenceConfig(config)?.practiceView).toBe('single');
+    expect(normalizePyqPreferenceConfig({ ...config, practiceView: 'invalid' })?.practiceView).toBe(
+      'single'
+    );
+    const store = usePyqPreferencesStore.getState();
+    store.savePrescription({
+      ...prescription('multiple'),
+      config: { ...config, practiceView: 'multiple' }
+    });
+    expect(usePyqPreferencesStore.getState().savedPrescriptions[0].config.practiceView).toBe(
+      'multiple'
+    );
   });
 
   it('deduplicates named prescriptions, bounds the ledger, and resets cleanly', () => {

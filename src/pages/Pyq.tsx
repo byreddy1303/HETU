@@ -40,6 +40,8 @@ import type { TagDraft } from '@/components/tags/TagFlow';
 import PageHeader from '@/components/layout/PageHeader';
 import ScientificCalculator, { CalculatorTrigger } from '@/components/shared/ScientificCalculator';
 import PyqExamWorkspace from '@/components/pyq/PyqExamWorkspace';
+import PyqPracticeViewControl from '@/components/pyq/PyqPracticeViewControl';
+import PyqPracticeSheet from '@/components/pyq/PyqPracticeSheet';
 import PyqImprovementInsights from '@/components/pyq/PyqImprovementInsights';
 import PyqEvidenceLedger from '@/components/pyq/PyqEvidenceLedger';
 import PyqRecommendedSetup from '@/components/pyq/PyqRecommendedSetup';
@@ -73,8 +75,7 @@ import {
   pyqPlainText,
   pyqSourceRef,
   type PyqManifest,
-  type PyqQuestion,
-  type PyqSourceClass
+  type PyqQuestion
 } from '@/lib/pyq';
 import {
   abandonPyqSession,
@@ -84,6 +85,8 @@ import {
   aggregatePyqAttemptScores,
   createPyqSessionRow,
   nextPyqAttemptNumber,
+  getPyqPracticeDraft,
+  navigatePyqPracticeQuestion,
   pausePyqPracticeSession,
   pausePyqSession,
   pyqAttemptScorePresentation,
@@ -216,7 +219,8 @@ function recommendationConfig(
     ...current,
     recommendationPreset: preset,
     examState: undefined,
-    practiceDraft: undefined
+    practiceDraft: undefined,
+    practiceDrafts: undefined
   };
   if (preset === 'custom') return common;
   if (preset === 'full-paper') {
@@ -249,12 +253,7 @@ function recommendationConfig(
     mode: 'practice',
     examKind: undefined,
     benchmarkPaperId: undefined,
-    bookSlug:
-      preset === 'mixed-gate'
-        ? manifest.defaultBookSlug
-        : preset === 'transfer'
-          ? 'all'
-          : current.bookSlug,
+    bookSlug: 'gate-cse',
     subjectSlug: preset === 'diagnose' || preset === 'mixed-gate' ? 'all' : current.subjectSlug,
     subjectSlugs:
       preset === 'diagnose' || preset === 'mixed-gate' ? undefined : current.subjectSlugs,
@@ -291,7 +290,10 @@ function commaSeparatedQuestionUids(searchParams: URLSearchParams): string[] {
 function pauseStoredPyqSession(session: PyqSessionRow): PyqSessionRow {
   if (session.config.mode === 'exam') return pausePyqExamSession(session);
   if (!session.current_question_uid) return pausePyqSession(session);
-  const savedDraft = session.config.practiceDraft;
+  const savedDraft = getPyqPracticeDraft(session, session.current_question_uid);
+  if (!savedDraft && session.completed_question_uids.includes(session.current_question_uid)) {
+    return pausePyqSession(session);
+  }
   return pausePyqPracticeSession(session, {
     questionUid: session.current_question_uid,
     selectedAnswer:
@@ -304,23 +306,16 @@ function pauseStoredPyqSession(session: PyqSessionRow): PyqSessionRow {
 }
 
 function savedPracticeElapsedSeconds(session: PyqSessionRow): number {
+  const drafts = { ...session.config.practiceDrafts };
+  if (session.config.practiceDraft)
+    drafts[session.config.practiceDraft.question_uid] = session.config.practiceDraft;
   return (
     session.elapsed_sec +
-    Math.ceil(Math.max(0, session.config.practiceDraft?.elapsed_ms ?? 0) / 1000)
+    Math.ceil(
+      Object.values(drafts).reduce((total, draft) => total + Math.max(0, draft.elapsed_ms), 0) /
+        1000
+    )
   );
-}
-
-function difficultyLabel(value: PyqManifest['books'][number]['difficultyFloor']): string {
-  if (value === 'above-gate') return 'Above GATE';
-  if (value === 'mixed') return 'Mixed level';
-  return 'GATE level';
-}
-
-function sourceClassLabel(value: PyqSourceClass): string {
-  if (value === 'official-sample') return 'Official sample';
-  if (value === 'reconstructed-exam') return 'Reconstructed';
-  if (value === 'audited-gate-prep') return 'Audited prep';
-  return 'Official exam';
 }
 
 function latestQuestionAttempt(
@@ -610,7 +605,7 @@ function PracticeSetup({
   onTryEvidenceTransfer: (questionUids: string[]) => void;
   onStart: () => void;
 }) {
-  const selectedBookSlug = config.bookSlug ?? manifest.defaultBookSlug;
+  const selectedBookSlug = 'gate-cse';
   const selectedBook = manifest.books.find((book) => book.slug === selectedBookSlug);
   const catalogSubjects = selectedBook?.subjects ?? manifest.subjects;
   const catalogYears = selectedBook?.years ?? manifest.years;
@@ -634,28 +629,15 @@ function PracticeSetup({
     () =>
       new Set(
         attempts
-          .filter(
-            (attempt) =>
-              selectedBookSlug === 'all' || pyqAttemptBookSlug(attempt) === selectedBookSlug
-          )
+          .filter((attempt) => pyqAttemptBookSlug(attempt) === selectedBookSlug)
           .map((attempt) => attempt.question_uid)
       ),
     [attempts, selectedBookSlug]
   );
-  const seenByBook = useMemo(() => {
-    const ids = new Map<string, Set<string>>();
-    for (const attempt of attempts) {
-      const bookSlug = pyqAttemptBookSlug(attempt);
-      const bookIds = ids.get(bookSlug) ?? new Set<string>();
-      bookIds.add(attempt.question_uid);
-      ids.set(bookSlug, bookIds);
-    }
-    return new Map([...ids].map(([bookSlug, bookIds]) => [bookSlug, bookIds.size]));
-  }, [attempts]);
   const seenBySubject = useMemo(() => {
     const ids = new Map<string, Set<string>>();
     for (const attempt of attempts) {
-      if (selectedBookSlug !== 'all' && pyqAttemptBookSlug(attempt) !== selectedBookSlug) continue;
+      if (pyqAttemptBookSlug(attempt) !== selectedBookSlug) continue;
       const subjectSlug =
         attempt.question_snapshot?.subject_slug ??
         manifest.subjects.find((subject) => subject.label === attempt.subject)?.slug ??
@@ -669,23 +651,11 @@ function PracticeSetup({
   const selectedSubject = catalogSubjects.find((subject) => subject.slug === config.subjectSlug);
   const selectedTopics = selectedSubject?.topics ?? [];
   const selectedTopicSlug = config.topicSlug ?? 'all';
-  const selectBook = (bookSlug: string) => {
-    const book = manifest.books.find((candidate) => candidate.slug === bookSlug);
-    setConfig({
-      ...config,
-      bookSlug,
-      subjectSlug: 'all',
-      subjectSlugs: undefined,
-      topicSlug: 'all',
-      fromYear: book?.firstYear ?? manifest.firstYear,
-      toYear: book?.lastYear ?? manifest.lastYear
-    });
-  };
   return (
     <div className="flex flex-col gap-4">
       <PageHeader
         title="GATE PYQs"
-        description={`${manifest.questionCount.toLocaleString()} questions across ${manifest.books.length} books, each held to a GATE difficulty floor.`}
+        description={`${catalogQuestionCount.toLocaleString()} GATE CSE Core questions for focused practice and exam sessions.`}
         showMobileMark={false}
       />
 
@@ -753,8 +723,8 @@ function PracticeSetup({
                           ? session.config.subjectSlugs
                               .map(
                                 (slug) =>
-                                  manifest.subjects.find((subject) => subject.slug === slug)?.label ??
-                                  slug
+                                  manifest.subjects.find((subject) => subject.slug === slug)
+                                    ?.label ?? slug
                               )
                               .join(' + ')
                           : 'Mixed subjects'
@@ -834,7 +804,8 @@ function PracticeSetup({
                     examKind: undefined,
                     benchmarkPaperId: undefined,
                     examState: undefined,
-                    practiceDraft: undefined
+                    practiceDraft: undefined,
+                    practiceDrafts: undefined
                   })
                 }
                 className={cn(
@@ -864,7 +835,7 @@ function PracticeSetup({
                   Practice mode
                 </span>
                 <span className="mt-1 block text-[12.5px] leading-relaxed text-text-muted">
-                  Work through one question at a time with the answer key and result revealed after
+                  Use a focused view or a question sheet, with the answer key and result revealed after
                   each committed response.
                 </span>
                 <span className="mt-4 grid gap-2 text-[11.5px] text-text-muted sm:grid-cols-2">
@@ -887,7 +858,8 @@ function PracticeSetup({
                     examKind: config.examKind ?? 'timed-set',
                     count: config.count === 'all' ? '15' : config.count,
                     examState: undefined,
-                    practiceDraft: undefined
+                    practiceDraft: undefined,
+                    practiceDrafts: undefined
                   })
                 }
                 className={cn(
@@ -933,6 +905,21 @@ function PracticeSetup({
           </CardBody>
         </Card>
       </section>
+
+      {(config.mode ?? 'practice') === 'practice' && (
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border bg-bg-raised p-4">
+          <div>
+            <p className="text-[13px] font-semibold text-text">Practice view</p>
+            <p className="mt-1 text-[12px] text-text-muted">
+              Focus on one question or browse the set together. You can switch during practice.
+            </p>
+          </div>
+          <PyqPracticeViewControl
+            value={config.practiceView}
+            onChange={(practiceView) => setConfig({ ...config, practiceView })}
+          />
+        </div>
+      )}
 
       {config.mode === 'exam' && (
         <Card className="overflow-hidden">
@@ -1033,99 +1020,6 @@ function PracticeSetup({
         />
       ) : (
         <>
-          <Card>
-            <CardBody className="p-4">
-              <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
-                <div>
-                  <p className="u-label">Step 2 · Choose a question book</p>
-                  <p className="mt-1 text-[13px] text-text-muted">
-                    Each catalog shows its source class and difficulty band; GATE CSE remains the
-                    default.
-                  </p>
-                </div>
-                <span className="u-num text-[11px] text-text-faint">
-                  {manifest.books.length} audited books
-                </span>
-              </div>
-              <label className="block text-[12px] font-medium text-text-muted sm:hidden">
-                Question book
-                <Select
-                  className="mt-1"
-                  value={selectedBookSlug}
-                  onChange={(event) => selectBook(event.target.value)}
-                >
-                  <option value="all">All books — {manifest.questionCount}</option>
-                  {manifest.books.map((book) => (
-                    <option key={book.slug} value={book.slug}>
-                      {book.label} — {book.count}
-                    </option>
-                  ))}
-                </Select>
-              </label>
-              <div className="hidden grid-cols-1 gap-2 sm:grid sm:grid-cols-2 xl:grid-cols-3">
-                <button
-                  type="button"
-                  onClick={() => selectBook('all')}
-                  aria-pressed={selectedBookSlug === 'all'}
-                  className={cn(
-                    'min-h-[112px] rounded border p-3 text-left transition-all',
-                    selectedBookSlug === 'all'
-                      ? 'border-accent/50 bg-accent-faint shadow-sm'
-                      : 'border-border bg-bg-raised hover:-translate-y-0.5 hover:border-border-hover'
-                  )}
-                >
-                  <span className="flex items-start justify-between gap-2">
-                    <span className="text-[13.5px] font-semibold text-text">All books</span>
-                    <Badge tone="accent">GATE+</Badge>
-                  </span>
-                  <span className="mt-2 block text-[11.5px] leading-relaxed text-text-muted">
-                    Mix every admitted source while keeping the same practice or exam flow.
-                  </span>
-                  <span className="u-num mt-2 block text-[11px] text-text-faint">
-                    {attempts.length > 0
-                      ? `${new Set(attempts.map((attempt) => attempt.question_uid)).size} / `
-                      : ''}
-                    {manifest.questionCount.toLocaleString()} questions
-                  </span>
-                </button>
-                {manifest.books.map((book) => {
-                  const active = selectedBookSlug === book.slug;
-                  const seen = seenByBook.get(book.slug) ?? 0;
-                  return (
-                    <button
-                      key={book.slug}
-                      type="button"
-                      onClick={() => selectBook(book.slug)}
-                      aria-pressed={active}
-                      className={cn(
-                        'min-h-[112px] rounded border p-3 text-left transition-all',
-                        active
-                          ? 'border-accent/50 bg-accent-faint shadow-sm'
-                          : 'border-border bg-bg-raised hover:-translate-y-0.5 hover:border-border-hover'
-                      )}
-                    >
-                      <span className="flex items-start justify-between gap-2">
-                        <span className="text-[13.5px] font-semibold leading-snug text-text">
-                          {book.label}
-                        </span>
-                        <span className="flex shrink-0 flex-col items-end gap-1">
-                          <Badge tone="accent">{difficultyLabel(book.difficultyFloor)}</Badge>
-                          <Badge>{sourceClassLabel(book.sourceClass)}</Badge>
-                        </span>
-                      </span>
-                      <span className="mt-2 block text-[11.5px] leading-relaxed text-text-muted">
-                        {book.description}
-                      </span>
-                      <span className="u-num mt-2 block text-[11px] text-text-faint">
-                        {seen}/{book.count} seen · {book.firstYear}–{book.lastYear}
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
-            </CardBody>
-          </Card>
-
           <Card className="overflow-hidden">
             <div className="flex flex-col gap-1 border-b border-border bg-bg-overlay/25 p-4 sm:p-5">
               <p className="u-label">Step 2 · Configure the set</p>
@@ -1133,7 +1027,7 @@ function PracticeSetup({
                 {config.mode === 'exam' ? 'Build your timed exam' : 'Build your practice session'}
               </h2>
               <p className="text-[12px] text-text-muted">
-                Choose the questions below, then start in the selected mode.
+                GATE CSE Core · Choose your subject and filters, then start your session.
               </p>
             </div>
             <div className="grid lg:grid-cols-[minmax(0,1.45fr)_minmax(300px,0.75fr)]">
@@ -1985,7 +1879,7 @@ export default function Pyq() {
         if (!active) return;
         setManifest(value);
         setConfig((current) => {
-          const defaultBook = value.books.find((book) => book.slug === value.defaultBookSlug);
+          const defaultBook = value.books.find((book) => book.slug === 'gate-cse');
           const defaultSubjects = defaultBook?.subjects ?? value.subjects;
           const requestedSubject = searchParams.get('subject');
           const requested = requestedSubject
@@ -1999,7 +1893,7 @@ export default function Pyq() {
           );
           return {
             ...current,
-            bookSlug: value.defaultBookSlug,
+            bookSlug: 'gate-cse',
             subjectSlug:
               requested?.slug ??
               (defaultSubjects.some((subject) => subject.slug === current.subjectSlug)
@@ -2063,13 +1957,11 @@ export default function Pyq() {
           ? ({
               ...storedLastConfig,
               examState: undefined,
-              practiceDraft: undefined
+              practiceDraft: undefined,
+              practiceDrafts: undefined
             } as AttemptConfig)
           : current;
-      const requestedBookSlug = searchParams.get('book') ?? remembered.bookSlug;
-      const selectedBook =
-        manifest.books.find((book) => book.slug === requestedBookSlug) ??
-        manifest.books.find((book) => book.slug === manifest.defaultBookSlug);
+      const selectedBook = manifest.books.find((book) => book.slug === 'gate-cse');
       const catalogSubjects = selectedBook?.subjects ?? manifest.subjects;
       const requestedSubjectSlug = searchParams.get('subjectSlug');
       const requestedSubjectSlugsParam = searchParams.get('subjectSlugs');
@@ -2078,9 +1970,7 @@ export default function Pyq() {
           (requestedSubjectSlugsParam ?? '')
             .split(',')
             .map((value) => value.trim())
-            .filter((value) =>
-              catalogSubjects.some((subject) => subject.slug === value)
-            )
+            .filter((value) => catalogSubjects.some((subject) => subject.slug === value))
         )
       ];
       const rememberedSubjectSlugs = (remembered.subjectSlugs ?? []).filter((value) =>
@@ -2125,7 +2015,7 @@ export default function Pyq() {
       const requestedDuration = Number(searchParams.get('duration'));
       return {
         ...remembered,
-        bookSlug: selectedBook?.slug ?? manifest.defaultBookSlug,
+        bookSlug: 'gate-cse',
         subjectSlug,
         subjectSlugs: subjectSlugs.length > 0 ? subjectSlugs : undefined,
         topicSlug,
@@ -2199,6 +2089,7 @@ export default function Pyq() {
         ...config,
         examState: undefined,
         practiceDraft: undefined,
+        practiceDrafts: undefined,
         selectionSeed,
         recommendationPreset
       },
@@ -2230,10 +2121,9 @@ export default function Pyq() {
         config.subjectSlug === 'all' && config.subjectSlugs?.length
           ? new Set(config.subjectSlugs)
           : null;
-      const selectedSubjects =
-        restrictedSubjectSlugs
-          ? manifest.subjects.filter((subject) => restrictedSubjectSlugs.has(subject.slug))
-          : config.subjectSlug === 'all'
+      const selectedSubjects = restrictedSubjectSlugs
+        ? manifest.subjects.filter((subject) => restrictedSubjectSlugs.has(subject.slug))
+        : config.subjectSlug === 'all'
           ? manifest.subjects
           : manifest.subjects.filter((subject) => subject.slug === config.subjectSlug);
       const bankRows = await loadPyqQuestions(
@@ -2365,15 +2255,20 @@ export default function Pyq() {
           topicSlugs,
           fromYear: Math.min(config.fromYear, config.toYear),
           toYear: Math.max(config.fromYear, config.toYear),
-          bookSlugs:
-            recommendationPreset === 'transfer' || config.bookSlug === 'all'
-              ? undefined
-              : [config.bookSlug ?? manifest.defaultBookSlug],
+          bookSlugs: ['gate-cse'],
           types: config.type === 'all' ? undefined : [config.type]
         },
         dueQuestionUids,
         transferQuestionUids:
-          pendingTransfers.size > 0 ? [...new Set(pendingTransfers.values())] : undefined,
+          pendingTransfers.size > 0
+            ? [...new Set(pendingTransfers.values())]
+            : bankRows
+                .filter(
+                  (question) =>
+                    matchesPyqBookScope(question, { bookSlug: 'gate-cse' }) &&
+                    !latestAttemptByUid.has(question.id)
+                )
+                .map((question) => question.id),
         exactQuestionUids: plannerQuestionUids.length > 0 ? plannerQuestionUids : undefined,
         primaryBookSlug: manifest.defaultBookSlug,
         benchmarkPapers: manifest.benchmarkPapers,
@@ -2421,8 +2316,14 @@ export default function Pyq() {
   const latestCurrentAttempt = currentId ? latestQuestionAttempt(completed, currentId) : null;
   useEffect(() => {
     if (!currentId) return;
-    window.scrollTo({ top: 0, behavior: 'auto' });
     const openSession = loadedSessionRef.current;
+    if (openSession?.config.practiceView === 'multiple' && openSession.config.mode !== 'exam') {
+      const article = document.getElementById(`practice-question-${index}`);
+      article?.scrollIntoView?.({ block: 'start', behavior: 'auto' });
+      article?.focus({ preventScroll: true });
+    } else {
+      window.scrollTo({ top: 0, behavior: 'auto' });
+    }
     if (openSession?.config.mode === 'exam' && openSession.config.examState) {
       const savedAnswer = openSession.config.examState.responses[currentId];
       setStartedAt(null);
@@ -2451,10 +2352,8 @@ export default function Pyq() {
     const priorAttempt = latestQuestionAttempt(completedRef.current, currentId);
     const lockedAttempt = priorAttempt?.mark_decision === 'SKIP' ? null : priorAttempt;
     const practiceDraft =
-      !lockedAttempt &&
-      openSession?.config.mode !== 'exam' &&
-      openSession?.config.practiceDraft?.question_uid === currentId
-        ? openSession.config.practiceDraft
+      !lockedAttempt && openSession && openSession.config.mode !== 'exam'
+        ? getPyqPracticeDraft(openSession, currentId)
         : null;
     const persistedStart = questionStartRef.current;
     setStartedAt(
@@ -2499,10 +2398,8 @@ export default function Pyq() {
 
   const liveSeconds = useTimer(submitted ? null : startedAt);
   const practiceDraftElapsedSec =
-    !submitted &&
-    loadedSession?.config.mode !== 'exam' &&
-    loadedSession?.config.practiceDraft?.question_uid === currentId
-      ? Math.floor(loadedSession.config.practiceDraft.elapsed_ms / 1000)
+    !submitted && loadedSession && currentId
+      ? Math.floor((getPyqPracticeDraft(loadedSession, currentId)?.elapsed_ms ?? 0) / 1000)
       : 0;
   const shownSeconds = submitted?.time_spent_sec ?? practiceDraftElapsedSec + liveSeconds;
   const timedExamActive =
@@ -2592,7 +2489,9 @@ export default function Pyq() {
         savedPracticeQuestionUid !== null &&
         rows.some((question) => question.id === savedPracticeQuestionUid);
       const exhausted =
-        !isExam && session.current_index >= rows.length && !hasResumablePracticeQuestion;
+        !isExam &&
+        rows.every((question) => session.completed_question_uids.includes(question.id)) &&
+        !hasResumablePracticeQuestion;
       // Bank rebuilds can add coverage or correct taxonomy without removing a
       // saved set's questions. Once every durable question ID resolves, move
       // the set to the current version instead of stranding it permanently.
@@ -2642,7 +2541,14 @@ export default function Pyq() {
       const nextIndex =
         resumablePracticeIndex >= 0
           ? resumablePracticeIndex
-          : Math.min(durableSession.current_index, Math.max(0, rows.length - 1));
+          : isExam
+            ? Math.min(durableSession.current_index, Math.max(0, rows.length - 1))
+            : Math.max(
+                0,
+                rows.findIndex(
+                  (question) => !durableSession.completed_question_uids.includes(question.id)
+                )
+              );
       let resumedSession = durableSession;
       if (!exhausted) {
         resumedSession = isExam
@@ -2792,10 +2698,14 @@ export default function Pyq() {
               ).toISOString()
             }
           : currentSession;
+      const savedDraft = practicePauseTarget.current_question_uid
+        ? getPyqPracticeDraft(practicePauseTarget, practicePauseTarget.current_question_uid)
+        : undefined;
+      const reviewingCommitted = pausingOpenSession && !!submitted;
       const paused =
         currentSession.config.mode === 'exam'
           ? pausePyqExamSession(currentSession, pauseNowMs)
-          : practicePauseTarget.current_question_uid
+          : practicePauseTarget.current_question_uid && !reviewingCommitted
             ? pausePyqPracticeSession(
                 practicePauseTarget,
                 {
@@ -2803,15 +2713,15 @@ export default function Pyq() {
                   selectedAnswer:
                     visiblePracticeQuestion?.id === practicePauseTarget.current_question_uid
                       ? selectedAnswer(visiblePracticeQuestion)
-                      : (practicePauseTarget.config.practiceDraft?.selected_answer ?? null),
+                      : (savedDraft?.selected_answer ?? null),
                   markDecision:
                     visiblePracticeQuestion?.id === practicePauseTarget.current_question_uid
                       ? decision
-                      : (practicePauseTarget.config.practiceDraft?.mark_decision ?? null),
+                      : (savedDraft?.mark_decision ?? null),
                   confidence:
                     visiblePracticeQuestion?.id === practicePauseTarget.current_question_uid
                       ? confidence
-                      : (practicePauseTarget.config.practiceDraft?.confidence ?? null)
+                      : (savedDraft?.confidence ?? null)
                 },
                 pauseNowMs
               )
@@ -2877,7 +2787,8 @@ export default function Pyq() {
         savedPrescriptionId: id,
         savedPrescriptionName: name.trim(),
         examState: undefined,
-        practiceDraft: undefined
+        practiceDraft: undefined,
+        practiceDrafts: undefined
       },
       selectionSeed,
       createdAt: now,
@@ -2896,12 +2807,14 @@ export default function Pyq() {
     setSelectionSeed(prescription.selectionSeed);
     setConfig({
       ...(prescription.config as AttemptConfig),
+      bookSlug: 'gate-cse',
       recommendationPreset: prescription.preset,
       selectionSeed: prescription.selectionSeed,
       savedPrescriptionId: prescription.id,
       savedPrescriptionName: prescription.name,
       examState: undefined,
-      practiceDraft: undefined
+      practiceDraft: undefined,
+      practiceDrafts: undefined
     });
     setStartError(null);
   }
@@ -2931,7 +2844,7 @@ export default function Pyq() {
     setSelectionSeed(seed);
     setConfig((current) => ({
       ...current,
-      bookSlug: 'all',
+      bookSlug: 'gate-cse',
       subjectSlug: 'all',
       subjectSlugs: undefined,
       topicSlug: 'all',
@@ -2947,7 +2860,8 @@ export default function Pyq() {
       examKind: undefined,
       benchmarkPaperId: undefined,
       examState: undefined,
-      practiceDraft: undefined
+      practiceDraft: undefined,
+      practiceDrafts: undefined
     }));
     navigate(`/pyq?questionUids=${encodeURIComponent(questionUids.join(','))}`);
   }
@@ -2995,7 +2909,7 @@ export default function Pyq() {
     setSelectionSeed(seed);
     setConfig((current) => ({
       ...current,
-      bookSlug: 'all',
+      bookSlug: 'gate-cse',
       subjectSlug: subjectSlugs.size === 1 ? [...subjectSlugs][0] : 'all',
       subjectSlugs: undefined,
       topicSlug: topicSlugs.size === 1 ? [...topicSlugs][0] : 'all',
@@ -3011,7 +2925,8 @@ export default function Pyq() {
       examKind: undefined,
       benchmarkPaperId: undefined,
       examState: undefined,
-      practiceDraft: undefined
+      practiceDraft: undefined,
+      practiceDrafts: undefined
     }));
     navigate('/pyq?job=transfer');
   }
@@ -3095,7 +3010,8 @@ export default function Pyq() {
             recommendationReasons: ['Full Paper preset', 'Official paper order'],
             examKind: 'full-paper',
             benchmarkPaperId: paper.id,
-            practiceDraft: undefined
+            practiceDraft: undefined,
+            practiceDrafts: undefined
           },
           paper.questionUids,
           {
@@ -3121,7 +3037,13 @@ export default function Pyq() {
               'No questions are available for this recommended job. Widen the scope or choose Custom.'
           );
         }
-        rows = recommendedSelection.questions;
+        rows = recommendedSelection.questions.filter((question) =>
+          matchesPyqBookScope(question, { bookSlug: 'gate-cse' })
+        );
+        if (rows.length === 0)
+          throw new Error(
+            'No GATE CSE Core questions match this setup. Choose another subject or filter.'
+          );
         const recommendationReasons = [
           ...recommendedSelection.preflight.reasonChips.map((reason) => reason.label),
           ...rows.flatMap(
@@ -3136,7 +3058,8 @@ export default function Pyq() {
           examKind: config.mode === 'exam' ? 'timed-set' : undefined,
           benchmarkPaperId: undefined,
           examState: undefined,
-          practiceDraft: undefined
+          practiceDraft: undefined,
+          practiceDrafts: undefined
         };
         sessionConfig =
           config.mode === 'exam'
@@ -3146,23 +3069,22 @@ export default function Pyq() {
               )
             : recommendedConfig;
       } else {
-        const selectedBook = manifest.books.find((book) => book.slug === config.bookSlug);
+        const selectedBook = manifest.books.find((book) => book.slug === 'gate-cse');
         const catalogSubjects = selectedBook?.subjects ?? manifest.subjects;
         const restrictedSubjectSlugs =
           config.subjectSlug === 'all' && config.subjectSlugs?.length
             ? new Set(config.subjectSlugs)
             : null;
-        const subjects =
-          restrictedSubjectSlugs
-            ? catalogSubjects.filter((subject) => restrictedSubjectSlugs.has(subject.slug))
-            : config.subjectSlug === 'all'
+        const subjects = restrictedSubjectSlugs
+          ? catalogSubjects.filter((subject) => restrictedSubjectSlugs.has(subject.slug))
+          : config.subjectSlug === 'all'
             ? catalogSubjects
             : catalogSubjects.filter((subject) => subject.slug === config.subjectSlug);
         const low = Math.min(config.fromYear, config.toYear);
         const high = Math.max(config.fromYear, config.toYear);
         rows = (await loadPyqQuestions(subjects, manifest.bankVersion)).filter(
           (question) =>
-            matchesPyqBookScope(question, config) &&
+            matchesPyqBookScope(question, { bookSlug: 'gate-cse' }) &&
             matchesPyqTopicScope(question, config) &&
             question.year >= low &&
             question.year <= high &&
@@ -3203,7 +3125,7 @@ export default function Pyq() {
         if (rows.length === 0) {
           throw new Error(
             includeReservedBenchmarkQuestions
-              ? 'No questions match those filters. Widen the book, subject, year, type, or history filter.'
+              ? 'No questions match those filters. Widen the subject, year, type, or history filter.'
               : 'No non-reserved questions match those filters. Widen the filters or explicitly allow sealed benchmark questions.'
           );
         }
@@ -3214,7 +3136,8 @@ export default function Pyq() {
                   ...config,
                   examKind: 'timed-set',
                   benchmarkPaperId: undefined,
-                  practiceDraft: undefined
+                  practiceDraft: undefined,
+                  practiceDrafts: undefined
                 },
                 rows.map((question) => question.id)
               )
@@ -3226,9 +3149,11 @@ export default function Pyq() {
                 examKind: undefined,
                 benchmarkPaperId: undefined,
                 examState: undefined,
-                practiceDraft: undefined
+                practiceDraft: undefined,
+                practiceDrafts: undefined
               };
       }
+      sessionConfig = { ...sessionConfig, bookSlug: 'gate-cse' };
       const session = createPyqSessionRow(userId!, manifest.bankVersion, sessionConfig, rows);
       const plannerDate = searchParams.get('plannerDate');
       const plannerBlockId = searchParams.get('plannerBlock');
@@ -3300,7 +3225,7 @@ export default function Pyq() {
         if (!paper) throw new Error('The original benchmark paper is no longer available.');
         const exposed = new Set([...attempts, ...completed].map((attempt) => attempt.question_uid));
         repeatedConfig = createPyqExamConfig(
-          { ...config, practiceDraft: undefined },
+          { ...config, practiceDraft: undefined, practiceDrafts: undefined },
           questions.map((question) => question.id),
           {
             paperMetadata: {
@@ -3319,7 +3244,8 @@ export default function Pyq() {
             ...config,
             examKind: 'timed-set',
             benchmarkPaperId: undefined,
-            practiceDraft: undefined
+            practiceDraft: undefined,
+            practiceDrafts: undefined
           },
           questions.map((question) => question.id)
         );
@@ -3330,7 +3256,8 @@ export default function Pyq() {
           examKind: undefined,
           benchmarkPaperId: undefined,
           examState: undefined,
-          practiceDraft: undefined
+          practiceDraft: undefined,
+          practiceDrafts: undefined
         };
       }
       const session = createPyqSessionRow(userId, manifest.bankVersion, repeatedConfig, questions);
@@ -3686,9 +3613,7 @@ export default function Pyq() {
         return;
       }
       const practiceDraft =
-        session.config.mode !== 'exam' && session.config.practiceDraft?.question_uid === current.id
-          ? session.config.practiceDraft
-          : null;
+        session.config.mode !== 'exam' ? getPyqPracticeDraft(session, current.id) : null;
       const firstStartedAtMs = Date.parse(practiceDraft?.first_started_at ?? '');
       const questionStartedAtMs = Number.isFinite(firstStartedAtMs)
         ? Math.min(firstStartedAtMs, committedAtMs)
@@ -3764,6 +3689,8 @@ export default function Pyq() {
           console.warn('[air] Practice recovery capture is waiting to retry.', captureError);
         }
       }
+      loadedSessionRef.current = nextSession;
+      setLoadedSession(nextSession);
       setSubmitted(attempt);
       setCompleted((rows) =>
         rows.some((row) => row.id === attempt.id)
@@ -3810,6 +3737,9 @@ export default function Pyq() {
     if (session.status !== 'active') {
       throw new Error('This Practice session is no longer active. Resume it before finishing.');
     }
+    if (!session.question_uids.every((uid) => session.completed_question_uids.includes(uid))) {
+      throw new Error('Answer or explicitly skip every question before finishing the set.');
+    }
     const completedSession = completePyqSession(session);
     const existingCanonical = await db.sessions.get(session.id);
     await writeLocalBatch([
@@ -3832,37 +3762,120 @@ export default function Pyq() {
     setLoadedSession(completedSession);
   }
 
-  async function goNext() {
-    if (loading || submittingRef.current || pausingSessionRef.current) return;
+  async function navigatePractice(nextIndex: number) {
+    if (
+      nextIndex < 0 ||
+      nextIndex >= questions.length ||
+      loading ||
+      submittingRef.current ||
+      pausingSessionRef.current
+    )
+      return;
+    if (nextIndex === index) {
+      document.getElementById(`practice-question-${index}`)?.scrollIntoView?.({ block: 'start' });
+      return;
+    }
     submittingRef.current = true;
     setSubmitting(true);
     setSubmitError(null);
     try {
-      const nextIndex = index + 1;
-      if (nextIndex >= questions.length) {
-        await markSessionComplete();
-        window.scrollTo({ top: 0, behavior: 'auto' });
-        setFinished(true);
-        return;
-      }
       const session = pyqSessionId ? await db.pyq_sessions.get(pyqSessionId) : null;
-      if (!session) {
-        setSubmitError('The active set could not be found. Return to PYQ setup and resume it.');
-        return;
-      }
-      const startedSession = startPyqSessionQuestion(session, questions[nextIndex].id);
-      if (startedSession !== session) await writeLocal('pyq_sessions', startedSession);
-      const nextStartedAt = Date.parse(startedSession.current_question_started_at ?? '');
-      questionStartRef.current = {
-        questionUid: questions[nextIndex].id,
-        startedAtMs: Number.isFinite(nextStartedAt) ? nextStartedAt : Date.now()
-      };
+      if (!session || !current) throw new Error('The active practice set could not be found.');
+      const nowMs = Date.now();
+      const outgoing = !submitted
+        ? {
+            questionUid: current.id,
+            selectedAnswer: selectedAnswer(current),
+            markDecision: decision,
+            confidence
+          }
+        : null;
+      const alignedSession = outgoing
+        ? {
+            ...session,
+            current_question_uid: current.id,
+            current_question_started_at: new Date(Math.min(startedAt ?? nowMs, nowMs)).toISOString()
+          }
+        : session;
+      const next = navigatePyqPracticeQuestion(
+        alignedSession,
+        questions[nextIndex].id,
+        outgoing,
+        nowMs
+      );
+      await writeLocal('pyq_sessions', next);
+      loadedSessionRef.current = next;
+      setLoadedSession(next);
+      questionStartRef.current = { questionUid: questions[nextIndex].id, startedAtMs: nowMs };
       setIndex(nextIndex);
     } catch (error) {
       setSubmitError(
         error instanceof Error
-          ? `Could not continue this practice set: ${error.message}`
-          : 'Could not continue this practice set. Try again.'
+          ? `Could not change questions: ${error.message}`
+          : 'Could not change questions. Your draft is still here.'
+      );
+    } finally {
+      submittingRef.current = false;
+      setSubmitting(false);
+    }
+  }
+
+  async function changePracticeView(practiceView: 'single' | 'multiple') {
+    if (!pyqSessionId || loading || submittingRef.current || pausingSessionRef.current) return;
+    submittingRef.current = true;
+    setSubmitting(true);
+    try {
+      const session = await db.pyq_sessions.get(pyqSessionId);
+      if (!session) throw new Error('The active practice set could not be found.');
+      const next = {
+        ...session,
+        config: { ...session.config, practiceView },
+        updated_at: new Date().toISOString()
+      };
+      await writeLocal('pyq_sessions', next);
+      loadedSessionRef.current = next;
+      setLoadedSession(next);
+      setConfig((currentConfig) => ({ ...currentConfig, practiceView }));
+      setSubmitError(null);
+    } catch (error) {
+      setSubmitError(
+        error instanceof Error ? error.message : 'Could not save the practice view. Try again.'
+      );
+    } finally {
+      submittingRef.current = false;
+      setSubmitting(false);
+    }
+  }
+
+  async function goNext() {
+    if (loading || submittingRef.current || pausingSessionRef.current) return;
+    const allCompleted = questions.every((question) =>
+      completed.some((attempt) => attempt.question_uid === question.id)
+    );
+    if (
+      index + 1 < questions.length &&
+      !(loadedSession?.config.practiceView === 'multiple' && allCompleted)
+    ) {
+      await navigatePractice(index + 1);
+      return;
+    }
+    const unansweredIndex = questions.findIndex(
+      (question) => !completed.some((attempt) => attempt.question_uid === question.id)
+    );
+    if (unansweredIndex >= 0) {
+      await navigatePractice(unansweredIndex);
+      return;
+    }
+    submittingRef.current = true;
+    setSubmitting(true);
+    setSubmitError(null);
+    try {
+      await markSessionComplete();
+      window.scrollTo({ top: 0, behavior: 'auto' });
+      setFinished(true);
+    } catch (error) {
+      setSubmitError(
+        error instanceof Error ? `Could not continue this practice set: ${error.message}` : 'Could not finish this practice set. Try again.'
       );
     } finally {
       submittingRef.current = false;
@@ -3871,8 +3884,7 @@ export default function Pyq() {
   }
 
   function goPrevious() {
-    if (index <= 0 || loading || submittingRef.current || pausingSessionRef.current) return;
-    setIndex(index - 1);
+    void navigatePractice(index - 1);
   }
 
   function exitSet() {
@@ -4262,57 +4274,8 @@ export default function Pyq() {
     );
   }
 
-  return (
-    <div className="mx-auto flex w-full max-w-5xl flex-col gap-4">
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border pb-3">
-        <div className="flex flex-col items-start">
-          <Button
-            variant="ghost"
-            size="sm"
-            disabled={loading || submitting || !loadedSession}
-            onClick={() => {
-              if (loadedSession) void saveSession(loadedSession);
-            }}
-            aria-label="Pause practice"
-            aria-describedby="pyq-practice-pause-hint"
-            className="-ml-2 whitespace-nowrap"
-          >
-            <Pause size={14} />
-            {loading ? 'Pausing…' : 'Pause practice'}
-          </Button>
-          <span
-            id="pyq-practice-pause-hint"
-            className="hidden pl-1 text-[9.5px] text-text-faint sm:block"
-          >
-            Draft and active time are saved
-          </span>
-        </div>
-        <div className="flex items-center gap-3">
-          <span className="u-num text-[12px] text-text-muted">
-            Q {index + 1}/{questions.length}
-          </span>
-          <span
-            role="timer"
-            aria-label={`${secondsToClock(shownSeconds)} active time on this question`}
-            aria-atomic="true"
-            className="inline-flex items-center gap-1 font-mono text-[12px] text-text-faint"
-          >
-            <Clock3 size={13} />
-            {secondsToClock(shownSeconds)}
-          </span>
-          <CalculatorTrigger onClick={() => setCalcOpen((v) => !v)} active={calcOpen} />
-        </div>
-      </div>
-
-      {submitError ? (
-        <p
-          role="alert"
-          className="rounded border border-danger/25 bg-danger-faint px-3 py-2 text-[12px] leading-relaxed text-danger"
-        >
-          {submitError}
-        </p>
-      ) : null}
-
+  const activeQuestionWorkspace = (
+    <div className="flex min-w-0 flex-col gap-4">
       <div ref={questionCaptureRef}>
         <Card className="overflow-hidden">
           <CardHeader
@@ -4416,7 +4379,18 @@ export default function Pyq() {
                     </Button>
                   ) : null}
                   <Button variant="primary" onClick={goNext} disabled={loading || submitting}>
-                    {index + 1 === questions.length ? 'Finish set' : 'Next question'}
+                    {loadedSession?.config.practiceView === 'multiple' &&
+                    questions.every((question) =>
+                      completed.some((attempt) => attempt.question_uid === question.id)
+                    )
+                      ? 'Finish set'
+                      : index + 1 === questions.length
+                        ? questions.every((question) =>
+                            completed.some((attempt) => attempt.question_uid === question.id)
+                          )
+                          ? 'Finish set'
+                          : 'Next unanswered question'
+                        : 'Next question'}
                     <ArrowRight size={15} />
                   </Button>
                   {journalSaved ? (
@@ -4438,6 +4412,82 @@ export default function Pyq() {
           </div>
         </CardBody>
       </Card>
+    </div>
+  );
+
+  return (
+    <div className="mx-auto flex w-full max-w-5xl flex-col gap-4">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border pb-3">
+        <div className="flex flex-col items-start">
+          <Button
+            variant="ghost"
+            size="sm"
+            disabled={loading || submitting || !loadedSession}
+            onClick={() => {
+              if (loadedSession) void saveSession(loadedSession);
+            }}
+            aria-label="Pause practice"
+            aria-describedby="pyq-practice-pause-hint"
+            className="-ml-2 whitespace-nowrap"
+          >
+            <Pause size={14} />
+            {loading ? 'Pausing…' : 'Pause practice'}
+          </Button>
+          <span
+            id="pyq-practice-pause-hint"
+            className="hidden pl-1 text-[9.5px] text-text-faint sm:block"
+          >
+            Draft and active time are saved
+          </span>
+        </div>
+        <div className="flex items-center gap-3">
+          <span className="u-num text-[12px] text-text-muted">
+            Q {index + 1}/{questions.length}
+          </span>
+          <span
+            role="timer"
+            aria-label={`${secondsToClock(shownSeconds)} active time on this question`}
+            aria-atomic="true"
+            className="inline-flex items-center gap-1 font-mono text-[12px] text-text-faint"
+          >
+            <Clock3 size={13} />
+            {secondsToClock(shownSeconds)}
+          </span>
+          <CalculatorTrigger onClick={() => setCalcOpen((v) => !v)} active={calcOpen} />
+        </div>
+      </div>
+
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <PyqPracticeViewControl
+          value={loadedSession?.config.practiceView}
+          onChange={(view) => void changePracticeView(view)}
+          disabled={loading || submitting}
+        />
+        <span className="text-[12px] text-text-muted">Feedback after each committed answer</span>
+      </div>
+
+      {submitError ? (
+        <p
+          role="alert"
+          className="rounded border border-danger/25 bg-danger-faint px-3 py-2 text-[12px] leading-relaxed text-danger"
+        >
+          {submitError}
+        </p>
+      ) : null}
+
+      {loadedSession?.config.practiceView === 'multiple' ? (
+        <PyqPracticeSheet
+          questions={questions}
+          index={index}
+          session={loadedSession}
+          attempts={completed}
+          disabled={loading || submitting}
+          onNavigate={(nextIndex) => void navigatePractice(nextIndex)}
+          activeQuestion={activeQuestionWorkspace}
+        />
+      ) : (
+        activeQuestionWorkspace
+      )}
 
       <ScientificCalculator open={calcOpen} onClose={() => setCalcOpen(false)} />
     </div>

@@ -129,6 +129,7 @@ export function normalizePyqPreferenceConfig(value: unknown): PyqSessionConfig |
     count: enumValue(value.count, COUNT_VALUES, '10'),
     history: enumValue(value.history, HISTORY_VALUES, 'all'),
     mode: value.mode === 'exam' ? 'exam' : 'practice',
+    practiceView: value.practiceView === 'multiple' ? 'multiple' : 'single',
     examKind:
       value.examKind === 'full-paper' || value.examKind === 'timed-set'
         ? value.examKind

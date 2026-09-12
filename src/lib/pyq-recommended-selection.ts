@@ -67,7 +67,7 @@ export const PYQ_RECOMMENDATION_PRESETS: Record<
   transfer: {
     id: 'transfer',
     label: 'Transfer',
-    description: 'Test the same ideas in a different source or an assigned transfer set.',
+    description: 'Test the same ideas on fresh questions or an assigned transfer set.',
     defaultCount: 10,
     defaultCohorts: ['transfer'],
     stratifyBy: ['subject', 'topic', 'year', 'marks']

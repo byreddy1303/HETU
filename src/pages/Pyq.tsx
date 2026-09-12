@@ -222,7 +222,18 @@ function recommendationConfig(
     practiceDraft: undefined,
     practiceDrafts: undefined
   };
-  if (preset === 'custom') return common;
+  if (preset === 'custom') {
+    const coreBook = manifest.books.find((book) => book.slug === 'gate-cse');
+    return {
+      ...common,
+      bookSlug: 'gate-cse',
+      fromYear: coreBook?.firstYear ?? 1990,
+      toYear: coreBook?.lastYear ?? 2026,
+      count: current.examKind === 'full-paper' ? '10' : current.count,
+      examKind: current.mode === 'exam' ? 'timed-set' : undefined,
+      benchmarkPaperId: undefined
+    };
+  }
   if (preset === 'full-paper') {
     const paper =
       manifest.benchmarkPapers.find((candidate) => candidate.id === current.benchmarkPaperId) ??

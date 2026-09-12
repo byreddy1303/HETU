@@ -106,7 +106,7 @@ export default function PyqRecommendedSetup({
         >
           <span className="font-display text-[15px] font-semibold text-text">Custom</span>
           <span className="mt-2 block text-[11.5px] leading-relaxed text-text-muted">
-            Use the book, subject, history, year, type, count, and order controls below directly.
+            Use the subject, history, year, type, count, and order controls below directly.
           </span>
         </button>
       </div>

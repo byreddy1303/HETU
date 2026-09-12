@@ -5,8 +5,11 @@ import { MemoryRouter } from 'react-router-dom';
 import { db } from '@/lib/db';
 import { normalizePyqManifest, type PyqQuestion } from '@/lib/pyq';
 import { createPyqSessionRow, pausePyqSession } from '@/lib/pyq-session';
+import type { PyqPresetPreference } from '@/stores/pyq-preferences';
 import { usePyqPreferencesStore } from '@/stores/pyq-preferences';
 import Pyq from '@/pages/Pyq';
+
+const authFixture = vi.hoisted(() => ({ username: 'kalyan' }));
 
 const USER = '00000000-0000-4000-8000-000000000001';
 const question: PyqQuestion = {
@@ -88,12 +91,18 @@ vi.mock('@/hooks/useAuth', () => ({
     userId: USER,
     sandbox: true,
     user: null,
-    profile: { id: USER, username: 'rishi', name: 'Rishi', timezone: 'Asia/Kolkata' }
+    profile: {
+      id: USER,
+      username: authFixture.username,
+      name: authFixture.username,
+      timezone: 'Asia/Kolkata'
+    }
   })
 }));
 
 describe('Custom PYQ setup and Rishi catalog visibility', () => {
   beforeEach(async () => {
+    authFixture.username = 'kalyan';
     usePyqPreferencesStore.getState().reset();
     vi.stubGlobal('scrollTo', vi.fn());
     vi.stubGlobal(
@@ -181,7 +190,8 @@ describe('Custom PYQ setup and Rishi catalog visibility', () => {
     expect(usePyqPreferencesStore.getState().lastConfig?.benchmarkPaperId).toBeUndefined();
   });
 
-  it('offers Rishi only core questions for new sets while preserving his saved non-core session', async () => {
+  it('offers Rishi a direct core setup while preserving his saved non-core session', async () => {
+    authFixture.username = 'rishi';
     const user = userEvent.setup();
     const legacySession = {
       ...pausePyqSession(
@@ -211,6 +221,9 @@ describe('Custom PYQ setup and Rishi catalog visibility', () => {
       </MemoryRouter>
     );
     await screen.findByRole('button', { name: 'Resume practice' });
+    expect(screen.queryByText('Recommended set')).not.toBeInTheDocument();
+    expect(screen.getByRole('combobox', { name: 'From year' })).toHaveValue('1990');
+    expect(screen.getByRole('combobox', { name: 'To year' })).toHaveValue('2026');
     expect(screen.queryByRole('combobox', { name: 'Question book' })).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /^All books/ })).not.toBeInTheDocument();
     await user.click(screen.getByRole('button', { name: 'Start practice set' }));
@@ -221,5 +234,87 @@ describe('Custom PYQ setup and Rishi catalog visibility', () => {
     expect(newSession?.config.bookSlug).toBe('gate-cse');
     expect(newSession?.question_uids).not.toContain(legacyQuestion.id);
     expect(sessions).toHaveLength(2);
+  });
+
+  it.each(['learn', 'repair', 'full-paper'] as PyqPresetPreference[])(
+    'ignores Rishi’s remembered %s preset and starts a normal core session',
+    async (preset) => {
+      authFixture.username = ' RISHI ';
+      const user = userEvent.setup();
+      usePyqPreferencesStore.getState().remember(
+        {
+          bookSlug: 'gate-cse',
+          subjectSlug: question.subjectSlug,
+          fromYear: 2026,
+          toYear: 2026,
+          type: 'all',
+          order: 'random',
+          count: preset === 'full-paper' ? 'all' : '10',
+          history: 'incorrect',
+          mode: 'practice',
+          practiceView: 'multiple',
+          examKind: preset === 'full-paper' ? 'full-paper' : undefined,
+          recommendationPreset: preset,
+          recommendationReasons: ['Old recommended cohort'],
+          savedPrescriptionId: 'old-repair',
+          savedPrescriptionName: 'Old repair prescription'
+        },
+        preset,
+        'old-seed'
+      );
+      render(
+        <MemoryRouter>
+          <Pyq />
+        </MemoryRouter>
+      );
+      await screen.findByRole('button', { name: 'Start practice set' });
+      expect(screen.queryByText('Recommended set')).not.toBeInTheDocument();
+      for (const name of [
+        'Learn',
+        'Diagnose',
+        'Repair',
+        'Speed',
+        'Transfer',
+        'Mixed GATE',
+        'Full Paper',
+        'Custom'
+      ]) {
+        expect(
+          screen.queryByRole('button', { name: new RegExp(`^${name}`) })
+        ).not.toBeInTheDocument();
+      }
+      expect(screen.getByRole('combobox', { name: 'From year' })).toHaveValue('1990');
+      expect(screen.getByRole('combobox', { name: 'To year' })).toHaveValue('2026');
+      expect(screen.getByRole('combobox', { name: 'Questions' })).toHaveValue('10');
+      expect(screen.getByRole('combobox', { name: 'Question history' })).toHaveValue('all');
+      await user.click(screen.getByRole('button', { name: 'Start practice set' }));
+      expect(await screen.findByText('A core question from 1990.')).toBeInTheDocument();
+      expect(screen.getByText('A core question from 2026.')).toBeInTheDocument();
+      const [session] = await db.pyq_sessions.toArray();
+      expect(session.config.recommendationPreset).toBe('custom');
+      expect(session.config.recommendationReasons).toBeUndefined();
+      expect(session.config.savedPrescriptionId).toBeUndefined();
+    }
+  );
+
+  it('ignores recommendation links for Rishi while leaving his manual filters usable', async () => {
+    authFixture.username = 'rishi';
+    const user = userEvent.setup();
+    render(
+      <MemoryRouter
+        initialEntries={['/pyq?preset=repair&fromYear=2026&toYear=2026&history=incorrect']}
+      >
+        <Pyq />
+      </MemoryRouter>
+    );
+    await screen.findByRole('button', { name: 'Start practice set' });
+    expect(screen.queryByText('Recommended set')).not.toBeInTheDocument();
+    expect(screen.getByRole('combobox', { name: 'From year' })).toHaveValue('1990');
+    await user.selectOptions(screen.getByRole('combobox', { name: 'From year' }), '2026');
+    await user.click(screen.getByRole('button', { name: 'Start practice set' }));
+    await screen.findByText('A core question from 2026.');
+    const [session] = await db.pyq_sessions.toArray();
+    expect(session.config.recommendationPreset).toBe('custom');
+    expect(session.question_uids).toEqual([recentQuestion.id]);
   });
 });

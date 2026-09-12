@@ -551,6 +551,7 @@ function PracticeSetup({
   config,
   setConfig,
   recommendationPreset,
+  showRecommendedSetup,
   recommendedSelection,
   recommendationLoading,
   recommendationError,
@@ -588,6 +589,7 @@ function PracticeSetup({
   config: AttemptConfig;
   setConfig: (next: AttemptConfig) => void;
   recommendationPreset: PyqPresetPreference;
+  showRecommendedSetup: boolean;
   recommendedSelection: RecommendedPyqSelection | null;
   recommendationLoading: boolean;
   recommendationError: string | null;
@@ -765,22 +767,24 @@ function PracticeSetup({
         </div>
       )}
 
-      <Card className="overflow-hidden border-accent/25">
-        <PyqRecommendedSetup
-          preset={recommendationPreset}
-          selection={recommendedSelection}
-          loading={recommendationLoading}
-          error={recommendationError}
-          seed={selectionSeed}
-          savedPrescriptions={savedPrescriptions}
-          onPreset={onRecommendationPreset}
-          onSeed={onSelectionSeed}
-          onRegenerate={onRegenerateSeed}
-          onSavePrescription={onSavePrescription}
-          onLoadPrescription={onLoadPrescription}
-          onDeletePrescription={onDeletePrescription}
-        />
-      </Card>
+      {showRecommendedSetup && (
+        <Card className="overflow-hidden border-accent/25">
+          <PyqRecommendedSetup
+            preset={recommendationPreset}
+            selection={recommendedSelection}
+            loading={recommendationLoading}
+            error={recommendationError}
+            seed={selectionSeed}
+            savedPrescriptions={savedPrescriptions}
+            onPreset={onRecommendationPreset}
+            onSeed={onSelectionSeed}
+            onRegenerate={onRegenerateSeed}
+            onSavePrescription={onSavePrescription}
+            onLoadPrescription={onLoadPrescription}
+            onDeletePrescription={onDeletePrescription}
+          />
+        </Card>
+      )}
 
       <section aria-labelledby="pyq-mode-heading">
         <Card className="overflow-hidden border-border-hover">
@@ -846,8 +850,8 @@ function PracticeSetup({
                   Practice mode
                 </span>
                 <span className="mt-1 block text-[12.5px] leading-relaxed text-text-muted">
-                  Use a focused view or a question sheet, with the answer key and result revealed after
-                  each committed response.
+                  Use a focused view or a question sheet, with the answer key and result revealed
+                  after each committed response.
                 </span>
                 <span className="mt-4 grid gap-2 text-[11.5px] text-text-muted sm:grid-cols-2">
                   {PRACTICE_MODE_FEATURES.map((item) => (
@@ -1703,6 +1707,9 @@ function formatAttemptAnswer(value: PyqSelectedAnswer): string {
 export default function Pyq() {
   const { userId, profile, sandbox } = useAuth();
   const [searchParams] = useSearchParams();
+  const coreSetupOnly =
+    profile?.username?.trim().toLowerCase() === 'rishi' ||
+    (import.meta.env.DEV && sandbox && searchParams.get('preview') === 'rishi');
   const navigate = useNavigate();
   const timeZone = profile?.timezone ?? 'Asia/Kolkata';
   const [manifest, setManifest] = useState<PyqManifest | null>(null);
@@ -1730,9 +1737,10 @@ export default function Pyq() {
   const rememberPyqPreferences = usePyqPreferencesStore((state) => state.remember);
   const savePyqPrescription = usePyqPreferencesStore((state) => state.savePrescription);
   const deletePyqPrescription = usePyqPreferencesStore((state) => state.deletePrescription);
-  const [recommendationPreset, setRecommendationPreset] = useState<PyqPresetPreference>(
+  const [selectedRecommendationPreset, setRecommendationPreset] = useState<PyqPresetPreference>(
     () => usePyqPreferencesStore.getState().lastPreset
   );
+  const recommendationPreset = coreSetupOnly ? 'custom' : selectedRecommendationPreset;
   const [selectionSeed, setSelectionSeed] = useState(
     () => usePyqPreferencesStore.getState().selectionSeed || `pyq-${todayISOInTimeZone(timeZone)}`
   );
@@ -1931,7 +1939,7 @@ export default function Pyq() {
 
   useEffect(() => {
     if (!manifest || !userId) return;
-    const preferenceSignature = `${userId}\u0000${searchParams.toString()}`;
+    const preferenceSignature = `${userId}\u0000${coreSetupOnly}\u0000${searchParams.toString()}`;
     if (appliedPreferenceSignatureRef.current === preferenceSignature) return;
     const explicitKeys = [
       'plannerDate',
@@ -2024,7 +2032,7 @@ export default function Pyq() {
       const requestedMode = searchParams.get('mode');
       const requestedExamKind = searchParams.get('examKind');
       const requestedDuration = Number(searchParams.get('duration'));
-      return {
+      const hydratedConfig: AttemptConfig = {
         ...remembered,
         bookSlug: 'gate-cse',
         subjectSlug,
@@ -2065,15 +2073,30 @@ export default function Pyq() {
             ? Math.max(5, Math.min(480, Math.round(requestedDuration)))
             : undefined
       };
+      if (!coreSetupOnly) return hydratedConfig;
+      return {
+        ...recommendationConfig('custom', hydratedConfig, manifest),
+        count:
+          (remembered.examKind === 'full-paper' || requestedExamKind === 'full-paper') && !count
+            ? '10'
+            : hydratedConfig.count,
+        history: 'all',
+        order: 'unseen',
+        recommendationReasons: undefined,
+        savedPrescriptionId: undefined,
+        savedPrescriptionName: undefined
+      };
     });
     const requestedPreset = recommendedPresetParam(searchParams.get('preset'));
     setRecommendationPreset(
-      requestedPreset ??
-        (plannerLinked
-          ? searchParams.get('history') === 'unseen'
-            ? 'learn'
-            : 'diagnose'
-          : storedLastPreset)
+      coreSetupOnly
+        ? 'custom'
+        : (requestedPreset ??
+            (plannerLinked
+              ? searchParams.get('history') === 'unseen'
+                ? 'learn'
+                : 'diagnose'
+              : storedLastPreset))
     );
     setSelectionSeed(
       searchParams.get('seed') ||
@@ -2084,6 +2107,7 @@ export default function Pyq() {
     appliedPreferenceSignatureRef.current = preferenceSignature;
     setPreferencesReady(true);
   }, [
+    coreSetupOnly,
     manifest,
     searchParams,
     storedLastConfig,
@@ -3886,7 +3910,9 @@ export default function Pyq() {
       setFinished(true);
     } catch (error) {
       setSubmitError(
-        error instanceof Error ? `Could not continue this practice set: ${error.message}` : 'Could not finish this practice set. Try again.'
+        error instanceof Error
+          ? `Could not continue this practice set: ${error.message}`
+          : 'Could not finish this practice set. Try again.'
       );
     } finally {
       submittingRef.current = false;
@@ -3933,6 +3959,7 @@ export default function Pyq() {
         config={config}
         setConfig={setConfig}
         recommendationPreset={recommendationPreset}
+        showRecommendedSetup={!coreSetupOnly}
         recommendedSelection={recommendedSelection}
         recommendationLoading={recommendationLoading}
         recommendationError={recommendationError}

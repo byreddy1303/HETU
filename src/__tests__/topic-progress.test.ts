@@ -2,10 +2,13 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   normalizeTopicCompletions,
   selectCompletionsForUser,
+  syncTopicProgressFromDb,
   topicProgressId,
   useTopicProgressStore
 } from '@/stores/topic-progress';
 import { db } from '@/lib/db';
+
+const USER = '11111111-1111-4111-8111-111111111111';
 
 describe('topic progress store', () => {
   beforeEach(async () => {
@@ -78,5 +81,57 @@ describe('topic progress store', () => {
       'COA::Cache': '2026-08-08T10:00:00.000Z'
     });
     vi.useRealTimers();
+  });
+
+  it('migrates a legacy localStorage blob into topic_progress rows in one batched write', async () => {
+    const legacyByUser: Record<string, string> = {
+      [topicProgressId('Algorithms', 'Greedy — Huffman / MST')]: '2026-08-01T10:00:00.000Z',
+      [topicProgressId('Databases', 'SQL — Joins & Subqueries')]: '2026-08-02T10:00:00.000Z'
+    };
+    localStorage.setItem(
+      'air.topic-progress',
+      JSON.stringify({ state: { byUser: { [USER]: legacyByUser } }, version: 1 })
+    );
+
+    await syncTopicProgressFromDb(USER);
+
+    const rows = await db.topic_progress.where('user_id').equals(USER).toArray();
+    const byTopic = new Map(rows.map((row) => [row.topic, row]));
+    expect(rows.length).toBe(2);
+    expect(byTopic.get('Greedy — Huffman / MST')?.completed_at).toBe(
+      '2026-08-01T10:00:00.000Z'
+    );
+    expect(byTopic.get('Greedy — Huffman / MST')?.subject).toBe('Algorithms');
+    expect(byTopic.get('SQL — Joins & Subqueries')?.completed_at).toBe('2026-08-02T10:00:00.000Z');
+  });
+
+  it('does not re-migrate already-owned legacy rows or regress newer timestamps', async () => {
+    const newer = '2026-09-01T10:00:00.000Z';
+    await db.topic_progress.put({
+      id: `row-er-${USER}`,
+      user_id: USER,
+      subject: 'Databases',
+      subject_id: 'databases',
+      topic: 'ER Model',
+      completed_at: newer,
+      updated_at: newer,
+      sync_status: 'synced'
+    });
+    localStorage.setItem(
+      'air.topic-progress',
+      JSON.stringify({
+        state: {
+          byUser: { [USER]: { [topicProgressId('Databases', 'ER Model')]: '2026-08-01T10:00:00.000Z' } }
+        },
+        version: 1
+      })
+    );
+
+    await syncTopicProgressFromDb(USER);
+
+    const rows = await db.topic_progress.where('user_id').equals(USER).toArray();
+    expect(rows.length).toBe(1);
+    expect(rows[0].completed_at).toBe(newer);
+    expect(rows[0].id).toBe(`row-er-${USER}`);
   });
 });

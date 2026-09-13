@@ -1,11 +1,12 @@
 import { create } from 'zustand';
-import { db } from '@/lib/db';
+import { db, type SyncedTableName } from '@/lib/db';
 import {
   awaitInitialPull,
   deleteLocal,
   flushPendingSync,
   isSyncEnabled,
-  writeLocal
+  writeLocal,
+  writeLocalBatch
 } from '@/lib/sync';
 import { nowISO, uuidFromString } from '@/lib/utils';
 import { canonicalSubjectId, canonicalSubjectLabel } from '@/lib/subjects';
@@ -216,12 +217,42 @@ export async function syncTopicProgressFromDb(userId: string): Promise<void> {
   const beforeRows = await db.topic_progress.where('user_id').equals(userId).toArray();
   const before = completionsFromTopicRows(beforeRows);
 
-  for (const [key, completedAt] of Object.entries(legacy)) {
-    const parsed = splitTopicProgressId(key);
-    if (!parsed) continue;
-    if (before[key] && before[key] >= completedAt) continue;
-    await persistTopicCompletion(userId, parsed.subject, parsed.topic, completedAt);
+  // Latest existing row per canonical leaf, so re-migrating a key keeps its
+  // stable id (and any downstream references) while bumping completed_at.
+  const existingByKey = new Map<string, TopicProgressRow>();
+  for (const row of beforeRows) {
+    const key = topicProgressId(row.subject, row.topic);
+    const current = existingByKey.get(key);
+    if (!current || row.completed_at > current.completed_at) existingByKey.set(key, row);
   }
+
+  // Persist everything missing/newer in ONE batched write. The old per-key
+  // `put` loop turned a stale offline-era cache into hundreds of sequential
+  // supabase upserts, each notifying every live query and freezing the page.
+  const pending: Array<{ name: SyncedTableName; row: TopicProgressRow }> = [];
+  for (const completionsKey of Object.keys(legacy)) {
+    const parsed = splitTopicProgressId(completionsKey);
+    if (!parsed) continue;
+    const completedAt = legacy[completionsKey] as string;
+    const canonicalTopicKey = topicProgressId(parsed.subject, parsed.topic);
+    if (before[canonicalTopicKey] && before[canonicalTopicKey] >= completedAt) continue;
+    const canonicalSubject = canonicalSubjectLabel(parsed.subject);
+    const topic = parsed.topic.trim();
+    const existing = existingByKey.get(canonicalTopicKey);
+    pending.push({
+      name: 'topic_progress',
+      row: {
+        id: existing?.id ?? topicProgressRowId(userId, canonicalSubject, topic),
+        user_id: userId,
+        subject: canonicalSubject,
+        subject_id: canonicalSubjectId(canonicalSubject),
+        topic,
+        completed_at: completedAt,
+        updated_at: completedAt
+      }
+    });
+  }
+  if (pending.length > 0) await writeLocalBatch(pending);
 
   const durable = !isSyncEnabled() || (await flushPendingSync(userId));
   const rows = await db.topic_progress.where('user_id').equals(userId).toArray();

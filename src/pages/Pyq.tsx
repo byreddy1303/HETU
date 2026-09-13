@@ -564,6 +564,7 @@ function PracticeSetup({
   setConfig,
   recommendationPreset,
   showRecommendedSetup,
+  isCoreOnly,
   recommendedSelection,
   recommendationLoading,
   recommendationError,
@@ -602,6 +603,7 @@ function PracticeSetup({
   setConfig: (next: AttemptConfig) => void;
   recommendationPreset: PyqPresetPreference;
   showRecommendedSetup: boolean;
+  isCoreOnly: boolean;
   recommendedSelection: RecommendedPyqSelection | null;
   recommendationLoading: boolean;
   recommendationError: string | null;
@@ -810,10 +812,12 @@ function PracticeSetup({
                 >
                   Choose how you want to work
                 </h2>
-                <p className="mt-1 max-w-2xl text-[12.5px] leading-relaxed text-text-muted">
-                  Learn with feedback in Practice mode, or simulate test conditions in Exam mode.
-                  Both can be paused and resumed.
-                </p>
+                {!isCoreOnly && (
+                  <p className="mt-1 max-w-2xl text-[12.5px] leading-relaxed text-text-muted">
+                    Learn with feedback in Practice mode, or simulate test conditions in Exam mode.
+                    Both can be paused and resumed.
+                  </p>
+                )}
               </div>
               <Badge tone={config.mode === 'exam' ? 'guess' : 'accent'} className="self-start">
                 {config.mode === 'exam' ? 'Exam selected' : 'Practice selected'}
@@ -865,14 +869,16 @@ function PracticeSetup({
                   Use a focused view or a question sheet, with the answer key and result revealed
                   after each committed response.
                 </span>
-                <span className="mt-4 grid gap-2 text-[11.5px] text-text-muted sm:grid-cols-2">
-                  {PRACTICE_MODE_FEATURES.map((item) => (
-                    <span key={item} className="flex items-center gap-2">
-                      <CheckCircle2 size={13} className="shrink-0 text-accent" />
-                      {item}
-                    </span>
-                  ))}
-                </span>
+                {!isCoreOnly && (
+                  <span className="mt-4 grid gap-2 text-[11.5px] text-text-muted sm:grid-cols-2">
+                    {PRACTICE_MODE_FEATURES.map((item) => (
+                      <span key={item} className="flex items-center gap-2">
+                        <CheckCircle2 size={13} className="shrink-0 text-accent" />
+                        {item}
+                      </span>
+                    ))}
+                  </span>
+                )}
               </button>
 
               <button
@@ -919,14 +925,16 @@ function PracticeSetup({
                   Use one countdown, move freely between questions, and see answer keys only after
                   final submission.
                 </span>
-                <span className="mt-4 grid gap-2 text-[11.5px] text-text-muted sm:grid-cols-2">
-                  {EXAM_MODE_FEATURES.map((item) => (
-                    <span key={item} className="flex items-center gap-2">
-                      <CheckCircle2 size={13} className="shrink-0 text-ink-violet" />
-                      {item}
-                    </span>
-                  ))}
-                </span>
+                {!isCoreOnly && (
+                  <span className="mt-4 grid gap-2 text-[11.5px] text-text-muted sm:grid-cols-2">
+                    {EXAM_MODE_FEATURES.map((item) => (
+                      <span key={item} className="flex items-center gap-2">
+                        <CheckCircle2 size={13} className="shrink-0 text-ink-violet" />
+                        {item}
+                      </span>
+                    ))}
+                  </span>
+                )}
               </button>
             </div>
           </CardBody>
@@ -1246,42 +1254,46 @@ function PracticeSetup({
               </div>
 
               <div className="workbench-controls flex flex-col bg-bg-overlay/25 p-4">
-                <div
-                  className={cn(
-                    'rounded border px-3 py-2.5',
-                    config.mode === 'exam'
-                      ? 'border-ink-violet/20 bg-guess-faint'
-                      : 'border-accent/20 bg-accent-faint'
-                  )}
-                >
-                  <p className="u-label">
-                    {config.mode === 'exam' ? 'Exam rules' : 'Practice rules'}
-                  </p>
-                  <p className="mt-1 text-[11.5px] leading-relaxed text-text-muted">
-                    {config.mode === 'exam'
-                      ? '3 minutes per question feed one shared countdown. Keys stay hidden until submission.'
-                      : 'There is no overall timer. Commit each response to reveal its key before moving on.'}
-                  </p>
-                </div>
-                {sealedBenchmarkCount > 0 && (
-                  <label className="mt-3 flex cursor-pointer items-start gap-2 rounded border border-success/20 bg-success-faint/50 p-2.5">
-                    <input
-                      type="checkbox"
-                      checked={includeReservedBenchmarkQuestions}
-                      onChange={(event) =>
-                        onIncludeReservedBenchmarkQuestions(event.target.checked)
-                      }
-                      className="mt-0.5 h-4 w-4 rounded border-border text-accent focus:ring-accent"
-                    />
-                    <span className="text-[11px] leading-relaxed text-text-muted">
-                      <span className="block font-semibold text-text">
-                        Allow sealed benchmark questions in this regular set
-                      </span>
-                      Off by default. {sealedBenchmarkCount} unseen full-paper
-                      {sealedBenchmarkCount === 1 ? ' reserve stays' : ' reserves stay'} intact for
-                      a future authentic attempt.
-                    </span>
-                  </label>
+                {!isCoreOnly && (
+                  <>
+                    <div
+                      className={cn(
+                        'rounded border px-3 py-2.5',
+                        config.mode === 'exam'
+                          ? 'border-ink-violet/20 bg-guess-faint'
+                          : 'border-accent/20 bg-accent-faint'
+                      )}
+                    >
+                      <p className="u-label">
+                        {config.mode === 'exam' ? 'Exam rules' : 'Practice rules'}
+                      </p>
+                      <p className="mt-1 text-[11.5px] leading-relaxed text-text-muted">
+                        {config.mode === 'exam'
+                          ? '3 minutes per question feed one shared countdown. Keys stay hidden until submission.'
+                          : 'There is no overall timer. Commit each response to reveal its key before moving on.'}
+                      </p>
+                    </div>
+                    {sealedBenchmarkCount > 0 && (
+                      <label className="mt-3 flex cursor-pointer items-start gap-2 rounded border border-success/20 bg-success-faint/50 p-2.5">
+                        <input
+                          type="checkbox"
+                          checked={includeReservedBenchmarkQuestions}
+                          onChange={(event) =>
+                            onIncludeReservedBenchmarkQuestions(event.target.checked)
+                          }
+                          className="mt-0.5 h-4 w-4 rounded border-border text-accent focus:ring-accent"
+                        />
+                        <span className="text-[11px] leading-relaxed text-text-muted">
+                          <span className="block font-semibold text-text">
+                            Allow sealed benchmark questions in this regular set
+                          </span>
+                          Off by default. {sealedBenchmarkCount} unseen full-paper
+                          {sealedBenchmarkCount === 1 ? ' reserve stays' : ' reserves stay'} intact
+                          for a future authentic attempt.
+                        </span>
+                      </label>
+                    )}
+                  </>
                 )}
                 <p className="u-label mt-5">
                   {config.mode === 'exam' ? 'Exam settings' : 'Practice settings'}
@@ -4010,6 +4022,7 @@ export default function Pyq() {
         setConfig={setConfig}
         recommendationPreset={recommendationPreset}
         showRecommendedSetup={!coreSetupOnly}
+        isCoreOnly={coreSetupOnly}
         recommendedSelection={recommendedSelection}
         recommendationLoading={recommendationLoading}
         recommendationError={recommendationError}

@@ -267,6 +267,12 @@ describe('Custom PYQ setup and Rishi catalog visibility', () => {
     );
     await screen.findByRole('button', { name: 'Start practice set' });
     expect(screen.queryByText('Recommended set')).not.toBeInTheDocument();
+    expect(screen.queryByText('Practice rules')).not.toBeInTheDocument();
+    expect(
+      screen.queryByText('Allow sealed benchmark questions in this regular set')
+    ).not.toBeInTheDocument();
+    expect(screen.queryByText('Feedback after each answer')).not.toBeInTheDocument();
+    expect(screen.queryByText('Learn with feedback in Practice mode, or simulate test conditions')).not.toBeInTheDocument();
     for (const name of [
       'Learn',
       'Diagnose',

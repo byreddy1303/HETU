@@ -1,20 +1,15 @@
 // /settings — settings that actually change day-to-day behaviour. Signed-in
-// preferences and resumable drafts live in Supabase with a local offline cache;
-// profile fields also round-trip through Supabase (or Dexie in sandbox).
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { differenceInCalendarDays, parseISO } from 'date-fns';
+// preferences, resumable drafts, and profile fields live in Supabase. The
+// database is the single source of truth; this page never touches a local DB.
+import { useEffect, useRef, useState } from 'react';
 import {
   Check,
   Copy,
   Download,
-  Lightbulb,
   LogOut,
   Plus,
   RefreshCcw,
-  RotateCcw,
-  Trash2,
-  Upload,
-  X
+  RotateCcw
 } from 'lucide-react';
 import PageHeader from '@/components/layout/PageHeader';
 import { Card, CardBody, CardHeader } from '@/components/ui/Card';
@@ -31,10 +26,7 @@ import { useAuthStore, type ProfilePatch } from '@/stores/auth';
 import { useAuth } from '@/hooks/useAuth';
 import { useUiStore } from '@/stores/ui';
 import {
-  DEFAULT_PREFERENCES,
   WEEKDAYS,
-  daysSinceBackup,
-  needsBackupReminder,
   usePrefsStore,
   type DurationMin,
   type FontScale,
@@ -42,10 +34,7 @@ import {
 } from '@/stores/prefs';
 import type { ThemeMode } from '@/lib/theme';
 import { supabase, supabaseConfigured } from '@/lib/supabase';
-import { wipeLocalState } from '@/lib/isolation';
-import { clearLocalCacheSafely } from '@/lib/durability';
 import {
-  EXAM_DATE_DEFAULT,
   INVITE_TTL_DAYS,
   QUESTION_COUNT_CHOICES,
   SUBJECTS,
@@ -55,23 +44,8 @@ import {
 import { cn, formatDate, uuid } from '@/lib/utils';
 import { haptic, isNativeApp } from '@/lib/native';
 import { collectProgressReport, downloadProgressReport } from '@/lib/progress-export';
-import {
-  BACKUP_VERSION,
-  downloadEnvelope,
-  exportAll,
-  importEnvelope,
-  isBackupEnvelope
-} from '@/lib/backup';
 import type { InviteRow, UserRow } from '@/types';
 import '@/supporting-surfaces.css';
-
-function humanCountdown(exam: string, today: Date): string {
-  const days = differenceInCalendarDays(parseISO(exam), today);
-  if (days < 0) return `${Math.abs(days)} days past`;
-  if (days === 0) return 'today';
-  if (days === 1) return 'tomorrow';
-  return `T−${days} days`;
-}
 
 export default function Settings() {
   const { userId, sandbox } = useAuth();
@@ -106,8 +80,6 @@ export default function Settings() {
     }
   }
 
-  const backupNudge = sandbox && needsBackupReminder(prefs);
-
   return (
     <div className="settings-workspace flex flex-col gap-4">
       <PageHeader
@@ -139,7 +111,7 @@ export default function Settings() {
             ['focus', 'Focus & appearance', 'Density, theme & type'],
             ['profile', 'Account & access', 'Profile, invites & access'],
             ['notifications', 'Reminders', 'Study & buddy notifications'],
-            ['data', 'Your study data', 'Reports, backups & storage'],
+            ['progress', 'Your progress', 'Browse-all CSV report'],
             ['session', 'This session', 'Sign out safely']
           ].map(([id, title, hint]) => (
             <a key={id} href={`#settings-${id}`}>
@@ -149,24 +121,9 @@ export default function Settings() {
         </nav>
         <div className="settings-content">
 
-      {backupNudge && prefs.backupReminderDays > 0 && (
-        <div className="flex items-start gap-3 rounded border border-warn/40 bg-warn/5 px-3 py-2">
-          <Lightbulb size={14} className="mt-0.5 shrink-0 text-warn" strokeWidth={1.75} />
-          <div className="flex-1 text-[12.5px] text-text">
-            <p className="font-medium">Backup nudge</p>
-            <p className="text-text-muted">
-              You asked to be reminded every {prefs.backupReminderDays} days.
-              {prefs.lastBackupAt
-                ? ` Last export: ${formatDate(prefs.lastBackupAt.slice(0, 10), 'dd MMM')} · ${daysSinceBackup(prefs.lastBackupAt)}d ago.`
-                : ' No export on record yet.'}
-            </p>
-          </div>
-        </div>
-      )}
-
       {/* --- Daily plan ---------------------------------------------------- */}
       <Card id="settings-study" className="settings-anchor" tabIndex={-1}>
-        <CardHeader title="Daily plan" aside={<PrefBadge label="on device" />} />
+        <CardHeader title="Daily plan" />
         <CardBody className="grid grid-cols-1 gap-3 sm:grid-cols-3">
           <NumberField
             label="Daily question target"
@@ -286,34 +243,6 @@ export default function Settings() {
         </CardBody>
       </Card>
 
-      {sandbox && (
-        <Card>
-          <CardHeader title="Backup reminder" />
-          <CardBody className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-            <SegmentField
-              label="Cadence"
-              value={String(prefs.backupReminderDays)}
-              options={[
-                { value: '0', label: 'Never' },
-                { value: '7', label: 'Weekly' },
-                { value: '30', label: 'Monthly' }
-              ]}
-              onChange={(v) =>
-                prefs.set('backupReminderDays', Number(v) as Preferences['backupReminderDays'])
-              }
-            />
-            <div className="flex flex-col gap-1 sm:col-span-2">
-              <span className="u-label">Last export</span>
-              <div className="rounded border border-border bg-bg-overlay/40 px-3 py-2 text-[13px] text-text-muted">
-                {prefs.lastBackupAt
-                  ? `${formatDate(prefs.lastBackupAt.slice(0, 10), 'dd MMM yyyy')} · ${daysSinceBackup(prefs.lastBackupAt)} days ago`
-                  : 'No export yet'}
-              </div>
-            </div>
-          </CardBody>
-        </Card>
-      )}
-
       {/* --- Reset prefs -------------------------------------------------- */}
       <Card>
         <CardBody className="flex flex-wrap items-center justify-between gap-2">
@@ -354,15 +283,9 @@ export default function Settings() {
       <NotificationsCard profile={profile} sandbox={sandbox} />
       </section>
 
-      {/* --- Usage -------------------------------------------------------- */}
-      <section id="settings-data" className="settings-anchor settings-group" tabIndex={-1} aria-label="Study data settings">
+      {/* --- Progress ----------------------------------------------------- */}
+      <section id="settings-progress" className="settings-anchor settings-group" tabIndex={-1} aria-label="Progress report settings">
       <ProgressExportCard userId={userId} learnerName={profile?.name ?? 'HETU learner'} />
-      <DataCard
-        profile={profile}
-        userId={userId}
-        sandbox={sandbox}
-        onBackup={() => prefs.markBackupNow()}
-      />
       </section>
 
       {/* --- Session ------------------------------------------------------ */}
@@ -370,8 +293,8 @@ export default function Settings() {
         <CardHeader title="Session" />
         <CardBody className="flex flex-wrap items-center justify-between gap-3">
           <p className="text-[12px] text-text-muted">
-            Sign-out first confirms every pending database write, then removes only this device's
-            cache. If anything is still pending, sign-out is safely blocked.
+            Signing out ends this session on this device. Your data stays in the database and
+            returns when you sign in again.
           </p>
           {lastSignOutError ? (
             <div className="flex items-center gap-2">
@@ -388,7 +311,7 @@ export default function Settings() {
                 size="sm"
                 onClick={() => void onSignOut(true)}
                 disabled={signingOut}
-                title="Sign out immediately even if pending sync cannot finish"
+                title="Exit immediately even if the normal sign-out cannot complete"
               >
                 <LogOut size={14} className="mr-1" strokeWidth={1.75} />
                 {signingOut ? 'Signing out…' : 'Force sign out'}
@@ -406,18 +329,9 @@ export default function Settings() {
       </div>
     </div>
   );
-
-  // Reference to keep imports referenced (some are used only via child components below).
-  void DEFAULT_PREFERENCES;
-  void humanCountdown;
-  void EXAM_DATE_DEFAULT;
 }
 
 /* ---------------- primitive editors ---------------- */
-
-function PrefBadge({ label }: { label: string }) {
-  return <Badge tone="neutral">{label}</Badge>;
-}
 
 function NumberField({
   label,
@@ -983,192 +897,6 @@ function ProgressExportCard({
           <Download size={14} strokeWidth={1.75} className="mr-1" />
           {downloading ? 'Preparing report…' : 'Download progress'}
         </Button>
-      </CardBody>
-    </Card>
-  );
-}
-
-function DataCard({
-  profile,
-  userId,
-  sandbox,
-  onBackup
-}: {
-  profile: UserRow | null;
-  userId: string | null;
-  sandbox: boolean;
-  onBackup: () => void;
-}) {
-  const pushToast = useUiStore((s) => s.pushToast);
-  const [busy, setBusy] = useState<'export' | 'import' | 'clear' | null>(null);
-  const [confirmClear, setConfirmClear] = useState(false);
-  const fileRef = useRef<HTMLInputElement>(null);
-
-  const backupSummary = useMemo(() => `backup v${BACKUP_VERSION}`, []);
-
-  async function onExport() {
-    setBusy('export');
-    try {
-      const env = await exportAll(profile, userId);
-      downloadEnvelope(env);
-      onBackup();
-      pushToast('Backup saved to Downloads.', 'success');
-    } catch (err) {
-      pushToast(`Export failed: ${(err as Error).message}`, 'neutral');
-    } finally {
-      setBusy(null);
-    }
-  }
-
-  async function onImportPick(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    e.target.value = '';
-    if (!file) return;
-    setBusy('import');
-    try {
-      const text = await file.text();
-      const parsed = JSON.parse(text) as unknown;
-      if (!isBackupEnvelope(parsed)) throw new Error('not a valid backup');
-      const report = await importEnvelope(parsed, userId);
-      const rowTotal = report.reduce((sum, row) => sum + row.added, 0);
-      const plannerTotal =
-        report.planner.dayPlansAdded +
-        report.planner.tombstonesAdded +
-        report.planner.templatesAdded +
-        report.planner.outboxRestored;
-      pushToast(
-        `Imported ${rowTotal} study rows and ${plannerTotal} Planner records.`,
-        'success'
-      );
-    } catch (err) {
-      pushToast(`Import failed: ${(err as Error).message}`, 'neutral');
-    } finally {
-      setBusy(null);
-    }
-  }
-
-  async function onClear() {
-    setBusy('clear');
-    try {
-      if (sandbox) {
-        await wipeLocalState();
-      } else {
-        if (!userId) throw new Error('No signed-in account was found.');
-        const result = await clearLocalCacheSafely(userId);
-        if (!result.ok) throw new Error(result.error ?? 'Database sync did not finish.');
-      }
-      pushToast(
-        sandbox
-          ? 'Local sandbox data cleared.'
-          : 'Device cache cleared. Restoring your account from the database…',
-        'neutral'
-      );
-      window.location.reload();
-    } catch (err) {
-      pushToast(`Clear failed: ${(err as Error).message}`, 'neutral');
-    } finally {
-      setBusy(null);
-      setConfirmClear(false);
-    }
-  }
-
-  return (
-    <Card>
-      <CardHeader
-        title="Backup & data"
-        aside={<span className="text-[11px] text-text-faint">{backupSummary}</span>}
-      />
-      <CardBody className="flex flex-col gap-3">
-        <div className="rounded border border-border/70 bg-bg-overlay/40 px-3 py-2 text-[12px] text-text-muted">
-          <p>
-            Take a copy of your journal off the app, put an old backup back in, or clear this
-            device's cache. Signed-in data is confirmed in Supabase before a cache clear; signing
-            out never deletes server data.
-          </p>
-        </div>
-        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border pt-3">
-          <div>
-            <p className="font-display text-[13px] font-semibold text-text">
-              1 · Download a backup
-            </p>
-            <p className="text-[12px] text-text-muted">
-              Saves every question, session, pattern, note, Planner day, template, deletion marker,
-              and pending offline Planner change on this device. Use it as a safety net or to move
-              to a new browser. Buddy-shared rows are excluded.
-            </p>
-          </div>
-          <Button variant="primary" onClick={() => void onExport()} disabled={busy !== null}>
-            <Download size={14} strokeWidth={1.75} className="mr-1" />
-            {busy === 'export' ? 'Preparing…' : 'Download backup'}
-          </Button>
-        </div>
-        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border pt-3">
-          <div>
-            <p className="font-display text-[13px] font-semibold text-text">
-              2 · Restore from a backup file
-            </p>
-            <p className="text-[12px] text-text-muted">
-              Reads a JSON backup and merges it with what's here now. Rows match by id — anything
-              you've edited since the backup stays as you left it. Nothing is deleted.
-            </p>
-          </div>
-          <div className="flex items-center gap-2">
-            <input
-              ref={fileRef}
-              type="file"
-              accept="application/json"
-              onChange={onImportPick}
-              className="hidden"
-              disabled={busy !== null}
-            />
-            <Button
-              variant="ghost"
-              onClick={() => fileRef.current?.click()}
-              disabled={busy !== null}
-            >
-              <Upload size={14} strokeWidth={1.75} className="mr-1" />
-              {busy === 'import' ? 'Merging…' : 'Choose backup file'}
-            </Button>
-          </div>
-        </div>
-        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border pt-3">
-          <div>
-            <p className="font-display text-[13px] font-semibold text-text">
-              3 · Clear this device's local cache
-            </p>
-            <p className="text-[12px] text-text-muted">
-              Rarely needed. Deletes the offline database on THIS device only; your Supabase server
-              data stays intact and re-syncs on next open. Use if a stuck row is misbehaving. In
-              sandbox mode (no sign-in), everything is lost — download a backup first.
-            </p>
-          </div>
-          {confirmClear ? (
-            <div className="flex items-center gap-2">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setConfirmClear(false)}
-                disabled={busy !== null}
-              >
-                <X size={12} strokeWidth={1.75} className="mr-1" /> Cancel
-              </Button>
-              <Button
-                variant="danger"
-                size="sm"
-                onClick={() => void onClear()}
-                disabled={busy !== null}
-              >
-                <Trash2 size={12} strokeWidth={1.75} className="mr-1" />
-                {busy === 'clear' ? 'Wiping…' : 'Confirm wipe'}
-              </Button>
-            </div>
-          ) : (
-            <Button variant="danger" onClick={() => setConfirmClear(true)} disabled={busy !== null}>
-              <Trash2 size={14} strokeWidth={1.75} className="mr-1" />
-              Clear device cache
-            </Button>
-          )}
-        </div>
       </CardBody>
     </Card>
   );

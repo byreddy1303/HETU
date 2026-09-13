@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 const mocks = vi.hoisted(() => ({
   initSync: vi.fn(),
   flushPendingSync: vi.fn(),
+  pendingSyncCount: vi.fn(),
   stopSync: vi.fn(),
   syncTopicProgressFromDb: vi.fn(),
   migrateLegacyDayPlansForUser: vi.fn(),
@@ -35,6 +36,7 @@ const mocks = vi.hoisted(() => ({
 vi.mock('@/lib/sync', () => ({
   initSync: mocks.initSync,
   flushPendingSync: mocks.flushPendingSync,
+  pendingSyncCount: mocks.pendingSyncCount,
   stopSync: mocks.stopSync
 }));
 
@@ -98,6 +100,7 @@ describe('durability barrier', () => {
     vi.spyOn(navigator, 'onLine', 'get').mockReturnValue(true);
 
     mocks.syncTopicProgressFromDb.mockResolvedValue(undefined);
+    mocks.pendingSyncCount.mockResolvedValue(0);
     mocks.flushPendingSync.mockResolvedValue(true);
     mocks.loadAllDayPlans.mockReturnValue([]);
     mocks.loadPlannerDayTombstones.mockReturnValue([]);
@@ -167,17 +170,27 @@ describe('durability barrier', () => {
     );
   });
 
-  it('blocks immediately while offline without touching any local data', async () => {
+  it('blocks while offline only when there are pending study records waiting for push', async () => {
     vi.spyOn(navigator, 'onLine', 'get').mockReturnValue(false);
+    mocks.pendingSyncCount.mockResolvedValue(3);
 
     const result = await flushAllDurableState('user-offline');
 
-    expect(result).toEqual({
-      ok: false,
-      error: 'You are offline. Reconnect before signing out or clearing local data.'
-    });
-    expect(mocks.syncTopicProgressFromDb).not.toHaveBeenCalled();
+    expect(result.ok).toBe(false);
+    expect(result.error).toContain('offline with pending study records waiting for the database');
+    expect(mocks.syncTopicProgressFromDb).toHaveBeenCalledWith('user-offline');
     expect(mocks.flushPendingSync).not.toHaveBeenCalled();
+    expect(mocks.wipeLocalState).not.toHaveBeenCalled();
+  });
+
+  it('allows flushAllDurableState to proceed while offline when there are zero pending rows', async () => {
+    vi.spyOn(navigator, 'onLine', 'get').mockReturnValue(false);
+    mocks.pendingSyncCount.mockResolvedValue(0);
+
+    const result = await flushAllDurableState('user-offline-clean');
+
+    expect(result).toEqual({ ok: true });
+    expect(mocks.flushPendingSync).toHaveBeenCalledWith('user-offline-clean');
     expect(mocks.wipeLocalState).not.toHaveBeenCalled();
   });
 

@@ -180,16 +180,39 @@ export default function Nav() {
             <p>{profile?.name ?? 'Your workspace'}</p>
             <span>{sandbox ? 'Local sandbox' : (profile?.email ?? 'GATE preparation')}</span>
           </div>
-          <button
-            type="button"
-            onClick={() => void handleSignOut()}
-            disabled={signingOut}
-            aria-label={forceReady ? 'Force sign out' : 'Sign out'}
-            title={signingOut ? 'Signing out…' : forceReady ? 'Force sign out (click to exit immediately)' : 'Sign out'}
-            className={forceReady ? 'text-danger' : undefined}
-          >
-            <LogOut size={16} strokeWidth={1.7} aria-hidden className={signingOut ? 'animate-spin' : undefined} />
-          </button>
+          {forceReady ? (
+            <div className="flex flex-col items-end gap-1.5">
+              <button
+                type="button"
+                onClick={() => setForceReady(false)}
+                disabled={signingOut}
+                className="text-[11px] text-text-muted"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => void handleSignOut(true)}
+                disabled={signingOut}
+                aria-label="Force sign out"
+                title={signingOut ? 'Signing out…' : 'Force sign out — exit immediately even if pending sync cannot finish'}
+                className="flex items-center gap-1.5 text-[11px] font-semibold text-danger"
+              >
+                <LogOut size={14} strokeWidth={1.7} aria-hidden className={signingOut ? 'animate-spin' : undefined} />
+                {signingOut ? 'Signing out…' : 'Force sign out'}
+              </button>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={() => void handleSignOut()}
+              disabled={signingOut}
+              aria-label="Sign out"
+              title={signingOut ? 'Signing out…' : 'Sign out'}
+            >
+              <LogOut size={16} strokeWidth={1.7} aria-hidden className={signingOut ? 'animate-spin' : undefined} />
+            </button>
+          )}
         </div>
       </div>
     </aside>

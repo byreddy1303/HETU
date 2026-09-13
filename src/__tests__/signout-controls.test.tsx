@@ -102,7 +102,7 @@ describe('mobile sign-out controls', () => {
   });
 
   it('ignores repeated taps while one sign-out request is still running', async () => {
-    let finishSignOut: ((value: {}) => void) | undefined;
+    let finishSignOut: ((value: Record<string, never>) => void) | undefined;
     mocks.signOut.mockImplementationOnce(
       () =>
         new Promise((resolve) => {

@@ -36,7 +36,6 @@ import { db } from '@/lib/db';
 import { useSessionStore } from '@/stores/session';
 import { useAuthStore } from '@/stores/auth';
 import { useUiStore } from '@/stores/ui';
-import { useAuth } from '@/hooks/useAuth';
 import { haptic } from '@/lib/native';
 
 type Item = { to: string; label: string; icon: LucideIcon };
@@ -87,7 +86,6 @@ export default function MobileTabs() {
   const sheetRef = useRef<HTMLDialogElement>(null);
   const moreButtonRef = useRef<HTMLButtonElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
-  const { profile, sandbox } = useAuth();
   const signOut = useAuthStore((s) => s.signOut);
   const pushToast = useUiStore((s) => s.pushToast);
   const storedSessionId = useSessionStore((s) => s.sessionId);

@@ -1,4 +1,4 @@
-import { flushPendingSync, initSync, stopSync } from '@/lib/sync';
+import { flushPendingSync, initSync, pendingSyncCount, stopSync } from '@/lib/sync';
 import { syncTopicProgressFromDb } from '@/stores/topic-progress';
 
 export interface DurabilityFlushResult {
@@ -196,13 +196,6 @@ async function migrateLegacyAccountDocuments(
  * acknowledged its latest payload.
  */
 export async function flushAllDurableState(userId: string): Promise<DurabilityFlushResult> {
-  if (typeof navigator !== 'undefined' && !navigator.onLine) {
-    return {
-      ok: false,
-      error: 'You are offline. Reconnect before signing out or clearing local data.'
-    };
-  }
-
   try {
     const unreadableKey = unreadableLegacyCacheKey(userId);
     if (unreadableKey) {
@@ -216,6 +209,12 @@ export async function flushAllDurableState(userId: string): Promise<DurabilityFl
     // Run the old syllabus-cache migration even when /syllabus was never
     // opened, then verify the whole Dexie sync queue.
     await syncTopicProgressFromDb(userId);
+    const pendingBefore = await pendingSyncCount(userId);
+    if (typeof navigator !== 'undefined' && !navigator.onLine && pendingBefore > 0) {
+      throw new Error(
+        'You are offline with pending study records waiting for the database. Reconnect first.'
+      );
+    }
     if (!(await flushPendingSync(userId))) {
       throw new Error('Some study records are still waiting for the database.');
     }

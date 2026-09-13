@@ -12,7 +12,6 @@ import { loginWithUsernamePin, signupViaInvite } from '@/lib/edge';
 import type { UserRow } from '@/types';
 import { EXAM_DATE_DEFAULT } from '@/lib/constants';
 import { unregisterCurrentPushDevice } from '@/lib/buddyNotifications';
-import { flushAllDurableState } from '@/lib/durability';
 import { initSync, stopSync } from '@/lib/sync';
 
 export type AuthStatus = 'loading' | 'signed_out' | 'signed_in';
@@ -79,6 +78,22 @@ const SANDBOX_PROFILE: UserRow = {
 };
 
 let initialized = false;
+
+function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
+    const timer = setTimeout(() => reject(new Error('Timed out waiting for cleanup.')), ms);
+    promise.then(
+      (value) => {
+        clearTimeout(timer);
+        resolve(value);
+      },
+      (error) => {
+        clearTimeout(timer);
+        reject(error);
+      }
+    );
+  });
+}
 
 export const useAuthStore = create<AuthState>((set, get) => ({
   status: 'loading',
@@ -166,11 +181,13 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   signOut: async (options?: { force?: boolean }) => {
+    // With Postgres as the only durable store there is no local durability
+    // barrier to cross. Sign-out just revokes the session and drops RAM.
     if (get().sandbox) {
       try {
         await wipeLocalState();
       } catch (error) {
-        const detail = error instanceof Error ? error.message : 'Local cache cleanup failed.';
+        const detail = error instanceof Error ? error.message : 'Local cleanup failed.';
         return { error: detail };
       }
       set({ status: 'signed_out', profile: null, sandbox: false, user: null });
@@ -193,78 +210,31 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       return {};
     }
 
-    if (options?.force) {
-      // This is the escape hatch after the durability barrier has already
-      // failed. Re-running that same barrier here can make every subsequent
-      // tap look unresponsive, especially when a remote table is unavailable.
-      try {
-        await unregisterCurrentPushDevice();
-      } catch (error) {
-        console.warn('[air] Force sign-out: push unregister error, proceeding.', error);
-      }
-      const accountState = await import('@/lib/account-state');
-      accountState.stopAccountStateSync(userId);
-      stopSync();
-      set({ status: 'loading' });
-      try {
-        const { error } = await supabase.auth.signOut({ scope: 'local' });
-        if (error) {
-          console.warn('[air] Force sign-out: Supabase session revoke failed, proceeding.', error);
-        }
-      } catch (error) {
-        console.warn('[air] Force sign-out: supabase.auth.signOut error, proceeding.', error);
-      }
-      let cleanupError: string | null = null;
-      try {
-        await wipeLocalState();
-      } catch (error) {
-        cleanupError =
-          error instanceof Error ? error.message : 'This device cache was not fully cleared.';
-      }
-      set({ status: 'signed_out', profile: null, user: null });
-      return cleanupError
-        ? {
-            error: `You are signed out, but local cleanup was incomplete. ${cleanupError}`
-          }
-        : {};
-    }
-
-    const durable = await flushAllDurableState(userId);
-    if (!durable.ok) return { error: durable.error };
-
+    // Best-effort push cleanup with a hard bound so it can never deadlock the
+    // button. Force sign-out gives the even shorter leash.
     try {
-      await unregisterCurrentPushDevice();
+      await withTimeout(unregisterCurrentPushDevice(), options?.force ? 2000 : 8000);
     } catch (error) {
-      console.warn('[air] Push-device cleanup did not finish during sign-out.', error);
+      console.warn('[air] Sign-out: push-device cleanup did not finish, proceeding.', error);
     }
 
-    // Resolve the listener controls before the final barrier. Any local edit
-    // that lands while this module loads is still captured by that barrier.
     const accountState = await import('@/lib/account-state');
-
-    // Push cleanup can take long enough for another local edit/background
-    // write to land. Re-run the complete barrier so the exact state at the
-    // irreversible auth boundary is confirmed in Supabase.
-    const finalDurable = await flushAllDurableState(userId);
-    if (!finalDurable.ok) return { error: finalDurable.error };
-
     accountState.stopAccountStateSync(userId);
     stopSync();
-    // Freeze authenticated routes before yielding to the network request. No
-    // UI event can create an unobserved local edit after the final barrier.
+    // Freeze authenticated routes before yielding to the network request.
     set({ status: 'loading' });
+
     const { error } = await supabase.auth.signOut({ scope: 'local' });
     if (error) {
       // auth-js removes the local session for most sign-out API failures. Only
-      // restore the signed-in UI when a session is demonstrably still present;
-      // otherwise the UI and Supabase storage would disagree until reload.
+      // restore the signed-in UI when a session is demonstrably still present.
       let sessionStillPresent = true;
       try {
         const { data } = await supabase.auth.getSession();
         sessionStillPresent = Boolean(data.session);
       } catch {
-        // If session verification itself fails, preserve the local cache and
-        // account state instead of guessing that sign-out completed.
+        // If session verification itself fails, preserve state instead of
+        // guessing that sign-out completed.
       }
       if (sessionStillPresent) {
         set({ status: 'signed_in' });
@@ -275,6 +245,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         return { error: error.message };
       }
     }
+
     let cleanupError: string | null = null;
     try {
       await wipeLocalState();

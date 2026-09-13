@@ -5,7 +5,10 @@ import path from 'path';
 export default defineConfig({
   plugins: [react()],
   resolve: {
-    alias: { '@': path.resolve(__dirname, './src') }
+    alias: {
+      '@': path.resolve(__dirname, './src'),
+      'dexie-react-hooks': path.resolve(__dirname, './src/lib/db-hooks.ts')
+    }
   },
   test: {
     environment: 'jsdom',
@@ -18,6 +21,12 @@ export default defineConfig({
     // Node 26's experimental Storage global doesn't shadow jsdom's.
     environmentOptions: {
       jsdom: { url: 'http://localhost' }
+    },
+    // Tests must never touch the real database. Blank the Supabase keys so
+    // the repository runs in memory-only mode regardless of local env files.
+    env: {
+      VITE_SUPABASE_URL: '',
+      VITE_SUPABASE_ANON_KEY: ''
     }
   }
 });

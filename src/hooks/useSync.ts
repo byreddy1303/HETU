@@ -1,10 +1,8 @@
 import { useEffect, useState } from 'react';
-import { useLiveQuery } from 'dexie-react-hooks';
-import { table, SYNCED_TABLES } from '@/lib/db';
 import { initSync, stopSync, isInitialPullActive, subscribeInitialPull } from '@/lib/sync';
 import { useAuth } from '@/hooks/useAuth';
 
-/** Boot the sync engine for the signed-in user. Mount once (Shell). */
+/** Boot the online repository for the signed-in user. Mount once (Shell). */
 export function useSyncBootstrap(): void {
   const { status, userId, sandbox } = useAuth();
   useEffect(() => {
@@ -32,25 +30,18 @@ export function useOnline(): boolean {
   return online;
 }
 
-/** Count of rows still waiting to reach the server. */
+/** Write-through to Postgres means nothing ever waits on a device queue. */
 export function usePendingCount(): number {
-  return (
-    useLiveQuery(async () => {
-      const counts = await Promise.all(
-        SYNCED_TABLES.map((name) =>
-          table(name).where('sync_status').anyOf('pending', 'error').count()
-        )
-      );
-      return counts.reduce((total, count) => total + count, 0);
-    }, []) ?? 0
-  );
+  return 0;
 }
 
 export function useInitialPullPending(): boolean {
   const [pending, setPending] = useState(isInitialPullActive);
   useEffect(() => {
     const unsubscribe = subscribeInitialPull(() => setPending(isInitialPullActive()));
-    return () => { unsubscribe(); };
+    return () => {
+      unsubscribe();
+    };
   }, []);
   return pending;
 }

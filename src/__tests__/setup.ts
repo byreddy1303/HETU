@@ -52,3 +52,48 @@ if (typeof globalThis.ResizeObserver === 'undefined') {
     configurable: true
   });
 }
+
+// PageHeader / LearningSculpture build scene-visibility observers on mount.
+// jsdom has none; a no-op stub keeps those effects inert in tests.
+if (typeof globalThis.IntersectionObserver === 'undefined') {
+  class IntersectionObserverStub {
+    root = null;
+    rootMargin = '';
+    thresholds = [];
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+    takeRecords() {
+      return [];
+    }
+  }
+  Object.defineProperty(globalThis, 'IntersectionObserver', {
+    value: IntersectionObserverStub,
+    configurable: true
+  });
+}
+
+// jsdom does not implement HTMLDialogElement's modal methods, which the
+// mobile nav overflow sheet relies on. Provide no-op modal plumbing so
+// interaction tests can open/close the sheet. Must stay writable: some
+// suites assign their own stub on the prototype.
+if (typeof globalThis.HTMLDialogElement !== 'undefined') {
+  if (typeof globalThis.HTMLDialogElement.prototype.showModal !== 'function') {
+    Object.defineProperty(globalThis.HTMLDialogElement.prototype, 'showModal', {
+      value: function showModal(this: HTMLDialogElement) {
+        this.setAttribute('open', '');
+      },
+      configurable: true,
+      writable: true
+    });
+  }
+  if (typeof globalThis.HTMLDialogElement.prototype.close !== 'function') {
+    Object.defineProperty(globalThis.HTMLDialogElement.prototype, 'close', {
+      value: function close(this: HTMLDialogElement) {
+        this.removeAttribute('open');
+      },
+      configurable: true,
+      writable: true
+    });
+  }
+}

@@ -215,7 +215,7 @@ describe('canonical automatic capture', () => {
     await expect(
       writeLocal('learning_events', { ...event, event_type: 'retrieval_again' })
     ).rejects.toThrow(/append-only/i);
-    await expect(deleteLocal('learning_events', event.id)).rejects.toThrow(/cannot be deleted/i);
+    await expect(deleteLocal('learning_events', event.id)).rejects.toThrow(/append-only/i);
   });
 });
 

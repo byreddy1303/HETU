@@ -191,9 +191,8 @@ describe('scheduling (Dexie-backed)', () => {
     expect(row?.stage).toBe('D3');
     expect(row?.scheduled_date).toBe('2026-07-20');
     const stored = await db.reattempts.get(row!.id);
-    // A configured client can receive this write before initSync finishes.
-    // Keeping it pending ensures the first authenticated sync cannot skip it.
-    expect(stored?.sync_status).toBe('pending');
+    // Writes go straight to the database now — the cache row is committed.
+    expect(stored?.sync_status).toBe('synced');
     expect((await db.learning_items.toArray())[0]).toMatchObject({
       source_kind: 'manual',
       source_question_id: 'q-9',

@@ -1,8 +1,7 @@
 import type { User } from '@supabase/supabase-js';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
-  flushAllDurableState: vi.fn(),
   unregisterCurrentPushDevice: vi.fn(),
   authSignOut: vi.fn(),
   authGetSession: vi.fn(),
@@ -16,10 +15,6 @@ const mocks = vi.hoisted(() => ({
   dbMetaPut: vi.fn(),
   loginWithUsernamePin: vi.fn(),
   signupViaInvite: vi.fn()
-}));
-
-vi.mock('@/lib/durability', () => ({
-  flushAllDurableState: mocks.flushAllDurableState
 }));
 
 vi.mock('@/lib/buddyNotifications', () => ({
@@ -71,7 +66,7 @@ import { useAuthStore } from '@/stores/auth';
 
 const USER_ID = '11111111-1111-4111-8111-111111111111';
 
-describe('authenticated sign-out durability', () => {
+describe('authenticated sign-out (online-only)', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     useAuthStore.setState({
@@ -80,7 +75,6 @@ describe('authenticated sign-out durability', () => {
       profile: null,
       sandbox: false
     });
-    mocks.flushAllDurableState.mockResolvedValue({ ok: true });
     mocks.unregisterCurrentPushDevice.mockResolvedValue(undefined);
     mocks.authSignOut.mockResolvedValue({ error: null });
     mocks.authGetSession.mockResolvedValue({ data: { session: null }, error: null });
@@ -88,29 +82,33 @@ describe('authenticated sign-out durability', () => {
     mocks.startAccountStateSync.mockResolvedValue(undefined);
   });
 
-  it('rechecks durability after push cleanup, freezes writers, then clears the cache', async () => {
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it('revokes the session and clears RAM without any durability barrier', async () => {
     const result = await useAuthStore.getState().signOut();
 
     expect(result).toEqual({});
-    expect(mocks.flushAllDurableState).toHaveBeenNthCalledWith(1, USER_ID);
-    expect(mocks.flushAllDurableState).toHaveBeenNthCalledWith(2, USER_ID);
     expect(mocks.unregisterCurrentPushDevice).toHaveBeenCalledTimes(1);
     expect(mocks.stopAccountStateSync).toHaveBeenCalledWith(USER_ID);
     expect(mocks.stopSync).toHaveBeenCalledTimes(1);
     expect(mocks.authSignOut).toHaveBeenCalledTimes(1);
     expect(mocks.authSignOut).toHaveBeenCalledWith({ scope: 'local' });
     expect(mocks.wipeLocalState).toHaveBeenCalledTimes(1);
+    expect(mocks.initSync).not.toHaveBeenCalled();
+    expect(mocks.startAccountStateSync).not.toHaveBeenCalled();
 
-    const firstBarrier = mocks.flushAllDurableState.mock.invocationCallOrder[0];
+    // Ordering is strictly: push cleanup, stop account listeners, stop sync,
+    // revoke the session, then drop the RAM cache.
     const pushCleanup = mocks.unregisterCurrentPushDevice.mock.invocationCallOrder[0];
-    const finalBarrier = mocks.flushAllDurableState.mock.invocationCallOrder[1];
     const listenerStop = mocks.stopAccountStateSync.mock.invocationCallOrder[0];
+    const syncStop = mocks.stopSync.mock.invocationCallOrder[0];
     const authSignOut = mocks.authSignOut.mock.invocationCallOrder[0];
     const localWipe = mocks.wipeLocalState.mock.invocationCallOrder[0];
-    expect(firstBarrier).toBeLessThan(pushCleanup);
-    expect(pushCleanup).toBeLessThan(finalBarrier);
-    expect(finalBarrier).toBeLessThan(listenerStop);
-    expect(listenerStop).toBeLessThan(authSignOut);
+    expect(pushCleanup).toBeLessThan(listenerStop);
+    expect(listenerStop).toBeLessThan(syncStop);
+    expect(syncStop).toBeLessThan(authSignOut);
     expect(authSignOut).toBeLessThan(localWipe);
 
     expect(useAuthStore.getState()).toMatchObject({
@@ -120,19 +118,34 @@ describe('authenticated sign-out durability', () => {
     });
   });
 
-  it('keeps the account and device cache intact when the final barrier fails', async () => {
-    mocks.flushAllDurableState
-      .mockResolvedValueOnce({ ok: true })
-      .mockResolvedValueOnce({ ok: false, error: 'A late edit is still pending.' });
+  it('finishes sign-out even when push cleanup hangs, bounded by a timeout', async () => {
+    vi.useFakeTimers();
+    mocks.unregisterCurrentPushDevice.mockReturnValue(new Promise(() => {}));
+
+    const pending = useAuthStore.getState().signOut({ force: true });
+    // Force sign-out puts a 2000ms leash on push cleanup.
+    await vi.advanceTimersByTimeAsync(2000);
+    const result = await pending;
+
+    expect(result).toEqual({});
+    expect(mocks.wipeLocalState).toHaveBeenCalledTimes(1);
+    expect(useAuthStore.getState()).toMatchObject({ status: 'signed_out', user: null });
+  });
+
+  it('reports incomplete local cleanup while still finishing sign-out', async () => {
+    mocks.wipeLocalState.mockRejectedValue(new Error('Offline database remained open.'));
 
     const result = await useAuthStore.getState().signOut();
 
-    expect(result).toEqual({ error: 'A late edit is still pending.' });
-    expect(mocks.authSignOut).not.toHaveBeenCalled();
-    expect(mocks.stopAccountStateSync).not.toHaveBeenCalled();
-    expect(mocks.stopSync).not.toHaveBeenCalled();
-    expect(mocks.wipeLocalState).not.toHaveBeenCalled();
-    expect(useAuthStore.getState()).toMatchObject({ status: 'signed_in', user: { id: USER_ID } });
+    expect(result.error).toContain('You are signed out and your database data is safe');
+    expect(result.error).toContain('Offline database remained open.');
+    expect(useAuthStore.getState()).toMatchObject({
+      status: 'signed_out',
+      user: null,
+      profile: null
+    });
+    expect(mocks.initSync).not.toHaveBeenCalled();
+    expect(mocks.startAccountStateSync).not.toHaveBeenCalled();
   });
 
   it('restores database listeners when Supabase refuses to sign out', async () => {
@@ -160,41 +173,6 @@ describe('authenticated sign-out durability', () => {
     expect(mocks.wipeLocalState).toHaveBeenCalledTimes(1);
     expect(mocks.initSync).not.toHaveBeenCalled();
     expect(mocks.startAccountStateSync).not.toHaveBeenCalled();
-    expect(useAuthStore.getState()).toMatchObject({
-      status: 'signed_out',
-      user: null,
-      profile: null
-    });
-  });
-
-  it('reports incomplete local cleanup without pretending the account is still signed in', async () => {
-    mocks.wipeLocalState.mockRejectedValue(new Error('Offline database remained open.'));
-
-    const result = await useAuthStore.getState().signOut();
-
-    expect(result.error).toContain('You are signed out and your database data is safe');
-    expect(result.error).toContain('Offline database remained open.');
-    expect(useAuthStore.getState()).toMatchObject({
-      status: 'signed_out',
-      user: null,
-      profile: null
-    });
-    expect(mocks.initSync).not.toHaveBeenCalled();
-    expect(mocks.startAccountStateSync).not.toHaveBeenCalled();
-  });
-
-  it('forces sign-out without re-running a failed durability barrier', async () => {
-    mocks.flushAllDurableState.mockResolvedValue({ ok: false, error: 'Network failure' });
-
-    const result = await useAuthStore.getState().signOut({ force: true });
-
-    expect(result).toEqual({});
-    expect(mocks.flushAllDurableState).not.toHaveBeenCalled();
-    expect(mocks.stopAccountStateSync).toHaveBeenCalledWith(USER_ID);
-    expect(mocks.stopSync).toHaveBeenCalledTimes(1);
-    expect(mocks.authSignOut).toHaveBeenCalledTimes(1);
-    expect(mocks.authSignOut).toHaveBeenCalledWith({ scope: 'local' });
-    expect(mocks.wipeLocalState).toHaveBeenCalledTimes(1);
     expect(useAuthStore.getState()).toMatchObject({
       status: 'signed_out',
       user: null,

@@ -96,7 +96,10 @@ export default defineConfig(({ mode }) => {
         : [])
     ],
     resolve: {
-      alias: { '@': path.resolve(__dirname, './src') }
+      alias: {
+        '@': path.resolve(__dirname, './src'),
+        'dexie-react-hooks': path.resolve(__dirname, './src/lib/db-hooks.ts')
+      }
     },
     server: { port: 5173 }
   };

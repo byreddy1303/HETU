@@ -181,10 +181,14 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     if (!userId) {
       try {
         await supabase.auth.signOut().catch(() => {});
-      } catch {}
+      } catch {
+        // ignore
+      }
       try {
         await wipeLocalState();
-      } catch {}
+      } catch {
+        // ignore
+      }
       set({ status: 'signed_out', profile: null, user: null, sandbox: false });
       return {};
     }

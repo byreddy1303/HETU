@@ -2,7 +2,9 @@
 // Signup goes through the signup-via-invite edge fn (validates invite +
 // creates auth user + stamps username). Login goes through the login edge fn
 // (server-side username→email resolve + password grant → session tokens).
-// Google OAuth and magic-link are gone.
+// Google OAuth and magic-link are gone. A successful login remembers this
+// device (refresh token under `air.device-trust`) so the same browser can
+// restore the session silently; explicit sign-out and "Wipe local" forget it.
 import { create } from 'zustand';
 import type { User } from '@supabase/supabase-js';
 import { supabase, supabaseConfigured } from '@/lib/supabase';
@@ -13,6 +15,7 @@ import type { UserRow } from '@/types';
 import { EXAM_DATE_DEFAULT } from '@/lib/constants';
 import { unregisterCurrentPushDevice } from '@/lib/buddyNotifications';
 import { initSync, stopSync } from '@/lib/sync';
+import { clearTrustedDevice, readTrustedDevice, rememberTrustedDevice } from '@/lib/device-trust';
 
 export type AuthStatus = 'loading' | 'signed_out' | 'signed_in';
 
@@ -79,6 +82,19 @@ const SANDBOX_PROFILE: UserRow = {
 
 let initialized = false;
 
+// Keeps the trusted-device record's refresh token in step with the live
+// session. supabase-js rotates the token on every refresh, so the stored one
+// must track the latest value or a future restore would fail on a stale token.
+function refreshTrustedToken(refreshToken: string): void {
+  const trusted = readTrustedDevice();
+  if (!trusted) return;
+  rememberTrustedDevice({
+    userId: trusted.userId,
+    username: trusted.username,
+    refreshToken
+  });
+}
+
 function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
   return new Promise<T>((resolve, reject) => {
     const timer = setTimeout(() => reject(new Error('Timed out waiting for cleanup.')), ms);
@@ -124,14 +140,49 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     supabase.auth.getSession().then(({ data }) => {
       const user = data.session?.user ?? null;
       set({ user, status: user ? 'signed_in' : 'signed_out' });
-      if (user) void get().refreshProfile();
+      if (user) {
+        if (data.session?.refresh_token) refreshTrustedToken(data.session.refresh_token);
+        void get().refreshProfile();
+        return;
+      }
+      // A trusted device restores the session silently — the username + PIN
+      // screen is never shown again on a browser that signed in before. The
+      // refresh token is rotated by the server, so a failed restore simply
+      // forgets the device.
+      const trusted = readTrustedDevice();
+      if (!trusted) return;
+      void supabase.auth.refreshSession({ refresh_token: trusted.refreshToken }).then(
+        ({ data: restored, error }) => {
+          if (error) {
+            console.warn('[air] Trusted-device restore failed; forgetting this device.', error);
+            clearTrustedDevice();
+            return;
+          }
+          const restoredUser = restored.session?.user ?? null;
+          if (!restoredUser) {
+            clearTrustedDevice();
+            return;
+          }
+          set({ user: restoredUser, status: 'signed_in' });
+          if (restored.session?.refresh_token) {
+            rememberTrustedDevice({
+              userId: restoredUser.id,
+              username: trusted.username,
+              refreshToken: restored.session.refresh_token
+            });
+          }
+          void get().refreshProfile();
+        }
+      );
     });
 
     supabase.auth.onAuthStateChange((_event, session) => {
       const user = session?.user ?? null;
       set({ user, status: user ? 'signed_in' : 'signed_out' });
-      if (user) void get().refreshProfile();
-      else set({ profile: null });
+      if (user) {
+        if (session?.refresh_token) refreshTrustedToken(session.refresh_token);
+        void get().refreshProfile();
+      } else set({ profile: null });
     });
   },
 
@@ -152,6 +203,10 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     });
     if (error) return { error: error.message };
     await get().refreshProfile();
+    const userId = res.user?.id ?? get().user?.id;
+    if (userId) {
+      rememberTrustedDevice({ userId, username, refreshToken: res.refresh_token });
+    }
     return {};
   },
 
@@ -171,6 +226,10 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     });
     if (error) return { error: error.message };
     await get().refreshProfile();
+    const userId = login.user?.id ?? get().user?.id;
+    if (userId) {
+      rememberTrustedDevice({ userId, username: payload.username, refreshToken: login.refresh_token });
+    }
     return {};
   },
 
@@ -253,6 +312,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       cleanupError =
         error instanceof Error ? error.message : 'This device cache was not fully cleared.';
     }
+    // Sign-out is the user's word that this browser should not come back
+    // silently; drop the trusted-device record (the sweep above covers it too).
+    clearTrustedDevice();
     set({ status: 'signed_out', profile: null, user: null });
     return cleanupError
       ? {

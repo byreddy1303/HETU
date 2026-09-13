@@ -18,7 +18,7 @@ import { usePlannerTemplatesStore } from '@/stores/planner-templates';
  *   • in-memory zustand caches (prefs / session / log / PYQ / templates)
  *   • in-memory user state (schema maps, planner caches, ...)
  *   • any residual `air.*` / `air-journal:` keys in localStorage (device
- *     caches and legacy keys)
+ *     caches, heritage keys, and the trusted-device record `air.device-trust`)
  *   • the in-memory database
  *
  * Each step is wrapped so a partial failure never blocks the remaining

@@ -1,13 +1,18 @@
+import { useState } from 'react';
 import { useOnline, usePendingCount, useInitialPullPending } from '@/hooks/useSync';
 import { useAuth } from '@/hooks/useAuth';
 import { cn } from '@/lib/utils';
+import { reconcileAll } from '@/lib/sync';
+import { flushAllDurableState } from '@/lib/durability';
+import { reloadAccountState } from '@/lib/account-state';
 
-/** Quiet sync status: invisible when everything is synced and online. */
+/** Sync status badge with click-to-reconcile for explicit multi-device confidence. */
 export default function OfflineBadge({ className }: { className?: string }) {
   const online = useOnline();
   const pending = usePendingCount();
   const initialPull = useInitialPullPending();
   const auth = useAuth();
+  const [manualSyncing, setManualSyncing] = useState(false);
 
   if (auth.sandbox) {
     return (
@@ -16,14 +21,48 @@ export default function OfflineBadge({ className }: { className?: string }) {
       </span>
     );
   }
-  if (online && pending === 0 && !initialPull) return null;
+
+  const handleManualSync = async () => {
+    if (!auth.userId || manualSyncing) return;
+    setManualSyncing(true);
+    try {
+      await flushAllDurableState(auth.userId);
+      await reconcileAll(auth.userId);
+      await reloadAccountState(auth.userId);
+    } finally {
+      setManualSyncing(false);
+    }
+  };
+
+  if (online && pending === 0 && !initialPull && !manualSyncing) return null;
 
   return (
-    <span
-      className={cn('u-label', online ? 'text-text-muted' : 'text-warn', className)}
-      title={online ? (initialPull ? 'Downloading latest data' : 'Sync in progress') : 'Offline — writes are saved locally'}
+    <button
+      type="button"
+      onClick={() => void handleManualSync()}
+      disabled={manualSyncing}
+      className={cn(
+        'u-label cursor-pointer hover:opacity-80 transition-opacity bg-transparent border-0 p-0',
+        online ? 'text-text-muted' : 'text-warn',
+        className
+      )}
+      title={
+        online
+          ? manualSyncing
+            ? 'Syncing with cloud...'
+            : initialPull
+              ? 'Downloading latest data'
+              : 'Sync in progress — click to force sync'
+          : 'Offline — writes are saved locally'
+      }
     >
-      {online ? (initialPull ? 'syncing...' : `syncing ${pending}`) : `offline${pending > 0 ? ` · ${pending} queued` : ''}`}
-    </span>
+      {manualSyncing
+        ? 'syncing...'
+        : online
+          ? initialPull
+            ? 'syncing...'
+            : `syncing ${pending}`
+          : `offline${pending > 0 ? ` · ${pending} queued` : ''}`}
+    </button>
   );
 }

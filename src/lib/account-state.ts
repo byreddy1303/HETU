@@ -11,6 +11,7 @@ import {
 import { normalizeSubjectIdentity } from '@/lib/subjects';
 import { supabase } from '@/lib/supabase';
 import { todayISO } from '@/lib/utils';
+import { broadcastSyncMutation } from '@/lib/sync';
 import {
   DEFAULT_PREFERENCES,
   usePrefsStore,
@@ -533,6 +534,7 @@ async function drainWriter(writer: AccountStateWriter): Promise<void> {
       }
       writer.failedRevisions.delete(namespace);
       if (writer.pending.size === 0) writer.lastError = null;
+      broadcastSyncMutation(writer.userId, ['account_state']);
     } catch (error) {
       writer.lastError = errorFrom(error);
       const latest = writer.pending.get(namespace);
@@ -657,6 +659,20 @@ function installSubscriptions(userId: string, generation: number): void {
   subscribe('log_draft', (listener) => useLogStore.subscribe(listener));
   subscribe('pyq_preferences', (listener) => usePyqPreferencesStore.subscribe(listener));
   subscribe('planner_templates', (listener) => usePlannerTemplatesStore.subscribe(listener));
+
+  if (typeof window !== 'undefined') {
+    const onCrossSync = (event: Event) => {
+      if (runtime.generation !== generation) return;
+      const custom = event as CustomEvent<{ tables?: string[]; userId?: string }>;
+      if (custom.detail?.userId && custom.detail.userId !== userId) return;
+      const tables = custom.detail?.tables;
+      if (!tables || tables.length === 0 || tables.includes('account_state')) {
+        void reloadAccountState(userId);
+      }
+    };
+    window.addEventListener('air:cross-device-sync', onCrossSync);
+    runtime.unsubscribers.push(() => window.removeEventListener('air:cross-device-sync', onCrossSync));
+  }
 }
 
 async function waitForLocalHydration(): Promise<void> {
@@ -782,10 +798,39 @@ export function stopAccountStateSync(userId: string): void {
   removeSubscriptions(runtime);
 }
 
-/** Retry bootstrap after a load error, otherwise retry pending writes. */
+/** Re-pull latest account_state rows from Supabase and hydrate stores without clobbering pending local edits. */
+export async function reloadAccountState(userId: string): Promise<void> {
+  const runtime = runtimes.get(userId);
+  if (!runtime || runtime.status !== 'ready') return;
+  const writer = writerFor(userId);
+
+  try {
+    const { data, error } = await supabase
+      .from('account_state')
+      .select('namespace,payload')
+      .eq('user_id', userId)
+      .in('namespace', [...ACCOUNT_STATE_NAMESPACES]);
+
+    if (error || !data) return;
+
+    for (const row of (data as AccountStateRow[])) {
+      if (ACCOUNT_STATE_NAMESPACES.includes(row.namespace as AccountStateNamespace)) {
+        const ns = row.namespace as AccountStateNamespace;
+        if (!writer.pending.has(ns)) {
+          hydrateNamespace(ns, row.payload);
+        }
+      }
+    }
+  } catch {
+    // Non-blocking network error
+  }
+}
+
+/** Retry bootstrap after a load error, otherwise retry pending writes and reload remote state. */
 export async function retryAccountStateSync(userId: string): Promise<void> {
   const runtime = runtimeFor(userId);
   if (runtime.status === 'loading' && runtime.bootstrap) return runtime.bootstrap;
   if (runtime.status !== 'ready') return startAccountStateSync(userId);
+  void reloadAccountState(userId);
   return flushAccountStateWrites(userId);
 }

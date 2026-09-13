@@ -13,6 +13,8 @@ import {
   pendingSyncCount,
   pullAll,
   stopSync,
+  reconcileAll,
+  broadcastSyncMutation,
   _enableForTests
 } from '@/lib/sync';
 import { pyqAttemptId, pyqJournalQuestionId } from '@/lib/pyq-session';
@@ -1129,5 +1131,19 @@ describe('sync engine (F1.3)', () => {
 
     for (const resolve of release) resolve();
     await first;
+  });
+
+  it('reconciles all tables via pull and push', async () => {
+    _enableForTests(USER);
+    mocks.selectPage.mockResolvedValue({ data: [], error: null });
+    mocks.upsert.mockResolvedValue({ error: null });
+    await writeLocal('sessions', sessionRow('reconcile-test'));
+    await reconcileAll(USER);
+    const stored = await db.sessions.get('reconcile-test');
+    expect(stored?.sync_status).toBe('synced');
+  });
+
+  it('safely handles broadcastSyncMutation without channel', () => {
+    expect(() => broadcastSyncMutation(USER, ['sessions'])).not.toThrow();
   });
 });

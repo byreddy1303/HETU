@@ -11,7 +11,8 @@ const mocks = vi.hoisted(() => {
 });
 
 vi.mock('@/lib/supabase', () => ({
-  supabase: { from: mocks.from }
+  supabase: { from: mocks.from },
+  supabaseConfigured: true
 }));
 
 import {

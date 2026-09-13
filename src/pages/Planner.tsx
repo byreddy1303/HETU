@@ -11,7 +11,10 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AnimatePresence } from 'motion/react';
 import { useLiveQuery } from 'dexie-react-hooks';
+import { ArrowRight, CalendarDays, Clock3 } from 'lucide-react';
 import PageHeader from '@/components/layout/PageHeader';
+import { Button } from '@/components/ui/Button';
+import '@/workflow-surfaces.css';
 import Calendar from '@/components/planner/Calendar';
 import DayPlanModal from '@/components/planner/DayPlanModal';
 import PlannerInsights from '@/components/planner/PlannerInsights';
@@ -385,11 +388,21 @@ export default function Planner() {
       void flushPlannerCloudWrites(userId).then(reportCloudWriteResult);
       setCloudRefreshRevision((value) => value + 1);
     };
+    const onCrossSync = (event: Event) => {
+      const custom = event as CustomEvent<{ tables?: string[]; userId?: string }>;
+      if (custom.detail?.userId && custom.detail.userId !== userId) return;
+      const tables = custom.detail?.tables;
+      if (!tables || tables.length === 0 || tables.includes('planner_day_plans')) {
+        setCloudRefreshRevision((v) => v + 1);
+      }
+    };
     window.addEventListener('online', retry);
     window.addEventListener('focus', retry);
+    window.addEventListener('air:cross-device-sync', onCrossSync);
     return () => {
       window.removeEventListener('online', retry);
       window.removeEventListener('focus', retry);
+      window.removeEventListener('air:cross-device-sync', onCrossSync);
       void flushPlannerCloudWrites(userId).then(reportCloudWriteResult);
     };
   }, [reportCloudWriteResult, sandbox, userId]);
@@ -713,12 +726,38 @@ export default function Planner() {
   }
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="workflow-page planner-workspace flex flex-col gap-4">
       <PageHeader
         title="Planner"
         description="Plan a day. Review a day. Every field saves as you edit."
       />
 
+      <section className="planner-day-launch" aria-label="Planning workspace">
+        <div className="planner-day-launch__date" aria-hidden="true">
+          <span>{today.toLocaleDateString('en', { month: 'short' })}</span>
+          <strong>{today.getDate()}</strong>
+          <span>{today.toLocaleDateString('en', { weekday: 'long' })}</span>
+        </div>
+        <div className="planner-day-launch__copy">
+          <h2>Make space for your next session.</h2>
+          <p>Set your available time, protect a little breathing room, and choose what deserves today.</p>
+          <Button variant="primary" onClick={() => openDate(todayISO)}>
+            Plan today <ArrowRight size={15} aria-hidden="true" />
+          </Button>
+        </div>
+        <dl className="planner-month-summary">
+          <div>
+            <dt><CalendarDays size={15} aria-hidden="true" /> Days planned in view</dt>
+            <dd>{planIndex.size}</dd>
+          </div>
+          <div>
+            <dt><Clock3 size={15} aria-hidden="true" /> Planned time in view</dt>
+            <dd>{Array.from(summaries.values()).reduce((total, day) => total + day.totalMin, 0)}<span> min</span></dd>
+          </div>
+        </dl>
+      </section>
+
+      <div className="planner-calendar-surface">
       <Calendar
         year={year}
         monthIndex={monthIndex}
@@ -729,13 +768,16 @@ export default function Planner() {
         onNextMonth={goNext}
         onPickDate={openDate}
       />
+      </div>
 
+      <div className="planner-insights-surface">
       <PlannerInsights
         revision={revision}
         evidenceCandidates={plannerEvidence.candidates}
         onCreateEvidenceBlock={createEvidenceBlock}
         onCreateNeglectedBlock={createNeglectedSubjectBlock}
       />
+      </div>
 
       <AnimatePresence>
         {selectedDate && openPlan && (

@@ -12,6 +12,8 @@ import {
 } from '@/lib/native';
 import { toast } from '@/stores/ui';
 import { useAuthStore } from '@/stores/auth';
+import { flushAllDurableState } from '@/lib/durability';
+import { reloadAccountState } from '@/lib/account-state';
 
 function isTextEntry(element: Element | null): boolean {
   return (
@@ -76,9 +78,20 @@ export default function NativeRuntime() {
       }),
       NativeApp.addListener('appStateChange', ({ isActive }) => {
         document.documentElement.dataset.appActive = String(isActive);
+        const uid = useAuthStore.getState().user?.id;
+        const isSandbox = useAuthStore.getState().sandbox;
         if (isActive) {
           lastRootBackAt = 0;
           resumeSync();
+          if (uid && !isSandbox) {
+            void flushAllDurableState(uid);
+            void reloadAccountState(uid);
+          }
+        } else {
+          // Native app minimizing/suspending: immediately push all durable state to Supabase
+          if (uid && !isSandbox) {
+            void flushAllDurableState(uid);
+          }
         }
       }),
       NativeApp.addListener('appUrlOpen', ({ url }) => {

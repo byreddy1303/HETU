@@ -2,6 +2,7 @@
 // user-scoped cache; the complete DayPlan is stored in planner_day_plans.plan.
 // The duplicated sessions column remains populated for notification functions.
 import { supabase } from '@/lib/supabase';
+import { broadcastSyncMutation } from '@/lib/sync';
 import {
   cacheDayPlanForUser,
   cachePlannerDayTombstone,
@@ -630,9 +631,10 @@ async function applyCloudMutation(
     const outcome = parseMutationOutcome(data, write.date, write.mutationId);
     preservePlannerConflict(userId, write, outcome);
     if (outcome.applied) clearPlannerConflict(userId, write);
-    // The RPC derives ownership from auth.uid(). Keep userId client-side only
-    // for applying its authoritative receipt to the matching scoped cache.
-    if (cacheOutcome && outcome.error === null) applyMutationOutcomeToCache(userId, outcome);
+    if (cacheOutcome && outcome.error === null) {
+      applyMutationOutcomeToCache(userId, outcome);
+      broadcastSyncMutation(userId, ['planner_day_plans']);
+    }
     return outcome;
   } catch (error) {
     return {

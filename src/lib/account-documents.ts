@@ -1,4 +1,5 @@
 import { supabase } from '@/lib/supabase';
+import { broadcastSyncMutation } from '@/lib/sync';
 
 export const ACCOUNT_DOCUMENT_SCHEMA_VERSION = 1 as const;
 
@@ -219,6 +220,7 @@ async function drainWriter(userId: string, writer: DocumentWriter): Promise<stri
         removeStorage(pendingStorageKey(userId, namespace));
       }
       writer.failedRevisions.delete(namespace);
+      broadcastSyncMutation(userId, ['account_state']);
     } catch (error) {
       firstError ??= errorMessage(error);
       const latest = writer.pending.get(namespace);

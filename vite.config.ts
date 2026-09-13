@@ -39,10 +39,10 @@ export default defineConfig(({ mode }) => {
           display: 'standalone',
           start_url: '/',
           icons: [
-            { src: '/hetu-mark-192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
-            { src: '/hetu-mark-512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
+            { src: '/hetu-cobalt-192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
+            { src: '/hetu-cobalt-512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
             {
-              src: '/hetu-mark-maskable-512.png',
+              src: '/hetu-cobalt-maskable-512.png',
               sizes: '512x512',
               type: 'image/png',
               purpose: 'maskable'

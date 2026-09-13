@@ -86,9 +86,6 @@ html[data-theme='dark'] .observatory-landing {
 .observatory-opening .observatory-brand .text-text {
   color: var(--obs-white);
 }
-.observatory-brand img {
-  filter: brightness(1.8) saturate(0.65);
-}
 .observatory-nav > nav {
   display: flex;
   margin-left: auto;

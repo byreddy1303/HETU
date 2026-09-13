@@ -23,11 +23,11 @@ export function BrandMark({
 }) {
   return (
     <img
-      src="/brand/hetu-mark.png"
+      src="/brand/hetu-cobalt.svg"
       alt={decorative ? '' : 'HETU logo'}
       aria-hidden={decorative || undefined}
-      width={1118}
-      height={805}
+      width={512}
+      height={512}
       decoding="async"
       draggable={false}
       className={cn('block shrink-0 select-none', className)}

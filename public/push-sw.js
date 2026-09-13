@@ -57,8 +57,8 @@ self.addEventListener('push', (event) => {
   const showAndBadge = self.registration
     .showNotification(title, {
       body,
-      icon: '/hetu-mark-192.png',
-      badge: '/hetu-mark-192.png',
+      icon: '/hetu-cobalt-192.png',
+      badge: '/hetu-notification-badge.png',
       tag: notifTag,
       renotify: false,
       timestamp: Date.now(),

@@ -5,6 +5,7 @@ const mocks = vi.hoisted(() => ({
   flushAllDurableState: vi.fn(),
   unregisterCurrentPushDevice: vi.fn(),
   authSignOut: vi.fn(),
+  authGetSession: vi.fn(),
   wipeLocalState: vi.fn(),
   initSync: vi.fn(),
   stopSync: vi.fn(),
@@ -30,7 +31,7 @@ vi.mock('@/lib/supabase', () => ({
   supabase: {
     auth: {
       signOut: mocks.authSignOut,
-      getSession: vi.fn(),
+      getSession: mocks.authGetSession,
       onAuthStateChange: vi.fn(),
       setSession: vi.fn()
     },
@@ -82,6 +83,7 @@ describe('authenticated sign-out durability', () => {
     mocks.flushAllDurableState.mockResolvedValue({ ok: true });
     mocks.unregisterCurrentPushDevice.mockResolvedValue(undefined);
     mocks.authSignOut.mockResolvedValue({ error: null });
+    mocks.authGetSession.mockResolvedValue({ data: { session: null }, error: null });
     mocks.wipeLocalState.mockResolvedValue(undefined);
     mocks.startAccountStateSync.mockResolvedValue(undefined);
   });
@@ -96,6 +98,7 @@ describe('authenticated sign-out durability', () => {
     expect(mocks.stopAccountStateSync).toHaveBeenCalledWith(USER_ID);
     expect(mocks.stopSync).toHaveBeenCalledTimes(1);
     expect(mocks.authSignOut).toHaveBeenCalledTimes(1);
+    expect(mocks.authSignOut).toHaveBeenCalledWith({ scope: 'local' });
     expect(mocks.wipeLocalState).toHaveBeenCalledTimes(1);
 
     const firstBarrier = mocks.flushAllDurableState.mock.invocationCallOrder[0];
@@ -134,6 +137,7 @@ describe('authenticated sign-out durability', () => {
 
   it('restores database listeners when Supabase refuses to sign out', async () => {
     mocks.authSignOut.mockResolvedValue({ error: { message: 'Sign-out request failed.' } });
+    mocks.authGetSession.mockResolvedValue({ data: { session: { user: { id: USER_ID } } } });
 
     const result = await useAuthStore.getState().signOut();
 
@@ -144,6 +148,23 @@ describe('authenticated sign-out durability', () => {
     expect(mocks.startAccountStateSync).toHaveBeenCalledWith(USER_ID);
     expect(mocks.wipeLocalState).not.toHaveBeenCalled();
     expect(useAuthStore.getState()).toMatchObject({ status: 'signed_in', user: { id: USER_ID } });
+  });
+
+  it('finishes local cleanup when auth-js reports an error after removing the session', async () => {
+    mocks.authSignOut.mockResolvedValue({ error: { message: 'Revoke request failed.' } });
+    mocks.authGetSession.mockResolvedValue({ data: { session: null } });
+
+    const result = await useAuthStore.getState().signOut();
+
+    expect(result).toEqual({});
+    expect(mocks.wipeLocalState).toHaveBeenCalledTimes(1);
+    expect(mocks.initSync).not.toHaveBeenCalled();
+    expect(mocks.startAccountStateSync).not.toHaveBeenCalled();
+    expect(useAuthStore.getState()).toMatchObject({
+      status: 'signed_out',
+      user: null,
+      profile: null
+    });
   });
 
   it('reports incomplete local cleanup without pretending the account is still signed in', async () => {
@@ -160,5 +181,37 @@ describe('authenticated sign-out durability', () => {
     });
     expect(mocks.initSync).not.toHaveBeenCalled();
     expect(mocks.startAccountStateSync).not.toHaveBeenCalled();
+  });
+
+  it('forces sign-out without re-running a failed durability barrier', async () => {
+    mocks.flushAllDurableState.mockResolvedValue({ ok: false, error: 'Network failure' });
+
+    const result = await useAuthStore.getState().signOut({ force: true });
+
+    expect(result).toEqual({});
+    expect(mocks.flushAllDurableState).not.toHaveBeenCalled();
+    expect(mocks.stopAccountStateSync).toHaveBeenCalledWith(USER_ID);
+    expect(mocks.stopSync).toHaveBeenCalledTimes(1);
+    expect(mocks.authSignOut).toHaveBeenCalledTimes(1);
+    expect(mocks.authSignOut).toHaveBeenCalledWith({ scope: 'local' });
+    expect(mocks.wipeLocalState).toHaveBeenCalledTimes(1);
+    expect(useAuthStore.getState()).toMatchObject({
+      status: 'signed_out',
+      user: null,
+      profile: null
+    });
+  });
+
+  it('handles sign-out cleanly when user is missing', async () => {
+    useAuthStore.setState({ user: null });
+
+    const result = await useAuthStore.getState().signOut();
+
+    expect(result).toEqual({});
+    expect(useAuthStore.getState()).toMatchObject({
+      status: 'signed_out',
+      user: null,
+      profile: null
+    });
   });
 });

@@ -40,6 +40,7 @@ alter table public.pyq_attempts
 -- Readiness v3 corrects a semantic error: D30 means the 30-day test is still
 -- waiting. Only MASTERED (a successful due-D30 recall) is stabilised evidence.
 alter table public.readiness_snapshots
+  drop constraint if exists readiness_snapshots_versioned_evidence_check,
   drop constraint if exists readiness_snapshots_v2_evidence_check,
   add constraint readiness_snapshots_versioned_evidence_check check (
     calculation_version < 2
@@ -298,6 +299,10 @@ create table if not exists public.recovery_sessions (
 create index if not exists recovery_sessions_active
   on public.recovery_sessions (user_id, updated_at desc)
   where status in ('active', 'paused', 'interrupted');
+
+alter table public.learning_items enable row level security;
+alter table public.learning_events enable row level security;
+alter table public.recovery_sessions enable row level security;
 
 alter table public.learning_events
   drop constraint if exists learning_events_recovery_session_owner_fk,
@@ -595,10 +600,6 @@ create policy upd_own on public.reattempts
   for update to authenticated
   using ((select auth.uid()) = user_id)
   with check ((select auth.uid()) = user_id);
-
-alter table public.learning_items enable row level security;
-alter table public.learning_events enable row level security;
-alter table public.recovery_sessions enable row level security;
 
 drop policy if exists learning_items_select_own on public.learning_items;
 create policy learning_items_select_own on public.learning_items

@@ -63,6 +63,7 @@ import {
   isBackupEnvelope
 } from '@/lib/backup';
 import type { InviteRow, UserRow } from '@/types';
+import '@/supporting-surfaces.css';
 
 function humanCountdown(exam: string, today: Date): string {
   const days = differenceInCalendarDays(parseISO(exam), today);
@@ -81,12 +82,26 @@ export default function Settings() {
   const prefs = usePrefsStore();
 
   const [signingOut, setSigningOut] = useState(false);
-  async function onSignOut() {
+  const [lastSignOutError, setLastSignOutError] = useState<string | null>(null);
+  const signOutInFlightRef = useRef(false);
+  async function onSignOut(force = false) {
+    if (signOutInFlightRef.current) return;
+    signOutInFlightRef.current = true;
     setSigningOut(true);
     try {
-      const result = await signOut();
-      if (result.error) pushToast(result.error, 'danger');
+      const result = await signOut({ force });
+      if (result.error && !force) {
+        setLastSignOutError(result.error);
+        pushToast(`${result.error} Choose 'Force sign out' to exit immediately.`, 'danger');
+      } else if (result.error) {
+        pushToast(result.error, 'danger');
+      }
+    } catch (error) {
+      const detail = error instanceof Error ? error.message : 'Sign-out failed.';
+      setLastSignOutError(detail);
+      pushToast(`${detail} Choose 'Force sign out' to exit immediately.`, 'danger');
     } finally {
+      signOutInFlightRef.current = false;
       setSigningOut(false);
     }
   }
@@ -94,7 +109,7 @@ export default function Settings() {
   const backupNudge = sandbox && needsBackupReminder(prefs);
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="settings-workspace flex flex-col gap-4">
       <PageHeader
         title="Settings"
         description={
@@ -103,6 +118,36 @@ export default function Settings() {
             : 'Everything here saves as you edit. Profile fields, preferences, and resumable drafts sync to your account.'
         }
       />
+
+      <section className="settings-desk" aria-labelledby="settings-desk-title">
+        <div className="settings-desk__copy">
+          <h2 id="settings-desk-title">Make room for your best work.</h2>
+          <p>Your pace, your focus, your way back to a difficult question.</p>
+        </div>
+        <dl className="settings-desk__readouts">
+          <div><dt>Questions a day</dt><dd>{prefs.dailyQuestionTarget}</dd></div>
+          <div><dt>Sessions a week</dt><dd>{prefs.weeklySessionTarget}</dd></div>
+          <div><dt>Minutes per session</dt><dd>{prefs.defaultDurationMin}</dd></div>
+        </dl>
+      </section>
+
+      <div className="settings-layout">
+        <nav className="settings-wayfinding" aria-label="Settings sections">
+          <span className="settings-wayfinding__label">Tune your workspace</span>
+          {[
+            ['study', 'Study rhythm', 'Targets & session defaults'],
+            ['focus', 'Focus & appearance', 'Density, theme & type'],
+            ['profile', 'Account & access', 'Profile, invites & access'],
+            ['notifications', 'Reminders', 'Study & buddy notifications'],
+            ['data', 'Your study data', 'Reports, backups & storage'],
+            ['session', 'This session', 'Sign out safely']
+          ].map(([id, title, hint]) => (
+            <a key={id} href={`#settings-${id}`}>
+              <span>{title}</span><small>{hint}</small>
+            </a>
+          ))}
+        </nav>
+        <div className="settings-content">
 
       {backupNudge && prefs.backupReminderDays > 0 && (
         <div className="flex items-start gap-3 rounded border border-warn/40 bg-warn/5 px-3 py-2">
@@ -120,7 +165,7 @@ export default function Settings() {
       )}
 
       {/* --- Daily plan ---------------------------------------------------- */}
-      <Card>
+      <Card id="settings-study" className="settings-anchor" tabIndex={-1}>
         <CardHeader title="Daily plan" aside={<PrefBadge label="on device" />} />
         <CardBody className="grid grid-cols-1 gap-3 sm:grid-cols-3">
           <NumberField
@@ -187,7 +232,7 @@ export default function Settings() {
       </Card>
 
       {/* --- Focus & density ---------------------------------------------- */}
-      <Card>
+      <Card id="settings-focus" className="settings-anchor" tabIndex={-1}>
         <CardHeader title="Focus & density" />
         <CardBody className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <div className="flex flex-col gap-3">
@@ -289,9 +334,8 @@ export default function Settings() {
         </CardBody>
       </Card>
 
-      <ProgressExportCard userId={userId} learnerName={profile?.name ?? 'HETU learner'} />
-
       {/* --- Profile (compact) -------------------------------------------- */}
+      <section id="settings-profile" className="settings-anchor settings-group" tabIndex={-1} aria-label="Account and access settings">
       <ProfileCard
         profile={profile}
         sandbox={sandbox}
@@ -299,40 +343,67 @@ export default function Settings() {
         onSave={updateProfile}
         onToast={pushToast}
       />
+      <AccessRequestsCard userId={userId} />
+      <InvitesCard userId={userId} sandbox={sandbox} />
+      </section>
 
       {/* --- Notifications ------------------------------------------------ */}
+      <section id="settings-notifications" className="settings-anchor settings-group" tabIndex={-1} aria-label="Reminder settings">
       <BuddyNotificationsCard profile={profile} sandbox={sandbox} />
       <StudyNotificationsCard profile={profile} sandbox={sandbox} />
       <NotificationsCard profile={profile} sandbox={sandbox} />
-
-      {/* --- Access requests (owner-only) --------------------------------- */}
-      <AccessRequestsCard userId={userId} />
-
-      {/* --- Invites ------------------------------------------------------ */}
-      <InvitesCard userId={userId} sandbox={sandbox} />
+      </section>
 
       {/* --- Usage -------------------------------------------------------- */}
+      <section id="settings-data" className="settings-anchor settings-group" tabIndex={-1} aria-label="Study data settings">
+      <ProgressExportCard userId={userId} learnerName={profile?.name ?? 'HETU learner'} />
       <DataCard
         profile={profile}
         userId={userId}
         sandbox={sandbox}
         onBackup={() => prefs.markBackupNow()}
       />
+      </section>
 
       {/* --- Session ------------------------------------------------------ */}
-      <Card>
+      <Card id="settings-session" className="settings-anchor settings-signout" tabIndex={-1}>
         <CardHeader title="Session" />
         <CardBody className="flex flex-wrap items-center justify-between gap-3">
           <p className="text-[12px] text-text-muted">
             Sign-out first confirms every pending database write, then removes only this device's
             cache. If anything is still pending, sign-out is safely blocked.
           </p>
-          <Button variant="danger" onClick={() => void onSignOut()} disabled={signingOut}>
-            <LogOut size={14} className="mr-1" strokeWidth={1.75} />
-            {signingOut ? 'Signing out…' : 'Sign out'}
-          </Button>
+          {lastSignOutError ? (
+            <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setLastSignOutError(null)}
+                disabled={signingOut}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="danger"
+                size="sm"
+                onClick={() => void onSignOut(true)}
+                disabled={signingOut}
+                title="Sign out immediately even if pending sync cannot finish"
+              >
+                <LogOut size={14} className="mr-1" strokeWidth={1.75} />
+                {signingOut ? 'Signing out…' : 'Force sign out'}
+              </Button>
+            </div>
+          ) : (
+            <Button variant="danger" onClick={() => void onSignOut()} disabled={signingOut}>
+              <LogOut size={14} className="mr-1" strokeWidth={1.75} />
+              {signingOut ? 'Signing out…' : 'Sign out'}
+            </Button>
+          )}
         </CardBody>
       </Card>
+        </div>
+      </div>
     </div>
   );
 

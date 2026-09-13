@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
-import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
+import { motion, useReducedMotion } from 'motion/react';
 import {
   BookOpen,
   CalendarCheck,
@@ -25,57 +25,42 @@ import {
   Target,
   Users,
   X,
-  Zap
+  Zap,
+  Ellipsis,
+  LogOut
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { cn } from '@/lib/utils';
 import { db } from '@/lib/db';
 import { useSessionStore } from '@/stores/session';
+import { useAuthStore } from '@/stores/auth';
+import { useUiStore } from '@/stores/ui';
+import { useAuth } from '@/hooks/useAuth';
 import { haptic } from '@/lib/native';
 
-/* ─── Primary tabs (4 only) ─────────────────────────────────── */
-interface Tab {
-  to: string;
-  label: string;
-  icon: LucideIcon;
-  match: string[];
-}
-
-const TABS: Tab[] = [
-  { to: '/', label: 'Home', icon: Gauge, match: ['/'] },
-  { to: '/log', label: 'Log', icon: PenLine, match: ['/log'] },
-  { to: '/planner', label: 'Planner', icon: CalendarDays, match: ['/planner'] }
+type Item = { to: string; label: string; icon: LucideIcon };
+const TABS: Item[] = [
+  { to: '/', label: 'Home', icon: Gauge },
+  { to: '/log', label: 'Log', icon: PenLine },
+  { to: '/planner', label: 'Planner', icon: CalendarDays }
 ];
-
-/* ─── More sheet groups ──────────────────────────────────────── */
-interface MoreItem {
-  to: string;
-  label: string;
-  icon: LucideIcon;
-}
-
-const MORE_GROUPS: { label: string; items: MoreItem[] }[] = [
+const MORE_GROUPS: { label: string; items: Item[] }[] = [
   {
     label: 'Study',
     items: [
-      { to: '/journal', label: 'Journal', icon: NotebookText },
       { to: '/today', label: 'Do now', icon: ClipboardList },
       { to: '/pyq', label: 'PYQ practice', icon: LibraryBig },
-      { to: '/revision-pack', label: 'Revision pack', icon: ClipboardList }
-    ]
-  },
-  {
-    label: 'Practice',
-    items: [
       { to: '/capture', label: 'Quick capture', icon: Camera },
       { to: '/mocks', label: 'Mock tests', icon: FileCheck2 },
-      { to: '/reattempts', label: 'Re-attempts', icon: RotateCcw }
+      { to: '/buddy', label: 'Buddy', icon: Users }
     ]
   },
   {
-    label: 'Analysis',
+    label: 'Reflect',
     items: [
+      { to: '/journal', label: 'Journal', icon: NotebookText },
+      { to: '/reattempts', label: 'Re-attempts', icon: RotateCcw },
       { to: '/weekly-review', label: 'Weekly review', icon: CalendarCheck },
       { to: '/heatmap', label: 'Heatmap', icon: Grid3x3 },
       { to: '/calibration', label: 'Calibration', icon: Target },
@@ -84,270 +69,255 @@ const MORE_GROUPS: { label: string; items: MoreItem[] }[] = [
     ]
   },
   {
-    label: 'Learn',
+    label: 'Library',
     items: [
       { to: '/topper-notes', label: 'Topper notes', icon: BookOpen },
+      { to: '/revision-pack', label: 'Revision pack', icon: ClipboardList },
       { to: '/syllabus', label: 'Syllabus tracker', icon: ListChecks },
       { to: '/trigger-drill', label: 'Trigger drill', icon: Zap },
       { to: '/formulas', label: 'Formulas', icon: Sigma }
     ]
-  },
-  {
-    label: 'Community',
-    items: [{ to: '/buddy', label: 'Buddy', icon: Users }]
   }
 ];
 
-const SETTINGS_ITEM: MoreItem = { to: '/settings', label: 'Settings', icon: Settings };
-
-/* ─── Component ─────────────────────────────────────────────── */
 export default function MobileTabs() {
   const { pathname } = useLocation();
   const [moreOpen, setMoreOpen] = useState(false);
   const reduceMotion = useReducedMotion();
-  const sheetRef = useRef<HTMLElement>(null);
-
+  const sheetRef = useRef<HTMLDialogElement>(null);
+  const moreButtonRef = useRef<HTMLButtonElement>(null);
+  const closeRef = useRef<HTMLButtonElement>(null);
+  const { profile, sandbox } = useAuth();
+  const signOut = useAuthStore((s) => s.signOut);
+  const pushToast = useUiStore((s) => s.pushToast);
   const storedSessionId = useSessionStore((s) => s.sessionId);
   const liveSessionId = useLiveQuery(async () => {
     if (!storedSessionId) return null;
     const row = await db.sessions.get(storedSessionId);
     return row && row.actual_duration_min === null ? storedSessionId : null;
   }, [storedSessionId]);
-
-  // FAB target: resume live session or start a new one
   const fabTo = liveSessionId ? `/session/${liveSessionId}/solve` : '/session/new';
   const fabLabel = liveSessionId ? 'Resume session' : 'Start session';
-
-  const moreActive = MORE_GROUPS.flatMap((g) => g.items)
-    .concat(SETTINGS_ITEM)
+  const moreActive = MORE_GROUPS.flatMap((group) => group.items)
+    .concat({ to: '/settings', label: 'Settings', icon: Settings })
     .some(({ to }) => pathname === to || pathname.startsWith(`${to}/`));
-  const moreHighlighted = moreOpen || moreActive;
-
-  // Close sheet on navigation
+  const transition = reduceMotion
+    ? { duration: 0 }
+    : { type: 'spring' as const, stiffness: 500, damping: 38 };
   useEffect(() => {
     setMoreOpen(false);
   }, [pathname]);
-
-  // Keyboard close
   useEffect(() => {
-    if (!moreOpen) return;
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setMoreOpen(false);
+    const sheet = sheetRef.current;
+    if (!moreOpen || !sheet) return;
+    const returnFocus = moreButtonRef.current;
+    const previousOverflow = document.body.style.overflow;
+    sheet.showModal();
+    document.body.style.overflow = 'hidden';
+    closeRef.current?.focus();
+    const desktop = window.matchMedia('(min-width: 768px)');
+    const closeOnDesktop = () => {
+      if (desktop.matches && !document.documentElement.hasAttribute('data-native'))
+        setMoreOpen(false);
     };
-    window.addEventListener('keydown', handler);
-    return () => window.removeEventListener('keydown', handler);
+    desktop.addEventListener('change', closeOnDesktop);
+    return () => {
+      sheet.close();
+      document.body.style.overflow = previousOverflow;
+      returnFocus?.focus();
+      desktop.removeEventListener('change', closeOnDesktop);
+    };
   }, [moreOpen]);
 
+  const [signingOut, setSigningOut] = useState(false);
+  const [forceReady, setForceReady] = useState(false);
+  const signOutInFlightRef = useRef(false);
+  async function handleSignOut(force = false) {
+    if (signOutInFlightRef.current) return;
+    const shouldForce = force || forceReady;
+    signOutInFlightRef.current = true;
+    setSigningOut(true);
+    try {
+      const result = await signOut({ force: shouldForce });
+      if (result.error && !shouldForce) {
+        setForceReady(true);
+        pushToast(`${result.error} Tap 'Force sign out' to exit immediately.`, 'danger');
+      } else if (result.error) {
+        pushToast(result.error, 'danger');
+      }
+    } catch (error) {
+      const detail = error instanceof Error ? error.message : 'Sign-out failed.';
+      pushToast(detail, 'danger');
+      setForceReady(true);
+    } finally {
+      signOutInFlightRef.current = false;
+      setSigningOut(false);
+    }
+  }
+  function tab(item: Item) {
+    const Icon = item.icon;
+    const active = item.to === '/' ? pathname === '/' : pathname.startsWith(item.to);
+    return (
+      <NavLink
+        key={item.to}
+        to={item.to}
+        end={item.to === '/'}
+        onClick={() => haptic('selection')}
+        className={cn('workspace-dock-tab native-bottom-tab', active && 'is-active')}
+      >
+        {active && (
+          <motion.span
+            className="workspace-dock-indicator"
+            layoutId={reduceMotion ? undefined : 'workspace-dock-active'}
+            transition={transition}
+            aria-hidden
+          />
+        )}
+        <Icon size={20} strokeWidth={1.7} aria-hidden />
+        <span>{item.label}</span>
+      </NavLink>
+    );
+  }
   return (
     <>
-      {/* ── More sheet overlay ── */}
-      <AnimatePresence>
-        {moreOpen && (
-          <motion.div
-            initial={reduceMotion ? false : { opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.16 }}
-            className="native-nav-overlay fixed inset-0 z-40 md:hidden"
-          >
-            {/* Scrim */}
-            <motion.button
+      <dialog
+        ref={sheetRef}
+        id="workspace-mobile-menu"
+        className="workspace-menu native-more-sheet"
+        aria-labelledby="workspace-menu-title"
+        onCancel={() => setMoreOpen(false)}
+        onClick={(event) => {
+          if (event.target === event.currentTarget) setMoreOpen(false);
+        }}
+      >
+        <div className="workspace-menu__panel">
+          <header className="workspace-menu__header">
+            <div>
+              <h2 id="workspace-menu-title">All sections</h2>
+              <p>Your space to study, reflect, and grow.</p>
+            </div>
+            <button
+              ref={closeRef}
               type="button"
-              className="absolute inset-0 bg-scrim/40 backdrop-blur-[2px]"
-              aria-label="Close navigation menu"
+              className="workspace-icon-button"
               onClick={() => setMoreOpen(false)}
-            />
-
-            {/* Sheet */}
-            <motion.section
-              ref={sheetRef}
-              initial={reduceMotion ? false : { opacity: 0, y: 20, scale: 0.98 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 12, scale: 0.99 }}
-              transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
-              className="native-more-sheet absolute inset-x-3 bottom-[calc(4.5rem+var(--safe-bottom))] rounded-xl border border-border bg-bg-raised shadow-lift overflow-hidden"
-              aria-label="All sections"
-              role="dialog"
-              aria-modal="true"
+              aria-label="Close"
             >
-              {/* Sheet header */}
-              <div className="flex items-center justify-between border-b border-border px-4 py-3">
-                <p className="text-[13px] font-semibold text-text">All sections</p>
+              <X size={19} aria-hidden />
+            </button>
+          </header>
+          <nav className="workspace-menu__groups" aria-label="All sections">
+            {MORE_GROUPS.map((group) => (
+              <section key={group.label}>
+                <h3>{group.label}</h3>
+                <div>
+                  {group.items.map((item) => {
+                    const Icon = item.icon;
+                    return (
+                      <NavLink
+                        key={item.to}
+                        to={item.to}
+                        onClick={() => {
+                          haptic('selection');
+                          setMoreOpen(false);
+                        }}
+                        className={({ isActive }) =>
+                          cn('workspace-menu__link', isActive && 'is-active')
+                        }
+                      >
+                        <Icon size={18} strokeWidth={1.7} aria-hidden />
+                        <span>{item.label}</span>
+                        <ChevronRight size={13} aria-hidden />
+                      </NavLink>
+                    );
+                  })}
+                </div>
+              </section>
+            ))}
+          </nav>
+          <footer className="workspace-menu__footer">
+            <NavLink to="/settings" onClick={() => setMoreOpen(false)}>
+              <Settings size={17} aria-hidden />
+              <span>Settings</span>
+            </NavLink>
+            <div>
+              {forceReady ? (
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setForceReady(false)}
+                    disabled={signingOut}
+                    className="text-[11px] text-text-muted"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => void handleSignOut(true)}
+                    disabled={signingOut}
+                    className="flex items-center gap-1.5 text-[11px] font-semibold text-danger"
+                    aria-label="Force sign out"
+                  >
+                    <LogOut size={14} aria-hidden className={signingOut ? 'animate-spin' : undefined} />
+                    {signingOut ? 'Signing out…' : 'Force sign out'}
+                  </button>
+                </div>
+              ) : (
                 <button
                   type="button"
-                  onClick={() => setMoreOpen(false)}
-                  className="flex h-8 w-8 items-center justify-center rounded-full bg-bg-overlay text-text-faint transition-colors hover:text-text"
-                  aria-label="Close"
+                  onClick={() => void handleSignOut()}
+                  disabled={signingOut}
+                  aria-label="Sign out"
                 >
-                  <X size={15} />
+                  <LogOut size={16} aria-hidden className={signingOut ? 'animate-spin' : undefined} />
+                  {signingOut ? 'Signing out…' : 'Sign out'}
                 </button>
-              </div>
-
-              {/* Scrollable groups */}
-              <div
-                className="overflow-y-auto overscroll-contain"
-                style={{ maxHeight: 'calc(75dvh - var(--safe-top) - var(--safe-bottom))' }}
-              >
-                {MORE_GROUPS.map((group) => (
-                  <div key={group.label}>
-                    <p className="px-4 pt-3 pb-1 text-[10px] font-semibold uppercase tracking-widest text-text-faint font-mono">
-                      {group.label}
-                    </p>
-                    {group.items.map((item) => {
-                      const Icon = item.icon;
-                      const active = pathname === item.to || pathname.startsWith(`${item.to}/`);
-                      return (
-                        <NavLink
-                          key={item.to}
-                          to={item.to}
-                          onClick={() => haptic('selection')}
-                          className={cn(
-                            'flex items-center gap-3 px-4 py-3 transition-colors active:bg-bg-overlay',
-                            active
-                              ? 'text-accent bg-accent-faint/60'
-                              : 'text-text-muted hover:bg-bg-overlay'
-                          )}
-                        >
-                          <Icon size={17} strokeWidth={1.75} className="shrink-0" />
-                          <span className="flex-1 text-[13.5px] font-medium">{item.label}</span>
-                          <ChevronRight size={14} className="shrink-0 text-text-faint/60" />
-                        </NavLink>
-                      );
-                    })}
-                  </div>
-                ))}
-
-                {/* Settings — separated */}
-                <div className="border-t border-border mt-1 pb-2">
-                  <NavLink
-                    to={SETTINGS_ITEM.to}
-                    onClick={() => haptic('selection')}
-                    className={cn(
-                      'flex items-center gap-3 px-4 py-3 transition-colors active:bg-bg-overlay',
-                      pathname === SETTINGS_ITEM.to
-                        ? 'text-accent bg-accent-faint/60'
-                        : 'text-text-muted hover:bg-bg-overlay'
-                    )}
-                  >
-                    <Settings size={17} strokeWidth={1.75} className="shrink-0" />
-                    <span className="flex-1 text-[13.5px] font-medium">Settings</span>
-                    <ChevronRight size={14} className="shrink-0 text-text-faint/60" />
-                  </NavLink>
-                </div>
-              </div>
-            </motion.section>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* ── Bottom nav bar ── */}
-      <nav
-        className="native-bottom-nav fixed inset-x-0 bottom-0 z-50 flex items-stretch border-t border-border bg-bg-raised/96 pb-[var(--safe-bottom)] shadow-nav backdrop-blur-sm md:hidden"
-        aria-label="Primary navigation"
-      >
-        {/* First 2 tabs: Home, Log */}
-        {TABS.slice(0, 2).map((tab) => (
-          <TabButton key={tab.to} tab={tab} pathname={pathname} />
-        ))}
-
-        {/* FAB — centre */}
-        <div className="flex flex-1 items-center justify-center">
+              )}
+            </div>
+          </footer>
+        </div>
+      </dialog>
+      <nav className="workspace-dock native-bottom-nav" aria-label="Primary navigation">
+        {TABS.slice(0, 2).map(tab)}
+        <div className="workspace-dock-center">
           <NavLink
             to={fabTo}
             onClick={() => haptic('firm')}
             aria-label={fabLabel}
-            className={({ isActive }) =>
-              cn(
-                'relative flex h-12 w-12 items-center justify-center rounded-full shadow-lift transition-all duration-150',
-                'active:scale-90',
-                isActive
-                  ? 'bg-accent-hover text-accent-contrast'
-                  : 'bg-accent text-accent-contrast hover:bg-accent-hover'
-              )
-            }
+            className="workspace-dock-session"
           >
-            {liveSessionId ? (
-              <Play size={20} strokeWidth={2} className="translate-x-px" />
-            ) : (
-              <Plus size={22} strokeWidth={2.25} />
-            )}
+            {liveSessionId ? <Play size={22} aria-hidden /> : <Plus size={25} aria-hidden />}
           </NavLink>
         </div>
-
-        {/* Last tab: Planner */}
-        {TABS.slice(2).map((tab) => (
-          <TabButton key={tab.to} tab={tab} pathname={pathname} />
-        ))}
-
-        {/* More button */}
+        {TABS.slice(2).map(tab)}
         <button
+          ref={moreButtonRef}
           type="button"
           onClick={() => {
             haptic('selection');
-            setMoreOpen((o) => !o);
+            setMoreOpen((open) => !open);
           }}
           aria-expanded={moreOpen}
+          aria-controls="workspace-mobile-menu"
+          aria-haspopup="dialog"
           aria-label="More sections"
           className={cn(
-            'native-bottom-tab relative flex flex-1 flex-col items-center justify-center gap-1 transition-colors active:scale-95',
-            moreHighlighted ? 'text-accent' : 'text-text-faint'
+            'workspace-dock-tab native-bottom-tab',
+            (moreOpen || moreActive) && 'is-active'
           )}
         >
-          {moreHighlighted && (
+          {(moreOpen || moreActive) && (
             <motion.span
-              layoutId="mobile-tab-indicator"
-              transition={{ type: 'spring', stiffness: 520, damping: 38 }}
-              className="absolute inset-x-3 top-0 h-[2.5px] rounded-b-full bg-accent"
+              className="workspace-dock-indicator"
+              layoutId={reduceMotion ? undefined : 'workspace-dock-active'}
+              transition={transition}
+              aria-hidden
             />
           )}
-          <svg
-            width="19"
-            height="19"
-            viewBox="0 0 19 19"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-            aria-hidden="true"
-            className="transition-transform duration-150"
-            style={{ transform: moreOpen ? 'rotate(90deg)' : 'none' }}
-          >
-            <circle cx="4" cy="9.5" r="1.5" fill="currentColor" />
-            <circle cx="9.5" cy="9.5" r="1.5" fill="currentColor" />
-            <circle cx="15" cy="9.5" r="1.5" fill="currentColor" />
-          </svg>
-          <span className="text-[9.5px] font-semibold tracking-tight">More</span>
+          <Ellipsis size={21} aria-hidden />
+          <span>More</span>
         </button>
       </nav>
     </>
-  );
-}
-
-/* ─── TabButton sub-component ───────────────────────────────── */
-function TabButton({ tab, pathname }: { tab: Tab; pathname: string }) {
-  const Icon = tab.icon;
-  const active =
-    tab.to === '/'
-      ? pathname === '/'
-      : tab.match.some((m) => pathname === m || pathname.startsWith(`${m}/`));
-
-  return (
-    <NavLink
-      to={tab.to}
-      end={tab.to === '/'}
-      onClick={() => haptic('selection')}
-      className={cn(
-        'native-bottom-tab relative flex flex-1 flex-col items-center justify-center gap-1 transition-colors active:scale-95',
-        active ? 'text-accent' : 'text-text-faint'
-      )}
-    >
-      {active && (
-        <motion.span
-          layoutId="mobile-tab-indicator"
-          transition={{ type: 'spring', stiffness: 520, damping: 38 }}
-          className="absolute inset-x-3 top-0 h-[2.5px] rounded-b-full bg-accent"
-        />
-      )}
-      <Icon size={19} strokeWidth={1.75} />
-      <span className="text-[9.5px] font-semibold tracking-tight">{tab.label}</span>
-    </NavLink>
   );
 }

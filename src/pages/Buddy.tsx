@@ -36,6 +36,7 @@ import { shortBuddyTime } from '@/lib/buddy';
 import { cn } from '@/lib/utils';
 import { isNativeApp } from '@/lib/native';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
+import '@/supporting-surfaces.css';
 
 interface BuddyRowExt extends BuddyRow {
   requested_by: string | null;
@@ -91,6 +92,21 @@ function peerDisplay(p: PeerLite): string {
 /** @-handle for the preview line; falls back to 'buddy' if empty. */
 function peerHandle(p: PeerLite): string {
   return (p.username || '').trim() || 'buddy';
+}
+
+function BuddyConnectionArt({ compact = false }: { compact?: boolean }) {
+  return (
+    <div className={cn('buddy-connection-art', compact && 'buddy-connection-art--compact')} aria-hidden="true">
+      <div className="buddy-connection-art__stage">
+        <span className="buddy-connection-art__orbit" />
+        <span className="buddy-connection-art__bridge" />
+        <span className="buddy-connection-art__node buddy-connection-art__node--first" />
+        <span className="buddy-connection-art__node buddy-connection-art__node--second" />
+        <span className="buddy-connection-art__spark buddy-connection-art__spark--first" />
+        <span className="buddy-connection-art__spark buddy-connection-art__spark--second" />
+      </div>
+    </div>
+  );
 }
 
 export default function Buddy() {
@@ -457,26 +473,38 @@ export default function Buddy() {
 
   if (showLocalMsg) {
     return (
-      <div className="flex flex-col gap-4">
+      <div className="buddy-workspace flex flex-col gap-4">
         <PageHeader title="Buddy" description="One peer at a time." />
-        <Card>
-          <CardBody className="flex flex-wrap items-center justify-between gap-3">
-            <p className="text-[12.5px] text-text-muted">
-              Sandbox / local-only mode. Buddy features rely on Supabase auth.
-            </p>
+        <section className="buddy-connection" aria-labelledby="buddy-connection-title">
+          <BuddyConnectionArt />
+          <div className="buddy-connection__copy">
+            <span className="buddy-connection__eyebrow">A shared study desk</span>
+            <h2 id="buddy-connection-title">Two minds.<br />A clearer way through.</h2>
+            <p>Talk through a difficult step, share a question, and give a good idea a second perspective.</p>
+            <div className="buddy-connection__availability">
+              <strong>Available with a signed-in account</strong>
+              <p>{sandbox
+                ? 'You’re exploring the local sandbox. Sign in with your account to connect with a study partner.'
+                : 'Buddy connections are unavailable in this environment. Open Settings to check your account.'}</p>
+            </div>
             <Link to="/settings">
-              <Button variant="ghost" size="sm">
+              <Button variant="primary">
                 Open Settings
               </Button>
             </Link>
-          </CardBody>
-        </Card>
+          </div>
+        </section>
+        <div className="buddy-principles">
+          <div><MessageSquarePlus size={19} aria-hidden /><h3>Think out loud</h3><p>Work through the reasoning with one peer at a time.</p></div>
+          <div><BookOpen size={19} aria-hidden /><h3>Share the question</h3><p>Your tags stay hidden when you share a question.</p></div>
+          <div><UserPlus size={19} aria-hidden /><h3>Choose your partner</h3><p>Connect by username and start when you’re both ready.</p></div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="native-buddy-page flex h-[calc(100dvh-8rem)] flex-col gap-3">
+    <div className="buddy-workspace native-buddy-page flex h-[calc(100dvh-8rem)] flex-col gap-3">
       <AnimatePresence initial={false}>
         {desktopLayout || mobileView === 'list' ? (
           <motion.div
@@ -657,10 +685,8 @@ export default function Buddy() {
                   </div>
                 </div>
               ) : (
-                <div className="flex h-full flex-col items-center justify-center gap-3 rounded-lg border border-border bg-bg/70 p-6 text-center">
-                  <span className="flex h-12 w-12 items-center justify-center rounded-lg border border-border bg-bg-raised text-ink-marigold shadow-sm">
-                    <BookOpen size={22} strokeWidth={1.5} />
-                  </span>
+                <div className="buddy-empty-desk flex h-full flex-col items-center justify-center gap-3 rounded-lg border border-border bg-bg/70 p-6 text-center">
+                  <BuddyConnectionArt compact />
                   <p className="font-display text-[16px] font-semibold text-text">
                     Open a study desk
                   </p>

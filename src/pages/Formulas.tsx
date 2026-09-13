@@ -98,7 +98,7 @@ export default function Formulas() {
   }
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="workspace-formulas flex flex-col gap-4">
       <PageHeader
         title="Formulas"
         description="Build a compact formula library by hand, then review each item on a calm spaced schedule."

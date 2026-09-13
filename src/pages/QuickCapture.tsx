@@ -101,7 +101,7 @@ export default function QuickCapture() {
   }
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="workspace-capture flex flex-col gap-4">
       <PageHeader
         title="Quick capture"
         description="Photograph the question, record what happened, and move on. Complete analysis later."

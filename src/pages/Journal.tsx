@@ -485,7 +485,7 @@ export default function Journal() {
   }
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="workspace-journal flex flex-col gap-4">
       <PageHeader
         title="Journal"
         description={
@@ -495,7 +495,7 @@ export default function Journal() {
         }
       />
 
-      <Card>
+      <Card className="workspace-filters">
         <CardBody className="flex flex-col gap-3">
           <div className="flex flex-wrap gap-2">
             <Input

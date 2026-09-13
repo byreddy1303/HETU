@@ -294,7 +294,7 @@ export default function SyllabusTracker() {
   }
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="workspace-syllabus flex flex-col gap-4">
       <PageHeader
         title="Syllabus tracker"
         description="Track topic coverage across the complete GATE CSE syllabus with verified practice evidence."

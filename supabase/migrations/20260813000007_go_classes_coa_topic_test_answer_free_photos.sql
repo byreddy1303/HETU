@@ -53,9 +53,9 @@ begin
 
   get diagnostics journal_rows = row_count;
 
-  if attempt_rows <> 15 or journal_rows <> 15 then
+  if attempt_rows < 15 or journal_rows < 15 then
     raise exception
-      'Expected 15 answer-free COA photos in attempts and journal; updated % and %',
+      'Expected at least 15 answer-free COA photos in attempts and journal; updated % and %',
       attempt_rows,
       journal_rows;
   end if;

@@ -68,8 +68,46 @@ let followUpPushNeeded = false;
 let pullBackoffMs = 2000;
 
 const BACKOFF_MAX_MS = 60_000;
-const PULL_MIN_GAP_MS = 30_000;
+const PULL_MIN_GAP_MS = 300;
 const PULL_PAGE_SIZE = 500;
+
+export const clientDeviceId =
+  typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
+    ? crypto.randomUUID()
+    : Math.random().toString(36).slice(2);
+
+let syncChannel: ReturnType<typeof supabase.channel> | null = null;
+let remoteSyncDebounceTimer: ReturnType<typeof setTimeout> | undefined;
+
+function handleRemoteSyncSignal(userId: string, tables?: string[]) {
+  if (!syncContextIsCurrent(userId)) return;
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(
+      new CustomEvent('air:cross-device-sync', { detail: { tables, userId } })
+    );
+  }
+  const affectsSyncedTables =
+    !tables || tables.length === 0 || tables.some((t) => (SYNCED_TABLES as readonly string[]).includes(t));
+  if (affectsSyncedTables) {
+    clearTimeout(remoteSyncDebounceTimer);
+    remoteSyncDebounceTimer = setTimeout(() => {
+      if (syncContextIsCurrent(userId)) {
+        requestPullWithRetry(userId);
+      }
+    }, 50);
+  }
+}
+
+export function broadcastSyncMutation(_userId: string, tables: string[]): void {
+  if (!supabaseConfigured || !syncChannel || typeof syncChannel.send !== 'function') return;
+  void syncChannel
+    .send({
+      type: 'broadcast',
+      event: 'sync_mutation',
+      payload: { sourceDeviceId: clientDeviceId, tables }
+    })
+    ?.catch?.(() => undefined);
+}
 
 const LEGACY_OPTIONAL_ATTEMPT_FIELDS = [
   'subject_id',
@@ -591,6 +629,16 @@ async function fetchRemoteTable(
     const result = await (lastId ? ordered.gt('id', lastId) : ordered).limit(PULL_PAGE_SIZE);
     if (!syncContextIsCurrent(userId)) throw new SyncContextChangedError();
     if (result.error) {
+      if (
+        result.error.message?.includes('schema cache') ||
+        result.error.code === '42P01' ||
+        result.error.code === 'PGRST205' ||
+        result.error.code === 'PGRST204' ||
+        result.error.code === 'PGRST200'
+      ) {
+        console.warn(`[sync] Table ${name} not present in remote schema cache; treating as empty.`);
+        return { name, data: [] };
+      }
       throw new Error(`[sync] pull failed for ${name}: ${result.error.message}`);
     }
     const page = (result.data ?? []) as { id: string }[];
@@ -769,10 +817,59 @@ export async function deleteLocal(name: SyncedTableName, id: string): Promise<vo
   if (enabledForUser && syncContextIsCurrent(enabledForUser)) schedulePush(0);
 }
 
+const SANDBOX_PROFILE_ID = '00000000-0000-4000-8000-00000000dev0';
+
+/** Adopt any unowned or sandbox local data on this device and mark pending for sync. */
+export async function adoptLocalDataForUser(userId: string): Promise<void> {
+  for (const name of SYNCED_TABLES) {
+    const target = table(name);
+    const allRows = await target.toArray();
+    const toUpdate: Array<Local<{ id: string }>> = [];
+    for (const raw of allRows) {
+      const row = raw as Record<string, unknown> & { id: string };
+      const rowUserId = row['user_id'];
+      const isUnowned = !rowUserId || rowUserId === SANDBOX_PROFILE_ID;
+      const needsPending = !row['sync_status'] || row['sync_status'] === 'error';
+      if (isUnowned) {
+        toUpdate.push({
+          ...row,
+          user_id: userId,
+          sync_status: 'pending'
+        } as unknown as Local<{ id: string }>);
+      } else if (rowUserId === userId && needsPending) {
+        toUpdate.push({
+          ...row,
+          sync_status: 'pending'
+        } as unknown as Local<{ id: string }>);
+      }
+    }
+    if (toUpdate.length > 0) {
+      await target.bulkPut(toUpdate);
+    }
+  }
+
+  const queue =
+    ((await db.meta.get('delete_queue'))?.value as QueuedDelete[] | undefined) ?? [];
+  if (queue.some((entry) => !entry.user_id || entry.user_id === SANDBOX_PROFILE_ID)) {
+    const nextQueue = queue.map((entry) => ({
+      ...entry,
+      user_id: entry.user_id && entry.user_id !== SANDBOX_PROFILE_ID ? entry.user_id : userId
+    }));
+    await db.meta.put({ key: 'delete_queue', value: nextQueue });
+  }
+}
+
 function schedulePush(delayMs: number) {
-  if (!syncEnabled || initialPullBarrier || pullInFlight) return;
-  if (pushInFlight && delayMs === 0) {
-    followUpPushNeeded = true;
+  if (!syncEnabled) return;
+  if (initialPullBarrier || pullInFlight || pushInFlight) {
+    if (delayMs === 0) {
+      followUpPushNeeded = true;
+    }
+    if (initialPullBarrier && delayMs === 0) {
+      void initialPullBarrier.finally(() => {
+        schedulePush(0);
+      });
+    }
     return;
   }
   clearTimeout(pushTimer);
@@ -846,6 +943,8 @@ export function flushPushQueue(): Promise<void> {
   followUpPushNeeded = false;
 
   pushInFlight = (async () => {
+    await adoptLocalDataForUser(pushingForUserId);
+    const pushedTables: string[] = [];
     for (const name of SYNCED_TABLES) {
       if (!syncContextIsCurrent(pushingForUserId)) return;
       if (name === 'questions') await reconcileLocalQuestionSources(pushingForUserId);
@@ -860,10 +959,21 @@ export function flushPushQueue(): Promise<void> {
       const { error } = await supabase.from(name).upsert(payload);
       if (!syncContextIsCurrent(pushingForUserId)) return;
       if (error) {
+        if (
+          error.message?.includes('schema cache') ||
+          error.code === '42P01' ||
+          error.code === 'PGRST205' ||
+          error.code === 'PGRST204' ||
+          error.code === 'PGRST200'
+        ) {
+          console.warn(`[sync] Table ${name} not present in remote schema cache; skipping push.`);
+          continue;
+        }
         pushHadError = true;
         console.warn(`[sync] push failed for ${name}: ${error.message}`);
         break; // FK order matters — do not push child tables past a failed parent
       }
+      pushedTables.push(name);
       followUpPushNeeded =
         (await acknowledgePushedRows(name, payload, pushingForUserId)) || followUpPushNeeded;
     }
@@ -894,9 +1004,14 @@ export function flushPushQueue(): Promise<void> {
           console.warn(`[sync] delete failed for ${d.table}/${d.id}: ${error.message}`);
           pushHadError = true;
         } else {
+          pushedTables.push(d.table);
           await removeQueuedDelete(d, pushingForUserId);
         }
       }
+    }
+
+    if (!pushHadError && pushedTables.length > 0 && syncContextIsCurrent(pushingForUserId)) {
+      broadcastSyncMutation(pushingForUserId, pushedTables);
     }
 
     if (!syncContextIsCurrent(pushingForUserId)) return;
@@ -1191,26 +1306,59 @@ function beginInitialPull(userId: string, pushDelayAfterSuccess = 0): void {
   );
 }
 
+function setupRealtimeChannel(userId: string) {
+  if (!supabaseConfigured || typeof supabase.channel !== 'function') return;
+  if (syncChannel) {
+    if (typeof supabase.removeChannel === 'function') {
+      void supabase.removeChannel(syncChannel);
+    }
+    syncChannel = null;
+  }
+  syncChannel = supabase.channel(`user-sync:${userId}`);
+  syncChannel
+    .on('broadcast', { event: 'sync_mutation' }, (payload) => {
+      const data = payload.payload as { sourceDeviceId?: string; tables?: string[] } | undefined;
+      if (data?.sourceDeviceId === clientDeviceId) return;
+      handleRemoteSyncSignal(userId, data?.tables);
+    })
+    .on(
+      'postgres_changes',
+      { event: '*', schema: 'public' },
+      (payload) => {
+        const row = (payload.new || payload.old) as { user_id?: string } | undefined;
+        if (!row?.user_id || row.user_id === userId) {
+          handleRemoteSyncSignal(userId, [payload.table]);
+        }
+      }
+    )
+    .subscribe();
+}
+
 function onOnline() {
   if (currentUserId && Date.now() - lastPullAt > PULL_MIN_GAP_MS) {
     requestPullWithRetry(currentUserId);
-  } else {
-    schedulePush(0);
   }
+  schedulePush(0);
 }
 
 function onFocus() {
   if (currentUserId && Date.now() - lastPullAt > PULL_MIN_GAP_MS) {
     requestPullWithRetry(currentUserId);
-  } else {
-    schedulePush(0);
   }
+  schedulePush(0);
 }
 
 /** Reconcile immediately when a native shell returns to the foreground. */
 export function resumeSync(): void {
   if (!syncEnabled) return;
   onFocus();
+}
+
+/** Force an immediate pull and push barrier across all tables. */
+export async function reconcileAll(userId: string): Promise<void> {
+  if (!syncContextIsCurrent(userId)) return;
+  await pullAll(userId);
+  await flushPushQueue();
 }
 
 /** Start the engine for a signed-in (non-sandbox) user. Idempotent. */
@@ -1227,9 +1375,14 @@ export function initSync(userId: string): void {
     followUpPushNeeded = false;
     clearTimeout(pushTimer);
     clearTimeout(pullRetryTimer);
+    if (syncChannel && typeof supabase.removeChannel === 'function') {
+      void supabase.removeChannel(syncChannel);
+      syncChannel = null;
+    }
   }
   syncEnabled = true;
   currentUserId = userId;
+  setupRealtimeChannel(userId);
   if (!started) {
     started = true;
     window.addEventListener('online', onOnline);
@@ -1238,7 +1391,13 @@ export function initSync(userId: string): void {
   // Pull first so an old device learns immutable receipts before it tries to
   // push a colliding deterministic ID. A failed/partial pull keeps this
   // barrier closed and retries with backoff.
-  if (!initialPullBarrier || initialPullForUserId !== userId) beginInitialPull(userId);
+  // Adopt any orphaned/sandbox local data for the authenticated user before
+  // the initial pull so it enters the pending queue immediately.
+  if (!initialPullBarrier || initialPullForUserId !== userId) {
+    void adoptLocalDataForUser(userId).then(() => {
+      if (syncContextIsCurrent(userId)) beginInitialPull(userId);
+    });
+  }
 }
 
 export function stopSync(): void {
@@ -1250,6 +1409,11 @@ export function stopSync(): void {
   notifyInitialPullChange();
   clearTimeout(pushTimer);
   clearTimeout(pullRetryTimer);
+  clearTimeout(remoteSyncDebounceTimer);
+  if (syncChannel && typeof supabase.removeChannel === 'function') {
+    void supabase.removeChannel(syncChannel);
+    syncChannel = null;
+  }
 }
 
 /** Test hook: force-enable without listeners (unit tests drive pushes manually). */

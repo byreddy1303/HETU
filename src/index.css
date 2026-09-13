@@ -1,6 +1,7 @@
 @import '@fontsource-variable/bricolage-grotesque';
 @import '@fontsource-variable/schibsted-grotesk';
 @import '@fontsource-variable/azeret-mono';
+@import './workspace.css';
 
 @tailwind base;
 @tailwind components;

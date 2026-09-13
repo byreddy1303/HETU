@@ -169,8 +169,8 @@ export default function SessionReview() {
   };
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="flex flex-wrap items-start justify-between gap-4 pb-2">
+    <div className="workspace-review flex flex-col gap-4">
+      <div className="review-heading flex flex-wrap items-start justify-between gap-4 pb-2">
         <div className="u-margin-line">
           <h1 className="font-display text-[26px] font-bold leading-tight tracking-tight">
             {pageTitle}

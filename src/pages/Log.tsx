@@ -270,7 +270,7 @@ export default function Log() {
   const showEntry = mode !== 'idle';
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="workspace-log flex flex-col gap-4">
       <PageHeader
         title="Log a question"
         description={

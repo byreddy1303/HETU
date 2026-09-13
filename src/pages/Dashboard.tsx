@@ -2,7 +2,7 @@ import { useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { differenceInCalendarDays, parseISO } from 'date-fns';
-import { ArrowRight, BookOpenCheck, CalendarRange, Target } from 'lucide-react';
+import { ArrowRight, BookOpenCheck, CalendarRange, Fingerprint, RotateCcw, Target } from 'lucide-react';
 import HeroCard from '@/components/dashboard/HeroCard';
 import LearningTips from '@/components/dashboard/LearningTips';
 import OutcomeDonut from '@/components/dashboard/OutcomeDonut';
@@ -225,7 +225,7 @@ export default function Dashboard() {
   const notClean = lastSessionQuestions.length - distribution.R;
 
   return (
-    <div className="flex flex-col gap-4 sm:gap-6">
+    <div className="workspace-dashboard flex flex-col gap-4 sm:gap-6">
       <WelcomeOverlay />
       <HeroCard
         name={profile?.name}
@@ -247,8 +247,26 @@ export default function Dashboard() {
         }
       />
 
+      <nav className="workspace-launchpad" aria-label="Your study loop">
+        <button type="button" className="workspace-launch" onClick={() => navigate('/pyq')}>
+          <span className="workspace-launch__icon"><BookOpenCheck size={21} aria-hidden /></span>
+          <span className="workspace-launch__text"><strong>Practice studio</strong><small>{uniquePyqsSeen.toLocaleString()} questions explored</small></span>
+          <ArrowRight size={16} aria-hidden />
+        </button>
+        <button type="button" className="workspace-launch" onClick={() => navigate('/reattempts')}>
+          <span className="workspace-launch__icon"><RotateCcw size={21} aria-hidden /></span>
+          <span className="workspace-launch__text"><strong>Return & recall</strong><small>{due} reviews ready for you</small></span>
+          <ArrowRight size={16} aria-hidden />
+        </button>
+        <button type="button" className="workspace-launch" onClick={() => navigate('/patterns')}>
+          <span className="workspace-launch__icon"><Fingerprint size={21} aria-hidden /></span>
+          <span className="workspace-launch__text"><strong>Find a connection</strong><small>Explore your recurring patterns</small></span>
+          <ArrowRight size={16} aria-hidden />
+        </button>
+      </nav>
+
       <div className="grid min-w-0 gap-4 lg:grid-cols-[minmax(0,1.65fr)_minmax(280px,0.85fr)]">
-        <Card className="min-w-0 overflow-hidden">
+        <Card className="dashboard-surface min-w-0 overflow-hidden">
           <CardHeader
             title="Mistake surface"
             aside={<span className="u-label text-text-faint">7 local days</span>}
@@ -257,7 +275,7 @@ export default function Dashboard() {
           <CardBody>
             <div className="flex flex-wrap items-end justify-between gap-3">
               <div>
-                <p className="u-num text-[34px] font-semibold leading-none text-text">{surface}</p>
+                <p className="dashboard-big-number u-num text-[34px] font-semibold leading-none text-text">{surface}</p>
                 <p className="mt-1.5 text-[11.5px] text-text-muted">open re-attempts now</p>
               </div>
               <div className="rounded-full border border-border bg-bg-overlay/50 px-3 py-1.5 text-[10.5px] text-text-muted">
@@ -290,7 +308,7 @@ export default function Dashboard() {
             aside={<Target size={14} className="text-accent" aria-hidden />}
             className="flex-nowrap items-center [&>div]:w-auto [&>div]:shrink-0"
           />
-          <CardBody className="flex h-[calc(100%-41px)] flex-col gap-5">
+          <CardBody className="flex flex-col gap-5">
             <TargetMeter label="Questions today" done={questionsToday} target={dailyQuestionTarget} />
             <TargetMeter label="Sessions this week" done={sessionsThisWeek} target={weeklySessionTarget} />
             <button
@@ -337,7 +355,7 @@ export default function Dashboard() {
       </div>
 
       <div className="grid min-w-0 gap-4 lg:grid-cols-[minmax(280px,0.85fr)_minmax(0,1.65fr)]">
-        <Card className="overflow-hidden">
+        <Card className="dashboard-weekly overflow-hidden">
           <CardHeader
             title="Weekly focus"
             aside={<CalendarRange size={14} className="text-ink-marigold" aria-hidden />}

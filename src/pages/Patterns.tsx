@@ -225,7 +225,7 @@ export default function Patterns() {
   const loading = patterns === undefined || questions === undefined;
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="workspace-patterns flex flex-col gap-4">
       <PageHeader
         title="Patterns"
         description={

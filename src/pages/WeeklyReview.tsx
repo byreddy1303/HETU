@@ -211,7 +211,7 @@ export default function WeeklyReview() {
   }
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="workspace-weekly flex flex-col gap-4">
       <PageHeader
         title="Weekly review"
         description={

@@ -1,5 +1,18 @@
 import { useState } from 'react';
-import { BookmarkPlus, Check, RefreshCw, Trash2 } from 'lucide-react';
+import {
+  BookOpen,
+  BookmarkPlus,
+  Check,
+  FileCheck2,
+  RefreshCw,
+  Route,
+  ScanSearch,
+  Shuffle,
+  SlidersHorizontal,
+  Timer,
+  Trash2,
+  Wrench
+} from 'lucide-react';
 import {
   PYQ_RECOMMENDATION_PRESETS,
   type RecommendedPyqSelection
@@ -9,6 +22,17 @@ import { cn, plural } from '@/lib/utils';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
+import './pyq-recommended-setup.css';
+
+const PRESET_ICONS = {
+  learn: BookOpen,
+  diagnose: ScanSearch,
+  repair: Wrench,
+  speed: Timer,
+  transfer: Route,
+  'mixed-gate': Shuffle,
+  'full-paper': FileCheck2
+} as const;
 
 export default function PyqRecommendedSetup({
   preset,
@@ -49,8 +73,8 @@ export default function PyqRecommendedSetup({
   }
 
   return (
-    <section aria-labelledby="recommended-pyq-heading" className="border-b border-border">
-      <div className="bg-bg-overlay/25 px-4 py-4 sm:px-5">
+    <section aria-labelledby="recommended-pyq-heading" className="pyq-recommended border-b border-border">
+      <div className="pyq-recommended__heading bg-bg-overlay/25 px-4 py-4 sm:px-5">
         <p id="recommended-pyq-heading" className="u-label text-accent">
           Recommended set
         </p>
@@ -60,36 +84,42 @@ export default function PyqRecommendedSetup({
         </p>
       </div>
 
-      <div className="grid gap-px bg-border sm:grid-cols-2 lg:grid-cols-4">
+      <div className="pyq-preset-deck">
         {presets.map((definition) => {
           const active = preset === definition.id;
+          const Icon = PRESET_ICONS[definition.id];
           return (
             <button
               key={definition.id}
               type="button"
+              data-preset={definition.id}
               aria-pressed={active}
               onClick={() => onPreset(definition.id)}
               className={cn(
-                'relative min-h-[112px] bg-bg-raised p-4 text-left transition-colors focus-visible:z-10 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-accent-faint',
+                'pyq-preset-control relative min-h-[112px] bg-bg-raised p-4 text-left transition-colors focus-visible:z-10 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-accent-faint',
                 active ? 'bg-accent-faint' : 'hover:bg-bg-overlay/60'
               )}
             >
-              <span className="flex items-start justify-between gap-3">
-                <span className="font-display text-[15px] font-semibold text-text">
-                  {definition.label}
+              <span className="pyq-preset-control__top">
+                <span className="pyq-preset-control__icon" aria-hidden="true">
+                  <Icon size={25} strokeWidth={1.55} />
                 </span>
                 <span
                   className={cn(
-                    'flex h-5 w-5 items-center justify-center rounded-full border',
+                    'pyq-preset-control__check flex h-5 w-5 items-center justify-center rounded-full border',
                     active
                       ? 'border-accent bg-accent text-accent-contrast'
                       : 'border-border-hover text-transparent'
                   )}
+                  aria-hidden="true"
                 >
                   <Check size={12} aria-hidden="true" />
                 </span>
               </span>
-              <span className="mt-2 block text-[11.5px] leading-relaxed text-text-muted">
+              <span className="pyq-preset-control__name font-display text-[15px] font-semibold text-text">
+                {definition.label}
+              </span>
+              <span className="pyq-preset-control__description mt-2 block text-[11.5px] leading-relaxed text-text-muted">
                 {definition.description}
               </span>
             </button>
@@ -97,24 +127,41 @@ export default function PyqRecommendedSetup({
         })}
         <button
           type="button"
+          data-preset="custom"
           aria-pressed={preset === 'custom'}
           onClick={() => onPreset('custom')}
           className={cn(
-            'relative min-h-[112px] bg-bg-raised p-4 text-left transition-colors focus-visible:z-10 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-accent-faint',
+            'pyq-preset-control relative min-h-[112px] bg-bg-raised p-4 text-left transition-colors focus-visible:z-10 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-accent-faint',
             preset === 'custom' ? 'bg-accent-faint' : 'hover:bg-bg-overlay/60'
           )}
         >
-          <span className="font-display text-[15px] font-semibold text-text">Custom</span>
-          <span className="mt-2 block text-[11.5px] leading-relaxed text-text-muted">
+          <span className="pyq-preset-control__top">
+            <span className="pyq-preset-control__icon" aria-hidden="true">
+              <SlidersHorizontal size={25} strokeWidth={1.55} />
+            </span>
+            <span
+              className={cn(
+                'pyq-preset-control__check flex h-5 w-5 items-center justify-center rounded-full border',
+                preset === 'custom'
+                  ? 'border-accent bg-accent text-accent-contrast'
+                  : 'border-border-hover text-transparent'
+              )}
+              aria-hidden="true"
+            >
+              <Check size={12} aria-hidden="true" />
+            </span>
+          </span>
+          <span className="pyq-preset-control__name font-display text-[15px] font-semibold text-text">Custom</span>
+          <span className="pyq-preset-control__description mt-2 block text-[11.5px] leading-relaxed text-text-muted">
             Use the subject, history, year, type, count, and order controls below directly.
           </span>
         </button>
       </div>
 
       {preset !== 'custom' && preset !== 'full-paper' ? (
-        <div className="grid gap-4 p-4 sm:p-5 lg:grid-cols-[minmax(0,1fr)_280px]">
+        <div className="pyq-recommended__preflight grid gap-4 p-4 sm:p-5 lg:grid-cols-[minmax(0,1fr)_280px]">
           <div>
-            <div className="grid grid-cols-2 gap-2 sm:grid-cols-4" aria-live="polite">
+            <div className="pyq-recommended__metrics grid grid-cols-2 gap-2 sm:grid-cols-4" aria-live="polite">
               {[
                 ['Matched', preflight?.exactMatchCount ?? '—'],
                 ['Selectable', preflight?.selectableCount ?? '—'],
@@ -127,7 +174,7 @@ export default function PyqRecommendedSetup({
               ].map(([label, value]) => (
                 <div
                   key={label}
-                  className="rounded border border-border bg-bg-overlay/20 px-3 py-2.5"
+                  className="pyq-recommended__metric rounded border border-border bg-bg-overlay/20 px-3 py-2.5"
                 >
                   <p className="u-label">{label}</p>
                   <p className="u-num mt-1 text-[16px] font-semibold text-text">{value}</p>
@@ -151,7 +198,7 @@ export default function PyqRecommendedSetup({
               </p>
             ) : null}
             {preflight && selection ? (
-              <div className="mt-3 rounded border border-border bg-bg-overlay/20 p-3">
+              <div className="pyq-recommended__distribution mt-3 rounded border border-border bg-bg-overlay/20 p-3">
                 <p className="u-label">Selected distribution</p>
                 <div className="mt-2 flex flex-wrap gap-1.5">
                   {Object.entries(preflight.distribution.subject).map(([subject, count]) => (
@@ -213,7 +260,7 @@ export default function PyqRecommendedSetup({
             ) : null}
           </div>
 
-          <div className="rounded border border-border bg-bg-overlay/20 p-3">
+          <div className="pyq-recommended__seed rounded border border-border bg-bg-overlay/20 p-3">
             <label className="text-[11.5px] font-medium text-text-muted">
               Reproducibility seed
               <Input
@@ -233,15 +280,17 @@ export default function PyqRecommendedSetup({
         </div>
       ) : null}
 
-      <div className="grid gap-3 border-t border-border p-4 sm:p-5 lg:grid-cols-2">
-        <div className="flex gap-2">
+      <div className="pyq-recommended__saved grid gap-3 border-t border-border p-4 sm:p-5 lg:grid-cols-2">
+        <div className="pyq-prescription-form">
           <Input
+            className="pyq-prescription-name"
             value={name}
             onChange={(event) => setName(event.target.value)}
             placeholder="Name this prescription"
+            aria-label="Name this prescription"
             maxLength={80}
           />
-          <Button variant="ghost" onClick={save} disabled={!name.trim()}>
+          <Button className="pyq-prescription-save" variant="ghost" onClick={save} disabled={!name.trim()}>
             <BookmarkPlus size={14} /> Save
           </Button>
         </div>
@@ -250,7 +299,7 @@ export default function PyqRecommendedSetup({
             {savedPrescriptions.slice(0, 6).map((prescription) => (
               <span
                 key={prescription.id}
-                className="inline-flex overflow-hidden rounded border border-border"
+                className="pyq-saved-prescription inline-flex overflow-hidden rounded border border-border"
               >
                 <button
                   type="button"

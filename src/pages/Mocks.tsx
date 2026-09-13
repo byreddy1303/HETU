@@ -281,7 +281,7 @@ export default function Mocks() {
   }
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="workspace-mocks flex flex-col gap-4">
       <PageHeader
         title="Mock tests"
         description="Track outcomes and keep qualified readiness evidence separate from supporting practice."

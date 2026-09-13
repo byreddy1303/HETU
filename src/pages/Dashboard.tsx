@@ -32,6 +32,7 @@ import {
   reconcilePyqPracticeSessions
 } from '@/lib/sessions';
 import { PYQ_BANK_QUESTION_COUNT } from '@/lib/pyq';
+import { isCoreSetupOnlyUsername } from '@/lib/core-only';
 import { buildDoNowQueue } from '@/lib/do-now';
 import { awaitInitialPull } from '@/lib/sync';
 import { loadDayPlan } from '@/lib/planner-storage';
@@ -96,6 +97,7 @@ function OutcomeKey({ distribution }: { distribution: ReturnType<typeof outcomeD
 
 export default function Dashboard() {
   const { userId, profile } = useAuth();
+  const coreOnly = isCoreSetupOnlyUsername(profile?.username);
   const navigate = useNavigate();
   const timeZone = profile?.timezone ?? 'Asia/Kolkata';
   const today = todayISOInTimeZone(timeZone);
@@ -253,54 +255,67 @@ export default function Dashboard() {
           <span className="workspace-launch__text"><strong>Practice studio</strong><small>{uniquePyqsSeen.toLocaleString()} questions explored</small></span>
           <ArrowRight size={16} aria-hidden />
         </button>
-        <button type="button" className="workspace-launch" onClick={() => navigate('/reattempts')}>
-          <span className="workspace-launch__icon"><RotateCcw size={21} aria-hidden /></span>
-          <span className="workspace-launch__text"><strong>Return & recall</strong><small>{due} reviews ready for you</small></span>
-          <ArrowRight size={16} aria-hidden />
-        </button>
-        <button type="button" className="workspace-launch" onClick={() => navigate('/patterns')}>
-          <span className="workspace-launch__icon"><Fingerprint size={21} aria-hidden /></span>
-          <span className="workspace-launch__text"><strong>Find a connection</strong><small>Explore your recurring patterns</small></span>
-          <ArrowRight size={16} aria-hidden />
-        </button>
+        {!coreOnly && (
+          <>
+            <button type="button" className="workspace-launch" onClick={() => navigate('/reattempts')}>
+              <span className="workspace-launch__icon"><RotateCcw size={21} aria-hidden /></span>
+              <span className="workspace-launch__text"><strong>Return & recall</strong><small>{due} reviews ready for you</small></span>
+              <ArrowRight size={16} aria-hidden />
+            </button>
+            <button type="button" className="workspace-launch" onClick={() => navigate('/patterns')}>
+              <span className="workspace-launch__icon"><Fingerprint size={21} aria-hidden /></span>
+              <span className="workspace-launch__text"><strong>Find a connection</strong><small>Explore your recurring patterns</small></span>
+              <ArrowRight size={16} aria-hidden />
+            </button>
+          </>
+        )}
       </nav>
 
-      <div className="grid min-w-0 gap-4 lg:grid-cols-[minmax(0,1.65fr)_minmax(280px,0.85fr)]">
-        <Card className="dashboard-surface min-w-0 overflow-hidden">
-          <CardHeader
-            title="Mistake surface"
-            aside={<span className="u-label text-text-faint">7 local days</span>}
-            className="flex-nowrap items-center [&>div]:w-auto [&>div]:shrink-0"
-          />
-          <CardBody>
-            <div className="flex flex-wrap items-end justify-between gap-3">
-              <div>
-                <p className="dashboard-big-number u-num text-[34px] font-semibold leading-none text-text">{surface}</p>
-                <p className="mt-1.5 text-[11.5px] text-text-muted">open re-attempts now</p>
+      <div
+        className={cn(
+          'grid min-w-0 gap-4',
+          coreOnly
+            ? 'grid-cols-1'
+            : 'lg:grid-cols-[minmax(0,1.65fr)_minmax(280px,0.85fr)]'
+        )}
+      >
+        {!coreOnly && (
+          <Card className="dashboard-surface min-w-0 overflow-hidden">
+            <CardHeader
+              title="Mistake surface"
+              aside={<span className="u-label text-text-faint">7 local days</span>}
+              className="flex-nowrap items-center [&>div]:w-auto [&>div]:shrink-0"
+            />
+            <CardBody>
+              <div className="flex flex-wrap items-end justify-between gap-3">
+                <div>
+                  <p className="dashboard-big-number u-num text-[34px] font-semibold leading-none text-text">{surface}</p>
+                  <p className="mt-1.5 text-[11.5px] text-text-muted">open re-attempts now</p>
+                </div>
+                <div className="rounded-full border border-border bg-bg-overlay/50 px-3 py-1.5 text-[10.5px] text-text-muted">
+                  <span className="u-num font-semibold text-text">{netLabel}</span> net in seven days
+                </div>
               </div>
-              <div className="rounded-full border border-border bg-bg-overlay/50 px-3 py-1.5 text-[10.5px] text-text-muted">
-                <span className="u-num font-semibold text-text">{netLabel}</span> net in seven days
+              <div className="mt-2">
+                <SurfaceTrendChart data={surfaceSeries} />
               </div>
-            </div>
-            <div className="mt-2">
-              <SurfaceTrendChart data={surfaceSeries} />
-            </div>
-            <div className="grid grid-cols-2 divide-x divide-border border-t border-border pt-3">
-              <div className="pr-3 sm:pr-4">
-                <p className="u-label">Opened</p>
-                <p className="mt-1 text-[12px] text-text-muted">
-                  <span className="u-num font-semibold text-text">{movement.opened}</span> added in 7 days
-                </p>
+              <div className="grid grid-cols-2 divide-x divide-border border-t border-border pt-3">
+                <div className="pr-3 sm:pr-4">
+                  <p className="u-label">Opened</p>
+                  <p className="mt-1 text-[12px] text-text-muted">
+                    <span className="u-num font-semibold text-text">{movement.opened}</span> added in 7 days
+                  </p>
+                </div>
+                <div className="pl-3 sm:pl-4">
+                  <p className="u-label">Mastered</p>
+                  <p className="mt-1 text-[12px] text-text-muted">
+                    <span className="u-num font-semibold text-success">{movement.mastered}</span> closed in 7 days
+                  </p>
+                </div>
               </div>
-              <div className="pl-3 sm:pl-4">
-                <p className="u-label">Mastered</p>
-                <p className="mt-1 text-[12px] text-text-muted">
-                  <span className="u-num font-semibold text-success">{movement.mastered}</span> closed in 7 days
-                </p>
-              </div>
-            </div>
-          </CardBody>
-        </Card>
+            </CardBody>
+          </Card>
+        )}
 
         <Card className="overflow-hidden">
           <CardHeader
@@ -354,112 +369,116 @@ export default function Dashboard() {
         </Card>
       </div>
 
-      <div className="grid min-w-0 gap-4 lg:grid-cols-[minmax(280px,0.85fr)_minmax(0,1.65fr)]">
-        <Card className="dashboard-weekly overflow-hidden">
-          <CardHeader
-            title="Weekly focus"
-            aside={<CalendarRange size={14} className="text-ink-marigold" aria-hidden />}
-            className="flex-nowrap items-center [&>div]:w-auto [&>div]:shrink-0"
-          />
-          <CardBody className="flex min-h-[200px] flex-col sm:min-h-[220px] lg:min-h-[260px]">
-            {weeklyFix ? (
-              <>
-                <p className="u-label text-text-muted">
-                  {weeklyFixCurrent
-                    ? 'Current constraint'
-                    : `From ${formatDate(weeklyFixRow!.week_start, 'dd MMM')}`}
-                </p>
-                <p className="mt-3 font-display text-[22px] font-semibold leading-snug tracking-[-0.015em] text-text">
-                  <span className={cn(weeklyFixCurrent && 'u-highlight')}>{weeklyFix}</span>
-                </p>
-                {!weeklyFixCurrent && (
-                  <p className="mt-3 text-[11.5px] leading-relaxed text-text-faint">
-                    This focus is stale. Review this week’s evidence before treating it as current.
-                  </p>
-                )}
-              </>
-            ) : (
-              <>
-                <p className="u-label text-text-muted">No constraint set</p>
-                <p className="mt-3 font-display text-[20px] font-semibold leading-snug text-text">
-                  Turn the week’s evidence into one fix.
-                </p>
-                <p className="mt-2 text-[12px] leading-relaxed text-text-faint">
-                  One specific change is easier to execute than a list of weak areas.
-                </p>
-              </>
-            )}
-            <div className="mt-auto pt-5">
-              <Button size="sm" variant="ghost" onClick={() => navigate('/weekly-review')} className="-ml-3">
-                {weeklyFix ? 'Open weekly review' : 'Set weekly focus'}
-                <ArrowRight size={13} aria-hidden />
-              </Button>
-            </div>
-          </CardBody>
-        </Card>
-
-        <Card className="min-w-0 overflow-hidden">
-          <CardHeader
-            title="Last session"
-            aside={lastSessionQuestions.length > 0 ? <OutcomeLegend /> : undefined}
-            className="flex-nowrap items-center [&>div]:w-auto [&>div]:shrink-0"
-          />
-          <CardBody className="min-h-[192px] sm:min-h-[260px]">
-            {last ? (
-              <div className="flex h-full flex-col gap-4 sm:flex-row sm:items-center">
-                {lastSessionQuestions.length > 0 ? (
-                  <OutcomeDonut distribution={distribution} total={lastSessionQuestions.length} />
-                ) : (
-                  <div className="flex h-[130px] w-[130px] shrink-0 items-center justify-center rounded-full border border-dashed border-border bg-bg-overlay/30 text-center">
-                    <span className="u-label max-w-[80px]">No tagged questions</span>
-                  </div>
-                )}
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2">
-                    <span className={cn('h-2 w-2 rounded-full', subjectInk(last.subject).dot)} aria-hidden />
-                    <h2 className="font-display text-[19px] font-semibold text-text">{last.subject}</h2>
-                  </div>
-                  <p className="mt-1 text-[11.5px] text-text-faint">
-                    {formatDate(last.date)} ·{' '}
-                    <span className="u-num">{last.actual_duration_min ?? 0}</span> min ·{' '}
-                    <span className="u-num">{lastSessionQuestionCount}</span>{' '}
-                    {plural(lastSessionQuestionCount, last.kind === 'pyq' ? 'submission' : 'question')}
-                  </p>
-                  {lastSessionQuestions.length > 0 && (
-                    <>
-                      <div className="mt-4 max-w-[360px]">
-                        <OutcomeKey distribution={distribution} />
-                      </div>
-                      <p className="mt-3 text-[11.5px] text-text-muted">
-                        <span className="u-num font-semibold text-text">{distribution.R}</span> clean ·{' '}
-                        <span className="u-num font-semibold text-danger">{notClean}</span> not clean
+      {!coreOnly && (
+        <>
+          <div className="grid min-w-0 gap-4 lg:grid-cols-[minmax(280px,0.85fr)_minmax(0,1.65fr)]">
+            <Card className="dashboard-weekly overflow-hidden">
+              <CardHeader
+                title="Weekly focus"
+                aside={<CalendarRange size={14} className="text-ink-marigold" aria-hidden />}
+                className="flex-nowrap items-center [&>div]:w-auto [&>div]:shrink-0"
+              />
+              <CardBody className="flex min-h-[200px] flex-col sm:min-h-[220px] lg:min-h-[260px]">
+                {weeklyFix ? (
+                  <>
+                    <p className="u-label text-text-muted">
+                      {weeklyFixCurrent
+                        ? 'Current constraint'
+                        : `From ${formatDate(weeklyFixRow!.week_start, 'dd MMM')}`}
+                    </p>
+                    <p className="mt-3 font-display text-[22px] font-semibold leading-snug tracking-[-0.015em] text-text">
+                      <span className={cn(weeklyFixCurrent && 'u-highlight')}>{weeklyFix}</span>
+                    </p>
+                    {!weeklyFixCurrent && (
+                      <p className="mt-3 text-[11.5px] leading-relaxed text-text-faint">
+                        This focus is stale. Review this week's evidence before treating it as current.
                       </p>
-                    </>
-                  )}
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={() => navigate(`/session/${last.id}/review`)}
-                    className="-ml-3 mt-3"
-                  >
-                    Open session review
+                    )}
+                  </>
+                ) : (
+                  <>
+                    <p className="u-label text-text-muted">No constraint set</p>
+                    <p className="mt-3 font-display text-[20px] font-semibold leading-snug text-text">
+                      Turn the week's evidence into one fix.
+                    </p>
+                    <p className="mt-2 text-[12px] leading-relaxed text-text-faint">
+                      One specific change is easier to execute than a list of weak areas.
+                    </p>
+                  </>
+                )}
+                <div className="mt-auto pt-5">
+                  <Button size="sm" variant="ghost" onClick={() => navigate('/weekly-review')} className="-ml-3">
+                    {weeklyFix ? 'Open weekly review' : 'Set weekly focus'}
                     <ArrowRight size={13} aria-hidden />
                   </Button>
                 </div>
-              </div>
-            ) : (
-              <div className="flex min-h-[160px] flex-col items-center justify-center text-center sm:min-h-[228px]">
-                <p className="font-display text-[18px] font-semibold text-text">No session evidence yet</p>
-                <p className="mt-2 max-w-[360px] text-[12.5px] leading-relaxed text-text-faint">
-                  Finish a focused, log, or PYQ practice session and its outcome shape will appear here.
-                </p>
-              </div>
-            )}
-          </CardBody>
-        </Card>
-      </div>
+              </CardBody>
+            </Card>
 
-      <LearningTips tips={learningTips} />
+            <Card className="min-w-0 overflow-hidden">
+              <CardHeader
+                title="Last session"
+                aside={lastSessionQuestions.length > 0 ? <OutcomeLegend /> : undefined}
+                className="flex-nowrap items-center [&>div]:w-auto [&>div]:shrink-0"
+              />
+              <CardBody className="min-h-[192px] sm:min-h-[228px]">
+                {last ? (
+                  <div className="flex h-full flex-col gap-4 sm:flex-row sm:items-center">
+                    {lastSessionQuestions.length > 0 ? (
+                      <OutcomeDonut distribution={distribution} total={lastSessionQuestions.length} />
+                    ) : (
+                      <div className="flex h-[130px] w-[130px] shrink-0 items-center justify-center rounded-full border border-dashed border-border bg-bg-overlay/30 text-center">
+                        <span className="u-label max-w-[80px]">No tagged questions</span>
+                      </div>
+                    )}
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2">
+                        <span className={cn('h-2 w-2 rounded-full', subjectInk(last.subject).dot)} aria-hidden />
+                        <h2 className="font-display text-[19px] font-semibold text-text">{last.subject}</h2>
+                      </div>
+                      <p className="mt-1 text-[11.5px] text-text-faint">
+                        {formatDate(last.date)} ·{' '}
+                        <span className="u-num">{last.actual_duration_min ?? 0}</span> min ·{' '}
+                        <span className="u-num">{lastSessionQuestionCount}</span>{' '}
+                        {plural(lastSessionQuestionCount, last.kind === 'pyq' ? 'submission' : 'question')}
+                      </p>
+                      {lastSessionQuestions.length > 0 && (
+                        <>
+                          <div className="mt-4 max-w-[360px]">
+                            <OutcomeKey distribution={distribution} />
+                          </div>
+                          <p className="mt-3 text-[11.5px] text-text-muted">
+                            <span className="u-num font-semibold text-text">{distribution.R}</span> clean ·{' '}
+                            <span className="u-num font-semibold text-danger">{notClean}</span> not clean
+                          </p>
+                        </>
+                      )}
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => navigate(`/session/${last.id}/review`)}
+                        className="-ml-3 mt-3"
+                      >
+                        Open session review
+                        <ArrowRight size={13} aria-hidden />
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex min-h-[160px] flex-col items-center justify-center text-center sm:min-h-[228px]">
+                    <p className="font-display text-[18px] font-semibold text-text">No session evidence yet</p>
+                    <p className="mt-2 max-w-[360px] text-[12.5px] leading-relaxed text-text-faint">
+                      Finish a focused, log, or PYQ practice session and its outcome shape will appear here.
+                    </p>
+                  </div>
+                )}
+              </CardBody>
+            </Card>
+          </div>
+
+          <LearningTips tips={learningTips} />
+        </>
+      )}
     </div>
   );
 }

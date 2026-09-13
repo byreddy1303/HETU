@@ -1,4 +1,6 @@
+import { useState } from 'react';
 import { NavLink } from 'react-router-dom';
+import { motion, useReducedMotion } from 'motion/react';
 import {
   Gauge,
   Play,
@@ -34,140 +36,58 @@ import { db } from '@/lib/db';
 import { cn } from '@/lib/utils';
 import Brand from '@/components/shared/Brand';
 
-interface Item {
-  to: string;
-  label: string;
-  icon: LucideIcon;
-  /** Active-state ink. Static classes — Tailwind needs to see them whole. */
-  active: string;
-}
-
-const JOURNAL_ITEM: Item = {
-  to: '/journal',
-  label: 'Journal',
-  icon: NotebookText,
-  active: 'bg-ink-cobalt/10 text-ink-cobalt'
-};
-
-const LOG_ITEM: Item = {
-  to: '/log',
-  label: 'Log',
-  icon: PenLine,
-  active: 'bg-ink-rose/10 text-ink-rose'
-};
-
-const PLANNER_ITEM: Item = {
-  to: '/planner',
-  label: 'Planner',
-  icon: CalendarDays,
-  active: 'bg-ink-marigold/10 text-ink-marigold'
-};
-
-const BUDDY_ITEM: Item = {
-  to: '/buddy',
-  label: 'Buddy',
-  icon: Users,
-  active: 'bg-ink-rose/10 text-ink-rose'
-};
-
-const ANALYSIS: Item[] = [
-  {
-    to: '/capture',
-    label: 'Quick capture',
-    icon: Camera,
-    active: 'bg-ink-rose/10 text-ink-rose'
-  },
-  { to: '/mocks', label: 'Mock tests', icon: FileCheck2, active: 'bg-ink-teal/10 text-ink-teal' },
-  { to: '/patterns', label: 'Patterns', icon: Shapes, active: 'bg-ink-violet/10 text-ink-violet' },
-  {
-    to: '/reattempts',
-    label: 'Re-attempts',
-    icon: RotateCcw,
-    active: 'bg-ink-rose/10 text-ink-rose'
-  },
-  {
-    to: '/weekly-review',
-    label: 'Weekly',
-    icon: CalendarCheck,
-    active: 'bg-ink-marigold/10 text-ink-marigold'
-  },
-  { to: '/heatmap', label: 'Heatmap', icon: Grid3x3, active: 'bg-ink-slate/10 text-ink-slate' },
-  {
-    to: '/calibration',
-    label: 'Calibration',
-    icon: Target,
-    active: 'bg-ink-teal/10 text-ink-teal'
-  },
-  {
-    to: '/readiness',
-    label: 'Readiness',
-    icon: Compass,
-    active: 'bg-ink-marigold/10 text-ink-marigold'
-  }
+type Item = { to: string; label: string; icon: LucideIcon };
+const REFLECT: Item[] = [
+  { to: '/journal', label: 'Journal', icon: NotebookText },
+  { to: '/patterns', label: 'Patterns', icon: Shapes },
+  { to: '/reattempts', label: 'Re-attempts', icon: RotateCcw },
+  { to: '/weekly-review', label: 'Weekly', icon: CalendarCheck },
+  { to: '/heatmap', label: 'Heatmap', icon: Grid3x3 },
+  { to: '/calibration', label: 'Calibration', icon: Target },
+  { to: '/readiness', label: 'Readiness', icon: Compass }
 ];
-
-const LEARN: Item[] = [
-  {
-    to: '/topper-notes',
-    label: 'Topper notes',
-    icon: BookOpen,
-    active: 'bg-ink-violet/10 text-ink-violet'
-  },
-  {
-    to: '/revision-pack',
-    label: 'Revision pack',
-    icon: ClipboardList,
-    active: 'bg-ink-marigold/10 text-ink-marigold'
-  },
-  {
-    to: '/syllabus',
-    label: 'Syllabus tracker',
-    icon: ListChecks,
-    active: 'bg-ink-cobalt/10 text-ink-cobalt'
-  },
-  {
-    to: '/trigger-drill',
-    label: 'Trigger drill',
-    icon: Zap,
-    active: 'bg-ink-marigold/10 text-ink-marigold'
-  },
-  { to: '/formulas', label: 'Formulas', icon: Sigma, active: 'bg-ink-teal/10 text-ink-teal' }
+const LIBRARY: Item[] = [
+  { to: '/topper-notes', label: 'Topper notes', icon: BookOpen },
+  { to: '/revision-pack', label: 'Revision pack', icon: ClipboardList },
+  { to: '/syllabus', label: 'Syllabus tracker', icon: ListChecks },
+  { to: '/trigger-drill', label: 'Trigger drill', icon: Zap },
+  { to: '/formulas', label: 'Formulas', icon: Sigma }
 ];
-
-const SETTINGS_ITEM: Item = {
-  to: '/settings',
-  label: 'Settings',
-  icon: Settings,
-  active: 'bg-ink-slate/10 text-ink-slate'
-};
-
 function NavItem({ item }: { item: Item }) {
   const Icon = item.icon;
+  const reduced = useReducedMotion();
   return (
     <NavLink
       to={item.to}
       end={item.to === '/'}
-      className={({ isActive }) =>
-        cn(
-          'relative flex h-9 items-center gap-3 rounded px-3 text-[13.5px] transition-all duration-150',
-          isActive
-            ? cn('font-semibold', item.active)
-            : 'font-medium text-text-muted hover:translate-x-0.5 hover:bg-bg-overlay/70 hover:text-text'
-        )
-      }
+      className={({ isActive }) => cn('workspace-nav-link', isActive && 'is-active')}
     >
-      <Icon size={16} strokeWidth={1.75} className="shrink-0" />
-      {item.label}
+      {({ isActive }) => (
+        <>
+          {isActive && (
+            <motion.span
+              className="workspace-nav-indicator"
+              layoutId={reduced ? undefined : 'workspace-nav-active'}
+              transition={
+                reduced ? { duration: 0 } : { type: 'spring', stiffness: 430, damping: 37 }
+              }
+              aria-hidden
+            />
+          )}
+          <Icon size={16} strokeWidth={1.65} aria-hidden />
+          <span>{item.label}</span>
+          {isActive && <span className="workspace-nav-dot" aria-hidden />}
+        </>
+      )}
     </NavLink>
   );
 }
-
-function Group({ label, items }: { label?: string; items: Item[] }) {
+function Group({ label, items }: { label: string; items: Item[] }) {
   return (
-    <div className="flex flex-col gap-0.5">
-      {label && <p className="u-label px-3 pb-1 pt-4">{label}</p>}
-      {items.map((i) => (
-        <NavItem key={i.to} item={i} />
+    <div className="workspace-nav-group">
+      <p>{label}</p>
+      {items.map((item) => (
+        <NavItem key={item.to} item={item} />
       ))}
     </div>
   );
@@ -180,96 +100,91 @@ export default function Nav() {
   const navCollapsed = useUiStore((s) => s.navCollapsed);
   const setNavCollapsed = useUiStore((s) => s.setNavCollapsed);
   const pushToast = useUiStore((s) => s.pushToast);
-
-  async function handleSignOut() {
-    const result = await signOut();
-    if (result.error) pushToast(result.error, 'danger');
-  }
-  // Confirm the stored session is still live (row exists, unfinished) — a
-  // stale localStorage entry after a "finish" that crashed shouldn't hijack
-  // the Session tab. useLiveQuery re-evaluates as Dexie changes.
   const liveSessionId = useLiveQuery(async () => {
     if (!storedSessionId) return null;
     const row = await db.sessions.get(storedSessionId);
     return row && row.actual_duration_min === null ? storedSessionId : null;
   }, [storedSessionId]);
-  const main: Item[] = [
-    { to: '/', label: 'Dashboard', icon: Gauge, active: 'bg-accent-faint text-accent' },
-    { to: '/today', label: 'Do now', icon: ClipboardList, active: 'bg-accent-faint text-accent' },
-    {
-      to: '/pyq',
-      label: 'PYQ practice',
-      icon: LibraryBig,
-      active: 'bg-accent-faint text-accent'
-    },
-    LOG_ITEM,
-    liveSessionId
-      ? {
-          to: `/session/${liveSessionId}/solve`,
-          label: 'Resume session',
-          icon: Play,
-          active: 'bg-ink-teal/10 text-ink-teal'
+  const [signingOut, setSigningOut] = useState(false);
+  async function handleSignOut(force = false) {
+    if (signingOut) return;
+    setSigningOut(true);
+    try {
+      const result = await signOut({ force });
+      if (result.error && !force) {
+        const confirmForce = window.confirm(
+          `Sync could not finish: ${result.error}\n\nDo you want to force sign out anyway? Any unsynced data on this device may be lost.`
+        );
+        if (confirmForce) {
+          await handleSignOut(true);
+        } else {
+          pushToast(result.error, 'danger');
         }
-      : {
-          to: '/session/new',
-          label: 'Session',
-          icon: Play,
-          active: 'bg-ink-teal/10 text-ink-teal'
-        },
-    JOURNAL_ITEM,
-    PLANNER_ITEM,
-    BUDDY_ITEM
+      } else if (result.error) {
+        pushToast(result.error, 'danger');
+      }
+    } finally {
+      setSigningOut(false);
+    }
+  }
+  const study: Item[] = [
+    { to: '/today', label: 'Do now', icon: ClipboardList },
+    { to: '/pyq', label: 'PYQ practice', icon: LibraryBig },
+    {
+      to: liveSessionId ? `/session/${liveSessionId}/solve` : '/session/new',
+      label: liveSessionId ? 'Resume session' : 'Session',
+      icon: Play
+    },
+    { to: '/log', label: 'Log', icon: PenLine },
+    { to: '/planner', label: 'Planner', icon: CalendarDays },
+    { to: '/capture', label: 'Quick capture', icon: Camera },
+    { to: '/mocks', label: 'Mock tests', icon: FileCheck2 },
+    { to: '/buddy', label: 'Buddy', icon: Users }
   ];
-
+  // Unmounting collapsed navigation keeps its links out of the keyboard order.
+  if (navCollapsed) return null;
   return (
-    <aside
-      className={cn(
-        'native-side-nav fixed inset-y-0 left-0 z-30 hidden w-[224px] flex-col border-r border-border bg-bg transition-transform duration-200 ease-in-out md:flex',
-        navCollapsed && '-translate-x-full pointer-events-none'
-      )}
-      aria-hidden={navCollapsed}
-    >
-      <div className="flex items-center justify-between px-4 pb-4 pt-4">
+    <aside className="workspace-sidebar native-side-nav">
+      <div className="workspace-sidebar__brand">
         <Brand />
         <button
           type="button"
           onClick={() => setNavCollapsed(true)}
           aria-label="Collapse sidebar"
           title="Collapse sidebar (Ctrl+B)"
-          className="flex h-7 w-7 items-center justify-center rounded text-text-faint transition-colors hover:bg-bg-overlay hover:text-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+          className="workspace-sidebar__collapse"
         >
-          <PanelLeftClose size={16} strokeWidth={1.75} />
+          <PanelLeftClose size={17} strokeWidth={1.7} aria-hidden />
         </button>
       </div>
-
-      <nav className="flex flex-1 flex-col gap-0.5 overflow-y-auto px-2">
-        <Group items={main} />
-        <Group label="Analysis" items={ANALYSIS} />
-        <Group label="Learn" items={LEARN} />
-        <Group items={[SETTINGS_ITEM]} />
+      <div className="workspace-sidebar__intro">
+        <span aria-hidden />
+        <p>Your learning observatory</p>
+      </div>
+      <nav className="workspace-sidebar__navigation" aria-label="Main navigation">
+        <NavItem item={{ to: '/', label: 'Dashboard', icon: Gauge }} />
+        <Group label="Study" items={study} />
+        <Group label="Reflect" items={REFLECT} />
+        <Group label="Library" items={LIBRARY} />
       </nav>
-
-      <div className="border-t border-border px-4 py-3">
-        <div className="flex items-center justify-between gap-2">
-          <div className="flex min-w-0 items-center gap-2.5">
-            <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-ink-cobalt/15 font-display text-[13px] font-bold text-ink-cobalt">
-              {(profile?.name ?? 'S')[0].toUpperCase()}
-            </span>
-            <div className="min-w-0">
-              <p className="truncate text-xs font-medium text-text">{profile?.name ?? '—'}</p>
-              <p className="u-num truncate text-[10px] text-text-faint">
-                {sandbox ? 'local sandbox' : (profile?.email ?? '')}
-              </p>
-            </div>
+      <div className="workspace-sidebar__footer">
+        <NavItem item={{ to: '/settings', label: 'Settings', icon: Settings }} />
+        <div className="workspace-profile">
+          <span className="workspace-profile__avatar">
+            {(profile?.name?.trim() || 'S')[0].toUpperCase()}
+          </span>
+          <div>
+            <p>{profile?.name ?? 'Your workspace'}</p>
+            <span>{sandbox ? 'Local sandbox' : (profile?.email ?? 'GATE preparation')}</span>
           </div>
           <button
             type="button"
             onClick={() => void handleSignOut()}
+            disabled={signingOut}
             aria-label="Sign out"
-            title="Sign out"
-            className="shrink-0 rounded-full p-1.5 text-text-faint transition-colors hover:bg-danger-faint hover:text-danger"
+            title={signingOut ? 'Signing out…' : 'Sign out'}
           >
-            <LogOut size={16} strokeWidth={1.75} />
+            <LogOut size={16} strokeWidth={1.7} aria-hidden className={signingOut ? 'animate-spin' : undefined} />
           </button>
         </div>
       </div>

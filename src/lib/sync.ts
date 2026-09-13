@@ -629,6 +629,14 @@ async function fetchRemoteTable(
     const result = await (lastId ? ordered.gt('id', lastId) : ordered).limit(PULL_PAGE_SIZE);
     if (!syncContextIsCurrent(userId)) throw new SyncContextChangedError();
     if (result.error) {
+      if (
+        result.error.message?.includes('schema cache') ||
+        result.error.code === '42P01' ||
+        result.error.code === 'PGRST204'
+      ) {
+        console.warn(`[sync] Table ${name} not present in remote schema cache; treating as empty.`);
+        return { name, data: [] };
+      }
       throw new Error(`[sync] pull failed for ${name}: ${result.error.message}`);
     }
     const page = (result.data ?? []) as { id: string }[];

@@ -68,8 +68,7 @@ export default function ResetPin() {
     // Sign out so the user re-authenticates with the new PIN (clean session state).
     const signOutResult = await signOut();
     if (signOutResult.error) {
-      setState({ kind: 'error', message: signOutResult.error });
-      return;
+      await signOut({ force: true });
     }
     setState({ kind: 'done' });
     setTimeout(() => navigate('/auth', { replace: true }), 1500);

@@ -35,7 +35,7 @@ interface AuthState {
   signIn: (username: string, pin: string) => Promise<{ error?: string }>;
   signUp: (payload: SignupPayload) => Promise<{ error?: string }>;
   enterSandbox: () => Promise<void>;
-  signOut: () => Promise<{ error?: string }>;
+  signOut: (options?: { force?: boolean }) => Promise<{ error?: string }>;
   refreshProfile: () => Promise<void>;
   updateProfile: (patch: ProfilePatch) => Promise<{ error?: string }>;
 }
@@ -165,7 +165,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     set({ status: 'signed_in', profile: SANDBOX_PROFILE, sandbox: true });
   },
 
-  signOut: async () => {
+  signOut: async (options?: { force?: boolean }) => {
     if (get().sandbox) {
       try {
         await wipeLocalState();
@@ -178,7 +178,52 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
 
     const userId = get().user?.id;
-    if (!userId) return { error: 'No signed-in account was found.' };
+    if (!userId) {
+      try {
+        await supabase.auth.signOut().catch(() => {});
+      } catch {}
+      try {
+        await wipeLocalState();
+      } catch {}
+      set({ status: 'signed_out', profile: null, user: null, sandbox: false });
+      return {};
+    }
+
+    if (options?.force) {
+      try {
+        await flushAllDurableState(userId);
+      } catch (error) {
+        console.warn('[air] Force sign-out: durable flush failed, proceeding anyway.', error);
+      }
+      try {
+        await unregisterCurrentPushDevice();
+      } catch (error) {
+        console.warn('[air] Force sign-out: push unregister error, proceeding.', error);
+      }
+      const accountState = await import('@/lib/account-state');
+      accountState.stopAccountStateSync(userId);
+      stopSync();
+      set({ status: 'loading' });
+      try {
+        await supabase.auth.signOut();
+      } catch (error) {
+        console.warn('[air] Force sign-out: supabase.auth.signOut error, proceeding.', error);
+      }
+      let cleanupError: string | null = null;
+      try {
+        await wipeLocalState();
+      } catch (error) {
+        cleanupError =
+          error instanceof Error ? error.message : 'This device cache was not fully cleared.';
+      }
+      set({ status: 'signed_out', profile: null, user: null });
+      return cleanupError
+        ? {
+            error: `You are signed out, but local cleanup was incomplete. ${cleanupError}`
+          }
+        : {};
+    }
+
     const durable = await flushAllDurableState(userId);
     if (!durable.ok) return { error: durable.error };
 

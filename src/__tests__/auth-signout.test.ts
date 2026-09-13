@@ -161,4 +161,34 @@ describe('authenticated sign-out durability', () => {
     expect(mocks.initSync).not.toHaveBeenCalled();
     expect(mocks.startAccountStateSync).not.toHaveBeenCalled();
   });
+
+  it('forces sign-out when force option is true even if flush fails', async () => {
+    mocks.flushAllDurableState.mockResolvedValue({ ok: false, error: 'Network failure' });
+
+    const result = await useAuthStore.getState().signOut({ force: true });
+
+    expect(result).toEqual({});
+    expect(mocks.stopAccountStateSync).toHaveBeenCalledWith(USER_ID);
+    expect(mocks.stopSync).toHaveBeenCalledTimes(1);
+    expect(mocks.authSignOut).toHaveBeenCalledTimes(1);
+    expect(mocks.wipeLocalState).toHaveBeenCalledTimes(1);
+    expect(useAuthStore.getState()).toMatchObject({
+      status: 'signed_out',
+      user: null,
+      profile: null
+    });
+  });
+
+  it('handles sign-out cleanly when user is missing', async () => {
+    useAuthStore.setState({ user: null });
+
+    const result = await useAuthStore.getState().signOut();
+
+    expect(result).toEqual({});
+    expect(useAuthStore.getState()).toMatchObject({
+      status: 'signed_out',
+      user: null,
+      profile: null
+    });
+  });
 });

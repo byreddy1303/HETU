@@ -8,19 +8,29 @@ import Shell from '@/components/layout/Shell';
 import { useUiStore } from '@/stores/ui';
 import { db } from '@/lib/db';
 
+const authFixture = vi.hoisted(() => ({ username: null as string | null }));
+
 vi.mock('@/hooks/useAuth', () => ({
   useAuth: () => ({
     status: 'signed_in',
     userId: '00000000-0000-4000-8000-000000000001',
     sandbox: true,
     user: null,
-    profile: null
+    profile: authFixture.username
+      ? {
+          id: '00000000-0000-4000-8000-000000000001',
+          username: authFixture.username,
+          name: authFixture.username,
+          timezone: 'Asia/Kolkata'
+        }
+      : null
   })
 }));
 
 vi.mock('@/lib/native', () => ({ haptic: vi.fn() }));
 
 beforeEach(() => {
+  authFixture.username = null;
   Object.defineProperty(window, 'matchMedia', {
     configurable: true,
     value: vi.fn().mockImplementation((query: string) => ({
@@ -88,6 +98,80 @@ describe('PYQ layout navigation', () => {
 
     expect(screen.getByRole('link', { name: 'Manual logging' })).toHaveAttribute('href', '/log');
     expect(screen.queryByRole('link', { name: 'Quick capture' })).toBeNull();
+  });
+
+  it('keeps Reflect and Library expanded for standard accounts', () => {
+    authFixture.username = 'kalyan';
+    render(
+      <MemoryRouter>
+        <Nav />
+      </MemoryRouter>
+    );
+
+    const navigation = screen.getByRole('navigation');
+    expect(within(navigation).getByRole('link', { name: 'Journal' })).toHaveAttribute(
+      'href',
+      '/journal'
+    );
+    expect(within(navigation).getByRole('link', { name: 'Formulas' })).toHaveAttribute(
+      'href',
+      '/formulas'
+    );
+    expect(within(navigation).queryByRole('button', { name: 'Reflect' })).toBeNull();
+    expect(within(navigation).queryByRole('button', { name: 'Library' })).toBeNull();
+  });
+
+  it('collapses Reflect and Library into dropdowns for the core-only account, openable on demand', async () => {
+    authFixture.username = 'ganirishivardhangmailcom';
+    const user = userEvent.setup();
+    render(
+      <MemoryRouter initialEntries={['/today']}>
+        <Nav />
+      </MemoryRouter>
+    );
+
+    const navigation = screen.getByRole('navigation');
+    expect(within(navigation).queryByRole('link', { name: 'Journal' })).toBeNull();
+    expect(within(navigation).queryByRole('link', { name: 'Formulas' })).toBeNull();
+
+    const reflectToggle = within(navigation).getByRole('button', { name: 'Reflect' });
+    expect(reflectToggle).toHaveAttribute('aria-expanded', 'false');
+    await user.click(reflectToggle);
+    expect(reflectToggle).toHaveAttribute('aria-expanded', 'true');
+    expect(within(navigation).getByRole('link', { name: 'Journal' })).toHaveAttribute(
+      'href',
+      '/journal'
+    );
+
+    const libraryToggle = within(navigation).getByRole('button', { name: 'Library' });
+    expect(libraryToggle).toHaveAttribute('aria-expanded', 'false');
+    await user.click(libraryToggle);
+    expect(within(navigation).getByRole('link', { name: 'Formulas' })).toHaveAttribute(
+      'href',
+      '/formulas'
+    );
+  });
+
+  it('automatically opens a collapsed group for the current route and closes it again', async () => {
+    authFixture.username = 'ganirishivardhangmailcom';
+    const user = userEvent.setup();
+    render(
+      <MemoryRouter initialEntries={['/patterns']}>
+        <Nav />
+      </MemoryRouter>
+    );
+
+    const navigation = screen.getByRole('navigation');
+    const reflectToggle = within(navigation).getByRole('button', { name: 'Reflect' });
+    expect(reflectToggle).toHaveAttribute('aria-expanded', 'true');
+    expect(within(navigation).getByRole('link', { name: 'Patterns' })).toHaveAttribute(
+      'href',
+      '/patterns'
+    );
+
+    await user.click(reflectToggle);
+    expect(reflectToggle).toHaveAttribute('aria-expanded', 'false');
+    expect(within(navigation).queryByRole('link', { name: 'Patterns' })).toBeNull();
   });
 
   it('allows collapsing and expanding the side menu on desktop', async () => {

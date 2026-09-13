@@ -101,6 +101,7 @@ import {
 } from '@/lib/pyq-session';
 import { reconcilePyqPracticeSessions } from '@/lib/sessions';
 import { captureElementToDataUrl } from '@/lib/image';
+import { isCoreSetupOnlyUsername } from '@/lib/core-only';
 import { cn, plural, secondsToClock, todayISOInTimeZone, uuid } from '@/lib/utils';
 import { analyzedAttemptIds, filterPyqByHistory, PYQ_HISTORY_OPTIONS } from '@/lib/pyq-history';
 import { attachPlannerPyqSession, reconcilePlannerExecutions } from '@/lib/planner-execution';
@@ -169,13 +170,7 @@ const RECOMMENDATION_COHORTS: readonly PyqRecommendationCohort[] = [
 
 // Accounts previewed as "core-only": they never see the Recommended set
 // controls and every visit starts from the GATE CSE core catalogue (all
-// subjects, all topics). Matches are case-insensitive trimmed usernames.
-const CORE_SETUP_ONLY_USERNAMES = new Set(['rishi', 'ganirishivardhangmailcom']);
-
-function isCoreSetupOnlyUsername(username: string | null | undefined): boolean {
-  return !!username && CORE_SETUP_ONLY_USERNAMES.has(username.trim().toLowerCase());
-}
-
+// subjects, all topics). See the allow-list in lib/core-only.
 function recommendedPresetParam(value: string | null): PyqPresetPreference | null {
   return RECOMMENDATION_PRESETS.includes(value as PyqPresetPreference)
     ? (value as PyqPresetPreference)

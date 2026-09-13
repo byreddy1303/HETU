@@ -5,16 +5,16 @@ import { KeyboardResize, KeyboardStyle } from '@capacitor/keyboard';
 const config: CapacitorConfig = {
   appId: 'in.airjournal.app',
   appName: 'HETU',
-  // server.url is set so the WebView loads from Vercel — no web assets need
-  // to be bundled in the APK. Point webDir at an empty stub so cap sync
-  // doesn't copy dist/ (or the 200 MB public/ folder) into the APK.
-  webDir: 'android-stub',
+  // Bundle the application shell in the APK so startup does not depend on
+  // Vercel, DNS, or a network connection. The native server keeps the
+  // production hostname to preserve the origin used by existing installs.
+  webDir: 'dist',
   backgroundColor: '#F6F1E9',
   loggingBehavior: 'production',
   server: {
-    // Load assets from Vercel so any deployed update reaches all installed
-    // apps immediately without requiring a new APK.
-    url: 'https://hetu-app.vercel.app',
+    // Serve bundled assets at the production origin. Do not set server.url:
+    // that would bypass Capacitor's local asset server and make the APK's
+    // application shell network-dependent again.
     hostname: 'hetu-app.vercel.app',
     androidScheme: 'https',
     cleartext: false

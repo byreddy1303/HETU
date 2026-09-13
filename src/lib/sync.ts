@@ -632,7 +632,9 @@ async function fetchRemoteTable(
       if (
         result.error.message?.includes('schema cache') ||
         result.error.code === '42P01' ||
-        result.error.code === 'PGRST204'
+        result.error.code === 'PGRST205' ||
+        result.error.code === 'PGRST204' ||
+        result.error.code === 'PGRST200'
       ) {
         console.warn(`[sync] Table ${name} not present in remote schema cache; treating as empty.`);
         return { name, data: [] };
@@ -907,6 +909,16 @@ export function flushPushQueue(): Promise<void> {
       const { error } = await supabase.from(name).upsert(payload);
       if (!syncContextIsCurrent(pushingForUserId)) return;
       if (error) {
+        if (
+          error.message?.includes('schema cache') ||
+          error.code === '42P01' ||
+          error.code === 'PGRST205' ||
+          error.code === 'PGRST204' ||
+          error.code === 'PGRST200'
+        ) {
+          console.warn(`[sync] Table ${name} not present in remote schema cache; skipping push.`);
+          continue;
+        }
         pushHadError = true;
         console.warn(`[sync] push failed for ${name}: ${error.message}`);
         break; // FK order matters — do not push child tables past a failed parent

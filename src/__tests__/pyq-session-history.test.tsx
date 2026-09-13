@@ -53,6 +53,11 @@ describe('complete PYQ session history', () => {
       />
     );
 
+    const historyToggle = screen.getByRole('button', { name: /Complete session history/i });
+    expect(historyToggle).toHaveAttribute('aria-expanded', 'false');
+    expect(screen.queryByRole('button', { name: /View report/i })).not.toBeInTheDocument();
+    await user.click(historyToggle);
+    expect(historyToggle).toHaveAttribute('aria-expanded', 'true');
     expect(screen.getAllByRole('button', { name: /View report/i })).toHaveLength(10);
     await user.click(screen.getByRole('button', { name: 'Show 2 more' }));
     expect(screen.getAllByRole('button', { name: /View report/i })).toHaveLength(12);
@@ -75,6 +80,7 @@ describe('complete PYQ session history', () => {
       />
     );
 
+    await user.click(screen.getByRole('button', { name: /Complete session history/i }));
     await user.selectOptions(screen.getByLabelText('Filter PYQ sessions by mode'), 'exam');
     expect(screen.getByText('1 of 2')).toBeInTheDocument();
     expect(screen.getByText(/DB benchmark · Databases/i)).toBeInTheDocument();

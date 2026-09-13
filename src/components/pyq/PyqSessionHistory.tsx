@@ -1,5 +1,5 @@
-import { useMemo, useState } from 'react';
-import { ArrowRight, Search } from 'lucide-react';
+import { useId, useMemo, useState } from 'react';
+import { ArrowRight, ChevronDown, Search } from 'lucide-react';
 import type { PyqAttemptRow, PyqSessionRow } from '@/types';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
@@ -64,6 +64,8 @@ export default function PyqSessionHistory({
   subjectLabels: Readonly<Record<string, string>>;
   onReview: (session: PyqSessionRow) => void;
 }) {
+  const panelId = useId();
+  const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
   const [mode, setMode] = useState<'all' | 'practice' | 'exam'>('all');
   const [preset, setPreset] = useState('all');
@@ -93,141 +95,168 @@ export default function PyqSessionHistory({
 
   return (
     <section aria-labelledby="pyq-session-history" className="pt-2">
-      <div className="mb-3 flex flex-col gap-3 px-1 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <p id="pyq-session-history" className="u-label">
-            Complete session history
-          </p>
-          <p className="mt-1 text-[12px] text-text-faint">
-            Search every saved report by subject, topic, preset, prescription, date, or session ID.
-          </p>
-        </div>
-        <Badge>
-          {filtered.length} of {sessions.length}
-        </Badge>
-      </div>
+      <div className="overflow-hidden rounded-xl border border-border bg-bg-raised shadow-sm">
+        <button
+          type="button"
+          aria-expanded={open}
+          aria-controls={panelId}
+          onClick={() => setOpen((current) => !current)}
+          className="group flex min-h-[72px] w-full items-center justify-between gap-4 px-4 py-3 text-left transition-colors hover:bg-bg-overlay/35 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent sm:px-5"
+        >
+          <span className="min-w-0">
+            <span id="pyq-session-history" className="u-label block">
+              Complete session history
+            </span>
+            <span className="mt-1 block truncate text-[12px] text-text-faint">
+              Search saved reports by subject, topic, prescription, date, or ID.
+            </span>
+          </span>
+          <span className="flex shrink-0 items-center gap-2">
+            <Badge>
+              {filtered.length} of {sessions.length}
+            </Badge>
+            <ChevronDown
+              size={17}
+              aria-hidden="true"
+              className={`text-text-faint transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
+            />
+          </span>
+        </button>
 
-      <div className="mb-3 grid gap-2 rounded border border-border bg-bg-overlay/20 p-3 sm:grid-cols-[minmax(0,1fr)_150px_170px]">
-        <label className="relative">
-          <span className="sr-only">Search PYQ session history</span>
-          <Search
-            size={14}
-            aria-hidden="true"
-            className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-text-faint"
-          />
-          <Input
-            value={query}
-            onChange={(event) => {
-              setQuery(event.target.value);
-              setVisibleCount(PAGE_SIZE);
-            }}
-            className="pl-9"
-            placeholder="Search sessions"
-          />
-        </label>
-        <label>
-          <span className="sr-only">Filter PYQ sessions by mode</span>
-          <Select
-            value={mode}
-            onChange={(event) => {
-              setMode(event.target.value as typeof mode);
-              setVisibleCount(PAGE_SIZE);
-            }}
+        {open ? (
+          <div
+            id={panelId}
+            role="region"
+            aria-labelledby="pyq-session-history"
+            className="border-t border-border p-3 sm:p-4"
           >
-            <option value="all">All modes</option>
-            <option value="practice">Practice</option>
-            <option value="exam">Exam</option>
-          </Select>
-        </label>
-        <label>
-          <span className="sr-only">Filter PYQ sessions by preset</span>
-          <Select
-            value={preset}
-            onChange={(event) => {
-              setPreset(event.target.value);
-              setVisibleCount(PAGE_SIZE);
-            }}
-          >
-            <option value="all">All prescriptions</option>
-            {presetOptions.map((option) => (
-              <option key={option} value={option}>
-                {option.replaceAll('-', ' ')}
-              </option>
-            ))}
-          </Select>
-        </label>
-      </div>
+            <div className="mb-3 grid gap-2 rounded border border-border bg-bg-overlay/20 p-3 sm:grid-cols-[minmax(0,1fr)_150px_170px]">
+              <label className="relative">
+                <span className="sr-only">Search PYQ session history</span>
+                <Search
+                  size={14}
+                  aria-hidden="true"
+                  className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-text-faint"
+                />
+                <Input
+                  value={query}
+                  onChange={(event) => {
+                    setQuery(event.target.value);
+                    setVisibleCount(PAGE_SIZE);
+                  }}
+                  className="pl-9"
+                  placeholder="Search sessions"
+                />
+              </label>
+              <label>
+                <span className="sr-only">Filter PYQ sessions by mode</span>
+                <Select
+                  value={mode}
+                  onChange={(event) => {
+                    setMode(event.target.value as typeof mode);
+                    setVisibleCount(PAGE_SIZE);
+                  }}
+                >
+                  <option value="all">All modes</option>
+                  <option value="practice">Practice</option>
+                  <option value="exam">Exam</option>
+                </Select>
+              </label>
+              <label>
+                <span className="sr-only">Filter PYQ sessions by preset</span>
+                <Select
+                  value={preset}
+                  onChange={(event) => {
+                    setPreset(event.target.value);
+                    setVisibleCount(PAGE_SIZE);
+                  }}
+                >
+                  <option value="all">All prescriptions</option>
+                  {presetOptions.map((option) => (
+                    <option key={option} value={option}>
+                      {option.replaceAll('-', ' ')}
+                    </option>
+                  ))}
+                </Select>
+              </label>
+            </div>
 
-      {visible.length === 0 ? (
-        <Card>
-          <CardBody className="p-6 text-center text-[12px] text-text-faint">
-            No saved session matches this search. Clear the filters to return to the full ledger.
-          </CardBody>
-        </Card>
-      ) : (
-        <div className="grid gap-2">
-          {visible.map((session) => {
-            const sessionAttempts = latestAttempts(session, attempts);
-            const correct = sessionAttempts.filter(
-              (attempt) => attempt.mark_correct === true
-            ).length;
-            const wrong = sessionAttempts.filter(
-              (attempt) => attempt.mark_correct === false
-            ).length;
-            const skipped = sessionAttempts.filter(
-              (attempt) => attempt.mark_decision === 'SKIP'
-            ).length;
-            const subject =
-              session.config.subjectSlug === 'all'
-                ? session.config.subjectSlugs?.length
-                  ? session.config.subjectSlugs
-                      .map((slug) => subjectLabels[slug] ?? slug)
-                      .join(' + ')
-                  : 'Mixed subjects'
-                : (subjectLabels[session.config.subjectSlug] ?? session.config.subjectSlug);
-            const sessionPreset = session.config.recommendationPreset ?? 'custom';
-            return (
-              <Card key={session.id}>
-                <CardBody className="flex flex-col gap-3 p-3 sm:flex-row sm:items-center sm:justify-between">
-                  <div className="min-w-0">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <Badge tone={session.config.mode === 'exam' ? 'guess' : 'neutral'}>
-                        {session.config.mode === 'exam' ? 'Exam' : 'Practice'}
-                      </Badge>
-                      <Badge tone="accent">{sessionPreset.replaceAll('-', ' ')}</Badge>
-                      <span className="u-num text-[10px] text-text-faint">
-                        {new Date(session.completed_at ?? session.updated_at).toLocaleDateString()}
-                      </span>
-                    </div>
-                    <p className="mt-1.5 truncate text-[13px] font-semibold text-text">
-                      {session.config.savedPrescriptionName
-                        ? `${session.config.savedPrescriptionName} · ${subject}`
-                        : subject}
-                    </p>
-                    <p className="mt-0.5 text-[11px] text-text-faint">
-                      {correct} correct · {wrong} wrong · {skipped} skipped ·{' '}
-                      {session.question_uids.length} selected ·{' '}
-                      {secondsToClock(session.elapsed_sec)}
-                    </p>
-                  </div>
-                  <Button size="sm" onClick={() => onReview(session)}>
-                    View report <ArrowRight size={13} />
-                  </Button>
+            {visible.length === 0 ? (
+              <Card>
+                <CardBody className="p-6 text-center text-[12px] text-text-faint">
+                  No saved session matches this search. Clear the filters to return to the full
+                  ledger.
                 </CardBody>
               </Card>
-            );
-          })}
-          {visible.length < filtered.length ? (
-            <Button
-              variant="ghost"
-              className="justify-center"
-              onClick={() => setVisibleCount((count) => count + PAGE_SIZE)}
-            >
-              Show {Math.min(PAGE_SIZE, filtered.length - visible.length)} more
-            </Button>
-          ) : null}
-        </div>
-      )}
+            ) : (
+              <div className="grid gap-2">
+                {visible.map((session) => {
+                  const sessionAttempts = latestAttempts(session, attempts);
+                  const correct = sessionAttempts.filter(
+                    (attempt) => attempt.mark_correct === true
+                  ).length;
+                  const wrong = sessionAttempts.filter(
+                    (attempt) => attempt.mark_correct === false
+                  ).length;
+                  const skipped = sessionAttempts.filter(
+                    (attempt) => attempt.mark_decision === 'SKIP'
+                  ).length;
+                  const subject =
+                    session.config.subjectSlug === 'all'
+                      ? session.config.subjectSlugs?.length
+                        ? session.config.subjectSlugs
+                            .map((slug) => subjectLabels[slug] ?? slug)
+                            .join(' + ')
+                        : 'Mixed subjects'
+                      : (subjectLabels[session.config.subjectSlug] ?? session.config.subjectSlug);
+                  const sessionPreset = session.config.recommendationPreset ?? 'custom';
+                  return (
+                    <Card key={session.id}>
+                      <CardBody className="flex flex-col gap-3 p-3 sm:flex-row sm:items-center sm:justify-between">
+                        <div className="min-w-0">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <Badge tone={session.config.mode === 'exam' ? 'guess' : 'neutral'}>
+                              {session.config.mode === 'exam' ? 'Exam' : 'Practice'}
+                            </Badge>
+                            <Badge tone="accent">{sessionPreset.replaceAll('-', ' ')}</Badge>
+                            <span className="u-num text-[10px] text-text-faint">
+                              {new Date(
+                                session.completed_at ?? session.updated_at
+                              ).toLocaleDateString()}
+                            </span>
+                          </div>
+                          <p className="mt-1.5 truncate text-[13px] font-semibold text-text">
+                            {session.config.savedPrescriptionName
+                              ? `${session.config.savedPrescriptionName} · ${subject}`
+                              : subject}
+                          </p>
+                          <p className="mt-0.5 text-[11px] text-text-faint">
+                            {correct} correct · {wrong} wrong · {skipped} skipped ·{' '}
+                            {session.question_uids.length} selected ·{' '}
+                            {secondsToClock(session.elapsed_sec)}
+                          </p>
+                        </div>
+                        <Button size="sm" onClick={() => onReview(session)}>
+                          View report <ArrowRight size={13} />
+                        </Button>
+                      </CardBody>
+                    </Card>
+                  );
+                })}
+                {visible.length < filtered.length ? (
+                  <Button
+                    variant="ghost"
+                    className="justify-center"
+                    onClick={() => setVisibleCount((count) => count + PAGE_SIZE)}
+                  >
+                    Show {Math.min(PAGE_SIZE, filtered.length - visible.length)} more
+                  </Button>
+                ) : null}
+              </div>
+            )}
+          </div>
+        ) : null}
+      </div>
     </section>
   );
 }

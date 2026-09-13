@@ -26,7 +26,7 @@ const baseQuestion: PyqQuestion = {
   answer: 'B',
   tolerance: null,
   answerStatus: 'available',
-  html: '<p>Choose the true proposition.</p>',
+  html: '<p>Choose the true proposition.</p><ol type="A"><li>A proposition is always false.</li><li>A proposition or its negation is true.</li><li>A proposition and its negation are true.</li><li>No proposition has a truth value.</li></ol>',
   sourceUrl: 'https://gateoverflow.in/multiple-view/1',
   answerSource: null
 };
@@ -38,7 +38,7 @@ const coreQuestions: PyqQuestion[] = [
     number: '2',
     type: 'MSQ',
     answer: ['A', 'C'],
-    html: '<p>Select all valid implications.</p>'
+    html: '<p>Select all valid implications.</p><ol style="list-style-type: upper-alpha"><li>A conjunction implies either operand.</li><li>A disjunction implies both operands.</li><li>A proposition implies its double negation.</li><li>A proposition implies its negation.</li></ol>'
   },
   {
     ...baseQuestion,
@@ -141,6 +141,19 @@ async function startMultiple(user: ReturnType<typeof userEvent.setup>) {
   return screen.findByRole('article', { name: 'Question 1' });
 }
 
+function questionCard(number: number) {
+  return within(screen.getByRole('article', { name: `Question ${number}` }));
+}
+
+function option(number: number, letter: string) {
+  return questionCard(number).getByRole('button', { name: letter });
+}
+
+async function commitWithHighConfidence(user: ReturnType<typeof userEvent.setup>) {
+  await user.click(screen.getByRole('button', { name: 'Answered: committed' }));
+  await user.click(screen.getByRole('button', { name: 'Commit & reveal key' }));
+}
+
 async function workOnQuestion(user: ReturnType<typeof userEvent.setup>, number: number) {
   await user.click(screen.getByRole('button', { name: `Work on question ${number}` }));
   await within(screen.getByRole('article', { name: `Question ${number}` })).findByRole('button', {
@@ -195,11 +208,12 @@ describe('PYQ multiple-question practice view', () => {
     await startMultiple(user);
     expect(screen.getAllByRole('article', { name: /^Question \d+$/ })).toHaveLength(3);
     for (const question of coreQuestions) {
-      expect(screen.getByText(question.html.replace(/<[^>]*>/g, ''))).toBeInTheDocument();
+      const stem = new DOMParser().parseFromString(question.html, 'text/html').querySelector('p')!;
+      expect(screen.getByText(stem.textContent!)).toBeInTheDocument();
     }
     expect(screen.getAllByRole('button', { name: 'Commit & reveal key' })).toHaveLength(1);
     expect(screen.queryByText('Correct answer')).not.toBeInTheDocument();
-    await user.click(screen.getByRole('button', { name: 'B' }));
+    await user.click(option(1, 'B'));
     await user.click(screen.getByRole('button', { name: 'One question' }));
     await waitFor(() =>
       expect(screen.queryByText('Select all valid implications.')).not.toBeInTheDocument()
@@ -207,7 +221,7 @@ describe('PYQ multiple-question practice view', () => {
     expect(screen.getByRole('button', { name: 'B' })).toHaveAttribute('aria-pressed', 'true');
     await user.click(screen.getByRole('button', { name: 'Multiple questions' }));
     expect(await screen.findByText('Select all valid implications.')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'B' })).toHaveAttribute('aria-pressed', 'true');
+    expect(option(1, 'B')).toHaveAttribute('aria-pressed', 'true');
     await waitFor(async () => {
       const [session] = await db.pyq_sessions.toArray();
       expect(session.config.practiceView).toBe('multiple');
@@ -215,19 +229,133 @@ describe('PYQ multiple-question practice view', () => {
     expect(usePyqPreferencesStore.getState().lastConfig?.practiceView).toBe('multiple');
   });
 
+  it('selects option content directly on inactive cards and asks confidence after the answer', async () => {
+    const user = userEvent.setup();
+    renderPractice();
+    await startMultiple(user);
+    expect(
+      screen.queryByRole('group', { name: 'How confident do you feel?' })
+    ).not.toBeInTheDocument();
+    expect(questionCard(1).getByRole('button', { name: 'Commit & reveal key' })).toBeDisabled();
+    expect(questionCard(3).queryByRole('spinbutton')).not.toBeInTheDocument();
+    expect(questionCard(3).getByRole('button', { name: 'Work on question 3' })).toBeEnabled();
+
+    await user.click(questionCard(2).getByText('A conjunction implies either operand.'));
+    expect(
+      await questionCard(2).findByRole('button', { name: 'Commit & reveal key' })
+    ).toBeDisabled();
+    expect(option(2, 'A')).toHaveAttribute('aria-pressed', 'true');
+    expect(
+      questionCard(2).getByRole('group', { name: 'How confident do you feel?' })
+    ).toBeVisible();
+    expect(screen.getByRole('button', { name: 'Answered: committed' })).toHaveAttribute(
+      'aria-pressed',
+      'false'
+    );
+    await user.click(screen.getByRole('button', { name: 'Guessed 50/50: uncertain' }));
+    expect(questionCard(2).getByRole('button', { name: 'Commit & reveal key' })).toBeEnabled();
+    await user.click(questionCard(2).getByText('A proposition implies its double negation.'));
+    expect(option(2, 'A')).toHaveAttribute('aria-pressed', 'true');
+    expect(option(2, 'C')).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByRole('button', { name: 'Guessed 50/50: uncertain' })).toHaveAttribute(
+      'aria-pressed',
+      'false'
+    );
+    expect(questionCard(2).getByRole('button', { name: 'Commit & reveal key' })).toBeDisabled();
+    await user.click(option(2, 'A'));
+    expect(option(2, 'A')).toHaveAttribute('aria-pressed', 'false');
+    expect(option(2, 'C')).toHaveAttribute('aria-pressed', 'true');
+
+    await user.click(questionCard(1).getByText('A proposition or its negation is true.'));
+    expect(
+      await questionCard(1).findByRole('button', { name: 'Commit & reveal key' })
+    ).toBeDisabled();
+    expect(option(1, 'B')).toHaveAttribute('aria-pressed', 'true');
+    await user.click(screen.getByRole('button', { name: 'Answered: committed' }));
+    await user.click(questionCard(1).getByText('A proposition is always false.'));
+    expect(option(1, 'A')).toHaveAttribute('aria-pressed', 'true');
+    expect(option(1, 'B')).toHaveAttribute('aria-pressed', 'false');
+    expect(screen.getByRole('button', { name: 'Answered: committed' })).toHaveAttribute(
+      'aria-pressed',
+      'false'
+    );
+    expect(questionCard(1).getByRole('button', { name: 'Commit & reveal key' })).toBeDisabled();
+
+    await workOnQuestion(user, 2);
+    expect(option(2, 'C')).toHaveAttribute('aria-pressed', 'true');
+    await user.click(option(2, 'C'));
+    expect(
+      screen.queryByRole('group', { name: 'How confident do you feel?' })
+    ).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Left blank: skipped' })).toBeEnabled();
+    expect(screen.getByRole('button', { name: 'Commit & reveal key' })).toBeDisabled();
+    expect(await db.pyq_attempts.count()).toBe(0);
+  });
+
+  it('keeps blank skip available and permits retry while committed choices stay locked', async () => {
+    const user = userEvent.setup();
+    renderPractice();
+    await startMultiple(user);
+    expect(
+      screen.queryByRole('group', { name: 'How confident do you feel?' })
+    ).not.toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Left blank: skipped' }));
+    await user.click(screen.getByRole('button', { name: 'Commit & reveal key' }));
+    const skippedReceipt = await screen.findByRole('region', { name: 'PYQ attempt receipt' });
+    expect(
+      within(skippedReceipt).getByText('Left blank', { exact: true, selector: 'p' })
+    ).toBeInTheDocument();
+    await user.click(option(2, 'A'));
+    expect(
+      await questionCard(2).findByRole('button', { name: 'Commit & reveal key' })
+    ).toBeDisabled();
+    expect(option(1, 'B')).toBeEnabled();
+    await user.click(option(1, 'B'));
+    expect(
+      await questionCard(1).findByRole('button', { name: 'Commit & reveal key' })
+    ).toBeDisabled();
+    expect(option(1, 'B')).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByText(/Previously skipped/)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Answered: committed' })).toHaveAttribute(
+      'aria-pressed',
+      'false'
+    );
+    await commitWithHighConfidence(user);
+    expect(
+      within(await screen.findByRole('region', { name: 'PYQ attempt receipt' })).getByText(
+        'Correct',
+        { exact: true }
+      )
+    ).toBeInTheDocument();
+    expect(option(1, 'A')).toBeDisabled();
+    expect(option(1, 'B')).toBeDisabled();
+    await user.click(option(2, 'C'));
+    await questionCard(2).findByRole('button', { name: 'Commit & reveal key' });
+    expect(option(2, 'A')).toHaveAttribute('aria-pressed', 'true');
+    expect(option(2, 'C')).toHaveAttribute('aria-pressed', 'true');
+    expect(option(1, 'A')).toBeDisabled();
+    expect(option(1, 'B')).toHaveAttribute('aria-pressed', 'true');
+    await user.click(option(1, 'A'));
+    expect(
+      questionCard(2).getByRole('button', { name: 'Commit & reveal key' })
+    ).toBeInTheDocument();
+    expect(option(1, 'A')).toHaveAttribute('aria-pressed', 'false');
+    expect(option(1, 'B')).toHaveAttribute('aria-pressed', 'true');
+  });
+
   it('restores independent MCQ, MSQ, numeric, and confidence drafts after jumping and pausing', async () => {
     const user = userEvent.setup();
     const mounted = renderPractice();
     await startMultiple(user);
-    await user.click(screen.getByRole('button', { name: 'B' }));
+    await user.click(option(1, 'B'));
     await user.click(screen.getByRole('button', { name: 'Guessed 50/50: uncertain' }));
     await workOnQuestion(user, 2);
-    await user.click(screen.getByRole('button', { name: 'A' }));
-    await user.click(screen.getByRole('button', { name: 'C' }));
+    await user.click(option(2, 'A'));
+    await user.click(option(2, 'C'));
     await workOnQuestion(user, 3);
     await user.type(screen.getByRole('spinbutton', { name: 'Your numeric answer' }), '12');
     await workOnQuestion(user, 1);
-    expect(screen.getByRole('button', { name: 'B' })).toHaveAttribute('aria-pressed', 'true');
+    expect(option(1, 'B')).toHaveAttribute('aria-pressed', 'true');
     expect(screen.getByRole('button', { name: 'Guessed 50/50: uncertain' })).toHaveAttribute(
       'aria-pressed',
       'true'
@@ -238,16 +366,44 @@ describe('PYQ multiple-question practice view', () => {
     renderPractice();
     await user.click(await screen.findByRole('button', { name: 'Resume practice' }));
     expect(await screen.findByRole('article', { name: 'Question 1' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'B' })).toHaveAttribute('aria-pressed', 'true');
+    expect(option(1, 'B')).toHaveAttribute('aria-pressed', 'true');
     expect(screen.getByRole('button', { name: 'Guessed 50/50: uncertain' })).toHaveAttribute(
       'aria-pressed',
       'true'
     );
     await workOnQuestion(user, 2);
-    expect(screen.getByRole('button', { name: 'A' })).toHaveAttribute('aria-pressed', 'true');
-    expect(screen.getByRole('button', { name: 'C' })).toHaveAttribute('aria-pressed', 'true');
+    expect(option(2, 'A')).toHaveAttribute('aria-pressed', 'true');
+    expect(option(2, 'C')).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByRole('button', { name: 'Answered: committed' })).toHaveAttribute(
+      'aria-pressed',
+      'false'
+    );
+    expect(screen.getByRole('button', { name: 'Commit & reveal key' })).toBeDisabled();
+    const [resumed] = await db.pyq_sessions.toArray();
+    expect(resumed.config.practiceDrafts?.[coreQuestions[1].id]).toMatchObject({
+      selected_answer: ['A', 'C'],
+      confidence: null,
+      mark_decision: null
+    });
     await workOnQuestion(user, 3);
     expect(screen.getByRole('spinbutton', { name: 'Your numeric answer' })).toHaveValue(12);
+    expect(screen.getByRole('button', { name: 'Answered: committed' })).toHaveAttribute(
+      'aria-pressed',
+      'false'
+    );
+    expect(screen.getByRole('button', { name: 'Commit & reveal key' })).toBeDisabled();
+    await user.click(screen.getByRole('button', { name: 'Guessed: uncertain' }));
+    expect(screen.getByRole('button', { name: 'Commit & reveal key' })).toBeEnabled();
+    await user.type(screen.getByRole('spinbutton', { name: 'Your numeric answer' }), '3');
+    expect(screen.getByRole('button', { name: 'Guessed: uncertain' })).toHaveAttribute(
+      'aria-pressed',
+      'false'
+    );
+    expect(screen.getByRole('button', { name: 'Commit & reveal key' })).toBeDisabled();
+    await user.clear(screen.getByRole('spinbutton', { name: 'Your numeric answer' }));
+    expect(
+      screen.queryByRole('group', { name: 'How confident do you feel?' })
+    ).not.toBeInTheDocument();
     expect(await db.pyq_attempts.count()).toBe(0);
   });
 
@@ -257,7 +413,7 @@ describe('PYQ multiple-question practice view', () => {
     await startMultiple(user);
     await workOnQuestion(user, 3);
     await user.type(screen.getByRole('spinbutton', { name: 'Your numeric answer' }), '12');
-    await user.click(screen.getByRole('button', { name: 'Commit & reveal key' }));
+    await commitWithHighConfidence(user);
     const receipt = await screen.findByRole('region', { name: 'PYQ attempt receipt' });
     expect(within(receipt).getByText('Correct', { exact: true })).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Finish set' })).not.toBeInTheDocument();
@@ -267,13 +423,13 @@ describe('PYQ multiple-question practice view', () => {
     });
     await workOnQuestion(user, 1);
     expect(screen.queryByText('Correct answer')).not.toBeInTheDocument();
-    await user.click(screen.getByRole('button', { name: 'B' }));
-    await user.click(screen.getByRole('button', { name: 'Commit & reveal key' }));
+    await user.click(option(1, 'B'));
+    await commitWithHighConfidence(user);
     await screen.findByRole('region', { name: 'PYQ attempt receipt' });
     await workOnQuestion(user, 2);
-    await user.click(screen.getByRole('button', { name: 'A' }));
-    await user.click(screen.getByRole('button', { name: 'C' }));
-    await user.click(screen.getByRole('button', { name: 'Commit & reveal key' }));
+    await user.click(option(2, 'A'));
+    await user.click(option(2, 'C'));
+    await commitWithHighConfidence(user);
     await user.click(await screen.findByRole('button', { name: 'Finish set' }));
     expect(
       await screen.findByRole('heading', { name: 'Practice set complete' })
@@ -298,11 +454,11 @@ describe('PYQ multiple-question practice view', () => {
     const user = userEvent.setup();
     renderPractice();
     await startMultiple(user);
-    await user.click(screen.getByRole('button', { name: 'B' }));
-    await user.click(screen.getByRole('button', { name: 'Commit & reveal key' }));
+    await user.click(option(1, 'B'));
+    await commitWithHighConfidence(user);
     await screen.findByRole('region', { name: 'PYQ attempt receipt' });
     await workOnQuestion(user, 2);
-    await user.click(screen.getByRole('button', { name: 'A' }));
+    await user.click(option(2, 'A'));
     await user.click(screen.getByRole('button', { name: 'Review question 1' }));
     await screen.findByRole('region', { name: 'PYQ attempt receipt' });
     const [beforePause] = await db.pyq_sessions.toArray();
@@ -329,21 +485,25 @@ describe('PYQ multiple-question practice view', () => {
     const user = userEvent.setup();
     const active = renderPractice();
     await startMultiple(user);
-    await user.click(screen.getByRole('button', { name: 'B' }));
+    await user.click(option(1, 'B'));
     await workOnQuestion(user, 2);
-    await user.click(screen.getByRole('button', { name: 'A' }));
-    await user.click(screen.getByRole('button', { name: 'C' }));
+    await user.click(option(2, 'A'));
+    await user.click(option(2, 'C'));
     await workOnQuestion(user, 3);
     await user.type(screen.getByRole('spinbutton', { name: 'Your numeric answer' }), '12');
-    await user.click(screen.getByRole('button', { name: 'Commit & reveal key' }));
+    await commitWithHighConfidence(user);
     await screen.findByRole('region', { name: 'PYQ attempt receipt' });
     const [original] = await db.pyq_sessions.toArray();
     expect(original.config.practiceDraft).toBeUndefined();
     expect(original.config.practiceDrafts?.[coreQuestions[0].id].selected_answer).toBe('B');
-    expect(original.config.practiceDrafts?.[coreQuestions[1].id].selected_answer).toEqual(['A', 'C']);
+    expect(original.config.practiceDrafts?.[coreQuestions[1].id].selected_answer).toEqual([
+      'A',
+      'C'
+    ]);
     await user.click(screen.getByRole('button', { name: 'Pause practice' }));
     await user.click(await screen.findByRole('button', { name: 'Resume practice' }));
-    expect(await screen.findByRole('button', { name: 'B' })).toHaveAttribute('aria-pressed', 'true');
+    await screen.findByRole('article', { name: 'Question 1' });
+    expect(option(1, 'B')).toHaveAttribute('aria-pressed', 'true');
     active.unmount();
 
     const setup = renderPractice();
@@ -353,14 +513,15 @@ describe('PYQ multiple-question practice view', () => {
     expect(pausedFromSetup?.status).toBe('paused');
     expect(pausedFromSetup?.config.practiceDrafts?.[coreQuestions[0].id]).toMatchObject({
       selected_answer: 'B',
-      mark_decision: 'MARK',
-      confidence: 'high'
+      mark_decision: null,
+      confidence: null
     });
     expect(pausedFromSetup?.config.practiceDrafts?.[coreQuestions[1].id]).toEqual(
       original.config.practiceDrafts?.[coreQuestions[1].id]
     );
     await user.click(screen.getByRole('button', { name: 'Resume practice' }));
-    expect(await screen.findByRole('button', { name: 'B' })).toHaveAttribute('aria-pressed', 'true');
+    await screen.findByRole('article', { name: 'Question 1' });
+    expect(option(1, 'B')).toHaveAttribute('aria-pressed', 'true');
     setup.unmount();
 
     renderPractice();
@@ -370,8 +531,8 @@ describe('PYQ multiple-question practice view', () => {
     expect(autoPaused?.status).toBe('paused');
     expect(autoPaused?.config.practiceDrafts?.[coreQuestions[0].id]).toMatchObject({
       selected_answer: 'B',
-      mark_decision: 'MARK',
-      confidence: 'high'
+      mark_decision: null,
+      confidence: null
     });
     expect(autoPaused?.config.practiceDrafts?.[coreQuestions[1].id]).toEqual(
       original.config.practiceDrafts?.[coreQuestions[1].id]

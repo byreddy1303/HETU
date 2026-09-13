@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { Card, CardBody, CardHeader } from '@/components/ui/Card';
 import PyqQuestionContent from './PyqQuestionContent';
+import PyqPracticeAnswer from './PyqPracticeAnswer';
 import { cn } from '@/lib/utils';
 
 export default function PyqPracticeSheet({
@@ -15,6 +16,7 @@ export default function PyqPracticeSheet({
   attempts,
   disabled,
   onNavigate,
+  onChoices,
   activeQuestion
 }: {
   questions: PyqQuestion[];
@@ -23,6 +25,7 @@ export default function PyqPracticeSheet({
   attempts: PyqAttemptRow[];
   disabled: boolean;
   onNavigate: (index: number) => void;
+  onChoices: (index: number, choices: string[]) => void;
   activeQuestion: ReactNode;
 }) {
   const latest = new Map(attempts.map((attempt) => [attempt.question_uid, attempt]));
@@ -39,8 +42,8 @@ export default function PyqPracticeSheet({
           </span>
         </div>
         <p className="mb-3 text-[12px] leading-relaxed text-text-muted">
-          Browse the set, then choose a question to work on. Each question keeps its own draft and
-          active time.
+          Select an option on any question, then choose your confidence. Each question keeps its own
+          draft and active time.
         </p>
         <div className="flex max-h-36 flex-wrap gap-1.5 overflow-y-auto">
           {questions.map((question, questionIndex) => {
@@ -81,6 +84,14 @@ export default function PyqPracticeSheet({
         const active = index === questionIndex;
         const attempt = latest.get(question.id);
         const committed = attempt && attempt.mark_decision !== 'SKIP';
+        const savedAnswer = committed
+          ? attempt.selected_answer
+          : getPyqPracticeDraft(session, question.id)?.selected_answer;
+        const savedChoices = Array.isArray(savedAnswer)
+          ? savedAnswer.map(String)
+          : typeof savedAnswer === 'string'
+            ? [savedAnswer]
+            : [];
         return (
           <article
             key={question.id}
@@ -124,7 +135,18 @@ export default function PyqPracticeSheet({
                   }
                 />
                 <CardBody className="p-5 sm:p-7">
-                  <PyqQuestionContent html={question.html} />
+                  {question.type === 'NAT' ? (
+                    <PyqQuestionContent html={question.html} />
+                  ) : (
+                    <PyqPracticeAnswer
+                      question={question}
+                      choices={savedChoices}
+                      numeric=""
+                      disabled={disabled || !!committed}
+                      onChoices={(nextChoices) => onChoices(questionIndex, nextChoices)}
+                      onNumeric={() => {}}
+                    />
+                  )}
                   <div className="mt-5 border-t border-border pt-4">
                     <Button disabled={disabled} onClick={() => onNavigate(questionIndex)}>
                       {committed ? 'Review' : 'Work on'} question {questionIndex + 1}

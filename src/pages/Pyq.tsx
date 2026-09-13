@@ -42,6 +42,8 @@ import ScientificCalculator, { CalculatorTrigger } from '@/components/shared/Sci
 import PyqExamWorkspace from '@/components/pyq/PyqExamWorkspace';
 import PyqPracticeViewControl from '@/components/pyq/PyqPracticeViewControl';
 import PyqPracticeSheet from '@/components/pyq/PyqPracticeSheet';
+import PyqPracticeAnswer from '@/components/pyq/PyqPracticeAnswer';
+import { pyqPracticeQuestionStem } from '@/components/pyq/pyqPracticeQuestion';
 import PyqImprovementInsights from '@/components/pyq/PyqImprovementInsights';
 import PyqEvidenceLedger from '@/components/pyq/PyqEvidenceLedger';
 import PyqRecommendedSetup from '@/components/pyq/PyqRecommendedSetup';
@@ -3621,6 +3623,7 @@ export default function Pyq() {
       !userId ||
       !manifest ||
       !decision ||
+      (loadedSession?.config.practiceView === 'multiple' && decision !== 'SKIP' && !confidence) ||
       submitted ||
       submitting ||
       submittingRef.current ||
@@ -3797,7 +3800,7 @@ export default function Pyq() {
     setLoadedSession(completedSession);
   }
 
-  async function navigatePractice(nextIndex: number) {
+  async function navigatePractice(nextIndex: number, incomingChoices?: string[]) {
     if (
       nextIndex < 0 ||
       nextIndex >= questions.length ||
@@ -3806,6 +3809,9 @@ export default function Pyq() {
       pausingSessionRef.current
     )
       return;
+    const target = questions[nextIndex];
+    const targetAttempt = latestQuestionAttempt(completedRef.current, target.id);
+    if (incomingChoices && targetAttempt && targetAttempt.mark_decision !== 'SKIP') return;
     if (nextIndex === index) {
       document.getElementById(`practice-question-${index}`)?.scrollIntoView?.({ block: 'start' });
       return;
@@ -3832,12 +3838,36 @@ export default function Pyq() {
             current_question_started_at: new Date(Math.min(startedAt ?? nowMs, nowMs)).toISOString()
           }
         : session;
-      const next = navigatePyqPracticeQuestion(
+      let next = navigatePyqPracticeQuestion(
         alignedSession,
         questions[nextIndex].id,
         outgoing,
         nowMs
       );
+      if (incomingChoices) {
+        const previousDraft = getPyqPracticeDraft(next, target.id);
+        const incomingDraft = {
+          question_uid: target.id,
+          selected_answer:
+            answerInputType(target) === 'MSQ'
+              ? incomingChoices.slice().sort()
+              : (incomingChoices[0] ?? null),
+          mark_decision: null,
+          confidence: null,
+          elapsed_ms: previousDraft?.elapsed_ms ?? 0,
+          first_started_at: previousDraft?.first_started_at ?? new Date(nowMs).toISOString()
+        };
+        // Hydration reads this checkpoint after the active card changes. Save the
+        // clicked option with both draft aliases so it cannot restore an old answer.
+        next = {
+          ...next,
+          config: {
+            ...next.config,
+            practiceDraft: incomingDraft,
+            practiceDrafts: { ...next.config.practiceDrafts, [target.id]: incomingDraft }
+          }
+        };
+      }
       await writeLocal('pyq_sessions', next);
       loadedSessionRef.current = next;
       setLoadedSession(next);
@@ -4161,12 +4191,17 @@ export default function Pyq() {
   }
 
   if (!current) return null;
+  const multiplePractice = loadedSession?.config.practiceView === 'multiple';
   const inputType = answerInputType(current);
   const hasAnswer =
     inputType === 'NAT'
       ? numeric.trim() !== '' && Number.isFinite(Number(numeric))
       : choices.length > 0;
-  const canSubmit = !!decision && (decision === 'SKIP' || hasAnswer) && !submitting && !loading;
+  const canSubmit =
+    !!decision &&
+    (decision === 'SKIP' || (hasAnswer && (!multiplePractice || !!confidence))) &&
+    !submitting &&
+    !loading;
   const previouslySkipped = latestCurrentAttempt?.mark_decision === 'SKIP' && !submitted;
 
   if (
@@ -4312,6 +4347,36 @@ export default function Pyq() {
     );
   }
 
+  function changePracticeChoices(nextChoices: string[]) {
+    if (submitted || submittingRef.current || loading) return;
+    if (
+      choices.length === nextChoices.length &&
+      choices.every((choice) => nextChoices.includes(choice))
+    ) {
+      return;
+    }
+    setChoices(nextChoices);
+    if (multiplePractice) {
+      setDecision(null);
+      setConfidence(null);
+    } else if (nextChoices.length > 0 && (decision === null || decision === 'SKIP')) {
+      setDecision('MARK');
+      setConfidence('high');
+    }
+  }
+
+  function changePracticeNumeric(nextNumeric: string) {
+    if (submitted || submittingRef.current || loading || nextNumeric === numeric) return;
+    setNumeric(nextNumeric);
+    if (multiplePractice) {
+      setDecision(null);
+      setConfidence(null);
+    } else if (nextNumeric.trim().length > 0 && (decision === null || decision === 'SKIP')) {
+      setDecision('MARK');
+      setConfidence('high');
+    }
+  }
+
   const activeQuestionWorkspace = (
     <div className="flex min-w-0 flex-col gap-4">
       <div ref={questionCaptureRef}>
@@ -4337,47 +4402,83 @@ export default function Pyq() {
             }
           />
           <CardBody className="p-5 sm:p-7">
-            <PyqQuestionContent html={current.html} />
+            <PyqQuestionContent
+              html={multiplePractice ? pyqPracticeQuestionStem(current) : current.html}
+            />
           </CardBody>
         </Card>
       </div>
 
       <Card>
-        <CardBody className="grid gap-5 p-4 sm:p-5 lg:grid-cols-[minmax(0,1fr)_minmax(310px,0.7fr)]">
-          <AnswerPad
-            question={current}
-            choices={choices}
-            numeric={numeric}
-            disabled={!!submitted || submitting || loading}
-            onChoices={(nextChoices) => {
-              setChoices(nextChoices);
-              if (nextChoices.length > 0 && (decision === null || decision === 'SKIP')) {
-                setDecision('MARK');
-                setConfidence('high');
-              }
-            }}
-            onNumeric={(nextNumeric) => {
-              setNumeric(nextNumeric);
-              if (nextNumeric.trim().length > 0 && (decision === null || decision === 'SKIP')) {
-                setDecision('MARK');
-                setConfidence('high');
-              }
-            }}
-          />
-          <div className="flex flex-col gap-4 border-t border-border pt-4 lg:border-l lg:border-t-0 lg:pl-5 lg:pt-0">
-            <PracticeConfidenceButtons
-              confidence={confidence}
-              decision={decision}
+        <CardBody
+          className={cn(
+            'grid gap-5 p-4 sm:p-5',
+            !multiplePractice && 'lg:grid-cols-[minmax(0,1fr)_minmax(310px,0.7fr)]'
+          )}
+        >
+          {multiplePractice ? (
+            <PyqPracticeAnswer
+              question={current}
+              choices={choices}
+              numeric={numeric}
               disabled={!!submitted || submitting || loading}
-              onChange={(newConfidence, newDecision) => {
-                setConfidence(newConfidence);
-                setDecision(newDecision);
-                if (newDecision === 'SKIP') {
-                  setChoices([]);
-                  setNumeric('');
-                }
-              }}
+              showStem={false}
+              onChoices={changePracticeChoices}
+              onNumeric={changePracticeNumeric}
             />
+          ) : (
+            <AnswerPad
+              question={current}
+              choices={choices}
+              numeric={numeric}
+              disabled={!!submitted || submitting || loading}
+              onChoices={changePracticeChoices}
+              onNumeric={changePracticeNumeric}
+            />
+          )}
+          <div
+            className={cn(
+              'flex flex-col gap-4',
+              !multiplePractice &&
+                'border-t border-border pt-4 lg:border-l lg:border-t-0 lg:pl-5 lg:pt-0'
+            )}
+          >
+            {!multiplePractice || hasAnswer ? (
+              <PracticeConfidenceButtons
+                confidence={confidence}
+                decision={decision}
+                disabled={!!submitted || submitting || loading}
+                onChange={(newConfidence, newDecision) => {
+                  setConfidence(newConfidence);
+                  setDecision(newDecision);
+                  if (newDecision === 'SKIP') {
+                    setChoices([]);
+                    setNumeric('');
+                  }
+                }}
+              />
+            ) : (
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <p className="text-[12px] text-text-muted">
+                  {decision === 'SKIP'
+                    ? 'This question will be left blank.'
+                    : 'Select your answer to choose a confidence level.'}
+                </p>
+                <Button
+                  aria-label="Left blank: skipped"
+                  aria-pressed={decision === 'SKIP'}
+                  disabled={!!submitted || submitting || loading}
+                  onClick={() => {
+                    setChoices([]);
+                    setNumeric('');
+                    setConfidence(null);
+                    setDecision('SKIP');
+                  }}
+                >
+                  Skip question
+                </Button>
+              </div>
+            )}
             {!submitted ? (
               <div>
                 {previouslySkipped ? (
@@ -4521,6 +4622,7 @@ export default function Pyq() {
           attempts={completed}
           disabled={loading || submitting}
           onNavigate={(nextIndex) => void navigatePractice(nextIndex)}
+          onChoices={(nextIndex, nextChoices) => void navigatePractice(nextIndex, nextChoices)}
           activeQuestion={activeQuestionWorkspace}
         />
       ) : (

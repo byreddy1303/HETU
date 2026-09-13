@@ -5,7 +5,8 @@
       "namespace": "android_app",
       "package_name": "in.airjournal.app",
       "sha256_cert_fingerprints": [
-        "33:EF:7A:BF:80:E8:9E:A7:0E:9E:25:CB:61:7F:48:23:EE:69:09:6F:5B:B2:BA:84:5D:64:3D:8E:93:1D:14:35"
+        "33:EF:7A:BF:80:E8:9E:A7:0E:9E:25:CB:61:7F:48:23:EE:69:09:6F:5B:B2:BA:84:5D:64:3D:8E:93:1D:14:35",
+        "4D:DB:FA:2A:1F:6C:08:00:1D:8B:04:EF:3F:1D:83:3C:2B:50:A8:00:A2:A3:52:A0:ED:C5:C3:E0:59:51:15:DF"
       ]
     }
   }

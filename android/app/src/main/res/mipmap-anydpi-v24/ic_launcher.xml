@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Density-independent fallback for Android 7; Android 8+ uses the adaptive icon. -->
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:drawable="@color/hetuPaper" />
     <item
-        android:width="144dp"
-        android:height="144dp"
+        android:width="48dp"
+        android:height="48dp"
         android:gravity="center"
         android:drawable="@drawable/hetu_brand_icon" />
 </layer-list>

@@ -22,6 +22,21 @@ allprojects {
         google()
         mavenCentral()
     }
+
+    // Capacitor's generated Android test variants pull Kotlin 1.6 JDK
+    // compatibility jars through coroutines while AndroidX resolves the
+    // regular stdlib to 1.8.22. Keep those test-only classpaths on one
+    // Kotlin generation so duplicate-class checks do not block emulator
+    // smoke tests.
+    configurations.configureEach {
+        if (name.contains('AndroidTest')) {
+            resolutionStrategy.eachDependency { details ->
+                if (details.requested.group == 'org.jetbrains.kotlin') {
+                    details.useVersion('1.8.22')
+                }
+            }
+        }
+    }
 }
 
 task clean(type: Delete) {

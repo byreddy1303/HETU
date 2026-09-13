@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#98182B</color>
-    <color name="colorPrimaryDark">#F6F1E9</color>
-    <color name="colorAccent">#98182B</color>
-    <color name="hetuPaper">#F6F1E9</color>
-    <color name="hetuInk">#1B191C</color>
-    <color name="hetuGold">#C69A43</color>
+    <color name="colorPrimary">#244ED0</color>
+    <color name="colorPrimaryDark">#F3F7FF</color>
+    <color name="colorAccent">#244ED0</color>
+    <color name="hetuPaper">#F3F7FF</color>
+    <color name="hetuInk">#142445</color>
+    <color name="hetuGold">#FFD166</color>
 </resources>

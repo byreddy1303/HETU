@@ -9,7 +9,7 @@ const config: CapacitorConfig = {
   // Vercel, DNS, or a network connection. The native server keeps the
   // production hostname to preserve the origin used by existing installs.
   webDir: 'dist',
-  backgroundColor: '#F6F1E9',
+  backgroundColor: '#F3F7FF',
   loggingBehavior: 'production',
   server: {
     // Serve bundled assets at the production origin. Do not set server.url:
@@ -20,7 +20,7 @@ const config: CapacitorConfig = {
     cleartext: false
   },
   android: {
-    backgroundColor: '#F6F1E9',
+    backgroundColor: '#F3F7FF',
     allowMixedContent: false,
     webContentsDebuggingEnabled: false
   },
@@ -34,7 +34,7 @@ const config: CapacitorConfig = {
       launchAutoHide: true,
       launchShowDuration: 500,
       launchFadeOutDuration: 180,
-      backgroundColor: '#F6F1E9',
+      backgroundColor: '#F3F7FF',
       showSpinner: false
     },
     PushNotifications: {

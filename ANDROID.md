@@ -22,6 +22,10 @@ The bundled app keeps `https://hetu-app.vercel.app` as its local WebView origin 
 - Android SDK Platform 36 and matching build tools
 - JDK 21 (Android Studio's bundled JDK is recommended)
 
+The APK, release, and bundle scripts select JDK 21 automatically on this Mac.
+On other machines, set `AIR_JDK21_HOME` (or `JAVA_HOME`) to a JDK 21 directory.
+They reject newer incompatible runtimes before starting Gradle.
+
 The generated project supports Android 7/API 24 and newer. The application ID is `in.airjournal.app`; changing it after distribution creates a different Android application and must not be done casually.
 
 ## First local build
@@ -74,7 +78,7 @@ keytool -genkeypair -v \
 Copy `android/keystore.properties.example` to `android/keystore.properties`, fill the four values, and build a signed APK:
 
 ```bash
-AIR_VERSION_CODE=11 AIR_VERSION_NAME=1.2.2 npm run android:release
+AIR_VERSION_CODE=20260913 AIR_VERSION_NAME=1.3.0 npm run android:release
 ```
 
 The production-signed direct-install artifact is:
@@ -96,8 +100,19 @@ Install a friend update without clearing its data:
 adb install -r android/app/build/outputs/apk/release/hetu-friend.apk
 ```
 
-Increment `AIR_VERSION_CODE` for every release. Android rejects same- or
-lower-version updates, and website deployments never update these APKs.
+The checked-in local build version is `20260913` / `1.3.0` in
+`android/gradle.properties`. This is above the previous shared APK's code
+`20260812`; the old fallback of `1` could not update that installation.
+Increment `AIR_VERSION_CODE` for every distributed release and update the
+checked-in default. Android rejects lower-version updates, and website
+deployments never update these APKs.
+
+Use the same signing identity as the installed app: `hetu-release.apk` updates
+the production-signed release; `hetu-friend.apk` updates the debug-signed
+direct-share build. Do not uninstall to work around a signing or version error:
+an in-place update preserves local study data. If signing fails, check that
+`storeFile` in the gitignored `android/keystore.properties` still points to the
+original keystore; use an absolute path if the repository has moved.
 
 For a Play Store bundle, run `npm run android:bundle`. The artifact is:
 
@@ -108,6 +123,28 @@ android/app/build/outputs/bundle/release/app-release.aab
 Keep the upload keystore and passwords in a password manager and an encrypted offline backup. Losing the signing key can prevent future direct-install updates from replacing the existing app.
 
 ## Release verification matrix
+
+Run native smoke tests on a dedicated emulator or test device:
+
+```bash
+npm run android:test
+```
+
+The tests verify native startup with WebView network loads blocked, preservation
+of isolated localStorage and IndexedDB markers across an offline reload, and a
+custom deep link to the PIN reset form. They do not sign in or modify an account.
+The optional `ApkUpgradeProbeTest` can seed markers in the previous friend APK
+and verify them after installing the new friend APK with `adb install -r`:
+
+```bash
+adb shell am instrument -w -e class in.airjournal.app.ApkUpgradeProbeTest -e upgradePhase seed in.airjournal.app.test/androidx.test.runner.AndroidJUnitRunner
+# Install the new APK over the old one, then run the same probe in verify mode.
+adb shell am instrument -w -e class in.airjournal.app.ApkUpgradeProbeTest -e upgradePhase verify in.airjournal.app.test/androidx.test.runner.AndroidJUnitRunner
+```
+
+Build/install the test APK with `bash scripts/android-gradle.sh assembleDebugAndroidTest`
+and `adb install -r android/app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk`
+before using this optional probe. It skips during the ordinary smoke suite.
 
 Before sharing a build, verify all of the following on at least one physical phone and one emulator:
 

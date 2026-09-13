@@ -15,6 +15,16 @@ import {
 import { SYNCED_TABLES } from '@/lib/db';
 import type { SyncedTableName } from '@/lib/db';
 import { supabase, supabaseConfigured } from '@/lib/supabase';
+import {
+  noteSyncDone,
+  noteSyncFailure,
+  noteSyncStarting,
+  noteSyncSuccess,
+  resetSyncStatus
+} from '@/stores/sync-status';
+
+/** How often the app proves the Postgres round-trip is alive (0.3s). */
+export const SYNC_HEARTBEAT_MS = 300;
 
 export const clientDeviceId =
   typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
@@ -26,6 +36,8 @@ let currentUserId: string | null = null;
 let hydrateChain: Promise<void> | null = null;
 let hydrateForUserId: string | null = null;
 let refreshTimer: ReturnType<typeof setTimeout> | undefined;
+let heartbeatTimer: ReturnType<typeof setInterval> | undefined;
+let heartbeatInFlight = false;
 const initialPullListeners = new Set<() => void>();
 
 function notifyInitialPullChange(): void {
@@ -96,11 +108,20 @@ function teardownChannel(): void {
 function startHydrate(userId: string, tables?: readonly SyncedTableName[]): Promise<void> {
   hydrateForUserId = userId;
   notifyInitialPullChange();
+  if (supabaseConfigured) noteSyncStarting();
   const operation = (tables && tables.length > 0 ? hydrateTables(userId, tables) : hydrateAll(userId))
+    .then(() => {
+      if (!supabaseConfigured) return;
+      noteSyncDone();
+      noteSyncSuccess();
+    })
     .catch((error) => {
       // A hydration failure must never hang a barrier: the app keeps the last
       // in-memory snapshot and surfaces the error to the logs.
       console.warn('[sync] initial hydrate failed; keeping current cache.', error);
+      if (!supabaseConfigured) return;
+      noteSyncDone();
+      noteSyncFailure(errorMessage(error));
     })
     .finally(() => {
       if (hydrateForUserId === userId) {
@@ -110,6 +131,47 @@ function startHydrate(userId: string, tables?: readonly SyncedTableName[]): Prom
     });
   hydrateChain = operation;
   return operation;
+}
+
+function errorMessage(error: unknown): string {
+  if (error instanceof Error) return error.message;
+  return typeof error === 'string' ? error : 'sync failure';
+}
+
+/**
+ * Prove the Postgres round-trip is alive on a 300ms cadence. This is a
+ * deliberately tiny indexed read (a single user row — no screenshots, no full
+ * tables), so it never competes with writes; data freshness itself rides on
+ * realtime + the write-through path. A tick is skipped while a request is
+ * already in flight or the tab is hidden, so requests never stack.
+ */
+function startHeartbeat(userId: string): void {
+  if (!supabaseConfigured) return;
+  stopHeartbeat();
+  heartbeatTimer = setInterval(() => {
+    if (typeof document !== 'undefined' && document.visibilityState === 'hidden') return;
+    void heartbeat(userId);
+  }, SYNC_HEARTBEAT_MS);
+}
+
+function stopHeartbeat(): void {
+  if (heartbeatTimer !== undefined) clearInterval(heartbeatTimer);
+  heartbeatTimer = undefined;
+  heartbeatInFlight = false;
+}
+
+async function heartbeat(userId: string): Promise<void> {
+  if (heartbeatInFlight || currentUserId !== userId || !supabaseConfigured) return;
+  heartbeatInFlight = true;
+  try {
+    const { error } = await supabase.from('users').select('id').eq('id', userId).limit(1);
+    if (error) noteSyncFailure(errorMessage(error));
+    else noteSyncSuccess();
+  } catch (error) {
+    noteSyncFailure(errorMessage(error));
+  } finally {
+    heartbeatInFlight = false;
+  }
 }
 
 /** Coalesce refreshes so a burst of writes triggers at most one re-pull. */
@@ -142,6 +204,7 @@ export function initSync(userId: string): void {
     currentUserId = userId;
     syncEnabled = true;
     setupRealtimeChannel(userId);
+    startHeartbeat(userId);
   }
   if (hydrateChain && hydrateForUserId === userId) return;
   void startHydrate(userId);
@@ -151,11 +214,13 @@ export function stopSync(): void {
   currentUserId = null;
   syncEnabled = false;
   teardownChannel();
+  stopHeartbeat();
   clearTimeout(refreshTimer);
   pendingRefreshTables = null;
   hydrateChain = null;
   hydrateForUserId = null;
   notifyInitialPullChange();
+  resetSyncStatus();
   // Drop the RAM cache. Nothing durable lives on this device, so this is
   // safe and never blocks.
   void clearLocalData();
@@ -204,7 +269,13 @@ export async function writeLocal<T extends { id: string }>(
   name: SyncedTableName,
   row: T
 ): Promise<void> {
-  await table(name).put(withSyncStatus(row));
+  try {
+    await table(name).put(withSyncStatus(row));
+  } catch (error) {
+    if (supabaseConfigured) noteSyncFailure(errorMessage(error));
+    throw error;
+  }
+  if (supabaseConfigured) noteSyncSuccess();
 }
 
 /** Batch-write rows straight to the database. */
@@ -218,14 +289,26 @@ export async function writeLocalBatch(
     target.push(row);
     grouped.set(name, target);
   }
-  for (const [name, targetRows] of grouped) {
-    await table(name).bulkPut(targetRows.map(withSyncStatus));
+  try {
+    for (const [name, targetRows] of grouped) {
+      await table(name).bulkPut(targetRows.map(withSyncStatus));
+    }
+  } catch (error) {
+    if (supabaseConfigured) noteSyncFailure(errorMessage(error));
+    throw error;
   }
+  if (supabaseConfigured) noteSyncSuccess();
 }
 
 /** Delete a row from the database. Immutable tables refuse. */
 export async function deleteLocal(name: SyncedTableName, id: string): Promise<void> {
-  await table(name).delete(id);
+  try {
+    await table(name).delete(id);
+  } catch (error) {
+    if (supabaseConfigured) noteSyncFailure(errorMessage(error));
+    throw error;
+  }
+  if (supabaseConfigured) noteSyncSuccess();
 }
 
 /** Nothing waits on a background queue anymore — always zero. */

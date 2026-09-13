@@ -6,6 +6,7 @@ import { usePrefsStore } from '@/stores/prefs';
 import { EXAM_DATE_DEFAULT } from '@/lib/constants';
 import ThemeToggle from '@/components/shared/ThemeToggle';
 import OfflineBadge from '@/components/shared/OfflineBadge';
+import SyncStatusBadge from '@/components/shared/SyncStatusBadge';
 import { cn } from '@/lib/utils';
 
 export function ExamCountdown({ className }: { className?: string }) {
@@ -51,6 +52,7 @@ export default function TopRightControls({ className }: { className?: string }) 
   return (
     <div className={cn('workspace-controls', className)}>
       <OfflineBadge />
+      <SyncStatusBadge />
       <ExamCountdown />
       <ThemeToggle className="workspace-theme-toggle" />
     </div>

@@ -42,7 +42,7 @@ describe('PYQ layout navigation', () => {
     useUiStore.setState({ navCollapsed: false });
   });
 
-  it('keeps PYQ practice in the desktop primary group and Quick capture in Analysis', () => {
+  it('keeps PYQ practice in the desktop Study group and merges logging into Manual logging', () => {
     render(
       <MemoryRouter>
         <Nav />
@@ -50,23 +50,24 @@ describe('PYQ layout navigation', () => {
     );
 
     const navigation = screen.getByRole('navigation');
-    const analysisHeading = within(navigation).getByText('Analysis');
-    const analysisGroup = analysisHeading.parentElement;
-    expect(analysisGroup).not.toBeNull();
-    expect(within(analysisGroup!).getByRole('link', { name: 'Quick capture' })).toHaveAttribute(
-      'href',
-      '/capture'
-    );
-    expect(within(analysisGroup!).queryByRole('link', { name: 'PYQ practice' })).toBeNull();
+    const studyHeading = within(navigation).getByText('Study');
+    const studyGroup = studyHeading.parentElement;
+    expect(studyGroup).not.toBeNull();
 
     const pyqLink = within(navigation).getByRole('link', { name: 'PYQ practice' });
     expect(pyqLink).toHaveAttribute('href', '/pyq');
-    expect(
-      pyqLink.compareDocumentPosition(analysisHeading) & Node.DOCUMENT_POSITION_FOLLOWING
-    ).toBeTruthy();
+    expect(studyGroup).toContainElement(pyqLink);
+
+    expect(within(navigation).getByRole('link', { name: 'Manual logging' })).toHaveAttribute(
+      'href',
+      '/log'
+    );
+    expect(within(navigation).queryByRole('link', { name: 'Quick capture' })).toBeNull();
+    expect(within(navigation).queryByRole('link', { name: 'Session' })).toBeNull();
+    expect(within(navigation).queryByRole('link', { name: 'Log' })).toBeNull();
   });
 
-  it('places PYQ practice under Study and Quick capture under Practice on mobile', async () => {
+  it('places PYQ practice under Study and drops Quick capture on mobile', async () => {
     const user = userEvent.setup();
     render(
       <MemoryRouter>
@@ -77,19 +78,16 @@ describe('PYQ layout navigation', () => {
     await user.click(screen.getByRole('button', { name: 'More sections' }));
     const dialog = await screen.findByRole('dialog', { name: 'All sections' });
     const studyGroup = within(dialog).getByText('Study').parentElement;
-    const practiceGroup = within(dialog).getByText('Practice').parentElement;
     expect(studyGroup).not.toBeNull();
-    expect(practiceGroup).not.toBeNull();
     expect(within(studyGroup!).getByRole('link', { name: 'PYQ practice' })).toHaveAttribute(
       'href',
       '/pyq'
     );
-    expect(within(studyGroup!).queryByRole('link', { name: 'Quick capture' })).toBeNull();
-    expect(within(practiceGroup!).getByRole('link', { name: 'Quick capture' })).toHaveAttribute(
-      'href',
-      '/capture'
-    );
-    expect(within(practiceGroup!).queryByRole('link', { name: 'PYQ practice' })).toBeNull();
+    expect(within(dialog).queryByText('Practice')).toBeNull();
+    expect(within(dialog).queryByRole('link', { name: 'Quick capture' })).toBeNull();
+
+    expect(screen.getByRole('link', { name: 'Manual logging' })).toHaveAttribute('href', '/log');
+    expect(screen.queryByRole('link', { name: 'Quick capture' })).toBeNull();
   });
 
   it('allows collapsing and expanding the side menu on desktop', async () => {

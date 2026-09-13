@@ -26,7 +26,6 @@ test('Dashboard and practical study-loop routes render in the local-first shell'
 
   const routes = [
     ['/today', 'Do now'],
-    ['/capture', 'Quick capture'],
     ['/pyq', 'GATE PYQs'],
     ['/mocks', 'Mock tests'],
     ['/revision-pack', 'Revision pack'],

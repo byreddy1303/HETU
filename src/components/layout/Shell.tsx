@@ -23,7 +23,7 @@ const ROUTE_CONTEXT: Record<string, [string, string]> = {
   '/today': ['Study', 'Do now'],
   '/session': ['Study', 'Session'],
   '/pyq': ['Study', 'PYQ practice'],
-  '/log': ['Study', 'Log'],
+  '/log': ['Study', 'Manual logging'],
   '/planner': ['Study', 'Planner'],
   '/capture': ['Study', 'Quick capture'],
   '/mocks': ['Study', 'Mock tests'],

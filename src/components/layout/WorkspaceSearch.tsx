@@ -1,18 +1,18 @@
 import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowUpRight, Search, X } from 'lucide-react';
-import { useLiveQuery } from 'dexie-react-hooks';
-import { db } from '@/lib/db';
-import { useSessionStore } from '@/stores/session';
 
 const SECTIONS = [
   { to: '/', label: 'Dashboard', group: 'Overview', keywords: 'home progress' },
   { to: '/today', label: 'Do now', group: 'Study', keywords: 'queue next due' },
   { to: '/pyq', label: 'PYQ practice', group: 'Study', keywords: 'questions previous year gate' },
-  { to: '/session/new', label: 'Session', group: 'Study', keywords: 'start timer focus solve' },
-  { to: '/log', label: 'Log', group: 'Study', keywords: 'record track practice' },
+  {
+    to: '/log',
+    label: 'Manual logging',
+    group: 'Study',
+    keywords: 'record track practice session timer focus solve'
+  },
   { to: '/planner', label: 'Planner', group: 'Study', keywords: 'calendar schedule plan' },
-  { to: '/capture', label: 'Quick capture', group: 'Study', keywords: 'camera scan question' },
   { to: '/mocks', label: 'Mock tests', group: 'Study', keywords: 'exam test practice' },
   { to: '/buddy', label: 'Buddy', group: 'Study', keywords: 'community friends study chat' },
   { to: '/journal', label: 'Journal', group: 'Reflect', keywords: 'history sessions notes' },
@@ -65,17 +65,7 @@ export default function WorkspaceSearch({ open, onClose }: { open: boolean; onCl
   const inputRef = useRef<HTMLInputElement>(null);
   const [query, setQuery] = useState('');
   const navigate = useNavigate();
-  const storedSessionId = useSessionStore((s) => s.sessionId);
-  const liveSessionId = useLiveQuery(async () => {
-    if (!storedSessionId) return null;
-    const row = await db.sessions.get(storedSessionId);
-    return row && row.actual_duration_min === null ? storedSessionId : null;
-  }, [storedSessionId]);
-  const results = SECTIONS.map((section) =>
-    section.to === '/session/new' && liveSessionId
-      ? { ...section, to: `/session/${liveSessionId}/solve`, label: 'Resume session' }
-      : section
-  ).filter((section) =>
+  const results = SECTIONS.filter((section) =>
     `${section.label} ${section.group} ${section.keywords}`
       .toLowerCase()
       .includes(query.trim().toLowerCase())

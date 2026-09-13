@@ -3,10 +3,8 @@ import { expect, test, type Page } from '@playwright/test';
 const INTERIOR_ROUTES = [
   { path: '/today', label: 'Do now', heading: 'Do now' },
   { path: '/pyq', label: 'PYQ practice', heading: 'GATE PYQs' },
-  { path: '/session/new', label: 'Session', heading: 'New session' },
-  { path: '/log', label: 'Log', heading: 'Log a question' },
+  { path: '/log', label: 'Manual logging', heading: 'Log a question' },
   { path: '/planner', label: 'Planner', heading: 'Planner' },
-  { path: '/capture', label: 'Quick capture', heading: 'Quick capture' },
   { path: '/mocks', label: 'Mock tests', heading: 'Mock tests' },
   { path: '/buddy', label: 'Buddy', heading: 'Buddy' },
   { path: '/journal', label: 'Journal', heading: 'Journal' },
@@ -143,7 +141,7 @@ test('mobile all-sections navigation reaches every destination and returns focus
   await expect(menu).toBeHidden();
   await expect(more).toBeFocused();
 
-  const dockRoutes = ['/session/new', '/log', '/planner'];
+  const dockRoutes = ['/log', '/planner'];
   for (const route of INTERIOR_ROUTES.filter((item) => !dockRoutes.includes(item.path))) {
     await test.step(`Open ${route.label} from mobile navigation`, async () => {
       await more.click();
@@ -157,7 +155,7 @@ test('mobile all-sections navigation reaches every destination and returns focus
   }
   const primary = page.getByRole('navigation', { name: 'Primary navigation' });
   for (const [label, path, heading] of [
-    ['Log', '/log', 'Log a question'],
+    ['Manual logging', '/log', 'Log a question'],
     ['Planner', '/planner', 'Planner'],
     ['Start session', '/session/new', 'New session']
   ]) {

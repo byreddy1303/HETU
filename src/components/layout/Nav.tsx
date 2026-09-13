@@ -3,7 +3,6 @@ import { NavLink } from 'react-router-dom';
 import { motion, useReducedMotion } from 'motion/react';
 import {
   Gauge,
-  Play,
   NotebookText,
   PenLine,
   Shapes,
@@ -21,18 +20,14 @@ import {
   LibraryBig,
   ListChecks,
   BookOpen,
-  Camera,
   ClipboardList,
   FileCheck2,
   PanelLeftClose
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
-import { useLiveQuery } from 'dexie-react-hooks';
 import { useAuthStore } from '@/stores/auth';
 import { useAuth } from '@/hooks/useAuth';
-import { useSessionStore } from '@/stores/session';
 import { useUiStore } from '@/stores/ui';
-import { db } from '@/lib/db';
 import { cn } from '@/lib/utils';
 import Brand from '@/components/shared/Brand';
 
@@ -96,15 +91,9 @@ function Group({ label, items }: { label: string; items: Item[] }) {
 export default function Nav() {
   const { profile, sandbox } = useAuth();
   const signOut = useAuthStore((s) => s.signOut);
-  const storedSessionId = useSessionStore((s) => s.sessionId);
   const navCollapsed = useUiStore((s) => s.navCollapsed);
   const setNavCollapsed = useUiStore((s) => s.setNavCollapsed);
   const pushToast = useUiStore((s) => s.pushToast);
-  const liveSessionId = useLiveQuery(async () => {
-    if (!storedSessionId) return null;
-    const row = await db.sessions.get(storedSessionId);
-    return row && row.actual_duration_min === null ? storedSessionId : null;
-  }, [storedSessionId]);
   const [signingOut, setSigningOut] = useState(false);
   const [forceReady, setForceReady] = useState(false);
   const signOutInFlightRef = useRef(false);
@@ -133,14 +122,8 @@ export default function Nav() {
   const study: Item[] = [
     { to: '/today', label: 'Do now', icon: ClipboardList },
     { to: '/pyq', label: 'PYQ practice', icon: LibraryBig },
-    {
-      to: liveSessionId ? `/session/${liveSessionId}/solve` : '/session/new',
-      label: liveSessionId ? 'Resume session' : 'Session',
-      icon: Play
-    },
-    { to: '/log', label: 'Log', icon: PenLine },
+    { to: '/log', label: 'Manual logging', icon: PenLine },
     { to: '/planner', label: 'Planner', icon: CalendarDays },
-    { to: '/capture', label: 'Quick capture', icon: Camera },
     { to: '/mocks', label: 'Mock tests', icon: FileCheck2 },
     { to: '/buddy', label: 'Buddy', icon: Users }
   ];

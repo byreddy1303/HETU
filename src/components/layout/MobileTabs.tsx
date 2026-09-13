@@ -5,7 +5,6 @@ import {
   BookOpen,
   CalendarCheck,
   CalendarDays,
-  Camera,
   ChevronRight,
   ClipboardList,
   Compass,
@@ -41,7 +40,7 @@ import { haptic } from '@/lib/native';
 type Item = { to: string; label: string; icon: LucideIcon };
 const TABS: Item[] = [
   { to: '/', label: 'Home', icon: Gauge },
-  { to: '/log', label: 'Log', icon: PenLine },
+  { to: '/log', label: 'Manual logging', icon: PenLine },
   { to: '/planner', label: 'Planner', icon: CalendarDays }
 ];
 const MORE_GROUPS: { label: string; items: Item[] }[] = [
@@ -50,7 +49,6 @@ const MORE_GROUPS: { label: string; items: Item[] }[] = [
     items: [
       { to: '/today', label: 'Do now', icon: ClipboardList },
       { to: '/pyq', label: 'PYQ practice', icon: LibraryBig },
-      { to: '/capture', label: 'Quick capture', icon: Camera },
       { to: '/mocks', label: 'Mock tests', icon: FileCheck2 },
       { to: '/buddy', label: 'Buddy', icon: Users }
     ]

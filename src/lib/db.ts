@@ -100,6 +100,44 @@ const LEGACY_OPTIONAL_ATTEMPT_FIELDS = [
   'round_attempt_number'
 ] as const;
 
+// ---- same-device write echo suppression ----
+//
+// Realtime streams our own committed writes back to us. Re-hydrating then
+// would re-download the entire account (attempts/questions embed hundreds of
+// multi-hundred-KB screenshots) for every single edit. The write path records
+// the rows it committed, and the realtime listener skips refreshes for them.
+const LOCAL_WRITE_TTL_MS = 10_000;
+const recentLocalWrites = new Map<string, number>();
+
+function localWriteKey(name: SyncedTableName, id: string): string {
+  return `${name}:${id}`;
+}
+
+/** Remember a row this device is about to commit so its echo can be skipped. */
+export function noteLocalWrite(name: SyncedTableName, id: string): void {
+  if (recentLocalWrites.size > 1024) {
+    const now = Date.now();
+    for (const [key, at] of recentLocalWrites) {
+      if (now - at > LOCAL_WRITE_TTL_MS) recentLocalWrites.delete(key);
+    }
+  }
+  recentLocalWrites.set(localWriteKey(name, id), Date.now());
+}
+
+/** Forget a previously noted write (used when the commit failed). */
+function forgetLocalWrite(name: SyncedTableName, id: string): void {
+  recentLocalWrites.delete(localWriteKey(name, id));
+}
+
+/** True if this device recently committed name/id; consumes the marker. */
+export function consumeLocalWrite(name: SyncedTableName, id: string): boolean {
+  const key = localWriteKey(name, id);
+  const at = recentLocalWrites.get(key);
+  if (at === undefined) return false;
+  recentLocalWrites.delete(key);
+  return Date.now() - at <= LOCAL_WRITE_TTL_MS;
+}
+
 // ---- in-memory cache ----
 
 const stores = new Map<SyncedTableName, Map<string, Row>>(
@@ -210,23 +248,29 @@ function isMissingRemoteSchema(error: { message?: string; code?: string } | null
 
 async function upsertRowsRemote(name: SyncedTableName, rows: Row[]): Promise<void> {
   if (!supabaseConfigured || rows.length === 0) return;
-  const { error } = await supabase.from(name).upsert(rows.map(toRemote));
-  if (error) {
+  for (const row of rows) noteLocalWrite(name, row.id);
+  try {
+    const { error } = await supabase.from(name).upsert(rows.map(toRemote));
+    if (error) throw error;
+  } catch (error) {
+    for (const row of rows) forgetLocalWrite(name, row.id);
     // Never swallow a failed write: if the durable store cannot confirm the
     // write, the caller must surface it instead of pretending the data saved.
-    if (isMissingRemoteSchema(error)) {
+    if (isMissingRemoteSchema(error as { message?: string; code?: string } | null)) {
       throw new Error(
-        `[db] write to ${name} was NOT saved (remote schema does not expose it): ${error.message}`
+        `[db] write to ${name} was NOT saved (remote schema does not expose it): ${(error as { message?: string }).message}`
       );
     }
-    throw new Error(`[db] write failed for ${name}: ${error.message}`);
+    throw new Error(`[db] write failed for ${name}: ${(error as { message?: string }).message}`);
   }
 }
 
 async function deleteRowRemote(name: SyncedTableName, id: string): Promise<void> {
   if (!supabaseConfigured) return;
+  noteLocalWrite(name, id);
   const { error } = await supabase.from(name).delete().eq('id', id);
   if (error) {
+    forgetLocalWrite(name, id);
     if (isMissingRemoteSchema(error)) {
       throw new Error(
         `[db] delete of ${name}/${id} was NOT applied (remote schema does not expose it): ${error.message}`
@@ -542,18 +586,17 @@ export function table(name: SyncedTableName): MemoryTable<Row> {
 // ---- hydration ----
 
 /**
- * Replace the RAM cache with the full server snapshot for a user. Called on
- * login and on every server-driven refresh. A failed hydration rejects so the
- * caller (initial-pull barrier) can resolve without a caller-blocking retry
- * loop; the app keeps whatever it already had in memory.
+ * Replace the RAM cache for the given tables with the server snapshot. Used
+ * for realtime refreshes so a single change elsewhere never re-downloads the
+ * entire account (attempts/questions embed multi-hundred-KB screenshots).
  */
-export async function hydrateAll(userId: string): Promise<void> {
-  if (!supabaseConfigured) {
-    await clearLocalData();
-    return;
-  }
+export async function hydrateTables(
+  userId: string,
+  names: readonly SyncedTableName[]
+): Promise<void> {
+  if (names.length === 0 || !supabaseConfigured) return;
   const results = await Promise.all(
-    SYNCED_TABLES.map(async (name) => {
+    names.map(async (name) => {
       const { data, error } = await supabase
         .from(name)
         .select('*')
@@ -573,6 +616,20 @@ export async function hydrateAll(userId: string): Promise<void> {
     }
   }
   notifyChange();
+}
+
+/**
+ * Replace the RAM cache with the full server snapshot for a user. Called on
+ * login and on every server-driven refresh. A failed hydration rejects so the
+ * caller (initial-pull barrier) can resolve without a caller-blocking retry
+ * loop; the app keeps whatever it already had in memory.
+ */
+export async function hydrateAll(userId: string): Promise<void> {
+  if (!supabaseConfigured) {
+    await clearLocalData();
+    return;
+  }
+  await hydrateTables(userId, SYNCED_TABLES);
 }
 
 /** Drop the RAM cache only — nothing durable is touched. */

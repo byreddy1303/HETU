@@ -2,7 +2,7 @@
 // suites run without Supabase env, so writes hit the RAM cache only while
 // still exercising the write-through contract (immutability, batches, deletes).
 import { beforeEach, describe, expect, it } from 'vitest';
-import { clearLocalData, db } from '@/lib/db';
+import { clearLocalData, consumeLocalWrite, db, noteLocalWrite } from '@/lib/db';
 import {
   _enableForTests,
   deleteLocal,
@@ -112,5 +112,24 @@ describe('write-through facade', () => {
     await writeLocal('sessions', sessionRow('s-1'));
     stopSync();
     expect(await db.sessions.count()).toBe(0);
+  });
+});
+
+describe('same-device write echo suppression', () => {
+  it('marks a committed row so its realtime echo is skipped once', () => {
+    noteLocalWrite('sessions', 's-1');
+    expect(consumeLocalWrite('sessions', 's-1')).toBe(true);
+    // The marker is consumed, so a second echo for the same row refreshes.
+    expect(consumeLocalWrite('sessions', 's-1')).toBe(false);
+  });
+
+  it('does not suppress echoes for rows this device never wrote', () => {
+    expect(consumeLocalWrite('topic_progress', 'never-written')).toBe(false);
+  });
+
+  it('keeps markers scoped per table', () => {
+    noteLocalWrite('sessions', 's-1');
+    expect(consumeLocalWrite('questions', 's-1')).toBe(false);
+    expect(consumeLocalWrite('sessions', 's-1')).toBe(true);
   });
 });

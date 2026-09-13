@@ -7,6 +7,17 @@ import {
   useTopicProgressStore
 } from '@/stores/topic-progress';
 import { db } from '@/lib/db';
+import { deleteLocal, writeLocal, writeLocalBatch } from '@/lib/sync';
+
+vi.mock('@/lib/sync', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/lib/sync')>();
+  return {
+    ...actual,
+    deleteLocal: vi.fn(actual.deleteLocal),
+    writeLocal: vi.fn(actual.writeLocal),
+    writeLocalBatch: vi.fn(actual.writeLocalBatch)
+  };
+});
 
 const USER = '11111111-1111-4111-8111-111111111111';
 
@@ -133,5 +144,58 @@ describe('topic progress store', () => {
     expect(rows.length).toBe(1);
     expect(rows[0].completed_at).toBe(newer);
     expect(rows[0].id).toBe(`row-er-${USER}`);
+  });
+
+  it('reverts the optimistic check when the durable write fails', async () => {
+    const id = topicProgressId('Algorithms', 'Divide & Conquer');
+    vi.mocked(writeLocal).mockRejectedValueOnce(
+      new Error('write failed for topic_progress: connection reset')
+    );
+
+    await expect(
+      useTopicProgressStore.getState().setCompleted(USER, id, true)
+    ).rejects.toThrow(/NOT saved/);
+
+    // The UI must not claim a save the durable store did not confirm.
+    expect(useTopicProgressStore.getState().byUser[USER]?.[id]).toBeUndefined();
+    expect(await db.topic_progress.where('user_id').equals(USER).toArray()).toEqual([]);
+  });
+
+  it('restores the previous timestamp when an untick fails to reach the durable store', async () => {
+    const id = topicProgressId('Databases', 'ER Model');
+
+    await useTopicProgressStore.getState().setCompleted(USER, id, true);
+    const savedAt = useTopicProgressStore.getState().byUser[USER][id];
+    expect(savedAt).toBeTruthy();
+
+    vi.mocked(deleteLocal).mockRejectedValueOnce(
+      new Error('delete failed for topic_progress/row: connection reset')
+    );
+
+    await expect(
+      useTopicProgressStore.getState().setCompleted(USER, id, false)
+    ).rejects.toThrow(/NOT saved/);
+
+    expect(useTopicProgressStore.getState().byUser[USER][id]).toBe(savedAt);
+    expect(await db.topic_progress.where('user_id').equals(USER).toArray()).toHaveLength(1);
+  });
+
+  it('keeps the legacy localStorage backup when the migration write fails', async () => {
+    const legacyByUser: Record<string, string> = {
+      [topicProgressId('Algorithms', 'Greedy — Huffman / MST')]: '2026-08-01T10:00:00.000Z'
+    };
+    localStorage.setItem(
+      'air.topic-progress',
+      JSON.stringify({ state: { byUser: { [USER]: legacyByUser } }, version: 1 })
+    );
+    vi.mocked(writeLocalBatch).mockRejectedValueOnce(
+      new Error('write to topic_progress was NOT saved')
+    );
+
+    await expect(syncTopicProgressFromDb(USER)).rejects.toThrow();
+
+    // The last non-durable copy must survive so the next visit can retry.
+    expect(localStorage.getItem('air.topic-progress')).not.toBeNull();
+    expect(await db.topic_progress.where('user_id').equals(USER).toArray()).toEqual([]);
   });
 });

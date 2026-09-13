@@ -271,6 +271,8 @@ export const useTopicProgressStore = create<TopicProgressState>()((set) => ({
     if (!parsed) throw new Error(`Invalid syllabus topic id: ${topicId}`);
     const canonicalTopicId = topicProgressId(parsed.subject, parsed.topic);
     const timestamp = nowISO();
+    const previousCompletedAt =
+      useTopicProgressStore.getState().byUser?.[userId]?.[canonicalTopicId];
 
     set((state) => {
       const next = { ...selectCompletionsForUser(state.byUser, userId) };
@@ -279,14 +281,25 @@ export const useTopicProgressStore = create<TopicProgressState>()((set) => ({
       return { byUser: { ...state.byUser, [userId]: next } };
     });
 
-    if (completed) {
-      await persistTopicCompletion(userId, parsed.subject, parsed.topic, timestamp);
-    } else {
-      await removeTopicCompletion(userId, parsed.subject, parsed.topic);
-    }
-
-    if (isSyncEnabled() && !(await flushPendingSync(userId))) {
-      throw new Error('Saved on this device; database sync will retry automatically.');
+    try {
+      if (completed) {
+        await persistTopicCompletion(userId, parsed.subject, parsed.topic, timestamp);
+      } else {
+        await removeTopicCompletion(userId, parsed.subject, parsed.topic);
+      }
+    } catch (error) {
+      // Revert the optimistic update so the UI never claims a save that the
+      // durable store did not confirm. Nothing is lost — nothing was saved.
+      set((state) => {
+        const next = { ...selectCompletionsForUser(state.byUser, userId) };
+        if (completed) delete next[canonicalTopicId];
+        else if (previousCompletedAt) next[canonicalTopicId] = previousCompletedAt;
+        else delete next[canonicalTopicId];
+        return { byUser: { ...state.byUser, [userId]: next } };
+      });
+      throw new Error(
+        `That change was NOT saved. ${error instanceof Error ? error.message : 'Check your connection and try again.'}`
+      );
     }
   }
 }));

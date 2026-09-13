@@ -159,7 +159,10 @@ export default function SyllabusTracker() {
     if (!effectiveUserId) return;
     void syncTopicProgressFromDb(effectiveUserId).catch((error: unknown) => {
       console.warn(error);
-      pushToast('Syllabus progress is safe on this device; database sync will retry.', 'neutral');
+      pushToast(
+        'Could not refresh your progress from the database. Showing the last saved copy.',
+        'neutral'
+      );
     });
   }, [effectiveUserId, pushToast]);
 
@@ -262,8 +265,8 @@ export default function SyllabusTracker() {
       pushToast(
         error instanceof Error
           ? error.message
-          : 'Saved on this device; database sync will retry automatically.',
-        'neutral'
+          : 'Could not save your progress. Please try again.',
+        'danger'
       );
     }
   }

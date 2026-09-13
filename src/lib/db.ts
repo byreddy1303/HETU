@@ -212,9 +212,12 @@ async function upsertRowsRemote(name: SyncedTableName, rows: Row[]): Promise<voi
   if (!supabaseConfigured || rows.length === 0) return;
   const { error } = await supabase.from(name).upsert(rows.map(toRemote));
   if (error) {
+    // Never swallow a failed write: if the durable store cannot confirm the
+    // write, the caller must surface it instead of pretending the data saved.
     if (isMissingRemoteSchema(error)) {
-      console.warn(`[db] Table ${name} not present in remote schema cache; write skipped.`);
-      return;
+      throw new Error(
+        `[db] write to ${name} was NOT saved (remote schema does not expose it): ${error.message}`
+      );
     }
     throw new Error(`[db] write failed for ${name}: ${error.message}`);
   }
@@ -225,8 +228,9 @@ async function deleteRowRemote(name: SyncedTableName, id: string): Promise<void>
   const { error } = await supabase.from(name).delete().eq('id', id);
   if (error) {
     if (isMissingRemoteSchema(error)) {
-      console.warn(`[db] Table ${name} not present in remote schema cache; delete skipped.`);
-      return;
+      throw new Error(
+        `[db] delete of ${name}/${id} was NOT applied (remote schema does not expose it): ${error.message}`
+      );
     }
     throw new Error(`[db] delete failed for ${name}/${id}: ${error.message}`);
   }

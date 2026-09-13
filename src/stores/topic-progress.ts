@@ -231,11 +231,6 @@ export async function syncTopicProgressFromDb(userId: string): Promise<void> {
   }));
 
   if (isSyncEnabled() && durable) await removeMigratedLegacyUser(userId);
-  if (isSyncEnabled() && !durable) {
-    throw new Error(
-      'Syllabus progress is queued locally and will retry when the database is reachable.'
-    );
-  }
 }
 
 export const useTopicProgressStore = create<TopicProgressState>()((set) => ({

@@ -59,7 +59,14 @@ export function isInitialPullActive() {
 
 export function awaitInitialPull(userId: string): Promise<void> {
   if (initialPullForUserId === userId && initialPullBarrier) {
-    return initialPullBarrier;
+    return initialPullBarrier.catch(async (error) => {
+      if (!syncContextIsCurrent(userId)) throw error;
+      beginInitialPull(userId, 0);
+      if (initialPullForUserId === userId && initialPullBarrier) {
+        return initialPullBarrier;
+      }
+      throw error;
+    });
   }
   return Promise.resolve();
 }
@@ -1074,14 +1081,18 @@ export async function pendingSyncCount(userId: string): Promise<number> {
  * visible, because we cannot prove the device cache is represented remotely. */
 export async function flushPendingSync(userId: string): Promise<boolean> {
   if (!supabaseConfigured) return true;
-  if (!syncEnabled || currentUserId !== userId) return false;
+  if (!syncEnabled || currentUserId !== userId) {
+    initSync(userId);
+  }
+  const pending = await pendingSyncCount(userId);
+  if (pending === 0) return true;
   if (typeof navigator !== 'undefined' && !navigator.onLine) return false;
   try {
     await awaitInitialPull(userId);
     await flushPushQueue();
     return (await pendingSyncCount(userId)) === 0;
   } catch {
-    return false;
+    return (await pendingSyncCount(userId)) === 0;
   }
 }
 

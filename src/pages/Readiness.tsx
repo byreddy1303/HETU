@@ -461,7 +461,7 @@ export default function Readiness() {
         : 'Early signal — small samples are deliberately tempered so one answer or an empty queue cannot dominate the score.';
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="workspace-readiness flex flex-col gap-4">
       <PageHeader
         title="Readiness"
         description="What to work on next, and how much runway you have."

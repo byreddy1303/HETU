@@ -31,12 +31,13 @@ export default function TagOption({
   return (
     <button
       type="button"
+      aria-pressed={selected}
       onClick={() => {
         haptic('selection');
         onSelect();
       }}
       className={cn(
-        'relative flex w-full items-center gap-3 rounded border bg-bg-raised px-4 py-3 text-left shadow-sm transition-all duration-150',
+        'u-tag-option relative flex w-full items-center gap-3 rounded border bg-bg-raised px-4 py-3 text-left shadow-sm transition-all duration-150',
         'before:absolute before:inset-y-2 before:left-0 before:w-[3px] before:rounded-full before:opacity-0 before:transition-opacity',
         TONES[tone].bar,
         selected

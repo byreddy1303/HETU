@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
+import '@/workflow-surfaces.css';
 import {
   ArrowLeft,
   ArrowRight,
@@ -236,7 +237,7 @@ function navigationState(value: unknown): ReattemptNavigationState | null {
 function Ladder({ stage }: { stage: ReattemptStage }) {
   const idx = RUNGS.indexOf(stage);
   return (
-    <span className="flex items-center gap-1" title="Ladder: D3 → D10 → D30 → mastered">
+    <span className="retrieval-ladder flex items-center gap-1" title="Ladder: D3 → D10 → D30 → mastered">
       {RUNGS.map((rung, index) => (
         <span
           key={rung}
@@ -303,7 +304,7 @@ function QueueCard({
       : 'Start re-attempt';
 
   return (
-    <article className="reattempt-card overflow-hidden rounded-[20px] border border-border bg-bg-raised shadow-card transition-colors">
+    <article className="retrieval-queue-card reattempt-card overflow-hidden rounded-[20px] border border-border bg-bg-raised shadow-card transition-colors">
       <button
         type="button"
         onClick={onOpen}
@@ -3229,7 +3230,7 @@ export default function Reattempts() {
   }
 
   return (
-    <div className="reattempt-page native-reattempt-page flex flex-col gap-4">
+    <div className="workflow-page retrieval-workspace reattempt-page native-reattempt-page flex flex-col gap-4">
       <PageHeader
         title="Re-attempts"
         description={
@@ -3239,8 +3240,31 @@ export default function Reattempts() {
         }
       />
 
+      <section className="retrieval-overview" aria-label="Retrieval overview">
+        <div className="retrieval-overview__copy">
+          <BrainCircuit size={26} strokeWidth={1.5} aria-hidden="true" />
+          <h2>Rebuild it from memory.</h2>
+          <p>Try the question before the explanation. Each return helps you see what stayed.</p>
+        </div>
+        <dl className="retrieval-overview__stages">
+          {[
+            { label: 'Due now', value: dueCount, detail: 'Ready to revisit', tone: 'due' },
+            { label: 'Upcoming', value: upcomingCount, detail: 'Space between returns', tone: 'next' },
+            { label: 'Mastered', value: masteredCount, detail: 'Recall demonstrated', tone: 'mastered' }
+          ].map((item) => (
+            <div key={item.label} className={`retrieval-overview__stage retrieval-overview__stage--${item.tone}`}>
+              <dt>{item.label}</dt>
+              <dd>
+                {reattempts === undefined || learningItems === undefined ? '—' : item.value}
+                <span className="retrieval-overview__detail">{item.detail}</span>
+              </dd>
+            </div>
+          ))}
+        </dl>
+      </section>
+
       {resumableRecoverySession && resumableRecoverySession.status !== 'active' ? (
-        <Card className="border-ink-violet/25 bg-ink-violet/[0.04]">
+        <Card className="retrieval-resume border-ink-violet/25 bg-ink-violet/[0.04]">
           <CardBody className="flex flex-wrap items-center justify-between gap-4 p-4 sm:p-5">
             <div>
               <p className="u-label text-ink-violet">Saved recovery sprint</p>
@@ -3280,8 +3304,8 @@ export default function Reattempts() {
       ) : null}
 
       {recoveryCandidates.length > 0 ? (
-        <section className="flex flex-col gap-3" aria-label="Canonical recovery due now">
-          <Card className="overflow-hidden border-accent/25">
+        <section className="retrieval-due-section flex flex-col gap-3" aria-label="Canonical recovery due now">
+          <Card className="retrieval-sprint-surface overflow-hidden border-accent/25">
             <CardHeader
               title={
                 <div>
@@ -3294,7 +3318,7 @@ export default function Reattempts() {
               }
             />
             <CardBody className="grid gap-4 p-4 sm:p-5">
-              <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-5">
+              <div className="retrieval-sprint-options grid gap-2 sm:grid-cols-2 lg:grid-cols-5">
                 {RECOVERY_SPRINT_OPTIONS.map((option) => {
                   const preview = recoveryPreviews[option.mode];
                   return (
@@ -3303,7 +3327,7 @@ export default function Reattempts() {
                       type="button"
                       disabled={startingRecoveryMode !== null || preview.selected.length === 0}
                       onClick={() => void beginRecoverySprint(option.mode)}
-                      className="rounded-xl border border-border bg-bg-raised px-3 py-3 text-left transition-colors hover:border-accent/35 hover:bg-accent-faint disabled:cursor-not-allowed disabled:opacity-50"
+                      className="retrieval-sprint-option rounded-xl border border-border bg-bg-raised px-3 py-3 text-left transition-colors hover:border-accent/35 hover:bg-accent-faint disabled:cursor-not-allowed disabled:opacity-50"
                     >
                       <span className="block text-[12.5px] font-semibold text-text">
                         {option.shortLabel}
@@ -3315,11 +3339,11 @@ export default function Reattempts() {
                   );
                 })}
               </div>
-              <div className="grid gap-2 sm:grid-cols-2">
+              <div className="retrieval-priority-list grid gap-2 sm:grid-cols-2">
                 {recommendedRecoverySprint.mustRecoverToday.slice(0, 6).map((candidate) => (
                   <div
                     key={candidate.item.id}
-                    className="rounded-xl border border-border bg-bg-raised px-3 py-3"
+                    className="retrieval-priority-item rounded-xl border border-border bg-bg-raised px-3 py-3"
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div>
@@ -3352,14 +3376,14 @@ export default function Reattempts() {
       ) : null}
 
       {allRecoveryCandidates.length > 0 ? (
-        <Card>
+        <Card className="retrieval-forecast">
           <CardHeader
             title="Recovery load forecast"
             aside={<span className="u-num text-[11px] text-text-faint">{thirtyDayRecoveryTotal} in 30d</span>}
           />
-          <CardBody className="grid grid-cols-2 gap-2 p-4 sm:grid-cols-4 lg:grid-cols-7">
+          <CardBody className="retrieval-forecast-days grid grid-cols-2 gap-2 p-4 sm:grid-cols-4 lg:grid-cols-7">
             {sevenDayRecoveryForecast.map((day, index) => (
-              <div key={day.date} className="rounded-xl border border-border bg-bg-raised px-3 py-3">
+              <div key={day.date} data-today={index === 0 ? 'true' : undefined} className="retrieval-forecast-day rounded-xl border border-border bg-bg-raised px-3 py-3">
                 <p className="u-label">{index === 0 ? 'Today' : formatDate(day.date, 'EEE')}</p>
                 <p className="mt-1 font-display text-[20px] font-semibold text-text">{day.itemCount}</p>
                 <p className="mt-0.5 text-[11px] text-text-faint">
@@ -3372,7 +3396,7 @@ export default function Reattempts() {
       ) : null}
 
       {legacyDue.length > 0 ? (
-        <section className="flex flex-col gap-3" aria-label="Questions due now">
+        <section className="retrieval-legacy-queue flex flex-col gap-3" aria-label="Questions due now">
           <div className="flex flex-wrap items-end justify-between gap-4 px-1">
             <div>
               <p className="u-label text-accent">Due now</p>
@@ -3407,13 +3431,13 @@ export default function Reattempts() {
       ) : null}
 
       {upcomingCount > 0 ? (
-        <Card>
+        <Card className="retrieval-upcoming">
           <CardHeader title="Upcoming" />
           <div>
             {upcomingGroups.map(({ date, count, subjects }) => (
               <div
                 key={date}
-                className="flex items-center gap-3 border-b border-border px-4 py-3 last:border-b-0"
+                className="retrieval-upcoming-row flex items-center gap-3 border-b border-border px-4 py-3 last:border-b-0"
               >
                 <span className="u-num w-[64px] shrink-0 text-[11px] text-text-muted">
                   {formatDate(date, 'dd MMM')}

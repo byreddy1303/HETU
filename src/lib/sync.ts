@@ -817,10 +817,59 @@ export async function deleteLocal(name: SyncedTableName, id: string): Promise<vo
   if (enabledForUser && syncContextIsCurrent(enabledForUser)) schedulePush(0);
 }
 
+const SANDBOX_PROFILE_ID = '00000000-0000-4000-8000-00000000dev0';
+
+/** Adopt any unowned or sandbox local data on this device and mark pending for sync. */
+export async function adoptLocalDataForUser(userId: string): Promise<void> {
+  for (const name of SYNCED_TABLES) {
+    const target = table(name);
+    const allRows = await target.toArray();
+    const toUpdate: Array<Local<{ id: string }>> = [];
+    for (const raw of allRows) {
+      const row = raw as Record<string, unknown> & { id: string };
+      const rowUserId = row['user_id'];
+      const isUnowned = !rowUserId || rowUserId === SANDBOX_PROFILE_ID;
+      const needsPending = !row['sync_status'] || row['sync_status'] === 'error';
+      if (isUnowned) {
+        toUpdate.push({
+          ...row,
+          user_id: userId,
+          sync_status: 'pending'
+        } as unknown as Local<{ id: string }>);
+      } else if (rowUserId === userId && needsPending) {
+        toUpdate.push({
+          ...row,
+          sync_status: 'pending'
+        } as unknown as Local<{ id: string }>);
+      }
+    }
+    if (toUpdate.length > 0) {
+      await target.bulkPut(toUpdate);
+    }
+  }
+
+  const queue =
+    ((await db.meta.get('delete_queue'))?.value as QueuedDelete[] | undefined) ?? [];
+  if (queue.some((entry) => !entry.user_id || entry.user_id === SANDBOX_PROFILE_ID)) {
+    const nextQueue = queue.map((entry) => ({
+      ...entry,
+      user_id: entry.user_id && entry.user_id !== SANDBOX_PROFILE_ID ? entry.user_id : userId
+    }));
+    await db.meta.put({ key: 'delete_queue', value: nextQueue });
+  }
+}
+
 function schedulePush(delayMs: number) {
-  if (!syncEnabled || initialPullBarrier || pullInFlight) return;
-  if (pushInFlight && delayMs === 0) {
-    followUpPushNeeded = true;
+  if (!syncEnabled) return;
+  if (initialPullBarrier || pullInFlight || pushInFlight) {
+    if (delayMs === 0) {
+      followUpPushNeeded = true;
+    }
+    if (initialPullBarrier && delayMs === 0) {
+      void initialPullBarrier.finally(() => {
+        schedulePush(0);
+      });
+    }
     return;
   }
   clearTimeout(pushTimer);
@@ -894,6 +943,7 @@ export function flushPushQueue(): Promise<void> {
   followUpPushNeeded = false;
 
   pushInFlight = (async () => {
+    await adoptLocalDataForUser(pushingForUserId);
     const pushedTables: string[] = [];
     for (const name of SYNCED_TABLES) {
       if (!syncContextIsCurrent(pushingForUserId)) return;
@@ -1341,7 +1391,13 @@ export function initSync(userId: string): void {
   // Pull first so an old device learns immutable receipts before it tries to
   // push a colliding deterministic ID. A failed/partial pull keeps this
   // barrier closed and retries with backoff.
-  if (!initialPullBarrier || initialPullForUserId !== userId) beginInitialPull(userId);
+  // Adopt any orphaned/sandbox local data for the authenticated user before
+  // the initial pull so it enters the pending queue immediately.
+  if (!initialPullBarrier || initialPullForUserId !== userId) {
+    void adoptLocalDataForUser(userId).then(() => {
+      if (syncContextIsCurrent(userId)) beginInitialPull(userId);
+    });
+  }
 }
 
 export function stopSync(): void {

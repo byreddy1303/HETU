@@ -116,7 +116,7 @@ export default function SessionNew() {
   useKeyboard({ enter: () => void start() }, !!subject);
 
   return (
-    <div>
+    <div className="workspace-session-builder">
       <PageHeader
         title="New session"
         description="Pick the block, start the clock, tag every question as you go."
@@ -158,10 +158,10 @@ export default function SessionNew() {
         </Card>
       )}
       <Card>
-        <CardBody className="flex flex-col gap-6">
+        <CardBody className="session-builder-body flex flex-col gap-6">
           <div>
             <p className="u-label mb-2">Subject</p>
-            <div className="grid grid-cols-2 gap-2 md:grid-cols-3">
+            <div className="session-subject-grid grid grid-cols-2 gap-2 md:grid-cols-3">
               {SUBJECTS.map((s) => {
                 const ink = subjectInk(s);
                 const active = subject === s;
@@ -170,8 +170,9 @@ export default function SessionNew() {
                     key={s}
                     type="button"
                     onClick={() => setSubject(s)}
+                    aria-pressed={active}
                     className={cn(
-                      'flex items-center gap-2 rounded border px-3 py-2.5 text-left text-[13px] font-medium transition-all duration-150 active:scale-[0.97]',
+                      'session-subject flex items-center gap-2 rounded border px-3 py-2.5 text-left text-[13px] font-medium transition-all duration-150 active:scale-[0.97]',
                       active
                         ? cn('shadow-sm', ink.selected)
                         : 'border-border bg-bg-raised text-text-muted hover:-translate-y-px hover:border-border-hover hover:text-text hover:shadow-card'
@@ -191,7 +192,7 @@ export default function SessionNew() {
             </div>
           </div>
 
-          <div className="flex flex-col gap-5 sm:flex-row sm:flex-wrap sm:gap-x-10 sm:gap-y-4">
+          <div className="session-settings flex flex-col gap-5 sm:flex-row sm:flex-wrap sm:gap-x-10 sm:gap-y-4">
             <div className="min-w-0">
               <p className="u-label mb-2">Target duration</p>
               <Segmented
@@ -206,7 +207,7 @@ export default function SessionNew() {
             </div>
           </div>
 
-          <div className="flex flex-col gap-3 border-t border-border pt-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="session-launch flex flex-col gap-3 border-t border-border pt-4 sm:flex-row sm:items-center sm:justify-between">
             <p className="text-[12px] text-text-faint">
               {subject ? (
                 <>

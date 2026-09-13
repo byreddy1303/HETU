@@ -1,0 +1,514 @@
+/* Study surfaces share the shell palette, but their structure follows the task:
+   a question shelf, an open calendar, and a sequence of retrieval decisions. */
+.workflow-page {
+  --workflow-edge: rgb(var(--color-accent) / 18%);
+  --workflow-recess: rgb(var(--color-bg-overlay) / 62%);
+  --workflow-lift: 0 12px 24px -20px rgb(var(--color-scrim) / 45%);
+  gap: 22px;
+}
+
+.pyq-workbench .workbench-section-heading {
+  padding: 24px;
+  background: linear-gradient(110deg, rgb(var(--color-accent) / 5%), transparent 65%);
+}
+.pyq-workbench .workbench-resume,
+.pyq-workbench .workbench-recommendations {
+  border-color: var(--workflow-edge);
+}
+.pyq-workbench .workbench-resume {
+  border-left: 4px solid rgb(var(--color-accent));
+}
+.pyq-workbench .workbench-mode-choices {
+  padding: 12px;
+  gap: 12px;
+  background: var(--workflow-recess);
+}
+.pyq-workbench .workbench-mode-choice {
+  min-height: 215px;
+  padding: 24px;
+  border: 1px solid rgb(var(--color-border));
+  border-radius: 16px;
+  box-shadow: var(--workflow-lift);
+}
+.pyq-workbench .workbench-mode-choice[aria-pressed='true'] {
+  border-color: rgb(var(--color-accent) / 45%);
+  background: rgb(var(--color-bg-raised));
+  box-shadow: inset 0 3px 0 rgb(var(--color-accent)), var(--workflow-lift);
+}
+.pyq-workbench .workbench-books > .u-card-body {
+  padding: 24px;
+}
+.pyq-workbench .workbench-book-shelf {
+  gap: 13px;
+  margin-top: 20px;
+  padding: 16px;
+  border: 1px solid rgb(var(--color-border) / 60%);
+  border-radius: 18px;
+  background: var(--workflow-recess);
+  box-shadow: inset 0 3px 8px rgb(var(--color-scrim) / 3%);
+}
+.pyq-workbench .workbench-book {
+  position: relative;
+  min-width: 0;
+  min-height: 150px;
+  padding: 16px 14px 16px 21px;
+  border-radius: 5px 13px 13px 5px;
+  background: rgb(var(--color-bg-raised));
+  box-shadow: 3px 3px 0 rgb(var(--color-border) / 45%), var(--workflow-lift);
+}
+.pyq-workbench .workbench-book::before {
+  position: absolute;
+  content: '';
+  inset: 0 auto 0 5px;
+  width: 2px;
+  border-left: 1px solid rgb(var(--color-accent) / 18%);
+  border-right: 1px solid rgb(var(--color-accent) / 8%);
+  pointer-events: none;
+}
+.pyq-workbench .workbench-book[aria-pressed='true'] {
+  border-color: rgb(var(--color-accent) / 60%);
+  background: linear-gradient(105deg, rgb(var(--color-accent-faint)), rgb(var(--color-bg-raised)) 80%);
+  box-shadow: 3px 3px 0 rgb(var(--color-accent) / 22%), var(--workflow-lift);
+}
+.pyq-workbench .workbench-subjects {
+  padding: 24px;
+}
+.pyq-workbench .workbench-subject-grid {
+  gap: 11px;
+  margin-top: 20px;
+}
+.pyq-workbench .workbench-subject {
+  align-items: center;
+  min-height: 105px;
+  border-radius: 15px;
+  padding: 14px;
+  box-shadow: 0 3px 0 rgb(var(--color-border) / 25%);
+}
+.pyq-workbench .workbench-subject-icon {
+  width: 33px;
+  height: 33px;
+  padding: 7px;
+  border: 1px solid rgb(var(--color-border));
+  border-radius: 10px;
+  background: rgb(var(--color-bg-overlay) / 40%);
+}
+.pyq-workbench .workbench-subject[aria-pressed='true'] {
+  border-color: rgb(var(--color-accent) / 45%);
+  background: rgb(var(--color-accent-faint) / 65%);
+  box-shadow: 0 3px 0 rgb(var(--color-accent) / 20%);
+}
+.pyq-workbench .workbench-subject[aria-pressed='true'] .workbench-subject-icon {
+  color: rgb(var(--color-accent-contrast));
+  border-color: transparent;
+  background: rgb(var(--color-accent));
+}
+.pyq-workbench .workbench-controls {
+  gap: 4px;
+  padding: 24px;
+  background: linear-gradient(165deg, rgb(var(--color-accent) / 6%), var(--workflow-recess));
+}
+.pyq-workbench .workbench-controls label {
+  line-height: 1.55;
+}
+.pyq-workbench .workbench-launch {
+  margin-top: 24px;
+  padding-top: 22px;
+  border-top: 1px solid var(--workflow-edge);
+}
+.pyq-workbench .workbench-launch .u-button {
+  min-height: 48px;
+  border-radius: 13px;
+}
+.pyq-workbench .workbench-history {
+  padding: 24px;
+  border: 1px solid rgb(var(--color-border));
+  border-radius: 22px;
+  background: var(--workflow-recess);
+}
+.pyq-workbench .workbench-history #pyq-session-history {
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-size: 22px;
+  font-weight: 550;
+  color: rgb(var(--color-text));
+}
+
+.planner-workspace .planner-day-launch {
+  display: grid;
+  grid-template-columns: 100px minmax(0, 1fr);
+  gap: 24px;
+  align-items: center;
+  padding: 26px;
+  border: 1px solid var(--workflow-edge);
+  border-radius: 23px;
+  background: linear-gradient(110deg, rgb(var(--color-accent) / 6%), rgb(var(--color-bg-raised)) 68%);
+  box-shadow: var(--workflow-lift);
+}
+.planner-day-launch__date {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 12px 10px;
+  color: rgb(var(--color-accent));
+  border: 1px solid rgb(var(--color-accent) / 20%);
+  border-top: 5px solid rgb(var(--color-accent) / 55%);
+  border-radius: 9px 9px 16px 16px;
+  background: rgb(var(--color-bg-raised));
+  box-shadow: 0 4px 0 rgb(var(--color-border) / 40%), 0 12px 25px -20px rgb(var(--color-scrim) / 50%);
+}
+.planner-day-launch__date strong {
+  font: 500 48px/1.15 'Bricolage Grotesque', sans-serif;
+  letter-spacing: -0.05em;
+  color: rgb(var(--color-text));
+}
+.planner-day-launch__date span {
+  font-size: 11px;
+}
+.planner-day-launch__copy h2,
+.retrieval-overview__copy h2 {
+  color: rgb(var(--color-text));
+  font: 500 25px/1.16 'Bricolage Grotesque', sans-serif;
+  letter-spacing: -0.035em;
+}
+.planner-day-launch__copy p,
+.retrieval-overview__copy p {
+  max-width: 48ch;
+  margin-top: 10px;
+  color: rgb(var(--color-text-muted));
+  font-size: 12.5px;
+  line-height: 1.7;
+}
+.planner-day-launch__copy .u-button {
+  margin-top: 17px;
+}
+.planner-month-summary {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px 36px;
+  padding-top: 20px;
+  border-top: 1px solid var(--workflow-edge);
+}
+.planner-month-summary > div {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 16px;
+}
+.planner-month-summary dt {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: rgb(var(--color-text-muted));
+  font-size: 11px;
+}
+.planner-month-summary dt svg {
+  color: rgb(var(--color-accent));
+}
+.planner-month-summary dd {
+  font-size: 18px;
+  font-weight: 550;
+  font-variant-numeric: tabular-nums;
+}
+.planner-month-summary dd span {
+  font-size: 11px;
+  color: rgb(var(--color-text-faint));
+}
+.planner-workspace .native-planner-calendar {
+  border-radius: 22px;
+  overflow: hidden;
+  box-shadow: var(--workflow-lift);
+}
+.planner-workspace .native-calendar-toolbar {
+  min-height: 84px;
+  padding: 20px 24px;
+  background: linear-gradient(90deg, rgb(var(--color-bg-raised)), rgb(var(--color-accent) / 4%));
+}
+.planner-workspace .native-calendar-title h2 {
+  font-size: 27px;
+  font-weight: 500;
+  letter-spacing: -0.035em;
+}
+.planner-workspace .native-calendar-arrow {
+  width: 38px;
+  height: 38px;
+  box-shadow: 0 3px 0 rgb(var(--color-border) / 40%);
+}
+.planner-workspace .native-calendar-cell {
+  min-width: 0;
+  min-height: 108px;
+  padding: 10px 8px;
+  border-color: rgb(var(--color-border) / 62%);
+}
+.planner-workspace .native-calendar-date {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 27px;
+  height: 27px;
+  border-radius: 9px;
+  font-size: 14px;
+}
+.planner-workspace .native-calendar-date.text-accent {
+  color: rgb(var(--color-accent-contrast));
+  background: rgb(var(--color-accent));
+  box-shadow: 0 4px 10px rgb(var(--color-accent) / 18%);
+}
+.planner-workspace .native-calendar-duration {
+  max-width: 100%;
+  padding: 3px 5px;
+  font-size: 9px;
+}
+.planner-workspace .native-calendar-details {
+  margin-top: 5px;
+}
+.planner-workspace .planner-day-sheet {
+  border-radius: 24px;
+  box-shadow: 0 30px 90px rgb(var(--color-scrim) / 30%);
+}
+.planner-workspace .planner-day-header {
+  padding: 22px 24px;
+  background: linear-gradient(120deg, rgb(var(--color-accent) / 7%), rgb(var(--color-bg-raised)));
+}
+.planner-workspace .planner-day-body {
+  padding: 24px;
+  gap: 18px;
+  background: rgb(var(--color-bg) / 65%);
+}
+.planner-workspace .planner-section,
+.planner-workspace .planner-view-block,
+.planner-workspace .planner-session-card {
+  border-radius: 16px;
+  background: rgb(var(--color-bg-raised));
+}
+.planner-workspace .planner-section-heading,
+.planner-workspace .planner-section-body {
+  padding: 18px;
+}
+.planner-workspace .planner-session-card {
+  padding: 18px;
+  border-left: 3px solid rgb(var(--color-accent) / 35%);
+}
+.planner-insights-surface:empty {
+  display: none;
+}
+
+.retrieval-overview {
+  display: grid;
+  gap: 24px;
+  padding: 26px;
+  border: 1px solid var(--workflow-edge);
+  border-radius: 23px;
+  background: linear-gradient(120deg, rgb(var(--color-accent) / 5%), rgb(var(--color-bg-raised)) 75%);
+  box-shadow: var(--workflow-lift);
+}
+.retrieval-overview__copy > svg {
+  margin-bottom: 14px;
+  color: rgb(var(--color-accent));
+}
+.retrieval-overview__stages {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+.retrieval-overview__stage {
+  position: relative;
+  padding: 16px 14px 12px;
+  border-top: 2px solid rgb(var(--color-border-hover));
+  background: linear-gradient(rgb(var(--color-bg-overlay) / 40%), transparent);
+  border-radius: 2px 2px 10px 10px;
+}
+.retrieval-overview__stage--due {
+  border-color: rgb(var(--color-accent));
+}
+.retrieval-overview__stage--mastered {
+  border-color: rgb(var(--color-success));
+}
+.retrieval-overview__stage dt {
+  color: rgb(var(--color-text-muted));
+  font-size: 12px;
+}
+.retrieval-overview__stage dd {
+  margin-top: 8px;
+  font: 500 32px/1.1 'Bricolage Grotesque', sans-serif;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.04em;
+}
+.retrieval-overview__stage .retrieval-overview__detail {
+  display: block;
+  margin-top: 7px;
+  font: 400 10px/1.5 'Schibsted Grotesk', sans-serif;
+  color: rgb(var(--color-text-faint));
+  letter-spacing: normal;
+}
+.retrieval-workspace .retrieval-resume {
+  border-left: 4px solid rgb(var(--color-ink-violet) / 60%);
+}
+.retrieval-workspace .retrieval-sprint-options {
+  padding: 12px;
+  border: 1px solid rgb(var(--color-border) / 60%);
+  border-radius: 16px;
+  background: var(--workflow-recess);
+}
+.retrieval-workspace .retrieval-sprint-option {
+  min-height: 88px;
+  padding: 16px;
+  border-radius: 12px;
+  box-shadow: 0 3px 0 rgb(var(--color-border) / 45%);
+}
+.retrieval-workspace .retrieval-priority-item {
+  padding: 16px;
+  border-left: 3px solid rgb(var(--color-accent) / 30%);
+  border-radius: 4px 14px 14px 4px;
+  background: rgb(var(--color-bg-overlay) / 20%);
+}
+.retrieval-workspace .retrieval-forecast-day {
+  min-width: 0;
+  min-height: 112px;
+  border-width: 0 0 2px;
+  border-radius: 12px 12px 4px 4px;
+  background: rgb(var(--color-bg-overlay) / 45%);
+}
+.retrieval-workspace .retrieval-forecast-day[data-today='true'] {
+  border-color: rgb(var(--color-accent));
+  background: rgb(var(--color-accent-faint));
+}
+.retrieval-workspace .retrieval-queue-card {
+  position: relative;
+  border-left: 3px solid rgb(var(--color-accent) / 35%);
+  border-radius: 6px 20px 20px 6px;
+}
+.retrieval-workspace .retrieval-ladder {
+  gap: 4px;
+  padding: 4px;
+  border: 1px solid rgb(var(--color-border) / 55%);
+  border-radius: 20px;
+  background: rgb(var(--color-bg-overlay) / 45%);
+}
+.retrieval-workspace .retrieval-upcoming-row {
+  min-height: 62px;
+  padding-inline: 22px;
+}
+.workflow-page button:focus-visible {
+  outline: 2px solid rgb(var(--color-accent));
+  outline-offset: 3px;
+}
+
+@media (min-width: 1280px) {
+  .pyq-workbench .workbench-subject-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 767px) {
+  .workflow-page {
+    gap: 18px;
+  }
+  .pyq-workbench .workbench-section-heading,
+  .pyq-workbench .workbench-books > .u-card-body,
+  .pyq-workbench .workbench-subjects,
+  .pyq-workbench .workbench-controls,
+  .pyq-workbench .workbench-history {
+    padding: 19px;
+  }
+  .pyq-workbench .workbench-mode-choice {
+    min-height: 0;
+    padding: 20px;
+  }
+  .planner-workspace .planner-day-launch {
+    grid-template-columns: 76px minmax(0, 1fr);
+    gap: 19px;
+    padding: 20px;
+  }
+  .planner-day-launch__copy h2 {
+    font-size: 23px;
+  }
+  .planner-day-launch__date strong {
+    font-size: 39px;
+  }
+  .planner-day-launch__date span {
+    font-size: 9px;
+  }
+  .planner-month-summary {
+    gap: 12px;
+  }
+  .planner-month-summary > div {
+    width: 100%;
+    justify-content: space-between;
+  }
+  .planner-workspace .native-calendar-toolbar {
+    min-height: 76px;
+    padding: 16px;
+  }
+  .planner-workspace .native-calendar-title h2 {
+    font-size: 24px;
+  }
+  .planner-workspace .native-calendar-cell {
+    min-height: 78px;
+    padding: 6px 3px;
+  }
+  .planner-workspace .native-calendar-date {
+    width: 23px;
+    height: 23px;
+    font-size: 12px;
+  }
+  .planner-workspace .native-calendar-duration {
+    font-size: 8px;
+    padding: 2px 3px;
+  }
+  .planner-workspace .native-calendar-cell > div:has(.native-calendar-date) {
+    flex-wrap: wrap;
+    gap: 2px;
+  }
+  .planner-workspace .native-calendar-details > span {
+    max-width: 100%;
+    overflow-wrap: anywhere;
+    padding: 3px;
+    font-size: 8px;
+  }
+  .planner-workspace .planner-day-body {
+    padding: 16px;
+  }
+  .planner-workspace .planner-day-header {
+    padding: 20px;
+  }
+  .retrieval-overview {
+    padding: 22px;
+  }
+  .retrieval-overview__stages {
+    gap: 8px;
+  }
+  .retrieval-overview__stage {
+    padding: 14px 8px 10px;
+  }
+  .retrieval-overview__stage dt {
+    font-size: 11px;
+  }
+  .retrieval-overview__stage dd {
+    font-size: 29px;
+  }
+}
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .pyq-workbench .workbench-book,
+  .pyq-workbench .workbench-subject,
+  .retrieval-workspace .retrieval-sprint-option,
+  .retrieval-workspace .retrieval-queue-card {
+    transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
+  }
+  .pyq-workbench .workbench-book:hover {
+    transform: translateY(-3px) rotate(-0.5deg);
+  }
+  .pyq-workbench .workbench-subject:hover,
+  .retrieval-workspace .retrieval-sprint-option:not(:disabled):hover,
+  .retrieval-workspace .retrieval-queue-card:hover {
+    transform: translateY(-2px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pyq-workbench .workbench-book,
+  .pyq-workbench .workbench-subject,
+  .pyq-workbench .workbench-mode-choice,
+  .retrieval-workspace .retrieval-sprint-option,
+  .retrieval-workspace .retrieval-queue-card {
+    transition: none;
+    transform: none;
+  }
+}

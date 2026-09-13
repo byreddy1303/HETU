@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { cn } from '@/lib/utils';
+import WorkspaceEmblem from '@/components/shared/WorkspaceEmblem';
 
 export function Empty({
   title,
@@ -15,13 +16,14 @@ export function Empty({
   return (
     <div
       className={cn(
-        'u-empty flex flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-border bg-bg-raised/50 px-6 py-12 text-center',
+        'u-empty workspace-empty flex flex-col items-center justify-center gap-2 px-6 py-10 text-center',
         className
       )}
     >
-      <p className="font-display text-[16px] font-semibold text-text-muted">{title}</p>
-      {hint && <p className="max-w-[360px] text-[13px] text-text-faint">{hint}</p>}
-      {action && <div className="mt-3">{action}</div>}
+      <WorkspaceEmblem variant="empty" className="workspace-empty__emblem" />
+      <p className="workspace-empty__title font-display font-semibold text-text">{title}</p>
+      {hint && <p className="workspace-empty__hint text-text-muted">{hint}</p>}
+      {action && <div className="workspace-empty__action">{action}</div>}
     </div>
   );
 }

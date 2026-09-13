@@ -83,24 +83,25 @@ export default function Settings() {
 
   const [signingOut, setSigningOut] = useState(false);
   const [lastSignOutError, setLastSignOutError] = useState<string | null>(null);
+  const signOutInFlightRef = useRef(false);
   async function onSignOut(force = false) {
+    if (signOutInFlightRef.current) return;
+    signOutInFlightRef.current = true;
     setSigningOut(true);
     try {
       const result = await signOut({ force });
       if (result.error && !force) {
         setLastSignOutError(result.error);
-        const confirmForce = window.confirm(
-          `Sync could not finish: ${result.error}\n\nDo you want to force sign out anyway? Any unsynced data on this device may be lost.`
-        );
-        if (confirmForce) {
-          await onSignOut(true);
-        } else {
-          pushToast(result.error, 'danger');
-        }
+        pushToast(`${result.error} Choose 'Force sign out' to exit immediately.`, 'danger');
       } else if (result.error) {
         pushToast(result.error, 'danger');
       }
+    } catch (error) {
+      const detail = error instanceof Error ? error.message : 'Sign-out failed.';
+      setLastSignOutError(detail);
+      pushToast(`${detail} Choose 'Force sign out' to exit immediately.`, 'danger');
     } finally {
+      signOutInFlightRef.current = false;
       setSigningOut(false);
     }
   }

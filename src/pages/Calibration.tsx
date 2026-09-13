@@ -188,7 +188,7 @@ export default function Calibration() {
   }
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="workspace-calibration flex flex-col gap-4">
       <PageHeader
         title="Calibration"
         description="How well your answer/skip calls hold up across exact-once attempt evidence."

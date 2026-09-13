@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import '@/workflow-surfaces.css';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
 import {
@@ -667,7 +668,7 @@ function PracticeSetup({
   const selectedTopics = selectedSubject?.topics ?? [];
   const selectedTopicSlug = config.topicSlug ?? 'all';
   return (
-    <div className="flex flex-col gap-4">
+    <div className="workflow-page pyq-workbench flex flex-col gap-4">
       <PageHeader
         title="GATE PYQs"
         description={`${catalogQuestionCount.toLocaleString()} GATE CSE Core questions for focused practice and exam sessions.`}
@@ -675,7 +676,7 @@ function PracticeSetup({
       />
 
       {activeSession && (
-        <Card className="border-accent/30">
+        <Card className="workbench-resume border-accent/30">
           <CardBody className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="min-w-0">
               <p className="font-display text-[16px] font-semibold text-text">
@@ -717,7 +718,7 @@ function PracticeSetup({
       )}
 
       {savedSessions.length > 0 && (
-        <div className="flex flex-col gap-2">
+        <div className="workbench-saved flex flex-col gap-2">
           <p className="px-1 text-[11px] font-semibold uppercase tracking-widest text-text-faint">
             Paused sessions
           </p>
@@ -770,7 +771,7 @@ function PracticeSetup({
       )}
 
       {showRecommendedSetup && (
-        <Card className="overflow-hidden border-accent/25">
+        <Card className="workbench-recommendations overflow-hidden border-accent/25">
           <PyqRecommendedSetup
             preset={recommendationPreset}
             selection={recommendedSelection}
@@ -788,10 +789,10 @@ function PracticeSetup({
         </Card>
       )}
 
-      <section aria-labelledby="pyq-mode-heading">
+      <section className="workbench-mode" aria-labelledby="pyq-mode-heading">
         <Card className="overflow-hidden border-border-hover">
           <CardBody className="p-0">
-            <div className="flex flex-col gap-3 border-b border-border bg-bg-overlay/25 p-4 sm:flex-row sm:items-end sm:justify-between sm:p-5">
+            <div className="workbench-section-heading flex flex-col gap-3 border-b border-border bg-bg-overlay/25 p-4 sm:flex-row sm:items-end sm:justify-between sm:p-5">
               <div>
                 <p className="u-label">Step 1 · Choose a mode</p>
                 <h2
@@ -810,7 +811,7 @@ function PracticeSetup({
               </Badge>
             </div>
 
-            <div className="grid md:grid-cols-2">
+            <div className="workbench-mode-choices grid md:grid-cols-2">
               <button
                 type="button"
                 aria-pressed={(config.mode ?? 'practice') === 'practice'}
@@ -826,7 +827,7 @@ function PracticeSetup({
                   })
                 }
                 className={cn(
-                  'group relative min-h-[230px] overflow-hidden border-b border-border p-5 text-left transition-all focus-visible:z-10 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-accent-faint md:border-b-0 md:border-r sm:p-6',
+                  'workbench-mode-choice group relative min-h-[230px] overflow-hidden border-b border-border p-5 text-left transition-all focus-visible:z-10 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-accent-faint md:border-b-0 md:border-r sm:p-6',
                   (config.mode ?? 'practice') === 'practice'
                     ? 'bg-accent-faint/70 shadow-[inset_5px_0_0_rgb(var(--color-accent))]'
                     : 'bg-bg-raised hover:bg-accent-faint/35'
@@ -880,7 +881,7 @@ function PracticeSetup({
                   })
                 }
                 className={cn(
-                  'group relative min-h-[230px] overflow-hidden p-5 text-left transition-all focus-visible:z-10 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-guess-faint sm:p-6',
+                  'workbench-mode-choice group relative min-h-[230px] overflow-hidden p-5 text-left transition-all focus-visible:z-10 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-guess-faint sm:p-6',
                   config.mode === 'exam'
                     ? 'bg-guess-faint/75 shadow-[inset_5px_0_0_rgb(var(--color-ink-violet))]'
                     : 'bg-bg-raised hover:bg-guess-faint/35'
@@ -1037,8 +1038,8 @@ function PracticeSetup({
         />
       ) : (
         <>
-          <Card className="overflow-hidden">
-            <div className="flex flex-col gap-1 border-b border-border bg-bg-overlay/25 p-4 sm:p-5">
+          <Card className="workbench-configuration overflow-hidden">
+            <div className="workbench-section-heading flex flex-col gap-1 border-b border-border bg-bg-overlay/25 p-4 sm:p-5">
               <p className="u-label">Step 2 · Configure the set</p>
               <h2 className="font-display text-[18px] font-bold text-text">
                 {config.mode === 'exam' ? 'Build your timed exam' : 'Build your practice session'}
@@ -1047,8 +1048,8 @@ function PracticeSetup({
                 GATE CSE Core · Choose your subject and filters, then start your session.
               </p>
             </div>
-            <div className="grid lg:grid-cols-[minmax(0,1.45fr)_minmax(300px,0.75fr)]">
-              <div className="border-b border-border p-4 lg:border-b-0 lg:border-r">
+            <div className="workbench-configuration-grid grid lg:grid-cols-[minmax(0,1.45fr)_minmax(300px,0.75fr)]">
+              <div className="workbench-subjects border-b border-border p-4 lg:border-b-0 lg:border-r">
                 <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
                   <div>
                     <p className="u-label">Choose a subject</p>
@@ -1083,7 +1084,7 @@ function PracticeSetup({
                     ))}
                   </Select>
                 </label>
-                <div className="hidden grid-cols-1 gap-2 sm:grid sm:grid-cols-2 xl:grid-cols-3">
+                <div className="workbench-subject-grid hidden grid-cols-1 gap-2 sm:grid sm:grid-cols-2 xl:grid-cols-3">
                   <button
                     type="button"
                     onClick={() =>
@@ -1096,13 +1097,16 @@ function PracticeSetup({
                     }
                     aria-pressed={config.subjectSlug === 'all'}
                     className={cn(
-                      'group flex min-h-[78px] items-start gap-3 rounded border p-3 text-left transition-all',
+                      'workbench-subject group flex min-h-[78px] items-start gap-3 rounded border p-3 text-left transition-all',
                       config.subjectSlug === 'all'
                         ? 'border-accent/50 bg-accent-faint shadow-sm'
                         : 'border-border bg-bg-raised hover:-translate-y-0.5 hover:border-border-hover'
                     )}
                   >
-                    <Shuffle size={17} className="mt-0.5 shrink-0 text-accent" />
+                    <Shuffle
+                      size={17}
+                      className="workbench-subject-icon mt-0.5 shrink-0 text-accent"
+                    />
                     <span>
                       <span className="block text-[13.5px] font-semibold text-text">
                         Mixed subjects
@@ -1129,7 +1133,7 @@ function PracticeSetup({
                         }
                         aria-pressed={active}
                         className={cn(
-                          'group flex min-h-[78px] items-start gap-3 rounded border p-3 text-left transition-all',
+                          'workbench-subject group flex min-h-[78px] items-start gap-3 rounded border p-3 text-left transition-all',
                           active
                             ? 'border-accent/50 bg-accent-faint shadow-sm'
                             : 'border-border bg-bg-raised hover:-translate-y-0.5 hover:border-border-hover'
@@ -1138,7 +1142,7 @@ function PracticeSetup({
                         <LibraryBig
                           size={17}
                           className={cn(
-                            'mt-0.5 shrink-0',
+                            'workbench-subject-icon mt-0.5 shrink-0',
                             active ? 'text-accent' : 'text-text-faint'
                           )}
                         />
@@ -1155,7 +1159,7 @@ function PracticeSetup({
                   })}
                 </div>
                 {selectedSubject && selectedTopics.length > 1 && (
-                  <div className="mt-4 border-t border-border pt-4">
+                  <div className="workbench-topics mt-4 border-t border-border pt-4">
                     <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
                       <div>
                         <p className="u-label">Choose a topic</p>
@@ -1232,7 +1236,7 @@ function PracticeSetup({
                 )}
               </div>
 
-              <div className="flex flex-col bg-bg-overlay/25 p-4">
+              <div className="workbench-controls flex flex-col bg-bg-overlay/25 p-4">
                 <div
                   className={cn(
                     'rounded border px-3 py-2.5',
@@ -1369,7 +1373,7 @@ function PracticeSetup({
                     </Select>
                   </label>
                 </div>
-                <div className="mt-auto pt-6">
+                <div className="workbench-launch mt-auto pt-6">
                   {error && !activeSession && (
                     <p role="alert" className="mb-3 text-[12px] text-danger">
                       {error}
@@ -1396,14 +1400,16 @@ function PracticeSetup({
       )}
 
       {completedSessions.length > 0 ? (
-        <PyqSessionHistory
-          sessions={completedSessions}
-          attempts={attempts}
-          subjectLabels={Object.fromEntries(
-            manifest.subjects.map((subject) => [subject.slug, subject.label])
-          )}
-          onReview={onReview}
-        />
+        <div className="workbench-history">
+          <PyqSessionHistory
+            sessions={completedSessions}
+            attempts={attempts}
+            subjectLabels={Object.fromEntries(
+              manifest.subjects.map((subject) => [subject.slug, subject.label])
+            )}
+            onReview={onReview}
+          />
+        </div>
       ) : null}
 
       {attempts.length > 0 ? (

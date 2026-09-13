@@ -153,7 +153,7 @@ export default function TriggerDrill() {
   const matchCount = attempts.filter((attempt) => attempt.result === 'MATCH').length;
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="workspace-drill flex flex-col gap-4">
       <PageHeader
         title="Trigger drill"
         description="Train a phrase-to-concept reflex locally. Exact answers are checked instantly; you remain the judge of valid synonyms."

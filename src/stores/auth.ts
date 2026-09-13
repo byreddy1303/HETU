@@ -180,7 +180,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     const userId = get().user?.id;
     if (!userId) {
       try {
-        await supabase.auth.signOut().catch(() => {});
+        await supabase.auth.signOut({ scope: 'local' }).catch(() => {});
       } catch {
         // ignore
       }
@@ -194,11 +194,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
 
     if (options?.force) {
-      try {
-        await flushAllDurableState(userId);
-      } catch (error) {
-        console.warn('[air] Force sign-out: durable flush failed, proceeding anyway.', error);
-      }
+      // This is the escape hatch after the durability barrier has already
+      // failed. Re-running that same barrier here can make every subsequent
+      // tap look unresponsive, especially when a remote table is unavailable.
       try {
         await unregisterCurrentPushDevice();
       } catch (error) {
@@ -209,7 +207,10 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       stopSync();
       set({ status: 'loading' });
       try {
-        await supabase.auth.signOut();
+        const { error } = await supabase.auth.signOut({ scope: 'local' });
+        if (error) {
+          console.warn('[air] Force sign-out: Supabase session revoke failed, proceeding.', error);
+        }
       } catch (error) {
         console.warn('[air] Force sign-out: supabase.auth.signOut error, proceeding.', error);
       }
@@ -252,14 +253,27 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     // Freeze authenticated routes before yielding to the network request. No
     // UI event can create an unobserved local edit after the final barrier.
     set({ status: 'loading' });
-    const { error } = await supabase.auth.signOut();
+    const { error } = await supabase.auth.signOut({ scope: 'local' });
     if (error) {
-      set({ status: 'signed_in' });
-      initSync(userId);
-      void accountState.startAccountStateSync(userId).catch((restartError) => {
-        console.error('[air] Account sync could not restart after sign-out failed.', restartError);
-      });
-      return { error: error.message };
+      // auth-js removes the local session for most sign-out API failures. Only
+      // restore the signed-in UI when a session is demonstrably still present;
+      // otherwise the UI and Supabase storage would disagree until reload.
+      let sessionStillPresent = true;
+      try {
+        const { data } = await supabase.auth.getSession();
+        sessionStillPresent = Boolean(data.session);
+      } catch {
+        // If session verification itself fails, preserve the local cache and
+        // account state instead of guessing that sign-out completed.
+      }
+      if (sessionStillPresent) {
+        set({ status: 'signed_in' });
+        initSync(userId);
+        void accountState.startAccountStateSync(userId).catch((restartError) => {
+          console.error('[air] Account sync could not restart after sign-out failed.', restartError);
+        });
+        return { error: error.message };
+      }
     }
     let cleanupError: string | null = null;
     try {

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import { motion, useReducedMotion } from 'motion/react';
 import {
@@ -106,24 +106,27 @@ export default function Nav() {
     return row && row.actual_duration_min === null ? storedSessionId : null;
   }, [storedSessionId]);
   const [signingOut, setSigningOut] = useState(false);
+  const [forceReady, setForceReady] = useState(false);
+  const signOutInFlightRef = useRef(false);
   async function handleSignOut(force = false) {
-    if (signingOut) return;
+    if (signOutInFlightRef.current) return;
+    const shouldForce = force || forceReady;
+    signOutInFlightRef.current = true;
     setSigningOut(true);
     try {
-      const result = await signOut({ force });
-      if (result.error && !force) {
-        const confirmForce = window.confirm(
-          `Sync could not finish: ${result.error}\n\nDo you want to force sign out anyway? Any unsynced data on this device may be lost.`
-        );
-        if (confirmForce) {
-          await handleSignOut(true);
-        } else {
-          pushToast(result.error, 'danger');
-        }
+      const result = await signOut({ force: shouldForce });
+      if (result.error && !shouldForce) {
+        setForceReady(true);
+        pushToast(`${result.error} Click sign out again to force exit.`, 'danger');
       } else if (result.error) {
         pushToast(result.error, 'danger');
       }
+    } catch (error) {
+      const detail = error instanceof Error ? error.message : 'Sign-out failed.';
+      pushToast(detail, 'danger');
+      setForceReady(true);
     } finally {
+      signOutInFlightRef.current = false;
       setSigningOut(false);
     }
   }
@@ -181,8 +184,9 @@ export default function Nav() {
             type="button"
             onClick={() => void handleSignOut()}
             disabled={signingOut}
-            aria-label="Sign out"
-            title={signingOut ? 'Signing out…' : 'Sign out'}
+            aria-label={forceReady ? 'Force sign out' : 'Sign out'}
+            title={signingOut ? 'Signing out…' : forceReady ? 'Force sign out (click to exit immediately)' : 'Sign out'}
+            className={forceReady ? 'text-danger' : undefined}
           >
             <LogOut size={16} strokeWidth={1.7} aria-hidden className={signingOut ? 'animate-spin' : undefined} />
           </button>

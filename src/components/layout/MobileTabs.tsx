@@ -130,24 +130,27 @@ export default function MobileTabs() {
   }, [moreOpen]);
 
   const [signingOut, setSigningOut] = useState(false);
+  const [forceReady, setForceReady] = useState(false);
+  const signOutInFlightRef = useRef(false);
   async function handleSignOut(force = false) {
-    if (signingOut) return;
+    if (signOutInFlightRef.current) return;
+    const shouldForce = force || forceReady;
+    signOutInFlightRef.current = true;
     setSigningOut(true);
     try {
-      const result = await signOut({ force });
-      if (result.error && !force) {
-        const confirmForce = window.confirm(
-          `Sync could not finish: ${result.error}\n\nDo you want to force sign out anyway? Any unsynced data on this device may be lost.`
-        );
-        if (confirmForce) {
-          await handleSignOut(true);
-        } else {
-          pushToast(result.error, 'danger');
-        }
+      const result = await signOut({ force: shouldForce });
+      if (result.error && !shouldForce) {
+        setForceReady(true);
+        pushToast(`${result.error} Tap 'Force sign out' to exit immediately.`, 'danger');
       } else if (result.error) {
         pushToast(result.error, 'danger');
       }
+    } catch (error) {
+      const detail = error instanceof Error ? error.message : 'Sign-out failed.';
+      pushToast(detail, 'danger');
+      setForceReady(true);
     } finally {
+      signOutInFlightRef.current = false;
       setSigningOut(false);
     }
   }
@@ -238,16 +241,38 @@ export default function MobileTabs() {
               <span>Settings</span>
             </NavLink>
             <div>
-              <span>{profile?.name || (sandbox ? 'Local sandbox' : 'Your workspace')}</span>
-              <button
-                type="button"
-                onClick={() => void handleSignOut()}
-                disabled={signingOut}
-                aria-label="Sign out"
-              >
-                <LogOut size={16} aria-hidden className={signingOut ? 'animate-spin' : undefined} />
-                {signingOut ? 'Signing out…' : 'Sign out'}
-              </button>
+              {forceReady ? (
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setForceReady(false)}
+                    disabled={signingOut}
+                    className="text-[11px] text-text-muted"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => void handleSignOut(true)}
+                    disabled={signingOut}
+                    className="flex items-center gap-1.5 text-[11px] font-semibold text-danger"
+                    aria-label="Force sign out"
+                  >
+                    <LogOut size={14} aria-hidden className={signingOut ? 'animate-spin' : undefined} />
+                    {signingOut ? 'Signing out…' : 'Force sign out'}
+                  </button>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => void handleSignOut()}
+                  disabled={signingOut}
+                  aria-label="Sign out"
+                >
+                  <LogOut size={16} aria-hidden className={signingOut ? 'animate-spin' : undefined} />
+                  {signingOut ? 'Signing out…' : 'Sign out'}
+                </button>
+              )}
             </div>
           </footer>
         </div>

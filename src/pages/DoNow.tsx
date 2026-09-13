@@ -82,7 +82,7 @@ export default function DoNow() {
   }
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="workspace-today flex flex-col gap-4">
       <PageHeader
         title="Do now"
         description={
@@ -94,7 +94,7 @@ export default function DoNow() {
 
       {queue.length > 0 ? (
         <>
-          <Card className="overflow-hidden border-accent/35">
+          <Card className="today-first-action overflow-hidden border-accent/35">
             <CardBody className="flex flex-wrap items-center gap-4 bg-accent-faint/35">
               <span className="flex h-11 w-11 items-center justify-center rounded-full border border-accent/25 bg-bg-raised text-accent">
                 <ListChecks size={20} />
@@ -111,19 +111,19 @@ export default function DoNow() {
             </CardBody>
           </Card>
 
-          <ol className="overflow-hidden rounded-lg border border-border bg-bg-raised shadow-card">
+          <ol className="today-queue">
             {queue.map((item, index) => (
               <li
                 key={item.id}
-                className="grid grid-cols-[54px_minmax(0,1fr)] border-b border-border last:border-b-0"
+                className="today-queue-item"
               >
-                <div className="flex items-start justify-center border-r border-border bg-bg-overlay/35 pt-4">
+                <div className="today-queue-number">
                   <span className="u-num text-[13px] font-semibold text-text-muted">
                     {String(index + 1).padStart(2, '0')}
                   </span>
                 </div>
-                <div className="flex flex-wrap items-center gap-3 px-4 py-3.5">
-                  <div className="min-w-[220px] flex-1">
+                <div className="today-queue-content">
+                  <div className="today-queue-description">
                     <div className="flex flex-wrap items-center gap-2">
                       <p className="font-display text-[15px] font-semibold text-text">
                         {item.title}

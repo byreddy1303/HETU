@@ -25,6 +25,7 @@ import { subjectInk } from '@/lib/subjectInk';
 import { cn } from '@/lib/utils';
 import { useUiStore } from '@/stores/ui';
 import notesManifest from '@/data/topper-notes.json';
+import '@/supporting-surfaces.css';
 
 interface TopperNote {
   id: string;
@@ -253,31 +254,49 @@ export default function TopperNotes() {
   }
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="workspace-notes flex flex-col gap-4">
       <PageHeader
         title="GATE Topper Notes"
         description="Follow complete handwritten notes in their intended order, then mark each notebook when you have revised it."
       />
 
-      <section className="topper-notes-hero relative grid overflow-hidden rounded-lg border border-border bg-bg-raised shadow-card lg:grid-cols-[minmax(0,1.45fr)_minmax(300px,.75fr)]">
-        <div className="relative z-10 px-5 py-6 sm:px-6 sm:py-8">
-          <p className="u-label text-accent">The topper archive</p>
-          <h2 className="mt-3 max-w-[680px] font-display text-[32px] font-bold leading-[1.04] tracking-[-0.035em] text-text sm:text-[42px]">
-            Read the route.
-            <span className="block text-accent">Revise the reasoning.</span>
-          </h2>
-          <p className="mt-4 max-w-[620px] text-[13.5px] leading-relaxed text-text-muted sm:text-[14.5px]">
+      <section className="notes-reading-room" aria-labelledby="notes-reading-title">
+        <div className="notes-reading-room__copy">
+          <span className="notes-reading-room__label">The handwritten collection</span>
+          <h2 id="notes-reading-title">Good ideas leave a paper trail.</h2>
+          <p>
             Real GATE notes from Karan Agrawal (AIR 102) and Mahek Garala (AIR 75), arranged as a
-            clean subject-wise reading path with every source credited.
+            subject-wise reading path with every source credited.
           </p>
-          <dl className="mt-6 grid max-w-[560px] grid-cols-3 divide-x divide-border border-y border-border/80 py-3">
+          <dl className="notes-reading-room__stats">
             <Stat value={notes.length} label="notebooks" />
             <Stat value={totalPages} label="pages" />
             <Stat value={SUBJECTS.length} label="subjects" />
           </dl>
         </div>
 
-        <div className="relative z-10 border-t border-border bg-bg-overlay/45 px-5 py-5 lg:border-l lg:border-t-0 lg:px-6 lg:py-8">
+        <div className="notes-bookscape" role="group" aria-label="Browse subject shelves">
+          {SUBJECTS.map((subject, index) => (
+            <button
+              key={subject}
+              type="button"
+              className={`notes-volume notes-volume--${index}`}
+              aria-label={`Browse ${subject} notes`}
+              aria-pressed={filter === subject}
+              onClick={() => { setFilter(subject); setQuery(''); }}
+            >
+              <span className="notes-volume__pages" aria-hidden="true" />
+              <span className="notes-volume__cover">
+                <span className="notes-volume__code">{SUBJECT_COPY[subject].short}</span>
+                <strong>{subject}</strong>
+                <span>{notes.filter((note) => note.subject === subject).length} notebooks</span>
+              </span>
+            </button>
+          ))}
+        </div>
+      </section>
+
+        <section className="notes-revision-index" aria-label="Your revision index">
           <div className="flex items-center justify-between gap-3">
             <div>
               <p className="u-label">Your revision index</p>
@@ -289,7 +308,7 @@ export default function TopperNotes() {
               {revisedCount}/{notes.length}
             </span>
           </div>
-          <div className="mt-5 flex flex-col gap-2.5">
+          <div className="notes-revision-index__subjects">
             {SUBJECTS.map((subject) => {
               const subjectNotes = notes.filter((note) => note.subject === subject);
               const subjectDone = subjectNotes.filter((note) =>
@@ -304,7 +323,8 @@ export default function TopperNotes() {
                     setFilter(subject);
                     setQuery('');
                   }}
-                  className="topper-subject-tab group flex w-full items-center gap-3 rounded border border-border bg-bg-raised px-3 py-2.5 text-left shadow-sm transition-[transform,border-color] hover:translate-x-1 hover:border-border-hover"
+                  aria-pressed={filter === subject}
+                  className="topper-subject-tab group flex w-full items-center gap-3 rounded border border-border bg-bg-raised px-3 py-2.5 text-left shadow-sm transition-[transform,border-color] hover:border-border-hover"
                 >
                   <span
                     className={cn(
@@ -332,7 +352,6 @@ export default function TopperNotes() {
               );
             })}
           </div>
-        </div>
       </section>
 
       {lastOpened && (
@@ -344,7 +363,7 @@ export default function TopperNotes() {
             rememberOpened(lastOpened.id);
             openHostedAsset(event, lastOpened.href);
           }}
-          className="group flex flex-wrap items-center gap-3 rounded border border-accent/20 bg-accent-faint px-4 py-3 text-[13px] transition-colors hover:border-accent/40"
+          className="notes-reading-bookmark group flex flex-wrap items-center gap-3 rounded border border-accent/20 bg-accent-faint px-4 py-3 text-[13px] transition-colors hover:border-accent/40"
         >
           <BookOpen size={17} className="shrink-0 text-accent" strokeWidth={1.8} />
           <span className="min-w-0 flex-1">
@@ -359,7 +378,7 @@ export default function TopperNotes() {
       )}
 
       <section
-        className="rounded-lg border border-border bg-bg-raised p-3 shadow-sm"
+        className="notes-library-tools rounded-lg border border-border bg-bg-raised p-3 shadow-sm"
         aria-label="Find notes"
       >
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
@@ -483,7 +502,7 @@ function SubjectShelf({
   const revised = subjectNotes.filter((note) => revisedIds.includes(note.id)).length;
 
   return (
-    <section aria-labelledby={`topper-notes-${SUBJECT_COPY[subject].short}`}>
+    <section className="notes-subject-shelf" aria-labelledby={`topper-notes-${SUBJECT_COPY[subject].short}`}>
       <header className="mb-2 flex flex-wrap items-end justify-between gap-2 px-1">
         <div className="flex items-center gap-3">
           <span className={cn('h-8 w-1 rounded-full', ink.dot)} />
@@ -502,9 +521,9 @@ function SubjectShelf({
         </span>
       </header>
 
-      <div className="overflow-hidden rounded-lg border border-border bg-bg-raised shadow-sm">
+      <div className="notes-shelf-material">
         {showLab && <LinearAlgebraLab />}
-        <ol className="divide-y divide-border">
+        <ol className="notes-shelf-grid">
           {subjectNotes.map((note) => (
             <NoteRow
               key={note.id}
@@ -566,15 +585,17 @@ function NoteRow({
   const ink = subjectInk(note.subject);
 
   return (
-    <li className="group grid gap-3 px-4 py-3 transition-colors hover:bg-bg-overlay/30 sm:grid-cols-[44px_minmax(0,1fr)_auto] sm:items-center">
+    <li className="notes-notebook group">
       <span
         className={cn(
-          'u-num flex h-10 w-10 items-center justify-center rounded-sm border bg-bg text-[11px] font-bold',
+          'notes-notebook__cover',
           ink.selected
         )}
         aria-hidden="true"
       >
-        {String(note.sequence).padStart(2, '0')}
+        <small>{SUBJECT_COPY[note.subject].short}</small>
+        <strong>{String(note.sequence).padStart(2, '0')}</strong>
+        <span>{note.pages} pp.</span>
       </span>
       <div className="min-w-0">
         <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
@@ -596,7 +617,7 @@ function NoteRow({
           </span>
         </p>
       </div>
-      <div className="flex items-center gap-1.5 sm:justify-end">
+      <div className="notes-notebook__actions flex items-center gap-1.5 sm:justify-end">
         <button
           type="button"
           aria-pressed={revised}

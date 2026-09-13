@@ -199,7 +199,7 @@ export default function SessionActive() {
     return <Navigate to={`/session/${id}/review`} replace />;
 
   return (
-    <div className="flex min-h-[70vh] flex-col">
+    <div className="workspace-session-active flex min-h-[70vh] flex-col">
       <div className="flex items-center justify-between gap-3 border-b border-border pb-3">
         <span className="u-label">
           session · <span className={subjectInk(session.subject).text}>{session.subject}</span>

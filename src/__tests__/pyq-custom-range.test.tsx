@@ -236,6 +236,70 @@ describe('Custom PYQ setup and Rishi catalog visibility', () => {
     expect(sessions).toHaveLength(2);
   });
 
+  it('gives the ganirishivardhangmailcom account the same core-only setup and defaults', async () => {
+    authFixture.username = 'ganirishivardhangmailcom';
+    const user = userEvent.setup();
+    usePyqPreferencesStore.getState().remember(
+      {
+        bookSlug: 'gate-cse',
+        subjectSlug: 'discrete-mathematics',
+        topicSlug: 'logic',
+        fromYear: 2026,
+        toYear: 2026,
+        type: 'MCQ',
+        order: 'random',
+        count: '25',
+        history: 'incorrect',
+        mode: 'practice',
+        practiceView: 'multiple',
+        recommendationPreset: 'repair',
+        recommendationReasons: ['Old recommended cohort'],
+        savedPrescriptionId: 'old-repair',
+        savedPrescriptionName: 'Old repair prescription'
+      },
+      'repair',
+      'old-seed'
+    );
+    render(
+      <MemoryRouter>
+        <Pyq />
+      </MemoryRouter>
+    );
+    await screen.findByRole('button', { name: 'Start practice set' });
+    expect(screen.queryByText('Recommended set')).not.toBeInTheDocument();
+    for (const name of [
+      'Learn',
+      'Diagnose',
+      'Repair',
+      'Speed',
+      'Transfer',
+      'Mixed GATE',
+      'Full Paper',
+      'Custom'
+    ]) {
+      expect(
+        screen.queryByRole('button', { name: new RegExp(`^${name}`) })
+      ).not.toBeInTheDocument();
+    }
+    expect(screen.getByRole('combobox', { name: 'From year' })).toHaveValue('1990');
+    expect(screen.getByRole('combobox', { name: 'To year' })).toHaveValue('2026');
+    expect(screen.getByRole('combobox', { name: 'Questions' })).toHaveValue('25');
+    expect(screen.getByRole('combobox', { name: 'Question history' })).toHaveValue('all');
+    await user.click(screen.getByRole('button', { name: 'Start practice set' }));
+    expect(await screen.findByText('A core question from 1990.')).toBeInTheDocument();
+    expect(screen.getByText('A core question from 2026.')).toBeInTheDocument();
+    const [session] = await db.pyq_sessions.toArray();
+    expect(session.config.bookSlug).toBe('gate-cse');
+    expect(session.config.subjectSlug).toBe('all');
+    expect(session.config.topicSlug).toBe('all');
+    expect(session.config.type).toBe('all');
+    expect(session.config.history).toBe('all');
+    expect(session.config.count).toBe('25');
+    expect(session.config.recommendationPreset).toBe('custom');
+    expect(session.config.recommendationReasons).toBeUndefined();
+    expect(session.config.savedPrescriptionId).toBeUndefined();
+  });
+
   it.each(['learn', 'repair', 'full-paper'] as PyqPresetPreference[])(
     'ignores Rishi’s remembered %s preset and starts a normal core session',
     async (preset) => {

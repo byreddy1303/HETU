@@ -167,6 +167,15 @@ const RECOMMENDATION_COHORTS: readonly PyqRecommendationCohort[] = [
   'exact-uid'
 ];
 
+// Accounts previewed as "core-only": they never see the Recommended set
+// controls and every visit starts from the GATE CSE core catalogue (all
+// subjects, all topics). Matches are case-insensitive trimmed usernames.
+const CORE_SETUP_ONLY_USERNAMES = new Set(['rishi', 'ganirishivardhangmailcom']);
+
+function isCoreSetupOnlyUsername(username: string | null | undefined): boolean {
+  return !!username && CORE_SETUP_ONLY_USERNAMES.has(username.trim().toLowerCase());
+}
+
 function recommendedPresetParam(value: string | null): PyqPresetPreference | null {
   return RECOMMENDATION_PRESETS.includes(value as PyqPresetPreference)
     ? (value as PyqPresetPreference)
@@ -1716,7 +1725,7 @@ export default function Pyq() {
   const { userId, profile, sandbox } = useAuth();
   const [searchParams] = useSearchParams();
   const coreSetupOnly =
-    profile?.username?.trim().toLowerCase() === 'rishi' ||
+    isCoreSetupOnlyUsername(profile?.username) ||
     (import.meta.env.DEV && sandbox && searchParams.get('preview') === 'rishi');
   const navigate = useNavigate();
   const timeZone = profile?.timezone ?? 'Asia/Kolkata';
@@ -2084,6 +2093,11 @@ export default function Pyq() {
       if (!coreSetupOnly) return hydratedConfig;
       return {
         ...recommendationConfig('custom', hydratedConfig, manifest),
+        bookSlug: 'gate-cse',
+        subjectSlug: 'all',
+        subjectSlugs: undefined,
+        topicSlug: 'all',
+        type: 'all',
         count:
           (remembered.examKind === 'full-paper' || requestedExamKind === 'full-paper') && !count
             ? '10'

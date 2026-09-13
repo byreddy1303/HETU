@@ -1,6 +1,8 @@
-// Durable Supabase persistence for Planner days. localStorage is a responsive,
-// user-scoped cache; the complete DayPlan is stored in planner_day_plans.plan.
-// The duplicated sessions column remains populated for notification functions.
+// Durable Supabase persistence for Planner days. The complete DayPlan lives in
+// planner_day_plans.plan; the duplicated sessions column remains populated for
+// notification functions. The write queue, conflicts archive and DayPlan
+// caches are in-memory this run only — the database is the single source of
+// truth, so clearing this device loses nothing that has been acknowledged.
 import { supabase } from '@/lib/supabase';
 import { broadcastSyncMutation } from '@/lib/sync';
 import {
@@ -79,64 +81,11 @@ interface PlannerCloudWriteQueue {
 }
 
 const CLOUD_PAGE_SIZE = 1_000;
-const PENDING_STORAGE_PREFIX = 'air.planner-cloud-pending.';
-const CONFLICT_STORAGE_PREFIX = 'air.planner-cloud-conflict.';
 const plannerCloudWriteQueues = new Map<string, PlannerCloudWriteQueue>();
 const plannerCloudConflicts = new Map<string, Map<string, PlannerCloudConflictEntry>>();
 
-function pendingStoragePrefix(userId: string): string {
-  return `${PENDING_STORAGE_PREFIX}${userId}.`;
-}
-
-function pendingStorageKey(userId: string, date: string): string {
-  return `${pendingStoragePrefix(userId)}${date}`;
-}
-
-function conflictStoragePrefix(userId: string): string {
-  return `${CONFLICT_STORAGE_PREFIX}${userId}.`;
-}
-
-function conflictStorageKey(userId: string, date: string, mutationId: string): string {
-  return `${conflictStoragePrefix(userId)}${date}.${mutationId}`;
-}
-
 function conflictIdentity(date: string, mutationId: string): string {
   return `${date}\u0000${mutationId}`;
-}
-
-function persistPendingWrite(userId: string, write: PlannerCloudWrite): void {
-  try {
-    localStorage.setItem(
-      pendingStorageKey(userId, write.date),
-      JSON.stringify(
-        write.kind === 'upsert'
-          ? {
-              kind: write.kind,
-              date: write.date,
-              plan: write.plan,
-              expectedRevision: write.expectedRevision,
-              mutationId: write.mutationId
-            }
-          : {
-              kind: write.kind,
-              date: write.date,
-              expectedRevision: write.expectedRevision,
-              mutationId: write.mutationId,
-              deletedAt: write.deletedAt
-            }
-      )
-    );
-  } catch {
-    // The in-memory queue and normal DayPlan cache remain available this run.
-  }
-}
-
-function clearPersistedWrite(userId: string, date: string): void {
-  try {
-    localStorage.removeItem(pendingStorageKey(userId, date));
-  } catch {
-    // The database already acknowledged the payload.
-  }
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -362,60 +311,21 @@ function preservePlannerConflict(
   const conflicts = plannerCloudConflicts.get(userId) ?? new Map();
   conflicts.set(conflictIdentity(entry.date, entry.mutationId), entry);
   plannerCloudConflicts.set(userId, conflicts);
-  try {
-    localStorage.setItem(
-      conflictStorageKey(userId, write.date, write.mutationId),
-      JSON.stringify(entry)
-    );
-  } catch {
-    // The in-memory conflict archive remains exportable this run. Ordinary
-    // version conflicts also remain in the retrying outbox.
-  }
 }
 
 function clearPlannerConflict(userId: string, write: PlannerCloudWrite): void {
   const conflicts = plannerCloudConflicts.get(userId);
   conflicts?.delete(conflictIdentity(write.date, write.mutationId));
   if (conflicts?.size === 0) plannerCloudConflicts.delete(userId);
-  try {
-    localStorage.removeItem(conflictStorageKey(userId, write.date, write.mutationId));
-  } catch {
-    // A stale diagnostic copy is harmless and remains exportable.
-  }
 }
 
 /** Export non-retrying conflict copies so acknowledged deletion never loses work. */
 export function exportPlannerCloudConflicts(userId: string): PlannerCloudConflictEntry[] {
-  const prefix = conflictStoragePrefix(userId);
-  const conflictsById = new Map<string, PlannerCloudConflictEntry>(
-    [...(plannerCloudConflicts.get(userId)?.entries() ?? [])].map(([key, entry]) => [
-      key,
-      normalizeConflictEntry(entry) ?? entry
-    ])
-  );
-  try {
-    const keys = Array.from({ length: localStorage.length }, (_, index) => localStorage.key(index));
-    for (const key of keys) {
-      if (!key?.startsWith(prefix)) continue;
-      try {
-        const entry = normalizeConflictEntry(JSON.parse(localStorage.getItem(key) ?? 'null'));
-        if (!entry) continue;
-        const identity = conflictIdentity(entry.date, entry.mutationId);
-        const existing = conflictsById.get(identity);
-        if (!existing || existing.detectedAt < entry.detectedAt) {
-          conflictsById.set(identity, entry);
-        }
-      } catch {
-        // One damaged diagnostic must not hide later valid conflicts.
-      }
-    }
-  } catch {
-    // The in-memory copies are still usable when browser storage is unavailable.
-  }
-  return [...conflictsById.values()].sort(
-    (left, right) =>
-      left.detectedAt.localeCompare(right.detectedAt) || left.date.localeCompare(right.date)
-  );
+  return [...(plannerCloudConflicts.get(userId)?.values() ?? [])]
+    .sort(
+      (left, right) =>
+        left.detectedAt.localeCompare(right.detectedAt) || left.date.localeCompare(right.date)
+    );
 }
 
 /** Restore conflict copies as diagnostics only; they are never replayed. */
@@ -427,24 +337,10 @@ export function importPlannerCloudConflicts(
   for (const candidate of entries as readonly unknown[]) {
     const entry = normalizeConflictEntry(candidate);
     if (!entry) continue;
-    const key = conflictStorageKey(userId, entry.date, entry.mutationId);
-    const identity = conflictIdentity(entry.date, entry.mutationId);
-    try {
-      const existingRaw = localStorage.getItem(key);
-      const stored = existingRaw ? normalizeConflictEntry(JSON.parse(existingRaw)) : null;
-      const cached = plannerCloudConflicts.get(userId)?.get(identity) ?? null;
-      const existing =
-        stored && (!cached || stored.detectedAt > cached.detectedAt) ? stored : cached;
-      if (existing && existing.detectedAt >= entry.detectedAt) continue;
-      localStorage.setItem(key, JSON.stringify(entry));
-    } catch {
-      const cached = plannerCloudConflicts.get(userId)?.get(identity);
-      if (cached && cached.detectedAt >= entry.detectedAt) continue;
-      // Keep restoring independent entries when one storage slot is malformed
-      // or browser storage is unavailable.
-    }
     const conflicts = plannerCloudConflicts.get(userId) ?? new Map();
-    conflicts.set(identity, entry);
+    const cached = conflicts.get(conflictIdentity(entry.date, entry.mutationId));
+    if (cached && cached.detectedAt >= entry.detectedAt) continue;
+    conflicts.set(conflictIdentity(entry.date, entry.mutationId), entry);
     plannerCloudConflicts.set(userId, conflicts);
     restored += 1;
   }
@@ -727,7 +623,6 @@ async function drainWriteQueue(
       if (outcome.conflict === 'deletion_wins' && outcome.tombstone) {
         cachePlannerDayTombstone(userId, outcome.tombstone);
         queue.pendingByDate.delete(next.date);
-        clearPersistedWrite(userId, next.date);
         continue;
       }
       const replacement = queue.pendingByDate.get(next.date);
@@ -737,7 +632,6 @@ async function drainWriteQueue(
         if (replacement.kind === 'upsert') {
           replacement.plan = { ...replacement.plan, syncRevision: acknowledgedRevision };
         }
-        persistPendingWrite(userId, replacement);
       }
       continue;
     }
@@ -748,7 +642,6 @@ async function drainWriteQueue(
     }
     applyMutationOutcomeToCache(userId, outcome);
     queue.pendingByDate.delete(next.date);
-    clearPersistedWrite(userId, next.date);
   }
 
   return firstError;
@@ -784,7 +677,6 @@ export function queuePlannerCloudWrite(userId: string, plan: CloudDayPlan): Prom
     version: ++queue.nextVersion
   };
   queue.pendingByDate.set(storedPlan.date, write);
-  persistPendingWrite(userId, write);
   return startWriteQueue(userId, queue);
 }
 
@@ -801,65 +693,7 @@ export function queuePlannerCloudDelete(userId: string, date: string): Promise<s
     version: ++queue.nextVersion
   };
   queue.pendingByDate.set(date, write);
-  persistPendingWrite(userId, write);
   return startWriteQueue(userId, queue);
-}
-
-function restorePersistedWrites(userId: string): void {
-  const prefix = pendingStoragePrefix(userId);
-  try {
-    const keys = Array.from({ length: localStorage.length }, (_, index) => localStorage.key(index));
-    for (const key of keys) {
-      if (!key?.startsWith(prefix)) continue;
-      try {
-        const parsed = JSON.parse(localStorage.getItem(key) ?? 'null') as unknown;
-        const keyDate = key.slice(prefix.length);
-        if (
-          !isRecord(parsed) ||
-          !validPlannerDate(parsed.date) ||
-          parsed.date !== keyDate
-        ) {
-          continue;
-        }
-        const queue = getWriteQueue(userId);
-        // A live queue entry is always newer than a persisted snapshot read
-        // later (including one restored from an old backup).
-        if (queue.pendingByDate.has(parsed.date)) continue;
-        const state = loadPlannerDaySyncState(userId, parsed.date);
-        const expectedRevision = validExpectedRevision(parsed.expectedRevision)
-          ? parsed.expectedRevision
-          : (state?.revision ?? 0);
-        const mutationId = validMutationId(parsed.mutationId) ? parsed.mutationId : uuid();
-        if (parsed.kind === 'delete') {
-          queue.pendingByDate.set(parsed.date, {
-            kind: 'delete',
-            date: parsed.date,
-            expectedRevision,
-            mutationId,
-            deletedAt: validTimestamp(parsed.deletedAt)
-              ? parsed.deletedAt
-              : state?.deletedAt ?? new Date().toISOString(),
-            version: ++queue.nextVersion
-          });
-        } else if (parsed.kind === 'upsert' && isRecord(parsed.plan)) {
-          const plan = cloneDayPlan(normalizeDayPlan(parsed.plan as unknown as DayPlan));
-          if (plan.date !== parsed.date) continue;
-          queue.pendingByDate.set(parsed.date, {
-            kind: 'upsert',
-            date: parsed.date,
-            plan: expectedRevision > 0 ? { ...plan, syncRevision: expectedRevision } : plan,
-            expectedRevision,
-            mutationId,
-            version: ++queue.nextVersion
-          });
-        }
-      } catch {
-        // One malformed entry must not stop independent valid dates restoring.
-      }
-    }
-  } catch {
-    // Ignore malformed/unavailable cache entries; do not delete potential data.
-  }
 }
 
 function outboxEntry(write: PlannerCloudWrite): PlannerCloudOutboxEntry {
@@ -881,9 +715,8 @@ function outboxEntry(write: PlannerCloudWrite): PlannerCloudOutboxEntry {
   };
 }
 
-/** Snapshot the durable Planner outbox so an offline backup cannot omit it. */
+/** Snapshot the Planner outbox so a backup cannot omit in-flight work. */
 export function exportPlannerCloudOutbox(userId: string): PlannerCloudOutboxEntry[] {
-  restorePersistedWrites(userId);
   const queue = plannerCloudWriteQueues.get(userId);
   return queue
     ? [...queue.pendingByDate.values()]
@@ -897,7 +730,6 @@ export function importPlannerCloudOutbox(
   userId: string,
   entries: readonly PlannerCloudOutboxEntry[]
 ): number {
-  restorePersistedWrites(userId);
   let restored = 0;
   const queue = getWriteQueue(userId);
   for (const candidate of entries as readonly unknown[]) {
@@ -911,7 +743,7 @@ export function importPlannerCloudOutbox(
     }
     const date = candidate.date;
     // Import is a recovery path. It must never replace an edit already queued
-    // by this running device or one already restored from local storage.
+    // by this running device.
     if (queue.pendingByDate.has(date)) continue;
     const state = loadPlannerDaySyncState(userId, date);
     if (state && candidate.expectedRevision !== state.revision) continue;
@@ -951,7 +783,6 @@ export function importPlannerCloudOutbox(
       continue;
     }
     queue.pendingByDate.set(date, write);
-    persistPendingWrite(userId, write);
     restored += 1;
   }
   if (queue.pendingByDate.size === 0 && queue.active === null) {
@@ -965,7 +796,6 @@ export function importPlannerCloudOutbox(
  * during logout, and from online/focus handlers.
  */
 export function flushPlannerCloudWrites(userId: string): Promise<string | null> {
-  restorePersistedWrites(userId);
   const queue = plannerCloudWriteQueues.get(userId);
   if (!queue) return Promise.resolve(null);
   return queue.active ?? startWriteQueue(userId, queue);
@@ -973,8 +803,6 @@ export function flushPlannerCloudWrites(userId: string): Promise<string | null> 
 
 /** Includes both queued failures and a write that is currently in flight. */
 export function hasPendingPlannerCloudWrites(userId: string): boolean {
-  restorePersistedWrites(userId);
   const queue = plannerCloudWriteQueues.get(userId);
-  if (queue && (queue.active || queue.pendingByDate.size > 0)) return true;
-  return false;
+  return Boolean(queue && (queue.active || queue.pendingByDate.size > 0));
 }

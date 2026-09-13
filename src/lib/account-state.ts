@@ -100,31 +100,6 @@ interface AccountStateRuntime {
 const writers = new Map<string, AccountStateWriter>();
 const runtimes = new Map<string, AccountStateRuntime>();
 
-function pendingStorageKey(userId: string, namespace: AccountStateNamespace): string {
-  return `air.account-state-pending.${userId}.${namespace}`;
-}
-
-function persistPendingWrite(
-  userId: string,
-  namespace: AccountStateNamespace,
-  payload: AnyAccountStatePayload
-): void {
-  try {
-    localStorage.setItem(pendingStorageKey(userId, namespace), JSON.stringify(payload));
-  } catch {
-    // The in-memory queue and the namespace's normal Zustand cache still keep
-    // the latest edit for this session when browser storage is unavailable.
-  }
-}
-
-function clearPersistedPendingWrite(userId: string, namespace: AccountStateNamespace): void {
-  try {
-    localStorage.removeItem(pendingStorageKey(userId, namespace));
-  } catch {
-    // Ignore unavailable browser storage after the server has acknowledged.
-  }
-}
-
 const DURATION_VALUES = new Set<DurationMin>([30, 60, 90, 120]);
 const FONT_SCALE_VALUES = new Set<FontScale>(['small', 'normal', 'large']);
 const THEME_VALUES = new Set<Preferences['colorTheme']>(['light', 'dark', 'system']);
@@ -530,7 +505,6 @@ async function drainWriter(writer: AccountStateWriter): Promise<void> {
       const latest = writer.pending.get(namespace);
       if (latest?.revision === attempted.revision) {
         writer.pending.delete(namespace);
-        clearPersistedPendingWrite(writer.userId, namespace);
       }
       writer.failedRevisions.delete(namespace);
       if (writer.pending.size === 0) writer.lastError = null;
@@ -575,46 +549,19 @@ function enqueueWrite(
     fingerprint: nextFingerprint,
     revision: writer.nextRevision
   });
-  persistPendingWrite(userId, namespace, payload);
   writer.failedRevisions.delete(namespace);
   if (startImmediately && mayWriteForUser(userId)) void startWriter(writer);
 }
 
-function restorePersistedPendingWrites(userId: string): void {
-  for (const namespace of ACCOUNT_STATE_NAMESPACES) {
-    try {
-      const raw = localStorage.getItem(pendingStorageKey(userId, namespace));
-      if (!raw) continue;
-      const parsed = JSON.parse(raw) as unknown;
-      const data = normalizeAccountStatePayload(namespace, parsed);
-      const payload = {
-        schemaVersion: ACCOUNT_STATE_SCHEMA_VERSION,
-        data
-      } as AnyAccountStatePayload;
-      enqueueWrite(userId, namespace, payload, false);
-    } catch {
-      // Leave malformed legacy state untouched; normal bootstrap remains safe.
-    }
-  }
-}
-
 /** True while at least one latest namespace payload has not reached Supabase. */
 export function hasPendingAccountStateWrites(userId: string): boolean {
-  if ((writers.get(userId)?.pending.size ?? 0) > 0) return true;
-  try {
-    return ACCOUNT_STATE_NAMESPACES.some((namespace) =>
-      Boolean(localStorage.getItem(pendingStorageKey(userId, namespace)))
-    );
-  } catch {
-    return false;
-  }
+  return (writers.get(userId)?.pending.size ?? 0) > 0;
 }
 
 /** Retry every failed namespace and wait until the current coalesced writer stops. */
 export async function flushAccountStateWrites(userId: string): Promise<void> {
   const runtime = runtimes.get(userId);
   if (runtime?.bootstrap) await runtime.bootstrap;
-  restorePersistedPendingWrites(userId);
   const writer = writers.get(userId);
   if (!writer || writer.pending.size === 0) return;
   if (writer.running) await writer.running;
@@ -675,38 +622,12 @@ function installSubscriptions(userId: string, generation: number): void {
   }
 }
 
-async function waitForLocalHydration(): Promise<void> {
-  const waitFor = (persist: {
-    hasHydrated: () => boolean;
-    onFinishHydration: (listener: () => void) => () => void;
-  }): Promise<void> => {
-    if (persist.hasHydrated()) return Promise.resolve();
-    return new Promise((resolve) => {
-      const unsubscribe = persist.onFinishHydration(() => {
-        unsubscribe();
-        resolve();
-      });
-    });
-  };
-
-  await Promise.all([
-    waitFor(usePrefsStore.persist),
-    waitFor(useSessionStore.persist),
-    waitFor(useLogStore.persist),
-    waitFor(usePyqPreferencesStore.persist),
-    waitFor(usePlannerTemplatesStore.persist)
-  ]);
-}
-
 async function bootstrapAccountState(userId: string, generation: number): Promise<void> {
   const runtime = runtimeFor(userId);
-  await waitForLocalHydration();
   if (runtime.generation !== generation) return;
 
-  // A failed latest payload survives a hard reload independently of the
-  // ordinary UI cache. It must win over the older remote row until confirmed.
-  restorePersistedPendingWrites(userId);
-
+  // A failed latest payload from this session wins over the older remote row
+  // until it is confirmed by Supabase.
   const beforeFetch = new Map<AccountStateNamespace, string>(
     ACCOUNT_STATE_NAMESPACES.map((namespace) => [
       namespace,

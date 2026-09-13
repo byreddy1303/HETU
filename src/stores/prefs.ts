@@ -1,9 +1,8 @@
 // User preferences — everything users can tune to change day-to-day behaviour.
-// localStorage is the immediate/offline cache. For authenticated accounts the
-// account-state runtime hydrates this store from Supabase and mirrors changes
-// back to the database, so clearing this device does not erase the preferences.
+// In-memory cache only. For authenticated accounts the account-state runtime
+// hydrates this store from Supabase and mirrors changes back to the database,
+// so clearing this device does not erase the preferences.
 import { create } from 'zustand';
-import { persist, createJSONStorage } from 'zustand/middleware';
 import type { ThemeMode } from '@/lib/theme';
 import { normalizeSubjectIdentity, type SubjectId } from '@/lib/subjects';
 
@@ -68,46 +67,16 @@ export function normalizePreferencePatch(patch: Partial<Preferences>): Partial<P
   };
 }
 
-export const usePrefsStore = create<PrefsState>()(
-  persist(
-    (set) => ({
-      ...DEFAULT_PREFERENCES,
-      set: (key, value) =>
-        set(
-          normalizePreferencePatch({ [key]: value } as Partial<Preferences>) as Partial<PrefsState>
-        ),
-      patch: (p) => set(normalizePreferencePatch(p) as Partial<PrefsState>),
-      reset: () => set({ ...DEFAULT_PREFERENCES }),
-      markBackupNow: () => set({ lastBackupAt: new Date().toISOString() })
-    }),
-    {
-      name: 'air.prefs',
-      version: 2,
-      storage: createJSONStorage(() => localStorage),
-      migrate: (persisted) => {
-        const previous = (persisted ?? {}) as Partial<Preferences>;
-        return {
-          ...previous,
-          ...normalizePreferencePatch({
-            defaultSubject: previous.defaultSubject,
-            defaultSubjectId: previous.defaultSubjectId
-          })
-        } as PrefsState;
-      },
-      merge: (persisted, current) => {
-        const previous = (persisted ?? {}) as Partial<Preferences>;
-        return {
-          ...current,
-          ...previous,
-          ...normalizePreferencePatch({
-            defaultSubject: previous.defaultSubject,
-            defaultSubjectId: previous.defaultSubjectId
-          })
-        };
-      }
-    }
-  )
-);
+export const usePrefsStore = create<PrefsState>((set) => ({
+  ...DEFAULT_PREFERENCES,
+  set: (key, value) =>
+    set(
+      normalizePreferencePatch({ [key]: value } as Partial<Preferences>) as Partial<PrefsState>
+    ),
+  patch: (p) => set(normalizePreferencePatch(p) as Partial<PrefsState>),
+  reset: () => set({ ...DEFAULT_PREFERENCES }),
+  markBackupNow: () => set({ lastBackupAt: new Date().toISOString() })
+}));
 
 /** Days since last backup, or null if never. */
 export function daysSinceBackup(lastAt: string | null, now: Date = new Date()): number | null {

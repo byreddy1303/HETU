@@ -497,18 +497,22 @@ describe('Planner cloud durability', () => {
     expect(hasPendingPlannerCloudWrites(userId)).toBe(false);
   });
 
-  it('isolates damaged persisted days and never lets an old backup replace live pending intent', () => {
+  it('keeps live pending intent and never lets an old backup replace it', () => {
     const userId = 'user-malformed-outbox';
     const plan = completePlan('2026-09-09');
     const entry: PlannerCloudOutboxEntry = {
       kind: 'upsert', date: plan.date, plan, expectedRevision: 0, mutationId: 'live-intent'
     };
-    localStorage.setItem(`air.planner-cloud-pending.${userId}.2026-09-08`, '{broken');
-    localStorage.setItem(`air.planner-cloud-pending.${userId}.${plan.date}`, JSON.stringify(entry));
-    expect(exportPlannerCloudOutbox(userId)).toEqual([entry]);
-    expect(importPlannerCloudOutbox(userId, [{ ...entry, mutationId: 'old-backup', plan: { ...plan, sessions: [] } }])).toBe(0);
+
+    expect(importPlannerCloudOutbox(userId, [entry])).toBe(1);
+    // A replay from an older backup must not replace an edit already queued by
+    // this running device.
+    expect(
+      importPlannerCloudOutbox(userId, [
+        { ...entry, mutationId: 'old-backup', plan: { ...plan, sessions: [] } }
+      ])
+    ).toBe(0);
     expect(exportPlannerCloudOutbox(userId)).toEqual([entry]);
     expect(mocks.rpc).not.toHaveBeenCalled();
-    expect(localStorage.getItem(`air.planner-cloud-pending.${userId}.2026-09-08`)).toBe('{broken');
   });
 });

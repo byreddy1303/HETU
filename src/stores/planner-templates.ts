@@ -1,5 +1,4 @@
 import { create } from 'zustand';
-import { createJSONStorage, persist } from 'zustand/middleware';
 import { normalizeSubjectIdentity, type SubjectId } from '@/lib/subjects';
 import { nowISO, uuid } from '@/lib/utils';
 
@@ -240,7 +239,7 @@ export function normalizePlannerTemplate(value: unknown): PlannerTemplate | null
   };
 }
 
-/** One validation boundary shared by localStorage and remote account-state hydration. */
+/** One validation boundary shared by in-memory writes and remote account-state hydration. */
 export function normalizePlannerTemplatesSnapshot(value: unknown): PlannerTemplatesSnapshot {
   const data = snapshotData(value);
   const templates: PlannerTemplate[] = [];
@@ -261,50 +260,36 @@ export function normalizePlannerTemplatesSnapshot(value: unknown): PlannerTempla
 
 export const EMPTY_PLANNER_TEMPLATES: PlannerTemplatesSnapshot = { templates: [] };
 
-export const usePlannerTemplatesStore = create<PlannerTemplatesState>()(
-  persist(
-    (set, get) => ({
-      ...EMPTY_PLANNER_TEMPLATES,
-      saveTemplate: (input) => {
-        const rawId = boundedString(input.id, 160);
-        const existing = rawId
-          ? get().templates.find((template) => template.id === rawId)
-          : undefined;
-        const timestamp = nowISO();
-        const normalized = normalizePlannerTemplate({
-          ...input,
-          id: rawId || uuid(),
-          createdAt: existing?.createdAt ?? input.createdAt ?? timestamp,
-          updatedAt: timestamp
-        });
-        if (!normalized) return null;
+export const usePlannerTemplatesStore = create<PlannerTemplatesState>((set, get) => ({
+  ...EMPTY_PLANNER_TEMPLATES,
+  saveTemplate: (input) => {
+    const rawId = boundedString(input.id, 160);
+    const existing = rawId
+      ? get().templates.find((template) => template.id === rawId)
+      : undefined;
+    const timestamp = nowISO();
+    const normalized = normalizePlannerTemplate({
+      ...input,
+      id: rawId || uuid(),
+      createdAt: existing?.createdAt ?? input.createdAt ?? timestamp,
+      updatedAt: timestamp
+    });
+    if (!normalized) return null;
 
-        set((state) => ({
-          templates: [
-            normalized,
-            ...state.templates.filter((template) => template.id !== normalized.id)
-          ].slice(0, MAX_PLANNER_TEMPLATES)
-        }));
-        return normalized;
-      },
-      deleteTemplate: (id) => {
-        const normalizedId = boundedString(id, 160);
-        if (!normalizedId) return;
-        set((state) => ({
-          templates: state.templates.filter((template) => template.id !== normalizedId)
-        }));
-      },
-      reset: () => set({ templates: [] })
-    }),
-    {
-      name: 'air.planner-templates',
-      version: 1,
-      storage: createJSONStorage(() => localStorage),
-      partialize: (state) => ({ templates: state.templates }),
-      merge: (persisted, current) => ({
-        ...current,
-        ...normalizePlannerTemplatesSnapshot(persisted)
-      })
-    }
-  )
-);
+    set((state) => ({
+      templates: [
+        normalized,
+        ...state.templates.filter((template) => template.id !== normalized.id)
+      ].slice(0, MAX_PLANNER_TEMPLATES)
+    }));
+    return normalized;
+  },
+  deleteTemplate: (id) => {
+    const normalizedId = boundedString(id, 160);
+    if (!normalizedId) return;
+    set((state) => ({
+      templates: state.templates.filter((template) => template.id !== normalizedId)
+    }));
+  },
+  reset: () => set({ templates: [] })
+}));

@@ -1,15 +1,15 @@
 // Runtime state of the active session. Durable facts (session row, tagged
-// questions) live in Dexie; this holds the resumable in-progress state:
+// questions) live in Postgres; this holds the resumable in-progress state:
 // planned question count (intentionally not stored in the schema), the current
 // question's start timestamp so in-app navigation never resets the timer,
 // and which mode (solve vs tag) plus the elapsed time captured when the user
 // opened the tag flow so mid-session navigation returns to the same screen.
 //
-// localStorage remains the immediate/offline cache. Authenticated accounts are
-// also mirrored through the account-state runtime, so a hard reload or a new
-// device resumes where the user left off (including the original timer).
+// In-memory only. For authenticated accounts the account-state runtime hydrates
+// this store from Supabase on login and mirrors changes to the database, so a
+// new device or a hard reload resumes where the user left off (including the
+// original timer).
 import { create } from 'zustand';
-import { persist, createJSONStorage } from 'zustand/middleware';
 
 export type SessionMode = 'solve' | 'tag';
 
@@ -38,34 +38,19 @@ interface SessionRunState extends ActiveSessionSnapshot {
   end: () => void;
 }
 
-export const useSessionStore = create<SessionRunState>()(
-  persist(
-    (set) => ({
-      ...EMPTY_ACTIVE_SESSION,
-      begin: (sessionId, plannedCount) =>
-        set({
-          sessionId,
-          plannedCount,
-          questionStartedAt: Date.now(),
-          mode: 'solve',
-          pendingTimeSpent: null
-        }),
-      startQuestion: () =>
-        set({ questionStartedAt: Date.now(), mode: 'solve', pendingTimeSpent: null }),
-      enterTag: (timeSpent) => set({ mode: 'tag', pendingTimeSpent: timeSpent }),
-      cancelTag: () => set({ mode: 'solve', pendingTimeSpent: null }),
-      end: () => set({ ...EMPTY_ACTIVE_SESSION })
+export const useSessionStore = create<SessionRunState>((set) => ({
+  ...EMPTY_ACTIVE_SESSION,
+  begin: (sessionId, plannedCount) =>
+    set({
+      sessionId,
+      plannedCount,
+      questionStartedAt: Date.now(),
+      mode: 'solve',
+      pendingTimeSpent: null
     }),
-    {
-      name: 'air.session',
-      storage: createJSONStorage(() => localStorage),
-      partialize: (s) => ({
-        sessionId: s.sessionId,
-        plannedCount: s.plannedCount,
-        questionStartedAt: s.questionStartedAt,
-        mode: s.mode,
-        pendingTimeSpent: s.pendingTimeSpent
-      })
-    }
-  )
-);
+  startQuestion: () =>
+    set({ questionStartedAt: Date.now(), mode: 'solve', pendingTimeSpent: null }),
+  enterTag: (timeSpent) => set({ mode: 'tag', pendingTimeSpent: timeSpent }),
+  cancelTag: () => set({ mode: 'solve', pendingTimeSpent: null }),
+  end: () => set({ ...EMPTY_ACTIVE_SESSION })
+}));

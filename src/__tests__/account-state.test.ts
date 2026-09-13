@@ -325,34 +325,27 @@ describe('account-state cold-start migration', () => {
       }),
       { onConflict: 'user_id,namespace' }
     );
-    expect(
-      localStorage.getItem(`air.account-state-pending.${USER_ID}.planner_templates`)
-    ).toBeNull();
     expect(hasPendingAccountStateWrites(USER_ID)).toBe(false);
   });
 
-  it('lets a persisted pending edit win over an older database payload until acknowledged', async () => {
-    localStorage.setItem(
-      `air.account-state-pending.${USER_ID}.preferences`,
-      JSON.stringify({
-        schemaVersion: 1,
-        data: {
-          ...usePrefsStore.getState(),
-          dailyQuestionTarget: 63,
-          colorTheme: 'dark'
-        }
-      })
-    );
+  it('lets an unacknowledged in-memory edit win over an older database payload until it is saved', async () => {
     mocks.query.in.mockResolvedValue({ data: remoteAccountRows(12), error: null });
-
     await retryAccountStateSync(USER_ID);
-    await flushAccountStateWrites(USER_ID);
 
+    // A store edit that cannot reach Supabase stays queued in memory and must
+    // keep the local (newest) value visible over the hydrated remote row.
+    mocks.query.upsert.mockResolvedValue({ error: { message: 'network unavailable' } });
+    usePrefsStore.setState({ dailyQuestionTarget: 63, colorTheme: 'dark' });
+    await flushAccountStateWrites(USER_ID).catch(() => {});
     expect(usePrefsStore.getState()).toMatchObject({
       dailyQuestionTarget: 63,
       colorTheme: 'dark'
     });
-    expect(mocks.query.upsert).toHaveBeenCalledTimes(1);
+    expect(hasPendingAccountStateWrites(USER_ID)).toBe(true);
+
+    mocks.query.upsert.mockResolvedValue({ error: null });
+    await flushAccountStateWrites(USER_ID);
+
     expect(mocks.query.upsert).toHaveBeenCalledWith(
       expect.objectContaining({
         user_id: USER_ID,
@@ -364,7 +357,6 @@ describe('account-state cold-start migration', () => {
       }),
       { onConflict: 'user_id,namespace' }
     );
-    expect(localStorage.getItem(`air.account-state-pending.${USER_ID}.preferences`)).toBeNull();
     expect(hasPendingAccountStateWrites(USER_ID)).toBe(false);
   });
 });

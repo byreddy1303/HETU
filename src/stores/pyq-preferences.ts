@@ -1,5 +1,4 @@
 import { create } from 'zustand';
-import { createJSONStorage, persist } from 'zustand/middleware';
 import type { PyqSessionConfig } from '@/types';
 
 export type PyqPresetPreference =
@@ -95,9 +94,10 @@ function validTimestamp(value: unknown, fallback: string): string {
 }
 
 /**
- * Keep one validation boundary for both localStorage hydration and Supabase
- * account-state hydration. Transient answer/checkpoint fields are deliberately
- * omitted: this store remembers setup prescriptions, never an active attempt.
+ * Keep one validation boundary for both remote account-state hydration and
+ * local setState calls (this store is in-memory only). Transient
+ * answer/checkpoint fields are deliberately omitted: this store remembers setup
+ * prescriptions, never an active attempt.
  */
 export function normalizePyqPreferenceConfig(value: unknown): PyqSessionConfig | null {
   if (!isRecord(value)) return null;
@@ -192,54 +192,35 @@ export const EMPTY_PYQ_PREFERENCES: PyqPreferencesSnapshot = {
   savedPrescriptions: []
 };
 
-export const usePyqPreferencesStore = create<PyqPreferencesState>()(
-  persist(
-    (set) => ({
-      ...EMPTY_PYQ_PREFERENCES,
-      remember: (lastConfig, lastPreset, selectionSeed) => {
-        const normalized = normalizePyqPreferencesSnapshot({
-          lastConfig,
-          lastPreset,
-          selectionSeed
-        });
-        set({
-          lastConfig: normalized.lastConfig,
-          lastPreset: normalized.lastPreset,
-          selectionSeed: normalized.selectionSeed
-        });
-      },
-      savePrescription: (prescription) => {
-        const normalized = normalizePyqSavedPrescription(prescription);
-        if (!normalized) return;
-        set((state) => ({
-          savedPrescriptions: [
-            normalized,
-            ...state.savedPrescriptions.filter((candidate) => candidate.id !== normalized.id)
-          ].slice(0, 30)
-        }));
-      },
-      deletePrescription: (id) =>
-        set((state) => ({
-          savedPrescriptions: state.savedPrescriptions.filter(
-            (prescription) => prescription.id !== id
-          )
-        })),
-      reset: () => set({ ...EMPTY_PYQ_PREFERENCES })
-    }),
-    {
-      name: 'air.pyq-preferences',
-      version: 1,
-      storage: createJSONStorage(() => localStorage),
-      partialize: (state) => ({
-        lastConfig: state.lastConfig,
-        lastPreset: state.lastPreset,
-        selectionSeed: state.selectionSeed,
-        savedPrescriptions: state.savedPrescriptions
-      }),
-      merge: (persisted, current) => ({
-        ...current,
-        ...normalizePyqPreferencesSnapshot(persisted)
-      })
-    }
-  )
-);
+export const usePyqPreferencesStore = create<PyqPreferencesState>((set) => ({
+  ...EMPTY_PYQ_PREFERENCES,
+  remember: (lastConfig, lastPreset, selectionSeed) => {
+    const normalized = normalizePyqPreferencesSnapshot({
+      lastConfig,
+      lastPreset,
+      selectionSeed
+    });
+    set({
+      lastConfig: normalized.lastConfig,
+      lastPreset: normalized.lastPreset,
+      selectionSeed: normalized.selectionSeed
+    });
+  },
+  savePrescription: (prescription) => {
+    const normalized = normalizePyqSavedPrescription(prescription);
+    if (!normalized) return;
+    set((state) => ({
+      savedPrescriptions: [
+        normalized,
+        ...state.savedPrescriptions.filter((candidate) => candidate.id !== normalized.id)
+      ].slice(0, 30)
+    }));
+  },
+  deletePrescription: (id) =>
+    set((state) => ({
+      savedPrescriptions: state.savedPrescriptions.filter(
+        (prescription) => prescription.id !== id
+      )
+    })),
+  reset: () => set({ ...EMPTY_PYQ_PREFERENCES })
+}))

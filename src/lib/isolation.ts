@@ -3,6 +3,8 @@
 // is a real concern for a multi-user tool that hands out invites. This util
 // exists so both the auth store and the Settings UI share exactly one
 // implementation of "fully forget everything about the previous session".
+// Postgres is the single source of truth, so this only drops the in-memory
+// caches and device-local replica keys; no user data is lost.
 import { clearLocalData } from '@/lib/db';
 import { DEFAULT_PREFERENCES, usePrefsStore } from '@/stores/prefs';
 import { useSessionStore } from '@/stores/session';
@@ -11,14 +13,13 @@ import { resetTopicProgressMemory } from '@/stores/topic-progress';
 import { usePyqPreferencesStore } from '@/stores/pyq-preferences';
 import { usePlannerTemplatesStore } from '@/stores/planner-templates';
 
-const KNOWN_LOCALSTORAGE_KEYS = ['air.prefs', 'air.session', 'air.log'];
-
 /**
  * Fully wipe every scrap of user-scoped state on this device:
- *   • all Dexie tables (including meta)
- *   • zustand stores that persist to localStorage (prefs / session / log)
- *   • any residual `air.*` / `air-journal:*` keys in localStorage
- *   • any remaining in-memory user data
+ *   • in-memory zustand caches (prefs / session / log / PYQ / templates)
+ *   • in-memory user state (schema maps, planner caches, ...)
+ *   • any residual `air.*` / `air-journal:` keys in localStorage (device
+ *     caches and legacy keys)
+ *   • the in-memory database
  *
  * Each step is wrapped so a partial failure never blocks the remaining
  * cleanup attempts. The function rejects after all attempts if any step
@@ -58,9 +59,8 @@ export async function wipeLocalState(): Promise<void> {
     failures.push('syllabus memory');
   }
   try {
-    for (const key of KNOWN_LOCALSTORAGE_KEYS) localStorage.removeItem(key);
-    // Sweep any other app-owned keys via the Storage index API rather than
-    // Object.keys (Storage is not a plain object in every runtime, and
+    // Sweep every app-owned localStorage key via the Storage index API rather
+    // than Object.keys (Storage is not a plain object in every runtime, and
     // Object.keys can miss stored entries in jsdom / server envs).
     for (let i = localStorage.length - 1; i >= 0; i--) {
       const key = localStorage.key(i);

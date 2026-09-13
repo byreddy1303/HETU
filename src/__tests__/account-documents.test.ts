@@ -43,12 +43,8 @@ describe('durable account documents', () => {
     mocks.query.upsert.mockResolvedValue({ error: null });
   });
 
-  it('uses the exact user database document instead of an ordinary local cache', async () => {
+  it('uses the exact user database document as the source of truth', async () => {
     const userId = 'database-authority-user';
-    localStorage.setItem(
-      `air.account-document-cache.${userId}.topper_notes`,
-      JSON.stringify(payload({ revisedIds: ['note-1'], lastOpenedId: 'note-1' }))
-    );
     mocks.query.maybeSingle.mockResolvedValue({
       data: {
         payload: payload(
@@ -68,10 +64,6 @@ describe('durable account documents', () => {
     });
     expect(mocks.query.eq).toHaveBeenNthCalledWith(1, 'user_id', userId);
     expect(mocks.query.eq).toHaveBeenNthCalledWith(2, 'namespace', 'topper_notes');
-    expect(
-      JSON.parse(localStorage.getItem(`air.account-document-cache.${userId}.topper_notes`) ?? '{}')
-        .data
-    ).toEqual({ revisedIds: ['note-2'], lastOpenedId: 'note-2' });
   });
 
   it('migrates an existing legacy document only after the database confirms absence', async () => {
@@ -100,12 +92,7 @@ describe('durable account documents', () => {
     expect(hasPendingAccountDocumentWrites(userId)).toBe(false);
   });
 
-  it('never falls back to another user cache when the database is unavailable', async () => {
-    const otherUser = 'some-other-user';
-    localStorage.setItem(
-      `air.account-document-cache.${otherUser}.topper_notes`,
-      JSON.stringify(payload({ revisedIds: ['note-3'], lastOpenedId: 'note-3' }))
-    );
+  it('never reports another user document when the database is unavailable', async () => {
     mocks.query.maybeSingle.mockResolvedValue({
       data: null,
       error: { message: 'offline' }
@@ -116,50 +103,49 @@ describe('durable account documents', () => {
     expect(result).toEqual({ data: null, source: 'absent', error: 'offline' });
   });
 
-  it('discovers and flushes a persisted pending marker without the page being mounted', async () => {
+  it('flushes an in-memory pending edit even when the owning page is not mounted', async () => {
     const userId = 'hard-reload-user';
-    const pending = payload(
-      { revisedIds: ['note-1', 'note-2'], lastOpenedId: 'note-2' },
-      '2026-08-30T14:00:00.000Z'
-    );
-    localStorage.setItem(
-      `air.account-document-pending.${userId}.topper_notes`,
-      JSON.stringify(pending)
-    );
+    mocks.query.upsert.mockResolvedValueOnce({ error: { message: 'network unavailable' } });
+    const failed = await queueAccountDocumentWrite(userId, 'topper_notes', {
+      revisedIds: ['note-1', 'note-2'],
+      lastOpenedId: 'note-2'
+    });
 
+    expect(failed).toBe('network unavailable');
     expect(hasPendingAccountDocumentWrites(userId)).toBe(true);
+
     const error = await flushAccountDocumentWrites(userId);
 
     expect(error).toBeNull();
-    expect(mocks.query.upsert).toHaveBeenCalledWith(
-      {
-        user_id: userId,
-        namespace: 'topper_notes',
-        payload: pending,
-        updated_at: pending.updatedAt
-      },
-      { onConflict: 'user_id,namespace' }
-    );
-    expect(localStorage.getItem(`air.account-document-pending.${userId}.topper_notes`)).toBeNull();
     expect(hasPendingAccountDocumentWrites(userId)).toBe(false);
   });
 
-  it('treats an explicitly pending local edit as newer than the database', async () => {
+  it('treats an in-flight pending edit as newer than the database', async () => {
     const userId = 'pending-load-user';
-    const pending = payload(
-      { revisedIds: ['note-3'], lastOpenedId: 'note-3' },
-      '2026-08-30T15:00:00.000Z'
+    let releaseWrite: ((value: { error: null }) => void) | undefined;
+    mocks.query.upsert.mockImplementationOnce(
+      () =>
+        new Promise<{ error: null }>((resolve) => {
+          releaseWrite = resolve;
+        })
     );
-    localStorage.setItem(
-      `air.account-document-pending.${userId}.topper_notes`,
-      JSON.stringify(pending)
-    );
+    const queued = queueAccountDocumentWrite(userId, 'topper_notes', {
+      revisedIds: ['note-3'],
+      lastOpenedId: 'note-3'
+    });
+    await vi.waitFor(() => expect(mocks.query.upsert).toHaveBeenCalledTimes(1));
 
     const result = await loadAccountDocument(userId, 'topper_notes', { normalize });
 
-    expect(result).toEqual({ data: pending.data, source: 'pending', error: null });
+    expect(result).toEqual({
+      data: { revisedIds: ['note-3'], lastOpenedId: 'note-3' },
+      source: 'pending',
+      error: null
+    });
     expect(mocks.query.maybeSingle).not.toHaveBeenCalled();
-    await flushAccountDocumentWrites(userId);
+
+    releaseWrite?.({ error: null });
+    await queued;
     expect(hasPendingAccountDocumentWrites(userId)).toBe(false);
   });
 
@@ -168,17 +154,25 @@ describe('durable account documents', () => {
     let finishLoad:
       | ((result: { data: { payload: ReturnType<typeof payload> }; error: null }) => void)
       | undefined;
+    let releaseWrite: ((value: { error: null }) => void) | undefined;
     mocks.query.maybeSingle.mockImplementationOnce(
       () =>
         new Promise<{ data: { payload: ReturnType<typeof payload> }; error: null }>((resolve) => {
           finishLoad = resolve;
         })
     );
+    mocks.query.upsert.mockImplementationOnce(
+      () =>
+        new Promise<{ error: null }>((resolve) => {
+          releaseWrite = resolve;
+        })
+    );
 
     const loading = loadAccountDocument(userId, 'topper_notes', { normalize });
     await vi.waitFor(() => expect(mocks.query.maybeSingle).toHaveBeenCalledTimes(1));
     const latest = { revisedIds: ['note-2'], lastOpenedId: 'note-2' };
-    await queueAccountDocumentWrite(userId, 'topper_notes', latest);
+    const queued = queueAccountDocumentWrite(userId, 'topper_notes', latest);
+    await vi.waitFor(() => expect(mocks.query.upsert).toHaveBeenCalledTimes(1));
     finishLoad?.({
       data: {
         payload: payload(
@@ -189,10 +183,13 @@ describe('durable account documents', () => {
       error: null
     });
 
-    expect(await loading).toEqual({ data: latest, source: 'cache', error: null });
+    expect(await loading).toEqual({ data: latest, source: 'pending', error: null });
+    releaseWrite?.({ error: null });
+    await queued;
+    expect(hasPendingAccountDocumentWrites(userId)).toBe(false);
   });
 
-  it('retains a failed edit across reload boundaries and clears it after a retry', async () => {
+  it('retains a failed edit in memory and clears it after a retry', async () => {
     const userId = 'offline-retry-user';
     mocks.query.upsert.mockResolvedValueOnce({ error: { message: 'network unavailable' } });
 
@@ -203,9 +200,6 @@ describe('durable account documents', () => {
 
     expect(firstError).toBe('network unavailable');
     expect(hasPendingAccountDocumentWrites(userId)).toBe(true);
-    expect(
-      localStorage.getItem(`air.account-document-pending.${userId}.topper_notes`)
-    ).not.toBeNull();
 
     mocks.query.upsert.mockResolvedValue({ error: null });
     expect(await flushAccountDocumentWrites(userId)).toBeNull();

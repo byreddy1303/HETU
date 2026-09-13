@@ -13,10 +13,10 @@ export interface AccountDocumentPayload<T> {
   updatedAt: string;
 }
 
-export type AccountDocumentSource = 'database' | 'pending' | 'cache' | 'legacy' | 'absent';
+export type AccountDocumentSource = 'database' | 'pending' | 'legacy' | 'absent';
 
 export interface AccountDocumentLoadOptions<T> {
-  /** Convert untrusted database/cache JSON into the page's canonical shape. */
+  /** Convert untrusted JSON into the page's canonical shape. */
   normalize: (value: unknown) => T;
   /** Supplied only when an older, user-scoped local document actually exists. */
   legacyData?: T | null;
@@ -62,41 +62,6 @@ function errorMessage(error: unknown): string {
   return 'Account document database sync failed.';
 }
 
-function cacheStorageKey(userId: string, namespace: AccountDocumentNamespace): string {
-  return `air.account-document-cache.${userId}.${namespace}`;
-}
-
-function pendingStorageKey(userId: string, namespace: AccountDocumentNamespace): string {
-  return `air.account-document-pending.${userId}.${namespace}`;
-}
-
-function readStorage(key: string): string | null {
-  try {
-    return localStorage.getItem(key);
-  } catch {
-    return null;
-  }
-}
-
-function writeStorage(key: string, value: string): void {
-  try {
-    localStorage.setItem(key, value);
-  } catch {
-    // The in-memory queue still owns the latest edit for this session. The
-    // database request starts immediately, so storage-unavailable browsers can
-    // still complete the write while online.
-  }
-}
-
-function removeStorage(key: string): void {
-  try {
-    localStorage.removeItem(key);
-  } catch {
-    // A server-acknowledged write is already durable. A stale marker can be
-    // retried idempotently because the database key is (user_id, namespace).
-  }
-}
-
 function parsePayload(raw: unknown): AccountDocumentPayload<unknown> | null {
   if (!isRecord(raw)) return null;
   if (raw.schemaVersion !== ACCOUNT_DOCUMENT_SCHEMA_VERSION) return null;
@@ -109,16 +74,6 @@ function parsePayload(raw: unknown): AccountDocumentPayload<unknown> | null {
     data: raw.data,
     updatedAt: raw.updatedAt
   };
-}
-
-function readPayload(key: string): AccountDocumentPayload<unknown> | null {
-  const raw = readStorage(key);
-  if (!raw) return null;
-  try {
-    return parsePayload(JSON.parse(raw));
-  } catch {
-    return null;
-  }
 }
 
 function cloneJson<T>(value: T): T {
@@ -148,16 +103,6 @@ function writerFor(userId: string): DocumentWriter {
   return created;
 }
 
-function persistPayload(
-  userId: string,
-  namespace: AccountDocumentNamespace,
-  payload: AccountDocumentPayload<unknown>
-): void {
-  const encoded = JSON.stringify(payload);
-  writeStorage(cacheStorageKey(userId, namespace), encoded);
-  writeStorage(pendingStorageKey(userId, namespace), encoded);
-}
-
 function enqueuePayload(
   userId: string,
   namespace: AccountDocumentNamespace,
@@ -179,7 +124,6 @@ function enqueuePayload(
     revision: writer.nextRevision
   });
   writer.failedRevisions.delete(namespace);
-  persistPayload(userId, namespace, payload);
   if (startImmediately) void startWriter(userId, writer);
   return writer;
 }
@@ -217,7 +161,6 @@ async function drainWriter(userId: string, writer: DocumentWriter): Promise<stri
       const latest = writer.pending.get(namespace);
       if (latest?.revision === attempted.revision) {
         writer.pending.delete(namespace);
-        removeStorage(pendingStorageKey(userId, namespace));
       }
       writer.failedRevisions.delete(namespace);
       broadcastSyncMutation(userId, ['account_state']);
@@ -250,67 +193,31 @@ function startWriter(userId: string, writer: DocumentWriter): Promise<string | n
   return active;
 }
 
-function restorePersistedPendingWrites(userId: string): string | null {
-  let firstError: string | null = null;
-  for (const namespace of ACCOUNT_DOCUMENT_NAMESPACES) {
-    const raw = readStorage(pendingStorageKey(userId, namespace));
-    if (!raw) continue;
-    try {
-      const payload = parsePayload(JSON.parse(raw));
-      if (!payload) {
-        firstError ??= `Pending ${namespace} data is invalid and was not discarded.`;
-        continue;
-      }
-      enqueuePayload(userId, namespace, payload, false);
-    } catch {
-      firstError ??= `Pending ${namespace} data is invalid and was not discarded.`;
-    }
-  }
-  return firstError;
-}
-
-function cachedResult<T>(
-  userId: string,
-  namespace: AccountDocumentNamespace,
-  options: AccountDocumentLoadOptions<T>,
-  error: string
-): AccountDocumentLoadResult<T> {
-  const cached = readPayload(cacheStorageKey(userId, namespace));
-  if (cached) {
-    return { data: options.normalize(cached.data), source: 'cache', error };
-  }
-  if (options.legacyData != null) {
-    return { data: options.normalize(options.legacyData), source: 'legacy', error };
-  }
-  return { data: null, source: 'absent', error };
-}
-
 function pendingLoadResult<T>(
   userId: string,
   namespace: AccountDocumentNamespace,
   options: AccountDocumentLoadOptions<T>
 ): AccountDocumentLoadResult<T> | null {
-  const pending = readPayload(pendingStorageKey(userId, namespace));
+  const writer = writerFor(userId);
+  const pending = writer.pending.get(namespace);
   if (!pending) return null;
 
   const canonical: AccountDocumentPayload<T> = {
-    ...pending,
-    data: options.normalize(pending.data)
+    ...pending.payload,
+    data: options.normalize(pending.payload.data)
   };
-  const writer = enqueuePayload(userId, namespace, canonical, false);
   // Opening the owning page is itself a useful retry opportunity. A matching
   // in-memory failure from earlier in this runtime must not suppress it.
   writer.failedRevisions.delete(namespace);
   void startWriter(userId, writer);
-  writeStorage(cacheStorageKey(userId, namespace), JSON.stringify(canonical));
   return { data: canonical.data, source: 'pending', error: null };
 }
 
 /**
- * Load a user document. Supabase wins over an ordinary local cache. The only
- * exception is an explicitly persisted pending edit, which is newer by
- * definition and is retried immediately. An absent row migrates an existing
- * legacy local document without treating a network error as absence.
+ * Load a user document. Supabase is the source of truth. The only override is
+ * an in-memory pending edit, which is newer by definition and is retried
+ * immediately. An absent row migrates an existing legacy local document
+ * without ever treating a network error as absence.
  */
 export async function loadAccountDocument<T>(
   userId: string,
@@ -319,9 +226,6 @@ export async function loadAccountDocument<T>(
 ): Promise<AccountDocumentLoadResult<T>> {
   const pending = pendingLoadResult(userId, namespace, options);
   if (pending) return pending;
-
-  const writer = writerFor(userId);
-  const revisionAtStart = writer.nextRevision;
 
   let row: AccountDocumentRow | null = null;
   try {
@@ -332,22 +236,16 @@ export async function loadAccountDocument<T>(
       .eq('namespace', namespace)
       .maybeSingle();
     if (error) {
-      return cachedResult(userId, namespace, options, error.message);
+      return fallbackLoadResult(userId, namespace, options, error.message);
     }
     row = data as AccountDocumentRow | null;
   } catch (error) {
-    return cachedResult(userId, namespace, options, errorMessage(error));
+    return fallbackLoadResult(userId, namespace, options, errorMessage(error));
   }
 
   // Do not let a response that began before a user edit overwrite that edit.
   const pendingAfterLoad = pendingLoadResult(userId, namespace, options);
   if (pendingAfterLoad) return pendingAfterLoad;
-  if (writer.nextRevision !== revisionAtStart) {
-    const cached = readPayload(cacheStorageKey(userId, namespace));
-    if (cached) {
-      return { data: options.normalize(cached.data), source: 'cache', error: null };
-    }
-  }
 
   if (row) {
     const remote = parsePayload(row.payload);
@@ -358,12 +256,7 @@ export async function loadAccountDocument<T>(
         error: 'The database document had an invalid versioned payload and was normalized safely.'
       };
     }
-    const canonical: AccountDocumentPayload<T> = {
-      ...remote,
-      data: options.normalize(remote.data)
-    };
-    writeStorage(cacheStorageKey(userId, namespace), JSON.stringify(canonical));
-    return { data: canonical.data, source: 'database', error: null };
+    return { data: options.normalize(remote.data), source: 'database', error: null };
   }
 
   // A successful maybeSingle with no row is the only case that triggers the
@@ -374,8 +267,21 @@ export async function loadAccountDocument<T>(
     return { data: legacy, source: 'legacy', error };
   }
 
-  removeStorage(cacheStorageKey(userId, namespace));
   return { data: null, source: 'absent', error: null };
+}
+
+function fallbackLoadResult<T>(
+  userId: string,
+  namespace: AccountDocumentNamespace,
+  options: AccountDocumentLoadOptions<T>,
+  error: string
+): AccountDocumentLoadResult<T> {
+  const pending = pendingLoadResult(userId, namespace, options);
+  if (pending) return pending;
+  if (options.legacyData != null) {
+    return { data: options.normalize(options.legacyData), source: 'legacy', error };
+  }
+  return { data: null, source: 'absent', error };
 }
 
 /** Queue the newest JSON snapshot and start its database upsert immediately. */
@@ -389,29 +295,23 @@ export function queueAccountDocumentWrite<T>(
 }
 
 /**
- * Retry every persisted or in-memory document once. This discovers pending
- * markers even after a hard reload and does not require the owning page to be
- * mounted, which makes it suitable for an auth logout barrier.
+ * Retry every failed document once. This does not require the owning page to
+ * be mounted, which makes it suitable for an auth logout barrier.
  */
 export async function flushAccountDocumentWrites(userId: string): Promise<string | null> {
-  const restoreError = restorePersistedPendingWrites(userId);
   const writer = writers.get(userId);
-  if (!writer) return restoreError;
+  if (!writer) return null;
 
   if (writer.active) await writer.active;
   for (const namespace of writer.pending.keys()) writer.failedRevisions.delete(namespace);
 
-  const syncError = writer.pending.size > 0 ? await startWriter(userId, writer) : null;
-  return restoreError ?? syncError;
+  return writer.pending.size > 0 ? startWriter(userId, writer) : null;
 }
 
-/** Includes in-flight writes and user-scoped markers restored after reload. */
+/** Includes in-flight writes queued this session. */
 export function hasPendingAccountDocumentWrites(userId: string): boolean {
   const writer = writers.get(userId);
-  if (writer && (writer.active !== null || writer.pending.size > 0)) return true;
-  return ACCOUNT_DOCUMENT_NAMESPACES.some(
-    (namespace) => readStorage(pendingStorageKey(userId, namespace)) !== null
-  );
+  return Boolean(writer && (writer.active !== null || writer.pending.size > 0));
 }
 
 /** Canonicalize a manifest-backed revision/opened document from untrusted JSON. */

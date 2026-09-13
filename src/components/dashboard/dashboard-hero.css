@@ -1,25 +1,19 @@
 .dashboard-hero {
-  --hero-ivory: #fff5ec;
-  --hero-rose: #efa8a1;
-  --hero-gold: #d9ba84;
+  --hero-text: #ffffff;
+  --hero-text-muted: #e1eaff;
+  --hero-action: #ffd166;
+  --hero-action-hover: #ffdf91;
+  --hero-action-ink: #172554;
+  --hero-action-edge: #122c59;
   position: relative;
   isolation: isolate;
   overflow: hidden;
   min-width: 0;
-  color: var(--hero-ivory);
-  border: 1px solid rgb(239 168 161 / 14%);
+  color: var(--hero-text);
+  border: 1px solid #244ed0;
   border-radius: 25px;
-  background: #251720;
-  box-shadow: 0 24px 52px -34px rgb(42 14 24 / 55%);
-}
-
-.dashboard-hero::before {
-  position: absolute;
-  z-index: -1;
-  inset: 0;
-  background: radial-gradient(ellipse at 87% 28%, rgb(152 24 43 / 18%), transparent 59%);
-  content: '';
-  pointer-events: none;
+  background: #244ed0;
+  box-shadow: 0 24px 52px -34px rgb(28 71 192 / 65%);
 }
 
 .dashboard-hero__body {
@@ -40,7 +34,7 @@
   align-items: center;
   gap: 9px;
   margin: 0 0 24px;
-  color: #e7c3be;
+  color: var(--hero-text-muted);
   font-size: 12px;
   line-height: 1.5;
 }
@@ -50,8 +44,8 @@
   height: 6px;
   flex: 0 0 6px;
   border-radius: 50%;
-  background: var(--hero-gold);
-  box-shadow: 0 0 0 4px rgb(217 186 132 / 7%);
+  background: var(--hero-action);
+  box-shadow: 0 0 0 4px rgb(255 209 102 / 16%);
 }
 
 .dashboard-hero__title {
@@ -67,7 +61,7 @@
 .dashboard-hero__description {
   max-width: 420px;
   margin: 19px 0 0;
-  color: #d2bbc3;
+  color: var(--hero-text-muted);
   font-size: 13px;
   line-height: 1.8;
   text-wrap: pretty;
@@ -85,27 +79,27 @@
   min-height: 44px;
   padding-inline: 19px;
   border-radius: 11px;
-  color: #321a22;
-  background: var(--hero-rose);
+  color: var(--hero-action-ink);
+  background: var(--hero-action);
   box-shadow:
-    0 3px 0 #b87976,
-    0 6px 22px rgb(239 168 161 / 9%);
+    0 3px 0 var(--hero-action-edge),
+    0 6px 22px rgb(13 35 104 / 24%);
 }
 
 .dashboard-hero__action .u-button:hover {
-  background: #fac3ba;
+  background: var(--hero-action-hover);
   box-shadow:
-    0 4px 0 #b87976,
-    0 8px 24px rgb(239 168 161 / 12%);
+    0 4px 0 var(--hero-action-edge),
+    0 8px 24px rgb(13 35 104 / 30%);
 }
 
 .dashboard-hero__action .u-button:active {
-  box-shadow: 0 1px 0 #b87976;
+  box-shadow: 0 1px 0 var(--hero-action-edge);
 }
 
 .dashboard-hero__action .u-button:focus-visible,
 .dashboard-hero__motion:focus-visible {
-  outline: 2px solid var(--hero-gold);
+  outline: 2px solid var(--hero-action);
   outline-offset: 5px;
 }
 
@@ -137,10 +131,10 @@
   justify-content: center;
   gap: 6px;
   padding: 6px 9px;
-  border: 1px solid rgb(239 168 161 / 13%);
+  border: 1px solid rgb(190 219 255 / 36%);
   border-radius: 20px;
-  color: #d2bbc3;
-  background: rgb(37 23 32 / 70%);
+  color: var(--hero-text-muted);
+  background: rgb(18 51 148 / 78%);
   font-size: 10px;
   line-height: 1.2;
   cursor: pointer;
@@ -150,8 +144,8 @@
 }
 
 .dashboard-hero__motion:hover {
-  color: var(--hero-ivory);
-  border-color: rgb(239 168 161 / 45%);
+  color: var(--hero-text);
+  border-color: rgb(190 219 255 / 70%);
 }
 
 .dashboard-hero__queue {
@@ -166,7 +160,7 @@
 }
 
 .dashboard-hero__queue-number {
-  color: var(--hero-ivory);
+  color: var(--hero-text);
   font-size: 43px;
   font-weight: 500;
   line-height: 1;
@@ -182,12 +176,12 @@
 }
 
 .dashboard-hero__queue-copy span:first-child {
-  color: #efd9d2;
+  color: var(--hero-text);
   font-size: 12px;
 }
 
 .dashboard-hero__queue-copy span:last-child {
-  color: #b9a1aa;
+  color: var(--hero-text-muted);
   font-size: 10px;
   line-height: 1.4;
 }
@@ -200,7 +194,7 @@
   gap: 18px;
   margin: 0 33px;
   padding: 17px 0 18px;
-  border-top: 1px solid rgb(239 168 161 / 15%);
+  border-top: 1px solid rgb(190 219 255 / 28%);
 }
 
 .dashboard-hero__review-stats {
@@ -216,13 +210,13 @@
 }
 
 .dashboard-hero__review-stats dt {
-  color: #d2bbc3;
+  color: var(--hero-text-muted);
   font-size: 11px;
 }
 
 .dashboard-hero__review-stats dd {
   margin: 0;
-  color: var(--hero-ivory);
+  color: var(--hero-text);
   font-size: 15px;
   font-weight: 500;
   font-variant-numeric: tabular-nums;
@@ -232,7 +226,7 @@
   display: flex;
   align-items: center;
   gap: 9px;
-  color: var(--hero-gold);
+  color: var(--hero-action);
 }
 
 .dashboard-hero__calendar p {
@@ -240,13 +234,13 @@
   flex-wrap: wrap;
   gap: 4px 12px;
   margin: 0;
-  color: #d2bbc3;
+  color: var(--hero-text-muted);
   font-size: 10px;
   line-height: 1.5;
 }
 
 .dashboard-hero__calendar p span {
-  color: var(--hero-gold);
+  color: var(--hero-action);
 }
 
 @media (max-width: 767px) {

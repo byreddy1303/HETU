@@ -4,6 +4,7 @@ import { Capacitor } from '@capacitor/core';
 import { registerSW } from 'virtual:pwa-register';
 import App from '@/App';
 import '@/index.css';
+import '@/energy-theme.css';
 
 const UPDATE_CHECK_INTERVAL_MS = 60 * 1000; // Check for PWA updates every 1 minute while app is open
 

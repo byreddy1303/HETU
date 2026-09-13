@@ -1,4 +1,8 @@
 .learning-sculpture {
+  --sculpture-hue: 166;
+  --sculpture-mint: 112 255 215;
+  --sculpture-cyan: 102 224 255;
+  --sculpture-spark: 226 255 246;
   position: relative;
   isolation: isolate;
   width: 100%;
@@ -25,8 +29,8 @@
   inset: 9% 10% 13%;
   border-radius: 50%;
   background:
-    radial-gradient(ellipse at 55% 40%, rgb(207 89 130 / 13%), transparent 62%),
-    radial-gradient(ellipse at 35% 67%, rgb(219 131 100 / 8%), transparent 54%);
+    radial-gradient(ellipse at 55% 40%, rgb(var(--sculpture-mint) / 17%), transparent 62%),
+    radial-gradient(ellipse at 35% 67%, rgb(var(--sculpture-cyan) / 12%), transparent 54%);
   filter: blur(18px);
   pointer-events: none;
 }
@@ -39,7 +43,7 @@
   left: 26%;
   height: 5%;
   border-radius: 50%;
-  background: radial-gradient(ellipse, rgb(217 121 156 / 17%), transparent 70%);
+  background: radial-gradient(ellipse, rgb(var(--sculpture-cyan) / 23%), transparent 70%);
   filter: blur(13px);
   pointer-events: none;
 }
@@ -51,30 +55,30 @@
   width: 60%;
   max-width: 370px;
   aspect-ratio: 1;
-  border: 30px solid rgb(193 94 133 / 35%);
+  border: 30px solid rgb(var(--sculpture-mint) / 45%);
   border-radius: 50%;
   transform: translate(-50%, -55%) rotate(-28deg) rotateX(38deg);
   box-shadow:
-    inset 5px 8px 20px rgb(255 197 179 / 15%),
-    3px 8px 30px rgb(231 148 170 / 12%);
+    inset 5px 8px 20px rgb(var(--sculpture-spark) / 25%),
+    3px 8px 30px rgb(var(--sculpture-cyan) / 22%);
   pointer-events: none;
 }
 
 .learning-sculpture__fallback span {
   position: absolute;
   inset: -20px;
-  border: 1px solid rgb(255 183 161 / 60%);
+  border: 1px solid rgb(var(--sculpture-spark) / 70%);
   border-radius: 50%;
 }
 
 .learning-sculpture__fallback span:nth-child(2) {
   inset: -10px;
-  border-color: rgb(235 134 174 / 65%);
+  border-color: rgb(var(--sculpture-cyan) / 75%);
 }
 
 .learning-sculpture__fallback span:nth-child(3) {
   inset: 0;
-  border-color: rgb(255 202 179 / 65%);
+  border-color: rgb(var(--sculpture-mint) / 75%);
 }
 
 .learning-sculpture[data-ready='true'] .learning-sculpture__fallback {

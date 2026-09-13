@@ -1,0 +1,344 @@
+/* HETU Cobalt & Gold. Keep color independent of the workspace's layout.
+   Cobalt prompts action, teal marks progress, and gold highlights the next step.
+   Explicit root scopes also cover dialogs rendered outside the workspace. */
+:root,
+:root .workspace-shell {
+  --color-bg: 243 247 255;
+  --color-bg-raised: 255 255 255;
+  --color-bg-overlay: 231 239 252;
+  --color-border: 207 220 241;
+  --color-border-hover: 144 170 211;
+  --color-text: 23 37 70;
+  --color-text-muted: 70 89 122;
+  --color-text-faint: 83 104 136;
+  --color-accent: 36 84 230;
+  --color-accent-hover: 25 65 193;
+  --color-accent-faint: 229 238 255;
+  --color-accent-contrast: 255 255 255;
+  --color-success: 0 122 101;
+  --color-success-faint: 221 248 239;
+  --color-success-contrast: 255 255 255;
+  --color-danger: 197 46 77;
+  --color-danger-faint: 255 232 237;
+  --color-danger-contrast: 255 255 255;
+  --color-warn: 148 86 0;
+  --color-warn-faint: 255 243 209;
+  --color-warn-contrast: 255 255 255;
+  --color-guess: 112 65 198;
+  --color-guess-faint: 241 233 255;
+  --color-guess-contrast: 255 255 255;
+  --color-highlight: 255 209 102;
+  --color-highlight-contrast: 23 37 70;
+  --color-ink-cobalt: 36 84 230;
+  --color-ink-teal: 0 122 101;
+  --color-ink-violet: 112 65 198;
+  --color-ink-rose: 197 46 100;
+  --color-ink-marigold: 148 86 0;
+  --color-ink-slate: 70 89 122;
+  --color-table-tint: 36 84 230;
+  --color-scrim: 8 20 46;
+  --ledger-line-opacity: 0;
+  --grain-opacity: 0;
+  --shadow-sm: 0 2px 4px rgb(25 65 135 / 6%);
+  --shadow-card: 0 2px 4px rgb(25 65 135 / 3%), 0 12px 30px -22px rgb(25 65 135 / 23%);
+  --shadow-lift: 0 5px 10px rgb(25 65 135 / 5%), 0 20px 40px -22px rgb(25 65 135 / 30%);
+  --shadow-press: inset 0 2px 4px rgb(25 65 135 / 12%);
+  --shadow-key: 0 3px 0 #163ca6, 0 6px 14px rgb(36 84 230 / 16%);
+  --shadow-key-hover: 0 4px 0 #163ca6, 0 9px 20px rgb(36 84 230 / 22%);
+  --shadow-nav: 0 -2px 14px rgb(25 65 135 / 8%);
+  --shadow-native-card: 0 10px 30px rgb(25 65 135 / 10%);
+  --shadow-native-soft: 0 4px 16px rgb(25 65 135 / 8%);
+  --shadow-native-rail: 0 -8px 28px rgb(25 65 135 / 10%);
+  --shadow-native-heatmap: 0 7px 22px rgb(25 65 135 / 7%);
+  --shadow-image: 0 2px 8px rgb(25 65 135 / 14%);
+  --shadow-stamp: inset 0 0 0 1px rgb(36 84 230 / 16%);
+  --workspace-glint: 255 255 255;
+  --workspace-surface-top: 255 255 255;
+  --workspace-surface-bottom: 255 255 255;
+}
+
+:root[data-theme='dark'],
+:root[data-theme='dark'] .workspace-shell {
+  --color-bg: 16 28 52;
+  --color-bg-raised: 24 41 70;
+  --color-bg-overlay: 33 53 87;
+  --color-border: 52 75 110;
+  --color-border-hover: 89 120 166;
+  --color-text: 240 246 255;
+  --color-text-muted: 187 206 235;
+  --color-text-faint: 152 177 211;
+  --color-accent: 132 174 255;
+  --color-accent-hover: 167 198 255;
+  --color-accent-faint: 30 57 106;
+  --color-accent-contrast: 12 32 71;
+  --color-success: 69 221 176;
+  --color-success-faint: 16 60 55;
+  --color-success-contrast: 7 40 33;
+  --color-danger: 255 142 161;
+  --color-danger-faint: 76 39 58;
+  --color-danger-contrast: 60 14 29;
+  --color-warn: 255 209 102;
+  --color-warn-faint: 68 53 29;
+  --color-warn-contrast: 48 30 4;
+  --color-guess: 192 167 255;
+  --color-guess-faint: 50 42 85;
+  --color-guess-contrast: 35 19 64;
+  --color-highlight: 255 209 102;
+  --color-highlight-contrast: 23 37 70;
+  --color-ink-cobalt: 132 174 255;
+  --color-ink-teal: 69 221 176;
+  --color-ink-violet: 192 167 255;
+  --color-ink-rose: 255 148 193;
+  --color-ink-marigold: 255 209 102;
+  --color-ink-slate: 187 206 235;
+  --color-table-tint: 132 174 255;
+  --color-scrim: 3 10 25;
+  --shadow-sm: 0 2px 4px rgb(3 10 25 / 22%);
+  --shadow-card: 0 2px 4px rgb(3 10 25 / 12%), 0 14px 36px -20px rgb(3 10 25 / 40%);
+  --shadow-lift: 0 4px 8px rgb(3 10 25 / 18%), 0 22px 46px -20px rgb(3 10 25 / 55%);
+  --shadow-press: inset 0 2px 4px rgb(3 10 25 / 40%);
+  --shadow-key: 0 3px 0 #4b73bb, 0 6px 18px rgb(3 10 25 / 22%);
+  --shadow-key-hover: 0 4px 0 #4b73bb, 0 9px 24px rgb(3 10 25 / 28%);
+  --shadow-nav: 0 -2px 14px rgb(3 10 25 / 30%);
+  --shadow-native-card: 0 12px 32px rgb(3 10 25 / 34%);
+  --shadow-native-soft: 0 5px 18px rgb(3 10 25 / 30%);
+  --shadow-native-rail: 0 -8px 30px rgb(3 10 25 / 40%);
+  --shadow-native-heatmap: 0 8px 24px rgb(3 10 25 / 30%);
+  --shadow-image: 0 2px 10px rgb(3 10 25 / 48%);
+  --shadow-stamp: inset 0 0 0 1px rgb(132 174 255 / 28%);
+  --workspace-glint: 187 216 255;
+  --workspace-surface-top: 24 41 70;
+  --workspace-surface-bottom: 24 41 70;
+}
+
+/* The established navigation uses the same palette as the workspace rail. */
+:root .native-side-nav:not(.workspace-sidebar) {
+  --color-bg: 18 44 89;
+  --color-bg-overlay: 33 63 111;
+  --color-text: 255 255 255;
+  --color-text-muted: 225 234 255;
+  --color-text-faint: 166 191 228;
+  --color-border: 52 78 124;
+  --color-accent: 255 209 102;
+  --color-ink-cobalt: 132 174 255;
+  --color-danger: 255 142 161;
+  --color-danger-faint: 76 39 58;
+  background: #122c59;
+  color: #e1eaff;
+  border-color: rgb(132 174 255 / 20%);
+}
+:root .native-side-nav:not(.workspace-sidebar) a[aria-current='page'] {
+  color: #fff;
+  background: #244ed0;
+}
+
+/* A navy navigation rail makes the bright active destination easy to find. */
+:root .workspace-sidebar {
+  background: #122c59;
+  color: #d8e6ff;
+  border-color: rgb(132 174 255 / 20%);
+  box-shadow: 10px 0 36px -24px rgb(8 28 60 / 25%);
+}
+:root .workspace-sidebar::before {
+  border-color: rgb(132 174 255 / 14%);
+}
+:root .workspace-sidebar__brand .text-text {
+  color: #fff;
+}
+:root .workspace-sidebar__intro > span {
+  background: #45ddb0;
+  box-shadow: 0 0 0 4px rgb(69 221 176 / 10%);
+}
+:root :is(.workspace-sidebar__intro p, .workspace-nav-group > p, .workspace-profile > div > span) {
+  color: #a6bfe4;
+}
+:root :is(.workspace-sidebar__collapse, .workspace-profile button) {
+  color: #bed3f5;
+}
+:root .workspace-sidebar__navigation {
+  scrollbar-color: #5275a7 transparent;
+}
+:root .workspace-nav-link {
+  color: #e1eaff;
+}
+:root
+  :is(
+    .workspace-nav-link:hover,
+    .workspace-sidebar__collapse:hover,
+    .workspace-profile button:hover
+  ) {
+  background: rgb(132 174 255 / 12%);
+  color: #fff;
+}
+:root .workspace-nav-link.is-active {
+  color: #fff;
+}
+:root .workspace-nav-indicator {
+  border-color: #547ff5;
+  background: #244ed0;
+  box-shadow: 0 4px 12px rgb(2 17 51 / 18%);
+}
+:root .workspace-nav-dot {
+  background: #ffd166;
+}
+:root .workspace-nav-group > p::after {
+  background: rgb(132 174 255 / 14%);
+}
+:root .workspace-sidebar__footer {
+  border-color: rgb(132 174 255 / 16%);
+  background: rgb(3 15 38 / 12%);
+}
+:root .workspace-profile__avatar {
+  border-color: #547ff5;
+  color: #fff;
+  background: #2454e6;
+}
+:root .workspace-profile p {
+  color: #edf4ff;
+}
+:root .workspace-sidebar :is(a, button):focus-visible {
+  outline-color: #ffd166;
+}
+
+/* Gold is reserved for time and the most immediate study action. */
+:root :is(.workspace-countdown, a[title^='GATE Exam in']) {
+  background: rgb(var(--color-highlight));
+  border-color: rgb(var(--color-highlight));
+  color: rgb(var(--color-highlight-contrast));
+}
+:root :is(.workspace-countdown, a[title^='GATE Exam in']):hover {
+  background: #ffdf91;
+  border-color: #ffdf91;
+}
+:root .workspace-launch:first-child {
+  border-color: rgb(var(--color-accent) / 28%);
+  background: rgb(var(--color-accent-faint));
+}
+:root .workspace-launch__icon {
+  color: rgb(var(--color-accent-contrast));
+  background: rgb(var(--color-accent));
+}
+:root .workspace-launch:nth-child(2) .workspace-launch__icon {
+  color: rgb(var(--color-success-contrast));
+  background: rgb(var(--color-success));
+}
+:root .workspace-launch:nth-child(3) .workspace-launch__icon {
+  color: rgb(var(--color-guess-contrast));
+  background: rgb(var(--color-guess));
+}
+:root .workspace-shell .u-tab[aria-selected='true'] {
+  font-weight: 600;
+}
+:root .workspace-shell .u-tab-indicator {
+  background: rgb(var(--color-accent-faint));
+  box-shadow:
+    var(--shadow-sm),
+    inset 0 0 0 1px rgb(var(--color-accent) / 24%);
+}
+
+/* Section headers carry the same blue and gold as the dashboard. Scope all
+   semantic values here so header actions stay readable in either theme. */
+:root .workspace-page-header {
+  --scene-metal: 126 239 224;
+  --color-text: 255 255 255;
+  --color-text-muted: 222 235 255;
+  --color-text-faint: 194 216 255;
+  --color-accent: 255 209 102;
+  --color-accent-hover: 255 222 143;
+  --color-accent-contrast: 23 37 70;
+  --color-accent-faint: 30 57 106;
+  --color-bg-raised: 25 60 153;
+  --color-bg-overlay: 32 70 174;
+  --color-border: 105 151 244;
+  --color-border-hover: 166 197 255;
+  --color-warn: 255 209 102;
+  --shadow-key: 0 3px 0 #b67d1a;
+  --shadow-key-hover: 0 4px 0 #b67d1a;
+  background: #244ed0;
+  border-color: rgb(132 174 255 / 50%);
+  box-shadow: 0 16px 35px -24px rgb(20 50 140 / 40%);
+}
+:root .workspace-page-header[data-scene='plan'] {
+  --scene-metal: 255 222 143;
+}
+:root .workspace-page-header[data-scene='analysis'] {
+  --scene-metal: 192 192 255;
+}
+:root .workspace-page-header[data-scene='library'] {
+  --scene-metal: 126 239 224;
+}
+:root .workspace-page-header::before {
+  opacity: 0;
+}
+:root .workspace-page-header .workspace-page-header__description {
+  color: #deebff;
+}
+:root .workspace-page-header__motion {
+  color: #e4eeff;
+  background: #1d40a4;
+  border-color: #7399ef;
+}
+:root .workspace-page-header__motion:hover {
+  color: #fff;
+  border-color: #b3ceff;
+}
+:root .workspace-page-header .workspace-page-header__emblem {
+  --color-accent-faint: 74 126 200;
+  --color-bg-raised: 228 247 255;
+  --color-border: 126 178 240;
+}
+:root .workspace-page-header__plinth {
+  background: rgb(11 40 100 / 45%);
+  box-shadow:
+    0 5px 0 #153da7,
+    0 6px 0 rgb(var(--scene-metal) / 30%),
+    0 18px 25px rgb(7 28 80 / 30%);
+}
+:root .workspace-page-header__emblem .workspace-emblem__orbit {
+  box-shadow:
+    inset 2px 2px 1px #e4ffff,
+    inset -2px -2px 1px #147a94,
+    4px 4px 0 rgb(var(--scene-metal) / 22%),
+    7px 9px 12px rgb(8 35 100 / 40%);
+}
+:root .workspace-page-header__emblem .workspace-emblem__orbit--two {
+  border-color: #ffd166;
+}
+:root .workspace-page-header__emblem .workspace-emblem__core {
+  background: radial-gradient(circle at 27% 22%, #edfffb, #7eefe0 24%, #1aa5b0 65%, #145598);
+  box-shadow: 4px 10px 20px rgb(8 35 100 / 40%);
+}
+:root .workspace-page-header__emblem .workspace-emblem__satellite {
+  background: radial-gradient(circle at 30% 25%, #fff6d6, #ffd166 60%, #c58a1b);
+}
+:root .workspace-page-header__emblem .workspace-emblem__slab {
+  box-shadow:
+    -2px 3px 0 #729cdc,
+    -3px 5px 0 rgb(217 236 255 / 35%),
+    0 14px 15px rgb(8 35 100 / 18%);
+}
+:root .workspace-page-header__emblem .workspace-emblem__slab i {
+  background: #5f8cc8;
+}
+:root .workspace-page-header__emblem .workspace-emblem__slab i:first-child {
+  background: #2454b4;
+}
+:root .workspace-page-header__emblem .workspace-emblem__book {
+  box-shadow:
+    3px 2px 0 #e0f9ff,
+    5px 4px 0 #73d7d4,
+    7px 6px 0 #177b93,
+    12px 17px 20px rgb(8 35 100 / 40%);
+}
+
+@media print {
+  :root .workspace-page-header {
+    --color-text: 0 0 0;
+    background: transparent;
+    border: 0;
+    box-shadow: none;
+  }
+  :root .workspace-page-header .workspace-page-header__description {
+    color: #000;
+  }
+}

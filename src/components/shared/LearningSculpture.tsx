@@ -45,6 +45,13 @@ export default function LearningSculpture({
     }
     if (!context) return;
     const ctx = context;
+    const sculptureStyle = window.getComputedStyle(container);
+    const palette = {
+      hue: Number(sculptureStyle.getPropertyValue('--sculpture-hue').trim()) || 166,
+      mint: sculptureStyle.getPropertyValue('--sculpture-mint').trim() || '112 255 215',
+      cyan: sculptureStyle.getPropertyValue('--sculpture-cyan').trim() || '102 224 255',
+      spark: sculptureStyle.getPropertyValue('--sculpture-spark').trim() || '226 255 246'
+    };
     const motionPreference = window.matchMedia('(prefers-reduced-motion: reduce)');
     let reducedMotion = motionPreference.matches;
     let visible = true;
@@ -80,7 +87,7 @@ export default function LearningSculpture({
       const cosY = Math.cos(angleY);
       const sinZ = Math.sin(angleZ);
       const cosZ = Math.cos(angleZ);
-      const hue = 351 + currentPhase * 10;
+      const hue = palette.hue + currentPhase * 12;
 
       const project = (x: number, y: number, z: number): Point => {
         const y1 = y * cosX - z * sinX;
@@ -119,7 +126,7 @@ export default function LearningSculpture({
           if (step === 0) ctx.moveTo(point.x, point.y);
           else ctx.lineTo(point.x, point.y);
         }
-        ctx.strokeStyle = `rgba(214, 156, 171, ${index === 0 ? 0.18 : 0.075})`;
+        ctx.strokeStyle = `rgb(${palette.cyan} / ${index === 0 ? 0.25 : 0.12})`;
         ctx.stroke();
       });
 
@@ -129,7 +136,7 @@ export default function LearningSculpture({
       const samples = compact ? 6 : 9;
 
       // Split each longitudinal filament into depth-sorted sections so the back
-      // of the object reads through the copper filaments on its nearer surface.
+      // of the object reads through the luminous filaments on its nearer surface.
       for (let fiber = 0; fiber < fibers; fiber += 1) {
         const v = (fiber / fibers) * TAU;
         for (let section = 0; section < sections; section += 1) {
@@ -168,7 +175,7 @@ export default function LearningSculpture({
       strokes.forEach(({ points, depth, light, cross }) => {
         const front = Math.max(0, Math.min(1, (depth + 1.3) / 2.6));
         const alpha = cross ? 0.075 + front * 0.12 : 0.15 + front * 0.58;
-        const luminance = 43 + front * 28 + light * 10;
+        const luminance = 49 + front * 26 + light * 10;
         ctx.strokeStyle = `hsla(${hue + light * 14}, ${64 + light * 12}%, ${luminance}%, ${alpha})`;
         ctx.lineWidth = cross ? 0.55 : 0.55 + front * 0.48;
         ctx.beginPath();
@@ -192,13 +199,16 @@ export default function LearningSculpture({
           point.y,
           active ? 18 : 9
         );
-        glow.addColorStop(0, active ? 'rgba(255, 197, 168, 0.62)' : 'rgba(238, 158, 182, 0.28)');
-        glow.addColorStop(1, 'rgba(238, 158, 182, 0)');
+        glow.addColorStop(
+          0,
+          active ? `rgb(${palette.mint} / 0.72)` : `rgb(${palette.cyan} / 0.38)`
+        );
+        glow.addColorStop(1, `rgb(${palette.cyan} / 0)`);
         ctx.fillStyle = glow;
         ctx.beginPath();
         ctx.arc(point.x, point.y, active ? 18 : 9, 0, TAU);
         ctx.fill();
-        ctx.fillStyle = active ? '#ffdcc5' : '#c58a9b';
+        ctx.fillStyle = `rgb(${active ? palette.spark : palette.cyan})`;
         ctx.beginPath();
         ctx.arc(point.x, point.y, active ? 2.4 : 1.5, 0, TAU);
         ctx.fill();

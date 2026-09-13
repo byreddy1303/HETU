@@ -1,0 +1,92 @@
+/* Supporting study surfaces share the workspace palette in both themes.
+   Geometry stays with the page and shared component styles. */
+.buddy-connection,
+.buddy-principles > div,
+.settings-desk,
+.settings-wayfinding,
+.notes-reading-room,
+.notes-revision-index {
+  color: rgb(var(--color-text));
+  background-color: rgb(var(--color-bg-raised));
+  border-color: rgb(var(--color-border));
+}
+
+.buddy-connection__copy > p,
+.buddy-principles p,
+.settings-desk__copy p,
+.settings-desk__readouts dt,
+.settings-wayfinding small,
+.notes-reading-room__copy > p {
+  color: rgb(var(--color-text-muted));
+}
+
+.buddy-connection__eyebrow,
+.buddy-principles svg,
+.settings-wayfinding__label,
+.notes-reading-room__label {
+  color: rgb(var(--color-accent));
+}
+
+.buddy-connection__availability {
+  color: rgb(var(--color-text));
+  background-color: rgb(var(--color-accent-faint));
+  border-color: rgb(var(--color-accent) / 24%);
+}
+
+.buddy-connection__availability p {
+  color: rgb(var(--color-text-muted));
+}
+
+.buddy-connection-art__orbit,
+.buddy-connection-art__bridge {
+  border-color: rgb(var(--color-accent) / 35%);
+}
+
+.buddy-connection-art__node--first {
+  background-color: rgb(var(--color-accent));
+}
+
+.buddy-connection-art__node--second,
+.buddy-connection-art__spark {
+  background-color: rgb(var(--color-success));
+}
+
+.settings-wayfinding a {
+  color: rgb(var(--color-text));
+}
+
+.settings-wayfinding a:hover,
+.settings-wayfinding a:focus-visible {
+  color: rgb(var(--color-accent));
+  background-color: rgb(var(--color-accent-faint));
+}
+
+.notes-volume {
+  color: rgb(var(--color-accent));
+  background-color: rgb(var(--color-accent-faint));
+  border-color: rgb(var(--color-accent) / 24%);
+}
+
+.notes-volume:nth-child(3n + 2) {
+  color: rgb(var(--color-success));
+  background-color: rgb(var(--color-success-faint));
+  border-color: rgb(var(--color-success) / 24%);
+}
+
+.notes-volume:nth-child(3n) {
+  color: rgb(var(--color-guess));
+  background-color: rgb(var(--color-guess-faint));
+  border-color: rgb(var(--color-guess) / 24%);
+}
+
+.notes-volume[aria-pressed='true'] {
+  color: rgb(var(--color-accent-contrast));
+  background-color: rgb(var(--color-accent));
+  border-color: rgb(var(--color-accent));
+}
+
+.notes-volume__pages,
+.notes-notebook__cover {
+  background-color: rgb(var(--color-bg-raised));
+  border-color: rgb(var(--color-border));
+}

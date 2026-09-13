@@ -34,8 +34,8 @@ export default defineConfig(({ mode }) => {
           name: 'HETU',
           short_name: 'HETU',
           description: 'Find the reason behind every mistake.',
-          theme_color: '#F6F1E9',
-          background_color: '#F6F1E9',
+          theme_color: '#F3F7FF',
+          background_color: '#F3F7FF',
           display: 'standalone',
           start_url: '/',
           icons: [

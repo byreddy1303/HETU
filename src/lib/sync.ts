@@ -68,7 +68,7 @@ let followUpPushNeeded = false;
 let pullBackoffMs = 2000;
 
 const BACKOFF_MAX_MS = 60_000;
-const PULL_MIN_GAP_MS = 2_000;
+const PULL_MIN_GAP_MS = 300;
 const PULL_PAGE_SIZE = 500;
 
 export const clientDeviceId =
@@ -94,7 +94,7 @@ function handleRemoteSyncSignal(userId: string, tables?: string[]) {
       if (syncContextIsCurrent(userId)) {
         requestPullWithRetry(userId);
       }
-    }, 150);
+    }, 50);
   }
 }
 

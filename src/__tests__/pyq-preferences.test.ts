@@ -77,11 +77,11 @@ describe('PYQ preference persistence boundary', () => {
     expect(normalized.lastConfig).not.toHaveProperty('practiceDrafts');
   });
 
-  it('remembers multiple-question practice and defaults legacy or invalid views to single', () => {
+  it('remembers multiple-question practice and defaults legacy or invalid views to multiple', () => {
     const config = prescription('view').config;
-    expect(normalizePyqPreferenceConfig(config)?.practiceView).toBe('single');
+    expect(normalizePyqPreferenceConfig(config)?.practiceView).toBe('multiple');
     expect(normalizePyqPreferenceConfig({ ...config, practiceView: 'invalid' })?.practiceView).toBe(
-      'single'
+      'multiple'
     );
     const store = usePyqPreferencesStore.getState();
     store.savePrescription({

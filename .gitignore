@@ -15,6 +15,13 @@ coverage
 playwright-report
 test-results
 
+# Python backend caches and local virtual environments
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+backend/.venv/
+
 # Local understand-anything scratch/output overlays (canonical graphs stay tracked)
 .ua/.trash-*/
 .ua/diff-overlay.json

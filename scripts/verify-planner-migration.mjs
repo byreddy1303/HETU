@@ -3,12 +3,12 @@ import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
 const root = new URL('../', import.meta.url);
-const config = readFileSync(new URL('supabase/config.toml', root), 'utf8');
+const config = readFileSync(new URL('backends/typescript/supabase/config.toml', root), 'utf8');
 const projectId = /^project_id\s*=\s*"([a-zA-Z0-9_-]+)"/m.exec(config)?.[1];
 if (!projectId) throw new Error('A local Supabase project_id is required.');
 const fixture = readFileSync(new URL('scripts/fixtures/planner-legacy-migration.sql', root), 'utf8');
 const migration = readFileSync(
-  new URL('supabase/migrations/20260902051324_unified_planner_durability.sql', root),
+  new URL('backends/typescript/supabase/migrations/20260902051324_unified_planner_durability.sql', root),
   'utf8'
 );
 const result = spawnSync(

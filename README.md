@@ -1,5 +1,14 @@
 # HETU
 
+## Backend migration status
+
+The backends are separated in [backends/](backends/README.md):
+`backends/python` contains the new FastAPI service; `backends/typescript/supabase`
+contains the existing TypeScript functions and migrations. The live frontend still
+uses the existing backend. The Python Vercel project is deployed in maintenance
+mode until service configuration, full parity, and data-recovery gates pass.
+See the [data-safety checklist](backends/python/docs/DATA_SAFETY.md).
+
 Local-first, multi-user GATE PYQ analysis app. Captures every PYQ decision as an immutable performance event, offers optional structured Journal analysis (pattern / trigger / root cause), schedules spaced re-attempts, supports focused one-to-one buddy study, and surfaces one weekly upstream weakness. An optional Telegram bot can deliver one daily study-only digest.
 
 Built for GATE 2027 CS, targeting AIR <100.
@@ -11,7 +20,7 @@ npm install
 cp .env.example .env.local        # fill VITE_SUPABASE_URL + VITE_SUPABASE_ANON_KEY
 
 # In another terminal:
-npx supabase start                # local Postgres + Studio at http://localhost:54323
+npm run supabase:start            # local Postgres + Studio at http://localhost:54323
 
 npm run dev                       # app at http://localhost:5173
 ```

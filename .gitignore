@@ -8,9 +8,9 @@ dist-ssr
 .DS_Store
 .vscode
 .idea
-supabase/.branches
-supabase/.temp
-supabase/functions/**/.env
+backends/typescript/supabase/.branches
+backends/typescript/supabase/.temp
+backends/typescript/supabase/functions/**/.env
 coverage
 playwright-report
 test-results
@@ -20,7 +20,9 @@ __pycache__/
 *.py[cod]
 .pytest_cache/
 .ruff_cache/
-backend/.venv/
+backends/python/.venv/
+backends/python/*.db
+backups/
 
 # Local understand-anything scratch/output overlays (canonical graphs stay tracked)
 .ua/.trash-*/

@@ -34,6 +34,7 @@ set -a
 source .deploy.env
 set +a
 ok "Loaded secrets"
+cd "$here/backends/typescript"
 
 step "Sanity check secrets"
 for var in RESEND_API_KEY MAIL_FROM OWNER_EMAIL SUPABASE_PROJECT_REF; do

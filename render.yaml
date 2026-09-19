@@ -42,11 +42,10 @@ services:
     runtime: docker
     region: singapore
     plan: starter
-    dockerContext: ./backend
-    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backends/python
+    dockerfilePath: ./backends/python/Dockerfile
     healthCheckPath: /health/ready
-    preDeployCommand: alembic upgrade head
-    autoDeploy: true
+    autoDeploy: false
     envVars:
       - fromGroup: hetu-backend
 
@@ -55,9 +54,9 @@ services:
     runtime: docker
     region: singapore
     plan: starter
-    dockerContext: ./backend
-    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backends/python
+    dockerfilePath: ./backends/python/Dockerfile
     dockerCommand: python -m app.worker
-    autoDeploy: true
+    autoDeploy: false
     envVars:
       - fromGroup: hetu-backend

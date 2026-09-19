@@ -34,7 +34,7 @@ describe('GO Classes COA Topic Test 2 screenshot archive', () => {
   it('keeps result receipts out of re-attempt and journal image fields', () => {
     const migration = readFileSync(
       path.resolve(
-        'supabase/migrations/20260813000006_go_classes_coa_topic_test_2_answer_free_reattempts.sql'
+        'backends/typescript/supabase/migrations/20260813000006_go_classes_coa_topic_test_2_answer_free_reattempts.sql'
       ),
       'utf8'
     );

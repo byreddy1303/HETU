@@ -5,7 +5,7 @@ import { describe, expect, it } from 'vitest';
 describe('PYQ production audit migration', () => {
   it('enforces one active set and immutable version-2 attempt receipts', () => {
     const sql = readFileSync(
-      path.resolve(process.cwd(), 'supabase/migrations/20260808000001_pyq_attempt_audit.sql'),
+      path.resolve(process.cwd(), 'backends/typescript/supabase/migrations/20260808000001_pyq_attempt_audit.sql'),
       'utf8'
     );
 
@@ -21,7 +21,7 @@ describe('PYQ production audit migration', () => {
     const sql = readFileSync(
       path.resolve(
         process.cwd(),
-        'supabase/migrations/20260822000001_phase1_canonical_evidence.sql'
+        'backends/typescript/supabase/migrations/20260822000001_phase1_canonical_evidence.sql'
       ),
       'utf8'
     );
@@ -124,12 +124,12 @@ describe('PYQ production audit migration', () => {
     const phaseOneSql = readFileSync(
       path.resolve(
         process.cwd(),
-        'supabase/migrations/20260822000001_phase1_canonical_evidence.sql'
+        'backends/typescript/supabase/migrations/20260822000001_phase1_canonical_evidence.sql'
       ),
       'utf8'
     );
     const auditSql = readFileSync(
-      path.resolve(process.cwd(), 'supabase/migrations/20260808000001_pyq_attempt_audit.sql'),
+      path.resolve(process.cwd(), 'backends/typescript/supabase/migrations/20260808000001_pyq_attempt_audit.sql'),
       'utf8'
     );
     const canonicalizer = phaseOneSql.match(
@@ -148,7 +148,7 @@ describe('PYQ production audit migration', () => {
     const sql = readFileSync(
       path.resolve(
         process.cwd(),
-        'supabase/migrations/20260828000001_gate_1990_attempt_year.sql'
+        'backends/typescript/supabase/migrations/20260828000001_gate_1990_attempt_year.sql'
       ),
       'utf8'
     );
@@ -159,7 +159,7 @@ describe('PYQ production audit migration', () => {
 
   it('stores qualified mock evidence with owner-safe PYQ links and strict readiness criteria', () => {
     const sql = readFileSync(
-      path.resolve(process.cwd(), 'supabase/migrations/20260827102350_qualified_mock_evidence.sql'),
+      path.resolve(process.cwd(), 'backends/typescript/supabase/migrations/20260827102350_qualified_mock_evidence.sql'),
       'utf8'
     );
 

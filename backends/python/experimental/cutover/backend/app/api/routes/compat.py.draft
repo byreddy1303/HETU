@@ -1,0 +1,323 @@
+from __future__ import annotations
+
+from datetime import UTC, datetime, timedelta
+from typing import Any
+
+from fastapi import APIRouter, HTTPException
+from sqlalchemy import delete, select
+
+from app.api.deps import CurrentUser, DbDep, SettingsDep
+from app.db.models import Buddy, Record
+from app.schemas import CompatMutation, CompatQuery, FunctionCall, RpcCall
+from app.services.compat import is_owner, mutate_compat, query_compat
+from app.services.domain import (
+    begin_telegram,
+    cancel_buddy_request,
+    disconnect_telegram,
+    ensure_study_preferences,
+    list_buddy_peers,
+    planner_mutation,
+    readiness_median,
+    respond_buddy_request,
+    send_buddy_request,
+    set_telegram_enabled,
+    unfriend,
+)
+from app.services.jobs import create_job, enqueue_job
+from app.services.realtime import broker
+from app.services.records import to_api, upsert_records
+
+router = APIRouter()
+
+
+@router.post("/tables/{table}/query")
+async def query_table(
+    table: str,
+    payload: CompatQuery,
+    identity: CurrentUser,
+    db: DbDep,
+    settings: SettingsDep,
+) -> dict[str, Any]:
+    rows, count = await query_compat(
+        db, table=table, user_id=identity.user_id, query=payload, settings=settings
+    )
+    if payload.cardinality == "single" and len(rows) != 1:
+        raise HTTPException(status_code=406, detail="Expected exactly one row")
+    if payload.cardinality == "maybe_single" and len(rows) > 1:
+        raise HTTPException(status_code=406, detail="Expected at most one row")
+    return {"data": rows, "count": count}
+
+
+@router.post("/tables/{table}/{operation}")
+async def mutate_table(
+    table: str,
+    operation: str,
+    payload: CompatMutation,
+    identity: CurrentUser,
+    db: DbDep,
+    settings: SettingsDep,
+) -> dict[str, Any]:
+    if operation not in {"insert", "upsert", "update", "delete"}:
+        raise HTTPException(status_code=404, detail="Unknown operation")
+    before = None
+    if table == "buddies" and payload.filters:
+        before, _ = await query_compat(
+            db,
+            table=table,
+            user_id=identity.user_id,
+            query=CompatQuery(filters=payload.filters, limit=1000),
+            settings=settings,
+        )
+    rows = await mutate_compat(
+        db,
+        table=table,
+        operation=operation,
+        user_id=identity.user_id,
+        mutation=payload,
+        settings=settings,
+    )
+    await db.commit()
+    recipients = await _event_recipients(db, table, identity.user_id, rows or before or [])
+    event_name = {"insert": "INSERT", "upsert": "UPDATE", "update": "UPDATE", "delete": "DELETE"}[
+        operation
+    ]
+    for recipient in recipients:
+        for row in rows or before or []:
+            await broker.publish(
+                recipient,
+                {
+                    "type": "postgres_changes",
+                    "table": table,
+                    "event": event_name,
+                    "new": {} if operation == "delete" else row,
+                    "old": row if operation == "delete" else {},
+                },
+            )
+    return {"data": rows}
+
+
+@router.post("/rpc/{name}")
+async def call_rpc(
+    name: str,
+    payload: RpcCall,
+    identity: CurrentUser,
+    db: DbDep,
+    settings: SettingsDep,
+) -> dict[str, Any]:
+    args = payload.arguments
+    result: Any
+    recipients = {identity.user_id}
+    table: str | None = None
+    event_row: dict[str, Any] | None = None
+    if name == "is_owner":
+        result = await is_owner(db, identity.user_id, settings)
+    elif name == "list_buddy_peers":
+        result = await list_buddy_peers(db, identity.user_id)
+    elif name == "send_buddy_request":
+        result = await send_buddy_request(
+            db, requester_id=identity.user_id, username=str(args.get("username", ""))
+        )
+        table = "buddies"
+        event_row = result.get("buddy")
+    elif name == "respond_buddy_request":
+        buddy = await respond_buddy_request(
+            db,
+            user_id=identity.user_id,
+            buddy_id=str(args.get("b_id", "")),
+            action=str(args.get("action", "")),
+            reason=args.get("reason") if isinstance(args.get("reason"), str) else None,
+        )
+        result = [{"buddy_id": buddy.id, "status": buddy.status}]
+        table, event_row = "buddies", _buddy_dict(buddy)
+        recipients.update((buddy.user_a, buddy.user_b))
+    elif name == "cancel_buddy_request":
+        buddy = await cancel_buddy_request(
+            db, user_id=identity.user_id, buddy_id=str(args.get("b_id", ""))
+        )
+        result = None
+        table, event_row = "buddies", _buddy_dict(buddy)
+        recipients.update((buddy.user_a, buddy.user_b))
+    elif name == "unfriend_buddy":
+        buddy = await unfriend(
+            db, user_id=identity.user_id, buddy_id=str(args.get("b_id", ""))
+        )
+        result = None
+        table, event_row = "buddies", _buddy_dict(buddy)
+        recipients.update((buddy.user_a, buddy.user_b))
+    elif name == "apply_planner_day_plan_mutation":
+        result = await planner_mutation(db, user_id=identity.user_id, arguments=args)
+        table = "planner_day_plans"
+        event_row = result.get("row")
+    elif name == "readiness_median_for_band":
+        result = await readiness_median(
+            db,
+            user_id=identity.user_id,
+            band_width_days=int(args.get("band_width_days", 7)),
+        )
+    elif name == "ensure_study_notification_preferences":
+        result = await ensure_study_preferences(db, identity.user_id)
+    elif name == "begin_telegram_connection":
+        result = await begin_telegram(db, identity.user_id)
+        table = "telegram_subscriptions"
+    elif name == "set_telegram_digest_enabled":
+        result = await set_telegram_enabled(
+            db, identity.user_id, bool(args.get("wants_enabled"))
+        )
+        table = "telegram_subscriptions"
+    elif name == "disconnect_telegram":
+        result = await disconnect_telegram(db, identity.user_id)
+        table = "telegram_subscriptions"
+    elif name == "upsert_push_subscription":
+        result = await _upsert_push(db, identity.user_id, args)
+        table = "push_subscriptions"
+    elif name == "unregister_push_subscription":
+        result = await _delete_push(db, identity.user_id, str(args.get("p_device_id", "")))
+        table = "push_subscriptions"
+    elif name in {"set_push_subscription_channels", "touch_push_subscription", "set_push_quiet_hours"}:
+        result = await _patch_push(db, identity.user_id, name, args)
+        table = "push_subscriptions"
+    else:
+        raise HTTPException(status_code=404, detail="Unknown RPC")
+    await db.commit()
+    if table and event_row:
+        action = "DELETE" if name in {"cancel_buddy_request", "unfriend_buddy"} else "UPDATE"
+        for recipient in recipients:
+            await broker.publish(
+                recipient,
+                {
+                    "type": "postgres_changes",
+                    "table": table,
+                    "event": action,
+                    "new": {} if action == "DELETE" else event_row,
+                    "old": event_row if action == "DELETE" else {},
+                },
+            )
+    return {"data": result}
+
+
+@router.post("/functions/{name}")
+async def invoke_function(
+    name: str, payload: FunctionCall, identity: CurrentUser, db: DbDep
+) -> dict[str, Any]:
+    if name not in {"buddy-notifications", "study-notifications", "daily-digest"}:
+        raise HTTPException(status_code=404, detail="Unknown function")
+    requested_user = payload.body.get("user_id")
+    if requested_user and requested_user != identity.user_id:
+        raise HTTPException(status_code=403, detail="Cannot schedule work for another user")
+    job = await create_job(
+        db,
+        kind=name,
+        payload={**payload.body, "user_id": identity.user_id},
+        owner_id=identity.user_id,
+        idempotency_key=None,
+    )
+    await db.commit()
+    await enqueue_job(job)
+    return {"data": {"ok": True, "queued": True, "job_id": job.id}}
+
+
+async def _upsert_push(
+    db: DbDep, user_id: str, args: dict[str, Any]
+) -> list[dict[str, Any]]:
+    device_id = str(args.get("p_device_id", ""))
+    if not device_id:
+        raise HTTPException(status_code=422, detail="Device ID is required")
+    rows = await upsert_records(
+        db,
+        collection="push_subscriptions",
+        owner_id=user_id,
+        items=[
+            {
+                "id": device_id,
+                "device_id": device_id,
+                "platform": args.get("p_platform"),
+                "web_endpoint": args.get("p_web_endpoint"),
+                "web_p256dh": args.get("p_web_p256dh"),
+                "web_auth": args.get("p_web_auth"),
+                "native_token": args.get("p_native_token"),
+                "enabled": True,
+                "buddy_enabled": True,
+                "study_enabled": True,
+                "last_seen_at": datetime.now(UTC).isoformat(),
+            }
+        ],
+    )
+    return [to_api(rows[0])]
+
+
+async def _delete_push(db: DbDep, user_id: str, device_id: str) -> bool:
+    result = await db.execute(
+        delete(Record).where(
+            Record.collection == "push_subscriptions",
+            Record.owner_id == user_id,
+            Record.external_id == device_id,
+        )
+    )
+    return bool(result.rowcount)
+
+
+async def _patch_push(
+    db: DbDep, user_id: str, name: str, args: dict[str, Any]
+) -> bool:
+    device_id = str(args.get("p_device_id", ""))
+    row = await db.scalar(
+        select(Record).where(
+            Record.collection == "push_subscriptions",
+            Record.owner_id == user_id,
+            Record.external_id == device_id,
+        )
+    )
+    if row is None:
+        return False
+    patch: dict[str, Any]
+    if name == "set_push_subscription_channels":
+        patch = {
+            "buddy_enabled": bool(args.get("p_buddy_enabled")),
+            "study_enabled": bool(args.get("p_study_enabled")),
+        }
+    elif name == "touch_push_subscription":
+        patch = {
+            "active_buddy_id": args.get("p_active_buddy_id"),
+            "last_seen_at": datetime.now(UTC).isoformat(),
+        }
+    else:
+        minutes = max(0, min(int(args.get("p_quiet_minutes", 0)), 2880))
+        patch = {
+            "push_quiet_until": (
+                datetime.now(UTC) + timedelta(minutes=minutes)
+            ).isoformat()
+            if minutes
+            else None
+        }
+    row.data = {**row.data, **patch}
+    row.version += 1
+    return True
+
+
+async def _event_recipients(
+    db: DbDep, table: str, user_id: str, rows: list[dict[str, Any]]
+) -> set[str]:
+    recipients = {user_id}
+    if table == "buddy_messages":
+        buddy_ids = {str(row.get("buddy_id")) for row in rows if row.get("buddy_id")}
+        buddies = (
+            await db.scalars(select(Buddy).where(Buddy.id.in_(buddy_ids)))
+        ).all()
+        for buddy in buddies:
+            recipients.update((buddy.user_a, buddy.user_b))
+    return recipients
+
+
+def _buddy_dict(row: Buddy) -> dict[str, Any]:
+    return {
+        "id": row.id,
+        "user_a": row.user_a,
+        "user_b": row.user_b,
+        "status": row.status,
+        "requested_by": row.requested_by,
+        "responded_at": row.responded_at,
+        "decline_reason": row.decline_reason,
+        "last_request_at": row.last_request_at,
+        "created_at": row.created_at,
+        "updated_at": row.updated_at,
+    }

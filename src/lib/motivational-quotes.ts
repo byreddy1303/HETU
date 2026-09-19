@@ -5,7 +5,7 @@ import {
   QUOTES,
   pickQuoteForDay,
   type QuotePreset
-} from '../../supabase/functions/_shared/quotes';
+} from '../../backends/typescript/supabase/functions/_shared/quotes';
 
 export { QUOTES, pickQuoteForDay, type QuotePreset };
 

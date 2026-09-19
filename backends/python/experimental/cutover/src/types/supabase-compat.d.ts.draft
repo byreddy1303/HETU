@@ -1,0 +1,4 @@
+declare module '@supabase/supabase-js' {
+  export type User = import('@/lib/supabase').ApiUser;
+  export type RealtimeChannel = import('@/lib/supabase').RealtimeChannel;
+}

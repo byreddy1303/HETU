@@ -7,14 +7,14 @@ import {
 } from '@/lib/studyNotifications';
 
 const migration = readFileSync(
-  'supabase/migrations/20260810000002_interactive_study_notifications.sql',
+  'backends/typescript/supabase/migrations/20260810000002_interactive_study_notifications.sql',
   'utf8'
 );
 const minuteMigration = readFileSync(
-  'supabase/migrations/20260810000004_study_notification_minutes.sql',
+  'backends/typescript/supabase/migrations/20260810000004_study_notification_minutes.sql',
   'utf8'
 );
-const worker = readFileSync('supabase/functions/study-notifications/index.ts', 'utf8');
+const worker = readFileSync('backends/typescript/supabase/functions/study-notifications/index.ts', 'utf8');
 const androidService = readFileSync(
   'android/app/src/main/java/in/airjournal/app/BuddyMessagingService.java',
   'utf8'

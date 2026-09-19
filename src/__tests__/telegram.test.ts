@@ -13,8 +13,8 @@ import {
   TELEGRAM_BOT_COMMANDS,
   tomorrowIsoDateForTimezone,
   weekIsoDatesForTimezone
-} from '../../supabase/functions/_shared/telegram';
-import { QUOTES, pickQuoteForDay } from '../../supabase/functions/_shared/quotes';
+} from '../../backends/typescript/supabase/functions/_shared/telegram';
+import { QUOTES, pickQuoteForDay } from '../../backends/typescript/supabase/functions/_shared/quotes';
 import { pickOneLinerFor } from '@/lib/one_liners';
 
 describe('Telegram daily digest', () => {

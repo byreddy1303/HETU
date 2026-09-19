@@ -28,7 +28,7 @@ import {
   computeReadinessScore,
   computeReadinessScoreResult,
   readinessEvidenceCounts
-} from '../../supabase/functions/_shared/readiness-score';
+} from '../../backends/typescript/supabase/functions/_shared/readiness-score';
 
 function question(o: Partial<QuestionRow> = {}): QuestionRow {
   return {

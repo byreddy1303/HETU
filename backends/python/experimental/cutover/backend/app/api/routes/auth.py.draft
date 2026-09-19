@@ -1,0 +1,116 @@
+from __future__ import annotations
+
+from datetime import UTC, datetime
+
+from fastapi import APIRouter, HTTPException
+from sqlalchemy import func, select
+
+from app.api.deps import DbDep, SettingsDep
+from app.db.models import Invite, User
+from app.schemas import PinResetConfirm, PinResetRequest, SignupRequest
+from app.services.integrations import (
+    clerk_create_user,
+    clerk_delete_user,
+    clerk_update_password,
+    create_reset_token,
+    send_email,
+    verify_reset_token,
+)
+
+router = APIRouter()
+
+
+@router.get("/username-available/{username}")
+async def username_available(username: str, db: DbDep) -> dict[str, bool]:
+    normalized = username.strip().lower()
+    if len(normalized) < 3:
+        return {"available": False}
+    found = await db.scalar(select(User.id).where(func.lower(User.username) == normalized))
+    return {"available": found is None}
+
+
+@router.post("/signup")
+async def signup(payload: SignupRequest, db: DbDep, settings: SettingsDep) -> dict[str, object]:
+    now = datetime.now(UTC)
+    invite = await db.scalar(
+        select(Invite).where(Invite.token == payload.invite_token).with_for_update()
+    )
+    if invite is None or invite.used_at is not None or invite.expires_at <= now:
+        raise HTTPException(status_code=400, detail="Invite is invalid or expired")
+    username = payload.username.lower()
+    existing = await db.scalar(select(User.id).where(func.lower(User.username) == username))
+    if existing:
+        raise HTTPException(status_code=409, detail="Username is already taken")
+
+    created = await clerk_create_user(
+        settings,
+        username=username,
+        email=payload.email.lower(),
+        name=payload.name.strip(),
+        pin=payload.pin,
+    )
+    clerk_id = created.get("id")
+    if not isinstance(clerk_id, str) or not clerk_id:
+        raise HTTPException(status_code=502, detail="Clerk returned an invalid user")
+    try:
+        user = User(
+            id=clerk_id,
+            email=payload.email.lower(),
+            username=username,
+            display_name=payload.name.strip(),
+            profile={
+                "name": payload.name.strip(),
+                "exam_date": "2027-02-06",
+                "target_rank": 100,
+                "sadhana_practice": False,
+                "timezone": "Asia/Kolkata",
+                "welcome_seen_at": None,
+                "digest_email_enabled": True,
+                "digest_whatsapp_enabled": False,
+                "digest_hour_local": 6,
+                "digest_minute_local": 0,
+                "buddy_notification_preview_enabled": True,
+                "study_notifications_enabled": False,
+            },
+        )
+        db.add(user)
+        invite.used_by = clerk_id
+        invite.used_at = now
+        await db.commit()
+    except Exception:
+        await db.rollback()
+        await clerk_delete_user(settings, clerk_id)
+        raise
+    return {"ok": True, "user_id": clerk_id, "email": payload.email.lower()}
+
+
+@router.post("/request-pin-reset")
+async def request_pin_reset(
+    payload: PinResetRequest, db: DbDep, settings: SettingsDep
+) -> dict[str, bool]:
+    user = await db.scalar(
+        select(User).where(func.lower(User.username) == payload.username.lower())
+    )
+    if user and user.email:
+        token = create_reset_token(settings, user_id=user.id)
+        url = f"{settings.app_url.rstrip('/')}/reset-pin?token={token}"
+        await send_email(
+            settings,
+            to=user.email,
+            subject="Reset your HETU PIN",
+            html=f'<p>Use this link within one hour to reset your HETU PIN:</p><p><a href="{url}">Reset PIN</a></p>',
+            text=f"Reset your HETU PIN within one hour: {url}",
+        )
+    return {"ok": True}
+
+
+@router.post("/reset-pin")
+async def reset_pin(
+    payload: PinResetConfirm, db: DbDep, settings: SettingsDep
+) -> dict[str, bool]:
+    user_id = verify_reset_token(settings, payload.token)
+    user = await db.get(User, user_id)
+    if user is None or user.deleted_at is not None:
+        raise HTTPException(status_code=400, detail="Reset link is invalid or expired")
+    await clerk_update_password(settings, user_id=user_id, pin=payload.pin)
+    return {"ok": True}

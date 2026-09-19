@@ -1,0 +1,15 @@
+import { describe, expect, it } from 'vitest';
+import { isValidApiUrl } from '@/lib/supabase';
+
+describe('Hetu API configuration validation', () => {
+  it('accepts HTTP and HTTPS API URLs', () => {
+    expect(isValidApiUrl('https://api.hetu.example')).toBe(true);
+    expect(isValidApiUrl('http://127.0.0.1:8000')).toBe(true);
+  });
+
+  it('rejects missing, placeholder, and unsafe URLs without throwing', () => {
+    expect(isValidApiUrl(undefined)).toBe(false);
+    expect(isValidApiUrl('api-url')).toBe(false);
+    expect(isValidApiUrl('javascript:alert(1)')).toBe(false);
+  });
+});

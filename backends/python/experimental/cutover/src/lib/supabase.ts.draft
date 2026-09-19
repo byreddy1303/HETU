@@ -1,0 +1,548 @@
+// Transitional name retained so feature modules and existing tests keep a
+// single import boundary. This is no longer a Supabase client: it is the Hetu
+// FastAPI + Clerk HTTP/WebSocket adapter.
+
+export interface ApiUser {
+  id: string;
+  email?: string;
+  username?: string | null;
+  user_metadata?: Record<string, unknown>;
+}
+
+interface ApiSession {
+  access_token: string;
+  refresh_token: string;
+  user: ApiUser;
+}
+
+interface ApiError {
+  message: string;
+  code?: string;
+}
+
+type AuthEvent = 'INITIAL_SESSION' | 'SIGNED_IN' | 'SIGNED_OUT' | 'TOKEN_REFRESHED';
+type AuthListener = (event: AuthEvent, session: ApiSession | null) => void;
+
+interface ClerkRuntime {
+  loaded: boolean;
+  user: ApiUser | null;
+  getToken: () => Promise<string | null>;
+  signIn: (username: string, pin: string) => Promise<void>;
+  signOut: () => Promise<void>;
+  updatePin: (pin: string) => Promise<void>;
+}
+
+const apiUrl = String(import.meta.env.VITE_API_URL || '').replace(/\/$/, '');
+const clerkKey = String(import.meta.env.VITE_CLERK_PUBLISHABLE_KEY || '');
+
+export function isValidApiUrl(value: string | undefined): boolean {
+  if (!value) return false;
+  try {
+    const parsed = new URL(value);
+    return ['http:', 'https:'].includes(parsed.protocol) && Boolean(parsed.hostname);
+  } catch {
+    return false;
+  }
+}
+
+export const supabaseConfigured = Boolean(isValidApiUrl(apiUrl) && clerkKey);
+
+let clerkRuntime: ClerkRuntime | null = null;
+let authSession: ApiSession | null = null;
+const authListeners = new Set<AuthListener>();
+
+export function configureClerkRuntime(runtime: ClerkRuntime): void {
+  const previousUserId = clerkRuntime?.user?.id ?? null;
+  clerkRuntime = runtime;
+  void refreshAuthSession().then(() => {
+    const nextUserId = runtime.user?.id ?? null;
+    const event: AuthEvent = nextUserId
+      ? previousUserId === nextUserId
+        ? 'TOKEN_REFRESHED'
+        : 'SIGNED_IN'
+      : 'SIGNED_OUT';
+    for (const listener of authListeners) listener(event, authSession);
+    if (!nextUserId) closeRealtimeSocket();
+  });
+}
+
+async function refreshAuthSession(): Promise<ApiSession | null> {
+  if (!clerkRuntime?.loaded || !clerkRuntime.user) {
+    authSession = null;
+    return null;
+  }
+  const token = await clerkRuntime.getToken();
+  if (!token) {
+    authSession = null;
+    return null;
+  }
+  authSession = {
+    access_token: token,
+    refresh_token: '',
+    user: clerkRuntime.user
+  };
+  return authSession;
+}
+
+async function accessToken(): Promise<string | null> {
+  return (await refreshAuthSession())?.access_token ?? null;
+}
+
+export async function apiRequest<T>(
+  path: string,
+  init: RequestInit = {},
+  options: { public?: boolean } = {}
+): Promise<T> {
+  if (!apiUrl) throw new Error('VITE_API_URL is not configured.');
+  const headers = new Headers(init.headers);
+  if (init.body && !headers.has('Content-Type')) headers.set('Content-Type', 'application/json');
+  if (!options.public) {
+    const token = await accessToken();
+    if (!token) throw new Error('Sign in first.');
+    headers.set('Authorization', `Bearer ${token}`);
+  }
+  const response = await fetch(`${apiUrl}${path}`, { ...init, headers });
+  const body = await response.json().catch(() => null);
+  if (!response.ok) {
+    const detail = body?.detail;
+    const message =
+      typeof detail === 'string'
+        ? detail
+        : typeof detail?.message === 'string'
+          ? detail.message
+          : `API request failed (${response.status})`;
+    const error = new Error(message) as Error & { status?: number; code?: string };
+    error.status = response.status;
+    error.code = body?.code;
+    throw error;
+  }
+  return body as T;
+}
+
+type FilterOperation = 'eq' | 'neq' | 'in' | 'gt' | 'gte' | 'lt' | 'lte' | 'is';
+interface Filter {
+  field: string;
+  op: FilterOperation;
+  value: unknown;
+}
+
+interface QueryResult<T = unknown> {
+  data: T | null;
+  error: ApiError | null;
+  count?: number | null;
+}
+
+class QueryBuilder<T = any> implements PromiseLike<QueryResult<T[]>> {
+  private operation: 'query' | 'insert' | 'upsert' | 'update' | 'delete' = 'query';
+  private values: Record<string, unknown>[] = [];
+  private filters: Filter[] = [];
+  private orFilters: Filter[] = [];
+  private orders: Array<{ field: string; ascending: boolean }> = [];
+  private columns = '*';
+  private rowLimit: number | null = null;
+  private offset = 0;
+  private head = false;
+  private countMode: 'exact' | null = null;
+  private cardinality: 'many' | 'single' | 'maybe_single' = 'many';
+  private onConflict: string | null = null;
+
+  constructor(private readonly table: string) {}
+
+  select(columns = '*', options?: { count?: 'exact'; head?: boolean }): this {
+    this.columns = columns;
+    this.countMode = options?.count ?? null;
+    this.head = options?.head ?? false;
+    return this;
+  }
+
+  insert<V extends object>(values: V | V[]): this {
+    this.operation = 'insert';
+    this.values = (Array.isArray(values) ? values : [values]) as Record<string, unknown>[];
+    return this;
+  }
+
+  upsert<V extends object>(
+    values: V | V[],
+    options?: { onConflict?: string }
+  ): this {
+    this.operation = 'upsert';
+    this.values = (Array.isArray(values) ? values : [values]) as Record<string, unknown>[];
+    this.onConflict = options?.onConflict ?? null;
+    return this;
+  }
+
+  update(value: Record<string, unknown>): this {
+    this.operation = 'update';
+    this.values = [value];
+    return this;
+  }
+
+  delete(): this {
+    this.operation = 'delete';
+    return this;
+  }
+
+  eq(field: string, value: unknown): this {
+    return this.filter(field, 'eq', value);
+  }
+  neq(field: string, value: unknown): this {
+    return this.filter(field, 'neq', value);
+  }
+  in(field: string, value: unknown[]): this {
+    return this.filter(field, 'in', value);
+  }
+  gt(field: string, value: unknown): this {
+    return this.filter(field, 'gt', value);
+  }
+  gte(field: string, value: unknown): this {
+    return this.filter(field, 'gte', value);
+  }
+  lt(field: string, value: unknown): this {
+    return this.filter(field, 'lt', value);
+  }
+  lte(field: string, value: unknown): this {
+    return this.filter(field, 'lte', value);
+  }
+  is(field: string, value: unknown): this {
+    return this.filter(field, 'is', value);
+  }
+
+  or(expression: string): this {
+    this.orFilters.push(...parseOrFilters(expression));
+    return this;
+  }
+
+  order(field: string, options?: { ascending?: boolean }): this {
+    this.orders.push({ field, ascending: options?.ascending ?? true });
+    return this;
+  }
+
+  limit(value: number): this {
+    this.rowLimit = value;
+    return this;
+  }
+
+  range(from: number, to: number): this {
+    this.offset = from;
+    this.rowLimit = Math.max(0, to - from + 1);
+    return this;
+  }
+
+  single(): Promise<QueryResult<T>> {
+    this.cardinality = 'single';
+    return this.execute() as Promise<QueryResult<T>>;
+  }
+
+  maybeSingle(): Promise<QueryResult<T | null>> {
+    this.cardinality = 'maybe_single';
+    return this.execute() as Promise<QueryResult<T | null>>;
+  }
+
+  then<TResult1 = QueryResult<T[]>, TResult2 = never>(
+    onfulfilled?: ((value: QueryResult<T[]>) => TResult1 | PromiseLike<TResult1>) | null,
+    onrejected?: ((reason: unknown) => TResult2 | PromiseLike<TResult2>) | null
+  ): PromiseLike<TResult1 | TResult2> {
+    return (this.execute() as Promise<QueryResult<T[]>>).then(onfulfilled, onrejected);
+  }
+
+  private filter(field: string, op: FilterOperation, value: unknown): this {
+    this.filters.push({ field, op, value });
+    return this;
+  }
+
+  private async execute(): Promise<QueryResult<unknown>> {
+    try {
+      if (this.operation === 'query') {
+        const response = await apiRequest<{ data: T[]; count: number }>(
+          `/v1/compat/tables/${encodeURIComponent(this.table)}/query`,
+          {
+            method: 'POST',
+            body: JSON.stringify({
+              columns: this.columns,
+              filters: this.filters,
+              or_filters: this.orFilters,
+              orders: this.orders,
+              limit: this.rowLimit,
+              offset: this.offset,
+              head: this.head,
+              count: this.countMode,
+              cardinality: this.cardinality
+            })
+          }
+        );
+        const data =
+          this.cardinality === 'single' || this.cardinality === 'maybe_single'
+            ? (response.data[0] ?? null)
+            : response.data;
+        return { data, error: null, count: response.count };
+      }
+      const response = await apiRequest<{ data: T[] }>(
+        `/v1/compat/tables/${encodeURIComponent(this.table)}/${this.operation}`,
+        {
+          method: 'POST',
+          body: JSON.stringify({
+            values: this.values,
+            filters: this.filters,
+            on_conflict: this.onConflict,
+            returning: true
+          })
+        }
+      );
+      return { data: response.data, error: null };
+    } catch (error) {
+      return { data: null, error: normalizeError(error), count: null };
+    }
+  }
+}
+
+function parseOrFilters(expression: string): Filter[] {
+  const filters: Filter[] = [];
+  for (const raw of expression.split(',')) {
+    const [field, op, ...tail] = raw.trim().split('.');
+    if (!field || !op || tail.length === 0) continue;
+    filters.push({
+      field,
+      op: op === 'not' ? 'neq' : (op as FilterOperation),
+      value: tail.join('.')
+    });
+  }
+  return filters;
+}
+
+function normalizeError(error: unknown): ApiError {
+  if (error instanceof Error) {
+    return { message: error.message, code: (error as Error & { code?: string }).code };
+  }
+  return { message: 'Unknown API error' };
+}
+
+type RealtimeKind = 'broadcast' | 'postgres_changes' | 'presence';
+type RealtimeCallback = (payload: any) => void;
+
+export class RealtimeChannel {
+  private handlers: Array<{
+    kind: RealtimeKind;
+    filter: Record<string, any>;
+    callback: RealtimeCallback;
+  }> = [];
+  private presence: Record<string, Array<Record<string, unknown>>> = {};
+  private subscribed = false;
+
+  constructor(
+    readonly topic: string,
+    readonly options?: { config?: { presence?: { key?: string } } }
+  ) {}
+
+  on(kind: RealtimeKind, filter: Record<string, any>, callback: RealtimeCallback): this {
+    this.handlers.push({ kind, filter, callback });
+    return this;
+  }
+
+  subscribe(callback?: (status: string) => void): this {
+    this.subscribed = true;
+    realtimeChannels.add(this);
+    void ensureRealtimeSocket()
+      .then(() => callback?.('SUBSCRIBED'))
+      .catch(() => callback?.('CHANNEL_ERROR'));
+    return this;
+  }
+
+  async send(message: { type: string; event: string; payload: Record<string, unknown> }): Promise<void> {
+    await ensureRealtimeSocket();
+    realtimeSocket?.send(JSON.stringify({ ...message, topic: this.topic }));
+  }
+
+  async track(payload: Record<string, unknown>): Promise<void> {
+    await ensureRealtimeSocket();
+    realtimeSocket?.send(JSON.stringify({ type: 'presence', topic: this.topic, payload }));
+  }
+
+  presenceState(): Record<string, Array<Record<string, unknown>>> {
+    return this.presence;
+  }
+
+  dispose(): void {
+    this.subscribed = false;
+    realtimeChannels.delete(this);
+  }
+
+  dispatch(message: Record<string, any>): void {
+    if (!this.subscribed) return;
+    if (message.type === 'presence' && message.topic === this.topic) {
+      this.presence = message.state ?? {};
+    }
+    for (const handler of this.handlers) {
+      if (handler.kind !== message.type) continue;
+      if (handler.kind === 'broadcast') {
+        if (message.topic !== this.topic || handler.filter.event !== message.event) continue;
+        handler.callback({ payload: message.payload });
+      } else if (handler.kind === 'presence') {
+        if (message.topic !== this.topic || handler.filter.event !== 'sync') continue;
+        handler.callback(message);
+      } else {
+        if (handler.filter.table && handler.filter.table !== message.table) continue;
+        if (
+          handler.filter.event &&
+          handler.filter.event !== '*' &&
+          handler.filter.event !== message.event
+        )
+          continue;
+        if (!matchesRealtimeFilter(message, handler.filter.filter)) continue;
+        handler.callback({
+          new: message.new ?? {},
+          old: message.old ?? {},
+          eventType: message.event
+        });
+      }
+    }
+  }
+}
+
+const realtimeChannels = new Set<RealtimeChannel>();
+let realtimeSocket: WebSocket | null = null;
+let realtimeOpening: Promise<void> | null = null;
+let reconnectTimer: number | null = null;
+
+async function ensureRealtimeSocket(): Promise<void> {
+  if (realtimeSocket?.readyState === WebSocket.OPEN) return;
+  if (realtimeOpening) return realtimeOpening;
+  realtimeOpening = (async () => {
+    const token = await accessToken();
+    if (!token) throw new Error('Sign in first.');
+    const wsUrl = `${apiUrl.replace(/^http/, 'ws')}/v1/ws`;
+    const socket = new WebSocket(wsUrl, ['clerk-session', token]);
+    realtimeSocket = socket;
+    await new Promise<void>((resolve, reject) => {
+      socket.onopen = () => resolve();
+      socket.onerror = () => reject(new Error('Realtime connection failed.'));
+    });
+    socket.onmessage = (event) => {
+      try {
+        const message = JSON.parse(String(event.data));
+        for (const channel of realtimeChannels) channel.dispatch(message);
+      } catch {
+        // Ignore malformed server frames; the authenticated socket stays open.
+      }
+    };
+    socket.onclose = () => {
+      realtimeSocket = null;
+      if (realtimeChannels.size > 0 && authSession && reconnectTimer === null) {
+        reconnectTimer = window.setTimeout(() => {
+          reconnectTimer = null;
+          void ensureRealtimeSocket();
+        }, 1500);
+      }
+    };
+  })().finally(() => {
+    realtimeOpening = null;
+  });
+  return realtimeOpening;
+}
+
+function closeRealtimeSocket(): void {
+  if (reconnectTimer !== null) window.clearTimeout(reconnectTimer);
+  reconnectTimer = null;
+  realtimeSocket?.close();
+  realtimeSocket = null;
+}
+
+function matchesRealtimeFilter(message: Record<string, any>, expression?: string): boolean {
+  if (!expression) return true;
+  const [field, operator, ...tail] = expression.split('.');
+  if (operator !== 'eq') return true;
+  const expected = tail.join('.');
+  const row = Object.keys(message.new ?? {}).length ? message.new : message.old;
+  return String(row?.[field]) === expected;
+}
+
+export const supabase = {
+  from<T = any>(table: string) {
+    return new QueryBuilder<T>(table);
+  },
+  async rpc<T = unknown>(
+    name: string,
+    arguments_: Record<string, unknown> = {}
+  ): Promise<QueryResult<T>> {
+    try {
+      const response = await apiRequest<{ data: T }>(
+        `/v1/compat/rpc/${encodeURIComponent(name)}`,
+        {
+          method: 'POST',
+          body: JSON.stringify({ arguments: arguments_ })
+        }
+      );
+      return { data: response.data, error: null };
+    } catch (error) {
+      return { data: null, error: normalizeError(error) };
+    }
+  },
+  functions: {
+    async invoke<T = any>(
+      name: string,
+      options?: { body?: Record<string, unknown> }
+    ): Promise<QueryResult<T>> {
+      try {
+        const response = await apiRequest<{ data: T }>(
+          `/v1/compat/functions/${encodeURIComponent(name)}`,
+          { method: 'POST', body: JSON.stringify({ body: options?.body ?? {} }) }
+        );
+        return { data: response.data, error: null };
+      } catch (error) {
+        return { data: null, error: normalizeError(error) };
+      }
+    }
+  },
+  auth: {
+    async getSession(): Promise<{ data: { session: ApiSession | null }; error: ApiError | null }> {
+      try {
+        return { data: { session: await refreshAuthSession() }, error: null };
+      } catch (error) {
+        return { data: { session: null }, error: normalizeError(error) };
+      }
+    },
+    onAuthStateChange(listener: AuthListener) {
+      authListeners.add(listener);
+      queueMicrotask(() => listener('INITIAL_SESSION', authSession));
+      return { data: { subscription: { unsubscribe: () => authListeners.delete(listener) } } };
+    },
+    async signInWithPassword(input: { username: string; password: string }) {
+      try {
+        if (!clerkRuntime) throw new Error('Clerk is still loading.');
+        await clerkRuntime.signIn(input.username, input.password);
+        await refreshAuthSession();
+        for (const listener of authListeners) listener('SIGNED_IN', authSession);
+        return { data: { session: authSession }, error: null };
+      } catch (error) {
+        return { data: { session: null }, error: normalizeError(error) };
+      }
+    },
+    async signOut(_options?: { scope?: string }) {
+      try {
+        await clerkRuntime?.signOut();
+        authSession = null;
+        closeRealtimeSocket();
+        for (const listener of authListeners) listener('SIGNED_OUT', null);
+        return { error: null };
+      } catch (error) {
+        return { error: normalizeError(error) };
+      }
+    },
+    async updateUser(input: { password: string }) {
+      try {
+        if (!clerkRuntime) throw new Error('Clerk is still loading.');
+        await clerkRuntime.updatePin(input.password);
+        return { error: null };
+      } catch (error) {
+        return { error: normalizeError(error) };
+      }
+    }
+  },
+  channel(topic: string, options?: { config?: { presence?: { key?: string } } }) {
+    return new RealtimeChannel(topic, options);
+  },
+  async removeChannel(channel: RealtimeChannel) {
+    channel.dispose();
+    if (realtimeChannels.size === 0) closeRealtimeSocket();
+    return 'ok';
+  }
+};

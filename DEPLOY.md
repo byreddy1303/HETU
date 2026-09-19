@@ -1,5 +1,14 @@
 # DEPLOY.md — Production deployment walkthrough
 
+**Migration note:** this document covers the currently live legacy backend.
+Its Supabase files now live in `backends/typescript/supabase`; add
+`--workdir backends/typescript` to direct Supabase CLI commands from the root.
+The deployment script and npm scripts already handle this path.
+For the separate Python Vercel deployment and its mandatory recovery gates, see
+[the Python README](backends/python/README.md) and
+[DATA_SAFETY](backends/python/docs/DATA_SAFETY.md). Do not switch the frontend's
+data source or run the partial importer against production.
+
 Follow this document top-to-bottom to take HETU from a fresh clone to a working production URL with a functional access-request pipeline. Every step is idempotent — you can run the whole thing again to roll changes.
 
 For the closed learning loop update, first follow [the dedicated release gate](docs/closed-loop-release.md).

@@ -1,0 +1,159 @@
+"""Add shared domain tables required by the React API contract.
+
+Revision ID: 202609190002
+Revises: 202609190001
+Create Date: 2026-09-19 18:10:00
+"""
+
+from collections.abc import Sequence
+
+import sqlalchemy as sa
+from sqlalchemy.dialects import postgresql
+
+from alembic import op
+
+revision: str = "202609190002"
+down_revision: str | None = "202609190001"
+branch_labels: str | Sequence[str] | None = None
+depends_on: str | Sequence[str] | None = None
+
+
+def upgrade() -> None:
+    op.create_table(
+        "access_requests",
+        sa.Column("id", sa.String(length=36), nullable=False),
+        sa.Column("name", sa.String(length=80), nullable=False),
+        sa.Column("email", sa.String(length=320), nullable=False),
+        sa.Column("purpose", sa.Text(), nullable=False),
+        sa.Column("status", sa.String(length=16), server_default="pending", nullable=False),
+        sa.Column("notes", sa.Text(), nullable=True),
+        sa.Column("invite_id", sa.String(length=36), nullable=True),
+        sa.Column("decided_by", sa.String(length=128), nullable=True),
+        sa.Column("decided_at", sa.DateTime(timezone=True), nullable=True),
+        sa.Column("ip_hash", sa.String(length=64), nullable=True),
+        sa.Column("user_agent", sa.String(length=512), nullable=True),
+        sa.Column(
+            "created_at", sa.DateTime(timezone=True), server_default=sa.text("now()"), nullable=False
+        ),
+        sa.Column(
+            "updated_at", sa.DateTime(timezone=True), server_default=sa.text("now()"), nullable=False
+        ),
+        sa.CheckConstraint(
+            "status IN ('pending', 'approved', 'declined')",
+            name="ck_access_requests_valid_status",
+        ),
+        sa.PrimaryKeyConstraint("id", name="pk_access_requests"),
+    )
+    op.create_index("ix_access_requests_email", "access_requests", ["email"])
+    op.create_index("ix_access_requests_invite_id", "access_requests", ["invite_id"])
+    op.create_index(
+        "ix_access_requests_status_created", "access_requests", ["status", "created_at"]
+    )
+
+    op.create_table(
+        "invites",
+        sa.Column("id", sa.String(length=36), nullable=False),
+        sa.Column("token", sa.String(length=128), nullable=False),
+        sa.Column("issued_by", sa.String(length=128), nullable=False),
+        sa.Column("email", sa.String(length=320), nullable=True),
+        sa.Column("expires_at", sa.DateTime(timezone=True), nullable=False),
+        sa.Column("used_by", sa.String(length=128), nullable=True),
+        sa.Column("used_at", sa.DateTime(timezone=True), nullable=True),
+        sa.Column(
+            "created_at", sa.DateTime(timezone=True), server_default=sa.text("now()"), nullable=False
+        ),
+        sa.Column(
+            "updated_at", sa.DateTime(timezone=True), server_default=sa.text("now()"), nullable=False
+        ),
+        sa.ForeignKeyConstraint(
+            ["issued_by"], ["users.id"], name="fk_invites_issued_by_users", ondelete="CASCADE"
+        ),
+        sa.PrimaryKeyConstraint("id", name="pk_invites"),
+        sa.UniqueConstraint("token", name="uq_invites_token"),
+    )
+    op.create_index("ix_invites_issued_by", "invites", ["issued_by"])
+    op.create_index("ix_invites_token", "invites", ["token"], unique=True)
+    op.create_index("ix_invites_used_by", "invites", ["used_by"])
+
+    op.create_table(
+        "buddies",
+        sa.Column("id", sa.String(length=36), nullable=False),
+        sa.Column("user_a", sa.String(length=128), nullable=False),
+        sa.Column("user_b", sa.String(length=128), nullable=False),
+        sa.Column("status", sa.String(length=16), server_default="pending", nullable=False),
+        sa.Column("requested_by", sa.String(length=128), nullable=True),
+        sa.Column("responded_at", sa.DateTime(timezone=True), nullable=True),
+        sa.Column("decline_reason", sa.Text(), nullable=True),
+        sa.Column("last_request_at", sa.DateTime(timezone=True), nullable=True),
+        sa.Column(
+            "created_at", sa.DateTime(timezone=True), server_default=sa.text("now()"), nullable=False
+        ),
+        sa.Column(
+            "updated_at", sa.DateTime(timezone=True), server_default=sa.text("now()"), nullable=False
+        ),
+        sa.CheckConstraint("user_a < user_b", name="ck_buddies_canonical_pair"),
+        sa.CheckConstraint(
+            "status IN ('pending', 'active', 'paused')", name="ck_buddies_valid_status"
+        ),
+        sa.ForeignKeyConstraint(
+            ["user_a"], ["users.id"], name="fk_buddies_user_a_users", ondelete="CASCADE"
+        ),
+        sa.ForeignKeyConstraint(
+            ["user_b"], ["users.id"], name="fk_buddies_user_b_users", ondelete="CASCADE"
+        ),
+        sa.PrimaryKeyConstraint("id", name="pk_buddies"),
+        sa.UniqueConstraint("user_a", "user_b", name="uq_buddies_pair"),
+    )
+    op.create_index("ix_buddies_user_a_status", "buddies", ["user_a", "status"])
+    op.create_index("ix_buddies_user_b_status", "buddies", ["user_b", "status"])
+
+    op.create_table(
+        "buddy_messages",
+        sa.Column("id", sa.String(length=128), nullable=False),
+        sa.Column("buddy_id", sa.String(length=36), nullable=False),
+        sa.Column("sender_id", sa.String(length=128), nullable=False),
+        sa.Column("kind", sa.String(length=16), nullable=False),
+        sa.Column("body", sa.Text(), nullable=True),
+        sa.Column(
+            "question_ref",
+            postgresql.JSONB(astext_type=sa.Text(), none_as_null=True),
+            nullable=True,
+        ),
+        sa.Column(
+            "created_at", sa.DateTime(timezone=True), server_default=sa.text("now()"), nullable=False
+        ),
+        sa.Column("read_at", sa.DateTime(timezone=True), nullable=True),
+        sa.CheckConstraint("kind IN ('text', 'question')", name="ck_buddy_messages_valid_kind"),
+        sa.ForeignKeyConstraint(
+            ["buddy_id"],
+            ["buddies.id"],
+            name="fk_buddy_messages_buddy_id_buddies",
+            ondelete="CASCADE",
+        ),
+        sa.ForeignKeyConstraint(
+            ["sender_id"],
+            ["users.id"],
+            name="fk_buddy_messages_sender_id_users",
+            ondelete="CASCADE",
+        ),
+        sa.PrimaryKeyConstraint("id", name="pk_buddy_messages"),
+    )
+    op.create_index(
+        "ix_buddy_messages_buddy_created", "buddy_messages", ["buddy_id", "created_at"]
+    )
+
+
+def downgrade() -> None:
+    op.drop_index("ix_buddy_messages_buddy_created", table_name="buddy_messages")
+    op.drop_table("buddy_messages")
+    op.drop_index("ix_buddies_user_b_status", table_name="buddies")
+    op.drop_index("ix_buddies_user_a_status", table_name="buddies")
+    op.drop_table("buddies")
+    op.drop_index("ix_invites_used_by", table_name="invites")
+    op.drop_index("ix_invites_token", table_name="invites")
+    op.drop_index("ix_invites_issued_by", table_name="invites")
+    op.drop_table("invites")
+    op.drop_index("ix_access_requests_status_created", table_name="access_requests")
+    op.drop_index("ix_access_requests_invite_id", table_name="access_requests")
+    op.drop_index("ix_access_requests_email", table_name="access_requests")
+    op.drop_table("access_requests")

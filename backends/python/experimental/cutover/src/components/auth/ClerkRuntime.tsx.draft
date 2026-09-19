@@ -1,0 +1,84 @@
+import { useEffect, useMemo } from 'react';
+import { useAuth, useUser } from '@clerk/react';
+import { useSignIn } from '@clerk/react/legacy';
+import { configureClerkRuntime, type ApiUser } from '@/lib/supabase';
+
+function clerkPassword(pin: string): string {
+  return `H3tu!${pin}#rank`;
+}
+
+function clerkError(error: unknown): Error {
+  const candidate = error as {
+    errors?: Array<{ longMessage?: string; message?: string }>;
+    message?: string;
+  };
+  return new Error(
+    candidate?.errors?.[0]?.longMessage ??
+      candidate?.errors?.[0]?.message ??
+      candidate?.message ??
+      'Authentication failed.'
+  );
+}
+
+export default function ClerkRuntime() {
+  const auth = useAuth();
+  const { user } = useUser();
+  const signInState = useSignIn();
+
+  const apiUser = useMemo<ApiUser | null>(() => {
+    if (!user) return null;
+    return {
+      id: user.id,
+      email: user.primaryEmailAddress?.emailAddress,
+      username: user.username,
+      user_metadata: {
+        first_name: user.firstName,
+        last_name: user.lastName
+      }
+    };
+  }, [user]);
+
+  useEffect(() => {
+    configureClerkRuntime({
+      loaded: auth.isLoaded && signInState.isLoaded,
+      user: apiUser,
+      getToken: async () => (auth.isLoaded ? auth.getToken() : null),
+      signIn: async (username, pin) => {
+        if (!signInState.isLoaded) throw new Error('Clerk is still loading.');
+        try {
+          const result = await signInState.signIn.create({
+            strategy: 'password',
+            identifier: username,
+            password: clerkPassword(pin)
+          });
+          if (result.status !== 'complete' || !result.createdSessionId) {
+            throw new Error(
+              result.status === 'needs_second_factor' || result.status === 'needs_client_trust'
+                ? 'Additional verification is required. Complete it in the Clerk account portal.'
+                : 'Sign-in could not be completed.'
+            );
+          }
+          await signInState.setActive({ session: result.createdSessionId });
+        } catch (error) {
+          throw clerkError(error);
+        }
+      },
+      signOut: async () => {
+        if (auth.isLoaded) await auth.signOut();
+      },
+      updatePin: async (pin) => {
+        if (!user) throw new Error('No active Clerk user.');
+        try {
+          await user.updatePassword({
+            newPassword: clerkPassword(pin),
+            signOutOfOtherSessions: true
+          });
+        } catch (error) {
+          throw clerkError(error);
+        }
+      }
+    });
+  }, [apiUser, auth, signInState, user]);
+
+  return null;
+}

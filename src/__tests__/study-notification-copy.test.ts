@@ -3,9 +3,9 @@ import {
   dailyPyqCopy,
   detailedDayPlanCopy,
   parseStudyPlanBlocks
-} from '../../supabase/functions/_shared/study-notification-copy';
-import { openPlannerSessions } from '../../supabase/functions/_shared/planner-reminders';
-import { parseTelegramStudySessions } from '../../supabase/functions/_shared/telegram';
+} from '../../backends/typescript/supabase/functions/_shared/study-notification-copy';
+import { openPlannerSessions } from '../../backends/typescript/supabase/functions/_shared/planner-reminders';
+import { parseTelegramStudySessions } from '../../backends/typescript/supabase/functions/_shared/telegram';
 
 describe('study notification copy', () => {
   const blocks = parseStudyPlanBlocks([

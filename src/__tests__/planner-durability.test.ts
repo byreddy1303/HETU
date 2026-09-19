@@ -170,7 +170,7 @@ describe('legacy Planner consolidation', () => {
     const sql = readFileSync(
       resolve(
         process.cwd(),
-        'supabase/migrations/20260902051324_unified_planner_durability.sql'
+        'backends/typescript/supabase/migrations/20260902051324_unified_planner_durability.sql'
       ),
       'utf8'
     );

@@ -1,0 +1,482 @@
+from __future__ import annotations
+
+import math
+from datetime import UTC, datetime, timedelta
+from statistics import median
+from typing import Any
+from uuid import uuid4
+
+from fastapi import HTTPException, status
+from sqlalchemy import and_, delete, func, or_, select
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.core.config import Settings
+from app.db.models import AccessRequest, Buddy, BuddyMessage, Invite, Record, User
+from app.schemas import CompatMutation, CompatQuery, QueryFilter
+from app.services.records import (
+    COLLECTIONS,
+    _filter_expression,
+    patch_record,
+    to_api,
+    upsert_records,
+)
+
+COMPOSITE_IDENTITIES: dict[str, tuple[str, ...]] = {
+    "account_state": ("namespace",),
+    "planner_day_plans": ("plan_date",),
+    "push_subscriptions": ("device_id",),
+    "readiness_snapshots": ("on_date",),
+    "study_notification_preferences": ("category",),
+    "telegram_subscriptions": ("user_id",),
+}
+
+
+def api_error(message: str, code: int = status.HTTP_400_BAD_REQUEST) -> HTTPException:
+    return HTTPException(status_code=code, detail=message)
+
+
+async def is_owner(db: AsyncSession, user_id: str, settings: Settings) -> bool:
+    if user_id in settings.owner_ids:
+        return True
+    user = await db.get(User, user_id)
+    if settings.owner_email:
+        return bool(user and user.email and user.email.lower() == settings.owner_email.lower())
+    if settings.environment in {"local", "test"}:
+        first_id = await db.scalar(select(User.id).order_by(User.created_at.asc()).limit(1))
+        return first_id == user_id
+    return False
+
+
+def user_row(user: User) -> dict[str, Any]:
+    profile = dict(user.profile or {})
+    return {
+        **profile,
+        "id": user.id,
+        "email": user.email,
+        "username": user.username,
+        "name": profile.get("name") or user.display_name or user.username or "Learner",
+        "created_at": user.created_at,
+        "updated_at": user.updated_at,
+    }
+
+
+def buddy_row(row: Buddy) -> dict[str, Any]:
+    return {
+        "id": row.id,
+        "user_a": row.user_a,
+        "user_b": row.user_b,
+        "status": row.status,
+        "requested_by": row.requested_by,
+        "responded_at": row.responded_at,
+        "decline_reason": row.decline_reason,
+        "last_request_at": row.last_request_at,
+        "created_at": row.created_at,
+        "updated_at": row.updated_at,
+    }
+
+
+def message_row(row: BuddyMessage) -> dict[str, Any]:
+    return {
+        "id": row.id,
+        "buddy_id": row.buddy_id,
+        "sender_id": row.sender_id,
+        "kind": row.kind,
+        "body": row.body,
+        "question_ref": row.question_ref,
+        "created_at": row.created_at,
+        "read_at": row.read_at,
+    }
+
+
+def invite_row(row: Invite) -> dict[str, Any]:
+    return {
+        "id": row.id,
+        "token": row.token,
+        "issued_by": row.issued_by,
+        "email": row.email,
+        "expires_at": row.expires_at,
+        "used_by": row.used_by,
+        "used_at": row.used_at,
+        "created_at": row.created_at,
+        "updated_at": row.updated_at,
+    }
+
+
+def access_request_row(row: AccessRequest) -> dict[str, Any]:
+    return {
+        "id": row.id,
+        "name": row.name,
+        "email": row.email,
+        "purpose": row.purpose,
+        "status": row.status,
+        "notes": row.notes,
+        "invite_id": row.invite_id,
+        "decided_by": row.decided_by,
+        "decided_at": row.decided_at,
+        "created_at": row.created_at,
+        "updated_at": row.updated_at,
+    }
+
+
+async def query_compat(
+    db: AsyncSession,
+    *,
+    table: str,
+    user_id: str,
+    query: CompatQuery,
+    settings: Settings,
+) -> tuple[list[dict[str, Any]], int]:
+    if table == "users":
+        rows = await _query_users(db, user_id, query)
+    elif table == "buddies":
+        rows = [
+            buddy_row(row)
+            for row in (
+                await db.scalars(
+                    select(Buddy).where(or_(Buddy.user_a == user_id, Buddy.user_b == user_id))
+                )
+            ).all()
+        ]
+        rows = _filter_dicts(rows, query)
+    elif table == "buddy_messages":
+        buddy_ids = select(Buddy.id).where(
+            Buddy.status == "active", or_(Buddy.user_a == user_id, Buddy.user_b == user_id)
+        )
+        rows = [
+            message_row(row)
+            for row in (
+                await db.scalars(select(BuddyMessage).where(BuddyMessage.buddy_id.in_(buddy_ids)))
+            ).all()
+        ]
+        rows = _filter_dicts(rows, query)
+    elif table == "invites":
+        statement = select(Invite).where(Invite.issued_by == user_id)
+        rows = [invite_row(row) for row in (await db.scalars(statement)).all()]
+        rows = _filter_dicts(rows, query)
+    elif table == "account_requests":
+        if not await is_owner(db, user_id, settings):
+            raise api_error("Owner access required", status.HTTP_403_FORBIDDEN)
+        rows = [access_request_row(row) for row in (await db.scalars(select(AccessRequest))).all()]
+        rows = _filter_dicts(rows, query)
+    else:
+        rows = await _query_records(db, table, user_id, query)
+        return rows
+
+    total = len(rows)
+    return _slice(rows, query), total
+
+
+async def mutate_compat(
+    db: AsyncSession,
+    *,
+    table: str,
+    operation: str,
+    user_id: str,
+    mutation: CompatMutation,
+    settings: Settings,
+) -> list[dict[str, Any]]:
+    if table == "users":
+        if operation != "update" or not mutation.values:
+            raise api_error("The users projection only supports profile updates")
+        user = await db.get(User, user_id)
+        assert user is not None
+        patch = mutation.values[0]
+        user.display_name = patch.get("name", user.display_name)
+        user.username = patch.get("username", user.username)
+        user.profile = {**(user.profile or {}), **_without(patch, "id", "email", "username")}
+        await db.flush()
+        return [user_row(user)]
+    if table == "buddy_messages":
+        return await _mutate_messages(db, operation, user_id, mutation)
+    if table == "buddies":
+        raise api_error("Buddy relationships must be changed through the buddy RPCs")
+    if table == "invites":
+        if operation not in {"insert", "upsert"}:
+            raise api_error("Invites can only be created through this table endpoint")
+        if not await is_owner(db, user_id, settings):
+            raise api_error("Owner access required", status.HTTP_403_FORBIDDEN)
+        output: list[dict[str, Any]] = []
+        for value in mutation.values:
+            expires_at = _datetime(value.get("expires_at"))
+            invite = Invite(
+                id=str(value.get("id") or uuid4()),
+                token=str(value.get("token") or uuid4().hex),
+                issued_by=user_id,
+                email=_optional_str(value.get("email")),
+                expires_at=expires_at or datetime.now(UTC) + timedelta(days=7),
+            )
+            db.add(invite)
+            output.append(invite_row(invite))
+        await db.flush()
+        return output
+    if table == "account_requests":
+        if not await is_owner(db, user_id, settings):
+            raise api_error("Owner access required", status.HTTP_403_FORBIDDEN)
+        raise api_error("Access requests are changed through approval endpoints")
+    return await _mutate_records(db, table, operation, user_id, mutation)
+
+
+async def _query_users(
+    db: AsyncSession, user_id: str, query: CompatQuery
+) -> list[dict[str, Any]]:
+    allowed = {user_id}
+    pairs = await db.execute(
+        select(Buddy.user_a, Buddy.user_b).where(
+            or_(Buddy.user_a == user_id, Buddy.user_b == user_id)
+        )
+    )
+    for user_a, user_b in pairs.all():
+        allowed.update((user_a, user_b))
+    rows = [user_row(row) for row in (await db.scalars(select(User).where(User.id.in_(allowed)))).all()]
+    return _filter_dicts(rows, query)
+
+
+async def _query_records(
+    db: AsyncSession, table: str, user_id: str, query: CompatQuery
+) -> tuple[list[dict[str, Any]], int]:
+    if table not in COLLECTIONS or table in {"buddies", "buddy_messages"}:
+        raise api_error("Unknown table", status.HTTP_404_NOT_FOUND)
+    conditions: list[Any] = [Record.collection == table, Record.owner_id == user_id]
+    conditions.extend(
+        _filter_expression(item) for item in query.filters if item.field not in {"user_id", "owner_id"}
+    )
+    if query.or_filters:
+        conditions.append(
+            or_(
+                *(
+                    _filter_expression(item)
+                    for item in query.or_filters
+                    if item.field not in {"user_id", "owner_id"}
+                )
+            )
+        )
+    base = select(Record).where(*conditions)
+    total = int(await db.scalar(select(func.count()).select_from(base.subquery())) or 0)
+    for order in query.orders:
+        column = {
+            "id": Record.external_id,
+            "user_id": Record.owner_id,
+            "created_at": Record.created_at,
+            "updated_at": Record.updated_at,
+            "version": Record.version,
+        }.get(order.field, Record.data[order.field].as_string())
+        base = base.order_by(column.asc() if order.ascending else column.desc())
+    if not query.orders:
+        base = base.order_by(Record.updated_at.desc(), Record.id.desc())
+    base = base.offset(query.offset)
+    if query.limit is not None:
+        base = base.limit(query.limit)
+    rows = [to_api(row) for row in (await db.scalars(base)).all()]
+    return rows, total
+
+
+async def _mutate_records(
+    db: AsyncSession,
+    table: str,
+    operation: str,
+    user_id: str,
+    mutation: CompatMutation,
+) -> list[dict[str, Any]]:
+    if table not in COLLECTIONS or table in {"buddies", "buddy_messages"}:
+        raise api_error("Unknown table", status.HTTP_404_NOT_FOUND)
+    if operation in {"insert", "upsert"}:
+        values = [_with_identity(table, value) for value in mutation.values]
+        rows = await upsert_records(db, collection=table, owner_id=user_id, items=values)
+        return [to_api(row) for row in rows]
+    selected, _ = await _query_records(
+        db,
+        table,
+        user_id,
+        CompatQuery(filters=mutation.filters, limit=1000),
+    )
+    if operation == "delete":
+        ids = [str(row["id"]) for row in selected]
+        if ids:
+            await db.execute(
+                delete(Record).where(
+                    Record.collection == table,
+                    Record.owner_id == user_id,
+                    Record.external_id.in_(ids),
+                )
+            )
+        return selected
+    if operation == "update":
+        if len(mutation.values) != 1:
+            raise api_error("Update requires one patch object")
+        output = []
+        for row in selected:
+            updated = await patch_record(
+                db,
+                collection=table,
+                owner_id=user_id,
+                external_id=str(row["id"]),
+                patch=mutation.values[0],
+                expected_version=None,
+            )
+            output.append(to_api(updated))
+        return output
+    raise api_error("Unsupported mutation")
+
+
+async def _mutate_messages(
+    db: AsyncSession, operation: str, user_id: str, mutation: CompatMutation
+) -> list[dict[str, Any]]:
+    if operation in {"insert", "upsert"}:
+        output: list[dict[str, Any]] = []
+        for value in mutation.values:
+            buddy = await _active_buddy(db, str(value.get("buddy_id", "")), user_id)
+            del buddy
+            kind = str(value.get("kind", ""))
+            body = value.get("body")
+            question_ref = value.get("question_ref")
+            if kind == "text" and (not isinstance(body, str) or not body.strip() or question_ref):
+                raise api_error("Invalid text message")
+            if kind == "question" and (body is not None or not isinstance(question_ref, dict)):
+                raise api_error("Invalid question message")
+            message = BuddyMessage(
+                id=str(value.get("id") or uuid4()),
+                buddy_id=str(value["buddy_id"]),
+                sender_id=user_id,
+                kind=kind,
+                body=body.strip()[:4000] if isinstance(body, str) else None,
+                question_ref=_safe_question_ref(question_ref),
+            )
+            db.add(message)
+            output.append(message_row(message))
+        await db.flush()
+        return output
+    buddy_ids = select(Buddy.id).where(
+        Buddy.status == "active", or_(Buddy.user_a == user_id, Buddy.user_b == user_id)
+    )
+    candidates = [
+        message_row(row)
+        for row in (
+            await db.scalars(select(BuddyMessage).where(BuddyMessage.buddy_id.in_(buddy_ids)))
+        ).all()
+    ]
+    rows = _filter_dicts(candidates, CompatQuery(filters=mutation.filters, limit=1000))
+    if operation != "update" or len(mutation.values) != 1:
+        raise api_error("Messages only support insert and read-receipt updates")
+    read_at = _datetime(mutation.values[0].get("read_at"))
+    if read_at is None:
+        raise api_error("Only read receipts may be updated")
+    output = []
+    for row in rows:
+        message = await db.get(BuddyMessage, str(row["id"]))
+        if message and message.sender_id != user_id and message.read_at is None:
+            message.read_at = read_at
+            output.append(message_row(message))
+    await db.flush()
+    return output
+
+
+async def _active_buddy(db: AsyncSession, buddy_id: str, user_id: str) -> Buddy:
+    buddy = await db.get(Buddy, buddy_id)
+    if (
+        buddy is None
+        or buddy.status != "active"
+        or user_id not in {buddy.user_a, buddy.user_b}
+    ):
+        raise api_error("Active buddy membership required", status.HTTP_403_FORBIDDEN)
+    return buddy
+
+
+def _with_identity(table: str, value: dict[str, Any]) -> dict[str, Any]:
+    if value.get("id"):
+        return value
+    fields = COMPOSITE_IDENTITIES.get(table)
+    if not fields:
+        return value
+    parts = [str(value.get(field, "")).strip() for field in fields]
+    if not all(parts):
+        return value
+    return {"id": "::".join(parts), **value}
+
+
+def _filter_dicts(rows: list[dict[str, Any]], query: CompatQuery) -> list[dict[str, Any]]:
+    filtered = [row for row in rows if all(_matches(row, item) for item in query.filters)]
+    if query.or_filters:
+        filtered = [row for row in filtered if any(_matches(row, item) for item in query.or_filters)]
+    for order in reversed(query.orders):
+        filtered.sort(
+            key=lambda row: (row.get(order.field) is None, row.get(order.field)),
+            reverse=not order.ascending,
+        )
+    if not query.orders:
+        filtered.sort(key=lambda row: str(row.get("created_at", "")), reverse=True)
+    return filtered
+
+
+def _slice(rows: list[dict[str, Any]], query: CompatQuery) -> list[dict[str, Any]]:
+    if query.head:
+        return []
+    end = None if query.limit is None else query.offset + query.limit
+    return rows[query.offset:end]
+
+
+def _matches(row: dict[str, Any], item: QueryFilter) -> bool:
+    actual = row.get(item.field)
+    expected = item.value
+    if item.op == "eq":
+        return actual == expected
+    if item.op == "neq":
+        return actual != expected
+    if item.op == "in":
+        return actual in expected if isinstance(expected, list) else False
+    if item.op == "is":
+        return (actual is None) == (expected is None)
+    if actual is None:
+        return False
+    if item.op == "gt":
+        return actual > expected
+    if item.op == "gte":
+        return actual >= expected
+    if item.op == "lt":
+        return actual < expected
+    if item.op == "lte":
+        return actual <= expected
+    return False
+
+
+def _safe_question_ref(value: Any) -> dict[str, Any] | None:
+    if not isinstance(value, dict):
+        return None
+    allowed = {
+        "subject",
+        "subtopic",
+        "question_text",
+        "image_url",
+        "source_ref",
+        "source_year",
+        "target_time_sec",
+        "origin_question_id",
+    }
+    if not set(value).issubset(allowed):
+        raise api_error("Question snapshot contains unsupported fields")
+    return value
+
+
+def _datetime(value: Any) -> datetime | None:
+    if isinstance(value, datetime):
+        return value
+    if not isinstance(value, str) or not value:
+        return None
+    try:
+        parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
+    except ValueError:
+        raise api_error("Invalid timestamp") from None
+    return parsed if parsed.tzinfo else parsed.replace(tzinfo=UTC)
+
+
+def _optional_str(value: Any) -> str | None:
+    return value if isinstance(value, str) and value else None
+
+
+def _without(value: dict[str, Any], *keys: str) -> dict[str, Any]:
+    excluded = set(keys)
+    return {key: item for key, item in value.items() if key not in excluded}
+
+
+def finite_median(values: list[float]) -> float | None:
+    clean = [value for value in values if math.isfinite(value)]
+    return float(median(clean)) if clean else None

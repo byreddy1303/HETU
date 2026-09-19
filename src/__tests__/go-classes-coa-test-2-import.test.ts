@@ -81,7 +81,7 @@ describe('GO Classes COA Topic Test 2 import', () => {
     const migration = readFileSync(
       path.resolve(
         process.cwd(),
-        'supabase/migrations/20260813000003_go_classes_coa_topic_test_2.sql'
+        'backends/typescript/supabase/migrations/20260813000003_go_classes_coa_topic_test_2.sql'
       ),
       'utf8'
     );

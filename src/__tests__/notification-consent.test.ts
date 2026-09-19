@@ -1,10 +1,10 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 
-const digestSource = readFileSync('supabase/functions/daily-digest/index.ts', 'utf8');
-const buddyPushSource = readFileSync('supabase/functions/buddy-notifications/index.ts', 'utf8');
-const buddyRequestSource = readFileSync('supabase/functions/buddy-request/index.ts', 'utf8');
-const sharedPushSource = readFileSync('supabase/functions/_shared/push.ts', 'utf8');
+const digestSource = readFileSync('backends/typescript/supabase/functions/daily-digest/index.ts', 'utf8');
+const buddyPushSource = readFileSync('backends/typescript/supabase/functions/buddy-notifications/index.ts', 'utf8');
+const buddyRequestSource = readFileSync('backends/typescript/supabase/functions/buddy-request/index.ts', 'utf8');
+const sharedPushSource = readFileSync('backends/typescript/supabase/functions/_shared/push.ts', 'utf8');
 const studySettingsSource = readFileSync(
   'src/components/settings/StudyNotificationsCard.tsx',
   'utf8'

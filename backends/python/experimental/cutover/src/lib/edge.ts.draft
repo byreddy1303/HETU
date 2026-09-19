@@ -1,0 +1,190 @@
+import { apiRequest, supabase } from '@/lib/supabase';
+
+export interface EdgeError {
+  ok: false;
+  status: number;
+  error: string;
+}
+
+function edgeError(error: unknown): EdgeError {
+  const candidate = error as Error & { status?: number };
+  return {
+    ok: false,
+    status: candidate?.status ?? 0,
+    error: candidate?.message ?? 'The API request failed.'
+  };
+}
+
+export interface RequestAccessInput {
+  name: string;
+  email: string;
+  purpose: string;
+  website?: string;
+}
+
+export interface RequestAccessOk {
+  ok: true;
+  id?: string;
+  dedup?: boolean;
+}
+
+export async function requestAccess(
+  input: RequestAccessInput
+): Promise<RequestAccessOk | EdgeError> {
+  try {
+    return await apiRequest<RequestAccessOk>(
+      '/v1/access/request',
+      { method: 'POST', body: JSON.stringify(input) },
+      { public: true }
+    );
+  } catch (error) {
+    return edgeError(error);
+  }
+}
+
+export interface ApproveResult {
+  ok: true;
+  invite_id: string;
+  invite_url: string;
+  mail_sent: boolean;
+  mail_error?: string;
+}
+
+export async function approveRequest(requestId: string): Promise<ApproveResult | EdgeError> {
+  try {
+    return await apiRequest<ApproveResult>(
+      `/v1/access/${encodeURIComponent(requestId)}/approve`,
+      { method: 'POST', body: '{}' }
+    );
+  } catch (error) {
+    return edgeError(error);
+  }
+}
+
+export interface DeclineResult {
+  ok: true;
+  mail_sent: boolean;
+  mail_error?: string;
+}
+
+export async function declineRequest(
+  requestId: string,
+  options: { reason?: string; notify?: boolean } = {}
+): Promise<DeclineResult | EdgeError> {
+  try {
+    return await apiRequest<DeclineResult>(
+      `/v1/access/${encodeURIComponent(requestId)}/decline`,
+      { method: 'POST', body: JSON.stringify(options) }
+    );
+  } catch (error) {
+    return edgeError(error);
+  }
+}
+
+export function isEdgeError(value: unknown): value is EdgeError {
+  return typeof value === 'object' && value !== null && (value as { ok?: boolean }).ok === false;
+}
+
+export interface SignupInput {
+  username: string;
+  pin: string;
+  email?: string;
+  name?: string;
+  invite_token?: string;
+}
+
+export interface SignupOk {
+  ok: true;
+  user_id: string;
+  email: string;
+}
+
+export async function signupViaInvite(input: SignupInput): Promise<SignupOk | EdgeError> {
+  if (!input.email || !input.name || !input.invite_token) {
+    return { ok: false, status: 422, error: 'Name, email, and invite token are required.' };
+  }
+  try {
+    return await apiRequest<SignupOk>(
+      '/v1/auth/signup',
+      { method: 'POST', body: JSON.stringify(input) },
+      { public: true }
+    );
+  } catch (error) {
+    return edgeError(error);
+  }
+}
+
+export interface PinResetInput {
+  username: string;
+}
+
+export async function requestPinReset(
+  input: PinResetInput
+): Promise<{ ok: true } | EdgeError> {
+  try {
+    return await apiRequest<{ ok: true }>(
+      '/v1/auth/request-pin-reset',
+      { method: 'POST', body: JSON.stringify(input) },
+      { public: true }
+    );
+  } catch (error) {
+    return edgeError(error);
+  }
+}
+
+export async function confirmPinReset(
+  token: string,
+  pin: string
+): Promise<{ ok: true } | EdgeError> {
+  try {
+    return await apiRequest<{ ok: true }>(
+      '/v1/auth/reset-pin',
+      { method: 'POST', body: JSON.stringify({ token, pin }) },
+      { public: true }
+    );
+  } catch (error) {
+    return edgeError(error);
+  }
+}
+
+export type BuddyRequestStatus =
+  | 'sent'
+  | 'new'
+  | 'reopened'
+  | 'already_pending'
+  | 'active'
+  | 'cooldown'
+  | 'rate_limit'
+  | 'self'
+  | 'no_such_user'
+  | 'invalid_username';
+
+export interface BuddyRequestOk {
+  ok: true;
+  exists: boolean;
+  status: BuddyRequestStatus;
+  created: boolean;
+}
+
+export async function sendBuddyRequest(
+  username: string
+): Promise<BuddyRequestOk | EdgeError> {
+  const { data, error } = await supabase.rpc<BuddyRequestOk>('send_buddy_request', { username });
+  if (error || !data) {
+    return { ok: false, status: 0, error: error?.message ?? 'Buddy request failed.' };
+  }
+  return data;
+}
+
+export async function isUsernameAvailable(username: string): Promise<boolean> {
+  try {
+    const response = await apiRequest<{ available: boolean }>(
+      `/v1/auth/username-available/${encodeURIComponent(username)}`,
+      {},
+      { public: true }
+    );
+    return response.available;
+  } catch {
+    return true;
+  }
+}

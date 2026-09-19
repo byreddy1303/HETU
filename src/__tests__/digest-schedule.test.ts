@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   isDigestTimeDue,
   localDigestClock
-} from '../../supabase/functions/_shared/digest-schedule';
+} from '../../backends/typescript/supabase/functions/_shared/digest-schedule';
 
 describe('daily digest minute scheduling', () => {
   it('resolves local hours, minutes, dates, and weekdays in the user timezone', () => {

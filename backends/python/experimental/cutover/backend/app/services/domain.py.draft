@@ -1,0 +1,324 @@
+from __future__ import annotations
+
+from datetime import UTC, datetime, timedelta
+from secrets import token_urlsafe
+from typing import Any
+from uuid import uuid4
+
+from fastapi import HTTPException, status
+from sqlalchemy import delete, func, or_, select
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.core.config import Settings
+from app.db.models import Buddy, BuddyMessage, Record, User
+from app.services.compat import buddy_row, finite_median, message_row, user_row
+from app.services.records import to_api, upsert_records
+
+STUDY_CATEGORIES = (
+    "dashboard",
+    "planner",
+    "reattempts",
+    "pyq",
+    "sessions",
+    "log",
+    "formulas",
+    "syllabus",
+    "patterns",
+    "trigger_drill",
+    "calibration",
+    "readiness",
+    "heatmap",
+    "journal",
+    "weekly_review",
+)
+
+
+async def send_buddy_request(
+    db: AsyncSession, *, requester_id: str, username: str
+) -> dict[str, Any]:
+    normalized = username.strip().lower().removeprefix("@")
+    if not normalized or len(normalized) > 32:
+        return {"ok": True, "exists": False, "status": "invalid_username", "created": False}
+    target = await db.scalar(select(User).where(func.lower(User.username) == normalized))
+    if target is None:
+        return {"ok": True, "exists": False, "status": "no_such_user", "created": False}
+    if target.id == requester_id:
+        return {"ok": True, "exists": True, "status": "self", "created": False}
+    day_ago = datetime.now(UTC) - timedelta(days=1)
+    outgoing = await db.scalar(
+        select(func.count(Buddy.id)).where(
+            Buddy.requested_by == requester_id, Buddy.last_request_at > day_ago
+        )
+    )
+    if int(outgoing or 0) >= 20:
+        return {"ok": True, "exists": True, "status": "rate_limit", "created": False}
+    user_a, user_b = sorted((requester_id, target.id))
+    row = await db.scalar(
+        select(Buddy)
+        .where(Buddy.user_a == user_a, Buddy.user_b == user_b)
+        .with_for_update()
+    )
+    now = datetime.now(UTC)
+    if row:
+        if row.status == "active":
+            outcome, created = "active", False
+        elif row.status == "pending" and row.requested_by == requester_id:
+            outcome, created = "already_pending", False
+        elif row.status == "paused" and row.responded_at and row.responded_at > day_ago:
+            outcome, created = "cooldown", False
+        else:
+            row.status = "pending"
+            row.requested_by = requester_id
+            row.decline_reason = None
+            row.responded_at = None
+            row.last_request_at = now
+            outcome, created = "reopened", True
+    else:
+        row = Buddy(
+            id=str(uuid4()),
+            user_a=user_a,
+            user_b=user_b,
+            status="pending",
+            requested_by=requester_id,
+            last_request_at=now,
+        )
+        db.add(row)
+        outcome, created = "new", True
+    await db.flush()
+    return {
+        "ok": True,
+        "exists": True,
+        "status": outcome,
+        "created": created,
+        "buddy": buddy_row(row),
+    }
+
+
+async def list_buddy_peers(db: AsyncSession, user_id: str) -> list[dict[str, Any]]:
+    pairs = (
+        await db.execute(
+            select(Buddy.user_a, Buddy.user_b).where(
+                or_(Buddy.user_a == user_id, Buddy.user_b == user_id)
+            )
+        )
+    ).all()
+    peer_ids = {user_b if user_a == user_id else user_a for user_a, user_b in pairs}
+    if not peer_ids:
+        return []
+    users = (await db.scalars(select(User).where(User.id.in_(peer_ids)))).all()
+    return [
+        {
+            "id": user.id,
+            "name": (user.profile or {}).get("name") or user.display_name,
+            "email": user.email,
+            "username": user.username,
+        }
+        for user in users
+    ]
+
+
+async def respond_buddy_request(
+    db: AsyncSession, *, user_id: str, buddy_id: str, action: str, reason: str | None
+) -> Buddy:
+    row = await db.scalar(select(Buddy).where(Buddy.id == buddy_id).with_for_update())
+    if row is None:
+        raise HTTPException(status_code=404, detail="Buddy request not found")
+    if row.status != "pending":
+        raise HTTPException(status_code=409, detail="Request is no longer pending")
+    if user_id not in {row.user_a, row.user_b} or row.requested_by == user_id:
+        raise HTTPException(status_code=403, detail="Not your request to respond to")
+    if action == "accept":
+        row.status = "active"
+        row.decline_reason = None
+    elif action == "decline":
+        row.status = "paused"
+        row.decline_reason = reason.strip()[:500] if reason and reason.strip() else None
+    else:
+        raise HTTPException(status_code=422, detail="Action must be accept or decline")
+    row.responded_at = datetime.now(UTC)
+    await db.flush()
+    return row
+
+
+async def cancel_buddy_request(db: AsyncSession, *, user_id: str, buddy_id: str) -> Buddy:
+    row = await db.scalar(select(Buddy).where(Buddy.id == buddy_id).with_for_update())
+    if row is None:
+        raise HTTPException(status_code=404, detail="Buddy request not found")
+    if row.status != "pending" or row.requested_by != user_id:
+        raise HTTPException(status_code=403, detail="Only the requester can cancel")
+    await db.delete(row)
+    await db.flush()
+    return row
+
+
+async def unfriend(db: AsyncSession, *, user_id: str, buddy_id: str) -> Buddy:
+    row = await db.scalar(select(Buddy).where(Buddy.id == buddy_id).with_for_update())
+    if row is None:
+        raise HTTPException(status_code=404, detail="Buddy relationship not found")
+    if user_id not in {row.user_a, row.user_b}:
+        raise HTTPException(status_code=403, detail="Not a member of this relationship")
+    await db.delete(row)
+    await db.flush()
+    return row
+
+
+async def planner_mutation(
+    db: AsyncSession, *, user_id: str, arguments: dict[str, Any]
+) -> dict[str, Any]:
+    plan_date = str(arguments.get("p_plan_date") or "")
+    mutation_id = str(arguments.get("p_mutation_id") or "")
+    expected = arguments.get("p_expected_revision")
+    deleted_at = arguments.get("p_deleted_at")
+    if not plan_date or not mutation_id or not isinstance(expected, int) or expected < 0:
+        raise HTTPException(status_code=422, detail="Invalid planner mutation")
+    row = await db.scalar(
+        select(Record)
+        .where(
+            Record.collection == "planner_day_plans",
+            Record.owner_id == user_id,
+            Record.external_id == plan_date,
+        )
+        .with_for_update()
+    )
+    if row and row.data.get("last_mutation_id") == mutation_id:
+        return {"applied": True, "conflict": "idempotent_retry", "row": to_api(row)}
+    if row is None:
+        if expected != 0:
+            return {"applied": False, "conflict": "missing_expected_row", "row": None}
+        saved = await upsert_records(
+            db,
+            collection="planner_day_plans",
+            owner_id=user_id,
+            items=[
+                {
+                    "id": plan_date,
+                    "plan_date": plan_date,
+                    "sessions": [] if deleted_at else arguments.get("p_sessions", []),
+                    "plan": None if deleted_at else arguments.get("p_plan"),
+                    "revision": 1,
+                    "deleted_at": deleted_at,
+                    "last_mutation_id": mutation_id,
+                }
+            ],
+        )
+        return {"applied": True, "conflict": None, "row": to_api(saved[0])}
+    current_revision = int(row.data.get("revision") or row.version)
+    conflict = None
+    if current_revision != expected:
+        if row.data.get("deleted_at") and not deleted_at:
+            return {"applied": False, "conflict": "deletion_wins", "row": to_api(row)}
+        if not deleted_at:
+            return {"applied": False, "conflict": "version_conflict", "row": to_api(row)}
+        conflict = "stale_delete_applied"
+    row.data = {
+        **row.data,
+        "plan_date": plan_date,
+        "sessions": [] if deleted_at else arguments.get("p_sessions", []),
+        "plan": None if deleted_at else arguments.get("p_plan"),
+        "revision": current_revision + 1,
+        "deleted_at": deleted_at,
+        "last_mutation_id": mutation_id,
+    }
+    row.version += 1
+    row.updated_at = datetime.now(UTC)
+    await db.flush()
+    return {"applied": True, "conflict": conflict, "row": to_api(row)}
+
+
+async def readiness_median(
+    db: AsyncSession, *, user_id: str, band_width_days: int
+) -> list[dict[str, Any]]:
+    del user_id, band_width_days
+    records = (
+        await db.scalars(select(Record).where(Record.collection == "readiness_snapshots"))
+    ).all()
+    latest: dict[str, Record] = {}
+    for record in records:
+        previous = latest.get(record.owner_id)
+        if previous is None or str(record.data.get("on_date", "")) > str(
+            previous.data.get("on_date", "")
+        ):
+            latest[record.owner_id] = record
+    scores = [float(row.data["score"]) for row in latest.values() if row.data.get("score") is not None]
+    return [{"median": finite_median(scores), "sample_size": len(scores)}]
+
+
+async def ensure_study_preferences(db: AsyncSession, user_id: str) -> list[dict[str, Any]]:
+    existing = {
+        row.data.get("category"): row
+        for row in (
+            await db.scalars(
+                select(Record).where(
+                    Record.collection == "study_notification_preferences",
+                    Record.owner_id == user_id,
+                )
+            )
+        ).all()
+    }
+    missing = []
+    for index, category in enumerate(STUDY_CATEGORIES):
+        if category not in existing:
+            missing.append(
+                {
+                    "id": category,
+                    "category": category,
+                    "enabled": False,
+                    "hour_local": 6 + (index % 3),
+                    "minute_local": 0,
+                    "last_sent_on": None,
+                    "muted_until": None,
+                }
+            )
+    if missing:
+        saved = await upsert_records(
+            db,
+            collection="study_notification_preferences",
+            owner_id=user_id,
+            items=missing,
+        )
+        existing.update({row.data["category"]: row for row in saved})
+    return [to_api(existing[category]) for category in STUDY_CATEGORIES]
+
+
+async def begin_telegram(db: AsyncSession, user_id: str) -> list[dict[str, Any]]:
+    token = token_urlsafe(24)
+    expires = datetime.now(UTC) + timedelta(minutes=15)
+    rows = await upsert_records(
+        db,
+        collection="telegram_subscriptions",
+        owner_id=user_id,
+        items=[
+            {
+                "id": user_id,
+                "enabled": False,
+                "connect_token": token,
+                "connect_token_expires_at": expires.isoformat(),
+            }
+        ],
+    )
+    del rows
+    return [{"token": token, "expires_at": expires}]
+
+
+async def set_telegram_enabled(db: AsyncSession, user_id: str, enabled: bool) -> bool:
+    row = await db.scalar(
+        select(Record).where(
+            Record.collection == "telegram_subscriptions",
+            Record.owner_id == user_id,
+            Record.external_id == user_id,
+        )
+    )
+    if row is None or (enabled and not row.data.get("chat_id")):
+        raise HTTPException(status_code=409, detail="Connect Telegram before enabling the digest")
+    row.data = {**row.data, "enabled": enabled}
+    row.version += 1
+    return True
+
+
+async def disconnect_telegram(db: AsyncSession, user_id: str) -> bool:
+    result = await db.execute(
+        delete(Record).where(
+            Record.collection == "telegram_subscriptions", Record.owner_id == user_id
+        )
+    )
+    return bool(result.rowcount)

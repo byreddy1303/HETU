@@ -1,0 +1,136 @@
+from __future__ import annotations
+
+import hashlib
+from datetime import UTC, datetime, timedelta
+from secrets import token_hex
+from uuid import uuid4
+
+from fastapi import APIRouter, HTTPException, Request
+from sqlalchemy import func, select
+
+from app.api.deps import CurrentUser, DbDep, SettingsDep
+from app.db.models import AccessRequest, Invite
+from app.schemas import AccessRequestCreate
+from app.services.compat import is_owner
+from app.services.integrations import send_email
+
+router = APIRouter()
+
+
+@router.post("/request")
+async def create_access_request(
+    payload: AccessRequestCreate, request: Request, db: DbDep, settings: SettingsDep
+) -> dict[str, object]:
+    if payload.website:
+        return {"ok": True, "dedup": True}
+    email = payload.email.strip().lower()
+    since = datetime.now(UTC) - timedelta(hours=24)
+    existing = await db.scalar(
+        select(AccessRequest).where(
+            func.lower(AccessRequest.email) == email,
+            AccessRequest.status == "pending",
+            AccessRequest.created_at >= since,
+        )
+    )
+    if existing:
+        return {"ok": True, "id": existing.id, "dedup": True}
+    forwarded = request.headers.get("x-forwarded-for", "").split(",", 1)[0].strip()
+    ip = forwarded or (request.client.host if request.client else "unknown")
+    row = AccessRequest(
+        id=str(uuid4()),
+        name=payload.name.strip(),
+        email=email,
+        purpose=payload.purpose.strip(),
+        ip_hash=hashlib.sha256(ip.encode()).hexdigest(),
+        user_agent=request.headers.get("user-agent", "")[:512],
+    )
+    db.add(row)
+    await db.commit()
+    if settings.owner_email:
+        await send_email(
+            settings,
+            to=settings.owner_email,
+            subject="New HETU access request",
+            html=f"<p>{row.name} ({row.email}) requested access.</p><p>{row.purpose}</p>",
+            text=f"{row.name} ({row.email}) requested access.\n\n{row.purpose}",
+        )
+    return {"ok": True, "id": row.id, "dedup": False}
+
+
+@router.post("/{request_id}/approve")
+async def approve_access_request(
+    request_id: str, identity: CurrentUser, db: DbDep, settings: SettingsDep
+) -> dict[str, object]:
+    if not await is_owner(db, identity.user_id, settings):
+        raise HTTPException(status_code=403, detail="Owner access required")
+    row = await db.scalar(
+        select(AccessRequest).where(AccessRequest.id == request_id).with_for_update()
+    )
+    if row is None:
+        raise HTTPException(status_code=404, detail="Request not found")
+    if row.status != "pending":
+        raise HTTPException(status_code=409, detail=f"Request is already {row.status}")
+    invite = Invite(
+        id=str(uuid4()),
+        token=token_hex(16),
+        issued_by=identity.user_id,
+        email=row.email,
+        expires_at=datetime.now(UTC) + timedelta(days=7),
+    )
+    db.add(invite)
+    row.status = "approved"
+    row.invite_id = invite.id
+    row.decided_by = identity.user_id
+    row.decided_at = datetime.now(UTC)
+    await db.commit()
+    url = f"{settings.app_url.rstrip('/')}/signup?invite={invite.token}"
+    sent, mail_error = await send_email(
+        settings,
+        to=row.email,
+        subject="Your HETU invitation",
+        html=f'<p>Your access request was approved.</p><p><a href="{url}">Create your account</a></p>',
+        text=f"Your HETU access request was approved: {url}",
+    )
+    return {
+        "ok": True,
+        "invite_id": invite.id,
+        "invite_url": url,
+        "mail_sent": sent,
+        "mail_error": mail_error,
+    }
+
+
+@router.post("/{request_id}/decline")
+async def decline_access_request(
+    request_id: str,
+    payload: dict[str, object],
+    identity: CurrentUser,
+    db: DbDep,
+    settings: SettingsDep,
+) -> dict[str, object]:
+    if not await is_owner(db, identity.user_id, settings):
+        raise HTTPException(status_code=403, detail="Owner access required")
+    row = await db.scalar(
+        select(AccessRequest).where(AccessRequest.id == request_id).with_for_update()
+    )
+    if row is None:
+        raise HTTPException(status_code=404, detail="Request not found")
+    if row.status != "pending":
+        raise HTTPException(status_code=409, detail=f"Request is already {row.status}")
+    reason = payload.get("reason")
+    row.status = "declined"
+    row.notes = str(reason)[:1000] if reason else row.notes
+    row.decided_by = identity.user_id
+    row.decided_at = datetime.now(UTC)
+    await db.commit()
+    sent = False
+    mail_error = None
+    if payload.get("notify", True):
+        sent, mail_error = await send_email(
+            settings,
+            to=row.email,
+            subject="HETU access request update",
+            html="<p>Your HETU access request could not be approved at this time.</p>",
+            text="Your HETU access request could not be approved at this time.",
+        )
+    return {"ok": True, "mail_sent": sent, "mail_error": mail_error}

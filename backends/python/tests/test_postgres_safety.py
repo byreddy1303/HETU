@@ -2,6 +2,7 @@
 
 import asyncio
 import os
+from urllib.parse import urlsplit
 from uuid import uuid4
 
 import pytest
@@ -14,6 +15,10 @@ from app.db.models import EntityRevision, Record, RecordRevision, User
 from app.services.records import patch_record, upsert_records
 
 URL = os.getenv("HETU_TEST_DATABASE_URL")
+if URL:
+    parsed = urlsplit(URL)
+    if parsed.hostname not in {"127.0.0.1", "localhost"} or parsed.path != "/hetu_test":
+        raise pytest.UsageError("Safety integration tests require local disposable hetu_test")
 pytestmark = pytest.mark.skipif(not URL, reason="Requires disposable migrated PostgreSQL")
 
 

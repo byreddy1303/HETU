@@ -13,6 +13,7 @@ from app.core.config import Settings
 class Identity:
     user_id: str
     session_id: str | None = None
+    expires_at: int | None = None
 
 
 async def authenticate_http_request(request: Request, settings: Settings) -> Identity:
@@ -82,4 +83,11 @@ async def _authenticate(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Token subject missing"
         )
     session_id = payload.get("sid")
-    return Identity(user_id=user_id, session_id=session_id if isinstance(session_id, str) else None)
+    expires_at = payload.get("exp")
+    if type(expires_at) is not int:
+        raise HTTPException(status_code=401, detail="Token expiration missing")
+    return Identity(
+        user_id=user_id,
+        session_id=session_id if isinstance(session_id, str) else None,
+        expires_at=expires_at,
+    )

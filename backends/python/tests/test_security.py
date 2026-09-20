@@ -6,6 +6,7 @@ import jwt
 import pytest
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
+from fastapi import HTTPException
 from pydantic import SecretStr
 from starlette.requests import Request
 
@@ -14,22 +15,32 @@ from app.core.security import authenticate_http_request
 
 
 @pytest.mark.asyncio
-async def test_clerk_session_token_is_verified_locally() -> None:
+@pytest.mark.parametrize("case", ["valid", "expired", "wrong_origin", "missing_exp", "future_nbf"])
+async def test_clerk_session_token_is_verified_locally(case) -> None:
     private_key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
     public_key = private_key.public_key().public_bytes(
         serialization.Encoding.PEM,
         serialization.PublicFormat.SubjectPublicKeyInfo,
     )
     now = datetime.now(UTC)
+    claims = {
+        "sub": "user_verified",
+        "sid": "sess_verified",
+        "azp": "https://app.example.com",
+        "iat": now,
+        "nbf": now - timedelta(seconds=1),
+        "exp": now + timedelta(minutes=1),
+    }
+    if case == "expired":
+        claims["exp"] = now - timedelta(minutes=5)
+    elif case == "wrong_origin":
+        claims["azp"] = "https://untrusted.example"
+    elif case == "missing_exp":
+        del claims["exp"]
+    elif case == "future_nbf":
+        claims["nbf"] = now + timedelta(minutes=5)
     token = jwt.encode(
-        {
-            "sub": "user_verified",
-            "sid": "sess_verified",
-            "azp": "https://app.example.com",
-            "iat": now,
-            "nbf": now - timedelta(seconds=1),
-            "exp": now + timedelta(minutes=1),
-        },
+        claims,
         private_key,
         algorithm="RS256",
     )
@@ -46,6 +57,11 @@ async def test_clerk_session_token_is_verified_locally() -> None:
         clerk_authorized_parties="https://app.example.com",
     )
 
+    if case != "valid":
+        with pytest.raises(HTTPException) as exc:
+            await authenticate_http_request(request, settings)
+        assert exc.value.status_code == 401
+        return
     identity = await authenticate_http_request(request, settings)
 
     assert identity.user_id == "user_verified"

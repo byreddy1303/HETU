@@ -81,5 +81,4 @@ async def head_object(key: str) -> dict[str, Any]:
 
 
 async def delete_object(key: str) -> None:
-    settings = get_settings()
-    await asyncio.to_thread(get_r2_client().delete_object, Bucket=settings.r2_bucket, Key=key)
+    raise RuntimeError("Physical object deletion disabled; reviewed erasure workflow required")

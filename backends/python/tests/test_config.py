@@ -15,7 +15,7 @@ def test_neon_url_is_normalized_for_asyncpg() -> None:
 
 
 def test_production_requires_external_services() -> None:
-    settings = Settings(environment="production")
+    settings = Settings(environment="production", database_url=SecretStr("sqlite+aiosqlite://"))
     try:
         settings.validate_runtime()
     except RuntimeError as exc:

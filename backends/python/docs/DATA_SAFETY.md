@@ -29,6 +29,11 @@ operator review remain mandatory. **The replacement is not cleared for cutover.*
 
 ## Required before live writes
 
+The `Data safety` GitHub Actions workflow runs the PostgreSQL migration,
+concurrent-write checks, destructive-operation guards, and backup/restore content
+comparison on Python 3.11 and 3.12. It uses disposable PostgreSQL only and no
+production secrets. This is regression protection, not a production backup job.
+
 1. Provision separate production and test Neon, Clerk, Upstash and R2 resources.
    Never point previews at production databases. Choose the Neon recovery/PITR
    window explicitly and verify the plan's retention limits in its console.

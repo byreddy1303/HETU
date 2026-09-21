@@ -182,6 +182,7 @@
   align-items: center;
   gap: 10px;
   width: calc(100% - 24px);
+  min-height: 32px;
   margin: 0 12px 6px;
   padding: 0;
   border: 0;
@@ -620,6 +621,33 @@
   color: rgb(var(--color-text-faint));
   font-size: 11px;
   font-weight: 500;
+}
+.workspace-menu__group-toggle {
+  display: flex;
+  width: 100%;
+  min-height: 44px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.workspace-menu__group-toggle:hover {
+  color: rgb(var(--color-text));
+}
+.workspace-menu__group-toggle[aria-expanded='true'] > svg {
+  transform: rotate(180deg);
+}
+.workspace-nav-group-toggle:focus-visible,
+.workspace-menu__group-toggle:focus-visible {
+  outline: 2px solid rgb(var(--color-accent));
+  outline-offset: 3px;
+  border-radius: 4px;
 }
 .workspace-menu__groups section > div {
   display: grid;

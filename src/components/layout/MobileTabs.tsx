@@ -1,10 +1,11 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { motion, useReducedMotion } from 'motion/react';
 import {
   BookOpen,
   CalendarCheck,
   CalendarDays,
+  ChevronDown,
   ChevronRight,
   ClipboardList,
   Compass,
@@ -76,6 +77,65 @@ const MORE_GROUPS: { label: string; items: Item[] }[] = [
     ]
   }
 ];
+
+function MobileMenuGroup({
+  group,
+  onNavigate
+}: {
+  group: (typeof MORE_GROUPS)[number];
+  onNavigate: () => void;
+}) {
+  const { pathname } = useLocation();
+  const contentId = useId();
+  const collapsible = group.label !== 'Study';
+  const active = group.items.some(
+    (item) => pathname === item.to || pathname.startsWith(`${item.to}/`)
+  );
+  const [open, setOpen] = useState(active);
+  useEffect(() => {
+    if (active) setOpen(true);
+  }, [pathname, active]);
+
+  return (
+    <section>
+      <h3>
+        {collapsible ? (
+          <button
+            type="button"
+            className="workspace-menu__group-toggle"
+            aria-expanded={open}
+            aria-controls={contentId}
+            onClick={() => setOpen((value) => !value)}
+          >
+            <span>{group.label}</span>
+            <ChevronDown size={15} aria-hidden />
+          </button>
+        ) : (
+          group.label
+        )}
+      </h3>
+      {(!collapsible || open) && (
+        <div id={contentId}>
+          {group.items.map((item) => {
+            const Icon = item.icon;
+            return (
+              <NavLink
+                key={item.to}
+                to={item.to}
+                onClick={onNavigate}
+                className={({ isActive }) => cn('workspace-menu__link', isActive && 'is-active')}
+              >
+                <Icon size={18} strokeWidth={1.7} aria-hidden />
+                <span>{item.label}</span>
+                <ChevronRight size={13} aria-hidden />
+              </NavLink>
+            );
+          })}
+        </div>
+      )}
+    </section>
+  );
+}
 
 export default function MobileTabs() {
   const { pathname } = useLocation();
@@ -204,31 +264,14 @@ export default function MobileTabs() {
           </header>
           <nav className="workspace-menu__groups" aria-label="All sections">
             {MORE_GROUPS.map((group) => (
-              <section key={group.label}>
-                <h3>{group.label}</h3>
-                <div>
-                  {group.items.map((item) => {
-                    const Icon = item.icon;
-                    return (
-                      <NavLink
-                        key={item.to}
-                        to={item.to}
-                        onClick={() => {
-                          haptic('selection');
-                          setMoreOpen(false);
-                        }}
-                        className={({ isActive }) =>
-                          cn('workspace-menu__link', isActive && 'is-active')
-                        }
-                      >
-                        <Icon size={18} strokeWidth={1.7} aria-hidden />
-                        <span>{item.label}</span>
-                        <ChevronRight size={13} aria-hidden />
-                      </NavLink>
-                    );
-                  })}
-                </div>
-              </section>
+              <MobileMenuGroup
+                key={group.label}
+                group={group}
+                onNavigate={() => {
+                  haptic('selection');
+                  setMoreOpen(false);
+                }}
+              />
             ))}
           </nav>
           <footer className="workspace-menu__footer">

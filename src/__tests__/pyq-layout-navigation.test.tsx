@@ -100,60 +100,46 @@ describe('PYQ layout navigation', () => {
     expect(screen.queryByRole('link', { name: 'Quick capture' })).toBeNull();
   });
 
-  it('keeps Reflect and Library expanded for standard accounts', () => {
-    authFixture.username = 'kalyan';
-    render(
-      <MemoryRouter>
-        <Nav />
-      </MemoryRouter>
-    );
+  it.each([null, 'kalyan', 'ganirishivardhangmailcom'])(
+    'collapses Reflect and Library into dropdowns for account %s, openable on demand',
+    async (username) => {
+      authFixture.username = username;
+      const user = userEvent.setup();
+      render(
+        <MemoryRouter initialEntries={['/today']}>
+          <Nav />
+        </MemoryRouter>
+      );
 
-    const navigation = screen.getByRole('navigation');
-    expect(within(navigation).getByRole('link', { name: 'Journal' })).toHaveAttribute(
-      'href',
-      '/journal'
-    );
-    expect(within(navigation).getByRole('link', { name: 'Formulas' })).toHaveAttribute(
-      'href',
-      '/formulas'
-    );
-    expect(within(navigation).queryByRole('button', { name: 'Reflect' })).toBeNull();
-    expect(within(navigation).queryByRole('button', { name: 'Library' })).toBeNull();
-  });
+      const navigation = screen.getByRole('navigation');
+      expect(within(navigation).queryByRole('link', { name: 'Journal' })).toBeNull();
+      expect(within(navigation).queryByRole('link', { name: 'Formulas' })).toBeNull();
 
-  it('collapses Reflect and Library into dropdowns for the core-only account, openable on demand', async () => {
-    authFixture.username = 'ganirishivardhangmailcom';
-    const user = userEvent.setup();
-    render(
-      <MemoryRouter initialEntries={['/today']}>
-        <Nav />
-      </MemoryRouter>
-    );
+      const reflectToggle = within(navigation).getByRole('button', { name: 'Reflect' });
+      expect(reflectToggle).toHaveAttribute('aria-expanded', 'false');
+      await user.click(reflectToggle);
+      expect(reflectToggle).toHaveAttribute('aria-expanded', 'true');
+      expect(within(navigation).getByRole('link', { name: 'Journal' })).toHaveAttribute(
+        'href',
+        '/journal'
+      );
 
-    const navigation = screen.getByRole('navigation');
-    expect(within(navigation).queryByRole('link', { name: 'Journal' })).toBeNull();
-    expect(within(navigation).queryByRole('link', { name: 'Formulas' })).toBeNull();
-
-    const reflectToggle = within(navigation).getByRole('button', { name: 'Reflect' });
-    expect(reflectToggle).toHaveAttribute('aria-expanded', 'false');
-    await user.click(reflectToggle);
-    expect(reflectToggle).toHaveAttribute('aria-expanded', 'true');
-    expect(within(navigation).getByRole('link', { name: 'Journal' })).toHaveAttribute(
-      'href',
-      '/journal'
-    );
-
-    const libraryToggle = within(navigation).getByRole('button', { name: 'Library' });
-    expect(libraryToggle).toHaveAttribute('aria-expanded', 'false');
-    await user.click(libraryToggle);
-    expect(within(navigation).getByRole('link', { name: 'Formulas' })).toHaveAttribute(
-      'href',
-      '/formulas'
-    );
-  });
+      const libraryToggle = within(navigation).getByRole('button', { name: 'Library' });
+      expect(libraryToggle).toHaveAttribute('aria-expanded', 'false');
+      await user.click(libraryToggle);
+      expect(within(navigation).getByRole('link', { name: 'Formulas' })).toHaveAttribute(
+        'href',
+        '/formulas'
+      );
+      await user.click(reflectToggle);
+      await user.click(libraryToggle);
+      expect(within(navigation).queryByRole('link', { name: 'Journal' })).toBeNull();
+      expect(within(navigation).queryByRole('link', { name: 'Formulas' })).toBeNull();
+    }
+  );
 
   it('automatically opens a collapsed group for the current route and closes it again', async () => {
-    authFixture.username = 'ganirishivardhangmailcom';
+    authFixture.username = 'kalyan';
     const user = userEvent.setup();
     render(
       <MemoryRouter initialEntries={['/patterns']}>

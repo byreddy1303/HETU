@@ -131,6 +131,16 @@ test('mobile all-sections navigation reaches every destination and returns focus
   const more = page.getByRole('button', { name: 'More sections', exact: true });
   await more.click();
   await expect(menu).toBeVisible();
+  await expect(menu.getByRole('button', { name: 'Reflect', exact: true })).toHaveAttribute(
+    'aria-expanded',
+    'false'
+  );
+  await expect(menu.getByRole('button', { name: 'Library', exact: true })).toHaveAttribute(
+    'aria-expanded',
+    'false'
+  );
+  await expect(menu.getByRole('link', { name: 'Journal', exact: true })).toHaveCount(0);
+  await expect(menu.getByRole('link', { name: 'Formulas', exact: true })).toHaveCount(0);
   await expect(menu.getByRole('button', { name: 'Close', exact: true })).toBeFocused();
   await page.keyboard.press('Shift+Tab');
   await expect(menu.getByRole('button', { name: 'Sign out', exact: true })).toBeFocused();
@@ -145,6 +155,10 @@ test('mobile all-sections navigation reaches every destination and returns focus
   for (const route of INTERIOR_ROUTES.filter((item) => !dockRoutes.includes(item.path))) {
     await test.step(`Open ${route.label} from mobile navigation`, async () => {
       await more.click();
+      for (const name of ['Reflect', 'Library']) {
+        const toggle = menu.getByRole('button', { name, exact: true });
+        if ((await toggle.getAttribute('aria-expanded')) === 'false') await toggle.click();
+      }
       const link = menu.getByRole('link', { name: route.label, exact: true });
       await expect(link).toHaveAttribute('href', route.path);
       await link.click();

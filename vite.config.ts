@@ -50,7 +50,7 @@ export default defineConfig(({ mode }) => {
           ]
         },
         workbox: {
-          navigateFallbackDenylist: [/^\/gate-topper-notes\//],
+          navigateFallbackDenylist: [/^\/api(?:\/|$)/, /^\/gate-topper-notes\//],
           importScripts: ['/push-sw.js'],
           globPatterns: ['**/*.{js,css,html,ico,png,svg}'],
           runtimeCaching: [

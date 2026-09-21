@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { motion, useReducedMotion } from 'motion/react';
 import {
@@ -29,7 +29,6 @@ import type { LucideIcon } from 'lucide-react';
 import { useAuthStore } from '@/stores/auth';
 import { useAuth } from '@/hooks/useAuth';
 import { useUiStore } from '@/stores/ui';
-import { isCoreSetupOnlyUsername } from '@/lib/core-only';
 import { cn } from '@/lib/utils';
 import Brand from '@/components/shared/Brand';
 
@@ -91,15 +90,19 @@ function Group({ label, items }: { label: string; items: Item[] }) {
 }
 
 function CollapsibleGroup({ label, items }: { label: string; items: Item[] }) {
-  const location = useLocation();
-  const [open, setOpen] = useState(() =>
-    items.some((item) => location.pathname.startsWith(item.to))
-  );
+  const { pathname } = useLocation();
+  const contentId = useId();
+  const active = items.some((item) => pathname === item.to || pathname.startsWith(`${item.to}/`));
+  const [open, setOpen] = useState(active);
+  useEffect(() => {
+    if (active) setOpen(true);
+  }, [pathname, active]);
   return (
     <div className="workspace-nav-group">
       <button
         type="button"
         aria-expanded={open}
+        aria-controls={contentId}
         onClick={() => setOpen((value) => !value)}
         className={cn('workspace-nav-group-toggle', open && 'is-open')}
       >
@@ -107,7 +110,7 @@ function CollapsibleGroup({ label, items }: { label: string; items: Item[] }) {
         <ChevronDown size={13} strokeWidth={2} aria-hidden />
       </button>
       {open && (
-        <div className="workspace-nav-group-items">
+        <div id={contentId} className="workspace-nav-group-items">
           {items.map((item) => (
             <NavItem key={item.to} item={item} />
           ))}
@@ -119,7 +122,6 @@ function CollapsibleGroup({ label, items }: { label: string; items: Item[] }) {
 
 export default function Nav() {
   const { profile, sandbox } = useAuth();
-  const coreOnly = isCoreSetupOnlyUsername(profile?.username);
   const signOut = useAuthStore((s) => s.signOut);
   const navCollapsed = useUiStore((s) => s.navCollapsed);
   const setNavCollapsed = useUiStore((s) => s.setNavCollapsed);
@@ -180,17 +182,8 @@ export default function Nav() {
       <nav className="workspace-sidebar__navigation" aria-label="Main navigation">
         <NavItem item={{ to: '/', label: 'Dashboard', icon: Gauge }} />
         <Group label="Study" items={study} />
-        {coreOnly ? (
-          <>
-            <CollapsibleGroup label="Reflect" items={REFLECT} />
-            <CollapsibleGroup label="Library" items={LIBRARY} />
-          </>
-        ) : (
-          <>
-            <Group label="Reflect" items={REFLECT} />
-            <Group label="Library" items={LIBRARY} />
-          </>
-        )}
+        <CollapsibleGroup label="Reflect" items={REFLECT} />
+        <CollapsibleGroup label="Library" items={LIBRARY} />
       </nav>
       <div className="workspace-sidebar__footer">
         <NavItem item={{ to: '/settings', label: 'Settings', icon: Settings }} />

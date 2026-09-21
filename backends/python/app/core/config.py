@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 from functools import lru_cache
 from typing import Literal
 from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
@@ -8,6 +9,14 @@ from pydantic import Field, SecretStr, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 Environment = Literal["local", "test", "staging", "production"]
+
+
+def _default_environment() -> Environment:
+    if os.getenv("VERCEL_ENV") == "production":
+        return "production"
+    if os.getenv("VERCEL_ENV") == "preview":
+        return "staging"
+    return "local"
 
 
 class Settings(BaseSettings):
@@ -20,9 +29,12 @@ class Settings(BaseSettings):
 
     app_name: str = "Hetu API"
     app_version: str = "1.0.0"
-    environment: Environment = "local"
+    environment: Environment = Field(default_factory=_default_environment)
     debug: bool = False
-    maintenance_mode: bool = False
+    # Hosted deployments stay closed until their environment explicitly opts in.
+    maintenance_mode: bool = Field(
+        default_factory=lambda: os.getenv("VERCEL_ENV") in {"production", "preview"}
+    )
     api_prefix: str = "/v1"
 
     database_url: SecretStr = SecretStr("sqlite+aiosqlite:///./hetu.db")

@@ -76,17 +76,23 @@ event log. The full legacy frontend contract is not yet implemented.
 Project: **hetu-python-api**. GitHub root directory: **backends/python**.
 The existing **hetu** Vite project remains separate and retains its data source.
 
-`vercel.json` deliberately ships with production `MAINTENANCE_MODE=true`:
+Settings detect the Vercel deployment environment: Production uses `production`
+and Preview uses `staging`. Both default to maintenance mode unless
+`MAINTENANCE_MODE=false` is explicitly configured for that environment:
 
 - `/health/live`: 200 (process alive)
 - `/health/ready` and all data routes: 503 (not ready for data)
 - WebSocket connections: rejected
 - No database/R2/Redis connection or schema migration during startup
 
-Remove the maintenance setting only after all DATA_SAFETY release gates pass.
+Enable production data access only after all DATA_SAFETY release gates pass.
+Preview may use separately provisioned staging resources for synthetic tests.
 Configure the real environment securely in Vercel and redeploy. A successful
 Vercel build is not evidence of a working database, backup, auth, or migration.
 The legacy Render blueprint is retained with automatic deployment disabled.
+
+See [STAGING.md](docs/STAGING.md) for the provisioned Preview resources,
+credential boundaries, verification results, and remaining production work.
 
 ## Verification
 

@@ -26,14 +26,40 @@ Do not repeatedly ask the user to choose which app sections to use or to approve
 routine authorized steps. Ask only when a material ambiguity cannot be resolved.
 Maximum capability means a complete useful outcome, not indiscriminate activity.
 
+## Latest binding user decisions
+
+- The preparation target is **GATE AIR top 10**, superseding the older AIR <100
+  aspiration within this scope. Pursue it through learning and exam evidence;
+  never represent a target as a guaranteed or already-achieved rank.
+- **Build relevant missing app features.** The user explicitly authorizes using
+  judgment to extend HETU wherever it materially helps preparation. Inventory gaps,
+  prioritize by learning benefit, and complete useful additions rather than merely
+  listing them as suggestions. Routine additions do not need renewed approval.
+- **Use the Python backend.** Implement MCP, APIs, domain logic, and persistence
+  operations in `backends/python` using the existing FastAPI architecture. Do not
+  build a TypeScript backend/MCP service, Supabase Edge Functions, or new features
+  that depend on the legacy Supabase domain implementation. Existing React frontend
+  code can consume Python APIs and render the new functionality.
+- **Every addition must be usable by ChatGPT.** Include discoverable tools and the
+  required reads, writes, detailed retrieval, and cross-section integration alongside
+  the app experience. Verify both surfaces against the same Python domain behavior.
+
+The specification's preparation-gap table is the starting inventory: prerequisite
+diagnosis, conversation knowledge, delayed retrieval, unfamiliar-problem transfer,
+exam execution, mock follow-through, and capacity-aware planning. Reuse working
+features first and build the missing pieces. Feature volume is not the objective.
+
 ## First implementation work
 
 1. Inspect the current branch, status, and backend runtime. Re-read current code;
    the state may differ from the design snapshot.
-2. Inventory each section's reads, writes, business rules, persistence, and tests.
-   Track supported, missing, and verified operations explicitly.
-3. Resolve the backend/authentication boundary before adding endpoints. The Python
-   replacement is documented as incomplete; do not enable a cutover as a shortcut.
+2. Inventory each section's reads, writes, business rules, persistence, tests, and
+   missing capabilities that matter for AIR top 10 preparation. Track supported,
+   missing, and verified operations explicitly.
+3. Implement through the Python/FastAPI boundary selected by the user; resolve its
+   authentication, parity, and data dependencies before enabling endpoints. The
+   replacement is documented as incomplete; complete required release verification
+   rather than using the legacy backend as a shortcut.
 4. Define the first complete vertical workflow: authenticate -> capture discussion
    -> persist -> display in HETU -> retrieve in a later ChatGPT Work conversation
    -> revise without duplicating or losing history.
@@ -58,6 +84,10 @@ Do not infer offline storage behavior from the older README or API names.
 
 ## Technical requirements to retain
 
+- Python for MCP, APIs, domain logic, and persistence operations; the existing UI
+  integrates with that backend. Language choice is settled, not an open question.
+- Useful missing features include domain code, migrations/storage, app UX, MCP
+  access, and tests. A backend endpoint or UI mock alone does not finish a feature.
 - Same domain semantics for app and MCP actions, including canonical scoring and
   recovery. No prompt-only enforcement of critical business rules.
 - Authenticated account access, accurate capability discovery, typed focused tools,
@@ -84,8 +114,12 @@ them. If provisioning becomes necessary, follow the applicable integration workf
 
 > Implement the HETU ChatGPT plugin according to
 > docs/hetu-chatgpt-plugin-spec.md and docs/hetu-chatgpt-plugin-handoff.md.
-> Preserve the full-app, intent-driven behavior. Start by inspecting the current
-> backend and existing uncommitted work, then deliver the authenticated capture and
-> retrieval workflow with app integration and meaningful tests. Continue through the
-> documented phases, reporting actual completed coverage and remaining work. Preserve
-> my data, existing changes, and the repository's commit/push requirements.
+> Preserve the full-app, intent-driven behavior and build relevant missing features
+> that help my preparation toward GATE AIR top 10. Make every new feature usable by
+> ChatGPT. Use the existing Python/FastAPI backend for MCP, APIs, domain logic, and
+> persistence; do not implement the backend in TypeScript or Supabase. Start by
+> inspecting the Python service and existing uncommitted work, then deliver the
+> authenticated capture and retrieval workflow with app integration and meaningful
+> tests. Continue through the documented phases and preparation gaps, reporting actual
+> completed coverage and remaining work. Preserve my data, existing changes, and the
+> repository's commit/push requirements.

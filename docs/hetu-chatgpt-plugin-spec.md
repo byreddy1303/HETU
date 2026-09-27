@@ -20,7 +20,17 @@ it does not mean performing the maximum number of actions.
 
 Agreed product decisions:
 
+- Optimize preparation toward the user's GATE target of AIR top 10. This supersedes
+  the older AIR <100 aspiration for this project scope. Treat rank as the ambition;
+  evaluate progress using actual learning and exam evidence, not a guaranteed rank.
 - Cover all HETU sections, with reads and meaningful writes wherever applicable.
+- Build missing app features when they materially support this preparation goal.
+  The current screen list and data model are not a ceiling on the implementation.
+  Every new learning capability must be usable through ChatGPT as well as HETU.
+- Use the existing Python/FastAPI backend in `backends/python` for the new MCP server,
+  APIs, business logic, and persistence operations. Do not implement the new backend
+  in TypeScript or add new features to the Supabase backend. Existing React frontend
+  work may use its current language to consume Python APIs and display the features.
 - Support any learning subject. Include the existing GATE taxonomy and allow
   custom subjects, topics, and concepts without forcing them into that taxonomy.
 - Make "Save to HETU" the default conversation-capture phrase. Equivalent natural
@@ -32,6 +42,40 @@ Agreed product decisions:
   loops or making the user design the workflow.
 - Complete design and a durable handoff before implementation with the user's
   chosen GPT-5.6 model. Do not interpret this document as a request to change models.
+
+### Preparation goal and permission to fill feature gaps
+
+The user explicitly authorizes building relevant missing capabilities, rather than
+limiting the plugin to existing app functions. During implementation, inspect what
+already works, identify the learning bottleneck each proposed addition addresses,
+and extend or build the capability without asking for routine feature-by-feature
+permission. Preserve the user's request and prioritize useful learning over feature
+count. Broad feature authorization does not require building every conceivable idea.
+
+For each addition, record the learner problem, evidence or rationale, expected
+observable benefit, app workflow, MCP operations, and how to verify it. Maintain a
+gap inventory so a missing capability does not silently disappear from delivery.
+
+Candidate capabilities to assess against existing functionality:
+
+| Preparation need | Build or extend where missing | Observable outcome |
+| --- | --- | --- |
+| Diagnose why understanding breaks | Concept/prerequisite mapping with targeted diagnostic questions and evidence-linked misconceptions. | Identify a specific missing prerequisite or reasoning step rather than labelling an entire subject weak. |
+| Preserve understanding from discussions | Learning Library with source captures, evolving topic explanations, derivations, intuition, counterexamples, and revision history. | Retrieve and apply a previously saved idea in a later conversation or practice session. |
+| Recall without dependence on hints | Concept retrieval integrated with existing recovery, learner responses, assistance tracking, and manageable review load. | Observe delayed unaided retrieval rather than counting reading as mastery. |
+| Transfer to unfamiliar problems | Diagnose, practise, and then assess on distinct questions; connect failure back to the relevant concept. | Separate success on repeated examples from success on unseen variants. |
+| Improve exam decisions and execution | Analyse pace, confidence, answer/skip choices, checking habits, and avoidable errors using actual attempts. | Explain observed time or mark losses and track whether the targeted habit improves. |
+| Turn mocks into effective follow-through | Question-level post-mock analysis linking errors to remediation, practice, and the next assessment. | Every selected high-priority issue has a concrete follow-up and a later outcome. |
+| Allocate preparation effort intelligently | Capacity-aware planning across prerequisites, coverage, review debt, recurrence, and measured practice needs. | Produce feasible plans and compare planned interventions with completed work and later evidence. |
+
+Treat estimated impact as a hypothesis unless validated. Preserve authentic unseen
+benchmark opportunities; using hints or viewing solutions changes how a later result
+is interpreted. Learning, retention, transfer, pace, and qualified full-paper outcomes
+provide evidence toward the ambition; none alone certifies an AIR top 10 result.
+
+Feature completion means Python domain implementation, durable storage/migrations,
+usable app presentation, discoverable MCP actions, and meaningful verification. A
+backend-only endpoint, UI-only prototype, or instruction-only skill is incomplete.
 
 ## 2. Operating behavior
 
@@ -204,8 +248,16 @@ instructions embedded in an imported note or a buddy message.
 
 Target architecture:
 
-ChatGPT with HETU workflow skills -> authenticated remote MCP tools -> shared HETU
-domain operations -> authoritative records and source assets.
+ChatGPT with HETU workflow skills -> authenticated Python MCP tools -> shared
+Python/FastAPI domain operations -> the Python backend's authoritative records and
+source assets. The HETU frontend consumes the same Python domain APIs.
+
+Backend technology is fixed by the user: extend `backends/python`. Do not introduce
+a TypeScript MCP service, Supabase Edge Functions, new Supabase-dependent domain
+features, or a Python facade that delegates the new business logic to that legacy
+backend. Port required domain behavior into Python with parity checks. Reuse the
+Python backend's configured infrastructure where suitable; provisioning choices
+must follow the applicable integration workflow when needed.
 
 The app and plugin must share validation, scoring, planning, recovery, authorization,
 and persistence semantics. A plugin-created record must work normally in the app.
@@ -244,7 +296,7 @@ plugin. Do not promise unlimited context or automatic access to every ChatGPT ch
 Do not introduce repetitive app-specific approvals for already-authorized routine
 work. Messages to others and other external effects follow the actual user request.
 
-## 7. Repository findings and integration decisions still to verify
+## 7. Repository findings and Python integration work still to verify
 
 The inspection found existing Journal analysis, patterns, formulas, triggers,
 recovery scheduling, immutable learning events, progress reporting, account documents,
@@ -270,13 +322,16 @@ in IndexedDB or all account documents have identical persistence behavior.
 
 At inspection, backend documentation says production uses the legacy backend and
 Python is not cleared for cutover. The working tree also contains pre-existing
-uncommitted FastAPI/Clerk adapter work. Verify actual runtime state before choosing
-where to add the MCP boundary. Do not commit that unrelated work, migrate accounts,
-or enable an incomplete backend just to make the plugin reachable.
+uncommitted FastAPI/Clerk adapter work. The user has now selected Python; verify its
+actual runtime state and identify the remaining parity/data dependencies before
+adding the MCP boundary there. Coordinate with the existing work and preserve
+unrelated changes. Complete required migration and recovery verification before
+enabling production data access; do not bypass the release gates for reachability.
 
-Outstanding engineering decisions are backend placement, compatible OAuth connection,
-exact schemas, source-content extraction, and environment/deployment configuration.
-These are implementation investigations, not reasons to reduce the agreed coverage.
+Outstanding engineering decisions are the Python MCP mounting/deployment details,
+compatible OAuth connection, exact schemas, required domain ports, source-content
+extraction, and environment configuration. Backend language is not an open decision.
+These investigations must support the agreed coverage and feature-gap authorization.
 
 ## 8. Implementation sequence
 
@@ -284,8 +339,9 @@ Deliver vertical workflows with visible coverage status. Phases are delivery ord
 not permanent restrictions on the plugin.
 
 1. **Establish the integration boundary.** Inspect authoritative persistence and
-   current changes; inventory section operations; choose a backend seam; define
-   authentication, shared domain APIs, migration strategy, and capability reporting.
+   current changes; inventory section operations and preparation feature gaps;
+   establish the Python/FastAPI seam; define authentication, shared Python domain
+   APIs, required parity work, migration strategy, and capability reporting.
 2. **Complete capture and retrieval.** Implement the Learning Library, source and
    revision handling, topic organization, searching, structured capture, and a real
    authenticated MCP connection. Prove save -> app display -> new-chat retrieval.
@@ -302,7 +358,9 @@ not permanent restrictions on the plugin.
    and prepare distribution appropriate to the user's account.
 
 Do not label the overall plugin complete when only capture works. Each phase should
-leave a precise list of shipped, tested, and outstanding operations.
+leave a precise list of shipped, tested, and outstanding operations. Incorporate
+useful missing preparation features into the phase matching their learning purpose;
+they are authorized work rather than automatically deferred future suggestions.
 
 ## 9. Acceptance criteria
 
@@ -330,6 +388,9 @@ Evaluate outcomes and durable records, not only whether the assistant chose a to
 | Requested buddy message | Sends the requested content to the resolved recipient and records actual delivery status; a normal save does not send messages. |
 | Export/import | Preserves supported records, links, and revisions; detects duplicates and reports unsupported content. |
 | Whole-app coverage | Every section has an explicit tested capability entry, including derived views and their legitimate underlying writes. |
+| Missing preparation capability | Identify a concrete learning need; extend or build the relevant feature; verify the complete app and ChatGPT workflow. |
+| Python backend | New server and domain operations run in the Python backend, with no new TypeScript server or dependency on legacy Supabase domain implementations. |
+| AIR top 10 goal | Recommendations connect to actual gaps, retention, transfer, pace, or qualified exam evidence; do not promise a rank or optimize only activity counts. |
 
 Synthetic fixtures belong in tests. The delivered connected workflows must use real
 provisioned integrations and report actual persistence. A mock demo is not completion.

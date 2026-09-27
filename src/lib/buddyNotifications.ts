@@ -1,6 +1,7 @@
 import { PushNotifications, type PermissionStatus } from '@capacitor/push-notifications';
 import { isNativeApp, nativePlatform } from '@/lib/native';
 import { supabase, supabaseConfigured } from '@/lib/supabase';
+import { runtimeStorage as localStorage } from '@/lib/runtime-storage';
 
 const DEVICE_ID_KEY = 'air:buddy-push-device-id';
 const OPT_IN_KEY = 'air:buddy-push-opt-in';

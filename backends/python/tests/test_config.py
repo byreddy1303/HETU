@@ -53,4 +53,13 @@ def test_production_requires_external_services() -> None:
         raise AssertionError("production configuration unexpectedly passed")
     assert "DATABASE_URL" in message
     assert "Upstash" in message
-    assert "R2" in message
+
+
+def test_vercel_marketplace_redis_names_are_supported(monkeypatch) -> None:
+    monkeypatch.setenv("KV_REST_API_URL", "https://example.upstash.io")
+    monkeypatch.setenv("KV_REST_API_TOKEN", "token")
+    settings = Settings(_env_file=None)
+    assert settings.redis_configured is True
+    assert settings.upstash_redis_rest_url == "https://example.upstash.io"
+    assert settings.upstash_redis_rest_token is not None
+    assert settings.upstash_redis_rest_token.get_secret_value() == "token"

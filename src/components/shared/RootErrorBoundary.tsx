@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { useRouteError, isRouteErrorResponse } from 'react-router-dom';
 import { AlertTriangle, RefreshCw } from 'lucide-react';
+import { runtimeSessionStorage as sessionStorage } from '@/lib/runtime-storage';
 import Brand from './Brand';
 
 export default function RootErrorBoundary() {

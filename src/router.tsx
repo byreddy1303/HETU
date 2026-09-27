@@ -1,10 +1,13 @@
 import { Suspense } from 'react';
+import { backendConfig } from '@/lib/backend-config';
 import { createBrowserRouter } from 'react-router-dom';
 import RequireAuth from '@/components/shared/RequireAuth';
 import LoadingScreen from '@/components/shared/LoadingScreen';
 import Shell from '@/components/layout/Shell';
 import RootErrorBoundary from '@/components/shared/RootErrorBoundary';
 import { lazyWithRetry } from '@/lib/lazyWithRetry';
+
+const ClerkAuth = lazyWithRetry(() => import('@/pages/ClerkAuth'));
 
 const Auth = lazyWithRetry(() => import('@/pages/Auth'));
 const Signup = lazyWithRetry(() => import('@/pages/Signup'));
@@ -55,10 +58,10 @@ const devRoutes = import.meta.env.DEV
 // Application routes.
 export const router = createBrowserRouter([
   ...devRoutes,
-  { path: '/auth', element: <Auth />, errorElement: <RootErrorBoundary /> },
-  { path: '/signup', element: <Signup />, errorElement: <RootErrorBoundary /> },
-  { path: '/forgot-pin', element: <ForgotPin />, errorElement: <RootErrorBoundary /> },
-  { path: '/reset-pin', element: <ResetPin />, errorElement: <RootErrorBoundary /> },
+  { path: '/auth', element: backendConfig.fastapi ? <ClerkAuth /> : <Auth />, errorElement: <RootErrorBoundary /> },
+  { path: '/signup', element: backendConfig.fastapi ? <ClerkAuth /> : <Signup />, errorElement: <RootErrorBoundary /> },
+  { path: '/forgot-pin', element: backendConfig.fastapi ? <ClerkAuth /> : <ForgotPin />, errorElement: <RootErrorBoundary /> },
+  { path: '/reset-pin', element: backendConfig.fastapi ? <ClerkAuth /> : <ResetPin />, errorElement: <RootErrorBoundary /> },
   { path: '/request-access', element: <RequestAccess />, errorElement: <RootErrorBoundary /> },
   {
     path: '/',

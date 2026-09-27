@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
+import { runtimeStorage } from '@/lib/runtime-storage';
 
 export type ToastTone = 'neutral' | 'success' | 'danger';
 
@@ -41,7 +42,7 @@ export const useUiStore = create<UiState>()(
     {
       name: 'air.ui',
       version: 1,
-      storage: createJSONStorage(() => localStorage),
+      storage: createJSONStorage(() => runtimeStorage),
       partialize: (state) => ({ navCollapsed: state.navCollapsed })
     }
   )

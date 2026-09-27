@@ -1,9 +1,11 @@
 from fastapi import APIRouter
 
-from app.api.routes import files, health, jobs, realtime, records, users, webhooks
+from app.api.routes import access, compat, files, health, jobs, realtime, records, users, webhooks
 
 api_router = APIRouter()
 api_router.include_router(users.router, tags=["users"])
+api_router.include_router(compat.router, prefix="/compat", tags=["compatibility"])
+api_router.include_router(access.router, prefix="/access", tags=["access"])
 api_router.include_router(records.router, prefix="/records", tags=["records"])
 api_router.include_router(files.router, prefix="/files", tags=["files"])
 api_router.include_router(jobs.router, prefix="/jobs", tags=["jobs"])

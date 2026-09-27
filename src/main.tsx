@@ -1,8 +1,10 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
+import { runtimeSessionStorage as sessionStorage } from '@/lib/runtime-storage';
 import { Capacitor } from '@capacitor/core';
 import { registerSW } from 'virtual:pwa-register';
 import App from '@/App';
+import AuthProvider from '@/components/auth/AuthProvider';
 import '@/index.css';
 import '@/energy-theme.css';
 
@@ -82,6 +84,6 @@ if (Capacitor.isNativePlatform()) {
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <App />
+    <AuthProvider><App /></AuthProvider>
   </React.StrictMode>
 );

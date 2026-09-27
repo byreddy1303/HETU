@@ -8,6 +8,7 @@
 
 import type { ReadinessBreakdown, ReadinessComponentKey, SubjectReadiness } from '@/lib/readiness';
 import { supabase, supabaseConfigured } from '@/lib/supabase';
+import { runtimeStorage as localStorage } from '@/lib/runtime-storage';
 
 // Re-export the calculation module's version so storage/UI cannot drift from
 // the formula they are snapshotting.
@@ -16,7 +17,7 @@ export { READINESS_CALCULATION_VERSION } from '@/lib/readiness';
 const STORAGE_PREFIX = 'air-journal:readiness:v3';
 const LEGACY_STORAGE_PREFIX = 'air-journal:readiness:v2';
 
-/** Kept modest so localStorage stays cheap. 180 days is more than any GATE
+/** Kept modest so the session cache stays cheap. 180 days is more than any GATE
  *  prep cycle needs. */
 const MAX_SNAPSHOTS = 180;
 const REQUIRED_EVIDENCE_KEYS = [

@@ -13,7 +13,7 @@
 //              Only the raw question (source, format, prompt, image, target
 //              time). The recipient sees the question fresh, no bias.
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import type { RealtimeChannel } from '@supabase/supabase-js';
+import type { RealtimeChannel } from '@/lib/supabase';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import {
   ArrowDown,

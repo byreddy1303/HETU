@@ -7,6 +7,7 @@
 // through so the caller controls IO.
 
 import type { DayPlan } from '@/lib/planner-storage';
+import { runtimeStorage as localStorage } from '@/lib/runtime-storage';
 import { dayKeyPrefix, loadDayPlan, migrateLegacyDayPlans } from '@/lib/planner-storage';
 import { canonicalSubjectLabel } from '@/lib/subjects';
 import { addDaysISO, todayISO } from '@/lib/utils';

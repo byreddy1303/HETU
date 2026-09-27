@@ -11,6 +11,7 @@ import {
   type ReadinessSnapshotDatabaseRow,
   type ReadinessSnapshot
 } from '@/lib/readiness-snapshots';
+import { runtimeStorage as localStorage } from '@/lib/runtime-storage';
 
 function snapshot(date: string, score: number): ReadinessSnapshot {
   return {

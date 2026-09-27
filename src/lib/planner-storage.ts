@@ -1,4 +1,4 @@
-// localStorage cache helpers for the calendar-based Planner. Signed-in plans
+// Session-memory cache helpers for the calendar-based Planner. Signed-in plans
 // are durably persisted in Supabase by planner-cloud; these user-scoped rows
 // keep editing instant and preserve an offline cache.
 //
@@ -6,6 +6,7 @@
 //   air.planner.<user-id>.YYYY-MM-DD   → DayPlan for that date
 
 import { currentUserId } from '@/stores/auth';
+import { runtimeStorage as localStorage } from '@/lib/runtime-storage';
 import { canonicalSubjectLabel, normalizeSubjectIdentity, type SubjectId } from '@/lib/subjects';
 import type { PlannerPyqLaunchPrescription, PlannerPyqResultReceipt } from '@/lib/planner-pyq';
 

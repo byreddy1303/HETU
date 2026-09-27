@@ -7,6 +7,7 @@ import {
   studyPushOptedIn,
   urlBase64ToUint8Array
 } from '@/lib/buddyNotifications';
+import { runtimeStorage as localStorage } from '@/lib/runtime-storage';
 
 describe('Buddy notification client helpers', () => {
   beforeEach(() => localStorage.clear());

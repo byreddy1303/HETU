@@ -6,7 +6,8 @@
 // device (refresh token under `air.device-trust`) so the same browser can
 // restore the session silently; explicit sign-out and "Wipe local" forget it.
 import { create } from 'zustand';
-import type { User } from '@supabase/supabase-js';
+import type { ApiUser as User } from '@/lib/supabase';
+import { backendConfig } from '@/lib/backend-config';
 import { supabase, supabaseConfigured } from '@/lib/supabase';
 import { db } from '@/lib/db';
 import { wipeLocalState } from '@/lib/isolation';
@@ -149,6 +150,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       // screen is never shown again on a browser that signed in before. The
       // refresh token is rotated by the server, so a failed restore simply
       // forgets the device.
+      if (backendConfig.fastapi) return;
       const trusted = readTrustedDevice();
       if (!trusted) return;
       void supabase.auth.refreshSession({ refresh_token: trusted.refreshToken }).then(
@@ -190,10 +192,11 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     const { user, sandbox } = get();
     if (sandbox || !user) return;
     const { data, error } = await supabase.from('users').select('*').eq('id', user.id).single();
-    if (!error && data) set({ profile: data as UserRow });
+    if (!error && data && get().user?.id === user.id) set({ profile: data as UserRow });
   },
 
   signIn: async (username, pin) => {
+    if (backendConfig.fastapi) return { error: 'Use the Clerk sign-in form.' };
     const res = await loginWithUsernamePin({ username, pin });
     if (!('ok' in res) || !res.ok) return { error: res.error };
     // Hand the tokens to the Supabase client so future calls carry the JWT.
@@ -211,6 +214,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   signUp: async (payload) => {
+    if (backendConfig.fastapi) return { error: 'Account migration and invitations must be completed before Clerk signup.' };
     const res = await signupViaInvite(payload);
     if (!('ok' in res) || !res.ok) return { error: res.error };
     // Sign in immediately with the same credentials so the user lands

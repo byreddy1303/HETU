@@ -25,6 +25,9 @@ export default defineConfig({
     // Tests must never touch the real database. Blank the Supabase keys so
     // the repository runs in memory-only mode regardless of local env files.
     env: {
+      VITE_BACKEND: 'supabase',
+      VITE_API_URL: '',
+      VITE_CLERK_PUBLISHABLE_KEY: '',
       VITE_SUPABASE_URL: '',
       VITE_SUPABASE_ANON_KEY: ''
     }

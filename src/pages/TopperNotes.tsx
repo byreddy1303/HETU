@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type MouseEvent } from 'react';
+import { runtimeStorage as localStorage } from '@/lib/runtime-storage';
 import { Browser as CapacitorBrowser } from '@capacitor/browser';
 import {
   ArrowRight,

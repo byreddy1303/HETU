@@ -73,6 +73,7 @@ function safeEqual(a: string, b: string): boolean {
 
 function cleanText(value: string | null | undefined): string {
   return String(value ?? '')
+    // eslint-disable-next-line no-control-regex
     .replace(/[\u0000-\u001f\u007f]+/g, ' ')
     .replace(/\s+/g, ' ')
     .trim();

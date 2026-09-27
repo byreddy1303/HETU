@@ -5,6 +5,7 @@ import {
   readTrustedDevice,
   rememberTrustedDevice
 } from '@/lib/device-trust';
+import { runtimeStorage as localStorage } from '@/lib/runtime-storage';
 
 describe('device-trust (remember this device)', () => {
   beforeEach(() => {

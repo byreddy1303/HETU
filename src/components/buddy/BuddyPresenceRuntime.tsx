@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import type { RealtimeChannel } from '@supabase/supabase-js';
+import type { RealtimeChannel } from '@/lib/supabase';
 import { buddyPresenceTopic, buddyPresenceUserIds } from '@/lib/buddy';
 import { supabase, supabaseConfigured } from '@/lib/supabase';
 import { useAuthStore } from '@/stores/auth';

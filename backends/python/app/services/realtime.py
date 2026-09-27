@@ -22,6 +22,7 @@ class RealtimeBroker:
         self._clients: dict[str, set[WebSocket]] = defaultdict(set)
         self._lock = asyncio.Lock()
         self._subscriber_task: asyncio.Task[None] | None = None
+        self._presence: dict[str, dict[str, dict[str, Any]]] = defaultdict(dict)
 
     async def start(self) -> None:
         if get_settings().redis_configured and self._subscriber_task is None:
@@ -49,6 +50,37 @@ class RealtimeBroker:
             clients.discard(websocket)
             if not clients:
                 self._clients.pop(user_id, None)
+
+    async def track_presence(
+        self,
+        *,
+        topic: str,
+        user_id: str,
+        payload: dict[str, Any],
+        recipients: set[str],
+    ) -> None:
+        async with self._lock:
+            self._presence[topic][user_id] = payload
+            state = {key: [value] for key, value in self._presence[topic].items()}
+        for recipient in recipients:
+            await self.publish(
+                recipient,
+                {"type": "presence", "topic": topic, "event": "sync", "state": state},
+            )
+
+    async def untrack_presence(self, *, topic: str, user_id: str, recipients: set[str]) -> None:
+        async with self._lock:
+            topic_state = self._presence.get(topic)
+            if topic_state:
+                topic_state.pop(user_id, None)
+                if not topic_state:
+                    self._presence.pop(topic, None)
+            state = {key: [value] for key, value in self._presence.get(topic, {}).items()}
+        for recipient in recipients:
+            await self.publish(
+                recipient,
+                {"type": "presence", "topic": topic, "event": "sync", "state": state},
+            )
 
     async def publish(self, user_id: str, event: dict[str, Any]) -> None:
         envelope = jsonable_encoder({"user_id": user_id, "event": event})

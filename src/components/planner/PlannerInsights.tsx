@@ -1,4 +1,4 @@
-// Cross-day rollups from every DayPlan in localStorage. Purely local — no
+// Cross-day rollups from every DayPlan in session memory, with no extra
 // server round-trip. Refreshes whenever `revision` (a number driven by
 // upstream saves) changes.
 import { useMemo } from 'react';

@@ -19,7 +19,7 @@ import { type FormEvent, useCallback, useEffect, useMemo, useState } from 'react
 import { Link, useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence, useReducedMotion } from 'motion/react';
 import { BookOpen, Check, MessageSquarePlus, RefreshCcw, Search, UserPlus, X } from 'lucide-react';
-import type { RealtimeChannel } from '@supabase/supabase-js';
+import type { RealtimeChannel } from '@/lib/supabase';
 import PageHeader from '@/components/layout/PageHeader';
 import { Card, CardBody } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';

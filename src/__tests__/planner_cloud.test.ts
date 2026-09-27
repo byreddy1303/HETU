@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { runtimeStorage as localStorage } from '@/lib/runtime-storage';
 
 interface PlannerMutationArgs {
   p_plan_date: string;

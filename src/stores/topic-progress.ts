@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { runtimeStorage as localStorage } from '@/lib/runtime-storage';
 import { db, type SyncedTableName } from '@/lib/db';
 import {
   awaitInitialPull,

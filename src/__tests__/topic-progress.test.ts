@@ -8,6 +8,7 @@ import {
 } from '@/stores/topic-progress';
 import { db } from '@/lib/db';
 import { deleteLocal, writeLocal, writeLocalBatch } from '@/lib/sync';
+import { runtimeStorage as localStorage } from '@/lib/runtime-storage';
 
 vi.mock('@/lib/sync', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@/lib/sync')>();

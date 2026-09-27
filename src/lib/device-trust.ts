@@ -9,6 +9,8 @@
 // honoured. It is per-browser and single-slot (the latest successful login
 // wins). Storing a refresh token here is no worse than supabase-js's own
 // session-storage decision, and it is never the user's PIN.
+import { runtimeStorage as localStorage } from '@/lib/runtime-storage';
+
 const TRUST_KEY = 'air.device-trust';
 const TRUST_VERSION = 1 as const;
 

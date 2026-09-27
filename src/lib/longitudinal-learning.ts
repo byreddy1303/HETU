@@ -1,4 +1,5 @@
 import type { LearningEventRow, LearningItemRow, RecoveryGrade } from '@/types';
+import { runtimeStorage as localStorage } from '@/lib/runtime-storage';
 import {
   computeRecoveryAnalytics,
   type RateMetric,

@@ -46,7 +46,10 @@ class Record(TimestampMixin, Base):
         ),
         CheckConstraint("version > 0", name="positive_version"),
         Index(
-            "ix_records_owner_collection_updated", "owner_id", "collection", text("updated_at DESC")
+            "ix_records_owner_collection_updated",
+            "owner_id",
+            "collection",
+            text("updated_at DESC"),
         ),
         Index("ix_records_data_gin", "data", postgresql_using="gin"),
     )
@@ -74,6 +77,7 @@ class RecordRevision(Base):
         UniqueConstraint("record_id", "version", name="uq_record_revisions_version"),
         Index("ix_record_revisions_owner_record", "owner_id", "record_id"),
     )
+
     id: Mapped[int] = mapped_column(
         BigInteger().with_variant(Integer, "sqlite"), primary_key=True, autoincrement=True
     )
@@ -159,3 +163,84 @@ class WebhookReceipt(Base):
     received_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )
+
+
+class AccessRequest(TimestampMixin, Base):
+    __tablename__ = "access_requests"
+    __table_args__ = (
+        CheckConstraint("status IN ('pending', 'approved', 'declined')", name="valid_status"),
+        Index("ix_access_requests_status_created", "status", "created_at"),
+    )
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    name: Mapped[str] = mapped_column(String(80), nullable=False)
+    email: Mapped[str] = mapped_column(String(320), nullable=False, index=True)
+    purpose: Mapped[str] = mapped_column(Text, nullable=False)
+    status: Mapped[str] = mapped_column(String(16), default="pending", nullable=False)
+    notes: Mapped[str | None] = mapped_column(Text)
+    invite_id: Mapped[str | None] = mapped_column(String(36), index=True)
+    decided_by: Mapped[str | None] = mapped_column(String(128))
+    decided_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    ip_hash: Mapped[str | None] = mapped_column(String(64))
+    user_agent: Mapped[str | None] = mapped_column(String(512))
+
+
+class Invite(TimestampMixin, Base):
+    __tablename__ = "invites"
+    __table_args__ = (
+        UniqueConstraint("token", name="uq_invites_token"),
+        Index("ix_invites_token", "token", unique=True),
+    )
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    token: Mapped[str] = mapped_column(String(128), nullable=False)
+    issued_by: Mapped[str] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    email: Mapped[str | None] = mapped_column(String(320))
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    used_by: Mapped[str | None] = mapped_column(String(128), index=True)
+    used_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+
+class Buddy(TimestampMixin, Base):
+    __tablename__ = "buddies"
+    __table_args__ = (
+        UniqueConstraint("user_a", "user_b", name="uq_buddies_pair"),
+        CheckConstraint("user_a < user_b", name="canonical_pair"),
+        CheckConstraint("status IN ('pending', 'active', 'paused')", name="valid_status"),
+        Index("ix_buddies_user_a_status", "user_a", "status"),
+        Index("ix_buddies_user_b_status", "user_b", "status"),
+    )
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    user_a: Mapped[str] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    user_b: Mapped[str] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    status: Mapped[str] = mapped_column(String(16), default="pending", nullable=False)
+    requested_by: Mapped[str | None] = mapped_column(String(128))
+    responded_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    decline_reason: Mapped[str | None] = mapped_column(Text)
+    last_request_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+
+class BuddyMessage(Base):
+    __tablename__ = "buddy_messages"
+    __table_args__ = (
+        CheckConstraint("kind IN ('text', 'question')", name="valid_kind"),
+        Index("ix_buddy_messages_buddy_created", "buddy_id", "created_at"),
+    )
+
+    id: Mapped[str] = mapped_column(String(128), primary_key=True)
+    buddy_id: Mapped[str] = mapped_column(
+        ForeignKey("buddies.id", ondelete="CASCADE"), nullable=False
+    )
+    sender_id: Mapped[str] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+    )
+    kind: Mapped[str] = mapped_column(String(16), nullable=False)
+    body: Mapped[str | None] = mapped_column(Text)
+    question_ref: Mapped[dict[str, Any] | None] = mapped_column(JSON_TYPE)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
+    read_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))

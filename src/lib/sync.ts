@@ -85,7 +85,7 @@ function setupRealtimeChannel(userId: string): void {
       (payload) => {
         const name = syncedTable(payload.table);
         if (!name) return;
-        const row = (payload.new || payload.old) as { id?: string; user_id?: string } | undefined;
+        const row = (payload.eventType === 'DELETE' ? payload.old : payload.new) as { id?: string; user_id?: string } | undefined;
         if (!row?.user_id) return;
         // A change authored by this device was already applied to the RAM cache
         // by the write path. Refreshing again would re-download the whole
@@ -95,7 +95,10 @@ function setupRealtimeChannel(userId: string): void {
         scheduleRefresh(userId, [name]);
       }
     )
-    .subscribe();
+    .subscribe((status) => {
+      // Realtime is not a durable log: recover any changes missed while disconnected.
+      if (status === 'SUBSCRIBED') scheduleRefresh(userId);
+    });
 }
 
 function teardownChannel(): void {

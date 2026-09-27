@@ -2,7 +2,7 @@
 //   1. Study sessions (subject × mode × priority × duration × goal)
 //   2. Review         (fill after the day)
 //
-// Persistence: writes on every field change to localStorage via
+// Persistence: writes on every field change to the session-memory cache via
 // planner-storage; the modal itself carries no async state.
 import { useEffect, useMemo, useState } from 'react';
 import { motion, useReducedMotion } from 'motion/react';

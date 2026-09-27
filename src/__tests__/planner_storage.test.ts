@@ -11,6 +11,7 @@ import {
   saveDayPlan,
   type DayPlan
 } from '@/lib/planner-storage';
+import { runtimeStorage as localStorage } from '@/lib/runtime-storage';
 import { useAuthStore } from '@/stores/auth';
 
 function actAs(userId: string) {

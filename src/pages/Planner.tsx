@@ -1,6 +1,6 @@
 // /planner — calendar-based study planner.
 //
-// Complete DayPlans are durable in Supabase. user-scoped localStorage is the
+// Complete DayPlans are durable in the configured online backend. Session memory is the
 // responsive cache used by the calendar and offline UI.
 //
 // Structure:
@@ -140,7 +140,7 @@ export default function Planner() {
     deepLinkedDate ? (loadDayPlan(deepLinkedDate) ?? emptyDayPlan(deepLinkedDate)) : null
   );
   // bumping `revision` after saves/deletes forces the summary memo to refetch
-  // localStorage without diving into React refs.
+  // session-memory cache without diving into React refs.
   const [revision, setRevision] = useState(0);
   const [cloudRefreshRevision, setCloudRefreshRevision] = useState(0);
   const syncErrorShownRef = useRef(false);

@@ -2,10 +2,12 @@
 
 FastAPI + SQLAlchemy/asyncpg + Neon + Clerk + Upstash + R2.
 
-**Status: implemented and tested infrastructure/data-safety layer, not a complete
-Supabase replacement.** The React frontend still uses the TypeScript backend in
-`../typescript/supabase`. The incomplete cutover is preserved as non-executable
-`.draft` files in `experimental/`; it is not shipped in Python deployments.
+**Status: the authenticated data, sharing, buddy, planner, access-request, and
+realtime compatibility contracts are implemented and tested.** Production stays
+in maintenance mode until existing Supabase identities and rows are reconciled,
+imported, counted, and recovery-tested. Notification delivery and private file
+uploads require their provider credentials and runtime workers before those
+features can be enabled.
 
 ## Data comes first
 
@@ -40,7 +42,8 @@ filesystem. Use a Neon pooled runtime URL and a direct migration/backup URL.
 
 Run the optional long-lived worker with `python -m app.worker` locally or on a
 separate worker host. It is **not** launched by a Vercel function deployment.
-Production task scheduling/notification parity is still a cutover blocker.
+Do not expose notification controls as available until the worker and delivery
+providers are configured.
 
 ## Supported HTTP contracts
 
@@ -62,6 +65,9 @@ origins; never expose database, Clerk backend, R2, or Redis secrets to the brows
 | `DELETE /v1/files/{id}` | Hide metadata; retain R2 bytes |
 | `POST /v1/files/{id}/restore` | Verify and restore retained attachment |
 | `POST/GET /v1/jobs[/id]` | Durable ledger for bounded job kinds |
+| `POST /v1/compat/tables/{table}/query` | Owner-scoped legacy query contract |
+| `POST /v1/compat/tables/{table}/{operation}` | Owner-scoped legacy mutations |
+| `POST /v1/compat/rpc/{name}` | Buddy, planner, readiness and settings RPCs |
 | `WS /v1/ws` | Authenticated owner-scoped change notifications |
 | `POST /v1/webhooks/clerk` | Verified Clerk identity events |
 
@@ -69,12 +75,13 @@ An existing changed record requires `expected_version`: missing returns 428,
 stale returns 409. Identical upserts are retry-safe no-ops. Tombstones require
 explicit restore. `learning_events` and `pyq_attempts` are append-only.
 Clients must re-query durable records after reconnect; Pub/Sub is not a durable
-event log. The full legacy frontend contract is not yet implemented.
+event log. Private file routes return 503 until object storage is configured.
 
 ## Vercel
 
 Project: **hetu-python-api**. GitHub root directory: **backends/python**.
-The existing **hetu** Vite project remains separate and retains its data source.
+The existing **hetu** Vite project remains separate. It switches only when
+`VITE_BACKEND=fastapi` is explicitly configured; there is no silent fallback.
 
 Settings detect the Vercel deployment environment: Production uses `production`
 and Preview uses `staging`. Both default to maintenance mode unless
@@ -109,5 +116,6 @@ alembic check
 
 `scripts/backup_database.py` creates consistent PostgreSQL dumps and manifests
 and verifies a separately restored database. See DATA_SAFETY for commands.
-`scripts/import_supabase.py` is partial dry-run auditing only; `--apply` refuses
-to run until shared-data, identity and attachment migration is completed.
+`scripts/import_supabase.py` remains dry-run auditing only; `--apply` refuses to
+run until shared-data, identity and attachment migration is completed. This is
+an intentional data-loss barrier, not a deploy-time migration.

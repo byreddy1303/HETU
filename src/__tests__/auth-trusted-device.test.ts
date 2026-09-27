@@ -6,6 +6,7 @@ import {
   rememberTrustedDevice
 } from '@/lib/device-trust';
 import type { useAuthStore as UseAuthStore } from '@/stores/auth';
+import { runtimeStorage as localStorage } from '@/lib/runtime-storage';
 
 const mocks = vi.hoisted(() => ({
   unregisterCurrentPushDevice: vi.fn(),

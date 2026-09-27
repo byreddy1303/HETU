@@ -5,6 +5,17 @@
 //   - decline-request  (owner auth)
 // Keeps error handling consistent so pages don't reinvent status-code parsing.
 import { supabase } from '@/lib/supabase';
+import { backendConfig } from '@/lib/backend-config';
+import { apiRequest, normalizeError } from '@/lib/fastapi-client';
+
+async function fastapiEdge<T>(path: string, body: unknown, isPublic = false): Promise<T | EdgeError> {
+  try {
+    return await apiRequest<T>(path, { method: 'POST', body: JSON.stringify(body) }, { public: isPublic });
+  } catch (error) {
+    const detail = normalizeError(error);
+    return { ok: false, status: detail.status ?? 0, error: detail.message };
+  }
+}
 
 function functionsBase(): string {
   const url =
@@ -52,6 +63,7 @@ export interface EdgeError {
 export async function requestAccess(
   input: RequestAccessInput
 ): Promise<RequestAccessOk | EdgeError> {
+  if (backendConfig.fastapi) return fastapiEdge('/v1/access/request', input, true);
   const key = anonKey();
   if (!key) {
     return { ok: false, status: 0, error: 'Supabase is not configured yet.' };
@@ -88,6 +100,7 @@ export interface ApproveResult {
 }
 
 export async function approveRequest(requestId: string): Promise<ApproveResult | EdgeError> {
+  if (backendConfig.fastapi) return fastapiEdge(`/v1/access/${encodeURIComponent(requestId)}/approve`, {});
   const jwt = await currentJwt();
   if (!jwt) return { ok: false, status: 401, error: 'Sign in first.' };
   const res = await fetch(`${functionsBase()}/approve-request`, {
@@ -120,6 +133,7 @@ export async function declineRequest(
   requestId: string,
   opts: { reason?: string; notify?: boolean } = {}
 ): Promise<DeclineResult | EdgeError> {
+  if (backendConfig.fastapi) return fastapiEdge(`/v1/access/${encodeURIComponent(requestId)}/decline`, opts);
   const jwt = await currentJwt();
   if (!jwt) return { ok: false, status: 401, error: 'Sign in first.' };
   const res = await fetch(`${functionsBase()}/decline-request`, {
@@ -163,6 +177,7 @@ export interface SignupOk {
 }
 
 export async function signupViaInvite(input: SignupInput): Promise<SignupOk | EdgeError> {
+  if (backendConfig.fastapi) return { ok: false, status: 400, error: 'Use the Clerk sign-in and recovery form.' };
   const key = anonKey();
   if (!key) return { ok: false, status: 0, error: 'Supabase is not configured yet.' };
   const res = await fetch(`${functionsBase()}/signup-via-invite`, {
@@ -196,6 +211,7 @@ export interface LoginOk {
 }
 
 export async function loginWithUsernamePin(input: LoginInput): Promise<LoginOk | EdgeError> {
+  if (backendConfig.fastapi) return { ok: false, status: 400, error: 'Use the Clerk sign-in and recovery form.' };
   const key = anonKey();
   if (!key) return { ok: false, status: 0, error: 'Supabase is not configured yet.' };
   const res = await fetch(`${functionsBase()}/login`, {
@@ -217,6 +233,7 @@ export interface PinResetInput {
 }
 
 export async function requestPinReset(input: PinResetInput): Promise<{ ok: true } | EdgeError> {
+  if (backendConfig.fastapi) return { ok: false, status: 400, error: 'Use the Clerk sign-in and recovery form.' };
   const key = anonKey();
   if (!key) return { ok: false, status: 0, error: 'Supabase is not configured yet.' };
   const res = await fetch(`${functionsBase()}/request-pin-reset`, {
@@ -255,6 +272,10 @@ export interface BuddyRequestOk {
 export async function sendBuddyRequest(
   username: string
 ): Promise<BuddyRequestOk | EdgeError> {
+  if (backendConfig.fastapi) {
+    const { data, error } = await supabase.rpc<BuddyRequestOk>('send_buddy_request', { username });
+    return error || !data ? { ok: false, status: error?.status ?? 0, error: error?.message ?? 'Buddy request failed.' } : data;
+  }
   const jwt = await currentJwt();
   if (!jwt) return { ok: false, status: 401, error: 'Sign in first.' };
   const res = await fetch(`${functionsBase()}/buddy-request`, {
@@ -285,6 +306,7 @@ export async function sendBuddyRequest(
 
 /** Optional client-side check before submitting the signup form. */
 export async function isUsernameAvailable(username: string): Promise<boolean> {
+  if (backendConfig.fastapi) return false; // Clerk owns identifiers in the cutover.
   const key = anonKey();
   if (!key) return true;
   const url = `${functionsBase().replace('/functions/v1', '')}/rest/v1/rpc/is_username_available`;

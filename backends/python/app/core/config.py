@@ -5,7 +5,7 @@ from functools import lru_cache
 from typing import Literal
 from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 
-from pydantic import Field, SecretStr, field_validator
+from pydantic import AliasChoices, Field, SecretStr, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 Environment = Literal["local", "test", "staging", "production"]
@@ -62,8 +62,14 @@ class Settings(BaseSettings):
     cors_origins: str = "http://localhost:5173,http://localhost:4173"
     trusted_hosts: str = "localhost,127.0.0.1,testserver"
 
-    upstash_redis_rest_url: str | None = None
-    upstash_redis_rest_token: SecretStr | None = None
+    upstash_redis_rest_url: str | None = Field(
+        default=None,
+        validation_alias=AliasChoices("UPSTASH_REDIS_REST_URL", "KV_REST_API_URL"),
+    )
+    upstash_redis_rest_token: SecretStr | None = Field(
+        default=None,
+        validation_alias=AliasChoices("UPSTASH_REDIS_REST_TOKEN", "KV_REST_API_TOKEN"),
+    )
     redis_events_channel: str = "hetu:events:v1"
     redis_jobs_key: str = "hetu:jobs:v1"
     rate_limit_requests: int = Field(default=120, ge=1, le=10000)
@@ -163,8 +169,6 @@ class Settings(BaseSettings):
             errors.append("CLERK_AUTHORIZED_PARTIES cannot be empty")
         if not self.redis_configured:
             errors.append("Upstash REST credentials are required")
-        if not self.r2_configured:
-            errors.append("Cloudflare R2 credentials are required")
         if errors:
             raise RuntimeError("Invalid production configuration: " + "; ".join(errors))
 

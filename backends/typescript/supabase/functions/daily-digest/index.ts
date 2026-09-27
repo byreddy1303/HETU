@@ -31,8 +31,7 @@ import {
   parseTelegramStudySessions,
   renderTelegramConnectionTest,
   renderTelegramDigest,
-  sendTelegramMessage,
-  type TelegramStudySession
+  sendTelegramMessage
 } from '../_shared/telegram.ts';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -306,7 +305,7 @@ async function buildDigest(
   const reAttemptRows = (reattempts as { id: string; question_id: string; stage: string }[]) ?? [];
 
   let subjectCounts: { subject: string; count: number }[] = [];
-  let sampleTitles: string[] = [];
+  const sampleTitles: string[] = [];
   if (reAttemptRows.length > 0) {
     const qids = reAttemptRows.map((r) => r.question_id);
     const { data: qs } = await admin

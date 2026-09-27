@@ -1,4 +1,5 @@
 import { lazy, type ComponentType } from 'react';
+import { runtimeSessionStorage as sessionStorage } from '@/lib/runtime-storage';
 
 /**
  * Wraps dynamic `import()` calls to handle deployment chunk mismatches automatically.

@@ -111,3 +111,59 @@ class HealthResponse(StrictModel):
     status: Literal["ok", "degraded", "error"]
     version: str
     checks: dict[str, str] = Field(default_factory=dict)
+
+
+class CompatOrder(StrictModel):
+    field: str = Field(pattern=r"^[A-Za-z][A-Za-z0-9_]{0,63}$")
+    ascending: bool = True
+
+
+class CompatQuery(StrictModel):
+    columns: str = "*"
+    filters: list[QueryFilter] = Field(default_factory=list, max_length=24)
+    or_filters: list[QueryFilter] = Field(default_factory=list, max_length=8)
+    orders: list[CompatOrder] = Field(default_factory=list, max_length=4)
+    limit: int | None = Field(default=None, ge=1, le=1000)
+    offset: int = Field(default=0, ge=0, le=10_000_000)
+    head: bool = False
+    count: Literal["exact"] | None = None
+    cardinality: Literal["many", "single", "maybe_single"] = "many"
+
+
+class CompatMutation(StrictModel):
+    values: list[dict[str, Any]] = Field(default_factory=list, max_length=100)
+    filters: list[QueryFilter] = Field(default_factory=list, max_length=24)
+    on_conflict: str | None = Field(default=None, max_length=255)
+    returning: bool = True
+
+
+class RpcCall(StrictModel):
+    arguments: dict[str, Any] = Field(default_factory=dict)
+
+
+class FunctionCall(StrictModel):
+    body: dict[str, Any] = Field(default_factory=dict)
+
+
+class AccessRequestCreate(StrictModel):
+    name: str = Field(min_length=1, max_length=80)
+    email: str = Field(min_length=3, max_length=320)
+    purpose: str = Field(min_length=10, max_length=500)
+    website: str = Field(default="", max_length=200)
+
+
+class SignupRequest(StrictModel):
+    username: str = Field(pattern=r"^[a-z0-9_]{3,32}$")
+    pin: str = Field(pattern=r"^\d{6}$")
+    email: str = Field(min_length=3, max_length=320)
+    name: str = Field(min_length=1, max_length=80)
+    invite_token: str = Field(min_length=16, max_length=128)
+
+
+class PinResetRequest(StrictModel):
+    username: str = Field(pattern=r"^[a-z0-9_]{3,32}$")
+
+
+class PinResetConfirm(StrictModel):
+    token: str = Field(min_length=20, max_length=2048)
+    pin: str = Field(pattern=r"^\d{6}$")

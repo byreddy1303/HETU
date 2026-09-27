@@ -11,11 +11,7 @@ import type {
   SessionRow
 } from '@/types';
 import type { PyqQuestion } from '@/lib/pyq';
-import {
-  inferPyqBookSlug,
-  pyqAnswerValueForLog,
-  pyqBookSlugForQuestion
-} from '@/lib/pyq';
+import { inferPyqBookSlug, pyqAnswerValueForLog, pyqBookSlugForQuestion } from '@/lib/pyq';
 import {
   aggregateGateScores,
   evaluateGateAnswer,
@@ -33,6 +29,9 @@ export function createPyqSessionRow(
   questions: Pick<PyqQuestion, 'id'>[],
   now = nowISO()
 ): PyqSessionRow {
+  if (new Set(questions.map((question) => question.id)).size !== questions.length) {
+    throw new Error('A PYQ set cannot contain duplicate question IDs. Rebuild the set.');
+  }
   return {
     id: uuid(),
     user_id: userId,
@@ -609,8 +608,7 @@ function pyqPracticeDrafts(session: PyqSessionRow): Record<string, PyqPracticeDr
   const questionUids = new Set(session.question_uids);
   const drafts = Object.fromEntries(
     Object.entries(session.config.practiceDrafts ?? {}).filter(
-      ([questionUid, draft]) =>
-        questionUids.has(questionUid) && draft?.question_uid === questionUid
+      ([questionUid, draft]) => questionUids.has(questionUid) && draft?.question_uid === questionUid
     )
   );
   const legacyDraft = session.config.practiceDraft;

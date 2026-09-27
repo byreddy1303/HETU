@@ -48,6 +48,22 @@ function InteractiveAnswer({
 }
 
 describe('PYQ clickable practice answers', () => {
+  it('exposes an explicit fifth HTML option when legacy choice metadata is absent', async () => {
+    render(
+      <InteractiveAnswer
+        value={{
+          ...question,
+          answer: 'E',
+          html: '<p>Choose.</p><ol type="A"><li>One</li><li>Two</li><li>Three</li><li>Four</li><li>None of these</li></ol>'
+        }}
+      />
+    );
+    const fifth = screen.getByRole('button', { name: 'E' });
+    await userEvent.click(fifth);
+    expect(fifth).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getAllByRole('button')).toHaveLength(5);
+  });
+
   it('makes rich option content clickable and preserves sanitized images and rendered math', async () => {
     const user = userEvent.setup();
     const { container } = render(<InteractiveAnswer />);

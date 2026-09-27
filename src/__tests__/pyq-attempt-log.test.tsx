@@ -4,7 +4,12 @@ import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import { db } from '@/lib/db';
 import Pyq from '@/pages/Pyq';
-import { loadPyqManifest, normalizePyqManifest, type PyqManifest, type PyqQuestion } from '@/lib/pyq';
+import {
+  loadPyqManifest,
+  normalizePyqManifest,
+  type PyqManifest,
+  type PyqQuestion
+} from '@/lib/pyq';
 import { createPyqSessionRow } from '@/lib/pyq-session';
 import { captureElementToDataUrl } from '@/lib/image';
 import { usePyqPreferencesStore } from '@/stores/pyq-preferences';
@@ -279,7 +284,9 @@ describe('PYQ committed-attempt logging', () => {
     );
     await user.click(await screen.findByRole('button', { name: 'Start practice set' }));
     expect(
-      await screen.findByText(/Which (pointer expression is valid|traversal visits the root first)\?/)
+      await screen.findByText(
+        /Which (pointer expression is valid|traversal visits the root first)\?/
+      )
     ).toBeInTheDocument();
     await waitFor(async () => expect(await db.pyq_sessions.count()).toBe(1));
 
@@ -289,10 +296,7 @@ describe('PYQ committed-attempt logging', () => {
       'c-programming',
       'data-structure'
     ]);
-    expect(session.question_uids.slice().sort()).toEqual([
-      cQuestion.id,
-      dsQuestion.id
-    ]);
+    expect(session.question_uids.slice().sort()).toEqual([cQuestion.id, dsQuestion.id]);
   });
 
   it('starts the exact recommended UID set and freezes its reproducibility receipt', async () => {
@@ -319,6 +323,53 @@ describe('PYQ committed-attempt logging', () => {
     expect(started.config.recommendationReasons).toEqual(
       expect.arrayContaining(['Learn preset', 'Unseen'])
     );
+  });
+
+  it('reveals the result even when screenshot capture never resolves', async () => {
+    vi.mocked(captureElementToDataUrl).mockReturnValueOnce(new Promise(() => {}));
+    const user = userEvent.setup();
+    render(
+      <MemoryRouter>
+        <Pyq />
+      </MemoryRouter>
+    );
+    await user.click(await screen.findByRole('button', { name: 'Start practice set' }));
+    await user.click(await screen.findByRole('button', { name: 'B' }));
+    await user.click(screen.getByRole('button', { name: /^Answered/ }));
+    await user.click(screen.getByRole('button', { name: 'Commit & reveal key' }));
+    expect(screen.getByRole('button', { name: 'Saving answer…' })).toBeDisabled();
+    const receipt = await screen.findByRole(
+      'region',
+      { name: 'PYQ attempt receipt' },
+      { timeout: 3000 }
+    );
+    expect(within(receipt).getByText('Correct', { exact: true })).toBeInTheDocument();
+    const [attempt] = await db.pyq_attempts.toArray();
+    expect(attempt.screenshot_url).toMatch(/^data:image\/svg\+xml/);
+  });
+
+  it('repairs a partial save without creating a second receipt', async () => {
+    const user = userEvent.setup();
+    render(
+      <MemoryRouter>
+        <Pyq />
+      </MemoryRouter>
+    );
+    await user.click(await screen.findByRole('button', { name: 'Start practice set' }));
+    await user.click(await screen.findByRole('button', { name: 'B' }));
+    await user.click(screen.getByRole('button', { name: /^Answered/ }));
+    vi.spyOn(db.pyq_sessions, 'bulkPut').mockRejectedValueOnce(new Error('connection interrupted'));
+    await user.click(screen.getByRole('button', { name: 'Commit & reveal key' }));
+    expect(
+      await screen.findByText(/Could not finish saving your answer: connection interrupted/)
+    ).toBeInTheDocument();
+    const [saved] = await db.pyq_attempts.toArray();
+    expect(saved).toBeDefined();
+    await user.click(screen.getByRole('button', { name: 'Commit & reveal key' }));
+    await screen.findByRole('region', { name: 'PYQ attempt receipt' });
+    expect(await db.pyq_attempts.count()).toBe(1);
+    expect((await db.pyq_sessions.toArray())[0].completed_count).toBe(1);
+    expect((await db.pyq_attempts.toArray())[0].id).toBe(saved.id);
   });
 
   it('stores the actual learner response, official key, snapshot, and timer atomically', async () => {

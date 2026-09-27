@@ -1,7 +1,8 @@
 import { targetTimeSecForMarks } from '@/lib/constants';
 import { pyqBenchmarkPaperExposure, type PyqBenchmarkPaperManifest } from '@/lib/pyq-benchmark';
-import { pyqBookSlugForQuestion, type PyqQuestion } from '@/lib/pyq';
+import { isPyqAutoGradable, pyqBookSlugForQuestion, type PyqQuestion } from '@/lib/pyq';
 import type { PyqAttemptRow } from '@/types';
+import { pyqContentIdentity } from '@/lib/pyq-integrity';
 
 export type PyqRecommendationPresetId =
   'learn' | 'diagnose' | 'repair' | 'speed' | 'transfer' | 'mixed-gate' | 'full-paper';
@@ -635,15 +636,16 @@ export function recommendPyqSelection(input: RecommendPyqSelectionInput): Recomm
       ? preset.defaultCohorts
       : exactQuestionUids && input.cohorts === undefined
         ? (['exact-uid'] as const)
-      : input.cohorts?.length
-        ? [...new Set(input.cohorts)]
-        : preset.defaultCohorts;
+        : input.cohorts?.length
+          ? [...new Set(input.cohorts)]
+          : preset.defaultCohorts;
   const requestedCohortSet = new Set(requestedCohorts);
   const questions = uniqueQuestions(input.questions);
   const knownQuestionUids = new Set(questions.map((question) => question.id));
   const missingExactUidCount = exactUidOrder.filter((uid) => !knownQuestionUids.has(uid)).length;
 
   const matched = questions.flatMap((question): Candidate[] => {
+    if (!isPyqAutoGradable(question)) return [];
     if (exactQuestionUids && !exactQuestionUids.has(question.id)) return [];
     if (
       input.preset !== 'full-paper' &&
@@ -674,10 +676,21 @@ export function recommendPyqSelection(input: RecommendPyqSelectionInput): Recomm
   const reserve = reserveState(input, attempts);
   const matchedReserved = matched.filter(({ question }) => reserve.reserved.has(question.id));
   const includeAllReserved = input.reserve?.includeReserved === true;
-  const selectable = matched.filter(
-    ({ question }) =>
-      includeAllReserved || !reserve.reserved.has(question.id) || reserve.allowed.has(question.id)
-  );
+  const seenContent = new Set<string>();
+  const selectable = matched.filter(({ question }) => {
+    if (
+      !includeAllReserved &&
+      reserve.reserved.has(question.id) &&
+      !reserve.allowed.has(question.id)
+    )
+      return false;
+    // A full paper retains its verified official question order and coverage.
+    if (input.preset === 'full-paper') return true;
+    const identity = pyqContentIdentity(question);
+    if (seenContent.has(identity)) return false;
+    seenContent.add(identity);
+    return true;
+  });
   const excludedCount = matchedReserved.filter(
     ({ question }) => !includeAllReserved && !reserve.allowed.has(question.id)
   ).length;

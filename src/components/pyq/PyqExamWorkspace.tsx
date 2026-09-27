@@ -1,3 +1,4 @@
+import { pyqPracticeChoices } from './pyqPracticeQuestion';
 import { useState } from 'react';
 import {
   ArrowLeft,
@@ -29,7 +30,6 @@ import { Card, CardBody, CardHeader } from '@/components/ui/Card';
 import { useUiStore } from '@/stores/ui';
 import { cn, secondsToClock } from '@/lib/utils';
 
-const ANSWER_CHOICES = ['A', 'B', 'C', 'D'] as const;
 
 const STATUS_LABELS: Record<PyqExamQuestionStatus, string> = {
   answered: 'Answered',
@@ -210,7 +210,7 @@ function ResponsePad({
   onConfidence?: (confidence: PyqExamConfidence) => void;
 }) {
   const inputType = answerInputType(question);
-  const answerChoices = question.choices?.length ? question.choices : ANSWER_CHOICES;
+  const answerChoices = pyqPracticeChoices(question);
   const statusTone =
     status === 'answered'
       ? 'success'

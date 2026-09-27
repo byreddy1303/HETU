@@ -1,6 +1,6 @@
 import { useState, useEffect, type ReactNode } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import type { PyqQuestion } from '@/lib/pyq';
+import { pyqMarksLabel, type PyqQuestion } from '@/lib/pyq';
 import type { PyqAttemptRow, PyqSessionRow } from '@/types';
 import { getPyqPracticeDraft } from '@/lib/pyq-session';
 import { Badge } from '@/components/ui/Badge';
@@ -230,11 +230,7 @@ export default function PyqPracticeSheet({
                   aside={
                     <div className="flex flex-wrap gap-1.5">
                       <Badge>{question.type}</Badge>
-                      {question.marks ? (
-                        <Badge>
-                          {question.marks} {question.marks === 1 ? 'mark' : 'marks'}
-                        </Badge>
-                      ) : null}
+                      <Badge>{pyqMarksLabel(question)}</Badge>
                     </div>
                   }
                 />

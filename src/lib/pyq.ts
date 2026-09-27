@@ -4,6 +4,8 @@ import { urlToDataUrl } from '@/lib/image';
 import type { PyqBenchmarkManifestFields, PyqBenchmarkPaperManifest } from '@/lib/pyq-benchmark';
 import { canonicalSubjectId } from '@/lib/subjects';
 import { gate2027BankSubjectSlugs } from '@/lib/gate-2027';
+import { evaluateGateAnswer } from '@/lib/gate-scoring';
+import { guardPyqQuestionIntegrity, PYQ_CONFLICTING_KEY_IDS } from '@/lib/pyq-integrity';
 
 export const PYQ_BANK_QUESTION_COUNT = 4334;
 
@@ -107,7 +109,8 @@ interface SubjectPayload {
 
 const subjectCache = new Map<string, Promise<SubjectPayload>>();
 let manifestPromise: Promise<PyqManifest> | null = null;
-const PYQ_MANIFEST_SCHEMA = 'benchmark-papers-v3';
+const PYQ_MANIFEST_SCHEMA = 'complete-gate-marks-v4';
+export const PYQ_BANK_REQUEST_TIMEOUT_MS = 15_000;
 
 const PYQ_MATH_DELIMITERS = [
   { left: '$$$', right: '$$$' },
@@ -272,9 +275,20 @@ export function normalizePyqQuestionHtml(html: string): string {
 }
 
 async function fetchJson<T>(url: string): Promise<T> {
-  const response = await fetch(url);
-  if (!response.ok) throw new Error(`Question bank request failed (${response.status})`);
-  return (await response.json()) as T;
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), PYQ_BANK_REQUEST_TIMEOUT_MS);
+  try {
+    const response = await fetch(url, { signal: controller.signal, cache: 'no-cache' });
+    if (!response.ok) throw new Error(`Question bank request failed (${response.status})`);
+    return (await response.json()) as T;
+  } catch (error) {
+    if (controller.signal.aborted) {
+      throw new Error('The question bank took too long to load. Check your connection and retry.');
+    }
+    throw error;
+  } finally {
+    clearTimeout(timer);
+  }
 }
 
 export function loadPyqManifest(): Promise<PyqManifest> {
@@ -283,7 +297,12 @@ export function loadPyqManifest(): Promise<PyqManifest> {
   // manifest with the latest JavaScript while a new worker activates.
   manifestPromise ??= fetchJson<PyqManifestPayload>(
     `/pyq/manifest.json?schema=${PYQ_MANIFEST_SCHEMA}`
-  ).then(normalizePyqManifest);
+  )
+    .then(normalizePyqManifest)
+    .catch((error: unknown) => {
+      manifestPromise = null;
+      throw error;
+    });
   return manifestPromise;
 }
 
@@ -337,13 +356,25 @@ export async function loadPyqQuestions(
       const versionedFile = `${subject.file}?bank=${encodeURIComponent(bankVersion)}`;
       let request = subjectCache.get(versionedFile);
       if (!request) {
-        request = fetchJson<SubjectPayload>(versionedFile);
+        request = fetchJson<SubjectPayload>(versionedFile)
+          .then((payload) => {
+            if (payload.bankVersion !== bankVersion) {
+              throw new Error(
+                'The question bank was updated. Refresh the page to load the latest marks and answers.'
+              );
+            }
+            return payload;
+          })
+          .catch((error: unknown) => {
+            subjectCache.delete(versionedFile);
+            throw error;
+          });
         subjectCache.set(versionedFile, request);
       }
       return request;
     })
   );
-  return payloads.flatMap((payload) => payload.questions);
+  return payloads.flatMap((payload) => payload.questions.map(guardPyqQuestionIntegrity));
 }
 
 /** Restore a legacy attempt from the current bundled bank without downloading
@@ -461,6 +492,10 @@ export function evaluatePyqAnswer(
 }
 
 export function formatPyqAnswer(question: PyqQuestion): string {
+  if (PYQ_CONFLICTING_KEY_IDS.has(question.id))
+    return 'Conflicting archive answer keys — automatic validation withheld.';
+  if (question.type === 'SUBJECTIVE')
+    return 'Written-answer question — automatic validation is unavailable.';
   if (question.answerStatus === 'ambiguous')
     return 'Official status: ambiguous; no definitive key.';
   if (question.answerStatus === 'marks-to-all') return 'Official status: marks awarded to all.';
@@ -471,6 +506,28 @@ export function formatPyqAnswer(question: PyqQuestion): string {
     return question.answer.map(String).join(separator);
   }
   return String(question.answer ?? 'Key unavailable');
+}
+
+/** Only objective questions with usable keys belong in automatically graded sets. */
+export function isPyqAutoGradable(question: PyqQuestion): boolean {
+  if (PYQ_CONFLICTING_KEY_IDS.has(question.id)) return false;
+  return (
+    evaluateGateAnswer({
+      questionType: question.type,
+      marks: question.marks,
+      answerStatus: question.answerStatus,
+      decision: 'MARK',
+      selectedAnswer: question.answer,
+      correctAnswer: question.answer,
+      tolerance: question.tolerance
+    }) === true
+  );
+}
+
+export function pyqMarksLabel(question: Pick<PyqQuestion, 'marks'>): string {
+  return question.marks != null && Number.isFinite(question.marks) && question.marks > 0
+    ? `${question.marks} ${question.marks === 1 ? 'mark' : 'marks'}`
+    : 'Marks unavailable';
 }
 
 export function pyqAnswerValueForLog(question: PyqQuestion): PyqSelectedAnswer {

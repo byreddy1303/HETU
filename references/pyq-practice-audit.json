@@ -1,0 +1,276 @@
+{
+  "bankVersion": "gate-and-cs-exams-1990-2026-v12-complete-gate-marks",
+  "questionCount": 4334,
+  "uniqueIdCount": 4334,
+  "missingMarksByBook": {
+    "tifr-gs-cs": 65,
+    "cmi-cs-objective": 122,
+    "isro-cs-overlap": 45,
+    "iiith-pgee": 8,
+    "ugc-net-cs-overlap": 21
+  },
+  "unavailableAutomaticKeysByType": {
+    "MARKS_TO_ALL/marks-to-all": 2,
+    "UNSUPPORTED/unsupported": 90,
+    "SUBJECTIVE/available": 20,
+    "AMBIGUOUS/ambiguous": 3
+  },
+  "provenance": {
+    "pdfMappingsChecked": 130,
+    "uidMappingsChecked": 143,
+    "archiveUrlMappingsChecked": 963,
+    "mismatches": []
+  },
+  "duplicateContentGroups": [
+    [
+      {
+        "id": "es:gate-me:qZPV1mw6XD7PrdOZ",
+        "paper": "GATE ME 2015 Set 3",
+        "number": "15",
+        "subject": "engineering-mathematics",
+        "answer": "B",
+        "marks": 2
+      },
+      {
+        "id": "es:gate-in:yhrmxinsXtPKQRSx",
+        "paper": "GATE IN 2015",
+        "number": "5",
+        "subject": "engineering-mathematics",
+        "answer": "B",
+        "marks": 2
+      }
+    ],
+    [
+      {
+        "id": "es:gate-ece:Ig4vtMlJfnv6M0Y2",
+        "paper": "GATE ECE 2015 Set 2",
+        "number": "20",
+        "subject": "engineering-mathematics",
+        "answer": "B",
+        "marks": 1
+      },
+      {
+        "id": "es:gate-me:U9fEtnrP6Dir4mLh",
+        "paper": "GATE ME 2015 Set 1",
+        "number": "18",
+        "subject": "engineering-mathematics",
+        "answer": "B",
+        "marks": 1
+      }
+    ],
+    [
+      {
+        "id": "es:gate-in:RWCXXBRU8O9qpOon",
+        "paper": "GATE IN 2013",
+        "number": "8",
+        "subject": "engineering-mathematics",
+        "answer": "A",
+        "marks": 1
+      },
+      {
+        "id": "es:gate-ee:Gxv0IWidRn37KTjh",
+        "paper": "GATE EE 2013",
+        "number": "22",
+        "subject": "engineering-mathematics",
+        "answer": "A",
+        "marks": 1
+      }
+    ],
+    [
+      {
+        "id": "es:gate-in:fk24FqclEgEt7Rmv",
+        "paper": "GATE IN 2012",
+        "number": "9",
+        "subject": "engineering-mathematics",
+        "answer": "B",
+        "marks": 1
+      },
+      {
+        "id": "es:gate-ee:jXyBWM4oY1xeOJCu",
+        "paper": "GATE EE 2012",
+        "number": "23",
+        "subject": "engineering-mathematics",
+        "answer": "B",
+        "marks": 1
+      },
+      {
+        "id": "es:gate-ece:WifHHf5YQ5r6BO5g",
+        "paper": "GATE ECE 2012",
+        "number": "37",
+        "subject": "engineering-mathematics",
+        "answer": "B",
+        "marks": 1
+      }
+    ],
+    [
+      {
+        "id": "es:gate-in:gPNwXSA0VfkRR6ZP",
+        "paper": "GATE IN 2012",
+        "number": "10",
+        "subject": "engineering-mathematics",
+        "answer": "B",
+        "marks": 1
+      },
+      {
+        "id": "es:gate-ee:fatQOKOglBQrcN7G",
+        "paper": "GATE EE 2012",
+        "number": "35",
+        "subject": "engineering-mathematics",
+        "answer": "B",
+        "marks": 1
+      },
+      {
+        "id": "es:gate-ece:iNcP7EcArDPMkAMi",
+        "paper": "GATE ECE 2012",
+        "number": "39",
+        "subject": "engineering-mathematics",
+        "answer": "B",
+        "marks": 1
+      }
+    ],
+    [
+      {
+        "id": "es:gate-in:PvKb0EM2lGLybU5V",
+        "paper": "GATE IN 2012",
+        "number": "10",
+        "subject": "engineering-mathematics",
+        "answer": "C",
+        "marks": 2
+      },
+      {
+        "id": "es:gate-ee:b3ioOzRnK0hDJwdf",
+        "paper": "GATE EE 2012",
+        "number": "24",
+        "subject": "engineering-mathematics",
+        "answer": "C",
+        "marks": 2
+      },
+      {
+        "id": "es:gate-ece:43IcVn4Gh7Q4Tfa3",
+        "paper": "GATE ECE 2012",
+        "number": "38",
+        "subject": "engineering-mathematics",
+        "answer": "C",
+        "marks": 2
+      }
+    ],
+    [
+      {
+        "id": "es:gate-cse:cSKl4EFy2RmrDF0x",
+        "paper": "GATE CSE 2001",
+        "number": "11",
+        "subject": "coa",
+        "answer": "C",
+        "marks": 1
+      },
+      {
+        "id": "es:gate-cse:nTk8JawFHJogRfme",
+        "paper": "GATE CSE 2001",
+        "number": "39",
+        "subject": "operating-systems",
+        "answer": "C",
+        "marks": 1
+      }
+    ],
+    [
+      {
+        "id": "es:gate-cse:g3z3rCFxZY6lWpJR",
+        "paper": "GATE CSE 1998",
+        "number": "6",
+        "subject": "coa",
+        "answer": "A",
+        "marks": 1
+      },
+      {
+        "id": "es:gate-cse:tgmtl2rqUXbgmFB0",
+        "paper": "GATE CSE 1998",
+        "number": "41",
+        "subject": "operating-systems",
+        "answer": "C",
+        "marks": 1
+      }
+    ],
+    [
+      {
+        "id": "es:gate-cse:dz6IpID2jG8YtJBH",
+        "paper": "GATE CSE 2001",
+        "number": "4",
+        "subject": "compiler-design",
+        "answer": "A",
+        "marks": 1
+      },
+      {
+        "id": "es:gate-cse:QLXk6o3rDR5I8HYS",
+        "paper": "GATE CSE 2001",
+        "number": "32",
+        "subject": "operating-systems",
+        "answer": "C",
+        "marks": 1
+      }
+    ],
+    [
+      {
+        "id": "es:gate-cse:zMpdXqI7KKWEUskG",
+        "paper": "GATE CSE 1998",
+        "number": "14",
+        "subject": "databases",
+        "answer": null,
+        "marks": 2
+      },
+      {
+        "id": "es:gate-cse:zr3nCaHbPbvsFdvq",
+        "paper": "GATE CSE 1998",
+        "number": "13",
+        "subject": "databases",
+        "answer": null,
+        "marks": 2
+      }
+    ]
+  ],
+  "conflictingKeyGroups": [
+    [
+      {
+        "id": "es:gate-cse:g3z3rCFxZY6lWpJR",
+        "paper": "GATE CSE 1998",
+        "number": "6",
+        "subject": "coa",
+        "answer": "A",
+        "marks": 1
+      },
+      {
+        "id": "es:gate-cse:tgmtl2rqUXbgmFB0",
+        "paper": "GATE CSE 1998",
+        "number": "41",
+        "subject": "operating-systems",
+        "answer": "C",
+        "marks": 1
+      }
+    ],
+    [
+      {
+        "id": "es:gate-cse:dz6IpID2jG8YtJBH",
+        "paper": "GATE CSE 2001",
+        "number": "4",
+        "subject": "compiler-design",
+        "answer": "A",
+        "marks": 1
+      },
+      {
+        "id": "es:gate-cse:QLXk6o3rDR5I8HYS",
+        "paper": "GATE CSE 2001",
+        "number": "32",
+        "subject": "operating-systems",
+        "answer": "C",
+        "marks": 1
+      }
+    ]
+  ],
+  "unquarantinedConflicts": [],
+  "archiveNumberCollisionGroups": 82,
+  "limitations": [
+    "Mapping consistency is not independent proof of mathematical answer correctness.",
+    "The 130 PDF mappings check stored provenance, not a fresh extraction of original PDF keys.",
+    "Older source archives include reconstructed numbering and allocations; the marks audit records evidence and limitations.",
+    "Exact content deduplication does not detect reworded or option-reordered duplicates."
+  ]
+}

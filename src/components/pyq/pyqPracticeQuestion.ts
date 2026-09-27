@@ -2,6 +2,25 @@ import type { PyqQuestion } from '@/lib/pyq';
 
 export const DEFAULT_PRACTICE_CHOICES = ['A', 'B', 'C', 'D'];
 
+/** Legacy rows may carry a fifth option in HTML without a choices field. */
+export function pyqPracticeChoices(question: PyqQuestion): string[] {
+  if (question.choices?.length) return question.choices;
+  if (typeof DOMParser === 'undefined') return DEFAULT_PRACTICE_CHOICES;
+  const document = new DOMParser().parseFromString(question.html, 'text/html');
+  const lists = Array.from(document.querySelectorAll('ol')).filter(
+    (list) =>
+      list.style.listStyleType === 'upper-alpha' ||
+      (!list.style.listStyleType && list.getAttribute('type') === 'A')
+  );
+  if (lists.length !== 1) return DEFAULT_PRACTICE_CHOICES;
+  const count = lists[0].children.length;
+  if (count < 4 || count > 26) return DEFAULT_PRACTICE_CHOICES;
+  const choices = Array.from({ length: count }, (_, index) => String.fromCharCode(65 + index));
+  return splitPyqPracticeQuestion(question.html, choices).options
+    ? choices
+    : DEFAULT_PRACTICE_CHOICES;
+}
+
 /** Only split option lists whose source explicitly identifies A, B, C… labels. */
 export function splitPyqPracticeQuestion(html: string, choices: string[]) {
   const fallback = { stem: html, options: null };
@@ -39,6 +58,6 @@ export function splitPyqPracticeQuestion(html: string, choices: string[]) {
 export function pyqPracticeQuestionStem(question: PyqQuestion): string {
   const inputType = question.type === 'MSQ' || question.type === 'NAT' ? question.type : 'MCQ';
   if (inputType === 'NAT') return question.html;
-  const answerChoices = question.choices?.length ? question.choices : DEFAULT_PRACTICE_CHOICES;
+  const answerChoices = pyqPracticeChoices(question);
   return splitPyqPracticeQuestion(question.html, answerChoices).stem;
 }

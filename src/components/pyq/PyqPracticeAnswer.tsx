@@ -2,7 +2,7 @@ import { useId, useMemo } from 'react';
 import type { PyqQuestion } from '@/lib/pyq';
 import { cn } from '@/lib/utils';
 import PyqQuestionContent from './PyqQuestionContent';
-import { DEFAULT_PRACTICE_CHOICES, splitPyqPracticeQuestion } from './pyqPracticeQuestion';
+import { pyqPracticeChoices, splitPyqPracticeQuestion } from './pyqPracticeQuestion';
 
 export default function PyqPracticeAnswer({
   question,
@@ -23,7 +23,7 @@ export default function PyqPracticeAnswer({
 }) {
   const id = useId();
   const inputType = question.type === 'MSQ' || question.type === 'NAT' ? question.type : 'MCQ';
-  const answerChoices = question.choices?.length ? question.choices : DEFAULT_PRACTICE_CHOICES;
+  const answerChoices = useMemo(() => pyqPracticeChoices(question), [question]);
   const content = useMemo(
     () =>
       inputType === 'NAT'

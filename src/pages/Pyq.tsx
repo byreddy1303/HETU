@@ -44,7 +44,7 @@ import PyqExamWorkspace from '@/components/pyq/PyqExamWorkspace';
 import PyqPracticeViewControl from '@/components/pyq/PyqPracticeViewControl';
 import PyqPracticeSheet from '@/components/pyq/PyqPracticeSheet';
 import PyqPracticeAnswer from '@/components/pyq/PyqPracticeAnswer';
-import { pyqPracticeQuestionStem } from '@/components/pyq/pyqPracticeQuestion';
+import { pyqPracticeChoices, pyqPracticeQuestionStem } from '@/components/pyq/pyqPracticeQuestion';
 import PyqImprovementInsights from '@/components/pyq/PyqImprovementInsights';
 import PyqEvidenceLedger from '@/components/pyq/PyqEvidenceLedger';
 import PyqRecommendedSetup from '@/components/pyq/PyqRecommendedSetup';
@@ -68,6 +68,8 @@ import {
   firstPyqImage,
   formatPyqAnswer,
   inferPyqBookSlug,
+  isPyqAutoGradable,
+  pyqMarksLabel,
   inferPyqDirectOutcome,
   pyqQuestionSnapshotDataUrl,
   resolvePyqJournalImageUrl,
@@ -93,14 +95,14 @@ import {
   pausePyqPracticeSession,
   pausePyqSession,
   pyqAttemptScorePresentation,
-  pyqAttemptId,
   pyqJournalQuestionId,
   pyqPracticeSessionRow,
   pyqPracticeSubject,
   startPyqSessionQuestion
 } from '@/lib/pyq-session';
 import { reconcilePyqPracticeSessions } from '@/lib/sessions';
-import { captureElementToDataUrl } from '@/lib/image';
+import { capturePyqSnapshot } from '@/lib/pyq-capture';
+import { uniquePyqPracticeQuestions } from '@/lib/pyq-integrity';
 import { isCoreSetupOnlyUsername } from '@/lib/core-only';
 import { cn, plural, secondsToClock, todayISOInTimeZone, uuid } from '@/lib/utils';
 import { analyzedAttemptIds, filterPyqByHistory, PYQ_HISTORY_OPTIONS } from '@/lib/pyq-history';
@@ -183,7 +185,6 @@ function recommendationCohortParam(value: string | null): PyqRecommendationCohor
     : null;
 }
 
-const DEFAULT_CHOICES = ['A', 'B', 'C', 'D'] as const;
 const PRACTICE_MODE_FEATURES = [
   'Feedback after each answer',
   'No overall time limit',
@@ -1458,7 +1459,7 @@ function AnswerPad({
   onNumeric: (value: string) => void;
 }) {
   const inputType = answerInputType(question);
-  const answerChoices = question.choices?.length ? question.choices : DEFAULT_CHOICES;
+  const answerChoices = pyqPracticeChoices(question);
   if (inputType === 'NAT') {
     return (
       <label className="block text-[12px] font-medium text-text-muted">
@@ -1621,8 +1622,8 @@ function ResultPanel({ question, attempt }: { question: PyqQuestion; attempt: Py
     skipped || attempt.mark_correct == null ? 'warn' : attempt.mark_correct ? 'success' : 'danger';
   const title = skipped
     ? 'Left blank'
-    : !available
-      ? 'No definitive key'
+    : !available || attempt.mark_correct == null
+      ? 'Not automatically graded'
       : attempt.mark_correct
         ? 'Correct'
         : 'Not correct';
@@ -1695,13 +1696,17 @@ function ResultPanel({ question, attempt }: { question: PyqQuestion; attempt: Py
               </p>
             )}
           <div className="mt-3 flex flex-wrap items-center gap-2">
-            {score.covered && <Badge tone="accent">{score.label}</Badge>}
+            <Badge tone={score.covered ? 'accent' : 'warn'}>{score.label}</Badge>
             {effectiveConfidence && (
               <Badge tone={effectiveConfidence === 'high' ? 'success' : 'guess'}>
                 {effectiveConfidence[0].toUpperCase() + effectiveConfidence.slice(1)} confidence
               </Badge>
             )}
-            {score.covered && <span className="text-[11px] text-text-faint">{score.detail}</span>}
+            <span className="text-[11px] text-text-faint">
+              {!score.covered && question.marks != null && question.marks > 2
+                ? `This historical question carries ${question.marks} marks. Its original scoring scheme is not included in the modern GATE score.`
+                : score.detail}
+            </span>
           </div>
           <p className="mt-2 text-[11px] text-text-faint">
             Committed {new Date(attempt.attempted_at).toLocaleString()} ·{' '}
@@ -1738,6 +1743,7 @@ export default function Pyq() {
   const timeZone = profile?.timezone ?? 'Asia/Kolkata';
   const [manifest, setManifest] = useState<PyqManifest | null>(null);
   const [manifestError, setManifestError] = useState<string | null>(null);
+  const [bankRetry, setBankRetry] = useState(0);
   const [config, setConfig] = useState<AttemptConfig>(() => ({
     bookSlug: 'gate-cse',
     subjectSlug: 'discrete-mathematics',
@@ -1800,6 +1806,7 @@ export default function Pyq() {
   const [calcOpen, setCalcOpen] = useState(false);
   const questionCaptureRef = useRef<HTMLDivElement>(null);
   const submittingRef = useRef(false);
+  const pendingPracticeAttemptRef = useRef<PyqAttemptRow | null>(null);
   const pausingSessionRef = useRef(false);
   const startingRef = useRef(false);
   const questionStartRef = useRef<{ questionUid: string; startedAtMs: number } | null>(null);
@@ -1917,6 +1924,7 @@ export default function Pyq() {
 
   useEffect(() => {
     let active = true;
+    setManifestError(null);
     loadPyqManifest()
       .then((value) => {
         if (!active) return;
@@ -1959,7 +1967,7 @@ export default function Pyq() {
     return () => {
       active = false;
     };
-  }, [searchParams]);
+  }, [searchParams, bankRetry]);
 
   useEffect(() => {
     if (!manifest || !userId) return;
@@ -3148,6 +3156,7 @@ export default function Pyq() {
         const high = Math.max(config.fromYear, config.toYear);
         rows = (await loadPyqQuestions(subjects, manifest.bankVersion)).filter(
           (question) =>
+            isPyqAutoGradable(question) &&
             matchesPyqBookScope(question, { bookSlug: 'gate-cse' }) &&
             matchesPyqTopicScope(question, config) &&
             question.year >= low &&
@@ -3163,6 +3172,7 @@ export default function Pyq() {
           rows = rows.filter((question) => !reservedQuestionUids.has(question.id));
         }
         rows = filterPyqByHistory(rows, config.history ?? 'all', attempts, journalQuestions);
+        rows = uniquePyqPracticeQuestions(rows);
         if (config.order === 'random') rows = deterministicQuestionOrder(rows, selectionSeed);
         else if (config.order === 'oldest')
           rows = rows
@@ -3420,22 +3430,6 @@ export default function Pyq() {
     setAnalyzedCount((count) => count + 1);
   }
 
-  async function captureQuestionSnapshot(): Promise<string> {
-    if (!current) throw new Error('No active question to capture.');
-    try {
-      const captured = questionCaptureRef.current
-        ? await captureElementToDataUrl(questionCaptureRef.current, { theme: 'light' })
-        : null;
-      if (captured) return captured;
-    } catch {
-      // A rasterization failure must not block the attempt log.
-    }
-    const embedded = await resolvePyqJournalImageUrl(current.html).catch(() => null);
-    // Every committed PYQ must carry an image into its attempt/journal log,
-    // even on browsers where DOM rasterization or a bundled figure fails.
-    return embedded ?? pyqQuestionSnapshotDataUrl(current);
-  }
-
   async function journalImageUrl(
     draft?: TagDraft,
     screenshot: string | null = questionScreenshot
@@ -3612,13 +3606,13 @@ export default function Pyq() {
           ...questionRowFromAttempt(attempt, undefined, attempt.screenshot_url, sourceQuestion),
           id: pyqJournalQuestionId(attempt.id)
         };
-        try {
-          await captureWeakPyqAttempt({ attempt, timeZone, compatibilityQuestion });
-        } catch (captureError) {
-          // The immutable exam receipt is already safe. Login/resume backfill
-          // retries recovery capture without making the whole paper look lost.
-          console.warn('[air] Exam recovery capture is waiting to retry.', captureError);
-        }
+        void captureWeakPyqAttempt({ attempt, timeZone, compatibilityQuestion }).catch(
+          (captureError: unknown) => {
+            // The immutable exam receipt is already safe. Login/resume backfill
+            // retries recovery capture without making the whole paper look lost.
+            console.warn('[air] Exam recovery capture is waiting to retry.', captureError);
+          }
+        );
       }
       const finalizedCanonical = await db.sessions.get(finalized.session.id);
       await reconcileLinkedPlannerReceipt(
@@ -3692,40 +3686,47 @@ export default function Pyq() {
         .toArray();
       const priorAttempt = latestQuestionAttempt(questionAttempts, current.id);
       const attemptNumber = nextPyqAttemptNumber(questionAttempts, session.id, current.id);
-      const id = pyqAttemptId(session.id, current.id, attemptNumber);
-      const existing = await db.pyq_attempts.get(id);
-      if (existing) {
-        setQuestionScreenshot(existing.screenshot_url);
-        setSubmitted(existing);
-        setCompleted((rows) =>
-          rows.some((row) => row.id === existing.id) ? rows : [...rows, existing]
-        );
-        return;
-      }
-      const screenshot = await captureQuestionSnapshot();
+      // A prior batch may have saved the immutable receipt before a later
+      // session/journal write failed. Repair it instead of creating a new attempt.
+      const existing =
+        priorAttempt &&
+        (priorAttempt.mark_decision !== 'SKIP' ||
+          priorAttempt.id === pendingPracticeAttemptRef.current?.id ||
+          !session.completed_question_uids.includes(current.id))
+          ? priorAttempt
+          : null;
+      const screenshot =
+        existing?.screenshot_url ?? (await capturePyqSnapshot(current, questionCaptureRef.current));
       setQuestionScreenshot(screenshot);
-      const attempt = createPyqAttemptRow({
-        userId,
-        session,
-        question: current,
-        selectedAnswer: selected,
-        decision,
-        confidence,
-        bankVersion: manifest.bankVersion,
-        questionStartedAtMs,
-        committedAtMs,
-        timeSpentMs,
-        screenshotUrl: screenshot,
-        attemptNumber,
-        retryingSkippedAttempt: priorAttempt?.mark_decision === 'SKIP'
-      });
-      const nextSession = advancePyqSessionProgress(
-        session,
-        current.id,
-        index + 1,
-        attempt.time_spent_sec,
-        attempt.attempted_at
-      );
+      const attempt =
+        existing ??
+        createPyqAttemptRow({
+          userId,
+          session,
+          question: current,
+          selectedAnswer: selected,
+          decision,
+          confidence,
+          bankVersion: manifest.bankVersion,
+          questionStartedAtMs,
+          committedAtMs,
+          timeSpentMs,
+          screenshotUrl: screenshot,
+          attemptNumber,
+          retryingSkippedAttempt: priorAttempt?.mark_decision === 'SKIP'
+        });
+      const nextSession =
+        existing &&
+        session.completed_question_uids.includes(current.id) &&
+        session.current_question_uid !== current.id
+          ? session
+          : advancePyqSessionProgress(
+              session,
+              current.id,
+              index + 1,
+              attempt.time_spent_sec,
+              attempt.attempted_at
+            );
       const writes: Parameters<typeof writeLocalBatch>[0] = [
         { name: 'pyq_attempts', row: attempt },
         { name: 'pyq_sessions', row: nextSession }
@@ -3735,7 +3736,7 @@ export default function Pyq() {
       let compatibilityQuestion: QuestionRow | null = null;
       if (attempt.mark_correct === true || recoveryNeeded) {
         const row = {
-          ...questionRowFromAttempt(attempt, undefined, await safeQuestionImageUrl()),
+          ...questionRowFromAttempt(attempt, undefined, firstPyqImage(current.html) ?? screenshot),
           id: pyqJournalQuestionId(attempt.id)
         };
         writes.push({ name: 'questions', row });
@@ -3744,15 +3745,17 @@ export default function Pyq() {
         // analysis so the learner can still open TagFlow.
         autoJournalSaved = attempt.mark_correct === true && !recoveryNeeded;
       }
+      pendingPracticeAttemptRef.current = attempt;
       await writeLocalBatch(writes);
+      pendingPracticeAttemptRef.current = null;
       if (compatibilityQuestion && recoveryNeeded) {
-        try {
-          await captureWeakPyqAttempt({ attempt, timeZone, compatibilityQuestion });
-        } catch (captureError) {
-          // The answer receipt remains committed; account bootstrap retries
-          // this idempotent recovery write after refresh or reconnection.
-          console.warn('[air] Practice recovery capture is waiting to retry.', captureError);
-        }
+        void captureWeakPyqAttempt({ attempt, timeZone, compatibilityQuestion }).catch(
+          (captureError: unknown) => {
+            // The answer receipt remains committed; account bootstrap retries
+            // this idempotent recovery write after refresh or reconnection.
+            console.warn('[air] Practice recovery capture is waiting to retry.', captureError);
+          }
+        );
       }
       loadedSessionRef.current = nextSession;
       setLoadedSession(nextSession);
@@ -3769,8 +3772,8 @@ export default function Pyq() {
     } catch (error) {
       setSubmitError(
         error instanceof Error
-          ? `Answer was not committed: ${error.message}`
-          : 'Answer was not committed. Your selection is still here; try again.'
+          ? `Could not finish saving your answer: ${error.message}. Retry to finish saving.`
+          : 'Could not finish saving your answer. Your selection is still here; try again.'
       );
     } finally {
       submittingRef.current = false;
@@ -3997,7 +4000,12 @@ export default function Pyq() {
         <PageHeader title="GATE PYQs" description="Opening the local question bank…" />
         <Card>
           <CardBody className="py-12 text-center text-[13px] text-text-faint">
-            {manifestError ?? 'Checking 37 years of papers…'}
+            <p>{manifestError ?? 'Checking 37 years of papers…'}</p>
+            {manifestError ? (
+              <Button className="mt-4" onClick={() => setBankRetry((value) => value + 1)}>
+                Retry question bank
+              </Button>
+            ) : null}
           </CardBody>
         </Card>
       </div>
@@ -4421,11 +4429,7 @@ export default function Pyq() {
               <div className="flex flex-wrap gap-1.5">
                 <Badge tone="accent">{current.subject}</Badge>
                 <Badge>{current.type}</Badge>
-                {current.marks && (
-                  <Badge>
-                    {current.marks} mark{current.marks === 1 ? '' : 's'}
-                  </Badge>
-                )}
+                <Badge>{pyqMarksLabel(current)}</Badge>
               </div>
             }
           />
@@ -4437,6 +4441,12 @@ export default function Pyq() {
         </Card>
       </div>
 
+      {!isPyqAutoGradable(current) ? (
+        <p role="status" className="rounded border border-warn/25 bg-warn-faint p-3 text-[13px]">
+          This archived question has no automatically verifiable answer. Skip it to continue; it
+          will not be counted as incorrect.
+        </p>
+      ) : null}
       <Card>
         <CardBody
           className={cn(
@@ -4521,8 +4531,15 @@ export default function Pyq() {
                   disabled={!canSubmit}
                   className="w-full"
                 >
-                  Commit & reveal key
+                  {submitting ? 'Saving answer…' : 'Commit & reveal key'}
                 </Button>
+                {!submitting && decision !== 'SKIP' && !canSubmit ? (
+                  <p className="mt-2 text-[12px] text-text-muted">
+                    {hasAnswer
+                      ? 'Choose your confidence above to check your answer.'
+                      : 'Select an answer or skip this question to continue.'}
+                  </p>
+                ) : null}
                 <div className="mt-3 flex flex-wrap gap-2">
                   {index > 0 ? (
                     <Button onClick={goPrevious} disabled={submitting || loading}>

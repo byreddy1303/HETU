@@ -135,6 +135,18 @@ class PyqCatalogQuestion(TimestampMixin, Base):
     duplicate_of_uid: Mapped[str | None] = mapped_column(String(128))
 
 
+class DataImport(Base):
+    __tablename__ = "data_imports"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    source: Mapped[str] = mapped_column(String(64), nullable=False)
+    source_hash: Mapped[str] = mapped_column(String(64), nullable=False, unique=True)
+    row_counts: Mapped[dict[str, Any]] = mapped_column(JSON_TYPE, nullable=False)
+    completed_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
+
+
 class Record(TimestampMixin, Base):
     __tablename__ = "records"
     __table_args__ = (

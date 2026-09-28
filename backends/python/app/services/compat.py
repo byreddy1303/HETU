@@ -18,6 +18,7 @@ from app.services.records import (
     _filter_expression,
     delete_record,
     patch_record,
+    require_generic_mutation_allowed,
     to_api,
     upsert_records,
 )
@@ -286,6 +287,7 @@ async def _mutate_records(
 ) -> list[dict[str, Any]]:
     if table not in COLLECTIONS or table in {"buddies", "buddy_messages"}:
         raise api_error("Unknown table", status.HTTP_404_NOT_FOUND)
+    require_generic_mutation_allowed(table)
     if operation in {"insert", "upsert"}:
         values: list[dict[str, Any]] = []
         for raw in mutation.values:

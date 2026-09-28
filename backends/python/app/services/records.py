@@ -25,7 +25,13 @@ COLLECTIONS = frozenset(
         "insights_daily",
         "interruption_logs",
         "learning_events",
+        "learning_insights",
         "learning_items",
+        "concept_pages",
+        "source_captures",
+        "plugin_receipts",
+        "workflow_records",
+        "concept_reviews",
         "llm_usage_daily",
         "mock_tests",
         "patterns",
@@ -53,7 +59,19 @@ COLLECTIONS = frozenset(
         "weekly_reviews",
     }
 )
-IMMUTABLE_COLLECTIONS = frozenset({"learning_events", "pyq_attempts"})
+IMMUTABLE_COLLECTIONS = frozenset(
+    {"learning_events", "pyq_attempts", "source_captures", "plugin_receipts"}
+)
+DOMAIN_MANAGED_COLLECTIONS = frozenset(
+    {
+        "concept_pages",
+        "learning_insights",
+        "source_captures",
+        "plugin_receipts",
+        "workflow_records",
+        "concept_reviews",
+    }
+)
 RESERVED_FIELDS = frozenset(
     {
         "id",
@@ -74,6 +92,15 @@ def require_collection(collection: str) -> str:
     if collection not in COLLECTIONS:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Unknown collection")
     return collection
+
+
+def require_generic_mutation_allowed(collection: str) -> None:
+    require_collection(collection)
+    if collection in DOMAIN_MANAGED_COLLECTIONS:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=f"{collection} must be changed through its validated domain API",
+        )
 
 
 def to_api(record: Record) -> dict[str, Any]:

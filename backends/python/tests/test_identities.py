@@ -49,9 +49,7 @@ async def test_deleted_mapped_user_is_rejected(db) -> None:
     await db.commit()
 
     with pytest.raises(HTTPException) as exc_info:
-        await resolve_identity(
-            db, Identity("deleted-subject", provider_subject="deleted-subject")
-        )
+        await resolve_identity(db, Identity("deleted-subject", provider_subject="deleted-subject"))
 
     assert exc_info.value.status_code == 403
 

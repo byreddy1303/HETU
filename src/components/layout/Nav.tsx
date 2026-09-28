@@ -34,6 +34,8 @@ import Brand from '@/components/shared/Brand';
 
 type Item = { to: string; label: string; icon: LucideIcon };
 const REFLECT: Item[] = [
+  { to: '/workflows', label: 'Workflows', icon: ListChecks },
+  { to: '/concept-review', label: 'Concept review', icon: RotateCcw },
   { to: '/journal', label: 'Journal', icon: NotebookText },
   { to: '/patterns', label: 'Patterns', icon: Shapes },
   { to: '/reattempts', label: 'Re-attempts', icon: RotateCcw },
@@ -43,6 +45,7 @@ const REFLECT: Item[] = [
   { to: '/readiness', label: 'Readiness', icon: Compass }
 ];
 const LIBRARY: Item[] = [
+  { to: '/learning-library', label: 'Learning Library', icon: LibraryBig },
   { to: '/topper-notes', label: 'Topper notes', icon: BookOpen },
   { to: '/revision-pack', label: 'Revision pack', icon: ClipboardList },
   { to: '/syllabus', label: 'Syllabus tracker', icon: ListChecks },

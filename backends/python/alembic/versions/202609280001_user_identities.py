@@ -35,9 +35,7 @@ def upgrade() -> None:
         sa.Column(
             "updated_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False
         ),
-        sa.UniqueConstraint(
-            "provider", "subject", name="uq_user_identities_provider_subject"
-        ),
+        sa.UniqueConstraint("provider", "subject", name="uq_user_identities_provider_subject"),
         sa.UniqueConstraint("user_id", "provider", name="uq_user_identities_user_provider"),
     )
     op.create_index("ix_user_identities_user_id", "user_identities", ["user_id"])
@@ -45,8 +43,7 @@ def upgrade() -> None:
     # Existing users were keyed by the Clerk subject. This preserves all foreign-key
     # ownership while future accounts receive provider-independent UUIDs.
     op.execute(
-        "INSERT INTO user_identities(user_id, provider, subject) "
-        "SELECT id, 'clerk', id FROM users"
+        "INSERT INTO user_identities(user_id, provider, subject) SELECT id, 'clerk', id FROM users"
     )
     op.execute(
         "CREATE TRIGGER retain_entity_revision AFTER INSERT OR UPDATE ON user_identities "

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import time
 from contextlib import asynccontextmanager
+from urllib.parse import urlparse
 from uuid import uuid4
 
 import sentry_sdk
@@ -17,10 +18,25 @@ from app.api.router import api_router, root_router
 from app.core.config import get_settings
 from app.core.logging import configure_logging
 from app.db.session import close_database
+from app.mcp_server import create_mcp_server
 from app.services.realtime import broker
 from app.services.redis import check_rate_limit, close_redis
 
 settings = get_settings()
+mcp_server = (
+    create_mcp_server(settings)
+    if settings.mcp_resource_url and settings.clerk_oauth_issuer
+    else None
+)
+mcp_asgi = (
+    mcp_server.streamable_http_app(
+        stateless_http=True,
+        json_response=True,
+        host=urlparse(settings.mcp_resource_url).hostname or "localhost",
+    )
+    if mcp_server and settings.mcp_resource_url
+    else None
+)
 configure_logging(settings.log_level)
 log = structlog.get_logger()
 
@@ -32,6 +48,16 @@ DURATION = Histogram(
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
+    if mcp_server is not None:
+        async with mcp_server.session_manager.run():
+            async for _ in _application_lifespan():
+                yield
+        return
+    async for _ in _application_lifespan():
+        yield
+
+
+async def _application_lifespan():
     if settings.maintenance_mode:
         log.warning("api_maintenance_mode", data_access="disabled")
         yield
@@ -82,7 +108,12 @@ app.add_middleware(
 
 @app.middleware("http")
 async def request_context(request: Request, call_next):
-    if settings.maintenance_mode and request.url.path not in {"/", "/health/live"}:
+    public_discovery = request.url.path == "/.well-known/oauth-protected-resource/mcp"
+    if (
+        settings.maintenance_mode
+        and request.url.path not in {"/", "/health/live"}
+        and not public_discovery
+    ):
         return JSONResponse(
             status_code=503,
             content={
@@ -107,9 +138,8 @@ async def request_context(request: Request, call_next):
             )
 
     rate_result = None
-    if request.url.path.startswith(settings.api_prefix) and not request.url.path.endswith(
-        "/webhooks/clerk"
-    ):
+    rate_limited = request.url.path.startswith((settings.api_prefix, "/mcp"))
+    if rate_limited and not request.url.path.endswith("/webhooks/clerk"):
         forwarded = request.headers.get("x-forwarded-for", "").split(",", 1)[0].strip()
         identifier = forwarded or (request.client.host if request.client else "unknown")
         rate_result = await check_rate_limit(identifier)
@@ -165,3 +195,5 @@ async def root() -> dict[str, str]:
 app.include_router(root_router)
 app.include_router(api_router, prefix=settings.api_prefix)
 app.mount("/metrics", make_asgi_app())
+if mcp_asgi is not None:
+    app.mount("/", mcp_asgi)

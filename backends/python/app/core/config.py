@@ -49,6 +49,11 @@ class Settings(BaseSettings):
     owner_user_ids: str = ""
     owner_email: str | None = None
     app_url: str = "http://localhost:5173"
+    # Clerk is the authorization server; MCP is a separate OAuth resource server.
+    # Hosted deployments enable the endpoint only when these are configured.
+    mcp_resource_url: str | None = None
+    clerk_oauth_issuer: str | None = None
+    mcp_allowed_client_ids: str = ""
 
     resend_api_key: SecretStr | None = None
     mail_from: str | None = None
@@ -125,6 +130,10 @@ class Settings(BaseSettings):
     @property
     def authorized_parties(self) -> list[str]:
         return _csv(self.clerk_authorized_parties)
+
+    @property
+    def allowed_mcp_clients(self) -> set[str]:
+        return set(_csv(self.mcp_allowed_client_ids))
 
     @property
     def owner_ids(self) -> set[str]:

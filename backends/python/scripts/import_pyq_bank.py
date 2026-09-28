@@ -43,9 +43,9 @@ async def import_bank(check_only: bool) -> None:
         existing = await db.get(PyqBank, version)
         if existing is not None:
             count = await db.scalar(
-                select(func.count()).select_from(PyqCatalogQuestion).where(
-                    PyqCatalogQuestion.bank_version == version
-                )
+                select(func.count())
+                .select_from(PyqCatalogQuestion)
+                .where(PyqCatalogQuestion.bank_version == version)
             )
             if existing.source_hash != bank_hash or count != len(rows):
                 raise RuntimeError("Existing PYQ bank differs from the immutable source")

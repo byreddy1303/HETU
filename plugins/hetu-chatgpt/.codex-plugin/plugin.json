@@ -1,0 +1,19 @@
+{
+  "name": "hetu-chatgpt",
+  "version": "0.1.0",
+  "description": "Connect HETU study context and learning workflows through its Python MCP server.",
+  "author": {
+    "name": "HETU"
+  },
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "HETU",
+    "shortDescription": "Save and retrieve sourced study learning.",
+    "longDescription": "Connect to a HETU account for learning captures, concept review, durable task briefs, and mapped section records. Additional whole-app actions are still being developed.",
+    "developerName": "HETU",
+    "category": "Productivity",
+    "capabilities": [],
+    "defaultPrompt": "Use my connected HETU account to help with this study task. Retrieve relevant context first, preserve my goal and constraints, and verify any saved work."
+  },
+  "mcpServers": "./.mcp.json"
+}

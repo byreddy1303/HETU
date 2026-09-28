@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "hetu": {
+      "type": "http",
+      "url": "http://localhost:8000/mcp",
+      "note": "Local development endpoint. Production installation requires the verified HTTPS Python MCP URL and Clerk OAuth configuration; keep maintenance mode until data safety gates pass."
+    }
+  }
+}

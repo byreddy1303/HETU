@@ -70,12 +70,38 @@ origins; never expose database, Clerk backend, R2, or Redis secrets to the brows
 | `POST /v1/compat/rpc/{name}` | Buddy, planner, readiness and settings RPCs |
 | `WS /v1/ws` | Authenticated owner-scoped change notifications |
 | `POST /v1/webhooks/clerk` | Verified Clerk identity events |
+| `POST /v1/learning/captures` | Transactional sourced concept and insight capture |
+| `GET /v1/learning/search`, `GET /v1/learning/concepts/{id}` | Search and detailed explanation, sources, and revisions |
+| `PATCH /v1/learning/insights/{id}` | Version-checked learning revision |
+| `/v1/workflows`, `/v1/concept-reviews`, `/v1/sections` | Task briefs, actual recall history, mapped record evidence |
 
 An existing changed record requires `expected_version`: missing returns 428,
 stale returns 409. Identical upserts are retry-safe no-ops. Tombstones require
 explicit restore. `learning_events` and `pyq_attempts` are append-only.
 Clients must re-query durable records after reconnect; Pub/Sub is not a durable
 event log. Private file routes return 503 until object storage is configured.
+Learning, workflow, and concept-review collections reject generic `/records`
+and compatibility mutations; their validated domain routes own those writes.
+
+## ChatGPT MCP boundary
+
+Set `MCP_RESOURCE_URL`, `CLERK_OAUTH_ISSUER`, and an exact
+`MCP_ALLOWED_CLIENT_IDS` allowlist to mount Streamable HTTP at `/mcp`. The URL
+must be the canonical resource identifier advertised in OAuth protected resource
+metadata. Hosted connections require HTTPS. The Clerk OAuth application must
+issue `hetu:read` and `hetu:write` scopes and carry that resource identifier in
+the verified token audience. Tokens lacking an exact audience, approved client,
+required scope, or user subject are rejected. MCP tools resolve the authenticated
+Clerk subject to HETU's internal owner ID; callers cannot supply another owner.
+
+The MCP server currently provides sourced learning capture/retrieval/revision,
+durable task briefs, concept recall responses, and explicitly partial record
+context for mapped sections. The bundled local plugin is under
+[`plugins/hetu-chatgpt`](../../plugins/hetu-chatgpt); its HTTP URL is a local
+development endpoint until a production URL is verified. It has not been
+installed in ChatGPT or cleared for production writes. Whole-app actions,
+complete migration, and live OAuth reconnection remain release work tracked in
+[`docs/hetu-plugin-implementation.md`](../../docs/hetu-plugin-implementation.md).
 
 ## Vercel
 

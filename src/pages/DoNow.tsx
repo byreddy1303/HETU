@@ -13,6 +13,10 @@ import { loadDayPlan } from '@/lib/planner-storage';
 import { reconcilePlannerExecutions, startPlannerBlock } from '@/lib/planner-execution';
 import { queuePlannerCloudWrite } from '@/lib/planner-cloud';
 import { todayISOInTimeZone } from '@/lib/utils';
+import { backendConfig } from '@/lib/backend-config';
+import { apiRequest } from '@/lib/fastapi-client';
+
+type DueConcept = { id: string; prompt: string; due_on: string; kind: string };
 
 const KIND_LABEL: Record<DoNowItem['kind'], string> = {
   reattempt: 'Retrieval',
@@ -28,6 +32,14 @@ export default function DoNow() {
   const navigate = useNavigate();
   const today = todayISOInTimeZone(profile?.timezone ?? 'Asia/Kolkata');
   const [planRevision, setPlanRevision] = useState(0);
+  const [dueConcepts, setDueConcepts] = useState<DueConcept[]>([]);
+
+  useEffect(() => {
+    if (!backendConfig.fastapi || !userId) return;
+    void apiRequest<DueConcept[]>('/v1/concept-reviews?due_only=true&limit=20')
+      .then(setDueConcepts)
+      .catch(() => setDueConcepts([]));
+  }, [userId]);
   const reattempts = useLiveQuery(
     () => (userId ? db.reattempts.where('user_id').equals(userId).toArray() : []),
     [userId],
@@ -91,6 +103,17 @@ export default function DoNow() {
             : 'Nothing is waiting. Create fresh evidence or capture a question.'
         }
       />
+
+      {dueConcepts.length > 0 && <Card>
+        <CardBody className="space-y-3">
+          <div><h2 className="font-display text-lg font-semibold">Concepts to retrieve</h2><p className="text-sm text-text-muted">Answer from memory before opening the saved explanation.</p></div>
+          <ul className="divide-y divide-border">{dueConcepts.map((review) => <li key={review.id} className="flex flex-wrap items-center gap-3 py-2">
+            <span className="min-w-0 flex-1 text-sm">{review.prompt}</span>
+            <span className="text-xs text-text-faint">{review.kind}</span>
+            <Button size="sm" onClick={() => navigate(`/concept-review/${review.id}`)}>Answer <ArrowRight size={13} /></Button>
+          </li>)}</ul>
+        </CardBody>
+      </Card>}
 
       {queue.length > 0 ? (
         <>

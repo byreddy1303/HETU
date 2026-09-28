@@ -39,6 +39,9 @@ const Readiness = lazyWithRetry(() => import('@/pages/Readiness'));
 const Buddy = lazyWithRetry(() => import('@/pages/Buddy'));
 const Pyq = lazyWithRetry(() => import('@/pages/Pyq'));
 const TopperNotes = lazyWithRetry(() => import('@/pages/TopperNotes'));
+const LearningLibrary = lazyWithRetry(() => import('@/pages/LearningLibrary'));
+const Workflows = lazyWithRetry(() => import('@/pages/Workflows'));
+const ConceptReview = lazyWithRetry(() => import('@/pages/ConceptReview'));
 const DevPrimitives = lazyWithRetry(() => import('@/pages/DevPrimitives'));
 
 const devRoutes = import.meta.env.DEV
@@ -94,6 +97,12 @@ export const router = createBrowserRouter([
       { path: 'trigger-drill', element: <TriggerDrill /> },
       { path: 'formulas', element: <Formulas /> },
       { path: 'topper-notes', element: <TopperNotes /> },
+      { path: 'learning-library', element: <LearningLibrary /> },
+      { path: 'learning-library/:conceptId', element: <LearningLibrary /> },
+      { path: 'workflows', element: <Workflows /> },
+      { path: 'workflows/:workflowId', element: <Workflows /> },
+      { path: 'concept-review', element: <ConceptReview /> },
+      { path: 'concept-review/:reviewId', element: <ConceptReview /> },
       { path: 'syllabus', element: <SyllabusTracker /> },
       { path: 'buddy', element: <Buddy /> },
       { path: 'settings', element: <Settings /> }

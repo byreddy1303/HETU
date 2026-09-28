@@ -13,6 +13,7 @@ from app.services.records import (
     patch_record,
     query_records,
     require_collection,
+    require_generic_mutation_allowed,
     restore_record,
     to_api,
     upsert_records,
@@ -54,6 +55,7 @@ async def record_history(
 async def restore_collection_record(
     collection: str, record_id: str, payload: RestoreRequest, identity: CurrentUser, db: DbDep
 ) -> dict:
+    require_generic_mutation_allowed(collection)
     row = await restore_record(
         db,
         collection=collection,
@@ -86,7 +88,7 @@ async def upsert_collection(
     identity: CurrentUser,
     db: DbDep,
 ) -> list[dict]:
-    require_collection(collection)
+    require_generic_mutation_allowed(collection)
     items = [item.model_dump(exclude_unset=True) for item in payload.items]
     rows = await upsert_records(db, collection=collection, owner_id=identity.user_id, items=items)
     await db.commit()
@@ -106,6 +108,7 @@ async def patch_collection_record(
     identity: CurrentUser,
     db: DbDep,
 ) -> dict:
+    require_generic_mutation_allowed(collection)
     row = await patch_record(
         db,
         collection=collection,
@@ -130,6 +133,7 @@ async def delete_collection_record(
     db: DbDep,
     expected_version: int | None = Query(default=None, ge=1),
 ) -> Response:
+    require_generic_mutation_allowed(collection)
     await delete_record(
         db,
         collection=collection,

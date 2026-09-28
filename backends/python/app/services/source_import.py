@@ -24,23 +24,42 @@ from app.db.models import (
     User,
 )
 
-COPY_PATTERN = re.compile(
-    r'^COPY (?:(?:"?public"?)\.)?"?([^" ]+)"? \(([^)]+)\) FROM stdin;$'
-)
+COPY_PATTERN = re.compile(r'^COPY (?:(?:"?public"?)\.)?"?([^" ]+)"? \(([^)]+)\) FROM stdin;$')
 NORMALIZED_TABLES = frozenset({"users", "account_requests", "invites", "buddies", "buddy_messages"})
 IMMUTABLE_COLLECTIONS = frozenset({"learning_events", "pyq_attempts"})
 JSON_COLUMNS = frozenset(
     {
-        "payload", "question_ref", "metadata", "sessions", "plan",
-        "config", "selected_answer", "correct_answer", "question_snapshot", "history",
-        "evidence_counts", "components", "subject_scores", "mistakes", "queue_snapshot",
-        "draft_answer", "elapsed_by_item_ms", "answer",
+        "payload",
+        "question_ref",
+        "metadata",
+        "sessions",
+        "plan",
+        "config",
+        "selected_answer",
+        "correct_answer",
+        "question_snapshot",
+        "history",
+        "evidence_counts",
+        "components",
+        "subject_scores",
+        "mistakes",
+        "queue_snapshot",
+        "draft_answer",
+        "elapsed_by_item_ms",
+        "answer",
     }
 )
 ARRAY_COLUMNS = frozenset(
     {
-        "question_uids", "completed_question_uids", "item_ids", "deferred_item_ids",
-        "hinted_item_ids", "question_ids", "allowed_actions", "used_actions", "participants",
+        "question_uids",
+        "completed_question_uids",
+        "item_ids",
+        "deferred_item_ids",
+        "hinted_item_ids",
+        "question_ids",
+        "allowed_actions",
+        "used_actions",
+        "participants",
         "reason_flags",
     }
 )
@@ -187,8 +206,7 @@ def _external_id(table: str, row: dict[str, Any]) -> str:
 def validate_source_tables(tables: dict[str, list[dict[str, Any]]]) -> dict[str, int]:
     users = {str(row["id"]) for row in tables.get("users", [])}
     subscriptions = {
-        str(row["id"]): str(row["user_id"])
-        for row in tables.get("push_subscriptions", [])
+        str(row["id"]): str(row["user_id"]) for row in tables.get("push_subscriptions", [])
     }
     for table, rows in tables.items():
         if table in NORMALIZED_TABLES:
@@ -249,9 +267,7 @@ async def import_source_dump(db: AsyncSession, path: Path) -> dict[str, int]:
     for row in tables.get("buddies", []):
         if await db.get(Buddy, str(row["id"])) is None:
             created = _timestamp(row.get("created_at"))
-            values = _timestamps(
-                row, "created_at", "responded_at", "last_request_at"
-            )
+            values = _timestamps(row, "created_at", "responded_at", "last_request_at")
             db.add(Buddy(**values, updated_at=created))
     await db.flush()
     for row in tables.get("buddy_messages", []):
@@ -263,8 +279,7 @@ async def import_source_dump(db: AsyncSession, path: Path) -> dict[str, int]:
         for record in await db.scalars(select(Record))
     }
     subscriptions = {
-        str(row["id"]): str(row["user_id"])
-        for row in tables.get("push_subscriptions", [])
+        str(row["id"]): str(row["user_id"]) for row in tables.get("push_subscriptions", [])
     }
     for table, rows in tables.items():
         if table in NORMALIZED_TABLES:

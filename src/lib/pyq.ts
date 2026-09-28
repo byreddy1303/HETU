@@ -6,6 +6,8 @@ import { canonicalSubjectId } from '@/lib/subjects';
 import { gate2027BankSubjectSlugs } from '@/lib/gate-2027';
 import { evaluateGateAnswer } from '@/lib/gate-scoring';
 import { guardPyqQuestionIntegrity, PYQ_CONFLICTING_KEY_IDS } from '@/lib/pyq-integrity';
+import { backendConfig } from '@/lib/backend-config';
+import { apiRequest } from '@/lib/fastapi-client';
 
 export const PYQ_BANK_QUESTION_COUNT = 4334;
 
@@ -295,14 +297,17 @@ export function loadPyqManifest(): Promise<PyqManifest> {
   // The query key bypasses the pre-topic service-worker cache. Normalization is
   // still required because an already-controlled tab can briefly mix an older
   // manifest with the latest JavaScript while a new worker activates.
-  manifestPromise ??= fetchJson<PyqManifestPayload>(
-    `/pyq/manifest.json?schema=${PYQ_MANIFEST_SCHEMA}`
-  )
-    .then(normalizePyqManifest)
-    .catch((error: unknown) => {
-      manifestPromise = null;
-      throw error;
-    });
+  if (!manifestPromise) {
+    const manifestRequest = backendConfig.fastapi
+      ? apiRequest<PyqManifestPayload>('/v1/pyq/manifest')
+      : fetchJson<PyqManifestPayload>(`/pyq/manifest.json?schema=${PYQ_MANIFEST_SCHEMA}`);
+    manifestPromise = manifestRequest
+      .then(normalizePyqManifest)
+      .catch((error: unknown) => {
+        manifestPromise = null;
+        throw error;
+      });
+  }
   return manifestPromise;
 }
 
@@ -353,10 +358,14 @@ export async function loadPyqQuestions(
 ): Promise<PyqQuestion[]> {
   const payloads = await Promise.all(
     subjects.map((subject) => {
-      const versionedFile = `${subject.file}?bank=${encodeURIComponent(bankVersion)}`;
+      const versionedFile = backendConfig.fastapi
+        ? `/v1/pyq/subjects/${encodeURIComponent(subject.slug)}?bank_version=${encodeURIComponent(bankVersion)}`
+        : `${subject.file}?bank=${encodeURIComponent(bankVersion)}`;
       let request = subjectCache.get(versionedFile);
       if (!request) {
-        request = fetchJson<SubjectPayload>(versionedFile)
+        request = (backendConfig.fastapi
+          ? apiRequest<SubjectPayload>(versionedFile)
+          : fetchJson<SubjectPayload>(versionedFile))
           .then((payload) => {
             if (payload.bankVersion !== bankVersion) {
               throw new Error(

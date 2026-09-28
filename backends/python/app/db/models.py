@@ -5,6 +5,7 @@ from typing import Any
 
 from sqlalchemy import (
     BigInteger,
+    Boolean,
     CheckConstraint,
     DateTime,
     ForeignKey,
@@ -62,6 +63,76 @@ class UserIdentity(TimestampMixin, Base):
     )
 
     user: Mapped[User] = relationship(back_populates="identities")
+
+
+class PyqBank(TimestampMixin, Base):
+    __tablename__ = "pyq_banks"
+    __table_args__ = (
+        Index(
+            "uq_pyq_banks_one_active",
+            "active",
+            unique=True,
+            postgresql_where=text("active"),
+            sqlite_where=text("active = 1"),
+        ),
+    )
+
+    version: Mapped[str] = mapped_column(String(128), primary_key=True)
+    manifest: Mapped[dict[str, Any]] = mapped_column(JSON_TYPE, nullable=False)
+    question_count: Mapped[int] = mapped_column(Integer, nullable=False)
+    source_hash: Mapped[str] = mapped_column(String(64), nullable=False, unique=True)
+    active: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False, index=True)
+
+
+class PyqCatalogQuestion(TimestampMixin, Base):
+    __tablename__ = "pyq_catalog_questions"
+    __table_args__ = (
+        UniqueConstraint("bank_version", "question_uid", name="uq_pyq_catalog_bank_uid"),
+        Index("ix_pyq_catalog_bank_subject", "bank_version", "subject_slug"),
+        Index("ix_pyq_catalog_bank_paper", "bank_version", "paper_label", "number"),
+        Index("ix_pyq_catalog_content_hash", "content_hash"),
+        CheckConstraint("marks IS NULL OR marks > 0", name="positive_marks"),
+        CheckConstraint(
+            "answer_status IN ('available', 'ambiguous', 'marks-to-all', 'unsupported')",
+            name="valid_answer_status",
+        ),
+        CheckConstraint(
+            "integrity_status IN ('verified', 'unscorable', 'quarantined')",
+            name="valid_integrity_status",
+        ),
+    )
+
+    id: Mapped[int] = mapped_column(
+        BigInteger().with_variant(Integer, "sqlite"), primary_key=True, autoincrement=True
+    )
+    bank_version: Mapped[str] = mapped_column(
+        ForeignKey("pyq_banks.version", ondelete="RESTRICT"), nullable=False
+    )
+    question_uid: Mapped[str] = mapped_column(String(128), nullable=False)
+    book_slug: Mapped[str] = mapped_column(String(64), nullable=False)
+    year: Mapped[int] = mapped_column(Integer, nullable=False)
+    set_number: Mapped[int | None] = mapped_column(Integer)
+    number: Mapped[str] = mapped_column(String(32), nullable=False)
+    paper_label: Mapped[str] = mapped_column(String(255), nullable=False)
+    subject: Mapped[str] = mapped_column(String(128), nullable=False)
+    subject_slug: Mapped[str] = mapped_column(String(64), nullable=False)
+    classification_hint: Mapped[dict[str, Any] | None] = mapped_column(JSON_TYPE)
+    topic: Mapped[str] = mapped_column(String(128), nullable=False)
+    topic_slug: Mapped[str] = mapped_column(String(64), nullable=False)
+    subtopics: Mapped[list[str]] = mapped_column(JSON_TYPE, default=list, nullable=False)
+    marks: Mapped[int | None] = mapped_column(Integer)
+    question_type: Mapped[str] = mapped_column(String(24), nullable=False)
+    choices: Mapped[list[str] | None] = mapped_column(JSON_TYPE)
+    answer: Mapped[Any | None] = mapped_column(JSON_TYPE)
+    tolerance: Mapped[dict[str, Any] | None] = mapped_column(JSON_TYPE)
+    answer_status: Mapped[str] = mapped_column(String(24), nullable=False)
+    html: Mapped[str] = mapped_column(Text, nullable=False)
+    source_url: Mapped[str] = mapped_column(String(2048), nullable=False)
+    answer_source: Mapped[Any | None] = mapped_column(JSON_TYPE)
+    content_hash: Mapped[str] = mapped_column(String(64), nullable=False)
+    source_hash: Mapped[str] = mapped_column(String(64), nullable=False)
+    integrity_status: Mapped[str] = mapped_column(String(24), nullable=False)
+    duplicate_of_uid: Mapped[str | None] = mapped_column(String(128))
 
 
 class Record(TimestampMixin, Base):

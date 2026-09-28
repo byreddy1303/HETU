@@ -14,6 +14,10 @@ async def test_deleted_account_cannot_open_socket(monkeypatch):
         "app.api.routes.realtime.authenticate_websocket",
         AsyncMock(return_value=Identity("deleted", expires_at=int(time.time()) + 60)),
     )
+    monkeypatch.setattr(
+        "app.api.routes.realtime.resolve_identity",
+        AsyncMock(return_value=Identity("deleted", expires_at=int(time.time()) + 60)),
+    )
     monkeypatch.setattr("app.api.routes.realtime.account_active", AsyncMock(return_value=False))
     connect = AsyncMock()
     monkeypatch.setattr("app.api.routes.realtime.broker.connect", connect)
@@ -27,6 +31,10 @@ async def test_expired_socket_is_closed_and_unsubscribed(monkeypatch):
     socket = AsyncMock()
     monkeypatch.setattr(
         "app.api.routes.realtime.authenticate_websocket",
+        AsyncMock(return_value=Identity("owner", expires_at=int(time.time()) - 1)),
+    )
+    monkeypatch.setattr(
+        "app.api.routes.realtime.resolve_identity",
         AsyncMock(return_value=Identity("owner", expires_at=int(time.time()) - 1)),
     )
     monkeypatch.setattr("app.api.routes.realtime.account_active", AsyncMock(return_value=True))

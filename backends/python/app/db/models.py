@@ -36,6 +36,32 @@ class User(TimestampMixin, Base):
     deleted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
     records: Mapped[list[Record]] = relationship(back_populates="owner", passive_deletes="all")
+    identities: Mapped[list[UserIdentity]] = relationship(
+        back_populates="user", passive_deletes="all"
+    )
+
+
+class UserIdentity(TimestampMixin, Base):
+    __tablename__ = "user_identities"
+    __table_args__ = (
+        UniqueConstraint("provider", "subject", name="uq_user_identities_provider_subject"),
+        UniqueConstraint("user_id", "provider", name="uq_user_identities_user_provider"),
+        Index("ix_user_identities_user_id", "user_id"),
+    )
+
+    id: Mapped[int] = mapped_column(
+        BigInteger().with_variant(Integer, "sqlite"), primary_key=True, autoincrement=True
+    )
+    user_id: Mapped[str] = mapped_column(
+        ForeignKey("users.id", ondelete="RESTRICT"), nullable=False
+    )
+    provider: Mapped[str] = mapped_column(String(32), nullable=False)
+    subject: Mapped[str] = mapped_column(String(255), nullable=False)
+    last_seen_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
+
+    user: Mapped[User] = relationship(back_populates="identities")
 
 
 class Record(TimestampMixin, Base):

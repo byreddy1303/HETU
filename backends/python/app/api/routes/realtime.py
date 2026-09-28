@@ -10,6 +10,7 @@ from app.core.config import get_settings
 from app.core.security import authenticate_websocket
 from app.db.models import Buddy, User
 from app.db.session import get_session_factory
+from app.services.identities import resolve_identity
 from app.services.realtime import broker
 
 router = APIRouter()
@@ -24,6 +25,12 @@ async def realtime_socket(websocket: WebSocket) -> None:
         identity = await authenticate_websocket(websocket, get_settings())
     except HTTPException:
         await websocket.close(code=4401, reason="Unauthorized")
+        return
+    try:
+        async with get_session_factory()() as db:
+            identity = await resolve_identity(db, identity)
+    except HTTPException:
+        await websocket.close(code=4403, reason="Account unavailable")
         return
     if not await account_active(identity.user_id):
         await websocket.close(code=4403, reason="Account unavailable")

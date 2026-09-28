@@ -14,6 +14,8 @@ class Identity:
     user_id: str
     session_id: str | None = None
     expires_at: int | None = None
+    provider: str = "clerk"
+    provider_subject: str | None = None
 
 
 async def authenticate_http_request(request: Request, settings: Settings) -> Identity:
@@ -90,4 +92,5 @@ async def _authenticate(
         user_id=user_id,
         session_id=session_id if isinstance(session_id, str) else None,
         expires_at=expires_at,
+        provider_subject=user_id,
     )

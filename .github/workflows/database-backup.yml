@@ -1,0 +1,72 @@
+name: Encrypted production database backup
+
+on:
+  schedule:
+    - cron: '17 2 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: production-database-backup
+  cancel-in-progress: false
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      BACKUP_DATABASE_URL: ${{ secrets.HETU_BACKUP_DATABASE_URL }}
+      BLOB_READ_WRITE_TOKEN: ${{ secrets.HETU_BACKUP_BLOB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install backup dependencies
+        run: pip install asyncpg==0.31.0 cryptography==45.0.7 vercel==0.11.4
+      - name: Back up, encrypt, upload, and read back
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$BACKUP_DATABASE_URL"
+          test -n "$BLOB_READ_WRITE_TOKEN"
+          mkdir -p "$RUNNER_TEMP/hetu-pg-tools"
+          cat > "$RUNNER_TEMP/hetu-pg-tools/pg_dump" <<'PY'
+          #!/usr/bin/env python3
+          import os
+          import subprocess
+          import sys
+          from urllib.parse import unquote, urlsplit
+
+          parts = urlsplit(os.environ["PGDATABASE"])
+          container_env = {
+              **os.environ,
+              "PGHOST": parts.hostname or "",
+              "PGPORT": str(parts.port or 5432),
+              "PGUSER": unquote(parts.username or ""),
+              "PGPASSWORD": unquote(parts.password or ""),
+              "PGDATABASE": unquote(parts.path.lstrip("/")),
+              "PGSSLMODE": "require",
+          }
+          command = [
+              "docker", "run", "--rm", "-i",
+              "-e", "PGHOST", "-e", "PGPORT", "-e", "PGUSER",
+              "-e", "PGPASSWORD", "-e", "PGDATABASE", "-e", "PGSSLMODE",
+              "postgres:18-alpine", "pg_dump", *sys.argv[1:],
+          ]
+          raise SystemExit(subprocess.run(command, env=container_env).returncode)
+          PY
+          chmod 700 "$RUNNER_TEMP/hetu-pg-tools/pg_dump"
+          export PATH="$RUNNER_TEMP/hetu-pg-tools:$PATH"
+          stamp="$(date -u +%Y-%m-%d)"
+          name="github-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          python backends/python/scripts/backup_database.py backup "$RUNNER_TEMP/hetu-backup"
+          python backends/python/scripts/encrypt_database_backup.py encrypt \
+            "$RUNNER_TEMP/hetu-backup" \
+            backends/python/config/backup-recipient.pub \
+            "$RUNNER_TEMP/$name.aesgcm"
+          rm -rf "$RUNNER_TEMP/hetu-backup"
+          python backends/python/scripts/upload_database_backup.py \
+            "$RUNNER_TEMP/$name.aesgcm" "backups/$stamp/$name.aesgcm"

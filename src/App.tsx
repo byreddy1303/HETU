@@ -13,6 +13,7 @@ import LoadingScreen from '@/components/shared/LoadingScreen';
 import { applyTheme, resolveTheme } from '@/lib/theme';
 import { configureNativeChrome } from '@/lib/native';
 import { useAccountState } from '@/hooks/useAccountState';
+import { backendConfig } from '@/lib/backend-config';
 
 const FONT_SCALE_PX: Record<'small' | 'normal' | 'large', string> = {
   small: '14px',
@@ -49,7 +50,7 @@ export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <NativeRuntime />
-      <BuddyNotificationRuntime />
+      {!backendConfig.fastapi && <BuddyNotificationRuntime />}
       <BuddyPresenceRuntime />
       <Suspense fallback={<LoadingScreen />}>
         <RouterProvider router={router} />

@@ -34,6 +34,7 @@ import {
 } from '@/stores/prefs';
 import type { ThemeMode } from '@/lib/theme';
 import { supabase, supabaseConfigured } from '@/lib/supabase';
+import { backendConfig } from '@/lib/backend-config';
 import {
   INVITE_TTL_DAYS,
   QUESTION_COUNT_CHOICES,
@@ -278,9 +279,24 @@ export default function Settings() {
 
       {/* --- Notifications ------------------------------------------------ */}
       <section id="settings-notifications" className="settings-anchor settings-group" tabIndex={-1} aria-label="Reminder settings">
-      <BuddyNotificationsCard profile={profile} sandbox={sandbox} />
-      <StudyNotificationsCard profile={profile} sandbox={sandbox} />
-      <NotificationsCard profile={profile} sandbox={sandbox} />
+      {backendConfig.fastapi ? (
+        <Card id="notifications-unavailable">
+          <CardHeader title="Notifications" />
+          <CardBody>
+            <p className="text-[12.5px] leading-relaxed text-text-muted">
+              Email, Telegram, and device notifications are temporarily unavailable while delivery
+              is being connected to the new backend. Your existing notification preferences are
+              preserved in your account.
+            </p>
+          </CardBody>
+        </Card>
+      ) : (
+        <>
+          <BuddyNotificationsCard profile={profile} sandbox={sandbox} />
+          <StudyNotificationsCard profile={profile} sandbox={sandbox} />
+          <NotificationsCard profile={profile} sandbox={sandbox} />
+        </>
+      )}
       </section>
 
       {/* --- Progress ----------------------------------------------------- */}

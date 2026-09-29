@@ -6,6 +6,7 @@ import io
 import json
 import re
 from collections import Counter
+from collections.abc import Collection
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
@@ -168,6 +169,23 @@ def _timestamps(row: dict[str, Any], *fields: str) -> dict[str, Any]:
     return values
 
 
+def _sync_existing(
+    target: Any,
+    row: dict[str, Any],
+    *fields: str,
+    timestamp_fields: Collection[str] = frozenset(),
+) -> None:
+    """Apply source changes to a normalized row during pre-cutover delta imports."""
+    for field in fields:
+        if field not in row:
+            continue
+        value = row[field]
+        if field in timestamp_fields and value is not None:
+            value = _timestamp(value)
+        if getattr(target, field) != value:
+            setattr(target, field, value)
+
+
 def _record_owner(table: str, row: dict[str, Any], subscriptions: dict[str, str]) -> str:
     for field in ("user_id", "recipient_id", "from_user", "created_by", "reply_sender_id"):
         if row.get(field):
@@ -247,7 +265,12 @@ async def import_source_dump(db: AsyncSession, path: Path) -> dict[str, int]:
                     updated_at=_timestamp(row.get("created_at")),
                 )
             )
-        elif user.email != row.get("email") or user.profile != profile:
+        elif (
+            user.email != row.get("email")
+            or user.username != row.get("username")
+            or user.display_name != row.get("name")
+            or user.profile != profile
+        ):
             user.email = row.get("email")
             user.username = row.get("username")
             user.display_name = row.get("name")
@@ -255,24 +278,73 @@ async def import_source_dump(db: AsyncSession, path: Path) -> dict[str, int]:
     await db.flush()
 
     for row in tables.get("account_requests", []):
-        if await db.get(AccessRequest, str(row["id"])) is None:
+        existing = await db.get(AccessRequest, str(row["id"]))
+        if existing is None:
             created = _timestamp(row.get("created_at"))
             values = _timestamps(row, "created_at", "decided_at")
             db.add(AccessRequest(**values, updated_at=created))
+        else:
+            _sync_existing(
+                existing,
+                row,
+                "name",
+                "email",
+                "purpose",
+                "status",
+                "notes",
+                "invite_id",
+                "decided_by",
+                "decided_at",
+                "ip_hash",
+                "user_agent",
+                timestamp_fields={"decided_at"},
+            )
     for row in tables.get("invites", []):
-        if await db.get(Invite, str(row["id"])) is None:
+        existing = await db.get(Invite, str(row["id"]))
+        if existing is None:
             created = _timestamp(row.get("created_at"))
             values = _timestamps(row, "created_at", "expires_at", "used_at")
             db.add(Invite(**values, email=None, updated_at=created))
+        else:
+            _sync_existing(
+                existing,
+                row,
+                "expires_at",
+                "used_by",
+                "used_at",
+                timestamp_fields={"expires_at", "used_at"},
+            )
     for row in tables.get("buddies", []):
-        if await db.get(Buddy, str(row["id"])) is None:
+        existing = await db.get(Buddy, str(row["id"]))
+        if existing is None:
             created = _timestamp(row.get("created_at"))
             values = _timestamps(row, "created_at", "responded_at", "last_request_at")
             db.add(Buddy(**values, updated_at=created))
+        else:
+            _sync_existing(
+                existing,
+                row,
+                "status",
+                "requested_by",
+                "responded_at",
+                "decline_reason",
+                "last_request_at",
+                timestamp_fields={"responded_at", "last_request_at"},
+            )
     await db.flush()
     for row in tables.get("buddy_messages", []):
-        if await db.get(BuddyMessage, str(row["id"])) is None:
+        existing = await db.get(BuddyMessage, str(row["id"]))
+        if existing is None:
             db.add(BuddyMessage(**_timestamps(row, "created_at", "read_at")))
+        else:
+            _sync_existing(
+                existing,
+                row,
+                "body",
+                "question_ref",
+                "read_at",
+                timestamp_fields={"read_at"},
+            )
 
     existing_records = {
         (record.collection, record.owner_id, record.external_id): record

@@ -2,7 +2,8 @@ import { useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { differenceInCalendarDays, parseISO } from 'date-fns';
-import { ArrowRight, BookOpenCheck, CalendarRange, Fingerprint, RotateCcw, Target } from 'lucide-react';
+import { ArrowRight, BookOpenCheck, CalendarRange, Fingerprint, LibraryBig, RotateCcw, Target } from 'lucide-react';
+import DiscussionLibraryCard from '@/components/dashboard/DiscussionLibraryCard';
 import HeroCard from '@/components/dashboard/HeroCard';
 import LearningTips from '@/components/dashboard/LearningTips';
 import OutcomeDonut from '@/components/dashboard/OutcomeDonut';
@@ -249,7 +250,12 @@ export default function Dashboard() {
         }
       />
 
-      <nav className="workspace-launchpad" aria-label="Your study loop">
+      <nav className={cn('workspace-launchpad', coreOnly && 'is-core-only')} aria-label="Your study loop">
+        <button type="button" className="workspace-launch" onClick={() => navigate('/learning-library')}>
+          <span className="workspace-launch__icon"><LibraryBig size={21} aria-hidden /></span>
+          <span className="workspace-launch__text"><strong>Saved discussions</strong><small>Ideas and reasoning from ChatGPT</small></span>
+          <ArrowRight size={16} aria-hidden />
+        </button>
         <button type="button" className="workspace-launch" onClick={() => navigate('/pyq')}>
           <span className="workspace-launch__icon"><BookOpenCheck size={21} aria-hidden /></span>
           <span className="workspace-launch__text"><strong>Practice studio</strong><small>{uniquePyqsSeen.toLocaleString()} questions explored</small></span>
@@ -270,6 +276,8 @@ export default function Dashboard() {
           </>
         )}
       </nav>
+
+      <DiscussionLibraryCard key={userId ?? 'signed-out'} userId={userId} />
 
       <div
         className={cn(

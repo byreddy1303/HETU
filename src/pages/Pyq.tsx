@@ -50,6 +50,7 @@ import PyqEvidenceLedger from '@/components/pyq/PyqEvidenceLedger';
 import PyqRecommendedSetup from '@/components/pyq/PyqRecommendedSetup';
 import PyqQuestionContent from '@/components/pyq/PyqQuestionContent';
 import PyqSessionHistory from '@/components/pyq/PyqSessionHistory';
+import PyqConversationHistory from '@/components/pyq/PyqConversationHistory';
 import TagFlow from '@/components/tags/TagFlow';
 import { Card, CardBody, CardHeader } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
@@ -1428,6 +1429,8 @@ function PracticeSetup({
           />
         </div>
       ) : null}
+
+      <PyqConversationHistory attempts={attempts} />
 
       {attempts.length > 0 ? (
         <PyqEvidenceLedger

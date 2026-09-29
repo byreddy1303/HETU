@@ -6,7 +6,7 @@ from collections import Counter
 from typing import Any
 
 from fastapi import HTTPException
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.models import PyqBank, PyqCatalogQuestion
@@ -125,3 +125,85 @@ def question_payload(question: PyqCatalogQuestion) -> dict[str, Any]:
         "sourceUrl": question.source_url,
         "answerSource": question.answer_source,
     }
+
+
+async def search_catalog(
+    db: AsyncSession,
+    *,
+    subject_slug: str | None = None,
+    topic_slug: str | None = None,
+    year_from: int | None = None,
+    year_to: int | None = None,
+    text: str = "",
+    limit: int = 25,
+    offset: int = 0,
+) -> dict[str, Any]:
+    if not 1 <= limit <= 100 or offset < 0 or len(text) > 200:
+        raise HTTPException(422, "Use limit 1–100, offset >= 0, and text <= 200 characters")
+    if year_from and year_to and year_from > year_to:
+        raise HTTPException(422, "year_from must not exceed year_to")
+    bank = await active_bank(db)
+    conditions = [PyqCatalogQuestion.bank_version == bank.version]
+    if subject_slug:
+        conditions.append(PyqCatalogQuestion.subject_slug == subject_slug)
+    if topic_slug:
+        conditions.append(PyqCatalogQuestion.topic_slug == topic_slug)
+    if year_from is not None:
+        conditions.append(PyqCatalogQuestion.year >= year_from)
+    if year_to is not None:
+        conditions.append(PyqCatalogQuestion.year <= year_to)
+    if text.strip():
+        escaped = text.strip().replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
+        conditions.append(PyqCatalogQuestion.html.ilike(f"%{escaped}%", escape="\\"))
+    total = await db.scalar(select(func.count()).select_from(PyqCatalogQuestion).where(*conditions))
+    rows = (
+        await db.scalars(
+            select(PyqCatalogQuestion)
+            .where(*conditions)
+            .order_by(
+                PyqCatalogQuestion.year.desc(),
+                PyqCatalogQuestion.paper_label,
+                PyqCatalogQuestion.number,
+            )
+            .offset(offset)
+            .limit(limit)
+        )
+    ).all()
+    count = int(total or 0)
+    return {
+        "bank_version": bank.version,
+        "items": [
+            {
+                "id": row.question_uid,
+                "year": row.year,
+                "paper_label": row.paper_label,
+                "subject": row.subject,
+                "subject_slug": row.subject_slug,
+                "topic": row.topic,
+                "topic_slug": row.topic_slug,
+                "marks": row.marks,
+                "type": row.question_type,
+                "answer_status": row.answer_status,
+                "integrity_status": row.integrity_status,
+                "source_url": row.source_url,
+                "preview_html": row.html[:500],
+            }
+            for row in rows
+        ],
+        "total_matches": count,
+        "next_offset": offset + limit if offset + limit < count else None,
+        "complete": True,
+    }
+
+
+async def catalog_question(db: AsyncSession, question_uid: str) -> dict[str, Any]:
+    bank = await active_bank(db)
+    question = await db.scalar(
+        select(PyqCatalogQuestion).where(
+            PyqCatalogQuestion.bank_version == bank.version,
+            PyqCatalogQuestion.question_uid == question_uid,
+        )
+    )
+    if question is None:
+        raise HTTPException(404, "Unknown PYQ question")
+    return {"bank_version": bank.version, **question_payload(question)}

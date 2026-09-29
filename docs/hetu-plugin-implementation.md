@@ -9,8 +9,10 @@ it does not mean production data has been migrated or a ChatGPT account connecte
 - [x] Run a clean Python baseline and document existing frontend test failures.
 - [x] Establish authenticated Python MCP transport and capability discovery in isolated tests.
 - [x] Complete capture → durable storage → Library view → detailed retrieval → revision with retry safety in code and isolated tests.
+- [x] Give saved ChatGPT discussions a clear dashboard destination and keep a concept page current when a linked insight improves.
 - [ ] Link knowledge to Journal, patterns, formulas, triggers, revision and actual retrieval practice.
 - [ ] Expose tested planning, diagnosis, sessions, PYQ, mock, weekly, syllabus, heatmap, calibration, and readiness workflows.
+- [x] Expose canonical PYQ search, detail, answer submission, score validation, and app receipt review as a first PYQ slice.
 - [ ] Expose tested Buddy, settings, notifications, exports/imports, recovery, and owner operations.
 - [ ] Verify full migration, backup restore, account isolation, and production credentials before live writes.
 - [ ] Install and test authenticated connection in ChatGPT Work; publish only after release gates pass.
@@ -28,10 +30,12 @@ it does not mean production data has been migrated or a ChatGPT account connecte
 
 - Python MCP transport advertises OAuth protected-resource metadata and per-tool scopes. The verifier requires an approved client, Clerk OAuth token, user subject, read/write scope, and the exact resource audience. The account resolves to the existing HETU owner; model-supplied owner IDs are not accepted.
 - “Save to HETU” captures immutable sources, distinct structured insights, concept pages, retry receipts, and revision history in one transaction. Search and detail return complete explanations and source links. A test saves through authenticated MCP, reads the same concept through the app API, and searches from a later MCP call.
+- The dashboard now has a Saved discussions launch tile and card, with the same destination in desktop and mobile navigation and workspace search. Connected Python accounts see recent concepts and links into the Library. Legacy accounts see an explicit connection status instead of invented Library content. Tests verify the card and that later discussions refresh the current page while preserving both source captures and the earlier insight revision.
 - Durable task briefs retain original goals, constraints, corrections, completed/pending steps and receipts. Concept recall/transfer records require actual responses and label assistance and evaluator provenance. The React Library, Workflows, Concept review, and Do now due review panel compile.
 - Mapped section records are owner scoped, filterable, paginated, and inspectable with revision history. Their overview explicitly marks section coverage as partial. This does not implement computed view scores or all actions.
 - Disposable PostgreSQL migration, preservation tests, Alembic schema check, backup and isolated restore content comparison passed on 2026-09-27. After the separately landed identity and PYQ catalog migrations, the disposable database passed Alembic check, 47 PostgreSQL tests, and a fresh isolated restore content comparison on 2026-09-28.
 - A local Codex plugin package validates. Its MCP URL points to localhost for development. No live Clerk OAuth token or ChatGPT Work connection has been exercised.
+- The Python PYQ catalog supports filtered search, detail, and versioned answer submission through authenticated HTTP and MCP. The app's compatibility writes for new v3 attempts validate the canonical bank snapshot, key, score, and timing; generic record writes cannot bypass that check. An app panel displays ChatGPT attempts with the question, actual answer, source, and timing provenance. PostgreSQL tests cover exact MCQ/MSQ/NAT scoring, quarantined and incomplete keys, replay, owner isolation, and tampered app receipts. The mounted MCP test exercises authenticated search, write, and replay with a synthetic bank. This covers individual PYQ answers, not set assembly, exam sessions, or linked recovery.
 - The mounted FastAPI endpoint returned protected-resource metadata and challenged an unauthenticated `/mcp` request over local HTTP on 2026-09-28. This is transport verification, not a live Clerk login.
 
 ## Release blockers
@@ -50,7 +54,7 @@ it does not mean production data has been migrated or a ChatGPT account connecte
 | Do now | React queue and recovery logic | Selection and outcome actions | No |
 | Planner | Python planner mutation and React planner | Capacity, split, move, reconcile | No |
 | Sessions and quick capture | Python records and React session pages | Safe start, answer, completion actions | No |
-| PYQ | React bank, scoring, attempts | Python canonical scoring and exam provenance | No |
+| PYQ | React bank, scoring, attempts | Python catalog search/detail and canonical individual attempts are implemented; set assembly, exam provenance, recovery linkage remain | Partial |
 | Mocks | React mocks and records | Question-level analysis and follow-through | No |
 | Journal | `questions` records and React Journal | Linked analysis edits | No |
 | Patterns | `patterns` records and React Patterns | Evidence-backed pattern actions | No |
@@ -64,7 +68,7 @@ it does not mean production data has been migrated or a ChatGPT account connecte
 | Syllabus | `topic_progress` records | Coverage state with evidence | No |
 | Trigger drill | `trigger_phrases` records | Run and record mixed drills | No |
 | Formulas | `formulas` records | Structured read/write/history | No |
-| Learning Library and topic pages | Not present | Capture, organize, revise, retrieve, UI, MCP | No |
+| Learning Library and topic pages | Python capture/revision, React Library, dashboard entry | Merge, split, archive/restore, semantic matching, and live connected verification remain | Partial |
 | Buddy | Python domain tables and React Buddy | Authorized reads, explicit sharing | No |
 | Settings and reminders | account and notification records | Validated preferences and connection state | No |
 | Export/import/recovery | React backup and Python history | Complete audited migration, restore | No |

@@ -239,7 +239,7 @@ export default function LearningLibrary() {
   }
 
   return <div className="learning-library">
-    <PageHeader title="Learning Library" description="Keep the explanations and reasoning changes you want to use again." />
+    <PageHeader title="Saved discussions" description="Explore ideas, reasoning changes, examples, and sources from your ChatGPT conversations." />
     {!backendConfig.fastapi ? (
       <div className="library-empty">The Learning Library opens when your account is connected to the Python service. Existing study data stays in its current account until migration is verified.</div>
     ) : <>

@@ -14,9 +14,7 @@ def test_parses_bcrypt_users_without_plaintext(tmp_path: Path) -> None:
         "\\.\n"
     )
     users = parse_supabase_auth_users(dump)
-    assert [(user.user_id, user.password_digest) for user in users] == [
-        ("source-user", digest)
-    ]
+    assert [(user.user_id, user.password_digest) for user in users] == [("source-user", digest)]
 
 
 def test_rejects_non_bcrypt_credentials(tmp_path: Path) -> None:

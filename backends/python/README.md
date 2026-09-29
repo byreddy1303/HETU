@@ -74,6 +74,8 @@ origins; never expose database, Clerk backend, R2, or Redis secrets to the brows
 | `GET /v1/learning/search`, `GET /v1/learning/concepts/{id}` | Search and detailed explanation, sources, and revisions |
 | `PATCH /v1/learning/insights/{id}` | Version-checked learning revision |
 | `/v1/workflows`, `/v1/concept-reviews`, `/v1/sections` | Task briefs, actual recall history, mapped record evidence |
+| `GET /v1/pyq/search`, `GET /v1/pyq/questions/{id}` | Filtered versioned bank search and question detail |
+| `POST /v1/pyq/attempts` | Canonically scored, immutable individual answer receipt |
 
 An existing changed record requires `expected_version`: missing returns 428,
 stale returns 409. Identical upserts are retry-safe no-ops. Tombstones require
@@ -82,6 +84,9 @@ Clients must re-query durable records after reconnect; Pub/Sub is not a durable
 event log. Private file routes return 503 until object storage is configured.
 Learning, workflow, and concept-review collections reject generic `/records`
 and compatibility mutations; their validated domain routes own those writes.
+New PYQ attempt records also reject generic record writes. The React compatibility
+write path checks its v3 snapshot, answer key, scoring fields, timing, and active
+session association against the Python bank before accepting a receipt.
 
 ## ChatGPT MCP boundary
 
@@ -95,8 +100,10 @@ required scope, or user subject are rejected. MCP tools resolve the authenticate
 Clerk subject to HETU's internal owner ID; callers cannot supply another owner.
 
 The MCP server currently provides sourced learning capture/retrieval/revision,
-durable task briefs, concept recall responses, and explicitly partial record
-context for mapped sections. The bundled local plugin is under
+durable task briefs, concept recall responses, versioned PYQ search and individual
+answer submission, and explicitly partial record context for mapped sections.
+PYQ detail hides its key by default; a quarantined key is never exposed. The
+bundled local plugin is under
 [`plugins/hetu-chatgpt`](../../plugins/hetu-chatgpt); its HTTP URL is a local
 development endpoint until a production URL is verified. It has not been
 installed in ChatGPT or cleared for production writes. Whole-app actions,

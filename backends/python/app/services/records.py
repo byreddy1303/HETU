@@ -73,6 +73,7 @@ DOMAIN_MANAGED_COLLECTIONS = frozenset(
         "learning_insights",
         "source_captures",
         "plugin_receipts",
+        "pyq_attempts",
         "workflow_records",
         "concept_reviews",
     }

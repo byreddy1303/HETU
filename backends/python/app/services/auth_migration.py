@@ -4,9 +4,7 @@ import re
 from dataclasses import dataclass
 from pathlib import Path
 
-COPY_PATTERN = re.compile(
-    r'^COPY (?:(?:"?auth"?)\.)?"?users"? \(([^)]+)\) FROM stdin;$'
-)
+COPY_PATTERN = re.compile(r'^COPY (?:(?:"?auth"?)\.)?"?users"? \(([^)]+)\) FROM stdin;$')
 
 
 @dataclass(frozen=True, slots=True)

@@ -32,6 +32,7 @@ const SECTIONS = [
   { to: '/heatmap', label: 'Heatmap', group: 'Reflect', keywords: 'topics coverage weakness' },
   { to: '/calibration', label: 'Calibration', group: 'Reflect', keywords: 'confidence accuracy' },
   { to: '/readiness', label: 'Readiness', group: 'Reflect', keywords: 'exam prepare progress' },
+  { to: '/learning-library', label: 'Saved discussions', group: 'Library', keywords: 'chatgpt conversation concept reasoning learning' },
   { to: '/topper-notes', label: 'Topper notes', group: 'Library', keywords: 'learn study notes' },
   {
     to: '/revision-pack',

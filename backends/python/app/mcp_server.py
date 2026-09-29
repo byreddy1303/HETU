@@ -37,6 +37,8 @@ from app.services.learning_library import (
     revise_insight,
     search_learning,
 )
+from app.services.pyq_catalog import catalog_question, search_catalog
+from app.services.pyq_practice import PyqAttemptDraft, submit_pyq_attempt
 from app.services.section_context import (
     SECTION_COLLECTIONS,
 )
@@ -226,6 +228,9 @@ def create_mcp_server(settings: Settings) -> MCPServer:
                 "sections.mapped_records",
                 "sections.filtered_mapped_records",
                 "sections.mapped_record_detail",
+                "pyq.search_catalog",
+                "pyq.question_detail",
+                "pyq.submit_answer",
             ],
             "unavailable": [
                 "production data cutover",
@@ -499,5 +504,71 @@ def create_mcp_server(settings: Settings) -> MCPServer:
                 record_id=record_id,
                 include_history=include_history,
             )
+
+    @server.tool(
+        description=(
+            "Search the canonical GATE PYQ catalog by subject, topic, year, or question text. "
+            "Results identify missing marks and quarantined answers."
+        ),
+        annotations=ToolAnnotations(read_only_hint=True),
+        meta=_security(READ_SCOPE),
+    )
+    async def search_pyq_catalog(
+        subject_slug: str | None = None,
+        topic_slug: str | None = None,
+        year_from: int | None = None,
+        year_to: int | None = None,
+        text: str = "",
+        limit: int = 25,
+        offset: int = 0,
+    ) -> dict[str, Any]:
+        async with get_session_factory()() as db:
+            await _user_id(db, READ_SCOPE)
+            return await search_catalog(
+                db,
+                subject_slug=subject_slug,
+                topic_slug=topic_slug,
+                year_from=year_from,
+                year_to=year_to,
+                text=text,
+                limit=limit,
+                offset=offset,
+            )
+
+    @server.tool(
+        description=(
+            "Read a canonical PYQ and its source. The answer key is hidden by default; "
+            "request it only after the learner answers or explicitly asks for an explanation. "
+            "Quarantined keys are never exposed."
+        ),
+        annotations=ToolAnnotations(read_only_hint=True),
+        meta=_security(READ_SCOPE),
+    )
+    async def get_pyq_question(question_uid: str, include_answer: bool = False) -> dict[str, Any]:
+        async with get_session_factory()() as db:
+            await _user_id(db, READ_SCOPE)
+            result = await catalog_question(db, question_uid)
+            if not include_answer:
+                result["answer"] = None
+                result["answer_hidden"] = True
+            return result
+
+    @server.tool(
+        description=(
+            "Record the learner's actual PYQ answer or skip, score it from the versioned "
+            "canonical question, and return an immutable retry-safe receipt. "
+            "Never fabricate a response or duration."
+        ),
+        annotations=ToolAnnotations(idempotent_hint=True),
+        meta=_security(WRITE_SCOPE),
+    )
+    async def submit_pyq_answer(draft: PyqAttemptDraft) -> dict[str, Any]:
+        async with get_session_factory()() as db:
+            user_id = await _user_id(db, WRITE_SCOPE)
+            result = await submit_pyq_attempt(
+                db, owner_id=user_id, draft=draft, app_url=settings.app_url
+            )
+            await db.commit()
+            return result
 
     return server

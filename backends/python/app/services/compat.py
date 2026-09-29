@@ -13,6 +13,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.config import Settings
 from app.db.models import AccessRequest, Buddy, BuddyMessage, Invite, Record, User
 from app.schemas import CompatMutation, CompatQuery, QueryFilter
+from app.services.pyq_practice import validate_app_attempt
 from app.services.records import (
     COLLECTIONS,
     _filter_expression,
@@ -287,7 +288,10 @@ async def _mutate_records(
 ) -> list[dict[str, Any]]:
     if table not in COLLECTIONS or table in {"buddies", "buddy_messages"}:
         raise api_error("Unknown table", status.HTTP_404_NOT_FOUND)
-    require_generic_mutation_allowed(table)
+    if table != "pyq_attempts":
+        require_generic_mutation_allowed(table)
+    elif operation not in {"insert", "upsert"}:
+        raise api_error("PYQ attempts are append-only", status.HTTP_409_CONFLICT)
     if operation in {"insert", "upsert"}:
         values: list[dict[str, Any]] = []
         for raw in mutation.values:
@@ -313,6 +317,8 @@ async def _mutate_records(
             )
             if existing is not None:
                 prepared["expected_version"] = existing.version
+            elif table == "pyq_attempts":
+                await validate_app_attempt(db, owner_id=user_id, row=prepared)
             values.append(prepared)
         rows = await upsert_records(db, collection=table, owner_id=user_id, items=values)
         return [to_api(row) for row in rows]

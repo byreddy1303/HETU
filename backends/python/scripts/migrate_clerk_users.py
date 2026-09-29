@@ -19,9 +19,7 @@ async def clerk_users(client: httpx.AsyncClient) -> dict[str, dict[str, Any]]:
     response.raise_for_status()
     users = response.json()
     return {
-        str(user["external_id"]): user
-        for user in users
-        if isinstance(user.get("external_id"), str)
+        str(user["external_id"]): user for user in users if isinstance(user.get("external_id"), str)
     }
 
 

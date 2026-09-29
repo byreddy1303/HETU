@@ -6,8 +6,14 @@ from pathlib import Path
 import pytest
 from fastapi import HTTPException
 
-from app.db.models import PyqCatalogQuestion
-from app.services.pyq_catalog import active_bank, prepare_catalog_rows, question_payload
+from app.db.models import PyqBank, PyqCatalogQuestion
+from app.services.pyq_catalog import (
+    active_bank,
+    catalog_question,
+    prepare_catalog_rows,
+    question_payload,
+    search_catalog,
+)
 
 ROOT = Path(__file__).resolve().parents[3]
 
@@ -79,6 +85,27 @@ async def test_missing_active_catalog_is_explicit(db) -> None:
     with pytest.raises(HTTPException) as exc_info:
         await active_bank(db)
     assert exc_info.value.status_code == 503
+
+
+@pytest.mark.asyncio
+async def test_catalog_search_filters_and_preserves_answer_integrity(db) -> None:
+    first = sample_question()
+    second = sample_question(
+        id="gate:test:2", year=2025, topicSlug="graphs", html="<p>Graph traversal?</p>"
+    )
+    rows, _ = prepare_catalog_rows([first, second], {"gate:test:2"})
+    db.add(PyqBank(version="v1", manifest={}, question_count=2, source_hash="hash", active=True))
+    db.add_all(PyqCatalogQuestion(bank_version="v1", **row) for row in rows)
+    await db.commit()
+
+    found = await search_catalog(db, subject_slug="algorithms", year_from=2026, limit=1)
+    assert found["total_matches"] == 1
+    assert found["items"][0]["id"] == "gate:test:1"
+    assert "answer" not in found["items"][0]
+    assert found["complete"] is True
+    quarantined = await catalog_question(db, "gate:test:2")
+    assert quarantined["answer"] is None
+    assert quarantined["answerStatus"] == "ambiguous"
 
 
 def test_shipped_bank_passes_server_import_validation() -> None:

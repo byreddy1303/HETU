@@ -242,6 +242,9 @@ async def capture_learning(
             )
         )
         await lock_identity(db, "concept_pages", owner_id, concept_id)
+        existing_page = await _owned(db, "concept_pages", owner_id, concept_id)
+        if existing_page is not None:
+            await db.refresh(existing_page)
         if concept_id not in pages:
             pages[concept_id] = {
                 **(existing_page.data if existing_page else {}),
@@ -269,6 +272,7 @@ async def capture_learning(
         )
         await lock_identity(db, "learning_insights", owner_id, insight_id)
         existing_insight = await _owned(db, "learning_insights", owner_id, insight_id)
+        previous_insight_data = dict(existing_insight.data) if existing_insight else None
         if existing_insight and existing_insight.data.get("concept_id") != concept_id:
             raise HTTPException(409, "Insight belongs to another concept")
         if draft.insight_id and (
@@ -318,6 +322,13 @@ async def capture_learning(
             )
         if insight_id not in page["insight_ids"]:
             page["insight_ids"].append(insight_id)
+        # Keep a page's concise reading view current when it still mirrors this
+        # insight. A separately edited page explanation remains authoritative.
+        if previous_insight_data:
+            if page.get("summary") == previous_insight_data.get("core_idea"):
+                page["summary"] = content["core_idea"]
+            if page.get("full_explanation") == previous_insight_data.get("full_explanation"):
+                page["full_explanation"] = content["full_explanation"]
         page.setdefault("summary", draft.core_idea)
         page.setdefault("full_explanation", draft.full_explanation)
         concept_ids.append(concept_id)
@@ -482,6 +493,17 @@ async def revise_insight(
     existing = await _owned(db, "learning_insights", owner_id, insight_id)
     if existing is None:
         raise HTTPException(404, "Insight not found")
+    concept_id = existing.data.get("concept_id")
+    if not isinstance(concept_id, str):
+        raise HTTPException(409, "Insight has no concept page")
+    await lock_identity(db, "concept_pages", owner_id, concept_id)
+    await lock_identity(db, "learning_insights", owner_id, insight_id)
+    await db.refresh(existing)
+    page = await _owned(db, "concept_pages", owner_id, concept_id)
+    if page is None:
+        raise HTTPException(409, "Insight concept page is missing")
+    previous_core = existing.data.get("core_idea")
+    previous_explanation = existing.data.get("full_explanation")
     patch = revision.model_dump(exclude_unset=True, exclude={"expected_version"})
     updated = await patch_record(
         db,
@@ -491,4 +513,21 @@ async def revise_insight(
         patch=patch,
         expected_version=revision.expected_version,
     )
+    page_changes: dict[str, Any] = {}
+    if page.data.get("summary") == previous_core and updated.data.get("core_idea") != previous_core:
+        page_changes["summary"] = updated.data["core_idea"]
+    if (
+        page.data.get("full_explanation") == previous_explanation
+        and updated.data.get("full_explanation") != previous_explanation
+    ):
+        page_changes["full_explanation"] = updated.data["full_explanation"]
+    if page_changes:
+        await patch_record(
+            db,
+            collection="concept_pages",
+            owner_id=owner_id,
+            external_id=concept_id,
+            patch={**page_changes, "revision_reason": "Linked insight revised"},
+            expected_version=page.version,
+        )
     return to_api(updated)

@@ -534,6 +534,9 @@ export interface PyqSessionRow {
 export interface PyqAttemptRow {
   id: string;
   user_id: string;
+  /** Present on answers captured through the authenticated HETU MCP workflow. */
+  capture_origin?: 'chatgpt';
+  duration_source?: 'measured' | 'reported' | 'unknown';
   pyq_session_id: string | null;
   question_uid: string;
   subject: string;

@@ -10,11 +10,13 @@ from app.api.deps import get_current_user
 from app.core.config import Settings
 from app.core.security import Identity
 from app.db.base import Base
-from app.db.models import User, UserIdentity
+from app.db.models import PyqBank, PyqCatalogQuestion, User, UserIdentity
 from app.db.session import get_db
 from app.main import app
 from app.mcp_server import ClerkOAuthVerifier, create_mcp_server
+from app.services.pyq_catalog import prepare_catalog_rows
 from tests.test_learning_library import capture
+from tests.test_pyq_catalog import sample_question
 
 
 @pytest.mark.asyncio
@@ -30,6 +32,13 @@ async def test_oauth_mcp_transport_exposes_and_executes_learning_workflow(monkey
     async with factory() as db:
         db.add_all([User(id="internal_user"), User(id="user_other")])
         db.add(UserIdentity(user_id="internal_user", provider="clerk", subject="user_mcp"))
+        catalog_rows, _ = prepare_catalog_rows([sample_question()], set())
+        db.add(
+            PyqBank(
+                version="v1", manifest={}, question_count=1, source_hash="test-bank", active=True
+            )
+        )
+        db.add(PyqCatalogQuestion(bank_version="v1", **catalog_rows[0]))
         await db.commit()
 
     settings = Settings(
@@ -82,6 +91,8 @@ async def test_oauth_mcp_transport_exposes_and_executes_learning_workflow(monkey
             assert listed.status_code == 200
             tools = {item["name"]: item for item in listed.json()["result"]["tools"]}
             assert "save_to_hetu" in tools
+            assert "search_pyq_catalog" in tools
+            assert "submit_pyq_answer" in tools
             assert tools["save_to_hetu"]["_meta"]["securitySchemes"][0]["scopes"] == ["hetu:write"]
             assert tools["get_profile"]["_meta"]["openai/profile"] is True
 
@@ -122,6 +133,57 @@ async def test_oauth_mcp_transport_exposes_and_executes_learning_workflow(monkey
                 4,
             )
             assert found.json()["result"]["structuredContent"]["items"][0]["id"] == concept_id
+
+            catalog = await call(
+                "oat_one",
+                "tools/call",
+                {"name": "search_pyq_catalog", "arguments": {"subject_slug": "algorithms"}},
+                7,
+            )
+            assert catalog.json()["result"]["structuredContent"]["items"][0]["id"] == "gate:test:1"
+            hidden_question = await call(
+                "oat_one",
+                "tools/call",
+                {"name": "get_pyq_question", "arguments": {"question_uid": "gate:test:1"}},
+                10,
+            )
+            assert hidden_question.json()["result"]["structuredContent"]["answer"] is None
+            assert hidden_question.json()["result"]["structuredContent"]["answer_hidden"] is True
+            answer = await call(
+                "oat_one",
+                "tools/call",
+                {
+                    "name": "submit_pyq_answer",
+                    "arguments": {
+                        "draft": {
+                            "idempotency_key": "mcp-attempt-one",
+                            "question_uid": "gate:test:1",
+                            "decision": "MARK",
+                            "selected_answer": "B",
+                        }
+                    },
+                },
+                8,
+            )
+            assert answer.json()["result"]["structuredContent"]["score_thirds"] == 3
+            assert answer.json()["result"]["structuredContent"]["capture_origin"] == "chatgpt"
+            repeated = await call(
+                "oat_one",
+                "tools/call",
+                {
+                    "name": "submit_pyq_answer",
+                    "arguments": {
+                        "draft": {
+                            "idempotency_key": "mcp-attempt-one",
+                            "question_uid": "gate:test:1",
+                            "decision": "MARK",
+                            "selected_answer": "B",
+                        }
+                    },
+                },
+                9,
+            )
+            assert repeated.json()["result"]["structuredContent"]["idempotent_replay"] is True
 
             other = await call(
                 "oat_other",

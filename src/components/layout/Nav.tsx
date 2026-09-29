@@ -45,7 +45,7 @@ const REFLECT: Item[] = [
   { to: '/readiness', label: 'Readiness', icon: Compass }
 ];
 const LIBRARY: Item[] = [
-  { to: '/learning-library', label: 'Learning Library', icon: LibraryBig },
+  { to: '/learning-library', label: 'Saved discussions', icon: LibraryBig },
   { to: '/topper-notes', label: 'Topper notes', icon: BookOpen },
   { to: '/revision-pack', label: 'Revision pack', icon: ClipboardList },
   { to: '/syllabus', label: 'Syllabus tracker', icon: ListChecks },

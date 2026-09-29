@@ -128,6 +128,10 @@ async def test_authenticated_capture_search_detail_revise_and_account_boundary(d
             )
             assert revised.status_code == 200
             assert revised.json()["version"] == 2
+            current = await client.get(f"/v1/learning/concepts/{receipt['concept_ids'][0]}")
+            assert current.json()["page"]["full_explanation"] == (
+                "Weights 0.2 and 0.6 normalize to 0.25 and 0.75."
+            )
             stale = await client.patch(
                 f"/v1/learning/insights/{receipt['insight_ids'][0]}",
                 json={"expected_version": 1, "revision_reason": "stale", "core_idea": "wrong"},
@@ -173,3 +177,43 @@ async def test_repeated_save_with_new_key_does_not_duplicate_insight(db) -> None
     detail = await learning_detail(db, owner_id="learner", concept_id=first["concept_ids"][0])
     assert len(detail["insights"]) == len(detail["sources"]) == 1
     assert detail["insights"][0]["version"] == 1
+    assert detail["page"]["version"] == 1
+
+
+@pytest.mark.asyncio
+async def test_later_discussion_refreshes_page_and_keeps_both_sources(db) -> None:
+    from app.services.learning_library import CaptureRequest, capture_learning, learning_detail
+
+    db.add(User(id="learner"))
+    await db.commit()
+    first = await capture_learning(
+        db,
+        owner_id="learner",
+        request=CaptureRequest.model_validate(capture("first-discussion")),
+        app_url="https://app.test",
+    )
+    await db.commit()
+    later = capture("later-discussion")
+    later["sources"][0]["excerpt"] = "Now I see that the denominator is total weighted evidence."
+    later["insights"][0]["full_explanation"] = (
+        "The denominator is total weighted evidence across the hypotheses; "
+        "it makes the posterior sum to one."
+    )
+    second = await capture_learning(
+        db,
+        owner_id="learner",
+        request=CaptureRequest.model_validate(later),
+        app_url="https://app.test",
+    )
+    await db.commit()
+    assert first["concept_ids"] == second["concept_ids"]
+    assert first["insight_ids"] == second["insight_ids"]
+    detail = await learning_detail(
+        db, owner_id="learner", concept_id=first["concept_ids"][0], include_history=True
+    )
+    assert detail["page"]["full_explanation"] == later["insights"][0]["full_explanation"]
+    assert len(detail["sources"]) == 2
+    assert [item["version"] for item in detail["insight_history"][first["insight_ids"][0]]] == [
+        2,
+        1,
+    ]

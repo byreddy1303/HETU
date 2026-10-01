@@ -93,6 +93,7 @@ async def test_oauth_mcp_transport_exposes_and_executes_learning_workflow(monkey
             assert "save_to_hetu" in tools
             assert "search_pyq_catalog" in tools
             assert "submit_pyq_answer" in tools
+            assert "link_saved_concepts" in tools
             assert tools["save_to_hetu"]["_meta"]["securitySchemes"][0]["scopes"] == ["hetu:write"]
             assert tools["get_profile"]["_meta"]["openai/profile"] is True
 
@@ -105,6 +106,52 @@ async def test_oauth_mcp_transport_exposes_and_executes_learning_workflow(monkey
             assert saved.status_code == 200, saved.text
             assert saved.json()["result"].get("isError") is not True
             concept_id = saved.json()["result"]["structuredContent"]["concept_ids"][0]
+
+            second_capture = capture("mcp-save-second-concept")
+            second_capture["insights"][0].update(
+                topic="Conditional probability",
+                concept="Conditional probability",
+                core_idea="Condition on the information already observed.",
+            )
+            second_saved = await call(
+                "oat_one",
+                "tools/call",
+                {"name": "save_to_hetu", "arguments": {"request": second_capture}},
+                31,
+            )
+            second_concept_id = second_saved.json()["result"]["structuredContent"]["concept_ids"][0]
+            linked = await call(
+                "oat_one",
+                "tools/call",
+                {
+                    "name": "link_saved_concepts",
+                    "arguments": {
+                        "draft": {
+                            "idempotency_key": "mcp-prerequisite-link-1",
+                            "source_concept_id": second_concept_id,
+                            "target_concept_id": concept_id,
+                            "relation": "prerequisite_for",
+                            "rationale": (
+                                "Conditional probability is needed to understand "
+                                "the Bayesian update."
+                            ),
+                        }
+                    },
+                },
+                32,
+            )
+            assert linked.status_code == 200
+            assert linked.json()["result"]["structuredContent"]["idempotent_replay"] is False
+            concept = await call(
+                "oat_one",
+                "tools/call",
+                {"name": "get_concept", "arguments": {"concept_id": concept_id}},
+                33,
+            )
+            assert (
+                concept.json()["result"]["structuredContent"]["links"][0]["other_concept"]["id"]
+                == second_concept_id
+            )
 
             async def api_db():
                 async with factory() as db:
@@ -129,7 +176,7 @@ async def test_oauth_mcp_transport_exposes_and_executes_learning_workflow(monkey
             found = await call(
                 "oat_one",
                 "tools/call",
-                {"name": "search_knowledge", "arguments": {"query": "Bayes"}},
+                {"name": "search_knowledge", "arguments": {"query": "Posterior normalization"}},
                 4,
             )
             assert found.json()["result"]["structuredContent"]["items"][0]["id"] == concept_id

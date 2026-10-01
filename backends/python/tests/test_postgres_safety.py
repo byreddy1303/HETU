@@ -12,6 +12,13 @@ from sqlalchemy.exc import DBAPIError
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
 from app.db.models import EntityRevision, Record, RecordRevision, User
+from app.services.learning_library import (
+    CaptureRequest,
+    ConceptLinkDraft,
+    capture_learning,
+    learning_detail,
+    link_concepts,
+)
 from app.services.records import patch_record, upsert_records
 
 URL = os.getenv("HETU_TEST_DATABASE_URL")
@@ -98,5 +105,91 @@ async def test_concurrent_writers_and_database_guards():
                 await db.rollback()
         async with factory() as db:
             assert await db.scalar(select(Record).where(Record.id == first)) is not None
+    finally:
+        await engine.dispose()
+
+
+@pytest.mark.asyncio
+async def test_concept_links_use_postgres_identity_locks_and_revision_history():
+    engine = create_async_engine(URL)
+    factory = async_sessionmaker(engine, expire_on_commit=False)
+    owner = str(uuid4())
+    try:
+        async with factory() as db:
+            db.add(User(id=owner))
+            await db.commit()
+            saved = await capture_learning(
+                db,
+                owner_id=owner,
+                request=CaptureRequest(
+                    idempotency_key=f"postgres-capture-{owner}",
+                    sources=[{"kind": "manual", "title": "Disposable relationship test"}],
+                    insights=[
+                        {
+                            "subject": "Test subject",
+                            "topic": "Prerequisites",
+                            "concept": "Foundations",
+                            "core_idea": "Foundation concept.",
+                            "full_explanation": "Foundation explanation.",
+                        },
+                        {
+                            "subject": "Test subject",
+                            "topic": "Applications",
+                            "concept": "Derived method",
+                            "core_idea": "Derived concept.",
+                            "full_explanation": "Derived explanation.",
+                        },
+                    ],
+                ),
+                app_url="https://hetu.example.test",
+            )
+            foundation_id, derived_id = saved["concept_ids"]
+            relationship = ConceptLinkDraft(
+                idempotency_key=f"postgres-link-{owner}",
+                source_concept_id=foundation_id,
+                target_concept_id=derived_id,
+                relation="prerequisite_for",
+                rationale="The derived method depends on this foundation.",
+            )
+            created = await link_concepts(db, owner_id=owner, draft=relationship)
+            await db.commit()
+            revised = await link_concepts(
+                db,
+                owner_id=owner,
+                draft=relationship.model_copy(
+                    update={
+                        "idempotency_key": f"postgres-link-revision-{owner}",
+                        "expected_version": 1,
+                        "rationale": "This prerequisite supports the derived method.",
+                    }
+                ),
+            )
+            await db.commit()
+            assert revised["version"] == 2
+            relation_record = await db.scalar(
+                select(Record).where(
+                    Record.collection == "concept_relations",
+                    Record.owner_id == owner,
+                    Record.external_id == created["id"],
+                )
+            )
+            assert relation_record is not None
+            history = list(
+                await db.scalars(
+                    select(RecordRevision)
+                    .where(RecordRevision.record_id == relation_record.id)
+                    .order_by(RecordRevision.version)
+                )
+            )
+            assert [row.version for row in history] == [1, 2]
+            assert (
+                history[0].snapshot["rationale"] == "The derived method depends on this foundation."
+            )
+            detail = await learning_detail(db, owner_id=owner, concept_id=derived_id)
+            assert detail["links"][0]["other_concept"]["id"] == foundation_id
+            assert (
+                detail["links"][0]["rationale"] == "This prerequisite supports the derived method."
+            )
+            await db.commit()
     finally:
         await engine.dispose()

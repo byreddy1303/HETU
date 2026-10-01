@@ -12,18 +12,18 @@ from app.services.identities import resolve_identity
 
 
 @pytest.mark.asyncio
-async def test_new_provider_subject_gets_stable_internal_user_id(db) -> None:
+async def test_mapped_provider_subject_gets_stable_internal_user_id(db) -> None:
     external = "user_clerk_subject"
+    user = User(id="internal-user")
+    db.add(user)
+    db.add(UserIdentity(user_id=user.id, provider="clerk", subject=external))
+    await db.commit()
 
     first = await resolve_identity(db, Identity(external, provider_subject=external))
     second = await resolve_identity(db, Identity(external, provider_subject=external))
 
     assert first.user_id == second.user_id
-    assert first.user_id != external
-    mapping = await db.scalar(select(UserIdentity))
-    assert mapping is not None
-    assert mapping.subject == external
-    assert mapping.user_id == first.user_id
+    assert first.user_id == user.id
 
 
 @pytest.mark.asyncio
@@ -56,9 +56,22 @@ async def test_deleted_mapped_user_is_rejected(db) -> None:
 
 @pytest.mark.asyncio
 async def test_identity_response_uses_internal_user_id(db) -> None:
+    user = User(id="internal-user")
+    db.add(user)
+    db.add(UserIdentity(user_id=user.id, provider="clerk", subject="provider-subject"))
+    await db.commit()
     resolved = await resolve_identity(
         db, Identity("provider-subject", provider_subject="provider-subject")
     )
 
     assert resolved.provider_subject == "provider-subject"
-    assert resolved.user_id != resolved.provider_subject
+    assert resolved.user_id == user.id
+
+
+@pytest.mark.asyncio
+async def test_unknown_provider_subject_cannot_create_an_account(db) -> None:
+    with pytest.raises(HTTPException) as exc_info:
+        await resolve_identity(db, Identity("unknown", provider_subject="unknown"))
+
+    assert exc_info.value.status_code == 403
+    assert await db.scalar(select(User)) is None

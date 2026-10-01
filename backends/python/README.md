@@ -100,8 +100,10 @@ required scope, or user subject are rejected. MCP tools resolve the authenticate
 Clerk subject to HETU's internal owner ID; callers cannot supply another owner.
 
 The MCP server currently provides sourced learning capture/retrieval/revision,
-durable task briefs, concept recall responses, versioned PYQ search and individual
-answer submission, and explicitly partial record context for mapped sections.
+owner-checked concept links (related ideas, contrasts, extensions, and acyclic
+prerequisites), durable task briefs, concept recall responses, versioned PYQ
+search and individual answer submission, and explicitly partial record context
+for mapped sections.
 PYQ detail hides its key by default; a quarantined key is never exposed. The
 bundled local plugin is under
 [`plugins/hetu-chatgpt`](../../plugins/hetu-chatgpt); its HTTP URL is a local

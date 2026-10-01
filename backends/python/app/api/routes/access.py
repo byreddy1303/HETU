@@ -9,12 +9,81 @@ from fastapi import APIRouter, HTTPException, Request
 from sqlalchemy import func, select
 
 from app.api.deps import CurrentUser, DbDep, SettingsDep
-from app.db.models import AccessRequest, Invite
-from app.schemas import AccessRequestCreate
+from app.db.models import AccessRequest, Invite, User, UserIdentity
+from app.schemas import AccessRequestCreate, SignupRequest
 from app.services.compat import is_owner
-from app.services.integrations import send_email
+from app.services.integrations import clerk_create_user, clerk_delete_user, send_email
 
 router = APIRouter()
+
+
+async def _active_invite(db: DbDep, token: str, *, lock: bool = False) -> Invite:
+    statement = select(Invite).where(Invite.token == token)
+    if lock:
+        statement = statement.with_for_update()
+    invite = await db.scalar(statement)
+    expires_at = invite.expires_at if invite else None
+    if expires_at and expires_at.tzinfo is None:
+        expires_at = expires_at.replace(tzinfo=UTC)
+    if invite is None or invite.used_by or expires_at <= datetime.now(UTC):
+        raise HTTPException(status_code=404, detail="Invite is invalid, expired, or already used")
+    return invite
+
+
+@router.get("/invites/{token}")
+async def inspect_invite(token: str, db: DbDep) -> dict[str, object]:
+    invite = await _active_invite(db, token)
+    return {"valid": True, "email": invite.email}
+
+
+@router.post("/signup")
+async def signup_from_invite(
+    payload: SignupRequest, db: DbDep, settings: SettingsDep
+) -> dict[str, object]:
+    invite = await _active_invite(db, payload.invite_token, lock=True)
+    email = payload.email.strip().lower()
+    username = payload.username.strip().lower()
+    if invite.email and invite.email.strip().lower() != email:
+        raise HTTPException(
+            status_code=400, detail="This invite belongs to a different email address"
+        )
+    if await db.scalar(select(User.id).where(func.lower(User.username) == username)):
+        raise HTTPException(status_code=409, detail="That username is already in use")
+    if await db.scalar(select(User.id).where(func.lower(User.email) == email)):
+        raise HTTPException(status_code=409, detail="An account already uses that email address")
+
+    user = User(
+        id=str(uuid4()),
+        email=email,
+        username=username,
+        display_name=payload.name.strip(),
+    )
+    db.add(user)
+    await db.flush()
+    clerk_user_id: str | None = None
+    try:
+        clerk_user = await clerk_create_user(
+            settings,
+            user_id=user.id,
+            username=username,
+            email=email,
+            name=payload.name.strip(),
+            password=payload.password,
+            email_verified=bool(invite.email),
+        )
+        clerk_user_id = clerk_user.get("id")
+        if not isinstance(clerk_user_id, str) or not clerk_user_id:
+            raise HTTPException(status_code=502, detail="Clerk returned an invalid account")
+        db.add(UserIdentity(user_id=user.id, provider="clerk", subject=clerk_user_id))
+        invite.used_by = user.id
+        invite.used_at = datetime.now(UTC)
+        await db.commit()
+    except Exception:
+        await db.rollback()
+        if clerk_user_id:
+            await clerk_delete_user(settings, clerk_user_id)
+        raise
+    return {"ok": True, "user_id": user.id}
 
 
 @router.post("/request")

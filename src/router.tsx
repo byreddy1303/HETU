@@ -8,6 +8,7 @@ import RootErrorBoundary from '@/components/shared/RootErrorBoundary';
 import { lazyWithRetry } from '@/lib/lazyWithRetry';
 
 const ClerkAuth = lazyWithRetry(() => import('@/pages/ClerkAuth'));
+const ClerkSignup = lazyWithRetry(() => import('@/pages/ClerkSignup'));
 
 const Auth = lazyWithRetry(() => import('@/pages/Auth'));
 const Signup = lazyWithRetry(() => import('@/pages/Signup'));
@@ -62,7 +63,7 @@ const devRoutes = import.meta.env.DEV
 export const router = createBrowserRouter([
   ...devRoutes,
   { path: '/auth', element: backendConfig.fastapi ? <ClerkAuth /> : <Auth />, errorElement: <RootErrorBoundary /> },
-  { path: '/signup', element: backendConfig.fastapi ? <ClerkAuth /> : <Signup />, errorElement: <RootErrorBoundary /> },
+  { path: '/signup', element: backendConfig.fastapi ? <ClerkSignup /> : <Signup />, errorElement: <RootErrorBoundary /> },
   { path: '/forgot-pin', element: backendConfig.fastapi ? <ClerkAuth /> : <ForgotPin />, errorElement: <RootErrorBoundary /> },
   { path: '/reset-pin', element: backendConfig.fastapi ? <ClerkAuth /> : <ResetPin />, errorElement: <RootErrorBoundary /> },
   { path: '/request-access', element: <RequestAccess />, errorElement: <RootErrorBoundary /> },

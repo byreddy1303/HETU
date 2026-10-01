@@ -28,15 +28,25 @@ def clerk_password(pin: str) -> str:
 
 
 async def clerk_create_user(
-    settings: Settings, *, username: str, email: str, name: str, pin: str
+    settings: Settings,
+    *,
+    user_id: str,
+    username: str,
+    email: str,
+    name: str,
+    password: str,
+    email_verified: bool,
 ) -> dict[str, Any]:
     payload = {
         "username": username,
         "email_address": [email],
-        "password": clerk_password(pin),
+        "password": password,
+        "external_id": user_id,
         "first_name": name,
-        "public_metadata": {"hetu_auth_version": 1},
+        "private_metadata": {"internal_user_id": user_id},
     }
+    if email_verified:
+        payload["email_address_identification_status"] = ["verified"]
     return await _clerk_request(settings, "POST", "/users", json=payload)
 
 

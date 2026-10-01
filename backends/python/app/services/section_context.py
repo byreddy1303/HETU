@@ -47,6 +47,7 @@ SECTION_COLLECTIONS: dict[str, tuple[str, ...]] = {
     "formulas": ("formulas",),
     "learning_library": (
         "concept_pages",
+        "concept_relations",
         "learning_insights",
         "source_captures",
         "concept_reviews",

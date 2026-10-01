@@ -31,9 +31,11 @@ from app.services.concept_review import (
 )
 from app.services.learning_library import (
     CaptureRequest,
+    ConceptLinkDraft,
     InsightRevision,
     capture_learning,
     learning_detail,
+    link_concepts,
     revise_insight,
     search_learning,
 )
@@ -169,8 +171,9 @@ def create_mcp_server(settings: Settings) -> MCPServer:
             "Preserve the user's original goal, constraints, and corrections. "
             "Retrieve account evidence before acting; do not invent attempts, mastery, "
             "availability, or historical conversation access. Save useful learning "
-            "from available conversation content with source attribution. Verify writes "
-            "and report unresolved work."
+            "from available conversation content with source attribution. Connect related "
+            "saved concepts, including useful prerequisite links. Verify writes and "
+            "report unresolved work."
         ),
         version="0.1.0",
         token_verifier=ClerkOAuthVerifier(settings),
@@ -215,6 +218,7 @@ def create_mcp_server(settings: Settings) -> MCPServer:
                 "learning.search",
                 "learning.detail",
                 "learning.revise",
+                "learning.link_concepts",
                 "workflow.start",
                 "workflow.list",
                 "workflow.detail",
@@ -301,6 +305,22 @@ def create_mcp_server(settings: Settings) -> MCPServer:
             result = await revise_insight(
                 db, owner_id=user_id, insight_id=insight_id, revision=revision
             )
+            await db.commit()
+            return result
+
+    @server.tool(
+        description=(
+            "Connect two existing saved concepts as a prerequisite, related idea, "
+            "contrast, or extension. Prerequisites must remain acyclic. Use an "
+            "expected version to change or deactivate an existing link."
+        ),
+        annotations=ToolAnnotations(idempotent_hint=True),
+        meta=_security(WRITE_SCOPE),
+    )
+    async def link_saved_concepts(draft: ConceptLinkDraft) -> dict[str, Any]:
+        async with get_session_factory()() as db:
+            user_id = await _user_id(db, WRITE_SCOPE)
+            result = await link_concepts(db, owner_id=user_id, draft=draft)
             await db.commit()
             return result
 

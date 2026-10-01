@@ -154,10 +154,10 @@ class AccessRequestCreate(StrictModel):
 
 class SignupRequest(StrictModel):
     username: str = Field(pattern=r"^[a-z0-9_]{3,32}$")
-    pin: str = Field(pattern=r"^\d{6}$")
-    email: str = Field(min_length=3, max_length=320)
+    email: str = Field(pattern=r"^[^\s@]+@[^\s@]+\.[^\s@]+$", max_length=320)
     name: str = Field(min_length=1, max_length=80)
     invite_token: str = Field(min_length=16, max_length=128)
+    password: str = Field(min_length=12, max_length=256)
 
 
 class PinResetRequest(StrictModel):

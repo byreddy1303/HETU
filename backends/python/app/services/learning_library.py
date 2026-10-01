@@ -134,6 +134,22 @@ class InsightRevision(StrictModel):
         return self
 
 
+class ConceptLinkDraft(StrictModel):
+    idempotency_key: str = Field(min_length=8, max_length=128)
+    source_concept_id: str = Field(min_length=1, max_length=128)
+    target_concept_id: str = Field(min_length=1, max_length=128)
+    relation: Literal["prerequisite_for", "related", "contrasts_with", "extends"]
+    rationale: str = Field(min_length=1, max_length=2000)
+    active: bool = True
+    expected_version: int | None = Field(default=None, ge=1)
+
+    @model_validator(mode="after")
+    def validate_link(self) -> ConceptLinkDraft:
+        if self.source_concept_id == self.target_concept_id:
+            raise ValueError("A concept cannot link to itself")
+        return self
+
+
 def key(value: str) -> str:
     normalized = unicodedata.normalize("NFKC", value).casefold().strip()
     return re.sub(r"\s+", " ", normalized)
@@ -448,6 +464,75 @@ async def learning_detail(
         "complete": len(related) == len(set([*insight_ids, *source_ids])),
         "retrieved_at": datetime.now(UTC).isoformat(),
     }
+    links = (
+        await db.scalars(
+            select(Record)
+            .where(
+                Record.collection == "concept_relations",
+                Record.owner_id == owner_id,
+                Record.deleted_at.is_(None),
+            )
+            .order_by(Record.updated_at.desc())
+            .limit(5001)
+        )
+    ).all()
+    if len(links) > 5000:
+        raise HTTPException(409, "Concept relationship inventory exceeds safe retrieval limit")
+    matching_links = [
+        row
+        for row in links
+        if page.external_id
+        in {row.data.get("source_concept_id"), row.data.get("target_concept_id")}
+    ]
+    other_ids = {
+        (
+            row.data["target_concept_id"]
+            if row.data["source_concept_id"] == page.external_id
+            else row.data["source_concept_id"]
+        )
+        for row in matching_links
+    }
+    linked_pages = (
+        (
+            await db.scalars(
+                select(Record).where(
+                    Record.collection == "concept_pages",
+                    Record.owner_id == owner_id,
+                    Record.deleted_at.is_(None),
+                    Record.external_id.in_(other_ids),
+                )
+            )
+        ).all()
+        if other_ids
+        else []
+    )
+    linked_by_id = {row.external_id: row for row in linked_pages}
+    result["links"] = [
+        {
+            "id": relation.external_id,
+            "version": relation.version,
+            "relation": relation.data["relation"],
+            "source_concept_id": relation.data["source_concept_id"],
+            "target_concept_id": relation.data["target_concept_id"],
+            "active": relation.data.get("active", True),
+            "direction": (
+                "outgoing" if relation.data["source_concept_id"] == page.external_id else "incoming"
+            ),
+            "rationale": relation.data["rationale"],
+            "other_concept": to_api(linked_by_id[other_id])
+            if (
+                other_id := (
+                    relation.data["target_concept_id"]
+                    if relation.data["source_concept_id"] == page.external_id
+                    else relation.data["source_concept_id"]
+                )
+            )
+            in linked_by_id
+            else None,
+        }
+        for relation in matching_links
+    ]
+    result["links_complete"] = len(linked_pages) == len(other_ids)
     if include_history:
         revisions = (
             await db.scalars(
@@ -481,6 +566,123 @@ async def learning_detail(
         result["insight_history"] = insight_history
         result["history_complete"] = len(insight_ids) <= 50
     return result
+
+
+async def _creates_prerequisite_cycle(
+    db: AsyncSession,
+    *,
+    owner_id: str,
+    source_id: str,
+    target_id: str,
+    ignored_relation_id: str,
+) -> bool:
+    rows = (
+        await db.scalars(
+            select(Record)
+            .where(
+                Record.collection == "concept_relations",
+                Record.owner_id == owner_id,
+                Record.deleted_at.is_(None),
+            )
+            .limit(5001)
+        )
+    ).all()
+    if len(rows) > 5000:
+        raise HTTPException(409, "Concept relationship inventory exceeds safe validation limit")
+    adjacency: dict[str, list[str]] = {}
+    for row in rows:
+        if (
+            row.external_id == ignored_relation_id
+            or not row.data.get("active", True)
+            or row.data.get("relation") != "prerequisite_for"
+        ):
+            continue
+        adjacency.setdefault(row.data["source_concept_id"], []).append(
+            row.data["target_concept_id"]
+        )
+    pending = [target_id]
+    visited: set[str] = set()
+    while pending:
+        node = pending.pop()
+        if node == source_id:
+            return True
+        if node in visited:
+            continue
+        visited.add(node)
+        pending.extend(adjacency.get(node, []))
+    return False
+
+
+async def link_concepts(
+    db: AsyncSession, *, owner_id: str, draft: ConceptLinkDraft
+) -> dict[str, Any]:
+    """Create or revise an owner-scoped relationship between two Library concepts."""
+    source = await _owned(db, "concept_pages", owner_id, draft.source_concept_id)
+    target = await _owned(db, "concept_pages", owner_id, draft.target_concept_id)
+    if source is None or target is None:
+        raise HTTPException(404, "Both concepts must exist in the connected account")
+
+    source_id, target_id = draft.source_concept_id, draft.target_concept_id
+    if draft.relation in {"related", "contrasts_with"} and target_id < source_id:
+        source_id, target_id = target_id, source_id
+    relation_id = stable_id("concept-relation", f"{draft.relation}:{source_id}:{target_id}")
+    await lock_identity(db, "concept_relations", owner_id, relation_id)
+    existing = await _owned(db, "concept_relations", owner_id, relation_id)
+    if draft.relation == "prerequisite_for" and draft.active:
+        if await _creates_prerequisite_cycle(
+            db,
+            owner_id=owner_id,
+            source_id=source_id,
+            target_id=target_id,
+            ignored_relation_id=relation_id,
+        ):
+            raise HTTPException(409, "This prerequisite link would create a cycle")
+
+    content = {
+        "id": relation_id,
+        "source_concept_id": source_id,
+        "target_concept_id": target_id,
+        "relation": draft.relation,
+        "rationale": draft.rationale,
+        "active": draft.active,
+        "last_idempotency_key": draft.idempotency_key,
+    }
+    if existing is not None:
+        previous = {key: value for key, value in existing.data.items() if key != "revision_reason"}
+        comparable = {
+            key: value
+            for key, value in content.items()
+            if key not in {"id", "last_idempotency_key"}
+        }
+        previous_comparable = {
+            key: value
+            for key, value in previous.items()
+            if key not in {"id", "last_idempotency_key"}
+        }
+        if comparable == previous_comparable:
+            return {**to_api(existing), "idempotent_replay": True}
+        if draft.expected_version is None:
+            raise HTTPException(428, "Updating a concept link requires expected_version")
+        saved = await patch_record(
+            db,
+            collection="concept_relations",
+            owner_id=owner_id,
+            external_id=relation_id,
+            patch={**content, "revision_reason": "Concept relationship updated"},
+            expected_version=draft.expected_version,
+        )
+        return {**to_api(saved), "idempotent_replay": False}
+    if draft.expected_version is not None:
+        raise HTTPException(409, "Concept link does not exist for the expected version")
+    saved = (
+        await upsert_records(
+            db,
+            collection="concept_relations",
+            owner_id=owner_id,
+            items=[{**content, "revision_reason": "Concept relationship created"}],
+        )
+    )[0]
+    return {**to_api(saved), "idempotent_replay": False}
 
 
 async def revise_insight(

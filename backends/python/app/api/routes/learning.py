@@ -5,9 +5,11 @@ from fastapi import APIRouter, Query
 from app.api.deps import CurrentUser, DbDep, SettingsDep
 from app.services.learning_library import (
     CaptureRequest,
+    ConceptLinkDraft,
     InsightRevision,
     capture_learning,
     learning_detail,
+    link_concepts,
     revise_insight,
     search_learning,
 )
@@ -22,6 +24,15 @@ async def save_capture(
     result = await capture_learning(
         db, owner_id=identity.user_id, request=payload, app_url=settings.app_url
     )
+    await db.commit()
+    return result
+
+
+@router.post("/links")
+async def create_or_update_link(
+    payload: ConceptLinkDraft, identity: CurrentUser, db: DbDep
+) -> dict:
+    result = await link_concepts(db, owner_id=identity.user_id, draft=payload)
     await db.commit()
     return result
 

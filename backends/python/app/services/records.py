@@ -31,6 +31,7 @@ COLLECTIONS = frozenset(
         "learning_insights",
         "learning_items",
         "concept_pages",
+        "concept_relations",
         "source_captures",
         "plugin_receipts",
         "workflow_records",
@@ -70,6 +71,7 @@ IMMUTABLE_COLLECTIONS = frozenset(
 DOMAIN_MANAGED_COLLECTIONS = frozenset(
     {
         "concept_pages",
+        "concept_relations",
         "learning_insights",
         "source_captures",
         "plugin_receipts",

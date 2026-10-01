@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, BookOpenText, ChevronRight, Search, Save } from 'lucide-react';
 import PageHeader from '@/components/layout/PageHeader';
+import ConceptLinks, { type ConceptLink } from '@/components/learning/ConceptLinks';
 import { backendConfig } from '@/lib/backend-config';
 import { apiRequest } from '@/lib/fastapi-client';
 import './learning-library.css';
@@ -58,6 +59,7 @@ type Detail = {
   complete: boolean;
   page_history?: Array<{ version: number; recorded_at?: string }>;
   insight_history?: Record<string, Array<{ version: number; revision_reason?: string; full_explanation?: string }>>;
+  links?: ConceptLink[];
 };
 
 function ErrorLine({ error }: { error: string | null }) {
@@ -289,8 +291,13 @@ export default function LearningLibrary() {
             </article>)}
             <section className="library-provenance"><h3>Sources</h3>{detail.sources.map((capture) => capture.sources.map((source, index) => {
               const href = safeSourceHref(source.url);
-              return <div key={`${capture.id}-${index}`} className="library-source"><strong>{source.title}</strong><span>{source.kind} / saved {new Date(capture.captured_at).toLocaleDateString()}</span>{href && <a href={href} target="_blank" rel="noreferrer">Open source</a>}{source.excerpt && <p>{source.excerpt}</p>}</div>;
+            return <div key={`${capture.id}-${index}`} className="library-source"><strong>{source.title}</strong><span>{source.kind} / saved {new Date(capture.captured_at).toLocaleDateString()}</span>{href && <a href={href} target="_blank" rel="noreferrer">Open source</a>}{source.excerpt && <p>{source.excerpt}</p>}</div>;
             }))}</section>
+            <ConceptLinks
+              conceptId={detail.page.id}
+              links={detail.links ?? []}
+              onChanged={() => loadDetail(detail.page.id, showHistory)}
+            />
             <button className="library-text-button" onClick={() => setShowHistory(!showHistory)}>{showHistory ? 'Hide page history' : 'Show page history'}</button>
             {showHistory && <div className="library-history">
               <p>Topic page: {detail.page_history?.map((item) => `v${item.version}`).join(', ')}</p>

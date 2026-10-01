@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from dataclasses import replace
-from uuid import uuid4
 
 from fastapi import HTTPException
 from sqlalchemy import func, select
@@ -27,13 +26,11 @@ async def resolve_identity(db: AsyncSession, identity: Identity) -> Identity:
         )
     )
     if mapping is None:
-        # A deployment made before this identity boundary stored the provider subject
-        # directly as users.id. Preserve those ownership links during the transition.
+        # Preserve legacy rows that used the provider subject as the user id, but
+        # never provision a new HETU account just because a provider session exists.
         user = await db.get(User, subject)
         if user is None:
-            user = User(id=str(uuid4()))
-            db.add(user)
-            await db.flush()
+            raise HTTPException(status_code=403, detail="This account is not authorized")
         mapping = UserIdentity(user_id=user.id, provider=provider, subject=subject)
         db.add(mapping)
     else:

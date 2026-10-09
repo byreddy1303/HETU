@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+import math
+import time
+from datetime import date
 from typing import Any
 from urllib.parse import urlparse
 
@@ -48,6 +51,14 @@ from app.services.learning_library import (
 )
 from app.services.pyq_catalog import catalog_question, search_catalog
 from app.services.pyq_practice import PyqAttemptDraft, submit_pyq_attempt
+from app.services.revision_pack import (
+    PackDraft,
+    PackOptions,
+    build_pack,
+    get_saved_pack,
+    list_saved_packs,
+    save_pack,
+)
 from app.services.section_context import (
     SECTION_COLLECTIONS,
 )
@@ -105,6 +116,21 @@ class ClerkOAuthVerifier:
         if not state.is_signed_in:
             return None
         claims = state.payload or {}
+        if not isinstance(claims, dict):
+            return None
+        # Clerk's opaque-token verification response uses expiration, not JWT exp.
+        # The installed SDK marks a successful verification response signed in;
+        # revoked and expired responses must still be rejected here.
+        expiration = claims.get("expiration")
+        if (
+            claims.get("revoked") is not False
+            or claims.get("expired") is not False
+            or isinstance(expiration, bool)
+            or not isinstance(expiration, (int, float))
+            or not math.isfinite(expiration)
+            or expiration <= time.time()
+        ):
+            return None
         subject = claims.get("subject")
         client_id = claims.get("client_id")
         raw_scopes = claims.get("scopes", [])
@@ -129,7 +155,7 @@ class ClerkOAuthVerifier:
             scopes=scopes,
             subject=subject,
             resource=self.settings.mcp_resource_url,
-            expires_at=claims.get("exp") if isinstance(claims.get("exp"), int) else None,
+            expires_at=int(expiration),
             claims=claims,
         )
 
@@ -143,7 +169,9 @@ async def _user_id(db: AsyncSession, required_scope: str) -> str:
             UserIdentity.provider == "clerk", UserIdentity.subject == access.subject
         )
     )
-    user_id = mapping.user_id if mapping else access.subject
+    if mapping is None:
+        raise HTTPException(403, "Connected identity has no HETU account mapping")
+    user_id = mapping.user_id
     user = await db.get(User, user_id)
     if user is None or user.deleted_at is not None:
         raise HTTPException(403, "Connected HETU account is unavailable")
@@ -243,6 +271,10 @@ def create_mcp_server(settings: Settings) -> MCPServer:
                 "pyq.search_catalog",
                 "pyq.question_detail",
                 "pyq.submit_answer",
+                "revision_pack.build",
+                "revision_pack.save",
+                "revision_pack.list",
+                "revision_pack.detail",
             ],
             "unavailable": [
                 "production data cutover",
@@ -650,5 +682,60 @@ def create_mcp_server(settings: Settings) -> MCPServer:
             )
             await db.commit()
             return result
+
+    @server.tool(
+        description=(
+            "Assemble a sourced revision pack from saved discussions, due concept recall, "
+            "formulas, recognition cues, repeated mistakes and priority Journal questions. "
+            "Use the account timezone unless as_of is supplied. Returns text for export, "
+            "source versions, linked full explanations and explicit completeness. "
+            "A sheet does not record practice or award mastery."
+        ),
+        annotations=ToolAnnotations(read_only_hint=True),
+        meta=_security(READ_SCOPE),
+    )
+    async def build_revision_pack(
+        as_of: date | None = None, subject: str | None = None, limit: int = 10
+    ) -> dict[str, Any]:
+        options = PackOptions(as_of=as_of, subject=subject, limit=limit)
+        async with get_session_factory()() as db:
+            user_id = await _user_id(db, READ_SCOPE)
+            return await build_pack(db, owner_id=user_id, options=options, app_url=settings.app_url)
+
+    @server.tool(
+        description=(
+            "Save a revision pack snapshot with its evidence versions and an app link. "
+            "Reuse the idempotency key after an interrupted response. An optional preview "
+            "content hash detects changed evidence. Does not create attempts or schedules."
+        ),
+        annotations=ToolAnnotations(idempotent_hint=True),
+        meta=_security(WRITE_SCOPE),
+    )
+    async def save_revision_pack(draft: PackDraft) -> dict[str, Any]:
+        async with get_session_factory()() as db:
+            user_id = await _user_id(db, WRITE_SCOPE)
+            result = await save_pack(db, owner_id=user_id, draft=draft, app_url=settings.app_url)
+            await db.commit()
+            return result
+
+    @server.tool(
+        description="List the connected learner's saved revision pack snapshots and links.",
+        annotations=ToolAnnotations(read_only_hint=True),
+        meta=_security(READ_SCOPE),
+    )
+    async def list_revision_packs(limit: int = 25, offset: int = 0) -> dict[str, Any]:
+        async with get_session_factory()() as db:
+            user_id = await _user_id(db, READ_SCOPE)
+            return await list_saved_packs(db, owner_id=user_id, limit=limit, offset=offset)
+
+    @server.tool(
+        description="Retrieve a saved revision pack, source versions, app links and export text.",
+        annotations=ToolAnnotations(read_only_hint=True),
+        meta=_security(READ_SCOPE),
+    )
+    async def get_revision_pack(pack_id: str) -> dict[str, Any]:
+        async with get_session_factory()() as db:
+            user_id = await _user_id(db, READ_SCOPE)
+            return await get_saved_pack(db, owner_id=user_id, pack_id=pack_id)
 
     return server

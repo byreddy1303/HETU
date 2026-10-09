@@ -24,8 +24,11 @@ operator review remain mandatory. **The replacement is not cleared for cutover.*
 - R2 deletion only hides metadata. Restore verifies the retained object. Upload
   signatures require `If-None-Match: *`, preventing upload-URL replay overwrites.
   Invalid upload completion does not erase the object. Downloads are private.
-- Production imports and destructive downgrade of the preservation migration
-  are disabled. Builds and deploys never execute database migrations.
+- The old partial importer refuses `--apply`; the newer COPY-dump importer
+  validates source tables, preserves owner IDs, reconciles supported mutable
+  rows, and records source hashes/counts in an import ledger. Destructive
+  downgrade of the preservation migration is disabled. Builds and deploys never
+  execute database migrations or source imports.
 
 ## Required before live writes
 
@@ -49,13 +52,20 @@ production secrets. This is regression protection, not a production backup job.
    SHA-256 inventory of object content. An ETag is not always a content checksum.
 4. Schedule encrypted daily full backups off-account, monitor failures and age,
    and run monthly isolated restore drills. Select and document RPO/RTO; no
-   production backup schedule has been configured by this change.
+   an encrypted production backup workflow was separately implemented. Public
+   October 6–8 job results show successful encrypted upload/download verification.
+   Independent production restore, backup-age monitoring and retention evidence
+   still require verification; those job results alone do not pass this gate.
 5. Run the complete migration inventory: identities, profile fields, private
    records, shared relationships/chat, invites, settings, attachments and jobs.
-   Current importer is a **partial dry-run audit**, not a complete migration.
+   The real COPY-dump importer supersedes the partial dry-run audit. Verify the
+   latest source dump, ledger counts, retained history, private object inventory,
+   and Clerk-to-internal-owner mapping against real accounts.
 6. Verify all frontend/native contracts against the Python service. The Clerk
-   adapter/domain port in `experimental/` has known security/parity blockers.
-   Do not enable it merely because the service health check is reachable.
+   runtime has now been separately switched to Python and the old experimental
+   adapter is retired. Preserve evidence for canonical scoring, recovery,
+   notifications, sharing and native behavior. A frontend cutover or reachable
+   health check does not establish complete parity or a successful restore.
 
 ## Backup and restore drill
 

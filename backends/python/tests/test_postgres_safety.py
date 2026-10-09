@@ -2,6 +2,7 @@
 
 import asyncio
 import os
+from datetime import date
 from urllib.parse import urlsplit
 from uuid import uuid4
 
@@ -21,6 +22,7 @@ from app.services.learning_library import (
     link_concepts,
 )
 from app.services.records import patch_record, upsert_records
+from app.services.revision_pack import PackDraft, save_pack
 
 URL = os.getenv("HETU_TEST_DATABASE_URL")
 if URL:
@@ -28,6 +30,73 @@ if URL:
     if parsed.hostname not in {"127.0.0.1", "localhost"} or parsed.path != "/hetu_test":
         raise pytest.UsageError("Safety integration tests require local disposable hetu_test")
 pytestmark = pytest.mark.skipif(not URL, reason="Requires disposable migrated PostgreSQL")
+
+
+@pytest.mark.asyncio
+async def test_revision_pack_concurrent_snapshot_creation_and_replay():
+    engine = create_async_engine(URL)
+    factory = async_sessionmaker(engine, expire_on_commit=False)
+    owner = str(uuid4())
+    try:
+        async with factory() as db:
+            db.add(User(id=owner))
+            await db.commit()
+            await upsert_records(
+                db,
+                owner_id=owner,
+                collection="formulas",
+                items=[
+                    {
+                        "id": "pg-pack-formula",
+                        "name": "Original formula",
+                        "next_review": "2026-10-09",
+                    }
+                ],
+            )
+            await db.commit()
+        draft = PackDraft(idempotency_key=f"pg-pack-{owner}", as_of=date(2026, 10, 9))
+
+        async def save():
+            async with factory() as db:
+                receipt = await save_pack(
+                    db, owner_id=owner, draft=draft, app_url="https://hetu.test"
+                )
+                await db.commit()
+                return receipt
+
+        first, second = await asyncio.gather(save(), save())
+        assert first["id"] == second["id"]
+        assert sorted([first["idempotent_replay"], second["idempotent_replay"]]) == [False, True]
+        assert first["snapshot"] == second["snapshot"]
+        async with factory() as db:
+            record = await db.scalar(
+                select(Record).where(
+                    Record.owner_id == owner,
+                    Record.collection == "revision_packs",
+                    Record.external_id == first["id"],
+                )
+            )
+            revisions = (
+                await db.scalars(
+                    select(RecordRevision).where(RecordRevision.record_id == record.id)
+                )
+            ).all()
+            assert len(revisions) == 1 and revisions[0].version == 1
+            await patch_record(
+                db,
+                owner_id=owner,
+                collection="formulas",
+                external_id="pg-pack-formula",
+                expected_version=1,
+                patch={"name": "Later formula"},
+            )
+            await db.commit()
+        replay = await save()
+        assert replay["snapshot"] == first["snapshot"]
+        assert "Original formula" in replay["snapshot"]["text"]
+        assert "Later formula" not in replay["snapshot"]["text"]
+    finally:
+        await engine.dispose()
 
 
 @pytest.mark.asyncio

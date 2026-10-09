@@ -11,6 +11,7 @@ from app.api.routes import (
     pyq_catalog,
     realtime,
     records,
+    revision_pack,
     section_context,
     users,
     webhooks,
@@ -24,6 +25,7 @@ api_router.include_router(access.router, prefix="/access", tags=["access"])
 api_router.include_router(records.router, prefix="/records", tags=["records"])
 api_router.include_router(pyq_catalog.router, prefix="/pyq", tags=["pyq"])
 api_router.include_router(learning.router, prefix="/learning", tags=["learning"])
+api_router.include_router(revision_pack.router, prefix="/revision-pack", tags=["revision-pack"])
 api_router.include_router(workflows.router, prefix="/workflows", tags=["workflows"])
 api_router.include_router(
     concept_reviews.router, prefix="/concept-reviews", tags=["concept-reviews"]

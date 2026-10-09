@@ -3,9 +3,9 @@
 FastAPI + SQLAlchemy/asyncpg + Neon + Clerk + Upstash + R2.
 
 **Status: the authenticated data, sharing, buddy, planner, access-request, and
-realtime compatibility contracts are implemented and tested.** Production stays
-in maintenance mode until existing Supabase identities and rows are reconciled,
-imported, counted, and recovery-tested. Notification delivery and private file
+realtime compatibility contracts are implemented and tested.** The separately
+landed frontend cutover consumes Python; the plugin's production release still
+requires reconciled identities/rows and verified recovery evidence. Notification delivery and private file
 uploads require their provider credentials and runtime workers before those
 features can be enabled.
 
@@ -19,8 +19,9 @@ Builds and deployments do not run migrations or import existing data.
 
 These protections are not a zero-data-loss guarantee. Independent encrypted
 backups, R2 retention, PITR, restricted runtime credentials and recovery drills
-are required before production writes. None has been configured on live services
-by the local tests.
+are required before production writes. Local tests do not configure live services.
+An encrypted production backup workflow now exists; its successful jobs do not
+replace independent restore, object-retention, or restricted-role verification.
 
 ## Local development
 
@@ -78,6 +79,8 @@ origins; never expose database, Clerk backend, R2, or Redis secrets to the brows
 | `/v1/workflows`, `/v1/concept-reviews`, `/v1/sections` | Task briefs, actual recall history, mapped record evidence |
 | `GET /v1/pyq/search`, `GET /v1/pyq/questions/{id}` | Filtered versioned bank search and question detail |
 | `POST /v1/pyq/attempts` | Canonically scored, immutable individual answer receipt |
+| `GET /v1/revision-pack` | Account-timezone revision sheet with saved discussion sources and study evidence |
+| `POST/GET /v1/revision-pack/saved`, `GET /v1/revision-pack/saved/{id}` | Retry-safe immutable snapshots, list, and detail |
 
 An existing changed record requires `expected_version`: missing returns 428,
 stale returns 409. Identical upserts are retry-safe no-ops. Tombstones require
@@ -98,13 +101,14 @@ must be the canonical resource identifier advertised in OAuth protected resource
 metadata. Hosted connections require HTTPS. The Clerk OAuth application must
 issue `hetu:read` and `hetu:write` scopes and carry that resource identifier in
 the verified token audience. Tokens lacking an exact audience, approved client,
-required scope, or user subject are rejected. MCP tools resolve the authenticated
+required scope, or user subject are rejected. Opaque tokens must have explicit
+non-revoked/non-expired flags and a finite future Clerk `expiration`. MCP tools resolve the authenticated
 Clerk subject to HETU's internal owner ID; callers cannot supply another owner.
 
 The MCP server currently provides sourced learning capture/retrieval/revision,
 owner-checked concept links (related ideas, contrasts, extensions, and acyclic
 prerequisites), versioned connections to Journal/formula/pattern/trigger/practice/review evidence, durable task briefs, concept recall responses, versioned PYQ
-search and individual answer submission, and explicitly partial record context
+search and individual answer submission, sourced revision pack build/save/list/detail, and explicitly partial record context
 for mapped sections.
 PYQ detail hides its key by default; a quarantined key is never exposed. The
 bundled local plugin is under
@@ -117,8 +121,8 @@ complete migration, and live OAuth reconnection remain release work tracked in
 ## Vercel
 
 Project: **hetu-python-api**. GitHub root directory: **backends/python**.
-The existing **hetu** Vite project remains separate. It switches only when
-`VITE_BACKEND=fastapi` is explicitly configured; there is no silent fallback.
+The existing **hetu** Vite project remains separate and now uses the Python API
+runtime. Its Clerk frontend requests use the configured Python proxy.
 
 Settings detect the Vercel deployment environment: Production uses `production`
 and Preview uses `staging`. Both default to maintenance mode unless
@@ -155,4 +159,7 @@ alembic check
 and verifies a separately restored database. See DATA_SAFETY for commands.
 `scripts/import_supabase.py` remains dry-run auditing only; `--apply` refuses to
 run until shared-data, identity and attachment migration is completed. This is
-an intentional data-loss barrier, not a deploy-time migration.
+an intentional data-loss barrier, not a deploy-time migration. The newer
+`app/services/source_import.py` imports audited COPY dumps and records their
+hash/count ledger. Verify real-owner and source-row reconciliation separately;
+neither an import script nor an import receipt alone clears the release gates.

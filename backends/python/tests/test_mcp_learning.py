@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import time
+
 import pytest
 from httpx import ASGITransport, AsyncClient
 from mcp.server.auth.provider import AccessToken
@@ -31,8 +33,13 @@ async def test_oauth_mcp_transport_exposes_and_executes_learning_workflow(monkey
         await connection.run_sync(Base.metadata.create_all)
     factory = async_sessionmaker(engine, expire_on_commit=False)
     async with factory() as db:
-        db.add_all([User(id="internal_user"), User(id="user_other")])
-        db.add(UserIdentity(user_id="internal_user", provider="clerk", subject="user_mcp"))
+        db.add_all([User(id="internal_user"), User(id="user_other"), User(id="user_unmapped")])
+        db.add_all(
+            [
+                UserIdentity(user_id="internal_user", provider="clerk", subject="user_mcp"),
+                UserIdentity(user_id="user_other", provider="clerk", subject="user_other"),
+            ]
+        )
         catalog_rows, _ = prepare_catalog_rows([sample_question()], set())
         db.add(
             PyqBank(
@@ -57,12 +64,14 @@ async def test_oauth_mcp_transport_exposes_and_executes_learning_workflow(monkey
     )
 
     async def fake_verify(self, token: str):
-        if token not in {"oat_one", "oat_other", "oat_read"}:
+        if token not in {"oat_one", "oat_other", "oat_read", "oat_unmapped"}:
             return None
         return AccessToken(
             token=token,
             client_id="https://chatgpt.com/oauth/client.json",
-            subject="user_other" if token == "oat_other" else "user_mcp",
+            subject={"oat_other": "user_other", "oat_unmapped": "user_unmapped"}.get(
+                token, "user_mcp"
+            ),
             scopes=["hetu:read"] if token == "oat_read" else ["hetu:read", "hetu:write"],
             resource=settings.mcp_resource_url,
         )
@@ -94,6 +103,10 @@ async def test_oauth_mcp_transport_exposes_and_executes_learning_workflow(monkey
             anonymous = await call(None, "tools/list", {}, 1)
             assert anonymous.status_code == 401
             assert "resource_metadata=" in anonymous.headers["www-authenticate"]
+            unmapped = await call(
+                "oat_unmapped", "tools/call", {"name": "get_profile", "arguments": {}}, 101
+            )
+            assert unmapped.json()["result"]["isError"] is True
             listed = await call("oat_one", "tools/list", {}, 2)
             assert listed.status_code == 200
             tools = {item["name"]: item for item in listed.json()["result"]["tools"]}
@@ -169,6 +182,53 @@ async def test_oauth_mcp_transport_exposes_and_executes_learning_workflow(monkey
             )
             assert denied_evidence.json()["result"]["isError"] is True
 
+            preview = await call(
+                "oat_one",
+                "tools/call",
+                {"name": "build_revision_pack", "arguments": {"as_of": "2026-10-09"}},
+                306,
+            )
+            pack = preview.json()["result"]["structuredContent"]
+            assert pack["sections"]["saved_concepts"][0]["id"] == concept_id
+            assert (
+                pack["sections"]["saved_concepts"][0]["evidence_links"][0]["record"]["id"]
+                == "bayes-formula"
+            )
+            pack_draft = {
+                "idempotency_key": "mcp-revision-pack",
+                "as_of": "2026-10-09",
+                "expected_content_hash": pack["content_hash"],
+            }
+            saved_pack = await call(
+                "oat_one",
+                "tools/call",
+                {"name": "save_revision_pack", "arguments": {"draft": pack_draft}},
+                307,
+            )
+            assert saved_pack.json()["result"].get("isError") is not True
+            pack_id = saved_pack.json()["result"]["structuredContent"]["id"]
+            retried_pack = await call(
+                "oat_one",
+                "tools/call",
+                {"name": "save_revision_pack", "arguments": {"draft": pack_draft}},
+                308,
+            )
+            assert retried_pack.json()["result"]["structuredContent"]["idempotent_replay"] is True
+            forbidden_pack = await call(
+                "oat_read",
+                "tools/call",
+                {"name": "save_revision_pack", "arguments": {"draft": pack_draft}},
+                309,
+            )
+            assert forbidden_pack.json()["result"]["isError"] is True
+            other_pack = await call(
+                "oat_other",
+                "tools/call",
+                {"name": "get_revision_pack", "arguments": {"pack_id": pack_id}},
+                310,
+            )
+            assert other_pack.json()["result"]["isError"] is True
+
             second_capture = capture("mcp-save-second-concept")
             second_capture["insights"][0].update(
                 topic="Conditional probability",
@@ -232,6 +292,9 @@ async def test_oauth_mcp_transport_exposes_and_executes_learning_workflow(monkey
                     assert displayed.status_code == 200, displayed.text
                     assert displayed.json()["page"]["id"] == concept_id
                     assert displayed.json()["insights"][0]["full_explanation"]
+                    pack_display = await api_client.get(f"/v1/revision-pack/saved/{pack_id}")
+                    assert pack_display.status_code == 200, pack_display.text
+                    assert pack_display.json()["snapshot"]["content_hash"] == pack["content_hash"]
             finally:
                 app.dependency_overrides.clear()
 
@@ -329,13 +392,33 @@ async def test_clerk_verifier_requires_allowed_client_and_user_subject(monkeypat
         "client_id": "https://chatgpt.com/oauth/client.json",
         "scopes": ["hetu:read", "hetu:write"],
         "aud": "https://api.example.test/mcp",
+        "revoked": False,
+        "expired": False,
+        "expiration": int(time.time()) + 3600,
     }
     monkeypatch.setattr(
         "app.mcp_server.authenticate_request",
         lambda request, options: SimpleNamespace(is_signed_in=True, payload=payload),
     )
     verifier = ClerkOAuthVerifier(settings)
-    assert (await verifier.verify_token("oat_123")).subject == "user_one"
+    verified = await verifier.verify_token("oat_123")
+    assert verified.subject == "user_one"
+    assert verified.expires_at == payload["expiration"]
+    for field, invalid in [
+        ("revoked", True),
+        ("expired", True),
+        ("expiration", 1),
+        ("expiration", None),
+        ("expiration", True),
+        ("expiration", float("nan")),
+        ("expiration", float("inf")),
+        ("revoked", None),
+        ("expired", None),
+    ]:
+        old = payload[field]
+        payload[field] = invalid
+        assert await verifier.verify_token("oat_123") is None
+        payload[field] = old
     payload["client_id"] = "https://untrusted.example/client.json"
     assert await verifier.verify_token("oat_123") is None
     payload["client_id"] = "https://chatgpt.com/oauth/client.json"

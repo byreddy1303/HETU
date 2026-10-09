@@ -36,6 +36,7 @@ COLLECTIONS = frozenset(
         "plugin_receipts",
         "workflow_records",
         "concept_reviews",
+        "revision_packs",
         "llm_usage_daily",
         "mock_tests",
         "notification_action_tokens",
@@ -66,7 +67,7 @@ COLLECTIONS = frozenset(
     }
 )
 IMMUTABLE_COLLECTIONS = frozenset(
-    {"learning_events", "pyq_attempts", "source_captures", "plugin_receipts"}
+    {"learning_events", "pyq_attempts", "source_captures", "plugin_receipts", "revision_packs"}
 )
 DOMAIN_MANAGED_COLLECTIONS = frozenset(
     {
@@ -78,6 +79,7 @@ DOMAIN_MANAGED_COLLECTIONS = frozenset(
         "pyq_attempts",
         "workflow_records",
         "concept_reviews",
+        "revision_packs",
     }
 )
 RESERVED_FIELDS = frozenset(

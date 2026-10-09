@@ -1,5 +1,5 @@
 // /settings — settings that actually change day-to-day behaviour. Signed-in
-// preferences, resumable drafts, and profile fields live in Supabase. The
+// preferences, resumable drafts, and profile fields live in Postgres. The
 // database is the single source of truth; this page never touches a local DB.
 import { useEffect, useRef, useState } from 'react';
 import {
@@ -33,7 +33,7 @@ import {
   type Preferences
 } from '@/stores/prefs';
 import type { ThemeMode } from '@/lib/theme';
-import { supabase, supabaseConfigured } from '@/lib/supabase';
+import { apiClient, apiConfigured } from '@/lib/api-client';
 import { backendConfig } from '@/lib/backend-config';
 import {
   INVITE_TTL_DAYS,
@@ -550,7 +550,7 @@ function ProfileCard({
         aside={
           <div className="flex items-center gap-2">
             <Badge tone={sandbox ? 'warn' : 'neutral'}>
-              {sandbox ? 'sandbox' : supabaseConfigured ? 'signed in' : 'no auth'}
+              {sandbox ? 'sandbox' : apiConfigured ? 'signed in' : 'no auth'}
             </Badge>
             {dirtyCount > 0 && <Badge tone="warn">{dirtyCount} unsaved</Badge>}
           </div>
@@ -714,7 +714,7 @@ function InvitesCard({ userId, sandbox }: { userId: string | null; sandbox: bool
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (sandbox || !supabaseConfigured || !userId) {
+    if (sandbox || !apiConfigured || !userId) {
       setInvites([]);
       return;
     }
@@ -724,7 +724,7 @@ function InvitesCard({ userId, sandbox }: { userId: string | null; sandbox: bool
   async function reload() {
     if (!userId) return;
     setLoading(true);
-    const { data, error } = await supabase
+    const { data, error } = await apiClient
       .from('invites')
       .select('*')
       .eq('issued_by', userId)
@@ -744,7 +744,7 @@ function InvitesCard({ userId, sandbox }: { userId: string | null; sandbox: bool
     const token = uuid().replace(/-/g, '').slice(0, 24);
     const expiresAt = new Date();
     expiresAt.setUTCDate(expiresAt.getUTCDate() + INVITE_TTL_DAYS);
-    const { error } = await supabase.from('invites').insert({
+    const { error } = await apiClient.from('invites').insert({
       id: uuid(),
       token,
       issued_by: userId,
@@ -758,7 +758,7 @@ function InvitesCard({ userId, sandbox }: { userId: string | null; sandbox: bool
     void reload();
   }
 
-  if (sandbox || !supabaseConfigured) {
+  if (sandbox || !apiConfigured) {
     return (
       <Card>
         <CardHeader title="Invites" />
@@ -812,7 +812,7 @@ function InvitesCard({ userId, sandbox }: { userId: string | null; sandbox: bool
       ) : (
         <ul className="divide-y divide-border">
           {invites.map((inv) => {
-            const url = `${window.location.origin}/auth?invite=${inv.token}`;
+            const url = `${window.location.origin}/signup?invite=${encodeURIComponent(inv.token)}`;
             const expired = new Date(inv.expires_at) < new Date();
             const used = !!inv.used_by;
             return (

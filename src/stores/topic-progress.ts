@@ -16,7 +16,7 @@ import type { TopicProgressRow } from '@/types';
 export type TopicCompletions = Record<string, string>;
 
 interface TopicProgressState {
-  /** In-memory view cache only. Supabase/Dexie rows are the source of truth. */
+  /** In-memory view cache only. online database rows are the source of truth. */
   byUser: Record<string, TopicCompletions>;
   setCompleted: (userId: string, topicId: string, completed: boolean) => Promise<void>;
 }
@@ -229,7 +229,7 @@ export async function syncTopicProgressFromDb(userId: string): Promise<void> {
 
   // Persist everything missing/newer in ONE batched write. The old per-key
   // `put` loop turned a stale offline-era cache into hundreds of sequential
-  // supabase upserts, each notifying every live query and freezing the page.
+  // API upserts, each notifying every live query and freezing the page.
   const pending: Array<{ name: SyncedTableName; row: TopicProgressRow }> = [];
   for (const completionsKey of Object.keys(legacy)) {
     const parsed = splitTopicProgressId(completionsKey);

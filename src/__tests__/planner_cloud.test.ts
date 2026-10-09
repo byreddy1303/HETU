@@ -23,9 +23,9 @@ const mocks = vi.hoisted(() => {
   return { from: vi.fn(), rpc: vi.fn(), query };
 });
 
-vi.mock('@/lib/supabase', () => ({
-  supabase: { from: mocks.from, rpc: mocks.rpc },
-  supabaseConfigured: true
+vi.mock('@/lib/api-client', () => ({
+  apiClient: { from: mocks.from, rpc: mocks.rpc },
+  apiConfigured: true
 }));
 
 import {

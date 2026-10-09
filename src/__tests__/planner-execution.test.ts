@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import type { User } from '@supabase/supabase-js';
+import type { ApiUser as User } from '@/lib/fastapi-client';
 import { db } from '@/lib/db';
 import { emptyDayPlan, loadDayPlan, saveDayPlan, type StudySession } from '@/lib/planner-storage';
 import {

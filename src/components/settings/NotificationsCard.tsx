@@ -7,7 +7,7 @@ import { Card, CardBody, CardHeader } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import NotificationTimeEditor from '@/components/settings/NotificationTimeEditor';
 import { TIMEZONES } from '@/lib/constants';
-import { supabase, supabaseConfigured } from '@/lib/supabase';
+import { apiClient, apiConfigured } from '@/lib/api-client';
 import { cn } from '@/lib/utils';
 import { useAuthStore, type ProfilePatch } from '@/stores/auth';
 import { useUiStore } from '@/stores/ui';
@@ -34,9 +34,9 @@ export default function NotificationsCard({ profile, sandbox }: Props) {
   const [sending, setSending] = useState(false);
 
   const loadTelegram = useCallback(async () => {
-    if (!profile || sandbox || !supabaseConfigured) return;
+    if (!profile || sandbox || !apiConfigured) return;
     setLoadingTelegram(true);
-    const { data, error } = await supabase
+    const { data, error } = await apiClient
       .from('telegram_subscriptions')
       .select('*')
       .eq('user_id', profile.id)
@@ -79,7 +79,7 @@ export default function NotificationsCard({ profile, sandbox }: Props) {
     ? `@${telegram.chat_username}`
     : connected
       ? 'Private Telegram chat'
-      : sandbox || !supabaseConfigured
+      : sandbox || !apiConfigured
         ? 'Sandbox mode (time saved locally)'
         : 'Not connected';
 
@@ -98,7 +98,7 @@ export default function NotificationsCard({ profile, sandbox }: Props) {
       pushToast('Connect Telegram before turning on daily delivery.', 'neutral');
       return;
     }
-    const { error } = await supabase.rpc('set_telegram_digest_enabled', {
+    const { error } = await apiClient.rpc('set_telegram_digest_enabled', {
       wants_enabled: value
     });
     if (error) {
@@ -113,12 +113,12 @@ export default function NotificationsCard({ profile, sandbox }: Props) {
   }
 
   async function beginConnection() {
-    if (sandbox || !supabaseConfigured) {
-      pushToast('Telegram connection requires connecting to Supabase backend.', 'neutral');
+    if (sandbox || !apiConfigured) {
+      pushToast('Telegram connection requires connecting to Postgres backend.', 'neutral');
       return;
     }
     setConnecting(true);
-    const { data, error } = await supabase.rpc('begin_telegram_connection');
+    const { data, error } = await apiClient.rpc('begin_telegram_connection');
     setConnecting(false);
     if (error) {
       pushToast(error.message, 'neutral');
@@ -134,7 +134,7 @@ export default function NotificationsCard({ profile, sandbox }: Props) {
   }
 
   async function disconnectTelegram() {
-    const { error } = await supabase.rpc('disconnect_telegram');
+    const { error } = await apiClient.rpc('disconnect_telegram');
     if (error) {
       pushToast(error.message, 'neutral');
       return;
@@ -174,7 +174,7 @@ export default function NotificationsCard({ profile, sandbox }: Props) {
   async function sendTest() {
     if (!profile || !connected || !telegram?.enabled) return;
     setSending(true);
-    const { data, error } = await supabase.functions.invoke('daily-digest', {
+    const { data, error } = await apiClient.functions.invoke('daily-digest', {
       body: { user_id: profile.id, force: true, test: true, channel: 'telegram' }
     });
     setSending(false);

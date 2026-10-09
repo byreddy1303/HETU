@@ -67,7 +67,7 @@ const manifest = normalizePyqManifest({
       slug: question.subjectSlug,
       label: question.subject,
       count: 3,
-      file: '/pyq/discrete-mathematics.json',
+      file: '/api/v1/pyq/subjects/discrete-mathematics',
       topics: [{ slug: 'logic', label: 'Logic', count: 3 }]
     }
   ],
@@ -115,8 +115,8 @@ describe('Custom PYQ setup and Rishi catalog visibility', () => {
     );
     vi.spyOn(globalThis, 'fetch').mockImplementation(async (input) => {
       const url = new URL(String(input), 'https://hetu.test');
-      if (url.pathname === '/pyq/manifest.json') return Response.json(manifest);
-      if (url.pathname === '/pyq/discrete-mathematics.json')
+      if (url.pathname === '/api/v1/pyq/manifest') return Response.json(manifest);
+      if (url.pathname === '/api/v1/pyq/subjects/discrete-mathematics')
         return Response.json({
           bankVersion: manifest.bankVersion,
           subject: question.subject,
@@ -387,4 +387,20 @@ describe('Custom PYQ setup and Rishi catalog visibility', () => {
     expect(session.config.recommendationPreset).toBe('custom');
     expect(session.question_uids).toEqual([recentQuestion.id]);
   });
+});
+
+
+// Exercise the Python catalog contract while keeping domain writes in fixture RAM.
+vi.mock('@/lib/backend-config', async (importOriginal) => ({
+  ...await importOriginal<typeof import('@/lib/backend-config')>(),
+  backendConfig: { backend: 'fastapi', fastapi: true, error: null, apiUrl: '/api', clerkKey: 'pk_test_fixture' }
+}));
+vi.mock('@/lib/api-client', async () => ({
+  apiConfigured: false,
+  apiClient: (await import('@/lib/fastapi-client')).fastapiClient
+}));
+beforeEach(async () => {
+  const { configureClerkRuntime } = await import('@/lib/fastapi-client');
+  configureClerkRuntime({ loaded: true, user: { id: 'test-catalog-reader' },
+    getToken: async () => 'test-session', signOut: async () => {} });
 });

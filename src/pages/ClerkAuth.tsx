@@ -1,5 +1,5 @@
 import { SignIn } from '@clerk/react';
-import { Navigate, useSearchParams } from 'react-router-dom';
+import { Link, Navigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import Brand from '@/components/shared/Brand';
 
@@ -7,6 +7,8 @@ export default function ClerkAuth() {
   const { status } = useAuth();
   const [params] = useSearchParams();
   if (status === 'signed_in') return <Navigate to="/" replace />;
+  const invite = params.get('invite');
+  if (invite) return <Navigate to={`/signup?invite=${encodeURIComponent(invite)}`} replace />;
   return (
     <main className="flex min-h-dvh flex-col items-center justify-center gap-6 bg-bg p-6">
       <Brand size="sm" />
@@ -14,6 +16,7 @@ export default function ClerkAuth() {
         <p role="status" className="text-sm text-text-muted">Account created. Sign in with your new email and password.</p>
       )}
       <SignIn routing="hash" forceRedirectUrl="/" withSignUp={false} />
+      <Link to="/request-access" className="text-sm text-accent underline">Request access</Link>
     </main>
   );
 }

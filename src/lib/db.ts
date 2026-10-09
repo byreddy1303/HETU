@@ -1,4 +1,4 @@
-// Supabase-backed repository. Postgres is the ONLY durable store.
+// Python API repository. Postgres is the ONLY durable store.
 //
 // This module is a RAM-only cache in front of the database. Reads are served
 // from memory after an account hydrate; every write goes straight to Postgres
@@ -9,7 +9,7 @@
 // The public surface is deliberately Dexie-shaped (`db.sessions.where(...)
 // .equals(...).toArray()`) so pages, libs and tests keep their queries
 // unchanged while the backing store moves from IndexedDB to Postgres.
-import { supabase, supabaseConfigured } from '@/lib/supabase';
+import { apiClient, apiConfigured } from '@/lib/api-client';
 import { normalizeMockSubjectScores, normalizeMockTestRow } from '@/lib/mocks';
 import { normalizeSubjectIdentity } from '@/lib/subjects';
 import type {
@@ -52,7 +52,7 @@ interface MetaRow {
   value: unknown;
 }
 
-/** Tables that write through to Supabase, in FK-safe order. */
+/** Tables that write through to Postgres, in FK-safe order. */
 export const SYNCED_TABLES = [
   'sessions',
   'pyq_sessions',
@@ -247,10 +247,10 @@ function isMissingRemoteSchema(error: { message?: string; code?: string } | null
 }
 
 async function upsertRowsRemote(name: SyncedTableName, rows: Row[]): Promise<void> {
-  if (!supabaseConfigured || rows.length === 0) return;
+  if (!apiConfigured || rows.length === 0) return;
   for (const row of rows) noteLocalWrite(name, row.id);
   try {
-    const { error } = await supabase.from(name).upsert(rows.map(toRemote));
+    const { error } = await apiClient.from(name).upsert(rows.map(toRemote));
     if (error) throw error;
   } catch (error) {
     for (const row of rows) forgetLocalWrite(name, row.id);
@@ -266,9 +266,9 @@ async function upsertRowsRemote(name: SyncedTableName, rows: Row[]): Promise<voi
 }
 
 async function deleteRowRemote(name: SyncedTableName, id: string): Promise<void> {
-  if (!supabaseConfigured) return;
+  if (!apiConfigured) return;
   noteLocalWrite(name, id);
-  const { error } = await supabase.from(name).delete().eq('id', id);
+  const { error } = await apiClient.from(name).delete().eq('id', id);
   if (error) {
     forgetLocalWrite(name, id);
     if (isMissingRemoteSchema(error)) {
@@ -594,18 +594,28 @@ export async function hydrateTables(
   userId: string,
   names: readonly SyncedTableName[]
 ): Promise<void> {
-  if (names.length === 0 || !supabaseConfigured) return;
+  if (names.length === 0 || !apiConfigured) return;
   const results = await Promise.all(
     names.map(async (name) => {
-      const { data, error } = await supabase
-        .from(name)
-        .select('*')
-        .eq('user_id', userId)
-        .order('id', { ascending: true });
-      if (error && !isMissingRemoteSchema(error)) {
-        throw new Error(`[db] hydrate failed for ${name}: ${error.message}`);
+      // Question snapshots contain images. Small pages keep existing history
+      // within the hosting response limit, even for image-heavy accounts.
+      const pageSize = name === 'questions' || name === 'pyq_attempts' ? 10 : 100;
+      const rows: Row[] = [];
+      for (let offset = 0; ; offset += pageSize) {
+        const { data, error } = await apiClient
+          .from(name)
+          .select('*')
+          .eq('user_id', userId)
+          .order('id', { ascending: true })
+          .range(offset, offset + pageSize - 1);
+        if (error && !isMissingRemoteSchema(error)) {
+          throw new Error(`[db] hydrate failed for ${name}: ${error.message}`);
+        }
+        const page = (data ?? []) as Row[];
+        rows.push(...page);
+        if (page.length < pageSize) break;
       }
-      return { name, rows: (data ?? []) as Row[] };
+      return { name, rows };
     })
   );
   for (const { name, rows } of results) {
@@ -625,7 +635,7 @@ export async function hydrateTables(
  * loop; the app keeps whatever it already had in memory.
  */
 export async function hydrateAll(userId: string): Promise<void> {
-  if (!supabaseConfigured) {
+  if (!apiConfigured) {
     await clearLocalData();
     return;
   }

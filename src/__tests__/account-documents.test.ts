@@ -10,9 +10,9 @@ const mocks = vi.hoisted(() => {
   return { from: vi.fn(), query };
 });
 
-vi.mock('@/lib/supabase', () => ({
-  supabase: { from: mocks.from },
-  supabaseConfigured: true
+vi.mock('@/lib/api-client', () => ({
+  apiClient: { from: mocks.from },
+  apiConfigured: true
 }));
 
 import {

@@ -8,19 +8,17 @@ export default defineConfig(({ mode }) => {
   const nativeBuild = mode === 'capacitor';
   const env = loadEnv(mode, process.cwd(), 'VITE_');
 
-  if (nativeBuild) {
+  if (mode !== 'test') {
     let validUrl = false;
     try {
-      const parsed = new URL(env.VITE_SUPABASE_URL ?? '');
-      validUrl = parsed.protocol === 'https:' || parsed.protocol === 'http:';
-    } catch {
-      validUrl = false;
-    }
-
-    if (!validUrl || !env.VITE_SUPABASE_ANON_KEY) {
-      throw new Error(
-        'Native build requires valid VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY values.'
-      );
+      const value = env.VITE_API_URL ?? '';
+      const parsed = new URL(value, nativeBuild ? undefined : 'https://hetu-app.vercel.app');
+      validUrl = ['http:', 'https:'].includes(parsed.protocol) && !parsed.username && !parsed.password
+        && !parsed.search && !parsed.hash && (!nativeBuild || parsed.protocol === 'https:');
+    } catch { /* invalid or missing API origin */ }
+    if ((env.VITE_BACKEND && env.VITE_BACKEND !== 'fastapi') || !env.VITE_API_URL || !validUrl
+      || !/^pk_(test|live)_\S+$/.test(env.VITE_CLERK_PUBLISHABLE_KEY ?? '')) {
+      throw new Error('HETU requires VITE_BACKEND=fastapi, VITE_API_URL and VITE_CLERK_PUBLISHABLE_KEY. Android requires an absolute HTTPS API URL.');
     }
   }
 
@@ -62,18 +60,6 @@ export default defineConfig(({ mode }) => {
                 cacheName: 'air-pyq-images-v1',
                 expiration: { maxEntries: 800, maxAgeSeconds: 60 * 60 * 24 * 365 }
               }
-            },
-            {
-              urlPattern: ({ url }) =>
-                url.origin === self.location.origin &&
-                url.pathname.startsWith('/pyq/') &&
-                url.pathname.endsWith('.json'),
-              handler: 'NetworkFirst',
-              options: {
-                cacheName: 'air-pyq-data-v5',
-                networkTimeoutSeconds: 5,
-                expiration: { maxEntries: 32, maxAgeSeconds: 60 * 60 * 24 * 30 }
-              }
             }
           ]
         }
@@ -97,8 +83,7 @@ export default defineConfig(({ mode }) => {
     ],
     resolve: {
       alias: {
-        '@': path.resolve(__dirname, './src'),
-        'dexie-react-hooks': path.resolve(__dirname, './src/lib/db-hooks.ts')
+        '@': path.resolve(__dirname, './src')
       }
     },
     server: { port: 5173 }

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { useLiveQuery } from 'dexie-react-hooks';
+import { useLiveQuery } from '@/lib/db-hooks';
 import { Play } from 'lucide-react';
 import type { SessionRow } from '@/types';
 import PageHeader from '@/components/layout/PageHeader';

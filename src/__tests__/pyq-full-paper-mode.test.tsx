@@ -59,7 +59,7 @@ const manifest: PyqManifest = normalizePyqManifest({
       slug: 'operating-systems',
       label: 'Operating Systems',
       count: 65,
-      file: '/pyq/operating-systems.json',
+      file: '/api/v1/pyq/subjects/operating-systems',
       topics: [{ slug: 'processes', label: 'Processes', count: 65 }]
     }
   ]
@@ -86,8 +86,8 @@ describe('authentic PYQ full-paper mode', () => {
     usePyqPreferencesStore.getState().reset();
     vi.spyOn(globalThis, 'fetch').mockImplementation(async (input) => {
       const url = new URL(String(input), 'https://hetu.test');
-      if (url.pathname === '/pyq/manifest.json') return Response.json(manifest);
-      if (url.pathname === '/pyq/operating-systems.json') {
+      if (url.pathname === '/api/v1/pyq/manifest') return Response.json(manifest);
+      if (url.pathname === '/api/v1/pyq/subjects/operating-systems') {
         return Response.json({
           bankVersion: manifest.bankVersion,
           subject: 'Operating Systems',
@@ -182,4 +182,20 @@ describe('authentic PYQ full-paper mode', () => {
       );
     });
   });
+});
+
+
+// Exercise the Python catalog contract while keeping domain writes in fixture RAM.
+vi.mock('@/lib/backend-config', async (importOriginal) => ({
+  ...await importOriginal<typeof import('@/lib/backend-config')>(),
+  backendConfig: { backend: 'fastapi', fastapi: true, error: null, apiUrl: '/api', clerkKey: 'pk_test_fixture' }
+}));
+vi.mock('@/lib/api-client', async () => ({
+  apiConfigured: false,
+  apiClient: (await import('@/lib/fastapi-client')).fastapiClient
+}));
+beforeEach(async () => {
+  const { configureClerkRuntime } = await import('@/lib/fastapi-client');
+  configureClerkRuntime({ loaded: true, user: { id: 'test-catalog-reader' },
+    getToken: async () => 'test-session', signOut: async () => {} });
 });

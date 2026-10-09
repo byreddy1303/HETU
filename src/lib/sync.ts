@@ -14,7 +14,7 @@ import {
 } from '@/lib/db';
 import { SYNCED_TABLES } from '@/lib/db';
 import type { SyncedTableName } from '@/lib/db';
-import { supabase, supabaseConfigured } from '@/lib/supabase';
+import { apiClient, apiConfigured } from '@/lib/api-client';
 import {
   noteSyncDone,
   noteSyncFailure,
@@ -23,8 +23,8 @@ import {
   resetSyncStatus
 } from '@/stores/sync-status';
 
-/** How often the app proves the Postgres round-trip is alive (0.3s). */
-export const SYNC_HEARTBEAT_MS = 300;
+/** Health checks leave the API request budget available for loading and saving study data. */
+export const SYNC_HEARTBEAT_MS = 30_000;
 
 export const clientDeviceId =
   typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
@@ -55,7 +55,7 @@ export function isInitialPullActive(): boolean {
   return hydrateChain !== null && hydrateForUserId !== null;
 }
 
-let syncChannel: ReturnType<typeof supabase.channel> | null = null;
+let syncChannel: ReturnType<typeof apiClient.channel> | null = null;
 
 /** Map a realtime payload table to a RAM-backed synced table, or null. */
 function syncedTable(target: string | undefined): SyncedTableName | null {
@@ -64,12 +64,12 @@ function syncedTable(target: string | undefined): SyncedTableName | null {
 }
 
 function setupRealtimeChannel(userId: string): void {
-  if (!supabaseConfigured || typeof supabase.channel !== 'function') return;
-  if (syncChannel && typeof supabase.removeChannel === 'function') {
-    void supabase.removeChannel(syncChannel);
+  if (!apiConfigured || typeof apiClient.channel !== 'function') return;
+  if (syncChannel && typeof apiClient.removeChannel === 'function') {
+    void apiClient.removeChannel(syncChannel);
     syncChannel = null;
   }
-  syncChannel = supabase.channel(`user-sync:${userId}`);
+  syncChannel = apiClient.channel(`user-sync:${userId}`);
   syncChannel
     .on('broadcast', { event: 'sync_mutation' }, (payload) => {
       const data = payload.payload as { sourceDeviceId?: string; tables?: string[] } | undefined;
@@ -102,8 +102,8 @@ function setupRealtimeChannel(userId: string): void {
 }
 
 function teardownChannel(): void {
-  if (syncChannel && typeof supabase.removeChannel === 'function') {
-    void supabase.removeChannel(syncChannel);
+  if (syncChannel && typeof apiClient.removeChannel === 'function') {
+    void apiClient.removeChannel(syncChannel);
   }
   syncChannel = null;
 }
@@ -111,10 +111,10 @@ function teardownChannel(): void {
 function startHydrate(userId: string, tables?: readonly SyncedTableName[]): Promise<void> {
   hydrateForUserId = userId;
   notifyInitialPullChange();
-  if (supabaseConfigured) noteSyncStarting();
+  if (apiConfigured) noteSyncStarting();
   const operation = (tables && tables.length > 0 ? hydrateTables(userId, tables) : hydrateAll(userId))
     .then(() => {
-      if (!supabaseConfigured) return;
+      if (!apiConfigured) return;
       noteSyncDone();
       noteSyncSuccess();
     })
@@ -122,7 +122,7 @@ function startHydrate(userId: string, tables?: readonly SyncedTableName[]): Prom
       // A hydration failure must never hang a barrier: the app keeps the last
       // in-memory snapshot and surfaces the error to the logs.
       console.warn('[sync] initial hydrate failed; keeping current cache.', error);
-      if (!supabaseConfigured) return;
+      if (!apiConfigured) return;
       noteSyncDone();
       noteSyncFailure(errorMessage(error));
     })
@@ -142,14 +142,14 @@ function errorMessage(error: unknown): string {
 }
 
 /**
- * Prove the Postgres round-trip is alive on a 300ms cadence. This is a
+ * Prove the Postgres round-trip is alive every 30 seconds. This is a
  * deliberately tiny indexed read (a single user row — no screenshots, no full
  * tables), so it never competes with writes; data freshness itself rides on
  * realtime + the write-through path. A tick is skipped while a request is
  * already in flight or the tab is hidden, so requests never stack.
  */
 function startHeartbeat(userId: string): void {
-  if (!supabaseConfigured) return;
+  if (!apiConfigured) return;
   stopHeartbeat();
   heartbeatTimer = setInterval(() => {
     if (typeof document !== 'undefined' && document.visibilityState === 'hidden') return;
@@ -164,10 +164,10 @@ function stopHeartbeat(): void {
 }
 
 async function heartbeat(userId: string): Promise<void> {
-  if (heartbeatInFlight || currentUserId !== userId || !supabaseConfigured) return;
+  if (heartbeatInFlight || currentUserId !== userId || !apiConfigured) return;
   heartbeatInFlight = true;
   try {
-    const { error } = await supabase.from('users').select('id').eq('id', userId).limit(1);
+    const { error } = await apiClient.from('users').select('id').eq('id', userId).limit(1);
     if (error) noteSyncFailure(errorMessage(error));
     else noteSyncSuccess();
   } catch (error) {
@@ -201,7 +201,7 @@ export function isSyncEnabled(): boolean {
 
 /** Start the repository for a signed-in user. Idempotent per user. */
 export function initSync(userId: string): void {
-  if (!supabaseConfigured) return;
+  if (!apiConfigured) return;
   if (currentUserId !== userId) {
     teardownChannel();
     currentUserId = userId;
@@ -250,7 +250,7 @@ export function resumeSync(): void {
 
 /** Notify other devices that tables changed (best-effort realtime ping). */
 export function broadcastSyncMutation(_userId: string, tables: string[]): void {
-  if (!supabaseConfigured || !syncChannel || typeof syncChannel.send !== 'function') return;
+  if (!apiConfigured || !syncChannel || typeof syncChannel.send !== 'function') return;
   void syncChannel
     .send({
       type: 'broadcast',
@@ -275,10 +275,10 @@ export async function writeLocal<T extends { id: string }>(
   try {
     await table(name).put(withSyncStatus(row));
   } catch (error) {
-    if (supabaseConfigured) noteSyncFailure(errorMessage(error));
+    if (apiConfigured) noteSyncFailure(errorMessage(error));
     throw error;
   }
-  if (supabaseConfigured) noteSyncSuccess();
+  if (apiConfigured) noteSyncSuccess();
 }
 
 /** Batch-write rows straight to the database. */
@@ -297,10 +297,10 @@ export async function writeLocalBatch(
       await table(name).bulkPut(targetRows.map(withSyncStatus));
     }
   } catch (error) {
-    if (supabaseConfigured) noteSyncFailure(errorMessage(error));
+    if (apiConfigured) noteSyncFailure(errorMessage(error));
     throw error;
   }
-  if (supabaseConfigured) noteSyncSuccess();
+  if (apiConfigured) noteSyncSuccess();
 }
 
 /** Delete a row from the database. Immutable tables refuse. */
@@ -308,10 +308,10 @@ export async function deleteLocal(name: SyncedTableName, id: string): Promise<vo
   try {
     await table(name).delete(id);
   } catch (error) {
-    if (supabaseConfigured) noteSyncFailure(errorMessage(error));
+    if (apiConfigured) noteSyncFailure(errorMessage(error));
     throw error;
   }
-  if (supabaseConfigured) noteSyncSuccess();
+  if (apiConfigured) noteSyncSuccess();
 }
 
 /** Nothing waits on a background queue anymore — always zero. */

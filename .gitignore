@@ -55,3 +55,7 @@ vite.config.d.ts
 !.env.example
 !.deploy.env.example
 !.env.capacitor.example
+
+# Private migration snapshots, credentials and deployment scratch
+.codex-tmp/
+**/.codex-tmp/

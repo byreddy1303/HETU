@@ -1,9 +1,9 @@
-// Durable Supabase persistence for Planner days. The complete DayPlan lives in
+// Durable Postgres persistence for Planner days. The complete DayPlan lives in
 // planner_day_plans.plan; the duplicated sessions column remains populated for
 // notification functions. The write queue, conflicts archive and DayPlan
 // caches are in-memory this run only — the database is the single source of
 // truth, so clearing this device loses nothing that has been acknowledged.
-import { supabase } from '@/lib/supabase';
+import { apiClient } from '@/lib/api-client';
 import { broadcastSyncMutation } from '@/lib/sync';
 import {
   cacheDayPlanForUser,
@@ -362,7 +362,7 @@ export async function loadCloudDayPlan(
   error: string | null;
 }> {
   try {
-    const { data, error } = await supabase
+    const { data, error } = await apiClient
       .from('planner_day_plans')
       .select('plan_date, sessions, plan, updated_at, revision, deleted_at, last_mutation_id')
       .eq('user_id', userId)
@@ -384,7 +384,7 @@ export async function loadCloudDayPlan(
 /**
  * Load every cloud plan by default so a cleared browser cache can be rebuilt
  * completely. Optional bounds are retained for callers that intentionally need
- * a range. Pagination avoids Supabase's configured per-request row limit.
+ * a range. Pagination avoids the Python API's configured per-request row limit.
  */
 export async function loadCloudDayPlans(
   userId: string,
@@ -400,7 +400,7 @@ export async function loadCloudDayPlans(
 
   try {
     for (let offset = 0; ; offset += CLOUD_PAGE_SIZE) {
-      let query = supabase
+      let query = apiClient
         .from('planner_day_plans')
         .select('plan_date, sessions, plan, updated_at, revision, deleted_at, last_mutation_id')
         .eq('user_id', userId);
@@ -507,7 +507,7 @@ async function applyCloudMutation(
 ): Promise<PlannerMutationOutcome> {
   const plan = write.kind === 'upsert' ? cloneDayPlan(write.plan) : null;
   try {
-    const { data, error } = await supabase.rpc('apply_planner_day_plan_mutation', {
+    const { data, error } = await apiClient.rpc('apply_planner_day_plan_mutation', {
       p_plan_date: write.date,
       p_expected_revision: write.expectedRevision,
       p_mutation_id: write.mutationId,

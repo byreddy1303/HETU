@@ -10,7 +10,7 @@
 //     also editable from the "Recently decided" panel so you can still fix
 //     mistakes days later.
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { useLiveQuery } from 'dexie-react-hooks';
+import { useLiveQuery } from '@/lib/db-hooks';
 import {
   AlertTriangle,
   Check,

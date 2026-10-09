@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { useLiveQuery } from 'dexie-react-hooks';
+import { useLiveQuery } from '@/lib/db-hooks';
 import { ArrowRight, CheckCircle2, Play, Plus, Timer, Trash2, XCircle } from 'lucide-react';
 import PageHeader from '@/components/layout/PageHeader';
 import { Card, CardBody, CardHeader } from '@/components/ui/Card';

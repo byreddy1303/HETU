@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useLiveQuery } from 'dexie-react-hooks';
+import { useLiveQuery } from '@/lib/db-hooks';
 import { ArrowRight, BookOpenCheck, Camera, CheckCircle2, Clock3, ListChecks } from 'lucide-react';
 import PageHeader from '@/components/layout/PageHeader';
 import { Card, CardBody } from '@/components/ui/Card';

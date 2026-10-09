@@ -1,4 +1,4 @@
-// Adapted from experimental/cutover; this module never imports or contacts Supabase.
+// Adapted from experimental/cutover; this module never imports or contacts Postgres.
 import { backendConfig } from '@/lib/backend-config';
 import { createRealtimeClient } from '@/lib/fastapi-realtime';
 
@@ -56,12 +56,54 @@ export function resetClerkRuntime(): void {
   realtime.reset();
 }
 
-async function refreshSession(): Promise<ApiSession | null> {
-  if (!runtime?.loaded) await new Promise<void>((resolve) => readyWaiters.add(resolve));
+export const API_REQUEST_TIMEOUT_MS = 30_000;
+
+function abortable<T>(promise: Promise<T>, signal: AbortSignal): Promise<T> {
+  if (signal.aborted) return Promise.reject(signal.reason);
+  return new Promise<T>((resolve, reject) => {
+    const abort = () => reject(signal.reason);
+    signal.addEventListener('abort', abort, { once: true });
+    promise.then(resolve, reject).finally(() => signal.removeEventListener('abort', abort));
+  });
+}
+
+async function withDeadline<T>(
+  operation: (signal: AbortSignal) => Promise<T>,
+  callerSignal?: AbortSignal | null
+): Promise<T> {
+  const controller = new AbortController();
+  const cancel = () => controller.abort(callerSignal?.reason);
+  callerSignal?.addEventListener('abort', cancel, { once: true });
+  if (callerSignal?.aborted) cancel();
+  const timer = setTimeout(() => controller.abort(Object.assign(new Error(
+    'The request timed out. Check your connection. A save may have completed; refresh before submitting it again.'
+  ), { code: 'REQUEST_TIMEOUT' })), API_REQUEST_TIMEOUT_MS);
+  try {
+    controller.signal.throwIfAborted();
+    return await abortable(operation(controller.signal), controller.signal);
+  } finally {
+    clearTimeout(timer);
+    callerSignal?.removeEventListener('abort', cancel);
+  }
+}
+
+async function refreshSession(requestSignal?: AbortSignal): Promise<ApiSession | null> {
+  if (!requestSignal) return withDeadline((signal) => refreshSession(signal));
+  if (!runtime?.loaded) {
+    let ready!: () => void;
+    const pending = new Promise<void>((resolve) => { ready = resolve; readyWaiters.add(resolve); });
+    try {
+      await abortable(pending, requestSignal);
+    } finally {
+      readyWaiters.delete(ready);
+    }
+  }
+  requestSignal.throwIfAborted();
   const active = runtime;
   const current = generation;
   if (!active?.user) return null;
-  const token = await active.getToken();
+  const token = await abortable(active.getToken(), requestSignal);
+  requestSignal.throwIfAborted();
   if (current !== generation) throw new Error('Authentication changed. Retry the request.');
   if (!token) throw new Error('The session token is unavailable. Please sign in again.');
   session = { access_token: token, refresh_token: '', user: active.user };
@@ -71,24 +113,29 @@ async function refreshSession(): Promise<ApiSession | null> {
 export async function apiRequest<T>(path: string, init: RequestInit = {}, options: { public?: boolean } = {}): Promise<T> {
   if (backendConfig.error || !backendConfig.fastapi) throw new Error(backendConfig.error || 'FastAPI is not selected.');
   if (!path.startsWith('/v1/')) throw new Error('Invalid API path.');
-  const headers = new Headers(init.headers);
-  if (init.body && !headers.has('Content-Type')) headers.set('Content-Type', 'application/json');
-  const current = generation;
-  if (!options.public) {
-    const token = (await refreshSession())?.access_token;
-    if (!token) throw new Error('Sign in first.');
-    headers.set('Authorization', `Bearer ${token}`);
-  }
-  const response = await fetch(`${backendConfig.apiUrl}${path}`, { ...init, headers, cache: 'no-store' });
-  const body = await response.json().catch(() => null);
-  if (!options.public && current !== generation) throw new Error('Authentication changed. Discarding stale response.');
-  if (!response.ok) {
-    const detail = body?.detail;
-    const message = typeof detail === 'string' ? detail : detail?.message ?? body?.error ?? `API request failed (${response.status})`;
-    throw Object.assign(new Error(message), { status: response.status, code: body?.code ?? detail?.code });
-  }
-  if (body === null) throw new Error('Invalid JSON from compatibility API.');
-  return body as T;
+  return withDeadline(async (signal) => {
+    const headers = new Headers(init.headers);
+    if (init.body && !headers.has('Content-Type')) headers.set('Content-Type', 'application/json');
+    const current = generation;
+    if (!options.public) {
+      const token = (await refreshSession(signal))?.access_token;
+      if (!token) throw new Error('Sign in first.');
+      headers.set('Authorization', `Bearer ${token}`);
+    }
+    signal.throwIfAborted();
+    const response = await abortable(fetch(`${backendConfig.apiUrl}${path}`, {
+      ...init, signal, headers, cache: 'no-store'
+    }), signal);
+    const body = await abortable(response.json().catch(() => null), signal);
+    if (!options.public && current !== generation) throw new Error('Authentication changed. Discarding stale response.');
+    if (!response.ok) {
+      const detail = body?.detail;
+      const message = typeof detail === 'string' ? detail : detail?.message ?? body?.error ?? `API request failed (${response.status})`;
+      throw Object.assign(new Error(message), { status: response.status, code: body?.code ?? detail?.code });
+    }
+    if (body === null) throw new Error('Invalid JSON from compatibility API.');
+    return body as T;
+  }, init.signal);
 }
 
 export function normalizeError(error: unknown): ApiError {

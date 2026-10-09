@@ -382,7 +382,9 @@ async def import_source_dump(db: AsyncSession, path: Path) -> dict[str, int]:
                 )
                 db.add(record)
                 existing_records[identity] = record
-            elif record.data != payload:
+            elif record.data != payload or record.deleted_at != (
+                _timestamp(deleted) if deleted else None
+            ):
                 if table in IMMUTABLE_COLLECTIONS:
                     raise ValueError(f"Immutable source row changed: {table}/{external_id}")
                 record.data = payload

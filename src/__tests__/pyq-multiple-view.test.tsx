@@ -61,7 +61,7 @@ const subject = {
   slug: 'discrete-mathematics',
   label: 'Discrete Mathematics',
   count: questions.length,
-  file: '/pyq/discrete-mathematics.json',
+  file: '/api/v1/pyq/subjects/discrete-mathematics',
   topics: [{ slug: 'propositional-logic', label: 'Propositional Logic', count: questions.length }]
 };
 const manifest = normalizePyqManifest({
@@ -175,7 +175,7 @@ describe('PYQ multiple-question practice view', () => {
     );
     vi.spyOn(globalThis, 'fetch').mockImplementation(async (input) => {
       const url = new URL(String(input), 'https://air-journal.test');
-      if (url.pathname === '/pyq/manifest.json') return Response.json(manifest);
+      if (url.pathname === '/api/v1/pyq/manifest') return Response.json(manifest);
       if (url.pathname === subject.file) {
         return Response.json({
           bankVersion: manifest.bankVersion,
@@ -590,4 +590,20 @@ describe('PYQ multiple-question practice view', () => {
       ).not.toBeInTheDocument();
     }
   );
+});
+
+
+// Exercise the Python catalog contract while keeping domain writes in fixture RAM.
+vi.mock('@/lib/backend-config', async (importOriginal) => ({
+  ...await importOriginal<typeof import('@/lib/backend-config')>(),
+  backendConfig: { backend: 'fastapi', fastapi: true, error: null, apiUrl: '/api', clerkKey: 'pk_test_fixture' }
+}));
+vi.mock('@/lib/api-client', async () => ({
+  apiConfigured: false,
+  apiClient: (await import('@/lib/fastapi-client')).fastapiClient
+}));
+beforeEach(async () => {
+  const { configureClerkRuntime } = await import('@/lib/fastapi-client');
+  configureClerkRuntime({ loaded: true, user: { id: 'test-catalog-reader' },
+    getToken: async () => 'test-session', signOut: async () => {} });
 });

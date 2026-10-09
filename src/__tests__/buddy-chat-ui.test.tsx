@@ -30,7 +30,7 @@ vi.mock('@/lib/db', () => ({
   }
 }));
 
-vi.mock('@/lib/supabase', () => {
+vi.mock('@/lib/api-client', () => {
   const makeBuilder = () => {
     const builder: Record<string, unknown> = {};
     const chain = () => builder;
@@ -67,7 +67,7 @@ vi.mock('@/lib/supabase', () => {
   channel.send = async () => 'ok';
 
   return {
-    supabase: {
+    apiClient: {
       from: () => makeBuilder(),
       channel: () => channel,
       removeChannel: async () => undefined

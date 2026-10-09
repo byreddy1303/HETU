@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useLiveQuery } from 'dexie-react-hooks';
+import { useLiveQuery } from '@/lib/db-hooks';
 import { Check, ChevronDown, CircleCheckBig, Search, Sparkles, Target } from 'lucide-react';
 import { useReducedMotion } from 'motion/react';
 import PageHeader from '@/components/layout/PageHeader';

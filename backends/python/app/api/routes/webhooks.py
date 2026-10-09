@@ -4,10 +4,11 @@ import json
 from datetime import UTC, datetime
 
 from fastapi import APIRouter, HTTPException, Request, Response, status
+from sqlalchemy import select
 from svix.webhooks import Webhook, WebhookVerificationError
 
 from app.api.deps import DbDep, SettingsDep
-from app.db.models import User, WebhookReceipt
+from app.db.models import User, UserIdentity, WebhookReceipt
 from app.services.records import lock_identity
 
 router = APIRouter()
@@ -46,17 +47,20 @@ async def clerk_webhook(
     event_type = str(event.get("type", "unknown"))
     data = event.get("data") or {}
     clerk_id = data.get("id")
+    user = None
     if isinstance(clerk_id, str):
-        await lock_identity(db, "users", clerk_id, "identity")
-    if event_type in {"user.created", "user.updated"} and isinstance(clerk_id, str):
-        user = await db.get(User, clerk_id)
-        if user is not None and user.deleted_at is not None:
-            db.add(WebhookReceipt(event_id=event_id, provider="clerk", event_type=event_type))
-            await db.commit()
-            return Response(status_code=status.HTTP_204_NO_CONTENT)
-        if user is None:
-            user = User(id=clerk_id)
-            db.add(user)
+        await lock_identity(db, "user_identities", "clerk", clerk_id)
+        mapping = await db.scalar(
+            select(UserIdentity).where(
+                UserIdentity.provider == "clerk", UserIdentity.subject == clerk_id
+            )
+        )
+        # Existing accounts retain their permanent HETU ID. A provider event
+        # cannot create an account or bypass the invite signup transaction.
+        user_id = mapping.user_id if mapping else clerk_id
+        await lock_identity(db, "users", user_id, "identity")
+        user = await db.get(User, user_id)
+    if event_type in {"user.created", "user.updated"} and user and user.deleted_at is None:
         primary_email_id = data.get("primary_email_address_id")
         email_addresses = data.get("email_addresses") or []
         primary_email = next(
@@ -72,12 +76,7 @@ async def clerk_webhook(
         names = [data.get("first_name"), data.get("last_name")]
         user.display_name = " ".join(name for name in names if name) or None
         # A delayed update must never resurrect a deleted identity.
-    if event_type == "user.deleted" and isinstance(clerk_id, str):
-        user = await db.get(User, clerk_id)
-        if user is None:
-            user = User(id=clerk_id)
-            db.add(user)
-            await db.flush()
+    if event_type == "user.deleted" and user and user.deleted_at is None:
         user.deleted_at = datetime.now(UTC)
         # Disable access, retain learning data and attachments. Erasure is a
         # separate reviewed operator workflow, never a webhook side effect.

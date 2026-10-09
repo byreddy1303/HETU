@@ -7,7 +7,7 @@
 // A "Back to subjects" button returns to the overview.
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useLiveQuery } from 'dexie-react-hooks';
+import { useLiveQuery } from '@/lib/db-hooks';
 import { ArrowLeft, ArrowRight, GitMerge, RotateCcw } from 'lucide-react';
 import type { PatternRow, QuestionRow } from '@/types';
 import { db } from '@/lib/db';

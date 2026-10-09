@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import '@/workflow-surfaces.css';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { useLiveQuery } from 'dexie-react-hooks';
+import { useLiveQuery } from '@/lib/db-hooks';
 import {
   ArrowLeft,
   ArrowRight,

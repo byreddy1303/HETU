@@ -9,7 +9,7 @@ import {
   type SourceKind
 } from '@/lib/constants';
 import { normalizeSubjectIdentity } from '@/lib/subjects';
-import { supabase } from '@/lib/supabase';
+import { apiClient } from '@/lib/api-client';
 import { todayISO } from '@/lib/utils';
 import { broadcastSyncMutation } from '@/lib/sync';
 import {
@@ -491,7 +491,7 @@ async function drainWriter(writer: AccountStateWriter): Promise<void> {
   while (candidate) {
     const [namespace, attempted] = candidate;
     try {
-      const { error } = await supabase.from('account_state').upsert(
+      const { error } = await apiClient.from('account_state').upsert(
         {
           user_id: writer.userId,
           namespace,
@@ -553,7 +553,7 @@ function enqueueWrite(
   if (startImmediately && mayWriteForUser(userId)) void startWriter(writer);
 }
 
-/** True while at least one latest namespace payload has not reached Supabase. */
+/** True while at least one latest namespace payload has not reached Postgres. */
 export function hasPendingAccountStateWrites(userId: string): boolean {
   return (writers.get(userId)?.pending.size ?? 0) > 0;
 }
@@ -627,7 +627,7 @@ async function bootstrapAccountState(userId: string, generation: number): Promis
   if (runtime.generation !== generation) return;
 
   // A failed latest payload from this session wins over the older remote row
-  // until it is confirmed by Supabase.
+  // until it is confirmed by Postgres.
   const beforeFetch = new Map<AccountStateNamespace, string>(
     ACCOUNT_STATE_NAMESPACES.map((namespace) => [
       namespace,
@@ -635,7 +635,7 @@ async function bootstrapAccountState(userId: string, generation: number): Promis
     ])
   );
 
-  const { data, error } = await supabase
+  const { data, error } = await apiClient
     .from('account_state')
     .select('namespace,payload')
     .eq('user_id', userId)
@@ -719,14 +719,14 @@ export function stopAccountStateSync(userId: string): void {
   removeSubscriptions(runtime);
 }
 
-/** Re-pull latest account_state rows from Supabase and hydrate stores without clobbering pending local edits. */
+/** Re-pull latest account_state rows from Postgres and hydrate stores without clobbering pending local edits. */
 export async function reloadAccountState(userId: string): Promise<void> {
   const runtime = runtimes.get(userId);
   if (!runtime || runtime.status !== 'ready') return;
   const writer = writerFor(userId);
 
   try {
-    const { data, error } = await supabase
+    const { data, error } = await apiClient
       .from('account_state')
       .select('namespace,payload')
       .eq('user_id', userId)

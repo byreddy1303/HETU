@@ -10,7 +10,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AnimatePresence } from 'motion/react';
-import { useLiveQuery } from 'dexie-react-hooks';
+import { useLiveQuery } from '@/lib/db-hooks';
 import { ArrowRight, CalendarDays, Clock3 } from 'lucide-react';
 import PageHeader from '@/components/layout/PageHeader';
 import { Button } from '@/components/ui/Button';

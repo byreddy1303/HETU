@@ -1,4 +1,4 @@
-import { supabase } from '@/lib/supabase';
+import { apiClient } from '@/lib/api-client';
 import { broadcastSyncMutation } from '@/lib/sync';
 
 export const ACCOUNT_DOCUMENT_SCHEMA_VERSION = 1 as const;
@@ -147,7 +147,7 @@ async function drainWriter(userId: string, writer: DocumentWriter): Promise<stri
   while (next) {
     const [namespace, attempted] = next;
     try {
-      const { error } = await supabase.from('account_state').upsert(
+      const { error } = await apiClient.from('account_state').upsert(
         {
           user_id: userId,
           namespace,
@@ -214,7 +214,7 @@ function pendingLoadResult<T>(
 }
 
 /**
- * Load a user document. Supabase is the source of truth. The only override is
+ * Load a user document. Postgres is the source of truth. The only override is
  * an in-memory pending edit, which is newer by definition and is retried
  * immediately. An absent row migrates an existing legacy local document
  * without ever treating a network error as absence.
@@ -229,7 +229,7 @@ export async function loadAccountDocument<T>(
 
   let row: AccountDocumentRow | null = null;
   try {
-    const { data, error } = await supabase
+    const { data, error } = await apiClient
       .from('account_state')
       .select('payload')
       .eq('user_id', userId)

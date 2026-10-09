@@ -6,7 +6,7 @@
 // opened the tag flow so mid-session navigation returns to the same screen.
 //
 // In-memory only. For authenticated accounts the account-state runtime hydrates
-// this store from Supabase on login and mirrors changes to the database, so a
+// this store from Postgres on login and mirrors changes to the database, so a
 // new device or a hard reload resumes where the user left off (including the
 // original timer).
 import { create } from 'zustand';

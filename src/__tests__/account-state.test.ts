@@ -1,4 +1,4 @@
-import type { User } from '@supabase/supabase-js';
+import type { ApiUser as User } from '@/lib/fastapi-client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => {
@@ -11,9 +11,9 @@ const mocks = vi.hoisted(() => {
   return { from: vi.fn(), query };
 });
 
-vi.mock('@/lib/supabase', () => ({
-  supabaseConfigured: true,
-  supabase: {
+vi.mock('@/lib/api-client', () => ({
+  apiConfigured: true,
+  apiClient: {
     from: mocks.from,
     auth: {
       getSession: vi.fn(),

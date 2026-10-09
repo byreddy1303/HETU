@@ -3,7 +3,7 @@
 // journal pre-filtered on that intersection.
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useLiveQuery } from 'dexie-react-hooks';
+import { useLiveQuery } from '@/lib/db-hooks';
 import type { RootCause } from '@/types';
 import PageHeader from '@/components/layout/PageHeader';
 import { Card, CardBody } from '@/components/ui/Card';

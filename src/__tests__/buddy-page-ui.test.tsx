@@ -22,7 +22,7 @@ vi.mock('@/components/buddy/BuddyChat', () => ({
   )
 }));
 
-vi.mock('@/lib/supabase', () => {
+vi.mock('@/lib/api-client', () => {
   const buddy = {
     id: 'buddy-1',
     user_a: 'me-1',
@@ -44,8 +44,8 @@ vi.mock('@/lib/supabase', () => {
   channel.subscribe = () => channel;
 
   return {
-    supabaseConfigured: true,
-    supabase: {
+    apiConfigured: true,
+    apiClient: {
       from: (table: string) => {
         const builder: Record<string, unknown> = {};
         const chain = () => builder;

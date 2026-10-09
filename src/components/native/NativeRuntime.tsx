@@ -88,7 +88,7 @@ export default function NativeRuntime() {
             void reloadAccountState(uid);
           }
         } else {
-          // Native app minimizing/suspending: immediately push all durable state to Supabase
+          // Native app minimizing/suspending: immediately push all durable state to Postgres
           if (uid && !isSandbox) {
             void flushAllDurableState(uid);
           }

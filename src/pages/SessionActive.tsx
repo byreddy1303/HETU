@@ -8,7 +8,7 @@
 // useState is reserved for things that can safely restart.
 import { useEffect } from 'react';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
-import { useLiveQuery } from 'dexie-react-hooks';
+import { useLiveQuery } from '@/lib/db-hooks';
 import { parseISO } from 'date-fns';
 import type { QuestionRow } from '@/types';
 import { db } from '@/lib/db';

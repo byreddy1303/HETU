@@ -159,7 +159,7 @@ export default function TopperNotes() {
     setProgress(localProgress);
 
     // The development sandbox intentionally stays device-local. Real accounts
-    // hydrate from Supabase; the old key is supplied only as a one-time legacy
+    // hydrate from Postgres; the old key is supplied only as a one-time legacy
     // migration when the database has no document yet.
     if (!userId || sandbox) return;
     let active = true;

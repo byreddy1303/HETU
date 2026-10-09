@@ -1,5 +1,4 @@
 import { Suspense } from 'react';
-import { backendConfig } from '@/lib/backend-config';
 import { createBrowserRouter } from 'react-router-dom';
 import RequireAuth from '@/components/shared/RequireAuth';
 import LoadingScreen from '@/components/shared/LoadingScreen';
@@ -10,10 +9,6 @@ import { lazyWithRetry } from '@/lib/lazyWithRetry';
 const ClerkAuth = lazyWithRetry(() => import('@/pages/ClerkAuth'));
 const ClerkSignup = lazyWithRetry(() => import('@/pages/ClerkSignup'));
 
-const Auth = lazyWithRetry(() => import('@/pages/Auth'));
-const Signup = lazyWithRetry(() => import('@/pages/Signup'));
-const ForgotPin = lazyWithRetry(() => import('@/pages/ForgotPin'));
-const ResetPin = lazyWithRetry(() => import('@/pages/ResetPin'));
 const RequestAccess = lazyWithRetry(() => import('@/pages/RequestAccess'));
 const NotFound = lazyWithRetry(() => import('@/pages/NotFound'));
 const Dashboard = lazyWithRetry(() => import('@/pages/Dashboard'));
@@ -62,10 +57,10 @@ const devRoutes = import.meta.env.DEV
 // Application routes.
 export const router = createBrowserRouter([
   ...devRoutes,
-  { path: '/auth', element: backendConfig.fastapi ? <ClerkAuth /> : <Auth />, errorElement: <RootErrorBoundary /> },
-  { path: '/signup', element: backendConfig.fastapi ? <ClerkSignup /> : <Signup />, errorElement: <RootErrorBoundary /> },
-  { path: '/forgot-pin', element: backendConfig.fastapi ? <ClerkAuth /> : <ForgotPin />, errorElement: <RootErrorBoundary /> },
-  { path: '/reset-pin', element: backendConfig.fastapi ? <ClerkAuth /> : <ResetPin />, errorElement: <RootErrorBoundary /> },
+  { path: '/auth', element: <ClerkAuth />, errorElement: <RootErrorBoundary /> },
+  { path: '/signup', element: <ClerkSignup />, errorElement: <RootErrorBoundary /> },
+  { path: '/forgot-pin', element: <ClerkAuth />, errorElement: <RootErrorBoundary /> },
+  { path: '/reset-pin', element: <ClerkAuth />, errorElement: <RootErrorBoundary /> },
   { path: '/request-access', element: <RequestAccess />, errorElement: <RootErrorBoundary /> },
   {
     path: '/',

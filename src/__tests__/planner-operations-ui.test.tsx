@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import type { User } from '@supabase/supabase-js';
+import type { ApiUser as User } from '@/lib/fastapi-client';
 import PlannerOperationsPanel from '@/components/planner/PlannerOperationsPanel';
 import { emptyDayPlan, saveDayPlan, type StudySession } from '@/lib/planner-storage';
 import { useAuthStore } from '@/stores/auth';

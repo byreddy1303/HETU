@@ -7,7 +7,7 @@
 // weeks so the user sees what's been holding them back the longest.
 
 import type { ReadinessBreakdown, ReadinessComponentKey, SubjectReadiness } from '@/lib/readiness';
-import { supabase, supabaseConfigured } from '@/lib/supabase';
+import { apiClient, apiConfigured } from '@/lib/api-client';
 import { runtimeStorage as localStorage } from '@/lib/runtime-storage';
 
 // Re-export the calculation module's version so storage/UI cannot drift from
@@ -345,11 +345,11 @@ function rowsMatch(expected: ReadinessSnapshotUpsertRow, actual: ReadinessSnapsh
 async function flushReadinessSnapshotsOnce(userId: string): Promise<string | null> {
   const localSnapshots = loadSnapshots(userId);
   if (localSnapshots.length === 0) return null;
-  if (!supabaseConfigured) {
+  if (!apiConfigured) {
     return 'Readiness history cannot be saved because the database is not configured';
   }
 
-  const existingResult = await supabase
+  const existingResult = await apiClient
     .from('readiness_snapshots')
     .select(READINESS_SNAPSHOT_SELECT)
     .eq('user_id', userId)
@@ -369,7 +369,7 @@ async function flushReadinessSnapshotsOnce(userId: string): Promise<string | nul
 
   const rows = snapshotMigrationRows(userId, localSnapshots, existing);
   if (rows.length > 0) {
-    const upsertResult = await supabase
+    const upsertResult = await apiClient
       .from('readiness_snapshots')
       .upsert(rows, { onConflict: 'user_id,on_date' });
     if (upsertResult.error) {
@@ -379,7 +379,7 @@ async function flushReadinessSnapshotsOnce(userId: string): Promise<string | nul
 
   // Re-query rather than trusting only the write response. Logout/cache wipe
   // callers use this function as a durability barrier.
-  const verificationResult = await supabase
+  const verificationResult = await apiClient
     .from('readiness_snapshots')
     .select(READINESS_SNAPSHOT_SELECT)
     .eq('user_id', userId)
@@ -438,10 +438,10 @@ export async function fetchCurrentReadinessSnapshotHistory(
   userId: string,
   calculationVersion: number
 ): Promise<{ snapshots: ReadinessSnapshot[]; error: string | null }> {
-  if (!supabaseConfigured) {
+  if (!apiConfigured) {
     return { snapshots: [], error: 'The database is not configured' };
   }
-  const result = await supabase
+  const result = await apiClient
     .from('readiness_snapshots')
     .select(READINESS_SNAPSHOT_SELECT)
     .eq('user_id', userId)

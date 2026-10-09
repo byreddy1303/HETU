@@ -6,7 +6,7 @@
 // the readiness_median_for_band() RPC when the user is signed in.
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useLiveQuery } from 'dexie-react-hooks';
+import { useLiveQuery } from '@/lib/db-hooks';
 import { differenceInCalendarDays, parseISO } from 'date-fns';
 import type { LearningEventRow, LearningItemRow } from '@/types';
 import {
@@ -25,7 +25,7 @@ import { Card, CardBody, CardHeader } from '@/components/ui/Card';
 import { Empty } from '@/components/ui/Empty';
 import { db } from '@/lib/db';
 import { useAuth } from '@/hooks/useAuth';
-import { supabase, supabaseConfigured } from '@/lib/supabase';
+import { apiClient, apiConfigured } from '@/lib/api-client';
 import {
   computeReadiness,
   computeReadinessBySubject,
@@ -372,11 +372,11 @@ export default function Readiness() {
     [trendSnapshots, daysLeft]
   );
 
-  /* -------- peer median (Supabase) -------- */
+  /* -------- peer median (Postgres) -------- */
 
   const [peer, setPeer] = useState<{ median: number | null; sampleSize: number } | null>(null);
   useEffect(() => {
-    if (sandbox || !supabaseConfigured || !userId) return;
+    if (sandbox || !apiConfigured || !userId) return;
     let cancelled = false;
 
     const reportCloudIssue = (detail: string, kind: 'history' | 'peer') => {
@@ -405,7 +405,7 @@ export default function Readiness() {
 
         const [historyResult, medianResult] = await Promise.all([
           fetchCurrentReadinessSnapshotHistory(userId, READINESS_CALCULATION_VERSION),
-          supabase.rpc('readiness_median_for_band', { band_width_days: 7 })
+          apiClient.rpc('readiness_median_for_band', { band_width_days: 7 })
         ]);
         if (cancelled) return;
         if (historyResult.error) {
@@ -924,7 +924,7 @@ export default function Readiness() {
                   }
                 />
                 <CardBody>
-                  {sandbox || !supabaseConfigured ? (
+                  {sandbox || !apiConfigured ? (
                     <p className="text-[12.5px] text-text-muted">
                       Sign in to compare against peers in the same T− window.
                     </p>

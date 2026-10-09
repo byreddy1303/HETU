@@ -1,5 +1,5 @@
 // Row types mirror supabase/migrations/20260717000001_initial_schema.sql exactly.
-// Nullable Postgres columns are `| null` (Supabase returns null, never undefined).
+// Nullable Postgres columns are `| null` (Postgres returns null, never undefined).
 
 export type Outcome = 'R' | 'RBS' | 'RBG' | 'W-C' | 'W-E' | 'W-R';
 export type RootCause = 'concept' | 'formula' | 'reading' | 'computation' | 'strategy';

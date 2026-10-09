@@ -1,7 +1,7 @@
 // Weekly review: inspect the data, name the cause, isolate the weakest concept,
 // and commit to one concrete fix.
 import { useEffect, useMemo, useState } from 'react';
-import { useLiveQuery } from 'dexie-react-hooks';
+import { useLiveQuery } from '@/lib/db-hooks';
 import { motion } from 'motion/react';
 import { Link } from 'react-router-dom';
 import { AlertCircle, ArrowLeft, ArrowRight } from 'lucide-react';

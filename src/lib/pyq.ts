@@ -6,8 +6,7 @@ import { canonicalSubjectId } from '@/lib/subjects';
 import { gate2027BankSubjectSlugs } from '@/lib/gate-2027';
 import { evaluateGateAnswer } from '@/lib/gate-scoring';
 import { guardPyqQuestionIntegrity, PYQ_CONFLICTING_KEY_IDS } from '@/lib/pyq-integrity';
-import { backendConfig } from '@/lib/backend-config';
-import { apiRequest } from '@/lib/fastapi-client';
+import { apiRequest, API_REQUEST_TIMEOUT_MS } from '@/lib/fastapi-client';
 
 export const PYQ_BANK_QUESTION_COUNT = 4334;
 
@@ -111,8 +110,7 @@ interface SubjectPayload {
 
 const subjectCache = new Map<string, Promise<SubjectPayload>>();
 let manifestPromise: Promise<PyqManifest> | null = null;
-const PYQ_MANIFEST_SCHEMA = 'complete-gate-marks-v4';
-export const PYQ_BANK_REQUEST_TIMEOUT_MS = 15_000;
+export const PYQ_BANK_REQUEST_TIMEOUT_MS = API_REQUEST_TIMEOUT_MS;
 
 const PYQ_MATH_DELIMITERS = [
   { left: '$$$', right: '$$$' },
@@ -276,31 +274,12 @@ export function normalizePyqQuestionHtml(html: string): string {
   );
 }
 
-async function fetchJson<T>(url: string): Promise<T> {
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), PYQ_BANK_REQUEST_TIMEOUT_MS);
-  try {
-    const response = await fetch(url, { signal: controller.signal, cache: 'no-cache' });
-    if (!response.ok) throw new Error(`Question bank request failed (${response.status})`);
-    return (await response.json()) as T;
-  } catch (error) {
-    if (controller.signal.aborted) {
-      throw new Error('The question bank took too long to load. Check your connection and retry.');
-    }
-    throw error;
-  } finally {
-    clearTimeout(timer);
-  }
-}
-
 export function loadPyqManifest(): Promise<PyqManifest> {
   // The query key bypasses the pre-topic service-worker cache. Normalization is
   // still required because an already-controlled tab can briefly mix an older
   // manifest with the latest JavaScript while a new worker activates.
   if (!manifestPromise) {
-    const manifestRequest = backendConfig.fastapi
-      ? apiRequest<PyqManifestPayload>('/v1/pyq/manifest')
-      : fetchJson<PyqManifestPayload>(`/pyq/manifest.json?schema=${PYQ_MANIFEST_SCHEMA}`);
+    const manifestRequest = apiRequest<PyqManifestPayload>('/v1/pyq/manifest');
     manifestPromise = manifestRequest
       .then(normalizePyqManifest)
       .catch((error: unknown) => {
@@ -358,14 +337,10 @@ export async function loadPyqQuestions(
 ): Promise<PyqQuestion[]> {
   const payloads = await Promise.all(
     subjects.map((subject) => {
-      const versionedFile = backendConfig.fastapi
-        ? `/v1/pyq/subjects/${encodeURIComponent(subject.slug)}?bank_version=${encodeURIComponent(bankVersion)}`
-        : `${subject.file}?bank=${encodeURIComponent(bankVersion)}`;
+      const versionedFile = `/v1/pyq/subjects/${encodeURIComponent(subject.slug)}?bank_version=${encodeURIComponent(bankVersion)}`;
       let request = subjectCache.get(versionedFile);
       if (!request) {
-        request = (backendConfig.fastapi
-          ? apiRequest<SubjectPayload>(versionedFile)
-          : fetchJson<SubjectPayload>(versionedFile))
+        request = apiRequest<SubjectPayload>(versionedFile)
           .then((payload) => {
             if (payload.bankVersion !== bankVersion) {
               throw new Error(

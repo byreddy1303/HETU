@@ -14,7 +14,7 @@ import { createPyqSessionRow } from '@/lib/pyq-session';
 import { captureElementToDataUrl } from '@/lib/image';
 import { usePyqPreferencesStore } from '@/stores/pyq-preferences';
 import { useAuthStore } from '@/stores/auth';
-import type { User } from '@supabase/supabase-js';
+import type { ApiUser as User } from '@/lib/fastapi-client';
 import { emptyDayPlan, loadDayPlan, saveDayPlan } from '@/lib/planner-storage';
 import {
   attachPlannerPyqSession,
@@ -67,7 +67,7 @@ const manifest: PyqManifest = normalizePyqManifest({
       slug: 'discrete-mathematics',
       label: 'Discrete Mathematics',
       count: 1,
-      file: '/pyq/discrete-mathematics.json',
+      file: '/api/v1/pyq/subjects/discrete-mathematics',
       topics: [{ slug: 'propositional-logic', label: 'Propositional Logic', count: 1 }]
     }
   ]
@@ -107,8 +107,8 @@ describe('PYQ committed-attempt logging', () => {
     vi.stubGlobal('scrollTo', vi.fn());
     vi.spyOn(globalThis, 'fetch').mockImplementation(async (input) => {
       const url = new URL(String(input), 'https://air-journal.test');
-      if (url.pathname === '/pyq/manifest.json') return Response.json(manifest);
-      if (url.pathname === '/pyq/discrete-mathematics.json') {
+      if (url.pathname === '/api/v1/pyq/manifest') return Response.json(manifest);
+      if (url.pathname === '/api/v1/pyq/subjects/discrete-mathematics') {
         return Response.json({
           bankVersion: manifest.bankVersion,
           subject: question.subject,
@@ -234,14 +234,14 @@ describe('PYQ committed-attempt logging', () => {
           slug: 'c-programming',
           label: 'C Programming',
           count: 1,
-          file: '/pyq/c-programming.json',
+          file: '/api/v1/pyq/subjects/c-programming',
           topics: [{ slug: 'pointers', label: 'Pointers', count: 1 }]
         },
         {
           slug: 'data-structure',
           label: 'Data Structure',
           count: 1,
-          file: '/pyq/data-structure.json',
+          file: '/api/v1/pyq/subjects/data-structure',
           topics: [{ slug: 'trees', label: 'Trees', count: 1 }]
         }
       ]
@@ -249,15 +249,15 @@ describe('PYQ committed-attempt logging', () => {
     vi.mocked(loadPyqManifest).mockResolvedValue(multiManifest);
     vi.mocked(globalThis.fetch).mockImplementation(async (input) => {
       const pathname = new URL(String(input), 'https://hetu.test').pathname;
-      if (pathname === '/pyq/manifest.json') return Response.json(multiManifest);
-      if (pathname === '/pyq/c-programming.json') {
+      if (pathname === '/api/v1/pyq/manifest') return Response.json(multiManifest);
+      if (pathname === '/api/v1/pyq/subjects/c-programming') {
         return Response.json({
           bankVersion: multiManifest.bankVersion,
           subject: cQuestion.subject,
           questions: [cQuestion]
         });
       }
-      if (pathname === '/pyq/data-structure.json') {
+      if (pathname === '/api/v1/pyq/subjects/data-structure') {
         return Response.json({
           bankVersion: multiManifest.bankVersion,
           subject: dsQuestion.subject,
@@ -927,4 +927,20 @@ describe('PYQ committed-attempt logging', () => {
     expect(attempts[0].confidence).toBe('low');
     expect(attempts[0].mark_decision).toBe('FIFTY_FIFTY');
   });
+});
+
+
+// Exercise the Python catalog contract while keeping domain writes in fixture RAM.
+vi.mock('@/lib/backend-config', async (importOriginal) => ({
+  ...await importOriginal<typeof import('@/lib/backend-config')>(),
+  backendConfig: { backend: 'fastapi', fastapi: true, error: null, apiUrl: '/api', clerkKey: 'pk_test_fixture' }
+}));
+vi.mock('@/lib/api-client', async () => ({
+  apiConfigured: false,
+  apiClient: (await import('@/lib/fastapi-client')).fastapiClient
+}));
+beforeEach(async () => {
+  const { configureClerkRuntime } = await import('@/lib/fastapi-client');
+  configureClerkRuntime({ loaded: true, user: { id: 'test-catalog-reader' },
+    getToken: async () => 'test-session', signOut: async () => {} });
 });

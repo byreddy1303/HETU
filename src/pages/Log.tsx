@@ -11,7 +11,7 @@
 // target_duration_min = 0 — a marker for "log-only session") so the group
 // appears in the Journal's Recent-sessions strip.
 import { useEffect, useMemo, useState } from 'react';
-import { useLiveQuery } from 'dexie-react-hooks';
+import { useLiveQuery } from '@/lib/db-hooks';
 import { motion } from 'motion/react';
 import { CheckCircle2, Pencil, PenLine, PlayCircle, StopCircle } from 'lucide-react';
 import type { QuestionRow, SessionRow } from '@/types';

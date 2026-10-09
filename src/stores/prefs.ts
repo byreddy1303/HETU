@@ -1,6 +1,6 @@
 // User preferences — everything users can tune to change day-to-day behaviour.
 // In-memory cache only. For authenticated accounts the account-state runtime
-// hydrates this store from Supabase and mirrors changes back to the database,
+// hydrates this store from Postgres and mirrors changes back to the database,
 // so clearing this device does not erase the preferences.
 import { create } from 'zustand';
 import type { ThemeMode } from '@/lib/theme';

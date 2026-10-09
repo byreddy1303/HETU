@@ -1,12 +1,11 @@
-// Client-side image utilities. Images taken during study are stored as JPEG
-// data URLs on the QuestionRow.image_url column so they ride the same offline
-// sync path as everything else. Long-term this should move to Supabase Storage,
-// but for now — with local-first + small photo counts — DataURLs are enough.
+// Study images are compressed into the question record and saved through the
+// Python API to online Postgres. The cap leaves room for a question snapshot
+// and its linked attempt in the API's 2 MiB request limit.
 import { THEME_COLORS, type ResolvedTheme } from '@/lib/theme';
 
 const MAX_EDGE = 1400;
 const JPEG_QUALITY = 0.82;
-const MAX_BYTES = 6 * 1024 * 1024; // ~6 MB post-compression cap
+const MAX_BYTES = 750 * 1024; // 750 KiB compressed
 
 export interface CompressedImage {
   dataUrl: string;
@@ -21,7 +20,7 @@ export interface ElementCaptureOptions {
 
 export class ImageTooLargeError extends Error {
   constructor(bytes: number) {
-    super(`Compressed image is ${(bytes / 1024 / 1024).toFixed(1)} MB — over 6 MB limit.`);
+    super(`Compressed image is ${(bytes / 1024 / 1024).toFixed(1)} MB — over the 750 KB limit. Choose a smaller image or crop it.`);
     this.name = 'ImageTooLargeError';
   }
 }

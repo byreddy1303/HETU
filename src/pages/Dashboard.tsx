@@ -1,6 +1,6 @@
 import { useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useLiveQuery } from 'dexie-react-hooks';
+import { useLiveQuery } from '@/lib/db-hooks';
 import { differenceInCalendarDays, parseISO } from 'date-fns';
 import { ArrowRight, BookOpenCheck, CalendarRange, Fingerprint, LibraryBig, RotateCcw, Target } from 'lucide-react';
 import DiscussionLibraryCard from '@/components/dashboard/DiscussionLibraryCard';

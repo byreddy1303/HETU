@@ -2,7 +2,7 @@
 // test session instead of expanding inside the queue.
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import { useLiveQuery } from 'dexie-react-hooks';
+import { useLiveQuery } from '@/lib/db-hooks';
 import '@/workflow-surfaces.css';
 import {
   ArrowLeft,

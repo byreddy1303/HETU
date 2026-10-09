@@ -15,7 +15,7 @@ beforeEach(async () => {
   api = await import('@/lib/fastapi-client');
   api.configureClerkRuntime({ loaded: true, user: { id: 'user_a' }, getToken: token, signOut: async () => {} });
 });
-afterEach(() => { api.resetClerkRuntime(); vi.unstubAllGlobals(); vi.unstubAllEnvs(); });
+afterEach(() => { vi.useRealTimers(); api.resetClerkRuntime(); vi.unstubAllGlobals(); vi.unstubAllEnvs(); });
 function body() { return JSON.parse(fetchMock.mock.lastCall![1].body); }
 
 describe('FastAPI compatibility boundary', () => {
@@ -129,5 +129,55 @@ describe('FastAPI compatibility boundary', () => {
     api.configureClerkRuntime({ loaded: true, user: { id: 'user_a' }, getToken: token, signOut: async () => { throw new Error('try again'); } });
     expect((await api.fastapiClient.auth.signOut()).error?.message).toBe('try again');
     expect((await api.fastapiClient.auth.getSession()).data.session?.user.id).toBe('user_a');
+  });
+});
+
+
+describe('bounded API requests', () => {
+  it('releases a stalled write without retrying or reporting success', async () => {
+    vi.useFakeTimers();
+    fetchMock.mockReturnValue(new Promise(() => {}));
+    const pending = api.fastapiClient.from('sessions').upsert({ id: 's1' }).single();
+    await vi.advanceTimersByTimeAsync(api.API_REQUEST_TIMEOUT_MS);
+    expect(await pending).toMatchObject({ data: null, error: { code: 'REQUEST_TIMEOUT' } });
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(fetchMock.mock.lastCall![1].signal.aborted).toBe(true);
+  });
+
+  it('times out token acquisition and never sends the write after the token arrives late', async () => {
+    vi.useFakeTimers();
+    let finish!: (value: string) => void;
+    token.mockReturnValue(new Promise((resolve) => { finish = resolve; }));
+    const pending = api.fastapiClient.from('sessions').insert({ id: 's1' }).single();
+    await vi.advanceTimersByTimeAsync(api.API_REQUEST_TIMEOUT_MS);
+    expect(await pending).toMatchObject({ data: null, error: { code: 'REQUEST_TIMEOUT' } });
+    finish('late-token');
+    await vi.advanceTimersByTimeAsync(1);
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it('bounds an uninitialized auth session and stalled response body', async () => {
+    vi.useFakeTimers();
+    api.resetClerkRuntime();
+    const session = api.fastapiClient.auth.getSession();
+    await vi.advanceTimersByTimeAsync(api.API_REQUEST_TIMEOUT_MS);
+    expect(await session).toMatchObject({ data: { session: null }, error: { code: 'REQUEST_TIMEOUT' } });
+    vi.stubGlobal('fetch', vi.fn(async () => ({ ok: true, json: () => new Promise(() => {}) })));
+    const pending = api.apiRequest('/v1/access/request', {}, { public: true });
+    const rejected = expect(pending).rejects.toMatchObject({ code: 'REQUEST_TIMEOUT' });
+    await vi.advanceTimersByTimeAsync(api.API_REQUEST_TIMEOUT_MS);
+    await rejected;
+  });
+
+  it('honors caller cancellation before auth is ready and never dispatches late', async () => {
+    api.resetClerkRuntime();
+    const controller = new AbortController();
+    const pending = api.apiRequest('/v1/me', { signal: controller.signal });
+    const rejected = expect(pending).rejects.toMatchObject({ name: 'AbortError' });
+    controller.abort();
+    await rejected;
+    api.configureClerkRuntime({ loaded: true, user: { id: 'user_a' }, getToken: token, signOut: async () => {} });
+    await Promise.resolve();
+    expect(fetchMock).not.toHaveBeenCalled();
   });
 });

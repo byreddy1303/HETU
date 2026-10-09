@@ -8,6 +8,8 @@ export type UseLiveQueryResult<T> = T | undefined;
  * re-runs it whenever the in-memory repository bumps its revision (any
  * hydration or completed write). Queries hit RAM only — never the network.
  */
+export function useLiveQuery<T>(querier: () => T | Promise<T>, deps?: readonly unknown[]): T | undefined;
+export function useLiveQuery<T, TDefault>(querier: () => T | Promise<T>, deps: readonly unknown[], defaultResult: TDefault): T | TDefault;
 export function useLiveQuery<T, TDefault = never>(
   querier: () => T | Promise<T>,
   deps: readonly unknown[] = [],
@@ -25,7 +27,7 @@ export function useLiveQuery<T, TDefault = never>(
         })
         .catch((error) => {
           console.error('[db] live query failed:', error);
-          if (!cancelled) setValue(undefined);
+          if (!cancelled) setValue(defaultResult);
         });
     };
     run();

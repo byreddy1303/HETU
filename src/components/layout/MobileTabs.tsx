@@ -30,7 +30,7 @@ import {
   LogOut
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
-import { useLiveQuery } from 'dexie-react-hooks';
+import { useLiveQuery } from '@/lib/db-hooks';
 import { cn } from '@/lib/utils';
 import { db } from '@/lib/db';
 import { useSessionStore } from '@/stores/session';

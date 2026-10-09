@@ -2,7 +2,7 @@
 // search, expandable rows, 50/page.
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { useLiveQuery } from 'dexie-react-hooks';
+import { useLiveQuery } from '@/lib/db-hooks';
 import { AnimatePresence, motion } from 'motion/react';
 import { ChevronDown, ChevronRight, Pencil } from 'lucide-react';
 import type { QuestionRow, SessionRow } from '@/types';

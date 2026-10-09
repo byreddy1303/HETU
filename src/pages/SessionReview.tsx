@@ -2,7 +2,7 @@
 // and an optional single-sentence takeaway with an explicit return destination.
 import { useMemo, useState } from 'react';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
-import { useLiveQuery } from 'dexie-react-hooks';
+import { useLiveQuery } from '@/lib/db-hooks';
 import { motion } from 'motion/react';
 import { Pencil } from 'lucide-react';
 import type { Outcome, QuestionRow } from '@/types';

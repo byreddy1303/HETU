@@ -1,6 +1,6 @@
 import { PushNotifications, type PermissionStatus } from '@capacitor/push-notifications';
 import { isNativeApp, nativePlatform } from '@/lib/native';
-import { supabase, supabaseConfigured } from '@/lib/supabase';
+import { apiClient, apiConfigured } from '@/lib/api-client';
 import { runtimeStorage as localStorage } from '@/lib/runtime-storage';
 
 const DEVICE_ID_KEY = 'air:buddy-push-device-id';
@@ -78,7 +78,7 @@ function setChannelOptedIn(channel: 'buddy' | 'study', value: boolean): void {
 }
 
 async function syncChannelFlags(): Promise<void> {
-  const { error } = await supabase.rpc('set_push_subscription_channels', {
+  const { error } = await apiClient.rpc('set_push_subscription_channels', {
     p_device_id: getPushDeviceId(),
     p_buddy_enabled: buddyPushOptedIn(),
     p_study_enabled: studyPushOptedIn()
@@ -102,7 +102,7 @@ async function upsertWebSubscription(subscription: PushSubscription): Promise<vo
   const p256dh = serialized.keys?.p256dh;
   const auth = serialized.keys?.auth;
   if (!p256dh || !auth) throw new Error('Browser did not return Web Push encryption keys.');
-  const { error } = await supabase.rpc('upsert_push_subscription', {
+  const { error } = await apiClient.rpc('upsert_push_subscription', {
     p_device_id: getPushDeviceId(),
     p_platform: 'web',
     p_web_endpoint: subscription.endpoint,
@@ -115,10 +115,10 @@ async function upsertWebSubscription(subscription: PushSubscription): Promise<vo
 }
 
 export async function saveNativePushToken(token: string): Promise<void> {
-  if (!pushNotificationsOptedIn() || !supabaseConfigured || !token.trim()) return;
+  if (!pushNotificationsOptedIn() || !apiConfigured || !token.trim()) return;
   const currentPlatform = platform();
   if (currentPlatform === 'web') return;
-  const { error } = await supabase.rpc('upsert_push_subscription', {
+  const { error } = await apiClient.rpc('upsert_push_subscription', {
     p_device_id: getPushDeviceId(),
     p_platform: currentPlatform,
     p_web_endpoint: null,
@@ -206,7 +206,7 @@ async function registerNativeToken(): Promise<string> {
 
 export async function getBuddyNotificationState(): Promise<BuddyNotificationState> {
   const currentPlatform = platform();
-  if (!supabaseConfigured) {
+  if (!apiConfigured) {
     return {
       supported: false,
       permission: 'unsupported',
@@ -222,7 +222,7 @@ export async function getBuddyNotificationState(): Promise<BuddyNotificationStat
     isNativeApp && supported
       ? nativePermission(false).catch(() => 'unsupported')
       : Promise.resolve(supported ? webPermission(Notification.permission) : 'unsupported');
-  const registrationPromise = supabase
+  const registrationPromise = apiClient
     .from('push_subscriptions')
     .select('id')
     .eq('device_id', getPushDeviceId())
@@ -241,7 +241,7 @@ export async function getBuddyNotificationState(): Promise<BuddyNotificationStat
 async function enableNotificationChannel(
   channel: 'buddy' | 'study'
 ): Promise<BuddyNotificationResult> {
-  if (!supabaseConfigured) return { ok: false, error: 'Sign in to enable notifications.' };
+  if (!apiConfigured) return { ok: false, error: 'Sign in to enable notifications.' };
   try {
     setChannelOptedIn(channel, true);
     if (isNativeApp) {
@@ -311,7 +311,7 @@ async function disableNotificationChannel(
 ): Promise<BuddyNotificationResult> {
   setChannelOptedIn(channel, false);
   try {
-    if (supabaseConfigured) {
+    if (apiConfigured) {
       await syncChannelFlags();
     }
     return { ok: true };
@@ -331,8 +331,8 @@ export function disableStudyNotifications(): Promise<BuddyNotificationResult> {
 export async function unregisterCurrentPushDevice(): Promise<void> {
   setChannelOptedIn('buddy', false);
   setChannelOptedIn('study', false);
-  if (supabaseConfigured) {
-    await supabase.rpc('unregister_push_subscription', { p_device_id: getPushDeviceId() });
+  if (apiConfigured) {
+    await apiClient.rpc('unregister_push_subscription', { p_device_id: getPushDeviceId() });
   }
   if (isNativeApp) {
     await PushNotifications.unregister();
@@ -345,7 +345,7 @@ export async function unregisterCurrentPushDevice(): Promise<void> {
 
 /** Refresh rotated tokens/subscriptions without prompting for permission. */
 export async function syncBuddyPushRegistration(): Promise<void> {
-  if (!pushNotificationsOptedIn() || !supabaseConfigured) return;
+  if (!pushNotificationsOptedIn() || !apiConfigured) return;
   if (isNativeApp) {
     if ((await nativePermission(false)) !== 'granted') return;
     const token = await registerNativeToken();
@@ -359,8 +359,8 @@ export async function syncBuddyPushRegistration(): Promise<void> {
 }
 
 export async function touchActiveBuddy(buddyId: string | null): Promise<void> {
-  if (!buddyPushOptedIn() || !supabaseConfigured) return;
-  await supabase.rpc('touch_push_subscription', {
+  if (!buddyPushOptedIn() || !apiConfigured) return;
+  await apiClient.rpc('touch_push_subscription', {
     p_device_id: getPushDeviceId(),
     p_active_buddy_id: buddyId
   });
@@ -368,8 +368,8 @@ export async function touchActiveBuddy(buddyId: string | null): Promise<void> {
 
 /** Best-effort fast path. The database outbox remains the source of retries. */
 export function notifyBuddyMessage(messageId: string): void {
-  if (!supabaseConfigured) return;
-  void supabase.functions
+  if (!apiConfigured) return;
+  void apiClient.functions
     .invoke('buddy-notifications', { body: { message_id: messageId } })
     .catch(() => undefined);
 }
@@ -401,13 +401,13 @@ export interface SnoozeStatus {
  * Returns ok:false with an error string on failure.
  */
 export async function snoozeNotifications(minutes: number): Promise<BuddyNotificationResult> {
-  if (!supabaseConfigured) {
+  if (!apiConfigured) {
     return { ok: false, error: 'Sign in to manage notification snooze.' };
   }
   if (minutes <= 0) {
     return { ok: false, error: 'Snooze duration must be at least 1 minute.' };
   }
-  const { error } = await supabase.rpc('set_push_quiet_hours', {
+  const { error } = await apiClient.rpc('set_push_quiet_hours', {
     p_device_id: getPushDeviceId(),
     p_quiet_minutes: Math.min(Math.round(minutes), 2880)
   });
@@ -419,10 +419,10 @@ export async function snoozeNotifications(minutes: number): Promise<BuddyNotific
  * Clear an active snooze immediately on this device.
  */
 export async function clearSnooze(): Promise<BuddyNotificationResult> {
-  if (!supabaseConfigured) {
+  if (!apiConfigured) {
     return { ok: false, error: 'Sign in to manage notification snooze.' };
   }
-  const { error } = await supabase.rpc('set_push_quiet_hours', {
+  const { error } = await apiClient.rpc('set_push_quiet_hours', {
     p_device_id: getPushDeviceId(),
     p_quiet_minutes: 0
   });
@@ -435,8 +435,8 @@ export async function clearSnooze(): Promise<BuddyNotificationResult> {
  * Returns { active: false, quietUntil: null } when not snoozed or on error.
  */
 export async function getSnoozeStatus(): Promise<SnoozeStatus> {
-  if (!supabaseConfigured) return { active: false, quietUntil: null };
-  const { data } = await supabase
+  if (!apiConfigured) return { active: false, quietUntil: null };
+  const { data } = await apiClient
     .from('push_subscriptions')
     .select('push_quiet_until')
     .eq('device_id', getPushDeviceId())

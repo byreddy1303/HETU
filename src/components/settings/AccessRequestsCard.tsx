@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { Empty } from '@/components/ui/Empty';
 import { Textarea } from '@/components/ui/Textarea';
-import { supabase, supabaseConfigured } from '@/lib/supabase';
+import { apiClient, apiConfigured } from '@/lib/api-client';
 import { approveRequest, declineRequest } from '@/lib/edge';
 import { useUiStore } from '@/stores/ui';
 import { cn, formatDate } from '@/lib/utils';
@@ -31,11 +31,11 @@ export default function AccessRequestsCard({ userId }: { userId: string | null }
   useEffect(() => {
     let cancelled = false;
     async function check() {
-      if (!supabaseConfigured || !userId) {
+      if (!apiConfigured || !userId) {
         setIsOwner(false);
         return;
       }
-      const { data } = await supabase.rpc('is_owner');
+      const { data } = await apiClient.rpc('is_owner');
       if (!cancelled) setIsOwner(data === true);
     }
     void check();
@@ -61,7 +61,7 @@ export default function AccessRequestsCard({ userId }: { userId: string | null }
 
   async function reload() {
     setLoading(true);
-    const { data, error } = await supabase
+    const { data, error } = await apiClient
       .from('account_requests')
       .select('*')
       .order('created_at', { ascending: false })
@@ -83,7 +83,7 @@ export default function AccessRequestsCard({ userId }: { userId: string | null }
       setInviteUrls({});
       return;
     }
-    const { data: invites } = await supabase
+    const { data: invites } = await apiClient
       .from('invites')
       .select('id,token,expires_at')
       .in('id', inviteIds);

@@ -6,8 +6,7 @@ export default defineConfig({
   plugins: [react()],
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, './src'),
-      'dexie-react-hooks': path.resolve(__dirname, './src/lib/db-hooks.ts')
+      '@': path.resolve(__dirname, './src')
     }
   },
   test: {
@@ -22,14 +21,12 @@ export default defineConfig({
     environmentOptions: {
       jsdom: { url: 'http://localhost' }
     },
-    // Tests must never touch the real database. Blank the Supabase keys so
+    // Tests must never touch the real database. Blank the API configuration so
     // the repository runs in memory-only mode regardless of local env files.
     env: {
-      VITE_BACKEND: 'supabase',
+      VITE_BACKEND: 'fastapi',
       VITE_API_URL: '',
       VITE_CLERK_PUBLISHABLE_KEY: '',
-      VITE_SUPABASE_URL: '',
-      VITE_SUPABASE_ANON_KEY: ''
     }
   }
 });

@@ -4,7 +4,7 @@ import {
   startAccountStateSync,
   stopAccountStateSync
 } from '@/lib/account-state';
-import { supabaseConfigured } from '@/lib/supabase';
+import { apiConfigured } from '@/lib/api-client';
 import { useAuthStore } from '@/stores/auth';
 import { flushAllDurableState } from '@/lib/durability';
 import { awaitInitialPull } from '@/lib/sync';
@@ -20,7 +20,7 @@ export function useAccountState(): void {
   const profileId = useAuthStore((state) => state.profile?.id ?? null);
   const timeZone = useAuthStore((state) => state.profile?.timezone ?? 'Asia/Kolkata');
   const sandbox = useAuthStore((state) => state.sandbox);
-  const canSync = status === 'signed_in' && !sandbox && supabaseConfigured && !!userId;
+  const canSync = status === 'signed_in' && !sandbox && apiConfigured && !!userId;
   const recoveryOwnerId = userId ?? profileId;
 
   useEffect(() => {

@@ -1,4 +1,4 @@
-// 1:1 chat between paired buddies. Full-fledged realtime over Supabase's
+// 1:1 chat between paired buddies. Full-fledged realtime over the Python API's
 // websocket channel:
 //   - postgres_changes INSERT   → new messages appear live
 //   - postgres_changes UPDATE   → read receipts propagate
@@ -13,7 +13,7 @@
 //              Only the raw question (source, format, prompt, image, target
 //              time). The recipient sees the question fresh, no bias.
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import type { RealtimeChannel } from '@/lib/supabase';
+import type { RealtimeChannel } from '@/lib/api-client';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import {
   ArrowDown,
@@ -28,7 +28,7 @@ import {
   UserX,
   X
 } from 'lucide-react';
-import { supabase } from '@/lib/supabase';
+import { apiClient } from '@/lib/api-client';
 import { db } from '@/lib/db';
 import type { BuddyMessageRow, QuestionRow, SharedQuestionRef, UserRow } from '@/types';
 import { formatDate } from '@/lib/utils';
@@ -152,7 +152,7 @@ export default function BuddyChat({ buddyId, meId, peer, onUnfriend, onBack, isV
 
     async function load() {
       const shouldUpdateHistoryHint = initialLoad.current;
-      const { data, error } = await supabase
+      const { data, error } = await apiClient
         .from('buddy_messages')
         .select('*')
         .eq('buddy_id', buddyId)
@@ -174,7 +174,7 @@ export default function BuddyChat({ buddyId, meId, peer, onUnfriend, onBack, isV
     }
     void load();
 
-    const channel: RealtimeChannel = supabase.channel(buddyRealtimeTopic(buddyId));
+    const channel: RealtimeChannel = apiClient.channel(buddyRealtimeTopic(buddyId));
 
     channel
       .on(
@@ -235,7 +235,7 @@ export default function BuddyChat({ buddyId, meId, peer, onUnfriend, onBack, isV
       document.removeEventListener('visibilitychange', resyncWhenVisible);
       if (peerTypingTimer.current) clearTimeout(peerTypingTimer.current);
       channelRef.current = null;
-      void supabase.removeChannel(channel);
+      void apiClient.removeChannel(channel);
     };
   }, [buddyId, meId, retryKey]);
 
@@ -246,7 +246,7 @@ export default function BuddyChat({ buddyId, meId, peer, onUnfriend, onBack, isV
     const previousHeight = list.scrollHeight;
     const previousTop = list.scrollTop;
     setLoadingOlder(true);
-    const { data, error: olderError } = await supabase
+    const { data, error: olderError } = await apiClient
       .from('buddy_messages')
       .select('*')
       .eq('buddy_id', buddyId)
@@ -281,7 +281,7 @@ export default function BuddyChat({ buddyId, meId, peer, onUnfriend, onBack, isV
     const now = new Date().toISOString();
     const unreadIdSet = new Set(unreadIds);
     setMessages((prev) => prev.map((m) => (unreadIdSet.has(m.id) ? { ...m, read_at: now } : m)));
-    const { error } = await supabase
+    const { error } = await apiClient
       .from('buddy_messages')
       .update({ read_at: now })
       .eq('buddy_id', buddyId)
@@ -397,7 +397,7 @@ export default function BuddyChat({ buddyId, meId, peer, onUnfriend, onBack, isV
     };
     setMessages((m) => mergeBuddyMessages(m, [optimistic]));
     setDraft('');
-    const { error } = await supabase.from('buddy_messages').insert({
+    const { error } = await apiClient.from('buddy_messages').insert({
       id: optimistic.id,
       buddy_id: buddyId,
       sender_id: meId,
@@ -430,7 +430,7 @@ export default function BuddyChat({ buddyId, meId, peer, onUnfriend, onBack, isV
       read_at: null
     };
     setMessages((m) => mergeBuddyMessages(m, [optimistic]));
-    const { error } = await supabase.from('buddy_messages').insert({
+    const { error } = await apiClient.from('buddy_messages').insert({
       id: optimistic.id,
       buddy_id: buddyId,
       sender_id: meId,

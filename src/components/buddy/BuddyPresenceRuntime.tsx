@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
-import type { RealtimeChannel } from '@/lib/supabase';
+import type { RealtimeChannel } from '@/lib/api-client';
 import { buddyPresenceTopic, buddyPresenceUserIds } from '@/lib/buddy';
-import { supabase, supabaseConfigured } from '@/lib/supabase';
+import { apiClient, apiConfigured } from '@/lib/api-client';
 import { useAuthStore } from '@/stores/auth';
 import { useBuddyPresenceStore } from '@/stores/buddyPresence';
 
@@ -21,7 +21,7 @@ export default function BuddyPresenceRuntime() {
   const sandbox = useAuthStore((state) => state.sandbox);
 
   useEffect(() => {
-    if (authStatus !== 'signed_in' || !userId || sandbox || !supabaseConfigured) return;
+    if (authStatus !== 'signed_in' || !userId || sandbox || !apiConfigured) return;
 
     let disposed = false;
     const presenceChannels = new Map<string, RealtimeChannel>();
@@ -32,7 +32,7 @@ export default function BuddyPresenceRuntime() {
 
     const addPresenceChannel = (buddyId: string) => {
       if (presenceChannels.has(buddyId)) return;
-      const channel = supabase.channel(buddyPresenceTopic(buddyId), {
+      const channel = apiClient.channel(buddyPresenceTopic(buddyId), {
         config: { presence: { key: userId } }
       });
       presenceChannels.set(buddyId, channel);
@@ -48,7 +48,7 @@ export default function BuddyPresenceRuntime() {
     };
 
     const syncPresenceChannels = async () => {
-      const { data, error } = await supabase
+      const { data, error } = await apiClient
         .from('buddies')
         .select('id')
         .eq('status', 'active')
@@ -60,7 +60,7 @@ export default function BuddyPresenceRuntime() {
         if (activeIds.has(buddyId)) continue;
         presenceChannels.delete(buddyId);
         useBuddyPresenceStore.getState().removeBuddy(buddyId);
-        void supabase.removeChannel(channel);
+        void apiClient.removeChannel(channel);
       }
       for (const buddyId of activeIds) addPresenceChannel(buddyId);
     };
@@ -68,7 +68,7 @@ export default function BuddyPresenceRuntime() {
     void syncPresenceChannels();
 
     // Keep the channel set current when a request is accepted, paused, or removed.
-    const relationshipChannel = supabase
+    const relationshipChannel = apiClient
       .channel(`buddy-presence-links:${userId}`)
       .on(
         'postgres_changes',
@@ -94,8 +94,8 @@ export default function BuddyPresenceRuntime() {
       disposed = true;
       document.removeEventListener('visibilitychange', refreshWhenVisible);
       window.removeEventListener('focus', refreshWhenVisible);
-      void supabase.removeChannel(relationshipChannel);
-      for (const channel of presenceChannels.values()) void supabase.removeChannel(channel);
+      void apiClient.removeChannel(relationshipChannel);
+      for (const channel of presenceChannels.values()) void apiClient.removeChannel(channel);
       presenceChannels.clear();
       presenceStore.reset();
     };

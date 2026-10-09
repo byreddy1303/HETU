@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { useLiveQuery } from 'dexie-react-hooks';
+import { useLiveQuery } from '@/lib/db-hooks';
 import { Check, Clipboard, Printer } from 'lucide-react';
 import PageHeader from '@/components/layout/PageHeader';
 import { Card, CardBody, CardHeader } from '@/components/ui/Card';

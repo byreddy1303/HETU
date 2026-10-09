@@ -19,7 +19,7 @@ import { type FormEvent, useCallback, useEffect, useMemo, useState } from 'react
 import { Link, useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence, useReducedMotion } from 'motion/react';
 import { BookOpen, Check, MessageSquarePlus, RefreshCcw, Search, UserPlus, X } from 'lucide-react';
-import type { RealtimeChannel } from '@/lib/supabase';
+import type { RealtimeChannel } from '@/lib/api-client';
 import PageHeader from '@/components/layout/PageHeader';
 import { Card, CardBody } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
@@ -27,7 +27,7 @@ import { Dialog } from '@/components/ui/Dialog';
 import { Textarea } from '@/components/ui/Textarea';
 import BuddyChat from '@/components/buddy/BuddyChat';
 import { BuddyAvatar } from '@/components/buddy/BuddyAvatar';
-import { supabase, supabaseConfigured } from '@/lib/supabase';
+import { apiClient, apiConfigured } from '@/lib/api-client';
 import { sendBuddyRequest } from '@/lib/edge';
 import { useAuth } from '@/hooks/useAuth';
 import { useUiStore } from '@/stores/ui';
@@ -150,7 +150,7 @@ export default function Buddy() {
     if (!userId) return;
     setLoading(true);
     setError(null);
-    const { data, error } = await supabase
+    const { data, error } = await apiClient
       .from('buddies')
       .select('*')
       .or(`user_a.eq.${userId},user_b.eq.${userId}`)
@@ -168,7 +168,7 @@ export default function Buddy() {
     // with placeholder peers rather than blocking chat.
     const peerMap = new Map<string, PeerLite>();
     if (rows.length > 0) {
-      const { data: peers, error: peersErr } = await supabase.rpc('list_buddy_peers');
+      const { data: peers, error: peersErr } = await apiClient.rpc('list_buddy_peers');
       if (peersErr) {
         console.warn('[buddy] list_buddy_peers failed:', peersErr.message);
       }
@@ -191,13 +191,13 @@ export default function Buddy() {
     await Promise.all(
       activeRows.map(async (v) => {
         const [{ data: msg }, { count }] = await Promise.all([
-          supabase
+          apiClient
             .from('buddy_messages')
             .select('id, buddy_id, sender_id, kind, body, question_ref, created_at, read_at')
             .eq('buddy_id', v.row.id)
             .order('created_at', { ascending: false })
             .limit(1),
-          supabase
+          apiClient
             .from('buddy_messages')
             .select('id', { count: 'exact', head: true })
             .eq('buddy_id', v.row.id)
@@ -217,13 +217,13 @@ export default function Buddy() {
     async (buddyId: string) => {
       if (!userId) return;
       const [{ data: message }, { count }] = await Promise.all([
-        supabase
+        apiClient
           .from('buddy_messages')
           .select('id, buddy_id, sender_id, kind, body, question_ref, created_at, read_at')
           .eq('buddy_id', buddyId)
           .order('created_at', { ascending: false })
           .limit(1),
-        supabase
+        apiClient
           .from('buddy_messages')
           .select('id', { count: 'exact', head: true })
           .eq('buddy_id', buddyId)
@@ -241,7 +241,7 @@ export default function Buddy() {
   );
 
   useEffect(() => {
-    if (!userId || sandbox || !supabaseConfigured) {
+    if (!userId || sandbox || !apiConfigured) {
       setBuddies([]);
       return;
     }
@@ -250,8 +250,8 @@ export default function Buddy() {
 
   // Live message previews and unread badges for every active thread.
   useEffect(() => {
-    if (!userId || sandbox || !supabaseConfigured) return;
-    const channel = supabase
+    if (!userId || sandbox || !apiConfigured) return;
+    const channel = apiClient
       .channel(`buddy-previews:${userId}`)
       .on(
         'postgres_changes',
@@ -265,15 +265,15 @@ export default function Buddy() {
       )
       .subscribe();
     return () => {
-      void supabase.removeChannel(channel);
+      void apiClient.removeChannel(channel);
     };
   }, [userId, sandbox, refreshPreview]);
 
   // Live tab updates: any change on public.buddies that includes us triggers
   // a reload so incoming requests / accepts / declines land without refresh.
   useEffect(() => {
-    if (!userId || sandbox || !supabaseConfigured) return;
-    const channel: RealtimeChannel = supabase
+    if (!userId || sandbox || !apiConfigured) return;
+    const channel: RealtimeChannel = apiClient
       .channel(`buddies:${userId}`)
       .on(
         'postgres_changes',
@@ -297,7 +297,7 @@ export default function Buddy() {
       )
       .subscribe();
     return () => {
-      void supabase.removeChannel(channel);
+      void apiClient.removeChannel(channel);
     };
   }, [userId, sandbox, reload]);
 
@@ -349,7 +349,7 @@ export default function Buddy() {
   async function onRespond(bId: string, action: 'accept' | 'decline', reason = '') {
     setBusyId(bId);
     try {
-      const { error } = await supabase.rpc('respond_buddy_request', {
+      const { error } = await apiClient.rpc('respond_buddy_request', {
         b_id: bId,
         action,
         reason: reason.trim() || null
@@ -378,7 +378,7 @@ export default function Buddy() {
   async function onCancelRequest(bId: string) {
     setBusyId(bId);
     try {
-      const { error } = await supabase.rpc('cancel_buddy_request', { b_id: bId });
+      const { error } = await apiClient.rpc('cancel_buddy_request', { b_id: bId });
       if (error) {
         pushToast(error.message, 'neutral');
         return;
@@ -412,7 +412,7 @@ export default function Buddy() {
   }
 
   async function onUnfriend(bId: string) {
-    const { error } = await supabase.rpc('unfriend_buddy', { b_id: bId });
+    const { error } = await apiClient.rpc('unfriend_buddy', { b_id: bId });
     if (error) {
       pushToast(error.message, 'neutral');
       return;
@@ -469,7 +469,7 @@ export default function Buddy() {
     }
   }, [active, activeId, desktopLayout, linkedChatId, mobileView]);
 
-  const showLocalMsg = sandbox || !supabaseConfigured;
+  const showLocalMsg = sandbox || !apiConfigured;
 
   if (showLocalMsg) {
     return (

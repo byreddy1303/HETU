@@ -122,3 +122,25 @@ async def test_delta_import_updates_mutable_normalized_rows(db, tmp_path: Path) 
     assert buddy is not None and buddy.status == "active"
     assert message is not None and message.read_at is not None
     assert await db.scalar(select(func.count()).select_from(DataImport)) == 2
+
+
+@pytest.mark.asyncio
+async def test_delta_import_preserves_deletion_when_payload_is_unchanged(db, tmp_path):
+    dump = tmp_path / "source.sql"
+    write_dump(dump)
+    await import_source_dump(db, dump)
+    original = dump.read_text()
+    original = original.replace(
+        '"created_at") FROM stdin;\n', '"created_at", "deleted_at") FROM stdin;\n'
+    )
+    original = original.replace("2026-09-01 00:00:00+00\n", "2026-09-01 00:00:00+00\t\\N\n")
+    original = original.replace(
+        "2026-09-02 00:00:00+00\n", "2026-09-02 00:00:00+00\t2026-10-01 00:00:00+00\n"
+    )
+    original = original.replace("2026-09-03 00:00:00+00\n", "2026-09-03 00:00:00+00\t\\N\n")
+    dump.write_text(original)
+    await import_source_dump(db, dump)
+    session = await db.scalar(select(Record).where(Record.collection == "sessions"))
+    assert session.deleted_at is not None
+    assert session.version == 2
+    assert session.data["insight"] == "line one\nline two"

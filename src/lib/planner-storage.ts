@@ -1,5 +1,5 @@
 // Session-memory cache helpers for the calendar-based Planner. Signed-in plans
-// are durably persisted in Supabase by planner-cloud; these user-scoped rows
+// are durably persisted in Postgres by planner-cloud; these user-scoped rows
 // keep editing instant and preserve an offline cache.
 //
 // Storage keys:

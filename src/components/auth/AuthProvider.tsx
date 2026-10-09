@@ -11,6 +11,5 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
       <p>{backendConfig.error}</p>
     </main>
   );
-  if (!backendConfig.fastapi) return children;
   return <Suspense fallback={<LoadingScreen />}><ClerkRuntime>{children}</ClerkRuntime></Suspense>;
 }

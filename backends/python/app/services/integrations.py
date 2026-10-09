@@ -40,13 +40,12 @@ async def clerk_create_user(
     payload = {
         "username": username,
         "email_address": [email],
+        "email_address_identification_status": ["verified" if email_verified else "reserved"],
         "password": password,
         "external_id": user_id,
         "first_name": name,
         "private_metadata": {"internal_user_id": user_id},
     }
-    if email_verified:
-        payload["email_address_identification_status"] = ["verified"]
     return await _clerk_request(settings, "POST", "/users", json=payload)
 
 

@@ -1,4 +1,4 @@
-// Supabase-shaped events over the compatibility API's authenticated socket.
+// Database events over the compatibility API's authenticated socket.
 // Server-side authorization remains mandatory; these filters only route UI events.
 type Row = Record<string, unknown>;
 type Kind = 'postgres_changes' | 'broadcast' | 'presence';

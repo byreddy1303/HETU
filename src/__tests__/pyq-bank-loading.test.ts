@@ -4,7 +4,7 @@ const subject = {
   slug: 'algorithms',
   label: 'Algorithms',
   count: 0,
-  file: '/pyq/algorithms.json',
+  file: '/api/v1/pyq/subjects/algorithms',
   topics: []
 };
 beforeEach(() => {
@@ -47,10 +47,26 @@ describe('PYQ bank loading recovery', () => {
       )
       .mockResolvedValueOnce(Response.json({ bankVersion: 'current', questions: [] }));
     const { loadPyqQuestions, PYQ_BANK_REQUEST_TIMEOUT_MS } = await import('@/lib/pyq');
-    const failed = expect(loadPyqQuestions([subject], 'current')).rejects.toThrow('too long');
+    const failed = expect(loadPyqQuestions([subject], 'current')).rejects.toThrow('timed out');
     await vi.advanceTimersByTimeAsync(PYQ_BANK_REQUEST_TIMEOUT_MS);
     await failed;
     await expect(loadPyqQuestions([subject], 'current')).resolves.toEqual([]);
     expect(fetch).toHaveBeenCalledTimes(2);
   });
+});
+
+
+// Exercise the Python catalog contract while keeping domain writes in fixture RAM.
+vi.mock('@/lib/backend-config', async (importOriginal) => ({
+  ...await importOriginal<typeof import('@/lib/backend-config')>(),
+  backendConfig: { backend: 'fastapi', fastapi: true, error: null, apiUrl: '/api', clerkKey: 'pk_test_fixture' }
+}));
+vi.mock('@/lib/api-client', async () => ({
+  apiConfigured: false,
+  apiClient: (await import('@/lib/fastapi-client')).fastapiClient
+}));
+beforeEach(async () => {
+  const { configureClerkRuntime } = await import('@/lib/fastapi-client');
+  configureClerkRuntime({ loaded: true, user: { id: 'test-catalog-reader' },
+    getToken: async () => 'test-session', signOut: async () => {} });
 });

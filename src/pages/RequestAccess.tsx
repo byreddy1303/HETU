@@ -1,6 +1,6 @@
 // Public landing + access-request form. Rendered outside RequireAuth.
 // Sells what HETU is in one screen, then lets an outsider ask to join.
-// The owner receives a mail and decides from Settings → Access requests.
+// The owner reviews requests in Settings → Access requests.
 import { useMemo, useRef, useState, type FormEvent, type ReactNode } from 'react';
 import { Link, Navigate } from 'react-router-dom';
 import { differenceInCalendarDays, parseISO } from 'date-fns';
@@ -65,7 +65,7 @@ export default function RequestAccess() {
         <Brand size="sm" />
         <div className="flex items-center gap-3">
           <Link to="/auth" className="u-label hover:text-text">
-            I have an invite
+            Sign in
           </Link>
           <ThemeToggle />
         </div>
@@ -89,7 +89,7 @@ export default function RequestAccess() {
                 Ask to join.
               </h2>
               <p className="mt-1 text-[13px] leading-relaxed text-text-muted">
-                Three fields. Real reply, usually within a day.
+                Send your request for the owner to review.
               </p>
             </div>
 
@@ -134,7 +134,7 @@ export default function RequestAccess() {
                   />
                 </Field>
 
-                <Field label="Email" htmlFor="ra-email" hint="We'll send the invite here.">
+                <Field label="Email" htmlFor="ra-email" hint="The email address to associate with your invitation.">
                   <Input
                     id="ra-email"
                     type="email"
@@ -313,13 +313,13 @@ function SentPanel({ dedup, onReset }: { dedup: boolean; onReset: () => void }) 
         </p>
         <p className="mt-1 text-[12.5px] leading-relaxed text-text-muted">
           {dedup
-            ? 'We already have an open request from this email — a reply is on the way.'
-            : 'You’ll get a reply at the email you provided, usually within a day. Approvals come with an invite link that expires in 7 days.'}
+            ? 'We already have an open request from this email. The owner can review it in HETU.'
+            : 'Your request is saved for the owner to review. If approved, the owner can share an invitation link with you. Automated invitation emails are currently unavailable.'}
         </p>
       </div>
       <div className="mt-5 flex items-center justify-between text-[12px]">
         <Link to="/auth" className="text-accent hover:underline">
-          Already have an invite? Sign in
+          Already have an account? Sign in
         </Link>
         <button
           type="button"

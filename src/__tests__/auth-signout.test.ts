@@ -1,4 +1,4 @@
-import type { User } from '@supabase/supabase-js';
+import type { ApiUser as User } from '@/lib/fastapi-client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
@@ -21,9 +21,9 @@ vi.mock('@/lib/buddyNotifications', () => ({
   unregisterCurrentPushDevice: mocks.unregisterCurrentPushDevice
 }));
 
-vi.mock('@/lib/supabase', () => ({
-  supabaseConfigured: true,
-  supabase: {
+vi.mock('@/lib/api-client', () => ({
+  apiConfigured: true,
+  apiClient: {
     auth: {
       signOut: mocks.authSignOut,
       getSession: mocks.authGetSession,

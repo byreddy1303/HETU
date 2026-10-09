@@ -1,4 +1,4 @@
-import { supabase } from '@/lib/supabase';
+import { apiClient } from '@/lib/api-client';
 
 export const STUDY_NOTIFICATION_CATEGORIES = [
   { id: 'dashboard', label: 'Daily overview', route: '/', action: 'View today' },
@@ -46,7 +46,7 @@ export function parseNotificationTime(value: string): { hour: number; minute: nu
 }
 
 export async function ensureStudyNotificationPreferences(): Promise<StudyNotificationPreference[]> {
-  const { data, error } = await supabase.rpc('ensure_study_notification_preferences');
+  const { data, error } = await apiClient.rpc('ensure_study_notification_preferences');
   if (error) throw new Error(error.message);
   return (data as StudyNotificationPreference[] | null) ?? [];
 }
@@ -59,7 +59,7 @@ export async function updateStudyNotificationPreference(
   // When the user changes the scheduled time, clear last_sent_on so the cron
   // can fire at the new time today rather than waiting until tomorrow.
   const isTimeChange = patch.hour_local !== undefined || patch.minute_local !== undefined;
-  const { error } = await supabase
+  const { error } = await apiClient
     .from('study_notification_preferences')
     .update({
       ...patch,
@@ -75,7 +75,7 @@ export async function sendStudyNotificationTest(
   userId: string,
   category: StudyNotificationCategory
 ): Promise<void> {
-  const { data, error } = await supabase.functions.invoke('study-notifications', {
+  const { data, error } = await apiClient.functions.invoke('study-notifications', {
     body: { user_id: userId, category, force: true, test: true }
   });
   if (error) throw new Error(error.message);

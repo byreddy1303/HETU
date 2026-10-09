@@ -7,7 +7,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { ArrowRight, X } from 'lucide-react';
-import { supabase, supabaseConfigured } from '@/lib/supabase';
+import { apiClient, apiConfigured } from '@/lib/api-client';
 import { useAuthStore } from '@/stores/auth';
 import { db } from '@/lib/db';
 import { Button } from '@/components/ui/Button';
@@ -68,7 +68,7 @@ export default function WelcomeOverlay() {
       } catch {
         // If Dexie fails, fall through to the account check.
       }
-      if (sandbox || !supabaseConfigured) {
+      if (sandbox || !apiConfigured) {
         if (!cancelled && !dismissed.current) setVisible(true);
         return;
       }
@@ -90,9 +90,9 @@ export default function WelcomeOverlay() {
       // Ignore device-marker errors; the account marker may still succeed.
     }
     setVisible(false);
-    if (sandbox || !supabaseConfigured) return;
+    if (sandbox || !apiConfigured) return;
     if (!profile) return;
-    const { error } = await supabase
+    const { error } = await apiClient
       .from('users')
       .update({ welcome_seen_at: stamp })
       .eq('id', profile.id);

@@ -14,6 +14,14 @@ function Runtime({ children }: { children: ReactNode }) {
   const [signingOut, setSigningOut] = useState(false);
 
   useEffect(() => {
+    if (isLoaded && userLoaded) return;
+    const timeout = setTimeout(() => {
+      setError('Sign-in took too long to start. Check your connection and reload to try again.');
+    }, 15_000);
+    return () => clearTimeout(timeout);
+  }, [isLoaded, userLoaded]);
+
+  useEffect(() => {
     if (!isLoaded || !userLoaded) return;
     const controller = new AbortController();
     setBound(false);
@@ -91,8 +99,11 @@ function Runtime({ children }: { children: ReactNode }) {
       <h1>Unable to load your account</h1>
       <p>{error}</p>
       <div className="mt-4 flex gap-3">
-        <Button onClick={() => setRetry((value) => value + 1)} disabled={signingOut}>Try again</Button>
-        <Button variant="secondary" disabled={signingOut} onClick={async () => {
+        <Button onClick={() => {
+          if (!isLoaded || !userLoaded) window.location.reload();
+          else setRetry((value) => value + 1);
+        }} disabled={signingOut}>Try again</Button>
+        <Button variant="secondary" disabled={signingOut || !isLoaded} onClick={async () => {
           setSigningOut(true);
           try {
             await signOut();
@@ -110,7 +121,8 @@ function Runtime({ children }: { children: ReactNode }) {
 
 export default function ClerkRuntime({ children }: { children: ReactNode }) {
   return (
-    <ClerkProvider publishableKey={backendConfig.clerkKey}>
+    <ClerkProvider publishableKey={backendConfig.clerkKey}
+      proxyUrl={import.meta.env.VITE_CLERK_PROXY_URL || '/__clerk'}>
       <Runtime>{children}</Runtime>
     </ClerkProvider>
   );

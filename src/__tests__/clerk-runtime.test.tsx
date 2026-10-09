@@ -77,6 +77,17 @@ describe('Clerk provider lifecycle', () => {
 
 
 describe('account recovery after startup errors', () => {
+  it('times out when the sign-in SDK never loads', async () => {
+    vi.useFakeTimers();
+    const { default: Runtime } = await import('@/components/auth/ClerkRuntime');
+    render(<Runtime><p>Authenticated application</p></Runtime>);
+    await act(() => vi.advanceTimersByTimeAsync(15_000));
+    expect(screen.getByRole('alert')).toHaveTextContent('Sign-in took too long to start');
+    expect(screen.getByRole('button', { name: 'Try again' })).toBeEnabled();
+    expect(screen.getByRole('button', { name: 'Sign out' })).toBeDisabled();
+    expect(fetch).not.toHaveBeenCalled();
+  });
+
   it('can retry a failed account lookup', async () => {
     vi.mocked(fetch).mockRejectedValueOnce(new TypeError('Network unavailable'));
     clerk.loaded = true;

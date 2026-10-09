@@ -15,6 +15,7 @@ from prometheus_client import Counter, Histogram, make_asgi_app
 from starlette.middleware.trustedhost import TrustedHostMiddleware
 
 from app.api.router import api_router, root_router
+from app.api.routes.clerk_proxy import router as clerk_proxy_router
 from app.core.config import get_settings
 from app.core.logging import configure_logging
 from app.db.session import close_database
@@ -193,6 +194,7 @@ async def root() -> dict[str, str]:
 
 
 app.include_router(root_router)
+app.include_router(clerk_proxy_router)
 app.include_router(api_router, prefix=settings.api_prefix)
 app.mount("/metrics", make_asgi_app())
 if mcp_asgi is not None:

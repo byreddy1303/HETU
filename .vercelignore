@@ -12,6 +12,7 @@ tmp/
 .ua/
 backups/
 backends/typescript/
+src/__tests__/
 backends/python/.venv/
 **/__pycache__/
 **/.pytest_cache/

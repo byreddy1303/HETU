@@ -8,19 +8,29 @@ from app.api.routes import clerk_proxy
 from app.core.config import Settings
 
 
-def request():
+def request(body=b"identifier=test"):
     async def receive():
-        return {"type": "http.request", "body": b"identifier=test", "more_body": False}
+        return {"type": "http.request", "body": body, "more_body": False}
 
-    return Request({
-        "type": "http", "method": "POST", "path": "/__clerk/v1/client/sign_ins",
-        "query_string": b"test=value", "scheme": "https", "server": ("testserver", 443),
-        "client": ("127.0.0.1", 1234),
-        "headers": [(b"host", b"testserver"), (b"clerk-secret-key", b"attacker"),
-                    (b"clerk-proxy-url", b"https://attacker.invalid"),
-                    (b"x-vercel-forwarded-for", b"192.0.2.1"),
-                    (b"content-type", b"application/x-www-form-urlencoded")],
-    }, receive)
+    return Request(
+        {
+            "type": "http",
+            "method": "POST",
+            "path": "/__clerk/v1/client/sign_ins",
+            "query_string": b"test=value",
+            "scheme": "https",
+            "server": ("testserver", 443),
+            "client": ("127.0.0.1", 1234),
+            "headers": [
+                (b"host", b"testserver"),
+                (b"clerk-secret-key", b"attacker"),
+                (b"clerk-proxy-url", b"https://attacker.invalid"),
+                (b"x-vercel-forwarded-for", b"192.0.2.1"),
+                (b"content-type", b"application/x-www-form-urlencoded"),
+            ],
+        },
+        receive,
+    )
 
 
 @pytest.mark.asyncio
@@ -29,21 +39,28 @@ async def test_proxy_keeps_fixed_destination_and_preserves_body_and_cookies(monk
 
     def handler(upstream):
         seen.append(upstream)
-        return httpx.Response(302, content=b"redirect", headers=[
-            ("location", "https://frontend-api.clerk.dev/v1/client"),
-            ("set-cookie", "one=1; Secure; HttpOnly"),
-            ("set-cookie", "two=2; Secure; HttpOnly"),
-            ("clerk-secret-key", "must-not-leak"),
-            ("cache-control", "public, max-age=3600"),
-        ])
+        return httpx.Response(
+            302,
+            content=b"redirect",
+            headers=[
+                ("location", "https://frontend-api.clerk.dev/v1/client"),
+                ("set-cookie", "one=1; Secure; HttpOnly"),
+                ("set-cookie", "two=2; Secure; HttpOnly"),
+                ("clerk-secret-key", "must-not-leak"),
+                ("cache-control", "public, max-age=3600"),
+            ],
+        )
 
     original = httpx.AsyncClient
-    monkeypatch.setattr(clerk_proxy.httpx, "AsyncClient", lambda **kwargs: original(
-        transport=httpx.MockTransport(handler), **kwargs
-    ))
-    settings = Settings(clerk_secret_key=SecretStr("synthetic-secret"),
-                        app_url="https://hetu-app.vercel.app")
-    result = await clerk_proxy.proxy_frontend_api("v1/client/sign_ins", request(), settings)
+    monkeypatch.setattr(
+        clerk_proxy.httpx,
+        "AsyncClient",
+        lambda **kwargs: original(transport=httpx.MockTransport(handler), **kwargs),
+    )
+    settings = Settings(
+        clerk_secret_key=SecretStr("synthetic-secret"), app_url="https://hetu-app.vercel.app"
+    )
+    result = await clerk_proxy.proxy_frontend_api("v1/client/sign_ins", request(), settings, None)
     assert len(seen) == 1  # Redirects must never forward the secret to a second host.
     assert str(seen[0].url) == "https://frontend-api.clerk.dev/v1/client/sign_ins?test=value"
     assert seen[0].content == b"identifier=test"
@@ -60,5 +77,43 @@ async def test_proxy_keeps_fixed_destination_and_preserves_body_and_cookies(monk
 @pytest.mark.asyncio
 async def test_unconfigured_sign_in_fails_closed():
     with pytest.raises(HTTPException) as error:
-        await clerk_proxy.proxy_frontend_api("v1/client", request(), Settings())
+        await clerk_proxy.proxy_frontend_api("v1/client", request(), Settings(), None)
     assert error.value.status_code == 503
+
+
+@pytest.mark.asyncio
+async def test_username_is_resolved_privately_without_changing_auth_strategy(db, monkeypatch):
+    from urllib.parse import parse_qs
+
+    from app.db.models import User
+
+    db.add(User(id="learner", username="alex", email="alex@example.com"))
+    await db.commit()
+    seen = []
+
+    def handler(upstream):
+        seen.append(parse_qs(upstream.content.decode()))
+        return httpx.Response(401, json={"errors": [{"message": "Incorrect password"}]})
+
+    original = httpx.AsyncClient
+    monkeypatch.setattr(
+        clerk_proxy.httpx,
+        "AsyncClient",
+        lambda **kwargs: original(transport=httpx.MockTransport(handler), **kwargs),
+    )
+    settings = Settings(clerk_secret_key=SecretStr("synthetic-secret"))
+    response = await clerk_proxy.proxy_frontend_api(
+        "v1/client/sign_ins",
+        request(b"strategy=password&identifier=ALEX&password=synthetic-password"),
+        settings,
+        db,
+    )
+    assert seen == [
+        {
+            "strategy": ["password"],
+            "identifier": ["alex@example.com"],
+            "password": ["synthetic-password"],
+        }
+    ]
+    assert response.status_code == 401  # A lookup alone must never authenticate.
+    assert b"alex@example.com" not in response.body

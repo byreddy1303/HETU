@@ -15,6 +15,7 @@ from app.db.session import get_db
 from app.main import app
 from app.mcp_server import ClerkOAuthVerifier, create_mcp_server
 from app.services.pyq_catalog import prepare_catalog_rows
+from app.services.records import upsert_records
 from tests.test_learning_library import capture
 from tests.test_pyq_catalog import sample_question
 
@@ -39,6 +40,12 @@ async def test_oauth_mcp_transport_exposes_and_executes_learning_workflow(monkey
             )
         )
         db.add(PyqCatalogQuestion(bank_version="v1", **catalog_rows[0]))
+        await upsert_records(
+            db,
+            owner_id="internal_user",
+            collection="formulas",
+            items=[{"id": "bayes-formula", "name": "Bayes normalization", "expression": "P(E)"}],
+        )
         await db.commit()
 
     settings = Settings(
@@ -106,6 +113,61 @@ async def test_oauth_mcp_transport_exposes_and_executes_learning_workflow(monkey
             assert saved.status_code == 200, saved.text
             assert saved.json()["result"].get("isError") is not True
             concept_id = saved.json()["result"]["structuredContent"]["concept_ids"][0]
+
+            evidence = await call(
+                "oat_one",
+                "tools/call",
+                {
+                    "name": "search_study_evidence",
+                    "arguments": {"collection": "formulas", "query": "Bayes"},
+                },
+                301,
+            )
+            assert (
+                evidence.json()["result"]["structuredContent"]["items"][0]["id"] == "bayes-formula"
+            )
+            evidence_draft = {
+                "idempotency_key": "mcp-evidence-link",
+                "source_concept_id": concept_id,
+                "target_collection": "formulas",
+                "target_record_id": "bayes-formula",
+                "rationale": "The denominator normalizes posterior weights.",
+            }
+            linked_evidence = await call(
+                "oat_one",
+                "tools/call",
+                {"name": "link_study_evidence", "arguments": {"draft": evidence_draft}},
+                302,
+            )
+            assert linked_evidence.json()["result"]["structuredContent"]["version"] == 1
+            replayed_evidence = await call(
+                "oat_one",
+                "tools/call",
+                {"name": "link_study_evidence", "arguments": {"draft": evidence_draft}},
+                303,
+            )
+            assert (
+                replayed_evidence.json()["result"]["structuredContent"]["idempotent_replay"] is True
+            )
+            read_evidence = await call(
+                "oat_one",
+                "tools/call",
+                {
+                    "name": "get_study_evidence",
+                    "arguments": {"collection": "formulas", "record_id": "bayes-formula"},
+                },
+                304,
+            )
+            assert (
+                read_evidence.json()["result"]["structuredContent"]["item"]["expression"] == "P(E)"
+            )
+            denied_evidence = await call(
+                "oat_read",
+                "tools/call",
+                {"name": "link_study_evidence", "arguments": {"draft": evidence_draft}},
+                305,
+            )
+            assert denied_evidence.json()["result"]["isError"] is True
 
             second_capture = capture("mcp-save-second-concept")
             second_capture["insights"][0].update(

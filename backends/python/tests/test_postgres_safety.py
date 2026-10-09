@@ -12,6 +12,7 @@ from sqlalchemy.exc import DBAPIError
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
 from app.db.models import EntityRevision, Record, RecordRevision, User
+from app.services.learning_evidence import EvidenceLinkDraft, link_evidence
 from app.services.learning_library import (
     CaptureRequest,
     ConceptLinkDraft,
@@ -191,5 +192,99 @@ async def test_concept_links_use_postgres_identity_locks_and_revision_history():
                 detail["links"][0]["rationale"] == "This prerequisite supports the derived method."
             )
             await db.commit()
+    finally:
+        await engine.dispose()
+
+
+@pytest.mark.asyncio
+async def test_evidence_links_concurrent_receipts_and_revisions():
+    engine = create_async_engine(URL)
+    factory = async_sessionmaker(engine, expire_on_commit=False)
+    owner = str(uuid4())
+    try:
+        async with factory() as db:
+            db.add(User(id=owner))
+            await db.commit()
+            saved = await capture_learning(
+                db,
+                owner_id=owner,
+                app_url="https://hetu.test",
+                request=CaptureRequest.model_validate(
+                    {
+                        "idempotency_key": "pg-evidence-concept",
+                        "sources": [{"kind": "manual", "title": "Probability study"}],
+                        "insights": [
+                            {
+                                "subject": "Probability",
+                                "topic": "Bayes",
+                                "concept": "Normalization",
+                                "core_idea": "Divide by the evidence.",
+                                "full_explanation": "Normalize prior times likelihood.",
+                            }
+                        ],
+                    }
+                ),
+            )
+            await upsert_records(
+                db,
+                collection="formulas",
+                owner_id=owner,
+                items=[{"id": "formula", "name": "Bayes rule", "expression": "P(H|E)"}],
+            )
+            await db.commit()
+        draft = EvidenceLinkDraft(
+            idempotency_key="pg-evidence-connection",
+            source_concept_id=saved["concept_ids"][0],
+            target_collection="formulas",
+            target_record_id="formula",
+            rationale="Formula for the saved explanation.",
+        )
+
+        async def create():
+            async with factory() as db:
+                result = await link_evidence(db, owner_id=owner, draft=draft)
+                await db.commit()
+                return result
+
+        first, second = await asyncio.gather(create(), create())
+        assert first["id"] == second["id"]
+        assert sorted([first["idempotent_replay"], second["idempotent_replay"]]) == [False, True]
+
+        async def revise(suffix):
+            async with factory() as db:
+                try:
+                    result = await link_evidence(
+                        db,
+                        owner_id=owner,
+                        draft=draft.model_copy(
+                            update={
+                                "idempotency_key": f"pg-evidence-edit-{suffix}",
+                                "expected_version": 1,
+                                "rationale": f"Updated rationale {suffix}",
+                            }
+                        ),
+                    )
+                    await db.commit()
+                    return result["version"]
+                except HTTPException as exc:
+                    await db.rollback()
+                    return exc.status_code
+
+        assert sorted(await asyncio.gather(revise("a"), revise("b"))) == [2, 409]
+        async with factory() as db:
+            replay = await link_evidence(db, owner_id=owner, draft=draft)
+            assert replay["version"] == 1
+            detail = await learning_detail(db, owner_id=owner, concept_id=draft.source_concept_id)
+            assert detail["evidence_links"][0]["version"] == 2
+            assert detail["evidence_links"][0]["evidence"]["title"] == "Bayes rule"
+            row = await db.scalar(
+                select(Record).where(
+                    Record.owner_id == owner, Record.collection == "concept_relations"
+                )
+            )
+            revisions = (
+                await db.scalars(select(RecordRevision).where(RecordRevision.record_id == row.id))
+            ).all()
+            assert {item.version for item in revisions} == {1, 2}
     finally:
         await engine.dispose()

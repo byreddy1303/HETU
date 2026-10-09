@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, BookOpenText, ChevronRight, Search, Save } from 'lucide-react';
 import PageHeader from '@/components/layout/PageHeader';
+import StudyEvidenceLinks, { type EvidenceLink } from '@/components/learning/StudyEvidenceLinks';
 import ConceptLinks, { type ConceptLink } from '@/components/learning/ConceptLinks';
 import { backendConfig } from '@/lib/backend-config';
 import { apiRequest } from '@/lib/fastapi-client';
@@ -60,6 +61,8 @@ type Detail = {
   page_history?: Array<{ version: number; recorded_at?: string }>;
   insight_history?: Record<string, Array<{ version: number; revision_reason?: string; full_explanation?: string }>>;
   links?: ConceptLink[];
+  evidence_links?: EvidenceLink[];
+  evidence_links_complete?: boolean;
 };
 
 function ErrorLine({ error }: { error: string | null }) {
@@ -293,6 +296,13 @@ export default function LearningLibrary() {
               const href = safeSourceHref(source.url);
             return <div key={`${capture.id}-${index}`} className="library-source"><strong>{source.title}</strong><span>{source.kind} / saved {new Date(capture.captured_at).toLocaleDateString()}</span>{href && <a href={href} target="_blank" rel="noreferrer">Open source</a>}{source.excerpt && <p>{source.excerpt}</p>}</div>;
             }))}</section>
+            <StudyEvidenceLinks
+              key={detail.page.id}
+              conceptId={detail.page.id}
+              links={detail.evidence_links ?? []}
+              complete={detail.evidence_links_complete}
+              onChanged={() => loadDetail(detail.page.id, showHistory)}
+            />
             <ConceptLinks
               conceptId={detail.page.id}
               links={detail.links ?? []}

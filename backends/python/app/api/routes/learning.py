@@ -3,6 +3,13 @@ from __future__ import annotations
 from fastapi import APIRouter, Query
 
 from app.api.deps import CurrentUser, DbDep, SettingsDep
+from app.services.learning_evidence import (
+    EvidenceCollection,
+    EvidenceLinkDraft,
+    evidence_detail,
+    link_evidence,
+    search_evidence,
+)
 from app.services.learning_library import (
     CaptureRequest,
     ConceptLinkDraft,
@@ -70,5 +77,38 @@ async def edit_insight(
     result = await revise_insight(
         db, owner_id=identity.user_id, insight_id=insight_id, revision=payload
     )
+    await db.commit()
+    return result
+
+
+@router.get("/evidence")
+async def find_evidence(
+    identity: CurrentUser,
+    db: DbDep,
+    collection: EvidenceCollection,
+    q: str = Query(default="", max_length=300),
+    limit: int = Query(default=25, ge=1, le=100),
+    offset: int = Query(default=0, ge=0),
+) -> dict:
+    return await search_evidence(
+        db, owner_id=identity.user_id, collection=collection, query=q, limit=limit, offset=offset
+    )
+
+
+@router.get("/evidence/{collection}/{record_id}")
+async def get_evidence(
+    collection: EvidenceCollection,
+    record_id: str,
+    identity: CurrentUser,
+    db: DbDep,
+) -> dict:
+    return await evidence_detail(
+        db, owner_id=identity.user_id, collection=collection, record_id=record_id
+    )
+
+
+@router.post("/evidence-links")
+async def save_evidence_link(payload: EvidenceLinkDraft, identity: CurrentUser, db: DbDep) -> dict:
+    result = await link_evidence(db, owner_id=identity.user_id, draft=payload)
     await db.commit()
     return result

@@ -12,7 +12,8 @@ it does not mean production data has been migrated or a ChatGPT account connecte
 - [x] Complete capture → durable storage → Library view → detailed retrieval → revision with retry safety in code and isolated tests.
 - [x] Give saved ChatGPT discussions a clear dashboard destination and keep a concept page current when a linked insight improves.
 - [x] Link saved concepts through a validated app and MCP operation, including cycle-safe prerequisite relationships.
-- [ ] Link knowledge to Journal, patterns, formulas, triggers, revision and actual retrieval practice.
+- [x] Connect saved concepts to existing Journal, pattern, formula, trigger, attempt, mock and review evidence through the app and MCP.
+- [ ] Complete linked revision packs and canonical recovery follow-through.
 - [ ] Expose tested planning, diagnosis, sessions, PYQ, mock, weekly, syllabus, heatmap, calibration, and readiness workflows.
 - [x] Expose canonical PYQ search, detail, answer submission, score validation, and app receipt review as a first PYQ slice.
 - [ ] Expose tested Buddy, settings, notifications, exports/imports, recovery, and owner operations.
@@ -33,7 +34,8 @@ it does not mean production data has been migrated or a ChatGPT account connecte
 
 - Python MCP transport advertises OAuth protected-resource metadata and per-tool scopes. The verifier requires an approved client, Clerk OAuth token, user subject, read/write scope, and the exact resource audience. The account resolves to the existing HETU owner; model-supplied owner IDs are not accepted.
 - “Save to HETU” captures immutable sources, distinct structured insights, concept pages, retry receipts, and revision history in one transaction. Search and detail return complete explanations and source links. A test saves through authenticated MCP, reads the same concept through the app API, and searches from a later MCP call.
-- Concept links now connect existing owner-scoped Library entries as related ideas, contrasts, extensions, or directed prerequisites. The Library can create, revise, deactivate, and navigate links. Prerequisite cycles are rejected; edits use optimistic versions and leave revision history. Tests cover the authenticated MCP operation, app interaction, account isolation, retry, stale writes, and cycle rejection. This is concept-to-concept linking; links to Journal, patterns, formulas, and triggers remain outstanding.
+- Concept links now connect existing owner-scoped Library entries as related ideas, contrasts, extensions, or directed prerequisites. The Library can create, revise, deactivate, and navigate links. Prerequisite cycles are rejected; edits use optimistic versions and leave revision history. Tests cover the authenticated MCP operation, app interaction, account isolation, retry, stale writes, and cycle rejection. Links into study records are provided by the evidence workflow below.
+- Saved concepts can now link to existing Journal entries, patterns, formulas, triggers, PYQ attempts, mocks, re-attempts, recovery items, and concept reviews. The app searches records, previews full evidence, saves a rationale, reads linked content, and deactivates versioned links. The same Python domain operations power `search_study_evidence`, `get_study_evidence`, and `link_study_evidence` in MCP. Durable receipts preserve retry results even after subsequent edits. HTTP/MCP ownership and scope tests, app retry/read/remove tests, and PostgreSQL concurrent creation and stale-write tests passed. This does not create attempts or infer mastery.
 - The dashboard now has a Saved discussions launch tile and card, with the same destination in desktop and mobile navigation and workspace search. Connected Python accounts see recent concepts and links into the Library. Legacy accounts see an explicit connection status instead of invented Library content. Tests verify the card and that later discussions refresh the current page while preserving both source captures and the earlier insight revision.
 - Invite-only signup validates an active single-use invitation and its bound email, creates the internal HETU owner and Clerk user, and stores their identity mapping. A failed external signup rolls back the HETU transaction and attempts to remove a partially created Clerk account. Unknown Clerk subjects cannot create owners at first sign-in. Tests mock Clerk calls; no real Clerk account has been created or connected in production.
 - Durable task briefs retain original goals, constraints, corrections, completed/pending steps and receipts. Concept recall/transfer records require actual responses and label assistance and evaluator provenance. The React Library, Workflows, Concept review, and Do now due review panel compile.
@@ -73,7 +75,7 @@ it does not mean production data has been migrated or a ChatGPT account connecte
 | Syllabus | `topic_progress` records | Coverage state with evidence | No |
 | Trigger drill | `trigger_phrases` records | Run and record mixed drills | No |
 | Formulas | `formulas` records | Structured read/write/history | No |
-| Learning Library and topic pages | Python capture/revision, acyclic concept links, React Library, dashboard entry | Links into Journal, patterns, formulas, triggers, merge/split, archive/restore, semantic matching, and live connected verification remain | Partial |
+| Learning Library and topic pages | Python capture/revision, acyclic concept links, React Library, dashboard entry | Merge/split, archive/restore, linked revision packs, and live connected verification remain | Partial |
 | Buddy | Python domain tables and React Buddy | Authorized reads, explicit sharing | No |
 | Settings and reminders | account and notification records | Validated preferences and connection state | No |
 | Export/import/recovery | React backup and Python history | Complete audited migration, restore | No |
@@ -91,3 +93,9 @@ it does not mean production data has been migrated or a ChatGPT account connecte
 | Exam decisions lose marks | Pace and answer/skip habit is explicit | Calibration and mock analysis | Compare actual attempts |
 | Mock analysis has no follow-through | Each priority issue has a later check | Mock → issue → practice → reassessment | Linked work and outcome |
 | Plans overfill available time | Work fits real capacity and due reviews | Planner and Do now actions | Capacity and conflict tests |
+
+## Current continuation
+
+- Learning evidence slice: full Python suite including disposable PostgreSQL passed (64 tests at this check); Ruff lint/format, TypeScript, ESLint, production build, and all frontend tests passed (128 files, 719 tests). The working tree also contains independent authentication/webhook edits; only the learning slice is staged by this task.
+- Live release audit is in progress. Older statements above about production still using the legacy backend require verification: Vercel currently lists Python/Clerk frontend configuration and production Python database/auth variables. MCP-specific variables are absent from the Python production environment list. Do not infer deployed values or successful migration from names alone.
+- A separately committed `source_import` COPY-dump importer and Clerk identity migration exist, together with an encrypted scheduled backup workflow. Their presence supersedes the old claim that all migration/backup work is missing. Production row verification and recovery evidence still need to be checked. GitHub CLI is not authenticated in this shell, so backup job outcomes have not been verified.

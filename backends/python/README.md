@@ -72,6 +72,8 @@ origins; never expose database, Clerk backend, R2, or Redis secrets to the brows
 | `POST /v1/webhooks/clerk` | Verified Clerk identity events |
 | `POST /v1/learning/captures` | Transactional sourced concept and insight capture |
 | `GET /v1/learning/search`, `GET /v1/learning/concepts/{id}` | Search and detailed explanation, sources, and revisions |
+| `GET /v1/learning/evidence`, `GET /v1/learning/evidence/{collection}/{id}` | Search and inspect existing study evidence |
+| `POST /v1/learning/evidence-links` | Versioned connections from concepts to owner-scoped study records |
 | `PATCH /v1/learning/insights/{id}` | Version-checked learning revision |
 | `/v1/workflows`, `/v1/concept-reviews`, `/v1/sections` | Task briefs, actual recall history, mapped record evidence |
 | `GET /v1/pyq/search`, `GET /v1/pyq/questions/{id}` | Filtered versioned bank search and question detail |
@@ -101,7 +103,7 @@ Clerk subject to HETU's internal owner ID; callers cannot supply another owner.
 
 The MCP server currently provides sourced learning capture/retrieval/revision,
 owner-checked concept links (related ideas, contrasts, extensions, and acyclic
-prerequisites), durable task briefs, concept recall responses, versioned PYQ
+prerequisites), versioned connections to Journal/formula/pattern/trigger/practice/review evidence, durable task briefs, concept recall responses, versioned PYQ
 search and individual answer submission, and explicitly partial record context
 for mapped sections.
 PYQ detail hides its key by default; a quarantined key is never exposed. The

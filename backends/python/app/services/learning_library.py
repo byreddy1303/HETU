@@ -469,6 +469,7 @@ async def learning_detail(
             select(Record)
             .where(
                 Record.collection == "concept_relations",
+                Record.data["target_concept_id"].as_string().is_not(None),
                 Record.owner_id == owner_id,
                 Record.deleted_at.is_(None),
             )
@@ -565,6 +566,11 @@ async def learning_detail(
             insight_history[insight_id] = [row.snapshot for row in history]
         result["insight_history"] = insight_history
         result["history_complete"] = len(insight_ids) <= 50
+    from app.services.learning_evidence import concept_evidence
+
+    evidence = await concept_evidence(db, owner_id=owner_id, concept_id=concept_id)
+    result["evidence_links"] = evidence["items"]
+    result["evidence_links_complete"] = evidence["complete"]
     return result
 
 

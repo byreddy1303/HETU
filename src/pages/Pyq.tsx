@@ -1408,7 +1408,7 @@ function PracticeSetup({
                   <p className="mt-3 text-center text-[11px] leading-relaxed text-text-faint">
                     {config.mode === 'exam'
                       ? 'No answer key or correctness is shown before final submission.'
-                      : 'Questions and diagrams are bundled locally. Your answer stays hidden until you commit.'}
+                      : 'Questions and diagrams load from your online question bank. Your answer stays hidden until you commit.'}
                   </p>
                 </div>
               </div>
@@ -2553,7 +2553,7 @@ export default function Pyq() {
       const rows = await questionsForSession(session);
       if (rows.length !== session.question_uids.length) {
         throw new Error(
-          'This saved set no longer matches the local question bank. Discard it before continuing.'
+          'This saved set no longer matches the current question bank. Discard it before continuing.'
         );
       }
       const isExam = session.config.mode === 'exam';

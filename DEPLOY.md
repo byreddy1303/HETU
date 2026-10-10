@@ -12,13 +12,19 @@ Postgres; browser memory is a temporary view of server data.
 - Python: Vercel project `hetu-python-api`, root `backends/python`,
   https://hetu-python-api.vercel.app.
 - Website variables: `VITE_BACKEND=fastapi`, `VITE_API_URL=/api`, and
-  `VITE_CLERK_PUBLISHABLE_KEY`. The website's `/api` rewrite forwards to Python.
+  `VITE_CLERK_PUBLISHABLE_KEY`, and `VITE_CLERK_PROXY_URL=/__clerk`.
+  The website's `/api` and `/__clerk` rewrites forward to Python. The latter
+  proxies production Clerk through the app domain; its secret stays in Python.
 - Android variables: the same backend and Clerk key, with the absolute
-  `VITE_API_URL=https://hetu-python-api.vercel.app`. Copy `.env.capacitor.example`
+  `VITE_API_URL=https://hetu-python-api.vercel.app` and
+  `VITE_CLERK_PROXY_URL=https://hetu-app.vercel.app/__clerk`. Copy `.env.capacitor.example`
   to `.env.capacitor.local` and fill in the publishable key before building.
 - Backend credentials belong only in the Python project's environment. Use the
   restricted `hetu_app` Postgres role; migration-owner credentials must never be
-  deployed. Preview resources are isolated from production.
+  deployed. Configure `CLERK_JWT_KEY` with the matched production public signing
+  key so request authentication verifies signatures without remote JWKS lookups.
+  Update it when the provider rotates signing keys. Preview resources are
+  isolated from production.
 
 Missing API or login configuration blocks startup/builds. It must never select
 another backend or enable device-only saves. Network failures are visible; writes
@@ -31,11 +37,17 @@ Use the current Vercel CLI (`npm i -g vercel@latest`). Run frontend typecheck,
 lint, tests and build, plus Python Ruff and pytest. Database migrations run as a
 separate operator step; deploys never run them automatically.
 
-Create a production deployment with `vercel deploy --prod --skip-domain`.
-Specify `--project hetu-python-api` from the repository root for Python so Vercel
-applies its configured root directory once. Verify the deployment before
-`vercel promote <deployment-url>`. Keep maintenance/previous deployments available
-while resolving release failures. Do not restore a backup over production.
+Deploy clean exports of committed `main`. Use separate exports for website and
+API so the CLI cannot overwrite their `.vercel/project.json` links. Link the
+website export to `hetu`, then run `vercel deploy --prod --skip-domain`.
+Link the API export to `hetu-python-api` and deploy from the export's repository
+root with `vercel deploy --prod --skip-domain --local-config backends/python/vercel.json`.
+Its configured project root applies `backends/python` once. The explicit config
+is necessary: the repository-root config is for the React website.
+Verify API `/health/ready` returns HTTP 200 with database and Redis `ok` before
+`vercel promote <deployment-url>`. Verify authenticated browser flows on the
+primary domain after promotion. Keep previous deployments available while
+resolving release failures. Do not restore a backup over production.
 
 For native builds run `npm run android:apk` or the signed release workflow.
 An existing APK does not receive JavaScript/API configuration changes just because
@@ -49,10 +61,10 @@ The legacy TypeScript/Supabase directory is retained as an archive for migration
 and recovery evidence and excluded from deployments. The Supabase SDK and legacy
 frontend auth flow are removed. `scripts/deploy.sh` is retired.
 
-Before final cutover, stop legacy writes and scheduled jobs, take a final export,
-reconcile all source records and identities into Postgres, and run an encrypted
-backup. Verify authenticated isolation, catalog loading, study writes, retries,
-reload persistence and Android configuration before declaring completion.
+The legacy writer is frozen and its scheduled jobs are stopped. Final source
+reconciliation, identity checks and encrypted recovery verification are recorded
+in [production verification](backends/python/docs/PRODUCTION.md). Reopening the
+archive requires an operator reconciliation and an explicit choice of one writer.
 
 Encrypted daily database backups run in GitHub Actions. See
 [backup recovery](backends/python/docs/backup-recovery.md) and

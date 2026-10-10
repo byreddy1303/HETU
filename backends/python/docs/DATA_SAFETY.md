@@ -1,105 +1,85 @@
-# Data preservation and release gates
+# Data preservation and recovery
 
-No implementation can guarantee that data can never be lost. These controls
-reduce accidental loss; backups, recovery drills, restricted credentials and
-operator review remain mandatory. **The replacement is not cleared for cutover.**
+Production uses one online PostgreSQL database through Python/FastAPI. The
+website and updated Android app share permanent HETU account IDs and records.
+See [production verification](PRODUCTION.md) for the cutover evidence and limits.
 
-## Implemented controls
+## Runtime controls
 
-- Record replacement requires `expected_version`. Missing preconditions return
-  428; stale versions return 409. Identical retry payloads are no-ops.
-- PostgreSQL transaction-scoped identity locks serialize creates and updates.
-- Every insert/update creates an append-only revision in the same transaction.
-  A rollback rolls back both. Existing records are snapshotted during migration.
-- PostgreSQL also snapshots account profiles and file metadata in
-  `entity_revisions`, including changes written outside the API. Recovery of
-  these metadata snapshots is currently an operator task, not a public API.
-- Deletes are tombstones. An ordinary upsert cannot resurrect a deleted record.
-  Authenticated owners can list history and explicitly restore a prior version.
-- Database triggers reject physical DELETE/TRUNCATE of records, users, file
-  metadata and record history; history UPDATE is also rejected. These controls
-  do not protect against a database owner deliberately dropping/disabling them.
-- Clerk deletion disables access without purging records or objects. Previously
-  queued purge jobs fail instead of erasing data.
-- R2 deletion only hides metadata. Restore verifies the retained object. Upload
-  signatures require `If-None-Match: *`, preventing upload-URL replay overwrites.
-  Invalid upload completion does not erase the object. Downloads are private.
-- The old partial importer refuses `--apply`; the newer COPY-dump importer
-  validates source tables, preserves owner IDs, reconciles supported mutable
-  rows, and records source hashes/counts in an import ledger. Destructive
-  downgrade of the preservation migration is disabled. Builds and deploys never
-  execute database migrations or source imports.
+- The deployed `hetu_app` role has SELECT/INSERT/UPDATE and required sequence
+  permissions. It cannot physically delete/truncate data, create schema objects,
+  own tables or disable their preservation triggers. Owner credentials are used
+  only for operator migrations and imports.
+- Replacement writes require `expected_version`: missing preconditions return
+  428 and stale writes return 409. Identical retries are no-ops. Transaction locks
+  serialize changes to the same record.
+- Every record change appends a revision in the same transaction. Database
+  triggers also snapshot profiles and file metadata, including operator writes.
+  History is immutable; physical DELETE/TRUNCATE is rejected on protected tables.
+- UI deletions create tombstones. Upserts cannot implicitly resurrect them.
+  Owners can inspect record history and explicitly restore a previous version.
+  Restoring profiles/file metadata remains an operator operation.
+- Clerk account deletion disables application access and retains data. Queued
+  purge operations fail instead of physically erasing retained records.
+- Source imports preserve account IDs, source timestamps, payloads and tombstones,
+  and record content hashes/counts in an import ledger. Unchanged source payloads
+  do not overwrite subsequent Python changes. Deploys never import data or run
+  migrations automatically.
+- The legacy Supabase writer and its scheduled jobs are retired. Its archive
+  remains readable for recovery; the application has no runtime dependency on it.
+  Retirement SQL and its recovery inverse are in `../ops/`.
 
-## Required before live writes
+## Backups
 
-The `Data safety` GitHub Actions workflow runs the PostgreSQL migration,
-concurrent-write checks, destructive-operation guards, and backup/restore content
-comparison on Python 3.11 and 3.12. It uses disposable PostgreSQL only and no
-production secrets. This is regression protection, not a production backup job.
+GitHub Actions runs an encrypted production backup daily at 02:17 UTC, using the
+read-only `hetu_backup` role and a private Vercel Blob store. Each backup uses a
+repeatable-read snapshot, includes all public tables and a manifest of content
+hashes/counts, and verifies encrypted upload bytes by downloading them again.
+The recipient private key stays offline on the operator's machine; only its
+public key is committed. Never upload the private key to CI or storage.
 
-1. Provision separate production and test Neon, Clerk, Upstash and R2 resources.
-   Never point previews at production databases. Choose the Neon recovery/PITR
-   window explicitly and verify the plan's retention limits in its console.
-2. Use different migration-owner and application credentials. The application
-   role must not own tables, create/drop schema objects, disable triggers,
-   truncate data, or have physical DELETE rights. Grant only the necessary
-   SELECT/INSERT/UPDATE and sequence usage; record_revisions needs SELECT/INSERT
-   only for the trigger, as does entity_revisions. Do not use Neon owner
-   credentials in the API.
-3. Enable R2 bucket retention locks and keep the bucket private. Include
-   `Content-Type` and `If-None-Match` in exact-origin CORS allowed headers.
-   Independently copy objects to a separate backup bucket/account; retain a
-   SHA-256 inventory of object content. An ETag is not always a content checksum.
-4. Schedule encrypted daily full backups off-account, monitor failures and age,
-   and run monthly isolated restore drills. Select and document RPO/RTO; no
-   an encrypted production backup workflow was separately implemented. Public
-   October 6–8 job results show successful encrypted upload/download verification.
-   Independent production restore, backup-age monitoring and retention evidence
-   still require verification; those job results alone do not pass this gate.
-5. Run the complete migration inventory: identities, profile fields, private
-   records, shared relationships/chat, invites, settings, attachments and jobs.
-   The real COPY-dump importer supersedes the partial dry-run audit. Verify the
-   latest source dump, ledger counts, retained history, private object inventory,
-   and Clerk-to-internal-owner mapping against real accounts.
-6. Verify all frontend/native contracts against the Python service. The Clerk
-   runtime has now been separately switched to Python and the old experimental
-   adapter is retired. Preserve evidence for canonical scoring, recovery,
-   notifications, sharing and native behavior. A frontend cutover or reachable
-   health check does not establish complete parity or a successful restore.
+An isolated PostgreSQL 18 restore and full public-table content comparison passed
+before cutover. The final cutover backup must also pass this comparison. A CI
+upload result alone does not prove restore success or an acceptable recovery time.
+Daily backups imply up to approximately one day of changes can fall between runs;
+no specific recovery-time or provider PITR-retention guarantee is claimed here.
+The backup storage shares the Vercel account, so an independently administered
+copy is still useful for recovery from account loss.
 
-## Backup and restore drill
-
-Use PostgreSQL client tools matching the source major version, direct database
-URLs, encrypted local storage, and a restricted read-only backup credential.
+Use matching PostgreSQL client tools and direct database URLs. Credentials must
+come from private environment files or secret injection, never command history.
 
 ```sh
-# Credentials set securely in the shell; never put production URLs in history.
+# BACKUP_DATABASE_URL is a restricted source connection.
 python scripts/backup_database.py backup /secure/backups/hetu-YYYYMMDD
+python scripts/encrypt_database_backup.py encrypt /secure/backups/hetu-YYYYMMDD \
+  config/backup-recipient.pub /secure/backups/hetu-YYYYMMDD.aesgcm
 ```
 
-`BACKUP_DATABASE_URL` supplies the source. This exports a repeatable-read snapshot,
-runs pg_dump against that snapshot, and records per-table row counts and content
-hashes plus the dump hash. A failed run has no complete manifest and is not a
-verified backup. Directories cannot be overwritten. Treat the entire directory
-as sensitive; encrypt and replicate it to storage with independent credentials.
-
-Restore **only to a newly created, empty, isolated database** using pg_restore
-`--no-owner --no-acl --exit-on-error --single-transaction` and the dump. Never use
-`--clean`, production connection strings, or a rollback migration for recovery.
+Restore only into a new, empty, isolated database with pg_restore
+`--no-owner --no-acl --exit-on-error --single-transaction`. Never use `--clean`
+or a production connection for a drill. Then verify every public table:
 
 ```sh
 # RESTORED_DATABASE_URL points to the isolated restored database.
 python scripts/backup_database.py verify /secure/backups/hetu-YYYYMMDD
 ```
 
-Verification is read-only and compares every public table's content and count.
-It does not verify R2 object bytes, Clerk identity ownership, permissions, or
-sequences: check those separately before recovery promotion. A retained history
-in the same database is useful for recovery but is not an independent backup.
+The comparison verifies rows and counts, not external object bytes, Clerk account
+ownership, sequences or restored privileges. Check those separately before a
+recovery promotion. History in the same database is not an independent backup.
+Regression tests use disposable PostgreSQL and exercise concurrency, preservation
+triggers and backup/restore behavior without production secrets.
 
-## Retention versus erasure
+## Storage and retained deletion
 
-Soft-deleted data is retained indefinitely by this implementation. A legitimate
-account-erasure request requires a separately reviewed workflow covering database
-history, objects, replicas and backups. Do not promise erasure after a UI delete.
-Existing signed download URLs may remain valid until their short expiry.
+Existing study images are inline PostgreSQL records. Optional generic R2 file
+uploads need a production bucket; that integration is currently unavailable.
+The implemented file API preserves objects on delete, prevents signed-upload
+replay overwrites with `If-None-Match: *`, and checks retained bytes on restore.
+Configure private bucket retention and separate object backups before enabling it.
+
+Tombstoned data is retained indefinitely. A request for permanent account erasure
+needs a separate workflow covering revisions, external objects, replicas and
+backups. A UI delete does not promise erasure. No implementation can guarantee
+zero loss; operator backups and recovery drills remain necessary.

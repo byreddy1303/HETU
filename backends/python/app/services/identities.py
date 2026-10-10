@@ -18,6 +18,26 @@ async def resolve_identity(db: AsyncSession, identity: Identity) -> Identity:
     if not provider or not subject:
         raise HTTPException(status_code=401, detail="Authentication identity missing")
 
+    # Established mappings are read-only during request authentication. Taking
+    # the same write lock and updating activity on every request serializes all
+    # the concurrent reads used to load an account, delaying even /me behind them.
+    known = (
+        await db.execute(
+            select(UserIdentity, User)
+            .outerjoin(User, User.id == UserIdentity.user_id)
+            .where(UserIdentity.provider == provider, UserIdentity.subject == subject)
+        )
+    ).first()
+    if known is not None:
+        mapping, user = known
+        if user is None:
+            raise HTTPException(status_code=409, detail="Authentication mapping is invalid")
+        if user.deleted_at is not None:
+            raise HTTPException(status_code=403, detail="This account has been deleted")
+        return replace(identity, user_id=user.id, provider=provider, provider_subject=subject)
+
+    # Only creating a legacy mapping needs serialization. Recheck after locking
+    # because another request may have created it while this request waited.
     await lock_identity(db, "user_identities", provider, subject)
     mapping = await db.scalar(
         select(UserIdentity).where(

@@ -1,8 +1,10 @@
 # Python staging services
 
-Provisioned on 2026-09-20 for the **Preview** environment of the Vercel project
-`hetu-python-api`. This is an isolated test environment; the live React app still
-uses Supabase. Existing accounts and learning data have not been migrated.
+This is a historical provisioning record from 2026-09-20 for the **Preview**
+environment of `hetu-python-api`. Its observations describe that date, not the
+current production state. See [production verification](PRODUCTION.md) for the
+Python cutover and migrated accounts. Preview resources remain separate from
+production.
 
 Verified Preview deployment:
 <https://hetu-python-bqsxe7pue-byreddy1303s-projects.vercel.app>

@@ -24,6 +24,8 @@ username login, with an additional identity-read concurrency correction.
 - Established account mappings are resolved with one read query. Parallel data
   loads do not acquire the account-mapping write lock or update its activity
   timestamp on every request. Legacy mapping creation still locks and rechecks.
+- CORS preflight requests do not consume the API data-request budget. Actual
+  reads and writes retain rate limiting, including requests from Android.
 - Missing API/login configuration blocks startup. Failed requests time out and
   offer recovery. There is no offline-only study-data save fallback. Browser
   memory holds temporary server views; authentication cookies and cached app
@@ -47,7 +49,7 @@ Authenticated production checks using two disposable accounts exercised online
 writes and reload reads, account isolation, stale-version rejection, append-only
 history, tombstones, explicit restoration, canonical PYQ scoring and idempotency.
 The frontend regression suite passed 127 files / 716 tests; backend checks passed
-74 tests on disposable PostgreSQL, with no Alembic schema drift. Signup validation
+75 tests on disposable PostgreSQL, with no Alembic schema drift. Signup validation
 was subsequently aligned to Clerk's 15-character minimum and its focused checks
 passed. The Android debug build succeeds and its bundle contains the Python API
 and production login proxy, with no legacy Supabase endpoint.

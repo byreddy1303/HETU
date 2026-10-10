@@ -156,7 +156,11 @@ async def test_concurrent_writers_and_database_guards():
         assert sorted(await asyncio.gather(update("a"), update("b"))) == [200, 409]
         async with factory() as db:
             revisions = list(
-                await db.scalars(select(RecordRevision).where(RecordRevision.record_id == first))
+                await db.scalars(
+                    select(RecordRevision)
+                    .where(RecordRevision.record_id == first)
+                    .order_by(RecordRevision.version)
+                )
             )
             assert len(revisions) == 2
             assert revisions[0].snapshot["answer"] == "original"

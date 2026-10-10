@@ -8,6 +8,7 @@ from app.core.security import Identity
 from app.db.models import User
 from app.db.session import get_db
 from app.main import app
+from app.services.redis import RateLimitResult
 
 
 @pytest.mark.asyncio
@@ -91,3 +92,31 @@ async def test_readiness_reports_unconfigured_redis_as_degraded(db) -> None:
         assert response.json()["checks"]["database"] == "ok"
     finally:
         app.dependency_overrides.clear()
+
+
+@pytest.mark.asyncio
+async def test_cors_preflight_does_not_consume_or_require_data_request_budget(monkeypatch):
+    calls: list[str] = []
+
+    async def exhausted_budget(identifier: str) -> RateLimitResult:
+        calls.append(identifier)
+        return RateLimitResult(False, 120, 0, 2_000_000_000)
+
+    monkeypatch.setattr("app.main.check_rate_limit", exhausted_budget)
+    async with AsyncClient(
+        transport=ASGITransport(app=app), base_url="http://testserver"
+    ) as client:
+        preflight = await client.options(
+            "/v1/me",
+            headers={
+                "Origin": "http://localhost:5173",
+                "Access-Control-Request-Method": "GET",
+                "Access-Control-Request-Headers": "authorization",
+            },
+        )
+        assert preflight.status_code == 200
+        assert preflight.headers["access-control-allow-origin"] == "http://localhost:5173"
+        assert calls == []
+        data_request = await client.get("/v1/me")
+        assert data_request.status_code == 429
+        assert len(calls) == 1

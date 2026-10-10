@@ -139,7 +139,11 @@ async def request_context(request: Request, call_next):
             )
 
     rate_result = None
-    rate_limited = request.url.path.startswith((settings.api_prefix, "/mcp"))
+    # CORS negotiation does not read or mutate application data. Counting it
+    # doubles the budget spent by Android and clients using the direct API URL.
+    rate_limited = request.method != "OPTIONS" and request.url.path.startswith(
+        (settings.api_prefix, "/mcp")
+    )
     if rate_limited and not request.url.path.endswith("/webhooks/clerk"):
         forwarded = request.headers.get("x-forwarded-for", "").split(",", 1)[0].strip()
         identifier = forwarded or (request.client.host if request.client else "unknown")

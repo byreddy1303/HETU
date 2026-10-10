@@ -28,36 +28,12 @@ function topicLookupKey(value: string | null | undefined): string {
     .replace(/\s+/g, ' ');
 }
 
-function sameTopic(value: string | null | undefined, expected: string): boolean {
-  const actualKey = topicLookupKey(value);
-  return actualKey.length > 0 && actualKey === topicLookupKey(expected);
-}
-
-function matchesAlias(
-  subject: string,
-  topic: string | null | undefined,
-  aliases: readonly TopicEvidenceAlias[]
-): boolean {
-  const canonicalSubject = canonicalSubjectLabel(subject);
-  return aliases.some(
-    (alias) =>
-      canonicalSubjectLabel(alias.subject) === canonicalSubject && sameTopic(topic, alias.topic)
-  );
-}
-
 function attemptBankTopicKey(attempt: PyqAttemptRow | undefined): string | null {
   const snapshot = attempt?.question_snapshot;
   if (!snapshot?.subject_slug?.trim() || !snapshot.topic_slug?.trim()) return null;
   return `${snapshot.subject_slug.trim().toLocaleLowerCase()}/${snapshot.topic_slug
     .trim()
     .toLocaleLowerCase()}`;
-}
-
-function daysSince(value: string, today: string): number {
-  return Math.max(
-    0,
-    Math.floor((new Date(`${today}T12:00:00Z`).getTime() - new Date(value).getTime()) / 86_400_000)
-  );
 }
 
 export interface TopicEvidenceQueryItem {

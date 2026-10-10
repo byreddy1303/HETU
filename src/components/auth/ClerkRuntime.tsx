@@ -9,6 +9,7 @@ function Runtime({ children }: { children: ReactNode }) {
   const { isLoaded, getToken, signOut, sessionId } = useAuth();
   const { isLoaded: userLoaded, user } = useUser();
   const [bound, setBound] = useState(false);
+  const [boundUserId, setBoundUserId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [retry, setRetry] = useState(0);
   const [signingOut, setSigningOut] = useState(false);
@@ -21,17 +22,28 @@ function Runtime({ children }: { children: ReactNode }) {
     return () => clearTimeout(timeout);
   }, [isLoaded, userLoaded]);
 
+  const userId = user?.id;
+
   useEffect(() => {
     if (!isLoaded || !userLoaded) return;
     const controller = new AbortController();
-    setBound(false);
-    setError(null);
 
     if (!user) {
+      setBound(false);
+      setBoundUserId(null);
+      setError(null);
       configureClerkRuntime({ loaded: true, user: null, getToken, signOut });
       setBound(true);
       return () => controller.abort();
     }
+
+    if (bound && boundUserId === user.id) {
+      // Already authenticated and bound to this user. Do not flicker or abort in-flight requests.
+      return () => controller.abort();
+    }
+
+    setBound(false);
+    setError(null);
 
     const timeout = setTimeout(() => {
       controller.abort();
@@ -76,6 +88,7 @@ function Runtime({ children }: { children: ReactNode }) {
           signOut
         });
         setBound(true);
+        setBoundUserId(body.id);
       } catch (cause) {
         if (controller.signal.aborted) return;
         resetClerkRuntime();
@@ -90,7 +103,7 @@ function Runtime({ children }: { children: ReactNode }) {
       controller.abort();
     };
 
-  }, [getToken, isLoaded, user, userLoaded, signOut, sessionId, retry]);
+  }, [getToken, isLoaded, userId, userLoaded, signOut, sessionId, retry, bound, boundUserId, user]);
 
   useEffect(() => () => resetClerkRuntime(), []);
 

@@ -155,6 +155,45 @@ export function pyqJournalSourceMap(
     attempts.map((attempt) => [`${attempt.user_id}\u0000${attempt.id}`, attempt] as const)
   );
 
+  const attemptsByDeterministicKey = new Map<string, PyqAttemptRow>();
+  for (const attempt of attempts) {
+    attemptsByDeterministicKey.set(
+      `${attempt.user_id}\u0000${pyqJournalQuestionId(attempt.id)}`,
+      attempt
+    );
+    attemptsByDeterministicKey.set(
+      `${attempt.user_id}\u0000${legacyPyqJournalQuestionId(attempt.id)}`,
+      attempt
+    );
+  }
+
+  // Pre-index legacy candidates by user_id and subject_id for fast matching
+  const legacyAttemptsByUserAndSubject = new Map<
+    string,
+    Array<{
+      attempt: PyqAttemptRow;
+      attemptedAtMs: number;
+      attemptedAtStr: string;
+    }>
+  >();
+  for (const attempt of attempts) {
+    if (attempt.capture_version === 2 || attempt.capture_version === 3) continue;
+    const subId = normalizeSubjectIdentity(attempt.subject, attempt.subject_id).id;
+    if (!subId) continue;
+    const key = `${attempt.user_id}\u0000${subId}`;
+    let list = legacyAttemptsByUserAndSubject.get(key);
+    if (!list) {
+      list = [];
+      legacyAttemptsByUserAndSubject.set(key, list);
+    }
+    const ms = Date.parse(attempt.attempted_at);
+    list.push({
+      attempt,
+      attemptedAtMs: ms,
+      attemptedAtStr: attempt.attempted_at
+    });
+  }
+
   // An explicit link already consumes the one-analysis slot even when another
   // legacy row also happens to match the receipt heuristically. Counting it
   // first keeps the unlinked row independent instead of creating a duplicate
@@ -168,12 +207,38 @@ export function pyqJournalSourceMap(
       questionCountByAttempt.set(linked.id, (questionCountByAttempt.get(linked.id) ?? 0) + 1);
     }
   }
+
   for (const question of journalQuestions) {
     if (question.source_pyq_attempt_id) continue;
-    const deterministic = pyqDeterministicSourceAttemptForJournalQuestion(question, attempts);
-    const candidates = deterministic ? [deterministic] : legacyPyqCandidates(question, attempts);
-    if (candidates.length !== 1) continue;
-    const [candidate] = candidates;
+    let candidate =
+      attemptsByDeterministicKey.get(`${question.user_id}\u0000${question.id}`) ?? null;
+    if (!candidate && /(^|[^a-z0-9])gate([^a-z0-9]|$)/i.test(question.source_ref ?? '')) {
+      const journalSubject = normalizeSubjectIdentity(question.subject, question.subject_id);
+      if (journalSubject.id) {
+        const pool =
+          legacyAttemptsByUserAndSubject.get(`${question.user_id}\u0000${journalSubject.id}`) ?? [];
+        const journalCreatedAtMs = Date.parse(question.created_at);
+        const matches = pool.filter(({ attempt, attemptedAtMs, attemptedAtStr }) => {
+          const timeMatch =
+            Number.isFinite(journalCreatedAtMs) && Number.isFinite(attemptedAtMs)
+              ? attemptedAtMs === journalCreatedAtMs
+              : attemptedAtStr === question.created_at;
+          return (
+            timeMatch &&
+            (question.source_year == null || attempt.year === question.source_year) &&
+            (question.session_id == null || attempt.pyq_session_id === question.session_id) &&
+            (question.mark_decision === undefined ||
+              attempt.mark_decision === question.mark_decision) &&
+            (question.mark_correct === undefined ||
+              attempt.mark_correct === question.mark_correct) &&
+            (question.time_spent_sec === undefined ||
+              attempt.time_spent_sec === question.time_spent_sec)
+          );
+        });
+        if (matches.length === 1) candidate = matches[0].attempt;
+      }
+    }
+    if (!candidate) continue;
     soleCandidate.set(question.id, candidate);
     questionCountByAttempt.set(candidate.id, (questionCountByAttempt.get(candidate.id) ?? 0) + 1);
   }

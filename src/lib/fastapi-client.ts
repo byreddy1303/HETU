@@ -31,9 +31,10 @@ const readyWaiters = new Set<() => void>();
 
 export function configureClerkRuntime(next: ClerkRuntime): () => void {
   const previousId = runtime?.user?.id;
+  const userChanged = previousId !== next.user?.id;
   runtime = next;
-  const current = ++generation;
-  if (previousId !== next.user?.id) {
+  const current = userChanged ? ++generation : generation;
+  if (userChanged) {
     session = null;
     realtime.reset();
   }
@@ -46,7 +47,7 @@ export function configureClerkRuntime(next: ClerkRuntime): () => void {
       for (const listener of listeners) listener(event, value);
     }).catch(() => { /* getSession/request reports token failures; do not manufacture sign-out. */ });
   }
-  return () => { if (generation === current) resetClerkRuntime(); };
+  return () => { if (generation === current && userChanged) resetClerkRuntime(); };
 }
 
 export function resetClerkRuntime(): void {

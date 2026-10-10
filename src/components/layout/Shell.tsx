@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import { motion, useReducedMotion } from 'motion/react';
 import { ChevronRight, PanelLeftOpen, Search } from 'lucide-react';
@@ -167,7 +167,18 @@ export default function Shell() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
           >
-            <Outlet />
+            <Suspense
+              fallback={
+                <div className="flex min-h-[40vh] items-center justify-center py-12" aria-busy="true">
+                  <div className="text-center">
+                    <Brand size="md" className="justify-center opacity-70" />
+                    <p className="u-label mt-3 text-xs">Loading section...</p>
+                  </div>
+                </div>
+              }
+            >
+              <Outlet />
+            </Suspense>
             {pathname === '/' || focusedSession ? null : (
               <ContextualGateTip pathname={pathname} className="mt-4" />
             )}

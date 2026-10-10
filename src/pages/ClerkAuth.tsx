@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { SignIn } from '@clerk/react';
 import { useSignIn } from '@clerk/react/legacy';
+import { isClerkAPIResponseError } from '@clerk/react/errors';
 import { Link, Navigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import Brand from '@/components/shared/Brand';
@@ -50,8 +51,21 @@ export default function ClerkAuth() {
       }
     } catch (cause) {
       if (attempt !== operation.current) return;
-      const message = cause instanceof Error && cause.message.includes('took too long')
+      let message = cause instanceof Error && cause.message.includes('took too long')
         ? cause.message : 'Unable to sign in. Check your username or email and password, then try again.';
+      if (isClerkAPIResponseError(cause)) {
+        const locked = cause.errors.find(({ code }) => code === 'user_locked');
+        if (locked) {
+          message = locked.longMessage || 'Your account is temporarily locked. Wait before trying again.';
+        } else if (cause.errors.some(({ code }) =>
+          code === 'form_password_compromised' || code === 'form_password_pwned'
+        )) {
+          message = 'Your existing PIN or password requires a security reset. Continue below to see your account’s available verification methods.';
+          setVerification(true);
+        } else if (cause.status >= 500) {
+          message = 'The sign-in service is temporarily unavailable. Please try again shortly.';
+        }
+      }
       setError(message);
     } finally {
       clearTimeout(timeout);
@@ -68,6 +82,7 @@ export default function ClerkAuth() {
         {params.get('created') === '1' && (
           <p role="status" className="mt-3 text-sm text-text-muted">Account created. Sign in with your new credentials.</p>
         )}
+        {error && <p role="alert" className="mt-3 text-sm text-danger">{error}</p>}
         {verification ? <SignIn routing="hash" forceRedirectUrl="/" withSignUp={false} /> : (
           <form onSubmit={submit} className="mt-6 space-y-4">
             <label className="block" htmlFor="signin-identifier">
@@ -80,7 +95,6 @@ export default function ClerkAuth() {
               <Input id="signin-password" type="password" autoComplete="current-password" maxLength={256}
                 value={password} onChange={(event) => setPassword(event.target.value)} className="mt-2" required />
             </label>
-            {error && <p role="alert" className="text-sm text-danger">{error}</p>}
             <Button type="submit" disabled={!isLoaded || sending || !identifier.trim() || !password} className="w-full">
               {sending ? 'Signing in…' : 'Sign in'}
             </Button>

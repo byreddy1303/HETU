@@ -42,17 +42,30 @@ operation and its recovery inverse preserves the prior cron states.
 After freezing writes, the final public export imported and compared **1,680
 source rows with zero mismatches**. All four original account profiles and
 Clerk mappings were checked. Permanent HETU UUIDs and bcrypt password digests
-were preserved; the final digest comparison required zero additional updates.
+were preserved. The four original provider accounts were refreshed with the
+final exported bcrypt digests before any successful provider sign-in, so the
+older import cannot leave stale credentials behind. A disposable six-digit PIN
+import and production password sign-in passed.
+The original owner's successful sign-in still needs confirmation; no original
+PIN was requested or handled in plaintext. The sign-in page distinguishes
+provider lockouts, service outages and required password security resets. It
+offers the provider's verification flow without bypassing those checks.
 Supabase storage contained no buckets or objects requiring migration.
 
 Authenticated production checks using two disposable accounts exercised online
 writes and reload reads, account isolation, stale-version rejection, append-only
 history, tombstones, explicit restoration, canonical PYQ scoring and idempotency.
+In the live browser, username/password sign-in reached the dashboard. A
+five-question practice set accepted GATE CSE 2026 Set 2 / Q1, revealed the stored
+answer A and awarded +1. Reloading retained the committed session and receipt.
 The frontend regression suite passed 127 files / 716 tests; backend checks passed
 75 tests on disposable PostgreSQL, with no Alembic schema drift. Signup validation
 was subsequently aligned to Clerk's 15-character minimum and its focused checks
 passed. The Android debug build succeeds and its bundle contains the Python API
 and production login proxy, with no legacy Supabase endpoint.
+The focused sign-in regression suite subsequently passed seven tests covering
+completion, additional verification, compromised credentials, lockout, service
+errors and a timed-out sign-in's late result.
 
 The active question catalog has **4,334 questions**. GATE source sets have no
 missing marks. Four suspect source questions are quarantined; linked duplicates

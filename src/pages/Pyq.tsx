@@ -3064,7 +3064,7 @@ export default function Pyq() {
           );
         if (!exactPaper) {
           throw new Error(
-            'This benchmark no longer resolves to the verified 65-question, 100-mark paper. Refresh the local question bank before starting.'
+            'This benchmark no longer resolves to the verified 65-question, 100-mark paper. Refresh the online question bank before starting.'
           );
         }
         sessionConfig = createPyqExamConfig(
@@ -4000,7 +4000,7 @@ export default function Pyq() {
   if (!manifest) {
     return (
       <div className="flex flex-col gap-4">
-        <PageHeader title="GATE PYQs" description="Opening the local question bank…" />
+        <PageHeader title="GATE PYQs" description="Opening the online question bank…" />
         <Card>
           <CardBody className="py-12 text-center text-[13px] text-text-faint">
             <p>{manifestError ?? 'Checking 37 years of papers…'}</p>

@@ -1,6 +1,7 @@
 import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
+import { ClerkAPIResponseError } from '@clerk/react/errors';
 const clerk = vi.hoisted(() => ({ create: vi.fn(), setActive: vi.fn() }));
 vi.mock('@clerk/react/legacy', () => ({ useSignIn: () => ({
   isLoaded: true, signIn: { create: clerk.create }, setActive: clerk.setActive
@@ -26,6 +27,38 @@ it('offers verification instead of activating a pending session', async () => {
   clerk.create.mockResolvedValue({ status: 'needs_second_factor' });
   submit();
   expect(await screen.findByText('Additional sign-in verification')).toBeInTheDocument();
+  expect(screen.getByRole('alert')).toHaveTextContent('additional verification');
+  expect(clerk.setActive).not.toHaveBeenCalled();
+});
+it.each(['form_password_compromised', 'form_password_pwned'])(
+  'explains %s and offers provider recovery without activating a session', async (code) => {
+    clerk.create.mockRejectedValue(new ClerkAPIResponseError('Password rejected', {
+      status: 422, data: [{ code, message: 'Password rejected' }]
+    }));
+    submit();
+    expect(await screen.findByText('Additional sign-in verification')).toBeInTheDocument();
+    expect(screen.getByRole('alert')).toHaveTextContent('requires a security reset');
+    expect(clerk.setActive).not.toHaveBeenCalled();
+  }
+);
+it('shows the provider lockout duration and allows a later retry', async () => {
+  clerk.create.mockRejectedValue(new ClerkAPIResponseError('Locked', {
+    status: 403, data: [{ code: 'user_locked', message: 'Locked',
+      long_message: 'Your account is locked. Try again in 30 minutes.' }]
+  }));
+  submit();
+  expect(await screen.findByRole('alert')).toHaveTextContent('Try again in 30 minutes');
+  expect(screen.getByRole('button', { name: 'Sign in' })).toBeEnabled();
+  expect(clerk.setActive).not.toHaveBeenCalled();
+});
+it('keeps incorrect credentials generic and distinguishes a service outage', async () => {
+  clerk.create.mockRejectedValueOnce(new ClerkAPIResponseError('Incorrect', {
+    status: 422, data: [{ code: 'form_identifier_not_found', message: 'Unknown user' }]
+  })).mockRejectedValueOnce(new ClerkAPIResponseError('Unavailable', { status: 503, data: [] }));
+  submit();
+  expect(await screen.findByRole('alert')).toHaveTextContent('Check your username or email and password');
+  fireEvent.click(screen.getByRole('button', { name: 'Sign in' }));
+  await waitFor(() => expect(screen.getByRole('alert')).toHaveTextContent('temporarily unavailable'));
   expect(clerk.setActive).not.toHaveBeenCalled();
 });
 it('releases a stuck sign-in and never activates its late result', async () => {

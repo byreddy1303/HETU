@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { ClerkProvider, useAuth, useUser } from '@clerk/react';
 import { configureClerkRuntime, resetClerkRuntime } from '@/lib/fastapi-client';
 import { backendConfig } from '@/lib/backend-config';
@@ -9,7 +9,9 @@ function Runtime({ children }: { children: ReactNode }) {
   const { isLoaded, getToken, signOut, sessionId } = useAuth();
   const { isLoaded: userLoaded, user } = useUser();
   const [bound, setBound] = useState(false);
-  const [boundUserId, setBoundUserId] = useState<string | null>(null);
+  // Clerk's subject and session identify this binding; the API returns a
+  // different, permanent HETU UUID for application records.
+  const boundIdentity = useRef<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [retry, setRetry] = useState(0);
   const [signingOut, setSigningOut] = useState(false);
@@ -23,27 +25,24 @@ function Runtime({ children }: { children: ReactNode }) {
   }, [isLoaded, userLoaded]);
 
   const userId = user?.id;
+  const identity = JSON.stringify([userId ?? null, sessionId ?? null]);
 
   useEffect(() => {
     if (!isLoaded || !userLoaded) return;
     const controller = new AbortController();
+    if (boundIdentity.current === identity) return;
+
+    boundIdentity.current = null;
+    setBound(false);
+    setError(null);
+    resetClerkRuntime();
 
     if (!user) {
-      setBound(false);
-      setBoundUserId(null);
-      setError(null);
       configureClerkRuntime({ loaded: true, user: null, getToken, signOut });
+      boundIdentity.current = identity;
       setBound(true);
       return () => controller.abort();
     }
-
-    if (bound && boundUserId === user.id) {
-      // Already authenticated and bound to this user. Do not flicker or abort in-flight requests.
-      return () => controller.abort();
-    }
-
-    setBound(false);
-    setError(null);
 
     const timeout = setTimeout(() => {
       controller.abort();
@@ -87,8 +86,8 @@ function Runtime({ children }: { children: ReactNode }) {
           getToken,
           signOut
         });
+        boundIdentity.current = identity;
         setBound(true);
-        setBoundUserId(body.id);
       } catch (cause) {
         if (controller.signal.aborted) return;
         resetClerkRuntime();
@@ -103,7 +102,7 @@ function Runtime({ children }: { children: ReactNode }) {
       controller.abort();
     };
 
-  }, [getToken, isLoaded, userId, userLoaded, signOut, sessionId, retry, bound, boundUserId, user]);
+  }, [getToken, isLoaded, identity, userLoaded, signOut, retry, user]);
 
   useEffect(() => () => resetClerkRuntime(), []);
 
@@ -129,7 +128,8 @@ function Runtime({ children }: { children: ReactNode }) {
       </div>
     </main>
   );
-  return bound && isLoaded && userLoaded ? children : <LoadingScreen />;
+  return bound && boundIdentity.current === identity && isLoaded && userLoaded
+    ? children : <LoadingScreen />;
 }
 
 export default function ClerkRuntime({ children }: { children: ReactNode }) {

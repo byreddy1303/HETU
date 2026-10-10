@@ -117,6 +117,26 @@ async def test_cors_preflight_does_not_consume_or_require_data_request_budget(mo
         assert preflight.status_code == 200
         assert preflight.headers["access-control-allow-origin"] == "http://localhost:5173"
         assert calls == []
-        data_request = await client.get("/v1/me")
+        data_request = await client.get("/v1/me", headers={"Origin": "http://localhost:5173"})
         assert data_request.status_code == 429
+        assert data_request.headers["access-control-allow-origin"] == "http://localhost:5173"
+        assert "Retry-After" in data_request.headers["access-control-expose-headers"]
         assert len(calls) == 1
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("maintenance,expected_status", [(False, 413), (True, 503)])
+async def test_cors_wraps_early_rejection_responses(monkeypatch, maintenance, expected_status):
+    from app.main import settings
+
+    monkeypatch.setattr(settings, "maintenance_mode", maintenance)
+    async with AsyncClient(
+        transport=ASGITransport(app=app), base_url="http://testserver"
+    ) as client:
+        response = await client.post(
+            "/v1/records/sessions",
+            headers={"Origin": "http://localhost:5173", "Content-Length": "3000000"},
+        )
+        assert response.status_code == expected_status
+        assert response.headers["access-control-allow-origin"] == "http://localhost:5173"
+        assert "detail" in response.json()

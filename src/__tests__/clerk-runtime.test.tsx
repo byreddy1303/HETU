@@ -3,12 +3,13 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const clerk = vi.hoisted(() => ({
   loaded: false,
+  sessionId: 'session-1',
   user: null as null | { id: string; username: string; primaryEmailAddress: { emailAddress: string } },
   getToken: vi.fn(async () => 'token'), signOut: vi.fn(async () => {})
 }));
 vi.mock('@clerk/react', () => ({
   ClerkProvider: ({ children }: { children: React.ReactNode }) => children,
-  useAuth: () => ({ isLoaded: clerk.loaded, getToken: clerk.getToken, signOut: clerk.signOut, sessionId: clerk.user ? 'session-1' : null }),
+  useAuth: () => ({ isLoaded: clerk.loaded, getToken: clerk.getToken, signOut: clerk.signOut, sessionId: clerk.user ? clerk.sessionId : null }),
   useUser: () => ({ isLoaded: clerk.loaded, user: clerk.user })
 }));
 
@@ -16,7 +17,7 @@ beforeEach(() => {
   vi.resetModules();
   vi.stubEnv('VITE_BACKEND', 'fastapi'); vi.stubEnv('VITE_API_URL', '/api');
   vi.stubEnv('VITE_CLERK_PUBLISHABLE_KEY', 'pk_test_synthetic');
-  clerk.loaded = false; clerk.user = null;
+  clerk.loaded = false; clerk.user = null; clerk.sessionId = 'session-1';
   clerk.getToken.mockReset().mockResolvedValue('token');
   clerk.signOut.mockReset().mockResolvedValue(undefined);
   vi.stubGlobal('fetch', vi.fn(async () => new Response(JSON.stringify({
@@ -29,6 +30,43 @@ beforeEach(() => {
 afterEach(() => { cleanup(); vi.useRealTimers(); vi.unstubAllEnvs(); vi.unstubAllGlobals(); });
 
 describe('Clerk provider lifecycle', () => {
+  it('binds distinct provider and database IDs once and stays mounted on provider rerenders', async () => {
+    clerk.loaded = true;
+    clerk.user = { id: 'user_provider_a', username: 'alex', primaryEmailAddress: { emailAddress: 'alex@example.com' } };
+    const { default: Runtime } = await import('@/components/auth/ClerkRuntime');
+    const view = render(<Runtime><p>Authenticated application</p></Runtime>);
+    await screen.findByText('Authenticated application');
+    clerk.user = { ...clerk.user };
+    await act(async () => view.rerender(<Runtime><p>Authenticated application</p></Runtime>));
+    expect(screen.getByText('Authenticated application')).toBeInTheDocument();
+    expect(fetch).toHaveBeenCalledOnce();
+  });
+
+  it('revalidates a new session for the same provider user before exposing account data', async () => {
+    clerk.loaded = true;
+    clerk.user = { id: 'user_provider_a', username: 'alex', primaryEmailAddress: { emailAddress: 'alex@example.com' } };
+    const { default: Runtime } = await import('@/components/auth/ClerkRuntime');
+    const { fastapiClient } = await import('@/lib/fastapi-client');
+    const view = render(<Runtime><p>Authenticated application</p></Runtime>);
+    await screen.findByText('Authenticated application');
+    let finish!: (response: Response) => void;
+    vi.mocked(fetch).mockImplementationOnce(() => new Promise((resolve) => { finish = resolve; }));
+    clerk.sessionId = 'session-2';
+    await act(async () => view.rerender(<Runtime><p>Authenticated application</p></Runtime>));
+    expect(screen.queryByText('Authenticated application')).toBeNull();
+    let sessionResolved = false;
+    const pendingSession = fastapiClient.auth.getSession().then((result) => {
+      sessionResolved = true;
+      return result;
+    });
+    await act(async () => { await Promise.resolve(); });
+    expect(sessionResolved).toBe(false);
+    await act(async () => finish(Response.json({ id: '0199d613-7d64-70c6-9046-3c919f48d974' })));
+    expect(await screen.findByText('Authenticated application')).toBeInTheDocument();
+    expect((await pendingSession).data.session?.user.id).toBe('0199d613-7d64-70c6-9046-3c919f48d974');
+    expect(fetch).toHaveBeenCalledTimes(2);
+  });
+
   it('gates app startup until Clerk is loaded and the compatibility runtime is bound', async () => {
     const { default: Runtime } = await import('@/components/auth/ClerkRuntime');
     const { fastapiClient } = await import('@/lib/fastapi-client');

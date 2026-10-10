@@ -23,7 +23,19 @@ export function useLiveQuery<T, TDefault = never>(
       Promise.resolve()
         .then(querier)
         .then((result) => {
-          if (!cancelled) setValue(result);
+          if (!cancelled) {
+            setValue((prev) => {
+              if (Array.isArray(prev) && Array.isArray(result)) {
+                if (
+                  prev.length === result.length &&
+                  prev.every((item, idx) => item === result[idx])
+                ) {
+                  return prev;
+                }
+              }
+              return result;
+            });
+          }
         })
         .catch((error) => {
           console.error('[db] live query failed:', error);

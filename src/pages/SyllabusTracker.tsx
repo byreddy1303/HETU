@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useLiveQuery } from '@/lib/db-hooks';
 import { Check, ChevronDown, CircleCheckBig, Search, Sparkles, Target } from 'lucide-react';
 import { useReducedMotion } from 'motion/react';
@@ -15,7 +15,7 @@ import { cn, formatDate, plural } from '@/lib/utils';
 import { todayISOInTimeZone } from '@/lib/utils';
 import { db } from '@/lib/db';
 import {
-  buildTopicEvidence,
+  buildBatchTopicEvidence,
   type TopicEvidence,
   type TopicEvidenceStatus
 } from '@/lib/topic-evidence';
@@ -94,9 +94,21 @@ function donutSlice(
   ].join(' ');
 }
 
+const SUBJECT_TOPICS: Record<Subject, string[]> = Object.fromEntries(
+  SUBJECTS.map((s) => [s, (SUBTOPICS_BY_SUBJECT[s] ?? []).map((t) => t.value)])
+) as Record<Subject, string[]>;
+
+const ALL_SYLLABUS_TARGETS = SUBJECTS.flatMap((subject) =>
+  (SUBTOPICS_BY_SUBJECT[subject] ?? []).map((topic) => ({
+    id: topicProgressId(subject, topic.value),
+    subject,
+    topic: topic.value
+  }))
+);
+
 function summariesFor(completions: TopicCompletions): SubjectSummary[] {
   return SUBJECTS.map((subject) => {
-    const topics = (SUBTOPICS_BY_SUBJECT[subject] ?? []).map((topic) => topic.value);
+    const topics = SUBJECT_TOPICS[subject] ?? [];
     const completed = topics.filter(
       (topic) => completions[topicProgressId(subject, topic)]
     ).length;
@@ -175,29 +187,18 @@ export default function SyllabusTracker() {
     }
     return merged;
   }, [byUser, effectiveUserId, topicProgressRows]);
+
   const summaries = useMemo(() => summariesFor(completions), [completions]);
-  const evidenceByTopic = useMemo(() => {
-    const map = new Map<string, TopicEvidence>();
-    for (const subject of SUBJECTS) {
-      const topics = SUBTOPICS_BY_SUBJECT[subject] ?? [];
-      for (const topic of topics) {
-        const id = topicProgressId(subject, topic.value);
-        map.set(
-          id,
-          buildTopicEvidence({
-            subject,
-            topic: topic.value,
-            studiedAt: completions[id] ?? null,
-            questions,
-            attempts,
-            reattempts,
-            today
-          })
-        );
-      }
-    }
-    return map;
-  }, [attempts, completions, questions, reattempts, today]);
+
+  const practiceEvidence = useMemo(() => {
+    return buildBatchTopicEvidence({
+      topics: ALL_SYLLABUS_TARGETS,
+      questions: questions ?? [],
+      attempts: attempts ?? [],
+      reattempts: reattempts ?? [],
+      today
+    });
+  }, [attempts, questions, reattempts, today]);
 
   const nextTopic = useMemo(() => nextTopicFrom(summaries, completions), [summaries, completions]);
   const [query, setQuery] = useState('');
@@ -212,66 +213,76 @@ export default function SyllabusTracker() {
   const completedSubjects = summaries.filter((summary) => summary.status === 'complete').length;
   const normalizedQuery = query.trim().toLocaleLowerCase();
 
-  const visibleSummaries = summaries.filter((summary) => {
-    const matchesFilter = filter === 'all' || summary.status === filter;
-    const matchesQuery =
-      !normalizedQuery ||
-      summary.subject.toLocaleLowerCase().includes(normalizedQuery) ||
-      summary.topics.some((topic) => topic.toLocaleLowerCase().includes(normalizedQuery));
-    return matchesFilter && matchesQuery;
-  });
+  const visibleSummaries = useMemo(() => {
+    return summaries.filter((summary) => {
+      const matchesFilter = filter === 'all' || summary.status === filter;
+      const matchesQuery =
+        !normalizedQuery ||
+        summary.subject.toLocaleLowerCase().includes(normalizedQuery) ||
+        summary.topics.some((topic) => topic.toLocaleLowerCase().includes(normalizedQuery));
+      return matchesFilter && matchesQuery;
+    });
+  }, [summaries, filter, normalizedQuery]);
 
-  const matchingTopicCount = normalizedQuery
-    ? visibleSummaries.reduce(
-        (sum, summary) =>
-          sum +
-          summary.topics.filter(
-            (topic) =>
-              summary.subject.toLocaleLowerCase().includes(normalizedQuery) ||
-              topic.toLocaleLowerCase().includes(normalizedQuery)
-          ).length,
-        0
-      )
-    : null;
+  const matchingTopicCount = useMemo(() => {
+    if (!normalizedQuery) return null;
+    return visibleSummaries.reduce(
+      (sum, summary) =>
+        sum +
+        summary.topics.filter(
+          (topic) =>
+            summary.subject.toLocaleLowerCase().includes(normalizedQuery) ||
+            topic.toLocaleLowerCase().includes(normalizedQuery)
+        ).length,
+      0
+    );
+  }, [normalizedQuery, visibleSummaries]);
 
-  const recent = summaries
-    .flatMap((summary) =>
-      summary.topics.flatMap((topic) => {
-        const completedAt = completions[topicProgressId(summary.subject, topic)];
-        return completedAt ? [{ subject: summary.subject, topic, completedAt }] : [];
-      })
-    )
-    .sort((left, right) => right.completedAt.localeCompare(left.completedAt))
-    .slice(0, 3);
+  const recent = useMemo(
+    () =>
+      summaries
+        .flatMap((summary) =>
+          summary.topics.flatMap((topic) => {
+            const completedAt = completions[topicProgressId(summary.subject, topic)];
+            return completedAt ? [{ subject: summary.subject, topic, completedAt }] : [];
+          })
+        )
+        .sort((left, right) => right.completedAt.localeCompare(left.completedAt))
+        .slice(0, 3),
+    [summaries, completions]
+  );
 
-  function toggleSubject(subject: string) {
+  const toggleSubject = useCallback((subject: string) => {
     setOpenSubjects((current) => {
       const next = new Set(current);
       if (next.has(subject)) next.delete(subject);
       else next.add(subject);
       return next;
     });
-  }
+  }, []);
 
-  async function toggleTopic(subject: string, topic: string, completed: boolean) {
-    if (!effectiveUserId) {
-      pushToast('Sign in before changing syllabus progress.', 'neutral');
-      return;
-    }
-    try {
-      await setCompleted(effectiveUserId, topicProgressId(subject, topic), completed);
-      haptic(completed ? 'success' : 'selection');
-    } catch (error) {
-      pushToast(
-        error instanceof Error
-          ? error.message
-          : 'Could not save your progress. Please try again.',
-        'danger'
-      );
-    }
-  }
+  const toggleTopic = useCallback(
+    async (subject: string, topic: string, completed: boolean) => {
+      if (!effectiveUserId) {
+        pushToast('Sign in before changing syllabus progress.', 'neutral');
+        return;
+      }
+      try {
+        await setCompleted(effectiveUserId, topicProgressId(subject, topic), completed);
+        haptic(completed ? 'success' : 'selection');
+      } catch (error) {
+        pushToast(
+          error instanceof Error
+            ? error.message
+            : 'Could not save your progress. Please try again.',
+          'danger'
+        );
+      }
+    },
+    [effectiveUserId, pushToast, setCompleted]
+  );
 
-  function openRecommended() {
+  const openRecommended = useCallback(() => {
     if (!nextTopic) return;
     setOpenSubjects((current) => new Set([...current, nextTopic.subject]));
     setFilter('all');
@@ -282,19 +293,22 @@ export default function SyllabusTracker() {
         block: 'start'
       });
     });
-  }
+  }, [nextTopic, reduceMotion]);
 
-  function handleSelectSubject(subject: Subject) {
-    setOpenSubjects((current) => new Set([...current, subject]));
-    setFilter('all');
-    setQuery('');
-    requestAnimationFrame(() => {
-      document.getElementById(`subject-${SUBJECTS.indexOf(subject)}`)?.scrollIntoView({
-        behavior: reduceMotion ? 'auto' : 'smooth',
-        block: 'start'
+  const handleSelectSubject = useCallback(
+    (subject: Subject) => {
+      setOpenSubjects((current) => new Set([...current, subject]));
+      setFilter('all');
+      setQuery('');
+      requestAnimationFrame(() => {
+        document.getElementById(`subject-${SUBJECTS.indexOf(subject)}`)?.scrollIntoView({
+          behavior: reduceMotion ? 'auto' : 'smooth',
+          block: 'start'
+        });
       });
-    });
-  }
+    },
+    [reduceMotion]
+  );
 
   return (
     <div className="workspace-syllabus flex flex-col gap-4">
@@ -444,9 +458,9 @@ export default function SyllabusTracker() {
               summary={summary}
               topics={matchingTopics}
               completions={completions}
-              evidence={evidenceByTopic}
+              evidence={practiceEvidence}
               open={isOpen}
-              onToggle={() => toggleSubject(summary.subject)}
+              onToggle={toggleSubject}
               onTopicChange={toggleTopic}
             />
           );
@@ -466,7 +480,7 @@ export default function SyllabusTracker() {
   );
 }
 
-function SyllabusOrbit({
+const SyllabusOrbit = React.memo(function SyllabusOrbit({
   summaries,
   percent,
   totalCompleted,
@@ -604,10 +618,66 @@ function SyllabusOrbit({
       </p>
     </div>
   );
-}
+});
 
+const TopicRow = React.memo(function TopicRow({
+  subject,
+  topic,
+  completedAt,
+  evidence,
+  onTopicChange
+}: {
+  subject: string;
+  topic: string;
+  completedAt: string | undefined;
+  evidence: TopicEvidence | undefined;
+  onTopicChange: (subject: string, topic: string, completed: boolean) => void;
+}) {
+  const completed = Boolean(completedAt);
+  return (
+    <label
+      className={cn(
+        'group/topic flex min-h-12 cursor-pointer items-start gap-3 rounded border px-3 py-2.5 transition-[border-color,background-color,transform]',
+        completed
+          ? 'border-success/25 bg-success-faint/45'
+          : 'border-transparent bg-bg-raised hover:border-border-hover hover:-translate-y-px'
+      )}
+    >
+      <input
+        type="checkbox"
+        checked={completed}
+        onChange={(event) =>
+          onTopicChange(subject, topic, event.target.checked)
+        }
+        className="peer sr-only"
+      />
+      <span
+        className={cn(
+          'mt-0.5 flex h-[19px] w-[19px] shrink-0 items-center justify-center rounded border transition-colors peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-accent',
+          completed
+            ? 'border-success bg-success text-success-contrast'
+            : 'border-border-hover bg-bg-raised group-hover/topic:border-accent'
+        )}
+        aria-hidden="true"
+      >
+        {completed && <Check size={13} strokeWidth={3} />}
+      </span>
+      <span className="min-w-0">
+        <span
+          className={cn(
+            'block text-[13px] font-medium leading-snug',
+            completed ? 'text-text-muted' : 'text-text'
+          )}
+        >
+          {topic}
+        </span>
+        <TopicEvidenceLine evidence={evidence} completedAt={completedAt} />
+      </span>
+    </label>
+  );
+});
 
-function SubjectLedger({
+const SubjectLedger = React.memo(function SubjectLedger({
   index,
   summary,
   topics,
@@ -623,7 +693,7 @@ function SubjectLedger({
   completions: TopicCompletions;
   evidence: Map<string, TopicEvidence>;
   open: boolean;
-  onToggle: () => void;
+  onToggle: (subject: string) => void;
   onTopicChange: (subject: string, topic: string, completed: boolean) => void;
 }) {
   const ink = subjectInk(summary.subject);
@@ -635,7 +705,7 @@ function SubjectLedger({
       <button
         type="button"
         aria-expanded={open}
-        onClick={onToggle}
+        onClick={() => onToggle(summary.subject)}
         className="group grid w-full grid-cols-[32px_minmax(0,1fr)_auto] items-center gap-3 px-3 py-3 text-left sm:px-4"
       >
         <span
@@ -701,49 +771,16 @@ function SubjectLedger({
             {topics.map((topic) => {
               const id = topicProgressId(summary.subject, topic);
               const completedAt = completions[id];
-              const completed = Boolean(completedAt);
               const topicEvidence = evidence.get(id);
               return (
-                <label
+                <TopicRow
                   key={topic}
-                  className={cn(
-                    'group/topic flex min-h-12 cursor-pointer items-start gap-3 rounded border px-3 py-2.5 transition-[border-color,background-color,transform]',
-                    completed
-                      ? 'border-success/25 bg-success-faint/45'
-                      : 'border-transparent bg-bg-raised hover:border-border-hover hover:-translate-y-px'
-                  )}
-                >
-                  <input
-                    type="checkbox"
-                    checked={completed}
-                    onChange={(event) =>
-                      onTopicChange(summary.subject, topic, event.target.checked)
-                    }
-                    className="peer sr-only"
-                  />
-                  <span
-                    className={cn(
-                      'mt-0.5 flex h-[19px] w-[19px] shrink-0 items-center justify-center rounded border transition-colors peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-accent',
-                      completed
-                        ? 'border-success bg-success text-success-contrast'
-                        : 'border-border-hover bg-bg-raised group-hover/topic:border-accent'
-                    )}
-                    aria-hidden="true"
-                  >
-                    {completed && <Check size={13} strokeWidth={3} />}
-                  </span>
-                  <span className="min-w-0">
-                    <span
-                      className={cn(
-                        'block text-[13px] font-medium leading-snug',
-                        completed ? 'text-text-muted' : 'text-text'
-                      )}
-                    >
-                      {topic}
-                    </span>
-                    <TopicEvidenceLine evidence={topicEvidence} completedAt={completedAt} />
-                  </span>
-                </label>
+                  subject={summary.subject}
+                  topic={topic}
+                  completedAt={completedAt}
+                  evidence={topicEvidence}
+                  onTopicChange={onTopicChange}
+                />
               );
             })}
           </div>
@@ -751,7 +788,7 @@ function SubjectLedger({
       )}
     </section>
   );
-}
+});
 
 const EVIDENCE_LABEL: Record<TopicEvidenceStatus, string> = {
   'not-started': 'Not started',
@@ -769,12 +806,18 @@ function TopicEvidenceLine({
   completedAt: string | undefined;
 }) {
   if (!evidence) return null;
+  const status: TopicEvidenceStatus =
+    evidence.practiced === 0
+      ? completedAt
+        ? 'studied'
+        : 'not-started'
+      : evidence.status;
   const tone =
-    evidence.status === 'strong'
+    status === 'strong'
       ? 'text-success'
-      : evidence.status === 'needs-revision'
+      : status === 'needs-revision'
         ? 'text-danger'
-        : evidence.status === 'active'
+        : status === 'active'
           ? 'text-accent'
           : 'text-text-faint';
   const facts = [
@@ -785,7 +828,7 @@ function TopicEvidenceLine({
   ].filter(Boolean);
   return (
     <span className="mt-1 block text-[9.5px] leading-relaxed">
-      <span className={cn('font-semibold', tone)}>{EVIDENCE_LABEL[evidence.status]}</span>
+      <span className={cn('font-semibold', tone)}>{EVIDENCE_LABEL[status]}</span>
       {facts.length > 0 ? (
         <span className="u-num text-text-faint"> · {facts.join(' · ')}</span>
       ) : null}

@@ -75,4 +75,24 @@ describe('SyllabusTracker UI and SyllabusOrbit chart', () => {
     fireEvent.mouseLeave(algoSegment);
     expect(screen.getByText('12 subjects · Click to jump')).toBeInTheDocument();
   });
+
+  it('allows clicking a topic checkbox without freezing or error', async () => {
+    render(
+      <MemoryRouter>
+        <SyllabusTracker />
+      </MemoryRouter>
+    );
+
+    // Discrete Mathematics starts open by default when no nextTopic
+    expect(screen.getByText('Discrete Mathematics')).toBeInTheDocument();
+
+    const checkboxes = screen.getAllByRole('checkbox');
+    expect(checkboxes.length).toBeGreaterThan(0);
+    const firstCheckbox = checkboxes[0];
+    expect(firstCheckbox).not.toBeChecked();
+
+    fireEvent.click(firstCheckbox);
+
+    expect(firstCheckbox).toBeChecked();
+  });
 });

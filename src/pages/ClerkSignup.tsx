@@ -64,7 +64,7 @@ export default function ClerkSignup() {
     && cleanedName.length <= 80
     && USERNAME_RE.test(cleanedUsername)
     && EMAIL_RE.test(cleanedEmail)
-    && password.length >= 12
+    && password.length >= 15
     && password.length <= 256
     && password === confirmPassword;
 
@@ -157,12 +157,12 @@ export default function ClerkSignup() {
               </label>
               <label htmlFor="invite-password" className="block">
                 <span className="u-label">Password</span>
-                <Input id="invite-password" type="password" autoComplete="new-password" minLength={12} maxLength={256}
+                <Input id="invite-password" type="password" autoComplete="new-password" minLength={15} maxLength={256}
                   aria-describedby="invite-password-help" required value={password}
                   onChange={(event) => setPassword(event.target.value)} className="mt-2" />
               </label>
               <p id="invite-password-help" className="-mt-3 text-xs text-text-muted">
-                Use at least 12 characters.
+                Use at least 15 characters.
               </p>
               <label htmlFor="invite-password-confirm" className="block">
                 <span className="u-label">Confirm password</span>

@@ -157,7 +157,7 @@ class SignupRequest(StrictModel):
     email: str = Field(pattern=r"^[^\s@]+@[^\s@]+\.[^\s@]+$", max_length=320)
     name: str = Field(min_length=1, max_length=80)
     invite_token: str = Field(min_length=16, max_length=128)
-    password: str = Field(min_length=12, max_length=256)
+    password: str = Field(min_length=15, max_length=256)
 
 
 class PinResetRequest(StrictModel):

@@ -102,6 +102,13 @@ Bank version `gate-and-cs-exams-1990-2026-v11-verified-pdf-marks` contains 4,334
 
 A book's `sourceClass` describes its source paper or collection; it does not certify every stored answer or mark. Each question's `answerSource` records row-level provenance. The audit currently finds 3,938 standard MCQ/MSQ/NAT rows plus two `MARKS_TO_ALL` rows that are GATE-rule-evaluable from stored metadata. Of those, only 130 rows have official PDF-answer-key-verified marks (60 one-mark and 70 two-mark); tag-derived marks remain useful for practice scoring but are not labelled officially verified.
 
+The PYQ catalog stays in version-controlled JSON, not Neon. The API reads its
+bundled copy; only user attempts, their historical snapshots and other durable
+user data belong in PostgreSQL. After changing the bank, run
+`backends/python/scripts/sync_pyq_bank_data.py` to refresh the API bundle.
+See [PYQ storage policy and cleanup](DEPLOY.md#pyq-storage-policy-and-neon-cleanup)
+for the safe migration order and free-tier storage caveats.
+
 The bank tooling is intentionally explicit:
 
 ```bash

@@ -1,14 +1,18 @@
 """Run only against a disposable database with migrations already applied."""
 
 import asyncio
+import importlib.util
 import os
 from datetime import UTC, date, datetime, timedelta
+from pathlib import Path
 from urllib.parse import urlsplit
 from uuid import uuid4
 
 import pytest
+from alembic.migration import MigrationContext
+from alembic.operations import Operations
 from fastapi import HTTPException
-from sqlalchemy import select, text
+from sqlalchemy import MetaData, Table, select, text
 from sqlalchemy.exc import DBAPIError
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
@@ -31,6 +35,108 @@ if URL:
     if parsed.hostname not in {"127.0.0.1", "localhost"} or parsed.path != "/hetu_test":
         raise pytest.UsageError("Safety integration tests require local disposable hetu_test")
 pytestmark = pytest.mark.skipif(not URL, reason="Requires disposable migrated PostgreSQL")
+
+
+@pytest.mark.asyncio
+async def test_drop_pyq_catalog_preserves_all_user_data_and_history():
+    from app.services.pyq_catalog import prepare_catalog_rows
+    from tests.test_pyq_catalog import sample_question
+
+    def migration(filename):
+        path = Path(__file__).resolve().parents[1] / "alembic" / "versions" / filename
+        spec = importlib.util.spec_from_file_location(path.stem, path)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        return module
+
+    create_catalog = migration("202609280002_pyq_catalog.py")
+    drop_catalog = migration("202609280004_drop_pyq_catalog.py")
+
+    async def snapshot(connection):
+        tables = await connection.scalars(
+            text("SELECT tablename FROM pg_tables WHERE schemaname='public' ORDER BY tablename")
+        )
+        return {
+            name: list(
+                await connection.scalars(
+                    text(
+                        f'SELECT to_jsonb(t)::text FROM public."{name}" t '
+                        'ORDER BY to_jsonb(t)::text COLLATE "C"'
+                    )
+                )
+            )
+            for name in tables
+            if name not in {"pyq_banks", "pyq_catalog_questions"}
+        }
+
+    engine = create_async_engine(URL)
+    try:
+        async with engine.connect() as connection:
+            # PostgreSQL rolls back the test's DDL and fixture writes together.
+            transaction = await connection.begin()
+            try:
+                assert await connection.scalar(text("SELECT to_regclass('pyq_banks')")) is None
+                owner = str(uuid4())
+                await connection.execute(User.__table__.insert().values(id=owner))
+                await connection.execute(
+                    Record.__table__.insert().values(
+                        owner_id=owner,
+                        collection="pyq_attempts",
+                        external_id="retained-attempt",
+                        data={"question_uid": "gate:test:1", "bank_version": "v1"},
+                    )
+                )
+                before = await snapshot(connection)
+
+                def apply(sync_connection, module):
+                    with Operations.context(MigrationContext.configure(sync_connection)):
+                        module.upgrade()
+
+                await connection.run_sync(apply, create_catalog)
+
+                def seed(sync_connection):
+                    metadata = MetaData()
+                    banks = Table("pyq_banks", metadata, autoload_with=sync_connection)
+                    questions = Table(
+                        "pyq_catalog_questions", metadata, autoload_with=sync_connection
+                    )
+                    sync_connection.execute(
+                        banks.insert().values(
+                            version="v1",
+                            manifest={},
+                            question_count=1,
+                            source_hash="test-source-hash",
+                            active=True,
+                        )
+                    )
+                    row = prepare_catalog_rows([sample_question()], set())[0][0]
+                    sync_connection.execute(questions.insert().values(bank_version="v1", **row))
+
+                await connection.run_sync(seed)
+                assert await connection.scalar(text("SELECT count(*) FROM pyq_banks")) == 1
+                assert (
+                    await connection.scalar(text("SELECT count(*) FROM pyq_catalog_questions"))
+                ) == 1
+                await connection.run_sync(apply, drop_catalog)
+                assert await connection.scalar(text("SELECT to_regclass('pyq_banks')")) is None
+                assert (
+                    await connection.scalar(text("SELECT to_regclass('pyq_catalog_questions')"))
+                ) is None
+                assert await snapshot(connection) == before
+                # User-data rejection triggers must survive this catalog-only cleanup.
+                triggers = set(
+                    await connection.scalars(
+                        text(
+                            "SELECT tgname FROM pg_trigger "
+                            "WHERE NOT tgisinternal AND tgrelid = 'records'::regclass"
+                        )
+                    )
+                )
+                assert {"reject_delete", "reject_truncate", "retain_record_revision"} <= triggers
+            finally:
+                await transaction.rollback()
+    finally:
+        await engine.dispose()
 
 
 @pytest.mark.asyncio

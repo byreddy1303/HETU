@@ -9,15 +9,14 @@ from sqlalchemy import select
 
 from app.api.deps import get_current_user
 from app.core.security import Identity
-from app.db.models import PyqBank, PyqCatalogQuestion, Record, User
+from app.db.models import Record, User
 from app.db.session import get_db
 from app.main import app
 from app.services import recovery
-from app.services.pyq_catalog import prepare_catalog_rows
 from app.services.pyq_practice import PyqAttemptDraft, submit_pyq_attempt
 from app.services.records import require_generic_mutation_allowed, upsert_records
 from app.services.recovery_engine import build_sprint, derive_grade, forecast, transition
-from tests.test_pyq_catalog import sample_question
+from tests.test_pyq_catalog import install_catalog, sample_question
 
 NOW = datetime(2026, 10, 10, 18, 31, tzinfo=UTC)  # 11 October in Kolkata
 TODAY = date(2026, 10, 11)
@@ -32,17 +31,12 @@ async def setup(db, monkeypatch):
         sample_question(id="gate:test:2", html="<p>Fresh sorting question</p>"),
         sample_question(id="gate:test:3", html="<p>Sealed sorting question</p>"),
     ]
-    rows, _ = prepare_catalog_rows(questions, set())
-    db.add(
-        PyqBank(
-            version="v1",
-            manifest={"benchmarkPapers": [{"questionUids": ["gate:test:3"]}]},
-            question_count=3,
-            source_hash="test",
-            active=True,
-        )
+    install_catalog(
+        monkeypatch,
+        questions,
+        set(),
+        manifest={"benchmarkPapers": [{"questionUids": ["gate:test:3"]}]},
     )
-    db.add_all(PyqCatalogQuestion(bank_version="v1", **row) for row in rows)
     await db.commit()
 
 

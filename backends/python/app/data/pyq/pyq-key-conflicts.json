@@ -1,0 +1,10 @@
+[
+  {
+    "ids": ["es:gate-cse:g3z3rCFxZY6lWpJR", "es:gate-cse:tgmtl2rqUXbgmFB0"],
+    "reason": "Identical 1998 interrupt question and option order have conflicting A/C archive keys. Original key reconciliation is pending."
+  },
+  {
+    "ids": ["es:gate-cse:dz6IpID2jG8YtJBH", "es:gate-cse:QLXk6o3rDR5I8HYS"],
+    "reason": "Identical 2001 relocation question and option order have conflicting A/C archive keys and different archive question numbers. Original paper/key reconciliation is pending."
+  }
+]

@@ -14,9 +14,14 @@ from pydantic import Field, field_validator, model_validator
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.db.models import PyqCatalogQuestion, Record, User
+from app.db.models import Record, User
 from app.services.learning_library import StrictModel, fingerprint, stable_id
-from app.services.pyq_catalog import active_bank, question_payload
+from app.services.pyq_catalog import (
+    active_bank,
+    bank_question,
+    question_payload,
+    transfer_candidate,
+)
 from app.services.pyq_practice import (
     PyqAttemptDraft,
     canonical_logged_answer,
@@ -942,34 +947,17 @@ async def assignment(db: AsyncSession, owner_id: str, item_id: str) -> Record | 
     )
 
 
-async def bank_question(
-    db: AsyncSession, uid: str, version: str | None = None
-) -> PyqCatalogQuestion:
-    bank = await active_bank(db)
-    if version and version != bank.version:
-        raise HTTPException(409, "PYQ bank changed; assign a current transfer question")
-    row = await db.scalar(
-        select(PyqCatalogQuestion).where(
-            PyqCatalogQuestion.bank_version == bank.version, PyqCatalogQuestion.question_uid == uid
-        )
-    )
-    if row is None:
-        raise HTTPException(404, "Recovery question is unavailable in the current bank")
-    return row
-
-
 async def prompt_for(db: AsyncSession, owner_id: str, item: Record) -> dict:
     if item.data["stage"] == "TRANSFER":
         transfer = await assignment(db, owner_id, item.external_id)
         if not transfer:
             raise HTTPException(409, "Transfer assignment evidence is missing")
-        question = await bank_question(
-            db,
+        question = bank_question(
             transfer.data["metadata"]["transfer_question_uid"],
             transfer.data["metadata"].get("bank_version"),
         )
     elif item.data["source_kind"] == "pyq":
-        question = await bank_question(db, item.data["question_uid"])
+        question = bank_question(item.data["question_uid"])
     elif item.data["source_kind"] == "concept":
         review = await owned(db, owner_id, "concept_reviews", item.data["source_review_id"])
         return {
@@ -1281,7 +1269,7 @@ async def record_answer(
                 transfer.data["metadata"]["transfer_question_uid"],
                 transfer.data["metadata"].get("bank_version"),
             )
-        question = await bank_question(db, uid, version)
+        question = bank_question(uid, version)
         answer_draft = PyqAttemptDraft(
             idempotency_key=f"recovery:{draft.idempotency_key}",
             question_uid=uid,
@@ -1299,7 +1287,7 @@ async def record_answer(
             source = await owned(db, owner_id, "pyq_attempts", draft.source_pyq_attempt_id)
             if (
                 source.data.get("question_uid") != uid
-                or source.data.get("bank_version") != (version or (await active_bank(db)).version)
+                or source.data.get("bank_version") != (version or active_bank().version)
                 or fingerprint(source.data.get("selected_answer")) != fingerprint(draft.answer)
             ):
                 raise HTTPException(422, "Recovery receipt does not match this question and answer")
@@ -1607,7 +1595,7 @@ async def assign_transfer(
             422, "Exact transfer requires a bank-backed item with remediation completed"
         )
     occurred, today, timezone = await account_clock(db, owner_id)
-    bank = await active_bank(db)
+    bank = active_bank()
     seen = set(
         await db.scalars(
             select(Record.data["question_uid"].as_string()).where(
@@ -1620,21 +1608,12 @@ async def assign_transfer(
         uids = set(paper.get("questionUids", []))
         if not uids & seen:
             reserved.update(uids)
-    source = await bank_question(db, item.data["question_uid"])
-    statement = select(PyqCatalogQuestion).where(
-        PyqCatalogQuestion.bank_version == bank.version,
-        PyqCatalogQuestion.subject_slug == source.subject_slug,
-        PyqCatalogQuestion.topic_slug == source.topic_slug,
-        PyqCatalogQuestion.question_uid != source.question_uid,
-        PyqCatalogQuestion.content_hash != source.content_hash,
-        PyqCatalogQuestion.answer_status == "available",
-        PyqCatalogQuestion.integrity_status != "quarantined",
-        PyqCatalogQuestion.question_type.in_(["MCQ", "MSQ", "NAT"]),
-        PyqCatalogQuestion.question_uid.not_in(seen | reserved),
+    source = bank_question(item.data["question_uid"])
+    question = transfer_candidate(
+        source,
+        excluded_uids=seen | reserved,
+        required_uid=draft.question_uid or None,
     )
-    if draft.question_uid:
-        statement = statement.where(PyqCatalogQuestion.question_uid == draft.question_uid)
-    question = await db.scalar(statement.order_by(PyqCatalogQuestion.question_uid).limit(1))
     if question is None:
         raise HTTPException(
             409,

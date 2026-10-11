@@ -674,8 +674,7 @@ def create_mcp_server(settings: Settings) -> MCPServer:
     ) -> dict[str, Any]:
         async with get_session_factory()() as db:
             await _user_id(db, READ_SCOPE)
-            return await search_catalog(
-                db,
+            return search_catalog(
                 subject_slug=subject_slug,
                 topic_slug=topic_slug,
                 year_from=year_from,
@@ -697,7 +696,7 @@ def create_mcp_server(settings: Settings) -> MCPServer:
     async def get_pyq_question(question_uid: str, include_answer: bool = False) -> dict[str, Any]:
         async with get_session_factory()() as db:
             await _user_id(db, READ_SCOPE)
-            result = await catalog_question(db, question_uid)
+            result = catalog_question(question_uid)
             if not include_answer:
                 result["answer"] = None
                 result["answer_hidden"] = True

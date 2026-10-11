@@ -1,11 +1,15 @@
 from __future__ import annotations
 
 from fastapi import APIRouter, HTTPException, Query
-from sqlalchemy import select
 
 from app.api.deps import CurrentUser, DbDep, SettingsDep
-from app.db.models import PyqCatalogQuestion
-from app.services.pyq_catalog import active_bank, catalog_question, question_payload, search_catalog
+from app.services.pyq_catalog import (
+    active_bank,
+    catalog_question,
+    catalog_subject,
+    question_payload,
+    search_catalog,
+)
 from app.services.pyq_practice import PyqAttemptDraft, submit_pyq_attempt
 
 router = APIRouter()
@@ -25,7 +29,6 @@ async def submit_answer(
 @router.get("/search")
 async def search_questions(
     identity: CurrentUser,
-    db: DbDep,
     subject_slug: str | None = None,
     topic_slug: str | None = None,
     year_from: int | None = None,
@@ -35,8 +38,7 @@ async def search_questions(
     offset: int = Query(default=0, ge=0),
 ) -> dict:
     del identity
-    return await search_catalog(
-        db,
+    return search_catalog(
         subject_slug=subject_slug,
         topic_slug=topic_slug,
         year_from=year_from,
@@ -48,38 +50,22 @@ async def search_questions(
 
 
 @router.get("/manifest")
-async def get_manifest(identity: CurrentUser, db: DbDep) -> dict:
+async def get_manifest(identity: CurrentUser) -> dict:
     del identity
-    return (await active_bank(db)).manifest
+    return active_bank().manifest
 
 
 @router.get("/subjects/{subject_slug}")
 async def get_subject(
     subject_slug: str,
     identity: CurrentUser,
-    db: DbDep,
     bank_version: str | None = Query(default=None),
 ) -> dict:
     del identity
-    bank = await active_bank(db)
+    bank = active_bank()
     if bank_version and bank_version != bank.version:
         raise HTTPException(status_code=409, detail="The PYQ catalog version has changed")
-    questions = list(
-        await db.scalars(
-            select(PyqCatalogQuestion)
-            .where(
-                PyqCatalogQuestion.bank_version == bank.version,
-                PyqCatalogQuestion.subject_slug == subject_slug,
-            )
-            .order_by(
-                PyqCatalogQuestion.year,
-                PyqCatalogQuestion.paper_label,
-                PyqCatalogQuestion.id,
-            )
-        )
-    )
-    if not questions:
-        raise HTTPException(status_code=404, detail="Unknown PYQ subject")
+    questions = catalog_subject(subject_slug)
     return {
         "bankVersion": bank.version,
         "subject": questions[0].subject,
@@ -88,8 +74,8 @@ async def get_subject(
 
 
 @router.get("/questions/{question_uid:path}")
-async def get_question(question_uid: str, identity: CurrentUser, db: DbDep) -> dict:
+async def get_question(question_uid: str, identity: CurrentUser) -> dict:
     del identity
-    payload = await catalog_question(db, question_uid)
+    payload = catalog_question(question_uid)
     payload.pop("bank_version")
     return payload

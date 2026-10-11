@@ -7,19 +7,18 @@ from sqlalchemy import select
 
 from app.api.deps import get_current_user
 from app.core.security import Identity
-from app.db.models import PyqBank, PyqCatalogQuestion, Record, User
+from app.db.models import Record, User
 from app.db.session import get_db
 from app.main import app
 from app.schemas import CompatMutation
 from app.services.compat import _mutate_records
-from app.services.pyq_catalog import prepare_catalog_rows
 from app.services.pyq_practice import PyqAttemptDraft, submit_pyq_attempt
 from app.services.records import require_generic_mutation_allowed
-from tests.test_pyq_catalog import sample_question
+from tests.test_pyq_catalog import install_catalog, sample_question
 
 
 @pytest.mark.asyncio
-async def test_canonical_pyq_attempt_scoring_retries_and_owner_boundary(db) -> None:
+async def test_canonical_pyq_attempt_scoring_retries_and_owner_boundary(db, monkeypatch) -> None:
     questions = [
         sample_question(),
         sample_question(
@@ -37,14 +36,8 @@ async def test_canonical_pyq_attempt_scoring_retries_and_owner_boundary(db) -> N
         sample_question(id="gate:test:missing", html="<p>Missing marks</p>", marks=None),
         sample_question(id="gate:test:ambiguous", html="<p>Conflicting key</p>"),
     ]
-    rows, _ = prepare_catalog_rows(questions, {"gate:test:ambiguous"})
+    install_catalog(monkeypatch, questions, {"gate:test:ambiguous"})
     db.add_all([User(id="learner-a"), User(id="learner-b")])
-    db.add(
-        PyqBank(
-            version="v1", manifest={}, question_count=len(rows), source_hash="hash", active=True
-        )
-    )
-    db.add_all(PyqCatalogQuestion(bank_version="v1", **row) for row in rows)
     await db.commit()
 
     async def submit(key: str, uid: str, selected, decision="MARK"):

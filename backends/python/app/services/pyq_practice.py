@@ -11,9 +11,9 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator, model_valida
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.db.models import PyqCatalogQuestion, Record
+from app.db.models import Record
 from app.services.learning_library import fingerprint, stable_id
-from app.services.pyq_catalog import active_bank, question_payload
+from app.services.pyq_catalog import CatalogQuestion, active_bank, question_payload
 from app.services.records import lock_identity, to_api, upsert_records
 
 
@@ -62,7 +62,7 @@ def _choice_set(value: Any) -> list[str]:
     return sorted({str(item).strip().upper() for item in values if str(item).strip()})
 
 
-def validate_question_response(question: PyqCatalogQuestion, draft: PyqAttemptDraft) -> None:
+def validate_question_response(question: CatalogQuestion, draft: PyqAttemptDraft) -> None:
     """Use the same response shapes accepted by React's PYQ attempt builder."""
     if draft.decision == "SKIP":
         return
@@ -86,7 +86,7 @@ def validate_question_response(question: PyqCatalogQuestion, draft: PyqAttemptDr
         raise HTTPException(422, "This question requires a selected choice")
 
 
-def evaluate_answer(question: PyqCatalogQuestion, selected: Any) -> bool | None:
+def evaluate_answer(question: CatalogQuestion, selected: Any) -> bool | None:
     """Match the app's exact-set MCQ/MSQ and tolerance-aware NAT evaluation."""
     if question.answer_status != "available" or question.integrity_status == "quarantined":
         return None
@@ -126,7 +126,7 @@ def evaluate_answer(question: PyqCatalogQuestion, selected: Any) -> bool | None:
 
 
 def score_question(
-    question: PyqCatalogQuestion, decision: str, correctness: bool | None
+    question: CatalogQuestion, decision: str, correctness: bool | None
 ) -> dict[str, Any]:
     """Use integer thirds so repeated MCQ penalties have no float drift."""
     marks = question.marks
@@ -205,7 +205,7 @@ def score_question(
     }
 
 
-def question_snapshot(question: PyqCatalogQuestion) -> dict[str, Any]:
+def question_snapshot(question: CatalogQuestion) -> dict[str, Any]:
     """Match the v3 attempt snapshot consumed by the React PYQ history."""
     visible = question_payload(question)
     return {
@@ -231,7 +231,7 @@ def question_snapshot(question: PyqCatalogQuestion) -> dict[str, Any]:
     }
 
 
-def canonical_logged_answer(question: PyqCatalogQuestion) -> Any:
+def canonical_logged_answer(question: CatalogQuestion) -> Any:
     """Mirror the app's immutable answer value, including sorted MSQ keys."""
     if question.integrity_status == "quarantined" or question.answer_status != "available":
         return None
@@ -278,15 +278,10 @@ async def validate_app_attempt(db: AsyncSession, *, owner_id: str, row: dict[str
         raise HTTPException(422, "New PYQ attempts require capture version 3")
     if not isinstance(row.get("id"), str) or not row["id"]:
         raise HTTPException(422, "PYQ attempt ID is required")
-    bank = await active_bank(db)
+    bank = active_bank()
     if row.get("bank_version") != bank.version:
         raise HTTPException(409, "PYQ bank version changed; reload the question")
-    question = await db.scalar(
-        select(PyqCatalogQuestion).where(
-            PyqCatalogQuestion.bank_version == bank.version,
-            PyqCatalogQuestion.question_uid == row.get("question_uid"),
-        )
-    )
+    question = bank.by_uid.get(row.get("question_uid"))
     if question is None:
         raise HTTPException(404, "Unknown PYQ question")
     try:
@@ -382,13 +377,8 @@ async def submit_pyq_attempt(
             "url": f"{app_url.rstrip('/')}/pyq",
         }
 
-    bank = await active_bank(db)
-    question = await db.scalar(
-        select(PyqCatalogQuestion).where(
-            PyqCatalogQuestion.bank_version == bank.version,
-            PyqCatalogQuestion.question_uid == draft.question_uid,
-        )
-    )
+    bank = active_bank()
+    question = bank.by_uid.get(draft.question_uid)
     if question is None:
         raise HTTPException(404, "Unknown PYQ question")
     await validate_session_association(

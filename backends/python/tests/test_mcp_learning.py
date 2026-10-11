@@ -12,14 +12,13 @@ from app.api.deps import get_current_user
 from app.core.config import Settings
 from app.core.security import Identity
 from app.db.base import Base
-from app.db.models import PyqBank, PyqCatalogQuestion, User, UserIdentity
+from app.db.models import User, UserIdentity
 from app.db.session import get_db
 from app.main import app
 from app.mcp_server import ClerkOAuthVerifier, create_mcp_server
-from app.services.pyq_catalog import prepare_catalog_rows
 from app.services.records import upsert_records
 from tests.test_learning_library import capture
-from tests.test_pyq_catalog import sample_question
+from tests.test_pyq_catalog import install_catalog, sample_question
 
 
 @pytest.mark.asyncio
@@ -40,13 +39,7 @@ async def test_oauth_mcp_transport_exposes_and_executes_learning_workflow(monkey
                 UserIdentity(user_id="user_other", provider="clerk", subject="user_other"),
             ]
         )
-        catalog_rows, _ = prepare_catalog_rows([sample_question()], set())
-        db.add(
-            PyqBank(
-                version="v1", manifest={}, question_count=1, source_hash="test-bank", active=True
-            )
-        )
-        db.add(PyqCatalogQuestion(bank_version="v1", **catalog_rows[0]))
+        install_catalog(monkeypatch, [sample_question()], set())
         await upsert_records(
             db,
             owner_id="internal_user",

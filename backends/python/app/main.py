@@ -94,7 +94,6 @@ app.add_middleware(TrustedHostMiddleware, allowed_hosts=settings.trusted_host_li
 app.add_middleware(GZipMiddleware, minimum_size=1024)
 
 
-
 @app.middleware("http")
 async def request_context(request: Request, call_next):
     public_discovery = request.url.path == "/.well-known/oauth-protected-resource/mcp"
@@ -186,6 +185,7 @@ app.add_middleware(
         "X-RateLimit-Reset",
     ],
 )
+
 
 @app.exception_handler(Exception)
 async def unhandled_exception(request: Request, exc: Exception) -> JSONResponse:

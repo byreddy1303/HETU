@@ -59,3 +59,4 @@ vite.config.d.ts
 # Private migration snapshots, credentials and deployment scratch
 .codex-tmp/
 **/.codex-tmp/
+.neon

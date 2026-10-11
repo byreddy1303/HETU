@@ -16,6 +16,7 @@ it does not mean production data has been migrated or a ChatGPT account connecte
 - [x] Assemble and save sourced discussion revision packs through shared Python APIs, app, and MCP.
 - [ ] Complete canonical recovery follow-through and extended pack depth/time-budget options.
 - [ ] Expose tested planning, diagnosis, sessions, PYQ, mock, weekly, syllabus, heatmap, calibration, and readiness workflows.
+- [x] Add shared app/MCP actions for Planner blocks, formulas, recognition cues, Journal analysis, syllabus coverage and weekly reflections.
 - [x] Expose canonical PYQ search, detail, answer submission, score validation, and app receipt review as a first PYQ slice.
 - [ ] Expose tested Buddy, settings, notifications, exports/imports, recovery, and owner operations.
 - [ ] Verify full migration, backup restore, account isolation, and production credentials before live writes.
@@ -49,7 +50,7 @@ it does not mean production data has been migrated or a ChatGPT account connecte
 
 ## Release blockers
 
-- Complete the data inventory and real-account migration, identity reconciliation, object backup, independent production backup/restore, restricted credentials, and frontend parity checks in `backends/python/docs/DATA_SAFETY.md`.
+- Review the separately committed migration, owner reconciliation, independent production restore and restricted credentials in `backends/python/docs/PRODUCTION.md` against the MCP release gates. On 2026-10-11 the live API returned 503 and Neon rejected connections because an account or project quota was exceeded; restore database capacity before live account verification.
 - Configure and verify Clerk OAuth resource audience, scopes, exact ChatGPT client ID/callback, HTTPS MCP endpoint, and production role credentials. MCP-specific production environment variables are absent and its metadata endpoint returned 404 at the audit. Keep this boundary disabled until its release gates pass; the separately enabled app is not proof of those gates.
 - Build and test domain actions for all remaining sections. Current section tools expose only mapped records and cannot honestly claim whole-app operation.
 
@@ -61,22 +62,22 @@ it does not mean production data has been migrated or a ChatGPT account connecte
 | --- | --- | --- | --- |
 | Dashboard | React aggregates over records | Evidence drilldown and recommendations | No |
 | Do now | React queue and recovery logic | Selection and outcome actions | No |
-| Planner | Python planner mutation and React planner | Capacity, split, move, reconcile | No |
+| Planner | Shared Python section action and React DayPlan records | Add/edit/split/remove/reorder with revision, capacity, buffer and time checks; cross-day move/reconcile remain | Partial |
 | Sessions and quick capture | Python records and React session pages | Safe start, answer, completion actions | No |
 | PYQ | React bank, scoring, attempts | Python catalog search/detail and canonical individual attempts are implemented; set assembly, exam provenance, recovery linkage remain | Partial |
 | Mocks | React mocks and records | Question-level analysis and follow-through | No |
-| Journal | `questions` records and React Journal | Linked analysis edits | No |
+| Journal | Shared Python analysis action and `questions` records | Provenance-labelled annotation preserving outcome/timing; linked PYQ analysis completion; broader diagnosis remains | Partial |
 | Patterns | `patterns` records and React Patterns | Evidence-backed pattern actions | No |
 | Recovery | `learning_items`, events, reattempts | Python response, help, scheduling rules | No |
-| Weekly review | `weekly_reviews` records | Evidence comparison and saved actions | No |
+| Weekly review | Shared Python reflection action and `weekly_reviews` records | Versioned reflection and concrete fix; automatic evidence comparison remains | Partial |
 | Heatmap | React derived view | Evidence drilldown and underlying actions | No |
 | Calibration | React derived view | Answer/skip and pace analysis | No |
 | Readiness | React derived view, snapshots | Qualified evidence, recompute | No |
 | References | bundled notes and account documents | Source retrieval and annotations | No |
 | Revision pack | Shared Python assembly, immutable snapshots, app copy/Print/PDF, MCP build/save/list/detail | Extended depth/time-budget options and live connected verification | Partial |
-| Syllabus | `topic_progress` records | Coverage state with evidence | No |
-| Trigger drill | `trigger_phrases` records | Run and record mixed drills | No |
-| Formulas | `formulas` records | Structured read/write/history | No |
+| Syllabus | Shared Python coverage action and `topic_progress` records | Reported coverage/reopening with evidence and preserved history; mastery is distinct | Partial |
+| Trigger drill | Shared Python cue action and `trigger_phrases` records | Save/edit cues with owned question links; running mixed drills remains | Partial |
+| Formulas | Shared Python formula action and `formulas` records | Structured read/write/history preserving review evidence; record actual review outcomes remains | Partial |
 | Learning Library and topic pages | Python capture/revision, acyclic concept links, React Library, dashboard entry | Merge/split, archive/restore, linked revision packs, and live connected verification remain | Partial |
 | Buddy | Python domain tables and React Buddy | Authorized reads, explicit sharing | No |
 | Settings and reminders | account and notification records | Validated preferences and connection state | No |
@@ -119,3 +120,12 @@ it does not mean production data has been migrated or a ChatGPT account connecte
 - [ ] Link concept response history into the same recovery evidence and distinguish self/assistant assessments from canonical mastery.
 - [ ] Prevent generic/compatibility writes from bypassing the recovery domain; test ownership, retries, stale writes, concurrency, historical preservation, and frontend API integration.
 - [ ] Commit and push this slice to `origin/main`, and record remaining scope accurately.
+
+## Current continuation — 2026-10-11
+
+- Added six authenticated MCP tools and `POST /v1/study-actions`, sharing one Python domain: `save_formula`, `save_recognition_cue`, `update_journal_analysis`, `set_syllabus_progress`, `save_weekly_review` and `edit_planner_day`. They use existing app records, owner mappings, revision history and durable retry receipts. No schema migration or new backend runtime is required.
+- Planner edits retain the app's complete DayPlan shape and preserve started work and execution metadata. Capacity, protected buffer, existing availability windows, overlapping times, stale revisions and duplicate block identities are validated. Splitting is one transaction containing an edit plus added blocks. Existing measured formula/cue/Journal evidence is preserved; syllabus coverage does not award mastery.
+- Fixed MCP protected-resource discovery to advertise both `hetu:read` and `hetu:write` while retaining the minimum read scope and per-tool write checks. Fixed untyped recovery/concept-help response declarations so the SDK returns structured content. New section tool errors preserve version/capacity details for the caller.
+- Tested the exact task changes on a clean export of committed `main` with disposable PostgreSQL 18: **109 Python tests passed**, including authenticated transport/app retrieval, read-only write denial, account isolation, history, delayed retries, six parallel identical writes producing one record/receipt, and concurrent Planner edits with one stale conflict. Alembic reported no schema drift. Selected Ruff lint/format checks and the local plugin skill validation passed; frontend typecheck and 37 existing Planner/syllabus regression tests passed.
+- Rechecked the live connection with the new read-only `scripts/verify_mcp_connection.py`: API readiness failed with 503, MCP discovery returned 404, and Clerk discovery lacked the HETU scopes and CIMD. Runtime logs identified the Neon quota rejection. The audit found no production MCP URL/issuer/client settings, custom Clerk scopes or registered OAuth applications. Production OAuth settings, accounts and data were not changed in this continuation.
+- [Connection instructions](hetu-mcp-connection.md) record the exact production URLs, scoped ChatGPT registration, public checks and final real-account save/reconnect verification. Deployment and authenticated connection remain blocked by current database availability and missing OAuth configuration; whole-app domain coverage remains incomplete.

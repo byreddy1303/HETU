@@ -23,6 +23,8 @@ from starlette.concurrency import run_in_threadpool
 from app.core.config import Settings
 from app.db.models import User, UserIdentity
 from app.db.session import get_session_factory
+from app.mcp_study_tools import STUDY_CAPABILITIES, register_study_tools
+from app.mcp_transport import HetuMCPServer
 from app.schemas import RecordQuery
 from app.services import recovery
 from app.services.concept_review import (
@@ -203,7 +205,7 @@ def create_mcp_server(settings: Settings) -> MCPServer:
         raise ValueError("MCP needs canonical /mcp URL, HTTPS issuer, and allowed client IDs")
     if settings.environment in {"staging", "production"} and resource.scheme != "https":
         raise ValueError("Hosted MCP_RESOURCE_URL must use HTTPS")
-    server = MCPServer(
+    server = HetuMCPServer(
         "HETU",
         description="Operate the connected learner's HETU preparation workspace.",
         instructions=(
@@ -293,11 +295,14 @@ def create_mcp_server(settings: Settings) -> MCPServer:
                 "recovery.assign_transfer",
                 "recovery.capture_attempt",
                 "recovery.schedule_journal_question",
+                *STUDY_CAPABILITIES,
             ],
             "unavailable": [
-                "production data cutover",
                 "historical ChatGPT transcript access",
                 "whole-app MCP actions",
+                "PYQ set assembly and timed exam sessions",
+                "mock question-level analysis",
+                "Buddy sharing and owner administration",
             ],
         }
 
@@ -562,7 +567,7 @@ def create_mcp_server(settings: Settings) -> MCPServer:
         annotations=ToolAnnotations(idempotent_hint=True),
         meta=_security(WRITE_SCOPE),
     )
-    async def record_concept_help(review_id: str, draft: ReviewHelp) -> dict:
+    async def record_concept_help(review_id: str, draft: ReviewHelp) -> dict[str, Any]:
         async with get_session_factory()() as db:
             owner = await _user_id(db, WRITE_SCOPE)
             result = await reveal_review_help(db, owner_id=owner, review_id=review_id, draft=draft)
@@ -726,7 +731,7 @@ def create_mcp_server(settings: Settings) -> MCPServer:
     )
     async def get_recovery_overview(
         mode: Mode = "minutes-20", subject: str | None = None, days: int = 7
-    ) -> dict:
+    ) -> dict[str, Any]:
         if not 1 <= days <= 30:
             raise ValueError("Forecast days must be 1–30")
         async with get_session_factory()() as db:
@@ -743,7 +748,7 @@ def create_mcp_server(settings: Settings) -> MCPServer:
         annotations=ToolAnnotations(read_only_hint=True),
         meta=_security(READ_SCOPE),
     )
-    async def get_recovery_item(item_id: str, cursor: int = 0, limit: int = 25) -> dict:
+    async def get_recovery_item(item_id: str, cursor: int = 0, limit: int = 25) -> dict[str, Any]:
         if cursor < 0 or not 1 <= limit <= 100:
             raise ValueError("Invalid recovery evidence pagination")
         async with get_session_factory()() as db:
@@ -761,7 +766,7 @@ def create_mcp_server(settings: Settings) -> MCPServer:
         annotations=ToolAnnotations(idempotent_hint=True),
         meta=_security(WRITE_SCOPE),
     )
-    async def start_recovery_session(draft: recovery.SessionStart) -> dict:
+    async def start_recovery_session(draft: recovery.SessionStart) -> dict[str, Any]:
         async with get_session_factory()() as db:
             owner = await _user_id(db, WRITE_SCOPE)
             result = await recovery.start_session(
@@ -780,7 +785,7 @@ def create_mcp_server(settings: Settings) -> MCPServer:
     )
     async def list_recovery_sessions(
         resumable_only: bool = False, cursor: int = 0, limit: int = 25
-    ) -> dict:
+    ) -> dict[str, Any]:
         if cursor < 0 or not 1 <= limit <= 100:
             raise ValueError("Invalid recovery session pagination")
         async with get_session_factory()() as db:
@@ -797,7 +802,7 @@ def create_mcp_server(settings: Settings) -> MCPServer:
         annotations=ToolAnnotations(read_only_hint=True),
         meta=_security(READ_SCOPE),
     )
-    async def get_recovery_session(session_id: str) -> dict:
+    async def get_recovery_session(session_id: str) -> dict[str, Any]:
         async with get_session_factory()() as db:
             owner = await _user_id(db, READ_SCOPE)
             return await recovery.get_session(db, owner_id=owner, session_id=session_id)
@@ -812,7 +817,7 @@ def create_mcp_server(settings: Settings) -> MCPServer:
     )
     async def checkpoint_recovery_session(
         session_id: str, draft: recovery.SessionCheckpoint
-    ) -> dict:
+    ) -> dict[str, Any]:
         async with get_session_factory()() as db:
             owner = await _user_id(db, WRITE_SCOPE)
             result = await recovery.checkpoint_session(
@@ -829,7 +834,9 @@ def create_mcp_server(settings: Settings) -> MCPServer:
         annotations=ToolAnnotations(idempotent_hint=True),
         meta=_security(WRITE_SCOPE),
     )
-    async def reveal_recovery_hint(session_id: str, draft: recovery.SessionCommand) -> dict:
+    async def reveal_recovery_hint(
+        session_id: str, draft: recovery.SessionCommand
+    ) -> dict[str, Any]:
         async with get_session_factory()() as db:
             owner = await _user_id(db, WRITE_SCOPE)
             result = await recovery.reveal_hint(
@@ -846,7 +853,7 @@ def create_mcp_server(settings: Settings) -> MCPServer:
         annotations=ToolAnnotations(idempotent_hint=True),
         meta=_security(WRITE_SCOPE),
     )
-    async def defer_recovery_item(session_id: str, draft: recovery.SessionDefer) -> dict:
+    async def defer_recovery_item(session_id: str, draft: recovery.SessionDefer) -> dict[str, Any]:
         async with get_session_factory()() as db:
             owner = await _user_id(db, WRITE_SCOPE)
             result = await recovery.defer_item(
@@ -865,7 +872,9 @@ def create_mcp_server(settings: Settings) -> MCPServer:
         annotations=ToolAnnotations(idempotent_hint=True),
         meta=_security(WRITE_SCOPE),
     )
-    async def submit_recovery_answer(session_id: str, draft: recovery.RecoveryAnswer) -> dict:
+    async def submit_recovery_answer(
+        session_id: str, draft: recovery.RecoveryAnswer
+    ) -> dict[str, Any]:
         async with get_session_factory()() as db:
             owner = await _user_id(db, WRITE_SCOPE)
             result = await recovery.record_answer(
@@ -882,7 +891,9 @@ def create_mcp_server(settings: Settings) -> MCPServer:
         annotations=ToolAnnotations(idempotent_hint=True),
         meta=_security(WRITE_SCOPE),
     )
-    async def complete_recovery_remediation(item_id: str, draft: recovery.RemediationDraft) -> dict:
+    async def complete_recovery_remediation(
+        item_id: str, draft: recovery.RemediationDraft
+    ) -> dict[str, Any]:
         async with get_session_factory()() as db:
             owner = await _user_id(db, WRITE_SCOPE)
             result = await recovery.remediate(db, owner_id=owner, item_id=item_id, draft=draft)
@@ -898,7 +909,9 @@ def create_mcp_server(settings: Settings) -> MCPServer:
         annotations=ToolAnnotations(idempotent_hint=True),
         meta=_security(WRITE_SCOPE),
     )
-    async def assign_recovery_transfer(item_id: str, draft: recovery.TransferDraft) -> dict:
+    async def assign_recovery_transfer(
+        item_id: str, draft: recovery.TransferDraft
+    ) -> dict[str, Any]:
         async with get_session_factory()() as db:
             owner = await _user_id(db, WRITE_SCOPE)
             result = await recovery.assign_transfer(
@@ -930,7 +943,7 @@ def create_mcp_server(settings: Settings) -> MCPServer:
         annotations=ToolAnnotations(idempotent_hint=True),
         meta=_security(WRITE_SCOPE),
     )
-    async def schedule_journal_recovery(question_id: str) -> dict:
+    async def schedule_journal_recovery(question_id: str) -> dict[str, Any]:
         async with get_session_factory()() as db:
             owner = await _user_id(db, WRITE_SCOPE)
             result = await recovery.schedule_question(db, owner_id=owner, question_id=question_id)
@@ -992,4 +1005,5 @@ def create_mcp_server(settings: Settings) -> MCPServer:
             user_id = await _user_id(db, READ_SCOPE)
             return await get_saved_pack(db, owner_id=user_id, pack_id=pack_id)
 
+    register_study_tools(server, settings, _user_id)
     return server

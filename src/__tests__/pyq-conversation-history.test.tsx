@@ -38,4 +38,39 @@ describe('PYQ answers recorded with ChatGPT', () => {
       'https://example.test/paper'
     );
   });
+
+  it('prefers the captured question screenshot and shows confidence when present', async () => {
+    const receipt = {
+      id: 'receipt-2',
+      capture_origin: 'chatgpt',
+      attempted_at: '2026-09-29T11:00:00.000Z',
+      subject: 'Algorithms',
+      question_uid: 'gate:test:2',
+      selected_answer: 'A',
+      correct_answer: 'A',
+      answer_status: 'available',
+      mark_decision: 'MARK',
+      mark_correct: true,
+      confidence: 'high',
+      duration_source: 'measured',
+      time_spent_ms: 42_000,
+      screenshot_url: 'data:image/png;base64,c2NyZWVuc2hvdA==',
+      question_snapshot: {
+        subject: 'Algorithms',
+        topic: 'Sorting',
+        html: '<p>Which option is correct?</p>',
+        source_url: 'https://example.test/paper'
+      }
+    } as PyqAttemptRow;
+    render(<PyqConversationHistory attempts={[receipt]} />);
+
+    await userEvent.click(screen.getByText(/Algorithms · Sorting/));
+
+    const screenshot = screen.getByRole('img', {
+      name: 'Question screenshot from when you attempted it'
+    });
+    expect(screenshot).toHaveAttribute('src', 'data:image/png;base64,c2NyZWVuc2hvdA==');
+    expect(screen.queryByText('Which option is correct?')).not.toBeInTheDocument();
+    expect(screen.getByText('high')).toBeInTheDocument();
+  });
 });

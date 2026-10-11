@@ -20,14 +20,29 @@ interface RecoveryResult {
   idempotent_replay?: boolean;
 }
 
+type CachedServerRow = { id: string; user_id?: string; version?: number; [key: string]: unknown };
+
 function cache(userId: string, result: RecoveryResult): void {
+  const toCached = (rows: unknown[]): CachedServerRow[] => rows as CachedServerRow[];
   applyServerRows(userId, [
-    { name: 'learning_items', rows: result.item ? [result.item] : [] },
-    { name: 'recovery_sessions', rows: result.session ? [result.session] : [] },
-    { name: 'learning_events', rows: [...(result.events ?? []), ...(result.event ? [result.event] : [])] },
-    { name: 'pyq_attempts', rows: result.attempt ? [result.attempt] : [] },
-    { name: 'questions', rows: result.compatibilityQuestion ? [result.compatibilityQuestion] : [] },
-    { name: 'reattempts', rows: [...(result.reattempts ?? []), ...(result.compatibilityReattempt ? [result.compatibilityReattempt] : [])] }
+    { name: 'learning_items', rows: result.item ? toCached([result.item]) : [] },
+    { name: 'recovery_sessions', rows: result.session ? toCached([result.session]) : [] },
+    {
+      name: 'learning_events',
+      rows: toCached([...(result.events ?? []), ...(result.event ? [result.event] : [])])
+    },
+    { name: 'pyq_attempts', rows: result.attempt ? toCached([result.attempt]) : [] },
+    {
+      name: 'questions',
+      rows: result.compatibilityQuestion ? toCached([result.compatibilityQuestion]) : []
+    },
+    {
+      name: 'reattempts',
+      rows: toCached([
+        ...(result.reattempts ?? []),
+        ...(result.compatibilityReattempt ? [result.compatibilityReattempt] : [])
+      ])
+    }
   ]);
 }
 

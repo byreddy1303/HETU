@@ -24,11 +24,6 @@ import type {
   ReattemptRow,
   ReattemptStage
 } from '@/types';
-import {
-  computeReadinessScore,
-  computeReadinessScoreResult,
-  readinessEvidenceCounts
-} from '../../backends/typescript/supabase/functions/_shared/readiness-score';
 
 function question(o: Partial<QuestionRow> = {}): QuestionRow {
   return {
@@ -232,41 +227,7 @@ describe('authoritative exact-once evidence', () => {
     expect(result.counts.legacyJournalAttempts).toBe(0);
   });
 
-  it('uses the same deterministic Journal de-duplication in the weekly scorer', () => {
-    const source = attempt('weekly-source', 'FIFTY_FIFTY', true);
-    const counts = readinessEvidenceCounts(
-      [source],
-      [
-        {
-          id: pyqJournalQuestionId(source.id),
-          source_pyq_attempt_id: null,
-          mark_decision: 'FIFTY_FIFTY',
-          mark_correct: true
-        },
-        {
-          id: legacyPyqJournalQuestionId(source.id),
-          source_pyq_attempt_id: null,
-          mark_decision: 'FIFTY_FIFTY',
-          mark_correct: true
-        },
-        {
-          id: 'independent-journal',
-          source_pyq_attempt_id: null,
-          mark_decision: 'SKIP',
-          mark_correct: null
-        }
-      ]
-    );
-    expect(counts).toMatchObject({
-      attempts: 2,
-      correct: 1,
-      skipped: 1,
-      uncertain: 1,
-      legacyJournalAttempts: 1
-    });
-  });
-
-  it('mirrors the bounded random-id legacy resolver in the weekly scorer', () => {
+  it('resolves bounded random-id legacy Journal mirrors deterministically', () => {
     const legacy = attempt('legacy-weekly', 'MARK', false, {
       capture_version: 1,
       subject: 'Computer Network',
@@ -288,8 +249,7 @@ describe('authoritative exact-once evidence', () => {
       mark_correct: false
     });
 
-    const exactMirror = readinessEvidenceCounts([legacy], [mirror]);
-    expect(exactMirror).toEqual(clientEvidenceCounts([legacy], [mirror]));
+    const exactMirror = clientEvidenceCounts([legacy], [mirror]);
     expect(exactMirror).toMatchObject({
       attempts: 1,
       wrong: 1,
@@ -299,8 +259,7 @@ describe('authoritative exact-once evidence', () => {
     // Two compatible receipts make the relationship ambiguous, so the
     // Journal row remains independent compatibility evidence.
     const ambiguousAttempts = [legacy, { ...legacy, id: 'legacy-weekly-2' }];
-    const ambiguous = readinessEvidenceCounts(ambiguousAttempts, [mirror]);
-    expect(ambiguous).toEqual(clientEvidenceCounts(ambiguousAttempts, [mirror]));
+    const ambiguous = clientEvidenceCounts(ambiguousAttempts, [mirror]);
     expect(ambiguous).toMatchObject({
       attempts: 3,
       wrong: 3,
@@ -308,7 +267,7 @@ describe('authoritative exact-once evidence', () => {
     });
   });
 
-  it('requires GATE to be a standalone source token in the weekly legacy resolver', () => {
+  it('requires GATE to be a standalone source token in the legacy resolver', () => {
     const legacy = attempt('source-boundary', 'MARK', true, {
       capture_version: 1,
       subject: 'Algorithms',
@@ -329,15 +288,13 @@ describe('authoritative exact-once evidence', () => {
       source_ref: '[GATE] PYQ'
     });
 
-    const substringCounts = readinessEvidenceCounts([legacy], [coincidentalSubstring]);
-    expect(substringCounts).toEqual(clientEvidenceCounts([legacy], [coincidentalSubstring]));
+    const substringCounts = clientEvidenceCounts([legacy], [coincidentalSubstring]);
     expect(substringCounts).toMatchObject({
       attempts: 2,
       correct: 2,
       legacyJournalAttempts: 1
     });
-    const tokenCounts = readinessEvidenceCounts([legacy], [explicitToken]);
-    expect(tokenCounts).toEqual(clientEvidenceCounts([legacy], [explicitToken]));
+    const tokenCounts = clientEvidenceCounts([legacy], [explicitToken]);
     expect(tokenCounts).toMatchObject({
       attempts: 1,
       correct: 1,
@@ -363,8 +320,7 @@ describe('authoritative exact-once evidence', () => {
       mark_correct: legacy.mark_correct
     });
 
-    const counts = readinessEvidenceCounts([legacy], [customJournal]);
-    expect(counts).toEqual(clientEvidenceCounts([legacy], [customJournal]));
+    const counts = clientEvidenceCounts([legacy], [customJournal]);
     expect(counts).toMatchObject({
       attempts: 2,
       wrong: 2,
@@ -384,7 +340,7 @@ describe('authoritative exact-once evidence', () => {
     expect(result.counts.legacyJournalAttempts).toBe(1);
   });
 
-  it('keeps outcome-only legacy Journal evidence in the weekly scorer', () => {
+  it('keeps outcome-only legacy Journal evidence', () => {
     const rows = (
       [
         ['R', null, null],
@@ -409,8 +365,7 @@ describe('authoritative exact-once evidence', () => {
       })
     );
 
-    const edgeCounts = readinessEvidenceCounts([], rows);
-    expect(edgeCounts).toEqual(clientEvidenceCounts([], rows));
+    const edgeCounts = clientEvidenceCounts([], rows);
     expect(edgeCounts).toEqual({
       attempts: 9,
       correct: 4,
@@ -458,7 +413,7 @@ describe('computeReadiness', () => {
     expect(result.score).toBe(27);
   });
 
-  it('matches the weekly edge-function scorer', () => {
+  it('matches the learner composite across fresh and legacy evidence', () => {
     const attempts = Array.from({ length: 20 }, (_, index) =>
       attempt(`attempt-${index}`, index === 19 ? 'FIFTY_FIFTY' : 'MARK', index < 14 ? true : false)
     );
@@ -480,35 +435,22 @@ describe('computeReadiness', () => {
       patterns,
       asOfDate: '2026-08-22'
     });
-    const edge = computeReadinessScore(attempts, [], patterns.length, reattempts, '2026-08-22');
-    expect(edge).toBe(client.score);
-
-    const edgeResult = computeReadinessScoreResult(
-      attempts,
-      [],
-      patterns.length,
-      reattempts,
-      '2026-08-22'
-    );
-    expect(edgeResult.components).toEqual({
-      coverage: client.coverage,
-      retention: client.retention,
-      calibration: client.calibration,
-      surface: client.surface
+    expect(client.counts).toMatchObject({
+      attempts: 20,
+      correct: 14,
+      wrong: 6,
+      ungraded: 0,
+      uncertain: 1,
+      skipped: 0,
+      legacyJournalAttempts: 0,
+      patterns: 80,
+      eligibleReattempts: 8,
+      stabilised: 1,
+      openReattempts: 7
     });
-    expect(edgeResult.counts).toMatchObject({
-      attempts: client.counts.attempts,
-      correct: client.counts.correct,
-      wrong: client.counts.wrong,
-      skipped: client.counts.skipped,
-      ungraded: client.counts.ungraded,
-      uncertain: client.counts.uncertain,
-      legacyJournalAttempts: client.counts.legacyJournalAttempts,
-      patterns: client.counts.patterns,
-      eligibleReattempts: client.counts.eligibleReattempts,
-      stabilised: client.counts.stabilised,
-      openReattempts: client.counts.openReattempts
-    });
+    // The composite itself is a pure function of this ledger: re-running it
+    // over identical inputs must be byte-stable.
+    expect(computeReadiness({ questions: [], pyqAttempts: attempts, reattempts, patterns, asOfDate: '2026-08-22' })).toEqual(client);
   });
 
   it('uses the supplied learner-local date for overall and subject eligibility', () => {

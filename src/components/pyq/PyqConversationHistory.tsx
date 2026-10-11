@@ -58,12 +58,32 @@ export default function PyqConversationHistory({ attempts }: { attempts: readonl
                 </span>
               </summary>
               <div className="border-t border-border px-3 py-4 text-[12px] sm:px-4">
-                {snapshot ? <PyqQuestionContent html={snapshot.html} /> : <p>Question snapshot unavailable.</p>}
+                {/* Show screenshot if available, otherwise show HTML content */}
+                {attempt.screenshot_url ? (
+                  <div className="mb-4">
+                    <p className="mb-2 text-text-faint">Question screenshot</p>
+                    <div className="overflow-hidden rounded-md border border-divider/40 bg-white">
+                      <img
+                        src={attempt.screenshot_url}
+                        alt="Question screenshot from when you attempted it"
+                        className="max-h-[300px] w-full object-contain object-top"
+                        loading="lazy"
+                      />
+                    </div>
+                  </div>
+                ) : snapshot ? (
+                  <PyqQuestionContent html={snapshot.html} />
+                ) : (
+                  <p>Question snapshot unavailable.</p>
+                )}
                 <dl className="mt-4 grid gap-2 sm:grid-cols-2">
                   <div><dt className="text-text-faint">Your answer</dt><dd className="font-medium text-text">{answerLabel(attempt.selected_answer)}</dd></div>
                   <div><dt className="text-text-faint">Recorded result</dt><dd className="font-medium text-text">{resultLabel(attempt)}</dd></div>
                   <div><dt className="text-text-faint">Official key</dt><dd className="font-medium text-text">{attempt.answer_status === 'available' ? answerLabel(attempt.correct_answer) : 'Unavailable or disputed'}</dd></div>
                   <div><dt className="text-text-faint">Time</dt><dd className="font-medium text-text">{attempt.duration_source === 'unknown' ? 'Not measured' : attempt.time_spent_ms == null ? 'Not recorded' : `${Math.ceil(attempt.time_spent_ms / 1000)} seconds (${attempt.duration_source ?? 'measured'})`}</dd></div>
+                  {attempt.confidence && (
+                    <div><dt className="text-text-faint">Confidence</dt><dd className="font-medium capitalize text-text">{attempt.confidence}</dd></div>
+                  )}
                 </dl>
                 {snapshot?.source_url ? (
                   <a className="mt-4 inline-block text-accent underline-offset-2 hover:underline" href={snapshot.source_url} target="_blank" rel="noreferrer">

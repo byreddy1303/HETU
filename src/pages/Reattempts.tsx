@@ -557,6 +557,22 @@ function PyqAnswerHistory({
               {secondsToClock(currentAttempt.time_spent_sec)}
             </span>
           </div>
+
+          {/* Question Screenshot - Show the captured question image */}
+          {currentAttempt.screenshot_url && (
+            <div className="mt-3">
+              <p className="u-label mb-2">Question snapshot</p>
+              <div className="overflow-hidden rounded-md border border-divider/40 bg-white">
+                <img
+                  src={currentAttempt.screenshot_url}
+                  alt="Question screenshot from when you attempted it"
+                  className="max-h-[400px] w-full object-contain object-top"
+                  loading="lazy"
+                />
+              </div>
+            </div>
+          )}
+
           <dl className="mt-3 grid gap-3 text-[12px] sm:grid-cols-3">
             {ordered
               .map((attempt, index) => ({ attempt, number: index + 1 }))
@@ -567,6 +583,11 @@ function PyqAnswerHistory({
                   <dd className="mt-0.5 font-mono font-semibold text-text">
                     {savedAttemptAnswer(attempt)}
                   </dd>
+                  {attempt.confidence && (
+                    <dd className="mt-1 text-[11px] capitalize text-text-faint">
+                      {attempt.confidence} confidence
+                    </dd>
+                  )}
                 </div>
               ))}
             <div>

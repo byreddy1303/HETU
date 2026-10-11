@@ -63,10 +63,13 @@ describe('shared Python recovery boundary', () => {
   });
 
   it('never lets a delayed receipt overwrite a newer checkpoint or another account', async () => {
-    applyServerRows('one', [{ name: 'recovery_sessions', rows: [{ ...session, version: 4, current_index: 1, status: 'completed' }] }]);
-    applyServerRows('one', [{ name: 'recovery_sessions', rows: [session] }]);
+    const asServerRows = (rows: unknown[]) => rows as Array<{ id: string; user_id?: string; version?: number; [key: string]: unknown }>;
+    applyServerRows('one', [{ name: 'recovery_sessions', rows: asServerRows([{ ...session, version: 4, current_index: 1, status: 'completed' }]) }]);
+    applyServerRows('one', [{ name: 'recovery_sessions', rows: asServerRows([{ ...session, version: 2, current_index: 0, status: 'active' }]) }]);
     expect((await db.recovery_sessions.get(session.id))?.version).toBe(4);
-    expect(() => applyServerRows('two', [{ name: 'learning_items', rows: [item] }])).toThrow('another account');
+    expect((await db.recovery_sessions.get(session.id))?.current_index).toBe(1);
+    expect((await db.recovery_sessions.get(session.id))?.status).toBe('completed');
+    expect(() => applyServerRows('two', [{ name: 'learning_items', rows: asServerRows([item]) }])).toThrow('another account');
     expect(await db.learning_items.get(item.id)).toBeUndefined();
   });
 });

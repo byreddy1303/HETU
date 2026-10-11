@@ -88,6 +88,19 @@ export default defineConfig(({ mode }) => {
         '@': path.resolve(__dirname, './src')
       }
     },
-    server: { port: 5173 }
+    server: {
+      port: 5173,
+      proxy: {
+        '/api': {
+          target: 'http://localhost:8000',
+          changeOrigin: true,
+          rewrite: (path) => path.replace(/^\/api/, '/v1')
+        },
+        '/__clerk': {
+          target: 'http://localhost:8000',
+          changeOrigin: true
+        }
+      }
+    }
   };
 });

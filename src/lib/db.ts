@@ -766,7 +766,7 @@ export function seedLocalRows(name: SyncedTableName, rows: Row[]): void {
 
 /** Apply an already committed domain response to RAM without sending it back as a write. */
 export function applyServerRows(userId: string, writes: Array<{
-  name: SyncedTableName; rows: Array<{ id: string; user_id?: string; version?: number }>
+  name: SyncedTableName; rows: Array<{ id: string; user_id?: string; version?: number; [key: string]: unknown }>
 }>): void {
   let changed = false;
   for (const { name, rows } of writes) {
@@ -782,7 +782,13 @@ export function applyServerRows(userId: string, writes: Array<{
       const incomingVersion = typeof row.version === 'number' ? row.version : 0;
       const currentVersion = typeof existing?.version === 'number' ? existing.version : 0;
       if (existing && currentVersion >= incomingVersion && incomingVersion > 0) continue;
-      map.set(row.id, { ...normalizeTableWrite(name, { ...row }), sync_status: 'synced' });
+      map.set(
+        row.id,
+        {
+          ...normalizeTableWrite(name, row as unknown as Record<string, unknown>),
+          sync_status: 'synced'
+        } as never
+      );
       changed = true;
     }
   }

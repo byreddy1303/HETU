@@ -1,0 +1,439 @@
+openapi: 3.1.0
+info:
+  title: HETU study workspace
+  version: 1.0.0
+  description: >-
+    Operate the connected learner's HETU preparation workspace: retrieve
+    account evidence before acting, save useful learning with source
+    attribution, and verify writes. Never invent attempts or mastery.
+servers:
+  - url: https://hetu-app.vercel.app/api/v1
+paths:
+  /me:
+    get:
+      operationId: getMe
+      summary: Identify the connected HETU account
+      responses:
+        '200':
+          description: Account identity
+  /learning/search:
+    get:
+      operationId: searchLearning
+      summary: Search saved concepts and insights
+      parameters:
+        - name: q
+          in: query
+          schema:
+            type: string
+        - name: subject
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 25
+      responses:
+        '200':
+          description: Matching concepts and insights
+  /learning/captures:
+    post:
+      operationId: saveCapture
+      summary: Save a discussion as learning with source attribution
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CaptureRequest'
+      responses:
+        '200':
+          description: Saved capture result
+  /learning/concepts/{concept_id}:
+    get:
+      operationId: getConcept
+      summary: Get a saved concept with optional history
+      parameters:
+        - name: concept_id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: include_history
+          in: query
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: Concept detail
+  /learning/insights/{insight_id}:
+    patch:
+      operationId: reviseInsight
+      summary: Revise a saved insight with reason and expected version
+      parameters:
+        - name: insight_id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InsightRevision'
+      responses:
+        '200':
+          description: Revised insight
+  /records/{collection}/query:
+    post:
+      operationId: queryRecords
+      summary: Query a record collection with filters
+      parameters:
+        - name: collection
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RecordQuery'
+      responses:
+        '200':
+          description: Matching records
+  /concept-reviews:
+    get:
+      operationId: listReviews
+      summary: List recent concept reviews
+      parameters:
+        - name: concept_id
+          in: query
+          schema:
+            type: string
+        - name: due_only
+          in: query
+          schema:
+            type: boolean
+            default: false
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+      responses:
+        '200':
+          description: Recent reviews
+    post:
+      operationId: createReview
+      summary: Create a recall or transfer review for a concept
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReviewDraft'
+      responses:
+        '200':
+          description: Created review
+  /workflows:
+    post:
+      operationId: createBrief
+      summary: Start a task brief with goal and constraints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BriefStart'
+      responses:
+        '200':
+          description: Created brief
+    get:
+      operationId: listBriefs
+      summary: List recent task briefs
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: Recent briefs
+  /workflows/{workflow_id}:
+    get:
+      operationId: getBrief
+      summary: Get a task brief by id
+      parameters:
+        - name: workflow_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Brief detail
+    patch:
+      operationId: updateBrief
+      summary: Update a task brief with expected version
+      parameters:
+        - name: workflow_id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BriefUpdate'
+      responses:
+        '200':
+          description: Updated brief
+  /revision-pack:
+    get:
+      operationId: previewRevisionPack
+      summary: Preview the due revision pack
+      parameters:
+        - name: subject
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+      responses:
+        '200':
+          description: Revision pack preview
+components:
+  schemas:
+    CaptureRequest:
+      type: object
+      required: [idempotency_key, sources, insights]
+      properties:
+        idempotency_key:
+          type: string
+          description: Unique key, min 8 chars. Reuse to retry safely.
+        sources:
+          type: array
+          maxItems: 12
+          items:
+            $ref: '#/components/schemas/SourceDraft'
+        insights:
+          type: array
+          maxItems: 12
+          items:
+            $ref: '#/components/schemas/InsightDraft'
+        page_explanations:
+          type: object
+          additionalProperties:
+            type: string
+    SourceDraft:
+      type: object
+      required: [kind, title]
+      properties:
+        kind:
+          type: string
+          enum: [conversation, document, web, manual, question, other]
+        title:
+          type: string
+        url:
+          type: string
+        conversation_id:
+          type: string
+        excerpt:
+          type: string
+    InsightDraft:
+      type: object
+      required: [subject, topic, concept, core_idea, full_explanation]
+      properties:
+        subject:
+          type: string
+        topic:
+          type: string
+        concept:
+          type: string
+        aliases:
+          type: array
+          items:
+            type: string
+        core_idea:
+          type: string
+        full_explanation:
+          type: string
+        reasoning_origin:
+          type: string
+          enum: [learner_stated, assistant_hypothesis, general_pitfall, none]
+          default: none
+        prior_reasoning:
+          type: string
+        reasoning_correction:
+          type: string
+        better_method:
+          type: string
+        intuition:
+          type: string
+        derivation:
+          type: string
+        conditions:
+          type: array
+          items:
+            type: string
+        exceptions:
+          type: array
+          items:
+            type: string
+        examples:
+          type: array
+          items:
+            type: string
+        recognition_cues:
+          type: array
+          items:
+            type: string
+        unresolved_questions:
+          type: array
+          items:
+            type: string
+        related_concepts:
+          type: array
+          items:
+            type: string
+        retrieval_question:
+          type: string
+        evaluation_guidance:
+          type: string
+    InsightRevision:
+      type: object
+      required: [expected_version, revision_reason]
+      properties:
+        expected_version:
+          type: integer
+        revision_reason:
+          type: string
+        core_idea:
+          type: string
+        full_explanation:
+          type: string
+        reasoning_origin:
+          type: string
+          enum: [learner_stated, assistant_hypothesis, general_pitfall, none]
+        prior_reasoning:
+          type: string
+        reasoning_correction:
+          type: string
+        better_method:
+          type: string
+    RecordQuery:
+      type: object
+      properties:
+        filters:
+          type: array
+          maxItems: 8
+          items:
+            $ref: '#/components/schemas/QueryFilter'
+        order_by:
+          type: string
+          default: updated_at
+        descending:
+          type: boolean
+          default: true
+        limit:
+          type: integer
+          default: 200
+        cursor:
+          type: string
+    QueryFilter:
+      type: object
+      properties:
+        field:
+          type: string
+        op:
+          type: string
+          enum: [eq, neq, in, gt, gte, lt, lte, is]
+          default: eq
+    ReviewDraft:
+      type: object
+      required: [idempotency_key, concept_id, kind, prompt, question_origin]
+      properties:
+        idempotency_key:
+          type: string
+        concept_id:
+          type: string
+        insight_id:
+          type: string
+        kind:
+          type: string
+          enum: [recall, transfer]
+        prompt:
+          type: string
+        evaluation_guidance:
+          type: string
+        question_origin:
+          type: string
+          enum: [saved_note, new_variant, external_exam]
+        source_ref:
+          type: string
+        due_on:
+          type: string
+          format: date
+    BriefStart:
+      type: object
+      required: [idempotency_key, goal]
+      properties:
+        idempotency_key:
+          type: string
+        goal:
+          type: string
+        constraints:
+          type: array
+          items:
+            type: string
+        assumptions:
+          type: array
+          items:
+            type: string
+        references:
+          type: array
+          items:
+            type: string
+        pending_steps:
+          type: array
+          items:
+            type: string
+        success_criteria:
+          type: array
+          items:
+            type: string
+    BriefUpdate:
+      type: object
+      required: [expected_version, operation_id]
+      properties:
+        expected_version:
+          type: integer
+        operation_id:
+          type: string
+          description: Unique key, min 8 chars.
+        correction:
+          type: string
+        completed_step:
+          type: string
+        pending_step:
+          type: string
+        remove_pending_step:
+          type: string
+        assumption:
+          type: string
+        reference:
+          type: string
+        status:
+          type: string
+          enum: [active, waiting, complete, cancelled]

@@ -3,10 +3,18 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from clerk_backend_api import AuthenticateRequestOptions, authenticate_request
+from clerk_backend_api.security.machine import get_token_type
+from clerk_backend_api.security.types import TokenType
 from fastapi import HTTPException, Request, WebSocket, status
 from starlette.concurrency import run_in_threadpool
 
 from app.core.config import Settings
+
+# OAuth scopes mirror the MCP scopes so connected clients (MCP or GPT Actions)
+# get the same read/write boundary on the REST API.
+OAUTH_READ_SCOPE = "hetu:read"
+OAUTH_WRITE_SCOPE = "hetu:write"
+_SAFE_METHODS = frozenset({"GET", "HEAD", "OPTIONS"})
 
 
 @dataclass(frozen=True, slots=True)
@@ -45,6 +53,36 @@ class _WebSocketAuthRequest:
         self.url = websocket.url
 
 
+def _enforce_oauth_scopes(
+    request: Request | WebSocket | _WebSocketAuthRequest, payload: dict[str, object]
+) -> None:
+    """Require hetu:read on OAuth tokens, plus hetu:write for unsafe methods."""
+    raw_scope = payload.get("scope")
+    if isinstance(raw_scope, str):
+        scopes = set(raw_scope.split())
+    elif isinstance(raw_scope, list) and all(isinstance(item, str) for item in raw_scope):
+        scopes = set(raw_scope)
+    else:
+        scopes = set()
+    if OAUTH_READ_SCOPE not in scopes:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=f"{OAUTH_READ_SCOPE} scope required",
+        )
+    method = getattr(request, "method", None)
+    if not isinstance(method, str):
+        # Realtime transports stay session-only; OAuth tokens use HTTP.
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="OAuth tokens are not accepted on this transport",
+        )
+    if method.upper() not in _SAFE_METHODS and OAUTH_WRITE_SCOPE not in scopes:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=f"{OAUTH_WRITE_SCOPE} scope required",
+        )
+
+
 async def _authenticate(
     request: Request | WebSocket | _WebSocketAuthRequest, settings: Settings
 ) -> Identity:
@@ -60,7 +98,7 @@ async def _authenticate(
         secret_key=secret_key,
         jwt_key=jwt_key,
         authorized_parties=settings.authorized_parties,
-        accepts_token=["session_token"],
+        accepts_token=["session_token", "oauth_token"],
     )
     try:
         state = await run_in_threadpool(authenticate_request, request, options)
@@ -79,6 +117,8 @@ async def _authenticate(
             headers={"WWW-Authenticate": "Bearer"},
         )
     payload = state.payload or {}
+    if state.token and get_token_type(state.token) is TokenType.OAUTH_TOKEN:
+        _enforce_oauth_scopes(request, payload)
     user_id = payload.get("sub")
     if not isinstance(user_id, str) or not user_id:
         raise HTTPException(

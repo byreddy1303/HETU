@@ -9,6 +9,9 @@ package still targets `http://localhost:8000/mcp`; it is a development package.
 The production app uses Clerk and Neon; its migration and independent restore
 evidence is recorded in [PRODUCTION.md](../backends/python/docs/PRODUCTION.md).
 That historical verification does not establish current service availability.
+The Python deployment for implementation commit `d7dbed6` reached Vercel `READY`
+and was assigned `hetu-python-api.vercel.app`. Public connection checks still
+failed after that deployment.
 
 The live `/health/ready` returned 503. Vercel runtime logs reported an
 `asyncpg.exceptions.InsufficientResourcesError` with the database provider's

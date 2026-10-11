@@ -8,6 +8,7 @@ import { lazyWithRetry } from '@/lib/lazyWithRetry';
 
 const ClerkAuth = lazyWithRetry(() => import('@/pages/ClerkAuth'));
 const ClerkSignup = lazyWithRetry(() => import('@/pages/ClerkSignup'));
+const OAuthConsentPage = lazyWithRetry(() => import('@/pages/OAuthConsent'));
 
 const RequestAccess = lazyWithRetry(() => import('@/pages/RequestAccess'));
 const NotFound = lazyWithRetry(() => import('@/pages/NotFound'));
@@ -63,6 +64,7 @@ export const router = createBrowserRouter([
   { path: '/forgot-pin', element: <ClerkAuth />, errorElement: <RootErrorBoundary /> },
   { path: '/reset-pin', element: <ClerkAuth />, errorElement: <RootErrorBoundary /> },
   { path: '/request-access', element: <RequestAccess />, errorElement: <RootErrorBoundary /> },
+  { path: '/oauth-consent', element: <OAuthConsentPage />, errorElement: <RootErrorBoundary /> },
   {
     path: '/',
     element: (

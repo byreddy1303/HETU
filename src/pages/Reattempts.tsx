@@ -1,7 +1,7 @@
 // Question-first spaced re-attempt queue. Each due item launches a dedicated
 // test session instead of expanding inside the queue.
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
-import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { Link, useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useLiveQuery } from '@/lib/db-hooks';
 import '@/workflow-surfaces.css';
 import {
@@ -34,6 +34,8 @@ import type {
   ReattemptStage
 } from '@/types';
 import { db } from '@/lib/db';
+import { apiConfigured } from '@/lib/api-client';
+import { getSessionApi, transferApi } from '@/lib/recovery-api';
 import {
   buildReattemptQueue,
   evaluateLoggedReattemptAnswer,
@@ -2412,8 +2414,10 @@ export default function Reattempts() {
     [userId]
   );
   const resumableRecoverySession = useLiveQuery(
-    () => (userId ? latestResumableRecoverySession(userId) : null),
-    [userId],
+    () => (userId ? apiConfigured && searchParams.get('recoverySession')
+      ? getSessionApi(userId, searchParams.get('recoverySession')!)
+      : latestResumableRecoverySession(userId) : null),
+    [userId, searchParams.get('recoverySession')],
     null
   );
 
@@ -2883,6 +2887,11 @@ export default function Reattempts() {
     if (!pyqAttempts || assigningTransfer) return;
     setAssigningTransfer(true);
     try {
+      if (apiConfigured) {
+        const assigned = await transferApi(item);
+        pushToast(`Unseen same-topic transfer assigned for ${formatDate(assigned.scheduled_date!, 'dd MMM')}.`, 'success');
+        return;
+      }
       const manifest = await loadPyqManifest();
       const subjectHint = activeRecoveryPyqQuestion?.subjectSlug ?? subjectSlugHint(item.subject);
       const subject = manifest.subjects.find(
@@ -3068,6 +3077,16 @@ export default function Reattempts() {
           </CardBody>
         </Card>
       );
+    }
+    if (activeRecoveryItem.source_kind === 'concept' && activeRecoveryItem.source_review_id) {
+      return <div className="mx-auto flex w-full max-w-3xl flex-col gap-4">
+        <PageHeader title="Saved discussion recall" description={`${activeRecoveryItem.subject} · ${activeRecoveryItem.topic ?? 'Concept review'}`} />
+        <Card><CardBody className="space-y-4">
+          <p className="text-sm text-text-muted">Continue this question from memory. Your answer, assessment, and any guidance received will be saved with the discussion and this recovery sprint.</p>
+          <Link className="inline-block rounded-lg bg-accent px-4 py-2 font-semibold text-accent-contrast"
+            to={`/concept-review/${encodeURIComponent(activeRecoveryItem.source_review_id)}?recoverySession=${encodeURIComponent(activeRecoverySession.id)}`}>Open recall question</Link>
+        </CardBody></Card>
+      </div>;
     }
     if (activeRecoverySource && recoveryPyqLoading) {
       return (

@@ -1,4 +1,9 @@
 import { db } from '@/lib/db';
+import { apiConfigured } from '@/lib/api-client';
+import {
+  answerApi, checkpointApi, deferApi, hintApi, interruptApi, latestSessionApi,
+  recoveryKey, startSessionApi
+} from '@/lib/recovery-api';
 import {
   buildRecoverySprint,
   deriveRecoveryGrade,
@@ -41,6 +46,13 @@ export async function startRecoverySession(args: {
   selectionSeed?: string;
   startedAt?: string;
 }): Promise<{ session: RecoverySessionRow; sprint: RecoverySprint }> {
+  if (apiConfigured) {
+    return startSessionApi({
+      userId: args.userId, mode: args.mode, itemIds: args.candidates.map((row) => row.item.id),
+      key: recoveryKey('start', [args.userId, args.mode, args.today, args.selectionSeed,
+        args.candidates.map((row) => [row.item.id, row.item.version ?? row.item.updated_at])])
+    });
+  }
   const sprint = buildRecoverySprint(args.candidates, args.mode, args.today);
   if (sprint.selected.length === 0) throw new Error('No recovery items match this sprint.');
   const startedAt = args.startedAt ?? nowISO();
@@ -69,6 +81,7 @@ export async function startRecoverySession(args: {
 export async function latestResumableRecoverySession(
   userId: string
 ): Promise<RecoverySessionRow | null> {
+  if (apiConfigured) return latestSessionApi(userId);
   const rows = await db.recovery_sessions
     .where('user_id')
     .equals(userId)
@@ -99,6 +112,7 @@ export async function checkpointRecoverySession(
   >,
   updatedAt = nowISO()
 ): Promise<RecoverySessionRow> {
+  if (apiConfigured) return checkpointApi(session, patch, updatedAt);
   const stored = await db.recovery_sessions.get(session.id);
   if (stored && stored.user_id !== session.user_id) {
     throw new Error('This recovery session belongs to another learner.');
@@ -261,6 +275,7 @@ export async function revealRecoveryHint(args: {
   timeZone: string;
   occurredAt?: string;
 }): Promise<RecoverySessionRow> {
+  if (apiConfigured) return hintApi(args.session, args.item);
   const occurredAt = args.occurredAt ?? nowISO();
   const requestedEvent = neutralEvent({
     session: args.session,
@@ -316,6 +331,7 @@ export async function deferRecoveryItem(args: {
   reason: string;
   occurredAt?: string;
 }): Promise<{ session: RecoverySessionRow; item: LearningItemRow }> {
+  if (apiConfigured) return deferApi(args.session, args.item, args.reason);
   const occurredAt = args.occurredAt ?? nowISO();
   const requestedEvent = neutralEvent({
     session: args.session,
@@ -388,6 +404,7 @@ export async function interruptRecoverySession(args: {
   elapsedMs?: number;
   occurredAt?: string;
 }): Promise<RecoverySessionRow> {
+  if (apiConfigured) return interruptApi(args.session, args.reason, args.elapsedMs);
   const occurredAt = args.occurredAt ?? nowISO();
   const requestedEvent = args.item
     ? neutralEvent({
@@ -500,6 +517,7 @@ export async function recordRecoveryRetrieval(args: {
   grade: ReturnType<typeof deriveRecoveryGrade>;
   explanation: string;
 }> {
+  if (apiConfigured) return answerApi(args);
   const occurredAt = args.occurredAt ?? nowISO();
   const grade = deriveRecoveryGrade(args.evidence);
   const idempotencyKey = `retrieval:${args.session.id}:${args.item.id}:${args.session.current_index}`;

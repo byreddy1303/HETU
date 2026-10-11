@@ -2,7 +2,7 @@
 
 import asyncio
 import os
-from datetime import date
+from datetime import UTC, date, datetime, timedelta
 from urllib.parse import urlsplit
 from uuid import uuid4
 
@@ -13,6 +13,7 @@ from sqlalchemy.exc import DBAPIError
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
 from app.db.models import EntityRevision, Record, RecordRevision, User
+from app.services import recovery
 from app.services.learning_evidence import EvidenceLinkDraft, link_evidence
 from app.services.learning_library import (
     CaptureRequest,
@@ -30,6 +31,114 @@ if URL:
     if parsed.hostname not in {"127.0.0.1", "localhost"} or parsed.path != "/hetu_test":
         raise pytest.UsageError("Safety integration tests require local disposable hetu_test")
 pytestmark = pytest.mark.skipif(not URL, reason="Requires disposable migrated PostgreSQL")
+
+
+@pytest.mark.asyncio
+async def test_recovery_concurrent_sessions_answers_and_stale_position(monkeypatch):
+    engine = create_async_engine(URL)
+    factory = async_sessionmaker(engine, expire_on_commit=False)
+    owner = str(uuid4())
+    instant = datetime(2026, 10, 10, 10, tzinfo=UTC)
+    monkeypatch.setattr(recovery, "now_utc", lambda: instant)
+    try:
+        async with factory() as db:
+            db.add(User(id=owner, profile={"timezone": "Asia/Kolkata"}))
+            await db.commit()
+            await upsert_records(
+                db,
+                owner_id=owner,
+                collection="questions",
+                items=[
+                    {
+                        "id": "recovery-question",
+                        "subject": "Algorithms",
+                        "subtopic": "Sorting",
+                        "source_ref": "Other · MCQ",
+                        "question_text": "Select a sorting invariant.",
+                        "answer_text": "B",
+                        "target_time_sec": 90,
+                    }
+                ],
+            )
+            await db.commit()
+            await recovery.schedule_question(db, owner_id=owner, question_id="recovery-question")
+            await db.commit()
+        monkeypatch.setattr(recovery, "now_utc", lambda: instant + timedelta(days=3))
+
+        async def start():
+            async with factory() as db:
+                result = await recovery.start_session(
+                    db,
+                    owner_id=owner,
+                    draft=recovery.SessionStart(idempotency_key="pg-recovery-start"),
+                    app_url="https://hetu.test",
+                )
+                await db.commit()
+                return result
+
+        first, second = await asyncio.gather(start(), start())
+        assert first["session"]["id"] == second["session"]["id"]
+        assert sorted([first["idempotent_replay"], second["idempotent_replay"]]) == [False, True]
+        session = first["session"]
+        draft = recovery.RecoveryAnswer(
+            idempotency_key="pg-recovery-answer",
+            expected_version=1,
+            expected_index=0,
+            item_id=session["item_ids"][0],
+            answer="B",
+            confidence="medium",
+            duration_ms=80000,
+            duration_source="reported",
+        )
+
+        async def answer():
+            async with factory() as db:
+                result = await recovery.record_answer(
+                    db,
+                    owner_id=owner,
+                    session_id=session["id"],
+                    draft=draft,
+                    app_url="https://hetu.test",
+                )
+                await db.commit()
+                return result
+
+        one, two = await asyncio.gather(answer(), answer())
+        assert one["item"]["version"] == two["item"]["version"] == 2
+        assert (
+            one["item"]["successful_retrieval_count"]
+            == two["item"]["successful_retrieval_count"]
+            == 1
+        )
+        assert sorted([one["idempotent_replay"], two["idempotent_replay"]]) == [False, True]
+        async with factory() as db:
+            events = list(
+                await db.scalars(
+                    select(Record).where(
+                        Record.owner_id == owner,
+                        Record.collection == "learning_events",
+                        Record.data["event_type"].as_string() == "retrieval_good",
+                    )
+                )
+            )
+            assert len(events) == 1
+            with pytest.raises(HTTPException) as stale:
+                await recovery.record_answer(
+                    db,
+                    owner_id=owner,
+                    session_id=session["id"],
+                    draft=draft.model_copy(update={"idempotency_key": "pg-other-key"}),
+                    app_url="https://hetu.test",
+                )
+            assert stale.value.status_code == 409
+            await db.rollback()
+            item = await recovery.owned(db, owner, "learning_items", session["item_ids"][0])
+            revisions = list(
+                await db.scalars(select(RecordRevision).where(RecordRevision.record_id == item.id))
+            )
+            assert [row.version for row in revisions] == [1, 2]
+    finally:
+        await engine.dispose()
 
 
 @pytest.mark.asyncio

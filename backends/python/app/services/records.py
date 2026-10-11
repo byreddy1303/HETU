@@ -80,6 +80,10 @@ DOMAIN_MANAGED_COLLECTIONS = frozenset(
         "workflow_records",
         "concept_reviews",
         "revision_packs",
+        "learning_items",
+        "learning_events",
+        "recovery_sessions",
+        "reattempts",
     }
 )
 RESERVED_FIELDS = frozenset(

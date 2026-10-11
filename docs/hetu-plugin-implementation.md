@@ -104,3 +104,18 @@ it does not mean production data has been migrated or a ChatGPT account connecte
 - Live Python health reported DB/Redis ready and `/v1/me` rejected anonymous access. MCP discovery returned 404 and the production environment list lacked MCP resource/issuer/client settings. No live Clerk OAuth grant or ChatGPT save has been completed.
 - Public GitHub evidence confirms encrypted daily backup jobs succeeded on October 6–8, including [October 8 run 37753416652](https://github.com/byreddy1303/HETU/actions/runs/37753416652). Their upload/download hash checks do not establish an independent production restore drill, object backup, retention, restricted runtime roles, or complete real-owner reconciliation. Those release gates remain pending verification.
 - Next: finish canonical recovery domain parity and app/MCP follow-through, then planning/diagnosis and remaining section operations. Resolve live recovery/identity evidence and prepare the exact scoped ChatGPT connection before enabling MCP writes. Keep this checklist current; the complete specification remains the delivery target.
+
+## Local demonstration — 2026-10-10
+
+- The app is running at `http://127.0.0.1:5173` against an isolated SQLite Python service at `127.0.0.1:8000`. The temporary demo launcher/configuration lives outside the repository in `/var/folders/l9/b8h40v014ks_p7nw3w5v6smr0000gn/T/hetu-plugin-demo-_ujqvaar`. It uses a temporary demo identity and token; it does not exercise Clerk OAuth or change production accounts/data.
+- Real MCP domain calls saved one example Bayes discussion, searched it, linked an existing formula, created a recall question, preserved a workflow goal/correction, and saved a revision pack. The browser revised the explanation to v2; MCP retrieved that edit, the original source/history remained, and the saved pack retained its v1 snapshot. Anonymous MCP access returned 401. Copy as text worked in the app.
+- Demo routes: Library `/learning-library/e71b3c77-6da7-5b58-8678-2fb94995f6db`; recall `/concept-review/3984e0b8-403e-5275-9d56-ee450f35e386`; workflow `/workflows/1a620735-b464-51b7-a3f5-b3860f7ff7f9`; pack `/revision-pack?pack=20d40c0c-7a6a-5525-9bf9-c229b4c4ea74`. The example pitfall is labelled general, and no learner attempt or mastery was invented.
+
+## Recovery implementation slice — in progress
+
+- [ ] Port browser grade/schedule rules to Python, with server checks for due dates, assistance, evaluator provenance, and actual question keys.
+- [ ] Capture weak PYQ/Journal evidence, migrate existing ladders conservatively, and preserve immutable learning events.
+- [ ] Share bounded session selection, checkpoints, hints, defer/interruption, answers, remediation, and exact unseen transfer assignment between app and MCP.
+- [ ] Link concept response history into the same recovery evidence and distinguish self/assistant assessments from canonical mastery.
+- [ ] Prevent generic/compatibility writes from bypassing the recovery domain; test ownership, retries, stale writes, concurrency, historical preservation, and frontend API integration.
+- [ ] Commit and push this slice to `origin/main`, and record remaining scope accurately.

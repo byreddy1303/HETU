@@ -141,7 +141,7 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
       root.classList.remove("dark", "light");
       root.classList.add(next);
       try {
-        localStorage.setItem("la-hub::theme", next);
+        hetuLabStorage.setItem("la-hub::theme", next);
       } catch {}
       setTheme(next);
       setTimeout(() => root.classList.remove("theme-switching"), 360);
@@ -194,7 +194,7 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
     const isDesktop = () => typeof window !== "undefined" && window.innerWidth >= 1280;
     const [open, setOpen] = useState(() => {
       try {
-        const saved = localStorage.getItem("la-hub::sidebar");
+        const saved = hetuLabStorage.getItem("la-hub::sidebar");
         return saved !== null ? saved === "open" : isDesktop();
       } catch {
         return false;
@@ -203,7 +203,7 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
     const toggle = useCallback(() => setOpen(o => !o), []);
     useEffect(() => {
       try {
-        localStorage.setItem("la-hub::sidebar", open ? "open" : "closed");
+        hetuLabStorage.setItem("la-hub::sidebar", open ? "open" : "closed");
       } catch {}
       const root = document.getElementById("root");
       if (root) {
@@ -964,7 +964,7 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
   window.PYQ = PYQ;
 
   /* ────────────────────────────────────────────────────────────────
-     PROGRESS PILL (localStorage)
+     PROGRESS PILL (hetuLabStorage)
      ──────────────────────────────────────────────────────────────── */
   const PROGRESS_STATES = [{
     key: "not",
@@ -994,14 +994,14 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
     const [state, setStateRaw] = useState("not");
     useEffect(() => {
       try {
-        const v = localStorage.getItem(key);
+        const v = hetuLabStorage.getItem(key);
         if (v) setStateRaw(v);
       } catch {}
     }, [key]);
     const set = k => {
       setStateRaw(k);
       try {
-        localStorage.setItem(key, k);
+        hetuLabStorage.setItem(key, k);
       } catch {}
     };
     return /*#__PURE__*/React.createElement("div", {
@@ -1495,10 +1495,10 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
 
   const MODULE_NUM = 7;
 
-  /* localStorage helpers ─────────────────────────────────────────── */
+  /* hetuLabStorage helpers ─────────────────────────────────────────── */
   const lsGet = (k, fallback) => {
     try {
-      const v = localStorage.getItem(k);
+      const v = hetuLabStorage.getItem(k);
       return v ? JSON.parse(v) : fallback;
     } catch {
       return fallback;
@@ -1506,7 +1506,7 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
   };
   const lsSet = (k, v) => {
     try {
-      localStorage.setItem(k, JSON.stringify(v));
+      hetuLabStorage.setItem(k, JSON.stringify(v));
     } catch {}
   };
   function useConceptProgress(conceptNum, totalProblems) {

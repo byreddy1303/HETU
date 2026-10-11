@@ -5,11 +5,13 @@ from fastapi import APIRouter, Query
 from app.api.deps import CurrentUser, DbDep, SettingsDep
 from app.services.concept_review import (
     ReviewDraft,
+    ReviewHelp,
     ReviewResponse,
     create_review,
     get_review,
     list_reviews,
     record_review_response,
+    reveal_review_help,
 )
 
 router = APIRouter()
@@ -54,6 +56,17 @@ async def respond(
 ) -> dict:
     result = await record_review_response(
         db, owner_id=identity.user_id, review_id=review_id, response=payload
+    )
+    await db.commit()
+    return result
+
+
+@router.post("/{review_id}/help")
+async def help_received(
+    review_id: str, payload: ReviewHelp, identity: CurrentUser, db: DbDep
+) -> dict:
+    result = await reveal_review_help(
+        db, owner_id=identity.user_id, review_id=review_id, draft=payload
     )
     await db.commit()
     return result

@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   normalizeTopicCompletions,
+  resetTopicProgressMemory,
   selectCompletionsForUser,
   syncTopicProgressFromDb,
   topicProgressId,
@@ -24,9 +25,10 @@ const USER = '11111111-1111-4111-8111-111111111111';
 
 describe('topic progress store', () => {
   beforeEach(async () => {
+    vi.clearAllMocks();
     localStorage.clear();
+    resetTopicProgressMemory();
     await db.topic_progress.clear();
-    useTopicProgressStore.setState({ byUser: {} });
   });
 
   it('keeps completion records scoped to each user', async () => {
@@ -155,7 +157,7 @@ describe('topic progress store', () => {
 
     await expect(
       useTopicProgressStore.getState().setCompleted(USER, id, true)
-    ).rejects.toThrow(/NOT saved/);
+    ).rejects.toThrow(/Could not confirm/);
 
     // The UI must not claim a save the durable store did not confirm.
     expect(useTopicProgressStore.getState().byUser[USER]?.[id]).toBeUndefined();
@@ -175,7 +177,7 @@ describe('topic progress store', () => {
 
     await expect(
       useTopicProgressStore.getState().setCompleted(USER, id, false)
-    ).rejects.toThrow(/NOT saved/);
+    ).rejects.toThrow(/Could not confirm/);
 
     expect(useTopicProgressStore.getState().byUser[USER][id]).toBe(savedAt);
     expect(await db.topic_progress.where('user_id').equals(USER).toArray()).toHaveLength(1);
@@ -198,5 +200,26 @@ describe('topic progress store', () => {
     // The last non-durable copy must survive so the next visit can retry.
     expect(localStorage.getItem('air.topic-progress')).not.toBeNull();
     expect(await db.topic_progress.where('user_id').equals(USER).toArray()).toEqual([]);
+  });
+
+  it('does not turn the view cache back into writes or resurrect a remotely unticked topic', async () => {
+    const id = topicProgressId('Databases', 'ER Model');
+    useTopicProgressStore.setState({ byUser: { [USER]: { [id]: '2026-08-01T10:00:00.000Z' } } });
+
+    await Promise.all([syncTopicProgressFromDb(USER), syncTopicProgressFromDb(USER)]);
+
+    expect(writeLocalBatch).not.toHaveBeenCalled();
+    expect(useTopicProgressStore.getState().byUser[USER]).toEqual({});
+    expect(await db.topic_progress.count()).toBe(0);
+  });
+
+  it('publishes remote deletions to the current view instead of retaining an old checked copy', async () => {
+    const id = topicProgressId('Databases', 'ER Model');
+    await useTopicProgressStore.getState().setCompleted(USER, id, true);
+    expect(useTopicProgressStore.getState().byUser[USER][id]).toBeTruthy();
+
+    await db.topic_progress.clear();
+
+    expect(useTopicProgressStore.getState().byUser[USER][id]).toBeUndefined();
   });
 });

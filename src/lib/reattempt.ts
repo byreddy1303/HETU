@@ -24,6 +24,8 @@ import {
   uuidFromString
 } from '@/lib/utils';
 import { db } from '@/lib/db';
+import { apiConfigured } from '@/lib/api-client';
+import { answerApi, recoveryKey, scheduleQuestionApi, startSessionApi } from '@/lib/recovery-api';
 import { writeLocal, writeLocalBatch } from '@/lib/sync';
 
 const NEXT_ON_CLEAN: Record<ReattemptStage, { stage: ReattemptStage; delayDays: number | null }> = {
@@ -218,6 +220,7 @@ export async function scheduleReattempt(
   today: string = todayISO(),
   timeZone = 'Asia/Kolkata'
 ): Promise<ReattemptRow | null> {
+  if (apiConfigured) return scheduleQuestionApi(userId, questionId);
   const question = await db.questions.get(questionId);
   if (!question || question.user_id !== userId) {
     throw new Error('The question is unavailable for recovery scheduling.');
@@ -336,6 +339,22 @@ export async function recordReattemptResult(
   timeSpent?: number,
   answer?: ReattemptAnswerEvidence
 ): Promise<ReattemptRow> {
+  if (apiConfigured) {
+    if (!answer && result === 'clean') {
+      throw new Error('An actual answer is required before a clean retrieval can be recorded.');
+    }
+    const linked = await scheduleQuestionApi(row.user_id, row.question_id);
+    if (!linked?.learning_item_id) throw new Error('Recovery item is unavailable.');
+    const item = await db.learning_items.get(linked.learning_item_id);
+    if (!item) throw new Error('Refresh recovery before answering.');
+    const { session } = await startSessionApi({ userId: row.user_id, mode: 'questions-5', itemIds: [item.id],
+      key: recoveryKey('legacy-session', [row.id, row.history.length]) });
+    await answerApi({ session, item, answer: answer?.selectedAnswer ?? null,
+      evidence: { correct: result === 'clean', blank: answer?.selectedAnswer == null,
+        timeSpentSec: timeSpent ?? 0, targetTimeSec: 120, confidence: null,
+        hintUsed: false, priorSuccessfulRetrievals: item.successful_retrieval_count } });
+    return (await db.reattempts.get(linked.id)) ?? linked;
+  }
   const updated: ReattemptRow = { ...row, ...advance(row, result, today, timeSpent, answer) };
   await writeLocal('reattempts', updated);
   return updated;

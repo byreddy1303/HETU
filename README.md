@@ -1,13 +1,8 @@
 # HETU
 
-## Backend migration status
+## Backend
 
-The backends are separated in [backends/](backends/README.md):
-`backends/python` contains the new FastAPI service; `backends/typescript/supabase`
-contains the existing TypeScript functions and migrations. The live frontend still
-uses the existing backend. The Python Vercel project is deployed in maintenance
-mode until service configuration, full parity, and data-recovery gates pass.
-See the [data-safety checklist](backends/python/docs/DATA_SAFETY.md).
+HETU uses a Python/FastAPI backend in [backends/python](backends/python). All data is stored in PostgreSQL. See the [data-safety documentation](backends/python/docs/DATA_SAFETY.md) for backup and recovery procedures.
 
 Local-first, multi-user GATE PYQ analysis app. Captures every PYQ decision as an immutable performance event, offers optional structured Journal analysis (pattern / trigger / root cause), schedules spaced re-attempts, supports focused one-to-one buddy study, and surfaces one weekly upstream weakness. An optional Telegram bot can deliver one daily study-only digest.
 
@@ -17,10 +12,7 @@ Built for GATE 2027 CS, targeting AIR <100.
 
 ```bash
 npm install
-cp .env.example .env.local        # fill VITE_SUPABASE_URL + VITE_SUPABASE_ANON_KEY
-
-# In another terminal:
-npm run supabase:start            # local Postgres + Studio at http://localhost:54323
+cp .env.example .env.local        # fill required environment variables
 
 npm run dev                       # app at http://localhost:5173
 ```
@@ -35,7 +27,7 @@ Open `http://localhost:5173/dev/primitives` to preview the design system in dev.
 4. Sign-in via magic link or Google OAuth. Dashboard opens with a walkthrough.
 5. First session → answer or skip PYQs → optionally analyse mistakes → re-attempts populate automatically.
 
-The **first person to sign up becomes the owner** (bootstrap in `20260717000005_invite_signup.sql`). Every account after that must arrive via invite. Public sign-up is blocked at the database trigger; there is no way around it from the client.
+The **first person to sign up becomes the owner** (bootstrap in the initial database migration). Every account after that must arrive via invite. Public sign-up is blocked at the database trigger; there is no way around it from the client.
 
 ## Access flow (production)
 
@@ -63,7 +55,7 @@ Owner concept: `public.is_owner(uid)` returns true when `uid` matches the earlie
 Each account's data is fully separate:
 
 - **Server**: RLS policies on every user-owned table (`user_id = auth.uid()` on select/insert/update/delete).
-- **Client**: on sign-out, `wipeLocalState()` (see `src/lib/isolation.ts`) drops all Dexie tables, resets zustand stores, and sweeps every `air.*` localStorage key. Non-app keys are left alone.
+- **Client**: on sign-out, `wipeLocalState()` (see `src/lib/isolation.ts`) drops all RAM caches, resets zustand stores, and sweeps every `air.*` localStorage key. Non-app keys are left alone.
 - **Verified by** `src/__tests__/isolation.test.ts`.
 
 ## Docs
@@ -121,7 +113,7 @@ npm run pyq:audit                # verify counts, images, provenance, scoring me
 
 ## Stack
 
-React 18 + Vite + TypeScript · Tailwind · Zustand · Dexie · React Query · Supabase (Postgres 15 + Auth + Edge Functions) · Web Push/VAPID · Firebase Cloud Messaging for native Android · Telegram Bot API · Resend.
+React 18 + Vite + TypeScript · Tailwind · Zustand · React Query · PostgreSQL (Python/FastAPI backend) · Web Push/VAPID · Firebase Cloud Messaging for native Android · Telegram Bot API · Resend.
 
 Total monthly cost at low volumes: ₹0. See `DEPLOY.md` for the scaling thresholds where paid tiers kick in.
 

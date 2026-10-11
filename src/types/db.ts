@@ -6,7 +6,7 @@ export type RootCause = 'concept' | 'formula' | 'reading' | 'computation' | 'str
 export type MarkDecision = 'MARK' | 'SKIP' | 'FIFTY_FIFTY';
 export type ReattemptStage = 'D3' | 'D10' | 'D30' | 'MASTERED';
 export type ReattemptResult = 'clean' | 'fail';
-export type LearningSourceKind = 'pyq' | 'manual';
+export type LearningSourceKind = 'pyq' | 'manual' | 'concept';
 export type LearningAnalysisState = 'pending' | 'completed' | 'not-required';
 export type LearningRecoveryState = 'active' | 'remediation' | 'transfer' | 'mastered' | 'paused';
 export type LearningStage = ReattemptStage | 'TRANSFER';
@@ -217,6 +217,8 @@ export interface ReattemptRow {
 
 /** One learner-owned identity and active schedule for an underlying question. */
 export interface LearningItemRow {
+  version?: number;
+  source_review_id?: string;
   id: string;
   user_id: string;
   source_kind: LearningSourceKind;
@@ -267,6 +269,7 @@ export interface LearningEventRow {
 
 /** Refresh-safe checkpoint for a bounded blind-retrieval session. */
 export interface RecoverySessionRow {
+  version?: number;
   id: string;
   user_id: string;
   status: RecoverySessionStatus;

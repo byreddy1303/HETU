@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type MouseEvent } from 'react';
 import { runtimeStorage as localStorage } from '@/lib/runtime-storage';
+import { Link } from 'react-router-dom';
 import { Browser as CapacitorBrowser } from '@capacitor/browser';
 import {
   ArrowRight,
@@ -557,17 +558,12 @@ function LinearAlgebraLab() {
           8 concept modules, 351 practice questions, a cheat sheet, mock test and theorems vault.
         </p>
       </div>
-      <a
-        href={assetHref('/gate-topper-notes/linear-algebra-lab/index.html')}
-        target="_blank"
-        rel="noreferrer"
-        onClick={(event) =>
-          openHostedAsset(event, '/gate-topper-notes/linear-algebra-lab/index.html')
-        }
+      <Link
+        to="/linear-algebra-lab"
         className="inline-flex h-9 items-center justify-center gap-1.5 rounded bg-ink-cobalt px-3 text-[12px] font-semibold text-bg-raised shadow-sm transition-transform hover:-translate-y-px"
       >
         Launch lab <ExternalLink size={13} />
-      </a>
+      </Link>
     </div>
   );
 }

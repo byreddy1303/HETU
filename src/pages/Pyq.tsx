@@ -61,7 +61,8 @@ import { db } from '@/lib/db';
 import { useAuth } from '@/hooks/useAuth';
 import { useTimer } from '@/hooks/useTimer';
 import { writeLocal, writeLocalBatch } from '@/lib/sync';
-import { createReattemptRow, needsReattempt } from '@/lib/reattempt';
+import { createReattemptRow, needsReattempt, scheduleReattempt } from '@/lib/reattempt';
+import { apiConfigured } from '@/lib/api-client';
 import { reconcileQuestionPattern } from '@/lib/patterns';
 import { targetTimeSecForMarks } from '@/lib/constants';
 import {
@@ -3421,13 +3422,14 @@ export default function Pyq() {
 
   async function persistJournalRow(row: QuestionRow, patternName: string | null, outcome: Outcome) {
     const writes: Parameters<typeof writeLocalBatch>[0] = [{ name: 'questions', row }];
-    if (needsReattempt(outcome)) {
+    if (needsReattempt(outcome) && !apiConfigured) {
       const existing = await db.reattempts.where('question_id').equals(row.id).first();
       if (!existing || existing.stage === 'MASTERED') {
         writes.push({ name: 'reattempts', row: createReattemptRow(userId!, row.id) });
       }
     }
     await writeLocalBatch(writes);
+    if (needsReattempt(outcome) && apiConfigured) await scheduleReattempt(userId!, row.id);
     if (patternName) await reconcileQuestionPattern(userId!, row.subject, patternName);
     setJournalSaved(true);
     setAnalyzedCount((count) => count + 1);

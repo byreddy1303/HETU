@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<script src="account-storage.js?storage=online-v1"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Module 10 · Mock Test — LA Mastery Hub</title>
@@ -8,7 +9,7 @@
 <script>
   (function () {
     try {
-      var t = localStorage.getItem("la-hub::theme") || "dark";
+      var t = hetuLabStorage.getItem("la-hub::theme") || "dark";
       document.documentElement.classList.add(t === "light" ? "light" : "dark");
     } catch (e) { document.documentElement.classList.add("dark"); }
   })();
@@ -120,7 +121,7 @@
 
 <div id="root"></div>
 
-<script type="text/babel" src="boilerplate.js"></script>
+<script type="text/babel" src="boilerplate.js?storage=online-v1"></script>
 
 <script type="text/babel">
 const { useState, useEffect, useMemo, useRef } = React;
@@ -341,21 +342,21 @@ const LS_KEY = "la-hub::mock-test-state";
 const LS_RESULTS = "la-hub::mock-test-results";
 
 function loadState() {
-  try { const v = localStorage.getItem(LS_KEY); return v ? JSON.parse(v) : null; }
+  try { const v = hetuLabStorage.getItem(LS_KEY); return v ? JSON.parse(v) : null; }
   catch { return null; }
 }
 function saveState(s) {
-  try { localStorage.setItem(LS_KEY, JSON.stringify(s)); } catch {}
+  try { hetuLabStorage.setItem(LS_KEY, JSON.stringify(s)); } catch {}
 }
 function clearState() {
-  try { localStorage.removeItem(LS_KEY); } catch {}
+  try { hetuLabStorage.removeItem(LS_KEY); } catch {}
 }
 function loadResults() {
-  try { const v = localStorage.getItem(LS_RESULTS); return v ? JSON.parse(v) : []; }
+  try { const v = hetuLabStorage.getItem(LS_RESULTS); return v ? JSON.parse(v) : []; }
   catch { return []; }
 }
 function saveResults(r) {
-  try { localStorage.setItem(LS_RESULTS, JSON.stringify(r)); } catch {}
+  try { hetuLabStorage.setItem(LS_RESULTS, JSON.stringify(r)); } catch {}
 }
 
 /* ════════════════════════════════════════════════════════

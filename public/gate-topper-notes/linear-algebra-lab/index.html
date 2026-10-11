@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<script src="account-storage.js?storage=online-v1"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>LA Mastery Hub — GATE CS · DA · PGEE</title>
@@ -8,7 +9,7 @@
 <script>
   (function () {
     try {
-      var t = localStorage.getItem("la-hub::theme") || "dark";
+      var t = hetuLabStorage.getItem("la-hub::theme") || "dark";
       document.documentElement.classList.add(t === "light" ? "light" : "dark");
     } catch (e) { document.documentElement.classList.add("dark"); }
   })();
@@ -116,7 +117,7 @@
     root.classList.add("theme-switching");
     root.classList.remove("light", "dark");
     root.classList.add(next);
-    try { localStorage.setItem("la-hub::theme", next); } catch {}
+    try { hetuLabStorage.setItem("la-hub::theme", next); } catch {}
     setTimeout(function () { root.classList.remove("theme-switching"); }, 360);
   });
 

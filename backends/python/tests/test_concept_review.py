@@ -6,14 +6,85 @@ from fastapi import HTTPException
 from app.db.models import User
 from app.services.concept_review import (
     ReviewDraft,
+    ReviewHelp,
     ReviewResponse,
     create_review,
     get_review,
     list_reviews,
     record_review_response,
+    reveal_review_help,
 )
 from app.services.learning_library import CaptureRequest, capture_learning
 from tests.test_learning_library import capture
+
+
+@pytest.mark.asyncio
+async def test_guidance_survives_refresh_and_links_real_response_to_recovery(db) -> None:
+    from app.services import recovery
+
+    db.add(User(id="learner"))
+    await db.commit()
+    saved = await capture_learning(
+        db,
+        owner_id="learner",
+        request=CaptureRequest.model_validate(capture()),
+        app_url="https://hetu.test",
+    )
+    review = await create_review(
+        db,
+        owner_id="learner",
+        app_url="https://hetu.test",
+        draft=ReviewDraft(
+            idempotency_key="concept-help-test",
+            concept_id=saved["concept_ids"][0],
+            kind="recall",
+            prompt="Explain the total evidence weight.",
+            evaluation_guidance="Sum the weighted likelihoods.",
+            question_origin="saved_note",
+        ),
+    )
+    await db.commit()
+    help_draft = ReviewHelp(
+        idempotency_key="concept-guidance-test", expected_version=1, assistance="solution"
+    )
+    helped = await reveal_review_help(
+        db, owner_id="learner", review_id=review["id"], draft=help_draft
+    )
+    await db.commit()
+    assert helped["review"]["pending_assistance"] == "solution"
+    assert (await get_review(db, owner_id="learner", review_id=review["id"]))[
+        "pending_assistance"
+    ] == "solution"
+    assert (
+        await reveal_review_help(db, owner_id="learner", review_id=review["id"], draft=help_draft)
+    )["idempotent_replay"]
+    result = await record_review_response(
+        db,
+        owner_id="learner",
+        review_id=review["id"],
+        response=ReviewResponse(
+            expected_version=2,
+            attempt_id="actual-helped-response",
+            answer="I sum prior times likelihood across all hypotheses.",
+            assistance="none",
+            evaluation="correct",
+            evaluated_by="self",
+        ),
+    )
+    await db.commit()
+    assert result["attempts"][0]["assistance"] == "solution"
+    assert result["unaided_correct_count"] == 0
+    evidence = result["recovery_evidence"]
+    assert evidence["item"]["successful_retrieval_count"] == 0
+    assert evidence["item"]["stage"] == "D3"
+    assert evidence["events"][0]["grade"] == "hard"
+    assert evidence["events"][0]["metadata"]["qualification"] == "reported"
+    detail = await recovery.item_detail(db, owner_id="learner", item_id=result["recovery_item_id"])
+    assert [row["event_type"] for row in reversed(detail["events"])] == [
+        "created",
+        "hint_revealed",
+        "retrieval_hard",
+    ]
 
 
 @pytest.mark.asyncio

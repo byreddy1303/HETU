@@ -1,8 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams, useSearchParams } from 'react-router-dom';
 import PageHeader from '@/components/layout/PageHeader';
 import { backendConfig } from '@/lib/backend-config';
 import { apiRequest } from '@/lib/fastapi-client';
+import { cacheRecoveryResponse, recoveryKey } from '@/lib/recovery-api';
+import type { LearningEventRow, LearningItemRow, RecoverySessionRow } from '@/types';
 
 type Attempt = {
   attempt_id: string;
@@ -15,6 +17,7 @@ type Attempt = {
 };
 type Review = {
   id: string;
+  user_id: string;
   version: number;
   concept_id: string;
   kind: 'recall' | 'transfer';
@@ -24,10 +27,15 @@ type Review = {
   due_on: string;
   attempts: Attempt[];
   last_evidence?: { assistance: string; evaluation: string; evaluated_by: string };
+  pending_assistance?: 'hint' | 'solution' | null;
+  recovery_item_id?: string;
+  recovery_evidence?: { item: LearningItemRow; session: RecoverySessionRow | null; events: LearningEventRow[]; explanation: string };
 };
 
 export default function ConceptReview() {
   const { reviewId } = useParams();
+  const [searchParams] = useSearchParams();
+  const recoverySessionId = searchParams.get('recoverySession');
   const [reviews, setReviews] = useState<Review[]>([]);
   const [review, setReview] = useState<Review | null>(null);
   const [answer, setAnswer] = useState('');
@@ -35,22 +43,69 @@ export default function ConceptReview() {
   const [revealed, setRevealed] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [recoverySession, setRecoverySession] = useState<RecoverySessionRow | null>(null);
+  const activeLoad = useRef<AbortController | null>(null);
   const pendingResponse = useRef<{ content: string; key: string } | null>(null);
 
-  const load = useCallback(async () => {
+  const load = useCallback(async (signal?: AbortSignal) => {
     if (!backendConfig.fastapi) return;
-    setReviews(await apiRequest<Review[]>('/v1/concept-reviews?limit=50'));
-    setReview(reviewId ? await apiRequest<Review>(`/v1/concept-reviews/${encodeURIComponent(reviewId)}`) : null);
-  }, [reviewId]);
+    const [items, selected, session] = await Promise.all([
+      apiRequest<Review[]>('/v1/concept-reviews?limit=50', { signal }),
+      reviewId ? apiRequest<Review>(`/v1/concept-reviews/${encodeURIComponent(reviewId)}`, { signal }) : null,
+      recoverySessionId ? apiRequest<{ session: RecoverySessionRow }>(`/v1/recovery/sessions/${encodeURIComponent(recoverySessionId)}`, { signal }) : null
+    ]);
+    if (signal?.aborted) return;
+    setReviews(items);
+    setReview(selected);
+    setRevealed(!!selected?.pending_assistance);
+    setRecoverySession(session?.session ?? null);
+  }, [reviewId, recoverySessionId]);
 
-  useEffect(() => { void load().catch((cause) => setError(
-    cause instanceof Error ? cause.message : 'Reviews could not load.'
-  )); }, [load]);
+  useEffect(() => {
+    const controller = new AbortController();
+    activeLoad.current = controller;
+    setLoading(true);
+    setReview(null);
+    setAnswer('');
+    setEvaluation('ungraded');
+    setRevealed(false);
+    setSaving(false);
+    setError(null);
+    pendingResponse.current = null;
+    void load(controller.signal).catch((cause) => {
+      if (!controller.signal.aborted) setError(cause instanceof Error ? cause.message : 'Reviews could not load.');
+    }).finally(() => { if (!controller.signal.aborted) setLoading(false); });
+    return () => controller.abort();
+  }, [load]);
+
+  async function showGuidance() {
+    if (!review || saving || revealed) return;
+    const signal = activeLoad.current?.signal;
+    setSaving(true);
+    setError(null);
+    try {
+      const result = await apiRequest<{ review: Review; item: LearningItemRow; events: LearningEventRow[] }>(
+        `/v1/concept-reviews/${encodeURIComponent(review.id)}/help`, {
+          method: 'POST', signal,
+          body: JSON.stringify({ idempotency_key: recoveryKey('concept-guidance', [review.id, review.attempts.length]),
+            expected_version: review.version, assistance: 'solution' })
+        }
+      );
+      if (signal?.aborted) return;
+      setReview(result.review);
+      setRevealed(true);
+      cacheRecoveryResponse(result.review.user_id, result);
+    } catch (cause) {
+      if (!signal?.aborted) setError(cause instanceof Error ? cause.message : 'Guidance could not be recorded.');
+    } finally { if (!signal?.aborted) setSaving(false); }
+  }
 
   async function saveResponse() {
     if (!review || !answer.trim()) return;
     setSaving(true);
     setError(null);
+    const signal = activeLoad.current?.signal;
     try {
       const content = JSON.stringify({
         expected_version: review.version,
@@ -58,27 +113,32 @@ export default function ConceptReview() {
         assistance: revealed ? 'solution' : 'none',
         evaluation,
         evaluated_by: 'self',
-        duration_source: 'unknown'
+        duration_source: 'unknown',
+        ...(recoverySession ? { recovery_session_id: recoverySession.id,
+          expected_session_version: recoverySession.version, expected_session_index: recoverySession.current_index } : {})
       });
       if (pendingResponse.current?.content !== content) {
         pendingResponse.current = { content, key: crypto.randomUUID() };
       }
-      await apiRequest(`/v1/concept-reviews/${encodeURIComponent(review.id)}/responses`, {
+      const saved = await apiRequest<Review>(`/v1/concept-reviews/${encodeURIComponent(review.id)}/responses`, {
         method: 'POST',
+        signal,
         body: JSON.stringify({
           ...JSON.parse(content),
           attempt_id: pendingResponse.current.key
         })
       });
+      if (signal?.aborted) return;
+      if (saved.recovery_evidence) cacheRecoveryResponse(saved.user_id, saved.recovery_evidence);
       pendingResponse.current = null;
       setAnswer('');
       setRevealed(false);
       setEvaluation('ungraded');
-      await load();
+      await load(signal);
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : 'The response could not be saved.');
+      if (!signal?.aborted) setError(cause instanceof Error ? cause.message : 'The response could not be saved.');
     } finally {
-      setSaving(false);
+      if (!signal?.aborted) setSaving(false);
     }
   }
 
@@ -98,16 +158,18 @@ export default function ConceptReview() {
           {review ? <div className="max-w-[72ch] space-y-5">
             <div><span className="text-xs text-text-muted">{review.kind} · {review.question_origin}</span><h2 className="mt-2 text-xl font-bold">{review.prompt}</h2><Link to={`/learning-library/${review.concept_id}`} className="mt-2 inline-block text-sm font-semibold text-accent">Open concept</Link></div>
             <label className="grid gap-2 text-sm font-semibold">Your answer<textarea className="min-h-32 rounded-lg border border-border bg-bg p-3 font-normal leading-relaxed" value={answer} onChange={(event) => setAnswer(event.target.value)} placeholder="Write your answer before checking guidance." /></label>
-            {review.evaluation_guidance && <div><button className="font-semibold text-accent" onClick={() => setRevealed(true)} disabled={revealed}>Show evaluation guidance</button>{revealed && <p className="mt-2 whitespace-pre-wrap rounded-lg bg-accent-faint p-3 text-sm leading-relaxed">{review.evaluation_guidance}</p>}</div>}
+            {review.evaluation_guidance && <div><button className="font-semibold text-accent" onClick={() => void showGuidance()} disabled={revealed || saving}>Show evaluation guidance</button>{revealed && <p className="mt-2 whitespace-pre-wrap rounded-lg bg-accent-faint p-3 text-sm leading-relaxed">{review.evaluation_guidance}</p>}</div>}
             <label className="grid gap-2 text-sm font-semibold">How did your answer hold up?
               <select className="rounded-lg border border-border bg-bg p-2 font-normal" value={evaluation} onChange={(event) => setEvaluation(event.target.value as typeof evaluation)}>
                 <option value="ungraded">Not graded</option><option value="correct">Correct</option><option value="partial">Partly correct</option><option value="incorrect">Incorrect</option>
               </select>
             </label>
             <p className="text-xs text-text-muted">This is saved as your own assessment. Seeing guidance marks the attempt as assisted. Neither action automatically marks the concept mastered.</p>
-            <button disabled={!answer.trim() || saving} className="rounded-lg bg-accent px-4 py-2 font-semibold text-accent-contrast disabled:opacity-50" onClick={() => void saveResponse()}>{saving ? 'Saving…' : 'Record response'}</button>
+            <button disabled={!answer.trim() || saving || (!!recoverySession && (recoverySession.status !== 'active' || (!!review.recovery_item_id && recoverySession.item_ids[recoverySession.current_index] !== review.recovery_item_id)))} className="rounded-lg bg-accent px-4 py-2 font-semibold text-accent-contrast disabled:opacity-50" onClick={() => void saveResponse()}>{saving ? 'Saving…' : 'Record response'}</button>
+            {review.recovery_evidence && <p className="text-sm text-text-muted">{review.recovery_evidence.explanation} Next due: {review.due_on}.</p>}
+            {recoverySessionId && <Link className="block font-semibold text-accent" to={`/reattempts?recoverySession=${encodeURIComponent(recoverySessionId)}`}>Continue recovery sprint</Link>}
             {review.attempts.length > 0 && <section className="border-t border-border pt-4"><h3 className="mb-3 font-bold">Earlier responses</h3><ul className="space-y-3">{review.attempts.slice().reverse().map((attempt) => <li key={attempt.attempt_id} className="rounded-lg border border-border p-3 text-sm"><p className="whitespace-pre-wrap">{attempt.answer}</p><small className="mt-2 block text-text-muted">{attempt.evaluation} · {attempt.evaluated_by} · {attempt.assistance === 'none' ? 'unaided' : attempt.assistance} · {new Date(attempt.recorded_at).toLocaleString()}</small></li>)}</ul></section>}
-          </div> : <p className="text-text-muted">Choose a question to begin.</p>}
+          </div> : <p className="text-text-muted">{loading ? 'Loading concept questions…' : 'Choose a question to begin.'}</p>}
         </main>
       </div>
     </>}

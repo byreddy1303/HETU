@@ -1,5 +1,5 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { useLiveQuery } from '@/lib/db-hooks';
+import React, { startTransition, useCallback, useEffect, useMemo, useState } from 'react';
+import { useTableRows } from '@/lib/db-hooks';
 import { Check, ChevronDown, CircleCheckBig, Search, Sparkles, Target } from 'lucide-react';
 import { useReducedMotion } from 'motion/react';
 import PageHeader from '@/components/layout/PageHeader';
@@ -13,7 +13,6 @@ import { subjectInk } from '@/lib/subjectInk';
 import { SUBTOPICS_BY_SUBJECT } from '@/lib/subtopics';
 import { cn, formatDate, plural } from '@/lib/utils';
 import { todayISOInTimeZone } from '@/lib/utils';
-import { db } from '@/lib/db';
 import {
   buildBatchTopicEvidence,
   type TopicEvidence,
@@ -21,8 +20,7 @@ import {
 } from '@/lib/topic-evidence';
 import { currentUserId } from '@/stores/auth';
 import {
-  completionsFromTopicRows,
-  selectCompletionsForUser,
+  EMPTY_TOPIC_COMPLETIONS,
   syncTopicProgressFromDb,
   topicProgressId,
   useTopicProgressStore,
@@ -139,66 +137,69 @@ function nextTopicFrom(
 export default function SyllabusTracker() {
   const { userId, profile } = useAuth();
   const reduceMotion = useReducedMotion();
-  const byUser = useTopicProgressStore((state) => state.byUser);
   const setCompleted = useTopicProgressStore((state) => state.setCompleted);
   const pushToast = useUiStore((state) => state.pushToast);
 
   const effectiveUserId = userId ?? currentUserId();
+  const completions = useTopicProgressStore((state) =>
+    (effectiveUserId && state.byUser[effectiveUserId]) || EMPTY_TOPIC_COMPLETIONS
+  );
+  const pendingCount = useTopicProgressStore((state) =>
+    effectiveUserId ? Object.keys(state.pendingByUser[effectiveUserId] ?? {}).length : 0
+  );
   const today = todayISOInTimeZone(profile?.timezone ?? 'Asia/Kolkata');
-  const questions = useLiveQuery(
-    () => (userId ? db.questions.where('user_id').equals(userId).toArray() : []),
-    [userId],
-    []
-  );
-  const attempts = useLiveQuery(
-    () => (userId ? db.pyq_attempts.where('user_id').equals(userId).toArray() : []),
-    [userId],
-    []
-  );
-  const reattempts = useLiveQuery(
-    () => (userId ? db.reattempts.where('user_id').equals(userId).toArray() : []),
-    [userId],
-    []
-  );
-  const topicProgressRows = useLiveQuery(
-    () =>
-      effectiveUserId ? db.topic_progress.where('user_id').equals(effectiveUserId).toArray() : [],
-    [effectiveUserId],
-    []
-  );
+  const questionRows = useTableRows('questions');
+  const attemptRows = useTableRows('pyq_attempts');
+  const reattemptRows = useTableRows('reattempts');
+  const [loadState, setLoadState] = useState<{ userId: string | null; status: 'loading' | 'ready' | 'error' }>({
+    userId: null, status: 'loading'
+  });
+  const [refreshKey, setRefreshKey] = useState(0);
+  const [failedSaveUser, setFailedSaveUser] = useState<string | null>(null);
 
   useEffect(() => {
     if (!effectiveUserId) return;
-    void syncTopicProgressFromDb(effectiveUserId).catch((error: unknown) => {
-      console.warn(error);
-      pushToast(
-        'Could not refresh your progress from the database. Showing the last saved copy.',
-        'neutral'
-      );
-    });
-  }, [effectiveUserId, pushToast]);
-
-  const completions = useMemo(() => {
-    const cached = selectCompletionsForUser(byUser, effectiveUserId);
-    const rows = completionsFromTopicRows(topicProgressRows);
-    const merged = { ...cached };
-    for (const [id, completedAt] of Object.entries(rows)) {
-      if (!merged[id] || merged[id] < completedAt) merged[id] = completedAt;
-    }
-    return merged;
-  }, [byUser, effectiveUserId, topicProgressRows]);
+    let cancelled = false;
+    setLoadState({ userId: effectiveUserId, status: 'loading' });
+    void syncTopicProgressFromDb(effectiveUserId)
+      .then(() => {
+        if (!cancelled) setLoadState({ userId: effectiveUserId, status: 'ready' });
+      })
+      .catch((error: unknown) => {
+        if (cancelled) return;
+        console.warn(error);
+        setLoadState({ userId: effectiveUserId, status: 'error' });
+        pushToast('Could not load saved progress. Check your connection and retry.', 'danger');
+      });
+    return () => { cancelled = true; };
+  }, [effectiveUserId, pushToast, refreshKey]);
 
   const summaries = useMemo(() => summariesFor(completions), [completions]);
 
-  const practiceEvidence = useMemo(() => {
-    return buildBatchTopicEvidence({
-      topics: ALL_SYLLABUS_TARGETS,
-      questions: questions ?? [],
-      attempts: attempts ?? [],
-      reattempts: reattempts ?? [],
-      today
-    });
-  }, [attempts, questions, reattempts, today]);
+  const [evidenceState, setEvidenceState] = useState(() => ({
+    userId, evidence: new Map<string, TopicEvidence>()
+  }));
+  useEffect(() => {
+    // Paint the checklist before calculating optional practice annotations.
+    // Checkbox writes do not invalidate any of these table snapshots.
+    const calculate = () => {
+      const evidence = buildBatchTopicEvidence({
+        topics: ALL_SYLLABUS_TARGETS,
+        questions: questionRows.filter((row) => row.user_id === userId),
+        attempts: attemptRows.filter((row) => row.user_id === userId),
+        reattempts: reattemptRows.filter((row) => row.user_id === userId),
+        today
+      });
+      startTransition(() => setEvidenceState({ userId, evidence }));
+    };
+    if (typeof requestIdleCallback === 'function') {
+      const id = requestIdleCallback(calculate, { timeout: 500 });
+      return () => cancelIdleCallback(id);
+    }
+    const id = setTimeout(calculate, 0);
+    return () => clearTimeout(id);
+  }, [attemptRows, questionRows, reattemptRows, today, userId]);
+  const practiceEvidence = evidenceState.userId === userId ? evidenceState.evidence : undefined;
 
   const nextTopic = useMemo(() => nextTopicFrom(summaries, completions), [summaries, completions]);
   const [query, setQuery] = useState('');
@@ -268,9 +269,11 @@ export default function SyllabusTracker() {
         return;
       }
       try {
+        setFailedSaveUser(null);
+        haptic('selection');
         await setCompleted(effectiveUserId, topicProgressId(subject, topic), completed);
-        haptic(completed ? 'success' : 'selection');
       } catch (error) {
+        setFailedSaveUser(effectiveUserId);
         pushToast(
           error instanceof Error
             ? error.message
@@ -337,6 +340,21 @@ export default function SyllabusTracker() {
               <span className="u-num text-[11px] text-text-faint">
                 {completedSubjects}/{SUBJECTS.length} subjects complete
               </span>
+              <span role="status" aria-live="polite" className="text-[11px] text-text-muted">
+                {pendingCount > 0
+                  ? `Saving ${pendingCount} ${plural(pendingCount, 'change')}…`
+                  : loadState.userId !== effectiveUserId || loadState.status === 'loading'
+                    ? 'Loading saved progress…'
+                    : loadState.status === 'error'
+                      ? 'Could not load saved progress'
+                      : failedSaveUser === effectiveUserId
+                        ? 'Could not confirm a save. Please try that checkbox again.'
+                        : 'Saved to database'}
+              </span>
+              {loadState.userId === effectiveUserId && loadState.status === 'error' && (
+                <button type="button" onClick={() => setRefreshKey((key) => key + 1)}
+                  className="text-[11px] font-semibold text-accent underline">Retry loading progress</button>
+              )}
             </div>
 
             {nextTopic ? (
@@ -691,7 +709,7 @@ const SubjectLedger = React.memo(function SubjectLedger({
   summary: SubjectSummary;
   topics: string[];
   completions: TopicCompletions;
-  evidence: Map<string, TopicEvidence>;
+  evidence: Map<string, TopicEvidence> | undefined;
   open: boolean;
   onToggle: (subject: string) => void;
   onTopicChange: (subject: string, topic: string, completed: boolean) => void;
@@ -771,7 +789,7 @@ const SubjectLedger = React.memo(function SubjectLedger({
             {topics.map((topic) => {
               const id = topicProgressId(summary.subject, topic);
               const completedAt = completions[id];
-              const topicEvidence = evidence.get(id);
+              const topicEvidence = evidence?.get(id);
               return (
                 <TopicRow
                   key={topic}

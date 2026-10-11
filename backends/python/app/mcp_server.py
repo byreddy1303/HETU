@@ -24,13 +24,16 @@ from app.core.config import Settings
 from app.db.models import User, UserIdentity
 from app.db.session import get_session_factory
 from app.schemas import RecordQuery
+from app.services import recovery
 from app.services.concept_review import (
     ReviewDraft,
+    ReviewHelp,
     ReviewResponse,
     create_review,
     get_review,
     list_reviews,
     record_review_response,
+    reveal_review_help,
 )
 from app.services.learning_evidence import (
     EvidenceCollection,
@@ -51,6 +54,7 @@ from app.services.learning_library import (
 )
 from app.services.pyq_catalog import catalog_question, search_catalog
 from app.services.pyq_practice import PyqAttemptDraft, submit_pyq_attempt
+from app.services.recovery_engine import Mode
 from app.services.revision_pack import (
     PackDraft,
     PackOptions,
@@ -263,6 +267,7 @@ def create_mcp_server(settings: Settings) -> MCPServer:
                 "concept_review.list",
                 "concept_review.detail",
                 "concept_review.respond",
+                "concept_review.record_help",
                 "sections.list",
                 "sections.mapped_record_overview",
                 "sections.mapped_records",
@@ -275,6 +280,19 @@ def create_mcp_server(settings: Settings) -> MCPServer:
                 "revision_pack.save",
                 "revision_pack.list",
                 "revision_pack.detail",
+                "recovery.overview",
+                "recovery.item_evidence",
+                "recovery.session_start",
+                "recovery.session_list",
+                "recovery.session_detail",
+                "recovery.checkpoint",
+                "recovery.hint",
+                "recovery.defer",
+                "recovery.answer",
+                "recovery.remediate",
+                "recovery.assign_transfer",
+                "recovery.capture_attempt",
+                "recovery.schedule_journal_question",
             ],
             "unavailable": [
                 "production data cutover",
@@ -537,6 +555,21 @@ def create_mcp_server(settings: Settings) -> MCPServer:
             return result
 
     @server.tool(
+        description=(
+            "Record hint/solution assistance before showing guidance for a concept question. "
+            "Use the returned version when recording the learner's response."
+        ),
+        annotations=ToolAnnotations(idempotent_hint=True),
+        meta=_security(WRITE_SCOPE),
+    )
+    async def record_concept_help(review_id: str, draft: ReviewHelp) -> dict:
+        async with get_session_factory()() as db:
+            owner = await _user_id(db, WRITE_SCOPE)
+            result = await reveal_review_help(db, owner_id=owner, review_id=review_id, draft=draft)
+            await db.commit()
+            return result
+
+    @server.tool(
         description="List HETU sections with available underlying account records.",
         annotations=ToolAnnotations(read_only_hint=True),
         meta=_security(READ_SCOPE),
@@ -680,6 +713,227 @@ def create_mcp_server(settings: Settings) -> MCPServer:
             result = await submit_pyq_attempt(
                 db, owner_id=user_id, draft=draft, app_url=settings.app_url
             )
+            await db.commit()
+            return result
+
+    @server.tool(
+        description=(
+            "Get due recovery priorities, a feasible sprint, and a 1–30 day load forecast. "
+            "Reports bounded retrieval."
+        ),
+        annotations=ToolAnnotations(read_only_hint=True),
+        meta=_security(READ_SCOPE),
+    )
+    async def get_recovery_overview(
+        mode: Mode = "minutes-20", subject: str | None = None, days: int = 7
+    ) -> dict:
+        if not 1 <= days <= 30:
+            raise ValueError("Forecast days must be 1–30")
+        async with get_session_factory()() as db:
+            owner = await _user_id(db, READ_SCOPE)
+            return await recovery.recovery_overview(
+                db, owner_id=owner, mode=mode, subject=subject, days=days
+            )
+
+    @server.tool(
+        description=(
+            "Read a recovery item's current schedule and paginated immutable evidence, "
+            "including help and assessment provenance."
+        ),
+        annotations=ToolAnnotations(read_only_hint=True),
+        meta=_security(READ_SCOPE),
+    )
+    async def get_recovery_item(item_id: str, cursor: int = 0, limit: int = 25) -> dict:
+        if cursor < 0 or not 1 <= limit <= 100:
+            raise ValueError("Invalid recovery evidence pagination")
+        async with get_session_factory()() as db:
+            owner = await _user_id(db, READ_SCOPE)
+            return await recovery.item_detail(
+                db, owner_id=owner, item_id=item_id, cursor=cursor, limit=limit
+            )
+
+    @server.tool(
+        description=(
+            "Start a bounded blind-retrieval session from actual due items. Python selects "
+            "priorities and enforces the time budget. Creating a session records no learner "
+            "answer."
+        ),
+        annotations=ToolAnnotations(idempotent_hint=True),
+        meta=_security(WRITE_SCOPE),
+    )
+    async def start_recovery_session(draft: recovery.SessionStart) -> dict:
+        async with get_session_factory()() as db:
+            owner = await _user_id(db, WRITE_SCOPE)
+            result = await recovery.start_session(
+                db, owner_id=owner, draft=draft, app_url=settings.app_url
+            )
+            await db.commit()
+            return result
+
+    @server.tool(
+        description=(
+            "List saved recovery sessions, optionally only resumable ones, with explicit "
+            "pagination."
+        ),
+        annotations=ToolAnnotations(read_only_hint=True),
+        meta=_security(READ_SCOPE),
+    )
+    async def list_recovery_sessions(
+        resumable_only: bool = False, cursor: int = 0, limit: int = 25
+    ) -> dict:
+        if cursor < 0 or not 1 <= limit <= 100:
+            raise ValueError("Invalid recovery session pagination")
+        async with get_session_factory()() as db:
+            owner = await _user_id(db, READ_SCOPE)
+            return await recovery.list_sessions(
+                db, owner_id=owner, resumable_only=resumable_only, cursor=cursor, limit=limit
+            )
+
+    @server.tool(
+        description=(
+            "Read a saved recovery session and its current prompt with the answer hidden. Use "
+            "its current version/position for writes."
+        ),
+        annotations=ToolAnnotations(read_only_hint=True),
+        meta=_security(READ_SCOPE),
+    )
+    async def get_recovery_session(session_id: str) -> dict:
+        async with get_session_factory()() as db:
+            owner = await _user_id(db, READ_SCOPE)
+            return await recovery.get_session(db, owner_id=owner, session_id=session_id)
+
+    @server.tool(
+        description=(
+            "Save the learner's draft, interrupt, resume, or abandon a recovery session. Never "
+            "advance its question position through a checkpoint."
+        ),
+        annotations=ToolAnnotations(idempotent_hint=True),
+        meta=_security(WRITE_SCOPE),
+    )
+    async def checkpoint_recovery_session(
+        session_id: str, draft: recovery.SessionCheckpoint
+    ) -> dict:
+        async with get_session_factory()() as db:
+            owner = await _user_id(db, WRITE_SCOPE)
+            result = await recovery.checkpoint_session(
+                db, owner_id=owner, session_id=session_id, draft=draft
+            )
+            await db.commit()
+            return result
+
+    @server.tool(
+        description=(
+            "Record cue/solution assistance before giving help on the current recovery item. "
+            "Persisted help cannot be removed by a later answer claiming assistance=none."
+        ),
+        annotations=ToolAnnotations(idempotent_hint=True),
+        meta=_security(WRITE_SCOPE),
+    )
+    async def reveal_recovery_hint(session_id: str, draft: recovery.SessionCommand) -> dict:
+        async with get_session_factory()() as db:
+            owner = await _user_id(db, WRITE_SCOPE)
+            result = await recovery.reveal_hint(
+                db, owner_id=owner, session_id=session_id, draft=draft
+            )
+            await db.commit()
+            return result
+
+    @server.tool(
+        description=(
+            "Record the learner's Not now choice; defer at most one day without adding a failed "
+            "or successful recall."
+        ),
+        annotations=ToolAnnotations(idempotent_hint=True),
+        meta=_security(WRITE_SCOPE),
+    )
+    async def defer_recovery_item(session_id: str, draft: recovery.SessionDefer) -> dict:
+        async with get_session_factory()() as db:
+            owner = await _user_id(db, WRITE_SCOPE)
+            result = await recovery.defer_item(
+                db, owner_id=owner, session_id=session_id, draft=draft
+            )
+            await db.commit()
+            return result
+
+    @server.tool(
+        description=(
+            "Submit the learner's actual recovery answer or explicit I don't know (null). "
+            "Python grades the stored key, records help/timing provenance, atomically commits a "
+            "PYQ receipt and immutable events, and reschedules. Uncheckable self-assessments "
+            "never prove canonical mastery."
+        ),
+        annotations=ToolAnnotations(idempotent_hint=True),
+        meta=_security(WRITE_SCOPE),
+    )
+    async def submit_recovery_answer(session_id: str, draft: recovery.RecoveryAnswer) -> dict:
+        async with get_session_factory()() as db:
+            owner = await _user_id(db, WRITE_SCOPE)
+            result = await recovery.record_answer(
+                db, owner_id=owner, session_id=session_id, draft=draft, app_url=settings.app_url
+            )
+            await db.commit()
+            return result
+
+    @server.tool(
+        description=(
+            "Save the learner's corrected opening move and focused remediation plan, then "
+            "schedule a later retrieval. A plan does not count as solved practice."
+        ),
+        annotations=ToolAnnotations(idempotent_hint=True),
+        meta=_security(WRITE_SCOPE),
+    )
+    async def complete_recovery_remediation(item_id: str, draft: recovery.RemediationDraft) -> dict:
+        async with get_session_factory()() as db:
+            owner = await _user_id(db, WRITE_SCOPE)
+            result = await recovery.remediate(db, owner_id=owner, item_id=item_id, draft=draft)
+            await db.commit()
+            return result
+
+    @server.tool(
+        description=(
+            "Assign delayed, answerable transfer from the exact source topic. Excludes "
+            "attempted questions, the original content, and sealed benchmark reserves; fails "
+            "explicitly when none remains."
+        ),
+        annotations=ToolAnnotations(idempotent_hint=True),
+        meta=_security(WRITE_SCOPE),
+    )
+    async def assign_recovery_transfer(item_id: str, draft: recovery.TransferDraft) -> dict:
+        async with get_session_factory()() as db:
+            owner = await _user_id(db, WRITE_SCOPE)
+            result = await recovery.assign_transfer(
+                db, owner_id=owner, item_id=item_id, draft=draft
+            )
+            await db.commit()
+            return result
+
+    @server.tool(
+        description=(
+            "Capture recovery needs from an existing owned PYQ attempt; reads the saved "
+            "evidence and never accepts invented attempt fields."
+        ),
+        annotations=ToolAnnotations(idempotent_hint=True),
+        meta=_security(WRITE_SCOPE),
+    )
+    async def capture_attempt_recovery(attempt_id: str) -> dict | None:
+        async with get_session_factory()() as db:
+            owner = await _user_id(db, WRITE_SCOPE)
+            result = await recovery.capture_attempt(db, owner_id=owner, attempt_id=attempt_id)
+            await db.commit()
+            return result
+
+    @server.tool(
+        description=(
+            "Schedule recovery for an existing owned Journal question, preserving its history "
+            "and one canonical learning identity."
+        ),
+        annotations=ToolAnnotations(idempotent_hint=True),
+        meta=_security(WRITE_SCOPE),
+    )
+    async def schedule_journal_recovery(question_id: str) -> dict:
+        async with get_session_factory()() as db:
+            owner = await _user_id(db, WRITE_SCOPE)
+            result = await recovery.schedule_question(db, owner_id=owner, question_id=question_id)
             await db.commit()
             return result
 

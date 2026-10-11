@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<script src="account-storage.js?storage=online-v1"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Module 4 · Problem Lab — LA Mastery Hub</title>
@@ -8,7 +9,7 @@
 <script>
   (function () {
     try {
-      var t = localStorage.getItem("la-hub::theme") || "dark";
+      var t = hetuLabStorage.getItem("la-hub::theme") || "dark";
       document.documentElement.classList.add(t === "light" ? "light" : "dark");
     } catch (e) {
       document.documentElement.classList.add("dark");
@@ -413,7 +414,7 @@
 <!-- Precompiled bundle: boilerplate.js + this module's content, with JSX already transpiled.
      Source of truth remains the inline script at the bottom of this file (kept for editing).
      If you edit this file, rerun the compile step to regenerate module-04-problem-lab.compiled.js. -->
-<script src="module-04-problem-lab.compiled.js"></script>
+<script src="module-04-problem-lab.compiled.js?storage=online-v1"></script>
 
 <script type="text/template" id="m4-source-of-truth" data-no-execute>
 const { useState, useEffect, useMemo, useRef, useCallback } = React;
@@ -424,12 +425,12 @@ const { useState, useEffect, useMemo, useRef, useCallback } = React;
 
 const MODULE_NUM = 4;
 
-/* localStorage helpers ─────────────────────────────────────────── */
+/* hetuLabStorage helpers ─────────────────────────────────────────── */
 const lsGet = (k, fallback) => {
-  try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : fallback; }
+  try { const v = hetuLabStorage.getItem(k); return v ? JSON.parse(v) : fallback; }
   catch { return fallback; }
 };
-const lsSet = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} };
+const lsSet = (k, v) => { try { hetuLabStorage.setItem(k, JSON.stringify(v)); } catch {} };
 
 function useConceptProgress(conceptNum, totalProblems) {
   const aKey = "gate_la_m" + MODULE_NUM + "_c" + conceptNum + "_attempted";

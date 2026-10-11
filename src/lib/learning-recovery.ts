@@ -1,4 +1,6 @@
 import { db } from '@/lib/db';
+import { apiConfigured } from '@/lib/api-client';
+import { analysisApi, captureAttemptApi, reconcileRecoveryApi } from '@/lib/recovery-api';
 import { targetTimeSecForMarks } from '@/lib/constants';
 import { writeLocalBatch } from '@/lib/sync';
 import {
@@ -214,6 +216,12 @@ export async function captureWeakPyqAttempt(args: {
   timeZone: string;
   compatibilityQuestion?: QuestionRow | null;
 }): Promise<WeakAttemptCapture | null> {
+  if (apiConfigured) {
+    if (args.compatibilityQuestion) {
+      await writeLocalBatch([{ name: 'questions', row: args.compatibilityQuestion }]);
+    }
+    return captureAttemptApi(args.attempt.user_id, args.attempt.id, args.compatibilityQuestion?.id);
+  }
   const { attempt, timeZone } = args;
   const reasons = weakAttemptReasons(attempt);
   if (reasons.length === 0) return null;
@@ -271,6 +279,7 @@ export async function markLearningAnalysisCompleted(args: {
   timeZone: string;
   occurredAt?: string;
 }): Promise<LearningItemRow | null> {
+  if (apiConfigured) return analysisApi(args.userId, args.sourceAttemptId);
   const attempt = await db.pyq_attempts.get(args.sourceAttemptId);
   if (!attempt || attempt.user_id !== args.userId) return null;
   const item = await db.learning_items
@@ -328,6 +337,7 @@ function conservativeStage(rows: ReattemptRow[]): LearningItemRow['stage'] {
  * Call only after the initial cloud pull so remote backfill rows win by ID.
  */
 export async function backfillLocalLearningEvidence(userId: string, timeZone: string): Promise<void> {
+  if (apiConfigured) return reconcileRecoveryApi(userId);
   const [reattempts, questions, attempts] = await Promise.all([
     db.reattempts.where('user_id').equals(userId).toArray(),
     db.questions.where('user_id').equals(userId).toArray(),

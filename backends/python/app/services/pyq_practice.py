@@ -27,6 +27,7 @@ class PyqAttemptDraft(BaseModel):
     duration_ms: int | None = Field(default=None, ge=0, le=86_400_000)
     duration_source: Literal["measured", "reported", "unknown"] = "unknown"
     session_id: str | None = Field(default=None, max_length=128)
+    confidence: Literal["low", "medium", "high"] | None = None
 
     @field_validator("selected_answer", mode="before")
     @classmethod
@@ -345,12 +346,26 @@ async def validate_app_attempt(db: AsyncSession, *, owner_id: str, row: dict[str
 
 
 async def submit_pyq_attempt(
-    db: AsyncSession, *, owner_id: str, draft: PyqAttemptDraft, app_url: str
+    db: AsyncSession,
+    *,
+    owner_id: str,
+    draft: PyqAttemptDraft,
+    app_url: str,
+    capture_recovery: bool = True,
+    recovery_session_id: str | None = None,
 ) -> dict[str, Any]:
     """Persist one actual learner response with a replay-safe immutable receipt."""
+    from app.services.recovery import capture_attempt, owner_lock
+
+    await owner_lock(db, owner_id)
     attempt_id = stable_id("pyq-attempt", draft.idempotency_key)
     await lock_identity(db, "pyq_attempts", owner_id, attempt_id)
-    request_hash = fingerprint(draft.model_dump(exclude={"idempotency_key"}))
+    request_data = draft.model_dump(exclude={"idempotency_key"})
+    if draft.confidence is None:
+        request_data.pop("confidence", None)  # Preserve pre-confidence retry receipts.
+    if recovery_session_id:
+        request_data["recovery_session_id"] = recovery_session_id
+    request_hash = fingerprint(request_data)
     existing = await db.scalar(
         select(Record).where(
             Record.collection == "pyq_attempts",
@@ -409,6 +424,7 @@ async def submit_pyq_attempt(
                     "id": attempt_id,
                     "request_hash": request_hash,
                     "pyq_session_id": draft.session_id,
+                    "recovery_session_id": recovery_session_id,
                     "question_uid": question.question_uid,
                     "capture_origin": "chatgpt",
                     "attempt_number": int(previous_attempts or 0) + 1,
@@ -436,16 +452,21 @@ async def submit_pyq_attempt(
                     "round_attempt_number": None,
                     **score,
                     "confidence": (
-                        "high"
+                        draft.confidence
+                        if draft.confidence is not None
+                        else "high"
                         if draft.decision == "MARK"
                         else "medium"
                         if draft.decision == "FIFTY_FIFTY"
                         else None
                     ),
+                    "confidence_source": "reported" if draft.confidence else "decision_inferred",
                 }
             ],
         )
     )[0]
+    if capture_recovery:
+        await capture_attempt(db, owner_id=owner_id, attempt_id=attempt_id)
     return {
         **to_api(row),
         "idempotent_replay": False,

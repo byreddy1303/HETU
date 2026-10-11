@@ -1,4 +1,6 @@
 import { db } from '@/lib/db';
+import { apiConfigured } from '@/lib/api-client';
+import { remediationApi, transferApi } from '@/lib/recovery-api';
 import { writeLocalBatch } from '@/lib/sync';
 import {
   addDaysISO,
@@ -209,6 +211,7 @@ export async function completeRecoveryRemediation(args: {
   session?: RecoverySessionRow | null;
   occurredAt?: string;
 }): Promise<{ item: LearningItemRow; session: RecoverySessionRow | null }> {
+  if (apiConfigured) return remediationApi(args);
   const correctedOpeningMove = args.correctedOpeningMove.trim();
   const focusedPlan = args.focusedPlan.trim();
   if (correctedOpeningMove.length < 8) {
@@ -287,6 +290,7 @@ export async function assignRecoveryTransfer(args: {
   delayDays?: number;
   occurredAt?: string;
 }): Promise<LearningItemRow> {
+  if (apiConfigured) return transferApi(args.item, args.question.id, args.delayDays);
   if (args.item.source_kind !== 'pyq') {
     throw new Error('A bank-backed source is required for an exact transfer assignment.');
   }

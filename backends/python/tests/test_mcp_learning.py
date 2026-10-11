@@ -113,6 +113,8 @@ async def test_oauth_mcp_transport_exposes_and_executes_learning_workflow(monkey
             assert "save_to_hetu" in tools
             assert "search_pyq_catalog" in tools
             assert "submit_pyq_answer" in tools
+            assert "start_recovery_session" in tools
+            assert "submit_recovery_answer" in tools
             assert "link_saved_concepts" in tools
             assert tools["save_to_hetu"]["_meta"]["securitySchemes"][0]["scopes"] == ["hetu:write"]
             assert tools["get_profile"]["_meta"]["openai/profile"] is True
@@ -356,6 +358,92 @@ async def test_oauth_mcp_transport_exposes_and_executes_learning_workflow(monkey
                 9,
             )
             assert repeated.json()["result"]["structuredContent"]["idempotent_replay"] is True
+
+            review_result = await call(
+                "oat_one",
+                "tools/call",
+                {
+                    "name": "create_concept_review",
+                    "arguments": {
+                        "draft": {
+                            "idempotency_key": "mcp-recovery-review",
+                            "concept_id": concept_id,
+                            "kind": "recall",
+                            "prompt": "Explain why the denominator is needed.",
+                            "question_origin": "saved_note",
+                            "due_on": "2000-01-01",
+                        }
+                    },
+                },
+                801,
+            )
+            review = review_result.json()["result"]["structuredContent"]
+            started_result = await call(
+                "oat_one",
+                "tools/call",
+                {
+                    "name": "start_recovery_session",
+                    "arguments": {
+                        "draft": {"idempotency_key": "mcp-recovery-session", "mode": "questions-5"}
+                    },
+                },
+                802,
+            )
+            assert started_result.json()["result"].get("isError") is not True, started_result.text
+            started = started_result.json()["result"]["structuredContent"]
+            assert started["session"]["current_index"] == 0
+            session_id = started["session"]["id"]
+            detail_result = await call(
+                "oat_one",
+                "tools/call",
+                {"name": "get_recovery_session", "arguments": {"session_id": session_id}},
+                803,
+            )
+            assert (
+                detail_result.json()["result"]["structuredContent"]["prompt"]["answer_hidden"]
+                is True
+            )
+            response_payload = {
+                "review_id": review["id"],
+                "response": {
+                    "expected_version": 1,
+                    "attempt_id": "mcp-actual-recall",
+                    "answer": "It normalizes all weighted hypotheses.",
+                    "assistance": "none",
+                    "evaluation": "correct",
+                    "evaluated_by": "assistant",
+                    "recovery_session_id": session_id,
+                    "expected_session_version": 1,
+                    "expected_session_index": 0,
+                },
+            }
+            denied_recovery = await call(
+                "oat_read",
+                "tools/call",
+                {"name": "record_concept_response", "arguments": response_payload},
+                804,
+            )
+            assert denied_recovery.json()["result"]["isError"] is True
+            response_result = await call(
+                "oat_one",
+                "tools/call",
+                {"name": "record_concept_response", "arguments": response_payload},
+                805,
+            )
+            response = response_result.json()["result"]["structuredContent"]
+            assert response["recovery_evidence"]["session"]["status"] == "completed"
+            assert (
+                response["recovery_evidence"]["events"][0]["metadata"]["qualification"]
+                == "reported"
+            )
+            assert response["recovery_evidence"]["item"]["mastered_at"] is None
+            other_recovery = await call(
+                "oat_other",
+                "tools/call",
+                {"name": "get_recovery_session", "arguments": {"session_id": session_id}},
+                806,
+            )
+            assert other_recovery.json()["result"]["isError"] is True
 
             other = await call(
                 "oat_other",

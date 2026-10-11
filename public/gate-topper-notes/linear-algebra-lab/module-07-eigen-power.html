@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<script src="account-storage.js?storage=online-v1"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Module 7 · Eigenvalue Power Tools — LA Mastery Hub</title>
@@ -8,7 +9,7 @@
 <script>
   (function () {
     try {
-      var t = localStorage.getItem("la-hub::theme") || "dark";
+      var t = hetuLabStorage.getItem("la-hub::theme") || "dark";
       document.documentElement.classList.add(t === "light" ? "light" : "dark");
     } catch (e) { document.documentElement.classList.add("dark"); }
   })();
@@ -40,7 +41,7 @@
 
 <div id="root"></div>
 
-<script type="text/babel" src="boilerplate.js"></script>
+<script type="text/babel" src="boilerplate.js?storage=online-v1"></script>
 
 <script type="text/babel">
 const { useState, useEffect, useMemo, useRef } = React;

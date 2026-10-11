@@ -1,5 +1,12 @@
-import { useEffect, useState } from 'react';
-import { subscribeDb } from '@/lib/db';
+import { useCallback, useEffect, useState, useSyncExternalStore } from 'react';
+import { getTableSnapshot, subscribeDb, type SyncedTableName } from '@/lib/db';
+
+/** Synchronous, table-scoped reads; unrelated writes never rerun the selector. */
+export function useTableRows<Name extends SyncedTableName>(name: Name) {
+  const subscribe = useCallback((listener: () => void) => subscribeDb(listener, [name]), [name]);
+  const getSnapshot = useCallback(() => getTableSnapshot(name), [name]);
+  return useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
+}
 
 export type UseLiveQueryResult<T> = T | undefined;
 

@@ -35,6 +35,7 @@ const Readiness = lazyWithRetry(() => import('@/pages/Readiness'));
 const Buddy = lazyWithRetry(() => import('@/pages/Buddy'));
 const Pyq = lazyWithRetry(() => import('@/pages/Pyq'));
 const TopperNotes = lazyWithRetry(() => import('@/pages/TopperNotes'));
+const LinearAlgebraLab = lazyWithRetry(() => import('@/pages/LinearAlgebraLab'));
 const LearningLibrary = lazyWithRetry(() => import('@/pages/LearningLibrary'));
 const Workflows = lazyWithRetry(() => import('@/pages/Workflows'));
 const ConceptReview = lazyWithRetry(() => import('@/pages/ConceptReview'));
@@ -93,6 +94,7 @@ export const router = createBrowserRouter([
       { path: 'trigger-drill', element: <TriggerDrill /> },
       { path: 'formulas', element: <Formulas /> },
       { path: 'topper-notes', element: <TopperNotes /> },
+      { path: 'linear-algebra-lab', element: <LinearAlgebraLab /> },
       { path: 'learning-library', element: <LearningLibrary /> },
       { path: 'learning-library/:conceptId', element: <LearningLibrary /> },
       { path: 'workflows', element: <Workflows /> },

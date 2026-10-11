@@ -1,10 +1,8 @@
 import { create } from 'zustand';
 import { runtimeStorage as localStorage } from '@/lib/runtime-storage';
-import { db, type SyncedTableName } from '@/lib/db';
+import { db, ensureTableHydrated, getTableSnapshot, subscribeDb, type SyncedTableName } from '@/lib/db';
 import {
-  awaitInitialPull,
   deleteLocal,
-  flushPendingSync,
   isSyncEnabled,
   writeLocal,
   writeLocalBatch
@@ -15,10 +13,27 @@ import type { TopicProgressRow } from '@/types';
 
 export type TopicCompletions = Record<string, string>;
 
+interface TopicMutation {
+  sequence: number;
+  completedAt: string | null;
+}
+
 interface TopicProgressState {
   /** In-memory view cache only. online database rows are the source of truth. */
   byUser: Record<string, TopicCompletions>;
+  pendingByUser: Record<string, Record<string, TopicMutation>>;
   setCompleted: (userId: string, topicId: string, completed: boolean) => Promise<void>;
+}
+
+export const EMPTY_TOPIC_COMPLETIONS: TopicCompletions = {};
+let generation = 0;
+let mutationSequence = 0;
+const saveChains = new Map<string, Promise<void>>();
+const touchedTopics = new Set<string>();
+const progressLoads = new Map<string, Promise<void>>();
+
+function mutationKey(userId: string, topicId: string): string {
+  return `${userId}:${topicId}`;
 }
 
 export function topicProgressId(subject: string, topic: string): string {
@@ -171,8 +186,7 @@ async function legacyCompletionsForUser(userId: string): Promise<TopicCompletion
   return mergeCompletions(
     selectCompletionsForUser(localStorageLegacyByUser(), userId),
     normalizeTopicCompletions(userRow?.value as TopicCompletions | undefined),
-    selectCompletionsForUser(byUserFromLegacyValue(globalRow?.value), userId),
-    selectCompletionsForUser(useTopicProgressStore.getState().byUser, userId)
+    selectCompletionsForUser(byUserFromLegacyValue(globalRow?.value), userId)
   );
 }
 
@@ -209,10 +223,23 @@ async function removeMigratedLegacyUser(userId: string): Promise<void> {
   }
 }
 
-/** Wait for the account's remote snapshot, then migrate only that account's
- * old Zustand/meta cache into normal topic_progress rows. */
-export async function syncTopicProgressFromDb(userId: string): Promise<void> {
-  await awaitInitialPull(userId);
+/** The view cache is never migration input: doing so resurrects deletions and
+ * can echo an optimistic click back as a second database write. */
+export function syncTopicProgressFromDb(userId: string): Promise<void> {
+  const existing = progressLoads.get(userId);
+  if (existing) return existing;
+  const load = loadTopicProgress(userId).catch((error) => {
+    if (progressLoads.get(userId) === load) progressLoads.delete(userId);
+    throw error;
+  });
+  progressLoads.set(userId, load);
+  return load;
+}
+
+async function loadTopicProgress(userId: string): Promise<void> {
+  const startedGeneration = generation;
+  await ensureTableHydrated(userId, 'topic_progress');
+  if (startedGeneration !== generation) return;
 
   const legacy = await legacyCompletionsForUser(userId);
   const beforeRows = await db.topic_progress.where('user_id').equals(userId).toArray();
@@ -232,6 +259,7 @@ export async function syncTopicProgressFromDb(userId: string): Promise<void> {
   // API upserts, each notifying every live query and freezing the page.
   const pending: Array<{ name: SyncedTableName; row: TopicProgressRow }> = [];
   for (const completionsKey of Object.keys(legacy)) {
+    if (touchedTopics.has(mutationKey(userId, completionsKey))) continue;
     const parsed = splitTopicProgressId(completionsKey);
     if (!parsed) continue;
     const completedAt = legacy[completionsKey] as string;
@@ -254,57 +282,124 @@ export async function syncTopicProgressFromDb(userId: string): Promise<void> {
     });
   }
   if (pending.length > 0) await writeLocalBatch(pending);
+  if (startedGeneration !== generation) return;
 
-  const durable = !isSyncEnabled() || (await flushPendingSync(userId));
-  const rows = await db.topic_progress.where('user_id').equals(userId).toArray();
-  const merged = mergeCompletions(legacy, completionsFromTopicRows(rows));
-  useTopicProgressStore.setState((state) => ({
-    byUser: { ...state.byUser, [userId]: merged }
-  }));
+  refreshUserCompletions(userId);
 
-  if (isSyncEnabled() && durable) await removeMigratedLegacyUser(userId);
+  if (isSyncEnabled()) await removeMigratedLegacyUser(userId);
+}
+
+function currentCompletions(state: TopicProgressState, userId: string): TopicCompletions {
+  const completions = completionsFromTopicRows(
+    getTableSnapshot('topic_progress').filter((row) => row.user_id === userId)
+  );
+  for (const [topicId, pending] of Object.entries(state.pendingByUser[userId] ?? {})) {
+    if (pending.completedAt) completions[topicId] = pending.completedAt;
+    else delete completions[topicId];
+  }
+  return completions;
+}
+
+function refreshUserCompletions(userId: string): void {
+  useTopicProgressStore.setState((state) => {
+    const completions = currentCompletions(state, userId);
+    const previous = state.byUser[userId];
+    if (previous && Object.keys(previous).length === Object.keys(completions).length &&
+      Object.entries(completions).every(([id, at]) => previous[id] === at)) return state;
+    return { byUser: { ...state.byUser, [userId]: completions } };
+  });
 }
 
 export const useTopicProgressStore = create<TopicProgressState>()((set) => ({
   byUser: {},
+  pendingByUser: {},
   setCompleted: async (userId, topicId, completed) => {
     const parsed = splitTopicProgressId(topicId);
     if (!parsed) throw new Error(`Invalid syllabus topic id: ${topicId}`);
     const canonicalTopicId = topicProgressId(parsed.subject, parsed.topic);
     const timestamp = nowISO();
-    const previousCompletedAt =
-      useTopicProgressStore.getState().byUser?.[userId]?.[canonicalTopicId];
+    const key = mutationKey(userId, canonicalTopicId);
+    const startedGeneration = generation;
+    const mutation: TopicMutation = {
+      sequence: ++mutationSequence,
+      completedAt: completed ? timestamp : null
+    };
+    touchedTopics.add(key);
 
     set((state) => {
-      const next = { ...selectCompletionsForUser(state.byUser, userId) };
+      const next = currentCompletions(state, userId);
       if (completed) next[canonicalTopicId] = timestamp;
       else delete next[canonicalTopicId];
-      return { byUser: { ...state.byUser, [userId]: next } };
+      return {
+        byUser: { ...state.byUser, [userId]: next },
+        pendingByUser: {
+          ...state.pendingByUser,
+          [userId]: { ...state.pendingByUser[userId], [canonicalTopicId]: mutation }
+        }
+      };
     });
 
-    try {
-      if (completed) {
-        await persistTopicCompletion(userId, parsed.subject, parsed.topic, timestamp);
-      } else {
-        await removeTopicCompletion(userId, parsed.subject, parsed.topic);
-      }
-    } catch (error) {
-      // Revert the optimistic update so the UI never claims a save that the
-      // durable store did not confirm. Nothing is lost — nothing was saved.
+    const isLatest = () => startedGeneration === generation &&
+      useTopicProgressStore.getState().pendingByUser[userId]?.[canonicalTopicId] === mutation;
+    const settle = () => {
       set((state) => {
-        const next = { ...selectCompletionsForUser(state.byUser, userId) };
-        if (completed) delete next[canonicalTopicId];
-        else if (previousCompletedAt) next[canonicalTopicId] = previousCompletedAt;
-        else delete next[canonicalTopicId];
-        return { byUser: { ...state.byUser, [userId]: next } };
+        const pending = { ...state.pendingByUser[userId] };
+        delete pending[canonicalTopicId];
+        const nextState = { ...state, pendingByUser: { ...state.pendingByUser, [userId]: pending } };
+        return {
+          pendingByUser: nextState.pendingByUser,
+          byUser: { ...state.byUser, [userId]: currentCompletions(nextState, userId) }
+        };
       });
-      throw new Error(
-        `That change was NOT saved. ${error instanceof Error ? error.message : 'Check your connection and try again.'}`
-      );
+    };
+    const persist = async () => {
+      // Collapse superseded clicks that have not been sent yet. An in-flight
+      // write finishes first; only then can the newest intent for that leaf run.
+      if (!isLatest()) return;
+      try {
+        // Only the small progress table is needed to retain legacy row IDs.
+        // The UI has already changed; unrelated account history never gates it.
+        await ensureTableHydrated(userId, 'topic_progress');
+        if (!isLatest()) return;
+        if (completed) await persistTopicCompletion(userId, parsed.subject, parsed.topic, timestamp);
+        else await removeTopicCompletion(userId, parsed.subject, parsed.topic);
+        if (isLatest()) settle();
+      } catch (error) {
+        // An older failure must never roll back a more recent click. The latest
+        // failure restores the last acknowledged database state, not an older
+        // optimistic value that might itself have failed.
+        if (!isLatest()) return;
+        settle();
+        throw new Error(
+          `Could not confirm that change was saved. ${error instanceof Error ? error.message : 'Check your connection and try again.'}`
+        );
+      }
+    };
+    const previous = saveChains.get(key);
+    const save = previous ? previous.catch(() => undefined).then(persist) : persist();
+    saveChains.set(key, save);
+    try {
+      await save;
+    } finally {
+      if (saveChains.get(key) === save) saveChains.delete(key);
     }
   }
 }));
 
+// Publish remote edits and acknowledged writes synchronously. Pending checks
+// AND unticks overlay them until the matching request finishes.
+subscribeDb(() => {
+  const users = new Set([
+    ...Object.keys(useTopicProgressStore.getState().byUser),
+    ...getTableSnapshot('topic_progress').map((row) => row.user_id)
+  ]);
+  for (const userId of users) refreshUserCompletions(userId);
+}, ['topic_progress']);
+
 export function resetTopicProgressMemory(): void {
-  useTopicProgressStore.setState({ byUser: {} });
+  generation++;
+  saveChains.clear();
+  touchedTopics.clear();
+  progressLoads.clear();
+  useTopicProgressStore.setState({ byUser: {}, pendingByUser: {} });
 }

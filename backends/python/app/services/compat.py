@@ -293,6 +293,10 @@ async def _mutate_records(
     elif operation not in {"insert", "upsert"}:
         raise api_error("PYQ attempts are append-only", status.HTTP_409_CONFLICT)
     if operation in {"insert", "upsert"}:
+        if table == "pyq_attempts":
+            from app.services.recovery import owner_lock
+
+            await owner_lock(db, user_id)
         values: list[dict[str, Any]] = []
         for raw in mutation.values:
             value = _with_identity(table, raw)
@@ -321,6 +325,12 @@ async def _mutate_records(
                 await validate_app_attempt(db, owner_id=user_id, row=prepared)
             values.append(prepared)
         rows = await upsert_records(db, collection=table, owner_id=user_id, items=values)
+        if table == "pyq_attempts":
+            from app.services.recovery import capture_attempt
+
+            for row in rows:
+                if not row.data.get("reattempt_id") and not row.data.get("recovery_session_id"):
+                    await capture_attempt(db, owner_id=user_id, attempt_id=row.external_id)
         return [to_api(row) for row in rows]
     selected, _ = await _query_records(
         db,

@@ -145,33 +145,69 @@ const stores = new Map<SyncedTableName, Map<string, Row>>(
 );
 const metaStore = new Map<string, MetaRow>();
 
-// Per-table promise chain serializing write-through operations so a read-modify
-// write (`update`) can never interleave with another write to the same row.
+// Most tables keep their existing table-wide write barrier. Syllabus leaves
+// are independent: serialize only the same row, so a slow save cannot hold up
+// every other checkbox. Bulk writes and clears still respect those row lanes.
 const writeChains = new Map<SyncedTableName, Promise<void>>();
-function enqueueWrite(name: SyncedTableName, op: () => Promise<void>): Promise<void> {
-  const previous = writeChains.get(name) ?? Promise.resolve();
-  const run = previous.catch(() => undefined).then(op);
-  writeChains.set(
-    name,
-    run.then(
-      () => undefined,
-      () => undefined
-    )
-  );
+const topicWriteChains = new Map<string, Promise<void>>();
+let cacheGeneration = 0;
+let topicRevision = 0;
+const topicRowRevisions = new Map<string, number>();
+
+function enqueueWrite(
+  name: SyncedTableName,
+  op: () => Promise<void>,
+  ids?: readonly string[]
+): Promise<void> {
+  const generation = cacheGeneration;
+  const dependencies = [writeChains.get(name)];
+  if (name === 'topic_progress') {
+    dependencies.push(...(ids ? ids.map((id) => topicWriteChains.get(id)) : topicWriteChains.values()));
+  }
+  const run = Promise.all(dependencies).then(async () => {
+    if (generation !== cacheGeneration) throw new Error('Account changed before the save started.');
+    await op();
+  });
+  const settled = run.catch(() => undefined);
+  if (name === 'topic_progress' && ids?.length) {
+    for (const id of ids) topicWriteChains.set(id, settled);
+    void settled.then(() => {
+      for (const id of ids) {
+        if (topicWriteChains.get(id) === settled) topicWriteChains.delete(id);
+      }
+    });
+  } else {
+    writeChains.set(name, settled);
+    void settled.then(() => {
+      if (writeChains.get(name) === settled) writeChains.delete(name);
+    });
+  }
   return run;
 }
 
-const listeners = new Set<() => void>();
+export type DbTableName = SyncedTableName | 'meta';
+const listeners = new Map<() => void, readonly DbTableName[] | undefined>();
+const tableSnapshots = new Map<SyncedTableName, Row[]>();
 
-function notifyChange(): void {
-  listeners.forEach((listener) => listener());
+function notifyChange(names?: readonly DbTableName[]): void {
+  if (names) {
+    for (const name of names) tableSnapshots.delete(name as SyncedTableName);
+  } else tableSnapshots.clear();
+  listeners.forEach((tables, listener) => {
+    if (!names || !tables || tables.some((name) => names.includes(name))) listener();
+  });
 }
 
-export function subscribeDb(listener: () => void): () => void {
-  listeners.add(listener);
+export function subscribeDb(listener: () => void, tables?: readonly DbTableName[]): () => void {
+  listeners.set(listener, tables);
   return () => {
     listeners.delete(listener);
   };
+}
+
+function noteCommittedRows(name: string, ids: readonly string[]): void {
+  if (name !== 'topic_progress') return;
+  for (const id of ids) topicRowRevisions.set(id, ++topicRevision);
 }
 
 // ---- normalization (mirrors the previous local-first write path) ----
@@ -412,10 +448,11 @@ class MemoryTable<T> {
 
   put(row: T): Promise<void> {
     return enqueueWrite(this.name as SyncedTableName, async () => {
+      const generation = cacheGeneration;
       const map = this.map();
       if (this.remoteMode) {
         map.set(String((row as unknown as Record<string, unknown>)[this.primaryKey]), asRow(row));
-        notifyChange();
+        notifyChange([this.name as DbTableName]);
         return;
       }
       const normalized = normalizeTableWrite(
@@ -429,20 +466,23 @@ class MemoryTable<T> {
         if (existing) return;
       }
       await upsertRowsRemote(this.name as SyncedTableName, [normalized]);
+      if (generation !== cacheGeneration) return;
       map.set(id, normalized);
-      notifyChange();
-    });
+      noteCommittedRows(this.name, [id]);
+      notifyChange([this.name as DbTableName]);
+    }, [asRow(row).id]);
   }
 
   bulkPut(rows: T[]): Promise<void> {
     if (rows.length === 0) return Promise.resolve();
     return enqueueWrite(this.name as SyncedTableName, async () => {
+      const generation = cacheGeneration;
       const map = this.map();
       if (this.remoteMode) {
         for (const row of rows) {
           map.set(String((row as unknown as Record<string, unknown>)[this.primaryKey]), asRow(row));
         }
-        notifyChange();
+        notifyChange([this.name as DbTableName]);
         return;
       }
       const normalizedRows = rows.map((row) =>
@@ -460,21 +500,24 @@ class MemoryTable<T> {
         this.name as SyncedTableName,
         normalizedRows.filter((row) => !map.has(row.id) || this.mutable)
       );
+      if (generation !== cacheGeneration) return;
       for (const normalized of normalizedRows) {
         if (this.mutable || !map.has(normalized.id)) map.set(normalized.id, normalized);
       }
-      notifyChange();
-    });
+      noteCommittedRows(this.name, normalizedRows.map((row) => row.id));
+      notifyChange([this.name as DbTableName]);
+    }, rows.map((row) => asRow(row).id));
   }
 
   update(id: string, changes: Record<string, unknown>): Promise<number> {
     return enqueueWrite(this.name as SyncedTableName, async () => {
+      const generation = cacheGeneration;
       if (this.remoteMode) {
         const map = this.map();
         const existing = map.get(id);
         if (!existing) return;
         map.set(id, { ...existing, ...changes } as Row);
-        notifyChange();
+        notifyChange([this.name as DbTableName]);
         return;
       }
       const map = this.map();
@@ -483,34 +526,44 @@ class MemoryTable<T> {
       if (!this.mutable) throw this.immutabilityError(id);
       const merged = { ...existing, ...changes };
       await upsertRowsRemote(this.name as SyncedTableName, [merged]);
+      if (generation !== cacheGeneration) return;
       map.set(id, merged);
-      notifyChange();
-    }).then(() => 1);
+      noteCommittedRows(this.name, [id]);
+      notifyChange([this.name as DbTableName]);
+    }, [id]).then(() => 1);
   }
 
   delete(id: string): Promise<void> {
     return enqueueWrite(this.name as SyncedTableName, async () => {
+      const generation = cacheGeneration;
       if (!this.mutable) throw this.immutabilityError(id);
       const map = this.map();
-      if (!map.has(id)) return;
+      // An untick may arrive before the initial snapshot. It must still reach
+      // Postgres even when this device has not cached the row yet.
+      if (!map.has(id) && this.name !== 'topic_progress') return;
       await deleteRowRemote(this.name as SyncedTableName, id);
+      if (generation !== cacheGeneration) return;
       map.delete(id);
-      notifyChange();
-    });
+      noteCommittedRows(this.name, [id]);
+      notifyChange([this.name as DbTableName]);
+    }, [id]);
   }
 
   bulkDelete(ids: string[]): Promise<void> {
     if (ids.length === 0) return Promise.resolve();
     return enqueueWrite(this.name as SyncedTableName, async () => {
+      const generation = cacheGeneration;
       const map = this.map();
       for (const id of ids) {
         if (!this.mutable) throw this.immutabilityError(id);
-        if (!map.has(id)) continue;
+        if (!map.has(id) && this.name !== 'topic_progress') continue;
         await deleteRowRemote(this.name as SyncedTableName, id);
+        if (generation !== cacheGeneration) return;
         map.delete(id);
+        noteCommittedRows(this.name, [id]);
       }
-      notifyChange();
-    });
+      notifyChange([this.name as DbTableName]);
+    }, ids);
   }
 
   clear(): Promise<void> {
@@ -518,7 +571,7 @@ class MemoryTable<T> {
       const map = this.map();
       if (this.remoteMode) {
         map.clear();
-        notifyChange();
+        notifyChange([this.name as DbTableName]);
         return;
       }
       if (!this.mutable) {
@@ -526,8 +579,9 @@ class MemoryTable<T> {
           await deleteRowRemote(this.name as SyncedTableName, id);
         }
       }
+      noteCommittedRows(this.name, [...map.keys()]);
       map.clear();
-      notifyChange();
+      notifyChange([this.name as DbTableName]);
     });
   }
 
@@ -583,7 +637,81 @@ export function table(name: SyncedTableName): MemoryTable<Row> {
   return db.table(name);
 }
 
+/** Stable synchronous snapshots for React's external-store subscription. */
+export function getTableSnapshot<Name extends SyncedTableName>(
+  name: Name
+): Awaited<ReturnType<(typeof db)[Name]['toArray']>> {
+  let snapshot = tableSnapshots.get(name);
+  if (!snapshot) {
+    snapshot = [...stores.get(name)!.values()];
+    tableSnapshots.set(name, snapshot);
+  }
+  return snapshot as unknown as Awaited<ReturnType<(typeof db)[Name]['toArray']>>;
+}
+
 // ---- hydration ----
+
+const tableHydrations = new Map<SyncedTableName, { userId: string; promise: Promise<void> }>();
+const hydratedUsers = new Map<SyncedTableName, string>();
+
+/** Wait only for this table, sharing any request already started at login. */
+export function ensureTableHydrated(userId: string, name: SyncedTableName): Promise<void> {
+  if (hydratedUsers.get(name) === userId) return Promise.resolve();
+  return hydrateTable(userId, name);
+}
+
+function hydrateTable(userId: string, name: SyncedTableName): Promise<void> {
+  if (!apiConfigured) return Promise.resolve();
+  const active = tableHydrations.get(name);
+  if (active?.userId === userId) return active.promise;
+  const generation = cacheGeneration;
+  const startingRevision = topicRevision;
+  const promise = (async () => {
+    // Question snapshots contain images. Small pages keep existing history
+    // within the hosting response limit, even for image-heavy accounts.
+    const pageSize = name === 'questions' || name === 'pyq_attempts' ? 10 : 100;
+    const rows: Row[] = [];
+    for (let offset = 0; ; offset += pageSize) {
+      const { data, error } = await apiClient
+        .from(name)
+        .select('*')
+        .eq('user_id', userId)
+        .order('id', { ascending: true })
+        .range(offset, offset + pageSize - 1);
+      if (error && !isMissingRemoteSchema(error)) {
+        throw new Error(`[db] hydrate failed for ${name}: ${error.message}`);
+      }
+      const page = (data ?? []) as Row[];
+      rows.push(...page);
+      if (page.length < pageSize) break;
+    }
+    if (generation !== cacheGeneration) return;
+    const map = stores.get(name)!;
+    const next = new Map(rows.map((row) => [
+      row.id, { ...normalizeTableWrite(name, row), sync_status: 'synced' }
+    ]));
+    if (name === 'topic_progress') {
+      // A read started before a checkbox save must not undo its acknowledged
+      // write (including deletions). Keep only changes newer than this read.
+      for (const [id, revision] of topicRowRevisions) {
+        if (revision <= startingRevision) continue;
+        const committed = map.get(id);
+        if (committed) next.set(id, committed as Row & { sync_status: string });
+        else next.delete(id);
+      }
+    }
+    map.clear();
+    for (const [id, row] of next) map.set(id, row);
+    hydratedUsers.set(name, userId);
+    // Publish lightweight progress immediately; large practice history may
+    // still be loading. Each table is replaced only after all its pages load.
+    notifyChange([name]);
+  })().finally(() => {
+    if (tableHydrations.get(name)?.promise === promise) tableHydrations.delete(name);
+  });
+  tableHydrations.set(name, { userId, promise });
+  return promise;
+}
 
 /**
  * Replace the RAM cache for the given tables with the server snapshot. Used
@@ -595,37 +723,7 @@ export async function hydrateTables(
   names: readonly SyncedTableName[]
 ): Promise<void> {
   if (names.length === 0 || !apiConfigured) return;
-  const results = await Promise.all(
-    names.map(async (name) => {
-      // Question snapshots contain images. Small pages keep existing history
-      // within the hosting response limit, even for image-heavy accounts.
-      const pageSize = name === 'questions' || name === 'pyq_attempts' ? 10 : 100;
-      const rows: Row[] = [];
-      for (let offset = 0; ; offset += pageSize) {
-        const { data, error } = await apiClient
-          .from(name)
-          .select('*')
-          .eq('user_id', userId)
-          .order('id', { ascending: true })
-          .range(offset, offset + pageSize - 1);
-        if (error && !isMissingRemoteSchema(error)) {
-          throw new Error(`[db] hydrate failed for ${name}: ${error.message}`);
-        }
-        const page = (data ?? []) as Row[];
-        rows.push(...page);
-        if (page.length < pageSize) break;
-      }
-      return { name, rows };
-    })
-  );
-  for (const { name, rows } of results) {
-    const map = stores.get(name)!;
-    map.clear();
-    for (const row of rows) {
-      map.set(row.id, { ...normalizeTableWrite(name, row), sync_status: 'synced' });
-    }
-  }
-  notifyChange();
+  await Promise.all(names.map((name) => hydrateTable(userId, name)));
 }
 
 /**
@@ -639,11 +737,18 @@ export async function hydrateAll(userId: string): Promise<void> {
     await clearLocalData();
     return;
   }
-  await hydrateTables(userId, SYNCED_TABLES);
+  await hydrateTables(userId, ['topic_progress', ...SYNCED_TABLES.filter((name) => name !== 'topic_progress')]);
 }
 
 /** Drop the RAM cache only — nothing durable is touched. */
 export async function clearLocalData(): Promise<void> {
+  cacheGeneration++;
+  tableHydrations.clear();
+  hydratedUsers.clear();
+  topicRowRevisions.clear();
+  writeChains.clear();
+  topicWriteChains.clear();
+  recentLocalWrites.clear();
   for (const map of stores.values()) map.clear();
   metaStore.clear();
   notifyChange();
@@ -655,5 +760,31 @@ export function seedLocalRows(name: SyncedTableName, rows: Row[]): void {
   for (const row of rows) {
     map.set(row.id, row);
   }
-  notifyChange();
+  noteCommittedRows(name, rows.map((row) => row.id));
+  notifyChange([name]);
+}
+
+/** Apply an already committed domain response to RAM without sending it back as a write. */
+export function applyServerRows(userId: string, writes: Array<{
+  name: SyncedTableName; rows: Array<{ id: string; user_id?: string; version?: number }>
+}>): void {
+  let changed = false;
+  for (const { name, rows } of writes) {
+    for (const row of rows) {
+      if (row.user_id !== userId) throw new Error('Domain response belongs to another account.');
+    }
+    if (!stores.has(name)) throw new Error('Unknown domain response table.');
+  }
+  for (const { name, rows } of writes) {
+    const map = stores.get(name)!;
+    for (const row of rows) {
+      const existing = map.get(row.id);
+      const incomingVersion = typeof row.version === 'number' ? row.version : 0;
+      const currentVersion = typeof existing?.version === 'number' ? existing.version : 0;
+      if (existing && currentVersion >= incomingVersion && incomingVersion > 0) continue;
+      map.set(row.id, { ...normalizeTableWrite(name, { ...row }), sync_status: 'synced' });
+      changed = true;
+    }
+  }
+  if (changed) notifyChange();
 }

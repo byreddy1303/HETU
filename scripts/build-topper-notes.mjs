@@ -3,6 +3,7 @@ import { existsSync } from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
+import { prepareLinearAlgebraLab } from './prepare-linear-algebra-lab.mjs';
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const projectRoot = path.resolve(scriptDir, '..');
@@ -303,6 +304,7 @@ async function main() {
       return path.basename(sourcePath) !== 'build-problem-lab.js';
     }
   });
+  await prepareLinearAlgebraLab(hubOutput);
 
   await mkdir(path.dirname(manifestPath), { recursive: true });
   await writeFile(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`, 'utf8');

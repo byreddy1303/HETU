@@ -67,12 +67,14 @@ export default defineConfig(({ mode }) => {
       ...(nativeBuild
         ? [
             {
-              name: 'exclude-hosted-topper-notes-from-native-bundle',
+              name: 'exclude-hosted-topper-note-pdfs-from-native-bundle',
               closeBundle() {
                 // PDFs remain hosted by the web app and open externally on native.
                 // Keeping 215 MB of source material out of every APK preserves a
                 // practical install size without removing access to the library.
-                rmSync(path.resolve(__dirname, 'dist/gate-topper-notes'), {
+                // Interactive lab pages stay in the APK so their authenticated
+                // parent can save progress through the same Python API.
+                rmSync(path.resolve(__dirname, 'dist/gate-topper-notes/pdfs'), {
                   recursive: true,
                   force: true
                 });

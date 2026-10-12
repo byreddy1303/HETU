@@ -7,11 +7,24 @@ import { useAuth } from '@/hooks/useAuth';
 import Brand from '@/components/shared/Brand';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
+import { getAuthReturnPath } from '@/lib/auth-return';
+
+function SignedInRedirect({ to }: { to: string }) {
+  const serverRedirect = to.startsWith('/__clerk/');
+  useEffect(() => {
+    // Clerk's continuation is a server endpoint, so React navigation cannot resume it.
+    if (serverRedirect) window.location.replace(to);
+  }, [serverRedirect, to]);
+  return serverRedirect
+    ? <p role="status">Returning to your authorization request…</p>
+    : <Navigate to={to} replace />;
+}
 
 export default function ClerkAuth() {
   const { status } = useAuth();
   const { isLoaded, signIn, setActive } = useSignIn();
   const [params] = useSearchParams();
+  const returnPath = getAuthReturnPath(params.get('redirect_url'), window.location.origin);
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
   const [sending, setSending] = useState(false);
@@ -19,7 +32,7 @@ export default function ClerkAuth() {
   const [verification, setVerification] = useState(false);
   const operation = useRef(0);
   useEffect(() => () => { operation.current += 1; }, []);
-  if (status === 'signed_in') return <Navigate to="/" replace />;
+  if (status === 'signed_in') return <SignedInRedirect to={returnPath} />;
   const invite = params.get('invite');
   if (invite) return <Navigate to={`/signup?invite=${encodeURIComponent(invite)}`} replace />;
 
@@ -83,7 +96,7 @@ export default function ClerkAuth() {
           <p role="status" className="mt-3 text-sm text-text-muted">Account created. Sign in with your new credentials.</p>
         )}
         {error && <p role="alert" className="mt-3 text-sm text-danger">{error}</p>}
-        {verification ? <SignIn routing="hash" forceRedirectUrl="/" withSignUp={false} /> : (
+        {verification ? <SignIn routing="hash" forceRedirectUrl={returnPath} withSignUp={false} /> : (
           <form onSubmit={submit} className="mt-6 space-y-4">
             <label className="block" htmlFor="signin-identifier">
               <span className="u-label">Username or email</span>

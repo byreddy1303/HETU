@@ -4,7 +4,64 @@ The Python service exposes authenticated MCP at `/mcp` when the resource URL,
 Clerk OAuth issuer and approved client IDs are configured. The local plugin
 package still targets `http://localhost:8000/mcp`; it is a development package.
 
-## Current live status — 2026-10-11
+## Current connection checks — 2026-10-12
+
+Public checks now return HTTP 200 for `/health/ready` (database and Redis `ok`)
+and `/.well-known/oauth-protected-resource/mcp`. The resource document advertises
+the production MCP audience, the proxied Clerk issuer and both HETU scopes. The
+issuer's `/__clerk/.well-known/oauth-authorization-server` advertises CIMD,
+S256 and public-client token authentication. CIMD is advertised in OAuth
+authorization-server metadata; it need not appear in OIDC discovery.
+
+For ChatGPT's **Add custom MCP server** form, use:
+
+- Server URL: `https://hetu-python-api.vercel.app/mcp`.
+- Authentication: OAuth with Client ID Metadata Documents (CIMD).
+- Scopes: `hetu:read hetu:write offline_access`.
+- Client ID/secret: leave manual credentials empty when using CIMD.
+
+In the production Clerk application's **Paths → Component paths**, select
+application-domain pages and save these URLs:
+
+| Field | URL |
+| --- | --- |
+| Sign-in | `https://hetu-app.vercel.app/auth` |
+| Sign-up | `https://hetu-app.vercel.app/signup` |
+| Signing out | `https://hetu-app.vercel.app/auth` |
+| OAuth consent | `https://hetu-app.vercel.app/oauth-consent` |
+
+The form supplies `https://` itself. Leaving sign-in unset can send an OAuth
+request to the unavailable `accounts.hetu-app.vercel.app` account portal.
+
+### An app-styled 404 at `/__clerk/oauth/authorize`
+
+The previous production PWA worker treated Clerk authorization navigations as
+app routes. It served cached `index.html`, and React rendered HETU's 404 even
+though the server correctly returned an OAuth redirect. Clerk and discovery
+paths must bypass both the PWA navigation fallback and the SPA rewrite. Sign-in
+must preserve Clerk's `redirect_url`, and a server continuation requires a full
+document navigation. The consent route also retains its original query if a
+signed-out user must sign in first; return destinations are restricted to
+same-origin OAuth paths.
+
+After building, verify the actual generated service worker in Chromium:
+
+```sh
+npm run build
+node scripts/verify-pwa-auth-routing.mjs
+```
+
+This uses a local server and synthetic OAuth parameters without granting
+account access. It checks that authorization and discovery reach the server,
+while sign-in and consent keep the app fallback and query parameters. After a
+release, reopen the website to receive the updated worker, close the failed
+OAuth window, and start **Authenticate** again in ChatGPT. A private browser
+window can also test without a previously cached worker.
+
+These public and browser routing checks do not verify a real user's completed
+ChatGPT grant, save or reconnect. Those still require the final account flow.
+
+## Historical live status — 2026-10-11
 
 The production app uses Clerk and Neon; its migration and independent restore
 evidence is recorded in [PRODUCTION.md](../backends/python/docs/PRODUCTION.md).

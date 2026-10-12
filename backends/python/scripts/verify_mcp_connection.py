@@ -44,7 +44,8 @@ def check_connection(client: httpx.Client, resource_url: str, issuer: str) -> di
         check("authorization_server", issuer in metadata.get("authorization_servers", []))
         scopes = metadata.get("scopes_supported", [])
         check("resource_scopes", {"hetu:read", "hetu:write"}.issubset(scopes), scopes)
-        response = client.get(issuer.rstrip("/") + "/.well-known/openid-configuration")
+        # CIMD is an OAuth authorization-server capability, not an OIDC requirement.
+        response = client.get(issuer.rstrip("/") + "/.well-known/oauth-authorization-server")
         check("issuer_discovery", response.status_code == 200, response.status_code)
         auth = response.json() if response.status_code == 200 else {}
         check("issuer_identity", auth.get("issuer") == issuer)

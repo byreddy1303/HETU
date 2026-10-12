@@ -48,7 +48,13 @@ export default defineConfig(({ mode }) => {
           ]
         },
         workbox: {
-          navigateFallbackDenylist: [/^\/api(?:\/|$)/, /^\/gate-topper-notes\//],
+          // OAuth navigations and discovery must reach the server, not the cached app.
+          navigateFallbackDenylist: [
+            /^\/api(?:\/|$)/,
+            /^\/__clerk(?:\/|$)/,
+            /^\/\.well-known(?:\/|$)/,
+            /^\/gate-topper-notes\//
+          ],
           importScripts: ['/push-sw.js'],
           globPatterns: ['**/*.{js,css,html,ico,png,svg}'],
           runtimeCaching: [

@@ -10,7 +10,7 @@
       "destination": "https://hetu-python-api.vercel.app/:path*"
     },
     {
-      "source": "/((?!api(?:/|$)|assets/|brand/|hetu-[^/]+\\.png|pyq/|gate-topper-notes/|\\.well-known/|favicon\\.svg|manifest\\.webmanifest|sw\\.js|push-sw\\.js|workbox-.*|registerSW\\.js|robots\\.txt).*)",
+      "source": "/((?!api(?:/|$)|__clerk(?:/|$)|assets/|brand/|hetu-[^/]+\\.png|pyq/|gate-topper-notes/|\\.well-known/|favicon\\.svg|manifest\\.webmanifest|sw\\.js|push-sw\\.js|workbox-.*|registerSW\\.js|robots\\.txt).*)",
       "destination": "/index.html"
     }
   ],

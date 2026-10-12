@@ -24,6 +24,9 @@ def public_server(failure: str | None = None) -> httpx.Client:
                 },
             )
         if request.url.path.endswith("/.well-known/openid-configuration"):
+            # Clerk's OIDC document need not publish its OAuth CIMD support.
+            return httpx.Response(200, json={"issuer": ISSUER})
+        if request.url.path.endswith("/.well-known/oauth-authorization-server"):
             return httpx.Response(
                 200,
                 json={

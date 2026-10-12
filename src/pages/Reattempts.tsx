@@ -34,6 +34,7 @@ import type {
   ReattemptStage
 } from '@/types';
 import { db } from '@/lib/db';
+import QuestionAttemptTimeline from '@/components/pyq/QuestionAttemptTimeline';
 import { apiConfigured } from '@/lib/api-client';
 import { getSessionApi, transferApi } from '@/lib/recovery-api';
 import {
@@ -1768,6 +1769,11 @@ function PyqReattemptSession({
                   question={question}
                   attempts={attempts}
                   currentAttempt={submitted}
+                />
+                <QuestionAttemptTimeline
+                  questionUid={question.id}
+                  attempts={attempts}
+                  targetTimeSec={targetTimeSecForMarks(question.marks)}
                 />
                 <p className="text-[12px] leading-relaxed text-text-muted">
                   {readOnly

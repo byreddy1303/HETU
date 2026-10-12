@@ -55,6 +55,9 @@ import {
   type ReadinessSnapshot
 } from '@/lib/readiness-snapshots';
 import { EXAM_DATE_DEFAULT, SUBJECTS } from '@/lib/constants';
+import { Badge } from '@/components/ui/Badge';
+import { buildAllQuestionTimelines } from '@/lib/question-attempt-timeline';
+import { buildNextActionPack } from '@/lib/readiness-next';
 import { mockScorePercent, normalizeMockEvidence } from '@/lib/mocks';
 import { GATE_2027_BLUEPRINT, GATE_2027_OFFICIAL_SOURCES } from '@/lib/gate-2027';
 import { cn, nowISO, todayISOInTimeZone, weekStartISO } from '@/lib/utils';
@@ -243,6 +246,20 @@ export default function Readiness() {
   );
 
   const moves = useMemo(() => nextMoves(breakdown, perSubject), [breakdown, perSubject]);
+  const questionPack = useMemo(() => {
+    const timelines = [...buildAllQuestionTimelines(pyqAttempts, questions).values()];
+    const dueUids = (learningEvidence.items ?? [])
+      .filter(
+        (item) =>
+          item.question_uid != null &&
+          item.scheduled_date != null &&
+          item.scheduled_date <= today &&
+          item.recovery_state !== 'mastered' &&
+          item.recovery_state !== 'paused'
+      )
+      .map((item) => item.question_uid as string);
+    return buildNextActionPack(timelines, dueUids, 20);
+  }, [learningEvidence.items, pyqAttempts, questions, today]);
   const mockSignal = useMemo(() => {
     const normalizedMocks = mocks.map((row) => normalizeMockEvidence(row));
     const qualified = normalizedMocks.filter((row) => row.evidence_status === 'qualified');
@@ -624,6 +641,39 @@ export default function Readiness() {
                   <MoveRow key={`${m.kind}-${m.subject ?? 'all'}-${i}`} move={m} />
                 ))}
               </ul>
+            </Card>
+          )}
+
+          {/* --- Question-level fix pack: due → fragile → relearn --- */}
+          {questionPack.length > 0 && (
+            <Card className="order-1">
+              <CardHeader
+                title={`Fix pack · ${questionPack.length} questions`}
+                aside={
+                  <span className="text-[11px] text-text-faint">due first, then fragile</span>
+                }
+              />
+              <ul className="divide-y divide-border">
+                {questionPack.slice(0, 8).map((action) => (
+                  <li
+                    key={action.questionUid}
+                    className="flex flex-wrap items-center gap-2 px-4 py-2.5 text-[12px]"
+                  >
+                    <Badge tone={action.reason === 'due' ? 'warn' : 'accent'}>
+                      {action.reason}
+                    </Badge>
+                    <span className="min-w-0 flex-1 truncate font-mono text-[11px] text-text-muted">
+                      {action.questionUid}
+                    </span>
+                    <span className="text-text-faint">{action.detail}</span>
+                  </li>
+                ))}
+              </ul>
+              {questionPack.length > 8 && (
+                <p className="border-t border-border px-4 py-2 text-[11px] text-text-faint">
+                  +{questionPack.length - 8} more in the full pack
+                </p>
+              )}
             </Card>
           )}
 

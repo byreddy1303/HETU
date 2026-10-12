@@ -5,7 +5,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useLiveQuery } from '@/lib/db-hooks';
 import { AnimatePresence, motion } from 'motion/react';
 import { ChevronDown, ChevronRight, Pencil } from 'lucide-react';
-import type { QuestionRow, SessionRow } from '@/types';
+import type { PyqAttemptRow, QuestionRow, SessionRow } from '@/types';
 import { db } from '@/lib/db';
 import { writeLocal, deleteLocal, awaitInitialPull } from '@/lib/sync';
 import {
@@ -38,6 +38,7 @@ import { Select } from '@/components/ui/Select';
 import { Empty } from '@/components/ui/Empty';
 import { ImagePreview } from '@/components/shared/ImagePreview';
 import AnswerReveal from '@/components/shared/AnswerReveal';
+import QuestionAttemptTimeline from '@/components/pyq/QuestionAttemptTimeline';
 import { Dialog } from '@/components/ui/Dialog';
 import QuestionEditor, { DeleteBar } from '@/components/shared/QuestionEditor';
 import SessionEditor from '@/components/shared/SessionEditor';
@@ -125,10 +126,12 @@ function Detail({ label, children }: { label: string; children: React.ReactNode 
 
 function Row({
   q,
+  attempts,
   onImage,
   onEdit
 }: {
   q: QuestionRow;
+  attempts: PyqAttemptRow[];
   onImage: (src: string, caption: string) => void;
   onEdit: (row: QuestionRow) => void;
 }) {
@@ -315,6 +318,21 @@ function Row({
                 )}
               </div>
               <AnswerReveal answer={q.answer_text} onAdd={() => onEdit(q)} className="mt-4" />
+              {(() => {
+                const linked = q.source_pyq_attempt_id
+                  ? attempts.find((attempt) => attempt.id === q.source_pyq_attempt_id)
+                  : undefined;
+                if (!linked) return null;
+                return (
+                  <div className="mt-4">
+                    <QuestionAttemptTimeline
+                      questionUid={linked.question_uid}
+                      attempts={attempts}
+                      journalQuestions={[q]}
+                    />
+                  </div>
+                );
+              })()}
             </td>
           </motion.tr>
         )}
@@ -732,6 +750,7 @@ export default function Journal() {
                       <Row
                         key={q.id}
                         q={q}
+                        attempts={pyqAttempts ?? []}
                         onImage={(src, caption) => setPreview({ src, caption })}
                         onEdit={openEdit}
                       />

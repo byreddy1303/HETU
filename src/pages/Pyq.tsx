@@ -51,6 +51,8 @@ import PyqRecommendedSetup from '@/components/pyq/PyqRecommendedSetup';
 import PyqQuestionContent from '@/components/pyq/PyqQuestionContent';
 import PyqSessionHistory from '@/components/pyq/PyqSessionHistory';
 import PyqConversationHistory from '@/components/pyq/PyqConversationHistory';
+import QuestionAttemptTimeline from '@/components/pyq/QuestionAttemptTimeline';
+import { simulateSkippingGuesses, thirdsToMarks } from '@/lib/negative-marking';
 import TagFlow from '@/components/tags/TagFlow';
 import { Card, CardBody, CardHeader } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
@@ -4067,6 +4069,7 @@ export default function Pyq() {
     const correct = graded.filter((attempt) => attempt.mark_correct).length;
     const skipped = completed.filter((attempt) => attempt.mark_decision === 'SKIP').length;
     const exactScores = aggregatePyqAttemptScores(completed);
+    const guessSim = simulateSkippingGuesses(completed);
     const completionSummary = loadedSession
       ? buildPyqSessionSummary(loadedSession, completed)
       : null;
@@ -4123,6 +4126,20 @@ export default function Pyq() {
                 ? '; the rest are excluded because stored type/marks metadata is incomplete or inconsistent.'
                 : '.'}
             </p>
+            {guessSim.recoveredThirds > 0 ? (
+              <p className="mt-2 text-[12px] text-text-muted">
+                Guesses cost you{' '}
+                <span className="u-num font-semibold text-warn">
+                  {thirdsToMarks(guessSim.recoveredThirds).toFixed(2).replace(/\.00$/, '')} marks
+                </span>{' '}
+                across {guessSim.guessedWrong} {plural(guessSim.guessedWrong, 'guess')} — skipping
+                them would have scored{' '}
+                <span className="u-num font-semibold text-text">
+                  {thirdsToMarks(guessSim.withoutGuessesThirds).toFixed(2).replace(/\.00$/, '')}
+                </span>
+                .
+              </p>
+            ) : null}
           </CardBody>
         </Card>
 
@@ -4445,6 +4462,12 @@ export default function Pyq() {
           </CardBody>
         </Card>
       </div>
+
+      <QuestionAttemptTimeline
+        questionUid={current.id}
+        attempts={[...attempts, ...completed]}
+        journalQuestions={journalQuestions}
+      />
 
       {!isPyqAutoGradable(current) ? (
         <p role="status" className="rounded border border-warn/25 bg-warn-faint p-3 text-[13px]">

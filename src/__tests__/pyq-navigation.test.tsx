@@ -259,7 +259,7 @@ describe('PYQ practice navigation', () => {
         )
       ).toMatchObject({ selected_answer: 'C', mark_decision: 'MARK' });
     });
-    expect(screen.getByText('Correct')).toBeInTheDocument();
+    expect(screen.getAllByText('Correct')[0]).toBeInTheDocument();
     await user.click(await screen.findByRole('button', { name: 'Previous question' }));
 
     expect(await screen.findByText('Which proposition is a tautology?')).toBeInTheDocument();

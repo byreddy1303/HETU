@@ -293,9 +293,11 @@ export async function writeLocalBatch(
     grouped.set(name, target);
   }
   try {
-    for (const [name, targetRows] of grouped) {
-      await table(name).bulkPut(targetRows.map(withSyncStatus));
-    }
+    await Promise.all(
+      Array.from(grouped.entries()).map(([name, targetRows]) =>
+        table(name).bulkPut(targetRows.map(withSyncStatus))
+      )
+    );
   } catch (error) {
     if (apiConfigured) noteSyncFailure(errorMessage(error));
     throw error;

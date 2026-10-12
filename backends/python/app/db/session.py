@@ -11,6 +11,7 @@ from sqlalchemy.ext.asyncio import (
 )
 
 from app.core.config import get_settings
+from app.core.timing import instrument_engine
 
 
 @lru_cache
@@ -24,7 +25,9 @@ def get_engine() -> AsyncEngine:
             max_overflow=settings.database_max_overflow,
             pool_recycle=300,
         )
-    return create_async_engine(url, **kwargs)
+    engine = create_async_engine(url, **kwargs)
+    instrument_engine(engine)
+    return engine
 
 
 @lru_cache

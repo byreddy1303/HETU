@@ -67,9 +67,14 @@ export function buildQuestionTimeline(
   attempts: readonly PyqAttemptRow[],
   journalQuestions: readonly Pick<QuestionRow, 'id' | 'source_pyq_attempt_id'>[] = []
 ): QuestionTimeline {
+  const seenIds = new Set<string>();
   const rows = attempts
-    .filter((attempt) => attempt.question_uid === questionUid)
-    .slice()
+    .filter((attempt) => {
+      if (attempt.question_uid !== questionUid) return false;
+      if (seenIds.has(attempt.id)) return false;
+      seenIds.add(attempt.id);
+      return true;
+    })
     .sort((a, b) => a.attempted_at.localeCompare(b.attempted_at));
   const journalByAttempt = new Map<string, string>();
   for (const question of journalQuestions) {

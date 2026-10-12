@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { memo, useEffect, useMemo, useRef, useState } from 'react';
 import '@/workflow-surfaces.css';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useLiveQuery } from '@/lib/db-hooks';
@@ -1739,6 +1739,30 @@ function formatAttemptAnswer(value: PyqSelectedAnswer): string {
   return Array.isArray(value) ? value.join(', ') : String(value);
 }
 
+const PracticeTimerBadge = memo(function PracticeTimerBadge({
+  startedAt,
+  submittedSec,
+  draftElapsedSec
+}: {
+  startedAt: number | null;
+  submittedSec?: number;
+  draftElapsedSec: number;
+}) {
+  const liveSeconds = useTimer(submittedSec !== undefined ? null : startedAt);
+  const total = submittedSec ?? draftElapsedSec + liveSeconds;
+  return (
+    <span
+      role="timer"
+      aria-label={`${secondsToClock(total)} active time on this question`}
+      aria-atomic="true"
+      className="inline-flex items-center gap-1 font-mono text-[12px] text-text-faint"
+    >
+      <Clock3 size={13} />
+      {secondsToClock(total)}
+    </span>
+  );
+});
+
 export default function Pyq() {
   const { userId, profile, sandbox } = useAuth();
   const [searchParams] = useSearchParams();
@@ -1819,6 +1843,7 @@ export default function Pyq() {
   const completedRef = useRef(completed);
   const loadedSessionRef = useRef<PyqSessionRow | null>(loadedSession);
   const examWriteQueueRef = useRef<Promise<void>>(Promise.resolve());
+  const practiceWriteQueueRef = useRef<Promise<void>>(Promise.resolve());
   const finalizeExamRef = useRef<(reason: 'manual' | 'time-expired') => Promise<void>>(
     async () => {}
   );
@@ -1842,7 +1867,8 @@ export default function Pyq() {
   const attempts = useLiveQuery(
     async () => (userId ? db.pyq_attempts.where('user_id').equals(userId).toArray() : []),
     [userId],
-    []
+    [],
+    ['pyq_attempts']
   );
   const activePyqSession = useLiveQuery(
     async () => {
@@ -1854,7 +1880,8 @@ export default function Pyq() {
       return rows.sort((a, b) => b.updated_at.localeCompare(a.updated_at))[0] ?? null;
     },
     [userId],
-    null
+    null,
+    ['pyq_sessions']
   );
   const pausedPyqSessions = useLiveQuery(
     async () => {
@@ -1866,7 +1893,8 @@ export default function Pyq() {
       return rows.sort((a, b) => b.updated_at.localeCompare(a.updated_at));
     },
     [userId],
-    []
+    [],
+    ['pyq_sessions']
   );
   const completedPyqSessions = useLiveQuery(
     async () => {
@@ -1878,27 +1906,32 @@ export default function Pyq() {
       return rows.sort((a, b) => b.updated_at.localeCompare(a.updated_at));
     },
     [userId],
-    []
+    [],
+    ['pyq_sessions']
   );
   const patterns = useLiveQuery(
     async () => (userId ? db.patterns.where('user_id').equals(userId).toArray() : []),
     [userId],
-    []
+    [],
+    ['patterns']
   );
   const journalQuestions = useLiveQuery(
     async () => (userId ? db.questions.where('user_id').equals(userId).toArray() : []),
     [userId],
-    []
+    [],
+    ['questions']
   );
   const learningItems = useLiveQuery(
     async () => (userId ? db.learning_items.where('user_id').equals(userId).toArray() : []),
     [userId],
-    []
+    [],
+    ['learning_items']
   );
   const learningEvents = useLiveQuery(
     async () => (userId ? db.learning_events.where('user_id').equals(userId).toArray() : []),
     [userId],
-    []
+    [],
+    ['learning_events']
   );
   const currentWeeklyReview = useLiveQuery(
     async () => {
@@ -1912,7 +1945,8 @@ export default function Pyq() {
       );
     },
     [timeZone, userId],
-    null
+    null,
+    ['weekly_reviews']
   );
   const pyqEvidenceInsights = useMemo(
     () =>
@@ -2474,12 +2508,10 @@ export default function Pyq() {
     if (journalOpen) window.scrollTo({ top: 0, behavior: 'auto' });
   }, [journalOpen]);
 
-  const liveSeconds = useTimer(submitted ? null : startedAt);
   const practiceDraftElapsedSec =
     !submitted && loadedSession && currentId
       ? Math.floor((getPyqPracticeDraft(loadedSession, currentId)?.elapsed_ms ?? 0) / 1000)
       : 0;
-  const shownSeconds = submitted?.time_spent_sec ?? practiceDraftElapsedSec + liveSeconds;
   const timedExamActive =
     loadedSession?.config.mode === 'exam' &&
     loadedSession.status === 'active' &&
@@ -2757,7 +2789,10 @@ export default function Pyq() {
     if (pausingOpenSession) setSubmitError(null);
     else setStartError(null);
     try {
-      await examWriteQueueRef.current.catch(() => undefined);
+      await Promise.all([
+        examWriteQueueRef.current.catch(() => undefined),
+        practiceWriteQueueRef.current.catch(() => undefined)
+      ]);
       const persistedSession = await db.pyq_sessions.get(session.id);
       const currentSession =
         persistedSession ??
@@ -3673,6 +3708,7 @@ export default function Pyq() {
     submittingRef.current = true;
     setSubmitting(true);
     try {
+      await practiceWriteQueueRef.current.catch(() => undefined);
       const session = pyqSessionId ? await db.pyq_sessions.get(pyqSessionId) : null;
       if (!session) {
         setSubmitError('The active set could not be found. Return to PYQ setup and resume it.');
@@ -3806,6 +3842,7 @@ export default function Pyq() {
 
   async function markSessionComplete() {
     if (!pyqSessionId) throw new Error('The active Practice session could not be found.');
+    await practiceWriteQueueRef.current.catch(() => undefined);
     const session = await db.pyq_sessions.get(pyqSessionId);
     if (!session) throw new Error('The active Practice session could not be found.');
     if (session.status === 'completed') return;
@@ -3853,11 +3890,10 @@ export default function Pyq() {
       document.getElementById(`practice-question-${index}`)?.scrollIntoView?.({ block: 'start' });
       return;
     }
-    submittingRef.current = true;
-    setSubmitting(true);
     setSubmitError(null);
     try {
-      const session = pyqSessionId ? await db.pyq_sessions.get(pyqSessionId) : null;
+      const session =
+        loadedSessionRef.current ?? (pyqSessionId ? await db.pyq_sessions.get(pyqSessionId) : null);
       if (!session || !current) throw new Error('The active practice set could not be found.');
       const nowMs = Date.now();
       const outgoing = !submitted
@@ -3905,47 +3941,60 @@ export default function Pyq() {
           }
         };
       }
-      await writeLocal('pyq_sessions', next);
       loadedSessionRef.current = next;
       setLoadedSession(next);
       questionStartRef.current = { questionUid: questions[nextIndex].id, startedAtMs: nowMs };
       setIndex(nextIndex);
+
+      const queued = practiceWriteQueueRef.current
+        .catch(() => undefined)
+        .then(() => writeLocal('pyq_sessions', next));
+      practiceWriteQueueRef.current = queued;
+      void queued.catch((error: unknown) => {
+        setSubmitError(
+          error instanceof Error
+            ? `Practice draft was not saved: ${error.message}`
+            : 'Practice draft was not saved. Try the action again.'
+        );
+      });
     } catch (error) {
       setSubmitError(
         error instanceof Error
           ? `Could not change questions: ${error.message}`
           : 'Could not change questions. Your draft is still here.'
       );
-    } finally {
-      submittingRef.current = false;
-      setSubmitting(false);
     }
   }
 
   async function changePracticeView(practiceView: 'single' | 'multiple') {
     if (!pyqSessionId || loading || submittingRef.current || pausingSessionRef.current) return;
-    submittingRef.current = true;
-    setSubmitting(true);
     try {
-      const session = await db.pyq_sessions.get(pyqSessionId);
+      const session =
+        loadedSessionRef.current ?? (await db.pyq_sessions.get(pyqSessionId));
       if (!session) throw new Error('The active practice set could not be found.');
       const next = {
         ...session,
         config: { ...session.config, practiceView },
         updated_at: new Date().toISOString()
       };
-      await writeLocal('pyq_sessions', next);
       loadedSessionRef.current = next;
       setLoadedSession(next);
       setConfig((currentConfig) => ({ ...currentConfig, practiceView }));
       setSubmitError(null);
+
+      const queued = practiceWriteQueueRef.current
+        .catch(() => undefined)
+        .then(() => writeLocal('pyq_sessions', next));
+      practiceWriteQueueRef.current = queued;
+      void queued.catch((error: unknown) => {
+        setSubmitError(
+          error instanceof Error ? error.message : 'Could not save the practice view. Try again.'
+        );
+      });
     } catch (error) {
       setSubmitError(
         error instanceof Error ? error.message : 'Could not save the practice view. Try again.'
       );
-    } finally {
-      submittingRef.current = false;
-      setSubmitting(false);
     }
   }
 
@@ -4656,15 +4705,11 @@ export default function Pyq() {
           <span className="u-num text-[12px] text-text-muted">
             Q {index + 1}/{questions.length}
           </span>
-          <span
-            role="timer"
-            aria-label={`${secondsToClock(shownSeconds)} active time on this question`}
-            aria-atomic="true"
-            className="inline-flex items-center gap-1 font-mono text-[12px] text-text-faint"
-          >
-            <Clock3 size={13} />
-            {secondsToClock(shownSeconds)}
-          </span>
+          <PracticeTimerBadge
+            startedAt={startedAt}
+            submittedSec={submitted?.time_spent_sec}
+            draftElapsedSec={practiceDraftElapsedSec}
+          />
           <CalculatorTrigger onClick={() => setCalcOpen((v) => !v)} active={calcOpen} />
         </div>
       </div>

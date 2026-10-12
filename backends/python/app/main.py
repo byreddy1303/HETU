@@ -18,6 +18,7 @@ from app.api.router import api_router, root_router
 from app.api.routes.clerk_proxy import router as clerk_proxy_router
 from app.core.config import get_settings
 from app.core.logging import configure_logging
+from app.core.timing import server_timing_header, start_request_timing
 from app.db.session import close_database
 from app.mcp_server import create_mcp_server
 from app.services.realtime import broker
@@ -113,6 +114,7 @@ async def request_context(request: Request, call_next):
     structlog.contextvars.clear_contextvars()
     structlog.contextvars.bind_contextvars(request_id=request_id)
     start = time.perf_counter()
+    timing = start_request_timing()
 
     content_length = request.headers.get("content-length")
     if content_length:
@@ -134,7 +136,9 @@ async def request_context(request: Request, call_next):
     if rate_limited and not request.url.path.endswith("/webhooks/clerk"):
         forwarded = request.headers.get("x-forwarded-for", "").split(",", 1)[0].strip()
         identifier = forwarded or (request.client.host if request.client else "unknown")
+        rate_started = time.perf_counter()
         rate_result = await check_rate_limit(identifier)
+        timing.rate_limit_ms = (time.perf_counter() - rate_started) * 1000
         if not rate_result.allowed:
             return JSONResponse(
                 status_code=429,
@@ -155,6 +159,7 @@ async def request_context(request: Request, call_next):
     REQUESTS.labels(request.method, path_template, response.status_code).inc()
     DURATION.labels(request.method, path_template).observe(elapsed)
     response.headers["X-Request-ID"] = request_id
+    response.headers["Server-Timing"] = server_timing_header(timing, elapsed * 1000)
     if rate_result:
         response.headers["X-RateLimit-Limit"] = str(rate_result.limit)
         response.headers["X-RateLimit-Remaining"] = str(rate_result.remaining)
@@ -165,6 +170,9 @@ async def request_context(request: Request, call_next):
         path=path_template,
         status=response.status_code,
         duration_ms=round(elapsed * 1000, 2),
+        db_ms=round(timing.db_ms, 2),
+        db_queries=timing.db_queries,
+        rate_limit_ms=round(timing.rate_limit_ms, 2),
     )
     return response
 
@@ -183,6 +191,7 @@ app.add_middleware(
         "X-RateLimit-Limit",
         "X-RateLimit-Remaining",
         "X-RateLimit-Reset",
+        "Server-Timing",
     ],
 )
 

@@ -15,12 +15,23 @@ export type UseLiveQueryResult<T> = T | undefined;
  * re-runs it whenever the in-memory repository bumps its revision (any
  * hydration or completed write). Queries hit RAM only — never the network.
  */
-export function useLiveQuery<T>(querier: () => T | Promise<T>, deps?: readonly unknown[]): T | undefined;
-export function useLiveQuery<T, TDefault>(querier: () => T | Promise<T>, deps: readonly unknown[], defaultResult: TDefault): T | TDefault;
+export function useLiveQuery<T>(
+  querier: () => T | Promise<T>,
+  deps?: readonly unknown[],
+  defaultResult?: undefined,
+  tables?: readonly SyncedTableName[]
+): T | undefined;
+export function useLiveQuery<T, TDefault>(
+  querier: () => T | Promise<T>,
+  deps: readonly unknown[],
+  defaultResult: TDefault,
+  tables?: readonly SyncedTableName[]
+): T | TDefault;
 export function useLiveQuery<T, TDefault = never>(
   querier: () => T | Promise<T>,
   deps: readonly unknown[] = [],
-  defaultResult?: TDefault
+  defaultResult?: TDefault,
+  tables?: readonly SyncedTableName[]
 ): T | TDefault | undefined {
   const [value, setValue] = useState<T | TDefault | undefined>(defaultResult);
 
@@ -52,7 +63,7 @@ export function useLiveQuery<T, TDefault = never>(
     run();
     const unsubscribe = subscribeDb(() => {
       if (!cancelled) run();
-    });
+    }, tables);
     return () => {
       cancelled = true;
       unsubscribe();

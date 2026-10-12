@@ -1,15 +1,15 @@
 {
   "name": "hetu-chatgpt",
-  "version": "0.1.0",
-  "description": "Connect HETU study context and learning workflows through its Python MCP server.",
+  "version": "0.2.0",
+  "description": "Save HETU test screenshot analyses, question practice and sourced learning through its Python MCP server.",
   "author": {
     "name": "HETU"
   },
   "skills": "./skills/",
   "interface": {
     "displayName": "HETU",
-    "shortDescription": "Save and retrieve sourced study learning.",
-    "longDescription": "Connect to a HETU account for learning captures, concept review, durable task briefs, and mapped section records. Additional whole-app actions are still being developed.",
+    "shortDescription": "Save test analyses and practice every question.",
+    "longDescription": "Connect to a HETU account for test screenshot analysis, question logs and repeat practice, sourced learning, formulas, recognition cues, concept review and resumable study workflows. Additional whole-app actions are still being developed.",
     "developerName": "HETU",
     "category": "Productivity",
     "capabilities": [],

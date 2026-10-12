@@ -20,6 +20,7 @@ import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
 import { Textarea } from '@/components/ui/Textarea';
 import { Badge } from '@/components/ui/Badge';
+import SavedTestAnalyses from '@/components/learning/SavedTestAnalyses';
 import { useAuth } from '@/hooks/useAuth';
 import { useUiStore } from '@/stores/ui';
 import { SUBJECTS } from '@/lib/constants';
@@ -543,6 +544,8 @@ export default function Mocks() {
           </CardBody>
         </Card>
       )}
+
+      <SavedTestAnalyses />
 
       {mocks.length > 0 && (
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">

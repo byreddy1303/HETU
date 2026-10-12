@@ -14,6 +14,14 @@ export interface OutcomeSpec {
 
 export const OUTCOMES: OutcomeSpec[] = [
   {
+    code: 'U',
+    key: 'u',
+    label: 'Outcome unknown',
+    hint: 'Question saved for practice; test result has not been confirmed',
+    tone: 'guess',
+    needsReattempt: true
+  },
+  {
     code: 'R',
     key: 'r',
     label: 'Right',

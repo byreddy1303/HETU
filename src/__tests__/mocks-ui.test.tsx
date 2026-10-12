@@ -11,6 +11,11 @@ vi.mock('@/hooks/useAuth', () => ({
   useAuth: () => ({ userId: USER, status: 'signed_in', sandbox: true })
 }));
 
+vi.mock('@/lib/fastapi-client', async (importOriginal) => ({
+  ...await importOriginal<typeof import('@/lib/fastapi-client')>(),
+  apiRequest: vi.fn().mockResolvedValue({ items: [], next_cursor: null, complete: true })
+}));
+
 describe('mock log UI', () => {
   beforeEach(async () => {
     await db.mock_tests.clear();

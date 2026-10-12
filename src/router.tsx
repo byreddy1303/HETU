@@ -16,6 +16,7 @@ const Dashboard = lazyWithRetry(() => import('@/pages/Dashboard'));
 const DoNow = lazyWithRetry(() => import('@/pages/DoNow'));
 const QuickCapture = lazyWithRetry(() => import('@/pages/QuickCapture'));
 const Mocks = lazyWithRetry(() => import('@/pages/Mocks'));
+const TestAnalysis = lazyWithRetry(() => import('@/pages/TestAnalysis'));
 const RevisionPack = lazyWithRetry(() => import('@/pages/RevisionPack'));
 const SessionNew = lazyWithRetry(() => import('@/pages/SessionNew'));
 const SessionActive = lazyWithRetry(() => import('@/pages/SessionActive'));
@@ -78,6 +79,7 @@ export const router = createBrowserRouter([
       { path: 'today', element: <DoNow /> },
       { path: 'capture', element: <QuickCapture /> },
       { path: 'mocks', element: <Mocks /> },
+      { path: 'mocks/analysis/:analysisId', element: <TestAnalysis /> },
       { path: 'revision-pack', element: <RevisionPack /> },
       { path: 'session/new', element: <SessionNew /> },
       { path: 'session/:id/solve', element: <SessionActive /> },

@@ -98,7 +98,7 @@ function eventFromJournal(question: QuestionRow): AttemptEvidenceEvent | null {
     questionUid: null,
     subject: question.subject,
     topic: question.subtopic,
-    occurredAt: question.created_at,
+    occurredAt: question.test_date ?? question.created_at,
     decision,
     outcome: outcomeFor(decision, correct),
     uncertain: decision === 'FIFTY_FIFTY',

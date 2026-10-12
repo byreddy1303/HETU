@@ -12,6 +12,7 @@ dependencies = [
   "httpx==0.28.1",
   "mcp==2.2.0",
   "orjson==3.11.5",
+  "Pillow==12.3.0",
   "prometheus-client==0.26.0",
   "pydantic-settings==2.11.0",
   "python-multipart==0.0.20",

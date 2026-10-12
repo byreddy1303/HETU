@@ -149,7 +149,7 @@ function Row({
           data-label="Date"
           className="u-num w-[86px] whitespace-nowrap px-3 py-2 text-[11px] text-text-faint"
         >
-          {formatDate(q.created_at.slice(0, 10), 'dd MMM yy')}
+          {formatDate(q.test_date ?? q.created_at.slice(0, 10), 'dd MMM yy')}
         </td>
         <td
           data-label="Subject"
@@ -214,7 +214,7 @@ function Row({
             over ? 'text-warn' : 'text-text-faint'
           )}
         >
-          {secondsToClock(q.time_spent_sec)}
+          {q.duration_source === 'unknown' ? 'Unknown' : secondsToClock(q.time_spent_sec)}
         </td>
         <td data-label="Actions" className="w-[88px] px-3 py-2 text-right">
           <span className="inline-flex items-center gap-1">
@@ -457,8 +457,8 @@ export default function Journal() {
     if (f.mark) rows = rows.filter((q) => q.mark_decision === f.mark);
     if (f.source) rows = rows.filter((q) => detectSourceKind(q.source_ref) === f.source);
     if (f.format) rows = rows.filter((q) => detectFormat(q.source_ref) === f.format);
-    if (f.from) rows = rows.filter((q) => q.created_at.slice(0, 10) >= f.from);
-    if (f.to) rows = rows.filter((q) => q.created_at.slice(0, 10) <= f.to);
+    if (f.from) rows = rows.filter((q) => (q.test_date ?? q.created_at.slice(0, 10)) >= f.from);
+    if (f.to) rows = rows.filter((q) => (q.test_date ?? q.created_at.slice(0, 10)) <= f.to);
     if (f.pattern.trim())
       rows = rows.filter((q) => q.pattern_name && fuzzy(f.pattern, q.pattern_name));
     if (f.trigger.trim())

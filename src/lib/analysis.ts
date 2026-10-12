@@ -40,7 +40,7 @@ export interface WeeklyDataSummary {
 
 /** Count of reattempts in an "open" state (not MASTERED). */
 export function mistakeSurfaceOpen(reattempts: ReattemptRow[]): number {
-  return reattempts.filter((r) => r.stage !== 'MASTERED').length;
+  return reattempts.filter((r) => !r.practice_only && r.stage !== 'MASTERED').length;
 }
 
 /**
@@ -55,6 +55,7 @@ export function mistakeSurfaceTrend(
   now: Date = new Date(),
   timeZone = 'Asia/Kolkata'
 ): { current: number; prior: number; delta: number } {
+  reattempts = reattempts.filter((row) => !row.practice_only);
   const current = reattempts.filter((r) => r.stage !== 'MASTERED').length;
   const asOf = calendarDateInTimeZone(subDays(now, 7), timeZone);
   const prior = reattempts.filter((r) => {
@@ -72,6 +73,7 @@ export function mistakeSurfaceMovement(
   now: Date = new Date(),
   timeZone = 'Asia/Kolkata'
 ): { opened: number; mastered: number; net: number } {
+  reattempts = reattempts.filter((row) => !row.practice_only);
   const from = calendarDateInTimeZone(subDays(now, 6), timeZone);
   const opened = reattempts.filter(
     (row) => calendarDateInTimeZone(row.created_at, timeZone) >= from
@@ -104,6 +106,7 @@ export function mistakeSurfaceSeries(
   timeZone = 'Asia/Kolkata',
   days = 7
 ): MistakeSurfacePoint[] {
+  reattempts = reattempts.filter((row) => !row.practice_only);
   const span = Math.max(1, Math.floor(days));
   const end = calendarDateInTimeZone(now, timeZone);
 
@@ -160,7 +163,7 @@ export function summarizeWeek(
 ): WeeklyDataSummary {
   const weekEnd = addDaysISO(weekStart, 6);
   const inWeek = allQuestions.filter((q) => {
-    const day = calendarDateInTimeZone(q.created_at, timeZone);
+    const day = q.test_date ?? calendarDateInTimeZone(q.created_at, timeZone);
     return day >= weekStart && day <= weekEnd;
   });
   const byOutcome = Object.fromEntries(OUTCOMES.map((o) => [o.code, 0])) as Record<Outcome, number>;
@@ -172,12 +175,12 @@ export function summarizeWeek(
     if (q.root_cause) byRootCause[q.root_cause] = (byRootCause[q.root_cause] ?? 0) + 1;
     const s = subjMap.get(q.subject) ?? { count: 0, wrongish: 0 };
     s.count += 1;
-    if (q.outcome !== 'R') s.wrongish += 1;
+    if (isMistake(q.outcome)) s.wrongish += 1;
     subjMap.set(q.subject, s);
     if (q.pattern_name) {
       const pattern = patternMap.get(q.pattern_name) ?? { wrongish: 0, total: 0 };
       pattern.total += 1;
-      if (q.outcome !== 'R') pattern.wrongish += 1;
+      if (isMistake(q.outcome)) pattern.wrongish += 1;
       patternMap.set(q.pattern_name, pattern);
     }
   }
@@ -366,7 +369,7 @@ export interface HeatmapCell {
 
 /** True for outcomes that count as "mistake surface" — the weakness heatmap only shows these. */
 export function isMistake(outcome: Outcome): boolean {
-  return outcome !== 'R';
+  return outcome !== 'R' && outcome !== 'U';
 }
 
 /**

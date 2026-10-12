@@ -1,7 +1,7 @@
 // Row types mirror supabase/migrations/20260717000001_initial_schema.sql exactly.
 // Nullable Postgres columns are `| null` (Postgres returns null, never undefined).
 
-export type Outcome = 'R' | 'RBS' | 'RBG' | 'W-C' | 'W-E' | 'W-R';
+export type Outcome = 'R' | 'RBS' | 'RBG' | 'W-C' | 'W-E' | 'W-R' | 'U';
 export type RootCause = 'concept' | 'formula' | 'reading' | 'computation' | 'strategy';
 export type MarkDecision = 'MARK' | 'SKIP' | 'FIFTY_FIFTY';
 export type ReattemptStage = 'D3' | 'D10' | 'D30' | 'MASTERED';
@@ -167,6 +167,9 @@ export interface QuestionRow {
   time_spent_sec: number;
   target_time_sec: number;
   outcome: Outcome;
+  test_date?: string;
+  duration_source?: 'reported' | 'unknown';
+  image_question_only?: boolean;
   pattern_name: string | null;
   trigger_sentence: string | null;
   root_cause: RootCause | null;
@@ -204,6 +207,8 @@ export interface ReattemptHistoryEntry {
 }
 
 export interface ReattemptRow {
+  /** Correct or ungraded test questions retained for practice, until a failed retrieval. */
+  practice_only?: boolean;
   id: string;
   user_id: string;
   question_id: string;

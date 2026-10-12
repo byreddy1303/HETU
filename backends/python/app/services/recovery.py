@@ -1475,6 +1475,7 @@ async def record_answer(
                         "scheduled_date": saved_item.data["scheduled_date"]
                         or row.data["scheduled_date"],
                         "history": [*row.data.get("history", []), history],
+                        "practice_only": bool(row.data.get("practice_only")) and correct is True,
                     },
                     row,
                 )

@@ -15,6 +15,7 @@ from app.api.routes import (
     revision_pack,
     section_context,
     study_actions,
+    test_analysis,
     users,
     webhooks,
     workflows,
@@ -35,6 +36,7 @@ api_router.include_router(
 )
 api_router.include_router(section_context.router, prefix="/sections", tags=["sections"])
 api_router.include_router(study_actions.router, prefix="/study-actions", tags=["study-actions"])
+api_router.include_router(test_analysis.router, prefix="/test-analyses", tags=["test-analysis"])
 api_router.include_router(files.router, prefix="/files", tags=["files"])
 api_router.include_router(jobs.router, prefix="/jobs", tags=["jobs"])
 api_router.include_router(realtime.router, tags=["realtime"])

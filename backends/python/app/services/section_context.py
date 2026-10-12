@@ -26,7 +26,7 @@ SECTION_COLLECTIONS: dict[str, tuple[str, ...]] = {
     "sessions": ("sessions", "questions", "doubt_sessions"),
     "quick_capture": ("sessions", "questions", "doubt_sessions"),
     "pyq": ("pyq_sessions", "pyq_attempts"),
-    "mocks": ("mock_tests", "pyq_attempts", "questions"),
+    "mocks": ("mock_tests", "pyq_attempts", "questions", "test_analyses"),
     "journal": ("questions", "learning_items", "learning_events"),
     "patterns": ("patterns", "questions", "reattempts"),
     "recovery": (

@@ -33,6 +33,7 @@ PACK_COLLECTIONS = (
 class PackOptions(StrictModel):
     as_of: date | None = None
     subject: str | None = Field(default=None, min_length=1, max_length=160)
+    test_analysis_id: str | None = Field(default=None, min_length=1, max_length=128)
     limit: int = Field(default=10, ge=1, le=20)
 
 
@@ -81,12 +82,19 @@ async def build_pack(
     today = (options.as_of or datetime.now(zone).date()).isoformat()
     scanned: dict[str, list[Record]] = {}
     scan: dict[str, dict[str, Any]] = {}
+    test = None
+    if options.test_analysis_id:
+        test = await _owned(db, "test_analyses", owner_id, options.test_analysis_id)
+        if test is None:
+            raise HTTPException(404, "Saved test analysis not found")
     for collection in PACK_COLLECTIONS:
         query = select(Record).where(
             Record.owner_id == owner_id,
             Record.collection == collection,
             Record.deleted_at.is_(None),
         )
+        if test is not None:
+            query = query.where(Record.external_id.in_(test.data["artifacts"].get(collection, [])))
         rows = (
             await db.scalars(
                 query.order_by(Record.updated_at.desc(), Record.external_id).limit(SCAN_LIMIT + 1)
@@ -381,6 +389,8 @@ async def build_pack(
         "as_of": today,
         "timezone": timezone,
         "subject": options.subject,
+        "test_analysis_id": options.test_analysis_id,
+        "test_name": test.data["name"] if test is not None else None,
         "limit": options.limit,
         "sections": sections,
         "totals_within_scan": totals,

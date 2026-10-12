@@ -176,7 +176,15 @@ Journal analysis explicitly labels `learner_reported` or
 `assistant_hypothesis`. Formula saves, cues, weekly reflections and syllabus
 coverage do not fabricate exam attempts, successful drills or mastery.
 
+For a completed test analyzed from screenshots, use `save_test_analysis` to
+coordinate every-question Journal logging and repeat practice, sourced saved
+discussions, formulas, cues, recall prompts, a test revision pack and a resumable
+Workflow. Retrieve it using `list_test_analyses` and `get_test_analysis`; the app
+shows **Mocks → Saved test analyses**. Screenshot files are persisted as cropped
+question images with answers kept separate. See
+[the test handoff guide](test-analysis-handoff.md) for retries and later batches.
+
 These actions extend the existing Library, workflows, concept review, PYQ,
 recovery and revision-pack tools. Whole-app operation remains incomplete: timed
-PYQ sets, question-level mock analysis, Buddy sharing, owner administration and
-other domain actions are still tracked in the implementation checklist.
+PYQ sets, Buddy sharing, owner administration and other domain actions are still
+tracked in the implementation checklist.

@@ -58,6 +58,21 @@ function ra(overrides: Partial<ReattemptRow>): ReattemptRow {
 }
 
 describe('mistakeSurfaceOpen', () => {
+  it('keeps correct and ungraded test practice in the queue without inventing mistakes', () => {
+    const now = new Date('2026-07-17T12:00:00Z');
+    const practice = ra({ practice_only: true });
+    expect(dueTodayCount([practice], '2026-07-17')).toBe(1);
+    expect(mistakeSurfaceOpen([practice])).toBe(0);
+    expect(mistakeSurfaceTrend([practice], now)).toEqual({ current: 0, prior: 0, delta: 0 });
+    expect(mistakeSurfaceMovement([practice], now)).toEqual({ opened: 0, mastered: 0, net: 0 });
+    expect(mistakeSurfaceSeries([practice], now).every((day) => day.open === 0)).toBe(true);
+    const unknown = q({ outcome: 'U', created_at: '2026-07-20T09:00:00Z', test_date: '2026-07-17' });
+    expect(heatmapCells([unknown])).toEqual([]);
+    const week = summarizeWeek([unknown], '2026-07-13');
+    expect(week.totalQ).toBe(1);
+    expect(week.wrong).toBe(0);
+  });
+
   it('counts everything not MASTERED', () => {
     const rows = [ra({ stage: 'D3' }), ra({ stage: 'D10' }), ra({ stage: 'MASTERED' })];
     expect(mistakeSurfaceOpen(rows)).toBe(2);

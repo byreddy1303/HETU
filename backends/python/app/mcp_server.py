@@ -24,6 +24,7 @@ from app.core.config import Settings
 from app.db.models import User, UserIdentity
 from app.db.session import get_session_factory
 from app.mcp_study_tools import STUDY_CAPABILITIES, register_study_tools
+from app.mcp_test_tools import TEST_CAPABILITIES, register_test_tools
 from app.mcp_transport import HetuMCPServer
 from app.schemas import RecordQuery
 from app.services import recovery
@@ -213,10 +214,13 @@ def create_mcp_server(settings: Settings) -> MCPServer:
             "Retrieve account evidence before acting; do not invent attempts, mastery, "
             "availability, or historical conversation access. Save useful learning "
             "from available conversation content with source attribution. Connect related "
-            "saved concepts, including useful prerequisite links. Verify writes and "
-            "report unresolved work."
+            "saved concepts, including useful prerequisite links. "
+            "Verify writes and report unresolved work. "
+            "Use save_test_analysis for a completed screenshot-based test: route useful artifacts "
+            "to the existing study sections and return its app handoff link. "
+            "Preserve unknown evidence."
         ),
-        version="0.1.0",
+        version="0.2.0",
         token_verifier=ClerkOAuthVerifier(settings),
         auth=AuthSettings(
             issuer_url=AnyHttpUrl(settings.clerk_oauth_issuer),
@@ -296,12 +300,12 @@ def create_mcp_server(settings: Settings) -> MCPServer:
                 "recovery.capture_attempt",
                 "recovery.schedule_journal_question",
                 *STUDY_CAPABILITIES,
+                *TEST_CAPABILITIES,
             ],
             "unavailable": [
                 "historical ChatGPT transcript access",
                 "whole-app MCP actions",
                 "PYQ set assembly and timed exam sessions",
-                "mock question-level analysis",
                 "Buddy sharing and owner administration",
             ],
         }
@@ -1005,4 +1009,5 @@ def create_mcp_server(settings: Settings) -> MCPServer:
             return await get_saved_pack(db, owner_id=user_id, pack_id=pack_id)
 
     register_study_tools(server, settings, _user_id)
+    register_test_tools(server, settings, _user_id)
     return server

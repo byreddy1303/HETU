@@ -85,7 +85,7 @@ export default function Patterns() {
         lastSeenAt: null
       };
       current.total += 1;
-      if (q.outcome !== 'R') current.notClean += 1;
+      if (q.outcome !== 'R' && q.outcome !== 'U') current.notClean += 1;
       if (!current.lastSeenAt || q.created_at > current.lastSeenAt) {
         current.lastSeenAt = q.created_at;
       }

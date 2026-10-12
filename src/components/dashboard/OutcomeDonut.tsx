@@ -3,6 +3,7 @@ import type { Outcome } from '@/types';
 import { OUTCOMES } from '@/lib/constants';
 
 const COLOR: Record<Outcome, string> = {
+  U: 'rgb(var(--color-text-faint))',
   R: 'rgb(var(--color-success, 79 124 69))',
   RBS: 'rgb(var(--color-warn, 138 91 19))',
   RBG: 'rgb(var(--color-guess, 103 81 143))',

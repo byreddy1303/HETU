@@ -17,6 +17,7 @@ it does not mean production data has been migrated or a ChatGPT account connecte
 - [ ] Complete canonical recovery follow-through and extended pack depth/time-budget options.
 - [ ] Expose tested planning, diagnosis, sessions, PYQ, mock, weekly, syllabus, heatmap, calibration, and readiness workflows.
 - [x] Add shared app/MCP actions for Planner blocks, formulas, recognition cues, Journal analysis, syllabus coverage and weekly reflections.
+- [x] Save coordinated external test analysis, clean question screenshots and every-question re-attempts through shared Python app/MCP actions and a saved-test app page.
 - [x] Expose canonical PYQ search, detail, answer submission, score validation, and app receipt review as a first PYQ slice.
 - [ ] Expose tested Buddy, settings, notifications, exports/imports, recovery, and owner operations.
 - [ ] Verify full migration, backup restore, account isolation, and production credentials before live writes.
@@ -65,7 +66,7 @@ it does not mean production data has been migrated or a ChatGPT account connecte
 | Planner | Shared Python section action and React DayPlan records | Add/edit/split/remove/reorder with revision, capacity, buffer and time checks; cross-day move/reconcile remain | Partial |
 | Sessions and quick capture | Python records and React session pages | Safe start, answer, completion actions | No |
 | PYQ | React bank, scoring, attempts | Python catalog search/detail and canonical individual attempts are implemented; set assembly, exam provenance, recovery linkage remain | Partial |
-| Mocks | React mocks and records | Question-level analysis and follow-through | No |
+| Mocks | Shared Python test-analysis handoff and React saved-test reports | External screenshot analysis, linked study artifacts and every-question recovery; timed test assembly remains | Partial |
 | Journal | Shared Python analysis action and `questions` records | Provenance-labelled annotation preserving outcome/timing; linked PYQ analysis completion; broader diagnosis remains | Partial |
 | Patterns | `patterns` records and React Patterns | Evidence-backed pattern actions | No |
 | Recovery | `learning_items`, events, reattempts | Python response, help, scheduling rules | No |

@@ -61,6 +61,17 @@ window can also test without a previously cached worker.
 These public and browser routing checks do not verify a real user's completed
 ChatGPT grant, save or reconnect. Those still require the final account flow.
 
+### A JSON parsing error on the Clerk consent screen
+
+An error such as “Unexpected non-whitespace character after JSON at position 4”
+can result from Clerk returning plain-text `404 page not found` for a malformed
+consent API path. ChatGPT's CIMD client ID is a URL. Its slashes must remain
+percent-encoded in `/v1/me/oauth/consent/{client_id}`. The Python proxy forwards
+the original ASGI `raw_path` and query bytes instead of rebuilding the path
+from FastAPI's decoded route parameter. This applies to both fetching the
+consent information and submitting the user's decision. Regression tests are
+in `backends/python/tests/test_clerk_proxy_paths.py`.
+
 ## Historical live status — 2026-10-11
 
 The production app uses Clerk and Neon; its migration and independent restore

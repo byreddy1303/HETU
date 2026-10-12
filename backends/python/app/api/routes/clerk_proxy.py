@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from urllib.parse import parse_qs, urlencode
+from urllib.parse import parse_qs, quote, urlencode
 
 import httpx
 from fastapi import APIRouter, HTTPException, Request, Response
@@ -49,7 +49,15 @@ async def proxy_frontend_api(
         .split(",", 1)[0]
         .strip()
     )
-    url = httpx.URL(UPSTREAM).copy_with(path="/" + path, query=request.url.query.encode())
+    # FastAPI decodes route parameters. A CIMD client URL must stay a single
+    # encoded consent-path segment, so forward the original ASGI path bytes.
+    raw_path = request.scope.get("raw_path", b"")
+    if raw_path.startswith(b"/__clerk/"):
+        raw_path = raw_path.removeprefix(b"/__clerk")
+    else:
+        raw_path = ("/" + quote(path, safe="/")).encode()
+    query = request.scope["query_string"]
+    url = httpx.URL(UPSTREAM).copy_with(raw_path=raw_path + (b"?" + query if query else b""))
     body = await request.body()
     if (
         request.method == "POST"
@@ -76,7 +84,7 @@ async def proxy_frontend_api(
         raise HTTPException(502, "Sign-in service is temporarily unavailable") from None
     response = Response(upstream.content, status_code=upstream.status_code)
     response.raw_headers = [
-        (key, value)
+        (key.lower(), value)
         for key, value in upstream.headers.raw
         if key.lower()
         not in {

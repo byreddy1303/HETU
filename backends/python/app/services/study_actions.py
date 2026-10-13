@@ -4,16 +4,17 @@ from __future__ import annotations
 
 from datetime import UTC, date, datetime
 from typing import Annotated, Any, Literal
+from uuid import uuid4
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 from fastapi import HTTPException
 from fastapi.encoders import jsonable_encoder
-from pydantic import Field, model_validator
+from pydantic import Field, field_validator, model_validator
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.models import Record, User
-from app.services.learning_library import StrictModel, fingerprint, stable_id
+from app.services.learning_library import StrictModel, fingerprint, key, stable_id
 from app.services.records import (
     delete_record,
     lock_identity,
@@ -25,7 +26,9 @@ from app.services.records import (
 
 
 class ActionDraft(StrictModel):
-    idempotency_key: str = Field(min_length=8, max_length=160)
+    idempotency_key: str = Field(
+        default_factory=lambda: f"act-{uuid4().hex[:16]}", min_length=8, max_length=160
+    )
     expected_version: int = Field(default=0, ge=0)
 
 
@@ -45,16 +48,112 @@ class TriggerDraft(ActionDraft):
     question_ids: list[str] = Field(default_factory=list, max_length=50)
 
 
-class JournalDraft(ActionDraft):
-    action: Literal["update_journal_analysis"] = "update_journal_analysis"
-    record_id: str = Field(min_length=1, max_length=128)
-    expected_version: int = Field(ge=1)
+class SaveQuestionDraft(ActionDraft):
+    action: Literal["save_question"] = "save_question"
+    record_id: str | None = Field(default=None, min_length=1, max_length=128)
+    subject: str = Field(min_length=1, max_length=160)
+    topic: str | None = Field(default=None, max_length=300)
+    question_text: str | None = Field(default=None, max_length=30000)
+    answer_text: str | None = Field(default=None, max_length=30000)
+    learner_answer: str | None = Field(default=None, max_length=10000)
+    source_ref: str | None = Field(default=None, max_length=500)
+    source_year: int | None = None
+    outcome: Literal[
+        "R", "RBS", "RBG", "W-C", "W-E", "W-R", "U", "W", "S", "L"
+    ] = "W-C"
+    time_spent_sec: int | None = Field(default=None, ge=0, le=86400)
+    target_time_sec: int = Field(default=120, ge=1, le=86400)
+    format: Literal["MCQ", "MSQ", "NAT"] | None = None
     capture_note: str | None = Field(default=None, max_length=10000)
     root_cause: Literal["concept", "formula", "reading", "computation", "strategy"] | None = None
     pattern_name: str | None = Field(default=None, max_length=300)
     trigger_sentence: str | None = Field(default=None, max_length=3000)
-    analysis_provenance: Literal["learner_reported", "assistant_hypothesis"]
+    analysis_provenance: Literal["learner_reported", "assistant_hypothesis"] = "learner_reported"
+    schedule_recovery: bool = True
+
+    @field_validator("outcome", mode="before")
+    @classmethod
+    def normalize_outcome(cls, v: Any) -> Any:
+        if isinstance(v, str):
+            mapping = {
+                "r": "R",
+                "right": "R",
+                "correct": "R",
+                "rbs": "RBS",
+                "rbg": "RBG",
+                "w": "W-C",
+                "wrong": "W-C",
+                "w-c": "W-C",
+                "wc": "W-C",
+                "w-e": "W-E",
+                "we": "W-E",
+                "w-r": "W-R",
+                "wr": "W-R",
+                "u": "U",
+                "unknown": "U",
+                "ungraded": "U",
+                "s": "S",
+                "skip": "S",
+                "skipped": "S",
+                "l": "L",
+                "leave": "L",
+                "left": "L",
+            }
+            return mapping.get(v.lower().strip(), v)
+        return v
+
+    @field_validator("root_cause", mode="before")
+    @classmethod
+    def normalize_root_cause(cls, v: Any) -> Any:
+        if isinstance(v, str):
+            mapping = {
+                "concept": "concept",
+                "concept_error": "concept",
+                "concept error": "concept",
+                "formula": "formula",
+                "formula_error": "formula",
+                "formula error": "formula",
+                "reading": "reading",
+                "reading_mistake": "reading",
+                "reading mistake": "reading",
+                "computation": "computation",
+                "calc_mistake": "computation",
+                "calculation": "computation",
+                "calculation_error": "computation",
+                "strategy": "strategy",
+                "time_management": "strategy",
+            }
+            return mapping.get(v.lower().strip(), v)
+        return v
+
+
+class JournalDraft(ActionDraft):
+    action: Literal["update_journal_analysis"] = "update_journal_analysis"
+    record_id: str = Field(min_length=1, max_length=128)
+    expected_version: int = Field(default=0, ge=0)
+    capture_note: str | None = Field(default=None, max_length=10000)
+    root_cause: Literal["concept", "formula", "reading", "computation", "strategy"] | None = None
+    pattern_name: str | None = Field(default=None, max_length=300)
+    trigger_sentence: str | None = Field(default=None, max_length=3000)
+    analysis_provenance: Literal["learner_reported", "assistant_hypothesis"] = (
+        "assistant_hypothesis"
+    )
     analysis_complete: bool = False
+
+    @field_validator("root_cause", mode="before")
+    @classmethod
+    def normalize_root_cause(cls, v: Any) -> Any:
+        if isinstance(v, str):
+            mapping = {
+                "concept": "concept",
+                "concept_error": "concept",
+                "formula": "formula",
+                "reading": "reading",
+                "computation": "computation",
+                "strategy": "strategy",
+            }
+            return mapping.get(v.lower().strip(), v)
+        return v
 
     @model_validator(mode="after")
     def require_annotation(self) -> JournalDraft:
@@ -106,12 +205,63 @@ class PlannerBlock(StrictModel):
     resource: str | None = Field(default=None, max_length=3000)
     start_at: str | None = Field(default=None, pattern=r"^([01]\d|2[0-3]):[0-5]\d$")
 
+    @field_validator("mode", mode="before")
+    @classmethod
+    def normalize_mode(cls, v: Any) -> Any:
+        if isinstance(v, str):
+            mapping = {
+                "deep study": "Deep Study",
+                "deep_study": "Deep Study",
+                "revision": "Revision",
+                "problem solving": "Problem Solving",
+                "problem_solving": "Problem Solving",
+                "pyq practice": "PYQ Practice",
+                "pyq_practice": "PYQ Practice",
+                "mock test": "Mock Test",
+                "mock_test": "Mock Test",
+                "lecture watch": "Lecture Watch",
+                "lecture_watch": "Lecture Watch",
+                "note making": "Note Making",
+                "note_making": "Note Making",
+                "doubt clearing": "Doubt Clearing",
+                "doubt_clearing": "Doubt Clearing",
+            }
+            return mapping.get(v.lower().strip(), v)
+        return v
+
+    @field_validator("priority", mode="before")
+    @classmethod
+    def normalize_priority(cls, v: Any) -> Any:
+        if isinstance(v, str):
+            mapping = {
+                "p1": "P1 Critical",
+                "critical": "P1 Critical",
+                "p1 critical": "P1 Critical",
+                "p1_critical": "P1 Critical",
+                "p2": "P2 High",
+                "high": "P2 High",
+                "p2 high": "P2 High",
+                "p2_high": "P2 High",
+                "p3": "P3 Medium",
+                "medium": "P3 Medium",
+                "p3 medium": "P3 Medium",
+                "p3_medium": "P3 Medium",
+                "p4": "P4 Low",
+                "low": "P4 Low",
+                "p4 low": "P4 Low",
+                "p4_low": "P4 Low",
+            }
+            return mapping.get(v.lower().strip(), v)
+        return v
+
 
 class PlannerDraft(StrictModel):
     action: Literal["edit_planner_day"] = "edit_planner_day"
-    idempotency_key: str = Field(min_length=8, max_length=160)
+    idempotency_key: str = Field(
+        default_factory=lambda: f"plan-{uuid4().hex[:16]}", min_length=8, max_length=160
+    )
     plan_date: date
-    expected_revision: int = Field(ge=0)
+    expected_revision: int | None = Field(default=None, ge=0)
     add_blocks: list[PlannerBlock] = Field(default_factory=list, max_length=30)
     edit_blocks: list[PlannerBlock] = Field(default_factory=list, max_length=30)
     remove_block_ids: list[str] = Field(default_factory=list, max_length=30)
@@ -139,13 +289,20 @@ class PlannerDraft(StrictModel):
 
 
 StudyAction = Annotated[
-    FormulaDraft | TriggerDraft | JournalDraft | SyllabusDraft | WeeklyDraft | PlannerDraft,
+    FormulaDraft
+    | TriggerDraft
+    | SaveQuestionDraft
+    | JournalDraft
+    | SyllabusDraft
+    | WeeklyDraft
+    | PlannerDraft,
     Field(discriminator="action"),
 ]
 
 ACTION_COLLECTIONS = {
     "save_formula": "formulas",
     "save_recognition_cue": "trigger_phrases",
+    "save_question": "questions",
     "update_journal_analysis": "questions",
     "set_syllabus_progress": "topic_progress",
     "save_weekly_review": "weekly_reviews",
@@ -154,6 +311,7 @@ ACTION_COLLECTIONS = {
 ACTION_ROUTES = {
     "save_formula": "/formulas",
     "save_recognition_cue": "/trigger-drill",
+    "save_question": "/journal",
     "update_journal_analysis": "/journal",
     "set_syllabus_progress": "/syllabus",
     "save_weekly_review": "/weekly-review",
@@ -247,7 +405,7 @@ async def execute_action(
 ) -> dict[str, Any]:
     """Commit is the caller's responsibility; action and receipt share one transaction."""
     # Recovery takes its owner lock before record locks throughout its domain.
-    if isinstance(draft, JournalDraft):
+    if isinstance(draft, (JournalDraft, SaveQuestionDraft)):
         from app.services.recovery import owner_lock
 
         await owner_lock(db, owner_id)
@@ -316,6 +474,108 @@ async def execute_action(
             },
             {"reflex_time_ms": None, "question_ids": []},
         )
+    elif isinstance(draft, SaveQuestionDraft):
+        record_id = draft.record_id or stable_id(
+            "journal-question", f"{owner_id}:{draft.idempotency_key}"
+        )
+        await lock_identity(db, collection, owner_id, record_id)
+        existing = await _owned(db, owner_id, collection, record_id)
+        expected = (
+            draft.expected_version
+            if draft.expected_version is not None and draft.expected_version > 0
+            else (existing.version if existing else 0)
+        )
+        data = {
+            "id": record_id,
+            "user_id": owner_id,
+            "session_id": None,
+            "subject": draft.subject,
+            "subtopic": draft.topic,
+            "source_year": draft.source_year,
+            "source_ref": draft.source_ref or f"Manual Log · {draft.subject}",
+            "question_text": draft.question_text,
+            "answer_text": draft.answer_text,
+            "learner_answer": draft.learner_answer,
+            "outcome": draft.outcome,
+            "time_spent_sec": draft.time_spent_sec or 0,
+            "target_time_sec": draft.target_time_sec,
+            "duration_source": "reported" if draft.time_spent_sec is not None else "unknown",
+            "format": draft.format,
+            "capture_note": draft.capture_note,
+            "root_cause": draft.root_cause,
+            "pattern_name": draft.pattern_name,
+            "trigger_sentence": draft.trigger_sentence,
+            "analysis_provenance": draft.analysis_provenance,
+            "mark_decision": None,
+            "mark_correct": None,
+            "created_at": now,
+            **metadata,
+        }
+        if existing is not None:
+            merged = {
+                **existing.data,
+                **{k: v for k, v in data.items() if v is not None or k in draft.model_fields_set},
+            }
+            merged["updated_at"] = now
+            row = await _save(db, owner_id, collection, record_id, expected, merged)
+        else:
+            row = await _save(
+                db,
+                owner_id,
+                collection,
+                record_id,
+                expected,
+                data,
+                {
+                    "outcome": "W-C",
+                    "time_spent_sec": 0,
+                    "target_time_sec": 120,
+                    "image_url": None,
+                    "image_question_only": False,
+                },
+            )
+        extra["recovery_scheduled"] = False
+        if draft.schedule_recovery and draft.outcome not in {"R"}:
+            try:
+                from app.services import recovery
+
+                await recovery.schedule_question(db, owner_id=owner_id, question_id=record_id)
+                extra["recovery_scheduled"] = True
+            except Exception:
+                pass
+        if draft.pattern_name:
+            pattern_rows = list(
+                await db.scalars(
+                    select(Record).where(
+                        Record.owner_id == owner_id,
+                        Record.collection == "patterns",
+                        Record.deleted_at.is_(None),
+                        Record.data["subject"].as_string() == draft.subject,
+                        Record.data["name"].as_string() == draft.pattern_name,
+                    )
+                )
+            )
+            if not pattern_rows:
+                pattern_id = stable_id(
+                    "pattern", fingerprint([key(draft.subject), key(draft.pattern_name)])
+                )
+                await _save(
+                    db,
+                    owner_id,
+                    "patterns",
+                    pattern_id,
+                    0,
+                    {
+                        "id": pattern_id,
+                        "name": draft.pattern_name,
+                        "subject": draft.subject,
+                        "count": 1,
+                        "is_reflexed": False,
+                        "mastery_level": 0,
+                        "first_seen_at": now,
+                    },
+                )
+            extra["pattern_name"] = draft.pattern_name
     elif isinstance(draft, JournalDraft):
         patch = draft.model_dump(
             exclude_unset=True,
@@ -330,13 +590,24 @@ async def execute_action(
         await lock_identity(db, collection, owner_id, draft.record_id)
         existing = await _owned(db, owner_id, collection, draft.record_id)
         if existing is None or existing.deleted_at is not None:
-            raise HTTPException(404, "Journal question is unavailable")
+            raise HTTPException(
+                404,
+                (
+                    f"Journal question '{draft.record_id}' not found. "
+                    "To create a new question, use the save_question tool."
+                ),
+            )
+        expected = (
+            draft.expected_version
+            if draft.expected_version is not None and draft.expected_version > 0
+            else existing.version
+        )
         row = await _save(
             db,
             owner_id,
             collection,
             draft.record_id,
-            draft.expected_version,
+            expected,
             {**patch, "analysis_updated_at": now},
         )
         attempt_id = row.data.get("source_pyq_attempt_id")
@@ -470,7 +741,7 @@ async def _planner_action(
     await lock_identity(db, "planner_day_plans", owner, plan_date)
     row = await _owned(db, owner, "planner_day_plans", plan_date)
     revision = int(row.data.get("revision", row.version)) if row else 0
-    if revision != draft.expected_revision:
+    if draft.expected_revision is not None and revision != draft.expected_revision:
         raise HTTPException(
             409, {"message": "Planner revision conflict", "current_revision": revision}
         )
@@ -523,6 +794,10 @@ async def _planner_action(
         blocks = {s["id"]: s for s in sessions}
         sessions = [blocks[i] for i in draft.ordered_block_ids]
 
+    if any(type(s.get("durationMin")) is not int or s["durationMin"] < 1 for s in sessions):
+        raise HTTPException(422, "Stored planner durations need correction")
+    planned = sum(s["durationMin"] for s in sessions)
+
     availability = dict(plan.get("availability") or {})
     available = (
         draft.available_min if draft.available_min is not None else availability.get("availableMin")
@@ -540,9 +815,6 @@ async def _planner_action(
         raise HTTPException(
             422, "Supply known available_min and protected_buffer_min before planning"
         )
-    if any(type(s.get("durationMin")) is not int or s["durationMin"] < 1 for s in sessions):
-        raise HTTPException(422, "Stored planner durations need correction")
-    planned = sum(s["durationMin"] for s in sessions)
     if planned > available - buffer:
         raise HTTPException(
             409,

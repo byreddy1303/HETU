@@ -101,6 +101,15 @@ async def test_focused_actions_through_authenticated_mcp_and_existing_app_record
             "protected_buffer_min": 15,
             "add_blocks": [{"subject": "OS", "duration_min": 30, "target": "Recall paging"}],
         },
+        "save_question": {
+            "subject": "Algorithms",
+            "topic": "Graph Algorithms",
+            "question_text": "Dijkstra negative edges",
+            "answer_text": "Fails on negative weight cycles",
+            "outcome": "W-C",
+            "root_cause": "concept",
+            "pattern_name": "Greedy trap",
+        },
     }
     try:
         async with server.session_manager.run():
@@ -159,6 +168,7 @@ async def test_focused_actions_through_authenticated_mcp_and_existing_app_record
                             section={
                                 "save_formula": "formulas",
                                 "save_recognition_cue": "trigger_drill",
+                                "save_question": "journal",
                                 "update_journal_analysis": "journal",
                                 "set_syllabus_progress": "syllabus",
                                 "save_weekly_review": "weekly_review",
@@ -170,6 +180,67 @@ async def test_focused_actions_through_authenticated_mcp_and_existing_app_record
                 capabilities = (await call("get_capabilities"))["structuredContent"]["supported"]
                 assert "planner.capacity_validation" in capabilities
                 assert "journal.update_analysis" in capabilities
+                assert "journal.save_question" in capabilities
+                assert "journal.get_question" in capabilities
+                assert "planner.get_day" in capabilities
+
+                # Test get_planner_day on existing day
+                day_info = await call(
+                    "get_planner_day", {"plan_date": "2026-10-12"}, token="oat_read"
+                )
+                assert not day_info.get("isError")
+                assert day_info["structuredContent"]["exists"] is True
+                assert day_info["structuredContent"]["revision"] == 1
+                assert day_info["structuredContent"]["planned_min"] == 30
+
+                # Test get_planner_day on non-existing day
+                empty_day = await call(
+                    "get_planner_day", {"plan_date": "2026-10-13"}, token="oat_read"
+                )
+                assert not empty_day.get("isError")
+                assert empty_day["structuredContent"]["exists"] is False
+                assert empty_day["structuredContent"]["revision"] == 0
+
+                # Test edit_planner_day with FLAT arguments, omitted keys, and case normalization
+                flat_plan = await call(
+                    "edit_planner_day",
+                    {
+                        "plan_date": "2026-10-13",
+                        "add_blocks": [
+                            {
+                                "subject": "Algorithms",
+                                "duration_min": 45,
+                                "target": "Bellman Ford",
+                                "mode": "problem_solving",
+                                "priority": "p1_critical",
+                            }
+                        ],
+                    },
+                )
+                assert not flat_plan.get("isError"), flat_plan
+                assert flat_plan["structuredContent"]["planned_min"] == 45
+
+                # Test save_question with FLAT arguments and shorthand outcome
+                flat_q = await call(
+                    "save_question",
+                    {
+                        "subject": "OS",
+                        "topic": "Deadlocks",
+                        "question_text": "Banker algorithm safe state",
+                        "outcome": "wrong",
+                        "root_cause": "concept_error",
+                    },
+                )
+                assert not flat_q.get("isError"), flat_q
+                saved_q_id = flat_q["structuredContent"]["record"]["id"]
+
+                # Test get_journal_question
+                read_q = await call(
+                    "get_journal_question", {"question_id": saved_q_id}, token="oat_read"
+                )
+                assert not read_q.get("isError")
+                assert read_q["structuredContent"]["question"]["id"] == saved_q_id
+                assert read_q["structuredContent"]["question"]["outcome"] == "W-C"
                 stale = await call(
                     "edit_planner_day",
                     {"draft": {**drafts["edit_planner_day"], "idempotency_key": "stale-planner"}},

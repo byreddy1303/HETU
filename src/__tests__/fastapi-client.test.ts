@@ -181,3 +181,137 @@ describe('bounded API requests', () => {
     expect(fetchMock).not.toHaveBeenCalled();
   });
 });
+
+describe('rate-limit recovery', () => {
+  function limited(seconds = '2', scope = 'interactive') {
+    return Response.json({ detail: 'Rate limit exceeded' }, { status: 429,
+      headers: { 'Retry-After': seconds, 'X-RateLimit-Scope': scope } });
+  }
+
+  it('waits for the reset and retries a protected read once, with a fresh token', async () => {
+    vi.useFakeTimers();
+    fetchMock.mockResolvedValueOnce(limited()).mockResolvedValueOnce(Response.json([{ id: 'workflow' }]));
+    const pending = api.apiRequest('/v1/workflows');
+    await vi.advanceTimersByTimeAsync(1);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    token.mockResolvedValue('refreshed-token');
+    await vi.advanceTimersByTimeAsync(1999);
+    expect(await pending).toEqual([{ id: 'workflow' }]);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(fetchMock.mock.lastCall![1].headers.get('Authorization')).toBe('Bearer refreshed-token');
+  });
+
+  it('shares the background cooldown without delaying a workflow read', async () => {
+    vi.useFakeTimers();
+    fetchMock.mockResolvedValueOnce(limited('2', 'background'));
+    const history = api.fastapiClient.from('pyq_attempts').select();
+    const pendingHistory = Promise.resolve(history);
+    await vi.advanceTimersByTimeAsync(1);
+    const pendingQuestions = Promise.resolve(api.fastapiClient.from('questions').select());
+    fetchMock.mockResolvedValue(Response.json({ data: [] }));
+    await api.apiRequest('/v1/workflows');
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(fetchMock.mock.lastCall![0]).toBe('/api/v1/workflows');
+    await vi.advanceTimersByTimeAsync(1999);
+    expect((await pendingHistory).error).toBeNull();
+    expect((await pendingQuestions).error).toBeNull();
+    expect(fetchMock).toHaveBeenCalledTimes(4);
+  });
+
+  it('allows a server cooldown longer than the network timeout while keeping each fetch bounded', async () => {
+    vi.useFakeTimers();
+    fetchMock.mockResolvedValueOnce(limited('45')).mockResolvedValueOnce(Response.json([]));
+    const pending = api.apiRequest('/v1/concept-reviews');
+    await vi.advanceTimersByTimeAsync(44_999);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    await vi.advanceTimersByTimeAsync(1);
+    expect(await pending).toEqual([]);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
+  it('rechecks a shared cooldown extended by another in-flight read before retrying', async () => {
+    vi.useFakeTimers();
+    let finishSecond!: (response: Response) => void;
+    fetchMock.mockResolvedValueOnce(limited('2'))
+      .mockReturnValueOnce(new Promise<Response>((resolve) => { finishSecond = resolve; }))
+      .mockResolvedValue(Response.json([]));
+    const first = api.apiRequest('/v1/workflows');
+    const second = api.apiRequest('/v1/concept-reviews');
+    await vi.advanceTimersByTimeAsync(1000);
+    finishSecond(limited('3'));
+    await vi.advanceTimersByTimeAsync(1000);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    await vi.advanceTimersByTimeAsync(2000);
+    expect(await first).toEqual([]);
+    expect(await second).toEqual([]);
+    expect(fetchMock).toHaveBeenCalledTimes(4);
+  });
+
+  it('bounds repeated throttling and preserves retry metadata', async () => {
+    vi.useFakeTimers();
+    fetchMock.mockResolvedValue(limited());
+    const pending = api.fastapiClient.from('sessions').select();
+    const result = Promise.resolve(pending);
+    await vi.advanceTimersByTimeAsync(2000);
+    expect(await result).toMatchObject({ data: null, error: { status: 429, code: 'RATE_LIMITED',
+      retryAfterMs: 2000, rateLimitScope: 'interactive' } });
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
+  it.each(['POST', 'PATCH', 'PUT', 'DELETE'])('never replays a %s write after throttling', async (method) => {
+    vi.useFakeTimers();
+    fetchMock.mockResolvedValue(limited());
+    await expect(api.apiRequest('/v1/workflows/one', { method, body: '{}' }))
+      .rejects.toMatchObject({ status: 429, retryAfterMs: 2000 });
+    await vi.advanceTimersByTimeAsync(2000);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not retry public reads or wait beyond a minute', async () => {
+    fetchMock.mockResolvedValue(limited('120'));
+    await expect(api.apiRequest('/v1/workflows')).rejects.toMatchObject({ retryAfterMs: 120000 });
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    fetchMock.mockResolvedValue(limited());
+    await expect(api.apiRequest('/v1/public', {}, { public: true })).rejects.toMatchObject({ status: 429 });
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
+  it('cancels a delayed read on route abort without fetching again', async () => {
+    vi.useFakeTimers();
+    fetchMock.mockResolvedValue(limited());
+    const controller = new AbortController();
+    const pending = api.apiRequest('/v1/concept-reviews', { signal: controller.signal });
+    const rejected = expect(pending).rejects.toMatchObject({ name: 'AbortError' });
+    await vi.advanceTimersByTimeAsync(1);
+    controller.abort();
+    await rejected;
+    await vi.advanceTimersByTimeAsync(2000);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('cancels the old account cooldown and never retries its request for a new account', async () => {
+    vi.useFakeTimers();
+    fetchMock.mockResolvedValueOnce(limited()).mockResolvedValue(Response.json([]));
+    const pending = api.apiRequest('/v1/workflows');
+    const rejected = expect(pending).rejects.toThrow('Authentication changed');
+    await vi.advanceTimersByTimeAsync(1);
+    api.configureClerkRuntime({ loaded: true, user: { id: 'user_b' }, getToken: token, signOut: async () => {} });
+    await rejected;
+    await api.apiRequest('/v1/workflows');
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    await vi.advanceTimersByTimeAsync(2000);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
+  it('uses the reset timestamp when Retry-After is absent', async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-10-13T02:30:00Z'));
+    fetchMock.mockResolvedValueOnce(Response.json({ detail: 'Rate limit exceeded' }, { status: 429,
+      headers: { 'X-RateLimit-Reset': String(Date.now() / 1000 + 2) } }))
+      .mockResolvedValueOnce(Response.json([]));
+    const pending = api.apiRequest('/v1/workflows');
+    await vi.advanceTimersByTimeAsync(2000);
+    expect(await pending).toEqual([]);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+});

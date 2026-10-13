@@ -11,7 +11,7 @@ beforeEach(async () => {
   api = await import('@/lib/fastapi-client');
   api.configureClerkRuntime({ loaded: true, user: { id: 'user_a' }, getToken: async () => 'token', signOut: async () => {} });
 });
-afterEach(() => { api.resetClerkRuntime(); vi.unstubAllGlobals(); vi.unstubAllEnvs(); });
+afterEach(() => { vi.useRealTimers(); api.resetClerkRuntime(); vi.unstubAllGlobals(); vi.unstubAllEnvs(); });
 
 describe('existing data facade through the FastAPI boundary', () => {
   it('hydrates, writes through, and preserves cached data when the server refuses writes or reads', async () => {
@@ -44,6 +44,26 @@ describe('existing data facade through the FastAPI boundary', () => {
       .mockResolvedValueOnce(Response.json({ detail: 'offline' }, { status: 503 }));
     await expect(hydrateTables('user_a', ['questions'])).rejects.toThrow('offline');
     expect(await table('questions').count()).toBe(11);
+  });
+
+  it('resumes a throttled history page without losing earlier pages or blocking workflow reads', async () => {
+    vi.useFakeTimers();
+    const { hydrateTables, table } = await import('@/lib/db');
+    const first = Array.from({ length: 10 }, (_, n) => ({ id: `a${n}`, user_id: 'user_a' }));
+    fetchMock.mockResolvedValueOnce(Response.json({ data: first }))
+      .mockResolvedValueOnce(Response.json({ detail: 'Rate limit exceeded' }, { status: 429,
+        headers: { 'Retry-After': '2', 'X-RateLimit-Scope': 'background' } }))
+      .mockResolvedValueOnce(Response.json([{ id: 'workflow' }]))
+      .mockResolvedValueOnce(Response.json({ data: [{ id: 'a10', user_id: 'user_a' }] }));
+    const loading = hydrateTables('user_a', ['pyq_attempts']);
+    await vi.advanceTimersByTimeAsync(1);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(await api.apiRequest('/v1/workflows')).toEqual([{ id: 'workflow' }]);
+    await vi.advanceTimersByTimeAsync(1999);
+    await loading;
+    expect(await table('pyq_attempts').count()).toBe(11);
+    expect(fetchMock.mock.calls.filter(([path]) => path.includes('pyq_attempts'))
+      .map((call) => JSON.parse(call[1].body).offset)).toEqual([0, 10, 10]);
   });
 
   it('never forwards Clerk tokens or PIN credentials to Supabase edge endpoints', async () => {

@@ -21,6 +21,7 @@ from app.core.logging import configure_logging
 from app.core.timing import server_timing_header, start_request_timing
 from app.db.session import close_database
 from app.mcp_server import create_mcp_server
+from app.services.rate_limit import request_rate_limit_bucket
 from app.services.realtime import broker
 from app.services.redis import check_rate_limit, close_redis
 
@@ -128,18 +129,29 @@ async def request_context(request: Request, call_next):
             )
 
     rate_result = None
+    rate_scope = None
     # CORS negotiation does not read or mutate application data. Counting it
     # doubles the budget spent by Android and clients using the direct API URL.
     rate_limited = request.method != "OPTIONS" and request.url.path.startswith(
         (settings.api_prefix, "/mcp")
     )
     if rate_limited and not request.url.path.endswith("/webhooks/clerk"):
-        forwarded = request.headers.get("x-forwarded-for", "").split(",", 1)[0].strip()
-        identifier = forwarded or (request.client.host if request.client else "unknown")
         rate_started = time.perf_counter()
-        rate_result = await check_rate_limit(identifier)
+        bucket = await request_rate_limit_bucket(request, settings)
+        rate_scope = bucket.scope
+        rate_result = await check_rate_limit(bucket.identifier)
         timing.rate_limit_ms = (time.perf_counter() - rate_started) * 1000
         if not rate_result.allowed:
+            # Keep identifiers, tokens and URLs containing record IDs out of logs.
+            log.warning(
+                "request_rate_limited",
+                request_id=request_id,
+                method=request.method,
+                scope=rate_scope,
+                status=429,
+                limit=rate_result.limit,
+                reset_epoch=rate_result.reset_epoch,
+            )
             return JSONResponse(
                 status_code=429,
                 content={"detail": "Rate limit exceeded"},
@@ -148,6 +160,7 @@ async def request_context(request: Request, call_next):
                     "X-RateLimit-Limit": str(rate_result.limit),
                     "X-RateLimit-Remaining": str(rate_result.remaining),
                     "X-RateLimit-Reset": str(rate_result.reset_epoch),
+                    "X-RateLimit-Scope": rate_scope,
                     "X-Request-ID": request_id,
                 },
             )
@@ -164,6 +177,7 @@ async def request_context(request: Request, call_next):
         response.headers["X-RateLimit-Limit"] = str(rate_result.limit)
         response.headers["X-RateLimit-Remaining"] = str(rate_result.remaining)
         response.headers["X-RateLimit-Reset"] = str(rate_result.reset_epoch)
+        response.headers["X-RateLimit-Scope"] = rate_scope
     log.info(
         "request_complete",
         method=request.method,
@@ -191,6 +205,7 @@ app.add_middleware(
         "X-RateLimit-Limit",
         "X-RateLimit-Remaining",
         "X-RateLimit-Reset",
+        "X-RateLimit-Scope",
         "Server-Timing",
     ],
 )

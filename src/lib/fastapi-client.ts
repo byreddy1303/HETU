@@ -13,7 +13,13 @@ export interface ApiSession {
   refresh_token: string;
   user: ApiUser;
 }
-export interface ApiError { message: string; code?: string; status?: number }
+export interface ApiError {
+  message: string;
+  code?: string;
+  status?: number;
+  retryAfterMs?: number;
+  rateLimitScope?: string;
+}
 type AuthEvent = 'INITIAL_SESSION' | 'SIGNED_IN' | 'SIGNED_OUT' | 'TOKEN_REFRESHED' | 'PASSWORD_RECOVERY';
 type AuthListener = (event: AuthEvent, session: ApiSession | null) => void;
 export interface ClerkRuntime {
@@ -28,6 +34,13 @@ let generation = 0;
 let session: ApiSession | null = null;
 const listeners = new Set<AuthListener>();
 const readyWaiters = new Set<() => void>();
+const rateLimitResets = new Map<string, number>();
+const retryCancellations = new Set<() => void>();
+
+function resetRateLimitState(): void {
+  rateLimitResets.clear();
+  for (const cancel of retryCancellations) cancel();
+}
 
 export function configureClerkRuntime(next: ClerkRuntime): () => void {
   const previousId = runtime?.user?.id;
@@ -36,6 +49,7 @@ export function configureClerkRuntime(next: ClerkRuntime): () => void {
   const current = userChanged ? ++generation : generation;
   if (userChanged) {
     session = null;
+    resetRateLimitState();
     realtime.reset();
   }
   if (next.loaded) {
@@ -54,10 +68,54 @@ export function resetClerkRuntime(): void {
   runtime = null;
   session = null;
   generation++;
+  resetRateLimitState();
   realtime.reset();
 }
 
 export const API_REQUEST_TIMEOUT_MS = 30_000;
+export const API_RATE_LIMIT_MAX_WAIT_MS = 60_000;
+
+function backgroundRead(path: string, init: RequestInit): boolean {
+  return init.method?.toUpperCase() === 'POST' &&
+    /^\/v1\/compat\/tables\/[^/?]+\/query$/.test(path);
+}
+
+function safeRead(path: string, init: RequestInit): boolean {
+  return ['GET', 'HEAD'].includes((init.method ?? 'GET').toUpperCase()) || backgroundRead(path, init);
+}
+
+function retryAfterMs(response: Response): number | undefined {
+  const retry = response.headers.get('Retry-After');
+  if (retry !== null && retry.trim()) {
+    const seconds = Number(retry);
+    const delay = Number.isFinite(seconds) ? seconds * 1000 : Date.parse(retry) - Date.now();
+    if (Number.isFinite(delay) && delay >= 0) return Math.max(delay, 250);
+  }
+  const reset = response.headers.get('X-RateLimit-Reset');
+  if (reset !== null && reset.trim()) {
+    const delay = Number(reset) * 1000 - Date.now();
+    if (Number.isFinite(delay) && delay >= 0) return Math.max(delay, 250);
+  }
+  return undefined;
+}
+
+function waitForRateLimit(ms: number, signal: AbortSignal | null | undefined): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const finish = (error?: unknown) => {
+      clearTimeout(timer);
+      signal?.removeEventListener('abort', abort);
+      retryCancellations.delete(cancel);
+      if (error) reject(error);
+      else resolve();
+    };
+    const abort = () => finish(signal?.reason ?? new DOMException('Request cancelled.', 'AbortError'));
+    const cancel = () => finish(new Error('Authentication changed. Retry the request.'));
+    const timer = setTimeout(() => finish(), ms);
+    retryCancellations.add(cancel);
+    signal?.addEventListener('abort', abort, { once: true });
+    if (signal?.aborted) abort();
+  });
+}
 
 function abortable<T>(promise: Promise<T>, signal: AbortSignal): Promise<T> {
   if (signal.aborted) return Promise.reject(signal.reason);
@@ -114,34 +172,84 @@ async function refreshSession(requestSignal?: AbortSignal): Promise<ApiSession |
 export async function apiRequest<T>(path: string, init: RequestInit = {}, options: { public?: boolean } = {}): Promise<T> {
   if (backendConfig.error || !backendConfig.fastapi) throw new Error(backendConfig.error || 'FastAPI is not selected.');
   if (!path.startsWith('/v1/')) throw new Error('Invalid API path.');
-  return withDeadline(async (signal) => {
-    const headers = new Headers(init.headers);
-    if (init.body && !headers.has('Content-Type')) headers.set('Content-Type', 'application/json');
-    const current = generation;
-    if (!options.public) {
-      const token = (await refreshSession(signal))?.access_token;
-      if (!token) throw new Error('Sign in first.');
-      headers.set('Authorization', `Bearer ${token}`);
+  const read = !options.public && safeRead(path, init);
+  const scope = backgroundRead(path, init) ? 'background' : 'interactive';
+  let retryGeneration: number | undefined;
+  let waitedMs = 0;
+  for (let attempt = 0; ; attempt++) {
+    while (read) {
+      const delay = (rateLimitResets.get(scope) ?? 0) - Date.now();
+      if (delay <= 0) break;
+      if (delay > API_RATE_LIMIT_MAX_WAIT_MS - waitedMs) {
+        throw Object.assign(new Error(`Too many requests. Try again in ${Math.ceil(delay / 1000)} seconds.`),
+          { status: 429, code: 'RATE_LIMITED', retryAfterMs: delay, rateLimitScope: scope });
+      }
+      const beforeWait = Date.now();
+      await waitForRateLimit(delay, init.signal);
+      waitedMs += Date.now() - beforeWait;
+      // A concurrent 429 can extend the shared reset while this read sleeps.
     }
-    signal.throwIfAborted();
-    const response = await abortable(fetch(`${backendConfig.apiUrl}${path}`, {
-      ...init, signal, headers, cache: 'no-store'
-    }), signal);
-    const body = await abortable(response.json().catch(() => null), signal);
-    if (!options.public && current !== generation) throw new Error('Authentication changed. Discarding stale response.');
-    if (!response.ok) {
-      const detail = body?.detail;
-      const message = typeof detail === 'string' ? detail : detail?.message ?? body?.error ?? `API request failed (${response.status})`;
-      throw Object.assign(new Error(message), { status: response.status, code: body?.code ?? detail?.code });
+    if (retryGeneration !== undefined && retryGeneration !== generation) {
+      throw new Error('Authentication changed. Retry the request.');
     }
-    if (body === null) throw new Error('Invalid JSON from compatibility API.');
-    return body as T;
-  }, init.signal);
+    try {
+      return await withDeadline(async (signal) => {
+        const headers = new Headers(init.headers);
+        if (init.body && !headers.has('Content-Type')) headers.set('Content-Type', 'application/json');
+        const current = generation;
+        if (!options.public) {
+          const token = (await refreshSession(signal))?.access_token;
+          if (!token) throw new Error('Sign in first.');
+          headers.set('Authorization', `Bearer ${token}`);
+        }
+        signal.throwIfAborted();
+        const response = await abortable(fetch(`${backendConfig.apiUrl}${path}`, {
+          ...init, signal, headers, cache: 'no-store'
+        }), signal);
+        const body = await abortable(response.json().catch(() => null), signal);
+        if (!options.public && current !== generation) throw new Error('Authentication changed. Discarding stale response.');
+        if (!response.ok) {
+          const detail = body?.detail;
+          const message = typeof detail === 'string' ? detail : detail?.message ?? body?.error ?? `API request failed (${response.status})`;
+          if (response.status === 429) {
+            const delay = retryAfterMs(response);
+            const responseScope = response.headers.get('X-RateLimit-Scope') ?? scope;
+            if (!options.public && delay !== undefined) {
+              rateLimitResets.set(responseScope, Math.max(rateLimitResets.get(responseScope) ?? 0, Date.now() + delay));
+            }
+            throw Object.assign(new Error(delay === undefined ? message :
+              `Too many requests. Try again in ${Math.ceil(delay / 1000)} seconds.`), {
+              status: 429, code: 'RATE_LIMITED', retryAfterMs: delay, rateLimitScope: responseScope,
+              authGeneration: current
+            });
+          }
+          throw Object.assign(new Error(message), { status: response.status, code: body?.code ?? detail?.code });
+        }
+        if (body === null) throw new Error('Invalid JSON from compatibility API.');
+        return body as T;
+      }, init.signal);
+    } catch (error) {
+      const limited = error as ApiError & { authGeneration?: number };
+      if (!read || attempt > 0 || limited.status !== 429 || limited.retryAfterMs === undefined ||
+          limited.retryAfterMs > API_RATE_LIMIT_MAX_WAIT_MS) throw error;
+      retryGeneration = limited.authGeneration;
+      // Each network attempt retains its own deadline. A server-requested
+      // cooldown may span the rest of the minute, and must not replay writes.
+      if (limited.rateLimitScope !== scope) {
+        if (limited.retryAfterMs > API_RATE_LIMIT_MAX_WAIT_MS - waitedMs) throw error;
+        const beforeWait = Date.now();
+        await waitForRateLimit(limited.retryAfterMs, init.signal);
+        waitedMs += Date.now() - beforeWait;
+      }
+    }
+  }
 }
 
 export function normalizeError(error: unknown): ApiError {
   return error instanceof Error
-    ? { message: error.message, code: (error as ApiError).code, status: (error as ApiError).status }
+    ? { message: error.message, code: (error as ApiError).code, status: (error as ApiError).status,
+      ...((error as ApiError).retryAfterMs !== undefined ? { retryAfterMs: (error as ApiError).retryAfterMs,
+        rateLimitScope: (error as ApiError).rateLimitScope } : {}) }
     : { message: 'Unknown API error' };
 }
 
@@ -397,6 +505,7 @@ export const fastapiClient = {
         if (!runtime?.loaded) throw new Error('Authentication is still loading.');
         await runtime.signOut();
         generation++;
+        resetRateLimitState();
         runtime = { ...runtime, user: null };
         session = null;
         realtime.reset();

@@ -31,6 +31,14 @@ another backend or enable device-only saves. Network failures are visible; write
 are not automatically replayed after a timeout because the server may have saved
 an operation whose response was lost.
 
+Authenticated API budgets use the verified Clerk account rather than a proxy IP.
+Background compatibility-table reads have a separate budget from interactive
+pages and saves. Public enrollment and MCP requests retain IP accounting. On a
+429, protected reads can retry once after the server's reset delay (up to one
+minute); saves are never automatically replayed. Workflows and Concept review
+show loading failures with a read-only retry instead of claiming their lists
+are empty.
+
 ## Release
 
 Use the current Vercel CLI (`npm i -g vercel@latest`). Run frontend typecheck,

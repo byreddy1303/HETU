@@ -1,5 +1,5 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { act, cleanup, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Link, MemoryRouter, Route, Routes } from 'react-router-dom';
 import ConceptReview from '@/pages/ConceptReview';
@@ -12,14 +12,85 @@ const review = { id: 'one', user_id: 'owner', version: 1, concept_id: 'concept',
   prompt: 'Why normalize the weights?', evaluation_guidance: 'Divide by their total.', due_on: '2026-10-10', attempts: [] };
 
 beforeEach(() => { apiRequest.mockReset(); });
+afterEach(cleanup);
 
-function renderReview() {
-  return render(<MemoryRouter initialEntries={['/concept-review/one']}><Link to="/concept-review/two">Next question</Link>
-    <Routes><Route path="/concept-review/:reviewId" element={<ConceptReview />} /></Routes>
+function renderReview(path = '/concept-review/one') {
+  return render(<MemoryRouter initialEntries={[path]}><Link to="/concept-review/two">Next question</Link>
+    <Routes><Route path="/concept-review/:reviewId?" element={<ConceptReview />} /></Routes>
   </MemoryRouter>);
 }
 
 describe('discussion recall evidence', () => {
+  it('shows loading and a retryable failure before showing a confirmed empty list', async () => {
+    let fail!: (cause: Error) => void;
+    apiRequest.mockImplementationOnce(() => new Promise((_resolve, reject) => { fail = reject; }))
+      .mockResolvedValueOnce([]);
+    const user = userEvent.setup();
+    renderReview('/concept-review');
+    expect(screen.getByRole('navigation', { name: 'Concept questions' })).toHaveTextContent('Loading concept questions…');
+    expect(screen.queryByText(/No concept questions yet/)).not.toBeInTheDocument();
+    await act(async () => fail(new Error('Rate limit exceeded')));
+    expect(screen.getByRole('alert')).toHaveTextContent('Rate limit exceeded');
+    expect(screen.queryByText(/No concept questions yet/)).not.toBeInTheDocument();
+    expect(screen.queryByText('Choose a question to begin.')).not.toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Retry load' }));
+    expect(await screen.findByText(/No concept questions yet/)).toBeInTheDocument();
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+    expect(apiRequest).toHaveBeenCalledTimes(2);
+  });
+
+  it('retries a failed selected question without claiming there is nothing to review', async () => {
+    let failDetail = true;
+    apiRequest.mockImplementation(async (path: string) => {
+      if (path.includes('?limit=')) return [review];
+      if (failDetail) throw new Error('Question could not load');
+      return review;
+    });
+    const user = userEvent.setup();
+    renderReview();
+    expect(await screen.findByRole('alert')).toHaveTextContent('Question could not load');
+    expect(screen.queryByText('Choose a question to begin.')).not.toBeInTheDocument();
+    expect(screen.queryByText(/No concept questions yet/)).not.toBeInTheDocument();
+    failDetail = false;
+    await user.click(screen.getByRole('button', { name: 'Retry load' }));
+    expect(await screen.findByRole('heading', { name: review.prompt })).toBeInTheDocument();
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+  });
+
+  it('cancels old route loads and ignores late results after another question opens', async () => {
+    let finishFirst!: (value: typeof review) => void;
+    let firstSignal: AbortSignal | undefined;
+    apiRequest.mockImplementation(async (path: string, init?: RequestInit) => {
+      if (path.includes('?limit=')) return [review];
+      if (path.endsWith('/one')) {
+        firstSignal = init?.signal as AbortSignal;
+        return new Promise<typeof review>((resolve) => { finishFirst = resolve; });
+      }
+      return { ...review, id: 'two', prompt: 'State the law of total probability.' };
+    });
+    const user = userEvent.setup();
+    renderReview();
+    await waitFor(() => expect(firstSignal).toBeDefined());
+    await user.click(screen.getByRole('link', { name: 'Next question' }));
+    expect(await screen.findByRole('heading', { name: 'State the law of total probability.' })).toBeInTheDocument();
+    expect(firstSignal?.aborted).toBe(true);
+    await act(async () => finishFirst(review));
+    expect(screen.queryByRole('heading', { name: review.prompt })).not.toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'State the law of total probability.' })).toBeInTheDocument();
+  });
+
+  it('aborts its pending load when the page unmounts', async () => {
+    let signal: AbortSignal | undefined;
+    apiRequest.mockImplementation((_path: string, init?: RequestInit) => {
+      signal = init?.signal as AbortSignal;
+      return new Promise(() => {});
+    });
+    const rendered = renderReview('/concept-review');
+    await waitFor(() => expect(signal).toBeDefined());
+    rendered.unmount();
+    expect(signal?.aborted).toBe(true);
+  });
+
   it('persists guidance before revealing it and submits the new version with assistance', async () => {
     const saved = { ...review, version: 2, pending_assistance: 'solution' };
     apiRequest.mockImplementation(async (path: string, init?: RequestInit) => {
@@ -51,5 +122,26 @@ describe('discussion recall evidence', () => {
     await screen.findByRole('heading', { name: 'State the law of total probability.' });
     expect(screen.getByLabelText('Your answer')).toHaveValue('');
     expect(screen.getByRole('button', { name: 'Record response' })).toBeDisabled();
+  });
+
+  it('retries only reads when refreshing a committed response fails', async () => {
+    let committed = false;
+    let failRefresh = true;
+    apiRequest.mockImplementation(async (path: string) => {
+      if (path.endsWith('/responses')) { committed = true; return { ...review, version: 2 }; }
+      if (committed && failRefresh) throw new Error('Refresh unavailable');
+      return path.includes('?limit=') ? [review] : { ...review, version: committed ? 2 : 1 };
+    });
+    const user = userEvent.setup();
+    renderReview();
+    await screen.findByRole('heading', { name: review.prompt });
+    await user.type(screen.getByLabelText('Your answer'), 'Normalize by the total.');
+    await user.click(screen.getByRole('button', { name: 'Record response' }));
+    expect(await screen.findByRole('alert')).toHaveTextContent('Refresh unavailable');
+    expect(screen.getByLabelText('Your answer')).toHaveValue('');
+    failRefresh = false;
+    await user.click(screen.getByRole('button', { name: 'Retry load' }));
+    await waitFor(() => expect(screen.queryByRole('alert')).not.toBeInTheDocument());
+    expect(apiRequest.mock.calls.filter(([path]) => path.endsWith('/responses'))).toHaveLength(1);
   });
 });

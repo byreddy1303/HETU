@@ -30,16 +30,19 @@ async def authenticate_http_request(request: Request, settings: Settings) -> Ide
     # Middleware uses the same verified identity as the endpoint dependency.
     # Cache only within this request; refreshed tokens are verified anew.
     cached = getattr(request.state, "http_auth_result", None)
-    if isinstance(cached, Identity):
-        return cached
-    if isinstance(cached, HTTPException):
-        raise cached
+    if getattr(request.state, "http_auth_settings", None) is settings:
+        if isinstance(cached, Identity):
+            return cached
+        if isinstance(cached, HTTPException):
+            raise cached
     try:
         identity = await _authenticate(request, settings)
     except HTTPException as exc:
         request.state.http_auth_result = exc
+        request.state.http_auth_settings = settings
         raise
     request.state.http_auth_result = identity
+    request.state.http_auth_settings = settings
     return identity
 
 

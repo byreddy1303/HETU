@@ -23,18 +23,18 @@ async def resolve_identity(db: AsyncSession, identity: Identity) -> Identity:
     # the concurrent reads used to load an account, delaying even /me behind them.
     known = (
         await db.execute(
-            select(UserIdentity, User)
+            select(UserIdentity.user_id, User.id, User.deleted_at)
             .outerjoin(User, User.id == UserIdentity.user_id)
             .where(UserIdentity.provider == provider, UserIdentity.subject == subject)
         )
     ).first()
     if known is not None:
-        mapping, user = known
-        if user is None:
+        _, user_id, deleted_at = known
+        if user_id is None:
             raise HTTPException(status_code=409, detail="Authentication mapping is invalid")
-        if user.deleted_at is not None:
+        if deleted_at is not None:
             raise HTTPException(status_code=403, detail="This account has been deleted")
-        return replace(identity, user_id=user.id, provider=provider, provider_subject=subject)
+        return replace(identity, user_id=user_id, provider=provider, provider_subject=subject)
 
     # Only creating a legacy mapping needs serialization. Recheck after locking
     # because another request may have created it while this request waited.
@@ -50,7 +50,17 @@ async def resolve_identity(db: AsyncSession, identity: Identity) -> Identity:
         # never provision a new HETU account just because a provider session exists.
         user = await db.get(User, subject)
         if user is None:
-            raise HTTPException(status_code=403, detail="This account is not authorized")
+            if provider == "local":
+                user = User(
+                    id=subject,
+                    display_name="Local Learner",
+                    username="local_learner",
+                    profile={"role": "learner", "local": True},
+                )
+                db.add(user)
+                await db.flush()
+            else:
+                raise HTTPException(status_code=403, detail="This account is not authorized")
         mapping = UserIdentity(user_id=user.id, provider=provider, subject=subject)
         db.add(mapping)
     else:

@@ -17,6 +17,7 @@ from starlette.middleware.trustedhost import TrustedHostMiddleware
 from app.api.router import api_router, root_router
 from app.api.routes.clerk_proxy import router as clerk_proxy_router
 from app.core.config import get_settings
+from app.core.database_errors import is_database_quota_error
 from app.core.logging import configure_logging
 from app.core.timing import server_timing_header, start_request_timing
 from app.db.session import close_database
@@ -66,6 +67,13 @@ async def _application_lifespan():
         yield
         return
     settings.validate_runtime()
+    if settings.environment == "local" and settings.sqlalchemy_database_url.startswith("sqlite"):
+        from app.db.base import Base
+        from app.db.session import get_engine
+        import app.db.models  # noqa: F401
+
+        async with get_engine().begin() as conn:
+            await conn.run_sync(Base.metadata.create_all)
     await broker.start()
     log.info("api_started", version=settings.app_version, environment=settings.environment)
     yield
@@ -165,7 +173,13 @@ async def request_context(request: Request, call_next):
                 },
             )
 
-    response = await call_next(request)
+    try:
+        response = await call_next(request)
+    except Exception as exc:
+        if not is_database_quota_error(exc):
+            raise
+        # Return inside CORS middleware so web/mobile clients can read the outage message.
+        response = await unhandled_exception(request, exc)
     route = request.scope.get("route")
     path_template = getattr(route, "path", request.url.path)
     elapsed = time.perf_counter() - start
@@ -213,6 +227,20 @@ app.add_middleware(
 
 @app.exception_handler(Exception)
 async def unhandled_exception(request: Request, exc: Exception) -> JSONResponse:
+    if is_database_quota_error(exc):
+        # Do not serialize or log the database exception, SQL, parameters, or connection details.
+        log.warning("database_quota_exceeded", method=request.method, path=request.url.path)
+        return JSONResponse(
+            status_code=503,
+            content={
+                "code": "DATABASE_QUOTA_EXCEEDED",
+                "detail": (
+                    "Study data is temporarily unavailable because the database usage allowance "
+                    "has been exceeded. Please try again after database access is restored."
+                ),
+            },
+            headers={"Cache-Control": "no-store", "Retry-After": "300"},
+        )
     log.exception("unhandled_exception", method=request.method, path=request.url.path)
     return JSONResponse(status_code=500, content={"detail": "Internal server error"})
 

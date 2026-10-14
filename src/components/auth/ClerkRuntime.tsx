@@ -132,7 +132,35 @@ function Runtime({ children }: { children: ReactNode }) {
     ? children : <LoadingScreen />;
 }
 
+function LocalRuntime({ children }: { children: ReactNode }) {
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    configureClerkRuntime({
+      loaded: true,
+      user: {
+        id: 'local_user',
+        email: 'local@hetu.internal',
+        username: 'local_learner',
+        user_metadata: {
+          first_name: 'Local',
+          last_name: 'Learner'
+        }
+      },
+      getToken: async () => 'local_token',
+      signOut: async () => {}
+    });
+    setReady(true);
+    return () => resetClerkRuntime();
+  }, []);
+
+  return ready ? <>{children}</> : <LoadingScreen />;
+}
+
 export default function ClerkRuntime({ children }: { children: ReactNode }) {
+  if (backendConfig.isLocal || !backendConfig.clerkKey) {
+    return <LocalRuntime>{children}</LocalRuntime>;
+  }
   return (
     <ClerkProvider publishableKey={backendConfig.clerkKey}
       proxyUrl={import.meta.env.VITE_CLERK_PROXY_URL || '/__clerk'}>

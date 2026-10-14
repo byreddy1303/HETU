@@ -3,12 +3,17 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
+  "main": "electron/main.cjs",
   "description": "GATE PYQ analysis, tagging, spaced re-attempts, root-cause review, and focused buddy study. Built to compress mistake surface for AIR <100.",
   "engines": {
     "node": ">=22"
   },
   "scripts": {
     "dev": "vite",
+    "desktop": "electron .",
+    "desktop:build": "vite build --mode desktop && electron-builder --mac",
+    "desktop:build:win": "vite build --mode desktop && electron-builder --win",
+    "desktop:pack": "vite build --mode desktop && electron-builder --dir",
     "build": "tsc -b && vite build",
     "build:native": "tsc -b && vite build --mode capacitor",
     "preview": "vite preview",
@@ -80,6 +85,8 @@
     "@typescript-eslint/parser": "^7.18.0",
     "@vitejs/plugin-react": "^6.0.3",
     "autoprefixer": "^10.4.19",
+    "electron": "^44.7.2",
+    "electron-builder": "^26.15.3",
     "eslint": "^8.57.0",
     "eslint-plugin-react-hooks": "^4.6.2",
     "eslint-plugin-react-refresh": "^0.4.26",
@@ -91,6 +98,35 @@
     "typescript": "^5.5.3",
     "vite": "^8.1.5",
     "vite-plugin-pwa": "^1.3.0",
-    "vitest": "^4.1.10"
+    "vitest": "^4.1.10",
+    "wait-on": "^9.5.1"
+  },
+  "build": {
+    "appId": "com.hetu.app",
+    "productName": "HETU",
+    "directories": {
+      "output": "release"
+    },
+    "mac": {
+      "category": "public.app-category.education",
+      "target": [
+        "dir"
+      ],
+      "icon": "public/hetu-cobalt-512.png",
+      "identity": null
+    },
+    "win": {
+      "target": [
+        "nsis"
+      ],
+      "icon": "public/hetu-cobalt-512.png"
+    },
+    "files": [
+      "dist/**/*",
+      "electron/**/*",
+      "package.json",
+      "!node_modules/**",
+      "!android/**"
+    ]
   }
 }

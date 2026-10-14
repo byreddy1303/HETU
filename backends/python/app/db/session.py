@@ -26,6 +26,16 @@ def get_engine() -> AsyncEngine:
             pool_recycle=300,
         )
     engine = create_async_engine(url, **kwargs)
+    if url.startswith("sqlite"):
+        from sqlalchemy import event
+
+        @event.listens_for(engine.sync_engine, "connect")
+        def set_sqlite_pragma(dbapi_connection, connection_record):  # type: ignore
+            cursor = dbapi_connection.cursor()
+            cursor.execute("PRAGMA journal_mode=WAL")
+            cursor.execute("PRAGMA synchronous=NORMAL")
+            cursor.execute("PRAGMA foreign_keys=ON")
+            cursor.close()
     instrument_engine(engine)
     return engine
 

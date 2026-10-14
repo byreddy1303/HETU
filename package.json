@@ -17,6 +17,7 @@
     "build": "tsc -b && vite build",
     "build:native": "tsc -b && vite build --mode capacitor",
     "preview": "vite preview",
+    "mcp": "cd backends/python && ./.venv/bin/python -m app.mcp_local",
     "notes:build": "node scripts/build-topper-notes.mjs",
     "pyq:import:supplemental": "node scripts/import-supplemental-pyqs.mjs",
     "pyq:build": "node scripts/build-pyq-bank.mjs",

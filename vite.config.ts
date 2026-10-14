@@ -16,13 +16,15 @@ export default defineConfig(({ mode }) => {
       validUrl = ['http:', 'https:'].includes(parsed.protocol) && !parsed.username && !parsed.password
         && !parsed.search && !parsed.hash && (!nativeBuild || parsed.protocol === 'https:');
     } catch { /* invalid or missing API origin */ }
+    const isLocal = env.VITE_LOCAL_MODE === 'true';
     if ((env.VITE_BACKEND && env.VITE_BACKEND !== 'fastapi') || !env.VITE_API_URL || !validUrl
-      || !/^pk_(test|live)_\S+$/.test(env.VITE_CLERK_PUBLISHABLE_KEY ?? '')) {
+      || (!isLocal && !/^pk_(test|live)_\S+$/.test(env.VITE_CLERK_PUBLISHABLE_KEY ?? ''))) {
       throw new Error('HETU requires VITE_BACKEND=fastapi, VITE_API_URL and VITE_CLERK_PUBLISHABLE_KEY. Android requires an absolute HTTPS API URL.');
     }
   }
 
   return {
+    base: './',
     plugins: [
       react(),
       VitePWA({
@@ -100,7 +102,7 @@ export default defineConfig(({ mode }) => {
         '/api': {
           target: 'http://localhost:8000',
           changeOrigin: true,
-          rewrite: (path) => path.replace(/^\/api/, '/v1')
+          rewrite: (path) => path.replace(/^\/api/, '')
         },
         '/__clerk': {
           target: 'http://localhost:8000',

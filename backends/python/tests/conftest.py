@@ -1,5 +1,9 @@
 from __future__ import annotations
 
+import os
+
+os.environ["ENVIRONMENT"] = "test"
+
 from collections.abc import AsyncIterator
 
 import pytest_asyncio

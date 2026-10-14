@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 import time
 from contextlib import asynccontextmanager
 from urllib.parse import urlparse
@@ -68,12 +69,33 @@ async def _application_lifespan():
         return
     settings.validate_runtime()
     if settings.environment == "local" and settings.sqlalchemy_database_url.startswith("sqlite"):
-        from app.db.base import Base
-        from app.db.session import get_engine
         import app.db.models  # noqa: F401
+        from app.db.base import Base
+        from app.db.models import User, UserIdentity
+        from app.db.session import get_engine, get_session_factory
 
         async with get_engine().begin() as conn:
             await conn.run_sync(Base.metadata.create_all)
+
+        async with get_session_factory()() as session:
+            user = await session.get(User, "local_user")
+            if user is None:
+                session.add(
+                    User(
+                        id="local_user",
+                        display_name="Local Learner",
+                        username="local_learner",
+                        profile={"role": "learner", "local": True},
+                    )
+                )
+                session.add(
+                    UserIdentity(
+                        user_id="local_user",
+                        provider="local",
+                        subject="local_user",
+                    )
+                )
+                await session.commit()
     await broker.start()
     log.info("api_started", version=settings.app_version, environment=settings.environment)
     yield
@@ -245,8 +267,19 @@ async def unhandled_exception(request: Request, exc: Exception) -> JSONResponse:
     return JSONResponse(status_code=500, content={"detail": "Internal server error"})
 
 
+static_dir = os.getenv("STATIC_DIR") or os.path.abspath(
+    os.path.join(os.path.dirname(__file__), "../../../dist")
+)
+
+
 @app.get("/", include_in_schema=False)
-async def root() -> dict[str, str]:
+def root():
+    if settings.environment == "local" and os.path.isdir(static_dir):
+        from starlette.responses import FileResponse
+
+        index_file = os.path.join(static_dir, "index.html")
+        if os.path.isfile(index_file):
+            return FileResponse(index_file)
     return {
         "service": settings.app_name,
         "version": settings.app_version,
@@ -260,3 +293,21 @@ app.include_router(api_router, prefix=settings.api_prefix)
 app.mount("/metrics", make_asgi_app())
 if mcp_asgi is not None:
     app.mount("/", mcp_asgi)
+
+if settings.environment == "local" and os.path.isdir(static_dir):
+    from fastapi.staticfiles import StaticFiles
+    from starlette.responses import FileResponse
+
+    assets_dir = os.path.join(static_dir, "assets")
+    if os.path.isdir(assets_dir):
+        app.mount("/assets", StaticFiles(directory=assets_dir), name="assets")
+
+    @app.get("/{full_path:path}", include_in_schema=False)
+    def serve_spa(full_path: str):
+        target = os.path.join(static_dir, full_path)
+        if full_path and os.path.isfile(target):
+            return FileResponse(target)
+        index_file = os.path.join(static_dir, "index.html")
+        if os.path.isfile(index_file):
+            return FileResponse(index_file)
+        return JSONResponse({"status": "ok", "service": settings.app_name})

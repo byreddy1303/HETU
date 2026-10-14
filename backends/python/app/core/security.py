@@ -102,17 +102,18 @@ def _enforce_oauth_scopes(
 async def _authenticate(
     request: Request | WebSocket | _WebSocketAuthRequest, settings: Settings
 ) -> Identity:
+    if settings.environment == "local":
+        return Identity(
+            user_id="local_user",
+            session_id="local_session",
+            expires_at=2147483647,
+            provider="local",
+            provider_subject="local_user",
+        )
+
     secret_key = settings.clerk_secret_key.get_secret_value() if settings.clerk_secret_key else None
     jwt_key = settings.clerk_jwt_key.get_secret_value() if settings.clerk_jwt_key else None
     if not secret_key and not jwt_key:
-        if settings.environment == "local":
-            return Identity(
-                user_id="local_user",
-                session_id="local_session",
-                expires_at=2147483647,
-                provider="local",
-                provider_subject="local_user",
-            )
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail="Authentication is not configured",

@@ -58,11 +58,27 @@ async def resolve_identity(db: AsyncSession, identity: Identity) -> Identity:
                     profile={"role": "learner", "local": True},
                 )
                 db.add(user)
-                await db.flush()
+                try:
+                    await db.flush()
+                except Exception:
+                    await db.rollback()
+                    user = await db.get(User, subject)
             else:
                 raise HTTPException(status_code=403, detail="This account is not authorized")
-        mapping = UserIdentity(user_id=user.id, provider=provider, subject=subject)
-        db.add(mapping)
+        if user is not None:
+            existing_mapping = await db.scalar(
+                select(UserIdentity).where(
+                    UserIdentity.provider == provider,
+                    UserIdentity.subject == subject,
+                )
+            )
+            if existing_mapping is None:
+                mapping = UserIdentity(user_id=user.id, provider=provider, subject=subject)
+                db.add(mapping)
+                try:
+                    await db.flush()
+                except Exception:
+                    await db.rollback()
     else:
         user = await db.get(User, mapping.user_id)
         if user is None:

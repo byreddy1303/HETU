@@ -12,61 +12,184 @@ function isDev() {
   return !app.isPackaged && process.env.NODE_ENV !== 'production';
 }
 
-function getPythonPath() {
-  if (isDev()) {
-    const venvPython = path.join(__dirname, '../backends/python/.venv/bin/python');
-    if (fs.existsSync(venvPython)) return venvPython;
+function findSitePackages(venvDir) {
+  if (!fs.existsSync(venvDir)) return null;
+  const libDir = path.join(venvDir, 'lib');
+  if (fs.existsSync(libDir)) {
+    try {
+      const pyDirs = fs.readdirSync(libDir).filter((f) => f.startsWith('python'));
+      for (const pyDir of pyDirs) {
+        const sp = path.join(libDir, pyDir, 'site-packages');
+        if (fs.existsSync(sp)) return sp;
+      }
+    } catch (_) {}
   }
-  // Packaged app path
-  const packagedPython = path.join(process.resourcesPath, 'python/bin/python');
-  if (fs.existsSync(packagedPython)) return packagedPython;
-  return 'python3';
+  const winSp = path.join(venvDir, 'Lib', 'site-packages');
+  if (fs.existsSync(winSp)) return winSp;
+  return null;
+}
+
+function getBackendConfig() {
+  const resourceBackend = path.join(process.resourcesPath, 'backend');
+  const projectBackend = path.resolve(__dirname, '../backends/python');
+  const fallbackBackend = '/Users/bkalyankrishnareddy/Desktop/hetu/backends/python';
+
+  let backendDir = fallbackBackend;
+  if (fs.existsSync(resourceBackend)) {
+    backendDir = resourceBackend;
+  } else if (fs.existsSync(projectBackend)) {
+    backendDir = projectBackend;
+  }
+
+  const candidateVenvs = [
+    path.join(backendDir, '.venv'),
+    path.join(projectBackend, '.venv'),
+    '/Users/bkalyankrishnareddy/Desktop/hetu/backends/python/.venv',
+  ];
+
+  const candidatePythons = [
+    path.join(backendDir, '.venv/bin/python'),
+    path.join(backendDir, '.venv/bin/python3'),
+    path.join(projectBackend, '.venv/bin/python'),
+    path.join(projectBackend, '.venv/bin/python3'),
+    '/Users/bkalyankrishnareddy/Desktop/hetu/backends/python/.venv/bin/python',
+    '/Users/bkalyankrishnareddy/.pyenv/versions/3.12.13/bin/python3',
+    '/Users/bkalyankrishnareddy/.pyenv/shims/python3',
+    '/opt/homebrew/bin/python3.12',
+    '/opt/homebrew/bin/python3',
+    '/usr/local/bin/python3.12',
+    '/usr/local/bin/python3',
+    path.join(backendDir, '.venv/Scripts/python.exe'),
+    process.env.PYTHON_PATH,
+    'python3',
+    'python',
+  ].filter(Boolean);
+
+  let pythonPath = 'python3';
+  for (const candidate of candidatePythons) {
+    if (fs.existsSync(candidate)) {
+      pythonPath = candidate;
+      break;
+    }
+  }
+
+  let sitePackages = null;
+  for (const venv of candidateVenvs) {
+    const sp = findSitePackages(venv);
+    if (sp) {
+      sitePackages = sp;
+      break;
+    }
+  }
+
+  return { backendDir, pythonPath, sitePackages };
 }
 
 function startBackend() {
   return new Promise((resolve) => {
-    const pythonPath = getPythonPath();
-    const backendDir = path.join(__dirname, '../backends/python');
+    const { backendDir, pythonPath, sitePackages } = getBackendConfig();
     const userData = app.getPath('userData');
     const dbPath = path.join(userData, 'hetu.db');
     const imageDir = path.join(userData, 'images');
+    const logFile = path.join(userData, 'backend.log');
 
-    if (!fs.existsSync(imageDir)) {
-      fs.mkdirSync(imageDir, { recursive: true });
+    try {
+      if (!fs.existsSync(imageDir)) {
+        fs.mkdirSync(imageDir, { recursive: true });
+      }
+    } catch (err) {
+      console.warn('[HETU Desktop] Image dir creation note:', err.message);
     }
 
-    console.log(`[HETU Desktop] Starting backend with ${pythonPath}`);
-    console.log(`[HETU Desktop] Database location: ${dbPath}`);
+    const resourceDist = path.join(process.resourcesPath, 'dist');
+    const projectDist = path.resolve(__dirname, '../dist');
+    const staticDir = fs.existsSync(resourceDist) ? resourceDist : projectDist;
+
+    const pythonPathParts = [backendDir];
+    if (sitePackages) {
+      pythonPathParts.push(sitePackages);
+    }
+    if (process.env.PYTHONPATH) {
+      pythonPathParts.push(process.env.PYTHONPATH);
+    }
+    const pythonPathEnv = pythonPathParts.join(process.platform === 'win32' ? ';' : ':');
+
+    const extraPaths = [
+      '/Users/bkalyankrishnareddy/.pyenv/shims',
+      '/Users/bkalyankrishnareddy/.pyenv/versions/3.12.13/bin',
+      '/opt/homebrew/bin',
+      '/usr/local/bin',
+    ];
+    const newPath = [...extraPaths.filter((p) => fs.existsSync(p)), process.env.PATH || ''].join(':');
+
+    console.log(`[HETU Desktop] Python: ${pythonPath}`);
+    console.log(`[HETU Desktop] Backend dir: ${backendDir}`);
+    console.log(`[HETU Desktop] Site packages: ${sitePackages || 'none'}`);
+    console.log(`[HETU Desktop] Static dir: ${staticDir}`);
+    console.log(`[HETU Desktop] SQLite Database: ${dbPath}`);
+    console.log(`[HETU Desktop] Log file: ${logFile}`);
 
     const env = {
       ...process.env,
-      PYTHONPATH: backendDir,
+      PATH: newPath,
+      PYTHONPATH: pythonPathEnv,
       ENVIRONMENT: 'local',
       DATABASE_URL: `sqlite+aiosqlite:///${dbPath}`,
       CORS_ORIGINS: `http://localhost:5173,http://127.0.0.1:${BACKEND_PORT},http://localhost:${BACKEND_PORT}`,
       TRUSTED_HOSTS: `localhost,127.0.0.1,127.0.0.1:${BACKEND_PORT}`,
       API_URL: `http://127.0.0.1:${BACKEND_PORT}`,
+      STATIC_DIR: staticDir,
     };
 
-    backendProcess = spawn(
-      pythonPath,
-      ['-m', 'uvicorn', 'app.main:app', '--host', '127.0.0.1', '--port', String(BACKEND_PORT)],
-      { cwd: backendDir, env, stdio: ['ignore', 'pipe', 'pipe'] }
-    );
+    let logStream = null;
+    try {
+      logStream = fs.createWriteStream(logFile, { flags: 'a' });
+    } catch (logErr) {
+      console.warn('[HETU Desktop] Could not open log stream:', logErr.message);
+    }
 
-    backendProcess.stdout.on('data', (data) => {
-      console.log(`[Backend] ${data.toString().trim()}`);
-    });
+    try {
+      backendProcess = spawn(
+        pythonPath,
+        ['-m', 'uvicorn', 'app.main:app', '--host', '127.0.0.1', '--port', String(BACKEND_PORT)],
+        {
+          cwd: fs.existsSync(backendDir) ? backendDir : process.cwd(),
+          env,
+          stdio: ['ignore', 'pipe', 'pipe'],
+        }
+      );
 
-    backendProcess.stderr.on('data', (data) => {
-      console.error(`[Backend ERR] ${data.toString().trim()}`);
-    });
+      backendProcess.on('error', (err) => {
+        console.error('[HETU Desktop] Backend spawn error:', err);
+        if (logStream) logStream.write(`[Spawn error] ${err.stack || err}\n`);
+        resolve(false);
+      });
 
-    backendProcess.on('exit', (code, signal) => {
-      console.log(`[HETU Desktop] Backend exited with code ${code}, signal ${signal}`);
-    });
+      backendProcess.stdout.on('data', (data) => {
+        const text = data.toString();
+        console.log(`[Backend] ${text.trim()}`);
+        if (logStream) logStream.write(text);
+      });
 
-    // Poll until backend is ready
+      backendProcess.stderr.on('data', (data) => {
+        const text = data.toString();
+        console.error(`[Backend ERR] ${text.trim()}`);
+        if (logStream) logStream.write(text);
+      });
+
+      backendProcess.on('exit', (code, signal) => {
+        const msg = `[HETU Desktop] Backend exited with code ${code}, signal ${signal}\n`;
+        console.log(msg.trim());
+        if (logStream) logStream.write(msg);
+      });
+    } catch (err) {
+      console.error('[HETU Desktop] Failed to launch backend process:', err);
+      if (logStream) logStream.write(`[Launch exception] ${err.stack || err}\n`);
+      resolve(false);
+      return;
+    }
+
+    // Poll until backend is healthy
     let attempts = 0;
     const interval = setInterval(() => {
       attempts++;
@@ -74,14 +197,14 @@ function startBackend() {
         if (res.statusCode === 200) {
           clearInterval(interval);
           console.log('[HETU Desktop] Backend is healthy and ready!');
-          resolve();
+          resolve(true);
         }
       });
       req.on('error', () => {
-        if (attempts > 30) {
+        if (attempts >= 40) {
           clearInterval(interval);
-          console.warn('[HETU Desktop] Backend startup timeout, opening window anyway.');
-          resolve();
+          console.warn('[HETU Desktop] Backend startup waiting timed out after 10s, launching UI anyway.');
+          resolve(false);
         }
       });
     }, 250);
@@ -95,17 +218,18 @@ function createWindow() {
     minWidth: 1024,
     minHeight: 700,
     backgroundColor: '#090a0f',
+    title: 'HETU',
     titleBarStyle: process.platform === 'darwin' ? 'hiddenInset' : 'default',
     trafficLightPosition: { x: 18, y: 18 },
     webPreferences: {
       preload: path.join(__dirname, 'preload.cjs'),
       nodeIntegration: false,
       contextIsolation: true,
-      sandbox: true,
+      sandbox: false,
+      webSecurity: false,
     },
   });
 
-  // Open external links in default browser
   mainWindow.webContents.setWindowOpenHandler(({ url }) => {
     if (url.startsWith('http:') || url.startsWith('https:')) {
       shell.openExternal(url);
@@ -113,15 +237,26 @@ function createWindow() {
     return { action: 'deny' };
   });
 
+  const resourceDist = path.join(process.resourcesPath, 'dist');
+  const projectDist = path.resolve(__dirname, '../dist');
+  const staticDir = fs.existsSync(resourceDist) ? resourceDist : projectDist;
+
+  const appUrl = `http://127.0.0.1:${BACKEND_PORT}`;
   const devUrl = 'http://localhost:5173';
-  if (isDev() && process.env.VITE_DEV_SERVER !== 'false') {
-    mainWindow.loadURL(devUrl).catch(() => {
-      // Fallback if dev server is not ready yet
-      setTimeout(() => mainWindow.loadURL(devUrl), 1000);
-    });
-  } else {
-    mainWindow.loadFile(path.join(__dirname, '../dist/index.html'));
-  }
+  const targetUrl = isDev() && process.env.VITE_DEV_SERVER === 'true' ? devUrl : appUrl;
+
+  mainWindow.loadURL(targetUrl).catch((err) => {
+    console.error('[HETU Desktop] Error loading URL, retrying in 500ms:', err);
+    setTimeout(() => {
+      mainWindow.loadURL(targetUrl).catch((retryErr) => {
+        console.error('[HETU Desktop] URL retry failed, falling back to static file:', retryErr);
+        const indexPath = path.join(staticDir, 'index.html');
+        if (fs.existsSync(indexPath)) {
+          mainWindow.loadFile(indexPath);
+        }
+      });
+    }, 500);
+  });
 
   mainWindow.on('closed', () => {
     mainWindow = null;
@@ -148,7 +283,9 @@ app.on('window-all-closed', () => {
 app.on('before-quit', () => {
   if (backendProcess) {
     console.log('[HETU Desktop] Terminating backend process...');
-    backendProcess.kill('SIGTERM');
+    try {
+      backendProcess.kill('SIGTERM');
+    } catch (_) {}
     backendProcess = null;
   }
 });

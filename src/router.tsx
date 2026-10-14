@@ -1,5 +1,5 @@
 import { Suspense } from 'react';
-import { createBrowserRouter } from 'react-router-dom';
+import { createBrowserRouter, createHashRouter } from 'react-router-dom';
 import RequireAuth from '@/components/shared/RequireAuth';
 import LoadingScreen from '@/components/shared/LoadingScreen';
 import Shell from '@/components/layout/Shell';
@@ -58,7 +58,12 @@ const devRoutes = import.meta.env.DEV
   : [];
 
 // Application routes.
-export const router = createBrowserRouter([
+const routerFactory =
+  typeof window !== 'undefined' && window.location.protocol === 'file:'
+    ? createHashRouter
+    : createBrowserRouter;
+
+export const router = routerFactory([
   ...devRoutes,
   { path: '/auth', element: <ClerkAuth />, errorElement: <RootErrorBoundary /> },
   { path: '/signup', element: <ClerkSignup />, errorElement: <RootErrorBoundary /> },

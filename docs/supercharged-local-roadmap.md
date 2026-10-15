@@ -123,4 +123,6 @@ To make an AI act as a true master coach (identifying root weaknesses, predictin
 |---|---|---|---|---|
 | 2026-10-15 | Setup | Blueprint & Roadmap creation | `c8579cd` | Created component architecture spec and agent roadmap. |
 | 2026-10-15 | Bugfix | Fix topic_progress 409 soft-delete restore error | `c0d29ed` | Allowed upsert_records to restore soft-deleted rows in mutable collections instead of throwing 409. |
+| 2026-10-15 | Architecture | Cognitive AI Master Integration Specification | `c932245` | Detailed metacognitive thinking traces, pattern debugger, Socratic debrief, and schema in cognitive-ai-master-integration-spec.md. |
+
 

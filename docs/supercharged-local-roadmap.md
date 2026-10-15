@@ -122,3 +122,5 @@ To make an AI act as a true master coach (identifying root weaknesses, predictin
 | Date | Phase | Task | Commit | Agent Summary |
 |---|---|---|---|---|
 | 2026-10-15 | Setup | Blueprint & Roadmap creation | `c8579cd` | Created component architecture spec and agent roadmap. |
+| 2026-10-15 | Bugfix | Fix topic_progress 409 soft-delete restore error | `c0d29ed` | Allowed upsert_records to restore soft-deleted rows in mutable collections instead of throwing 409. |
+

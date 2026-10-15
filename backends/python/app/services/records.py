@@ -182,16 +182,30 @@ async def upsert_records(
             )
             db.add(existing)
         else:
-            if existing.deleted_at is not None:
-                raise HTTPException(
-                    status_code=409, detail="Deleted record requires explicit restore"
-                )
             if collection in IMMUTABLE_COLLECTIONS:
+                if existing.deleted_at is not None:
+                    raise HTTPException(
+                        status_code=409, detail=f"{collection} records are append-only"
+                    )
                 if existing.data != payload:
                     raise HTTPException(
                         status_code=409, detail=f"{collection} records are append-only"
                     )
                 output.append(existing)
+                continue
+            if existing.deleted_at is not None:
+                if expected is not None and expected != existing.version:
+                    raise HTTPException(
+                        status_code=409,
+                        detail={"message": "Version conflict", "current_version": existing.version},
+                    )
+                existing.deleted_at = None
+                existing.data = payload
+                existing.version += 1
+                existing.updated_at = datetime.now(UTC)
+                output.append(existing)
+                await db.flush()
+                await snapshot_for_sqlite(db, existing)
                 continue
             if existing.data == payload:
                 output.append(existing)

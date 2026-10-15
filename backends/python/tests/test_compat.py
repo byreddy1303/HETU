@@ -72,6 +72,23 @@ async def test_compat_table_round_trip_is_owner_scoped(db) -> None:
                 json={"filters": [{"field": "id", "op": "eq", "value": "session-1"}]},
             )
             assert after.json()["data"] == []
+
+            # Re-upserting the deleted session must restore it without error
+            restored = await client.post(
+                "/v1/compat/tables/sessions/upsert",
+                json={
+                    "values": [{"id": "session-1", "subject": "DBMS"}],
+                    "returning": True,
+                },
+            )
+            assert restored.status_code == 200, restored.text
+            assert restored.json()["data"][0]["subject"] == "DBMS"
+
+            queried_again = await client.post(
+                "/v1/compat/tables/sessions/query",
+                json={"filters": [{"field": "id", "op": "eq", "value": "session-1"}]},
+            )
+            assert queried_again.json()["data"][0]["subject"] == "DBMS"
     finally:
         app.dependency_overrides.clear()
 

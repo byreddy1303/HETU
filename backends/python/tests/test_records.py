@@ -92,3 +92,56 @@ async def test_append_only_evidence_rejects_mutation(db) -> None:
             external_id="event-1",
         )
     assert conflict.value.status_code == 409
+
+
+@pytest.mark.asyncio
+async def test_soft_deleted_record_restored_on_upsert(db) -> None:
+    db.add(User(id="user_c"))
+    await db.flush()
+    # 1. Insert initial record
+    rows = await upsert_records(
+        db,
+        collection="topic_progress",
+        owner_id="user_c",
+        items=[{"id": "topic-1", "subject": "TOC", "topic": "DFA / NFA"}],
+    )
+    await db.commit()
+    assert rows[0].deleted_at is None
+    assert rows[0].version == 1
+
+    # 2. Delete the record (soft delete)
+    await delete_record(
+        db,
+        collection="topic_progress",
+        owner_id="user_c",
+        external_id="topic-1",
+        expected_version=1,
+    )
+    await db.commit()
+
+    # Query should return nothing
+    active, _ = await query_records(
+        db, collection="topic_progress", owner_id="user_c", query=RecordQuery()
+    )
+    assert active == []
+
+    # 3. Upsert again (re-ticking topic) - should restore cleanly without 409
+    restored = await upsert_records(
+        db,
+        collection="topic_progress",
+        owner_id="user_c",
+        items=[{"id": "topic-1", "subject": "TOC", "topic": "DFA / NFA", "completed_at": "2026-10-15T00:00:00Z"}],
+    )
+    await db.commit()
+    assert len(restored) == 1
+    assert restored[0].deleted_at is None
+    assert restored[0].version == 3  # v1 insert, v2 delete, v3 restore
+    assert restored[0].data["completed_at"] == "2026-10-15T00:00:00Z"
+
+    # Query now returns restored record
+    active_again, _ = await query_records(
+        db, collection="topic_progress", owner_id="user_c", query=RecordQuery()
+    )
+    assert len(active_again) == 1
+    assert active_again[0].external_id == "topic-1"
+

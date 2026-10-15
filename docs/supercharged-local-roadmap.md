@@ -1,0 +1,124 @@
+# HETU Local Desktop: Supercharged Roadmap & Agent Execution Log
+
+**Current Status**: Phase 1 — Starting Implementation  
+**Target**: GATE CSE 2027 AIR < 100  
+**Architecture**: 100% Local Desktop (Electron + SQLite WAL + Python 3.12 + Native stdio MCP)  
+**Last Updated**: 2026-10-15  
+
+> **Note for Future Agents**:  
+> Always consult this document before starting a task. When you complete a sub-task or phase, update its checkbox (`[x]`), record the commit hash in the Progress Log below, and commit this file to `main` before finalizing your turn.
+
+---
+
+## 1. AI Integration Architecture: The "Ultimate Master Coach"
+
+To make an AI act as a true master coach (identifying root weaknesses, predicting rank impact, and prescribing exact daily interventions) rather than a generic chatbot, HETU requires four core pillars:
+
+```
++-----------------------------------------------------------------------------------+
+|                            HETU Local Architecture                                |
+|                                                                                   |
+|  1. Flight Recorder Telemetry         2. SQLite Engine Aggregator                 |
+|  - Reading / Solving / Review Splits  - Negative mark hemorrhage calculation      |
+|  - Calculator audit tape              - Forgetting curve & D3/D7 review debt      |
+|  - Confidence tags (Solid/Guess)      - Syllabus prerequisite graph traversal     |
+|  - Error codes (W-C, W-E, W-R)        - Topic decay metrics                       |
+|                   \                       /                                       |
+|                    v                     v                                        |
+|              +----------------------------------+                                 |
+|              |  Aspirant Diagnostic Dossier     |  (Structured 2KB JSON snapshot) |
+|              +----------------------------------+                                 |
+|                                |                                                  |
+|                                v                                                  |
+|         +---------------------------------------------+                           |
+|         | Master AI Engine (Claude / GPT / Local)    |                           |
+|         | - Analyzes cognitive gaps                   |                           |
+|         | - Identifies upstream syllabus bottlenecks  |                           |
+|         | - Conducts Socratic post-mortem debriefs    |                           |
+|         +---------------------------------------------+                           |
+|                                |                                                  |
+|                                v  (Tool Invocations via MCP / In-App API)         |
+|         +---------------------------------------------+                           |
+|         | Prescriptive Actions Executed in HETU       |                           |
+|         | - Injects targeted blocks into Planner      |                           |
+|         | - Generates 3 custom reflex trigger drills  |                           |
+|         | - Adjusts FSRS spacing for fragile topics   |                           |
+|         +---------------------------------------------+                           |
++-----------------------------------------------------------------------------------+
+```
+
+### Necessary App Features to Power the AI:
+1. **Granular Telemetry**: Recording reading vs solving times, calculator usage count, and initial vs final option toggles.
+2. **Deterministic Diagnostic Dossier Endpoint**: A dedicated SQLite view/endpoint (`/api/ai/diagnostic-dossier`) that computes exact stats (negative mark hemorrhage, error code distribution, syllabus decay) so the LLM receives facts instead of doing mental arithmetic.
+3. **Syllabus Prerequisite Map**: Knowledge DAG connecting topics (e.g. Cache Mapping $\to$ Digital Logic Addressing) so the AI can diagnose *upstream* causes when a downstream question fails.
+4. **Bi-directional MCP/API Tool Execution**: Giving the AI direct tools to adjust study plans, save flashcards, and schedule focused micro-sessions.
+
+---
+
+## 2. Master Execution Roadmap
+
+### Phase 1: High-Frequency UI & Input Precision (Current Phase)
+- [ ] **1.1 Full Keyboard Navigation in Question Workspace**:
+  - `1-4` or `A-D` for instant option selection.
+  - `C` to clear response.
+  - `Space` to toggle "Mark for Review".
+  - `Enter` to lock answer and advance.
+  - Target files: `src/components/pyq/PyqExamWorkspace.tsx`, `src/components/pyq/PyqPracticeAnswer.tsx`.
+- [ ] **1.2 1:1 TCS iON Virtual Scientific Calculator**:
+  - Authentic button layout matching GATE CBT.
+  - Full physical numpad integration (`0-9`, `.`, `+`, `-`, `*`, `/`, `Enter`).
+  - High-contrast visual warning banner when in Radian mode.
+  - Chronological calculation audit tape to trace arithmetic slips.
+  - Draggable & floating window component.
+- [ ] **1.3 Question Pace & Hesitation Split Timer**:
+  - Split tracking: Reading Time $\to$ Derivation Time $\to$ Sanity Check Time.
+  - Subtle visual amber pulse when lingering > 2.5m (1-mark) or > 4.5m (2-mark).
+- [ ] **1.4 Infinite Dark-Mode Scratchpad Overlay**:
+  - Slide-over canvas (`Cmd + E`) with pen, highlighter, straight-edge ruler.
+  - Vector stroke persistence saved directly to attempt record in SQLite.
+
+### Phase 2: The Master AI Coach Engine
+- [ ] **2.1 Granular Telemetry Persistence**:
+  - Store split timings, calculator operations, and confidence states in SQLite schema.
+- [ ] **2.2 Diagnostic Dossier Generator (`/api/ai/diagnostic-dossier`)**:
+  - High-performance SQLite query aggregating:
+    - Top 3 negative mark leak areas.
+    - Error code ratios (`W-C` vs `W-E` vs `W-R`).
+    - D3/D7/D21 spaced review debt.
+    - Topic decay rates based on days since last practice.
+- [ ] **2.3 In-App AI Coach Interface**:
+  - Settings panel to configure AI provider (OpenAI / Anthropic / Gemini / local Ollama).
+  - Floating "Coach" drawer providing:
+    - 1-Click "Diagnose My Weaknesses".
+    - "Generate Today's Action Plan".
+    - "Socratic Mistake Audit" during question review.
+
+### Phase 3: Closed-Loop Mistake Reduction & Ingestion
+- [ ] **3.1 15-Second Reflex Recognition Cue Drills**:
+  - Rapid-fire flashcard blitz mode testing boundary conditions and counter-examples.
+  - Keyboard navigation (`Space` flip, `1`/`2` pass/fail).
+- [ ] **3.2 Automated Test Screenshot & PDF Ingestion Studio**:
+  - Python OpenCV pipeline for bounding-box detection and answer-key masking.
+  - Drag-and-drop ingestion of Made Easy / Ace test papers directly into SQLite.
+- [ ] **3.3 Multi-Attempt Thought Evolution Timeline**:
+  - Interactive scrubber showing past attempts, time taken, and saved scratchpads side-by-side.
+
+### Phase 4: Systems & Native Desktop Superpowers
+- [ ] **4.1 Authentic TCS iON Exam Simulator (GATE 2027 Mode)**:
+  - 65 questions, 100 marks, 180 minutes, official GATE CBT skin.
+  - Sealed benchmark papers (GATE CSE 2026 Set 1 & 2).
+  - Kiosk full-screen lock.
+- [ ] **4.2 Interactive Syllabus Dependency DAG**:
+  - Interactive SVG prerequisite graph color-coded by empirical accuracy.
+- [ ] **4.3 Global Desktop Quick-Capture (`Cmd + Shift + H`)**:
+  - Floating borderless window over any application for instant screenshot/text clipping into HETU.
+- [ ] **4.4 macOS Menu Bar Focus Applet**:
+  - Status bar widget showing current study block countdown and due reattempts count.
+
+---
+
+## 3. Progress Log
+
+| Date | Phase | Task | Commit | Agent Summary |
+|---|---|---|---|---|
+| 2026-10-15 | Setup | Blueprint & Roadmap creation | `c8579cd` | Created component architecture spec and agent roadmap. |

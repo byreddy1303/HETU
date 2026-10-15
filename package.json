@@ -11,13 +11,17 @@
   "scripts": {
     "dev": "vite",
     "desktop": "electron .",
-    "desktop:build": "vite build --mode desktop && electron-builder --mac",
-    "desktop:build:win": "vite build --mode desktop && electron-builder --win",
-    "desktop:pack": "vite build --mode desktop && electron-builder --dir",
+    "desktop:build": "tsc -b && vite build --mode desktop && electron-builder --mac",
+    "desktop:build:win": "tsc -b && vite build --mode desktop && electron-builder --win",
+    "desktop:pack": "tsc -b && vite build --mode desktop && electron-builder --dir",
+    "test:desktop": "node --test electron/*.test.cjs",
     "build": "tsc -b && vite build",
     "build:native": "tsc -b && vite build --mode capacitor",
     "preview": "vite preview",
-    "mcp": "cd backends/python && ./.venv/bin/python -m app.mcp_local",
+    "mcp": "node scripts/mcp-local.cjs",
+    "mcp:setup": "node scripts/setup-local-mcp.cjs",
+    "mcp:check": "node scripts/mcp-local.cjs --check",
+    "db:backup": "cd backends/python && ./.venv/bin/python scripts/backup_local_db.py",
     "notes:build": "node scripts/build-topper-notes.mjs",
     "pyq:import:supplemental": "node scripts/import-supplemental-pyqs.mjs",
     "pyq:build": "node scripts/build-pyq-bank.mjs",
@@ -103,6 +107,7 @@
     "wait-on": "^9.5.1"
   },
   "build": {
+    "beforePack": "./electron/before-pack.cjs",
     "appId": "com.hetu.app",
     "productName": "HETU",
     "directories": {
@@ -137,8 +142,17 @@
           "**/*",
           "!**/__pycache__/**",
           "!**/.pytest_cache/**",
-          "!**/*.db"
+          "!.venv/**",
+          "!.env*",
+          "!**/*.db*",
+          "!**/tests/**",
+          "!**/.ruff_cache/**"
         ]
+      },
+      {
+        "from": ".codex-tmp/desktop-runtime/python",
+        "to": "python-runtime",
+        "filter": ["**/*", "!**/__pycache__/**", "!**/*.pyc"]
       },
       {
         "from": "dist",

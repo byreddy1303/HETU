@@ -134,5 +134,6 @@ Implementation, verification, and remaining limits are recorded in [study-memory
 | 2026-10-15 | Setup | Blueprint & Roadmap creation | `c8579cd` | Created component architecture spec and agent roadmap. |
 | 2026-10-15 | Bugfix | Fix topic_progress 409 soft-delete restore error | `c0d29ed` | Allowed upsert_records to restore soft-deleted rows in mutable collections instead of throwing 409. |
 | 2026-10-15 | Architecture | Cognitive AI Master Integration Specification | `c932245` | Detailed metacognitive thinking traces, pattern debugger, Socratic debrief, and schema in cognitive-ai-master-integration-spec.md. |
+| 2026-10-16 | Learning foundation | Durable Learning Memory and repair practice loop | `5f840ec` | Added source-linked thinking, independent exam post-mortems, concept recall, executable repairs, Planner follow-ups, and atomic exam receipts without a paid model. Staged source: 44 frontend and 21 backend tests pass; isolated browser and packaged-runtime flows verified. See study-memory-build.md. |
 
 

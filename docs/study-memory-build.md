@@ -41,6 +41,7 @@ The future coach can read these sources before proposing a diagnosis or repair. 
 - 26 backend tests across memory, library, recovery, and cognitive services pass. Memory cases cover owner isolation, stale writes, revision reopening, immutable verification, more than 100 search results, literal wildcard search, source export, atomic exam submission, and canonical repair aggregates.
 - Isolated browser acceptance uses a temporary SQLite database and blocks non-loopback requests. It verifies concept creation/recall draft reopening, two independent exam review histories, a selected-question repair launch, an actual answer and deferred reflection, result linking, and a prepared follow-up.
 - The desktop packaging command succeeds. A separate online backup and restore retains the memory records, source records, and revision rows, with SQLite integrity checks passing.
+- The final package's bundled Python runtime and compiled interface pass concept creation, a closed-book recall with notes/sidebar snippets hidden, immutable verification, and a downloaded JSON evidence export, with no browser errors.
 
 ## Remaining development
 

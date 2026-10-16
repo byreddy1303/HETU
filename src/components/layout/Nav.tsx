@@ -34,6 +34,7 @@ import Brand from '@/components/shared/Brand';
 
 type Item = { to: string; label: string; icon: LucideIcon };
 const REFLECT: Item[] = [
+  { to: '/memory', label: 'Learning Memory', icon: NotebookText },
   { to: '/workflows', label: 'Workflows', icon: ListChecks },
   { to: '/concept-review', label: 'Concept review', icon: RotateCcw },
   { to: '/journal', label: 'Journal', icon: NotebookText },

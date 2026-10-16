@@ -18,7 +18,7 @@ const MASTERY_META: Record<QuestionMastery, { label: string; tone: 'neutral' | '
   new: { label: 'New', tone: 'neutral' },
   learning: { label: 'Learning', tone: 'warn' },
   fragile: { label: 'Fragile', tone: 'warn' },
-  mastered: { label: 'Mastered', tone: 'success' }
+  mastered: { label: 'Repeated correct', tone: 'success' }
 };
 
 const VERDICT_META: Record<TimelineVerdict, { label: string; tone: 'neutral' | 'success' | 'danger' | 'accent' }> = {
@@ -150,6 +150,7 @@ export default function QuestionAttemptTimeline({
         <span className="text-text-faint">· avg {secondsToClock(timeline.avgTimeSec)}</span>
       </summary>
       <ol className="border-t border-border px-3 pt-3">
+        {timeline.mastery === 'mastered' && <li className="pb-3 text-xs text-text-muted">Consistency on this question does not establish delayed retention or fresh transfer.</li>}
         {timeline.attempts.map((attempt, index) => (
           <AttemptRow
             key={attempt.id}

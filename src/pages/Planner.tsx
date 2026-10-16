@@ -54,6 +54,8 @@ import type { StudySession } from '@/lib/planner-storage';
 import { normalizeSubjectIdentity } from '@/lib/subjects';
 import { db } from '@/lib/db';
 import { buildPlannerEvidenceCandidates } from '@/lib/planner-evidence-candidates';
+import { exportMemory, type StudyMemoryEntry } from '@/lib/study-memory';
+import { apiConfigured } from '@/lib/api-client';
 import { forecastReviewLoadWindows } from '@/lib/planner-review-load';
 import { loadDebt, loadSnapshots } from '@/lib/readiness-snapshots';
 import { SUBJECTS } from '@/lib/constants';
@@ -104,6 +106,14 @@ export default function Planner() {
   const authStatus = useAuthStore((s) => s.status);
   const userId = useAuthStore((s) => (s.sandbox ? s.profile?.id : s.user?.id) ?? null);
   const sandbox = useAuthStore((s) => s.sandbox);
+  const [memoryRepairs, setMemoryRepairs] = useState<StudyMemoryEntry[]>([]);
+  useEffect(() => {
+    if (!userId || !apiConfigured) return;
+    let active = true;
+    void Promise.all([exportMemory({ kind: 'repair' }), exportMemory({ kind: 'concept' })]).then((groups) => { if (active) setMemoryRepairs(groups.flat()); })
+      .catch((cause: unknown) => { if (active) pushToast(`Learning repairs could not load: ${cause instanceof Error ? cause.message : 'retry from Learning Memory'}`, 'danger'); });
+    return () => { active = false; };
+  }, [userId, pushToast]);
   const repairRequest = useMemo(() => {
     const params = new URLSearchParams(window.location.search);
     if (params.get('addPyqRepair') !== '1') return null;
@@ -211,6 +221,7 @@ export default function Planner() {
         .sort((left, right) => right.week_start.localeCompare(left.week_start))[0] ?? null;
     const candidates = buildPlannerEvidenceCandidates({
       asOfDate: date,
+      studyMemoryEntries: memoryRepairs,
       learningItems: evidence.learningItems,
       reattempts: evidence.reattempts,
       pyqAttempts: evidence.pyqAttempts,
@@ -268,7 +279,7 @@ export default function Planner() {
             }
           : undefined
     };
-  }, [evidence, openPlan, selectedDate, todayISO, userId]);
+  }, [evidence, openPlan, selectedDate, todayISO, userId, memoryRepairs]);
 
   const reportCloudWriteResult = useCallback(
     (error: string | null) => {

@@ -23,6 +23,9 @@ import { Dialog } from '@/components/ui/Dialog';
 import QuestionEditor, { DeleteBar } from '@/components/shared/QuestionEditor';
 import SessionEditor from '@/components/shared/SessionEditor';
 import PyqSessionSummary from '@/components/pyq/PyqSessionSummary';
+import PostExamReview from '@/components/memory/PostExamReview';
+import MemoryPracticeResult from '@/components/memory/MemoryPracticeResult';
+import { apiConfigured } from '@/lib/api-client';
 import { applyDraftToRow, draftFromRow, type EditorDraft } from '@/components/shared/questionDraft';
 import { useAuth } from '@/hooks/useAuth';
 import { markLearningAnalysisCompleted } from '@/lib/learning-recovery';
@@ -64,6 +67,7 @@ export default function SessionReview() {
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [editSessionOpen, setEditSessionOpen] = useState(false);
+  const [showAnswerReport, setShowAnswerReport] = useState(false);
 
   function openEdit(row: QuestionRow) {
     setEditRow(row);
@@ -215,7 +219,13 @@ export default function SessionReview() {
         </div>
       </div>
 
-      {session.kind === 'pyq' ? (
+      {session.kind === 'pyq' && pyqSession && apiConfigured ? <>
+        <MemoryPracticeResult session={pyqSession} attempts={pyqAttempts} />
+        <PostExamReview session={pyqSession} attempts={pyqAttempts} answersAlreadyVisible={showAnswerReport || questions.length > 0 || pyqSession.config.mode !== 'exam'} />
+        {pyqSession.config.mode === 'exam' && <Button onClick={() => setShowAnswerReport(true)} disabled={showAnswerReport}>Show detailed score and answer report</Button>}
+      </> : null}
+
+      {session.kind === 'pyq' && (pyqSession?.config.mode !== 'exam' || showAnswerReport || !apiConfigured) ? (
         pyqSession ? (
           <PyqSessionSummary session={pyqSession} attempts={pyqAttempts} />
         ) : (

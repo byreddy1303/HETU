@@ -65,6 +65,7 @@ COLLECTIONS = frozenset(
         "trigger_phrases",
         "variations",
         "weekly_reviews",
+        "study_memory",
     }
 )
 IMMUTABLE_COLLECTIONS = frozenset(
@@ -86,6 +87,7 @@ DOMAIN_MANAGED_COLLECTIONS = frozenset(
         "learning_events",
         "recovery_sessions",
         "reattempts",
+        "study_memory",
     }
 )
 RESERVED_FIELDS = frozenset(

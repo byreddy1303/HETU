@@ -39,6 +39,7 @@ const Pyq = lazyWithRetry(() => import('@/pages/Pyq'));
 const TopperNotes = lazyWithRetry(() => import('@/pages/TopperNotes'));
 const LinearAlgebraLab = lazyWithRetry(() => import('@/pages/LinearAlgebraLab'));
 const LearningLibrary = lazyWithRetry(() => import('@/pages/LearningLibrary'));
+const LearningMemory = lazyWithRetry(() => import('@/pages/LearningMemory'));
 const Workflows = lazyWithRetry(() => import('@/pages/Workflows'));
 const ConceptReview = lazyWithRetry(() => import('@/pages/ConceptReview'));
 const DevPrimitives = lazyWithRetry(() => import('@/pages/DevPrimitives'));
@@ -106,6 +107,8 @@ export const router = routerFactory([
       { path: 'linear-algebra-lab', element: <LinearAlgebraLab /> },
       { path: 'learning-library', element: <LearningLibrary /> },
       { path: 'learning-library/:conceptId', element: <LearningLibrary /> },
+      { path: 'memory', element: <LearningMemory /> },
+      { path: 'memory/:entryId', element: <LearningMemory /> },
       { path: 'workflows', element: <Workflows /> },
       { path: 'workflows/:workflowId', element: <Workflows /> },
       { path: 'concept-review', element: <ConceptReview /> },

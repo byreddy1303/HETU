@@ -57,6 +57,7 @@ const MORE_GROUPS: { label: string; items: Item[] }[] = [
   {
     label: 'Reflect',
     items: [
+      { to: '/memory', label: 'Learning Memory', icon: NotebookText },
       { to: '/journal', label: 'Journal', icon: NotebookText },
       { to: '/reattempts', label: 'Re-attempts', icon: RotateCcw },
       { to: '/weekly-review', label: 'Weekly review', icon: CalendarCheck },

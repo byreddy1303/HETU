@@ -52,6 +52,12 @@ import PyqQuestionContent from '@/components/pyq/PyqQuestionContent';
 import PyqSessionHistory from '@/components/pyq/PyqSessionHistory';
 import PyqConversationHistory from '@/components/pyq/PyqConversationHistory';
 import QuestionAttemptTimeline from '@/components/pyq/QuestionAttemptTimeline';
+import ThinkingReviewDrawer, { type DebriefContext } from '@/components/pyq/ThinkingReviewDrawer';
+import MemoryPracticeResult from '@/components/memory/MemoryPracticeResult';
+import MemoryPracticeStart from '@/components/memory/MemoryPracticeStart';
+import { attachMemoryRepairSession, loadMemoryQuestions } from '@/lib/study-memory-practice';
+import { getMemoryEntry } from '@/lib/study-memory';
+import { apiRequest } from '@/lib/fastapi-client';
 import { simulateSkippingGuesses, thirdsToMarks } from '@/lib/negative-marking';
 import TagFlow from '@/components/tags/TagFlow';
 import { Card, CardBody, CardHeader } from '@/components/ui/Card';
@@ -59,7 +65,7 @@ import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { Select } from '@/components/ui/Select';
 import { Dialog } from '@/components/ui/Dialog';
-import { db } from '@/lib/db';
+import { db, hydrateTables } from '@/lib/db';
 import { useAuth } from '@/hooks/useAuth';
 import { useTimer } from '@/hooks/useTimer';
 import { writeLocal, writeLocalBatch } from '@/lib/sync';
@@ -1834,6 +1840,31 @@ export default function Pyq() {
   const [loadedSession, setLoadedSession] = useState<PyqSessionRow | null>(null);
   const [examSubmitOpen, setExamSubmitOpen] = useState(false);
   const [calcOpen, setCalcOpen] = useState(false);
+  const [debriefCtx, setDebriefCtx] = useState<DebriefContext | null>(null);
+  const [debriefOpen, setDebriefOpen] = useState(false);
+  const [debriefQueue, setDebriefQueue] = useState<DebriefContext[]>([]);
+
+  function queueOrOpenDebrief(ctx: DebriefContext) {
+    if (debriefOpen) {
+      setDebriefQueue((q) => [...q, ctx]);
+      return;
+    }
+    setDebriefCtx(ctx);
+    setDebriefOpen(true);
+  }
+
+  function closeDebrief() {
+    const [next, ...rest] = debriefQueue;
+    setDebriefQueue(rest);
+    if (next) {
+      setDebriefCtx(next);
+      setDebriefOpen(true);
+    } else {
+      setDebriefOpen(false);
+      setDebriefCtx(null);
+    }
+  }
+
   const questionCaptureRef = useRef<HTMLDivElement>(null);
   const submittingRef = useRef(false);
   const pendingPracticeAttemptRef = useRef<PyqAttemptRow | null>(null);
@@ -3069,7 +3100,17 @@ export default function Pyq() {
       let rows: PyqQuestion[];
       let sessionConfig: AttemptConfig;
 
-      if (isFullPaper) {
+      const memoryRepairId = searchParams.get('memoryRepairId');
+      if (memoryRepairId) {
+        const { entry } = await getMemoryEntry(memoryRepairId);
+        if (entry.kind !== 'repair') throw new Error('This memory record is not a practice repair.');
+        rows = await loadMemoryQuestions(entry, userId);
+        if (!rows.length) throw new Error('The repair has no eligible selected questions. Return to Learning Memory and choose an available set.');
+        if (!Array.isArray(entry.data.question_uids) || !entry.data.question_uids.length) throw new Error('Select the repair’s questions in Learning Memory before starting.');
+        sessionConfig = { ...config, bookSlug: 'gate-cse', subjectSlug: 'all', subjectSlugs: undefined,
+          topicSlug: 'all', mode: 'practice', count: 'all', history: 'all', recommendationPreset: 'custom',
+          examKind: undefined, benchmarkPaperId: undefined, examState: undefined, practiceDraft: undefined, practiceDrafts: undefined };
+      } else if (isFullPaper) {
         const paper = manifest.benchmarkPapers.find(
           (candidate) => candidate.id === config.benchmarkPaperId
         );
@@ -3269,7 +3310,8 @@ export default function Pyq() {
               };
       }
       sessionConfig = { ...sessionConfig, bookSlug: 'gate-cse' };
-      const session = createPyqSessionRow(userId!, manifest.bankVersion, sessionConfig, rows);
+      const linkedConfig = { ...sessionConfig, ...(searchParams.get('memoryRepairId') ? { memoryRepairId: searchParams.get('memoryRepairId') } : {}) };
+      const session = createPyqSessionRow(userId!, manifest.bankVersion, linkedConfig, rows);
       const plannerDate = searchParams.get('plannerDate');
       const plannerBlockId = searchParams.get('plannerBlock');
       const canonical: SessionRow = {
@@ -3284,6 +3326,12 @@ export default function Pyq() {
           row: canonical
         }
       ]);
+      if (memoryRepairId) {
+        // The session carries the link even if this optional index update fails.
+        void attachMemoryRepairSession(memoryRepairId, session.id).catch((cause: unknown) => {
+          console.warn('[memory] Practice is saved; repair index update needs retry.', cause);
+        });
+      }
       if (plannerDate && plannerBlockId) {
         const linkedPlan = attachPlannerPyqSession({
           plannerDate,
@@ -3626,20 +3674,13 @@ export default function Pyq() {
         timeZone
       });
       const existingCanonical = await db.sessions.get(session.id);
-      await writeLocalBatch([
-        ...finalized.attempts.map((attempt) => ({ name: 'pyq_attempts' as const, row: attempt })),
-        { name: 'pyq_sessions', row: finalized.session },
-        ...(mockTest ? ([{ name: 'mock_tests', row: mockTest }] as const) : []),
-        {
-          name: 'sessions',
-          row: pyqPracticeSessionRow(
-            finalized.session,
-            pyqPracticeSubject(questions),
-            timeZone,
-            existingCanonical
-          )
-        }
-      ]);
+      const canonicalSession = pyqPracticeSessionRow(finalized.session, pyqPracticeSubject(questions), timeZone, existingCanonical);
+      // Receipts are validated while active; completion shares their transaction.
+      await apiRequest('/v1/study-memory/exams/submit', {
+        method: 'POST', body: JSON.stringify({ session: finalized.session, attempts: finalized.attempts,
+          canonical_session: canonicalSession, mock_test: mockTest })
+      });
+      await hydrateTables(userId, ['pyq_attempts', 'pyq_sessions', 'sessions', 'mock_tests']);
       for (const attempt of finalized.attempts) {
         if (!needsRecoveryCapture(attempt)) continue;
         const sourceQuestion = questions.find((question) => question.id === attempt.question_uid);
@@ -3665,6 +3706,7 @@ export default function Pyq() {
       setLoadedSession(finalized.session);
       setCompleted(finalized.attempts);
       setFinished(true);
+      // Review derives every question from this exam's durable receipts.
       navigate(`/session/${session.id}/review`);
     } catch (error) {
       setSubmitError(
@@ -3803,6 +3845,28 @@ export default function Pyq() {
       loadedSessionRef.current = nextSession;
       setLoadedSession(nextSession);
       setSubmitted(attempt);
+      // Every-PYQ Socratic trigger (practice opens now; exam queues for post-mortem).
+      try {
+        const isExam = nextSession.config.mode === 'exam';
+        const fire = !isExam;
+        if (fire && !isExam) {
+          queueOrOpenDebrief({
+            attemptId: attempt.id,
+            questionUid: current.id,
+            subject: current.subject,
+            topic: current.topic,
+            selectedOption: Array.isArray(attempt.selected_answer)
+              ? attempt.selected_answer.join(',')
+              : String(attempt.selected_answer ?? ''),
+            correctOption: Array.isArray(attempt.correct_answer)
+              ? attempt.correct_answer.join(',')
+              : String(attempt.correct_answer ?? ''),
+            timeSpentSeconds: attempt.time_spent_sec ?? 0
+          });
+        }
+      } catch {
+        // debrief is advisory — never break the immutable receipt flow
+      }
       setCompleted((rows) =>
         rows.some((row) => row.id === attempt.id)
           ? rows.map((row) => (row.id === attempt.id ? attempt : row))
@@ -4069,6 +4133,8 @@ export default function Pyq() {
   }
 
   if (questions.length === 0) {
+    const memoryRepairId = searchParams.get('memoryRepairId');
+    if (memoryRepairId) return <MemoryPracticeStart repairId={memoryRepairId} loading={loading} error={startError} onStart={() => void startPractice()} />;
     return (
       <PracticeSetup
         manifest={manifest}
@@ -4128,6 +4194,7 @@ export default function Pyq() {
           title="Practice set complete"
           description={`${completed.length} immutable ${plural(completed.length, 'attempt')} saved without exposing a key early.`}
         />
+        {loadedSession && <MemoryPracticeResult session={loadedSession} attempts={completed} />}
         <Card>
           <CardBody className="p-6 sm:p-8">
             <div className="flex items-center gap-3">
@@ -4654,6 +4721,27 @@ export default function Pyq() {
                         : 'Next question'}
                     <ArrowRight size={15} />
                   </Button>
+                  <Button
+                    variant="secondary"
+                    onClick={() =>
+                      queueOrOpenDebrief({
+                        attemptId: submitted.id,
+                        questionUid: current.id,
+                        subject: current.subject,
+                        topic: current.topic,
+                        selectedOption: Array.isArray(submitted.selected_answer)
+                          ? submitted.selected_answer.join(',')
+                          : String(submitted.selected_answer ?? ''),
+                        correctOption: Array.isArray(submitted.correct_answer)
+                          ? submitted.correct_answer.join(',')
+                          : String(submitted.correct_answer ?? ''),
+                        timeSpentSeconds: submitted.time_spent_sec ?? 0
+                      })
+                    }
+                    disabled={loading || submitting}
+                  >
+                    Debug thinking
+                  </Button>
                   {journalSaved ? (
                     <Badge tone="success" className="self-center">
                       Saved to journal
@@ -4748,6 +4836,12 @@ export default function Pyq() {
       )}
 
       <ScientificCalculator open={calcOpen} onClose={() => setCalcOpen(false)} />
+      <ThinkingReviewDrawer ctx={debriefCtx} open={debriefOpen} onClose={closeDebrief} />
+      {debriefQueue.length > 0 && (
+        <div className="fixed bottom-4 left-4 z-40 rounded-lg border border-accent/30 bg-bg-raised px-3 py-2 text-[12px] text-text shadow-lift">
+          {debriefQueue.length} more debrief{debriefQueue.length === 1 ? '' : 's'} queued — finish this one to continue.
+        </div>
+      )}
     </div>
   );
 }

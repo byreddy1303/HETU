@@ -96,6 +96,7 @@ import {
   abandonPyqSession,
   advancePyqSessionProgress,
   completePyqSession,
+  endPausedPyqPracticeSession,
   createPyqAttemptRow,
   aggregatePyqAttemptScores,
   createPyqSessionRow,
@@ -582,6 +583,7 @@ function PracticeSetup({
   error,
   onResume,
   onSave,
+  onEndAndSave,
   onDiscard,
   onReview,
   onIncludeReservedBenchmarkQuestions,
@@ -621,6 +623,7 @@ function PracticeSetup({
   error: string | null;
   onResume: (session: PyqSessionRow) => void;
   onSave: (session: PyqSessionRow) => void;
+  onEndAndSave: (session: PyqSessionRow) => void;
   onDiscard: (session: PyqSessionRow) => void;
   onReview: (session: PyqSessionRow) => void;
   onIncludeReservedBenchmarkQuestions: (included: boolean) => void;
@@ -739,6 +742,10 @@ function PracticeSetup({
           <p className="px-1 text-[11px] font-semibold uppercase tracking-widest text-text-faint">
             Paused sessions
           </p>
+          <p className="px-1 text-[12px] text-text-muted">
+            End and save finishes a session now and opens its saved report. Practice drafts stay
+            saved; exams submit their saved responses.
+          </p>
           {savedSessions.map((session) => (
             <Card key={session.id}>
               <CardBody className="flex flex-col gap-3 p-3 sm:flex-row sm:items-center sm:justify-between">
@@ -776,6 +783,18 @@ function PracticeSetup({
                 <div className="flex flex-wrap gap-2">
                   <Button variant="primary" onClick={() => onResume(session)} disabled={loading}>
                     {session.config.mode === 'exam' ? 'Resume exam' : 'Resume practice'}
+                  </Button>
+                  <Button
+                    onClick={() => onEndAndSave(session)}
+                    disabled={loading}
+                    title={
+                      session.config.mode === 'exam'
+                        ? 'Finish this exam, submit saved responses, and open the report'
+                        : 'Finish now and save submitted answers, drafts, and active time'
+                    }
+                  >
+                    <CheckCircle2 size={14} aria-hidden="true" />
+                    End and save
                   </Button>
                   <Button variant="danger" onClick={() => onDiscard(session)} disabled={loading}>
                     Discard session
@@ -2807,6 +2826,85 @@ export default function Pyq() {
     }
   }
 
+  async function endAndSaveSession(session: PyqSessionRow) {
+    if (!userId || loading || submittingRef.current || pausingSessionRef.current) return;
+    submittingRef.current = true;
+    setLoading(true);
+    setStartError(null);
+    try {
+      // Reconcile a submission whose response may have been lost before
+      // creating new immutable receipts with a different commit timestamp.
+      await hydrateTables(userId, ['pyq_sessions', 'sessions', 'pyq_attempts', 'mock_tests']);
+      const persistedSession = await db.pyq_sessions.get(session.id);
+      if (!persistedSession || persistedSession.user_id !== userId) {
+        throw new Error('That session is unavailable for this account.');
+      }
+      if (persistedSession.status === 'completed' && persistedSession.config.mode === 'exam') {
+        navigate(`/session/${session.id}/review`);
+        return;
+      }
+      if (persistedSession.status !== 'paused' && persistedSession.status !== 'completed') {
+        throw new Error('This session is no longer paused. Refresh its saved state and try again.');
+      }
+      if (persistedSession.config.mode === 'exam') {
+        if (!manifest) throw new Error('The question bank is still loading. Try again shortly.');
+        const examQuestions = await questionsForSession(persistedSession);
+        if (examQuestions.length !== persistedSession.question_uids.length) {
+          throw new Error('A saved exam question is unavailable. Your exam is still paused.');
+        }
+        const nowMs = Date.now();
+        // A zero-length in-memory resume lets the finalizer use the frozen
+        // countdown. The persisted exam remains paused until atomic submission.
+        const finalized = finalizePyqExam({
+          userId,
+          session: resumePyqExamSession(persistedSession, nowMs),
+          questions: examQuestions,
+          bankVersion: persistedSession.bank_version,
+          reason: 'manual',
+          nowMs
+        });
+        await persistFinalizedExam(finalized, examQuestions);
+      } else {
+        const completedSession = endPausedPyqPracticeSession(persistedSession);
+        const existingCanonical = await db.sessions.get(session.id);
+        // These tables use separate requests. Save the review row first so
+        // a failed write leaves practice paused and available to retry.
+        await writeLocalBatch([
+          {
+            name: 'sessions',
+            row: pyqPracticeSessionRow(
+              completedSession,
+              existingCanonical?.subject ??
+                manifest?.subjects.find(
+                  (subject) => subject.slug === completedSession.config.subjectSlug
+                )?.label ??
+                'PYQ practice',
+              timeZone,
+              existingCanonical
+            )
+          }
+        ]);
+        if (persistedSession.status !== 'completed') {
+          await writeLocalBatch([{ name: 'pyq_sessions', row: completedSession }]);
+        }
+        await reconcileLinkedPlannerReceipt(
+          existingCanonical?.planner_date ?? null,
+          existingCanonical?.planner_block_id ?? null
+        );
+      }
+      navigate(`/session/${session.id}/review`);
+    } catch (error) {
+      setStartError(
+        error instanceof Error
+          ? `Could not end and save this session: ${error.message}`
+          : 'Could not end and save this session. Your paused work is still available.'
+      );
+    } finally {
+      submittingRef.current = false;
+      setLoading(false);
+    }
+  }
+
   async function saveSession(session: PyqSessionRow) {
     const pausingExam = session.config.mode === 'exam';
     const pausingOpenSession = pyqSessionId === session.id && questions.length > 0;
@@ -3641,6 +3739,57 @@ export default function Pyq() {
     navigateExam(index + 1);
   }
 
+  async function persistFinalizedExam(
+    finalized: ReturnType<typeof finalizePyqExam>,
+    examQuestions: PyqQuestion[]
+  ) {
+    if (!userId) throw new Error('Sign in before saving this exam.');
+    const mockTest = mockTestFromFinalizedPyqExam({
+      session: finalized.session,
+      attempts: finalized.attempts,
+      timeZone
+    });
+    const existingCanonical = await db.sessions.get(finalized.session.id);
+    const canonicalSession = pyqPracticeSessionRow(
+      finalized.session,
+      pyqPracticeSubject(examQuestions),
+      timeZone,
+      existingCanonical
+    );
+    // Receipts and completion share a transaction for active or paused exams.
+    await apiRequest('/v1/study-memory/exams/submit', {
+      method: 'POST',
+      body: JSON.stringify({
+        session: finalized.session,
+        attempts: finalized.attempts,
+        canonical_session: canonicalSession,
+        mock_test: mockTest
+      })
+    });
+    await hydrateTables(userId, ['pyq_attempts', 'pyq_sessions', 'sessions', 'mock_tests']);
+    for (const attempt of finalized.attempts) {
+      if (!needsRecoveryCapture(attempt)) continue;
+      const sourceQuestion = examQuestions.find((question) => question.id === attempt.question_uid);
+      if (!sourceQuestion) continue;
+      const compatibilityQuestion = {
+        ...questionRowFromAttempt(attempt, undefined, attempt.screenshot_url, sourceQuestion),
+        id: pyqJournalQuestionId(attempt.id)
+      };
+      void captureWeakPyqAttempt({ attempt, timeZone, compatibilityQuestion }).catch(
+        (captureError: unknown) => {
+          // The immutable exam receipt is already safe. Login/resume backfill
+          // retries recovery capture without making the whole paper look lost.
+          console.warn('[air] Exam recovery capture is waiting to retry.', captureError);
+        }
+      );
+    }
+    const finalizedCanonical = await db.sessions.get(finalized.session.id);
+    await reconcileLinkedPlannerReceipt(
+      finalizedCanonical?.planner_date ?? null,
+      finalizedCanonical?.planner_block_id ?? null
+    );
+  }
+
   async function submitExam(reason: 'manual' | 'time-expired') {
     const session = loadedSessionRef.current;
     if (
@@ -3668,40 +3817,7 @@ export default function Pyq() {
         bankVersion: manifest.bankVersion,
         reason
       });
-      const mockTest = mockTestFromFinalizedPyqExam({
-        session: finalized.session,
-        attempts: finalized.attempts,
-        timeZone
-      });
-      const existingCanonical = await db.sessions.get(session.id);
-      const canonicalSession = pyqPracticeSessionRow(finalized.session, pyqPracticeSubject(questions), timeZone, existingCanonical);
-      // Receipts are validated while active; completion shares their transaction.
-      await apiRequest('/v1/study-memory/exams/submit', {
-        method: 'POST', body: JSON.stringify({ session: finalized.session, attempts: finalized.attempts,
-          canonical_session: canonicalSession, mock_test: mockTest })
-      });
-      await hydrateTables(userId, ['pyq_attempts', 'pyq_sessions', 'sessions', 'mock_tests']);
-      for (const attempt of finalized.attempts) {
-        if (!needsRecoveryCapture(attempt)) continue;
-        const sourceQuestion = questions.find((question) => question.id === attempt.question_uid);
-        if (!sourceQuestion) continue;
-        const compatibilityQuestion = {
-          ...questionRowFromAttempt(attempt, undefined, attempt.screenshot_url, sourceQuestion),
-          id: pyqJournalQuestionId(attempt.id)
-        };
-        void captureWeakPyqAttempt({ attempt, timeZone, compatibilityQuestion }).catch(
-          (captureError: unknown) => {
-            // The immutable exam receipt is already safe. Login/resume backfill
-            // retries recovery capture without making the whole paper look lost.
-            console.warn('[air] Exam recovery capture is waiting to retry.', captureError);
-          }
-        );
-      }
-      const finalizedCanonical = await db.sessions.get(finalized.session.id);
-      await reconcileLinkedPlannerReceipt(
-        finalizedCanonical?.planner_date ?? null,
-        finalizedCanonical?.planner_block_id ?? null
-      );
+      await persistFinalizedExam(finalized, questions);
       loadedSessionRef.current = finalized.session;
       setLoadedSession(finalized.session);
       setCompleted(finalized.attempts);
@@ -4159,6 +4275,7 @@ export default function Pyq() {
         error={startError}
         onResume={(session) => void resumeSession(session)}
         onSave={(session) => void saveSession(session)}
+        onEndAndSave={(session) => void endAndSaveSession(session)}
         onDiscard={(session) => void discardSession(session)}
         onReview={(session) => navigate(`/session/${session.id}/review`)}
         onIncludeReservedBenchmarkQuestions={setIncludeReservedBenchmarkQuestions}

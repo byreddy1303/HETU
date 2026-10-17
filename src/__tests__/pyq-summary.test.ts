@@ -10,7 +10,7 @@ import {
 import type { PyqQuestion } from '@/lib/pyq';
 import { createPyqAttemptRow, createPyqSessionRow } from '@/lib/pyq-session';
 import { buildPyqSessionSummary, latestPyqSessionAttempts } from '@/lib/pyq-summary';
-import type { PyqSessionConfig, PyqSessionRow } from '@/types';
+import type { PyqPracticeDraft, PyqSessionConfig, PyqSessionRow } from '@/types';
 
 const START_MS = Date.parse('2026-08-24T04:30:00.000Z');
 
@@ -64,6 +64,132 @@ function examSession(questions: readonly PyqQuestion[], nowMs = START_MS): PyqSe
 }
 
 describe('PYQ session summary aggregation', () => {
+  it('preserves unsubmitted practice answers and active time without grading or double counting the draft alias', () => {
+    const candidates = [question('saved-draft'), question('unvisited')];
+    const savedDraft: PyqPracticeDraft = {
+      question_uid: candidates[0].id,
+      selected_answer: 'B',
+      mark_decision: 'MARK',
+      confidence: 'low',
+      elapsed_ms: 2_500,
+      first_started_at: new Date(START_MS).toISOString()
+    };
+    const session: PyqSessionRow = {
+      ...createPyqSessionRow(
+        'user-1',
+        'bank-3',
+        baseConfig,
+        candidates,
+        new Date(START_MS).toISOString()
+      ),
+      status: 'completed',
+      elapsed_sec: 3,
+      config: {
+        ...baseConfig,
+        practiceDraft: savedDraft,
+        practiceDrafts: { [savedDraft.question_uid]: savedDraft }
+      }
+    };
+
+    const summary = buildPyqSessionSummary(session, []);
+
+    expect(summary.questions[0]).toMatchObject({
+      savedDraft,
+      attempt: null,
+      outcome: 'not-submitted',
+      visited: true,
+      confidence: 'low',
+      timeSpentMs: 2_500,
+      timeSpentSec: 3,
+      scoreThirds: null,
+      maxThirds: null,
+      scoringCovered: false
+    });
+    expect(summary.questions[1]).toMatchObject({
+      visited: false,
+      outcome: 'not-submitted',
+      timeSpentMs: 0
+    });
+    expect(summary.questions[1].savedDraft).toBeUndefined();
+    expect(summary).toMatchObject({
+      elapsedSec: 3,
+      rawReceiptCount: 0,
+      answered: 0,
+      correct: 0,
+      wrong: 0,
+      notVisited: 1,
+      scoringCoverageCount: 0,
+      gradedAccuracyPercent: null,
+      resultantMarks: 0,
+      confidence: { high: 0, medium: 0, low: 1, unset: 1 }
+    });
+  });
+
+  it('adds unsent retry time to prior receipts while preserving the submitted skip outcome', () => {
+    const candidate = question('saved-retry');
+    const initialSession = createPyqSessionRow(
+      'user-1',
+      'bank-3',
+      baseConfig,
+      [candidate],
+      new Date(START_MS).toISOString()
+    );
+    const skipped = createPyqAttemptRow({
+      userId: 'user-1',
+      session: initialSession,
+      question: candidate,
+      selectedAnswer: null,
+      decision: 'SKIP',
+      bankVersion: 'bank-3',
+      questionStartedAtMs: START_MS,
+      committedAtMs: START_MS + 500,
+      timeSpentMs: 500,
+      screenshotUrl: null,
+      attemptNumber: 1
+    });
+    const savedDraft: PyqPracticeDraft = {
+      question_uid: candidate.id,
+      selected_answer: 'B',
+      mark_decision: 'MARK',
+      confidence: null,
+      elapsed_ms: 700,
+      first_started_at: new Date(START_MS + 500).toISOString()
+    };
+    const session: PyqSessionRow = {
+      ...initialSession,
+      status: 'completed',
+      elapsed_sec: 2,
+      config: {
+        ...baseConfig,
+        practiceDraft: savedDraft,
+        practiceDrafts: { [candidate.id]: { ...savedDraft, elapsed_ms: 400 } }
+      }
+    };
+
+    const summary = buildPyqSessionSummary(session, [skipped]);
+
+    expect(summary.questions[0]).toMatchObject({
+      attempt: skipped,
+      savedDraft,
+      outcome: 'skipped',
+      visited: true,
+      confidence: null,
+      timeSpentMs: 1_200,
+      timeSpentSec: 2,
+      scoreThirds: 0
+    });
+    expect(summary).toMatchObject({
+      elapsedSec: 2,
+      rawReceiptCount: 1,
+      answered: 0,
+      correct: 0,
+      wrong: 0,
+      skipped: 1,
+      gradedAccuracyPercent: null,
+      resultantMarks: 0
+    });
+  });
+
   it('keeps the latest practice outcome while summing time across skip-and-retry receipts', () => {
     const candidate = question('practice-retry');
     const session = createPyqSessionRow(

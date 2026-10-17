@@ -1,5 +1,6 @@
-import type { PyqAttemptRow, PyqExamConfidence, PyqSessionRow } from '@/types';
+import type { PyqAttemptRow, PyqExamConfidence, PyqPracticeDraft, PyqSessionRow } from '@/types';
 import { scoreGateOutcome, type GateScoreResult } from '@/lib/gate-scoring';
+import { getPyqPracticeDraft } from '@/lib/pyq-session';
 
 export type PyqSummaryOutcome =
   'correct' | 'wrong' | 'skipped' | 'bonus' | 'unscorable' | 'not-submitted';
@@ -9,6 +10,8 @@ export interface PyqQuestionSummary {
   questionNumber: number;
   attemptOrder: number;
   attempt: PyqAttemptRow | null;
+  /** Preserved practice work that was never submitted or graded. */
+  savedDraft?: PyqPracticeDraft;
   outcome: PyqSummaryOutcome;
   visited: boolean;
   markedForReview: boolean;
@@ -151,21 +154,28 @@ export function buildPyqSessionSummary(
 
   const questions = questionUids.map((questionUid, index): PyqQuestionSummary => {
     const attempt = latest.get(questionUid) ?? null;
+    const savedDraft =
+      session.config.mode === 'exam' ? undefined : getPyqPracticeDraft(session, questionUid);
     const exactScore = attempt ? exactStoredScore(attempt) : null;
     const examTimeMs = examState?.time_by_question_ms[questionUid];
     const hasExamTime = typeof examTimeMs === 'number' && Number.isFinite(examTimeMs);
+    const draftTimeMs =
+      savedDraft && Number.isFinite(savedDraft.elapsed_ms) ? Math.max(0, savedDraft.elapsed_ms) : 0;
     const timeSpentMs = hasExamTime
       ? Math.max(0, examTimeMs)
-      : (practiceTimeMsByQuestion.get(questionUid) ?? 0);
+      : (practiceTimeMsByQuestion.get(questionUid) ?? 0) + draftTimeMs;
+    const practiceResponse = savedDraft ?? attempt;
     const rawConfidence = examState
       ? confidenceByQuestion[questionUid]
-      : (attempt?.confidence ??
-        (attempt?.mark_decision === 'MARK'
-          ? 'high'
-          : attempt?.mark_decision === 'FIFTY_FIFTY'
-            ? 'medium'
-            : null) ??
-        confidenceByQuestion[questionUid]);
+      : savedDraft?.confidence !== undefined
+        ? savedDraft.confidence
+        : (practiceResponse?.confidence ??
+          (practiceResponse?.mark_decision === 'MARK'
+            ? 'high'
+            : practiceResponse?.mark_decision === 'FIFTY_FIFTY'
+              ? 'medium'
+              : null) ??
+          confidenceByQuestion[questionUid]);
     const recordedConfidence =
       rawConfidence === 'high' || rawConfidence === 'medium' || rawConfidence === 'low'
         ? rawConfidence
@@ -176,8 +186,9 @@ export function buildPyqSessionSummary(
       attemptOrder:
         visitOrder.get(questionUid) ?? receiptOrder.get(questionUid) ?? Number.MAX_SAFE_INTEGER,
       attempt,
+      ...(savedDraft ? { savedDraft } : {}),
       outcome: outcomeForAttempt(attempt),
-      visited: examState ? visited.has(questionUid) : attempt !== null,
+      visited: examState ? visited.has(questionUid) : attempt !== null || !!savedDraft,
       markedForReview: marked.has(questionUid),
       confidence: recordedConfidence,
       timeSpentMs,

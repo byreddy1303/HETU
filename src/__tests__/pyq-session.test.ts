@@ -16,6 +16,7 @@ import {
   pyqPracticeSubject,
   advancePyqSessionProgress,
   completePyqSession,
+  endPausedPyqPracticeSession,
   abandonPyqSession,
   getPyqPracticeDraft,
   navigatePyqPracticeQuestion,
@@ -462,6 +463,49 @@ describe('PYQ session logic and determinism', () => {
 
     const abandoned = abandonPyqSession(session);
     expect(abandoned.status).toBe('abandoned');
+  });
+
+  it('ends paused practice with partial coverage and counts each draft once without paused time', () => {
+    const startMs = Date.parse('2026-08-08T08:00:00.000Z');
+    const original = createPyqSessionRow(
+      'user-1', '1.0.0', mockConfig, [{ id: 'q1' }, { id: 'q2' }, { id: 'q3' }],
+      new Date(startMs).toISOString()
+    );
+    const progressed = advancePyqSessionProgress(original, 'q1', 1, 30);
+    const paused = pausePyqPracticeSession(
+      startPyqSessionQuestion(progressed, 'q2', new Date(startMs + 30_000).toISOString()),
+      { questionUid: 'q2', selectedAnswer: 'B', markDecision: null, confidence: 'low' },
+      startMs + 95_000
+    );
+    const saved = endPausedPyqPracticeSession(paused, new Date(startMs + 3_600_000).toISOString());
+
+    expect(saved).toMatchObject({
+      status: 'completed', elapsed_sec: 95, completed_count: 1,
+      completed_question_uids: ['q1'], current_question_uid: null,
+      current_question_started_at: null,
+      config: { practiceDraft: { selected_answer: 'B', mark_decision: null, elapsed_ms: 65_000 } }
+    });
+    expect(saved.config).toEqual(paused.config);
+    expect(endPausedPyqPracticeSession(saved).elapsed_sec).toBe(95);
+    expect(pyqPracticeSessionRow(saved, 'Algorithms').actual_duration_min).toBe(2);
+  });
+
+  it('saves draft-only practice time and rejects the wrong end-and-save flow', () => {
+    const original = createPyqSessionRow(
+      'user-1', '1.0.0', mockConfig, [{ id: 'q1' }], '2026-08-08T08:00:00.000Z'
+    );
+    const paused = pausePyqPracticeSession(
+      original, { questionUid: 'q1', selectedAnswer: null, markDecision: null },
+      Date.parse('2026-08-08T08:01:01.000Z')
+    );
+    const saved = endPausedPyqPracticeSession(paused);
+    expect(saved.completed_count).toBe(0);
+    expect(saved.completed_question_uids).toEqual([]);
+    expect(pyqPracticeSessionRow(saved, 'Algorithms').actual_duration_min).toBe(2);
+    expect(() => endPausedPyqPracticeSession(original)).toThrow(/Pause this practice session/);
+    expect(() => endPausedPyqPracticeSession({
+      ...paused, config: { ...paused.config, mode: 'exam' }
+    })).toThrow(/exam submission flow/);
   });
 
   it('projects a PYQ set into the canonical session stream', () => {

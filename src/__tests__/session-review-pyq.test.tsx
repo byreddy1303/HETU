@@ -9,8 +9,14 @@ import {
   setPyqExamResponse
 } from '@/lib/pyq-exam';
 import type { PyqQuestion } from '@/lib/pyq';
-import { createPyqSessionRow, pyqPracticeSessionRow } from '@/lib/pyq-session';
+import {
+  createPyqAttemptRow,
+  createPyqSessionRow,
+  endPausedPyqPracticeSession,
+  pyqPracticeSessionRow
+} from '@/lib/pyq-session';
 import SessionReview from '@/pages/SessionReview';
+import type { PyqPracticeDraft, PyqSessionConfig, PyqSessionRow } from '@/types';
 
 const USER = '00000000-0000-4000-8000-000000000001';
 const START_MS = Date.parse('2026-08-24T04:30:00.000Z');
@@ -123,6 +129,126 @@ describe('historical PYQ session review', () => {
       db.questions.clear(),
       db.sessions.clear()
     ]);
+  });
+
+  it('shows saved unsubmitted practice drafts after reopening the completed report', async () => {
+    const config: PyqSessionConfig = {
+      subjectSlug: 'algorithms',
+      topicSlug: 'shortest-paths',
+      fromYear: 2026,
+      toYear: 2026,
+      type: 'all',
+      order: 'unseen',
+      count: '5'
+    };
+    const initialSession = createPyqSessionRow(
+      USER,
+      'session-review-test-bank',
+      config,
+      questions.slice(0, 2),
+      new Date(START_MS).toISOString()
+    );
+    const skipped = createPyqAttemptRow({
+      userId: USER,
+      session: { ...initialSession, current_index: 1, current_question_uid: questions[1].id },
+      question: questions[1],
+      selectedAnswer: null,
+      decision: 'SKIP',
+      bankVersion: 'session-review-test-bank',
+      questionStartedAtMs: START_MS,
+      committedAtMs: START_MS + 2_000,
+      screenshotUrl: null
+    });
+    const savedDraft: PyqPracticeDraft = {
+      question_uid: questions[0].id,
+      selected_answer: 'B',
+      mark_decision: 'MARK',
+      confidence: 'low',
+      elapsed_ms: 6_000,
+      first_started_at: new Date(START_MS).toISOString()
+    };
+    const retryDraft: PyqPracticeDraft = {
+      question_uid: questions[1].id,
+      selected_answer: 'C',
+      mark_decision: 'FIFTY_FIFTY',
+      confidence: 'medium',
+      elapsed_ms: 4_000,
+      first_started_at: new Date(START_MS + 6_000).toISOString()
+    };
+    const pausedSession: PyqSessionRow = {
+      ...initialSession,
+      config: {
+        ...config,
+        practiceDraft: savedDraft,
+        practiceDrafts: {
+          [savedDraft.question_uid]: savedDraft,
+          [retryDraft.question_uid]: retryDraft
+        }
+      },
+      status: 'paused',
+      elapsed_sec: 2,
+      current_question_uid: null,
+      current_question_started_at: null,
+      completed_count: 1,
+      completed_question_uids: [questions[1].id]
+    };
+    const session = endPausedPyqPracticeSession(
+      pausedSession,
+      new Date(START_MS + 60_000).toISOString()
+    );
+    await db.transaction('rw', [db.sessions, db.pyq_sessions, db.pyq_attempts], async () => {
+      await db.sessions.put({
+        ...pyqPracticeSessionRow(session, 'Algorithms'),
+        sync_status: 'synced'
+      });
+      await db.pyq_sessions.put({ ...session, sync_status: 'synced' });
+      await db.pyq_attempts.put({ ...skipped, sync_status: 'synced' });
+    });
+
+    render(
+      <MemoryRouter initialEntries={[`/session/${session.id}/review`]}>
+        <Routes>
+          <Route path="/session/:id/review" element={<SessionReview />} />
+        </Routes>
+      </MemoryRouter>
+    );
+
+    await screen.findByRole('heading', { name: 'Practice session complete' });
+    expect(screen.getByRole('img', { name: 'Accuracy unavailable' })).toBeInTheDocument();
+    const draftCards = screen
+      .getAllByText('Saved draft answer · not submitted')
+      .map((label) => label.closest('details')!);
+    expect(draftCards).toHaveLength(2);
+    const [draftOnly, retriedSkip] = draftCards;
+    expect(
+      within(draftOnly).getByText('Saved draft answer · not submitted').closest('dl')
+    ).toHaveTextContent('B');
+    expect(within(draftOnly).getByText('Your answer').closest('div')).toHaveTextContent(
+      'Not submitted'
+    );
+    expect(within(draftOnly).getByText('Correct answer').closest('div')).toHaveTextContent(
+      'No submitted receipt'
+    );
+    expect(within(draftOnly).getByText('Outcome').closest('div')).toHaveTextContent(
+      'Not submitted'
+    );
+    expect(within(draftOnly).getByText('Score').closest('div')).toHaveTextContent('Score excluded');
+    expect(within(draftOnly).getByText('Time').closest('div')).toHaveTextContent('00:06');
+    expect(within(draftOnly).getByText('Low confidence')).toBeInTheDocument();
+    expect(within(draftOnly).getByText('Frozen question unavailable')).toBeInTheDocument();
+
+    expect(
+      within(retriedSkip).getByText('Saved draft answer · not submitted').closest('dl')
+    ).toHaveTextContent('C');
+    expect(within(retriedSkip).getByText('Your answer').closest('div')).toHaveTextContent(
+      'Left blank'
+    );
+    expect(within(retriedSkip).getByText('Outcome').closest('div')).toHaveTextContent('Left blank');
+    expect(within(retriedSkip).getByText('Time').closest('div')).toHaveTextContent('00:06');
+    expect(within(retriedSkip).getByText('Medium confidence')).toBeInTheDocument();
+    const paperLedger = screen.getByRole('region', { name: 'Paper ledger' });
+    expect(within(paperLedger).getByText('Time taken').closest('div')).toHaveTextContent('00:12');
+    expect(await db.pyq_attempts.count()).toBe(1);
   });
 
   it('renders the detailed report from immutable PYQ receipts without Journal rows', async () => {

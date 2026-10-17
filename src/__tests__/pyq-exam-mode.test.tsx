@@ -7,6 +7,7 @@ import { normalizePyqManifest, type PyqManifest, type PyqQuestion } from '@/lib/
 import { writeLocal, writeLocalBatch } from '@/lib/sync';
 import { usePyqPreferencesStore } from '@/stores/pyq-preferences';
 import { needsRecoveryCapture } from '@/lib/learning-recovery';
+import type { MockTestRow, PyqAttemptRow, PyqSessionRow, SessionRow } from '@/types';
 import Pyq from '@/pages/Pyq';
 
 const USER = '00000000-0000-4000-8000-000000000001';
@@ -132,7 +133,7 @@ describe('PYQ timed exam mode', () => {
     vi.mocked(writeLocal).mockClear();
     vi.mocked(writeLocalBatch).mockClear();
     vi.stubGlobal('scrollTo', vi.fn());
-    vi.spyOn(globalThis, 'fetch').mockImplementation(async (input) => {
+    vi.spyOn(globalThis, 'fetch').mockClear().mockImplementation(async (input, init) => {
       const url = new URL(String(input), 'https://air-journal.test');
       if (url.pathname === '/api/v1/pyq/manifest') return Response.json(manifest);
       if (url.pathname === '/api/v1/pyq/subjects/discrete-mathematics') {
@@ -141,6 +142,23 @@ describe('PYQ timed exam mode', () => {
           subject: questions[0].subject,
           questions
         });
+      }
+      if (url.pathname === '/api/v1/study-memory/exams/submit') {
+        const payload = JSON.parse(String(init?.body)) as {
+          session: PyqSessionRow;
+          attempts: PyqAttemptRow[];
+          canonical_session: SessionRow;
+          mock_test: MockTestRow | null;
+        };
+        await db.pyq_attempts.bulkPut(
+          payload.attempts.map((attempt) => ({ ...attempt, sync_status: 'synced' }))
+        );
+        await db.pyq_sessions.put({ ...payload.session, sync_status: 'synced' });
+        await db.sessions.put({ ...payload.canonical_session, sync_status: 'synced' });
+        if (payload.mock_test) {
+          await db.mock_tests.put({ ...payload.mock_test, sync_status: 'synced' });
+        }
+        return Response.json({ committed: true });
       }
       return new Response(null, { status: 404 });
     });
@@ -152,6 +170,7 @@ describe('PYQ timed exam mode', () => {
       db.recovery_sessions.clear(),
       db.learning_items.clear(),
       db.reattempts.clear(),
+      db.mock_tests.clear(),
       db.sessions.clear()
     ]);
   });
@@ -422,10 +441,10 @@ describe('PYQ timed exam mode', () => {
 
     await new Promise<void>((resolve) => setTimeout(resolve, 600));
 
-    const finalizationWrites = vi
-      .mocked(writeLocalBatch)
-      .mock.calls.filter(([rows]) => rows.some(({ name }) => name === 'pyq_attempts'));
-    expect(finalizationWrites).toHaveLength(1);
+    const finalizationRequests = vi
+      .mocked(globalThis.fetch)
+      .mock.calls.filter(([input]) => String(input).includes('/v1/study-memory/exams/submit'));
+    expect(finalizationRequests).toHaveLength(1);
     expect(await db.pyq_attempts.where('pyq_session_id').equals(startedSession.id).count()).toBe(
       questions.length
     );

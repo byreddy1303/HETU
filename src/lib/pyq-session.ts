@@ -522,7 +522,7 @@ export function pyqPracticeSessionRow(
 ): SessionRow {
   const closed = session.status === 'completed' || session.status === 'abandoned';
   const actualDuration = closed
-    ? session.completed_count > 0
+    ? session.completed_count > 0 || session.elapsed_sec > 0
       ? Math.max(1, Math.ceil(session.elapsed_sec / 60))
       : 0
     : null;
@@ -623,6 +623,30 @@ export function completePyqSession(session: PyqSessionRow, now = nowISO()): PyqS
     updated_at: now,
     completed_at: now
   };
+}
+
+/** Close paused practice with its real coverage and frozen draft work intact. */
+export function endPausedPyqPracticeSession(
+  session: PyqSessionRow,
+  now = nowISO()
+): PyqSessionRow {
+  if (session.config.mode === 'exam') {
+    throw new Error('Timed exams must use the exam submission flow.');
+  }
+  // Retrying an already successful save must never count draft time twice.
+  if (session.status === 'completed') return session;
+  if (session.status !== 'paused') {
+    throw new Error('Pause this practice session before ending and saving it.');
+  }
+  const draftTimeMs = Object.values(pyqPracticeDrafts(session)).reduce(
+    (total, draft) =>
+      total + (Number.isFinite(draft.elapsed_ms) ? Math.max(0, draft.elapsed_ms) : 0),
+    0
+  );
+  return completePyqSession(
+    { ...session, elapsed_sec: session.elapsed_sec + Math.ceil(draftTimeMs / 1000) },
+    now
+  );
 }
 
 export function abandonPyqSession(session: PyqSessionRow, now = nowISO()): PyqSessionRow {

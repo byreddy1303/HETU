@@ -75,7 +75,7 @@ class ExamSubmissionDraft(BaseModel):
 
 
 async def commit_exam(db: AsyncSession, *, owner_id: str, draft: ExamSubmissionDraft) -> dict:
-    """Validate receipts while active, then commit the completed exam atomically."""
+    """Validate receipts without resuming, then commit the completed exam atomically."""
     session_id = draft.session.get("id")
     if not isinstance(session_id, str) or len(session_id) > 128:
         raise HTTPException(422, "Exam session id is required")
@@ -103,7 +103,7 @@ async def commit_exam(db: AsyncSession, *, owner_id: str, draft: ExamSubmissionD
             raise HTTPException(422, "Exam attempt ownership or session does not match")
         existing = await _owned(db, owner_id, "pyq_attempts", row["id"])
         if existing is None:
-            await validate_app_attempt(db, owner_id=owner_id, row=row)
+            await validate_app_attempt(db, owner_id=owner_id, row=row, allow_paused_exam=True)
     await upsert_records(db, collection="pyq_attempts", owner_id=owner_id, items=draft.attempts)
     for collection, raw in [("pyq_sessions", draft.session), ("sessions", draft.canonical_session),
                             *([("mock_tests", draft.mock_test)] if draft.mock_test else [])]:

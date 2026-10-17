@@ -248,6 +248,7 @@ async def validate_session_association(
     session_id: str | None,
     bank_version: str,
     question_uid: str,
+    allow_paused_exam: bool = False,
 ) -> None:
     if not session_id:
         return
@@ -261,18 +262,33 @@ async def validate_session_association(
     )
     if (
         session is None
-        or session.data.get("status") != "active"
+        or not (
+            session.data.get("status") == "active"
+            or (
+                allow_paused_exam
+                and session.data.get("status") == "paused"
+                and session.data.get("config", {}).get("mode") == "exam"
+            )
+        )
         or session.data.get("bank_version") != bank_version
         or question_uid not in session.data.get("question_uids", [])
     ):
         raise HTTPException(422, "PYQ session is not active for this question and account")
 
 
-async def validate_app_attempt(db: AsyncSession, *, owner_id: str, row: dict[str, Any]) -> None:
+async def validate_app_attempt(
+    db: AsyncSession,
+    *,
+    owner_id: str,
+    row: dict[str, Any],
+    allow_paused_exam: bool = False,
+) -> None:
     """Validate the React receipt against the same catalog and scoring as MCP.
 
     Historical imported attempts use the separate import path. New app receipts
     must carry the current v3 snapshot and cannot supply a fabricated score.
+    Only atomic exam submission may validate receipts against a paused exam;
+    ordinary practice writes must continue to require an active session.
     """
     if row.get("capture_version") != 3:
         raise HTTPException(422, "New PYQ attempts require capture version 3")
@@ -337,6 +353,7 @@ async def validate_app_attempt(db: AsyncSession, *, owner_id: str, row: dict[str
         session_id=draft.session_id,
         bank_version=bank.version,
         question_uid=question.question_uid,
+        allow_paused_exam=allow_paused_exam,
     )
 
 

@@ -144,8 +144,9 @@ async def test_atomic_exam_validates_all_receipts_while_session_is_active(db, mo
     await db.commit()
     seen = []
 
-    async def validator(connection, *, owner_id, row):
+    async def validator(connection, *, owner_id, row, allow_paused_exam):
         assert owner_id == "learner-a" and session.data["status"] == "active"
+        assert allow_paused_exam is True
         seen.append(row["question_uid"])
         if row.get("invalid"):
             raise HTTPException(422, "Invalid answer metadata")

@@ -576,7 +576,7 @@ function ResponseCard({
   question: PyqQuestionSummary;
   defaultOpen: boolean;
 }) {
-  const { attempt } = question;
+  const { attempt, savedDraft } = question;
   const snapshot =
     attempt && attempt.capture_version >= 2 ? (attempt.question_snapshot ?? null) : null;
   const outcome = OUTCOME_META[question.outcome];
@@ -618,6 +618,7 @@ function ResponseCard({
             <Badge tone={outcome.tone}>
               <OutcomeIcon size={11} aria-hidden="true" /> {outcome.shortLabel}
             </Badge>
+            {savedDraft ? <Badge tone="accent">Saved draft · unsubmitted</Badge> : null}
             {question.markedForReview ? (
               <Badge tone="guess">
                 <Bookmark size={10} aria-hidden="true" /> Review
@@ -695,6 +696,21 @@ function ResponseCard({
             </div>
           </dl>
 
+          {savedDraft ? (
+            <div className="mt-3 rounded border border-accent/30 bg-accent-faint p-3">
+              <dl>
+                <dt className="u-label text-accent">Saved draft answer · not submitted</dt>
+                <dd className="mt-1 break-words font-mono text-[13px] font-semibold text-text">
+                  {formatAnswer(savedDraft.selected_answer)}
+                </dd>
+              </dl>
+              <p className="mt-2 text-[11px] leading-relaxed text-text-muted">
+                This answer was saved when you ended practice. It was not graded and does not change
+                any submitted receipt or score.
+              </p>
+            </div>
+          ) : null}
+
           <dl className="mt-3 grid grid-cols-2 gap-px overflow-hidden rounded border border-border bg-border sm:grid-cols-4">
             {[
               ['Outcome', outcome.label],
@@ -716,8 +732,9 @@ function ResponseCard({
 
           {!question.scoringCovered ? (
             <p className="mt-3 rounded border border-warn/30 bg-warn-faint px-3 py-2 text-[11px] leading-relaxed text-text-muted">
-              This question is excluded from score totals because its stored scoring version, type,
-              marks, answer status, or result is missing or inconsistent. No score was inferred.
+              {savedDraft && !attempt
+                ? 'This saved draft was not submitted, so it is excluded from score totals. No score was inferred.'
+                : 'This question is excluded from score totals because its stored scoring version, type, marks, answer status, or result is missing or inconsistent. No score was inferred.'}
             </p>
           ) : null}
 

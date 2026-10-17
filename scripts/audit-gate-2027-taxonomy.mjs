@@ -348,17 +348,17 @@ const verifiedPdfExact = marksPresentRuleEvaluable.filter(
 );
 const verifiedPdfOneMark = verifiedPdfExact.filter((question) => question.marks === 1).length;
 const verifiedPdfTwoMark = verifiedPdfExact.filter((question) => question.marks === 2).length;
-check(pdfAnswerKeyRows.length === 130, 'Expected 130 PDF-answer-key-provenance questions');
-check(verifiedPdfExact.length === 130, 'All 130 PDF-key rows must be verified-exact');
+check(pdfAnswerKeyRows.length === 131, 'Expected 131 PDF-answer-key-provenance questions');
+check(verifiedPdfExact.length === 131, 'All 131 PDF-key rows must be verified-exact');
 check(
-  verifiedPdfOneMark === 60 && verifiedPdfTwoMark === 70,
-  `Expected the 2026 PDF-key split 60x1M/70x2M, found ${verifiedPdfOneMark}x1M/${verifiedPdfTwoMark}x2M`
+  verifiedPdfOneMark === 60 && verifiedPdfTwoMark === 71,
+  `Expected the verified PDF-key split 60x1M/71x2M, found ${verifiedPdfOneMark}x1M/${verifiedPdfTwoMark}x2M`
 );
 check(
   manifest.verifiedPdfMarkMetadata?.policyVersion === VERIFIED_PDF_MARK_POLICY_VERSION &&
-    manifest.verifiedPdfMarkMetadata?.questionCount === 130 &&
+    manifest.verifiedPdfMarkMetadata?.questionCount === 131 &&
     manifest.verifiedPdfMarkMetadata?.oneMarkCount === 60 &&
-    manifest.verifiedPdfMarkMetadata?.twoMarkCount === 70,
+    manifest.verifiedPdfMarkMetadata?.twoMarkCount === 71,
   'Manifest verified-PDF mark provenance is stale'
 );
 if (failures.length > 0) {

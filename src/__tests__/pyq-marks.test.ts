@@ -133,9 +133,13 @@ describe('PYQ source mark tags', () => {
           (question.answerSource as { kind?: unknown } | null)?.kind === 'pdf_answer_key'
       );
 
-    expect(verified).toHaveLength(130);
+    expect(verified).toHaveLength(131);
     expect(verified.filter((question) => question.marks === 1)).toHaveLength(60);
-    expect(verified.filter((question) => question.marks === 2)).toHaveLength(70);
+    expect(verified.filter((question) => question.marks === 2)).toHaveLength(71);
+    const rows2026 = verified.filter((question) => question.year === 2026);
+    expect(rows2026).toHaveLength(130);
+    expect(rows2026.filter((question) => question.marks === 1)).toHaveLength(60);
+    expect(rows2026.filter((question) => question.marks === 2)).toHaveLength(70);
     expect(
       verified.every(
         (question) =>
@@ -144,9 +148,9 @@ describe('PYQ source mark tags', () => {
       )
     ).toBe(true);
     expect(manifest.verifiedPdfMarkMetadata).toMatchObject({
-      questionCount: 130,
+      questionCount: 131,
       oneMarkCount: 60,
-      twoMarkCount: 70
+      twoMarkCount: 71
     });
   });
 

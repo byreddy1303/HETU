@@ -206,13 +206,14 @@ function HeadlineStat({
   icon: LucideIcon;
   label: string;
   value: ReactNode;
-  tone: 'success' | 'danger' | 'warn' | 'accent';
+  tone: 'success' | 'danger' | 'warn' | 'accent' | 'neutral';
 }) {
   const toneClass = {
     success: 'text-success',
     danger: 'text-danger',
     warn: 'text-warn',
-    accent: 'text-accent'
+    accent: 'text-accent',
+    neutral: 'text-text-muted'
   }[tone];
 
   return (
@@ -826,7 +827,8 @@ export default function PyqSessionSummary({ session, attempts }: PyqSessionSumma
     { label: 'Incorrect', count: summary.wrong, className: 'bg-danger' },
     { label: 'Bonus', count: summary.bonus, className: 'bg-accent' },
     { label: 'Unscored', count: summary.unscorable, className: 'bg-guess' },
-    { label: 'Skipped', count: summary.skipped, className: 'bg-text-faint' }
+    { label: 'Skipped', count: summary.skipped, className: 'bg-text-faint' },
+    { label: 'Not submitted', count: summary.notSubmitted, className: 'bg-border' }
   ].filter((segment) => segment.count > 0);
 
   return (
@@ -872,7 +874,7 @@ export default function PyqSessionSummary({ session, attempts }: PyqSessionSumma
                 <span className="u-num text-text-muted">{summary.totalQuestions}</span> questions.
               </p>
 
-              <div className="mt-5 grid grid-cols-2 gap-2 sm:max-w-2xl sm:grid-cols-4">
+              <div className="mt-5 grid grid-cols-2 gap-2 sm:max-w-2xl sm:grid-cols-5">
                 <HeadlineStat
                   icon={CheckCircle2}
                   label="correct"
@@ -885,6 +887,12 @@ export default function PyqSessionSummary({ session, attempts }: PyqSessionSumma
                   label="skipped"
                   value={summary.skipped}
                   tone="warn"
+                />
+                <HeadlineStat
+                  icon={FileQuestion}
+                  label="not submitted"
+                  value={summary.notSubmitted}
+                  tone="neutral"
                 />
                 <HeadlineStat
                   icon={Clock3}
@@ -903,7 +911,7 @@ export default function PyqSessionSummary({ session, attempts }: PyqSessionSumma
             <div
               className="flex h-2 overflow-hidden rounded-full bg-bg-overlay"
               role="img"
-              aria-label={`${summary.correct} correct, ${summary.wrong} incorrect, ${summary.skipped} skipped, ${summary.bonus} bonus, ${summary.unscorable} unscored`}
+              aria-label={`${summary.correct} correct, ${summary.wrong} incorrect, ${summary.skipped} skipped, ${summary.notSubmitted} not submitted, ${summary.bonus} bonus, ${summary.unscorable} unscored`}
             >
               {responseSegments.map((segment) => (
                 <span
@@ -944,7 +952,8 @@ export default function PyqSessionSummary({ session, attempts }: PyqSessionSumma
             { label: 'Questions attempted', value: summary.answered },
             { label: 'Correct attempts', value: summary.correct, valueClass: 'text-success' },
             { label: 'Incorrect attempts', value: summary.wrong, valueClass: 'text-danger' },
-            { label: 'Left blank / no receipt', value: summary.skipped }
+            { label: 'Explicit skips', value: summary.skipped },
+            { label: 'No submitted receipt', value: summary.notSubmitted }
           ]}
         />
         <LedgerCard

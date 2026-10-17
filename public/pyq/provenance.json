@@ -1,5 +1,5 @@
 {
-  "bankVersion": "gate-and-cs-exams-1990-2026-v12-complete-gate-marks",
+  "bankVersion": "gate-and-cs-exams-1990-2026-v13-official-cs2-q47",
   "sources": [
     {
       "name": "GateQA",
@@ -70,9 +70,9 @@
   "verifiedPdfMarkMetadata": {
     "policyVersion": "pdf-answer-key-marks-v1",
     "authoritativeSourceKind": "pdf_answer_key",
-    "questionCount": 130,
+    "questionCount": 131,
     "oneMarkCount": 60,
-    "twoMarkCount": 70,
+    "twoMarkCount": 71,
     "correctedQuestionIds": [
       "go:523026",
       "go:523027",

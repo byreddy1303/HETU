@@ -20,7 +20,7 @@ function questionOrder(left: PyqQuestionSummary, right: PyqQuestionSummary): num
 }
 
 function recordedQuestionTime(question: PyqQuestionSummary): number | null {
-  if (!question.visited) {
+  if (!question.visited || question.outcome === 'not-submitted' || question.attempt?.duration_source === 'unknown') {
     return null;
   }
   if (

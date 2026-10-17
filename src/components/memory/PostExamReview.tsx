@@ -7,19 +7,21 @@ import type { PyqAttemptRow, PyqSessionRow } from '@/types';
 import { Button } from '@/components/ui/Button';
 import PyqQuestionContent from '@/components/pyq/PyqQuestionContent';
 import ThinkingReviewEditor from '@/components/memory/ThinkingReviewEditor';
+import SessionEvidenceSummary from '@/components/memory/SessionEvidenceSummary';
 
 export default function PostExamReview({ session, attempts, answersAlreadyVisible = false }: { session: PyqSessionRow; attempts: PyqAttemptRow[]; answersAlreadyVisible?: boolean }) {
   const { userId } = useAuth();
   const [params] = useSearchParams();
   const queue = useMemo(() => buildExamReviewQueue(attempts), [attempts]);
-  const initial = useMemo(() => newMemoryEntry('exam_review', memoryEntryId('exam_review', session.id), 'Exam post-mortem', {
+  const initial = useMemo(() => newMemoryEntry('exam_review', memoryEntryId('exam_review', session.id), session.config?.mode === 'practice' ? 'Practice review' : 'Exam post-mortem', {
     user_id: userId ?? '', session_id: session.id, state: 'open',
     data: { reviewed_attempt_ids: [], current_attempt_id: queue[0]?.attempt.id ?? null }
-  }), [session.id, userId, queue]);
+  }), [session.id, session.config?.mode, userId, queue]);
   const draft = useStudyMemoryDraft(initial);
   const { ready, update } = draft;
   const reviewData = draft.entry.data;
   const [localSelected, setLocalSelected] = useState<string | null>(params.get('attempt'));
+  const [reflectionRevision, setReflectionRevision] = useState(0);
   const revealedIds = useMemo(() => memoryStrings(reviewData, 'revealed_attempt_ids'), [reviewData]);
   const revealed = new Set(revealedIds);
   const reviewed = memoryStrings(draft.entry.data, 'reviewed_attempt_ids');
@@ -46,15 +48,16 @@ export default function PostExamReview({ session, attempts, answersAlreadyVisibl
 
   return <section className="rounded-lg border border-border bg-bg-raised" aria-label="Guided exam review">
     <div className="flex flex-wrap items-start justify-between gap-3 border-b border-border p-4 sm:p-5">
-      <div><h2 className="font-display text-xl font-semibold">Make this exam useful</h2><p className="mt-1 text-sm text-text-muted">Record what happened, investigate the important questions, and plan the next check.</p></div>
+      <div><h2 className="font-display text-xl font-semibold">{session.config?.mode === 'practice' ? 'Make this practice useful' : 'Make this exam useful'}</h2><p className="mt-1 text-sm text-text-muted">Record what happened, investigate the important questions, and plan the next check.</p></div>
       <span role="status" className="text-sm text-text-muted">{reviewed.length}/{queue.length} reviewed · {draft.saving ? 'Saving…' : draft.entry.version ? 'Progress saved' : 'Not started'}</span>
     </div>
+    <SessionEvidenceSummary session={session} attempts={attempts} onSelectAttempt={select} revision={reflectionRevision} />
     {draft.error && <p role="alert" className="m-4 rounded border border-danger/30 p-3 text-sm text-danger">{draft.error} <Button size="sm" onClick={() => void draft.reload()}>Retry loading review</Button></p>}
     <div className="border-b border-border p-4 sm:p-5">
-      <label className="grid gap-2 text-sm font-medium">What do you remember about this exam?
+      <label className="grid gap-2 text-sm font-medium">{session.config?.mode === 'practice' ? 'What do you remember about this set?' : 'What do you remember about this exam?'}
         <textarea disabled={!draft.ready} value={draft.entry.content} onChange={(event) => draft.update({ content: event.target.value })} className="min-h-24 rounded border border-border bg-bg p-3 font-normal" placeholder="Where did time disappear? Which answers felt uncertain? What would you like to investigate?" />
       </label>
-      <Link className="mt-2 inline-block text-sm font-medium text-accent underline" to={`/memory/${draft.entry.id}`}>Open this exam’s memory</Link>
+      <Link className="mt-2 inline-block text-sm font-medium text-accent underline" to={`/memory/${draft.entry.id}`}>Open this set’s memory</Link>
     </div>
     <div className="grid md:grid-cols-[220px_minmax(0,1fr)]">
       <nav aria-label="Exam review questions" className="max-h-[36rem] overflow-y-auto border-b border-border p-3 md:border-b-0 md:border-r">
@@ -71,7 +74,7 @@ export default function PostExamReview({ session, attempts, answersAlreadyVisibl
             <Button size="sm" onClick={() => draft.update({ data: { ...draft.entry.data, revealed_attempt_ids: [...new Set([...revealedIds, selected.attempt.id])], last_answer_revealed_at: new Date().toISOString() } })} disabled={!draft.ready || revealed.has(selected.attempt.id)}>Reveal recorded answer key</Button>
             {revealed.has(selected.attempt.id) && <p className="mt-2 text-sm">Recorded key: <strong>{String(selected.attempt.correct_answer ?? 'Unavailable')}</strong>. This key alone does not establish the solution method.</p>}
           </div>
-          <ThinkingReviewEditor key={selected.attempt.id} attempt={selected.attempt} revealState={revealed.has(selected.attempt.id) || answersAlreadyVisible ? 'after' : 'before'} onSaved={(state) => { if (state === 'completed') complete(selected.attempt.id); }} />
+          <ThinkingReviewEditor key={selected.attempt.id} attempt={selected.attempt} revealState={revealed.has(selected.attempt.id) || answersAlreadyVisible ? 'after' : 'before'} onSaved={(state) => { setReflectionRevision((value) => value + 1); if (state === 'completed') complete(selected.attempt.id); }} />
         </div> : <p>No submitted question receipts are available for this review.</p>}
       </div>
     </div>

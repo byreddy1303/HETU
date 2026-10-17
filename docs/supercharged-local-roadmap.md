@@ -3,7 +3,7 @@
 **Current Status**: Learning Memory foundation implemented; broader phases remain in progress
 **Target**: GATE CSE 2027 AIR < 100  
 **Architecture**: 100% Local Desktop (Electron + SQLite WAL + Python 3.12 + Native stdio MCP)  
-**Last Updated**: 2026-10-16
+**Last Updated**: 2026-10-17
 
 > **Note for Future Agents**:  
 > Always consult this document before starting a task. When you complete a sub-task or phase, update its checkbox (`[x]`), record the commit hash in the Progress Log below, and commit this file to `main` before finalizing your turn.
@@ -66,6 +66,14 @@ To make an AI act as a true master coach (identifying root weaknesses, predictin
 - [x] Atomic exam submission and canonical repair result aggregation.
 
 Implementation, verification, and remaining limits are recorded in [study-memory-build.md](study-memory-build.md).
+
+### Connected history and session evidence
+- [x] Read-only history across ten existing study source types, with bounded source inspection and owner-scoped search.
+- [x] Session-wide coverage, frozen-score, confidence, topic, and timing synthesis with source-linked repair drafts.
+- [x] Separate explicit skips from unsubmitted work in both the synthesis and existing detailed report.
+- [x] Correct official GATE 2025 CS2 Q47 to MSQ/D for future attempts, preserving historical receipts.
+
+Details and limitations: [study-history-and-session-evidence.md](study-history-and-session-evidence.md).
 
 ### Phase 1: High-Frequency UI & Input Precision (Current Phase)
 - [ ] **1.1 Full Keyboard Navigation in Question Workspace**:

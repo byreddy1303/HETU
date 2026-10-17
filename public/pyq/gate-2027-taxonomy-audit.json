@@ -32,7 +32,7 @@
       "msqPartialCredit": false
     }
   },
-  "bankVersion": "gate-and-cs-exams-1990-2026-v12-complete-gate-marks",
+  "bankVersion": "gate-and-cs-exams-1990-2026-v13-official-cs2-q47",
   "bankGeneratedAt": "2026-08-29T02:06:35.098Z",
   "auditKind": "independent-official-scope-audit",
   "scopeLimit": "This registry audits taxonomy scope, not the correctness of every individual question classification.",
@@ -63,8 +63,8 @@
     "questionTypes": {
       "AMBIGUOUS": 3,
       "MARKS_TO_ALL": 2,
-      "MCQ": 3337,
-      "MSQ": 226,
+      "MCQ": 3336,
+      "MSQ": 227,
       "NAT": 656,
       "SUBJECTIVE": 20,
       "UNSUPPORTED": 90
@@ -90,14 +90,14 @@
       "gateoverflow_top_answer": 79,
       "independent-audit": 8,
       "learner-provided-screenshot": 30,
-      "legacy-structured": 2785,
+      "legacy-structured": 2784,
       "manual-audit": 3,
       "missing": 3,
       "official_key": 16,
       "official-answer-key": 66,
       "official-marked-solution": 65,
       "official-solution": 122,
-      "pdf_answer_key": 130,
+      "pdf_answer_key": 131,
       "question_uid": 64
     },
     "books": [
@@ -198,10 +198,10 @@
       "marksToAllQuestionCount": 2,
       "ruleEvaluableMarksToAllQuestionCount": 2,
       "totalRuleEvaluableQuestionCount": 3940,
-      "officialKeyVerifiedExactQuestionCount": 130,
+      "officialKeyVerifiedExactQuestionCount": 131,
       "officialKeyVerifiedOneMarkCount": 60,
-      "officialKeyVerifiedTwoMarkCount": 70,
-      "unverifiedMarkProvenanceRuleEvaluableCount": 3808,
+      "officialKeyVerifiedTwoMarkCount": 71,
+      "unverifiedMarkProvenanceRuleEvaluableCount": 3807,
       "pdfMarkConflicts": [],
       "policy": "Stored MCQ/MSQ/NAT rows with a valid answer, answer provenance, and 1/2-mark metadata are standard GATE-rule-evaluable rows. MARKS_TO_ALL rows are counted separately and are rule-evaluable only when 1/2-mark metadata and provenance are present. Only matching structured PDF-answer-key marks are labelled official-key verified exact; tag-only marks are not promoted to verified provenance."
     }
@@ -1463,7 +1463,7 @@
     "Historical and supporting questions remain available but are excluded from current-syllabus coverage evidence.",
     "Broad and review-required leaves are visible gaps, not claims of verified row-level coverage.",
     "Book sourceClass and difficultyFloor describe a source collection; row-level answer and mark authority remains explicit in answerSource.",
-    "3,938 standard rows and 2 marks-to-all rows are GATE-rule-evaluable from stored metadata; only 130 standard rows have official PDF-key-verified marks.",
+    "3,938 standard rows and 2 marks-to-all rows are GATE-rule-evaluable from stored metadata; only 131 standard rows have official PDF-key-verified marks.",
     "Structured PDF-answer-key marks are authoritative over contradictory archive tags; the 2026 split is locked at 60 one-mark and 70 two-mark questions."
   ]
 }

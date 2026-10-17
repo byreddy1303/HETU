@@ -6,6 +6,7 @@ import path from 'node:path';
 import process from 'node:process';
 import { fileURLToPath } from 'node:url';
 import { JSDOM } from 'jsdom';
+import { OFFICIAL_ANSWER_OVERRIDES } from './pyq-answer-overrides.mjs';
 import {
   classifyPyqQuestion,
   PYQ_BANK_QUESTION_COUNT,
@@ -1408,7 +1409,7 @@ async function main() {
     const detail = shards.get(source.detailShardKey)?.recordsByQuestionUid?.[source.question_uid];
     if (!detail?.question)
       throw new Error(`Missing full question detail for ${source.question_uid}`);
-    const answerMeta = answers[source.question_uid] ?? null;
+    const answerMeta = OFFICIAL_ANSWER_OVERRIDES[source.question_uid] ?? answers[source.question_uid] ?? null;
     const [subjectSlug, subject] = slugLabel(source.subjectLabel);
     const metadataTags = detail.tags ?? source.tags ?? [];
     const markMetadataTags = [...(detail.tags ?? []), ...(source.tags ?? [])];
@@ -1593,9 +1594,9 @@ async function main() {
     correctedQuestionIds: [...new Set(correctedPdfMarkIds)].sort()
   };
   if (
-    verifiedPdfMarkMetadata.questionCount !== 130 ||
+    verifiedPdfMarkMetadata.questionCount !== 131 ||
     verifiedPdfMarkMetadata.oneMarkCount !== 60 ||
-    verifiedPdfMarkMetadata.twoMarkCount !== 70 ||
+    verifiedPdfMarkMetadata.twoMarkCount !== 71 ||
     verifiedPdfMarkMetadata.correctedQuestionIds.length !== 41 ||
     verifiedPdfMarkMismatches.length > 0
   ) {

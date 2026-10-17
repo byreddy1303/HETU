@@ -45,6 +45,6 @@ The future coach can read these sources before proposing a diagnosis or repair. 
 
 ## Remaining development
 
-The memory timeline currently contains these new memory records and links to the existing library and session views; it is not yet a merged event stream of every historical application record. Search is paginated SQL text search, without a semantic index. Question selection establishes subject/topic matching, not a reviewed mapping of every question to a cognitive trap. Concept responses remain explicitly self-assessed.
+The follow-on [connected history milestone](study-history-and-session-evidence.md) now indexes ten existing source types and adds a session-wide synthesis with explicit submission coverage. This remains a direct-source history rather than every application event. Search is paginated SQL text search, without a semantic index. Question selection establishes subject/topic matching, not a reviewed mapping of every question to a cognitive trap. Concept responses remain explicitly self-assessed.
 
 Further work includes reviewed prerequisite and trap mappings, richer reading/derivation/check timing, calculator and scratchpad evidence, attachment ingestion, calibrated retention/transfer models, and the provider-backed coaching interface. Those larger roadmap items are not marked complete by this milestone.

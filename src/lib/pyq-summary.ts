@@ -32,6 +32,7 @@ export interface PyqSessionSummaryData {
   correct: number;
   wrong: number;
   skipped: number;
+  notSubmitted: number;
   bonus: number;
   unscorable: number;
   notVisited: number;
@@ -204,6 +205,7 @@ export function buildPyqSessionSummary(
   let correct = 0;
   let wrong = 0;
   let skipped = 0;
+  let notSubmitted = 0;
   let bonus = 0;
   let unscorable = 0;
   let notVisited = 0;
@@ -225,7 +227,8 @@ export function buildPyqSessionSummary(
     if (question.outcome === 'correct') correct += 1;
     else if (question.outcome === 'wrong') wrong += 1;
     else if (question.outcome === 'bonus') bonus += 1;
-    else if (question.outcome === 'skipped' || question.outcome === 'not-submitted') skipped += 1;
+    else if (question.outcome === 'skipped') skipped += 1;
+    else if (question.outcome === 'not-submitted') notSubmitted += 1;
     else unscorable += 1;
     if (!question.visited) notVisited += 1;
     if (question.markedForReview) markedForReview += 1;
@@ -259,6 +262,7 @@ export function buildPyqSessionSummary(
     correct,
     wrong,
     skipped,
+    notSubmitted,
     bonus,
     unscorable,
     notVisited,

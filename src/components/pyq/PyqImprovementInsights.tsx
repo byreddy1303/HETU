@@ -148,7 +148,7 @@ export default function PyqImprovementInsights({ questions }: PyqImprovementInsi
             <Lightbulb size={18} strokeWidth={2} aria-hidden="true" />
           </span>
           <div className="min-w-0">
-            <p className="u-label text-accent">Next-attempt diagnosis</p>
+            <p className="u-label text-accent">Recorded session observations</p>
             <h2
               id={headingId}
               className="mt-1 font-display text-[21px] font-bold leading-tight text-text sm:text-[24px]"
@@ -172,9 +172,8 @@ export default function PyqImprovementInsights({ questions }: PyqImprovementInsi
           <InsightLine label="Median pace">
             {medianLabel ? (
               <>
-                <span className="u-num text-text">{medianLabel}</span> per timed question. Keep
-                difficult questions near this mark or park them for a later pass unless confidence
-                is high.
+                <span className="u-num text-text">{medianLabel}</span> per timed question.
+                Compare similar question types and conditions before planning pace changes.
               </>
             ) : (
               'Unavailable because this session has no positive per-question timing evidence.'
@@ -222,8 +221,8 @@ export default function PyqImprovementInsights({ questions }: PyqImprovementInsi
             {insights.fastIncorrectQuestions.length > 0 && medianLabel ? (
               <>
                 {pluralizedQuestions(insights.fastIncorrectQuestions.length)} finished in under half
-                the <span className="u-num text-text">{medianLabel}</span> session median. Slow down
-                briefly on the first pass to reduce avoidable negatives.
+                the <span className="u-num text-text">{medianLabel}</span> session median.
+                Inspect the reasoning and recorded conditions before deciding whether pace contributed.
               </>
             ) : medianLabel ? (
               'None. No incorrect answer finished in under half the session median.'

@@ -9,6 +9,7 @@ import type { PyqAttemptRow, PyqSessionRow } from '@/types';
 vi.mock('@/hooks/useAuth', () => ({ useAuth: () => ({ userId: 'learner' }) }));
 vi.mock('@/lib/fastapi-client', async (original) => ({ ...await original<typeof import('@/lib/fastapi-client')>(), apiRequest: vi.fn() }));
 vi.mock('@/components/memory/ThinkingReviewEditor', () => ({ default: ({ revealState }: { revealState: string }) => <p>Capture condition: {revealState}</p> }));
+vi.mock('@/components/memory/SessionEvidenceSummary', () => ({ default: () => null }));
 
 const records = new Map<string, StudyMemoryEntry>();
 const attempt: PyqAttemptRow = { id: 'a1', user_id: 'learner', pyq_session_id: 'exam', question_uid: 'q1', subject: 'Algorithms', year: 2024,

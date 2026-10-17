@@ -114,6 +114,8 @@ describe('PYQ session summary aggregation', () => {
     expect(summary).toMatchObject({
       elapsedSec: 3,
       rawReceiptCount: 0,
+      skipped: 0,
+      notSubmitted: 2,
       answered: 0,
       correct: 0,
       wrong: 0,

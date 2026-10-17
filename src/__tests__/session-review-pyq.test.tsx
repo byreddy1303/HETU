@@ -296,8 +296,9 @@ describe('historical PYQ session review', () => {
       '1'
     );
     expect(
-      within(responseLedger).getByText('Left blank / no receipt').closest('div')
+      within(responseLedger).getByText('Explicit skips').closest('div')
     ).toHaveTextContent('1');
+    expect(within(responseLedger).getByText('No submitted receipt').closest('div')).toHaveTextContent('0');
 
     const marksLedger = screen.getByRole('region', { name: 'Marks ledger' });
     expect(within(marksLedger).getByText('Correct marks').closest('div')).toHaveTextContent('+2');

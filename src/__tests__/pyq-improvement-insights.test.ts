@@ -24,6 +24,14 @@ function summaryQuestion(
 }
 
 describe('PYQ improvement insights', () => {
+  it('excludes unsubmitted timed drafts from the submitted-work median', () => {
+    const result = buildPyqImprovementInsights([
+      summaryQuestion(1, { timeSpentSec: 30 }), summaryQuestion(2, { timeSpentSec: 60 }),
+      summaryQuestion(3, { outcome: 'not-submitted', timeSpentSec: 1200, scoringCovered: false })
+    ]);
+    expect(result.timedQuestionCount).toBe(2);
+    expect(result.medianPaceSec).toBe(45);
+  });
   it('derives pace, time sink, accuracy, rushed misses, slow low returns, and review priority', () => {
     const insights = buildPyqImprovementInsights([
       summaryQuestion(1, { timeSpentSec: 60 }),

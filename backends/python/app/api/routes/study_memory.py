@@ -3,11 +3,12 @@ from __future__ import annotations
 from fastapi import APIRouter, Query
 
 from app.api.deps import CurrentUser, DbDep
+from app.services.study_history import HistoryCollection, get_history_detail, list_history
 from app.services.study_memory import (
+    ExamSubmissionDraft,
     MemoryKind,
     MemoryState,
     StudyMemoryDraft,
-    ExamSubmissionDraft,
     commit_exam,
     context_for_attempt,
     export_memory,
@@ -17,6 +18,40 @@ from app.services.study_memory import (
 )
 
 router = APIRouter()
+
+
+@router.get("/history")
+async def history(
+    identity: CurrentUser,
+    db: DbDep,
+    q: str | None = Query(default=None, max_length=300),
+    subject: str | None = Query(default=None, max_length=160),
+    topic: str | None = Query(default=None, max_length=300),
+    question_uid: str | None = Query(default=None, max_length=300),
+    session_id: str | None = Query(default=None, max_length=128),
+    collection: HistoryCollection | None = None,
+    limit: int = Query(default=50, ge=1, le=100),
+    offset: int = Query(default=0, ge=0),
+) -> dict:
+    return await list_history(
+        db,
+        owner_id=identity.user_id,
+        q=q,
+        subject=subject,
+        topic=topic,
+        question_uid=question_uid,
+        session_id=session_id,
+        collection=collection,
+        limit=limit,
+        offset=offset,
+    )
+
+
+@router.get("/history/{collection}/{record_id}")
+async def history_detail(collection: str, record_id: str, identity: CurrentUser, db: DbDep) -> dict:
+    return await get_history_detail(
+        db, owner_id=identity.user_id, collection=collection, record_id=record_id
+    )
 
 
 @router.post("/exams/submit")
@@ -41,9 +76,17 @@ async def entries(
     offset: int = Query(default=0, ge=0),
 ) -> dict:
     return await list_entries(
-        db, owner_id=identity.user_id, q=q, kind=kind, subject=subject, state=state,
-        attempt_id=attempt_id, session_id=session_id, repair_id=repair_id,
-        limit=limit, offset=offset,
+        db,
+        owner_id=identity.user_id,
+        q=q,
+        kind=kind,
+        subject=subject,
+        state=state,
+        attempt_id=attempt_id,
+        session_id=session_id,
+        repair_id=repair_id,
+        limit=limit,
+        offset=offset,
     )
 
 
@@ -54,13 +97,13 @@ async def detail(
     db: DbDep,
     before_version: int | None = Query(default=None, ge=1),
 ) -> dict:
-    return await get_entry(db, owner_id=identity.user_id, entry_id=entry_id, before_version=before_version)
+    return await get_entry(
+        db, owner_id=identity.user_id, entry_id=entry_id, before_version=before_version
+    )
 
 
 @router.put("/entries/{entry_id}")
-async def save(
-    entry_id: str, payload: StudyMemoryDraft, identity: CurrentUser, db: DbDep
-) -> dict:
+async def save(entry_id: str, payload: StudyMemoryDraft, identity: CurrentUser, db: DbDep) -> dict:
     result = await save_entry(db, owner_id=identity.user_id, entry_id=entry_id, draft=payload)
     await db.commit()
     return result

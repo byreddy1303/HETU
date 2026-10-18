@@ -14,6 +14,7 @@ import { applyTheme, resolveTheme } from '@/lib/theme';
 import { configureNativeChrome } from '@/lib/native';
 import { useAccountState } from '@/hooks/useAccountState';
 import { backendConfig } from '@/lib/backend-config';
+import LocalLearningRuntime from '@/components/memory/LocalLearningRuntime';
 
 const FONT_SCALE_PX: Record<'small' | 'normal' | 'large', string> = {
   small: '14px',
@@ -50,6 +51,7 @@ export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <NativeRuntime />
+      <LocalLearningRuntime />
       {!backendConfig.fastapi && <BuddyNotificationRuntime />}
       <BuddyPresenceRuntime />
       <Suspense fallback={<LoadingScreen />}>

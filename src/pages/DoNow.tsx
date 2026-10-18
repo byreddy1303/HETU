@@ -15,6 +15,7 @@ import { queuePlannerCloudWrite } from '@/lib/planner-cloud';
 import { todayISOInTimeZone } from '@/lib/utils';
 import { backendConfig } from '@/lib/backend-config';
 import { apiRequest } from '@/lib/fastapi-client';
+import LocalLearningEngine from '@/components/memory/LocalLearningEngine';
 
 type DueConcept = { id: string; prompt: string; due_on: string; kind: string };
 
@@ -33,6 +34,7 @@ export default function DoNow() {
   const today = todayISOInTimeZone(profile?.timezone ?? 'Asia/Kolkata');
   const [planRevision, setPlanRevision] = useState(0);
   const [dueConcepts, setDueConcepts] = useState<DueConcept[]>([]);
+  const [automaticActionCount, setAutomaticActionCount] = useState(0);
 
   useEffect(() => {
     if (!backendConfig.fastapi || !userId) return;
@@ -98,11 +100,13 @@ export default function DoNow() {
       <PageHeader
         title="Do now"
         description={
-          queue.length > 0
+          automaticActionCount > 0 ? 'Prepared study activities and scheduled checks, with their evidence linked.' : queue.length > 0
             ? `${queue.length} ordered ${queue.length === 1 ? 'step' : 'steps'}. Start at the top.`
             : 'Nothing is waiting. Create fresh evidence or capture a question.'
         }
       />
+
+      {backendConfig.isLocal && <LocalLearningEngine compact onActionCountChange={setAutomaticActionCount} />}
 
       {dueConcepts.length > 0 && <Card>
         <CardBody className="space-y-3">
@@ -170,7 +174,7 @@ export default function DoNow() {
             ))}
           </ol>
         </>
-      ) : (
+      ) : automaticActionCount === 0 ? (
         <Empty
           title="The queue is clear"
           hint="Nothing is overdue, unanalyzed, due for formula review, or left in today’s plan."
@@ -185,7 +189,7 @@ export default function DoNow() {
             </div>
           }
         />
-      )}
+      ) : null}
 
       <div className="flex items-center gap-2 text-[11px] text-text-faint">
         <CheckCircle2 size={13} className="text-success" />

@@ -8,6 +8,7 @@ from app.api.routes import (
     health,
     jobs,
     learning,
+    local_learning_engine,
     pyq_catalog,
     realtime,
     records,
@@ -38,6 +39,9 @@ api_router.include_router(
 api_router.include_router(section_context.router, prefix="/sections", tags=["sections"])
 api_router.include_router(study_actions.router, prefix="/study-actions", tags=["study-actions"])
 api_router.include_router(study_memory.router, prefix="/study-memory", tags=["study-memory"])
+api_router.include_router(
+    local_learning_engine.router, prefix="/study-memory/engine", tags=["local-learning"]
+)
 api_router.include_router(test_analysis.router, prefix="/test-analyses", tags=["test-analysis"])
 api_router.include_router(files.router, prefix="/files", tags=["files"])
 api_router.include_router(jobs.router, prefix="/jobs", tags=["jobs"])

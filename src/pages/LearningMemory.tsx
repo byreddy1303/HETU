@@ -8,6 +8,8 @@ import PageHeader from '@/components/layout/PageHeader';
 import { Button } from '@/components/ui/Button';
 import MemoryEntryEditor from '@/components/memory/MemoryEntryEditor';
 import StudyHistoryBrowser from '@/components/memory/StudyHistoryBrowser';
+import LocalLearningEngine from '@/components/memory/LocalLearningEngine';
+import { backendConfig } from '@/lib/backend-config';
 
 const views: { label: string; kind?: MemoryKind; href?: string }[] = [
   { label: 'Memory records' }, { label: 'Exam reviews', kind: 'exam_review' }, { label: 'Concepts & skills', kind: 'concept' },
@@ -71,6 +73,7 @@ export default function LearningMemory() {
 
   return <div className="space-y-5">
     <PageHeader title="Learning Memory" description="Your attempts, thinking, concepts, and follow-ups, with the evidence kept in view." />
+    {backendConfig.isLocal && <LocalLearningEngine onChanged={refresh} />}
     <nav aria-label="Memory views" className="flex flex-wrap gap-1 border-b border-border pb-3"><button aria-pressed={showHistory} onClick={() => setShowHistory(true)} className={`rounded px-3 py-2 text-sm ${showHistory ? 'bg-accent-faint font-semibold text-accent' : 'text-text-muted hover:bg-bg-overlay'}`}>All study history</button>{views.map((view) => view.href ? <Link key={view.label} className="rounded px-3 py-2 text-sm text-accent underline" to={view.href}>{view.label}</Link> : <button key={view.label} onClick={() => { setShowHistory(false); setKind(view.kind || ''); setOffset(0); }} aria-pressed={!showHistory && kind === (view.kind || '')} className={`rounded px-3 py-2 text-sm ${!showHistory && kind === (view.kind || '') ? 'bg-accent-faint font-semibold text-accent' : 'text-text-muted hover:bg-bg-overlay'}`}>{view.label}</button>)}</nav>
     <div className="flex flex-wrap gap-2"><Button size="sm" onClick={() => create('concept')}>Add concept</Button><Button size="sm" onClick={() => create('finding')}>Record finding or open question</Button><Button size="sm" onClick={() => create('repair')}>Create repair</Button><Button size="sm" onClick={() => create('profile')}>Record learning context</Button><Button size="sm" onClick={() => void download()}>Export memory and evidence</Button><Link className="self-center px-2 text-sm text-accent underline" to="/concept-review">Open scheduled concept reviews</Link></div>
     {error && <p role="alert" className="rounded border border-danger/30 bg-danger-faint p-3 text-sm text-danger">{error} <Button size="sm" onClick={refresh}>Retry</Button></p>}

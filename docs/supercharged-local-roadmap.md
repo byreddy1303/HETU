@@ -1,9 +1,9 @@
 # HETU Local Desktop: Supercharged Roadmap & Agent Execution Log
 
-**Current Status**: Learning Memory foundation implemented; broader phases remain in progress
+**Current Status**: Learning Memory, connected history, and local-model study follow-ups implemented; broader phases remain in progress
 **Target**: GATE CSE 2027 AIR < 100  
 **Architecture**: 100% Local Desktop (Electron + SQLite WAL + Python 3.12 + Native stdio MCP)  
-**Last Updated**: 2026-10-17
+**Last Updated**: 2026-10-18
 
 > **Note for Future Agents**:  
 > Always consult this document before starting a task. When you complete a sub-task or phase, update its checkbox (`[x]`), record the commit hash in the Progress Log below, and commit this file to `main` before finalizing your turn.
@@ -56,6 +56,14 @@ To make an AI act as a true master coach (identifying root weaknesses, predictin
 ---
 
 ## 2. Master Execution Roadmap
+
+### Local model study loop (2026-10-18)
+- [x] Ollama and local OpenAI-compatible model discovery, connection controls, and explicit failure states.
+- [x] Source-validated local analysis of completed PYQ evidence, with active exam and independent review protection.
+- [x] Automatic activities in Learning Memory and Do now, eligibility rechecks, result reconciliation, and dated follow-ups.
+- [x] Accuracy/pace follow-ups after repeated accurate checks; transparent 3/7/14/30-day rules.
+- [x] Bounded practice history and local reconsideration of unsuccessful follow-ups without duplicating tasks or changing review dates.
+- See [local-learning-engine.md](local-learning-engine.md) for verification, scope, and remaining semantic retrieval/skill mapping work.
 
 ### Learning Memory foundation (usable without a paid AI API)
 - [x] Versioned, searchable memory with source links, owner isolation, and evidence export.

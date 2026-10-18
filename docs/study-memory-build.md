@@ -45,6 +45,8 @@ The future coach can read these sources before proposing a diagnosis or repair. 
 
 ## Remaining development
 
+The [local learning engine](local-learning-engine.md) now connects Ollama/local compatible models to completed PYQ evidence, active study actions, automatic result reconciliation, and dated follow-ups. It preserves independent exam review and keeps model explanations unverified.
+
 The follow-on [connected history milestone](study-history-and-session-evidence.md) now indexes ten existing source types and adds a session-wide synthesis with explicit submission coverage. This remains a direct-source history rather than every application event. Search is paginated SQL text search, without a semantic index. Question selection establishes subject/topic matching, not a reviewed mapping of every question to a cognitive trap. Concept responses remain explicitly self-assessed.
 
 Further work includes reviewed prerequisite and trap mappings, richer reading/derivation/check timing, calculator and scratchpad evidence, attachment ingestion, calibrated retention/transfer models, and the provider-backed coaching interface. Those larger roadmap items are not marked complete by this milestone.

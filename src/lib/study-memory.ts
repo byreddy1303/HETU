@@ -158,9 +158,11 @@ export function memoryWritePayload(entry: StudyMemoryEntry): Record<string, unkn
 }
 
 export async function saveMemoryEntry(entry: StudyMemoryEntry): Promise<StudyMemoryEntry> {
-  return apiRequest<StudyMemoryEntry>(`/v1/study-memory/entries/${encodeURIComponent(entry.id)}`, {
+  const saved = await apiRequest<StudyMemoryEntry>(`/v1/study-memory/entries/${encodeURIComponent(entry.id)}`, {
     method: 'PUT', body: JSON.stringify(memoryWritePayload(entry))
   });
+  window.dispatchEvent(new Event('hetu:memory-saved'));
+  return saved;
 }
 
 const saveChains = new Map<string, Promise<StudyMemoryEntry>>();

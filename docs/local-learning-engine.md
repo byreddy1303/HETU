@@ -36,4 +36,6 @@ The implementation milestone passed 104 frontend tests across 18 suites and 69 t
 
 Browser acceptance uses an isolated SQLite copy and real local inference. It checks activity preparation, Do now navigation, actual question submission, automatic result/follow-up creation without pressing the result button, and a narrow mobile layout. Packaged acceptance runs the bundled backend, Python runtime, and compiled UI. Synthetic acceptance attempts never return to the learner's database.
 
+Activation on 2026-10-18: the rebuilt macOS desktop app uses the installed Ollama application with `qwen3:8b` selected for subsequent analysis. Existing prepared activities are retained. Packaged Qwen acceptance verified a submitted skip, one automatic verification, a next-day follow-up, and model refinement of that same follow-up without duplication. The original six session attempts and six linked reflections matched the earlier database copy byte for byte; the old paused practice remained intact. A pre-refinement SQLite backup is stored under the local HETU data directory's `backups` folder.
+
 API references: [Ollama model discovery](https://docs.ollama.com/api/tags), [chat](https://docs.ollama.com/api/chat), and [structured output](https://docs.ollama.com/capabilities/structured-outputs).

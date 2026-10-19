@@ -1342,23 +1342,32 @@ async def reconcile_engine_results(db: AsyncSession, *, owner_id: str) -> int:
 
 
 async def run_engine_cycle(
-    factory: async_sessionmaker[AsyncSession], *, owner_id: str, force: bool = False
+    factory: async_sessionmaker[AsyncSession],
+    *,
+    owner_id: str,
+    force: bool = False,
+    app_url: str = "http://127.0.0.1:8765",
 ) -> dict:
     """Network generation occurs with no open database transaction/session."""
     snapshot = None
+    from app.services.learning_concept_bridge import sync_learning_concept_reviews
+
     try:
         async with factory() as db:
             config = await get_engine_config(db, owner_id=owner_id)
             if not config.enabled:
                 return await get_engine_state(db, owner_id=owner_id)
             await reconcile_engine_results(db, owner_id=owner_id)
+            await sync_learning_concept_reviews(db, owner_id=owner_id, app_url=app_url)
             snapshot = await prepare_engine_run(db, owner_id=owner_id, force=force)
             await db.commit()
             if snapshot is None:
                 return await get_engine_state(db, owner_id=owner_id)
         plan = await generate_engine_plan(snapshot)
         async with factory() as db:
-            await apply_engine_plan(db, owner_id=owner_id, snapshot=snapshot, plan=plan)
+            applied = await apply_engine_plan(db, owner_id=owner_id, snapshot=snapshot, plan=plan)
+            if applied.get("applied"):
+                await sync_learning_concept_reviews(db, owner_id=owner_id, app_url=app_url)
             await db.commit()
             return await get_engine_state(db, owner_id=owner_id)
     except Exception as exc:

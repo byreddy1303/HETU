@@ -3,6 +3,8 @@ import { Link, useParams } from 'react-router-dom';
 import PageHeader from '@/components/layout/PageHeader';
 import { backendConfig } from '@/lib/backend-config';
 import { apiRequest } from '@/lib/fastapi-client';
+import { useAuth } from '@/hooks/useAuth';
+import LearningWorkflows from '@/components/workflows/LearningWorkflows';
 
 type Brief = {
   id: string;
@@ -22,6 +24,7 @@ type Brief = {
 
 export default function Workflows() {
   const { workflowId } = useParams();
+  const { userId } = useAuth();
   const [briefs, setBriefs] = useState<Brief[]>([]);
   const [selected, setSelected] = useState<Brief | null>(null);
   const [correction, setCorrection] = useState('');
@@ -33,35 +36,45 @@ export default function Workflows() {
   const activeLoad = useRef<AbortController | null>(null);
   const pendingChange = useRef<{ content: string; key: string } | null>(null);
 
-  const refresh = useCallback(async (signal: AbortSignal) => {
-    if (!backendConfig.fastapi) return;
-    const [recent, detail] = await Promise.all([
-      apiRequest<Brief[]>('/v1/workflows?limit=50', { signal }),
-      workflowId ? apiRequest<Brief>(`/v1/workflows/${encodeURIComponent(workflowId)}`, { signal }) : null
-    ]);
-    if (signal.aborted) return;
-    setBriefs(recent);
-    setSelected(detail);
-  }, [workflowId]);
+  const refresh = useCallback(
+    async (signal: AbortSignal) => {
+      if (!backendConfig.fastapi) return;
+      const [recent, detail] = await Promise.all([
+        apiRequest<Brief[]>('/v1/workflows?limit=50', { signal }),
+        workflowId
+          ? apiRequest<Brief>(`/v1/workflows/${encodeURIComponent(workflowId)}`, { signal })
+          : null
+      ]);
+      if (signal.aborted) return;
+      setBriefs(recent);
+      setSelected(detail);
+    },
+    [workflowId]
+  );
 
-  const loadPage = useCallback(async (signal: AbortSignal) => {
-    if (signal.aborted) return;
-    setLoading(true);
-    setLoadError(null);
-    try {
-      await refresh(signal);
-      if (!signal.aborted) setError(null);
-    } catch (cause) {
-      if (!signal.aborted) setLoadError(cause instanceof Error ? cause.message : 'Workflows could not load.');
-    } finally {
-      if (!signal.aborted) setLoading(false);
-    }
-  }, [refresh]);
+  const loadPage = useCallback(
+    async (signal: AbortSignal) => {
+      if (signal.aborted) return;
+      setLoading(true);
+      setLoadError(null);
+      try {
+        await refresh(signal);
+        if (!signal.aborted) setError(null);
+      } catch (cause) {
+        if (!signal.aborted)
+          setLoadError(cause instanceof Error ? cause.message : 'Workflows could not load.');
+      } finally {
+        if (!signal.aborted) setLoading(false);
+      }
+    },
+    [refresh]
+  );
 
   useEffect(() => {
     const controller = new AbortController();
     activeLoad.current = controller;
     setSelected(null);
+    setBriefs([]);
     setCorrection('');
     setPending('');
     setSaving(false);
@@ -69,7 +82,7 @@ export default function Workflows() {
     pendingChange.current = null;
     void loadPage(controller.signal);
     return () => controller.abort();
-  }, [loadPage]);
+  }, [loadPage, userId]);
 
   function retryLoad() {
     const signal = activeLoad.current?.signal;
@@ -101,51 +114,175 @@ export default function Workflows() {
       setPending('');
       await loadPage(signal);
     } catch (cause) {
-      if (!signal.aborted) setError(cause instanceof Error ? cause.message : 'The update could not be saved.');
+      if (!signal.aborted)
+        setError(cause instanceof Error ? cause.message : 'The update could not be saved.');
     } finally {
       if (!signal.aborted) setSaving(false);
     }
   }
 
-  return <div className="flex flex-col gap-4">
-    <PageHeader title="Workflows" description="See the goal, corrections, completed steps, and work still open in each HETU task." />
-    {!backendConfig.fastapi ? <p className="rounded-xl border border-border bg-bg-raised p-5 text-text-muted">Workflows open after your account is connected to the Python service.</p> : <>
-      {(loadError || error) && <div role="alert" className="rounded-xl bg-danger-faint p-3 text-danger">
-        <p>{loadError || error}</p>
-        {loadError && <button className="mt-2 font-semibold underline disabled:opacity-50" disabled={loading || saving} onClick={retryLoad}>Retry load</button>}
-      </div>}
-      <div className="grid gap-4 lg:grid-cols-[minmax(220px,310px)_minmax(0,1fr)]">
-        <nav aria-label="Recent workflows" aria-busy={loading} className="rounded-xl border border-border bg-bg-raised p-3">
-          {briefs.length ? briefs.map((brief) => <Link key={brief.id} to={`/workflows/${brief.id}`}
-            className={`block rounded-lg p-3 hover:bg-accent-faint ${brief.id === workflowId ? 'bg-accent-faint' : ''}`}>
-            <strong className="block text-sm text-text">{brief.goal}</strong>
-            <small className="text-text-muted">{brief.status} · {brief.pending_steps.length} pending</small>
-          </Link>) : <p className="p-3 text-sm text-text-muted">{loading ? 'Loading workflows…' : loadError ? 'Your saved task briefs could not load. Retry to see them.' : 'No saved task briefs yet. ChatGPT will create one when a multi-step HETU workflow begins.'}</p>}
-        </nav>
-        <main aria-busy={loading} className="rounded-xl border border-border bg-bg-raised p-5">
-          {selected ? <div className="max-w-[72ch] space-y-5">
-            <div><span className="text-xs text-text-muted">{selected.status} · version {selected.version}</span><h2 className="mt-1 text-2xl font-bold text-text">{selected.goal}</h2></div>
-            <BriefList title="Success means" values={selected.success_criteria} />
-            <BriefList title="Constraints" values={selected.constraints} />
-            <BriefList title="Corrections" values={selected.corrections} />
-            <BriefList title="Pending" values={selected.pending_steps} />
-            <BriefList title="Completed" values={selected.completed_steps} />
-            <BriefList title="Assumptions" values={selected.assumptions} />
-            <BriefList title="References" values={selected.references} />
-            {selected.receipts.length > 0 && <section><h3 className="mb-2 font-bold">Receipts</h3><ul className="space-y-2 text-sm">{selected.receipts.map((receipt) => <li key={receipt.operation_id} className="rounded-lg border border-border p-3"><span className="text-text-muted">{new Date(receipt.recorded_at).toLocaleString()}</span><pre className="mt-1 overflow-auto whitespace-pre-wrap">{JSON.stringify(receipt.result, null, 2)}</pre></li>)}</ul></section>}
-            <div className="grid gap-3 border-t border-border pt-5">
-              <label className="grid gap-1 text-sm font-semibold">Add a correction<input className="rounded-lg border border-border bg-bg p-2 font-normal" value={correction} onChange={(event) => setCorrection(event.target.value)} placeholder="What should this task focus on now?" /></label>
-              <button disabled={!correction.trim() || saving || loading || !!loadError} className="justify-self-start font-semibold text-accent disabled:opacity-50" onClick={() => void saveChange({ correction })}>Save correction</button>
-              <label className="grid gap-1 text-sm font-semibold">Add a pending step<input className="rounded-lg border border-border bg-bg p-2 font-normal" value={pending} onChange={(event) => setPending(event.target.value)} placeholder="What remains to be done?" /></label>
-              <button disabled={!pending.trim() || saving || loading || !!loadError} className="justify-self-start font-semibold text-accent disabled:opacity-50" onClick={() => void saveChange({ pending_step: pending })}>Add step</button>
+  return (
+    <div className="flex flex-col gap-4">
+      <PageHeader
+        title="Workflows"
+        description="Follow focused study from evidence to its next review, and keep multi-step assistant tasks organised."
+      />
+      <LearningWorkflows />
+      {!backendConfig.fastapi ? (
+        <p className="rounded-xl border border-border bg-bg-raised p-5 text-text-muted">
+          Workflows open after your account is connected to the Python service.
+        </p>
+      ) : (
+        <>
+          <div className="mt-2">
+            <h2 className="font-display text-2xl font-semibold">Assistant task briefs</h2>
+            <p className="mt-1 text-sm text-text-muted">
+              Goals, corrections, and pending steps saved during multi-step work with your
+              assistant.
+            </p>
+          </div>
+          {(loadError || error) && (
+            <div role="alert" className="rounded-xl bg-danger-faint p-3 text-danger">
+              <p>{loadError || error}</p>
+              {loadError && (
+                <button
+                  className="mt-2 font-semibold underline disabled:opacity-50"
+                  disabled={loading || saving}
+                  onClick={retryLoad}
+                >
+                  Retry load
+                </button>
+              )}
             </div>
-          </div> : <p className="text-text-muted">{loading ? (workflowId ? 'Loading workflow…' : 'Loading saved task briefs…') : loadError ? 'Workflow details are unavailable. Retry loading to continue.' : 'Choose a workflow to see its current state.'}</p>}
-        </main>
-      </div>
-    </>}
-  </div>;
+          )}
+          <div className="grid gap-4 lg:grid-cols-[minmax(220px,310px)_minmax(0,1fr)]">
+            <nav
+              aria-label="Recent workflows"
+              aria-busy={loading}
+              className="rounded-xl border border-border bg-bg-raised p-3"
+            >
+              {briefs.length ? (
+                briefs.map((brief) => (
+                  <Link
+                    key={brief.id}
+                    to={`/workflows/${brief.id}`}
+                    className={`block rounded-lg p-3 hover:bg-accent-faint ${brief.id === workflowId ? 'bg-accent-faint' : ''}`}
+                  >
+                    <strong className="block text-sm text-text">{brief.goal}</strong>
+                    <small className="text-text-muted">
+                      {brief.status} · {brief.pending_steps.length} pending
+                    </small>
+                  </Link>
+                ))
+              ) : (
+                <p className="p-3 text-sm text-text-muted">
+                  {loading
+                    ? 'Loading workflows…'
+                    : loadError
+                      ? 'Your saved task briefs could not load. Retry to see them.'
+                      : 'No saved task briefs yet. ChatGPT will create one when a multi-step HETU workflow begins.'}
+                </p>
+              )}
+            </nav>
+            <main aria-busy={loading} className="rounded-xl border border-border bg-bg-raised p-5">
+              {selected ? (
+                <div className="max-w-[72ch] space-y-5">
+                  <div>
+                    <span className="text-xs text-text-muted">
+                      {selected.status} · version {selected.version}
+                    </span>
+                    <h2 className="mt-1 text-2xl font-bold text-text">{selected.goal}</h2>
+                  </div>
+                  <BriefList title="Success means" values={selected.success_criteria} />
+                  <BriefList title="Constraints" values={selected.constraints} />
+                  <BriefList title="Corrections" values={selected.corrections} />
+                  <BriefList title="Pending" values={selected.pending_steps} />
+                  <BriefList title="Completed" values={selected.completed_steps} />
+                  <BriefList title="Assumptions" values={selected.assumptions} />
+                  <BriefList title="References" values={selected.references} />
+                  {selected.receipts.length > 0 && (
+                    <section>
+                      <h3 className="mb-2 font-bold">Receipts</h3>
+                      <ul className="space-y-2 text-sm">
+                        {selected.receipts.map((receipt) => (
+                          <li
+                            key={receipt.operation_id}
+                            className="rounded-lg border border-border p-3"
+                          >
+                            <span className="text-text-muted">
+                              {new Date(receipt.recorded_at).toLocaleString()}
+                            </span>
+                            <pre className="mt-1 overflow-auto whitespace-pre-wrap">
+                              {JSON.stringify(receipt.result, null, 2)}
+                            </pre>
+                          </li>
+                        ))}
+                      </ul>
+                    </section>
+                  )}
+                  <div className="grid gap-3 border-t border-border pt-5">
+                    <label className="grid gap-1 text-sm font-semibold">
+                      Add a correction
+                      <input
+                        className="rounded-lg border border-border bg-bg p-2 font-normal"
+                        value={correction}
+                        onChange={(event) => setCorrection(event.target.value)}
+                        placeholder="What should this task focus on now?"
+                      />
+                    </label>
+                    <button
+                      disabled={!correction.trim() || saving || loading || !!loadError}
+                      className="justify-self-start font-semibold text-accent disabled:opacity-50"
+                      onClick={() => void saveChange({ correction })}
+                    >
+                      Save correction
+                    </button>
+                    <label className="grid gap-1 text-sm font-semibold">
+                      Add a pending step
+                      <input
+                        className="rounded-lg border border-border bg-bg p-2 font-normal"
+                        value={pending}
+                        onChange={(event) => setPending(event.target.value)}
+                        placeholder="What remains to be done?"
+                      />
+                    </label>
+                    <button
+                      disabled={!pending.trim() || saving || loading || !!loadError}
+                      className="justify-self-start font-semibold text-accent disabled:opacity-50"
+                      onClick={() => void saveChange({ pending_step: pending })}
+                    >
+                      Add step
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <p className="text-text-muted">
+                  {loading
+                    ? workflowId
+                      ? 'Loading workflow…'
+                      : 'Loading saved task briefs…'
+                    : loadError
+                      ? 'Workflow details are unavailable. Retry loading to continue.'
+                      : 'Choose a workflow to see its current state.'}
+                </p>
+              )}
+            </main>
+          </div>
+        </>
+      )}
+    </div>
+  );
 }
 
 function BriefList({ title, values }: { title: string; values: string[] }) {
-  return values.length ? <section><h3 className="mb-2 font-bold">{title}</h3><ul className="list-disc space-y-1 pl-5 text-sm leading-relaxed">{values.map((value, index) => <li key={`${index}-${value}`}>{value}</li>)}</ul></section> : null;
+  return values.length ? (
+    <section>
+      <h3 className="mb-2 font-bold">{title}</h3>
+      <ul className="list-disc space-y-1 pl-5 text-sm leading-relaxed">
+        {values.map((value, index) => (
+          <li key={`${index}-${value}`}>{value}</li>
+        ))}
+      </ul>
+    </section>
+  ) : null;
 }

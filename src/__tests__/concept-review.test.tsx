@@ -11,6 +11,7 @@ vi.mock('@/lib/fastapi-client', async (load) => ({ ...await load<typeof import('
 const review = { id: 'one', user_id: 'owner', version: 1, concept_id: 'concept', kind: 'recall', question_origin: 'saved_note',
   prompt: 'Why normalize the weights?', evaluation_guidance: 'Divide by their total.', due_on: '2026-10-10', attempts: [] };
 
+const queue = (items: unknown[] = [review]) => ({ items, today: '2026-10-19', complete: true, held_for_exam: false });
 beforeEach(() => { apiRequest.mockReset(); });
 afterEach(cleanup);
 
@@ -21,10 +22,25 @@ function renderReview(path = '/concept-review/one') {
 }
 
 describe('discussion recall evidence', () => {
+  it('separates due and upcoming recall without revealing hidden guidance', async () => {
+    apiRequest.mockImplementation(async (path: string) => path.includes('?limit=')
+      ? { ...queue(), items: [review, { ...review, id: 'later', prompt: 'Recall this later.', due_on: '2026-11-01' }] }
+      : { ...review, has_guidance: true, evaluation_guidance: null,
+          source: { href: '/memory/repair', guidance_status: 'unverified_model_proposal', snapshot_changed: false } });
+    const user = userEvent.setup();
+    renderReview();
+    await screen.findByRole('heading', { name: review.prompt });
+    expect(screen.getByRole('link', { name: 'Original study activity' })).toHaveAttribute('href', '/memory/repair');
+    expect(screen.getByRole('button', { name: 'Show evaluation guidance' })).toBeEnabled();
+    expect(screen.queryByText('Divide by their total.')).not.toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: /Recall this later\./ })).not.toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Upcoming' }));
+    expect(screen.getByRole('link', { name: /Recall this later\./ })).toHaveAttribute('href', '/concept-review/later');
+  });
   it('shows loading and a retryable failure before showing a confirmed empty list', async () => {
     let fail!: (cause: Error) => void;
     apiRequest.mockImplementationOnce(() => new Promise((_resolve, reject) => { fail = reject; }))
-      .mockResolvedValueOnce([]);
+      .mockResolvedValueOnce(queue([]));
     const user = userEvent.setup();
     renderReview('/concept-review');
     expect(screen.getByRole('navigation', { name: 'Concept questions' })).toHaveTextContent('Loading concept questions…');
@@ -42,7 +58,7 @@ describe('discussion recall evidence', () => {
   it('retries a failed selected question without claiming there is nothing to review', async () => {
     let failDetail = true;
     apiRequest.mockImplementation(async (path: string) => {
-      if (path.includes('?limit=')) return [review];
+      if (path.includes('?limit=')) return queue();
       if (failDetail) throw new Error('Question could not load');
       return review;
     });
@@ -61,7 +77,7 @@ describe('discussion recall evidence', () => {
     let finishFirst!: (value: typeof review) => void;
     let firstSignal: AbortSignal | undefined;
     apiRequest.mockImplementation(async (path: string, init?: RequestInit) => {
-      if (path.includes('?limit=')) return [review];
+      if (path.includes('?limit=')) return queue();
       if (path.endsWith('/one')) {
         firstSignal = init?.signal as AbortSignal;
         return new Promise<typeof review>((resolve) => { finishFirst = resolve; });
@@ -94,7 +110,7 @@ describe('discussion recall evidence', () => {
   it('persists guidance before revealing it and submits the new version with assistance', async () => {
     const saved = { ...review, version: 2, pending_assistance: 'solution' };
     apiRequest.mockImplementation(async (path: string, init?: RequestInit) => {
-      if (path.includes('?limit=')) return [review];
+      if (path.includes('?limit=')) return queue();
       if (path.endsWith('/help')) return { review: saved, events: [] };
       if (path.endsWith('/responses')) return { ...saved, version: 3 };
       return init?.method === 'POST' ? saved : review;
@@ -113,7 +129,7 @@ describe('discussion recall evidence', () => {
   });
 
   it('resets answer and assistance when moving to a different discussion question', async () => {
-    apiRequest.mockImplementation(async (path: string) => path.includes('?limit=') ? [review] : { ...review, id: path.endsWith('two') ? 'two' : 'one', prompt: path.endsWith('two') ? 'State the law of total probability.' : review.prompt });
+    apiRequest.mockImplementation(async (path: string) => path.includes('?limit=') ? queue() : { ...review, id: path.endsWith('two') ? 'two' : 'one', prompt: path.endsWith('two') ? 'State the law of total probability.' : review.prompt });
     const user = userEvent.setup();
     renderReview();
     await screen.findByRole('heading', { name: review.prompt });
@@ -130,7 +146,7 @@ describe('discussion recall evidence', () => {
     apiRequest.mockImplementation(async (path: string) => {
       if (path.endsWith('/responses')) { committed = true; return { ...review, version: 2 }; }
       if (committed && failRefresh) throw new Error('Refresh unavailable');
-      return path.includes('?limit=') ? [review] : { ...review, version: committed ? 2 : 1 };
+      return path.includes('?limit=') ? queue() : { ...review, version: committed ? 2 : 1 };
     });
     const user = userEvent.setup();
     renderReview();

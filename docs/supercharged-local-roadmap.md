@@ -3,7 +3,7 @@
 **Current Status**: Learning Memory, connected history, and local-model study follow-ups implemented; broader phases remain in progress
 **Target**: GATE CSE 2027 AIR < 100  
 **Architecture**: 100% Local Desktop (Electron + SQLite WAL + Python 3.12 + Native stdio MCP)  
-**Last Updated**: 2026-10-18
+**Last Updated**: 2026-10-19
 
 > **Note for Future Agents**:  
 > Always consult this document before starting a task. When you complete a sub-task or phase, update its checkbox (`[x]`), record the commit hash in the Progress Log below, and commit this file to `main` before finalizing your turn.
@@ -64,6 +64,13 @@ To make an AI act as a true master coach (identifying root weaknesses, predictin
 - [x] Accuracy/pace follow-ups after repeated accurate checks; transparent 3/7/14/30-day rules.
 - [x] Bounded practice history and local reconsideration of unsuccessful follow-ups without duplicating tasks or changing review dates.
 - See [local-learning-engine.md](local-learning-engine.md) for verification, scope, and remaining semantic retrieval/skill mapping work.
+
+### Connected learning workspace (2026-10-19)
+- [x] Dashboard led by prepared work, due recall, upcoming checks and actual results, with unfinished practice kept visible.
+- [x] Learning workflows connected to evidence, current practice, results and dated follow-ups; assistant task briefs retained.
+- [x] Durable source-linked recall questions prepared automatically from eligible activities, reused across each follow-up family.
+- [x] Concept Review due/upcoming queues, guidance provenance and saved-response next dates using the existing recovery scheduler.
+- See [connected-learning-workspace.md](connected-learning-workspace.md) for scope and verification.
 
 ### Learning Memory foundation (usable without a paid AI API)
 - [x] Versioned, searchable memory with source links, owner isolation, and evidence export.

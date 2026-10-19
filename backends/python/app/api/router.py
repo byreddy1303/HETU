@@ -8,6 +8,7 @@ from app.api.routes import (
     health,
     jobs,
     learning,
+    learning_concept_bridge,
     local_learning_engine,
     pyq_catalog,
     realtime,
@@ -31,6 +32,9 @@ api_router.include_router(records.router, prefix="/records", tags=["records"])
 api_router.include_router(recovery.router, prefix="/recovery", tags=["recovery"])
 api_router.include_router(pyq_catalog.router, prefix="/pyq", tags=["pyq"])
 api_router.include_router(learning.router, prefix="/learning", tags=["learning"])
+api_router.include_router(
+    learning_concept_bridge.router, prefix="/learning/concept-bridge", tags=["concept-reviews"]
+)
 api_router.include_router(revision_pack.router, prefix="/revision-pack", tags=["revision-pack"])
 api_router.include_router(workflows.router, prefix="/workflows", tags=["workflows"])
 api_router.include_router(

@@ -774,7 +774,7 @@
   .workspace-mobile-brand {
     min-width: 0;
   }
-  .workspace-mobile-mark {
+  .workspace-mobile-brand > .workspace-mobile-mark {
     display: none;
   }
   .workspace-mobile-topbar__actions {
@@ -897,7 +897,7 @@
   .workspace-mobile-brand > span {
     display: none;
   }
-  .workspace-mobile-mark {
+  .workspace-mobile-brand > .workspace-mobile-mark {
     display: block;
     width: 39px;
     height: auto;

@@ -2,9 +2,18 @@ import { useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLiveQuery } from '@/lib/db-hooks';
 import { differenceInCalendarDays, parseISO } from 'date-fns';
-import { ArrowRight, BookOpenCheck, CalendarRange, Fingerprint, LibraryBig, RotateCcw, Target } from 'lucide-react';
+import {
+  ArrowRight,
+  BookOpenCheck,
+  CalendarRange,
+  Fingerprint,
+  LibraryBig,
+  RotateCcw,
+  Target
+} from 'lucide-react';
 import DiscussionLibraryCard from '@/components/dashboard/DiscussionLibraryCard';
-import HeroCard from '@/components/dashboard/HeroCard';
+import LearningOverview from '@/components/dashboard/LearningOverview';
+import { latestUnfinishedPractice } from '@/lib/learning-overview';
 import LearningTips from '@/components/dashboard/LearningTips';
 import OutcomeDonut from '@/components/dashboard/OutcomeDonut';
 import OutcomeLegend from '@/components/dashboard/OutcomeLegend';
@@ -34,9 +43,7 @@ import {
 } from '@/lib/sessions';
 import { PYQ_BANK_QUESTION_COUNT } from '@/lib/pyq';
 import { isCoreSetupOnlyUsername } from '@/lib/core-only';
-import { buildDoNowQueue } from '@/lib/do-now';
 import { awaitInitialPull } from '@/lib/sync';
-import { loadDayPlan } from '@/lib/planner-storage';
 import {
   dueTodayCount,
   latestSession,
@@ -66,10 +73,15 @@ function TargetMeter({ label, done, target }: { label: string; done: number; tar
         aria-valuemax={target}
         aria-valuenow={Math.min(done, target)}
       >
-        <div className="h-full rounded-full bg-accent transition-[width]" style={{ width: `${progress}%` }} />
+        <div
+          className="h-full rounded-full bg-accent transition-[width]"
+          style={{ width: `${progress}%` }}
+        />
       </div>
       <p className="mt-1.5 text-[10.5px] text-text-faint">
-        {remaining === 0 ? 'Target met. More is optional.' : `${remaining} remaining at your current setting.`}
+        {remaining === 0
+          ? 'Target met. More is optional.'
+          : `${remaining} remaining at your current setting.`}
       </p>
     </div>
   );
@@ -127,10 +139,14 @@ export default function Dashboard() {
     [userId],
     []
   );
-  const formulas = useLiveQuery(
-    async () => (userId ? db.formulas.where('user_id').equals(userId).toArray() : []),
+  const pyqSessions = useLiveQuery(
+    async () => (userId ? db.pyq_sessions.where('user_id').equals(userId).toArray() : []),
     [userId],
     []
+  );
+  const resumeSession = useMemo(
+    () => (userId ? latestUnfinishedPractice(pyqSessions, userId) : null),
+    [pyqSessions, userId]
   );
 
   useEffect(() => {
@@ -168,22 +184,6 @@ export default function Dashboard() {
   );
 
   const due = useMemo(() => dueTodayCount(reattempts, today), [reattempts, today]);
-  const doNowQueue = useMemo(
-    () =>
-      buildDoNowQueue({
-        today,
-        reattempts,
-        questions,
-        pyqAttempts,
-        formulas,
-        plan: loadDayPlan(today)
-      }),
-    [formulas, pyqAttempts, questions, reattempts, today]
-  );
-  const overdue = useMemo(
-    () => reattempts.filter((row) => row.stage !== 'MASTERED' && row.scheduled_date < today).length,
-    [reattempts, today]
-  );
   const surface = useMemo(() => mistakeSurfaceOpen(reattempts), [reattempts]);
   const movement = useMemo(
     () => mistakeSurfaceMovement(reattempts, new Date(), timeZone),
@@ -230,47 +230,73 @@ export default function Dashboard() {
   return (
     <div className="workspace-dashboard flex flex-col gap-4 sm:gap-6">
       <WelcomeOverlay />
-      <HeroCard
+      <LearningOverview
+        userId={userId}
         name={profile?.name}
         today={today}
+        timeZone={timeZone}
+        coreOnly={coreOnly}
         showCountdown={showCountdown}
         daysLeft={daysLeft}
-        due={due}
-        overdue={overdue}
-        queueCount={doNowQueue.length}
-        action={
-          <Button
-            variant="primary"
-            onClick={() => navigate('/today')}
-            aria-label={`${doNowQueue.length} ordered actions. Open Do now`}
-          >
-            Open Do now
-            <ArrowRight size={15} strokeWidth={2} aria-hidden />
-          </Button>
-        }
+        resumeSession={resumeSession}
       />
 
-      <nav className={cn('workspace-launchpad', coreOnly && 'is-core-only')} aria-label="Your study loop">
-        <button type="button" className="workspace-launch" onClick={() => navigate('/learning-library')}>
-          <span className="workspace-launch__icon"><LibraryBig size={21} aria-hidden /></span>
-          <span className="workspace-launch__text"><strong>Saved discussions</strong><small>Ideas and reasoning from ChatGPT</small></span>
+      <nav
+        className={cn('workspace-launchpad', coreOnly && 'is-core-only')}
+        aria-label="Your study loop"
+      >
+        <button
+          type="button"
+          className="workspace-launch"
+          onClick={() => navigate('/learning-library')}
+        >
+          <span className="workspace-launch__icon">
+            <LibraryBig size={21} aria-hidden />
+          </span>
+          <span className="workspace-launch__text">
+            <strong>Saved discussions</strong>
+            <small>Ideas and reasoning from ChatGPT</small>
+          </span>
           <ArrowRight size={16} aria-hidden />
         </button>
         <button type="button" className="workspace-launch" onClick={() => navigate('/pyq')}>
-          <span className="workspace-launch__icon"><BookOpenCheck size={21} aria-hidden /></span>
-          <span className="workspace-launch__text"><strong>Practice studio</strong><small>{uniquePyqsSeen.toLocaleString()} questions explored</small></span>
+          <span className="workspace-launch__icon">
+            <BookOpenCheck size={21} aria-hidden />
+          </span>
+          <span className="workspace-launch__text">
+            <strong>Practice studio</strong>
+            <small>{uniquePyqsSeen.toLocaleString()} questions explored</small>
+          </span>
           <ArrowRight size={16} aria-hidden />
         </button>
         {!coreOnly && (
           <>
-            <button type="button" className="workspace-launch" onClick={() => navigate('/reattempts')}>
-              <span className="workspace-launch__icon"><RotateCcw size={21} aria-hidden /></span>
-              <span className="workspace-launch__text"><strong>Return & recall</strong><small>{due} reviews ready for you</small></span>
+            <button
+              type="button"
+              className="workspace-launch"
+              onClick={() => navigate('/reattempts')}
+            >
+              <span className="workspace-launch__icon">
+                <RotateCcw size={21} aria-hidden />
+              </span>
+              <span className="workspace-launch__text">
+                <strong>Return & recall</strong>
+                <small>{due} reviews ready for you</small>
+              </span>
               <ArrowRight size={16} aria-hidden />
             </button>
-            <button type="button" className="workspace-launch" onClick={() => navigate('/patterns')}>
-              <span className="workspace-launch__icon"><Fingerprint size={21} aria-hidden /></span>
-              <span className="workspace-launch__text"><strong>Find a connection</strong><small>Explore your recurring patterns</small></span>
+            <button
+              type="button"
+              className="workspace-launch"
+              onClick={() => navigate('/patterns')}
+            >
+              <span className="workspace-launch__icon">
+                <Fingerprint size={21} aria-hidden />
+              </span>
+              <span className="workspace-launch__text">
+                <strong>Find a connection</strong>
+                <small>Explore your recurring patterns</small>
+              </span>
               <ArrowRight size={16} aria-hidden />
             </button>
           </>
@@ -282,9 +308,7 @@ export default function Dashboard() {
       <div
         className={cn(
           'grid min-w-0 gap-4',
-          coreOnly
-            ? 'grid-cols-1'
-            : 'lg:grid-cols-[minmax(0,1.65fr)_minmax(280px,0.85fr)]'
+          coreOnly ? 'grid-cols-1' : 'lg:grid-cols-[minmax(0,1.65fr)_minmax(280px,0.85fr)]'
         )}
       >
         {!coreOnly && (
@@ -297,11 +321,14 @@ export default function Dashboard() {
             <CardBody>
               <div className="flex flex-wrap items-end justify-between gap-3">
                 <div>
-                  <p className="dashboard-big-number u-num text-[34px] font-semibold leading-none text-text">{surface}</p>
+                  <p className="dashboard-big-number u-num text-[34px] font-semibold leading-none text-text">
+                    {surface}
+                  </p>
                   <p className="mt-1.5 text-[11.5px] text-text-muted">open re-attempts now</p>
                 </div>
                 <div className="rounded-full border border-border bg-bg-overlay/50 px-3 py-1.5 text-[10.5px] text-text-muted">
-                  <span className="u-num font-semibold text-text">{netLabel}</span> net in seven days
+                  <span className="u-num font-semibold text-text">{netLabel}</span> net in seven
+                  days
                 </div>
               </div>
               <div className="mt-2">
@@ -311,13 +338,15 @@ export default function Dashboard() {
                 <div className="pr-3 sm:pr-4">
                   <p className="u-label">Opened</p>
                   <p className="mt-1 text-[12px] text-text-muted">
-                    <span className="u-num font-semibold text-text">{movement.opened}</span> added in 7 days
+                    <span className="u-num font-semibold text-text">{movement.opened}</span> added
+                    in 7 days
                   </p>
                 </div>
                 <div className="pl-3 sm:pl-4">
                   <p className="u-label">Mastered</p>
                   <p className="mt-1 text-[12px] text-text-muted">
-                    <span className="u-num font-semibold text-success">{movement.mastered}</span> closed in 7 days
+                    <span className="u-num font-semibold text-success">{movement.mastered}</span>{' '}
+                    closed in 7 days
                   </p>
                 </div>
               </div>
@@ -332,8 +361,16 @@ export default function Dashboard() {
             className="flex-nowrap items-center [&>div]:w-auto [&>div]:shrink-0"
           />
           <CardBody className="flex flex-col gap-5">
-            <TargetMeter label="Questions today" done={questionsToday} target={dailyQuestionTarget} />
-            <TargetMeter label="Sessions this week" done={sessionsThisWeek} target={weeklySessionTarget} />
+            <TargetMeter
+              label="Questions today"
+              done={questionsToday}
+              target={dailyQuestionTarget}
+            />
+            <TargetMeter
+              label="Sessions this week"
+              done={sessionsThisWeek}
+              target={weeklySessionTarget}
+            />
             <button
               type="button"
               onClick={() => navigate('/pyq')}
@@ -356,7 +393,10 @@ export default function Dashboard() {
                   </span>
                   <span className="mt-1.5 flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-[11px] leading-relaxed text-text-faint">
                     <span>
-                      <span className="u-num text-text-muted">{uniquePyqsSeen.toLocaleString()}</span> of{' '}
+                      <span className="u-num text-text-muted">
+                        {uniquePyqsSeen.toLocaleString()}
+                      </span>{' '}
+                      of{' '}
                       <span className="u-num text-text-muted">
                         {PYQ_BANK_QUESTION_COUNT.toLocaleString()}
                       </span>{' '}
@@ -399,7 +439,8 @@ export default function Dashboard() {
                     </p>
                     {!weeklyFixCurrent && (
                       <p className="mt-3 text-[11.5px] leading-relaxed text-text-faint">
-                        This focus is stale. Review this week's evidence before treating it as current.
+                        This focus is stale. Review this week's evidence before treating it as
+                        current.
                       </p>
                     )}
                   </>
@@ -415,7 +456,12 @@ export default function Dashboard() {
                   </>
                 )}
                 <div className="mt-auto pt-5">
-                  <Button size="sm" variant="ghost" onClick={() => navigate('/weekly-review')} className="-ml-3">
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => navigate('/weekly-review')}
+                    className="-ml-3"
+                  >
                     {weeklyFix ? 'Open weekly review' : 'Set weekly focus'}
                     <ArrowRight size={13} aria-hidden />
                   </Button>
@@ -433,7 +479,10 @@ export default function Dashboard() {
                 {last ? (
                   <div className="flex h-full flex-col gap-4 sm:flex-row sm:items-center">
                     {lastSessionQuestions.length > 0 ? (
-                      <OutcomeDonut distribution={distribution} total={lastSessionQuestions.length} />
+                      <OutcomeDonut
+                        distribution={distribution}
+                        total={lastSessionQuestions.length}
+                      />
                     ) : (
                       <div className="flex h-[130px] w-[130px] shrink-0 items-center justify-center rounded-full border border-dashed border-border bg-bg-overlay/30 text-center">
                         <span className="u-label max-w-[80px]">No tagged questions</span>
@@ -441,14 +490,22 @@ export default function Dashboard() {
                     )}
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2">
-                        <span className={cn('h-2 w-2 rounded-full', subjectInk(last.subject).dot)} aria-hidden />
-                        <h2 className="font-display text-[19px] font-semibold text-text">{last.subject}</h2>
+                        <span
+                          className={cn('h-2 w-2 rounded-full', subjectInk(last.subject).dot)}
+                          aria-hidden
+                        />
+                        <h2 className="font-display text-[19px] font-semibold text-text">
+                          {last.subject}
+                        </h2>
                       </div>
                       <p className="mt-1 text-[11.5px] text-text-faint">
                         {formatDate(last.date)} ·{' '}
                         <span className="u-num">{last.actual_duration_min ?? 0}</span> min ·{' '}
                         <span className="u-num">{lastSessionQuestionCount}</span>{' '}
-                        {plural(lastSessionQuestionCount, last.kind === 'pyq' ? 'submission' : 'question')}
+                        {plural(
+                          lastSessionQuestionCount,
+                          last.kind === 'pyq' ? 'submission' : 'question'
+                        )}
                       </p>
                       {lastSessionQuestions.length > 0 && (
                         <>
@@ -456,8 +513,10 @@ export default function Dashboard() {
                             <OutcomeKey distribution={distribution} />
                           </div>
                           <p className="mt-3 text-[11.5px] text-text-muted">
-                            <span className="u-num font-semibold text-text">{distribution.R}</span> clean ·{' '}
-                            <span className="u-num font-semibold text-danger">{notClean}</span> not clean
+                            <span className="u-num font-semibold text-text">{distribution.R}</span>{' '}
+                            clean ·{' '}
+                            <span className="u-num font-semibold text-danger">{notClean}</span> not
+                            clean
                           </p>
                         </>
                       )}
@@ -474,9 +533,12 @@ export default function Dashboard() {
                   </div>
                 ) : (
                   <div className="flex min-h-[160px] flex-col items-center justify-center text-center sm:min-h-[228px]">
-                    <p className="font-display text-[18px] font-semibold text-text">No session evidence yet</p>
+                    <p className="font-display text-[18px] font-semibold text-text">
+                      No session evidence yet
+                    </p>
                     <p className="mt-2 max-w-[360px] text-[12.5px] leading-relaxed text-text-faint">
-                      Finish a focused, log, or PYQ practice session and its outcome shape will appear here.
+                      Finish a focused, log, or PYQ practice session and its outcome shape will
+                      appear here.
                     </p>
                   </div>
                 )}

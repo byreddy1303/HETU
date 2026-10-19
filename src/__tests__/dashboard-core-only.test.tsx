@@ -73,7 +73,7 @@ describe('Dashboard core-only minimal view', () => {
 
     // Hero present - check for action button and hero section
     expect(screen.getByText('Open Do now')).toBeInTheDocument();
-    expect(screen.getByRole('region', { name: /A clear queue/ })).toBeInTheDocument();
+    expect(screen.getByRole('region', { name: /Your learning, ready to use/ })).toBeInTheDocument();
 
     // Launchpad has all three tiles
     expect(screen.getByRole('button', { name: /Practice studio/ })).toBeInTheDocument();
@@ -97,7 +97,7 @@ describe('Dashboard core-only minimal view', () => {
 
     // Hero present (core user still gets greeting + Do now)
     expect(screen.getByText('Open Do now')).toBeInTheDocument();
-    expect(screen.getByRole('region', { name: /A clear queue/ })).toBeInTheDocument();
+    expect(screen.getByRole('region', { name: /Your learning, ready to use/ })).toBeInTheDocument();
 
     // Launchpad ONLY has Practice studio
     expect(screen.getByRole('button', { name: /Practice studio/ })).toBeInTheDocument();
@@ -126,7 +126,7 @@ describe('Dashboard core-only minimal view', () => {
     );
 
     expect(screen.getByText('Open Do now')).toBeInTheDocument();
-    expect(screen.getByRole('region', { name: /A clear queue/ })).toBeInTheDocument();
+    expect(screen.getByRole('region', { name: /Your learning, ready to use/ })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /Practice studio/ })).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /Return & recall/ })).toBeNull();
     expect(screen.queryByRole('button', { name: /Find a connection/ })).toBeNull();

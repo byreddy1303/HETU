@@ -11,6 +11,7 @@ from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel, ConfigDict
 
 from app.api.deps import CurrentUser, DbDep, SettingsDep
+from app.core.config import get_settings
 from app.db.session import get_session_factory
 from app.services.local_models import LocalModelConfig, discover_local_models
 from app.services.memory_learning_engine import (
@@ -67,7 +68,12 @@ async def _work(owner_id: str, force: bool) -> None:
     try:
         # No database session is held while waiting for the local GPU.
         async with _model_slot:
-            await run_engine_cycle(get_session_factory(), owner_id=owner_id, force=force)
+            await run_engine_cycle(
+                get_session_factory(),
+                owner_id=owner_id,
+                force=force,
+                app_url=get_settings().app_url,
+            )
     except asyncio.CancelledError:
         raise
     except Exception:

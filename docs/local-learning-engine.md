@@ -2,6 +2,8 @@
 
 Built 2026-10-18. Entry points: **Learning Memory → Your next study actions → Local model connection**, and the prepared activities in **Do now**.
 
+The 2026-10-19 [connected learning workspace](connected-learning-workspace.md) also exposes these activities on the dashboard and in Workflows, and prepares durable concept recall from eligible activity families.
+
 ## What runs automatically
 
 When local learning is enabled, HETU checks on app open, after saved practice changes or memory saves, and every minute while the app is visible. The trigger returns immediately; the local backend runs model inference separately from request handling and without holding a database session open. One job per account and one model job per backend process prevent duplicate concurrent work.

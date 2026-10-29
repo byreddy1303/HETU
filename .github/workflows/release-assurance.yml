@@ -1,0 +1,65 @@
+name: Release assurance
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-assurance-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  frontend-and-desktop:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      # All tests use synthetic memory-only fixtures, never a hosted account.
+      VITE_API_URL: '/api'
+      VITE_CLERK_PUBLISHABLE_KEY: 'pk_test_synthetic_ci'
+      ELECTRON_SKIP_BINARY_DOWNLOAD: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test -- --maxWorkers=4
+      - run: npm run pyq:audit
+      - run: npm run test:desktop
+      - name: Build the web interface
+        run: npm run build
+      - name: Build the desktop interface
+        # Portable Python packaging is a separate macOS arm64 acceptance gate.
+        run: npx vite build --mode desktop
+
+  sqlite-recovery:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: backends/python
+    env:
+      ENVIRONMENT: test
+      DATABASE_URL: sqlite+aiosqlite:///${{ runner.temp }}/hetu-ci.db
+      HETU_DATA_DIR: ${{ runner.temp }}/hetu-ci-workspace
+      # PostgreSQL checks run separately in Data safety against its disposable service.
+      HETU_TEST_DATABASE_URL: ''
+      HETU_BACKUP_TEST_DATABASE_URL: ''
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: backends/python/requirements*.txt
+      - run: pip install -r requirements-dev.txt
+      - name: Verify SQLite workflows, recovery, restart, and backup with disposable fixtures
+        run: pytest

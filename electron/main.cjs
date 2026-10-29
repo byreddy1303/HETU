@@ -1,7 +1,8 @@
-const { app, BrowserWindow, dialog, ipcMain, shell } = require('electron');
+const { app, BrowserWindow, dialog, ipcMain, shell, powerMonitor } = require('electron');
 const path = require('node:path');
 const fs = require('node:fs');
 const { BACKEND_PORT, getLocalDataDir, getBackendDir, getLocalEnvironment, getPythonRuntime, launchBackend } = require('./runtime.cjs');
+const { createDailyBrief } = require('./daily-brief.cjs');
 
 // Preserve the existing profile and SQLite location when productName is capitalized.
 app.setName('hetu');
@@ -15,6 +16,7 @@ let mainWindow = null;
 let backendProcess = null;
 let logStream = null;
 let quitting = false;
+let dailyBrief = null;
 const appUrl = `http://127.0.0.1:${BACKEND_PORT}`;
 const devUrl = 'http://localhost:5173';
 const targetUrl = !app.isPackaged && process.env.VITE_DEV_SERVER === 'true' ? devUrl : appUrl;
@@ -28,7 +30,7 @@ function openExternal(url) {
   } catch { /* Invalid and non-web URLs must not reach the operating system. */ }
 }
 
-async function createWindow() {
+async function createWindow(route = '/') {
   mainWindow = new BrowserWindow({
     width: 1440,
     height: 900,
@@ -44,6 +46,7 @@ async function createWindow() {
       contextIsolation: true,
       sandbox: true,
       webSecurity: true,
+      additionalArguments: [`--hetu-api-url=${appUrl}`],
     },
   });
   mainWindow.webContents.setWindowOpenHandler(({ url }) => {
@@ -57,7 +60,7 @@ async function createWindow() {
   });
   mainWindow.webContents.session.setPermissionRequestHandler((_webContents, _permission, callback) => callback(false));
   mainWindow.on('closed', () => { mainWindow = null; });
-  await mainWindow.loadURL(targetUrl);
+  await mainWindow.loadURL(new URL(route, targetUrl).href);
 }
 
 function fail(error) {
@@ -70,7 +73,11 @@ function fail(error) {
 if (!app.requestSingleInstanceLock()) {
   app.quit();
 } else {
-  app.on('second-instance', () => {
+  app.on('second-instance', (_event, argv) => {
+    if (argv.includes('--daily-brief')) {
+      void dailyBrief?.tick().catch(() => {});
+      return;
+    }
     if (mainWindow?.isMinimized()) mainWindow.restore();
     mainWindow?.show();
     mainWindow?.focus();
@@ -94,6 +101,30 @@ if (!app.requestSingleInstanceLock()) {
       if (!quitting) fail(new Error(`The HETU data service stopped (code ${code}, signal ${signal}). Reopen HETU to restart it.`));
     });
     await createWindow();
+    dailyBrief = createDailyBrief({
+      dataDir, port: BACKEND_PORT,
+      allowAutoLaunch: app.isPackaged && process.env.HETU_TEST_DISABLE_AUTOLAUNCH !== '1',
+      autoDeliver: process.env.HETU_TEST_DISABLE_AUTOLAUNCH !== '1',
+      launchOptions: { pythonPath: runtime.pythonPath, backendDir, executable: app.getPath('exe') },
+      show: (options) => dialog.showMessageBox(options),
+      navigate: async (route) => {
+        if (!mainWindow) await createWindow(route);
+        else mainWindow.webContents.send('daily-brief:navigate', route);
+        mainWindow.show();
+        mainWindow.focus();
+      },
+    });
+    const trustedSender = (event) => {
+      if (!mainWindow || event.sender !== mainWindow.webContents ||
+          new URL(event.senderFrame.url).origin !== new URL(targetUrl).origin) {
+        throw new Error('Daily brief controls require the local HETU window.');
+      }
+    };
+    ipcMain.handle('daily-brief:get', (event) => { trustedSender(event); return dailyBrief.status(); });
+    ipcMain.handle('daily-brief:save', (event, patch) => { trustedSender(event); return dailyBrief.save(patch); });
+    ipcMain.handle('daily-brief:preview', (event) => { trustedSender(event); return dailyBrief.tick(true); });
+    await dailyBrief.start().catch((error) => console.error('Daily brief initialization:', error.message));
+    powerMonitor.on('resume', () => { void dailyBrief?.tick().catch(() => {}); });
     triggerBackup(runtime, backendDir);
     setInterval(() => triggerBackup(runtime, backendDir), 60 * 60 * 1000);
     app.on('activate', () => {
@@ -107,8 +138,8 @@ function triggerBackup(runtime, backendDir) {
     const backupScript = path.join(backendDir, 'scripts', 'backup_local_db.py');
     if (fs.existsSync(backupScript) && runtime?.pythonPath) {
       const { spawn } = require('node:child_process');
-      const proc = spawn(runtime.pythonPath, [backupScript], {
-        env: { ...process.env, PYTHONPATH: backendDir },
+      const proc = spawn(runtime.pythonPath, [backupScript, '--source', path.join(dataDir, 'hetu.db'), '--backup-dir', path.join(dataDir, 'backups')], {
+        env: { ...process.env, PYTHONPATH: backendDir, HETU_DATA_DIR: dataDir },
         detached: true,
         stdio: 'ignore',
       });
@@ -125,6 +156,7 @@ app.on('window-all-closed', () => {
 
 app.on('before-quit', () => {
   quitting = true;
+  dailyBrief?.stop();
   backendProcess?.kill('SIGTERM');
   backendProcess = null;
   logStream?.end();

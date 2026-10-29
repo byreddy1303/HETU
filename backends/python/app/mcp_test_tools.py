@@ -32,10 +32,22 @@ TEST_CAPABILITIES = [
 
 
 def register_test_tools(
-    server: MCPServer, settings: Settings, authorize: Callable[[AsyncSession, str], Awaitable[str]]
+    server: MCPServer,
+    settings: Settings,
+    authorize: Callable[[AsyncSession, str], Awaitable[str]],
+    *,
+    authenticated: bool = True,
 ) -> None:
-    read = {"securitySchemes": [{"type": "oauth2", "scopes": ["hetu:read"]}]}
-    write = {"securitySchemes": [{"type": "oauth2", "scopes": ["hetu:write"]}]}
+    read = {
+        "securitySchemes": [
+            {"type": "oauth2", "scopes": ["hetu:read"]} if authenticated else {"type": "noauth"}
+        ]
+    }
+    write = {
+        "securitySchemes": [
+            {"type": "oauth2", "scopes": ["hetu:write"]} if authenticated else {"type": "noauth"}
+        ]
+    }
 
     @server.tool(
         description=(

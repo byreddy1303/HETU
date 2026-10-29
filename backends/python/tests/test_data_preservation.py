@@ -41,21 +41,23 @@ async def test_delete_restore_preserves_every_revision(db):
     assert (await query_records(db, collection="sessions", owner_id=owner, query=RecordQuery()))[
         0
     ] == []
-    with pytest.raises(HTTPException) as exc:
-        await upsert_records(
-            db, collection="sessions", owner_id=owner, items=[{"id": "s1", "minutes": 45}]
-        )
-    assert exc.value.status_code == 409
+    # Mutable compatibility upserts can revive a soft-deleted row. Both that
+    # revival and a later explicit historical restore must retain the ledger.
+    await upsert_records(
+        db, collection="sessions", owner_id=owner, items=[{"id": "s1", "minutes": 45}]
+    )
+    assert row.version == 4
+    assert row.deleted_at is None
     await restore_record(
-        db, collection="sessions", owner_id=owner, external_id="s1", revision=1, expected_version=3
+        db, collection="sessions", owner_id=owner, external_id="s1", revision=1, expected_version=4
     )
     await db.commit()
-    assert row.version == 4
+    assert row.version == 5
     assert row.data == {"minutes": 45}
     assert row.deleted_at is None
     revisions = list(await db.scalars(select(RecordRevision).order_by(RecordRevision.version)))
-    assert [r.version for r in revisions] == [1, 2, 3, 4]
-    assert [r.snapshot["minutes"] for r in revisions] == [45, 60, 60, 45]
+    assert [r.version for r in revisions] == [1, 2, 3, 4, 5]
+    assert [r.snapshot["minutes"] for r in revisions] == [45, 60, 60, 45, 45]
 
 
 @pytest.mark.asyncio

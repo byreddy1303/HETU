@@ -4,11 +4,13 @@ from app.api.routes import (
     access,
     compat,
     concept_reviews,
+    daily_brief,
     files,
     health,
     jobs,
     learning,
     learning_concept_bridge,
+    local_backups,
     local_learning_engine,
     pyq_catalog,
     realtime,
@@ -47,6 +49,8 @@ api_router.include_router(
     local_learning_engine.router, prefix="/study-memory/engine", tags=["local-learning"]
 )
 api_router.include_router(test_analysis.router, prefix="/test-analyses", tags=["test-analysis"])
+api_router.include_router(local_backups.router, prefix="/local-backups", tags=["local-backups"])
+api_router.include_router(daily_brief.router, prefix="/daily-brief", tags=["local-desktop"])
 api_router.include_router(files.router, prefix="/files", tags=["files"])
 api_router.include_router(jobs.router, prefix="/jobs", tags=["jobs"])
 api_router.include_router(realtime.router, tags=["realtime"])

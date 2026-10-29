@@ -4,7 +4,7 @@ from fastapi import APIRouter, HTTPException
 from sqlalchemy import text
 
 from app import __version__
-from app.api.deps import DbDep
+from app.api.deps import DbDep, SettingsDep
 from app.schemas import HealthResponse
 from app.services.redis import get_redis
 
@@ -17,7 +17,7 @@ async def liveness() -> HealthResponse:
 
 
 @router.get("/health/ready", response_model=HealthResponse, include_in_schema=False)
-async def readiness(db: DbDep) -> HealthResponse:
+async def readiness(db: DbDep, settings: SettingsDep) -> HealthResponse:
     checks: dict[str, str] = {}
     try:
         await db.execute(text("SELECT 1"))
@@ -26,6 +26,9 @@ async def readiness(db: DbDep) -> HealthResponse:
         checks["database"] = "error"
         raise HTTPException(status_code=503, detail={"status": "error", "checks": checks}) from exc
 
+    if settings.local_workspace:
+        checks["storage"] = "local"
+        return HealthResponse(status="ok", version=__version__, checks=checks)
     redis = get_redis()
     if redis is None:
         checks["redis"] = "not-configured"

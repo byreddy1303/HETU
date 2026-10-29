@@ -1,8 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import LocalLearningEngine from '@/components/memory/LocalLearningEngine';
 import { apiRequest } from '@/lib/fastapi-client';
+import { LEARNING_UPDATED_EVENT } from '@/lib/local-learning-engine';
 import { newMemoryEntry } from '@/lib/study-memory';
 
 vi.mock('@/hooks/useAuth', () => ({
@@ -32,6 +33,8 @@ const action = newMemoryEntry('repair', 'repair', 'Count initial page loads', {
   state: 'open',
   evidence_kind: 'model',
   session_id: 'source',
+  subject: 'Operating Systems',
+  topic: 'Memory Management',
   data: {
     reason: 'The saved answer was 2; the frozen key is 6.',
     success_criteria: 'Trace every request.',
@@ -41,7 +44,6 @@ const action = newMemoryEntry('repair', 'repair', 'Count initial page loads', {
     activity: 'retry'
   }
 });
-
 function mount() {
   return render(
     <MemoryRouter>
@@ -63,58 +65,87 @@ describe('automatic local learning UI', () => {
       });
   });
 
-  it('leads with a usable action and its recorded evidence', async () => {
+  it('shows one practice action and keeps source navigation collapsed without leaking answers', async () => {
     mount();
-    expect(await screen.findByText('Count initial page loads')).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Start practice' }).getAttribute('href')).toContain(
-      'memoryRepairId=repair'
-    );
-    expect(screen.getByRole('link', { name: 'See original evidence' })).toHaveAttribute(
+    expect(
+      await screen.findByRole('heading', { name: 'Retry original questions' })
+    ).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Start practice' })).toBeInTheDocument();
+    expect(screen.getByText('10 min')).toBeInTheDocument();
+    expect(screen.getByText('1 question')).toBeInTheDocument();
+    expect(
+      screen.getByRole('link', { name: 'Original evidence' }).closest('details')
+    ).not.toHaveAttribute('open');
+    expect(screen.queryByText(action.title)).not.toBeInTheDocument();
+    expect(screen.queryByText(String(action.data.reason))).not.toBeInTheDocument();
+    expect(screen.queryByText(String(action.data.success_criteria))).not.toBeInTheDocument();
+    fireEvent.click(screen.getByText('Details and source'));
+    expect(screen.getByRole('link', { name: 'Original evidence' })).toHaveAttribute(
       'href',
       '/session/source/review?attempt=attempt'
     );
-    expect(screen.getByText(/needs a practice check/)).toBeInTheDocument();
-    expect(screen.queryByText('Recorded details and evidence')).not.toBeInTheDocument();
+    expect(screen.getByText(/Source records may reveal them/)).toBeInTheDocument();
+    expect(screen.queryByText(String(action.data.reason))).not.toBeInTheDocument();
+    expect(screen.queryByText(String(action.data.success_criteria))).not.toBeInTheDocument();
   });
 
-  it('discovers and saves a selected local model with automation enabled', async () => {
+  it('distinguishes the same topic by activity, time, count and date', async () => {
     const original = vi.mocked(apiRequest).getMockImplementation()!;
-    vi.mocked(apiRequest).mockImplementation(async (path, init) => {
-      if (path.endsWith('/models'))
-        return { reachable: true, models: [{ id: 'qwen3:8b', name: 'qwen3:8b' }] };
-      if (path.endsWith('/config') && init?.method === 'PUT') return JSON.parse(String(init.body));
-      return original(path, init);
-    });
-    mount();
-    await screen.findByText('Count initial page loads');
-    fireEvent.click(screen.getByText('Local model connection'));
-    fireEvent.click(screen.getByRole('button', { name: 'Test local connection' }));
-    await screen.findByRole('option', { name: 'qwen3:8b' });
-    fireEvent.change(screen.getByLabelText('Installed model'), { target: { value: 'qwen3:8b' } });
-    fireEvent.click(screen.getByRole('checkbox', { name: /Enable automatic study follow-ups/ }));
-    fireEvent.click(screen.getByRole('button', { name: 'Save connection' }));
-    await waitFor(() =>
-      expect(apiRequest).toHaveBeenCalledWith(
-        expect.stringContaining('/config'),
-        expect.objectContaining({
-          method: 'PUT',
-          body: expect.stringContaining('"model":"qwen3:8b"')
-        })
-      )
+    vi.mocked(apiRequest).mockImplementation(async (path, init) =>
+      path.endsWith('/actions')
+        ? {
+            items: [
+              action,
+              {
+                ...action,
+                id: 'transfer',
+                data: {
+                  ...action.data,
+                  activity: 'transfer',
+                  duration_min: 20,
+                  question_uids: ['fresh-1', 'fresh-2'],
+                  due_date: '2099-11-01'
+                }
+              }
+            ],
+            latest_results: []
+          }
+        : original(path, init)
     );
-    expect(
-      await screen.findByText('Connection saved. Automatic study follow-ups are enabled.')
-    ).toBeInTheDocument();
+    mount();
+    await screen.findByRole('heading', { name: 'Retry original questions' });
+    expect(screen.getByRole('heading', { name: 'Fresh application' })).toBeInTheDocument();
+    expect(screen.getByText('20 min')).toBeInTheDocument();
+    expect(screen.getByText('2 questions')).toBeInTheDocument();
+    expect(screen.getByText(/Scheduled 1 Nov 2099/)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Scheduled' })).toBeDisabled();
   });
 
-  it('checks eligibility before opening a prepared activity', async () => {
+  it('keeps connection configuration in Settings and retains processing controls', async () => {
+    mount();
+    await screen.findByRole('heading', { name: 'Prepared practice' });
+    await screen.findByRole('heading', { name: 'Retry original questions' });
+    expect(screen.getByRole('link', { name: 'Local model settings' })).toHaveAttribute(
+      'href',
+      '/settings'
+    );
+    expect(screen.queryByLabelText('Installed model')).not.toBeInTheDocument();
+    expect(screen.queryByLabelText('Local server address')).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Process saved learning' })).toBeDisabled();
+    fireEvent.click(screen.getByRole('button', { name: 'Refresh status' }));
+    await waitFor(() =>
+      expect(apiRequest).toHaveBeenCalledWith(expect.stringContaining('/config'))
+    );
+  });
+
+  it('checks eligibility before opening a prepared activity and makes failures visible', async () => {
     const original = vi.mocked(apiRequest).getMockImplementation()!;
     vi.mocked(apiRequest).mockImplementation(async (path, init) => {
       if (path.endsWith('/prepare')) throw new Error('No eligible matching questions remain.');
       return original(path, init);
     });
     mount();
-    fireEvent.click(await screen.findByRole('link', { name: 'Start practice' }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Start practice' }));
     expect(await screen.findByRole('alert')).toHaveTextContent(
       'No eligible matching questions remain.'
     );
@@ -123,18 +154,24 @@ describe('automatic local learning UI', () => {
     });
   });
 
-  it('shows an offline connection error without claiming analysis succeeded', async () => {
+  it('refreshes activities after saved work changes and exposes processing failures', async () => {
     const original = vi.mocked(apiRequest).getMockImplementation()!;
-    vi.mocked(apiRequest).mockImplementation(async (path, init) =>
-      path.endsWith('/models')
-        ? { reachable: false, models: [], message: 'Start Ollama, then test again.' }
-        : original(path, init)
-    );
+    let finished = false;
+    vi.mocked(apiRequest).mockImplementation(async (path, init) => {
+      if (path.endsWith('/config')) return { ...config, model: 'local-model', enabled: true };
+      if (path.endsWith('/actions')) return { items: finished ? [] : [action], latest_results: [] };
+      if (path.endsWith('/run')) throw new Error('The local model is offline.');
+      return original(path, init);
+    });
     mount();
-    await screen.findByText('Count initial page loads');
-    fireEvent.click(screen.getByText('Local model connection'));
-    fireEvent.click(screen.getByRole('button', { name: 'Test local connection' }));
-    expect(await screen.findByRole('alert')).toHaveTextContent('Start Ollama, then test again.');
-    expect(screen.getByRole('button', { name: 'Save connection' })).toBeDisabled();
+    await screen.findByRole('heading', { name: 'Retry original questions' });
+    finished = true;
+    act(() => window.dispatchEvent(new Event('hetu:memory-saved')));
+    await screen.findByText(/No prepared activity is waiting/);
+    expect(screen.queryByRole('button', { name: 'Start practice' })).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Process saved learning' }));
+    expect(await screen.findByRole('alert')).toHaveTextContent('The local model is offline.');
+    act(() => window.dispatchEvent(new Event(LEARNING_UPDATED_EVENT)));
+    await waitFor(() => expect(screen.queryByRole('alert')).not.toBeInTheDocument());
   });
 });

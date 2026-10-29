@@ -40,6 +40,8 @@ class Settings(BaseSettings):
     database_url: SecretStr = SecretStr("sqlite+aiosqlite:///./hetu.db")
     database_pool_size: int = Field(default=5, ge=1, le=20)
     database_max_overflow: int = Field(default=5, ge=0, le=40)
+    local_display_name: str = ""
+    local_username: str = ""
 
     clerk_secret_key: SecretStr | None = None
     clerk_jwt_key: SecretStr | None = None
@@ -126,6 +128,11 @@ class Settings(BaseSettings):
         return urlunsplit(
             (parts.scheme, parts.netloc, parts.path, urlencode(query), parts.fragment)
         )
+
+    @property
+    def local_workspace(self) -> bool:
+        """Only an explicitly local SQLite database can bypass hosted sign-in."""
+        return self.environment == "local" and self.sqlalchemy_database_url.startswith("sqlite")
 
     @property
     def authorized_parties(self) -> list[str]:

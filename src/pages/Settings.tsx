@@ -22,6 +22,7 @@ import AccessRequestsCard from '@/components/settings/AccessRequestsCard';
 import NotificationsCard from '@/components/settings/NotificationsCard';
 import BuddyNotificationsCard from '@/components/settings/BuddyNotificationsCard';
 import StudyNotificationsCard from '@/components/settings/StudyNotificationsCard';
+import LocalSettings from '@/pages/LocalSettings';
 import { useAuthStore, type ProfilePatch } from '@/stores/auth';
 import { useAuth } from '@/hooks/useAuth';
 import { useUiStore } from '@/stores/ui';
@@ -49,6 +50,10 @@ import type { InviteRow, UserRow } from '@/types';
 import '@/supporting-surfaces.css';
 
 export default function Settings() {
+  return backendConfig.isLocal ? <LocalSettings /> : <HostedSettings />;
+}
+
+function HostedSettings() {
   const { userId, sandbox } = useAuth();
   const profile = useAuthStore((s) => s.profile);
   const updateProfile = useAuthStore((s) => s.updateProfile);

@@ -1,3 +1,4 @@
+import { backendConfig } from '@/lib/backend-config';
 import { useEffect, useId, useRef, useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { motion, useReducedMotion } from 'motion/react';
@@ -197,9 +198,9 @@ export default function Nav() {
           </span>
           <div>
             <p>{profile?.name ?? 'Your workspace'}</p>
-            <span>{sandbox ? 'Local sandbox' : (profile?.email ?? 'GATE preparation')}</span>
+            <span>{backendConfig.isLocal ? (profile?.username ? `@${profile.username} · Personal workspace` : 'Personal workspace') : sandbox ? 'Local sandbox' : (profile?.email ?? 'GATE preparation')}</span>
           </div>
-          {forceReady ? (
+          {!backendConfig.isLocal && (forceReady ? (
             <div className="flex flex-col items-end gap-1.5">
               <button
                 type="button"
@@ -231,7 +232,7 @@ export default function Nav() {
             >
               <LogOut size={16} strokeWidth={1.7} aria-hidden className={signingOut ? 'animate-spin' : undefined} />
             </button>
-          )}
+          ))}
         </div>
       </div>
     </aside>

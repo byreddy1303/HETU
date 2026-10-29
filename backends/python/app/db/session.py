@@ -36,6 +36,7 @@ def get_engine() -> AsyncEngine:
             cursor.execute("PRAGMA synchronous=NORMAL")
             cursor.execute("PRAGMA foreign_keys=ON")
             cursor.close()
+
     instrument_engine(engine)
     return engine
 

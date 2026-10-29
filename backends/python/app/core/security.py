@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from ipaddress import ip_address
+from urllib.parse import urlsplit
 
 from clerk_backend_api import AuthenticateRequestOptions, authenticate_request
 from clerk_backend_api.security.machine import get_token_type
@@ -15,6 +17,17 @@ from app.core.config import Settings
 OAUTH_READ_SCOPE = "hetu:read"
 OAUTH_WRITE_SCOPE = "hetu:write"
 _SAFE_METHODS = frozenset({"GET", "HEAD", "OPTIONS"})
+
+
+def _local_origin_allowed(origin: str, settings: Settings) -> bool:
+    try:
+        return origin in settings.cors_origin_list and urlsplit(origin).hostname in {
+            "localhost",
+            "127.0.0.1",
+            "::1",
+        }
+    except ValueError:
+        return False
 
 
 @dataclass(frozen=True, slots=True)
@@ -67,6 +80,7 @@ class _WebSocketAuthRequest:
         self.headers = dict(websocket.headers)
         self.headers["Authorization"] = authorization
         self.url = websocket.url
+        self.client = websocket.client
 
 
 def _enforce_oauth_scopes(
@@ -102,7 +116,17 @@ def _enforce_oauth_scopes(
 async def _authenticate(
     request: Request | WebSocket | _WebSocketAuthRequest, settings: Settings
 ) -> Identity:
-    if settings.environment == "local":
+    if settings.local_workspace:
+        client = getattr(request, "client", None)
+        try:
+            loopback = client is not None and ip_address(client.host).is_loopback
+        except ValueError:
+            loopback = False
+        origin = request.headers.get("origin")
+        if not loopback or (origin and not _local_origin_allowed(origin, settings)):
+            raise HTTPException(
+                status_code=403, detail="Personal workspace requires a local client"
+            )
         return Identity(
             user_id="local_user",
             session_id="local_session",

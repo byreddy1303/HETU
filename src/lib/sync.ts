@@ -74,6 +74,11 @@ function setupRealtimeChannel(userId: string): void {
     .on('broadcast', { event: 'sync_mutation' }, (payload) => {
       const data = payload.payload as { sourceDeviceId?: string; tables?: string[] } | undefined;
       if (data?.sourceDeviceId === clientDeviceId) return;
+      if (data?.sourceDeviceId === 'local-sqlite' && typeof window !== 'undefined') {
+        // Domain records such as study_memory are fetched directly, outside
+        // the table cache. Their views still need invalidation after MCP saves.
+        window.dispatchEvent(new Event('hetu:workspace-changed'));
+      }
       const tables = data?.tables
         ?.map((item) => syncedTable(item))
         .filter((item): item is SyncedTableName => item !== null);

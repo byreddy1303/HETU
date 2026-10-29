@@ -1,171 +1,102 @@
-"""Local stdio MCP server for HETU desktop and local AI clients."""
+"""Local stdio MCP server sharing the desktop app's personal workspace."""
 
 from __future__ import annotations
 
 import asyncio
+import logging
+import os
 import sys
 from pathlib import Path
-from typing import Any
 
-# Ensure backends/python is on sys.path when invoked directly
+# Also support direct invocation by a local MCP client.
 _backend_dir = Path(__file__).resolve().parent.parent
 if str(_backend_dir) not in sys.path:
     sys.path.insert(0, str(_backend_dir))
 
 from mcp.server.mcpserver import MCPServer  # noqa: E402
-from mcp.types import ToolAnnotations  # noqa: E402
+from mcp.server.mcpserver.exceptions import ToolError  # noqa: E402
 from sqlalchemy.ext.asyncio import AsyncSession  # noqa: E402
 
 from app.core.config import Settings, get_settings  # noqa: E402
+from app.core.logging import configure_logging  # noqa: E402
 from app.db.models import User  # noqa: E402
-from app.db.session import get_session_factory  # noqa: E402
-from app.mcp_study_tools import STUDY_CAPABILITIES, register_study_tools  # noqa: E402
-from app.mcp_test_tools import TEST_CAPABILITIES, register_test_tools  # noqa: E402
-from app.services.learning_library import (  # noqa: E402
-    CaptureRequest,
-    capture_learning,
-    learning_detail,
-    search_learning,
+from app.db.session import close_database  # noqa: E402
+from app.mcp_server import READ_SCOPE, WRITE_SCOPE, register_domain_tools  # noqa: E402
+from app.mcp_transport import HetuMCPServer  # noqa: E402
+from app.services.local_workspace import (  # noqa: E402
+    LOCAL_USER_ID,
+    ensure_local_workspace,
 )
 
-LOCAL_USER_ID = "local_user"
+
+def _validate_local_settings(settings: Settings) -> None:
+    if settings.environment != "local" or not settings.sqlalchemy_database_url.startswith(
+        "sqlite+aiosqlite:"
+    ):
+        raise ValueError("Local MCP requires ENVIRONMENT=local and a local SQLite DATABASE_URL")
 
 
-async def authorize_local(_db: AsyncSession, _required_scope: str) -> str:
-    """Always resolves to the local user for single-user desktop MCP operations."""
-    return LOCAL_USER_ID
+async def authorize_local(db: AsyncSession, required_scope: str) -> str:
+    """Use the same persisted personal account as the desktop API, never a model-supplied ID."""
+    if required_scope not in {READ_SCOPE, WRITE_SCOPE}:
+        raise ToolError("Unsupported local HETU scope")
+    user = await db.get(User, LOCAL_USER_ID)
+    if user is None or user.deleted_at is not None:
+        raise ToolError("The personal HETU workspace is unavailable")
+    return user.id
 
 
 async def init_local_db(settings: Settings) -> None:
-    """Ensure database tables and local_user exist before serving requests."""
-    if settings.environment == "local" and settings.sqlalchemy_database_url.startswith("sqlite"):
-        import app.db.models  # noqa: F401
-        from app.db.base import Base
-        from app.db.models import User, UserIdentity
-        from app.db.session import get_engine, get_session_factory
-
-        async with get_engine().begin() as conn:
-            await conn.run_sync(Base.metadata.create_all)
-
-        async with get_session_factory()() as session:
-            user = await session.get(User, LOCAL_USER_ID)
-            if user is None:
-                session.add(
-                    User(
-                        id=LOCAL_USER_ID,
-                        display_name="Local Learner",
-                        username="local_learner",
-                        profile={"role": "learner", "local": True},
-                    )
-                )
-                session.add(
-                    UserIdentity(
-                        user_id=LOCAL_USER_ID,
-                        provider="local",
-                        subject=LOCAL_USER_ID,
-                    )
-                )
-                await session.commit()
+    """Initialize the desktop database and repair the personal identity mapping."""
+    _validate_local_settings(settings)
+    await ensure_local_workspace(settings)
 
 
 def create_local_server(settings: Settings | None = None) -> MCPServer:
     current_settings = settings or get_settings()
-
-    server = MCPServer(
+    _validate_local_settings(current_settings)
+    server = HetuMCPServer(
         "HETU",
-        description="Operate the local learner's HETU preparation workspace.",
+        description="Operate your personal HETU preparation workspace on this computer.",
         instructions=(
             "Preserve the user's original goal, constraints, and corrections. "
-            "Retrieve account evidence before acting; do not invent attempts or mastery. "
-            "For test screenshots: use save_test_analysis to atomically crop questions, "
-            "exclude solutions/answer markings, log into Journal, record mistake patterns, "
-            "and schedule re-attempts. "
-            "For study actions: use save_question, update_journal_analysis, save_formula, "
-            "save_recognition_cue, set_syllabus_progress, save_weekly_review, and edit_planner_day."
+            "Retrieve account evidence before acting; do not invent attempts, mastery, "
+            "availability, or access to historical conversations. Save useful learning "
+            "with source attribution and verify writes. "
+            "Use get_profile to identify this personal workspace. "
+            "For planning: read get_planner_day before editing existing blocks. "
+            "For test screenshots: use save_test_analysis, crop questions to exclude "
+            "solutions and answer markings, preserve unknown evidence, and return the "
+            "saved app handoff link. Use the study, concept, review, recovery, revision "
+            "pack, section, and task brief tools to continue the user's work."
         ),
         version="0.2.0",
     )
 
-    @server.tool(
-        description="Identify the connected HETU account.",
-        annotations=ToolAnnotations(read_only_hint=True),
-    )
-    async def get_profile() -> dict[str, Any]:
-        async with get_session_factory()() as db:
-            user = await db.get(User, LOCAL_USER_ID)
-            return {
-                "profile_id": LOCAL_USER_ID,
-                "display_name": (user.display_name if user else None) or "Local Learner",
-                "email": user.email if user else None,
-            }
+    async def authorize(db: AsyncSession, required_scope: str) -> str:
+        _validate_local_settings(current_settings)
+        return await authorize_local(db, required_scope)
 
-    @server.tool(
-        description="Report actual supported HETU operations and current capabilities.",
-        annotations=ToolAnnotations(read_only_hint=True),
-    )
-    async def get_capabilities() -> dict[str, Any]:
-        return {
-            "schema_version": "learning-v1",
-            "supported": [
-                "learning.capture",
-                "learning.search",
-                "learning.detail",
-                *STUDY_CAPABILITIES,
-                *TEST_CAPABILITIES,
-            ],
-            "mode": "local_desktop",
-        }
-
-    @server.tool(
-        description="Search saved concepts by text or subject in the local HETU workspace.",
-        annotations=ToolAnnotations(read_only_hint=True),
-    )
-    async def search_knowledge(
-        query: str = "", subject: str | None = None, limit: int = 25, offset: int = 0
-    ) -> dict[str, Any]:
-        if not 1 <= limit <= 100 or offset < 0 or len(query) > 300:
-            raise ValueError("Use limit 1–100, offset >= 0, and a query under 300 characters")
-        async with get_session_factory()() as db:
-            user_id = await authorize_local(db, "hetu:read")
-            return await search_learning(
-                db, owner_id=user_id, text=query, subject=subject, limit=limit, offset=offset
-            )
-
-    @server.tool(
-        description="Get a concept's full explanation, insights, and sources.",
-        annotations=ToolAnnotations(read_only_hint=True),
-    )
-    async def get_concept(concept_id: str, include_history: bool = False) -> dict[str, Any]:
-        async with get_session_factory()() as db:
-            user_id = await authorize_local(db, "hetu:read")
-            return await learning_detail(
-                db, owner_id=user_id, concept_id=concept_id, include_history=include_history
-            )
-
-    @server.tool(
-        description="Save useful ideas and insights from the conversation into HETU.",
-        annotations=ToolAnnotations(idempotent_hint=True),
-    )
-    async def save_to_hetu(request: CaptureRequest) -> dict[str, Any]:
-        async with get_session_factory()() as db:
-            user_id = await authorize_local(db, "hetu:write")
-            result = await capture_learning(
-                db, owner_id=user_id, request=request, app_url=current_settings.app_url
-            )
-            await db.commit()
-            return result
-
-    register_study_tools(server, current_settings, authorize_local)
-    register_test_tools(server, current_settings, authorize_local)
-
+    register_domain_tools(server, current_settings, authorize, authenticated=False)
     return server
 
 
 async def main() -> None:
+    # MCP stdout is reserved for JSON-RPC. Application logs must go to stderr.
+    os.environ.setdefault("APP_URL", "http://127.0.0.1:8765")
     settings = get_settings()
+    logging.basicConfig(format="%(message)s", stream=sys.stderr, level=settings.log_level.upper())
+    configure_logging(settings.log_level)
+    if not os.environ.get("DATABASE_URL"):
+        raise ValueError(
+            "Set DATABASE_URL to the desktop SQLite database or launch with npm run mcp; "
+            "refusing to create a separate database in the current directory"
+        )
     await init_local_db(settings)
-    server = create_local_server(settings)
-    await server.run_stdio_async()
+    try:
+        await create_local_server(settings).run_stdio_async()
+    finally:
+        await close_database()
 
 
 if __name__ == "__main__":

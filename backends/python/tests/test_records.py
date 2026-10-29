@@ -130,7 +130,14 @@ async def test_soft_deleted_record_restored_on_upsert(db) -> None:
         db,
         collection="topic_progress",
         owner_id="user_c",
-        items=[{"id": "topic-1", "subject": "TOC", "topic": "DFA / NFA", "completed_at": "2026-10-15T00:00:00Z"}],
+        items=[
+            {
+                "id": "topic-1",
+                "subject": "TOC",
+                "topic": "DFA / NFA",
+                "completed_at": "2026-10-15T00:00:00Z",
+            }
+        ],
     )
     await db.commit()
     assert len(restored) == 1
@@ -144,4 +151,3 @@ async def test_soft_deleted_record_restored_on_upsert(db) -> None:
     )
     assert len(active_again) == 1
     assert active_again[0].external_id == "topic-1"
-

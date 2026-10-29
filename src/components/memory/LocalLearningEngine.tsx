@@ -5,24 +5,17 @@ import { dateLabel } from '@/lib/local-learning-display';
 import { Button } from '@/components/ui/Button';
 import { useAuth } from '@/hooks/useAuth';
 import {
-  discoverLocalModels,
   getLocalLearningActions,
   getLocalLearningConfig,
   getLocalLearningStatus,
-  localModelDefaultUrl,
   LEARNING_UPDATED_EVENT,
   runLocalLearningEngine,
-  saveLocalLearningConfig,
   type LocalLearningActions,
   type LocalLearningEngineConfig,
-  type LocalLearningEngineStatus,
-  type LocalModelDiscovery,
-  type LocalModelProvider
+  type LocalLearningEngineStatus
 } from '@/lib/local-learning-engine';
-import { memoryString } from '@/lib/study-memory';
 import { todayISOInTimeZone } from '@/lib/utils';
 
-const field = 'w-full min-w-0 rounded border border-border bg-bg-raised px-3 py-2 text-sm';
 const emptyActions: LocalLearningActions = { items: [], latest_results: [] };
 
 function errorMessage(cause: unknown): string {
@@ -45,23 +38,38 @@ export default function LocalLearningEngine({
   const [config, setConfig] = useState<LocalLearningEngineConfig | null>(null);
   const [status, setStatus] = useState<LocalLearningEngineStatus | null>(null);
   const [actions, setActions] = useState(emptyActions);
-  const [discovery, setDiscovery] = useState<LocalModelDiscovery | null>(null);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState('');
   const [error, setError] = useState('');
-  const [settingsError, setSettingsError] = useState('');
-  const [notice, setNotice] = useState('');
   const [retry, setRetry] = useState(0);
   const [pollExpired, setPollExpired] = useState(false);
   const mounted = useRef(true);
   const changed = useRef(onChanged);
   changed.current = onChanged;
 
+  const requestVersion = useRef(0);
   useEffect(() => {
     mounted.current = true;
     return () => {
       mounted.current = false;
+      requestVersion.current += 1;
     };
+  }, []);
+
+  const refreshStatus = useCallback(async () => {
+    const request = ++requestVersion.current;
+    const [nextConfig, nextStatus, nextActions] = await Promise.all([
+      getLocalLearningConfig(),
+      getLocalLearningStatus(),
+      getLocalLearningActions()
+    ]);
+    if (!mounted.current || request !== requestVersion.current) return;
+    setConfig(nextConfig);
+    setStatus(nextStatus);
+    setActions(nextActions);
+    setError('');
+    setLoading(false);
+    setPollExpired(false);
   }, []);
 
   useEffect(() => {
@@ -69,49 +77,37 @@ export default function LocalLearningEngine({
     setLoading(true);
     setError('');
     setActions(emptyActions);
-    void Promise.all([
-      getLocalLearningConfig(),
-      getLocalLearningStatus(),
-      getLocalLearningActions()
-    ])
-      .then(([saved, nextStatus, nextActions]) => {
-        if (!active) return;
-        setConfig(saved);
-        setStatus(nextStatus);
-        setActions(nextActions);
-      })
-      .catch((cause: unknown) => {
-        if (active) setError(errorMessage(cause));
-      })
-      .finally(() => {
-        if (active) setLoading(false);
-      });
+    void refreshStatus().catch((cause: unknown) => {
+      if (active) {
+        setError(errorMessage(cause));
+        setLoading(false);
+      }
+    });
     return () => {
       active = false;
+      requestVersion.current += 1;
     };
-  }, [userId, revision, retry]);
+  }, [userId, revision, retry, refreshStatus]);
 
-  const refreshStatus = useCallback(async () => {
-    const [nextStatus, nextActions] = await Promise.all([
-      getLocalLearningStatus(),
-      getLocalLearningActions()
-    ]);
-    if (!mounted.current) return;
-    setStatus(nextStatus);
-    setActions(nextActions);
-    setPollExpired(false);
-  }, []);
-
-  const running = status?.state === 'running';
   useEffect(() => {
     const update = () => {
       void refreshStatus().catch((cause: unknown) => {
         if (mounted.current) setError(errorMessage(cause));
       });
     };
-    window.addEventListener(LEARNING_UPDATED_EVENT, update);
-    return () => window.removeEventListener(LEARNING_UPDATED_EVENT, update);
+    const events = [LEARNING_UPDATED_EVENT, 'hetu:memory-saved', 'hetu:workspace-changed', 'focus'];
+    const visible = () => {
+      if (document.visibilityState === 'visible') update();
+    };
+    for (const event of events) window.addEventListener(event, update);
+    document.addEventListener('visibilitychange', visible);
+    return () => {
+      for (const event of events) window.removeEventListener(event, update);
+      document.removeEventListener('visibilitychange', visible);
+    };
   }, [refreshStatus]);
+
+  const running = status?.state === 'running';
   useEffect(() => {
     if (!running) return;
     let active = true;
@@ -121,14 +117,15 @@ export default function LocalLearningEngine({
       try {
         const next = await getLocalLearningStatus();
         if (!active) return;
-        setStatus(next);
         if (next.state !== 'running') {
           const nextActions = await getLocalLearningActions();
           if (!active) return;
+          setStatus(next);
           setActions(nextActions);
           changed.current?.();
           return;
         }
+        setStatus(next);
         if (++polls >= 100) {
           setPollExpired(true);
           return;
@@ -152,80 +149,62 @@ export default function LocalLearningEngine({
   async function perform(name: string, task: () => Promise<void>) {
     if (busy) return;
     setBusy(name);
-    setNotice('');
-    setSettingsError('');
     setError('');
     try {
       await task();
     } catch (cause) {
-      if (mounted.current) setSettingsError(errorMessage(cause));
+      if (mounted.current) setError(errorMessage(cause));
     } finally {
       if (mounted.current) setBusy('');
     }
   }
-
-  function updateProvider(provider: LocalModelProvider) {
-    if (!config) return;
-    setConfig({ ...config, provider, base_url: localModelDefaultUrl(provider), model: '' });
-    setDiscovery(null);
-    setSettingsError('');
-    setNotice('');
-  }
-
-  const ready = actions.items.slice(0, 3);
+  const ready = compact ? actions.items.slice(0, 3) : actions.items;
   const today = todayISOInTimeZone(timeZone);
   useEffect(() => {
     onActionCountChange?.(actions.items.length);
   }, [actions.items.length, onActionCountChange]);
-  const selectedMissing =
-    discovery && config?.model && !discovery.models.some((model) => model.id === config.model);
-
   if (compact && !loading && !error && !config?.enabled && !ready.length) return null;
 
   return (
     <section
       aria-label="Automatic learning follow-ups"
-      className="rounded-lg border border-border bg-bg-raised p-4 sm:p-6"
+      className="min-w-0 rounded-lg border border-border bg-bg-raised p-4 sm:p-6"
     >
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div className="max-w-prose space-y-2">
-          <h2 className="font-display text-2xl font-semibold">Your next study actions</h2>
-          <p className="text-sm leading-relaxed text-text-muted">
-            HETU uses your saved answers and explanations to prepare focused practice, record its
-            result, and arrange the next check.
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h2 className="font-display text-xl font-semibold">Prepared practice</h2>
+          <p className="mt-1 text-sm text-text-muted">
+            Choose an activity. Earlier answers stay hidden until you practise.
           </p>
         </div>
         {config && (
-          <span
-            className={`rounded px-2 py-1 text-xs font-medium ${running ? 'bg-accent-faint text-accent' : 'bg-bg-overlay text-text-muted'}`}
-          >
+          <span className="text-xs text-text-muted">
             {running
-              ? 'Analysing saved learning…'
+              ? 'Preparing activities…'
               : config.enabled
                 ? 'Automatic follow-ups on'
                 : 'Automatic follow-ups paused'}
           </span>
         )}
       </div>
-
       {loading && (
         <p role="status" className="mt-4 text-sm text-text-muted">
-          Loading your study actions…
+          Loading prepared practice…
         </p>
       )}
       {error && (
-        <p
+        <div
           role="alert"
           className="mt-4 rounded border border-danger/30 bg-danger-faint p-3 text-sm text-danger"
         >
-          {error}{' '}
-          <Button size="sm" onClick={() => setRetry((value) => value + 1)}>
+          <p>{error}</p>
+          <Button size="sm" className="mt-2" onClick={() => setRetry((value) => value + 1)}>
             Retry learning engine
           </Button>
-        </p>
+        </div>
       )}
       {!loading && !error && ready.length > 0 && (
-        <ul className="mt-3 divide-y divide-border">
+        <ul className="mt-3 divide-y divide-border" aria-label="Prepared activities">
           {ready.map((entry) => (
             <LocalLearningActionCard
               key={entry.id}
@@ -237,263 +216,107 @@ export default function LocalLearningEngine({
         </ul>
       )}
       {!loading && !error && !ready.length && (
-        <p className="mt-5 max-w-prose text-sm leading-relaxed text-text-muted">
+        <p className="mt-4 max-w-prose text-sm leading-relaxed text-text-muted">
           {running
-            ? 'The local model is checking your saved work. Prepared activities will appear here when the analysis finishes.'
+            ? 'Your saved work is being checked. Prepared activities appear here when the check finishes.'
             : !config?.model
-              ? 'Connect an installed local model below. HETU can then turn saved learning into practice activities.'
-              : 'No study activity is ready yet. Process saved learning to check for unresolved mistakes and follow-ups.'}
+              ? 'Connect an installed local model in Settings to prepare practice from your saved work.'
+              : 'No prepared activity is waiting. Process saved learning to check for follow-ups.'}
         </p>
       )}
-
-      {actions.latest_results.length > 0 && (
-        <div className="mt-4 border-t border-border pt-4">
-          <h3 className="text-sm font-semibold">Recent practice results</h3>
-          <ul className="mt-2 space-y-3">
-            {actions.latest_results.slice(0, 3).map((result) => {
-              const nextId = memoryString(result.data, 'next_review_entry_id');
-              return (
-                <li key={result.id} className="text-sm">
-                  <Link className="font-medium text-accent underline" to={`/memory/${result.id}`}>
-                    {result.title}
-                  </Link>
-                  <p className="mt-1 max-w-prose text-text-muted">{result.content}</p>
-                  {nextId && (
-                    <Link
-                      className="mt-1 inline-block text-accent underline"
-                      to={`/memory/${encodeURIComponent(nextId)}`}
-                    >
-                      Open the next review
-                    </Link>
-                  )}
-                </li>
-              );
-            })}
-          </ul>
-        </div>
-      )}
-
-      {status && (
-        <div
-          className="mt-4 space-y-1 border-t border-border pt-4 text-xs text-text-muted"
-          aria-live="polite"
+      {compact && actions.items.length > ready.length && (
+        <Link
+          className="mt-3 inline-block text-sm text-accent underline underline-offset-2"
+          to="/memory?view=followups"
         >
-          <p>
-            {status.message ||
-              (status.state === 'disabled'
-                ? 'Connect a local model to enable automatic processing.'
-                : 'The learning engine is ready.')}
-          </p>
-          {status.last_run_at && (
-            <p>
-              Last check: {dateLabel(status.last_run_at, timeZone, true)}.
-              {status.model ? ` Selected model: ${status.model}.` : ''}
-            </p>
-          )}
-          {status.state === 'error' && (
-            <p role="alert" className="text-danger">
-              {status.last_error ||
-                'The local model did not complete the check. Open the connection settings and test it again.'}
-            </p>
-          )}
-          {pollExpired && <p>The analysis is still running. Use Refresh status to check again.</p>}
-        </div>
-      )}
-
-      {compact && (
-        <Link className="mt-4 inline-block text-sm font-medium text-accent underline" to="/memory">
-          Open Learning Memory and local model connection
+          See all {actions.items.length} activities
         </Link>
       )}
-      {config && !compact && (
-        <details className="mt-4 border-t border-border pt-4">
-          <summary className="cursor-pointer text-sm font-semibold text-accent">
-            Local model connection
+      {actions.latest_results.length > 0 && (
+        <details className="mt-4 border-t border-border pt-3 text-sm">
+          <summary className="w-fit cursor-pointer rounded py-1 font-medium focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent">
+            Recent results ({actions.latest_results.length})
           </summary>
-          <div className="mt-4 max-w-2xl space-y-4">
-            <p className="text-sm leading-relaxed text-text-muted">
-              Run Ollama or LM Studio on this computer, then connect an installed model. Saved study
-              evidence is sent to that local server. HETU does not switch to a paid cloud model if
-              it is unavailable.
-            </p>
-            <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
-              <label className="space-y-1 text-sm">
-                <span className="block font-medium">Local model app</span>
-                <select
-                  className={field}
-                  value={config.provider}
-                  onChange={(event) => updateProvider(event.target.value as LocalModelProvider)}
-                  disabled={Boolean(busy)}
-                >
-                  <option value="ollama">Ollama</option>
-                  <option value="openai_compatible">
-                    LM Studio / OpenAI-compatible local server
-                  </option>
-                </select>
-              </label>
-              <label className="space-y-1 text-sm">
-                <span className="block font-medium">Local server address</span>
-                <input
-                  className={field}
-                  type="url"
-                  value={config.base_url}
-                  onChange={(event) => {
-                    setConfig({ ...config, base_url: event.target.value });
-                    setDiscovery(null);
-                  }}
-                  disabled={Boolean(busy)}
-                  spellCheck={false}
-                  placeholder={localModelDefaultUrl(config.provider)}
-                />
-              </label>
-            </div>
-            <div className="flex flex-wrap items-center gap-3">
-              <Button
-                disabled={Boolean(busy)}
-                onClick={() =>
-                  void perform('discover', async () => {
-                    const found = await discoverLocalModels(config);
-                    if (!mounted.current) return;
-                    setDiscovery(found);
-                    if (!found.reachable) {
-                      setSettingsError(
-                        found.message ||
-                          'The local server is offline. Start it and test the connection again.'
-                      );
-                      return;
-                    }
-                    setNotice(
-                      found.models.length
-                        ? `Connected. Found ${found.models.length} installed ${found.models.length === 1 ? 'model' : 'models'}.`
-                        : 'The server is running, but no installed models were found. Install a model in Ollama or LM Studio, then test again.'
-                    );
-                  })
-                }
+          <ul className="mt-2 divide-y divide-border">
+            {actions.latest_results.slice(0, 3).map((result) => (
+              <li
+                key={result.id}
+                className="flex flex-wrap items-center justify-between gap-2 py-3"
               >
-                {busy === 'discover' ? 'Testing local connection…' : 'Test local connection'}
-              </Button>
-            </div>
-            <label className="block space-y-1 text-sm">
-              <span className="block font-medium">Installed model</span>
-              <select
-                className={field}
-                aria-label="Installed model"
-                aria-describedby="local-model-help"
-                value={config.model}
-                disabled={Boolean(busy) || !discovery?.reachable}
-                onChange={(event) => setConfig({ ...config, model: event.target.value })}
-              >
-                <option value="">Choose an installed model</option>
-                {config.model && (!discovery || selectedMissing) && (
-                  <option value={config.model}>
-                    {config.model}
-                    {selectedMissing ? ' (not found on this server)' : ' (saved model)'}
-                  </option>
-                )}
-                {discovery?.models.map((model) => (
-                  <option value={model.id} key={model.id}>
-                    {model.name || model.id}
-                  </option>
-                ))}
-              </select>
-              <span id="local-model-help" className="block text-xs text-text-muted">
-                Test the connection to refresh the installed model list. HETU uses only the model
-                you select.
-              </span>
-            </label>
-            <label className="flex items-start gap-2 text-sm">
-              <input
-                className="mt-1 accent-accent"
-                type="checkbox"
-                checked={config.enabled}
-                onChange={(event) => setConfig({ ...config, enabled: event.target.checked })}
-                disabled={Boolean(busy)}
-              />
-              <span>
-                <span className="block font-medium">Enable automatic study follow-ups</span>
-                <span className="block text-xs leading-relaxed text-text-muted">
-                  Check new saved work while HETU is open. Practice results stay linked to their
-                  source, and future checks are prepared automatically.
+                <span className="min-w-0 break-words text-text-muted">
+                  {result.topic || result.subject || 'Completed practice'}
                 </span>
-              </span>
-            </label>
-            {settingsError && (
-              <p
-                role="alert"
-                className="rounded border border-danger/30 bg-danger-faint p-3 text-sm text-danger"
-              >
-                {settingsError}
-              </p>
-            )}
-            {notice && (
-              <p role="status" className="text-sm text-text-muted">
-                {notice}
-              </p>
-            )}
-            <div className="flex flex-wrap gap-2">
-              <Button
-                variant="primary"
-                disabled={Boolean(busy) || !config.model.trim() || Boolean(selectedMissing)}
-                onClick={() =>
-                  void perform('save', async () => {
-                    const saved = await saveLocalLearningConfig({ ...config, time_zone: timeZone });
-                    if (!mounted.current) return;
-                    setConfig(saved);
-                    await refreshStatus();
-                    setNotice(
-                      saved.enabled
-                        ? 'Connection saved. Automatic study follow-ups are enabled.'
-                        : 'Connection saved. Automatic study follow-ups are paused.'
-                    );
-                  })
-                }
-              >
-                {busy === 'save' ? 'Saving connection…' : 'Save connection'}
-              </Button>
-              <Button
-                disabled={Boolean(busy) || running || !config.model.trim() || !config.enabled}
-                onClick={() =>
-                  void perform('run', async () => {
-                    const next = await runLocalLearningEngine();
-                    if (!mounted.current) return;
-                    setStatus(next);
-                    setPollExpired(false);
-                    if (next.state !== 'running') {
-                      await refreshStatus();
-                      changed.current?.();
-                    }
-                  })
-                }
-              >
-                {busy === 'run' ? 'Starting analysis…' : 'Process saved learning'}
-              </Button>
-              {config.enabled && (
-                <Button
-                  disabled={Boolean(busy)}
-                  onClick={() =>
-                    void perform('pause', async () => {
-                      const saved = await saveLocalLearningConfig({ ...config, enabled: false });
-                      if (!mounted.current) return;
-                      setConfig(saved);
-                      await refreshStatus();
-                      setNotice(
-                        'Automatic processing is paused. Any analysis in progress will be discarded.'
-                      );
-                    })
-                  }
+                <Link
+                  className="shrink-0 text-accent underline underline-offset-2"
+                  to={`/memory/${encodeURIComponent(result.id)}`}
                 >
-                  Pause automatic processing
-                </Button>
-              )}
-              <Button
-                disabled={Boolean(busy)}
-                onClick={() => void perform('refresh', refreshStatus)}
-              >
-                Refresh status
-              </Button>
-            </div>
+                  View result
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </details>
+      )}
+      <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-border pt-3">
+        <Button
+          size="sm"
+          disabled={Boolean(busy) || running || !config?.model.trim() || !config.enabled}
+          onClick={() =>
+            void perform('run', async () => {
+              const next = await runLocalLearningEngine();
+              if (!mounted.current) return;
+              setStatus(next);
+              setPollExpired(false);
+              if (next.state !== 'running') {
+                await refreshStatus();
+                changed.current?.();
+              }
+            })
+          }
+        >
+          {busy === 'run' ? 'Starting…' : 'Process saved learning'}
+        </Button>
+        <Button
+          size="sm"
+          variant="ghost"
+          disabled={Boolean(busy)}
+          onClick={() => void perform('refresh', refreshStatus)}
+        >
+          {busy === 'refresh' ? 'Refreshing…' : 'Refresh status'}
+        </Button>
+        <Link
+          className="ml-auto py-2 text-sm text-accent underline underline-offset-2"
+          to="/settings"
+        >
+          Local model settings
+        </Link>
+      </div>
+      {status && (
+        <details className="mt-2 text-xs text-text-muted">
+          <summary className="w-fit cursor-pointer rounded py-1 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent">
+            Processing status
+          </summary>
+          <div className="mt-2 max-w-prose space-y-1 leading-relaxed" aria-live="polite">
+            <p>{status.message || 'The learning engine is ready.'}</p>
+            {status.last_run_at && (
+              <p>
+                Last check: {dateLabel(status.last_run_at, timeZone, true)}.
+                {status.model ? ` Selected model: ${status.model}.` : ''}
+              </p>
+            )}
           </div>
         </details>
+      )}
+      {status?.state === 'error' && (
+        <p role="alert" className="mt-2 text-sm text-danger">
+          {status.last_error ||
+            'The local model could not finish. Check the connection in Settings.'}
+        </p>
+      )}
+      {pollExpired && (
+        <p className="mt-2 text-sm text-text-muted">
+          The check is still running. Refresh status to check again.
+        </p>
       )}
     </section>
   );

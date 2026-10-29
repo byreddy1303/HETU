@@ -6,7 +6,16 @@ import { rmSync } from 'node:fs';
 
 export default defineConfig(({ mode }) => {
   const nativeBuild = mode === 'capacitor';
+  const desktopBuild = mode === 'desktop';
   const env = loadEnv(mode, process.cwd(), 'VITE_');
+  // Packaged desktop builds must work from a clean checkout, without a private .env file.
+  const desktopEnv = {
+    VITE_BACKEND: 'fastapi',
+    VITE_LOCAL_MODE: 'true',
+    VITE_API_URL: 'http://127.0.0.1:8765',
+    VITE_CLERK_PUBLISHABLE_KEY: ''
+  };
+  if (desktopBuild) Object.assign(env, desktopEnv);
 
   if (mode !== 'test') {
     let validUrl = false;
@@ -24,11 +33,13 @@ export default defineConfig(({ mode }) => {
   }
 
   return {
-    base: './',
+    base: desktopBuild ? '/' : './',
+    ...(desktopBuild ? { define: Object.fromEntries(Object.entries(desktopEnv)
+      .map(([key, value]) => [`import.meta.env.${key}`, JSON.stringify(value)])) } : {}),
     plugins: [
       react(),
       VitePWA({
-        disable: nativeBuild,
+        disable: nativeBuild || desktopBuild,
         registerType: 'autoUpdate',
         manifest: {
           name: 'HETU',

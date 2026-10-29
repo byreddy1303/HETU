@@ -51,6 +51,8 @@ def register_study_tools(
     server: MCPServer,
     settings: Settings,
     authorize: Callable[[AsyncSession, str], Awaitable[str]],
+    *,
+    authenticated: bool = True,
 ) -> None:
     annotations = ToolAnnotations(
         read_only_hint=False,
@@ -58,7 +60,11 @@ def register_study_tools(
         idempotent_hint=True,
         open_world_hint=False,
     )
-    security = {"securitySchemes": [{"type": "oauth2", "scopes": ["hetu:write"]}]}
+    security = {
+        "securitySchemes": [
+            {"type": "oauth2", "scopes": ["hetu:write"]} if authenticated else {"type": "noauth"}
+        ]
+    }
 
     async def run(draft: StudyAction) -> dict[str, Any]:
         async with get_session_factory()() as db:
@@ -151,7 +157,11 @@ def register_study_tools(
     async def save_weekly_review(draft: WeeklyDraft) -> dict[str, Any]:
         return await run(draft)
 
-    read_security = {"securitySchemes": [{"type": "oauth2", "scopes": ["hetu:read"]}]}
+    read_security = {
+        "securitySchemes": [
+            {"type": "oauth2", "scopes": ["hetu:read"]} if authenticated else {"type": "noauth"}
+        ]
+    }
     read_annotations = ToolAnnotations(read_only_hint=True)
 
     @server.tool(
@@ -273,4 +283,3 @@ def register_study_tools(
             if row is None:
                 raise ToolError(f"Question '{question_id}' not found")
             return {"question": to_api(row)}
-

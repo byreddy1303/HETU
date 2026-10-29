@@ -496,8 +496,8 @@ describe('re-attempt solve flow', () => {
       </MemoryRouter>
     );
 
-    const dueButton = await screen.findByRole('button', {
-      name: '1 ordered actions. Open Do now'
+    const dueButton = await screen.findByRole('link', {
+      name: 'Open Do now'
     });
     await user.click(dueButton);
 

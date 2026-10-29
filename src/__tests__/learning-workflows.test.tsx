@@ -35,6 +35,8 @@ const ready = newMemoryEntry('repair', 'repair-now', 'Trace page faults', {
   user_id: 'owner',
   state: 'open',
   evidence_kind: 'model',
+  subject: 'Operating Systems',
+  topic: 'Virtual memory',
   session_id: 'original-session',
   data: {
     due_date: '2000-01-01',
@@ -51,6 +53,8 @@ const upcoming = newMemoryEntry('repair', 'repair-later', 'Check page translatio
   user_id: 'owner',
   state: 'open',
   evidence_kind: 'rule',
+  subject: 'Operating Systems',
+  topic: 'Address translation',
   data: {
     due_date: '2999-03-12',
     target: 'Preserve the offset.',
@@ -113,15 +117,28 @@ describe('learning workflows', () => {
 
   it('links each due activity to its real evidence and checks questions before starting', async () => {
     mount();
-    expect(await screen.findByRole('heading', { name: 'Trace page faults' })).toBeInTheDocument();
+    expect(
+      await screen.findByRole('heading', {
+        name: 'Retry the original question in Operating Systems'
+      })
+    ).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Review source evidence' })).not.toBeVisible();
+    const details = screen.getByText('History and evidence').closest('details');
+    expect(details).not.toHaveAttribute('open');
+    fireEvent.click(screen.getByText('History and evidence'));
     expect(screen.getByRole('link', { name: 'Review source evidence' })).toHaveAttribute(
       'href',
       '/session/original-session/review?attempt=original-attempt'
     );
-    expect(screen.getByText('The recorded answer was 2; the frozen key is 6.')).toBeInTheDocument();
+    expect(screen.queryByText(ready.title)).not.toBeInTheDocument();
+    expect(
+      screen.queryByText('The recorded answer was 2; the frozen key is 6.')
+    ).not.toBeInTheDocument();
+    expect(screen.queryByText('Count initial page loads.')).not.toBeInTheDocument();
+    expect(screen.queryByText('Trace every request.')).not.toBeInTheDocument();
     expect(screen.getByText(/Its explanation still needs a practice check/)).toBeInTheDocument();
     expect(
-      screen.queryByRole('heading', { name: 'Check page translation again' })
+      screen.queryByRole('heading', { name: 'Concept repair in Operating Systems' })
     ).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Start practice' }));
     await waitFor(() =>
@@ -134,11 +151,18 @@ describe('learning workflows', () => {
 
   it('connects a completed check to its scheduled review without counting skips as judged answers', async () => {
     mount();
-    await screen.findByRole('heading', { name: 'Trace page faults' });
+    await screen.findByRole('heading', {
+      name: 'Retry the original question in Operating Systems'
+    });
     fireEvent.click(screen.getByRole('button', { name: 'Upcoming checks (1)' }));
     expect(
-      screen.getByRole('heading', { name: 'Check page translation again' })
+      screen.getByRole('heading', { name: 'Concept repair in Operating Systems' })
     ).toBeInTheDocument();
+    fireEvent.click(screen.getByText('History and evidence'));
+    const completed = screen.getByText('Completed practice checks').closest('details');
+    expect(completed).not.toHaveAttribute('open');
+    fireEvent.click(screen.getByText('Completed practice checks'));
+    expect(completed).toHaveAttribute('open');
     expect(screen.getAllByText('0/1 reliably judged answers correct')).toHaveLength(2);
     expect(
       screen.getAllByText('2/3 selected questions submitted; 1 explicitly skipped.')
@@ -168,6 +192,7 @@ describe('learning workflows', () => {
       'No eligible matching questions remain.'
     );
     expect(screen.getByLabelText('Current location')).toHaveTextContent('/');
+    fireEvent.click(screen.getByText('History and evidence'));
     expect(screen.getByRole('link', { name: 'Activity details' })).toHaveAttribute(
       'href',
       '/memory/repair-now'
@@ -181,7 +206,9 @@ describe('learning workflows', () => {
     mount();
     expect(await screen.findByRole('alert')).toHaveTextContent('Local service unavailable.');
     fireEvent.click(screen.getByRole('button', { name: 'Retry study workflows' }));
-    await screen.findByRole('heading', { name: 'Trace page faults' });
+    await screen.findByRole('heading', {
+      name: 'Retry the original question in Operating Systems'
+    });
     vi.mocked(getLocalLearningActions).mockResolvedValue({
       items: [upcoming],
       latest_results: [result]
@@ -215,8 +242,26 @@ describe('learning workflows', () => {
     );
     await screen.findByText(/No prepared study activities yet/);
     await act(async () => resolveOld({ items: [ready], latest_results: [result] }));
-    expect(screen.queryByRole('heading', { name: 'Trace page faults' })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('heading', { name: 'Retry the original question in Operating Systems' })
+    ).not.toBeInTheDocument();
     expect(screen.queryByText(result.title)).not.toBeInTheDocument();
+  });
+
+  it('refreshes after external workspace changes and links model failures to Settings', async () => {
+    vi.mocked(getLocalLearningStatus).mockResolvedValue({
+      ...status,
+      state: 'error',
+      message: 'Model unavailable.'
+    });
+    mount();
+    expect(await screen.findByRole('alert')).toHaveTextContent('Model unavailable.');
+    expect(screen.getByRole('link', { name: 'Settings' })).toHaveAttribute('href', '/settings');
+    vi.mocked(getLocalLearningActions).mockResolvedValue({ items: [upcoming], latest_results: [] });
+    act(() => window.dispatchEvent(new Event('hetu:workspace-changed')));
+    await waitFor(() =>
+      expect(screen.getByRole('button', { name: 'Ready or due (0)' })).toBeInTheDocument()
+    );
   });
 
   it('does not contact local model routes in hosted mode', () => {

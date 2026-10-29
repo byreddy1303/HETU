@@ -121,11 +121,12 @@ export default function Workflows() {
     }
   }
 
+  const BriefContainer = workflowId ? 'section' : 'details';
   return (
     <div className="flex flex-col gap-4">
       <PageHeader
         title="Workflows"
-        description="Follow focused study from evidence to its next review, and keep multi-step assistant tasks organised."
+        description="Focused practice, follow-up checks, and saved assistant tasks."
       />
       <LearningWorkflows />
       {!backendConfig.fastapi ? (
@@ -133,14 +134,20 @@ export default function Workflows() {
           Workflows open after your account is connected to the Python service.
         </p>
       ) : (
-        <>
-          <div className="mt-2">
-            <h2 className="font-display text-2xl font-semibold">Assistant task briefs</h2>
-            <p className="mt-1 text-sm text-text-muted">
-              Goals, corrections, and pending steps saved during multi-step work with your
-              assistant.
-            </p>
-          </div>
+        <BriefContainer className="min-w-0 rounded-lg border border-border bg-bg-raised p-4 sm:p-5">
+          {workflowId ? (
+            <h2 className="mb-4 font-display text-xl font-semibold">Assistant task briefs</h2>
+          ) : (
+            <summary className="cursor-pointer rounded text-sm font-semibold text-text focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-4">
+              Assistant task briefs{' '}
+              <span className="ml-2 font-normal text-text-muted">
+                {loading ? 'Loading…' : loadError ? 'Needs attention' : `(${briefs.length})`}
+              </span>
+            </summary>
+          )}
+          <p className="my-3 text-sm text-text-muted">
+            Goals and pending steps saved with your assistant.
+          </p>
           {(loadError || error) && (
             <div role="alert" className="rounded-xl bg-danger-faint p-3 text-danger">
               <p>{loadError || error}</p>
@@ -155,11 +162,17 @@ export default function Workflows() {
               )}
             </div>
           )}
-          <div className="grid gap-4 lg:grid-cols-[minmax(220px,310px)_minmax(0,1fr)]">
+          <div
+            className={
+              workflowId
+                ? 'grid min-w-0 gap-4 lg:grid-cols-[minmax(220px,280px)_minmax(0,1fr)]'
+                : 'min-w-0'
+            }
+          >
             <nav
               aria-label="Recent workflows"
               aria-busy={loading}
-              className="rounded-xl border border-border bg-bg-raised p-3"
+              className="min-w-0 rounded border border-border p-2"
             >
               {briefs.length ? (
                 briefs.map((brief) => (
@@ -184,91 +197,93 @@ export default function Workflows() {
                 </p>
               )}
             </nav>
-            <main aria-busy={loading} className="rounded-xl border border-border bg-bg-raised p-5">
-              {selected ? (
-                <div className="max-w-[72ch] space-y-5">
-                  <div>
-                    <span className="text-xs text-text-muted">
-                      {selected.status} · version {selected.version}
-                    </span>
-                    <h2 className="mt-1 text-2xl font-bold text-text">{selected.goal}</h2>
+            {workflowId && (
+              <main aria-busy={loading} className="min-w-0 rounded border border-border p-4">
+                {selected ? (
+                  <div className="max-w-[72ch] space-y-5">
+                    <div>
+                      <span className="text-xs text-text-muted">
+                        {selected.status} · version {selected.version}
+                      </span>
+                      <h2 className="mt-1 text-2xl font-bold text-text">{selected.goal}</h2>
+                    </div>
+                    <BriefList title="Success means" values={selected.success_criteria} />
+                    <BriefList title="Constraints" values={selected.constraints} />
+                    <BriefList title="Corrections" values={selected.corrections} />
+                    <BriefList title="Pending" values={selected.pending_steps} />
+                    <BriefList title="Completed" values={selected.completed_steps} />
+                    <BriefList title="Assumptions" values={selected.assumptions} />
+                    <BriefList title="References" values={selected.references} />
+                    {selected.receipts.length > 0 && (
+                      <section>
+                        <h3 className="mb-2 font-bold">Receipts</h3>
+                        <ul className="space-y-2 text-sm">
+                          {selected.receipts.map((receipt) => (
+                            <li
+                              key={receipt.operation_id}
+                              className="rounded-lg border border-border p-3"
+                            >
+                              <span className="text-text-muted">
+                                {new Date(receipt.recorded_at).toLocaleString()}
+                              </span>
+                              <pre className="mt-1 overflow-auto whitespace-pre-wrap">
+                                {JSON.stringify(receipt.result, null, 2)}
+                              </pre>
+                            </li>
+                          ))}
+                        </ul>
+                      </section>
+                    )}
+                    <div className="grid gap-3 border-t border-border pt-5">
+                      <label className="grid gap-1 text-sm font-semibold">
+                        Add a correction
+                        <input
+                          className="rounded-lg border border-border bg-bg p-2 font-normal"
+                          value={correction}
+                          onChange={(event) => setCorrection(event.target.value)}
+                          placeholder="What should this task focus on now?"
+                        />
+                      </label>
+                      <button
+                        disabled={!correction.trim() || saving || loading || !!loadError}
+                        className="justify-self-start font-semibold text-accent disabled:opacity-50"
+                        onClick={() => void saveChange({ correction })}
+                      >
+                        Save correction
+                      </button>
+                      <label className="grid gap-1 text-sm font-semibold">
+                        Add a pending step
+                        <input
+                          className="rounded-lg border border-border bg-bg p-2 font-normal"
+                          value={pending}
+                          onChange={(event) => setPending(event.target.value)}
+                          placeholder="What remains to be done?"
+                        />
+                      </label>
+                      <button
+                        disabled={!pending.trim() || saving || loading || !!loadError}
+                        className="justify-self-start font-semibold text-accent disabled:opacity-50"
+                        onClick={() => void saveChange({ pending_step: pending })}
+                      >
+                        Add step
+                      </button>
+                    </div>
                   </div>
-                  <BriefList title="Success means" values={selected.success_criteria} />
-                  <BriefList title="Constraints" values={selected.constraints} />
-                  <BriefList title="Corrections" values={selected.corrections} />
-                  <BriefList title="Pending" values={selected.pending_steps} />
-                  <BriefList title="Completed" values={selected.completed_steps} />
-                  <BriefList title="Assumptions" values={selected.assumptions} />
-                  <BriefList title="References" values={selected.references} />
-                  {selected.receipts.length > 0 && (
-                    <section>
-                      <h3 className="mb-2 font-bold">Receipts</h3>
-                      <ul className="space-y-2 text-sm">
-                        {selected.receipts.map((receipt) => (
-                          <li
-                            key={receipt.operation_id}
-                            className="rounded-lg border border-border p-3"
-                          >
-                            <span className="text-text-muted">
-                              {new Date(receipt.recorded_at).toLocaleString()}
-                            </span>
-                            <pre className="mt-1 overflow-auto whitespace-pre-wrap">
-                              {JSON.stringify(receipt.result, null, 2)}
-                            </pre>
-                          </li>
-                        ))}
-                      </ul>
-                    </section>
-                  )}
-                  <div className="grid gap-3 border-t border-border pt-5">
-                    <label className="grid gap-1 text-sm font-semibold">
-                      Add a correction
-                      <input
-                        className="rounded-lg border border-border bg-bg p-2 font-normal"
-                        value={correction}
-                        onChange={(event) => setCorrection(event.target.value)}
-                        placeholder="What should this task focus on now?"
-                      />
-                    </label>
-                    <button
-                      disabled={!correction.trim() || saving || loading || !!loadError}
-                      className="justify-self-start font-semibold text-accent disabled:opacity-50"
-                      onClick={() => void saveChange({ correction })}
-                    >
-                      Save correction
-                    </button>
-                    <label className="grid gap-1 text-sm font-semibold">
-                      Add a pending step
-                      <input
-                        className="rounded-lg border border-border bg-bg p-2 font-normal"
-                        value={pending}
-                        onChange={(event) => setPending(event.target.value)}
-                        placeholder="What remains to be done?"
-                      />
-                    </label>
-                    <button
-                      disabled={!pending.trim() || saving || loading || !!loadError}
-                      className="justify-self-start font-semibold text-accent disabled:opacity-50"
-                      onClick={() => void saveChange({ pending_step: pending })}
-                    >
-                      Add step
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <p className="text-text-muted">
-                  {loading
-                    ? workflowId
-                      ? 'Loading workflow…'
-                      : 'Loading saved task briefs…'
-                    : loadError
-                      ? 'Workflow details are unavailable. Retry loading to continue.'
-                      : 'Choose a workflow to see its current state.'}
-                </p>
-              )}
-            </main>
+                ) : (
+                  <p className="text-text-muted">
+                    {loading
+                      ? workflowId
+                        ? 'Loading workflow…'
+                        : 'Loading saved task briefs…'
+                      : loadError
+                        ? 'Workflow details are unavailable. Retry loading to continue.'
+                        : 'Choose a workflow to see its current state.'}
+                  </p>
+                )}
+              </main>
+            )}
           </div>
-        </>
+        </BriefContainer>
       )}
     </div>
   );

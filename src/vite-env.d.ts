@@ -14,3 +14,29 @@ interface ImportMetaEnv {
 interface ImportMeta {
   readonly env: ImportMetaEnv;
 }
+
+interface DesktopDailyBriefConfig {
+  enabled: boolean;
+  time: string;
+  timezone: string;
+  autoLaunch: boolean;
+  autoLaunchSupported: boolean;
+  autoLaunchInstalled: boolean;
+  last_shown_on: string | null;
+  last_error: string | null;
+}
+
+interface Window {
+  electronAPI?: {
+    platform: string;
+    isElectron: boolean;
+    apiUrl?: string;
+    getAppVersion(): Promise<string>;
+    getDailyBrief(): Promise<DesktopDailyBriefConfig>;
+    saveDailyBrief(
+      patch: Pick<DesktopDailyBriefConfig, 'enabled' | 'time' | 'autoLaunch'>
+    ): Promise<DesktopDailyBriefConfig>;
+    previewDailyBrief(): Promise<{ shown: boolean; held?: boolean }>;
+    onBriefNavigate(listener: (route: string) => void): () => void;
+  };
+}

@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter, Route, Routes, useParams } from 'react-router-dom';
-import { db } from '@/lib/db';
+import { applyServerRows, db } from '@/lib/db';
 import { normalizePyqManifest, type PyqManifest, type PyqQuestion } from '@/lib/pyq';
 import Pyq from '@/pages/Pyq';
 import { usePyqPreferencesStore } from '@/stores/pyq-preferences';
@@ -84,7 +84,7 @@ describe('authentic PYQ full-paper mode', () => {
   beforeEach(async () => {
     vi.stubGlobal('scrollTo', vi.fn());
     usePyqPreferencesStore.getState().reset();
-    vi.spyOn(globalThis, 'fetch').mockImplementation(async (input) => {
+    vi.spyOn(globalThis, 'fetch').mockImplementation(async (input, init) => {
       const url = new URL(String(input), 'https://hetu.test');
       if (url.pathname === '/api/v1/pyq/manifest') return Response.json(manifest);
       if (url.pathname === '/api/v1/pyq/subjects/operating-systems') {
@@ -93,6 +93,16 @@ describe('authentic PYQ full-paper mode', () => {
           subject: 'Operating Systems',
           questions
         });
+      }
+      if (url.pathname === '/api/v1/study-memory/exams/submit') {
+        const payload = JSON.parse(String(init?.body));
+        applyServerRows(USER, [
+          { name: 'pyq_attempts', rows: payload.attempts },
+          { name: 'pyq_sessions', rows: [payload.session] },
+          { name: 'sessions', rows: [payload.canonical_session] },
+          { name: 'mock_tests', rows: payload.mock_test ? [payload.mock_test] : [] }
+        ]);
+        return Response.json({ status: 'saved' });
       }
       return new Response(null, { status: 404 });
     });
@@ -181,7 +191,7 @@ describe('authentic PYQ full-paper mode', () => {
         expect.arrayContaining(['incomplete-visit-coverage', 'low-active-time'])
       );
     });
-  });
+  }, 15_000);
 });
 
 

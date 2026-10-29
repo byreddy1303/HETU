@@ -9,6 +9,7 @@ import {
   RefreshCw
 } from 'lucide-react';
 import LocalLearningActionCard from '@/components/memory/LocalLearningActionCard';
+import TodayActions from '@/components/dashboard/TodayActions';
 import { dateLabel } from '@/lib/local-learning-display';
 import { Button } from '@/components/ui/Button';
 import { backendConfig } from '@/lib/backend-config';
@@ -496,7 +497,7 @@ export default function LearningOverview(props: Props) {
         </Link>
       </header>
       {!coreOnly && userId && backendConfig.fastapi && (
-        <OverviewData
+        backendConfig.isLocal ? <TodayActions key={userId} userId={userId} today={today} compact /> : <OverviewData
           key={userId}
           userId={userId}
           today={today}

@@ -5,7 +5,8 @@ import { backendConfig } from '@/lib/backend-config';
 import { apiRequest } from '@/lib/fastapi-client';
 import { cacheRecoveryResponse, recoveryKey } from '@/lib/recovery-api';
 import { useAuth } from '@/hooks/useAuth';
-import { todayISOInTimeZone } from '@/lib/utils';
+import { formatDate, todayISOInTimeZone } from '@/lib/utils';
+import { ArrowRight, ChevronRight } from 'lucide-react';
 import { LEARNING_UPDATED_EVENT } from '@/lib/local-learning-engine';
 import type { LearningEventRow, LearningItemRow, RecoverySessionRow } from '@/types';
 
@@ -42,6 +43,17 @@ type Review = {
     explanation: string;
   };
 };
+
+function queueLabel(item: Review): string {
+  return (
+    item.concept?.topic ||
+    (item.concept?.subject
+      ? `${item.concept.subject} concept`
+      : item.kind === 'transfer'
+        ? 'Application check'
+        : 'Recall check')
+  );
+}
 
 export default function ConceptReview() {
   const { reviewId } = useParams();
@@ -275,61 +287,19 @@ export default function ConceptReview() {
 
   return (
     <div className="flex flex-col gap-4">
-      <PageHeader
-        title="Concept review"
-        description="Answer from memory first. Hints and shown guidance stay attached to the attempt."
-      />
-      {backendConfig.fastapi && (
-        <section
-          aria-label="Recall schedule"
-          className="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-border bg-bg-raised p-4 sm:p-5"
-        >
-          <div>
-            <h2 className="font-display text-xl font-semibold">Recall, then check</h2>
-            <p className="mt-1 max-w-prose text-sm leading-relaxed text-text-muted">
-              Prepared study targets become recall questions with their sources attached. Write your
-              explanation before opening guidance.
+      <PageHeader title="Concept review" description="Recall the idea, then check your answer." />
+      {backendConfig.fastapi && (queueMeta.held_for_exam || queueMeta.held_sources > 0) && (
+        <div className="space-y-1 rounded border border-border px-4 py-3 text-sm text-text-muted">
+          {queueMeta.held_for_exam && (
+            <p>Concept review waits until your active or paused exam is finished.</p>
+          )}
+          {queueMeta.held_sources > 0 && (
+            <p>
+              {queueMeta.held_sources} reviews have changed or unavailable sources. Check their
+              evidence in Learning Memory.
             </p>
-            {!loading && !loadError && (
-              <p className="mt-3 text-sm">
-                <strong>
-                  {queueMeta.complete ? '' : 'At least '}
-                  {due.length}
-                </strong>{' '}
-                due now / <strong>{upcoming.length}</strong> scheduled later
-                {!queueMeta.complete ? ' in the returned queue' : ''}.
-              </p>
-            )}
-            {queueMeta.held_for_exam && (
-              <p className="mt-2 text-sm text-text-muted">
-                Concept review waits until your active or paused exam is finished.
-              </p>
-            )}
-            {queueMeta.held_sources > 0 && (
-              <p className="mt-2 text-sm text-text-muted">
-                {queueMeta.held_sources} reviews have changed or unavailable sources. Check their
-                evidence in Learning Memory.
-              </p>
-            )}
-          </div>
-          <div className="flex flex-wrap gap-3 text-sm font-semibold">
-            {backendConfig.isLocal && (
-              <button
-                className="rounded-lg border border-accent px-3 py-2 text-accent disabled:opacity-50"
-                disabled={preparing || loading || saving}
-                onClick={() => void prepareRecall()}
-              >
-                {preparing ? 'Preparing recall…' : 'Prepare recall from activities'}
-              </button>
-            )}
-            <Link className="self-center text-accent underline" to="/memory">
-              Learning Memory
-            </Link>
-            <Link className="self-center text-accent underline" to="/workflows">
-              Workflows
-            </Link>
-          </div>
-        </section>
+          )}
+        </div>
       )}
       {notice && (
         <p role="status" className="rounded-lg bg-success-faint p-3 text-sm text-text">
@@ -356,13 +326,35 @@ export default function ConceptReview() {
               )}
             </div>
           )}
-          <div className="grid gap-4 lg:grid-cols-[minmax(220px,300px)_minmax(0,1fr)]">
+          <div
+            className={
+              reviewId
+                ? 'grid min-w-0 gap-4 lg:grid-cols-[minmax(220px,280px)_minmax(0,1fr)]'
+                : 'min-w-0'
+            }
+          >
             <nav
               aria-label="Concept questions"
               aria-busy={loading}
-              className="rounded-xl border border-border bg-bg-raised p-3"
+              className="min-w-0 self-start rounded-lg border border-border bg-bg-raised p-4"
             >
-              <div role="group" aria-label="Concept schedule" className="mb-3 flex flex-wrap gap-2">
+              <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+                <h2 className="font-display text-lg font-semibold">Recall queue</h2>
+                {!reviewId && !loading && !loadError && visibleReviews[0] && (
+                  <Link
+                    className="inline-flex min-h-10 items-center gap-2 rounded bg-accent px-4 py-2 text-sm font-semibold text-accent-contrast focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-4"
+                    to={`/concept-review/${encodeURIComponent(visibleReviews[0].id)}`}
+                  >
+                    {schedule === 'due' ? 'Start recall' : 'Open scheduled check'}
+                    <ArrowRight size={14} aria-hidden />
+                  </Link>
+                )}
+              </div>
+              <div
+                role="group"
+                aria-label="Concept schedule"
+                className="mb-2 flex flex-wrap gap-2 border-b border-border pb-3"
+              >
                 {(['due', 'upcoming'] as const).map((value) => (
                   <button
                     key={value}
@@ -370,28 +362,45 @@ export default function ConceptReview() {
                     className={`min-h-10 rounded border px-3 text-sm ${schedule === value ? 'border-accent bg-accent-faint text-accent' : 'border-border text-text-muted'}`}
                     onClick={() => setSchedule(value)}
                   >
-                    {value === 'due' ? 'Due now' : 'Upcoming'}
+                    {value === 'due' ? 'Due now' : 'Upcoming'}{' '}
+                    <span className="ml-1 text-xs">
+                      (
+                      {loading
+                        ? '…'
+                        : loadError
+                          ? '?'
+                          : `${!queueMeta.complete ? 'at least ' : ''}${value === 'due' ? due.length : upcoming.length}`}
+                      )
+                    </span>
                   </button>
                 ))}
               </div>
               {visibleReviews.length ? (
-                visibleReviews.map((item) => (
-                  <Link
-                    key={item.id}
-                    to={`/concept-review/${item.id}`}
-                    className={`block rounded-lg p-3 hover:bg-accent-faint ${reviewId === item.id ? 'bg-accent-faint' : ''}`}
-                  >
-                    <strong className="block text-sm">{item.concept?.title || item.prompt}</strong>
-                    {item.concept && (
-                      <span className="mt-1 block text-xs text-text-muted">
-                        {item.concept.subject}: {item.concept.topic}
-                      </span>
-                    )}
-                    <small className="text-text-muted">
-                      {item.kind} · due {item.due_on}
-                    </small>
-                  </Link>
-                ))
+                <ul className="max-h-80 divide-y divide-border overflow-y-auto">
+                  {visibleReviews.map((item) => (
+                    <li key={item.id}>
+                      <Link
+                        to={`/concept-review/${encodeURIComponent(item.id)}`}
+                        aria-current={reviewId === item.id ? 'page' : undefined}
+                        className={`flex min-h-16 items-center justify-between gap-3 rounded px-2 py-3 focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-[-2px] hover:bg-bg-overlay ${reviewId === item.id ? 'bg-accent-faint' : ''}`}
+                      >
+                        <span className="min-w-0">
+                          <strong className="block text-sm font-semibold">
+                            {queueLabel(item)}
+                          </strong>{' '}
+                          <span className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-xs text-text-muted">
+                            {item.concept?.subject && item.concept.topic && (
+                              <span>{item.concept.subject}</span>
+                            )}{' '}
+                            <span>{item.kind === 'transfer' ? 'Application' : 'Recall'}</span>{' '}
+                            <time dateTime={item.due_on}>Due {formatDate(item.due_on)}</time>
+                          </span>
+                        </span>
+                        <ChevronRight size={15} className="shrink-0 text-text-faint" aria-hidden />
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
               ) : (
                 <p className="p-3 text-sm text-text-muted">
                   {loading
@@ -407,151 +416,183 @@ export default function ConceptReview() {
                           : 'No concept questions yet. Prepare one from a study activity or add a recall question to a saved insight.'}
                 </p>
               )}
-            </nav>
-            <main aria-busy={loading} className="rounded-xl border border-border bg-bg-raised p-5">
-              {review ? (
-                <div className="max-w-[72ch] space-y-5">
-                  <div>
-                    <span className="text-xs text-text-muted">
-                      {review.kind} ·{' '}
-                      {review.source ? 'Prepared from study evidence' : review.question_origin}
-                    </span>
-                    <h2 className="mt-2 text-xl font-bold">{review.prompt}</h2>
-                    <Link
-                      to={`/learning-library/${review.concept_id}`}
-                      className="mt-2 inline-block text-sm font-semibold text-accent"
+              <details className="mt-3 border-t border-border pt-3 text-sm">
+                <summary className="w-fit cursor-pointer rounded font-medium text-text-muted focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-4">
+                  Manage recall questions
+                </summary>
+                <div className="mt-3 flex flex-wrap items-center gap-3 text-xs">
+                  {backendConfig.isLocal && (
+                    <button
+                      className="rounded border border-border px-3 py-2 font-medium text-text disabled:opacity-50"
+                      disabled={preparing || loading || saving}
+                      onClick={() => void prepareRecall()}
                     >
-                      Open concept
-                    </Link>
-                  </div>
-                  {review.source && (
-                    <div className="rounded-lg border border-border p-3 text-sm leading-relaxed">
-                      <p>
-                        This recall cue comes from a local model's study target. The suggested
-                        method remains unverified.
-                      </p>
-                      <Link
-                        to={review.source.href}
-                        className="mt-2 inline-block font-semibold text-accent underline"
-                      >
-                        Original study activity
-                      </Link>
-                      {review.source.snapshot_changed && (
-                        <p className="mt-2 text-xs text-text-muted">
-                          The activity has changed since this recall question was prepared. Your
-                          earlier recall responses are preserved.
-                        </p>
-                      )}
-                    </div>
+                      {preparing ? 'Preparing recall…' : 'Prepare recall from activities'}
+                    </button>
                   )}
-                  <label className="grid gap-2 text-sm font-semibold">
-                    Your answer
-                    <textarea
-                      className="min-h-32 rounded-lg border border-border bg-bg p-3 font-normal leading-relaxed"
-                      value={answer}
-                      onChange={(event) => setAnswer(event.target.value)}
-                      placeholder="Write your answer before checking guidance."
-                    />
-                  </label>
-                  {(review.has_guidance || review.evaluation_guidance) && (
-                    <div>
-                      <button
-                        className="font-semibold text-accent"
-                        onClick={() => void showGuidance()}
-                        disabled={revealed || saving || loading || !!loadError}
-                      >
-                        Show evaluation guidance
-                      </button>
-                      {revealed && (
-                        <p className="mt-2 whitespace-pre-wrap rounded-lg bg-accent-faint p-3 text-sm leading-relaxed">
-                          {review.evaluation_guidance}
-                        </p>
-                      )}
-                    </div>
-                  )}
-                  <label className="grid gap-2 text-sm font-semibold">
-                    How did your answer hold up?
-                    <select
-                      className="rounded-lg border border-border bg-bg p-2 font-normal"
-                      value={evaluation}
-                      onChange={(event) => setEvaluation(event.target.value as typeof evaluation)}
-                    >
-                      <option value="ungraded">Not graded</option>
-                      <option value="correct">Correct</option>
-                      <option value="partial">Partly correct</option>
-                      <option value="incorrect">Incorrect</option>
-                    </select>
-                  </label>
-                  <p className="text-xs text-text-muted">
-                    This is saved as your own assessment. Seeing guidance marks the attempt as
-                    assisted. Neither action automatically marks the concept mastered.
-                  </p>
-                  <button
-                    disabled={
-                      !answer.trim() ||
-                      saving ||
-                      loading ||
-                      !!loadError ||
-                      (!!recoverySession &&
-                        (recoverySession.status !== 'active' ||
-                          (!!review.recovery_item_id &&
-                            recoverySession.item_ids[recoverySession.current_index] !==
-                              review.recovery_item_id)))
-                    }
-                    className="rounded-lg bg-accent px-4 py-2 font-semibold text-accent-contrast disabled:opacity-50"
-                    onClick={() => void saveResponse()}
-                  >
-                    {saving ? 'Saving…' : 'Record response'}
-                  </button>
-                  {review.recovery_evidence && (
-                    <p className="text-sm text-text-muted">
-                      {review.recovery_evidence.explanation} Next due: {review.due_on}.
-                    </p>
-                  )}
-                  {recoverySessionId && (
-                    <Link
-                      className="block font-semibold text-accent"
-                      to={`/reattempts?recoverySession=${encodeURIComponent(recoverySessionId)}`}
-                    >
-                      Continue recovery sprint
-                    </Link>
-                  )}
-                  {review.attempts.length > 0 && (
-                    <section className="border-t border-border pt-4">
-                      <h3 className="mb-3 font-bold">Earlier responses</h3>
-                      <ul className="space-y-3">
-                        {review.attempts
-                          .slice()
-                          .reverse()
-                          .map((attempt) => (
-                            <li
-                              key={attempt.attempt_id}
-                              className="rounded-lg border border-border p-3 text-sm"
-                            >
-                              <p className="whitespace-pre-wrap">{attempt.answer}</p>
-                              <small className="mt-2 block text-text-muted">
-                                {attempt.evaluation} · {attempt.evaluated_by} ·{' '}
-                                {attempt.assistance === 'none' ? 'unaided' : attempt.assistance} ·{' '}
-                                {new Date(attempt.recorded_at).toLocaleString()}
-                              </small>
-                            </li>
-                          ))}
-                      </ul>
-                    </section>
-                  )}
+                  <Link className="text-accent underline" to="/memory">
+                    Learning Memory
+                  </Link>
+                  <Link className="text-accent underline" to="/workflows">
+                    Workflows
+                  </Link>
                 </div>
-              ) : (
-                <p className="text-text-muted">
-                  {loading
-                    ? reviewId
-                      ? 'Loading question…'
-                      : 'Loading recall practice…'
-                    : loadError
-                      ? 'Concept review is unavailable. Retry loading to continue.'
-                      : 'Choose a question to begin.'}
-                </p>
-              )}
-            </main>
+                {!queueMeta.complete && (
+                  <p className="mt-2 text-xs text-text-muted">
+                    Counts cover the returned queue. More reviews may be available.
+                  </p>
+                )}
+              </details>
+            </nav>
+            {reviewId && (
+              <main
+                aria-busy={loading}
+                className="min-w-0 rounded-lg border border-border bg-bg-raised p-4 sm:p-5"
+              >
+                {review ? (
+                  <div className="max-w-[72ch] space-y-5">
+                    <div>
+                      <span className="text-xs text-text-muted">
+                        {review.kind} ·{' '}
+                        {review.source ? 'Prepared from study evidence' : review.question_origin}
+                      </span>
+                      <h2 className="mt-2 text-xl font-bold">{review.prompt}</h2>
+                      <Link
+                        to={`/learning-library/${review.concept_id}`}
+                        className="mt-2 inline-block text-sm font-semibold text-accent"
+                      >
+                        Open concept
+                      </Link>
+                    </div>
+                    {review.source && (
+                      <div className="rounded-lg border border-border p-3 text-sm leading-relaxed">
+                        <p>
+                          This recall cue comes from a local model's study target. The suggested
+                          method remains unverified.
+                        </p>
+                        <Link
+                          to={review.source.href}
+                          className="mt-2 inline-block font-semibold text-accent underline"
+                        >
+                          Original study activity
+                        </Link>
+                        {review.source.snapshot_changed && (
+                          <p className="mt-2 text-xs text-text-muted">
+                            The activity has changed since this recall question was prepared. Your
+                            earlier recall responses are preserved.
+                          </p>
+                        )}
+                      </div>
+                    )}
+                    <label className="grid gap-2 text-sm font-semibold">
+                      Your answer
+                      <textarea
+                        className="min-h-32 rounded-lg border border-border bg-bg p-3 font-normal leading-relaxed"
+                        value={answer}
+                        onChange={(event) => setAnswer(event.target.value)}
+                        placeholder="Write your answer before checking guidance."
+                      />
+                    </label>
+                    {(review.has_guidance || review.evaluation_guidance) && (
+                      <div>
+                        <button
+                          className="font-semibold text-accent"
+                          onClick={() => void showGuidance()}
+                          disabled={revealed || saving || loading || !!loadError}
+                        >
+                          Show evaluation guidance
+                        </button>
+                        {revealed && (
+                          <p className="mt-2 whitespace-pre-wrap rounded-lg bg-accent-faint p-3 text-sm leading-relaxed">
+                            {review.evaluation_guidance}
+                          </p>
+                        )}
+                      </div>
+                    )}
+                    <label className="grid gap-2 text-sm font-semibold">
+                      How did your answer hold up?
+                      <select
+                        className="rounded-lg border border-border bg-bg p-2 font-normal"
+                        value={evaluation}
+                        onChange={(event) => setEvaluation(event.target.value as typeof evaluation)}
+                      >
+                        <option value="ungraded">Not graded</option>
+                        <option value="correct">Correct</option>
+                        <option value="partial">Partly correct</option>
+                        <option value="incorrect">Incorrect</option>
+                      </select>
+                    </label>
+                    <p className="text-xs text-text-muted">
+                      This is saved as your own assessment. Seeing guidance marks the attempt as
+                      assisted. Neither action automatically marks the concept mastered.
+                    </p>
+                    <button
+                      disabled={
+                        !answer.trim() ||
+                        saving ||
+                        loading ||
+                        !!loadError ||
+                        (!!recoverySession &&
+                          (recoverySession.status !== 'active' ||
+                            (!!review.recovery_item_id &&
+                              recoverySession.item_ids[recoverySession.current_index] !==
+                                review.recovery_item_id)))
+                      }
+                      className="rounded-lg bg-accent px-4 py-2 font-semibold text-accent-contrast disabled:opacity-50"
+                      onClick={() => void saveResponse()}
+                    >
+                      {saving ? 'Saving…' : 'Record response'}
+                    </button>
+                    {review.recovery_evidence && (
+                      <p className="text-sm text-text-muted">
+                        {review.recovery_evidence.explanation} Next due: {review.due_on}.
+                      </p>
+                    )}
+                    {recoverySessionId && (
+                      <Link
+                        className="block font-semibold text-accent"
+                        to={`/reattempts?recoverySession=${encodeURIComponent(recoverySessionId)}`}
+                      >
+                        Continue recovery sprint
+                      </Link>
+                    )}
+                    {review.attempts.length > 0 && (
+                      <section className="border-t border-border pt-4">
+                        <h3 className="mb-3 font-bold">Earlier responses</h3>
+                        <ul className="space-y-3">
+                          {review.attempts
+                            .slice()
+                            .reverse()
+                            .map((attempt) => (
+                              <li
+                                key={attempt.attempt_id}
+                                className="rounded-lg border border-border p-3 text-sm"
+                              >
+                                <p className="whitespace-pre-wrap">{attempt.answer}</p>
+                                <small className="mt-2 block text-text-muted">
+                                  {attempt.evaluation} · {attempt.evaluated_by} ·{' '}
+                                  {attempt.assistance === 'none' ? 'unaided' : attempt.assistance} ·{' '}
+                                  {new Date(attempt.recorded_at).toLocaleString()}
+                                </small>
+                              </li>
+                            ))}
+                        </ul>
+                      </section>
+                    )}
+                  </div>
+                ) : (
+                  <p className="text-text-muted">
+                    {loading
+                      ? reviewId
+                        ? 'Loading question…'
+                        : 'Loading recall practice…'
+                      : loadError
+                        ? 'Concept review is unavailable. Retry loading to continue.'
+                        : 'Choose a question to begin.'}
+                  </p>
+                )}
+              </main>
+            )}
           </div>
         </>
       )}

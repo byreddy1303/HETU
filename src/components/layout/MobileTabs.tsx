@@ -1,3 +1,4 @@
+import { backendConfig } from '@/lib/backend-config';
 import { useEffect, useId, useRef, useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { motion, useReducedMotion } from 'motion/react';
@@ -282,7 +283,7 @@ export default function MobileTabs() {
               <span>Settings</span>
             </NavLink>
             <div>
-              {forceReady ? (
+              {!backendConfig.isLocal && (forceReady ? (
                 <div className="flex items-center gap-2">
                   <button
                     type="button"
@@ -313,7 +314,7 @@ export default function MobileTabs() {
                   <LogOut size={16} aria-hidden className={signingOut ? 'animate-spin' : undefined} />
                   {signingOut ? 'Signing out…' : 'Sign out'}
                 </button>
-              )}
+              ))}
             </div>
           </footer>
         </div>

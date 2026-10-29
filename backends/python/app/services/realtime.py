@@ -10,11 +10,14 @@ import httpx
 import structlog
 from fastapi import WebSocket
 from fastapi.encoders import jsonable_encoder
+from sqlalchemy.ext.asyncio import AsyncConnection, AsyncEngine
 
 from app.core.config import get_settings
+from app.db.session import get_engine
 from app.services.redis import get_redis
 
 log = structlog.get_logger()
+LOCAL_CHANGE_POLL_SECONDS = 1.0
 
 
 class RealtimeBroker:
@@ -22,20 +25,111 @@ class RealtimeBroker:
         self._clients: dict[str, set[WebSocket]] = defaultdict(set)
         self._lock = asyncio.Lock()
         self._subscriber_task: asyncio.Task[None] | None = None
+        self._local_watcher_task: asyncio.Task[None] | None = None
+        self._local_connection: AsyncConnection | None = None
         self._presence: dict[str, dict[str, dict[str, Any]]] = defaultdict(dict)
 
     async def start(self) -> None:
-        if get_settings().redis_configured and self._subscriber_task is None:
+        settings = get_settings()
+        if (
+            settings.environment == "local"
+            and settings.sqlalchemy_database_url.startswith("sqlite")
+            and self._local_watcher_task is None
+        ):
+            engine = get_engine()
+            connection = await engine.connect()
+            try:
+                version = await self._local_data_version(connection)
+            except BaseException:
+                await connection.close()
+                raise
+            # Establish the baseline before startup finishes, so even a write
+            # immediately after opening the app is observed on the first poll.
+            self._local_connection = connection
+            self._local_watcher_task = asyncio.create_task(
+                self._watch_local_changes(engine, connection, version),
+                name="sqlite-change-watcher",
+            )
+        if settings.redis_configured and self._subscriber_task is None:
             self._subscriber_task = asyncio.create_task(
                 self._subscribe_forever(), name="upstash-event-subscriber"
             )
 
     async def stop(self) -> None:
+        if self._local_watcher_task is not None:
+            self._local_watcher_task.cancel()
+            with suppress(asyncio.CancelledError):
+                await self._local_watcher_task
+            self._local_watcher_task = None
+        # stop() may run before the watcher coroutine gets its first turn.
+        if self._local_connection is not None:
+            await self._local_connection.close()
+            self._local_connection = None
         if self._subscriber_task is not None:
             self._subscriber_task.cancel()
             with suppress(asyncio.CancelledError):
                 await self._subscriber_task
             self._subscriber_task = None
+
+    @staticmethod
+    async def _local_data_version(connection: AsyncConnection) -> int:
+        try:
+            result = await connection.exec_driver_sql("PRAGMA data_version")
+            return int(result.scalar_one())
+        finally:
+            # Keep the physical connection, not a transaction/read snapshot.
+            # data_version is comparable only on the same SQLite connection.
+            await connection.rollback()
+
+    async def _notify_local_change(self) -> None:
+        async with self._lock:
+            owners = tuple(self._clients)
+        for owner in owners:
+            # Reuse the client's existing reconciliation event. No row content
+            # or untrusted owner ID crosses the process boundary, and a burst
+            # of commits becomes one lightweight refresh of version manifests.
+            await self._deliver(
+                {
+                    "user_id": owner,
+                    "event": {
+                        "type": "broadcast",
+                        "topic": f"user-sync:{owner}",
+                        "event": "sync_mutation",
+                        "payload": {"sourceDeviceId": "local-sqlite"},
+                    },
+                }
+            )
+
+    async def _watch_local_changes(
+        self, engine: AsyncEngine, connection: AsyncConnection | None, version: int
+    ) -> None:
+        try:
+            while True:
+                await asyncio.sleep(LOCAL_CHANGE_POLL_SECONDS)
+                try:
+                    if connection is None:
+                        connection = await engine.connect()
+                        self._local_connection = connection
+                        version = await self._local_data_version(connection)
+                        # A reconnected connection has a different counter.
+                        # Reconcile once rather than miss writes during retry.
+                        await self._notify_local_change()
+                    else:
+                        current = await self._local_data_version(connection)
+                        if current != version:
+                            version = current
+                            await self._notify_local_change()
+                except Exception:
+                    log.exception("local_change_watcher_retry")
+                    if connection is not None:
+                        with suppress(Exception):
+                            await connection.close()
+                        connection = None
+                        self._local_connection = None
+        finally:
+            if connection is not None:
+                await connection.close()
+            self._local_connection = None
 
     async def connect(self, user_id: str, websocket: WebSocket) -> None:
         await websocket.accept(subprotocol=getattr(websocket.state, "accept_subprotocol", None))

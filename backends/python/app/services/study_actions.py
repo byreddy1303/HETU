@@ -58,9 +58,7 @@ class SaveQuestionDraft(ActionDraft):
     learner_answer: str | None = Field(default=None, max_length=10000)
     source_ref: str | None = Field(default=None, max_length=500)
     source_year: int | None = None
-    outcome: Literal[
-        "R", "RBS", "RBG", "W-C", "W-E", "W-R", "U", "W", "S", "L"
-    ] = "W-C"
+    outcome: Literal["R", "RBS", "RBG", "W-C", "W-E", "W-R", "U", "W", "S", "L"] = "W-C"
     time_spent_sec: int | None = Field(default=None, ge=0, le=86400)
     target_time_sec: int = Field(default=120, ge=1, le=86400)
     format: Literal["MCQ", "MSQ", "NAT"] | None = None

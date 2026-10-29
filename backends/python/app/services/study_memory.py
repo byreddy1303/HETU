@@ -16,8 +16,8 @@ from sqlalchemy import String, cast, func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.models import Record, RecordRevision
-from app.services.records import lock_identity, to_api, upsert_records
 from app.services.pyq_practice import validate_app_attempt
+from app.services.records import lock_identity, to_api, upsert_records
 
 MemoryKind = Literal[
     "reflection", "exam_review", "finding", "repair", "concept", "verification", "profile"
@@ -91,10 +91,17 @@ async def commit_exam(db: AsyncSession, *, owner_id: str, draft: ExamSubmissionD
         raise HTTPException(422, "Final exam must preserve the original question set")
     if draft.canonical_session.get("id") != session_id:
         raise HTTPException(422, "Canonical session does not match the exam")
-    if any(not isinstance(row.get("id"), str) or not row["id"] or len(row["id"]) > 128
-           or not isinstance(row.get("question_uid"), str) for row in draft.attempts):
+    if any(
+        not isinstance(row.get("id"), str)
+        or not row["id"]
+        or len(row["id"]) > 128
+        or not isinstance(row.get("question_uid"), str)
+        for row in draft.attempts
+    ):
         raise HTTPException(422, "Exam receipts require valid attempt and question ids")
-    if len(draft.attempts) != len(uids) or {row.get("question_uid") for row in draft.attempts} != set(uids):
+    if len(draft.attempts) != len(uids) or {
+        row.get("question_uid") for row in draft.attempts
+    } != set(uids):
         raise HTTPException(422, "Exam requires exactly one receipt for every question")
     if len({row.get("id") for row in draft.attempts}) != len(draft.attempts):
         raise HTTPException(422, "Duplicate exam attempt ids")
@@ -105,14 +112,33 @@ async def commit_exam(db: AsyncSession, *, owner_id: str, draft: ExamSubmissionD
         if existing is None:
             await validate_app_attempt(db, owner_id=owner_id, row=row, allow_paused_exam=True)
     await upsert_records(db, collection="pyq_attempts", owner_id=owner_id, items=draft.attempts)
-    for collection, raw in [("pyq_sessions", draft.session), ("sessions", draft.canonical_session),
-                            *([("mock_tests", draft.mock_test)] if draft.mock_test else [])]:
+    for collection, raw in [
+        ("pyq_sessions", draft.session),
+        ("sessions", draft.canonical_session),
+        *([("mock_tests", draft.mock_test)] if draft.mock_test else []),
+    ]:
         existing = await _owned(db, owner_id, collection, raw.get("id", ""))
-        value = {key: item for key, item in raw.items() if key not in {"version", "expected_version", "updated_at", "created_at", "owner_id", "user_id"}}
+        value = {
+            key: item
+            for key, item in raw.items()
+            if key
+            not in {
+                "version",
+                "expected_version",
+                "updated_at",
+                "created_at",
+                "owner_id",
+                "user_id",
+            }
+        }
         if existing:
             value["expected_version"] = existing.version
         await upsert_records(db, collection=collection, owner_id=owner_id, items=[value])
-    return {"session_id": session_id, "attempt_ids": [row["id"] for row in draft.attempts], "committed": True}
+    return {
+        "session_id": session_id,
+        "attempt_ids": [row["id"] for row in draft.attempts],
+        "committed": True,
+    }
 
 
 async def _owned(
@@ -181,15 +207,21 @@ async def _validate_links(
         "attempt_ids": "pyq_attempts",
     }.items():
         values = draft.data.get(key, [])
-        if not isinstance(values, list) or len(values) > 1000 or any(
-            not isinstance(value, str) or not value or len(value) > 128 for value in values
+        if (
+            not isinstance(values, list)
+            or len(values) > 1000
+            or any(not isinstance(value, str) or not value or len(value) > 128 for value in values)
         ):
             raise HTTPException(422, f"{key} must contain at most 1000 record ids")
         if values:
-            count = await db.scalar(select(func.count(Record.id)).where(
-                Record.owner_id == owner_id, Record.collection == collection,
-                Record.external_id.in_(set(values)), Record.deleted_at.is_(None),
-            ))
+            count = await db.scalar(
+                select(func.count(Record.id)).where(
+                    Record.owner_id == owner_id,
+                    Record.collection == collection,
+                    Record.external_id.in_(set(values)),
+                    Record.deleted_at.is_(None),
+                )
+            )
             if count != len(set(values)):
                 raise HTTPException(422, f"{key} contains an unavailable record")
 
@@ -204,8 +236,10 @@ async def _validate_links(
     review_ids: set[str] = set()
     for key in ("reviewed_attempt_ids", "revealed_attempt_ids"):
         values = draft.data.get(key, [])
-        if not isinstance(values, list) or len(values) > 1000 or any(
-            not isinstance(value, str) or not value or len(value) > 128 for value in values
+        if (
+            not isinstance(values, list)
+            or len(values) > 1000
+            or any(not isinstance(value, str) or not value or len(value) > 128 for value in values)
         ):
             raise HTTPException(422, f"{key} must contain at most 1000 attempt ids")
         review_ids.update(values)
@@ -247,22 +281,34 @@ async def save_entry(
         session = await _session(db, owner_id, draft.session_id)
         if session.data.get("config", {}).get("memoryRepairId") != draft.repair_id:
             raise HTTPException(422, "This session was not launched by the linked repair")
-        receipts = list((await db.scalars(select(Record).where(
-            Record.owner_id == owner_id, Record.collection == "pyq_attempts",
-            Record.data["pyq_session_id"].as_string() == draft.session_id,
-            Record.deleted_at.is_(None),
-        ))).all())
+        receipts = list(
+            (
+                await db.scalars(
+                    select(Record).where(
+                        Record.owner_id == owner_id,
+                        Record.collection == "pyq_attempts",
+                        Record.data["pyq_session_id"].as_string() == draft.session_id,
+                        Record.deleted_at.is_(None),
+                    )
+                )
+            ).all()
+        )
         if not receipts:
             raise HTTPException(422, "This repair session has no submitted attempt receipts")
-        judged = [row for row in receipts if row.data.get("mark_correct") is not None
-                  and row.data.get("mark_decision") != "SKIP"]
-        payload["data"] = {**payload["data"],
+        judged = [
+            row
+            for row in receipts
+            if row.data.get("mark_correct") is not None and row.data.get("mark_decision") != "SKIP"
+        ]
+        payload["data"] = {
+            **payload["data"],
             "attempt_ids": sorted(row.external_id for row in receipts),
             "correct": sum(row.data.get("mark_correct") is True for row in judged),
             "judged": len(judged),
             "skipped": sum(row.data.get("mark_decision") == "SKIP" for row in receipts),
             "active_time_sec": sum(row.data.get("time_spent_sec") or 0 for row in receipts),
-            "calculated_from": "canonical_attempt_receipts", "mastery_claim": False,
+            "calculated_from": "canonical_attempt_receipts",
+            "mastery_claim": False,
         }
     if existing:
         # A response lost during a save must be replayable even with the old
@@ -334,7 +380,11 @@ async def list_entries(
             )
         ).all()
     )
-    return {"items": [to_api(row) for row in rows], "total": total, "has_more": offset + len(rows) < total}
+    return {
+        "items": [to_api(row) for row in rows],
+        "total": total,
+        "has_more": offset + len(rows) < total,
+    }
 
 
 async def get_entry(
@@ -381,7 +431,10 @@ async def context_for_attempt(
     memory = list(
         (
             await db.scalars(
-                select(Record).where(*filters).order_by(Record.updated_at.desc(), Record.id.desc()).limit(100)
+                select(Record)
+                .where(*filters)
+                .order_by(Record.updated_at.desc(), Record.id.desc())
+                .limit(100)
             )
         ).all()
     )
@@ -430,7 +483,12 @@ async def export_memory(db: AsyncSession, *, owner_id: str) -> dict[str, Any]:
         if row.data.get("session_id"):
             session_ids.add(row.data["session_id"])
         data = row.data.get("data", {})
-        for key in ("reviewed_attempt_ids", "revealed_attempt_ids", "source_attempt_ids", "attempt_ids"):
+        for key in (
+            "reviewed_attempt_ids",
+            "revealed_attempt_ids",
+            "source_attempt_ids",
+            "attempt_ids",
+        ):
             attempt_ids.update(data.get(key, []))
         if data.get("current_attempt_id"):
             attempt_ids.add(data["current_attempt_id"])

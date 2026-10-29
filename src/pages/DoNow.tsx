@@ -16,6 +16,7 @@ import { todayISOInTimeZone } from '@/lib/utils';
 import { backendConfig } from '@/lib/backend-config';
 import { apiRequest } from '@/lib/fastapi-client';
 import LocalLearningEngine from '@/components/memory/LocalLearningEngine';
+import TodayActions from '@/components/dashboard/TodayActions';
 
 type DueConcept = { id: string; prompt: string; due_on: string; kind: string };
 
@@ -29,6 +30,17 @@ const KIND_LABEL: Record<DoNowItem['kind'], string> = {
 };
 
 export default function DoNow() {
+  const { userId, profile, sandbox } = useAuth();
+  if (backendConfig.isLocal && userId && !sandbox) return (
+    <div className="workspace-today flex flex-col gap-4">
+      <PageHeader title="Do now" description="Continue saved work or start a manageable session from your due evidence." />
+      <TodayActions key={userId} userId={userId} today={todayISOInTimeZone(profile?.timezone ?? 'Asia/Kolkata')} />
+    </div>
+  );
+  return <LegacyDoNow />;
+}
+
+function LegacyDoNow() {
   const { userId, profile, sandbox } = useAuth();
   const navigate = useNavigate();
   const today = todayISOInTimeZone(profile?.timezone ?? 'Asia/Kolkata');

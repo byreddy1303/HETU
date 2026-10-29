@@ -8,92 +8,13 @@ even while the desktop application and MCP server are writing to it in WAL mode.
 from __future__ import annotations
 
 import argparse
-import datetime
-import os
-import shutil
-import sqlite3
 import sys
 from pathlib import Path
 
+# Direct invocation works in both a checkout and the packaged backend.
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-def default_data_dir() -> Path:
-    if os.environ.get("HETU_DATA_DIR"):
-        return Path(os.environ["HETU_DATA_DIR"]).expanduser().resolve()
-    if sys.platform == "darwin":
-        return Path.home() / "Library" / "Application Support" / "hetu"
-    if sys.platform == "win32":
-        app_data = os.environ.get("APPDATA") or str(Path.home() / "AppData" / "Roaming")
-        return Path(app_data) / "hetu"
-    return Path.home() / ".local" / "share" / "hetu"
-
-
-def backup_database(
-    source_db: Path,
-    backup_dir: Path,
-    keep_count: int = 14,
-    sync_icloud: bool = True,
-) -> Path:
-    if not source_db.exists():
-        raise FileNotFoundError(f"Database not found at {source_db}")
-
-    backup_dir.mkdir(parents=True, exist_ok=True)
-    timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-    backup_file = backup_dir / f"hetu_backup_{timestamp}.db"
-
-    # 1. Perform online backup using SQLite's native backup API
-    src_conn = sqlite3.connect(source_db)
-    dst_conn = sqlite3.connect(backup_file)
-
-    try:
-        with dst_conn:
-            src_conn.backup(dst_conn, pages=250)
-    finally:
-        dst_conn.close()
-        src_conn.close()
-
-    # 2. Verify integrity of the backup file
-    verify_conn = sqlite3.connect(backup_file)
-    try:
-        cur = verify_conn.cursor()
-        cur.execute("PRAGMA integrity_check;")
-        result = cur.fetchall()
-        if result != [("ok",)]:
-            backup_file.unlink(missing_ok=True)
-            raise RuntimeError(f"Backup verification failed: {result}")
-    finally:
-        verify_conn.close()
-
-    # 3. Create or update a 'latest.db' copy for quick reference
-    latest_file = backup_dir / "hetu_latest.db"
-    try:
-        shutil.copy2(backup_file, latest_file)
-    except OSError:
-        pass
-
-    # 4. Optional sync to iCloud Drive if available on macOS
-    if sync_icloud and sys.platform == "darwin":
-        icloud_base = Path.home() / "Library" / "Mobile Documents" / "com~apple~CloudDocs"
-        icloud_dir = icloud_base / "HetuBackups"
-        if icloud_dir.parent.exists():
-            try:
-                icloud_dir.mkdir(parents=True, exist_ok=True)
-                shutil.copy2(backup_file, icloud_dir / backup_file.name)
-            except OSError:
-                pass  # CloudDocs might be disabled or read-only
-
-    # 5. Rotate backups: retain only the latest `keep_count`
-    existing_backups = sorted(
-        backup_dir.glob("hetu_backup_*.db"),
-        key=lambda p: p.stat().st_mtime,
-        reverse=True,
-    )
-    for old_backup in existing_backups[keep_count:]:
-        try:
-            old_backup.unlink()
-        except OSError:
-            pass
-
-    return backup_file
+from app.services.local_backup import backup_database, backup_status, default_data_dir
 
 
 def main() -> None:
@@ -133,8 +54,13 @@ def main() -> None:
         )
         size_kb = round(backup_path.stat().st_size / 1024, 2)
         print(f"SUCCESS: Backup verified and created at {backup_path} ({size_kb} KB)")
-    except Exception as exc:
-        print(f"ERROR: {exc}", file=sys.stderr)
+        status = backup_status(args.source, args.backup_dir)
+        if status["last_error"]:
+            print(f"WARNING: {status['last_error']}", file=sys.stderr)
+    except Exception:
+        print(
+            "ERROR: Backup did not complete. Check backup health in HETU Settings.", file=sys.stderr
+        )
         sys.exit(1)
 
 

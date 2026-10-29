@@ -2,7 +2,11 @@
 
 ## Backend
 
-HETU uses a Python/FastAPI backend in [backends/python](backends/python). All data is stored in PostgreSQL. See the [data-safety documentation](backends/python/docs/DATA_SAFETY.md) for backup and recovery procedures.
+The current development target is the **local desktop app**: Electron, the Python/FastAPI backend in [backends/python](backends/python), and a personal SQLite database. The desktop app and local stdio MCP read the same workspace. PostgreSQL remains the storage mode for older hosted deployments; hosted access/deployment instructions below describe that separate mode.
+
+The local foundation release adds one daily queue shared by Dashboard and Do now, budgeted recovery launches, live refresh after external SQLite commits, and visible verified-backup health. See [local foundation release](docs/local-foundation-release.md) for the architecture, verification gates, and remaining work.
+
+Build the self-contained local app on an Apple Silicon Mac with `npm install` followed by `npm run desktop:pack`. Desktop mode supplies its loopback API configuration at build time and bundles a pinned Python runtime; no hosted account or private frontend environment file is required. The verified packaging target is macOS arm64. The local workspace lives at `~/Library/Application Support/hetu/hetu.db`; use `HETU_DATA_DIR` for an isolated installation or test workspace.
 
 Local-first, multi-user GATE PYQ analysis app. Captures every PYQ decision as an immutable performance event, offers optional structured Journal analysis (pattern / trigger / root cause), schedules spaced re-attempts, supports focused one-to-one buddy study, and surfaces one weekly upstream weakness. An optional Telegram bot can deliver one daily study-only digest.
 

@@ -23,6 +23,7 @@ from app.core.logging import configure_logging
 from app.core.timing import server_timing_header, start_request_timing
 from app.db.session import close_database
 from app.mcp_server import create_mcp_server
+from app.services.local_workspace import ensure_local_workspace
 from app.services.rate_limit import request_rate_limit_bucket
 from app.services.realtime import broker
 from app.services.redis import check_rate_limit, close_redis
@@ -30,7 +31,7 @@ from app.services.redis import check_rate_limit, close_redis
 settings = get_settings()
 mcp_server = (
     create_mcp_server(settings)
-    if settings.mcp_resource_url and settings.clerk_oauth_issuer
+    if not settings.local_workspace and settings.mcp_resource_url and settings.clerk_oauth_issuer
     else None
 )
 mcp_asgi = (
@@ -68,34 +69,8 @@ async def _application_lifespan():
         yield
         return
     settings.validate_runtime()
-    if settings.environment == "local" and settings.sqlalchemy_database_url.startswith("sqlite"):
-        import app.db.models  # noqa: F401
-        from app.db.base import Base
-        from app.db.models import User, UserIdentity
-        from app.db.session import get_engine, get_session_factory
-
-        async with get_engine().begin() as conn:
-            await conn.run_sync(Base.metadata.create_all)
-
-        async with get_session_factory()() as session:
-            user = await session.get(User, "local_user")
-            if user is None:
-                session.add(
-                    User(
-                        id="local_user",
-                        display_name="Local Learner",
-                        username="local_learner",
-                        profile={"role": "learner", "local": True},
-                    )
-                )
-                session.add(
-                    UserIdentity(
-                        user_id="local_user",
-                        provider="local",
-                        subject="local_user",
-                    )
-                )
-                await session.commit()
+    if settings.local_workspace:
+        await ensure_local_workspace(settings)
     await broker.start()
     log.info("api_started", version=settings.app_version, environment=settings.environment)
     yield
@@ -294,20 +269,7 @@ app.mount("/metrics", make_asgi_app())
 if mcp_asgi is not None:
     app.mount("/", mcp_asgi)
 
-if settings.environment == "local" and os.path.isdir(static_dir):
-    from fastapi.staticfiles import StaticFiles
-    from starlette.responses import FileResponse
+if settings.local_workspace and os.path.isdir(static_dir):
+    from app.services.desktop_static import desktop_static_router
 
-    assets_dir = os.path.join(static_dir, "assets")
-    if os.path.isdir(assets_dir):
-        app.mount("/assets", StaticFiles(directory=assets_dir), name="assets")
-
-    @app.get("/{full_path:path}", include_in_schema=False)
-    def serve_spa(full_path: str):
-        target = os.path.join(static_dir, full_path)
-        if full_path and os.path.isfile(target):
-            return FileResponse(target)
-        index_file = os.path.join(static_dir, "index.html")
-        if os.path.isfile(index_file):
-            return FileResponse(index_file)
-        return JSONResponse({"status": "ok", "service": settings.app_name})
+    app.include_router(desktop_static_router(static_dir))

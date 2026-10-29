@@ -11,7 +11,12 @@ import {
   type LocalLearningActions,
   type LocalLearningEngineStatus
 } from '@/lib/local-learning-engine';
-import { getMemoryRepairData, memoryString, type StudyMemoryEntry } from '@/lib/study-memory';
+import {
+  getMemoryRepairData,
+  MEMORY_ACTIVITIES,
+  memoryString,
+  type StudyMemoryEntry
+} from '@/lib/study-memory';
 import { memoryRepairHref } from '@/lib/study-memory-practice';
 import { todayISOInTimeZone } from '@/lib/utils';
 
@@ -88,7 +93,7 @@ function PracticeButton({ entry }: { entry: StudyMemoryEntry }) {
     <div className="space-y-2">
       {resumeId ? (
         <Link
-          className="inline-flex min-h-10 items-center gap-2 rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-accent-contrast"
+          className="inline-flex min-h-10 items-center gap-2 rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-accent-contrast focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-4"
           to={`/pyq?resumeSession=${encodeURIComponent(resumeId)}`}
         >
           Resume practice <ArrowRight size={15} aria-hidden />
@@ -96,7 +101,7 @@ function PracticeButton({ entry }: { entry: StudyMemoryEntry }) {
       ) : (
         <button
           type="button"
-          className="inline-flex min-h-10 items-center gap-2 rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-accent-contrast disabled:opacity-50"
+          className="inline-flex min-h-10 items-center gap-2 rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-accent-contrast focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-4 disabled:opacity-50"
           disabled={preparing}
           onClick={() => void start()}
         >
@@ -133,107 +138,123 @@ function StudyWorkflow({
     : repair.source_entry_ids[0]
       ? `/memory/${encodeURIComponent(repair.source_entry_ids[0])}`
       : null;
+  const activityLabel = MEMORY_ACTIVITIES.find((item) => item.id === repair.activity)!.label;
+  const title = entry.subject ? `${activityLabel} in ${entry.subject}` : activityLabel;
+  const resume = !!memoryString(entry.data, 'active_session_id');
   return (
-    <li className="min-w-0 border-t border-border py-6 first:border-t-0 first:pt-0 last:pb-0">
-      <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
-        <div className="max-w-prose space-y-1">
-          <span className="inline-flex items-center gap-1.5 text-xs font-medium text-text-muted">
-            {upcoming ? <CalendarDays size={14} aria-hidden /> : <Clock3 size={14} aria-hidden />}
-            {memoryString(entry.data, 'active_session_id')
-              ? 'Practice in progress'
-              : upcoming
-                ? `Next check ${dateLabel(repair.due_date!, timeZone)}`
-                : repair.due_date && repair.due_date < today
-                  ? `Due since ${dateLabel(repair.due_date, timeZone)}`
-                  : 'Ready today'}
-          </span>
-          <h3 className="font-display text-xl font-semibold text-text">
-            {memoryString(entry.data, 'display_title') || entry.title}
-          </h3>
-          <p className="text-sm text-text-muted">
-            {[entry.subject, entry.topic].filter(Boolean).join(' / ')}
-            {entry.subject || entry.topic ? ' · ' : ''}
-            {repair.duration_min} minutes
-          </p>
+    <li className="min-w-0 border-t border-border py-4 first:border-t-0 first:pt-0 last:pb-0">
+      <div className="flex flex-wrap items-center justify-between gap-x-5 gap-y-3">
+        <div className="min-w-0 flex-1 basis-60">
+          <div className="mb-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-text-muted">
+            <span
+              className={`inline-flex items-center gap-1.5 font-medium ${!upcoming ? 'text-accent' : ''}`}
+            >
+              {upcoming ? <CalendarDays size={13} aria-hidden /> : <Clock3 size={13} aria-hidden />}
+              {resume
+                ? 'In progress'
+                : upcoming
+                  ? 'Scheduled'
+                  : repair.due_date && repair.due_date < today
+                    ? 'Overdue'
+                    : 'Ready today'}
+            </span>
+            {repair.due_date && (
+              <time dateTime={repair.due_date}>{dateLabel(repair.due_date, timeZone)}</time>
+            )}
+            <span>{repair.duration_min} min</span>
+          </div>
+          <h3 className="font-display text-lg font-semibold leading-snug text-text">{title}</h3>
+          {entry.topic && <p className="mt-1 text-sm text-text-muted">{entry.topic}</p>}
         </div>
-        {!upcoming && <PracticeButton entry={entry} />}
-      </div>
-      <ol
-        aria-label={`Learning steps for ${entry.title}`}
-        className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4"
-      >
-        <li className="min-w-0 border-l-2 border-accent/40 pl-3">
-          <p className="mb-2 text-xs font-semibold text-text">1. Saved evidence</p>
-          <p className="text-sm leading-relaxed text-text-muted">
-            {repair.reason || 'This activity is linked to saved learning evidence.'}
-          </p>
-          {sourceHref && (
-            <Link className={`mt-2 inline-block text-xs ${linkClass}`} to={sourceHref}>
-              Review source evidence
-            </Link>
-          )}
-        </li>
-        <li className="min-w-0 border-l-2 border-accent/40 pl-3">
-          <p className="mb-2 text-xs font-semibold text-text">2. Focused activity</p>
-          <p className="text-sm leading-relaxed text-text-muted">{repair.target}</p>
-          {repair.success_criteria && (
-            <p className="mt-2 text-xs leading-relaxed text-text-muted">
-              Check: {repair.success_criteria}
-            </p>
-          )}
+        {!upcoming ? (
+          <PracticeButton entry={entry} />
+        ) : (
           <Link
-            className={`mt-2 inline-block text-xs ${linkClass}`}
+            className={`shrink-0 text-sm ${linkClass}`}
             to={`/memory/${encodeURIComponent(entry.id)}`}
           >
-            Activity details
+            View activity
           </Link>
-          {memoryString(entry.data, 'concept_review_id') && (
-            <Link
-              className={`ml-3 text-xs ${linkClass}`}
-              to={`/concept-review/${encodeURIComponent(memoryString(entry.data, 'concept_review_id'))}`}
-            >
-              Recall check
-            </Link>
-          )}
-        </li>
-        <li className="min-w-0 border-l-2 border-border pl-3">
-          <p className="mb-2 text-xs font-semibold text-text">3. Practice result</p>
-          {previousResult ? (
-            <>
-              <ResultFacts result={previousResult} />
-              <Link
-                className={`mt-2 inline-block text-xs ${linkClass}`}
-                to={`/memory/${encodeURIComponent(previousResult.id)}`}
-              >
-                Previous practice result
+        )}
+      </div>
+      <details className="mt-3 text-sm">
+        <summary className="w-fit cursor-pointer rounded text-xs font-medium text-text-muted focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-4">
+          History and evidence
+        </summary>
+        <ol
+          aria-label={`Learning steps for ${title}`}
+          className="mt-4 space-y-4 border-l border-border pl-4"
+        >
+          <li className="space-y-1">
+            <p className="font-semibold text-text">Saved evidence</p>
+            <p className="text-xs text-text-muted">
+              {repair.source_attempt_ids.length
+                ? `${repair.source_attempt_ids.length} saved ${repair.source_attempt_ids.length === 1 ? 'attempt' : 'attempts'} linked to this activity.`
+                : 'This activity is linked to your saved study evidence.'}
+            </p>
+            {sourceHref && (
+              <Link className={`inline-block text-xs ${linkClass}`} to={sourceHref}>
+                Review source evidence
               </Link>
-            </>
-          ) : (
-            <p className="text-sm leading-relaxed text-text-muted">
-              After you finish linked practice, HETU records the submitted answers and the result
-              automatically.
+            )}
+          </li>
+          <li className="space-y-1">
+            <p className="font-semibold text-text">Focused activity</p>
+            <p className="text-xs text-text-muted">
+              {activityLabel}. Questions are checked for eligibility when practice starts.
             </p>
-          )}
-        </li>
-        <li className="min-w-0 border-l-2 border-border pl-3">
-          <p className="mb-2 text-xs font-semibold text-text">4. Next check</p>
-          <p className="text-sm leading-relaxed text-text-muted">
-            {previousResult && repair.due_date
-              ? `Scheduled for ${dateLabel(repair.due_date, timeZone)} from the previous practice result.`
-              : 'The practice result determines the next review date and whether to revisit errors or check application later.'}
+            <div className="flex flex-wrap gap-x-4 gap-y-2 text-xs">
+              <Link className={linkClass} to={`/memory/${encodeURIComponent(entry.id)}`}>
+                Activity details
+              </Link>
+              {memoryString(entry.data, 'concept_review_id') && (
+                <Link
+                  className={linkClass}
+                  to={`/concept-review/${encodeURIComponent(memoryString(entry.data, 'concept_review_id'))}`}
+                >
+                  Recall check
+                </Link>
+              )}
+            </div>
+          </li>
+          <li className="space-y-1">
+            <p className="font-semibold text-text">Practice result</p>
+            {previousResult ? (
+              <>
+                <ResultFacts result={previousResult} />
+                <Link
+                  className={`inline-block text-xs ${linkClass}`}
+                  to={`/memory/${encodeURIComponent(previousResult.id)}`}
+                >
+                  Previous practice result
+                </Link>
+              </>
+            ) : (
+              <p className="text-xs text-text-muted">
+                Results appear after linked practice is saved.
+              </p>
+            )}
+          </li>
+          <li className="space-y-1">
+            <p className="font-semibold text-text">Next check</p>
+            <p className="text-xs text-text-muted">
+              {previousResult && repair.due_date
+                ? `Scheduled for ${dateLabel(repair.due_date, timeZone)} from the previous practice result.`
+                : 'Your practice result determines the next review date.'}
+            </p>
+            {entry.data.needs_local_review === true && (
+              <p className="text-xs text-text-muted">
+                This follow-up is waiting for local model review.
+              </p>
+            )}
+          </li>
+        </ol>
+        {entry.evidence_kind === 'model' && (
+          <p className="mt-4 text-xs text-text-muted">
+            Local model suggestion. Its explanation still needs a practice check.
           </p>
-          {entry.data.needs_local_review === true && (
-            <p className="mt-2 text-xs text-text-muted">
-              The local model still needs to reconsider this follow-up.
-            </p>
-          )}
-        </li>
-      </ol>
-      {entry.evidence_kind === 'model' && (
-        <p className="mt-4 text-xs text-text-muted">
-          Local model suggestion. Its explanation still needs a practice check.
-        </p>
-      )}
+        )}
+      </details>
     </li>
   );
 }
@@ -297,6 +318,7 @@ export default function LearningWorkflows() {
     };
     window.addEventListener(LEARNING_UPDATED_EVENT, changed);
     window.addEventListener('hetu:memory-saved', changed);
+    window.addEventListener('hetu:workspace-changed', changed);
     document.addEventListener('visibilitychange', visible);
     void load();
     return () => {
@@ -306,6 +328,7 @@ export default function LearningWorkflows() {
       refresh.current = () => {};
       window.removeEventListener(LEARNING_UPDATED_EVENT, changed);
       window.removeEventListener('hetu:memory-saved', changed);
+      window.removeEventListener('hetu:workspace-changed', changed);
       document.removeEventListener('visibilitychange', visible);
     };
   }, [userId]);
@@ -331,12 +354,11 @@ export default function LearningWorkflows() {
             Your learning workflows
           </h2>
           <p className="text-sm leading-relaxed text-text-muted">
-            Follow each learning target from its saved evidence to practice and the next dated
-            check. HETU updates the loop when linked practice finishes.
+            Practice that is ready now, with its evidence and next check kept together.
           </p>
         </div>
         <Link to="/memory" className={`text-sm ${linkClass}`}>
-          Learning Memory and model settings
+          Open Learning Memory
         </Link>
       </div>
       {!userId ? (
@@ -365,10 +387,14 @@ export default function LearningWorkflows() {
           )}
           {status?.state === 'error' && !error && (
             <p role="alert" className="mb-4 rounded-lg bg-danger-faint p-3 text-sm text-danger">
-              {status.message} Open Learning Memory to check the local model connection.
+              {status.message} Open{' '}
+              <Link className={linkClass} to="/settings">
+                Settings
+              </Link>{' '}
+              to check the local model connection.
             </p>
           )}
-          {status && (
+          {status && ['running', 'disabled'].includes(status.state) && (
             <p className="mb-4 text-xs text-text-muted">
               {status.state === 'running'
                 ? 'HETU is reviewing saved learning and updating follow-ups.'
@@ -429,17 +455,16 @@ export default function LearningWorkflows() {
             )
           )}
           {actions.latest_results.length > 0 && (
-            <section
-              aria-labelledby="workflow-results-title"
-              className="mt-6 border-t border-border pt-5"
-            >
-              <h3
-                id="workflow-results-title"
-                className="mb-3 inline-flex items-center gap-2 font-display text-lg font-semibold"
-              >
-                <CheckCircle2 size={18} aria-hidden /> Completed practice checks
-              </h3>
-              <p className="mb-3 text-xs text-text-muted">
+            <details className="mt-6 border-t border-border pt-4">
+              <summary className="cursor-pointer rounded text-sm font-semibold text-text focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-4">
+                <span className="inline-flex items-center gap-2">
+                  <CheckCircle2 size={16} aria-hidden /> Completed practice checks{' '}
+                  <span className="font-normal text-text-muted">
+                    ({actions.latest_results.length})
+                  </span>
+                </span>
+              </summary>
+              <p className="my-3 text-xs text-text-muted">
                 These are recorded practice results, not a claim that the concept is mastered.
                 Showing the latest {actions.latest_results.length} results.
               </p>
@@ -458,7 +483,7 @@ export default function LearningWorkflows() {
                           className={`text-sm ${linkClass}`}
                           to={`/memory/${encodeURIComponent(result.id)}`}
                         >
-                          {result.title}
+                          {result.subject ? `${result.subject} practice result` : 'Practice result'}
                         </Link>
                         <ResultFacts result={result} />
                         {dueDate && (
@@ -486,7 +511,7 @@ export default function LearningWorkflows() {
                   );
                 })}
               </ul>
-            </section>
+            </details>
           )}
         </>
       )}

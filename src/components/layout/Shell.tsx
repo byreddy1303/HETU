@@ -1,5 +1,5 @@
 import { Suspense, useEffect, useState } from 'react';
-import { Outlet, useLocation } from 'react-router-dom';
+import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { motion, useReducedMotion } from 'motion/react';
 import { ChevronRight, PanelLeftOpen, Search } from 'lucide-react';
 import Nav from '@/components/layout/Nav';
@@ -46,6 +46,7 @@ const ROUTE_CONTEXT: Record<string, [string, string]> = {
 export default function Shell() {
   useSyncBootstrap();
   const { pathname } = useLocation();
+  const navigate = useNavigate();
   const reduceMotion = useReducedMotion();
   const navCollapsed = useUiStore((s) => s.navCollapsed);
   const setNavCollapsed = useUiStore((s) => s.setNavCollapsed);
@@ -76,6 +77,11 @@ export default function Shell() {
 
   const authUserId = useAuthStore((s) => s.user?.id);
   const isSandbox = useAuthStore((s) => s.sandbox);
+
+  useEffect(() => window.electronAPI?.onBriefNavigate((route) => {
+    void (authUserId ? flushAllDurableState(authUserId) : Promise.resolve())
+      .then(() => navigate(route));
+  }), [authUserId, navigate]);
 
   useEffect(() => {
     if (!authUserId || isSandbox) return;

@@ -6,36 +6,86 @@ import Workflows from '@/pages/Workflows';
 
 const apiRequest = vi.hoisted(() => vi.fn());
 vi.mock('@/lib/backend-config', () => ({ backendConfig: { fastapi: true } }));
-vi.mock('@/lib/fastapi-client', async (load) => ({ ...await load<typeof import('@/lib/fastapi-client')>(), apiRequest }));
+vi.mock('@/lib/fastapi-client', async (load) => ({
+  ...(await load<typeof import('@/lib/fastapi-client')>()),
+  apiRequest
+}));
 
 const brief = {
-  id: 'one', goal: 'Review the mock test', status: 'active', version: 1,
-  constraints: [], assumptions: [], corrections: [], references: [], pending_steps: ['Review evidence'],
-  completed_steps: [], success_criteria: [], receipts: [], updated_at: '2026-10-12T08:00:00Z'
+  id: 'one',
+  goal: 'Review the mock test',
+  status: 'active',
+  version: 1,
+  constraints: [],
+  assumptions: [],
+  corrections: [],
+  references: [],
+  pending_steps: ['Review evidence'],
+  completed_steps: [],
+  success_criteria: [],
+  receipts: [],
+  updated_at: '2026-10-12T08:00:00Z'
 };
 
-beforeEach(() => { apiRequest.mockReset(); });
+beforeEach(() => {
+  apiRequest.mockReset();
+});
 afterEach(cleanup);
 
 function renderWorkflows(path = '/workflows') {
-  return render(<MemoryRouter initialEntries={[path]}><Link to="/workflows/two">Next workflow</Link>
-    <Routes><Route path="/workflows/:workflowId?" element={<Workflows />} /></Routes>
-  </MemoryRouter>);
+  return render(
+    <MemoryRouter initialEntries={[path]}>
+      <Link to="/workflows/two">Next workflow</Link>
+      <Routes>
+        <Route path="/workflows/:workflowId?" element={<Workflows />} />
+      </Routes>
+    </MemoryRouter>
+  );
 }
 
 describe('workflow loading', () => {
+  it('keeps assistant briefs collapsed until requested and shows no empty detail panel', async () => {
+    apiRequest.mockResolvedValue([brief]);
+    const user = userEvent.setup();
+    renderWorkflows();
+    await waitFor(() => expect(screen.getByText('(1)')).toBeInTheDocument());
+    expect(screen.getByRole('link', { name: /Review the mock test/ })).not.toBeVisible();
+    expect(
+      screen.queryByText('Choose a workflow to see its current state.')
+    ).not.toBeInTheDocument();
+    await user.click(screen.getByText('Assistant task briefs'));
+    expect(screen.getByRole('link', { name: /Review the mock test/ })).toHaveAttribute(
+      'href',
+      '/workflows/one'
+    );
+  });
+
   it('shows loading and a retryable failure before showing a confirmed empty list', async () => {
     let fail!: (cause: Error) => void;
-    apiRequest.mockImplementationOnce(() => new Promise((_resolve, reject) => { fail = reject; }))
+    apiRequest
+      .mockImplementationOnce(
+        () =>
+          new Promise((_resolve, reject) => {
+            fail = reject;
+          })
+      )
       .mockResolvedValueOnce([]);
     const user = userEvent.setup();
     renderWorkflows();
-    expect(screen.getByRole('navigation', { name: 'Recent workflows' })).toHaveTextContent('Loading workflows…');
+    expect(screen.getByText('Assistant task briefs').closest('details')).not.toHaveAttribute(
+      'open'
+    );
+    await user.click(screen.getByText('Assistant task briefs'));
+    expect(screen.getByRole('navigation', { name: 'Recent workflows' })).toHaveTextContent(
+      'Loading workflows…'
+    );
     expect(screen.queryByText(/No saved task briefs yet/)).not.toBeInTheDocument();
     await act(async () => fail(new Error('Rate limit exceeded')));
     expect(screen.getByRole('alert')).toHaveTextContent('Rate limit exceeded');
     expect(screen.queryByText(/No saved task briefs yet/)).not.toBeInTheDocument();
-    expect(screen.queryByText('Choose a workflow to see its current state.')).not.toBeInTheDocument();
+    expect(
+      screen.queryByText('Choose a workflow to see its current state.')
+    ).not.toBeInTheDocument();
     await user.click(screen.getByRole('button', { name: 'Retry load' }));
     expect(await screen.findByText(/No saved task briefs yet/)).toBeInTheDocument();
     expect(screen.queryByRole('alert')).not.toBeInTheDocument();
@@ -52,7 +102,9 @@ describe('workflow loading', () => {
     const user = userEvent.setup();
     renderWorkflows('/workflows/one');
     expect(await screen.findByRole('alert')).toHaveTextContent('Workflow could not load');
-    expect(screen.queryByText('Choose a workflow to see its current state.')).not.toBeInTheDocument();
+    expect(
+      screen.queryByText('Choose a workflow to see its current state.')
+    ).not.toBeInTheDocument();
     expect(screen.queryByText(/No saved task briefs yet/)).not.toBeInTheDocument();
     failDetail = false;
     await user.click(screen.getByRole('button', { name: 'Retry load' }));
@@ -67,7 +119,9 @@ describe('workflow loading', () => {
       if (path.includes('?limit=')) return [brief];
       if (path.endsWith('/one')) {
         firstSignal = init?.signal as AbortSignal;
-        return new Promise<typeof brief>((resolve) => { finishFirst = resolve; });
+        return new Promise<typeof brief>((resolve) => {
+          finishFirst = resolve;
+        });
       }
       return { ...brief, id: 'two', goal: 'Review the next mock' };
     });
@@ -75,7 +129,9 @@ describe('workflow loading', () => {
     renderWorkflows('/workflows/one');
     await waitFor(() => expect(firstSignal).toBeDefined());
     await user.click(screen.getByRole('link', { name: 'Next workflow' }));
-    expect(await screen.findByRole('heading', { name: 'Review the next mock' })).toBeInTheDocument();
+    expect(
+      await screen.findByRole('heading', { name: 'Review the next mock' })
+    ).toBeInTheDocument();
     expect(firstSignal?.aborted).toBe(true);
     await act(async () => finishFirst(brief));
     expect(screen.queryByRole('heading', { name: brief.goal })).not.toBeInTheDocument();
@@ -98,7 +154,10 @@ describe('workflow loading', () => {
     let failed = false;
     apiRequest.mockImplementation(async (path: string, init?: RequestInit) => {
       if (init?.method === 'PATCH') {
-        if (!failed) { failed = true; throw new Error('Connection lost'); }
+        if (!failed) {
+          failed = true;
+          throw new Error('Connection lost');
+        }
         return { ...brief, version: 2 };
       }
       return path.includes('?limit=') ? [brief] : brief;
@@ -115,7 +174,10 @@ describe('workflow loading', () => {
     const writes = apiRequest.mock.calls.filter(([, init]) => init?.method === 'PATCH');
     expect(writes).toHaveLength(2);
     const first = JSON.parse(writes[0][1].body);
-    expect(first).toMatchObject({ expected_version: 1, correction: 'Focus on the missed concept.' });
+    expect(first).toMatchObject({
+      expected_version: 1,
+      correction: 'Focus on the missed concept.'
+    });
     expect(JSON.parse(writes[1][1].body).operation_id).toBe(first.operation_id);
   });
 
@@ -123,7 +185,10 @@ describe('workflow loading', () => {
     let committed = false;
     let failRefresh = true;
     apiRequest.mockImplementation(async (path: string, init?: RequestInit) => {
-      if (init?.method === 'PATCH') { committed = true; return { ...brief, version: 2 }; }
+      if (init?.method === 'PATCH') {
+        committed = true;
+        return { ...brief, version: 2 };
+      }
       if (committed && failRefresh) throw new Error('Refresh unavailable');
       return path.includes('?limit=') ? [brief] : { ...brief, version: committed ? 2 : 1 };
     });

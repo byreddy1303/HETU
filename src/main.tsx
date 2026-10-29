@@ -5,6 +5,7 @@ import { Capacitor } from '@capacitor/core';
 import { registerSW } from 'virtual:pwa-register';
 import App from '@/App';
 import AuthProvider from '@/components/auth/AuthProvider';
+import { backendConfig } from '@/lib/backend-config';
 import '@/index.css';
 import '@/energy-theme.css';
 
@@ -76,7 +77,7 @@ function configurePwaUpdates(): void {
   });
 }
 
-if (Capacitor.isNativePlatform()) {
+if (Capacitor.isNativePlatform() || backendConfig.isLocal) {
   void disableNativeServiceWorkers().catch(() => undefined);
 } else {
   configurePwaUpdates();

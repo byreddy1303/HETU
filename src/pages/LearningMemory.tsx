@@ -150,6 +150,7 @@ export default function LearningMemory() {
   return (
     <div className="min-w-0 space-y-5">
       <PageHeader
+        compact={backendConfig.isLocal}
         title="Learning Memory"
         description="Find your past work, continue a follow-up, or open a saved record."
       />

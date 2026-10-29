@@ -125,6 +125,7 @@ export default function Workflows() {
   return (
     <div className="flex flex-col gap-4">
       <PageHeader
+        compact={backendConfig.isLocal}
         title="Workflows"
         description="Focused practice, follow-up checks, and saved assistant tasks."
       />

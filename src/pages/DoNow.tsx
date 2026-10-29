@@ -33,7 +33,7 @@ export default function DoNow() {
   const { userId, profile, sandbox } = useAuth();
   if (backendConfig.isLocal && userId && !sandbox) return (
     <div className="workspace-today flex flex-col gap-4">
-      <PageHeader title="Do now" description="Continue saved work or start a manageable session from your due evidence." />
+      <PageHeader compact title="Do now" description="Continue saved work or start a manageable session from your due evidence." />
       <TodayActions key={userId} userId={userId} today={todayISOInTimeZone(profile?.timezone ?? 'Asia/Kolkata')} />
     </div>
   );

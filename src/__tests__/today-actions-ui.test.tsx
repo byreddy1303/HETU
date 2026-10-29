@@ -53,10 +53,10 @@ const concepts = {
   today: '2026-10-29',
   complete: true
 };
-function mount() {
+function mount(compact = false) {
   return render(
     <MemoryRouter>
-      <TodayActions userId="owner" today="2026-10-29" />
+      <TodayActions userId="owner" today="2026-10-29" compact={compact} />
     </MemoryRouter>
   );
 }
@@ -82,7 +82,7 @@ describe('local daily queue states and launch', () => {
     mount();
     await screen.findByRole('heading', { name: 'Memory Management recall' });
     expect(screen.queryByText(/The queue is clear/)).not.toBeInTheDocument();
-    fireEvent.click(screen.getByRole('button', { name: 'Start next action' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Start recall' }));
     expect(fixture.navigate).toHaveBeenCalledWith('/concept-review/recall');
   });
 
@@ -145,9 +145,9 @@ describe('local daily queue states and launch', () => {
     mount();
     await screen.findByRole('heading', { name: 'Retrieve 1 due question' });
     expect(screen.getByText(/About 9 minutes/)).toBeInTheDocument();
-    fireEvent.click(screen.getByRole('button', { name: 'Start next action' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Start retrieval' }));
     expect(await screen.findByRole('alert')).toHaveTextContent('Selection changed');
-    fireEvent.click(screen.getByRole('button', { name: 'Start next action' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Start retrieval' }));
     await waitFor(() =>
       expect(fixture.navigate).toHaveBeenCalledWith('/reattempts?recoverySession=saved')
     );
@@ -165,6 +165,33 @@ describe('local daily queue states and launch', () => {
       JSON.stringify([[['one', null]], null])
     ]);
     expect(vi.mocked(recoveryKey).mock.calls[0]).toEqual(vi.mocked(recoveryKey).mock.calls[1]);
+  });
+
+  it('summarises actual due reviews rather than sprint buckets and reveals the reason on demand', async () => {
+    vi.mocked(apiRequest).mockImplementation(async (path) =>
+      path.includes('concept-bridge')
+        ? { ...concepts, items: [] }
+        : path.includes('/v1/recovery')
+          ? {
+              complete: true,
+              forecast: [{ date: '2026-10-29', itemCount: 7 }],
+              sprint: {
+                selected: [{ item: { id: 'one' } }, { item: { id: 'two' } }],
+                estimatedSeconds: 540,
+                deferredCount: 5
+              }
+            }
+          : { items: [], total: 0, has_more: false }
+    );
+    mount(true);
+    await screen.findByRole('heading', { name: 'Retrieve 2 due questions' });
+    expect(screen.getByText('7 due reviews')).toBeVisible();
+    const reason = screen.getByText(/5 other items stay scheduled/);
+    expect(reason.closest('details')).not.toHaveAttribute('open');
+    expect(reason).not.toBeVisible();
+    fireEvent.click(screen.getByText('Why this?'));
+    expect(reason).toBeVisible();
+    expect(screen.getByRole('button', { name: 'Start retrieval' })).toBeVisible();
   });
 
   it('does not claim clear when cached study records failed to refresh', async () => {

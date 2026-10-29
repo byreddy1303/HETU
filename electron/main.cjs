@@ -3,6 +3,7 @@ const path = require('node:path');
 const fs = require('node:fs');
 const { BACKEND_PORT, getLocalDataDir, getBackendDir, getLocalEnvironment, getPythonRuntime, launchBackend } = require('./runtime.cjs');
 const { createDailyBrief } = require('./daily-brief.cjs');
+const { prepareDesktopRenderer } = require('./desktop-renderer.cjs');
 
 // Preserve the existing profile and SQLite location when productName is capitalized.
 app.setName('hetu');
@@ -60,6 +61,9 @@ async function createWindow(route = '/') {
   });
   mainWindow.webContents.session.setPermissionRequestHandler((_webContents, _permission, callback) => callback(false));
   mainWindow.on('closed', () => { mainWindow = null; });
+  if (targetUrl === appUrl) {
+    await prepareDesktopRenderer(mainWindow.webContents.session, targetUrl);
+  }
   await mainWindow.loadURL(new URL(route, targetUrl).href);
 }
 

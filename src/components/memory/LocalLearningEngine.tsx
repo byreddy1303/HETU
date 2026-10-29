@@ -15,6 +15,7 @@ import {
   type LocalLearningEngineStatus
 } from '@/lib/local-learning-engine';
 import { todayISOInTimeZone } from '@/lib/utils';
+import { getMemoryRepairData, memoryString } from '@/lib/study-memory';
 
 const emptyActions: LocalLearningActions = { items: [], latest_results: [] };
 
@@ -158,33 +159,58 @@ export default function LocalLearningEngine({
       if (mounted.current) setBusy('');
     }
   }
-  const ready = compact ? actions.items.slice(0, 3) : actions.items;
   const today = todayISOInTimeZone(timeZone);
+  const scheduled = actions.items
+    .filter(
+      (entry) =>
+        !memoryString(entry.data, 'active_session_id') &&
+        (getMemoryRepairData(entry).due_date || today) > today
+    )
+    .sort(
+      (a, b) =>
+        getMemoryRepairData(a).due_date!.localeCompare(getMemoryRepairData(b).due_date!) ||
+        a.created_at.localeCompare(b.created_at) ||
+        a.id.localeCompare(b.id)
+    );
+  const ready = actions.items
+    .filter(
+      (entry) =>
+        memoryString(entry.data, 'active_session_id') ||
+        (getMemoryRepairData(entry).due_date || today) <= today
+    )
+    .sort(
+      (a, b) =>
+        Number(Boolean(memoryString(b.data, 'active_session_id'))) -
+          Number(Boolean(memoryString(a.data, 'active_session_id'))) ||
+        (getMemoryRepairData(a).due_date || today).localeCompare(
+          getMemoryRepairData(b).due_date || today
+        ) ||
+        a.created_at.localeCompare(b.created_at) ||
+        a.id.localeCompare(b.id)
+    );
+  const recommended = ready[0];
+  const other = ready.slice(1);
+  const problem =
+    error ||
+    (status?.state === 'error'
+      ? status.last_error || 'The local model could not finish. Check the connection in Settings.'
+      : '');
   useEffect(() => {
     onActionCountChange?.(actions.items.length);
   }, [actions.items.length, onActionCountChange]);
-  if (compact && !loading && !error && !config?.enabled && !ready.length) return null;
+  if (compact && !loading && !problem && !config?.enabled && !actions.items.length) return null;
 
   return (
     <section
       aria-label="Automatic learning follow-ups"
       className="min-w-0 rounded-lg border border-border bg-bg-raised p-4 sm:p-6"
     >
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h2 className="font-display text-xl font-semibold">Prepared practice</h2>
-          <p className="mt-1 text-sm text-text-muted">
-            Choose an activity. Earlier answers stay hidden until you practise.
+      <div className="flex flex-wrap items-baseline justify-between gap-2">
+        <h2 className="font-display text-xl font-semibold">Prepared practice</h2>
+        {!loading && !error && (
+          <p className="text-xs text-text-muted">
+            {ready.length} ready now{scheduled.length ? ` · ${scheduled.length} scheduled` : ''}
           </p>
-        </div>
-        {config && (
-          <span className="text-xs text-text-muted">
-            {running
-              ? 'Preparing activities…'
-              : config.enabled
-                ? 'Automatic follow-ups on'
-                : 'Automatic follow-ups paused'}
-          </span>
         )}
       </div>
       {loading && (
@@ -192,45 +218,80 @@ export default function LocalLearningEngine({
           Loading prepared practice…
         </p>
       )}
-      {error && (
+      {problem && (
         <div
           role="alert"
           className="mt-4 rounded border border-danger/30 bg-danger-faint p-3 text-sm text-danger"
         >
-          <p>{error}</p>
-          <Button size="sm" className="mt-2" onClick={() => setRetry((value) => value + 1)}>
-            Retry learning engine
-          </Button>
+          <p>{problem}</p>
+          <div className="mt-2 flex flex-wrap items-center gap-3">
+            <Button
+              size="sm"
+              disabled={Boolean(busy)}
+              onClick={() => setRetry((value) => value + 1)}
+            >
+              Retry learning engine
+            </Button>
+            <Link className="font-medium underline underline-offset-2" to="/settings">
+              Open Settings
+            </Link>
+          </div>
         </div>
       )}
-      {!loading && !error && ready.length > 0 && (
-        <ul className="mt-3 divide-y divide-border" aria-label="Prepared activities">
-          {ready.map((entry) => (
-            <LocalLearningActionCard
-              key={entry.id}
-              entry={entry}
-              today={today}
-              timeZone={timeZone}
-            />
-          ))}
+      {!loading && !error && recommended && (
+        <ul className="mt-2" aria-label="Recommended practice">
+          <LocalLearningActionCard
+            key={recommended.id}
+            entry={recommended}
+            today={today}
+            timeZone={timeZone}
+          />
         </ul>
       )}
-      {!loading && !error && !ready.length && (
+      {!loading && !error && !recommended && (
         <p className="mt-4 max-w-prose text-sm leading-relaxed text-text-muted">
-          {running
-            ? 'Your saved work is being checked. Prepared activities appear here when the check finishes.'
-            : !config?.model
-              ? 'Connect an installed local model in Settings to prepare practice from your saved work.'
-              : 'No prepared activity is waiting. Process saved learning to check for follow-ups.'}
+          {scheduled[0]
+            ? `Your next check is scheduled for ${dateLabel(getMemoryRepairData(scheduled[0]).due_date, timeZone)}.`
+            : running
+              ? 'Your saved work is being checked. Activities will appear when ready.'
+              : !config?.model
+                ? 'Connect an installed local model in Settings to prepare practice.'
+                : 'No prepared activity is waiting.'}
         </p>
       )}
-      {compact && actions.items.length > ready.length && (
-        <Link
-          className="mt-3 inline-block text-sm text-accent underline underline-offset-2"
-          to="/memory?view=followups"
-        >
-          See all {actions.items.length} activities
-        </Link>
+      {!loading && !error && other.length > 0 && (
+        <details className="mt-3 border-t border-border pt-3 text-sm">
+          <summary className="w-fit cursor-pointer rounded py-1 font-medium focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent">
+            Other activities ({other.length})
+          </summary>
+          <ul className="mt-2 divide-y divide-border" aria-label="Other prepared activities">
+            {other.map((entry) => (
+              <LocalLearningActionCard
+                key={entry.id}
+                entry={entry}
+                today={today}
+                timeZone={timeZone}
+              />
+            ))}
+          </ul>
+        </details>
+      )}
+      {!loading && !error && scheduled.length > 0 && (
+        <details className="mt-3 border-t border-border pt-3 text-sm">
+          <summary className="w-fit cursor-pointer rounded py-1 font-medium focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent">
+            Scheduled checks ({scheduled.length})
+          </summary>
+          <ul className="mt-2 divide-y divide-border" aria-label="Scheduled practice">
+            {scheduled.map((entry) => (
+              <LocalLearningActionCard
+                key={entry.id}
+                entry={entry}
+                today={today}
+                timeZone={timeZone}
+              />
+            ))}
+          </ul>
+        </details>
       )}
       {actions.latest_results.length > 0 && (
         <details className="mt-4 border-t border-border pt-3 text-sm">
@@ -238,7 +299,7 @@ export default function LocalLearningEngine({
             Recent results ({actions.latest_results.length})
           </summary>
           <ul className="mt-2 divide-y divide-border">
-            {actions.latest_results.slice(0, 3).map((result) => (
+            {actions.latest_results.map((result) => (
               <li
                 key={result.id}
                 className="flex flex-wrap items-center justify-between gap-2 py-3"
@@ -257,46 +318,58 @@ export default function LocalLearningEngine({
           </ul>
         </details>
       )}
-      <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-border pt-3">
-        <Button
-          size="sm"
-          disabled={Boolean(busy) || running || !config?.model.trim() || !config.enabled}
-          onClick={() =>
-            void perform('run', async () => {
-              const next = await runLocalLearningEngine();
-              if (!mounted.current) return;
-              setStatus(next);
-              setPollExpired(false);
-              if (next.state !== 'running') {
-                await refreshStatus();
-                changed.current?.();
-              }
-            })
-          }
-        >
-          {busy === 'run' ? 'Starting…' : 'Process saved learning'}
-        </Button>
-        <Button
-          size="sm"
-          variant="ghost"
-          disabled={Boolean(busy)}
-          onClick={() => void perform('refresh', refreshStatus)}
-        >
-          {busy === 'refresh' ? 'Refreshing…' : 'Refresh status'}
-        </Button>
-        <Link
-          className="ml-auto py-2 text-sm text-accent underline underline-offset-2"
-          to="/settings"
-        >
-          Local model settings
-        </Link>
-      </div>
-      {status && (
-        <details className="mt-2 text-xs text-text-muted">
-          <summary className="w-fit cursor-pointer rounded py-1 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent">
-            Processing status
-          </summary>
-          <div className="mt-2 max-w-prose space-y-1 leading-relaxed" aria-live="polite">
+      <details className="mt-4 border-t border-border pt-3 text-sm">
+        <summary className="w-fit cursor-pointer rounded py-1 font-medium text-text-muted focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent">
+          Automatic preparation
+        </summary>
+        {config && (
+          <p className="mt-3 text-xs text-text-muted">
+            {running
+              ? 'Preparing activities…'
+              : config.enabled
+                ? 'Automatic follow-ups on'
+                : 'Automatic follow-ups paused'}
+          </p>
+        )}
+        <div className="mt-3 flex flex-wrap items-center gap-2">
+          <Button
+            size="sm"
+            disabled={Boolean(busy) || running || !config?.model.trim() || !config.enabled}
+            onClick={() =>
+              void perform('run', async () => {
+                const next = await runLocalLearningEngine();
+                if (!mounted.current) return;
+                setStatus(next);
+                setPollExpired(false);
+                if (next.state !== 'running') {
+                  await refreshStatus();
+                  changed.current?.();
+                }
+              })
+            }
+          >
+            {busy === 'run' ? 'Starting…' : 'Process saved learning'}
+          </Button>
+          <Button
+            size="sm"
+            variant="ghost"
+            disabled={Boolean(busy)}
+            onClick={() => void perform('refresh', refreshStatus)}
+          >
+            {busy === 'refresh' ? 'Refreshing…' : 'Refresh status'}
+          </Button>
+          <Link
+            className="ml-auto py-2 text-sm text-accent underline underline-offset-2"
+            to="/settings"
+          >
+            Local model settings
+          </Link>
+        </div>
+        {status && (
+          <div
+            className="mt-3 max-w-prose space-y-1 text-xs leading-relaxed text-text-muted"
+            aria-live="polite"
+          >
             <p>{status.message || 'The learning engine is ready.'}</p>
             {status.last_run_at && (
               <p>
@@ -305,14 +378,8 @@ export default function LocalLearningEngine({
               </p>
             )}
           </div>
-        </details>
-      )}
-      {status?.state === 'error' && (
-        <p role="alert" className="mt-2 text-sm text-danger">
-          {status.last_error ||
-            'The local model could not finish. Check the connection in Settings.'}
-        </p>
-      )}
+        )}
+      </details>
       {pollExpired && (
         <p className="mt-2 text-sm text-text-muted">
           The check is still running. Refresh status to check again.

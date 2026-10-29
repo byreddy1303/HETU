@@ -27,6 +27,7 @@ export interface TodayAction {
 
 export interface TodayRecoveryOverview {
   complete: boolean;
+  forecast?: { date: string; itemCount: number }[];
   sprint: {
     selected: {
       item: {

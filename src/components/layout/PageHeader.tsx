@@ -23,12 +23,14 @@ export default function PageHeader({
   description,
   actions,
   showMobileMark = false,
+  compact = false,
   className
 }: {
   title: string;
   description?: ReactNode;
   actions?: ReactNode;
   showMobileMark?: boolean;
+  compact?: boolean;
   className?: string;
 }) {
   const context = getWorkspaceContext(title);
@@ -72,6 +74,26 @@ export default function PageHeader({
     headerRef.current?.style.removeProperty('--light-x');
   }
 
+  if (compact)
+    return (
+      <header
+        className={cn(
+          'flex min-w-0 flex-wrap items-center justify-between gap-3 border-b border-border pb-4',
+          className
+        )}
+      >
+        <div className="min-w-0">
+          <h1 className="font-display text-2xl font-semibold tracking-tight text-text">{title}</h1>
+          {description && (
+            <p className="mt-1 max-w-[65ch] text-sm leading-relaxed text-text-muted">
+              {description}
+            </p>
+          )}
+        </div>
+        {actions && <div className="flex flex-wrap gap-2">{actions}</div>}
+      </header>
+    );
+
   return (
     <header
       ref={headerRef}
@@ -86,10 +108,10 @@ export default function PageHeader({
         <h1 className="font-display font-bold tracking-tight text-text">{title}</h1>
         {description && <p className="workspace-page-header__description">{description}</p>}
         {(showMobileMark || actions) && (
-        <div className="workspace-page-header__actions">
-          {showMobileMark && <BrandMark className="page-header-brand-mark h-9 w-9 md:hidden" />}
-          {actions}
-        </div>
+          <div className="workspace-page-header__actions">
+            {showMobileMark && <BrandMark className="page-header-brand-mark h-9 w-9 md:hidden" />}
+            {actions}
+          </div>
         )}
       </div>
       <div className="workspace-page-header__scene" aria-hidden="true">
@@ -106,7 +128,10 @@ export default function PageHeader({
           className="workspace-page-header__motion"
           aria-label={paused ? 'Resume ambient motion' : 'Pause ambient motion'}
           aria-pressed={paused}
-          onClick={() => { resetScene(); setPaused((value) => !value); }}
+          onClick={() => {
+            resetScene();
+            setPaused((value) => !value);
+          }}
         >
           {paused ? <Play size={11} aria-hidden /> : <Pause size={11} aria-hidden />}
           <span>Motion {paused ? 'off' : 'on'}</span>

@@ -287,7 +287,11 @@ export default function ConceptReview() {
 
   return (
     <div className="flex flex-col gap-4">
-      <PageHeader title="Concept review" description="Recall the idea, then check your answer." />
+      <PageHeader
+        compact={backendConfig.isLocal}
+        title="Concept review"
+        description="Recall the idea, then check your answer."
+      />
       {backendConfig.fastapi && (queueMeta.held_for_exam || queueMeta.held_sources > 0) && (
         <div className="space-y-1 rounded border border-border px-4 py-3 text-sm text-text-muted">
           {queueMeta.held_for_exam && (

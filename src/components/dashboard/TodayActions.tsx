@@ -32,6 +32,24 @@ const actionLabels: Record<TodayAction['kind'], string> = {
   evidence: 'From your saved work'
 };
 
+function actionButton(action: TodayAction) {
+  if (action.kind === 'resume')
+    return action.id.startsWith('resume-recovery:')
+      ? 'Resume retrieval'
+      : action.title.includes('exam')
+        ? 'Resume exam'
+        : 'Resume practice';
+  return (
+    {
+      planned: 'Start planned work',
+      recovery: 'Start retrieval',
+      concept: 'Start recall',
+      repair: 'Start practice',
+      evidence: 'Open activity'
+    } as const
+  )[action.kind];
+}
+
 interface Snapshot {
   ownerId: string;
   budget: TodayBudget;
@@ -198,6 +216,8 @@ export default function TodayActions({
       : null;
   const pending = loading || hydrating || !rows || !state;
   const first = queue?.fitting[0];
+  const dueReviews = state?.recovery?.forecast?.find((day) => day.date === today)?.itemCount;
+  const otherCount = (queue?.actions.length ?? 0) - (first ? 1 : 0);
   const clear =
     !pending &&
     !syncError &&
@@ -315,9 +335,11 @@ export default function TodayActions({
       {!pending && first && (
         <div className="grid gap-4 rounded-lg border border-accent/25 bg-accent-faint/30 p-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center sm:p-5">
           <div className="min-w-0 space-y-2">
-            <p className="text-xs font-medium text-accent">{actionLabels[first.kind]}</p>
             <h3 className="font-display text-xl font-semibold leading-snug">{first.title}</h3>
-            <p className="max-w-[65ch] text-sm leading-relaxed text-text-muted">{first.reason}</p>
+            <details className="max-w-[65ch] text-xs text-text-muted">
+              <summary className="w-fit cursor-pointer py-1">Why this?</summary>
+              <p className="mt-1 leading-relaxed">{first.reason}</p>
+            </details>
             {first.estimatedMin !== null && (
               <p className="text-xs text-text-muted">
                 About {first.estimatedMin} minutes · estimate
@@ -330,11 +352,7 @@ export default function TodayActions({
             disabled={Boolean(busy)}
             onClick={() => void start(first)}
           >
-            {busy === first.id
-              ? 'Checking saved action…'
-              : first.kind === 'resume'
-                ? 'Resume next action'
-                : 'Start next action'}
+            {busy === first.id ? 'Checking saved action…' : actionButton(first)}
             <ArrowRight size={14} aria-hidden />
           </Button>
         </div>
@@ -361,17 +379,20 @@ export default function TodayActions({
         queue.actions.length > 0 &&
         (compact ? (
           <div
-            className="flex flex-wrap gap-x-5 gap-y-2 text-xs text-text-muted"
+            className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-text-muted"
             aria-label="Saved work in this queue"
           >
-            {Object.entries(actionLabels).map(([kind, label]) => {
-              const count = queue.actions.filter((action) => action.kind === kind).length;
-              return count ? (
-                <p key={kind}>
-                  <strong className="font-semibold text-text">{count}</strong> {label.toLowerCase()}
-                </p>
-              ) : null;
-            })}
+            {typeof dueReviews === 'number' && dueReviews > 0 && (
+              <p>
+                {state?.recovery?.complete ? '' : 'At least '}
+                {dueReviews} due reviews
+              </p>
+            )}
+            {otherCount > 0 && (
+              <Link to="/today" className="text-accent underline underline-offset-4">
+                {otherCount} other {otherCount === 1 ? 'activity' : 'activities'}
+              </Link>
+            )}
           </div>
         ) : (
           queue.actions.some((action) => action.id !== first?.id) && (
@@ -410,7 +431,7 @@ export default function TodayActions({
                               disabled={Boolean(busy)}
                               onClick={() => void start(action)}
                             >
-                              Open action
+                              {actionButton(action)}
                             </Button>
                           </li>
                         ))}
@@ -431,18 +452,20 @@ export default function TodayActions({
         >
           <RefreshCw size={14} aria-hidden /> Refresh queue
         </Button>
-        <Link
-          to="/planner"
-          className="text-text-muted underline decoration-border underline-offset-4 hover:text-accent"
-        >
-          Inspect today’s Planner
-        </Link>
-        <Link
-          to="/workflows"
-          className="text-text-muted underline decoration-border underline-offset-4 hover:text-accent"
-        >
-          All activities and future checks
-        </Link>
+        <details className="ml-auto">
+          <summary className="cursor-pointer py-2 text-text-muted">Study tools</summary>
+          <nav aria-label="More study tools" className="flex flex-wrap gap-x-4 gap-y-2 py-2">
+            <Link to="/planner" className="text-accent underline">
+              Today’s Planner
+            </Link>
+            <Link to="/workflows" className="text-accent underline">
+              Activities and future checks
+            </Link>
+            <Link to="/concept-review" className="text-accent underline">
+              Concept reviews
+            </Link>
+          </nav>
+        </details>
       </div>
     </section>
   );

@@ -16,6 +16,7 @@ import { useAuthStore } from '@/stores/auth';
 import { flushAllDurableState } from '@/lib/durability';
 import { resumeSync } from '@/lib/sync';
 import { reloadAccountState } from '@/lib/account-state';
+import { backendConfig } from '@/lib/backend-config';
 import './workspace-shell.css';
 
 const ROUTE_CONTEXT: Record<string, [string, string]> = {
@@ -55,6 +56,8 @@ export default function Shell() {
   const [category, section] = ROUTE_CONTEXT[`/${pathname.split('/')[1]}`] ?? ['Workspace', 'Study'];
   const focusedSession =
     /\/session\/[^/]+\/solve$/.test(pathname) || /\/mocks\/[^/]+\/take$/.test(pathname);
+  const minimalStudy =
+    backendConfig.isLocal && /^\/(today|memory|workflows|concept-review)(\/|$)/.test(pathname);
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -65,7 +68,12 @@ export default function Shell() {
         return;
       }
       const target = event.target as HTMLElement | null;
-      if (target && typeof target.closest === 'function' && target.closest('input, textarea, select, [contenteditable="true"], dialog')) return;
+      if (
+        target &&
+        typeof target.closest === 'function' &&
+        target.closest('input, textarea, select, [contenteditable="true"], dialog')
+      )
+        return;
       if (event.key.toLowerCase() === 'b') {
         event.preventDefault();
         toggleNavCollapsed();
@@ -78,10 +86,15 @@ export default function Shell() {
   const authUserId = useAuthStore((s) => s.user?.id);
   const isSandbox = useAuthStore((s) => s.sandbox);
 
-  useEffect(() => window.electronAPI?.onBriefNavigate((route) => {
-    void (authUserId ? flushAllDurableState(authUserId) : Promise.resolve())
-      .then(() => navigate(route));
-  }), [authUserId, navigate]);
+  useEffect(
+    () =>
+      window.electronAPI?.onBriefNavigate((route) => {
+        void (authUserId ? flushAllDurableState(authUserId) : Promise.resolve()).then(() =>
+          navigate(route)
+        );
+      }),
+    [authUserId, navigate]
+  );
 
   useEffect(() => {
     if (!authUserId || isSandbox) return;
@@ -175,7 +188,10 @@ export default function Shell() {
           >
             <Suspense
               fallback={
-                <div className="flex min-h-[40vh] items-center justify-center py-12" aria-busy="true">
+                <div
+                  className="flex min-h-[40vh] items-center justify-center py-12"
+                  aria-busy="true"
+                >
                   <div className="text-center">
                     <Brand size="md" className="justify-center opacity-70" />
                     <p className="u-label mt-3 text-xs">Loading section...</p>
@@ -185,11 +201,11 @@ export default function Shell() {
             >
               <Outlet />
             </Suspense>
-            {pathname === '/' || focusedSession ? null : (
+            {pathname === '/' || focusedSession || minimalStudy ? null : (
               <ContextualGateTip pathname={pathname} className="mt-4" />
             )}
           </motion.div>
-          {pathname === '/' || focusedSession ? null : <DailyQuote />}
+          {pathname === '/' || focusedSession || minimalStudy ? null : <DailyQuote />}
         </div>
       </main>
       <MobileTabs />

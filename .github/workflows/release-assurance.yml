@@ -48,8 +48,6 @@ jobs:
         working-directory: backends/python
     env:
       ENVIRONMENT: test
-      DATABASE_URL: sqlite+aiosqlite:///${{ runner.temp }}/hetu-ci.db
-      HETU_DATA_DIR: ${{ runner.temp }}/hetu-ci-workspace
       # PostgreSQL checks run separately in Data safety against its disposable service.
       HETU_TEST_DATABASE_URL: ''
       HETU_BACKUP_TEST_DATABASE_URL: ''
@@ -62,4 +60,7 @@ jobs:
           cache-dependency-path: backends/python/requirements*.txt
       - run: pip install -r requirements-dev.txt
       - name: Verify SQLite workflows, recovery, restart, and backup with disposable fixtures
+        env:
+          DATABASE_URL: sqlite+aiosqlite:///${{ runner.temp }}/hetu-ci.db
+          HETU_DATA_DIR: ${{ runner.temp }}/hetu-ci-workspace
         run: pytest

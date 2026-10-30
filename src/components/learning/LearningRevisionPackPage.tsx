@@ -1,3 +1,4 @@
+import MathText from '@/components/shared/MathText';
 import { useEffect, useRef, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { Check, Clipboard, Printer, Save } from 'lucide-react';
@@ -319,7 +320,7 @@ function ConnectedRevisionPack() {
               <CardHeader title="This week’s constraint" />
               <CardBody>
                 <p className="font-display text-[20px] font-semibold">
-                  {sections.weekly_focus.this_weeks_fix}
+                  <MathText>{sections.weekly_focus.this_weeks_fix}</MathText>
                 </p>
                 <a href={sections.weekly_focus.url} className="library-text-button">
                   Open weekly review
@@ -356,7 +357,8 @@ function ConnectedRevisionPack() {
                 title={`Due formulas · ${sections.due_formulas.length}`}
                 rows={sections.due_formulas.map((row) => ({
                   id: row.id,
-                  text: `${row.subject}: ${row.name} — ${row.expression}`,
+                  text: `${row.subject}: ${row.name}`,
+                  expression: row.expression || undefined,
                   url: row.url,
                   label: 'Open formulas'
                 }))}
@@ -441,12 +443,12 @@ function ConceptSheet({ concept }: { concept: PackConcept }) {
   return (
     <article className="border-b border-border pb-5 last:border-0 last:pb-0">
       <p className="text-[12px] text-text-faint">
-        {concept.subject} / {concept.topic}
+        <MathText>{`${concept.subject} / ${concept.topic}`}</MathText>
         {concept.due_review ? ' · Recall due' : ''}
       </p>
-      <h3 className="mt-1 font-display text-[18px] font-semibold">{concept.concept}</h3>
+      <h3 className="mt-1 font-display text-[18px] font-semibold"><MathText>{concept.concept}</MathText></h3>
       <p className="mt-2 whitespace-pre-wrap text-[13px] leading-relaxed text-text">
-        {concept.summary}
+        <MathText>{concept.summary}</MathText>
       </p>
       {concept.reasoning_correction && (
         <div className="mt-3 rounded-md bg-surface px-3 py-2">
@@ -454,14 +456,14 @@ function ConceptSheet({ concept }: { concept: PackConcept }) {
             {originLabels[concept.reasoning_origin] || 'Reasoning correction'}
           </p>
           <p className="whitespace-pre-wrap text-[13px] text-text-muted">
-            {concept.reasoning_correction}
+            <MathText>{concept.reasoning_correction}</MathText>
           </p>
         </div>
       )}
       {!!concept.recognition_cues.length && (
         <ul className="mt-3 list-inside list-disc text-[12px] text-text-muted">
           {concept.recognition_cues.map((cue) => (
-            <li key={cue}>{cue}</li>
+            <li key={cue}><MathText>{cue}</MathText></li>
           ))}
         </ul>
       )}
@@ -473,15 +475,15 @@ function ConceptSheet({ concept }: { concept: PackConcept }) {
       {concept.retrieval_question && (
         <p className="mt-3 text-[13px] text-text-muted">
           <strong>Recall question: </strong>
-          {concept.retrieval_question}
+          <MathText>{concept.retrieval_question}</MathText>
         </p>
       )}
       {!!concept.evidence_links.length && (
         <ul className="mt-3 grid gap-2 text-[12px] text-text-muted">
           {concept.evidence_links.map((link) => (
             <li key={link.link_id}>
-              <strong>{link.record?.title || 'Linked evidence is unavailable'}</strong>
-              <p>{link.rationale}</p>
+              <strong><MathText>{link.record?.title || 'Linked evidence is unavailable'}</MathText></strong>
+              <p><MathText>{link.rationale}</MathText></p>
               {link.record && (
                 <Link to={link.record.section_path} className="library-text-button">
                   Open {link.record.section}
@@ -501,10 +503,10 @@ function ConceptSheet({ concept }: { concept: PackConcept }) {
               Source:{' '}
               {source.url ? (
                 <a href={source.url} target="_blank" rel="noreferrer" className="underline">
-                  {source.title}
+                  <MathText>{source.title}</MathText>
                 </a>
               ) : (
-                source.title
+                <MathText>{source.title}</MathText>
               )}
               {capture.captured_at ? ` · ${formatDate(capture.captured_at, 'dd MMM yyyy')}` : ''}
             </li>
@@ -532,7 +534,7 @@ function PackList({
   empty
 }: {
   title: string;
-  rows: { id: string; text: string; url?: string; label?: string; detail?: string }[];
+  rows: { id: string; text: string; expression?: string; url?: string; label?: string; detail?: string }[];
   empty: string;
 }) {
   return (
@@ -542,8 +544,9 @@ function PackList({
         <ul className="divide-y divide-border">
           {rows.map((row) => (
             <li key={row.id} className="px-4 py-3 text-[12px] leading-relaxed text-text-muted">
-              <p className="whitespace-pre-wrap">{row.text}</p>
-              {row.detail && <p className="text-[11px] text-text-faint">{row.detail}</p>}
+              <p className="whitespace-pre-wrap"><MathText>{row.text}</MathText></p>
+              {row.expression && <MathText display math className="mt-1">{row.expression}</MathText>}
+              {row.detail && <p className="text-[11px] text-text-faint"><MathText>{row.detail}</MathText></p>}
               {row.url && (
                 <a href={row.url} className="library-text-button mt-1 inline-block">
                   {row.label || 'Open evidence'}

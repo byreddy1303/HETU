@@ -80,6 +80,38 @@ describe('connected study history', () => {
       true
     );
   });
+  it('typesets source snippets and selected explanations without changing saved evidence', async () => {
+    const mathEvent = { ...event, excerpt: String.raw`For $\alpha \leq n^2$, use $\frac{a}{b}$.` };
+    vi.mocked(apiRequest).mockImplementation(async (path) =>
+      String(path).includes('/history?')
+        ? { ...page, items: [mathEvent] }
+        : {
+            event: mathEvent,
+            evidence: { content: String.raw`Result: \(\sqrt{x}\neq\infty\)` },
+            linked_memory: [],
+            sources: [],
+            related_truncated: false,
+            evidence_truncated: false
+          }
+    );
+    const { container } = mount();
+    const row = (await screen.findByText('Graph condition')).closest('button')!;
+    expect(row.querySelectorAll('.katex')).toHaveLength(2);
+    expect(row.querySelector('.mfrac')).not.toBeNull();
+    fireEvent.click(row);
+    await waitFor(() =>
+      expect(
+        screen.getByRole('article', { name: 'Selected history record' }).querySelector('.katex')
+      ).not.toBeNull()
+    );
+    expect(container.querySelector('.katex-error')).toBeNull();
+    expect(
+      vi
+        .mocked(apiRequest)
+        .mock.calls.every(([, options]) => !options?.method || options.method === 'GET')
+    ).toBe(true);
+  });
+
   it('offers an explicit retry after a source-index failure', async () => {
     vi.mocked(apiRequest).mockRejectedValueOnce(new Error('Database unavailable'));
     mount();

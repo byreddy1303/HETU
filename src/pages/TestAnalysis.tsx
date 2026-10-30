@@ -1,3 +1,4 @@
+import MathText from '@/components/shared/MathText';
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { ArrowLeft, BookOpen, ClipboardList, RotateCcw } from 'lucide-react';
@@ -91,7 +92,7 @@ function ConnectedTestAnalysis({ analysisId }: { analysisId: string }) {
         description={`Test review from ${formatDate(report.test_date, 'dd MMM yyyy')}`}
       />
       <div className="border-l-4 border-accent py-2 pl-5">
-        <p className="max-w-prose text-[16px] leading-relaxed">{report.summary}</p>
+        <p className="max-w-prose text-[16px] leading-relaxed"><MathText>{report.summary}</MathText></p>
         {mock && (
           <p className="mt-3 text-[13px] text-text-muted">
             Score {mock.total_marks}/{mock.max_marks} · {mock.correct} correct · {mock.wrong} wrong
@@ -130,7 +131,7 @@ function ConnectedTestAnalysis({ analysisId }: { analysisId: string }) {
           <CardBody>
             <ul className="list-disc space-y-2 pl-5 text-[13px] text-text-muted">
               {[...report.missing_information, ...report.unresolved].map((item, index) => (
-                <li key={`${index}:${item}`}>{item}</li>
+                <li key={`${index}:${item}`}><MathText>{item}</MathText></li>
               ))}
             </ul>
           </CardBody>
@@ -143,7 +144,7 @@ function ConnectedTestAnalysis({ analysisId }: { analysisId: string }) {
             <CardHeader title="Test analysis" />
             <CardBody>
               <p className="max-w-prose whitespace-pre-wrap break-words text-[14px] leading-7">
-                {report.full_analysis}
+                <MathText>{report.full_analysis}</MathText>
               </p>
             </CardBody>
           </Card>
@@ -188,14 +189,14 @@ function ConnectedTestAnalysis({ analysisId }: { analysisId: string }) {
                         rel="noreferrer"
                         className="text-[13px] font-medium text-accent"
                       >
-                        {source.title}
+                        <MathText>{source.title}</MathText>
                       </a>
                     ) : (
-                      <p className="text-[13px] font-medium">{source.title}</p>
+                      <p className="text-[13px] font-medium"><MathText>{source.title}</MathText></p>
                     )}
                     {source.excerpt && (
                       <p className="mt-2 whitespace-pre-wrap break-words text-[12px] leading-relaxed text-text-muted">
-                        {source.excerpt}
+                        <MathText>{source.excerpt}</MathText>
                       </p>
                     )}
                   </li>
@@ -211,7 +212,7 @@ function ConnectedTestAnalysis({ analysisId }: { analysisId: string }) {
               {report.next_steps.length ? (
                 <ol className="list-decimal space-y-3 pl-5 text-[14px] leading-relaxed">
                   {report.next_steps.map((step, index) => (
-                    <li key={`${index}:${step}`}>{step}</li>
+                    <li key={`${index}:${step}`}><MathText>{step}</MathText></li>
                   ))}
                 </ol>
               ) : (
@@ -247,7 +248,7 @@ function ConnectedTestAnalysis({ analysisId }: { analysisId: string }) {
                     {reviews.map((item) => (
                       <li key={item.id}>
                         <Link className="text-accent" to={`/concept-review/${item.id}`}>
-                          {item.prompt}
+                          <MathText>{item.prompt || ''}</MathText>
                         </Link>
                         {item.due_on && (
                           <span className="block text-[11px] text-text-faint">
@@ -271,17 +272,17 @@ function ConnectedTestAnalysis({ analysisId }: { analysisId: string }) {
                   to={`/learning-library/${item.id}`}
                   className="text-[14px] font-semibold text-accent"
                 >
-                  {item.concept}
+                  <MathText>{item.concept || ''}</MathText>
                 </Link>
                 <p className="mt-1 text-[12px] text-text-faint">
-                  {item.subject} / {item.topic}
+                  <MathText>{[item.subject, item.topic].filter(Boolean).join(' / ')}</MathText>
                 </p>
                 <details className="mt-2 text-[13px]">
                   <summary className="cursor-pointer text-text-muted">
                     Read the saved explanation
                   </summary>
                   <p className="mt-2 whitespace-pre-wrap break-words leading-relaxed">
-                    {item.full_explanation}
+                    <MathText>{item.full_explanation || ''}</MathText>
                   </p>
                 </details>
               </>
@@ -293,10 +294,10 @@ function ConnectedTestAnalysis({ analysisId }: { analysisId: string }) {
             empty="No formulas were captured."
             render={(item) => (
               <>
-                <p className="text-[14px] font-medium">{item.name}</p>
-                <p className="mt-2 whitespace-pre-wrap break-words font-mono text-[12px] leading-relaxed">
-                  {item.expression}
-                </p>
+                <p className="text-[14px] font-medium"><MathText>{item.name || ''}</MathText></p>
+                <MathText display math className="mt-2 text-[13px] leading-relaxed">
+                  {item.expression || ''}
+                </MathText>
               </>
             )}
           />
@@ -306,9 +307,9 @@ function ConnectedTestAnalysis({ analysisId }: { analysisId: string }) {
             empty="No recognition cues were captured."
             render={(item) => (
               <>
-                <p className="text-[14px] font-medium">When you see: {item.phrase}</p>
+                <p className="text-[14px] font-medium">When you see: <MathText>{item.phrase || ''}</MathText></p>
                 <p className="mt-2 whitespace-pre-wrap break-words text-[13px] text-text-muted">
-                  Think: {item.concept}
+                  Think: <MathText>{item.concept || ''}</MathText>
                 </p>
               </>
             )}

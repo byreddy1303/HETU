@@ -147,6 +147,25 @@ describe('Python revision pack', () => {
     );
   });
 
+  it('typesets a saved explanation and the bare expressions in due formulas', async () => {
+    const preview = pack();
+    preview.sections.saved_concepts[0].summary = String.raw`Normalize with $\sum_i w_i$.`;
+    preview.sections.due_formulas = [{
+      id: 'formula-one', version: 1, url: '/formulas', subject: 'Probability',
+      name: 'Normalized weight', expression: String.raw`\frac{w_i}{\sum_j w_j}`
+    }];
+    apiRequest.mockImplementation(async (path: string) =>
+      path.startsWith('/v1/revision-pack?')
+        ? preview
+        : { items: [], next_offset: null, complete: true }
+    );
+    const view = render(<MemoryRouter><RevisionPack /></MemoryRouter>);
+    await screen.findByText('Probability: Normalized weight');
+    expect([...view.container.querySelectorAll('annotation')].map((node) => node.textContent))
+      .toEqual(expect.arrayContaining([String.raw`\sum_i w_i`, String.raw`\frac{w_i}{\sum_j w_j}`]));
+    expect(screen.getByRole('link', { name: 'Open formulas' })).toHaveAttribute('href', '/formulas');
+  });
+
   it('refreshes changed evidence before another save instead of silently overwriting', async () => {
     let generation = 0;
     apiRequest.mockImplementation(async (path: string) => {

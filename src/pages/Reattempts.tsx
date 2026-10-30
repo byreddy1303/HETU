@@ -108,6 +108,7 @@ import Timer from '@/components/shared/Timer';
 import { Card, CardBody, CardHeader } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
+import MathText from '@/components/shared/MathText';
 import { Empty } from '@/components/ui/Empty';
 import { Textarea } from '@/components/ui/Textarea';
 import '@/reattempt.css';
@@ -338,7 +339,7 @@ function QueueCard({
             <span className="u-label">Pattern to revisit</span>
             <span className="reattempt-pattern mt-1 block font-display text-[18px] font-semibold leading-snug text-text">
               {question?.pattern_name ? (
-                <span className="u-highlight">{question.pattern_name}</span>
+                <MathText className="u-highlight">{question.pattern_name}</MathText>
               ) : (
                 'Untitled mistake'
               )}
@@ -582,7 +583,7 @@ function PyqAnswerHistory({
                 <div key={attempt.id}>
                   <dt className="u-label">Attempt {number} answer</dt>
                   <dd className="mt-0.5 font-mono font-semibold text-text">
-                    {savedAttemptAnswer(attempt)}
+                    <MathText>{savedAttemptAnswer(attempt)}</MathText>
                   </dd>
                   {attempt.confidence && (
                     <dd className="mt-1 text-[11px] capitalize text-text-faint">
@@ -594,7 +595,7 @@ function PyqAnswerHistory({
             <div>
               <dt className="u-label">Actual answer</dt>
               <dd className="mt-0.5 font-mono font-semibold text-text">
-                {formatAttemptAnswer(currentAttempt.correct_answer)}
+                <MathText>{formatAttemptAnswer(currentAttempt.correct_answer)}</MathText>
               </dd>
             </div>
           </dl>
@@ -643,25 +644,27 @@ function LoggedQuestionAnswerHistory({
         <div>
           <dt className="u-label">Attempt {row.history.length + 2} answer</dt>
           <dd className="mt-0.5 font-mono font-semibold text-text">
-            {formatDecisionAnswer(selectedAnswer, decision)}
+            <MathText>{formatDecisionAnswer(selectedAnswer, decision)}</MathText>
           </dd>
         </div>
         {recordedAttempts.map(({ entry, number }) => (
           <div key={`${number}-${entry.date}`}>
             <dt className="u-label">Attempt {number} answer</dt>
             <dd className="mt-0.5 font-mono font-semibold text-text">
-              {formatDecisionAnswer(entry.selectedAnswer ?? null, entry.markDecision)}
+              <MathText>
+                {formatDecisionAnswer(entry.selectedAnswer ?? null, entry.markDecision)}
+              </MathText>
             </dd>
           </div>
         ))}
         <div>
           <dt className="u-label">Attempt 1 answer</dt>
-          <dd className="mt-0.5 font-mono font-semibold text-text">{firstAttemptAnswer}</dd>
+          <dd className="mt-0.5 font-mono font-semibold text-text"><MathText>{firstAttemptAnswer}</MathText></dd>
         </div>
         <div>
           <dt className="u-label">Actual answer</dt>
           <dd className="mt-0.5 whitespace-pre-wrap font-semibold text-text">
-            {question.answer_text?.trim() || 'Not saved in the original log'}
+            <MathText>{question.answer_text?.trim() || 'Not saved in the original log'}</MathText>
           </dd>
         </div>
       </dl>
@@ -725,27 +728,33 @@ function RecoveryRevealedContext({
         <div>
           <dt className="u-label">Your answer</dt>
           <dd className="mt-0.5 whitespace-pre-wrap font-mono font-semibold text-text">
-            {answer == null ? "I don't know" : formatAttemptAnswer(answer)}
+            <MathText>{answer == null ? "I don't know" : formatAttemptAnswer(answer)}</MathText>
           </dd>
         </div>
         <div>
           <dt className="u-label">Actual answer</dt>
           <dd className="mt-0.5 whitespace-pre-wrap font-semibold text-text">
-            {correctAnswer == null || String(correctAnswer).trim() === ''
-              ? 'No checkable answer was stored'
-              : formatAttemptAnswer(correctAnswer)}
+            <MathText>
+              {correctAnswer == null || String(correctAnswer).trim() === ''
+                ? 'No checkable answer was stored'
+                : formatAttemptAnswer(correctAnswer)}
+            </MathText>
           </dd>
         </div>
         {question?.pattern_name ? (
           <div>
             <dt className="u-label">Pattern</dt>
-            <dd className="u-highlight mt-0.5 font-semibold text-text">{question.pattern_name}</dd>
+            <dd className="u-highlight mt-0.5 font-semibold text-text">
+              <MathText>{question.pattern_name}</MathText>
+            </dd>
           </div>
         ) : null}
         {question?.trigger_sentence ? (
           <div>
             <dt className="u-label">Opening trigger</dt>
-            <dd className="mt-0.5 text-text">{question.trigger_sentence}</dd>
+            <dd className="mt-0.5 text-text">
+              <MathText>{question.trigger_sentence}</MathText>
+            </dd>
           </div>
         ) : null}
         {question ? (
@@ -803,7 +812,9 @@ function RecoveryResultPanel({
           <Badge key={reason}>{reason}</Badge>
         ))}
       </div>
-      <p className="mt-3 text-[13px] leading-relaxed text-text-muted">{feedback.explanation}</p>
+      <MathText display className="mt-3 text-[13px] leading-relaxed text-text-muted">
+        {feedback.explanation}
+      </MathText>
       <div className="mt-4">
         <RecoveryRevealedContext
           question={question}
@@ -1005,7 +1016,7 @@ function CanonicalRecoverySession({
           </p>
           <p className="mt-1 text-[13px] font-semibold text-text">
             {item.subject}
-            {item.topic ? ` · ${item.topic}` : ''}
+            {item.topic ? <> · <MathText>{item.topic}</MathText></> : ''}
           </p>
         </div>
         <RecoveryRemediationPanel
@@ -1329,9 +1340,11 @@ function CanonicalRecoverySession({
           title={
             <span className="flex items-center gap-2">
               <BrainCircuit size={16} className="text-accent" />
-              {pyqQuestion
-                ? `${pyqQuestion.paperLabel} · Q ${pyqQuestion.number}`
-                : (question?.source_ref ?? 'Blind retrieval')}
+              <MathText>
+                {pyqQuestion
+                  ? `${pyqQuestion.paperLabel} · Q ${pyqQuestion.number}`
+                  : (question?.source_ref ?? 'Blind retrieval')}
+              </MathText>
             </span>
           }
           aside={
@@ -1372,7 +1385,9 @@ function CanonicalRecoverySession({
               {cueRevealed ? (
                 <div>
                   <p className="u-label">Opening cue revealed · grade capped at Hard</p>
-                  <p className="mt-1 text-[13px] font-medium text-text">{openingCue}</p>
+                  <p className="mt-1 text-[13px] font-medium text-text">
+                    <MathText>{openingCue}</MathText>
+                  </p>
                 </div>
               ) : (
                 <div className="flex flex-wrap items-center justify-between gap-3">
@@ -2077,7 +2092,7 @@ function ReattemptSession({
           title={
             <span className="flex items-center gap-2">
               <BookOpen size={15} className="text-accent" />
-              <span>{question?.source_ref ?? 'Question to re-solve'}</span>
+              <MathText>{question?.source_ref ?? 'Question to re-solve'}</MathText>
             </span>
           }
           aside={
@@ -2099,14 +2114,16 @@ function ReattemptSession({
                 <div>
                   <p className="u-label">Pattern to revisit</p>
                   <p className="u-highlight mt-1 text-[13px] font-medium text-text">
-                    {question.pattern_name}
+                    <MathText>{question.pattern_name}</MathText>
                   </p>
                 </div>
               ) : null}
               {question?.trigger_sentence ? (
                 <div>
                   <p className="u-label">Opening trigger</p>
-                  <p className="mt-1 text-[13px] text-text">{question.trigger_sentence}</p>
+                  <p className="mt-1 text-[13px] text-text">
+                    <MathText>{question.trigger_sentence}</MathText>
+                  </p>
                 </div>
               ) : null}
             </div>
@@ -3107,7 +3124,7 @@ export default function Reattempts() {
     }
     if (activeRecoveryItem.source_kind === 'concept' && activeRecoveryItem.source_review_id) {
       return <div className="mx-auto flex w-full max-w-3xl flex-col gap-4">
-        <PageHeader title="Saved discussion recall" description={`${activeRecoveryItem.subject} · ${activeRecoveryItem.topic ?? 'Concept review'}`} />
+        <PageHeader title="Saved discussion recall" description={<MathText>{`${activeRecoveryItem.subject} · ${activeRecoveryItem.topic ?? 'Concept review'}`}</MathText>} />
         <Card><CardBody className="space-y-4">
           <p className="text-sm text-text-muted">Continue this question from memory. Your answer, assessment, and any guidance received will be saved with the discussion and this recovery sprint.</p>
           <Link className="inline-block rounded-lg bg-accent px-4 py-2 font-semibold text-accent-contrast"
@@ -3395,7 +3412,7 @@ export default function Reattempts() {
                       <div>
                         <p className="text-[12.5px] font-semibold text-text">
                           {candidate.item.subject}
-                          {candidate.item.topic ? ` · ${candidate.item.topic}` : ''}
+                          {candidate.item.topic ? <> · <MathText>{candidate.item.topic}</MathText></> : ''}
                         </p>
                         <div className="mt-2 flex flex-wrap gap-1.5" aria-label="Priority reasons">
                           {candidate.reasons.map((reason) => (

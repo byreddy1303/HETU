@@ -235,6 +235,32 @@ describe('discussion recall evidence', () => {
     });
   });
 
+  it('typesets a recall prompt and keeps mathematical guidance hidden until help is recorded', async () => {
+    const prompt = String.raw`Explain $\frac{a}{b}$.`;
+    const guidance = String.raw`Use $\sqrt{x}$.`;
+    let finishHelp!: (value: unknown) => void;
+    apiRequest.mockImplementation(async (path: string) => {
+      if (path.includes('?limit=')) return queue();
+      if (path.endsWith('/help')) return new Promise((resolve) => { finishHelp = resolve; });
+      return { ...review, prompt, evaluation_guidance: guidance };
+    });
+    const user = userEvent.setup();
+    const view = renderReview();
+    await waitFor(() => expect(view.container.querySelector('h2 .katex')).toBeInTheDocument());
+    expect(view.container.querySelector('annotation')?.textContent).toBe(String.raw`\frac{a}{b}`);
+    expect(view.container.textContent).not.toContain(String.raw`\sqrt{x}`);
+    await user.click(screen.getByRole('button', { name: 'Show evaluation guidance' }));
+    expect(view.container.textContent).not.toContain(String.raw`\sqrt{x}`);
+    await act(async () => finishHelp({
+      review: { ...review, version: 2, prompt, evaluation_guidance: guidance },
+      events: []
+    }));
+    await waitFor(() => expect(view.container.querySelectorAll('.katex')).toHaveLength(2));
+    expect([...view.container.querySelectorAll('annotation')].map((node) => node.textContent))
+      .toContain(String.raw`\sqrt{x}`);
+    expect(screen.getByLabelText('Your answer')).toHaveValue('');
+  });
+
   it('resets answer and assistance when moving to a different discussion question', async () => {
     apiRequest.mockImplementation(async (path: string) =>
       path.includes('?limit=')

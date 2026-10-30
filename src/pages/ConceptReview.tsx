@@ -1,3 +1,4 @@
+import MathText from '@/components/shared/MathText';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
 import PageHeader from '@/components/layout/PageHeader';
@@ -390,11 +391,11 @@ export default function ConceptReview() {
                       >
                         <span className="min-w-0">
                           <strong className="block text-sm font-semibold">
-                            {queueLabel(item)}
+                            <MathText>{queueLabel(item)}</MathText>
                           </strong>{' '}
                           <span className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-xs text-text-muted">
                             {item.concept?.subject && item.concept.topic && (
-                              <span>{item.concept.subject}</span>
+                              <span><MathText>{item.concept.subject}</MathText></span>
                             )}{' '}
                             <span>{item.kind === 'transfer' ? 'Application' : 'Recall'}</span>{' '}
                             <time dateTime={item.due_on}>Due {formatDate(item.due_on)}</time>
@@ -460,7 +461,7 @@ export default function ConceptReview() {
                         {review.kind} ·{' '}
                         {review.source ? 'Prepared from study evidence' : review.question_origin}
                       </span>
-                      <h2 className="mt-2 text-xl font-bold">{review.prompt}</h2>
+                      <h2 className="mt-2 text-xl font-bold"><MathText>{review.prompt}</MathText></h2>
                       <Link
                         to={`/learning-library/${review.concept_id}`}
                         className="mt-2 inline-block text-sm font-semibold text-accent"
@@ -508,7 +509,7 @@ export default function ConceptReview() {
                         </button>
                         {revealed && (
                           <p className="mt-2 whitespace-pre-wrap rounded-lg bg-accent-faint p-3 text-sm leading-relaxed">
-                            {review.evaluation_guidance}
+                            <MathText>{review.evaluation_guidance || ''}</MathText>
                           </p>
                         )}
                       </div>
@@ -549,7 +550,7 @@ export default function ConceptReview() {
                     </button>
                     {review.recovery_evidence && (
                       <p className="text-sm text-text-muted">
-                        {review.recovery_evidence.explanation} Next due: {review.due_on}.
+                        <MathText>{review.recovery_evidence.explanation}</MathText> Next due: {review.due_on}.
                       </p>
                     )}
                     {recoverySessionId && (
@@ -572,7 +573,7 @@ export default function ConceptReview() {
                                 key={attempt.attempt_id}
                                 className="rounded-lg border border-border p-3 text-sm"
                               >
-                                <p className="whitespace-pre-wrap">{attempt.answer}</p>
+                                <p className="whitespace-pre-wrap"><MathText>{attempt.answer}</MathText></p>
                                 <small className="mt-2 block text-text-muted">
                                   {attempt.evaluation} · {attempt.evaluated_by} ·{' '}
                                   {attempt.assistance === 'none' ? 'unaided' : attempt.assistance} ·{' '}

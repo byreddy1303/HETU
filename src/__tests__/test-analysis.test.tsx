@@ -163,7 +163,7 @@ describe('saved test handoff', () => {
       'href',
       '/reattempts/retry-one'
     );
-    expect(screen.getByText('log2(64)')).toBeInTheDocument();
+    expect(screen.getByText('log2(64)').closest('.katex')).toBeInTheDocument();
     expect(screen.getByText('Confirm the duration.')).toBeInTheDocument();
     expect(apiRequest).toHaveBeenCalledTimes(1);
     expect(screen.queryByText('Six offset bits.')).not.toBeInTheDocument();
@@ -176,6 +176,19 @@ describe('saved test handoff', () => {
     await user.click(screen.getByRole('button', { name: 'Show answer' }));
     expect(screen.getByText('Six offset bits.')).toBeInTheDocument();
     await user.click(screen.getByRole('button', { name: 'Hide answer' }));
+    expect(screen.queryByText('Six offset bits.')).not.toBeInTheDocument();
+  });
+
+  it('typesets captured discussion math and bare formula expressions', async () => {
+    const saved = detail();
+    saved.report.summary = String.raw`Use $\log_2 n$ for the bit count.`;
+    saved.artifacts.formulas[0].expression = String.raw`\frac{a}{b}`;
+    apiRequest.mockResolvedValue(saved);
+    const view = render(page());
+    await screen.findByRole('heading', { name: 'COA test 2' });
+    expect([...view.container.querySelectorAll('annotation')].map((node) => node.textContent))
+      .toEqual(expect.arrayContaining([String.raw`\log_2 n`, String.raw`\frac{a}{b}`]));
+    expect(view.container.querySelectorAll('.katex')).toHaveLength(2);
     expect(screen.queryByText('Six offset bits.')).not.toBeInTheDocument();
   });
 

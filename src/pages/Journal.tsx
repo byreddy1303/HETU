@@ -33,6 +33,7 @@ import PageHeader from '@/components/layout/PageHeader';
 import { Card, CardBody } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
+import MathText from '@/components/shared/MathText';
 import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
 import { Empty } from '@/components/ui/Empty';
@@ -169,7 +170,11 @@ function Row({
           className="hidden max-w-[180px] px-3 py-2 text-[12px] text-text-muted sm:table-cell"
         >
           <span className="truncate">
-            {q.subtopic ?? <span className="text-text-faint">—</span>}
+            {q.subtopic ? (
+              <MathText>{q.subtopic}</MathText>
+            ) : (
+              <span className="text-text-faint">—</span>
+            )}
           </span>
         </td>
         <td data-label="Outcome" className="hidden px-3 py-2 sm:table-cell">
@@ -186,7 +191,11 @@ function Row({
         </td>
         <td data-label="Pattern" data-mobile-wide className="min-w-0 max-w-[280px] px-3 py-2">
           <span className="truncate text-[13px]">
-            {q.pattern_name ?? <span className="text-text-faint">no pattern</span>}
+            {q.pattern_name ? (
+              <MathText>{q.pattern_name}</MathText>
+            ) : (
+              <span className="text-text-faint">no pattern</span>
+            )}
           </span>
         </td>
         <td data-label="Photo" className="w-[52px] px-3 py-2">
@@ -253,7 +262,7 @@ function Row({
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
                 <Detail label="trigger">
                   {q.trigger_sentence ? (
-                    <span className="u-highlight">{q.trigger_sentence}</span>
+                    <MathText className="u-highlight">{q.trigger_sentence}</MathText>
                   ) : (
                     <span className="text-text-faint">—</span>
                   )}
@@ -267,7 +276,7 @@ function Row({
                 </Detail>
                 {q.capture_note && (
                   <Detail label="quick note">
-                    <span className="whitespace-pre-wrap">{q.capture_note}</span>
+                    <MathText className="whitespace-pre-wrap">{q.capture_note}</MathText>
                   </Detail>
                 )}
                 <Detail label="time vs target">
@@ -279,7 +288,7 @@ function Row({
                 <Detail label="source">
                   {q.source_ref || q.image_url ? (
                     <div className="flex flex-col gap-1.5">
-                      {q.source_ref && <span>{q.source_ref}</span>}
+                      {q.source_ref && <MathText>{q.source_ref}</MathText>}
                       {q.image_url && (
                         <button
                           type="button"

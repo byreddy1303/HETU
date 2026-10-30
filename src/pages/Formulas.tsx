@@ -1,3 +1,4 @@
+import MathText from '@/components/shared/MathText';
 import { useMemo, useState } from 'react';
 import { useLiveQuery } from '@/lib/db-hooks';
 import { Plus, RotateCcw, Trash2 } from 'lucide-react';
@@ -152,6 +153,14 @@ export default function Formulas() {
               Add
             </Button>
           </form>
+          {expression.trim() && (
+            <div
+              aria-label="Formula preview"
+              className="mt-3 min-w-0 border-t border-border pt-3 text-sm"
+            >
+              <MathText math>{expression}</MathText>
+            </div>
+          )}
         </CardBody>
       </Card>
 
@@ -231,10 +240,12 @@ function FormulaReviewRow({
     <li className="flex flex-wrap items-center gap-3 px-4 py-3 text-[13px]">
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-baseline gap-2">
-          <span className="font-display font-semibold text-text">{row.name}</span>
-          <code className="max-w-full break-words rounded bg-bg-overlay px-1.5 py-0.5 font-mono text-[12px] text-accent">
+          <span className="font-display font-semibold text-text">
+            <MathText>{row.name}</MathText>
+          </span>
+          <MathText math className="max-w-full rounded bg-bg-overlay px-2 py-1 text-sm text-accent">
             {row.expression}
-          </code>
+          </MathText>
         </div>
         <p className="text-[11.5px] text-text-faint">
           due {formatDate(row.next_review, 'dd MMM')} ·{' '}
@@ -295,13 +306,23 @@ function FormulaLibraryRow({ row, onDelete }: { row: FormulaRow; onDelete: () =>
               placeholder="Expression"
               className="font-mono"
             />
+            {expression.trim() && (
+              <MathText math className="sm:col-span-2">
+                {expression}
+              </MathText>
+            )}
           </div>
         ) : (
           <div className="flex flex-wrap items-baseline gap-2">
-            <span className="font-display font-semibold text-text">{row.name}</span>
-            <code className="max-w-full break-words rounded bg-bg-overlay px-1.5 py-0.5 font-mono text-[12px] text-accent">
+            <span className="font-display font-semibold text-text">
+              <MathText>{row.name}</MathText>
+            </span>
+            <MathText
+              math
+              className="max-w-full rounded bg-bg-overlay px-2 py-1 text-sm text-accent"
+            >
               {row.expression}
-            </code>
+            </MathText>
             {row.forgot_count > 0 && <Badge tone="warn">{row.forgot_count} forgot</Badge>}
           </div>
         )}

@@ -1,3 +1,4 @@
+import MathText from '@/components/shared/MathText';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, RefreshCw } from 'lucide-react';
@@ -98,8 +99,8 @@ function ConnectedTestAnalyses() {
                     {formatDate(item.test_date, 'dd MMM yyyy')} · {item.question_count} captured{' '}
                     {item.question_count === 1 ? 'question' : 'questions'}
                   </p>
-                  <p className="mt-1 font-semibold">{item.name}</p>
-                  <p className="mt-1 line-clamp-2 text-[13px] text-text-muted">{item.summary}</p>
+                  <p className="mt-1 font-semibold"><MathText>{item.name}</MathText></p>
+                  <p className="mt-1 line-clamp-2 text-[13px] text-text-muted"><MathText>{item.summary}</MathText></p>
                   {item.missing_information.length > 0 && (
                     <p className="mt-2 text-[12px] text-warn">
                       {item.missing_information.length}{' '}

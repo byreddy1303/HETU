@@ -1,3 +1,4 @@
+import MathText from '@/components/shared/MathText';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, BookOpenText, ChevronRight, Search, Save } from 'lucide-react';
@@ -73,7 +74,7 @@ function DetailList({ label, values }: { label: string; values?: string[] }) {
   return values?.length ? (
     <section className="library-detail-list">
       <h4>{label}</h4>
-      <ul>{values.map((value, index) => <li key={`${index}-${value}`}>{value}</li>)}</ul>
+      <ul>{values.map((value, index) => <li key={`${index}-${value}`}><MathText>{value}</MathText></li>)}</ul>
     </section>
   ) : null;
 }
@@ -260,7 +261,7 @@ export default function LearningLibrary() {
           {!complete && <p className="library-note">More records exist than this search could inspect. Narrow the query.</p>}
           {results.length ? <ul className="library-index-list">{results.map((item) => <li key={item.id}>
             <Link to={`/learning-library/${item.id}`} className={item.id === conceptId ? 'is-selected' : undefined}>
-              <span>{item.subject} / {item.topic}</span><strong>{item.concept}</strong><small>{item.summary}</small>
+              <span><MathText>{`${item.subject} / ${item.topic}`}</MathText></span><strong><MathText>{item.concept}</MathText></strong><small><MathText>{item.summary}</MathText></small>
             </Link>
           </li>)}</ul> : !loading && <p className="library-note">No saved concepts match. Add an insight or try another search.</p>}
           {nextOffset !== null && <button className="library-more" onClick={() => void loadList(submittedQuery, nextOffset)}>Load more</button>}
@@ -268,24 +269,24 @@ export default function LearningLibrary() {
         <main className="library-reading-desk">
           {conceptId && detail ? <>
             <Link className="library-back" to="/learning-library"><ArrowLeft size={14} aria-hidden /> All concepts</Link>
-            <div className="library-path">{detail.page.subject} <ChevronRight size={13} aria-hidden /> {detail.page.topic}</div>
-            <h2>{detail.page.concept}</h2>
-            <p className="library-recall">{detail.page.summary}</p>
+            <div className="library-path"><MathText>{detail.page.subject}</MathText> <ChevronRight size={13} aria-hidden /> <MathText>{detail.page.topic}</MathText></div>
+            <h2><MathText>{detail.page.concept}</MathText></h2>
+            <p className="library-recall"><MathText>{detail.page.summary}</MathText></p>
             {!detail.complete && <p className="library-note">Some linked sources or insights could not be retrieved.</p>}
             {detail.insights.map((insight) => <article className="library-insight" key={insight.id}>
-              <h3>{insight.core_idea}</h3>
-              <p className="library-rich-text">{insight.full_explanation}</p>
-              {insight.prior_reasoning && <section className="library-reasoning"><h4>Earlier reasoning</h4><p>{insight.prior_reasoning}</p><span>{insight.reasoning_origin === 'learner_stated' ? 'Stated by you' : insight.reasoning_origin === 'assistant_hypothesis' ? 'Possible explanation' : 'General pitfall'}</span></section>}
-              {insight.reasoning_correction && <section className="library-reasoning"><h4>What changed</h4><p>{insight.reasoning_correction}</p></section>}
-              {insight.better_method && <section className="library-reasoning"><h4>Better method</h4><p>{insight.better_method}</p></section>}
-              {insight.intuition && <section className="library-reasoning"><h4>Intuition</h4><p>{insight.intuition}</p></section>}
-              {insight.derivation && <section className="library-reasoning"><h4>Derivation</h4><p className="library-rich-text">{insight.derivation}</p></section>}
+              <h3><MathText>{insight.core_idea}</MathText></h3>
+              <p className="library-rich-text"><MathText>{insight.full_explanation}</MathText></p>
+              {insight.prior_reasoning && <section className="library-reasoning"><h4>Earlier reasoning</h4><p><MathText>{insight.prior_reasoning}</MathText></p><span>{insight.reasoning_origin === 'learner_stated' ? 'Stated by you' : insight.reasoning_origin === 'assistant_hypothesis' ? 'Possible explanation' : 'General pitfall'}</span></section>}
+              {insight.reasoning_correction && <section className="library-reasoning"><h4>What changed</h4><p><MathText>{insight.reasoning_correction}</MathText></p></section>}
+              {insight.better_method && <section className="library-reasoning"><h4>Better method</h4><p><MathText>{insight.better_method}</MathText></p></section>}
+              {insight.intuition && <section className="library-reasoning"><h4>Intuition</h4><p><MathText>{insight.intuition}</MathText></p></section>}
+              {insight.derivation && <section className="library-reasoning"><h4>Derivation</h4><p className="library-rich-text"><MathText>{insight.derivation}</MathText></p></section>}
               <DetailList label="Conditions" values={insight.conditions} />
               <DetailList label="Exceptions" values={insight.exceptions} />
               <DetailList label="Examples" values={insight.examples} />
               <DetailList label="Recognition cues" values={insight.recognition_cues} />
               <DetailList label="Still open" values={insight.unresolved_questions} />
-              {insight.retrieval_question && <div className="library-retrieval"><strong>Check your recall</strong><p>{insight.retrieval_question}</p><button className="library-text-button" onClick={() => void createRecall(insight)}>Practice and record an answer</button></div>}
+              {insight.retrieval_question && <div className="library-retrieval"><strong>Check your recall</strong><p><MathText>{insight.retrieval_question}</MathText></p><button className="library-text-button" onClick={() => void createRecall(insight)}>Practice and record an answer</button></div>}
               {editing === insight.id ? <div className="library-edit">
                 <label>Full explanation<textarea rows={8} value={editText} onChange={(event) => setEditText(event.target.value)} /></label>
                 <label>Reason for revision<input value={editReason} onChange={(event) => setEditReason(event.target.value)} placeholder="What improved or changed?" /></label>
@@ -294,7 +295,7 @@ export default function LearningLibrary() {
             </article>)}
             <section className="library-provenance"><h3>Sources</h3>{detail.sources.map((capture) => capture.sources.map((source, index) => {
               const href = safeSourceHref(source.url);
-            return <div key={`${capture.id}-${index}`} className="library-source"><strong>{source.title}</strong><span>{source.kind} / saved {new Date(capture.captured_at).toLocaleDateString()}</span>{href && <a href={href} target="_blank" rel="noreferrer">Open source</a>}{source.excerpt && <p>{source.excerpt}</p>}</div>;
+            return <div key={`${capture.id}-${index}`} className="library-source"><strong><MathText>{source.title}</MathText></strong><span>{source.kind} / saved {new Date(capture.captured_at).toLocaleDateString()}</span>{href && <a href={href} target="_blank" rel="noreferrer">Open source</a>}{source.excerpt && <p><MathText>{source.excerpt}</MathText></p>}</div>;
             }))}</section>
             <StudyEvidenceLinks
               key={detail.page.id}
@@ -312,10 +313,10 @@ export default function LearningLibrary() {
             {showHistory && <div className="library-history">
               <p>Topic page: {detail.page_history?.map((item) => `v${item.version}`).join(', ')}</p>
               {detail.insights.map((insight) => <details key={insight.id}>
-                <summary>{insight.core_idea} — {detail.insight_history?.[insight.id]?.length ?? 0} versions</summary>
+                <summary><MathText>{insight.core_idea}</MathText> — {detail.insight_history?.[insight.id]?.length ?? 0} versions</summary>
                 {detail.insight_history?.[insight.id]?.map((item) => <div key={item.version}>
-                  <strong>Version {item.version}</strong> {item.revision_reason && <span>{item.revision_reason}</span>}
-                  <p>{item.full_explanation}</p>
+                  <strong>Version {item.version}</strong> {item.revision_reason && <span><MathText>{item.revision_reason}</MathText></span>}
+                  <p><MathText>{item.full_explanation || ''}</MathText></p>
                 </div>)}
               </details>)}
             </div>}

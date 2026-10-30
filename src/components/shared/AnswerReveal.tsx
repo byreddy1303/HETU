@@ -2,6 +2,7 @@ import { useId, useState } from 'react';
 import { Eye, EyeOff, KeyRound, Plus } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/Button';
+import MathText from '@/components/shared/MathText';
 
 export default function AnswerReveal({
   answer,
@@ -97,14 +98,15 @@ export default function AnswerReveal({
           aria-label="Saved answer"
           className={cn('border-t border-ink-teal/20 px-4 py-3', compact && 'px-3 py-2')}
         >
-          <p
+          <MathText
+            display
             className={cn(
               'whitespace-pre-wrap text-[13.5px] leading-[1.75] text-text',
               compact && 'text-[12.5px]'
             )}
           >
             {savedAnswer}
-          </p>
+          </MathText>
         </div>
       ) : null}
     </section>

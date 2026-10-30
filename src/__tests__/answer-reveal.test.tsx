@@ -16,6 +16,33 @@ describe('AnswerReveal', () => {
     expect(screen.queryByText('Use inclusion-exclusion: 42.')).not.toBeInTheDocument();
   });
 
+  it('typesets math only after revealing and conceals it when the saved answer changes', async () => {
+    const user = userEvent.setup();
+    const { container, rerender } = render(
+      <AnswerReveal answer={String.raw`Use $\frac{1}{2}$ of the total.`} />
+    );
+
+    expect(container.querySelector('math')).toBeNull();
+    expect(container.textContent).not.toContain('of the total');
+    await user.click(screen.getByRole('button', { name: 'Show answer' }));
+
+    const revealed = screen.getByRole('region', { name: 'Saved answer' });
+    expect(revealed.querySelector('math')).not.toBeNull();
+    expect(revealed).toHaveTextContent('of the total.');
+    expect(revealed.textContent).not.toContain('$');
+
+    rerender(<AnswerReveal answer={String.raw`Now use $\sqrt{3}$.`} />);
+    expect(screen.queryByRole('region', { name: 'Saved answer' })).not.toBeInTheDocument();
+    expect(container.querySelector('math')).toBeNull();
+
+    await user.click(screen.getByRole('button', { name: 'Show answer' }));
+    expect(
+      screen.getByRole('region', { name: 'Saved answer' }).querySelector('math')
+    ).not.toBeNull();
+    await user.click(screen.getByRole('button', { name: 'Hide answer' }));
+    expect(container.querySelector('math')).toBeNull();
+  });
+
   it('offers an add action when no answer was recorded', async () => {
     const user = userEvent.setup();
     const onAdd = vi.fn();

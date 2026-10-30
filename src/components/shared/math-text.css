@@ -1,0 +1,25 @@
+.math-text {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.math-text .katex {
+  font-size: 1.05em;
+  white-space: normal;
+  text-indent: 0;
+}
+.math-text .katex-display {
+  max-width: 100%;
+  margin: 0.6em 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-bottom: 4px;
+}
+
+.math-text--formula {
+  display: inline-block;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-block: 0.2em;
+  vertical-align: middle;
+}

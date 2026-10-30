@@ -1,3 +1,4 @@
+import MathText from '@/components/shared/MathText';
 import { useCallback, useEffect, useState } from 'react';
 import { ChevronDown, Plus } from 'lucide-react';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
@@ -293,17 +294,21 @@ export default function LearningMemory() {
                     to={`/memory/${item.id}`}
                   >
                     <span className="block text-sm font-semibold">
-                      {item.kind === 'repair' && item.state !== 'completed'
-                        ? `${item.topic || item.subject || 'Focused practice'}: ${MEMORY_ACTIVITIES.find((activity) => activity.id === getMemoryRepairData(item).activity)?.label || 'Practice'}`
-                        : item.title}
+                      <MathText>
+                        {item.kind === 'repair' && item.state !== 'completed'
+                          ? `${item.topic || item.subject || 'Focused practice'}: ${MEMORY_ACTIVITIES.find((activity) => activity.id === getMemoryRepairData(item).activity)?.label || 'Practice'}`
+                          : item.title}
+                      </MathText>
                     </span>
                     <span className="mt-1 block text-xs text-text-muted">
                       {item.kind.replace('_', ' ')} · {item.subject || 'General'} · {item.state}
                     </span>
                     <span className="mt-1 block truncate text-xs text-text-muted">
-                      {item.kind === 'repair' && item.state !== 'completed'
-                        ? `${getMemoryRepairData(item).duration_min} minutes · Open the activity before reviewing earlier answers.`
-                        : item.content || 'No written reflection yet'}
+                      <MathText>
+                        {item.kind === 'repair' && item.state !== 'completed'
+                          ? `${getMemoryRepairData(item).duration_min} minutes · Open the activity before reviewing earlier answers.`
+                          : item.content || 'No written reflection yet'}
+                      </MathText>
                     </span>
                   </Link>
                 </li>

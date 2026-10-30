@@ -1,3 +1,4 @@
+import MathText from '@/components/shared/MathText';
 import { useEffect, useState } from 'react';
 import { apiRequest } from '@/lib/fastapi-client';
 import type { TestArtifact, TestQuestion } from '@/lib/test-analysis';
@@ -53,7 +54,7 @@ export default function TestQuestionCapture({
       {open && (
         <div>
           <p className="mt-4 whitespace-pre-wrap break-words text-[14px] leading-relaxed">
-            {q.question_text}
+            <MathText>{q.question_text || ''}</MathText>
           </p>
           {hasImage && !image && !error && (
             <p role="status" className="mt-3 text-[12px] text-text-muted">
@@ -77,18 +78,22 @@ export default function TestQuestionCapture({
             </p>
           )}
           {q.learner_answer && (
-            <p className="mt-3 text-[13px] text-text-muted">Your test answer: {q.learner_answer}</p>
+            <p className="mt-3 text-[13px] text-text-muted">
+              Your test answer: <MathText>{q.learner_answer}</MathText>
+            </p>
           )}
           <AnswerReveal answer={q.answer_text} className="mt-3" />
           {q.capture_note && (
-            <p className="mt-3 whitespace-pre-wrap text-[13px] text-text-muted">{q.capture_note}</p>
+            <p className="mt-3 whitespace-pre-wrap text-[13px] text-text-muted">
+              <MathText>{q.capture_note}</MathText>
+            </p>
           )}
           {(q.root_cause || q.pattern_name) && (
             <p className="mt-2 text-[12px] text-text-faint">
               {q.analysis_provenance === 'learner_reported'
                 ? 'Your reflection'
                 : 'Suggested diagnosis'}
-              : {[q.root_cause, q.pattern_name].filter(Boolean).join(' · ')}
+              : <MathText>{[q.root_cause, q.pattern_name].filter(Boolean).join(' · ')}</MathText>
             </p>
           )}
           <p className="mt-2 text-[12px] text-text-faint">

@@ -1,3 +1,4 @@
+import MathText from '@/components/shared/MathText';
 import { useEffect, useRef, useState, type PointerEvent, type ReactNode } from 'react';
 import { useReducedMotion } from 'motion/react';
 import { Pause, Play } from 'lucide-react';
@@ -83,7 +84,9 @@ export default function PageHeader({
         )}
       >
         <div className="min-w-0">
-          <h1 className="font-display text-2xl font-semibold tracking-tight text-text">{title}</h1>
+          <h1 className="font-display text-2xl font-semibold tracking-tight text-text">
+            <MathText>{title}</MathText>
+          </h1>
           {description && (
             <p className="mt-1 max-w-[65ch] text-sm leading-relaxed text-text-muted">
               {description}
@@ -105,7 +108,9 @@ export default function PageHeader({
     >
       <div className="workspace-page-header__copy">
         <span className="workspace-page-header__category">{context.category}</span>
-        <h1 className="font-display font-bold tracking-tight text-text">{title}</h1>
+        <h1 className="font-display font-bold tracking-tight text-text">
+          <MathText>{title}</MathText>
+        </h1>
         {description && <p className="workspace-page-header__description">{description}</p>}
         {(showMobileMark || actions) && (
           <div className="workspace-page-header__actions">

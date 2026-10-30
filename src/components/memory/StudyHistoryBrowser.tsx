@@ -1,3 +1,4 @@
+import MathText from '@/components/shared/MathText';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
@@ -191,7 +192,9 @@ export default function StudyHistoryBrowser({ revision = 0 }: { revision?: numbe
                   <span className="block text-xs text-text-muted">
                     {studyHistoryLabel(item.collection)} · {displayDate(item.occurred_at, timeZone)}
                   </span>
-                  <span className="mt-1 block font-semibold">{item.title}</span>
+                  <span className="mt-1 block font-semibold">
+                    <MathText>{item.title}</MathText>
+                  </span>
                   {item.subject && (
                     <span className="mt-1 block text-xs text-text-muted">
                       {item.subject}
@@ -200,7 +203,7 @@ export default function StudyHistoryBrowser({ revision = 0 }: { revision?: numbe
                   )}
                   {item.excerpt && (
                     <span className="mt-2 block line-clamp-3 text-sm text-text-muted">
-                      {item.excerpt}
+                      <MathText math={item.collection === 'formulas'}>{item.excerpt}</MathText>
                     </span>
                   )}
                 </button>
@@ -244,7 +247,9 @@ export default function StudyHistoryBrowser({ revision = 0 }: { revision?: numbe
             <>
               <div>
                 <p className="text-xs text-text-muted">{studyHistoryLabel(selected.collection)}</p>
-                <h3 className="mt-1 font-display text-xl font-semibold">{selected.title}</h3>
+                <h3 className="mt-1 font-display text-xl font-semibold">
+                  <MathText>{selected.title}</MathText>
+                </h3>
               </div>
               <div className="flex flex-wrap gap-2">
                 {selected.href && (
@@ -293,20 +298,30 @@ export default function StudyHistoryBrowser({ revision = 0 }: { revision?: numbe
               ) : (
                 <>
                   {text(snapshot.html) && <PyqQuestionContent html={text(snapshot.html)} />}
+                  {text(evidence.expression) && (
+                    <MathText display math>
+                      {text(evidence.expression)}
+                    </MathText>
+                  )}
                   {(text(evidence.content) ||
                     text(evidence.full_explanation) ||
                     text(evidence.capture_note)) && (
                     <p className="whitespace-pre-wrap text-sm leading-relaxed">
-                      {text(evidence.content) ||
-                        text(evidence.full_explanation) ||
-                        text(evidence.capture_note)}
+                      <MathText>
+                        {text(evidence.content) ||
+                          text(evidence.full_explanation) ||
+                          text(evidence.capture_note)}
+                      </MathText>
                     </p>
                   )}
-                  {detail.event.excerpt && !text(snapshot.html) && !text(evidence.content) && (
-                    <p className="whitespace-pre-wrap text-sm leading-relaxed">
-                      {detail.event.excerpt}
-                    </p>
-                  )}
+                  {detail.event.excerpt &&
+                    !text(snapshot.html) &&
+                    !text(evidence.content) &&
+                    !text(evidence.expression) && (
+                      <p className="whitespace-pre-wrap text-sm leading-relaxed">
+                        <MathText>{detail.event.excerpt}</MathText>
+                      </p>
+                    )}
                   {detail.linked_memory.length > 0 && (
                     <div>
                       <h4 className="text-sm font-semibold">Connected learning memory</h4>
@@ -315,14 +330,18 @@ export default function StudyHistoryBrowser({ revision = 0 }: { revision?: numbe
                           <li key={item.id}>
                             {item.href ? (
                               <Link className="text-sm text-accent underline" to={item.href}>
-                                {item.title}
+                                <MathText>{item.title}</MathText>
                               </Link>
                             ) : (
-                              <span className="text-sm">{item.title}</span>
+                              <span className="text-sm">
+                                <MathText>{item.title}</MathText>
+                              </span>
                             )}
                             <p className="text-xs text-text-muted">
                               {item.state || 'Recorded'}
-                              {item.excerpt ? ` · ${item.excerpt}` : ''}
+                              {item.excerpt
+                                ? ` · $<MathText math={item.collection === 'formulas'}>{item.excerpt}</MathText>`
+                                : ''}
                             </p>
                           </li>
                         ))}
@@ -339,7 +358,7 @@ export default function StudyHistoryBrowser({ revision = 0 }: { revision?: numbe
                               className="text-left text-sm text-accent underline"
                               onClick={() => setSelected(item)}
                             >
-                              {item.title}
+                              <MathText>{item.title}</MathText>
                             </button>
                             <p className="text-xs text-text-muted">
                               {studyHistoryLabel(item.collection)}

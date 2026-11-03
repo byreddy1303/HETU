@@ -21,6 +21,7 @@ from pathlib import Path
 from typing import Any
 
 from fastapi import HTTPException
+from app.services.local_test_bank import local_test_bank_path, merge_local_test_bank
 
 DATA_DIR = Path(__file__).resolve().parents[1] / "data" / "pyq"
 
@@ -191,6 +192,7 @@ def build_catalog(
 
 
 _CACHED: CatalogBank | None = None
+_LOCAL_STAMP: tuple | None = None
 
 
 def _read_bundled_bank() -> CatalogBank:
@@ -205,6 +207,11 @@ def _read_bundled_bank() -> CatalogBank:
     conflicting_ids = {uid for group in conflicts for uid in group["ids"]}
     if len(questions) != manifest["questionCount"]:
         raise ValueError("Manifest question count does not match subject payloads")
+    local_path = local_test_bank_path()
+    if local_path and local_path.is_file():
+        extra = json.loads(local_path.read_text())
+        manifest = merge_local_test_bank(manifest, questions, extra)
+        manifest["bankVersion"] += "-local-" + canonical_hash(extra)[:12]
     return build_catalog(manifest=manifest, questions=questions, conflicting_ids=conflicting_ids)
 
 
@@ -214,9 +221,13 @@ def load_catalog() -> CatalogBank:
     This is the single seam tests patch to inject a purpose-built bank; every
     catalog accessor resolves it at call time through this module's globals.
     """
-    global _CACHED
-    if _CACHED is None:
+    global _CACHED, _LOCAL_STAMP
+    path = local_test_bank_path()
+    stat = path.stat() if path and path.is_file() else None
+    stamp = (str(path), stat.st_mtime_ns, stat.st_size) if stat else None
+    if _CACHED is None or stamp != _LOCAL_STAMP:
         _CACHED = _read_bundled_bank()
+        _LOCAL_STAMP = stamp
     return _CACHED
 
 

@@ -599,6 +599,7 @@ function PracticeSetup({
   onAnalyzeEvidenceFirst,
   onPlanEvidenceRepair,
   onTryEvidenceTransfer,
+  onStartTestSeries,
   onStart
 }: {
   manifest: PyqManifest;
@@ -639,6 +640,7 @@ function PracticeSetup({
   onAnalyzeEvidenceFirst: (questionUid: string) => void;
   onPlanEvidenceRepair: (questionUids: string[]) => void;
   onTryEvidenceTransfer: (questionUids: string[]) => void;
+  onStartTestSeries: (bookSlug: string) => void;
   onStart: () => void;
 }) {
   const selectedBookSlug = 'gate-cse';
@@ -694,6 +696,30 @@ function PracticeSetup({
         description={`${catalogQuestionCount.toLocaleString()} GATE CSE Core questions for focused practice and exam sessions.`}
         showMobileMark={false}
       />
+
+      {manifest.books.some((book) => book.sourceClass === 'user-import') && (
+        <Card>
+          <CardHeader title="Test Series" />
+          <CardBody className="space-y-3">
+            {manifest.books.filter((book) => book.sourceClass === 'user-import').map((book) => (
+              <div key={book.slug} className="flex flex-wrap items-center justify-between gap-3 rounded border border-border p-4">
+                <div>
+                  <p className="font-semibold text-text">{book.label}</p>
+                  <p className="text-[12px] text-text-muted">
+                    {book.count} questions · Local question set · Source-provided answer key
+                  </p>
+                  <p className="text-[12px] text-text-muted">
+                    {book.subjects.map((subject) => `${subject.label} → ${subject.topics.map((topic) => topic.label).join(', ')}`).join(' · ')}
+                  </p>
+                </div>
+                <Button disabled={loading} onClick={() => onStartTestSeries(book.slug)} aria-label={`Practice ${book.label}`}>
+                  Practice this set
+                </Button>
+              </div>
+            ))}
+          </CardBody>
+        </Card>
+      )}
 
       {activeSession && (
         <Card className="workbench-resume border-accent/30">
@@ -3173,7 +3199,7 @@ export default function Pyq() {
     navigate('/pyq?job=transfer');
   }
 
-  async function startPractice() {
+  async function startPractice(testBookSlug?: string) {
     if (!manifest || loading || !userId || startingRef.current) return;
     startingRef.current = true;
     setLoading(true);
@@ -3198,8 +3224,26 @@ export default function Pyq() {
       let rows: PyqQuestion[];
       let sessionConfig: AttemptConfig;
 
-      const memoryRepairId = searchParams.get('memoryRepairId');
-      if (memoryRepairId) {
+      const testBook = testBookSlug
+        ? manifest.books.find((book) => book.slug === testBookSlug && book.sourceClass === 'user-import')
+        : undefined;
+      if (testBookSlug && !testBook) throw new Error('This local test series is unavailable. Refresh the question bank.');
+      const memoryRepairId = testBook ? null : searchParams.get('memoryRepairId');
+      if (testBook) {
+        rows = (await loadPyqQuestions(testBook.subjects, manifest.bankVersion))
+          .filter((question) => matchesPyqBookScope(question, { bookSlug: testBook.slug }) && isPyqAutoGradable(question))
+          .sort((a, b) => a.number.localeCompare(b.number, undefined, { numeric: true }));
+        if (!rows.length) throw new Error('This test series has no answerable questions.');
+        sessionConfig = {
+          ...config, bookSlug: testBook.slug, subjectSlug: testBook.subjects.length === 1 ? testBook.subjects[0].slug : 'all',
+          subjectSlugs: undefined, topicSlug: 'all', fromYear: testBook.firstYear, toYear: testBook.lastYear,
+          mode: 'practice', count: 'all', type: 'all', history: 'all', order: 'oldest',
+          recommendationPreset: 'custom', recommendationReasons: undefined,
+          savedPrescriptionId: undefined, savedPrescriptionName: undefined,
+          examKind: undefined, benchmarkPaperId: undefined, examState: undefined,
+          practiceDraft: undefined, practiceDrafts: undefined
+        };
+      } else if (memoryRepairId) {
         const { entry } = await getMemoryEntry(memoryRepairId);
         if (entry.kind !== 'repair') throw new Error('This memory record is not a practice repair.');
         rows = await loadMemoryQuestions(entry, userId);
@@ -3407,7 +3451,7 @@ export default function Pyq() {
                 practiceDrafts: undefined
               };
       }
-      sessionConfig = { ...sessionConfig, bookSlug: 'gate-cse' };
+      sessionConfig = { ...sessionConfig, bookSlug: testBook?.slug ?? 'gate-cse' };
       const linkedConfig = { ...sessionConfig, ...(searchParams.get('memoryRepairId') ? { memoryRepairId: searchParams.get('memoryRepairId') } : {}) };
       const session = createPyqSessionRow(userId!, manifest.bankVersion, linkedConfig, rows);
       const plannerDate = searchParams.get('plannerDate');
@@ -4292,6 +4336,7 @@ export default function Pyq() {
         onPlanEvidenceRepair={planEvidenceRepair}
         onTryEvidenceTransfer={tryEvidenceTransfer}
         onStart={() => void startPractice()}
+        onStartTestSeries={(bookSlug) => void startPractice(bookSlug)}
       />
     );
   }

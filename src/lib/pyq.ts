@@ -24,7 +24,7 @@ export interface PyqSubjectManifest {
 
 export type PyqDifficultyFloor = 'gate' | 'mixed' | 'above-gate';
 export type PyqSourceClass =
-  'official-exam' | 'official-sample' | 'reconstructed-exam' | 'audited-gate-prep';
+  'official-exam' | 'official-sample' | 'reconstructed-exam' | 'audited-gate-prep' | 'user-import';
 
 export interface PyqBookManifest {
   slug: string;

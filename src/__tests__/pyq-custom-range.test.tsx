@@ -47,7 +47,14 @@ const legacyQuestion = {
   paperLabel: 'TIFR GS CS 2026',
   html: '<p>A saved TIFR question.</p>'
 };
-const questions = [question, recentQuestion, legacyQuestion];
+const localQuestion = {
+  ...recentQuestion,
+  id: 'local-test:one',
+  bookSlug: 'local-test-series-example',
+  paperLabel: 'Imported Test Series',
+  html: '<p>A private test-series question.</p>'
+};
+const questions = [question, recentQuestion, legacyQuestion, localQuestion];
 const manifest = normalizePyqManifest({
   bankVersion: 'custom-range-bank',
   generatedAt: '2026-09-12T00:00:00Z',
@@ -83,6 +90,13 @@ const manifest = normalizePyqManifest({
       questionUids: Array.from({ length: 65 }, (_, index) => `benchmark-${index}`)
     }
   ]
+});
+
+manifest.books.push({
+  ...manifest.books[0], slug: localQuestion.bookSlug,
+  label: 'Example Test Series', sourceClass: 'user-import', count: 1,
+  firstYear: 2026, lastYear: 2026,
+  subjects: [{ ...manifest.subjects[0], count: 1 }]
 });
 
 vi.mock('@/hooks/useAuth', () => ({
@@ -130,6 +144,19 @@ describe('Custom PYQ setup and Rishi catalog visibility', () => {
       db.sessions.clear(),
       db.questions.clear()
     ]);
+  });
+
+  it('starts an imported test book separately without recording an answer or including core questions', async () => {
+    const user = userEvent.setup();
+    render(<MemoryRouter><Pyq /></MemoryRouter>);
+    await user.click(await screen.findByRole('button', { name: 'Practice Example Test Series' }));
+    expect(await screen.findByText('A private test-series question.')).toBeInTheDocument();
+    expect(screen.queryByText('A core question from 2026.')).not.toBeInTheDocument();
+    const sessions = await db.pyq_sessions.toArray();
+    expect(sessions).toHaveLength(1);
+    expect(sessions[0].config.bookSlug).toBe(localQuestion.bookSlug);
+    expect(sessions[0].question_uids).toEqual([localQuestion.id]);
+    expect(await db.pyq_attempts.count()).toBe(0);
   });
 
   it('restores 1990–2026 when returning from a recommendation and keeps the chosen view and subject', async () => {

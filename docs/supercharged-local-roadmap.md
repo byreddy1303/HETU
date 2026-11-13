@@ -1,9 +1,9 @@
 # HETU Local Desktop: Supercharged Roadmap & Agent Execution Log
 
-**Current Status**: Learning Memory, connected history, and local-model study follow-ups implemented; broader phases remain in progress
+**Current Status**: Daily study desk and three-skill personal GATE pilot installed; broader planning, coverage, and learning-effectiveness stages remain in progress
 **Target**: GATE CSE 2027 AIR < 100  
 **Architecture**: 100% Local Desktop (Electron + SQLite WAL + Python 3.12 + Native stdio MCP)  
-**Last Updated**: 2026-10-19
+**Last Updated**: 2026-11-13
 
 > **Note for Future Agents**:  
 > Always consult this document before starting a task. When you complete a sub-task or phase, update its checkbox (`[x]`), record the commit hash in the Progress Log below, and commit this file to `main` before finalizing your turn.
@@ -56,6 +56,16 @@ To make an AI act as a true master coach (identifying root weaknesses, predictin
 ---
 
 ## 2. Master Execution Roadmap
+
+### Personal GATE preparation pilot (2026-11-13)
+- [x] Today-first entry, durable daily capacity, contextual resume, practice reprioritization, and distinct retrieval/activity counts.
+- [x] Five primary destinations while preserving existing tools and loading the detailed dashboard separately.
+- [x] Three reviewed skill areas with 30 hash-pinned question mappings, blind contrast exercises, resumable drafts, and learner-confirmed assessments.
+- [x] One linked practice/result/follow-up lifecycle, immutable question sets, explicit help reports, and qualified fresh/delayed evidence.
+- [x] Local schema snapshots, concurrent-write protection, isolated browser verification, packaged update, and original-record preservation checks.
+- [ ] Observe delayed application and management time during the proposed two-week usage pilot before claiming learning gains or broadening the skill map.
+- [ ] Subsequent stages: evidence-driven day planning and mock debriefs, broader reviewed coverage, and convenience improvements justified by actual friction.
+- Release scope, checks, and limitations: [personal-gate-pilot.md](personal-gate-pilot.md).
 
 ### Local model study loop (2026-10-18)
 - [x] Ollama and local OpenAI-compatible model discovery, connection controls, and explicit failure states.
@@ -154,6 +164,7 @@ Details and limitations: [study-history-and-session-evidence.md](study-history-a
 
 | Date | Phase | Task | Commit | Agent Summary |
 |---|---|---|---|---|
+| 2026-11-13 | Personal GATE pilot | Daily usability and three reviewed skill workflows | `3e42a5f` | Installed the local Today desk, saved time/priority choices, reviewed contrasts, source-pinned application practice, and assistance-qualified result/follow-up view. 887 frontend and 242 backend tests passed; 17 desktop tests and 2 local browser flows passed. Original 79 study records preserved byte-for-byte; database integrity and local storage verified. Broader stages and empirical learning outcomes remain pending. |
 | 2026-10-15 | Setup | Blueprint & Roadmap creation | `c8579cd` | Created component architecture spec and agent roadmap. |
 | 2026-10-15 | Bugfix | Fix topic_progress 409 soft-delete restore error | `c0d29ed` | Allowed upsert_records to restore soft-deleted rows in mutable collections instead of throwing 409. |
 | 2026-10-15 | Architecture | Cognitive AI Master Integration Specification | `c932245` | Detailed metacognitive thinking traces, pattern debugger, Socratic debrief, and schema in cognitive-ai-master-integration-spec.md. |

@@ -159,8 +159,7 @@ export function transitionRecoveryItem(args: {
     scheduled_date: next.intervalDays == null ? null : addDaysISO(today, next.intervalDays),
     reason_flags: reasonFlags,
     lapse_count: lapseCount,
-    successful_retrieval_count:
-      item.successful_retrieval_count + (successful ? 1 : 0),
+    successful_retrieval_count: item.successful_retrieval_count + (successful ? 1 : 0),
     last_grade: grade,
     last_interval_days: next.intervalDays,
     successful_due_d30_at: dueD30Passed ? occurredAt : item.successful_due_d30_at,
@@ -200,7 +199,10 @@ export function rankRecoveryCandidates(
         reasons.push(`${overdueDays}d overdue`);
       } else if (dueToday) reasons.push('due today');
       score += candidate.item.lapse_count * 14;
-      if (candidate.item.lapse_count > 0) reasons.push(`${candidate.item.lapse_count} lapse${candidate.item.lapse_count === 1 ? '' : 's'}`);
+      if (candidate.item.lapse_count > 0)
+        reasons.push(
+          `${candidate.item.lapse_count} lapse${candidate.item.lapse_count === 1 ? '' : 's'}`
+        );
       if (candidate.item.recovery_state === 'remediation') {
         score += 35;
         reasons.push('remediation');
@@ -253,12 +255,19 @@ function interleaveSubjects(rows: RankedRecoveryCandidate[]): RankedRecoveryCand
   return result;
 }
 
-function sprintLimit(mode: RecoverySessionMode): { seconds: number | null; questions: number | null } {
+function sprintLimit(mode: RecoverySessionMode): {
+  seconds: number | null;
+  questions: number | null;
+} {
   switch (mode) {
     case 'minutes-10':
       return { seconds: 600, questions: null };
     case 'minutes-20':
       return { seconds: 1_200, questions: null };
+    case 'minutes-45':
+      return { seconds: 2_700, questions: null };
+    case 'minutes-60':
+      return { seconds: 3_600, questions: null };
     case 'minutes-30':
       return { seconds: 1_800, questions: null };
     case 'questions-5':

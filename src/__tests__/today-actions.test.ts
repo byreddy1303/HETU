@@ -122,11 +122,35 @@ describe('one local daily action decision', () => {
     const queue = buildTodayActions({
       ...base,
       practiceSessions: [exam],
+      parkedActionIds: ['resume-practice:exam'],
       studyMemoryEntries: [repair]
     });
     expect(queue.heldForExam).toBe(true);
     expect(queue.actions).toHaveLength(1);
     expect(queue.fitting[0].href).toBe('/pyq?resumeSession=exam');
+  });
+
+  it('sets aside practice for this day without removing the saved session', () => {
+    const practice = {
+      id: 'saved',
+      user_id: 'owner',
+      status: 'paused',
+      updated_at: '2026-10-29',
+      config: { mode: 'practice', subjectSlug: 'operating-systems' },
+      completed_count: 1,
+      question_uids: ['a', 'b', 'c']
+    } as PyqSessionRow;
+    const input = {
+      ...base,
+      budget: 45 as const,
+      practiceSessions: [practice],
+      studyMemoryEntries: [repair]
+    };
+    expect(buildTodayActions(input).fitting[0].id).toBe('resume-practice:saved');
+    const parked = buildTodayActions({ ...input, parkedActionIds: ['resume-practice:saved'] });
+    expect(parked.fitting[0].id).toBe('repair:repair-1');
+    expect(parked.actions.some((action) => action.id === 'resume-practice:saved')).toBe(true);
+    expect(practice.completed_count).toBe(1);
   });
 
   it('does not recreate an active sprint, including an interrupted session', () => {

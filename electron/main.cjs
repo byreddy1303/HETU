@@ -142,7 +142,7 @@ function triggerBackup(runtime, backendDir) {
     const backupScript = path.join(backendDir, 'scripts', 'backup_local_db.py');
     if (fs.existsSync(backupScript) && runtime?.pythonPath) {
       const { spawn } = require('node:child_process');
-      const proc = spawn(runtime.pythonPath, [backupScript, '--source', path.join(dataDir, 'hetu.db'), '--backup-dir', path.join(dataDir, 'backups')], {
+      const proc = spawn(runtime.pythonPath, [backupScript, '--source', path.join(dataDir, 'hetu.db'), '--backup-dir', path.join(dataDir, 'backups'), '--no-icloud'], {
         env: { ...process.env, PYTHONPATH: backendDir, HETU_DATA_DIR: dataDir },
         detached: true,
         stdio: 'ignore',

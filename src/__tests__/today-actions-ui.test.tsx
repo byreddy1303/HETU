@@ -60,13 +60,27 @@ function mount(compact = false) {
     </MemoryRouter>
   );
 }
+let dayChoices = { version: 0, budget: 20, parked_action_ids: [] };
+function dayResponse(options?: RequestInit) {
+  if (options?.method === 'PUT') {
+    const draft = JSON.parse(String(options.body));
+    dayChoices = {
+      version: dayChoices.version + 1,
+      budget: draft.budget,
+      parked_action_ids: draft.parked_action_ids
+    };
+  }
+  return { ...dayChoices };
+}
 function responses(withConcepts = concepts) {
-  vi.mocked(apiRequest).mockImplementation(async (path) =>
-    path.includes('concept-bridge')
-      ? withConcepts
-      : path.includes('/v1/recovery')
-        ? { complete: true, sprint: { selected: [], estimatedSeconds: 0, deferredCount: 0 } }
-        : { items: [], total: 0, has_more: false }
+  vi.mocked(apiRequest).mockImplementation(async (path, options) =>
+    path.includes('/skill-coach/day/')
+      ? dayResponse(options)
+      : path.includes('concept-bridge')
+        ? withConcepts
+        : path.includes('/v1/recovery')
+          ? { complete: true, sprint: { selected: [], estimatedSeconds: 0, deferredCount: 0 } }
+          : { items: [], total: 0, has_more: false }
   );
 }
 beforeEach(() => {
@@ -74,6 +88,7 @@ beforeEach(() => {
   vi.clearAllMocks();
   runtimeStorage.clear();
   useSyncStatusStore.getState().resetSyncStatus();
+  dayChoices = { version: 0, budget: 20, parked_action_ids: [] };
   responses();
 });
 
@@ -89,7 +104,7 @@ describe('local daily queue states and launch', () => {
   it('keeps failed sources visible and retries them', async () => {
     vi.mocked(apiRequest).mockRejectedValue(new Error('Unavailable'));
     mount();
-    expect(await screen.findAllByRole('alert')).toHaveLength(4);
+    expect(await screen.findAllByRole('alert')).toHaveLength(5);
     expect(screen.queryByText(/The queue is clear/)).not.toBeInTheDocument();
     responses();
     fireEvent.click(screen.getByRole('button', { name: 'Refresh queue' }));
@@ -125,19 +140,21 @@ describe('local daily queue states and launch', () => {
   });
 
   it('starts the exact advertised canonical sprint and exposes launch failures', async () => {
-    vi.mocked(apiRequest).mockImplementation(async (path) =>
-      path.includes('concept-bridge')
-        ? { ...concepts, items: [] }
-        : path.includes('/v1/recovery')
-          ? {
-              complete: true,
-              sprint: {
-                selected: [{ item: { id: 'one' } }],
-                estimatedSeconds: 540,
-                deferredCount: 5
+    vi.mocked(apiRequest).mockImplementation(async (path, options) =>
+      path.includes('/skill-coach/day/')
+        ? dayResponse(options)
+        : path.includes('concept-bridge')
+          ? { ...concepts, items: [] }
+          : path.includes('/v1/recovery')
+            ? {
+                complete: true,
+                sprint: {
+                  selected: [{ item: { id: 'one' } }],
+                  estimatedSeconds: 540,
+                  deferredCount: 5
+                }
               }
-            }
-          : { items: [], total: 0, has_more: false }
+            : { items: [], total: 0, has_more: false }
     );
     vi.mocked(startSessionApi)
       .mockRejectedValueOnce(new Error('Selection changed'))
@@ -153,14 +170,14 @@ describe('local daily queue states and launch', () => {
     );
     expect(startSessionApi).toHaveBeenLastCalledWith({
       userId: 'owner',
-      mode: 'minutes-10',
+      mode: 'minutes-20',
       itemIds: ['one'],
       key: 'stable-key'
     });
     expect(recoveryKey).toHaveBeenLastCalledWith('today-sprint', [
       'owner',
       '2026-10-29',
-      10,
+      20,
       ['one'],
       JSON.stringify([[['one', null]], null])
     ]);
@@ -168,24 +185,26 @@ describe('local daily queue states and launch', () => {
   });
 
   it('summarises actual due reviews rather than sprint buckets and reveals the reason on demand', async () => {
-    vi.mocked(apiRequest).mockImplementation(async (path) =>
-      path.includes('concept-bridge')
-        ? { ...concepts, items: [] }
-        : path.includes('/v1/recovery')
-          ? {
-              complete: true,
-              forecast: [{ date: '2026-10-29', itemCount: 7 }],
-              sprint: {
-                selected: [{ item: { id: 'one' } }, { item: { id: 'two' } }],
-                estimatedSeconds: 540,
-                deferredCount: 5
+    vi.mocked(apiRequest).mockImplementation(async (path, options) =>
+      path.includes('/skill-coach/day/')
+        ? dayResponse(options)
+        : path.includes('concept-bridge')
+          ? { ...concepts, items: [] }
+          : path.includes('/v1/recovery')
+            ? {
+                complete: true,
+                forecast: [{ date: '2026-10-29', itemCount: 7 }],
+                sprint: {
+                  selected: [{ item: { id: 'one' } }, { item: { id: 'two' } }],
+                  estimatedSeconds: 540,
+                  deferredCount: 5
+                }
               }
-            }
-          : { items: [], total: 0, has_more: false }
+            : { items: [], total: 0, has_more: false }
     );
     mount(true);
     await screen.findByRole('heading', { name: 'Retrieve 2 due questions' });
-    expect(screen.getByText('7 due reviews')).toBeVisible();
+    expect(screen.getByText('7 due retrieval items · queue details')).toBeVisible();
     const reason = screen.getByText(/5 other items stay scheduled/);
     expect(reason.closest('details')).not.toHaveAttribute('open');
     expect(reason).not.toBeVisible();

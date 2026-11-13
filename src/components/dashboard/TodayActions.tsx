@@ -14,13 +14,14 @@ import { memoryRepairHref } from '@/lib/study-memory-practice';
 import type { MemoryEntriesPage, StudyMemoryEntry } from '@/lib/study-memory';
 import {
   buildTodayActions,
+  TODAY_BUDGETS,
   type TodayAction,
   type TodayBudget,
   type TodayConceptQueue,
   type TodayRecoveryOverview
 } from '@/lib/today-actions';
 import { recoveryKey, startSessionApi } from '@/lib/recovery-api';
-import { runtimeStorage } from '@/lib/runtime-storage';
+import { useStudyDay } from '@/hooks/useStudyDay';
 import { useSyncStatusStore } from '@/stores/sync-status';
 
 const actionLabels: Record<TodayAction['kind'], string> = {
@@ -71,11 +72,8 @@ export default function TodayActions({
   compact?: boolean;
 }) {
   const navigate = useNavigate();
-  const budgetKey = `air.today-budget.${userId}.${today}`;
-  const [budget, setBudget] = useState<TodayBudget>(() => {
-    const saved = Number(runtimeStorage.getItem(budgetKey));
-    return saved === 20 || saved === 30 ? saved : 10;
-  });
+  const day = useStudyDay(userId, today);
+  const budget = day.value.budget;
   const [snapshot, setSnapshot] = useState<Snapshot | null>(null);
   const [loading, setLoading] = useState(true);
   const [retry, setRetry] = useState(0);
@@ -211,16 +209,18 @@ export default function TodayActions({
           studyMemoryEntries: state.memory,
           concepts: state.concepts,
           recovery: state.recovery,
-          analyzedAttemptIds
+          analyzedAttemptIds,
+          parkedActionIds: day.value.parked_action_ids
         })
       : null;
-  const pending = loading || hydrating || !rows || !state;
+  const pending = loading || hydrating || !rows || !state || !day.ready;
   const first = queue?.fitting[0];
   const dueReviews = state?.recovery?.forecast?.find((day) => day.date === today)?.itemCount;
   const otherCount = (queue?.actions.length ?? 0) - (first ? 1 : 0);
   const clear =
     !pending &&
     !syncError &&
+    !day.error &&
     state?.errors.length === 0 &&
     !state.partial &&
     !queue?.heldForExam &&
@@ -290,16 +290,15 @@ export default function TodayActions({
           Time available
           <select
             aria-label="Time available"
-            disabled={Boolean(busy)}
+            disabled={Boolean(busy) || !day.ready || day.saving}
             value={budget}
             onChange={(event) => {
               const value = Number(event.target.value) as TodayBudget;
-              runtimeStorage.setItem(budgetKey, String(value));
-              setBudget(value);
+              void day.save({ budget: value });
             }}
             className="rounded border border-border bg-bg px-2 py-2 text-text"
           >
-            {[10, 20, 30].map((minutes) => (
+            {TODAY_BUDGETS.map((minutes) => (
               <option key={minutes} value={minutes}>
                 {minutes} minutes
               </option>
@@ -307,6 +306,14 @@ export default function TodayActions({
           </select>
         </label>
       </div>
+      {day.error && (
+        <div role="alert" className="text-sm text-danger">
+          {day.error}{' '}
+          <button type="button" className="underline" onClick={day.reload}>
+            Reload study choices
+          </button>
+        </div>
+      )}
       {pending && (
         <p role="status" className="text-sm text-text-muted">
           Checking your saved work…
@@ -336,6 +343,7 @@ export default function TodayActions({
         <div className="grid gap-4 rounded-lg border border-accent/25 bg-accent-faint/30 p-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center sm:p-5">
           <div className="min-w-0 space-y-2">
             <h3 className="font-display text-xl font-semibold leading-snug">{first.title}</h3>
+            {first.context && <p className="text-sm text-text-muted">{first.context}</p>}
             <details className="max-w-[65ch] text-xs text-text-muted">
               <summary className="w-fit cursor-pointer py-1">Why this?</summary>
               <p className="mt-1 leading-relaxed">{first.reason}</p>
@@ -346,15 +354,28 @@ export default function TodayActions({
               </p>
             )}
           </div>
-          <Button
-            variant="primary"
-            className="justify-self-start sm:justify-self-end"
-            disabled={Boolean(busy)}
-            onClick={() => void start(first)}
-          >
-            {busy === first.id ? 'Checking saved action…' : actionButton(first)}
-            <ArrowRight size={14} aria-hidden />
-          </Button>
+          <div className="flex flex-wrap items-center gap-2">
+            <Button
+              variant="primary"
+              className="justify-self-start sm:justify-self-end"
+              disabled={Boolean(busy)}
+              onClick={() => void start(first)}
+            >
+              {busy === first.id ? 'Checking saved action…' : actionButton(first)}
+              <ArrowRight size={14} aria-hidden />
+            </Button>
+            {first.id.startsWith('resume-practice:') && !queue?.heldForExam && (
+              <Button
+                variant="ghost"
+                disabled={Boolean(busy) || day.saving}
+                onClick={() =>
+                  void day.save({ parked_action_ids: [...day.value.parked_action_ids, first.id] })
+                }
+              >
+                Set aside today
+              </Button>
+            )}
+          </div>
         </div>
       )}
       {startError && (
@@ -370,9 +391,39 @@ export default function TodayActions({
       )}
       {!pending && !first && Boolean(queue?.actions.length) && (
         <p className="text-sm text-text-muted">
-          The available actions need more than {budget} minutes. Choose more time or inspect the
-          work below.
+          Other work is saved below. Some activities need more than {budget} minutes or have been
+          set aside today.
         </p>
+      )}
+      {!pending && typeof dueReviews === 'number' && (
+        <details className="text-sm text-text-muted">
+          <summary className="cursor-pointer py-2">
+            {state?.recovery?.complete ? '' : 'At least '}
+            {dueReviews} due retrieval items · queue details
+          </summary>
+          <p className="mt-2">
+            This counts questions and concepts due for retrieval. An activity may contain several
+            items; other activities below are sessions, not additional review counts.
+          </p>
+          {state?.recovery && (
+            <p className="mt-1">
+              {state.recovery.sprint.selected.length} selected for this time budget;{' '}
+              {state.recovery.sprint.deferredCount} remain scheduled.
+            </p>
+          )}
+        </details>
+      )}
+      {day.value.parked_action_ids.length > 0 && (
+        <div className="flex flex-wrap items-center gap-2 text-sm">
+          <p>Saved practice set aside for today. Your answers are preserved.</p>
+          <Button
+            variant="ghost"
+            disabled={day.saving}
+            onClick={() => void day.save({ parked_action_ids: [] })}
+          >
+            Restore practice priority
+          </Button>
+        </div>
       )}
       {!pending &&
         queue &&
@@ -382,12 +433,6 @@ export default function TodayActions({
             className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-text-muted"
             aria-label="Saved work in this queue"
           >
-            {typeof dueReviews === 'number' && dueReviews > 0 && (
-              <p>
-                {state?.recovery?.complete ? '' : 'At least '}
-                {dueReviews} due reviews
-              </p>
-            )}
             {otherCount > 0 && (
               <Link to="/today" className="text-accent underline underline-offset-4">
                 {otherCount} other {otherCount === 1 ? 'activity' : 'activities'}
@@ -448,7 +493,10 @@ export default function TodayActions({
           variant="ghost"
           size="sm"
           disabled={loading || Boolean(busy)}
-          onClick={() => setRetry((value) => value + 1)}
+          onClick={() => {
+            day.reload();
+            setRetry((value) => value + 1);
+          }}
         >
           <RefreshCw size={14} aria-hidden /> Refresh queue
         </Button>

@@ -18,6 +18,7 @@ from app.api.routes import (
     recovery,
     revision_pack,
     section_context,
+    skill_coach,
     study_actions,
     study_memory,
     test_analysis,
@@ -58,3 +59,5 @@ api_router.include_router(webhooks.router, prefix="/webhooks", tags=["webhooks"]
 
 root_router = APIRouter()
 root_router.include_router(health.router)
+
+api_router.include_router(skill_coach.router, prefix="/skill-coach", tags=["local-skills"])

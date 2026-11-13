@@ -7,7 +7,8 @@ import type { OverviewConceptQueue } from '@/lib/learning-overview';
 import type { DayPlan } from '@/lib/planner-storage';
 import type { PyqSessionRow, RecoverySessionRow } from '@/types';
 
-export type TodayBudget = 10 | 20 | 30;
+export const TODAY_BUDGETS = [10, 20, 30, 45, 60] as const;
+export type TodayBudget = (typeof TODAY_BUDGETS)[number];
 export type TodayActionKind = 'resume' | 'planned' | 'recovery' | 'concept' | 'repair' | 'evidence';
 
 export interface TodayAction {
@@ -23,6 +24,7 @@ export interface TodayAction {
   recoveryItemIds?: string[];
   recoveryStartRevision?: string;
   priority: number;
+  context?: string;
 }
 
 export interface TodayRecoveryOverview {
@@ -56,6 +58,7 @@ export interface TodayActionsInput extends BuildPlannerEvidenceCandidatesInput {
   recovery: TodayRecoveryOverview | null;
   practiceSessions: readonly PyqSessionRow[];
   recoverySessions: readonly RecoverySessionRow[];
+  parkedActionIds?: readonly string[];
 }
 
 /** One deterministic decision for Dashboard and Do now. No writes or model claims. */
@@ -235,7 +238,9 @@ export function buildTodayActions(input: TodayActionsInput) {
   return {
     actions: unique,
     fitting: unique.filter(
-      (action) => action.estimatedMin === null || action.estimatedMin <= input.budget
+      (action) =>
+        !input.parkedActionIds?.includes(action.id) &&
+        (action.estimatedMin === null || action.estimatedMin <= input.budget)
     ),
     heldForExam: false
   };
@@ -246,6 +251,7 @@ function resumePractice(session: PyqSessionRow): TodayAction {
     id: `resume-practice:${session.id}`,
     kind: 'resume',
     title: `Resume ${session.config.mode === 'exam' ? 'exam' : 'practice'}`,
+    context: `${!session.config.subjectSlug || session.config.subjectSlug === 'all' ? 'Mixed subjects' : session.config.subjectSlug.replaceAll('-', ' ')} · ${session.completed_count} of ${session.question_uids.length} submitted`,
     reason: `${session.completed_count} of ${session.question_uids.length} questions submitted. Continue your saved set.`,
     href: `/pyq?resumeSession=${encodeURIComponent(session.id)}`,
     estimatedMin: null,

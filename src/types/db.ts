@@ -41,6 +41,8 @@ export type RecoverySessionMode =
   | 'minutes-10'
   | 'minutes-20'
   | 'minutes-30'
+  | 'minutes-45'
+  | 'minutes-60'
   | 'questions-5'
   | 'all';
 export type BuddyStatus = 'pending' | 'active' | 'paused';

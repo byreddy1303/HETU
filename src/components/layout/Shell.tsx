@@ -20,7 +20,11 @@ import { backendConfig } from '@/lib/backend-config';
 import './workspace-shell.css';
 
 const ROUTE_CONTEXT: Record<string, [string, string]> = {
-  '/': ['Overview', 'Dashboard'],
+  '/': backendConfig.isLocal ? ['Study', 'Today'] : ['Overview', 'Dashboard'],
+  '/skills': ['Review', 'Skill practice'],
+  '/review': ['Study', 'Review'],
+  '/knowledge': ['Study', 'Knowledge'],
+  '/progress': ['Evidence', 'Progress'],
   '/today': ['Study', 'Do now'],
   '/session': ['Study', 'Session'],
   '/pyq': ['Study', 'PYQ practice'],
@@ -57,7 +61,7 @@ export default function Shell() {
   const focusedSession =
     /\/session\/[^/]+\/solve$/.test(pathname) || /\/mocks\/[^/]+\/take$/.test(pathname);
   const minimalStudy =
-    backendConfig.isLocal && /^\/(today|memory|workflows|concept-review)(\/|$)/.test(pathname);
+    backendConfig.isLocal && (pathname === '/' || /^\/(today|skills|review|knowledge|progress|memory|workflows|concept-review)(\/|$)/.test(pathname));
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {

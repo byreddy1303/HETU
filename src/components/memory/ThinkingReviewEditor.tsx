@@ -1,3 +1,4 @@
+import { backendConfig } from '@/lib/backend-config';
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import type { PyqAttemptRow } from '@/types';
@@ -93,6 +94,7 @@ export default function ThinkingReviewEditor({ attempt, revealState = 'unknown',
     <div className="flex flex-wrap gap-2">
       <Button variant="primary" disabled={!draft.ready || finishing || !draft.entry.content.trim()} onClick={() => void finish('completed')}>Finish this review</Button>
       <Button disabled={!draft.ready || finishing} onClick={() => void finish('deferred')}>Save for later</Button>
+      {backendConfig.isLocal && <Link className="self-center text-sm text-accent underline" to={`/skills?question=${encodeURIComponent(attempt.question_uid)}&attempt=${encodeURIComponent(attempt.id)}`}>Find a mapped skill check</Link>}
       {draft.entry.version > 0 && <Link className="self-center px-2 text-sm font-medium text-accent underline" to={`/memory/${draft.entry.id}`}>Open thinking and plan a repair</Link>}
     </div>
     {message && <p role="status" className="text-sm text-success">{message}</p>}

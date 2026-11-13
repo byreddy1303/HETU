@@ -1,3 +1,4 @@
+import { LOCAL_NAVIGATION } from '@/lib/local-navigation';
 import { backendConfig } from '@/lib/backend-config';
 import { useEffect, useId, useRef, useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
@@ -57,15 +58,18 @@ const LIBRARY: Item[] = [
 function NavItem({ item }: { item: Item }) {
   const Icon = item.icon;
   const reduced = useReducedMotion();
+  const { pathname } = useLocation();
+  const skillSection = backendConfig.isLocal && item.to === '/review' && (pathname === '/skills' || pathname.startsWith('/skills/'));
   return (
     <NavLink
       to={item.to}
       end={item.to === '/'}
-      className={({ isActive }) => cn('workspace-nav-link', isActive && 'is-active')}
+      aria-current={skillSection ? 'page' : undefined}
+      className={({ isActive }) => cn('workspace-nav-link', (isActive || skillSection) && 'is-active')}
     >
       {({ isActive }) => (
         <>
-          {isActive && (
+          {(isActive || skillSection) && (
             <motion.span
               className="workspace-nav-indicator"
               layoutId={reduced ? undefined : 'workspace-nav-active'}
@@ -77,7 +81,7 @@ function NavItem({ item }: { item: Item }) {
           )}
           <Icon size={16} strokeWidth={1.65} aria-hidden />
           <span>{item.label}</span>
-          {isActive && <span className="workspace-nav-dot" aria-hidden />}
+          {(isActive || skillSection) && <span className="workspace-nav-dot" aria-hidden />}
         </>
       )}
     </NavLink>
@@ -185,10 +189,28 @@ export default function Nav() {
         <p>Your learning observatory</p>
       </div>
       <nav className="workspace-sidebar__navigation" aria-label="Main navigation">
-        <NavItem item={{ to: '/', label: 'Dashboard', icon: Gauge }} />
-        <Group label="Study" items={study} />
-        <CollapsibleGroup label="Reflect" items={REFLECT} />
-        <CollapsibleGroup label="Library" items={LIBRARY} />
+        {backendConfig.isLocal ? (
+          <>
+            {LOCAL_NAVIGATION.map((item) => (
+              <NavItem key={item.to} item={item} />
+            ))}
+            <CollapsibleGroup
+              label="Tools"
+              items={[
+                ...study.filter((item) => !['/today', '/pyq'].includes(item.to)),
+                ...REFLECT,
+                ...LIBRARY
+              ]}
+            />
+          </>
+        ) : (
+          <>
+            <NavItem item={{ to: '/', label: 'Dashboard', icon: Gauge }} />
+            <Group label="Study" items={study} />
+            <CollapsibleGroup label="Reflect" items={REFLECT} />
+            <CollapsibleGroup label="Library" items={LIBRARY} />
+          </>
+        )}
       </nav>
       <div className="workspace-sidebar__footer">
         <NavItem item={{ to: '/settings', label: 'Settings', icon: Settings }} />
@@ -198,41 +220,64 @@ export default function Nav() {
           </span>
           <div>
             <p>{profile?.name ?? 'Your workspace'}</p>
-            <span>{backendConfig.isLocal ? (profile?.username ? `@${profile.username} · Personal workspace` : 'Personal workspace') : sandbox ? 'Local sandbox' : (profile?.email ?? 'GATE preparation')}</span>
+            <span>
+              {backendConfig.isLocal
+                ? profile?.username
+                  ? `@${profile.username} · Personal workspace`
+                  : 'Personal workspace'
+                : sandbox
+                  ? 'Local sandbox'
+                  : (profile?.email ?? 'GATE preparation')}
+            </span>
           </div>
-          {!backendConfig.isLocal && (forceReady ? (
-            <div className="flex flex-col items-end gap-1.5">
+          {!backendConfig.isLocal &&
+            (forceReady ? (
+              <div className="flex flex-col items-end gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => setForceReady(false)}
+                  disabled={signingOut}
+                  className="text-[11px] text-text-muted"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={() => void handleSignOut(true)}
+                  disabled={signingOut}
+                  aria-label="Force sign out"
+                  title={
+                    signingOut
+                      ? 'Signing out…'
+                      : 'Force sign out — exit immediately even if pending sync cannot finish'
+                  }
+                  className="flex items-center gap-1.5 text-[11px] font-semibold text-danger"
+                >
+                  <LogOut
+                    size={14}
+                    strokeWidth={1.7}
+                    aria-hidden
+                    className={signingOut ? 'animate-spin' : undefined}
+                  />
+                  {signingOut ? 'Signing out…' : 'Force sign out'}
+                </button>
+              </div>
+            ) : (
               <button
                 type="button"
-                onClick={() => setForceReady(false)}
+                onClick={() => void handleSignOut()}
                 disabled={signingOut}
-                className="text-[11px] text-text-muted"
+                aria-label="Sign out"
+                title={signingOut ? 'Signing out…' : 'Sign out'}
               >
-                Cancel
+                <LogOut
+                  size={16}
+                  strokeWidth={1.7}
+                  aria-hidden
+                  className={signingOut ? 'animate-spin' : undefined}
+                />
               </button>
-              <button
-                type="button"
-                onClick={() => void handleSignOut(true)}
-                disabled={signingOut}
-                aria-label="Force sign out"
-                title={signingOut ? 'Signing out…' : 'Force sign out — exit immediately even if pending sync cannot finish'}
-                className="flex items-center gap-1.5 text-[11px] font-semibold text-danger"
-              >
-                <LogOut size={14} strokeWidth={1.7} aria-hidden className={signingOut ? 'animate-spin' : undefined} />
-                {signingOut ? 'Signing out…' : 'Force sign out'}
-              </button>
-            </div>
-          ) : (
-            <button
-              type="button"
-              onClick={() => void handleSignOut()}
-              disabled={signingOut}
-              aria-label="Sign out"
-              title={signingOut ? 'Signing out…' : 'Sign out'}
-            >
-              <LogOut size={16} strokeWidth={1.7} aria-hidden className={signingOut ? 'animate-spin' : undefined} />
-            </button>
-          ))}
+            ))}
         </div>
       </div>
     </aside>

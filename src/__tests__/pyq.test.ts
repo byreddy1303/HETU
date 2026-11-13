@@ -99,12 +99,12 @@ describe('PYQ answer evaluation', () => {
       'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==',
       'base64'
     );
-    const blob = new Blob([png], { type: 'image/png' });
     const fetchSpy = vi
       .spyOn(globalThis, 'fetch')
-      .mockResolvedValue(
-        new Response(blob, { status: 200, headers: { 'Content-Type': 'image/png' } })
-      );
+      .mockResolvedValue({
+        ok: true,
+        blob: async () => new Blob([png], { type: 'image/png' })
+      } as Response);
     const html = '<p>See figure</p><img src="/pyq/images/test.png" alt="fig" />';
     const dataUrl = await resolvePyqJournalImageUrl(html);
     expect(dataUrl).toMatch(/^data:image\/png;base64,/);

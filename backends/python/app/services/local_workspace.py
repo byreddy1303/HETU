@@ -13,6 +13,7 @@ from app.core.config import Settings
 from app.db.base import Base
 from app.db.models import User, UserIdentity
 from app.db.session import get_engine, get_session_factory
+from app.services.local_schema import migrate_local_schema
 
 LOCAL_USER_ID = "local_user"
 
@@ -40,10 +41,12 @@ async def ensure_local_workspace(
         raise RuntimeError("The personal workspace requires ENVIRONMENT=local and SQLite")
     engine = engine if engine is not None else get_engine()
     session_factory = session_factory if session_factory is not None else get_session_factory()
+    await migrate_local_schema(engine)
     async with engine.begin() as connection:
         await connection.exec_driver_sql("BEGIN IMMEDIATE")
         await connection.run_sync(Base.metadata.create_all)
 
+    await migrate_local_schema(engine)
     name, username = local_profile_defaults(settings)
     async with session_factory() as db:
         # API and MCP may start together. Conflict-safe inserts keep one owner

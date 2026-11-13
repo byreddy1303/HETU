@@ -36,6 +36,7 @@
     "typecheck": "tsc -b --pretty false",
     "test": "vitest run",
     "test:e2e": "playwright test",
+    "test:local-skills": "playwright test --config playwright.skill.config.ts",
     "native:sync": "npm run build:native && cap sync android",
     "android:open": "npm run native:sync && cap open android",
     "android:run": "npm run native:sync && cap run android",

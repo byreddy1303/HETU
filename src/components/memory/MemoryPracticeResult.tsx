@@ -26,6 +26,13 @@ export default function MemoryPracticeResult({ session, attempts }: { session: P
     catch (cause) { setError(cause instanceof Error ? cause.message : 'The result could not be linked.'); }
     finally { setBusy(false); }
   }
+  if (entry?.data.skill_id) {
+    return <section className="space-y-3 rounded border border-border bg-bg-raised p-4" aria-label="Linked repair result">
+      <h2 className="font-display text-lg font-semibold">Skill practice saved</h2>
+      <p className="text-sm text-text-muted">Your submitted answers are linked automatically. Record whether you used help to inspect fresh and delayed evidence.</p>
+      <Link to="/skills" className="text-accent underline">Open skill results and next check</Link>
+    </section>;
+  }
   return <section className="space-y-3 rounded border border-border bg-bg-raised p-4" aria-label="Linked repair result">
     <h2 className="font-display text-lg font-semibold">{entry?.title || 'Linked learning activity'}</h2>
     <p className="text-sm text-text-muted">These immutable attempts can be linked to the repair that launched this set. Accuracy and pace remain separate evidence; completing a set does not establish mastery.</p>

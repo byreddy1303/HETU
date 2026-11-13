@@ -7,7 +7,9 @@ from datetime import date, timedelta
 from typing import Any, Literal
 
 Grade = Literal["again", "hard", "good", "easy"]
-Mode = Literal["minutes-10", "minutes-20", "minutes-30", "questions-5", "all"]
+Mode = Literal[
+    "minutes-10", "minutes-20", "minutes-30", "minutes-45", "minutes-60", "questions-5", "all"
+]
 
 
 def derive_grade(
@@ -202,7 +204,13 @@ def build_sprint(candidates: list[dict[str, Any]], mode: Mode, today: date) -> d
         row = remaining.pop(index)
         ranked.append(row)
         last_subject = row["item"]["subject"]
-    seconds_limit = {"minutes-10": 600, "minutes-20": 1200, "minutes-30": 1800}.get(mode)
+    seconds_limit = {
+        "minutes-10": 600,
+        "minutes-20": 1200,
+        "minutes-30": 1800,
+        "minutes-45": 2700,
+        "minutes-60": 3600,
+    }.get(mode)
     count_limit = 5 if mode == "questions-5" else 100
     selected, seconds = [], 0
     for row in ranked:

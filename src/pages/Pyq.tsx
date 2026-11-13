@@ -1,3 +1,5 @@
+import { backendConfig } from '@/lib/backend-config';
+import { prepareLocalLearningActivity } from '@/lib/local-learning-engine';
 import { memo, useEffect, useMemo, useRef, useState } from 'react';
 import '@/workflow-surfaces.css';
 import { useNavigate, useSearchParams } from 'react-router-dom';
@@ -692,34 +694,11 @@ function PracticeSetup({
   return (
     <div className="workflow-page pyq-workbench flex flex-col gap-4">
       <PageHeader
+        compact={backendConfig.isLocal}
         title="GATE PYQs"
-        description={`${catalogQuestionCount.toLocaleString()} GATE CSE Core questions for focused practice and exam sessions.`}
+        description={`${catalogQuestionCount.toLocaleString()} ${selectedBook?.label ?? "bank"} questions for focused practice and exam sessions.`}
         showMobileMark={false}
       />
-
-      {manifest.books.some((book) => book.sourceClass === 'user-import') && (
-        <Card>
-          <CardHeader title="Test Series" />
-          <CardBody className="space-y-3">
-            {manifest.books.filter((book) => book.sourceClass === 'user-import').map((book) => (
-              <div key={book.slug} className="flex flex-wrap items-center justify-between gap-3 rounded border border-border p-4">
-                <div>
-                  <p className="font-semibold text-text">{book.label}</p>
-                  <p className="text-[12px] text-text-muted">
-                    {book.count} questions · Local question set · Source-provided answer key
-                  </p>
-                  <p className="text-[12px] text-text-muted">
-                    {book.subjects.map((subject) => `${subject.label} → ${subject.topics.map((topic) => topic.label).join(', ')}`).join(' · ')}
-                  </p>
-                </div>
-                <Button disabled={loading} onClick={() => onStartTestSeries(book.slug)} aria-label={`Practice ${book.label}`}>
-                  Practice this set
-                </Button>
-              </div>
-            ))}
-          </CardBody>
-        </Card>
-      )}
 
       {activeSession && (
         <Card className="workbench-resume border-accent/30">
@@ -830,6 +809,30 @@ function PracticeSetup({
             </Card>
           ))}
         </div>
+      )}
+
+      {manifest.books.some((book) => book.sourceClass === 'user-import') && (
+        <Card>
+          <CardHeader title="Test Series" />
+          <CardBody className="space-y-3">
+            {manifest.books.filter((book) => book.sourceClass === 'user-import').map((book) => (
+              <div key={book.slug} className="flex flex-wrap items-center justify-between gap-3 rounded border border-border p-4">
+                <div>
+                  <p className="font-semibold text-text">{book.label}</p>
+                  <p className="text-[12px] text-text-muted">
+                    {book.count} questions · Local question set · Source-provided answer key
+                  </p>
+                  <p className="text-[12px] text-text-muted">
+                    {book.subjects.map((subject) => `${subject.label} → ${subject.topics.map((topic) => topic.label).join(', ')}`).join(' · ')}
+                  </p>
+                </div>
+                <Button disabled={loading} onClick={() => onStartTestSeries(book.slug)} aria-label={`Practice ${book.label}`}>
+                  Practice this set
+                </Button>
+              </div>
+            ))}
+          </CardBody>
+        </Card>
       )}
 
       {showRecommendedSetup && (
@@ -3205,22 +3208,9 @@ export default function Pyq() {
     setLoading(true);
     setStartError(null);
     try {
-      // Auto-pause any active set so the user can start a fresh one
-      const activeRows = await db.pyq_sessions
-        .where('[user_id+status]')
-        .equals([userId, 'active'])
-        .toArray();
-      for (const activeRow of activeRows) {
-        await writeLocal('pyq_sessions', pauseStoredPyqSession(activeRow));
-      }
-      if (pyqSessionId && activeRows.some((r) => r.id === pyqSessionId)) {
-        setQuestions([]);
-        setFinished(false);
-        setIndex(0);
-        setPyqSessionId(null);
-      }
       const attemptedIds = new Set(attempts.map((attempt) => attempt.question_uid));
       const isFullPaper = config.mode === 'exam' && config.examKind === 'full-paper';
+      let skillManaged = false;
       let rows: PyqQuestion[];
       let sessionConfig: AttemptConfig;
 
@@ -3244,7 +3234,16 @@ export default function Pyq() {
           practiceDraft: undefined, practiceDrafts: undefined
         };
       } else if (memoryRepairId) {
-        const { entry } = await getMemoryEntry(memoryRepairId);
+        let { entry } = await getMemoryEntry(memoryRepairId);
+        if (entry.data.skill_id) {
+          skillManaged = true;
+          entry = await prepareLocalLearningActivity(memoryRepairId);
+          const savedSessionId = typeof entry.data.active_session_id === 'string' ? entry.data.active_session_id : null;
+          if (savedSessionId) {
+            navigate(`/pyq?resumeSession=${encodeURIComponent(savedSessionId)}`);
+            return;
+          }
+        }
         if (entry.kind !== 'repair') throw new Error('This memory record is not a practice repair.');
         rows = await loadMemoryQuestions(entry, userId);
         if (!rows.length) throw new Error('The repair has no eligible selected questions. Return to Learning Memory and choose an available set.');
@@ -3451,8 +3450,22 @@ export default function Pyq() {
                 practiceDrafts: undefined
               };
       }
+      // Auto-pause any active set so the user can start a fresh one
+      const activeRows = await db.pyq_sessions
+        .where('[user_id+status]')
+        .equals([userId, 'active'])
+        .toArray();
+      for (const activeRow of activeRows) {
+        await writeLocal('pyq_sessions', pauseStoredPyqSession(activeRow));
+      }
+      if (pyqSessionId && activeRows.some((r) => r.id === pyqSessionId)) {
+        setQuestions([]);
+        setFinished(false);
+        setIndex(0);
+        setPyqSessionId(null);
+      }
       sessionConfig = { ...sessionConfig, bookSlug: testBook?.slug ?? 'gate-cse' };
-      const linkedConfig = { ...sessionConfig, ...(searchParams.get('memoryRepairId') ? { memoryRepairId: searchParams.get('memoryRepairId') } : {}) };
+      const linkedConfig = { ...sessionConfig, ...(memoryRepairId ? { memoryRepairId } : {}) };
       const session = createPyqSessionRow(userId!, manifest.bankVersion, linkedConfig, rows);
       const plannerDate = searchParams.get('plannerDate');
       const plannerBlockId = searchParams.get('plannerBlock');
@@ -3468,7 +3481,7 @@ export default function Pyq() {
           row: canonical
         }
       ]);
-      if (memoryRepairId) {
+      if (memoryRepairId && !skillManaged) {
         // The session carries the link even if this optional index update fails.
         void attachMemoryRepairSession(memoryRepairId, session.id).catch((cause: unknown) => {
           console.warn('[memory] Practice is saved; repair index update needs retry.', cause);
@@ -3492,7 +3505,7 @@ export default function Pyq() {
           startedAtMs: Number.isFinite(firstStartedAt) ? firstStartedAt : Date.now()
         };
       }
-      setConfig(sessionConfig);
+      setConfig(linkedConfig);
       setPyqSessionId(session.id);
       loadedSessionRef.current = session;
       setLoadedSession(session);
@@ -3501,6 +3514,10 @@ export default function Pyq() {
       setCompleted([]);
       setFinished(false);
       setAnalyzedCount(0);
+      if (memoryRepairId) {
+        autoResumeHandledRef.current = session.id;
+        navigate(`/pyq?resumeSession=${encodeURIComponent(session.id)}`, { replace: true });
+      }
     } catch (error) {
       setStartError(error instanceof Error ? error.message : 'Could not build this practice set.');
     } finally {

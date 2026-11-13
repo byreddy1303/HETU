@@ -102,6 +102,15 @@ export default function MemoryEntryEditor({ initial, onChanged, onCheckStateChan
     setChecking(false); setResponse(''); setNotice('Response recorded as your self-assessment. A later recall check is scheduled; concept mastery has not been inferred.');
   }
 
+  if (entry.data.skill_id || entry.id.startsWith('study-day:')) {
+    return <article className="space-y-4">
+      <h2 className="font-display text-xl font-semibold">{entry.title}</h2>
+      <p className="text-sm text-text-muted">This record is managed by the study workflow. Its original evidence is preserved here.</p>
+      <p>{entry.content}</p>
+      <Link className="text-accent underline" to={entry.id.startsWith('skill-diagnosis:') ? `/skills/diagnoses/${encodeURIComponent(entry.id)}` : entry.id.startsWith('study-day:') ? '/' : '/skills'}>Open study workflow</Link>
+      {entry.kind === 'verification' && <p className="text-sm">{String(entry.data.reliable_correct ?? entry.data.correct ?? 0)} correct · {String(entry.data.planned ?? entry.data.judged ?? 0)} selected questions</p>}
+    </article>;
+  }
   return <article className="min-w-0 space-y-5" aria-label="Memory record">
     <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border pb-3">
       <p className="text-sm text-text-muted">{entry.kind.replace('_', ' ')} · {entry.evidence_kind === 'learner' ? 'Recorded by you' : entry.evidence_kind === 'rule' ? 'Rule-derived observation' : entry.evidence_kind === 'model' ? 'Model interpretation' : 'Recorded event'}</p>

@@ -5,6 +5,9 @@ import { runLocalLearningEngine } from '@/lib/local-learning-engine';
 import { backendConfig } from '@/lib/backend-config';
 import { subscribeDb } from '@/lib/db';
 
+vi.mock('@/lib/skill-coach', () => ({
+  reconcileSkills: vi.fn().mockResolvedValue({ reconciled: 0 })
+}));
 vi.mock('@/hooks/useAuth', () => ({ useAuth: () => ({ userId: 'owner' }) }));
 vi.mock('@/lib/backend-config', () => ({ backendConfig: { isLocal: true } }));
 vi.mock('@/lib/db', () => ({ subscribeDb: vi.fn(() => vi.fn()) }));

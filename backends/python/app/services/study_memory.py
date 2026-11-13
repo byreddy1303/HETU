@@ -269,14 +269,45 @@ async def _validate_links(
 
 
 async def save_entry(
-    db: AsyncSession, *, owner_id: str, entry_id: str, draft: StudyMemoryDraft
+    db: AsyncSession,
+    *,
+    owner_id: str,
+    entry_id: str,
+    draft: StudyMemoryDraft,
+    skill_domain: bool = False,
 ) -> dict[str, Any]:
     if not entry_id or len(entry_id) > 128:
         raise HTTPException(422, "Memory id must contain 1 to 128 characters")
+    if not skill_domain and entry_id.startswith(
+        ("skill-diagnosis:", "study-day:", "skill-conditions:")
+    ):
+        raise HTTPException(422, "Use the skill coaching workflow to update this record.")
     await lock_identity(db, COLLECTION, owner_id, entry_id)
     existing = await _owned(db, owner_id, COLLECTION, entry_id)
     await _validate_links(db, owner_id, entry_id, draft)
     payload = draft.model_dump(exclude={"expected_version"})
+    if not skill_domain and (
+        draft.data.get("skill_id") or (existing and existing.data.get("data", {}).get("skill_id"))
+    ):
+        permitted = False
+        if existing and draft.kind == "repair" and existing.data.get("state") == "open":
+            allowed = {
+                **existing.data,
+                "data": {
+                    **existing.data.get("data", {}),
+                    "active_session_id": draft.data.get("active_session_id"),
+                },
+            }
+            permitted = bool(draft.data.get("active_session_id")) and payload == allowed
+            if permitted:
+                linked = await _owned(db, owner_id, "pyq_sessions", draft.data["active_session_id"])
+                permitted = bool(
+                    linked and linked.data.get("config", {}).get("memoryRepairId") == entry_id
+                )
+        if not permitted:
+            raise HTTPException(
+                422, "Use Skill practice to update this evidence and its follow-up."
+            )
     if draft.kind == "verification" and draft.repair_id and draft.session_id:
         session = await _session(db, owner_id, draft.session_id)
         if session.data.get("config", {}).get("memoryRepairId") != draft.repair_id:

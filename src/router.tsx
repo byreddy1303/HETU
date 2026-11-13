@@ -5,6 +5,7 @@ import LoadingScreen from '@/components/shared/LoadingScreen';
 import Shell from '@/components/layout/Shell';
 import RootErrorBoundary from '@/components/shared/RootErrorBoundary';
 import { lazyWithRetry } from '@/lib/lazyWithRetry';
+import { backendConfig } from '@/lib/backend-config';
 
 const ClerkAuth = lazyWithRetry(() => import('@/pages/ClerkAuth'));
 const ClerkSignup = lazyWithRetry(() => import('@/pages/ClerkSignup'));
@@ -12,7 +13,14 @@ const OAuthConsentPage = lazyWithRetry(() => import('@/pages/OAuthConsent'));
 
 const RequestAccess = lazyWithRetry(() => import('@/pages/RequestAccess'));
 const NotFound = lazyWithRetry(() => import('@/pages/NotFound'));
-const Dashboard = lazyWithRetry(() => import('@/pages/Dashboard'));
+const Dashboard = lazyWithRetry(() =>
+  backendConfig.isLocal
+    ? import('@/components/dashboard/LocalStudyDesk')
+    : import('@/pages/Dashboard')
+);
+const LegacyDashboard = lazyWithRetry(() => import('@/pages/Dashboard'));
+const StudyHub = lazyWithRetry(() => import('@/pages/StudyHub'));
+const SkillStudio = lazyWithRetry(() => import('@/pages/SkillStudio'));
 const DoNow = lazyWithRetry(() => import('@/pages/DoNow'));
 const QuickCapture = lazyWithRetry(() => import('@/pages/QuickCapture'));
 const Mocks = lazyWithRetry(() => import('@/pages/Mocks'));
@@ -82,6 +90,12 @@ export const router = routerFactory([
     errorElement: <RootErrorBoundary />,
     children: [
       { index: true, element: <Dashboard /> },
+      { path: 'skills', element: <SkillStudio /> },
+      { path: 'skills/diagnoses/:diagnosisId', element: <SkillStudio /> },
+      { path: 'review', element: <StudyHub kind="review" /> },
+      { path: 'knowledge', element: <StudyHub kind="knowledge" /> },
+      { path: 'progress', element: <StudyHub kind="progress" /> },
+      { path: 'progress/overview', element: <LegacyDashboard /> },
       { path: 'today', element: <DoNow /> },
       { path: 'capture', element: <QuickCapture /> },
       { path: 'mocks', element: <Mocks /> },

@@ -155,6 +155,10 @@ async def upsert_records(
     items: list[dict[str, Any]],
 ) -> list[Record]:
     require_collection(collection)
+    if collection == "pyq_sessions":
+        from app.services.recovery import owner_lock
+
+        await owner_lock(db, owner_id)
     output: list[Record] = []
     # Stable ordering avoids opposite-order batch deadlocks. Advisory locks also
     # serialize first inserts, for which SELECT FOR UPDATE has no row to lock.
@@ -173,6 +177,13 @@ async def upsert_records(
             .with_for_update()
             .execution_options(populate_existing=True)
         )
+        skill_repair = None
+        if collection == "pyq_sessions":
+            from app.services.skill_coach import validate_practice_session
+
+            skill_repair = await validate_practice_session(
+                db, owner_id, external_id, payload, existing
+            )
         if existing is None:
             if expected is not None:
                 raise HTTPException(status_code=409, detail=f"Record {external_id} does not exist")
@@ -224,6 +235,10 @@ async def upsert_records(
         output.append(existing)
         await db.flush()
         await snapshot_for_sqlite(db, existing)
+        if skill_repair is not None:
+            from app.services.skill_coach import bind_practice_session
+
+            await bind_practice_session(db, owner_id, skill_repair, external_id)
     return output
 
 
@@ -237,6 +252,10 @@ async def patch_record(
     expected_version: int | None,
 ) -> Record:
     require_collection(collection)
+    if collection == "pyq_sessions":
+        from app.services.recovery import owner_lock
+
+        await owner_lock(db, owner_id)
     if collection in IMMUTABLE_COLLECTIONS:
         raise HTTPException(status_code=409, detail=f"{collection} records are append-only")
     record = await _owned_record(db, collection, owner_id, external_id)
@@ -249,7 +268,12 @@ async def patch_record(
             detail={"message": "Version conflict", "current_version": record.version},
         )
     _, _, cleaned = clean_payload({"id": external_id, **patch})
-    record.data = {**record.data, **cleaned}
+    merged = {**record.data, **cleaned}
+    if collection == "pyq_sessions":
+        from app.services.skill_coach import validate_practice_session
+
+        await validate_practice_session(db, owner_id, external_id, merged, record)
+    record.data = merged
     record.version += 1
     record.updated_at = datetime.now(UTC)
     await db.flush()
@@ -383,6 +407,10 @@ async def restore_record(
     if saved is None or saved.snapshot.get("deleted_at"):
         raise HTTPException(status_code=404, detail="Live revision not found")
     _, _, payload = clean_payload(saved.snapshot)
+    if collection == "pyq_sessions":
+        from app.services.skill_coach import validate_practice_session
+
+        await validate_practice_session(db, owner_id, external_id, payload, record)
     record.data = payload
     record.deleted_at = None
     record.version += 1

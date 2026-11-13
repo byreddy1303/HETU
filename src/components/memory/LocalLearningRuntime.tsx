@@ -1,3 +1,4 @@
+import { reconcileSkills } from '@/lib/skill-coach';
 import { useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { backendConfig } from '@/lib/backend-config';
@@ -16,6 +17,7 @@ export default function LocalLearningRuntime() {
       if (!active || pending || document.visibilityState === 'hidden') return;
       pending = true;
       try {
+        await reconcileSkills();
         await runLocalLearningEngine();
         if (active) window.dispatchEvent(new Event(LEARNING_UPDATED_EVENT));
       } catch {

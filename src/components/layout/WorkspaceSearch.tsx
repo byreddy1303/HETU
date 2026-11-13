@@ -1,9 +1,25 @@
+import { backendConfig } from '@/lib/backend-config';
 import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowUpRight, Search, X } from 'lucide-react';
 
 const SECTIONS = [
-  { to: '/', label: 'Dashboard', group: 'Overview', keywords: 'home progress' },
+  {
+    to: '/skills',
+    label: 'Skill practice and evidence',
+    group: 'Review',
+    keywords: 'contrast diagnosis repair transfer delayed'
+  },
+  { to: '/review', label: 'Review', group: 'Study', keywords: 'recall repair' },
+  { to: '/knowledge', label: 'Knowledge', group: 'Library', keywords: 'sources concepts' },
+  { to: '/progress', label: 'Progress', group: 'Evidence', keywords: 'learning results' },
+  {
+    to: '/memory',
+    label: 'Learning Memory',
+    group: 'Reflect',
+    keywords: 'history search evidence'
+  },
+  { to: '/', label: backendConfig.isLocal ? 'Today' : 'Dashboard', group: 'Overview', keywords: 'home progress' },
   { to: '/today', label: 'Do now', group: 'Study', keywords: 'queue next due' },
   { to: '/pyq', label: 'PYQ practice', group: 'Study', keywords: 'questions previous year gate' },
   {
@@ -32,7 +48,12 @@ const SECTIONS = [
   { to: '/heatmap', label: 'Heatmap', group: 'Reflect', keywords: 'topics coverage weakness' },
   { to: '/calibration', label: 'Calibration', group: 'Reflect', keywords: 'confidence accuracy' },
   { to: '/readiness', label: 'Readiness', group: 'Reflect', keywords: 'exam prepare progress' },
-  { to: '/learning-library', label: 'Saved discussions', group: 'Library', keywords: 'chatgpt conversation concept reasoning learning' },
+  {
+    to: '/learning-library',
+    label: 'Saved discussions',
+    group: 'Library',
+    keywords: 'chatgpt conversation concept reasoning learning'
+  },
   { to: '/topper-notes', label: 'Topper notes', group: 'Library', keywords: 'learn study notes' },
   {
     to: '/revision-pack',
@@ -66,7 +87,7 @@ export default function WorkspaceSearch({ open, onClose }: { open: boolean; onCl
   const inputRef = useRef<HTMLInputElement>(null);
   const [query, setQuery] = useState('');
   const navigate = useNavigate();
-  const results = SECTIONS.filter((section) =>
+  const results = SECTIONS.filter((section) => backendConfig.isLocal || !['/skills', '/review', '/knowledge', '/progress'].includes(section.to)).filter((section) =>
     `${section.label} ${section.group} ${section.keywords}`
       .toLowerCase()
       .includes(query.trim().toLowerCase())

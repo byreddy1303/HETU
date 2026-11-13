@@ -1,3 +1,4 @@
+import { LOCAL_NAVIGATION } from '@/lib/local-navigation';
 import { backendConfig } from '@/lib/backend-config';
 import { useEffect, useId, useRef, useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
@@ -157,9 +158,16 @@ export default function MobileTabs() {
   }, [storedSessionId]);
   const fabTo = liveSessionId ? `/session/${liveSessionId}/solve` : '/session/new';
   const fabLabel = liveSessionId ? 'Resume session' : 'Start session';
-  const moreActive = MORE_GROUPS.flatMap((group) => group.items)
-    .concat({ to: '/settings', label: 'Settings', icon: Settings })
-    .some(({ to }) => pathname === to || pathname.startsWith(`${to}/`));
+  const primaryActive =
+    backendConfig.isLocal &&
+    LOCAL_NAVIGATION.some(({ to }) =>
+      to === '/' ? pathname === '/' : pathname === to || pathname.startsWith(`${to}/`)
+    );
+  const moreActive =
+    !primaryActive &&
+    MORE_GROUPS.flatMap((group) => group.items)
+      .concat({ to: '/settings', label: 'Settings', icon: Settings })
+      .some(({ to }) => pathname === to || pathname.startsWith(`${to}/`));
   const transition = reduceMotion
     ? { duration: 0 }
     : { type: 'spring' as const, stiffness: 500, damping: 38 };
@@ -215,12 +223,13 @@ export default function MobileTabs() {
   }
   function tab(item: Item) {
     const Icon = item.icon;
-    const active = item.to === '/' ? pathname === '/' : pathname.startsWith(item.to);
+    const active = (backendConfig.isLocal && item.to === '/review' && (pathname === '/skills' || pathname.startsWith('/skills/'))) || (item.to === '/' ? pathname === '/' : pathname.startsWith(item.to));
     return (
       <NavLink
         key={item.to}
         to={item.to}
         end={item.to === '/'}
+        aria-current={active ? 'page' : undefined}
         onClick={() => haptic('selection')}
         className={cn('workspace-dock-tab native-bottom-tab', active && 'is-active')}
       >
@@ -283,55 +292,70 @@ export default function MobileTabs() {
               <span>Settings</span>
             </NavLink>
             <div>
-              {!backendConfig.isLocal && (forceReady ? (
-                <div className="flex items-center gap-2">
+              {!backendConfig.isLocal &&
+                (forceReady ? (
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setForceReady(false)}
+                      disabled={signingOut}
+                      className="text-[11px] text-text-muted"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => void handleSignOut(true)}
+                      disabled={signingOut}
+                      className="flex items-center gap-1.5 text-[11px] font-semibold text-danger"
+                      aria-label="Force sign out"
+                    >
+                      <LogOut
+                        size={14}
+                        aria-hidden
+                        className={signingOut ? 'animate-spin' : undefined}
+                      />
+                      {signingOut ? 'Signing out…' : 'Force sign out'}
+                    </button>
+                  </div>
+                ) : (
                   <button
                     type="button"
-                    onClick={() => setForceReady(false)}
+                    onClick={() => void handleSignOut()}
                     disabled={signingOut}
-                    className="text-[11px] text-text-muted"
+                    aria-label="Sign out"
                   >
-                    Cancel
+                    <LogOut
+                      size={16}
+                      aria-hidden
+                      className={signingOut ? 'animate-spin' : undefined}
+                    />
+                    {signingOut ? 'Signing out…' : 'Sign out'}
                   </button>
-                  <button
-                    type="button"
-                    onClick={() => void handleSignOut(true)}
-                    disabled={signingOut}
-                    className="flex items-center gap-1.5 text-[11px] font-semibold text-danger"
-                    aria-label="Force sign out"
-                  >
-                    <LogOut size={14} aria-hidden className={signingOut ? 'animate-spin' : undefined} />
-                    {signingOut ? 'Signing out…' : 'Force sign out'}
-                  </button>
-                </div>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => void handleSignOut()}
-                  disabled={signingOut}
-                  aria-label="Sign out"
-                >
-                  <LogOut size={16} aria-hidden className={signingOut ? 'animate-spin' : undefined} />
-                  {signingOut ? 'Signing out…' : 'Sign out'}
-                </button>
-              ))}
+                ))}
             </div>
           </footer>
         </div>
       </dialog>
       <nav className="workspace-dock native-bottom-nav" aria-label="Primary navigation">
-        {TABS.slice(0, 2).map(tab)}
-        <div className="workspace-dock-center">
-          <NavLink
-            to={fabTo}
-            onClick={() => haptic('firm')}
-            aria-label={fabLabel}
-            className="workspace-dock-session"
-          >
-            {liveSessionId ? <Play size={22} aria-hidden /> : <Plus size={25} aria-hidden />}
-          </NavLink>
-        </div>
-        {TABS.slice(2).map(tab)}
+        {backendConfig.isLocal ? (
+          LOCAL_NAVIGATION.map(tab)
+        ) : (
+          <>
+            {TABS.slice(0, 2).map(tab)}
+            <div className="workspace-dock-center">
+              <NavLink
+                to={fabTo}
+                onClick={() => haptic('firm')}
+                aria-label={fabLabel}
+                className="workspace-dock-session"
+              >
+                {liveSessionId ? <Play size={22} aria-hidden /> : <Plus size={25} aria-hidden />}
+              </NavLink>
+            </div>
+            {TABS.slice(2).map(tab)}
+          </>
+        )}
         <button
           ref={moreButtonRef}
           type="button"

@@ -11,7 +11,7 @@ from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 from fastapi import HTTPException
 from pydantic import Field, field_validator, model_validator
-from sqlalchemy import func, select
+from sqlalchemy import func, select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.models import Record, User
@@ -123,7 +123,12 @@ async def account_clock(db: AsyncSession, owner_id: str) -> tuple[str, date, str
 
 async def owner_lock(db: AsyncSession, owner_id: str) -> None:
     # One consistent lock order for PYQ capture, answer and session mutations.
-    await lock_identity(db, "recovery_owner", owner_id, "workflow")
+    if db.bind.dialect.name == "sqlite":
+        # SQLite has no advisory locks. Acquire its transaction-scoped writer
+        # reservation before reading workflow state; a no-op preserves profiles.
+        await db.execute(text("UPDATE users SET id=id WHERE id=:owner"), {"owner": owner_id})
+    else:
+        await lock_identity(db, "recovery_owner", owner_id, "workflow")
 
 
 async def owned(db: AsyncSession, owner_id: str, collection: str, record_id: str) -> Record:

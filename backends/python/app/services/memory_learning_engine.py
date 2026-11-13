@@ -200,33 +200,38 @@ async def update_engine_config(db: AsyncSession, *, owner_id: str, config: Engin
 
 
 async def list_engine_actions(db: AsyncSession, *, owner_id: str) -> dict:
-    rows = list(
+    base = select(Record).where(
+        Record.owner_id == owner_id,
+        Record.collection == "study_memory",
+        Record.deleted_at.is_(None),
+        Record.data["data"]["automation"].as_string() == AUTOMATION,
+    )
+    # Recent result receipts must never crowd unfinished activities out of the queue.
+    repairs = list(
         (
             await db.scalars(
-                select(Record)
-                .where(
-                    Record.owner_id == owner_id,
-                    Record.collection == "study_memory",
-                    Record.deleted_at.is_(None),
-                    Record.data["data"]["automation"].as_string() == AUTOMATION,
-                    Record.data["kind"].as_string().in_(["repair", "verification"]),
+                base.where(
+                    Record.data["kind"].as_string() == "repair",
+                    Record.data["state"].as_string().in_(["open", "deferred"]),
                 )
-                .order_by(Record.updated_at.desc(), Record.id.desc())
-                .limit(100)
+                .order_by(Record.data["data"]["due_date"].as_string(), Record.id)
+                .limit(101)
             )
         ).all()
     )
-    items = [
-        to_api(row)
-        for row in rows
-        if row.data.get("kind") == "repair" and row.data.get("state") in {"open", "deferred"}
-    ]
-    items.sort(key=lambda row: (row.get("data", {}).get("due_date", "9999"), str(row["id"])))
+    results = (
+        await db.scalars(
+            base.where(
+                Record.data["kind"].as_string() == "verification",
+            )
+            .order_by(Record.updated_at.desc(), Record.id.desc())
+            .limit(10)
+        )
+    ).all()
     return {
-        "items": items,
-        "latest_results": [to_api(row) for row in rows if row.data.get("kind") == "verification"][
-            :10
-        ],
+        "items": [to_api(row) for row in repairs[:100]],
+        "complete": len(repairs) <= 100,
+        "latest_results": [to_api(row) for row in results],
     }
 
 
@@ -755,8 +760,18 @@ async def _exposure(db: AsyncSession, owner_id: str) -> set[str]:
 
 
 def _select_questions(
-    subject: str, topic: str, seen: set[str], source_uids: list[str], *, fresh: bool
+    subject: str,
+    topic: str,
+    seen: set[str],
+    source_uids: list[str],
+    *,
+    fresh: bool,
+    skill_id: str | None = None,
 ) -> list[str]:
+    if skill_id:
+        from app.services.skill_curriculum import select_skill_questions
+
+        return select_skill_questions(skill_id, seen, fresh=fresh, source_uids=source_uids)
     bank = active_bank()
     reserved: set[str] = set()
     for paper in bank.manifest.get("benchmarkPapers", []):
@@ -856,6 +871,7 @@ async def _memory_write(db: AsyncSession, owner_id: str, entry_id: str, payload:
         draft=StudyMemoryDraft.model_validate(
             {**payload, "expected_version": existing.version if existing else 0}
         ),
+        skill_domain=True,
     )
 
 
@@ -870,6 +886,17 @@ async def prepare_engine_activity(db: AsyncSession, *, owner_id: str, entry_id: 
     if row.data.get("state") not in {"open", "deferred"}:
         raise HTTPException(409, "This activity is already finished. Open its next review.")
     data = row.data.get("data", {})
+    if data.get("skill_id"):
+        from app.services.skill_coach import ensure_no_exam
+
+        await ensure_no_exam(db, owner_id)
+        config = await get_engine_config(db, owner_id=owner_id)
+        if data.get("due_date", "") > _day(config.model_dump()):
+            raise HTTPException(409, "This application check is scheduled for a later day.")
+        if data.get("active_session_id"):
+            active = await _owned(db, owner_id, "pyq_sessions", data["active_session_id"])
+            if active and active.data.get("status") in {"active", "paused", "interrupted"}:
+                return to_api(row)
     source_uids = []
     for attempt_id in data.get("source_attempt_ids", [])[:50]:
         attempt = await _owned(db, owner_id, "pyq_attempts", attempt_id)
@@ -887,6 +914,7 @@ async def prepare_engine_activity(db: AsyncSession, *, owner_id: str, entry_id: 
         await _exposure(db, owner_id),
         source_uids,
         fresh=fresh,
+        skill_id=data.get("skill_id"),
     )
     if not selected:
         raise HTTPException(
@@ -1136,6 +1164,10 @@ async def apply_engine_plan(
 
 async def reconcile_engine_results(db: AsyncSession, *, owner_id: str) -> int:
     """Finish linked practice and prepare the next check from real receipts."""
+    from app.services.recovery import owner_lock
+    from app.services.skill_coach import result_conditions
+
+    await owner_lock(db, owner_id)
     config = await get_engine_config(db, owner_id=owner_id)
     actions = await list_engine_actions(db, owner_id=owner_id)
     seen = await _exposure(db, owner_id)
@@ -1190,6 +1222,7 @@ async def reconcile_engine_results(db: AsyncSession, *, owner_id: str) -> int:
         clean = correct == len(planned) == len(latest) and judged == len(latest)
         result_id = _id("verification", f"{owner_id}:{repair_id}:{session.external_id}")
         followup_id = _id("followup", f"{owner_id}:{repair_id}:{session.external_id}")
+        skill_evidence = await result_conditions(db, owner_id, entry, session, receipts)
         prior_result = await _owned(db, owner_id, "study_memory", result_id)
         if prior_result is None:
             await _memory_write(
@@ -1213,6 +1246,7 @@ async def reconcile_engine_results(db: AsyncSession, *, owner_id: str) -> int:
                     "data": {
                         "automation": AUTOMATION,
                         "attempt_ids": [row.external_id for row in receipts],
+                        **skill_evidence,
                         "reliable_correct": correct,
                         "reliable_judged": judged,
                         "submitted": len(latest),
@@ -1241,6 +1275,7 @@ async def reconcile_engine_results(db: AsyncSession, *, owner_id: str) -> int:
             if fresh
             else retry_uids,
             fresh=fresh,
+            skill_id=entry.get("data", {}).get("skill_id"),
         )
         clean_checks = int(entry.get("data", {}).get("successful_checks", 0)) + 1 if clean else 0
         interval_days = [3, 7, 14, 30][min(clean_checks - 1, 3)] if clean else 1
@@ -1297,7 +1332,8 @@ async def reconcile_engine_results(db: AsyncSession, *, owner_id: str) -> int:
                         "failed_checks": 0
                         if clean
                         else int(entry.get("data", {}).get("failed_checks", 0)) + 1,
-                        "needs_local_review": not clean,
+                        "needs_local_review": not clean
+                        and not entry.get("data", {}).get("skill_id"),
                         "interval_days": interval_days,
                         "requested_count": len(uids) or 3,
                         "question_uids": uids,
@@ -1306,10 +1342,14 @@ async def reconcile_engine_results(db: AsyncSession, *, owner_id: str) -> int:
                         ),
                         "allow_seen": not fresh,
                         "selection_status": "ready" if uids else "insufficient-eligible-questions",
-                        "selection_basis": "same-topic-and-similar-text"
+                        "selection_basis": "reviewed-skill-map"
+                        if entry.get("data", {}).get("skill_id")
+                        else "same-topic-and-similar-text"
                         if fresh
                         else "original-question",
-                        "skill_match_verified": False,
+                        "skill_id": entry.get("data", {}).get("skill_id"),
+                        "curriculum_version": entry.get("data", {}).get("curriculum_version"),
+                        "skill_match_verified": bool(entry.get("data", {}).get("skill_id")),
                         "source_entry_ids": [repair_id, result_id],
                         "source_attempt_ids": [
                             row.external_id

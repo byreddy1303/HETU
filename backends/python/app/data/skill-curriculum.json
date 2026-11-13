@@ -1,0 +1,260 @@
+{
+  "version": 1,
+  "skills": [
+    {
+      "id": "cache-address-fields",
+      "title": "Cache address fields",
+      "subject": "Computer Organization",
+      "topic": "Cache Memory",
+      "prerequisites": [
+        "Binary logarithms",
+        "Byte and word addressing"
+      ],
+      "principle": "Convert capacity and block size to the same addressable unit. Sets = capacity / (block size × ways). Offset = log2(block size); index = log2(sets); tag = address width − index − offset.",
+      "contrast": "Changing associativity changes the number of sets, even when capacity and block size stay fixed.",
+      "probes": [
+        {
+          "id": "direct",
+          "prompt": "A byte-addressed machine has 32-bit addresses, a 16 KiB direct-mapped cache and 32-byte blocks. How many tag bits are needed? (1 KiB = 1024 bytes.)",
+          "choices": [
+            "18",
+            "20",
+            "23",
+            "27"
+          ],
+          "answer": 0,
+          "explanation": "There are 512 lines: 9 index bits and 5 offset bits. The tag is 32 − 9 − 5 = 18 bits."
+        },
+        {
+          "id": "four-way",
+          "prompt": "The same byte-addressed machine now uses a 4-way cache. Capacity remains 16 KiB and each block is still 32 bytes. How many tag bits are needed?",
+          "choices": [
+            "18",
+            "20",
+            "23",
+            "27"
+          ],
+          "answer": 1,
+          "explanation": "There are 128 sets: 7 index bits and 5 offset bits. The tag is 32 − 7 − 5 = 20 bits."
+        }
+      ],
+      "questions": [
+        {
+          "uid": "go:460806",
+          "source_hash": "4ab4816a50748aeb8651623fdb9673ca3b11988e8b689a847fc0d4855d85033d"
+        },
+        {
+          "uid": "go:460054",
+          "source_hash": "bcbd25e64db8f1bd0b4a265b1ab6e654a72524a8e52f8ea14c85d79eec3ac0de"
+        },
+        {
+          "uid": "go:399257",
+          "source_hash": "5cd6f2f091f9c58a992b20001263902187da0c04692093024254c3ed4ff2aea8"
+        },
+        {
+          "uid": "go:357521",
+          "source_hash": "3d9d0fd5de71f58213cd8332cdd85803015f5942bcc0cfab307e50ff2ebc9970"
+        },
+        {
+          "uid": "go:357429",
+          "source_hash": "2c536e2bd1289453a16348d47bc1f37eabd770c236c86031e33d100ac800b4d8"
+        },
+        {
+          "uid": "go:333201",
+          "source_hash": "9caf424c864a5897e668deb4e30213463599af077b6a5158975278b152289c86"
+        },
+        {
+          "uid": "go:302847",
+          "source_hash": "0da63277e3a6e0ae4458aaa440c08fcc59631e58c67b26d20b57a655656bc90e"
+        },
+        {
+          "uid": "go:118748",
+          "source_hash": "3b066b5730b162f41cc0e2be0798c57d5eb63418497fe3e579c20692b3c59db9"
+        },
+        {
+          "uid": "go:39622",
+          "source_hash": "33364b91d062bd476c4f29b147ee4b10fa9a86751f5e6a21f0b8c124ebfde6a0"
+        },
+        {
+          "uid": "go:8410",
+          "source_hash": "2d197e17b057359853d7194c6e89a235b00814b21a625c5fba5da9936403021a"
+        },
+        {
+          "uid": "go:1963",
+          "source_hash": "296878b0a63dd9ceb816dac58ef4fd45cb8268e17cec39db7a59e4699cda685d"
+        },
+        {
+          "uid": "go:2192",
+          "source_hash": "ddaccbe61754a694d791629f61399616d924faf385ba27fca3fade1af891cfd1"
+        }
+      ],
+      "review": {
+        "kind": "assistant-reviewed-skill-mapping",
+        "date": "2026-11-13",
+        "scope": "Question-to-skill relevance; answer provenance remains the catalog source. Contrast exercises are original HETU teaching material, not official exam questions."
+      }
+    },
+    {
+      "id": "page-replacement-trace",
+      "title": "Page replacement decisions",
+      "subject": "Operating Systems",
+      "topic": "Memory Management",
+      "prerequisites": [
+        "Resident pages and page faults",
+        "Queue order and recency"
+      ],
+      "principle": "Count a fault whenever the referenced page is absent, including initial loads. FIFO updates arrival order only on insertion; LRU updates recency on every reference. Optimal replacement uses the next future use.",
+      "contrast": "A hit changes recency for LRU but does not change arrival order for FIFO.",
+      "probes": [
+        {
+          "id": "fifo",
+          "prompt": "Two frames are initially empty. For references 1, 2, 1, 3, 1, how many page faults occur under FIFO?",
+          "choices": [
+            "3",
+            "4",
+            "5",
+            "2"
+          ],
+          "answer": 1,
+          "explanation": "The first two references fault. The hit on 1 does not move it in FIFO order. Loading 3 evicts 1, so the last reference faults again: 4 faults."
+        },
+        {
+          "id": "lru",
+          "prompt": "Two frames are initially empty. For the same references 1, 2, 1, 3, 1, how many page faults occur under LRU?",
+          "choices": [
+            "3",
+            "4",
+            "5",
+            "2"
+          ],
+          "answer": 0,
+          "explanation": "The hit on 1 makes 2 least recently used. Loading 3 evicts 2, and the final 1 is a hit: 3 faults."
+        }
+      ],
+      "questions": [
+        {
+          "uid": "go:460798",
+          "source_hash": "36b88bdc05b24f4b140659beb787590b99c95b7f09efdebded8a49ec4ea70c04"
+        },
+        {
+          "uid": "go:460036",
+          "source_hash": "ae7cb0c24d22ebe3f4042af37c607e54549fe697302b3a6b798c0f6184c4c785"
+        },
+        {
+          "uid": "go:399264",
+          "source_hash": "70b9d508da2d71eac86f6aa9461ec0aa5d5c3cd9df68ad3f378e4cdf50566d20"
+        },
+        {
+          "uid": "go:371882",
+          "source_hash": "d42030ea321ea3f4015c91bbb720de9b437da291ded4d1f77af627e81320ee1d"
+        },
+        {
+          "uid": "go:39711",
+          "source_hash": "80f7bc64399905875199e49a6e496a2252b1dd4d56948819b5e8b72408ead975"
+        },
+        {
+          "uid": "go:8353",
+          "source_hash": "996bcf5149c78eaa8ddcfaf066d6985f704255352749df1b16c1daa7c37451b6"
+        },
+        {
+          "uid": "go:2054",
+          "source_hash": "aed48a58286854171a9fea1bf0ce82b5681e5f70d5f49cad61a95bdaf391b13f"
+        },
+        {
+          "uid": "go:1992",
+          "source_hash": "462370fe8cd97db6c46584027c1019f320f470c2d97a17222719a944a9073941"
+        },
+        {
+          "uid": "go:2150",
+          "source_hash": "8de458236fdd369f4fc30c19a8543482b47af334c266a8ff53ad353fac9b55ae"
+        },
+        {
+          "uid": "go:1805",
+          "source_hash": "491dcfa701582eeaece59702205a4e70f8135e3236cd145088e631aeffc8be4d"
+        },
+        {
+          "uid": "go:2203",
+          "source_hash": "4c1e01cd949e6dfe7d24b793465378c0266c48118fea901f953c8f326cda5f6f"
+        },
+        {
+          "uid": "go:1274",
+          "source_hash": "499529876794e1f67bac0ab2a22842d4f82cf1d7df5779e6bc1ea55b47bfd87c"
+        }
+      ],
+      "review": {
+        "kind": "assistant-reviewed-skill-mapping",
+        "date": "2026-11-13",
+        "scope": "Question-to-skill relevance; answer provenance remains the catalog source. Contrast exercises are original HETU teaching material, not official exam questions."
+      }
+    },
+    {
+      "id": "sliding-window-limits",
+      "title": "Sliding-window limits",
+      "subject": "Computer Network",
+      "topic": "Data Link Layer",
+      "prerequisites": [
+        "Transmission and propagation delay",
+        "Sequence number wraparound"
+      ],
+      "principle": "With n sequence bits, standard Go-Back-N uses a receiver window of 1 and sender window at most 2^n − 1. Equal sender/receiver windows in Selective Repeat are at most 2^(n−1). For a lossless link with negligible ACK transmission and processing, utilization is min(1, W / (1 + 2Tp/Tt)).",
+      "contrast": "The same sequence space supports different window limits when the receiver accepts out-of-order frames.",
+      "probes": [
+        {
+          "id": "gbn",
+          "prompt": "A standard Go-Back-N protocol uses 3-bit frame sequence numbers and a receiver window of 1. What is the largest safe sender window, in frames?",
+          "choices": [
+            "4",
+            "7",
+            "8",
+            "3"
+          ],
+          "answer": 1,
+          "explanation": "The sequence space has 8 values. Go-Back-N needs one value outside the sender window, giving a maximum of 7."
+        },
+        {
+          "id": "sr",
+          "prompt": "A standard Selective Repeat protocol uses the same 3-bit sequence numbers, with equal sender and receiver window sizes. What is the largest safe window, in frames?",
+          "choices": [
+            "4",
+            "7",
+            "8",
+            "3"
+          ],
+          "answer": 0,
+          "explanation": "Old and new receive windows must not overlap after wraparound. Twice the window must fit in the 8-value space, so the maximum is 4."
+        }
+      ],
+      "questions": [
+        {
+          "uid": "go:357402",
+          "source_hash": "3d54f0c09c15b1ce613a96854ad3aa48e65e24e1f80c0627f825747e32a009ae"
+        },
+        {
+          "uid": "go:39577",
+          "source_hash": "ae058b03f2631b2ceca8bacdc38eb6aa71babf99a71e8ed219842cb3b3bc6f08"
+        },
+        {
+          "uid": "go:8481",
+          "source_hash": "12110271c33ffe7292a27d1fdf67e72adfaab845fee9cf8ab1016be29ceafd16"
+        },
+        {
+          "uid": "go:1795",
+          "source_hash": "bac2d9d5780ea5b1bb5f33c93977633083c57b596f8a337aff9c106d9d712b68"
+        },
+        {
+          "uid": "go:1361",
+          "source_hash": "5d67d46f8da518a1a09cf206c4b6529faeff55666961acfb7683c2d3a136c385"
+        },
+        {
+          "uid": "go:967",
+          "source_hash": "a452c456df61217ef3910a7a34062e75776f3ccf5136eb420b727c77850be959"
+        }
+      ],
+      "review": {
+        "kind": "assistant-reviewed-skill-mapping",
+        "date": "2026-11-13",
+        "scope": "Question-to-skill relevance; answer provenance remains the catalog source. Contrast exercises are original HETU teaching material, not official exam questions."
+      }
+    }
+  ]
+}

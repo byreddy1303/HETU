@@ -171,6 +171,7 @@ Details and limitations: [study-history-and-session-evidence.md](study-history-a
 
 | Date | Phase | Task | Commit | Agent Summary |
 |---|---|---|---|---|
+| 2026-11-14 | Workspace usability | Vibrant minimal surfaces and Today refresh stability | `62ad024` | Installed shared indigo/violet/coral styling and stopped unchanged hydration from retriggering subscribers. Today keeps usable actions visible during background requests. 888 frontend tests, 17 desktop tests, four local browser checks, lint, typecheck, and desktop packaging passed. Installed app remained settled; the 79 checked original study records were preserved. See vibrant-workspace-redesign.md. |
 | 2026-11-13 | Personal GATE pilot | Daily usability and three reviewed skill workflows | `3e42a5f` | Installed the local Today desk, saved time/priority choices, reviewed contrasts, source-pinned application practice, and assistance-qualified result/follow-up view. 887 frontend and 242 backend tests passed; 17 desktop tests and 2 local browser flows passed. Original 79 study records preserved byte-for-byte; database integrity and local storage verified. Broader stages and empirical learning outcomes remain pending. |
 | 2026-10-15 | Setup | Blueprint & Roadmap creation | `c8579cd` | Created component architecture spec and agent roadmap. |
 | 2026-10-15 | Bugfix | Fix topic_progress 409 soft-delete restore error | `c0d29ed` | Allowed upsert_records to restore soft-deleted rows in mutable collections instead of throwing 409. |

@@ -1,9 +1,9 @@
 # HETU Local Desktop: Supercharged Roadmap & Agent Execution Log
 
-**Current Status**: Daily study desk and three-skill personal GATE pilot installed; broader planning, coverage, and learning-effectiveness stages remain in progress
+**Current Status**: Vibrant study workspace and Today refresh fix installed alongside the three-skill personal GATE pilot; broader planning, coverage, and learning-effectiveness stages remain in progress
 **Target**: GATE CSE 2027 AIR < 100  
 **Architecture**: 100% Local Desktop (Electron + SQLite WAL + Python 3.12 + Native stdio MCP)  
-**Last Updated**: 2026-11-13
+**Last Updated**: 2026-11-14
 
 > **Note for Future Agents**:  
 > Always consult this document before starting a task. When you complete a sub-task or phase, update its checkbox (`[x]`), record the commit hash in the Progress Log below, and commit this file to `main` before finalizing your turn.
@@ -56,6 +56,13 @@ To make an AI act as a true master coach (identifying root weaknesses, predictin
 ---
 
 ## 2. Master Execution Roadmap
+
+### Vibrant workspace and Today stability (2026-11-14)
+- [x] Minimal shared surfaces with vibrant indigo, violet, and coral accents in light and dark themes.
+- [x] Quiet navigation, consistent headers/buttons, compact practice setup, and clearer Today, hub, and skill views.
+- [x] No-op hydration preserves snapshots; Today keeps usable actions mounted during background refresh and listens to relevant tables.
+- [x] Regression checks, responsive browser verification, packaged local installation, and original-record preservation checks.
+- Release scope and verification: [vibrant-workspace-redesign.md](vibrant-workspace-redesign.md).
 
 ### Personal GATE preparation pilot (2026-11-13)
 - [x] Today-first entry, durable daily capacity, contextual resume, practice reprioritization, and distinct retrieval/activity counts.

@@ -139,6 +139,31 @@ describe('local daily queue states and launch', () => {
     expect(screen.getByRole('combobox', { name: 'Time available' })).toHaveValue('20');
   });
 
+  it('keeps the current action mounted while a background refresh is pending', async () => {
+    mount();
+    const action = await screen.findByRole('heading', { name: 'Memory Management recall' });
+    const region = screen.getByRole('region', { name: "Today's study queue" });
+    let release: (() => void) | undefined;
+    const waiting = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    const original = vi.mocked(apiRequest).getMockImplementation()!;
+    vi.mocked(apiRequest).mockImplementation(async (...args) => {
+      await waiting;
+      return original(...args);
+    });
+    const before = vi.mocked(apiRequest).mock.calls.length;
+    act(() => window.dispatchEvent(new Event('hetu:workspace-changed')));
+    await waitFor(() => expect(vi.mocked(apiRequest).mock.calls.length).toBeGreaterThan(before));
+    expect(region).toHaveAttribute('aria-busy', 'false');
+    expect(screen.getByRole('heading', { name: 'Memory Management recall' })).toBe(action);
+    expect(screen.queryByText('Checking your saved work…')).not.toBeInTheDocument();
+    await act(async () => {
+      release?.();
+      await waiting;
+    });
+  });
+
   it('starts the exact advertised canonical sprint and exposes launch failures', async () => {
     vi.mocked(apiRequest).mockImplementation(async (path, options) =>
       path.includes('/skill-coach/day/')

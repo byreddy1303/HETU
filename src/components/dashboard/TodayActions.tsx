@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { ArrowRight, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { useLiveQuery } from '@/lib/db-hooks';
-import { db, subscribeDb } from '@/lib/db';
+import { db, subscribeDb, type SyncedTableName } from '@/lib/db';
 import { apiRequest } from '@/lib/fastapi-client';
 import { isInitialPullActive, subscribeInitialPull } from '@/lib/sync';
 import { loadDayPlan } from '@/lib/planner-storage';
@@ -23,6 +23,18 @@ import {
 import { recoveryKey, startSessionApi } from '@/lib/recovery-api';
 import { useStudyDay } from '@/hooks/useStudyDay';
 import { useSyncStatusStore } from '@/stores/sync-status';
+
+const TODAY_TABLES: readonly SyncedTableName[] = [
+  'learning_items',
+  'reattempts',
+  'pyq_attempts',
+  'formulas',
+  'questions',
+  'pyq_sessions',
+  'recovery_sessions',
+  'sessions',
+  'mock_tests'
+];
 
 const actionLabels: Record<TodayAction['kind'], string> = {
   resume: 'In progress',
@@ -76,6 +88,7 @@ export default function TodayActions({
   const budget = day.value.budget;
   const [snapshot, setSnapshot] = useState<Snapshot | null>(null);
   const [loading, setLoading] = useState(true);
+  const [readyOwner, setReadyOwner] = useState<string | null>(null);
   const [retry, setRetry] = useState(0);
   const [busy, setBusy] = useState('');
   const [startError, setStartError] = useState('');
@@ -94,7 +107,9 @@ export default function TodayActions({
       practiceSessions: await db.pyq_sessions.where('user_id').equals(userId).toArray(),
       recoverySessions: await db.recovery_sessions.where('user_id').equals(userId).toArray()
     }),
-    [userId]
+    [userId],
+    undefined,
+    TODAY_TABLES
   );
 
   useEffect(() => {
@@ -155,11 +170,11 @@ export default function TodayActions({
       });
       setLoading(false);
       try {
-        await reconcilePlannerExecutions(userId);
+        const changed = await reconcilePlannerExecutions(userId);
+        if (active && changed > 0) setPlanRevision((value) => value + 1);
       } catch {
         /* Existing commitments remain visible. */
       }
-      if (active) setPlanRevision((value) => value + 1);
     };
     const refresh = () => {
       clearTimeout(debounce);
@@ -169,7 +184,7 @@ export default function TodayActions({
       if (document.visibilityState === 'visible') refresh();
     };
     void load();
-    const unsubscribe = subscribeDb(refresh);
+    const unsubscribe = subscribeDb(refresh, TODAY_TABLES);
     const events = [
       LEARNING_UPDATED_EVENT,
       'hetu:memory-saved',
@@ -213,7 +228,12 @@ export default function TodayActions({
           parkedActionIds: day.value.parked_action_ids
         })
       : null;
-  const pending = loading || hydrating || !rows || !state || !day.ready;
+  useEffect(() => {
+    if (!hydrating && rows && state && day.ready) setReadyOwner(userId);
+  }, [hydrating, rows, state, day.ready, userId]);
+  // Keep the last usable queue mounted during background refreshes. A different
+  // owner or time budget still waits for its own snapshot before showing actions.
+  const pending = !rows || !state || !day.ready || (hydrating && readyOwner !== userId);
   const first = queue?.fitting[0];
   const dueReviews = state?.recovery?.forecast?.find((day) => day.date === today)?.itemCount;
   const otherCount = (queue?.actions.length ?? 0) - (first ? 1 : 0);
@@ -282,11 +302,11 @@ export default function TodayActions({
     <section
       aria-label="Today's study queue"
       aria-busy={pending}
-      className="min-w-0 space-y-4 rounded-lg border border-border bg-bg-raised p-4 sm:p-6"
+      className="study-next min-w-0 space-y-3"
     >
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h2 className="font-display text-xl font-semibold">Your next study action</h2>
-        <label className="flex items-center gap-2 text-sm">
+        <h2 className="study-section-label">Next up</h2>
+        <label className="study-time-budget">
           Time available
           <select
             aria-label="Time available"
@@ -296,7 +316,7 @@ export default function TodayActions({
               const value = Number(event.target.value) as TodayBudget;
               void day.save({ budget: value });
             }}
-            className="rounded border border-border bg-bg px-2 py-2 text-text"
+            className="rounded border border-border bg-bg-raised px-2 py-1.5 text-text"
           >
             {TODAY_BUDGETS.map((minutes) => (
               <option key={minutes} value={minutes}>
@@ -340,9 +360,9 @@ export default function TodayActions({
         </p>
       )}
       {!pending && first && (
-        <div className="grid gap-4 rounded-lg border border-accent/25 bg-accent-faint/30 p-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center sm:p-5">
+        <div className="study-next__action">
           <div className="min-w-0 space-y-2">
-            <h3 className="font-display text-xl font-semibold leading-snug">{first.title}</h3>
+            <h3 className="study-next__title">{first.title}</h3>
             {first.context && <p className="text-sm text-text-muted">{first.context}</p>}
             <details className="max-w-[65ch] text-xs text-text-muted">
               <summary className="w-fit cursor-pointer py-1">Why this?</summary>
@@ -354,7 +374,7 @@ export default function TodayActions({
               </p>
             )}
           </div>
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="study-next__buttons">
             <Button
               variant="primary"
               className="justify-self-start sm:justify-self-end"
@@ -396,7 +416,7 @@ export default function TodayActions({
         </p>
       )}
       {!pending && typeof dueReviews === 'number' && (
-        <details className="text-sm text-text-muted">
+        <details className="study-next__disclosure text-sm text-text-muted">
           <summary className="cursor-pointer py-2">
             {state?.recovery?.complete ? '' : 'At least '}
             {dueReviews} due retrieval items · queue details
@@ -441,8 +461,8 @@ export default function TodayActions({
           </div>
         ) : (
           queue.actions.some((action) => action.id !== first?.id) && (
-            <details className="group rounded-lg border border-border">
-              <summary className="cursor-pointer px-4 py-3 text-sm font-semibold">
+            <details className="study-next__disclosure group">
+              <summary className="cursor-pointer py-2 text-sm font-medium">
                 More saved work ({queue.actions.length - (first ? 1 : 0)})
               </summary>
               <div className="border-t border-border px-4">

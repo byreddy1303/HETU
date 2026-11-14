@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { backendConfig } from '@/lib/backend-config';
 import {
   BookOpen,
   BookmarkPlus,
@@ -73,14 +74,17 @@ export default function PyqRecommendedSetup({
   }
 
   return (
-    <section aria-labelledby="recommended-pyq-heading" className="pyq-recommended border-b border-border">
+    <section
+      aria-labelledby="recommended-pyq-heading"
+      className="pyq-recommended border-b border-border"
+    >
       <div className="pyq-recommended__heading bg-bg-overlay/25 px-4 py-4 sm:px-5">
         <p id="recommended-pyq-heading" className="u-label text-accent">
           Recommended set
         </p>
         <p className="mt-1 max-w-3xl text-[12.5px] leading-relaxed text-text-muted">
-          Choose the learning job first. Hetu resolves a reproducible exact set, explains why each
-          cohort is present, and keeps untouched benchmark papers sealed.
+          Choose a focus. Preview your questions before starting; reserved full papers stay
+          protected.
         </p>
       </div>
 
@@ -151,7 +155,9 @@ export default function PyqRecommendedSetup({
               <Check size={12} aria-hidden="true" />
             </span>
           </span>
-          <span className="pyq-preset-control__name font-display text-[15px] font-semibold text-text">Custom</span>
+          <span className="pyq-preset-control__name font-display text-[15px] font-semibold text-text">
+            Custom
+          </span>
           <span className="pyq-preset-control__description mt-2 block text-[11.5px] leading-relaxed text-text-muted">
             Use the subject, history, year, type, count, and order controls below directly.
           </span>
@@ -161,7 +167,10 @@ export default function PyqRecommendedSetup({
       {preset !== 'custom' && preset !== 'full-paper' ? (
         <div className="pyq-recommended__preflight grid gap-4 p-4 sm:p-5 lg:grid-cols-[minmax(0,1fr)_280px]">
           <div>
-            <div className="pyq-recommended__metrics grid grid-cols-2 gap-2 sm:grid-cols-4" aria-live="polite">
+            <div
+              className="pyq-recommended__metrics grid grid-cols-2 gap-2 sm:grid-cols-4"
+              aria-live="polite"
+            >
               {[
                 ['Matched', preflight?.exactMatchCount ?? '—'],
                 ['Selectable', preflight?.selectableCount ?? '—'],
@@ -290,7 +299,12 @@ export default function PyqRecommendedSetup({
             aria-label="Name this prescription"
             maxLength={80}
           />
-          <Button className="pyq-prescription-save" variant="ghost" onClick={save} disabled={!name.trim()}>
+          <Button
+            className="pyq-prescription-save"
+            variant="ghost"
+            onClick={save}
+            disabled={!name.trim()}
+          >
             <BookmarkPlus size={14} /> Save
           </Button>
         </div>
@@ -321,7 +335,9 @@ export default function PyqRecommendedSetup({
           </div>
         ) : (
           <p className="self-center text-[11px] text-text-faint lg:text-right">
-            Saved prescriptions sync with your account and can be reopened on another device.
+            {backendConfig.isLocal
+              ? 'Save this setup to use it again in your local workspace.'
+              : 'Saved prescriptions sync with your account and can be reopened on another device.'}
           </p>
         )}
       </div>

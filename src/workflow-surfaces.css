@@ -3,13 +3,13 @@
 .workflow-page {
   --workflow-edge: rgb(var(--color-accent) / 18%);
   --workflow-recess: rgb(var(--color-bg-overlay) / 62%);
-  --workflow-lift: 0 12px 24px -20px rgb(var(--color-scrim) / 45%);
+  --workflow-lift: var(--shadow-card);
   gap: 22px;
 }
 
 .pyq-workbench .workbench-section-heading {
   padding: 24px;
-  background: linear-gradient(110deg, rgb(var(--color-accent) / 5%), transparent 65%);
+  background: transparent;
 }
 .pyq-workbench .workbench-resume,
 .pyq-workbench .workbench-recommendations {
@@ -19,12 +19,12 @@
   border-left: 4px solid rgb(var(--color-accent));
 }
 .pyq-workbench .workbench-mode-choices {
-  padding: 12px;
+  padding: 16px;
   gap: 12px;
-  background: var(--workflow-recess);
+  background: transparent;
 }
 .pyq-workbench .workbench-mode-choice {
-  min-height: 215px;
+  min-height: 0;
   padding: 24px;
   border: 1px solid rgb(var(--color-border));
   border-radius: 16px;
@@ -33,7 +33,7 @@
 .pyq-workbench .workbench-mode-choice[aria-pressed='true'] {
   border-color: rgb(var(--color-accent) / 45%);
   background: rgb(var(--color-bg-raised));
-  box-shadow: inset 0 3px 0 rgb(var(--color-accent)), var(--workflow-lift);
+  box-shadow: none;
 }
 .pyq-workbench .workbench-books > .u-card-body {
   padding: 24px;
@@ -79,10 +79,10 @@
 }
 .pyq-workbench .workbench-subject {
   align-items: center;
-  min-height: 105px;
-  border-radius: 15px;
+  min-height: 80px;
+  border-radius: 10px;
   padding: 14px;
-  box-shadow: 0 3px 0 rgb(var(--color-border) / 25%);
+  box-shadow: none;
 }
 .pyq-workbench .workbench-subject-icon {
   width: 33px;
@@ -95,7 +95,7 @@
 .pyq-workbench .workbench-subject[aria-pressed='true'] {
   border-color: rgb(var(--color-accent) / 45%);
   background: rgb(var(--color-accent-faint) / 65%);
-  box-shadow: 0 3px 0 rgb(var(--color-accent) / 20%);
+  box-shadow: none;
 }
 .pyq-workbench .workbench-subject[aria-pressed='true'] .workbench-subject-icon {
   color: rgb(var(--color-accent-contrast));

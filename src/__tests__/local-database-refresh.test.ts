@@ -89,6 +89,18 @@ describe('local database changes received while the app stays open', () => {
     window.addEventListener('hetu:workspace-changed', domainChanged);
     const unsubscribe = repository.subscribeDb(changed, ['formulas']);
 
+    // An unrelated local commit causes a full refresh. Unchanged practice and
+    // formula snapshots must not retrigger workers or invalidate live selectors.
+    const formulaSnapshot = repository.getTableSnapshot('formulas');
+    const practiceChanged = vi.fn();
+    const stopPractice = repository.subscribeDb(practiceChanged, ['pyq_attempts', 'pyq_sessions']);
+    await sync.reconcileAll(user);
+    await sync.reconcileAll(user);
+    expect(changed).not.toHaveBeenCalled();
+    expect(practiceChanged).not.toHaveBeenCalled();
+    expect(repository.getTableSnapshot('formulas')).toBe(formulaSnapshot);
+    stopPractice();
+
     // The Python SQLite watcher emits this exact frame after an external commit.
     formula = { ...formula, version: 2, expression: 'P(E|H)P(H)/P(E)' };
     socket.message({

@@ -1,7 +1,8 @@
-import { Cloud, RefreshCw, TriangleAlert } from 'lucide-react';
+import { Check, Cloud, RefreshCw, TriangleAlert } from 'lucide-react';
 import { useSyncStatusStore } from '@/stores/sync-status';
 import { useAuthStore } from '@/stores/auth';
 import { cn } from '@/lib/utils';
+import { backendConfig } from '@/lib/backend-config';
 
 function clock(ms: number): string {
   const date = new Date(ms);
@@ -10,7 +11,7 @@ function clock(ms: number): string {
 }
 
 /**
- * Live proof that data reached Postgres. Rendered from the sync-status store,
+ * Live proof that data reached the configured database. Rendered from the sync-status store,
  * which is updated by every confirmed write, every completed hydrate, and the
  * 300ms Postgres heartbeat — so the clock is the last round-trip the database
  * acknowledged.
@@ -20,8 +21,8 @@ export default function SyncStatusBadge({ className }: { className?: string }) {
   const lastSyncedAt = useSyncStatusStore((s) => s.lastSyncedAt);
   const syncing = useSyncStatusStore((s) => s.syncing);
   const degraded =
-    useSyncStatusStore((s) =>
-      s.lastErrorAt != null && (s.lastSyncedAt == null || s.lastErrorAt > s.lastSyncedAt)
+    useSyncStatusStore(
+      (s) => s.lastErrorAt != null && (s.lastSyncedAt == null || s.lastErrorAt > s.lastSyncedAt)
     ) === true;
 
   if (sandbox) return null;
@@ -31,7 +32,7 @@ export default function SyncStatusBadge({ className }: { className?: string }) {
     return (
       <span
         className={cn('u-label flex items-center gap-1 text-text-muted', className)}
-        title="Downloading your data from the database"
+        title="Loading your saved data"
       >
         <RefreshCw size={11} aria-hidden />
         connecting&hellip;
@@ -56,8 +57,8 @@ export default function SyncStatusBadge({ className }: { className?: string }) {
       className={cn('u-label flex items-center gap-1 text-success', className)}
       title={`Every change is saved straight to your database. Last confirmed sync ${clock(lastSyncedAt)}`}
     >
-      <Cloud size={11} aria-hidden />
-      synced {clock(lastSyncedAt)}
+      {backendConfig.isLocal ? <Check size={12} aria-hidden /> : <Cloud size={11} aria-hidden />}
+      {backendConfig.isLocal ? 'Saved locally' : `synced ${clock(lastSyncedAt)}`}
     </span>
   );
 }

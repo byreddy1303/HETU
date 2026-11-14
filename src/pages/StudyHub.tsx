@@ -1,3 +1,4 @@
+import { ArrowUpRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import PageHeader from '@/components/layout/PageHeader';
 
@@ -63,7 +64,7 @@ const destinations = {
 export default function StudyHub({ kind }: { kind: keyof typeof destinations }) {
   const title = { review: 'Review', knowledge: 'Knowledge', progress: 'Progress' }[kind];
   return (
-    <div className="space-y-5">
+    <div className="space-y-6">
       <PageHeader
         compact
         title={title}
@@ -75,15 +76,14 @@ export default function StudyHub({ kind }: { kind: keyof typeof destinations }) 
           }[kind]
         }
       />
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="study-hub">
         {destinations[kind].map(([href, label, detail]) => (
-          <Link
-            key={href}
-            to={href}
-            className="rounded-lg border border-border bg-bg-raised p-4 hover:border-accent"
-          >
-            <h2 className="font-display text-lg font-semibold">{label}</h2>
-            <p className="mt-1 text-sm text-text-muted">{detail}</p>
+          <Link key={href} to={href} className="study-hub__link">
+            <div>
+              <h2>{label}</h2>
+              <p>{detail}</p>
+            </div>
+            <ArrowUpRight size={16} strokeWidth={1.6} aria-hidden />
           </Link>
         ))}
       </div>

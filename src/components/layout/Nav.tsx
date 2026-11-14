@@ -59,13 +59,18 @@ function NavItem({ item }: { item: Item }) {
   const Icon = item.icon;
   const reduced = useReducedMotion();
   const { pathname } = useLocation();
-  const skillSection = backendConfig.isLocal && item.to === '/review' && (pathname === '/skills' || pathname.startsWith('/skills/'));
+  const skillSection =
+    backendConfig.isLocal &&
+    item.to === '/review' &&
+    (pathname === '/skills' || pathname.startsWith('/skills/'));
   return (
     <NavLink
       to={item.to}
       end={item.to === '/'}
       aria-current={skillSection ? 'page' : undefined}
-      className={({ isActive }) => cn('workspace-nav-link', (isActive || skillSection) && 'is-active')}
+      className={({ isActive }) =>
+        cn('workspace-nav-link', (isActive || skillSection) && 'is-active')
+      }
     >
       {({ isActive }) => (
         <>
@@ -173,7 +178,7 @@ export default function Nav() {
   return (
     <aside className="workspace-sidebar native-side-nav">
       <div className="workspace-sidebar__brand">
-        <Brand />
+        <Brand size="sm" />
         <button
           type="button"
           onClick={() => setNavCollapsed(true)}
@@ -186,7 +191,7 @@ export default function Nav() {
       </div>
       <div className="workspace-sidebar__intro">
         <span aria-hidden />
-        <p>Your learning observatory</p>
+        <p>Personal study space</p>
       </div>
       <nav className="workspace-sidebar__navigation" aria-label="Main navigation">
         {backendConfig.isLocal ? (
@@ -222,9 +227,7 @@ export default function Nav() {
             <p>{profile?.name ?? 'Your workspace'}</p>
             <span>
               {backendConfig.isLocal
-                ? profile?.username
-                  ? `@${profile.username} · Personal workspace`
-                  : 'Personal workspace'
+                ? 'Local workspace'
                 : sandbox
                   ? 'Local sandbox'
                   : (profile?.email ?? 'GATE preparation')}

@@ -1,58 +1,92 @@
 import { Link } from 'react-router-dom';
+import {
+  ArrowUpRight,
+  BookOpen,
+  CalendarDays,
+  FileCheck2,
+  History,
+  Plus,
+  Settings2,
+  ScanLine
+} from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { todayISOInTimeZone, formatDate } from '@/lib/utils';
 import TodayActions from '@/components/dashboard/TodayActions';
 import PageHeader from '@/components/layout/PageHeader';
 
+const directions = [
+  {
+    href: '/pyq',
+    title: 'Practice',
+    description: 'A fresh set of questions, at your own pace.',
+    icon: BookOpen
+  },
+  {
+    href: '/skills',
+    title: 'Check a skill',
+    description: 'Find the distinction that makes it click.',
+    icon: ScanLine
+  },
+  {
+    href: '/mocks',
+    title: 'Review a mock',
+    description: 'Reflect on a test. Choose what comes next.',
+    icon: FileCheck2
+  }
+];
+
 export default function LocalStudyDesk() {
   const { userId, profile } = useAuth();
   const today = todayISOInTimeZone(profile?.timezone ?? 'Asia/Kolkata');
   return (
-    <div className="space-y-5">
+    <div className="study-desk">
       <PageHeader
         compact
         title="Today"
         description={formatDate(today, 'EEEE, dd MMMM')}
         actions={
-          <Link to="/planner" className="text-sm font-medium text-accent underline">
-            Plan your day
+          <Link
+            to="/planner"
+            className="u-button inline-flex items-center gap-2 rounded border border-border bg-bg-raised px-3 py-2 text-sm font-medium text-text-muted hover:border-border-hover hover:text-text"
+          >
+            <CalendarDays size={15} aria-hidden /> Plan your day
           </Link>
         }
       />
       {userId && <TodayActions key={`${userId}:${today}`} userId={userId} today={today} />}
-      <section
-        className="space-y-3 border-t border-border pt-4"
-        aria-label="Choose your study direction"
-      >
-        <h2 className="font-display text-lg font-semibold">Choose your next direction</h2>
-        <div className="grid gap-4 sm:grid-cols-3">
-          {[
-            ['/pyq', 'Practice', 'Start a new set or continue your saved questions.'],
-            ['/skills', 'Check a skill', 'Compare two conditions and follow a targeted repair.'],
-            ['/mocks', 'Review a mock', 'Turn a completed test into a few useful next actions.']
-          ].map(([href, title, description]) => (
-            <Link
-              key={href}
-              to={href}
-              className="rounded border border-border bg-bg-raised p-4 hover:border-accent"
-            >
-              <h3 className="font-semibold">{title}</h3>
-              <p className="mt-1 text-sm text-text-muted">{description}</p>
+      <section className="study-directions" aria-label="Choose your study direction">
+        <h2 className="study-section-label">Keep learning</h2>
+        <div className="study-directions__grid">
+          {directions.map(({ href, title, description, icon: Icon }) => (
+            <Link key={href} to={href} className="study-direction">
+              <div className="study-direction__top">
+                <span className="study-direction__icon">
+                  <Icon size={17} strokeWidth={1.6} aria-hidden />
+                </span>
+                <ArrowUpRight size={15} strokeWidth={1.6} aria-hidden />
+              </div>
+              <div>
+                <h3>{title}</h3>
+                <p>{description}</p>
+              </div>
             </Link>
           ))}
         </div>
       </section>
-      <div className="flex flex-wrap gap-4 text-sm">
-        <Link to="/capture" className="text-accent underline">
+      <nav className="study-shortcuts" aria-label="Workspace shortcuts">
+        <Link to="/capture">
+          <Plus size={14} aria-hidden />
           Capture a question
         </Link>
-        <Link to="/memory" className="text-accent underline">
+        <Link to="/memory">
+          <History size={14} aria-hidden />
           Study history
         </Link>
-        <Link to="/settings" className="text-accent underline">
+        <Link to="/settings">
+          <Settings2 size={14} aria-hidden />
           Local settings
         </Link>
-      </div>
+      </nav>
     </div>
   );
 }

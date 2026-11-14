@@ -60,8 +60,7 @@ export default function Shell() {
   const [category, section] = ROUTE_CONTEXT[`/${pathname.split('/')[1]}`] ?? ['Workspace', 'Study'];
   const focusedSession =
     /\/session\/[^/]+\/solve$/.test(pathname) || /\/mocks\/[^/]+\/take$/.test(pathname);
-  const minimalStudy =
-    backendConfig.isLocal && (pathname === '/' || /^\/(today|skills|review|knowledge|progress|memory|workflows|concept-review)(\/|$)/.test(pathname));
+  const minimalStudy = backendConfig.isLocal;
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {

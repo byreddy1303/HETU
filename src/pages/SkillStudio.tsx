@@ -35,7 +35,7 @@ const causes = [
 export function SkillEvidence({ skill }: { skill: Skill }) {
   const e = skill.evidence;
   return (
-    <dl className="grid grid-cols-2 gap-x-6 gap-y-3 text-sm sm:grid-cols-3">
+    <dl className="study-skill__evidence grid grid-cols-2 gap-x-6 gap-y-3 text-sm sm:grid-cols-3">
       <div>
         <dt className="text-text-muted">Fresh application</dt>
         <dd>
@@ -440,7 +440,7 @@ export default function SkillStudio() {
           This is a partial history. Open Learning Memory for older records.
         </p>
       )}
-      <p className="text-sm text-text-muted">
+      <p className="study-evidence-note">
         Three reviewed skill areas. Application counts require no prior recorded attempts and your
         report of answering without help. No mastery or rank is inferred.
       </p>
@@ -451,10 +451,7 @@ export default function SkillStudio() {
         </p>
       )}
       {skills.map((skill) => (
-        <section
-          key={skill.id}
-          className="space-y-4 rounded-lg border border-border bg-bg-raised p-4 sm:p-5"
-        >
+        <section key={skill.id} className="study-skill space-y-4">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
               <h2 className="font-display text-xl font-semibold">{skill.title}</h2>

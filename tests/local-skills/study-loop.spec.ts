@@ -74,3 +74,88 @@ test('local navigation remains usable at narrow widths', async ({ page }) => {
     true
   );
 });
+
+test('study screens fit narrow and desktop layouts in both themes', async ({ page }) => {
+  const errors: string[] = [];
+  page.on('pageerror', (error) => errors.push(error.message));
+  await page.goto('/');
+  await expect(page.getByRole('region', { name: "Today's study queue" })).toHaveAttribute(
+    'aria-busy',
+    'false'
+  );
+  for (const width of [390, 1280]) {
+    await page.setViewportSize({ width, height: 844 });
+    for (const [route, title] of [
+      ['/', 'Today'],
+      ['/review', 'Review'],
+      ['/knowledge', 'Knowledge'],
+      ['/progress', 'Progress'],
+      ['/skills', 'Skill practice and evidence'],
+      ['/settings', 'Settings'],
+      ['/pyq', 'GATE PYQs']
+    ]) {
+      const navigation = page.getByRole('navigation', {
+        name: width < 768 ? 'Primary navigation' : 'Main navigation'
+      });
+      if (route === '/skills') {
+        await navigation.getByRole('link', { name: 'Review', exact: true }).click();
+        await page.getByRole('link', { name: /^Skill repairs/ }).click();
+      } else if (route === '/settings' && width < 768) {
+        await page.getByRole('button', { name: 'More' }).click();
+        await page.getByRole('link', { name: 'Settings', exact: true }).click();
+      } else if (route === '/settings') {
+        await page.getByRole('link', { name: 'Settings', exact: true }).click();
+      } else {
+        await navigation
+          .getByRole('link', { name: route === '/pyq' ? 'Practice' : title, exact: true })
+          .click();
+      }
+      await expect(page.getByRole('heading', { name: title, exact: true })).toBeVisible();
+      if (route === '/')
+        await expect(page.getByRole('combobox', { name: 'Time available' })).toBeEnabled();
+      if (route === '/skills')
+        await expect(page.getByRole('heading', { name: 'Cache address fields' })).toBeVisible();
+      if (route === '/pyq')
+        await expect(page.getByText('Choose a subject', { exact: true })).toBeVisible();
+      await expect(page.getByRole('button', { name: /Switch to (light|dark) mode/ })).toBeVisible();
+      for (const mode of ['light', 'dark']) {
+        const toggle = page.getByRole('button', { name: `Switch to ${mode} mode` });
+        if (await toggle.isVisible()) await toggle.click();
+        await expect(page.locator('html')).toHaveAttribute('data-theme', mode);
+        expect(
+          await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth),
+          `${route} at ${width}px in ${mode}`
+        ).toBe(true);
+      }
+    }
+  }
+  expect(errors).toEqual([]);
+});
+
+test('Today settles while the local learning worker and realtime connection are idle', async ({
+  page
+}) => {
+  await page.goto('/');
+  const queue = page.getByRole('region', { name: "Today's study queue" });
+  await expect(queue).toHaveAttribute('aria-busy', 'false');
+  // Let startup reconciliation finish before measuring a sustained idle period.
+  await page.waitForTimeout(4_000);
+  let refreshes = 0;
+  page.on('request', (request) => {
+    if (new URL(request.url()).pathname === '/v1/recovery') refreshes++;
+  });
+  // Observe long enough to catch the former 2.5-second worker/refresh feedback cycle.
+  const busyTransitions = await queue.evaluate(async (element) => {
+    let busy = 0;
+    const observer = new MutationObserver(() => {
+      if (element.getAttribute('aria-busy') === 'true') busy++;
+    });
+    observer.observe(element, { attributes: true, attributeFilter: ['aria-busy'] });
+    await new Promise((resolve) => setTimeout(resolve, 10_000));
+    observer.disconnect();
+    return busy;
+  });
+  expect(busyTransitions).toBe(0);
+  expect(refreshes).toBeLessThanOrEqual(2);
+  await expect(queue).toHaveAttribute('aria-busy', 'false');
+});

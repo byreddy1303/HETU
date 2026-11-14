@@ -7,7 +7,11 @@ import App from '@/App';
 import AuthProvider from '@/components/auth/AuthProvider';
 import { backendConfig } from '@/lib/backend-config';
 import '@/index.css';
-import '@/energy-theme.css';
+import '@/study-theme.css';
+
+if (window.electronAPI?.isElectron) {
+  document.documentElement.dataset.desktop = window.electronAPI.platform;
+}
 
 const UPDATE_CHECK_INTERVAL_MS = 60 * 1000; // Check for PWA updates every 1 minute while app is open
 
@@ -85,6 +89,8 @@ if (Capacitor.isNativePlatform() || backendConfig.isLocal) {
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <AuthProvider><App /></AuthProvider>
+    <AuthProvider>
+      <App />
+    </AuthProvider>
   </React.StrictMode>
 );

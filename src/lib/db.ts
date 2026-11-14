@@ -237,6 +237,22 @@ function comparablePayload(value: Row): unknown {
   return comparableValue(normalized);
 }
 
+/** Compare JSON data without copying large question images or depending on key order. */
+function sameStoredValue(left: unknown, right: unknown): boolean {
+  if (Object.is(left, right)) return true;
+  if (!left || !right || typeof left !== 'object' || typeof right !== 'object') return false;
+  if (Array.isArray(left) || Array.isArray(right)) {
+    return Array.isArray(left) && Array.isArray(right) && left.length === right.length &&
+      left.every((value, index) => sameStoredValue(value, right[index]));
+  }
+  const a = left as Record<string, unknown>;
+  const b = right as Record<string, unknown>;
+  const keys = Object.keys(a);
+  return keys.length === Object.keys(b).length && keys.every((key) =>
+    Object.prototype.hasOwnProperty.call(b, key) && sameStoredValue(a[key], b[key])
+  );
+}
+
 function samePayload(left: Row, right: Row): boolean {
   return JSON.stringify(comparablePayload(left)) === JSON.stringify(comparablePayload(right));
 }
@@ -700,12 +716,20 @@ function hydrateTable(userId: string, name: SyncedTableName): Promise<void> {
         else next.delete(id);
       }
     }
-    map.clear();
-    for (const [id, row] of next) map.set(id, row);
+    let changed = map.size !== next.size;
+    for (const [id, row] of next) {
+      const existing = map.get(id);
+      if (existing && sameStoredValue(existing, row)) next.set(id, existing as typeof row);
+      else changed = true;
+    }
     hydratedUsers.set(name, userId);
-    // Publish lightweight progress immediately; large practice history may
-    // still be loading. Each table is replaced only after all its pages load.
-    notifyChange([name]);
+    // A no-op hydrate is not a study edit. Preserving row and snapshot identities
+    // prevents subscribers from writing in response to their own refresh echo.
+    if (changed) {
+      map.clear();
+      for (const [id, row] of next) map.set(id, row);
+      notifyChange([name]);
+    }
   })().finally(() => {
     if (tableHydrations.get(name)?.promise === promise) tableHydrations.delete(name);
   });

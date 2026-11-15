@@ -61,8 +61,7 @@ export default function DailyBriefCard() {
       <CardHeader title="Daily desktop brief" />
       <CardBody className="space-y-4">
         <p className="text-sm text-text-muted">
-          A desktop popup with today’s Planner blocks, due reattempts and concepts to revise. It
-          opens at your India-time schedule, or after the Mac next wakes. Active exams defer it.
+          Today’s plan and reviews, delivered at your chosen time. Waits until active exams finish.
         </p>
         {error && (
           <p role="alert" className="text-sm text-danger">
@@ -94,7 +93,6 @@ export default function DailyBriefCard() {
                 onChange={(event) => setConfig({ ...config, time: event.target.value })}
                 className="rounded border border-border bg-bg p-2 text-text"
               />
-              <span className="text-xs text-text-muted">Asia/Kolkata</span>
             </label>
             <label className="flex items-center gap-2 text-sm">
               <input

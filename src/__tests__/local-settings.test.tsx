@@ -1,6 +1,8 @@
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import type { ReactNode } from 'react';
+import { usePrefsStore } from '@/stores/prefs';
 import type { UserRow } from '@/types';
 const fixture = vi.hoisted(() => ({
   profile: {
@@ -12,7 +14,9 @@ const fixture = vi.hoisted(() => ({
     target_rank: 100
   } as unknown as UserRow,
   updateProfile: vi.fn(),
-  signOut: vi.fn()
+  signOut: vi.fn(),
+  collectProgress: vi.fn(),
+  downloadProgress: vi.fn()
 }));
 vi.mock('@/lib/backend-config', () => ({
   backendConfig: { isLocal: true, fastapi: true, apiUrl: 'http://127.0.0.1:8765' }
@@ -28,16 +32,24 @@ vi.mock('@/components/settings/LocalModelSettings', () => ({
     </section>
   )
 }));
+vi.mock('@/lib/progress-export', () => ({
+  collectProgressReport: fixture.collectProgress,
+  downloadProgressReport: fixture.downloadProgress
+}));
 vi.mock('@/components/settings/BackupHealthCard', () => ({
-  default: () => (
+  default: ({ children }: { children?: ReactNode }) => (
     <section id="settings-backups">
-      <h2>Database backups</h2>
+      <h2>Backups & export</h2>
+      {children}
     </section>
   )
 }));
 beforeEach(() => {
   cleanup();
   fixture.updateProfile.mockReset().mockResolvedValue({});
+  fixture.collectProgress.mockReset().mockResolvedValue({ rows: [] });
+  fixture.downloadProgress.mockReset();
+  usePrefsStore.getState().reset();
   vi.stubGlobal('fetch', vi.fn().mockResolvedValue(Response.json({ checks: { database: 'ok' } })));
 });
 afterEach(() => {
@@ -51,30 +63,27 @@ async function mount() {
       <Settings />
     </MemoryRouter>
   );
-  await screen.findByText('Database ready');
+  await screen.findByRole('textbox', { name: 'Name' });
 }
 describe('local-only desktop settings', () => {
-  it('keeps useful local controls and removes hosted/mobile/unfinished surfaces', async () => {
+  it('shows everyday preferences and removes unused or hosted-only controls', async () => {
     await mount();
-    for (const heading of [
-      'Study defaults',
-      'Appearance',
-      'Your profile',
-      'Local model',
-      'Database backups',
-      'Export'
-    ])
+    for (const heading of ['Appearance', 'Your study', 'Backups & export'])
       expect(screen.getByRole('heading', { name: heading })).toBeInTheDocument();
     expect(screen.getByRole('textbox', { name: 'Name' })).toHaveValue('Kalyan');
+    expect(screen.queryByRole('navigation', { name: 'Settings sections' })).not.toBeInTheDocument();
+    expect(screen.queryByText('Local model')).not.toBeInTheDocument();
     expect(screen.queryByText('Invites')).not.toBeInTheDocument();
-    expect(screen.queryByText(/Cognitive AI engine/)).not.toBeInTheDocument();
     expect(
       screen.queryByText(/Telegram|Email notifications|Tactile feedback/)
     ).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Sign out' })).not.toBeInTheDocument();
-    expect(
-      screen.getByText('Connect an AI client through local MCP').closest('details')
-    ).not.toHaveAttribute('open');
+    expect(fetch).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByText('Advanced', { exact: true }));
+    await screen.findByText('Database ready');
+    expect(screen.queryByLabelText('Weekly review day')).not.toBeInTheDocument();
+    expect(screen.queryByLabelText('Target AIR')).not.toBeInTheDocument();
+    expect(screen.queryByText(/npm run|remote connectors/)).not.toBeInTheDocument();
   });
   it('preserves only edited profile fields and makes a failed save retryable', async () => {
     await mount();
@@ -85,18 +94,29 @@ describe('local-only desktop settings', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Save profile' }));
     expect(await screen.findByRole('alert')).toHaveTextContent('Database busy');
     fireEvent.click(screen.getByRole('button', { name: 'Save profile' }));
-    await screen.findByText('Profile saved on this workspace.');
+    await screen.findByText('Profile saved.');
     expect(fixture.updateProfile).toHaveBeenLastCalledWith({ name: 'Kalyan Reddy' });
   });
-  it('uses section navigation without changing a desktop hash route', async () => {
+  it('opens advanced tools without changing the route and preserves appearance when editing defaults', async () => {
     await mount();
-    const target = document.getElementById('settings-profile')!;
-    target.scrollIntoView = vi.fn();
+    fireEvent.change(screen.getByLabelText('Theme'), { target: { value: 'dark' } });
     const hash = window.location.hash;
-    fireEvent.click(screen.getByRole('link', { name: 'Your profile' }));
-    expect(target.scrollIntoView).toHaveBeenCalledOnce();
-    expect(target).toHaveFocus();
+    fireEvent.click(screen.getByText('Advanced', { exact: true }));
+    await screen.findByRole('heading', { name: 'Local model' });
+    fireEvent.change(screen.getByLabelText('Daily question target'), { target: { value: '25' } });
+    expect(usePrefsStore.getState()).toMatchObject({ dailyQuestionTarget: 25, colorTheme: 'dark' });
     expect(window.location.hash).toBe(hash);
+  });
+  it('keeps export failure retryable without affecting the profile', async () => {
+    await mount();
+    fixture.collectProgress.mockRejectedValueOnce(new Error('Export unavailable'));
+    fireEvent.click(screen.getByRole('button', { name: 'Download progress' }));
+    expect(await screen.findByRole('alert')).toHaveTextContent('Export unavailable');
+    fireEvent.click(screen.getByRole('button', { name: 'Download progress' }));
+    await screen.findByText('Progress report downloaded.');
+    expect(fixture.collectProgress).toHaveBeenLastCalledWith('local_user', 'Kalyan');
+    expect(fixture.downloadProgress).toHaveBeenCalledOnce();
+    expect(fixture.updateProfile).not.toHaveBeenCalled();
   });
   it('can retry a failed database health check', async () => {
     vi.mocked(fetch).mockResolvedValueOnce(
@@ -108,6 +128,7 @@ describe('local-only desktop settings', () => {
         <Settings />
       </MemoryRouter>
     );
+    fireEvent.click(screen.getByText('Advanced', { exact: true }));
     expect(await screen.findByRole('alert')).toHaveTextContent('local database is unavailable');
     fireEvent.click(screen.getByRole('button', { name: 'Check database' }));
     await waitFor(() => expect(screen.getByText('Database ready')).toBeInTheDocument());

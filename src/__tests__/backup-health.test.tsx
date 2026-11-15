@@ -28,7 +28,9 @@ describe('visible local backup health', () => {
   it('shows verified local success without claiming remote protection or a tested restore', async () => {
     render(<BackupHealthCard />);
     await screen.findByText('Verified local snapshot available');
-    expect(screen.getByText(/No off-device backup is verified/)).toBeInTheDocument();
+    expect(screen.getByText('Backup details').closest('details')).not.toHaveAttribute('open');
+    fireEvent.click(screen.getByText('Backup details'));
+    expect(screen.getByText(/No off-device backup is verified/)).toBeVisible();
     expect(screen.getByText(/does not rehearse a restore/)).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Back up now' }));
     await waitFor(() =>
@@ -43,5 +45,13 @@ describe('visible local backup health', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Back up now' }));
     expect(await screen.findByRole('alert')).toHaveTextContent('Service offline');
     expect(screen.getByRole('button', { name: 'Check backup health' })).toBeEnabled();
+  });
+  it('reports an unavailable initial status and lets the user retry', async () => {
+    vi.mocked(apiRequest).mockRejectedValueOnce(new Error('Service offline'));
+    render(<BackupHealthCard />);
+    expect(await screen.findByText('Backup status unavailable')).toBeInTheDocument();
+    expect(screen.queryByText('Checking backup health…')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Check backup health' }));
+    await screen.findByText('Verified local snapshot available');
   });
 });

@@ -1,10 +1,9 @@
 import { useEffect, useState } from 'react';
-import { Copy, RefreshCcw } from 'lucide-react';
+import { RefreshCcw } from 'lucide-react';
 import { Card, CardBody, CardHeader } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { backendConfig } from '@/lib/backend-config';
-import { useUiStore } from '@/stores/ui';
 
 type DatabaseState = 'checking' | 'ready' | 'error';
 
@@ -13,7 +12,6 @@ export default function LocalWorkspaceCard() {
   const [database, setDatabase] = useState<DatabaseState>('checking');
   const [detail, setDetail] = useState<string | null>(null);
   const [retry, setRetry] = useState(0);
-  const pushToast = useUiStore((state) => state.pushToast);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -57,7 +55,7 @@ export default function LocalWorkspaceCard() {
   return (
     <Card id="settings-local" className="settings-anchor" tabIndex={-1}>
       <CardHeader
-        title="Local app & MCP"
+        title="Workspace status"
         aside={
           <Badge
             tone={database === 'ready' ? 'success' : database === 'error' ? 'danger' : 'neutral'}
@@ -73,10 +71,7 @@ export default function LocalWorkspaceCard() {
       <CardBody className="flex flex-col gap-4">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="max-w-xl text-[12.5px] leading-relaxed text-text-muted">
-            <p>
-              Your profile and study records are stored in your personal database on this device.
-              Closing HETU keeps your work saved.
-            </p>
+            <p>Your study records are saved on this Mac.</p>
             {detail && (
               <p role="alert" className="mt-2 text-danger">
                 {detail}
@@ -93,54 +88,14 @@ export default function LocalWorkspaceCard() {
             Check database
           </Button>
         </div>
-        <details className="rounded border border-border bg-bg-overlay/30 p-3 text-[12.5px] leading-relaxed">
-          <summary className="cursor-pointer font-semibold text-text">
-            Connect an AI client through local MCP
-          </summary>
-          <p className="mt-1 text-text-muted">
-            HETU includes a local MCP server for compatible clients, including Codex and Claude
-            Desktop. It uses the same personal database as this app.
-          </p>
-          <p className="mt-2 text-text-muted">
-            Run <code className="u-num">npm run mcp:setup</code> from the HETU project folder for
-            your client configuration, or follow the{' '}
-            <a
-              className="text-accent underline"
-              href="https://github.com/byreddy1303/HETU/blob/main/docs/local-desktop-mcp.md"
-              target="_blank"
-              rel="noreferrer"
-            >
-              connection guide
-            </a>
-            .
-          </p>
-          <p className="mt-2 text-text-muted">
-            For a manual stdio launch, run this command from the HETU project folder:
-          </p>
-          <div className="mt-2 flex items-center justify-between gap-2 rounded border border-border bg-bg-raised px-3 py-2">
-            <code className="u-num text-text">npm run mcp</code>
-            <Button
-              variant="ghost"
-              size="sm"
-              aria-label="Copy MCP command"
-              onClick={async () => {
-                try {
-                  await navigator.clipboard.writeText('npm run mcp');
-                  pushToast('MCP command copied.', 'success');
-                } catch {
-                  pushToast('Unable to copy. Select the command and copy it manually.', 'neutral');
-                }
-              }}
-            >
-              <Copy size={13} aria-hidden />
-            </Button>
-          </div>
-          <p className="mt-2 text-[11.5px] text-text-faint">
-            The MCP client starts its own stdio process. Connection status and enabled tools are
-            shown in that client. ChatGPT remote connectors require a separately configured HTTPS
-            MCP endpoint.
-          </p>
-        </details>
+        <a
+          className="text-[12.5px] text-accent underline underline-offset-4"
+          href="https://github.com/byreddy1303/HETU/blob/main/docs/local-desktop-mcp.md"
+          target="_blank"
+          rel="noreferrer"
+        >
+          Connect a desktop AI client
+        </a>
       </CardBody>
     </Card>
   );

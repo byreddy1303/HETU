@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { DatabaseBackup, RefreshCw } from 'lucide-react';
 import { Card, CardBody, CardHeader } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
@@ -27,7 +27,7 @@ function dateLabel(value: string | null): string {
   return Number.isNaN(date.getTime()) ? 'Not recorded' : date.toLocaleString();
 }
 
-export default function BackupHealthCard() {
+export default function BackupHealthCard({ children }: { children?: ReactNode }) {
   const [status, setStatus] = useState<BackupHealth | null>(null);
   const [busy, setBusy] = useState<'loading' | 'backup' | null>('loading');
   const [error, setError] = useState<string | null>(null);
@@ -76,7 +76,9 @@ export default function BackupHealthCard() {
   const label = running
     ? 'Creating a verified snapshot…'
     : !status
-      ? 'Checking backup health…'
+      ? error
+        ? 'Backup status unavailable'
+        : 'Checking backup health…'
       : status.state === 'error'
         ? 'Backup needs attention'
         : status.state === 'warning'
@@ -87,13 +89,44 @@ export default function BackupHealthCard() {
               ? 'Verified local snapshot available'
               : 'No verified snapshot recorded';
 
+  const checkHealthControl = (
+    <Button
+      variant="ghost"
+      size="sm"
+      disabled={busy !== null}
+      onClick={() => setRevision((value) => value + 1)}
+    >
+      <RefreshCw size={14} aria-hidden="true" /> Check backup health
+    </Button>
+  );
+
   return (
     <Card id="settings-backups" className="settings-anchor" tabIndex={-1}>
-      <CardHeader title="Database backups" aside={<DatabaseBackup size={17} aria-hidden />} />
+      <CardHeader
+        title={
+          <>
+            <DatabaseBackup size={17} aria-hidden="true" />{' '}
+            {children ? 'Backups & export' : 'Backups'}
+          </>
+        }
+      />
       <CardBody className="space-y-3">
-        <p role="status" className="text-sm font-semibold">
-          {label}
-        </p>
+        <div className="local-settings__backup-overview">
+          <div>
+            <p role="status" className="text-sm font-semibold">
+              {label}
+            </p>
+            {status?.last_success_at && (
+              <p className="mt-1 text-xs text-text-muted">
+                Last backup · {dateLabel(status.last_success_at)}
+              </p>
+            )}
+          </div>
+          <Button size="sm" disabled={busy !== null || running} onClick={() => void createBackup()}>
+            <DatabaseBackup size={14} aria-hidden="true" />
+            {busy === 'backup' ? 'Backing up…' : 'Back up now'}
+          </Button>
+        </div>
         {error && (
           <p role="alert" className="text-sm text-danger">
             {error}
@@ -104,57 +137,47 @@ export default function BackupHealthCard() {
             {status.last_error}
           </p>
         )}
-        {status && (
-          <dl className="grid gap-2 text-sm sm:grid-cols-2">
-            <div>
-              <dt className="text-text-muted">Last successful snapshot</dt>
-              <dd>{dateLabel(status.last_success_at)}</dd>
-            </div>
-            <div>
-              <dt className="text-text-muted">Last attempt</dt>
-              <dd>{dateLabel(status.last_attempt_at)}</dd>
-            </div>
-            <div className="sm:col-span-2">
-              <dt className="text-text-muted">Backup folder</dt>
-              <dd className="break-all font-mono text-xs">{status.backup_dir}</dd>
-            </div>
-            {verified && (
-              <div className="sm:col-span-2">
-                <dt className="text-text-muted">Snapshot verified when created</dt>
-                <dd>
-                  SQLite integrity check passed ·{' '}
-                  {Math.round(status.last_backup!.size_bytes / 1024).toLocaleString()} KB
-                </dd>
+        <p className="text-xs leading-relaxed text-text-muted">
+          Automatic backups run at startup and hourly while HETU is open. Copies stay on this Mac.
+        </p>
+        <details className="local-settings__backup-details">
+          <summary>Backup details</summary>
+          {status && (
+            <dl className="grid gap-3 text-sm">
+              <div>
+                <dt className="text-text-muted">Last attempt</dt>
+                <dd>{dateLabel(status.last_attempt_at)}</dd>
               </div>
-            )}
-          </dl>
-        )}
-        <p className="text-xs leading-relaxed text-text-muted">
-          The desktop app attempts a snapshot at startup and every hour while open. A local snapshot
-          protects against database damage; it remains on this device. This check does not rehearse
-          a restore.
-        </p>
-        <p className="text-xs leading-relaxed text-text-muted">
-          {status?.cloud_copy?.state === 'copied'
-            ? 'A matching copy was written to iCloud Drive on this Mac. Cloud upload and recovery on another device are not verified.'
-            : status?.cloud_copy?.state === 'failed'
-              ? 'The iCloud Drive copy failed. No off-device backup is verified.'
-              : 'No off-device backup is verified. Keep a separate copy of the backup folder on another device or drive.'}
-        </p>
-        <div className="flex flex-wrap gap-2">
-          <Button size="sm" disabled={busy !== null || running} onClick={() => void createBackup()}>
-            <DatabaseBackup size={14} aria-hidden />{' '}
-            {busy === 'backup' ? 'Backing up…' : 'Back up now'}
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            disabled={busy !== null}
-            onClick={() => setRevision((value) => value + 1)}
-          >
-            <RefreshCw size={14} aria-hidden /> Check backup health
-          </Button>
-        </div>
+              <div>
+                <dt className="text-text-muted">Backup folder</dt>
+                <dd className="break-all font-mono text-xs">{status.backup_dir}</dd>
+              </div>
+              {verified && (
+                <div>
+                  <dt className="text-text-muted">Snapshot verified when created</dt>
+                  <dd>
+                    SQLite integrity check passed ·{' '}
+                    {Math.round(status.last_backup!.size_bytes / 1024).toLocaleString()} KB
+                  </dd>
+                </div>
+              )}
+            </dl>
+          )}
+          <p className="text-xs leading-relaxed text-text-muted">
+            A local snapshot protects against database damage. This check does not rehearse a
+            restore.
+          </p>
+          <p className="text-xs leading-relaxed text-text-muted">
+            {status?.cloud_copy?.state === 'copied'
+              ? 'A matching copy was written to iCloud Drive on this Mac. Cloud upload and recovery on another device are not verified.'
+              : status?.cloud_copy?.state === 'failed'
+                ? 'The iCloud Drive copy failed. No off-device backup is verified.'
+                : 'No off-device backup is verified. Keep a separate copy of the backup folder on another device or drive.'}
+          </p>
+          {!error && checkHealthControl}
+        </details>
+        {error && checkHealthControl}
+        {children}
       </CardBody>
     </Card>
   );

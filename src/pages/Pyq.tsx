@@ -55,7 +55,9 @@ import PyqPracticeAnswer from '@/components/pyq/PyqPracticeAnswer';
 import { pyqPracticeChoices, pyqPracticeQuestionStem } from '@/components/pyq/pyqPracticeQuestion';
 import PyqImprovementInsights from '@/components/pyq/PyqImprovementInsights';
 import PyqEvidenceLedger from '@/components/pyq/PyqEvidenceLedger';
-import PyqRecommendedSetup from '@/components/pyq/PyqRecommendedSetup';
+import PyqRecommendedSetup, {
+  PyqRecommendationOptions
+} from '@/components/pyq/PyqRecommendedSetup';
 import PyqQuestionContent from '@/components/pyq/PyqQuestionContent';
 import PyqSessionHistory from '@/components/pyq/PyqSessionHistory';
 import PyqConversationHistory from '@/components/pyq/PyqConversationHistory';
@@ -272,11 +274,11 @@ function recommendationConfig(
       count: 'all'
     };
   }
-  const count = preset === 'diagnose' || preset === 'mixed-gate' ? '15' : '10';
+  const count = current.examKind === 'full-paper' ? '10' : current.count;
   return {
     ...common,
-    mode: 'practice',
-    examKind: undefined,
+    mode: current.mode ?? 'practice',
+    examKind: current.mode === 'exam' ? 'timed-set' : undefined,
     benchmarkPaperId: undefined,
     bookSlug: 'gate-cse',
     subjectSlug: preset === 'diagnose' || preset === 'mixed-gate' ? 'all' : current.subjectSlug,
@@ -557,7 +559,6 @@ function PracticeSetup({
   recommendedSelection,
   recommendationLoading,
   recommendationError,
-  selectionSeed,
   savedPrescriptions,
   includeReservedBenchmarkQuestions,
   closedBookConfirmed,
@@ -571,7 +572,6 @@ function PracticeSetup({
   onIncludeReservedBenchmarkQuestions,
   onClosedBookConfirmed,
   onRecommendationPreset,
-  onSelectionSeed,
   onRegenerateSeed,
   onSavePrescription,
   onLoadPrescription,
@@ -598,7 +598,6 @@ function PracticeSetup({
   recommendedSelection: RecommendedPyqSelection | null;
   recommendationLoading: boolean;
   recommendationError: string | null;
-  selectionSeed: string;
   savedPrescriptions: PyqSavedPrescription[];
   includeReservedBenchmarkQuestions: boolean;
   closedBookConfirmed: boolean;
@@ -612,7 +611,6 @@ function PracticeSetup({
   onIncludeReservedBenchmarkQuestions: (included: boolean) => void;
   onClosedBookConfirmed: (confirmed: boolean) => void;
   onRecommendationPreset: (preset: PyqPresetPreference) => void;
-  onSelectionSeed: (seed: string) => void;
   onRegenerateSeed: () => void;
   onSavePrescription: (name: string) => void;
   onLoadPrescription: (prescription: PyqSavedPrescription) => void;
@@ -673,33 +671,63 @@ function PracticeSetup({
   const selectedTopicSlug = config.topicSlug ?? 'all';
   const [libraryTab, setLibraryTab] = useState<PyqLibraryTab>('pyqs');
   const testBooks = manifest.books.filter((book) => book.sourceClass === 'user-import');
+  const usesRecommendedSet =
+    showRecommendedSetup && recommendationPreset !== 'custom' && !fullPaperSelected;
+  const recommendationReady =
+    !usesRecommendedSet ||
+    (!recommendationLoading &&
+      !recommendationError &&
+      recommendedSelection?.preset.id === recommendationPreset &&
+      recommendedSelection.questions.length > 0);
   const recommendationControls = showRecommendedSetup ? (
     <PyqRecommendedSetup
-      compact
       preset={recommendationPreset}
       selection={recommendedSelection}
       loading={recommendationLoading}
       error={recommendationError}
-      seed={selectionSeed}
-      savedPrescriptions={savedPrescriptions}
       onPreset={onRecommendationPreset}
-      onSeed={onSelectionSeed}
-      onRegenerate={onRegenerateSeed}
-      onSavePrescription={onSavePrescription}
-      onLoadPrescription={onLoadPrescription}
-      onDeletePrescription={onDeletePrescription}
     />
   ) : null;
+  const selectedTopicLabels =
+    selectedTopicSlug === 'all'
+      ? []
+      : selectedTopics
+          .filter((topic) => selectedTopicSlug.split(',').includes(topic.slug))
+          .map((topic) => topic.label);
   const advancedSummary = [
+    selectedTopicLabels.length ? selectedTopicLabels.join(', ') : 'All topics',
     `${config.fromYear}–${config.toYear}`,
     config.type === 'all' ? 'All types' : config.type,
-    PYQ_HISTORY_OPTIONS.find((option) => option.value === (config.history ?? 'all'))?.label,
-    { unseen: 'Unseen first', random: 'Random', newest: 'Newest first', oldest: 'Oldest first' }[
-      config.order
-    ]
+    ...(recommendationPreset === 'custom'
+      ? [
+          PYQ_HISTORY_OPTIONS.find((option) => option.value === (config.history ?? 'all'))?.label,
+          {
+            unseen: 'Unseen first',
+            random: 'Random',
+            newest: 'Newest first',
+            oldest: 'Oldest first'
+          }[config.order]
+        ]
+      : [])
   ]
     .filter(Boolean)
     .join(' · ');
+
+  function changeMode(mode: 'practice' | 'exam') {
+    const leavingPaper = fullPaperSelected || recommendationPreset === 'full-paper';
+    const base = leavingPaper ? recommendationConfig('custom', config, manifest) : config;
+    if (leavingPaper) onRecommendationPreset('custom');
+    setConfig({
+      ...base,
+      mode,
+      examKind: mode === 'exam' ? 'timed-set' : undefined,
+      count: mode === 'exam' && base.count === 'all' ? '15' : base.count,
+      benchmarkPaperId: undefined,
+      examState: undefined,
+      practiceDraft: undefined,
+      practiceDrafts: undefined
+    });
+  }
   return (
     <div className="workflow-page pyq-workbench practice-library flex flex-col gap-4">
       <PageHeader
@@ -762,17 +790,7 @@ function PracticeSetup({
               <button
                 type="button"
                 aria-pressed={(config.mode ?? 'practice') === 'practice'}
-                onClick={() =>
-                  setConfig({
-                    ...config,
-                    mode: 'practice',
-                    examKind: undefined,
-                    benchmarkPaperId: undefined,
-                    examState: undefined,
-                    practiceDraft: undefined,
-                    practiceDrafts: undefined
-                  })
-                }
+                onClick={() => changeMode('practice')}
               >
                 <BookOpenCheck size={16} aria-hidden="true" />
                 Practice mode
@@ -780,18 +798,7 @@ function PracticeSetup({
               <button
                 type="button"
                 aria-pressed={config.mode === 'exam'}
-                onClick={() =>
-                  setConfig({
-                    ...config,
-                    mode: 'exam',
-                    examKind: 'timed-set',
-                    count: config.count === 'all' ? '15' : config.count,
-                    benchmarkPaperId: undefined,
-                    examState: undefined,
-                    practiceDraft: undefined,
-                    practiceDrafts: undefined
-                  })
-                }
+                onClick={() => changeMode('exam')}
               >
                 <Clock3 size={16} aria-hidden="true" />
                 Exam mode
@@ -810,14 +817,7 @@ function PracticeSetup({
             <button
               type="button"
               aria-pressed={(config.examKind ?? 'timed-set') === 'timed-set'}
-              onClick={() =>
-                setConfig({
-                  ...config,
-                  examKind: 'timed-set',
-                  benchmarkPaperId: undefined,
-                  count: config.count === 'all' ? '15' : config.count
-                })
-              }
+              onClick={() => changeMode('exam')}
             >
               <span>Timed set</span>
               <small>3 min / question</small>
@@ -827,6 +827,7 @@ function PracticeSetup({
               aria-pressed={config.examKind === 'full-paper'}
               onClick={() => {
                 const paper = selectedBenchmarkPaper;
+                onRecommendationPreset('full-paper');
                 setConfig({
                   ...config,
                   mode: 'exam',
@@ -851,7 +852,6 @@ function PracticeSetup({
           </div>
         )}
 
-        {fullPaperSelected && recommendationControls}
         {fullPaperSelected ? (
           <FullPaperSetup
             papers={benchmarkPapers}
@@ -926,47 +926,6 @@ function PracticeSetup({
                   {selectedSubject.label}
                 </p>
               )}
-              {selectedSubject && selectedTopics.length > 1 && (
-                <fieldset className="practice-topic-picker">
-                  <legend>
-                    Topics <span>Choose one or more</span>
-                  </legend>
-                  <div>
-                    <button
-                      type="button"
-                      aria-pressed={selectedTopicSlug === 'all'}
-                      onClick={() => setConfig({ ...config, topicSlug: 'all' })}
-                    >
-                      All {selectedSubject.label}
-                      <span>{selectedSubject.count}</span>
-                    </button>
-                    {selectedTopics.map((topic) => {
-                      const activeList =
-                        selectedTopicSlug === 'all' ? [] : selectedTopicSlug.split(',');
-                      const active = activeList.includes(topic.slug);
-                      return (
-                        <button
-                          key={topic.slug}
-                          type="button"
-                          aria-pressed={active}
-                          onClick={() => {
-                            const next = active
-                              ? activeList.filter((slug) => slug !== topic.slug)
-                              : [...activeList, topic.slug];
-                            setConfig({
-                              ...config,
-                              topicSlug: next.length ? next.join(',') : 'all'
-                            });
-                          }}
-                        >
-                          {topic.label}
-                          <span>{topic.count}</span>
-                        </button>
-                      );
-                    })}
-                  </div>
-                </fieldset>
-              )}
               {recommendationControls}
 
               <details className="practice-advanced">
@@ -977,6 +936,47 @@ function PracticeSetup({
                   </span>
                   <small>{advancedSummary}</small>
                 </summary>
+                {selectedSubject && selectedTopics.length > 1 && (
+                  <fieldset className="practice-topic-picker">
+                    <legend>
+                      Topics <span>Choose one or more</span>
+                    </legend>
+                    <div>
+                      <button
+                        type="button"
+                        aria-pressed={selectedTopicSlug === 'all'}
+                        onClick={() => setConfig({ ...config, topicSlug: 'all' })}
+                      >
+                        All {selectedSubject.label}
+                        <span>{selectedSubject.count}</span>
+                      </button>
+                      {selectedTopics.map((topic) => {
+                        const activeList =
+                          selectedTopicSlug === 'all' ? [] : selectedTopicSlug.split(',');
+                        const active = activeList.includes(topic.slug);
+                        return (
+                          <button
+                            key={topic.slug}
+                            type="button"
+                            aria-pressed={active}
+                            onClick={() => {
+                              const next = active
+                                ? activeList.filter((slug) => slug !== topic.slug)
+                                : [...activeList, topic.slug];
+                              setConfig({
+                                ...config,
+                                topicSlug: next.length ? next.join(',') : 'all'
+                              });
+                            }}
+                          >
+                            {topic.label}
+                            <span>{topic.count}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </fieldset>
+                )}
                 <div className="practice-builder__fields practice-builder__fields--advanced">
                   <label>
                     From year
@@ -1021,35 +1021,42 @@ function PracticeSetup({
                       <option value="NAT">NAT</option>
                     </Select>
                   </label>
-                  <label>
-                    Question history
-                    <Select
-                      value={config.history ?? 'all'}
-                      onChange={(event) =>
-                        setConfig({ ...config, history: event.target.value as PyqHistoryFilter })
-                      }
-                    >
-                      {PYQ_HISTORY_OPTIONS.map((option) => (
-                        <option key={option.value} value={option.value}>
-                          {option.label}
-                        </option>
-                      ))}
-                    </Select>
-                  </label>
-                  <label>
-                    Order
-                    <Select
-                      value={config.order}
-                      onChange={(event) =>
-                        setConfig({ ...config, order: event.target.value as Order })
-                      }
-                    >
-                      <option value="unseen">Unseen first</option>
-                      <option value="random">Random</option>
-                      <option value="newest">Newest first</option>
-                      <option value="oldest">Oldest first</option>
-                    </Select>
-                  </label>
+                  {recommendationPreset === 'custom' && (
+                    <>
+                      <label>
+                        Question history
+                        <Select
+                          value={config.history ?? 'all'}
+                          onChange={(event) =>
+                            setConfig({
+                              ...config,
+                              history: event.target.value as PyqHistoryFilter
+                            })
+                          }
+                        >
+                          {PYQ_HISTORY_OPTIONS.map((option) => (
+                            <option key={option.value} value={option.value}>
+                              {option.label}
+                            </option>
+                          ))}
+                        </Select>
+                      </label>
+                      <label>
+                        Order
+                        <Select
+                          value={config.order}
+                          onChange={(event) =>
+                            setConfig({ ...config, order: event.target.value as Order })
+                          }
+                        >
+                          <option value="unseen">Unseen first</option>
+                          <option value="random">Random</option>
+                          <option value="newest">Newest first</option>
+                          <option value="oldest">Oldest first</option>
+                        </Select>
+                      </label>
+                    </>
+                  )}
                 </div>
                 {(config.mode ?? 'practice') === 'practice' && (
                   <div className="practice-builder__view">
@@ -1078,6 +1085,17 @@ function PracticeSetup({
                     </span>
                   </label>
                 )}
+                {showRecommendedSetup && (
+                  <PyqRecommendationOptions
+                    preset={recommendationPreset}
+                    onPreset={onRecommendationPreset}
+                    onRegenerate={onRegenerateSeed}
+                    savedPrescriptions={savedPrescriptions}
+                    onSavePrescription={onSavePrescription}
+                    onLoadPrescription={onLoadPrescription}
+                    onDeletePrescription={onDeletePrescription}
+                  />
+                )}
               </details>
             </div>
             <div className="practice-library-launch">
@@ -1094,7 +1112,11 @@ function PracticeSetup({
                     : 'Commit an answer to reveal its key.'}
                 </span>
               </div>
-              <Button variant="primary" onClick={onStart} disabled={loading}>
+              <Button
+                variant="primary"
+                onClick={onStart}
+                disabled={loading || !recommendationReady}
+              >
                 {loading
                   ? 'Opening question bank…'
                   : config.mode === 'exam'
@@ -3971,7 +3993,6 @@ export default function Pyq() {
         recommendedSelection={recommendedSelection}
         recommendationLoading={recommendationLoading}
         recommendationError={recommendationError}
-        selectionSeed={selectionSeed}
         savedPrescriptions={savedPrescriptions}
         includeReservedBenchmarkQuestions={includeReservedBenchmarkQuestions}
         closedBookConfirmed={closedBookConfirmed}
@@ -3985,7 +4006,6 @@ export default function Pyq() {
         onIncludeReservedBenchmarkQuestions={setIncludeReservedBenchmarkQuestions}
         onClosedBookConfirmed={setClosedBookConfirmed}
         onRecommendationPreset={selectRecommendationPreset}
-        onSelectionSeed={setSelectionSeed}
         onRegenerateSeed={regenerateSelectionSeed}
         onSavePrescription={savePrescription}
         onLoadPrescription={loadPrescription}

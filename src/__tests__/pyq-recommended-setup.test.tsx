@@ -1,7 +1,9 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
-import PyqRecommendedSetup from '@/components/pyq/PyqRecommendedSetup';
+import PyqRecommendedSetup, {
+  PyqRecommendationOptions
+} from '@/components/pyq/PyqRecommendedSetup';
 import {
   PYQ_RECOMMENDATION_PRESETS,
   type RecommendedPyqSelection
@@ -84,72 +86,88 @@ const selection: RecommendedPyqSelection = {
 };
 
 describe('recommended PYQ setup', () => {
-  it('shows complete preflight evidence and exact UID reasons', async () => {
+  it('keeps everyday choices short and reports the actual set size without exposing answers', async () => {
     const user = userEvent.setup();
+    const onPreset = vi.fn();
     render(
       <PyqRecommendedSetup
         preset="repair"
         selection={selection}
         loading={false}
         error={null}
-        seed="repair-proof"
-        savedPrescriptions={[]}
-        onPreset={vi.fn()}
-        onSeed={vi.fn()}
-        onRegenerate={vi.fn()}
-        onSavePrescription={vi.fn()}
-        onLoadPrescription={vi.fn()}
-        onDeletePrescription={vi.fn()}
+        onPreset={onPreset}
       />
     );
-
-    expect(screen.getByText('8')).toBeInTheDocument();
-    expect(screen.getByText('6')).toBeInTheDocument();
-    expect(screen.getByText('Repair preset')).toBeInTheDocument();
-    expect(screen.getByText(/Requested set is 9 questions short/i)).toBeInTheDocument();
-    await user.click(screen.getByText(/Why these 1 exact UIDs/i));
-    expect(screen.getByText(new RegExp(question.id))).toBeInTheDocument();
-    expect(screen.getByText('high confidence wrong')).toBeInTheDocument();
-    expect(screen.getByText('weekly focus')).toBeInTheDocument();
+    expect(
+      screen.getByRole('group', { name: 'Practice focus' }).querySelectorAll('button')
+    ).toHaveLength(3);
+    expect(screen.getByRole('button', { name: 'Review mistakes' })).toHaveAttribute(
+      'aria-pressed',
+      'true'
+    );
+    expect(screen.getByRole('status')).toHaveTextContent('1 question · About 3 min');
+    expect(
+      screen.getByText(
+        'Only 1 of the requested 10 questions match. Widen your filters for a larger set.'
+      )
+    ).toBeInTheDocument();
+    expect(screen.queryByText('Matched')).not.toBeInTheDocument();
+    expect(screen.queryByLabelText('Reproducibility seed')).not.toBeInTheDocument();
+    await user.click(screen.getByText('Why this set?'));
+    expect(screen.getByText('Algorithms · 2025 · Q7')).toBeInTheDocument();
+    expect(screen.getByText(/weekly focus/)).toBeInTheDocument();
+    expect(screen.queryByText(question.id)).not.toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'New questions' }));
+    expect(onPreset).toHaveBeenCalledWith('learn');
   });
 
-  it('exposes all seven jobs plus Custom and persists a named prescription action', async () => {
+  it('hides stale preview counts while preparing another focus and keeps failures visible', () => {
+    const props = {
+      preset: 'learn' as const,
+      selection,
+      loading: true,
+      error: null,
+      onPreset: vi.fn()
+    };
+    const { rerender } = render(<PyqRecommendedSetup {...props} />);
+    expect(screen.getByRole('status')).toHaveTextContent('Preparing your set');
+    expect(screen.queryByText(/1 question ·/)).not.toBeInTheDocument();
+    rerender(
+      <PyqRecommendedSetup {...props} loading={false} error="The question bank is unavailable." />
+    );
+    expect(screen.getByRole('alert')).toHaveTextContent('The question bank is unavailable.');
+    expect(screen.queryByRole('status')).not.toBeInTheDocument();
+  });
+
+  it('keeps specialised focuses and named setups available in advanced settings', async () => {
     const user = userEvent.setup();
     const onPreset = vi.fn();
     const onSavePrescription = vi.fn();
+    const onRegenerate = vi.fn();
     render(
-      <PyqRecommendedSetup
-        preset="custom"
-        selection={null}
-        loading={false}
-        error={null}
-        seed="custom-proof"
-        savedPrescriptions={[]}
+      <PyqRecommendationOptions
+        preset="speed"
         onPreset={onPreset}
-        onSeed={vi.fn()}
-        onRegenerate={vi.fn()}
+        onRegenerate={onRegenerate}
+        savedPrescriptions={[]}
         onSavePrescription={onSavePrescription}
         onLoadPrescription={vi.fn()}
         onDeletePrescription={vi.fn()}
       />
     );
-
-    for (const label of [
-      'Learn',
-      'Diagnose',
-      'Repair',
-      'Speed',
-      'Transfer',
-      'Mixed GATE',
-      'Full Paper',
-      'Custom'
-    ]) {
-      expect(screen.getByRole('button', { name: new RegExp(label, 'i') })).toBeInTheDocument();
-    }
-    await user.click(screen.getByRole('button', { name: /Transfer/i }));
+    expect(screen.getByRole('combobox', { name: 'Specialised focus' })).toHaveValue('speed');
+    await user.selectOptions(
+      screen.getByRole('combobox', { name: 'Specialised focus' }),
+      'transfer'
+    );
     expect(onPreset).toHaveBeenCalledWith('transfer');
-    await user.type(screen.getByPlaceholderText('Name this prescription'), 'Weekly repair');
-    await user.click(screen.getByRole('button', { name: 'Save' }));
+    await user.click(screen.getByRole('button', { name: 'Refresh question mix' }));
+    expect(onRegenerate).toHaveBeenCalledOnce();
+    await user.type(
+      screen.getByRole('textbox', { name: 'Save this setup' }),
+      '  Weekly repair  {Enter}'
+    );
     expect(onSavePrescription).toHaveBeenCalledWith('Weekly repair');
+    expect(screen.getByRole('textbox', { name: 'Save this setup' })).toHaveValue('');
   });
 });

@@ -163,7 +163,7 @@ describe('PYQ committed-attempt logging', () => {
       </MemoryRouter>
     );
 
-    expect(await screen.findByText(/Why these 1 exact UIDs/i)).toBeInTheDocument();
+    expect(await screen.findByText('Why this set?')).toBeInTheDocument();
     await user.click(screen.getByRole('button', { name: 'Start practice set' }));
     expect(await screen.findByText('Which proposition is a tautology?')).toBeInTheDocument();
 
@@ -307,8 +307,8 @@ describe('PYQ committed-attempt logging', () => {
       </MemoryRouter>
     );
 
-    await user.click(await screen.findByRole('button', { name: /^Learn/i }));
-    expect(await screen.findByText(/Why these 1 exact UIDs/i)).toBeInTheDocument();
+    await user.click(await screen.findByRole('button', { name: 'New questions' }));
+    expect(await screen.findByText('Why this set?')).toBeInTheDocument();
     await user.click(screen.getByRole('button', { name: 'Start practice set' }));
     expect(await screen.findByText('Which proposition is a tautology?')).toBeInTheDocument();
 

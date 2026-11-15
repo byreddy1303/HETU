@@ -203,8 +203,8 @@ describe('Custom PYQ setup and Rishi catalog visibility', () => {
     );
     await user.selectOptions(await screen.findByRole('combobox', { name: 'From year' }), '2026');
     await user.click(screen.getByRole('button', { name: 'Multiple questions' }));
-    await user.click(screen.getByRole('button', { name: /^Learn/ }));
-    await user.click(screen.getByRole('button', { name: /^Custom/ }));
+    await user.click(screen.getByRole('button', { name: 'New questions' }));
+    await user.click(screen.getByRole('button', { name: 'My selection' }));
     expect(screen.getByRole('combobox', { name: 'From year' })).toHaveValue('1990');
     expect(screen.getByRole('combobox', { name: 'To year' })).toHaveValue('2026');
     expect(screen.getByRole('button', { name: 'Multiple questions' })).toHaveAttribute(
@@ -225,17 +225,41 @@ describe('Custom PYQ setup and Rishi catalog visibility', () => {
     expect(screen.getByText('A core question from 2026.')).toBeInTheDocument();
   });
 
-  it('leaves the single-year Full Paper configuration when Custom is selected', async () => {
+  it('preserves exam mode and the chosen count when changing focus', async () => {
     const user = userEvent.setup();
     render(
       <MemoryRouter>
         <Pyq />
       </MemoryRouter>
     );
-    await user.click(await screen.findByRole('button', { name: /^Full Paper/ }));
+    await user.selectOptions(await screen.findByRole('combobox', { name: 'Questions' }), '25');
+    await user.click(screen.getByRole('button', { name: 'Exam mode' }));
+    await user.click(screen.getByRole('button', { name: 'New questions' }));
+    expect(screen.getByRole('button', { name: 'Exam mode' })).toHaveAttribute(
+      'aria-pressed',
+      'true'
+    );
+    expect(screen.getByRole('combobox', { name: 'Questions' })).toHaveValue('25');
+    expect(screen.queryByRole('combobox', { name: 'Question history' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('combobox', { name: 'Order' })).not.toBeInTheDocument();
+    await waitFor(() =>
+      expect(screen.getByRole('button', { name: 'Start timed exam' })).toBeEnabled()
+    );
+  });
+
+  it('restores the full year range when leaving an official paper for a timed set', async () => {
+    const user = userEvent.setup();
+    render(
+      <MemoryRouter>
+        <Pyq />
+      </MemoryRouter>
+    );
+    await user.click(await screen.findByRole('button', { name: 'Exam mode' }));
+    await user.click(screen.getByRole('button', { name: /Official full paper/ }));
     expect(screen.getByRole('button', { name: 'Start 3-hour full paper' })).toBeInTheDocument();
     expect(screen.queryByRole('combobox', { name: 'From year' })).not.toBeInTheDocument();
-    await user.click(screen.getByRole('button', { name: /^Custom/ }));
+    expect(screen.queryByRole('group', { name: 'Practice focus' })).not.toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: /Timed set/ }));
     expect(screen.getByRole('combobox', { name: 'From year' })).toHaveValue('1990');
     expect(screen.getByRole('combobox', { name: 'To year' })).toHaveValue('2026');
     expect(screen.getByRole('button', { name: 'Start timed exam' })).toBeInTheDocument();

@@ -567,10 +567,18 @@ describe('PYQ multiple-question practice view', () => {
       ).not.toBeInTheDocument();
       expect(screen.queryByRole('button', { name: /^All books/ })).not.toBeInTheDocument();
       if (source === 'saved prescription') {
+        await user.click(screen.getByText('More settings'));
         await user.click(screen.getByRole('button', { name: 'Legacy TIFR set' }));
       }
       if (source === 'Transfer preset') {
-        await user.click(screen.getByRole('button', { name: /^Transfer/ }));
+        await user.click(screen.getByText('More settings'));
+        await user.selectOptions(
+          screen.getByRole('combobox', { name: 'Specialised focus' }),
+          'transfer'
+        );
+        await waitFor(() =>
+          expect(screen.getByRole('button', { name: /Start (?:fresh set|practice)/ })).toBeEnabled()
+        );
       }
       await user.click(screen.getByRole('button', { name: /Start (?:fresh set|practice)/ }));
       await waitFor(async () => {

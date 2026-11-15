@@ -1,379 +1,220 @@
 import { useState } from 'react';
-import { backendConfig } from '@/lib/backend-config';
-import {
-  BookOpen,
-  BookmarkPlus,
-  Check,
-  FileCheck2,
-  RefreshCw,
-  Route,
-  ScanSearch,
-  Shuffle,
-  SlidersHorizontal,
-  Timer,
-  Trash2,
-  Wrench
-} from 'lucide-react';
-import {
-  PYQ_RECOMMENDATION_PRESETS,
-  type RecommendedPyqSelection
-} from '@/lib/pyq-recommended-selection';
+import { BookOpen, BookmarkPlus, RefreshCw, SlidersHorizontal, Trash2, Wrench } from 'lucide-react';
+import type { RecommendedPyqSelection } from '@/lib/pyq-recommended-selection';
 import type { PyqPresetPreference, PyqSavedPrescription } from '@/stores/pyq-preferences';
-import { cn, plural } from '@/lib/utils';
-import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
+import { Select } from '@/components/ui/Select';
+import { plural } from '@/lib/utils';
 import './pyq-recommended-setup.css';
 
-const PRESET_ICONS = {
-  learn: BookOpen,
-  diagnose: ScanSearch,
-  repair: Wrench,
-  speed: Timer,
-  transfer: Route,
-  'mixed-gate': Shuffle,
-  'full-paper': FileCheck2
-} as const;
+const EVERYDAY_FOCUSES = [
+  { id: 'custom', label: 'My selection', icon: SlidersHorizontal },
+  { id: 'learn', label: 'New questions', icon: BookOpen },
+  { id: 'repair', label: 'Review mistakes', icon: Wrench }
+] as const;
+const SPECIALISED_FOCUSES = [
+  { id: 'diagnose', label: 'Find gaps' },
+  { id: 'speed', label: 'Improve speed' },
+  { id: 'transfer', label: 'Apply ideas to fresh questions' },
+  { id: 'mixed-gate', label: 'Mixed GATE practice' }
+] as const;
+const FOCUS_HELP: Record<PyqPresetPreference, string> = {
+  custom: 'Use the subject, question count, and filters you choose.',
+  learn: 'Practise questions you have not attempted before.',
+  repair: 'Revisit mistakes, uncertain answers, and questions due for review.',
+  diagnose: 'Find gaps: sample across subjects to see what needs attention.',
+  speed: 'Improve speed: revisit correct answers that took longer than their target time.',
+  transfer: 'Apply ideas: try fresh questions or an assigned transfer set.',
+  'mixed-gate': 'Mixed GATE practice: work through a broad set across subjects.',
+  'full-paper': 'Take an intact official paper in Exam mode.'
+};
+
+interface FocusProps {
+  preset: PyqPresetPreference;
+  onPreset: (preset: PyqPresetPreference) => void;
+}
 
 export default function PyqRecommendedSetup({
-  compact = false,
   preset,
   selection,
   loading,
   error,
-  seed,
-  savedPrescriptions,
-  onPreset,
-  onSeed,
-  onRegenerate,
-  onSavePrescription,
-  onLoadPrescription,
-  onDeletePrescription
-}: {
-  compact?: boolean;
-  preset: PyqPresetPreference;
+  onPreset
+}: FocusProps & {
   selection: RecommendedPyqSelection | null;
   loading: boolean;
   error: string | null;
-  seed: string;
-  savedPrescriptions: PyqSavedPrescription[];
-  onPreset: (preset: PyqPresetPreference) => void;
-  onSeed: (seed: string) => void;
+}) {
+  // Never present a previous focus's count as the newly requested set.
+  const currentSelection = !loading && !error && selection?.preset.id === preset ? selection : null;
+  const preflight = currentSelection?.preflight;
+  const automatic = preset !== 'custom' && preset !== 'full-paper';
+  return (
+    <section className="pyq-focus" aria-labelledby="pyq-focus-heading">
+      <h3 id="pyq-focus-heading">What would you like to practise?</h3>
+      <div className="pyq-focus__choices" role="group" aria-label="Practice focus">
+        {EVERYDAY_FOCUSES.map(({ id, label, icon: Icon }) => (
+          <button
+            key={id}
+            type="button"
+            data-focus={id}
+            aria-pressed={preset === id}
+            onClick={() => onPreset(id)}
+          >
+            <Icon size={16} aria-hidden="true" />
+            {label}
+          </button>
+        ))}
+      </div>
+      <p className="pyq-focus__help">{FOCUS_HELP[preset]}</p>
+      {error && (
+        <p role="alert" className="pyq-focus__error">
+          {error}
+        </p>
+      )}
+      {automatic && !error && (
+        <div className="pyq-focus__preview">
+          <p role="status">
+            {preflight
+              ? `${preflight.selectedCount} ${plural(preflight.selectedCount, 'question')} · About ${preflight.estimatedMinutes} min`
+              : 'Preparing your set…'}
+          </p>
+          {preflight?.selectedCount === 0 ? (
+            <p className="pyq-focus__help">
+              No matching questions. Try My selection or widen your filters.
+            </p>
+          ) : preflight && preflight.shortfall > 0 ? (
+            <p className="pyq-focus__help">
+              Only {preflight.selectedCount} of the requested {preflight.requestedCount} questions
+              match. Widen your filters for a larger set.
+            </p>
+          ) : null}
+          {currentSelection && preflight && preflight.selectedCount > 0 && (
+            <details className="pyq-focus__details">
+              <summary>Why this set?</summary>
+              <p>
+                {preflight.reserve.protected
+                  ? 'Unseen full papers stay protected.'
+                  : 'Reserved full-paper questions are allowed in this set.'}
+              </p>
+              <ul>
+                {currentSelection.questions.map((question) => {
+                  const reasons = [
+                    ...(currentSelection.reasonsByQuestionUid[question.id] ?? [])
+                      .filter((reason) => reason !== 'all')
+                      .map((reason) => reason.replaceAll('-', ' ')),
+                    ...(currentSelection.priorityReasonsByQuestionUid[question.id] ?? [])
+                  ];
+                  return (
+                    <li key={question.id}>
+                      <span>
+                        {question.subject} · {question.year} · Q{question.number}
+                      </span>
+                      {reasons.length > 0 && <small>{reasons.join(' · ')}</small>}
+                    </li>
+                  );
+                })}
+              </ul>
+            </details>
+          )}
+        </div>
+      )}
+    </section>
+  );
+}
+
+/** In the builder's single advanced disclosure, separate from the daily choices. */
+export function PyqRecommendationOptions({
+  preset,
+  onPreset,
+  onRegenerate,
+  savedPrescriptions,
+  onSavePrescription,
+  onLoadPrescription,
+  onDeletePrescription
+}: FocusProps & {
   onRegenerate: () => void;
+  savedPrescriptions: PyqSavedPrescription[];
   onSavePrescription: (name: string) => void;
   onLoadPrescription: (prescription: PyqSavedPrescription) => void;
   onDeletePrescription: (id: string) => void;
 }) {
   const [name, setName] = useState('');
-  const presets = Object.values(PYQ_RECOMMENDATION_PRESETS);
-  const preflight = selection?.preflight ?? null;
-  const PreflightContainer = compact ? 'details' : 'div';
-  const SavedContainer = compact ? 'details' : 'div';
-
+  const specialised = SPECIALISED_FOCUSES.some((focus) => focus.id === preset);
   function save() {
-    const trimmed = name.trim();
-    if (!trimmed) return;
-    onSavePrescription(trimmed);
+    if (!name.trim()) return;
+    onSavePrescription(name.trim());
     setName('');
   }
-
   return (
-    <section
-      aria-labelledby="recommended-pyq-heading"
-      className={cn(
-        'pyq-recommended',
-        compact ? 'pyq-recommended--compact' : 'border-b border-border'
-      )}
-    >
-      <div className="pyq-recommended__heading bg-bg-overlay/25 px-4 py-4 sm:px-5">
-        <p id="recommended-pyq-heading" className="u-label text-accent">
-          {compact ? 'Focus' : 'Recommended set'}
-        </p>
-        <p className="mt-1 max-w-3xl text-[12.5px] leading-relaxed text-text-muted">
-          {compact
-            ? preset === 'custom'
-              ? 'Choose your own scope, or let a focus shape your set.'
-              : PYQ_RECOMMENDATION_PRESETS[preset]?.description
-            : 'Choose a focus. Preview your questions before starting; reserved full papers stay protected.'}
-        </p>
-      </div>
-
-      <div className="pyq-preset-deck">
-        {presets.map((definition) => {
-          const active = preset === definition.id;
-          const Icon = PRESET_ICONS[definition.id];
-          return (
-            <button
-              key={definition.id}
-              type="button"
-              data-preset={definition.id}
-              aria-pressed={active}
-              onClick={() => onPreset(definition.id)}
-              className={cn(
-                'pyq-preset-control relative min-h-[112px] bg-bg-raised p-4 text-left transition-colors focus-visible:z-10 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-accent-faint',
-                active ? 'bg-accent-faint' : 'hover:bg-bg-overlay/60'
-              )}
-            >
-              <span className="pyq-preset-control__top">
-                <span className="pyq-preset-control__icon" aria-hidden="true">
-                  <Icon size={25} strokeWidth={1.55} />
-                </span>
-                <span
-                  className={cn(
-                    'pyq-preset-control__check flex h-5 w-5 items-center justify-center rounded-full border',
-                    active
-                      ? 'border-accent bg-accent text-accent-contrast'
-                      : 'border-border-hover text-transparent'
-                  )}
-                  aria-hidden="true"
-                >
-                  <Check size={12} aria-hidden="true" />
-                </span>
-              </span>
-              <span className="pyq-preset-control__name font-display text-[15px] font-semibold text-text">
-                {definition.label}
-              </span>
-              <span className="pyq-preset-control__description mt-2 block text-[11.5px] leading-relaxed text-text-muted">
-                {definition.description}
-              </span>
-            </button>
-          );
-        })}
-        <button
-          type="button"
-          data-preset="custom"
-          aria-pressed={preset === 'custom'}
-          onClick={() => onPreset('custom')}
-          className={cn(
-            'pyq-preset-control relative min-h-[112px] bg-bg-raised p-4 text-left transition-colors focus-visible:z-10 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-accent-faint',
-            preset === 'custom' ? 'bg-accent-faint' : 'hover:bg-bg-overlay/60'
-          )}
-        >
-          <span className="pyq-preset-control__top">
-            <span className="pyq-preset-control__icon" aria-hidden="true">
-              <SlidersHorizontal size={25} strokeWidth={1.55} />
-            </span>
-            <span
-              className={cn(
-                'pyq-preset-control__check flex h-5 w-5 items-center justify-center rounded-full border',
-                preset === 'custom'
-                  ? 'border-accent bg-accent text-accent-contrast'
-                  : 'border-border-hover text-transparent'
-              )}
-              aria-hidden="true"
-            >
-              <Check size={12} aria-hidden="true" />
-            </span>
-          </span>
-          <span className="pyq-preset-control__name font-display text-[15px] font-semibold text-text">
-            Custom
-          </span>
-          <span className="pyq-preset-control__description mt-2 block text-[11.5px] leading-relaxed text-text-muted">
-            Use the subject, history, year, type, count, and order controls below directly.
-          </span>
-        </button>
-      </div>
-
-      {compact && error ? (
-        <p role="alert" className="mt-2 text-[12px] text-danger">
-          {error}
-        </p>
-      ) : null}
-      {preset !== 'custom' && preset !== 'full-paper' ? (
-        <PreflightContainer className={compact ? 'practice-recommendation-details' : undefined}>
-          {compact && (
-            <summary>
-              {loading
-                ? 'Preparing your set…'
-                : `${preflight?.selectedCount ?? '—'} selected · ${preflight?.estimatedMinutes ?? '—'} min · Preview set`}
-              {preflight?.shortfall ? ` · ${preflight.shortfall} short` : ''}
-            </summary>
-          )}
-          <div className="pyq-recommended__preflight grid gap-4 p-4 sm:p-5 lg:grid-cols-[minmax(0,1fr)_280px]">
-            <div>
-              <div
-                className="pyq-recommended__metrics grid grid-cols-2 gap-2 sm:grid-cols-4"
-                aria-live="polite"
-              >
-                {[
-                  ['Matched', preflight?.exactMatchCount ?? '—'],
-                  ['Selectable', preflight?.selectableCount ?? '—'],
-                  ['Selected', preflight?.selectedCount ?? '—'],
-                  ['Unseen', preflight?.matchedHistory.unseen ?? '—'],
-                  ['Seen', preflight?.matchedHistory.seen ?? '—'],
-                  ['Time', preflight ? `${preflight.estimatedMinutes}m` : '—'],
-                  ['Marks', preflight ? preflight.estimatedMarks : '—'],
-                  ['Protected', preflight?.reserve.excludedCount ?? '—']
-                ].map(([label, value]) => (
-                  <div
-                    key={label}
-                    className="pyq-recommended__metric rounded border border-border bg-bg-overlay/20 px-3 py-2.5"
-                  >
-                    <p className="u-label">{label}</p>
-                    <p className="u-num mt-1 text-[16px] font-semibold text-text">{value}</p>
-                  </div>
-                ))}
-              </div>
-              <div className="mt-3 flex flex-wrap gap-1.5">
-                {preflight?.reasonChips.map((reason) => (
-                  <Badge key={reason.code} tone={reason.code === 'shortfall' ? 'warn' : 'neutral'}>
-                    {reason.label}
-                    {reason.selectedCount != null ? ` · ${reason.selectedCount}` : ''}
-                  </Badge>
-                ))}
-                {loading ? <Badge>Calculating exact set…</Badge> : null}
-              </div>
-              {preflight?.shortfall ? (
-                <p className="mt-3 text-[12px] text-warn">
-                  Requested set is {preflight.shortfall} {plural(preflight.shortfall, 'question')}{' '}
-                  short. Widen scope or choose another job; Hetu will not silently consume a sealed
-                  paper.
-                </p>
-              ) : null}
-              {preflight && selection ? (
-                <div className="pyq-recommended__distribution mt-3 rounded border border-border bg-bg-overlay/20 p-3">
-                  <p className="u-label">Selected distribution</p>
-                  <div className="mt-2 flex flex-wrap gap-1.5">
-                    {Object.entries(preflight.distribution.subject).map(([subject, count]) => (
-                      <Badge key={`subject:${subject}`}>
-                        {subject} · {count}
-                      </Badge>
-                    ))}
-                    {Object.entries(preflight.distribution.year).map(([year, count]) => (
-                      <Badge key={`year:${year}`}>
-                        {year} · {count}
-                      </Badge>
-                    ))}
-                    {Object.entries(preflight.distribution.marks).map(([marks, count]) => (
-                      <Badge key={`marks:${marks}`}>
-                        {marks} mark · {count}
-                      </Badge>
-                    ))}
-                  </div>
-                  <details className="mt-3 border-t border-border pt-3">
-                    <summary className="cursor-pointer text-[11.5px] font-semibold text-text-muted">
-                      Why these {selection.questionUids.length} exact UIDs
-                    </summary>
-                    <ol className="mt-2 max-h-64 space-y-2 overflow-auto pr-1">
-                      {selection.questionUids.map((questionUid, index) => {
-                        const cohortReasons = selection.reasonsByQuestionUid[questionUid] ?? [];
-                        const priorityReasons =
-                          selection.priorityReasonsByQuestionUid[questionUid] ?? [];
-                        return (
-                          <li
-                            key={questionUid}
-                            className="rounded border border-border bg-bg-raised px-2.5 py-2"
-                          >
-                            <p className="truncate font-mono text-[10.5px] text-text">
-                              {String(index + 1).padStart(2, '0')} · {questionUid}
-                            </p>
-                            <div className="mt-1.5 flex flex-wrap gap-1">
-                              {cohortReasons.map((reason) => (
-                                <Badge key={`${questionUid}:${reason}`}>
-                                  {reason.replaceAll('-', ' ')}
-                                </Badge>
-                              ))}
-                              {priorityReasons.map((reason) => (
-                                <Badge key={`${questionUid}:priority:${reason}`} tone="accent">
-                                  {reason}
-                                </Badge>
-                              ))}
-                            </div>
-                          </li>
-                        );
-                      })}
-                    </ol>
-                  </details>
-                </div>
-              ) : null}
-              {error && !compact ? (
-                <p role="alert" className="mt-3 text-[12px] text-danger">
-                  {error}
-                </p>
-              ) : null}
-            </div>
-
-            <div className="pyq-recommended__seed rounded border border-border bg-bg-overlay/20 p-3">
-              <label className="text-[11.5px] font-medium text-text-muted">
-                Reproducibility seed
-                <Input
-                  className="mt-1 font-mono"
-                  value={seed}
-                  onChange={(event) => onSeed(event.target.value)}
-                  aria-describedby="pyq-seed-help"
-                />
-              </label>
-              <p id="pyq-seed-help" className="mt-1 text-[10.5px] leading-relaxed text-text-faint">
-                Same bank, evidence, scope, and seed produce the same UID order.
-              </p>
-              <Button variant="ghost" size="sm" className="mt-2 w-full" onClick={onRegenerate}>
-                <RefreshCw size={13} /> New deterministic seed
-              </Button>
-            </div>
-          </div>
-        </PreflightContainer>
-      ) : null}
-
-      <SavedContainer className={compact ? 'practice-recommendation-details' : undefined}>
-        {compact && (
-          <summary>
-            Save or load a setup
-            {savedPrescriptions.length ? ` · ${savedPrescriptions.length} saved` : ''}
-          </summary>
+    <div className="pyq-focus-options">
+      <div className="pyq-focus-options__goals">
+        <label>
+          Specialised focus
+          <Select
+            value={specialised ? preset : ''}
+            onChange={(event) => {
+              if (event.target.value) onPreset(event.target.value as PyqPresetPreference);
+            }}
+          >
+            <option value="" disabled>
+              Choose another focus
+            </option>
+            {SPECIALISED_FOCUSES.map(({ id, label }) => (
+              <option key={id} value={id}>
+                {label}
+              </option>
+            ))}
+          </Select>
+        </label>
+        {preset !== 'custom' && preset !== 'full-paper' && (
+          <Button size="sm" onClick={onRegenerate}>
+            <RefreshCw size={14} aria-hidden="true" />
+            Refresh question mix
+          </Button>
         )}
-        <div className="pyq-recommended__saved grid gap-3 border-t border-border p-4 sm:p-5 lg:grid-cols-2">
-          <div className="pyq-prescription-form">
-            <Input
-              className="pyq-prescription-name"
-              value={name}
-              onChange={(event) => setName(event.target.value)}
-              placeholder="Name this prescription"
-              aria-label="Name this prescription"
-              maxLength={80}
-            />
-            <Button
-              className="pyq-prescription-save"
-              variant="ghost"
-              onClick={save}
-              disabled={!name.trim()}
-            >
-              <BookmarkPlus size={14} /> Save
-            </Button>
-          </div>
-          {savedPrescriptions.length > 0 ? (
-            <div className="flex flex-wrap justify-start gap-2 lg:justify-end">
-              {savedPrescriptions.slice(0, 6).map((prescription) => (
-                <span
-                  key={prescription.id}
-                  className="pyq-saved-prescription inline-flex overflow-hidden rounded border border-border"
+      </div>
+      <div className="pyq-focus-options__saved">
+        <label htmlFor="pyq-setup-name">Save this setup</label>
+        <form
+          onSubmit={(event) => {
+            event.preventDefault();
+            save();
+          }}
+        >
+          <Input
+            id="pyq-setup-name"
+            value={name}
+            onChange={(event) => setName(event.target.value)}
+            placeholder="Give it a name"
+            maxLength={80}
+          />
+          <Button type="submit" size="sm" disabled={!name.trim()}>
+            <BookmarkPlus size={14} aria-hidden="true" />
+            Save
+          </Button>
+        </form>
+        {savedPrescriptions.length > 0 && (
+          <div className="pyq-focus-options__saved-list">
+            {savedPrescriptions.map((prescription) => (
+              <span key={prescription.id}>
+                <Button size="sm" onClick={() => onLoadPrescription(prescription)}>
+                  {prescription.name}
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => onDeletePrescription(prescription.id)}
+                  aria-label={`Delete ${prescription.name} setup`}
                 >
-                  <button
-                    type="button"
-                    onClick={() => onLoadPrescription(prescription)}
-                    className="bg-bg-raised px-2.5 py-1.5 text-[11.5px] font-medium text-text hover:bg-bg-overlay"
-                  >
-                    {prescription.name}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => onDeletePrescription(prescription.id)}
-                    className="border-l border-border bg-bg-raised px-2 text-text-faint hover:bg-danger-faint hover:text-danger"
-                    aria-label={`Delete ${prescription.name} prescription`}
-                  >
-                    <Trash2 size={12} />
-                  </button>
-                </span>
-              ))}
-            </div>
-          ) : (
-            <p className="self-center text-[11px] text-text-faint lg:text-right">
-              {backendConfig.isLocal
-                ? 'Save this setup to use it again in your local workspace.'
-                : 'Saved prescriptions sync with your account and can be reopened on another device.'}
-            </p>
-          )}
-        </div>
-      </SavedContainer>
-    </section>
+                  <Trash2 size={14} aria-hidden="true" />
+                </Button>
+              </span>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
   );
 }

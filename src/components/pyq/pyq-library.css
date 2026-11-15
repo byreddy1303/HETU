@@ -506,79 +506,6 @@
   border-radius: 10px;
   font-size: 13px;
 }
-/* Focus choices share the library's compact rhythm; explanations remain available. */
-.practice-library .pyq-recommended--compact {
-  overflow: visible;
-}
-.practice-library .pyq-recommended--compact .pyq-recommended__heading {
-  padding: 0 0 12px;
-}
-.practice-library .pyq-recommended--compact #recommended-pyq-heading {
-  font-size: 12px;
-  font-weight: 600;
-}
-.practice-library .pyq-recommended--compact .pyq-recommended__heading > p + p {
-  font-size: 12px;
-  margin-top: 5px;
-}
-.practice-library .pyq-recommended--compact .pyq-preset-deck {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  padding: 0;
-}
-.practice-library .pyq-recommended--compact .pyq-preset-control {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  padding: 8px 11px;
-  border-radius: 8px;
-}
-.practice-library .pyq-recommended--compact .pyq-preset-control__top {
-  display: contents;
-}
-.practice-library .pyq-recommended--compact .pyq-preset-control__icon {
-  width: 18px;
-  height: 18px;
-  color: rgb(var(--practice-blue));
-}
-.practice-library .pyq-recommended--compact [data-preset='repair'] .pyq-preset-control__icon {
-  color: rgb(var(--practice-teal));
-}
-.practice-library .pyq-recommended--compact [data-preset='speed'] .pyq-preset-control__icon {
-  color: rgb(var(--color-ink-marigold));
-}
-.practice-library .pyq-recommended--compact [data-preset='transfer'] .pyq-preset-control__icon {
-  color: rgb(var(--practice-rose));
-}
-.practice-library
-  .pyq-recommended--compact
-  :is(.pyq-preset-control__description, .pyq-preset-control__check) {
-  display: none;
-}
-.practice-library .pyq-recommended--compact .pyq-preset-control__name {
-  font-size: 12px;
-  font-weight: 500;
-}
-.practice-library .pyq-recommended--compact .pyq-preset-control[aria-pressed='true'] {
-  border-color: rgb(var(--color-accent) / 55%);
-  background: rgb(var(--color-accent-faint));
-}
-.practice-recommendation-details {
-  margin-top: 12px;
-  font-size: 12px;
-}
-.practice-recommendation-details > summary {
-  cursor: pointer;
-  padding-block: 4px;
-  color: rgb(var(--color-text-muted));
-}
-.practice-library
-  .pyq-recommended--compact
-  :is(.pyq-recommended__preflight, .pyq-recommended__saved) {
-  padding: 16px 0 0;
-  border-top: 0;
-}
 .practice-solving-toolbar {
   border-radius: 12px;
   padding: 10px 14px;
@@ -710,4 +637,8 @@
     position: static;
     box-shadow: none;
   }
+}
+
+.practice-advanced > .practice-topic-picker {
+  margin-top: 18px;
 }

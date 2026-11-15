@@ -1,5 +1,5 @@
 import { useState, useEffect, type ReactNode } from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react';
 import { pyqMarksLabel, type PyqQuestion } from '@/lib/pyq';
 import type { PyqAttemptRow, PyqSessionRow } from '@/types';
 import { getPyqPracticeDraft } from '@/lib/pyq-session';
@@ -125,50 +125,55 @@ export default function PyqPracticeSheet({
         aria-label="Practice question navigator"
         className="rounded-lg border border-border bg-bg-raised p-3 sm:p-4"
       >
-        <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
-          <p className="text-[13px] font-semibold text-text">Your question sheet</p>
-          <span className="text-[12px] text-text-muted">
-            {latest.size} of {questions.length} committed
-          </span>
-        </div>
-        <p className="mb-3 text-[12px] leading-relaxed text-text-muted">
-          Select an option on any question, then choose your confidence. Each question keeps its own
-          draft and active time.
-        </p>
-        <div className="flex max-h-36 flex-wrap gap-1.5 overflow-y-auto">
-          {questions.map((question, questionIndex) => {
-            const attempt = latest.get(question.id);
-            const status = attempt
-              ? attempt.mark_decision === 'SKIP'
-                ? 'Skipped'
-                : 'Committed'
-              : getPyqPracticeDraft(session, question.id)
-                ? 'Draft'
-                : 'Not answered';
-            return (
-              <button
-                key={question.id}
-                type="button"
-                aria-label={`Go to question ${questionIndex + 1}: ${status}`}
-                aria-current={index === questionIndex ? 'step' : undefined}
-                disabled={disabled}
-                onClick={() => onNavigate(questionIndex)}
-                className={cn(
-                  'min-h-10 min-w-10 rounded border px-2 text-[12px] font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent disabled:opacity-50',
-                  index === questionIndex
-                    ? 'border-accent bg-accent text-accent-contrast'
-                    : attempt
-                      ? 'border-success/35 bg-success-faint text-success'
-                      : status === 'Draft'
-                        ? 'border-accent/35 bg-accent-faint text-accent'
-                        : 'border-border text-text-muted hover:border-accent'
-                )}
-              >
-                {questionIndex + 1}
-              </button>
-            );
-          })}
-        </div>
+        <details className="practice-sheet-navigator" open>
+          <summary className="flex cursor-pointer flex-wrap items-center justify-between gap-2">
+            <span className="flex items-center gap-2 text-[13px] font-semibold text-text">
+              <ChevronDown size={15} aria-hidden="true" />
+              Your question sheet
+            </span>
+            <span className="text-[12px] text-text-muted">
+              {latest.size} of {questions.length} committed
+            </span>
+          </summary>
+          <p className="mb-3 mt-3 text-[12px] leading-relaxed text-text-muted">
+            Select an option on any question, then choose your confidence. Each question keeps its
+            own draft and active time.
+          </p>
+          <div className="flex max-h-36 flex-wrap gap-1.5 overflow-y-auto">
+            {questions.map((question, questionIndex) => {
+              const attempt = latest.get(question.id);
+              const status = attempt
+                ? attempt.mark_decision === 'SKIP'
+                  ? 'Skipped'
+                  : 'Committed'
+                : getPyqPracticeDraft(session, question.id)
+                  ? 'Draft'
+                  : 'Not answered';
+              return (
+                <button
+                  key={question.id}
+                  type="button"
+                  aria-label={`Go to question ${questionIndex + 1}: ${status}`}
+                  aria-current={index === questionIndex ? 'step' : undefined}
+                  disabled={disabled}
+                  onClick={() => onNavigate(questionIndex)}
+                  className={cn(
+                    'min-h-10 min-w-10 rounded border px-2 text-[12px] font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent disabled:opacity-50',
+                    index === questionIndex
+                      ? 'border-accent bg-accent text-accent-contrast'
+                      : attempt
+                        ? 'border-success/35 bg-success-faint text-success'
+                        : status === 'Draft'
+                          ? 'border-accent/35 bg-accent-faint text-accent'
+                          : 'border-border text-text-muted hover:border-accent'
+                  )}
+                >
+                  {questionIndex + 1}
+                </button>
+              );
+            })}
+          </div>
+        </details>
         {totalPages > 1 && (
           <div className="mt-3 border-t border-border pt-3">
             <p className="mb-2 text-center text-[11px] text-text-faint">

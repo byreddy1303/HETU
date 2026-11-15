@@ -36,6 +36,7 @@ const PRESET_ICONS = {
 } as const;
 
 export default function PyqRecommendedSetup({
+  compact = false,
   preset,
   selection,
   loading,
@@ -49,6 +50,7 @@ export default function PyqRecommendedSetup({
   onLoadPrescription,
   onDeletePrescription
 }: {
+  compact?: boolean;
   preset: PyqPresetPreference;
   selection: RecommendedPyqSelection | null;
   loading: boolean;
@@ -65,6 +67,8 @@ export default function PyqRecommendedSetup({
   const [name, setName] = useState('');
   const presets = Object.values(PYQ_RECOMMENDATION_PRESETS);
   const preflight = selection?.preflight ?? null;
+  const PreflightContainer = compact ? 'details' : 'div';
+  const SavedContainer = compact ? 'details' : 'div';
 
   function save() {
     const trimmed = name.trim();
@@ -76,15 +80,21 @@ export default function PyqRecommendedSetup({
   return (
     <section
       aria-labelledby="recommended-pyq-heading"
-      className="pyq-recommended border-b border-border"
+      className={cn(
+        'pyq-recommended',
+        compact ? 'pyq-recommended--compact' : 'border-b border-border'
+      )}
     >
       <div className="pyq-recommended__heading bg-bg-overlay/25 px-4 py-4 sm:px-5">
         <p id="recommended-pyq-heading" className="u-label text-accent">
-          Recommended set
+          {compact ? 'Focus' : 'Recommended set'}
         </p>
         <p className="mt-1 max-w-3xl text-[12.5px] leading-relaxed text-text-muted">
-          Choose a focus. Preview your questions before starting; reserved full papers stay
-          protected.
+          {compact
+            ? preset === 'custom'
+              ? 'Choose your own scope, or let a focus shape your set.'
+              : PYQ_RECOMMENDATION_PRESETS[preset]?.description
+            : 'Choose a focus. Preview your questions before starting; reserved full papers stay protected.'}
         </p>
       </div>
 
@@ -164,183 +174,206 @@ export default function PyqRecommendedSetup({
         </button>
       </div>
 
+      {compact && error ? (
+        <p role="alert" className="mt-2 text-[12px] text-danger">
+          {error}
+        </p>
+      ) : null}
       {preset !== 'custom' && preset !== 'full-paper' ? (
-        <div className="pyq-recommended__preflight grid gap-4 p-4 sm:p-5 lg:grid-cols-[minmax(0,1fr)_280px]">
-          <div>
-            <div
-              className="pyq-recommended__metrics grid grid-cols-2 gap-2 sm:grid-cols-4"
-              aria-live="polite"
-            >
-              {[
-                ['Matched', preflight?.exactMatchCount ?? '—'],
-                ['Selectable', preflight?.selectableCount ?? '—'],
-                ['Selected', preflight?.selectedCount ?? '—'],
-                ['Unseen', preflight?.matchedHistory.unseen ?? '—'],
-                ['Seen', preflight?.matchedHistory.seen ?? '—'],
-                ['Time', preflight ? `${preflight.estimatedMinutes}m` : '—'],
-                ['Marks', preflight ? preflight.estimatedMarks : '—'],
-                ['Protected', preflight?.reserve.excludedCount ?? '—']
-              ].map(([label, value]) => (
-                <div
-                  key={label}
-                  className="pyq-recommended__metric rounded border border-border bg-bg-overlay/20 px-3 py-2.5"
-                >
-                  <p className="u-label">{label}</p>
-                  <p className="u-num mt-1 text-[16px] font-semibold text-text">{value}</p>
-                </div>
-              ))}
-            </div>
-            <div className="mt-3 flex flex-wrap gap-1.5">
-              {preflight?.reasonChips.map((reason) => (
-                <Badge key={reason.code} tone={reason.code === 'shortfall' ? 'warn' : 'neutral'}>
-                  {reason.label}
-                  {reason.selectedCount != null ? ` · ${reason.selectedCount}` : ''}
-                </Badge>
-              ))}
-              {loading ? <Badge>Calculating exact set…</Badge> : null}
-            </div>
-            {preflight?.shortfall ? (
-              <p className="mt-3 text-[12px] text-warn">
-                Requested set is {preflight.shortfall} {plural(preflight.shortfall, 'question')}{' '}
-                short. Widen scope or choose another job; Hetu will not silently consume a sealed
-                paper.
-              </p>
-            ) : null}
-            {preflight && selection ? (
-              <div className="pyq-recommended__distribution mt-3 rounded border border-border bg-bg-overlay/20 p-3">
-                <p className="u-label">Selected distribution</p>
-                <div className="mt-2 flex flex-wrap gap-1.5">
-                  {Object.entries(preflight.distribution.subject).map(([subject, count]) => (
-                    <Badge key={`subject:${subject}`}>
-                      {subject} · {count}
-                    </Badge>
-                  ))}
-                  {Object.entries(preflight.distribution.year).map(([year, count]) => (
-                    <Badge key={`year:${year}`}>
-                      {year} · {count}
-                    </Badge>
-                  ))}
-                  {Object.entries(preflight.distribution.marks).map(([marks, count]) => (
-                    <Badge key={`marks:${marks}`}>
-                      {marks} mark · {count}
-                    </Badge>
-                  ))}
-                </div>
-                <details className="mt-3 border-t border-border pt-3">
-                  <summary className="cursor-pointer text-[11.5px] font-semibold text-text-muted">
-                    Why these {selection.questionUids.length} exact UIDs
-                  </summary>
-                  <ol className="mt-2 max-h-64 space-y-2 overflow-auto pr-1">
-                    {selection.questionUids.map((questionUid, index) => {
-                      const cohortReasons = selection.reasonsByQuestionUid[questionUid] ?? [];
-                      const priorityReasons =
-                        selection.priorityReasonsByQuestionUid[questionUid] ?? [];
-                      return (
-                        <li
-                          key={questionUid}
-                          className="rounded border border-border bg-bg-raised px-2.5 py-2"
-                        >
-                          <p className="truncate font-mono text-[10.5px] text-text">
-                            {String(index + 1).padStart(2, '0')} · {questionUid}
-                          </p>
-                          <div className="mt-1.5 flex flex-wrap gap-1">
-                            {cohortReasons.map((reason) => (
-                              <Badge key={`${questionUid}:${reason}`}>
-                                {reason.replaceAll('-', ' ')}
-                              </Badge>
-                            ))}
-                            {priorityReasons.map((reason) => (
-                              <Badge key={`${questionUid}:priority:${reason}`} tone="accent">
-                                {reason}
-                              </Badge>
-                            ))}
-                          </div>
-                        </li>
-                      );
-                    })}
-                  </ol>
-                </details>
+        <PreflightContainer className={compact ? 'practice-recommendation-details' : undefined}>
+          {compact && (
+            <summary>
+              {loading
+                ? 'Preparing your set…'
+                : `${preflight?.selectedCount ?? '—'} selected · ${preflight?.estimatedMinutes ?? '—'} min · Preview set`}
+              {preflight?.shortfall ? ` · ${preflight.shortfall} short` : ''}
+            </summary>
+          )}
+          <div className="pyq-recommended__preflight grid gap-4 p-4 sm:p-5 lg:grid-cols-[minmax(0,1fr)_280px]">
+            <div>
+              <div
+                className="pyq-recommended__metrics grid grid-cols-2 gap-2 sm:grid-cols-4"
+                aria-live="polite"
+              >
+                {[
+                  ['Matched', preflight?.exactMatchCount ?? '—'],
+                  ['Selectable', preflight?.selectableCount ?? '—'],
+                  ['Selected', preflight?.selectedCount ?? '—'],
+                  ['Unseen', preflight?.matchedHistory.unseen ?? '—'],
+                  ['Seen', preflight?.matchedHistory.seen ?? '—'],
+                  ['Time', preflight ? `${preflight.estimatedMinutes}m` : '—'],
+                  ['Marks', preflight ? preflight.estimatedMarks : '—'],
+                  ['Protected', preflight?.reserve.excludedCount ?? '—']
+                ].map(([label, value]) => (
+                  <div
+                    key={label}
+                    className="pyq-recommended__metric rounded border border-border bg-bg-overlay/20 px-3 py-2.5"
+                  >
+                    <p className="u-label">{label}</p>
+                    <p className="u-num mt-1 text-[16px] font-semibold text-text">{value}</p>
+                  </div>
+                ))}
               </div>
-            ) : null}
-            {error ? (
-              <p role="alert" className="mt-3 text-[12px] text-danger">
-                {error}
-              </p>
-            ) : null}
-          </div>
+              <div className="mt-3 flex flex-wrap gap-1.5">
+                {preflight?.reasonChips.map((reason) => (
+                  <Badge key={reason.code} tone={reason.code === 'shortfall' ? 'warn' : 'neutral'}>
+                    {reason.label}
+                    {reason.selectedCount != null ? ` · ${reason.selectedCount}` : ''}
+                  </Badge>
+                ))}
+                {loading ? <Badge>Calculating exact set…</Badge> : null}
+              </div>
+              {preflight?.shortfall ? (
+                <p className="mt-3 text-[12px] text-warn">
+                  Requested set is {preflight.shortfall} {plural(preflight.shortfall, 'question')}{' '}
+                  short. Widen scope or choose another job; Hetu will not silently consume a sealed
+                  paper.
+                </p>
+              ) : null}
+              {preflight && selection ? (
+                <div className="pyq-recommended__distribution mt-3 rounded border border-border bg-bg-overlay/20 p-3">
+                  <p className="u-label">Selected distribution</p>
+                  <div className="mt-2 flex flex-wrap gap-1.5">
+                    {Object.entries(preflight.distribution.subject).map(([subject, count]) => (
+                      <Badge key={`subject:${subject}`}>
+                        {subject} · {count}
+                      </Badge>
+                    ))}
+                    {Object.entries(preflight.distribution.year).map(([year, count]) => (
+                      <Badge key={`year:${year}`}>
+                        {year} · {count}
+                      </Badge>
+                    ))}
+                    {Object.entries(preflight.distribution.marks).map(([marks, count]) => (
+                      <Badge key={`marks:${marks}`}>
+                        {marks} mark · {count}
+                      </Badge>
+                    ))}
+                  </div>
+                  <details className="mt-3 border-t border-border pt-3">
+                    <summary className="cursor-pointer text-[11.5px] font-semibold text-text-muted">
+                      Why these {selection.questionUids.length} exact UIDs
+                    </summary>
+                    <ol className="mt-2 max-h-64 space-y-2 overflow-auto pr-1">
+                      {selection.questionUids.map((questionUid, index) => {
+                        const cohortReasons = selection.reasonsByQuestionUid[questionUid] ?? [];
+                        const priorityReasons =
+                          selection.priorityReasonsByQuestionUid[questionUid] ?? [];
+                        return (
+                          <li
+                            key={questionUid}
+                            className="rounded border border-border bg-bg-raised px-2.5 py-2"
+                          >
+                            <p className="truncate font-mono text-[10.5px] text-text">
+                              {String(index + 1).padStart(2, '0')} · {questionUid}
+                            </p>
+                            <div className="mt-1.5 flex flex-wrap gap-1">
+                              {cohortReasons.map((reason) => (
+                                <Badge key={`${questionUid}:${reason}`}>
+                                  {reason.replaceAll('-', ' ')}
+                                </Badge>
+                              ))}
+                              {priorityReasons.map((reason) => (
+                                <Badge key={`${questionUid}:priority:${reason}`} tone="accent">
+                                  {reason}
+                                </Badge>
+                              ))}
+                            </div>
+                          </li>
+                        );
+                      })}
+                    </ol>
+                  </details>
+                </div>
+              ) : null}
+              {error && !compact ? (
+                <p role="alert" className="mt-3 text-[12px] text-danger">
+                  {error}
+                </p>
+              ) : null}
+            </div>
 
-          <div className="pyq-recommended__seed rounded border border-border bg-bg-overlay/20 p-3">
-            <label className="text-[11.5px] font-medium text-text-muted">
-              Reproducibility seed
-              <Input
-                className="mt-1 font-mono"
-                value={seed}
-                onChange={(event) => onSeed(event.target.value)}
-                aria-describedby="pyq-seed-help"
-              />
-            </label>
-            <p id="pyq-seed-help" className="mt-1 text-[10.5px] leading-relaxed text-text-faint">
-              Same bank, evidence, scope, and seed produce the same UID order.
-            </p>
-            <Button variant="ghost" size="sm" className="mt-2 w-full" onClick={onRegenerate}>
-              <RefreshCw size={13} /> New deterministic seed
-            </Button>
+            <div className="pyq-recommended__seed rounded border border-border bg-bg-overlay/20 p-3">
+              <label className="text-[11.5px] font-medium text-text-muted">
+                Reproducibility seed
+                <Input
+                  className="mt-1 font-mono"
+                  value={seed}
+                  onChange={(event) => onSeed(event.target.value)}
+                  aria-describedby="pyq-seed-help"
+                />
+              </label>
+              <p id="pyq-seed-help" className="mt-1 text-[10.5px] leading-relaxed text-text-faint">
+                Same bank, evidence, scope, and seed produce the same UID order.
+              </p>
+              <Button variant="ghost" size="sm" className="mt-2 w-full" onClick={onRegenerate}>
+                <RefreshCw size={13} /> New deterministic seed
+              </Button>
+            </div>
           </div>
-        </div>
+        </PreflightContainer>
       ) : null}
 
-      <div className="pyq-recommended__saved grid gap-3 border-t border-border p-4 sm:p-5 lg:grid-cols-2">
-        <div className="pyq-prescription-form">
-          <Input
-            className="pyq-prescription-name"
-            value={name}
-            onChange={(event) => setName(event.target.value)}
-            placeholder="Name this prescription"
-            aria-label="Name this prescription"
-            maxLength={80}
-          />
-          <Button
-            className="pyq-prescription-save"
-            variant="ghost"
-            onClick={save}
-            disabled={!name.trim()}
-          >
-            <BookmarkPlus size={14} /> Save
-          </Button>
-        </div>
-        {savedPrescriptions.length > 0 ? (
-          <div className="flex flex-wrap justify-start gap-2 lg:justify-end">
-            {savedPrescriptions.slice(0, 6).map((prescription) => (
-              <span
-                key={prescription.id}
-                className="pyq-saved-prescription inline-flex overflow-hidden rounded border border-border"
-              >
-                <button
-                  type="button"
-                  onClick={() => onLoadPrescription(prescription)}
-                  className="bg-bg-raised px-2.5 py-1.5 text-[11.5px] font-medium text-text hover:bg-bg-overlay"
-                >
-                  {prescription.name}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => onDeletePrescription(prescription.id)}
-                  className="border-l border-border bg-bg-raised px-2 text-text-faint hover:bg-danger-faint hover:text-danger"
-                  aria-label={`Delete ${prescription.name} prescription`}
-                >
-                  <Trash2 size={12} />
-                </button>
-              </span>
-            ))}
-          </div>
-        ) : (
-          <p className="self-center text-[11px] text-text-faint lg:text-right">
-            {backendConfig.isLocal
-              ? 'Save this setup to use it again in your local workspace.'
-              : 'Saved prescriptions sync with your account and can be reopened on another device.'}
-          </p>
+      <SavedContainer className={compact ? 'practice-recommendation-details' : undefined}>
+        {compact && (
+          <summary>
+            Save or load a setup
+            {savedPrescriptions.length ? ` · ${savedPrescriptions.length} saved` : ''}
+          </summary>
         )}
-      </div>
+        <div className="pyq-recommended__saved grid gap-3 border-t border-border p-4 sm:p-5 lg:grid-cols-2">
+          <div className="pyq-prescription-form">
+            <Input
+              className="pyq-prescription-name"
+              value={name}
+              onChange={(event) => setName(event.target.value)}
+              placeholder="Name this prescription"
+              aria-label="Name this prescription"
+              maxLength={80}
+            />
+            <Button
+              className="pyq-prescription-save"
+              variant="ghost"
+              onClick={save}
+              disabled={!name.trim()}
+            >
+              <BookmarkPlus size={14} /> Save
+            </Button>
+          </div>
+          {savedPrescriptions.length > 0 ? (
+            <div className="flex flex-wrap justify-start gap-2 lg:justify-end">
+              {savedPrescriptions.slice(0, 6).map((prescription) => (
+                <span
+                  key={prescription.id}
+                  className="pyq-saved-prescription inline-flex overflow-hidden rounded border border-border"
+                >
+                  <button
+                    type="button"
+                    onClick={() => onLoadPrescription(prescription)}
+                    className="bg-bg-raised px-2.5 py-1.5 text-[11.5px] font-medium text-text hover:bg-bg-overlay"
+                  >
+                    {prescription.name}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => onDeletePrescription(prescription.id)}
+                    className="border-l border-border bg-bg-raised px-2 text-text-faint hover:bg-danger-faint hover:text-danger"
+                    aria-label={`Delete ${prescription.name} prescription`}
+                  >
+                    <Trash2 size={12} />
+                  </button>
+                </span>
+              ))}
+            </div>
+          ) : (
+            <p className="self-center text-[11px] text-text-faint lg:text-right">
+              {backendConfig.isLocal
+                ? 'Save this setup to use it again in your local workspace.'
+                : 'Saved prescriptions sync with your account and can be reopened on another device.'}
+            </p>
+          )}
+        </div>
+      </SavedContainer>
     </section>
   );
 }

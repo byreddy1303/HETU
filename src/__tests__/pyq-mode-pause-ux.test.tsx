@@ -134,18 +134,15 @@ describe('PYQ mode selection and pause controls', () => {
     expect(practiceMode).toHaveAttribute('aria-pressed', 'true');
     expect(modeChooser).toHaveTextContent(/answer key|immediate feedback/i);
     expect(modeChooser).toHaveTextContent(/no overall (?:timer|time limit)|work at your own pace/i);
-    expect(modeChooser).toHaveTextContent(/timed/i);
-    expect(modeChooser).toHaveTextContent(
-      /after (?:final )?(?:submit|submission)|until (?:final )?submission/i
-    );
-
-    const filterHeading = screen.getByText('Choose a subject');
-    expect(modeChooser.compareDocumentPosition(filterHeading)).toBe(
+    const subjectControl = screen.getByRole('combobox', { name: 'Subject' });
+    expect(modeChooser.compareDocumentPosition(subjectControl)).toBe(
       Node.DOCUMENT_POSITION_FOLLOWING
     );
     expect(screen.getByRole('button', { name: 'Start practice set' })).toBeEnabled();
 
     await user.click(examMode);
+    expect(modeChooser).toHaveTextContent(/timed/i);
+    expect(modeChooser).toHaveTextContent(/after final submission/i);
     expect(examMode).toHaveAttribute('aria-pressed', 'true');
     expect(practiceMode).toHaveAttribute('aria-pressed', 'false');
     expect(screen.getByRole('button', { name: 'Start timed exam' })).toBeEnabled();
@@ -313,9 +310,7 @@ describe('PYQ mode selection and pause controls', () => {
     await user.click(await screen.findByRole('button', { name: 'Resume practice' }));
     expect(await screen.findByText('Which proposition is a tautology?')).toBeInTheDocument();
     expect(screen.getByRole('timer')).toHaveTextContent('01:05');
-    expect(screen.getByRole('timer')).toHaveAccessibleName(
-      '01:05 active time on this question'
-    );
+    expect(screen.getByRole('timer')).toHaveAccessibleName('01:05 active time on this question');
   });
 
   it('keeps Practice open and announces a pause write failure', async () => {
@@ -340,11 +335,16 @@ describe('PYQ mode selection and pause controls', () => {
   });
 });
 
-
 // Exercise the Python catalog contract while keeping domain writes in fixture RAM.
 vi.mock('@/lib/backend-config', async (importOriginal) => ({
-  ...await importOriginal<typeof import('@/lib/backend-config')>(),
-  backendConfig: { backend: 'fastapi', fastapi: true, error: null, apiUrl: '/api', clerkKey: 'pk_test_fixture' }
+  ...(await importOriginal<typeof import('@/lib/backend-config')>()),
+  backendConfig: {
+    backend: 'fastapi',
+    fastapi: true,
+    error: null,
+    apiUrl: '/api',
+    clerkKey: 'pk_test_fixture'
+  }
 }));
 vi.mock('@/lib/api-client', async () => ({
   apiConfigured: false,
@@ -352,6 +352,10 @@ vi.mock('@/lib/api-client', async () => ({
 }));
 beforeEach(async () => {
   const { configureClerkRuntime } = await import('@/lib/fastapi-client');
-  configureClerkRuntime({ loaded: true, user: { id: 'test-catalog-reader' },
-    getToken: async () => 'test-session', signOut: async () => {} });
+  configureClerkRuntime({
+    loaded: true,
+    user: { id: 'test-catalog-reader' },
+    getToken: async () => 'test-session',
+    signOut: async () => {}
+  });
 });

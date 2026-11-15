@@ -2,6 +2,13 @@ import { backendConfig } from '@/lib/backend-config';
 import { prepareLocalLearningActivity } from '@/lib/local-learning-engine';
 import { memo, useEffect, useMemo, useRef, useState } from 'react';
 import '@/workflow-surfaces.css';
+import '@/components/pyq/pyq-library.css';
+import {
+  PyqLibraryTabs,
+  PyqSessionShelf,
+  PyqTestSeriesLibrary,
+  type PyqLibraryTab
+} from '@/components/pyq/PyqLibrary';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useLiveQuery } from '@/lib/db-hooks';
 import {
@@ -15,7 +22,6 @@ import {
   Clock3,
   ExternalLink,
   FileQuestion,
-  LibraryBig,
   LockKeyhole,
   Pause,
   Route,
@@ -198,19 +204,6 @@ function recommendationCohortParam(value: string | null): PyqRecommendationCohor
     : null;
 }
 
-const PRACTICE_MODE_FEATURES = [
-  'Feedback after each answer',
-  'No overall time limit',
-  'Confidence tracking',
-  'Pause with your draft saved'
-];
-const EXAM_MODE_FEATURES = [
-  'Timed set or full paper',
-  'Free question navigation',
-  'Confidence + review marks',
-  'Validity receipt at submit'
-];
-
 function countForRecommendation(config: AttemptConfig): number | 'all' {
   return config.count === 'all' ? 'all' : Number(config.count);
 }
@@ -335,19 +328,6 @@ function pauseStoredPyqSession(session: PyqSessionRow): PyqSessionRow {
     confidence:
       savedDraft?.question_uid === session.current_question_uid ? savedDraft.confidence : null
   });
-}
-
-function savedPracticeElapsedSeconds(session: PyqSessionRow): number {
-  const drafts = { ...session.config.practiceDrafts };
-  if (session.config.practiceDraft)
-    drafts[session.config.practiceDraft.question_uid] = session.config.practiceDraft;
-  return (
-    session.elapsed_sec +
-    Math.ceil(
-      Object.values(drafts).reduce((total, draft) => total + Math.max(0, draft.elapsed_ms), 0) /
-        1000
-    )
-  );
 }
 
 function latestQuestionAttempt(
@@ -691,194 +671,94 @@ function PracticeSetup({
   const selectedSubject = catalogSubjects.find((subject) => subject.slug === config.subjectSlug);
   const selectedTopics = selectedSubject?.topics ?? [];
   const selectedTopicSlug = config.topicSlug ?? 'all';
+  const [libraryTab, setLibraryTab] = useState<PyqLibraryTab>('pyqs');
+  const testBooks = manifest.books.filter((book) => book.sourceClass === 'user-import');
+  const recommendationControls = showRecommendedSetup ? (
+    <PyqRecommendedSetup
+      compact
+      preset={recommendationPreset}
+      selection={recommendedSelection}
+      loading={recommendationLoading}
+      error={recommendationError}
+      seed={selectionSeed}
+      savedPrescriptions={savedPrescriptions}
+      onPreset={onRecommendationPreset}
+      onSeed={onSelectionSeed}
+      onRegenerate={onRegenerateSeed}
+      onSavePrescription={onSavePrescription}
+      onLoadPrescription={onLoadPrescription}
+      onDeletePrescription={onDeletePrescription}
+    />
+  ) : null;
+  const advancedSummary = [
+    `${config.fromYear}–${config.toYear}`,
+    config.type === 'all' ? 'All types' : config.type,
+    PYQ_HISTORY_OPTIONS.find((option) => option.value === (config.history ?? 'all'))?.label,
+    { unseen: 'Unseen first', random: 'Random', newest: 'Newest first', oldest: 'Oldest first' }[
+      config.order
+    ]
+  ]
+    .filter(Boolean)
+    .join(' · ');
   return (
-    <div className="workflow-page pyq-workbench flex flex-col gap-4">
+    <div className="workflow-page pyq-workbench practice-library flex flex-col gap-4">
       <PageHeader
         compact={backendConfig.isLocal}
-        title="GATE PYQs"
-        description={`${catalogQuestionCount.toLocaleString()} ${selectedBook?.label ?? "bank"} questions for focused practice and exam sessions.`}
+        title="Practice"
+        description="Your questions, your pace. Pick a set and find your focus."
         showMobileMark={false}
       />
 
-      {activeSession && (
-        <Card className="workbench-resume border-accent/30">
-          <CardBody className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
-            <div className="min-w-0">
-              <p className="font-display text-[16px] font-semibold text-text">
-                {activeSession.config.mode === 'exam'
-                  ? 'Exam currently open'
-                  : 'Practice session currently open'}
-              </p>
-              <p className="mt-1 text-[12px] text-text-muted">
-                {activeSession.completed_count} of {activeSession.question_uids.length}{' '}
-                {activeSession.config.mode === 'exam' ? 'answered' : 'submitted'} ·{' '}
-                {activeSession.config.mode === 'exam' && activeSession.config.examState
-                  ? `${secondsToClock(pyqExamRemainingSeconds(activeSession))} remaining`
-                  : `${secondsToClock(savedPracticeElapsedSeconds(activeSession))} active work saved`}
-              </p>
-              {error && (
-                <p role="alert" className="mt-2 text-[12px] text-danger">
-                  {error}
-                </p>
-              )}
-            </div>
-            <div className="flex flex-wrap gap-2">
-              <Button variant="primary" onClick={() => onResume(activeSession)} disabled={loading}>
-                {activeSession.config.mode === 'exam' ? 'Resume exam' : 'Resume practice'}
-              </Button>
-              <Button
-                onClick={() => onSave(activeSession)}
-                disabled={loading}
-                title="Pause this session so you can return to it later"
-              >
-                <Pause size={14} />
-                {activeSession.config.mode === 'exam' ? 'Pause exam' : 'Pause practice'}
-              </Button>
-              <Button variant="danger" onClick={() => onDiscard(activeSession)} disabled={loading}>
-                Discard session
-              </Button>
-            </div>
-          </CardBody>
-        </Card>
+      <PyqSessionShelf
+        manifest={manifest}
+        activeSession={activeSession}
+        savedSessions={savedSessions}
+        loading={loading}
+        onResume={onResume}
+        onSave={onSave}
+        onEndAndSave={onEndAndSave}
+        onDiscard={onDiscard}
+      />
+      {error && (
+        <p role="alert" className="practice-library-error">
+          {error}
+        </p>
       )}
+      <PyqLibraryTabs value={libraryTab} onChange={setLibraryTab} />
 
-      {savedSessions.length > 0 && (
-        <div className="workbench-saved flex flex-col gap-2">
-          <p className="px-1 text-[11px] font-semibold uppercase tracking-widest text-text-faint">
-            Paused sessions
-          </p>
-          <p className="px-1 text-[12px] text-text-muted">
-            End and save finishes a session now and opens its saved report. Practice drafts stay
-            saved; exams submit their saved responses.
-          </p>
-          {savedSessions.map((session) => (
-            <Card key={session.id}>
-              <CardBody className="flex flex-col gap-3 p-3 sm:flex-row sm:items-center sm:justify-between">
-                <div className="flex min-w-0 items-center gap-3">
-                  <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded bg-bg-overlay text-text-faint">
-                    <Bookmark size={15} />
-                  </span>
-                  <div className="min-w-0">
-                    <p className="flex items-center gap-2 truncate text-[13.5px] font-semibold text-text">
-                      <Badge tone={session.config.mode === 'exam' ? 'guess' : 'accent'}>
-                        {session.config.mode === 'exam' ? 'Exam' : 'Practice'}
-                      </Badge>
-                      {session.config.subjectSlug === 'all'
-                        ? session.config.subjectSlugs?.length
-                          ? session.config.subjectSlugs
-                              .map(
-                                (slug) =>
-                                  manifest.subjects.find((subject) => subject.slug === slug)
-                                    ?.label ?? slug
-                              )
-                              .join(' + ')
-                          : 'Mixed subjects'
-                        : (manifest.subjects.find((s) => s.slug === session.config.subjectSlug)
-                            ?.label ?? session.config.subjectSlug)}
-                    </p>
-                    <p className="mt-0.5 text-[11.5px] text-text-faint">
-                      {session.completed_count} / {session.question_uids.length}{' '}
-                      {session.config.mode === 'exam' ? 'answered' : 'done'} ·{' '}
-                      {session.config.mode === 'exam' && session.config.examState
-                        ? `${secondsToClock(pyqExamRemainingSeconds(session))} left`
-                        : `${secondsToClock(savedPracticeElapsedSeconds(session))} active work saved`}
-                    </p>
-                  </div>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  <Button variant="primary" onClick={() => onResume(session)} disabled={loading}>
-                    {session.config.mode === 'exam' ? 'Resume exam' : 'Resume practice'}
-                  </Button>
-                  <Button
-                    onClick={() => onEndAndSave(session)}
-                    disabled={loading}
-                    title={
-                      session.config.mode === 'exam'
-                        ? 'Finish this exam, submit saved responses, and open the report'
-                        : 'Finish now and save submitted answers, drafts, and active time'
-                    }
-                  >
-                    <CheckCircle2 size={14} aria-hidden="true" />
-                    End and save
-                  </Button>
-                  <Button variant="danger" onClick={() => onDiscard(session)} disabled={loading}>
-                    Discard session
-                  </Button>
-                </div>
-              </CardBody>
-            </Card>
-          ))}
+      <section
+        id="practice-panel-series"
+        role="tabpanel"
+        aria-labelledby="practice-tab-series"
+        hidden={libraryTab !== 'series'}
+      >
+        <PyqTestSeriesLibrary books={testBooks} loading={loading} onStart={onStartTestSeries} />
+      </section>
+
+      <section
+        id="practice-panel-pyqs"
+        role="tabpanel"
+        aria-labelledby="practice-tab-pyqs"
+        hidden={libraryTab !== 'pyqs'}
+        className="practice-library-panel"
+      >
+        <div className="practice-library-section-title">
+          <div>
+            <h2>GATE PYQs</h2>
+            <p>
+              {catalogQuestionCount.toLocaleString()} questions ·{' '}
+              {attemptedIds.size.toLocaleString()} seen
+            </p>
+          </div>
+          <span className="practice-library-bank">
+            <BookOpenCheck size={15} aria-hidden="true" />
+            {selectedBook?.label ?? 'Question bank'}
+          </span>
         </div>
-      )}
-
-      {manifest.books.some((book) => book.sourceClass === 'user-import') && (
-        <Card>
-          <CardHeader title="Test Series" />
-          <CardBody className="space-y-3">
-            {manifest.books.filter((book) => book.sourceClass === 'user-import').map((book) => (
-              <div key={book.slug} className="flex flex-wrap items-center justify-between gap-3 rounded border border-border p-4">
-                <div>
-                  <p className="font-semibold text-text">{book.label}</p>
-                  <p className="text-[12px] text-text-muted">
-                    {book.count} questions · Local question set · Source-provided answer key
-                  </p>
-                  <p className="text-[12px] text-text-muted">
-                    {book.subjects.map((subject) => `${subject.label} → ${subject.topics.map((topic) => topic.label).join(', ')}`).join(' · ')}
-                  </p>
-                </div>
-                <Button disabled={loading} onClick={() => onStartTestSeries(book.slug)} aria-label={`Practice ${book.label}`}>
-                  Practice this set
-                </Button>
-              </div>
-            ))}
-          </CardBody>
-        </Card>
-      )}
-
-      {showRecommendedSetup && (
-        <Card className="workbench-recommendations overflow-hidden border-accent/25">
-          <PyqRecommendedSetup
-            preset={recommendationPreset}
-            selection={recommendedSelection}
-            loading={recommendationLoading}
-            error={recommendationError}
-            seed={selectionSeed}
-            savedPrescriptions={savedPrescriptions}
-            onPreset={onRecommendationPreset}
-            onSeed={onSelectionSeed}
-            onRegenerate={onRegenerateSeed}
-            onSavePrescription={onSavePrescription}
-            onLoadPrescription={onLoadPrescription}
-            onDeletePrescription={onDeletePrescription}
-          />
-        </Card>
-      )}
-
-      <section className="workbench-mode" aria-labelledby="pyq-mode-heading">
-        <Card className="overflow-hidden border-border-hover">
-          <CardBody className="p-0">
-            <div className="workbench-section-heading flex flex-col gap-3 border-b border-border bg-bg-overlay/25 p-4 sm:flex-row sm:items-end sm:justify-between sm:p-5">
-              <div>
-                <p className="u-label">Step 1 · Choose a mode</p>
-                <h2
-                  id="pyq-mode-heading"
-                  className="mt-1 font-display text-[20px] font-bold tracking-tight text-text sm:text-[23px]"
-                >
-                  Choose how you want to work
-                </h2>
-                {!isCoreOnly && (
-                  <p className="mt-1 max-w-2xl text-[12.5px] leading-relaxed text-text-muted">
-                    Learn with feedback in Practice mode, or simulate test conditions in Exam mode.
-                    Both can be paused and resumed.
-                  </p>
-                )}
-              </div>
-              <Badge tone={config.mode === 'exam' ? 'guess' : 'accent'} className="self-start">
-                {config.mode === 'exam' ? 'Exam selected' : 'Practice selected'}
-              </Badge>
-            </div>
-
-            <div className="workbench-mode-choices grid md:grid-cols-2">
+        <section className="practice-mode-bar" aria-labelledby="pyq-mode-heading">
+          <div className="practice-mode-bar__heading">
+            <h2 id="pyq-mode-heading">Choose how you want to work</h2>
+            <div className="practice-mode-switch" role="group" aria-label="Session mode">
               <button
                 type="button"
                 aria-pressed={(config.mode ?? 'practice') === 'practice'}
@@ -893,48 +773,10 @@ function PracticeSetup({
                     practiceDrafts: undefined
                   })
                 }
-                className={cn(
-                  'workbench-mode-choice group relative min-h-[230px] overflow-hidden border-b border-border p-5 text-left transition-all focus-visible:z-10 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-accent-faint md:border-b-0 md:border-r sm:p-6',
-                  (config.mode ?? 'practice') === 'practice'
-                    ? 'bg-accent-faint/70 shadow-[inset_5px_0_0_rgb(var(--color-accent))]'
-                    : 'bg-bg-raised hover:bg-accent-faint/35'
-                )}
               >
-                <span className="flex items-start justify-between gap-4">
-                  <span className="flex h-11 w-11 items-center justify-center rounded-lg border border-accent/25 bg-bg-raised text-accent shadow-sm">
-                    <BookOpenCheck size={21} aria-hidden="true" />
-                  </span>
-                  <span
-                    className={cn(
-                      'flex h-6 w-6 items-center justify-center rounded-full border transition-colors',
-                      (config.mode ?? 'practice') === 'practice'
-                        ? 'border-accent bg-accent text-accent-contrast'
-                        : 'border-border-hover text-transparent'
-                    )}
-                    aria-hidden="true"
-                  >
-                    <Check size={13} strokeWidth={3} />
-                  </span>
-                </span>
-                <span className="mt-4 block font-display text-[19px] font-bold text-text">
-                  Practice mode
-                </span>
-                <span className="mt-1 block text-[12.5px] leading-relaxed text-text-muted">
-                  Use a focused view or a question sheet, with the answer key and result revealed
-                  after each committed response.
-                </span>
-                {!isCoreOnly && (
-                  <span className="mt-4 grid gap-2 text-[11.5px] text-text-muted sm:grid-cols-2">
-                    {PRACTICE_MODE_FEATURES.map((item) => (
-                      <span key={item} className="flex items-center gap-2">
-                        <CheckCircle2 size={13} className="shrink-0 text-accent" />
-                        {item}
-                      </span>
-                    ))}
-                  </span>
-                )}
+                <BookOpenCheck size={16} aria-hidden="true" />
+                Practice mode
               </button>
-
               <button
                 type="button"
                 aria-pressed={config.mode === 'exam'}
@@ -942,78 +784,29 @@ function PracticeSetup({
                   setConfig({
                     ...config,
                     mode: 'exam',
-                    examKind: config.examKind ?? 'timed-set',
+                    examKind: 'timed-set',
                     count: config.count === 'all' ? '15' : config.count,
+                    benchmarkPaperId: undefined,
                     examState: undefined,
                     practiceDraft: undefined,
                     practiceDrafts: undefined
                   })
                 }
-                className={cn(
-                  'workbench-mode-choice group relative min-h-[230px] overflow-hidden p-5 text-left transition-all focus-visible:z-10 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-guess-faint sm:p-6',
-                  config.mode === 'exam'
-                    ? 'bg-guess-faint/75 shadow-[inset_5px_0_0_rgb(var(--color-ink-violet))]'
-                    : 'bg-bg-raised hover:bg-guess-faint/35'
-                )}
               >
-                <span className="flex items-start justify-between gap-4">
-                  <span className="flex h-11 w-11 items-center justify-center rounded-lg border border-ink-violet/25 bg-bg-raised text-ink-violet shadow-sm">
-                    <Clock3 size={21} aria-hidden="true" />
-                  </span>
-                  <span
-                    className={cn(
-                      'flex h-6 w-6 items-center justify-center rounded-full border transition-colors',
-                      config.mode === 'exam'
-                        ? 'border-ink-violet bg-ink-violet text-white'
-                        : 'border-border-hover text-transparent'
-                    )}
-                    aria-hidden="true"
-                  >
-                    <Check size={13} strokeWidth={3} />
-                  </span>
-                </span>
-                <span className="mt-4 block font-display text-[19px] font-bold text-text">
-                  Exam mode
-                </span>
-                <span className="mt-1 block text-[12.5px] leading-relaxed text-text-muted">
-                  Use one countdown, move freely between questions, and see answer keys only after
-                  final submission.
-                </span>
-                {!isCoreOnly && (
-                  <span className="mt-4 grid gap-2 text-[11.5px] text-text-muted sm:grid-cols-2">
-                    {EXAM_MODE_FEATURES.map((item) => (
-                      <span key={item} className="flex items-center gap-2">
-                        <CheckCircle2 size={13} className="shrink-0 text-ink-violet" />
-                        {item}
-                      </span>
-                    ))}
-                  </span>
-                )}
+                <Clock3 size={16} aria-hidden="true" />
+                Exam mode
               </button>
             </div>
-          </CardBody>
-        </Card>
-      </section>
-
-      {(config.mode ?? 'practice') === 'practice' && (
-        <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border bg-bg-raised p-4">
-          <div>
-            <p className="text-[13px] font-semibold text-text">Practice view</p>
-            <p className="mt-1 text-[12px] text-text-muted">
-              Focus on one question or browse the set together. You can switch during practice.
-            </p>
           </div>
-          <PyqPracticeViewControl
-            value={config.practiceView}
-            onChange={(practiceView) => setConfig({ ...config, practiceView })}
-          />
-        </div>
-      )}
+          <p>
+            {config.mode === 'exam'
+              ? 'Timed practice · Answer keys after final submission.'
+              : 'Immediate feedback · No overall time limit.'}
+          </p>
+        </section>
 
-      {config.mode === 'exam' && (
-        <Card className="overflow-hidden">
-          <CardHeader title="Step 2 · Choose the exam format" />
-          <CardBody className="grid gap-2 p-3 sm:grid-cols-2">
+        {config.mode === 'exam' && (
+          <div className="practice-exam-formats" role="group" aria-label="Exam format">
             <button
               type="button"
               aria-pressed={(config.examKind ?? 'timed-set') === 'timed-set'}
@@ -1025,20 +818,9 @@ function PracticeSetup({
                   count: config.count === 'all' ? '15' : config.count
                 })
               }
-              className={cn(
-                'rounded border p-3 text-left transition-all',
-                (config.examKind ?? 'timed-set') === 'timed-set'
-                  ? 'border-accent/45 bg-accent-faint shadow-sm'
-                  : 'border-border bg-bg-raised hover:border-border-hover'
-              )}
             >
-              <span className="flex items-center justify-between gap-2">
-                <span className="text-[13.5px] font-semibold text-text">Timed set</span>
-                <Badge tone="accent">3 min / question</Badge>
-              </span>
-              <span className="mt-1.5 block text-[11.5px] leading-relaxed text-text-muted">
-                Build a shorter diagnostic set from subjects, years, type, and history filters.
-              </span>
+              <span>Timed set</span>
+              <small>3 min / question</small>
             </button>
             <button
               type="button"
@@ -1062,81 +844,47 @@ function PracticeSetup({
                   count: 'all'
                 });
               }}
-              className={cn(
-                'rounded border p-3 text-left transition-all',
-                config.examKind === 'full-paper'
-                  ? 'border-ink-violet/45 bg-guess-faint shadow-sm'
-                  : 'border-border bg-bg-raised hover:border-border-hover'
-              )}
             >
-              <span className="flex items-center justify-between gap-2">
-                <span className="text-[13.5px] font-semibold text-text">Official full paper</span>
-                <Badge tone="guess">65Q · 100M · 180m</Badge>
-              </span>
-              <span className="mt-1.5 block text-[11.5px] leading-relaxed text-text-muted">
-                Take a verified GATE CSE paper and receive an explicit evidence-validity receipt.
-              </span>
+              <span>Official full paper</span>
+              <small>65Q · 100M · 180m</small>
             </button>
-          </CardBody>
-        </Card>
-      )}
+          </div>
+        )}
 
-      {fullPaperSelected ? (
-        <FullPaperSetup
-          papers={benchmarkPapers}
-          selectedPaperId={selectedBenchmarkPaper?.id ?? null}
-          closedBookConfirmed={closedBookConfirmed}
-          loading={loading}
-          error={!activeSession ? error : null}
-          onSelectPaper={(paper) =>
-            setConfig({
-              ...config,
-              benchmarkPaperId: paper.id,
-              bookSlug: paper.bookSlug,
-              subjectSlug: 'all',
-              subjectSlugs: undefined,
-              topicSlug: 'all',
-              fromYear: paper.year,
-              toYear: paper.year,
-              type: 'all',
-              history: 'all',
-              order: 'oldest',
-              count: 'all'
-            })
-          }
-          onClosedBookConfirmed={onClosedBookConfirmed}
-          onStart={onStart}
-        />
-      ) : (
-        <>
-          <Card className="workbench-configuration overflow-hidden">
-            <div className="workbench-section-heading flex flex-col gap-1 border-b border-border bg-bg-overlay/25 p-4 sm:p-5">
-              <p className="u-label">Step 2 · Configure the set</p>
-              <h2 className="font-display text-[18px] font-bold text-text">
-                {config.mode === 'exam' ? 'Build your timed exam' : 'Build your practice session'}
-              </h2>
-              <p className="text-[12px] text-text-muted">
-                GATE CSE Core · Choose your subject and filters, then start your session.
-              </p>
-            </div>
-            <div className="workbench-configuration-grid grid lg:grid-cols-[minmax(0,1.45fr)_minmax(300px,0.75fr)]">
-              <div className="workbench-subjects border-b border-border p-4 lg:border-b-0 lg:border-r">
-                <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
-                  <div>
-                    <p className="u-label">Choose a subject</p>
-                    <p className="mt-1 text-[13px] text-text-muted">
-                      Each stack is scoped to the selected question book.
-                    </p>
-                  </div>
-                  <span className="u-num text-[12px] text-text-faint">
-                    {attemptedIds.size.toLocaleString()} / {catalogQuestionCount.toLocaleString()}{' '}
-                    seen
-                  </span>
-                </div>
-                <label className="block text-[12px] font-medium text-text-muted sm:hidden">
+        {fullPaperSelected && recommendationControls}
+        {fullPaperSelected ? (
+          <FullPaperSetup
+            papers={benchmarkPapers}
+            selectedPaperId={selectedBenchmarkPaper?.id ?? null}
+            closedBookConfirmed={closedBookConfirmed}
+            loading={loading}
+            error={null}
+            onSelectPaper={(paper) =>
+              setConfig({
+                ...config,
+                benchmarkPaperId: paper.id,
+                bookSlug: paper.bookSlug,
+                subjectSlug: 'all',
+                subjectSlugs: undefined,
+                topicSlug: 'all',
+                fromYear: paper.year,
+                toYear: paper.year,
+                type: 'all',
+                history: 'all',
+                order: 'oldest',
+                count: 'all'
+              })
+            }
+            onClosedBookConfirmed={onClosedBookConfirmed}
+            onStart={onStart}
+          />
+        ) : (
+          <div className="practice-library-surface practice-builder">
+            <div className="practice-builder__body">
+              <div className="practice-builder__fields">
+                <label>
                   Subject
                   <Select
-                    className="mt-1"
                     value={config.subjectSlug}
                     onChange={(event) =>
                       setConfig({
@@ -1147,216 +895,92 @@ function PracticeSetup({
                       })
                     }
                   >
-                    <option value="all">Mixed subjects — {catalogQuestionCount} questions</option>
+                    <option value="all">Mixed subjects</option>
                     {catalogSubjects.map((subject) => (
                       <option key={subject.slug} value={subject.slug}>
-                        {subject.label} — {subject.count}
+                        {subject.label}
                       </option>
                     ))}
                   </Select>
                 </label>
-                <div className="workbench-subject-grid hidden grid-cols-1 gap-2 sm:grid sm:grid-cols-2 xl:grid-cols-3">
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setConfig({
-                        ...config,
-                        subjectSlug: 'all',
-                        subjectSlugs: undefined,
-                        topicSlug: 'all'
-                      })
+                <label>
+                  Questions
+                  <Select
+                    value={config.count}
+                    onChange={(event) =>
+                      setConfig({ ...config, count: event.target.value as CountChoice })
                     }
-                    aria-pressed={config.subjectSlug === 'all'}
-                    className={cn(
-                      'workbench-subject group flex min-h-[78px] items-start gap-3 rounded border p-3 text-left transition-all',
-                      config.subjectSlug === 'all'
-                        ? 'border-accent/50 bg-accent-faint shadow-sm'
-                        : 'border-border bg-bg-raised hover:-translate-y-0.5 hover:border-border-hover'
-                    )}
                   >
-                    <Shuffle
-                      size={17}
-                      className="workbench-subject-icon mt-0.5 shrink-0 text-accent"
-                    />
-                    <span>
-                      <span className="block text-[13.5px] font-semibold text-text">
-                        Mixed subjects
-                      </span>
-                      <span className="u-num mt-1 block text-[11px] text-text-faint">
-                        {catalogQuestionCount.toLocaleString()} questions
-                      </span>
-                    </span>
-                  </button>
-                  {catalogSubjects.map((subject) => {
-                    const active = config.subjectSlug === subject.slug;
-                    const seen = seenBySubject.get(subject.slug) ?? 0;
-                    return (
-                      <button
-                        key={subject.slug}
-                        type="button"
-                        onClick={() =>
-                          setConfig({
-                            ...config,
-                            subjectSlug: subject.slug,
-                            subjectSlugs: undefined,
-                            topicSlug: 'all'
-                          })
-                        }
-                        aria-pressed={active}
-                        className={cn(
-                          'workbench-subject group flex min-h-[78px] items-start gap-3 rounded border p-3 text-left transition-all',
-                          active
-                            ? 'border-accent/50 bg-accent-faint shadow-sm'
-                            : 'border-border bg-bg-raised hover:-translate-y-0.5 hover:border-border-hover'
-                        )}
-                      >
-                        <LibraryBig
-                          size={17}
-                          className={cn(
-                            'workbench-subject-icon mt-0.5 shrink-0',
-                            active ? 'text-accent' : 'text-text-faint'
-                          )}
-                        />
-                        <span className="min-w-0">
-                          <span className="block text-[13.5px] font-semibold leading-snug text-text">
-                            {subject.label}
-                          </span>
-                          <span className="u-num mt-1 block text-[11px] text-text-faint">
-                            {seen}/{subject.count} seen
-                          </span>
-                        </span>
-                      </button>
-                    );
-                  })}
-                </div>
-                {selectedSubject && selectedTopics.length > 1 && (
-                  <div className="workbench-topics mt-4 border-t border-border pt-4">
-                    <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
-                      <div>
-                        <p className="u-label">Choose a topic</p>
-                        <p className="mt-1 text-[13px] text-text-muted">
-                          Pick one topic, or keep the complete subject selected.
-                        </p>
-                      </div>
-                      <span className="u-num text-[11px] text-text-faint">
-                        {selectedTopics.length} topics
-                      </span>
-                    </div>
-                    <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-3">
-                      <button
-                        type="button"
-                        onClick={() => setConfig({ ...config, topicSlug: 'all' })}
-                        aria-pressed={selectedTopicSlug === 'all'}
-                        className={cn(
-                          'flex min-h-[56px] items-center justify-between gap-3 rounded border px-3 py-2 text-left transition-all',
-                          selectedTopicSlug === 'all'
-                            ? 'border-accent/50 bg-accent-faint shadow-sm'
-                            : 'border-border bg-bg-raised hover:border-border-hover'
-                        )}
-                      >
-                        <span className="text-[13px] font-semibold text-text">
-                          All {selectedSubject.label}
-                        </span>
-                        <span className="u-num shrink-0 text-[11px] text-text-faint">
-                          {selectedSubject.count}
-                        </span>
-                      </button>
-                      {selectedTopics.map((topic) => {
-                        const activeList =
-                          selectedTopicSlug === 'all' ? [] : selectedTopicSlug.split(',');
-                        const active = activeList.includes(topic.slug);
-                        return (
-                          <button
-                            key={topic.slug}
-                            type="button"
-                            onClick={() => {
-                              let newList: string[];
-                              if (selectedTopicSlug === 'all') {
-                                newList = [topic.slug];
-                              } else {
-                                if (active) {
-                                  newList = activeList.filter((t) => t !== topic.slug);
-                                } else {
-                                  newList = [...activeList, topic.slug];
-                                }
-                              }
-                              setConfig({
-                                ...config,
-                                topicSlug: newList.length > 0 ? newList.join(',') : 'all'
-                              });
-                            }}
-                            aria-pressed={active}
-                            className={cn(
-                              'flex min-h-[56px] items-center justify-between gap-3 rounded border px-3 py-2 text-left transition-all',
-                              active
-                                ? 'border-accent/50 bg-accent-faint shadow-sm'
-                                : 'border-border bg-bg-raised hover:border-border-hover'
-                            )}
-                          >
-                            <span className="text-[13px] font-medium leading-snug text-text">
-                              {topic.label}
-                            </span>
-                            <span className="u-num shrink-0 text-[11px] text-text-faint">
-                              {topic.count}
-                            </span>
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-                )}
+                    {['5', '10', '15', '25', '50'].map((count) => (
+                      <option key={count} value={count}>
+                        {count}
+                      </option>
+                    ))}
+                    {config.mode !== 'exam' && <option value="all">All matching</option>}
+                  </Select>
+                </label>
               </div>
-
-              <div className="workbench-controls flex flex-col bg-bg-overlay/25 p-4">
-                {!isCoreOnly && (
-                  <>
-                    <div
-                      className={cn(
-                        'rounded border px-3 py-2.5',
-                        config.mode === 'exam'
-                          ? 'border-ink-violet/20 bg-guess-faint'
-                          : 'border-accent/20 bg-accent-faint'
-                      )}
-                    >
-                      <p className="u-label">
-                        {config.mode === 'exam' ? 'Exam rules' : 'Practice rules'}
-                      </p>
-                      <p className="mt-1 text-[11.5px] leading-relaxed text-text-muted">
-                        {config.mode === 'exam'
-                          ? '3 minutes per question feed one shared countdown. Keys stay hidden until submission.'
-                          : 'There is no overall timer. Commit each response to reveal its key before moving on.'}
-                      </p>
-                    </div>
-                    {sealedBenchmarkCount > 0 && (
-                      <label className="mt-3 flex cursor-pointer items-start gap-2 rounded border border-success/20 bg-success-faint/50 p-2.5">
-                        <input
-                          type="checkbox"
-                          checked={includeReservedBenchmarkQuestions}
-                          onChange={(event) =>
-                            onIncludeReservedBenchmarkQuestions(event.target.checked)
-                          }
-                          className="mt-0.5 h-4 w-4 rounded border-border text-accent focus:ring-accent"
-                        />
-                        <span className="text-[11px] leading-relaxed text-text-muted">
-                          <span className="block font-semibold text-text">
-                            Allow sealed benchmark questions in this regular set
-                          </span>
-                          Off by default. {sealedBenchmarkCount} unseen full-paper
-                          {sealedBenchmarkCount === 1 ? ' reserve stays' : ' reserves stay'} intact
-                          for a future authentic attempt.
-                        </span>
-                      </label>
-                    )}
-                  </>
-                )}
-                <p className="u-label mt-5">
-                  {config.mode === 'exam' ? 'Exam settings' : 'Practice settings'}
+              {selectedSubject && (
+                <p className="practice-library-muted text-[12px]">
+                  {seenBySubject.get(selectedSubject.slug) ?? 0} / {selectedSubject.count} seen in{' '}
+                  {selectedSubject.label}
                 </p>
-                <div className="mt-4 grid grid-cols-2 gap-3">
-                  <label className="text-[12px] font-medium text-text-muted">
+              )}
+              {selectedSubject && selectedTopics.length > 1 && (
+                <fieldset className="practice-topic-picker">
+                  <legend>
+                    Topics <span>Choose one or more</span>
+                  </legend>
+                  <div>
+                    <button
+                      type="button"
+                      aria-pressed={selectedTopicSlug === 'all'}
+                      onClick={() => setConfig({ ...config, topicSlug: 'all' })}
+                    >
+                      All {selectedSubject.label}
+                      <span>{selectedSubject.count}</span>
+                    </button>
+                    {selectedTopics.map((topic) => {
+                      const activeList =
+                        selectedTopicSlug === 'all' ? [] : selectedTopicSlug.split(',');
+                      const active = activeList.includes(topic.slug);
+                      return (
+                        <button
+                          key={topic.slug}
+                          type="button"
+                          aria-pressed={active}
+                          onClick={() => {
+                            const next = active
+                              ? activeList.filter((slug) => slug !== topic.slug)
+                              : [...activeList, topic.slug];
+                            setConfig({
+                              ...config,
+                              topicSlug: next.length ? next.join(',') : 'all'
+                            });
+                          }}
+                        >
+                          {topic.label}
+                          <span>{topic.count}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </fieldset>
+              )}
+              {recommendationControls}
+
+              <details className="practice-advanced">
+                <summary>
+                  <span>
+                    <SlidersHorizontal size={15} aria-hidden="true" />
+                    More settings
+                  </span>
+                  <small>{advancedSummary}</small>
+                </summary>
+                <div className="practice-builder__fields practice-builder__fields--advanced">
+                  <label>
                     From year
                     <Select
-                      className="mt-1"
                       value={config.fromYear}
                       onChange={(event) =>
                         setConfig({ ...config, fromYear: Number(event.target.value) })
@@ -1370,10 +994,9 @@ function PracticeSetup({
                         ))}
                     </Select>
                   </label>
-                  <label className="text-[12px] font-medium text-text-muted">
+                  <label>
                     To year
                     <Select
-                      className="mt-1"
                       value={config.toYear}
                       onChange={(event) =>
                         setConfig({ ...config, toYear: Number(event.target.value) })
@@ -1384,10 +1007,9 @@ function PracticeSetup({
                       ))}
                     </Select>
                   </label>
-                  <label className="text-[12px] font-medium text-text-muted">
+                  <label>
                     Question type
                     <Select
-                      className="mt-1"
                       value={config.type}
                       onChange={(event) =>
                         setConfig({ ...config, type: event.target.value as TypeFilter })
@@ -1399,27 +1021,9 @@ function PracticeSetup({
                       <option value="NAT">NAT</option>
                     </Select>
                   </label>
-                  <label className="text-[12px] font-medium text-text-muted">
-                    Questions
-                    <Select
-                      className="mt-1"
-                      value={config.count}
-                      onChange={(event) =>
-                        setConfig({ ...config, count: event.target.value as CountChoice })
-                      }
-                    >
-                      <option value="5">5</option>
-                      <option value="10">10</option>
-                      <option value="15">15</option>
-                      <option value="25">25</option>
-                      <option value="50">50</option>
-                      {config.mode !== 'exam' ? <option value="all">All matching</option> : null}
-                    </Select>
-                  </label>
-                  <label className="col-span-2 text-[12px] font-medium text-text-muted">
+                  <label>
                     Question history
                     <Select
-                      className="mt-1"
                       value={config.history ?? 'all'}
                       onChange={(event) =>
                         setConfig({ ...config, history: event.target.value as PyqHistoryFilter })
@@ -1432,10 +1036,9 @@ function PracticeSetup({
                       ))}
                     </Select>
                   </label>
-                  <label className="col-span-2 text-[12px] font-medium text-text-muted">
+                  <label>
                     Order
                     <Select
-                      className="mt-1"
                       value={config.order}
                       onChange={(event) =>
                         setConfig({ ...config, order: event.target.value as Order })
@@ -1448,34 +1051,70 @@ function PracticeSetup({
                     </Select>
                   </label>
                 </div>
-                <div className="workbench-launch mt-auto pt-6">
-                  {error && !activeSession && (
-                    <p role="alert" className="mb-3 text-[12px] text-danger">
-                      {error}
-                    </p>
-                  )}
-                  <Button variant="primary" className="w-full" onClick={onStart} disabled={loading}>
-                    <BookOpenCheck size={17} />
-                    {loading
-                      ? 'Opening question bank…'
-                      : config.mode === 'exam'
-                        ? 'Start timed exam'
-                        : 'Start practice set'}
-                  </Button>
-                  <p className="mt-3 text-center text-[11px] leading-relaxed text-text-faint">
-                    {config.mode === 'exam'
-                      ? 'No answer key or correctness is shown before final submission.'
-                      : 'Questions and diagrams load from your online question bank. Your answer stays hidden until you commit.'}
-                  </p>
-                </div>
-              </div>
+                {(config.mode ?? 'practice') === 'practice' && (
+                  <div className="practice-builder__view">
+                    <p>Practice view</p>
+                    <PyqPracticeViewControl
+                      value={config.practiceView}
+                      onChange={(practiceView) => setConfig({ ...config, practiceView })}
+                    />
+                  </div>
+                )}
+                {!isCoreOnly && sealedBenchmarkCount > 0 && (
+                  <label className="practice-reserve-control">
+                    <input
+                      type="checkbox"
+                      checked={includeReservedBenchmarkQuestions}
+                      onChange={(event) =>
+                        onIncludeReservedBenchmarkQuestions(event.target.checked)
+                      }
+                    />
+                    <span>
+                      Allow sealed benchmark questions in this regular set
+                      <small>
+                        Off by default. {sealedBenchmarkCount} unseen full-paper reserves stay
+                        protected.
+                      </small>
+                    </span>
+                  </label>
+                )}
+              </details>
             </div>
-          </Card>
-        </>
-      )}
+            <div className="practice-library-launch">
+              <div>
+                <p>
+                  {config.count === 'all'
+                    ? 'All matching questions'
+                    : `Up to ${config.count} questions`}{' '}
+                  · {config.mode === 'exam' ? 'Timed exam' : 'Practice'}
+                </p>
+                <span>
+                  {config.mode === 'exam'
+                    ? 'Keys stay hidden until final submission.'
+                    : 'Commit an answer to reveal its key.'}
+                </span>
+              </div>
+              <Button variant="primary" onClick={onStart} disabled={loading}>
+                {loading
+                  ? 'Opening question bank…'
+                  : config.mode === 'exam'
+                    ? 'Start timed exam'
+                    : 'Start practice set'}
+                <ArrowRight size={16} aria-hidden="true" />
+              </Button>
+            </div>
+          </div>
+        )}
+      </section>
 
-      {completedSessions.length > 0 ? (
-        <div className="workbench-history">
+      <section
+        id="practice-panel-history"
+        role="tabpanel"
+        aria-labelledby="practice-tab-history"
+        hidden={libraryTab !== 'history'}
+        className="practice-library-panel"
+      >
+        {completedSessions.length > 0 ? (
           <PyqSessionHistory
             sessions={completedSessions}
             attempts={attempts}
@@ -1484,21 +1123,25 @@ function PracticeSetup({
             )}
             onReview={onReview}
           />
-        </div>
-      ) : null}
-
-      <PyqConversationHistory attempts={attempts} />
-
-      {attempts.length > 0 ? (
-        <PyqEvidenceLedger
-          insights={evidenceInsights}
-          onPractice={onPracticeEvidenceSubset}
-          onAddToRecovery={onAddEvidenceToRecovery}
-          onAnalyzeFirst={onAnalyzeEvidenceFirst}
-          onPlanRepair={onPlanEvidenceRepair}
-          onTryTransfer={onTryEvidenceTransfer}
-        />
-      ) : null}
+        ) : (
+          <div className="practice-library-empty">
+            <Bookmark size={26} aria-hidden="true" />
+            <h2>A place for your progress</h2>
+            <p>Finished sessions appear here. Resume an open set above, or start a new one.</p>
+          </div>
+        )}
+        <PyqConversationHistory attempts={attempts} />
+        {attempts.length > 0 && (
+          <PyqEvidenceLedger
+            insights={evidenceInsights}
+            onPractice={onPracticeEvidenceSubset}
+            onAddToRecovery={onAddEvidenceToRecovery}
+            onAnalyzeFirst={onAnalyzeEvidenceFirst}
+            onPlanRepair={onPlanEvidenceRepair}
+            onTryTransfer={onTryEvidenceTransfer}
+          />
+        )}
+      </section>
     </div>
   );
 }
@@ -4944,8 +4587,8 @@ export default function Pyq() {
   );
 
   return (
-    <div className="mx-auto flex w-full max-w-5xl flex-col gap-4">
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border pb-3">
+    <div className="practice-solving mx-auto flex w-full max-w-5xl flex-col gap-4">
+      <div className="practice-solving-toolbar flex flex-wrap items-center justify-between gap-3">
         <div className="flex flex-col items-start">
           <Button
             variant="ghost"

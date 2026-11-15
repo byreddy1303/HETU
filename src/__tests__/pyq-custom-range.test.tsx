@@ -93,9 +93,13 @@ const manifest = normalizePyqManifest({
 });
 
 manifest.books.push({
-  ...manifest.books[0], slug: localQuestion.bookSlug,
-  label: 'Example Test Series', sourceClass: 'user-import', count: 1,
-  firstYear: 2026, lastYear: 2026,
+  ...manifest.books[0],
+  slug: localQuestion.bookSlug,
+  label: 'Example Test Series',
+  sourceClass: 'user-import',
+  count: 1,
+  firstYear: 2026,
+  lastYear: 2026,
   subjects: [{ ...manifest.subjects[0], count: 1 }]
 });
 
@@ -148,14 +152,45 @@ describe('Custom PYQ setup and Rishi catalog visibility', () => {
 
   it('starts an imported test book separately without recording an answer or including core questions', async () => {
     const user = userEvent.setup();
-    render(<MemoryRouter><Pyq /></MemoryRouter>);
-    await user.click(await screen.findByRole('button', { name: 'Practice Example Test Series' }));
+    render(
+      <MemoryRouter>
+        <Pyq />
+      </MemoryRouter>
+    );
+    await user.click(await screen.findByRole('tab', { name: 'Test Series' }));
+    await user.click(screen.getByRole('button', { name: 'Open Example Test Series' }));
+    expect(await db.pyq_sessions.count()).toBe(0);
+    expect(await db.pyq_attempts.count()).toBe(0);
+    await user.click(screen.getByRole('button', { name: 'Practice Example Test Series' }));
     expect(await screen.findByText('A private test-series question.')).toBeInTheDocument();
     expect(screen.queryByText('A core question from 2026.')).not.toBeInTheDocument();
     const sessions = await db.pyq_sessions.toArray();
     expect(sessions).toHaveLength(1);
     expect(sessions[0].config.bookSlug).toBe(localQuestion.bookSlug);
     expect(sessions[0].question_uids).toEqual([localQuestion.id]);
+    expect(await db.pyq_attempts.count()).toBe(0);
+  });
+
+  it('keeps the selected setup while switching sources with the keyboard', async () => {
+    const user = userEvent.setup();
+    render(
+      <MemoryRouter>
+        <Pyq />
+      </MemoryRouter>
+    );
+    await user.selectOptions(await screen.findByRole('combobox', { name: 'Questions' }), '25');
+    await user.click(screen.getByRole('tab', { name: 'PYQs' }));
+    await user.keyboard('{ArrowRight}');
+    expect(screen.getByRole('tab', { name: 'Test Series' })).toHaveAttribute(
+      'aria-selected',
+      'true'
+    );
+    expect(screen.queryByRole('button', { name: 'Start practice set' })).not.toBeInTheDocument();
+    await user.keyboard('{End}');
+    expect(screen.getByRole('tab', { name: 'History' })).toHaveAttribute('aria-selected', 'true');
+    await user.keyboard('{Home}');
+    expect(screen.getByRole('combobox', { name: 'Questions' })).toHaveValue('25');
+    expect(await db.pyq_sessions.count()).toBe(0);
     expect(await db.pyq_attempts.count()).toBe(0);
   });
 
@@ -299,7 +334,9 @@ describe('Custom PYQ setup and Rishi catalog visibility', () => {
       screen.queryByText('Allow sealed benchmark questions in this regular set')
     ).not.toBeInTheDocument();
     expect(screen.queryByText('Feedback after each answer')).not.toBeInTheDocument();
-    expect(screen.queryByText('Learn with feedback in Practice mode, or simulate test conditions')).not.toBeInTheDocument();
+    expect(
+      screen.queryByText('Learn with feedback in Practice mode, or simulate test conditions')
+    ).not.toBeInTheDocument();
     for (const name of [
       'Learn',
       'Diagnose',
@@ -416,11 +453,16 @@ describe('Custom PYQ setup and Rishi catalog visibility', () => {
   });
 });
 
-
 // Exercise the Python catalog contract while keeping domain writes in fixture RAM.
 vi.mock('@/lib/backend-config', async (importOriginal) => ({
-  ...await importOriginal<typeof import('@/lib/backend-config')>(),
-  backendConfig: { backend: 'fastapi', fastapi: true, error: null, apiUrl: '/api', clerkKey: 'pk_test_fixture' }
+  ...(await importOriginal<typeof import('@/lib/backend-config')>()),
+  backendConfig: {
+    backend: 'fastapi',
+    fastapi: true,
+    error: null,
+    apiUrl: '/api',
+    clerkKey: 'pk_test_fixture'
+  }
 }));
 vi.mock('@/lib/api-client', async () => ({
   apiConfigured: false,
@@ -428,6 +470,10 @@ vi.mock('@/lib/api-client', async () => ({
 }));
 beforeEach(async () => {
   const { configureClerkRuntime } = await import('@/lib/fastapi-client');
-  configureClerkRuntime({ loaded: true, user: { id: 'test-catalog-reader' },
-    getToken: async () => 'test-session', signOut: async () => {} });
+  configureClerkRuntime({
+    loaded: true,
+    user: { id: 'test-catalog-reader' },
+    getToken: async () => 'test-session',
+    signOut: async () => {}
+  });
 });

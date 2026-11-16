@@ -322,8 +322,8 @@ function matchingCohorts(
   if (latestAttempt?.mark_correct === false) {
     matches.push('wrong');
     if (
-      latestAttempt.confidence === 'high' ||
-      (latestAttempt.confidence == null && latestAttempt.mark_decision === 'MARK')
+      latestAttempt.confidence === 'high' &&
+      latestAttempt.confidence_source !== 'decision_inferred'
     ) {
       matches.push('high-confidence-wrong');
     }

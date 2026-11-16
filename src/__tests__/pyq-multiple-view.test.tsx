@@ -229,7 +229,7 @@ describe('PYQ multiple-question practice view', () => {
     expect(usePyqPreferencesStore.getState().lastConfig?.practiceView).toBe('multiple');
   });
 
-  it('selects option content directly on inactive cards and asks confidence after the answer', async () => {
+  it('selects option content directly on inactive cards and allows submission with confidence left unknown', async () => {
     const user = userEvent.setup();
     renderPractice();
     await startMultiple(user);
@@ -243,7 +243,7 @@ describe('PYQ multiple-question practice view', () => {
     await user.click(questionCard(2).getByText('A conjunction implies either operand.'));
     expect(
       await questionCard(2).findByRole('button', { name: 'Commit & reveal key' })
-    ).toBeDisabled();
+    ).toBeEnabled();
     expect(option(2, 'A')).toHaveAttribute('aria-pressed', 'true');
     expect(
       questionCard(2).getByRole('group', { name: 'How confident do you feel?' })
@@ -261,7 +261,7 @@ describe('PYQ multiple-question practice view', () => {
       'aria-pressed',
       'false'
     );
-    expect(questionCard(2).getByRole('button', { name: 'Commit & reveal key' })).toBeDisabled();
+    expect(questionCard(2).getByRole('button', { name: 'Commit & reveal key' })).toBeEnabled();
     await user.click(option(2, 'A'));
     expect(option(2, 'A')).toHaveAttribute('aria-pressed', 'false');
     expect(option(2, 'C')).toHaveAttribute('aria-pressed', 'true');
@@ -269,7 +269,7 @@ describe('PYQ multiple-question practice view', () => {
     await user.click(questionCard(1).getByText('A proposition or its negation is true.'));
     expect(
       await questionCard(1).findByRole('button', { name: 'Commit & reveal key' })
-    ).toBeDisabled();
+    ).toBeEnabled();
     expect(option(1, 'B')).toHaveAttribute('aria-pressed', 'true');
     await user.click(screen.getByRole('button', { name: 'Answered: committed' }));
     await user.click(questionCard(1).getByText('A proposition is always false.'));
@@ -279,7 +279,7 @@ describe('PYQ multiple-question practice view', () => {
       'aria-pressed',
       'false'
     );
-    expect(questionCard(1).getByRole('button', { name: 'Commit & reveal key' })).toBeDisabled();
+    expect(questionCard(1).getByRole('button', { name: 'Commit & reveal key' })).toBeEnabled();
 
     await workOnQuestion(user, 2);
     expect(option(2, 'C')).toHaveAttribute('aria-pressed', 'true');
@@ -308,12 +308,12 @@ describe('PYQ multiple-question practice view', () => {
     await user.click(option(2, 'A'));
     expect(
       await questionCard(2).findByRole('button', { name: 'Commit & reveal key' })
-    ).toBeDisabled();
+    ).toBeEnabled();
     expect(option(1, 'B')).toBeEnabled();
     await user.click(option(1, 'B'));
     expect(
       await questionCard(1).findByRole('button', { name: 'Commit & reveal key' })
-    ).toBeDisabled();
+    ).toBeEnabled();
     expect(option(1, 'B')).toHaveAttribute('aria-pressed', 'true');
     expect(screen.getByText(/Previously skipped/)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Answered: committed' })).toHaveAttribute(
@@ -378,12 +378,12 @@ describe('PYQ multiple-question practice view', () => {
       'aria-pressed',
       'false'
     );
-    expect(screen.getByRole('button', { name: 'Commit & reveal key' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Commit & reveal key' })).toBeEnabled();
     const [resumed] = await db.pyq_sessions.toArray();
     expect(resumed.config.practiceDrafts?.[coreQuestions[1].id]).toMatchObject({
       selected_answer: ['A', 'C'],
       confidence: null,
-      mark_decision: null
+      mark_decision: 'MARK'
     });
     await workOnQuestion(user, 3);
     expect(screen.getByRole('spinbutton', { name: 'Your numeric answer' })).toHaveValue(12);
@@ -391,7 +391,7 @@ describe('PYQ multiple-question practice view', () => {
       'aria-pressed',
       'false'
     );
-    expect(screen.getByRole('button', { name: 'Commit & reveal key' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Commit & reveal key' })).toBeEnabled();
     await user.click(screen.getByRole('button', { name: 'Guessed: uncertain' }));
     expect(screen.getByRole('button', { name: 'Commit & reveal key' })).toBeEnabled();
     await user.type(screen.getByRole('spinbutton', { name: 'Your numeric answer' }), '3');
@@ -399,7 +399,7 @@ describe('PYQ multiple-question practice view', () => {
       'aria-pressed',
       'false'
     );
-    expect(screen.getByRole('button', { name: 'Commit & reveal key' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Commit & reveal key' })).toBeEnabled();
     await user.clear(screen.getByRole('spinbutton', { name: 'Your numeric answer' }));
     expect(
       screen.queryByRole('group', { name: 'How confident do you feel?' })
@@ -513,7 +513,7 @@ describe('PYQ multiple-question practice view', () => {
     expect(pausedFromSetup?.status).toBe('paused');
     expect(pausedFromSetup?.config.practiceDrafts?.[coreQuestions[0].id]).toMatchObject({
       selected_answer: 'B',
-      mark_decision: null,
+      mark_decision: 'MARK',
       confidence: null
     });
     expect(pausedFromSetup?.config.practiceDrafts?.[coreQuestions[1].id]).toEqual(
@@ -531,7 +531,7 @@ describe('PYQ multiple-question practice view', () => {
     expect(autoPaused?.status).toBe('paused');
     expect(autoPaused?.config.practiceDrafts?.[coreQuestions[0].id]).toMatchObject({
       selected_answer: 'B',
-      mark_decision: null,
+      mark_decision: 'MARK',
       confidence: null
     });
     expect(autoPaused?.config.practiceDrafts?.[coreQuestions[1].id]).toEqual(
@@ -600,11 +600,16 @@ describe('PYQ multiple-question practice view', () => {
   );
 });
 
-
 // Exercise the Python catalog contract while keeping domain writes in fixture RAM.
 vi.mock('@/lib/backend-config', async (importOriginal) => ({
-  ...await importOriginal<typeof import('@/lib/backend-config')>(),
-  backendConfig: { backend: 'fastapi', fastapi: true, error: null, apiUrl: '/api', clerkKey: 'pk_test_fixture' }
+  ...(await importOriginal<typeof import('@/lib/backend-config')>()),
+  backendConfig: {
+    backend: 'fastapi',
+    fastapi: true,
+    error: null,
+    apiUrl: '/api',
+    clerkKey: 'pk_test_fixture'
+  }
 }));
 vi.mock('@/lib/api-client', async () => ({
   apiConfigured: false,
@@ -612,6 +617,10 @@ vi.mock('@/lib/api-client', async () => ({
 }));
 beforeEach(async () => {
   const { configureClerkRuntime } = await import('@/lib/fastapi-client');
-  configureClerkRuntime({ loaded: true, user: { id: 'test-catalog-reader' },
-    getToken: async () => 'test-session', signOut: async () => {} });
+  configureClerkRuntime({
+    loaded: true,
+    user: { id: 'test-catalog-reader' },
+    getToken: async () => 'test-session',
+    signOut: async () => {}
+  });
 });

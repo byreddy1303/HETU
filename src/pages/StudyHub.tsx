@@ -5,6 +5,11 @@ import PageHeader from '@/components/layout/PageHeader';
 const destinations = {
   review: [
     [
+      '/practice-lab',
+      'Mistake repairs',
+      'Short original exercises, selective reflection, and dated checks.'
+    ],
+    [
       '/skills',
       'Skill repairs',
       'Contrast checks, targeted practice, and delayed application evidence.'
@@ -23,6 +28,16 @@ const destinations = {
   ],
   knowledge: [
     [
+      '/practice-lab?tab=traps',
+      'My principles',
+      'Keep useful corrections linked to the attempts behind them.'
+    ],
+    [
+      '/practice-lab?tab=notebook',
+      'Notebook sessions',
+      'Log a whole set of external questions together.'
+    ],
+    [
       '/learning-library',
       'Saved discussions',
       'Find explanations, examples, and their original sources.'
@@ -40,6 +55,11 @@ const destinations = {
     ]
   ],
   progress: [
+    [
+      '/practice-lab?tab=progress',
+      'Practice evidence',
+      'Original exercise results and your next exam strategy experiment.'
+    ],
     [
       '/skills',
       'Skill evidence',

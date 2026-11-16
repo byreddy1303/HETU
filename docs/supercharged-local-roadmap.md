@@ -1,9 +1,9 @@
 # HETU Local Desktop: Supercharged Roadmap & Agent Execution Log
 
-**Current Status**: Vibrant study workspace and Today refresh fix installed alongside the three-skill personal GATE pilot; broader planning, coverage, and learning-effectiveness stages remain in progress
+**Current Status**: Efficient practice, selective review, notebook batches, and mistake-family repairs implemented alongside the vibrant workspace and personal GATE pilot; broader reviewed coverage and learning-effectiveness validation remain in progress
 **Target**: GATE CSE 2027 AIR < 100  
 **Architecture**: 100% Local Desktop (Electron + SQLite WAL + Python 3.12 + Native stdio MCP)  
-**Last Updated**: 2026-11-14
+**Last Updated**: 2026-11-15
 
 > **Note for Future Agents**:  
 > Always consult this document before starting a task. When you complete a sub-task or phase, update its checkbox (`[x]`), record the commit hash in the Progress Log below, and commit this file to `main` before finalizing your turn.
@@ -56,6 +56,16 @@ To make an AI act as a true master coach (identifying root weaknesses, predictin
 ---
 
 ## 2. Master Execution Roadmap
+
+### Efficient practice and mistake repairs (2026-11-15)
+- [x] Automatic answer receipts, optional confidence/flags, and no per-question reflection popup.
+- [x] Capped short reviews with durable later/return/edit actions and optional detailed review.
+- [x] Notebook batch logging, honest unknown evidence, and locally stored photos opened on demand.
+- [x] Original three-question mistake packs with hidden keys, resumable drafts, immutable answers, deduplication, and dated retries.
+- [x] Learner-confirmed principles, mixed method practice, linked fresh bank application, and qualified delayed/fresh evidence.
+- [x] Budgeted daily sessions, exam judgement experiments, and per-family history with timing limitations.
+- [x] Standing local visit helper and validated authoring endpoint for uncovered mistake groups.
+- Scope and operating instructions: [efficient-practice.md](efficient-practice.md).
 
 ### Vibrant workspace and Today stability (2026-11-14)
 - [x] Minimal shared surfaces with vibrant indigo, violet, and coral accents in light and dark themes.

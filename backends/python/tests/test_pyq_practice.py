@@ -59,7 +59,8 @@ async def test_canonical_pyq_attempt_scoring_retries_and_owner_boundary(db, monk
     assert wrong["score_thirds"] == -1
     assert wrong["scoring_status"] == "scored"
     assert wrong["negative_applied"] is True
-    assert wrong["confidence"] == "high"
+    assert wrong["confidence"] is None
+    assert wrong["confidence_source"] == "unknown"
     assert wrong["attempt_number"] == 1
     assert wrong["question_snapshot"]["question_uid"] == "gate:test:1"
     assert wrong["question_snapshot"]["answer_status"] == "available"

@@ -170,13 +170,9 @@ export function buildPyqSessionSummary(
       ? confidenceByQuestion[questionUid]
       : savedDraft?.confidence !== undefined
         ? savedDraft.confidence
-        : (practiceResponse?.confidence ??
-          (practiceResponse?.mark_decision === 'MARK'
-            ? 'high'
-            : practiceResponse?.mark_decision === 'FIFTY_FIFTY'
-              ? 'medium'
-              : null) ??
-          confidenceByQuestion[questionUid]);
+        : attempt?.confidence_source === 'decision_inferred'
+          ? null
+          : (practiceResponse?.confidence ?? confidenceByQuestion[questionUid]);
     const recordedConfidence =
       rawConfidence === 'high' || rawConfidence === 'medium' || rawConfidence === 'low'
         ? rawConfidence

@@ -20,6 +20,7 @@ const Dashboard = lazyWithRetry(() =>
 );
 const LegacyDashboard = lazyWithRetry(() => import('@/pages/Dashboard'));
 const StudyHub = lazyWithRetry(() => import('@/pages/StudyHub'));
+const PracticeLab = lazyWithRetry(() => import('@/pages/PracticeLab'));
 const SkillStudio = lazyWithRetry(() => import('@/pages/SkillStudio'));
 const DoNow = lazyWithRetry(() => import('@/pages/DoNow'));
 const QuickCapture = lazyWithRetry(() => import('@/pages/QuickCapture'));
@@ -91,6 +92,7 @@ export const router = routerFactory([
     children: [
       { index: true, element: <Dashboard /> },
       { path: 'skills', element: <SkillStudio /> },
+      { path: 'practice-lab', element: <PracticeLab /> },
       { path: 'skills/diagnoses/:diagnosisId', element: <SkillStudio /> },
       { path: 'review', element: <StudyHub kind="review" /> },
       { path: 'knowledge', element: <StudyHub kind="knowledge" /> },

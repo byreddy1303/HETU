@@ -44,7 +44,7 @@ test('local daily preferences and a blind skill check survive navigation and rel
   for (let index = 0; index < 3; index++) {
     await page.getByRole('button', { name: 'Left blank: skipped', exact: true }).click();
     await page.getByRole('button', { name: 'Commit & reveal key', exact: true }).click();
-    await page.getByRole('button', { name: 'Save for later', exact: true }).click();
+    await expect(page.getByRole('heading', { name: 'Capture your thinking' })).toHaveCount(0);
     await page
       .getByRole('button', { name: index === 2 ? 'Finish set' : 'Next question', exact: true })
       .click();

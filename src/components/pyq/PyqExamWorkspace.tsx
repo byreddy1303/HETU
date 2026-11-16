@@ -1,3 +1,4 @@
+import ExamStrategy from '@/components/practice/ExamStrategy';
 import { pyqPracticeChoices } from './pyqPracticeQuestion';
 import { useState } from 'react';
 import {
@@ -29,7 +30,6 @@ import { Button } from '@/components/ui/Button';
 import { Card, CardBody, CardHeader } from '@/components/ui/Card';
 import { useUiStore } from '@/stores/ui';
 import { cn, secondsToClock } from '@/lib/utils';
-
 
 const STATUS_LABELS: Record<PyqExamQuestionStatus, string> = {
   answered: 'Answered',
@@ -456,238 +456,240 @@ export default function PyqExamWorkspace({
 
   return (
     <>
-    <section
-      aria-label={`${isFullPaper ? 'Official full paper' : 'Timed PYQ exam'} workspace`}
-      className={cn(
-        'relative left-1/2 flex w-full -translate-x-1/2 flex-col gap-3',
-        navCollapsed
-          ? 'md:w-[min(1240px,calc(100vw-48px))]'
-          : 'md:w-[min(1180px,calc(100vw-268px))]'
-      )}
-    >
-      <header className="sticky top-[calc(56px+var(--safe-top))] z-20 rounded-lg border border-border bg-bg-raised/95 px-3 py-2 shadow-card backdrop-blur md:top-2 sm:px-4">
-        <div className="flex flex-wrap items-center justify-between gap-2.5">
-          <div className="flex flex-col items-start">
-            <Button
-              variant="ghost"
-              size="sm"
-              disabled={submitting}
-              onClick={onPause}
-              aria-label="Pause exam"
-              aria-describedby="pyq-exam-pause-hint"
-              className="-ml-1 whitespace-nowrap"
-            >
-              <Pause size={14} />
-              Pause exam
-            </Button>
-            <span
-              id="pyq-exam-pause-hint"
-              className="hidden pl-2 text-[9.5px] text-text-faint sm:block"
-            >
-              Progress saved · timer stops
-            </span>
-          </div>
-
-          <div className="order-3 flex w-full items-center justify-between gap-3 border-t border-border pt-2.5 sm:order-none sm:w-auto sm:border-0 sm:pt-0">
-            <div className="text-left sm:text-center">
-              <p className="u-label">
-                {isFullPaper ? 'Official full paper' : 'Timed PYQ exam'}
-              </p>
-              <p className="u-num mt-0.5 text-[12px] font-semibold text-text">
-                Question {Math.min(index + 1, questions.length)} of {questions.length}
-              </p>
-            </div>
-            <span className="hidden h-7 w-px bg-border sm:block" aria-hidden="true" />
-            <div className="text-right sm:hidden">
-              <p className="u-label">Answered</p>
-              <p className="u-num mt-0.5 text-[12px] font-semibold text-text">
-                {counts.answered + counts.answeredAndMarked}/{questions.length}
-              </p>
-            </div>
-          </div>
-
-          <div
-            role="timer"
-            aria-label={`${secondsToClock(remainingSec)} remaining in this exam`}
-            aria-atomic="true"
-            className={cn(
-              'flex min-w-[108px] items-center justify-center gap-2 rounded border px-3 py-2 font-mono text-[14px] font-bold tabular-nums',
-              urgent
-                ? 'border-danger/35 bg-danger-faint text-danger'
-                : 'border-accent/25 bg-accent-faint text-accent'
-            )}
-          >
-            <Clock3 size={15} aria-hidden="true" />
-            {secondsToClock(remainingSec)}
-          </div>
-          <CalculatorTrigger
-            onClick={() => setCalcOpen((v) => !v)}
-            active={calcOpen}
-          />
-        </div>
-      </header>
-
-      {error && (
-        <div
-          role="alert"
-          className="rounded border border-danger/35 bg-danger-faint px-4 py-3 text-[12.5px] leading-relaxed text-danger"
-        >
-          {error}
-        </div>
-      )}
-
-      {!current ? (
-        <Card>
-          <CardBody className="py-12 text-center">
-            <p className="font-display text-[17px] font-semibold text-text">
-              This exam has no question at the selected position.
-            </p>
-            <p className="mt-1 text-[12.5px] text-text-muted">
-              Pause the exam, then resume it to reload the saved question order.
-            </p>
-          </CardBody>
-        </Card>
-      ) : (
-        <div className="grid min-w-0 gap-3 lg:grid-cols-[minmax(0,1fr)_286px] lg:items-start">
-          <div className="flex min-w-0 flex-col gap-3">
-            <Card className="overflow-hidden">
-              <div className="h-1 bg-accent" aria-hidden="true" />
-              <CardHeader
-                className="flex-col items-stretch gap-2.5 py-3 sm:flex-row sm:items-center"
-                title={
-                  <span className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
-                    <span className="font-display text-[15px] font-semibold normal-case tracking-normal text-text">
-                      {current.paperLabel}
-                    </span>
-                    <span className="text-border-hover" aria-hidden="true">
-                      /
-                    </span>
-                    <span className="font-mono text-[11px] text-text-muted">
-                      Q {current.number}
-                    </span>
-                  </span>
-                }
-                aside={
-                  <div className="flex flex-wrap gap-1.5">
-                    <Badge tone="accent">{current.subject}</Badge>
-                    <Badge>{current.type}</Badge>
-                    {current.marks && (
-                      <Badge>
-                        {current.marks} {current.marks === 1 ? 'mark' : 'marks'}
-                      </Badge>
-                    )}
-                  </div>
-                }
-              />
-              <CardBody className="min-h-[280px] p-5 sm:min-h-[360px] sm:p-7 lg:p-8">
-                <PyqQuestionContent html={current.html} />
-              </CardBody>
-            </Card>
-
-            <ResponsePad
-              question={current}
-              status={pyqExamQuestionStatus(session, current)}
-              choices={choices}
-              numeric={numeric}
-              submitting={submitting}
-              confidence={getPyqExamConfidence(session, current.id)}
-              onChoices={onChoices}
-              onNumeric={onNumeric}
-              onConfidence={onConfidence}
-            />
-          </div>
-
-          <aside
-            aria-label="Question status and submission"
-            className="sticky top-[92px] hidden max-h-[calc(100dvh-108px)] overflow-y-auto rounded-lg lg:block"
-          >
-            <Card className="overflow-hidden">
-              <div className="border-l-4 border-accent p-4">
-                <PalettePanel
-                  session={session}
-                  questions={questions}
-                  index={index}
-                  counts={counts}
-                  submitting={submitting}
-                  onNavigate={onNavigate}
-                  onSubmit={onSubmit}
-                />
-              </div>
-            </Card>
-          </aside>
-        </div>
-      )}
-
-      {current && (
-        <details className="group overflow-hidden rounded-lg border border-border bg-bg-raised shadow-card lg:hidden">
-          <summary className="flex min-h-12 cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 [&::-webkit-details-marker]:hidden">
-            <span className="flex items-center gap-2">
-              <Flag size={15} className="text-accent" aria-hidden="true" />
-              <span className="text-[13px] font-semibold text-text">Question palette</span>
-              <span className="u-num rounded-full bg-bg-overlay px-2 py-0.5 text-[10px] text-text-muted">
-                {counts.answered + counts.answeredAndMarked}/{questions.length} answered
+      <ExamStrategy reminder />
+      <section
+        aria-label={`${isFullPaper ? 'Official full paper' : 'Timed PYQ exam'} workspace`}
+        className={cn(
+          'relative left-1/2 flex w-full -translate-x-1/2 flex-col gap-3',
+          navCollapsed
+            ? 'md:w-[min(1240px,calc(100vw-48px))]'
+            : 'md:w-[min(1180px,calc(100vw-268px))]'
+        )}
+      >
+        <header className="sticky top-[calc(56px+var(--safe-top))] z-20 rounded-lg border border-border bg-bg-raised/95 px-3 py-2 shadow-card backdrop-blur md:top-2 sm:px-4">
+          <div className="flex flex-wrap items-center justify-between gap-2.5">
+            <div className="flex flex-col items-start">
+              <Button
+                variant="ghost"
+                size="sm"
+                disabled={submitting}
+                onClick={onPause}
+                aria-label="Pause exam"
+                aria-describedby="pyq-exam-pause-hint"
+                className="-ml-1 whitespace-nowrap"
+              >
+                <Pause size={14} />
+                Pause exam
+              </Button>
+              <span
+                id="pyq-exam-pause-hint"
+                className="hidden pl-2 text-[9.5px] text-text-faint sm:block"
+              >
+                Progress saved · timer stops
               </span>
-            </span>
-            <ChevronDown
-              size={16}
-              className="shrink-0 text-text-faint transition-transform group-open:rotate-180"
-              aria-hidden="true"
-            />
-          </summary>
-          <div className="border-t border-border p-4">
-            <PalettePanel
-              session={session}
-              questions={questions}
-              index={index}
-              counts={counts}
-              submitting={submitting}
-              onNavigate={onNavigate}
-              onSubmit={onSubmit}
-            />
-          </div>
-        </details>
-      )}
+            </div>
 
-      {current && (
-        <div className="sticky bottom-[calc(4.5rem+var(--safe-bottom))] z-20 md:bottom-2">
-          <Card className="overflow-hidden border-border-hover bg-bg-raised/95 shadow-lift backdrop-blur">
-            <CardBody className="flex flex-col gap-2 p-2.5 sm:flex-row sm:items-center sm:justify-between sm:p-3">
-              <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
-                <Button variant="secondary" size="sm" disabled={submitting} onClick={onMarkAndNext}>
-                  <Bookmark size={14} />
-                  {isLastQuestion ? 'Mark for review' : 'Mark for review & next'}
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  disabled={submitting || !hasResponse}
-                  onClick={onClear}
-                >
-                  <Eraser size={14} />
-                  Clear response
-                </Button>
+            <div className="order-3 flex w-full items-center justify-between gap-3 border-t border-border pt-2.5 sm:order-none sm:w-auto sm:border-0 sm:pt-0">
+              <div className="text-left sm:text-center">
+                <p className="u-label">{isFullPaper ? 'Official full paper' : 'Timed PYQ exam'}</p>
+                <p className="u-num mt-0.5 text-[12px] font-semibold text-text">
+                  Question {Math.min(index + 1, questions.length)} of {questions.length}
+                </p>
               </div>
-              <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:justify-end">
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  disabled={submitting || index <= 0}
-                  onClick={onPrevious}
-                >
-                  <ArrowLeft size={14} />
-                  Previous
-                </Button>
-                <Button variant="primary" size="sm" disabled={submitting} onClick={onSaveAndNext}>
-                  {isLastQuestion ? 'Review & submit' : 'Save & next'}
-                  {isLastQuestion ? <Send size={14} /> : <ArrowRight size={14} />}
-                </Button>
+              <span className="hidden h-7 w-px bg-border sm:block" aria-hidden="true" />
+              <div className="text-right sm:hidden">
+                <p className="u-label">Answered</p>
+                <p className="u-num mt-0.5 text-[12px] font-semibold text-text">
+                  {counts.answered + counts.answeredAndMarked}/{questions.length}
+                </p>
               </div>
+            </div>
+
+            <div
+              role="timer"
+              aria-label={`${secondsToClock(remainingSec)} remaining in this exam`}
+              aria-atomic="true"
+              className={cn(
+                'flex min-w-[108px] items-center justify-center gap-2 rounded border px-3 py-2 font-mono text-[14px] font-bold tabular-nums',
+                urgent
+                  ? 'border-danger/35 bg-danger-faint text-danger'
+                  : 'border-accent/25 bg-accent-faint text-accent'
+              )}
+            >
+              <Clock3 size={15} aria-hidden="true" />
+              {secondsToClock(remainingSec)}
+            </div>
+            <CalculatorTrigger onClick={() => setCalcOpen((v) => !v)} active={calcOpen} />
+          </div>
+        </header>
+
+        {error && (
+          <div
+            role="alert"
+            className="rounded border border-danger/35 bg-danger-faint px-4 py-3 text-[12.5px] leading-relaxed text-danger"
+          >
+            {error}
+          </div>
+        )}
+
+        {!current ? (
+          <Card>
+            <CardBody className="py-12 text-center">
+              <p className="font-display text-[17px] font-semibold text-text">
+                This exam has no question at the selected position.
+              </p>
+              <p className="mt-1 text-[12.5px] text-text-muted">
+                Pause the exam, then resume it to reload the saved question order.
+              </p>
             </CardBody>
           </Card>
-        </div>
-      )}
-    </section>
+        ) : (
+          <div className="grid min-w-0 gap-3 lg:grid-cols-[minmax(0,1fr)_286px] lg:items-start">
+            <div className="flex min-w-0 flex-col gap-3">
+              <Card className="overflow-hidden">
+                <div className="h-1 bg-accent" aria-hidden="true" />
+                <CardHeader
+                  className="flex-col items-stretch gap-2.5 py-3 sm:flex-row sm:items-center"
+                  title={
+                    <span className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
+                      <span className="font-display text-[15px] font-semibold normal-case tracking-normal text-text">
+                        {current.paperLabel}
+                      </span>
+                      <span className="text-border-hover" aria-hidden="true">
+                        /
+                      </span>
+                      <span className="font-mono text-[11px] text-text-muted">
+                        Q {current.number}
+                      </span>
+                    </span>
+                  }
+                  aside={
+                    <div className="flex flex-wrap gap-1.5">
+                      <Badge tone="accent">{current.subject}</Badge>
+                      <Badge>{current.type}</Badge>
+                      {current.marks && (
+                        <Badge>
+                          {current.marks} {current.marks === 1 ? 'mark' : 'marks'}
+                        </Badge>
+                      )}
+                    </div>
+                  }
+                />
+                <CardBody className="min-h-[280px] p-5 sm:min-h-[360px] sm:p-7 lg:p-8">
+                  <PyqQuestionContent html={current.html} />
+                </CardBody>
+              </Card>
 
-    <ScientificCalculator open={calcOpen} onClose={() => setCalcOpen(false)} />
-  </>);
+              <ResponsePad
+                question={current}
+                status={pyqExamQuestionStatus(session, current)}
+                choices={choices}
+                numeric={numeric}
+                submitting={submitting}
+                confidence={getPyqExamConfidence(session, current.id)}
+                onChoices={onChoices}
+                onNumeric={onNumeric}
+                onConfidence={onConfidence}
+              />
+            </div>
+
+            <aside
+              aria-label="Question status and submission"
+              className="sticky top-[92px] hidden max-h-[calc(100dvh-108px)] overflow-y-auto rounded-lg lg:block"
+            >
+              <Card className="overflow-hidden">
+                <div className="border-l-4 border-accent p-4">
+                  <PalettePanel
+                    session={session}
+                    questions={questions}
+                    index={index}
+                    counts={counts}
+                    submitting={submitting}
+                    onNavigate={onNavigate}
+                    onSubmit={onSubmit}
+                  />
+                </div>
+              </Card>
+            </aside>
+          </div>
+        )}
+
+        {current && (
+          <details className="group overflow-hidden rounded-lg border border-border bg-bg-raised shadow-card lg:hidden">
+            <summary className="flex min-h-12 cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 [&::-webkit-details-marker]:hidden">
+              <span className="flex items-center gap-2">
+                <Flag size={15} className="text-accent" aria-hidden="true" />
+                <span className="text-[13px] font-semibold text-text">Question palette</span>
+                <span className="u-num rounded-full bg-bg-overlay px-2 py-0.5 text-[10px] text-text-muted">
+                  {counts.answered + counts.answeredAndMarked}/{questions.length} answered
+                </span>
+              </span>
+              <ChevronDown
+                size={16}
+                className="shrink-0 text-text-faint transition-transform group-open:rotate-180"
+                aria-hidden="true"
+              />
+            </summary>
+            <div className="border-t border-border p-4">
+              <PalettePanel
+                session={session}
+                questions={questions}
+                index={index}
+                counts={counts}
+                submitting={submitting}
+                onNavigate={onNavigate}
+                onSubmit={onSubmit}
+              />
+            </div>
+          </details>
+        )}
+
+        {current && (
+          <div className="sticky bottom-[calc(4.5rem+var(--safe-bottom))] z-20 md:bottom-2">
+            <Card className="overflow-hidden border-border-hover bg-bg-raised/95 shadow-lift backdrop-blur">
+              <CardBody className="flex flex-col gap-2 p-2.5 sm:flex-row sm:items-center sm:justify-between sm:p-3">
+                <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    disabled={submitting}
+                    onClick={onMarkAndNext}
+                  >
+                    <Bookmark size={14} />
+                    {isLastQuestion ? 'Mark for review' : 'Mark for review & next'}
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    disabled={submitting || !hasResponse}
+                    onClick={onClear}
+                  >
+                    <Eraser size={14} />
+                    Clear response
+                  </Button>
+                </div>
+                <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:justify-end">
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    disabled={submitting || index <= 0}
+                    onClick={onPrevious}
+                  >
+                    <ArrowLeft size={14} />
+                    Previous
+                  </Button>
+                  <Button variant="primary" size="sm" disabled={submitting} onClick={onSaveAndNext}>
+                    {isLastQuestion ? 'Review & submit' : 'Save & next'}
+                    {isLastQuestion ? <Send size={14} /> : <ArrowRight size={14} />}
+                  </Button>
+                </div>
+              </CardBody>
+            </Card>
+          </div>
+        )}
+      </section>
+
+      <ScientificCalculator open={calcOpen} onClose={() => setCalcOpen(false)} />
+    </>
+  );
 }

@@ -458,16 +458,8 @@ async def submit_pyq_attempt(
                     "reattempt_round": None,
                     "round_attempt_number": None,
                     **score,
-                    "confidence": (
-                        draft.confidence
-                        if draft.confidence is not None
-                        else "high"
-                        if draft.decision == "MARK"
-                        else "medium"
-                        if draft.decision == "FIFTY_FIFTY"
-                        else None
-                    ),
-                    "confidence_source": "reported" if draft.confidence else "decision_inferred",
+                    "confidence": draft.confidence,
+                    "confidence_source": "reported" if draft.confidence else "unknown",
                 }
             ],
         )

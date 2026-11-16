@@ -46,10 +46,7 @@ export interface PyqEvidenceInsights {
 }
 
 function confidenceForAttempt(attempt: PyqAttemptRow): PyqExamConfidence | null {
-  if (attempt.confidence) return attempt.confidence;
-  if (attempt.mark_decision === 'MARK') return 'high';
-  if (attempt.mark_decision === 'FIFTY_FIFTY') return 'medium';
-  return null;
+  return attempt.confidence_source === 'decision_inferred' ? null : (attempt.confidence ?? null);
 }
 
 function attemptTopic(attempt: PyqAttemptRow): string {

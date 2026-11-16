@@ -311,10 +311,26 @@ export function buildPlannerEvidenceCandidates(
     uniqueRowsById(input.existingSessions ?? []).map((session) => [session.id, session])
   );
   for (const entry of input.studyMemoryEntries ?? []) {
-    if (entry.kind === 'concept' && entry.state !== 'superseded' && typeof entry.data.next_review_on === 'string' && entry.data.next_review_on <= input.asOfDate) {
-      add({ id: `memory-concept:${entry.id}`, kind: 'study', title: `Recall: ${entry.title}`, subject: entry.subject || undefined,
-        estimatedMin: 5, dueDate: entry.data.next_review_on, priority: 'P2 High', energy: 'any', href: `/memory/${entry.id}` },
-      ['Concept recall is due', 'Answer the saved prompt before showing guidance']);
+    if (
+      entry.kind === 'concept' &&
+      entry.state !== 'superseded' &&
+      typeof entry.data.next_review_on === 'string' &&
+      entry.data.next_review_on <= input.asOfDate
+    ) {
+      add(
+        {
+          id: `memory-concept:${entry.id}`,
+          kind: 'study',
+          title: `Recall: ${entry.title}`,
+          subject: entry.subject || undefined,
+          estimatedMin: 5,
+          dueDate: entry.data.next_review_on,
+          priority: 'P2 High',
+          energy: 'any',
+          href: `/memory/${entry.id}`
+        },
+        ['Concept recall is due', 'Answer the saved prompt before showing guidance']
+      );
       continue;
     }
     if (entry.kind !== 'repair' || !['open', 'deferred'].includes(entry.state)) continue;
@@ -322,11 +338,29 @@ export function buildPlannerEvidenceCandidates(
     if (repair.due_date && repair.due_date > input.asOfDate) continue;
     const id = `memory-repair:${entry.id}`;
     if (sessionById.has(id)) continue;
-    add({ id, kind: repair.activity === 'speed' ? 'slow' : repair.activity === 'retry' ? 'reattempt' : 'study',
-      title: repair.target, subject: entry.subject || undefined, detail: repair.success_criteria,
-      estimatedMin: repair.duration_min, dueDate: repair.due_date || input.asOfDate,
-      priority: 'P2 High', energy: 'any', href: `/memory/${entry.id}` },
-    [repair.reason || 'Recorded learning repair', 'Open the linked activity for its evidence and selected questions']);
+    add(
+      {
+        id,
+        kind:
+          repair.activity === 'speed'
+            ? 'slow'
+            : repair.activity === 'retry'
+              ? 'reattempt'
+              : 'study',
+        title: repair.target,
+        subject: entry.subject || undefined,
+        detail: repair.success_criteria,
+        estimatedMin: repair.duration_min,
+        dueDate: repair.due_date || input.asOfDate,
+        priority: 'P2 High',
+        energy: 'any',
+        href: `/memory/${entry.id}`
+      },
+      [
+        repair.reason || 'Recorded learning repair',
+        'Open the linked activity for its evidence and selected questions'
+      ]
+    );
   }
   for (const session of [...sessionById.values()].sort((left, right) =>
     left.id.localeCompare(right.id)
@@ -440,8 +474,7 @@ export function buildPlannerEvidenceCandidates(
   if (pendingWrong.length > 0) {
     const highConfidenceWrong = pendingWrong.filter(
       (attempt) =>
-        attempt.confidence === 'high' ||
-        (attempt.confidence == null && attempt.mark_decision === 'MARK')
+        attempt.confidence === 'high' && attempt.confidence_source !== 'decision_inferred'
     ).length;
     const attemptedDates = pendingWrong
       .map((attempt) => attempt.attempted_at.slice(0, 10))

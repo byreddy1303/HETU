@@ -17,3 +17,26 @@ Every AI agent must read this file before making or pushing any change to this r
 - All changes must land on `main`. Do not create, commit to, or push any other branch unless the user explicitly asks.
 - Before pushing, run `git status` and confirm `main` is current with `origin/main`; push using `git push origin main`.
 - Never include unrelated pre-existing or user-authored changes in that commit. If committing or pushing fails, preserve the work and clearly report the exact blocker.
+
+## Standing request: each HETU chat visit
+
+The user explicitly requested on 2026-11-15 that future HETU visits review the local
+mistake log and prepare a few corrective problems for each kind of mistake.
+
+- At the beginning of a substantive HETU visit, run `python3 scripts/practice-visit.py
+  --include-context` against the installed app. It checks local storage, reads the
+  mistake groups, and idempotently prepares three original problems for supported
+  groups. Existing packs and their due dates are retained; do not flood the queue.
+- Inspect the returned groups and any uncovered sources. For uncovered groups,
+  read the linked local attempt/question/reflection through the local API and
+  author two or three original, answer-checked exercises through
+  `POST /v1/practice-coach/authored-packs`. See `docs/efficient-practice.md`.
+  Include a recognition case, an application, and a boundary where useful.
+- Verify the saved pack through the same local API. Keep keys hidden until the
+  learner submits. Distinguish topic association, the user's assessment, and an
+  assistant hypothesis; do not invent a cause or certify mastery.
+- Never change historical attempts, answer a drill on the user's behalf, expose
+  sealed exams, upload study records, or replace a pending pack simply to create
+  something new. During an active/paused exam, respect the coaching hold.
+- This is a standing instruction for active HETU conversations, not a background
+  chat-open trigger or a guarantee that unrelated projects load this file.

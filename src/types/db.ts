@@ -30,12 +30,7 @@ export type LearningEventType =
   | 'transfer_failed'
   | 'mastered'
   | 'reopened';
-export type RecoverySessionStatus =
-  | 'active'
-  | 'paused'
-  | 'completed'
-  | 'abandoned'
-  | 'interrupted';
+export type RecoverySessionStatus = 'active' | 'paused' | 'completed' | 'abandoned' | 'interrupted';
 export type RecoverySessionMode =
   | 'due'
   | 'minutes-10'
@@ -413,6 +408,8 @@ export interface PyqQuestionSnapshot {
 }
 
 export interface PyqSessionConfig {
+  /** Conceal subject/topic hints during mixed method-selection practice. */
+  hideTopicLabels?: boolean;
   /** Missing on legacy sets created before source-book sessions shipped. */
   bookSlug?: string;
   subjectSlug: string;
@@ -429,14 +426,7 @@ export interface PyqSessionConfig {
   history?: PyqHistoryFilter;
   /** Reproducible recommendation metadata retained with the immutable set receipt. */
   recommendationPreset?:
-    | 'custom'
-    | 'learn'
-    | 'diagnose'
-    | 'repair'
-    | 'speed'
-    | 'transfer'
-    | 'mixed-gate'
-    | 'full-paper';
+    'custom' | 'learn' | 'diagnose' | 'repair' | 'speed' | 'transfer' | 'mixed-gate' | 'full-paper';
   selectionSeed?: string;
   recommendationReasons?: string[];
   savedPrescriptionId?: string;
@@ -542,6 +532,7 @@ export interface PyqSessionRow {
  * Versions 0/1 are retained only for honest legacy-data handling.
  */
 export interface PyqAttemptRow {
+  confidence_source?: 'reported' | 'unknown' | 'decision_inferred';
   id: string;
   user_id: string;
   /** Present on answers captured through the authenticated HETU MCP workflow. */

@@ -626,10 +626,7 @@ export function completePyqSession(session: PyqSessionRow, now = nowISO()): PyqS
 }
 
 /** Close paused practice with its real coverage and frozen draft work intact. */
-export function endPausedPyqPracticeSession(
-  session: PyqSessionRow,
-  now = nowISO()
-): PyqSessionRow {
+export function endPausedPyqPracticeSession(session: PyqSessionRow, now = nowISO()): PyqSessionRow {
   if (session.config.mode === 'exam') {
     throw new Error('Timed exams must use the exam submission flow.');
   }
@@ -950,14 +947,8 @@ export function createPyqAttemptRow(args: {
     screenshot_url: args.screenshotUrl,
     mark_decision: args.decision,
     mark_correct: markCorrect,
-    confidence:
-      args.confidence !== undefined
-        ? args.confidence
-        : args.decision === 'MARK'
-          ? 'high'
-          : args.decision === 'FIFTY_FIFTY'
-            ? 'medium'
-            : null,
+    confidence: args.confidence ?? null,
+    confidence_source: args.confidence ? 'reported' : 'unknown',
     question_started_at: questionStartedAt,
     time_spent_ms: timeSpentMs,
     time_spent_sec: Math.max(1, Math.ceil(timeSpentMs / 1000)),

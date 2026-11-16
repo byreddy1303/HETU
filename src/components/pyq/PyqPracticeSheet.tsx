@@ -136,8 +136,8 @@ export default function PyqPracticeSheet({
             </span>
           </summary>
           <p className="mb-3 mt-3 text-[12px] leading-relaxed text-text-muted">
-            Select an option on any question, then choose your confidence. Each question keeps its
-            own draft and active time.
+            Select an answer on any question. Confidence is optional. Each question keeps its own
+            draft and active time.
           </p>
           <div className="flex max-h-36 flex-wrap gap-1.5 overflow-y-auto">
             {questions.map((question, questionIndex) => {

@@ -62,6 +62,8 @@ import PyqQuestionContent from '@/components/pyq/PyqQuestionContent';
 import PyqSessionHistory from '@/components/pyq/PyqSessionHistory';
 import PyqConversationHistory from '@/components/pyq/PyqConversationHistory';
 import QuestionAttemptTimeline from '@/components/pyq/QuestionAttemptTimeline';
+import PracticeWrapUp from '@/components/practice/PracticeWrapUp';
+import QuickPracticeSignals from '@/components/practice/QuickPracticeSignals';
 import ThinkingReviewDrawer, { type DebriefContext } from '@/components/pyq/ThinkingReviewDrawer';
 import MemoryPracticeResult from '@/components/memory/MemoryPracticeResult';
 import MemoryPracticeStart from '@/components/memory/MemoryPracticeStart';
@@ -1299,18 +1301,15 @@ function PracticeConfidenceButtons({
   return (
     <fieldset disabled={disabled}>
       <legend className="text-[13px] font-semibold text-text">How confident do you feel?</legend>
-      <p className="mt-0.5 text-[11.5px] text-text-faint">Record how certain you feel.</p>
+      <p className="mt-0.5 text-[11.5px] text-text-faint">
+        Optional — leave unset if you prefer to keep solving.
+      </p>
       <div className="mt-3 grid grid-cols-4 gap-2">
         {options.map((option) => {
           const isSelected =
             option.decision === 'SKIP'
               ? decision === 'SKIP'
-              : decision !== 'SKIP' &&
-                (confidence === option.confidence ||
-                  (confidence === null && option.confidence === 'high' && decision === 'MARK') ||
-                  (confidence === null &&
-                    option.confidence === 'medium' &&
-                    decision === 'FIFTY_FIFTY'));
+              : decision !== 'SKIP' && confidence !== null && confidence === option.confidence;
 
           return (
             <button
@@ -1370,12 +1369,7 @@ function ResultPanel({ question, attempt }: { question: PyqQuestion; attempt: Py
       : answerText(question).replace(/^Answer key:\s*/i, '');
   const score = pyqAttemptScorePresentation(attempt);
   const effectiveConfidence =
-    attempt.confidence ??
-    (attempt.mark_decision === 'MARK'
-      ? 'high'
-      : attempt.mark_decision === 'FIFTY_FIFTY'
-        ? 'medium'
-        : null);
+    attempt.confidence_source === 'decision_inferred' ? null : attempt.confidence;
   return (
     <section
       aria-label="PYQ attempt receipt"
@@ -2230,10 +2224,7 @@ export default function Pyq() {
     );
     setNumeric(answerInputType(questions[index]) === 'NAT' ? String(savedAnswer ?? '') : '');
     const savedDecision = lockedAttempt?.mark_decision ?? practiceDraft?.mark_decision ?? null;
-    const savedConfidence =
-      lockedAttempt?.confidence ??
-      practiceDraft?.confidence ??
-      (savedDecision === 'MARK' ? 'high' : savedDecision === 'FIFTY_FIFTY' ? 'medium' : null);
+    const savedConfidence = lockedAttempt?.confidence ?? practiceDraft?.confidence ?? null;
     setDecision(savedDecision);
     setConfidence(savedConfidence);
     setSubmitted(lockedAttempt ?? null);
@@ -2880,42 +2871,130 @@ export default function Pyq() {
       let sessionConfig: AttemptConfig;
 
       const testBook = testBookSlug
-        ? manifest.books.find((book) => book.slug === testBookSlug && book.sourceClass === 'user-import')
+        ? manifest.books.find(
+            (book) => book.slug === testBookSlug && book.sourceClass === 'user-import'
+          )
         : undefined;
-      if (testBookSlug && !testBook) throw new Error('This local test series is unavailable. Refresh the question bank.');
+      if (testBookSlug && !testBook)
+        throw new Error('This local test series is unavailable. Refresh the question bank.');
       const memoryRepairId = testBook ? null : searchParams.get('memoryRepairId');
       if (testBook) {
         rows = (await loadPyqQuestions(testBook.subjects, manifest.bankVersion))
-          .filter((question) => matchesPyqBookScope(question, { bookSlug: testBook.slug }) && isPyqAutoGradable(question))
+          .filter(
+            (question) =>
+              matchesPyqBookScope(question, { bookSlug: testBook.slug }) &&
+              isPyqAutoGradable(question)
+          )
           .sort((a, b) => a.number.localeCompare(b.number, undefined, { numeric: true }));
         if (!rows.length) throw new Error('This test series has no answerable questions.');
         sessionConfig = {
-          ...config, bookSlug: testBook.slug, subjectSlug: testBook.subjects.length === 1 ? testBook.subjects[0].slug : 'all',
-          subjectSlugs: undefined, topicSlug: 'all', fromYear: testBook.firstYear, toYear: testBook.lastYear,
-          mode: 'practice', count: 'all', type: 'all', history: 'all', order: 'oldest',
-          recommendationPreset: 'custom', recommendationReasons: undefined,
-          savedPrescriptionId: undefined, savedPrescriptionName: undefined,
-          examKind: undefined, benchmarkPaperId: undefined, examState: undefined,
-          practiceDraft: undefined, practiceDrafts: undefined
+          ...config,
+          bookSlug: testBook.slug,
+          subjectSlug: testBook.subjects.length === 1 ? testBook.subjects[0].slug : 'all',
+          subjectSlugs: undefined,
+          topicSlug: 'all',
+          fromYear: testBook.firstYear,
+          toYear: testBook.lastYear,
+          mode: 'practice',
+          count: 'all',
+          type: 'all',
+          history: 'all',
+          order: 'oldest',
+          recommendationPreset: 'custom',
+          recommendationReasons: undefined,
+          savedPrescriptionId: undefined,
+          savedPrescriptionName: undefined,
+          examKind: undefined,
+          benchmarkPaperId: undefined,
+          examState: undefined,
+          practiceDraft: undefined,
+          practiceDrafts: undefined
         };
       } else if (memoryRepairId) {
         let { entry } = await getMemoryEntry(memoryRepairId);
         if (entry.data.skill_id) {
           skillManaged = true;
           entry = await prepareLocalLearningActivity(memoryRepairId);
-          const savedSessionId = typeof entry.data.active_session_id === 'string' ? entry.data.active_session_id : null;
+          const savedSessionId =
+            typeof entry.data.active_session_id === 'string' ? entry.data.active_session_id : null;
           if (savedSessionId) {
             navigate(`/pyq?resumeSession=${encodeURIComponent(savedSessionId)}`);
             return;
           }
         }
-        if (entry.kind !== 'repair') throw new Error('This memory record is not a practice repair.');
+        if (entry.kind !== 'repair')
+          throw new Error('This memory record is not a practice repair.');
         rows = await loadMemoryQuestions(entry, userId);
-        if (!rows.length) throw new Error('The repair has no eligible selected questions. Return to Learning Memory and choose an available set.');
-        if (!Array.isArray(entry.data.question_uids) || !entry.data.question_uids.length) throw new Error('Select the repair’s questions in Learning Memory before starting.');
-        sessionConfig = { ...config, bookSlug: 'gate-cse', subjectSlug: 'all', subjectSlugs: undefined,
-          topicSlug: 'all', mode: 'practice', count: 'all', history: 'all', recommendationPreset: 'custom',
-          examKind: undefined, benchmarkPaperId: undefined, examState: undefined, practiceDraft: undefined, practiceDrafts: undefined };
+        if (!rows.length)
+          throw new Error(
+            'The repair has no eligible selected questions. Return to Learning Memory and choose an available set.'
+          );
+        if (!Array.isArray(entry.data.question_uids) || !entry.data.question_uids.length)
+          throw new Error('Select the repair’s questions in Learning Memory before starting.');
+        sessionConfig = {
+          ...config,
+          bookSlug: 'gate-cse',
+          subjectSlug: 'all',
+          subjectSlugs: undefined,
+          topicSlug: 'all',
+          mode: 'practice',
+          count: 'all',
+          history: 'all',
+          recommendationPreset: 'custom',
+          examKind: undefined,
+          benchmarkPaperId: undefined,
+          examState: undefined,
+          practiceDraft: undefined,
+          practiceDrafts: undefined
+        };
+      } else if (
+        !isFullPaper &&
+        recommendationPreset === 'custom' &&
+        commaSeparatedQuestionUids(searchParams).length
+      ) {
+        const requestedUids = commaSeparatedQuestionUids(searchParams);
+        const bank = await loadPyqQuestions(manifest.subjects, manifest.bankVersion);
+        const byId = new Map(bank.map((question) => [question.id, question]));
+        rows = requestedUids.flatMap((uid) => {
+          const question = byId.get(uid);
+          return question && isPyqAutoGradable(question) ? [question] : [];
+        });
+        if (rows.length !== requestedUids.length)
+          throw new Error(
+            'Some selected questions are unavailable. Return to the source and prepare the set again.'
+          );
+        if (!includeReservedBenchmarkQuestions) {
+          const reserved = new Set(
+            manifest.benchmarkPapers
+              .filter((paper) => pyqBenchmarkPaperExposure(paper, attempts).sealed)
+              .flatMap((paper) => paper.questionUids)
+          );
+          if (rows.some((question) => reserved.has(question.id)))
+            throw new Error(
+              'This selection includes a sealed benchmark. Explicitly allow sealed questions or choose another set.'
+            );
+        }
+        const selectedConfig: AttemptConfig = {
+          ...config,
+          count: 'all',
+          history: 'all',
+          subjectSlug: 'all',
+          subjectSlugs: undefined,
+          topicSlug: 'all',
+          recommendationPreset: 'custom',
+          benchmarkPaperId: undefined,
+          practiceDraft: undefined,
+          practiceDrafts: undefined,
+          examState: undefined,
+          examKind: config.mode === 'exam' ? 'timed-set' : undefined
+        };
+        sessionConfig =
+          config.mode === 'exam'
+            ? createPyqExamConfig(
+                selectedConfig,
+                rows.map((question) => question.id)
+              )
+            : selectedConfig;
       } else if (isFullPaper) {
         const paper = manifest.benchmarkPapers.find(
           (candidate) => candidate.id === config.benchmarkPaperId
@@ -3130,7 +3209,13 @@ export default function Pyq() {
         setPyqSessionId(null);
       }
       sessionConfig = { ...sessionConfig, bookSlug: testBook?.slug ?? 'gate-cse' };
-      const linkedConfig = { ...sessionConfig, ...(memoryRepairId ? { memoryRepairId } : {}) };
+      const linkedConfig = {
+        ...sessionConfig,
+        ...(memoryRepairId ? { memoryRepairId } : {}),
+        hideTopicLabels:
+          searchParams.get('hideTopics') === '1' ||
+          sessionConfig.recommendationPreset === 'mixed-gate'
+      };
       const session = createPyqSessionRow(userId!, manifest.bankVersion, linkedConfig, rows);
       const plannerDate = searchParams.get('plannerDate');
       const plannerBlockId = searchParams.get('plannerBlock');
@@ -3570,7 +3655,6 @@ export default function Pyq() {
       !userId ||
       !manifest ||
       !decision ||
-      (loadedSession?.config.practiceView === 'multiple' && decision !== 'SKIP' && !confidence) ||
       submitted ||
       submitting ||
       submittingRef.current ||
@@ -3687,28 +3771,6 @@ export default function Pyq() {
       loadedSessionRef.current = nextSession;
       setLoadedSession(nextSession);
       setSubmitted(attempt);
-      // Every-PYQ Socratic trigger (practice opens now; exam queues for post-mortem).
-      try {
-        const isExam = nextSession.config.mode === 'exam';
-        const fire = !isExam;
-        if (fire && !isExam) {
-          queueOrOpenDebrief({
-            attemptId: attempt.id,
-            questionUid: current.id,
-            subject: current.subject,
-            topic: current.topic,
-            selectedOption: Array.isArray(attempt.selected_answer)
-              ? attempt.selected_answer.join(',')
-              : String(attempt.selected_answer ?? ''),
-            correctOption: Array.isArray(attempt.correct_answer)
-              ? attempt.correct_answer.join(',')
-              : String(attempt.correct_answer ?? ''),
-            timeSpentSeconds: attempt.time_spent_sec ?? 0
-          });
-        }
-      } catch {
-        // debrief is advisory — never break the immutable receipt flow
-      }
       setCompleted((rows) =>
         rows.some((row) => row.id === attempt.id)
           ? rows.map((row) => (row.id === attempt.id ? attempt : row))
@@ -3831,7 +3893,7 @@ export default function Pyq() {
             answerInputType(target) === 'MSQ'
               ? incomingChoices.slice().sort()
               : (incomingChoices[0] ?? null),
-          mark_decision: null,
+          mark_decision: incomingChoices.length ? ('MARK' as const) : null,
           confidence: null,
           elapsed_ms: previousDraft?.elapsed_ms ?? 0,
           first_started_at: previousDraft?.first_started_at ?? new Date(nowMs).toISOString()
@@ -3875,8 +3937,7 @@ export default function Pyq() {
   async function changePracticeView(practiceView: 'single' | 'multiple') {
     if (!pyqSessionId || loading || submittingRef.current || pausingSessionRef.current) return;
     try {
-      const session =
-        loadedSessionRef.current ?? (await db.pyq_sessions.get(pyqSessionId));
+      const session = loadedSessionRef.current ?? (await db.pyq_sessions.get(pyqSessionId));
       if (!session) throw new Error('The active practice set could not be found.');
       const next = {
         ...session,
@@ -3976,7 +4037,15 @@ export default function Pyq() {
 
   if (questions.length === 0) {
     const memoryRepairId = searchParams.get('memoryRepairId');
-    if (memoryRepairId) return <MemoryPracticeStart repairId={memoryRepairId} loading={loading} error={startError} onStart={() => void startPractice()} />;
+    if (memoryRepairId)
+      return (
+        <MemoryPracticeStart
+          repairId={memoryRepairId}
+          loading={loading}
+          error={startError}
+          onStart={() => void startPractice()}
+        />
+      );
     return (
       <PracticeSetup
         manifest={manifest}
@@ -4036,6 +4105,7 @@ export default function Pyq() {
           title="Practice set complete"
           description={`${completed.length} immutable ${plural(completed.length, 'attempt')} saved without exposing a key early.`}
         />
+        {loadedSession && <PracticeWrapUp sessionId={loadedSession.id} />}
         {loadedSession && <MemoryPracticeResult session={loadedSession} attempts={completed} />}
         <Card>
           <CardBody className="p-6 sm:p-8">
@@ -4046,7 +4116,7 @@ export default function Pyq() {
               <div>
                 <p className="font-display text-[21px] font-bold text-text">Set closed cleanly</p>
                 <p className="text-[13px] text-text-muted">
-                  Attempts are saved locally and queued for sync.
+                  Your answers are saved. Reflection is optional.
                 </p>
               </div>
             </div>
@@ -4055,7 +4125,7 @@ export default function Pyq() {
                 ['Submitted', completed.length],
                 ['Correct', correct],
                 ['Left blank', skipped],
-                ['Analyzed', analyzedCount]
+                ['Journal records', analyzedCount]
               ].map(([label, value]) => (
                 <div
                   key={String(label)}
@@ -4213,11 +4283,7 @@ export default function Pyq() {
     inputType === 'NAT'
       ? numeric.trim() !== '' && Number.isFinite(Number(numeric))
       : choices.length > 0;
-  const canSubmit =
-    !!decision &&
-    (decision === 'SKIP' || (hasAnswer && (!multiplePractice || !!confidence))) &&
-    !submitting &&
-    !loading;
+  const canSubmit = !!decision && (decision === 'SKIP' || hasAnswer) && !submitting && !loading;
   const previouslySkipped = latestCurrentAttempt?.mark_decision === 'SKIP' && !submitted;
 
   if (
@@ -4372,25 +4438,15 @@ export default function Pyq() {
       return;
     }
     setChoices(nextChoices);
-    if (multiplePractice) {
-      setDecision(null);
-      setConfidence(null);
-    } else if (nextChoices.length > 0 && (decision === null || decision === 'SKIP')) {
-      setDecision('MARK');
-      setConfidence('high');
-    }
+    setConfidence(null);
+    setDecision(nextChoices.length > 0 ? 'MARK' : null);
   }
 
   function changePracticeNumeric(nextNumeric: string) {
     if (submitted || submittingRef.current || loading || nextNumeric === numeric) return;
     setNumeric(nextNumeric);
-    if (multiplePractice) {
-      setDecision(null);
-      setConfidence(null);
-    } else if (nextNumeric.trim().length > 0 && (decision === null || decision === 'SKIP')) {
-      setDecision('MARK');
-      setConfidence('high');
-    }
+    setConfidence(null);
+    setDecision(nextNumeric.trim().length > 0 ? 'MARK' : null);
   }
 
   const activeQuestionWorkspace = (
@@ -4407,7 +4463,11 @@ export default function Pyq() {
             }
             aside={
               <div className="flex flex-wrap gap-1.5">
-                <Badge tone="accent">{current.subject}</Badge>
+                <Badge tone="accent">
+                  {loadedSession?.config.hideTopicLabels && !submitted
+                    ? 'Mixed practice'
+                    : current.subject}
+                </Badge>
                 <Badge>{current.type}</Badge>
                 <Badge>{pyqMarksLabel(current)}</Badge>
               </div>
@@ -4486,7 +4546,7 @@ export default function Pyq() {
                 <p className="text-[12px] text-text-muted">
                   {decision === 'SKIP'
                     ? 'This question will be left blank.'
-                    : 'Select your answer to choose a confidence level.'}
+                    : 'Select an answer. Confidence is optional.'}
                 </p>
                 <Button
                   aria-label="Left blank: skipped"
@@ -4522,7 +4582,7 @@ export default function Pyq() {
                 {!submitting && decision !== 'SKIP' && !canSubmit ? (
                   <p className="mt-2 text-[12px] text-text-muted">
                     {hasAnswer
-                      ? 'Choose your confidence above to check your answer.'
+                      ? 'Select an answer to check it.'
                       : 'Select an answer or skip this question to continue.'}
                   </p>
                 ) : null}
@@ -4542,6 +4602,7 @@ export default function Pyq() {
             ) : (
               <div className="flex flex-col gap-3">
                 <ResultPanel question={current} attempt={submitted} />
+                <QuickPracticeSignals attemptId={submitted.id} />
                 <div className="flex flex-wrap gap-2">
                   {index > 0 ? (
                     <Button onClick={goPrevious} disabled={loading || submitting}>
@@ -4681,7 +4742,8 @@ export default function Pyq() {
       <ThinkingReviewDrawer ctx={debriefCtx} open={debriefOpen} onClose={closeDebrief} />
       {debriefQueue.length > 0 && (
         <div className="fixed bottom-4 left-4 z-40 rounded-lg border border-accent/30 bg-bg-raised px-3 py-2 text-[12px] text-text shadow-lift">
-          {debriefQueue.length} more debrief{debriefQueue.length === 1 ? '' : 's'} queued — finish this one to continue.
+          {debriefQueue.length} more debrief{debriefQueue.length === 1 ? '' : 's'} queued — finish
+          this one to continue.
         </div>
       )}
     </div>

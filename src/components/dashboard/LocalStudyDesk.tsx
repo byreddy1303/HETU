@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { todayISOInTimeZone, formatDate } from '@/lib/utils';
+import DailyPracticePlan from '@/components/practice/DailyPracticePlan';
 import TodayActions from '@/components/dashboard/TodayActions';
 import PageHeader from '@/components/layout/PageHeader';
 
@@ -54,6 +55,18 @@ export default function LocalStudyDesk() {
         }
       />
       {userId && <TodayActions key={`${userId}:${today}`} userId={userId} today={today} />}
+      <details className="rounded-xl border border-border bg-bg-raised p-4">
+        <summary className="cursor-pointer text-sm font-medium">Build a balanced session</summary>
+        <div className="mt-4">
+          <DailyPracticePlan />
+        </div>
+      </details>
+      <Link
+        to="/practice-lab"
+        className="inline-flex items-center gap-2 text-sm font-medium text-accent"
+      >
+        Mistake repairs and short reviews <ArrowUpRight size={15} />
+      </Link>
       <section className="study-directions" aria-label="Choose your study direction">
         <h2 className="study-section-label">Keep learning</h2>
         <div className="study-directions__grid">

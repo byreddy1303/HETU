@@ -12,6 +12,7 @@ from app.api.routes import (
     learning_concept_bridge,
     local_backups,
     local_learning_engine,
+    practice_coach,
     pyq_catalog,
     realtime,
     records,
@@ -61,3 +62,4 @@ root_router = APIRouter()
 root_router.include_router(health.router)
 
 api_router.include_router(skill_coach.router, prefix="/skill-coach", tags=["local-skills"])
+api_router.include_router(practice_coach.router, prefix="/practice-coach", tags=["local-practice"])

@@ -201,8 +201,10 @@ async def test_plan_respects_budget_excludes_exposed_and_keeps_started_steps(db)
     for budget in [10, 20, 30, 45, 60]:
         plan = await coach.daily_plan(db, "owner", budget)
         assert sum(s["minutes"] for s in plan["steps"]) == budget
-        assert plan["steps"][2]["minutes"] > 0
-        assert "hideTopics=1" in plan["steps"][2]["href"]
+        fresh = next(s for s in plan["steps"] if s["id"] == "fresh")
+        assert fresh["minutes"] > 0
+        assert "hideTopics=1" in fresh["href"]
+        assert len(plan["steps"]) == (1 if budget == 10 else 4)
     plan = await coach.complete_plan_step(db, "owner", plan["id"], "recall", plan["version"])
     assert (await coach.daily_plan(db, "owner", 60))["completed"]["recall"]
 

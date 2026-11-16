@@ -1213,13 +1213,32 @@ async def reconcile_engine_results(db: AsyncSession, *, owner_id: str) -> int:
         )
         if not receipts or any(row.data.get("question_uid") not in planned for row in receipts):
             continue
-        by_question = {row.data.get("question_uid"): row for row in receipts}
+        by_question = {}
+        for row in receipts:
+            uid = row.data.get("question_uid")
+            if entry.get("data", {}).get("practice_pack_id"):
+                # A later corrected answer cannot erase the first application result.
+                by_question.setdefault(uid, row)
+            else:
+                by_question[uid] = row
         latest = list(by_question.values())
         scores = [_frozen_score(row.data) for row in latest]
         correct = sum(bool(score and score["mark_correct"] is True) for score in scores)
         judged = sum(bool(score and score["mark_correct"] is not None) for score in scores)
         skipped = sum(row.data.get("mark_decision") == "SKIP" for row in latest)
         clean = correct == len(planned) == len(latest) and judged == len(latest)
+        application_assistance = "unknown"
+        if entry.get("data", {}).get("practice_pack_id"):
+            from app.services.practice_coach import COLLECTION, identity
+
+            conditions = await _owned(
+                db, owner_id, COLLECTION, identity("application-conditions", session.external_id)
+            )
+            if conditions is None:
+                # Saved answers remain safe; ask once before choosing the next interval.
+                continue
+            application_assistance = conditions.data["assistance"]
+            clean = clean and application_assistance == "without-help"
         result_id = _id("verification", f"{owner_id}:{repair_id}:{session.external_id}")
         followup_id = _id("followup", f"{owner_id}:{repair_id}:{session.external_id}")
         skill_evidence = await result_conditions(db, owner_id, entry, session, receipts)
@@ -1254,7 +1273,7 @@ async def reconcile_engine_results(db: AsyncSession, *, owner_id: str) -> int:
                         "not_submitted": max(0, len(planned) - len(latest)),
                         "explicit_skips": skipped,
                         "unscorable": sum(score is None for score in scores),
-                        "assistance": "unknown",
+                        "assistance": application_assistance,
                         "next_review_entry_id": followup_id,
                         "mastery_claim": False,
                     },
@@ -1267,6 +1286,12 @@ async def reconcile_engine_results(db: AsyncSession, *, owner_id: str) -> int:
             if uid not in by_question
             or (_frozen_score(by_question[uid].data) or {}).get("mark_correct") is not True
         ]
+        independent_check_needed = (
+            bool(entry.get("data", {}).get("practice_pack_id"))
+            and application_assistance != "without-help"
+        )
+        if independent_check_needed:
+            retry_uids = planned
         uids = _select_questions(
             entry.get("subject"),
             entry.get("topic"),
@@ -1292,6 +1317,8 @@ async def reconcile_engine_results(db: AsyncSession, *, owner_id: str) -> int:
                             if clean_checks >= 3
                             else "Delayed application check"
                             if clean
+                            else "Check independently"
+                            if independent_check_needed
                             else "Check remaining errors"
                         )
                         + f": {entry.get('topic') or entry['title']}"
@@ -1307,6 +1334,9 @@ async def reconcile_engine_results(db: AsyncSession, *, owner_id: str) -> int:
                         "mastery is not established."
                     )
                     if clean
+                    else "Repeat the linked questions without help before extending the interval. "
+                    "The saved answers are retained with the reported practice conditions."
+                    if independent_check_needed
                     else (
                         "The linked practice still contains an error, skip, missing answer "
                         "or uncertain scoring. Check the first unsupported step "
@@ -1333,7 +1363,8 @@ async def reconcile_engine_results(db: AsyncSession, *, owner_id: str) -> int:
                         if clean
                         else int(entry.get("data", {}).get("failed_checks", 0)) + 1,
                         "needs_local_review": not clean
-                        and not entry.get("data", {}).get("skill_id"),
+                        and not entry.get("data", {}).get("skill_id")
+                        and not entry.get("data", {}).get("practice_pack_id"),
                         "interval_days": interval_days,
                         "requested_count": len(uids) or 3,
                         "question_uids": uids,
@@ -1348,6 +1379,7 @@ async def reconcile_engine_results(db: AsyncSession, *, owner_id: str) -> int:
                         if fresh
                         else "original-question",
                         "skill_id": entry.get("data", {}).get("skill_id"),
+                        "practice_pack_id": entry.get("data", {}).get("practice_pack_id"),
                         "curriculum_version": entry.get("data", {}).get("curriculum_version"),
                         "skill_match_verified": bool(entry.get("data", {}).get("skill_id")),
                         "source_entry_ids": [repair_id, result_id],

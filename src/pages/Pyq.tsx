@@ -2455,6 +2455,10 @@ export default function Pyq() {
         if (!session || session.user_id !== userId) {
           throw new Error('That planned PYQ session is unavailable for this account.');
         }
+        if (session.status === 'completed' && session.config.mode === 'practice') {
+          navigate(`/session/${session.id}/review`, { replace: true });
+          return;
+        }
         if (session.status !== 'active' && session.status !== 'paused') {
           throw new Error('That planned PYQ session is already closed.');
         }
@@ -2470,7 +2474,7 @@ export default function Pyq() {
     return () => {
       active = false;
     };
-  }, [loading, manifest, searchParams, userId]);
+  }, [loading, manifest, navigate, searchParams, userId]);
 
   async function discardSession(session: PyqSessionRow) {
     if (loading) return;

@@ -23,6 +23,7 @@ import {
 import { recoveryKey, startSessionApi } from '@/lib/recovery-api';
 import { useStudyDay } from '@/hooks/useStudyDay';
 import { useSyncStatusStore } from '@/stores/sync-status';
+import type { DrillPack, PracticeOverview } from '@/lib/practice-coach';
 
 const TODAY_TABLES: readonly SyncedTableName[] = [
   'learning_items',
@@ -71,6 +72,7 @@ interface Snapshot {
   recovery: TodayRecoveryOverview | null;
   errors: string[];
   partial: boolean;
+  focusedRepairs: DrillPack[];
 }
 
 /** Shared local daily entry point. Blind queue text never renders answers or diagnoses. */
@@ -135,15 +137,17 @@ export default function TodayActions({
         }),
         apiRequest<TodayRecoveryOverview>(`/v1/recovery?mode=minutes-${budget}&days=1`, {
           signal: request.signal
-        })
+        }),
+        apiRequest<PracticeOverview>('/v1/practice-coach', { signal: request.signal })
       ]);
       if (!active || request.signal.aborted) return;
-      const [open, deferred, concepts, recovery] = results;
+      const [open, deferred, concepts, recovery, practice] = results;
       const labels = [
         'Prepared practice',
         'Deferred practice',
         'Concept reviews',
-        'Recovery sprint'
+        'Recovery sprint',
+        'Repair focus'
       ];
       const errors = results.flatMap((result, index) =>
         result.status === 'rejected'
@@ -160,13 +164,20 @@ export default function TodayActions({
         ),
         concepts: concepts.status === 'fulfilled' ? concepts.value : null,
         recovery: recovery.status === 'fulfilled' ? recovery.value : null,
+        focusedRepairs:
+          practice.status === 'fulfilled'
+            ? (practice.value.focus?.pack_ids ?? []).flatMap(
+                (id) => practice.value.packs?.find((pack) => pack.id === id) ?? []
+              )
+            : [],
         errors,
         partial:
           [open, deferred].some(
             (result) => result.status === 'fulfilled' && result.value.has_more
           ) ||
           (concepts.status === 'fulfilled' && !concepts.value.complete) ||
-          (recovery.status === 'fulfilled' && !recovery.value.complete)
+          (recovery.status === 'fulfilled' && !recovery.value.complete) ||
+          (practice.status === 'fulfilled' && practice.value.complete === false)
       });
       setLoading(false);
       try {
@@ -224,6 +235,7 @@ export default function TodayActions({
           studyMemoryEntries: state.memory,
           concepts: state.concepts,
           recovery: state.recovery,
+          focusedRepairs: state.focusedRepairs,
           analyzedAttemptIds,
           parkedActionIds: day.value.parked_action_ids
         })

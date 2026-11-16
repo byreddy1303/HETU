@@ -3,6 +3,7 @@ import { buildTodayActions, type TodayActionsInput } from '@/lib/today-actions';
 import { emptyDayPlan } from '@/lib/planner-storage';
 import { newMemoryEntry } from '@/lib/study-memory';
 import type { LearningItemRow, PyqSessionRow, RecoverySessionRow } from '@/types';
+import type { DrillPack } from '@/lib/practice-coach';
 
 const base: TodayActionsInput = {
   ownerId: 'owner',
@@ -28,6 +29,26 @@ const repair = newMemoryEntry('repair', 'repair-1', 'Answer is B', {
 });
 
 describe('one local daily action decision', () => {
+  it('offers selected due repairs within ten minutes while keeping solutions out of Today', () => {
+    const focused = {
+      id: 'pack',
+      title: 'Count initial loads',
+      due: true,
+      due_date: base.asOfDate,
+      done: false,
+      selections: {},
+      principle: 'Secret answer',
+      questions: [{ answer: 2 }]
+    } as unknown as DrillPack;
+    const queue = buildTodayActions({
+      ...base,
+      focusedRepairs: [focused, { ...focused, id: 'later', due: false, due_date: '2099-01-01' }]
+    });
+    expect(queue.fitting).toHaveLength(1);
+    expect(queue.fitting[0]).toMatchObject({ href: '/practice-lab?pack=pack', estimatedMin: 10 });
+    expect(JSON.stringify(queue)).not.toContain('Secret answer');
+  });
+
   it('uses the canonical budgeted sprint and removes its compatibility/concept duplicates', () => {
     const queue = buildTodayActions({
       ...base,

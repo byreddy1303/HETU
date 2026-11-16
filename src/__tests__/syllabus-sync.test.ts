@@ -9,14 +9,20 @@ let progress: typeof import('@/stores/topic-progress');
 
 function deferred<T>() {
   let resolve!: (value: T) => void;
-  const promise = new Promise<T>((done) => { resolve = done; });
+  const promise = new Promise<T>((done) => {
+    resolve = done;
+  });
   return { promise, resolve };
 }
 
 function row(id: string, topic = id) {
   return {
-    id, user_id: USER, subject: 'Algorithms', topic,
-    completed_at: '2026-10-11T01:00:00.000Z', updated_at: '2026-10-11T01:00:00.000Z'
+    id,
+    user_id: USER,
+    subject: 'Algorithms',
+    topic,
+    completed_at: '2026-10-11T01:00:00.000Z',
+    updated_at: '2026-10-11T01:00:00.000Z'
   };
 }
 
@@ -29,7 +35,10 @@ beforeEach(async () => {
   vi.stubGlobal('fetch', async (...args: unknown[]) => (await fetchMock(...args)).clone());
   api = await import('@/lib/fastapi-client');
   api.configureClerkRuntime({
-    loaded: true, user: { id: USER }, getToken: async () => 'test-token', signOut: async () => {}
+    loaded: true,
+    user: { id: USER },
+    getToken: async () => 'test-token',
+    signOut: async () => {}
   });
   repository = await import('@/lib/db');
   progress = await import('@/stores/topic-progress');
@@ -46,7 +55,10 @@ afterEach(() => {
 describe('syllabus saves through the authenticated API', () => {
   it('sends five independent checkbox saves immediately and survives a fresh database read', async () => {
     await progress.syncTopicProgressFromDb(USER);
-    const pending: Array<{ gate: ReturnType<typeof deferred<Response>>; values: ReturnType<typeof row>[] }> = [];
+    const pending: Array<{
+      gate: ReturnType<typeof deferred<Response>>;
+      values: ReturnType<typeof row>[];
+    }> = [];
     const server = new Map<string, ReturnType<typeof row>>();
     fetchMock.mockImplementation(async (url: string, init: RequestInit) => {
       if (url.endsWith('/query')) return Response.json({ data: [...server.values()] });
@@ -57,39 +69,53 @@ describe('syllabus saves through the authenticated API', () => {
       if (response.ok) for (const value of values) server.set(value.id, value);
       return response;
     });
-    const ids = ['Sorting', 'Graphs', 'Greedy', 'Dynamic programming', 'Searching']
-      .map((topic) => progress.topicProgressId('Algorithms', topic));
-    const saves = ids.map((id) => progress.useTopicProgressStore.getState().setCompleted(USER, id, true));
+    const ids = ['Sorting', 'Graphs', 'Greedy', 'Dynamic programming', 'Searching'].map((topic) =>
+      progress.topicProgressId('Algorithms', topic)
+    );
+    const saves = ids.map((id) =>
+      progress.useTopicProgressStore.getState().setCompleted(USER, id, true)
+    );
 
     // All five UI values change before even one network response arrives.
     expect(Object.keys(progress.useTopicProgressStore.getState().byUser[USER])).toEqual(ids);
     await waitFor(() => expect(pending).toHaveLength(5));
     expect(await repository.db.topic_progress.count()).toBe(0);
-    for (const item of [...pending].reverse()) item.gate.resolve(Response.json({ data: item.values }));
+    for (const item of [...pending].reverse())
+      item.gate.resolve(Response.json({ data: item.values }));
     await Promise.all(saves);
     expect(server.size).toBe(5);
-    expect(Object.keys(progress.useTopicProgressStore.getState().pendingByUser[USER])).toHaveLength(0);
+    expect(Object.keys(progress.useTopicProgressStore.getState().pendingByUser[USER])).toHaveLength(
+      0
+    );
 
     await repository.clearLocalData();
     progress.resetTopicProgressMemory();
     await progress.syncTopicProgressFromDb(USER);
-    expect(Object.keys(progress.useTopicProgressStore.getState().byUser[USER]).sort()).toEqual(ids.sort());
+    expect(Object.keys(progress.useTopicProgressStore.getState().byUser[USER]).sort()).toEqual(
+      ids.sort()
+    );
   });
 
   it('keeps a rapid untick visible while the earlier check is in flight, then deletes the saved row', async () => {
     await progress.syncTopicProgressFromDb(USER);
     const check = deferred<Response>();
     const uncheck = deferred<Response>();
-    fetchMock.mockImplementation((url: string) => url.endsWith('/delete') ? uncheck.promise : check.promise);
+    fetchMock.mockImplementation((url: string) =>
+      url.endsWith('/delete') ? uncheck.promise : check.promise
+    );
     const id = progress.topicProgressId('Algorithms', 'Graphs');
     const first = progress.useTopicProgressStore.getState().setCompleted(USER, id, true);
-    await waitFor(() => expect(fetchMock.mock.calls.some(([url]) => url.endsWith('/upsert'))).toBe(true));
+    await waitFor(() =>
+      expect(fetchMock.mock.calls.some(([url]) => url.endsWith('/upsert'))).toBe(true)
+    );
     const second = progress.useTopicProgressStore.getState().setCompleted(USER, id, false);
     expect(progress.useTopicProgressStore.getState().byUser[USER][id]).toBeUndefined();
 
     check.resolve(Response.json({ data: [] }));
     await first;
-    await waitFor(() => expect(fetchMock.mock.calls.some(([url]) => url.endsWith('/delete'))).toBe(true));
+    await waitFor(() =>
+      expect(fetchMock.mock.calls.some(([url]) => url.endsWith('/delete'))).toBe(true)
+    );
     expect(progress.useTopicProgressStore.getState().byUser[USER][id]).toBeUndefined();
     uncheck.resolve(Response.json({ data: [] }));
     await second;
@@ -101,7 +127,9 @@ describe('syllabus saves through the authenticated API', () => {
     fetchMock.mockClear();
     const firstResponse = deferred<Response>();
     const lastResponse = deferred<Response>();
-    fetchMock.mockImplementationOnce(() => firstResponse.promise).mockImplementationOnce(() => lastResponse.promise);
+    fetchMock
+      .mockImplementationOnce(() => firstResponse.promise)
+      .mockImplementationOnce(() => lastResponse.promise);
     const id = progress.topicProgressId('Algorithms', 'Graphs');
     const first = progress.useTopicProgressStore.getState().setCompleted(USER, id, true);
     await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
@@ -121,7 +149,10 @@ describe('syllabus saves through the authenticated API', () => {
     await progress.syncTopicProgressFromDb(USER);
     const firstResponse = deferred<Response>();
     const lastResponse = deferred<Response>();
-    fetchMock.mockClear().mockImplementationOnce(() => firstResponse.promise).mockImplementationOnce(() => lastResponse.promise);
+    fetchMock
+      .mockClear()
+      .mockImplementationOnce(() => firstResponse.promise)
+      .mockImplementationOnce(() => lastResponse.promise);
     const id = progress.topicProgressId('Algorithms', 'Graphs');
     const first = progress.useTopicProgressStore.getState().setCompleted(USER, id, true);
     await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
@@ -138,28 +169,85 @@ describe('syllabus saves through the authenticated API', () => {
 
   it('retains an imported row ID when a click happens before initial progress finishes loading', async () => {
     const read = deferred<Response>();
-    fetchMock.mockImplementation((url: string) => url.endsWith('/query') ? read.promise : Response.json({ data: [] }));
+    fetchMock.mockImplementation((url: string) =>
+      url.endsWith('/query') ? read.promise : Response.json({ data: [] })
+    );
     const load = progress.syncTopicProgressFromDb(USER);
     const id = progress.topicProgressId('Algorithms', 'Graphs');
     const save = progress.useTopicProgressStore.getState().setCompleted(USER, id, false);
     read.resolve(Response.json({ data: [row('legacy-row-id', 'Graphs')] }));
     await Promise.all([load, save]);
     const deletion = fetchMock.mock.calls.find(([url]) => url.endsWith('/delete'));
-    expect(JSON.parse(deletion![1].body).filters).toContainEqual({ field: 'id', op: 'eq', value: 'legacy-row-id' });
+    expect(JSON.parse(deletion![1].body).filters).toContainEqual({
+      field: 'id',
+      op: 'eq',
+      value: 'legacy-row-id'
+    });
     expect(await repository.db.topic_progress.count()).toBe(0);
     expect(progress.useTopicProgressStore.getState().byUser[USER][id]).toBeUndefined();
   });
 });
 
 describe('syllabus loading and refresh isolation', () => {
+  it('protects formula edits, deletion, and server versions from an older hydration', async () => {
+    const formula = {
+      id: 'edit',
+      user_id: USER,
+      subject: 'Algorithms',
+      name: 'Rule',
+      expression: 'old',
+      version: 1
+    };
+    repository.seedLocalRows('formulas', [formula, { ...formula, id: 'remove' }]);
+    const read = deferred<Response>();
+    fetchMock.mockImplementation((url: string, init: RequestInit) => {
+      if (url.endsWith('/query')) return read.promise;
+      const values = JSON.parse(String(init.body)).values ?? [];
+      return Response.json({ data: values.map((value: object) => ({ ...value, version: 2 })) });
+    });
+    const load = repository.hydrateTables(USER, ['formulas']);
+    await repository.db.formulas.update('edit', { expression: 'new' });
+    await repository.db.formulas.delete('remove');
+    read.resolve(
+      Response.json({
+        data: [formula, { ...formula, id: 'remove' }, { ...formula, id: 'elsewhere' }]
+      })
+    );
+    await load;
+    expect(await repository.db.formulas.get('edit')).toMatchObject({
+      expression: 'new',
+      version: 2
+    });
+    expect(await repository.db.formulas.get('remove')).toBeUndefined();
+    expect(await repository.db.formulas.get('elsewhere')).toBeDefined();
+  });
+
+  it('keeps a newly committed domain receipt when a prior history read arrives later', async () => {
+    const read = deferred<Response>();
+    fetchMock.mockImplementation(() => read.promise);
+    const load = repository.hydrateTables(USER, ['pyq_attempts']);
+    repository.applyServerRows(USER, [
+      { name: 'pyq_attempts', rows: [{ id: 'committed', user_id: USER, version: 1 }] }
+    ]);
+    read.resolve(Response.json({ data: [] }));
+    await load;
+    expect(await repository.db.pyq_attempts.get('committed')).toMatchObject({
+      id: 'committed',
+      version: 1
+    });
+  });
+
   it('publishes progress before slow history finishes and deduplicates the tracker read', async () => {
     const history = deferred<Response>();
-    fetchMock.mockImplementation((url: string) => url.includes('/questions/')
-      ? history.promise : Response.json({ data: [row('saved-topic')] }));
+    fetchMock.mockImplementation((url: string) =>
+      url.includes('/questions/') ? history.promise : Response.json({ data: [row('saved-topic')] })
+    );
     const load = repository.hydrateTables(USER, ['questions', 'topic_progress']);
     await progress.syncTopicProgressFromDb(USER);
     expect(await repository.db.topic_progress.count()).toBe(1);
-    expect(fetchMock.mock.calls.filter(([url]) => url.includes('/topic_progress/'))).toHaveLength(1);
+    expect(fetchMock.mock.calls.filter(([url]) => url.includes('/topic_progress/'))).toHaveLength(
+      1
+    );
     history.resolve(Response.json({ data: [] }));
     await load;
   });
@@ -167,7 +255,11 @@ describe('syllabus loading and refresh isolation', () => {
   it('does not invalidate practice snapshots or listeners after a checkbox save', async () => {
     const snapshot = repository.getTableSnapshot('questions');
     const changed = vi.fn();
-    const unsubscribe = repository.subscribeDb(changed, ['questions', 'pyq_attempts', 'reattempts']);
+    const unsubscribe = repository.subscribeDb(changed, [
+      'questions',
+      'pyq_attempts',
+      'reattempts'
+    ]);
     await repository.db.topic_progress.put({ ...row('topic'), sync_status: 'synced' });
     expect(changed).not.toHaveBeenCalled();
     expect(repository.getTableSnapshot('questions')).toBe(snapshot);
@@ -177,7 +269,9 @@ describe('syllabus loading and refresh isolation', () => {
   it('does not overwrite acknowledged checks or resurrect unticks with an older refresh response', async () => {
     repository.seedLocalRows('topic_progress', [row('remove-me')]);
     const read = deferred<Response>();
-    fetchMock.mockImplementation((url: string) => url.endsWith('/query') ? read.promise : Response.json({ data: [] }));
+    fetchMock.mockImplementation((url: string) =>
+      url.endsWith('/query') ? read.promise : Response.json({ data: [] })
+    );
     const load = repository.hydrateTables(USER, ['topic_progress']);
     await Promise.all([
       repository.db.topic_progress.delete('remove-me'),
@@ -185,8 +279,10 @@ describe('syllabus loading and refresh isolation', () => {
     ]);
     read.resolve(Response.json({ data: [row('remove-me'), row('another-device')] }));
     await load;
-    expect((await repository.db.topic_progress.toArray()).map((item) => item.id).sort())
-      .toEqual(['another-device', 'new-check']);
+    expect((await repository.db.topic_progress.toArray()).map((item) => item.id).sort()).toEqual([
+      'another-device',
+      'new-check'
+    ]);
   });
 
   it('does not repopulate a signed-out account from a late save or hydration', async () => {
@@ -212,7 +308,8 @@ describe('syllabus loading and refresh isolation', () => {
     const batchResponse = deferred<Response>();
     fetchMock.mockImplementationOnce(() => batchResponse.promise);
     const batch = repository.db.topic_progress.bulkPut([
-      { ...row('a'), sync_status: 'synced' }, { ...row('b'), sync_status: 'synced' }
+      { ...row('a'), sync_status: 'synced' },
+      { ...row('b'), sync_status: 'synced' }
     ]);
     const deletion = repository.db.topic_progress.delete('a');
     await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));

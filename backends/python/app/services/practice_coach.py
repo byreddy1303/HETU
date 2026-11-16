@@ -120,6 +120,22 @@ class PackDraft(Draft):
     selections: dict[str, StrictInt] = Field(default_factory=dict)
 
 
+class RepairFocus(Draft):
+    expected_version: int = Field(ge=0)
+    pack_ids: list[str] = Field(max_length=3)
+
+
+class RepairAssessment(Draft):
+    expected_version: int = Field(ge=1)
+    difficulty: Literal["uncertain", "understanding", "recognition", "execution", "time"]
+    next_action: str = Field(default="", max_length=500)
+
+
+class ApplicationConditions(Draft):
+    expected_version: int = Field(ge=0)
+    assistance: Literal["unknown", "without-help", "with-help"]
+
+
 class Strategy(Draft):
     expected_version: int = Field(ge=0)
     approach: Literal["two-pass", "check-conditions", "protect-review"] = "two-pass"
@@ -204,7 +220,9 @@ async def private_state(db, owner):
                     Record.owner_id == owner,
                     Record.collection == COLLECTION,
                     Record.deleted_at.is_(None),
-                    Record.data["kind"].as_string().in_(["pack", "trap"]),
+                    Record.data["kind"]
+                    .as_string()
+                    .in_(["pack", "trap", "focus", "application_conditions"]),
                 )
             )
         ).all()
@@ -393,6 +411,107 @@ def pack_view(row, day):
         "source_url": data.get("source_url") if done else None,
         "transfer_id": data.get("transfer_id"),
         "source_count": len(data["source_ids"]),
+        "assessment": data.get("assessment"),
+        "round_outcome": data.get("round_outcome") if done else None,
+        "independent_rounds": data.get("independent_rounds", 0),
+        "independent_delayed_rounds": data.get("independent_delayed_rounds", 0),
+        "unsuccessful_rounds": data.get("unsuccessful_rounds", 0),
+    }
+
+
+def focus_view(private, day):
+    saved = next((r for r in private if r.data.get("kind") == "focus"), None)
+    packs = [r for r in private if r.data.get("kind") == "pack"]
+    available = {r.external_id for r in packs}
+    # Suggestions remain read-only. A learner's selected targets survive time and queue changes.
+    ranked = sorted(
+        packs,
+        key=lambda r: (
+            not bool(
+                r.data.get("selections") and len(r.data["answers"]) < len(r.data["questions"])
+            ),
+            r.data["due_date"] > day.isoformat(),
+            -len(r.data["source_ids"]),
+            r.data["due_date"],
+            r.data["title"],
+            r.external_id,
+        ),
+    )
+    return {
+        "version": saved.version if saved else 0,
+        "pack_ids": [key for key in saved.data["pack_ids"] if key in available]
+        if saved
+        else [r.external_id for r in ranked[:3]],
+        "suggested": saved is None,
+    }
+
+
+async def save_focus(db, owner, draft: RepairFocus):
+    await owner_lock(db, owner)
+    await ensure_no_exam(db, owner)
+    if len(set(draft.pack_ids)) != len(draft.pack_ids):
+        raise HTTPException(422, "Choose distinct repair targets")
+    for key in draft.pack_ids:
+        await get_pack(db, owner, key)
+    await write(
+        db,
+        owner,
+        identity("focus", "repairs"),
+        {"kind": "focus", "pack_ids": draft.pack_ids},
+        draft.expected_version,
+    )
+    return await overview(db, owner)
+
+
+async def assess_repair(db, owner, key, draft: RepairAssessment):
+    await owner_lock(db, owner)
+    row = await get_pack(db, owner, key)
+    assessment = {
+        "difficulty": draft.difficulty,
+        "next_action": draft.next_action.strip(),
+        "basis": "learner assessment",
+    }
+    previous = row.data.get("assessment", {})
+    if all(previous.get(key) == value for key, value in assessment.items()):
+        return pack_view(row, await today(db, owner))
+    assessment["saved_at"] = datetime.now(UTC).isoformat()
+    row = await write(
+        db, owner, key, {**row.data, "assessment": assessment}, draft.expected_version
+    )
+    return pack_view(row, await today(db, owner))
+
+
+async def application_conditions(db, owner, session_id, draft=None):
+    from app.services.memory_learning_engine import reconcile_engine_results
+    from app.services.practice_application import application
+
+    if draft:
+        await owner_lock(db, owner)
+    await ensure_no_exam(db, owner)
+    _, _, pack_id = await application(db, owner, session_id)
+    key = identity("application-conditions", session_id)
+    row = await _owned(db, owner, COLLECTION, key)
+    if draft:
+        # A condition report is evidence about a completed session. Preserve it once saved.
+        if row and row.data["assistance"] != draft.assistance:
+            raise HTTPException(409, "The saved application conditions cannot be changed")
+        row = await write(
+            db,
+            owner,
+            key,
+            {
+                "kind": "application_conditions",
+                "session_id": session_id,
+                "pack_id": pack_id,
+                "assistance": draft.assistance,
+            },
+            draft.expected_version,
+        )
+        await reconcile_engine_results(db, owner_id=owner)
+    return {
+        "version": row.version if row else 0,
+        "assistance": row.data["assistance"] if row else "unknown",
+        "pack_id": pack_id,
     }
 
 
@@ -406,6 +525,7 @@ async def overview(db, owner):
     independent = [a for a in answers if a["assistance"] == "without-help"]
     fresh = [a for a in independent if a["fresh_in_workspace"]]
     delayed = [a for a in independent if a["delayed"]]
+    fresh_delayed = [a for a in delayed if a["fresh_in_workspace"]]
     sessions, _ = await rows(db, owner, "pyq_sessions", 100)
     recent_sessions = [
         {
@@ -446,9 +566,28 @@ async def overview(db, owner):
                 "previous_correct": sum(a["correct"] for a in previous),
                 "timed_count": len(timed),
                 "median_seconds": median(timed) if timed else None,
+                "fresh_count": sum(
+                    a["fresh_in_workspace"] and a["assistance"] == "without-help" for a in history
+                ),
+                "fresh_correct": sum(
+                    a["correct"] and a["fresh_in_workspace"] and a["assistance"] == "without-help"
+                    for a in history
+                ),
+                "delayed_count": sum(
+                    a["delayed"] and a["assistance"] == "without-help" for a in history
+                ),
+                "delayed_correct": sum(
+                    a["correct"] and a["delayed"] and a["assistance"] == "without-help"
+                    for a in history
+                ),
             }
         )
+    from app.services.practice_application import progress
+
+    applications = await progress(db, owner, private)
     return {
+        "focus": focus_view(private, day),
+        "applications": applications,
         "group_progress": group_progress,
         "recent_sessions": recent_sessions,
         "groups": [{**g, "trap": traps.get(g["id"])} for g in groups],
@@ -462,6 +601,9 @@ async def overview(db, owner):
             "delayed": len(delayed),
             "delayed_correct": sum(a["correct"] for a in delayed),
             "conditions_unknown": sum(a["assistance"] == "unknown" for a in answers),
+            "helped": sum(a["assistance"] == "with-help" for a in answers),
+            "fresh_delayed": len(fresh_delayed),
+            "fresh_delayed_correct": sum(a["correct"] for a in fresh_delayed),
         },
         "batches": [
             {
@@ -609,6 +751,7 @@ async def prepare_transfer(db, owner, pack):
             "approximate; the exact mistake mechanism is not certified.",
             "data": {
                 "automation": "local_learning_engine",
+                "practice_pack_id": identity("pack", pack["group_id"]),
                 "activity": "transfer",
                 "target": pack["principle"],
                 "reason": "Fresh application after a completed original micro-drill",
@@ -678,15 +821,30 @@ async def submit_answer(db, owner, key, draft: Answer):
     }
     if len(answers) == len(data["questions"]):
         clean = all(a["correct"] for a in answers.values())
-        streak = data["streak"] + 1 if clean else 0
-        interval = [3, 7, 14, 30][min(streak - 1, 3)] if clean else 1
+        independent = clean and all(a["assistance"] == "without-help" for a in answers.values())
+        # Old streaks may contain helped answers; never promote them as independent evidence.
+        streak = data.get("independent_streak", 0) + 1 if independent else 0
+        interval = [3, 7, 14, 30][min(streak - 1, 3)] if independent else 1
         next_data.update(
             streak=streak,
+            independent_streak=streak,
+            independent_rounds=data.get("independent_rounds", 0) + int(independent),
+            independent_delayed_rounds=data.get("independent_delayed_rounds", 0)
+            + int(independent and all(a["delayed"] for a in answers.values())),
+            unsuccessful_rounds=0
+            if independent
+            else data.get("unsuccessful_rounds", 0) + int(not clean),
+            round_outcome="independent"
+            if independent
+            else "needs-independent-check"
+            if clean
+            else "needs-repair",
+            schedule_policy=2,
             completed_rounds=data["completed_rounds"] + 1,
             completed_at=now.isoformat(),
             due_date=((await today(db, owner)) + timedelta(days=interval)).isoformat(),
         )
-        if clean:
+        if independent:
             next_data["transfer_id"] = await prepare_transfer(db, owner, data)
     row = await write(db, owner, key, next_data)
     return pack_view(row, await today(db, owner))
@@ -934,14 +1092,17 @@ async def daily_plan(db, owner, budget: int):
     review_minutes = 1 if budget == 10 else 2
     repair = max(3, budget // 4)
     fresh = budget - recall - review_minutes - repair
-    selected = eligible[: max(1, fresh // 3)]
+    selected = eligible[: max(1, (budget if budget == 10 else fresh) // 3)]
+    focus_ids = focus_view(private, day)["pack_ids"]
     packs = sorted(
         [
             r
             for r in private
-            if r.data.get("kind") == "pack" and r.data["due_date"] <= day.isoformat()
+            if r.data.get("kind") == "pack"
+            and r.data["due_date"] <= day.isoformat()
+            and r.external_id in focus_ids
         ],
-        key=lambda r: (r.data["due_date"], r.external_id),
+        key=lambda r: (focus_ids.index(r.external_id), r.data["due_date"]),
     )
     steps = [
         {
@@ -984,6 +1145,23 @@ async def daily_plan(db, owner, budget: int):
             "reason": "Answers are already saved; review at most three moments.",
         },
     ]
+    if budget == 10:
+        # One destination: short sessions should not spend their budget changing tools.
+        step = steps[1] if packs else steps[2]
+        steps = [
+            {
+                **step,
+                "minutes": budget,
+                "reason": "Stay with one repair and its feedback."
+                if packs
+                else "Stay with fresh practice; stop when your available time is used.",
+            }
+        ]
+    elif packs:
+        steps[1]["reason"] = "One of your selected repair targets; other packs stay scheduled."
+    else:
+        steps[1]["reason"] = "Choose a skill check when no selected repair is due."
+    focused_pack_ids = [packs[0].external_id] if packs else []
     key = identity("plan", f"{day}:{budget}")
     previous = await _owned(db, owner, COLLECTION, key)
     if previous and any(previous.data.get("completed", {}).values()):
@@ -1000,7 +1178,8 @@ async def daily_plan(db, owner, budget: int):
                 "steps": steps,
                 "completed": {},
                 "complete_history": complete,
-                "fresh_count": len(selected),
+                "fresh_count": len(selected) if any(s["id"] == "fresh" for s in steps) else 0,
+                "focus_pack_ids": focused_pack_ids,
             },
         )
     )

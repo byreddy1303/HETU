@@ -45,7 +45,8 @@ export default function DailyPracticePlan() {
         <div>
           <h2 className="font-display text-lg font-semibold">Make this session count</h2>
           <p className="mt-1 text-sm text-text-muted">
-            A little recall, one repair, fresh coverage, and a short review.
+            Ten minutes stays with one activity. Longer sessions include recall, one repair, fresh
+            coverage, and a short review.
           </p>
         </div>
         <div className="flex items-center gap-2">

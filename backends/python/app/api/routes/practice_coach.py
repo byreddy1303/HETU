@@ -20,6 +20,20 @@ async def strategy(identity: CurrentUser, db: DbDep, session_id: str | None = No
     return await service.strategy(db, identity.user_id, session_id=session_id)
 
 
+@router.get("/applications/{session_id}/conditions")
+async def application_conditions(session_id: str, identity: CurrentUser, db: DbDep):
+    return await service.application_conditions(db, identity.user_id, session_id)
+
+
+@router.put("/applications/{session_id}/conditions")
+async def save_application_conditions(
+    session_id: str, payload: service.ApplicationConditions, identity: CurrentUser, db: DbDep
+):
+    result = await service.application_conditions(db, identity.user_id, session_id, payload)
+    await db.commit()
+    return result
+
+
 @router.put("/strategy")
 async def save_strategy(payload: service.Strategy, identity: CurrentUser, db: DbDep):
     result = await service.strategy(db, identity.user_id, payload)
@@ -30,6 +44,20 @@ async def save_strategy(payload: service.Strategy, identity: CurrentUser, db: Db
 @router.post("/prepare")
 async def prepare(identity: CurrentUser, db: DbDep):
     result = await service.prepare(db, identity.user_id)
+    await db.commit()
+    return result
+
+
+@router.put("/focus")
+async def focus(payload: service.RepairFocus, identity: CurrentUser, db: DbDep):
+    result = await service.save_focus(db, identity.user_id, payload)
+    await db.commit()
+    return result
+
+
+@router.put("/packs/{key}/assessment")
+async def assessment(key: str, payload: service.RepairAssessment, identity: CurrentUser, db: DbDep):
+    result = await service.assess_repair(db, identity.user_id, key, payload)
     await db.commit()
     return result
 

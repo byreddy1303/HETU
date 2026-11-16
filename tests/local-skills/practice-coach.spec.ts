@@ -1,5 +1,53 @@
 import { expect, test } from '@playwright/test';
 
+test('independent repair opens bank application and keeps its reported conditions after reload', async ({
+  page
+}) => {
+  // The entire test runs against the disposable local SQLite workspace.
+  await page.goto('/pyq?questionUids=go%3A460036&count=all&mode=practice');
+  await page
+    .getByRole('button', { name: /Start (?:selected practice|practice set|fresh set)/ })
+    .click();
+  await page.getByPlaceholder('Enter a number').fill('2');
+  await page.getByRole('button', { name: 'Commit & reveal key' }).click();
+  await page.getByRole('button', { name: 'Finish set', exact: true }).click();
+  await page.goto('/practice-lab');
+  await page.getByRole('button', { name: 'Prepare from my mistakes' }).click();
+  await page
+    .getByRole('region', { name: 'Your repair focus' })
+    .getByRole('link', { name: 'Faults and replacements', exact: true })
+    .click();
+  const drill = page.getByRole('region', { name: 'Mistake repair practice' });
+  for (const [index, answer] of ['A fault and no eviction', '3', 'C'].entries()) {
+    await drill.getByRole('radio', { name: answer, exact: true }).check();
+    await drill.getByLabel('Practice conditions', { exact: true }).selectOption('without-help');
+    await drill.getByRole('button', { name: 'Check answer' }).click();
+    await drill
+      .getByRole('button', { name: index === 2 ? 'See next step' : 'Next question', exact: true })
+      .click();
+  }
+  await expect(drill.getByText('Correct without reported help.', { exact: false })).toBeVisible();
+  await drill.getByRole('link', { name: 'Apply to fresh questions' }).click();
+  await page.getByRole('link', { name: 'Start selected practice' }).click();
+  await page.getByRole('button', { name: 'Start selected practice' }).click();
+  for (let index = 0; index < 3; index++) {
+    await page.getByRole('button', { name: 'Left blank: skipped', exact: true }).click();
+    await page.getByRole('button', { name: 'Commit & reveal key', exact: true }).click();
+    await page
+      .getByRole('button', { name: index === 2 ? 'Finish set' : 'Next question', exact: true })
+      .click();
+  }
+  const result = page.getByRole('region', { name: 'Repair application result' });
+  await result.getByLabel('Application conditions').selectOption('with-help');
+  await result.getByRole('button', { name: 'Save conditions and next check' }).click();
+  await expect(result.getByRole('status')).toContainText('helped or unqualified practice');
+  await page.reload();
+  await expect(result.getByRole('status')).toContainText('helped or unqualified practice');
+  await result.getByRole('link', { name: 'Inspect repair evidence' }).click();
+  await expect(page.getByRole('heading', { name: 'Application on bank questions' })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Open next check', exact: true })).toBeVisible();
+});
+
 test('notebook batch becomes a deduplicated blind repair with durable answers and a dated follow-up', async ({
   page
 }) => {
@@ -56,6 +104,37 @@ test('notebook batch becomes a deduplicated blind repair with durable answers an
   await practice.getByRole('button', { name: 'See next step' }).click();
   await expect(practice.getByText(/3\/3 correct. Next check:/)).toBeVisible();
   await expect(practice.getByRole('button', { name: 'Start due check' })).toHaveCount(0);
+  await expect(
+    practice.getByText('The review interval has not been extended.', { exact: false })
+  ).toBeVisible();
+  await practice.getByText('Choose what to try next (optional)').click();
+  await practice.getByLabel('What needs attention?').selectOption('recognition');
+  await practice
+    .getByLabel('One action for the next attempt (optional)')
+    .fill('Check the distance definition before calculating.');
+  await practice.getByRole('button', { name: 'Save my next action' }).click();
+  await expect(practice.getByRole('status')).toHaveText(
+    'Your next action is saved with this repair.'
+  );
+  await page.reload();
+  await practice.getByText('Choose what to try next (optional)').click();
+  await expect(practice.getByLabel('What needs attention?')).toHaveValue('recognition');
+  await expect(practice.getByLabel('One action for the next attempt (optional)')).toHaveValue(
+    'Check the distance definition before calculating.'
+  );
+  await practice.getByRole('link', { name: 'Return to repair focus' }).click();
+  const focus = page.getByRole('region', { name: 'Your repair focus' });
+  await focus.getByText(/Choose focus targets/).click();
+  const target = focus.getByRole('checkbox', { name: 'Distance, detection, and correction' });
+  await target.click();
+  await expect(target).not.toBeChecked();
+  await expect(target).toBeEnabled();
+  await page.reload();
+  await focus.getByText(/Choose focus targets/).click();
+  await expect(target).not.toBeChecked();
+  await target.click();
+  await expect(target).toBeChecked();
+  await expect(target).toBeEnabled();
   await page.getByRole('button', { name: 'Prepare from my mistakes' }).click();
   await expect(page.getByText('No duplicates added.', { exact: false })).toBeVisible();
   await page.getByRole('button', { name: 'My principles' }).click();
@@ -120,6 +199,7 @@ test('balanced session stays within budget and retains completion; exam strategy
   await plan.getByLabel('Session length').selectOption('10');
   await plan.getByRole('button', { name: 'Build session' }).click();
   await expect(plan.getByText('10 minutes planned', { exact: false })).toBeVisible();
+  await expect(plan.getByRole('button', { name: 'Mark done', exact: true })).toHaveCount(1);
   await plan.getByRole('button', { name: 'Mark done', exact: true }).first().click();
   await expect(plan.getByRole('button', { name: 'Marked done' })).toHaveCount(1);
   await page.reload();

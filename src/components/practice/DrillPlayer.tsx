@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/Button';
 import { practiceApi, practiceError, type DrillPack } from '@/lib/practice-coach';
+import RepairAssessment from '@/components/practice/RepairAssessment';
 
 export default function DrillPlayer({
   id,
@@ -108,6 +109,7 @@ export default function DrillPlayer({
     try {
       setPack(await practiceApi<DrillPack>(`/packs/${id}/start`, 'POST'));
       setFeedbackIndex(null);
+      setAssistance('unknown');
     } catch (e) {
       setError(practiceError(e));
     } finally {
@@ -220,6 +222,15 @@ export default function DrillPlayer({
             {pack.questions.filter((q) => q.result?.correct).length}/{pack.questions.length}{' '}
             correct. Next check: {pack.due_date}.
           </p>
+          <p className="text-sm text-text-muted">
+            {pack.round_outcome === 'needs-independent-check'
+              ? `The answers were correct with help or unreported conditions. Independent check: ${pack.due_date}. The review interval has not been extended.`
+              : pack.round_outcome === 'needs-repair'
+                ? `Use the correction below, then return on ${pack.due_date}. The next attempt can test a different approach.`
+                : pack.round_outcome === 'independent'
+                  ? 'Correct without reported help. Apply the idea to fresh questions, then return for the scheduled check.'
+                  : 'This earlier round keeps its saved date. Future checks will distinguish independent answers from helped practice.'}
+          </p>
           <div className="space-y-2 text-sm">
             <p>{pack.principle}</p>
             <p className="text-text-muted">Applies when: {pack.conditions}</p>
@@ -229,6 +240,7 @@ export default function DrillPlayer({
             A completed correction is evidence of this attempt. Repeated questions and helped
             answers stay separate from fresh, independent application.
           </p>
+          <RepairAssessment key={`${pack.id}:${pack.round}`} pack={pack} onSaved={setPack} />
           <div className="flex flex-wrap gap-3">
             {pack.transfer_id && (
               <Link
@@ -262,6 +274,9 @@ export default function DrillPlayer({
           )}
         </div>
       )}
+      <Link to="/practice-lab" className="inline-block text-sm text-accent underline">
+        Return to repair focus
+      </Link>
       {error && (
         <div role="alert" className="space-y-2 text-sm text-danger">
           <p>{error}</p>

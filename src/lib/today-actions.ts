@@ -6,6 +6,7 @@ import { getMemoryRepairData, memoryString, type StudyMemoryEntry } from '@/lib/
 import type { OverviewConceptQueue } from '@/lib/learning-overview';
 import type { DayPlan } from '@/lib/planner-storage';
 import type { PyqSessionRow, RecoverySessionRow } from '@/types';
+import type { DrillPack } from '@/lib/practice-coach';
 
 export const TODAY_BUDGETS = [10, 20, 30, 45, 60] as const;
 export type TodayBudget = (typeof TODAY_BUDGETS)[number];
@@ -59,6 +60,7 @@ export interface TodayActionsInput extends BuildPlannerEvidenceCandidatesInput {
   practiceSessions: readonly PyqSessionRow[];
   recoverySessions: readonly RecoverySessionRow[];
   parkedActionIds?: readonly string[];
+  focusedRepairs?: readonly DrillPack[];
 }
 
 /** One deterministic decision for Dashboard and Do now. No writes or model claims. */
@@ -80,6 +82,21 @@ export function buildTodayActions(input: TodayActionsInput) {
   if (exam || input.concepts?.held_for_exam) {
     const resume = exam ? [resumePractice(exam)] : [];
     return { actions: resume, fitting: resume, heldForExam: true };
+  }
+  for (const pack of input.focusedRepairs ?? []) {
+    if (!pack.due) continue;
+    actions.push({
+      id: `mistake-pack:${pack.id}`,
+      kind: 'repair',
+      title: `Repair: ${pack.title}`,
+      reason: pack.done
+        ? 'A scheduled check for one of your repair targets.'
+        : 'One of your repair targets. Complete the short check and use its feedback.',
+      href: `/practice-lab?pack=${encodeURIComponent(pack.id)}`,
+      estimatedMin: 10,
+      dueDate: pack.due_date,
+      priority: 1.5
+    });
   }
   const recoverySession = input.recoverySessions
     .filter(

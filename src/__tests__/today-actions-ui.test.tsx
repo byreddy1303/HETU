@@ -104,7 +104,7 @@ describe('local daily queue states and launch', () => {
   it('keeps failed sources visible and retries them', async () => {
     vi.mocked(apiRequest).mockRejectedValue(new Error('Unavailable'));
     mount();
-    expect(await screen.findAllByRole('alert')).toHaveLength(5);
+    expect(await screen.findAllByRole('alert')).toHaveLength(6);
     expect(screen.queryByText(/The queue is clear/)).not.toBeInTheDocument();
     responses();
     fireEvent.click(screen.getByRole('button', { name: 'Refresh queue' }));

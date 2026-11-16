@@ -1,12 +1,46 @@
 import { apiRequest } from '@/lib/fastapi-client';
 
-export function practiceApi<T>(path: string, method = 'GET', body?: unknown, signal?: AbortSignal) {
-  return apiRequest<T>(`/v1/practice-coach${path}`, {
+export async function practiceApi<T>(
+  path: string,
+  method = 'GET',
+  body?: unknown,
+  signal?: AbortSignal
+) {
+  const result = await apiRequest<T>(`/v1/practice-coach${path}`, {
     method,
     signal,
     ...(body === undefined ? {} : { body: JSON.stringify(body) })
   });
+  if (method !== 'GET') window.dispatchEvent(new Event('hetu:memory-saved'));
+  return result;
 }
+export type RepairDifficulty = 'uncertain' | 'understanding' | 'recognition' | 'execution' | 'time';
+export const REPAIR_APPROACHES: Record<RepairDifficulty, { label: string; action: string }> = {
+  uncertain: {
+    label: 'Not sure yet',
+    action: 'Try a fresh problem and notice the first step where you need help.'
+  },
+  understanding: {
+    label: 'Understanding the idea',
+    action:
+      'Revisit the principle and its conditions below, then explain the distinction in your own words before the next independent check.'
+  },
+  recognition: {
+    label: 'Choosing the method',
+    action:
+      'Compare when the rule applies and when it does not. Use Mix methods when you are ready to choose without the family label.'
+  },
+  execution: {
+    label: 'Carrying out the steps',
+    action:
+      'Work through one calculation or trace slowly. Choose one checking habit to use on the next problem.'
+  },
+  time: {
+    label: 'Using time well',
+    action:
+      'Establish independent accuracy first. Then try one time-allocation change in mixed practice or your next mock.'
+  }
+};
 export interface DrillProblem {
   prompt: string;
   choices: string[];
@@ -43,6 +77,11 @@ export interface DrillPack {
   source_url: string | null;
   transfer_id: string | null;
   source_count: number;
+  assessment?: { difficulty: RepairDifficulty; next_action: string; basis: string } | null;
+  round_outcome?: 'independent' | 'needs-independent-check' | 'needs-repair' | null;
+  independent_rounds?: number;
+  independent_delayed_rounds?: number;
+  unsuccessful_rounds?: number;
 }
 export interface PracticeTrap {
   version: number;
@@ -64,6 +103,23 @@ export interface MistakeGroup {
   trap: PracticeTrap | null;
 }
 export interface PracticeOverview {
+  focus: { version: number; pack_ids: string[]; suggested: boolean };
+  applications?: {
+    complete: boolean;
+    items: {
+      pack_id: string;
+      session_id: string;
+      repair_id: string;
+      next_review_id: string | null;
+      assistance: string;
+      submitted: number;
+      planned: number;
+      fresh_count: number;
+      fresh_correct: number;
+      delayed_count: number;
+      delayed_correct: number;
+    }[];
+  };
   groups: MistakeGroup[];
   packs: DrillPack[];
   complete: boolean;
@@ -77,6 +133,10 @@ export interface PracticeOverview {
     previous_correct: number;
     timed_count: number;
     median_seconds: number | null;
+    fresh_count: number;
+    fresh_correct: number;
+    delayed_count: number;
+    delayed_correct: number;
   }[];
   evidence: {
     answers: number;
@@ -86,6 +146,9 @@ export interface PracticeOverview {
     delayed: number;
     delayed_correct: number;
     conditions_unknown: number;
+    helped: number;
+    fresh_delayed: number;
+    fresh_delayed_correct: number;
   };
   batches: {
     id: string;

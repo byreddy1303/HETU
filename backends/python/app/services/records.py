@@ -366,7 +366,14 @@ def require_version(record: Record, expected: int | None) -> None:
             status_code=428, detail="expected_version is required for existing data"
         )
     if record.version != expected:
-        raise HTTPException(status_code=409, detail={"current_version": record.version})
+        raise HTTPException(
+            status_code=409,
+            detail={
+                "message": "This record changed after you opened it. "
+                "Reload the saved record before editing again.",
+                "current_version": record.version,
+            },
+        )
 
 
 async def snapshot_for_sqlite(db: AsyncSession, record: Record) -> None:

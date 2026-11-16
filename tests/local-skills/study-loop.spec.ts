@@ -116,7 +116,7 @@ test('study screens fit narrow and desktop layouts in both themes', async ({ pag
       if (route === '/skills')
         await expect(page.getByRole('heading', { name: 'Cache address fields' })).toBeVisible();
       if (route === '/pyq')
-        await expect(page.getByText('Choose a subject', { exact: true })).toBeVisible();
+        await expect(page.getByRole('combobox', { name: 'Subject', exact: true })).toBeEnabled();
       await expect(page.getByRole('button', { name: /Switch to (light|dark) mode/ })).toBeVisible();
       for (const mode of ['light', 'dark']) {
         const toggle = page.getByRole('button', { name: `Switch to ${mode} mode` });

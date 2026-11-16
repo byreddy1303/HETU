@@ -21,14 +21,7 @@ import {
   type WeeklyDataSummary,
   type WeeklyDraft
 } from '@/lib/analysis';
-import {
-  cn,
-  formatDate,
-  nowISO,
-  todayISOInTimeZone,
-  uuid,
-  weekStartISO
-} from '@/lib/utils';
+import { cn, formatDate, nowISO, todayISOInTimeZone, uuid, weekStartISO } from '@/lib/utils';
 import { subjectInk } from '@/lib/subjectInk';
 import { ROOT_CAUSES } from '@/lib/constants';
 import {
@@ -41,7 +34,7 @@ export type WeeklyStep = 1 | 2 | 3 | 4;
 
 const STEP_LABELS: { id: WeeklyStep; label: string }[] = [
   { id: 1, label: 'this week' },
-  { id: 2, label: 'root cause' },
+  { id: 2, label: 'observation' },
   { id: 3, label: 'weakest concept' },
   { id: 4, label: 'the fix' }
 ];
@@ -146,9 +139,9 @@ export default function WeeklyReview() {
 
   function requireOnStep(): string | null {
     if (step === 2 && !draft.root_cause_summary.trim())
-      return 'Write one sentence naming the pattern behind this week\'s misses.';
+      return 'Write one observation, or say that the cause is still uncertain.';
     if (step === 3 && !draft.weakest_concept.trim())
-      return 'Name the single weakest concept — the one you\'d hate to see on the paper.';
+      return "Name the single weakest concept — the one you'd hate to see on the paper.";
     if (step === 4 && !draft.this_weeks_fix.trim())
       return 'Commit to ONE concrete action for the coming week.';
     return null;
@@ -164,13 +157,13 @@ export default function WeeklyReview() {
         return;
       }
     }
-    setStep((s) => (Math.min(4, s + 1) as WeeklyStep));
+    setStep((s) => Math.min(4, s + 1) as WeeklyStep);
   }
 
   function goBack() {
     setError(null);
     if (step === 1) return;
-    setStep((s) => (Math.max(1, s - 1) as WeeklyStep));
+    setStep((s) => Math.max(1, s - 1) as WeeklyStep);
   }
 
   async function save() {
@@ -178,7 +171,7 @@ export default function WeeklyReview() {
     const problem =
       (!draft.root_cause_summary.trim() && 'root cause') ||
       (!draft.weakest_concept.trim() && 'weakest concept') ||
-      (!draft.this_weeks_fix.trim() && 'this week\'s fix');
+      (!draft.this_weeks_fix.trim() && "this week's fix");
     if (problem) {
       setError(`Fill in ${problem} before saving.`);
       return;
@@ -275,8 +268,8 @@ export default function WeeklyReview() {
         {step === 1 && <DataStep summary={summary} learning={learningSignals} />}
         {step === 2 && (
           <NarrativeStep
-            label="Root cause of this week's misses"
-            hint="One sentence. The pattern behind the mistakes — not what the concept was, but why the wrong answer felt right."
+            label="What did you notice this week?"
+            hint="One observation is enough. You can say the cause is uncertain; a score does not establish why a mistake happened."
             multiline
             value={draft.root_cause_summary}
             onChange={(v) => setDraft((d) => ({ ...d, root_cause_summary: v }))}
@@ -296,7 +289,7 @@ export default function WeeklyReview() {
         {step === 4 && (
           <NarrativeStep
             label="This week's ONE fix"
-            hint="Actionable, testable. Not 'study harder'. Something you can point at on Sunday and say done/not done."
+            hint="Choose one action to try on the next relevant questions, and what you will look for to see whether it helped."
             value={draft.this_weeks_fix}
             onChange={(v) => setDraft((d) => ({ ...d, this_weeks_fix: v }))}
             placeholder="e.g. Re-derive LRU vs. FIFO vs. optimal for the three GATE 2020 cache questions, timed."
@@ -367,10 +360,7 @@ function DataStep({
   const volumeLeader = summary.bySubject[0];
   const rateLeader = [...summary.bySubject]
     .filter((subject) => subject.count >= 3)
-    .sort(
-      (a, b) =>
-        b.wrongish / b.count - a.wrongish / a.count || b.wrongish - a.wrongish
-    )[0];
+    .sort((a, b) => b.wrongish / b.count - a.wrongish / a.count || b.wrongish - a.wrongish)[0];
   return (
     <div className="flex flex-col gap-4">
       {summary.totalQ > 0 && (
@@ -384,12 +374,12 @@ function DataStep({
               <DataCell label="Clean rate" value={cleanRate} color="text-ink-teal" suffix="%" />
             </div>
             <p className="mt-3 text-[12px] text-text-muted">
-              Outcome mix:{' '}
-              <span className="u-num text-warn">{summary.slow} slow</span> ·{' '}
+              Outcome mix: <span className="u-num text-warn">{summary.slow} slow</span> ·{' '}
               <span className="u-num text-guess">{summary.guess} guessed</span> ·{' '}
               <span className="u-num text-danger">{summary.wrong} wrong</span>
               <span className="text-text-faint">
-                {' '}({summary.byOutcome['W-C']} concept, {summary.byOutcome['W-E']} execution,{' '}
+                {' '}
+                ({summary.byOutcome['W-C']} concept, {summary.byOutcome['W-E']} execution,{' '}
                 {summary.byOutcome['W-R']} reading)
               </span>
             </p>
@@ -419,11 +409,7 @@ function DataStep({
               value={learning.totals.newMistakes}
               color="text-danger"
             />
-            <DataCell
-              label="Mastered"
-              value={learning.totals.mastered}
-              color="text-success"
-            />
+            <DataCell label="Mastered" value={learning.totals.mastered} color="text-success" />
             <DataCell label="Due now" value={learning.dueBacklog} color="text-warn" />
           </div>
           <p className="text-[12px] leading-relaxed text-text-muted">
@@ -432,11 +418,11 @@ function DataStep({
               {learning.totals.hintFreeRecall.numerator}/
               {learning.totals.hintFreeRecall.denominator} hint-free correct
             </span>{' '}
-            · grades{' '}
-            <span className="u-num text-danger">{learning.totals.grades.again} Again</span> /{' '}
-            <span className="u-num text-warn">{learning.totals.grades.hard} Hard</span> /{' '}
+            · grades <span className="u-num text-danger">{learning.totals.grades.again} Again</span>{' '}
+            / <span className="u-num text-warn">{learning.totals.grades.hard} Hard</span> /{' '}
             <span className="u-num text-success">{learning.totals.grades.good} Good</span> /{' '}
-            <span className="u-num text-success">{learning.totals.grades.easy} Easy</span> · transfer{' '}
+            <span className="u-num text-success">{learning.totals.grades.easy} Easy</span> ·
+            transfer{' '}
             <span className="u-num text-text">
               {learning.totals.transferSuccess.numerator}/
               {learning.totals.transferSuccess.denominator}
@@ -506,8 +492,7 @@ function DataStep({
             <ul className="flex flex-col divide-y divide-border">
               {summary.bySubject.map((s) => {
                 const ink = subjectInk(s.subject);
-                const wrongPct =
-                  s.count === 0 ? 0 : Math.round((s.wrongish / s.count) * 100);
+                const wrongPct = s.count === 0 ? 0 : Math.round((s.wrongish / s.count) * 100);
                 return (
                   <li key={s.subject} className="flex items-center justify-between gap-3 py-2">
                     <span className="flex items-center gap-2 text-[13px]">
@@ -531,11 +516,13 @@ function DataStep({
           <CardHeader title="Recurring patterns" />
           <CardBody>
             <div className="flex flex-wrap gap-1.5">
-              {summary.topPatterns.filter((pattern) => pattern.count > 0).map((p) => (
-                <Badge key={p.name} tone="neutral">
-                  {p.name} · {p.count}/{p.total} not clean
-                </Badge>
-              ))}
+              {summary.topPatterns
+                .filter((pattern) => pattern.count > 0)
+                .map((p) => (
+                  <Badge key={p.name} tone="neutral">
+                    {p.name} · {p.count}/{p.total} not clean
+                  </Badge>
+                ))}
             </div>
           </CardBody>
         </Card>
@@ -582,7 +569,8 @@ function DataCell({
           muted && 'text-[16px]'
         )}
       >
-        {value}{suffix}
+        {value}
+        {suffix}
       </span>
     </div>
   );

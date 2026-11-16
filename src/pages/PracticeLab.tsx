@@ -9,6 +9,7 @@ import TrapEditor from '@/components/practice/TrapEditor';
 import PracticeWrapUp from '@/components/practice/PracticeWrapUp';
 import { practiceApi, practiceError, type PracticeOverview } from '@/lib/practice-coach';
 import ExamStrategy from '@/components/practice/ExamStrategy';
+import RepairFocus from '@/components/practice/RepairFocus';
 import { useAuth } from '@/hooks/useAuth';
 
 export default function PracticeLab() {
@@ -133,6 +134,7 @@ export default function PracticeLab() {
             />
           ) : (
             <>
+              {view?.focus && <RepairFocus view={view} onSaved={setView} />}
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <p className="text-sm text-text-muted">
                   Three short problems per mistake family. Choose one pack; the rest can wait.
@@ -144,28 +146,33 @@ export default function PracticeLab() {
                   Mix methods
                 </Button>
               </div>
-              <div className="grid gap-3 sm:grid-cols-2">
-                {view?.packs.map((pack) => (
-                  <Link
-                    key={pack.id}
-                    to={`/practice-lab?pack=${pack.id}`}
-                    className="rounded-xl border border-border bg-bg-raised p-5 transition-colors hover:border-accent"
-                  >
-                    <p className="text-xs text-accent">
-                      {pack.done
-                        ? pack.due
-                          ? 'Due check'
-                          : `Next check ${pack.due_date}`
-                        : 'Ready to practise'}
-                    </p>
-                    <h2 className="mt-2 text-base font-semibold">{pack.title}</h2>
-                    <p className="mt-2 text-xs text-text-muted">
-                      {pack.questions.length} original problems · {pack.source_count} linked
-                      observations
-                    </p>
-                  </Link>
-                ))}
-              </div>
+              <details>
+                <summary className="cursor-pointer text-sm text-accent">
+                  All repair packs ({view?.packs.length ?? 0})
+                </summary>
+                <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                  {view?.packs.map((pack) => (
+                    <Link
+                      key={pack.id}
+                      to={`/practice-lab?pack=${pack.id}`}
+                      className="rounded-xl border border-border bg-bg-raised p-5 transition-colors hover:border-accent"
+                    >
+                      <p className="text-xs text-accent">
+                        {pack.done
+                          ? pack.due
+                            ? 'Due check'
+                            : `Next check ${pack.due_date}`
+                          : 'Ready to practise'}
+                      </p>
+                      <h2 className="mt-2 text-base font-semibold">{pack.title}</h2>
+                      <p className="mt-2 text-xs text-text-muted">
+                        {pack.questions.length} original problems · {pack.source_count} linked
+                        observations
+                      </p>
+                    </Link>
+                  ))}
+                </div>
+              </details>
               {view && !view.packs.length && (
                 <p className="rounded-xl border border-border p-5 text-sm text-text-muted">
                   Prepare exercises from your saved mistakes. If there are no recorded errors yet,
@@ -232,17 +239,17 @@ export default function PracticeLab() {
             {[
               [
                 'Recorded exercise answers',
-                `${stats.correct}/${stats.answers}`,
+                stats.answers ? `${stats.correct}/${stats.answers}` : 'Not checked yet',
                 'Correct across original micro-exercises.'
               ],
               [
                 'New exercises, without reported help',
-                `${stats.fresh_correct}/${stats.fresh}`,
+                stats.fresh ? `${stats.fresh_correct}/${stats.fresh}` : 'Not checked yet',
                 'First recorded exposure to this exact exercise in this workspace.'
               ],
               [
                 'Checks after at least three days',
-                `${stats.delayed_correct}/${stats.delayed}`,
+                stats.delayed ? `${stats.delayed_correct}/${stats.delayed}` : 'Not checked yet',
                 'Without reported help; may include familiar exercises.'
               ]
             ].map(([label, value, description]) => (
@@ -254,13 +261,64 @@ export default function PracticeLab() {
             ))}
           </div>
           <p className="text-sm text-text-muted">
-            {stats.conditions_unknown} answers have unreported assistance. These counts do not
-            certify mastery or a rank. Exercise novelty, bank application, and delayed retention are
-            separate evidence.
+            {stats.helped ?? 0} answers used reported help. {stats.conditions_unknown} answers have
+            unreported assistance. These counts do not certify mastery or a rank. Exercise novelty,
+            bank application, and delayed retention are separate evidence.
           </p>
           <Link to="/skills" className="inline-block text-sm text-accent underline">
             Inspect fresh and delayed bank application
           </Link>
+          <section aria-label="Linked bank application" className="space-y-3">
+            <h2 className="font-display text-xl font-semibold">Application on bank questions</h2>
+            <p className="text-xs text-text-muted">
+              First attempts on new questions, with no reported help. Topic matching is approximate.
+              Delayed counts additionally require the scheduled interval of at least three days.
+            </p>
+            {!view.applications?.items.length && (
+              <p className="text-sm text-text-muted">
+                Not checked yet. Finish an independent repair round, then open its linked fresh
+                application.
+              </p>
+            )}
+            {view.applications?.complete === false && (
+              <p className="text-xs text-warn">
+                History is incomplete; fresh application is not qualified from this partial scan.
+              </p>
+            )}
+            {view.applications?.items.map((item) => (
+              <div key={item.session_id} className="space-y-2 rounded-lg border border-border p-4">
+                <h3 className="text-sm font-semibold">
+                  {view.packs.find((pack) => pack.id === item.pack_id)?.title ?? 'Linked repair'}
+                </h3>
+                <p className="text-sm text-text-muted">
+                  {item.submitted}/{item.planned} selected questions submitted · fresh without help:{' '}
+                  {item.fresh_count
+                    ? `${item.fresh_correct}/${item.fresh_count}`
+                    : 'Not established'}{' '}
+                  · after a delay:{' '}
+                  {item.delayed_count
+                    ? `${item.delayed_correct}/${item.delayed_count}`
+                    : 'Not checked yet'}
+                </p>
+                <Link
+                  className="inline-block text-sm text-accent underline"
+                  to={`/session/${encodeURIComponent(item.session_id)}/review`}
+                >
+                  {item.assistance === 'unreported'
+                    ? 'Report application conditions'
+                    : 'Inspect saved answers and conditions'}
+                </Link>
+                {item.next_review_id && (
+                  <Link
+                    className="ml-4 inline-block text-sm text-accent underline"
+                    to={`/memory/${encodeURIComponent(item.next_review_id)}`}
+                  >
+                    Open next check
+                  </Link>
+                )}
+              </div>
+            ))}
+          </section>
           <section aria-label="Mistake family evidence" className="space-y-3">
             <h2 className="font-display text-xl font-semibold">What keeps coming back?</h2>
             <p className="text-xs text-text-muted">
@@ -279,6 +337,16 @@ export default function PracticeLab() {
                   {group.recent_count} correct
                   {group.previous_count > 0 &&
                     ` · previous ${group.previous_correct}/${group.previous_count}`}
+                </p>
+                <p className="mt-2 text-xs text-text-muted">
+                  Fresh without help:{' '}
+                  {group.fresh_count
+                    ? `${group.fresh_correct}/${group.fresh_count}`
+                    : 'Not checked yet'}
+                  {' · '}After a delay without help:{' '}
+                  {group.delayed_count
+                    ? `${group.delayed_correct}/${group.delayed_count}`
+                    : 'Not checked yet'}
                 </p>
                 {group.median_seconds !== null && (
                   <p className="mt-1 text-xs text-text-muted">

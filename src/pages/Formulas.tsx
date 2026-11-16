@@ -278,13 +278,22 @@ function FormulaLibraryRow({ row, onDelete }: { row: FormulaRow; onDelete: () =>
   const [name, setName] = useState(row.name);
   const [expression, setExpression] = useState(row.expression);
   const [saving, setSaving] = useState(false);
+  const [editBase, setEditBase] = useState(row);
+  const [error, setError] = useState('');
 
   async function save() {
     if (!name.trim() || !expression.trim()) return;
     setSaving(true);
+    setError('');
     try {
-      await writeLocal('formulas', { ...row, name: name.trim(), expression: expression.trim() });
+      await writeLocal('formulas', {
+        ...editBase,
+        name: name.trim(),
+        expression: expression.trim()
+      });
       setEditing(false);
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : 'Your edit could not be saved.');
     } finally {
       setSaving(false);
     }
@@ -310,6 +319,12 @@ function FormulaLibraryRow({ row, onDelete }: { row: FormulaRow; onDelete: () =>
               <MathText math className="sm:col-span-2">
                 {expression}
               </MathText>
+            )}
+            {error && (
+              <p role="alert" className="text-xs text-danger">
+                {error} Your draft is still here. Cancel and reopen the editor to review the latest
+                saved formula.
+              </p>
             )}
           </div>
         ) : (
@@ -344,7 +359,13 @@ function FormulaLibraryRow({ row, onDelete }: { row: FormulaRow; onDelete: () =>
           <>
             <button
               type="button"
-              onClick={() => setEditing(true)}
+              onClick={() => {
+                setEditBase(row);
+                setName(row.name);
+                setExpression(row.expression);
+                setError('');
+                setEditing(true);
+              }}
               className="text-[11px] text-text-faint underline decoration-dotted underline-offset-2 hover:text-text"
             >
               edit

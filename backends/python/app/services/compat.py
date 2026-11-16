@@ -320,7 +320,12 @@ async def _mutate_records(
                 "owner_id",
             )
             if existing is not None:
-                prepared["expected_version"] = existing.version
+                # Explicit concurrency tokens belong to the client. Substituting the
+                # latest server version makes stale edits silently overwrite newer work.
+                expected = value.get("expected_version")
+                if expected is None and table == "formulas":
+                    expected = value.get("version")
+                prepared["expected_version"] = existing.version if expected is None else expected
             elif table == "pyq_attempts":
                 await validate_app_attempt(db, owner_id=user_id, row=prepared)
             values.append(prepared)

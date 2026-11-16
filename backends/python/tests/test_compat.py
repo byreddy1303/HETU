@@ -11,6 +11,40 @@ from app.main import app
 
 
 @pytest.mark.asyncio
+async def test_compat_formula_edit_rejects_stale_content_and_keeps_successful_retries(db):
+    from fastapi import HTTPException
+
+    from app.schemas import CompatMutation
+    from app.services.compat import _mutate_records
+
+    db.add(User(id="editor"))
+    await db.flush()
+
+    async def save(value):
+        return (
+            await _mutate_records(
+                db, "formulas", "upsert", "editor", CompatMutation(values=[value])
+            )
+        )[0]
+
+    first = await save({"id": "formula", "name": "First", "expression": "original"})
+    second = await save({**first, "expression": "newer explanation"})
+    assert second["version"] == first["version"] + 1
+    assert (await save({**first, "expression": "newer explanation"}))["version"] == second[
+        "version"
+    ]
+    with pytest.raises(HTTPException) as stale:
+        await save({**first, "name": "Stale title edit"})
+    assert stale.value.status_code == 409
+    assert stale.value.detail["current_version"] == second["version"]
+    from app.services.study_memory import _owned
+
+    assert (await _owned(db, "editor", "formulas", "formula")).data[
+        "expression"
+    ] == "newer explanation"
+
+
+@pytest.mark.asyncio
 async def test_compat_table_round_trip_is_owner_scoped(db) -> None:
     db.add_all([User(id="compat-user"), User(id="other-user")])
     await db.commit()

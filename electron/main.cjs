@@ -3,6 +3,7 @@ const path = require('node:path');
 const fs = require('node:fs');
 const { BACKEND_PORT, getLocalDataDir, getBackendDir, getLocalEnvironment, getPythonRuntime, launchBackend } = require('./runtime.cjs');
 const { createDailyBrief } = require('./daily-brief.cjs');
+const { showDailyBrief } = require('./daily-brief-window.cjs');
 const { prepareDesktopRenderer } = require('./desktop-renderer.cjs');
 
 // Preserve the existing profile and SQLite location when productName is capitalized.
@@ -110,7 +111,7 @@ if (!app.requestSingleInstanceLock()) {
       allowAutoLaunch: app.isPackaged && process.env.HETU_TEST_DISABLE_AUTOLAUNCH !== '1',
       autoDeliver: process.env.HETU_TEST_DISABLE_AUTOLAUNCH !== '1',
       launchOptions: { pythonPath: runtime.pythonPath, backendDir, executable: app.getPath('exe') },
-      show: (options) => dialog.showMessageBox(options),
+      show: showDailyBrief,
       navigate: async (route) => {
         if (!mainWindow) await createWindow(route);
         else mainWindow.webContents.send('daily-brief:navigate', route);

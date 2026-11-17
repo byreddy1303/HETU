@@ -33,6 +33,8 @@ function readConfig(dataDir) {
     timezone: 'Asia/Kolkata',
     autoLaunch: true,
     last_shown_on: null,
+    snoozed_on: null,
+    snoozed_until: null,
     last_error: null
   };
   try {
@@ -56,31 +58,10 @@ function writeConfig(dataDir, value) {
 }
 function due(config, now = new Date()) {
   const local = indiaClock(now);
+  const snoozed = config.snoozed_on === local.date && Date.parse(config.snoozed_until) > now.getTime();
   return Boolean(
-    config.enabled && local.time >= config.time && config.last_shown_on !== local.date
+    config.enabled && local.time >= config.time && config.last_shown_on !== local.date && !snoozed
   );
-}
-function briefText(brief) {
-  const plan = brief.planner;
-  const repeats = brief.reattempts;
-  const concepts = brief.concepts;
-  return [
-    `Today's plan · ${plan.count} unfinished ${plan.count === 1 ? 'block' : 'blocks'}`,
-    ...(plan.items.length
-      ? plan.items.map(
-          (item) =>
-            `• ${item.title}${Number.isFinite(item.minutes) ? ` (${item.minutes} min)` : ''}`
-        )
-      : ['No Planner blocks saved for today.']),
-    '',
-    `${repeats.complete ? '' : 'At least '}${repeats.count} due reattempts`,
-    ...repeats.items.map((item) => `• ${item.label}`),
-    '',
-    `${concepts.complete ? '' : 'At least '}${concepts.count} concepts to revise`,
-    ...concepts.items.map((item) => `• ${item.label}`),
-    '',
-    'Open Do now for the current queue. Counts describe saved work, not completed learning.'
-  ].join('\n');
 }
 function fetchBrief(port) {
   return new Promise((resolve, reject) => {
@@ -204,28 +185,26 @@ function createDailyBrief({
     try {
       const brief = await load();
       if (brief.held_for_exam) return { shown: false, held: true };
-      const result = await show({
-        type: 'info',
-        title: 'HETU · Today’s study brief',
-        message: `Your study brief · ${brief.date}`,
-        detail: briefText(brief),
-        buttons: ['Open Do now', 'Open Planner', 'Open revisions', 'Close'],
-        defaultId: 0,
-        cancelId: 3,
-        noLink: true
-      });
+      const result = await show({ brief, preview, time: config.time });
+      if (result.action === 'snooze' && !preview) {
+        const until = new Date(now().getTime() + 15 * 60 * 1000).toISOString();
+        writeConfig(dataDir, {
+          ...readConfig(dataDir), snoozed_on: deliveryDate, snoozed_until: until, last_error: null
+        });
+        return { shown: true, snoozed: true };
+      }
+      const routes = {
+        today: '/today',
+        planner: `/planner?date=${encodeURIComponent(brief.date)}`,
+        concepts: '/concept-review'
+      };
+      if (Object.hasOwn(routes, result.action)) await navigate(routes[result.action]);
       // Keep any preference edits made while the popup was visible.
       writeConfig(dataDir, {
         ...readConfig(dataDir),
-        ...(!preview ? { last_shown_on: deliveryDate } : {}),
+        ...(!preview ? { last_shown_on: deliveryDate, snoozed_on: null, snoozed_until: null } : {}),
         last_error: null
       });
-      const routes = [
-        '/today',
-        `/planner?date=${encodeURIComponent(brief.date)}`,
-        '/concept-review'
-      ];
-      if (routes[result.response]) await navigate(routes[result.response]);
       return { shown: true };
     } catch (error) {
       writeConfig(dataDir, { ...readConfig(dataDir), last_error: error.message });
@@ -251,7 +230,9 @@ function createDailyBrief({
         ...readConfig(dataDir),
         enabled: patch.enabled,
         autoLaunch: patch.autoLaunch,
-        time: patch.time
+        time: patch.time,
+        snoozed_on: null,
+        snoozed_until: null
       });
       await configure();
       return this.status();
@@ -274,7 +255,6 @@ function createDailyBrief({
 module.exports = {
   indiaClock,
   due,
-  briefText,
   readConfig,
   writeConfig,
   configureLaunchAgent,

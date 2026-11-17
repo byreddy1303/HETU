@@ -155,3 +155,24 @@ def test_launcher_handles_corrupt_marker_and_throttles_spawn_errors(tmp_path, mo
     popen.return_value = Mock(pid=456)
     assert launch_if_due(tmp_path, tmp_path / "HETU", datetime(2026, 10, 29, 3, 36, tzinfo=UTC))
     assert popen.call_count == 2
+
+
+def test_launcher_waits_for_persisted_snooze_and_ignores_old_day(tmp_path, monkeypatch):
+    import json
+
+    from scripts import daily_brief_launcher as launcher
+
+    settings = {
+        "enabled": True, "autoLaunch": True, "time": "09:00",
+        "snoozed_on": "2026-11-17", "snoozed_until": "2026-11-17T03:45:00.000Z",
+    }
+    file = tmp_path / "daily-brief.json"
+    file.write_text(json.dumps(settings))
+    monkeypatch.setattr(launcher, "_app_is_running", lambda _path: False)
+    popen = Mock(return_value=Mock(pid=123))
+    monkeypatch.setattr(launcher.subprocess, "Popen", popen)
+    app = tmp_path / "HETU"
+    assert not launch_if_due(tmp_path, app, datetime(2026, 11, 17, 3, 44, tzinfo=UTC))
+    assert launch_if_due(tmp_path, app, datetime(2026, 11, 17, 3, 45, tzinfo=UTC))
+    assert launch_if_due(tmp_path, app, datetime(2026, 11, 18, 3, 30, tzinfo=UTC))
+    assert popen.call_count == 2

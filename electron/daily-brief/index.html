@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; base-uri 'none'; form-action 'none'" />
+    <title>HETU · Your daily brief</title>
+    <link rel="stylesheet" href="style.css" />
+    <script src="renderer.js" defer></script>
+  </head>
+  <body>
+    <main>
+      <header>
+        <div class="brand"><img class="brand-mark" src="../../dist/hetu-cobalt-512.png" alt="" /><span>HETU <span class="brand-divider">/</span> DAILY BRIEF</span></div>
+        <span id="schedule" class="schedule"></span>
+      </header>
+      <div class="intro">
+        <p id="date" class="date"></p>
+        <h1>Your study day.<br />One clear next step.</h1>
+        <p class="subtitle">Your study day, one useful step at a time.</p>
+      </div>
+      <section id="stats" class="stats" aria-label="Your saved workload"></section>
+      <section class="focus" aria-labelledby="focus-title">
+        <p id="focus-eyebrow" class="eyebrow"></p>
+        <h2 id="focus-title"></h2>
+        <p id="focus-detail" class="focus-detail"></p>
+        <div class="focus-bottom"><span id="focus-meta" class="focus-meta"></span><button id="primary" class="primary"></button></div>
+      </section>
+      <details id="agenda">
+        <summary><span>Inside today’s brief</span><span class="expand" aria-hidden="true">+</span></summary>
+        <div class="agenda-content">
+          <h3>Today’s plan</h3>
+          <ol id="plan"></ol>
+          <p id="remaining" class="muted"></p>
+          <p id="reattempt-topics" class="topics"></p>
+          <p id="concept-topics" class="topics"></p>
+        </div>
+      </details>
+      <p id="partial" class="partial" hidden>+ means at least this many; some records could not be included. Open a queue for the latest work.</p>
+      <p class="footnote">A snapshot of saved work. Choose a manageable amount today.</p>
+    </main>
+    <footer><span id="footer-note">Pick a starting point when you’re ready.</span><div><button id="snooze" class="secondary" data-action="snooze">In 15 minutes</button><button id="dismiss" class="quiet" data-action="dismiss">Dismiss today</button></div></footer>
+  </body>
+</html>

@@ -8,6 +8,7 @@ const {
   due,
   createDailyBrief,
   readConfig,
+  writeConfig,
   configureLaunchAgent
 } = require('./daily-brief.cjs');
 function temporary(t) {
@@ -51,10 +52,9 @@ test('daily delivery is once per day, preview is repeatable, and exam holds do n
     load: async () => ({ ...payload, held_for_exam: held }),
     show: async (options) => {
       shown++;
-      assert.match(options.detail, /Study graphs/);
-      assert.match(options.detail, /2 due reattempts/);
-      assert.match(options.detail, /At least 1 concepts/);
-      return { response: 0 };
+      assert.deepEqual(options.brief, payload);
+      assert.equal(options.time, '09:00');
+      return { action: 'today' };
     },
     navigate: async (route) => routes.push(route)
   });
@@ -85,6 +85,67 @@ test('failed agenda loads remain retryable and record an error instead of a zero
   });
   await assert.rejects(brief.tick(), /Unavailable/);
   assert.equal(brief.status().last_error, 'Unavailable');
+  assert.equal(brief.status().last_shown_on, null);
+});
+test('snooze persists across restarts, reloads the agenda, and preview does not consume it', async (t) => {
+  const dataDir = temporary(t);
+  let clock = new Date('2026-11-17T03:30:00Z');
+  let loads = 0;
+  let action = 'snooze';
+  const routes = [];
+  const options = {
+    dataDir, allowAutoLaunch: false, now: () => clock,
+    load: async () => { loads++; return payload; },
+    show: async () => ({ action }),
+    navigate: async (route) => routes.push(route)
+  };
+  const first = createDailyBrief(options);
+  assert.deepEqual(await first.tick(), { shown: true, snoozed: true });
+  assert.equal(first.status().last_shown_on, null);
+  const persisted = readConfig(dataDir).snoozed_until;
+  assert.equal(persisted, '2026-11-17T03:45:00.000Z');
+  const reopened = createDailyBrief(options);
+  clock = new Date('2026-11-17T03:44:59Z');
+  assert.deepEqual(await reopened.tick(), { shown: false });
+  action = 'dismiss';
+  await reopened.tick(true);
+  assert.equal(reopened.status().snoozed_until, persisted);
+  assert.equal(reopened.status().last_shown_on, null);
+  clock = new Date('2026-11-17T03:45:00Z');
+  action = 'concepts';
+  await reopened.tick();
+  assert.equal(loads, 3);
+  assert.deepEqual(routes, ['/concept-review']);
+  assert.equal(reopened.status().last_shown_on, '2026-11-17');
+  assert.equal(reopened.status().snoozed_until, null);
+  assert.deepEqual(await reopened.tick(), { shown: false });
+});
+
+test('stale snooze does not suppress a new day and preference saves clear it', async (t) => {
+  const dataDir = temporary(t);
+  const config = { ...readConfig(dataDir), snoozed_on: '2026-11-16', snoozed_until: '2026-11-18T03:45:00Z' };
+  writeConfig(dataDir, config);
+  assert.equal(due(config, new Date('2026-11-17T03:30:00Z')), true);
+  assert.equal(due({ ...config, snoozed_on: '2026-11-17', snoozed_until: 'invalid' }, new Date('2026-11-17T03:30:00Z')), true);
+  const brief = createDailyBrief({ dataDir, allowAutoLaunch: false });
+  await brief.save({ enabled: false, autoLaunch: false, time: '10:00' });
+  assert.equal(brief.status().snoozed_until, null);
+});
+
+test('one open brief suppresses duplicates and a failed navigation remains retryable', async (t) => {
+  const dataDir = temporary(t);
+  let finish;
+  const brief = createDailyBrief({
+    dataDir, allowAutoLaunch: false, now: () => new Date('2026-11-17T03:30:00Z'),
+    load: async () => payload,
+    show: () => new Promise((resolve) => { finish = resolve; }),
+    navigate: async () => { throw new Error('Window unavailable'); }
+  });
+  const pending = brief.tick();
+  await new Promise((resolve) => setImmediate(resolve));
+  assert.deepEqual(await brief.tick(true), { shown: false });
+  finish({ action: 'planner' });
+  await assert.rejects(pending, /Window unavailable/);
   assert.equal(brief.status().last_shown_on, null);
 });
 test('macOS launch job runs a local clock helper with explicit paths and can be removed', async (t) => {

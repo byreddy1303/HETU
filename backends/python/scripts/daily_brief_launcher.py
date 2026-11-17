@@ -81,6 +81,13 @@ def launch_if_due(data_dir: Path, executable: Path, now: dt.datetime | None = No
         return False
     if time < settings["time"] or settings.get("last_shown_on") == date:
         return False
+    if settings.get("snoozed_on") == date:
+        try:
+            until = dt.datetime.fromisoformat(settings.get("snoozed_until") or "")
+            if until.tzinfo is not None and instant < until:
+                return False
+        except (ValueError, TypeError):
+            pass
     marker = data_dir / "daily-brief-launch.json"
     if _app_is_running(executable) or _recent_attempt(marker, _read_marker(marker), date, instant):
         return False

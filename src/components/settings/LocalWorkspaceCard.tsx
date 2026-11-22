@@ -28,7 +28,7 @@ export default function LocalWorkspaceCard() {
         const body = (await response.json()) as { checks?: { database?: string } };
         if (disposed) return;
         if (!response.ok || body.checks?.database !== 'ok') {
-          throw new Error('The local database is unavailable. Restart HETU and check again.');
+          throw new Error('The local database is unavailable. Restart rebuild and check again.');
         }
         setDatabase('ready');
       } catch (cause) {

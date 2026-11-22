@@ -100,7 +100,7 @@ export default function DailyBriefCard() {
                 checked={config.autoLaunch}
                 onChange={(event) => setConfig({ ...config, autoLaunch: event.target.checked })}
               />
-              Launch HETU automatically if it is fully quit
+              Launch rebuild automatically if it is fully quit
             </label>
             <p className="text-xs text-text-muted">
               {config.autoLaunchInstalled

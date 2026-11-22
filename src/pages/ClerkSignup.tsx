@@ -109,10 +109,10 @@ export default function ClerkSignup() {
           <span className="u-stamp absolute right-6 top-7">invite-only</span>
           <div className="u-margin-line">
             <h1 id="invite-signup-title" className="font-display text-[24px] font-bold text-text">
-              Create your HETU account
+              Create your rebuild account
             </h1>
             <p className="mt-2 max-w-sm text-sm leading-relaxed text-text-muted">
-              Your account and study data will be stored in HETU’s online database.
+              Your account and study data will be stored in rebuild’s online database.
             </p>
           </div>
           <div className="u-rule my-5" />

@@ -19,7 +19,7 @@ self.addEventListener('push', (event) => {
   const isQuestion = kind === 'question';
 
   const title =
-    typeof payload.title === 'string' && payload.title.trim() ? payload.title.trim() : 'HETU';
+    typeof payload.title === 'string' && payload.title.trim() ? payload.title.trim() : 'rebuild';
 
   const body =
     typeof payload.body === 'string' && payload.body.trim()
@@ -57,8 +57,8 @@ self.addEventListener('push', (event) => {
   const showAndBadge = self.registration
     .showNotification(title, {
       body,
-      icon: '/hetu-cobalt-192.png',
-      badge: '/hetu-notification-badge.png',
+      icon: '/rebuild-192.png',
+      badge: '/rebuild-notification-badge.png',
       tag: notifTag,
       renotify: false,
       timestamp: Date.now(),

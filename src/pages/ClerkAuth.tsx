@@ -90,7 +90,7 @@ export default function ClerkAuth() {
     <main className="flex min-h-dvh flex-col items-center justify-center gap-6 bg-bg p-6">
       <Brand size="sm" />
       <section className="u-panel w-full max-w-[440px] p-8" aria-labelledby="signin-title">
-        <h1 id="signin-title" className="font-display text-2xl font-bold">Sign in to HETU</h1>
+        <h1 id="signin-title" className="font-display text-2xl font-bold">Sign in to rebuild</h1>
         <p className="mt-2 text-sm text-text-muted">Use your existing username and PIN, or your email and password.</p>
         {params.get('created') === '1' && (
           <p role="status" className="mt-3 text-sm text-text-muted">Account created. Sign in with your new credentials.</p>

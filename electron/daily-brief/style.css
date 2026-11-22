@@ -54,3 +54,5 @@ footer > div { gap: 8px; }
 [hidden] { display: none !important; }
 @media (max-width: 460px) { main { padding: 20px; } footer { padding: 15px 20px; } h1 { font-size: 29px; } .stat { padding: 12px 9px; } .stat-label { font-size: 11px; } .focus { padding: 17px; } .primary { width: 100%; } .brand { letter-spacing: 1px; } }
 @media (prefers-color-scheme: dark) { :root { --bg: #101725; --surface: #192233; --text: #eef2fc; --muted: #a5b2ca; --line: #303e56; --blue: #8fabff; --focus: #1b2c50; --focus-line: #3e568d; --focus-text: #b5caff; } }
+
+.brand-wordmark { display: block; width: 100px; aspect-ratio: 825 / 210; background: var(--blue); mask: url("../../dist/brand/rebuild-wordmark.svg") center / contain no-repeat; -webkit-mask: url("../../dist/brand/rebuild-wordmark.svg") center / contain no-repeat; }

@@ -140,7 +140,7 @@ export default function LearningMemory() {
       );
       const link = document.createElement('a');
       link.href = url;
-      link.download = `hetu-learning-memory-${todayISOInTimeZone(profile?.timezone)}.json`;
+      link.download = `rebuild-learning-memory-${todayISOInTimeZone(profile?.timezone)}.json`;
       link.click();
       setTimeout(() => URL.revokeObjectURL(url), 1000);
     } catch (cause) {

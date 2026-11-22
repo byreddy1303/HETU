@@ -157,7 +157,7 @@ async function registerNativeToken(): Promise<string> {
       PushNotifications.createChannel({
         id: 'study_reminders',
         name: 'Study reminders',
-        description: 'Daily, interactive reminders for HETU study modules.',
+        description: 'Daily, interactive reminders for rebuild study modules.',
         importance: 3,
         visibility: 0,
         vibration: true,

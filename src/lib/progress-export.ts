@@ -470,7 +470,7 @@ function csvCell(value: string | number): string {
 
 export function progressReportCsv(report: ProgressReport): string {
   const rows: (string | number)[][] = [
-    ['HETU progress report'],
+    ['rebuild progress report'],
     ['Learner', report.learnerName],
     ['Generated at', report.generatedAt],
     ['Report version', report.version],
@@ -486,7 +486,7 @@ export function downloadProgressReport(report: ProgressReport): void {
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
   link.href = url;
-  link.download = `hetu-progress-${report.generatedAt.slice(0, 10)}.csv`;
+  link.download = `rebuild-progress-${report.generatedAt.slice(0, 10)}.csv`;
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);

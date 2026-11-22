@@ -140,7 +140,7 @@ async function configureLaunchAgent({
     await execute('launchctl', ['bootstrap', `gui/${uid}`, file], { timeout: 5000 });
   } catch {
     throw new Error(
-      'macOS could not enable the daily launch. The brief will still appear while HETU is open.'
+      'macOS could not enable the daily launch. The brief will still appear while rebuild is open.'
     );
   }
   return { supported: true, installed: true };

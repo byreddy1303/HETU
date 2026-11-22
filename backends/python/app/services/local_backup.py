@@ -186,7 +186,7 @@ def backup_database(
     source_db: Path,
     backup_dir: Path,
     keep_count: int = 14,
-    sync_icloud: bool = True,
+    sync_icloud: bool = False,
 ) -> Path:
     """Create an atomic, verified snapshot; never open the source for writes."""
     if keep_count < 1:

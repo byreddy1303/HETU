@@ -23,7 +23,7 @@ function run(command, args, options = {}) {
 async function prepareRuntime({ projectRoot = path.resolve(__dirname, '..'), platform = process.platform, arch = process.arch } = {}) {
   // Native dependencies must be installed and tested on the target architecture.
   if (platform !== 'darwin' || arch !== 'arm64' || process.platform !== platform || process.arch !== arch) {
-    throw new Error('The bundled HETU desktop backend currently supports building macOS arm64 on an Apple Silicon Mac. Build Windows, Intel Mac, and Linux runtimes on their matching hosts before adding those targets.');
+    throw new Error('The bundled rebuild desktop backend currently supports building macOS arm64 on an Apple Silicon Mac. Build Windows, Intel Mac, and Linux runtimes on their matching hosts before adding those targets.');
   }
   const workDir = path.join(projectRoot, '.codex-tmp', 'desktop-runtime');
   const backendDir = path.join(projectRoot, 'backends', 'python');
@@ -37,7 +37,7 @@ async function prepareRuntime({ projectRoot = path.resolve(__dirname, '..'), pla
     fs.mkdirSync(workDir, { recursive: true });
     const archive = path.join(workDir, RUNTIME.filename);
     if (!fs.existsSync(archive) || crypto.createHash('sha256').update(fs.readFileSync(archive)).digest('hex') !== RUNTIME.sha256) {
-      console.log('[HETU] Downloading the pinned portable Python runtime...');
+      console.log('[rebuild] Downloading the pinned portable Python runtime...');
       const url = `https://github.com/astral-sh/python-build-standalone/releases/download/${RUNTIME.release}/${encodeURIComponent(RUNTIME.filename)}`;
       const response = await fetch(url, { signal: AbortSignal.timeout(120000) });
       if (!response.ok) throw new Error(`Python runtime download failed: HTTP ${response.status}`);
@@ -51,13 +51,13 @@ async function prepareRuntime({ projectRoot = path.resolve(__dirname, '..'), pla
     await run('tar', ['-xzf', archive, '-C', workDir]);
     const python = path.join(runtimeDir, 'bin', 'python3.12');
     const env = getLocalEnvironment({ backendDir, dataDir: path.join(workDir, 'validation-data') });
-    console.log('[HETU] Installing the backend into the portable runtime...');
+    console.log('[rebuild] Installing the backend into the portable runtime...');
     await run(python, ['-m', 'pip', 'install', '--disable-pip-version-check', '--no-cache-dir', '--only-binary=:all:', '-r', path.join(backendDir, 'requirements.txt')], { env });
     fs.writeFileSync(marker, JSON.stringify({ ...RUNTIME, fingerprint, platform, arch }, null, 2));
   }
   // Probe only imports, never start the API or open the user's database at build time.
   getPythonRuntime({ backendDir, env: { ...getLocalEnvironment({ backendDir, dataDir: path.join(workDir, 'validation-data') }), PYTHON_PATH: path.join(runtimeDir, 'bin', 'python3.12') } });
-  console.log('[HETU] Portable backend runtime verified.');
+  console.log('[rebuild] Portable backend runtime verified.');
   return runtimeDir;
 }
 

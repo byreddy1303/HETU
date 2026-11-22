@@ -11,8 +11,7 @@ export default function LoadingScreen() {
         transition={{ duration: 0.16, delay: reduceMotion ? 0 : 0.1 }}
         className="text-center"
       >
-        <Brand size="lg" className="justify-center" />
-        <p className="u-label mt-3">finding the reason</p>
+        <Brand size="lg" tagline className="items-center" />
       </motion.div>
     </div>
   );

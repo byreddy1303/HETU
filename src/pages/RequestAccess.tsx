@@ -148,7 +148,7 @@ export default function RequestAccess() {
                 </Field>
 
                 <Field
-                  label="Why HETU?"
+                  label="Why rebuild?"
                   htmlFor="ra-purpose"
                   hint={`One paragraph is plenty. ${purposeLen}/${PURPOSE_MAX}`}
                   hintTone={purposeValid || purposeLen === 0 ? 'faint' : 'warn'}
@@ -235,7 +235,7 @@ function Pitch({ daysLeft }: { daysLeft: number }) {
         <div className="mt-2 flex items-center gap-3">
           <BrandMark className="h-14 w-auto" />
           <h1 className="font-sans text-[32px] font-semibold uppercase leading-none tracking-[0.18em] text-text">
-            HETU
+            rebuild
           </h1>
         </div>
         <p className="mt-3 text-[14.5px] leading-relaxed text-text-muted">
@@ -259,7 +259,7 @@ function Pitch({ daysLeft }: { daysLeft: number }) {
       </ul>
       <div className="u-rule my-6" />
       <p className="text-[12px] leading-relaxed text-text-faint">
-        HETU is invite-only on purpose: it is a quiet tool built for one demanding use case, not
+        rebuild is invite-only on purpose: it is a quiet tool built for one demanding use case, not
         an engagement feed. You ask; a human replies. T−
         <span className="u-num text-text-muted">{daysLeft}</span> days to the exam.
       </p>
@@ -313,7 +313,7 @@ function SentPanel({ dedup, onReset }: { dedup: boolean; onReset: () => void }) 
         </p>
         <p className="mt-1 text-[12.5px] leading-relaxed text-text-muted">
           {dedup
-            ? 'We already have an open request from this email. The owner can review it in HETU.'
+            ? 'We already have an open request from this email. The owner can review it in rebuild.'
             : 'Your request is saved for the owner to review. If approved, the owner can share an invitation link with you. Automated invitation emails are currently unavailable.'}
         </p>
       </div>

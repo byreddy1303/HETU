@@ -9,7 +9,7 @@ export interface QuotePreset {
 
 const original = (text: string): QuotePreset => ({
   text,
-  attribution: 'HETU'
+  attribution: 'rebuild'
 });
 
 export const QUOTES: readonly QuotePreset[] = [

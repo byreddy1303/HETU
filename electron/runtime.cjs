@@ -20,7 +20,7 @@ function getLocalDataDir({ env = process.env, platform = process.platform, homed
 function getBackendDir({ resourcesPath, projectRoot = path.resolve(__dirname, '..') } = {}) {
   const candidates = [resourcesPath && path.join(resourcesPath, 'backend'), path.join(projectRoot, 'backends', 'python')];
   const backendDir = candidates.find((candidate) => candidate && fs.existsSync(path.join(candidate, 'app', 'main.py')));
-  if (!backendDir) throw new Error('The HETU Python backend is missing. Rebuild or reinstall HETU.');
+  if (!backendDir) throw new Error('The rebuild Python backend is missing. Rebuild or reinstall rebuild.');
   return backendDir;
 }
 
@@ -69,20 +69,20 @@ function getPythonRuntime({ backendDir, env = process.env, check = spawnSync } =
       continue;
     }
     const runtimeEnv = { ...env, PYTHONPATH: backendDir };
-    const result = check(pythonPath, ['-c', 'import sys; assert (3, 11) <= sys.version_info[:2] < (3, 13), "HETU requires Python 3.11 or 3.12"; import app.main; import app.mcp_local'], {
+    const result = check(pythonPath, ['-c', 'import sys; assert (3, 11) <= sys.version_info[:2] < (3, 13), "rebuild requires Python 3.11 or 3.12"; import app.main; import app.mcp_local'], {
       cwd: backendDir, env: runtimeEnv, encoding: 'utf8', timeout: 20000, windowsHide: true, maxBuffer: 1024 * 1024,
     });
     if (!result.error && result.status === 0) return { pythonPath, env: runtimeEnv };
     errors.push(`${pythonPath}: ${result.error?.message || result.stderr?.trim() || `exited ${result.status}`}`);
     if (env.PYTHON_PATH) break;
   }
-  throw new Error(`HETU could not find Python 3.11/3.12 with its backend dependencies. Install backends/python/requirements.txt into backends/python/.venv, or set PYTHON_PATH to a prepared interpreter.\n\n${errors.join('\n\n')}`);
+  throw new Error(`rebuild could not find Python 3.11/3.12 with its backend dependencies. Install backends/python/requirements.txt into backends/python/.venv, or set PYTHON_PATH to a prepared interpreter.\n\n${errors.join('\n\n')}`);
 }
 
 function assertPortAvailable(port = BACKEND_PORT) {
   return new Promise((resolve, reject) => {
     const probe = net.createServer();
-    probe.once('error', (error) => reject(new Error(`HETU cannot start on 127.0.0.1:${port}: ${error.code === 'EADDRINUSE' ? 'the port is already in use. Close the other HETU instance or process and reopen HETU.' : error.message}`)));
+    probe.once('error', (error) => reject(new Error(`rebuild cannot start on 127.0.0.1:${port}: ${error.code === 'EADDRINUSE' ? 'the port is already in use. Close the other rebuild instance or process and reopen rebuild.' : error.message}`)));
     probe.listen({ host: '127.0.0.1', port, exclusive: true }, () => probe.close(resolve));
   });
 }
@@ -127,10 +127,10 @@ async function launchBackend({ backendDir, runtime, port = BACKEND_PORT, timeout
     };
     child.stdout?.on('data', writeLog);
     child.stderr?.on('data', writeLog);
-    child.once('error', (error) => finish(new Error(`Could not launch the HETU backend: ${error.message}`)));
+    child.once('error', (error) => finish(new Error(`Could not launch the rebuild backend: ${error.message}`)));
     child.once('exit', (code, signal) => {
       writeLog(`\nBackend exited: code ${code}, signal ${signal}\n`);
-      finish(new Error(`The HETU backend stopped before it was ready (code ${code}, signal ${signal}).`));
+      finish(new Error(`The rebuild backend stopped before it was ready (code ${code}, signal ${signal}).`));
     });
     const deadline = Date.now() + timeoutMs;
     const poll = async () => {
@@ -138,7 +138,7 @@ async function launchBackend({ backendDir, runtime, port = BACKEND_PORT, timeout
       const healthy = await ready(port, Math.min(1000, timeoutMs));
       if (settled) return;
       if (healthy) return finish();
-      if (Date.now() >= deadline) return finish(new Error(`The HETU backend did not become ready within ${timeoutMs / 1000} seconds.`));
+      if (Date.now() >= deadline) return finish(new Error(`The rebuild backend did not become ready within ${timeoutMs / 1000} seconds.`));
       timer = setTimeout(poll, 200);
     };
     void poll();

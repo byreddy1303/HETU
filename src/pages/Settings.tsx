@@ -216,7 +216,7 @@ function HostedSettings() {
               hint={
                 isNativeApp
                   ? 'Subtle taps for selections, completed work, and errors.'
-                  : 'Used when HETU runs as the Android app.'
+                  : 'Used when rebuild runs as the Android app.'
               }
               value={prefs.hapticsEnabled}
               onChange={(v) => prefs.set('hapticsEnabled', v)}
@@ -306,7 +306,7 @@ function HostedSettings() {
 
       {/* --- Progress ----------------------------------------------------- */}
       <section id="settings-progress" className="settings-anchor settings-group" tabIndex={-1} aria-label="Progress report settings">
-      <ProgressExportCard userId={userId} learnerName={profile?.name ?? 'HETU learner'} />
+      <ProgressExportCard userId={userId} learnerName={profile?.name ?? 'rebuild learner'} />
       </section>
 
       {/* --- Session ------------------------------------------------------ */}

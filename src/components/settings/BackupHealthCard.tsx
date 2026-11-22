@@ -138,7 +138,7 @@ export default function BackupHealthCard({ children }: { children?: ReactNode })
           </p>
         )}
         <p className="text-xs leading-relaxed text-text-muted">
-          Automatic backups run at startup and hourly while HETU is open. Copies stay on this Mac.
+          Automatic backups run at startup and hourly while rebuild is open. Copies stay on this Mac.
         </p>
         <details className="local-settings__backup-details">
           <summary>Backup details</summary>

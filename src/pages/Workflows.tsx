@@ -194,7 +194,7 @@ export default function Workflows() {
                     ? 'Loading workflows…'
                     : loadError
                       ? 'Your saved task briefs could not load. Retry to see them.'
-                      : 'No saved task briefs yet. ChatGPT will create one when a multi-step HETU workflow begins.'}
+                      : 'No saved task briefs yet. ChatGPT will create one when a multi-step rebuild workflow begins.'}
                 </p>
               )}
             </nav>

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Bell, Download, Palette, Settings2, UserRound } from 'lucide-react';
 import PageHeader from '@/components/layout/PageHeader';
+import Brand from '@/components/shared/Brand';
 import { Card, CardBody, CardHeader } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
@@ -66,6 +67,7 @@ export default function LocalSettings() {
   }
   return (
     <div className="local-settings">
+      <Brand size="md" tagline className="mb-3" />
       <PageHeader compact title="Settings" description="A few preferences for your study space." />
       <Card id="settings-focus" className="settings-anchor" tabIndex={-1}>
         <CardHeader

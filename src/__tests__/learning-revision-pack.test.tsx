@@ -20,7 +20,7 @@ function pack(hash = 'a'.repeat(64)): LearningRevisionPack {
     complete: true,
     has_more: {},
     totals_within_scan: {},
-    text: 'HETU REVISION PACK\nNormalization\nSource: Study discussion\nFull explanation: https://hetu.test/learning-library/concept-one',
+    text: 'rebuild REVISION PACK\nNormalization\nSource: Study discussion\nFull explanation: https://hetu.test/learning-library/concept-one',
     sections: {
       weekly_focus: null,
       due_formulas: [],

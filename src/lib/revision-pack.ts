@@ -79,7 +79,7 @@ export function buildRevisionPack(args: {
 }
 
 export function revisionPackText(pack: RevisionPack): string {
-  const lines = ['HETU REVISION PACK', ''];
+  const lines = ['rebuild REVISION PACK', ''];
   if (pack.weeklyFix) lines.push('THIS WEEK', pack.weeklyFix, '');
   lines.push('DUE FORMULAS');
   lines.push(

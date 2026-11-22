@@ -388,7 +388,7 @@ export default function Mocks() {
               </summary>
               <div className="border-t border-border p-3">
                 <p className="mb-3 text-[11.5px] leading-relaxed text-text-muted">
-                  Hetu uses a mock in the readiness outcome range only when every condition is
+                  rebuild uses a mock in the readiness outcome range only when every condition is
                   explicitly known and matches a fresh 65-question, 100-mark full paper.
                 </p>
                 <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">

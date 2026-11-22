@@ -56,7 +56,8 @@ def test_cloud_copy_failure_is_visible_without_claiming_remote_backup(tmp_path, 
         original_copy(source, target)
 
     monkeypatch.setattr(local_backup, "_copy_verified", copy)
-    local_backup.backup_database(source, folder)
+    # iCloud copies are off by default since the rebuild rename; opt in to test the failure path.
+    local_backup.backup_database(source, folder, sync_icloud=True)
     status = local_backup.backup_status(source, folder)
     assert status["state"] == "warning"
     assert status["cloud_copy"]["state"] == "failed"

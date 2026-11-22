@@ -173,7 +173,7 @@ export default function BuddyNotificationsCard({ profile, sandbox }: Props) {
         <div className="flex items-start gap-3">
           <Bell size={15} strokeWidth={1.75} className="mt-0.5 shrink-0 text-accent" />
           <p className="text-[12.5px] leading-relaxed text-text-muted">
-            Get a phone or desktop alert when a buddy sends a message, even while HETU is
+            Get a phone or desktop alert when a buddy sends a message, even while rebuild is
             closed. Alerts stay quiet on a device that already has that chat open.
           </p>
         </div>
@@ -197,7 +197,7 @@ export default function BuddyNotificationsCard({ profile, sandbox }: Props) {
                   : permissionBlocked
                     ? 'Allow notifications in system or browser settings, then return here.'
                     : iosNeedsInstall
-                      ? 'On iPhone or iPad, add HETU to the Home Screen, reopen it, then enable alerts.'
+                      ? 'On iPhone or iPad, add rebuild to the Home Screen, reopen it, then enable alerts.'
                       : 'Enable once on every phone or computer where you want alerts.'}
               </p>
             </div>

@@ -33,7 +33,7 @@ export default function LearningRevisionPackPage() {
   ) : (
     <Empty
       title="Sign in to assemble your revision pack"
-      hint="Your saved discussions and study evidence belong to your HETU account."
+      hint="Your saved discussions and study evidence belong to your rebuild account."
     />
   );
 }

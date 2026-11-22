@@ -53,7 +53,7 @@ async def run(settings: SettingsDep, response: Response) -> dict:
     response.headers["Cache-Control"] = "no-store"
     source, directory = _paths(settings)
     try:
-        await run_in_threadpool(backup_database, source, directory)
+        await run_in_threadpool(backup_database, source, directory, sync_icloud=False)
     except BackupBusy as cause:
         raise HTTPException(409, str(cause)) from cause
     except (BackupFailure, OSError) as cause:

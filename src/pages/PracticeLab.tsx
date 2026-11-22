@@ -110,7 +110,7 @@ export default function PracticeLab() {
       {view && !view.complete && (
         <p className="text-xs text-warn">
           This view uses a bounded recent history. It does not establish lifetime totals or exposure
-          outside HETU.
+          outside rebuild.
         </p>
       )}
       {!view && !error && <p role="status">Reading your saved practice…</p>}

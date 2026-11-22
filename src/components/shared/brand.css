@@ -1,0 +1,78 @@
+/* rebuild identity: outlined Damaru mark beside a lowercase blue wordmark. */
+.rebuild-brand {
+  --brand-ink: #244ed0;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 9px;
+  color: var(--brand-ink);
+  vertical-align: middle;
+}
+
+:root[data-theme='dark'] .rebuild-brand {
+  --brand-ink: #a6bfff;
+}
+
+.rebuild-brand__lockup {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.rebuild-brand .rebuild-mark {
+  width: 32px;
+  height: 32px;
+}
+
+.rebuild-wordmark {
+  display: block;
+  width: 92px;
+  aspect-ratio: 825 / 210;
+  background: currentColor;
+  -webkit-mask: url('/brand/rebuild-wordmark.svg') center / contain no-repeat;
+  mask: url('/brand/rebuild-wordmark.svg') center / contain no-repeat;
+}
+
+.rebuild-brand--md .rebuild-mark {
+  width: 44px;
+  height: 44px;
+}
+
+.rebuild-brand--md .rebuild-wordmark {
+  width: 132px;
+}
+
+.rebuild-brand--lg .rebuild-brand__lockup {
+  gap: 16px;
+}
+
+.rebuild-brand--lg .rebuild-mark {
+  width: 70px;
+  height: 70px;
+}
+
+.rebuild-brand--lg .rebuild-wordmark {
+  width: 218px;
+}
+
+.rebuild-tagline {
+  color: rgb(var(--color-text-muted));
+  font-family: var(--font-sans, sans-serif);
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0;
+  line-height: 1.6;
+  text-transform: none;
+}
+
+.rebuild-brand--lg .rebuild-tagline {
+  font-size: 13px;
+}
+
+.rebuild-mark {
+  color-scheme: light;
+}
+
+:root[data-theme='dark'] .rebuild-mark {
+  color-scheme: dark;
+}

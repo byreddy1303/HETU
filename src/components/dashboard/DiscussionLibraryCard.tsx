@@ -85,7 +85,7 @@ export default function DiscussionLibraryCard({ userId }: { userId: string | nul
             </ul>
           </div>
         ) : (
-          <p className="mt-4 text-[12px] text-text-muted">No discussions saved yet. In ChatGPT, say “Save to HETU” after an explanation you want to remember.</p>
+          <p className="mt-4 text-[12px] text-text-muted">No discussions saved yet. In ChatGPT, say “Save to rebuild” after an explanation you want to remember.</p>
         )}
 
         <Link to="/learning-library" className="mt-4 inline-flex items-center gap-1.5 text-[12px] font-semibold text-accent hover:underline">

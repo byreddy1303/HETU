@@ -1,18 +1,7 @@
 import { cn } from '@/lib/utils';
+import './brand.css';
 
 type BrandSize = 'sm' | 'md' | 'lg';
-
-const MARK_SIZE: Record<BrandSize, string> = {
-  sm: 'h-7 w-auto',
-  md: 'h-9 w-auto',
-  lg: 'h-14 w-auto'
-};
-
-const WORD_SIZE: Record<BrandSize, string> = {
-  sm: 'text-[15px]',
-  md: 'text-[19px]',
-  lg: 'text-[28px]'
-};
 
 export function BrandMark({
   className,
@@ -23,37 +12,34 @@ export function BrandMark({
 }) {
   return (
     <img
-      src="/brand/hetu-cobalt.svg"
-      alt={decorative ? '' : 'HETU logo'}
+      src="/brand/rebuild-mark.svg"
+      alt={decorative ? '' : 'rebuild logo'}
       aria-hidden={decorative || undefined}
       width={512}
       height={512}
       decoding="async"
       draggable={false}
-      className={cn('block shrink-0 select-none', className)}
+      className={cn('rebuild-mark block shrink-0 select-none', className)}
     />
   );
 }
 
 export default function Brand({
   size = 'md',
-  className
+  className,
+  tagline = false
 }: {
   size?: BrandSize;
   className?: string;
+  tagline?: boolean;
 }) {
   return (
-    <span className={cn('inline-flex items-center gap-2.5', className)} aria-label="HETU">
-      <BrandMark className={MARK_SIZE[size]} decorative />
-      <span
-        aria-hidden="true"
-        className={cn(
-          'font-sans font-semibold uppercase leading-none tracking-[0.18em] text-text',
-          WORD_SIZE[size]
-        )}
-      >
-        HETU
+    <span className={cn('rebuild-brand', `rebuild-brand--${size}`, className)}>
+      <span className="rebuild-brand__lockup" role="img" aria-label="rebuild">
+        <BrandMark decorative />
+        <span className="rebuild-wordmark" aria-hidden="true" />
       </span>
+      {tagline && <span className="rebuild-tagline">Every mistake. One step higher.</span>}
     </span>
   );
 }

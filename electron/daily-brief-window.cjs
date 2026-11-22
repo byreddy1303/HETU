@@ -12,7 +12,7 @@ function showDailyBrief({ brief, preview, time }) {
     width: Math.min(640, area.width), height: Math.min(760, area.height),
     minWidth: Math.min(380, area.width), minHeight: Math.min(520, area.height),
     show: false, maximizable: false, fullscreenable: false,
-    autoHideMenuBar: true, title: 'HETU · Your daily brief',
+    autoHideMenuBar: true, title: 'rebuild · Your daily brief',
     backgroundColor: '#f7f8fc',
     webPreferences: {
       preload: path.join(__dirname, 'daily-brief-preload.cjs'),

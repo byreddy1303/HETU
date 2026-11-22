@@ -317,7 +317,7 @@ function ConnectedTestAnalysis({ analysisId }: { analysisId: string }) {
         </div>
       </div>
       <nav
-        aria-label="Continue studying in Hetu"
+        aria-label="Continue studying in rebuild"
         className="flex flex-wrap gap-x-5 gap-y-3 border-t border-border pt-5 text-[13px]"
       >
         {studyLinks.map(([href, label]) => (

@@ -6,8 +6,8 @@ const { createDailyBrief } = require('./daily-brief.cjs');
 const { showDailyBrief } = require('./daily-brief-window.cjs');
 const { prepareDesktopRenderer } = require('./desktop-renderer.cjs');
 
-// Preserve the existing profile and SQLite location when productName is capitalized.
-app.setName('hetu');
+// The display name changes; runtime.cjs keeps the established hetu workspace.
+app.setName('rebuild');
 const dataDir = getLocalDataDir();
 let profileError;
 try {
@@ -39,7 +39,7 @@ async function createWindow(route = '/') {
     minWidth: 1024,
     minHeight: 700,
     backgroundColor: '#090a0f',
-    title: 'HETU',
+    title: 'rebuild',
     titleBarStyle: process.platform === 'darwin' ? 'hiddenInset' : 'default',
     trafficLightPosition: { x: 18, y: 18 },
     webPreferences: {
@@ -70,8 +70,8 @@ async function createWindow(route = '/') {
 
 function fail(error) {
   if (quitting) return;
-  console.error('[HETU Desktop]', error);
-  dialog.showErrorBox('HETU could not start', `${error.message}\n\nYour study data remains at:\n${dataDir}\n\nBackend log:\n${path.join(dataDir, 'backend.log')}`);
+  console.error('[rebuild Desktop]', error);
+  dialog.showErrorBox('rebuild could not start', `${error.message}\n\nYour study data remains at:\n${dataDir}\n\nBackend log:\n${path.join(dataDir, 'backend.log')}`);
   app.quit();
 }
 
@@ -88,7 +88,7 @@ if (!app.requestSingleInstanceLock()) {
     mainWindow?.focus();
   });
   app.whenReady().then(async () => {
-    if (profileError) throw new Error(`HETU could not open its data directory: ${profileError.message}`);
+    if (profileError) throw new Error(`rebuild could not open its data directory: ${profileError.message}`);
     ipcMain.handle('get-app-version', () => app.getVersion());
     fs.mkdirSync(path.join(dataDir, 'images'), { recursive: true, mode: 0o700 });
     logStream = fs.createWriteStream(path.join(dataDir, 'backend.log'), { flags: 'a', mode: 0o600 });
@@ -100,10 +100,10 @@ if (!app.requestSingleInstanceLock()) {
     }
     const env = getLocalEnvironment({ backendDir, dataDir, staticDir });
     const runtime = getPythonRuntime({ backendDir, env });
-    logStream.write(`\nStarting HETU with ${runtime.pythonPath}\nDatabase: ${env.DATABASE_URL}\n`);
+    logStream.write(`\nStarting rebuild with ${runtime.pythonPath}\nDatabase: ${env.DATABASE_URL}\n`);
     backendProcess = await launchBackend({ backendDir, runtime, logStream, onSpawn: (child) => { backendProcess = child; } });
     backendProcess.once('exit', (code, signal) => {
-      if (!quitting) fail(new Error(`The HETU data service stopped (code ${code}, signal ${signal}). Reopen HETU to restart it.`));
+      if (!quitting) fail(new Error(`The rebuild data service stopped (code ${code}, signal ${signal}). Reopen rebuild to restart it.`));
     });
     await createWindow();
     dailyBrief = createDailyBrief({
@@ -122,7 +122,7 @@ if (!app.requestSingleInstanceLock()) {
     const trustedSender = (event) => {
       if (!mainWindow || event.sender !== mainWindow.webContents ||
           new URL(event.senderFrame.url).origin !== new URL(targetUrl).origin) {
-        throw new Error('Daily brief controls require the local HETU window.');
+        throw new Error('Daily brief controls require the local rebuild window.');
       }
     };
     ipcMain.handle('daily-brief:get', (event) => { trustedSender(event); return dailyBrief.status(); });

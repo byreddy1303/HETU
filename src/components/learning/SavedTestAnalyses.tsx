@@ -83,7 +83,7 @@ function ConnectedTestAnalyses() {
         )}
         {result?.items.length === 0 && (
           <p className="text-[13px] text-text-muted">
-            After analyzing your screenshots, ask ChatGPT: “Save this test to Hetu, including the
+            After analyzing your screenshots, ask ChatGPT: “Save this test to rebuild, including the
             concepts and formulas, and add every question to Re-attempts.”
           </p>
         )}

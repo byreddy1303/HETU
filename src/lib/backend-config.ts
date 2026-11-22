@@ -25,7 +25,7 @@ export function readBackendConfig(env: Record<string, string | undefined>) {
   const clerkKey = env.VITE_CLERK_PUBLISHABLE_KEY || '';
   const error =
     backend !== 'fastapi'
-      ? 'HETU requires the Python backend. Set VITE_BACKEND=fastapi.'
+      ? 'rebuild requires the Python backend. Set VITE_BACKEND=fastapi.'
       : !isValidApiUrl(apiUrl) || (!isLocal && !/^pk_(test|live)_\S+$/.test(clerkKey))
         ? 'FastAPI requires a valid VITE_API_URL and VITE_CLERK_PUBLISHABLE_KEY.'
         : null;

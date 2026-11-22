@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <title>rebuild — outlined Damaru</title>
+  <style>:root{--ink:#244ed0;--coral:#d9574c}@media(prefers-color-scheme:dark){:root{--ink:#a6bfff;--coral:#f28378}}</style>
+  <g fill="none" stroke="var(--ink)" stroke-width="14" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M238 126a175 175 0 1 0 36 0"/>
+    <path d="M182 222c12 31 44 60 44 82s-32 51-44 82m148-164c-12 31-44 60-44 82s32 51 44 82"/>
+    <path d="M287 304c29-22 49 4 77 22" stroke-width="11"/>
+    <path d="M256 126c-24-20-31-36-22-56 8-18 25-30 22-51 30 31 46 66 0 107Z" stroke="var(--coral)" stroke-width="11"/>
+    <path d="M182 222h148m-148 164h148" stroke="var(--coral)" stroke-width="22"/>
+  </g>
+  <circle cx="369" cy="330" r="13" fill="var(--coral)"/>
+</svg>

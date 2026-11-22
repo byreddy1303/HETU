@@ -188,7 +188,7 @@ function DiagnosisForm({ initial }: { initial: SkillDiagnosis }) {
       <PageHeader
         compact
         title={result.skill.title}
-        description="Commit both answers before comparing the changed condition. These are HETU teaching exercises."
+        description="Commit both answers before comparing the changed condition. These are rebuild teaching exercises."
       />
       <p className="text-sm text-text-muted">
         {result.skill.subject} · {result.skill.topic}

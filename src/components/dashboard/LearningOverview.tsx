@@ -234,7 +234,7 @@ function OverviewData({
                 </h3>
                 <p className="mt-2 max-w-prose text-sm leading-relaxed text-text-muted">
                   {working
-                    ? 'HETU will add an activity after it checks the saved answers and explanations.'
+                    ? 'rebuild will add an activity after it checks the saved answers and explanations.'
                     : actions.upcoming.length
                       ? 'Scheduled checks stay below until their review date. You can continue other practice today.'
                       : 'Complete a practice set, review a concept, or open Learning Memory to connect a local model.'}

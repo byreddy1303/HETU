@@ -1,5 +1,5 @@
 {
-  "name": "hetu",
+  "name": "rebuild",
   "private": true,
   "version": "0.1.0",
   "type": "module",
@@ -110,7 +110,7 @@
   "build": {
     "beforePack": "./electron/before-pack.cjs",
     "appId": "com.hetu.app",
-    "productName": "HETU",
+    "productName": "rebuild",
     "directories": {
       "output": "release"
     },
@@ -119,14 +119,14 @@
       "target": [
         "dir"
       ],
-      "icon": "public/hetu-cobalt-512.png",
+      "icon": "public/rebuild-1024.png",
       "identity": null
     },
     "win": {
       "target": [
         "nsis"
       ],
-      "icon": "public/hetu-cobalt-512.png"
+      "icon": "public/rebuild-1024.png"
     },
     "files": [
       "dist/**/*",

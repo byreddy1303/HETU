@@ -239,7 +239,7 @@ export default function Landing() {
 
   useEffect(() => {
     const previousTitle = document.title;
-    document.title = 'HETU — Understand. Rebuild. Remember.';
+    document.title = 'rebuild — Every mistake. One step higher.';
     return () => {
       document.title = previousTitle;
     };
@@ -252,7 +252,7 @@ export default function Landing() {
       </a>
       <div className="observatory-header-shell">
         <header className="observatory-nav">
-          <Link to="/" aria-label="HETU home" className="observatory-brand">
+          <Link to="/" aria-label="rebuild home" className="observatory-brand">
             <Brand />
           </Link>
           <nav aria-label="Landing page">
@@ -392,7 +392,7 @@ export default function Landing() {
               only the beginning.
             </h2>
             <p>
-              Getting a question wrong is a moment. Understanding why is a turning point. HETU helps
+              Getting a question wrong is a moment. Understanding why is a turning point. rebuild helps
               you take the next step, with a clear path from practice to lasting recall.
             </p>
             <div className="observatory-method__note">
@@ -441,7 +441,7 @@ export default function Landing() {
                   <span>Understand</span>
                 </div>
                 <div className="observatory-book observatory-book--front">
-                  <span>HETU</span>
+                  <span>rebuild</span>
                   <strong>
                     Think it
                     <br />
@@ -538,7 +538,7 @@ export default function Landing() {
         </section>
       </main>
       <footer className="observatory-footer">
-        <Link to="/" aria-label="HETU home">
+        <Link to="/" aria-label="rebuild home">
           <Brand size="sm" />
         </Link>
         <p>Find the reason. Change the outcome.</p>

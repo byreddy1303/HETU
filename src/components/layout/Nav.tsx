@@ -191,7 +191,11 @@ export default function Nav() {
       </div>
       <div className="workspace-sidebar__intro">
         <span aria-hidden />
-        <p>Personal study space</p>
+        <p>
+          Every mistake.
+          <br />
+          One step higher.
+        </p>
       </div>
       <nav className="workspace-sidebar__navigation" aria-label="Main navigation">
         {backendConfig.isLocal ? (

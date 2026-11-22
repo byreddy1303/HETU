@@ -397,7 +397,7 @@ export default function LearningWorkflows() {
           {status && ['running', 'disabled'].includes(status.state) && (
             <p className="mb-4 text-xs text-text-muted">
               {status.state === 'running'
-                ? 'HETU is reviewing saved learning and updating follow-ups.'
+                ? 'rebuild is reviewing saved learning and updating follow-ups.'
                 : status.state === 'disabled'
                   ? 'Automatic analysis is paused. Saved activities and results remain available.'
                   : 'Activities follow recorded performance; retention and independent mastery remain unverified.'}
@@ -444,10 +444,10 @@ export default function LearningWorkflows() {
             !error && (
               <div className="max-w-prose rounded-lg bg-bg p-4 text-sm leading-relaxed text-text-muted">
                 {filter === 'upcoming'
-                  ? 'No dated checks are waiting yet. HETU adds the next check after completed linked practice.'
+                  ? 'No dated checks are waiting yet. rebuild adds the next check after completed linked practice.'
                   : actions.items.length
                     ? 'No study activities are due today. Upcoming checks have their own dates; you can review those above.'
-                    : 'No prepared study activities yet. Complete practice and save your reasoning so HETU can prepare focused follow-ups.'}{' '}
+                    : 'No prepared study activities yet. Complete practice and save your reasoning so rebuild can prepare focused follow-ups.'}{' '}
                 <Link to={filter === 'upcoming' ? '/today' : '/pyq'} className={linkClass}>
                   {filter === 'upcoming' ? 'Open Do now' : 'Open practice'}
                 </Link>

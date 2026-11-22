@@ -756,7 +756,7 @@ function AvailabilityEditor({
         </div>
         {plan.availability.timeWindows.length === 0 ? (
           <p className="mt-3 border-l-2 border-border pl-3 text-[11.5px] text-text-faint">
-            No fixed windows. Hetu will use the available-minute budget without assigning clock
+            No fixed windows. rebuild will use the available-minute budget without assigning clock
             times.
           </p>
         ) : (

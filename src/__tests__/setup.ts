@@ -1,5 +1,13 @@
 import 'fake-indexeddb/auto';
 import '@testing-library/jest-dom/vitest';
+import { vi } from 'vitest';
+
+// Tests commit answers within milliseconds, which the under-8-second check would
+// intercept. Keep it off here; src/__tests__/fast-answer.test.tsx tests it for real.
+vi.mock('@/lib/fast-answer', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/lib/fast-answer')>()),
+  needsFastAnswerCheck: () => false
+}));
 
 // Node 26 ships an experimental `localStorage` global that is undefined unless
 // launched with --localstorage-file, and jsdom refuses to expose localStorage

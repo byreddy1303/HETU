@@ -73,7 +73,7 @@ export default function ProgressDashboard() {
           value={firstTries ? `${Math.round((firstTryCorrect / firstTries) * 100)}%` : '–'}
           detail={
             firstTries
-              ? `${firstTryCorrect} of ${firstTries} answered questions`
+              ? `${firstTryCorrect} of ${firstTries} answered; 50/50 guesses don't count`
               : 'Answer a PYQ to start measuring'
           }
         />
@@ -122,7 +122,12 @@ export default function ProgressDashboard() {
         </p>
       )}
 
-      <CoverageMap subjects={subjects} bankLoaded={bank.loaded} lastYear={bank.lastYear} />
+      <CoverageMap
+        subjects={subjects}
+        bankLoaded={bank.loaded}
+        lastYear={bank.lastYear}
+        paceLastYear={bank.paceLastYear}
+      />
 
       <div className="progress-board__split">
         <ReattemptLadder pipeline={pipeline} dueNow={reattempts.dueNow} />

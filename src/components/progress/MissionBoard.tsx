@@ -21,6 +21,8 @@ interface MissionBoardProps {
   bankLoaded: boolean;
   bankError: string | null;
   lastYear: number | null;
+  /** Newest year in the paced set; later papers stay sealed for mocks. */
+  paceLastYear: number | null;
   onRetryBank: () => void;
 }
 
@@ -83,6 +85,27 @@ function PaceTile({
         <p className="target-tile__hint">Counting unseen PYQs…</p>
       </li>
     );
+  if (pace.mockDay)
+    return (
+      <li className={`target-tile target-tile--${kind}`} data-state="open">
+        <p className="target-tile__label">
+          {icon}
+          {title}
+        </p>
+        <p className="target-tile__value target-tile__value--text">
+          <strong>Mock day</strong>
+        </p>
+        <p className="target-tile__hint">
+          Today&apos;s mock is the practice; new PYQs resume tomorrow
+          {pace.doneToday > 0 ? ` (${pace.doneToday} done anyway)` : ''}.
+        </p>
+        {pace.remaining > 0 && (
+          <Link className="target-tile__action" to={href}>
+            Practise anyway <ArrowRight size={14} aria-hidden />
+          </Link>
+        )}
+      </li>
+    );
   return (
     <li className={`target-tile target-tile--${kind}`} data-state={met ? 'done' : 'open'}>
       <p className="target-tile__label">
@@ -128,6 +151,7 @@ export default function MissionBoard({
   bankLoaded,
   bankError,
   lastYear,
+  paceLastYear,
   onRetryBank
 }: MissionBoardProps) {
   if (!signals) {
@@ -147,7 +171,23 @@ export default function MissionBoard({
     subjects.find((subject) => subject.subjectId !== APTITUDE_ID && subject.stage === 'practise') ??
     subjects.find((subject) => subject.subjectId !== APTITUDE_ID) ??
     null;
-  const coreSet = setSize(plan.core.dailyTarget, plan.core.doneToday);
+  // From Consolidate on, sets mix every studied subject and hide topic labels, so each
+  // question first asks which method applies (interleaved practice).
+  const studied = subjects
+    .filter((subject) => subject.subjectId !== APTITUDE_ID && subject.stage !== 'learn')
+    .map((subject) => subject.subjectId);
+  const mixed = (phase.id === 'consolidate' || phase.id === 'simulate') && studied.length >= 2;
+  const coreSet = setSize(plan.core.pace, plan.core.doneToday);
+  const coreHref = mixed
+    ? practiceHref({
+        subjectIds: studied,
+        count: coreSet,
+        toYear: lastYear,
+        order: 'random',
+        hideTopics: true
+      })
+    : practiceHref({ subjectId: focus?.subjectId, count: coreSet, toYear: lastYear });
+  const coreLabel = `Start ${coreSet} · ${mixed ? 'mixed' : (focus?.shortLabel ?? 'mixed')}`;
   const aptitudeSet = setSize(plan.aptitude.dailyTarget, plan.aptitude.doneToday);
   const reviewTotal = reattempts.doneToday + reattempts.dueNow;
   const reviewsClear = reattempts.dueNow === 0;
@@ -211,7 +251,7 @@ export default function MissionBoard({
                 ? 'Retrieve before practising new questions.'
                 : reattempts.nextDueOn
                   ? `Next due ${formatDate(reattempts.nextDueOn, 'EEE d MMM')}.`
-                  : 'Missed questions return here on a D3 → D10 → D30 ladder.'}
+                  : 'Missed questions return on a D3 → D10 → D30 ladder; gaps shrink as the exam nears.'}
           </p>
           {reattempts.dueNow > 0 ? (
             <Link className="target-tile__action target-tile__action--primary" to="/reattempts">
@@ -230,8 +270,8 @@ export default function MissionBoard({
           icon={<Sparkles size={15} aria-hidden />}
           pace={plan.core}
           ready={bankLoaded}
-          href={practiceHref({ subjectId: focus?.subjectId, count: coreSet, toYear: lastYear })}
-          actionLabel={`Start ${coreSet} · ${focus?.shortLabel ?? 'mixed'}`}
+          href={coreHref}
+          actionLabel={coreLabel}
         />
 
         <PaceTile
@@ -302,11 +342,14 @@ export default function MissionBoard({
           <>
             <span>
               <strong>{number.format(remaining)}</strong> PYQs from {PACE_FROM_YEAR}–
-              {lastYear ?? 'now'} still unseen.{' '}
+              {paceLastYear ?? lastYear ?? 'now'} still unseen.{' '}
               <strong>
-                {plan.core.dailyTarget} core + {plan.aptitude.dailyTarget} aptitude a day
+                {plan.core.pace} core on non-mock days + {plan.aptitude.pace} aptitude daily
               </strong>{' '}
               clears them by {finishBy}, before the full-mock weeks.
+              {lastYear && paceLastYear && lastYear > paceLastYear
+                ? ` ${lastYear} papers stay sealed for your final mocks.`
+                : ''}
             </span>
             {plan.savedGoal &&
               (plan.savedGoal.afterExam ? (

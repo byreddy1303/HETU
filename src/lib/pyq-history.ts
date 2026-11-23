@@ -63,7 +63,11 @@ export function matchesPyqHistory(
   if (filter === 'guessed')
     return latest.mark_decision === 'FIFTY_FIFTY' && latest.mark_correct === true;
   if (filter === 'slow')
-    return latest.mark_correct === true && latest.time_spent_sec > targetSeconds(question);
+    return (
+      latest.mark_correct === true &&
+      latest.duration_source !== 'unknown' &&
+      latest.time_spent_sec > targetSeconds(question)
+    );
   if (filter === 'skipped') return latest.mark_decision === 'SKIP';
   if (filter === 'unanalyzed')
     return latest.mark_correct === false && !analyzedAttempts.has(latest.id);

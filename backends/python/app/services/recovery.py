@@ -31,10 +31,13 @@ from app.services.pyq_practice import (
 )
 from app.services.records import lock_identity, require_version, to_api, upsert_records
 from app.services.recovery_engine import (
+    DEFAULT_EXAM_DATE,
     Mode,
     build_sprint,
     derive_grade,
+    exam_interval,
     forecast,
+    is_final_pass_due,
     rank_candidates,
     transition,
 )
@@ -140,6 +143,21 @@ async def account_clock(db: AsyncSession, owner_id: str) -> tuple[str, date, str
         raise HTTPException(422, "Account timezone is invalid; update it in Settings") from cause
     now = now_utc()
     return now.isoformat(), now.astimezone(zone).date(), timezone
+
+
+def account_exam_date(user: User | None) -> date | None:
+    """The exam the schedule works towards: the profile's date, else the GATE 2027 default."""
+    raw = (user.profile or {}).get("exam_date") if user is not None else None
+    if isinstance(raw, str) and raw.strip():
+        try:
+            return date.fromisoformat(raw.strip()[:10])
+        except ValueError:
+            pass
+    return DEFAULT_EXAM_DATE
+
+
+async def exam_date_for(db: AsyncSession, owner_id: str) -> date | None:
+    return account_exam_date(await db.get(User, owner_id))
 
 
 async def owner_lock(db: AsyncSession, owner_id: str) -> None:
@@ -266,8 +284,16 @@ async def append_event(db: AsyncSession, owner_id: str, data: dict) -> Record:
 
 
 def initial_item(
-    *, item_id: str, subject: str, topic: str | None, today: date, reasons: list[str], **fields
+    *,
+    item_id: str,
+    subject: str,
+    topic: str | None,
+    today: date,
+    reasons: list[str],
+    exam_date: date | None = None,
+    **fields,
 ) -> dict:
+    first_gap = exam_interval(3, today, exam_date) or 3
     return {
         "id": item_id,
         "source_kind": "manual",
@@ -281,7 +307,7 @@ def initial_item(
         "analysis_state": "pending",
         "recovery_state": "active",
         "stage": "D3",
-        "scheduled_date": (today + timedelta(days=3)).isoformat(),
+        "scheduled_date": (today + timedelta(days=first_gap)).isoformat(),
         "reason_flags": reasons,
         "lapse_count": 0,
         "successful_retrieval_count": 0,
@@ -407,6 +433,8 @@ async def credit_practice_attempt(
     """
     previous_stage = data.get("stage")
     due = data.get("scheduled_date")
+    exam_date = await exam_date_for(db, owner_id)
+    final_pass = is_final_pass_due(data, attempted_day)
     correct = attempt.get("mark_correct")
     blank = attempt.get("mark_decision") == "SKIP" or attempt.get("selected_answer") in (
         None,
@@ -446,6 +474,7 @@ async def credit_practice_attempt(
             today=attempted_day,
             occurred_at=attempted_at,
             qualification="canonical",
+            exam_date=exam_date,
         )
         updated = {**result["item"], "analysis_state": "pending"}
         return updated, {
@@ -464,10 +493,10 @@ async def credit_practice_attempt(
                 f"{updated['scheduled_date']}."
             ),
         }
-    if data.get("recovery_state") in {"mastered", "remediation"} or previous_stage in {
-        "MASTERED",
-        "TRANSFER",
-    }:
+    if not final_pass and (
+        data.get("recovery_state") in {"mastered", "remediation"}
+        or previous_stage in {"MASTERED", "TRANSFER"}
+    ):
         reason = (
             "already mastered"
             if previous_stage == "MASTERED" or data.get("recovery_state") == "mastered"
@@ -520,6 +549,7 @@ async def credit_practice_attempt(
         today=attempted_day,
         occurred_at=attempted_at,
         qualification="canonical",
+        exam_date=exam_date,
     )
     updated = result["item"]
     return updated, {
@@ -531,6 +561,7 @@ async def credit_practice_attempt(
         "next_stage": updated["stage"],
         "next_due_date": updated["scheduled_date"],
         "mastered": result["mastered"],
+        "final_pass": final_pass and result["mastered"],
         "explanation": result["explanation"],
     }
 
@@ -605,6 +636,7 @@ async def capture_attempt(
                 topic=(attempt.get("question_snapshot") or {}).get("topic"),
                 today=attempted_day,
                 reasons=reasons,
+                exam_date=await exam_date_for(db, owner_id),
                 source_kind="pyq",
                 question_uid=attempt["question_uid"],
                 origin_pyq_attempt_id=attempt_id,
@@ -791,6 +823,7 @@ async def schedule_question(db: AsyncSession, *, owner_id: str, question_id: str
             topic=question.data.get("subtopic"),
             today=today,
             reasons=["manual-recovery"],
+            exam_date=await exam_date_for(db, owner_id),
             source_question_id=question_id,
             analysis_state="completed",
         )
@@ -812,6 +845,7 @@ async def schedule_question(db: AsyncSession, *, owner_id: str, question_id: str
             ),
         )
     elif item.data.get("recovery_state") == "mastered":
+        gap = exam_interval(3, today, await exam_date_for(db, owner_id)) or 3
         item = await write(
             db,
             owner_id,
@@ -820,7 +854,7 @@ async def schedule_question(db: AsyncSession, *, owner_id: str, question_id: str
                 **item.data,
                 "stage": "D3",
                 "recovery_state": "active",
-                "scheduled_date": (today + timedelta(days=3)).isoformat(),
+                "scheduled_date": (today + timedelta(days=gap)).isoformat(),
                 "mastered_at": None,
             },
             item,
@@ -1545,11 +1579,14 @@ async def record_answer(
         return replay
     session, item = await current(db, owner_id, session_id, draft)
     previous_item = dict(item.data)
-    if item.data.get("recovery_state") in {"mastered", "paused", "remediation"}:
+    occurred, today, timezone = await account_clock(db, owner_id)
+    state = item.data.get("recovery_state")
+    if state in {"paused", "remediation"} or (
+        state == "mastered" and not is_final_pass_due(item.data, today)
+    ):
         raise HTTPException(409, "This item requires its current recovery action before answering")
     if item.data.get("source_kind") == "concept":
         raise HTTPException(422, "Submit this concept answer through the concept response API")
-    occurred, today, timezone = await account_clock(db, owner_id)
     assisted = draft.assistance != "none" or item.external_id in session.data.get(
         "hinted_item_ids", []
     )
@@ -1659,6 +1696,7 @@ async def record_answer(
         occurred_at=occurred,
         qualification=qualification,
         fresh_transfer=fresh,
+        exam_date=await exam_date_for(db, owner_id),
     )
     if attempt:
         result["item"]["latest_pyq_attempt_id"] = attempt["id"]
@@ -1713,7 +1751,7 @@ async def record_answer(
             previous_item["stage"] == "TRANSFER",
             "transfer_passed" if result["mastered"] else "transfer_failed",
         ),
-        (result["mastered"], "mastered"),
+        (result["mastered"] and previous_item["stage"] != "MASTERED", "mastered"),
     ):
         if enabled:
             events.append(
@@ -2053,7 +2091,12 @@ async def concept_response_evidence(
             else "good"
         )
         result = transition(
-            item.data, grade=grade, today=today, occurred_at=occurred, qualification="reported"
+            item.data,
+            grade=grade,
+            today=today,
+            occurred_at=occurred,
+            qualification="reported",
+            exam_date=await exam_date_for(db, owner_id),
         )
         data, explanation = result["item"], result["explanation"]
     saved_session = None
@@ -2075,7 +2118,12 @@ async def concept_response_evidence(
         if assisted and grade == "good":
             grade = "hard"
             result = transition(
-                item.data, grade=grade, today=today, occurred_at=occurred, qualification="reported"
+                item.data,
+                grade=grade,
+                today=today,
+                occurred_at=occurred,
+                qualification="reported",
+                exam_date=await exam_date_for(db, owner_id),
             )
             data, explanation = result["item"], result["explanation"]
         saved_session = await write(

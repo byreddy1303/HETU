@@ -184,15 +184,16 @@ export function rankRecoveryCandidates(
   return candidates
     .filter(
       ({ item }) =>
-        item.recovery_state !== 'mastered' &&
         item.recovery_state !== 'paused' &&
-        item.scheduled_date != null
+        item.scheduled_date != null &&
+        // A mastered question rejoins only for its final-pass look, once that day arrives.
+        (item.recovery_state !== 'mastered' || item.scheduled_date <= today)
     )
     .map((candidate) => {
       const due = candidate.item.scheduled_date as string;
       const overdueDays = Math.max(0, dayDifference(today, due));
       const dueToday = due <= today;
-      const reasons: string[] = [];
+      const reasons: string[] = candidate.item.recovery_state === 'mastered' ? ['final pass'] : [];
       let score = dueToday ? 100 : Math.max(0, 30 - Math.max(0, dayDifference(due, today)) * 4);
       if (overdueDays > 0) {
         score += Math.min(80, overdueDays * 6);
@@ -328,7 +329,8 @@ export function forecastRecoveryLoad(
     overdue: 0
   }));
   for (const candidate of candidates) {
-    if (!candidate.item.scheduled_date || candidate.item.recovery_state === 'mastered') continue;
+    // Mastered questions keep a date only for their final-pass look.
+    if (!candidate.item.scheduled_date) continue;
     const offset = dayDifference(candidate.item.scheduled_date, startDate);
     const bucketIndex = offset < 0 ? 0 : offset;
     if (bucketIndex >= result.length) continue;

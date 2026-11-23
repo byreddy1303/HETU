@@ -446,11 +446,17 @@ export function createPyqReattemptAttemptRow(args: {
   committedAtMs: number;
   screenshotUrl: string | null;
   attemptNumber: number;
+  /**
+   * The active bank version. The server accepts receipts only against the current
+   * bank, so a question first answered under an older bank must not reuse that version.
+   */
+  bankVersion?: string;
 }): PyqAttemptRow {
+  const bankVersion = args.bankVersion ?? args.sourceAttempt.bank_version;
   const syntheticSession: PyqSessionRow = {
     id: args.sourceAttempt.pyq_session_id ?? args.sourceAttempt.id,
     user_id: args.userId,
-    bank_version: args.sourceAttempt.bank_version,
+    bank_version: bankVersion,
     config: {
       bookSlug: pyqBookSlugForQuestion(args.question),
       subjectSlug: args.question.subjectSlug,
@@ -482,7 +488,7 @@ export function createPyqReattemptAttemptRow(args: {
     question: args.question,
     selectedAnswer: args.selectedAnswer,
     decision: args.decision,
-    bankVersion: args.sourceAttempt.bank_version,
+    bankVersion,
     questionStartedAtMs: args.questionStartedAtMs,
     committedAtMs: args.committedAtMs,
     screenshotUrl: args.screenshotUrl,

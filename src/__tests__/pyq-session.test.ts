@@ -977,3 +977,52 @@ describe('PYQ session logic and determinism', () => {
     expect(legacyPyqJournalQuestionId(firstAttempt.id)).not.toBe(journalQuestionId);
   });
 });
+
+describe('re-attempt receipts after a bank update', () => {
+  it('carry the active bank version instead of the original attempt’s', () => {
+    const session = createPyqSessionRow('user-1', 'bank-v12', mockConfig, [question]);
+    const original = createPyqAttemptRow({
+      userId: 'user-1',
+      session,
+      question,
+      selectedAnswer: 'A',
+      decision: 'MARK',
+      bankVersion: 'bank-v12',
+      questionStartedAtMs: 1_000,
+      committedAtMs: 2_000,
+      screenshotUrl: null
+    });
+    const receipt = createPyqReattemptAttemptRow({
+      userId: 'user-1',
+      reattemptId: 'item-1',
+      reattemptRound: 0,
+      roundAttemptNumber: 1,
+      sourceAttempt: original,
+      bankVersion: 'bank-v13',
+      question,
+      selectedAnswer: 'A',
+      decision: 'MARK',
+      questionStartedAtMs: 3_000,
+      committedAtMs: 4_000,
+      screenshotUrl: null,
+      attemptNumber: 2
+    });
+    expect(receipt.bank_version).toBe('bank-v13');
+    expect(receipt.pyq_session_id).toBeNull();
+    const unchanged = createPyqReattemptAttemptRow({
+      userId: 'user-1',
+      reattemptId: 'item-1',
+      reattemptRound: 0,
+      roundAttemptNumber: 2,
+      sourceAttempt: original,
+      question,
+      selectedAnswer: 'A',
+      decision: 'MARK',
+      questionStartedAtMs: 3_000,
+      committedAtMs: 4_000,
+      screenshotUrl: null,
+      attemptNumber: 3
+    });
+    expect(unchanged.bank_version).toBe('bank-v12');
+  });
+});

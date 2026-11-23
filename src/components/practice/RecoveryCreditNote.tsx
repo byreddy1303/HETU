@@ -38,9 +38,11 @@ export default function RecoveryCreditNote({ credit }: { credit: PracticeCredit 
       <p className="flex items-start gap-2 rounded border border-success/25 bg-success-faint px-3 py-2 text-[12.5px] text-text">
         <TrendingUp size={14} className="mt-0.5 shrink-0 text-success" aria-hidden />
         <span>
-          {credit.mastered
-            ? 'Re-attempt passed. This question is now mastered.'
-            : `Re-attempt passed: ${credit.previous_stage ?? 'D3'} → ${credit.next_stage ?? ''}${due ? `, next check ${due}` : ''}.`}
+          {credit.final_pass
+            ? 'Final pass done. This question is ready for the exam.'
+            : credit.mastered
+              ? 'Re-attempt passed. This question is now mastered.'
+              : `Re-attempt passed: ${credit.previous_stage ?? 'D3'} → ${credit.next_stage ?? ''}${due ? `, next check ${due}` : ''}.`}
         </span>
       </p>
     );

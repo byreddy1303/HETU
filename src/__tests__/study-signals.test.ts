@@ -253,10 +253,13 @@ describe('dailyPlan', () => {
       remaining: 109,
       doneToday: 2,
       olderToday: 1,
-      daysLeft: 56,
-      deadline: '2027-01-18'
+      // 56 calendar days minus 12 mock days (Sundays, then Wednesdays and Sundays).
+      daysLeft: 44,
+      deadline: '2027-01-18',
+      mockDay: false
     });
-    expect(plan.core.dailyTarget).toBe(Math.ceil(111 / 56));
+    expect(plan.core.dailyTarget).toBe(Math.ceil(111 / 44));
+    expect(plan.core.pace).toBe(plan.core.dailyTarget);
     expect(plan.aptitude).toMatchObject({ total: 20, attempted: 1, doneToday: 1 });
     expect(plan.aptitude.dailyTarget).toBe(5);
     expect(plan.savedGoal).toMatchObject({ perDay: 15, afterExam: false, afterDeadline: false });

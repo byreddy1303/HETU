@@ -41,6 +41,8 @@ export interface PracticeCredit {
   lapse_count?: number;
   remediation?: boolean;
   mastered?: boolean;
+  /** A mastered question's one last look before the exam was passed. */
+  final_pass?: boolean;
   explanation: string;
 }
 

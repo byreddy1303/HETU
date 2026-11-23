@@ -11,6 +11,7 @@ import {
   BrainCircuit,
   CheckCircle2,
   Clock3,
+  Crosshair,
   FileQuestion,
   Lightbulb,
   PauseCircle,
@@ -65,6 +66,7 @@ import {
   type PyqQuestion
 } from '@/lib/pyq';
 import { pyqBenchmarkPaperExposure } from '@/lib/pyq-benchmark';
+import { similarUnseenQuestion } from '@/lib/similar-question';
 import {
   createPyqReattemptAttemptRow,
   nextReattemptRoundAttemptNumber,
@@ -130,6 +132,26 @@ const TONE_BADGE: Record<
 
 const RUNGS: ReattemptStage[] = ['D3', 'D10', 'D30'];
 const DEFAULT_PYQ_CHOICES = ['A', 'B', 'C', 'D'] as const;
+
+/**
+ * The question and bank version a new re-attempt receipt must use. The server only
+ * accepts receipts for the active bank, so a question first answered under an older
+ * bank is graded against its current version. Offline, the original version stands.
+ */
+async function receiptBasis(
+  question: PyqQuestion,
+  sourceBankVersion: string
+): Promise<{ question: PyqQuestion; bankVersion: string }> {
+  try {
+    const manifest = await loadPyqManifest();
+    if (manifest.bankVersion === sourceBankVersion)
+      return { question, bankVersion: sourceBankVersion };
+    const current = await loadPyqQuestionByUid(question.id, question.subjectSlug);
+    return { question: current ?? question, bankVersion: manifest.bankVersion };
+  } catch {
+    return { question, bankVersion: sourceBankVersion };
+  }
+}
 
 function plainTextQuestionHtml(value: string): string {
   return value
@@ -1112,6 +1134,7 @@ function CanonicalRecoverySession({
     );
     const alreadySaved = await db.pyq_attempts.get(receiptId);
     if (alreadySaved) return alreadySaved;
+    const basis = await receiptBasis(pyqQuestion, sourceAttempt.bank_version);
     const committedAtMs = Date.now();
     const attempt = createPyqReattemptAttemptRow({
       userId: item.user_id,
@@ -1119,7 +1142,8 @@ function CanonicalRecoverySession({
       reattemptRound,
       roundAttemptNumber,
       sourceAttempt,
-      question: pyqQuestion,
+      bankVersion: basis.bankVersion,
+      question: basis.question,
       selectedAnswer: answer,
       decision,
       questionStartedAtMs: Math.max(0, committedAtMs - Math.max(1, seconds) * 1000),
@@ -1639,13 +1663,15 @@ function PyqReattemptSession({
       } catch {
         // The immutable HTML snapshot still keeps the exact question auditable.
       }
+      const basis = await receiptBasis(question, sourceAttempt.bank_version);
       const attempt = createPyqReattemptAttemptRow({
         userId,
         reattemptId: row.id,
         reattemptRound,
         roundAttemptNumber,
         sourceAttempt,
-        question,
+        bankVersion: basis.bankVersion,
+        question: basis.question,
         selectedAnswer: selectedAnswer(),
         decision,
         questionStartedAtMs,
@@ -2454,6 +2480,7 @@ export default function Reattempts() {
   const [recoveryFeedback, setRecoveryFeedback] = useState<RecoveryFeedback | null>(null);
   const [startingRecoveryMode, setStartingRecoveryMode] = useState<RecoverySessionMode | null>(null);
   const [assigningTransfer, setAssigningTransfer] = useState(false);
+  const [openingSimilar, setOpeningSimilar] = useState(false);
   const recoveryAutoStartRef = useRef(false);
   const timeZone = profile?.timezone ?? 'Asia/Kolkata';
   const today = todayISOInTimeZone(timeZone);
@@ -2947,6 +2974,44 @@ export default function Reattempts() {
     }
   }
 
+  /** After a missed re-attempt, open one unseen PYQ on the same topic as a practice set. */
+  async function openSimilarQuestion(missed: PyqQuestion) {
+    if (!pyqAttempts || openingSimilar) return;
+    setOpeningSimilar(true);
+    try {
+      const manifest = await loadPyqManifest();
+      const bank = await loadPyqQuestions(
+        manifest.subjects.filter((subject) => subject.slug === missed.subjectSlug),
+        manifest.bankVersion
+      );
+      const sealed = manifest.benchmarkPapers
+        .filter((paper) => pyqBenchmarkPaperExposure(paper, pyqAttempts).sealed)
+        .flatMap((paper) => paper.questionUids);
+      const similar = similarUnseenQuestion(missed, bank, {
+        attempted: new Set(pyqAttempts.map((attempt) => attempt.question_uid)),
+        exclude: new Set(sealed)
+      });
+      if (!similar) {
+        pushToast(`Every unseen ${missed.topic} question is already used.`, 'neutral');
+        return;
+      }
+      const params = new URLSearchParams({
+        questionUids: similar.id,
+        preset: 'custom',
+        mode: 'practice',
+        count: 'all'
+      });
+      navigate(`/pyq?${params.toString()}`);
+    } catch (cause) {
+      pushToast(
+        cause instanceof Error ? cause.message : 'A similar question could not be found.',
+        'danger'
+      );
+    } finally {
+      setOpeningSimilar(false);
+    }
+  }
+
   async function assignFreshTransfer(item: LearningItemRow) {
     if (!pyqAttempts || assigningTransfer) return;
     setAssigningTransfer(true);
@@ -3199,6 +3264,19 @@ export default function Reattempts() {
             >
               <ScanSearch size={15} />
               {assigningTransfer ? 'Finding exact-topic transfer…' : 'Try fresh transfer in 3 days'}
+            </Button>
+          ) : recoveryFeedback &&
+            !recoveryFeedback.wasTransfer &&
+            recoveryFeedback.grade.grade === 'again' &&
+            activeRecoveryPyqQuestion ? (
+            <Button
+              variant="ghost"
+              onClick={() => void openSimilarQuestion(activeRecoveryPyqQuestion)}
+              disabled={openingSimilar}
+              title="Opens one unseen question on the same topic; this sprint stays saved."
+            >
+              <Crosshair size={15} />
+              {openingSimilar ? 'Finding a similar question…' : 'Solve a similar unseen question'}
             </Button>
           ) : undefined
         }

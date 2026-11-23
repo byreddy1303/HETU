@@ -48,7 +48,9 @@ function loadBankStats(): Promise<BankStats> {
         manifest.subjects.filter((subject) => slugs.has(subject.slug)),
         manifest.bankVersion
       );
-      return buildBankStats(questions);
+      // Papers sealed for the final mocks never count towards daily coverage.
+      const reserved = new Set(manifest.benchmarkPapers.flatMap((paper) => paper.questionUids));
+      return buildBankStats(questions, reserved);
     })().catch((error: unknown) => {
       bankStatsRequest = null;
       throw error;

@@ -62,7 +62,7 @@ const SHORT_LABELS: Record<SubjectId, string> = {
   'engineering-mathematics': 'Engg Maths',
   'digital-logic': 'Digital Logic',
   coa: 'COA',
-  'programming-data-structures': 'Programming & DS',
+  'programming-data-structures': 'C & DS',
   algorithms: 'Algorithms',
   'theory-of-computation': 'TOC',
   'compiler-design': 'Compilers',
@@ -115,6 +115,10 @@ export interface BankStats {
   paceIdSet: ReadonlySet<string>;
   /** Newest paper year in the loaded bank; null before it loads. */
   lastYear: number | null;
+  /** Newest year inside the paced set (sealed mock papers excluded). */
+  paceLastYear: number | null;
+  /** Questions kept out of daily practice because their papers are sealed for mocks. */
+  reservedCount: number;
 }
 
 function inScope(question: PyqQuestion): boolean {
@@ -126,8 +130,15 @@ function inScope(question: PyqQuestion): boolean {
   }
 }
 
-/** Weights and question sets from the GATE CSE book of the bundled bank. */
-export function buildBankStats(questions: readonly PyqQuestion[]): BankStats {
+/**
+ * Weights and question sets from the GATE CSE book of the bundled bank.
+ * `reservedIds` are questions from papers sealed for the final mocks; they never
+ * count towards daily coverage, so the paced target can actually reach zero.
+ */
+export function buildBankStats(
+  questions: readonly PyqQuestion[],
+  reservedIds: ReadonlySet<string> = new Set()
+): BankStats {
   const gate = questions.filter((question) => pyqBookSlugForQuestion(question) === 'gate-cse');
   const papers = new Map<string, PyqQuestion[]>();
   for (const question of gate) {
@@ -157,10 +168,16 @@ export function buildBankStats(questions: readonly PyqQuestion[]): BankStats {
   const subjectOf = new Map<string, SubjectId>();
   const paceIdSet = new Set<string>();
   let lastYear = 0;
+  let paceLastYear = 0;
+  let reservedCount = 0;
   for (const question of gate) {
     const subjectId = SUBJECT_BY_BANK_SLUG.get(question.subjectSlug);
     if (!subjectId || !inScope(question)) continue;
     lastYear = Math.max(lastYear, question.year);
+    if (reservedIds.has(question.id)) {
+      reservedCount += 1;
+      continue;
+    }
     subjectOf.set(question.id, subjectId);
     if (!all.has(subjectId)) all.set(subjectId, new Set());
     all.get(subjectId)!.add(question.id);
@@ -168,6 +185,7 @@ export function buildBankStats(questions: readonly PyqQuestion[]): BankStats {
       if (!pace.has(subjectId)) pace.set(subjectId, new Set());
       pace.get(subjectId)!.add(question.id);
       paceIdSet.add(question.id);
+      paceLastYear = Math.max(paceLastYear, question.year);
     }
   }
   const loaded = gate.length > 0;
@@ -186,7 +204,9 @@ export function buildBankStats(questions: readonly PyqQuestion[]): BankStats {
     })),
     subjectOf,
     paceIdSet,
-    lastYear: lastYear || null
+    lastYear: lastYear || null,
+    paceLastYear: paceLastYear || null,
+    reservedCount
   };
 }
 
@@ -358,6 +378,7 @@ export interface SubjectSignal {
   /** Share of the paced set attempted at least once. */
   coverage: number;
   firstTries: number;
+  /** Right on the first attempt without marking it 50/50. */
   firstTryCorrect: number;
   /** First-try accuracy once at least three answered questions exist. */
   accuracy: number | null;
@@ -421,7 +442,9 @@ export function subjectSignals(
         allAttempted += 1;
         if (entry.first.mark_decision === 'SKIP' || entry.first.mark_correct === null) continue;
         firstTries += 1;
-        if (entry.first.mark_correct) firstTryCorrect += 1;
+        // A 50/50 that happened to land is not knowledge yet; it stays on the re-attempt ladder.
+        if (entry.first.mark_correct && entry.first.mark_decision !== 'FIFTY_FIFTY')
+          firstTryCorrect += 1;
       }
       const paceTotal = subject.paceIds.size;
       const coverage = paceTotal ? paceAttempted / paceTotal : 0;
@@ -469,10 +492,15 @@ export interface PaceTarget {
   doneToday: number;
   /** First attempts today on older in-scope questions (still progress, outside the pace set). */
   olderToday: number;
-  /** Questions a day that clear the paced set before the deadline; null once pacing ends. */
+  /** Today's target: the pace, or 0 on a mock day; null once pacing ends. */
   dailyTarget: number | null;
+  /** Questions per practice day that clear the paced set before the deadline. */
+  pace: number | null;
   deadline: string;
+  /** Practice days left before the deadline (mock days excluded for core PYQs). */
   daysLeft: number;
+  /** Today is a scheduled full-mock day, so no new core PYQs are expected. */
+  mockDay: boolean;
 }
 
 export interface DailyPlan {
@@ -496,7 +524,8 @@ function paceTarget(
   timeZone: string,
   phase: StudyPhase,
   minimum: number,
-  include: (subjectId: SubjectId) => boolean
+  include: (subjectId: SubjectId) => boolean,
+  skipMockDays: boolean
 ): PaceTarget {
   let attempted = 0;
   for (const id of ids) if (history.has(id)) attempted += 1;
@@ -512,21 +541,38 @@ function paceTarget(
   const total = ids.length;
   const remaining = total - attempted;
   const deadline = phase.simulateStartsOn;
-  const daysLeft = Math.max(0, differenceInCalendarDays(parseISO(deadline), parseISO(today)));
+  const calendarDays = Math.max(0, differenceInCalendarDays(parseISO(deadline), parseISO(today)));
+  let daysLeft = calendarDays;
+  if (skipMockDays)
+    for (let offset = 0; offset < calendarDays; offset += 1)
+      if (isMockDay(addDaysISO(today, offset), phase)) daysLeft -= 1;
   const pacing = phase.id === 'cover' || phase.id === 'consolidate';
+  const mockDay = skipMockDays && pacing && isMockDay(today, phase);
   // Count today's work back in so the target stays fixed through the day.
   const openAtDayStart = remaining + doneToday;
-  const dailyTarget =
-    !pacing || daysLeft === 0
+  const pace =
+    !pacing || calendarDays === 0
       ? null
       : openAtDayStart === 0
         ? 0
         : Math.min(
             MAX_DAILY_NEW,
-            Math.max(minimum, Math.ceil(openAtDayStart / daysLeft)),
+            Math.max(minimum, Math.ceil(openAtDayStart / Math.max(1, daysLeft))),
             openAtDayStart
           );
-  return { total, attempted, remaining, doneToday, olderToday, dailyTarget, deadline, daysLeft };
+  const dailyTarget = pace === null ? null : mockDay ? 0 : pace;
+  return {
+    total,
+    attempted,
+    remaining,
+    doneToday,
+    olderToday,
+    dailyTarget,
+    pace,
+    deadline,
+    daysLeft,
+    mockDay
+  };
 }
 
 export function dailyPlan(
@@ -553,7 +599,8 @@ export function dailyPlan(
     timeZone,
     phase,
     1,
-    (id) => id !== APTITUDE_ID
+    (id) => id !== APTITUDE_ID,
+    true
   );
   const aptitude = paceTarget(
     aptitudeIds,
@@ -564,7 +611,8 @@ export function dailyPlan(
     timeZone,
     phase,
     MIN_DAILY_APTITUDE,
-    (id) => id === APTITUDE_ID
+    (id) => id === APTITUDE_ID,
+    false
   );
   const remaining = core.remaining + aptitude.remaining;
   const savedGoal =
@@ -608,7 +656,9 @@ export function reattemptProgress(
   let dueNow = 0;
   let nextDueOn: string | null = null;
   for (const item of items) {
-    if (!OPEN_STATES.has(item.recovery_state) || !item.scheduled_date) continue;
+    // Mastered questions carry a date only for their final-pass look before the exam.
+    const scheduled = OPEN_STATES.has(item.recovery_state) || item.recovery_state === 'mastered';
+    if (!scheduled || !item.scheduled_date) continue;
     if (item.scheduled_date <= today) dueNow += 1;
     else if (!nextDueOn || item.scheduled_date < nextDueOn) nextDueOn = item.scheduled_date;
   }
@@ -665,6 +715,12 @@ const MOCK_WEEKDAYS: Partial<Record<StudyPhaseId, readonly number[]>> = {
 
 function mockDayFor(date: string, phase: StudyPhaseId): boolean {
   return MOCK_WEEKDAYS[phase]?.includes(getDay(parseISO(date))) ?? false;
+}
+
+/** A scheduled full-mock day (none in the two days before the exam). */
+export function isMockDay(date: string, phase: StudyPhase): boolean {
+  if (date > addDaysISO(phase.examDate, -2)) return false;
+  return mockDayFor(date, phaseIdOn(date, phase));
 }
 
 function phaseIdOn(date: string, phase: StudyPhase): StudyPhaseId {
@@ -773,6 +829,10 @@ export function practiceCount(target: number): (typeof PRACTICE_COUNTS)[number] 
 
 export interface PracticeLink {
   subjectId?: SubjectId | null;
+  /** Several subjects mixed in one set (interleaved practice). */
+  subjectIds?: readonly SubjectId[];
+  /** Hide subject and topic labels until each answer is committed. */
+  hideTopics?: boolean;
   count: number;
   history?: PyqHistoryFilter;
   fromYear?: number;
@@ -784,6 +844,8 @@ export interface PracticeLink {
 /** An exact, filter-driven Practice setup (the Custom preset keeps the filters literal). */
 export function practiceHref({
   subjectId,
+  subjectIds,
+  hideTopics = false,
   count,
   history = 'unseen',
   fromYear = PACE_FROM_YEAR,
@@ -791,7 +853,9 @@ export function practiceHref({
   order = 'newest'
 }: PracticeLink): string {
   const params = new URLSearchParams({ preset: 'custom', mode: 'practice' });
-  if (subjectId) {
+  if (subjectIds && subjectIds.length > 0) {
+    params.set('subjectSlugs', subjectIds.flatMap((id) => bankSlugsForSubject(id)).join(','));
+  } else if (subjectId) {
     const slugs = bankSlugsForSubject(subjectId);
     if (slugs.length === 1) params.set('subjectSlug', slugs[0]);
     else params.set('subjectSlugs', slugs.join(','));
@@ -810,6 +874,7 @@ export function practiceHref({
   params.set('order', order);
   params.set('history', history);
   params.set('count', String(practiceCount(count)));
+  if (hideTopics) params.set('hideTopics', '1');
   return `/pyq?${params.toString()}`;
 }
 

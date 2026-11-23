@@ -65,6 +65,7 @@ export default function LocalStudyDesk() {
           bankLoaded={bank.loaded}
           bankError={bankError}
           lastYear={bank.lastYear}
+          paceLastYear={bank.paceLastYear}
           onRetryBank={retryBank}
         />
       )}
@@ -74,6 +75,7 @@ export default function LocalStudyDesk() {
           subjects={signals.subjects}
           bankLoaded={bank.loaded}
           lastYear={bank.lastYear}
+          paceLastYear={bank.paceLastYear}
           includeAptitude={false}
           limit={4}
           moreHref="/progress"

@@ -68,6 +68,10 @@ import QuickDiagnosis from '@/components/practice/QuickDiagnosis';
 import { needsQuickDiagnosis, type QuickDiagnosisResult } from '@/lib/quick-diagnosis';
 import PendingDiagnoses from '@/components/practice/PendingDiagnoses';
 import RecoveryCreditNote from '@/components/practice/RecoveryCreditNote';
+import SimilarQuestionOffer from '@/components/practice/SimilarQuestionOffer';
+import FastAnswerCheck from '@/components/practice/FastAnswerCheck';
+import { fastAnswerInputs, needsFastAnswerCheck, type FastAnswer } from '@/lib/fast-answer';
+import { similarUnseenQuestion } from '@/lib/similar-question';
 import ThinkingReviewDrawer, { type DebriefContext } from '@/components/pyq/ThinkingReviewDrawer';
 import MemoryPracticeResult from '@/components/memory/MemoryPracticeResult';
 import MemoryPracticeStart from '@/components/memory/MemoryPracticeStart';
@@ -1646,6 +1650,18 @@ export default function Pyq() {
     attemptId: string;
     credit: PracticeCredit;
   } | null>(null);
+  const [similar, setSimilar] = useState<{
+    attemptId: string;
+    question: PyqQuestion | null;
+    added: boolean;
+  } | null>(null);
+  const similarAttemptRef = useRef<string | null>(null);
+  // A commit under eight seconds pauses for one question about how it was solved.
+  const [fastCheck, setFastCheck] = useState<{
+    questionUid: string;
+    seconds: number;
+    committedAtMs: number;
+  } | null>(null);
   const [analyzedCount, setAnalyzedCount] = useState(0);
   const [questionScreenshot, setQuestionScreenshot] = useState<string | null>(null);
   const [pyqSessionId, setPyqSessionId] = useState<string | null>(null);
@@ -2270,6 +2286,46 @@ export default function Pyq() {
   const current = questions[index] ?? null;
   const currentId = current?.id ?? null;
   const latestCurrentAttempt = currentId ? latestQuestionAttempt(completed, currentId) : null;
+  // After a miss in plain practice, find one unseen PYQ on the same topic to offer next.
+  const submittedMissId =
+    submitted && submitted.mark_correct === false && submitted.question_uid === currentId
+      ? submitted.id
+      : null;
+  useEffect(() => {
+    if (!submittedMissId || !current || !manifest) return;
+    if (similarAttemptRef.current === submittedMissId) return;
+    const session = loadedSessionRef.current;
+    if (
+      !session ||
+      session.config.mode === 'exam' ||
+      session.config.plannerPrescriptionId ||
+      'memoryRepairId' in session.config
+    )
+      return;
+    similarAttemptRef.current = submittedMissId;
+    const missId = submittedMissId;
+    const missed = current;
+    void (async () => {
+      let question: PyqQuestion | null = null;
+      try {
+        const bank = await loadPyqQuestions(
+          manifest.subjects.filter((subject) => subject.slug === missed.subjectSlug),
+          manifest.bankVersion
+        );
+        const sealed = manifest.benchmarkPapers
+          .filter((paper) => pyqBenchmarkPaperExposure(paper, attempts).sealed)
+          .flatMap((paper) => paper.questionUids);
+        question = similarUnseenQuestion(missed, bank, {
+          attempted: new Set(attempts.map((attempt) => attempt.question_uid)),
+          exclude: new Set([...(loadedSessionRef.current?.question_uids ?? []), ...sealed])
+        });
+      } catch {
+        question = null;
+      }
+      if (similarAttemptRef.current === missId)
+        setSimilar({ attemptId: missId, question, added: false });
+    })();
+  }, [submittedMissId, current, manifest, attempts]);
   useEffect(() => {
     if (!currentId) return;
     const openSession = loadedSessionRef.current;
@@ -3770,7 +3826,7 @@ export default function Pyq() {
 
   finalizeExamRef.current = submitExam;
 
-  async function submitAnswer() {
+  async function submitAnswer(options: { fastAnswer?: FastAnswer; committedAtMs?: number } = {}) {
     if (
       !current ||
       !userId ||
@@ -3791,7 +3847,7 @@ export default function Pyq() {
     ) {
       return;
     }
-    const committedAtMs = Date.now();
+    const committedAtMs = options.committedAtMs ?? Date.now();
     const activeSegmentStartedAtMs = Math.min(startedAt ?? committedAtMs, committedAtMs);
     setSubmitError(null);
     submittingRef.current = true;
@@ -3827,18 +3883,33 @@ export default function Pyq() {
           !session.completed_question_uids.includes(current.id))
           ? priorAttempt
           : null;
+      const elapsedMs = timeSpentMs ?? committedAtMs - questionStartedAtMs;
+      if (
+        !existing &&
+        !options.fastAnswer &&
+        session.config.mode !== 'exam' &&
+        needsFastAnswerCheck(elapsedMs, decision)
+      ) {
+        setFastCheck({
+          questionUid: current.id,
+          seconds: Math.max(1, Math.round(elapsedMs / 1000)),
+          committedAtMs
+        });
+        return;
+      }
+      setFastCheck(null);
+      const inputs = fastAnswerInputs(options.fastAnswer, decision, confidence);
       const screenshot =
         existing?.screenshot_url ?? (await capturePyqSnapshot(current, questionCaptureRef.current));
       setQuestionScreenshot(screenshot);
-      const attempt =
-        existing ??
-        createPyqAttemptRow({
+      const attempt: PyqAttemptRow = existing ?? {
+        ...createPyqAttemptRow({
           userId,
           session,
           question: current,
           selectedAnswer: selected,
-          decision,
-          confidence,
+          decision: inputs.decision,
+          confidence: inputs.confidence,
           bankVersion: manifest.bankVersion,
           questionStartedAtMs,
           committedAtMs,
@@ -3846,7 +3917,9 @@ export default function Pyq() {
           screenshotUrl: screenshot,
           attemptNumber,
           retryingSkippedAttempt: priorAttempt?.mark_decision === 'SKIP'
-        });
+        }),
+        ...inputs.extra
+      };
       const nextSession =
         existing &&
         session.completed_question_uids.includes(current.id) &&
@@ -4014,6 +4087,7 @@ export default function Pyq() {
       document.getElementById(`practice-question-${index}`)?.scrollIntoView?.({ block: 'start' });
       return;
     }
+    setFastCheck(null);
     setSubmitError(null);
     try {
       const session =
@@ -4119,6 +4193,42 @@ export default function Pyq() {
         error instanceof Error ? error.message : 'Could not save the practice view. Try again.'
       );
     }
+  }
+
+  /** Insert an unseen same-topic question straight after the current one. */
+  async function addSimilarNext(question: PyqQuestion) {
+    if (!pyqSessionId) throw new Error('The active practice set could not be found.');
+    if (loading || submittingRef.current || pausingSessionRef.current)
+      throw new Error('Wait for the current save to finish, then try again.');
+    const session = loadedSessionRef.current ?? (await db.pyq_sessions.get(pyqSessionId));
+    if (!session) throw new Error('The active practice set could not be found.');
+    if (!session.question_uids.includes(question.id)) {
+      const position = Math.min(index + 1, session.question_uids.length);
+      const next: PyqSessionRow = {
+        ...session,
+        question_uids: [
+          ...session.question_uids.slice(0, position),
+          question.id,
+          ...session.question_uids.slice(position)
+        ],
+        updated_at: new Date().toISOString()
+      };
+      loadedSessionRef.current = next;
+      setLoadedSession(next);
+      setQuestions((rows) =>
+        rows.some((row) => row.id === question.id)
+          ? rows
+          : [...rows.slice(0, position), question, ...rows.slice(position)]
+      );
+      const queued = practiceWriteQueueRef.current
+        .catch(() => undefined)
+        .then(() => writeLocal('pyq_sessions', next));
+      practiceWriteQueueRef.current = queued;
+      await queued;
+    }
+    setSimilar((value) =>
+      value && value.question?.id === question.id ? { ...value, added: true } : value
+    );
   }
 
   async function goNext() {
@@ -4732,14 +4842,28 @@ export default function Pyq() {
                     locked.
                   </p>
                 ) : null}
-                <Button
-                  variant="primary"
-                  onClick={() => void submitAnswer()}
-                  disabled={!canSubmit}
-                  className="w-full"
-                >
-                  {submitting ? 'Saving answer…' : 'Commit & reveal key'}
-                </Button>
+                {fastCheck?.questionUid === current.id ? (
+                  <FastAnswerCheck
+                    seconds={fastCheck.seconds}
+                    busy={submitting}
+                    onChoose={(choice) =>
+                      void submitAnswer({
+                        fastAnswer: choice,
+                        committedAtMs: fastCheck.committedAtMs
+                      })
+                    }
+                    onCancel={() => setFastCheck(null)}
+                  />
+                ) : (
+                  <Button
+                    variant="primary"
+                    onClick={() => void submitAnswer()}
+                    disabled={!canSubmit}
+                    className="w-full"
+                  >
+                    {submitting ? 'Saving answer…' : 'Commit & reveal key'}
+                  </Button>
+                )}
                 {!submitting && decision !== 'SKIP' && !canSubmit ? (
                   <p className="mt-2 text-[12px] text-text-muted">
                     {hasAnswer
@@ -4780,6 +4904,14 @@ export default function Pyq() {
                 ) : (
                   <QuickPracticeSignals attemptId={submitted.id} />
                 )}
+                {similar?.attemptId === submitted.id ? (
+                  <SimilarQuestionOffer
+                    missed={current}
+                    similar={similar.question}
+                    added={similar.added}
+                    onAdd={addSimilarNext}
+                  />
+                ) : null}
                 <div className="flex flex-wrap gap-2">
                   {index > 0 ? (
                     <Button onClick={goPrevious} disabled={loading || submitting}>

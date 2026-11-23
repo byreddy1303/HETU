@@ -15,6 +15,8 @@ interface CoverageMapProps {
   subjects: readonly SubjectSignal[];
   bankLoaded: boolean;
   lastYear: number | null;
+  /** Newest year counted towards coverage; later papers stay sealed for mocks. */
+  paceLastYear?: number | null;
   /** Show only the first N subjects (already ranked by open marks). */
   limit?: number;
   includeAptitude?: boolean;
@@ -88,6 +90,7 @@ export default function CoverageMap({
   subjects,
   bankLoaded,
   lastYear,
+  paceLastYear = null,
   limit,
   includeAptitude = true,
   moreHref
@@ -117,7 +120,7 @@ export default function CoverageMap({
       <p className="signal-card__note">
         Ranked by marks per paper not yet backed by correct practice. Each bar is as long as the
         subject&apos;s marks in a paper; the fill is the share of its {PACE_FROM_YEAR}–
-        {lastYear ?? 'now'} PYQs you have attempted.
+        {paceLastYear ?? lastYear ?? 'now'} PYQs you have attempted.
         {notStudied.length > 0 && (
           <>
             {' '}

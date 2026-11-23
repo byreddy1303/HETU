@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hashlib
 import math
 from datetime import date, timedelta
 from typing import Any, Literal
@@ -54,6 +55,50 @@ def derive_grade(
     }
 
 
+# Mirror of EXAM_DATE_DEFAULT in src/lib/constants.ts; a profile exam_date overrides it.
+DEFAULT_EXAM_DATE = date(2027, 2, 6)
+# Spacing studies put the best gap at a fraction of the time left before the test,
+# so no gap may exceed a quarter of the days remaining.
+EXAM_GAP_FRACTION = 0.25
+# A question mastered before this window gets one last look inside it.
+FINAL_PASS_OPENS_DAYS = 10
+FINAL_PASS_CLOSES_DAYS = 2
+
+
+def exam_interval(interval: int | None, today: date, exam_date: date | None) -> int | None:
+    """Shrink a gap as the exam nears so the next check still lands before it."""
+    if interval is None or exam_date is None:
+        return interval
+    days_left = (exam_date - today).days
+    if days_left <= 1:
+        return interval
+    cap = max(1, min(days_left - 1, int(days_left * EXAM_GAP_FRACTION + 0.5)))
+    return min(interval, cap)
+
+
+def final_pass_date(key: str, today: date, exam_date: date | None) -> date | None:
+    """Spread one last look at a mastered question across the final-pass window."""
+    if exam_date is None:
+        return None
+    opens = exam_date - timedelta(days=FINAL_PASS_OPENS_DAYS)
+    closes = exam_date - timedelta(days=FINAL_PASS_CLOSES_DAYS)
+    if today >= opens:
+        return None
+    span = (closes - opens).days + 1
+    offset = int(hashlib.sha256(key.encode()).hexdigest(), 16) % span
+    return opens + timedelta(days=offset)
+
+
+def is_final_pass_due(item: dict[str, Any], today: date) -> bool:
+    """A mastered question whose one last look has arrived."""
+    due = item.get("scheduled_date")
+    return (
+        item.get("recovery_state") == "mastered"
+        and isinstance(due, str)
+        and due <= today.isoformat()
+    )
+
+
 def next_stage(stage: str, grade: Grade) -> tuple[str, int | None]:
     if grade == "again":
         return ("D10", 3) if stage in {"TRANSFER", "D30"} else ("D3", 3)
@@ -79,25 +124,45 @@ def transition(
     occurred_at: str,
     qualification: Literal["canonical", "reported", "ungraded"],
     fresh_transfer: bool = False,
+    exam_date: date | None = None,
 ) -> dict[str, Any]:
     stage, interval = next_stage(item["stage"], grade)
     due = item.get("scheduled_date")
     due_now = isinstance(due, str) and due <= today.isoformat()
     qualified = grade in {"good", "easy"} and qualification == "canonical" and due_now
+    # A mastered question back for its final-pass look keeps mastery when it passes.
+    final_check = item["stage"] == "MASTERED"
     # Self/assistant assessments stay visible without upgrading them to verified mastery.
     mastered = (
         stage == "MASTERED"
         and qualified
-        and (item["stage"] == "D30" or (item["stage"] == "TRANSFER" and fresh_transfer))
+        and (
+            item["stage"] in {"D30", "MASTERED"} or (item["stage"] == "TRANSFER" and fresh_transfer)
+        )
     )
     if stage == "MASTERED" and not mastered:
         stage, interval = ("TRANSFER", 3) if item["stage"] == "TRANSFER" else ("D30", 10)
     # An early rehearsal is evidence, but cannot advance a due-retrieval ladder.
-    if not due_now and grade in {"good", "easy"}:
+    rehearsal = not due_now and grade in {"good", "easy"}
+    keep_mastery = rehearsal and item.get("recovery_state") == "mastered"
+    ladder_interval = interval
+    last_look = None
+    if rehearsal:
         stage, interval = item["stage"], item.get("last_interval_days")
         scheduled = due
     else:
+        interval = exam_interval(interval, today, exam_date)
         scheduled = (today + timedelta(days=interval)).isoformat() if interval else None
+        if mastered and not final_check:
+            key = str(
+                item.get("id")
+                or item.get("source_question_id")
+                or item.get("question_uid")
+                or item.get("created_at")
+                or ""
+            )
+            last_look = final_pass_date(key, today, exam_date)
+            scheduled = last_look.isoformat() if last_look else None
     lapse_count = int(item.get("lapse_count", 0)) + int(grade == "again")
     remediation = grade == "again" and lapse_count >= 3
     flags = list(item.get("reason_flags", []))
@@ -108,7 +173,7 @@ def transition(
         "stage": stage,
         "scheduled_date": scheduled,
         "recovery_state": "mastered"
-        if mastered
+        if mastered or keep_mastery
         else "remediation"
         if remediation
         else "transfer"
@@ -126,12 +191,29 @@ def transition(
         "transfer_passed_at": occurred_at
         if mastered and item["stage"] == "TRANSFER"
         else item.get("transfer_passed_at"),
-        "mastered_at": occurred_at if mastered else None,
+        "mastered_at": (item.get("mastered_at") or occurred_at)
+        if mastered and final_check
+        else occurred_at
+        if mastered
+        else item.get("mastered_at")
+        if keep_mastery
+        else None,
+        "final_pass_at": occurred_at if mastered and final_check else item.get("final_pass_at"),
         "updated_at": occurred_at,
     }
+    sooner = (
+        not rehearsal
+        and interval is not None
+        and ladder_interval is not None
+        and interval < ladder_interval
+    )
     explanation = (
-        "Fresh transfer solved; canonical mastery evidence recorded."
+        "Final pass done; this question is ready for the exam."
+        if mastered and final_check
+        else "Fresh transfer solved; canonical mastery evidence recorded."
         if mastered and item["stage"] == "TRANSFER"
+        else f"Due D30 retrieval passed; mastered. One last look on {scheduled}, before the exam."
+        if mastered and last_look
         else "Due D30 retrieval passed; canonical mastery evidence recorded."
         if mastered
         else "Early rehearsal recorded; the due retrieval remains scheduled."
@@ -140,7 +222,8 @@ def transition(
         if qualification != "canonical" and item["stage"] in {"D30", "TRANSFER"}
         else f"Again at {item['stage']}; focused remediation is required."
         if remediation
-        else f"{grade.capitalize()} at {item['stage']}; next {stage} retrieval in {interval} days."
+        else f"{grade.capitalize()} at {item['stage']}; next {stage} retrieval in {interval} days"
+        + (", sooner because the exam is close." if sooner else ".")
     )
     return {
         "item": updated,
@@ -154,11 +237,14 @@ def rank_candidates(candidates: list[dict[str, Any]], today: date) -> list[dict[
     result = []
     for candidate in candidates:
         item = candidate["item"]
-        if item.get("recovery_state") in {"mastered", "paused"} or not item.get("scheduled_date"):
+        if item.get("recovery_state") == "paused" or not item.get("scheduled_date"):
             continue
         due = date.fromisoformat(item["scheduled_date"])
+        # A mastered question only rejoins for its final-pass look once that day arrives.
+        if item.get("recovery_state") == "mastered" and due > today:
+            continue
         overdue = max(0, (today - due).days)
-        reasons = []
+        reasons = ["final pass"] if item.get("recovery_state") == "mastered" else []
         score = 100 if due <= today else max(0, 30 - (due - today).days * 4)
         if overdue:
             score += min(80, overdue * 6)
@@ -248,7 +334,7 @@ def forecast(candidates: list[dict[str, Any]], today: date, days: int = 7) -> li
     ]
     for row in candidates:
         item = row["item"]
-        if item.get("recovery_state") in {"mastered", "paused"} or not item.get("scheduled_date"):
+        if item.get("recovery_state") == "paused" or not item.get("scheduled_date"):
             continue
         offset = (date.fromisoformat(item["scheduled_date"]) - today).days
         index = max(0, offset)

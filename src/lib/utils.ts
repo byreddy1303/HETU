@@ -43,6 +43,22 @@ export function todayISO(): string {
  * assigns work done after midnight in India to the previous study day. Keep
  * all dashboard and analysis bucketing on this one conversion path instead.
  */
+const calendarFormatters = new Map<string, Intl.DateTimeFormat>();
+
+function calendarFormatter(timeZone: string): Intl.DateTimeFormat {
+  let formatter = calendarFormatters.get(timeZone);
+  if (!formatter) {
+    formatter = new Intl.DateTimeFormat('en-US', {
+      timeZone,
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit'
+    });
+    calendarFormatters.set(timeZone, formatter);
+  }
+  return formatter;
+}
+
 export function calendarDateInTimeZone(
   value: string | Date,
   timeZone = 'Asia/Kolkata'
@@ -50,12 +66,7 @@ export function calendarDateInTimeZone(
   const date = typeof value === 'string' ? new Date(value) : value;
   if (Number.isNaN(date.getTime())) return '';
   try {
-    const parts = new Intl.DateTimeFormat('en-US', {
-      timeZone,
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit'
-    }).formatToParts(date);
+    const parts = calendarFormatter(timeZone).formatToParts(date);
     const part = (type: Intl.DateTimeFormatPartTypes) =>
       parts.find((item) => item.type === type)?.value ?? '';
     return `${part('year')}-${part('month')}-${part('day')}`;

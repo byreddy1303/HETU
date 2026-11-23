@@ -1,6 +1,7 @@
 import { ArrowUpRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import PageHeader from '@/components/layout/PageHeader';
+import ProgressDashboard from '@/components/progress/ProgressDashboard';
 
 const destinations = {
   review: [
@@ -92,10 +93,12 @@ export default function StudyHub({ kind }: { kind: keyof typeof destinations }) 
           {
             review: 'Retrieve, repair, and check what changed.',
             knowledge: 'Your sources, explanations, and learning history.',
-            progress: 'Inspect what the evidence supports and what remains untested.'
+            progress: 'Coverage, accuracy and the re-attempt ladder, from your own saved work.'
           }[kind]
         }
       />
+      {kind === 'progress' && <ProgressDashboard />}
+      {kind === 'progress' && <h2 className="study-section-label">Detailed views</h2>}
       <div className="study-hub">
         {destinations[kind].map(([href, label, detail]) => (
           <Link key={href} to={href} className="study-hub__link">

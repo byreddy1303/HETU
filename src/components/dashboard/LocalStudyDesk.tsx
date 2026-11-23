@@ -14,6 +14,9 @@ import { todayISOInTimeZone, formatDate } from '@/lib/utils';
 import DailyPracticePlan from '@/components/practice/DailyPracticePlan';
 import TodayActions from '@/components/dashboard/TodayActions';
 import PageHeader from '@/components/layout/PageHeader';
+import CoverageMap from '@/components/progress/CoverageMap';
+import MissionBoard from '@/components/progress/MissionBoard';
+import { useStudySignals } from '@/hooks/useStudySignals';
 
 const directions = [
   {
@@ -39,6 +42,7 @@ const directions = [
 export default function LocalStudyDesk() {
   const { userId, profile } = useAuth();
   const today = todayISOInTimeZone(profile?.timezone ?? 'Asia/Kolkata');
+  const { signals, bank, bankError, retryBank } = useStudySignals();
   return (
     <div className="study-desk">
       <PageHeader
@@ -54,7 +58,27 @@ export default function LocalStudyDesk() {
           </Link>
         }
       />
+      {userId && (
+        <MissionBoard
+          signals={signals}
+          today={today}
+          bankLoaded={bank.loaded}
+          bankError={bankError}
+          lastYear={bank.lastYear}
+          onRetryBank={retryBank}
+        />
+      )}
       {userId && <TodayActions key={`${userId}:${today}`} userId={userId} today={today} />}
+      {signals && (
+        <CoverageMap
+          subjects={signals.subjects}
+          bankLoaded={bank.loaded}
+          lastYear={bank.lastYear}
+          includeAptitude={false}
+          limit={4}
+          moreHref="/progress"
+        />
+      )}
       <details className="rounded-xl border border-border bg-bg-raised p-4">
         <summary className="cursor-pointer text-sm font-medium">Build a balanced session</summary>
         <div className="mt-4">

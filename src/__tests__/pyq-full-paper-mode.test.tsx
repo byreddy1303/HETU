@@ -129,8 +129,9 @@ describe('authentic PYQ full-paper mode', () => {
     await user.click(await screen.findByRole('button', { name: /^Exam mode/i }));
     await user.click(screen.getByRole('button', { name: /Official full paper/i }));
 
-    expect(screen.getByRole('heading', { name: 'Open one sealed benchmark' })).toBeInTheDocument();
-    expect(screen.getByText('Sealed · unseen')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: '1 complete GATE CSE paper' })).toBeInTheDocument();
+    expect(screen.getByText('Keep for the final 10 days')).toBeInTheDocument();
+    expect(screen.getByText('Unseen · counts as a qualified mock')).toBeInTheDocument();
     expect(screen.getByText('65', { selector: 'p' })).toBeInTheDocument();
     expect(screen.getByText('100', { selector: 'p' })).toBeInTheDocument();
     expect(screen.getByText('180', { selector: 'p' })).toBeInTheDocument();

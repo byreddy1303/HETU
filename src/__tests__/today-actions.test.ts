@@ -174,6 +174,50 @@ describe('one local daily action decision', () => {
     expect(practice.completed_count).toBe(1);
   });
 
+  it('puts due re-attempts ahead of a paused practice set', () => {
+    const practice = {
+      id: 'saved',
+      user_id: 'owner',
+      status: 'paused',
+      updated_at: '2026-10-29',
+      config: { mode: 'practice', subjectSlug: 'discrete-mathematics' },
+      completed_count: 2,
+      question_uids: ['a', 'b', 'c']
+    } as PyqSessionRow;
+    const queue = buildTodayActions({
+      ...base,
+      budget: 20,
+      practiceSessions: [practice],
+      recovery: {
+        complete: true,
+        sprint: { selected: [{ item: { id: 'due' } }], estimatedSeconds: 1200, deferredCount: 33 }
+      }
+    });
+    expect(queue.fitting.map((action) => action.id)).toEqual([
+      'recovery-sprint',
+      'resume-practice:saved'
+    ]);
+  });
+
+  it('keeps a stale paused set off Today until it is resumed from Practice', () => {
+    const stale = {
+      id: 'old',
+      user_id: 'owner',
+      status: 'paused',
+      updated_at: '2026-10-26T08:00:00Z',
+      config: { mode: 'practice', subjectSlug: 'c-programming' },
+      completed_count: 0,
+      question_uids: ['a', 'b']
+    } as PyqSessionRow;
+    expect(buildTodayActions({ ...base, practiceSessions: [stale] }).actions).toEqual([]);
+    expect(
+      buildTodayActions({
+        ...base,
+        practiceSessions: [{ ...stale, updated_at: '2026-10-27T23:00:00Z' }]
+      }).actions.map((action) => action.id)
+    ).toEqual(['resume-practice:old']);
+  });
+
   it('does not recreate an active sprint, including an interrupted session', () => {
     const session = {
       id: 'saved',

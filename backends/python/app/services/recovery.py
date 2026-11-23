@@ -30,7 +30,14 @@ from app.services.pyq_practice import (
     validate_question_response,
 )
 from app.services.records import lock_identity, require_version, to_api, upsert_records
-from app.services.recovery_engine import Mode, build_sprint, derive_grade, forecast, transition
+from app.services.recovery_engine import (
+    Mode,
+    build_sprint,
+    derive_grade,
+    forecast,
+    rank_candidates,
+    transition,
+)
 
 SCAN_LIMIT = 2000
 CONFIDENCE = Literal["low", "medium", "high"]
@@ -102,6 +109,20 @@ class TransferDraft(StrictModel):
     expected_version: int = Field(ge=1, strict=True)
     question_uid: str | None = Field(default=None, max_length=128)
     delay_days: int = Field(default=3, ge=1, le=30, strict=True)
+
+
+class TriageDraft(StrictModel):
+    """The learner's own answer to: did you miss this question in the test?"""
+
+    idempotency_key: str = Field(min_length=8, max_length=128)
+    expected_version: int = Field(ge=1, strict=True)
+    decision: Literal["missed", "correct", "unsure"]
+
+
+class RebalanceDraft(StrictModel):
+    idempotency_key: str = Field(min_length=8, max_length=128)
+    per_day: int = Field(default=8, ge=1, le=50, strict=True)
+    max_days: int = Field(default=7, ge=1, le=21, strict=True)
 
 
 def now_utc() -> datetime:
@@ -304,6 +325,216 @@ def target_seconds(marks: Any) -> int:
     return 120
 
 
+REHEARSAL_WINDOW = timedelta(hours=20)
+CREDIT_GRADES = {"good", "easy", "hard", "again"}
+
+
+def parse_instant(value: Any) -> datetime | None:
+    if not isinstance(value, str) or not value:
+        return None
+    try:
+        parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
+    except ValueError:
+        return None
+    return parsed if parsed.tzinfo else parsed.replace(tzinfo=UTC)
+
+
+async def recent_key_exposure(
+    db: AsyncSession, owner_id: str, question_uid: str, attempt_id: str, attempted: datetime
+) -> datetime | None:
+    """Latest earlier committed answer to this question inside the rehearsal window.
+
+    Committing an answer reveals its key, so a correct answer soon afterwards shows
+    short-term memory, not spaced recall.
+    """
+    rows = await db.scalars(
+        select(Record).where(
+            Record.owner_id == owner_id,
+            Record.collection == "pyq_attempts",
+            Record.deleted_at.is_(None),
+            Record.data["question_uid"].as_string() == question_uid,
+            Record.external_id != attempt_id,
+        )
+    )
+    latest = None
+    for row in rows:
+        seen = parse_instant(row.data.get("attempted_at"))
+        if seen is None or seen >= attempted or attempted - seen > REHEARSAL_WINDOW:
+            continue
+        latest = seen if latest is None or seen > latest else latest
+    return latest
+
+
+async def lapsed_on(db: AsyncSession, owner_id: str, item_id: str, day: date) -> bool:
+    found = await db.scalar(
+        select(Record.id)
+        .where(
+            Record.owner_id == owner_id,
+            Record.collection == "learning_events",
+            Record.deleted_at.is_(None),
+            Record.data["learning_item_id"].as_string() == item_id,
+            Record.data["grade"].as_string() == "again",
+            Record.data["local_date"].as_string() == day.isoformat(),
+        )
+        .limit(1)
+    )
+    return found is not None
+
+
+def practice_confidence(attempt: dict) -> str | None:
+    """A 50/50 mark is a guess, whatever confidence chip was chosen."""
+    if attempt.get("mark_decision") == "FIFTY_FIFTY":
+        return "low"
+    value = attempt.get("confidence")
+    return value if value in {"low", "medium", "high"} else None
+
+
+async def credit_practice_attempt(
+    db: AsyncSession,
+    *,
+    owner_id: str,
+    item: Record,
+    data: dict,
+    attempt: dict,
+    attempt_id: str,
+    attempted_at: str,
+    attempted_day: date,
+) -> tuple[dict, dict]:
+    """Grade a later answer to a question that already has a learning item.
+
+    Practice, mocks and Review mistakes all reach the same ladder: a miss is a lapse,
+    and a correct due answer advances it exactly like a re-attempt session would.
+    """
+    previous_stage = data.get("stage")
+    due = data.get("scheduled_date")
+    correct = attempt.get("mark_correct")
+    blank = attempt.get("mark_decision") == "SKIP" or attempt.get("selected_answer") in (
+        None,
+        "",
+        [],
+    )
+    summary: dict[str, Any] = {
+        "via": "practice",
+        "credited": False,
+        "previous_stage": previous_stage,
+        "next_stage": previous_stage,
+        "next_due_date": due,
+    }
+    if correct is None and not blank:
+        return data, {
+            **summary,
+            "outcome": "ungraded",
+            "explanation": "This answer has no checkable key, so the re-attempt is unchanged.",
+        }
+    if data.get("recovery_state") == "paused":
+        return data, {
+            **summary,
+            "outcome": "paused",
+            "explanation": "This re-attempt is paused. Your answer is saved without moving it.",
+        }
+    if blank or correct is False:
+        # One lapse per item per day: a second miss today reschedules without escalating twice.
+        already = await lapsed_on(db, owner_id, item.external_id, attempted_day)
+        base = (
+            {**data, "lapse_count": max(0, int(data.get("lapse_count", 0)) - 1)}
+            if already
+            else data
+        )
+        result = transition(
+            base,
+            grade="again",
+            today=attempted_day,
+            occurred_at=attempted_at,
+            qualification="canonical",
+        )
+        updated = {**result["item"], "analysis_state": "pending"}
+        return updated, {
+            **summary,
+            "credited": True,
+            "outcome": "again",
+            "grade": "again",
+            "next_stage": updated["stage"],
+            "next_due_date": updated["scheduled_date"],
+            "lapse_count": updated["lapse_count"],
+            "remediation": updated["recovery_state"] == "remediation",
+            "explanation": (
+                "Missed again: this needs focused remediation before its next re-attempt."
+                if updated["recovery_state"] == "remediation"
+                else f"Missed again: back to {updated['stage']}, next re-attempt "
+                f"{updated['scheduled_date']}."
+            ),
+        }
+    if data.get("recovery_state") in {"mastered", "remediation"} or previous_stage in {
+        "MASTERED",
+        "TRANSFER",
+    }:
+        reason = (
+            "already mastered"
+            if previous_stage == "MASTERED" or data.get("recovery_state") == "mastered"
+            else "waiting for remediation"
+            if data.get("recovery_state") == "remediation"
+            else "waiting for its unseen transfer question"
+        )
+        return data, {
+            **summary,
+            "outcome": "rehearsal",
+            "reason": reason,
+            "explanation": f"Correct. Saved as practice; this item is {reason}.",
+        }
+    attempted = parse_instant(attempted_at) or now_utc()
+    seen = await recent_key_exposure(db, owner_id, attempt["question_uid"], attempt_id, attempted)
+    if seen is not None:
+        return data, {
+            **summary,
+            "outcome": "rehearsal",
+            "reason": "key seen within 20 hours",
+            "explanation": (
+                "Correct, but you saw this key within the last 20 hours, so it counts as "
+                f"practice. The re-attempt stays due {due}."
+            ),
+        }
+    if not isinstance(due, str) or due > attempted_day.isoformat():
+        return data, {
+            **summary,
+            "outcome": "rehearsal",
+            "reason": "not due yet",
+            "explanation": f"Correct. Early practice; the spaced re-attempt stays due {due}.",
+        }
+    measured = attempt.get("duration_source") != "unknown" and isinstance(
+        attempt.get("time_spent_ms"), int | float
+    )
+    graded = derive_grade(
+        correct=True,
+        blank=False,
+        seconds=attempt["time_spent_ms"] / 1000 if measured else None,
+        target_seconds=target_seconds(
+            attempt.get("question_marks") or (attempt.get("question_snapshot") or {}).get("marks")
+        ),
+        confidence=practice_confidence(attempt),
+        assisted=False,
+        prior_successes=int(data.get("successful_retrieval_count", 0)),
+    )
+    result = transition(
+        data,
+        grade=graded["grade"],
+        today=attempted_day,
+        occurred_at=attempted_at,
+        qualification="canonical",
+    )
+    updated = result["item"]
+    return updated, {
+        **summary,
+        "credited": True,
+        "outcome": graded["grade"],
+        "grade": graded["grade"],
+        "grade_reasons": graded["reasons"],
+        "next_stage": updated["stage"],
+        "next_due_date": updated["scheduled_date"],
+        "mastered": result["mastered"],
+        "explanation": result["explanation"],
+    }
+
+
 async def capture_attempt(
     db: AsyncSession, *, owner_id: str, attempt_id: str, question_id: str | None = None
 ) -> dict | None:
@@ -311,7 +542,16 @@ async def capture_attempt(
     attempt_row = await owned(db, owner_id, "pyq_attempts", attempt_id)
     attempt = attempt_row.data
     reasons = weak_reasons(attempt)
-    if not reasons:
+    existing = await db.scalar(
+        select(Record).where(
+            Record.owner_id == owner_id,
+            Record.collection == "learning_items",
+            Record.deleted_at.is_(None),
+            Record.data["question_uid"].as_string() == attempt["question_uid"],
+        )
+    )
+    # A clean first solve needs no ladder; a later answer to a scheduled question always counts.
+    if not reasons and existing is None:
         return None
     occurred, today, timezone = await account_clock(db, owner_id)
     attempted_at = attempt.get("attempted_at") or occurred
@@ -323,14 +563,6 @@ async def capture_attempt(
         )
     except (ValueError, TypeError):
         raise HTTPException(422, "Attempt timestamp is invalid") from None
-    existing = await db.scalar(
-        select(Record).where(
-            Record.owner_id == owner_id,
-            Record.collection == "learning_items",
-            Record.deleted_at.is_(None),
-            Record.data["question_uid"].as_string() == attempt["question_uid"],
-        )
-    )
     event_key = f"attempt:{attempt_id}"
     previous = await db.scalar(
         select(Record).where(
@@ -339,13 +571,13 @@ async def capture_attempt(
             Record.data["idempotency_key"].as_string() == event_key,
         )
     )
+    credit = None
     if existing and previous:
         item = existing
+        credit = (previous.data.get("metadata") or {}).get("credit")
     else:
         if existing:
             data = dict(existing.data)
-            reopened = data.get("stage") == "MASTERED" or data.get("recovery_state") == "mastered"
-            next_due = (attempted_day + timedelta(days=3)).isoformat()
             data.update(
                 {
                     "latest_pyq_attempt_id": attempt_id,
@@ -356,12 +588,16 @@ async def capture_attempt(
                     "reason_flags": list(dict.fromkeys([*data.get("reason_flags", []), *reasons])),
                 }
             )
-            if reopened:
-                data.update(
-                    stage="D3", recovery_state="active", scheduled_date=next_due, mastered_at=None
-                )
-            elif not data.get("scheduled_date") or data["scheduled_date"] > next_due:
-                data["scheduled_date"] = next_due
+            data, credit = await credit_practice_attempt(
+                db,
+                owner_id=owner_id,
+                item=existing,
+                data=data,
+                attempt=attempt,
+                attempt_id=attempt_id,
+                attempted_at=attempted_at,
+                attempted_day=attempted_day,
+            )
         else:
             data = initial_item(
                 item_id=stable_id("recovery-pyq", f"{owner_id}:{attempt['question_uid']}"),
@@ -375,17 +611,19 @@ async def capture_attempt(
                 latest_pyq_attempt_id=attempt_id,
             )
         item = await write(db, owner_id, "learning_items", data, existing)
+    graded = bool(credit and credit.get("credited"))
     event = previous or await append_event(
         db,
         owner_id,
         event_data(
             item.external_id,
             event_key,
-            "answer_committed",
+            f"retrieval_{credit['grade']}" if graded else "answer_committed",
             attempted_at,
             attempted_day,
             timezone,
             source_pyq_attempt_id=attempt_id,
+            grade=credit["grade"] if graded else None,
             is_correct=attempt.get("mark_correct"),
             answer=attempt.get("selected_answer"),
             confidence=attempt.get("confidence"),
@@ -397,9 +635,23 @@ async def capture_attempt(
                 "question_marks": attempt.get("question_marks"),
                 "pyq_session_id": attempt.get("pyq_session_id"),
                 "duration_source": attempt.get("duration_source", "measured"),
+                **(
+                    {
+                        "credit": credit,
+                        "previous_stage": credit["previous_stage"],
+                        "next_stage": credit["next_stage"],
+                        "next_due_date": credit["next_due_date"],
+                        "qualification": "canonical" if graded else "practice",
+                        "canonical_version": "recovery-v1",
+                    }
+                    if credit
+                    else {}
+                ),
             },
         ),
     )
+    if graded and not previous:
+        await record_practice_history(db, owner_id, item, attempt, attempted_day, credit)
     question = (
         await owned(db, owner_id, "questions", question_id)
         if question_id
@@ -419,9 +671,51 @@ async def capture_attempt(
         "item": to_api(item),
         "event": to_api(event),
         "reasons": reasons,
+        "credit": credit,
         "compatibilityQuestion": to_api(question) if question else None,
         "compatibilityReattempt": to_api(reattempt) if reattempt else None,
     }
+
+
+async def record_practice_history(
+    db: AsyncSession, owner_id: str, item: Record, attempt: dict, day: date, credit: dict
+) -> None:
+    """Mirror a credited practice answer onto the Re-attempts history it belongs to."""
+    rows = list(
+        await db.scalars(
+            select(Record).where(
+                Record.owner_id == owner_id,
+                Record.collection == "reattempts",
+                Record.deleted_at.is_(None),
+                Record.data["learning_item_id"].as_string() == item.external_id,
+            )
+        )
+    )
+    clean = credit["grade"] in {"good", "easy"}
+    entry: dict[str, Any] = {
+        "date": day.isoformat(),
+        "result": "clean" if clean else "fail",
+        "selectedAnswer": attempt.get("selected_answer"),
+        "recovery_grade": credit["grade"],
+        "hint_used": False,
+        "via": "practice",
+    }
+    if isinstance(attempt.get("time_spent_ms"), int | float):
+        entry["timeSpent"] = math.ceil(attempt["time_spent_ms"] / 1000)
+    for row in rows:
+        await write(
+            db,
+            owner_id,
+            "reattempts",
+            {
+                **row.data,
+                "stage": "D30" if item.data["stage"] == "TRANSFER" else item.data["stage"],
+                "scheduled_date": item.data.get("scheduled_date") or row.data["scheduled_date"],
+                "history": [*row.data.get("history", []), entry],
+                "practice_only": bool(row.data.get("practice_only")) and clean,
+            },
+            row,
+        )
 
 
 async def projection(
@@ -1832,3 +2126,191 @@ async def concept_response_evidence(
         "explanation": explanation,
         "due_on": item.data["scheduled_date"],
     }
+
+
+AWAITING_RESULT = "awaiting-test-result"
+TRIAGE_FLAGS = {"missed": "triage-missed", "correct": "triage-correct", "unsure": "triage-unsure"}
+
+
+def triaged_item(data: dict, decision: str, today: date) -> dict:
+    """Apply the learner's test result to an item whose outcome was unknown at import."""
+    flags = [
+        flag
+        for flag in data.get("reason_flags", [])
+        if flag != AWAITING_RESULT and not flag.startswith("triage-")
+    ]
+    flags.append(TRIAGE_FLAGS[decision])
+    if decision == "correct":
+        # Answered correctly in the test: nothing to recover, so it leaves the due queue.
+        return {**data, "recovery_state": "paused", "reason_flags": flags}
+    due = data.get("scheduled_date") or (today + timedelta(days=3)).isoformat()
+    state = data.get("recovery_state")
+    return {
+        **data,
+        "recovery_state": "active" if state in {None, "paused"} else state,
+        "scheduled_date": due,
+        "analysis_state": "pending" if decision == "missed" else data.get("analysis_state"),
+        "reason_flags": flags,
+    }
+
+
+async def triage_item(db: AsyncSession, *, owner_id: str, item_id: str, draft: TriageDraft) -> dict:
+    operation = f"triage:{item_id}"
+    request_hash, replay = await begin(
+        db, owner_id, operation, draft.idempotency_key, draft.model_dump()
+    )
+    if replay:
+        return replay
+    item = await owned(db, owner_id, "learning_items", item_id)
+    require_version(item, draft.expected_version)
+    if item.data.get("source_kind") != "manual":
+        raise HTTPException(422, "Only imported or logged questions take a test result")
+    occurred, today, timezone = await account_clock(db, owner_id)
+    saved = await write(
+        db, owner_id, "learning_items", triaged_item(item.data, draft.decision, today), item
+    )
+    event = await append_event(
+        db,
+        owner_id,
+        event_data(
+            item_id,
+            f"triaged:{item_id}:{draft.idempotency_key}",
+            "triaged",
+            occurred,
+            today,
+            timezone,
+            metadata={
+                "decision": draft.decision,
+                "previous_state": item.data.get("recovery_state"),
+                "next_state": saved.data.get("recovery_state"),
+            },
+        ),
+    )
+    reattempts = await sync_reattempt_schedule(db, owner_id, saved)
+    return await finish(
+        db,
+        owner_id,
+        operation,
+        draft.idempotency_key,
+        request_hash,
+        {"item": to_api(saved), "events": [to_api(event)], "reattempts": reattempts},
+    )
+
+
+async def mark_awaiting_result(db: AsyncSession, *, owner_id: str, item_id: str) -> Record:
+    """Keep an imported question with no known result out of the due queue until triaged."""
+    item = await owned(db, owner_id, "learning_items", item_id)
+    flags = item.data.get("reason_flags", [])
+    if item.data.get("recovery_state") == "paused" or any(f.startswith("triage-") for f in flags):
+        return item
+    if item.data.get("successful_retrieval_count") or item.data.get("lapse_count"):
+        return item  # Real retrieval evidence already exists; never hide it.
+    return await write(
+        db,
+        owner_id,
+        "learning_items",
+        {
+            **item.data,
+            "recovery_state": "paused",
+            "reason_flags": list(dict.fromkeys([*flags, AWAITING_RESULT])),
+        },
+        item,
+    )
+
+
+async def sync_reattempt_schedule(db: AsyncSession, owner_id: str, item: Record) -> list[dict]:
+    rows = list(
+        await db.scalars(
+            select(Record).where(
+                Record.owner_id == owner_id,
+                Record.collection == "reattempts",
+                Record.deleted_at.is_(None),
+                Record.data["learning_item_id"].as_string() == item.external_id,
+            )
+        )
+    )
+    saved = []
+    for row in rows:
+        if row.data.get("scheduled_date") == item.data.get("scheduled_date"):
+            saved.append(to_api(row))
+            continue
+        saved.append(
+            to_api(
+                await write(
+                    db,
+                    owner_id,
+                    "reattempts",
+                    {
+                        **row.data,
+                        "scheduled_date": item.data.get("scheduled_date")
+                        or row.data["scheduled_date"],
+                    },
+                    row,
+                )
+            )
+        )
+    return saved
+
+
+async def rebalance_backlog(db: AsyncSession, *, owner_id: str, draft: RebalanceDraft) -> dict:
+    """Spread overdue re-attempts across the coming days, most urgent first.
+
+    Nothing becomes due earlier and no grade changes; only the order of work is set.
+    """
+    operation = "rebalance"
+    request_hash, replay = await begin(
+        db, owner_id, operation, draft.idempotency_key, draft.model_dump()
+    )
+    if replay:
+        return replay
+    await owner_lock(db, owner_id)
+    occurred, today, timezone = await account_clock(db, owner_id)
+    candidates, complete = await recovery_candidates(db, owner_id)
+    if not complete:
+        raise HTTPException(409, "Too many re-attempts to rebalance at once")
+    due = [
+        row
+        for row in candidates
+        if row["item"].get("scheduled_date")
+        and row["item"]["scheduled_date"] <= today.isoformat()
+        and row["item"].get("recovery_state") in {"active", "transfer"}
+    ]
+    ranked = rank_candidates(due, today)
+    moved = []
+    for position, row in enumerate(ranked):
+        offset = min(position // draft.per_day, draft.max_days - 1)
+        if offset == 0:
+            continue
+        target = (today + timedelta(days=offset)).isoformat()
+        item = await owned(db, owner_id, "learning_items", row["item"]["id"])
+        previous = item.data.get("scheduled_date")
+        item = await write(
+            db, owner_id, "learning_items", {**item.data, "scheduled_date": target}, item
+        )
+        await append_event(
+            db,
+            owner_id,
+            event_data(
+                item.external_id,
+                f"rebalanced:{item.external_id}:{draft.idempotency_key}",
+                "rescheduled",
+                occurred,
+                today,
+                timezone,
+                metadata={"reason": "backlog-spread", "from": previous, "to": target},
+            ),
+        )
+        await sync_reattempt_schedule(db, owner_id, item)
+        moved.append({"item_id": item.external_id, "from": previous, "to": target})
+    return await finish(
+        db,
+        owner_id,
+        operation,
+        draft.idempotency_key,
+        request_hash,
+        {
+            "due_today": min(len(ranked), draft.per_day),
+            "moved": moved,
+            "days": min(draft.max_days, math.ceil(len(ranked) / draft.per_day)) if ranked else 0,
+        },
+    )

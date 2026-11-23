@@ -69,6 +69,7 @@ import {
   createPyqReattemptAttemptRow,
   nextReattemptRoundAttemptNumber,
   pyqAttemptScorePresentation,
+  pyqJournalQuestionId,
   pyqQuestionFromAttempt,
   pyqReattemptAttemptId,
   pyqSourceAttemptForJournalQuestion
@@ -109,6 +110,10 @@ import { Card, CardBody, CardHeader } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import MathText from '@/components/shared/MathText';
+import {
+  SpreadBacklog,
+  TriageImportedQuestions
+} from '@/components/reattempts/RecoveryHousekeeping';
 import { Empty } from '@/components/ui/Empty';
 import { Textarea } from '@/components/ui/Textarea';
 import '@/reattempt.css';
@@ -989,7 +994,19 @@ function CanonicalRecoverySession({
     0,
     Math.ceil((session.elapsed_by_item_ms[item.id] ?? 0) / 1000) + liveSeconds
   );
-  const openingCue = question?.trigger_sentence?.trim() || question?.pattern_name?.trim() || '';
+  // The latest answer may carry no reason; fall back to the newest fix line written for this question.
+  const attemptJournalIds = attempts.map((attempt) => pyqJournalQuestionId(attempt.id));
+  const attemptJournal = useLiveQuery(
+    () => (attemptJournalIds.length ? db.questions.bulkGet(attemptJournalIds) : []),
+    [attemptJournalIds.join('|')],
+    []
+  );
+  const latestFixLine = [...attemptJournal]
+    .reverse()
+    .find((row) => row?.trigger_sentence?.trim())
+    ?.trigger_sentence?.trim();
+  const openingCue =
+    question?.trigger_sentence?.trim() || latestFixLine || question?.pattern_name?.trim() || '';
   const questionImageUrl = answerFreePyqImageUrl(question?.image_url);
   const revealed = !!feedback || !!selfCheck;
   const selected: PyqSelectedAnswer =
@@ -2639,6 +2656,9 @@ export default function Reattempts() {
       (!row.learning_item_id || !learningItemById.has(row.learning_item_id))
   ).length;
   const dueCount = recoveryCandidates.length + legacyDue.length;
+  const overdueCount = recoveryCandidates.filter(
+    (candidate) => (candidate.item.scheduled_date ?? '') < today
+  ).length;
   const upcomingCount =
     (learningItems ?? []).filter(
       (item) =>
@@ -3325,6 +3345,13 @@ export default function Reattempts() {
           ))}
         </dl>
       </section>
+
+      {userId && learningItems ? (
+        <>
+          <SpreadBacklog userId={userId} overdueCount={overdueCount} />
+          <TriageImportedQuestions userId={userId} items={learningItems} questionById={qById} />
+        </>
+      ) : null}
 
       {resumableRecoverySession && resumableRecoverySession.status !== 'active' ? (
         <Card className="retrieval-resume border-ink-violet/25 bg-ink-violet/[0.04]">

@@ -175,3 +175,21 @@ async def transfer(
     )
     await db.commit()
     return result
+
+
+@router.post("/items/{item_id}/triage")
+async def triage(
+    item_id: str, payload: recovery.TriageDraft, identity: CurrentUser, db: DbDep
+) -> dict:
+    result = await recovery.triage_item(
+        db, owner_id=identity.user_id, item_id=item_id, draft=payload
+    )
+    await db.commit()
+    return result
+
+
+@router.post("/rebalance")
+async def rebalance(payload: recovery.RebalanceDraft, identity: CurrentUser, db: DbDep) -> dict:
+    result = await recovery.rebalance_backlog(db, owner_id=identity.user_id, draft=payload)
+    await db.commit()
+    return result

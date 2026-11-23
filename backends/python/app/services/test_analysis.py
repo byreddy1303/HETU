@@ -424,6 +424,12 @@ async def save_test_analysis(
                     reattempt["version"],
                     {"practice_only": practice_only},
                 )
+            if q.outcome is None:
+                # No known result: keep it out of the due queue until the learner says
+                # whether they missed it (Re-attempts asks once).
+                await recovery.mark_awaiting_result(
+                    db, owner_id=owner_id, item_id=scheduled["item"]["id"]
+                )
             remember("learning_items", scheduled["item"]["id"])
             remember("reattempts", scheduled["compatibilityReattempt"]["id"])
 

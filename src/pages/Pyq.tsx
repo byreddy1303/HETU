@@ -64,6 +64,10 @@ import PyqConversationHistory from '@/components/pyq/PyqConversationHistory';
 import QuestionAttemptTimeline from '@/components/pyq/QuestionAttemptTimeline';
 import PracticeWrapUp from '@/components/practice/PracticeWrapUp';
 import QuickPracticeSignals from '@/components/practice/QuickPracticeSignals';
+import QuickDiagnosis from '@/components/practice/QuickDiagnosis';
+import { needsQuickDiagnosis, type QuickDiagnosisResult } from '@/lib/quick-diagnosis';
+import PendingDiagnoses from '@/components/practice/PendingDiagnoses';
+import RecoveryCreditNote from '@/components/practice/RecoveryCreditNote';
 import ThinkingReviewDrawer, { type DebriefContext } from '@/components/pyq/ThinkingReviewDrawer';
 import MemoryPracticeResult from '@/components/memory/MemoryPracticeResult';
 import MemoryPracticeStart from '@/components/memory/MemoryPracticeStart';
@@ -145,13 +149,19 @@ import {
   setPyqExamResponse,
   setPyqExamReviewMark
 } from '@/lib/pyq-exam';
-import { pyqBenchmarkPaperExposure, type PyqBenchmarkPaper } from '@/lib/pyq-benchmark';
+import {
+  derivePyqBenchmarkPaperManifests,
+  pyqBenchmarkPaperExposure,
+  type PyqBenchmarkPaper,
+  type PyqBenchmarkPaperManifest
+} from '@/lib/pyq-benchmark';
 import { mockTestFromFinalizedPyqExam } from '@/lib/pyq-mock-evidence';
 import { buildPyqSessionSummary } from '@/lib/pyq-summary';
 import {
   captureWeakPyqAttempt,
   markLearningAnalysisCompleted,
-  needsRecoveryCapture
+  needsRecoveryCapture,
+  type PracticeCredit
 } from '@/lib/learning-recovery';
 import {
   recommendPyqSelection,
@@ -253,12 +263,22 @@ function recommendationConfig(
     };
   }
   if (preset === 'full-paper') {
+    const listed = manifest.benchmarkPapers.find(
+      (candidate) => candidate.id === current.benchmarkPaperId
+    );
+    // A paper derived from the bank is not in the manifest's reserve list; keep the choice.
     const paper =
-      manifest.benchmarkPapers.find((candidate) => candidate.id === current.benchmarkPaperId) ??
-      manifest.benchmarkPapers.find(
-        (candidate) => pyqBenchmarkPaperExposure(candidate, []).sealed
-      ) ??
-      manifest.benchmarkPapers[0];
+      listed ??
+      (current.benchmarkPaperId
+        ? {
+            id: current.benchmarkPaperId,
+            bookSlug: 'gate-cse' as const,
+            year: current.fromYear,
+            set: null
+          }
+        : (manifest.benchmarkPapers.find(
+            (candidate) => pyqBenchmarkPaperExposure(candidate, []).sealed
+          ) ?? manifest.benchmarkPapers[0]));
     return {
       ...common,
       mode: 'exam',
@@ -379,6 +399,53 @@ function sourceDraft(question: PyqQuestion, screenshot: string | null): SourceDr
   };
 }
 
+let fullPaperCache: {
+  bankVersion: string;
+  promise: Promise<PyqBenchmarkPaperManifest[]>;
+} | null = null;
+
+/**
+ * Every complete, fully scorable GATE CSE paper in the bank (65 questions, 100 marks).
+ * The manifest lists only the sealed reserve; older papers are derived from the bank.
+ */
+function loadFullPapers(manifest: PyqManifest): Promise<PyqBenchmarkPaperManifest[]> {
+  if (fullPaperCache?.bankVersion === manifest.bankVersion) return fullPaperCache.promise;
+  const book = manifest.books.find((candidate) => candidate.slug === 'gate-cse');
+  const promise = book
+    ? loadPyqQuestions(book.subjects, manifest.bankVersion).then((rows) => {
+        const byId = new Map(
+          derivePyqBenchmarkPaperManifests(rows).map((paper) => [paper.id, paper])
+        );
+        for (const paper of manifest.benchmarkPapers) byId.set(paper.id, paper);
+        return [...byId.values()];
+      })
+    : Promise.resolve(manifest.benchmarkPapers);
+  fullPaperCache = { bankVersion: manifest.bankVersion, promise };
+  promise.catch(() => {
+    fullPaperCache = null;
+  });
+  return promise;
+}
+
+/** Older unseen papers first, so the newest sets stay fresh for the final weeks. */
+function suggestedFullPaper(
+  papers: readonly PyqBenchmarkPaper[],
+  reservedIds: ReadonlySet<string>
+): PyqBenchmarkPaper | null {
+  const open = papers
+    .filter((paper) => paper.sealed && !reservedIds.has(paper.id))
+    .slice()
+    .sort((left, right) => left.year - right.year || (left.set ?? 0) - (right.set ?? 0));
+  // Papers from 2014 on carry numerical-answer questions, so they feel like the real exam.
+  return (
+    open.find((paper) => paper.year >= 2014) ??
+    open[0] ??
+    papers.find((paper) => paper.sealed) ??
+    papers[0] ??
+    null
+  );
+}
+
 function benchmarkFreshnessLabel(paper: PyqBenchmarkPaper): string {
   if (paper.freshness === 'unseen') return 'Sealed · unseen';
   if (paper.freshness === 'repeated') return 'Fully exposed';
@@ -387,6 +454,7 @@ function benchmarkFreshnessLabel(paper: PyqBenchmarkPaper): string {
 
 function FullPaperSetup({
   papers,
+  reservedIds,
   selectedPaperId,
   closedBookConfirmed,
   loading,
@@ -396,6 +464,7 @@ function FullPaperSetup({
   onStart
 }: {
   papers: PyqBenchmarkPaper[];
+  reservedIds: ReadonlySet<string>;
   selectedPaperId: string | null;
   closedBookConfirmed: boolean;
   loading: boolean;
@@ -406,6 +475,44 @@ function FullPaperSetup({
 }) {
   const selectedPaper = papers.find((paper) => paper.id === selectedPaperId) ?? null;
   const canQualify = selectedPaper?.sealed === true && closedBookConfirmed;
+  const byExamOrder = (left: PyqBenchmarkPaper, right: PyqBenchmarkPaper) =>
+    left.year - right.year || (left.set ?? 0) - (right.set ?? 0);
+  const openPapers = papers.filter((paper) => !reservedIds.has(paper.id)).sort(byExamOrder);
+  const reservedPapers = papers.filter((paper) => reservedIds.has(paper.id)).sort(byExamOrder);
+  const unseenCount = openPapers.filter((paper) => paper.sealed).length;
+  const paperButton = (paper: PyqBenchmarkPaper) => {
+    const selected = paper.id === selectedPaperId;
+    return (
+      <button
+        key={paper.id}
+        type="button"
+        aria-pressed={selected}
+        onClick={() => onSelectPaper(paper)}
+        className={cn(
+          'flex min-h-[78px] flex-col justify-between gap-2 rounded border p-3 text-left transition-colors focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-guess-faint',
+          selected
+            ? 'border-ink-violet/55 bg-guess-faint shadow-card'
+            : 'border-border bg-bg-raised hover:border-border-hover'
+        )}
+      >
+        <span className="flex items-start justify-between gap-2">
+          <span className="font-display text-[14.5px] font-bold leading-snug text-text">
+            {paper.paperLabel.replace(/^GATE CSE /, '')}
+          </span>
+          {paper.sealed ? (
+            <ShieldCheck size={16} className="shrink-0 text-success" aria-hidden="true" />
+          ) : (
+            <ShieldAlert size={16} className="shrink-0 text-warn" aria-hidden="true" />
+          )}
+        </span>
+        <span className="text-[11px] leading-snug text-text-muted">
+          {paper.sealed
+            ? 'Unseen · counts as a qualified mock'
+            : `${benchmarkFreshnessLabel(paper)} · supporting`}
+        </span>
+      </button>
+    );
+  };
 
   return (
     <Card className="overflow-hidden border-ink-violet/25">
@@ -414,11 +521,12 @@ function FullPaperSetup({
           <div>
             <p className="u-label text-ink-violet">Step 2 · Select an official paper</p>
             <h2 className="mt-1 font-display text-[20px] font-bold tracking-tight text-text">
-              Open one sealed benchmark
+              {papers.length} complete GATE CSE {papers.length === 1 ? 'paper' : 'papers'}
             </h2>
             <p className="mt-1 max-w-2xl text-[12.5px] leading-relaxed text-text-muted">
-              The complete paper opens in official order with one 180-minute countdown. Answer keys
-              stay hidden until final submission.
+              Each opens in official order with one 180-minute countdown, and keys stay hidden until
+              final submission. {unseenCount} are still unseen. Start with older papers and keep the
+              newest sets for the last weeks.
             </p>
           </div>
           <div className="grid shrink-0 grid-cols-3 gap-px overflow-hidden rounded border border-ink-violet/20 bg-ink-violet/20 text-center">
@@ -446,48 +554,23 @@ function FullPaperSetup({
             </p>
           </div>
         ) : (
-          <div className="grid gap-3 sm:grid-cols-2">
-            {papers.map((paper) => {
-              const selected = paper.id === selectedPaperId;
-              return (
-                <button
-                  key={paper.id}
-                  type="button"
-                  aria-pressed={selected}
-                  onClick={() => onSelectPaper(paper)}
-                  className={cn(
-                    'group relative min-h-[150px] rounded border p-4 text-left transition-all focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-guess-faint',
-                    selected
-                      ? 'border-ink-violet/55 bg-guess-faint shadow-card'
-                      : 'border-border bg-bg-raised hover:-translate-y-0.5 hover:border-border-hover'
-                  )}
-                >
-                  <span className="flex items-start justify-between gap-3">
-                    <span
-                      className={cn(
-                        'flex h-10 w-10 items-center justify-center rounded-lg border',
-                        paper.sealed
-                          ? 'border-success/25 bg-success-faint text-success'
-                          : 'border-warn/25 bg-warn-faint text-warn'
-                      )}
-                    >
-                      {paper.sealed ? <ShieldCheck size={19} /> : <ShieldAlert size={19} />}
-                    </span>
-                    <Badge tone={paper.sealed ? 'success' : 'warn'}>
-                      {benchmarkFreshnessLabel(paper)}
-                    </Badge>
+          <div className="flex flex-col gap-4">
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
+              {openPapers.map(paperButton)}
+            </div>
+            {reservedPapers.length > 0 ? (
+              <div className="flex flex-col gap-2">
+                <p className="text-[12px] font-semibold text-text">
+                  Keep for the final 10 days{' '}
+                  <span className="font-normal text-text-muted">
+                    · these never appear in practice sets or re-attempt transfers
                   </span>
-                  <span className="mt-4 block font-display text-[17px] font-bold text-text">
-                    {paper.paperLabel}
-                  </span>
-                  <span className="mt-1 block text-[11.5px] leading-relaxed text-text-muted">
-                    {paper.sealed
-                      ? 'No prior answer receipt touches this paper. Eligible for unseen evidence.'
-                      : 'You can retake this paper, but the outcome will remain supporting evidence.'}
-                  </span>
-                </button>
-              );
-            })}
+                </p>
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
+                  {reservedPapers.map(paperButton)}
+                </div>
+              </div>
+            ) : null}
           </div>
         )}
 
@@ -569,6 +652,7 @@ function PracticeSetup({
   onResume,
   onSave,
   onEndAndSave,
+  onEndStale,
   onDiscard,
   onReview,
   onIncludeReservedBenchmarkQuestions,
@@ -608,6 +692,7 @@ function PracticeSetup({
   onResume: (session: PyqSessionRow) => void;
   onSave: (session: PyqSessionRow) => void;
   onEndAndSave: (session: PyqSessionRow) => void;
+  onEndStale: (sessions: PyqSessionRow[]) => void;
   onDiscard: (session: PyqSessionRow) => void;
   onReview: (session: PyqSessionRow) => void;
   onIncludeReservedBenchmarkQuestions: (included: boolean) => void;
@@ -630,20 +715,35 @@ function PracticeSetup({
   const catalogSubjects = selectedBook?.subjects ?? manifest.subjects;
   const catalogYears = selectedBook?.years ?? manifest.years;
   const catalogQuestionCount = selectedBook?.count ?? manifest.questionCount;
+  const fullPaperSelected = config.mode === 'exam' && config.examKind === 'full-paper';
+  const [derivedPapers, setDerivedPapers] = useState<PyqBenchmarkPaperManifest[] | null>(null);
+  useEffect(() => {
+    if (config.mode !== 'exam') return;
+    let live = true;
+    void loadFullPapers(manifest)
+      .then((papers) => {
+        if (live) setDerivedPapers(papers);
+      })
+      .catch(() => undefined);
+    return () => {
+      live = false;
+    };
+  }, [config.mode, manifest]);
+  const reservedPaperIds = useMemo(
+    () => new Set(manifest.benchmarkPapers.map((paper) => paper.id)),
+    [manifest.benchmarkPapers]
+  );
   const benchmarkPapers = useMemo(
     () =>
-      manifest.benchmarkPapers.map((paper) => ({
+      (derivedPapers ?? manifest.benchmarkPapers).map((paper) => ({
         ...paper,
         ...pyqBenchmarkPaperExposure(paper, attempts)
       })),
-    [attempts, manifest.benchmarkPapers]
+    [attempts, derivedPapers, manifest.benchmarkPapers]
   );
   const selectedBenchmarkPaper =
     benchmarkPapers.find((paper) => paper.id === config.benchmarkPaperId) ??
-    benchmarkPapers.find((paper) => paper.sealed) ??
-    benchmarkPapers[0] ??
-    null;
-  const fullPaperSelected = config.mode === 'exam' && config.examKind === 'full-paper';
+    suggestedFullPaper(benchmarkPapers, reservedPaperIds);
   const sealedBenchmarkCount = benchmarkPapers.filter((paper) => paper.sealed).length;
   const attemptedIds = useMemo(
     () =>
@@ -747,6 +847,7 @@ function PracticeSetup({
         onResume={onResume}
         onSave={onSave}
         onEndAndSave={onEndAndSave}
+        onEndStale={onEndStale}
         onDiscard={onDiscard}
       />
       {error && (
@@ -857,6 +958,7 @@ function PracticeSetup({
         {fullPaperSelected ? (
           <FullPaperSetup
             papers={benchmarkPapers}
+            reservedIds={reservedPaperIds}
             selectedPaperId={selectedBenchmarkPaper?.id ?? null}
             closedBookConfirmed={closedBookConfirmed}
             loading={loading}
@@ -1540,6 +1642,10 @@ export default function Pyq() {
   const [finished, setFinished] = useState(false);
   const [journalOpen, setJournalOpen] = useState(false);
   const [journalSaved, setJournalSaved] = useState(false);
+  const [recoveryCredit, setRecoveryCredit] = useState<{
+    attemptId: string;
+    credit: PracticeCredit;
+  } | null>(null);
   const [analyzedCount, setAnalyzedCount] = useState(0);
   const [questionScreenshot, setQuestionScreenshot] = useState<string | null>(null);
   const [pyqSessionId, setPyqSessionId] = useState<string | null>(null);
@@ -2515,7 +2621,10 @@ export default function Pyq() {
     }
   }
 
-  async function endAndSaveSession(session: PyqSessionRow) {
+  async function endAndSaveSession(
+    session: PyqSessionRow,
+    { navigateAfter = true }: { navigateAfter?: boolean } = {}
+  ) {
     if (!userId || loading || submittingRef.current || pausingSessionRef.current) return;
     submittingRef.current = true;
     setLoading(true);
@@ -2581,7 +2690,7 @@ export default function Pyq() {
           existingCanonical?.planner_block_id ?? null
         );
       }
-      navigate(`/session/${session.id}/review`);
+      if (navigateAfter) navigate(`/session/${session.id}/review`);
     } catch (error) {
       setStartError(
         error instanceof Error
@@ -2591,6 +2700,14 @@ export default function Pyq() {
     } finally {
       submittingRef.current = false;
       setLoading(false);
+    }
+  }
+
+  /** End and save stale paused practice sets in one pass; answers stay, the sets leave Today. */
+  async function endStaleSessions(sessions: PyqSessionRow[]) {
+    for (const session of sessions) {
+      if (session.config.mode === 'exam') continue;
+      await endAndSaveSession(session, { navigateAfter: false });
     }
   }
 
@@ -3000,7 +3117,7 @@ export default function Pyq() {
               )
             : selectedConfig;
       } else if (isFullPaper) {
-        const paper = manifest.benchmarkPapers.find(
+        const paper = (await loadFullPapers(manifest)).find(
           (candidate) => candidate.id === config.benchmarkPaperId
         );
         if (!paper) throw new Error('Select a verified full paper before starting.');
@@ -3295,7 +3412,7 @@ export default function Pyq() {
       }
       let repeatedConfig: AttemptConfig;
       if (config.mode === 'exam' && config.examKind === 'full-paper') {
-        const paper = manifest.benchmarkPapers.find(
+        const paper = (await loadFullPapers(manifest)).find(
           (candidate) => candidate.id === config.benchmarkPaperId
         );
         if (!paper) throw new Error('The original benchmark paper is no longer available.');
@@ -3763,14 +3880,25 @@ export default function Pyq() {
       pendingPracticeAttemptRef.current = attempt;
       await writeLocalBatch(writes);
       pendingPracticeAttemptRef.current = null;
-      if (compatibilityQuestion && recoveryNeeded) {
-        void captureWeakPyqAttempt({ attempt, timeZone, compatibilityQuestion }).catch(
-          (captureError: unknown) => {
+      // A later answer to an already-scheduled question also moves its re-attempt ladder.
+      const scheduled =
+        !recoveryNeeded && apiConfigured
+          ? await db.learning_items
+              .where('[user_id+question_uid]')
+              .equals([userId, current.id])
+              .first()
+          : undefined;
+      if (compatibilityQuestion && (recoveryNeeded || scheduled)) {
+        void captureWeakPyqAttempt({ attempt, timeZone, compatibilityQuestion })
+          .then((captured) => {
+            if (captured?.credit)
+              setRecoveryCredit({ attemptId: attempt.id, credit: captured.credit });
+          })
+          .catch((captureError: unknown) => {
             // The answer receipt remains committed; account bootstrap retries
             // this idempotent recovery write after refresh or reconnection.
             console.warn('[air] Practice recovery capture is waiting to retry.', captureError);
-          }
-        );
+          });
       }
       loadedSessionRef.current = nextSession;
       setLoadedSession(nextSession);
@@ -3810,6 +3938,30 @@ export default function Pyq() {
       timeZone
     });
     setJournalOpen(false);
+  }
+
+  /** Save a 15-second reason for any answer in this set, current or earlier. */
+  async function saveQuickDiagnosis(
+    attempt: PyqAttemptRow,
+    question: PyqQuestion,
+    diagnosis: QuickDiagnosisResult
+  ) {
+    if (!userId) return;
+    const isCurrent = attempt.id === submitted?.id && question.id === current?.id;
+    const imageUrl = isCurrent
+      ? ((await safeQuestionImageUrl()) ?? (await journalImageUrl()))
+      : ((await resolvePyqJournalImageUrl(question.html).catch(() =>
+          firstPyqImage(question.html)
+        )) ?? pyqQuestionSnapshotDataUrl(question));
+    const row: QuestionRow = {
+      ...questionRowFromAttempt(attempt, undefined, imageUrl, question),
+      id: pyqJournalQuestionId(attempt.id),
+      outcome: diagnosis.outcome,
+      root_cause: diagnosis.rootCause,
+      trigger_sentence: diagnosis.fix
+    };
+    await persistJournalRow(row, null, diagnosis.outcome);
+    await markLearningAnalysisCompleted({ userId, sourceAttemptId: attempt.id, timeZone });
   }
 
   async function markSessionComplete() {
@@ -4074,6 +4226,7 @@ export default function Pyq() {
         onResume={(session) => void resumeSession(session)}
         onSave={(session) => void saveSession(session)}
         onEndAndSave={(session) => void endAndSaveSession(session)}
+        onEndStale={(sessions) => void endStaleSessions(sessions)}
         onDiscard={(session) => void discardSession(session)}
         onReview={(session) => navigate(`/session/${session.id}/review`)}
         onIncludeReservedBenchmarkQuestions={setIncludeReservedBenchmarkQuestions}
@@ -4109,6 +4262,7 @@ export default function Pyq() {
           title="Practice set complete"
           description={`${completed.length} immutable ${plural(completed.length, 'attempt')} saved without exposing a key early.`}
         />
+        <PendingDiagnoses attempts={completed} questions={questions} onSave={saveQuickDiagnosis} />
         {loadedSession && <PracticeWrapUp sessionId={loadedSession.id} />}
         {loadedSession && <MemoryPracticeResult session={loadedSession} attempts={completed} />}
         <Card>
@@ -4453,6 +4607,9 @@ export default function Pyq() {
     setDecision(nextNumeric.trim().length > 0 ? 'MARK' : null);
   }
 
+  // Weak answers get a 15-second reason before moving on; the reason feeds the re-attempt cue.
+  const needsWhy =
+    !!submitted && !journalSaved && needsQuickDiagnosis(submitted, needsRecoveryCapture(submitted));
   const activeQuestionWorkspace = (
     <div className="flex min-w-0 flex-col gap-4">
       <div ref={questionCaptureRef}>
@@ -4606,14 +4763,34 @@ export default function Pyq() {
             ) : (
               <div className="flex flex-col gap-3">
                 <ResultPanel question={current} attempt={submitted} />
-                <QuickPracticeSignals attemptId={submitted.id} />
+                {recoveryCredit?.attemptId === submitted.id ? (
+                  <RecoveryCreditNote credit={recoveryCredit.credit} />
+                ) : null}
+                {needsWhy ? (
+                  <QuickDiagnosis
+                    key={submitted.id}
+                    attempt={submitted}
+                    saveLabel="Save and continue"
+                    onSave={async (diagnosis) => {
+                      await saveQuickDiagnosis(submitted, current, diagnosis);
+                      await goNext();
+                    }}
+                    onLater={() => void goNext()}
+                  />
+                ) : (
+                  <QuickPracticeSignals attemptId={submitted.id} />
+                )}
                 <div className="flex flex-wrap gap-2">
                   {index > 0 ? (
                     <Button onClick={goPrevious} disabled={loading || submitting}>
                       <ArrowLeft size={15} /> Previous question
                     </Button>
                   ) : null}
-                  <Button variant="primary" onClick={goNext} disabled={loading || submitting}>
+                  <Button
+                    variant={needsWhy ? 'secondary' : 'primary'}
+                    onClick={goNext}
+                    disabled={loading || submitting}
+                  >
                     {loadedSession?.config.practiceView === 'multiple' &&
                     questions.every((question) =>
                       completed.some((attempt) => attempt.question_uid === question.id)
@@ -4653,6 +4830,14 @@ export default function Pyq() {
                     <Badge tone="success" className="self-center">
                       Saved to journal
                     </Badge>
+                  ) : needsWhy ? (
+                    <Button
+                      variant="ghost"
+                      onClick={() => setJournalOpen(true)}
+                      disabled={loading || submitting}
+                    >
+                      Full analysis
+                    </Button>
                   ) : submitted.mark_correct === false ? (
                     <Button onClick={() => setJournalOpen(true)} disabled={loading || submitting}>
                       Continue analysis

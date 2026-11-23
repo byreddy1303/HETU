@@ -9,6 +9,8 @@ import type { PyqSessionRow, RecoverySessionRow } from '@/types';
 import type { DrillPack } from '@/lib/practice-coach';
 
 export const TODAY_BUDGETS = [10, 20, 30, 45, 60] as const;
+/** A paused practice set older than this no longer competes with due re-attempts on Today. */
+export const FRESH_PRACTICE_DAYS = 2;
 export type TodayBudget = (typeof TODAY_BUDGETS)[number];
 export type TodayActionKind = 'resume' | 'planned' | 'recovery' | 'concept' | 'repair' | 'evidence';
 
@@ -116,7 +118,9 @@ export function buildTodayActions(input: TodayActionsInput) {
       estimatedMin: null,
       priority: 0
     });
-  if (practice[0]) actions.push(resumePractice(practice[0]));
+  // Due retrieval comes before new questions; only a recently touched set may follow it.
+  if (practice[0] && isFreshPractice(practice[0], today))
+    actions.push(resumePractice(practice[0], 2));
 
   const memoryById = new Map(ownedMemory.map((entry) => [entry.id, entry]));
   const candidates = buildPlannerEvidenceCandidates({
@@ -165,7 +169,7 @@ export function buildTodayActions(input: TodayActionsInput) {
             ]
           : null
       ]),
-      priority: 2
+      priority: 0.5
     });
   for (const candidate of candidates) {
     // The canonical sprint owns due retrieval; its compatibility projection is not another task.
@@ -196,7 +200,7 @@ export function buildTodayActions(input: TodayActionsInput) {
       estimatedMin: candidate.estimatedMin,
       dueDate: candidate.dueDate,
       plannerBlockId: block?.id,
-      priority: block ? 1 : candidate.kind === 'reattempt' ? 2 : 5
+      priority: block ? 1 : candidate.kind === 'reattempt' ? 0.5 : 5
     });
   }
   // Approved lower-priority blocks remain visible too; the compiler only carries P1/P2.
@@ -263,7 +267,17 @@ export function buildTodayActions(input: TodayActionsInput) {
   };
 }
 
-function resumePractice(session: PyqSessionRow): TodayAction {
+/** Whether a saved practice set was touched within the last FRESH_PRACTICE_DAYS days. */
+export function isFreshPractice(
+  session: Pick<PyqSessionRow, 'updated_at'>,
+  today: string
+): boolean {
+  const cutoff = new Date(`${today}T00:00:00Z`);
+  cutoff.setUTCDate(cutoff.getUTCDate() - FRESH_PRACTICE_DAYS);
+  return session.updated_at.slice(0, 10) >= cutoff.toISOString().slice(0, 10);
+}
+
+function resumePractice(session: PyqSessionRow, priority = 0): TodayAction {
   return {
     id: `resume-practice:${session.id}`,
     kind: 'resume',
@@ -272,7 +286,7 @@ function resumePractice(session: PyqSessionRow): TodayAction {
     reason: `${session.completed_count} of ${session.question_uids.length} questions submitted. Continue your saved set.`,
     href: `/pyq?resumeSession=${encodeURIComponent(session.id)}`,
     estimatedMin: null,
-    priority: 0
+    priority
   };
 }
 

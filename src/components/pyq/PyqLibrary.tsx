@@ -13,7 +13,8 @@ import { Button } from '@/components/ui/Button';
 import type { PyqBookManifest, PyqManifest } from '@/lib/pyq';
 import { pyqExamRemainingSeconds } from '@/lib/pyq-exam';
 import type { PyqSessionRow } from '@/types';
-import { secondsToClock } from '@/lib/utils';
+import { secondsToClock, todayISOInTimeZone } from '@/lib/utils';
+import { FRESH_PRACTICE_DAYS, isFreshPractice } from '@/lib/today-actions';
 
 export type PyqLibraryTab = 'pyqs' | 'series' | 'history';
 
@@ -85,6 +86,7 @@ export function PyqSessionShelf({
   onResume,
   onSave,
   onEndAndSave,
+  onEndStale,
   onDiscard
 }: {
   manifest: PyqManifest;
@@ -94,6 +96,7 @@ export function PyqSessionShelf({
   onResume: (session: PyqSessionRow) => void;
   onSave: (session: PyqSessionRow) => void;
   onEndAndSave: (session: PyqSessionRow) => void;
+  onEndStale?: (sessions: PyqSessionRow[]) => void;
   onDiscard: (session: PyqSessionRow) => void;
 }) {
   const [expanded, setExpanded] = useState(false);
@@ -102,6 +105,14 @@ export function PyqSessionShelf({
     ? [activeSession, ...savedSessions.filter((session) => session.id !== activeSession.id)]
     : savedSessions;
   if (!sessions.length) return null;
+  const today = todayISOInTimeZone();
+  const stale = savedSessions.filter(
+    (session) =>
+      session.status === 'paused' &&
+      session.config.mode !== 'exam' &&
+      session.id !== activeSession?.id &&
+      !isFreshPractice(session, today)
+  );
   return (
     <section className="practice-continue" aria-label="Saved sessions">
       <div className="practice-continue__heading">
@@ -118,6 +129,21 @@ export function PyqSessionShelf({
           </button>
         )}
       </div>
+      {stale.length > 0 && onEndStale ? (
+        <p className="mb-2 text-[12px] leading-relaxed text-text-muted">
+          {stale.length} paused {stale.length === 1 ? 'set is' : 'sets are'} more than{' '}
+          {FRESH_PRACTICE_DAYS} days old, so Today shows your due re-attempts first.{' '}
+          <button
+            type="button"
+            disabled={loading}
+            onClick={() => onEndStale(stale)}
+            className="font-semibold text-accent underline-offset-2 hover:underline disabled:opacity-50"
+          >
+            End and save {stale.length === 1 ? 'it' : `all ${stale.length}`}
+          </button>
+          . Answers you submitted are kept.
+        </p>
+      ) : null}
       <div id={listId}>
         {(expanded ? sessions : sessions.slice(0, 1)).map((session) => {
           const isActive = session.id === activeSession?.id;

@@ -410,7 +410,9 @@ describe('PYQ committed-attempt logging', () => {
       within(receipt).getByText('Exact GATE-rule score using the stored question type and marks.')
     ).toBeInTheDocument();
 
-    await user.click(screen.getByRole('button', { name: 'Continue analysis' }));
+    // A miss now asks for a 15-second reason inline; the full four-step analysis stays available.
+    expect(screen.getByRole('region', { name: 'Why did you miss it?' })).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Full analysis' }));
     expect(await screen.findByRole('button', { name: 'Pause practice' })).toBeEnabled();
     await user.click(screen.getByRole('button', { name: 'Back to answer' }));
 

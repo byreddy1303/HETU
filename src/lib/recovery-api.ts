@@ -6,7 +6,7 @@ import type {
   QuestionRow, RecoverySessionMode, RecoverySessionRow, ReattemptRow
 } from '@/types';
 import type { RecoveryGradeDecision, RecoveryGradeEvidence, RecoverySprint } from '@/lib/recovery-engine';
-import type { WeakAttemptReason } from '@/lib/learning-recovery';
+import type { PracticeCredit, WeakAttemptReason } from '@/lib/learning-recovery';
 
 interface RecoveryResult {
   session?: RecoverySessionRow | null;
@@ -89,7 +89,7 @@ async function post<T extends RecoveryResult>(userId: string, path: string, payl
 
 export async function captureAttemptApi(userId: string, attemptId: string, questionId?: string) {
   const suffix = questionId ? `?question_id=${encodeURIComponent(questionId)}` : '';
-  const result = await apiRequest<(RecoveryResult & { item: LearningItemRow; event: LearningEventRow; reasons: WeakAttemptReason[]; compatibilityQuestion: QuestionRow | null; compatibilityReattempt: ReattemptRow | null }) | null>(
+  const result = await apiRequest<(RecoveryResult & { item: LearningItemRow; event: LearningEventRow; reasons: WeakAttemptReason[]; credit?: PracticeCredit | null; compatibilityQuestion: QuestionRow | null; compatibilityReattempt: ReattemptRow | null }) | null>(
     `/v1/recovery/attempts/${encodeURIComponent(attemptId)}/capture${suffix}`, { method: 'POST' }
   );
   if (result) cache(userId, result);
@@ -150,6 +150,34 @@ export async function hintApi(session: RecoverySessionRow, item: LearningItemRow
   const result = await post<RecoveryResult & { session: RecoverySessionRow }>(session.user_id,
     `/sessions/${encodeURIComponent(session.id)}/hint`, command(session, item.id, 'hint'));
   return result.session;
+}
+
+export type TriageDecision = 'missed' | 'correct' | 'unsure';
+
+/** Record the learner's own test result for an imported question whose outcome was unknown. */
+export async function triageItemApi(userId: string, item: LearningItemRow, decision: TriageDecision): Promise<LearningItemRow> {
+  const result = await post<RecoveryResult & { item: LearningItemRow }>(userId, `/items/${encodeURIComponent(item.id)}/triage`, {
+    idempotency_key: recoveryKey('triage', [item.id, item.version ?? null, decision]),
+    expected_version: version(item), decision
+  });
+  return result.item;
+}
+
+export interface RebalanceResult {
+  due_today: number;
+  moved: { item_id: string; from: string | null; to: string }[];
+  days: number;
+}
+
+/** Spread overdue re-attempts over the coming days, most urgent first; nothing moves earlier. */
+export async function rebalanceBacklogApi(userId: string, perDay = 8, maxDays = 7): Promise<RebalanceResult> {
+  return apiRequest<RebalanceResult>('/v1/recovery/rebalance', {
+    method: 'POST',
+    body: JSON.stringify({
+      idempotency_key: recoveryKey('rebalance', [userId, new Date().toISOString().slice(0, 10), perDay]),
+      per_day: perDay, max_days: maxDays
+    })
+  });
 }
 
 export async function deferApi(session: RecoverySessionRow, item: LearningItemRow, reason: string): Promise<{ session: RecoverySessionRow; item: LearningItemRow }> {

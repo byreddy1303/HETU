@@ -27,10 +27,28 @@ export type WeakAttemptReason =
   | 'guessed-correct'
   | 'slow-correct';
 
+/** How a later answer to an already-scheduled question moved its re-attempt ladder. */
+export interface PracticeCredit {
+  via: 'practice';
+  credited: boolean;
+  outcome: 'again' | 'hard' | 'good' | 'easy' | 'rehearsal' | 'ungraded' | 'paused';
+  grade?: 'again' | 'hard' | 'good' | 'easy';
+  grade_reasons?: string[];
+  reason?: string;
+  previous_stage: LearningItemRow['stage'] | null;
+  next_stage: LearningItemRow['stage'] | null;
+  next_due_date: string | null;
+  lapse_count?: number;
+  remediation?: boolean;
+  mastered?: boolean;
+  explanation: string;
+}
+
 export interface WeakAttemptCapture {
   item: LearningItemRow;
   event: LearningEventRow;
   reasons: WeakAttemptReason[];
+  credit?: PracticeCredit | null;
   compatibilityQuestion: QuestionRow | null;
   compatibilityReattempt: ReattemptRow | null;
 }

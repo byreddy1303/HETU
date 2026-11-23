@@ -475,3 +475,207 @@ async def test_repeated_lapse_requires_real_remediation_and_cannot_bypass_versio
         with pytest.raises(HTTPException) as blocked:
             require_generic_mutation_allowed(collection)
         assert blocked.value.status_code == 403
+
+
+async def practice_attempt(
+    db, key, selected, at, *, confidence="medium", decision="MARK", ms=60000
+):
+    """An app practice answer to gate:test:1 (key B) committed at a chosen instant."""
+    row = (
+        await upsert_records(
+            db,
+            owner_id="one",
+            collection="pyq_attempts",
+            items=[
+                {
+                    "id": key,
+                    "question_uid": "gate:test:1",
+                    "subject": "Algorithms",
+                    "selected_answer": selected,
+                    "correct_answer": "B",
+                    "mark_decision": decision,
+                    "mark_correct": None if decision == "SKIP" else selected == "B",
+                    "confidence": confidence,
+                    "attempted_at": at.isoformat(),
+                    "time_spent_ms": ms,
+                    "time_spent_sec": ms // 1000,
+                    "duration_source": "measured",
+                    "question_marks": 1,
+                    "question_snapshot": {"topic": "Sorting", "marks": 1},
+                    "capture_version": 3,
+                    "pyq_session_id": None,
+                }
+            ],
+        )
+    )[0]
+    return await recovery.capture_attempt(db, owner_id="one", attempt_id=row.external_id)
+
+
+ORIGINAL = datetime(2026, 10, 1, 4, 0, tzinfo=UTC)  # 1 October in Kolkata; due 4 October
+
+
+@pytest.mark.asyncio
+async def test_practice_resolve_of_a_due_mistake_advances_the_same_ladder(db, monkeypatch):
+    await setup(db, monkeypatch)
+    first = await practice_attempt(db, "practice-wrong", "A", ORIGINAL)
+    item_id = first["item"]["id"]
+    assert first["item"]["stage"] == "D3" and first["item"]["scheduled_date"] == "2026-10-04"
+    assert first["credit"] is None
+    # A clean, timely, medium-confidence answer once it is due moves D3 -> D10.
+    solved = await practice_attempt(db, "practice-right", "B", ORIGINAL + timedelta(days=4))
+    await db.commit()
+    assert solved["item"]["id"] == item_id
+    assert solved["credit"]["credited"] and solved["credit"]["grade"] == "good"
+    assert solved["item"]["stage"] == "D10"
+    assert solved["item"]["scheduled_date"] == "2026-10-15"
+    assert solved["item"]["successful_retrieval_count"] == 1
+    assert solved["event"]["event_type"] == "retrieval_good"
+    assert solved["event"]["metadata"]["previous_stage"] == "D3"
+    # Retrying the same receipt never grades it twice.
+    replay = await recovery.capture_attempt(db, owner_id="one", attempt_id="practice-right")
+    assert replay["item"]["version"] == solved["item"]["version"]
+    assert replay["credit"]["grade"] == "good"
+
+
+@pytest.mark.asyncio
+async def test_practice_miss_is_a_lapse_that_reschedules_once_per_day(db, monkeypatch):
+    await setup(db, monkeypatch)
+    await practice_attempt(db, "miss-original", "A", ORIGINAL)
+    later = ORIGINAL + timedelta(days=9)  # 10 October in Kolkata
+    missed = await practice_attempt(db, "miss-again", "C", later, confidence="high")
+    await db.commit()
+    assert missed["credit"]["outcome"] == "again"
+    assert missed["item"]["stage"] == "D3"
+    assert missed["item"]["scheduled_date"] == "2026-10-13"
+    assert missed["item"]["lapse_count"] == 1
+    assert missed["item"]["analysis_state"] == "pending"
+    assert missed["event"]["event_type"] == "retrieval_again"
+    # A second miss the same day keeps the new date but is not a second lapse.
+    twice = await practice_attempt(db, "miss-twice", "D", later + timedelta(hours=1))
+    await db.commit()
+    assert twice["item"]["lapse_count"] == 1
+    assert twice["item"]["scheduled_date"] == "2026-10-13"
+
+
+@pytest.mark.asyncio
+async def test_seen_key_and_early_answers_stay_practice(db, monkeypatch):
+    await setup(db, monkeypatch)
+    await practice_attempt(db, "seen-original", "A", ORIGINAL)
+    # Correct on 3 October: not due yet, so the spaced check stays on 4 October.
+    early = await practice_attempt(db, "seen-early", "B", ORIGINAL + timedelta(days=2, hours=6))
+    assert early["credit"]["outcome"] == "rehearsal" and early["credit"]["reason"] == "not due yet"
+    assert early["item"]["stage"] == "D3" and early["item"]["scheduled_date"] == "2026-10-04"
+    assert early["event"]["event_type"] == "answer_committed"
+    # Due on 4 October, but 14 hours after that answer revealed the key: practice, not recall.
+    recent = await practice_attempt(db, "seen-recent", "B", ORIGINAL + timedelta(days=2, hours=20))
+    await db.commit()
+    assert recent["credit"]["reason"] == "key seen within 20 hours"
+    assert recent["item"]["stage"] == "D3" and recent["item"]["successful_retrieval_count"] == 0
+
+
+async def logged_item(db, ref, *, overdue_days=5, outcome="U"):
+    """A logged (manual) question with a learning item that is already overdue."""
+    await upsert_records(
+        db,
+        owner_id="one",
+        collection="questions",
+        items=[
+            {
+                "id": ref,
+                "subject": "Computer Networks",
+                "subtopic": "Transport Layer",
+                "question_text": f"Imported question {ref}",
+                "answer_text": "B",
+                "outcome": outcome,
+                "format": "MCQ",
+                "target_time_sec": 120,
+            }
+        ],
+    )
+    scheduled = await recovery.schedule_question(db, owner_id="one", question_id=ref)
+    row = await recovery.owned(db, "one", "learning_items", scheduled["item"]["id"])
+    return (
+        await upsert_records(
+            db,
+            owner_id="one",
+            collection="learning_items",
+            items=[
+                {
+                    "id": row.external_id,
+                    "expected_version": row.version,
+                    **row.data,
+                    "scheduled_date": (TODAY - timedelta(days=overdue_days)).isoformat(),
+                }
+            ],
+        )
+    )[0]
+
+
+@pytest.mark.asyncio
+async def test_unknown_test_results_wait_for_the_learner_and_triage_once(db, monkeypatch):
+    await setup(db, monkeypatch)
+    missed = await logged_item(db, "q-missed")
+    paused = await recovery.mark_awaiting_result(db, owner_id="one", item_id=missed.external_id)
+    assert paused.data["recovery_state"] == "paused"
+    assert recovery.AWAITING_RESULT in paused.data["reason_flags"]
+
+    def triage(row, decision, key):
+        return recovery.TriageDraft(
+            idempotency_key=key, expected_version=row.version, decision=decision
+        )
+
+    result = await recovery.triage_item(
+        db, owner_id="one", item_id=missed.external_id, draft=triage(paused, "missed", "triage-m1")
+    )
+    await db.commit()
+    assert result["item"]["recovery_state"] == "active"
+    assert result["item"]["analysis_state"] == "pending"
+    assert "triage-missed" in result["item"]["reason_flags"]
+    assert recovery.AWAITING_RESULT not in result["item"]["reason_flags"]
+    assert result["events"][0]["event_type"] == "triaged"
+    # A triaged item is never hidden again by a later import of the same question.
+    again = await recovery.mark_awaiting_result(db, owner_id="one", item_id=missed.external_id)
+    assert again.data["recovery_state"] == "active"
+
+    correct = await logged_item(db, "q-correct")
+    done = await recovery.triage_item(
+        db,
+        owner_id="one",
+        item_id=correct.external_id,
+        draft=triage(correct, "correct", "triage-c1"),
+    )
+    await db.commit()
+    assert done["item"]["recovery_state"] == "paused"
+    overview = await recovery.recovery_overview(db, owner_id="one", mode="all")
+    due_ids = {row["item"]["id"] for row in overview["sprint"]["selected"]}
+    assert missed.external_id in due_ids and correct.external_id not in due_ids
+
+
+@pytest.mark.asyncio
+async def test_backlog_spreads_worst_first_without_making_anything_earlier(db, monkeypatch):
+    await setup(db, monkeypatch)
+    rows = [await logged_item(db, f"q-{n}", overdue_days=n + 1) for n in range(5)]
+    await db.commit()
+    result = await recovery.rebalance_backlog(
+        db,
+        owner_id="one",
+        draft=recovery.RebalanceDraft(idempotency_key="spread-backlog-1", per_day=2, max_days=7),
+    )
+    await db.commit()
+    assert result["due_today"] == 2 and len(result["moved"]) == 3 and result["days"] == 3
+    targets = sorted(move["to"] for move in result["moved"])
+    tomorrow, day_after = (
+        (TODAY + timedelta(days=1)).isoformat(),
+        (TODAY + timedelta(days=2)).isoformat(),
+    )
+    assert targets == [tomorrow, tomorrow, day_after]
+    # The two most overdue items stay due today.
+    stay = {row.external_id for row in rows[3:]}
+    moved = {move["item_id"] for move in result["moved"]}
+    assert stay.isdisjoint(moved)
+    replay = await recovery.rebalance_backlog(
+        db,
+        owner_id="one",
+        draft=recovery.RebalanceDraft(idempotency_key="spread-backlog-1", per_day=2, max_days=7),
+    )
+    assert replay["idempotent_replay"]
